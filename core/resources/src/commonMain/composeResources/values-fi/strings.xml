@@ -172,6 +172,10 @@
     <string name="busy_noise_floor">Kanava varattu</string>
     <string name="button_gpio">Painikkeen GPIO-pinni</string>
     <string name="buzzer_gpio">Summerin GPIO-pinni</string>
+    <plurals name="cache_limit_eviction_warning">
+        <item quantity="one">Tämän pienentäminen poistaa pysyvästi tallennetun historian %1$d laitteelta.</item>
+        <item quantity="other">Tämän pienentäminen poistaa pysyvästi tallennetun historian %1$d laitteelta.</item>
+    </plurals>
     <string name="calculating">Lasketaan…</string>
     <string name="call_sign">Kutsutunnus</string>
     <string name="call_sign_summary">Amatööriradion kutsutunnuksesi, enintään 8 merkkiä</string>
@@ -233,6 +237,8 @@
     <string name="clean_unknown_nodes">Poista vain tuntemattomat laitteet</string>
     <!-- CLEAR -->
     <string name="clear">Tyhjennä</string>
+    <string name="clear_position_track_message">Tämä poistaa pysyvästi radion tallennetun GPS-jäljen. Toimintoa ei voi peruuttaa.</string>
+    <string name="clear_position_track_title">Poistetaanko GPS-jälki?</string>
     <string name="clear_selection">Tyhjennä valinta</string>
     <string name="clear_time_zone">Tyhjennä aikavyöhyke</string>
     <string name="client_notification">Sovellusilmoitukset</string>
@@ -660,6 +666,23 @@
     <string name="firmware_edition">Laiteohjelmistoversio</string>
     <string name="firmware_event_ended_banner">%1$s on päättynyt. Palaa tavalliseen Meshtastic-laiteohjelmistoon palauttaaksesi normaalit ominaisuudet.</string>
     <string name="firmware_event_ended_button">Päivitä laiteohjelmisto</string>
+    <string name="firmware_maintenance_cdc_unblock_failed">Poistotiedosto kopioitiin, mutta laite ei aloittanut poistamista. Mitään ei ole vielä muutettu. Irrota laite, paina sen nollauspainiketta kahdesti ja yritä uudelleen.</string>
+    <string name="firmware_maintenance_copy_failed">Tiedostoa ei voitu kopioida laitteen asemalle. Varmista, että asema on edelleen yhdistetty ja yritä uudelleen.</string>
+    <string name="firmware_maintenance_erase_action">Tyhjennä ja asenna uudelleen</string>
+    <string name="firmware_maintenance_erase_confirm_button">Tyhjennä laite</string>
+    <string name="firmware_maintenance_erase_confirm_text">Tämä tyhjentää kaiken laitteesta %1$s, mukaan lukien kanavat, avaimet ja kaikki asetukset, ja asentaa sitten laiteohjelmiston uudelleen.\n\nToimintoa ei voi peruuttaa, eikä varmuuskopiota ole. Sinua pyydetään valitsemaan laitteen asema kahdesti: ensin poistotiedostoa ja sitten laiteohjelmistoa varten.</string>
+    <string name="firmware_maintenance_erase_confirm_title">Tyhjennetäänkö tämä laite?</string>
+    <string name="firmware_maintenance_no_release">Valitse ensin laiteohjelmiston versio, jotta laite voidaan asentaa uudelleen tyhjentämisen jälkeen.</string>
+    <string name="firmware_maintenance_not_a_bootloader_volume">Tämä asema ei ole laitteen päivitysasema. Valitse asema, joka näkyy, kun laite on päivitystilassa (se sisältää tiedoston nimeltä INFO_UF2.TXT).</string>
+    <string name="firmware_maintenance_select_drive">Valitse laitteen päivitysasema</string>
+    <string name="firmware_maintenance_softdevice_conflict">Laite ilmoittaa käyttävänsä odotetusta poikkeavaa Bluetooth-pinoa, joten poistaminen ei ole turvallista. Ilmoita tästä yhdessä laitteen mallin kanssa.</string>
+    <string name="firmware_maintenance_unknown_board">Tämän laitteen käynnistyslatainta ei voi päivittää tällä sovelluksella.</string>
+    <string name="firmware_maintenance_unknown_softdevice">Tämä sovellus ei pysty varmistamaan, mitä Bluetooth-pinoa tämä laite käyttää, joten poistaminen ei ole turvallista. Käytä sen sijaan verkkopohjaista Flasheria osoitteessa flasher.meshtastic.org</string>
+    <string name="firmware_maintenance_unsupported_device">Tämä laite ei tue tyhjentämistä sovelluksesta.</string>
+    <string name="firmware_maintenance_upgrade_bootloader_action">Päivitä käynnistyslatain</string>
+    <string name="firmware_maintenance_upgrade_confirm_text">Tämä asentaa päivitetyn käynnistyslataimen laitteeseen %1$s, mikä nopeuttaa tulevia Bluetooth-päivityksiä huomattavasti. \n\nSen jälkeen laiteohjelmisto asennetaan uudelleen. Älä irrota laitetta tämän aikana.</string>
+    <string name="firmware_maintenance_upgrade_confirm_title">Päivitetäänkö käynnistyslatain?</string>
+    <string name="firmware_maintenance_wrong_destination">Valittu sijainti ei ole laitteen päivitysasema, joten laitteelle ei kirjoitettu mitään. Valitse siirrettävä asema, joka tulee näkyviin, kun laite on päivitystilassa.</string>
     <string name="firmware_old">Radion laiteohjelmisto on liian vanha toimiakseen tämän sovelluksen kanssa. Lisätietoja löydät <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">ohjelmiston asennusoppaasta</a>.</string>
     <string name="firmware_recovery_banner">Päivitys valmistuu %1$s kuluttua</string>
     <string name="firmware_recovery_ble_failed">Päivitystä ei voitu viimeistellä Bluetoothin kautta. Tämän laitteen vakiokäynnistyslatain ei pysty luotettavasti jatkamaan keskeytynyttä OTA-päivitystä. Liitä laite tietokoneeseen USB:llä ja kirjoita laiteohjelmisto uudelleen valmistajan sarjamuotoisella DFU-työkalulla (esimerkiksi adafruit-nrfutil), jotta laite voidaan palauttaa toimintakuntoon.</string>
@@ -716,6 +739,7 @@
     <string name="firmware_update_open_flasher">Avaa Meshtastic Flasher</string>
     <string name="firmware_update_ota_failed">OTA-päivitys epäonnistui: %1$s</string>
     <string name="firmware_update_ota_unsupported_reason">Tämän laitteen OTA-käynnistyslatain ei tue pyydettyä päivitystapaa: %1$s</string>
+    <string name="firmware_update_rak4631_bootloader_hint">RAK WisBlock RAK4631 -laitteessa valmistajan käynnistyslatain (.zip) on asennettava sarjaliitäntäisen DFU-työkalun, kuten adafruit-nrfutilin, avulla. Pelkkä .zip-tiedoston kopioiminen laitteen asemalle ei toimi. Vaihtoehtoisesti voit yhdistää laitteen USB:n kautta ja päivittää käynnistyslataimen tällä sovelluksella.</string>
     <string name="firmware_update_rebooting">Käynnistetään DFU-tilaan...</string>
     <string name="firmware_update_release_notes">Julkaisutiedot</string>
     <string name="firmware_update_requires_bin">%1$s edellyttää kohteeseen sopivaa .bin-tiedostoa.</string>
@@ -732,6 +756,7 @@
     <string name="firmware_update_starting_dfu">Käynnistetään DFU...</string>
     <string name="firmware_update_starting_ota">Käynnistetään OTA-päivitys...</string>
     <string name="firmware_update_success">Päivitys onnistui!</string>
+    <string name="firmware_update_success_wiped">Laite palautettiin tehdasasetuksiin ja se on määritettävä (sekä pariliitettävä) uudelleen.</string>
     <string name="firmware_update_taking_a_while">Tämä voi kestää hetken...</string>
     <string name="firmware_update_target">Kohde: %1$s</string>
     <string name="firmware_update_title">Laiteohjelmiston päivitys</string>
@@ -751,6 +776,10 @@
     <string name="firmware_update_verifying">Vahvistetaan päivitystä...</string>
     <string name="firmware_update_waiting_reboot">Odotetaan, että laite käynnistyy uudelleen OTA-tilassa...</string>
     <string name="firmware_update_waiting_reconnect">Odotetaan, että laite muodostaa yhteyden uudelleen...</string>
+    <string name="firmware_update_wipe_ble_detail">Palauttaa laitteen tehdasasetuksiin, kun päivitys on varmistettu. Kaikki asetukset ja Bluetooth-pariliitokset poistetaan.</string>
+    <string name="firmware_update_wipe_confirm_warning">Laite tyhjennetään myös – kaikki asetukset, kanavat ja avaimet menetetään.</string>
+    <string name="firmware_update_wipe_label">Tyhjennä laite päivityksen aikana</string>
+    <string name="firmware_update_wipe_usb_detail">Tyhjentää laitteen flash-muistin kokonaan ja asentaa sen jälkeen valitun laiteohjelmiston alusta alkaen.</string>
     <string name="firmware_version">Firmwaren versio: %1$s</string>
     <string name="fixed_pin">Kiinteä PIN-koodi</string>
     <string name="fixed_position">Kiinteä sijainti</string>
@@ -927,6 +956,7 @@
     <string name="loading">Ladataan</string>
     <!-- LOCAL -->
     <string name="local_mbtiles_file">Paikallinen MBTiles-karttatiedosto</string>
+    <string name="local_network_permission_denied_hint">Meshtasticin paikallisverkon käyttöoikeus on poistettu käytöstä. Jos tämä radio on paikallisverkossasi, yhteys epäonnistuu, kunnes sallit paikallisverkon käytön järjestelmän asetuksissa.</string>
     <string name="local_stats_bad">Huonot %1$d</string>
     <string name="local_stats_battery">Akku: %1$d%</string>
     <string name="local_stats_diagnostics_prefix">Vianmääritys: %1$s</string>
@@ -1732,10 +1762,15 @@
     <string name="tak_server_status_waiting">Kuunnellaan osoitteessa 127.0.0.1:8089 – odotetaan ATAK-yhteyttä</string>
     <string name="tak_server_test_card_title">TAK Mesh -testitila (debug)</string>
     <string name="tak_server_test_idle">Lähetä kaikki %1$d testisanomat mesh-verkkoon</string>
+    <string name="tak_server_test_protocol_v1_label">V1 (vanha laiteohjelmisto &lt; &lt; 2.8.0 – vain PLI + chat)</string>
+    <string name="tak_server_test_protocol_v2_label">V2 (laiteohjelmisto ≥ 2.8.0)</string>
     <string name="tak_server_test_result_bytes">%1$dB ✓</string>
+    <string name="tak_server_test_result_expected_drop">Ei v1-rakenteessa (odotettu)</string>
     <string name="tak_server_test_result_unknown_error">✗</string>
+    <string name="tak_server_test_results_v2">%1$d hyväksytty, %2$d odotetusti hylätty, %3$d epäonnistui / %4$d/%5$d</string>
     <string name="tak_server_test_run">Suorita</string>
     <string name="tak_server_test_running">Käynnissä: %1$s</string>
+    <string name="tak_server_v1_fallback_notice">Yhdistetyn radion laiteohjelmisto ei tue täydellistä TAK-integraatiota – vain sijaintitiedot ja chat-viestit välitetään ATAKiin. Merkit ja muut tapahtumatyypit edellyttävät laiteohjelmiston versiota 2.8.0 tai uudempaa.</string>
     <string name="tak_team">Tiimin väri</string>
     <string name="tak_team_blue">Sininen</string>
     <string name="tak_team_brown">Ruskea</string>
