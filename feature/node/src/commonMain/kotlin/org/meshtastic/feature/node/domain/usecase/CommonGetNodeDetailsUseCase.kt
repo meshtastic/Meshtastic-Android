@@ -25,6 +25,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onStart
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.TemperatureUnit
+import org.meshtastic.core.common.util.getSystemTemperatureUnit
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.DeviceLink
@@ -49,7 +51,6 @@ import org.meshtastic.feature.node.detail.NodeRequestActions
 import org.meshtastic.feature.node.metrics.EnvironmentMetricsState
 import org.meshtastic.feature.node.model.LogsType
 import org.meshtastic.feature.node.model.MetricsState
-import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits
 import org.meshtastic.proto.DeviceProfile
 import org.meshtastic.proto.FirmwareEdition
 import org.meshtastic.proto.MeshPacket
@@ -200,7 +201,7 @@ constructor(
                     deviceLinks = deviceLinks,
                     reportedTarget = pioEnv,
                     isManaged = identity.profile.config?.security?.is_managed ?: false,
-                    isFahrenheit = displayUnits == DisplayUnits.IMPERIAL,
+                    isFahrenheit = getSystemTemperatureUnit() == TemperatureUnit.FAHRENHEIT,
                     displayUnits = displayUnits,
                     deviceMetrics = logs.telemetry.filter { it.device_metrics != null },
                     localStats = logs.telemetry.filter { it.local_stats != null },

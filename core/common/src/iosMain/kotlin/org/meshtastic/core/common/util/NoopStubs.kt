@@ -40,6 +40,8 @@ actual object DateFormatter {
 
 actual fun getSystemMeasurementSystem(): MeasurementSystem = MeasurementSystem.METRIC
 
+actual fun getSystemTemperatureUnit(): TemperatureUnit = TemperatureUnit.CELSIUS
+
 actual fun currentLocaleCode(): String = "en"
 
 actual fun currentRegionCode(): String = ""
