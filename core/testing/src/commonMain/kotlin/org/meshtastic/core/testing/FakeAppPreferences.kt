@@ -498,4 +498,10 @@ class FakeTakPrefs : org.meshtastic.core.repository.TakPrefs {
     override fun setMeshToCotEnabled(enabled: Boolean) {
         isMeshToCotEnabled.value = enabled
     }
+
+    override val takServerChannel = MutableStateFlow(0)
+
+    override fun setTakServerChannel(index: Int) {
+        takServerChannel.value = index
+    }
 }

@@ -377,6 +377,14 @@ interface TakPrefs {
     val isMeshToCotEnabled: StateFlow<Boolean>
 
     fun setMeshToCotEnabled(enabled: Boolean)
+
+    /**
+     * Meshtastic channel index used for outbound TAK traffic (TAK client -> mesh). Parity with iOS's `takServerChannel`
+     * setting and the legacy ATAK plugin's channel option. Defaults to 0 (the primary channel).
+     */
+    val takServerChannel: StateFlow<Int>
+
+    fun setTakServerChannel(index: Int)
 }
 
 /** Reactive interface for App Functions (system AI integration) preferences. */

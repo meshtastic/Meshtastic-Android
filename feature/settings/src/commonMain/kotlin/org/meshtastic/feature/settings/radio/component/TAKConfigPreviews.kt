@@ -20,6 +20,9 @@ package org.meshtastic.feature.settings.radio.component
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.tak_server_channel_option
 import org.meshtastic.core.takserver.TakTestResult
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.proto.MemberRole
@@ -48,6 +51,13 @@ fun TakServerSectionDisabledPreview() {
             onEnabledChange = {},
             isMeshToCotEnabled = false,
             onMeshToCotChange = {},
+            takServerChannel = 0,
+            channelOptions =
+            listOf(
+                0 to stringResource(Res.string.tak_server_channel_option, 0, "LongFast"),
+                1 to stringResource(Res.string.tak_server_channel_option, 1, "tak"),
+            ),
+            onChannelSelected = {},
             status = TakServerStatus.Off,
             clientCount = 0,
             onExport = {},
@@ -65,6 +75,13 @@ fun TakServerSectionEnabledPreview() {
             onEnabledChange = {},
             isMeshToCotEnabled = true,
             onMeshToCotChange = {},
+            takServerChannel = 0,
+            channelOptions =
+            listOf(
+                0 to stringResource(Res.string.tak_server_channel_option, 0, "LongFast"),
+                1 to stringResource(Res.string.tak_server_channel_option, 1, "tak"),
+            ),
+            onChannelSelected = {},
             status = TakServerStatus.WaitingForClient,
             clientCount = 0,
             onExport = {},
@@ -82,6 +99,13 @@ fun TakServerSectionConnectedPreview() {
             onEnabledChange = {},
             isMeshToCotEnabled = true,
             onMeshToCotChange = {},
+            takServerChannel = 0,
+            channelOptions =
+            listOf(
+                0 to stringResource(Res.string.tak_server_channel_option, 0, "LongFast"),
+                1 to stringResource(Res.string.tak_server_channel_option, 1, "tak"),
+            ),
+            onChannelSelected = {},
             status = TakServerStatus.Connected,
             clientCount = 1,
             onExport = {},
@@ -99,6 +123,13 @@ fun TakServerSectionFailedPreview() {
             onEnabledChange = {},
             isMeshToCotEnabled = true,
             onMeshToCotChange = {},
+            takServerChannel = 0,
+            channelOptions =
+            listOf(
+                0 to stringResource(Res.string.tak_server_channel_option, 0, "LongFast"),
+                1 to stringResource(Res.string.tak_server_channel_option, 1, "tak"),
+            ),
+            onChannelSelected = {},
             status = TakServerStatus.Failed,
             clientCount = 0,
             onExport = {},
@@ -116,6 +147,13 @@ fun TakServerSectionV1FallbackPreview() {
             onEnabledChange = {},
             isMeshToCotEnabled = true,
             onMeshToCotChange = {},
+            takServerChannel = 0,
+            channelOptions =
+            listOf(
+                0 to stringResource(Res.string.tak_server_channel_option, 0, "LongFast"),
+                1 to stringResource(Res.string.tak_server_channel_option, 1, "tak"),
+            ),
+            onChannelSelected = {},
             status = TakServerStatus.Connected,
             clientCount = 1,
             onExport = {},

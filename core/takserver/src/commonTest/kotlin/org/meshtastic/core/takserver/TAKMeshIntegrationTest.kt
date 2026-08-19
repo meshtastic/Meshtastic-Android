@@ -179,6 +179,7 @@ class TAKMeshIntegrationTest {
                 meshConfigHandler = meshConfigHandler,
                 nodeRepository = nodeRepository,
                 meshToCotBroadcaster = broadcaster,
+                takPrefs = takPrefs,
             )
     }
 
@@ -319,6 +320,44 @@ class TAKMeshIntegrationTest {
 
         assertEquals(1, h.commandSender.sentPackets.size)
         assertEquals(PortNum.ATAK_PLUGIN.value, h.commandSender.sentPackets.single().dataType)
+    }
+
+    // ── Outbound channel selection ───────────────────────────────────────────
+
+    @Test
+    fun `default outbound channel is the primary channel`() = runTest(UnconfinedTestDispatcher()) {
+        val h = TestHarness(nodeRepository = FakeNodeRepository(firmwareVersion = "2.8.0.0"))
+        h.integration.start(backgroundScope)
+
+        h.serverManager.emitInbound(createPli("test-default-channel"))
+
+        assertEquals(0, h.commandSender.sentPackets.single().channel)
+    }
+
+    @Test
+    fun `configured takServerChannel is applied to V2 sends`() = runTest(UnconfinedTestDispatcher()) {
+        val h = TestHarness(nodeRepository = FakeNodeRepository(firmwareVersion = "2.8.0.0"))
+        h.takPrefs.setTakServerChannel(3)
+        h.integration.start(backgroundScope)
+
+        h.serverManager.emitInbound(createPli("test-v2-channel"))
+
+        val sent = h.commandSender.sentPackets.single()
+        assertEquals(PortNum.ATAK_PLUGIN_V2.value, sent.dataType)
+        assertEquals(3, sent.channel)
+    }
+
+    @Test
+    fun `configured takServerChannel is applied to V1 sends`() = runTest(UnconfinedTestDispatcher()) {
+        val h = TestHarness(nodeRepository = FakeNodeRepository(firmwareVersion = "2.7.0.0"))
+        h.takPrefs.setTakServerChannel(5)
+        h.integration.start(backgroundScope)
+
+        h.serverManager.emitInbound(createPli("test-v1-channel"))
+
+        val sent = h.commandSender.sentPackets.single()
+        assertEquals(PortNum.ATAK_PLUGIN.value, sent.dataType)
+        assertEquals(5, sent.channel)
     }
 
     @Test
