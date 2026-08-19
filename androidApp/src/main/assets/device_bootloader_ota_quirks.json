@@ -267,6 +267,14 @@
         "heltec-mesh-node-t1"
       ],
       "softDevice": "6.1.1"
+    },
+    {
+      "hwModel": 136,
+      "hwModelSlug": "T_ECHO_CARD",
+      "platformioTargets": [
+        "t-echo-card"
+      ],
+      "softDevice": "6.1.1"
     }
   ]
 }
