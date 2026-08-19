@@ -37,6 +37,7 @@ graph TB
   :core:service -.-> :core:network
   :core:service -.-> :core:ble
   :core:service -.-> :core:prefs
+  :core:service -.-> :core:resources
   :core:service -.-> :core:takserver
   :core:service -.-> :core:testing
 
