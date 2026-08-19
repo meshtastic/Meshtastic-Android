@@ -189,7 +189,7 @@ jobs:
   #   shard-core:    remaining core:* KMP module tests (allTests)
   #   shard-feature: feature:* KMP module tests + :core:service
   #   shard-app:     Pure-Android/JVM tests (androidApp, desktopApp,
-  #                  core:barcode, feature:car, feature:widget)
+  #                  core:barcode, feature:widget)
   #                  + :core:database + :core:network
   test-shards:
     runs-on: ubuntu-24.04
@@ -267,8 +267,6 @@ jobs:
               :core:barcode:testGoogleDebugUnitTest
               :core:database:allTests
               :core:network:allTests
-              :feature:car:testFdroidDebugUnitTest
-              :feature:car:testGoogleDebugUnitTest
               :feature:widget:testDebugUnitTest
             kover: >-
               :androidApp:koverXmlReportFdroidDebug
@@ -278,8 +276,6 @@ jobs:
               :desktopApp:koverXmlReport
               :core:database:koverXmlReport
               :core:network:koverXmlReport
-              :feature:car:koverXmlReportFdroidDebug
-              :feature:car:koverXmlReportGoogleDebug
               :feature:widget:koverXmlReportDebug
 
     steps:

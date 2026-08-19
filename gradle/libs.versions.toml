@@ -4,7 +4,6 @@ xmlutil = "1.0.2"
 # Android
 agp = "9.3.1"
 appcompat = "1.8.0"
-car-app = "1.7.0"
 appfunctions = "1.0.0-alpha10"
 
 # androidx
@@ -124,9 +123,6 @@ androidx-camera-lifecycle = { module = "androidx.camera:camera-lifecycle", versi
 androidx-camera-view = { module = "androidx.camera:camera-view", version.ref = "camerax" }
 androidx-camera-compose = { module = "androidx.camera:camera-compose", version.ref = "camerax" }
 androidx-camera-viewfinder-compose = { module = "androidx.camera.viewfinder:viewfinder-compose", version = "1.6.1" }
-androidx-car-app = { module = "androidx.car.app:app", version.ref = "car-app" }
-androidx-car-app-projected = { module = "androidx.car.app:app-projected", version.ref = "car-app" }
-androidx-car-app-testing = { module = "androidx.car.app:app-testing", version.ref = "car-app" }
 androidx-core-ktx = { module = "androidx.core:core-ktx", version = "1.19.0" }
 androidx-core-location-altitude = { module = "androidx.core:core-location-altitude", version = "1.0.0" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version = "1.2.0" }

@@ -45,21 +45,8 @@ if (keystorePropertiesFile.exists()) {
     keystorePropertiesFile.inputStream().use { keystoreProperties.load(it) }
 }
 
-// The templated Android Auto experience (CarAppService + HomeScreen) is a Google "templated
-// messaging" beta feature that is publishable only to Closed/Internal tracks — Open/Production
-// submissions are auto-rejected (https://developer.android.com/training/cars/communication/templated-messaging).
-// Default builds therefore ship *notification-only* car messaging, which is GA and production-safe.
-// Build a Closed-track templated AAB with: -PenableCarTemplates=true
-val enableCarTemplates = providers.gradleProperty("enableCarTemplates").map { it.toBoolean() }.getOrElse(false)
-
 configure<ApplicationExtension> {
     namespace = "org.meshtastic.app"
-
-    // When templates are enabled, this res dir overrides feature:car's notification-only
-    // automotive_app_desc.xml with one that also declares <uses name="template" />.
-    if (enableCarTemplates) {
-        sourceSets.getByName("google").res.srcDir("src/googleCarTemplates/res")
-    }
 
     signingConfigs {
         // Shared debug key (checked in; debug keys are not secret) so local builds and CI snapshots
@@ -299,7 +286,6 @@ dependencies {
     // instead of manually polling `dumpsys meminfo`.
     debugImplementation(libs.leakcanary.android)
 
-    googleImplementation(projects.feature.car)
     googleImplementation(libs.location.services)
     googleImplementation(libs.play.services.maps)
     googleImplementation(libs.maps.compose)
