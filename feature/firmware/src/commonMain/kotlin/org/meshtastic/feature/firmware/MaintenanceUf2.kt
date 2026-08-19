@@ -56,11 +56,11 @@ internal data class MaintenanceUf2(
 private const val ERASE_UF2_BASE =
     "https://raw.githubusercontent.com/meshtastic/web-flasher/0e353b5d0756c9a1b76f53be78e948fafc1ebd8a/public/uf2"
 
-/** Release-pinned base for the OTAFIX bootloader self-update images (`oltaco/…_OTAFIX`, MIT). */
-private const val OTAFIX_RELEASE_TAG = "0.9.2-OTAFIX2.2-BP1.3"
+/** Release-pinned base for the OTAFIX bootloader self-update images (`meshtastic/…_OTAFIX`, MIT). */
+private const val OTAFIX_RELEASE_TAG = "0.9.2-OTAFIX2.2-BP1.4"
 
 private const val OTAFIX_BASE =
-    "https://github.com/oltaco/Adafruit_nRF52_Bootloader_OTAFIX/releases/download/$OTAFIX_RELEASE_TAG"
+    "https://github.com/meshtastic/Adafruit_nRF52_Bootloader_OTAFIX/releases/download/$OTAFIX_RELEASE_TAG"
 
 /** S140 6.1.1 application start — the address `nrf_erase2.uf2` is linked for. */
 internal const val APP_START_S140_6_1_1 = 0x26000L
@@ -115,69 +115,69 @@ private val OTAFIX_BY_BOARD_ID: Map<String, MaintenanceUf2> =
         "HT-n5262" to
             otafixAsset(
                 board = "heltec_t114",
-                sha256 = "d7a51ef7e41e7ba3b5906c162e8926ca0bc88a5010436a3589991d5a99741220",
+                sha256 = "c1ce07c1e66dbf42faea03df88f1e4bac6d66f1177600f41c280059e1653cba2",
             ),
         "MinewSemi-MX25LE01" to
             otafixAsset(
                 board = "minewsemi_mx25le01",
-                sha256 = "3d2039b3e22e0b350b49a8456e30709d2f8be440a239d2ed864091b1c4abc3ae",
+                sha256 = "b50a9bd0381155074ccc0a211942365ebd9cd108697c8f2e9d9da947e10265a1",
             ),
         "TRACKER L1" to
             otafixAsset(
                 board = "wio_tracker_l1",
-                sha256 = "efe1fc16f64f04deb26d171b9a3f6d81b32767ff01c40fe894924b8c682a2964",
+                sha256 = "29e11b45d43d0d2ffc49a780c6299bbef86992465a568d74c533d0d0dd5d5e30",
             ),
         "WisBlock-RAK4631-Board" to
             otafixAsset(
                 board = "wiscore_rak4631_board",
-                sha256 = "3509c8b01296bc6473acf5a9422f9aec857a5bbb47e80000f9b98e15b046e46a",
+                sha256 = "910806d0aedfcacf317fc4b9f2469593d6ec0d855568ff69c70faec3a4b06c4a",
             ),
         "WisMesh-Tag" to
             otafixAsset(
                 board = "wismesh_tag",
-                sha256 = "e1701badf22d9684d953cb5274d5d9241c3bf776c2524b935ef21a607c0bca4a",
+                sha256 = "b9e92b4ec1a74d176f75473be00804ee9902a4816bd94e098ad153ecd60a34c1",
             ),
         "nRF52840-SeeedSenseCAPSolarP1-v1" to
             otafixAsset(
                 board = "sensecap_solar_p1",
-                sha256 = "efe28af706a4a3e5604390d3bf5bcbeb7470aadc957e191c7e26e8fadc2ed4e5",
+                sha256 = "f0fad2cfa98867504085fe524a0af65916aa13c781cc5e1ff3025f04cea5db0b",
             ),
         "nRF52840-SeeedXiao-v1" to
             otafixAsset(
                 board = "xiao_nrf52840_ble",
-                sha256 = "49364762fb9992334fe55b3bea7f2d30e14dce4433de6c31e90036f6ec95d2a4",
+                sha256 = "6c7d6c6226c4b425a473f689bb25687baa9cdc79d9a350fd5201762bf7819cba",
             ),
         "nRF52840-SeeedXiaoSense-v1" to
             otafixAsset(
                 board = "xiao_nrf52840_ble_sense",
-                sha256 = "fc492fc2e30f2f75789217c0ead68ad64917de0844e6011269755fddfe532c36",
+                sha256 = "4857ae18d2f3145534515da3c6e6e2a813722069f0bc415a7fe43d9de8a0be62",
             ),
         "nRF52840-T1000-E-v1" to
-            otafixAsset(board = "t1000_e", sha256 = "c1dd30cce0f250eb7ad21e8c065cef6692b53e7efcba0578371bedcfd2493cc9"),
+            otafixAsset(board = "t1000_e", sha256 = "1b02fb4e8083a85930f615d95adcc29e983f2795a9c7755674d6a380b00410e5"),
         "nRF52840-TEcho-v1" to
             otafixAsset(
                 board = "lilygo_techo",
-                sha256 = "244c3ea9a783dbcfd9fabfa95d5f8bae3a52246bbe41c5414b2b6657683025c9",
+                sha256 = "b254aa092b312238a857e68db5beffda922410092e63044410e4c25f25498b2e",
             ),
         "nRF52840-ThinkNode-M3-v1" to
             otafixAsset(
                 board = "thinknode_m3",
-                sha256 = "073a6b6acf1bb0ca9ea4e8f7ca3c8df1cf3992aced06650b85c00aba5fa3ff13",
+                sha256 = "b04f020c7f4f0b7bd99548efbd5db33ebc9e09ef42e5dd874ef69433c363798d",
             ),
         "nRF52840-ThinkNodeM1-v1" to
             otafixAsset(
                 board = "thinknode_m1",
-                sha256 = "315d36a189b30bbc09c7846031483caea669b1d0c7237da9221ab2794757498f",
+                sha256 = "991114392f6b731860f05a932e1c6529f0c97a5e4c054ff51e081d81f2e7d3f1",
             ),
         "nRF52840-ThinkNodeM6-v1" to
             otafixAsset(
                 board = "thinknode_m6",
-                sha256 = "a7e977a8af02946559a8c703f1d2f27e22fd1cbedf61a9bc7af3472eb86fe99f",
+                sha256 = "aea8e4ce5d9f9ff7adc68e794ff735fe94bace7a6d391c3606df4c0ae6f45547",
             ),
         "nRF52840-promicro" to
             otafixAsset(
                 board = "promicro_nrf52840",
-                sha256 = "5ceb9ad4a8092f1319fc5371649eeae55b47c5ff2acd647972558017ba51dccb",
+                sha256 = "bd9cc4de26fd162b6600eafc2634a1e8c6e81ade84c141f8eb44350506321e8b",
             ),
     )
 
