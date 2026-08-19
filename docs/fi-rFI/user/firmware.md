@@ -43,15 +43,15 @@ Yleisin päivitystapa Android-käyttäjille:
 
 Kun radio on yhdistetty **USB:n tai sarjayhteyden** kautta (bluetoothin sijaan), **laiteohjelmiston päivitys** -näkymässä on käytettävissä **USB-tiedostonsiirto**. Sovellus käynnistää laitteen uudelleen DFU-tilaan ja pyytää sitten tallentamaan `.uf2`-tiedoston laitteen DFU-asemaan järjestelmän tiedostonvalitsimen avulla. Tämä vaihtoehto näkyy vain USB tai sarjayhteydellä — sitä ei voi käyttää bluetoothin kautta.
 
-> ℹ️ **nRF bootloader note:** A vendor bootloader supplied as a `.zip` (e.g. RAK WisBlock RAK4631) has to be flashed with a serial DFU tool such as `adafruit-nrfutil` — copying that `.zip` to the drive won't work. A bootloader supplied as an `update-....uf2` **can** be installed by copying it to the drive; that is how the app's own bootloader upgrade works. The app surfaces a hint when the serial-only route applies.
+> ℹ️ \*\* nFR käynnistyslataimen huomautus:\*\* Valmistajan toimittama .zip-muotoinen käynnistyslatain (esimerkiksi RAK WisBlock RAK4631) on asennettava sarjaliitäntäisen DFU-työkalun, kuten adafruit-nrfutilin, avulla. Pelkkä .zip-tiedoston kopioiminen asemalle ei toimi. Päivitysmuotoinen .uf2-käynnistyslatain voidaan asentaa kopioimalla se asemalle. Näin myös tämän sovelluksen käynnistyslataimen päivitystoiminto toimii. Sovellus näyttää huomautuksen, kun käytettävissä on vain sarjaliitäntäinen menetelmä.
 
-### Factory Erase and Bootloader Upgrade
+### Tyhjennys tehdasasetuksiin ja käynnistyslataimen päivitys
 
-On a **USB/serial** connection, nRF52 and RP2040 devices also offer **Erase and reinstall** and, where an upgraded bootloader is published for the board, **Upgrade bootloader**.
+**USB-/sarjaliitäntäyhteydellä** NRF52- ja RP2040-laitteet tarjoavat myös vaihtoehdot **Tyhjennys tehdasasetuksiin ja uudelleenasennus** sekä, jos laitteelle on julkaistu päivitetty käynnistyslatain, **Päivitä käynnistyslatain**.
 
-Erasing wipes everything on the device — channels, keys and all settings — and there is no backup, so the app asks for confirmation first. Both operations write two files in turn, so you will be asked to select the device's update drive twice: once for the erase or bootloader image, then again for the firmware.
+Tyhjennys tehdasasetuksiin poistaa laitteesta kaiken – kanavat, avaimet ja kaikki asetukset – eikä varmuuskopiota ole, joten sovellus pyytää ensin vahvistuksen. Molemmat toiminnot kirjoittavat vuorollaan kaksi tiedostoa, joten sinua pyydetään valitsemaan laitteen päivitysasema kahdesti: ensin tyhjennystiedostoa tai käynnistyslatainkuvaa varten ja sen jälkeen laiteohjelmistoa varten.
 
-The app reads `INFO_UF2.TXT` from the drive you select to confirm it really is the device's update drive and to identify the board before writing anything. If it can't confirm which Bluetooth stack your device uses it refuses to erase and points you at the [Web Flasher](https://flasher.meshtastic.org) instead — picking wrong there can leave the device needing a hardware programmer to recover.
+Sovellus lukee valitsemaltasi asemalta tiedoston `INFO_UF2.TXT` varmistaakseen, että kyseessä on todella laitteen päivitysasema, sekä tunnistaakseen laitteen ennen kuin mitään kirjoitetaan. Jos sovellus ei pysty varmistamaan, mitä Bluetooth-pinoa laitteesi käyttää, se kieltäytyy suorittamasta tyhjennystä ja ohjaa sinut sen sijaan **Web Flasheriin** (https://flasher.meshtastic.org). Väärän vaihtoehdon valitseminen siellä voi johtaa siihen, että laitteen palauttaminen edellyttää erillistä laiteohjelmointilaitetta.
 
 ### Muut päivitysvaihtoehdot
 
