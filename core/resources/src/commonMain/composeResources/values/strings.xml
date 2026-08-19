@@ -1756,6 +1756,7 @@
     <string name="tak_server">TAK Server</string>
     <string name="tak_server_channel">TAK Mesh Channel</string>
     <string name="tak_server_channel_desc">Meshtastic channel used for outgoing TAK traffic</string>
+    <string name="tak_server_channel_option">%1$d: %2$s</string>
     <string name="tak_server_enabled">Enable Local TAK Server</string>
     <string name="tak_server_enabled_desc">Starts a local TLS server on port 8089 for ATAK connections</string>
     <string name="tak_server_export_data_package_desc">Generate .zip for ATAK to connect to this server</string>

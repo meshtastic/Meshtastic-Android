@@ -68,6 +68,7 @@ import org.meshtastic.core.resources.tak_role
 import org.meshtastic.core.resources.tak_server
 import org.meshtastic.core.resources.tak_server_channel
 import org.meshtastic.core.resources.tak_server_channel_desc
+import org.meshtastic.core.resources.tak_server_channel_option
 import org.meshtastic.core.resources.tak_server_enabled
 import org.meshtastic.core.resources.tak_server_enabled_desc
 import org.meshtastic.core.resources.tak_server_export_data_package_desc
@@ -218,7 +219,8 @@ fun TakServerScreen(onBack: () -> Unit) {
     val channelOptions =
         channelSet.settings
             .mapIndexed { index, settings ->
-                index to "$index: ${Channel(settings, channelSet.lora_config ?: Channel.default.loraConfig).name}"
+                val channelName = Channel(settings, channelSet.lora_config ?: Channel.default.loraConfig).name
+                index to stringResource(Res.string.tak_server_channel_option, index, channelName)
             }
             .let { options ->
                 if (options.none { it.first == takServerChannel }) {

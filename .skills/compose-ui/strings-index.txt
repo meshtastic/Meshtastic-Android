@@ -1708,6 +1708,7 @@ tak_role_unspecified
 tak_server
 tak_server_channel
 tak_server_channel_desc
+tak_server_channel_option
 tak_server_enabled
 tak_server_enabled_desc
 tak_server_export_data_package_desc
