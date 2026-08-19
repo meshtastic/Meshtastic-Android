@@ -54,6 +54,7 @@ class CoreTakServerModule {
         meshConfigHandler: MeshConfigHandler,
         nodeRepository: NodeRepository,
         meshToCotBroadcaster: MeshToCotBroadcaster,
+        takPrefs: TakPrefs,
     ): TAKMeshIntegration = TAKMeshIntegration(
         takServerManager,
         commandSender,
@@ -61,5 +62,6 @@ class CoreTakServerModule {
         meshConfigHandler,
         nodeRepository,
         meshToCotBroadcaster,
+        takPrefs,
     )
 }

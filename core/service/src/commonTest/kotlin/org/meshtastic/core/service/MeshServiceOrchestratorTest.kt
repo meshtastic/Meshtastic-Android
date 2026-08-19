@@ -124,6 +124,7 @@ class MeshServiceOrchestratorTest {
         every { meshConfigHandler.moduleConfig } returns MutableStateFlow(LocalModuleConfig())
         every { takPrefs.isTakServerEnabled } returns takEnabledFlow
         every { takPrefs.isMeshToCotEnabled } returns MutableStateFlow(false)
+        every { takPrefs.takServerChannel } returns MutableStateFlow(0)
         every { takServerManager.isRunning } returns takRunningFlow
         every { takServerManager.inboundMessages } returns MutableSharedFlow()
         every { nodeRepository.myNodeInfo } returns MutableStateFlow(null)
@@ -139,6 +140,7 @@ class MeshServiceOrchestratorTest {
                 serviceRepository = serviceRepository,
                 meshConfigHandler = meshConfigHandler,
                 nodeRepository = nodeRepository,
+                takPrefs = takPrefs,
                 meshToCotBroadcaster =
                 MeshToCotBroadcaster(
                     takServerManager = takServerManager,

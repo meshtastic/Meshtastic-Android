@@ -53,9 +53,11 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.model.Capabilities
+import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.getColorFrom
 import org.meshtastic.core.model.getStringResFrom
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.TakPrefs
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.back
@@ -64,6 +66,8 @@ import org.meshtastic.core.resources.tak
 import org.meshtastic.core.resources.tak_config
 import org.meshtastic.core.resources.tak_role
 import org.meshtastic.core.resources.tak_server
+import org.meshtastic.core.resources.tak_server_channel
+import org.meshtastic.core.resources.tak_server_channel_desc
 import org.meshtastic.core.resources.tak_server_enabled
 import org.meshtastic.core.resources.tak_server_enabled_desc
 import org.meshtastic.core.resources.tak_server_export_data_package_desc
@@ -110,6 +114,7 @@ import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.feature.settings.radio.ResponseState
 import org.meshtastic.feature.settings.tak.TakPermissionHandler
 import org.meshtastic.feature.settings.tak.rememberDataPackageExporter
+import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.MemberRole
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.Team
@@ -202,8 +207,26 @@ fun TakServerScreen(onBack: () -> Unit) {
     val takPrefs: TakPrefs = koinInject()
     val takServerManager: TAKServerManager = koinInject()
     val nodeRepository: NodeRepository = koinInject()
+    val radioConfigRepository: RadioConfigRepository = koinInject()
     val isTakServerEnabled by takPrefs.isTakServerEnabled.collectAsStateWithLifecycle()
     val isMeshToCotEnabled by takPrefs.isMeshToCotEnabled.collectAsStateWithLifecycle()
+    val takServerChannel by takPrefs.takServerChannel.collectAsStateWithLifecycle()
+    val channelSet by radioConfigRepository.channelSetFlow.collectAsStateWithLifecycle(initialValue = ChannelSet())
+    // Options come from the radio's configured channels; the persisted index is appended as a bare
+    // number when it isn't among them (no radio connected yet, or the channel list shrank) so the
+    // dropdown never renders an empty selection.
+    val channelOptions =
+        channelSet.settings
+            .mapIndexed { index, settings ->
+                index to "$index: ${Channel(settings, channelSet.lora_config ?: Channel.default.loraConfig).name}"
+            }
+            .let { options ->
+                if (options.none { it.first == takServerChannel }) {
+                    options + (takServerChannel to takServerChannel.toString())
+                } else {
+                    options
+                }
+            }
     val isTakServerRunning by takServerManager.isRunning.collectAsStateWithLifecycle()
     val isTakServerStarting by takServerManager.isStarting.collectAsStateWithLifecycle()
     val takClientCount by takServerManager.connectionCount.collectAsStateWithLifecycle()
@@ -264,6 +287,9 @@ fun TakServerScreen(onBack: () -> Unit) {
                 onEnabledChange = { takPrefs.setTakServerEnabled(it) },
                 isMeshToCotEnabled = isMeshToCotEnabled,
                 onMeshToCotChange = { takPrefs.setMeshToCotEnabled(it) },
+                takServerChannel = takServerChannel,
+                channelOptions = channelOptions,
+                onChannelSelected = { takPrefs.setTakServerChannel(it) },
                 status = takServerStatus,
                 clientCount = takClientCount,
                 onExport = { exportLauncher("Meshtastic_TAK_Server.zip") },
@@ -281,6 +307,9 @@ internal fun TakServerSection(
     onEnabledChange: (Boolean) -> Unit,
     isMeshToCotEnabled: Boolean,
     onMeshToCotChange: (Boolean) -> Unit,
+    takServerChannel: Int,
+    channelOptions: List<Pair<Int, String>>,
+    onChannelSelected: (Int) -> Unit,
     status: TakServerStatus,
     clientCount: Int,
     onExport: () -> Unit,
@@ -309,6 +338,15 @@ internal fun TakServerSection(
                 HorizontalDivider()
                 TakV1FallbackNotice()
             }
+            HorizontalDivider()
+            DropDownPreference(
+                title = stringResource(Res.string.tak_server_channel),
+                summary = stringResource(Res.string.tak_server_channel_desc),
+                enabled = true,
+                items = channelOptions,
+                selectedItem = takServerChannel,
+                onItemSelected = onChannelSelected,
+            )
             HorizontalDivider()
             Row(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),

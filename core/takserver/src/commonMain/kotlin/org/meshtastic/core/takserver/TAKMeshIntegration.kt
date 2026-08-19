@@ -33,6 +33,7 @@ import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.TakPrefs
 import org.meshtastic.core.takserver.TAKPacketConversion.toCoTMessage
 import org.meshtastic.core.takserver.TAKPacketConversion.toTAKPacket
 import org.meshtastic.core.takserver.TAKPacketV2Conversion.toTAKPacketV2
@@ -96,6 +97,7 @@ class TAKMeshIntegration(
     private val meshConfigHandler: MeshConfigHandler,
     private val nodeRepository: NodeRepository,
     private val meshToCotBroadcaster: MeshToCotBroadcaster,
+    private val takPrefs: TakPrefs,
 ) {
     private val isRunning = AtomicBoolean(false)
 
@@ -299,6 +301,7 @@ class TAKMeshIntegration(
                     to = NodeAddress.ID_BROADCAST,
                     bytes = wirePayload.toByteString(),
                     dataType = PortNum.ATAK_PLUGIN_V2.value,
+                    channel = takPrefs.takServerChannel.value,
                 )
             commandSender.sendData(dataPacket)
             Logger.d { "Sent V2 to mesh: ${cotMessage.type} (${wirePayload.size} bytes)" }
@@ -349,6 +352,7 @@ class TAKMeshIntegration(
                     to = NodeAddress.ID_BROADCAST,
                     bytes = wirePayload.toByteString(),
                     dataType = PortNum.ATAK_PLUGIN.value,
+                    channel = takPrefs.takServerChannel.value,
                 )
             commandSender.sendData(dataPacket)
             Logger.d { "Sent V1 to mesh: ${cotMessage.type} (${wirePayload.size} bytes)" }

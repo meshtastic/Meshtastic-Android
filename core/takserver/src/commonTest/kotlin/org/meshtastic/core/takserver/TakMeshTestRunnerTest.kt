@@ -90,6 +90,7 @@ class TakMeshTestRunnerTest {
                 meshConfigHandler = meshConfigHandler,
                 nodeRepository = nodeRepository,
                 meshToCotBroadcaster = broadcaster,
+                takPrefs = takPrefs,
             )
 
         val runner = TakMeshTestRunner(integration)
