@@ -95,8 +95,42 @@
     <h1 class="cover"><span><span>Package-level</span></span> <span><span>declarations</span></span></h1>
   </div>
   <div class="tabbedcontent">
-    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="FUNCTION,EXTENSION_FUNCTION">Functions</button></div>
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="TYPE">Types</button><button class="section-tab" data-togglable="FUNCTION,EXTENSION_FUNCTION">Functions</button></div>
     <div class="tabs-section-body">
+      <div data-togglable="TYPE">
+        <h2 class="tableheader">Types</h2>
+        <div class="table"><a data-name="1796765938%2FClasslikes%2F-1202228022" anchor-label="LocalNetworkGateAction" id="1796765938%2FClasslikes%2F-1202228022" data-filterable-set=":feature:connections/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:connections/commonMain" data-filterable-set=":feature:connections/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-local-network-gate-action/index.html"><span>Local</span><wbr><span>Network</span><wbr><span>Gate</span><wbr><span><span>Action</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1796765938%2FClasslikes%2F-1202228022"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:connections/commonMain"><div class="symbol monospace"><span class="token keyword">enum </span><a href="-local-network-gate-action/index.html">LocalNetworkGateAction</a> : <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-enum/index.html">Enum</a><span class="token operator">&lt;</span><a href="-local-network-gate-action/index.html">LocalNetworkGateAction</a><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">What the Connections UI should do when the user takes a TCP-connect action that may need <code class="lang-kotlin">ACCESS_LOCAL_NETWORK</code>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2091774336%2FClasslikes%2F-1202228022" anchor-label="PendingTcpConnectResolution" id="2091774336%2FClasslikes%2F-1202228022" data-filterable-set=":feature:connections/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:connections/commonMain" data-filterable-set=":feature:connections/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-pending-tcp-connect-resolution/index.html"><span>Pending</span><wbr><span>Tcp</span><wbr><span>Connect</span><wbr><span><span>Resolution</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2091774336%2FClasslikes%2F-1202228022"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:connections/commonMain"><div class="symbol monospace"><span class="token keyword">enum </span><a href="-pending-tcp-connect-resolution/index.html">PendingTcpConnectResolution</a> : <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-enum/index.html">Enum</a><span class="token operator">&lt;</span><a href="-pending-tcp-connect-resolution/index.html">PendingTcpConnectResolution</a><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">How a connect stashed behind an in-flight permission request should be resolved once the status moves.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       <div data-togglable="FUNCTION">
         <h2 class="tableheader">Functions</h2>
         <div class="table"><a data-name="1132163561%2FFunctions%2F-1202228022" anchor-label="ConnectionsScreen" id="1132163561%2FFunctions%2F-1202228022" data-filterable-set=":feature:connections/commonMain"></a>
@@ -110,6 +144,36 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:connections/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-connections-screen.html"><span class="token function">ConnectionsScreen</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">connectionsViewModel<span class="token operator">: </span><a href="../../../core/ui/org.meshtastic.core.ui.viewmodel/-connections-view-model/index.html">ConnectionsViewModel</a><span class="token operator"> = </span>koinViewModel()<span class="token punctuation">, </span></span><span class="parameter ">scanModel<span class="token operator">: </span><a href="../org.meshtastic.feature.connections/-scanner-view-model/index.html">ScannerViewModel</a><span class="token operator"> = </span>koinViewModel()<span class="token punctuation">, </span></span><span class="parameter ">onClickNodeChip<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">onNavigateToNodeDetails<span class="token operator">: </span><span class="token punctuation">(</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token punctuation">, </span></span><span class="parameter ">onConfigNavigate<span class="token operator">: </span><span class="token punctuation">(</span><a href="../../../core/navigation/org.meshtastic.core.navigation/-route/index.html">Route</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Composable screen for managing device connections (BLE, TCP, USB). It displays connection status.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1516326318%2FFunctions%2F-1202228022" anchor-label="localNetworkGateAction" id="-1516326318%2FFunctions%2F-1202228022" data-filterable-set=":feature:connections/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:connections/commonMain" data-filterable-set=":feature:connections/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="local-network-gate-action.html"><span>local</span><wbr><span>Network</span><wbr><span>Gate</span><wbr><span><span>Action</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1516326318%2FFunctions%2F-1202228022"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:connections/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="local-network-gate-action.html"><span class="token function">localNetworkGateAction</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">status<span class="token operator">: </span><a href="../../../core/ui/org.meshtastic.core.ui.util/-permission-status/index.html">PermissionStatus</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-local-network-gate-action/index.html">LocalNetworkGateAction</a></div><div class="brief "><p class="paragraph">Pure classifier for gating a TCP-connect action on <code class="lang-kotlin">ACCESS_LOCAL_NETWORK</code>. Kept side-effect-free and platform-agnostic so it can be unit-tested in <code class="lang-kotlin">commonTest</code> without an Android <code class="lang-kotlin">Activity</code>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1469010698%2FFunctions%2F-1202228022" anchor-label="resolvePendingTcpConnect" id="1469010698%2FFunctions%2F-1202228022" data-filterable-set=":feature:connections/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:connections/commonMain" data-filterable-set=":feature:connections/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="resolve-pending-tcp-connect.html"><span>resolve</span><wbr><span>Pending</span><wbr><span>Tcp</span><wbr><span><span>Connect</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1469010698%2FFunctions%2F-1202228022"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:connections/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="resolve-pending-tcp-connect.html"><span class="token function">resolvePendingTcpConnect</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">stashedStatus<span class="token operator">: </span><a href="../../../core/ui/org.meshtastic.core.ui.util/-permission-status/index.html">PermissionStatus</a><span class="token punctuation">, </span></span><span class="parameter ">currentStatus<span class="token operator">: </span><a href="../../../core/ui/org.meshtastic.core.ui.util/-permission-status/index.html">PermissionStatus</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="-pending-tcp-connect-resolution/index.html">PendingTcpConnectResolution</a></div><div class="brief "><p class="paragraph">Resolves a TCP connect stashed while a permission request was in flight, given the status at stash time and now.</p></div></div></div>
                 </div>
               </div>
             </div>
