@@ -180,7 +180,7 @@ private const val CYCLE_DELAY_MS = 4500L
  * app could drop the DFU link and brick the device.
  */
 private const val OTAFIX_BOOTLOADER_URL =
-    "https://github.com/oltaco/Adafruit_nRF52_Bootloader_OTAFIX#changes-in-otafix-21"
+    "https://github.com/meshtastic/Adafruit_nRF52_Bootloader_OTAFIX/blob/master/changelog.md#otafix-21"
 
 @Composable
 @Suppress("LongMethod")
