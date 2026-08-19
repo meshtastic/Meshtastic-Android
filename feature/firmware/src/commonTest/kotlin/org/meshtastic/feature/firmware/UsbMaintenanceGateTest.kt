@@ -182,6 +182,100 @@ class UsbMaintenanceGateTest {
         assertEquals(images.size, images.map { it.fileName }.toSet().size, "No two boards may share a filename")
     }
 
+    /**
+     * Board-ID -> (release filename, sha256), transcribed from the actual `0.9.2-OTAFIX2.2-BP1.4` release assets
+     * (downloaded and hashed, not carried over from BP1.3), so a future edit that pairs the right hash with the wrong
+     * board — or vice versa — fails here even though it would still pass the uniqueness-only checks above.
+     */
+    private val expectedOtafixAssetsByBoardId =
+        mapOf(
+            "HT-n5262" to
+                (
+                    "update-heltec_t114_bootloader-0.9.2-OTAFIX2.2-BP1.4_nosd.uf2" to
+                        "c1ce07c1e66dbf42faea03df88f1e4bac6d66f1177600f41c280059e1653cba2"
+                    ),
+            "MinewSemi-MX25LE01" to
+                (
+                    "update-minewsemi_mx25le01_bootloader-0.9.2-OTAFIX2.2-BP1.4_nosd.uf2" to
+                        "b50a9bd0381155074ccc0a211942365ebd9cd108697c8f2e9d9da947e10265a1"
+                    ),
+            "TRACKER L1" to
+                (
+                    "update-wio_tracker_l1_bootloader-0.9.2-OTAFIX2.2-BP1.4_nosd.uf2" to
+                        "29e11b45d43d0d2ffc49a780c6299bbef86992465a568d74c533d0d0dd5d5e30"
+                    ),
+            "WisBlock-RAK4631-Board" to
+                (
+                    "update-wiscore_rak4631_board_bootloader-0.9.2-OTAFIX2.2-BP1.4_nosd.uf2" to
+                        "910806d0aedfcacf317fc4b9f2469593d6ec0d855568ff69c70faec3a4b06c4a"
+                    ),
+            "WisMesh-Tag" to
+                (
+                    "update-wismesh_tag_bootloader-0.9.2-OTAFIX2.2-BP1.4_nosd.uf2" to
+                        "b9e92b4ec1a74d176f75473be00804ee9902a4816bd94e098ad153ecd60a34c1"
+                    ),
+            "nRF52840-SeeedSenseCAPSolarP1-v1" to
+                (
+                    "update-sensecap_solar_p1_bootloader-0.9.2-OTAFIX2.2-BP1.4_nosd.uf2" to
+                        "f0fad2cfa98867504085fe524a0af65916aa13c781cc5e1ff3025f04cea5db0b"
+                    ),
+            "nRF52840-SeeedXiao-v1" to
+                (
+                    "update-xiao_nrf52840_ble_bootloader-0.9.2-OTAFIX2.2-BP1.4_nosd.uf2" to
+                        "6c7d6c6226c4b425a473f689bb25687baa9cdc79d9a350fd5201762bf7819cba"
+                    ),
+            "nRF52840-SeeedXiaoSense-v1" to
+                (
+                    "update-xiao_nrf52840_ble_sense_bootloader-0.9.2-OTAFIX2.2-BP1.4_nosd.uf2" to
+                        "4857ae18d2f3145534515da3c6e6e2a813722069f0bc415a7fe43d9de8a0be62"
+                    ),
+            "nRF52840-T1000-E-v1" to
+                (
+                    "update-t1000_e_bootloader-0.9.2-OTAFIX2.2-BP1.4_nosd.uf2" to
+                        "1b02fb4e8083a85930f615d95adcc29e983f2795a9c7755674d6a380b00410e5"
+                    ),
+            "nRF52840-TEcho-v1" to
+                (
+                    "update-lilygo_techo_bootloader-0.9.2-OTAFIX2.2-BP1.4_nosd.uf2" to
+                        "b254aa092b312238a857e68db5beffda922410092e63044410e4c25f25498b2e"
+                    ),
+            "nRF52840-ThinkNode-M3-v1" to
+                (
+                    "update-thinknode_m3_bootloader-0.9.2-OTAFIX2.2-BP1.4_nosd.uf2" to
+                        "b04f020c7f4f0b7bd99548efbd5db33ebc9e09ef42e5dd874ef69433c363798d"
+                    ),
+            "nRF52840-ThinkNodeM1-v1" to
+                (
+                    "update-thinknode_m1_bootloader-0.9.2-OTAFIX2.2-BP1.4_nosd.uf2" to
+                        "991114392f6b731860f05a932e1c6529f0c97a5e4c054ff51e081d81f2e7d3f1"
+                    ),
+            "nRF52840-ThinkNodeM6-v1" to
+                (
+                    "update-thinknode_m6_bootloader-0.9.2-OTAFIX2.2-BP1.4_nosd.uf2" to
+                        "aea8e4ce5d9f9ff7adc68e794ff735fe94bace7a6d391c3606df4c0ae6f45547"
+                    ),
+            "nRF52840-promicro" to
+                (
+                    "update-promicro_nrf52840_bootloader-0.9.2-OTAFIX2.2-BP1.4_nosd.uf2" to
+                        "bd9cc4de26fd162b6600eafc2634a1e8c6e81ade84c141f8eb44350506321e8b"
+                    ),
+        )
+
+    @Test
+    fun `every otafix board id maps to its exact expected release filename and digest`() {
+        assertEquals(
+            expectedOtafixAssetsByBoardId.keys,
+            otafixBoardIds,
+            "This test's expectation table and the shipped board-id map have drifted apart",
+        )
+        expectedOtafixAssetsByBoardId.forEach { (boardId, expected) ->
+            val (expectedFileName, expectedSha256) = expected
+            val image = assertNotNull(otafixUf2ForBoardId(boardId), "no image for $boardId")
+            assertEquals(expectedFileName, image.fileName, "$boardId: wrong release filename")
+            assertEquals(expectedSha256, image.sha256, "$boardId: wrong digest")
+        }
+    }
+
     @Test
     fun `board id selects the image rather than the build target`() {
         val rak = otafixUf2ForBoardId("WisBlock-RAK4631-Board")
