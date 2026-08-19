@@ -29,7 +29,7 @@ jobs:
           // Match branch prefix (e.g. feat/..., fix/..., chore-something)
           // Also parse conventional-commit-style PR titles as a fallback: type(scope): subject
           const branchPrefix = branch.split(/[\/\-_]/)[0].toLowerCase();
-          const titleMatch = title.match(/^(\w+)(?:\(([^)]+)\))?:/);
+          const titleMatch = title.match(/^(\w+)(?:\(([^)]+)\))?!?:/);
           const titlePrefix = titleMatch?.[1]?.toLowerCase();
           const titleScope = titleMatch?.[2]?.toLowerCase();
 
