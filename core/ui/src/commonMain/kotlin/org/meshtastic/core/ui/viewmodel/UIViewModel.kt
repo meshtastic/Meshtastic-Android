@@ -125,6 +125,18 @@ class UIViewModel(
     val navigationDeepLink = _navigationDeepLink.asSharedFlow()
 
     /**
+     * Clears the buffered deep link once its collector has applied it to the backstack.
+     *
+     * [_navigationDeepLink] replays its last value so a deep link emitted before the collector subscribes (e.g. on cold
+     * start) isn't lost. But this ViewModel is Activity-scoped and survives configuration changes, while the collecting
+     * `LaunchedEffect` does not — without this, a device rotation after a deep link re-subscribes and replays the same
+     * value, duplicate-appending it onto [MultiBackstack]'s current tab.
+     */
+    fun onDeepLinkHandled() {
+        _navigationDeepLink.resetReplayCache()
+    }
+
+    /**
      * Unified handler for all Meshtastic deep links and OS intents.
      *
      * This method orchestrates two distinct types of URI handling:
