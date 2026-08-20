@@ -542,6 +542,7 @@
     <string name="firmware_update_starting_dfu">Spouštění DFU...</string>
     <string name="firmware_update_starting_ota">Spouštění aktualizace OTA...</string>
     <string name="firmware_update_success">Aktualizace byla úspěšná!</string>
+    <string name="firmware_update_success_wiped">Zařízení bylo obnoveno do továrního nastavení a je nutné jej znovu nastavit a spárovat s aplikací.</string>
     <string name="firmware_update_taking_a_while">Může to chvíli trvat...</string>
     <string name="firmware_update_target">Cíl: %1$s</string>
     <string name="firmware_update_title">Aktualizace firmware</string>
@@ -560,6 +561,8 @@
     <string name="firmware_update_verifying">Ověřuji aktualizaci...</string>
     <string name="firmware_update_waiting_reboot">Čekání na restart zařízení do OTA režimu...</string>
     <string name="firmware_update_waiting_reconnect">Čekání na opětovné připojení zařízení...</string>
+    <string name="firmware_update_wipe_ble_detail">Po ověření aktualizace obnoví zařízení do továrního nastavení. Dojde k odstranění všech nastavení a párování přes Bluetooth.</string>
+    <string name="firmware_update_wipe_label">Vymazat zařízení během aktualizace</string>
     <string name="firmware_version">Verze firmware: %1$s</string>
     <string name="fixed_pin">Pevný PIN</string>
     <string name="fixed_position">Pevná poloha</string>
@@ -834,6 +837,7 @@
     <string name="mqtt_proxy_local_summary">Tento telefon přeposílá MQTT provoz pro připojené zařízení. Vypnutím okamžitě zastavíte přenos (relay), aniž byste museli měnit nastavení MQTT v zařízení — užitečné v případě, že MQTT provoz zahlcuje připojení. Opětovným zapnutím obnovíte přeposílání.</string>
     <string name="mqtt_status_connected">Připojeno</string>
     <string name="mqtt_status_disconnected">Odpojeno</string>
+    <string name="mqtt_status_reconnecting">Opětovné připojování…</string>
     <string name="mqtt_test_connection">Test připojení</string>
     <string name="must_set_region">Musíte nastavit region!</string>
     <string name="must_update">Musíte aktualizovat aplikaci v obchodu Google Play (nebo z Githubu). Je příliš stará pro komunikaci s touto verzí firmware vysílače. Přečtěte si prosím naše <a href="https://meshtastic.org/docs/software/android/installation">dokumenty</a> na toto téma.</string>
