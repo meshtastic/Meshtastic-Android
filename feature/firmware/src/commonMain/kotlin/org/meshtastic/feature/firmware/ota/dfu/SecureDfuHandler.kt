@@ -23,6 +23,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 import org.meshtastic.core.ble.BleConnectionFactory
+import org.meshtastic.core.ble.BleDevice
+import org.meshtastic.core.ble.BleScanStartException
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.ioDispatcher
@@ -559,13 +561,9 @@ class SecureDfuHandler(
 
         Logger.i { "DFU: detect — scanning for Legacy DFU service (${LegacyDfuUuids.SERVICE})" }
         val legacyHit =
-            scanForBleDevice(
-                scanner = bleScanner,
+            scanForBleDeviceTolerant(
                 tag = "DFU detect (legacy)",
                 serviceUuid = LegacyDfuUuids.SERVICE,
-                retryCount = 1,
-                retryDelay = 0.seconds,
-                scanTimeout = DETECT_SCAN_TIMEOUT,
                 predicate = { it.address in targetAddresses },
             )
 
@@ -578,19 +576,48 @@ class SecureDfuHandler(
 
         Logger.i { "DFU: detect — scanning for Secure DFU service (${SecureDfuUuids.SERVICE})" }
         val secureHit =
-            scanForBleDevice(
-                scanner = bleScanner,
+            scanForBleDeviceTolerant(
                 tag = "DFU detect (secure)",
                 serviceUuid = SecureDfuUuids.SERVICE,
-                retryCount = 1,
-                retryDelay = 0.seconds,
-                scanTimeout = DETECT_SCAN_TIMEOUT,
                 predicate = { it.address in targetAddresses },
             )
 
         val detection = if (secureHit != null) BootloaderDetection.SecureObserved else BootloaderDetection.Unknown
         Logger.i { "DFU: detect — secureHit=${secureHit != null}, result=$detection" }
         return detection
+    }
+
+    /**
+     * [scanForBleDevice] with `retryCount = 1`, `scanTimeout = DETECT_SCAN_TIMEOUT` — detection's fixed shape — but
+     * tolerant of Android's BLE scan-start quota: with no internal retry budget of its own, a throttled scan here would
+     * otherwise propagate straight out of [detectBootloaderProtocol] and abort the whole DFU attempt before a single
+     * reconnect attempt ran. Waits the reported cooldown (or the same detect timeout, if the failure carried none) and
+     * tries once more; if that also can't start a scan, returns null so detection degrades to
+     * [BootloaderDetection.Unknown] rather than crashing — the fallback coordinator still tries both protocols from
+     * there, now via [retryWithDelay]'s own scan-start-aware backoff.
+     */
+    private suspend fun scanForBleDeviceTolerant(
+        tag: String,
+        serviceUuid: Uuid,
+        predicate: (BleDevice) -> Boolean,
+    ): BleDevice? {
+        repeat(2) { pass ->
+            try {
+                return scanForBleDevice(
+                    scanner = bleScanner,
+                    tag = tag,
+                    serviceUuid = serviceUuid,
+                    retryCount = 1,
+                    retryDelay = 0.seconds,
+                    scanTimeout = DETECT_SCAN_TIMEOUT,
+                    predicate = predicate,
+                )
+            } catch (e: BleScanStartException) {
+                Logger.w(e) { "$tag: scan could not start (${e.reason}), pass ${pass + 1}/2" }
+                if (pass == 0) delay(e.retryAfter ?: DETECT_SCAN_TIMEOUT)
+            }
+        }
+        return null
     }
 
     /**

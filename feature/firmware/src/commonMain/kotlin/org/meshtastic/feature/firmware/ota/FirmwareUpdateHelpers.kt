@@ -17,6 +17,7 @@
 package org.meshtastic.feature.firmware.ota
 
 import kotlinx.coroutines.delay
+import org.meshtastic.core.ble.BleScanStartException
 import org.meshtastic.core.common.util.NumberFormatter
 
 private const val PERCENT_MAX = 100
@@ -39,7 +40,11 @@ internal fun formatTransferProgress(progress: Float, totalBytes: Int, bytesPerSe
 
 /**
  * Runs [block] up to [attempts] times, returning the first successful [Result]. [onAttempt] fires before each attempt
- * (1-based) for progress reporting, and [retryDelayMillis] is waited between tries (never after the last). If every
+ * (1-based) for progress reporting, and [retryDelayMillis] is waited between tries (never after the last) — except when
+ * a failure is (or wraps) a [BleScanStartException] carrying a `retryAfter`, in which case the wait is extended to
+ * cover it. A flat [retryDelayMillis] is nowhere near Android's BLE scan-start quota cooldown (up to its full rolling
+ * window), so retrying on schedule after a throttled scan just re-throttles every remaining attempt — this is exactly
+ * the failure mode a DFU reconnect can hit after the couple of scans `detectBootloaderProtocol` already spent. If every
  * attempt fails, returns the last failure so the caller can surface it however it likes (rethrow as-is vs. wrap in a
  * domain exception).
  */
@@ -55,7 +60,11 @@ internal suspend fun <T> retryWithDelay(
         val result = block(attempt)
         if (result.isSuccess) return result
         lastError = result.exceptionOrNull()
-        if (attempt < attempts) delay(retryDelayMillis)
+        if (attempt < attempts) delay(maxOf(retryDelayMillis, lastError.scanStartRetryAfterMillis() ?: 0L))
     }
     return Result.failure(lastError ?: IllegalStateException("retryWithDelay: all $attempts attempts failed"))
 }
+
+/** The scan-start cooldown a [BleScanStartException] (found directly or as this error's cause) demands, if any. */
+private fun Throwable?.scanStartRetryAfterMillis(): Long? =
+    ((this as? BleScanStartException) ?: (this?.cause as? BleScanStartException))?.retryAfter?.inWholeMilliseconds
