@@ -53,6 +53,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsPropertyKey
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.isSensitiveData
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
@@ -323,6 +324,7 @@ fun MessageItem(
             .semantics(mergeDescendants = true) {
                 contentDescription = messageA11yText
                 role = Role.Button
+                isSensitiveData = true
             },
         color = containerColor,
         contentColor = contentColor,
@@ -537,7 +539,12 @@ private fun OriginalMessageSnippet(
         // rounded corners, so the reply header inherits the correct top radii
         // automatically and stays square on the bottom where body text follows.
         Surface(
-            modifier = modifier.fillMaxWidth().clickable { onNavigateToOriginalMessage(originalMessage.packetId) },
+            modifier =
+            modifier
+                .fillMaxWidth()
+                .clickable { onNavigateToOriginalMessage(originalMessage.packetId) }
+                // clickable makes this its own a11y node, so the bubble's isSensitiveData doesn't reach it
+                .semantics { isSensitiveData = true },
             contentColor = replyContentColor,
             color = replyContainerColor,
             shape = RectangleShape,

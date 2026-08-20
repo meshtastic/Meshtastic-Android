@@ -46,6 +46,7 @@ import androidx.compose.ui.platform.Clipboard
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.isSensitiveData
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -406,7 +407,10 @@ private fun PublicKeyItem(publicKeyBytes: ByteArray) {
                 role = Role.Button,
             )
             .padding(horizontal = 20.dp, vertical = 8.dp)
-            .semantics(mergeDescendants = true) { contentDescription = contentDescriptionText },
+            .semantics(mergeDescendants = true) {
+                contentDescription = contentDescriptionText
+                isSensitiveData = true
+            },
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
