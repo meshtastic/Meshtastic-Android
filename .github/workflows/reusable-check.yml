@@ -451,7 +451,8 @@ jobs:
         # -Dorg.gradle.isolated-projects=false: the dependency-graph plugin injected by setup-gradle force-resolves
         # via allprojects{}, which Isolated Projects forbids (fatal since Gradle 9.7). The property form is
         # used everywhere instead of --no-isolated-projects: that flag only exists on Gradle 9.7+, and the
-        # wrapper is pinned to 9.6.1 until gradle/gradle#38787 ships in 9.7.1.
+        # wrapper is pinned to 9.6.1 (9.7.1 broke the CC fingerprint and CMP Windows packaging — see
+        # gradle-wrapper.properties and the renovate.json block on the 9.7 line).
         run: ./gradlew androidApp:assembleFdroidDebug androidApp:assembleGoogleDebug -Pci=true --parallel --configuration-cache -Dorg.gradle.isolated-projects=false --continue
 
       - name: Upload debug artifact
