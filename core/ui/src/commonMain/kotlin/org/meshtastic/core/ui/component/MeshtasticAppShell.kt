@@ -48,7 +48,10 @@ fun MeshtasticAppShell(
     content: @Composable () -> Unit,
 ) {
     LaunchedEffect(uiViewModel) {
-        uiViewModel.navigationDeepLink.collect { navKeys -> multiBackstack.handleDeepLink(navKeys) }
+        uiViewModel.navigationDeepLink.collect { navKeys ->
+            multiBackstack.handleDeepLink(navKeys)
+            uiViewModel.onDeepLinkHandled()
+        }
     }
 
     MeshtasticCommonAppSetup(
