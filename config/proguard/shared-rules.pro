@@ -126,7 +126,6 @@
 # bundled JNI library calls back into JVM methods on the driver class
 # (e.g. `nativeThreadSafeMode`). Keep the whole driver package.
 -keep class androidx.sqlite.driver.bundled.** { *; }
--keepclassmembers class androidx.sqlite.driver.bundled.** { native <methods>; *; }
 
 # ---- Room KMP (room3) -------------------------------------------------------
 -keep class * extends androidx.room3.RoomDatabase { <init>(); }
