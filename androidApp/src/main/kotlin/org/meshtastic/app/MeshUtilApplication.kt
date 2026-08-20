@@ -202,9 +202,14 @@ open class MeshUtilApplication :
         val kill =
             getSystemService(ActivityManager::class.java)
                 ?.getHistoricalProcessExitReasons(null, 0, MEMORY_LIMITER_SCAN_DEPTH)
-                ?.firstOrNull { it.description == MEMORY_LIMITER_ANON_SWAP_REASON && it.timestamp > watermark }
-                ?: return
-        prefs.edit().putLong(KEY_LAST_REPORTED_EXIT_TIMESTAMP, kill.timestamp).apply()
+                ?.firstOrNull {
+                    // contains(), not equality: OEMs may decorate the description as the rollout expands.
+                    it.description?.contains(MEMORY_LIMITER_ANON_SWAP_REASON) == true && it.timestamp > watermark
+                } ?: return
+
+        // Synchronous commit() before telemetry: this path runs precisely when the OS has been killing this
+        // process, and an apply() lost to another death would re-report the same kill. Background thread.
+        if (!prefs.edit().putLong(KEY_LAST_REPORTED_EXIT_TIMESTAMP, kill.timestamp).commit()) return
 
         // Force PlatformAnalytics construction so its Kermit log writers (Crashlytics/Datadog) are
         // registered before we log, even though nothing else has injected it yet this early in startup.
@@ -214,7 +219,12 @@ open class MeshUtilApplication :
         // a denied permission), a memory-ceiling kill means this process's own footprint was too large —
         // an actionable engineering signal, so it is deliberately reported as a non-fatal (Error), not a
         // rate-only breadcrumb.
-        Logger.e { "Previous process exit: $MEMORY_LIMITER_ANON_SWAP_REASON pss=${kill.pss}KB rss=${kill.rss}KB" }
+        // getPss()/getRss() return 0 when the system didn't capture them; don't report that as "0KB".
+        fun formatKb(kiloBytes: Long) = if (kiloBytes > 0) "${kiloBytes}KB" else "unreported"
+        Logger.e {
+            "Previous process exit: $MEMORY_LIMITER_ANON_SWAP_REASON " +
+                "pss=${formatKb(kill.pss)} rss=${formatKb(kill.rss)}"
+        }
     }
 
     private fun scheduleMeshLogCleanup() {
