@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="fi-rFI" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kuinka Meshtastic-signaalimittari toimii</title>
+  <link rel="stylesheet" href="../../styles/docs.css">
+</head>
+<body data-page="signal-meter" data-locale="fi-rFI">
+<pre class="markdown-content"># Kuinka Meshtastic-signaalimittari toimii
+
+Meshtasticin signaalimittari — sovelluksessa näkyvät tutut palkit tai tilan väri — lasketaan hyvin eri tavalla kuin perinteisen matkapuhelimen tai WiFi-reitittimen "palkit".
+
+Useimmat kuluttajalaitteet mittaavat yksinkertaisesti signaalin “voimakkuutta”. Koska Meshtastic käyttää **LoRa (Long Range)** -teknologiaa, signaalimittari arvioi sen sijaan kuinka “selkeä” signaali on suhteessa käytössä olevan mesh-verkon asetuksiin.
+
+## 2. LoRa:n “taika”: kuuleminen kohinan alta
+
+Tavallisessa radiossa (kuten FM- tai WiFi-yhteydessä), jos taustakohina on voimakkaampi kuin signaali (negatiivinen SNR), vastaanotin kuulee vain kohinaa.
+
+LoRa on erilainen. Se käyttää **hajaspektritekniikkaa (Spread Spectrum)**, joka mahdollistaa signaalin erottamisen myös silloin, kun se on taustakohinan alla. Siksi Meshtasticissa näkyy usein **negatiivisia SNR-arvoja** (esim. -10 dB tarkoittaa, että signaali on 10 dB heikompi kuin kohina).
+
+Riippuen siitä, mitä Meshtastic-esiasetusta käytät (esim. “LongFast” vs. “ShortFast”), radiolla on tietty **SNR-raja** — eli suurin määrä kohinaa, jonka se kestää ennen kuin viesti alkaa kadota täysin kohinaan.
+
+-------- | ------ | -------------------------------------- | ------------------------------------------------------------------------------------------ |
+ Hyvä        | 3      | SNR **esiasetuksen rajan yläpuolella** | Signaali on selvästi demodulaation alarajan yläpuolella — hyvä yhteys.     |
+ Kohtalainen | 2      | alle 5,5 dB rajan alapuolella          | Signaali voidaan vielä purkaa, mutta se on lähellä demodulaation alarajaa. |
+ Huono       | 1      | 5,5–7,5 dB rajan alapuolella           | Signaali on aivan esiasetuksen palautumiskyvyn rajalla.                    |
+ ei mitään   | 0      | yli 7,5 dB "rajan" alapuolella         | Signaali on demodulaation alarajan alapuolella — lähetys hukkuu kohinaan.  |
+
+&gt; **Huomautus:** Kiinteitä SNR-rajoja, joita olet ehkä nähnyt muualla (−7 dB / −15 dB), käytetään nykyisin vain traceroute-tulosten yksittäisten hyppyjen väritykseen — ei radion yleisen signaalin laadun arviointiin.
+
+</pre>
+</body>
+</html>
