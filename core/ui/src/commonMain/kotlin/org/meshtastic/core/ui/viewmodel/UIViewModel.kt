@@ -71,6 +71,7 @@ import org.meshtastic.core.repository.notificationId
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.client_notification
 import org.meshtastic.core.resources.compromised_keys
+import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.resources.import_pending_channels_connect
 import org.meshtastic.core.resources.import_pending_contact_connect
 import org.meshtastic.core.ui.component.ScrollToTopEvent
@@ -329,7 +330,7 @@ class UIViewModel(
      */
     private fun notifyImportPendingIfNotConnected(messageRes: StringResource) {
         if (connectionState.value is ConnectionState.Connected) return
-        safeLaunch(tag = "notifyImportPending") { snackbarManager.showSnackbar(message = getString(messageRes)) }
+        safeLaunch(tag = "notifyImportPending") { snackbarManager.showSnackbar(message = getStringSuspend(messageRes)) }
     }
 
     /** Clears the pending shared contact request. */
