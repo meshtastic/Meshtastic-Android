@@ -171,18 +171,35 @@ jobs:
           bash .workflow-ref/scripts/play-track-preflight.sh \
             fastlane/play-store-credentials.json "$PKG" "$TO_TRACK" "$VERSION_CODE"
 
+      # --version_code pins release selection. Without it supply picks the
+      # source release by status (default "completed"), so a staged inProgress
+      # rollout on the source track silently promotes the OLD release instead.
       - name: Promote to next channel
         if: ${{ steps.preflight.outputs.already_on_track != 'true' }}
+        env:
+          VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
         run: |
           bundle exec fastlane supply \
             --track "$FROM_TRACK" \
             --track_promote_to "$TO_TRACK" \
+            --version_code "$VERSION_CODE" \
             --rollout "$USER_FRACTION" \
             --changes_not_sent_for_review true \
             --skip_upload_metadata \
             --skip_upload_changelogs \
             --skip_upload_images \
             --skip_upload_screenshots
+
+      # supply exits 0 even when its edit changed nothing, so a promotion only
+      # counts once the destination track is seen holding this versionCode.
+      - name: Verify versionCode landed on the target track
+        if: ${{ steps.preflight.outputs.already_on_track != 'true' }}
+        env:
+          VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
+        run: |
+          PKG=$(grep '^APPLICATION_ID=' config.properties | cut -d'=' -f2)
+          bash .workflow-ref/scripts/play-track-preflight.sh \
+            fastlane/play-store-credentials.json "$PKG" "$TO_TRACK" "$VERSION_CODE" verify
 
       - name: Clean up credentials
         if: always()
