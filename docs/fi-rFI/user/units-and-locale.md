@@ -35,7 +35,7 @@ Lämpötila-arvot ympäristösensoreista lähetetään muodossa **°C** ja näyt
 
 Tämä vaikuttaa kaikkiin lämpötilanäyttöihin sovelluksessa: radion ympäristötelemetria, maaperän lämpötila, kastepiste ja telemetriakäyrien akselit.
 
-Temperature follows your locale's **temperature preference**, independent of the distance system. Locales that mix systems work correctly — a UK phone shows miles for distance but **°C** for temperature. On Android 14+, the **Temperature** regional preference (Settings → System → Languages → Regional preferences) overrides the locale default.
+Lämpötila noudattaa alueesi **lämpötila-asetusta** riippumatta etäisyysjärjestelmästä. Alueet, joissa käytetään sekä metri- että brittiläisiä yksiköitä, toimivat oikein – esimerkiksi Isossa-Britanniassa etäisyydet näytetään maileina, mutta lämpötila **°C**-asteina. Android 14:ssä **Lämpötila** -alueasetus (Asetukset → Järjestelmä → Kielet → Alueasetukset) ohittaa alueen oletusasetuksen.
 
 ## Etäisyys ja korkeus
 
@@ -115,7 +115,7 @@ Androidissa mittausjärjestelmäsi (metrinen vs imperial) on sidottu alueasetuks
 
 1. Avaa **Asetukset → Järjestelmä → Kieli ja alue**
 2. Vaihda **Alue**- tai **Mittausyksiköt**-asetusta
-3. On Android 14+, temperature can be overridden on its own under **Regional preferences → Temperature**
+3. Android 14:ssä lämpötila-asetus voidaan määrittää erikseen kohdassa **Alueasetukset → Lämpötila**
 4. Palaa Meshtasticiin — arvot päivittyvät välittömästi
 
 > 💡 **Vinkki:** Kaikki mittausten muotoilut tehdään keskitetysti ja ne noudattavat käyttöympäristösi alueasetuksia, joten yksiköt pysyvät yhtenäisinä kaikkialla sovelluksessa.
