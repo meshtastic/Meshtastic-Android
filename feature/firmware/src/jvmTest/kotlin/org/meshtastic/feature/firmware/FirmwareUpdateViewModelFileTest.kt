@@ -109,8 +109,11 @@ class FirmwareUpdateViewModelFileTest {
         MaintenanceUf2Manifest(
             erase =
             MaintenanceUf2EraseSet(
-                sd611 = EraseImageEntry(fileName = "nrf_erase2.uf2", sha256 = "0".repeat(64)),
-                sd730 = EraseImageEntry(fileName = "nrf_erase_sd7_3.uf2", sha256 = "0".repeat(64)),
+                nrf52 =
+                mapOf(
+                    "6.1.1" to EraseImageEntry(fileName = "nrf_erase2.uf2", sha256 = "0".repeat(64)),
+                    "7.3.0" to EraseImageEntry(fileName = "nrf_erase_sd7_3.uf2", sha256 = "0".repeat(64)),
+                ),
                 rp2040 = EraseImageEntry(fileName = "pico_erase.uf2", sha256 = "0".repeat(64)),
             ),
         )

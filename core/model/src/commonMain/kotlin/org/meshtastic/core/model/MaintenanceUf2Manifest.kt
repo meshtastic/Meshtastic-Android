@@ -35,10 +35,15 @@ data class MaintenanceUf2Manifest(
     @SerialName("otafixSupportedTargets") val otafixSupportedTargets: List<String> = emptyList(),
 )
 
+/**
+ * Nested by architecture, then (for nRF52) by SoftDevice wire value — RP2040 has no SoftDevice concept at all, so it
+ * correctly has no sub-key, unlike the old flat {s140_6_1_1, s140_7_3_0, rp2040} shape that mixed a SoftDevice-variant
+ * axis with an architecture axis in one object.
+ */
 @Serializable
 data class MaintenanceUf2EraseSet(
-    @SerialName("s140_6_1_1") val sd611: EraseImageEntry,
-    @SerialName("s140_7_3_0") val sd730: EraseImageEntry,
+    /** Keyed by [SoftDeviceVariant.fromWire]'s own input strings, e.g. "6.1.1" / "7.3.0". */
+    @SerialName("nrf52") val nrf52: Map<String, EraseImageEntry> = emptyMap(),
     @SerialName("rp2040") val rp2040: EraseImageEntry,
 )
 
@@ -49,5 +54,13 @@ data class EraseImageEntry(
     @SerialName("expectedFirstTargetAddress") val expectedFirstTargetAddress: Long? = null,
 )
 
+/**
+ * @property otafixBoardSlug OTAFIX's own release-asset board slug (e.g. "wiscore_rak4631_board") — deliberately NOT
+ *   named the same as [DeviceHardware.platformioTarget] (e.g. "rak4631"): the two vocabularies differ per board, and a
+ *   shared name here would invite exactly the confusion this class's callers already have to spell out in prose.
+ */
 @Serializable
-data class OtafixAssetEntry(@SerialName("board") val board: String, @SerialName("sha256") val sha256: String)
+data class OtafixAssetEntry(
+    @SerialName("otafixBoardSlug") val otafixBoardSlug: String,
+    @SerialName("sha256") val sha256: String,
+)

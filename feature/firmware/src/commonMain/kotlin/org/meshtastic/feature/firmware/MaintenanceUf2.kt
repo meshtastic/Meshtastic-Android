@@ -69,10 +69,18 @@ private fun EraseImageEntry.toMaintenanceUf2(): MaintenanceUf2 = MaintenanceUf2(
  * [MaintenanceUf2Manifest.otafixBase]/[MaintenanceUf2Manifest.otafixReleaseTag] (and the per-board digest) now come
  * from the fetched manifest instead of being hardcoded.
  */
-private fun MaintenanceUf2Manifest.otafixAsset(board: String, sha256: String): MaintenanceUf2 {
-    val name = "update-${board}_bootloader-${otafixReleaseTag}_nosd.uf2"
+private fun MaintenanceUf2Manifest.otafixAsset(otafixBoardSlug: String, sha256: String): MaintenanceUf2 {
+    val name = "update-${otafixBoardSlug}_bootloader-${otafixReleaseTag}_nosd.uf2"
     return MaintenanceUf2(url = "$otafixBase/$name", fileName = name, sha256 = sha256)
 }
+
+/** [SoftDeviceVariant.fromWire]'s own input strings — the key space [MaintenanceUf2EraseSet.nrf52] is indexed by. */
+private val SoftDeviceVariant.wireValue: String
+    get() =
+        when (this) {
+            SoftDeviceVariant.S140_6_1_1 -> "6.1.1"
+            SoftDeviceVariant.S140_7_3_0 -> "7.3.0"
+        }
 
 /**
  * The factory-erase image for [hardware] given [manifest], or `null` when none can be resolved safely.
@@ -86,14 +94,7 @@ internal fun eraseUf2For(manifest: MaintenanceUf2Manifest, hardware: DeviceHardw
     val erase = manifest.erase ?: return null
     return when {
         hardware.isRp2040Arc -> erase.rp2040.toMaintenanceUf2()
-
-        hardware.isNrf52Arc ->
-            when (hardware.softDeviceVariant) {
-                SoftDeviceVariant.S140_6_1_1 -> erase.sd611.toMaintenanceUf2()
-                SoftDeviceVariant.S140_7_3_0 -> erase.sd730.toMaintenanceUf2()
-                null -> null
-            }
-
+        hardware.isNrf52Arc -> hardware.softDeviceVariant?.let { erase.nrf52[it.wireValue]?.toMaintenanceUf2() }
         else -> null
     }
 }
@@ -113,7 +114,9 @@ internal fun otafixSupportsTarget(manifest: MaintenanceUf2Manifest, platformioTa
  * hardware is unrecoverable without SWD.
  */
 internal fun otafixUf2ForBoardId(manifest: MaintenanceUf2Manifest, boardId: String): MaintenanceUf2? =
-    manifest.otafixByBoardId[boardId.trim()]?.let { manifest.otafixAsset(board = it.board, sha256 = it.sha256) }
+    manifest.otafixByBoardId[boardId.trim()]?.let {
+        manifest.otafixAsset(otafixBoardSlug = it.otafixBoardSlug, sha256 = it.sha256)
+    }
 
 /**
  * Extracts the `Board-ID:` value from the contents of a UF2 bootloader's `INFO_UF2.TXT`.
@@ -155,15 +158,13 @@ internal fun parseUf2SoftDevice(infoUf2Text: String): SoftDeviceVariant? {
 }
 
 /**
- * Which erase image a given variant needs, from [manifest]. `null` when [manifest] carries no `erase` set (never
- * fetched/seeded — fail closed); otherwise total over the enum, so a new variant cannot silently reuse an old image.
+ * Which erase image [variant] needs, from [manifest]. `null` when [manifest] carries no `erase` set at all (never
+ * fetched/seeded — fail closed), or when this specific variant's row is missing from `erase.nrf52` (a malformed or
+ * partial manifest) — never a guess at a substitute image.
  */
 internal fun eraseUf2ForVariant(manifest: MaintenanceUf2Manifest, variant: SoftDeviceVariant): MaintenanceUf2? {
     val erase = manifest.erase ?: return null
-    return when (variant) {
-        SoftDeviceVariant.S140_6_1_1 -> erase.sd611
-        SoftDeviceVariant.S140_7_3_0 -> erase.sd730
-    }.toMaintenanceUf2()
+    return erase.nrf52[variant.wireValue]?.toMaintenanceUf2()
 }
 
 /** Outcome of reconciling the SoftDevice the drive reports against the manifest's pre-flight hint. */

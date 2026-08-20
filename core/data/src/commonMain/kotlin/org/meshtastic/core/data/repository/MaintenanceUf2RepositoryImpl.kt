@@ -126,10 +126,11 @@ class MaintenanceUf2RepositoryImpl(
     companion object {
         /**
          * SHA-256 of `data/maintenanceUf2.json` in `meshtastic/api` (and of the byte-identical bundled
-         * `maintenance_uf2.json` asset here), as of the 2026-08-20 OTAFIX 0.9.2-OTAFIX2.3-BP1.5 release. Bump this, and
-         * the bundled asset, together — a test asserts they match.
+         * `maintenance_uf2.json` asset here), as of the 2026-08-20 erase{}/otafixBoardSlug naming fixup (same OTAFIX
+         * 0.9.2-OTAFIX2.3-BP1.5 release data, restructured). Bump this, and the bundled asset, together — a test
+         * asserts they match.
          */
-        const val EXPECTED_MANIFEST_SHA256 = "cbd50ab3fb076af3adf2ccbd5fb06936eb005b612225fa71aec9ca7dd14a3cf9"
+        const val EXPECTED_MANIFEST_SHA256 = "73315bced19dc4ed31029a6c734b24420c96673f1666b9d046f96b55f629dc10"
         private const val BUNDLED_ASSET_NAME = "maintenance_uf2.json"
     }
 }
