@@ -2,7 +2,7 @@
 title: TAK integratsioon
 parent: User Guide
 nav_order: 10
-last_updated: 2026-07-08
+last_updated: 2026-08-19
 description: Koostöö ATAKi ja WinTAKiga — CoT asukoha jagamine, TAK rollid ja pluginate seadistamine.
 aliases:
   - tak
@@ -56,6 +56,7 @@ Rakendus saab käitada ka **kohalikku TAK serverit**, nii et **samal seadmel** o
 ![Kohaliku TAK-serveri seaded koos lubamise lüliti ja ekspordi valikuga](../../assets/screenshots/tak_server_enabled.png)
 
 - **Luba kohalik TAK server** – käivitab pordil **8089** ainult tagasihelistamise eesmärgil toimiva mTLS-serveri sama seadme ATAK/iTAK-ühenduste jaoks.
+- **TAK Mesh Channel** — selects which Meshtastic channel outgoing TAK traffic is sent on (default: the primary channel, index 0). Incoming TAK traffic is accepted from any channel. Matches the equivalent setting on iOS and in the legacy ATAK plugin.
 - **Ekspordi TAK andmepakett** — genereerib `.zip`-andmepaketi, mille ATAK/iTAK saab selle serveriga ühenduse loomiseks importida.
 
 ## TAK rollid

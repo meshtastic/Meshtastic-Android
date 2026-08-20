@@ -2,7 +2,7 @@
 title: Ühikud, mõõtühikud ja lokaat
 parent: User Guide
 nav_order: 16
-last_updated: 2026-07-08
+last_updated: 2026-08-19
 description: Kuidas rakendus vormindab temperatuuri, vahemaad, kiirust ja muid mõõtmisi vastavalt seadme lokaadile.
 ---
 
@@ -34,6 +34,8 @@ Temperature values from environment sensors are transmitted as **°C** and displ
 | Fahrenheit  | 72°F       |
 
 This affects all temperature displays throughout the app: node environment telemetry, soil temperature, dew point, and telemetry chart axes.
+
+Temperature follows your locale's **temperature preference**, independent of the distance system. Locales that mix systems work correctly — a UK phone shows miles for distance but **°C** for temperature. On Android 14+, the **Temperature** regional preference (Settings → System → Languages → Regional preferences) overrides the locale default.
 
 ## Distance & Altitude
 
@@ -113,7 +115,8 @@ On Android, your measurement system (metric vs imperial) is tied to your region 
 
 1. Ava **Androidi seaded → Süsteem → Keel ja piirkond**
 2. Change your **Region** or **Measurement units** preference
-3. Tagasi Meshtastic juurde — väärtused värskendatakse kohe
+3. On Android 14+, temperature can be overridden on its own under **Regional preferences → Temperature**
+4. Tagasi Meshtastic juurde — väärtused värskendatakse kohe
 
 > 💡 **Vihje:** Kogu mõõtühikute vormindamine toimub tsentraalselt ja arvestab platvormi lokaaduga, seega püsivad ühikud kogu rakenduses ühtsed.
 

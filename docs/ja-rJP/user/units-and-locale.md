@@ -2,7 +2,7 @@
 title: 単位・計測・ロケール
 parent: User Guide
 nav_order: 16
-last_updated: 2026-07-08
+last_updated: 2026-08-19
 description: アプリが、デバイスのロケールに基づいて温度・距離・速度などの計測値をどう表示するかを説明します。
 ---
 
@@ -34,6 +34,8 @@ Android では、計測の設定はシステムの**言語と地域**の設定�
 | 華氏     | 72°F |
 
 これは、アプリ全体のすべての温度表示に影響します：ノードの環境テレメトリ、土壌温度、露点、テレメトリグラフの軸。
+
+Temperature follows your locale's **temperature preference**, independent of the distance system. Locales that mix systems work correctly — a UK phone shows miles for distance but **°C** for temperature. On Android 14+, the **Temperature** regional preference (Settings → System → Languages → Regional preferences) overrides the locale default.
 
 ## 距離と標高
 
@@ -113,7 +115,8 @@ Android では、計測系（メートル法かヤード・ポンド法か）は
 
 1. 「**Android の設定 → システム → 言語と地域**」を開きます
 2. 「**地域**」または「**計測単位**」の設定を変更します
-3. Meshtastic に戻ります。値がすぐに更新されます
+3. On Android 14+, temperature can be overridden on its own under **Regional preferences → Temperature**
+4. Meshtastic に戻ります。値がすぐに更新されます
 
 > 💡 **ヒント：** すべての計測値の書式は一元的に処理され、プラットフォームのロケールに従うため、単位はアプリ全体で一貫しています。
 

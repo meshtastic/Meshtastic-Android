@@ -2,7 +2,7 @@
 title: TAK 連携
 parent: User Guide
 nav_order: 10
-last_updated: 2026-07-08
+last_updated: 2026-08-19
 description: ATAK および WinTAK と相互運用します。CoT による位置共有、TAK の役割、プラグインの設定を説明します。
 aliases:
   - tak
@@ -56,6 +56,7 @@ TAK モジュールを使うと、Meshtastic のノードは次のことがで�
 ![有効化トグルとエクスポートオプションを備えたローカル TAK サーバーの設定](../../assets/screenshots/tak_server_enabled.png)
 
 - **ローカル TAK サーバーを有効化**：同じデバイスからの ATAK／iTAK 接続用に、ポート **8089** でループバック専用の mTLS サーバーを起動します。
+- **TAK Mesh Channel** — selects which Meshtastic channel outgoing TAK traffic is sent on (default: the primary channel, index 0). Incoming TAK traffic is accepted from any channel. Matches the equivalent setting on iOS and in the legacy ATAK plugin.
 - **TAK データパッケージをエクスポート**：ATAK／iTAK がこのサーバーに接続するためにインポートできる `.zip` データパッケージを生成します。
 
 ## TAK の役割
