@@ -1742,6 +1742,9 @@
     <string name="tak_role_teammember">Tiimin jäsen</string>
     <string name="tak_role_unspecified">Määrittelemätön</string>
     <string name="tak_server">TAK palvelin</string>
+    <string name="tak_server_channel">TAK-mesh-kanava</string>
+    <string name="tak_server_channel_desc">Lähtevään TAK-liikenteeseen käytettävä Meshtastic-kanava</string>
+    <string name="tak_server_channel_option">%1$d: %2$s</string>
     <string name="tak_server_enabled">Ota paikallinen TAK-palvelin käyttöön</string>
     <string name="tak_server_enabled_desc">Käynnistää paikallisen TLS-palvelimen portissa 8089 ATAK-yhteyksiä varten</string>
     <string name="tak_server_export_data_package_desc">Luo ATAKille .zip-paketti tätä palvelinta varten</string>

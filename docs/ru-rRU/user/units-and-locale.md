@@ -35,7 +35,7 @@ description: Как приложение отображает температу
 
 Это влияет на все отображения температуры в приложении: телеметрия окружающей среды ноды, температура почвы, точка росы и оси диаграммы телеметрии.
 
-Temperature follows your locale's **temperature preference**, independent of the distance system. Locales that mix systems work correctly — a UK phone shows miles for distance but **°C** for temperature. On Android 14+, the **Temperature** regional preference (Settings → System → Languages → Regional preferences) overrides the locale default.
+Температура следует вашим **настройкам предпочитаемой шкалы температуры**, независимо от системы измерения расстояния. Локали, где смешаны системы, работают корректно — телефон из Великобритании показывает мили для расстояния, но **°C** для температуры. На Android 14+ региональные настройки **Температуры** (Настройки → Система → Языки → Региональные предпочтения) заменяют значение по умолчанию для локали.
 
 ## Расстояние и высота
 
@@ -115,7 +115,7 @@ Temperature follows your locale's **temperature preference**, independent of the
 
 1. Откройте **Настройки Android → Система → Язык и регион**
 2. Измените свои предпочтения в **Регион** или **Единицы измерения**
-3. On Android 14+, temperature can be overridden on its own under **Regional preferences → Temperature**
+3. На Android 14+ температуру можно настроить отдельно в **Региональные настройки → Температура**
 4. Вернуться к Meshtastic — значения обновляются немедленно
 
 > 💡 **Совет:** Все форматирование производится в централизованном порядке и уважает локаль платформы, поэтому единицы измерения всегда в приложении.
