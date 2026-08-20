@@ -96,9 +96,13 @@
       "automerge": false
     },
     {
-      "description": "Block Gradle 9.7.0: its ExecOperations.exec spec defaults standardOutput to null, crashing the Compose Multiplatform proguardReleaseJars task (ExternalToolRunner reads the stream back). Lift once a fixed Gradle patch or a CMP release that stops reading spec.standardOutput is out.",
+      "description": "Block Gradle 9.7.0: its ExecOperations.exec spec defaults standardOutput to null, crashing the Compose Multiplatform proguardReleaseJars task (ExternalToolRunner reads the stream back). Lift once a fixed Gradle patch or a CMP release that stops reading spec.standardOutput is out. Matches by depName so the flatpak-manifest custom manager (customManagers below) is pinned identically and can never propose the blocked version on its own.",
+      "matchDepNames": [
+        "gradle"
+      ],
       "matchManagers": [
-        "gradle-wrapper"
+        "gradle-wrapper",
+        "custom.regex"
       ],
       "allowedVersions": "!/^9\\.7\\.0$/"
     },
@@ -122,6 +126,21 @@
         "/^io\\.insert-koin\\.compiler\\.plugin/"
       ],
       "automerge": false
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Mirror gradle-wrapper.properties bumps into the vendored Gradle distribution URL in the verify-flatpak offline manifest (see PRs #6777/#6782, where a wrapper bump without this file broke both build-flatpak arches). Shares depName 'gradle' with the gradle-wrapper manager so both files update in the same Renovate branch/PR. The sha256 line below the URL cannot be auto-updated (the gradle-version datasource has no digest support and the hosted app disallows postUpgradeTasks); the fail-fast guard in verify-flatpak.yml's generate-sources job holds that PR red until the sha256 is copied from distributionSha256Sum.",
+      "managerFilePatterns": [
+        "/^scripts/verify-flatpak/desktop-offline\\.yaml$/"
+      ],
+      "matchStrings": [
+        "services\\.gradle\\.org/distributions/gradle-(?<currentValue>\\d+(?:\\.\\d+)*)-bin\\.zip"
+      ],
+      "depNameTemplate": "gradle",
+      "datasourceTemplate": "gradle-version",
+      "versioningTemplate": "gradle"
     }
   ]
 }
