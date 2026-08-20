@@ -25,6 +25,7 @@ import androidx.room3.RoomDatabase
 import androidx.room3.migration.AutoMigrationSpec
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.meshtastic.core.common.util.ioDispatcher
+import org.meshtastic.core.database.dao.BootloaderOtaQuirksDao
 import org.meshtastic.core.database.dao.ChannelSetDao
 import org.meshtastic.core.database.dao.DeviceHardwareDao
 import org.meshtastic.core.database.dao.DeviceLinkDao
@@ -37,6 +38,7 @@ import org.meshtastic.core.database.dao.NodeInfoDao
 import org.meshtastic.core.database.dao.PacketDao
 import org.meshtastic.core.database.dao.QuickChatActionDao
 import org.meshtastic.core.database.dao.TracerouteNodePositionDao
+import org.meshtastic.core.database.entity.BootloaderOtaQuirksCacheEntity
 import org.meshtastic.core.database.entity.ChannelSetEntity
 import org.meshtastic.core.database.entity.ContactSettings
 import org.meshtastic.core.database.entity.DeviceHardwareEntity
@@ -79,6 +81,7 @@ import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
         EventFirmwareEditionEntity::class,
         MergeMarkerEntity::class,
         ChannelSetEntity::class,
+        BootloaderOtaQuirksCacheEntity::class,
     ],
     autoMigrations =
     [
@@ -131,8 +134,9 @@ import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
         AutoMigration(from = 49, to = 50),
         AutoMigration(from = 50, to = 51),
         AutoMigration(from = 51, to = 52),
+        AutoMigration(from = 52, to = 53),
     ],
-    version = 52,
+    version = 53,
     exportSchema = true,
 )
 @androidx.room3.ConstructedBy(MeshtasticDatabaseConstructor::class)
@@ -163,6 +167,8 @@ abstract class MeshtasticDatabase : RoomDatabase() {
     abstract fun mergeMarkerDao(): MergeMarkerDao
 
     abstract fun channelSetDao(): ChannelSetDao
+
+    abstract fun bootloaderOtaQuirksDao(): BootloaderOtaQuirksDao
 
     companion object {
         /**

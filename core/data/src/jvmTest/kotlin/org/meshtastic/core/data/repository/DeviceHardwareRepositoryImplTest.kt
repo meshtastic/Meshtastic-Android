@@ -29,7 +29,9 @@ import okio.Buffer
 import okio.Source
 import org.meshtastic.core.data.datasource.BundledAssetReader
 import org.meshtastic.core.data.datasource.DeviceHardwareLocalDataSource
+import org.meshtastic.core.data.datasource.decode
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.BootloaderOtaQuirksResponse
 import org.meshtastic.core.model.DeviceLink
 import org.meshtastic.core.model.EventFirmwareResponse
 import org.meshtastic.core.model.FirmwareReleaseManifest
@@ -40,6 +42,7 @@ import org.meshtastic.core.model.NetworkFirmwareReleases
 import org.meshtastic.core.model.SoftDeviceVariant
 import org.meshtastic.core.network.DeviceHardwareRemoteDataSource
 import org.meshtastic.core.network.service.ApiService
+import org.meshtastic.core.repository.BootloaderOtaQuirksRepository
 import org.meshtastic.core.repository.DeviceLinkRepository
 import org.meshtastic.core.testing.FakeDatabaseProvider
 import kotlin.test.AfterTest
@@ -71,6 +74,8 @@ class DeviceHardwareRepositoryImplTest {
         override suspend fun getNightlyFirmware(): NetworkFirmwareNightly? = error("unused")
 
         override suspend fun getEventFirmware(): EventFirmwareResponse = error("unused")
+
+        override suspend fun getBootloaderOtaQuirks(): BootloaderOtaQuirksResponse = error("unused")
     }
 
     private class FakeBundledAssetReader(var hardware: List<NetworkDeviceHardware>, private val json: Json) :
@@ -100,6 +105,27 @@ class DeviceHardwareRepositoryImplTest {
             emptyList()
 
         override fun observeAllLinks(): Flow<List<DeviceLink>> = flowOf(emptyList())
+    }
+
+    /**
+     * Mirrors the pre-migration `loadQuirksAsset()` behavior exactly: reads straight from the same bundled-asset fake
+     * the hardware-catalog seed uses, fails open to an empty response on an absent or malformed asset. Real caching and
+     * network-refresh behavior is covered separately in BootloaderOtaQuirksRepositoryImplTest; this fake exists so
+     * these tests can keep driving SoftDevice/quirk resolution through [FakeBundledAssetReader.quirksJson] unchanged.
+     */
+    private class FakeBootloaderOtaQuirksRepository(
+        private val assetReader: BundledAssetReader,
+        private val json: Json,
+    ) : BootloaderOtaQuirksRepository {
+        var reconcileCalls = 0
+
+        override suspend fun getSnapshot(): BootloaderOtaQuirksResponse =
+            runCatching { assetReader.decode<BootloaderOtaQuirksResponse>("device_bootloader_ota_quirks.json", json) }
+                .getOrNull() ?: BootloaderOtaQuirksResponse()
+
+        override suspend fun reconcile() {
+            reconcileCalls += 1
+        }
     }
 
     private val json = Json { ignoreUnknownKeys = true }
@@ -146,6 +172,7 @@ class DeviceHardwareRepositoryImplTest {
                 assetReader = assetReader,
                 json = json,
                 deviceLinkRepository = links,
+                bootloaderOtaQuirksRepository = FakeBootloaderOtaQuirksRepository(assetReader, json),
                 dispatchers = dispatchers,
             )
     }
@@ -243,6 +270,7 @@ class DeviceHardwareRepositoryImplTest {
             assetReader = assetReader,
             json = json,
             deviceLinkRepository = links,
+            bootloaderOtaQuirksRepository = FakeBootloaderOtaQuirksRepository(assetReader, json),
             dispatchers = dispatchers,
         )
     }
