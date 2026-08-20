@@ -17,8 +17,10 @@
 package org.meshtastic.feature.firmware
 
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.Json
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.MaintenanceUf2Manifest
 import org.meshtastic.core.model.SoftDeviceVariant
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -32,6 +34,109 @@ import kotlin.test.assertTrue
  * supplies the runner. Without that subclass these tests would silently not run at all.
  */
 abstract class CommonMaintenanceVolumeTest {
+
+    /** The real maintenance-UF2 manifest, embedded verbatim — see UsbMaintenanceGateTest for why. */
+    private val testManifest =
+        Json { ignoreUnknownKeys = true }
+            .decodeFromString<MaintenanceUf2Manifest>(
+                """
+                {
+                  "manifestVersion": 1,
+                  "otafixReleaseTag": "0.9.2-OTAFIX2.3-BP1.5",
+                  "otafixBase": "https://github.com/meshtastic/Adafruit_nRF52_Bootloader_OTAFIX/releases/download/0.9.2-OTAFIX2.3-BP1.5",
+                  "erase": {
+                    "s140_6_1_1": {
+                      "fileName": "nrf_erase2.uf2",
+                      "sha256": "4b778a3def19854415db64cb51bfd29c15b11cc46006353dd518f62d09efe3fe",
+                      "expectedFirstTargetAddress": 155648
+                    },
+                    "s140_7_3_0": {
+                      "fileName": "nrf_erase_sd7_3.uf2",
+                      "sha256": "13941bedce009e61255c37b1524d11ca604e88c38e7588bb8b391e2998da468f",
+                      "expectedFirstTargetAddress": 159744
+                    },
+                    "rp2040": {
+                      "fileName": "pico_erase.uf2",
+                      "sha256": "08aa7d561e8b8bf2f9b061b3506fb4d8f135e832efe0f3ae978241db2da0c853"
+                    }
+                  },
+                  "otafixByBoardId": {
+                    "HT-n5262": {
+                      "board": "heltec_t114",
+                      "sha256": "ae92d3577cb58dd9b43c9b61ffb9bfffda05b0eca4113a0ec42a37cd8be53b19"
+                    },
+                    "MinewSemi-MX25LE01": {
+                      "board": "minewsemi_mx25le01",
+                      "sha256": "e09564fd8dd03fc25d76dcb732a0214c79653da3b130240949b783254d3dfc1b"
+                    },
+                    "TRACKER L1": {
+                      "board": "wio_tracker_l1",
+                      "sha256": "70fbce0eda9d70d7bd8a4367057badf5ec310838bf3221370d45a56f04956b9e"
+                    },
+                    "WisBlock-RAK4631-Board": {
+                      "board": "wiscore_rak4631_board",
+                      "sha256": "8741bc677a3c24f28422c5ffb80761de7d98a127a3b0191ba6585bf57ce9f305"
+                    },
+                    "WisMesh-Tag": {
+                      "board": "wismesh_tag",
+                      "sha256": "96d42e1990e17251e8c625e98a1551cac12c6e29111bc2e59ab7c9fe6dec8758"
+                    },
+                    "nRF52840-SeeedSenseCAPSolarP1-v1": {
+                      "board": "sensecap_solar_p1",
+                      "sha256": "9b4bce48c1b4830617715c5619457bce6b21f3079803e35e13433de7701290f5"
+                    },
+                    "nRF52840-SeeedXiao-v1": {
+                      "board": "xiao_nrf52840_ble",
+                      "sha256": "ff8a0916e98cceb394fd66590bccc17f63612c11ff56b086ef88bd436c8df67f"
+                    },
+                    "nRF52840-SeeedXiaoSense-v1": {
+                      "board": "xiao_nrf52840_ble_sense",
+                      "sha256": "fc233d83a1011419625fcb50b49084578460c25bbc0270374ca176757a3c40da"
+                    },
+                    "nRF52840-T1000-E-v1": {
+                      "board": "t1000_e",
+                      "sha256": "5c065e11b8acd5b0cefa9295f98bca1512306cfa478856aa76a871124a904cc4"
+                    },
+                    "nRF52840-TEcho-v1": {
+                      "board": "lilygo_techo",
+                      "sha256": "2ddb36188ffe521c270bb2ce8441d742d0fe45325c57e4db6475bf63162a59b0"
+                    },
+                    "nRF52840-ThinkNode-M3-v1": {
+                      "board": "thinknode_m3",
+                      "sha256": "bf90979f2f6adc96ef6ca09c280b2ab7e66cb8ce2654fc80da9b20407bfb8708"
+                    },
+                    "nRF52840-ThinkNodeM1-v1": {
+                      "board": "thinknode_m1",
+                      "sha256": "aa0721b573c60e0b179274d5a5296bac7a8436faf339cfc03116ebe8a4375795"
+                    },
+                    "nRF52840-ThinkNodeM6-v1": {
+                      "board": "thinknode_m6",
+                      "sha256": "aaf94953a540a18f3e48f4cdec0c78290ad3c5f8740aea26fa3b3ce3632a8d4a"
+                    },
+                    "nRF52840-promicro": {
+                      "board": "promicro_nrf52840",
+                      "sha256": "46ef3440f151d6f2606075bcd1aa83db25a660da7d25b988aeb47ef350c98794"
+                    }
+                  },
+                  "otafixSupportedTargets": [
+                    "rak4631",
+                    "rak_wismeshtag",
+                    "t-echo",
+                    "heltec-mesh-node-t114",
+                    "nrf52_promicro_diy_tcxo",
+                    "thinknode_m1",
+                    "thinknode_m3",
+                    "thinknode_m6",
+                    "tracker-t1000-e",
+                    "seeed_wio_tracker_L1",
+                    "seeed_wio_tracker_L1_eink",
+                    "seeed_solar_node",
+                    "seeed_xiao_nrf52840_kit"
+                  ]
+                }
+                """
+                    .trimIndent(),
+            )
 
     private val treeUri = CommonUri.parse("content://com.android.externalstorage.documents/tree/1234-5678%3A")
 
@@ -118,6 +223,7 @@ abstract class CommonMaintenanceVolumeTest {
     fun `erase uses the volume's softdevice when it agrees with the map`() {
         val choice =
             chooseMaintenanceImage(
+                testManifest,
                 UsbMaintenanceRequest.FactoryErase,
                 nrf(SoftDeviceVariant.S140_6_1_1),
                 MaintenanceVolume("WisBlock-RAK4631-Board", SoftDeviceVariant.S140_6_1_1),
@@ -130,6 +236,7 @@ abstract class CommonMaintenanceVolumeTest {
     fun `erase refuses when the volume and the map disagree`() {
         val choice =
             chooseMaintenanceImage(
+                testManifest,
                 UsbMaintenanceRequest.FactoryErase,
                 nrf(SoftDeviceVariant.S140_6_1_1),
                 MaintenanceVolume("WisBlock-RAK4631-Board", SoftDeviceVariant.S140_7_3_0),
@@ -146,6 +253,7 @@ abstract class CommonMaintenanceVolumeTest {
     fun `erase falls back to the map when the volume reports no softdevice`() {
         val choice =
             chooseMaintenanceImage(
+                testManifest,
                 UsbMaintenanceRequest.FactoryErase,
                 nrf(SoftDeviceVariant.S140_7_3_0),
                 MaintenanceVolume("SomeBoard", softDevice = null),
@@ -158,6 +266,7 @@ abstract class CommonMaintenanceVolumeTest {
     fun `erase refuses when neither the volume nor the map knows the softdevice`() {
         val choice =
             chooseMaintenanceImage(
+                testManifest,
                 UsbMaintenanceRequest.FactoryErase,
                 nrf(variant = null),
                 MaintenanceVolume("SomeBoard", softDevice = null),
@@ -170,6 +279,7 @@ abstract class CommonMaintenanceVolumeTest {
     fun `erase on rp2040 resolves without consulting a softdevice`() {
         val choice =
             chooseMaintenanceImage(
+                testManifest,
                 UsbMaintenanceRequest.FactoryErase,
                 rp2040(),
                 MaintenanceVolume("RPI-RP2", softDevice = null),
@@ -184,6 +294,7 @@ abstract class CommonMaintenanceVolumeTest {
         // thing physically in front of us.
         val choice =
             chooseMaintenanceImage(
+                testManifest,
                 UsbMaintenanceRequest.BootloaderUpgrade,
                 nrf(SoftDeviceVariant.S140_6_1_1),
                 MaintenanceVolume("nRF52840-TEcho-v1", SoftDeviceVariant.S140_6_1_1),
@@ -196,6 +307,7 @@ abstract class CommonMaintenanceVolumeTest {
     fun `bootloader upgrade refuses an unrecognized board id`() {
         val choice =
             chooseMaintenanceImage(
+                testManifest,
                 UsbMaintenanceRequest.BootloaderUpgrade,
                 nrf(SoftDeviceVariant.S140_6_1_1),
                 MaintenanceVolume("RPI-RP2", softDevice = null),

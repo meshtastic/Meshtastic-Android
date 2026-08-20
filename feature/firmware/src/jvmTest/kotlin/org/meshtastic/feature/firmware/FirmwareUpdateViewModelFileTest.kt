@@ -47,9 +47,13 @@ import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.datastore.BootloaderWarningDataSource
 import org.meshtastic.core.datastore.FirmwareRecoveryDataSource
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.EraseImageEntry
+import org.meshtastic.core.model.MaintenanceUf2EraseSet
+import org.meshtastic.core.model.MaintenanceUf2Manifest
 import org.meshtastic.core.model.SoftDeviceVariant
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
+import org.meshtastic.core.repository.MaintenanceUf2Repository
 import org.meshtastic.core.repository.NodeRestartTracker
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioPrefs
@@ -81,6 +85,7 @@ class FirmwareUpdateViewModelFileTest {
 
     private val firmwareReleaseRepository: FirmwareReleaseRepository = mock(MockMode.autofill)
     private val deviceHardwareRepository: DeviceHardwareRepository = mock(MockMode.autofill)
+    private val maintenanceUf2Repository: MaintenanceUf2Repository = mock(MockMode.autofill)
     private val nodeRepository = FakeNodeRepository()
     private val radioController = FakeRadioController()
     private val radioPrefs: RadioPrefs = mock(MockMode.autofill)
@@ -97,6 +102,19 @@ class FirmwareUpdateViewModelFileTest {
 
     private val hardware = DeviceHardware(hwModel = 1, architecture = "nrf52", platformioTarget = "tbeam")
 
+    // Populated so erase-image resolution actually succeeds for both known SoftDevice variants — an empty
+    // MaintenanceUf2Manifest() would make every S140_6_1_1/S140_7_3_0 resolution refuse as unresolved, which is
+    // wrong for a test fixture standing in for the fetched/bundled manifest, not for a genuinely-empty cache.
+    private val testMaintenanceUf2Manifest =
+        MaintenanceUf2Manifest(
+            erase =
+            MaintenanceUf2EraseSet(
+                sd611 = EraseImageEntry(fileName = "nrf_erase2.uf2", sha256 = "0".repeat(64)),
+                sd730 = EraseImageEntry(fileName = "nrf_erase_sd7_3.uf2", sha256 = "0".repeat(64)),
+                rp2040 = EraseImageEntry(fileName = "pico_erase.uf2", sha256 = "0".repeat(64)),
+            ),
+        )
+
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
@@ -110,6 +128,8 @@ class FirmwareUpdateViewModelFileTest {
         everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any()) } returns
             Result.success(hardware)
         everySuspend { bootloaderWarningDataSource.isDismissed(any()) } returns true
+        everySuspend { maintenanceUf2Repository.reconcile() } returns Unit
+        everySuspend { maintenanceUf2Repository.getSnapshot() } returns testMaintenanceUf2Manifest
         every { firmwareRecoveryDataSource.pending } returns flowOf(null)
 
         nodeRepository.setMyNodeInfo(
@@ -137,6 +157,7 @@ class FirmwareUpdateViewModelFileTest {
     private fun createViewModel() = FirmwareUpdateViewModel(
         firmwareReleaseRepository,
         deviceHardwareRepository,
+        maintenanceUf2Repository,
         nodeRepository,
         radioController,
         radioPrefs,

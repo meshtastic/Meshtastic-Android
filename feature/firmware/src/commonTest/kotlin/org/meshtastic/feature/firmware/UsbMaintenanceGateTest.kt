@@ -16,7 +16,9 @@
  */
 package org.meshtastic.feature.firmware
 
+import kotlinx.serialization.json.Json
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.MaintenanceUf2Manifest
 import org.meshtastic.core.model.SoftDeviceVariant
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -36,6 +38,113 @@ import kotlin.test.assertTrue
  * cannot silently contribute zero tests.
  */
 class UsbMaintenanceGateTest {
+
+    /**
+     * The real maintenance-UF2 manifest ([api/data/maintenanceUf2.json] in `meshtastic/api`, embedded verbatim), so
+     * this test suite keeps exercising the exact board/digest table that ships, not a hand-trimmed fixture that could
+     * drift from it silently.
+     */
+    private val testManifest =
+        Json { ignoreUnknownKeys = true }
+            .decodeFromString<MaintenanceUf2Manifest>(
+                """
+                {
+                  "manifestVersion": 1,
+                  "otafixReleaseTag": "0.9.2-OTAFIX2.3-BP1.5",
+                  "otafixBase": "https://github.com/meshtastic/Adafruit_nRF52_Bootloader_OTAFIX/releases/download/0.9.2-OTAFIX2.3-BP1.5",
+                  "erase": {
+                    "s140_6_1_1": {
+                      "fileName": "nrf_erase2.uf2",
+                      "sha256": "4b778a3def19854415db64cb51bfd29c15b11cc46006353dd518f62d09efe3fe",
+                      "expectedFirstTargetAddress": 155648
+                    },
+                    "s140_7_3_0": {
+                      "fileName": "nrf_erase_sd7_3.uf2",
+                      "sha256": "13941bedce009e61255c37b1524d11ca604e88c38e7588bb8b391e2998da468f",
+                      "expectedFirstTargetAddress": 159744
+                    },
+                    "rp2040": {
+                      "fileName": "pico_erase.uf2",
+                      "sha256": "08aa7d561e8b8bf2f9b061b3506fb4d8f135e832efe0f3ae978241db2da0c853"
+                    }
+                  },
+                  "otafixByBoardId": {
+                    "HT-n5262": {
+                      "board": "heltec_t114",
+                      "sha256": "ae92d3577cb58dd9b43c9b61ffb9bfffda05b0eca4113a0ec42a37cd8be53b19"
+                    },
+                    "MinewSemi-MX25LE01": {
+                      "board": "minewsemi_mx25le01",
+                      "sha256": "e09564fd8dd03fc25d76dcb732a0214c79653da3b130240949b783254d3dfc1b"
+                    },
+                    "TRACKER L1": {
+                      "board": "wio_tracker_l1",
+                      "sha256": "70fbce0eda9d70d7bd8a4367057badf5ec310838bf3221370d45a56f04956b9e"
+                    },
+                    "WisBlock-RAK4631-Board": {
+                      "board": "wiscore_rak4631_board",
+                      "sha256": "8741bc677a3c24f28422c5ffb80761de7d98a127a3b0191ba6585bf57ce9f305"
+                    },
+                    "WisMesh-Tag": {
+                      "board": "wismesh_tag",
+                      "sha256": "96d42e1990e17251e8c625e98a1551cac12c6e29111bc2e59ab7c9fe6dec8758"
+                    },
+                    "nRF52840-SeeedSenseCAPSolarP1-v1": {
+                      "board": "sensecap_solar_p1",
+                      "sha256": "9b4bce48c1b4830617715c5619457bce6b21f3079803e35e13433de7701290f5"
+                    },
+                    "nRF52840-SeeedXiao-v1": {
+                      "board": "xiao_nrf52840_ble",
+                      "sha256": "ff8a0916e98cceb394fd66590bccc17f63612c11ff56b086ef88bd436c8df67f"
+                    },
+                    "nRF52840-SeeedXiaoSense-v1": {
+                      "board": "xiao_nrf52840_ble_sense",
+                      "sha256": "fc233d83a1011419625fcb50b49084578460c25bbc0270374ca176757a3c40da"
+                    },
+                    "nRF52840-T1000-E-v1": {
+                      "board": "t1000_e",
+                      "sha256": "5c065e11b8acd5b0cefa9295f98bca1512306cfa478856aa76a871124a904cc4"
+                    },
+                    "nRF52840-TEcho-v1": {
+                      "board": "lilygo_techo",
+                      "sha256": "2ddb36188ffe521c270bb2ce8441d742d0fe45325c57e4db6475bf63162a59b0"
+                    },
+                    "nRF52840-ThinkNode-M3-v1": {
+                      "board": "thinknode_m3",
+                      "sha256": "bf90979f2f6adc96ef6ca09c280b2ab7e66cb8ce2654fc80da9b20407bfb8708"
+                    },
+                    "nRF52840-ThinkNodeM1-v1": {
+                      "board": "thinknode_m1",
+                      "sha256": "aa0721b573c60e0b179274d5a5296bac7a8436faf339cfc03116ebe8a4375795"
+                    },
+                    "nRF52840-ThinkNodeM6-v1": {
+                      "board": "thinknode_m6",
+                      "sha256": "aaf94953a540a18f3e48f4cdec0c78290ad3c5f8740aea26fa3b3ce3632a8d4a"
+                    },
+                    "nRF52840-promicro": {
+                      "board": "promicro_nrf52840",
+                      "sha256": "46ef3440f151d6f2606075bcd1aa83db25a660da7d25b988aeb47ef350c98794"
+                    }
+                  },
+                  "otafixSupportedTargets": [
+                    "rak4631",
+                    "rak_wismeshtag",
+                    "t-echo",
+                    "heltec-mesh-node-t114",
+                    "nrf52_promicro_diy_tcxo",
+                    "thinknode_m1",
+                    "thinknode_m3",
+                    "thinknode_m6",
+                    "tracker-t1000-e",
+                    "seeed_wio_tracker_L1",
+                    "seeed_wio_tracker_L1_eink",
+                    "seeed_solar_node",
+                    "seeed_xiao_nrf52840_kit"
+                  ]
+                }
+                """
+                    .trimIndent(),
+            )
 
     private fun nrf(
         variant: SoftDeviceVariant? = SoftDeviceVariant.S140_6_1_1,
@@ -58,7 +167,7 @@ class UsbMaintenanceGateTest {
 
     @Test
     fun `gate is shown for nrf52840 over usb with a release`() {
-        val gate = usbMaintenanceGate(nrf(), FirmwareUpdateMethod.Usb, hasRelease = true)
+        val gate = usbMaintenanceGate(testManifest, nrf(), FirmwareUpdateMethod.Usb, hasRelease = true)
 
         assertTrue(gate.show, "nRF52840 over USB should offer maintenance")
         assertNull(gate.eraseRefusal, "A resolved SoftDevice must not refuse")
@@ -66,7 +175,7 @@ class UsbMaintenanceGateTest {
 
     @Test
     fun `gate is shown for rp2040 over usb and never refuses on softdevice`() {
-        val gate = usbMaintenanceGate(rp2040(), FirmwareUpdateMethod.Usb, hasRelease = true)
+        val gate = usbMaintenanceGate(testManifest, rp2040(), FirmwareUpdateMethod.Usb, hasRelease = true)
 
         assertTrue(gate.show, "RP2040 over USB should offer maintenance")
         assertNull(gate.eraseRefusal, "RP2040 has no SoftDevice to resolve")
@@ -75,14 +184,14 @@ class UsbMaintenanceGateTest {
 
     @Test
     fun `gate is hidden for esp32 even over usb`() {
-        assertFalse(usbMaintenanceGate(esp32(), FirmwareUpdateMethod.Usb, hasRelease = true).show)
+        assertFalse(usbMaintenanceGate(testManifest, esp32(), FirmwareUpdateMethod.Usb, hasRelease = true).show)
     }
 
     @Test
     fun `gate is hidden for every non-usb transport`() {
         listOf(FirmwareUpdateMethod.Ble, FirmwareUpdateMethod.Wifi, FirmwareUpdateMethod.Unknown).forEach { method ->
             assertFalse(
-                usbMaintenanceGate(nrf(), method, hasRelease = true).show,
+                usbMaintenanceGate(testManifest, nrf(), method, hasRelease = true).show,
                 "Maintenance must not be offered over $method — the flow needs the UF2 mass-storage drive",
             )
         }
@@ -90,14 +199,14 @@ class UsbMaintenanceGateTest {
 
     @Test
     fun `gate is hidden without a release because there would be nothing to reflash`() {
-        assertFalse(usbMaintenanceGate(nrf(), FirmwareUpdateMethod.Usb, hasRelease = false).show)
+        assertFalse(usbMaintenanceGate(testManifest, nrf(), FirmwareUpdateMethod.Usb, hasRelease = false).show)
     }
 
     // ── Fail-closed SoftDevice refusal (R4) ──────────────────────────────────
 
     @Test
     fun `unresolved softdevice shows the action but refuses it`() {
-        val gate = usbMaintenanceGate(nrf(variant = null), FirmwareUpdateMethod.Usb, hasRelease = true)
+        val gate = usbMaintenanceGate(testManifest, nrf(variant = null), FirmwareUpdateMethod.Usb, hasRelease = true)
 
         assertTrue(gate.show, "The action stays visible so the refusal can be explained")
         assertEquals(UsbMaintenanceRefusal.UnknownSoftDevice, gate.eraseRefusal)
@@ -105,31 +214,34 @@ class UsbMaintenanceGateTest {
 
     @Test
     fun `no erase image is resolved for an unresolved softdevice`() {
-        assertNull(eraseUf2For(nrf(variant = null)), "An unknown variant must never fall back to a default image")
+        assertNull(
+            eraseUf2For(testManifest, nrf(variant = null)),
+            "An unknown variant must never fall back to a default image",
+        )
     }
 
     @Test
     fun `each softdevice variant resolves to its own image and target address`() {
-        val six = eraseUf2For(nrf(variant = SoftDeviceVariant.S140_6_1_1))
-        val seven = eraseUf2For(nrf(variant = SoftDeviceVariant.S140_7_3_0))
+        val six = eraseUf2For(testManifest, nrf(variant = SoftDeviceVariant.S140_6_1_1))
+        val seven = eraseUf2For(testManifest, nrf(variant = SoftDeviceVariant.S140_7_3_0))
 
         assertNotNull(six)
         assertNotNull(seven)
         assertEquals("nrf_erase2.uf2", six.fileName)
         assertEquals("nrf_erase_sd7_3.uf2", seven.fileName)
-        assertEquals(APP_START_S140_6_1_1, six.expectedFirstTargetAddress)
-        assertEquals(APP_START_S140_7_3_0, seven.expectedFirstTargetAddress)
+        assertEquals(0x26000L, six.expectedFirstTargetAddress)
+        assertEquals(0x27000L, seven.expectedFirstTargetAddress)
         assertTrue(six.sha256 != seven.sha256, "The two variants must not share a digest")
     }
 
     @Test
     fun `esp32 resolves no erase image`() {
-        assertNull(eraseUf2For(esp32()))
+        assertNull(eraseUf2For(testManifest, esp32()))
     }
 
     @Test
     fun `rp2040 resolves the pico erase image with no address invariant`() {
-        val asset = eraseUf2For(rp2040())
+        val asset = eraseUf2For(testManifest, rp2040())
 
         assertNotNull(asset)
         assertEquals("pico_erase.uf2", asset.fileName)
@@ -141,11 +253,16 @@ class UsbMaintenanceGateTest {
     @Test
     fun `otafix is offered only for supported targets`() {
         assertTrue(
-            usbMaintenanceGate(nrf(target = "rak4631"), FirmwareUpdateMethod.Usb, hasRelease = true)
+            usbMaintenanceGate(testManifest, nrf(target = "rak4631"), FirmwareUpdateMethod.Usb, hasRelease = true)
                 .showBootloaderUpgrade,
         )
         assertTrue(
-            usbMaintenanceGate(nrf(target = "heltec-mesh-node-t114"), FirmwareUpdateMethod.Usb, hasRelease = true)
+            usbMaintenanceGate(
+                testManifest,
+                nrf(target = "heltec-mesh-node-t114"),
+                FirmwareUpdateMethod.Usb,
+                hasRelease = true,
+            )
                 .showBootloaderUpgrade,
             "T114 is on OTAFIX's supported list even though the project names differ",
         )
@@ -165,7 +282,7 @@ class UsbMaintenanceGateTest {
         )
             .forEach { target ->
                 assertFalse(
-                    usbMaintenanceGate(nrf(target = target), FirmwareUpdateMethod.Usb, hasRelease = true)
+                    usbMaintenanceGate(testManifest, nrf(target = target), FirmwareUpdateMethod.Usb, hasRelease = true)
                         .showBootloaderUpgrade,
                     "$target is not an OTAFIX-supported product",
                 )
@@ -176,8 +293,11 @@ class UsbMaintenanceGateTest {
 
     @Test
     fun `every shipped otafix image resolves and no two boards share a digest or filename`() {
-        assertEquals(14, otafixBoardIds.size, "OTAFIX 2.2-BP1.4 ships 14 update images")
-        val images = otafixBoardIds.map { assertNotNull(otafixUf2ForBoardId(it), "no image for $it") }
+        assertEquals(14, testManifest.otafixByBoardId.keys.size, "OTAFIX 2.2-BP1.4 ships 14 update images")
+        val images =
+            testManifest.otafixByBoardId.keys.map {
+                assertNotNull(otafixUf2ForBoardId(testManifest, it), "no image for $it")
+            }
         assertEquals(images.size, images.map { it.sha256 }.toSet().size, "No two boards may share a digest")
         assertEquals(images.size, images.map { it.fileName }.toSet().size, "No two boards may share a filename")
     }
@@ -265,12 +385,12 @@ class UsbMaintenanceGateTest {
     fun `every otafix board id maps to its exact expected release filename and digest`() {
         assertEquals(
             expectedOtafixAssetsByBoardId.keys,
-            otafixBoardIds,
+            testManifest.otafixByBoardId.keys,
             "This test's expectation table and the shipped board-id map have drifted apart",
         )
         expectedOtafixAssetsByBoardId.forEach { (boardId, expected) ->
             val (expectedFileName, expectedSha256) = expected
-            val image = assertNotNull(otafixUf2ForBoardId(boardId), "no image for $boardId")
+            val image = assertNotNull(otafixUf2ForBoardId(testManifest, boardId), "no image for $boardId")
             assertEquals(expectedFileName, image.fileName, "$boardId: wrong release filename")
             assertEquals(expectedSha256, image.sha256, "$boardId: wrong digest")
         }
@@ -278,8 +398,8 @@ class UsbMaintenanceGateTest {
 
     @Test
     fun `board id selects the image rather than the build target`() {
-        val rak = otafixUf2ForBoardId("WisBlock-RAK4631-Board")
-        val techo = otafixUf2ForBoardId("nRF52840-TEcho-v1")
+        val rak = otafixUf2ForBoardId(testManifest, "WisBlock-RAK4631-Board")
+        val techo = otafixUf2ForBoardId(testManifest, "nRF52840-TEcho-v1")
 
         assertNotNull(rak)
         assertNotNull(techo)
@@ -291,8 +411,8 @@ class UsbMaintenanceGateTest {
 
     @Test
     fun `xiao sense is distinguished from plain xiao only by board id`() {
-        val plain = otafixUf2ForBoardId("nRF52840-SeeedXiao-v1")
-        val sense = otafixUf2ForBoardId("nRF52840-SeeedXiaoSense-v1")
+        val plain = otafixUf2ForBoardId(testManifest, "nRF52840-SeeedXiao-v1")
+        val sense = otafixUf2ForBoardId(testManifest, "nRF52840-SeeedXiaoSense-v1")
 
         assertNotNull(plain)
         assertNotNull(sense)
@@ -303,8 +423,8 @@ class UsbMaintenanceGateTest {
 
     @Test
     fun `an unrecognized board id refuses rather than falling back`() {
-        assertNull(otafixUf2ForBoardId("SomeOtherBoard-v9"))
-        assertNull(otafixUf2ForBoardId(""))
+        assertNull(otafixUf2ForBoardId(testManifest, "SomeOtherBoard-v9"))
+        assertNull(otafixUf2ForBoardId(testManifest, ""))
     }
 
     @Test
@@ -316,7 +436,7 @@ class UsbMaintenanceGateTest {
                 "Date: Apr 13 2026\r\n"
 
         assertEquals("WisBlock-RAK4631-Board", parseUf2BoardId(info))
-        assertNotNull(parseUf2BoardId(info)?.let { otafixUf2ForBoardId(it) })
+        assertNotNull(parseUf2BoardId(info)?.let { otafixUf2ForBoardId(testManifest, it) })
     }
 
     @Test
@@ -346,7 +466,7 @@ class UsbMaintenanceGateTest {
         assertEquals(SoftDeviceVariant.S140_7_3_0, parseUf2SoftDevice(seeedL1Info))
         assertEquals("TRACKER L1", parseUf2BoardId(seeedL1Info))
         // The stock Seeed bootloader reports the same Board-ID as OTAFIX's build for this board.
-        assertNotNull(otafixUf2ForBoardId(parseUf2BoardId(seeedL1Info)!!))
+        assertNotNull(otafixUf2ForBoardId(testManifest, parseUf2BoardId(seeedL1Info)!!))
     }
 
     /** Verbatim `INFO_UF2.TXT` from a RAK4631 running OTAFIX 2.2-BP1.3 (hwModel 9), captured 2026-07-30. */
@@ -394,7 +514,7 @@ class UsbMaintenanceGateTest {
 
         assertEquals("WisBlock-RAK4631-Board", parseUf2BoardId(rak4631OtafixInfo))
         assertNotNull(
-            otafixUf2ForBoardId(parseUf2BoardId(rak4631OtafixInfo)!!),
+            otafixUf2ForBoardId(testManifest, parseUf2BoardId(rak4631OtafixInfo)!!),
             "An OTAFIX-flashed device must still resolve its own image, so re-running the upgrade is idempotent",
         )
     }
@@ -410,10 +530,10 @@ class UsbMaintenanceGateTest {
         // Verified against hardware 2026-07-30: on a 6.1.1 RAK4631 the app vector table sits at 0x26000
         // (sp=0x20040000, top of nRF52840 RAM), and 0x27000 is mid-application. On a 7.3.0 device the app starts at
         // 0x27000, which makes 0x26000 the SoftDevice's last page — the direction that corrupts.
-        assertEquals(0x26000L, APP_START_S140_6_1_1)
-        assertEquals(0x27000L, APP_START_S140_7_3_0)
-        assertEquals(APP_START_S140_6_1_1, eraseUf2ForVariant(SoftDeviceVariant.S140_6_1_1).expectedFirstTargetAddress)
-        assertEquals(APP_START_S140_7_3_0, eraseUf2ForVariant(SoftDeviceVariant.S140_7_3_0).expectedFirstTargetAddress)
+        val six = assertNotNull(eraseUf2ForVariant(testManifest, SoftDeviceVariant.S140_6_1_1))
+        val seven = assertNotNull(eraseUf2ForVariant(testManifest, SoftDeviceVariant.S140_7_3_0))
+        assertEquals(0x26000L, six.expectedFirstTargetAddress)
+        assertEquals(0x27000L, seven.expectedFirstTargetAddress)
     }
 
     @Test
@@ -429,6 +549,7 @@ class UsbMaintenanceGateTest {
         // The map says 6.1.1, the device says 7.3.0 with nothing else to go on — but they disagree, so refuse.
         val conflict =
             resolveNrfEraseImage(
+                testManifest,
                 mapped = SoftDeviceVariant.S140_6_1_1,
                 reportedFromDrive = SoftDeviceVariant.S140_7_3_0,
             )
@@ -439,18 +560,20 @@ class UsbMaintenanceGateTest {
     fun `agreement resolves to the reported variant's image`() {
         val resolved =
             resolveNrfEraseImage(
+                testManifest,
                 mapped = SoftDeviceVariant.S140_7_3_0,
                 reportedFromDrive = SoftDeviceVariant.S140_7_3_0,
             )
 
         assertTrue(resolved is EraseImageResolution.Resolved)
         assertEquals("nrf_erase_sd7_3.uf2", resolved.asset.fileName)
-        assertEquals(APP_START_S140_7_3_0, resolved.asset.expectedFirstTargetAddress)
+        assertEquals(0x27000L, resolved.asset.expectedFirstTargetAddress)
     }
 
     @Test
     fun `an old bootloader with no softdevice line falls back to the bundled map`() {
-        val resolved = resolveNrfEraseImage(mapped = SoftDeviceVariant.S140_6_1_1, reportedFromDrive = null)
+        val resolved =
+            resolveNrfEraseImage(testManifest, mapped = SoftDeviceVariant.S140_6_1_1, reportedFromDrive = null)
 
         assertTrue(resolved is EraseImageResolution.Resolved)
         assertEquals("nrf_erase2.uf2", resolved.asset.fileName)
@@ -459,7 +582,8 @@ class UsbMaintenanceGateTest {
     @Test
     fun `a drive report rescues an unmapped model`() {
         // THINKNODE_M8 has no firmware variant on master and so no map row; the drive can still answer.
-        val resolved = resolveNrfEraseImage(mapped = null, reportedFromDrive = SoftDeviceVariant.S140_6_1_1)
+        val resolved =
+            resolveNrfEraseImage(testManifest, mapped = null, reportedFromDrive = SoftDeviceVariant.S140_6_1_1)
 
         assertTrue(resolved is EraseImageResolution.Resolved)
         assertEquals(SoftDeviceVariant.S140_6_1_1, resolved.variant)
@@ -467,7 +591,10 @@ class UsbMaintenanceGateTest {
 
     @Test
     fun `neither source resolving means unresolved`() {
-        assertEquals(EraseImageResolution.Unresolved, resolveNrfEraseImage(mapped = null, reportedFromDrive = null))
+        assertEquals(
+            EraseImageResolution.Unresolved,
+            resolveNrfEraseImage(testManifest, mapped = null, reportedFromDrive = null),
+        )
     }
 
     // ── UF2 header parsing (R8) ──────────────────────────────────────────────
@@ -481,7 +608,7 @@ class UsbMaintenanceGateTest {
         block[UF2_TARGET_ADDR_OFFSET + 2] = 0x02
         block[UF2_TARGET_ADDR_OFFSET + 3] = 0x00
 
-        assertEquals(APP_START_S140_7_3_0, uf2FirstTargetAddress(block))
+        assertEquals(0x27000L, uf2FirstTargetAddress(block))
     }
 
     @Test

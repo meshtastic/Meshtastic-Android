@@ -80,6 +80,14 @@ interface ApiService {
      * server serves this file verbatim, so there is nothing to transform.
      */
     suspend fun getBootloaderOtaQuirks(): BootloaderOtaQuirksResponse
+
+    /**
+     * Fetches the pinned maintenance-UF2 manifest's raw bytes from the Meshtastic API. Returns raw bytes, not a decoded
+     * model: this manifest gates an irreversible bootloader/erase write, so the caller must hash these exact bytes
+     * against a compile-time digest pin before trusting (and only then parsing) them — decoding here first would defeat
+     * that check, since JSON re-serialization is not guaranteed byte-identical to what was hashed.
+     */
+    suspend fun getMaintenanceUf2ManifestBytes(): ByteArray
 }
 
 /**
@@ -114,4 +122,6 @@ class ApiServiceImpl(private val client: HttpClient) : ApiService {
 
     override suspend fun getBootloaderOtaQuirks(): BootloaderOtaQuirksResponse =
         client.get("resource/bootloaderOtaQuirks").body()
+
+    override suspend fun getMaintenanceUf2ManifestBytes(): ByteArray = client.get("resource/maintenanceUf2").body()
 }

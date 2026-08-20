@@ -87,6 +87,8 @@ class FirmwareReleaseRepositoryImplTest {
         override suspend fun getEventFirmware(): EventFirmwareResponse = error("unused")
 
         override suspend fun getBootloaderOtaQuirks(): BootloaderOtaQuirksResponse = error("unused")
+
+        override suspend fun getMaintenanceUf2ManifestBytes(): ByteArray = error("unused")
     }
 
     /** Serves `firmware_releases.json` from [bundled] via the real decode path, or nothing when null. */

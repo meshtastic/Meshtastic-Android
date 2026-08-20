@@ -23,6 +23,7 @@ import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.repository.MaintenanceUf2Repository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.resources.Res
@@ -185,6 +186,7 @@ private const val CDC_DTR_HOLD_MS = 2_000L
  */
 internal class UsbPassWriter(
     private val fileHandler: FirmwareFileHandler,
+    private val maintenanceUf2Repository: MaintenanceUf2Repository,
     private val retrieveMaintenanceUf2: suspend (MaintenanceUf2, (Float) -> Unit) -> FirmwareArtifact?,
     private val awaitDeviceDetach: suspend (Long) -> Boolean,
     private val unblockCdc: suspend (waitMillis: Long, holdMillis: Long) -> Boolean,
@@ -276,7 +278,10 @@ internal class UsbPassWriter(
         is UsbFileSavePass.Prepared -> ImageResolution.Ready(pass.artifact)
 
         is UsbFileSavePass.FromVolume ->
-            when (val choice = chooseMaintenanceImage(pass.request, hardware, volume)) {
+            when (
+                val choice =
+                    chooseMaintenanceImage(maintenanceUf2Repository.getSnapshot(), pass.request, hardware, volume)
+            ) {
                 is MaintenanceImageChoice.Refused -> ImageResolution.Failed(UsbPassResult.Refused(choice.reason))
 
                 is MaintenanceImageChoice.Resolved -> {

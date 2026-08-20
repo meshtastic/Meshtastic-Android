@@ -72,6 +72,8 @@ class EventFirmwareRepositoryImplTest {
         }
 
         override suspend fun getBootloaderOtaQuirks(): BootloaderOtaQuirksResponse = error("unused")
+
+        override suspend fun getMaintenanceUf2ManifestBytes(): ByteArray = error("unused")
     }
 
     /** Serves only `event_firmware.json`, serializing [editions] so the repo decodes via the real path. */

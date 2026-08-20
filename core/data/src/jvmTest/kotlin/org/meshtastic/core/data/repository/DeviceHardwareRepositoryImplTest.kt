@@ -77,6 +77,8 @@ class DeviceHardwareRepositoryImplTest {
         override suspend fun getEventFirmware(): EventFirmwareResponse = error("unused")
 
         override suspend fun getBootloaderOtaQuirks(): BootloaderOtaQuirksResponse = error("unused")
+
+        override suspend fun getMaintenanceUf2ManifestBytes(): ByteArray = error("unused")
     }
 
     private class FakeBundledAssetReader(var hardware: List<NetworkDeviceHardware>, private val json: Json) :

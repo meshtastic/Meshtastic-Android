@@ -18,6 +18,7 @@ package org.meshtastic.feature.firmware
 
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.MaintenanceUf2Manifest
 import org.meshtastic.core.model.SoftDeviceVariant
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
@@ -149,6 +150,7 @@ data class UsbMaintenanceGate(
  *   application, so the whole section is hidden.
  */
 internal fun usbMaintenanceGate(
+    manifest: MaintenanceUf2Manifest,
     hardware: DeviceHardware,
     updateMethod: FirmwareUpdateMethod,
     hasRelease: Boolean,
@@ -160,7 +162,7 @@ internal fun usbMaintenanceGate(
 
     val eraseRefusal =
         when {
-            eraseUf2For(hardware) != null -> null
+            eraseUf2For(manifest, hardware) != null -> null
             hardware.isNrf52Arc -> UsbMaintenanceRefusal.UnknownSoftDevice
             else -> UsbMaintenanceRefusal.UnsupportedArchitecture
         }
@@ -170,7 +172,7 @@ internal fun usbMaintenanceGate(
         eraseRefusal = eraseRefusal,
         // nRF-only: RP2040 boards run no Adafruit bootloader, so OTAFIX does not apply. This is a visibility hint only
         // — which image gets written is decided later from the Board-ID the drive reports.
-        showBootloaderUpgrade = hardware.isNrf52Arc && otafixSupportsTarget(hardware.effectiveTarget),
+        showBootloaderUpgrade = hardware.isNrf52Arc && otafixSupportsTarget(manifest, hardware.effectiveTarget),
     )
 }
 
@@ -226,13 +228,14 @@ internal sealed interface MaintenanceImageChoice {
  * message, never a half-flashed device.
  */
 internal fun chooseMaintenanceImage(
+    manifest: MaintenanceUf2Manifest,
     request: UsbMaintenanceRequest,
     hardware: DeviceHardware,
     volume: MaintenanceVolume,
 ): MaintenanceImageChoice = when (request) {
     UsbMaintenanceRequest.FactoryErase ->
         if (hardware.isNrf52Arc) {
-            when (val resolution = resolveNrfEraseImage(hardware.softDeviceVariant, volume.softDevice)) {
+            when (val resolution = resolveNrfEraseImage(manifest, hardware.softDeviceVariant, volume.softDevice)) {
                 is EraseImageResolution.Resolved -> MaintenanceImageChoice.Resolved(resolution.asset)
 
                 is EraseImageResolution.Conflict ->
@@ -243,11 +246,11 @@ internal fun chooseMaintenanceImage(
             }
         } else {
             // RP2040: pico_erase is board-agnostic and there is no SoftDevice to reconcile.
-            eraseUf2For(hardware)?.let { MaintenanceImageChoice.Resolved(it) }
+            eraseUf2For(manifest, hardware)?.let { MaintenanceImageChoice.Resolved(it) }
                 ?: MaintenanceImageChoice.Refused(UsbMaintenanceRefusal.UnsupportedArchitecture)
         }
 
     UsbMaintenanceRequest.BootloaderUpgrade ->
-        otafixUf2ForBoardId(volume.boardId)?.let { MaintenanceImageChoice.Resolved(it) }
+        otafixUf2ForBoardId(manifest, volume.boardId)?.let { MaintenanceImageChoice.Resolved(it) }
             ?: MaintenanceImageChoice.Refused(UsbMaintenanceRefusal.UnknownBoardId)
 }

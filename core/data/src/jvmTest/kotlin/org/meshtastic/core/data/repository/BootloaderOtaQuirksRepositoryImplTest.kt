@@ -58,6 +58,8 @@ class BootloaderOtaQuirksRepositoryImplTest {
         override suspend fun getEventFirmware(): EventFirmwareResponse = error("unused")
 
         override suspend fun getBootloaderOtaQuirks(): BootloaderOtaQuirksResponse = response
+
+        override suspend fun getMaintenanceUf2ManifestBytes(): ByteArray = error("unused")
     }
 
     /**
