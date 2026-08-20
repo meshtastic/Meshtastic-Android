@@ -35,6 +35,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.semantics.isSensitiveData
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -94,7 +96,10 @@ fun EditBase64Preference(
                 valueState = it
                 runCatching { it.base64ToByteString() }.onSuccess(onValueChange)
             },
-            modifier = Modifier.fillMaxWidth().onFocusChanged { focusState -> isFocused = focusState.isFocused },
+            modifier =
+            Modifier.fillMaxWidth()
+                .onFocusChanged { focusState -> isFocused = focusState.isFocused }
+                .semantics { isSensitiveData = true },
             enabled = enabled,
             readOnly = readOnly,
             label = { Text(text = title) },

@@ -46,6 +46,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.isSensitiveData
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -172,7 +173,7 @@ private fun ChatMetadata(contact: Contact, modifier: Modifier = Modifier) {
     ) {
         Text(
             text = contact.lastMessageText.orEmpty(),
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f).semantics { isSensitiveData = true },
             style = MaterialTheme.typography.bodyMedium,
             overflow = TextOverflow.Ellipsis,
             maxLines = 2,

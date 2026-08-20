@@ -39,6 +39,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.isSensitiveData
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
@@ -136,7 +138,7 @@ fun QrDialog(title: String, uriString: String, onDismiss: () -> Unit) {
                 ) {
                     Text(
                         text = uriString,
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.weight(1f).semantics { isSensitiveData = true },
                         style = MaterialTheme.typography.bodySmall,
                         overflow = TextOverflow.Visible,
                         softWrap = true,
