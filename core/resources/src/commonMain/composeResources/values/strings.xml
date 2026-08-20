@@ -879,6 +879,8 @@
     <string name="import_export_label">Import/Export</string>
     <string name="import_known_shared_contact_text">Warning: This contact is known, importing will overwrite the previous contact information.</string>
     <string name="import_label">Import</string>
+    <string name="import_pending_channels_connect">Channel settings received. Connect to a device to import them.</string>
+    <string name="import_pending_contact_connect">Contact received. Connect to a device to import it.</string>
     <string name="import_shared_contact">Import Shared Contact?</string>
     <string name="incoming_messages">Incoming Messages</string>
     <string name="indoor_air_quality_iaq">Indoor Air Quality (IAQ)</string>

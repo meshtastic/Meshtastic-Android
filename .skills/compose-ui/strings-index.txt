@@ -849,6 +849,8 @@ import_configuration
 import_export_label
 import_known_shared_contact_text
 import_label
+import_pending_channels_connect
+import_pending_contact_connect
 import_shared_contact
 incoming_messages
 indoor_air_quality_iaq
