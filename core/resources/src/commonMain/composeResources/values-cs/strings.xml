@@ -30,11 +30,13 @@
     <!-- ACTION -->
     <string name="action_delete_message">Smazat zprávu</string>
     <string name="action_react_with_emoji">Reagovat s emoji</string>
+    <string name="action_select_device">Vybrat zařízení</string>
     <string name="actions">Akce</string>
     <string name="adc_multiplier_override_ratio">Vlastní hodnota násobiče pro ADC</string>
     <!-- ADD -->
     <string name="add">Přidat</string>
     <string name="add_a_note">Přidat soukromou poznámku…</string>
+    <string name="add_channels_description">QR kód obsahuje následující kanály. Vyberte ty, které chcete přidat do zařízení. Stávající kanály zůstanou zachovány.</string>
     <string name="add_favorite">Přidat do oblíbených</string>
     <string name="add_layer">Přidat vrstvu</string>
     <string name="add_network_device">Přidat</string>
@@ -471,6 +473,15 @@
     <string name="firmware">Firmware</string>
     <string name="firmware_edition">Firmware edice</string>
     <string name="firmware_event_ended_button">Aktualizovat firmware</string>
+    <string name="firmware_maintenance_erase_confirm_text">Tímto se ze zařízení %1$s vymaže vše včetně kanálů, klíčů a všech nastavení a poté se znovu nainstaluje firmware. Tuto akci nelze vrátit zpět a neexistuje žádná záloha.\n\nBudete dvakrát vyzváni k výběru disku zařízení: nejprve pro soubor pro vymazání a poté znovu pro firmware.</string>
+    <string name="firmware_maintenance_no_release">Nejprve vyberte verzi firmwaru, aby bylo možné po vymazání zařízení firmware znovu nainstalovat.</string>
+    <string name="firmware_maintenance_not_a_bootloader_volume">Vybraný disk není aktualizační disk zařízení. Vyberte disk, který se zobrazí v režimu aktualizace zařízení (obsahuje soubor INFO_UF2.TXT).</string>
+    <string name="firmware_maintenance_select_drive">Vyberte disk zařízení určený pro aktualizaci</string>
+    <string name="firmware_maintenance_unknown_board">Bootloader tohoto zařízení nelze pomocí této aplikace aktualizovat.</string>
+    <string name="firmware_maintenance_upgrade_bootloader_action">Aktualizovat bootloader</string>
+    <string name="firmware_maintenance_upgrade_confirm_text">Do zařízení %1$s se nainstaluje nový bootloader, který výrazně urychlí budoucí aktualizace přes Bluetooth. Poté se znovu nainstaluje firmware.\n\nBěhem procesu zařízení neodpojujte.</string>
+    <string name="firmware_maintenance_upgrade_confirm_title">Aktualizovat bootloader?</string>
+    <string name="firmware_maintenance_wrong_destination">Toto umístění není aktualizační disk zařízení, takže do zařízení nebylo nic zapsáno. Vyberte vyměnitelný disk, který se zobrazí, když je zařízení v režimu aktualizace.</string>
     <string name="firmware_old">Firmware rádia je příliš starý na to, aby mohl komunikovat s touto aplikací. Více informací o tomto naleznete v <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">naší firmware instalační příručce</a>.</string>
     <string name="firmware_recovery_banner">Dokončit aktualizaci %1$s</string>
     <string name="firmware_recovery_ble_failed">Aktualizaci se nepodařilo dokončit přes Bluetooth. Původní bootloader tohoto zařízení nedokáže spolehlivě dokončit přerušenou bezdrátovou aktualizaci. Připojte zařízení k počítači pomocí USB a znovu nahrajte firmware pomocí sériového DFU nástroje výrobce (například adafruit-nrfutil), aby bylo zařízení obnoveno.</string>
@@ -563,6 +574,7 @@
     <string name="firmware_update_waiting_reconnect">Čekání na opětovné připojení zařízení...</string>
     <string name="firmware_update_wipe_ble_detail">Po ověření aktualizace obnoví zařízení do továrního nastavení. Dojde k odstranění všech nastavení a párování přes Bluetooth.</string>
     <string name="firmware_update_wipe_label">Vymazat zařízení během aktualizace</string>
+    <string name="firmware_update_wipe_usb_detail">Úplně vymaže paměť zařízení a poté od začátku nainstaluje vybraný firmware.</string>
     <string name="firmware_version">Verze firmware: %1$s</string>
     <string name="fixed_pin">Pevný PIN</string>
     <string name="fixed_position">Pevná poloha</string>
@@ -931,6 +943,7 @@
     <!-- NODES -->
     <string name="nodes">Uzly</string>
     <string name="nodes_at_this_location">Uzly na tomto místě</string>
+    <string name="nodes_empty_disconnected_hint">Připojte se k zařízení a vyhledejte okolní uzly.</string>
     <string name="nodes_empty_disconnected_title">Není připojeno žádné zařízení</string>
     <string name="nodes_queued_for_deletion">%1$d uzlů zařazeno k odstranění:</string>
     <string name="none">Žádný (zakázat)</string>
@@ -1215,6 +1228,7 @@
     <string name="should_update">Chcete-li využít nejnovějších oprav a funkcí, aktualizujte firmware vašeho uzlu.\n\nPoslední stabilní verze firmwaru: %1$s</string>
     <string name="should_update_firmware">Doporučena aktualizace firmwaru.</string>
     <!-- SHOW -->
+    <string name="show_full_message_timestamps">Zobrazovat úplná časová razítka zpráv</string>
     <string name="show_layer">Zobrazit vrstvu</string>
     <string name="show_password">Zobrazit heslo</string>
     <string name="show_precision_circle">Zobrazit kruhy přesnosti</string>
