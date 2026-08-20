@@ -2,7 +2,7 @@
 title: Интеграция TAK
 parent: Руководство пользователя
 nav_order: 10
-last_updated: 2026-07-08
+last_updated: 2026-08-19
 description: Взаимодействие с ATAK и WinTAK — передача данных CoT о местоположении, роли TAK и настройка плагина.
 aliases:
   - tak
@@ -56,6 +56,7 @@ Meshtastic интегрируется с экосистемой Team Awareness K
 ![Настройки локального TAK-сервера с переключателем включения и опцией экспорта](../../assets/screenshots/tak_server_enabled.png)
 
 - **Включить локальный TAK-сервер** — запускает mTLS-сервер только на локальную петлю на порту **8089** для подключений ATAK/iTAK с того же устройства.
+- **TAK Mesh Channel** — selects which Meshtastic channel outgoing TAK traffic is sent on (default: the primary channel, index 0). Incoming TAK traffic is accepted from any channel. Matches the equivalent setting on iOS and in the legacy ATAK plugin.
 - **Экспорт пакета данных TAK** — создаёт пакет данных `.zip`, который ATAK/iTAK может импортировать для подключения к этому серверу.
 
 ## Роли TAK

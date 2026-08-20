@@ -2,7 +2,7 @@
 title: Единицы измерения и локаль
 parent: Руководство пользователя
 nav_order: 16
-last_updated: 2026-07-08
+last_updated: 2026-08-19
 description: Как приложение отображает температуру, расстояние, скорость и другие показатели в зависимости от настроек устройства.
 ---
 
@@ -34,6 +34,8 @@ description: Как приложение отображает температу
 | Фаренгейт      | 72°F      |
 
 Это влияет на все отображения температуры в приложении: телеметрия окружающей среды ноды, температура почвы, точка росы и оси диаграммы телеметрии.
+
+Temperature follows your locale's **temperature preference**, independent of the distance system. Locales that mix systems work correctly — a UK phone shows miles for distance but **°C** for temperature. On Android 14+, the **Temperature** regional preference (Settings → System → Languages → Regional preferences) overrides the locale default.
 
 ## Расстояние и высота
 
@@ -113,7 +115,8 @@ description: Как приложение отображает температу
 
 1. Откройте **Настройки Android → Система → Язык и регион**
 2. Измените свои предпочтения в **Регион** или **Единицы измерения**
-3. Вернуться к Meshtastic — значения обновляются немедленно
+3. On Android 14+, temperature can be overridden on its own under **Regional preferences → Temperature**
+4. Вернуться к Meshtastic — значения обновляются немедленно
 
 > 💡 **Совет:** Все форматирование производится в централизованном порядке и уважает локаль платформы, поэтому единицы измерения всегда в приложении.
 
