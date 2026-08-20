@@ -18152,7 +18152,7 @@
   },"2593": {
     "doc": "Measurement & Formatting",
     "title": "Unit Conversion",
-    "content": "Three measurements convert away from metric for display, each gated by a boolean flag sourced from the user’s device locale or preferences: . | Measurement | Flag | Conversion | . | temperature | isFahrenheit | °F = °C × 1.8 + 32 | . | windSpeed | isImperial | m/s × 2.23694 → mph | . | rainfall | isImperial | mm ÷ 25.4 → in | . Everything else (voltage, current, pressure, SNR, RSSI, humidity, percent) displays in its native metric units. The user-facing Units &amp; Locale page explains what end users see. ",
+    "content": "Three measurements convert away from metric for display, each gated by a boolean flag sourced from the user’s device locale or preferences: . | Measurement | Flag | Source | Conversion | . | temperature | isFahrenheit | getSystemTemperatureUnit() | °F = °C × 1.8 + 32 | . | windSpeed | isImperial | getSystemMeasurementSystem() | m/s × 2.23694 → mph | . | rainfall | isImperial | getSystemMeasurementSystem() | mm ÷ 25.4 → in | . The two source functions (in core/common/.../util/MeasurementSystem.kt) are deliberately separate: some locales mix systems (the UK uses miles for distance but Celsius for temperature), so temperature must never be derived from the distance unit. On Android, getSystemTemperatureUnit() delegates to androidx.core.text.util.LocalePreferences, which resolves CLDR locale data and honors the Android 14+ Regional preferences temperature override. Everything else (voltage, current, pressure, SNR, RSSI, humidity, percent) displays in its native metric units. The user-facing Units &amp; Locale page explains what end users see. ",
     "url": "/Meshtastic-Android/main/en/developer/measurement.html#unit-conversion",
     
     "relUrl": "/en/developer/measurement.html#unit-conversion"
@@ -43772,7 +43772,7 @@
   },"6253": {
     "doc": "Units, Measurement & Locale",
     "title": "Temperature",
-    "content": "Temperature values from environment sensors are transmitted as °C and displayed based on your device’s temperature unit preference. | Your Setting | You See | . | Celsius | 22°C | . | Fahrenheit | 72°F | . This affects all temperature displays throughout the app: node environment telemetry, soil temperature, dew point, and telemetry chart axes. ",
+    "content": "Temperature values from environment sensors are transmitted as °C and displayed based on your device’s temperature unit preference. | Your Setting | You See | . | Celsius | 22°C | . | Fahrenheit | 72°F | . This affects all temperature displays throughout the app: node environment telemetry, soil temperature, dew point, and telemetry chart axes. Temperature follows your locale’s temperature preference, independent of the distance system. Locales that mix systems work correctly — a UK phone shows miles for distance but °C for temperature. On Android 14+, the Temperature regional preference (Settings → System → Languages → Regional preferences) overrides the locale default. ",
     "url": "/Meshtastic-Android/main/en/user/units-and-locale.html#temperature",
     
     "relUrl": "/en/user/units-and-locale.html#temperature"
@@ -43821,7 +43821,7 @@
   },"6260": {
     "doc": "Units, Measurement & Locale",
     "title": "Changing Your Measurement System (Android)",
-    "content": "On Android, your measurement system (metric vs imperial) is tied to your region setting: . | Open Android Settings → System → Language &amp; Region | Change your Region or Measurement units preference | Return to Meshtastic — values update immediately | . 💡 Tip: All measurement formatting is handled centrally and respects your platform’s locale, so units stay consistent everywhere in the app. ",
+    "content": "On Android, your measurement system (metric vs imperial) is tied to your region setting: . | Open Android Settings → System → Language &amp; Region | Change your Region or Measurement units preference | On Android 14+, temperature can be overridden on its own under Regional preferences → Temperature | Return to Meshtastic — values update immediately | . 💡 Tip: All measurement formatting is handled centrally and respects your platform’s locale, so units stay consistent everywhere in the app. ",
     "url": "/Meshtastic-Android/main/en/user/units-and-locale.html#changing-your-measurement-system-android",
     
     "relUrl": "/en/user/units-and-locale.html#changing-your-measurement-system-android"
