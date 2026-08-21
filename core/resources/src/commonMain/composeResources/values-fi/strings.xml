@@ -875,6 +875,8 @@
     <string name="import_export_label">Tuonti ja vienti</string>
     <string name="import_known_shared_contact_text">Varoitus: Kontakti on jo olemassa, tuonti ylikirjoittaa aiemmat tiedot.</string>
     <string name="import_label">Tuo</string>
+    <string name="import_pending_channels_connect">Kanavan asetukset vastaanotettu. Yhdistä laitteeseen tuodaksesi ne.</string>
+    <string name="import_pending_contact_connect">Yhteystieto vastaanotettu. Yhdistä laitteeseen tuodaksesi sen.</string>
     <string name="import_shared_contact">Tuo jaettu yhteystieto?</string>
     <string name="incoming_messages">Saapuvat viestit</string>
     <string name="indoor_air_quality_iaq">Sisäilmanlaatu (IAQ)</string>
