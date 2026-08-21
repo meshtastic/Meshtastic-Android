@@ -74,7 +74,15 @@ class MapNodeClusterItemsTest {
             waitForIdle()
         }
 
-        assertEquals(SIMULATED_CAMERA_FRAMES + 1, observedLists.size)
+        // At *least* one composition per frame plus the initial one. Not an exact count: Compose is free to
+        // recompose more than the minimum, and asserting equality here made this test fail intermittently on
+        // loaded CI runners (twice on one PR, including a merge-queue run, which ejects unrelated PRs from the
+        // queue). The reuse invariant below is what this test exists for, and extra recompositions only
+        // strengthen it — every additional observation is one more chance to catch a rebuilt list.
+        assertTrue(
+            observedLists.size >= SIMULATED_CAMERA_FRAMES + 1,
+            "expected at least ${SIMULATED_CAMERA_FRAMES + 1} compositions, saw ${observedLists.size}",
+        )
         val first = observedLists.first()
         assertEquals(NODE_COUNT, first.size)
         observedLists.drop(1).forEach { items ->
