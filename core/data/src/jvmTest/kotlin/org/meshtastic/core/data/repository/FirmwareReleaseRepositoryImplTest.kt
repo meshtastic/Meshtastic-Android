@@ -32,6 +32,7 @@ import org.meshtastic.core.data.datasource.FirmwareReleaseLocalDataSource
 import org.meshtastic.core.database.entity.FirmwareReleaseEntity
 import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.BootloaderOtaQuirksResponse
 import org.meshtastic.core.model.EventFirmwareResponse
 import org.meshtastic.core.model.FirmwareReleaseManifest
 import org.meshtastic.core.model.FirmwareTarget
@@ -84,6 +85,8 @@ class FirmwareReleaseRepositoryImplTest {
         }
 
         override suspend fun getEventFirmware(): EventFirmwareResponse = error("unused")
+
+        override suspend fun getBootloaderOtaQuirks(): BootloaderOtaQuirksResponse = error("unused")
     }
 
     /** Serves `firmware_releases.json` from [bundled] via the real decode path, or nothing when null. */
