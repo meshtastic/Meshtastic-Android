@@ -44,6 +44,17 @@ interface DfuUploadTransport {
     suspend fun transferFirmware(firmware: ByteArray, onProgress: suspend (Float) -> Unit): Result<Unit>
 
     /**
+     * As [transferFirmware], additionally reporting coarse [DfuUploadPhase] transitions so the UI can explain a wait
+     * that produces no progress (Legacy DFU erases the whole application region before it accepts a single byte).
+     * Transports without a meaningful prepare step keep the default, which never reports a phase.
+     */
+    suspend fun transferFirmware(
+        firmware: ByteArray,
+        onPhase: suspend (DfuUploadPhase) -> Unit,
+        onProgress: suspend (Float) -> Unit,
+    ): Result<Unit> = transferFirmware(firmware, onProgress)
+
+    /**
      * Best-effort abort. Operational transport exceptions are swallowed; structured-concurrency cancellation and Error
      * subtypes propagate.
      */
@@ -51,4 +62,13 @@ interface DfuUploadTransport {
 
     /** Disconnect and release resources. */
     suspend fun close()
+}
+
+/** Coarse phases inside [DfuUploadTransport.transferFirmware], for UI that must explain a silent wait. */
+enum class DfuUploadPhase {
+    /** Start request sent; the bootloader is erasing flash and will not accept data until it has finished. */
+    PREPARING,
+
+    /** The bootloader accepted the start; firmware bytes are streaming and progress callbacks follow. */
+    STREAMING,
 }

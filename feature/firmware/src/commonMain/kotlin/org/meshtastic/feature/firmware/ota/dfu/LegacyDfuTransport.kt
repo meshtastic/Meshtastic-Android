@@ -237,58 +237,69 @@ internal constructor(
      *     acknowledgement; treat that operational Exception as expected success (structured cancellation and Error
      *     subtypes still propagate).
      */
-    @Suppress("LongMethod")
     override suspend fun transferFirmware(firmware: ByteArray, onProgress: suspend (Float) -> Unit): Result<Unit> =
-        safeCatching {
-            val initPacket =
-                pendingInitPacket
-                    ?: throw DfuException.TransferFailed("transferInitPacket must be called before transferFirmware")
-            Logger.i { "Legacy DFU: Starting upload (init=${initPacket.size}B, firmware=${firmware.size}B)..." }
+        transferFirmware(firmware, onPhase = {}, onProgress = onProgress)
 
-            // ── 1. START_DFU + image sizes on Packet, then response ─────────────
-            writeControlPoint(byteArrayOf(LegacyDfuOpcode.START_DFU, LegacyDfuImageType.APPLICATION))
-            writePacket(legacyImageSizesPayload(appSize = firmware.size))
-            handleStartResponse(awaitResponse(START_RESPONSE_TIMEOUT))
+    @Suppress("LongMethod")
+    override suspend fun transferFirmware(
+        firmware: ByteArray,
+        onPhase: suspend (DfuUploadPhase) -> Unit,
+        onProgress: suspend (Float) -> Unit,
+    ): Result<Unit> = safeCatching {
+        val initPacket =
+            pendingInitPacket
+                ?: throw DfuException.TransferFailed("transferInitPacket must be called before transferFirmware")
+        Logger.i { "Legacy DFU: Starting upload (init=${initPacket.size}B, firmware=${firmware.size}B)..." }
 
-            // ── 2. INIT_PARAMS_START → init bytes on Packet → INIT_PARAMS_COMPLETE → response ──
-            writeControlPoint(byteArrayOf(LegacyDfuOpcode.INIT_DFU_PARAMS, LegacyDfuOpcode.INIT_PARAMS_START))
-            writePacketChunked(initPacket)
-            writeControlPoint(byteArrayOf(LegacyDfuOpcode.INIT_DFU_PARAMS, LegacyDfuOpcode.INIT_PARAMS_COMPLETE))
-            requireSuccess(LegacyDfuOpcode.INIT_DFU_PARAMS, awaitResponse(COMMAND_TIMEOUT))
+        // ── 1. START_DFU + image sizes on Packet, then response ─────────────
+        // The bootloader erases the application region before it answers; without lazy erase that is tens of
+        // seconds of silence, so tell the UI what the wait is.
+        onPhase(DfuUploadPhase.PREPARING)
+        writeControlPoint(byteArrayOf(LegacyDfuOpcode.START_DFU, LegacyDfuImageType.APPLICATION))
+        writePacket(legacyImageSizesPayload(appSize = firmware.size))
+        handleStartResponse(awaitResponse(START_RESPONSE_TIMEOUT))
 
-            // Bump the BLE link to high-throughput mode (~7.5 ms interval) before streaming.
-            // Default Android intervals (~30-50 ms) starve the link during sustained DFU and trigger LSTO. Mirrors
-            // Nordic LegacyDfuImpl.java requestConnectionPriority(CONNECTION_PRIORITY_HIGH).
-            val highPriorityRequested = bleConnection.requestHighConnectionPriority()
-            Logger.i { "Legacy DFU: requestHighConnectionPriority -> $highPriorityRequested" }
+        // ── 2. INIT_PARAMS_START → init bytes on Packet → INIT_PARAMS_COMPLETE → response ──
+        writeControlPoint(byteArrayOf(LegacyDfuOpcode.INIT_DFU_PARAMS, LegacyDfuOpcode.INIT_PARAMS_START))
+        writePacketChunked(initPacket)
+        writeControlPoint(byteArrayOf(LegacyDfuOpcode.INIT_DFU_PARAMS, LegacyDfuOpcode.INIT_PARAMS_COMPLETE))
+        requireSuccess(LegacyDfuOpcode.INIT_DFU_PARAMS, awaitResponse(COMMAND_TIMEOUT))
 
-            // ── 3. PRN setup ────────────────────────────────────────────────────
-            writeControlPoint(legacyPrnRequestPayload(streamProfile.prnIntervalPackets))
+        // Bump the BLE link to high-throughput mode (~7.5 ms interval) before streaming.
+        // Default Android intervals (~30-50 ms) starve the link during sustained DFU and trigger LSTO. Mirrors
+        // Nordic LegacyDfuImpl.java requestConnectionPriority(CONNECTION_PRIORITY_HIGH).
+        val highPriorityRequested = bleConnection.requestHighConnectionPriority()
+        Logger.i { "Legacy DFU: requestHighConnectionPriority -> $highPriorityRequested" }
 
-            // ── 4. RECEIVE_FIRMWARE_IMAGE ──────────────────────────────────────
-            writeControlPoint(byteArrayOf(LegacyDfuOpcode.RECEIVE_FIRMWARE_IMAGE))
+        onPhase(DfuUploadPhase.STREAMING)
 
-            // ── 5. Stream firmware ─────────────────────────────────────────────
-            streamFirmware(firmware, onProgress)
+        // ── 3. PRN setup ────────────────────────────────────────────────────
+        writeControlPoint(legacyPrnRequestPayload(streamProfile.prnIntervalPackets))
 
-            // ── 6. Final RECEIVE_FIRMWARE_IMAGE response ────────────────────────
-            requireSuccess(LegacyDfuOpcode.RECEIVE_FIRMWARE_IMAGE, awaitResponse(VALIDATE_TIMEOUT))
+        // ── 4. RECEIVE_FIRMWARE_IMAGE ──────────────────────────────────────
+        writeControlPoint(byteArrayOf(LegacyDfuOpcode.RECEIVE_FIRMWARE_IMAGE))
 
-            // ── 7. VALIDATE ────────────────────────────────────────────────────
-            writeControlPoint(byteArrayOf(LegacyDfuOpcode.VALIDATE))
-            requireSuccess(LegacyDfuOpcode.VALIDATE, awaitResponse(VALIDATE_TIMEOUT))
+        // ── 5. Stream firmware ─────────────────────────────────────────────
+        streamFirmware(firmware, onProgress)
 
-            // ── 8. ACTIVATE_AND_RESET ──────────────────────────────────────────
-            // The device may reset before the GATT write ACK lands; an ordinary disconnect/write Exception is expected
-            // because of that reset — safeCatching treats it as success. Structured cancellation and Error subtypes
-            // still propagate.
-            Logger.i { "Legacy DFU: Sending ACTIVATE_AND_RESET (disconnect during write is expected)" }
-            safeCatching { writeControlPoint(byteArrayOf(LegacyDfuOpcode.ACTIVATE_AND_RESET)) }
-                .onFailure { Logger.i(it) { "Legacy DFU: ACTIVATE write reported failure (expected on reset)" } }
+        // ── 6. Final RECEIVE_FIRMWARE_IMAGE response ────────────────────────
+        requireSuccess(LegacyDfuOpcode.RECEIVE_FIRMWARE_IMAGE, awaitResponse(VALIDATE_TIMEOUT))
 
-            onProgress(1f)
-            Logger.i { "Legacy DFU: Upload complete, device rebooting into new firmware." }
-        }
+        // ── 7. VALIDATE ────────────────────────────────────────────────────
+        writeControlPoint(byteArrayOf(LegacyDfuOpcode.VALIDATE))
+        requireSuccess(LegacyDfuOpcode.VALIDATE, awaitResponse(VALIDATE_TIMEOUT))
+
+        // ── 8. ACTIVATE_AND_RESET ──────────────────────────────────────────
+        // The device may reset before the GATT write ACK lands; an ordinary disconnect/write Exception is expected
+        // because of that reset — safeCatching treats it as success. Structured cancellation and Error subtypes
+        // still propagate.
+        Logger.i { "Legacy DFU: Sending ACTIVATE_AND_RESET (disconnect during write is expected)" }
+        safeCatching { writeControlPoint(byteArrayOf(LegacyDfuOpcode.ACTIVATE_AND_RESET)) }
+            .onFailure { Logger.i(it) { "Legacy DFU: ACTIVATE write reported failure (expected on reset)" } }
+
+        onProgress(1f)
+        Logger.i { "Legacy DFU: Upload complete, device rebooting into new firmware." }
+    }
 
     /**
      * Low-speed when the bootloader did not negotiate a larger MTU, leaving us on the 20-byte packet floor. Valid once
