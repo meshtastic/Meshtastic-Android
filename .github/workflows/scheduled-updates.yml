@@ -426,6 +426,8 @@ jobs:
             androidApp/src/main/assets/device_hardware.json
             androidApp/src/main/assets/event_firmware.json
             androidApp/src/main/assets/device_links.json
+            androidApp/src/main/assets/device_bootloader_ota_quirks.json
+            androidApp/src/main/assets/maintenance_uf2.json
             fastlane/metadata/android/**
             **/strings.xml
             docs/**/*.md
