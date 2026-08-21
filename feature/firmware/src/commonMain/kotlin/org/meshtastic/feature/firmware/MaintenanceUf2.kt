@@ -43,34 +43,52 @@ internal data class MaintenanceUf2(
     val expectedFirstTargetAddress: Long? = null,
 ) {
     init {
-        // downloadFile interpolates fileName straight into a temp path; the manifest is content-addressed by its own
-        // digest pin, but assert this anyway so a future edit (or a compromised manifest that somehow passed the pin)
-        // can't introduce traversal.
-        require(fileName.isNotBlank() && fileName.none { it == '/' || it == '\\' } && !fileName.contains("..")) {
-            "Unsafe maintenance UF2 filename: $fileName"
-        }
+        // downloadFile interpolates fileName straight into a temp path. The mapping boundary already refuses unsafe
+        // names (see SAFE_UF2_FILE_NAME) so this never fires in practice; it stays as defence-in-depth for values
+        // constructed directly, and is deliberately the *same* rule so there is one definition of "safe".
+        require(SAFE_UF2_FILE_NAME.matches(fileName)) { "Unsafe maintenance UF2 filename: $fileName" }
     }
 }
+
+/**
+ * The only shape a manifest-supplied UF2 file name may take: a plain `<name>.uf2` of unreserved characters.
+ *
+ * Every name reaching [MaintenanceUf2] is now a string from `resource/maintenanceUf2` rather than a compile-time
+ * constant, so it is validated at the mapping boundary and a rejected row resolves to `null` — refusing that one image
+ * instead of throwing out of a resolver whose callers all document a nullable result. An allowlist rather than a
+ * traversal blacklist: excluding separators outright makes `..` inert, and nothing legitimate falls outside it.
+ */
+private val SAFE_UF2_FILE_NAME = Regex("""[A-Za-z0-9._-]+\.uf2""")
 
 /**
  * Factory-erase images are now vendored and served by `meshtastic/api` (`resource/maintenanceUf2/asset/<fileName>`)
  * rather than a commit-pinned URL into `meshtastic/web-flasher`'s `public/uf2/` — see `data/maintenanceUf2.json` in
  * that repo.
+ *
+ * `null` when the row names an unsafe file: a refusal of that image, never a crash. One malformed row must not take
+ * down the whole firmware screen.
  */
-private fun EraseImageEntry.toMaintenanceUf2(): MaintenanceUf2 = MaintenanceUf2(
-    url = "${HttpClientDefaults.API_BASE_URL}resource/maintenanceUf2/asset/$fileName",
-    fileName = fileName,
-    sha256 = sha256,
-    expectedFirstTargetAddress = expectedFirstTargetAddress,
-)
+private fun EraseImageEntry.toMaintenanceUf2OrNull(): MaintenanceUf2? {
+    if (!SAFE_UF2_FILE_NAME.matches(fileName)) return null
+    return MaintenanceUf2(
+        url = "${HttpClientDefaults.API_BASE_URL}resource/maintenanceUf2/asset/$fileName",
+        fileName = fileName,
+        sha256 = sha256,
+        expectedFirstTargetAddress = expectedFirstTargetAddress,
+    )
+}
 
 /**
  * OTAFIX bootloader self-update images stay hosted on `Adafruit_nRF52_Bootloader_OTAFIX`'s own GitHub releases — only
  * [MaintenanceUf2Manifest.otafixBase]/[MaintenanceUf2Manifest.otafixReleaseTag] (and the per-board digest) now come
  * from the fetched manifest instead of being hardcoded.
+ *
+ * `null` on the same terms as [toMaintenanceUf2OrNull]. The name is composed from two manifest-supplied strings
+ * ([otafixBoardSlug] and [MaintenanceUf2Manifest.otafixReleaseTag]), so it is validated after composition.
  */
-private fun MaintenanceUf2Manifest.otafixAsset(otafixBoardSlug: String, sha256: String): MaintenanceUf2 {
+private fun MaintenanceUf2Manifest.otafixAssetOrNull(otafixBoardSlug: String, sha256: String): MaintenanceUf2? {
     val name = "update-${otafixBoardSlug}_bootloader-${otafixReleaseTag}_nosd.uf2"
+    if (!SAFE_UF2_FILE_NAME.matches(name)) return null
     return MaintenanceUf2(url = "$otafixBase/$name", fileName = name, sha256 = sha256)
 }
 
@@ -86,15 +104,16 @@ private val SoftDeviceVariant.wireValue: String
  * The factory-erase image for [hardware] given [manifest], or `null` when none can be resolved safely.
  *
  * `null` when [manifest] carries no `erase` set at all (never fetched/seeded yet — fail closed, same as an unresolved
- * [DeviceHardware.softDeviceVariant]). nRF52840 additionally requires a resolved [DeviceHardware.softDeviceVariant]:
- * the two images are linked for different application start addresses, and the UF2 bootloader's write guard begins at
- * `MBR_SIZE`, so the wrong one erases a SoftDevice page. There is deliberately no default branch.
+ * [DeviceHardware.softDeviceVariant]), when the matching row names an unsafe file, or — for nRF52840 — without a
+ * resolved [DeviceHardware.softDeviceVariant]: the two images are linked for different application start addresses,
+ * and the UF2 bootloader's write guard begins at `MBR_SIZE`, so the wrong one erases a SoftDevice page. There is
+ * deliberately no default branch.
  */
 internal fun eraseUf2For(manifest: MaintenanceUf2Manifest, hardware: DeviceHardware): MaintenanceUf2? {
     val erase = manifest.erase ?: return null
     return when {
-        hardware.isRp2040Arc -> erase.rp2040.toMaintenanceUf2()
-        hardware.isNrf52Arc -> hardware.softDeviceVariant?.let { erase.nrf52[it.wireValue]?.toMaintenanceUf2() }
+        hardware.isRp2040Arc -> erase.rp2040.toMaintenanceUf2OrNull()
+        hardware.isNrf52Arc -> hardware.softDeviceVariant?.let { erase.nrf52[it.wireValue]?.toMaintenanceUf2OrNull() }
         else -> null
     }
 }
@@ -115,7 +134,7 @@ internal fun otafixSupportsTarget(manifest: MaintenanceUf2Manifest, platformioTa
  */
 internal fun otafixUf2ForBoardId(manifest: MaintenanceUf2Manifest, boardId: String): MaintenanceUf2? =
     manifest.otafixByBoardId[boardId.trim()]?.let {
-        manifest.otafixAsset(otafixBoardSlug = it.otafixBoardSlug, sha256 = it.sha256)
+        manifest.otafixAssetOrNull(otafixBoardSlug = it.otafixBoardSlug, sha256 = it.sha256)
     }
 
 /**
@@ -159,12 +178,12 @@ internal fun parseUf2SoftDevice(infoUf2Text: String): SoftDeviceVariant? {
 
 /**
  * Which erase image [variant] needs, from [manifest]. `null` when [manifest] carries no `erase` set at all (never
- * fetched/seeded — fail closed), or when this specific variant's row is missing from `erase.nrf52` (a malformed or
- * partial manifest) — never a guess at a substitute image.
+ * fetched/seeded — fail closed), when this specific variant's row is missing from `erase.nrf52` (a malformed or
+ * partial manifest), or when that row names an unsafe file — never a guess at a substitute image.
  */
 internal fun eraseUf2ForVariant(manifest: MaintenanceUf2Manifest, variant: SoftDeviceVariant): MaintenanceUf2? {
     val erase = manifest.erase ?: return null
-    return erase.nrf52[variant.wireValue]?.toMaintenanceUf2()
+    return erase.nrf52[variant.wireValue]?.toMaintenanceUf2OrNull()
 }
 
 /** Outcome of reconciling the SoftDevice the drive reports against the manifest's pre-flight hint. */

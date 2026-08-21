@@ -74,9 +74,12 @@ class MaintenanceUf2RepositoryImpl(
     }
 
     /**
-     * Not locked itself — every caller already holds [writeMutex] for the duration of a write. A manifest with neither
-     * erase images nor an OTAFIX board map is ignored rather than stored, so a bad or transient response can never wipe
-     * an existing seed/cache back to nothing.
+     * Not locked itself — every caller already holds [writeMutex] for the duration of a write.
+     *
+     * A manifest with neither erase images nor an OTAFIX board map is ignored rather than stored, so a fully empty
+     * response can never wipe an existing seed/cache back to nothing. A *partial* response still replaces the cached
+     * manifest wholesale — the server is authoritative for which images exist, so a dropped section means that section
+     * was withdrawn, and the resolvers fail closed on the sections it no longer carries.
      */
     private suspend fun store(manifest: MaintenanceUf2Manifest) {
         if (manifest.erase == null && manifest.otafixByBoardId.isEmpty()) {

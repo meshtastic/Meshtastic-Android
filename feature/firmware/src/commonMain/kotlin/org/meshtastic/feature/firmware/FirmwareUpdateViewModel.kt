@@ -249,9 +249,9 @@ class FirmwareUpdateViewModel(
                     val deviceHardware = getDeviceHardware(ourNode) ?: return@launch
                     _deviceHardware.value = deviceHardware
                     _currentFirmwareVersion.value = ourNode.firmwareVersion
-                    // Best-effort, once per check — not per release-flow emission below. A failed or
-                    // digest-mismatched
-                    // fetch leaves the cache/seed untouched, so this never regresses the maintenance gate.
+                    // Best-effort, once per check — not per release-flow emission below. A failed fetch, or one
+                    // carrying no images at all, leaves the cache/seed untouched, so this never regresses the
+                    // maintenance gate.
                     maintenanceUf2Repository.reconcile()
                     val maintenanceUf2Manifest = maintenanceUf2Repository.getSnapshot()
 

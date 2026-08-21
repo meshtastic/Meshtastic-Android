@@ -22,6 +22,7 @@ import org.meshtastic.core.model.MaintenanceUf2Manifest
 import org.meshtastic.core.model.SoftDeviceVariant
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
+import org.meshtastic.core.resources.firmware_maintenance_data_unavailable
 import org.meshtastic.core.resources.firmware_maintenance_no_release
 import org.meshtastic.core.resources.firmware_maintenance_not_a_bootloader_volume
 import org.meshtastic.core.resources.firmware_maintenance_softdevice_conflict
@@ -77,6 +78,13 @@ enum class UsbMaintenanceRefusal {
     /** The architecture has no UF2 erase path at all (ESP32, portduino). */
     UnsupportedArchitecture,
 
+    /**
+     * The architecture has a UF2 erase path, but the manifest carries no image for it — never fetched or seeded, or a
+     * row naming an unsafe file. Distinct from [UnsupportedArchitecture] so the copy reflects "not available right now"
+     * rather than "not possible on this device".
+     */
+    MaintenanceDataUnavailable,
+
     /** No release firmware is selected, so there would be nothing to re-flash after erasing. */
     NoFirmwareRelease,
 
@@ -111,6 +119,9 @@ internal fun usbMaintenanceRefusalMessage(reason: UsbMaintenanceRefusal): UiText
 
     UsbMaintenanceRefusal.UnsupportedArchitecture ->
         UiText.Resource(Res.string.firmware_maintenance_unsupported_device)
+
+    UsbMaintenanceRefusal.MaintenanceDataUnavailable ->
+        UiText.Resource(Res.string.firmware_maintenance_data_unavailable)
 
     UsbMaintenanceRefusal.NoFirmwareRelease -> UiText.Resource(Res.string.firmware_maintenance_no_release)
 
@@ -160,11 +171,14 @@ internal fun usbMaintenanceGate(
         return UsbMaintenanceGate(show = false)
     }
 
+    // nRF52 keeps the SoftDevice-flavoured refusal: an unresolved variant is by far the likelier cause there, and its
+    // copy already points at the web flasher. RP2040 has no SoftDevice, so an unresolved image there can only mean the
+    // manifest lacks usable data. Both architectures are UF2-capable — reaching this at all means data, not capability.
     val eraseRefusal =
         when {
             eraseUf2For(manifest, hardware) != null -> null
             hardware.isNrf52Arc -> UsbMaintenanceRefusal.UnknownSoftDevice
-            else -> UsbMaintenanceRefusal.UnsupportedArchitecture
+            else -> UsbMaintenanceRefusal.MaintenanceDataUnavailable
         }
 
     return UsbMaintenanceGate(
@@ -245,9 +259,10 @@ internal fun chooseMaintenanceImage(
                     MaintenanceImageChoice.Refused(UsbMaintenanceRefusal.UnknownSoftDevice)
             }
         } else {
-            // RP2040: pico_erase is board-agnostic and there is no SoftDevice to reconcile.
+            // RP2040: pico_erase is board-agnostic and there is no SoftDevice to reconcile, so an unresolved image
+            // means the manifest lacks usable data rather than the architecture lacking a UF2 erase path.
             eraseUf2For(manifest, hardware)?.let { MaintenanceImageChoice.Resolved(it) }
-                ?: MaintenanceImageChoice.Refused(UsbMaintenanceRefusal.UnsupportedArchitecture)
+                ?: MaintenanceImageChoice.Refused(UsbMaintenanceRefusal.MaintenanceDataUnavailable)
         }
 
     UsbMaintenanceRequest.BootloaderUpgrade ->

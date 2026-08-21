@@ -123,6 +123,40 @@ class MeshtasticDatabaseMigrationTest {
     }
 
     /**
+     * 54→55 adds the `maintenance_uf2_cache` table. [migrateAll] only proves the resulting schema validates from an
+     * empty database; this proves an existing install's rows are untouched by the addition — specifically the
+     * `bootloader_ota_quirks_cache` row added one version earlier, whose `softDeviceVariants` table gates a destructive
+     * flash and must survive the upgrade rather than silently reverting to the bundled seed.
+     */
+    @Test
+    fun maintenanceUf2TableAddedWithoutDisturbingTheQuirksCache() = runTest {
+        helper.createDatabase(MAINTENANCE_UF2_FROM_VERSION).use { connection ->
+            connection.execSQL(
+                "INSERT INTO bootloader_ota_quirks_cache (id, devices_json, soft_device_variants_json) " +
+                    "VALUES (0, '[{\"hwModel\":\"HELTEC_V3\"}]', '[{\"target\":\"rak4631\",\"variant\":\"7.3.0\"}]')",
+            )
+        }
+
+        helper.runMigrationsAndValidate(
+            MAINTENANCE_UF2_TO_VERSION,
+            listOf(MeshtasticDatabase.MIGRATION_52_53),
+        ).use { connection ->
+            assertEquals(
+                listOf("[{\"target\":\"rak4631\",\"variant\":\"7.3.0\"}]"),
+                queryColumn(connection, "SELECT soft_device_variants_json FROM bootloader_ota_quirks_cache"),
+            )
+            assertEquals(
+                listOf("[{\"hwModel\":\"HELTEC_V3\"}]"),
+                queryColumn(connection, "SELECT devices_json FROM bootloader_ota_quirks_cache"),
+            )
+            // The new table exists, is empty, and accepts the single row the repository writes.
+            assertTrue(queryColumn(connection, "SELECT manifest_json FROM maintenance_uf2_cache").isEmpty())
+            connection.execSQL("INSERT INTO maintenance_uf2_cache (id, manifest_json) VALUES (0, '{}')")
+            assertEquals(listOf("{}"), queryColumn(connection, "SELECT manifest_json FROM maintenance_uf2_cache"))
+        }
+    }
+
+    /**
      * 50→51 makes the three `rssi` columns nullable, which Room implements by recreating `packet`, `reactions` and
      * `discovered_node` (DROP + RENAME). [migrateAll] only proves the resulting schema validates from an empty
      * database; this proves existing rows survive the rebuild with their values — including a legacy `rssi = 0`, which
@@ -207,6 +241,8 @@ class MeshtasticDatabaseMigrationTest {
     private companion object {
         const val EARLIEST_SCHEMA_VERSION = 3
         const val FTS_REBUILD_TO_VERSION = 53
+        const val MAINTENANCE_UF2_FROM_VERSION = 54
+        const val MAINTENANCE_UF2_TO_VERSION = 55
 
         /** Room's runtime FTS content-sync triggers, verbatim from the generated MeshtasticDatabase_Impl. */
         val FTS_SYNC_TRIGGERS =

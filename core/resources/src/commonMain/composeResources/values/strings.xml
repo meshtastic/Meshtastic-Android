@@ -672,6 +672,7 @@
     <string name="firmware_event_ended_button">Update firmware</string>
     <string name="firmware_maintenance_cdc_unblock_failed">The erase file was copied but the device didn't start erasing. Nothing has been changed yet. Unplug the device, double-press its reset button, and try again.</string>
     <string name="firmware_maintenance_copy_failed">Couldn't copy the file to the device's drive. Make sure the drive is still connected and try again.</string>
+    <string name="firmware_maintenance_data_unavailable">The erase image list isn't available right now. Check your connection and try again, or use the web flasher at flasher.meshtastic.org.</string>
     <string name="firmware_maintenance_erase_action">Erase and reinstall</string>
     <string name="firmware_maintenance_erase_confirm_button">Erase device</string>
     <string name="firmware_maintenance_erase_confirm_text">This erases everything on %1$s, including its channels, keys and all settings, then reinstalls the firmware. It cannot be undone and there is no backup.\n\nYou will be asked to select the device's drive twice: once for the erase file, then again for the firmware.</string>

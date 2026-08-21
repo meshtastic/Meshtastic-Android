@@ -184,6 +184,71 @@ class UsbMaintenanceGateTest {
         assertFalse(gate.showBootloaderUpgrade, "OTAFIX is nRF-only")
     }
 
+    /**
+     * The manifest is now fetched from `resource/maintenanceUf2` rather than compiled in, so a hostile or corrupt row
+     * is reachable input. A traversal-shaped `fileName` must refuse *that image* and leave the rest of the screen
+     * working — throwing out of a resolver every caller documents as nullable would surface as a blanket
+     * `FirmwareUpdateState.Error` and hide the maintenance action for every device.
+     */
+    @Test
+    fun `an unsafe erase filename refuses the image instead of throwing`() {
+        val hostile =
+            Json { ignoreUnknownKeys = true }
+                .decodeFromString<MaintenanceUf2Manifest>(
+                    """
+                    {
+                      "erase": {
+                        "nrf52": {
+                          "6.1.1": { "fileName": "../../etc/passwd", "sha256": "00" }
+                        },
+                        "rp2040": { "fileName": "sub/dir/pico_erase.uf2", "sha256": "00" }
+                      }
+                    }
+                    """
+                        .trimIndent(),
+                )
+
+        assertNull(eraseUf2For(hostile, nrf()), "A traversal fileName must resolve to null, not throw")
+        assertNull(eraseUf2For(hostile, rp2040()), "A separator in fileName must resolve to null, not throw")
+
+        val gate = usbMaintenanceGate(hostile, rp2040(), FirmwareUpdateMethod.Usb, hasRelease = true)
+        assertEquals(UsbMaintenanceRefusal.MaintenanceDataUnavailable, gate.eraseRefusal)
+    }
+
+    /** Same contract for the OTAFIX side, whose file name is composed from two manifest-supplied strings. */
+    @Test
+    fun `an unsafe otafix slug or tag refuses the image instead of throwing`() {
+        val hostile =
+            Json { ignoreUnknownKeys = true }
+                .decodeFromString<MaintenanceUf2Manifest>(
+                    """
+                    {
+                      "otafixReleaseTag": "../../../evil",
+                      "otafixBase": "https://example.invalid/releases",
+                      "otafixByBoardId": {
+                        "rak4631": { "otafixBoardSlug": "rak4631", "sha256": "00" }
+                      }
+                    }
+                    """
+                        .trimIndent(),
+                )
+
+        assertNull(otafixUf2ForBoardId(hostile, "rak4631"), "A traversal release tag must resolve to null, not throw")
+    }
+
+    /**
+     * RP2040 has a UF2 erase path, so an absent image is missing data — not an unsupported architecture. The two
+     * refusals carry different copy ("try again" vs "not possible on this device").
+     */
+    @Test
+    fun `rp2040 with no erase data reports missing data rather than unsupported architecture`() {
+        val empty = MaintenanceUf2Manifest()
+
+        val gate = usbMaintenanceGate(empty, rp2040(), FirmwareUpdateMethod.Usb, hasRelease = true)
+
+        assertEquals(UsbMaintenanceRefusal.MaintenanceDataUnavailable, gate.eraseRefusal)
+    }
+
     @Test
     fun `gate is hidden for esp32 even over usb`() {
         assertFalse(usbMaintenanceGate(testManifest, esp32(), FirmwareUpdateMethod.Usb, hasRelease = true).show)
@@ -295,7 +360,11 @@ class UsbMaintenanceGateTest {
 
     @Test
     fun `every shipped otafix image resolves and no two boards share a digest or filename`() {
-        assertEquals(14, testManifest.otafixByBoardId.keys.size, "OTAFIX 2.2-BP1.4 ships 14 update images")
+        assertEquals(
+            14,
+            testManifest.otafixByBoardId.keys.size,
+            "${testManifest.otafixReleaseTag} ships 14 update images",
+        )
         val images =
             testManifest.otafixByBoardId.keys.map {
                 assertNotNull(otafixUf2ForBoardId(testManifest, it), "no image for $it")
