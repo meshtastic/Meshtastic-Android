@@ -102,6 +102,12 @@ class MeshtasticDatabaseMigrationTest {
             FTS_SYNC_TRIGGERS.forEach(connection::execSQL)
             // rank=1 verifies the index against the external-content table, not just its internal shape.
             connection.execSQL("INSERT INTO packet_fts(packet_fts, rank) VALUES('integrity-check', 1)")
+            // Both rows and their text survived the two table recreations before anything mutates them.
+            assertEquals(listOf("1", "2"), queryColumn(connection, "SELECT uuid FROM packet ORDER BY uuid"))
+            assertEquals(
+                listOf("hello mesh world", "second message here"),
+                queryColumn(connection, "SELECT message_text FROM packet ORDER BY uuid"),
+            )
             // The write shapes that stormed with error 267 in the field: clearUnreadCount and message deletion.
             connection.execSQL("UPDATE packet SET read = 1 WHERE contact_key = '0^all'")
             connection.execSQL("DELETE FROM packet WHERE uuid = 2")
