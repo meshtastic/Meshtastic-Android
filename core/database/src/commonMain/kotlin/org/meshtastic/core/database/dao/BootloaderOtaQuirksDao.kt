@@ -25,7 +25,7 @@ import org.meshtastic.core.database.entity.BootloaderOtaQuirksCacheEntity
 interface BootloaderOtaQuirksDao {
     @Upsert suspend fun upsert(entity: BootloaderOtaQuirksCacheEntity)
 
-    @Query("SELECT * FROM bootloader_ota_quirks_cache WHERE id = 0")
+    @Query("SELECT * FROM bootloader_ota_quirks_cache WHERE id = 0 LIMIT 1")
     suspend fun get(): BootloaderOtaQuirksCacheEntity?
 
     @Query("SELECT COUNT(*) FROM bootloader_ota_quirks_cache")

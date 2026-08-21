@@ -108,9 +108,9 @@ class DeviceHardwareRepositoryImpl(
             } else {
                 Logger.w { "DeviceHardwareRepository: remote catalog was empty; retaining cached data" }
             }
-            // Refresh msh.to device links and the bootloader/OTA quirk catalog after a hardware refresh. Hardware
-            // freshness is recorded first: neither refresh failing may cause another full hardware fetch on the next
-            // packet-driven lookup.
+            // Refresh msh.to device links and the bootloader/OTA quirk catalog after a hardware refresh. When the
+            // hardware fetch itself succeeds, its freshness is recorded before either of these — so neither one
+            // failing can cause another full hardware fetch on the next packet-driven lookup.
             deviceLinkRepository.reconcile()
             bootloaderOtaQuirksRepository.reconcile()
         }

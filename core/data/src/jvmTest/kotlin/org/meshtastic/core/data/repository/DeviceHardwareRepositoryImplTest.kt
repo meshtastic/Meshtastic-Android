@@ -27,6 +27,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import okio.Buffer
 import okio.Source
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.data.datasource.BundledAssetReader
 import org.meshtastic.core.data.datasource.DeviceHardwareLocalDataSource
 import org.meshtastic.core.data.datasource.decode
@@ -120,7 +121,7 @@ class DeviceHardwareRepositoryImplTest {
         var reconcileCalls = 0
 
         override suspend fun getSnapshot(): BootloaderOtaQuirksResponse =
-            runCatching { assetReader.decode<BootloaderOtaQuirksResponse>("device_bootloader_ota_quirks.json", json) }
+            safeCatching { assetReader.decode<BootloaderOtaQuirksResponse>("device_bootloader_ota_quirks.json", json) }
                 .getOrNull() ?: BootloaderOtaQuirksResponse()
 
         override suspend fun reconcile() {
