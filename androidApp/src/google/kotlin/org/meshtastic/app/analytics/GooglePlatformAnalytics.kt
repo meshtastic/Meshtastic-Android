@@ -18,6 +18,7 @@ package org.meshtastic.app.analytics
 
 import android.app.Application
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import androidx.lifecycle.ProcessLifecycleOwner
@@ -85,6 +86,22 @@ class GooglePlatformAnalytics(private val context: Context, private val analytic
             return "true" == testLabSetting
         }
 
+    /**
+     * True under Robolectric, where initializing the SDKs is both pointless and actively harmful.
+     *
+     * `Datadog.initialize` registers a `BroadcastReceiver` and installs a JVM shutdown hook. Robolectric tears the
+     * application context down between test classes, so at JVM shutdown that hook unregisters a receiver that no
+     * longer exists and throws `IllegalArgumentException: Receiver not registered` on its own `datadog_shutdown`
+     * thread. Robolectric attributes a stray uncaught exception to whichever test is entering, so the failure lands on
+     * an unrelated test — it surfaced as `MapNodeClusterItemsTest` failing at its `runComposeUiTest` line, in CI and in
+     * the merge queue (where it ejects whatever else is queued), while passing locally and on rerun.
+     *
+     * Only the three test classes that deliberately boot the real [org.meshtastic.app.MeshUtilApplication] reach this
+     * path; the rest already substitute a bare `Application` for the same family of reasons.
+     */
+    private val isRobolectric: Boolean
+        get() = "robolectric" == Build.FINGERPRINT
+
     companion object {
         private const val TAG = "GooglePlatformAnalytics"
         private const val SERVICE_NAME = "org.meshtastic"
@@ -119,7 +136,7 @@ class GooglePlatformAnalytics(private val context: Context, private val analytic
      * Ensures that Datadog and Firebase SDKs are initialized if allowed. This is called lazily when consent is granted.
      */
     private fun ensureInitialized() {
-        if (!analyticsPrefs.analyticsAllowed.value || isInTestLab) return
+        if (!analyticsPrefs.analyticsAllowed.value || isInTestLab || isRobolectric) return
 
         if (!Datadog.isInitialized()) {
             initDatadog(context as Application)
