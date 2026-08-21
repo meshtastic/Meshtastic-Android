@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 53,
-    "identityHash": "be83bf472b3ac745b5da703491ff6f01",
+    "identityHash": "4045629645b02d263f278d1140cdec4e",
     "entities": [
       {
         "tableName": "my_node",
@@ -1736,41 +1736,11 @@
             "id"
           ]
         }
-      },
-      {
-        "tableName": "bootloader_ota_quirks_cache",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `devices_json` TEXT NOT NULL, `soft_device_variants_json` TEXT NOT NULL, PRIMARY KEY(`id`))",
-        "fields": [
-          {
-            "fieldPath": "id",
-            "columnName": "id",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "devicesJson",
-            "columnName": "devices_json",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "softDeviceVariantsJson",
-            "columnName": "soft_device_variants_json",
-            "affinity": "TEXT",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": false,
-          "columnNames": [
-            "id"
-          ]
-        }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'be83bf472b3ac745b5da703491ff6f01')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4045629645b02d263f278d1140cdec4e')"
     ]
   }
 }
