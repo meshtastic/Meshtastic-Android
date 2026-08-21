@@ -196,6 +196,65 @@ class LegacyDfuRetryPolicyTest {
     }
 
     /**
+     * Every retry that is actually going to happen is announced (next attempt number, total) before the inter-attempt
+     * delay, and the exhausted last attempt is not — the UI must never promise a retry that will not come.
+     */
+    @Test
+    fun `retries are announced before the delay and not after the last attempt`() = runTest {
+        val announced = mutableListOf<Pair<Int, Int>>()
+        val order = mutableListOf<String>()
+
+        val outcome =
+            runDfuRetryLoop(
+                protocol = DfuProtocolKind.LEGACY,
+                budget = DfuAttemptBudget(LEGACY_SESSION_ATTEMPTS, LEGACY_SESSION_ATTEMPTS),
+                maxStaleResets = MAX_LEGACY_STALE_RESETS,
+                runUploadSession = {
+                    order.add("upload")
+                    DfuUploadResult.Failure(DfuException.TransferFailed("ordinary failure"), false)
+                },
+                resetStaleBootloader = {},
+                interAttemptDelay = { order.add("delay") },
+                onRetryScheduled = { next, total ->
+                    order.add("announce")
+                    announced.add(next to total)
+                },
+            )
+
+        assertIs<DfuUploadResult.Failure>(outcome)
+        assertEquals(listOf(2 to 3, 3 to 3), announced)
+        assertEquals(listOf("upload", "announce", "delay", "upload", "announce", "delay", "upload"), order)
+    }
+
+    /** A stale-session cleanup is not a retry of the upload and must not be announced as one. */
+    @Test
+    fun `stale cleanup is not announced as a retry`() = runTest {
+        var announcements = 0
+        var sessions = 0
+
+        val outcome =
+            runDfuRetryLoop(
+                protocol = DfuProtocolKind.LEGACY,
+                budget = DfuAttemptBudget(LEGACY_SESSION_ATTEMPTS, LEGACY_SESSION_ATTEMPTS),
+                maxStaleResets = MAX_LEGACY_STALE_RESETS,
+                runUploadSession = {
+                    sessions++
+                    if (sessions == 1) {
+                        DfuUploadResult.Failure(LegacyDfuException.StaleSessionReset(), true)
+                    } else {
+                        DfuUploadResult.Success
+                    }
+                },
+                resetStaleBootloader = {},
+                interAttemptDelay = {},
+                onRetryScheduled = { _, _ -> announcements++ },
+            )
+
+        assertEquals(DfuUploadResult.Success, outcome)
+        assertEquals(0, announcements)
+    }
+
+    /**
      * A StaleSessionReset must NOT consume an upload attempt — the cleanup cycle never tried to upload. After the stale
      * cleanup, the same upload-attempt budget remains, and a subsequent successful attempt succeeds.
      */

@@ -39,6 +39,8 @@ import org.meshtastic.core.resources.firmware_update_downloading_percent
 import org.meshtastic.core.resources.firmware_update_enabling_dfu
 import org.meshtastic.core.resources.firmware_update_not_found_in_release
 import org.meshtastic.core.resources.firmware_update_ota_failed
+import org.meshtastic.core.resources.firmware_update_preparing_flash
+import org.meshtastic.core.resources.firmware_update_retrying_upload
 import org.meshtastic.core.resources.firmware_update_slow_bootloader_hint
 import org.meshtastic.core.resources.firmware_update_starting_dfu
 import org.meshtastic.core.resources.firmware_update_uploading
@@ -253,6 +255,19 @@ private fun DfuProtocolKind.serviceUuid(): Uuid = when (this) {
 }
 
 /**
+ * UI state for a [DfuUploadPhase] reported by the transport during the firmware transfer. PREPARING is a silent wait
+ * the user would otherwise read as a hang, so it is a [FirmwareUpdateState.Processing] with its own copy rather than an
+ * "Uploading 0%" that never moves.
+ */
+internal fun dfuUploadPhaseState(phase: DfuUploadPhase, uploadMsg: UiText, slowHint: UiText?): FirmwareUpdateState =
+    when (phase) {
+        DfuUploadPhase.PREPARING ->
+            FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_preparing_flash)))
+
+        DfuUploadPhase.STREAMING -> FirmwareUpdateState.Updating(ProgressState(uploadMsg, 0f, hint = slowHint))
+    }
+
+/**
  * Drives the bounded Legacy/Secure DFU upload retry loop. Extracted from [SecureDfuHandler.runDfuUploadWithRetry] so
  * the retry policy can be unit-tested without bringing up the full BLE stack — callers supply a [runUploadSession]
  * lambda that returns the next [DfuUploadResult] and a [resetStaleBootloader] lambda that performs the fresh-connection
@@ -283,6 +298,7 @@ internal suspend fun runDfuRetryLoop(
     runUploadSession: suspend (LegacyDfuStreamProfile) -> DfuUploadResult,
     resetStaleBootloader: suspend () -> Unit,
     interAttemptDelay: suspend () -> Unit,
+    onRetryScheduled: (nextAttempt: Int, totalAttempts: Int) -> Unit = { _, _ -> },
 ): DfuUploadResult {
     var uploadAttempts = 0
     var staleResets = 0
@@ -375,7 +391,10 @@ internal suspend fun runDfuRetryLoop(
                         }
                     }
 
-                    if (uploadAttempts < activeAttempts) interAttemptDelay()
+                    if (uploadAttempts < activeAttempts) {
+                        onRetryScheduled(uploadAttempts + 1, activeAttempts)
+                        interAttemptDelay()
+                    }
                 }
             }
         }
@@ -638,6 +657,13 @@ class SecureDfuHandler(
         runUploadSession = { profile -> runUploadSession(protocol, target, pkg, profile, updateState) },
         resetStaleBootloader = { resetStaleBootloader(protocol, target) },
         interAttemptDelay = { delay(SESSION_RETRY_DELAY_MS) },
+        onRetryScheduled = { next, total ->
+            updateState(
+                FirmwareUpdateState.Processing(
+                    ProgressState(UiText.Resource(Res.string.firmware_update_retrying_upload, next, total)),
+                ),
+            )
+        },
     )
 
     private fun createTransport(
@@ -714,7 +740,10 @@ class SecureDfuHandler(
             val firmwareSize = pkg.firmware.size
             val throughputTracker = ThroughputTracker()
             transport
-                .transferFirmware(pkg.firmware) { progress ->
+                .transferFirmware(
+                    pkg.firmware,
+                    onPhase = { phase -> updateState(dfuUploadPhaseState(phase, uploadMsg, slowHint)) },
+                ) { progress ->
                     val bytesSent = (progress * firmwareSize).toLong()
                     throughputTracker.record(bytesSent)
                     val details = formatTransferProgress(progress, firmwareSize, throughputTracker.bytesPerSecond())
