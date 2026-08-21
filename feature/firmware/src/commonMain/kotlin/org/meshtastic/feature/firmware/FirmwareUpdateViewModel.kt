@@ -55,6 +55,7 @@ import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
+import org.meshtastic.core.repository.MaintenanceUf2Repository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NodeRestartTracker
 import org.meshtastic.core.repository.PlatformAnalytics
@@ -114,6 +115,7 @@ private val BLUETOOTH_ADDRESS_REGEX = Regex("([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}"
 class FirmwareUpdateViewModel(
     private val firmwareReleaseRepository: FirmwareReleaseRepository,
     private val deviceHardwareRepository: DeviceHardwareRepository,
+    private val maintenanceUf2Repository: MaintenanceUf2Repository,
     private val nodeRepository: NodeRepository,
     private val radioController: RadioController,
     private val radioPrefs: RadioPrefs,
@@ -247,6 +249,11 @@ class FirmwareUpdateViewModel(
                     val deviceHardware = getDeviceHardware(ourNode) ?: return@launch
                     _deviceHardware.value = deviceHardware
                     _currentFirmwareVersion.value = ourNode.firmwareVersion
+                    // Best-effort, once per check — not per release-flow emission below. A failed fetch, or one
+                    // carrying no images at all, leaves the cache/seed untouched, so this never regresses the
+                    // maintenance gate.
+                    maintenanceUf2Repository.reconcile()
+                    val maintenanceUf2Manifest = maintenanceUf2Repository.getSnapshot()
 
                     val releaseFlow =
                         if (_selectedReleaseType.value == FirmwareReleaseType.LOCAL) {
@@ -295,6 +302,7 @@ class FirmwareUpdateViewModel(
                                 currentFirmwareVersion = ourNode.firmwareVersion,
                                 maintenance =
                                 usbMaintenanceGate(
+                                    manifest = maintenanceUf2Manifest,
                                     hardware = deviceHardware,
                                     updateMethod = firmwareUpdateMethod,
                                     hasRelease = release != null,
@@ -702,6 +710,7 @@ class FirmwareUpdateViewModel(
 
     private fun usbPassWriter(portsBefore: Set<String>) = UsbPassWriter(
         fileHandler = fileHandler,
+        maintenanceUf2Repository = maintenanceUf2Repository,
         retrieveMaintenanceUf2 = { asset, onProgress ->
             firmwareRetriever.retrieveMaintenanceUf2(asset, onProgress)
         },

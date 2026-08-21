@@ -18,9 +18,11 @@ package org.meshtastic.feature.firmware
 
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.MaintenanceUf2Manifest
 import org.meshtastic.core.model.SoftDeviceVariant
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
+import org.meshtastic.core.resources.firmware_maintenance_data_unavailable
 import org.meshtastic.core.resources.firmware_maintenance_no_release
 import org.meshtastic.core.resources.firmware_maintenance_not_a_bootloader_volume
 import org.meshtastic.core.resources.firmware_maintenance_softdevice_conflict
@@ -76,6 +78,13 @@ enum class UsbMaintenanceRefusal {
     /** The architecture has no UF2 erase path at all (ESP32, portduino). */
     UnsupportedArchitecture,
 
+    /**
+     * The architecture has a UF2 erase path, but the manifest carries no image for it — never fetched or seeded, or a
+     * row naming an unsafe file. Distinct from [UnsupportedArchitecture] so the copy reflects "not available right now"
+     * rather than "not possible on this device".
+     */
+    MaintenanceDataUnavailable,
+
     /** No release firmware is selected, so there would be nothing to re-flash after erasing. */
     NoFirmwareRelease,
 
@@ -110,6 +119,9 @@ internal fun usbMaintenanceRefusalMessage(reason: UsbMaintenanceRefusal): UiText
 
     UsbMaintenanceRefusal.UnsupportedArchitecture ->
         UiText.Resource(Res.string.firmware_maintenance_unsupported_device)
+
+    UsbMaintenanceRefusal.MaintenanceDataUnavailable ->
+        UiText.Resource(Res.string.firmware_maintenance_data_unavailable)
 
     UsbMaintenanceRefusal.NoFirmwareRelease -> UiText.Resource(Res.string.firmware_maintenance_no_release)
 
@@ -149,6 +161,7 @@ data class UsbMaintenanceGate(
  *   application, so the whole section is hidden.
  */
 internal fun usbMaintenanceGate(
+    manifest: MaintenanceUf2Manifest,
     hardware: DeviceHardware,
     updateMethod: FirmwareUpdateMethod,
     hasRelease: Boolean,
@@ -158,11 +171,14 @@ internal fun usbMaintenanceGate(
         return UsbMaintenanceGate(show = false)
     }
 
+    // nRF52 keeps the SoftDevice-flavoured refusal: an unresolved variant is by far the likelier cause there, and its
+    // copy already points at the web flasher. RP2040 has no SoftDevice, so an unresolved image there can only mean the
+    // manifest lacks usable data. Both architectures are UF2-capable — reaching this at all means data, not capability.
     val eraseRefusal =
         when {
-            eraseUf2For(hardware) != null -> null
+            eraseUf2For(manifest, hardware) != null -> null
             hardware.isNrf52Arc -> UsbMaintenanceRefusal.UnknownSoftDevice
-            else -> UsbMaintenanceRefusal.UnsupportedArchitecture
+            else -> UsbMaintenanceRefusal.MaintenanceDataUnavailable
         }
 
     return UsbMaintenanceGate(
@@ -170,7 +186,7 @@ internal fun usbMaintenanceGate(
         eraseRefusal = eraseRefusal,
         // nRF-only: RP2040 boards run no Adafruit bootloader, so OTAFIX does not apply. This is a visibility hint only
         // — which image gets written is decided later from the Board-ID the drive reports.
-        showBootloaderUpgrade = hardware.isNrf52Arc && otafixSupportsTarget(hardware.effectiveTarget),
+        showBootloaderUpgrade = hardware.isNrf52Arc && otafixSupportsTarget(manifest, hardware.effectiveTarget),
     )
 }
 
@@ -226,13 +242,14 @@ internal sealed interface MaintenanceImageChoice {
  * message, never a half-flashed device.
  */
 internal fun chooseMaintenanceImage(
+    manifest: MaintenanceUf2Manifest,
     request: UsbMaintenanceRequest,
     hardware: DeviceHardware,
     volume: MaintenanceVolume,
 ): MaintenanceImageChoice = when (request) {
     UsbMaintenanceRequest.FactoryErase ->
         if (hardware.isNrf52Arc) {
-            when (val resolution = resolveNrfEraseImage(hardware.softDeviceVariant, volume.softDevice)) {
+            when (val resolution = resolveNrfEraseImage(manifest, hardware.softDeviceVariant, volume.softDevice)) {
                 is EraseImageResolution.Resolved -> MaintenanceImageChoice.Resolved(resolution.asset)
 
                 is EraseImageResolution.Conflict ->
@@ -242,12 +259,13 @@ internal fun chooseMaintenanceImage(
                     MaintenanceImageChoice.Refused(UsbMaintenanceRefusal.UnknownSoftDevice)
             }
         } else {
-            // RP2040: pico_erase is board-agnostic and there is no SoftDevice to reconcile.
-            eraseUf2For(hardware)?.let { MaintenanceImageChoice.Resolved(it) }
-                ?: MaintenanceImageChoice.Refused(UsbMaintenanceRefusal.UnsupportedArchitecture)
+            // RP2040: pico_erase is board-agnostic and there is no SoftDevice to reconcile, so an unresolved image
+            // means the manifest lacks usable data rather than the architecture lacking a UF2 erase path.
+            eraseUf2For(manifest, hardware)?.let { MaintenanceImageChoice.Resolved(it) }
+                ?: MaintenanceImageChoice.Refused(UsbMaintenanceRefusal.MaintenanceDataUnavailable)
         }
 
     UsbMaintenanceRequest.BootloaderUpgrade ->
-        otafixUf2ForBoardId(volume.boardId)?.let { MaintenanceImageChoice.Resolved(it) }
+        otafixUf2ForBoardId(manifest, volume.boardId)?.let { MaintenanceImageChoice.Resolved(it) }
             ?: MaintenanceImageChoice.Refused(UsbMaintenanceRefusal.UnknownBoardId)
 }

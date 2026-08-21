@@ -476,8 +476,8 @@ abstract class CommonFirmwareRetrieverTest {
     fun `maintenance uf2 with matching digest and target address is returned`() = runTest {
         val handler = FakeFirmwareFileHandler()
         val retriever = FirmwareRetriever(handler)
-        val payload = uf2Block(APP_START_S140_7_3_0)
-        val asset = maintenanceAsset(payload, APP_START_S140_7_3_0)
+        val payload = uf2Block(0x27000L)
+        val asset = maintenanceAsset(payload, 0x27000L)
         handler.existingUrls.add(asset.url)
         handler.fileBytes[asset.fileName] = payload
 
@@ -492,8 +492,8 @@ abstract class CommonFirmwareRetrieverTest {
     fun `maintenance uf2 digest mismatch is terminal and deletes the download`() = runTest {
         val handler = FakeFirmwareFileHandler()
         val retriever = FirmwareRetriever(handler)
-        val payload = uf2Block(APP_START_S140_7_3_0)
-        val asset = maintenanceAsset(payload, APP_START_S140_7_3_0).copy(sha256 = "00".repeat(32))
+        val payload = uf2Block(0x27000L)
+        val asset = maintenanceAsset(payload, 0x27000L).copy(sha256 = "00".repeat(32))
         handler.existingUrls.add(asset.url)
         handler.fileBytes[asset.fileName] = payload
 
@@ -509,8 +509,8 @@ abstract class CommonFirmwareRetrieverTest {
         // SoftDevice. Writing it would erase a SoftDevice page.
         val handler = FakeFirmwareFileHandler()
         val retriever = FirmwareRetriever(handler)
-        val payload = uf2Block(APP_START_S140_6_1_1)
-        val asset = maintenanceAsset(payload, APP_START_S140_7_3_0)
+        val payload = uf2Block(0x26000L)
+        val asset = maintenanceAsset(payload, 0x27000L)
         handler.existingUrls.add(asset.url)
         handler.fileBytes[asset.fileName] = payload
 

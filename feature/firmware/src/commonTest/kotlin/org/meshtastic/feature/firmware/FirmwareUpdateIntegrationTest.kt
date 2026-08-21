@@ -38,8 +38,10 @@ import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.datastore.BootloaderWarningDataSource
 import org.meshtastic.core.datastore.FirmwareRecoveryDataSource
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.MaintenanceUf2Manifest
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
+import org.meshtastic.core.repository.MaintenanceUf2Repository
 import org.meshtastic.core.repository.NodeRestartTracker
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioPrefs
@@ -63,6 +65,7 @@ class FirmwareUpdateIntegrationTest {
 
     private val firmwareReleaseRepository: FirmwareReleaseRepository = mock(MockMode.autofill)
     private val deviceHardwareRepository: DeviceHardwareRepository = mock(MockMode.autofill)
+    private val maintenanceUf2Repository: MaintenanceUf2Repository = mock(MockMode.autofill)
     private val nodeRepository = FakeNodeRepository()
     private val radioController = FakeRadioController()
     private val radioPrefs: RadioPrefs = mock(MockMode.autofill)
@@ -91,6 +94,8 @@ class FirmwareUpdateIntegrationTest {
         everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any()) } returns
             Result.success(hardware)
         everySuspend { bootloaderWarningDataSource.isDismissed(any()) } returns false
+        everySuspend { maintenanceUf2Repository.reconcile() } returns Unit
+        everySuspend { maintenanceUf2Repository.getSnapshot() } returns MaintenanceUf2Manifest()
         every { firmwareRecoveryDataSource.pending } returns flowOf(null)
         every { fileHandler.cleanupAllTemporaryFiles() } returns Unit
         everySuspend { fileHandler.deleteFile(any()) } returns Unit
@@ -110,6 +115,7 @@ class FirmwareUpdateIntegrationTest {
     private fun createViewModel() = FirmwareUpdateViewModel(
         firmwareReleaseRepository,
         deviceHardwareRepository,
+        maintenanceUf2Repository,
         nodeRepository,
         radioController,
         radioPrefs,
