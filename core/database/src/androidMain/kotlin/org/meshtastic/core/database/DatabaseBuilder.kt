@@ -42,14 +42,14 @@ actual fun getDatabaseBuilder(dbName: String): RoomDatabase.Builder<MeshtasticDa
         factory = { MeshtasticDatabaseConstructor.initialize() },
     )
         .configureCommon()
-        .setDriver(BundledSQLiteDriver())
+        .setDriver(BusyTimeoutSQLiteDriver(BundledSQLiteDriver()))
 }
 
 /** Returns a [RoomDatabase.Builder] configured for an in-memory Android database. */
 actual fun getInMemoryDatabaseBuilder(): RoomDatabase.Builder<MeshtasticDatabase> =
     Room.inMemoryDatabaseBuilder<MeshtasticDatabase>(factory = { MeshtasticDatabaseConstructor.initialize() })
         .configureCommon()
-        .setDriver(BundledSQLiteDriver())
+        .setDriver(BusyTimeoutSQLiteDriver(BundledSQLiteDriver()))
 
 /** Returns the Android directory where database files are stored. */
 actual fun getDatabaseDirectory(): Path {

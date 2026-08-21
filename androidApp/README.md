@@ -26,7 +26,6 @@ The module primarily serves as a "glue" layer, connecting:
 graph TB
   :androidApp[androidApp]:::android-application
   :androidApp -.-> :baselineprofile
-  :androidApp -.-> :feature:car
   :androidApp -.-> :core:ble
   :androidApp -.-> :core:common
   :androidApp -.-> :core:data

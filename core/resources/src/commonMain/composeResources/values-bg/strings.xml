@@ -64,7 +64,7 @@
     <string name="air_quality_metrics_module_enabled">Модулът за показатели за качеството на въздуха е активиран</string>
     <string name="air_quality_metrics_update_interval_seconds">Интервал на актуализиране на показателите за качеството на въздуха</string>
     <string name="air_util_definition">Процент от ефирното време за предаване, използвано през последния час.</string>
-    <string name="air_utilization">Използ. на ефира</string>
+    <string name="air_utilization">Изпол. на ефира</string>
     <!-- ALERT -->
     <string name="all_time">Всички</string>
     <string name="alt">н.в.</string>
@@ -74,7 +74,12 @@
     <string name="analytics_okay">Разрешаване на анализи и докладване за сривове.</string>
     <string name="analytics_platforms">Аналитични платформи:</string>
     <!-- APP -->
+    <string name="app_functions_get_channel_info">Получаване на информация за канала</string>
+    <string name="app_functions_get_device_status">Получаване на състоянието на устройството</string>
+    <string name="app_functions_get_mesh_status">Получаване на състоянието на mesh</string>
+    <string name="app_functions_get_node_details">Получaване на подробности за възела</string>
     <string name="app_functions_get_node_list">Получаване на списък с възли</string>
+    <string name="app_functions_get_recent_messages">Получаване на последните съобщения</string>
     <string name="app_notifications">Известия от приложението</string>
     <string name="app_settings">Приложение</string>
     <string name="app_too_old">Изисква се актуализация на приложението</string>
@@ -153,7 +158,7 @@
     <string name="channel_invalid">URL адресът на този канал е невалиден и не може да се използва</string>
     <string name="channel_label">Канал</string>
     <string name="channel_name">Име на канал</string>
-    <string name="channel_utilization">Използ. на канала</string>
+    <string name="channel_utilization">Изпол. на канала</string>
     <string name="channels">Канали</string>
     <!-- CHIRPY -->
     <string name="chirpy">Чирпи</string>
@@ -238,6 +243,7 @@
     <string name="contrast_standard">Стандартен</string>
     <string name="conversations">Разговори</string>
     <string name="copy">Копиране</string>
+    <string name="copyright_notice">Meshtastic® Авторско право Meshtastic LLC</string>
     <string name="create_your_own_networks">Създайте свои собствени мрежи</string>
     <string name="critical_alert">Критичен сигнал!</string>
     <string name="critical_alerts">Критични предупреждения</string>
@@ -317,6 +323,7 @@
     <string name="disconnected">Прекъсната връзка</string>
     <string name="discovered_network_devices">Открити мрежови устройства</string>
     <!-- DISCOVERY -->
+    <string name="discovery_connection_warning">Не е свързано. Свържете се с устройство Meshtastic, за да започнете сканирането.</string>
     <string name="discovery_delete_session">Изтриване на сесията</string>
     <string name="discovery_dwell_minutes">%1$d мин</string>
     <string name="discovery_keep_screen_awake">Поддържане на екрана активен</string>
@@ -729,6 +736,7 @@
     <string name="message_delivery_status">Състояние на доставка на съобщението</string>
     <string name="message_device_managed">Това радио се управлява и може да бъде променяно само от отдалечен администратор.</string>
     <string name="message_input_label">Съобщение</string>
+    <string name="message_routing_error_max_retransmit">Неуспешно доставяне към mesh</string>
     <string name="message_routing_error_no_interface">Няма радио интерфейс</string>
     <string name="message_routing_error_pki_failed">Не можа да се изпрати криптирано съобщение</string>
     <string name="message_routing_error_pki_send_fail_public_key">Ключът на получателя не е наличен</string>
@@ -1037,6 +1045,7 @@
     <string name="rotary_encoder_1_enabled">Ротационен енкодер #1 е активиран</string>
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Получено отрицателно потвърждение</string>
+    <string name="routing_error_max_retransmit">Неуспешно доставяне към mesh</string>
     <string name="routing_error_no_interface">Няма радио интерфейс</string>
     <string name="routing_error_no_route">Няма маршрут</string>
     <string name="routing_error_none">Признато</string>
@@ -1170,6 +1179,7 @@
     <string name="tak_server_loading">…</string>
     <string name="tak_server_section">Сървър</string>
     <string name="tak_server_status">Статус</string>
+    <string name="tak_server_status_failed">Не може да се стартира TAK сървъра. Изключете го и го включете, за да опитате отново.</string>
     <string name="tak_server_test_result_bytes">%1$dB ✓</string>
     <string name="tak_server_test_result_unknown_error">✗</string>
     <string name="tak_team">Цвят на екипа</string>
@@ -1221,6 +1231,8 @@
     <string name="traffic_management_nodeinfo_direct_response_max_hops">Максимален брой отскоци за директен отговор</string>
     <string name="translate">Превод</string>
     <!-- TRANSLATION -->
+    <string name="translation_failed">Не може да се преведе съобщението</string>
+    <string name="translation_model_download_failed">Изтеглянето на модела за превод не е успешно</string>
     <string name="transmit_over_lora">Предаване през LoRa</string>
     <!-- TRANSPORT -->
     <string name="transport">Транспорт</string>

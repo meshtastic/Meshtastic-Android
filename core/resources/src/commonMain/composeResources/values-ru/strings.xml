@@ -880,6 +880,8 @@
     <string name="import_export_label">Импорт/Экспорт</string>
     <string name="import_known_shared_contact_text">Внимание: Данный контакт уже существует, импорт перезапишет ранее известную информацию о нём.</string>
     <string name="import_label">Импортировать</string>
+    <string name="import_pending_channels_connect">Настройки канала получены. Подключись к устройству чтобы их импортировать.</string>
+    <string name="import_pending_contact_connect">Контакт получен. Подключись к устройству чтобы импортировать его.</string>
     <string name="import_shared_contact">Импортировать контакт?</string>
     <string name="incoming_messages">Входящие сообщения</string>
     <string name="indoor_air_quality_iaq">Качество воздуха в помещении (IAQ)</string>

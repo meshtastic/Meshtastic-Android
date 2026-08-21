@@ -24,6 +24,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.isSuccess
 import kotlinx.serialization.json.Json
 import org.koin.core.annotation.Single
+import org.meshtastic.core.model.BootloaderOtaQuirksResponse
 import org.meshtastic.core.model.EventFirmwareResponse
 import org.meshtastic.core.model.FirmwareReleaseManifest
 import org.meshtastic.core.model.NetworkDeviceHardware
@@ -72,6 +73,13 @@ interface ApiService {
 
     /** Fetches event-firmware display metadata (editions, welcome messages, links) from the Meshtastic API. */
     suspend fun getEventFirmware(): EventFirmwareResponse
+
+    /**
+     * Fetches the nRF52 bootloader/OTA quirk catalog (advisory bootloader-upgrade flags and the SoftDevice-variant
+     * gating table) from the Meshtastic API. Decodes directly to the same model the bundled asset seed uses — the
+     * server serves this file verbatim, so there is nothing to transform.
+     */
+    suspend fun getBootloaderOtaQuirks(): BootloaderOtaQuirksResponse
 }
 
 /**
@@ -103,4 +111,7 @@ class ApiServiceImpl(private val client: HttpClient) : ApiService {
     }
 
     override suspend fun getEventFirmware(): EventFirmwareResponse = client.get("resource/eventFirmware").body()
+
+    override suspend fun getBootloaderOtaQuirks(): BootloaderOtaQuirksResponse =
+        client.get("resource/bootloaderOtaQuirks").body()
 }

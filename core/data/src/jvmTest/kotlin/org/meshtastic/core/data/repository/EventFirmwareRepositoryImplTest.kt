@@ -26,6 +26,7 @@ import okio.Source
 import org.meshtastic.core.data.datasource.BundledAssetReader
 import org.meshtastic.core.data.datasource.EventFirmwareEditionLocalDataSource
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.BootloaderOtaQuirksResponse
 import org.meshtastic.core.model.EventFirmwareBuild
 import org.meshtastic.core.model.EventFirmwareEdition
 import org.meshtastic.core.model.EventFirmwareFonts
@@ -69,6 +70,8 @@ class EventFirmwareRepositoryImplTest {
             eventFirmwareCalls++
             return response
         }
+
+        override suspend fun getBootloaderOtaQuirks(): BootloaderOtaQuirksResponse = error("unused")
     }
 
     /** Serves only `event_firmware.json`, serializing [editions] so the repo decodes via the real path. */
