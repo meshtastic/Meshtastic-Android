@@ -13,9 +13,15 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 * perf(ui): render QR codes at display density instead of fixed 960px by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6793
 * feat: report Android 17 memory-limiter kills via ApplicationExitInfo by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6792
 * feat(privacy): shield sensitive UI content from non-tool accessibility services by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6794
+* feat(hardware): fetch bootloader OTA quirks from the API, seeded from the bundled asset by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6802
+* feat(hardware): fetch the maintenance UF2 manifest from the API, digest-pinned by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6803
 #### 🛠️ Fixes
 * fix(navigation): clear deep-link replay cache once applied to the backstack by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6796
 * fix(ui): give feedback when a contact or channel import arrives while disconnected by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6798
+* fix(database): rebuild the packet FTS index after the schema-52 table recreation by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6808
+* fix(map): raise android-maps-utils to 5.1.1 so KML import survives xmlutil 1.0.x by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6811
+* fix(database): give every SQLite connection a busy timeout by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6809
+* fix(firmware): show the erase wait and upload retries during Legacy DFU by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6812
 <!-- UNRELEASED_END -->
 
 <!-- RELEASED_START -->
