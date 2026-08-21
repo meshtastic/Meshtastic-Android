@@ -271,8 +271,6 @@ internal constructor(
         val highPriorityRequested = bleConnection.requestHighConnectionPriority()
         Logger.i { "Legacy DFU: requestHighConnectionPriority -> $highPriorityRequested" }
 
-        onPhase(DfuUploadPhase.STREAMING)
-
         // ── 3. PRN setup ────────────────────────────────────────────────────
         writeControlPoint(legacyPrnRequestPayload(streamProfile.prnIntervalPackets))
 
@@ -280,6 +278,7 @@ internal constructor(
         writeControlPoint(byteArrayOf(LegacyDfuOpcode.RECEIVE_FIRMWARE_IMAGE))
 
         // ── 5. Stream firmware ─────────────────────────────────────────────
+        onPhase(DfuUploadPhase.STREAMING)
         streamFirmware(firmware, onProgress)
 
         // ── 6. Final RECEIVE_FIRMWARE_IMAGE response ────────────────────────
