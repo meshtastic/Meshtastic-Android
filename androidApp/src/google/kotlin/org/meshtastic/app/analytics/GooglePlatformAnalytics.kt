@@ -90,10 +90,10 @@ class GooglePlatformAnalytics(private val context: Context, private val analytic
      * True under Robolectric, where initializing the SDKs is both pointless and actively harmful.
      *
      * `Datadog.initialize` registers a `BroadcastReceiver` and installs a JVM shutdown hook. Robolectric tears the
-     * application context down between test classes, so at JVM shutdown that hook unregisters a receiver that no
-     * longer exists and throws `IllegalArgumentException: Receiver not registered` on its own `datadog_shutdown`
-     * thread. Robolectric attributes a stray uncaught exception to whichever test is entering, so the failure lands on
-     * an unrelated test — it surfaced as `MapNodeClusterItemsTest` failing at its `runComposeUiTest` line, in CI and in
+     * application context down between test classes, so at JVM shutdown that hook unregisters a receiver that no longer
+     * exists and throws `IllegalArgumentException: Receiver not registered` on its own `datadog_shutdown` thread.
+     * Robolectric attributes a stray uncaught exception to whichever test is entering, so the failure lands on an
+     * unrelated test — it surfaced as `MapNodeClusterItemsTest` failing at its `runComposeUiTest` line, in CI and in
      * the merge queue (where it ejects whatever else is queued), while passing locally and on rerun.
      *
      * Only the three test classes that deliberately boot the real [org.meshtastic.app.MeshUtilApplication] reach this
