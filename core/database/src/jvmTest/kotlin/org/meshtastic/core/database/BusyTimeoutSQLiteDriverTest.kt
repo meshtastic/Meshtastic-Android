@@ -37,12 +37,22 @@ class BusyTimeoutSQLiteDriverTest {
     @Test
     fun appliesBusyTimeoutToEveryOpenedConnection() {
         val driver = BusyTimeoutSQLiteDriver(BundledSQLiteDriver())
-        driver.open(dbFile.absolutePath).use { connection ->
-            connection.prepare("PRAGMA busy_timeout").use { statement ->
-                statement.step()
-                assertEquals(BusyTimeoutSQLiteDriver.DEFAULT_BUSY_TIMEOUT_MS, statement.getLong(0))
+        // Two successive opens, so a wrapper that only configured its first connection would fail.
+        repeat(2) {
+            driver.open(dbFile.absolutePath).use { connection ->
+                connection.prepare("PRAGMA busy_timeout").use { statement ->
+                    statement.step()
+                    assertEquals(BusyTimeoutSQLiteDriver.DEFAULT_BUSY_TIMEOUT_MS, statement.getLong(0))
+                }
             }
         }
+    }
+
+    @Test
+    fun rejectsNonPositiveTimeouts() {
+        // SQLite treats zero/negative busy_timeout as "no busy handler", silently defeating the wrapper.
+        assertFailsWith<IllegalArgumentException> { BusyTimeoutSQLiteDriver(BundledSQLiteDriver(), 0) }
+        assertFailsWith<IllegalArgumentException> { BusyTimeoutSQLiteDriver(BundledSQLiteDriver(), -1) }
     }
 
     /**

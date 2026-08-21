@@ -36,8 +36,25 @@ class BusyTimeoutSQLiteDriver(
     private val delegate: SQLiteDriver,
     private val busyTimeoutMs: Long = DEFAULT_BUSY_TIMEOUT_MS,
 ) : SQLiteDriver {
-    override fun open(fileName: String): SQLiteConnection =
-        delegate.open(fileName).also { connection -> connection.execSQL("PRAGMA busy_timeout = $busyTimeoutMs") }
+    init {
+        // SQLite disables the busy handler entirely for zero or negative values, which would silently
+        // defeat this wrapper's whole purpose.
+        require(busyTimeoutMs > 0) { "busyTimeoutMs must be positive, was $busyTimeoutMs" }
+    }
+
+    override fun open(fileName: String): SQLiteConnection {
+        val connection = delegate.open(fileName)
+        try {
+            connection.execSQL("PRAGMA busy_timeout = $busyTimeoutMs")
+        } catch (@Suppress("TooGenericExceptionCaught") setupFailure: Throwable) {
+            // The platforms throw different exception types here (android.database.SQLException on
+            // Android, androidx.sqlite.SQLiteException elsewhere); close the live native connection
+            // before rethrowing so a failed setup never leaks it.
+            connection.close()
+            throw setupFailure
+        }
+        return connection
+    }
 
     companion object {
         /**
