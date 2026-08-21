@@ -105,8 +105,8 @@ private val SoftDeviceVariant.wireValue: String
  *
  * `null` when [manifest] carries no `erase` set at all (never fetched/seeded yet — fail closed, same as an unresolved
  * [DeviceHardware.softDeviceVariant]), when the matching row names an unsafe file, or — for nRF52840 — without a
- * resolved [DeviceHardware.softDeviceVariant]: the two images are linked for different application start addresses,
- * and the UF2 bootloader's write guard begins at `MBR_SIZE`, so the wrong one erases a SoftDevice page. There is
+ * resolved [DeviceHardware.softDeviceVariant]: the two images are linked for different application start addresses, and
+ * the UF2 bootloader's write guard begins at `MBR_SIZE`, so the wrong one erases a SoftDevice page. There is
  * deliberately no default branch.
  */
 internal fun eraseUf2For(manifest: MaintenanceUf2Manifest, hardware: DeviceHardware): MaintenanceUf2? {
@@ -178,8 +178,8 @@ internal fun parseUf2SoftDevice(infoUf2Text: String): SoftDeviceVariant? {
 
 /**
  * Which erase image [variant] needs, from [manifest]. `null` when [manifest] carries no `erase` set at all (never
- * fetched/seeded — fail closed), when this specific variant's row is missing from `erase.nrf52` (a malformed or
- * partial manifest), or when that row names an unsafe file — never a guess at a substitute image.
+ * fetched/seeded — fail closed), when this specific variant's row is missing from `erase.nrf52` (a malformed or partial
+ * manifest), or when that row names an unsafe file — never a guess at a substitute image.
  */
 internal fun eraseUf2ForVariant(manifest: MaintenanceUf2Manifest, variant: SoftDeviceVariant): MaintenanceUf2? {
     val erase = manifest.erase ?: return null
