@@ -25,7 +25,7 @@ import org.meshtastic.core.database.entity.MaintenanceUf2CacheEntity
 interface MaintenanceUf2Dao {
     @Upsert suspend fun upsert(entity: MaintenanceUf2CacheEntity)
 
-    @Query("SELECT * FROM maintenance_uf2_cache WHERE id = 0")
+    @Query("SELECT * FROM maintenance_uf2_cache WHERE id = 0 LIMIT 1")
     suspend fun get(): MaintenanceUf2CacheEntity?
 
     @Query("SELECT COUNT(*) FROM maintenance_uf2_cache")
