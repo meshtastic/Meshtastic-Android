@@ -291,6 +291,11 @@ dependencies {
     googleImplementation(libs.maps.compose)
     googleImplementation(libs.maps.compose.utils)
     googleImplementation(libs.maps.compose.widgets)
+    // Direct declaration raises the transitive android-maps-utils 5.0.0 (via maps-utils-ktx 6.2.0)
+    // to 5.1.1, whose KmlParser is built against the xmlutil 1.0.x compat API the app actually ships
+    // — 5.0.0's is compiled against 0.91.x's removed policyBuilder(), so every KML/KMZ map import
+    // crashed with NoSuchMethodError. Drop when maps-compose's chain requires >= 5.1.1 on its own.
+    googleImplementation(libs.android.maps.utils)
     // maps-compose-widgets requests androidx.compose.material:material version-less (expects a BOM
     // we exclude). Name it with a version so the version is published in the app's graph metadata.
     googleImplementation(libs.androidx.compose.material)

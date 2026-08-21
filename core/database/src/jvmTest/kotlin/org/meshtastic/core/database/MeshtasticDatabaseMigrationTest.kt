@@ -26,6 +26,7 @@ import kotlin.io.path.Path
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 /**
  * Creates the earliest exported schema (v3) and walks every auto-migration up to the current version, validating the
@@ -63,8 +64,62 @@ class MeshtasticDatabaseMigrationTest {
     @Test
     fun migrateAll() = runTest {
         helper.createDatabase(EARLIEST_SCHEMA_VERSION).close()
-        // No manual migrations: every version bump is an @AutoMigration, so Room derives the full path itself.
-        helper.runMigrationsAndValidate(latestSchemaVersion(), emptyList()).close()
+        // Every bump through 52 is an @AutoMigration; 52→53 is the manual FTS-rebuild migration.
+        helper.runMigrationsAndValidate(latestSchemaVersion(), listOf(MeshtasticDatabase.MIGRATION_52_53)).close()
+    }
+
+    /**
+     * The 50→51 and 51→52 auto-migrations both recreate `packet` (DROP + RENAME) underneath the `packet_fts` FTS5
+     * external-content table. In production (2.8.1, build 29321949) upgraders came out of that chain with the FTS
+     * shadow tables desynced from the content table, and every later packet write failed with SQLITE_CORRUPT_VTAB (267,
+     * "database disk image is malformed") — permanently, since the sync triggers surface the desync on each write
+     * instead of repairing it. [MeshtasticDatabase.MIGRATION_52_53] rebuilds the index; this proves a populated index
+     * comes out of the chain consistent for the exact write shapes that stormed in the field.
+     */
+    @Test
+    fun ftsIndexSurvivesPacketTableRecreations() = runTest {
+        helper.createDatabase(RSSI_NULLABLE_FROM_VERSION).use { connection ->
+            // Simulate a live install: Room's runtime sync triggers exist and the index is populated through them.
+            FTS_SYNC_TRIGGERS.forEach(connection::execSQL)
+            connection.execSQL(
+                "INSERT INTO packet (uuid, myNodeNum, port_num, contact_key, received_time, read, data, snr, rssi, " +
+                    "message_text) VALUES (1, 42, 1, '0^all', 1000, 0, '{}', 5.0, -70, 'hello mesh world')",
+            )
+            connection.execSQL(
+                "INSERT INTO packet (uuid, myNodeNum, port_num, contact_key, received_time, read, data, snr, rssi, " +
+                    "message_text) VALUES (2, 42, 1, '0^all', 2000, 0, '{}', 5.0, -70, 'second message here')",
+            )
+            assertEquals(
+                listOf("1"),
+                queryColumn(connection, "SELECT rowid FROM packet_fts WHERE packet_fts MATCH 'hello'"),
+            )
+        }
+
+        val migrated =
+            helper.runMigrationsAndValidate(FTS_REBUILD_TO_VERSION, listOf(MeshtasticDatabase.MIGRATION_52_53))
+        migrated.use { connection ->
+            // Room recreates the sync triggers on open; the migrations dropped them with the old packet table.
+            FTS_SYNC_TRIGGERS.forEach(connection::execSQL)
+            // rank=1 verifies the index against the external-content table, not just its internal shape.
+            connection.execSQL("INSERT INTO packet_fts(packet_fts, rank) VALUES('integrity-check', 1)")
+            // Both rows and their text survived the two table recreations before anything mutates them.
+            assertEquals(listOf("1", "2"), queryColumn(connection, "SELECT uuid FROM packet ORDER BY uuid"))
+            assertEquals(
+                listOf("hello mesh world", "second message here"),
+                queryColumn(connection, "SELECT message_text FROM packet ORDER BY uuid"),
+            )
+            // The write shapes that stormed with error 267 in the field: clearUnreadCount and message deletion.
+            connection.execSQL("UPDATE packet SET read = 1 WHERE contact_key = '0^all'")
+            connection.execSQL("DELETE FROM packet WHERE uuid = 2")
+            connection.execSQL("INSERT INTO packet_fts(packet_fts, rank) VALUES('integrity-check', 1)")
+            assertEquals(
+                listOf("1"),
+                queryColumn(connection, "SELECT rowid FROM packet_fts WHERE packet_fts MATCH 'hello'"),
+            )
+            assertTrue(
+                queryColumn(connection, "SELECT rowid FROM packet_fts WHERE packet_fts MATCH 'second'").isEmpty(),
+            )
+        }
     }
 
     /**
@@ -151,6 +206,22 @@ class MeshtasticDatabaseMigrationTest {
 
     private companion object {
         const val EARLIEST_SCHEMA_VERSION = 3
+        const val FTS_REBUILD_TO_VERSION = 53
+
+        /** Room's runtime FTS content-sync triggers, verbatim from the generated MeshtasticDatabase_Impl. */
+        val FTS_SYNC_TRIGGERS =
+            listOf(
+                "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_packet_fts_BEFORE_UPDATE BEFORE UPDATE ON " +
+                    "`packet` BEGIN DELETE FROM `packet_fts` WHERE `rowid`=OLD.`rowid`; END",
+                "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_packet_fts_BEFORE_DELETE BEFORE DELETE ON " +
+                    "`packet` BEGIN DELETE FROM `packet_fts` WHERE `rowid`=OLD.`rowid`; END",
+                "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_packet_fts_AFTER_UPDATE AFTER UPDATE ON " +
+                    "`packet` BEGIN INSERT INTO `packet_fts`(`rowid`, `message_text`) VALUES (NEW.`rowid`, " +
+                    "NEW.`message_text`); END",
+                "CREATE TRIGGER IF NOT EXISTS room_fts_content_sync_packet_fts_AFTER_INSERT AFTER INSERT ON " +
+                    "`packet` BEGIN INSERT INTO `packet_fts`(`rowid`, `message_text`) VALUES (NEW.`rowid`, " +
+                    "NEW.`message_text`); END",
+            )
         const val RSSI_NULLABLE_FROM_VERSION = 50
         const val RSSI_NULLABLE_TO_VERSION = 51
         const val SNR_NULLABLE_FROM_VERSION = 51
