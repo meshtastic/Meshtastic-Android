@@ -19,6 +19,7 @@ package org.meshtastic.core.network
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.MaintenanceUf2Manifest
 import org.meshtastic.core.network.service.ApiService
 
 @Single
@@ -26,7 +27,6 @@ class MaintenanceUf2RemoteDataSource(
     private val apiService: ApiService,
     private val dispatchers: CoroutineDispatchers,
 ) {
-    /** Raw bytes, deliberately not decoded here — see [ApiService.getMaintenanceUf2ManifestBytes]. */
-    suspend fun getManifestBytes(): ByteArray =
-        withContext(dispatchers.io) { apiService.getMaintenanceUf2ManifestBytes() }
+    suspend fun getManifest(): MaintenanceUf2Manifest =
+        withContext(dispatchers.io) { apiService.getMaintenanceUf2Manifest() }
 }

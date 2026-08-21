@@ -28,6 +28,7 @@ import org.meshtastic.core.model.BootloaderOtaQuirk
 import org.meshtastic.core.model.BootloaderOtaQuirksResponse
 import org.meshtastic.core.model.EventFirmwareResponse
 import org.meshtastic.core.model.FirmwareReleaseManifest
+import org.meshtastic.core.model.MaintenanceUf2Manifest
 import org.meshtastic.core.model.NetworkDeviceHardware
 import org.meshtastic.core.model.NetworkDeviceLinksResponse
 import org.meshtastic.core.model.NetworkFirmwareNightly
@@ -59,7 +60,7 @@ class BootloaderOtaQuirksRepositoryImplTest {
 
         override suspend fun getBootloaderOtaQuirks(): BootloaderOtaQuirksResponse = response
 
-        override suspend fun getMaintenanceUf2ManifestBytes(): ByteArray = error("unused")
+        override suspend fun getMaintenanceUf2Manifest(): MaintenanceUf2Manifest = error("unused")
     }
 
     /**

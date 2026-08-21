@@ -27,6 +27,7 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.BootloaderOtaQuirksResponse
 import org.meshtastic.core.model.EventFirmwareResponse
 import org.meshtastic.core.model.FirmwareReleaseManifest
+import org.meshtastic.core.model.MaintenanceUf2Manifest
 import org.meshtastic.core.model.NetworkDeviceHardware
 import org.meshtastic.core.model.NetworkDeviceLink
 import org.meshtastic.core.model.NetworkDeviceLinksResponse
@@ -59,7 +60,7 @@ class DeviceLinkRepositoryImplTest {
 
         override suspend fun getBootloaderOtaQuirks(): BootloaderOtaQuirksResponse = error("unused")
 
-        override suspend fun getMaintenanceUf2ManifestBytes(): ByteArray = error("unused")
+        override suspend fun getMaintenanceUf2Manifest(): MaintenanceUf2Manifest = error("unused")
     }
 
     /** Serves only `device_links.json`, serializing the current [links] so the repo seeds via the real decode path. */

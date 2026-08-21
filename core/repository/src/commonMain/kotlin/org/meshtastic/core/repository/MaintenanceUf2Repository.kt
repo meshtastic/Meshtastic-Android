@@ -20,13 +20,14 @@ import org.meshtastic.core.model.MaintenanceUf2Manifest
 
 /**
  * The pinned nRF52/RP2040 maintenance-UF2 manifest (factory-erase and OTAFIX bootloader self-update images), seeded
- * from a bundled asset and refreshed from `resource/maintenanceUf2`. Unlike [BootloaderOtaQuirksRepository], a refresh
- * is only ever adopted if its raw bytes match a compile-time SHA-256 pin — see the implementation.
+ * from a bundled asset and refreshed from `resource/maintenanceUf2`. Each image's own `sha256` is still checked against
+ * its downloaded bytes before any write — see `MaintenanceUf2.kt` — this repository only caches the manifest that names
+ * those images.
  */
 interface MaintenanceUf2Repository {
-    /** Current best-known manifest: bundled seed until a verified fetch has landed, then that fetch. */
+    /** Current best-known manifest: bundled seed until a fetch has landed, then that fetch. */
     suspend fun getSnapshot(): MaintenanceUf2Manifest
 
-    /** Best-effort network refresh. Never throws; a failed fetch or a digest mismatch leaves the cache untouched. */
+    /** Best-effort network refresh. Never throws; a failed or empty fetch leaves the cache untouched. */
     suspend fun reconcile()
 }

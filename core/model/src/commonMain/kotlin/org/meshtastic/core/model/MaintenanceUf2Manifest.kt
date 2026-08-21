@@ -21,9 +21,9 @@ import kotlinx.serialization.Serializable
 
 /**
  * Pinned nRF52/RP2040 maintenance UF2 manifest — factory-erase and OTAFIX bootloader self-update images, keyed by
- * hardware. Envelope of `resource/maintenanceUf2` and the bundled `maintenance_uf2.json` seed asset; both are the same
- * bytes (verified by a digest test), unlike [BootloaderOtaQuirksResponse] this gates an irreversible write, so callers
- * must only trust a fetched copy whose raw-byte SHA-256 matches a compile-time pin — see `MaintenanceUf2Repository`.
+ * hardware. Envelope of `resource/maintenanceUf2` and the bundled `maintenance_uf2.json` seed asset. Each image's own
+ * `sha256` is checked against its downloaded bytes before any write — see `MaintenanceUf2.kt` — independently of how
+ * this manifest itself is fetched.
  */
 @Serializable
 data class MaintenanceUf2Manifest(

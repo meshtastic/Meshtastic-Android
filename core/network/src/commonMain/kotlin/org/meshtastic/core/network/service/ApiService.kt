@@ -27,6 +27,7 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.model.BootloaderOtaQuirksResponse
 import org.meshtastic.core.model.EventFirmwareResponse
 import org.meshtastic.core.model.FirmwareReleaseManifest
+import org.meshtastic.core.model.MaintenanceUf2Manifest
 import org.meshtastic.core.model.NetworkDeviceHardware
 import org.meshtastic.core.model.NetworkDeviceLinksResponse
 import org.meshtastic.core.model.NetworkFirmwareNightly
@@ -82,12 +83,12 @@ interface ApiService {
     suspend fun getBootloaderOtaQuirks(): BootloaderOtaQuirksResponse
 
     /**
-     * Fetches the pinned maintenance-UF2 manifest's raw bytes from the Meshtastic API. Returns raw bytes, not a decoded
-     * model: this manifest gates an irreversible bootloader/erase write, so the caller must hash these exact bytes
-     * against a compile-time digest pin before trusting (and only then parsing) them — decoding here first would defeat
-     * that check, since JSON re-serialization is not guaranteed byte-identical to what was hashed.
+     * Fetches the pinned maintenance-UF2 manifest (factory-erase and OTAFIX bootloader self-update images) from the
+     * Meshtastic API. Decodes directly to the same model the bundled asset seed uses — the server serves this file
+     * verbatim, so there is nothing to transform. Each image's own `sha256` is still checked against the downloaded
+     * bytes before any write; that is unaffected by how this manifest itself is fetched.
      */
-    suspend fun getMaintenanceUf2ManifestBytes(): ByteArray
+    suspend fun getMaintenanceUf2Manifest(): MaintenanceUf2Manifest
 }
 
 /**
@@ -123,5 +124,6 @@ class ApiServiceImpl(private val client: HttpClient) : ApiService {
     override suspend fun getBootloaderOtaQuirks(): BootloaderOtaQuirksResponse =
         client.get("resource/bootloaderOtaQuirks").body()
 
-    override suspend fun getMaintenanceUf2ManifestBytes(): ByteArray = client.get("resource/maintenanceUf2").body()
+    override suspend fun getMaintenanceUf2Manifest(): MaintenanceUf2Manifest =
+        client.get("resource/maintenanceUf2").body()
 }

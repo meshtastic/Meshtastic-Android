@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 54,
-    "identityHash": "3fc21eb0c9c92054919acc60a0f35778",
+    "identityHash": "127e9038105289134550ef0c0f8d3123",
     "entities": [
       {
         "tableName": "my_node",
@@ -1769,7 +1769,7 @@
       },
       {
         "tableName": "maintenance_uf2_cache",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `manifest_bytes` BLOB NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `manifest_json` TEXT NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -1778,9 +1778,9 @@
             "notNull": true
           },
           {
-            "fieldPath": "manifestBytes",
-            "columnName": "manifest_bytes",
-            "affinity": "BLOB",
+            "fieldPath": "manifestJson",
+            "columnName": "manifest_json",
+            "affinity": "TEXT",
             "notNull": true
           }
         ],
@@ -1794,7 +1794,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3fc21eb0c9c92054919acc60a0f35778')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '127e9038105289134550ef0c0f8d3123')"
     ]
   }
 }

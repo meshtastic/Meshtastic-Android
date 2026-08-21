@@ -16,24 +16,37 @@
  */
 package org.meshtastic.core.database.entity
 
+import androidx.room3.ColumnInfo
+import androidx.room3.Entity
+import androidx.room3.PrimaryKey
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import org.meshtastic.core.model.MaintenanceUf2Manifest
+
+/** Lenient so decoding a cached column survives a model that gained fields since it was written (forward-compat). */
+private val entityJson = Json { ignoreUnknownKeys = true }
+
 /**
- * Single-row cache of the maintenance-UF2 manifest (`/resource/maintenanceUf2`), storing the exact bytes served — not a
- * decoded/re-serialized model — so a cached row's own digest can be re-verified against the compile-time pin on read,
- * the same way a fresh fetch is. [id] is always [SINGLETON_ID]; this table only ever holds one row.
+ * Single-row cache of the maintenance-UF2 manifest (`/resource/maintenanceUf2`), pre-serialized as one JSON column —
+ * the only reader ([org.meshtastic.core.data.repository.MaintenanceUf2RepositoryImpl]) always wants the whole envelope,
+ * so a granular per-field schema would add migration surface for no query anyone runs. [id] is always [SINGLETON_ID];
+ * this table only ever holds one row.
  */
-@androidx.room3.Entity(tableName = "maintenance_uf2_cache")
+@Serializable
+@Entity(tableName = "maintenance_uf2_cache")
 data class MaintenanceUf2CacheEntity(
-    @androidx.room3.PrimaryKey val id: Int = SINGLETON_ID,
-    @androidx.room3.ColumnInfo(name = "manifest_bytes") val manifestBytes: ByteArray,
+    @PrimaryKey val id: Int = SINGLETON_ID,
+    @ColumnInfo(name = "manifest_json") val manifestJson: String,
 ) {
     companion object {
         const val SINGLETON_ID = 0
     }
-
-    // Room needs no equals/hashCode, but a data class with a ByteArray property gets a broken default one — avoid
-    // anything relying on it (there is no such use today; this exists so a future misuse fails loudly, not subtly).
-    override fun equals(other: Any?): Boolean = this === other ||
-        (other is MaintenanceUf2CacheEntity && id == other.id && manifestBytes.contentEquals(other.manifestBytes))
-
-    override fun hashCode(): Int = id * 31 + manifestBytes.contentHashCode()
 }
+
+fun MaintenanceUf2Manifest.asEntity() = MaintenanceUf2CacheEntity(manifestJson = entityJson.encodeToString(this))
+
+// A malformed column value decodes to an empty (all-defaults) manifest rather than propagating the failure —
+// consistent with the bundled-asset seed path.
+fun MaintenanceUf2CacheEntity.asExternalModel(): MaintenanceUf2Manifest =
+    runCatching { entityJson.decodeFromString<MaintenanceUf2Manifest>(manifestJson) }
+        .getOrDefault(MaintenanceUf2Manifest())

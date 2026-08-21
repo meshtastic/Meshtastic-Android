@@ -36,6 +36,7 @@ import org.meshtastic.core.model.BootloaderOtaQuirksResponse
 import org.meshtastic.core.model.EventFirmwareResponse
 import org.meshtastic.core.model.FirmwareReleaseManifest
 import org.meshtastic.core.model.FirmwareTarget
+import org.meshtastic.core.model.MaintenanceUf2Manifest
 import org.meshtastic.core.model.NetworkDeviceHardware
 import org.meshtastic.core.model.NetworkDeviceLinksResponse
 import org.meshtastic.core.model.NetworkFirmwareNightly
@@ -88,7 +89,7 @@ class FirmwareReleaseRepositoryImplTest {
 
         override suspend fun getBootloaderOtaQuirks(): BootloaderOtaQuirksResponse = error("unused")
 
-        override suspend fun getMaintenanceUf2ManifestBytes(): ByteArray = error("unused")
+        override suspend fun getMaintenanceUf2Manifest(): MaintenanceUf2Manifest = error("unused")
     }
 
     /** Serves `firmware_releases.json` from [bundled] via the real decode path, or nothing when null. */

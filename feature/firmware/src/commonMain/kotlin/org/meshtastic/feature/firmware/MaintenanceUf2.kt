@@ -28,8 +28,8 @@ import org.meshtastic.core.network.HttpClientDefaults
  * The URL/fileName/sha256 come from [MaintenanceUf2Manifest] (fetched from `resource/maintenanceUf2`, seeded from a
  * bundled asset — see `MaintenanceUf2Repository`) rather than being hardcoded here, so a new OTAFIX release or a
  * changed erase-image digest ships without an app release. Verifying [sha256] before any write is what makes that safe:
- * this class is the download-time gate, the manifest's own compile-time digest pin (see
- * `MaintenanceUf2RepositoryImpl.EXPECTED_MANIFEST_SHA256`) is the fetch-time one.
+ * this class is the download-time gate against a corrupted transfer, independent of how the manifest naming this image
+ * was itself fetched.
  *
  * @property expectedFirstTargetAddress For nRF erase images, the flash address the UF2's first block writes to. Checked
  *   against the resolved [SoftDeviceVariant] before the image is offered, because a swapped URL/digest row is the one
