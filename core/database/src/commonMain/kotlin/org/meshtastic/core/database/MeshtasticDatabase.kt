@@ -23,6 +23,9 @@ import androidx.room3.DeleteColumn
 import androidx.room3.DeleteTable
 import androidx.room3.RoomDatabase
 import androidx.room3.migration.AutoMigrationSpec
+import androidx.room3.migration.Migration
+import androidx.sqlite.SQLiteConnection
+import androidx.sqlite.execSQL
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.database.dao.ChannelSetDao
@@ -131,8 +134,9 @@ import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
         AutoMigration(from = 49, to = 50),
         AutoMigration(from = 50, to = 51),
         AutoMigration(from = 51, to = 52),
+        // 52 -> 53 is the manual MIGRATION_52_53 (FTS rebuild), applied via configureCommon().
     ],
-    version = 52,
+    version = 53,
     exportSchema = true,
 )
 @androidx.room3.ConstructedBy(MeshtasticDatabaseConstructor::class)
@@ -166,6 +170,26 @@ abstract class MeshtasticDatabase : RoomDatabase() {
 
     companion object {
         /**
+         * Rebuilds the `packet_fts` FTS5 index from its external-content table.
+         *
+         * `packet_fts` is an FTS5 external-content table over `packet`, so its shadow tables only stay valid while they
+         * agree with the content table's rowids and text. The 51→52 auto-migration recreates `packet`
+         * (copy/DROP/RENAME), and 2.8.1 (29321949) upgraders stormed SQLITE_CORRUPT_VTAB (267, "database disk image is
+         * malformed") on every subsequent packet write — `clearUnreadCount`, `markAllAsRead`, delete paths — with no
+         * self-heal, because [org.meshtastic.core.database.entity.PacketFts]'s sync triggers surface the desync on each
+         * write instead of repairing it. FTS5's `rebuild` command regenerates the index wholesale from the content
+         * table, so this migration both repairs databases the earlier chain already desynced and re-asserts the
+         * invariant for everyone else. Any future migration that recreates `packet` (Room rebuilds the table for any
+         * nullability or constraint change) must be followed by the same rebuild.
+         */
+        internal val MIGRATION_52_53: Migration =
+            object : Migration(52, 53) {
+                override suspend fun migrate(connection: SQLiteConnection) {
+                    connection.execSQL("INSERT INTO `packet_fts`(`packet_fts`) VALUES('rebuild')")
+                }
+            }
+
+        /**
          * Configures a [RoomDatabase.Builder] with standard settings for this project.
          *
          * All platforms force [setSingleConnectionPool]. Without it, Room defaults to a 4-reader pool for named
@@ -181,6 +205,7 @@ abstract class MeshtasticDatabase : RoomDatabase() {
         @OptIn(ExperimentalCoroutinesApi::class)
         fun <T : RoomDatabase> RoomDatabase.Builder<T>.configureCommon(): RoomDatabase.Builder<T> =
             this.fallbackToDestructiveMigration(dropAllTables = false)
+                .addMigrations(MIGRATION_52_53)
                 .setSingleConnectionPool()
                 .setQueryCoroutineContext(
                     // limitedParallelism(1) has the same throughput ceiling as the single-connection pool
