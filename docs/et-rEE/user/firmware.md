@@ -1,6 +1,6 @@
 ---
 title: Püsivara värskendus
-parent: User Guide
+parent: Kasutusjuhend
 nav_order: 13
 last_updated: 2026-07-07
 description: Raadio püsivara uuendamine sinihamba ​​või USB kaudu – OTA protsess, versioonikanalid, lennueelsed kontrollid ja taastamine.
@@ -41,15 +41,15 @@ Kõige levinum värskendamisviis Androidi kasutajate seas:
 
 ### Rakendusesisene USB värskendus
 
-Kui raadio on ühendatud **USB/jadaühenduse** (mitte sinihamba) kaudu, pakub püsivara värskendamise ekraan **USB failiedastust**. Rakendus taaskäivitab seadme DFU-režiimis ja seejärel palub süsteemifailide valija abil salvestada `.uf2`-fail seadme DFU-draivi. See valik kuvatakse ainult USB/jadaühenduse korral – see pole sinihamba ​​kaudu saadaval.
+Kui raadio on ühendatud **USB/jadaühenduse** (mitte sinihamba) kaudu, pakub püsivara värskendamise ekraan **USB failiedastust**. Rakendus taaskäivitab seadme DFU-režiimis ja seejärel palub süsteemifailide valija abil salvestada `.uf2`-fail seadme DFU kettale. See valik kuvatakse ainult USB/jadaühenduse korral – see pole sinihamba ​​kaudu saadaval.
 
-> ℹ️ **nRF bootloader note:** A vendor bootloader supplied as a `.zip` (e.g. RAK WisBlock RAK4631) has to be flashed with a serial DFU tool such as `adafruit-nrfutil` — copying that `.zip` to the drive won't work. A bootloader supplied as an `update-....uf2` **can** be installed by copying it to the drive; that is how the app's own bootloader upgrade works. The app surfaces a hint when the serial-only route applies.
+> ℹ️ **nRF alglaaduri märkus:** Tootja alglaadur, mis on tarnitud `.zip`-failina (nt RAK WisBlock RAK4631), tuleb paigaldada jadapordiga DFU-tööriistaga, näiteks `adafruit-nrfutil` – selle `.zip`-faili kettale kopeerimine ei toimi. Failina pakutavat alglaadur `update-....uf2` **saab** installida selle kettale kopeerimise teel; nii töötabki rakenduse enda alglaaduri uuendamine. The app surfaces a hint when the serial-only route applies.
 
 ### Factory Erase and Bootloader Upgrade
 
-On a **USB/serial** connection, nRF52 and RP2040 devices also offer **Erase and reinstall** and, where an upgraded bootloader is published for the board, **Upgrade bootloader**.
+**USB/jadapordi** ühenduse korral pakuvad nRF52 ja RP2040 seadmed ka **Kustuta ja installi uuesti** ning kui plaadile on avaldatud uuendatud alglaadur, siis **Alguslaaduri uuendamine**.
 
-Erasing wipes everything on the device — channels, keys and all settings — and there is no backup, so the app asks for confirmation first. Both operations write two files in turn, so you will be asked to select the device's update drive twice: once for the erase or bootloader image, then again for the firmware.
+Kustutamine puhastab seadmest kõik – kanalid, klahvid ja kõik seaded – ning varukoopiat ei tehta, seega küsib rakendus kõigepealt kinnitust. Mõlemad toimingud kirjutavad kordamööda kaks faili, seega palutakse teil seadme uuendusdraiv valida kaks korda: üks kord kustutus- või alglaaduri kujutise jaoks ja seejärel uuesti püsivara jaoks.
 
 The app reads `INFO_UF2.TXT` from the drive you select to confirm it really is the device's update drive and to identify the board before writing anything. If it can't confirm which Bluetooth stack your device uses it refuses to erase and points you at the [Web Flasher](https://flasher.meshtastic.org) instead — picking wrong there can leave the device needing a hardware programmer to recover.
 
@@ -92,7 +92,7 @@ Kui värskendus õnnestub:
 
 ![Püsivara värskendus õnnestus](/assets/screenshots/firmware_success.png)
 
-## Troubleshooting
+## Veaotsing
 
 ### Värskendus on ummikus
 
@@ -119,11 +119,11 @@ Rakendus võib kuvada hoiatusi järgmistel juhtudel:
 
 - Ühendatud raadio püsivara versioon on madalam kui minimaalselt toetatud versioon
 - Rakenduse ja püsivara versioonide mittevastavus
-- Deprecated features need migration
+- Vananenud funktsioonid vajavad migreerimist
 
 > ⚠️ **Tähtis:** Ühilduvuse tagamiseks värskenda Meshtastic rakendust enne püsivara värskendust.
 
-## Related Topics
+## Seotud teemad
 
 - [Ühendused](connections) — ühenduse loomine pärast püsivara värskendamist
 - [Püsivara uuendamise juhend](https://meshtastic.org/docs/getting-started/flashing-firmware) — täielik püsivara uuendamise juhend meshtastic.org lehel

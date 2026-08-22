@@ -254,6 +254,63 @@
         "zipUrl": null,
         "releaseNotes": "## Welcome to Burning Man 2026!\n\n### ⚠️ Flash the Latest 2026 Firmware\n\nFlash your node with the latest Burning Man 2026 firmware before joining the mesh. Burning Mesh firmware from previous years is not compatible with the 2026 mesh. Use the [Burning Man Firmware Flasher](https://burn.meshtastic.org) to install the current release.\n\nThis Burning Mesh firmware includes event defaults tuned for Black Rock City, including the SHORT_TURBO modem preset, frequency slot 33, an Everyone channel, event routing limits, and location-sharing protections on the event channel.\n\n### ⚠️ Important: Backup Before Flashing\n\nIf you care about what is currently stored on your node, back up your keys and configuration before proceeding. A full erase is not required for a normal update, but installation and reset choices can replace saved configuration.\n\nIf you updated from a previous version or installed a UF2 on an nRF52 device, perform a factory reset to activate Burning Man mode.\n\n### Learn More\n\n- [Burning Man Firmware Flasher](https://burn.meshtastic.org)\n- [Quick Start Guide](https://docs.burningmesh.org/en/guides/quick_start)\n- [Android Offline Maps](https://docs.burningmesh.org/en/offline_maps/android_offline_maps)\n- [iOS Offline Maps](https://docs.burningmesh.org/en/offline_maps/ios_offline_maps)\n- [Burning Mesh Discord](https://discord.gg/eXUBcCEJuH)"
       }
+    },
+    {
+      "edition": "DRAGON_CON",
+      "displayName": "Dragon Con 2026",
+      "welcomeMessage": "Welcome to Dragon Con 2026!",
+      "tag": "Dragon Con",
+      "eventStart": "2026-09-03",
+      "eventEnd": "2026-09-07",
+      "timeZone": "America/New_York",
+      "location": "Atlanta, Georgia, USA",
+      "iconUrl": "https://api.meshtastic.org/resource/eventFirmware/dragoncon2026.png",
+      "accentColor": "#F2C94C",
+      "domain": "dragon.meshtastic.org",
+      "links": [
+        {
+          "label": "Dragon Con Firmware Flasher",
+          "url": "https://dragon.meshtastic.org"
+        },
+        {
+          "label": "EFF @ Dragon Con",
+          "url": "https://www.eff.org/event/eff-dragoncon-1"
+        },
+        {
+          "label": "MtnMe.sh Community",
+          "url": "https://mtnme.sh"
+        },
+        {
+          "label": "Event Website",
+          "url": "https://dragoncon.org"
+        }
+      ],
+      "theme": {
+        "name": "40th Anniversary",
+        "tagline": "🐉 Dragontastic 2026 🐉",
+        "colors": {
+          "primary": "#5B2482",
+          "secondary": "#8A4FB8",
+          "accent": "#F2C94C"
+        },
+        "palette": [
+          "#5B2482",
+          "#8A4FB8",
+          "#F2C94C"
+        ],
+        "fonts": {
+          "heading": "Lato",
+          "body": "Atkinson Hyperlegible"
+        }
+      },
+      "firmware": {
+        "slug": "dragoncon2026",
+        "version": "2.8.0.a820487",
+        "id": "v2.8.0.a820487",
+        "title": "Meshtastic Firmware 2.8.0.a820487",
+        "zipUrl": null,
+        "releaseNotes": "## Welcome to Dragon Con 2026! 🐉\n\n### ⚠️ Flash the Latest 2026 Firmware\n\nFlash your node with the latest Dragon Con 2026 firmware before joining the mesh. Use the [Dragon Con Firmware Flasher](https://dragon.meshtastic.org) to install the current release.\n\nThis Dragon Con firmware includes event defaults tuned for Atlanta, including the MEDIUM_FAST modem preset, frequency slot 45, event channels, and event routing limits.\n\n### ⚠️ Important: Backup Before Flashing\n\nIf you care about what is currently stored on your node, back up your keys and configuration before proceeding. A full erase is not required for a normal update, but installation and reset choices can replace saved configuration.\n\nIf you updated from a previous version or installed a UF2 on an nRF52 device, perform a factory reset to activate Dragon Con mode.\n\n### Learn More\n\n- [Dragon Con Firmware Flasher](https://dragon.meshtastic.org)\n- [Quick Start Guide](https://docs.meshtastic.org/en/guides/quick_start)\n- [EFF @ Dragon Con](https://www.eff.org/event/eff-dragoncon-1)\n- [Meshtastic Discord](https://discord.gg/meshtastic)"
+      }
     }
   ]
 }

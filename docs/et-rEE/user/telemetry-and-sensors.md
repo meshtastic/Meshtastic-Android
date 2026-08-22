@@ -1,6 +1,6 @@
 ---
 title: Telemeetria & Sensorid
-parent: User Guide
+parent: Kasutusjuhend
 nav_order: 9
 last_updated: 2026-05-13
 description: Kärgvõrgu andurite andmed — toetatud keskkonna-, õhukvaliteedi- ja võimsusandurid ning konfiguratsiooni- ja vaatamisjuhendid.
@@ -83,7 +83,7 @@ Kasulik päikesepaneelide laadimise või aku seisundi jälgimiseks kaugsõlmedes
 
 ### Recommended Intervals
 
-| Use Case                                   | Device (s) | Environment (s) |
+| Kasutusjuhtum                              | Device (s) | Environment (s) |
 | ------------------------------------------ | ----------------------------- | ---------------------------------- |
 | Urban mesh (many nodes) | 3600                          | 3600                               |
 | Rural mesh (few nodes)  | 900                           | 900                                |
@@ -96,7 +96,7 @@ Kasulik päikesepaneelide laadimise või aku seisundi jälgimiseks kaugsõlmedes
 
 Nodes with particulate matter or CO₂ sensors report air quality data:
 
-| Meetriline            | Unit  | Kirjeldus                         |
+| Meetriline            | Ühik  | Kirjeldus                         |
 | --------------------- | ----- | --------------------------------- |
 | PM1.0 | µg/m³ | Ultrafine particulate matter      |
 | PM2.5 | µg/m³ | Fine particulate matter           |
@@ -121,13 +121,13 @@ CO₂ näit on värvikoodiga märgitud vastavalt raskusastmele (Hea → Umbne �
 
 ![Telemeetria toimingud](../../assets/screenshots/node-metrics_telemetric_actions.png)
 
-## Troubleshooting
+## Veaotsing
 
 - **Keskkonnaandmeid ei kuvata?** Kaugühenduse jaoks on vaja ühendada füüsiline andur (nt BME280 I2C-l). Seadme telemeetria (aku, tööaeg) on ​​alati saadaval, kuid keskkonnamõõdikute jaoks on vaja riistvara.
 - **Vananenud näidud?** Kontrolli aruandlusintervalli – väga pikad intervallid (7200+ sekundit) tähendavad harva andmete uuendamist. Samuti veendu, et kaugsõlm on endiselt võrgus.
 - **Sensor conflict on I2C bus?** Some sensors share I2C addresses. Kui samal siinil on mitu andurit, kontrolli raadio jadapordi arendajaväljundis aadresside kokkupõrkeid.
 
-## Related Topics
+## Seotud teemad
 
 - [Node Metrics](node-metrics) — view telemetry data on the node detail screen
 - [Seaded — Moodulid ja administreerimine](settings-module-admin) — telemeetriamooduli konfiguratsioon
