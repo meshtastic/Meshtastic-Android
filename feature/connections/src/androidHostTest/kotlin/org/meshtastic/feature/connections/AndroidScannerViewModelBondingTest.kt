@@ -16,6 +16,9 @@
  */
 package org.meshtastic.feature.connections
 
+import android.companion.CompanionDeviceManager
+import android.content.Context
+import android.content.pm.PackageManager
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import kotlinx.coroutines.CancellationException
@@ -26,6 +29,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.jetbrains.compose.resources.getString
 import org.junit.runner.RunWith
+import org.meshtastic.core.ble.CompanionAssociationRepository
 import org.meshtastic.core.network.repository.UsbRepository
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.bonding_failed_retry
@@ -37,6 +41,7 @@ import org.meshtastic.core.testing.runUntilSettled
 import org.meshtastic.feature.connections.model.DeviceListEntry
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
+import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -81,6 +86,7 @@ class AndroidScannerViewModelBondingTest {
                 networkRepository = harness.networkRepository,
                 dispatchers = harness.dispatchers,
                 bluetoothRepository = harness.bluetoothRepository,
+                companionAssociationRepository = CompanionAssociationRepository(RuntimeEnvironment.getApplication()),
                 usbRepository = inertUsbRepository(),
                 uiPrefs = harness.uiPrefs,
                 firmwareRecoveryDataSource = harness.firmwareRecoveryDataSource,
@@ -184,6 +190,26 @@ class AndroidScannerViewModelBondingTest {
             "CE must propagate, not be caught as generic failure",
         )
     }
+
+    @Test
+    fun `successful bond offers a companion association without gating the connect`() =
+        runTest(harness.testDispatcher) {
+            // The association is additive: the request must reach CompanionDeviceManager, and the transport must arm
+            // regardless of whether the user ever confirms the system chooser.
+            val application = RuntimeEnvironment.getApplication()
+            shadowOf(application.packageManager).setSystemFeature(PackageManager.FEATURE_COMPANION_DEVICE_SETUP, true)
+
+            viewModel.onSelected(ScannerViewModelHarness.unbondedBleEntry(mac))
+            testScheduler.advanceUntilIdle()
+
+            val companionDeviceManager =
+                application.getSystemService(Context.COMPANION_DEVICE_SERVICE) as CompanionDeviceManager
+            assertNotNull(
+                shadowOf(companionDeviceManager).lastAssociationRequest,
+                "a successful bond should request a companion association",
+            )
+            assertEquals(expectedFullAddress, harness.radioController.lastSetDeviceAddress)
+        }
 
     @Test
     fun `already bonded entry arms the transport without bonding`() = runTest(harness.testDispatcher) {

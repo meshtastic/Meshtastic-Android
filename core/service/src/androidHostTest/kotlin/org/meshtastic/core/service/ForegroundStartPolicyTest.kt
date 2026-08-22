@@ -50,10 +50,17 @@ class ForegroundStartPolicyTest {
     @Test
     fun `before Android 12 every trigger may start in the background`() {
         ServiceStartTrigger.entries.forEach { trigger ->
-            assertTrue(
-                ForegroundStartPolicy.isForegroundStartAllowed(trigger, appInForeground = false, sdkInt = ANDROID_11),
-                "$trigger should be allowed pre-Android-12",
-            )
+            listOf(true, false).forEach { associated ->
+                assertTrue(
+                    ForegroundStartPolicy.isForegroundStartAllowed(
+                        trigger,
+                        appInForeground = false,
+                        hasCompanionAssociation = associated,
+                        sdkInt = ANDROID_11,
+                    ),
+                    "$trigger should be allowed pre-Android-12 (associated=$associated)",
+                )
+            }
         }
     }
 
@@ -64,6 +71,7 @@ class ForegroundStartPolicyTest {
                 ForegroundStartPolicy.isForegroundStartAllowed(
                     ServiceStartTrigger.UserInterface,
                     appInForeground = true,
+                    hasCompanionAssociation = false,
                     sdkInt = sdk,
                 ),
                 "UserInterface should be allowed on API $sdk",
@@ -78,6 +86,7 @@ class ForegroundStartPolicyTest {
                 ForegroundStartPolicy.isForegroundStartAllowed(
                     ServiceStartTrigger.BootCompleted,
                     appInForeground = false,
+                    hasCompanionAssociation = false,
                     sdkInt = sdk,
                 ),
                 "BootCompleted should be allowed on API $sdk",
@@ -86,12 +95,13 @@ class ForegroundStartPolicyTest {
     }
 
     @Test
-    fun `a backgrounded device-address change is refused`() {
+    fun `a backgrounded device-address change without an association is refused`() {
         RESTRICTED_LEVELS.forEach { sdk ->
             assertFalse(
                 ForegroundStartPolicy.isForegroundStartAllowed(
                     ServiceStartTrigger.DeviceAddressChanged,
                     appInForeground = false,
+                    hasCompanionAssociation = false,
                     sdkInt = sdk,
                 ),
                 "DeviceAddressChanged should be refused while backgrounded on API $sdk",
@@ -100,16 +110,36 @@ class ForegroundStartPolicyTest {
     }
 
     @Test
-    fun `a device-address change while the app is visible is allowed`() {
+    fun `a backgrounded device-address change with a companion association is allowed`() {
+        // REQUEST_COMPANION_START_FOREGROUND_SERVICES_FROM_BACKGROUND exists from API 31, exactly the level where
+        // the background-start restriction begins — so on every restricted level the association is an exemption.
         RESTRICTED_LEVELS.forEach { sdk ->
             assertTrue(
                 ForegroundStartPolicy.isForegroundStartAllowed(
                     ServiceStartTrigger.DeviceAddressChanged,
-                    appInForeground = true,
+                    appInForeground = false,
+                    hasCompanionAssociation = true,
                     sdkInt = sdk,
                 ),
-                "DeviceAddressChanged should be allowed while visible on API $sdk",
+                "DeviceAddressChanged with a companion association should be allowed on API $sdk",
             )
+        }
+    }
+
+    @Test
+    fun `a device-address change while the app is visible is allowed`() {
+        RESTRICTED_LEVELS.forEach { sdk ->
+            listOf(true, false).forEach { associated ->
+                assertTrue(
+                    ForegroundStartPolicy.isForegroundStartAllowed(
+                        ServiceStartTrigger.DeviceAddressChanged,
+                        appInForeground = true,
+                        hasCompanionAssociation = associated,
+                        sdkInt = sdk,
+                    ),
+                    "DeviceAddressChanged should be allowed while visible on API $sdk (associated=$associated)",
+                )
+            }
         }
     }
 
@@ -236,24 +266,36 @@ class ForegroundStartPolicyTest {
      */
     @Test
     fun `a permitted background start never asks for a while-in-use restricted type`() {
+        // Checked with and without a companion association: the association widens WHICH starts are permitted, but
+        // it must never widen the types a background start claims — location stays while-in-use restricted.
         RESTRICTED_LEVELS.forEach { sdk ->
-            ServiceStartTrigger.entries
-                .filter { ForegroundStartPolicy.isForegroundStartAllowed(it, appInForeground = false, sdkInt = sdk) }
-                .forEach { trigger ->
-                    val types =
-                        ForegroundStartPolicy.foregroundServiceType(
-                            hasLocationPermission = true,
+            listOf(true, false).forEach { associated ->
+                ServiceStartTrigger.entries
+                    .filter {
+                        ForegroundStartPolicy.isForegroundStartAllowed(
+                            it,
                             appInForeground = false,
+                            hasCompanionAssociation = associated,
                             sdkInt = sdk,
                         )
-                    if (sdk >= ANDROID_14) {
-                        assertEquals(
-                            0,
-                            types and LOCATION,
-                            "$trigger on API $sdk is permitted in the background but claims location",
-                        )
                     }
-                }
+                    .forEach { trigger ->
+                        val types =
+                            ForegroundStartPolicy.foregroundServiceType(
+                                hasLocationPermission = true,
+                                appInForeground = false,
+                                sdkInt = sdk,
+                            )
+                        if (sdk >= ANDROID_14) {
+                            assertEquals(
+                                0,
+                                types and LOCATION,
+                                "$trigger on API $sdk (associated=$associated) is permitted in the background " +
+                                    "but claims location",
+                            )
+                        }
+                    }
+            }
         }
     }
 }

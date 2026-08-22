@@ -125,6 +125,15 @@ class UiPrefsImpl(private val dataStore: UiDataStore, dispatchers: CoroutineDisp
         scope.launch { dataStore.edit { it[KEY_HAS_SHOWN_NOT_PAIRED_WARNING_PREF] = shown } }
     }
 
+    override val companionAssociationPromptDismissed: StateFlow<Boolean> =
+        dataStore.data
+            .map { it[KEY_COMPANION_ASSOCIATION_PROMPT_DISMISSED] ?: false }
+            .stateIn(scope, SharingStarted.Eagerly, false)
+
+    override fun setCompanionAssociationPromptDismissed(dismissed: Boolean) {
+        scope.launch { dataStore.edit { it[KEY_COMPANION_ASSOCIATION_PROMPT_DISMISSED] = dismissed } }
+    }
+
     override val showQuickChat: StateFlow<Boolean> =
         dataStore.data.map { it[KEY_SHOW_QUICK_CHAT_PREF] ?: false }.stateIn(scope, SharingStarted.Eagerly, false)
 
@@ -304,6 +313,7 @@ class UiPrefsImpl(private val dataStore: UiDataStore, dispatchers: CoroutineDisp
 
     companion object {
         val KEY_HAS_SHOWN_NOT_PAIRED_WARNING_PREF = booleanPreferencesKey("has_shown_not_paired_warning")
+        val KEY_COMPANION_ASSOCIATION_PROMPT_DISMISSED = booleanPreferencesKey("companion-association-prompt-dismissed")
         val KEY_SHOW_QUICK_CHAT_PREF = booleanPreferencesKey("show-quick-chat")
         val KEY_SHOW_FULL_MESSAGE_TIMESTAMPS = booleanPreferencesKey("show-full-message-timestamps")
         val KEY_EVENT_THEME_ENABLED = booleanPreferencesKey("event-theme-enabled")
