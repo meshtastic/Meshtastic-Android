@@ -64,12 +64,9 @@ import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.core.repository.RadioTransportCallback
 import kotlin.concurrent.Volatile
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
-private const val SCAN_RETRY_COUNT = 3
-private val SCAN_RETRY_DELAY = 1.seconds
 private val CONNECTION_TIMEOUT = 15.seconds
 
 /**
@@ -83,18 +80,6 @@ private val CONNECTION_TIMEOUT = 15.seconds
  */
 private val HEARTBEAT_DRAIN_DELAY = 200.milliseconds
 
-/**
- * Bounded scan duration used by both discovery paths in [findDevice]:
- * - Bonded devices get one address-filtered scan before falling back to the bonded handle.
- * - Non-bonded retries each use this duration.
- *
- * Keeping the bonded path to one scanner registration is important on Android, which throttles applications that start
- * BLE scans too frequently. A single 5s window still covers multiple advertising intervals for typical power-save slots
- * (~1–2s each), resolves immediately when the target advertises, and avoids consuming two scan starts per reconnect. If
- * the scan misses, [findDevice] falls back to the bonded handle and [attemptConnection] keeps that patient
- * `autoConnect` path bounded through [CONNECTION_TIMEOUT].
- */
-internal val SCAN_TIMEOUT = 5.seconds
 private val GATT_CLEANUP_TIMEOUT = 5.seconds
 private val BLE_WRITE_OPERATION_TIMEOUT = 10.seconds
 private const val BLE_MAX_PENDING_WRITES = 4
@@ -244,6 +229,16 @@ class BleRadioTransport(
     // recovering (issue #6685). This gate decides when a long failure streak has earned one cache refresh.
     private val gattCacheInvalidationGate = GattCacheInvalidationGate()
 
+    // For the same reason, a bonded radio that stays away would otherwise keep paying the full bonded-fallback price
+    // (a GATT open against Android's stale-GATT window plus up to CONNECTION_TIMEOUT) on every retry. This gate makes
+    // most long-streak attempts cheap scan-only probes while periodically yielding to bonded autoConnect as a self-heal
+    // when Android scanning is unavailable.
+    private val scanOnlyProbeGate = ScanOnlyProbeGate()
+
+    // Device discovery (bonded-first lookup + bounded scans) lives in BleDeviceLocator so this class stays within
+    // detekt's LargeClass budget.
+    private val deviceLocator = BleDeviceLocator(scanner, bluetoothRepository, address)
+
     private val heartbeatSender =
         HeartbeatSender(
             sendToRadio = { handleSendToRadio(it) },
@@ -259,75 +254,6 @@ class BleRadioTransport(
     }
 
     // --- Connection & Discovery Logic ---
-
-    /** Robustly finds the device. Checks bonded devices, preferring a fresh scan result when available. */
-    @Suppress("ReturnCount")
-    private suspend fun findDevice(): BleDevice {
-        val bondedDevice =
-            bluetoothRepository.state.value.bondedDevices.firstOrNull { it.address.equals(address, ignoreCase = true) }
-
-        if (bondedDevice != null) {
-            // Use one bounded, address-filtered scan. Splitting this into a short scan plus an escalated scan consumed
-            // two Android scanner registrations per reconnect and could hit SCAN_FAILED_SCANNING_TOO_FREQUENTLY when a
-            // user switched devices while the reconnect policy and the Connections screen were also scanning.
-            Logger.i { "[${address.anonymize()}] Bonded device found; scanning once for a fresh advertisement" }
-            scanForFreshDevice(SCAN_TIMEOUT)?.let {
-                Logger.i { "[${address.anonymize()}] Fresh advertisement found; using scanned device" }
-                return it
-            }
-
-            // If the scan misses, fall back to the bonded handle. Bonded-only devices have no fresh advertisement, so
-            // Kable uses autoConnect=true and Android can patiently wait for the device to advertise again.
-            // This remains bounded by CONNECTION_TIMEOUT in connectAndAwait(), after which BleReconnectPolicy owns
-            // retry/backoff.
-            Logger.w {
-                "[${address.anonymize()}] No fresh advertisement within $SCAN_TIMEOUT; " +
-                    "falling back to bonded handle for bounded autoConnect"
-            }
-            return bondedDevice
-        }
-
-        // Non-bonded path: preserve existing retry behavior (SCAN_RETRY_COUNT attempts at SCAN_TIMEOUT).
-        Logger.i { "[${address.anonymize()}] Device not found in bonded list, scanning" }
-        repeat(SCAN_RETRY_COUNT) { attempt ->
-            scanForFreshDevice(SCAN_TIMEOUT)?.let {
-                return it
-            }
-            if (attempt < SCAN_RETRY_COUNT - 1) {
-                delay(SCAN_RETRY_DELAY)
-            }
-        }
-        throw RadioNotConnectedException("Device not found at address $address")
-    }
-
-    /**
-     * Performs a single BLE scan attempt for the selected [address] and returns the first matching [BleDevice], or null
-     * if the scan times out or fails.
-     *
-     * One scan attempt only — no retry, no backoff. Both bonded and non-bonded paths in [findDevice] share this
-     * primitive so retry policy stays centralized:
-     * - Bonded: one address-filtered [SCAN_TIMEOUT] attempt before [findDevice] returns the bonded handle.
-     * - Non-bonded: [SCAN_RETRY_COUNT] attempts at [SCAN_TIMEOUT] with [SCAN_RETRY_DELAY] between attempts.
-     *
-     * The outer [withTimeoutOrNull] is binding: the scanner receives [timeout] as a hint, but this coroutine resumes on
-     * its own schedule regardless of when (or whether) the scanner honors it.
-     *
-     * [CancellationException] is rethrown — coroutine cancellation must never be swallowed.
-     */
-    private suspend fun scanForFreshDevice(timeout: Duration): BleDevice? = try {
-        withTimeoutOrNull(timeout) {
-            // Pass both service UUID and address; the scanner picks whichever filter the platform can honour
-            // (address natively on Android, service UUID elsewhere) and narrows to the address itself.
-            scanner.scan(timeout = timeout, serviceUuid = SERVICE_UUID, address = address).first {
-                it.address.equals(address, ignoreCase = true)
-            }
-        }
-    } catch (e: CancellationException) {
-        throw e
-    } catch (e: Exception) {
-        Logger.v(e) { "[${address.anonymize()}] Scan failed (timeout=$timeout)" }
-        null
-    }
 
     private fun connect() {
         connectionJob =
@@ -380,7 +306,43 @@ class BleRadioTransport(
 
         awaitPendingSessionCleanup()
         sessionFailed.value = false
-        val device = findDevice()
+
+        // Long-streak probe: once the retry ladder has saturated, a bonded device that is still absent fails most
+        // full-price attempts (GATT open + connection timeout) identically. Probe by scan alone instead — but
+        // deliberately yield at a fixed interval so a bonded autoConnect still gets recovery opportunities when Android
+        // scanning is unavailable (for example Location-off gating on API 26–30 or a revoked scan permission on 31+).
+        // Any stable connection resets the reconnect streak, which disarms probing automatically.
+        val consecutiveFailures = reconnectPolicy.consecutiveFailures
+        val isBonded = bluetoothRepository.isBonded(address)
+        val shouldProbe = isBonded && scanOnlyProbeGate.shouldProbeInsteadOfBondedConnect(consecutiveFailures)
+        if (isBonded && consecutiveFailures >= scanOnlyProbeGate.failureThreshold && !shouldProbe) {
+            Logger.d {
+                "[${address.anonymize()}] $consecutiveFailures consecutive failures; " +
+                    "trying periodic bonded fallback"
+            }
+        }
+
+        val probedDevice =
+            if (shouldProbe) {
+                // Entering probe mode earns one Info line; every continuation is Debug so a days-long absence does
+                // not repeat the same message at Info on every retry (the same noise class the heartbeat demotion
+                // addresses).
+                if (consecutiveFailures == scanOnlyProbeGate.failureThreshold) {
+                    Logger.i {
+                        "[${address.anonymize()}] $consecutiveFailures consecutive failures; probing by scan only"
+                    }
+                } else {
+                    Logger.d {
+                        "[${address.anonymize()}] $consecutiveFailures consecutive failures; probing by scan only"
+                    }
+                }
+                deviceLocator.scanForFreshDevice(SCAN_TIMEOUT)
+                    ?: throw RadioNotConnectedException("No advertisement during scan-only probe")
+            } else {
+                null
+            }
+
+        val device = probedDevice ?: deviceLocator.findDevice()
 
         bondDeviceBeforeConnect(device)
 
@@ -399,7 +361,6 @@ class BleRadioTransport(
         // consumeGattCacheInvalidationRequest() is read into a val first: `||` short-circuiting must never skip
         // consuming the one-shot post-OTA flag.
         val postOtaRequested = (callback as? RadioInterfaceService)?.consumeGattCacheInvalidationRequest() == true
-        val consecutiveFailures = reconnectPolicy.consecutiveFailures
         val staleCacheSuspected = gattCacheInvalidationGate.shouldInvalidateOnAttempt(consecutiveFailures)
         if (postOtaRequested || staleCacheSuspected) {
             val triggers = buildList {
