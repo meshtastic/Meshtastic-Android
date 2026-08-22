@@ -225,6 +225,9 @@ class BleRadioTransport(
 
     private val bytesSent = atomic(0L)
 
+    /** Per-instance sink keeps send-rejection routing observable without replacing Kermit's process-wide writers. */
+    internal var sendRejectionLogger: (String) -> Unit = { message -> Logger.w { message } }
+
     @Volatile private var isFullyConnected = false
     private var connectionJob: Job? = null
 
@@ -246,12 +249,14 @@ class BleRadioTransport(
 
     private val heartbeatSender =
         HeartbeatSender(
-            sendToRadio = { handleSendToRadio(it) },
+            // HeartbeatSender owns rejection severity. Suppress the generic offline-admission warning here so one
+            // rejected heartbeat cannot emit two warnings; write-backlog pressure remains warning-worthy below.
+            sendToRadio = { trySendToRadio(it, logUnavailable = false) },
             afterHeartbeat = {
                 delay(HEARTBEAT_DRAIN_DELAY)
                 activeSession.value?.profile?.requestDrain()
             },
-            logTag = address,
+            logTag = address.anonymize(),
         )
 
     override fun start() {
@@ -768,7 +773,9 @@ class BleRadioTransport(
      * @return true when the current BLE profile generation accepted responsibility for the bounded write attempt.
      *   Delivery is confirmed later by the protocol, not by this result.
      */
-    override fun handleSendToRadio(p: ByteArray): Boolean {
+    override fun handleSendToRadio(p: ByteArray): Boolean = trySendToRadio(p, logUnavailable = true)
+
+    private fun trySendToRadio(p: ByteArray, logUnavailable: Boolean): Boolean {
         val transportLease = lifecycle.tryAcquire()
         return if (transportLease == null) {
             false
@@ -780,12 +787,14 @@ class BleRadioTransport(
                 if (writePermit) writePermits.release()
                 sessionLease?.release()
                 transportLease.release()
-                Logger.w {
-                    if (!writePermit && session != null && sessionLease != null) {
-                        "[$address] BLE write backlog is full, cannot admit ${p.size} bytes"
-                    } else {
-                        "[$address] toRadio characteristic unavailable, cannot send ${p.size} bytes"
-                    }
+                if (!writePermit && session != null && sessionLease != null) {
+                    sendRejectionLogger(
+                        "[${address.anonymize()}] BLE write backlog is full, cannot admit ${p.size} bytes",
+                    )
+                } else if (logUnavailable) {
+                    sendRejectionLogger(
+                        "[${address.anonymize()}] toRadio characteristic unavailable, cannot send ${p.size} bytes",
+                    )
                 }
                 false
             } else {

@@ -32,6 +32,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.network.repository.SerialConnection
 import org.meshtastic.core.network.repository.SerialConnectionListener
 import org.meshtastic.core.network.transport.HeartbeatSender
@@ -97,10 +98,18 @@ class SerialRadioTransport(
     private val lifecycle =
         TransportLifecycleGate("Android serial", teardownTimeout = SERIAL_TRANSPORT_TEARDOWN_TIMEOUT)
 
+    /** Per-instance sink keeps send-rejection routing observable without replacing Kermit's process-wide writers. */
+    internal var sendRejectionLogger: (String) -> Unit = { message -> Logger.w { message } }
+
     // Detached from the service scope so a claimed generation always publishes cleanup completion.
     private val cleanupScope = CoroutineScope(SupervisorJob() + scope.coroutineContext.minusKey(Job))
 
-    private val heartbeatSender = HeartbeatSender(sendToRadio = { handleSendToRadio(it) }, logTag = "Serial[$address]")
+    private val heartbeatSender =
+        HeartbeatSender(
+            // HeartbeatSender owns rejection severity; avoid a second warning from the generic admission path.
+            sendToRadio = { trySendToRadio(it, logUnavailable = false) },
+            logTag = "Serial[${address.anonymize()}]",
+        )
 
     override fun start() = connect()
 
@@ -463,7 +472,9 @@ class SerialRadioTransport(
         completion.complete(Unit)
     }
 
-    override fun handleSendToRadio(p: ByteArray): Boolean {
+    override fun handleSendToRadio(p: ByteArray): Boolean = trySendToRadio(p, logUnavailable = true)
+
+    private fun trySendToRadio(p: ByteArray, logUnavailable: Boolean): Boolean {
         val transportLease = lifecycle.tryAcquire()
         val operation =
             transportLease?.let {
@@ -472,7 +483,11 @@ class SerialRadioTransport(
             }
         return if (transportLease == null || operation == null) {
             transportLease?.release()
-            Logger.w { "[$address] Serial connection not available, cannot send ${p.size} bytes" }
+            if (logUnavailable) {
+                sendRejectionLogger(
+                    "[${address.anonymize()}] Serial connection not available, cannot send ${p.size} bytes",
+                )
+            }
             false
         } else {
             queueFramedSend(

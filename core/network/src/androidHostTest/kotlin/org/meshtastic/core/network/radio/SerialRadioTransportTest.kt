@@ -111,6 +111,26 @@ class SerialRadioTransportTest {
     }
 
     @Test
+    fun `offline heartbeat owns rejection logging while an ordinary send keeps the serial warning`() = runTest {
+        val address = "serial-device"
+        val transportRejections = mutableListOf<String>()
+        val transport = createTransport(address, backgroundScope)
+        transport.sendRejectionLogger = { transportRejections += it }
+
+        transport.keepAlive()
+        testScheduler.runCurrent()
+        assertTrue(
+            transportRejections.isEmpty(),
+            "HeartbeatSender must be the sole owner of expected offline rejection severity",
+        )
+
+        assertFalse(transport.handleSendToRadio(byteArrayOf(1)))
+        assertEquals(1, transportRejections.size)
+        assertTrue("Serial connection not available" in transportRejections.single())
+        transport.close()
+    }
+
+    @Test
     fun `send is rejected promptly while connection is still opening`() = runBlocking<Unit> {
         val address = "serial-device"
         val connectEntered = CountDownLatch(1)
