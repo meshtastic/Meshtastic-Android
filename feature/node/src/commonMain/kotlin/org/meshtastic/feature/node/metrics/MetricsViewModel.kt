@@ -16,8 +16,12 @@
  */
 package org.meshtastic.feature.node.metrics
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.ViewModel
 import co.touchlab.kermit.Logger
@@ -296,7 +300,11 @@ open class MetricsViewModel(
     fun showLogDetail(titleRes: StringResource, annotatedMessage: AnnotatedString) {
         alertManager.showAlert(
             titleRes = titleRes,
-            composableMessage = { SelectionContainer { Text(text = annotatedMessage) } },
+            composableMessage = {
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                    SelectionContainer { Text(text = annotatedMessage) }
+                }
+            },
         )
     }
 
@@ -311,7 +319,11 @@ open class MetricsViewModel(
             val snapshotPositions = tracerouteSnapshotRepository.getSnapshotPositions(responseLogUuid).first()
             alertManager.showAlert(
                 titleRes = Res.string.traceroute,
-                composableMessage = { SelectionContainer { Text(text = annotatedMessage) } },
+                composableMessage = {
+                    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                        SelectionContainer { Text(text = annotatedMessage) }
+                    }
+                },
                 confirmTextRes = Res.string.view_on_map,
                 onConfirm = {
                     val positionedNodeNums =
