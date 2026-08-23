@@ -74,9 +74,16 @@ private val KMZ_MAGIC = byteArrayOf('P'.code.toByte(), 'K'.code.toByte())
 fun InputStream.isKmzArchive(): Boolean {
     mark(KMZ_MAGIC.size)
     val magic = ByteArray(KMZ_MAGIC.size)
-    val read = read(magic)
+    // read(ByteArray) is only guaranteed to return at least 1 byte before EOF, not to fill the buffer — loop rather
+    // than trust a single call, or a short read could misclassify a real KMZ as bare KML.
+    var totalRead = 0
+    while (totalRead < magic.size) {
+        val read = read(magic, totalRead, magic.size - totalRead)
+        if (read == -1) break
+        totalRead += read
+    }
     reset()
-    return read == KMZ_MAGIC.size && magic.contentEquals(KMZ_MAGIC)
+    return totalRead == KMZ_MAGIC.size && magic.contentEquals(KMZ_MAGIC)
 }
 
 /** On-disk extension marking a saved coverage estimate, so [LayerType.COVERAGE] survives a restart. */

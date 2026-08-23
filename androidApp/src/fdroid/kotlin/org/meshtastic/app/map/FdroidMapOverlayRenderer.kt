@@ -19,6 +19,7 @@ package org.meshtastic.app.map
 import android.graphics.Color
 import androidx.core.graphics.toColorInt
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.meshtastic.app.map.cluster.RadiusMarkerClusterer
@@ -37,9 +38,16 @@ import org.osmdroid.views.overlay.Polyline
 import java.io.BufferedInputStream
 import java.io.File
 import java.io.InputStream
+import java.io.OutputStream
 import kotlin.math.roundToInt
 
 private const val TAG = "MapOverlayRenderer"
+
+/**
+ * Cap on a spooled KMZ's size: `openStream` can be an unbounded network fetch, and osmbonuspack's KMZ path needs the
+ * whole archive on disk before it can parse it. 50 MB comfortably covers a legitimate overlay plus embedded icons.
+ */
+private const val MAX_KMZ_BYTES = 50L * 1024 * 1024
 
 // simplestyle-spec fallbacks, mirroring the Google flavor's applySimpleStyleSpec(); tune here.
 private const val DEFAULT_GEOJSON_FILL_OPACITY = 0.35f
@@ -129,7 +137,7 @@ class FdroidMapOverlayRenderer {
                             LayerType.KML -> {
                                 val buffered = BufferedInputStream(input)
                                 if (buffered.isKmzArchive()) {
-                                    parseKmz(buffered, doc, cacheDir)
+                                    parseKmz(buffered, doc, cacheDir, layer.name)
                                 } else {
                                     doc.parseKMLStream(buffered, null)
                                 }
@@ -139,9 +147,13 @@ class FdroidMapOverlayRenderer {
                 if (ok) {
                     doc
                 } else {
-                    Logger.withTag(TAG).e { "Failed to parse map layer (malformed KML/KMZ/GeoJSON?): ${layer.name}" }
+                    Logger.withTag(TAG).w { "Failed to parse map layer (malformed KML/KMZ/GeoJSON?): ${layer.name}" }
                     null
                 }
+            } catch (e: CancellationException) {
+                // reconcile() is re-invoked on every layer-list change, cancelling an in-flight parse routinely —
+                // not a load failure. Matches the Google flavor's MapLayerOverlay handling of the same pattern.
+                throw e
             } catch (e: Exception) {
                 Logger.withTag(TAG).e(e) { "Error parsing map layer: ${layer.name}" }
                 null
@@ -155,13 +167,35 @@ class FdroidMapOverlayRenderer {
      * temp file — matching how the Google flavor treats KMZ uniformly regardless of whether the layer's source is a
      * local file or a network fetch — rather than reimplementing the unzip here.
      */
-    private fun parseKmz(stream: InputStream, doc: KmlDocument, cacheDir: File): Boolean {
+    private fun parseKmz(stream: InputStream, doc: KmlDocument, cacheDir: File, layerName: String): Boolean {
         val temp = File.createTempFile("layer", ".kmz", cacheDir)
         return try {
-            temp.outputStream().use { stream.copyTo(it) }
-            doc.parseKMZFile(temp)
+            val bytesCopied = temp.outputStream().use { stream.copyToBounded(it, MAX_KMZ_BYTES) }
+            if (bytesCopied > MAX_KMZ_BYTES) {
+                // Oversized input, not an app defect — warn (matching the malformed-input path), don't error.
+                Logger.withTag(TAG).w { "KMZ layer exceeds $MAX_KMZ_BYTES byte limit, skipping: $layerName" }
+                false
+            } else {
+                doc.parseKMZFile(temp)
+            }
         } finally {
             temp.delete()
+        }
+    }
+
+    /**
+     * Like [InputStream.copyTo], but stops as soon as more than [limit] bytes have been read, returning the count read
+     * so far (which will exceed [limit]) instead of continuing to buffer an unbounded stream to disk.
+     */
+    private fun InputStream.copyToBounded(out: OutputStream, limit: Long): Long {
+        val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+        var total = 0L
+        while (true) {
+            val read = read(buffer)
+            if (read == -1) return total
+            total += read
+            if (total > limit) return total
+            out.write(buffer, 0, read)
         }
     }
 
