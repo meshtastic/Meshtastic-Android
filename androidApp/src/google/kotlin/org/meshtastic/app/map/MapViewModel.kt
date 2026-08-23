@@ -137,8 +137,7 @@ class MapViewModel(
                                 (waypoint.latitude_i ?: 0) / WAYPOINT_COORD_SCALE,
                                 (waypoint.longitude_i ?: 0) / WAYPOINT_COORD_SCALE,
                             )
-                        cameraPositionState.position =
-                            CameraPosition.fromLatLngZoom(latLng, WAYPOINT_FOCUS_ZOOM)
+                        cameraPositionState.position = CameraPosition.fromLatLngZoom(latLng, WAYPOINT_FOCUS_ZOOM)
                     }
                 }
             }

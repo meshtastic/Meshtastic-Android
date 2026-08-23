@@ -39,6 +39,9 @@ import kotlin.concurrent.withLock
 import kotlin.random.Random
 import kotlinx.coroutines.isActive as coroutineIsActive
 
+/** Listen-socket backlog; a handful of pending connections is plenty for local TAK clients. */
+private const val SERVER_SOCKET_BACKLOG = 4
+
 /**
  * JSSE-backed TLS TAK server. Matches the Meshtastic-Apple (iOS) implementation:
  * - Binds `127.0.0.1:8089` (loopback only — no remote device can reach the server)
@@ -92,8 +95,7 @@ internal class TAKServerJvm(private val dispatchers: CoroutineDispatchers, priva
                     val factory = sslContext.serverSocketFactory
                     // Use the address-specific overload so we bind to loopback only.
                     val loopback = InetAddress.getByName("127.0.0.1")
-                    // backlog of 4 is plenty for local TAK clients
-                    val tls = factory.createServerSocket(port, 4, loopback) as SSLServerSocket
+                    val tls = factory.createServerSocket(port, SERVER_SOCKET_BACKLOG, loopback) as SSLServerSocket
                     configureTlsServerSocket(tls)
                     tls
                 }

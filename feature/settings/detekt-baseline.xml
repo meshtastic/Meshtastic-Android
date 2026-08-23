@@ -21,7 +21,6 @@
     <ID>LongMethod:DetectionSensorConfigItemList.kt:@Composable fun DetectionSensorConfigScreen</ID>
     <ID>LongMethod:LoRaConfigItemList.kt:@Composable fun LoRaConfigScreen</ID>
     <ID>LongMethod:PowerConfigItemList.kt:@Composable fun PowerConfigScreen</ID>
-    <ID>LongMethod:RadioConfigViewModel.kt:RadioConfigViewModel$fun setResponseStateLoading</ID>
     <ID>LongMethod:RadioConfigViewModel.kt:RadioConfigViewModel$private fun processPacketResponse</ID>
     <ID>LongMethod:SecurityConfigScreen.android.kt:@Composable actual fun SecurityKeyBackupActions</ID>
     <ID>LongMethod:SerialConfigItemList.kt:@Composable fun SerialConfigScreen</ID>
@@ -38,17 +37,16 @@
     <ID>MagicNumber:EditDeviceProfileDialog.kt:ProfileField.FIXED_POSITION$6</ID>
     <ID>MagicNumber:EditDeviceProfileDialog.kt:ProfileField.MODULE_CONFIG$5</ID>
     <ID>ModifierClickableOrder:ChannelScreen.kt:clickable(onClick = onClick)</ID>
+    <ID>ModifierMissing:AcknowledgementsScreen.kt:@Composable fun AcknowledgementsScreen</ID>
     <ID>ModifierMissing:AdministrationScreen.kt:@Composable fun AdministrationScreen</ID>
     <ID>ModifierMissing:AmbientLightingConfigItemList.kt:@Composable fun AmbientLightingConfigScreen</ID>
     <ID>ModifierMissing:AppInfoSection.kt:@Composable fun AppInfoSection</ID>
-    <ID>ModifierMissing:AcknowledgementsScreen.kt:@Composable fun AcknowledgementsScreen</ID>
     <ID>ModifierMissing:AudioConfigItemList.kt:@Composable fun AudioConfigScreen</ID>
     <ID>ModifierMissing:BluetoothConfigItemList.kt:@Composable fun BluetoothConfigScreen</ID>
     <ID>ModifierMissing:CannedMessageConfigItemList.kt:@Suppress("DEPRECATION", "LongMethod") @Composable fun CannedMessageConfigScreen</ID>
     <ID>ModifierMissing:ChannelConfigScreen.kt:@Composable fun ChannelConfigScreen</ID>
     <ID>ModifierMissing:ChannelScreen.kt:@Composable @Suppress("LongMethod") fun ChannelScreen</ID>
     <ID>ModifierMissing:CleanNodeDatabaseScreen.kt:@Composable fun CleanNodeDatabaseScreen</ID>
-    <ID>ModifierMissing:Debug.kt:@Suppress("LongMethod") @Composable fun DebugScreen</ID>
     <ID>ModifierMissing:DesktopSettingsScreen.kt:@Suppress("LongMethod") @Composable fun DesktopSettingsScreen</ID>
     <ID>ModifierMissing:DetectionSensorConfigItemList.kt:@Composable fun DetectionSensorConfigScreen</ID>
     <ID>ModifierMissing:DeviceConfigScreen.kt:@Suppress("DEPRECATION", "LongMethod") @Composable fun DeviceConfigScreenCommon</ID>
@@ -76,10 +74,8 @@
     <ID>ModifierMissing:SettingsScreen.kt:@Suppress("LongMethod", "CyclomaticComplexMethod") @Composable fun SettingsScreen</ID>
     <ID>ModifierMissing:StatusMessageConfigItemList.kt:@Composable fun StatusMessageConfigScreen</ID>
     <ID>ModifierMissing:StoreForwardConfigItemList.kt:@Composable fun StoreForwardConfigScreen</ID>
-    <ID>ModifierMissing:TAKConfigItemList.kt:@Composable fun TAKConfigScreen</ID>
     <ID>ModifierMissing:TelemetryConfigItemList.kt:@Composable fun TelemetryConfigScreen</ID>
     <ID>ModifierMissing:ThemePickerDialog.kt:@Composable fun ThemePickerDialog</ID>
-    <ID>ModifierMissing:TrafficManagementConfigItemList.kt:@Suppress("LongMethod") @Composable fun TrafficManagementConfigScreen</ID>
     <ID>ModifierMissing:UserConfigItemList.kt:@Composable fun UserConfigScreen</ID>
     <ID>MultipleEmitters:MQTTConfigItemList.kt:@Composable private fun MqttAddressAndProbe</ID>
     <ID>MultipleEmitters:PacketResponseStateDialog.kt:@Composable private fun ErrorContent</ID>
@@ -90,6 +86,7 @@
     <ID>ParameterNaming:CleanNodeDatabaseScreen.kt:onCheckedChanged: (Boolean) -> Unit</ID>
     <ID>ParameterNaming:CleanNodeDatabaseScreen.kt:onDaysChanged: (Float) -> Unit</ID>
     <ID>ParameterNaming:ExternalNotificationConfigScreen.android.kt:onRingtoneImported: (String) -> Unit</ID>
+    <ID>ParameterNaming:ExternalNotificationConfigScreen.ios.kt:onRingtoneImported: (String) -> Unit</ID>
     <ID>ParameterNaming:ExternalNotificationConfigScreen.jvm.kt:onRingtoneImported: (String) -> Unit</ID>
     <ID>ParameterNaming:ExternalNotificationConfigScreen.kt:onRingtoneImported: (String) -> Unit</ID>
     <ID>ParameterNaming:MapReportingPreference.kt:onMapReportingEnabledChanged: (Boolean) -> Unit = {}</ID>
@@ -97,6 +94,7 @@
     <ID>ParameterNaming:MapReportingPreference.kt:onPublishIntervalSecsChanged: (Int) -> Unit = {}</ID>
     <ID>ParameterNaming:MapReportingPreference.kt:onShouldReportLocationChanged: (Boolean) -> Unit = {}</ID>
     <ID>ParameterNaming:PositionConfigScreen.android.kt:onLocationReceived: (Position) -> Unit</ID>
+    <ID>ParameterNaming:PositionConfigScreen.ios.kt:onLocationReceived: (Position) -> Unit</ID>
     <ID>ParameterNaming:PositionConfigScreen.jvm.kt:onLocationReceived: (Position) -> Unit</ID>
     <ID>ParameterNaming:PositionConfigScreen.kt:onLocationReceived: (Position) -> Unit</ID>
     <ID>PreviewPublic:AppInfoSection.kt:@Preview(showBackground = true) @Composable fun AppInfoSectionPreview</ID>
@@ -108,8 +106,6 @@
     <ID>TooGenericExceptionCaught:DebugViewModel.kt:DebugViewModel$e: Exception</ID>
     <ID>TooManyFunctions:RadioConfigViewModel.kt:RadioConfigViewModel : ViewModel</ID>
     <ID>ViewModelForwarding:AdministrationScreen.kt:AdminRouteItems(viewModel = viewModel, enabled = enabled, state = state, destNode = destNode)</ID>
-    <ID>ViewModelForwarding:Debug.kt:DebugLogSettings(viewModel = viewModel)</ID>
-    <ID>ViewModelForwarding:Debug.kt:DebugSearchStateWithViewModel( viewModel = viewModel, modifier = Modifier.graphicsLayer(alpha = animatedAlpha), searchState = searchState, filterTexts = filterTexts, presetFilters = viewModel.presetFilters, logs = logs, filterMode = filterMode, onFilterModeChange = { filterMode = it }, onExportLogs = { val format = LocalDateTime.Format { year() monthNumber() day() char('_') hour() minute() second() } val timestamp = fromEpochMilliseconds(nowMillis).toLocalDateTime(TimeZone.UTC).format(format) val fileName = "meshtastic_debug_$timestamp.txt" exportLogsLauncher(fileName) }, )</ID>
     <ID>ViewModelForwarding:PositionConfigScreen.kt:DeviceLocationButton( viewModel = viewModel, enabled = state.connected, onLocationReceived = { locationInput = it }, )</ID>
     <ID>ViewModelForwarding:SecurityConfigScreen.kt:SecurityKeyBackupActions( viewModel = viewModel, enabled = state.connected, securityConfig = securityConfig, )</ID>
   </CurrentIssues>

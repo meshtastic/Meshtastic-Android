@@ -71,6 +71,8 @@
     <ID>ParameterNaming:EmojiPickerDialog.kt:onCategoryChanged: (Int) -> Unit</ID>
     <ID>ParameterNaming:EmojiPickerDialog.kt:onCategorySelected: (Int) -> Unit</ID>
     <ID>ParameterNaming:EmojiPickerDialog.kt:onEmojiSelected: (String) -> Unit</ID>
+    <ID>ParameterNaming:NoopStubs.kt:onUriReceived: (CommonUri) -> Unit</ID>
+    <ID>ParameterNaming:NoopStubs.kt:onUriReceived: (CommonUri?) -> Unit</ID>
     <ID>ParameterNaming:PlatformUtils.kt:onUriReceived: (CommonUri) -> Unit</ID>
     <ID>ParameterNaming:PlatformUtils.kt:onUriReceived: (CommonUri?) -> Unit</ID>
     <ID>ParameterNaming:PlatformUtils.kt:onUriReceived: (org.meshtastic.core.common.util.CommonUri) -> Unit</ID>
@@ -115,6 +117,7 @@
     <ID>PreviewPublic:SwitchPreference.kt:@Preview(showBackground = true) @Composable fun SwitchPreferencePreview</ID>
     <ID>PreviewPublic:TextDividerPreference.kt:@Preview(showBackground = true) @Composable fun TextDividerPreferencePreview</ID>
     <ID>PreviewPublic:TitledCard.kt:@PreviewLightDark @Composable fun TitledCardPreview</ID>
+    <ID>TooManyFunctions:NoopStubs.kt:org.meshtastic.core.ui.util.NoopStubs.kt</ID>
     <ID>ViewModelForwarding:MeshtasticAppShell.kt:MeshtasticCommonAppSetup( uiViewModel = uiViewModel, onNavigateToTracerouteMap = { destNum, requestId, logUuid -> multiBackstack.handleDeepLink( listOf( NodesRoute.Nodes, NodeDetailRoute.TracerouteMap(destNum = destNum, requestId = requestId, logUuid = logUuid), ), ) }, )</ID>
     <ID>ViewModelForwarding:MeshtasticCommonAppSetup.kt:FirmwareVersionCheck(viewModel = uiViewModel)</ID>
     <ID>ViewModelForwarding:MeshtasticCommonAppSetup.kt:SharedDialogs(uiViewModel = uiViewModel)</ID>
