@@ -33,6 +33,8 @@ import org.meshtastic.core.resources.map_download_region
 import org.meshtastic.core.ui.icon.Download
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 
+private const val DOWNLOAD_ICON_SCALE = 1.25f
+
 @Composable
 fun DownloadButton(enabled: Boolean, onClick: () -> Unit) {
     AnimatedVisibility(
@@ -52,7 +54,7 @@ fun DownloadButton(enabled: Boolean, onClick: () -> Unit) {
             Icon(
                 imageVector = MeshtasticIcons.Download,
                 contentDescription = stringResource(Res.string.map_download_region),
-                modifier = Modifier.scale(1.25f),
+                modifier = Modifier.scale(DOWNLOAD_ICON_SCALE),
             )
         }
     }

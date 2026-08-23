@@ -34,6 +34,7 @@ class MarkerWithLabel(mapView: MapView?, label: String, emoji: String? = null) :
         private const val LABEL_Y_OFFSET_DP = 34f
         private const val FONT_SIZE_SP = 14f
         private const val EMOJI_FONT_SIZE_SP = 20f
+        private const val LABEL_BG_HALF_WIDTH_PADDING_PX = 3
     }
 
     private val labelYOffsetPx by lazy { mapView?.context?.dpToPx(LABEL_Y_OFFSET_DP) ?: 100 }
@@ -94,7 +95,7 @@ class MarkerWithLabel(mapView: MapView?, label: String, emoji: String? = null) :
 
     private fun getTextBackgroundSize(text: String, x: Float, y: Float): RectF {
         val fontMetrics = textPaint.fontMetrics
-        val halfTextLength = textPaint.measureText(text) / 2 + 3
+        val halfTextLength = textPaint.measureText(text) / 2 + LABEL_BG_HALF_WIDTH_PADDING_PX
         return RectF((x - halfTextLength), (y + fontMetrics.top), (x + halfTextLength), (y + fontMetrics.bottom))
     }
 

@@ -21,4 +21,6 @@ import org.meshtastic.core.ui.util.MapViewProvider
 fun getMapViewProvider(): MapViewProvider = GoogleMapViewProvider()
 
 /** Site Planner (coverage-estimate) availability — Google flavor only (the flavor that renders map overlays). */
+// Flavor-dispatched: the fdroid flavor returns a different value.
+@Suppress("FunctionOnlyReturningConstant")
 fun sitePlannerAvailable(): Boolean = true

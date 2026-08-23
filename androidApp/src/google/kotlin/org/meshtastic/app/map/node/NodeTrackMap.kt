@@ -32,7 +32,7 @@ import org.meshtastic.proto.Position
  * which provides the full shared map infrastructure (location tracking, tile providers, controls overlay with track
  * filter).
  *
- * Supports optional synchronized selection via [selectedPositionTime] and [onPositionSelected].
+ * Supports optional synchronized selection via [selectedPositionTime] and [onPositionSelect].
  */
 @Composable
 fun NodeTrackMap(
@@ -40,7 +40,7 @@ fun NodeTrackMap(
     positions: List<Position>,
     modifier: Modifier = Modifier,
     selectedPositionTime: Int? = null,
-    onPositionSelected: ((Int) -> Unit)? = null,
+    onPositionSelect: ((Int) -> Unit)? = null,
 ) {
     val vm = koinViewModel<NodeMapViewModel>()
     vm.setDestNum(destNum)
@@ -52,7 +52,7 @@ fun NodeTrackMap(
             focusedNode = focusedNode,
             positions = positions,
             selectedPositionTime = selectedPositionTime,
-            onPositionSelected = onPositionSelected,
+            onPositionSelected = onPositionSelect,
         ),
     )
 }

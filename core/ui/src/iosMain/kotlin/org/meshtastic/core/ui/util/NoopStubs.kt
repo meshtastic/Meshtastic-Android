@@ -50,7 +50,10 @@ actual fun rememberOpenFileLauncher(onUriReceived: (CommonUri?) -> Unit): (mimeT
 
 @Composable actual fun rememberReadTextFromUri(): suspend (uri: CommonUri, maxChars: Int) -> String? = { _, _ -> null }
 
-@Composable actual fun KeepScreenOn(enabled: Boolean) {}
+@Composable
+actual fun KeepScreenOn(enabled: Boolean) {
+    // No-op iOS stub.
+}
 
 @Composable actual fun rememberOpenLocationSettings(): () -> Unit = {}
 
@@ -64,7 +67,10 @@ actual fun rememberOpenFileLauncher(onUriReceived: (CommonUri?) -> Unit): (mimeT
 
 @Composable actual fun isWifiUnavailable(): Boolean = false
 
-@Composable actual fun SetScreenBrightness(brightness: Float) {}
+@Composable
+actual fun SetScreenBrightness(brightness: Float) {
+    // No-op iOS stub.
+}
 
 @Composable actual fun rememberOpenAppSettings(): () -> Unit = {}
 

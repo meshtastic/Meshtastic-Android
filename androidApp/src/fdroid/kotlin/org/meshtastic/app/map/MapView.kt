@@ -102,6 +102,7 @@ import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.geofence.toGeofence
 import org.meshtastic.core.model.isLocked
 import org.meshtastic.core.model.isModifiableBy
+import org.meshtastic.core.model.util.GeoConstants.DEG_D
 import org.meshtastic.core.model.util.toCodePointString
 import org.meshtastic.core.model.util.waypointIconOrDefault
 import org.meshtastic.core.resources.Res
@@ -384,11 +385,11 @@ fun MapView(
                     enableFollowLocation()
                     getBitmapFromVectorDrawable(context, R.drawable.ic_map_location_dot)?.let {
                         setPersonIcon(it)
-                        setPersonAnchor(0.5f, 0.5f)
+                        setPersonAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
                     }
                     getBitmapFromVectorDrawable(context, R.drawable.ic_map_navigation)?.let {
                         setDirectionIcon(it)
-                        setDirectionAnchor(0.5f, 0.5f)
+                        setDirectionAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
                     }
                 }
             overlays.add(myLocationOverlay)
@@ -420,7 +421,7 @@ fun MapView(
     LaunchedEffect(selectedWaypointId, waypoints) {
         if (selectedWaypointId != null && waypoints.containsKey(selectedWaypointId)) {
             waypoints[selectedWaypointId]?.waypoint?.let { pt ->
-                val geoPoint = GeoPoint((pt.latitude_i ?: 0) * 1e-7, (pt.longitude_i ?: 0) * 1e-7)
+                val geoPoint = GeoPoint((pt.latitude_i ?: 0) * DEG_D, (pt.longitude_i ?: 0) * DEG_D)
                 map.controller.setCenter(geoPoint)
                 map.controller.setZoom(WAYPOINT_ZOOM)
             }
@@ -620,9 +621,8 @@ fun MapView(
 
     fun MapView.generateBoxOverlay() {
         overlays.removeAll { it is Polygon && it !is GeofenceOverlayPolygon }
-        val zoomFactor = 1.3
         zoomLevelMin = minOf(zoomLevelDouble, zoomLevelMax)
-        downloadRegionBoundingBox = boundingBox.zoomIn(zoomFactor)
+        downloadRegionBoundingBox = boundingBox.zoomIn(DOWNLOAD_BOX_ZOOM_FACTOR)
         val polygon =
             Polygon().apply {
                 points = Polygon.pointsAsRect(downloadRegionBoundingBox).map { GeoPoint(it.latitude, it.longitude) }
@@ -1198,8 +1198,8 @@ private fun CacheInfoDialog(mapView: MapView, onDismiss: () -> Unit) {
         onDismiss = onDismiss,
         negativeButton = { TextButton(onClick = { onDismiss() }) { Text(text = stringResource(Res.string.close)) } },
     ) {
-        val capacityMb = cacheCapacity / (1024 * 1024)
-        val usageMb = currentCacheUsage / (1024 * 1024)
+        val capacityMb = cacheCapacity / BYTES_PER_MB
+        val usageMb = currentCacheUsage / BYTES_PER_MB
         Text(modifier = Modifier.padding(16.dp), text = stringResource(Res.string.map_cache_info, capacityMb, usageMb))
     }
 }
@@ -1289,6 +1289,8 @@ private const val GEOFENCE_OVERLAY_COLOR = 0xFFFF9800.toInt()
 private const val GEOFENCE_FILL_COLOR = 0x1FFF9800 // ~12% alpha orange
 private const val GEOFENCE_STROKE_WIDTH_PX = 4f
 private const val GEOFENCE_BOX_ZOOM_FACTOR = 1.3
+private const val DOWNLOAD_BOX_ZOOM_FACTOR = 1.3
+private const val BYTES_PER_MB = 1024 * 1024
 
 /** Converts an OSMDroid [BoundingBox] (decimal degrees) to a proto [ProtoBoundingBox] (degrees ×1e7). */
 @Suppress("MagicNumber")

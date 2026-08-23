@@ -70,6 +70,12 @@ import kotlin.uuid.Uuid
 
 private const val TILE_SIZE = 256
 
+/** Waypoint coordinates arrive as integer degrees scaled by 1e7. */
+private const val WAYPOINT_COORD_SCALE = 1e7
+
+/** Camera zoom applied when centering on a selected waypoint. */
+private const val WAYPOINT_FOCUS_ZOOM = 15f
+
 enum class CameraInitialization {
     Loading,
     FitNodes,
@@ -126,8 +132,12 @@ class MapViewModel(
                     val wpMap = waypoints.first { it.containsKey(id) }
                     wpMap[id]?.let { packet ->
                         val waypoint = packet.waypoint!!
-                        val latLng = LatLng((waypoint.latitude_i ?: 0) / 1e7, (waypoint.longitude_i ?: 0) / 1e7)
-                        cameraPositionState.position = CameraPosition.fromLatLngZoom(latLng, 15f)
+                        val latLng =
+                            LatLng(
+                                (waypoint.latitude_i ?: 0) / WAYPOINT_COORD_SCALE,
+                                (waypoint.longitude_i ?: 0) / WAYPOINT_COORD_SCALE,
+                            )
+                        cameraPositionState.position = CameraPosition.fromLatLngZoom(latLng, WAYPOINT_FOCUS_ZOOM)
                     }
                 }
             }
@@ -405,8 +415,12 @@ class MapViewModel(
                 val wpMap = waypoints.first { it.containsKey(wpId) }
                 wpMap[wpId]?.let { packet ->
                     val waypoint = packet.waypoint!!
-                    val latLng = LatLng((waypoint.latitude_i ?: 0) / 1e7, (waypoint.longitude_i ?: 0) / 1e7)
-                    cameraPositionState.position = CameraPosition.fromLatLngZoom(latLng, 15f)
+                    val latLng =
+                        LatLng(
+                            (waypoint.latitude_i ?: 0) / WAYPOINT_COORD_SCALE,
+                            (waypoint.longitude_i ?: 0) / WAYPOINT_COORD_SCALE,
+                        )
+                    cameraPositionState.position = CameraPosition.fromLatLngZoom(latLng, WAYPOINT_FOCUS_ZOOM)
                 }
             }
         }

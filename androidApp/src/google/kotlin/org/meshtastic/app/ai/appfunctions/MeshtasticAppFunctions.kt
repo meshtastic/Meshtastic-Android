@@ -30,6 +30,9 @@ import org.meshtastic.core.data.ai.SendMessageResult
  * Exposes Meshtastic mesh networking capabilities to system AI assistants via the Android App Functions API. Functions
  * declared here are discoverable by the system and can be invoked by AI agents such as Gemini.
  */
+// The AppFunctions calling convention requires every @AppFunction to take AppFunctionContext as
+// its first parameter, even when the implementation never reads it.
+@Suppress("UnusedParameter")
 class MeshtasticAppFunctions(private val provider: AiFunctionProvider) {
 
     /**

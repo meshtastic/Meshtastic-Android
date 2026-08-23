@@ -47,7 +47,7 @@ internal fun MapTypeDropdown(
     expanded: Boolean,
     onDismissRequest: () -> Unit,
     mapViewModel: MapViewModel,
-    onManageCustomTileProvidersClicked: () -> Unit,
+    onManageCustomTileProvidersClick: () -> Unit,
 ) {
     val customTileProviders by mapViewModel.customTileProviderConfigs.collectAsStateWithLifecycle()
     val selectedCustomProviderId by mapViewModel.selectedCustomTileProviderId.collectAsStateWithLifecycle()
@@ -112,7 +112,7 @@ internal fun MapTypeDropdown(
         DropdownMenuItem(
             text = { Text(stringResource(Res.string.manage_custom_tile_sources)) },
             onClick = {
-                onManageCustomTileProvidersClicked()
+                onManageCustomTileProvidersClick()
                 onDismissRequest()
             },
         )

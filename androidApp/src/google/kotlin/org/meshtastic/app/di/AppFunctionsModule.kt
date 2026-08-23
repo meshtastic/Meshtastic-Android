@@ -46,5 +46,7 @@ class AppFunctionsModule {
 
     @Single
     @Named(GOOGLE_SERVICES_AVAILABLE)
+    // Flavor-dispatched: the fdroid flavor returns a different value.
+    @Suppress("FunctionOnlyReturningConstant")
     fun googleServicesAvailable(): Boolean = true
 }

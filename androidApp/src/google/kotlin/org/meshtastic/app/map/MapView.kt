@@ -694,7 +694,7 @@ fun MapView(
                             displayUnits = displayUnits,
                             myNodeNum = myNodeNum,
                             selectedPositionTime = mode.selectedPositionTime,
-                            onPositionSelected = mode.onPositionSelected,
+                            onPositionSelect = mode.onPositionSelected,
                         )
                     }
                 }
@@ -880,7 +880,7 @@ fun MapView(
                         expanded = mapTypeMenuExpanded,
                         onDismissRequest = { mapTypeMenuExpanded = false },
                         mapViewModel = mapViewModel,
-                        onManageCustomTileProvidersClicked = {
+                        onManageCustomTileProvidersClick = {
                             mapTypeMenuExpanded = false
                             showCustomTileManagerSheet = true
                         },
@@ -1172,7 +1172,7 @@ private fun WaypointGeofenceOverlay(waypoint: Waypoint) {
  * [TripOrigin] dot with an info-window on tap.
  *
  * When [selectedPositionTime] matches a marker's `Position.time`, that marker is highlighted with the primary color and
- * elevated z-index. Tapping a marker invokes [onPositionSelected] for list synchronization.
+ * elevated z-index. Tapping a marker invokes [onPositionSelect] for list synchronization.
  */
 @OptIn(MapsComposeExperimentalApi::class)
 @Composable
@@ -1183,7 +1183,7 @@ private fun NodeTrackOverlay(
     displayUnits: DisplayUnits,
     myNodeNum: Int?,
     selectedPositionTime: Int? = null,
-    onPositionSelected: ((Int) -> Unit)? = null,
+    onPositionSelect: ((Int) -> Unit)? = null,
 ) {
     val isHighPriority = focusedNode.num == myNodeNum || focusedNode.isFavorite
     val activeNodeZIndex = if (isHighPriority) 5f else 4f
@@ -1212,7 +1212,7 @@ private fun NodeTrackOverlay(
                     zIndex = activeNodeZIndex,
                     alpha = if (isHighPriority) 1.0f else 0.9f,
                     onClick = {
-                        onPositionSelected?.invoke(position.time)
+                        onPositionSelect?.invoke(position.time)
                         false // Allow default info window behavior
                     },
                 ) {
@@ -1225,7 +1225,7 @@ private fun NodeTrackOverlay(
                     snippet = formatAgo(position.time),
                     zIndex = if (isSelected) activeNodeZIndex - 0.5f else 1f + alpha,
                     onClick = {
-                        onPositionSelected?.invoke(position.time)
+                        onPositionSelect?.invoke(position.time)
                         false // Allow default info window behavior
                     },
                     infoContent = { PositionInfoWindowContent(position = position, displayUnits = displayUnits) },

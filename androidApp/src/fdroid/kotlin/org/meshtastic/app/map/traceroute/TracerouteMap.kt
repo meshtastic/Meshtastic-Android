@@ -29,13 +29,13 @@ import org.meshtastic.proto.Position
 fun TracerouteMap(
     tracerouteOverlay: TracerouteOverlay?,
     tracerouteNodePositions: Map<Int, Position>,
-    onMappableCountChanged: (shown: Int, total: Int) -> Unit,
+    onMappableCountChange: (shown: Int, total: Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     TracerouteOsmMap(
         tracerouteOverlay = tracerouteOverlay,
         tracerouteNodePositions = tracerouteNodePositions,
-        onMappableCountChanged = onMappableCountChanged,
+        onMappableCountChange = onMappableCountChange,
         modifier = modifier,
     )
 }

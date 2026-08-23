@@ -25,6 +25,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import org.meshtastic.app.R
+import org.meshtastic.core.model.util.GeoConstants.DEG_D
+import org.meshtastic.core.model.util.GeoConstants.HEADING_DEG
 import org.meshtastic.proto.Position
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
@@ -34,6 +36,13 @@ import org.osmdroid.views.overlay.Polyline
 import org.osmdroid.views.overlay.ScaleBarOverlay
 import org.osmdroid.views.overlay.advancedpolyline.MonochromaticPaintList
 import org.osmdroid.views.overlay.gridlines.LatLonGridlineOverlay2
+
+private const val GRID_LABEL_TEXT_SIZE_PX = 40f
+private const val GRID_LINE_WIDTH_PX = 3.0f
+
+// Track polyline dash pattern (on/off lengths in px), shared by the border and fill paints.
+private const val TRACK_DASH_ON_PX = 80f
+private const val TRACK_DASH_OFF_PX = 60f
 
 /** Adds copyright to map depending on what source is showing */
 fun MapView.addCopyright() {
@@ -56,7 +65,7 @@ fun MapView.createLatLongGrid(enabled: Boolean) {
     if (latLongGridOverlay.isEnabled) {
         val textPaint =
             Paint().apply {
-                textSize = 40f
+                textSize = GRID_LABEL_TEXT_SIZE_PX
                 color = Color.GRAY
                 isAntiAlias = true
                 isFakeBoldText = true
@@ -64,7 +73,7 @@ fun MapView.createLatLongGrid(enabled: Boolean) {
             }
         latLongGridOverlay.textPaint = textPaint
         latLongGridOverlay.setBackgroundColor(Color.TRANSPARENT)
-        latLongGridOverlay.setLineWidth(3.0f)
+        latLongGridOverlay.setLineWidth(GRID_LINE_WIDTH_PX)
         latLongGridOverlay.setLineColor(Color.GRAY)
         overlays.add(latLongGridOverlay)
     }
@@ -99,7 +108,7 @@ fun MapView.addPolyline(density: Density, geoPoints: List<GeoPoint>, onClick: ()
                     style = Paint.Style.STROKE
                     strokeJoin = Paint.Join.ROUND
                     strokeCap = Paint.Cap.ROUND
-                    pathEffect = DashPathEffect(floatArrayOf(80f, 60f), 0f)
+                    pathEffect = DashPathEffect(floatArrayOf(TRACK_DASH_ON_PX, TRACK_DASH_OFF_PX), 0f)
                 }
             outlinePaintLists.add(MonochromaticPaintList(borderPaint))
             val fillPaint =
@@ -110,7 +119,7 @@ fun MapView.addPolyline(density: Density, geoPoints: List<GeoPoint>, onClick: ()
                     style = Paint.Style.FILL_AND_STROKE
                     strokeJoin = Paint.Join.ROUND
                     strokeCap = Paint.Cap.ROUND
-                    pathEffect = DashPathEffect(floatArrayOf(80f, 60f), 0f)
+                    pathEffect = DashPathEffect(floatArrayOf(TRACK_DASH_ON_PX, TRACK_DASH_OFF_PX), 0f)
                 }
             outlinePaintLists.add(MonochromaticPaintList(fillPaint))
             setPoints(geoPoints)
@@ -130,9 +139,9 @@ fun MapView.addPositionMarkers(positions: List<Position>, onClick: (Int) -> Unit
         positions.map { pos ->
             Marker(this).apply {
                 icon = navIcon
-                rotation = ((pos.ground_track ?: 0) * 1e-5).toFloat()
+                rotation = ((pos.ground_track ?: 0) * HEADING_DEG).toFloat()
                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-                position = GeoPoint((pos.latitude_i ?: 0) * 1e-7, (pos.longitude_i ?: 0) * 1e-7)
+                position = GeoPoint((pos.latitude_i ?: 0) * DEG_D, (pos.longitude_i ?: 0) * DEG_D)
                 setOnMarkerClickListener { _, _ ->
                     onClick(pos.time)
                     true

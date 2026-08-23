@@ -26,6 +26,14 @@ import kotlin.math.atan
 import kotlin.math.pow
 import kotlin.math.sinh
 
+private const val MAX_ZOOM_LEVEL = 5
+private const val TILE_SIZE_PX = 256
+private const val FULL_CIRCLE_DEGREES = 360.0
+private const val MAX_LONGITUDE_DEGREES = 180
+
+// A web Mercator bounding box holds four coordinates: minX, minY, maxX, maxY.
+private const val BBOX_SIZE = 4
+
 open class NOAAWmsTileSource(
     aName: String,
     aBaseUrl: Array<String>,
@@ -38,8 +46,8 @@ open class NOAAWmsTileSource(
 ) : OnlineTileSourceBase(
     aName,
     0,
-    5,
-    256,
+    MAX_ZOOM_LEVEL,
+    TILE_SIZE_PX,
     "png",
     aBaseUrl,
     "",
@@ -86,7 +94,8 @@ open class NOAAWmsTileSource(
         if (time != null) this.time = time
     }
 
-    private fun tile2lon(x: Int, z: Int): Double = x / 2.0.pow(z.toDouble()) * 360.0 - 180
+    private fun tile2lon(x: Int, z: Int): Double =
+        x / 2.0.pow(z.toDouble()) * FULL_CIRCLE_DEGREES - MAX_LONGITUDE_DEGREES
 
     private fun tile2lat(y: Int, z: Int): Double {
         val n = Math.PI - 2.0 * Math.PI * y / 2.0.pow(z.toDouble())
@@ -101,7 +110,7 @@ open class NOAAWmsTileSource(
         val maxx = tileOrigin[origX] + (x + 1) * tileSize
         val miny = tileOrigin[origY] - (y + 1) * tileSize
         val maxy = tileOrigin[origY] - y * tileSize
-        val bbox = DoubleArray(4)
+        val bbox = DoubleArray(BBOX_SIZE)
         bbox[minX] = minx
         bbox[minY] = miny
         bbox[maxX] = maxx
