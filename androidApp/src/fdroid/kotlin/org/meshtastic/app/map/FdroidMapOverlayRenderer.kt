@@ -34,6 +34,8 @@ import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Overlay
 import org.osmdroid.views.overlay.Polygon
 import org.osmdroid.views.overlay.Polyline
+import java.io.BufferedInputStream
+import java.io.File
 import java.io.InputStream
 import kotlin.math.roundToInt
 
@@ -83,7 +85,7 @@ class FdroidMapOverlayRenderer {
         // Build overlays for visible layers not already drawn.
         for (layer in visible) {
             if (rendered.containsKey(layer.id)) continue
-            val doc = parse(layer, openStream) ?: continue
+            val doc = parse(layer, openStream, map.context.cacheDir) ?: continue
             val overlay =
                 withContext(Dispatchers.Main.immediate) {
                     // Build on the main thread: overlay markers reference the MapView (info windows, defaults).
@@ -108,7 +110,11 @@ class FdroidMapOverlayRenderer {
         map.invalidate()
     }
 
-    private suspend fun parse(layer: MapLayerItem, openStream: suspend (MapLayerItem) -> InputStream?): KmlDocument? {
+    private suspend fun parse(
+        layer: MapLayerItem,
+        openStream: suspend (MapLayerItem) -> InputStream?,
+        cacheDir: File,
+    ): KmlDocument? {
         val stream = openStream(layer) ?: return null
         return withContext(Dispatchers.IO) {
             try {
@@ -120,14 +126,42 @@ class FdroidMapOverlayRenderer {
                             LayerType.COVERAGE,
                             -> doc.parseGeoJSON(input.bufferedReader().readText())
 
-                            LayerType.KML -> doc.parseKMLStream(input, null)
+                            LayerType.KML -> {
+                                val buffered = BufferedInputStream(input)
+                                if (buffered.isKmzArchive()) {
+                                    parseKmz(buffered, doc, cacheDir)
+                                } else {
+                                    doc.parseKMLStream(buffered, null)
+                                }
+                            }
                         }
                     }
-                if (ok) doc else null
+                if (ok) {
+                    doc
+                } else {
+                    Logger.withTag(TAG).e { "Failed to parse map layer (malformed KML/KMZ/GeoJSON?): ${layer.name}" }
+                    null
+                }
             } catch (e: Exception) {
                 Logger.withTag(TAG).e(e) { "Error parsing map layer: ${layer.name}" }
                 null
             }
+        }
+    }
+
+    /**
+     * osmbonuspack only exposes KMZ parsing via [KmlDocument.parseKMZFile], which needs random-access zip seeking (to
+     * resolve embedded images) that a sequential [InputStream] can't do. So spool the already-sniffed KMZ stream to a
+     * temp file — matching how the Google flavor treats KMZ uniformly regardless of whether the layer's source is a
+     * local file or a network fetch — rather than reimplementing the unzip here.
+     */
+    private fun parseKmz(stream: InputStream, doc: KmlDocument, cacheDir: File): Boolean {
+        val temp = File.createTempFile("layer", ".kmz", cacheDir)
+        return try {
+            temp.outputStream().use { stream.copyTo(it) }
+            doc.parseKMZFile(temp)
+        } finally {
+            temp.delete()
         }
     }
 
