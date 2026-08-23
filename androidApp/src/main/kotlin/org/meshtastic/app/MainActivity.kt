@@ -242,7 +242,7 @@ class MainActivity : AppCompatActivity() {
                     org.meshtastic.app.map.traceroute.TracerouteMap(
                         tracerouteOverlay = overlay,
                         tracerouteNodePositions = nodePositions,
-                        onMappableCountChanged = onMappableCountChanged,
+                        onMappableCountChange = onMappableCountChanged,
                         modifier = modifier,
                     )
                 },

@@ -21,6 +21,9 @@ import com.google.android.gms.maps.model.Tile
 import com.google.android.gms.maps.model.TileProvider
 import java.io.File
 
+/** MBTiles raster tiles are 256x256 pixels. */
+private const val TILE_SIZE_PX = 256
+
 class MBTilesProvider(private val file: File) :
     TileProvider,
     AutoCloseable {
@@ -51,7 +54,7 @@ class MBTilesProvider(private val file: File) :
 
         if (cursor.moveToFirst()) {
             val tileData = cursor.getBlob(0)
-            tile = Tile(256, 256, tileData)
+            tile = Tile(TILE_SIZE_PX, TILE_SIZE_PX, tileData)
         }
         cursor.close()
 

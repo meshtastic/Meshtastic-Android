@@ -78,7 +78,7 @@ private const val TRACEROUTE_ZOOM_OUT_LEVELS = 0.5
 fun TracerouteOsmMap(
     tracerouteOverlay: TracerouteOverlay?,
     tracerouteNodePositions: Map<Int, Position>,
-    onMappableCountChanged: (shown: Int, total: Int) -> Unit,
+    onMappableCountChange: (shown: Int, total: Int) -> Unit,
     modifier: Modifier = Modifier,
     mapViewModel: MapViewModel = koinViewModel(),
 ) {
@@ -105,7 +105,7 @@ fun TracerouteOsmMap(
     // Report mappable count
     LaunchedEffect(tracerouteOverlay, displayNodes) {
         if (tracerouteOverlay != null) {
-            onMappableCountChanged(displayNodes.size, tracerouteOverlay.relatedNodeNums.size)
+            onMappableCountChange(displayNodes.size, tracerouteOverlay.relatedNodeNums.size)
         }
     }
 

@@ -28,6 +28,8 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 
+private const val INLINE_MAP_ZOOM = 15.0
+
 @Composable
 fun InlineMap(node: Node, modifier: Modifier = Modifier) {
     val context = androidx.compose.ui.platform.LocalContext.current
@@ -42,7 +44,7 @@ fun InlineMap(node: Node, modifier: Modifier = Modifier) {
             setMultiTouchControls(false)
             isTilesScaledToDpi = true
 
-            controller.setZoom(15.0)
+            controller.setZoom(INLINE_MAP_ZOOM)
         }
     }
 

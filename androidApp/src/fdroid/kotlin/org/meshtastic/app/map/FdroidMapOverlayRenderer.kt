@@ -44,6 +44,11 @@ private const val DEFAULT_GEOJSON_FILL_OPACITY = 0.35f
 private const val DEFAULT_GEOJSON_STROKE_WIDTH = 2f
 private const val OPAQUE = 255
 
+// rgb()/rgba() component-list layout for parseCssColor().
+private const val RGB_PARTS = 3
+private const val RGBA_PARTS = 4
+private const val ALPHA_INDEX = 3
+
 /**
  * F-Droid flavor's map-overlay renderer: turns the shared [MapLayerItem] list into OSMdroid overlays via osmbonuspack's
  * [KmlDocument], honoring per-feature mapbox **simplestyle** (`fill`/`stroke`/`fill-opacity`/`stroke-width`) so
@@ -209,8 +214,8 @@ private fun parseCssColor(raw: String): Int? {
     return try {
         if (value.startsWith("rgb", ignoreCase = true)) {
             val parts = value.substringAfter('(').substringBefore(')').split(',').map { it.trim() }
-            if (parts.size < 3) return null
-            val alpha = if (parts.size >= 4) (parts[3].toFloat() * OPAQUE).roundToInt() else OPAQUE
+            if (parts.size < RGB_PARTS) return null
+            val alpha = if (parts.size >= RGBA_PARTS) (parts[ALPHA_INDEX].toFloat() * OPAQUE).roundToInt() else OPAQUE
             Color.argb(alpha, parts[0].toInt(), parts[1].toInt(), parts[2].toInt())
         } else {
             value.toColorInt() // #hex or named color

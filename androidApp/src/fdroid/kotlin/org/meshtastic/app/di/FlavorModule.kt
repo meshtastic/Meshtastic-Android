@@ -24,6 +24,7 @@ import org.meshtastic.core.ui.theme.EventFontResolver
 
 @Module(includes = [FdroidAiModule::class])
 class FlavorModule {
+    @Suppress("FunctionOnlyReturningConstant") // Flavor-dispatched: the google flavor returns a different value.
     @Single
     @Named(GOOGLE_SERVICES_AVAILABLE)
     fun googleServicesAvailable(): Boolean = false
