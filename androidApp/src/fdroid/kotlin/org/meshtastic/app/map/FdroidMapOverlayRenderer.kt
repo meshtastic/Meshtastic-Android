@@ -19,6 +19,7 @@ package org.meshtastic.app.map
 import android.graphics.Color
 import androidx.core.graphics.toColorInt
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.meshtastic.app.map.cluster.RadiusMarkerClusterer
@@ -34,10 +35,19 @@ import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Overlay
 import org.osmdroid.views.overlay.Polygon
 import org.osmdroid.views.overlay.Polyline
+import java.io.BufferedInputStream
+import java.io.File
 import java.io.InputStream
+import java.io.OutputStream
 import kotlin.math.roundToInt
 
 private const val TAG = "MapOverlayRenderer"
+
+/**
+ * Cap on a spooled KMZ's size: `openStream` can be an unbounded network fetch, and osmbonuspack's KMZ path needs the
+ * whole archive on disk before it can parse it. 50 MB comfortably covers a legitimate overlay plus embedded icons.
+ */
+private const val MAX_KMZ_BYTES = 50L * 1024 * 1024
 
 // simplestyle-spec fallbacks, mirroring the Google flavor's applySimpleStyleSpec(); tune here.
 private const val DEFAULT_GEOJSON_FILL_OPACITY = 0.35f
@@ -83,7 +93,7 @@ class FdroidMapOverlayRenderer {
         // Build overlays for visible layers not already drawn.
         for (layer in visible) {
             if (rendered.containsKey(layer.id)) continue
-            val doc = parse(layer, openStream) ?: continue
+            val doc = parse(layer, openStream, map.context.cacheDir) ?: continue
             val overlay =
                 withContext(Dispatchers.Main.immediate) {
                     // Build on the main thread: overlay markers reference the MapView (info windows, defaults).
@@ -108,7 +118,11 @@ class FdroidMapOverlayRenderer {
         map.invalidate()
     }
 
-    private suspend fun parse(layer: MapLayerItem, openStream: suspend (MapLayerItem) -> InputStream?): KmlDocument? {
+    private suspend fun parse(
+        layer: MapLayerItem,
+        openStream: suspend (MapLayerItem) -> InputStream?,
+        cacheDir: File,
+    ): KmlDocument? {
         val stream = openStream(layer) ?: return null
         return withContext(Dispatchers.IO) {
             try {
@@ -120,14 +134,68 @@ class FdroidMapOverlayRenderer {
                             LayerType.COVERAGE,
                             -> doc.parseGeoJSON(input.bufferedReader().readText())
 
-                            LayerType.KML -> doc.parseKMLStream(input, null)
+                            LayerType.KML -> {
+                                val buffered = BufferedInputStream(input)
+                                if (buffered.isKmzArchive()) {
+                                    parseKmz(buffered, doc, cacheDir, layer.name)
+                                } else {
+                                    doc.parseKMLStream(buffered, null)
+                                }
+                            }
                         }
                     }
-                if (ok) doc else null
+                if (ok) {
+                    doc
+                } else {
+                    Logger.withTag(TAG).w { "Failed to parse map layer (malformed KML/KMZ/GeoJSON?): ${layer.name}" }
+                    null
+                }
+            } catch (e: CancellationException) {
+                // reconcile() is re-invoked on every layer-list change, cancelling an in-flight parse routinely —
+                // not a load failure. Matches the Google flavor's MapLayerOverlay handling of the same pattern.
+                throw e
             } catch (e: Exception) {
                 Logger.withTag(TAG).e(e) { "Error parsing map layer: ${layer.name}" }
                 null
             }
+        }
+    }
+
+    /**
+     * osmbonuspack only exposes KMZ parsing via [KmlDocument.parseKMZFile], which needs random-access zip seeking (to
+     * resolve embedded images) that a sequential [InputStream] can't do. So spool the already-sniffed KMZ stream to a
+     * temp file — matching how the Google flavor treats KMZ uniformly regardless of whether the layer's source is a
+     * local file or a network fetch — rather than reimplementing the unzip here.
+     */
+    private fun parseKmz(stream: InputStream, doc: KmlDocument, cacheDir: File, layerName: String): Boolean {
+        val temp = File.createTempFile("layer", ".kmz", cacheDir)
+        return try {
+            val bytesCopied = temp.outputStream().use { stream.copyToBounded(it, MAX_KMZ_BYTES) }
+            if (bytesCopied > MAX_KMZ_BYTES) {
+                // Oversized input, not an app defect — warn (matching the malformed-input path), don't error.
+                Logger.withTag(TAG).w { "KMZ layer exceeds $MAX_KMZ_BYTES byte limit, skipping: $layerName" }
+                false
+            } else {
+                doc.parseKMZFile(temp)
+            }
+        } finally {
+            temp.delete()
+        }
+    }
+
+    /**
+     * Like [InputStream.copyTo], but stops as soon as more than [limit] bytes have been read, returning the count read
+     * so far (which will exceed [limit]) instead of continuing to buffer an unbounded stream to disk.
+     */
+    private fun InputStream.copyToBounded(out: OutputStream, limit: Long): Long {
+        val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+        var total = 0L
+        while (true) {
+            val read = read(buffer)
+            if (read == -1) return total
+            total += read
+            if (total > limit) return total
+            out.write(buffer, 0, read)
         }
     }
 

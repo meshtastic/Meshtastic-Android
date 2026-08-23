@@ -1438,25 +1438,13 @@ private fun MapLayerOverlay(layerItem: MapLayerItem, mapViewModel: MapViewModel)
     }
 }
 
-/** Zip magic bytes; a [LayerType.KML] source starting with these is a KMZ archive rather than bare KML. */
-private val KMZ_MAGIC = byteArrayOf('P'.code.toByte(), 'K'.code.toByte())
-
 /**
  * Parse a custom overlay into the maps-utils platform-agnostic [DataLayer] model; null if the format is unrecognized.
  */
 private fun parseMapLayer(layerType: LayerType, stream: InputStream): DataLayer? = when (layerType) {
     LayerType.KML -> {
         val buffered = BufferedInputStream(stream)
-        buffered.mark(KMZ_MAGIC.size)
-        val magic = ByteArray(KMZ_MAGIC.size)
-        val read = buffered.read(magic)
-        buffered.reset()
-        val kml =
-            if (read == KMZ_MAGIC.size && magic.contentEquals(KMZ_MAGIC)) {
-                KmzParser().parse(buffered)
-            } else {
-                KmlParser().parse(buffered)
-            }
+        val kml = if (buffered.isKmzArchive()) KmzParser().parse(buffered) else KmlParser().parse(buffered)
         kml.toLayer()
     }
 

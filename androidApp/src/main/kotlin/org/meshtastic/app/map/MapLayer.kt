@@ -21,6 +21,7 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import co.touchlab.kermit.Logger
 import org.meshtastic.core.common.util.nowMillis
+import java.io.InputStream
 import kotlin.uuid.Uuid
 
 /**
@@ -58,6 +59,32 @@ data class MapLayerItem(
 
 private val KML_EXTENSIONS = listOf("kml", "kmz", "vnd.google-earth.kml+xml", "vnd.google-earth.kmz")
 private val GEOJSON_EXTENSIONS = listOf("geojson", "json")
+
+/** Zip magic bytes; a [LayerType.KML] source starting with these is a KMZ archive rather than bare KML. */
+private val KMZ_MAGIC = byteArrayOf('P'.code.toByte(), 'K'.code.toByte())
+
+/**
+ * True if [this] starts with the zip magic bytes, meaning a nominally-[LayerType.KML] source (`.kml` and `.kmz` both
+ * resolve to that one type — see [KML_EXTENSIONS]) is actually a KMZ archive. Shared by both flavors' parsers so
+ * neither has to duplicate the sniff or trust the file extension, which the content resolver can get wrong.
+ *
+ * Requires a mark-capable stream (wrap with [java.io.BufferedInputStream] first if unsure); leaves the stream position
+ * unchanged either way.
+ */
+fun InputStream.isKmzArchive(): Boolean {
+    mark(KMZ_MAGIC.size)
+    val magic = ByteArray(KMZ_MAGIC.size)
+    // read(ByteArray) is only guaranteed to return at least 1 byte before EOF, not to fill the buffer — loop rather
+    // than trust a single call, or a short read could misclassify a real KMZ as bare KML.
+    var totalRead = 0
+    while (totalRead < magic.size) {
+        val read = read(magic, totalRead, magic.size - totalRead)
+        if (read == -1) break
+        totalRead += read
+    }
+    reset()
+    return totalRead == KMZ_MAGIC.size && magic.contentEquals(KMZ_MAGIC)
+}
 
 /** On-disk extension marking a saved coverage estimate, so [LayerType.COVERAGE] survives a restart. */
 const val COVERAGE_EXTENSION = "coverage"
