@@ -42,6 +42,7 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.scene.DialogSceneStrategy
 import androidx.navigation3.scene.Scene
 import androidx.navigation3.ui.NavDisplay
+import co.touchlab.kermit.Logger
 import org.meshtastic.core.navigation.MultiBackstack
 import org.meshtastic.core.navigation.rumViewName
 import org.meshtastic.core.repository.PlatformAnalytics
@@ -83,6 +84,14 @@ fun MeshtasticNavDisplay(
     onBack: (() -> Unit)? = null,
     analytics: PlatformAnalytics? = null,
 ) {
+    // Root captured at first composition; a stale entry back handler can drain the stack mid-transition
+    // and NavDisplay rejects an empty backstack (fatal in the field), so self-heal back to the root.
+    val fallbackRoot = remember(backStack) { backStack.firstOrNull() }
+    if (backStack.isEmpty() && fallbackRoot != null) {
+        Logger.e { "Backstack self-healed to root (NavDisplay): root=${fallbackRoot::class.simpleName}" }
+        backStack.add(fallbackRoot)
+    }
+
     // Track the top-of-backstack destination as a RUM view. Datadog's dd-sdk-android-compose
     // NavigationViewTrackingEffect only supports Jetpack Navigation, so Nav3 is wired manually here.
     // No-op when [analytics] is null (fdroid/desktop hosts and the intro flow pass nothing).

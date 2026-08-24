@@ -36,6 +36,7 @@ import org.koin.compose.koinInject
 import org.meshtastic.core.common.util.currentLocaleCode
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.navigation.SettingsRoute
+import org.meshtastic.core.navigation.popUnlessRoot
 import org.meshtastic.feature.docs.ai.AIDocAssistant
 import org.meshtastic.feature.docs.ai.ChirpySessionHolder
 import org.meshtastic.feature.docs.data.DefaultDocBundleLoader
@@ -156,7 +157,13 @@ private fun DocsHelpScreen(backStack: NavBackStack<NavKey>, chirpy: ChirpyUiStat
     }
 
     val backHandlerState = rememberNavigationEventState(NavigationEventInfo.None)
-    NavigationBackHandler(state = backHandlerState, onBackCompleted = { backStack.removeLastOrNull() })
+    // Outranks NavDisplay's own handler and stays alive during the exit crossfade; gate and guard it so
+    // a rapid second back press cannot pop the tab root and hand NavDisplay an empty backstack.
+    NavigationBackHandler(
+        state = backHandlerState,
+        isBackEnabled = backStack.size > 1,
+        onBackCompleted = { backStack.popUnlessRoot() },
+    )
 
     DocsBrowserScreen(
         pages = pages,
@@ -164,7 +171,7 @@ private fun DocsHelpScreen(backStack: NavBackStack<NavKey>, chirpy: ChirpyUiStat
         searchQuery = searchQuery,
         onSearchQueryChange = { searchQuery = it },
         onSelectPage = { pageId -> backStack.add(SettingsRoute.HelpDocPage(pageId)) },
-        onBack = { backStack.removeLastOrNull() },
+        onBack = { backStack.popUnlessRoot() },
         isAiSupported = chirpy.isSupported,
         modelReadiness = chirpy.modelReadiness,
         showFab = chirpy.showFab,
@@ -243,7 +250,13 @@ private fun DocsPageScreen(pageId: String, backStack: NavBackStack<NavKey>, chir
     }
 
     val backHandlerState = rememberNavigationEventState(NavigationEventInfo.None)
-    NavigationBackHandler(state = backHandlerState, onBackCompleted = { backStack.removeLastOrNull() })
+    // Outranks NavDisplay's own handler and stays alive during the exit crossfade; gate and guard it so
+    // a rapid second back press cannot pop the tab root and hand NavDisplay an empty backstack.
+    NavigationBackHandler(
+        state = backHandlerState,
+        isBackEnabled = backStack.size > 1,
+        onBackCompleted = { backStack.popUnlessRoot() },
+    )
 
     DocsPageRouteScreen(
         pageId = pageId,
@@ -260,7 +273,7 @@ private fun DocsPageScreen(pageId: String, backStack: NavBackStack<NavKey>, chir
         onChirpyDraftChange = chirpy.onDraftChange,
         onChirpySubmit = chirpy.onSubmit,
         onChirpyNavigateToPage = chirpy.onNavigateToPage,
-        onBack = { backStack.removeLastOrNull() },
+        onBack = { backStack.popUnlessRoot() },
         onNavigateToPage = { targetPageId -> backStack.add(SettingsRoute.HelpDocPage(targetPageId)) },
     )
 }
