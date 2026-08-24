@@ -27,6 +27,8 @@ data class Contact(
     val isMuted: Boolean,
     val isUnmessageable: Boolean,
     val nodeColors: Pair<Int, Int>? = null,
+    /** Unsent composer text for this conversation; empty when there is nothing in progress. */
+    val draft: String = "",
 )
 
 data class ContactSettings(
@@ -36,4 +38,5 @@ data class ContactSettings(
     val lastReadMessageTimestamp: Long? = null,
     val filteringDisabled: Boolean = false,
     val isMuted: Boolean = false,
+    val draft: String = "",
 )

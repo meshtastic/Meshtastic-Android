@@ -143,8 +143,9 @@ import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
         // 52 -> 53 is the manual MIGRATION_52_53 (FTS rebuild), applied via configureCommon().
         AutoMigration(from = 53, to = 54),
         AutoMigration(from = 54, to = 55),
+        AutoMigration(from = 55, to = 56),
     ],
-    version = 55,
+    version = 56,
     exportSchema = true,
 )
 @androidx.room3.ConstructedBy(MeshtasticDatabaseConstructor::class)

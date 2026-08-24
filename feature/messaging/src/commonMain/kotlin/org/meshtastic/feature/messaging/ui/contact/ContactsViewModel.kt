@@ -124,6 +124,7 @@ class ContactsViewModel(
                     unreadCount = packetRepository.getUnreadCount(contactKey),
                     messageCount = packetRepository.getMessageCount(contactKey),
                     isMuted = settings[contactKey]?.isMuted == true,
+                    draft = settings[contactKey]?.draft.orEmpty(),
                     isUnmessageable = user.is_unmessagable ?: false,
                     nodeColors =
                     if (!toBroadcast) {

@@ -145,8 +145,34 @@ class MessageViewModelTest {
 
     @Test fun testInitialization() = runTest { assertNotNull(viewModel) }
 
+    private val draftContact = "0!12345678"
+
+    /** Draft edits are ignored until the stored value has been read back, so every draft test loads first. */
+    private suspend fun loadDraftAndAwait(stored: String = "") {
+        everySuspend { packetRepository.getDraft(draftContact) } returns stored
+        viewModel.draftMessage.test {
+            assertNull(awaitItem())
+            viewModel.loadDraft(draftContact)
+            assertEquals(stored, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test fun testDraftIsRestoredFromTheRepository() = runTest { loadDraftAndAwait(stored = "half typed") }
+
+    @Test
+    fun testDraftEditsAreIgnoredBeforeTheStoredValueIsRead() = runTest {
+        // The composer reports its initial empty value as soon as it composes; that must not erase a stored draft.
+        viewModel.setDraftMessage("")
+        assertNull(viewModel.draftMessage.value)
+
+        loadDraftAndAwait(stored = "survived")
+        assertEquals("survived", viewModel.draftMessage.value)
+    }
+
     @Test
     fun testDraftPersistenceDebouncesRapidEdits() = runTest {
+        loadDraftAndAwait()
         viewModel.setDraftMessage("a")
         testDispatcher.scheduler.runCurrent()
         testDispatcher.scheduler.advanceTimeBy(100L)
@@ -168,10 +194,13 @@ class MessageViewModelTest {
         testDispatcher.scheduler.advanceTimeBy(1L)
         testDispatcher.scheduler.runCurrent()
         assertEquals("abc", savedStateHandle.get<String>("draftMessage"))
+        advanceUntilIdle()
+        verifySuspend { packetRepository.setDraft(draftContact, "abc") }
     }
 
     @Test
     fun testClearDraftCancelsPendingPersistenceAndClearsImmediately() = runTest {
+        loadDraftAndAwait()
         viewModel.setDraftMessage("pending")
         testDispatcher.scheduler.runCurrent()
 

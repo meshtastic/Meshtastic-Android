@@ -52,9 +52,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.model.Contact
 import org.meshtastic.core.model.ContactKey
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.contact_draft_prefix
 import org.meshtastic.core.ui.component.SecurityIcon
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.VolumeOff
@@ -171,10 +174,18 @@ private fun ChatMetadata(contact: Contact, modifier: Modifier = Modifier) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        // An unsent draft outranks the last message: it is the thing this row is waiting on the user for.
+        val hasDraft = contact.draft.isNotBlank()
         Text(
-            text = contact.lastMessageText.orEmpty(),
+            text =
+            if (hasDraft) {
+                stringResource(Res.string.contact_draft_prefix, contact.draft)
+            } else {
+                contact.lastMessageText.orEmpty()
+            },
             modifier = Modifier.weight(1f).semantics { isSensitiveData = true },
             style = MaterialTheme.typography.bodyMedium,
+            color = if (hasDraft) MaterialTheme.colorScheme.tertiary else Color.Unspecified,
             overflow = TextOverflow.Ellipsis,
             maxLines = 2,
         )

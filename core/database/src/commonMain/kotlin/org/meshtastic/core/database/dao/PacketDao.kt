@@ -528,6 +528,22 @@ interface PacketDao {
     @Query("UPDATE contact_settings SET muteUntil = :muteUntil WHERE contact_key IN (:contactKeys)")
     suspend fun updateMuteUntil(contactKeys: List<String>, muteUntil: Long)
 
+    @Query("UPDATE contact_settings SET draft = :draft WHERE contact_key = :contact")
+    suspend fun updateDraft(contact: String, draft: String)
+
+    /**
+     * Persists the unsent composer text for [contact], creating the settings row if absent. INSERT OR IGNORE plus a
+     * targeted UPDATE, like [updateLastReadMessage], so mute and filtering survive without a read-modify-write.
+     */
+    @Transaction
+    suspend fun setDraft(contact: String, draft: String) {
+        insertContactSettingsIgnore(listOf(ContactSettings(contact_key = contact)))
+        updateDraft(contact, draft)
+    }
+
+    @Query("SELECT draft FROM contact_settings WHERE contact_key = :contact")
+    suspend fun getDraft(contact: String): String?
+
     @Transaction
     suspend fun setMuteUntil(contacts: List<String>, until: Long) {
         val absoluteMuteUntil =
