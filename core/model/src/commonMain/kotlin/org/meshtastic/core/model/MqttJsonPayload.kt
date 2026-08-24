@@ -18,6 +18,10 @@ package org.meshtastic.core.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.JsonTransformingSerializer
 
 @Serializable
 data class MqttJsonPayload(
@@ -25,10 +29,17 @@ data class MqttJsonPayload(
     val from: Long,
     val to: Long? = null,
     val channel: Int? = null,
-    val payload: String? = null,
+    @Serializable(with = MqttPayloadStringSerializer::class) val payload: String? = null,
     @SerialName("hop_limit") val hopLimit: Int? = null,
     val id: Long? = null,
     val time: Long? = null,
     val sender: String? = null,
     // Add other fields as needed for position/telemetry
 )
+
+// Firmware and MQTT bridges send "payload" as a string for text messages but as a nested JSON
+// object for position/telemetry/map reports; coerce non-strings to their compact JSON text.
+private object MqttPayloadStringSerializer : JsonTransformingSerializer<String>(String.serializer()) {
+    override fun transformDeserialize(element: JsonElement): JsonElement =
+        if (element is JsonPrimitive && element.isString) element else JsonPrimitive(element.toString())
+}
