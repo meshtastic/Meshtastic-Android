@@ -148,6 +148,14 @@ class MeshNotificationManagerImpl(
         // overwrite the foreground-service notification, or num == 1 the group summary). notify()/cancel() must use
         // the same (tag, id) pair.
         private const val TAG_MESSAGE = "message"
+
+        /**
+         * Fully-qualified name of the bubble host, as a string to avoid a module dependency back onto `:androidApp`.
+         */
+        private const val BUBBLE_ACTIVITY_CLASS = "org.meshtastic.app.BubbleActivity"
+
+        /** Roughly a phone's lower half — enough conversation to reply in without covering what is underneath. */
+        private const val BUBBLE_DESIRED_HEIGHT_DP = 600
         private const val TAG_MESSAGE_SUMMARY = "message_summary"
         private const val TAG_WAYPOINT = "waypoint"
         private const val TAG_ALERT = "alert"
@@ -172,6 +180,12 @@ class MeshNotificationManagerImpl(
      * entries are cheap and colors/names rarely change.
      */
     private val personIconCache = ConcurrentHashMap<String, IconCompat>()
+
+    /** Rounded variant, for surfaces that mask the icon into a circle (notification bubbles). */
+    private fun cachedRoundedPersonIcon(key: String, shortName: String, backgroundColor: Int, foregroundColor: Int) =
+        personIconCache.getOrPut("rounded|$key|$shortName|$backgroundColor|$foregroundColor") {
+            PersonIconFactory.createLabel(shortName, backgroundColor, foregroundColor, rounded = true)
+        }
 
     /** Circular, node-colored avatar holding the sender's full short name (e.g. "2c3d"), not just its first letter. */
     private fun cachedPersonIcon(key: String, shortName: String, backgroundColor: Int, foregroundColor: Int) =
@@ -811,12 +825,31 @@ class MeshNotificationManagerImpl(
             }
         }
         val lastMessage = history.last()
+        // The bubble wears the other party's avatar, not ours — a bubble is recognised by who is in it.
+        val bubbleNode = lastMessage.node
+        val bubbleIcon =
+            cachedRoundedPersonIcon(
+                bubbleNode.user.id,
+                bubbleNode.user.short_name,
+                bubbleNode.colors.second,
+                bubbleNode.colors.first,
+            )
 
         builder
             .setCategory(Notification.CATEGORY_MESSAGE)
             // Link to the conversation shortcut so this is treated as a Conversation notification (Android 11+).
             .setShortcutId(contactKey)
             .setLocusId(LocusIdCompat(contactKey))
+            // MessagingStyle carries per-message Persons, but conversation and bubble eligibility is judged on the
+            // notification's own person list, so the counterpart is added here too.
+            .addPerson(
+                Person.Builder()
+                    .setName(bubbleNode.user.long_name.ifEmpty { bubbleNode.user.short_name })
+                    .setKey(bubbleNode.user.id)
+                    .setIcon(bubbleIcon)
+                    .build(),
+            )
+            .setBubbleMetadata(createBubbleMetadata(contactKey, bubbleIcon))
             .setAutoCancel(true)
             .setStyle(style)
             .setGroup(GROUP_KEY_MESSAGES)
@@ -940,6 +973,35 @@ class MeshNotificationManagerImpl(
             addNextIntentWithParentStack(deepLinkIntent)
             getPendingIntent(contactKey.hashCode(), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         }
+    }
+
+    /**
+     * Bubble target: [org.meshtastic.app.BubbleActivity], not the launcher activity. A bubble's activity must be
+     * resizeable, embeddable and document-launched, and making the launcher activity document-launched would change how
+     * the whole app behaves in recents.
+     *
+     * The icon is the same per-node avatar the conversation notification already builds, so a bubble is recognisable as
+     * that conversation rather than as the app.
+     */
+    private fun createBubbleMetadata(contactKey: String, icon: IconCompat): NotificationCompat.BubbleMetadata {
+        val deepLinkUri = "$DEEP_LINK_BASE_URI/messages/$contactKey".toUri()
+        // No task flags: the platform launches this into the bubble's own task, and a NEW_TASK-style flag
+        // (including NEW_DOCUMENT) makes it launch outside and collapse the bubble instead.
+        val intent = Intent(Intent.ACTION_VIEW, deepLinkUri, context, Class.forName(BUBBLE_ACTIVITY_CLASS))
+        val pendingIntent =
+            PendingIntent.getActivity(
+                context,
+                contactKey.hashCode(),
+                intent,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+            )
+        return NotificationCompat.BubbleMetadata.Builder(pendingIntent, icon)
+            .setDesiredHeight(BUBBLE_DESIRED_HEIGHT_DP)
+            // Never auto-expand or suppress the shade entry: the user opts a conversation into bubbling, the app does
+            // not decide to take over their screen because a packet arrived.
+            .setAutoExpandBubble(false)
+            .setSuppressNotification(false)
+            .build()
     }
 
     private fun createOpenWaypointIntent(waypointId: Int): PendingIntent {

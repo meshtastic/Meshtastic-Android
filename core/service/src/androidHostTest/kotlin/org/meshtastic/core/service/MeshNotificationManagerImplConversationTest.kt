@@ -144,7 +144,13 @@ class MeshNotificationManagerImplConversationTest {
      * `:androidApp` and is intentionally not on this module's test classpath.
      */
     private fun registerStubMainActivity() {
-        val componentName = android.content.ComponentName(context, "org.meshtastic.app.MainActivity")
+        registerStubActivity("org.meshtastic.app.MainActivity")
+        // The conversation notification also builds bubble metadata pointing at the bubble host.
+        registerStubActivity("org.meshtastic.app.BubbleActivity")
+    }
+
+    private fun registerStubActivity(className: String) {
+        val componentName = android.content.ComponentName(context, className)
         val activityInfo =
             android.content.pm.ActivityInfo().apply {
                 name = componentName.className
@@ -152,6 +158,44 @@ class MeshNotificationManagerImplConversationTest {
                 exported = true
             }
         org.robolectric.Shadows.shadowOf(context.packageManager).addOrUpdateActivity(activityInfo)
+    }
+
+    /**
+     * Bubble eligibility is a checklist the platform silently fails: it needs a long-lived conversation shortcut, a
+     * Person on the notification itself, and an activity target that is not launched with a NEW_TASK-style flag —
+     * `FLAG_ACTIVITY_NEW_DOCUMENT` included, which launches outside the bubble and collapses it.
+     */
+    @Test
+    fun `conversation notifications carry bubble metadata the platform will accept`() = runWithRenderScope { scope ->
+        val manager = createManager(scope).also { it.initChannels() }
+        mockHistory(message("hello", read = false, receivedTime = 1_000))
+
+        manager.updateMessageNotification("0^all", "Hawk Ridge", "hello", isBroadcast = true, channelName = "LongFast")
+        advanceUntilIdle()
+
+        val posted = activeByTag("message").single().notification
+        val bubble = posted.bubbleMetadata
+        assertNotNull(bubble, "conversation notifications must offer a bubble")
+        assertNotNull(bubble.icon, "a bubble without an icon is rejected")
+        assertEquals("0^all", posted.shortcutId, "the bubble needs its long-lived conversation shortcut")
+        assertTrue(
+            posted.extras.containsKey(Notification.EXTRA_PEOPLE_LIST),
+            "eligibility is judged on the notification's own person list, not MessagingStyle's",
+        )
+
+        val shadowIntent = org.robolectric.Shadows.shadowOf(bubble.intent)
+        val savedIntent = shadowIntent.savedIntent
+        assertEquals(
+            "org.meshtastic.app.BubbleActivity",
+            savedIntent.component?.className,
+            "bubbles must target the embeddable host, not the launcher activity",
+        )
+        assertEquals(
+            0,
+            savedIntent.flags and
+                (android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT),
+            "a NEW_TASK-style flag launches outside the bubble and collapses it",
+        )
     }
 
     @Test
