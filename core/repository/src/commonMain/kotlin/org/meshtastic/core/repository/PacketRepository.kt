@@ -236,6 +236,12 @@ interface PacketRepository {
 
     suspend fun getDraft(contactKey: String): String
 
+    /** Pins or unpins conversations so they sort above their unpinned siblings. */
+    suspend fun setPinned(contactKeys: List<String>, pinned: Boolean)
+
+    /** Returns a conversation to unread: flips its newest message back and rewinds the read watermark past it. */
+    suspend fun markContactUnread(contactKey: String)
+
     /** Clears all packet and message history from the database. */
     suspend fun clearPacketDB()
 

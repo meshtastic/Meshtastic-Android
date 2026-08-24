@@ -320,6 +320,8 @@
     <string name="connection_status">Current connections:</string>
     <string name="connections">Connection</string>
     <string name="contact_draft_prefix">Draft: %1$s</string>
+    <string name="contact_muted_snackbar">Muted %1$s</string>
+    <string name="contact_pinned">Pinned</string>
     <string name="contrast">Contrast</string>
     <string name="contrast_high">High</string>
     <string name="contrast_medium">Medium</string>
@@ -1076,6 +1078,7 @@
     <string name="map_type_satellite">Satellite</string>
     <string name="map_type_terrain">Terrain</string>
     <string name="mark_as_read">Mark as read</string>
+    <string name="mark_unread_selected">Mark unread</string>
     <string name="match_all">Match All | Any</string>
     <string name="match_any">Match Any | All</string>
     <string name="max">Max</string>
@@ -1411,6 +1414,7 @@
     <string name="permission_missing_31">Meshtastic needs "Nearby devices" permissions enabled to find and connect to devices via Bluetooth. You can disable when not in use.</string>
     <string name="phone_location">Phone Location</string>
     <string name="phone_location_description">Meshtastic uses your phone's location to enable a number of features. You can update your location permissions at any time from settings.</string>
+    <string name="pin_selected">Pin</string>
     <string name="play">Play</string>
     <plurals name="plurals_hours">
         <item quantity="one">%1$d hour</item>
@@ -1748,6 +1752,9 @@
     <string name="super_deep_sleep_duration_seconds">Super deep sleep duration</string>
     <string name="supported">Supported</string>
     <string name="supported_by_community">Supported by Meshtastic Community</string>
+    <string name="swipe_action_delete">Delete</string>
+    <string name="swipe_action_mute">Mute</string>
+    <string name="swipe_action_unmute">Unmute</string>
     <string name="sx126x_rx_boosted_gain">RX Boosted Gain</string>
     <string name="system_settings">System Settings</string>
     <!-- TAK -->
@@ -1893,6 +1900,7 @@
     <string name="type">Type</string>
     <string name="type_a_message">Type a message</string>
     <string name="udp_enabled">UDP broadcasting</string>
+    <string name="undo">Undo</string>
     <!-- UNKNOWN -->
     <string name="unknown">Unknown</string>
     <string name="unknown_age">Unknown Age</string>
@@ -1904,6 +1912,7 @@
     <string name="unmonitored_or_infrastructure">Unmonitored or Infrastructure</string>
     <string name="unmute">Unmute</string>
     <string name="unmute_selected">Unmute selected</string>
+    <string name="unpin_selected">Unpin</string>
     <string name="unrecognized">Unrecognized</string>
     <string name="unset">Unset - 0</string>
     <string name="up_down_select_input_enabled">Up/Down/Select input enabled</string>

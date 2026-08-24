@@ -132,6 +132,65 @@ abstract class CommonPacketDaoTest {
     }
 
     @Test
+    fun testMarkContactUnreadRestoresTheBadge() = runTest {
+        createDb()
+        val contactKey = testContactKeys.first()
+        packetDao.clearUnreadCount(contactKey, nowMillis + SAMPLE_SIZE)
+        assertEquals(0, packetDao.getUnreadCount(contactKey))
+
+        packetDao.markContactUnread(contactKey)
+
+        assertEquals(1, packetDao.getUnreadCount(contactKey))
+    }
+
+    /**
+     * The regression this feature exists to avoid. `updateLastReadMessageIfNewer` refuses to move the watermark
+     * backwards, so flipping a packet's `read` flag without also rewinding it would leave a badge that reopening the
+     * conversation could never clear — the read path no-ops whenever the incoming timestamp is not newer than the
+     * stored one.
+     */
+    @Test
+    fun testMarkContactUnreadCanBeClearedAgainByReadingIt() = runTest {
+        createDb()
+        val contactKey = testContactKeys.first()
+        val newest = nowMillis + SAMPLE_SIZE
+        packetDao.clearUnreadCount(contactKey, newest)
+        packetDao.updateLastReadMessage(contactKey, messageUuid = 1L, lastReadTimestamp = newest)
+
+        packetDao.markContactUnread(contactKey)
+        assertEquals(1, packetDao.getUnreadCount(contactKey))
+        assertNull(packetDao.getContactSettings(contactKey)?.lastReadMessageTimestamp)
+
+        // Reopening the conversation clears it, exactly as it would for a genuinely new message.
+        packetDao.clearUnreadCount(contactKey, newest)
+        packetDao.updateLastReadMessage(contactKey, messageUuid = 1L, lastReadTimestamp = newest)
+        assertEquals(0, packetDao.getUnreadCount(contactKey))
+    }
+
+    @Test
+    fun testMarkContactUnreadOnAnEmptyConversationIsANoOp() = runTest {
+        createDb()
+        packetDao.markContactUnread("9!nosuchcontact")
+        assertEquals(0, packetDao.getUnreadCount("9!nosuchcontact"))
+    }
+
+    @Test
+    fun testSetPinnedCreatesTheRowAndPreservesMute() = runTest {
+        createDb()
+        val contactKey = testContactKeys.first()
+        packetDao.setMuteUntil(listOf(contactKey), Long.MAX_VALUE)
+
+        packetDao.setPinned(listOf(contactKey), pinned = true)
+
+        val settings = packetDao.getContactSettings(contactKey)
+        assertEquals(true, settings?.pinned)
+        assertEquals(Long.MAX_VALUE, settings?.muteUntil)
+
+        packetDao.setPinned(listOf(contactKey), pinned = false)
+        assertEquals(false, packetDao.getContactSettings(contactKey)?.pinned)
+    }
+
+    @Test
     fun testClearAllUnreadCounts() = runTest {
         createDb()
         packetDao.clearAllUnreadCounts()

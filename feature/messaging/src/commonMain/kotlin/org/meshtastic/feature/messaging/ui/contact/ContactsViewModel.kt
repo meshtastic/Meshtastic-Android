@@ -36,6 +36,7 @@ import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.ui.util.SnackbarManager
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.ChannelSet
@@ -46,6 +47,7 @@ class ContactsViewModel(
     private val savedStateHandle: SavedStateHandle,
     private val nodeRepository: NodeRepository,
     private val packetRepository: PacketRepository,
+    private val snackbarManager: SnackbarManager,
     radioConfigRepository: RadioConfigRepository,
     connectionStateProvider: ConnectionStateProvider,
 ) : ViewModel() {
@@ -125,6 +127,7 @@ class ContactsViewModel(
                     messageCount = packetRepository.getMessageCount(contactKey),
                     isMuted = settings[contactKey]?.isMuted == true,
                     draft = settings[contactKey]?.draft.orEmpty(),
+                    isPinned = settings[contactKey]?.pinned == true,
                     isUnmessageable = user.is_unmessagable ?: false,
                     nodeColors =
                     if (!toBroadcast) {
@@ -147,6 +150,16 @@ class ContactsViewModel(
 
     fun setMuteUntil(contacts: List<String>, until: Long) =
         safeLaunch(context = ioDispatcher, tag = "setMuteUntil") { packetRepository.setMuteUntil(contacts, until) }
+
+    fun showSnackbar(message: String, actionLabel: String? = null, onAction: (() -> Unit)? = null) =
+        snackbarManager.showSnackbar(message = message, actionLabel = actionLabel, onAction = onAction)
+
+    fun setPinned(contacts: List<String>, pinned: Boolean) =
+        safeLaunch(context = ioDispatcher, tag = "setPinned") { packetRepository.setPinned(contacts, pinned) }
+
+    fun markUnread(contacts: List<String>) = safeLaunch(context = ioDispatcher, tag = "markUnread") {
+        contacts.forEach { packetRepository.markContactUnread(it) }
+    }
 
     fun getContactSettings() = packetRepository.getContactSettings()
 
