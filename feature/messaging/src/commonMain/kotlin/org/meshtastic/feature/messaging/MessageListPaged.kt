@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.messaging
 
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -41,9 +42,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemContentType
@@ -221,7 +226,26 @@ private fun MessageListPagedContent(
     // Disable animations during scroll to prevent jank/stutter
     val enableAnimations by remember { derivedStateOf { !listState.isScrollInProgress } }
 
-    Box(modifier = modifier.fillMaxSize()) {
+    // One bar at a time, owned above the rows: a row cannot see a tap that lands on another row or on the space
+    // between them, and two rows owning their own state could both be open at once.
+    var openReactionBarFor by remember { mutableStateOf<Long?>(null) }
+
+    // Back closes it too: it is transient UI, and leaving it open would make Back look unresponsive.
+    val reactionBarBackState = rememberNavigationEventState(NavigationEventInfo.None)
+    NavigationBackHandler(
+        state = reactionBarBackState,
+        isBackEnabled = openReactionBarFor != null,
+        onBackCompleted = { openReactionBarFor = null },
+    )
+
+    Box(
+        modifier =
+        modifier.fillMaxSize().pointerInput(Unit) {
+            // Only taps no row consumed reach here, so this closes on the background without stealing a tap meant
+            // for a bubble or an emoji.
+            detectTapGestures { openReactionBarFor = null }
+        },
+    ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             state = listState,
@@ -278,6 +302,8 @@ private fun MessageListPagedContent(
                                 hasSamePrev = hasSamePrev,
                                 hasSameNext = hasSameNext,
                                 quickEmojis = quickEmojis,
+                                openReactionBarFor = openReactionBarFor,
+                                onOpenReactionBarChange = { openReactionBarFor = it },
                             )
                         }
                     } else {
@@ -298,6 +324,8 @@ private fun MessageListPagedContent(
                             hasSamePrev = hasSamePrev,
                             hasSameNext = hasSameNext,
                             quickEmojis = quickEmojis,
+                            openReactionBarFor = openReactionBarFor,
+                            onOpenReactionBarChange = { openReactionBarFor = it },
                         )
                     }
                 }
@@ -340,6 +368,8 @@ private fun RenderPagedChatMessageRow(
     showUserName: Boolean,
     hasSamePrev: Boolean,
     hasSameNext: Boolean,
+    openReactionBarFor: Long?,
+    onOpenReactionBarChange: (Long?) -> Unit,
     quickEmojis: List<String>,
 ) {
     val ourNode = state.ourNode ?: return
@@ -360,7 +390,15 @@ private fun RenderPagedChatMessageRow(
         message = message,
         selected = selected,
         inSelectionMode = inSelectionMode,
-        onClick = { if (inSelectionMode) state.selectedIds.toggle(message.uuid) },
+        quickReactionsOpen = openReactionBarFor == message.uuid,
+        onQuickReactionsOpenChange = { open -> onOpenReactionBarChange(if (open) message.uuid else null) },
+        // A tap that closes another row's bar is spent doing just that, the same way the owning row swallows it.
+        onClick = {
+            when {
+                openReactionBarFor != null -> onOpenReactionBarChange(null)
+                inSelectionMode -> state.selectedIds.toggle(message.uuid)
+            }
+        },
         onLongClick = {
             if (inSelectionMode) {
                 state.selectedIds.toggle(message.uuid)

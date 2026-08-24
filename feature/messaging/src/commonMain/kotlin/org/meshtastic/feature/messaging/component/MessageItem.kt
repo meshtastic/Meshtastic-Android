@@ -138,6 +138,12 @@ fun MessageItem(
     showFullMessageTimestamp: Boolean = false,
     emojis: List<Reaction> = emptyList(),
     quickEmojis: List<String> = listOf("👍", "👎", "😂", "🔥", "❤️", "😮"),
+    /**
+     * Hoisted so the list can keep at most one bar open and close it on a tap anywhere else; owning it here would leave
+     * every row's bar independent, and none of them able to see a tap outside their own bubble.
+     */
+    quickReactionsOpen: Boolean = false,
+    onQuickReactionsOpenChange: (Boolean) -> Unit = {},
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
     onDoubleClick: () -> Unit = {},
@@ -319,9 +325,8 @@ fun MessageItem(
     // Reached by long press or double tap; neither sends anything on its own, because a reaction is a real packet
     // on a
     // duty-cycled radio. The overflow button keeps the full actions sheet one tap away.
-    var showQuickReactions by remember { mutableStateOf(false) }
     AnimatedVisibility(
-        visible = showQuickReactions && !inSelectionMode,
+        visible = quickReactionsOpen && !inSelectionMode,
         modifier = Modifier.align(if (message.fromLocal) Alignment.End else Alignment.Start),
     ) {
         Surface(
@@ -333,15 +338,15 @@ fun MessageItem(
             QuickEmojiRow(
                 quickEmojis = quickEmojis,
                 onReact = { emoji ->
-                    showQuickReactions = false
+                    onQuickReactionsOpenChange(false)
                     sendReaction(emoji)
                 },
                 onMoreReactions = {
-                    showQuickReactions = false
+                    onQuickReactionsOpenChange(false)
                     activeSheet = ActiveSheet.Emoji
                 },
                 onMoreActions = {
-                    showQuickReactions = false
+                    onQuickReactionsOpenChange(false)
                     activeSheet = ActiveSheet.Actions
                 },
             )
@@ -403,16 +408,16 @@ fun MessageItem(
                 )
                 .widthIn(max = 480.dp)
                 .combinedClickable(
-                    onClick = { if (showQuickReactions) showQuickReactions = false else onClick() },
+                    onClick = { if (quickReactionsOpen) onQuickReactionsOpenChange(false) else onClick() },
                     onLongClick = {
                         onLongClick()
                         if (!inSelectionMode) {
-                            showQuickReactions = true
+                            onQuickReactionsOpenChange(true)
                         }
                     },
                     onDoubleClick = {
                         onDoubleClick()
-                        if (!inSelectionMode) showQuickReactions = !showQuickReactions
+                        if (!inSelectionMode) onQuickReactionsOpenChange(!quickReactionsOpen)
                     },
                 )
                 .then(messageModifier)
