@@ -10,6 +10,18 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 ### Unreleased (not yet in any build)
 
 #### 🏗️ Features
+* feat(messaging): swipe to reply, double-tap reactions, day separators by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6850
+* feat(messaging): per-contact drafts and a quieter composer by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6851
+* feat(messaging): name the sender on the jump-to-latest control by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6856
+* feat(notifications): offer conversations as bubbles by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6858
+* feat(messaging): mark unread, swipe row actions, and pinned conversations by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6857
+#### 🛠️ Fixes
+* fix(messaging): clear and suppress notifications for the conversation on screen by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6849
+
+### Internal (v2.8.2-internal.1)
+Changes since [`v2.8.1`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.1):
+
+#### 🏗️ Features
 * perf(ui): render QR codes at display density instead of fixed 960px by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6793
 * feat: report Android 17 memory-limiter kills via ApplicationExitInfo by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6792
 * feat(privacy): shield sensitive UI content from non-tool accessibility services by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6794
