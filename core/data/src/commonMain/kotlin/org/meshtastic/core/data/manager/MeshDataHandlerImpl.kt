@@ -206,8 +206,6 @@ class MeshDataHandlerImpl(
 
             PortNum.REMOTE_SHELL_APP -> {
                 remoteShellHandler.handleRemoteShell(packet)
-                // Do not broadcast — RemoteShell frames are point-to-point PTY I/O
-                shouldBroadcast = false
             }
 
             PortNum.NEIGHBORINFO_APP -> {

@@ -42,9 +42,7 @@ import org.meshtastic.core.database.entity.asDeviceVersion
 import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.SessionStatus
-import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.navigation.NodeDetailRoute
-import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.repository.EventFirmwareRepository
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.administration
@@ -59,7 +57,6 @@ import org.meshtastic.core.resources.latest_stable_firmware
 import org.meshtastic.core.resources.refresh_metadata
 import org.meshtastic.core.resources.remote_admin
 import org.meshtastic.core.resources.remote_shell
-import org.meshtastic.core.resources.request_metadata
 import org.meshtastic.core.resources.session_active
 import org.meshtastic.core.resources.session_refresh_required
 import org.meshtastic.core.ui.component.BasicListItem

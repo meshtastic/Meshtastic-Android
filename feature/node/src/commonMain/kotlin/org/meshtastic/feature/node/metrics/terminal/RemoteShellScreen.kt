@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -192,9 +192,15 @@ fun RemoteShellScreen(viewModel: RemoteShellViewModel, onNavigateUp: () -> Unit,
                     newText.forEach { char ->
                         when {
                             char == '\n' || char == '\r' -> viewModel.typeEnter()
+
                             char == '\b' -> viewModel.typeBackspace()
-                            char == '\t' -> viewModel.typeKey('\t') // tab: immediate flush in VM
-                            char.isISOControl() -> Unit // ignore other control chars
+
+                            char == '\t' -> viewModel.typeKey('\t')
+
+                            // tab: immediate flush in VM
+                            char.isISOControl() -> Unit
+
+                            // ignore other control chars
                             else -> viewModel.typeKey(char)
                         }
                     }
@@ -212,14 +218,17 @@ fun RemoteShellScreen(viewModel: RemoteShellViewModel, onNavigateUp: () -> Unit,
                                 viewModel.typeEnter()
                                 true
                             }
+
                             Key.Tab -> {
                                 viewModel.typeKey('\t')
                                 true
                             }
+
                             Key.Backspace -> {
                                 viewModel.typeBackspace()
                                 true
                             }
+
                             else -> false
                         }
                     },

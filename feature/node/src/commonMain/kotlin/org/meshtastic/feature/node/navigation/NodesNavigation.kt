@@ -178,8 +178,8 @@ fun EntryProviderScope<NavKey>.nodeDetailGraph(backStack: NavBackStack<NavKey>) 
 
             NodeDetailRoute.NeighborInfoLog::class ->
                 addNodeDetailScreenComposable<NodeDetailRoute.NeighborInfoLog>(backStack, routeInfo) { it.destNum }
-            // NodeDetailRoute.RemoteShell is handled by the dedicated entry above.
 
+            // NodeDetailRoute.RemoteShell is handled by the dedicated entry above.
             else -> Unit
         }
     }

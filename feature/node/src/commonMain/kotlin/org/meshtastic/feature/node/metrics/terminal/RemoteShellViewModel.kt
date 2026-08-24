@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@ import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RemoteShellHandler
@@ -266,10 +267,12 @@ class RemoteShellViewModel(
         if (seq == 0) return@withLock RxAction.PROCESS
         when {
             seq < nextExpectedRxSeq -> RxAction.DUPLICATE
+
             seq > nextExpectedRxSeq -> {
                 if (seq > highestSeenRxSeq) highestSeenRxSeq = seq
                 RxAction.GAP
             }
+
             else -> {
                 lastRxSeq = seq
                 nextExpectedRxSeq = seq + 1
@@ -574,10 +577,12 @@ class RemoteShellViewModel(
             RxAction.DUPLICATE -> {
                 requestMissingSeqOnce()?.let { sendAck(replayFrom = it) }
             }
+
             RxAction.GAP -> {
                 rxMutex.withLock { pendingRxFrames[frame.seq] = frame }
                 requestMissingSeqOnce()?.let { sendAck(replayFrom = it) }
             }
+
             RxAction.PROCESS -> {
                 handleInOrderFrame(frame)
                 drainPendingRxFrames()
@@ -610,6 +615,7 @@ class RemoteShellViewModel(
                 }
                 Logger.i { "RemoteShell OPEN_OK session=${frame.session_id} pid=${_remotePid.value}" }
             }
+
             RemoteShell.OpCode.OUTPUT -> {
                 val text =
                     frame.payload.utf8().ifEmpty {
@@ -617,15 +623,18 @@ class RemoteShellViewModel(
                     }
                 text.lines().forEach { appendOutput(it) }
             }
+
             RemoteShell.OpCode.ERROR -> {
                 appendOutput("[error] ${frame.payload.utf8().ifEmpty { "unknown error" }}")
                 _sessionState.update { SessionState.ERROR }
             }
+
             RemoteShell.OpCode.CLOSED -> {
                 val msg = frame.payload.utf8()
                 appendOutput(if (msg.isNotEmpty()) "[session closed: $msg]" else "[session closed]")
                 _sessionState.update { SessionState.CLOSED }
             }
+
             RemoteShell.OpCode.PONG -> {
                 val peerLastTxSeq = frame.last_tx_seq
                 val peerLastRxSeq = frame.last_rx_seq
@@ -638,6 +647,7 @@ class RemoteShellViewModel(
                     requestMissingSeqOnce()?.let { sendAck(replayFrom = it) }
                 }
             }
+
             else -> Logger.d { "RemoteShell unhandled in-order op=${frame.op}" }
         }
     }
@@ -681,13 +691,13 @@ class RemoteShellViewModel(
             val myNum = nodeRepository.myNodeInfo.value?.myNodeNum ?: 0
             val packet =
                 DataPacket(
-                    to = DataPacket.nodeNumToDefaultId(destNum),
-                    from = DataPacket.nodeNumToDefaultId(myNum),
+                    to = NodeAddress.numToDefaultId(destNum),
+                    from = NodeAddress.numToDefaultId(myNum),
                     bytes = RemoteShell.ADAPTER.encode(frame).toByteString(),
                     dataType = PortNum.REMOTE_SHELL_APP.value,
                     // PKC_CHANNEL_INDEX (8) triggers Curve25519 encryption in CommandSenderImpl.
                     // The firmware rejects DMShell packets that are not PKI-encrypted.
-                    channel = DataPacket.PKC_CHANNEL_INDEX,
+                    channel = NodeAddress.PKC_CHANNEL_INDEX,
                 )
             commandSender.sendData(packet)
         }
