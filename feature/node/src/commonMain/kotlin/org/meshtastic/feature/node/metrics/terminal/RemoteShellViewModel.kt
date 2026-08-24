@@ -95,6 +95,19 @@ private const val MAX_FLUSH_WINDOW_MS = 5_000L
 /** Size in bytes of an encoded uint32 (big-endian). */
 private const val UINT32_BYTES = 4
 
+/**
+ * Half-duplex turn-taking ("talking stick") flags carried in [RemoteShell.flags].
+ *
+ * The device grants and requests the turn; we are the idle owner, so we grant on every frame we send and answer any
+ * request immediately. We do not gate our own sends on holding the token — that matters on a real LoRa link, where both
+ * ends transmitting at once collides, and is a follow-up rather than something the mesh needs here.
+ */
+private const val TURN_FLAG_GRANT = 0x01
+
+private const val TURN_FLAG_MORE = 0x02
+
+private const val TURN_FLAG_RTS = 0x04
+
 private fun decodeUint32BE(bytes: ByteArray, offset: Int = 0): Int =
     Buffer().apply { write(bytes, offset, UINT32_BYTES) }.readInt()
 
@@ -335,17 +348,6 @@ class RemoteShellViewModel(
 
     // endregion
 
-    // region --- Phosphor colour pref ---
-
-    private val _phosphor = MutableStateFlow(PhosphorPreset.GREEN)
-    val phosphor: StateFlow<PhosphorPreset> = _phosphor.asStateFlow()
-
-    fun setPhosphor(preset: PhosphorPreset) {
-        _phosphor.value = preset
-    }
-
-    // endregion
-
     // region --- Heartbeat timing ---
 
     @Volatile private var lastActivityMs: Long = nowMillis
@@ -390,6 +392,7 @@ class RemoteShellViewModel(
             sendFrame(
                 RemoteShell(
                     op = RemoteShell.OpCode.OPEN,
+                    flags = TURN_FLAG_GRANT,
                     session_id = newSessionId,
                     seq = allocSeq(),
                     cols = _cols.value,
@@ -408,6 +411,7 @@ class RemoteShellViewModel(
             sendFrame(
                 RemoteShell(
                     op = RemoteShell.OpCode.CLOSE,
+                    flags = TURN_FLAG_GRANT,
                     session_id = sessionId.value,
                     seq = allocSeq(),
                     ack_seq = currentAckSeq(),
@@ -424,6 +428,7 @@ class RemoteShellViewModel(
                 sendFrame(
                     RemoteShell(
                         op = RemoteShell.OpCode.RESIZE,
+                        flags = TURN_FLAG_GRANT,
                         session_id = sessionId.value,
                         seq = allocSeq(),
                         ack_seq = currentAckSeq(),
@@ -504,6 +509,7 @@ class RemoteShellViewModel(
                 sendFrame(
                     RemoteShell(
                         op = RemoteShell.OpCode.INPUT,
+                        flags = TURN_FLAG_GRANT,
                         session_id = sessionId.value,
                         seq = allocSeq(),
                         ack_seq = currentAckSeq(),
@@ -534,6 +540,7 @@ class RemoteShellViewModel(
                     sendFrame(
                         RemoteShell(
                             op = RemoteShell.OpCode.PING,
+                            flags = TURN_FLAG_GRANT,
                             session_id = sessionId.value,
                             seq = allocSeq(),
                             ack_seq = currentAckSeq(),
@@ -564,6 +571,10 @@ class RemoteShellViewModel(
 
     @Suppress("CyclomaticComplexMethod")
     private suspend fun processFrame(frame: RemoteShell) {
+        // Before the ordering checks: a grant request rides on ACK and on OUTPUT frames that may arrive out of
+        // order, and the device applies turn flags ahead of its own ordering checks for the same reason.
+        if (frame.flags and (TURN_FLAG_RTS or TURN_FLAG_MORE) != 0) sendTurnGrant()
+
         pruneSentFrames(frame.ack_seq)
 
         if (frame.op == RemoteShell.OpCode.ACK) {
@@ -655,6 +666,25 @@ class RemoteShellViewModel(
     // endregion
 
     // region --- Frame dispatch ---
+
+    /**
+     * Answer the peer's request for a turn.
+     *
+     * The device only asks (RTS) when it has shell output and does not hold the token, so a client that never grants
+     * leaves it asking every 250 ms forever and the output never arrives.
+     */
+    private suspend fun sendTurnGrant() {
+        sendFrame(
+            RemoteShell(
+                op = RemoteShell.OpCode.ACK,
+                session_id = sessionId.value,
+                seq = 0,
+                ack_seq = currentAckSeq(),
+                flags = TURN_FLAG_GRANT,
+            ),
+            remember = false,
+        )
+    }
 
     private suspend fun sendAck(replayFrom: Int? = null) {
         sendFrame(

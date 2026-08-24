@@ -1375,7 +1375,6 @@ periodic_position_broadcast
 permission_missing_31
 phone_location
 phone_location_description
-phosphor_colour
 play
 plurals_hours
 plurals_minutes
