@@ -33,6 +33,20 @@ class NumberFormatterTest {
         assertEquals("-1.23", NumberFormatter.format(-1.23456, 2))
     }
 
+    /**
+     * The invariant path must not follow the locale: it feeds CoT payloads another client parses. Asserted separately
+     * from [testFormat] because that one only reads the same under the en-US locale the test JVMs are pinned to.
+     */
+    @Test
+    fun `formatInvariant always uses a dot and no grouping`() {
+        assertEquals("1.23", NumberFormatter.formatInvariant(1.23456, 2))
+        assertEquals("-1.23", NumberFormatter.formatInvariant(-1.23456, 2))
+        assertEquals("1234.5", NumberFormatter.formatInvariant(1234.45, 1))
+        assertEquals("1234", NumberFormatter.formatInvariant(1234.4, 0))
+        assertEquals("—", NumberFormatter.formatInvariant(Double.NaN, 2))
+        assertEquals("—", NumberFormatter.formatInvariant(Float.NaN, 1))
+    }
+
     @Test
     fun testFormatZeroDecimalPlaces() {
         assertEquals("1", NumberFormatter.format(1.23, 0))
@@ -120,7 +134,8 @@ class NumberFormatterTest {
 
     @Test
     fun testParseDecimalRoundTripsFormatOutput() {
-        // format() always emits '.', so its output must survive the parser unchanged.
+        // Under the build's pinned en-US test locale format() emits '.', so its output survives the parser. The
+        // round trip on comma locales is not asserted here — parseDecimalOrNull's own cases cover those separators.
         assertEquals(-42.75, NumberFormatter.parseDecimalOrNull(NumberFormatter.format(-42.75, 2)))
     }
 }

@@ -33,6 +33,20 @@ class DistanceExtensionsTest {
         assertEquals(50, 80.kmhIn(MeasurementSystem.IMPERIAL))
     }
 
+    /** Exact values, not the 10 m buckets CLDR's road rounding would have imposed. */
+    @Test
+    fun `distances keep their precision`() {
+        assertEquals("87 m", 87.toDistanceString(MeasurementSystem.METRIC))
+        assertEquals("320 m", 320.toDistanceString(MeasurementSystem.METRIC))
+    }
+
+    @Test
+    fun `metres switch to kilometres at the threshold`() {
+        assertEquals("999 m", 999.toDistanceString(MeasurementSystem.METRIC))
+        assertEquals("1.0 km", 1000.toDistanceString(MeasurementSystem.METRIC))
+        assertEquals("1.0 mi", 1609.toDistanceString(MeasurementSystem.IMPERIAL))
+    }
+
     @Test
     fun `kmhIn handles zero`() {
         assertEquals(0, 0.kmhIn(MeasurementSystem.METRIC))

@@ -68,7 +68,9 @@ class MetricFormatterTest {
 
     @Test
     fun pressure() {
-        assertEquals("1013.3 hPa", MetricFormatter.pressure(1013.25f))
+        // Grouped, because display formatting follows the locale and en-US groups thousands. The test JVMs are pinned
+        // to en-US for exactly this reason.
+        assertEquals("1,013.3 hPa", MetricFormatter.pressure(1013.25f))
     }
 
     @Test

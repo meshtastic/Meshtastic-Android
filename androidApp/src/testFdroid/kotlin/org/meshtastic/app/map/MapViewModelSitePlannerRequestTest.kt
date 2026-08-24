@@ -39,6 +39,7 @@ import org.junit.runner.RunWith
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.testing.FakeLocaleUnitsProvider
 import org.meshtastic.core.testing.FakeMapPrefs
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeNotificationPrefs
@@ -88,6 +89,7 @@ class MapViewModelSitePlannerRequestTest {
                 notificationPrefs = FakeNotificationPrefs(),
                 mapLayersManager = mapLayersManager,
                 savedStateHandle = SavedStateHandle(),
+                localeUnitsProvider = FakeLocaleUnitsProvider(),
             )
     }
 

@@ -18,16 +18,17 @@
 
 package org.meshtastic.core.model.util
 
+import org.meshtastic.core.common.util.MeasureUnitKind
 import org.meshtastic.core.common.util.MeasurementSystem
-import org.meshtastic.core.common.util.formatString
+import org.meshtastic.core.common.util.formatMeasure
 import kotlin.math.roundToInt
 
 @Suppress("MagicNumber")
-enum class DistanceUnit(val symbol: String, val multiplier: Float, val system: MeasurementSystem) {
-    METER("m", multiplier = 1F, MeasurementSystem.METRIC),
-    KILOMETER("km", multiplier = 0.001F, MeasurementSystem.METRIC),
-    FOOT("ft", multiplier = 3.28084F, MeasurementSystem.IMPERIAL),
-    MILE("mi", multiplier = 0.000621371F, MeasurementSystem.IMPERIAL),
+enum class DistanceUnit(val multiplier: Float, val system: MeasurementSystem, val kind: MeasureUnitKind) {
+    METER(multiplier = 1F, MeasurementSystem.METRIC, MeasureUnitKind.METER),
+    KILOMETER(multiplier = 0.001F, MeasurementSystem.METRIC, MeasureUnitKind.KILOMETER),
+    FOOT(multiplier = 3.28084F, MeasurementSystem.IMPERIAL, MeasureUnitKind.FOOT),
+    MILE(multiplier = 0.000621371F, MeasurementSystem.IMPERIAL, MeasureUnitKind.MILE),
 }
 
 fun Int.metersIn(unit: DistanceUnit): Float = this * unit.multiplier
@@ -41,14 +42,10 @@ fun Int.metersIn(system: MeasurementSystem): Float {
     return this.metersIn(unit)
 }
 
+/** Whole units for the small denominations, one decimal for the large ones — a node 1.2 km away, not 1.234 km. */
 fun Float.toString(unit: DistanceUnit): String {
-    val pattern =
-        if (unit in setOf(DistanceUnit.METER, DistanceUnit.FOOT)) {
-            "%.0f %s"
-        } else {
-            "%.1f %s"
-        }
-    return formatString(pattern, this, unit.symbol)
+    val fractionDigits = if (unit == DistanceUnit.METER || unit == DistanceUnit.FOOT) 0 else 1
+    return formatMeasure(this.toDouble(), unit.kind, fractionDigits)
 }
 
 fun Float.toString(system: MeasurementSystem): String {
@@ -63,6 +60,14 @@ fun Float.toString(system: MeasurementSystem): String {
 private const val KILOMETER_THRESHOLD = 1000
 private const val MILE_THRESHOLD = 1609
 
+/**
+ * Formats a distance in metres for display, choosing the unit from the magnitude.
+ *
+ * An earlier revision consulted ICU's `usage("road")` so CLDR could pick the unit. It was removed: CLDR's road
+ * preferences also impose road rounding, which snaps to the nearest 10 m under 300 m and 50 m above it — so a node 87 m
+ * away read "90 m", and the GNSS-accuracy and position-precision labels that share this function are not road distances
+ * at all. It also disagreed with the requested system on the locales ICU reports as US but CLDR has no road entry for.
+ */
 fun Int.toDistanceString(system: MeasurementSystem): String {
     val unit =
         if (system == MeasurementSystem.METRIC) {
@@ -76,9 +81,9 @@ fun Int.toDistanceString(system: MeasurementSystem): String {
 
 @Suppress("MagicNumber")
 fun Float.toSpeedString(system: MeasurementSystem): String = if (system == MeasurementSystem.METRIC) {
-    formatString("%.0f km/h", this * 3.6)
+    formatMeasure(this * 3.6, MeasureUnitKind.KILOMETER_PER_HOUR, 0)
 } else {
-    formatString("%.0f mph", this * 2.23694f)
+    formatMeasure(this * 2.23694, MeasureUnitKind.MILE_PER_HOUR, 0)
 }
 
 /**
@@ -92,7 +97,7 @@ fun Int.kmhIn(system: MeasurementSystem): Int =
 
 @Suppress("MagicNumber")
 fun Float.toSmallDistanceString(system: MeasurementSystem): String = if (system == MeasurementSystem.IMPERIAL) {
-    formatString("%.2f in", this / 25.4f)
+    formatMeasure(this / 25.4, MeasureUnitKind.INCH, 2)
 } else {
-    formatString("%.0f mm", this)
+    formatMeasure(this.toDouble(), MeasureUnitKind.MILLIMETER, 0)
 }

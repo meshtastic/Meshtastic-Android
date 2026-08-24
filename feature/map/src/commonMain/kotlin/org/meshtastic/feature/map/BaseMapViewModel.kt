@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import org.jetbrains.compose.resources.StringResource
+import org.meshtastic.core.common.util.LocaleUnitsProvider
 import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.common.util.getSystemMeasurementSystem
 import org.meshtastic.core.common.util.ioDispatcher
@@ -67,16 +68,17 @@ open class BaseMapViewModel(
     private val radioController: RadioController,
     private val radioConfigRepository: RadioConfigRepository,
     private val notificationPrefs: NotificationPrefs,
+    localeUnitsProvider: LocaleUnitsProvider,
 ) : ViewModel() {
 
     val myNodeInfo = nodeRepository.myNodeInfo
 
     /**
-     * OS locale display units (metric/imperial) for distance/altitude/speed formatting across map surfaces. StateFlow
-     * kept for the existing collectAsState call sites; value is a one-time snapshot at construction and does not react
-     * to a mid-session locale change (ViewModel survives config changes).
+     * OS locale display units (metric/imperial) for distance/altitude/speed formatting across map surfaces. Re-read on
+     * every locale change, because this ViewModel survives the configuration change one triggers.
      */
-    val displayUnits: StateFlow<MeasurementSystem> = MutableStateFlow(getSystemMeasurementSystem()).asStateFlow()
+    val displayUnits: StateFlow<MeasurementSystem> =
+        localeUnitsProvider.measurementSystem.stateInWhileSubscribed(initialValue = getSystemMeasurementSystem())
 
     val ourNodeInfo = nodeRepository.ourNodeInfo
 

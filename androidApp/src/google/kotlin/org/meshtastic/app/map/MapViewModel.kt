@@ -47,6 +47,7 @@ import org.meshtastic.app.map.prefs.map.GoogleMapSelectionPrefs
 import org.meshtastic.app.map.prefs.map.GoogleMapsPrefs
 import org.meshtastic.app.map.repository.CustomTileProviderRepository
 import org.meshtastic.app.map.repository.CustomTileProviderSaveResult
+import org.meshtastic.core.common.util.LocaleUnitsProvider
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
@@ -99,6 +100,7 @@ class MapViewModel(
     uiPrefs: UiPrefs,
     notificationPrefs: NotificationPrefs,
     savedStateHandle: SavedStateHandle,
+    localeUnitsProvider: LocaleUnitsProvider,
 ) : BaseMapViewModel(
     mapPrefs,
     nodeRepository,
@@ -106,6 +108,7 @@ class MapViewModel(
     radioController,
     radioConfigRepository,
     notificationPrefs,
+    localeUnitsProvider,
 ) {
 
     private val _selectedWaypointId = MutableStateFlow(savedStateHandle.get<Int>("waypointId"))

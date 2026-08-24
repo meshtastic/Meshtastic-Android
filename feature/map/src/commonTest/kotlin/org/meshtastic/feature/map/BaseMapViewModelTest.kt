@@ -27,12 +27,14 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.testing.FakeLocaleUnitsProvider
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeNotificationPrefs
 import org.meshtastic.core.testing.FakeRadioConfigRepository
@@ -56,6 +58,7 @@ class BaseMapViewModelTest {
     private lateinit var waypointPacketsFlow: MutableStateFlow<List<DataPacket>>
     private val mapPrefs: MapPrefs = mock()
     private val packetRepository: PacketRepository = mock()
+    private val localeUnitsProvider = FakeLocaleUnitsProvider()
 
     @BeforeTest
     fun setUp() {
@@ -82,6 +85,7 @@ class BaseMapViewModelTest {
                 radioController = radioController,
                 radioConfigRepository = radioConfigRepository,
                 notificationPrefs = FakeNotificationPrefs(),
+                localeUnitsProvider = localeUnitsProvider,
             )
     }
 
@@ -93,6 +97,19 @@ class BaseMapViewModelTest {
     @Test
     fun testInitialization() {
         assertNotNull(viewModel)
+    }
+
+    /** The map renders distance, altitude and speed, so it has to follow a mid-session units change too. */
+    @Test
+    fun `displayUnits follows a mid-session units change`() = runTest(testDispatcher) {
+        viewModel.displayUnits.test {
+            assertEquals(MeasurementSystem.METRIC, awaitItem())
+
+            localeUnitsProvider.set(system = MeasurementSystem.IMPERIAL)
+
+            assertEquals(MeasurementSystem.IMPERIAL, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test

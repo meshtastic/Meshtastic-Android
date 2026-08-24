@@ -20,8 +20,13 @@ package org.meshtastic.core.common.util
  * Centralized metric formatting for display strings. Eliminates duplicated `formatString` patterns across Node,
  * NodeItem, and metric screens.
  *
- * All methods return locale-independent strings using [NumberFormatter] (dot decimal separator), which is intentional
- * for a mesh networking app where consistency matters.
+ * Everything here reads in the user's locale. Units that vary by locale (wind speed, rainfall, weight) go through
+ * [formatMeasure], so the value, the symbol and the spacing between them all come from CLDR; the universal units (V,
+ * mA, dB, dBm, hPa, %, °C) keep their fixed symbol but format the number via [NumberFormatter.format], so a German
+ * reader sees "3,85 V" and "0,0°C".
+ *
+ * The one thing that stays locale-independent is anything another system parses — see
+ * [NumberFormatter.formatInvariant].
  */
 @Suppress("TooManyFunctions")
 object MetricFormatter {
@@ -58,22 +63,22 @@ object MetricFormatter {
      */
     fun rssi(value: Int?): String = if (value == null) UNKNOWN_VALUE else "$value dBm"
 
-    fun windSpeed(metersPerSecond: Float, isImperial: Boolean, decimalPlaces: Int = 1): String {
-        val value = if (isImperial) metersPerSecond * MPH_PER_MPS else metersPerSecond
-        val unit = if (isImperial) "mph" else "m/s"
-        return "${NumberFormatter.format(value, decimalPlaces)} $unit"
+    fun windSpeed(metersPerSecond: Float, isImperial: Boolean, decimalPlaces: Int = 1): String = if (isImperial) {
+        formatMeasure((metersPerSecond * MPH_PER_MPS).toDouble(), MeasureUnitKind.MILE_PER_HOUR, decimalPlaces)
+    } else {
+        formatMeasure(metersPerSecond.toDouble(), MeasureUnitKind.METER_PER_SECOND, decimalPlaces)
     }
 
-    fun rainfall(millimeters: Float, isImperial: Boolean, decimalPlaces: Int = 1): String {
-        val value = if (isImperial) millimeters / MM_PER_INCH else millimeters
-        val unit = if (isImperial) "in" else "mm"
-        return "${NumberFormatter.format(value, decimalPlaces)} $unit"
+    fun rainfall(millimeters: Float, isImperial: Boolean, decimalPlaces: Int = 1): String = if (isImperial) {
+        formatMeasure((millimeters / MM_PER_INCH).toDouble(), MeasureUnitKind.INCH, decimalPlaces)
+    } else {
+        formatMeasure(millimeters.toDouble(), MeasureUnitKind.MILLIMETER, decimalPlaces)
     }
 
-    fun weight(kilograms: Float, isImperial: Boolean, decimalPlaces: Int = 2): String {
-        val value = if (isImperial) kilograms * LBS_PER_KG else kilograms
-        val unit = if (isImperial) "lb" else "kg"
-        return "${NumberFormatter.format(value, decimalPlaces)} $unit"
+    fun weight(kilograms: Float, isImperial: Boolean, decimalPlaces: Int = 2): String = if (isImperial) {
+        formatMeasure((kilograms * LBS_PER_KG).toDouble(), MeasureUnitKind.POUND, decimalPlaces)
+    } else {
+        formatMeasure(kilograms.toDouble(), MeasureUnitKind.KILOGRAM, decimalPlaces)
     }
 }
 
