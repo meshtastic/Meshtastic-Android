@@ -26,7 +26,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performTouchInput
@@ -94,6 +96,41 @@ class SwipeableContactRowTest {
         waitForIdle()
         assertEquals(2, muteCalls, "the row must stay swipeable after it settles back")
         assertFalse(muted, "second swipe should unmute, not re-mute")
+    }
+
+    @Test
+    fun exposesMuteAndDeleteWithoutTheSwipeGesture() = runComposeUiTest {
+        var muted by mutableStateOf(false)
+        var deleted = false
+
+        setContent {
+            MaterialTheme {
+                val current = contact(isMuted = muted)
+                SwipeableContactRow(
+                    contact = current,
+                    enabled = true,
+                    onMute = { muted = !current.isMuted },
+                    onDelete = { deleted = true },
+                ) {
+                    Box(Modifier.testTag(ROW_TAG).fillMaxWidth().height(64.dp)) { Text(current.longName) }
+                }
+            }
+        }
+
+        // A screen reader cannot swipe, so both actions have to be reachable from the row's semantics.
+        val actions =
+            onNode(SemanticsMatcher.keyIsDefined(SemanticsActions.CustomActions))
+                .fetchSemanticsNode()
+                .config[SemanticsActions.CustomActions]
+        assertEquals(2, actions.size, "the row should offer both swipe actions to accessibility services")
+
+        actions[0].action()
+        waitForIdle()
+        assertTrue(muted, "the first action should mute")
+
+        actions[1].action()
+        waitForIdle()
+        assertTrue(deleted, "the second action should delete")
     }
 
     private companion object {

@@ -63,7 +63,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
@@ -695,6 +697,17 @@ internal fun SwipeableContactRow(
     val currentOnMute by rememberUpdatedState(onMute)
     val currentOnDelete by rememberUpdatedState(onDelete)
     val dismissState = rememberSwipeToDismissBoxState()
+    val haptics = LocalHapticFeedback.current
+    LaunchedEffect(dismissState) {
+        // A tick the moment the swipe becomes eligible, so the row can be committed or dragged back without
+        // watching it. `snapshotFlow` is distinct-until-changed, so re-crossing the threshold ticks again.
+        snapshotFlow { dismissState.targetValue }
+            .collect { target ->
+                if (target != SwipeToDismissBoxValue.Settled) {
+                    haptics.performHapticFeedback(HapticFeedbackType.GestureThresholdActivate)
+                }
+            }
+    }
     // Kept stable on purpose: the box raises `onDismiss` from a `LaunchedEffect` keyed on the lambda, so a fresh one
     // each recomposition would re-fire the action for a row that is still settled open.
     val onDismiss = remember {
@@ -722,9 +735,28 @@ internal fun SwipeableContactRow(
                 }
             }
     }
+    // The same two actions without the gesture: a swipe is unusable under a screen reader, and Material asks for a
+    // non-swipe route to anything a swipe can reach.
+    val muteLabel =
+        stringResource(if (contact.isMuted) Res.string.swipe_action_unmute else Res.string.swipe_action_mute)
+    val deleteLabel = stringResource(Res.string.swipe_action_delete)
+    val rowActions =
+        remember(muteLabel, deleteLabel) {
+            listOf(
+                CustomAccessibilityAction(muteLabel) {
+                    currentOnMute()
+                    true
+                },
+                CustomAccessibilityAction(deleteLabel) {
+                    currentOnDelete()
+                    true
+                },
+            )
+        }
     SwipeToDismissBox(
         state = dismissState,
         backgroundContent = { SwipeBackground(dismissState.dismissDirection, contact.isMuted) },
+        modifier = Modifier.semantics { customActions = rowActions },
         gesturesEnabled = enabled,
         onDismiss = onDismiss,
         content = { content() },
