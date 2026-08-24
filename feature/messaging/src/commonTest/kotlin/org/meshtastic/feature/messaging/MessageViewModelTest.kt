@@ -161,6 +161,9 @@ class MessageViewModelTest {
             assertEquals(stored, awaitItem())
             cancelAndIgnoreRemainingEvents()
         }
+        // Drain the load coroutine fully before the caller starts asserting on debounce timing, so a slow CI machine
+        // cannot interleave its tail with the edits that follow.
+        testDispatcher.scheduler.advanceUntilIdle()
     }
 
     @Test fun testDraftIsRestoredFromTheRepository() = runTest { loadDraftAndAwait(stored = "half typed") }

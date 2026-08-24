@@ -136,9 +136,13 @@ class MessageViewModel(
         if (draftContactKey == contactKey) return
         draftContactKey = contactKey
         _draftMessage.value = null
-        safeLaunch(context = ioDispatcher, tag = "loadDraft") {
+        // The coroutine itself stays on the view-model dispatcher and only the database read hops to IO, so the
+        // publish below is ordered against everything else the view model does rather than racing it.
+        safeLaunch(tag = "loadDraft") {
             val restored = savedStateHandle.get<String>(draftKey(contactKey))
-            val loaded = restored?.takeIf { it.isNotEmpty() } ?: packetRepository.getDraft(contactKey)
+            val loaded =
+                restored?.takeIf { it.isNotEmpty() }
+                    ?: withContext(ioDispatcher) { packetRepository.getDraft(contactKey) }
             // Two loads can be in flight after a fast switch between conversations; only the one still current may
             // publish, or one conversation's unsent text surfaces in another.
             if (draftContactKey == contactKey) _draftMessage.value = loaded

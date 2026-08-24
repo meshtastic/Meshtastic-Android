@@ -549,8 +549,11 @@ interface PacketDao {
 
     @Transaction
     suspend fun setPinned(contactKeys: List<String>, pinned: Boolean) {
-        insertContactSettingsIgnore(contactKeys.map { ContactSettings(contact_key = it) })
-        updatePinned(contactKeys, pinned)
+        // Select-all can hand this every conversation, and SQLite rejects an IN clause past its bind-parameter limit.
+        for (chunk in contactKeys.chunked(SQLITE_MAX_BIND_PARAMETERS)) {
+            insertContactSettingsIgnore(chunk.map { ContactSettings(contact_key = it) })
+            updatePinned(chunk, pinned)
+        }
     }
 
     /**

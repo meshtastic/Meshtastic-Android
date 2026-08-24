@@ -185,6 +185,16 @@ fun ContactsScreen(
     LaunchedEffect(selectedContactKeys.size, selectedContactKeys.joinToString(",")) {
         selectedCount = viewModel.getTotalMessageCount(selectedContactKeys.toList())
     }
+    var pendingSwipeDelete by remember { mutableStateOf<Contact?>(null) }
+    LaunchedEffect(pendingSwipeDelete) {
+        val contact = pendingSwipeDelete ?: return@LaunchedEffect
+        selectedContactKeys.clear()
+        selectedContactKeys.add(contact.contactKey)
+        selectedCount = viewModel.getTotalMessageCount(listOf(contact.contactKey))
+        showDeleteDialog = true
+        pendingSwipeDelete = null
+    }
+
     val isAllMuted = remember(selectedContacts) { selectedContacts.all { it.isMuted } }
     val isAllPinned =
         remember(selectedContacts) { selectedContacts.isNotEmpty() && selectedContacts.all { it.isPinned } }
@@ -312,13 +322,10 @@ fun ContactsScreen(
                         )
                     }
                 },
-                onSwipeDelete = { contact ->
-                    // Deleting a conversation drops its packets outright, so it always goes through the same
-                    // confirmation the selection toolbar uses rather than acting on the gesture alone.
-                    selectedContactKeys.clear()
-                    selectedContactKeys.add(contact.contactKey)
-                    showDeleteDialog = true
-                },
+                // Deleting a conversation drops its packets outright, so a swipe only nominates a target; the
+                // confirmation opens once its message count has been read, so the dialog can never quote a stale
+                // count from the previous selection.
+                onSwipeDelete = { contact -> pendingSwipeDelete = contact },
                 listState = contactsListState,
                 channels = channels,
                 collapsedSections = collapsedSections,
