@@ -1706,6 +1706,7 @@
     <string name="site_planner_use_current_location">Käytä nykyistä sijaintia</string>
     <string name="site_planner_use_map_center">Käytä kartan keskikohtaa</string>
     <string name="site_planner_use_node_location">Käytä nykyistä radion sijaintia</string>
+    <string name="site_planner_webview_updating">WebView järjestelmä päivittyy. Yritä myöhemmin uudelleen.</string>
     <string name="skip">Ohita</string>
     <string name="slot">Paikka</string>
     <string name="smart_position">Älykäs sijainti</string>
