@@ -186,6 +186,7 @@
     <!-- SHOW -->
     <string name="shutdown">Slökkva</string>
     <!-- SITE -->
+    <string name="swipe_action_delete">Eyða</string>
     <!-- TAK -->
     <string name="theme">Þema</string>
     <string name="theme_dark">Dökkt</string>

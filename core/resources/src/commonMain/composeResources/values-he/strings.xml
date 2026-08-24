@@ -206,6 +206,7 @@
     <!-- SHOW -->
     <string name="shutdown">כיבוי</string>
     <!-- SITE -->
+    <string name="swipe_action_delete">מחק</string>
     <!-- TAK -->
     <string name="theme">ערכת נושא</string>
     <string name="theme_dark">כהה</string>

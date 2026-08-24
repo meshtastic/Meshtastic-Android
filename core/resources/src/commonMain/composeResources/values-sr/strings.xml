@@ -467,6 +467,8 @@
     <string name="speed">Брзина</string>
     <string name="spread_factor">Фактор ширења</string>
     <string name="supported">Подржан</string>
+    <string name="swipe_action_delete">Обриши</string>
+    <string name="swipe_action_mute">Утишај</string>
     <string name="sx126x_rx_boosted_gain">Појачање пријемника</string>
     <!-- TAK -->
     <string name="tak_server_section">Сервер</string>

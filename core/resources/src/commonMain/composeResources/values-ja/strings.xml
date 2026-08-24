@@ -836,6 +836,7 @@
     <string name="ip_port">ポート：</string>
     <string name="ipv4_mode">IPv4 モード</string>
     <string name="json_output_enabled">JSON出力の有効化</string>
+    <string name="jump_to_latest_from">%1$s</string>
     <!-- KEY -->
     <string name="key_backup_deleted">鍵のバックアップを削除しました</string>
     <string name="key_backup_not_found">このノードの鍵のバックアップが見つかりません</string>
@@ -1608,6 +1609,9 @@
     <string name="super_deep_sleep_duration_seconds">スーパーディープスリープの時間</string>
     <string name="supported">対応済み</string>
     <string name="supported_by_community">Meshtastic コミュニティによるサポート</string>
+    <string name="swipe_action_delete">削除</string>
+    <string name="swipe_action_mute">ミュート</string>
+    <string name="swipe_action_unmute">ミュート解除</string>
     <string name="sx126x_rx_boosted_gain">RX ブーストゲイン</string>
     <string name="system_settings">システム設定</string>
     <!-- TAK -->

@@ -892,6 +892,7 @@
     <string name="ip_port">Port:</string>
     <string name="ipv4_mode">IPv4 režiim</string>
     <string name="json_output_enabled">JSON väljund lubatud</string>
+    <string name="jump_to_latest_from">%1$s</string>
     <!-- KEY -->
     <string name="key_backup_deleted">Taastevõtmed kustutaud</string>
     <string name="key_backup_not_found">Taastevõtmeid selles seadmes ei leitud</string>
@@ -1677,6 +1678,9 @@
     <string name="super_deep_sleep_duration_seconds">Super sügava une kestus</string>
     <string name="supported">Toetatud</string>
     <string name="supported_by_community">Toetatud Meshtastic kommuuni poolt</string>
+    <string name="swipe_action_delete">Eemalda</string>
+    <string name="swipe_action_mute">Vaigista</string>
+    <string name="swipe_action_unmute">Eemalda vaigistus</string>
     <string name="sx126x_rx_boosted_gain">RX võimendatud võimendus</string>
     <string name="system_settings">Süsteemi sätted</string>
     <!-- TAK -->

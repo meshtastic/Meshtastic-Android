@@ -629,6 +629,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="permission_missing_31">Meshtastic necesita activar los permisos "Dispositivos cercanos" para encontrar y conectarse a dispositivos mediante Bluetooth. Puede desactivar cuando no esté en uso.</string>
     <string name="phone_location">Ubicación del teléfono</string>
     <string name="phone_location_description">Meshtastic utiliza la ubicación de tu teléfono para habilitar varias características. Puedes actualizar los permisos de ubicación en cualquier momento desde la configuración.</string>
+    <string name="pin_selected">Pin</string>
     <plurals name="plurals_hours">
         <item quantity="one">%1$d hora</item>
         <item quantity="other">%1$d horas</item>
@@ -827,6 +828,9 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="super_deep_sleep_duration_seconds">Duración del sueño súper profundo</string>
     <string name="supported">Soportado nativamente</string>
     <string name="supported_by_community">Apoyado por la comunidad Meshtastic</string>
+    <string name="swipe_action_delete">Eliminar</string>
+    <string name="swipe_action_mute">Silenciar</string>
+    <string name="swipe_action_unmute">Desilenciar</string>
     <string name="sx126x_rx_boosted_gain">Aumentar ganancia de RX</string>
     <string name="system_settings">Ajustes del sistema</string>
     <!-- TAK -->
