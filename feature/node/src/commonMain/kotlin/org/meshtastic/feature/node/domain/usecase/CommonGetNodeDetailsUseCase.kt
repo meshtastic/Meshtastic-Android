@@ -25,15 +25,15 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onStart
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.LocaleUnitsProvider
+import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.common.util.TemperatureUnit
-import org.meshtastic.core.common.util.getSystemTemperatureUnit
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.DeviceLink
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.model.util.DistanceUnit
 import org.meshtastic.core.model.util.hasValidEnvironmentMetrics
 import org.meshtastic.core.model.util.isDirectSignal
 import org.meshtastic.core.repository.DeviceHardwareRepository
@@ -67,6 +67,7 @@ constructor(
     private val deviceLinkRepository: DeviceLinkRepository,
     private val firmwareReleaseRepository: FirmwareReleaseRepository,
     private val nodeRequestActions: NodeRequestActions,
+    private val localeUnitsProvider: LocaleUnitsProvider,
 ) : GetNodeDetailsUseCase {
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -165,6 +166,13 @@ constructor(
                 trReqs to niReqs
             }
 
+        // Units are a flow, not a read inside the combine: the combine only re-runs when node data changes, so a
+        // read there would keep stale units after the user edits their regional preferences.
+        val localeUnitsFlow =
+            combine(localeUnitsProvider.measurementSystem, localeUnitsProvider.temperatureUnit) { system, temperature ->
+                system to temperature
+            }
+
         // Assemble final UI state
         return combine(
             nodeFlow,
@@ -173,6 +181,7 @@ constructor(
             metadataFlow,
             requestsFlow,
             hardwareAndLinksFlow,
+            localeUnitsFlow,
         ) { args: Array<Any?> ->
             @Suppress("UNCHECKED_CAST")
             val node = args[NODE_INDEX] as Node
@@ -191,7 +200,9 @@ constructor(
             val isLocal = node.num == identity.ourNode?.num
             val pioEnv = if (isLocal) identity.myInfo?.pioEnv else null
 
-            val displayUnits = DistanceUnit.getFromLocale()
+            @Suppress("UNCHECKED_CAST")
+            val localeUnits = args[LOCALE_UNITS_INDEX] as Pair<MeasurementSystem, TemperatureUnit>
+            val (displayUnits, temperatureUnit) = localeUnits
 
             val metricsState =
                 MetricsState(
@@ -201,7 +212,7 @@ constructor(
                     deviceLinks = deviceLinks,
                     reportedTarget = pioEnv,
                     isManaged = identity.profile.config?.security?.is_managed ?: false,
-                    isFahrenheit = getSystemTemperatureUnit() == TemperatureUnit.FAHRENHEIT,
+                    isFahrenheit = temperatureUnit == TemperatureUnit.FAHRENHEIT,
                     displayUnits = displayUnits,
                     deviceMetrics = logs.telemetry.filter { it.device_metrics != null },
                     localStats = logs.telemetry.filter { it.local_stats != null },
@@ -284,5 +295,6 @@ constructor(
         const val METADATA_INDEX = 3
         const val REQUESTS_INDEX = 4
         const val HARDWARE_INDEX = 5
+        const val LOCALE_UNITS_INDEX = 6
     }
 }

@@ -47,6 +47,7 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
+import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.resources.Res
@@ -62,7 +63,6 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.feature.node.model.LogsType
 import org.meshtastic.feature.node.model.NodeDetailAction
-import org.meshtastic.proto.Config
 import org.meshtastic.proto.Telemetry
 
 private data class TelemetricFeature(
@@ -84,7 +84,7 @@ internal fun TelemetricActionsSection(
     availableLogs: Set<LogsType>,
     lastTracerouteTime: Long?,
     lastRequestNeighborsTime: Long?,
-    displayUnits: Config.DisplayConfig.DisplayUnits,
+    displayUnits: MeasurementSystem,
     isFahrenheit: Boolean,
     onAction: (NodeDetailAction) -> Unit,
     isLocal: Boolean = false,
@@ -128,7 +128,7 @@ private fun rememberTelemetricFeatures(
     ourNode: Node?,
     lastTracerouteTime: Long?,
     lastRequestNeighborsTime: Long?,
-    displayUnits: Config.DisplayConfig.DisplayUnits,
+    displayUnits: MeasurementSystem,
     isFahrenheit: Boolean,
     isLocal: Boolean,
     airQualityHistory: List<Telemetry>,

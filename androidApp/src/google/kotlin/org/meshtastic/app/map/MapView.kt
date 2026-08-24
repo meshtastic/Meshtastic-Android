@@ -124,6 +124,7 @@ import org.meshtastic.app.map.component.NodeClusterMarkers
 import org.meshtastic.app.map.component.NodeMapFilterDropdown
 import org.meshtastic.app.map.component.WaypointMarkers
 import org.meshtastic.app.map.model.NodeClusterItem
+import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.TracerouteOverlay
@@ -178,7 +179,6 @@ import org.meshtastic.feature.map.component.MapControlsOverlay
 import org.meshtastic.feature.map.component.WaypointInfoDialog
 import org.meshtastic.feature.map.tracerouteNodeSelection
 import org.meshtastic.proto.BoundingBox
-import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.Waypoint
 import java.io.BufferedInputStream
@@ -1180,7 +1180,7 @@ private fun WaypointGeofenceOverlay(waypoint: Waypoint) {
 private fun NodeTrackOverlay(
     focusedNode: Node,
     sortedPositions: List<Position>,
-    displayUnits: DisplayUnits,
+    displayUnits: MeasurementSystem,
     myNodeNum: Int?,
     selectedPositionTime: Int? = null,
     onPositionSelect: ((Int) -> Unit)? = null,
@@ -1259,7 +1259,7 @@ private fun NodeTrackOverlay(
 
 @Composable
 @Suppress("LongMethod")
-private fun PositionInfoWindowContent(position: Position, displayUnits: DisplayUnits = DisplayUnits.METRIC) {
+private fun PositionInfoWindowContent(position: Position, displayUnits: MeasurementSystem = MeasurementSystem.METRIC) {
     @Composable
     fun PositionRow(label: String, value: String) {
         Row(modifier = Modifier.padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -1295,9 +1295,9 @@ private fun PositionInfoWindowContent(position: Position, displayUnits: DisplayU
 }
 
 @Composable
-private fun speedFromPosition(position: Position, displayUnits: DisplayUnits): String {
+private fun speedFromPosition(position: Position, displayUnits: MeasurementSystem): String {
     // Position.ground_speed is km/h on the wire (proto canon), not m/s.
-    val speedRes = if (displayUnits == DisplayUnits.IMPERIAL) Res.string.speed_mph else Res.string.speed_kmh
+    val speedRes = if (displayUnits == MeasurementSystem.IMPERIAL) Res.string.speed_mph else Res.string.speed_kmh
     return stringResource(speedRes, (position.ground_speed ?: 0).kmhIn(displayUnits))
 }
 

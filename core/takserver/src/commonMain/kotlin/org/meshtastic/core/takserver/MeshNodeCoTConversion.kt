@@ -78,11 +78,11 @@ internal fun Node.cotCallsign(): String {
 internal fun Node.cotRemarks(): String? {
     val parts = buildList {
         batteryLevel?.let { add("Battery: $it%") }
-        voltage?.let { add("Voltage: ${NumberFormatter.format(it, VOLTAGE_DECIMALS)}V") }
-        deviceMetrics.channel_utilization?.let { add("Chan Util: ${NumberFormatter.format(it, 1)}%") }
-        deviceMetrics.air_util_tx?.let { add("Air Util Tx: ${NumberFormatter.format(it, 1)}%") }
+        voltage?.let { add("Voltage: ${NumberFormatter.formatInvariant(it, VOLTAGE_DECIMALS)}V") }
+        deviceMetrics.channel_utilization?.let { add("Chan Util: ${NumberFormatter.formatInvariant(it, 1)}%") }
+        deviceMetrics.air_util_tx?.let { add("Air Util Tx: ${NumberFormatter.formatInvariant(it, 1)}%") }
         rssiOrNull?.let { add("RSSI: $it dBm") }
-        snrOrNull?.let { add("SNR: ${NumberFormatter.format(it, 1)} dB") }
+        snrOrNull?.let { add("SNR: ${NumberFormatter.formatInvariant(it, 1)} dB") }
     }
     return parts.joinToString(" | ").ifEmpty { null }
 }

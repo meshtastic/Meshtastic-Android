@@ -22,8 +22,8 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.v2.runComposeUiTest
+import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.model.Node
-import org.meshtastic.proto.Config
 import kotlin.test.Test
 import org.meshtastic.proto.EnvironmentMetrics as EnvironmentMetricsProto
 
@@ -83,7 +83,7 @@ class EnvironmentChannelMetricsTest {
         MaterialTheme {
             EnvironmentMetrics(
                 node = Node(num = 1, environmentMetrics = metrics),
-                displayUnits = Config.DisplayConfig.DisplayUnits.METRIC,
+                displayUnits = MeasurementSystem.METRIC,
             )
         }
     }

@@ -16,7 +16,7 @@
  */
 package org.meshtastic.core.model.util
 
-import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits
+import org.meshtastic.core.common.util.MeasurementSystem
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -24,18 +24,32 @@ class DistanceExtensionsTest {
 
     @Test
     fun `kmhIn returns value unchanged for metric`() {
-        assertEquals(50, 50.kmhIn(DisplayUnits.METRIC))
+        assertEquals(50, 50.kmhIn(MeasurementSystem.METRIC))
     }
 
     @Test
     fun `kmhIn converts to mph for imperial`() {
-        assertEquals(31, 50.kmhIn(DisplayUnits.IMPERIAL))
-        assertEquals(50, 80.kmhIn(DisplayUnits.IMPERIAL))
+        assertEquals(31, 50.kmhIn(MeasurementSystem.IMPERIAL))
+        assertEquals(50, 80.kmhIn(MeasurementSystem.IMPERIAL))
+    }
+
+    /** Exact values, not the 10 m buckets CLDR's road rounding would have imposed. */
+    @Test
+    fun `distances keep their precision`() {
+        assertEquals("87 m", 87.toDistanceString(MeasurementSystem.METRIC))
+        assertEquals("320 m", 320.toDistanceString(MeasurementSystem.METRIC))
+    }
+
+    @Test
+    fun `metres switch to kilometres at the threshold`() {
+        assertEquals("999 m", 999.toDistanceString(MeasurementSystem.METRIC))
+        assertEquals("1.0 km", 1000.toDistanceString(MeasurementSystem.METRIC))
+        assertEquals("1.0 mi", 1609.toDistanceString(MeasurementSystem.IMPERIAL))
     }
 
     @Test
     fun `kmhIn handles zero`() {
-        assertEquals(0, 0.kmhIn(DisplayUnits.METRIC))
-        assertEquals(0, 0.kmhIn(DisplayUnits.IMPERIAL))
+        assertEquals(0, 0.kmhIn(MeasurementSystem.METRIC))
+        assertEquals(0, 0.kmhIn(MeasurementSystem.IMPERIAL))
     }
 }

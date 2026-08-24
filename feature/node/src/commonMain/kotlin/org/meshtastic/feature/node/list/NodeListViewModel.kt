@@ -28,14 +28,14 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
+import org.meshtastic.core.common.util.LocaleUnitsProvider
+import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.common.util.TemperatureUnit
-import org.meshtastic.core.common.util.getSystemTemperatureUnit
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.NodeListDensity
 import org.meshtastic.core.model.NodeSortOption
-import org.meshtastic.core.model.util.DistanceUnit
 import org.meshtastic.core.repository.AdminController
 import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.DeviceHardwareRepository
@@ -64,6 +64,7 @@ class NodeListViewModel(
     private val nodeRequestActions: NodeRequestActions,
     private val getFilteredNodesUseCase: GetFilteredNodesUseCase,
     val nodeFilterPreferences: NodeFilterPreferences,
+    localeUnitsProvider: LocaleUnitsProvider,
 ) : ViewModel() {
 
     val ourNodeInfo: StateFlow<Node?> = nodeRepository.ourNodeInfo
@@ -132,16 +133,20 @@ class NodeListViewModel(
             )
         }
 
-    // OS locale rarely changes mid-session; snapshot once instead of per filter/sort emission.
-    private val distanceUnits = DistanceUnit.getFromLocale().value
-    private val tempInFahrenheit = getSystemTemperatureUnit() == TemperatureUnit.FAHRENHEIT
+    // Re-read on every locale change: this ViewModel survives the configuration change one triggers, so a value
+    // snapshotted at construction would keep showing the old units until the screen is rebuilt.
+    private val localeUnits: Flow<LocaleUnits> =
+        combine(localeUnitsProvider.measurementSystem, localeUnitsProvider.temperatureUnit) { system, temperature ->
+            LocaleUnits(distanceUnits = system, tempInFahrenheit = temperature == TemperatureUnit.FAHRENHEIT)
+        }
+
     val nodesUiState: StateFlow<NodesUiState> =
-        combine(nodeSortOption, nodeFilter) { sort, nodeFilter ->
+        combine(nodeSortOption, nodeFilter, localeUnits) { sort, nodeFilter, units ->
             NodesUiState(
                 sort = sort,
                 filter = nodeFilter,
-                distanceUnits = distanceUnits,
-                tempInFahrenheit = tempInFahrenheit,
+                distanceUnits = units.distanceUnits,
+                tempInFahrenheit = units.tempInFahrenheit,
             )
         }
             .stateInWhileSubscribed(initialValue = NodesUiState())
@@ -223,10 +228,13 @@ class NodeListViewModel(
     }
 }
 
+/** The locale-derived display units, re-read together whenever the OS reports a locale change. */
+private data class LocaleUnits(val distanceUnits: MeasurementSystem, val tempInFahrenheit: Boolean)
+
 data class NodesUiState(
     val sort: NodeSortOption = NodeSortOption.LAST_HEARD,
     val filter: NodeFilterState = NodeFilterState(),
-    val distanceUnits: Int = 0,
+    val distanceUnits: MeasurementSystem = MeasurementSystem.METRIC,
     val tempInFahrenheit: Boolean = false,
 )
 

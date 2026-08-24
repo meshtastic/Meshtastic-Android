@@ -18,7 +18,7 @@ package org.meshtastic.core.ui.component
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
@@ -26,10 +26,10 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.v2.runComposeUiTest
+import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.toDistanceString
-import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.User
 import kotlin.test.Test
@@ -58,20 +58,20 @@ class NodeItemDistanceUnitsTest {
     }
 
     private fun ComposeUiTest.assertDistanceUpdates(
-        content: @androidx.compose.runtime.Composable (Node, Node, Int) -> Unit,
+        content: @androidx.compose.runtime.Composable (Node, Node, MeasurementSystem) -> Unit,
     ) {
         val thisNode = node(num = 1, latitudeI = 100_000_000, longitudeI = 100_000_000)
         val thatNode = node(num = 2, latitudeI = 100_000_000, longitudeI = 110_000_000)
         val distanceMeters = requireNotNull(thisNode.distance(thatNode))
-        val metricDistance = distanceMeters.toDistanceString(DisplayUnits.METRIC)
-        val imperialDistance = distanceMeters.toDistanceString(DisplayUnits.IMPERIAL)
-        var distanceUnits by mutableIntStateOf(DisplayUnits.METRIC.value)
+        val metricDistance = distanceMeters.toDistanceString(MeasurementSystem.METRIC)
+        val imperialDistance = distanceMeters.toDistanceString(MeasurementSystem.IMPERIAL)
+        var distanceUnits by mutableStateOf(MeasurementSystem.METRIC)
 
         setContent { MaterialTheme { content(thisNode, thatNode, distanceUnits) } }
 
         onNodeWithText(metricDistance).assertIsDisplayed()
 
-        runOnIdle { distanceUnits = DisplayUnits.IMPERIAL.value }
+        runOnIdle { distanceUnits = MeasurementSystem.IMPERIAL }
 
         onNodeWithText(metricDistance).assertDoesNotExist()
         onNodeWithText(imperialDistance).assertIsDisplayed()

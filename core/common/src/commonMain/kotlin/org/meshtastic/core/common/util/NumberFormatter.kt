@@ -19,20 +19,53 @@ package org.meshtastic.core.common.util
 import kotlin.math.pow
 import kotlin.math.roundToLong
 
-/** Pure Kotlin number formatting utility — no expect/actual needed. */
+/**
+ * Number formatting for display, and its locale-independent counterpart.
+ *
+ * [format] follows the OS locale, because a number shown to a user should read the way that user writes numbers.
+ * [formatInvariant] keeps a fixed dot separator and no grouping, for the few strings that are not prose: interop
+ * payloads another system parses, and values that get re-parsed rather than read.
+ */
 object NumberFormatter {
-    /** Formats a double value with the specified number of decimal places. */
+    /** Formats a double for display, using the locale's decimal and grouping separators. */
     fun format(value: Double, decimalPlaces: Int): String {
-        if (value.isNaN() || value.isInfinite()) return "—"
-        val factor = 10.0.pow(decimalPlaces)
-        val rounded = (value * factor).roundToLong()
+        if (value.isNaN() || value.isInfinite()) return UNKNOWN_VALUE
+        return formatDecimalLocalized(value, decimalPlaces)
+    }
+
+    /** Formats a float for display, using the locale's decimal and grouping separators. */
+    fun format(value: Float, decimalPlaces: Int): String {
+        if (value.isNaN() || value.isInfinite()) return UNKNOWN_VALUE
+        return format(value.toDouble(), decimalPlaces)
+    }
+
+    /**
+     * Formats with a fixed dot separator and no grouping, whatever the locale.
+     *
+     * For strings that are not read as prose: a CoT payload another client parses, or a value written out and read
+     * back. Localizing those turns "1.5" into "1,5" and breaks the reader.
+     */
+    fun formatInvariant(value: Double, decimalPlaces: Int): String {
+        val scaled = value * 10.0.pow(decimalPlaces)
+        // Past Long's range the scaling saturates, and negating Long.MIN_VALUE is a no-op that would print a
+        // double-signed number. NaN fails every comparison, so it is tested directly.
+        val unrepresentable =
+            value.isNaN() ||
+                value.isInfinite() ||
+                scaled >= Long.MAX_VALUE.toDouble() ||
+                scaled <= Long.MIN_VALUE.toDouble()
+        if (unrepresentable) return UNKNOWN_VALUE
+        // Half away from zero, matching the locale path's HALF_UP. Kotlin's roundToLong breaks ties toward positive
+        // infinity, so a negative tie like -6.25 dB would otherwise print -6.2 here and -6.3 on screen — and firmware
+        // reports SNR in quarter-dB steps, so those ties are routine rather than theoretical.
+        val rounded = if (scaled < 0) -((-scaled).roundToLong()) else scaled.roundToLong()
         return formatFixedPoint(rounded, decimalPlaces)
     }
 
-    /** Formats a float value with the specified number of decimal places. */
-    fun format(value: Float, decimalPlaces: Int): String {
-        if (value.isNaN() || value.isInfinite()) return "—"
-        return format(value.toDouble(), decimalPlaces)
+    /** Float overload of [formatInvariant]. */
+    fun formatInvariant(value: Float, decimalPlaces: Int): String {
+        if (value.isNaN() || value.isInfinite()) return UNKNOWN_VALUE
+        return formatInvariant(value.toDouble(), decimalPlaces)
     }
 
     /**
@@ -74,4 +107,7 @@ object NumberFormatter {
 
     /** Decimal marks reachable from a `Decimal`/`DecimalSigned` keyboard, across keyboard locales. */
     private val DECIMAL_SEPARATORS = setOf('.', ',', '٫', '、', '·')
+
+    /** Shown in place of a value the radio did not report, or one that is not a number. */
+    private const val UNKNOWN_VALUE = "—"
 }

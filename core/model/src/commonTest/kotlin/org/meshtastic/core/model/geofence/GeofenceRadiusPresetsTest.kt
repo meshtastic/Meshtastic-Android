@@ -16,7 +16,7 @@
  */
 package org.meshtastic.core.model.geofence
 
-import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits
+import org.meshtastic.core.common.util.MeasurementSystem
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -30,15 +30,15 @@ class GeofenceRadiusPresetsTest {
 
     @Test
     fun forUnitsSelectsBySystem() {
-        assertEquals(GeofenceRadiusPresets.IMPERIAL_METERS, GeofenceRadiusPresets.forUnits(DisplayUnits.IMPERIAL))
-        assertEquals(GeofenceRadiusPresets.METRIC_METERS, GeofenceRadiusPresets.forUnits(DisplayUnits.METRIC))
+        assertEquals(GeofenceRadiusPresets.IMPERIAL_METERS, GeofenceRadiusPresets.forUnits(MeasurementSystem.IMPERIAL))
+        assertEquals(GeofenceRadiusPresets.METRIC_METERS, GeofenceRadiusPresets.forUnits(MeasurementSystem.METRIC))
     }
 
     @Test
     fun nearestSnapsToClosestPreset() {
-        assertEquals(0, GeofenceRadiusPresets.nearest(0, DisplayUnits.METRIC))
-        assertEquals(100, GeofenceRadiusPresets.nearest(120, DisplayUnits.METRIC))
-        assertEquals(2000, GeofenceRadiusPresets.nearest(2600, DisplayUnits.METRIC))
-        assertEquals(5000, GeofenceRadiusPresets.nearest(99999, DisplayUnits.METRIC))
+        assertEquals(0, GeofenceRadiusPresets.nearest(0, MeasurementSystem.METRIC))
+        assertEquals(100, GeofenceRadiusPresets.nearest(120, MeasurementSystem.METRIC))
+        assertEquals(2000, GeofenceRadiusPresets.nearest(2600, MeasurementSystem.METRIC))
+        assertEquals(5000, GeofenceRadiusPresets.nearest(99999, MeasurementSystem.METRIC))
     }
 }

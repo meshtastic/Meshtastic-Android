@@ -142,7 +142,8 @@ class MeshNodeCoTConversionTest {
         assertEquals(-122.4194, cot.longitude, absoluteTolerance = 1e-6)
     }
 
-    private companion object {
+    // Internal, not private: the locale-invariance test in jvmTest builds its nodes from the same fixtures.
+    internal companion object {
         const val NODE_NUM = 0xa1b2c3d4.toInt()
         const val OTHER_NODE_NUM = 0x11111111
         const val STALE_THRESHOLD = 1_000_000

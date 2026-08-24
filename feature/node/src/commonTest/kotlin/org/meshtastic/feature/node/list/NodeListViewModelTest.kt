@@ -25,12 +25,15 @@ import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import org.meshtastic.core.common.util.MeasurementSystem
+import org.meshtastic.core.common.util.TemperatureUnit
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeSortOption
 import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.testing.FakeDeviceHardwareRepository
+import org.meshtastic.core.testing.FakeLocaleUnitsProvider
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.testing.FakeRadioInterfaceService
@@ -52,6 +55,7 @@ class NodeListViewModelTest {
     private val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
     private val connectionStateProvider: ConnectionStateProvider = mock(MockMode.autofill)
     private val nodeFilterPreferences: NodeFilterPreferences = mock(MockMode.autofill)
+    private val localeUnitsProvider = FakeLocaleUnitsProvider()
     private val nodeManagementActions: NodeManagementActions = mock(MockMode.autofill)
     private val nodeRequestActions: NodeRequestActions = mock(MockMode.autofill)
     private val getFilteredNodesUseCase: GetFilteredNodesUseCase = mock(MockMode.autofill)
@@ -91,6 +95,7 @@ class NodeListViewModelTest {
         nodeRequestActions = nodeRequestActions,
         getFilteredNodesUseCase = getFilteredNodesUseCase,
         nodeFilterPreferences = nodeFilterPreferences,
+        localeUnitsProvider = localeUnitsProvider,
     )
 
     @Test
@@ -113,6 +118,26 @@ class NodeListViewModelTest {
             nodesFlow.value = testNodes
 
             assertEquals(3, awaitItem().size)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    /**
+     * The regression this guards: units used to be snapshotted at construction, so a user changing their regional
+     * preferences kept seeing the old ones until the screen was rebuilt.
+     */
+    @Test
+    fun `nodesUiState follows a mid-session units change`() = runTest {
+        val vm = createViewModel()
+        vm.nodesUiState.test {
+            assertEquals(MeasurementSystem.METRIC, awaitItem().distanceUnits)
+
+            localeUnitsProvider.set(system = MeasurementSystem.IMPERIAL, temperature = TemperatureUnit.FAHRENHEIT)
+
+            val updated = awaitItem()
+            assertEquals(MeasurementSystem.IMPERIAL, updated.distanceUnits)
+            assertEquals(true, updated.tempInFahrenheit)
+
             cancelAndIgnoreRemainingEvents()
         }
     }

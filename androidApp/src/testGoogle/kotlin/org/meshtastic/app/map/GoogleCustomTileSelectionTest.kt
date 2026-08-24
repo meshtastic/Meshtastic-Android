@@ -46,6 +46,7 @@ import org.meshtastic.app.map.repository.CustomTileProviderRepositoryImpl
 import org.meshtastic.app.map.repository.CustomTileProviderSaveResult
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.testing.FakeLocaleUnitsProvider
 import org.meshtastic.core.testing.FakeMapPrefs
 import org.meshtastic.core.testing.FakeMapTileProviderPrefs
 import org.meshtastic.core.testing.FakeNodeRepository
@@ -208,6 +209,7 @@ class GoogleCustomTileSelectionTest {
             uiPrefs = FakeUiPrefs(),
             notificationPrefs = FakeNotificationPrefs(),
             savedStateHandle = SavedStateHandle(),
+            localeUnitsProvider = FakeLocaleUnitsProvider(),
         )
     }
 

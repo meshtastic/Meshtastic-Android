@@ -19,6 +19,7 @@ package org.meshtastic.core.model
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.util.GPSFormat
+import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.common.util.bearing
 import org.meshtastic.core.common.util.latLongToMeter
@@ -145,8 +146,7 @@ data class Node(
     }
 
     // @return formatted distance string to another node, using the given display units
-    fun distanceStr(o: Node, displayUnits: Config.DisplayConfig.DisplayUnits): String? =
-        distance(o)?.toDistanceString(displayUnits)
+    fun distanceStr(o: Node, displayUnits: MeasurementSystem): String? = distance(o)?.toDistanceString(displayUnits)
 
     // @return bearing to the other position in degrees
     fun bearing(o: Node?): Int? = when {

@@ -100,6 +100,12 @@ internal fun Project.configureTestOptions() {
         systemProperty("java.awt.headless", "true")
         jvmArgs("-Dapple.awt.UIElement=true")
 
+        // Numbers and units format in the OS locale, so the forked test JVMs are pinned to one: otherwise a
+        // contributor whose machine defaults to de-DE gets "0,0°C" and fails every test that pins "0.0°C".
+        // Locale-specific behaviour is asserted by tests that set the locale themselves.
+        systemProperty("user.language", "en")
+        systemProperty("user.country", "US")
+
         // JUnit Jupiter parallel execution within each Gradle fork.
         // Classes run sequentially ("same_thread") because 19+ ViewModel test classes use
         // Dispatchers.setMain() — a JVM-global singleton that races when classes execute

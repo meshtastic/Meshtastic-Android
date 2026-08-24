@@ -19,10 +19,10 @@ package org.meshtastic.feature.discovery.export
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.common.util.NumberFormatter
+import org.meshtastic.core.common.util.getSystemMeasurementSystem
 import org.meshtastic.core.database.entity.DiscoveredNodeEntity
 import org.meshtastic.core.database.entity.DiscoveryPresetResultEntity
 import org.meshtastic.core.database.entity.DiscoverySessionEntity
-import org.meshtastic.core.model.util.DistanceUnit
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.feature.discovery.ui.formatDuration
 import kotlin.math.roundToInt
@@ -65,7 +65,7 @@ internal object DiscoveryReportFormatter {
         append(" | RSSI: ${MetricFormatter.rssi(node.rssi)}")
         val distance = node.distanceFromUser
         if (distance != null) {
-            append(" | ${distance.roundToInt().toDistanceString(DistanceUnit.getFromLocale())}")
+            append(" | ${distance.roundToInt().toDistanceString(getSystemMeasurementSystem())}")
         }
     }
 

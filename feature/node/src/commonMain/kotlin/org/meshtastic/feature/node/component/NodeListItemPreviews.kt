@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import okio.ByteString.Companion.toByteString
+import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.ui.component.NodeItem
 import org.meshtastic.core.ui.component.NodeItemCompact
@@ -52,7 +53,7 @@ fun NodeItemCompletePreview() {
                 NodeItem(
                     thisNode = previewNodes.mickeyMouse,
                     thatNode = previewNodes.minnieMouse,
-                    distanceUnits = 0,
+                    distanceUnits = MeasurementSystem.METRIC,
                     tempInFahrenheit = false,
                     connectionState = ConnectionState.Connected,
                 )
@@ -70,7 +71,7 @@ fun NodeItemCompleteActivePreview() {
                 NodeItem(
                     thisNode = previewNodes.mickeyMouse,
                     thatNode = previewNodes.mickeyMouse,
-                    distanceUnits = 0,
+                    distanceUnits = MeasurementSystem.METRIC,
                     tempInFahrenheit = false,
                     connectionState = ConnectionState.Connected,
                     isActive = true,
@@ -91,7 +92,7 @@ fun NodeItemSignedPreview() {
                 NodeItem(
                     thisNode = previewNodes.mickeyMouse,
                     thatNode = signedNode,
-                    distanceUnits = 0,
+                    distanceUnits = MeasurementSystem.METRIC,
                     tempInFahrenheit = false,
                     connectionState = ConnectionState.Connected,
                 )
@@ -110,7 +111,7 @@ fun NodeItemUnknownPreview() {
                 NodeItem(
                     thisNode = previewNodes.mickeyMouse,
                     thatNode = previewNodes.unknown,
-                    distanceUnits = 0,
+                    distanceUnits = MeasurementSystem.METRIC,
                     tempInFahrenheit = false,
                     connectionState = ConnectionState.Connected,
                 )
@@ -129,7 +130,11 @@ fun NodeItemCompactUnknownPreview() {
     AppTheme {
         Surface {
             Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-                NodeItemCompact(thisNode = previewNodes.mickeyMouse, thatNode = previewNodes.unknown, distanceUnits = 0)
+                NodeItemCompact(
+                    thisNode = previewNodes.mickeyMouse,
+                    thatNode = previewNodes.unknown,
+                    distanceUnits = MeasurementSystem.METRIC,
+                )
             }
         }
     }
@@ -144,7 +149,7 @@ fun NodeItemCompactAllFieldsPreview() {
                 NodeItemCompact(
                     thisNode = previewNodes.mickeyMouse,
                     thatNode = previewNodes.minnieMouse,
-                    distanceUnits = 0,
+                    distanceUnits = MeasurementSystem.METRIC,
                 )
             }
         }
@@ -160,7 +165,7 @@ fun NodeItemCompactMinimalPreview() {
                 NodeItemCompact(
                     thisNode = previewNodes.mickeyMouse,
                     thatNode = previewNodes.minnieMouse,
-                    distanceUnits = 0,
+                    distanceUnits = MeasurementSystem.METRIC,
                     showPower = false,
                     showLastHeard = false,
                     showLocation = false,
@@ -184,7 +189,7 @@ fun NodeItemCompactActivePreview() {
                 NodeItemCompact(
                     thisNode = previewNodes.mickeyMouse,
                     thatNode = previewNodes.mickeyMouse,
-                    distanceUnits = 0,
+                    distanceUnits = MeasurementSystem.METRIC,
                     isActive = true,
                 )
             }
@@ -200,7 +205,11 @@ fun NodeItemCompactOnlineRemotePreview() {
     AppTheme {
         Surface {
             Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-                NodeItemCompact(thisNode = previewNodes.mickeyMouse, thatNode = onlineNode, distanceUnits = 0)
+                NodeItemCompact(
+                    thisNode = previewNodes.mickeyMouse,
+                    thatNode = onlineNode,
+                    distanceUnits = MeasurementSystem.METRIC,
+                )
             }
         }
     }
@@ -217,7 +226,7 @@ fun NodeItemCompleteOnlineRemotePreview() {
                 NodeItem(
                     thisNode = previewNodes.mickeyMouse,
                     thatNode = onlineNode,
-                    distanceUnits = 0,
+                    distanceUnits = MeasurementSystem.METRIC,
                     tempInFahrenheit = false,
                     connectionState = ConnectionState.Connected,
                 )

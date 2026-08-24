@@ -37,7 +37,7 @@ import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.InjectedParam
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.CommonUri
-import org.meshtastic.core.common.util.formatString
+import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.MeshLog
@@ -388,7 +388,9 @@ open class MetricsViewModel(
         ) { pos ->
             val lat = (pos.latitude_i ?: 0) * GeoConstants.DEG_D
             val lon = (pos.longitude_i ?: 0) * GeoConstants.DEG_D
-            val heading = formatString("%.2f", (pos.ground_track ?: 0) * GeoConstants.HEADING_DEG)
+            // Invariant: a CSV column is parsed, not read. A comma decimal here would shift every later field.
+            val heading =
+                NumberFormatter.formatInvariant((pos.ground_track ?: 0) * GeoConstants.HEADING_DEG, HEADING_DECIMALS)
             "\"$lat\",\"$lon\",\"${pos.altitude}\",\"${pos.sats_in_view}\",\"${pos.ground_speed}\",\"$heading\""
         }
     }
@@ -580,11 +582,15 @@ open class MetricsViewModel(
     protected fun decodeBase64(base64: String): ByteArray = base64.decodeBase64()?.toByteArray() ?: ByteArray(0)
 }
 
-private fun buildGpx(positions: List<org.meshtastic.proto.Position>, trackName: String): String {
+/**
+ * Coordinates are formatted invariantly: GPX is XML another program parses, and a comma decimal makes
+ * `lat="52,5200000"` — a file no importer accepts. Internal so a test can pin a comma locale and prove it.
+ */
+internal fun buildGpx(positions: List<org.meshtastic.proto.Position>, trackName: String): String {
     val trkpts = buildString {
         for (pos in positions) {
-            val lat = formatString("%.7f", (pos.latitude_i ?: 0) * GeoConstants.DEG_D)
-            val lon = formatString("%.7f", (pos.longitude_i ?: 0) * GeoConstants.DEG_D)
+            val lat = NumberFormatter.formatInvariant((pos.latitude_i ?: 0) * GeoConstants.DEG_D, COORDINATE_DECIMALS)
+            val lon = NumberFormatter.formatInvariant((pos.longitude_i ?: 0) * GeoConstants.DEG_D, COORDINATE_DECIMALS)
             append("    <trkpt lat=\"$lat\" lon=\"$lon\">")
             if ((pos.altitude ?: 0) != 0) append("<ele>${pos.altitude}</ele>")
             if (pos.time > 0) append("<time>${Instant.fromEpochSeconds(pos.time.toLong())}</time>")
@@ -601,3 +607,8 @@ $trkpts    </trkseg>
   </trk>
 </gpx>"""
 }
+
+/** GPX stores coordinates to 7 decimals, roughly a centimetre. */
+private const val COORDINATE_DECIMALS = 7
+
+private const val HEADING_DECIMALS = 2

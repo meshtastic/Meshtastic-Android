@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import org.koin.core.annotation.KoinViewModel
+import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.common.util.bearing
 import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.common.util.latLongToMeter
@@ -36,7 +37,6 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.ui.component.precisionBitsToMeters
 import org.meshtastic.core.ui.viewmodel.safeLaunch
-import org.meshtastic.proto.Config
 import org.meshtastic.proto.Position
 import kotlin.math.abs
 import kotlin.math.atan2
@@ -69,7 +69,7 @@ class CompassViewModel(
     private var targetPositionProto: Position? = null
     private var targetPositionTimeSec: Long? = null
 
-    fun start(node: Node, displayUnits: Config.DisplayConfig.DisplayUnits) {
+    fun start(node: Node, displayUnits: MeasurementSystem) {
         val targetPos = node.validPosition?.let { node.latitude to node.longitude }
         targetPosition = targetPos
         targetPositionProto = node.position

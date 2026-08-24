@@ -22,9 +22,9 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.v2.runComposeUiTest
+import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
-import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits
 import org.meshtastic.proto.EnvironmentMetrics
 import org.meshtastic.proto.User
 import kotlin.test.Test
@@ -108,7 +108,7 @@ class NodeItemZeroMetricsTest {
             NodeItem(
                 thisNode = null,
                 thatNode = node(metrics),
-                distanceUnits = DisplayUnits.METRIC.value,
+                distanceUnits = MeasurementSystem.METRIC,
                 tempInFahrenheit = false,
                 connectionState = ConnectionState.Connected,
             )
@@ -117,7 +117,7 @@ class NodeItemZeroMetricsTest {
 
     private fun ComposeUiTest.setNodeItemCompact(metrics: EnvironmentMetrics) = setContent {
         MaterialTheme {
-            NodeItemCompact(thisNode = null, thatNode = node(metrics), distanceUnits = DisplayUnits.METRIC.value)
+            NodeItemCompact(thisNode = null, thatNode = node(metrics), distanceUnits = MeasurementSystem.METRIC)
         }
     }
 
