@@ -66,8 +66,9 @@ interface MeshConnectionManager {
      *
      * On fast transports (TCP, USB serial) this re-arms the transport-aware handshake watchdog so a steady trickle of
      * progress does not trip the aggressive fast-recovery timeout while a true stall still fires on schedule. On BLE
-     * this is a no-op: BLE keeps the original long-and-retry stall-guard budget because GATT latency is high and
-     * variable.
+     * this re-arms the current stage's stall guard with its full budget, turning the fixed stage deadline into an
+     * inactivity window: a large node database that streams for longer than the budget is not misread as a stall, while
+     * a silent link still fires on schedule because nothing re-arms.
      */
     fun onHandshakeProgress()
 
