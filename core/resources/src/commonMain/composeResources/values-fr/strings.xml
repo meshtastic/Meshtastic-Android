@@ -307,6 +307,8 @@
     <string name="current">Actif</string>
     <string name="currently">Actuellement :</string>
     <string name="date">Date</string>
+    <string name="date_separator_today">Aujourd'hui</string>
+    <string name="date_separator_yesterday">Hier</string>
     <string name="dbm_value">%1$d dBm</string>
     <!-- DEBUG -->
     <string name="debug">Debug</string>

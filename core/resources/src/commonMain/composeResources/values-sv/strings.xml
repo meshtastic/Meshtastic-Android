@@ -254,6 +254,8 @@
     <string name="current">Ström</string>
     <string name="currently">Nuvarande:</string>
     <string name="date">Datum</string>
+    <string name="date_separator_today">Idag</string>
+    <string name="date_separator_yesterday">Igår</string>
     <string name="dbm_value">%1$d dBm</string>
     <!-- DEBUG -->
     <string name="debug">Felsökning</string>

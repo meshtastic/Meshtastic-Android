@@ -316,6 +316,8 @@
     <string name="current">Strom</string>
     <string name="currently">Aktuell:</string>
     <string name="date">Datum</string>
+    <string name="date_separator_today">Heute</string>
+    <string name="date_separator_yesterday">Gestern</string>
     <string name="dbm_value">%1$d dBm</string>
     <!-- DEBUG -->
     <string name="debug">Debug</string>
