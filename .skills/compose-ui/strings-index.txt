@@ -1670,6 +1670,7 @@ site_planner_tx_power_watts
 site_planner_use_current_location
 site_planner_use_map_center
 site_planner_use_node_location
+site_planner_webview_updating
 skip
 slot
 smart_position
