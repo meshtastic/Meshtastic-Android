@@ -37,7 +37,7 @@ Tap the widget to open the app, or use its refresh control to request fresh stat
 
 > ⚠️ **Märkus:** Vidin on ainult Androidile. It is not available on the Desktop or iOS builds.
 
-## Related Topics
+## Seotud teemad
 
 - [Node Metrics](node-metrics) — the full Signal Quality and Local Stats history inside the app
 - [Ühendused](connections) — loo ühendus raadioga, et vidinal oleks statistikat kuvada

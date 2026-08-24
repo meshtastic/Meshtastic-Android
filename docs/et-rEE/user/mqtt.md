@@ -1,6 +1,6 @@
 ---
 title: MQTT
-parent: User Guide
+parent: Kasutusjuhend
 nav_order: 11
 last_updated: 2026-05-13
 description: Silda oma võrk internetiga – MQTT maakleri seadistamine, krüpteerimiskihid ja kaardiaruandlus.
@@ -14,7 +14,7 @@ aliases:
 
 MQTT ühendab Meshtastic võrgu internetiga, võimaldades raadiolevi ulatusest kaugemale ulatuvat pikamaasidet.
 
-## Overview
+## Ülevaade
 
 MQTT moodul ühendab sinu sõlme MQTT vahendajaga, võimaldades:
 
@@ -23,7 +23,7 @@ MQTT moodul ühendab sinu sõlme MQTT vahendajaga, võimaldades:
 - Sõlmede asukoha avaldamine avalikul Meshtastic kaardil
 - Custom data pipelines for logging and alerting
 
-## How It Works
+## Kuidas see toimib
 
 ```
 [Sinu sõlm] → Raadio → [WiFi-ga lüüsisõlm] → MQTT vahendaja → [Kauglüüs] → Raadio → [Kaugsõlm]
@@ -86,7 +86,7 @@ Kui kaardiaruandlus on lubatud, avaldab sõlm oma asukoha Meshtasticu kogukonnak
 
 ## Üleslink vs allalink
 
-| Direction    | Kirjeldus                          |
+| Suund        | Kirjeldus                          |
 | ------------ | ---------------------------------- |
 | **Üleslink** | Sõnumid kärgvõrgust → MQTT maakler |
 | **Allalink** | Sõnumid MQTT maaklerist → kärgvõrk |
@@ -97,7 +97,7 @@ Konfi iga kanali kohta, millised suunad on aktiivsed, et kontrollida sõnumivoog
 
 MQTT kasutab protobuf-sõnumivormingut:
 
-| Vorming      | Kirjeldus                              | Use case                   |
+| Vorming      | Kirjeldus                              | Kasutusjuhtum              |
 | ------------ | -------------------------------------- | -------------------------- |
 | **Protobuf** | Binaarne Meshtastic protobuf kodeering | Node-to-node mesh bridging |
 
@@ -113,7 +113,7 @@ Understanding the layered encryption model:
 
 > 🔒 **Tähtis:** Vaikimisi avalikul kanalil on tuntud võti. MQTT kaudu saadetud vaikekanalil olevad sõnumid on sisuliselt **krüpteerimata** – igaüks saab neid dekodeerida. Always use a custom PSK for private communications.
 
-## Best Practices
+## Parimad tavad
 
 - Kasuta kanali krüptimist (PSK), kanalitel mis on sillatud MQTT-ga
 - Ära luba MQTT internetiühenduseta sõlmedel (see puhverdab ja raiskab mälu)
@@ -121,7 +121,7 @@ Understanding the layered encryption model:
 - MQTT sõnumite allalaadimisel arvesta eetriaja kuluga – iga allalingitud sõnum tarbib sinu kohalikus võrgus raadioeetriaega
 - Kaalu ainult üleslingi lubamist, kui sul on vaja oma kärgvõrku eemalt jälgida ilma sõnumeid tagasi tõmbamata
 
-## Troubleshooting
+## Veaotsing
 
 ### MQTT ei ühendu
 
@@ -136,7 +136,7 @@ Understanding the layered encryption model:
 - **Kanali mittevastavus** – mõlemad lüüsid peavad jagama sama kanalit sama PSK-ga. Vastuolu tähendab, et sõnumid on krüpteeritud erinevate võtmetega ja kuvatakse prügina.
 - **Teema mittevastavus** — veendu, et mõlemad lüüsid kasutaksid sama juurteemat. The default `msh` works for the public broker.
 
-## Related Topics
+## Seotud teemad
 
 - [Seaded — Moodulid ja administreerimine](settings-module-admin) — MQTT mooduli konfi viide
 - [Sõnumid ja kanalid](messages-and-channels) — kanali krüptimine ja PSK seadistamine

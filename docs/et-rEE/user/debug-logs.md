@@ -32,13 +32,13 @@ Each tab has its own **export** button and produces its own file, so you can gra
 
 Rakenduse logide vahekaart kuvab ainult selle rakenduse uusimaid logisid – mitte kunagi teiste seadmes olevate rakenduste logisid.
 
-- **Search** — type in the search box to filter to matching lines.
+- **Otsi** – sisesta otsingukasti otsing, et filtreerida sobivate ridade hulgast.
 - **Tasemefilter** — **V / D / I / W / E** kiibid lülitavad sisse üksikasjaliku, arendaja-, teabe-, hoiatus- ja vearea. Tap a level to hide it; tap again to bring it back. Fataalseid jooni näidatakse alati.
-- **Refresh** — the refresh icon re-reads the latest logs.
+- **Värskenda** – värskendamise ikoon loeb uuesti viimased logid.
 
 Error and warning lines are tinted so problems stand out.
 
-## Exporting
+## Eksportimine
 
 Praeguste logide faili salvestamiseks puuduta ikooni **allalaadimine**. Süsteemi failivalijast valite, kuhu see liigub ja failile lisatakse ajatempliga nimi (näiteks `meshtastic_logcat_20260701_143312.txt`), nii, et korduvad ekspordid ei kirjuta üksteist kunagi üle.
 
@@ -48,11 +48,11 @@ Attach that file to your GitHub issue.
 
 ## Töölaud
 
-Töölauarakendusel puudub süsteemi logcat, seega kuvatakse vahekaardil **Rakenduse logid** rakenduse enda jäädvustatud logide väljundit. Search, filtering, and export work the same way.
+Töölauarakendusel puudub süsteemi logcat, seega kuvatakse vahekaardil **Rakenduse logid** rakenduse enda jäädvustatud logide väljundit. Otsimine, filtreerimine ja eksportimine toimivad samamoodi.
 
-## Related Topics
+## Seotud teemad
 
-- [Help & In-App Docs](help-and-docs) — reading this documentation offline inside the app
+- [Abi ja rakendusesisesed dokumendid](help-and-docs) — selle dokumentatsiooni lugemine rakenduses võrguühenduseta
 - [Connections](connections) — if the problem is getting connected to your radio in the first place
 
 ---

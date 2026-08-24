@@ -1,12 +1,12 @@
 ---
 title: Kuidas Meshtastic signaalimõõtur töötab
-parent: User Guide
+parent: Kasutusjuhend
 nav_order: 15
 last_updated: 2026-07-08
 description: How the signal meter rates quality from SNR relative to the LoRa modem preset — spread spectrum, presets, and what the bars really mean.
 aliases:
-  - signal
-  - signal-meter
+  - signaal
+  - signaali-mõõtur
   - snr
   - rssi
 ---
@@ -40,7 +40,7 @@ Kui su sõber karjub sulle kõrvulukustava rokkkontserdi ajal, on signaal uskuma
 
 Standardraadiote (nt FM või WiFi) puhul, kui taustamüra on signaalist valjem (negatiivne signaali-müra suhe), kuuleb vastuvõtja ainult staatilist müra.
 
-LoRa is special. It uses **"Spread Spectrum"** modulation, which allows the radio to mathematically pull a signal out of the air even when it is buried deep _underneath_ the background noise. Seepärast näed Meshtasticus sageli **negatiivseid SNR numbreid** (nt -10 dB, mis tähendab, et signaal on 10 detsibelli nõrgem kui taustamüra).
+LoRa on eriline. It uses **"Spread Spectrum"** modulation, which allows the radio to mathematically pull a signal out of the air even when it is buried deep _underneath_ the background noise. Seepärast näed Meshtasticus sageli **negatiivseid SNR numbreid** (nt -10 dB, mis tähendab, et signaal on 10 detsibelli nõrgem kui taustamüra).
 
 Sõltuvalt sellest, millist Meshtastic eelhäälestust kasutad (nt `PikkKauge` vs. `LühikeKiire`), on raadiol kindel **SNR-i piirang** – absoluutne maksimaalne müra hulk, mida see talub enne, kui sõnum staatilise müra tõttu täielikult kaob.
 
@@ -48,16 +48,16 @@ Sõltuvalt sellest, millist Meshtastic eelhäälestust kasutad (nt `PikkKauge` v
 
 ## 3. How the Signal Meter Calculates Quality
 
-The app rates your signal quality (None, Bad, Fair, or Good) from **SNR alone, measured relative to the preset's SNR Limit** — the demodulation floor described above. It deliberately does **not** factor RSSI into the rating: without the local noise floor, RSSI cannot tell you whether a signal is actually decodable, so SNR-versus-the-preset-limit is the meaningful measure. (RSSI is still displayed to you elsewhere.)
+Rakendus hindab signaali kvaliteeti (puudub, halb, rahuldav või hea) ainult **signaali-müra suhte (SNR) põhjal, mõõdetuna eelseadistatud SNR-i piirväärtuse** suhtes – see on eespool kirjeldatud demodulatsiooni alumine piirväärtus. See **ei** arvesta RSSI-d hinnangus teadlikult: ilma kohaliku müratasemeta ei saa RSSI öelda, kas signaal on tegelikult dekodeeritav, seega on sisukas mõõdupuu SNR versus eelseadistatud piirväärtus. (RSSI is still displayed to you elsewhere.)
 
 Kuna hinnang on eelseadistatud piirangu suhtes suhteline, võib _sama_ signaali-müra suhe erinevatel eelseadistustel olla erinev – „-15 dB” on „LongSlow” puhul kasutatav, kuid „ShortFast” puhul mittekasutatav. Kui aktiivse eelseadistuse signaali ja müra piiranguks on `limit`, valib rakendus ribad (või värvi) järgmiselt:
 
-| Level    | Bars | Criteria                               | Meaning                                                                                  |
-| -------- | ---- | -------------------------------------- | ---------------------------------------------------------------------------------------- |
-| Hea      | 3    | SNR **above** the preset's `limit`     | Signal is comfortably above the demodulation floor — healthy connection. |
-| Rahuldav | 2    | less than `5.5 dB` below the `limit`   | Decodable, but getting close to the floor.                               |
-| Halb     | 1    | `5.5 dB` to `7.5 dB` below the `limit` | At the very edge of what the preset can recover.                         |
-| Puudub   | 0    | more than `7.5 dB` below the `limit`   | Below the floor — transmission lost to noise.                            |
+| Level    | Bars | Criteria                                        | Tähendus                                                                                 |
+| -------- | ---- | ----------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Hea      | 3    | SNR **above** the preset's `limit`              | Signal is comfortably above the demodulation floor — healthy connection. |
+| Rahuldav | 2    | vähem kui `5,5` dB `piirväärtusest` allpool     | Decodable, but getting close to the floor.                               |
+| Halb     | 1    | `5,5 dB` kuni `7,5 dB` `piirväärtusest` allpool | At the very edge of what the preset can recover.                         |
+| Puudub   | 0    | üle `7,5` dB `piirväärtusest` allpool           | Below the floor — transmission lost to noise.                            |
 
 > **Märkus:** Fikseeritud SNR lävesid, mida võisid mujal näha (`-7 dB` / `-15 dB`), kasutatakse nüüd ainult üksikute hüpete rõhutamiseks traceroute'i tulemustes – mitte siin kirjeldatud sõlmepõhise signaalimõõtja jaoks.
 
@@ -69,20 +69,20 @@ Kuna Meshtasticu mõõdik toimib **"selguse mõõturina"**, käitub see erineval
 
 > 💡 **Vihje:** Ära paanitse madala RSSI pärast. You might see a seemingly terrible RSSI value like `-118 dBm`. On a cell phone, you would have zero bars. Aga kui sinu seadme signaali-müra suhe on `+2 dB`, näitab Meshtastic ikkagi tugevat signaali! _The library is quiet, so the whisper is heard perfectly._
 
-> ⚠️ **Warning:** Watch out for local noise. Kui ühendad tohutu antenni ja näed suurepärast RSSI-d (nt „-90 dBm”), aga signaalimõõtur näitab ainult **1 tulpa (halb)**, on sul probleem. It means you have local interference — perhaps a cheap power supply, a noisy computer, or a nearby radio tower — creating so much static that it is drowning out your mesh.
+> ⚠️ **Warning:** Watch out for local noise. Kui ühendad tohutu antenni ja näed suurepärast RSSI-d (nt „-90 dBm”), aga signaalimõõtur näitab ainult **1 tulpa (halb)**, on sul probleem. See tähendab, et on lokaalsed häired – näiteks odav toiteallikas, lärmakas arvuti või lähedal asuv raadiomast –, mis tekitavad nii palju staatilist müra, et see uputab sinu võrgu heli.
 
 ## Where Signal Information Appears
 
 Rakenduses kuvatakse signaaliandmeid mitmes kohas:
 
-- **Node list** — signal bars icon next to each node
+- **Sõlmede loend** — signaaliribade ikoon iga sõlme kõrval
 - **Node detail** — SNR, RSSI, and signal quality in the device metrics section
 - **Traceroute** — iga vahendussõlme signaali kvaliteet hüppe kohta
 - **Signal metrics** — historical SNR and RSSI data in the metrics charts
 
 ![Sõlme kirje, mis näitab signaali ja signaali suhet SNR, RSSI väärtusi ja värvilisi signaaliribasid](../../assets/screenshots/nodes_signal_info.png)
 
-## Related Topics
+## Seotud teemad
 
 - [Nodes](nodes) — where signal bars appear in the node list
 - [Node Metrics](node-metrics) — SNR/RSSI history and the per-node signal quality reference
