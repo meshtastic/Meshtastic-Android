@@ -605,6 +605,7 @@
     <string name="ip_address">IP адрес:</string>
     <string name="ip_port">Порт:</string>
     <string name="ipv4_mode">Режим на IPv4</string>
+    <string name="jump_to_latest_from">%1$s</string>
     <!-- KEY -->
     <string name="key_verification_final_title">Проверката на ключа е завършена</string>
     <string name="key_verification_request_title">Заявка за проверка на ключ</string>
@@ -921,6 +922,7 @@
     <string name="permission_missing_31">Meshtastic се нуждае от активирани разрешения за "Устройства наблизо", за да намира и да се свързва с устройства чрез Bluetooth. Можете да ги дезактивирате, когато не се използват.</string>
     <string name="phone_location">Местоположение на телефона</string>
     <string name="phone_location_description">Meshtastic използва местоположението на телефона ви, за да активира редица функции. Можете да актуализирате разрешенията си за местоположение по всяко време от настройките.</string>
+    <string name="pin_selected">ПИН</string>
     <plurals name="plurals_hours">
         <item quantity="one">%1$d час</item>
         <item quantity="other">%1$d часа</item>
@@ -1164,6 +1166,9 @@
     <string name="super_deep_sleep_duration_seconds">Продължителност на супер дълбок сън</string>
     <string name="supported">Поддържан</string>
     <string name="supported_by_community">Поддържа се от общността Meshtastic</string>
+    <string name="swipe_action_delete">Изтриване</string>
+    <string name="swipe_action_mute">Заглуши</string>
+    <string name="swipe_action_unmute">Включване на звука</string>
     <string name="system_settings">Системни настройки</string>
     <!-- TAK -->
     <string name="tak">TAK (ATAK)</string>

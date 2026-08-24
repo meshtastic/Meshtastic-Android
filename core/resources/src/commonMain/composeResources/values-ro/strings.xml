@@ -529,6 +529,7 @@
     <string name="ip_port">Port:</string>
     <string name="ipv4_mode">Mod IPv4</string>
     <string name="json_output_enabled">Ieșire JSON activată</string>
+    <string name="jump_to_latest_from">%1$s</string>
     <!-- KEY -->
     <string name="key_verification_final_title">Verificare cheie finalizată</string>
     <string name="key_verification_request_title">Solicitare de verificare cheie</string>
@@ -1057,6 +1058,8 @@
     <string name="super_deep_sleep_duration_seconds">Durată maximă de somn</string>
     <string name="supported">Suportate</string>
     <string name="supported_by_community">Sprijinită de comunitatea Meshtastic</string>
+    <string name="swipe_action_delete">Șterge</string>
+    <string name="swipe_action_unmute">Activare sunet</string>
     <string name="sx126x_rx_boosted_gain">Amplificare RX amplificată</string>
     <string name="system_settings">Setări ale sistemului</string>
     <!-- TAK -->

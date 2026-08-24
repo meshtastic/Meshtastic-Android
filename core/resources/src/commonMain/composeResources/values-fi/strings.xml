@@ -905,6 +905,7 @@
     <string name="ip_port">Portti:</string>
     <string name="ipv4_mode">IPv4-tila</string>
     <string name="json_output_enabled">JSON ulostulo käytössä</string>
+    <string name="jump_to_latest_from">%1$s</string>
     <!-- KEY -->
     <string name="key_backup_deleted">Avaimen varmuuskopio poistettu</string>
     <string name="key_backup_not_found">Tälle radiolle ei löytynyt avaimen varmuuskopiota</string>
@@ -1403,6 +1404,7 @@
     <string name="permission_missing_31">Meshtastic tarvitsee "lähistön laitteet" -oikeudet, jotta se voi löytää ja yhdistää laitteisiin Bluetoothin kautta. Voit poistaa oikeuden käytöstä, kun et käytä sovellusta.</string>
     <string name="phone_location">Puhelimen sijainti</string>
     <string name="phone_location_description">Meshtastic hyödyntää puhelimen sijaintia tarjotakseen erilaisia toimintoja. Voit muuttaa sijaintioikeuksia koska tahansa asetuksista.</string>
+    <string name="pin_selected">PIN</string>
     <string name="play">Aloita</string>
     <plurals name="plurals_hours">
         <item quantity="one">%1$d tunti</item>
@@ -1736,6 +1738,9 @@
     <string name="super_deep_sleep_duration_seconds">Super-syväunen kesto</string>
     <string name="supported">Tuettu</string>
     <string name="supported_by_community">Meshtastic-yhteisön tukema</string>
+    <string name="swipe_action_delete">Poista</string>
+    <string name="swipe_action_mute">Mykistä</string>
+    <string name="swipe_action_unmute">Poista mykistys</string>
     <string name="sx126x_rx_boosted_gain">RX tehostettu vahvistus</string>
     <string name="system_settings">Järjestelmäasetukset</string>
     <!-- TAK -->

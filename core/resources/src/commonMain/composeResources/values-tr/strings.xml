@@ -423,6 +423,7 @@
     <string name="paxcounter">Pax sayacı</string>
     <string name="paxcounter_config">Pax sayacı Ayarı</string>
     <string name="paxcounter_enabled">Pax sayacı etkin</string>
+    <string name="pin_selected">Pin</string>
     <!-- POSITION -->
     <string name="position">Konum</string>
     <string name="position_enabled">Pozisyon etkinleştirildi</string>
@@ -557,6 +558,9 @@
     <string name="state_broadcast_seconds">Durum yayını (saniye)</string>
     <string name="subnet">Alt ağ</string>
     <string name="supported">Desteklenen</string>
+    <string name="swipe_action_delete">Sil</string>
+    <string name="swipe_action_mute">Sessiz</string>
+    <string name="swipe_action_unmute">Sesi aç</string>
     <!-- TAK -->
     <string name="tak_server_section">Sunucu</string>
     <string name="tak_team_blue">Mavi</string>

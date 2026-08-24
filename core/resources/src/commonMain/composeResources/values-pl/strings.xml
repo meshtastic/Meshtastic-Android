@@ -591,6 +591,7 @@
     <string name="paxcounter">Paxcounter</string>
     <string name="permission_missing_31">Meshtastic potrzebuje uprawnienia "Urządzenia w pobliżu" w celu znalezienia i połączenia się z urządzeniem poprzez Bluetooth. Możesz wyłączyć, gdy nie jest używane.</string>
     <string name="phone_location">Lokalizacja telefonu</string>
+    <string name="pin_selected">Pin</string>
     <string name="play">Odtwórz</string>
     <plurals name="plurals_hours">
         <item quantity="one">%1$d godzina</item>
@@ -754,6 +755,8 @@
     <string name="ssid">SSID</string>
     <string name="subnet">Podsieć</string>
     <string name="supported">Obsługiwane</string>
+    <string name="swipe_action_delete">Usuń</string>
+    <string name="swipe_action_mute">Wycisz</string>
     <string name="system_settings">Ustawienia systemowe</string>
     <!-- TAK -->
     <string name="tak_server_section">Serwer</string>

@@ -35,6 +35,7 @@
     <!-- ACTION -->
     <string name="action_copy_message">Скопировать сообщение</string>
     <string name="action_delete_message">Удалить сообщение</string>
+    <string name="action_more_message_actions">Дополнительные действия с сообщением</string>
     <string name="action_react_with_emoji">Отреагировать эмодзи</string>
     <string name="action_select_device">Выберите устройство</string>
     <string name="action_select_message">Выбрать сообщение</string>
@@ -322,6 +323,7 @@
     <string name="connecting">Подключение</string>
     <string name="connection_status">Текущие подключения:</string>
     <string name="connections">Соединения</string>
+    <string name="contact_draft_prefix">Черновик: %1$s</string>
     <string name="contrast">Контрастность</string>
     <string name="contrast_high">Высокий</string>
     <string name="contrast_medium">Средний</string>
@@ -908,6 +910,7 @@
     <string name="ip_port">Порт:</string>
     <string name="ipv4_mode">Режим IPv4</string>
     <string name="json_output_enabled">Вывод JSON включен</string>
+    <string name="jump_to_latest_from">%1$s</string>
     <!-- KEY -->
     <string name="key_backup_deleted">Резервная копия ключа удалена</string>
     <string name="key_backup_not_found">Для этой ноды не найдено резервной копии ключа</string>
@@ -1410,6 +1413,7 @@
     <string name="permission_missing_31">Meshtastic требует разрешение на поиск и подключение к устройствам через Bluetooth. Вы можете отключить его, когда он не используется.</string>
     <string name="phone_location">Местоположение телефона</string>
     <string name="phone_location_description">Meshtastic использует местоположение вашего телефона, чтобы включить ряд функций. Вы можете обновить права доступа к вашему местоположению в любое время из настроек.</string>
+    <string name="pin_selected">PIN-код</string>
     <string name="play">Воспроизвести</string>
     <plurals name="plurals_hours">
         <item quantity="one">%1$d час</item>
@@ -1725,6 +1729,7 @@
     <string name="site_planner_use_current_location">Использовать текущее местоположение</string>
     <string name="site_planner_use_map_center">Использовать центр карты</string>
     <string name="site_planner_use_node_location">Использовать текущее местоположение</string>
+    <string name="site_planner_webview_updating">Системный WebView обновляется. Повтори попытку через мгновение.</string>
     <string name="skip">Пропустить</string>
     <string name="slot">Слот</string>
     <string name="smart_position">Умная позиция</string>
@@ -1750,6 +1755,9 @@
     <string name="super_deep_sleep_duration_seconds">Длительность супер-глубокого сна</string>
     <string name="supported">Поддерживается</string>
     <string name="supported_by_community">Поддерживается Meshtastic Community</string>
+    <string name="swipe_action_delete">Удалить</string>
+    <string name="swipe_action_mute">Заглушить</string>
+    <string name="swipe_action_unmute">Включить микрофон</string>
     <string name="sx126x_rx_boosted_gain">Усиление RX</string>
     <string name="system_settings">Настройка системы</string>
     <!-- TAK -->

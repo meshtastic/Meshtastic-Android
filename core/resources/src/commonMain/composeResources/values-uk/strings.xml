@@ -592,6 +592,7 @@
     <string name="ip_port">Порт:</string>
     <string name="ipv4_mode">Режим IPv4</string>
     <string name="json_output_enabled">Вивід JSON увімкнено</string>
+    <string name="jump_to_latest_from">%1$s</string>
     <!-- KEY -->
     <string name="key_verification_final_title">Перевірку ключа завершено</string>
     <string name="key_verification_request_title">Запит ключа верифікації</string>
@@ -926,6 +927,7 @@
     <string name="permission_missing_31">Для пошуку та підключення до пристроїв через Bluetooth програмі Meshtastic потрібен дозвіл «Пристрої поблизу». Ви можете вимкнути його, коли не користуєтеся програмою.</string>
     <string name="phone_location">Геопозиція телефона</string>
     <string name="phone_location_description">Meshtastic використовує геопозицію вашого телефона для роботи низки функцій. Ви можете змінити дозволи на доступ до місцезнаходження в будь-який час у налаштуваннях.</string>
+    <string name="pin_selected">Контакт</string>
     <string name="play">Відтворити</string>
     <plurals name="plurals_hours">
         <item quantity="one">%1$d година</item>
@@ -1195,6 +1197,9 @@
     <string name="super_deep_sleep_duration_seconds">Тривалість глибокого сну</string>
     <string name="supported">Підтримується</string>
     <string name="supported_by_community">Підтримується спільнотою Meshtastic</string>
+    <string name="swipe_action_delete">Видалити</string>
+    <string name="swipe_action_mute">Вимкнути звук</string>
+    <string name="swipe_action_unmute">Увімкнути звук</string>
     <string name="sx126x_rx_boosted_gain">Підсилення передачі</string>
     <string name="system_settings">Системі налаштування</string>
     <!-- TAK -->

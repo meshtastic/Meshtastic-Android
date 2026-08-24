@@ -768,6 +768,7 @@
     <string name="ip_port">Port:</string>
     <string name="ipv4_mode">IPv4 Modus</string>
     <string name="json_output_enabled">JSON-Ausgabe aktiviert</string>
+    <string name="jump_to_latest_from">%1$s</string>
     <!-- KEY -->
     <string name="key_backup_deleted">Schlüssel Backup gelöscht</string>
     <string name="key_backup_not_found">Kein Schlüssel Backup für diesen Knoten gefunden</string>
@@ -1189,6 +1190,7 @@
     <string name="permission_missing_31">Meshtastic benötigt die Berechtigung „Geräte in der Nähe“, um Geräte über Bluetooth zu finden und eine Verbindung zu ihnen herzustellen. Sie können die Funktion deaktivieren, wenn sie nicht verwendet wird.</string>
     <string name="phone_location">Telefonstandort</string>
     <string name="phone_location_description">Meshtastic nutzt den Standort Ihres Telefons, um einige Funktionen zu aktivieren. Sie können Ihre Standortberechtigungen jederzeit in den Einstellungen aktualisieren.</string>
+    <string name="pin_selected">PIN Nummer</string>
     <string name="play">Wiedergabe</string>
     <plurals name="plurals_hours">
         <item quantity="one">%1$d Stunde</item>
@@ -1492,6 +1494,9 @@
     <string name="super_deep_sleep_duration_seconds">Dauer Supertiefschlaf</string>
     <string name="supported">Unterstützt</string>
     <string name="supported_by_community">Unterstützt von der Meshtastic Gemeinschaft</string>
+    <string name="swipe_action_delete">Löschen</string>
+    <string name="swipe_action_mute">Stummschalten</string>
+    <string name="swipe_action_unmute">Stummschaltung aufheben</string>
     <string name="sx126x_rx_boosted_gain">Empfangsverstärkung</string>
     <string name="system_settings">Systemeinstellungen</string>
     <!-- TAK -->

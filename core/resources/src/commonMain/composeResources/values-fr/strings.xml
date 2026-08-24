@@ -730,6 +730,7 @@
     <string name="ip_port">Port :</string>
     <string name="ipv4_mode">Mode IPv4</string>
     <string name="json_output_enabled">Sortie JSON activée</string>
+    <string name="jump_to_latest_from">%1$s</string>
     <!-- KEY -->
     <string name="key_verification_final_title">Vérification de la clé terminée</string>
     <string name="key_verification_request_title">Requête de vérification de clé</string>
@@ -1078,6 +1079,7 @@
     <string name="permission_missing_31">Meshtastic a besoin des autorisations "Périphériques à proximité" activées pour trouver et se connecter à des appareils via Bluetooth. Vous pouvez désactiver la lorsque la localisation n'est pas utilisée.</string>
     <string name="phone_location">Localisation du téléphone</string>
     <string name="phone_location_description">Meshtastic utilise la localisation de votre téléphone pour activer un certain nombre de fonctionnalités. Vous pouvez mettre à jour vos autorisations de localisation à tout moment à partir des paramètres.</string>
+    <string name="pin_selected">Broche</string>
     <string name="play">Lancer</string>
     <plurals name="plurals_hours">
         <item quantity="one">%1$d heure</item>
@@ -1346,6 +1348,9 @@
     <string name="super_deep_sleep_duration_seconds">Durée du sommeil extra profond</string>
     <string name="supported">Pris en charge</string>
     <string name="supported_by_community">Soutenu par la communauté Meshtastic</string>
+    <string name="swipe_action_delete">Effacer</string>
+    <string name="swipe_action_mute">Mode Muet</string>
+    <string name="swipe_action_unmute">Désactiver Muet</string>
     <string name="sx126x_rx_boosted_gain">Gain RX Boosté</string>
     <string name="system_settings">Paramètres système</string>
     <!-- TAK -->

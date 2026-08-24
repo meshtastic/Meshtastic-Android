@@ -409,6 +409,7 @@
     <string name="paxcounter">팍스카운터</string>
     <string name="paxcounter_config">팍스카운터 설정</string>
     <string name="paxcounter_enabled">팍스카운터 활성화</string>
+    <string name="pin_selected">핀</string>
     <!-- POSITION -->
     <string name="position">위치</string>
     <string name="position_enabled">위치 활성화</string>
@@ -548,6 +549,9 @@
     <string name="state_broadcast_seconds">상태 전송 간격 (초)</string>
     <string name="subnet">서브넷</string>
     <string name="supported">지원됨</string>
+    <string name="swipe_action_delete">삭제</string>
+    <string name="swipe_action_mute">음소거</string>
+    <string name="swipe_action_unmute">음소거 해제</string>
     <!-- TAK -->
     <string name="tak_server_section">서버</string>
     <string name="tak_team_blue">파랑</string>

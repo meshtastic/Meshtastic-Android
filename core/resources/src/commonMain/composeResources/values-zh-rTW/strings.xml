@@ -631,6 +631,7 @@
     <string name="ip_port">IP連接埠：</string>
     <string name="ipv4_mode">第四代IP模式</string>
     <string name="json_output_enabled">JSON輸出已啟用</string>
+    <string name="jump_to_latest_from">%1$s</string>
     <!-- KEY -->
     <string name="key_verification_final_title">金鑰驗證已完成</string>
     <string name="key_verification_request_title">金鑰驗證請求</string>
@@ -977,6 +978,7 @@
     <string name="permission_missing_31">Meshtastic 應用程式需要啟用「鄰近裝置」權限，才能透過藍牙尋找並連接到裝置，可以選擇在不使用時停用。</string>
     <string name="phone_location">手機定位</string>
     <string name="phone_location_description">Meshtastic 會使用您手機的定位資訊來啟用多項功能。您隨時可以在設定中修改定位權限。</string>
+    <string name="pin_selected">配對碼</string>
     <string name="play">播放</string>
     <plurals name="plurals_hours">
         <item quantity="other">%1$d 小時</item>
@@ -1242,6 +1244,9 @@
     <string name="super_deep_sleep_duration_seconds">超深度睡眠時長</string>
     <string name="supported">已支援</string>
     <string name="supported_by_community">由 Meshtastic 社群協作</string>
+    <string name="swipe_action_delete">刪除</string>
+    <string name="swipe_action_mute">靜音</string>
+    <string name="swipe_action_unmute">解除靜默</string>
     <string name="sx126x_rx_boosted_gain">接收增益提升</string>
     <string name="system_settings">系統設定</string>
     <!-- TAK -->

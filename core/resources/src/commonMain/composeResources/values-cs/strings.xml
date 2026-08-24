@@ -750,6 +750,7 @@
     <string name="ip_port">Port:</string>
     <string name="ipv4_mode">Režim IPv4</string>
     <string name="json_output_enabled">JSON výstup povolen</string>
+    <string name="jump_to_latest_from">%1$s</string>
     <!-- KEY -->
     <string name="key_backup_restore_failed">Nepodařilo se obnovit klíče ze zálohy</string>
     <string name="key_backup_restored">Klíče obnoveny — ukládání do zařízení</string>
@@ -1438,6 +1439,9 @@
     <string name="super_deep_sleep_duration_seconds">Doba super hlubokého spánku</string>
     <string name="supported">Podporované</string>
     <string name="supported_by_community">Podporováno komunitou Meshtastic</string>
+    <string name="swipe_action_delete">Smazat</string>
+    <string name="swipe_action_mute">Ztlumit</string>
+    <string name="swipe_action_unmute">Zrušit ztlumení</string>
     <string name="sx126x_rx_boosted_gain">Zvýšené zesílení přijímače (RX)</string>
     <string name="system_settings">Nastavení systému</string>
     <!-- TAK -->

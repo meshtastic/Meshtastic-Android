@@ -849,6 +849,7 @@
     <string name="ip_port">端口：</string>
     <string name="ipv4_mode">IPv4模式</string>
     <string name="json_output_enabled">启用JSON输出</string>
+    <string name="jump_to_latest_from">%1$s</string>
     <!-- KEY -->
     <string name="key_backup_deleted">密钥备份已删除</string>
     <string name="key_backup_not_found">未找到此节点的密钥备份</string>
@@ -1307,6 +1308,7 @@
     <string name="permission_missing_31">Meshtastic需要启用“附近的设备”权限，以便通过蓝牙查找并连接设备。不使用时，您可以将其禁用。</string>
     <string name="phone_location">手机位置</string>
     <string name="phone_location_description">Meshtastic 通过使用您的手机定位功能来实现多项功能。您可随时通过设置菜单调整定位权限。</string>
+    <string name="pin_selected">PIN</string>
     <string name="play">开始</string>
     <plurals name="plurals_hours">
         <item quantity="other">%1$d 小时</item>
@@ -1624,6 +1626,9 @@
     <string name="super_deep_sleep_duration_seconds">深度睡眠时间</string>
     <string name="supported">已支持</string>
     <string name="supported_by_community">由 Meshtastic 社区支持</string>
+    <string name="swipe_action_delete">删除</string>
+    <string name="swipe_action_mute">静音</string>
+    <string name="swipe_action_unmute">取消静音</string>
     <string name="sx126x_rx_boosted_gain">RX 增益</string>
     <string name="system_settings">系统设置</string>
     <!-- TAK -->

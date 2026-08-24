@@ -249,6 +249,8 @@
     <!-- SITE -->
     <string name="site_planner_section_display">Οθόνη</string>
     <string name="ssid">SSID</string>
+    <string name="swipe_action_delete">Διαγραφή</string>
+    <string name="swipe_action_mute">Σίγαση</string>
     <!-- TAK -->
     <string name="tak_team_blue">Μπλε</string>
     <string name="tak_team_green">Πράσινο</string>

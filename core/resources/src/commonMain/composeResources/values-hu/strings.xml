@@ -834,6 +834,9 @@
     <string name="super_deep_sleep_duration_seconds">Szuper mélyalvás időtartama</string>
     <string name="supported">Támogatott</string>
     <string name="supported_by_community">Meshtastic közösség által támogatott</string>
+    <string name="swipe_action_delete">Törlés</string>
+    <string name="swipe_action_mute">Némítás</string>
+    <string name="swipe_action_unmute">Némítás feloldása</string>
     <string name="sx126x_rx_boosted_gain">RX fokozott erősítés</string>
     <string name="system_settings">Rendszerbeállítások</string>
     <!-- TAK -->

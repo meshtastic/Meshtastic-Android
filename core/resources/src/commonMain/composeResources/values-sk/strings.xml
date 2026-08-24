@@ -449,6 +449,8 @@
     <string name="speed">Rýchlosť</string>
     <string name="ssid">SSID</string>
     <string name="supported">Podporované</string>
+    <string name="swipe_action_delete">Vymazať</string>
+    <string name="swipe_action_mute">Stlmiť</string>
     <!-- TAK -->
     <string name="tak_team_blue">Modrá</string>
     <string name="tak_team_green">Zelená</string>

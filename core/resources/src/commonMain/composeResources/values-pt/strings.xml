@@ -527,6 +527,9 @@
     <string name="state_broadcast_seconds">Transmissão de estado (segundos)</string>
     <string name="subnet">Subnet</string>
     <string name="supported">Suportado</string>
+    <string name="swipe_action_delete">Excluir</string>
+    <string name="swipe_action_mute">Silenciar</string>
+    <string name="swipe_action_unmute">Tirar mute</string>
     <!-- TAK -->
     <string name="tak_server_section">Servidor</string>
     <string name="tak_team_blue">Azul</string>
