@@ -35,6 +35,7 @@
     <!-- ACTION -->
     <string name="action_copy_message">Copy message</string>
     <string name="action_delete_message">Delete message</string>
+    <string name="action_more_message_actions">More message actions</string>
     <string name="action_react_with_emoji">React with emoji</string>
     <string name="action_select_device">Select device</string>
     <string name="action_select_message">Select message</string>

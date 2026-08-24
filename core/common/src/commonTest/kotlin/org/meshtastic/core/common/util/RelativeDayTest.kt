@@ -38,7 +38,8 @@ class RelativeDayTest {
 
     @Test
     fun `midnight starts a new day even minutes apart`() {
-        // The point of comparing dates rather than elapsed millis: 23:59 and 00:01 are two minutes and two days.
+        // The point of comparing dates rather than elapsed millis: 23:59 and 00:01 are two minutes apart, on two
+        // different dates.
         assertFalse(isSameLocalDay(dayStart - 60_000L, dayStart + 60_000L, utc))
     }
 

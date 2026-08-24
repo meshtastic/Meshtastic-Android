@@ -47,6 +47,7 @@ import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.action_copy_message
 import org.meshtastic.core.resources.action_delete_message
+import org.meshtastic.core.resources.action_more_message_actions
 import org.meshtastic.core.resources.action_react_with_emoji
 import org.meshtastic.core.resources.action_select_message
 import org.meshtastic.core.resources.action_send_reply
@@ -71,6 +72,7 @@ import org.meshtastic.core.ui.icon.Copy
 import org.meshtastic.core.ui.icon.Delete
 import org.meshtastic.core.ui.icon.History
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.More
 import org.meshtastic.core.ui.icon.Reply
 import org.meshtastic.core.ui.icon.SelectAll
 import org.meshtastic.core.ui.icon.ShieldCheck
@@ -228,8 +230,17 @@ fun MessageActionsContent(
 
 internal const val MAX_EMOJI_ROW_SIZE = 6
 
+/**
+ * Six one-tap reactions plus the full picker. [onMoreActions], when supplied, appends an overflow button — the inline
+ * bar uses it to reach the actions sheet, which is where the row itself lives when opened the other way round.
+ */
 @Composable
-internal fun QuickEmojiRow(quickEmojis: List<String>, onReact: (String) -> Unit, onMoreReactions: () -> Unit) {
+internal fun QuickEmojiRow(
+    quickEmojis: List<String>,
+    onReact: (String) -> Unit,
+    onMoreReactions: () -> Unit,
+    onMoreActions: (() -> Unit)? = null,
+) {
     Row(
         // Scrollable so seven 44dp touch targets never clip on narrow (320dp) sheets.
         modifier =
@@ -267,6 +278,20 @@ internal fun QuickEmojiRow(quickEmojis: List<String>, onReact: (String) -> Unit,
                 modifier = Modifier.size(20.dp),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+        }
+
+        if (onMoreActions != null) {
+            IconButton(
+                onClick = onMoreActions,
+                modifier = Modifier.size(44.dp).background(MaterialTheme.colorScheme.surfaceVariant, CircleShape),
+            ) {
+                Icon(
+                    MeshtasticIcons.More,
+                    contentDescription = stringResource(Res.string.action_more_message_actions),
+                    modifier = Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }

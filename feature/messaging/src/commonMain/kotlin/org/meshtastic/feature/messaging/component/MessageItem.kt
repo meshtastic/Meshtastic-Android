@@ -314,9 +314,11 @@ fun MessageItem(
             }
         }
     }
-    // Double-tap opens the quick reactions inline instead of firing one straight onto the mesh — a reaction is a
-    // real
-    // packet on a duty-cycled radio, so the gesture picks, it does not send.
+    // Reactions live on the bubble, where the eye already is, instead of behind a modal that covers the
+    // conversation.
+    // Reached by long press or double tap; neither sends anything on its own, because a reaction is a real packet
+    // on a
+    // duty-cycled radio. The overflow button keeps the full actions sheet one tap away.
     var showQuickReactions by remember { mutableStateOf(false) }
     AnimatedVisibility(
         visible = showQuickReactions && !inSelectionMode,
@@ -337,6 +339,10 @@ fun MessageItem(
                 onMoreReactions = {
                     showQuickReactions = false
                     activeSheet = ActiveSheet.Emoji
+                },
+                onMoreActions = {
+                    showQuickReactions = false
+                    activeSheet = ActiveSheet.Actions
                 },
             )
         }
@@ -364,18 +370,20 @@ fun MessageItem(
                         onDragEnd = {
                             val reached = swipeOffset.value * swipeSign >= swipeThresholdPx
                             swipeArmed = false
-                            coroutineScope.launch {
-                                swipeOffset.animateTo(0f)
-                                if (reached) onReply()
-                            }
+                            // Fire before animating home: Animatable serializes mutations, so a fresh drag
+                            // would
+                            // cancel the settle coroutine and take the reply with it.
+                            if (reached) onReply()
+                            coroutineScope.launch { swipeOffset.animateTo(0f) }
                         },
                         onDragCancel = {
                             swipeArmed = false
                             coroutineScope.launch { swipeOffset.animateTo(0f) }
                         },
                     ) { change, dragAmount ->
-                        // Only claim the gesture once it is unambiguously horizontal, so the list still
-                        // scrolls.
+                        // detectHorizontalDragGestures already applies horizontal touch slop, so this tests
+                        // direction, not axis: claim the gesture only while dragging toward reply, so a
+                        // back-swipe still reaches whatever is behind.
                         val next = (swipeOffset.value + dragAmount) * swipeSign
                         if (next > 0f) change.consume()
                         val clamped = next.coerceIn(0f, swipeThresholdPx * REPLY_SWIPE_OVERDRAG) * swipeSign
@@ -395,11 +403,11 @@ fun MessageItem(
                 )
                 .widthIn(max = 480.dp)
                 .combinedClickable(
-                    onClick = onClick,
+                    onClick = { if (showQuickReactions) showQuickReactions = false else onClick() },
                     onLongClick = {
                         onLongClick()
                         if (!inSelectionMode) {
-                            activeSheet = ActiveSheet.Actions
+                            showQuickReactions = true
                         }
                     },
                     onDoubleClick = {
