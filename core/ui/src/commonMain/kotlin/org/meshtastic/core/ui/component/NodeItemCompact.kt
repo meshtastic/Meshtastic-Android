@@ -53,6 +53,7 @@ import coil3.compose.AsyncImage
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
+import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.isUnmessageableRole
@@ -89,7 +90,6 @@ import org.meshtastic.core.ui.icon.Unmessageable
 import org.meshtastic.core.ui.icon.role
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 import org.meshtastic.core.ui.util.LocalModemPreset
-import org.meshtastic.proto.Config
 
 private const val COMPACT_ICON_SIZE_DP = 16
 
@@ -98,7 +98,7 @@ private const val COMPACT_ICON_SIZE_DP = 16
 fun NodeItemCompact(
     thisNode: Node?,
     thatNode: Node,
-    distanceUnits: Int,
+    distanceUnits: MeasurementSystem,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
     onLongClick: (() -> Unit)? = null,
@@ -119,10 +119,7 @@ fun NodeItemCompact(
     val isFavorite = thatNode.isFavorite
     val isIgnored = thatNode.isIgnored
     val isThisNode = remember(thatNode) { thisNode?.num == thatNode.num }
-    val system =
-        remember(distanceUnits) {
-            Config.DisplayConfig.DisplayUnits.fromValue(distanceUnits) ?: Config.DisplayConfig.DisplayUnits.METRIC
-        }
+    val system = distanceUnits
     val distance =
         remember(thisNode, thatNode, system) {
             thisNode?.distance(thatNode)?.takeIf { it > 0 }?.toDistanceString(system)

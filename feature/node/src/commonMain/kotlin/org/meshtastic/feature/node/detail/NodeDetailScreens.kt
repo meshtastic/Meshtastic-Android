@@ -35,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.navigation.Route
@@ -49,14 +50,13 @@ import org.meshtastic.feature.node.component.CompassSheetContent
 import org.meshtastic.feature.node.component.FirmwareReleaseSheetContent
 import org.meshtastic.feature.node.component.NodeMenuAction
 import org.meshtastic.feature.node.model.NodeDetailAction
-import org.meshtastic.proto.Config
 
 private sealed interface NodeDetailOverlay {
     data object SharedContact : NodeDetailOverlay
 
     data class FirmwareReleaseInfo(val release: FirmwareRelease) : NodeDetailOverlay
 
-    data class Compass(val nodeNum: Int, val displayUnits: Config.DisplayConfig.DisplayUnits) : NodeDetailOverlay
+    data class Compass(val nodeNum: Int, val displayUnits: MeasurementSystem) : NodeDetailOverlay
 }
 
 @Composable

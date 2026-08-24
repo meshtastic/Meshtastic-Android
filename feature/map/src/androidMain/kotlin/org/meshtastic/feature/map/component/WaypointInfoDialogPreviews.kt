@@ -18,8 +18,8 @@ package org.meshtastic.feature.map.component
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.ui.theme.AppTheme
-import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits
 import org.meshtastic.proto.Waypoint
 
 private fun sampleGeofence(lockedTo: Int) = Waypoint(
@@ -41,7 +41,7 @@ fun WaypointInfoDialogReadOnlyPreview() {
     AppTheme {
         WaypointInfoDialog(
             waypoint = sampleGeofence(lockedTo = 7),
-            displayUnits = DisplayUnits.METRIC,
+            displayUnits = MeasurementSystem.METRIC,
             alertsEnabled = false,
             onToggleAlerts = {},
             onDismissRequest = {},
@@ -59,7 +59,7 @@ fun WaypointInfoDialogOptedInPreview() {
     AppTheme {
         WaypointInfoDialog(
             waypoint = sampleGeofence(lockedTo = 0),
-            displayUnits = DisplayUnits.METRIC,
+            displayUnits = MeasurementSystem.METRIC,
             alertsEnabled = true,
             onToggleAlerts = {},
             onDismissRequest = {},

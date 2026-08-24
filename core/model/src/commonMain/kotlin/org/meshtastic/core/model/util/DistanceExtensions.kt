@@ -20,33 +20,23 @@ package org.meshtastic.core.model.util
 
 import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.common.util.formatString
-import org.meshtastic.core.common.util.getSystemMeasurementSystem
-import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits
 import kotlin.math.roundToInt
 
 @Suppress("MagicNumber")
-enum class DistanceUnit(val symbol: String, val multiplier: Float, val system: Int) {
-    METER("m", multiplier = 1F, DisplayUnits.METRIC.value),
-    KILOMETER("km", multiplier = 0.001F, DisplayUnits.METRIC.value),
-    FOOT("ft", multiplier = 3.28084F, DisplayUnits.IMPERIAL.value),
-    MILE("mi", multiplier = 0.000621371F, DisplayUnits.IMPERIAL.value),
-    ;
-
-    companion object {
-        fun getFromLocale(): DisplayUnits = when (getSystemMeasurementSystem()) {
-            MeasurementSystem.METRIC -> DisplayUnits.METRIC
-            MeasurementSystem.IMPERIAL -> DisplayUnits.IMPERIAL
-        }
-    }
+enum class DistanceUnit(val symbol: String, val multiplier: Float, val system: MeasurementSystem) {
+    METER("m", multiplier = 1F, MeasurementSystem.METRIC),
+    KILOMETER("km", multiplier = 0.001F, MeasurementSystem.METRIC),
+    FOOT("ft", multiplier = 3.28084F, MeasurementSystem.IMPERIAL),
+    MILE("mi", multiplier = 0.000621371F, MeasurementSystem.IMPERIAL),
 }
 
 fun Int.metersIn(unit: DistanceUnit): Float = this * unit.multiplier
 
-fun Int.metersIn(system: DisplayUnits): Float {
+fun Int.metersIn(system: MeasurementSystem): Float {
     val unit =
-        when (system.value) {
-            DisplayUnits.IMPERIAL.value -> DistanceUnit.FOOT
-            else -> DistanceUnit.METER
+        when (system) {
+            MeasurementSystem.IMPERIAL -> DistanceUnit.FOOT
+            MeasurementSystem.METRIC -> DistanceUnit.METER
         }
     return this.metersIn(unit)
 }
@@ -61,11 +51,11 @@ fun Float.toString(unit: DistanceUnit): String {
     return formatString(pattern, this, unit.symbol)
 }
 
-fun Float.toString(system: DisplayUnits): String {
+fun Float.toString(system: MeasurementSystem): String {
     val unit =
-        when (system.value) {
-            DisplayUnits.IMPERIAL.value -> DistanceUnit.FOOT
-            else -> DistanceUnit.METER
+        when (system) {
+            MeasurementSystem.IMPERIAL -> DistanceUnit.FOOT
+            MeasurementSystem.METRIC -> DistanceUnit.METER
         }
     return this.toString(unit)
 }
@@ -73,9 +63,9 @@ fun Float.toString(system: DisplayUnits): String {
 private const val KILOMETER_THRESHOLD = 1000
 private const val MILE_THRESHOLD = 1609
 
-fun Int.toDistanceString(system: DisplayUnits): String {
+fun Int.toDistanceString(system: MeasurementSystem): String {
     val unit =
-        if (system.value == DisplayUnits.METRIC.value) {
+        if (system == MeasurementSystem.METRIC) {
             if (this < KILOMETER_THRESHOLD) DistanceUnit.METER else DistanceUnit.KILOMETER
         } else {
             if (this < MILE_THRESHOLD) DistanceUnit.FOOT else DistanceUnit.MILE
@@ -85,7 +75,7 @@ fun Int.toDistanceString(system: DisplayUnits): String {
 }
 
 @Suppress("MagicNumber")
-fun Float.toSpeedString(system: DisplayUnits): String = if (system == DisplayUnits.METRIC) {
+fun Float.toSpeedString(system: MeasurementSystem): String = if (system == MeasurementSystem.METRIC) {
     formatString("%.0f km/h", this * 3.6)
 } else {
     formatString("%.0f mph", this * 2.23694f)
@@ -97,11 +87,11 @@ fun Float.toSpeedString(system: DisplayUnits): String = if (system == DisplayUni
  * translatable (see `speed_kmh`/`speed_mph`).
  */
 @Suppress("MagicNumber")
-fun Int.kmhIn(system: DisplayUnits): Int =
-    if (system == DisplayUnits.IMPERIAL) (this * 0.621371f).roundToInt() else this
+fun Int.kmhIn(system: MeasurementSystem): Int =
+    if (system == MeasurementSystem.IMPERIAL) (this * 0.621371f).roundToInt() else this
 
 @Suppress("MagicNumber")
-fun Float.toSmallDistanceString(system: DisplayUnits): String = if (system == DisplayUnits.IMPERIAL) {
+fun Float.toSmallDistanceString(system: MeasurementSystem): String = if (system == MeasurementSystem.IMPERIAL) {
     formatString("%.2f in", this / 25.4f)
 } else {
     formatString("%.0f mm", this)

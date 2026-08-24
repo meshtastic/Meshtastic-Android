@@ -16,7 +16,7 @@
  */
 package org.meshtastic.core.model.util
 
-import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits
+import org.meshtastic.core.common.util.MeasurementSystem
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -24,18 +24,18 @@ class DistanceExtensionsTest {
 
     @Test
     fun `kmhIn returns value unchanged for metric`() {
-        assertEquals(50, 50.kmhIn(DisplayUnits.METRIC))
+        assertEquals(50, 50.kmhIn(MeasurementSystem.METRIC))
     }
 
     @Test
     fun `kmhIn converts to mph for imperial`() {
-        assertEquals(31, 50.kmhIn(DisplayUnits.IMPERIAL))
-        assertEquals(50, 80.kmhIn(DisplayUnits.IMPERIAL))
+        assertEquals(31, 50.kmhIn(MeasurementSystem.IMPERIAL))
+        assertEquals(50, 80.kmhIn(MeasurementSystem.IMPERIAL))
     }
 
     @Test
     fun `kmhIn handles zero`() {
-        assertEquals(0, 0.kmhIn(DisplayUnits.METRIC))
-        assertEquals(0, 0.kmhIn(DisplayUnits.IMPERIAL))
+        assertEquals(0, 0.kmhIn(MeasurementSystem.METRIC))
+        assertEquals(0, 0.kmhIn(MeasurementSystem.IMPERIAL))
     }
 }

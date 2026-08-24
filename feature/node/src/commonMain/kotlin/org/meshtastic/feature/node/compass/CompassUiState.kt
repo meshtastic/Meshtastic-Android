@@ -17,7 +17,7 @@
 package org.meshtastic.feature.node.compass
 
 import androidx.compose.ui.graphics.Color
-import org.meshtastic.proto.Config
+import org.meshtastic.core.common.util.MeasurementSystem
 
 private const val DEFAULT_TARGET_COLOR_HEX = 0xFFFF9800
 
@@ -43,6 +43,6 @@ data class CompassUiState(
     val angularErrorDeg: Float? = null,
     val isAligned: Boolean = false,
     val hasTargetPosition: Boolean = true,
-    val displayUnits: Config.DisplayConfig.DisplayUnits = Config.DisplayConfig.DisplayUnits.METRIC,
+    val displayUnits: MeasurementSystem = MeasurementSystem.METRIC,
     val targetAltitude: Int? = null,
 )

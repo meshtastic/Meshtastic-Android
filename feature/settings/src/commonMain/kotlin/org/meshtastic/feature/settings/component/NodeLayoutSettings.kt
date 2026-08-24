@@ -36,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import okio.ByteString.Companion.toByteString
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
@@ -121,7 +122,7 @@ fun NodeLayoutSettings(
                     NodeItem(
                         thisNode = localNode,
                         thatNode = previewNode,
-                        distanceUnits = 0,
+                        distanceUnits = MeasurementSystem.METRIC,
                         tempInFahrenheit = false,
                         connectionState = ConnectionState.Connected,
                         showTelemetry = state.showTelemetry,
@@ -131,7 +132,7 @@ fun NodeLayoutSettings(
                     NodeItemCompact(
                         thisNode = localNode,
                         thatNode = previewNode,
-                        distanceUnits = 0,
+                        distanceUnits = MeasurementSystem.METRIC,
                         showPower = state.showPower,
                         showLastHeard = state.showLastHeard,
                         lastHeardIsRelative = state.lastHeardIsRelative,

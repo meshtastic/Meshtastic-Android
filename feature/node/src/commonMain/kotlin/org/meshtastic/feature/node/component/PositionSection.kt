@@ -36,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.navigation.MapRoute
@@ -49,7 +50,6 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.util.LocalInlineMapProvider
 import org.meshtastic.core.ui.util.LocalSitePlannerAvailable
 import org.meshtastic.feature.node.model.NodeDetailAction
-import org.meshtastic.proto.Config
 
 private const val MAP_HEIGHT_DP = 200
 
@@ -61,7 +61,7 @@ private const val MAP_HEIGHT_DP = 200
 internal fun PositionInlineContent(
     node: Node,
     ourNode: Node?,
-    displayUnits: Config.DisplayConfig.DisplayUnits,
+    displayUnits: MeasurementSystem,
     onAction: (NodeDetailAction) -> Unit,
 ) {
     val distance = ourNode?.distance(node)?.takeIf { it > 0 }?.toDistanceString(displayUnits)

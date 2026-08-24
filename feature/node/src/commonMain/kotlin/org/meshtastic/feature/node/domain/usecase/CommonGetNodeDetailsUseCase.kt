@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onStart
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.TemperatureUnit
+import org.meshtastic.core.common.util.getSystemMeasurementSystem
 import org.meshtastic.core.common.util.getSystemTemperatureUnit
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
@@ -33,7 +34,6 @@ import org.meshtastic.core.model.DeviceLink
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.model.util.DistanceUnit
 import org.meshtastic.core.model.util.hasValidEnvironmentMetrics
 import org.meshtastic.core.model.util.isDirectSignal
 import org.meshtastic.core.repository.DeviceHardwareRepository
@@ -191,7 +191,7 @@ constructor(
             val isLocal = node.num == identity.ourNode?.num
             val pioEnv = if (isLocal) identity.myInfo?.pioEnv else null
 
-            val displayUnits = DistanceUnit.getFromLocale()
+            val displayUnits = getSystemMeasurementSystem()
 
             val metricsState =
                 MetricsState(

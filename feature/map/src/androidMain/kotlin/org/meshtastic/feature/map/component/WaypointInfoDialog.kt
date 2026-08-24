@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.model.util.PUSHPIN_CODE_POINT
 import org.meshtastic.core.model.util.toCodePointString
 import org.meshtastic.core.model.util.toDistanceString
@@ -46,7 +47,6 @@ import org.meshtastic.core.resources.geofence_alerts_opt_in_desc
 import org.meshtastic.core.resources.geofence_radius
 import org.meshtastic.core.resources.geofence_set_area
 import org.meshtastic.core.ui.component.BasicListItem
-import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits
 import org.meshtastic.proto.Waypoint
 
 /**
@@ -61,7 +61,7 @@ import org.meshtastic.proto.Waypoint
 @Composable
 fun WaypointInfoDialog(
     waypoint: Waypoint,
-    displayUnits: DisplayUnits,
+    displayUnits: MeasurementSystem,
     alertsEnabled: Boolean,
     onToggleAlerts: (Boolean) -> Unit,
     onDismissRequest: () -> Unit,

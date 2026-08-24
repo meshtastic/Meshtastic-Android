@@ -37,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.actions
@@ -60,7 +61,6 @@ import org.meshtastic.core.ui.icon.VolumeUp
 import org.meshtastic.feature.node.model.LogsType
 import org.meshtastic.feature.node.model.NodeDetailAction
 import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
-import org.meshtastic.proto.Config
 import org.meshtastic.proto.Telemetry
 
 @Composable
@@ -71,7 +71,7 @@ fun DeviceActions(
     lastRequestNeighborsTime: Long?,
     availableLogs: Set<LogsType>,
     onAction: (NodeDetailAction) -> Unit,
-    displayUnits: Config.DisplayConfig.DisplayUnits,
+    displayUnits: MeasurementSystem,
     isFahrenheit: Boolean,
     modifier: Modifier = Modifier,
     isLocal: Boolean = false,

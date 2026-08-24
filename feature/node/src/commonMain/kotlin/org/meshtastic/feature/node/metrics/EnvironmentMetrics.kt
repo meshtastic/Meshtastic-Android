@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.DateFormatter
+import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.formatString
@@ -92,7 +93,7 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Un
         viewModel.saveEnvironmentMetricsCSV(uri, filteredTelemetries)
     }
 
-    val isImperial = state.displayUnits == org.meshtastic.proto.Config.DisplayConfig.DisplayUnits.IMPERIAL
+    val isImperial = state.displayUnits == MeasurementSystem.IMPERIAL
 
     BaseMetricScreen(
         onNavigateUp = onNavigateUp,

@@ -28,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.NodeListDensity
 import org.meshtastic.core.ui.component.NodeItem
@@ -156,7 +157,7 @@ fun SampleNodeCompletePreview() {
                 NodeItem(
                     thisNode = localNode,
                     thatNode = sampleNode,
-                    distanceUnits = 0,
+                    distanceUnits = MeasurementSystem.METRIC,
                     tempInFahrenheit = false,
                     connectionState = ConnectionState.Connected,
                 )
@@ -176,7 +177,7 @@ fun SampleNodeCompleteDirectSignalPreview() {
                 NodeItem(
                     thisNode = localNode,
                     thatNode = previewSampleNode(hopsAway = 0),
-                    distanceUnits = 0,
+                    distanceUnits = MeasurementSystem.METRIC,
                     tempInFahrenheit = false,
                     connectionState = ConnectionState.Connected,
                 )
@@ -193,7 +194,7 @@ fun SampleNodeCompactAllFieldsPreview() {
     AppTheme {
         Surface {
             Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-                NodeItemCompact(thisNode = localNode, thatNode = sampleNode, distanceUnits = 0)
+                NodeItemCompact(thisNode = localNode, thatNode = sampleNode, distanceUnits = MeasurementSystem.METRIC)
             }
         }
     }
@@ -210,7 +211,7 @@ fun SampleNodeCompactSignalOnlyPreview() {
                 NodeItemCompact(
                     thisNode = localNode,
                     thatNode = previewSampleNode(hopsAway = 0),
-                    distanceUnits = 0,
+                    distanceUnits = MeasurementSystem.METRIC,
                     showPower = false,
                     showLastHeard = true,
                     lastHeardIsRelative = true,
@@ -237,7 +238,7 @@ fun SampleNodeCompactNameOnlyPreview() {
                 NodeItemCompact(
                     thisNode = localNode,
                     thatNode = sampleNode,
-                    distanceUnits = 0,
+                    distanceUnits = MeasurementSystem.METRIC,
                     showPower = false,
                     showLastHeard = false,
                     showLocation = false,
@@ -265,12 +266,14 @@ fun SampleNodeCompactToggleMatrixPreview() {
     AppTheme {
         Surface {
             Column(modifier = Modifier.fillMaxWidth().padding(8.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                MatrixRow("All fields") { NodeItemCompact(thisNode = local, thatNode = node, distanceUnits = 0) }
+                MatrixRow("All fields") {
+                    NodeItemCompact(thisNode = local, thatNode = node, distanceUnits = MeasurementSystem.METRIC)
+                }
                 MatrixRow("Health only") {
                     NodeItemCompact(
                         thisNode = local,
                         thatNode = node,
-                        distanceUnits = 0,
+                        distanceUnits = MeasurementSystem.METRIC,
                         showHops = false,
                         showChannel = false,
                         showRole = false,
@@ -278,13 +281,18 @@ fun SampleNodeCompactToggleMatrixPreview() {
                     )
                 }
                 MatrixRow("No metrics") {
-                    NodeItemCompact(thisNode = local, thatNode = node, distanceUnits = 0, showTelemetry = false)
+                    NodeItemCompact(
+                        thisNode = local,
+                        thatNode = node,
+                        distanceUnits = MeasurementSystem.METRIC,
+                        showTelemetry = false,
+                    )
                 }
                 MatrixRow("No footer") {
                     NodeItemCompact(
                         thisNode = local,
                         thatNode = node,
-                        distanceUnits = 0,
+                        distanceUnits = MeasurementSystem.METRIC,
                         showHops = false,
                         showChannel = false,
                         showRole = false,
@@ -294,7 +302,7 @@ fun SampleNodeCompactToggleMatrixPreview() {
                     NodeItemCompact(
                         thisNode = local,
                         thatNode = node,
-                        distanceUnits = 0,
+                        distanceUnits = MeasurementSystem.METRIC,
                         showPower = false,
                         showLastHeard = false,
                         showLocation = false,
@@ -305,7 +313,7 @@ fun SampleNodeCompactToggleMatrixPreview() {
                     NodeItemCompact(
                         thisNode = local,
                         thatNode = node,
-                        distanceUnits = 0,
+                        distanceUnits = MeasurementSystem.METRIC,
                         showPower = false,
                         showLastHeard = false,
                         showLocation = false,
@@ -335,7 +343,7 @@ fun SampleNodeCompleteToggleMatrixPreview() {
                     NodeItem(
                         thisNode = local,
                         thatNode = node,
-                        distanceUnits = 0,
+                        distanceUnits = MeasurementSystem.METRIC,
                         tempInFahrenheit = false,
                         connectionState = ConnectionState.Connected,
                         showTelemetry = true,
@@ -345,7 +353,7 @@ fun SampleNodeCompleteToggleMatrixPreview() {
                     NodeItem(
                         thisNode = local,
                         thatNode = node,
-                        distanceUnits = 0,
+                        distanceUnits = MeasurementSystem.METRIC,
                         tempInFahrenheit = false,
                         connectionState = ConnectionState.Connected,
                         showTelemetry = false,
@@ -381,7 +389,7 @@ fun SampleNodeCompleteFahrenheitPreview() {
                 NodeItem(
                     thisNode = localNode,
                     thatNode = sampleNode,
-                    distanceUnits = 0,
+                    distanceUnits = MeasurementSystem.METRIC,
                     tempInFahrenheit = true,
                     connectionState = ConnectionState.Connected,
                 )
@@ -401,7 +409,7 @@ fun SampleNodeCompleteImperialPreview() {
                 NodeItem(
                     thisNode = localNode,
                     thatNode = sampleNode,
-                    distanceUnits = 1,
+                    distanceUnits = MeasurementSystem.IMPERIAL,
                     tempInFahrenheit = true,
                     connectionState = ConnectionState.Connected,
                 )

@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
+import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
@@ -75,7 +76,6 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Notes
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.util.LocalModemPreset
-import org.meshtastic.proto.Config
 
 private const val GRID_COLUMNS = 3
 
@@ -84,7 +84,7 @@ private const val GRID_COLUMNS = 3
 fun NodeItem(
     thisNode: Node?,
     thatNode: Node,
-    distanceUnits: Int,
+    distanceUnits: MeasurementSystem,
     tempInFahrenheit: Boolean,
     connectionState: ConnectionState,
     modifier: Modifier = Modifier,
@@ -101,10 +101,7 @@ fun NodeItem(
     val isFavorite = thatNode.isFavorite
 
     val isThisNode = remember(thatNode) { thisNode?.num == thatNode.num }
-    val system =
-        remember(distanceUnits) {
-            Config.DisplayConfig.DisplayUnits.fromValue(distanceUnits) ?: Config.DisplayConfig.DisplayUnits.METRIC
-        }
+    val system = distanceUnits
     val distance =
         remember(thisNode, thatNode, system) {
             thisNode?.distance(thatNode)?.takeIf { it > 0 }?.toDistanceString(system)
@@ -241,7 +238,7 @@ private fun NodeBatteryPositionRow(
     thatNode: Node,
     distance: String?,
     bearingDegrees: Int?,
-    system: Config.DisplayConfig.DisplayUnits,
+    system: MeasurementSystem,
     contentColor: Color,
 ) {
     Row(

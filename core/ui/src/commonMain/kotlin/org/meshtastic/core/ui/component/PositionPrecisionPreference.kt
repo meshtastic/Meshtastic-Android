@@ -30,7 +30,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.model.util.DistanceUnit
+import org.meshtastic.core.common.util.getSystemMeasurementSystem
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.position_enabled
@@ -56,7 +56,7 @@ fun PositionPrecisionPreference(
     onValueChanged: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val unit = remember { DistanceUnit.getFromLocale() }
+    val unit = remember { getSystemMeasurementSystem() }
 
     Column(modifier = modifier) {
         SwitchPreference(

@@ -16,7 +16,7 @@
  */
 package org.meshtastic.core.model.geofence
 
-import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits
+import org.meshtastic.core.common.util.MeasurementSystem
 import kotlin.math.abs
 
 /**
@@ -32,9 +32,9 @@ object GeofenceRadiusPresets {
     /** Off, ~250 ft, ~500 ft, ~1000 ft, 1 mi, 2 mi, 5 mi (stored as metres). */
     val IMPERIAL_METERS: List<Int> = listOf(0, 76, 152, 305, 1609, 3219, 8047)
 
-    fun forUnits(units: DisplayUnits): List<Int> =
-        if (units == DisplayUnits.IMPERIAL) IMPERIAL_METERS else METRIC_METERS
+    fun forUnits(units: MeasurementSystem): List<Int> =
+        if (units == MeasurementSystem.IMPERIAL) IMPERIAL_METERS else METRIC_METERS
 
     /** The preset (in the active unit system) closest to [meters] — used to highlight the current selection. */
-    fun nearest(meters: Int, units: DisplayUnits): Int = forUnits(units).minBy { abs(it - meters) }
+    fun nearest(meters: Int, units: MeasurementSystem): Int = forUnits(units).minBy { abs(it - meters) }
 }

@@ -24,6 +24,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import org.jetbrains.compose.resources.StringResource
+import org.meshtastic.core.common.util.MeasurementSystem
+import org.meshtastic.core.common.util.getSystemMeasurementSystem
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.ContactKey
@@ -33,7 +35,6 @@ import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.core.model.geofence.activeWaypointPackets
 import org.meshtastic.core.model.isFromLocal
-import org.meshtastic.core.model.util.DistanceUnit
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NotificationPrefs
@@ -49,7 +50,6 @@ import org.meshtastic.core.resources.two_days
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.ChannelSet
-import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.Waypoint
 
@@ -76,7 +76,7 @@ open class BaseMapViewModel(
      * kept for the existing collectAsState call sites; value is a one-time snapshot at construction and does not react
      * to a mid-session locale change (ViewModel survives config changes).
      */
-    val displayUnits: StateFlow<DisplayUnits> = MutableStateFlow(DistanceUnit.getFromLocale()).asStateFlow()
+    val displayUnits: StateFlow<MeasurementSystem> = MutableStateFlow(getSystemMeasurementSystem()).asStateFlow()
 
     val ourNodeInfo = nodeRepository.ourNodeInfo
 

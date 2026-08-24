@@ -73,6 +73,7 @@ import kotlinx.datetime.number
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.common.util.systemTimeZone
 import org.meshtastic.core.model.geofence.GeofenceRadiusPresets
 import org.meshtastic.core.model.isLocked
@@ -103,7 +104,6 @@ import org.meshtastic.core.ui.emoji.EmojiPickerDialog
 import org.meshtastic.core.ui.icon.CalendarMonth
 import org.meshtastic.core.ui.icon.Lock
 import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits
 import org.meshtastic.proto.Waypoint
 import kotlin.time.Duration.Companion.hours
 
@@ -118,7 +118,7 @@ import kotlin.time.Duration.Companion.hours
 @Composable
 fun EditWaypointDialog(
     waypoint: Waypoint,
-    displayUnits: DisplayUnits,
+    displayUnits: MeasurementSystem,
     myNodeNum: Int?,
     onSend: (Waypoint) -> Unit,
     onDelete: (Waypoint) -> Unit,
@@ -424,7 +424,7 @@ fun EditWaypointDialog(
 @Composable
 private fun GeofenceSection(
     waypoint: Waypoint,
-    displayUnits: DisplayUnits,
+    displayUnits: MeasurementSystem,
     onWaypointChange: (Waypoint) -> Unit,
     onBeginBoxAuthoring: () -> Unit,
 ) {

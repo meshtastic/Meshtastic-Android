@@ -35,7 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.model.util.DistanceUnit
+import org.meshtastic.core.common.util.getSystemMeasurementSystem
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.i_agree
@@ -118,7 +118,7 @@ fun MapReportingPreference(
                         steps = POSITION_PRECISION_MAX - POSITION_PRECISION_MIN - 1,
                     )
                     val precisionMeters = precisionBitsToMeters(positionPrecision).toInt()
-                    val unit = DistanceUnit.Companion.getFromLocale()
+                    val unit = getSystemMeasurementSystem()
                     Text(
                         text = "± ${precisionMeters.toDistanceString(unit)}",
                         modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),

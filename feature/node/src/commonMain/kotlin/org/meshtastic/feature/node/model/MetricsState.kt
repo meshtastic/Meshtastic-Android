@@ -16,13 +16,13 @@
  */
 package org.meshtastic.feature.node.model
 
+import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.DeviceLink
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.rxTimeOrNull
-import org.meshtastic.proto.Config
 import org.meshtastic.proto.FirmwareEdition
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.Position
@@ -32,7 +32,7 @@ data class MetricsState(
     val isLocal: Boolean = false,
     val isManaged: Boolean = true,
     val isFahrenheit: Boolean = false,
-    val displayUnits: Config.DisplayConfig.DisplayUnits = Config.DisplayConfig.DisplayUnits.METRIC,
+    val displayUnits: MeasurementSystem = MeasurementSystem.METRIC,
     val node: Node? = null,
     val deviceMetrics: List<Telemetry> = emptyList(),
     val localStats: List<Telemetry> = emptyList(),

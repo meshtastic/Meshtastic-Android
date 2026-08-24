@@ -30,9 +30,9 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.Node
-import org.meshtastic.proto.Config
 import org.meshtastic.proto.User
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -87,12 +87,12 @@ class CompassViewModelTest {
     fun `uiState reflects target node info after start`() = runTest {
         val node = Node(num = 1234, user = User(id = "!1234", long_name = "Target Node"))
 
-        viewModel.start(node, Config.DisplayConfig.DisplayUnits.METRIC)
+        viewModel.start(node, MeasurementSystem.METRIC)
 
         viewModel.uiState.test {
             val state = awaitItem()
             assertEquals("Target Node", state.targetName)
-            assertEquals(Config.DisplayConfig.DisplayUnits.METRIC, state.displayUnits)
+            assertEquals(MeasurementSystem.METRIC, state.displayUnits)
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -110,7 +110,7 @@ class CompassViewModelTest {
                 ), // 1 deg North, 1 deg East
             )
 
-        viewModel.start(node, Config.DisplayConfig.DisplayUnits.METRIC)
+        viewModel.start(node, MeasurementSystem.METRIC)
 
         viewModel.uiState.test {
             // Skip initial states
@@ -271,7 +271,7 @@ class CompassViewModelTest {
     ): CompassUiState {
         viewModel.start(
             Node(num = 1234, user = User(id = "!1234"), position = targetPosition),
-            Config.DisplayConfig.DisplayUnits.METRIC,
+            MeasurementSystem.METRIC,
         )
 
         locationFlow.value = PhoneLocationState(permissionGranted = true, providerEnabled = true, location = location)

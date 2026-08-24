@@ -30,6 +30,7 @@ import androidx.compose.ui.semantics.semantics
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.GPSFormat
+import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.metersIn
 import org.meshtastic.core.model.util.toString
@@ -45,14 +46,10 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.util.createClipEntry
 import org.meshtastic.core.ui.util.formatAgo
 import org.meshtastic.core.ui.util.rememberOpenMap
-import org.meshtastic.proto.Config
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun LinkedCoordinatesItem(
-    node: Node,
-    displayUnits: Config.DisplayConfig.DisplayUnits = Config.DisplayConfig.DisplayUnits.METRIC,
-) {
+fun LinkedCoordinatesItem(node: Node, displayUnits: MeasurementSystem = MeasurementSystem.METRIC) {
     val clipboard: Clipboard = LocalClipboard.current
     val coroutineScope = rememberCoroutineScope()
     val openMap = rememberOpenMap()

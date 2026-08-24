@@ -22,10 +22,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import okio.ByteString.Companion.toByteString
+import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.feature.node.model.LogsType
-import org.meshtastic.proto.Config
 
 // ---------------------------------------------------------------------------
 // Sample data for previews
@@ -57,7 +57,7 @@ fun DeviceActionsRemotePreview() {
                     LogsType.TRACEROUTE,
                 ),
                 onAction = {},
-                displayUnits = Config.DisplayConfig.DisplayUnits.METRIC,
+                displayUnits = MeasurementSystem.METRIC,
                 isFahrenheit = false,
             )
         }
@@ -77,7 +77,7 @@ fun DeviceActionsLocalPreview() {
                 lastRequestNeighborsTime = null,
                 availableLogs = setOf(LogsType.DEVICE, LogsType.POSITIONS),
                 onAction = {},
-                displayUnits = Config.DisplayConfig.DisplayUnits.METRIC,
+                displayUnits = MeasurementSystem.METRIC,
                 isFahrenheit = false,
                 isLocal = true,
             )
@@ -109,7 +109,7 @@ fun TelemetricActionsSectionPreview() {
                 ),
                 lastTracerouteTime = null,
                 lastRequestNeighborsTime = null,
-                displayUnits = Config.DisplayConfig.DisplayUnits.METRIC,
+                displayUnits = MeasurementSystem.METRIC,
                 isFahrenheit = false,
                 onAction = {},
             )
@@ -129,7 +129,7 @@ fun TelemetricActionsSectionEmptyPreview() {
                 availableLogs = emptySet(),
                 lastTracerouteTime = null,
                 lastRequestNeighborsTime = null,
-                displayUnits = Config.DisplayConfig.DisplayUnits.IMPERIAL,
+                displayUnits = MeasurementSystem.IMPERIAL,
                 isFahrenheit = true,
                 onAction = {},
             )
@@ -150,7 +150,7 @@ fun TelemetricActionsSectionLocalPreview() {
                 availableLogs = emptySet(),
                 lastTracerouteTime = null,
                 lastRequestNeighborsTime = null,
-                displayUnits = Config.DisplayConfig.DisplayUnits.METRIC,
+                displayUnits = MeasurementSystem.METRIC,
                 isFahrenheit = false,
                 onAction = {},
                 isLocal = true,
@@ -232,7 +232,7 @@ fun EnvironmentMetricsPreview() {
                 radiation = 0.15f,
             ),
         )
-    AppTheme { Surface { EnvironmentMetrics(node = node, displayUnits = Config.DisplayConfig.DisplayUnits.METRIC) } }
+    AppTheme { Surface { EnvironmentMetrics(node = node, displayUnits = MeasurementSystem.METRIC) } }
 }
 
 @PreviewLightDark
@@ -267,7 +267,7 @@ fun PositionInlineContentPreview() {
             PositionInlineContent(
                 node = node,
                 ourNode = previewData.mickeyMouse.copy(num = 9999),
-                displayUnits = Config.DisplayConfig.DisplayUnits.METRIC,
+                displayUnits = MeasurementSystem.METRIC,
                 onAction = {},
             )
         }
