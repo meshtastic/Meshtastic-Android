@@ -32,7 +32,9 @@
       "hwModel": 9,
       "hwModelSlug": "RAK4631",
       "platformioTargets": [
-        "rak4631"
+        "rak4631",
+        "rak_wismesh_pocket",
+        "rak_wismesh_repeater_mini"
       ],
       "softDevice": "6.1.1"
     },
@@ -217,7 +219,8 @@
       "hwModel": 117,
       "hwModelSlug": "RAK3401",
       "platformioTargets": [
-        "rak3401-1watt"
+        "rak3401-1watt",
+        "rak_wismesh_repeater_mini_hp"
       ],
       "softDevice": "6.1.1"
     },
@@ -275,6 +278,22 @@
         "t-echo-card"
       ],
       "softDevice": "6.1.1"
+    },
+    {
+      "hwModel": 139,
+      "hwModelSlug": "HELTEC_MESH_TOWER_V2",
+      "platformioTargets": [
+        "heltec-mesh-tower-v2"
+      ],
+      "softDevice": "6.1.1"
+    },
+    {
+      "hwModel": 144,
+      "hwModelSlug": "SEEED_WIO_TRACKER_L1_PRO_1W",
+      "platformioTargets": [
+        "seeed_wio_tracker_L1_Pro_1W"
+      ],
+      "softDevice": "7.3.0"
     }
   ]
 }
