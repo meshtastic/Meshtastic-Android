@@ -28,9 +28,10 @@ import org.koin.core.annotation.Single
  *
  * Events are buffered in a [Channel] and consumed exactly once by the host composable via `MeshtasticSnackbarHost`.
  *
- * `MeshtasticSnackbarHost` consumes events from a single `collect`, and `showSnackbar` suspends until the snackbar goes
- * away — so an [SnackbarDuration.Indefinite] event with no dismiss affordance stalls that collector and every later
- * snackbar queues behind it. Action snackbars therefore default to [SnackbarDuration.Long], not indefinite.
+ * [showSnackbar] here only buffers and returns. It is the host that waits: `MeshtasticSnackbarHost` consumes events
+ * from a single `collect`, and its `SnackbarHostState.showSnackbar` call suspends for as long as that snackbar is on
+ * screen — so an [SnackbarDuration.Indefinite] event with no dismiss affordance stalls the collector and leaves every
+ * later snackbar queued behind it. Action snackbars therefore default to [SnackbarDuration.Long], not indefinite.
  *
  * @see AlertManager for the modal dialog equivalent.
  */
