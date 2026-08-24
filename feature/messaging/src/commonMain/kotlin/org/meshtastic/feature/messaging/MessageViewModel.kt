@@ -448,9 +448,14 @@ class MessageViewModel(
             packetRepository.clearUnreadCount(contact, lastReadTimestamp)
             packetRepository.updateLastReadMessage(contact, messageUuid, lastReadTimestamp)
             val unreadCount = packetRepository.getUnreadCount(contact)
-            // Must go through the domain manager: the conversation is posted under a notification *tag*, so an
-            // untagged cancel by id never matches it. This also rebuilds the group summary.
-            if (unreadCount == 0) meshNotificationManager.cancelMessageNotification(contact)
+            // The count is read before this suspends, so it can be stale by the time the cancel lands. Re-checking
+            // that the conversation is still on screen closes the window: while it is, an arriving message posts no
+            // notification at all (ActiveConversationTracker suppresses it), so there is nothing this can erase. Once
+            // the user has left, the notification is theirs to see and must survive.
+            // Cancelling must go through the domain manager: the conversation is posted under a notification *tag*,
+            // so an untagged cancel by id never matches it. This also rebuilds the group summary.
+            val stillOnScreen = activeConversationTracker.activeContactKey.value == contact
+            if (unreadCount == 0 && stillOnScreen) meshNotificationManager.cancelMessageNotification(contact)
         }
 
     companion object {

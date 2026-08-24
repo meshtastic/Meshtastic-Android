@@ -25,6 +25,7 @@ import dev.mokkery.every
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
+import dev.mokkery.verify.VerifyMode
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -76,6 +77,7 @@ class MessageViewModelTest {
     private val uiPrefs: UiPrefs = mock(MockMode.autofill)
     private val meshNotificationManager: org.meshtastic.core.repository.MeshNotificationManager =
         mock(MockMode.autofill)
+    private val activeConversationTracker = ActiveConversationTracker()
     private val messageTranslationService: MessageTranslationService = mock(MockMode.autofill)
     private val snackbarManager: SnackbarManager = SnackbarManager()
 
@@ -135,7 +137,7 @@ class MessageViewModelTest {
                 homoglyphEncodingPrefs = homoglyphPrefs,
                 uiPrefs = uiPrefs,
                 meshNotificationManager = meshNotificationManager,
-                activeConversationTracker = ActiveConversationTracker(),
+                activeConversationTracker = activeConversationTracker,
                 messageTranslationService = messageTranslationService,
                 snackbarManager = snackbarManager,
             )
@@ -319,6 +321,7 @@ class MessageViewModelTest {
         everySuspend { packetRepository.updateLastReadMessage(contact, 1L, 1000L) } returns Unit
         everySuspend { packetRepository.getUnreadCount(contact) } returns 0
         everySuspend { meshNotificationManager.cancelMessageNotification(contact) } returns Unit
+        activeConversationTracker.setActive(contact)
 
         viewModel.clearUnreadCount(contact, 1L, 1000L)
 
@@ -327,6 +330,23 @@ class MessageViewModelTest {
         verifySuspend { packetRepository.clearUnreadCount(contact, 1000L) }
         verifySuspend { packetRepository.updateLastReadMessage(contact, 1L, 1000L) }
         verifySuspend { meshNotificationManager.cancelMessageNotification(contact) }
+    }
+
+    @Test
+    fun testClearUnreadCountLeavesNotificationAloneOnceTheUserHasLeft() = runTest {
+        // The count was read before this coroutine suspended. If the user left in the meantime, a message that
+        // arrived since posted a notification that is legitimately theirs to see — cancelling would erase it.
+        val contact = "0!12345678"
+        everySuspend { packetRepository.clearUnreadCount(contact, 1000L) } returns Unit
+        everySuspend { packetRepository.updateLastReadMessage(contact, 1L, 1000L) } returns Unit
+        everySuspend { packetRepository.getUnreadCount(contact) } returns 0
+        activeConversationTracker.clearActive(contact)
+
+        viewModel.clearUnreadCount(contact, 1L, 1000L)
+
+        advanceUntilIdle()
+
+        verifySuspend(mode = VerifyMode.not) { meshNotificationManager.cancelMessageNotification(contact) }
     }
 
     @Test
