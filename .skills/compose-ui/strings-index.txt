@@ -17,6 +17,7 @@ acknowledgements
 ### ACTION ###
 action_copy_message
 action_delete_message
+action_more_message_actions
 action_react_with_emoji
 action_select_device
 action_select_message
@@ -309,6 +310,8 @@ current
 currently
 datadog_link
 date
+date_separator_today
+date_separator_yesterday
 dbm_value
 ### DEBUG ###
 debug
