@@ -1,0 +1,327 @@
+<h1 id="nœuds">Nœuds</h1>
+
+<p>The Nodes screen displays all devices visible on your mesh network.</p>
+
+<h2 id="node-list">Node List</h2>
+
+<p>The node list shows every node your radio has heard, including:</p>
+
+<ul>
+  <li><strong>Node name</strong> — user-configured long name</li>
+  <li><strong>Short name</strong> — 4-character identifier</li>
+  <li><strong>Signal quality</strong> — last heard signal strength</li>
+  <li><strong>Last heard</strong> — time since last communication</li>
+  <li><strong>Distance</strong> — estimated distance (if positions are shared)</li>
+  <li><strong>Battery</strong> — remote node battery level (if telemetry is enabled)</li>
+</ul>
+
+<h3 id="node-status-indicators">Node Status Indicators</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Badge</th>
+      <th>Meaning</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>🟢 Online</td>
+      <td>Node heard within the last 2 hours</td>
+    </tr>
+    <tr>
+      <td>⚪ Offline</td>
+      <td>Node not heard for over 2 hours</td>
+    </tr>
+    <tr>
+      <td>⭐ Favorite</td>
+      <td>Node marked as favorite by the user</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>A node is considered <strong>online</strong> if it was heard within the last 2 hours, and <strong>offline</strong> otherwise — there is no separate “away” tier.</p>
+
+<h3 id="node-roles">Node Roles</h3>
+
+<p>Nodes can be configured with different roles that affect their mesh behavior:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Rôle</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Client</td>
+      <td>Standard end-user device</td>
+    </tr>
+    <tr>
+      <td>Base Client</td>
+      <td>Treats favorited-node traffic as Router Late priority; all other traffic as Client</td>
+    </tr>
+    <tr>
+      <td>Client muet</td>
+      <td>Receives but doesn’t retransmit</td>
+    </tr>
+    <tr>
+      <td>Client masqué</td>
+      <td>Like Client Mute, plus hides from node list</td>
+    </tr>
+    <tr>
+      <td>Routeur</td>
+      <td>Prioritizes message forwarding; stays awake to relay</td>
+    </tr>
+    <tr>
+      <td>Routeur avec retard</td>
+      <td>Infrastructure node that rebroadcasts once, but only after all other modes (provides supplemental coverage)</td>
+    </tr>
+    <tr>
+      <td><del>Router Client</del></td>
+      <td>⚠️ <strong>Deprecated</strong> (removed in firmware 2.3.15) — no longer selectable; use Router or Client instead</td>
+    </tr>
+    <tr>
+      <td><del>Repeater</del></td>
+      <td>⚠️ <strong>Deprecated</strong> (removed in firmware 2.7.11) — no longer selectable; use Router instead</td>
+    </tr>
+    <tr>
+      <td>Traqueur</td>
+      <td>Optimized for position reporting at regular intervals</td>
+    </tr>
+    <tr>
+      <td>Capteur</td>
+      <td>Optimized for telemetry reporting</td>
+    </tr>
+    <tr>
+      <td>TAK</td>
+      <td>Interoperates with TAK systems (sends/receives CoT)</td>
+    </tr>
+    <tr>
+      <td>Traqueur TAK</td>
+      <td>TAK position reporting only</td>
+    </tr>
+    <tr>
+      <td>Lost &amp; Found</td>
+      <td>Continuous position beacon for recovery</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="choosing-a-role">Choosing a Role</h3>
+
+<p>Most users should keep the default <strong>Client</strong> role. Consider a different role when:</p>
+
+<ul>
+  <li><strong>Router</strong> — You have a node in a fixed, elevated location with reliable power (rooftop, hilltop). Routers stay awake continuously to relay messages for others and are essential for extending mesh coverage. Don’t use Router on battery-powered handheld devices.</li>
+  <li><strong>Router Late</strong> — An infrastructure node that always rebroadcasts packets once but only after all other routing modes have had their turn. Provides supplemental coverage for local clusters without competing with primary routers.</li>
+  <li><strong>Client Base</strong> — Treats traffic from/to your favorited nodes with Router Late priority (ensuring those messages get extra relay coverage) while handling everything else as a normal Client.</li>
+  <li><strong>Client Mute</strong> — You want to receive mesh traffic but not contribute to relaying. Useful for monitoring-only devices or to reduce congestion in dense areas.</li>
+  <li><strong>Tracker</strong> — An unattended device whose sole purpose is broadcasting its GPS position (e.g., a vehicle, pet, or asset). Sleeps between broadcasts to conserve battery.</li>
+  <li><strong>Sensor</strong> — An unattended device reporting environmental telemetry (temperature, humidity, air quality). Similar power profile to Tracker.</li>
+  <li><strong>TAK / TAK Tracker</strong> — Only needed if interoperating with ATAK/WinTAK systems. See <a href="tak">TAK Integration</a> for details.</li>
+</ul>
+
+<blockquote>
+  <p>💡 <strong>Tip:</strong> The mesh works best when most nodes are <strong>Client</strong> or <strong>Router</strong>. Too many Mute nodes reduces mesh resilience; too many Routers in a dense area can cause congestion. A good rule of thumb: one Router per 5–10 Clients in your area.</p>
+</blockquote>
+
+<h3 id="encryption-indicators">Encryption Indicators</h3>
+
+<p>Nodes display encryption status icons next to their name:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Icon</th>
+      <th>Meaning</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>🔒 Locked</td>
+      <td>Communication uses PKI (public key infrastructure) — end-to-end encrypted with verified identity</td>
+    </tr>
+    <tr>
+      <td>🔓 Unlocked</td>
+      <td>Communication uses shared channel PSK — encrypted but identity not individually verified</td>
+    </tr>
+    <tr>
+      <td>⚠️ Mismatch</td>
+      <td>Public key mismatch — the node’s key has changed since last seen (investigate before trusting)</td>
+    </tr>
+  </tbody>
+</table>
+
+<blockquote>
+  <p>💡 <strong>Tip:</strong> PKI encryption (firmware 2.5+) provides stronger security than channel PSK because each node has a unique key pair. If you see a key mismatch warning, the node may have been reset or compromised.</p>
+</blockquote>
+
+<h2 id="quick-actions">Quick Actions</h2>
+
+<p>From the node list, you can:</p>
+
+<ul>
+  <li><strong>Tap</strong> a node to view its detail page</li>
+  <li><strong>Long-press</strong> for quick actions:
+    <ul>
+      <li>Mark/remove favorite</li>
+      <li>Mute/unmute notifications</li>
+      <li>Send a direct message</li>
+      <li>Trace route</li>
+      <li>Ignore/unignore</li>
+      <li>Supprimer le nœud</li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="filtering--sorting">Filtering &amp; Sorting</h2>
+
+<h3 id="text-search">Text Search</h3>
+
+<p>Type in the search field to filter nodes by name or short name. The filter updates in real time as you type.</p>
+
+<h3 id="filter-toggles">Filter Toggles</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Filtre</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Only online</strong></td>
+      <td>Show only nodes heard within the last 2 hours</td>
+    </tr>
+    <tr>
+      <td><strong>Only direct</strong></td>
+      <td>Show only nodes with direct (non-relayed) connections</td>
+    </tr>
+    <tr>
+      <td><strong>Include unknown</strong></td>
+      <td>Show nodes that haven’t sent user info yet</td>
+    </tr>
+    <tr>
+      <td><strong>Exclude infrastructure</strong></td>
+      <td>Hide infrastructure-role nodes (Router, Router Late, Client Base)</td>
+    </tr>
+    <tr>
+      <td><strong>Exclude MQTT</strong></td>
+      <td>Hide nodes heard only via MQTT internet bridge</td>
+    </tr>
+    <tr>
+      <td><strong>Show ignored</strong></td>
+      <td>Show nodes you’ve previously dismissed or muted</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="sort-options">Sort Options</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Sort</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Last heard</strong> (default)</td>
+      <td>Most recently heard nodes first</td>
+    </tr>
+    <tr>
+      <td><strong>Alphabetical</strong></td>
+      <td>Sorted by node long name</td>
+    </tr>
+    <tr>
+      <td><strong>Distance</strong></td>
+      <td>Nearest nodes first (requires position sharing)</td>
+    </tr>
+    <tr>
+      <td><strong>Hops away</strong></td>
+      <td>Fewest relay hops first</td>
+    </tr>
+    <tr>
+      <td><strong>Channel</strong></td>
+      <td>Grouped by channel index</td>
+    </tr>
+    <tr>
+      <td><strong>Via MQTT</strong></td>
+      <td>Grouped by MQTT vs. radio-heard</td>
+    </tr>
+    <tr>
+      <td><strong>Favorites</strong></td>
+      <td>Favorited nodes first</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="nodes-per-hop">Nodes per Hop</h2>
+
+<p>Tap the hop-histogram icon in the node list’s app bar to open a bar chart of how many nodes sit at each hop distance (0 = direct, 1 = one relay away, and so on). Filter the chart to a <strong>last heard</strong> window — All time, 1 hour, 8 hours, or 24 hours — to see how the mesh looks right now versus over a longer period. It’s a quick way to gauge how busy and spread out your local mesh is.</p>
+
+<h2 id="node-detail">Node Detail</h2>
+
+<p>Tapping a node opens the detail view with comprehensive information. See <a href="node-metrics">Node Metrics</a> for full details on metrics and telemetry.</p>
+
+<p><img src="../../assets/screenshots/nodes_node_list.png" alt="Node detail view" /></p>
+
+<p>The detail screen includes device info, position, and action buttons:</p>
+
+<p><img src="../../assets/screenshots/nodes_detail_section.png" alt="Node detail section" /></p>
+
+<p>Inline status indicators show key metrics at a glance:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Indicator</th>
+      <th>Screenshot</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Signal quality</td>
+      <td><img src="../../assets/screenshots/nodes_signal_info.png" alt="Signal" /></td>
+    </tr>
+    <tr>
+      <td>Niveau de batterie</td>
+      <td><img src="../../assets/screenshots/nodes_battery_info.png" alt="Battery" /></td>
+    </tr>
+    <tr>
+      <td>Hop count</td>
+      <td><img src="../../assets/screenshots/nodes_hops_info.png" alt="Hops" /></td>
+    </tr>
+    <tr>
+      <td>Dernière écoute</td>
+      <td><img src="../../assets/screenshots/nodes_last_heard.png" alt="Last heard" /></td>
+    </tr>
+    <tr>
+      <td>Distance</td>
+      <td><img src="../../assets/screenshots/nodes_distance_info.png" alt="Distance" /></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="device-links-i-want-one">Device Links (“I want one”)</h3>
+
+<p>When a node’s hardware is recognized, the detail view shows a collapsible <strong>“I want one”</strong> section linking to places to buy or learn more about that device: the vendor’s product page, product variants, and regional marketplace listings (such as AliExpress, Amazon, and supported retailers), filtered to your country. Each link opens through the <code class="language-plaintext highlighter-rouge">msh.to</code> redirect service. Devices with no matching links don’t show the section.</p>
+
+<p>A full, browsable directory of every link is also available under <strong>Settings → Help &amp; Documentation → Device Links</strong>.</p>
+
+<h2 id="related-topics">Related Topics</h2>
+
+<ul>
+  <li><a href="node-metrics">Node Metrics</a> — detailed telemetry dashboards for each node</li>
+  <li><a href="messages-and-channels">Messages &amp; Channels</a> — send a direct message to a node</li>
+  <li><a href="map-and-waypoints">Map &amp; Waypoints</a> — view node positions geographically</li>
+  <li><a href="discovery">Discovery</a> — traceroute and neighbor info for topology exploration</li>
+  <li><a href="signal-meter">Signal Meter</a> — understand what the signal bars mean</li>
+</ul>
+
+<hr />
+

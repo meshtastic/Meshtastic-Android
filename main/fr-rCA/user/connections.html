@@ -1,0 +1,155 @@
+<h1 id="connexions">Connexions</h1>
+
+<p>Meshtastic supports multiple transport methods to communicate between your phone/desktop and a radio node.</p>
+
+<h2 id="bluetooth-ble">Bluetooth (BLE)</h2>
+
+<p>Bluetooth Low Energy is the default and most common connection method on Android.</p>
+
+<h3 id="pairing-a-device">Pairing a Device</h3>
+
+<ol>
+  <li>Ensure your Meshtastic radio is powered on and in pairing mode.</li>
+  <li>Open the app and navigate to the <strong>Connect</strong> tab.</li>
+  <li>Tap <strong>Scan for Bluetooth devices</strong> — nearby Meshtastic radios will appear.</li>
+  <li>Select your device from the list.</li>
+  <li>Accept the Bluetooth pairing prompt if shown.</li>
+</ol>
+
+<p><img src="../../assets/screenshots/connections_bluetooth_scan.png" alt="Scanning for Bluetooth devices, with a discovered radio in the list" /></p>
+
+<p>Use the transport selector — a segmented button row below the connection card — to switch between the Bluetooth, Network, and USB transports (one is active at a time):</p>
+
+<p><img src="../../assets/screenshots/connections_transport_filters.png" alt="Transport selector" /></p>
+
+<blockquote>
+  <p>💡 <strong>Tip:</strong> If your device doesn’t appear, check that Bluetooth and Location permissions are granted, and that the radio is not already connected to another device.</p>
+</blockquote>
+
+<h3 id="connection-status">Connection Status</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Icon</th>
+      <th>State</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>🟢</td>
+      <td>Connecté</td>
+      <td>Active radio link established</td>
+    </tr>
+    <tr>
+      <td>🟡</td>
+      <td>Connexion en cours</td>
+      <td>Handshake in progress</td>
+    </tr>
+    <tr>
+      <td>🔴</td>
+      <td>Déconnecté</td>
+      <td>No active connection</td>
+    </tr>
+    <tr>
+      <td>⚪</td>
+      <td>Not configured</td>
+      <td>Aucun appareil sélectionné</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>When connecting, a status indicator shows the current connection state:</p>
+
+<p><img src="../../assets/screenshots/connections_connecting.png" alt="Connecting status" /></p>
+
+<p>If no devices are found, the app shows an empty state with instructions:</p>
+
+<p><img src="../../assets/screenshots/connections_empty_state.png" alt="No devices found" /></p>
+
+<h3 id="troubleshooting-bluetooth">Troubleshooting Bluetooth</h3>
+
+<ul>
+  <li><strong>Device not found:</strong> Toggle Bluetooth off/on, ensure location is enabled.</li>
+  <li><strong>Connection drops:</strong> Move closer to the radio; check for interference.</li>
+  <li><strong>Pairing rejected:</strong> Forget the device in Android Bluetooth settings and retry.</li>
+</ul>
+
+<h2 id="usb-serial">USB Serial</h2>
+
+<p>USB connections provide a wired alternative, useful for desktop or when Bluetooth is unavailable.</p>
+
+<h3 id="setup">Setup</h3>
+
+<ol>
+  <li>Connect your radio via USB cable to your device.</li>
+  <li>The app will prompt for USB permission — tap <strong>Allow</strong>.</li>
+  <li>The connection is established automatically.</li>
+</ol>
+
+<blockquote>
+  <p>⚠️ <strong>Note:</strong> USB connections require OTG support on Android devices.</p>
+</blockquote>
+
+<h2 id="tcpip-network">TCP/IP (Network)</h2>
+
+<p>Some Meshtastic radios support WiFi/Ethernet connectivity, allowing TCP-based connections over your local network. Get the radio onto your network first — using the radio’s own WiFi settings (via the firmware web interface or another connection) — then connect to it from the app.</p>
+
+<h3 id="connecting-over-the-network">Connecting over the Network</h3>
+
+<ol>
+  <li>Make sure the radio is on the same local network as your phone/desktop.</li>
+  <li>On the Connect screen, select <strong>Network</strong> in the transport selector.</li>
+  <li>Choose the radio one of two ways:
+    <ul>
+      <li><strong>Scan for network devices</strong> — toggle this on to auto-discover radios that advertise themselves on the local network (mDNS / <code class="language-plaintext highlighter-rouge">_meshtastic._tcp</code>). Discovered devices appear in the list; tap one to connect.</li>
+      <li><strong>Add device manually…</strong> — enter the radio’s IP address (or hostname) and port (default: <code class="language-plaintext highlighter-rouge">4403</code>).</li>
+    </ul>
+  </li>
+  <li>Previously-used network addresses are remembered under <strong>Recent Network Devices</strong> for quick reconnection (long-press to remove one).</li>
+</ol>
+
+<blockquote>
+  <p>💡 <strong>Tip:</strong> Network discovery uses mDNS, which only works when both devices are on the same subnet. On Android 17+ the app needs the local-network permission for scanning; if discovery finds nothing, add the device manually by IP.</p>
+</blockquote>
+
+<h3 id="when-to-use-tcp">When to Use TCP</h3>
+
+<ul>
+  <li>Radio is on the same local network</li>
+  <li>Testing with a simulated radio</li>
+  <li>Environments where Bluetooth has interference issues</li>
+</ul>
+
+<h2 id="reconnection-behavior">Reconnection Behavior</h2>
+
+<p>The app reconnects to the <strong>last selected device</strong> on startup. You can switch transports from the Connect screen at any time.</p>
+
+<p>To disconnect, tap the disconnect button on the Connect screen:</p>
+
+<p><img src="../../assets/screenshots/connections_disconnect.png" alt="Disconnect from radio" /></p>
+
+<h2 id="desktop-connections">Desktop Connections</h2>
+
+<p>On Desktop (Linux/macOS/Windows), the app supports:</p>
+
+<ul>
+  <li><strong>Bluetooth (BLE)</strong> — via the Kable library; works on macOS, Linux, and Windows</li>
+  <li><strong>USB Serial</strong> — primary wired connection method</li>
+  <li><strong>TCP/IP</strong> — for network-connected radios</li>
+</ul>
+
+<p>See <a href="desktop">Desktop App</a> for platform-specific details and keyboard shortcuts.</p>
+
+<h2 id="related-topics">Related Topics</h2>
+
+<ul>
+  <li><a href="onboarding">Getting Started</a> — first-launch setup and permissions</li>
+  <li><a href="settings-radio-user">Settings — Radio &amp; User</a> — Bluetooth and network configuration</li>
+  <li><a href="desktop">Desktop App</a> — desktop-specific connection details</li>
+  <li><a href="https://meshtastic.org/docs/hardware/devices">Supported devices</a> — full list of compatible radios on meshtastic.org</li>
+</ul>
+
+<hr />
+

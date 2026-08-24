@@ -1,0 +1,163 @@
+<h1 id="map--waypoints">Map &amp; Waypoints</h1>
+
+<p>The Map screen shows the geographic positions of nodes on your mesh, along with shared waypoints.</p>
+
+<h2 id="map-view">Map View</h2>
+
+<p>The map displays:</p>
+
+<ul>
+  <li><strong>Node positions</strong> — colored markers for each node reporting location</li>
+  <li><strong>Waypoints</strong> — shared points of interest</li>
+  <li><strong>Your position</strong> — your current GPS location</li>
+</ul>
+
+<h3 id="node-markers">Node Markers</h3>
+
+<p>Each node that reports a position is shown as a <strong>node chip</strong> marker displaying the node’s short name. The chip is colored by the node’s own identity color (a stable color derived from its node number) — the same chip used in the node list, so a node looks the same everywhere. Marker color does <strong>not</strong> encode online/offline status. When a node’s position updates live, its marker briefly pulses. Nearby markers are clustered as you zoom out.</p>
+
+<h3 id="map-controls">Map Controls</h3>
+
+<ul>
+  <li><strong>Zoom</strong> — pinch or use +/- buttons</li>
+  <li><strong>Pan</strong> — drag to explore</li>
+  <li><strong>Center</strong> — select the location button to center on your position</li>
+  <li><strong>Node tap</strong> — tap a node marker to view details</li>
+</ul>
+
+<p>The floating toolbar provides quick access to compass, layer switching, node filters, refresh, and location tracking. Tap the compass to reorient north-up, or tap the location button to center on your current position.</p>
+
+<p><img src="../../assets/screenshots/map_controls_overlay.png" alt="Map controls overlay" /></p>
+
+<h2 id="waypoints">Waypoints</h2>
+
+<p>Waypoints are shared geographic points of interest that all mesh members can see.</p>
+
+<h3 id="creating-a-waypoint">Creating a Waypoint</h3>
+
+<ol>
+  <li>Long-press on the map at the desired location.</li>
+  <li>Enter a name and optional description.</li>
+  <li>Choose an icon/emoji for the waypoint.</li>
+  <li>Tap <strong>Send</strong> to share with the mesh.</li>
+</ol>
+
+<p>Waypoints are addressed like messages: by default they broadcast on the primary channel, but a waypoint can also be sent on a specific channel or as a direct message to a single node.</p>
+
+<h3 id="waypoint-properties">Waypoint Properties</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Property</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Nom</td>
+      <td>Short identifier (max 29 characters)</td>
+    </tr>
+    <tr>
+      <td>Description</td>
+      <td>Optional longer description</td>
+    </tr>
+    <tr>
+      <td>Icon</td>
+      <td>Visual marker emoji on the map</td>
+    </tr>
+    <tr>
+      <td>Verrouillé</td>
+      <td>If locked, only the creator can edit or delete</td>
+    </tr>
+    <tr>
+      <td>Expiration</td>
+      <td>Optional auto-remove date and time</td>
+    </tr>
+    <tr>
+      <td>Geofence</td>
+      <td>Optional enter/exit alert area — see below</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="waypoint-expiration">Waypoint Expiration</h3>
+
+<p>Waypoints can be set to expire automatically:</p>
+
+<ul>
+  <li><strong>Never</strong> (default) — waypoint remains until manually deleted</li>
+  <li><strong>Timed</strong> — pick a specific date and time; the waypoint is automatically removed once that time passes. Useful for temporary markers like rally points, hazards, or meeting locations.</li>
+</ul>
+
+<p>Expired waypoints are automatically hidden from the map so they don’t clutter the display. The expiration countdown is based on the absolute time you picked, not a duration from when the waypoint was created or received.</p>
+
+<h3 id="waypoint-geofences">Waypoint Geofences</h3>
+
+<p>Any waypoint can also define a <strong>geofence</strong> — an alert area — so you or others get notified when a node enters or leaves it:</p>
+
+<ol>
+  <li>Set a <strong>geofence radius</strong> from the preset chips (or <strong>Off</strong> to disable), or tap <strong>Set area on map</strong> to draw a custom rectangular area instead.</li>
+  <li>Once a region is set, toggle <strong>Notify on enter</strong> and/or <strong>Notify on exit</strong>.</li>
+  <li>Optionally enable <strong>Favorites only</strong> to limit alerts to your favorited nodes.</li>
+</ol>
+
+<p>Since waypoints (and their geofences) are broadcast to the whole mesh, only the <strong>creator</strong> is alerted by default. If someone else shares a geofenced waypoint with you, its detail view offers a <strong>“Notify me of crossings”</strong> opt-in so you can also receive enter/exit alerts for it.</p>
+
+<h3 id="managing-waypoints">Managing Waypoints</h3>
+
+<ul>
+  <li>Tap a waypoint on the map to view its details and coordinates</li>
+  <li>Edit or delete waypoints you created</li>
+  <li><strong>Locked waypoints</strong> cannot be modified or deleted by other nodes — only the original creator can change them</li>
+  <li>Unlocked waypoints can be edited by any mesh member</li>
+</ul>
+
+<h2 id="couches-cartographiques">Couches cartographiques</h2>
+
+<p>Tap the layers icon on the map to open <strong>Manage Map Layers</strong>, where you can import your own overlays in <code class="language-plaintext highlighter-rouge">.kml</code>, <code class="language-plaintext highlighter-rouge">.kmz</code>, or GeoJSON format — either by opening a file with Meshtastic or sharing it into the app from another app. Imported layers are listed with a toggle to show/hide each one and an option to remove it. This is available on both the Google Play and F-Droid builds.</p>
+
+<h3 id="site-planner">Site Planner</h3>
+
+<p><strong>Site Planner</strong> estimates RF coverage for a transmitter and draws it on the map as a color-coded overlay. Open it from a map control, or from a node’s detail page via <strong>Estimate coverage</strong> (shown only for nodes with a known position). Configure the transmitter (location, frequency, TX power, antenna gain and height), the receiver (sensitivity, height), and simulation options (max range, high-resolution terrain, color palette), then run the estimate. Like map layers, Site Planner works on both the Google Play and F-Droid builds.</p>
+
+<h2 id="position-sharing">Position Sharing</h2>
+
+<h3 id="enabling-position-sharing">Enabling Position Sharing</h3>
+
+<p>Your node shares its GPS position based on:</p>
+
+<ul>
+  <li><strong>Fixed interval</strong> — broadcast position at regular intervals</li>
+  <li><strong>Smart position</strong> — broadcast when movement exceeds a threshold</li>
+  <li><strong>Manual</strong> — only share when explicitly requested</li>
+</ul>
+
+<p>Configure position behavior in <strong>Settings → Position</strong>.</p>
+
+<h3 id="privacy-considerations">Privacy Considerations</h3>
+
+<blockquote>
+  <p>🔒 <strong>Privacy:</strong> Position data is broadcast to all nodes on your channel. If you don’t want your location shared, disable GPS position in settings or use a fixed/fake position.</p>
+</blockquote>
+
+<h2 id="map-sources">Map Sources</h2>
+
+<p>The base map depends on your app flavor: <strong>Google Play</strong> builds use Google Maps, while <strong>F-Droid</strong> and Desktop builds use OpenStreetMap. On top of the base map, additional tile sources are available as overlays or alternatives:</p>
+
+<ul>
+  <li>Satellite imagery (where available)</li>
+  <li>Offline tiles (download map areas for offline use)</li>
+</ul>
+
+<h2 id="related-topics">Related Topics</h2>
+
+<ul>
+  <li><a href="nodes">Nodes</a> — view and filter your node list</li>
+  <li><a href="node-metrics">Node Metrics</a> — signal quality and position history for individual nodes</li>
+  <li><a href="discovery">Discovery</a> — traceroute and neighbor info for understanding mesh topology</li>
+  <li><a href="units-and-locale">Units &amp; Locale</a> — distance and coordinate display formats</li>
+</ul>
+
+<hr />
+

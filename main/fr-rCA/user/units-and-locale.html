@@ -1,0 +1,255 @@
+<h1 id="units-measurement--locale">Units, Measurement &amp; Locale</h1>
+
+<p>The Meshtastic app automatically displays temperatures, distances, speeds, and times in the units your device is configured to use — no settings to change inside the app.</p>
+
+<hr />
+
+<h2 id="how-it-works">How It Works</h2>
+
+<p>Meshtastic radios always transmit data in <strong>metric units</strong> (meters, °C, m/s, hPa, etc.). When the app receives this data, it converts and displays values in whatever unit system your device’s locale specifies.</p>
+
+<p>On Android, your measurement preferences are determined by your system <strong>Language &amp; Region</strong> settings. On Desktop (JVM), the app uses the JVM’s default <code class="language-plaintext highlighter-rouge">Locale</code>.</p>
+
+<blockquote>
+  <p>💡 <strong>Tip:</strong> You never need to toggle units inside the app. Change your system measurement preferences and every screen in Meshtastic updates automatically — node details, telemetry charts, weather, altitude, and more.</p>
+</blockquote>
+
+<hr />
+
+<h2 id="température">Température</h2>
+
+<p>Temperature values from environment sensors are transmitted as <strong>°C</strong> and displayed based on your device’s temperature unit preference.</p>
+
+<p><img src="../../assets/screenshots/nodes_environment_metrics.png" alt="Environment metrics with temperature" /></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Your Setting</th>
+      <th>You See</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Celsius</td>
+      <td>22°C</td>
+    </tr>
+    <tr>
+      <td>Fahrenheit</td>
+      <td>72°F</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>This affects all temperature displays throughout the app: node environment telemetry, soil temperature, dew point, and telemetry chart axes.</p>
+
+<p>Temperature follows your locale’s <strong>temperature preference</strong>, independent of the distance system. Locales that mix systems work correctly — a UK phone shows miles for distance but <strong>°C</strong> for temperature. On Android 14+, the <strong>Temperature</strong> regional preference (Settings → System → Languages → Regional preferences) overrides the locale default.</p>
+
+<h2 id="distance--altitude">Distance &amp; Altitude</h2>
+
+<p>Distances between nodes and GPS altitudes are transmitted as <strong>meters</strong> and automatically scaled and converted.</p>
+
+<p><img src="../../assets/screenshots/nodes_distance_info.png" alt="Distance info display" /></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Your Setting</th>
+      <th>Small Distance</th>
+      <th>Large Distance</th>
+      <th>Altitude</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Metric</td>
+      <td>350 m</td>
+      <td>2.5 km</td>
+      <td>1,200 m</td>
+    </tr>
+    <tr>
+      <td>Imperial (US)</td>
+      <td>1,148 ft</td>
+      <td>1.6 mi</td>
+      <td>3,937 ft</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The app uses natural scaling — short distances stay in meters or feet, while longer distances switch to kilometres or miles automatically.</p>
+
+<h3 id="where-these-appear">Where these appear</h3>
+
+<ul>
+  <li><strong>Node list</strong> — distance and bearing to each node</li>
+  <li><strong>Node detail</strong> — altitude, distance from your position</li>
+  <li><strong>Map</strong> — waypoint distances, traceroute hop distances</li>
+  <li><strong>Compass</strong> — distance to selected node</li>
+</ul>
+
+<h2 id="vitesse">Vitesse</h2>
+
+<p>GPS ground speed is displayed in your locale’s preferred speed unit.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Your Setting</th>
+      <th>You See</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Metric</td>
+      <td>12 km/h</td>
+    </tr>
+    <tr>
+      <td>Imperial (US)</td>
+      <td>7 mph</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="vent">Vent</h2>
+
+<p>Wind speed and gust data from environment sensors are transmitted as <strong>m/s</strong> and converted for display.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Your Setting</th>
+      <th>You See</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Metric</td>
+      <td>5 m/s</td>
+    </tr>
+    <tr>
+      <td>Imperial (US)</td>
+      <td>11 mph</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Wind readings appear in the <strong>Node Detail</strong> environment section and the <strong>Environment Telemetry</strong> charts.</p>
+
+<h2 id="rainfall">Rainfall</h2>
+
+<p>Rainfall measurements (1-hour and 24-hour totals) are transmitted as <strong>mm</strong> and converted for display.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Your Setting</th>
+      <th>You See</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Metric</td>
+      <td>12 mm</td>
+    </tr>
+    <tr>
+      <td>Imperial (US)</td>
+      <td>0.5 in</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="units-that-never-change">Units That Never Change</h2>
+
+<p>Some units are international standards and are displayed the same way regardless of your locale:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Measurement</th>
+      <th>Unit</th>
+      <th>Why</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Barometric pressure</td>
+      <td>hPa</td>
+      <td>International meteorological standard</td>
+    </tr>
+    <tr>
+      <td>Heading / bearing</td>
+      <td>° (degrees)</td>
+      <td>Universal navigation convention</td>
+    </tr>
+    <tr>
+      <td>Radiation</td>
+      <td>μR/hr</td>
+      <td>Standard dosimetry unit</td>
+    </tr>
+    <tr>
+      <td>GPS coordinates</td>
+      <td>decimal degrees</td>
+      <td>Universal geographic standard</td>
+    </tr>
+    <tr>
+      <td>Humidity, battery, soil moisture</td>
+      <td>%</td>
+      <td>Universal</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="date--time">Date &amp; Time</h2>
+
+<p>All timestamps throughout the app — last heard, message times, telemetry logs, chart axes — follow your device’s date and time preferences.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Setting</th>
+      <th>What It Controls</th>
+      <th>Example</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>24-Hour Time</strong></td>
+      <td>Clock format</td>
+      <td>14:30 vs 2:30 PM</td>
+    </tr>
+    <tr>
+      <td><strong>Date Format</strong></td>
+      <td>Date ordering</td>
+      <td>09/05/2026 vs 05/09/2026</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The app also uses <strong>relative time</strong> where it makes sense — for example, “5 min ago” or “2 hours ago” in the node list — which is automatically localised into your device language.</p>
+
+<h2 id="changing-your-measurement-system-android">Changing Your Measurement System (Android)</h2>
+
+<p>On Android, your measurement system (metric vs imperial) is tied to your region setting:</p>
+
+<ol>
+  <li>Open <strong>Android Settings → System → Language &amp; Region</strong></li>
+  <li>Change your <strong>Region</strong> or <strong>Measurement units</strong> preference</li>
+  <li>On Android 14+, temperature can be overridden on its own under <strong>Regional preferences → Temperature</strong></li>
+  <li>Return to Meshtastic — values update immediately</li>
+</ol>
+
+<blockquote>
+  <p>💡 <strong>Tip:</strong> All measurement formatting is handled centrally and respects your platform’s locale, so units stay consistent everywhere in the app.</p>
+</blockquote>
+
+<h2 id="related-topics">Related Topics</h2>
+
+<ul>
+  <li><a href="node-metrics">Node Metrics</a> — where temperature, distance, and sensor values are displayed</li>
+  <li><a href="telemetry-and-sensors">Telemetry &amp; Sensors</a> — the sensors that produce these measurements</li>
+  <li><a href="../developer/measurement">Measurement &amp; Formatting</a> — developer reference for the formatting utilities</li>
+  <li><a href="settings-radio-user">Settings — Radio &amp; User</a> — region setting that drives unit selection</li>
+</ul>
+
+<hr />
+

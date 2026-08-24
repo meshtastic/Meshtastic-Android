@@ -1,0 +1,108 @@
+<h1 id="getting-started">Getting Started</h1>
+
+<p>Welcome to Meshtastic! This guide walks you through the initial setup of the Meshtastic Android app.</p>
+
+<h2 id="first-launch">First Launch</h2>
+
+<p>When you open the app for the first time, you’ll be guided through an introductory flow that helps configure essential permissions and settings. Each step can be completed in order, or you can skip and configure permissions later in Android settings.</p>
+
+<h3 id="welcome-screen">Welcome Screen</h3>
+
+<p>The welcome screen introduces Meshtastic and its core capabilities:</p>
+
+<ul>
+  <li>Off-grid mesh communication</li>
+  <li>No cellular or internet required</li>
+  <li>End-to-end encrypted messaging</li>
+</ul>
+
+<p>Tap <strong>Get Started</strong> to proceed through the setup flow.</p>
+
+<p><img src="../../assets/screenshots/onboarding_welcome.png" alt="Welcome screen" /></p>
+
+<h2 id="permissions">Permissions</h2>
+
+<p>The app requests several permissions during setup. Each one serves a specific purpose, and some are required for core functionality.</p>
+
+<h3 id="bluetooth-permission">Bluetooth Permission</h3>
+
+<p>Bluetooth is the primary connection method between your phone and Meshtastic radio:</p>
+
+<ul>
+  <li><strong>Bluetooth scanning</strong> — discover nearby Meshtastic radios</li>
+  <li><strong>Bluetooth connect</strong> — establish and maintain connections with paired radios</li>
+</ul>
+
+<p>Grant both permissions when prompted. Without Bluetooth, you’ll need to use USB or TCP connections instead.</p>
+
+<h3 id="location-permission">Location Permission</h3>
+
+<blockquote>
+  <p>⚠️ <strong>Why is location required for Bluetooth?</strong> Android requires location permission to discover nearby Bluetooth Low Energy devices. This is an Android system requirement, not a Meshtastic-specific choice.</p>
+</blockquote>
+
+<p>Meshtastic also uses your location for:</p>
+
+<ul>
+  <li>Showing your position on the mesh map</li>
+  <li>Calculating distances to other nodes</li>
+  <li>Sharing your GPS coordinates with other mesh members (if enabled)</li>
+</ul>
+
+<p>Grant <strong>“While using the app”</strong> or <strong>“Always”</strong> depending on your preference:</p>
+
+<ul>
+  <li><strong>While using the app</strong> — position updates only when the app is open</li>
+  <li><strong>Always</strong> — enables background position updates for always-on mesh presence</li>
+</ul>
+
+<p>If denied, Bluetooth scanning will not function and your node will not report a position.</p>
+
+<h3 id="notifications-permission">Notifications Permission</h3>
+
+<p>Notifications alert you to:</p>
+
+<ul>
+  <li>Incoming messages from channels and direct messages</li>
+  <li>New nodes joining the mesh</li>
+  <li>Low battery on a remote node</li>
+</ul>
+
+<blockquote>
+  <p>💡 <strong>Tip:</strong> You can fine-tune notification preferences later in Android system settings — the app creates a separate notification channel per category (plus a few internal ones, like the background service), so you can enable or silence them individually.</p>
+</blockquote>
+
+<h3 id="critical-alerts-permission">Critical Alerts Permission</h3>
+
+<p>On supported devices, the app may request permission for critical alerts:</p>
+
+<ul>
+  <li>These are high-priority notifications that can break through Do Not Disturb mode</li>
+  <li>Useful for emergency mesh alerts or urgent messages</li>
+  <li>You can <strong>skip</strong> this step if you don’t need breakthrough notifications</li>
+  <li>Configure or revoke later in Android notification settings</li>
+</ul>
+
+<h2 id="after-setup">After Setup</h2>
+
+<p>Once permissions are granted, the app transitions to the main interface. Your first action should be connecting to a Meshtastic radio — see <a href="connections">Connections</a> for detailed instructions.</p>
+
+<blockquote>
+  <p>💡 <strong>Tip:</strong> If you skipped any permissions during setup, you can grant them later through <strong>Android Settings → Apps → Meshtastic → Permissions</strong>. The app will prompt you again if a missing permission blocks a feature you try to use.</p>
+</blockquote>
+
+<h2 id="whats-next">What’s Next?</h2>
+
+<p>Once connected to a radio, explore:</p>
+
+<ul>
+  <li><a href="connections">Connections</a> — pair your first radio device</li>
+  <li><a href="messages-and-channels">Messages &amp; Channels</a> — send your first message</li>
+  <li><a href="nodes">Nodes</a> — see who’s on your mesh</li>
+  <li><a href="map-and-waypoints">Map &amp; Waypoints</a> — view node positions</li>
+  <li><a href="settings-radio-user">Settings</a> — configure your radio and user profile</li>
+</ul>
+
+<p>New to Meshtastic? The <a href="https://meshtastic.org/docs/getting-started">getting started guide</a> on meshtastic.org covers hardware selection, initial radio configuration, and your first mesh setup.</p>
+
+<hr />

@@ -1,0 +1,162 @@
+<h1 id="firmware-updates">Firmware Updates</h1>
+
+<p>Keep your Meshtastic radio up to date with the latest firmware for new features, bug fixes, and security improvements.</p>
+
+<h2 id="checking-for-updates">Checking for Updates</h2>
+
+<ol>
+  <li>Open the connected radio’s configuration and, under <strong>Advanced</strong>, tap <strong>Firmware Update</strong>. The entry appears only for OTA-capable devices.</li>
+  <li>The app checks for available firmware versions.</li>
+  <li>Available updates show the version number and changelog summary.</li>
+</ol>
+
+<h2 id="update-methods">Update Methods</h2>
+
+<h3 id="ota-over-the-air-via-bluetooth">OTA (Over-The-Air) via Bluetooth</h3>
+
+<p>The most common update method for Android users:</p>
+
+<ol>
+  <li>Ensure your radio is connected via Bluetooth.</li>
+  <li>Navigate to the Firmware Update screen.</li>
+  <li>Select the desired firmware version.</li>
+  <li>Tap <strong>Update</strong> to begin the OTA process.</li>
+  <li>Wait for the update to complete — <strong>do not disconnect</strong> during the update.</li>
+</ol>
+
+<p><img src="../../assets/screenshots/firmware_checking.png" alt="Firmware checking for updates" /></p>
+
+<blockquote>
+  <p>⚠️ <strong>Warning:</strong> Interrupting a firmware update can brick your device. Ensure your radio has sufficient battery (&gt;50% recommended) and maintain Bluetooth proximity during the entire process.</p>
+</blockquote>
+
+<p><img src="../../assets/screenshots/firmware_disclaimer.png" alt="Firmware disclaimer" /></p>
+
+<h3 id="in-app-usb-update">In-App USB Update</h3>
+
+<p>When your radio is connected over <strong>USB/serial</strong> (rather than Bluetooth), the Firmware Update screen offers <strong>USB File Transfer</strong>. The app reboots the device into DFU mode, then prompts you to save the <code class="language-plaintext highlighter-rouge">.uf2</code> file to the device’s DFU drive using the system file picker. This option appears only on a USB/serial connection — it is not available over Bluetooth.</p>
+
+<blockquote>
+  <p>ℹ️ <strong>nRF bootloader note:</strong> A vendor bootloader supplied as a <code class="language-plaintext highlighter-rouge">.zip</code> (e.g. RAK WisBlock RAK4631) has to be flashed with a serial DFU tool such as <code class="language-plaintext highlighter-rouge">adafruit-nrfutil</code> — copying that <code class="language-plaintext highlighter-rouge">.zip</code> to the drive won’t work. A bootloader supplied as an <code class="language-plaintext highlighter-rouge">update-....uf2</code> <strong>can</strong> be installed by copying it to the drive; that is how the app’s own bootloader upgrade works. The app surfaces a hint when the serial-only route applies.</p>
+</blockquote>
+
+<h3 id="factory-erase-and-bootloader-upgrade">Factory Erase and Bootloader Upgrade</h3>
+
+<p>On a <strong>USB/serial</strong> connection, nRF52 and RP2040 devices also offer <strong>Erase and reinstall</strong> and, where an upgraded bootloader is published for the board, <strong>Upgrade bootloader</strong>.</p>
+
+<p>Erasing wipes everything on the device — channels, keys and all settings — and there is no backup, so the app asks for confirmation first. Both operations write two files in turn, so you will be asked to select the device’s update drive twice: once for the erase or bootloader image, then again for the firmware.</p>
+
+<p>The app reads <code class="language-plaintext highlighter-rouge">INFO_UF2.TXT</code> from the drive you select to confirm it really is the device’s update drive and to identify the board before writing anything. If it can’t confirm which Bluetooth stack your device uses it refuses to erase and points you at the <a href="https://flasher.meshtastic.org">Web Flasher</a> instead — picking wrong there can leave the device needing a hardware programmer to recover.</p>
+
+<h3 id="other-flashing-options">Other Flashing Options</h3>
+
+<p>For recovery or when neither OTA nor in-app USB is available:</p>
+
+<ul>
+  <li>Use the <a href="https://flasher.meshtastic.org">Meshtastic Web Flasher</a></li>
+  <li>Or the <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Meshtastic CLI tool</a> on desktop</li>
+</ul>
+
+<h2 id="version-channels">Version Channels</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Canal</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Stable</td>
+      <td>Recommended for most users; tested releases</td>
+    </tr>
+    <tr>
+      <td>Alpha</td>
+      <td>Preview releases; may contain bugs</td>
+    </tr>
+    <tr>
+      <td>Fichier local</td>
+      <td>Flash a firmware file you select yourself, instead of a downloaded release</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="pre-update-checklist">Pre-Update Checklist</h2>
+
+<p>Before updating:</p>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Battery &gt; 50%</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Stable Bluetooth connection</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Note your current settings (they may reset on major version changes)</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Check the release notes for breaking changes</li>
+</ul>
+
+<h2 id="post-update">Post-Update</h2>
+
+<p>After the firmware is written, the app verifies the update and waits for the device to come back online:</p>
+
+<p><img src="../../assets/screenshots/firmware_verifying.png" alt="Verifying update and waiting for the device to reconnect" /></p>
+
+<p>Once the update succeeds:</p>
+
+<ul>
+  <li>The radio will reboot automatically</li>
+  <li>Bluetooth connection will re-establish</li>
+  <li>Verify your settings are intact</li>
+  <li>Confirm the new version under <strong>Currently Installed</strong> on the Firmware Update screen — it’s also shown on the node’s detail page and the Connections screen</li>
+</ul>
+
+<p><img src="../../assets/screenshots/firmware_success.png" alt="Firmware update success" /></p>
+
+<h2 id="troubleshooting">Troubleshooting</h2>
+
+<h3 id="update-stuck">Update Stuck</h3>
+
+<p>If the update appears frozen:</p>
+
+<ul>
+  <li>Wait at least 5 minutes before intervening</li>
+  <li>If truly stuck, power-cycle the radio</li>
+  <li>Attempt the update again</li>
+</ul>
+
+<p><img src="../../assets/screenshots/firmware_error.png" alt="Firmware update error" /></p>
+
+<h3 id="device-wont-boot-after-update">Device Won’t Boot After Update</h3>
+
+<p>If your device fails to boot:</p>
+
+<ol>
+  <li>Try connecting via USB to a computer</li>
+  <li>Use the web flasher in recovery/DFU mode</li>
+  <li>Flash a known-good firmware version</li>
+  <li>Check the Meshtastic Discord for device-specific recovery steps</li>
+</ol>
+
+<h3 id="compatibility-warnings">Compatibility Warnings</h3>
+
+<p>The app may show warnings when:</p>
+
+<ul>
+  <li>Connected radio firmware is below minimum supported version</li>
+  <li>Major version mismatch between app and firmware</li>
+  <li>Deprecated features need migration</li>
+</ul>
+
+<blockquote>
+  <p>⚠️ <strong>Important:</strong> Always update the Meshtastic app before or alongside firmware updates to ensure compatibility.</p>
+</blockquote>
+
+<h2 id="related-topics">Related Topics</h2>
+
+<ul>
+  <li><a href="connections">Connections</a> — reconnecting after a firmware update</li>
+  <li><a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Flashing firmware guide</a> — full firmware flashing walkthrough on meshtastic.org</li>
+  <li><a href="https://meshtastic.org/docs/hardware/devices">Supported devices</a> — check firmware compatibility by device</li>
+  <li><a href="https://meshtastic.org/docs/faq/">FAQ</a> — common questions on meshtastic.org</li>
+</ul>
+
+<hr />
+

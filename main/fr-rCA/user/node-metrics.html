@@ -1,0 +1,349 @@
+<h1 id="node-metrics">Node Metrics</h1>
+
+<p>The node detail screen provides comprehensive telemetry and metrics for each node on your mesh.</p>
+
+<h2 id="métriques-de-lappareil">Métriques de l’appareil</h2>
+
+<p>Basic operating information reported by each node:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Metric</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Niveau de batterie</td>
+      <td>Current battery percentage</td>
+    </tr>
+    <tr>
+      <td>Tension</td>
+      <td>Battery voltage reading</td>
+    </tr>
+    <tr>
+      <td>Utilisation du canal</td>
+      <td>Percentage of airtime consumed</td>
+    </tr>
+    <tr>
+      <td>Temps d’émission</td>
+      <td>Transmission time used by this node</td>
+    </tr>
+    <tr>
+      <td>Durée de fonctionnement</td>
+      <td>Time since last reboot</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Device metrics are displayed as individual cards with trend sparklines showing battery level, voltage, channel utilization, airtime, and uptime over time.</p>
+
+<blockquote>
+  <p>💡 <strong>Tip:</strong> Tap any metric card to expand it into a full chart with historical data points. Pinch to zoom the time axis.</p>
+</blockquote>
+
+<h2 id="métriques-denvironnement">Métriques d’environnement</h2>
+
+<p>Environmental sensor data (requires compatible hardware):</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Metric</th>
+      <th>Sensor Examples</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Température</td>
+      <td>BME280, BME680, SHT31</td>
+    </tr>
+    <tr>
+      <td>Humidité</td>
+      <td>BME280, BME680, SHT31</td>
+    </tr>
+    <tr>
+      <td>Pression Barométrique</td>
+      <td>BME280, BMP280</td>
+    </tr>
+    <tr>
+      <td>Résistance au gaz</td>
+      <td>BME680</td>
+    </tr>
+    <tr>
+      <td>IAQ (Air Quality)</td>
+      <td>BME680</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Environment metrics are charted over time for easy trend analysis — temperature, humidity, and pressure each get their own line chart with the measurement unit displayed on the Y axis.</p>
+
+<p>The BME680 <strong>IAQ (Indoor Air Quality)</strong> index is a single 0–500+ value derived from gas resistance, shown against a color-coded scale from <em>Excellent</em> to <em>Dangerously Polluted</em>:</p>
+
+<p><img src="../../assets/screenshots/node-metrics_iaq_scale.png" alt="IAQ index scale from Excellent to Dangerously Polluted" /></p>
+
+<blockquote>
+  <p>💡 <strong>Tip:</strong> Environment metrics require a sensor connected to the remote node. Not all nodes report environmental data. See <a href="telemetry-and-sensors">Telemetry &amp; Sensors</a> for a full list of supported sensors.</p>
+</blockquote>
+
+<h2 id="air-quality-metrics">Air Quality Metrics</h2>
+
+<p>Air Quality is a dedicated metrics view for nodes equipped with a particulate-matter and/or CO₂ sensor. It is <strong>separate from the BME680 IAQ reading</strong> listed under Environment Metrics — IAQ is a single gas-resistance-derived index, while the Air Quality view charts the underlying particulate and CO₂ measurements.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Metric</th>
+      <th>Unit</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>PM1.0</td>
+      <td>µg/m³</td>
+      <td>Particulate matter up to 1.0 micron</td>
+    </tr>
+    <tr>
+      <td>PM2.5</td>
+      <td>µg/m³</td>
+      <td>Particulate matter up to 2.5 microns</td>
+    </tr>
+    <tr>
+      <td>PM10</td>
+      <td>µg/m³</td>
+      <td>Particulate matter up to 10 microns</td>
+    </tr>
+    <tr>
+      <td>AQI</td>
+      <td>EPA index</td>
+      <td>EPA <strong>NowCast</strong> AQI computed from your recent PM2.5 history, with a color-coded severity label. Shown next to PM2.5 once enough readings have accumulated.</td>
+    </tr>
+    <tr>
+      <td>CO₂</td>
+      <td>ppm</td>
+      <td>Carbon dioxide concentration</td>
+    </tr>
+    <tr>
+      <td>CO₂ temperature</td>
+      <td>°C / °F</td>
+      <td>Temperature reported by the CO₂ sensor itself (e.g. SCD4x)</td>
+    </tr>
+    <tr>
+      <td>CO₂ humidity</td>
+      <td>%</td>
+      <td>Relative humidity reported by the CO₂ sensor</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>CO₂ readings are color-coded by severity to make air quality easy to read at a glance:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Band</th>
+      <th>CO₂ Range (ppm)</th>
+      <th>Color</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Bon</td>
+      <td>&lt; 1000</td>
+      <td>Vert</td>
+    </tr>
+    <tr>
+      <td>Stuffy</td>
+      <td>&lt; 2000</td>
+      <td>Amber</td>
+    </tr>
+    <tr>
+      <td>Poor</td>
+      <td>&lt; 5000</td>
+      <td>Orange</td>
+    </tr>
+    <tr>
+      <td>Unsafe</td>
+      <td>&lt; 30000</td>
+      <td>Rouge</td>
+    </tr>
+    <tr>
+      <td>Evacuate</td>
+      <td>≥ 30000</td>
+      <td>Dark red</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><img src="../../assets/screenshots/node-metrics_air_quality.png" alt="Air quality readings with color-coded CO₂ severity" /></p>
+
+<p>An air-quality log/metrics button appears on the node detail screen <strong>only when the node has reported air-quality telemetry</strong>. From the Air Quality view you can:</p>
+
+<ul>
+  <li>Select a <strong>time frame</strong> for the charts.</li>
+  <li>Filter with <strong>metric chips</strong> — only metrics that have data are shown.</li>
+  <li><strong>Refresh / request</strong> the latest air-quality telemetry.</li>
+  <li><strong>Export to CSV</strong> for analysis in a spreadsheet.</li>
+</ul>
+
+<blockquote>
+  <p>💡 <strong>Tip:</strong> Air Quality metrics require a compatible air-quality sensor on the remote node. If a node has no particulate or CO₂ sensor, the air-quality button won’t appear. See <a href="telemetry-and-sensors">Telemetry &amp; Sensors</a> for supported hardware.</p>
+</blockquote>
+
+<h2 id="métriques-de-signal">Métriques de Signal</h2>
+
+<p>Radio signal quality information:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Metric</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>SNR</td>
+      <td>Signal-to-Noise Ratio (higher is better)</td>
+    </tr>
+    <tr>
+      <td>RSSI</td>
+      <td>Received Signal Strength Indicator (closer to 0 is better)</td>
+    </tr>
+    <tr>
+      <td>Noise Floor</td>
+      <td>Local background RF noise in dBm (more negative is quieter)</td>
+    </tr>
+    <tr>
+      <td>Hop Count</td>
+      <td>Number of mesh hops for last message</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="signal-quality-reference">Signal Quality Reference</h3>
+
+<p>Signal quality is rated from <strong>SNR relative to the active LoRa modem preset’s demodulation floor</strong>, not from fixed thresholds — a given SNR means different things on different presets (e.g. −15 dB is fine on LongSlow but unusable on ShortFast). RSSI is shown but is not part of the rating. Letting <code class="language-plaintext highlighter-rouge">limit</code> be the preset’s SNR limit:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Quality</th>
+      <th>Criteria</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Bon</td>
+      <td>SNR above the preset’s limit</td>
+    </tr>
+    <tr>
+      <td>Passable</td>
+      <td>less than 5.5 dB below the limit</td>
+    </tr>
+    <tr>
+      <td>Mauvais</td>
+      <td>5.5 dB to 7.5 dB below the limit</td>
+    </tr>
+    <tr>
+      <td>Aucun</td>
+      <td>more than 7.5 dB below the limit</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>See <a href="signal-meter">Understanding the Signal Meter</a> for the full explanation.</p>
+
+<p>Local Stats from your connected radio are also shown in Signal Quality when available. These logs include noise floor, traffic counters, relay counters, online node counts, and radio uptime. The noise floor chart uses a dashed reference line at -85 dBm to help identify a busy RF environment. Use <strong>Request</strong> to ask the connected radio for a fresh Local Stats telemetry report, <strong>Clear</strong> to remove Local Stats logs for that node, and <strong>Save</strong> to export the visible Local Stats history as CSV.</p>
+
+<h2 id="métriques-dalimentation">Métriques d’alimentation</h2>
+
+<p>Power management telemetry (requires INA sensor or compatible hardware):</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Metric</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Bus Voltage</td>
+      <td>Supply voltage</td>
+    </tr>
+    <tr>
+      <td>Actif</td>
+      <td>Power draw in milliamps</td>
+    </tr>
+    <tr>
+      <td>Alimentation</td>
+      <td>Calculated wattage</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="traceroute">Traceroute</h2>
+
+<p>Traceroute shows the path a message takes through the mesh:</p>
+
+<ol>
+  <li>From the node detail screen, tap <strong>Traceroute</strong>.</li>
+  <li>The app sends a traceroute request to the target node.</li>
+  <li>Results show each hop with SNR/RSSI values.</li>
+</ol>
+
+<h3 id="reading-traceroute-results">Reading Traceroute Results</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>You → Node A (SNR: 8.5) → Node B (SNR: 5.2) → Target
+</code></pre></div></div>
+
+<p>Each hop represents a relay node that forwarded the message.</p>
+
+<h2 id="journal-des-positions">Journal des positions</h2>
+
+<p>Historical position data for nodes that share their location:</p>
+
+<ul>
+  <li>GPS coordinates</li>
+  <li>Altitude</li>
+  <li>Speed (if moving)</li>
+  <li>Timestamp for each position report</li>
+</ul>
+
+<h2 id="informations-sur-les-voisins">Informations sur les voisins</h2>
+
+<p>Shows which nodes a given node can directly hear, useful for understanding mesh topology.</p>
+
+<h2 id="viewing-metrics">Viewing Metrics</h2>
+
+<ol>
+  <li>Navigate to <strong>Nodes</strong>.</li>
+  <li>Tap the node you want to inspect.</li>
+  <li>Select the metric category from the detail tabs.</li>
+</ol>
+
+<p><img src="../../assets/screenshots/nodes_detail_local.png" alt="Node detail — local device" /></p>
+
+<p>The position tab shows location data for nodes that share GPS:</p>
+
+<p><img src="../../assets/screenshots/nodes_position.png" alt="Position inline content" /></p>
+
+<blockquote>
+  <p>⚠️ <strong>Note:</strong> Metrics are only available when they have been reported by the remote node. Metrics update at intervals configured on each node’s telemetry settings.</p>
+</blockquote>
+
+<h2 id="related-topics">Related Topics</h2>
+
+<ul>
+  <li><a href="nodes">Nodes</a> — node list, filtering, and sorting</li>
+  <li><a href="telemetry-and-sensors">Telemetry &amp; Sensors</a> — supported sensors and configuration</li>
+  <li><a href="signal-meter">Signal Meter</a> — how signal quality is calculated from SNR and RSSI</li>
+  <li><a href="discovery">Discovery</a> — traceroute details and neighbor info</li>
+  <li><a href="units-and-locale">Units &amp; Locale</a> — temperature, distance, and speed display formats</li>
+</ul>
+
+<hr />

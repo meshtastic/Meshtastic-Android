@@ -1,0 +1,227 @@
+<h1 id="mqtt">MQTT</h1>
+
+<p>MQTT bridges your Meshtastic mesh network to the internet, enabling long-range communication beyond radio range.</p>
+
+<h2 id="overview">Overview</h2>
+
+<p>The MQTT module connects your node to an MQTT broker, allowing:</p>
+
+<ul>
+  <li>Messages to reach nodes on different physical meshes via the internet</li>
+  <li>Integration with home automation and monitoring systems</li>
+  <li>Publishing node positions to the public Meshtastic map</li>
+  <li>Custom data pipelines for logging and alerting</li>
+</ul>
+
+<h2 id="how-it-works">How It Works</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[Your Node] → Radio → [Gateway Node with WiFi] → MQTT Broker → [Remote Gateway] → Radio → [Remote Node]
+</code></pre></div></div>
+
+<p>A gateway node with internet access (WiFi or Ethernet) publishes mesh messages to an MQTT topic. Remote gateways subscribed to the same topic inject those messages into their local mesh.</p>
+
+<h2 id="configuration">Configuration</h2>
+
+<h3 id="enabling-mqtt">Enabling MQTT</h3>
+
+<ol>
+  <li>Navigate to <strong>Settings → Module Config → MQTT</strong>.</li>
+  <li>Enable the MQTT module.</li>
+  <li>Configure the broker connection:</li>
+</ol>
+
+<p><img src="../../assets/screenshots/settings_switch.png" alt="MQTT toggle switch" /></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Setting</th>
+      <th>Description</th>
+      <th>Par défaut</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Server Address</td>
+      <td>MQTT broker hostname</td>
+      <td>mqtt.meshtastic.org</td>
+    </tr>
+    <tr>
+      <td>Nom d’utilisateur</td>
+      <td>Broker authentication</td>
+      <td>meshdev</td>
+    </tr>
+    <tr>
+      <td>Mot de passe</td>
+      <td>Broker authentication</td>
+      <td>large4cats</td>
+    </tr>
+    <tr>
+      <td>Root Topic</td>
+      <td>Base topic for messages</td>
+      <td>msh</td>
+    </tr>
+    <tr>
+      <td>Chiffrement</td>
+      <td>Encrypt MQTT payload</td>
+      <td>Activé</td>
+    </tr>
+    <tr>
+      <td><del>JSON Output</del></td>
+      <td>⚠️ <strong>Deprecated</strong> — JSON packet support has been removed from firmware; this field is ignored</td>
+      <td>Désactivé</td>
+    </tr>
+    <tr>
+      <td>TLS</td>
+      <td>Secure connection to broker</td>
+      <td>Désactivé</td>
+    </tr>
+    <tr>
+      <td>Map Reporting</td>
+      <td>Report position to public map</td>
+      <td>Désactivé</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="mqtt-proxy-on-this-phone">MQTT Proxy on This Phone</h3>
+
+<p>If your node has no internet access of its own, it can use the connected phone as its MQTT gateway: enable <strong>MQTT</strong> and <strong>Proxy to client enabled</strong> in the module config, and the app relays MQTT traffic between the radio and the broker over your phone’s internet connection.</p>
+
+<p>The <strong>MQTT proxy on this phone</strong> toggle at the top of the MQTT settings screen shows whether this relay is currently running and lets you cut it off (or restart it) immediately — without editing and re-saving the device’s MQTT configuration.</p>
+
+<h3 id="default-meshtastic-broker">Default Meshtastic Broker</h3>
+
+<p>The community maintains a public broker at <code class="language-plaintext highlighter-rouge">mqtt.meshtastic.org</code>. This is intended for general use and testing.</p>
+
+<blockquote>
+  <p>ℹ️ <strong>Note:</strong> Connections to <code class="language-plaintext highlighter-rouge">mqtt.meshtastic.org</code> always use TLS (port 8883), even if the TLS toggle is off. For any other broker, TLS is used only when you enable it (port 8883 with TLS, 1883 without).</p>
+</blockquote>
+
+<blockquote>
+  <p>🔒 <strong>Privacy:</strong> Messages on the public broker are readable by anyone subscribed. Always use channel encryption for private communications.</p>
+</blockquote>
+
+<h3 id="private-broker">Private Broker</h3>
+
+<p>For better privacy and control, you can run your own MQTT broker:</p>
+
+<ul>
+  <li>Mosquitto (lightweight, open-source)</li>
+  <li>HiveMQ</li>
+  <li>EMQX</li>
+</ul>
+
+<p>Configure your node to point to your private broker with appropriate credentials.</p>
+
+<h2 id="map-reporting">Map Reporting</h2>
+
+<p>When Map Reporting is enabled, your node publishes its position to the Meshtastic community map:</p>
+
+<ul>
+  <li>Visible at <a href="https://meshmap.net">meshmap.net</a> and similar community map services</li>
+  <li>Only position and node info are shared</li>
+  <li>Disable this if you don’t want your location publicly visible</li>
+</ul>
+
+<h2 id="uplink-vs-downlink">Uplink vs Downlink</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Direction</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Uplink</strong></td>
+      <td>Messages from mesh → MQTT broker</td>
+    </tr>
+    <tr>
+      <td><strong>Downlink</strong></td>
+      <td>Messages from MQTT broker → mesh</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Configure per-channel which directions are active to control message flow and airtime usage.</p>
+
+<h2 id="message-formats">Message Formats</h2>
+
+<p>MQTT uses protobuf message format:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Format</th>
+      <th>Description</th>
+      <th>Use case</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Protobuf</strong></td>
+      <td>Binary Meshtastic protobuf encoding</td>
+      <td>Node-to-node mesh bridging</td>
+    </tr>
+  </tbody>
+</table>
+
+<blockquote>
+  <p>⚠️ <strong>Note:</strong> JSON output support was removed from firmware. The <code class="language-plaintext highlighter-rouge">json_enabled</code> setting is still visible in the app for legacy compatibility but has no effect on current firmware versions.</p>
+</blockquote>
+
+<h2 id="encryption--privacy">Encryption &amp; Privacy</h2>
+
+<p>Understanding the layered encryption model:</p>
+
+<ol>
+  <li><strong>Channel encryption</strong> happens on the mesh <em>before</em> MQTT. If your channel has a PSK, the MQTT payload is already encrypted — the broker and any subscribers see only the ciphertext.</li>
+  <li><strong>MQTT encryption</strong> (the module setting) adds an additional encryption layer for transit to the broker. This protects metadata and routing information.</li>
+  <li><strong>TLS</strong> encrypts the TCP connection to the broker itself, preventing network-level eavesdropping.</li>
+</ol>
+
+<blockquote>
+  <p>🔒 <strong>Important:</strong> The default public channel has a well-known key. Messages on the default channel sent via MQTT are effectively <strong>unencrypted</strong> — anyone can decode them. Always use a custom PSK for private communications.</p>
+</blockquote>
+
+<h2 id="best-practices">Best Practices</h2>
+
+<ul>
+  <li>Use channel-level encryption (PSK) on channels that bridge to MQTT</li>
+  <li>Don’t enable MQTT on nodes without internet access (it will buffer and waste memory)</li>
+  <li>Use a private broker for sensitive deployments</li>
+  <li>Be mindful of airtime when downlinking messages from busy MQTT topics — every downlinked message consumes radio airtime on your local mesh</li>
+  <li>Consider enabling uplink-only if you only need to monitor your mesh remotely without injecting messages back</li>
+</ul>
+
+<h2 id="troubleshooting">Troubleshooting</h2>
+
+<h3 id="mqtt-not-connecting">MQTT Not Connecting</h3>
+
+<ul>
+  <li><strong>Check WiFi</strong> — the gateway node must have an active internet connection (WiFi or Ethernet). MQTT does not work over the LoRa radio link itself.</li>
+  <li><strong>Verify credentials</strong> — incorrect username or password will silently fail on most brokers. Double-check for trailing spaces.</li>
+  <li><strong>Firewall</strong> — port 1883 (MQTT) or 8883 (MQTT+TLS) must be open. Some networks block non-standard ports.</li>
+  <li><strong>DNS resolution</strong> — if using a custom broker hostname, verify the node can resolve it. Try the broker’s IP address directly.</li>
+</ul>
+
+<h3 id="messages-not-bridging">Messages Not Bridging</h3>
+
+<ul>
+  <li><strong>Check uplink/downlink settings</strong> — if only uplink is enabled, messages flow from mesh to MQTT but not back. Enable downlink on the receiving gateway.</li>
+  <li><strong>Channel mismatch</strong> — both gateways must share the same channel with the same PSK. A mismatch means messages are encrypted with different keys and appear as garbage.</li>
+  <li><strong>Topic mismatch</strong> — ensure both gateways use the same root topic. The default <code class="language-plaintext highlighter-rouge">msh</code> works for the public broker.</li>
+</ul>
+
+<h2 id="related-topics">Related Topics</h2>
+
+<ul>
+  <li><a href="settings-module-admin">Settings — Modules &amp; Admin</a> — MQTT module configuration reference</li>
+  <li><a href="messages-and-channels">Messages &amp; Channels</a> — channel encryption and PSK setup</li>
+  <li><a href="https://meshtastic.org/docs/software/integrations/mqtt">MQTT integration guide</a> — detailed MQTT documentation on meshtastic.org</li>
+</ul>
+
+<hr />
+

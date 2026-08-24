@@ -1,0 +1,234 @@
+<h1 id="tak-integration">TAK Integration</h1>
+
+<p>Meshtastic integrates with the Team Awareness Kit (TAK) ecosystem, enabling interoperability between Meshtastic mesh devices and TAK applications like ATAK and WinTAK.</p>
+
+<h2 id="overview">Overview</h2>
+
+<p>The TAK module allows Meshtastic nodes to:</p>
+
+<ul>
+  <li>Share position data in TAK-compatible CoT (Cursor on Target) format</li>
+  <li>Appear as team members on TAK map displays</li>
+  <li>Receive TAK PLI (Position Location Information) messages</li>
+</ul>
+
+<h2 id="setup">Setup</h2>
+
+<h3 id="prerequisites">Prerequisites</h3>
+
+<ul>
+  <li>ATAK (Android Team Awareness Kit) or WinTAK installed</li>
+  <li>Meshtastic ATAK Plugin installed</li>
+  <li>TAK module enabled on your Meshtastic radio</li>
+</ul>
+
+<h3 id="configuration">Configuration</h3>
+
+<ol>
+  <li>Navigate to <strong>Settings → Module Config → TAK</strong>.</li>
+  <li>Enable the TAK module.</li>
+  <li>Configure the TAK team/group settings:</li>
+</ol>
+
+<p><img src="../../assets/screenshots/settings_switch.png" alt="Module toggle switch" /></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Setting</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Activé</td>
+      <td>Activate TAK interop</td>
+    </tr>
+    <tr>
+      <td>Mode</td>
+      <td>TAK-compatible output mode</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="atak-plugin-setup">ATAK Plugin Setup</h3>
+
+<ol>
+  <li>Install the Meshtastic ATAK Plugin from the plugin repository.</li>
+  <li>Open ATAK and enable the Meshtastic plugin.</li>
+  <li>The plugin bridges messages between ATAK and your mesh network.</li>
+</ol>
+
+<h3 id="local-tak-server">Local TAK Server</h3>
+
+<p>The app can also run a <strong>local TAK server</strong> so ATAK/iTAK on the <strong>same device</strong> can connect directly, without a remote TAK server. The server binds to localhost only (<code class="language-plaintext highlighter-rouge">127.0.0.1:8089</code>) and uses TLS with mutual certificate authentication (mTLS), so it is not reachable from other devices on the network. Open <strong>Settings → Module Config → TAK → TAK Server</strong>:</p>
+
+<p><img src="../../assets/screenshots/tak_server_enabled.png" alt="Local TAK Server settings with enable toggle and export option" /></p>
+
+<ul>
+  <li><strong>Enable Local TAK Server</strong> — starts the loopback-only mTLS server on port <strong>8089</strong> for ATAK/iTAK connections from the same device.</li>
+  <li><strong>TAK Mesh Channel</strong> — selects which Meshtastic channel outgoing TAK traffic is sent on (default: the primary channel, index 0). Incoming TAK traffic is accepted from any channel. Matches the equivalent setting on iOS and in the legacy ATAK plugin.</li>
+  <li><strong>Export TAK Data Package</strong> — generates a <code class="language-plaintext highlighter-rouge">.zip</code> data package that ATAK/iTAK can import to connect to this server.</li>
+</ul>
+
+<h2 id="tak-roles">TAK Roles</h2>
+
+<p>Nodes configured with TAK-related roles behave differently from standard clients:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Rôle</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>TAK</strong></td>
+      <td>Full TAK interoperability — sends and receives CoT data, chat messages, and PLI updates. Functions as a standard client plus TAK bridge.</td>
+    </tr>
+    <tr>
+      <td><strong>TAK Tracker</strong></td>
+      <td>Position-only TAK output — automatically broadcasts PLI at regular intervals without user interaction. Optimized for unattended position beacons (vehicles, equipment, waypoints). Does not relay chat messages.</td>
+    </tr>
+  </tbody>
+</table>
+
+<blockquote>
+  <p>💡 <strong>Tip:</strong> Use <strong>TAK Tracker</strong> for devices that only need to report position (e.g., a radio mounted in a vehicle). Use <strong>TAK</strong> for devices where users actively participate in TAK operations.</p>
+</blockquote>
+
+<h3 id="cot-cursor-on-target-format">CoT (Cursor on Target) Format</h3>
+
+<p>TAK messages use the Cursor on Target XML format — a military standard for sharing situational awareness data. Meshtastic converts its internal protobuf messages to CoT format when bridging to TAK systems, so no manual format conversion is needed.</p>
+
+<h2 id="tak-identity">TAK Identity</h2>
+
+<p>When using TAK roles, your node broadcasts identity information that appears on TAK maps:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Setting</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Couleur de l’équipe</td>
+      <td>Your team color on the TAK map (e.g., Blue, Red, Cyan, Green)</td>
+    </tr>
+    <tr>
+      <td>Rôle Membre</td>
+      <td>Your operational role (Team Member, Team Lead, HQ, Medic, RTO, etc.)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>These settings appear in <strong>Settings → Module Config → TAK</strong> when the TAK module is enabled. Your TAK callsign isn’t a separate setting — it’s derived automatically from your Meshtastic node name.</p>
+
+<blockquote>
+  <p>💡 <strong>Tip:</strong> Team/role colors are the standard TAK affiliation colors. Coordinate with your TAK team to use consistent team assignments.</p>
+</blockquote>
+
+<h2 id="wire-format-v1--v2">Wire Format (V1 / V2)</h2>
+
+<p>Meshtastic supports two TAK wire formats, chosen automatically based on the connected radio’s firmware — no manual configuration needed:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Format</th>
+      <th>Compatibility</th>
+      <th>Features</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>V1 (Legacy)</td>
+      <td>Firmware 2.7.x and older</td>
+      <td>Bare protobuf encoding on port 72. Supports position sharing (PLI) and chat (GeoChat) only — shapes, markers, routes, and other typed CoT events are dropped</td>
+    </tr>
+    <tr>
+      <td>V2 (Current)</td>
+      <td>Firmware 2.8.0+</td>
+      <td>Compact, zstd-compressed encoding on port 78. Adds shapes, markers, routes, aircraft, casevac, emergency, and task CoT types on top of everything V1 supports</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>A node still relays legacy V1 packets from older nodes even while running V2 itself, so mixed-firmware meshes keep working.</p>
+
+<h2 id="usage-with-atak">Usage with ATAK</h2>
+
+<p>Once configured:</p>
+
+<ul>
+  <li>Meshtastic nodes appear as markers on the ATAK map with callsign labels</li>
+  <li>Chat messages can bridge between mesh and TAK networks</li>
+  <li>Position updates flow bidirectionally between Meshtastic and TAK</li>
+  <li>TAK Tracker nodes broadcast PLI automatically — their positions appear on ATAK maps without any ATAK-side configuration</li>
+</ul>
+
+<blockquote>
+  <p>⚠️ <strong>Note:</strong> TAK integration requires specific node roles and module configuration. Standard client nodes don’t automatically participate in TAK operations.</p>
+</blockquote>
+
+<h2 id="troubleshooting">Troubleshooting</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Problem</th>
+      <th>Cause</th>
+      <th>Solution</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Node doesn’t appear on ATAK map</td>
+      <td>TAK module disabled or wrong role</td>
+      <td>Verify TAK module is enabled and node role is TAK or TAK Tracker</td>
+    </tr>
+    <tr>
+      <td>Position updates are stale</td>
+      <td>GPS fix lost or interval too long</td>
+      <td>Check GPS status; reduce position broadcast interval in Position Config</td>
+    </tr>
+    <tr>
+      <td>ATAK plugin shows “disconnected”</td>
+      <td>BLE connection lost or plugin crashed</td>
+      <td>Reconnect Bluetooth in Meshtastic app, then restart ATAK plugin</td>
+    </tr>
+    <tr>
+      <td>Shapes, markers, or routes not bridging</td>
+      <td>Sending node is on legacy V1 (firmware 2.7.x or older)</td>
+      <td>Update the sending node’s firmware to 2.8.0+ for V2 wire format</td>
+    </tr>
+    <tr>
+      <td>CoT data not flowing</td>
+      <td>Channel mismatch</td>
+      <td>All TAK nodes must be on the same channel with matching encryption</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="security-considerations">Security Considerations</h2>
+
+<ul>
+  <li>TAK data shares your position and callsign information</li>
+  <li>Ensure your channel encryption is configured when using TAK in sensitive environments</li>
+  <li>The TAK module respects the same channel encryption as other Meshtastic messages</li>
+</ul>
+
+<h2 id="related-topics">Related Topics</h2>
+
+<ul>
+  <li><a href="settings-module-admin">Settings — Modules &amp; Admin</a> — TAK module configuration</li>
+  <li><a href="nodes">Nodes</a> — TAK and TAK Tracker roles in the node list</li>
+  <li><a href="map-and-waypoints">Map &amp; Waypoints</a> — node positions on the map</li>
+  <li><a href="https://meshtastic.org/docs/software/integrations/integrations-atak-plugin/">ATAK plugin guide</a> — detailed ATAK setup on meshtastic.org</li>
+</ul>
+
+<hr />
+

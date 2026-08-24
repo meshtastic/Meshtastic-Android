@@ -1,0 +1,315 @@
+<h1 id="telemetry--sensors">Telemetry &amp; Sensors</h1>
+
+<p>Meshtastic nodes can collect and share sensor data across the mesh network.</p>
+
+<h2 id="overview">Overview</h2>
+
+<p>Telemetry allows nodes equipped with sensors to broadcast environmental, power, and device health information. This data is visible on the node detail screen and can be logged over time.</p>
+
+<h2 id="device-telemetry">Device Telemetry</h2>
+
+<p>All Meshtastic nodes report basic device telemetry:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Metric</th>
+      <th>Description</th>
+      <th>Typical Range</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Niveau de batterie</td>
+      <td>Charge percentage</td>
+      <td>0–100%</td>
+    </tr>
+    <tr>
+      <td>Tension</td>
+      <td>Battery voltage</td>
+      <td>3.0–4.2V (LiPo)</td>
+    </tr>
+    <tr>
+      <td>Utilisation du canal</td>
+      <td>% of airtime used locally</td>
+      <td>0–100%</td>
+    </tr>
+    <tr>
+      <td>Air Utilization TX</td>
+      <td>% of airtime used by this node</td>
+      <td>0–100%</td>
+    </tr>
+    <tr>
+      <td>Durée de fonctionnement</td>
+      <td>Seconds since last boot</td>
+      <td>Varies</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="environment-sensors">Environment Sensors</h2>
+
+<p>Supported environmental sensors:</p>
+
+<h3 id="temperature--humidity">Temperature &amp; Humidity</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Capteur</th>
+      <th>Température</th>
+      <th>Humidité</th>
+      <th>Pression</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>BME280</td>
+      <td>✓</td>
+      <td>✓</td>
+      <td>✓</td>
+      <td>Recommended all-in-one</td>
+    </tr>
+    <tr>
+      <td>BME680</td>
+      <td>✓</td>
+      <td>✓</td>
+      <td>✓</td>
+      <td>Adds gas resistance/IAQ</td>
+    </tr>
+    <tr>
+      <td>SHT31</td>
+      <td>✓</td>
+      <td>✓</td>
+      <td>—</td>
+      <td>High accuracy</td>
+    </tr>
+    <tr>
+      <td>MCP9808</td>
+      <td>✓</td>
+      <td>—</td>
+      <td>—</td>
+      <td>Precision temperature</td>
+    </tr>
+    <tr>
+      <td>LPS22</td>
+      <td>—</td>
+      <td>—</td>
+      <td>✓</td>
+      <td>Pressure only</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="air-quality">Air Quality</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Capteur</th>
+      <th>Metric</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>BME680</td>
+      <td>Gas Resistance / IAQ</td>
+      <td>Volatile organic compounds</td>
+    </tr>
+    <tr>
+      <td>PMSA003I</td>
+      <td>PM1.0, PM2.5, PM10</td>
+      <td>Particulate matter</td>
+    </tr>
+    <tr>
+      <td>SEN55</td>
+      <td>PM, NOx, VOC, Temp, Humidity</td>
+      <td>Multi-sensor</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="light--uv">Light &amp; UV</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Capteur</th>
+      <th>Metric</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>OPT3001</td>
+      <td>Ambient light (lux)</td>
+    </tr>
+    <tr>
+      <td>VEML7700</td>
+      <td>Ambient light (lux)</td>
+    </tr>
+    <tr>
+      <td>LTR390</td>
+      <td>UV index</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="métriques-dalimentation">Métriques d’alimentation</h2>
+
+<p>Nodes with INA-series power sensors can report:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Metric</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Bus Voltage</td>
+      <td>Supply rail voltage</td>
+    </tr>
+    <tr>
+      <td>Actif</td>
+      <td>Power consumption (mA)</td>
+    </tr>
+    <tr>
+      <td>Alimentation</td>
+      <td>Calculated power (mW)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Useful for monitoring solar charging or battery health on remote nodes.</p>
+
+<h2 id="configuring-telemetry">Configuring Telemetry</h2>
+
+<ol>
+  <li>Navigate to <strong>Settings → Module Config → Telemetry</strong>.</li>
+  <li>Set reporting intervals:
+    <ul>
+      <li><strong>Device Metrics Interval</strong> — how often to broadcast device metrics</li>
+      <li><strong>Environment Metrics Interval</strong> — how often to broadcast sensor data</li>
+    </ul>
+  </li>
+  <li>Enable specific sensor types as needed.</li>
+</ol>
+
+<h3 id="recommended-intervals">Recommended Intervals</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Use Case</th>
+      <th>Device (s)</th>
+      <th>Environment (s)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Urban mesh (many nodes)</td>
+      <td>3600</td>
+      <td>3600</td>
+    </tr>
+    <tr>
+      <td>Rural mesh (few nodes)</td>
+      <td>900</td>
+      <td>900</td>
+    </tr>
+    <tr>
+      <td>Weather station</td>
+      <td>900</td>
+      <td>300</td>
+    </tr>
+    <tr>
+      <td>Battery conservation</td>
+      <td>7200</td>
+      <td>7200</td>
+    </tr>
+  </tbody>
+</table>
+
+<blockquote>
+  <p>⚠️ <strong>Note:</strong> Shorter intervals increase airtime usage and battery drain across the mesh.</p>
+</blockquote>
+
+<h2 id="air-quality-metrics">Air Quality Metrics</h2>
+
+<p>Nodes with particulate matter or CO₂ sensors report air quality data:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Metric</th>
+      <th>Unit</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>PM1.0</td>
+      <td>µg/m³</td>
+      <td>Ultrafine particulate matter</td>
+    </tr>
+    <tr>
+      <td>PM2.5</td>
+      <td>µg/m³</td>
+      <td>Fine particulate matter</td>
+    </tr>
+    <tr>
+      <td>PM10</td>
+      <td>µg/m³</td>
+      <td>Coarse particulate matter</td>
+    </tr>
+    <tr>
+      <td>CO₂</td>
+      <td>ppm</td>
+      <td>Carbon dioxide concentration</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>CO₂ sensors such as the SCD4x also report their own temperature and humidity, which appear alongside the readings above. From PM2.5 history the app additionally derives an <strong>EPA NowCast AQI</strong> value.</p>
+
+<p>The CO₂ reading is color-coded by severity (Good → Stuffy → Poor → Unsafe → Evacuate). See <a href="node-metrics#air-quality-metrics">Node Metrics — Air Quality</a> for the exact ppm bands, colors, and AQI detail.</p>
+
+<p>Air quality data can be viewed as info cards on the node detail screen, charted over time, and exported to CSV.</p>
+
+<h2 id="viewing-telemetry">Viewing Telemetry</h2>
+
+<ol>
+  <li>Navigate to <strong>Nodes</strong> and select a node.</li>
+  <li>Telemetry sections show on the detail screen:
+    <ul>
+      <li>Device Metrics (always available)</li>
+      <li>Environment Metrics (if sensors present)</li>
+      <li>Power Metrics (if INA sensor present)</li>
+      <li>Air Quality Metrics (if PM/CO₂ sensor present)</li>
+    </ul>
+  </li>
+  <li>Historical graphs show trends over time.</li>
+</ol>
+
+<p><img src="../../assets/screenshots/node-metrics_telemetric_actions.png" alt="Telemetry actions" /></p>
+
+<h2 id="troubleshooting">Troubleshooting</h2>
+
+<ul>
+  <li><strong>No environment data showing?</strong> The remote node needs a physical sensor connected (e.g., BME280 on I2C). Device telemetry (battery, uptime) is always available, but environment metrics require hardware.</li>
+  <li><strong>Stale readings?</strong> Check the reporting interval — very long intervals (7200s+) mean data updates infrequently. Also verify the remote node is still online.</li>
+  <li><strong>Sensor conflict on I2C bus?</strong> Some sensors share I2C addresses. If you have multiple sensors on the same bus, check for address collisions in the radio’s serial debug output.</li>
+</ul>
+
+<h2 id="related-topics">Related Topics</h2>
+
+<ul>
+  <li><a href="node-metrics">Node Metrics</a> — view telemetry data on the node detail screen</li>
+  <li><a href="settings-module-admin">Settings — Modules &amp; Admin</a> — telemetry module configuration</li>
+  <li><a href="units-and-locale">Units &amp; Locale</a> — temperature and pressure display units</li>
+</ul>
+
+<hr />
+

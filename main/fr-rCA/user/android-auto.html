@@ -1,0 +1,55 @@
+<h1 id="android-auto">Android Auto</h1>
+
+<p>Meshtastic integrates with Android Auto so you can stay in touch with your mesh while driving, without taking your hands off the wheel or your eyes off the road.</p>
+
+<blockquote>
+  <p>⚠️ <strong>Note:</strong> Android Auto support is available on <strong>Google-flavor Android builds only</strong>. It is not included in the F-Droid build, and it is not available on Desktop or iOS.</p>
+</blockquote>
+
+<blockquote>
+  <p>ℹ️ <strong>What ships today:</strong> The Google Play build provides <strong>notification-only</strong> car messaging — incoming messages are announced on the head unit and you reply through its notification controls. The full tabbed <strong>Messages / Nodes / Status</strong> experience described below is a beta built on the Android Car App Library (Google’s templated car UI is currently restricted to Closed/Internal Play tracks), so it appears only in builds compiled with <code class="language-plaintext highlighter-rouge">-PenableCarTemplates=true</code>. The rest of this page documents that beta experience.</p>
+</blockquote>
+
+<h2 id="overview">Overview</h2>
+
+<p>When your phone is connected to an Android Auto head unit (or the Desktop Head Unit emulator used for development), the beta build presents Meshtastic as a messaging app built with the Android Car App Library, with a tabbed Home screen optimized for driving-safe, glanceable use:</p>
+
+<ul>
+  <li><strong>Messages</strong> — recent conversations, with hands-free reading and replies.</li>
+  <li><strong>Nodes</strong> — the mesh node list, with a node-detail view.</li>
+  <li><strong>Status</strong> — current connection and mesh status.</li>
+</ul>
+
+<p>The car app does not add a new connection of its own. It uses the Meshtastic app’s existing connection, node, and message state, so it reflects whatever your phone is already connected to.</p>
+
+<blockquote>
+  <p>⚠️ <strong>Note:</strong> Your phone must be connected to a Meshtastic radio for the car app to show live data. If the app is disconnected, the car screen reflects that disconnected state.</p>
+</blockquote>
+
+<h2 id="messages">Messages</h2>
+
+<p>The Messages tab lists your recent conversations. While driving, you can:</p>
+
+<ul>
+  <li><strong>Have messages read aloud</strong> so you don’t need to look at the screen.</li>
+  <li><strong>Reply by voice or text</strong> using your head unit’s reply control, dictating your response hands-free.</li>
+</ul>
+
+<h2 id="nœuds">Nœuds</h2>
+
+<p>The Nodes tab shows your mesh node list in a car-friendly layout. Selecting a node opens a node-detail view with key information about that node. See <a href="nodes">Nodes</a> for the full meaning of the information shown.</p>
+
+<h2 id="status">Status</h2>
+
+<p>The Status tab summarizes your current connection and mesh status at a glance — useful for confirming you’re still connected to your radio without opening your phone.</p>
+
+<h2 id="related-topics">Related Topics</h2>
+
+<ul>
+  <li><a href="messages-and-channels">Messages &amp; Channels</a> — full messaging features on your phone</li>
+  <li><a href="nodes">Nodes</a> — detailed node list and node-detail information</li>
+  <li><a href="connections">Connections</a> — how the app connects to your radio</li>
+</ul>
+
+<hr />
+

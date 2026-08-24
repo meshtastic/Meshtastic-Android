@@ -1,0 +1,55 @@
+<h1 id="debug-logs">Debug Logs</h1>
+
+<p>When something misbehaves, the app’s debug logs are the single most useful thing you can attach to a bug report. Meshtastic can capture them <strong>for you, from inside the app</strong> — you no longer need <code class="language-plaintext highlighter-rouge">adb</code> or any desktop tooling to collect them.</p>
+
+<p>Open the <strong>Debug Panel</strong> from <strong>Settings → Advanced → Debug Panel</strong>.</p>
+
+<blockquote>
+  <p>📎 <strong>Filing an issue?</strong> Export your logs (see below) and attach the <code class="language-plaintext highlighter-rouge">.txt</code> file to your report at <a href="https://github.com/meshtastic/Meshtastic-Android/issues">github.com/meshtastic/Meshtastic-Android/issues</a>. A log capture that covers the moment the problem happened turns “it doesn’t work” into something a developer can actually track down.</p>
+</blockquote>
+
+<h2 id="the-two-tabs">The two tabs</h2>
+
+<p>The Debug Panel has two tabs:</p>
+
+<ul>
+  <li><strong>Packets</strong> — the decoded mesh traffic your radio has sent and received (protocol-level messages). Useful for diagnosing mesh and routing behavior.</li>
+  <li><strong>App logs</strong> — the app’s own diagnostic log (Android <em>logcat</em>), including warnings, errors, and stack traces from the app itself. This is usually what a bug report needs.</li>
+</ul>
+
+<p>Each tab has its own <strong>export</strong> button and produces its own file, so you can grab whichever is relevant — or both.</p>
+
+<h2 id="viewing-app-logs">Viewing app logs</h2>
+
+<p>The <strong>App logs</strong> tab shows the most recent log lines from <strong>this app only</strong> — never other apps on your device.</p>
+
+<ul>
+  <li><strong>Search</strong> — type in the search box to filter to matching lines.</li>
+  <li><strong>Level filter</strong> — the <strong>V / D / I / W / E</strong> chips toggle Verbose, Debug, Info, Warn, and Error lines. Tap a level to hide it; tap again to bring it back. Fatal lines are always shown.</li>
+  <li><strong>Refresh</strong> — the refresh icon re-reads the latest logs.</li>
+</ul>
+
+<p>Error and warning lines are tinted so problems stand out.</p>
+
+<h2 id="exporting">Exporting</h2>
+
+<p>Tap the <strong>download</strong> icon to save the current logs to a file. You choose where it goes through the system file picker, and the file is named with a timestamp (for example <code class="language-plaintext highlighter-rouge">meshtastic_logcat_20260701_143312.txt</code>) so repeated exports never overwrite each other.</p>
+
+<p>Attach that file to your GitHub issue.</p>
+
+<blockquote>
+  <p>🔒 <strong>Privacy:</strong> Exports automatically <strong>redact</strong> private keys, admin keys, and session passkeys before writing the file. Channel PSKs are <strong>not</strong> redacted, and logs can also contain node names, positions, and other identifying details — glance through the file before sharing it publicly, and share privately if you have any doubt.</p>
+</blockquote>
+
+<h2 id="desktop">Desktop</h2>
+
+<p>The desktop app has no system logcat, so the <strong>App logs</strong> tab shows the app’s own captured log output instead. Search, filtering, and export work the same way.</p>
+
+<h2 id="related-topics">Related Topics</h2>
+
+<ul>
+  <li><a href="help-and-docs">Help &amp; In-App Docs</a> — reading this documentation offline inside the app</li>
+  <li><a href="connections">Connections</a> — if the problem is getting connected to your radio in the first place</li>
+</ul>
+
+<hr />

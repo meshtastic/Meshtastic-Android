@@ -1,0 +1,350 @@
+<h1 id="messages--channels">Messages &amp; Channels</h1>
+
+<p>Meshtastic supports two communication modes: <strong>channel broadcasts</strong> and <strong>direct messages</strong>.</p>
+
+<h2 id="canaux">Canaux</h2>
+
+<p>Channels are shared communication groups. All nodes configured with the same channel key can read and send messages on that channel.</p>
+
+<h3 id="default-channel">Default Channel</h3>
+
+<p>Every Meshtastic device comes with a default <strong>LongFast</strong> channel. This is an unencrypted channel used for general mesh communication.</p>
+
+<h3 id="sécurité-du-canal">Sécurité du canal</h3>
+
+<p>Channels support multiple encryption levels:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Icon</th>
+      <th>Security Level</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>🔒</td>
+      <td>PSK (256-bit AES)</td>
+      <td>Fully encrypted with a strong pre-shared key. Only nodes with the matching key can read messages.</td>
+    </tr>
+    <tr>
+      <td>🔐</td>
+      <td>PSK (128-bit AES)</td>
+      <td>Encrypted with a shorter key. Secure for most uses but 256-bit is preferred for sensitive data.</td>
+    </tr>
+    <tr>
+      <td>🔓</td>
+      <td>Default / Open</td>
+      <td>Uses the well-known default key. <strong>Any Meshtastic device</strong> on the same preset can read these messages.</td>
+    </tr>
+    <tr>
+      <td>⚠️</td>
+      <td>Insecure + Position</td>
+      <td>Open channel that also broadcasts your GPS position. Use with caution in public meshes.</td>
+    </tr>
+  </tbody>
+</table>
+
+<blockquote>
+  <p>🔒 <strong>Security Tip:</strong> Always configure a unique PSK for private communications. The default channel is intentionally open so new users can discover the mesh — but you should create a separate encrypted channel for anything sensitive.</p>
+</blockquote>
+
+<h3 id="adding-a-channel">Adding a Channel</h3>
+
+<ol>
+  <li>Navigate to <strong>Settings → Channels</strong>.</li>
+  <li>Tap <strong>Add Channel</strong> or scan a QR code.</li>
+  <li>Configure the channel name and encryption key.</li>
+  <li>Share the channel URL/QR code with others who need access.</li>
+</ol>
+
+<p>Tapping a channel shows its details and sharing options.</p>
+
+<h2 id="messages-directs">Messages directs</h2>
+
+<p>Direct messages (DMs) are point-to-point encrypted communications between two specific nodes.</p>
+
+<h3 id="sending-a-direct-message">Sending a Direct Message</h3>
+
+<ol>
+  <li>Open the <strong>Messages</strong> tab.</li>
+  <li>Select a node from your contacts list or tap a node in the node list.</li>
+  <li>Type your message and tap <strong>Send</strong>.</li>
+</ol>
+
+<h3 id="message-states">Message States</h3>
+
+<p>A status label appears under <strong>your own</strong> outgoing messages only (incoming messages from others show no status label):</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>State</th>
+      <th>Meaning</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Sending…</td>
+      <td>Queued or already handed to the radio, not yet resolved either way (queued and en-route both show this same text)</td>
+    </tr>
+    <tr>
+      <td>Delivered to recipient</td>
+      <td>The strongest confirmation for a direct message — an acknowledgment came back</td>
+    </tr>
+    <tr>
+      <td>Délivré au nœud</td>
+      <td>For a channel broadcast, the message reached the mesh (broadcasts have no per-recipient ack)</td>
+    </tr>
+    <tr>
+      <td>Relayed, not confirmed by recipient</td>
+      <td>For a direct message, shown in a warning color — the message was relayed but no acknowledgment has come back yet</td>
+    </tr>
+    <tr>
+      <td>Routage via chaîne SF++…</td>
+      <td>Being routed/buffered by the Store &amp; Forward Plus Plus chain</td>
+    </tr>
+    <tr>
+      <td>Confirmé via chaîne SF++</td>
+      <td>Confirmed delivered via the SF++ chain</td>
+    </tr>
+    <tr>
+      <td>Erreur</td>
+      <td>Delivery failed — tap the status for the specific reason (see Delivery Errors below)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="delivery-errors">Delivery Errors</h3>
+
+<p>When a message fails to deliver, the error indicator shows what went wrong:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Erreur</th>
+      <th>Meaning</th>
+      <th>What to Do</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Pas de route</td>
+      <td>No path exists to the destination node</td>
+      <td>The recipient may be offline or out of mesh range. Try later or move closer.</td>
+    </tr>
+    <tr>
+      <td>Got NAK</td>
+      <td>The next-hop node refused to relay</td>
+      <td>The relay node may be congested. Wait and retry.</td>
+    </tr>
+    <tr>
+      <td>Délai d’expiration</td>
+      <td>No acknowledgment within retry window</td>
+      <td>The recipient may be just out of range. Try increasing hop limit or moving to a better position.</td>
+    </tr>
+    <tr>
+      <td>No radio interface</td>
+      <td>No radio interface available to send</td>
+      <td>Check that your radio is connected and available.</td>
+    </tr>
+    <tr>
+      <td>Failed to deliver to mesh</td>
+      <td>All retry attempts exhausted</td>
+      <td>Move closer, improve signal, or wait for mesh conditions to improve.</td>
+    </tr>
+    <tr>
+      <td>Channel/key mismatch</td>
+      <td>Destination channel/key does not match</td>
+      <td>Verify both nodes share the same channel and PSK.</td>
+    </tr>
+    <tr>
+      <td>Message is too large to send</td>
+      <td>Message exceeds maximum payload size</td>
+      <td>Shorten the message and try again.</td>
+    </tr>
+    <tr>
+      <td>No app response</td>
+      <td>App or plugin did not respond to the request</td>
+      <td>Retry or check the destination app or module state.</td>
+    </tr>
+    <tr>
+      <td>Duty cycle limit</td>
+      <td>Regional airtime limit reached</td>
+      <td>Wait for the duty cycle window to reset.</td>
+    </tr>
+    <tr>
+      <td>Invalid request</td>
+      <td>Malformed or invalid request</td>
+      <td>Retry after updating or restarting the app if this persists.</td>
+    </tr>
+  </tbody>
+</table>
+
+<blockquote>
+  <p>💡 <strong>Tip:</strong> Most delivery errors resolve themselves. If a node is intermittently reachable, the mesh will retry. For persistent “No Route” errors, check that intermediate Router nodes are online.</p>
+</blockquote>
+
+<h2 id="message-features">Message Features</h2>
+
+<h3 id="quick-chat">Quick Chat</h3>
+
+<p>Pre-configured messages for rapid communication:</p>
+
+<ul>
+  <li>Access via the Quick Chat button in the message input area</li>
+  <li>Choose from built-in phrases or custom messages</li>
+  <li>Customize quick chat messages in <strong>Settings → Quick Chat</strong></li>
+  <li>Useful when typing is impractical (gloves, small screen, urgent)</li>
+</ul>
+
+<p><img src="../../assets/screenshots/messages_quick_chat.png" alt="Quick chat option" /></p>
+
+<p>Each quick chat entry has a short <strong>Name</strong> (the button label), the <strong>Message</strong> it inserts, and an <strong>Instantly send</strong> toggle — when enabled, tapping the button sends the message immediately instead of placing it in the input field for editing:</p>
+
+<p><img src="../../assets/screenshots/messages_edit_quick_chat.png" alt="New quick chat dialog with name, message, and instantly-send toggle" /></p>
+
+<p>The channel list shows each channel with its latest message preview.</p>
+
+<h3 id="searching-messages">Searching Messages</h3>
+
+<p>You can search the full history of any conversation directly from the chat screen:</p>
+
+<ol>
+  <li>Open a conversation (a channel or a direct message).</li>
+  <li>Tap the <strong>search icon</strong> in the top bar.</li>
+  <li>Type into the <strong>Search messages…</strong> field. The search runs as you type, across all stored messages in that conversation.</li>
+  <li>Use the <strong>N / M</strong> result counter and the <strong>previous / next arrows</strong> to jump between matches, which are highlighted in the conversation.</li>
+</ol>
+
+<p><img src="../../assets/screenshots/messages_search_bar.png" alt="Message search bar with result counter and previous/next arrows" /></p>
+
+<blockquote>
+  <p>💡 <strong>Tip:</strong> Search is full-text and stays within the conversation you opened it from — it doesn’t search across other channels or contacts. It matches against the messages already stored on your device, so it works fully offline.</p>
+</blockquote>
+
+<h3 id="message-bubbles">Message Bubbles</h3>
+
+<p>Messages appear as chat bubbles — sent messages on the right, received messages on the left. Each bubble shows the sender, timestamp, and delivery status. Messages with replies include a quoted preview of the original message above the response.</p>
+
+<h3 id="text-formatting">Text Formatting</h3>
+
+<p>Messages support lightweight inline <strong>Markdown</strong>. Received messages render the styling with the syntax characters removed:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Syntax</th>
+      <th>Renders as</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Bold</td>
+      <td><code class="language-plaintext highlighter-rouge">**bold**</code></td>
+      <td><strong>bold</strong></td>
+    </tr>
+    <tr>
+      <td>Italic</td>
+      <td><code class="language-plaintext highlighter-rouge">*italic*</code></td>
+      <td><em>italic</em></td>
+    </tr>
+    <tr>
+      <td>Strikethrough</td>
+      <td><code class="language-plaintext highlighter-rouge">~~strike~~</code></td>
+      <td><del>strike</del></td>
+    </tr>
+    <tr>
+      <td>Inline code</td>
+      <td><code class="language-plaintext highlighter-rouge">`code`</code></td>
+      <td>monospace <code class="language-plaintext highlighter-rouge">code</code></td>
+    </tr>
+    <tr>
+      <td>Link</td>
+      <td><code class="language-plaintext highlighter-rouge">[label](https://example.com)</code></td>
+      <td>a tappable <strong>label</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>When composing, focus the message field and type at least three characters to reveal a <strong>formatting toolbar</strong> below the input. Select text and tap a style to wrap it (tap again to remove it); with no selection, a style inserts an empty pair with the cursor between the markers. The link button opens a dialog to enter a URL. As you type, the draft styles live in the field while the underlying text keeps its Markdown characters.</p>
+
+<blockquote>
+  <p>💡 <strong>Tip:</strong> Formatting is carried as literal characters on the mesh — the same bytes iOS sends. Clients that don’t support Markdown (older apps, plain firmware clients) will show the raw <code class="language-plaintext highlighter-rouge">**</code>/<code class="language-plaintext highlighter-rouge">~~</code> characters. URLs, email addresses, and phone numbers are still auto-linked whether or not you use Markdown.</p>
+</blockquote>
+
+<h3 id="mentions">Mentions</h3>
+
+<p>Type <code class="language-plaintext highlighter-rouge">@</code> while composing to mention a node — a picker suggests matching contacts as you type. In a received message, a mention appears as a highlighted chip showing the node’s name; tap it to jump straight to that node’s detail page.</p>
+
+<h3 id="reactions">Reactions</h3>
+
+<p>React to messages with emoji:</p>
+
+<ul>
+  <li><strong>Long-press</strong> a message to open the actions menu</li>
+  <li>Tap <strong>Add Reaction</strong> to choose an emoji</li>
+  <li>Reactions appear below the message bubble</li>
+  <li>Multiple users can react to the same message</li>
+  <li>React to your own messages or others’ messages</li>
+</ul>
+
+<p><img src="../../assets/screenshots/messages_reaction.png" alt="Emoji reaction badges displayed beneath a message" /></p>
+
+<blockquote>
+  <p>💡 <strong>Tip:</strong> Reactions are lightweight — they use minimal mesh bandwidth compared to full text messages.</p>
+</blockquote>
+
+<h3 id="message-actions">Message Actions</h3>
+
+<p>Long-press any message to access:</p>
+
+<ul>
+  <li><strong>Copy</strong> — copy message text to clipboard</li>
+  <li><strong>Reply</strong> — quote the message in your response</li>
+  <li><strong>React</strong> — add an emoji reaction</li>
+  <li><strong>Translate</strong> — translate a received message into your device language and toggle between the original and translated text (Google Play build only; uses on-device translation)</li>
+  <li><strong>Delete</strong> — remove a message you sent (local deletion)</li>
+</ul>
+
+<h3 id="message-priority">Message Priority</h3>
+
+<p>Messages are queued and transmitted based on priority:</p>
+
+<ol>
+  <li>Emergency/alert messages (highest)</li>
+  <li>Direct messages</li>
+  <li>Channel broadcasts (lowest)</li>
+</ol>
+
+<h3 id="message-limits">Message Limits</h3>
+
+<ul>
+  <li><strong>Maximum length:</strong> 200 bytes (approximately 200 characters for ASCII text)</li>
+  <li>The 200-byte cap applies to the in-app composer — the mesh payload limit itself is ~233 bytes, so messages from other senders (e.g., App Functions or Android Auto) may arrive slightly longer</li>
+  <li><strong>Rate limiting:</strong> The mesh enforces airtime fairness; heavy message volume may be throttled</li>
+  <li><strong>Delivery:</strong> Messages are retried automatically if no acknowledgment is received</li>
+</ul>
+
+<h2 id="best-practices">Best Practices</h2>
+
+<ul>
+  <li>Use channels for group coordination</li>
+  <li>Use direct messages for private person-to-person communication</li>
+  <li>Keep messages short — mesh bandwidth is limited</li>
+  <li>Configure encryption for sensitive communications</li>
+</ul>
+
+<h2 id="related-topics">Related Topics</h2>
+
+<ul>
+  <li><a href="nodes">Nodes</a> — tap a node to start a direct message</li>
+  <li><a href="settings-radio-user">Settings — Radio &amp; User</a> — configure channel encryption and presets</li>
+  <li><a href="mqtt">MQTT</a> — bridge channel messages to the internet</li>
+  <li><a href="https://meshtastic.org/docs/configuration/radio/channels">Channel configuration</a> — detailed channel settings on meshtastic.org</li>
+</ul>
+
+<hr />
+

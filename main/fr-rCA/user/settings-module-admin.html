@@ -1,0 +1,552 @@
+<h1 id="settings--modules--admin">Settings — Modules &amp; Admin</h1>
+
+<p>Configure optional feature modules and perform device administration. Modules extend Meshtastic with specialized capabilities — each can be independently enabled or disabled.</p>
+
+<blockquote>
+  <p>💡 <strong>Tip:</strong> You only need to enable the modules you actually use. Disabling unused modules reduces airtime, saves battery, and simplifies your configuration.</p>
+</blockquote>
+
+<p>Module settings use a card-based layout with toggle switches, dropdowns, text fields, and sliders:</p>
+
+<p><img src="../../assets/screenshots/settings_switch.png" alt="Toggle switch" /></p>
+
+<p><img src="../../assets/screenshots/settings_dropdown.png" alt="Dropdown selector" /></p>
+
+<p><img src="../../assets/screenshots/settings_text_field.png" alt="Text field" /></p>
+
+<p><img src="../../assets/screenshots/settings_titled_card.png" alt="Settings card layout" /></p>
+
+<h2 id="configuration-du-module">Configuration du module</h2>
+
+<h3 id="mqtt-module">MQTT Module</h3>
+
+<p>Bridges mesh messages to and from an MQTT broker for internet connectivity. This is how you extend your mesh beyond radio range or integrate with home automation systems.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Setting</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Activé</td>
+      <td>Toggle MQTT bridge</td>
+    </tr>
+    <tr>
+      <td>Serveur</td>
+      <td>MQTT broker address</td>
+    </tr>
+    <tr>
+      <td>Nom d’utilisateur</td>
+      <td>Authentication username</td>
+    </tr>
+    <tr>
+      <td>Mot de passe</td>
+      <td>Authentication password</td>
+    </tr>
+    <tr>
+      <td>Chiffrement</td>
+      <td>Encrypt MQTT payloads</td>
+    </tr>
+    <tr>
+      <td><del>JSON Output</del></td>
+      <td>⚠️ <strong>Deprecated</strong> — JSON support removed from firmware; field is ignored</td>
+    </tr>
+    <tr>
+      <td>TLS</td>
+      <td>Use secure connection</td>
+    </tr>
+    <tr>
+      <td>Root Topic</td>
+      <td>Base MQTT topic path</td>
+    </tr>
+    <tr>
+      <td>Map Report</td>
+      <td>Publish position for public map</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>See <a href="mqtt">MQTT</a> for a detailed usage guide including encryption, privacy, and broker setup.</p>
+
+<h3 id="serial-module">Serial Module</h3>
+
+<p>Enables serial port communication for external device integrations (GPS modules, sensors, or custom hardware). When enabled, the node’s serial port can send and receive protobuf or text data, allowing external microcontrollers or computers to interact with the mesh.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Setting</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Activé</td>
+      <td>Activate serial communication</td>
+    </tr>
+    <tr>
+      <td>Écho</td>
+      <td>Echo received serial data back</td>
+    </tr>
+    <tr>
+      <td>Mode</td>
+      <td>Text, Protobuf, or NMEA output</td>
+    </tr>
+    <tr>
+      <td>RX/TX Pins</td>
+      <td>GPIO pins for serial connection</td>
+    </tr>
+    <tr>
+      <td>Vitesse en bauds</td>
+      <td>Serial communication speed</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="external-notification-module">External Notification Module</h3>
+
+<p>Controls buzzer, LED, or vibration alerts on your radio hardware. Useful for devices that need to physically signal when a message arrives — particularly helpful for unattended or outdoor installations.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Setting</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Activé</td>
+      <td>Activate notifications</td>
+    </tr>
+    <tr>
+      <td>Message d’alerte</td>
+      <td>Notify on incoming messages</td>
+    </tr>
+    <tr>
+      <td>Message d’alerte buzzer</td>
+      <td>Use buzzer for messages</td>
+    </tr>
+    <tr>
+      <td>Alert Message Vibra</td>
+      <td>Use vibration for messages</td>
+    </tr>
+    <tr>
+      <td>Bip d’alerte</td>
+      <td>Notify on bell character</td>
+    </tr>
+    <tr>
+      <td>Output (GPIO)</td>
+      <td>Pin for notification output</td>
+    </tr>
+    <tr>
+      <td>Actif</td>
+      <td>High or Low active</td>
+    </tr>
+    <tr>
+      <td>Duration (ms)</td>
+      <td>Notification length</td>
+    </tr>
+    <tr>
+      <td>Use I2S as Buzzer</td>
+      <td>Use I2S audio output</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="store--forward-module">Store &amp; Forward Module</h3>
+
+<p>Buffers messages for nodes that were temporarily offline, then replays them when those nodes reconnect. Essential for meshes where nodes go in and out of range regularly — ensures messages aren’t lost during brief disconnections.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Setting</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Activé</td>
+      <td>Activate store and forward</td>
+    </tr>
+    <tr>
+      <td>Battement de cœur (heartbeat)</td>
+      <td>Periodically announce this node’s store-and-forward capability</td>
+    </tr>
+    <tr>
+      <td>Enregistrements</td>
+      <td>Maximum stored messages</td>
+    </tr>
+    <tr>
+      <td>History Return (max)</td>
+      <td>Max messages to replay</td>
+    </tr>
+    <tr>
+      <td>History Return (window)</td>
+      <td>Time window for replay</td>
+    </tr>
+    <tr>
+      <td>Serveur</td>
+      <td>Act as a store-and-forward server for the mesh (requires ample memory, e.g. ESP32 with PSRAM)</td>
+    </tr>
+  </tbody>
+</table>
+
+<blockquote>
+  <p>💡 <strong>Tip:</strong> Store and Forward works best on nodes with ample memory (ESP32 with PSRAM). Router nodes are ideal candidates since they’re typically always-on.</p>
+</blockquote>
+
+<h3 id="range-test-module">Range Test Module</h3>
+
+<p>Automated range testing tool for evaluating link quality between nodes. When enabled, the node periodically transmits test messages with incrementing counters. A receiver node logs these messages, allowing you to walk or drive away and later analyze at what distance messages stopped arriving.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Setting</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Activé</td>
+      <td>Activate range testing</td>
+    </tr>
+    <tr>
+      <td>Sender Interval (s)</td>
+      <td>Time between test transmissions</td>
+    </tr>
+    <tr>
+      <td>Save CSV</td>
+      <td>Log received test data to SD card</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="telemetry-module">Telemetry Module</h3>
+
+<p>Controls what telemetry data your node shares with the mesh. Telemetry includes device health (battery, uptime) and environmental sensor data (temperature, humidity, pressure).</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Setting</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Device Metrics Interval</td>
+      <td>How often to report device metrics</td>
+    </tr>
+    <tr>
+      <td>Environment Metrics Interval</td>
+      <td>How often to report environment sensors</td>
+    </tr>
+    <tr>
+      <td>Qualité de l’air activée</td>
+      <td>Report particulate sensor data</td>
+    </tr>
+    <tr>
+      <td>Power Metrics Enabled</td>
+      <td>Report power usage</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>See <a href="telemetry-and-sensors">Telemetry &amp; Sensors</a> for supported sensors and configuration recommendations.</p>
+
+<h3 id="canned-message-module">Canned Message Module</h3>
+
+<p>Pre-configured messages accessible from the device’s physical buttons (for radios with rotary encoders, keypads, or similar input hardware). Define a list of quick-send messages that can be transmitted without a phone connected — ideal for field use.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Setting</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><del>Enabled</del></td>
+      <td>⚠️ <strong>Deprecated</strong> — current firmware may ignore this toggle</td>
+    </tr>
+    <tr>
+      <td>Messages</td>
+      <td>Newline-separated list of messages</td>
+    </tr>
+    <tr>
+      <td>Envoyer un bip</td>
+      <td>Play bell sound on send</td>
+    </tr>
+    <tr>
+      <td>Rotary Encoder</td>
+      <td>Enable rotary encoder input</td>
+    </tr>
+    <tr>
+      <td>Up/Down/Press Pins</td>
+      <td>GPIO pin assignments for input</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="audio-module">Audio Module</h3>
+
+<p>Codec2 audio support for low-bandwidth voice communication over the mesh. This is an <strong>experimental</strong> feature that encodes voice into very small data packets using the Codec2 codec.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Setting</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Activé</td>
+      <td>Activate audio module</td>
+    </tr>
+    <tr>
+      <td>Codec2 Rate</td>
+      <td>Audio quality/bandwidth tradeoff</td>
+    </tr>
+    <tr>
+      <td>I2S Word Select</td>
+      <td>GPIO pin for I2S WS</td>
+    </tr>
+    <tr>
+      <td>I2S Data In</td>
+      <td>GPIO pin for I2S DIN</td>
+    </tr>
+    <tr>
+      <td>I2S Data Out</td>
+      <td>GPIO pin for I2S DOUT</td>
+    </tr>
+  </tbody>
+</table>
+
+<blockquote>
+  <p>⚠️ <strong>Note:</strong> Audio requires specific hardware (I2S microphone and speaker). Voice quality is very low-bandwidth — think “understandable radio voice,” not phone-call quality.</p>
+</blockquote>
+
+<h3 id="remote-hardware-module">Remote Hardware Module</h3>
+
+<p>GPIO control over the mesh network. Allows a remote node to read or write GPIO pins on another node — useful for activating relays, reading switches, or controlling external hardware from a distance.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Setting</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Activé</td>
+      <td>Activate remote GPIO access</td>
+    </tr>
+    <tr>
+      <td>Allow Undefined Pins</td>
+      <td>Allow access to any GPIO pin (security risk)</td>
+    </tr>
+    <tr>
+      <td>Available Pins</td>
+      <td>Up to 4 GPIO pins this node exposes for remote read/write</td>
+    </tr>
+  </tbody>
+</table>
+
+<blockquote>
+  <p>⚠️ <strong>Warning:</strong> Enabling “Allow Undefined Pins” gives remote nodes access to all GPIO pins, which could interfere with the radio’s own hardware. Only enable on dedicated GPIO nodes.</p>
+</blockquote>
+
+<h3 id="neighbor-info-module">Neighbor Info Module</h3>
+
+<p>Broadcasts information about directly heard neighbors, enabling mesh topology mapping. Each enabled node periodically shares a list of the other nodes it can hear and their signal quality.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Setting</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Activé</td>
+      <td>Activate neighbor broadcasting</td>
+    </tr>
+    <tr>
+      <td>Update Interval (s)</td>
+      <td>How often to broadcast neighbor list</td>
+    </tr>
+    <tr>
+      <td>Transmit Over LoRa</td>
+      <td>Also broadcast neighbor info over LoRa, not just MQTT/phone. Unavailable on a channel using the default key and name</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>See <a href="discovery">Discovery</a> for how to use neighbor data for mesh topology exploration.</p>
+
+<h3 id="ambient-lighting-module">Ambient Lighting Module</h3>
+
+<p>Controls onboard NeoPixel or other addressable RGB LEDs on supported hardware. Can be used for visual status indicators, notification lights, or decorative effects.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Setting</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>État des LED</td>
+      <td>Turn the LED on or off</td>
+    </tr>
+    <tr>
+      <td>Actif</td>
+      <td>LED current limit (0–31)</td>
+    </tr>
+    <tr>
+      <td>Red / Green / Blue</td>
+      <td>Individual color channel values (0–255)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="detection-sensor-module">Detection Sensor Module</h3>
+
+<p>Turns your node into a motion or door sensor alert system. When a GPIO pin detects a state change (motion detected, door opened), the node broadcasts an alert message over the mesh.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Setting</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Activé</td>
+      <td>Activate detection sensor</td>
+    </tr>
+    <tr>
+      <td>Broche de monitoring</td>
+      <td>GPIO pin connected to sensor</td>
+    </tr>
+    <tr>
+      <td>Detection Trigger Type</td>
+      <td>How the pin’s state maps to a detection event (e.g. active high/low, edge-triggered)</td>
+    </tr>
+    <tr>
+      <td>Use Input Pullup Mode</td>
+      <td>Enable the pin’s internal pull-up resistor</td>
+    </tr>
+    <tr>
+      <td>Minimum Broadcast (s)</td>
+      <td>Minimum time between alert broadcasts</td>
+    </tr>
+    <tr>
+      <td>State Broadcast (s)</td>
+      <td>Periodic state broadcast interval</td>
+    </tr>
+    <tr>
+      <td>Envoyer un bip</td>
+      <td>Include bell character in alerts</td>
+    </tr>
+    <tr>
+      <td>Nom convivial</td>
+      <td>Custom name for this sensor</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="paxcounter-module">Paxcounter Module</h3>
+
+<p>People counter using WiFi and BLE probe requests. Counts nearby devices by passively listening for probe requests that phones and laptops emit when scanning for networks. Available only on ESP32 devices.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Setting</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Activé</td>
+      <td>Activate people counting</td>
+    </tr>
+    <tr>
+      <td>Update Interval (s)</td>
+      <td>How often to report counts</td>
+    </tr>
+  </tbody>
+</table>
+
+<blockquote>
+  <p>💡 <strong>Tip:</strong> Paxcounter is useful for estimating foot traffic at trailheads, event venues, or other locations. Counts are approximate — one person may carry multiple devices.</p>
+</blockquote>
+
+<h3 id="tak-module">TAK Module</h3>
+
+<p>Team Awareness Kit integration for interoperability with ATAK and WinTAK. See <a href="tak">TAK Integration</a> for detailed setup and usage.</p>
+
+<h2 id="administration">Administration</h2>
+
+<h3 id="administration-à-distance">Administration à distance</h3>
+
+<p>Remotely configure nodes that share your admin key:</p>
+
+<ol>
+  <li>Select the target node in the node list.</li>
+  <li>Navigate to <strong>Settings</strong> for that node.</li>
+  <li>Modify configuration.</li>
+  <li>Tap <strong>Save</strong> — changes are sent over the mesh.</li>
+</ol>
+
+<blockquote>
+  <p>⚠️ <strong>Requires:</strong> Admin key configured on both your node and the target node.</p>
+</blockquote>
+
+<h3 id="nettoyer-la-base-de-données-des-nœuds">Nettoyer la base de données des nœuds</h3>
+
+<p>Removes stale nodes from your local database that haven’t been heard in a configurable time window.</p>
+
+<h3 id="factory-reset">Factory Reset</h3>
+
+<p>Resets all settings to factory defaults. <strong>This cannot be undone.</strong></p>
+
+<h3 id="redémarrer">Redémarrer</h3>
+
+<p>Remotely reboot a connected or administered node.</p>
+
+<h3 id="panneau-de-débogage">Panneau de débogage</h3>
+
+<p>Opens the <strong>Packets</strong> and <strong>App logs</strong> tabs for viewing, filtering, and exporting diagnostic output. See <a href="debug-logs">Debug Logs</a> for the full walkthrough.</p>
+
+<h3 id="troubleshooting-remote-admin">Troubleshooting Remote Admin</h3>
+
+<ul>
+  <li><strong>“No response from target node”</strong> — the target may be out of range, offline, or have a mismatched admin key. Verify the admin key matches on both nodes.</li>
+  <li><strong>Changes not applying</strong> — some settings require a reboot to take effect. Try the Reboot action after saving.</li>
+  <li><strong>Can’t see remote settings</strong> — ensure your node has the admin key for the target node. The admin channel is configured automatically when an admin key is set.</li>
+</ul>
+
+<h2 id="related-topics">Related Topics</h2>
+
+<ul>
+  <li><a href="settings-radio-user">Settings — Radio &amp; User</a> — core radio and user profile settings</li>
+  <li><a href="https://meshtastic.org/docs/configuration/module">Module configuration reference</a> — detailed module docs on meshtastic.org</li>
+  <li><a href="https://meshtastic.org/docs/faq/">FAQ</a> — common questions on meshtastic.org</li>
+</ul>
+
+<hr />
+
