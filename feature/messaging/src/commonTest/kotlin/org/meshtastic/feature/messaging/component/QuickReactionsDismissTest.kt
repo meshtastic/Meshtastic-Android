@@ -90,6 +90,17 @@ class QuickReactionsDismissTest {
     }
 
     @Test
+    fun tappingTheOwningBubbleClosesTheBar() = runComposeUiTest {
+        val harness = setHarness()
+        harness.openBarOnFirst(this)
+        onNodeWithText(EMOJI).assertIsDisplayed()
+
+        onNodeWithText(FIRST_TEXT).performClick()
+        waitForIdle()
+        assertNull(harness.openFor(), "a tap on the row that owns the bar should close it")
+    }
+
+    @Test
     fun tappingTheBackgroundClosesTheBar() = runComposeUiTest {
         val harness = setHarness()
         harness.openBarOnFirst(this)
