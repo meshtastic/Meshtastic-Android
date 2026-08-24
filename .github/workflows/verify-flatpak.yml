@@ -53,7 +53,7 @@ jobs:
           fi
           echo "OK: $manifest vendors $wrapper_dist, matching $props"
 
-      - uses: actions/setup-java@v5
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: 25
@@ -61,7 +61,7 @@ jobs:
 
       # JBR resolves its version list via the GitHub API — unauthenticated requests
       # rate-limit on the shared runner IPs, so the token is required, not optional.
-      - uses: actions/setup-java@v5
+      - uses: actions/setup-java@v6
         with:
           distribution: jetbrains
           java-version: 25
