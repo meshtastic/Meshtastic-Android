@@ -46,12 +46,13 @@ import org.meshtastic.core.model.ContactSettings
 import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
+import org.meshtastic.core.repository.ActiveConversationTracker
 import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.CustomEmojiPrefs
 import org.meshtastic.core.repository.HomoglyphPrefs
+import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.MessagingController
 import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.QuickChatActionRepository
 import org.meshtastic.core.repository.RadioConfigRepository
@@ -103,7 +104,8 @@ class MessageViewModel(
     private val uiPrefs: UiPrefs,
     private val customEmojiPrefs: CustomEmojiPrefs,
     private val homoglyphEncodingPrefs: HomoglyphPrefs,
-    private val notificationManager: NotificationManager,
+    private val meshNotificationManager: MeshNotificationManager,
+    private val activeConversationTracker: ActiveConversationTracker,
     private val sendMessageUseCase: SendMessageUseCase,
     private val messageTranslationService: MessageTranslationService,
     private val snackbarManager: SnackbarManager,
@@ -428,6 +430,15 @@ class MessageViewModel(
 
     // endregion
 
+    /**
+     * Marks [contactKey] as the conversation on screen so an arriving message for it is not also announced as a
+     * notification. Paired with [onConversationHidden] on pause — backgrounding the app hides the screen, which is what
+     * makes a single signal enough.
+     */
+    fun onConversationVisible(contactKey: String) = activeConversationTracker.setActive(contactKey)
+
+    fun onConversationHidden(contactKey: String) = activeConversationTracker.clearActive(contactKey)
+
     fun clearUnreadCount(contact: String, messageUuid: Long, lastReadTimestamp: Long) =
         safeLaunch(context = ioDispatcher, tag = "clearUnreadCount") {
             val existingTimestamp = contactSettings.value[contact]?.lastReadMessageTimestamp ?: Long.MIN_VALUE
@@ -437,7 +448,9 @@ class MessageViewModel(
             packetRepository.clearUnreadCount(contact, lastReadTimestamp)
             packetRepository.updateLastReadMessage(contact, messageUuid, lastReadTimestamp)
             val unreadCount = packetRepository.getUnreadCount(contact)
-            if (unreadCount == 0) notificationManager.cancel(contact.hashCode())
+            // Must go through the domain manager: the conversation is posted under a notification *tag*, so an
+            // untagged cancel by id never matches it. This also rebuilds the group summary.
+            if (unreadCount == 0) meshNotificationManager.cancelMessageNotification(contact)
         }
 
     companion object {

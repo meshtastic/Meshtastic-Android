@@ -45,12 +45,14 @@ import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.core.model.util.isValidCodePoint
 import org.meshtastic.core.model.util.snrOrNull
 import org.meshtastic.core.model.util.toOneLiner
+import org.meshtastic.core.repository.ActiveConversationTracker
 import org.meshtastic.core.repository.AdminPacketHandler
 import org.meshtastic.core.repository.DataPair
 import org.meshtastic.core.repository.DiscoveryPacketCollectorRegistry
 import org.meshtastic.core.repository.MeshBeaconRepository
 import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.MeshNotificationManager
+import org.meshtastic.core.repository.MessageAnnouncement
 import org.meshtastic.core.repository.MessageFilter
 import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.NodeManager
@@ -115,6 +117,7 @@ class MeshDataHandlerImpl(
     private val geofenceMonitor: GeofenceMonitor,
     private val meshBeaconRepository: MeshBeaconRepository,
     private val radioInterfaceService: RadioInterfaceService,
+    private val activeConversationTracker: ActiveConversationTracker,
     private val scope: ServiceScope,
 ) : MeshDataHandler {
 
@@ -503,18 +506,33 @@ class MeshDataHandlerImpl(
         val mentionsMe =
             dataPacket.dataType == PortNum.TEXT_MESSAGE_APP.value &&
                 textMentionsNode(dataPacket.text, nodeManager.getMyId())
-        val isSilent = nodeMuted || (conversationMuted && !mentionsMe)
-        if (dataPacket.dataType == PortNum.ALERT_APP.value && !isSilent) {
-            notificationManager.dispatch(
-                Notification(
-                    title = getSenderName(dataPacket),
-                    message = dataPacket.alert ?: getStringSuspend(Res.string.critical_alert),
-                    category = Notification.Category.Alert,
-                    contactKey = contactKey,
-                ),
-            )
-        } else if (updateNotification && !isSilent) {
-            updateNotification(contactKey, dataPacket, isSilent)
+        val muted = nodeMuted || (conversationMuted && !mentionsMe)
+        when {
+            // A critical alert is the one category that deliberately breaks through, so it is not suppressed for the
+            // conversation on screen — only mute silences it.
+            dataPacket.dataType == PortNum.ALERT_APP.value ->
+                if (!muted) {
+                    notificationManager.dispatch(
+                        Notification(
+                            title = getSenderName(dataPacket),
+                            message = dataPacket.alert ?: getStringSuspend(Res.string.critical_alert),
+                            category = Notification.Category.Alert,
+                            contactKey = contactKey,
+                        ),
+                    )
+                }
+
+            !updateNotification || muted -> Unit
+
+            // Reading the conversation is its own acknowledgement: notifying about a message whose bubble is already
+            // on screen only buzzes the phone in the user's hand. Foreground-but-elsewhere still posts, silently, so
+            // the shade and Auto/Wear keep the conversation.
+            else ->
+                when (activeConversationTracker.announcementFor(contactKey)) {
+                    MessageAnnouncement.Suppress -> Unit
+                    MessageAnnouncement.Silent -> updateNotification(contactKey, dataPacket, isSilent = true)
+                    MessageAnnouncement.Alert -> updateNotification(contactKey, dataPacket, isSilent = false)
+                }
         }
     }
 
@@ -620,9 +638,10 @@ class MeshDataHandlerImpl(
                     // Skip notification if the original message was filtered
                     val conversationMuted = packetRepository.value.getContactSettings(contactKey).isMuted
                     val nodeMuted = nodeManager.getNodeById(fromId)?.isMuted == true
-                    val isSilent = conversationMuted || nodeMuted
+                    val muted = conversationMuted || nodeMuted
+                    val announcement = activeConversationTracker.announcementFor(contactKey)
 
-                    if (!isSilent) {
+                    if (!muted && announcement != MessageAnnouncement.Suppress) {
                         val isBroadcast = originalPacket.destination is NodeAddress.Broadcast
                         val channelName =
                             if (isBroadcast) {
@@ -640,7 +659,7 @@ class MeshDataHandlerImpl(
                             emoji,
                             isBroadcast,
                             channelName,
-                            isSilent,
+                            announcement == MessageAnnouncement.Silent,
                         )
                     }
                 }

@@ -81,6 +81,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
 import kotlinx.collections.immutable.ImmutableMap
@@ -194,6 +195,12 @@ fun MessageScreen(
 
     // Prevent the message TextField from stealing focus when the screen opens
     SideEffect(contactKey) { focusManager.clearFocus() }
+
+    // Tell the notification path this conversation is on screen, so an arriving message for it is not announced twice.
+    LifecycleResumeEffect(contactKey) {
+        viewModel.onConversationVisible(contactKey)
+        onPauseOrDispose { viewModel.onConversationHidden(contactKey) }
+    }
 
     // Derived state, memoized for performance
     val channelInfo =

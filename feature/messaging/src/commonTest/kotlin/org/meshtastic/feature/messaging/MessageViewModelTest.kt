@@ -35,6 +35,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.ContactSettings
+import org.meshtastic.core.repository.ActiveConversationTracker
 import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.CustomEmojiPrefs
 import org.meshtastic.core.repository.HomoglyphPrefs
@@ -73,7 +74,8 @@ class MessageViewModelTest {
     private val customEmojiPrefs: CustomEmojiPrefs = mock(MockMode.autofill)
     private val homoglyphPrefs: HomoglyphPrefs = mock(MockMode.autofill)
     private val uiPrefs: UiPrefs = mock(MockMode.autofill)
-    private val notificationManager: org.meshtastic.core.repository.NotificationManager = mock(MockMode.autofill)
+    private val meshNotificationManager: org.meshtastic.core.repository.MeshNotificationManager =
+        mock(MockMode.autofill)
     private val messageTranslationService: MessageTranslationService = mock(MockMode.autofill)
     private val snackbarManager: SnackbarManager = SnackbarManager()
 
@@ -132,7 +134,8 @@ class MessageViewModelTest {
                 customEmojiPrefs = customEmojiPrefs,
                 homoglyphEncodingPrefs = homoglyphPrefs,
                 uiPrefs = uiPrefs,
-                notificationManager = notificationManager,
+                meshNotificationManager = meshNotificationManager,
+                activeConversationTracker = ActiveConversationTracker(),
                 messageTranslationService = messageTranslationService,
                 snackbarManager = snackbarManager,
             )
@@ -315,7 +318,7 @@ class MessageViewModelTest {
         everySuspend { packetRepository.clearUnreadCount(contact, 1000L) } returns Unit
         everySuspend { packetRepository.updateLastReadMessage(contact, 1L, 1000L) } returns Unit
         everySuspend { packetRepository.getUnreadCount(contact) } returns 0
-        every { notificationManager.cancel(contact.hashCode()) } returns Unit
+        everySuspend { meshNotificationManager.cancelMessageNotification(contact) } returns Unit
 
         viewModel.clearUnreadCount(contact, 1L, 1000L)
 
@@ -323,7 +326,7 @@ class MessageViewModelTest {
 
         verifySuspend { packetRepository.clearUnreadCount(contact, 1000L) }
         verifySuspend { packetRepository.updateLastReadMessage(contact, 1L, 1000L) }
-        verifySuspend { notificationManager.cancel(contact.hashCode()) }
+        verifySuspend { meshNotificationManager.cancelMessageNotification(contact) }
     }
 
     @Test

@@ -37,11 +37,12 @@ import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.ContactSettings
 import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.MessageStatus
+import org.meshtastic.core.repository.ActiveConversationTracker
 import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.CustomEmojiPrefs
 import org.meshtastic.core.repository.HomoglyphPrefs
+import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.MessagingController
-import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.QuickChatActionRepository
 import org.meshtastic.core.repository.RadioConfigRepository
@@ -124,7 +125,7 @@ class MessageViewModelTranslationTest {
     private val customEmojiPrefs: CustomEmojiPrefs = mock(MockMode.autofill)
     private val homoglyphPrefs: HomoglyphPrefs = mock(MockMode.autofill)
     private val uiPrefs: UiPrefs = mock(MockMode.autofill)
-    private val notificationManager: NotificationManager = mock(MockMode.autofill)
+    private val meshNotificationManager: MeshNotificationManager = mock(MockMode.autofill)
 
     private val testDispatcher = StandardTestDispatcher()
 
@@ -188,7 +189,8 @@ class MessageViewModelTranslationTest {
                 customEmojiPrefs = customEmojiPrefs,
                 homoglyphEncodingPrefs = homoglyphPrefs,
                 uiPrefs = uiPrefs,
-                notificationManager = notificationManager,
+                meshNotificationManager = meshNotificationManager,
+                activeConversationTracker = ActiveConversationTracker(),
                 messageTranslationService = translationService,
                 snackbarManager = snackbarManager,
             )

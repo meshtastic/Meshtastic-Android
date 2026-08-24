@@ -45,6 +45,7 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.Reaction
 import org.meshtastic.core.model.util.MeshDataMapper
+import org.meshtastic.core.repository.ActiveConversationTracker
 import org.meshtastic.core.repository.AdminPacketHandler
 import org.meshtastic.core.repository.MeshBeaconPrefs
 import org.meshtastic.core.repository.MeshBeaconRepository
@@ -136,6 +137,9 @@ class MeshDataHandlerTest {
         }
     private val meshBeaconRepository = MeshBeaconRepository(fakeBeaconPrefs, geofenceScope)
 
+    // Backgrounded by default, so existing expectations about notifications firing are unchanged.
+    private val activeConversationTracker = ActiveConversationTracker()
+
     @AfterTest
     fun tearDown() {
         geofenceScope.cancel()
@@ -175,6 +179,7 @@ class MeshDataHandlerTest {
                 ),
                 meshBeaconRepository = meshBeaconRepository,
                 radioInterfaceService = radioInterfaceService,
+                activeConversationTracker = activeConversationTracker,
                 scope = testScope.asServiceScope(),
             )
 
@@ -1125,6 +1130,65 @@ class MeshDataHandlerTest {
             Node(num = 456, user = User(id = "!remote", long_name = "Remote User"))
 
         handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
+
+        verifySuspend {
+            serviceNotifications.updateMessageNotification(any(), any(), any(), any(), any(), isSilent = false)
+        }
+    }
+
+    // --- Active-conversation suppression ---
+    //
+    // contactKey for these packets is "$channel$to" = "0^all" (channel 0, broadcast).
+
+    private fun arrangeUnmutedBroadcast() {
+        val packet = mentionPacket()
+        every { dataMapper.toDataPacket(packet) } returns mentionDataPacket()
+        everySuspend { packetRepository.findPacketsWithId(101) } returns emptyList()
+        everySuspend { packetRepository.getContactSettings(any()) } returns ContactSettings(contactKey = "test")
+        every { messageFilter.shouldFilter(any(), any()) } returns false
+        every { nodeManager.getMyId() } returns myId
+        every { nodeManager.getNodeById("!remote") } returns
+            Node(num = 456, user = User(id = "!remote", long_name = "Remote User"))
+    }
+
+    @Test
+    fun `message for the conversation on screen does not notify`() = testScope.runTest {
+        arrangeUnmutedBroadcast()
+        activeConversationTracker.setAppForeground(true)
+        activeConversationTracker.setActive("0^all")
+
+        handler.handleReceivedData(mentionPacket(), 123)
+        advanceUntilIdle()
+
+        verifySuspend(mode = dev.mokkery.verify.VerifyMode.not) {
+            serviceNotifications.updateMessageNotification(any(), any(), any(), any(), any(), any())
+        }
+    }
+
+    @Test
+    fun `message for another conversation while foregrounded notifies silently`() = testScope.runTest {
+        arrangeUnmutedBroadcast()
+        activeConversationTracker.setAppForeground(true)
+        activeConversationTracker.setActive("0!someoneelse")
+
+        handler.handleReceivedData(mentionPacket(), 123)
+        advanceUntilIdle()
+
+        verifySuspend {
+            serviceNotifications.updateMessageNotification(any(), any(), any(), any(), any(), isSilent = true)
+        }
+    }
+
+    @Test
+    fun `message while backgrounded notifies normally even for the last viewed conversation`() = testScope.runTest {
+        arrangeUnmutedBroadcast()
+        // Screen paused on backgrounding clears the key; belt-and-braces, a stale key must not silence a
+        // background notification either.
+        activeConversationTracker.setActive("0^all")
+        activeConversationTracker.setAppForeground(false)
+
+        handler.handleReceivedData(mentionPacket(), 123)
         advanceUntilIdle()
 
         verifySuspend {
