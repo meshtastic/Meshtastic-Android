@@ -544,6 +544,63 @@ interface PacketDao {
     @Query("SELECT draft FROM contact_settings WHERE contact_key = :contact LIMIT 1")
     suspend fun getDraft(contact: String): String?
 
+    @Query("UPDATE contact_settings SET pinned = :pinned WHERE contact_key IN (:contactKeys)")
+    suspend fun updatePinned(contactKeys: List<String>, pinned: Boolean)
+
+    @Transaction
+    suspend fun setPinned(contactKeys: List<String>, pinned: Boolean) {
+        // Select-all can hand this every conversation, and SQLite rejects an IN clause past its bind-parameter limit.
+        for (chunk in contactKeys.chunked(SQLITE_MAX_BIND_PARAMETERS)) {
+            insertContactSettingsIgnore(chunk.map { ContactSettings(contact_key = it) })
+            updatePinned(chunk, pinned)
+        }
+    }
+
+    /**
+     * Unconditional watermark rewind, for marking a conversation unread again.
+     *
+     * [updateLastReadMessageIfNewer] refuses to move the watermark backwards, which is right for the read path but
+     * would strand a mark-unread: the packet's `read` flag would be 0 while the watermark still claimed everything was
+     * read, and the message screen's clear path — which no-ops unless the incoming timestamp is newer — could never
+     * clear the badge again.
+     */
+    @Query(
+        """
+        UPDATE contact_settings
+        SET last_read_message_uuid = :messageUuid,
+            last_read_message_timestamp = :lastReadTimestamp
+        WHERE contact_key = :contact
+        """,
+    )
+    suspend fun rewindLastReadMessage(contact: String, messageUuid: Long?, lastReadTimestamp: Long?)
+
+    @Query(
+        """
+    SELECT uuid FROM packet
+    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+        AND port_num = 1 AND contact_key = :contact AND filtered = 0
+    ORDER BY received_time DESC
+    LIMIT 1
+    """,
+    )
+    suspend fun getNewestMessageUuid(contact: String): Long?
+
+    @Query("UPDATE packet SET read = 0 WHERE uuid = :uuid")
+    suspend fun markPacketUnread(uuid: Long)
+
+    /**
+     * Marks [contact] unread by flipping its newest message back to unread and rewinding the read watermark past it.
+     * Both writes are needed: the badge counts `read = 0` packets, while the watermark is what the message screen
+     * compares against when it later clears the conversation.
+     */
+    @Transaction
+    suspend fun markContactUnread(contact: String) {
+        val newest = getNewestMessageUuid(contact) ?: return
+        markPacketUnread(newest)
+        insertContactSettingsIgnore(listOf(ContactSettings(contact_key = contact)))
+        rewindLastReadMessage(contact, messageUuid = null, lastReadTimestamp = null)
+    }
+
     @Transaction
     suspend fun setMuteUntil(contacts: List<String>, until: Long) {
         val absoluteMuteUntil =

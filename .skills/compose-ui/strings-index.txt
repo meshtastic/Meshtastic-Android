@@ -296,6 +296,8 @@ connecting
 connection_status
 connections
 contact_draft_prefix
+contact_muted_snackbar
+contact_pinned
 contrast
 contrast_high
 contrast_medium
@@ -1042,6 +1044,7 @@ map_type_normal
 map_type_satellite
 map_type_terrain
 mark_as_read
+mark_unread_selected
 match_all
 match_any
 max
@@ -1377,6 +1380,7 @@ periodic_position_broadcast
 permission_missing_31
 phone_location
 phone_location_description
+pin_selected
 play
 plurals_hours
 plurals_minutes
@@ -1702,6 +1706,9 @@ success
 super_deep_sleep_duration_seconds
 supported
 supported_by_community
+swipe_action_delete
+swipe_action_mute
+swipe_action_unmute
 sx126x_rx_boosted_gain
 system_settings
 ### TAK ###
@@ -1841,6 +1848,7 @@ tx_power_dbm
 type
 type_a_message
 udp_enabled
+undo
 ### UNKNOWN ###
 unknown
 unknown_age
@@ -1852,6 +1860,7 @@ unmessageable
 unmonitored_or_infrastructure
 unmute
 unmute_selected
+unpin_selected
 unrecognized
 unset
 up_down_select_input_enabled

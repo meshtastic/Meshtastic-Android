@@ -28,12 +28,14 @@ import dev.mokkery.mock
 import dev.mokkery.verify.VerifyMode
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.withContext
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.ContactSettings
 import org.meshtastic.core.repository.ActiveConversationTracker
@@ -60,6 +62,10 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.TimeSource
 
 class MessageViewModelTest {
 
@@ -148,6 +154,30 @@ class MessageViewModelTest {
         Dispatchers.resetMain()
     }
 
+    /**
+     * Waits for work the view model launched on the real IO dispatcher.
+     *
+     * [advanceUntilIdle] only drains the test scheduler, but `safeLaunch(context = ioDispatcher)` passes an explicit
+     * dispatcher to `viewModelScope.launch`, which overrides the `Dispatchers.setMain` replacement — so that coroutine
+     * runs on real `Dispatchers.IO` and an assertion straight after `advanceUntilIdle` races it. That is why these
+     * tests pass locally and fail on a loaded CI machine. Retries [verification] in real time until it holds, then
+     * gives up with the assertion's own error.
+     */
+    private suspend fun eventually(timeout: Duration = 5.seconds, verification: () -> Unit) {
+        withContext(Dispatchers.Default) {
+            val start = TimeSource.Monotonic.markNow()
+            while (true) {
+                try {
+                    verification()
+                    return@withContext
+                } catch (e: AssertionError) {
+                    if (start.elapsedNow() >= timeout) throw e
+                    delay(POLL_INTERVAL)
+                }
+            }
+        }
+    }
+
     @Test fun testInitialization() = runTest { assertNotNull(viewModel) }
 
     private val draftContact = "0!12345678"
@@ -161,6 +191,9 @@ class MessageViewModelTest {
             assertEquals(stored, awaitItem())
             cancelAndIgnoreRemainingEvents()
         }
+        // Drain the load coroutine fully before the caller starts asserting on debounce timing, so a slow CI machine
+        // cannot interleave its tail with the edits that follow.
+        testDispatcher.scheduler.advanceUntilIdle()
     }
 
     @Test fun testDraftIsRestoredFromTheRepository() = runTest { loadDraftAndAwait(stored = "half typed") }
@@ -200,7 +233,7 @@ class MessageViewModelTest {
         testDispatcher.scheduler.runCurrent()
         assertEquals("abc", savedStateHandle.get<String>("draftMessage:$draftContact"))
         advanceUntilIdle()
-        verifySuspend { packetRepository.setDraft(draftContact, "abc") }
+        eventually { verifySuspend { packetRepository.setDraft(draftContact, "abc") } }
     }
 
     @Test
@@ -282,7 +315,7 @@ class MessageViewModelTest {
         advanceUntilIdle()
 
         // Verify via mokkery
-        verifySuspend { sendMessageUseCase.invoke("Hello", "0!12345678", null) }
+        eventually { verifySuspend { sendMessageUseCase.invoke("Hello", "0!12345678", null) } }
     }
 
     @Test
@@ -300,7 +333,7 @@ class MessageViewModelTest {
             cancelAndIgnoreRemainingEvents()
         }
 
-        verifySuspend { sendMessageUseCase.invoke("Hello", "0!12345678", null) }
+        eventually { verifySuspend { sendMessageUseCase.invoke("Hello", "0!12345678", null) } }
     }
 
     @Test
@@ -311,7 +344,7 @@ class MessageViewModelTest {
 
         advanceUntilIdle()
 
-        verifySuspend { messagingController.sendReaction("❤️", 123, "0!12345678") }
+        eventually { verifySuspend { messagingController.sendReaction("❤️", 123, "0!12345678") } }
     }
 
     @Test
@@ -322,7 +355,7 @@ class MessageViewModelTest {
 
         advanceUntilIdle()
 
-        verifySuspend { packetRepository.deleteMessages(listOf(1L, 2L)) }
+        eventually { verifySuspend { packetRepository.deleteMessages(listOf(1L, 2L)) } }
     }
 
     @Test
@@ -356,9 +389,11 @@ class MessageViewModelTest {
 
         advanceUntilIdle()
 
-        verifySuspend { packetRepository.clearUnreadCount(contact, 1000L) }
-        verifySuspend { packetRepository.updateLastReadMessage(contact, 1L, 1000L) }
-        verifySuspend { meshNotificationManager.cancelMessageNotification(contact) }
+        eventually {
+            verifySuspend { packetRepository.clearUnreadCount(contact, 1000L) }
+            verifySuspend { packetRepository.updateLastReadMessage(contact, 1L, 1000L) }
+            verifySuspend { meshNotificationManager.cancelMessageNotification(contact) }
+        }
     }
 
     @Test
@@ -374,7 +409,9 @@ class MessageViewModelTest {
         viewModel.clearUnreadCount(contact, 1L, 1000L)
 
         advanceUntilIdle()
-
+        // A negative assertion cannot be retried into correctness — retrying would pass on the first attempt and
+        // miss a cancel that lands a moment later. Wait for the IO work to have had its chance, then assert.
+        eventually { verifySuspend { packetRepository.updateLastReadMessage(contact, 1L, 1000L) } }
         verifySuspend(mode = VerifyMode.not) { meshNotificationManager.cancelMessageNotification(contact) }
     }
 
@@ -391,5 +428,9 @@ class MessageViewModelTest {
             assertEquals(3, list.size)
             cancelAndIgnoreRemainingEvents()
         }
+    }
+
+    private companion object {
+        val POLL_INTERVAL = 10.milliseconds
     }
 }

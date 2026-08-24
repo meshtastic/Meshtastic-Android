@@ -29,6 +29,8 @@ data class Contact(
     val nodeColors: Pair<Int, Int>? = null,
     /** Unsent composer text for this conversation; empty when there is nothing in progress. */
     val draft: String = "",
+    /** Sorts above unpinned conversations within the same list section. */
+    val isPinned: Boolean = false,
 )
 
 data class ContactSettings(
@@ -39,4 +41,5 @@ data class ContactSettings(
     val filteringDisabled: Boolean = false,
     val isMuted: Boolean = false,
     val draft: String = "",
+    val pinned: Boolean = false,
 )

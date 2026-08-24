@@ -177,6 +177,8 @@ data class ContactSettings(
     @ColumnInfo(name = "filtering_disabled", defaultValue = "0") val filteringDisabled: Boolean = false,
     /** Unsent composer text for this conversation. Empty when there is nothing in progress. */
     @ColumnInfo(name = "draft", defaultValue = "''") val draft: String = "",
+    /** Sorts this conversation above its unpinned siblings within its own list section. */
+    @ColumnInfo(name = "pinned", defaultValue = "0") val pinned: Boolean = false,
 ) {
     val isMuted
         get() = nowMillis <= muteUntil

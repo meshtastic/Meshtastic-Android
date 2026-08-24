@@ -58,7 +58,9 @@ import org.meshtastic.core.model.Contact
 import org.meshtastic.core.model.ContactKey
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.contact_draft_prefix
+import org.meshtastic.core.resources.contact_pinned
 import org.meshtastic.core.ui.component.SecurityIcon
+import org.meshtastic.core.ui.icon.Keep
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.VolumeOff
 import org.meshtastic.proto.ChannelSet
@@ -189,6 +191,14 @@ private fun ChatMetadata(contact: Contact, modifier: Modifier = Modifier) {
             overflow = TextOverflow.Ellipsis,
             maxLines = 2,
         )
+        AnimatedVisibility(visible = contact.isPinned) {
+            Icon(
+                modifier = Modifier.padding(start = 4.dp).size(18.dp),
+                imageVector = MeshtasticIcons.Keep,
+                contentDescription = stringResource(Res.string.contact_pinned),
+                tint = MaterialTheme.colorScheme.primary,
+            )
+        }
         AnimatedVisibility(visible = contact.isMuted) {
             Icon(
                 modifier = Modifier.padding(start = 4.dp).size(20.dp),
