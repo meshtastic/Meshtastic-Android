@@ -29,17 +29,17 @@ Mooduli seaded kasutavad kaardipõhist paigutust koos lülitite, rippmenüüde, 
 
 Sildab võrgusõnumeid MQTT vahendajasse ja sealt internetiühenduse loomiseks. This is how you extend your mesh beyond radio range or integrate with home automation systems.
 
- Sätted          | Kirjeldus                                                                |
- --------------- | ------------------------------------------------------------------------ |
- Lubatud         | Lükka MQTT sild sisse                                                    |
- Server          | MQTT vahendaja aadress                                                   |
- Kasutajatunnus  | Authentication username                                                  |
- Parool          | Authentication password                                                  |
- Encryption      | Krüpteeri MQTT kasutus                                                   |
- ~~JSON Output~~ | ⚠️ **Vananenud** — JSON tugi püsivarast eemaldatud; välja ignoreeritakse |
- TLS             | Use secure connection                                                    |
- Root Topic      | Baas MQTT teema teekond                                                  |
- Kaardiaruanne   | Avalda asukoht avalikul kaardil                                          |
+ Sätted           | Kirjeldus                                                                |
+ ---------------- | ------------------------------------------------------------------------ |
+ Lubatud          | Lükka MQTT sild sisse                                                    |
+ Server           | MQTT vahendaja aadress                                                   |
+ Kasutajatunnus   | Authentication username                                                  |
+ Parool           | Authentication password                                                  |
+ Encryption       | Krüpteeri MQTT kasutus                                                   |
+ ~~JSON väljund~~ | ⚠️ **Vananenud** — JSON tugi püsivarast eemaldatud; välja ignoreeritakse |
+ TLS              | Use secure connection                                                    |
+ Root Topic       | Baas MQTT teema teekond                                                  |
+ Kaardiaruanne    | Avalda asukoht avalikul kaardil                                          |
 
 Vaata [MQTT](mqtt) üksikasjalikumat kasutusjuhendit, mis sisaldab teavet krüpteerimise, privaatsuse ja vahendaja seadistamise kohta,.
 
@@ -51,7 +51,7 @@ Võimaldab jadapordi sidet väliste seadmete integreerimiseks (GPS-moodulid, and
  --------------- | ------------------------------ |
  Lubatud         | Aktiveeri jadapordi ühendus    |
  Echo            | Kaja sai jadaandmed tagasi     |
- Mode            | Text, Protobuf, or NMEA output |
+ Režiim          | Text, Protobuf, or NMEA output |
  RX/TX kontaktid | GPIO sisend jagaühenduseks     |
  Baud Rate       | Jadaühenduse kiirus            |
 
@@ -161,13 +161,13 @@ Vaata [Avasta](Discovery) kuidas kasutada naabri-andmeid kärgvõrgu topoloogia 
 
 ### Ambientvalguse moodul
 
-Juhib toetatud riistvaral NeoPixeli või muid adresseeritavaid RGB LEDe. Can be used for visual status indicators, notification lights, or decorative effects.
+Juhib toetatud riistvaral NeoPixeli või muid adresseeritavaid RGB LEDe. Saab kasutada visuaalsete olekuindikaatorite, märgutulede või dekoratiivsete efektide jaoks.
 
- Sätted             | Kirjeldus                                                          |
- ------------------ | ------------------------------------------------------------------ |
- LED olek           | Turn the LED on or off                                             |
- Pinge              | LED current limit (0–31)                        |
- Red / Green / Blue | Individuaalsete värvikanalite väärtused (0–255) |
+ Sätted                     | Kirjeldus                                                          |
+ -------------------------- | ------------------------------------------------------------------ |
+ LED olek                   | Turn the LED on or off                                             |
+ Pinge                      | LED current limit (0–31)                        |
+ Punane / Roheline / Sinine | Individuaalsete värvikanalite väärtused (0–255) |
 
 ### Tuvastusanduri moodul
 
@@ -182,7 +182,7 @@ Turns your node into a motion or door sensor alert system. Kui GPIO sisend tuvas
  Minimaalne leviring(id) | Minimaalne aeg hoiatusteadete levitamisel                                                                         |
  Riiklik ringhääling(ud) | Perioodilise oleku levitamise intervall                                                                           |
  Saada hoiatuskell                          | Lisa märguannetesse hoiatuskella sümbol                                                                           |
- Friendly Name                              | Selle anduri kohandatud nimi                                                                                      |
+ Sõbralik nimi                              | Selle anduri kohandatud nimi                                                                                      |
 
 ### Paxloenduri moodul
 
@@ -214,7 +214,7 @@ Administraatori võtit jagavate sõlmede kaugkonfigureerimine:
 
 ### Tühjenda sõlmede andmebaas
 
-Removes stale nodes from your local database that haven't been heard in a configurable time window.
+Eemaldab kohalikust andmebaasist aegunud sõlmed, mida pole konfigureeritava aja jooksul kuuldud.
 
 ### Factory Reset
 
@@ -234,7 +234,7 @@ Avab vahekaardid **Paketid** ja **Rakenduse logid** diagnostilise väljundi vaat
 - **Muudatused ei rakendu** — mõnede sätete jõustumiseks on vaja taaskäivitada. Pärast salvestamist proovi taaskäivitust.
 - **Ei näe kaugseadeid** — veendu, et sõlmel oleks sihtsõlme administraatori võti ja et administraatori kanal oleks turbekonfiguratsioonis lubatud. Administraatori kanal seadistatakse automaatselt, kui administraatori võti on määratud.
 
-## Related Topics
+## Seotud teemad
 
 - [Seaded — Raadio ja kasutaja](settings-radio-user) — raadio ja kasutajaprofiili põhiseaded
 - [Mooduli konfiguratsiooni viide](https://meshtastic.org/docs/configuration/module) — üksikasjalik mooduli dokumentatsioon aadressil meshtastic.org

@@ -24,7 +24,7 @@ Temperature values from environment sensors are transmitted as **°C** and displ
 
 This affects all temperature displays throughout the app: node environment telemetry, soil temperature, dew point, and telemetry chart axes.
 
-Temperature follows your locale's **temperature preference**, independent of the distance system. Locales that mix systems work correctly — a UK phone shows miles for distance but **°C** for temperature. On Android 14+, the **Temperature** regional preference (Settings → System → Languages → Regional preferences) overrides the locale default.
+Temperature follows your locale's **temperature preference**, independent of the distance system. Locales that mix systems work correctly — a UK phone shows miles for distance but **°C** for temperature. Android 14+ puhul tühistab **Temperatuuri** piirkondlik eelistus (Seaded → Süsteem → Keeled → Piirkondlikud eelistused) lokaalse vaikesätte.
 
 ## Distance &amp; Altitude
 
@@ -34,7 +34,7 @@ Sõlmede vahelised kaugused ja GPS kõrgused edastatakse **meetrites** ning skal
 
  Sinu sätted                      | Small Distance | Large Distance         | Kõrgus   |
  -------------------------------- | -------------- | ---------------------- | -------- |
- Meetriline                       | 350 m          | 2.5 km | 1,200 m  |
+ Meetriline                       | 350 m          | 2.5 km | 1200 m   |
  Imperial (US) | 1,148 ft       | 1.6 mi | 3,937 ft |
 
 Rakendus kasutab loomulikku skaleerimist – lühikesed vahemaad jäävad meetritesse või jalgadesse, pikemad vahemaad aga muutuvad automaatselt kilomeetriteks või miilideks.
@@ -91,16 +91,16 @@ Mõned ühikud on rahvusvahelised standardid ja neid kuvatakse ühtemoodi olenem
 
 All timestamps throughout the app — last heard, message times, telemetry logs, chart axes — follow your device's date and time preferences.
 
- Sätted               | What It Controls | Example                                          |
- -------------------- | ---------------- | ------------------------------------------------ |
- **24-Hour Time**     | Kella vorming    | 14:30 vs 2:30 PM |
- **Kuupäeva vorming** | Date ordering    | 09/05/2026 vs 05/09/2026                         |
+ Sätted               | What It Controls | Example                                           |
+ -------------------- | ---------------- | ------------------------------------------------- |
+ **24 tunnine aeg**   | Kella vorming    | 14:30 või 2:30 PM |
+ **Kuupäeva vorming** | Date ordering    | 09/05/2026 või 05/09/2026                         |
 
-The app also uses **relative time** where it makes sense — for example, "5 min ago" or "2 hours ago" in the node list — which is automatically localised into your device language.
+Rakendus kasutab ka **suhtelist aega**, kui see on loogiline – näiteks sõlmede loendis „5 minutit tagasi” või „2 tundi tagasi” –, mis lokaliseeritakse automaatselt sinu seadme keelde.
 
 ## Changing Your Measurement System (Android)
 
-On Android, your measurement system (metric vs imperial) is tied to your region setting:
+Androidis on mõõtühikute süsteem (meetriline vs. imperial) seotud sinu piirkonna seadetega:
 
 1. Ava **Androidi seaded → Süsteem → Keel ja piirkond**
 2. Change your **Region** or **Measurement units** preference
@@ -109,7 +109,7 @@ On Android, your measurement system (metric vs imperial) is tied to your region 
 
 &gt; 💡 **Vihje:** Kogu mõõtühikute vormindamine toimub tsentraalselt ja arvestab platvormi lokaaduga, seega püsivad ühikud kogu rakenduses ühtsed.
 
-## Related Topics
+## Seotud teemad
 
 - [Node Metrics](node-metrics) — where temperature, distance, and sensor values are displayed
 - [Telemeetia &amp; Sensorid](telemetry-and-sensors) — andurid, mis neid mõõtmisi teevad

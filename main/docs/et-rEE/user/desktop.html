@@ -9,7 +9,7 @@
 <body data-page="desktop" data-locale="et-rEE">
 <pre class="markdown-content"># Desktop App
 
-Meshtastic arvuti rakendus jagab oma põhikoodibaasi Androidiga Kotlin Multiplatformi kaudu. Most features work identically on Linux, macOS, and Windows.
+Meshtastic arvuti rakendus jagab oma põhikoodibaasi Androidiga Kotlin Multiplatformi kaudu. Enamik funktsioone töötab identselt Linuxis, macOS-is ja Windowsis.
 
 ## Paigaldus
 
@@ -55,23 +55,23 @@ Sinihamba madal voolutarve on lauaarvutites toetatud [Kable](https://github.com/
 
 ## Feature Parity
 
- Feature                                      | Android | Desktop | Sõnumid                                                                                                     |
- -------------------------------------------- | ------- | ------- | ----------------------------------------------------------------------------------------------------------- |
- Messaging                                    | ✓       | ✓       | Full parity                                                                                                 |
- Node List                                    | ✓       | ✓       | Full parity                                                                                                 |
- Kaart                                        | ✓       | ◐       | Kaardi vahekaart on küll töölaual olemas, aga interaktiivne kaardivaade on saadaval ainult Androidis        |
- Sätted                                       | ✓       | ✓       | Full parity                                                                                                 |
- Sinihammas (BLE)          | ✓       | ✓       | Via Kable on desktop                                                                                        |
- Püsivara uuendus                             | ✓       | ✓       | Rakendusesisese USB, BLE ja Wi-Fi (ESP32) värskendused toimivad samamoodi nagu Androidis |
- Märguanded                                   | ✓       | ✓       | Emakeelsed op.süsteemi märguanded                                                           |
- Widgets                                      | ✓       | ✗       | Android-only                                                                                                |
- Android auto                                 | ✓       | ✗       | Android-only — not available on Desktop or iOS                                                              |
- AI Assistant (Chirpy)     | ✓\*     | ✗       | Google flavor Android only                                                                                  |
- App Functions (system AI) | ✓†      | ✗       | Google flavor Android only                                                                                  |
+ Feature                                                | Android | Desktop | Sõnumid                                                                                                     |
+ ------------------------------------------------------ | ------- | ------- | ----------------------------------------------------------------------------------------------------------- |
+ Messaging                                              | ✓       | ✓       | Full parity                                                                                                 |
+ Sõlmede loend                                          | ✓       | ✓       | Full parity                                                                                                 |
+ Kaart                                                  | ✓       | ◐       | Kaardi vahekaart on küll töölaual olemas, aga interaktiivne kaardivaade on saadaval ainult Androidis        |
+ Sätted                                                 | ✓       | ✓       | Full parity                                                                                                 |
+ Sinihammas (BLE)                    | ✓       | ✓       | Via Kable on desktop                                                                                        |
+ Püsivara uuendus                                       | ✓       | ✓       | Rakendusesisese USB, BLE ja Wi-Fi (ESP32) värskendused toimivad samamoodi nagu Androidis |
+ Märguanded                                             | ✓       | ✓       | Emakeelsed op.süsteemi märguanded                                                           |
+ Widgets                                                | ✓       | ✗       | Android-only                                                                                                |
+ Android auto                                           | ✓       | ✗       | Android-only — not available on Desktop or iOS                                                              |
+ TI assistent (Chirpy)               | ✓\*     | ✗       | Google flavor Android only                                                                                  |
+ Rakenduse funktsioonid (süstemi TI) | ✓†      | ✗       | Google flavor Android only                                                                                  |
 
-\*Chirpy AI requires Android 14+ on Google flavor builds with supported hardware.
+\*Chirpy tehisintellekti jaoks on vaja Google'i eriversioonidel Android 14+ ja toetatud riistvaraga.
 
-†App Functions exposes app actions to the Android system AI on Google flavor builds. See [App Functions](app-functions).
+†Rakendusfunktsioonid paljastavad rakenduse toimingud Androidi süsteemi tehisintellektile Google'i eri versioonides. Vaata [Rakenduse funktsioonid](app-functions).
 
 ## UI Differences
 
@@ -102,13 +102,13 @@ Otseteed kasutavad macOS-is **⌘** (Command) ja Windowsis ning Linuxis **Ctrl**
 
 Töölauarakendus pakub rakendusesiseste kuvatavate märguannete juhtimist – sõnumite, uute sõlmede ja aku tühjenemise märguanded. Nendele pääsed ligi rakenduses menüüst **Seaded → Märguanded**.
 
-## Built-in Documentation Browser
+## Sisseehitatud dokumentatsioonibrauser
 
 Töölauarakendusel on sisseehitatud dokumentatsioonibrauser, mis võimaldab kiiret juurdepääsu abisisule ilma rakendusest lahkumata.
 
 ![Dokumentide brauser sisukorraga](../../assets/screenshots/docs-browser_toc.png)
 
-The browser supports full-text search across all documentation:
+Brauser toetab täistekstiotsingut kogu dokumentatsioonis:
 
 ![Dokumentide brauserist otsimine](../../assets/screenshots/docs-browser_search.png)
 
@@ -136,9 +136,9 @@ Requirements:
 - Performance may vary on low-spec hardware running Compose Desktop
 - Lauaarvutid ei toeta veel BLE liitmist (sidumine toimib ilma ühendamiseta)
 
-## Related Topics
+## Seotud teemad
 
-- [Connections](connections) — connection methods overview
+- [Ühendused] (connections) — ühendusmeetodite ülevaade
 - [Püsivara uuendus](firmware) — USB, BLE ja Wi-Fi värskendused toimivad samamoodi nagu Androidis
 
 ---

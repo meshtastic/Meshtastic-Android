@@ -17,15 +17,15 @@ Most consumer devices simply measure how "loud" a signal is. Kuna Meshtastic kas
 
 Standardraadiote (nt FM või WiFi) puhul, kui taustamüra on signaalist valjem (negatiivne signaali-müra suhe), kuuleb vastuvõtja ainult staatilist müra.
 
-LoRa is special. It uses **"Spread Spectrum"** modulation, which allows the radio to mathematically pull a signal out of the air even when it is buried deep _underneath_ the background noise. Seepärast näed Meshtasticus sageli **negatiivseid SNR numbreid** (nt -10 dB, mis tähendab, et signaal on 10 detsibelli nõrgem kui taustamüra).
+LoRa on eriline. It uses **"Spread Spectrum"** modulation, which allows the radio to mathematically pull a signal out of the air even when it is buried deep _underneath_ the background noise. Seepärast näed Meshtasticus sageli **negatiivseid SNR numbreid** (nt -10 dB, mis tähendab, et signaal on 10 detsibelli nõrgem kui taustamüra).
 
 Sõltuvalt sellest, millist Meshtastic eelhäälestust kasutad (nt `PikkKauge` vs. `LühikeKiire`), on raadiol kindel **SNR-i piirang** – absoluutne maksimaalne müra hulk, mida see talub enne, kui sõnum staatilise müra tõttu täielikult kaob.
 
------ | ---- | -------------------------------------- | ---------------------------------------------------------------------------------------- |
- Hea      | 3    | SNR **above** the preset's `limit`     | Signal is comfortably above the demodulation floor — healthy connection. |
- Rahuldav | 2    | less than `5.5 dB` below the `limit`   | Decodable, but getting close to the floor.                               |
- Halb     | 1    | `5.5 dB` to `7.5 dB` below the `limit` | At the very edge of what the preset can recover.                         |
- Puudub   | 0    | more than `7.5 dB` below the `limit`   | Below the floor — transmission lost to noise.                            |
+----- | ---- | ----------------------------------------------- | ---------------------------------------------------------------------------------------- |
+ Hea      | 3    | SNR **above** the preset's `limit`              | Signal is comfortably above the demodulation floor — healthy connection. |
+ Rahuldav | 2    | vähem kui `5,5` dB `piirväärtusest` allpool     | Decodable, but getting close to the floor.                               |
+ Halb     | 1    | `5,5 dB` kuni `7,5 dB` `piirväärtusest` allpool | At the very edge of what the preset can recover.                         |
+ Puudub   | 0    | üle `7,5` dB `piirväärtusest` allpool           | Below the floor — transmission lost to noise.                            |
 
 &gt; **Märkus:** Fikseeritud SNR lävesid, mida võisid mujal näha (`-7 dB` / `-15 dB`), kasutatakse nüüd ainult üksikute hüpete rõhutamiseks traceroute'i tulemustes – mitte siin kirjeldatud sõlmepõhise signaalimõõtja jaoks.
 

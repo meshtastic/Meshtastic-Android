@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>App Functions</title>
+  <title>Rakenduse funktsioonid</title>
   <link rel="stylesheet" href="../../styles/docs.css">
 </head>
 <body data-page="app-functions" data-locale="et-rEE">
-<pre class="markdown-content"># App Functions
+<pre class="markdown-content"># Rakenduse funktsioonid
 
 Rakendusfunktsioonid avaldavad Meshtasticu võimalused Androidi süsteemile ja seadmesisestele TI assistentidele (näiteks Gemini) Androidi rakenduste funktsioonide API kaudu. Kui need on lubatud, saab assistent sinu eest kärgvõrgu töövooge avastada ja käivitada – näiteks sõnumi saata või kärgvõrgu olekut kontrollida – ilma, et peaksid rakendust avama.
 
@@ -15,31 +15,31 @@ Rakendusfunktsioonid avaldavad Meshtasticu võimalused Androidi süsteemile ja s
 
 &gt; ⚠️ **Märkus:** See on eraldi rakenduse sisesest **Chirpy** assistendist. Rakenduse funktsioonid lasevad _süsteemi_ TI assistendil kärgvõrgu kallal tegutseda; Chirpy on vestlusassistent Meshtasticu rakenduses endas.
 
-## Enabling App Functions
+## Luba rakenduse funktsioonid
 
 Rakenduse funktsioone saab juhtida menüüst **Seaded → Süsteemi TI** (rakenduse sisemine ekraan on tähistatud kui „Süsteemi TI“). The screen has:
 
-- **Pealüliti** sildiga **"Luba tehisintellektile juurdepääs"** alapealkirjaga _"Luba süsteemi TI assistentidel (nt Gemini) kärgvõrgu funktsioone avastada ja kasutada"_. When off, no functions are exposed to the system.
-- An **individual toggle for each function**, so you can expose only the capabilities you want.
+- **Pealüliti** sildiga **"Luba tehisintellektile juurdepääs"** alapealkirjaga _"Luba süsteemi TI assistentidel (nt Gemini) kärgvõrgu funktsioone avastada ja kasutada"_. Väljalülitatud olekus pole süsteemile ühtegi funktsiooni avatud.
+- **Iga funktsiooni jaoks on eraldi lüliti**, nii et saad kuvada ainult soovitud võimalusi.
 
-The functions are grouped into a **Write** section (functions that change something or send data to your mesh) and a **Read** section (functions that only return information).
+Funktsioonid on rühmitatud kirjutamis- (Write) sektsiooni (funktsioonid, mis midagi muudavad või andmeid kärgvõrgule saadavad) ja lugemis- (Read) sektsiooni (funktsioonid, mis ainult teavet tagastavad).
 
 ![Rakenduse funktsioonide ekraan põhi- ja funktsioonipõhiste lülititega](../../assets/screenshots/app-functions_settings.png)
 
-### Write Functions
+### Kirjutamis funktsioonid
 
- Function         | What it does                                                                                                |
+ Funktsioon       | What it does                                                                                                |
  ---------------- | ----------------------------------------------------------------------------------------------------------- |
  **Send Message** | Saadab kontaktile (otsesõnum) või kanalile tekstisõnumi, kuni 237 baiti. |
 
-### Read Functions
+### Lugemis funktsioonid
 
- Function                | What it returns                                             |
+ Funktsioon              | What it returns                                             |
  ----------------------- | ----------------------------------------------------------- |
- **Get Mesh Status**     | Overall mesh status.                        |
+ **Küsi kärgvõrgu olek** | Kärgvõrgu üldine seisund.                   |
  **Get Node List**       | The list of nodes on your mesh.             |
  **Saa kanali info**     | Teave kanalite kohta.                       |
- **Get Device Status**   | Status of your connected radio.             |
+ **Küsi kärgvõrgu olek** | Ühendatud raadio olek.                      |
  **Get Node Details**    | Detailed information about a specific node. |
  **Get Recent Messages** | Recent messages from your conversations.    |
  **Get Unread Summary**  | A summary of unread messages.               |
@@ -47,12 +47,12 @@ The functions are grouped into a **Write** section (functions that change someth
 
 ## Privacy
 
-&gt; 🔒 **Privaatsus:** Funktsioon **Saada sõnum** võimaldab assistendil sinu nimel sinu kärgvõrku sõnumeid saata. Only enable functions you trust the assistant to use. The read functions expose node, message, and metric data to the assistant — enable only what you're comfortable sharing. Igal funktsioonil on oma lüliti ja peamine lüliti lülitab need kõik korraga välja.
+&gt; 🔒 **Privaatsus:** Funktsioon **Saada sõnum** võimaldab assistendil sinu nimel sinu kärgvõrku sõnumeid saata. Luba ainult need funktsioonid, mille kasutamist sa assistendile usaldad. Lugemisfunktsioonid avaldavad abilisele sõlme-, sõnumi- ja mõõdikuandmeid – lubage jagada ainult seda, mida soovite. Igal funktsioonil on oma lüliti ja peamine lüliti lülitab need kõik korraga välja.
 
-## Related Topics
+## Seotud teemad
 
 - [Sõnumid ja kanalid](user/messages-and-channels)— sõnumite saatmine otse rakenduses
-- [Nodes](nodes) — the node list the read functions draw from
+- [Sõlmed](nodes) — sõlmede loend, millest lugemisfunktsioonid ammutavad
 - [Node Metrics](node-metrics) — the telemetry behind Get Mesh Metrics
 
 ---

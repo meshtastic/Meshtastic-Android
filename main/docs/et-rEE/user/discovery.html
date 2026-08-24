@@ -16,10 +16,10 @@ The app offers two complementary approaches:
 - **Kohalik kärgvõrgu avastaja (skanner)** – automaatne režiim, mis perioodiliselt skaneerib ühendatud raadiol läbi erinevate LoRa eelhäälestuste, kuulab igaüht neist ja järjestab, milline eelhäälestus sinu asukohas kõige paremini toimib.
 - **Manuaalne uurimine** – traceroute, naabri info ja sõlmede loend, mida saate igal ajal kasutada konkreetsete teede ja topoloogia uurimiseks.
 
-------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
- **LoRa preset picker** | Select one or more presets to scan. Otsing peatub kordamööda iga valitud eelseadistuse juures, et kuulata liiklust.                                                                                      |
- **Kuulamisaeg**        | Time to listen on each preset. Choose from 1, 5, 15, 30, 45, 60, 90, 120, or 180 minutes. Pikemad kuulamisajad koguvad rohkem pakette ja annavad selgema pildi, kuid võtavad kauem aega. |
- **Keep screen awake**  | Valikuline lüliti, mis takistab ekraani pika skannimise ajal magamaminekut.                                                                                                                                              |
+------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+ **LoRa preset picker** | Select one or more presets to scan. Otsing peatub kordamööda iga valitud eelseadistuse juures, et kuulata liiklust.                                                                               |
+ **Kuulamisaeg**        | Time to listen on each preset. Vali 1, 5, 15, 30, 45, 60, 90, 120 või 180 minutit. Pikemad kuulamisajad koguvad rohkem pakette ja annavad selgema pildi, kuid võtavad kauem aega. |
+ **Keep screen awake**  | Valikuline lüliti, mis takistab ekraani pika skannimise ajal magamaminekut.                                                                                                                                       |
 
 The **Start** button stays disabled — with an explanation of why — until the scan can run. Common reasons it's disabled:
 
@@ -58,7 +58,7 @@ Metrics include:
  Otse- ja vahendussõlmed   | Kui mitu võrgusõlme kuuldi otse, võrreldes vahendaja kaudu.          |
  Halvad / duplikaatpaketid | Rikutud ja korduvate pakettide arv, mis näitab ummikuid või häireid. |
 
-Additional features available from the results:
+Tulemustest saadaolevad lisafunktsioonid:
 
 - **Scan History** — saved sessions you can revisit; view or delete past scans.
 - **Avastuskaart** – skanni käigus leitud sõlmede kaart.
@@ -74,16 +74,16 @@ The tools below are available at any time from the node list and node detail scr
 
 Traceroute näitab täpset teed, mida sõnum sõlmest mis tahes teise kärgvõrgu sõlme kulgeb. See on kõige kasulikum tööriist ühenduvusprobleemide tõrkeotsinguks.
 
-### Running a Traceroute
+### Traceroute'i käivitamine
 
 1. Mine valikuni **Sõlmed** ja puuduta sõlme, mida soovid jälgida.
 2. Sõlme üksikasjade ekraanil puuduta **Traceroute**.
-3. The app sends a traceroute request and waits for the response.
+3. Rakendus saadab traceroute'i päringu ja ootab vastust.
 4. Tulemused kuvatakse iga hüppe kohta, koos signaali kvaliteediga igal sammul.
 
 ### Reading the Results
 
-A traceroute result looks like this:
+Traceroute'i tulemus näeb välja selline:
 
 ```
 You → Node A (SNR: 8.5, RSSI: -95) → Node B (SNR: 5.2, RSSI: -108) → Target
@@ -100,7 +100,7 @@ Iga hüpe näitab vahendussõlme, mis sõnumi edastas. The SNR and RSSI values a
 
 &gt; 💡 **Vihje:** Käivita traceroute'i mitu korda mõne minuti tagant. If the path changes, your mesh has redundant routes — a sign of a well-connected network.
 
-### Troubleshooting with Traceroute
+### Veaotsing koos Traceroute
 
 - **"Marsruuti ei leitud"** — Sihtsõlm võib olla võrguühenduseta, leviulatusest väljas või teisel kanalil. Kontrolli, et mõlemad sõlmed jagaksid vähemalt ühte kanalit sama krüpteerimisvõtmega.
 - **Traceroute aegus** — Tee võib olla liiga pikk (ületab hüppete limiidi) või on vahendussõlm ülekoormatud. Proovi hüppe limiiti suurendada menüüs **Seaded → LoRa konfiguratsioon**.
@@ -112,7 +112,7 @@ Sõlmede loend ise on võimas avastusvahend, kui kasutada selle filtreerimis- ja
 
 ### Finding New Nodes
 
-- Sort by **Last heard** to see the most recently active nodes at the top.
+- Sorteeri **Viimati kuuldud** järgi, et näha kõige hiljutisemaid aktiivseid sõlmi ülaosas.
 - Enable **Include unknown** to see nodes that have appeared on the mesh but haven't sent user info yet — these are often newly powered-on devices.
 
 ### Assessing Connectivity
@@ -124,9 +124,9 @@ Sõlmede loend ise on võimas avastusvahend, kui kasutada selle filtreerimis- ja
 ### Infrastructure Audit
 
 - Disable **Exclude infrastructure** to see Router, Router Late, and Client Base nodes.
-- Check their signal quality and last-heard times to verify your infrastructure nodes are healthy.
+- Kontrolli nende signaali kvaliteeti ja viimase kuulmise aegu, et veenduda oma infrastruktuuri sõlmede töökorras olekus.
 
-See [Nodes](nodes) for full details on filtering and sorting options.
+Filtreerimis- ja sortimisvalikute kohta leiate lisateavet jaotisest [Nodes](nodes).
 
 </pre>
 </body>
