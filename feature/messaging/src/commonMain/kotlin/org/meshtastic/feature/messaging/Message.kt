@@ -317,8 +317,10 @@ fun MessageScreen(
                         .firstOrNull { it != null && !it.fromLocal && !it.read }
                         ?.node
                         ?.user
-                        ?.let { user -> user.long_name.ifEmpty { user.short_name } }
-                        ?.takeIf { it.isNotEmpty() }
+                        // Blank, not just empty: a name of only spaces would render an empty pill.
+                        ?.let { user ->
+                            user.long_name.takeIf { it.isNotBlank() } ?: user.short_name.takeIf { it.isNotBlank() }
+                        }
                 }
             }
         }
