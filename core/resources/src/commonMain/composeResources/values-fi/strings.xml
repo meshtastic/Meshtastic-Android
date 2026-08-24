@@ -35,6 +35,7 @@
     <!-- ACTION -->
     <string name="action_copy_message">Kopioi viesti</string>
     <string name="action_delete_message">Poista viesti</string>
+    <string name="action_more_message_actions">Lisää viestitoimintoja</string>
     <string name="action_react_with_emoji">Reaktio emojin kanssa</string>
     <string name="action_select_device">Valitse laite</string>
     <string name="action_select_message">Valitse viesti</string>
@@ -318,6 +319,7 @@
     <string name="connecting">Yhdistetään</string>
     <string name="connection_status">Aktiiviset yhteydet:</string>
     <string name="connections">Yhteys</string>
+    <string name="contact_draft_prefix">Luonnos: %1$s</string>
     <string name="contrast">Kontrasti</string>
     <string name="contrast_high">Korkea</string>
     <string name="contrast_medium">Keskitaso</string>
