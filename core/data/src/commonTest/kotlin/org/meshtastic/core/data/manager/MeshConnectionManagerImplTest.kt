@@ -1047,35 +1047,96 @@ class MeshConnectionManagerImplTest {
     }
 
     @Test
-    fun `BLE transport unaffected by onHandshakeProgress regression`() = runTest(testDispatcher) {
-        // Explicit BLE address (starts with 'x') — must NOT engage the fast path.
+    fun `BLE Stage 1 progress re-arms the stall guard as an inactivity window`() = runTest(testDispatcher) {
+        // Explicit BLE address (starts with 'x'): must NOT engage the 12s fast path.
         every { radioInterfaceService.getDeviceAddress() } returns "xAA:BB:CC:DD:EE:FF"
         manager = createManager(backgroundScope)
         radioConnectionState.value = ConnectionState.Connected
         advanceTimeBy(200)
         advanceUntilIdle()
 
-        // Spam progress signals — BLE must ignore them, so the 30s Stage 1 budget is unchanged.
-        repeat(10) {
+        // Trickle progress every 20s. Total elapsed crosses the 30s Stage 1 budget several
+        // times over, but each progress signal re-arms the full budget, so no restart may
+        // fire while progress continues. The 20s gaps also prove BLE never armed the 12s
+        // fast watchdog (it would have fired inside each gap).
+        repeat(4) {
+            advanceTimeBy(20_000L)
+            advanceUntilIdle()
             manager.onHandshakeProgress()
             advanceUntilIdle()
         }
-
-        // Advance to 13s — would fire a fast watchdog if BLE were incorrectly included.
-        advanceTimeBy(13_000L)
-        advanceUntilIdle()
 
         verifySuspend(exactly(0)) { radioInterfaceService.restartTransport() }
         assertEquals(
             ConnectionState.Connecting,
             serviceRepository.connectionState.value,
-            "BLE must ignore onHandshakeProgress and stay Connecting through 13s",
+            "BLE must stay Connecting while progress keeps arriving past the fixed budget",
         )
 
-        // Now advance past the full BLE Stage 1 budget (30s). We already advanced 13s, so 33s
-        // more crosses the 30s Stage 1 stall threshold the recovery sibling fires at. (Extra
-        // slack is harmless — the BLE stage has no retry delay before recovery.)
-        advanceTimeBy(33_000L)
+        // Silence after the last progress: the guard fires once the full 30s budget elapses.
+        advanceTimeBy(31_000L)
+        advanceUntilIdle()
+
+        verifySuspend(exactly(1)) { radioInterfaceService.restartTransport() }
+    }
+
+    @Test
+    fun `BLE total cap fires the stall guard despite continuous trickle progress`() = runTest(testDispatcher) {
+        // Explicit BLE address (starts with 'x'): must NOT engage the 12s fast path.
+        every { radioInterfaceService.getDeviceAddress() } returns "xAA:BB:CC:DD:EE:FF"
+        manager = createManager(backgroundScope)
+        radioConnectionState.value = ConnectionState.Connected
+        advanceTimeBy(200)
+        advanceUntilIdle()
+
+        // Trickle progress every 20s, which would extend the inactivity window forever. The
+        // 300s total cap (10x the 30s Stage 1 budget) stops re-arms, so the pending guard
+        // fires at most one budget later. 20 iterations = 400s, comfortably past cap + budget.
+        repeat(20) {
+            advanceTimeBy(20_000L)
+            advanceUntilIdle()
+            manager.onHandshakeProgress()
+            advanceUntilIdle()
+        }
+
+        verifySuspend(exactly(1)) { radioInterfaceService.restartTransport() }
+        assertEquals(
+            ConnectionState.Disconnected,
+            serviceRepository.connectionState.value,
+            "The total cap must end the handshake despite continuous trickle progress",
+        )
+    }
+
+    @Test
+    fun `BLE Stage 2 progress re-arms the 60s stall guard as an inactivity window`() = runTest(testDispatcher) {
+        // Default mock address is not a fast transport, so the BLE stage-guard path applies.
+        manager = createManager(backgroundScope)
+        radioConnectionState.value = ConnectionState.Connected
+        advanceTimeBy(200)
+        advanceUntilIdle()
+
+        // Enter Stage 2 directly, as the config-flow manager does once Stage 1 completes.
+        manager.startNodeInfoOnly()
+        advanceUntilIdle()
+
+        // A big node database streaming for 90s (past the fixed 60s budget) must not be
+        // misread as a stall while NodeInfo progress keeps re-arming the window.
+        repeat(2) {
+            advanceTimeBy(45_000L)
+            advanceUntilIdle()
+            manager.onHandshakeProgress()
+            advanceUntilIdle()
+        }
+
+        verifySuspend(exactly(0)) { radioInterfaceService.restartTransport() }
+        assertEquals(
+            ConnectionState.Connecting,
+            serviceRepository.connectionState.value,
+            "BLE must stay Connecting while Stage 2 progress keeps arriving past the fixed budget",
+        )
+
+        // Silence after the last progress: the guard fires once the full 60s budget elapses.
+        advanceTimeBy(61_000L)
         advanceUntilIdle()
 
         verifySuspend(exactly(1)) { radioInterfaceService.restartTransport() }

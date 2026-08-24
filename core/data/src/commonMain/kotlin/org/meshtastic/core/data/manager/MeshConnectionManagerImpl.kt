@@ -128,6 +128,18 @@ class MeshConnectionManagerImpl(
     private val handshakeCompleteLatch = atomic(false)
     private val locationRejectionLogged = atomic(false)
 
+    /** Armed stage guard: stage, budget, and a generation so a stale re-arm racing a stage change always loses. */
+    private data class StageGuardSpec(val stage: Int, val timeout: Duration, val generation: Long)
+
+    private val armedStageGuard = atomic<StageGuardSpec?>(null)
+    private val stageGuardGeneration = atomic(0L)
+
+    /** Clears [armedStageGuard] once a stage has run for 10x its budget, ending re-arms from trickle progress. */
+    private val stageCapJob = atomic<Job?>(null)
+
+    /** Progress signals seen since the current stage was armed; 0 in a stall report means total silence. */
+    private val stageProgressSignals = atomic(0)
+
     /**
      * Consecutive handshake-recovery failure count for [runSiblingHandshakeRecovery].
      *
@@ -264,6 +276,7 @@ class MeshConnectionManagerImpl(
             // Collapse cancel+clear into one atomic swap so a concurrent re-arm cannot
             // orphan a job in the gap between cancel and reassign.
             handshakeTimeout.getAndSet(null)?.cancel()
+            stageCapJob.getAndSet(null)?.cancel()
 
             when (c) {
                 is ConnectionState.Connecting -> serviceRepository.setConnectionState(ConnectionState.Connecting)
@@ -290,6 +303,8 @@ class MeshConnectionManagerImpl(
         // signals ignored (latch left set from the prior failed cycle). This covers both initial
         // user-initiated connects and transport-restart recovery siblings.
         handshakeCompleteLatch.value = false
+        // Fresh handshake: drop the stale stage-guard spec so early progress cannot re-arm the old stage.
+        armedStageGuard.value = null
         lockdownCoordinator.onConnect()
         // Send a wake-up heartbeat before the config request. The firmware may be in a
         // power-saving state where the NimBLE callback context needs warming up. The 100ms
@@ -304,13 +319,39 @@ class MeshConnectionManagerImpl(
             }
     }
 
-    private fun startHandshakeStallGuard(stage: Int, timeout: Duration) {
+    private fun armStageGuard(stage: Int, timeout: Duration) {
+        val spec = StageGuardSpec(stage, timeout, stageGuardGeneration.incrementAndGet())
+        armedStageGuard.value = spec
+        // Hard ceiling: after 10x the budget of continuous re-arms, clear the spec so trickle
+        // progress can no longer extend this stage; the pending guard then expires on schedule.
+        stageCapJob
+            .getAndSet(
+                scope.handledLaunch {
+                    delay(timeout * STAGE_GUARD_TOTAL_CAP_FACTOR)
+                    armedStageGuard.compareAndSet(spec, null)
+                },
+            )
+            ?.cancel()
+        scheduleStallGuard(spec)
+    }
+
+    private fun rearmStageGuardOnProgress() {
+        while (true) {
+            val spec = armedStageGuard.value ?: return
+            scheduleStallGuard(spec)
+            // A newer stage can arm mid-swap; loop so the newest spec owns the pending guard job.
+            if (armedStageGuard.value === spec) return
+        }
+    }
+
+    private fun scheduleStallGuard(spec: StageGuardSpec) {
+        val stage = spec.stage
         val fastTransport = isFastRecoveryTransport()
         // On TCP/USB the firmware handshake completes in roughly 1s when healthy (logs show),
         // while a wedged socket takes the full ~30s transport read timeout without any further
         // progress. The aggressive 12s fast timeout recovers a stuck session quickly; BLE keeps
         // the original generous budget because its GATT latency is high and variable.
-        val effectiveTimeout = if (fastTransport) FAST_HANDSHAKE_TIMEOUT else timeout
+        val effectiveTimeout = if (fastTransport) FAST_HANDSHAKE_TIMEOUT else spec.timeout
         val transportLabel = if (fastTransport) "fast transport" else "BLE"
         // Collapse cancel+reassign into one atomic swap so a concurrent re-arm cannot orphan a
         // job in the gap between cancel and reassign.
@@ -332,8 +373,12 @@ class MeshConnectionManagerImpl(
                     // re-enters handleStartConfig(). A clean transport restart creates a fresh
                     // session and re-enters the handshake naturally, which is both safer and more
                     // deterministic than a same-session retry.
+                    // connectTimeMsec is 0 until the first transport Connected (e.g. reboot re-handshake).
+                    val sinceConnectMs = connectTimeMsec.takeIf { it > 0 }?.let { nowMillis - it } ?: -1
                     Logger.e {
-                        "Handshake stall detected at Stage $stage on $transportLabel — " +
+                        "Handshake stall detected at Stage $stage on $transportLabel after " +
+                            "${effectiveTimeout.inWholeSeconds}s without progress " +
+                            "(progressSignals=${stageProgressSignals.value}, sinceConnectMs=$sinceConnectMs); " +
                             "requesting forced transport restart"
                     }
                     runSiblingHandshakeRecovery()
@@ -343,8 +388,7 @@ class MeshConnectionManagerImpl(
     }
 
     /**
-     * Launches the deterministic two-phase stall-recovery sibling used by [startHandshakeStallGuard] on every
-     * transport.
+     * Launches the deterministic two-phase stall-recovery sibling used by [scheduleStallGuard] on every transport.
      *
      * Phase 1 flips the app-level state from Connecting to Disconnected first, guarded by the connection mutex so a
      * just-completed handshake cannot be torn down after winning the race. Phase 2 then calls
@@ -511,7 +555,8 @@ class MeshConnectionManagerImpl(
     }
 
     override fun startConfigOnly() {
-        startHandshakeStallGuard(1, HANDSHAKE_TIMEOUT_STAGE1)
+        stageProgressSignals.value = 0
+        armStageGuard(1, HANDSHAKE_TIMEOUT_STAGE1)
         packetHandler.sendToRadio(ToRadio(want_config_id = HandshakeConstants.CONFIG_NONCE))
     }
 
@@ -524,7 +569,8 @@ class MeshConnectionManagerImpl(
     }
 
     override fun startNodeInfoOnly() {
-        startHandshakeStallGuard(2, HANDSHAKE_TIMEOUT_STAGE2)
+        stageProgressSignals.value = 0
+        armStageGuard(2, HANDSHAKE_TIMEOUT_STAGE2)
         packetHandler.sendToRadio(ToRadio(want_config_id = HandshakeConstants.NODE_INFO_NONCE))
     }
 
@@ -556,6 +602,7 @@ class MeshConnectionManagerImpl(
         // Collapse cancel+clear into one atomic swap so a concurrent re-arm cannot
         // orphan a job in the gap between cancel and reassign.
         handshakeTimeout.getAndSet(null)?.cancel()
+        stageCapJob.getAndSet(null)?.cancel()
 
         schedulePostHandshakeRequests()
 
@@ -698,6 +745,7 @@ class MeshConnectionManagerImpl(
         // Collapse cancel+clear into one atomic swap so a concurrent re-arm cannot orphan a
         // job in the gap between cancel and reassign.
         handshakeTimeout.getAndSet(null)?.cancel()
+        stageCapJob.getAndSet(null)?.cancel()
         // Set the completion latch so late-arriving progress packets (e.g. FileInfo that lands
         // between NODE_INFO_NONCE and the async Room DB install completion) cannot re-arm the
         // fast watchdog we just cancelled. Without this latch, those late packets would
@@ -748,13 +796,17 @@ class MeshConnectionManagerImpl(
         radioInterfaceService.getDeviceAddress()?.let { DeviceType.fromAddress(it) } in FAST_RECOVERY_TYPES
 
     override fun onHandshakeProgress() {
-        // Arm only inside the fast-recovery envelope, while Connecting, before the completion latch
-        // has fired. BLE retains the long stall-guard budget because its GATT latency is variable.
-        val shouldArmFastWatchdog =
-            isFastRecoveryTransport() &&
-                serviceRepository.connectionState.value is ConnectionState.Connecting &&
-                !handshakeCompleteLatch.value
-        if (!shouldArmFastWatchdog) return
+        // Progress only matters while a handshake is live, before the completion latch has fired.
+        if (serviceRepository.connectionState.value !is ConnectionState.Connecting || handshakeCompleteLatch.value) {
+            return
+        }
+        stageProgressSignals.incrementAndGet()
+        if (!isFastRecoveryTransport()) {
+            // BLE: re-arm the stage guard with its full budget so it acts as an inactivity window.
+            // Fixes false stalls on big meshes that drain past the fixed budget (Crashlytics e61fc83f).
+            rearmStageGuardOnProgress()
+            return
+        }
         // Atomic swap: cancel any in-flight fast watchdog and re-arm it with the full fast
         // timeout in a single operation. This keeps the watchdog quiet as long as meaningful
         // progress keeps arriving within the window, while a true stall still fires on
@@ -824,12 +876,17 @@ class MeshConnectionManagerImpl(
             return POST_HANDSHAKE_ADMISSION_INITIAL_RETRY_DELAY * (1 shl exponent)
         }
 
+        /** Total-cap multiple: a stage may re-arm for at most this many budgets before the guard must fire. */
+        private const val STAGE_GUARD_TOTAL_CAP_FACTOR = 10
+
+        /** Stage 1 budget. On BLE it is an inactivity window: each progress packet re-arms the full budget. */
         private val HANDSHAKE_TIMEOUT_STAGE1 = 30.seconds
 
         /**
          * Stage 2 drains the full node database, which can be significantly larger than Stage 1 config on big meshes.
          * 60 s matches the meshtastic-client SDK timeout and avoids premature stall-guard triggers on meshes with 50+
-         * nodes.
+         * nodes. On BLE it is an inactivity window: each progress packet re-arms the full budget, so a large nodeDB
+         * that streams for longer than the budget is never misread as a stall.
          */
         private val HANDSHAKE_TIMEOUT_STAGE2 = 60.seconds
 
@@ -846,7 +903,7 @@ class MeshConnectionManagerImpl(
          * BLE is intentionally excluded — its GATT latency budget is variable enough that the existing
          * [HANDSHAKE_TIMEOUT_STAGE1] (30s) and [HANDSHAKE_TIMEOUT_STAGE2] (60s) budgets remain the right trade-off.
          * Both transports now recover exclusively via [runSiblingHandshakeRecovery] (transport restart); the previous
-         * BLE mid-session want_config retry has been removed (see [startHandshakeStallGuard] for the firmware crash
+         * BLE mid-session want_config retry has been removed (see [scheduleStallGuard] for the firmware crash
          * rationale).
          */
         private val FAST_HANDSHAKE_TIMEOUT = 12.seconds
