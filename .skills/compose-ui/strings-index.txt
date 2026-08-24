@@ -879,6 +879,8 @@ ip_address
 ip_port
 ipv4_mode
 json_output_enabled
+jump_to_latest_from
+jump_to_latest_from_and_more
 ### KEY ###
 key_backup_deleted
 key_backup_not_found

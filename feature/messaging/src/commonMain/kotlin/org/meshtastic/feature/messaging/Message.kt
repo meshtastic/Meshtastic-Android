@@ -305,6 +305,24 @@ fun MessageScreen(
         }
     }
 
+    // Who sent the newest unread message, for the jump-to-latest pill. Own messages are never unread, so this is
+    // simply the newest loaded message that did not come from this device.
+    val newestUnreadSender by
+        remember(pagedMessages.itemCount, unreadCount) {
+            derivedStateOf {
+                if (unreadCount == 0) {
+                    null
+                } else {
+                    pagedMessages.itemSnapshotList
+                        .firstOrNull { it != null && !it.fromLocal && !it.read }
+                        ?.node
+                        ?.user
+                        ?.let { user -> user.long_name.ifEmpty { user.short_name } }
+                        ?.takeIf { it.isNotEmpty() }
+                }
+            }
+        }
+
     val onEvent: (MessageScreenEvent) -> Unit =
         remember(viewModel, contactKey, messageInputState, ourNode) {
             fun handle(event: MessageScreenEvent) {
@@ -516,7 +534,7 @@ fun MessageScreen(
             )
             // Show FAB if we can scroll towards the newest messages (index 0).
             if (listState.canScrollBackward) {
-                ScrollToBottomFab(coroutineScope, listState, unreadCount)
+                ScrollToBottomFab(coroutineScope, listState, unreadCount, newestUnreadSender)
             }
         }
     }

@@ -909,6 +909,8 @@
     <string name="ip_port">Port:</string>
     <string name="ipv4_mode">IPv4 mode</string>
     <string name="json_output_enabled">JSON output enabled</string>
+    <string name="jump_to_latest_from">%1$s</string>
+    <string name="jump_to_latest_from_and_more">%1$s +%2$d</string>
     <!-- KEY -->
     <string name="key_backup_deleted">Key backup deleted</string>
     <string name="key_backup_not_found">No key backup found for this node</string>

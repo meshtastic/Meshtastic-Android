@@ -43,6 +43,7 @@ import androidx.compose.material3.DropdownMenuGroup
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -90,6 +91,8 @@ import org.meshtastic.core.resources.filter_enable_for_contact
 import org.meshtastic.core.resources.filter_hide_count
 import org.meshtastic.core.resources.filter_settings
 import org.meshtastic.core.resources.filter_show_count
+import org.meshtastic.core.resources.jump_to_latest_from
+import org.meshtastic.core.resources.jump_to_latest_from_and_more
 import org.meshtastic.core.resources.navigate_back
 import org.meshtastic.core.resources.new_messages_below
 import org.meshtastic.core.resources.overflow_menu
@@ -136,31 +139,60 @@ import org.meshtastic.proto.ChannelSet
 // region ── ScrollToBottomFab ──
 
 /**
- * A FloatingActionButton that scrolls the message list to the bottom (most recent messages).
+ * Jump-to-latest control for the message list.
+ *
+ * A bare count answers "how many" but not "from whom", which is what actually decides whether to scroll now or keep
+ * reading — so when the newest unread message has a sender, the control widens to name them and keeps the count as the
+ * overflow case.
  *
  * @param coroutineScope The coroutine scope for launching the scroll animation.
  * @param listState The [LazyListState] of the message list.
  * @param unreadCount The number of unread messages to display as a badge.
+ * @param newestUnreadSender Display name of whoever sent the newest unread message, or null when there is none.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BoxScope.ScrollToBottomFab(coroutineScope: CoroutineScope, listState: LazyListState, unreadCount: Int) {
-    FloatingActionButton(
-        modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
-        onClick = { coroutineScope.launch { listState.animateScrollToItem(0) } },
-    ) {
-        if (unreadCount > 0) {
-            BadgedBox(badge = { Badge { Text(unreadCount.toString()) } }) {
-                Icon(
-                    imageVector = MeshtasticIcons.ArrowDownward,
-                    contentDescription = stringResource(Res.string.scroll_to_bottom),
-                )
-            }
-        } else {
+fun BoxScope.ScrollToBottomFab(
+    coroutineScope: CoroutineScope,
+    listState: LazyListState,
+    unreadCount: Int,
+    newestUnreadSender: String? = null,
+) {
+    val modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp)
+    val onClick: () -> Unit = { coroutineScope.launch { listState.animateScrollToItem(0) } }
+    val icon =
+        @Composable {
             Icon(
                 imageVector = MeshtasticIcons.ArrowDownward,
                 contentDescription = stringResource(Res.string.scroll_to_bottom),
             )
+        }
+
+    if (unreadCount > 0 && newestUnreadSender != null) {
+        ExtendedFloatingActionButton(
+            modifier = modifier,
+            onClick = onClick,
+            icon = icon,
+            text = {
+                Text(
+                    text =
+                    if (unreadCount > 1) {
+                        stringResource(Res.string.jump_to_latest_from_and_more, newestUnreadSender, unreadCount - 1)
+                    } else {
+                        stringResource(Res.string.jump_to_latest_from, newestUnreadSender)
+                    },
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            },
+        )
+    } else {
+        FloatingActionButton(modifier = modifier, onClick = onClick) {
+            if (unreadCount > 0) {
+                BadgedBox(badge = { Badge { Text(unreadCount.toString()) } }) { icon() }
+            } else {
+                icon()
+            }
         }
     }
 }
