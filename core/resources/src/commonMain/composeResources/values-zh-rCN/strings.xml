@@ -319,6 +319,8 @@
     <string name="current">电流</string>
     <string name="currently">当前:</string>
     <string name="date">日期</string>
+    <string name="date_separator_today">今天</string>
+    <string name="date_separator_yesterday">昨天</string>
     <string name="dbm_value">%1$d dBm</string>
     <!-- DEBUG -->
     <string name="debug">调试</string>

@@ -30,10 +30,12 @@
     <!-- ACTION -->
     <string name="action_copy_message">Kopírovat zprávu</string>
     <string name="action_delete_message">Smazat zprávu</string>
+    <string name="action_more_message_actions">Další akce zprávy</string>
     <string name="action_react_with_emoji">Reagovat s emoji</string>
     <string name="action_select_device">Vybrat zařízení</string>
     <string name="action_select_message">Vybrat zprávu</string>
     <string name="action_select_network">Vybrat síť</string>
+    <string name="action_send_reply">Odpovědět</string>
     <string name="action_show_message_status">Zobrazit stav zprávy</string>
     <string name="action_toggle_translation">Přepnout mezi původním a přeloženým textem</string>
     <string name="action_translate_message">Přeložit zprávu</string>
@@ -200,6 +202,7 @@
     <string name="chirpy_error_unsupported_platform">Ach ne! Moje anténa se na této platformě zřejmě nedokáže připojit. 📡 Zkontrolujte prosím kompatibilitu svého hardwaru!</string>
     <string name="chirpy_intro">Ahoj! 📡 Jsem Chirpy, váš asistent Meshtastic přímo v zařízení! Mohu vám pomoci s nastavením, konfigurací, řešením problémů a tipy pro mesh sítě. S čím vám mohu pomoci?</string>
     <string name="chirpy_ready">Zeptat se Chirpyho</string>
+    <string name="chirpy_search_placeholder">Zeptejte se na Meshtastic…</string>
     <string name="chirpy_suggested_pages_help">Zde jsou některé stránky dokumentace, které by vám mohly pomoci:</string>
     <string name="chirpy_thinking">Chirpy směruje komunikaci přes mesh síť…📡</string>
     <string name="choose_contrast">Úroveň kontrastu</string>
@@ -219,6 +222,7 @@
     <string name="client_notification">Oznámení klienta</string>
     <string name="close">Zavřít</string>
     <string name="close_selection">Zavřít výběr</string>
+    <string name="collapse_chart">Sbalit graf</string>
     <string name="communicate_off_the_grid">Komunikujte off-the-grid s přáteli a komunitou bez mobilních služeb.</string>
     <!-- COMPASS -->
     <string name="compass_bearing">Směr: %1$s</string>
@@ -283,6 +287,7 @@
     <string name="connected_device">Připojená zařízení</string>
     <string name="connected_sleeping">Připojené k uspanému vysílači</string>
     <string name="connecting">Připojování</string>
+    <string name="connection_status">Aktuální připojení:</string>
     <string name="connections">Připojení</string>
     <string name="contrast">Kontrast</string>
     <string name="contrast_high">Vysoká</string>
@@ -298,6 +303,8 @@
     <string name="current">Proud</string>
     <string name="currently">Aktuálně:</string>
     <string name="date">Datum</string>
+    <string name="date_separator_today">Dnes</string>
+    <string name="date_separator_yesterday">Včera</string>
     <string name="dbm_value">%1$d dBm</string>
     <!-- DEBUG -->
     <string name="debug">Ladění</string>
@@ -353,6 +360,7 @@
     <!-- DESKTOP -->
     <string name="desktop_notification_title">Meshtastic</string>
     <string name="desktop_update_available_title">Je k dispozici aktualizace aplikace</string>
+    <string name="desktop_update_download">Stáhnout aktualizaci %1$s</string>
     <string name="details">Podrobnosti</string>
     <string name="detection_sensor">Detekční senzor</string>
     <string name="detection_sensor_config">Konfigurace detekčního senzoru</string>
@@ -372,6 +380,7 @@
     <string name="device_metrics_numeric_value">%1$s</string>
     <string name="device_metrics_percent_value">%1$s: %2$s%%</string>
     <string name="device_metrics_update_interval_seconds">Interval aktualizace metrik zařízení</string>
+    <string name="device_metrics_voltage_value">%1$s: %2$s V</string>
     <string name="device_sleeping">Zařízení spí</string>
     <string name="device_telemetry_enabled">Odesílat telemetrii zařízení</string>
     <string name="device_telemetry_enabled_summary">Povolí/zakáže modul telemetrie zařízení pro odesílání metrik do mesh sítě. Jde o nominální hodnoty. Přetížené mesh sítě se automaticky přizpůsobí na delší intervaly podle počtu online uzlů.</string>
@@ -391,12 +400,18 @@
     <string name="discovery_dwell_progress">Naslouchání na %1$s, %2$s zbývá</string>
     <string name="discovery_local_mesh">Vyhledávání zařízení v místní mesh síti</string>
     <string name="discovery_not_connected">Nepřipojeno</string>
+    <string name="discovery_not_connected_description">Připojte se k zařízení Meshtastic a spusťte skenování.</string>
+    <string name="discovery_paused">Pozastaveno: %1$s</string>
+    <string name="discovery_preparing">Příprava skenování</string>
+    <string name="discovery_reconnecting">Obnovuji připojení k %1$s</string>
+    <string name="discovery_rerun_analysis">Spustit analýzu znovu</string>
     <string name="discovery_scan_progress">Průběh vyhledávání</string>
     <string name="discovery_scan_summary">Výsledek vyhledávání</string>
     <string name="discovery_start_scan">Spustit vyhledávání</string>
     <string name="discovery_start_scan_reason_24ghz_unsupported">rádiový hardware nepodporuje pásmo 2,4 GHz</string>
     <string name="discovery_start_scan_reason_no_presets">není vybrána žádná předvolba</string>
     <string name="discovery_start_scan_reason_not_connected">zařízení není připojeno</string>
+    <string name="discovery_stat_analysis">Analýza</string>
     <string name="discovery_stat_channel_utilization">Využití kanálu</string>
     <string name="discovery_stat_date">Datum</string>
     <string name="discovery_stat_direct">Přímý</string>
@@ -407,6 +422,7 @@
     <string name="discovery_stat_selected">Vybrané</string>
     <string name="discovery_stat_status">Stav</string>
     <string name="discovery_stat_total_messages">Celkový počet zpráv</string>
+    <string name="discovery_stat_total_unique_nodes">Celkem jedinečných uzlů</string>
     <string name="discovery_stat_unique_nodes">Jedinečné uzly</string>
     <string name="discovery_stat_unselected">Nevybráno</string>
     <string name="discovery_stop_scan">Zastavit vyhledávání</string>
@@ -919,6 +935,7 @@
     <string name="message_routing_error_max_retransmit_detail">Žádný uzel tuto zprávu nepotvrdil. Zkuste to znovu, až budete mít lepší signál nebo větší pokrytí mesh sítě.</string>
     <string name="message_routing_error_no_response_detail">Cílové zařízení požadavek přijalo, ale žádná aplikace ani modul neodpověděly. Zkuste to znovu, až bude příjemce dostupný.</string>
     <string name="message_routing_error_no_route_detail">V mesh síti nebyla nalezena žádná cesta k cílovému uzlu. Zkuste to znovu, až bude dostupných více uzlů.</string>
+    <string name="message_routing_error_not_authorized">Neautorizováno</string>
     <string name="message_routing_error_pki_failed">Nepodařilo se odeslat šifrovanou zprávu</string>
     <string name="message_routing_error_pki_failed_detail">Šifrovanou cestu pro odeslání se nepodařilo použít. Počkejte, až se synchronizují informace o uzlu nebo klíče, a poté to zkuste znovu.</string>
     <string name="message_routing_error_pki_send_fail_public_key_detail">Váš uzel zatím nemá veřejný klíč příjemce. Počkejte, až se synchronizují informace o uzlu, a poté to zkuste znovu.</string>
@@ -935,6 +952,8 @@
     <string name="message_status_unknown">Neznámé</string>
     <string name="message_translated_label">Překlad</string>
     <string name="messages">Zprávy</string>
+    <string name="micrograms_per_cubic_meter">μg/m3</string>
+    <string name="min">Min</string>
     <string name="minimum_broadcast_seconds">Minimální vysílání (sekundy)</string>
     <string name="minimum_distance">Chytrá vzdálenost</string>
     <string name="minimum_interval">Chytrý Interval</string>
@@ -1003,6 +1022,7 @@
     <string name="no_usb_devices_hint">Připojte zařízení datovým USB kabelem, chcete-li použít sériové připojení.</string>
     <string name="no_usb_devices_seen">Nebyla nalezena žádná USB zařízení</string>
     <!-- NODE -->
+    <string name="node_count_online">%1$d online</string>
     <string name="node_count_shown">%1$d zobrazeno</string>
     <string name="node_count_template">(%1$d online / %2$d zobrazeno / %3$d celkem)</string>
     <string name="node_count_total">%1$d celkem</string>
@@ -1092,6 +1112,7 @@
     <string name="open_settings">Otevřít nastavení</string>
     <string name="open_source_description">Meshtastic používá následující open-source knihovny. Klepnutím zobrazíte jejich licence.</string>
     <string name="open_source_libraries">Open source knihovny</string>
+    <string name="open_wifi_settings">Otevřít nastavení Wi-Fi</string>
     <string name="options">Nastavení</string>
     <!-- OUTPUT -->
     <string name="output_buzzer_gpio">Výstupní pin bzučáku (GPIO)</string>
@@ -1367,8 +1388,10 @@
     <string name="show_full_message_timestamps">Zobrazovat úplná časová razítka zpráv</string>
     <string name="show_full_message_timestamps_summary">Vždy zobrazovat datum a čas v záhlaví konverzací a při akcích se zprávami</string>
     <string name="show_layer">Zobrazit vrstvu</string>
+    <string name="show_original">Zobrazit originál</string>
     <string name="show_password">Zobrazit heslo</string>
     <string name="show_precision_circle">Zobrazit kruhy přesnosti</string>
+    <string name="show_translation">Zobrazit překlad</string>
     <string name="show_waypoints">Zobrazit trasové body</string>
     <string name="shutdown">Vypnout</string>
     <string name="shutdown_node_name">Uzel: %1$s</string>
@@ -1426,6 +1449,7 @@
     <string name="tak_server_enabled">Povolit místní TAK server</string>
     <string name="tak_server_enabled_desc">Spustí místní TLS server na portu 8089 pro připojení k ATAK</string>
     <string name="tak_server_export_data_package_desc">Vygenerovat soubor .zip pro připojení ATAK k tomuto serveru</string>
+    <string name="tak_server_loading">…</string>
     <string name="tak_server_mesh_to_cot">Převodník Mesh na CoT</string>
     <string name="tak_server_mesh_to_cot_desc">Zobrazovat uzly Meshtastic na mapě ATAK jako kontakty</string>
     <string name="tak_server_section">Server</string>

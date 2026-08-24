@@ -194,6 +194,8 @@
     <string name="current">Áramerősség</string>
     <string name="currently">Jelenleg:</string>
     <string name="date">Dátum</string>
+    <string name="date_separator_today">Ma</string>
+    <string name="date_separator_yesterday">Tegnap</string>
     <string name="dbm_value">%1$d dBm</string>
     <!-- DEBUG -->
     <string name="debug">Debug</string>

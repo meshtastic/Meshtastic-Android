@@ -120,6 +120,8 @@
     <string name="critical_alert">중요 경고!</string>
     <string name="current">전류</string>
     <string name="date">날짜</string>
+    <string name="date_separator_today">오늘</string>
+    <string name="date_separator_yesterday">어제</string>
     <!-- DEBUG -->
     <string name="debug">Debug</string>
     <string name="debug_clear">로그 지우기</string>

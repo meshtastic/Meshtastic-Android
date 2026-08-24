@@ -244,6 +244,8 @@
     <string name="current">Поточний</string>
     <string name="currently">Наразі:</string>
     <string name="date">Дата</string>
+    <string name="date_separator_today">Сьогодні</string>
+    <string name="date_separator_yesterday">Вчора</string>
     <string name="dbm_value">%1$d дБм</string>
     <!-- DEBUG -->
     <string name="debug">Відлагодження</string>

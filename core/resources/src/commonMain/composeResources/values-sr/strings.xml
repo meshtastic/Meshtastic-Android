@@ -126,6 +126,7 @@
     <string name="critical_alert">Критично упозорење!</string>
     <string name="current">Струја</string>
     <string name="date">Датум</string>
+    <string name="date_separator_yesterday">Јуче</string>
     <!-- DEBUG -->
     <string name="debug">Дебагуј</string>
     <string name="debug_panel">Panel za otklanjanje grešaka</string>

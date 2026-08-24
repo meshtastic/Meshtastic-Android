@@ -250,6 +250,8 @@
     <string name="current">Текущ</string>
     <string name="currently">В момента:</string>
     <string name="date">Дата</string>
+    <string name="date_separator_today">Днес</string>
+    <string name="date_separator_yesterday">Вчера</string>
     <string name="dbm_value">%1$d dBm</string>
     <!-- DEBUG -->
     <string name="debug">Отстраняване на грешки</string>

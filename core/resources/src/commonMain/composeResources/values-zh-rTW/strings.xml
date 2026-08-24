@@ -272,6 +272,8 @@
     <string name="current">當前</string>
     <string name="currently">目前：</string>
     <string name="date">日期</string>
+    <string name="date_separator_today">今日</string>
+    <string name="date_separator_yesterday">昨天</string>
     <string name="dbm_value">%1$d dBm</string>
     <!-- DEBUG -->
     <string name="debug">除錯</string>
