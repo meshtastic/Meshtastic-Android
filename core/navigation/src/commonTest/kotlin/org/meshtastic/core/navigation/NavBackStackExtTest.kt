@@ -19,8 +19,52 @@ package org.meshtastic.core.navigation
 import androidx.navigation3.runtime.NavKey
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class NavBackStackExtTest {
+
+    // region popUnlessRoot
+
+    @Test
+    fun `popUnlessRoot pops the top entry above the root`() {
+        val stack = mutableListOf<NavKey>(SettingsRoute.Settings(), SettingsRoute.HelpDocs)
+
+        assertTrue(stack.popUnlessRoot())
+
+        assertEquals(listOf<NavKey>(SettingsRoute.Settings()), stack.toList())
+    }
+
+    @Test
+    fun `popUnlessRoot refuses to pop the root entry`() {
+        val stack = mutableListOf<NavKey>(SettingsRoute.Settings())
+
+        assertFalse(stack.popUnlessRoot())
+
+        assertEquals(1, stack.size)
+    }
+
+    @Test
+    fun `popUnlessRoot on an empty stack is a no-op`() {
+        val stack = mutableListOf<NavKey>()
+
+        assertFalse(stack.popUnlessRoot())
+
+        assertTrue(stack.isEmpty())
+    }
+
+    @Test
+    fun `rapid double popUnlessRoot stops at the root`() {
+        val stack = mutableListOf<NavKey>(SettingsRoute.Settings(), SettingsRoute.HelpDocs)
+
+        stack.popUnlessRoot()
+        stack.popUnlessRoot()
+
+        assertEquals(1, stack.size)
+        assertEquals(SettingsRoute.Settings(), stack.first())
+    }
+
+    // endregion
 
     // region replaceLast
 

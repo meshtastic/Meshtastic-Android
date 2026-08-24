@@ -28,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
+import co.touchlab.kermit.Logger
 
 /** Manages independent backstacks for multiple tabs. */
 class MultiBackstack(val startTab: NavKey, private val currentTabState: MutableState<NavKey>) {
@@ -37,7 +38,15 @@ class MultiBackstack(val startTab: NavKey, private val currentTabState: MutableS
         private set
 
     val activeBackStack: NavBackStack<NavKey>
-        get() = backStacks[currentTabRoute] ?: error("Stack for $currentTabRoute not found")
+        get() {
+            val stack = backStacks[currentTabRoute] ?: error("Stack for $currentTabRoute not found")
+            // A drained stack crashes NavDisplay ("backstack cannot be empty"), so restore the tab root.
+            if (stack.isEmpty()) {
+                Logger.e { "Backstack self-healed to root (MultiBackstack): tab=${currentTabRoute::class.simpleName}" }
+                stack.add(currentTabRoute)
+            }
+            return stack
+        }
 
     /** Switches to a new top-level tab route. */
     fun navigateTopLevel(route: NavKey) {

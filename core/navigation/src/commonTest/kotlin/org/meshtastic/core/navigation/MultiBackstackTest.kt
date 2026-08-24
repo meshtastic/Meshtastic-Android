@@ -180,4 +180,81 @@ class MultiBackstackTest {
         assertEquals(NodesRoute.Nodes, multiBackstack.activeBackStack.first())
         assertEquals(tracerouteMap, multiBackstack.activeBackStack.last())
     }
+
+    @Test
+    fun `goBack at root of start tab keeps the root entry`() {
+        val startTab = TopLevelDestination.Connect.route
+        val multiBackstack = createMultiBackstack(startTab)
+
+        val connectStack = NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Connect.route)) }
+        multiBackstack.backStacks = mapOf(TopLevelDestination.Connect.route to connectStack)
+
+        multiBackstack.goBack()
+
+        assertEquals(1, multiBackstack.activeBackStack.size)
+        assertEquals(TopLevelDestination.Connect.route, multiBackstack.activeBackStack.first())
+    }
+
+    @Test
+    fun `rapid double goBack from depth two never empties the stack`() {
+        val startTab = TopLevelDestination.Nodes.route
+        val multiBackstack = createMultiBackstack(startTab)
+
+        val nodesStack =
+            NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Nodes.route, NodesRoute.Nodes)) }
+        multiBackstack.backStacks = mapOf(TopLevelDestination.Nodes.route to nodesStack)
+
+        multiBackstack.goBack()
+        multiBackstack.goBack()
+
+        assertEquals(1, multiBackstack.activeBackStack.size)
+        assertEquals(TopLevelDestination.Nodes.route, multiBackstack.activeBackStack.first())
+    }
+
+    @Test
+    fun `activeBackStack self-heals a stack drained by a stale back handler`() {
+        // Regression for the field fatal "NavDisplay backstack cannot be empty": an always-enabled entry
+        // back handler kept firing during its exit crossfade and drained the stack past its root.
+        val startTab = TopLevelDestination.Settings.route
+        val multiBackstack = createMultiBackstack(startTab)
+
+        val settingsStack =
+            NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Settings.route, SettingsRoute.HelpDocs)) }
+        multiBackstack.backStacks = mapOf(TopLevelDestination.Settings.route to settingsStack)
+
+        settingsStack.removeLastOrNull()
+        settingsStack.removeLastOrNull()
+        assertEquals(0, settingsStack.size)
+
+        val healed = multiBackstack.activeBackStack
+        assertEquals(1, healed.size)
+        assertEquals(TopLevelDestination.Settings.route, healed.first())
+    }
+
+    @Test
+    fun `navigateTopLevel to a tab with an empty stack self-heals to that tab root`() {
+        val startTab = TopLevelDestination.Connect.route
+        val multiBackstack = createMultiBackstack(startTab)
+
+        val connectStack = NavBackStack<NavKey>().apply { addAll(listOf(TopLevelDestination.Connect.route)) }
+        multiBackstack.backStacks =
+            mapOf(TopLevelDestination.Connect.route to connectStack, TopLevelDestination.Map.route to NavBackStack())
+
+        multiBackstack.navigateTopLevel(TopLevelDestination.Map.route)
+
+        assertEquals(TopLevelDestination.Map.route, multiBackstack.currentTabRoute)
+        assertEquals(1, multiBackstack.activeBackStack.size)
+        assertEquals(TopLevelDestination.Map.route, multiBackstack.activeBackStack.first())
+    }
+
+    @Test
+    fun `activeBackStack self-heals a stack restored empty from saved state`() {
+        val startTab = TopLevelDestination.Nodes.route
+        val multiBackstack = createMultiBackstack(startTab)
+        multiBackstack.backStacks = mapOf(TopLevelDestination.Nodes.route to NavBackStack())
+
+        val healed = multiBackstack.activeBackStack
+        assertEquals(1, healed.size)
+        assertEquals(TopLevelDestination.Nodes.route, healed.first())
+    }
 }
