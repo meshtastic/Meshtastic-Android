@@ -20,10 +20,10 @@ package org.meshtastic.core.common.util
  * Centralized metric formatting for display strings. Eliminates duplicated `formatString` patterns across Node,
  * NodeItem, and metric screens.
  *
- * Everything here reads in the user's locale. Units that vary by locale (wind speed, rainfall, weight) go through
- * [formatMeasure], so the value, the symbol and the spacing between them all come from CLDR; the universal units (V,
- * mA, dB, dBm, hPa, %, °C) keep their fixed symbol but format the number via [NumberFormatter.format], so a German
- * reader sees "3,85 V" and "0,0°C".
+ * Every number here reads in the user's locale; the unit symbols are fixed. Units that vary by locale (wind speed,
+ * rainfall, weight) pick their symbol from [MeasureUnitKind] via [formatMeasure]; the universal ones (V, mA, dB, dBm,
+ * hPa, %, °C) carry theirs inline. Either way the value goes through [NumberFormatter.format], so a German reader sees
+ * "3,85 V" and "0,0°C".
  *
  * The one thing that stays locale-independent is anything another system parses — see
  * [NumberFormatter.formatInvariant].
