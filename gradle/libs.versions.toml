@@ -308,7 +308,7 @@ screenshot-validation-api = { group = "com.android.tools.screenshot", name = "sc
 
 # Build Logic
 android-gradleApiPlugin = { module = "com.android.tools.build:gradle-api", version.ref = "agp" }
-android-tools-common = { module = "com.android.tools:common", version = "32.3.1" }
+android-tools-common = { module = "com.android.tools:common", version = "32.3.2" }
 androidx-room-gradlePlugin = { module = "androidx.room3:room3-gradle-plugin", version.ref = "room" }
 compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 compose-multiplatform-gradlePlugin = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "compose-multiplatform" }
