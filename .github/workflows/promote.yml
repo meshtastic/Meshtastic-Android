@@ -52,26 +52,34 @@ on:
         required: true
       DISCORD_WEBHOOK_ANDROID:
         required: false
+      HOMEBREW_TAP_TOKEN:
+        required: false
 
+# Never cancel a promotion mid-flight: being killed between the Play edit
+# commit and the GitHub release/tag update leaves the two disagreeing. The
+# caller's queue-only concurrency serializes dispatches; this group (keyed by
+# channel + tag) is a second line of defense that queues rather than cancels.
 concurrency:
-  group: ${{ github.workflow }}-${{ inputs.tag_name }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ inputs.channel }}-${{ inputs.tag_name }}
+  cancel-in-progress: false
 
 permissions:
   contents: write
-  pull-requests: read
+  pull-requests: write
+  statuses: write
   id-token: write
   attestations: write
 
 jobs:
   prepare-build-info:
     runs-on: ubuntu-24.04-arm
+    timeout-minutes: 10
     outputs:
       APP_VERSION_NAME: ${{ steps.prep_version.outputs.APP_VERSION_NAME }}
       APP_VERSION_CODE: ${{ steps.calculate_version_code.outputs.versionCode }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7.0.1
         with:
           ref: ${{ inputs.commit_sha || inputs.tag_name }}
           fetch-depth: 0
@@ -82,45 +90,137 @@ jobs:
         env:
           INPUT_TAG_NAME: ${{ inputs.tag_name }}
         run: |
-          VERSION_NAME=$(echo $INPUT_TAG_NAME | sed 's/-.*//' | sed 's/v//')
-          echo "APP_VERSION_NAME=$VERSION_NAME" >> $GITHUB_OUTPUT
+          VERSION_NAME=$(echo "$INPUT_TAG_NAME" | sed 's/-.*//' | sed 's/v//')
+          echo "APP_VERSION_NAME=$VERSION_NAME" >> "$GITHUB_OUTPUT"
           echo "Parsed Version: $VERSION_NAME"
 
       - name: Extract VERSION_CODE_OFFSET from config.properties
         id: get_version_code_offset
         run: |
           OFFSET=$(grep '^VERSION_CODE_OFFSET=' config.properties | cut -d'=' -f2)
-          echo "VERSION_CODE_OFFSET=$OFFSET" >> $GITHUB_OUTPUT
+          echo "VERSION_CODE_OFFSET=$OFFSET" >> "$GITHUB_OUTPUT"
 
       - name: Calculate Version Code from Git Commit Count
         id: calculate_version_code
+        env:
+          VERSION_CODE_OFFSET: ${{ steps.get_version_code_offset.outputs.VERSION_CODE_OFFSET }}
         run: |
           COMMIT_COUNT=$(git rev-list --count HEAD)
-          OFFSET=${{ steps.get_version_code_offset.outputs.VERSION_CODE_OFFSET }}
-          VERSION_CODE=$((COMMIT_COUNT + OFFSET))
-          echo "versionCode=$VERSION_CODE" >> $GITHUB_OUTPUT
+          if ! [[ "$VERSION_CODE_OFFSET" =~ ^[0-9]+$ ]]; then
+            echo "::error::VERSION_CODE_OFFSET from config.properties is not numeric: '$VERSION_CODE_OFFSET'"
+            exit 1
+          fi
+          VERSION_CODE=$((COMMIT_COUNT + VERSION_CODE_OFFSET))
+          echo "versionCode=$VERSION_CODE" >> "$GITHUB_OUTPUT"
         shell: bash
 
   promote-release:
     runs-on: ubuntu-24.04-arm
-    environment: Release
+    timeout-minutes: 30
     needs: [ prepare-build-info ]
+    env:
+      FROM_TRACK: ${{ inputs.from_channel == 'closed' && 'NewAlpha' || (inputs.from_channel == 'open' && 'beta' || 'internal') }}
+      TO_TRACK: ${{ inputs.channel == 'closed' && 'NewAlpha' || (inputs.channel == 'open' && 'beta' || 'production') }}
+      USER_FRACTION: ${{ (inputs.channel == 'production' && '0.1') || (inputs.channel == 'open' && '0.5') || '1.0' }}
     steps:
-      - name: Promote to next channel
-        uses: kevin-david/promote-play-release@v1.2.0
+      - name: Checkout code
+        uses: actions/checkout@v7.0.1
         with:
-          service-account-json-raw: ${{ secrets.GOOGLE_PLAY_JSON_KEY }}
-          package-name: 'com.geeksville.mesh'
-          from-track: ${{ inputs.from_channel == 'closed' && 'NewAlpha' || (inputs.from_channel == 'open' && 'beta' || 'internal') }}
-          to-track: ${{ inputs.channel == 'closed' && 'NewAlpha' || (inputs.channel == 'open' && 'beta' || 'production') }}
-          user-fraction: ${{ (inputs.channel == 'production' && '0.1') || (inputs.channel == 'open' && '0.5') || '1.0' }}
+          ref: ${{ inputs.commit_sha || inputs.tag_name }}
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '4.0.6'
+          bundler-cache: true
+
+      - name: Decode Play Store credentials
+        run: echo '${{ secrets.GOOGLE_PLAY_JSON_KEY }}' > fastlane/play-store-credentials.json
+
+      # A re-dispatched promotion whose versionCode is already live on the
+      # target track must no-op: every redundant `supply` commit creates a new
+      # Play submission, and each submission cancels + restarts any review in
+      # flight (this reset the v2.8.0 review clock repeatedly, Jul 2026).
+      # Fail-open — a preflight error proceeds to supply, which uses the same
+      # credentials and will surface any real failure.
+      # The main checkout above is at the release tag, which predates this
+      # script — fetch it from the caller's commit instead, so script and
+      # workflow always move in lockstep. This is a local reusable-workflow
+      # call (`uses: ./.github/workflows/promote.yml`), so promote.yml is
+      # loaded from that same commit.
+      #
+      # Must NOT be a release input: any tag cut before this landed has no
+      # scripts/ entry, and a missing script exits 127 at the step level,
+      # bypassing the script's own fail-open path and hard-failing the
+      # promotion. workflow_sha is no better — the github context in a called
+      # reusable workflow is caller-associated, so it resolves to the caller's
+      # workflow too. A cross-repo caller would need explicit repo+ref inputs.
+      - name: Checkout preflight script from caller commit
+        uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          path: .workflow-ref
+          sparse-checkout: scripts
+
+      - name: Preflight — is this versionCode already on the target track?
+        id: preflight
+        env:
+          VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
+        run: |
+          PKG=$(grep '^APPLICATION_ID=' config.properties | cut -d'=' -f2)
+          bash .workflow-ref/scripts/play-track-preflight.sh \
+            fastlane/play-store-credentials.json "$PKG" "$TO_TRACK" "$VERSION_CODE"
+
+      # --version_code pins release selection. Without it supply picks the
+      # source release by status (default "completed"), so a staged inProgress
+      # rollout on the source track silently promotes the OLD release instead.
+      - name: Promote to next channel
+        if: ${{ steps.preflight.outputs.already_on_track != 'true' }}
+        env:
+          VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
+        run: |
+          bundle exec fastlane supply \
+            --track "$FROM_TRACK" \
+            --track_promote_to "$TO_TRACK" \
+            --version_code "$VERSION_CODE" \
+            --rollout "$USER_FRACTION" \
+            --changes_not_sent_for_review true \
+            --skip_upload_metadata \
+            --skip_upload_changelogs \
+            --skip_upload_images \
+            --skip_upload_screenshots
+
+      # supply exits 0 even when its edit changed nothing, so a promotion only
+      # counts once the destination track is seen holding this versionCode.
+      - name: Verify versionCode landed on the target track
+        if: ${{ steps.preflight.outputs.already_on_track != 'true' }}
+        env:
+          VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
+        run: |
+          PKG=$(grep '^APPLICATION_ID=' config.properties | cut -d'=' -f2)
+          bash .workflow-ref/scripts/play-track-preflight.sh \
+            fastlane/play-store-credentials.json "$PKG" "$TO_TRACK" "$VERSION_CODE" verify
+
+      - name: Clean up credentials
+        if: always()
+        run: rm -f fastlane/play-store-credentials.json
 
   update-github-release:
     runs-on: ubuntu-24.04-arm
+    timeout-minutes: 10
     needs: [ prepare-build-info, promote-release ]
+    # actions: write is scoped here — only this job's publish-workflow
+    # dispatch needs it, and the other jobs must not get it. Job-level
+    # permissions replace the workflow-level block, so the full set this
+    # job uses is listed.
+    permissions:
+      contents: write
+      pull-requests: write
+      statuses: write
+      actions: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7.0.1
         with:
           ref: ${{ inputs.commit_sha || inputs.tag_name }}
           fetch-depth: 0
@@ -141,6 +241,120 @@ jobs:
             --title "${{ inputs.release_name }} (${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }})" \
             --draft=false \
             --prerelease=${{ inputs.channel != 'production' }}
+
+      # The edit above is made with GITHUB_TOKEN, and GITHUB_TOKEN-caused
+      # events never start workflow runs — winget-publish.yml's `released`
+      # trigger will not fire from it. workflow_dispatch is exempt from that
+      # suppression, so dispatch it explicitly. Soft-fail: a winget hiccup
+      # must not block the changelog stamp or Discord notification.
+      - name: Dispatch winget publish
+        if: ${{ inputs.channel == 'production' }}
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.final_tag }}
+        run: gh workflow run winget-publish.yml --ref main -f "tag=$TAG"
+
+      # Same GITHUB_TOKEN-suppression story as the winget dispatch above.
+      - name: Dispatch Microsoft Store publish
+        if: ${{ inputs.channel == 'production' }}
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.final_tag }}
+        run: gh workflow run msstore-publish.yml --ref main -f "tag=$TAG"
+
+      - name: Stamp CHANGELOG.md for release
+        if: ${{ inputs.channel == 'production' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.final_tag }}
+          VERSION: ${{ inputs.base_version }}
+          REPO: ${{ github.repository }}
+        run: |
+          DATE=$(date -u +%Y-%m-%d)
+
+          # Checkout CHANGELOG.md from main (we're on a tag checkout)
+          git fetch origin main
+          git checkout -b "changelog/v${VERSION}" origin/main
+
+          # Find the previous production tag for the full-range notes
+          PREV_PROD=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | grep -v "^v${VERSION}$" | head -1)
+
+          # Generate a single flat changelog for the entire release using GitHub API
+          FLAT_NOTES=""
+          if [ -n "$PREV_PROD" ]; then
+            FLAT_NOTES=$(gh api "repos/${REPO}/releases/generate-notes" \
+              -f tag_name="$TAG" \
+              -f target_commitish="$(git rev-parse "$TAG")" \
+              -f previous_tag_name="$PREV_PROD" \
+              --jq '.body' 2>/dev/null || true)
+
+            # Strip boilerplate
+            FLAT_NOTES=$(echo "$FLAT_NOTES" \
+              | sed '/^<!-- .* -->/d' \
+              | sed '/^## What'\''s Changed$/d' \
+              | sed '/^\*\*Full Changelog\*\*/d' \
+              | sed '/./,$!d' \
+              | sed -e :a -e '/^\n*$/{$d;N;ba}')
+          fi
+
+          # Build the versioned section and reset unreleased
+          python3 -c "
+          import sys
+          version, date, notes = sys.argv[1], sys.argv[2], sys.argv[3]
+          with open('CHANGELOG.md', 'r') as f:
+              content = f.read()
+
+          us = '<!-- UNRELEASED_START -->'
+          ue = '<!-- UNRELEASED_END -->'
+          rs = '<!-- RELEASED_START -->'
+
+          start = content.find(us)
+          end = content.find(ue)
+          rstart = content.find(rs)
+
+          if start == -1 or end == -1 or rstart == -1:
+              print('Markers not found in CHANGELOG.md')
+              sys.exit(1)
+
+          versioned = f'## [{version}] - {date}\n\n{notes}'
+          fresh = '## [Unreleased]\n\n*No changes yet.*'
+
+          new_content = (
+              content[:start + len(us)] + '\n' + fresh + '\n'
+              + content[end:rstart + len(rs)] + '\n\n' + versioned + '\n'
+              + content[rstart + len(rs):]
+          )
+
+          with open('CHANGELOG.md', 'w') as f:
+              f.write(new_content)
+          " "$VERSION" "$DATE" "$FLAT_NOTES"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          git diff --cached --quiet || {
+            BRANCH="automation/changelog-v${VERSION}"
+            git checkout -B "$BRANCH"
+            git commit -m "docs: release CHANGELOG.md for v${VERSION}"
+            git push origin "$BRANCH" --force
+
+            gh pr create \
+              --title "docs: release CHANGELOG.md for v${VERSION}" \
+              --body "Automated changelog stamp for production release v${VERSION}." \
+              --head "$BRANCH" \
+              --base main \
+              --label "automation" \
+              --label "skip-changelog"
+
+            # Post required commit status so the PR isn't blocked
+            COMMIT_SHA=$(git rev-parse HEAD)
+            gh api "repos/${{ github.repository }}/statuses/${COMMIT_SHA}" \
+              -f state="success" \
+              -f context="Check Workflow Status" \
+              -f description="Skipped — changelog-only PR"
+          }
 
       - name: Notify Discord
         if: ${{ inputs.channel != 'internal' }}
@@ -188,3 +402,65 @@ jobs:
           )
 
           curl -H "Content-Type: application/json" -d "$PAYLOAD" "$DISCORD_WEBHOOK"
+
+  # Runs in-workflow rather than on `release: published` because the undraft above
+  # uses github.token, whose events never trigger other workflows. Once the cask is
+  # promoted to homebrew/cask, replace the tap PR with `brew bump-cask-pr`.
+  update-homebrew-cask:
+    if: ${{ inputs.channel == 'production' }}
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 15
+    needs: [ update-github-release ]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ inputs.commit_sha || inputs.tag_name }}
+
+      - name: Render cask and open PR against meshtastic/homebrew-tap
+        env:
+          TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          TAG: ${{ inputs.final_tag }}
+        run: |
+          if [[ -z "$TAP_TOKEN" ]]; then
+            echo "HOMEBREW_TAP_TOKEN not set; skipping Homebrew cask update."
+            exit 0
+          fi
+          # Tags cut before the template landed check out without it — skip, don't fail.
+          if [[ ! -f .github/homebrew/meshtastic-desktop.rb ]]; then
+            echo "Cask template not present at this tag; skipping Homebrew cask update."
+            exit 0
+          fi
+
+          VERSION=${TAG#v}
+          # GitHub rewrites spaces in asset names to dots:
+          # "Meshtastic Desktop-X.dmg" is served as "Meshtastic.Desktop-X.dmg".
+          # --retry-all-errors covers the brief 404 window while the undraft propagates.
+          curl -fsSL --retry 5 --retry-delay 30 --retry-all-errors -o /tmp/app.dmg \
+            "https://github.com/${{ github.repository }}/releases/download/${TAG}/Meshtastic.Desktop-${VERSION}.dmg"
+          SHA256=$(sha256sum /tmp/app.dmg | cut -d' ' -f1)
+
+          sed -e "s/{{VERSION}}/${VERSION}/" -e "s/{{SHA256}}/${SHA256}/" \
+            .github/homebrew/meshtastic-desktop.rb > /tmp/meshtastic-desktop.rb
+
+          # PR (not a direct push to main) so the tap's brew test-bot CI validates the bump.
+          git clone "https://x-access-token:${TAP_TOKEN}@github.com/meshtastic/homebrew-tap.git" /tmp/tap
+          cd /tmp/tap
+          BRANCH="meshtastic-desktop-${VERSION}"
+          git checkout -b "$BRANCH"
+          mkdir -p Casks
+          cp /tmp/meshtastic-desktop.rb Casks/meshtastic-desktop.rb
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Casks/meshtastic-desktop.rb
+          if git diff --cached --quiet; then
+            echo "Cask already up to date."
+            exit 0
+          fi
+          git commit -m "meshtastic-desktop ${VERSION}"
+          git push -fu origin "$BRANCH"
+          GH_TOKEN="$TAP_TOKEN" gh pr create --repo meshtastic/homebrew-tap \
+            --head "$BRANCH" --base main \
+            --title "meshtastic-desktop ${VERSION}" \
+            --body "Automated cask bump for the ${TAG} production release of [Meshtastic-Android](https://github.com/${{ github.repository }}/releases/tag/${TAG})." \
+            || echo "PR already exists for $BRANCH; branch updated."

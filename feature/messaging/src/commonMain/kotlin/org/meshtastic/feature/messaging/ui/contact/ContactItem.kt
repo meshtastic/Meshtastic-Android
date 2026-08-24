@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 package org.meshtastic.feature.messaging.ui.contact
 
 import androidx.compose.animation.AnimatedVisibility
@@ -25,7 +27,7 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -35,6 +37,7 @@ import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -43,13 +46,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.isSensitiveData
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.model.Contact
+import org.meshtastic.core.model.ContactKey
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.contact_draft_prefix
 import org.meshtastic.core.ui.component.SecurityIcon
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.VolumeOff
@@ -119,7 +127,9 @@ private fun ContactHeader(
         AssistChip(
             onClick = onNodeChipClick,
             modifier =
-            Modifier.width(IntrinsicSize.Min).height(32.dp).semantics { contentDescription = contact.shortName },
+            Modifier.width(IntrinsicSize.Min).heightIn(min = 32.dp).semantics {
+                contentDescription = contact.shortName
+            },
             label = {
                 Text(
                     text = contact.shortName,
@@ -135,13 +145,12 @@ private fun ContactHeader(
         val isBroadcast = with(contact.contactKey) { getOrNull(1) == '^' || endsWith("^all") || endsWith("^broadcast") }
 
         if (isBroadcast && channels != null) {
-            val channelIndex = contact.contactKey[0].digitToIntOrNull()
-            channelIndex?.let { index -> SecurityIcon(channels, index) }
+            ContactKey(contact.contactKey).channelOrNull?.let { index -> SecurityIcon(channels, index) }
         }
 
         Text(
             modifier = Modifier.padding(start = 8.dp).weight(1f),
-            style = MaterialTheme.typography.bodyLarge,
+            style = MaterialTheme.typography.bodyLargeEmphasized,
             fontWeight = FontWeight.Medium,
             overflow = TextOverflow.Ellipsis,
             maxLines = 1,
@@ -165,10 +174,18 @@ private fun ChatMetadata(contact: Contact, modifier: Modifier = Modifier) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        // An unsent draft outranks the last message: it is the thing this row is waiting on the user for.
+        val hasDraft = contact.draft.isNotBlank()
         Text(
-            text = contact.lastMessageText.orEmpty(),
-            modifier = Modifier.weight(1f),
+            text =
+            if (hasDraft) {
+                stringResource(Res.string.contact_draft_prefix, contact.draft)
+            } else {
+                contact.lastMessageText.orEmpty()
+            },
+            modifier = Modifier.weight(1f).semantics { isSensitiveData = true },
             style = MaterialTheme.typography.bodyMedium,
+            color = if (hasDraft) MaterialTheme.colorScheme.tertiary else Color.Unspecified,
             overflow = TextOverflow.Ellipsis,
             maxLines = 2,
         )

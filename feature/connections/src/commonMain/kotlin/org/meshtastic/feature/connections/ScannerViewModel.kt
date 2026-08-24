@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,28 +19,128 @@ package org.meshtastic.feature.connections
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
+import co.touchlab.kermit.Severity
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import org.meshtastic.core.ble.BleDevice
+import org.meshtastic.core.ble.BleScanStartException
+import org.meshtastic.core.ble.BleScanStartFailureReason
+import org.meshtastic.core.ble.BleScanner
+import org.meshtastic.core.ble.MeshtasticBleConstants
+import org.meshtastic.core.common.util.safeCatchingAll
+import org.meshtastic.core.datastore.FirmwareRecoveryDataSource
 import org.meshtastic.core.datastore.RecentAddressesDataSource
+import org.meshtastic.core.datastore.model.PendingFirmwareRecovery
 import org.meshtastic.core.datastore.model.RecentAddress
-import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.util.anonymize
+import org.meshtastic.core.network.repository.NetworkRepository
+import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.UiPrefs
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.bluetooth_disabled
+import org.meshtastic.core.resources.bluetooth_scan_location_services_disabled
+import org.meshtastic.core.resources.bluetooth_scan_missing_permission
+import org.meshtastic.core.resources.bluetooth_scan_start_failed
+import org.meshtastic.core.resources.bluetooth_scan_too_frequent
+import org.meshtastic.core.resources.getPluralStringSuspend
+import org.meshtastic.core.resources.getStringSuspend
+import org.meshtastic.core.resources.local_network_permission_denied_hint
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.connections.model.DeviceListEntry
+import org.meshtastic.feature.connections.model.DiscoveredDevices
 import org.meshtastic.feature.connections.model.GetDiscoveredDevicesUseCase
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
+internal val BLE_SCAN_START_FAILURE_RETRY_COOLDOWN = 15.seconds
+private const val BLE_SCAN_START_FAILURE_MESSAGE_FALLBACK =
+    "Bluetooth scan couldn't start. Try again, or toggle Bluetooth if the problem continues."
+
+// English fallback for local_network_permission_denied_hint when resource lookup is unavailable. Internal so tests
+// can assert the exact surfaced text.
+internal const val LOCAL_NETWORK_PERMISSION_DENIED_HINT_FALLBACK =
+    "Local network access is turned off for Meshtastic. If this radio is on your local network, " +
+        "the connection will fail until you allow local network access in system settings."
+
+/**
+ * How long to block scan restarts after a scan-start failure.
+ *
+ * A cooldown only helps where retrying too soon is itself the problem — Android's scan-start quota, or a registration
+ * failure that needs time to settle. [BleScanStartFailureReason.BluetoothDisabled] and
+ * [BleScanStartFailureReason.LocationServicesDisabled] instead clear the moment the user flips a system toggle, so
+ * holding the scan button dead for 15s after they have fixed it would just look broken.
+ */
+private fun effectiveBleScanRetryCooldown(reason: BleScanStartFailureReason, retryAfter: Duration?): Duration =
+    when (reason) {
+        BleScanStartFailureReason.BluetoothDisabled,
+        BleScanStartFailureReason.LocationServicesDisabled,
+        -> retryAfter ?: Duration.ZERO
+
+        BleScanStartFailureReason.ApplicationRegistrationFailed,
+        BleScanStartFailureReason.MissingScanPermission,
+        BleScanStartFailureReason.ScanningTooFrequently,
+        ->
+            maxOf(BLE_SCAN_START_FAILURE_RETRY_COOLDOWN, retryAfter ?: Duration.ZERO)
+    }
+
+/**
+ * Last-resort English copy used only when compose-resources cannot resolve the translated string.
+ *
+ * Kept in step with the `bluetooth_scan_*` resources so the degraded path still names the actual problem instead of
+ * falling back to generic "scan couldn't start" advice for every reason.
+ */
+private fun untranslatedScanStartFailureMessage(reason: BleScanStartFailureReason, retryCooldownSeconds: Long): String =
+    when (reason) {
+        BleScanStartFailureReason.ScanningTooFrequently -> {
+            val unit = if (retryCooldownSeconds == 1L) "second" else "seconds"
+            "Bluetooth scan limit reached. Try again in $retryCooldownSeconds $unit."
+        }
+
+        BleScanStartFailureReason.BluetoothDisabled -> "Bluetooth is off. Turn it on to scan for nearby devices."
+
+        BleScanStartFailureReason.LocationServicesDisabled ->
+            "Location services are off. Turn them on to scan for nearby devices."
+
+        BleScanStartFailureReason.ApplicationRegistrationFailed,
+        BleScanStartFailureReason.MissingScanPermission,
+        -> BLE_SCAN_START_FAILURE_MESSAGE_FALLBACK
+    }
+
+private fun Duration.roundedUpWholeSeconds(): Long {
+    val completeSeconds = inWholeSeconds
+    return completeSeconds + if (this > completeSeconds.seconds) 1 else 0
+}
+
+/**
+ * Platform-neutral ViewModel that drives the Connections screen: device discovery (BLE/USB/TCP), scan state, current
+ * selection, and connection-progress chatter.
+ *
+ * Subclassed per-platform (see `AndroidScannerViewModel`, `JvmScannerViewModel`) to plug in platform-specific bonding /
+ * permission flows.
+ */
 @Suppress("LongParameterList", "TooManyFunctions")
 open class ScannerViewModel(
     protected val serviceRepository: ServiceRepository,
@@ -49,187 +149,533 @@ open class ScannerViewModel(
     private val radioPrefs: RadioPrefs,
     private val recentAddressesDataSource: RecentAddressesDataSource,
     private val getDiscoveredDevicesUseCase: GetDiscoveredDevicesUseCase,
-    private val dispatchers: org.meshtastic.core.di.CoroutineDispatchers,
-    private val bleScanner: org.meshtastic.core.ble.BleScanner? = null,
+    private val networkRepository: NetworkRepository,
+    private val dispatchers: CoroutineDispatchers,
+    private val uiPrefs: UiPrefs,
+    private val firmwareRecoveryDataSource: FirmwareRecoveryDataSource,
+    private val bleScanner: BleScanner? = null,
 ) : ViewModel() {
-    private val _showMockTransport = MutableStateFlow(false)
-    val showMockTransport: StateFlow<Boolean> = _showMockTransport.asStateFlow()
 
-    private val _errorText = MutableStateFlow<String?>(null)
-    val errorText: StateFlow<String?> = _errorText.asStateFlow()
+    // ── Mock / demo transport ─────────────────────────────────────────────────────────────────
 
-    private val isBleScanningState = MutableStateFlow(false)
-    val isBleScanning: StateFlow<Boolean> = isBleScanningState.asStateFlow()
+    /**
+     * Whether the Demo Mode entries belong in the device list. Observed rather than sampled once: in a release build
+     * the gate opens mid-session, when the user performs the hidden-features gesture in Settings.
+     */
+    val showMockTransport: StateFlow<Boolean> = radioInterfaceService.mockTransportEnabled
 
-    private val scannedBleDevices = MutableStateFlow<Map<String, org.meshtastic.core.ble.BleDevice>>(emptyMap())
+    private val _showReplayTransport = MutableStateFlow(false)
 
-    private var scanJob: kotlinx.coroutines.Job? = null
+    /**
+     * Whether the replay demo entry should be offered alongside [showMockTransport]. The capture asset is a locally
+     * generated artifact that no clean-checkout build carries, and without it replay silently degrades to the plain
+     * mock — so the entry stays hidden rather than advertising behaviour it cannot deliver.
+     */
+    val showReplayTransport: StateFlow<Boolean> = _showReplayTransport.asStateFlow()
+
+    // ── Connection-progress chatter (surfaced as the bottom status pill) ──────────────────────
+    private val _connectionProgressText = MutableStateFlow<String?>(null)
+
+    /**
+     * Transient, fine-grained status text emitted during connect/bonding (e.g. "Bonding…", "Requesting config…").
+     * Nullable because `serviceRepository.connectionProgress` does not emit during steady-state.
+     *
+     * Persistent "Not connected / Connecting / Connected" copy is derived separately in
+     * `ConnectionsViewModel.connectionStatus` so the UI can choose `progress ?: status`.
+     */
+    val connectionProgressText: StateFlow<String?> = _connectionProgressText.asStateFlow()
+
+    // ── BLE scanning ──────────────────────────────────────────────────────────────────────────
+    private val _isBleScanning = MutableStateFlow(false)
+
+    /** Whether a BLE scan is currently active. */
+    val isBleScanning: StateFlow<Boolean> = _isBleScanning.asStateFlow()
+
+    /** User preference that controls whether BLE scanning auto-starts when the Connections screen opens. */
+    val bleAutoScan: StateFlow<Boolean> = uiPrefs.bleAutoScan
+
+    private val scannedBleDevices = MutableStateFlow<Map<String, BleDevice>>(emptyMap())
+    private val discoveryOrder = MutableStateFlow<List<String>>(emptyList())
+    private var scanJob: Job? = null
+    private var scanStartFailureCooldownJob: Job? = null
+    private val scanStartFailureCooldownActive = MutableStateFlow(false)
+    private var scanStartFailureCooldownGeneration = 0
+
+    // Generation counter that owns the `_isBleScanning` flag's cleanup. The scan coroutine's `finally` block may run
+    // asynchronously on the IO dispatcher after a stop+restart has already kicked off a new scan; without this guard
+    // the old job's finally would reset the flag on the new scan's state. Bumped on each start and each stop so that
+    // only the current generation's finally may clear the flag.
+    private val scanGeneration = MutableStateFlow(0)
+
+    // ── Network scanning (NSD gating) ─────────────────────────────────────────────────────────
+    private val _isNetworkScanning = MutableStateFlow(false)
+
+    /** Whether an NSD network scan is currently active. */
+    val isNetworkScanning: StateFlow<Boolean> = _isNetworkScanning.asStateFlow()
+
+    /** User preference that controls whether NSD network scanning auto-starts when the Connections screen opens. */
+    val networkAutoScan: StateFlow<Boolean> = uiPrefs.networkAutoScan
+
+    /**
+     * Resolved NSD services flow, gated by [_isNetworkScanning]. When scanning is inactive, emits `emptyList()` so
+     * `NsdManager.discoverServices()` is never triggered. Android 15+ shows a system consent dialog the first time
+     * `resolvedList` is subscribed, so the gate ensures NSD only runs when the user explicitly requests it.
+     */
+    private val gatedResolvedList =
+        _isNetworkScanning.flatMapLatest { scanning ->
+            if (scanning) networkRepository.resolvedList else flowOf(emptyList())
+        }
+
+    private val discoveredDevicesFlow: StateFlow<DiscoveredDevices> =
+        combine(showMockTransport, showReplayTransport, ::Pair)
+            .flatMapLatest { (showMock, showReplay) ->
+                getDiscoveredDevicesUseCase.invoke(showMock, showReplay, gatedResolvedList)
+            }
+            .stateInWhileSubscribed(initialValue = DiscoveredDevices())
 
     init {
-        _showMockTransport.value = radioInterfaceService.isMockTransport()
-    }
-
-    fun startBleScan() {
-        if (isBleScanningState.value || bleScanner == null) return
-
-        isBleScanningState.value = true
-        scannedBleDevices.value = emptyMap()
-
-        scanJob =
-            safeLaunch(tag = "startBleScan") {
-                try {
-                    bleScanner
-                        .scan(
-                            timeout = kotlin.time.Duration.INFINITE,
-                            serviceUuid = org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID,
-                        )
-                        .flowOn(dispatchers.io)
-                        .collect { device ->
-                            if (!scannedBleDevices.value.containsKey(device.address)) {
-                                scannedBleDevices.update { current -> current + (device.address to device) }
-                            }
-                        }
-                } finally {
-                    isBleScanningState.value = false
+        // Sampled once, unlike [showMockTransport]: whether the replay capture ships is fixed when the build is
+        // assembled, so there is nothing for it to react to.
+        _showReplayTransport.value = radioInterfaceService.isReplayTransportAvailable
+        serviceRepository.connectionProgress.onEach { _connectionProgressText.value = it }.launchIn(viewModelScope)
+        serviceRepository.connectionState
+            .onEach { state ->
+                if (state is ConnectionState.Connected) {
+                    stopAllScans()
+                    clearRecoveryIfConnectedDeviceReturned()
                 }
             }
-    }
-
-    fun stopBleScan() {
-        scanJob?.cancel()
-        scanJob = null
-        isBleScanningState.value = false
-    }
-
-    private val discoveredDevicesFlow =
-        showMockTransport
-            .flatMapLatest { showMock -> getDiscoveredDevicesUseCase.invoke(showMock) }
-            .stateInWhileSubscribed(initialValue = null)
-
-    /** A combined list of bonded and scanned BLE devices for the UI. */
-    val bleDevicesForUi: StateFlow<List<DeviceListEntry>> =
-        kotlinx.coroutines.flow
-            .combine(discoveredDevicesFlow, scannedBleDevices) { discovered, scannedMap ->
-                val bonded = discovered?.bleDevices?.filterIsInstance<DeviceListEntry.Ble>() ?: emptyList()
-                val bondedAddresses = bonded.map { it.address }.toSet()
-
-                // Add scanned devices that aren't already in the bonded list.
-                // These are explicitly marked as unbonded so the UI routes through
-                // requestBonding() — which on Android triggers createBond() for the
-                // pairing dialog before connecting.
-                val unbondedScanned =
-                    scannedMap.values
-                        .filter { it.address !in bondedAddresses }
-                        .map { DeviceListEntry.Ble(device = it, bonded = false) }
-
-                // Sort by name
-                (bonded + unbondedScanned).sortedBy { it.name }
-            }
-            .flowOn(dispatchers.default)
-            .distinctUntilChanged()
-            .stateInWhileSubscribed(initialValue = emptyList())
-
-    /** UI StateFlow for USB devices. */
-    val usbDevicesForUi: StateFlow<List<DeviceListEntry>> =
-        discoveredDevicesFlow
-            .map { it?.usbDevices ?: emptyList() }
-            .distinctUntilChanged()
-            .stateInWhileSubscribed(initialValue = emptyList())
-
-    /** UI StateFlow for discovered TCP devices (NSD). */
-    val discoveredTcpDevicesForUi: StateFlow<List<DeviceListEntry>> =
-        discoveredDevicesFlow
-            .map { it?.discoveredTcpDevices ?: emptyList() }
-            .distinctUntilChanged()
-            .stateInWhileSubscribed(initialValue = emptyList())
-
-    /** UI StateFlow for recent TCP devices. */
-    val recentTcpDevicesForUi: StateFlow<List<DeviceListEntry>> =
-        discoveredDevicesFlow
-            .map { it?.recentTcpDevices ?: emptyList() }
-            .distinctUntilChanged()
-            .stateInWhileSubscribed(initialValue = emptyList())
-
-    val selectedAddressFlow: StateFlow<String?> = radioInterfaceService.currentDeviceAddressFlow
-
-    /** The persisted device name from the last selection, for use as a UI fallback. */
-    val persistedDeviceName: StateFlow<String?> = radioPrefs.devName
-
-    val selectedNotNullFlow: StateFlow<String> =
-        selectedAddressFlow
-            .map { it ?: NO_DEVICE_SELECTED }
-            .stateInWhileSubscribed(initialValue = selectedAddressFlow.value ?: NO_DEVICE_SELECTED)
-
-    val supportedDeviceTypes: List<org.meshtastic.core.model.DeviceType> = radioInterfaceService.supportedDeviceTypes
-
-    init {
-        serviceRepository.connectionProgress.onEach { _errorText.value = it }.launchIn(viewModelScope)
+            .launchIn(viewModelScope)
         Logger.d { "ScannerViewModel created" }
     }
 
     override fun onCleared() {
         super.onCleared()
+        stopBleScan()
+        stopNetworkScan()
         Logger.d { "ScannerViewModel cleared" }
     }
 
-    fun setErrorText(text: String) {
-        _errorText.value = text
+    // ── Device lists for UI ──────────────────────────────────────────────────────────────────
+
+    /**
+     * BLE devices for the UI — restricted to those currently visible via an active scan.
+     *
+     * Previously bonded / system-paired peripherals that aren't advertising right now are intentionally excluded so the
+     * list reflects what's actually nearby. The currently-selected device is the one exception: it's always kept so the
+     * active connection stays visible (a connected radio stops advertising and would otherwise drop out).
+     *
+     * Sorted for stability to prevent "shifting" as advertisements arrive: bonded devices appear first (sorted by
+     * name), followed by unbonded scanned devices in the order they were first discovered. RSSI updates are reflected
+     * on the cards but do not trigger a re-sort.
+     */
+    val bleDevicesForUi: StateFlow<List<DeviceListEntry>> =
+        combine(
+            discoveredDevicesFlow,
+            scannedBleDevices,
+            discoveryOrder,
+            radioInterfaceService.currentDeviceAddressFlow,
+        ) { discovered, scannedMap, order, selectedAddress ->
+            // Surface a bonded device only when it's currently visible via scan (advertising) or it's the selected
+            // device — this hides stale system-bonded peripherals that aren't nearby.
+            val bonded =
+                discovered.bleDevices.filterIsInstance<DeviceListEntry.Ble>().filter {
+                    it.address in scannedMap || it.fullAddress == selectedAddress
+                }
+            val bondedAddresses = bonded.mapTo(mutableSetOf()) { it.address }
+
+            // Scanned-but-not-bonded devices are explicitly flagged unbonded so the UI routes through
+            // requestBonding() — which on Android triggers createBond() for the pairing dialog before connecting.
+            // Preserves discovery order to prevent items jumping around during the scan burst.
+            val unbondedScanned =
+                order
+                    .filter { it !in bondedAddresses }
+                    .mapNotNull { address ->
+                        scannedMap[address]?.let { DeviceListEntry.Ble(device = it, bonded = false) }
+                    }
+
+            // For bonded devices, attach the latest scan RSSI (if we've seen an advertisement this session) so the
+            // UI can show the signal indicator, but keep them sorted by name for stability.
+            val bondedForUi =
+                bonded
+                    .map { entry ->
+                        val scanned = scannedMap[entry.address]
+                        if (scanned != null && scanned.rssi != null) entry.copy(device = scanned) else entry
+                    }
+                    .sortedBy { it.name }
+
+            bondedForUi + unbondedScanned
+        }
+            .flowOn(dispatchers.default)
+            .distinctUntilChanged()
+            .stateInWhileSubscribed(initialValue = emptyList())
+
+    val usbDevicesForUi: StateFlow<List<DeviceListEntry>> =
+        discoveredDevicesFlow.map { it.usbDevices }.distinctUntilChanged().stateInWhileSubscribed(emptyList())
+
+    /** Discovered (NSD) TCP devices for the Connections device list, gated by the network-scan flag. */
+    val discoveredTcpDevicesForUi: StateFlow<List<DeviceListEntry>> =
+        discoveredDevicesFlow.map { it.discoveredTcpDevices }.distinctUntilChanged().stateInWhileSubscribed(emptyList())
+
+    /** Recently-used TCP addresses for the Connections device list. */
+    val recentTcpDevicesForUi: StateFlow<List<DeviceListEntry>> =
+        discoveredDevicesFlow.map { it.recentTcpDevices }.distinctUntilChanged().stateInWhileSubscribed(emptyList())
+
+    /**
+     * A firmware update that didn't finish, leaving a device stranded in bootloader mode. Non-null drives the recovery
+     * banner on the Connections screen, whose tap deep-links into the Firmware Update screen to re-flash the device.
+     */
+    val pendingRecovery: StateFlow<PendingFirmwareRecovery?> =
+        firmwareRecoveryDataSource.pending.distinctUntilChanged().stateInWhileSubscribed(initialValue = null)
+
+    // ── Current selection ────────────────────────────────────────────────────────────────────
+
+    /** The currently-selected device address, or `null` when nothing is selected. */
+    val selectedAddressFlow: StateFlow<String?> = radioInterfaceService.currentDeviceAddressFlow
+
+    /** The persisted device name from the last selection, for use as a UI fallback. */
+    val persistedDeviceName: StateFlow<String?> = radioPrefs.devName
+
+    /** Non-null variant of [selectedAddressFlow] that substitutes [NO_DEVICE_SELECTED] for `null`. */
+    val selectedNotNullFlow: StateFlow<String> =
+        selectedAddressFlow
+            .map { it ?: NO_DEVICE_SELECTED }
+            .stateInWhileSubscribed(initialValue = selectedAddressFlow.value ?: NO_DEVICE_SELECTED)
+
+    // ── Active transport pane ────────────────────────────────────────────────────────────────
+
+    /** The single transport pane currently rendered by the Connections screen. */
+    val activeTransport: StateFlow<DeviceType> =
+        combine(uiPrefs.selectedConnectionTransport, selectedAddressFlow) { preferred, selectedAddress ->
+            resolveActiveTransport(preferred, selectedAddress)
+        }
+            .distinctUntilChanged()
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.Eagerly,
+                initialValue =
+                resolveActiveTransport(uiPrefs.selectedConnectionTransport.value, selectedAddressFlow.value),
+            )
+
+    /** Selects one Connections transport pane and stops scans that cannot belong to that pane. */
+    fun selectTransport(type: DeviceType) {
+        when (type) {
+            DeviceType.BLE -> stopNetworkScan()
+            DeviceType.TCP -> stopBleScan()
+            DeviceType.USB -> stopAllScans()
+        }
+        if (activeTransport.value != type) uiPrefs.setSelectedConnectionTransport(type)
     }
 
+    // ── Scan commands ────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Starts BLE scanning. Enforces mutual exclusion (cancels any active network scan first). No-op if already scanning
+     * or if [bleScanner] is null.
+     *
+     * The `finally` that clears [_isBleScanning] is guarded by a generation counter so a stale cancellation from a
+     * prior scan cannot reset the flag on this new scan's state.
+     */
+    fun startBleScan() {
+        if (_isBleScanning.value || bleScanner == null || scanStartFailureCooldownActive.value) return
+        // Cancel the other scan first so only one flag is ever true. Both stop methods are idempotent.
+        stopNetworkScan()
+
+        _isBleScanning.value = true
+        val generation = scanGeneration.value + 1
+        scanGeneration.value = generation
+
+        scanJob =
+            safeLaunch(tag = "startBleScan") {
+                try {
+                    bleScanner
+                        .scan(timeout = Duration.INFINITE, serviceUuid = MeshtasticBleConstants.SERVICE_UUID)
+                        .flowOn(dispatchers.io)
+                        .collect { device ->
+                            scannedBleDevices.update { current ->
+                                val existing = current[device.address]
+                                // Replace if RSSI changed so the UI reflects the latest advertisement. Keep the same
+                                // instance otherwise to avoid unnecessary recomposition.
+                                if (existing != null && existing.rssi == device.rssi) {
+                                    current
+                                } else {
+                                    current + (device.address to device)
+                                }
+                            }
+                            if (device.address !in discoveryOrder.value) {
+                                discoveryOrder.update { it + device.address }
+                            }
+                        }
+                } catch (ex: BleScanStartException) {
+                    handleBleScanStartFailure(ex, generation)
+                } finally {
+                    if (scanGeneration.value == generation) {
+                        _isBleScanning.value = false
+                        scanJob = null
+                    }
+                }
+            }
+    }
+
+    /**
+     * Starts BLE scanning for screen-entry auto-scan only when no device is already selected. Manual scan toggles call
+     * [startBleScan] directly so users can still discover/switch devices while connected.
+     */
+    fun startBleAutoScan() {
+        if (activeTransport.value != DeviceType.BLE) return
+        val selectedAddress = selectedAddressFlow.value
+        if (selectedAddress != null && selectedAddress != NO_DEVICE_SELECTED) return
+        startBleScan()
+    }
+
+    /**
+     * Cancels the active BLE scan and resets the scanning flag. Idempotent.
+     *
+     * Bumps [scanGeneration] so any in-flight `finally` from the cancelled job cannot reset `_isBleScanning` after a
+     * subsequent [startBleScan] has flipped it back to `true`.
+     */
+    fun stopBleScan() {
+        scanJob?.cancel()
+        scanJob = null
+        scanGeneration.value = scanGeneration.value + 1
+        _isBleScanning.value = false
+    }
+
+    /**
+     * Toggles BLE scanning. Persists the auto-scan preference only when the scan actually activates, and clears the
+     * opposite [networkAutoScan] preference to keep persisted state consistent with the runtime mutual-exclusion
+     * invariant.
+     */
+    fun toggleBleScan() {
+        if (_isBleScanning.value) {
+            stopBleScan()
+            uiPrefs.setBleAutoScan(false)
+        } else {
+            startBleScan()
+            // Only persist enable-intent (and clear the opposite pref) if start actually worked — e.g. not
+            // blocked by a null bleScanner.
+            if (_isBleScanning.value) {
+                uiPrefs.setBleAutoScan(true)
+                uiPrefs.setNetworkAutoScan(false)
+            }
+        }
+    }
+
+    private suspend fun handleBleScanStartFailure(exception: BleScanStartException, generation: Int) {
+        if (scanGeneration.value != generation) return
+
+        scanGeneration.value = generation + 1
+        scanJob = null
+        _isBleScanning.value = false
+        uiPrefs.setBleAutoScan(false)
+        val retryCooldown = effectiveBleScanRetryCooldown(exception.reason, exception.retryAfter)
+        if (retryCooldown > Duration.ZERO) startBleScanRetryCooldown(retryCooldown)
+
+        Logger.w(exception) {
+            "BLE scan could not start: ${exception.reason.androidCode} (${exception.reason.description})"
+        }
+        val retryCooldownSeconds = retryCooldown.roundedUpWholeSeconds()
+        val errorMessage =
+            safeCatchingAll {
+                when (exception.reason) {
+                    BleScanStartFailureReason.MissingScanPermission ->
+                        getStringSuspend(Res.string.bluetooth_scan_missing_permission)
+
+                    BleScanStartFailureReason.ApplicationRegistrationFailed ->
+                        getStringSuspend(Res.string.bluetooth_scan_start_failed)
+
+                    BleScanStartFailureReason.ScanningTooFrequently ->
+                        getPluralStringSuspend(
+                            Res.plurals.bluetooth_scan_too_frequent,
+                            retryCooldownSeconds.coerceAtMost(Int.MAX_VALUE.toLong()).toInt(),
+                            retryCooldownSeconds,
+                        )
+
+                    BleScanStartFailureReason.BluetoothDisabled -> getStringSuspend(Res.string.bluetooth_disabled)
+
+                    BleScanStartFailureReason.LocationServicesDisabled ->
+                        getStringSuspend(Res.string.bluetooth_scan_location_services_disabled)
+                }
+            }
+                .getOrDefault(untranslatedScanStartFailureMessage(exception.reason, retryCooldownSeconds))
+        serviceRepository.setErrorMessage(text = errorMessage, severity = Severity.Warn)
+    }
+
+    private fun startBleScanRetryCooldown(cooldown: Duration) {
+        val generation = ++scanStartFailureCooldownGeneration
+        scanStartFailureCooldownActive.value = true
+        scanStartFailureCooldownJob?.cancel()
+        scanStartFailureCooldownJob =
+            viewModelScope.launch {
+                try {
+                    delay(cooldown)
+                } finally {
+                    if (scanStartFailureCooldownGeneration == generation) {
+                        scanStartFailureCooldownActive.value = false
+                        scanStartFailureCooldownJob = null
+                    }
+                }
+            }
+    }
+
+    /**
+     * Starts NSD network scanning. Enforces the same mutual-exclusion invariant as [startBleScan]; starting Network
+     * cancels any active BLE scan first.
+     */
+    fun startNetworkScan() {
+        if (_isNetworkScanning.value) return
+        // Cancel the other scan first so only one flag is ever true. Both stop methods are idempotent.
+        stopBleScan()
+        _isNetworkScanning.value = true
+    }
+
+    /** Starts NSD scanning for screen-entry auto-scan only when the Network pane is active. */
+    fun startNetworkAutoScan() {
+        if (activeTransport.value != DeviceType.TCP) return
+        val selectedAddress = selectedAddressFlow.value
+        if (selectedAddress != null && selectedAddress != NO_DEVICE_SELECTED) return
+        startNetworkScan()
+    }
+
+    /** Cancels the active network scan and resets the scanning flag. Idempotent. */
+    fun stopNetworkScan() {
+        _isNetworkScanning.value = false
+    }
+
+    /** Stops both BLE and network scans. Idempotent — safe to call when neither scan is active. */
+    private fun stopAllScans() {
+        stopBleScan()
+        stopNetworkScan()
+    }
+
+    /**
+     * Toggles network scanning. Persists the auto-scan preference only when the scan actually activates, and clears the
+     * opposite [bleAutoScan] preference to keep persisted state consistent with the runtime mutual-exclusion invariant.
+     */
+    fun toggleNetworkScan() {
+        if (_isNetworkScanning.value) {
+            stopNetworkScan()
+            uiPrefs.setNetworkAutoScan(false)
+        } else {
+            startNetworkScan()
+            // Only persist enable-intent (and clear the opposite pref) if start actually worked.
+            if (_isNetworkScanning.value) {
+                uiPrefs.setNetworkAutoScan(true)
+                uiPrefs.setBleAutoScan(false)
+            }
+        }
+    }
+
+    /**
+     * Persists the user's intent to auto-scan the network on next screen entry without flipping the active scan flag.
+     * Used by the Connections screen when it must defer the actual scan start until after the system permission grant
+     * dialog resolves. When [enabled] is `true`, also clears [bleAutoScan] so persisted state mirrors the runtime
+     * mutual-exclusion invariant (at most one of [bleAutoScan] / [networkAutoScan] may be true).
+     */
+    fun persistNetworkAutoScanIntent(enabled: Boolean) {
+        uiPrefs.setNetworkAutoScan(enabled)
+        if (enabled) uiPrefs.setBleAutoScan(false)
+    }
+
+    // ── Device selection / disconnect ───────────────────────────────────────────────────────
+
+    /** Asynchronously tells the radio controller to connect to [address]. */
     fun changeDeviceAddress(address: String) {
         Logger.i { "Attempting to change device address to ${address.anonymize()}" }
-        radioController.setDeviceAddress(address)
+        safeLaunch(tag = "changeDeviceAddress") { radioController.setDeviceAddress(address) }
     }
 
+    /**
+     * Persists [address] in the recent-TCP list under [name]. No-op when [address] does not start with
+     * [TCP_DEVICE_PREFIX].
+     */
     fun addRecentAddress(address: String, name: String) {
-        if (!address.startsWith("t")) return
+        if (!address.startsWith(TCP_DEVICE_PREFIX)) return
         safeLaunch(tag = "addRecentAddress") { recentAddressesDataSource.add(RecentAddress(address, name)) }
     }
 
+    /** Removes [address] from the recent-TCP list. */
     fun removeRecentAddress(address: String) {
         safeLaunch(tag = "removeRecentAddress") { recentAddressesDataSource.remove(address) }
     }
 
     /**
-     * Called by the GUI when a new device has been selected by the user.
-     *
-     * @return true if the connection was initiated immediately.
+     * Connects to a manually-entered TCP address. Wraps the manual-entry flow with the same scan-cancel invariant as
+     * [onSelected]: stops discovery before connection setup so the manual connect does not race an in-progress
+     * BLE/network scan for radio resources.
      */
-    fun onSelected(it: DeviceListEntry): Boolean = when (it) {
-        is DeviceListEntry.Ble -> {
-            if (it.bonded) {
-                radioPrefs.setDevName(it.name)
-                changeDeviceAddress(it.fullAddress)
+    fun connectToManualAddress(fullAddress: String) {
+        val displayAddress = fullAddress.removePrefix(TCP_DEVICE_PREFIX)
+        stopAllScans()
+        uiPrefs.setSelectedConnectionTransport(DeviceType.TCP)
+        addRecentAddress(fullAddress, displayAddress)
+        changeDeviceAddress(fullAddress)
+    }
+
+    /**
+     * Surfaces the local-network warning for a TCP connect that proceeds without `ACCESS_LOCAL_NETWORK` — either the
+     * permission is permanently denied (no prompt possible) or an in-context request just resolved as a denial. The
+     * connect is attempted regardless (the target may be a public host or VPN peer, which the permission does not
+     * govern); this message names the fix for the case where it IS local and the connect is about to time out.
+     */
+    fun warnLocalNetworkPermissionDenied() {
+        safeLaunch(tag = "warnLocalNetworkPermissionDenied") {
+            val message =
+                safeCatchingAll { getStringSuspend(Res.string.local_network_permission_denied_hint) }
+                    .getOrDefault(LOCAL_NETWORK_PERMISSION_DENIED_HINT_FALLBACK)
+            serviceRepository.setErrorMessage(text = message, severity = Severity.Warn)
+        }
+    }
+
+    /**
+     * Called by the UI when a device has been tapped. BLE and USB entries may still need bonding/permission — the
+     * concrete return value tells the caller whether the connection was initiated immediately.
+     *
+     * @return `true` if the connection has been initiated; `false` if bonding/permission is pending.
+     */
+    fun onSelected(entry: DeviceListEntry): Boolean {
+        // Stop discovery the moment the user picks a device, before any connection setup runs. The connect
+        // attempt (BLE GATT or TCP) contends with an active BLE scan for the same radio resources during the
+        // handshake; cancelling here keeps the lifecycle ordered: scan → stop → connect.
+        stopAllScans()
+        recordSelectedTransport(entry.fullAddress)
+        radioPrefs.setDevName(entry.name)
+        addRecentAddress(entry.fullAddress, entry.name)
+        return when (entry) {
+            is DeviceListEntry.Ble -> {
+                if (entry.bonded) {
+                    changeDeviceAddress(entry.fullAddress)
+                    true
+                } else {
+                    requestBonding(entry)
+                    false
+                }
+            }
+
+            is DeviceListEntry.Usb -> {
+                if (entry.bonded) {
+                    changeDeviceAddress(entry.fullAddress)
+                    true
+                } else {
+                    requestPermission(entry)
+                    false
+                }
+            }
+
+            is DeviceListEntry.Tcp -> {
+                safeLaunch(tag = "onSelectedTcp") { changeDeviceAddress(entry.fullAddress) }
                 true
-            } else {
-                radioPrefs.setDevName(it.name)
-                requestBonding(it)
-                false
             }
-        }
-        is DeviceListEntry.Usb -> {
-            if (it.bonded) {
-                radioPrefs.setDevName(it.name)
-                changeDeviceAddress(it.fullAddress)
+
+            is DeviceListEntry.Mock -> {
+                changeDeviceAddress(entry.fullAddress)
                 true
-            } else {
-                radioPrefs.setDevName(it.name)
-                requestPermission(it)
-                false
             }
-        }
-        is DeviceListEntry.Tcp -> {
-            safeLaunch(tag = "onSelectedTcp") {
-                radioPrefs.setDevName(it.name)
-                addRecentAddress(it.fullAddress, it.name)
-                changeDeviceAddress(it.fullAddress)
+
+            is DeviceListEntry.Replay -> {
+                changeDeviceAddress(entry.fullAddress)
+                true
             }
-            true
-        }
-        is DeviceListEntry.Mock -> {
-            radioPrefs.setDevName(it.name)
-            changeDeviceAddress(it.fullAddress)
-            true
         }
     }
 
@@ -244,12 +690,42 @@ open class ScannerViewModel(
         changeDeviceAddress(entry.fullAddress)
     }
 
-    protected open fun requestPermission(entry: DeviceListEntry.Usb) {}
+    /** Platform hook for requesting USB permission before connecting; default is a no-op. */
+    protected open fun requestPermission(entry: DeviceListEntry.Usb) = Unit
 
+    /** Clears the persisted device name and tells the radio controller to disconnect. */
     fun disconnect() {
         radioPrefs.setDevName(null)
         changeDeviceAddress(NO_DEVICE_SELECTED)
     }
-}
 
-const val NO_DEVICE_SELECTED = "n"
+    /**
+     * Manually retire the pending recovery record (user dismissed the banner). Needed for a device whose bootloader
+     * can't be re-flashed over BLE at all — e.g. a stock nRF Legacy-DFU bootloader that never answers its control point
+     * — where recovery persistently fails and would otherwise nag forever (it only auto-clears on a successful
+     * reconnect or re-flash). The record is re-created next time a DFU update is triggered.
+     */
+    fun dismissRecovery() {
+        safeLaunch(tag = "dismissRecovery") { firmwareRecoveryDataSource.clear() }
+    }
+
+    /**
+     * If the device that had a pending recovery record has since reconnected normally (e.g. its bootloader timed out
+     * and booted a valid app, or a prior update actually succeeded), retire the record so the banner doesn't linger.
+     */
+    private fun clearRecoveryIfConnectedDeviceReturned() {
+        safeLaunch(tag = "clearRecovery") {
+            val recovery = firmwareRecoveryDataSource.pending.first() ?: return@safeLaunch
+            if (recovery.fullAddress == radioInterfaceService.currentDeviceAddressFlow.value) {
+                firmwareRecoveryDataSource.clear()
+            }
+        }
+    }
+
+    private fun resolveActiveTransport(preferred: DeviceType?, selectedAddress: String?): DeviceType =
+        preferred ?: selectedAddress?.let(DeviceType::fromAddress) ?: DeviceType.BLE
+
+    private fun recordSelectedTransport(fullAddress: String) {
+        DeviceType.fromAddress(fullAddress)?.let(uiPrefs::setSelectedConnectionTransport)
+    }
+}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 @file:Suppress("MatchingDeclarationName")
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
 
 package org.meshtastic.core.ui.theme
 
@@ -25,9 +26,13 @@ import androidx.compose.material3.MotionScheme.Companion.expressive
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFontFamilyResolver
+import co.touchlab.kermit.Logger
+import kotlin.coroutines.cancellation.CancellationException
 
 private val lightScheme =
     lightColorScheme(
@@ -107,162 +112,6 @@ private val darkScheme =
         surfaceContainerHighest = surfaceContainerHighestDark,
     )
 
-private val mediumContrastLightColorScheme =
-    lightColorScheme(
-        primary = primaryLightMediumContrast,
-        onPrimary = onPrimaryLightMediumContrast,
-        primaryContainer = primaryContainerLightMediumContrast,
-        onPrimaryContainer = onPrimaryContainerLightMediumContrast,
-        secondary = secondaryLightMediumContrast,
-        onSecondary = onSecondaryLightMediumContrast,
-        secondaryContainer = secondaryContainerLightMediumContrast,
-        onSecondaryContainer = onSecondaryContainerLightMediumContrast,
-        tertiary = tertiaryLightMediumContrast,
-        onTertiary = onTertiaryLightMediumContrast,
-        tertiaryContainer = tertiaryContainerLightMediumContrast,
-        onTertiaryContainer = onTertiaryContainerLightMediumContrast,
-        error = errorLightMediumContrast,
-        onError = onErrorLightMediumContrast,
-        errorContainer = errorContainerLightMediumContrast,
-        onErrorContainer = onErrorContainerLightMediumContrast,
-        background = backgroundLightMediumContrast,
-        onBackground = onBackgroundLightMediumContrast,
-        surface = surfaceLightMediumContrast,
-        onSurface = onSurfaceLightMediumContrast,
-        surfaceVariant = surfaceVariantLightMediumContrast,
-        onSurfaceVariant = onSurfaceVariantLightMediumContrast,
-        outline = outlineLightMediumContrast,
-        outlineVariant = outlineVariantLightMediumContrast,
-        scrim = scrimLightMediumContrast,
-        inverseSurface = inverseSurfaceLightMediumContrast,
-        inverseOnSurface = inverseOnSurfaceLightMediumContrast,
-        inversePrimary = inversePrimaryLightMediumContrast,
-        surfaceDim = surfaceDimLightMediumContrast,
-        surfaceBright = surfaceBrightLightMediumContrast,
-        surfaceContainerLowest = surfaceContainerLowestLightMediumContrast,
-        surfaceContainerLow = surfaceContainerLowLightMediumContrast,
-        surfaceContainer = surfaceContainerLightMediumContrast,
-        surfaceContainerHigh = surfaceContainerHighLightMediumContrast,
-        surfaceContainerHighest = surfaceContainerHighestLightMediumContrast,
-    )
-
-private val highContrastLightColorScheme =
-    lightColorScheme(
-        primary = primaryLightHighContrast,
-        onPrimary = onPrimaryLightHighContrast,
-        primaryContainer = primaryContainerLightHighContrast,
-        onPrimaryContainer = onPrimaryContainerLightHighContrast,
-        secondary = secondaryLightHighContrast,
-        onSecondary = onSecondaryLightHighContrast,
-        secondaryContainer = secondaryContainerLightHighContrast,
-        onSecondaryContainer = onSecondaryContainerLightHighContrast,
-        tertiary = tertiaryLightHighContrast,
-        onTertiary = onTertiaryLightHighContrast,
-        tertiaryContainer = tertiaryContainerLightHighContrast,
-        onTertiaryContainer = onTertiaryContainerLightHighContrast,
-        error = errorLightHighContrast,
-        onError = onErrorLightHighContrast,
-        errorContainer = errorContainerLightHighContrast,
-        onErrorContainer = onErrorContainerLightHighContrast,
-        background = backgroundLightHighContrast,
-        onBackground = onBackgroundLightHighContrast,
-        surface = surfaceLightHighContrast,
-        onSurface = onSurfaceLightHighContrast,
-        surfaceVariant = surfaceVariantLightHighContrast,
-        onSurfaceVariant = onSurfaceVariantLightHighContrast,
-        outline = outlineLightHighContrast,
-        outlineVariant = outlineVariantLightHighContrast,
-        scrim = scrimLightHighContrast,
-        inverseSurface = inverseSurfaceLightHighContrast,
-        inverseOnSurface = inverseOnSurfaceLightHighContrast,
-        inversePrimary = inversePrimaryLightHighContrast,
-        surfaceDim = surfaceDimLightHighContrast,
-        surfaceBright = surfaceBrightLightHighContrast,
-        surfaceContainerLowest = surfaceContainerLowestLightHighContrast,
-        surfaceContainerLow = surfaceContainerLowLightHighContrast,
-        surfaceContainer = surfaceContainerLightHighContrast,
-        surfaceContainerHigh = surfaceContainerHighLightHighContrast,
-        surfaceContainerHighest = surfaceContainerHighestLightHighContrast,
-    )
-
-private val mediumContrastDarkColorScheme =
-    darkColorScheme(
-        primary = primaryDarkMediumContrast,
-        onPrimary = onPrimaryDarkMediumContrast,
-        primaryContainer = primaryContainerDarkMediumContrast,
-        onPrimaryContainer = onPrimaryContainerDarkMediumContrast,
-        secondary = secondaryDarkMediumContrast,
-        onSecondary = onSecondaryDarkMediumContrast,
-        secondaryContainer = secondaryContainerDarkMediumContrast,
-        onSecondaryContainer = onSecondaryContainerDarkMediumContrast,
-        tertiary = tertiaryDarkMediumContrast,
-        onTertiary = onTertiaryDarkMediumContrast,
-        tertiaryContainer = tertiaryContainerDarkMediumContrast,
-        onTertiaryContainer = onTertiaryContainerDarkMediumContrast,
-        error = errorDarkMediumContrast,
-        onError = onErrorDarkMediumContrast,
-        errorContainer = errorContainerDarkMediumContrast,
-        onErrorContainer = onErrorContainerDarkMediumContrast,
-        background = backgroundDarkMediumContrast,
-        onBackground = onBackgroundDarkMediumContrast,
-        surface = surfaceDarkMediumContrast,
-        onSurface = onSurfaceDarkMediumContrast,
-        surfaceVariant = surfaceVariantDarkMediumContrast,
-        onSurfaceVariant = onSurfaceVariantDarkMediumContrast,
-        outline = outlineDarkMediumContrast,
-        outlineVariant = outlineVariantDarkMediumContrast,
-        scrim = scrimDarkMediumContrast,
-        inverseSurface = inverseSurfaceDarkMediumContrast,
-        inverseOnSurface = inverseOnSurfaceDarkMediumContrast,
-        inversePrimary = inversePrimaryDarkMediumContrast,
-        surfaceDim = surfaceDimDarkMediumContrast,
-        surfaceBright = surfaceBrightDarkMediumContrast,
-        surfaceContainerLowest = surfaceContainerLowestDarkMediumContrast,
-        surfaceContainerLow = surfaceContainerLowDarkMediumContrast,
-        surfaceContainer = surfaceContainerDarkMediumContrast,
-        surfaceContainerHigh = surfaceContainerHighDarkMediumContrast,
-        surfaceContainerHighest = surfaceContainerHighestDarkMediumContrast,
-    )
-
-private val highContrastDarkColorScheme =
-    darkColorScheme(
-        primary = primaryDarkHighContrast,
-        onPrimary = onPrimaryDarkHighContrast,
-        primaryContainer = primaryContainerDarkHighContrast,
-        onPrimaryContainer = onPrimaryContainerDarkHighContrast,
-        secondary = secondaryDarkHighContrast,
-        onSecondary = onSecondaryDarkHighContrast,
-        secondaryContainer = secondaryContainerDarkHighContrast,
-        onSecondaryContainer = onSecondaryContainerDarkHighContrast,
-        tertiary = tertiaryDarkHighContrast,
-        onTertiary = onTertiaryDarkHighContrast,
-        tertiaryContainer = tertiaryContainerDarkHighContrast,
-        onTertiaryContainer = onTertiaryContainerDarkHighContrast,
-        error = errorDarkHighContrast,
-        onError = onErrorDarkHighContrast,
-        errorContainer = errorContainerDarkHighContrast,
-        onErrorContainer = onErrorContainerDarkHighContrast,
-        background = backgroundDarkHighContrast,
-        onBackground = onBackgroundDarkHighContrast,
-        surface = surfaceDarkHighContrast,
-        onSurface = onSurfaceDarkHighContrast,
-        surfaceVariant = surfaceVariantDarkHighContrast,
-        onSurfaceVariant = onSurfaceVariantDarkHighContrast,
-        outline = outlineDarkHighContrast,
-        outlineVariant = outlineVariantDarkHighContrast,
-        scrim = scrimDarkHighContrast,
-        inverseSurface = inverseSurfaceDarkHighContrast,
-        inverseOnSurface = inverseOnSurfaceDarkHighContrast,
-        inversePrimary = inversePrimaryDarkHighContrast,
-        surfaceDim = surfaceDimDarkHighContrast,
-        surfaceBright = surfaceBrightDarkHighContrast,
-        surfaceContainerLowest = surfaceContainerLowestDarkHighContrast,
-        surfaceContainerLow = surfaceContainerLowDarkHighContrast,
-        surfaceContainer = surfaceContainerDarkHighContrast,
-        surfaceContainerHigh = surfaceContainerHighDarkHighContrast,
-        surfaceContainerHighest = surfaceContainerHighestDarkHighContrast,
-    )
-
 @Immutable
 data class ColorFamily(val color: Color, val onColor: Color, val colorContainer: Color, val onColorContainer: Color)
 
@@ -273,32 +122,42 @@ val unspecified_scheme = ColorFamily(Color.Unspecified, Color.Unspecified, Color
 fun AppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     dynamicColor: Boolean = true,
-    contrastLevel: ContrastLevel = ContrastLevel.STANDARD,
     content:
     @Composable()
     () -> Unit,
 ) {
-    val dynamicScheme =
-        if (dynamicColor && contrastLevel == ContrastLevel.STANDARD) {
+    val colorScheme =
+        if (dynamicColor) {
             dynamicColorScheme(darkTheme)
         } else {
             null
-        }
-    val colorScheme =
-        dynamicScheme
-            ?: when (contrastLevel) {
-                ContrastLevel.MEDIUM -> if (darkTheme) mediumContrastDarkColorScheme else mediumContrastLightColorScheme
-                ContrastLevel.HIGH -> if (darkTheme) highContrastDarkColorScheme else highContrastLightColorScheme
-                else -> if (darkTheme) darkScheme else lightScheme
-            }
+        } ?: if (darkTheme) darkScheme else lightScheme
 
-    CompositionLocalProvider(LocalContrastLevel provides contrastLevel) {
-        MaterialExpressiveTheme(
-            colorScheme = colorScheme,
-            typography = AppTypography,
-            motionScheme = expressive(),
-            content = content,
-        )
+    // When a device is on event firmware (and the event theme isn't opted out), swap the whole typescale to the event
+    // typeface. Null everywhere else (desktop, F-Droid, non-event, opted out) → default typography.
+    val eventFonts = LocalEventTheme.current?.fonts
+    val typography = remember(eventFonts) { eventFonts?.let { AppTypography.withEventFonts(it) } ?: AppTypography }
+
+    // Downloadable (Google) fonts referenced only through the theme's Typography are NOT auto-fetched during text
+    // layout — Compose silently renders the fallback. Preloading them into the font cache is the documented way to make
+    // them actually apply; once cached, the themed Text re-resolves to the real typeface. No-op when there are no event
+    // fonts (desktop / F-Droid / non-event / opted out).
+    val fontResolver = LocalFontFamilyResolver.current
+    LaunchedEffect(eventFonts, fontResolver) {
+        val fonts = eventFonts ?: return@LaunchedEffect
+        listOfNotNull(fonts.heading, fonts.body).forEach { family ->
+            try {
+                fontResolver.preload(family)
+            } catch (e: CancellationException) {
+                throw e // preload suspends; never swallow structured-concurrency cancellation
+            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                Logger.w(e) { "Event font preload failed for $family; falling back to the default typeface" }
+            }
+        }
+    }
+
+    MaterialExpressiveTheme(colorScheme = colorScheme, typography = typography, motionScheme = expressive()) {
+        content()
     }
 }
 

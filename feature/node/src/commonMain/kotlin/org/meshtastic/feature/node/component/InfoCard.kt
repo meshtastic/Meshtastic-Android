@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.Clipboard
 import androidx.compose.ui.platform.LocalClipboard
@@ -61,6 +62,7 @@ fun InfoCard(
     icon: ImageVector? = null,
     iconRes: DrawableResource? = null,
     rotateIcon: Float = 0f,
+    valueColor: Color = MaterialTheme.colorScheme.onSurface,
 ) {
     val clipboard: Clipboard = LocalClipboard.current
     val coroutineScope = rememberCoroutineScope()
@@ -107,13 +109,27 @@ fun InfoCard(
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                Text(value, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurface)
+                Text(value, style = MaterialTheme.typography.labelLarge, color = valueColor)
             }
         }
     }
 }
 
 @Composable
-internal fun DrawableInfoCard(iconRes: DrawableResource, text: String, value: String, rotateIcon: Float = 0f) {
-    InfoCard(iconRes = iconRes, text = text, value = value, rotateIcon = rotateIcon)
+internal fun DrawableInfoCard(
+    iconRes: DrawableResource,
+    text: String,
+    value: String,
+    modifier: Modifier = Modifier,
+    rotateIcon: Float = 0f,
+    valueColor: Color = MaterialTheme.colorScheme.onSurface,
+) {
+    InfoCard(
+        iconRes = iconRes,
+        text = text,
+        value = value,
+        rotateIcon = rotateIcon,
+        modifier = modifier,
+        valueColor = valueColor,
+    )
 }

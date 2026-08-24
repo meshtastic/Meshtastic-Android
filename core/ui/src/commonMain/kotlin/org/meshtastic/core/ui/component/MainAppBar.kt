@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,8 @@ package org.meshtastic.core.ui.component
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -27,8 +29,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
@@ -39,6 +43,13 @@ import org.meshtastic.core.resources.ic_meshtastic
 import org.meshtastic.core.resources.navigate_back
 import org.meshtastic.core.ui.icon.ArrowBack
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.theme.LocalEventTheme
+
+/** Alpha for the ambient event accent wash over the app bar — subtle enough to keep title text legible. */
+private const val EVENT_ACCENT_ALPHA = 0.12f
+
+/** Height of the event brand rule under the app bar. A hairline: brand presence without stealing vertical space. */
+private val EVENT_BRAND_RULE_HEIGHT = 3.dp
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -50,46 +61,71 @@ fun MainAppBar(
     showNodeChip: Boolean,
     canNavigateUp: Boolean,
     onNavigateUp: () -> Unit,
-    actions: @Composable () -> Unit,
     onClickChip: (Node) -> Unit,
+    // Trailing slot: a @Composable content lambda, not an event handler (detekt LambdaParameterEventTrailing).
+    actions: @Composable () -> Unit,
 ) {
-    TopAppBar(
-        title = {
-            Text(
-                text = title,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.titleLarge,
+    // Ambient event theming: when connected to event firmware (and not opted out), tint the bar with a faint wash of
+    // the edition's accent color. Gated with the app-wide fonts via LocalEventTheme / the "Use event theme" toggle.
+    val eventTheme = LocalEventTheme.current
+    val accent = eventTheme?.accent
+    val colors =
+        if (accent != null) {
+            TopAppBarDefaults.topAppBarColors(
+                containerColor =
+                accent.copy(alpha = EVENT_ACCENT_ALPHA).compositeOver(MaterialTheme.colorScheme.surface),
             )
-        },
-        subtitle = {
-            subtitle?.let {
+        } else {
+            TopAppBarDefaults.topAppBarColors()
+        }
+    Column(modifier = modifier) {
+        TopAppBar(
+            colors = colors,
+            title = {
                 Text(
-                    text = it,
+                    text = title,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.titleLargeEmphasized,
                 )
-            }
-        },
-        modifier = modifier,
-        if (canNavigateUp) {
-            {
-                IconButton(onClick = onNavigateUp) {
-                    Icon(
-                        imageVector = MeshtasticIcons.ArrowBack,
-                        contentDescription = stringResource(Res.string.navigate_back),
+            },
+            subtitle = {
+                subtitle?.let {
+                    Text(
+                        text = it,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-            }
-        } else {
-            { Icon(imageVector = vectorResource(Res.drawable.ic_meshtastic), contentDescription = null) }
-        },
-        actions = {
-            TopBarActions(ourNode = ourNode, showNodeChip = showNodeChip, actions = actions, onClickChip = onClickChip)
-        },
-    )
+            },
+            navigationIcon =
+            if (canNavigateUp) {
+                {
+                    IconButton(onClick = onNavigateUp) {
+                        Icon(
+                            imageVector = MeshtasticIcons.ArrowBack,
+                            contentDescription = stringResource(Res.string.navigate_back),
+                        )
+                    }
+                }
+            } else {
+                // The Meshtastic logo is never swapped for event branding — the app's identity stays put. Event
+                // firmware is surfaced on the Connections screen instead (EventFirmwareCard).
+                { Icon(imageVector = vectorResource(Res.drawable.ic_meshtastic), contentDescription = null) }
+            },
+            actions = {
+                TopBarActions(
+                    ourNode = ourNode,
+                    showNodeChip = showNodeChip,
+                    actions = actions,
+                    onClickChip = onClickChip,
+                )
+            },
+        )
+        EventPaletteStrip(palette = eventTheme?.palette.orEmpty(), height = EVENT_BRAND_RULE_HEIGHT)
+    }
 }
 
 @Composable

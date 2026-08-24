@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,8 +58,9 @@ fun MaterialBatteryInfo(
     level: Int?,
     voltage: Float? = null,
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
+    unknownLabel: String = stringResource(Res.string.unknown),
 ) {
-    val levelString = level?.let { MetricFormatter.percent(it) } ?: stringResource(Res.string.unknown)
+    val levelString = level?.let { MetricFormatter.percent(it) } ?: unknownLabel
 
     Row(
         modifier = modifier,
@@ -71,7 +72,7 @@ fun MaterialBatteryInfo(
                 modifier = Modifier.size(SIZE_ICON.dp),
                 imageVector = MeshtasticIcons.BatteryUnknown,
                 tint = contentColor.copy(alpha = 0.65f),
-                contentDescription = stringResource(Res.string.unknown),
+                contentDescription = unknownLabel,
             )
         } else if (level > 100) {
             Icon(
@@ -98,19 +99,20 @@ fun MaterialBatteryInfo(
             Icon(
                 modifier =
                 Modifier.size(SIZE_ICON.dp).drawBehind {
-                    val insetVertical = size.height * .28f
-                    val insetLeft = size.width * .11f
-                    val insetRight = size.width * .22f
+                    val insetVertical = size.height * .375f
+                    val insetLeft = size.width * .25f
+                    val insetRight = size.width * .167f
 
                     val availableWidth = size.width - (insetLeft + insetRight)
                     val availableHeight = size.height - (insetVertical * 2)
 
-                    // Fill (grow from left to right)
+                    // Fill grows from right (flat end) toward left (terminal)
                     val fillWidth = availableWidth * (level / 100f)
+                    val fillX = insetLeft + availableWidth - fillWidth
 
                     drawRect(
                         color = fillColor,
-                        topLeft = Offset(insetLeft, insetVertical),
+                        topLeft = Offset(fillX, insetVertical),
                         size = Size(fillWidth, availableHeight),
                     )
                 },

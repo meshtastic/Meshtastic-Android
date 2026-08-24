@@ -16,14 +16,40 @@
  */
 package org.meshtastic.core.data.di
 
+import androidx.lifecycle.Lifecycle
+import kotlinx.coroutines.launch
 import org.koin.core.annotation.ComponentScan
 import org.koin.core.annotation.Module
+import org.koin.core.annotation.Named
+import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.ApplicationCoroutineScope
+import org.meshtastic.core.common.di.PROCESS_LIFECYCLE
 import org.meshtastic.core.model.util.MeshDataMapper
 import org.meshtastic.core.model.util.NodeIdLookup
+import org.meshtastic.core.repository.ActiveConversationTracker
+import kotlin.time.Clock
 
 @Module
 @ComponentScan("org.meshtastic.core.data")
 class CoreDataModule {
     @Single fun provideMeshDataMapper(nodeIdLookup: NodeIdLookup): MeshDataMapper = MeshDataMapper(nodeIdLookup)
+
+    @Single fun provideClock(): Clock = Clock.System
+
+    /**
+     * [ActiveConversationTracker] is a plain holder so it stays trivially constructible in tests; the process lifecycle
+     * is bridged into it here, where an application-lifetime scope is already available.
+     */
+    @Single
+    fun provideActiveConversationTracker(
+        @Provided @Named(PROCESS_LIFECYCLE) processLifecycle: Lifecycle,
+        @Provided applicationScope: ApplicationCoroutineScope,
+    ): ActiveConversationTracker = ActiveConversationTracker().also { tracker ->
+        applicationScope.launch {
+            processLifecycle.currentStateFlow.collect { state ->
+                tracker.setAppForeground(state.isAtLeast(Lifecycle.State.STARTED))
+            }
+        }
+    }
 }

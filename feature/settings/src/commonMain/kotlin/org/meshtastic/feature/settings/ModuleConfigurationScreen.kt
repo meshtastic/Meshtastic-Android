@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,19 +43,20 @@ import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 @Composable
 fun ModuleConfigurationScreen(
     viewModel: RadioConfigViewModel,
-    excludedModulesUnlocked: Boolean,
+    hiddenFeaturesUnlocked: Boolean,
     onBack: () -> Unit,
     onNavigate: (Route) -> Unit,
 ) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val destNode by viewModel.destNode.collectAsStateWithLifecycle()
 
+    val deviceRole = state.radioConfig.device?.role
     val modules =
-        remember(state.metadata, excludedModulesUnlocked) {
-            if (excludedModulesUnlocked) {
+        remember(state.metadata, deviceRole, hiddenFeaturesUnlocked) {
+            if (hiddenFeaturesUnlocked) {
                 ModuleRoute.entries
             } else {
-                ModuleRoute.filterExcludedFrom(state.metadata, state.userConfig.role)
+                ModuleRoute.filterExcludedFrom(state.metadata, deviceRole)
             }
         }
 

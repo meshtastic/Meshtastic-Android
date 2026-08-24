@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,7 +43,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.DpOffset
@@ -57,8 +56,10 @@ import org.meshtastic.core.resources.debug_filter_clear
 import org.meshtastic.core.resources.debug_filter_included
 import org.meshtastic.core.resources.debug_filter_preset_title
 import org.meshtastic.core.resources.debug_filters
+import org.meshtastic.core.resources.filter_icon
 import org.meshtastic.core.resources.match_all
 import org.meshtastic.core.resources.match_any
+import org.meshtastic.core.resources.remove_filter
 import org.meshtastic.core.ui.icon.Add
 import org.meshtastic.core.ui.icon.Check
 import org.meshtastic.core.ui.icon.Close
@@ -127,7 +128,8 @@ fun DebugPresetFilters(
     Column(modifier = modifier) {
         Text(
             text = stringResource(Res.string.debug_filter_preset_title),
-            style = TextStyle(fontWeight = FontWeight.Bold),
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(vertical = 4.dp),
         )
         FlowRow(
@@ -183,7 +185,8 @@ fun DebugFilterBar(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = stringResource(Res.string.debug_filters),
-                        style = TextStyle(fontWeight = FontWeight.Bold),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold,
                     )
                     Icon(
                         imageVector =
@@ -243,7 +246,8 @@ fun DebugActiveFilters(
             ) {
                 Text(
                     text = stringResource(Res.string.debug_active_filters),
-                    style = TextStyle(fontWeight = FontWeight.Bold),
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold,
                 )
                 TextButton(
                     onClick = {
@@ -281,8 +285,18 @@ fun DebugActiveFilters(
                         selected = true,
                         onClick = { onFilterTextsChange(filterTexts - filter) },
                         label = { Text(filter) },
-                        leadingIcon = { Icon(imageVector = MeshtasticIcons.FilterAlt, contentDescription = null) },
-                        trailingIcon = { Icon(imageVector = MeshtasticIcons.Close, contentDescription = null) },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = MeshtasticIcons.FilterAlt,
+                                contentDescription = stringResource(Res.string.filter_icon),
+                            )
+                        },
+                        trailingIcon = {
+                            Icon(
+                                imageVector = MeshtasticIcons.Close,
+                                contentDescription = stringResource(Res.string.remove_filter),
+                            )
+                        },
                     )
                 }
             }

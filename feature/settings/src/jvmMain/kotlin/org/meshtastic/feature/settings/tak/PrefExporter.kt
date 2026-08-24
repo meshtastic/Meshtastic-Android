@@ -19,9 +19,9 @@ package org.meshtastic.feature.settings.tak
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.meshtastic.core.common.util.ioDispatcher
 import java.awt.FileDialog
 import java.awt.Frame
 import java.io.File
@@ -44,7 +44,7 @@ actual fun rememberDataPackageExporter(dataPackageProvider: suspend () -> ByteAr
                 if (directory != null && file != null) {
                     val targetFile = File(directory, file)
                     val data = dataPackageProvider()
-                    withContext(Dispatchers.IO) { targetFile.writeBytes(data) }
+                    withContext(ioDispatcher) { targetFile.writeBytes(data) }
                     Logger.i { "TAK data package exported successfully to ${targetFile.absolutePath}" }
                 }
             }

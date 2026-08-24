@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,9 +34,14 @@ class SwitchingNodeInfoWriteDataSource(
         withContext(dispatchers.io) { dbManager.withDb { it.nodeInfoDao().upsert(node) } }
     }
 
-    override suspend fun installConfig(mi: MyNodeEntity, nodes: List<NodeEntity>) {
-        withContext(dispatchers.io) { dbManager.withDb { it.nodeInfoDao().installConfig(mi, nodes) } }
-    }
+    override suspend fun installConfig(mi: MyNodeEntity, nodes: List<NodeEntity>): List<Int> =
+        withContext(dispatchers.io) {
+            // Throw rather than no-op when no database is available: the config-flow manager treats a
+            // successful install as "node DB ready → Connected", and its catch runs the transport
+            // recovery path — silently skipping the install would fake a healthy connection.
+            dbManager.withDb { it.nodeInfoDao().installConfig(mi, nodes) }
+                ?: error("Node DB install skipped: no active database")
+        }
 
     override suspend fun clearNodeDB(preserveFavorites: Boolean) {
         withContext(dispatchers.io) { dbManager.withDb { it.nodeInfoDao().clearNodeInfo(preserveFavorites) } }
@@ -46,16 +51,12 @@ class SwitchingNodeInfoWriteDataSource(
         withContext(dispatchers.io) { dbManager.withDb { it.nodeInfoDao().clearMyNodeInfo() } }
     }
 
-    override suspend fun deleteNode(num: Int) {
-        withContext(dispatchers.io) { dbManager.withDb { it.nodeInfoDao().deleteNode(num) } }
+    override suspend fun deleteNodeAndMetadata(num: Int) {
+        withContext(dispatchers.io) { dbManager.withDb { it.nodeInfoDao().deleteNodeAndMetadata(num) } }
     }
 
-    override suspend fun deleteNodes(nodeNums: List<Int>) {
-        withContext(dispatchers.io) { dbManager.withDb { it.nodeInfoDao().deleteNodes(nodeNums) } }
-    }
-
-    override suspend fun deleteMetadata(num: Int) {
-        withContext(dispatchers.io) { dbManager.withDb { it.nodeInfoDao().deleteMetadata(num) } }
+    override suspend fun deleteNodesAndMetadata(nodeNums: List<Int>) {
+        withContext(dispatchers.io) { dbManager.withDb { it.nodeInfoDao().deleteNodesAndMetadata(nodeNums) } }
     }
 
     override suspend fun upsert(metadata: MetadataEntity) {
@@ -64,6 +65,12 @@ class SwitchingNodeInfoWriteDataSource(
 
     override suspend fun setNodeNotes(num: Int, notes: String) {
         withContext(dispatchers.io) { dbManager.withDb { it.nodeInfoDao().setNodeNotes(num, notes) } }
+    }
+
+    override suspend fun updatePowerChannelLabel(num: Int, channelIndex: Int, label: String) {
+        withContext(dispatchers.io) {
+            dbManager.withDb { it.nodeInfoDao().updatePowerChannelLabel(num, channelIndex, label) }
+        }
     }
 
     override suspend fun backfillDenormalizedNames() {

@@ -245,6 +245,63 @@ class BleReconnectPolicyTest {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
+    fun `execute reaches recovery after repeated inner connect failures`() = runTest {
+        val failedInnerCyclesBeforeRecovery = 5
+        val maxFailuresAfterRecovery = 7
+        val policy =
+            BleReconnectPolicy(
+                maxFailures = maxFailuresAfterRecovery,
+                failureThreshold = 3,
+                settleDelay = 1.milliseconds,
+                backoffStrategy = { 1.milliseconds },
+            )
+        var attemptCount = 0
+        var reachedRecoveryAttempt = false
+        var transientBeforeRecovery = 0
+        var transientAfterRecovery = 0
+        var permanentCalled = false
+
+        policy.execute(
+            attempt = {
+                attemptCount++
+                when {
+                    attemptCount <= failedInnerCyclesBeforeRecovery ->
+                        BleReconnectPolicy.Outcome.Failed(
+                            RuntimeException("bounded inner Kable cycle #$attemptCount failed"),
+                        )
+
+                    !reachedRecoveryAttempt -> {
+                        reachedRecoveryAttempt = true
+                        BleReconnectPolicy.Outcome.Disconnected(wasStable = true, wasIntentional = false)
+                    }
+
+                    else -> BleReconnectPolicy.Outcome.Failed(RuntimeException("post-recovery failure"))
+                }
+            },
+            onTransientDisconnect = {
+                if (reachedRecoveryAttempt) {
+                    transientAfterRecovery++
+                } else {
+                    transientBeforeRecovery++
+                }
+            },
+            onPermanentDisconnect = { permanentCalled = true },
+        )
+
+        assertTrue(reachedRecoveryAttempt, "outer reconnect must reach a later successful connection attempt")
+        assertEquals(
+            failedInnerCyclesBeforeRecovery + 1 + maxFailuresAfterRecovery,
+            attemptCount,
+            "outer reconnect should continue through failed inner cycles before and after recovery",
+        )
+        assertEquals(3, transientBeforeRecovery, "failures at threshold and above should signal transient state")
+        assertEquals(4, transientAfterRecovery, "stable recovery should reset the failure threshold")
+        assertTrue(permanentCalled, "finite maxFailures is used only to terminate this test")
+        assertEquals(maxFailuresAfterRecovery, policy.consecutiveFailures)
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
     fun `execute stops when coroutine is cancelled`() = runTest {
         var attemptCount = 0
         val policy =

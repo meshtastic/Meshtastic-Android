@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,35 +20,30 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.update
 import okio.BufferedSink
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.common.database.DatabaseManager
+import org.meshtastic.core.common.state.HiddenFeaturesUnlock
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.domain.usecase.settings.ExportDataUseCase
+import org.meshtastic.core.domain.usecase.settings.ExportNodeDatabaseUseCase
 import org.meshtastic.core.domain.usecase.settings.IsOtaCapableUseCase
-import org.meshtastic.core.domain.usecase.settings.MeshLocationUseCase
-import org.meshtastic.core.domain.usecase.settings.SetAppIntroCompletedUseCase
-import org.meshtastic.core.domain.usecase.settings.SetContrastLevelUseCase
-import org.meshtastic.core.domain.usecase.settings.SetDatabaseCacheLimitUseCase
-import org.meshtastic.core.domain.usecase.settings.SetLocaleUseCase
 import org.meshtastic.core.domain.usecase.settings.SetMeshLogSettingsUseCase
-import org.meshtastic.core.domain.usecase.settings.SetNotificationSettingsUseCase
-import org.meshtastic.core.domain.usecase.settings.SetProvideLocationUseCase
-import org.meshtastic.core.domain.usecase.settings.SetThemeUseCase
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.model.NodeListDensity
 import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.MeshLogPrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NotificationPrefs
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
@@ -65,18 +60,12 @@ class SettingsViewModel(
     private val databaseManager: DatabaseManager,
     private val meshLogPrefs: MeshLogPrefs,
     private val notificationPrefs: NotificationPrefs,
-    private val setThemeUseCase: SetThemeUseCase,
-    private val setContrastLevelUseCase: SetContrastLevelUseCase,
-    private val setLocaleUseCase: SetLocaleUseCase,
-    private val setAppIntroCompletedUseCase: SetAppIntroCompletedUseCase,
-    private val setProvideLocationUseCase: SetProvideLocationUseCase,
-    private val setDatabaseCacheLimitUseCase: SetDatabaseCacheLimitUseCase,
     private val setMeshLogSettingsUseCase: SetMeshLogSettingsUseCase,
-    private val setNotificationSettingsUseCase: SetNotificationSettingsUseCase,
-    private val meshLocationUseCase: MeshLocationUseCase,
     private val exportDataUseCase: ExportDataUseCase,
+    private val exportNodeDatabaseUseCase: ExportNodeDatabaseUseCase,
     private val isOtaCapableUseCase: IsOtaCapableUseCase,
     private val fileService: FileService,
+    private val hiddenFeaturesUnlock: HiddenFeaturesUnlock,
 ) : ViewModel() {
     val myNodeInfo: StateFlow<MyNodeInfo?> = nodeRepository.myNodeInfo
 
@@ -106,15 +95,15 @@ class SettingsViewModel(
             .stateInWhileSubscribed(initialValue = false)
 
     fun startProvidingLocation() {
-        meshLocationUseCase.startProvidingLocation()
+        radioController.startProvideLocation()
     }
 
     fun stopProvidingLocation() {
-        meshLocationUseCase.stopProvidingLocation()
+        radioController.stopProvideLocation()
     }
 
-    private val _excludedModulesUnlocked = MutableStateFlow(false)
-    val excludedModulesUnlocked: StateFlow<Boolean> = _excludedModulesUnlocked.asStateFlow()
+    // Process-scoped shared state so other features (e.g. the nightly firmware channel) see the same unlock.
+    val hiddenFeaturesUnlocked: StateFlow<Boolean> = hiddenFeaturesUnlock.unlocked
 
     val appVersionName
         get() = buildConfigProvider.versionName
@@ -125,19 +114,23 @@ class SettingsViewModel(
     val dbCacheLimit: StateFlow<Int> = databaseManager.cacheLimit
 
     fun setDbCacheLimit(limit: Int) {
-        setDatabaseCacheLimitUseCase(limit)
+        databaseManager.setCacheLimit(limit)
     }
+
+    /** How many currently-cached device databases would be evicted if the cache limit were lowered to [limit]. */
+    suspend fun cachedDeviceCountExceeding(limit: Int): Int =
+        (databaseManager.cachedDeviceDbCount() - limit).coerceAtLeast(0)
 
     // Notifications
     val messagesEnabled = notificationPrefs.messagesEnabled
     val nodeEventsEnabled = notificationPrefs.nodeEventsEnabled
     val lowBatteryEnabled = notificationPrefs.lowBatteryEnabled
 
-    fun setMessagesEnabled(enabled: Boolean) = setNotificationSettingsUseCase.setMessagesEnabled(enabled)
+    fun setMessagesEnabled(enabled: Boolean) = notificationPrefs.setMessagesEnabled(enabled)
 
-    fun setNodeEventsEnabled(enabled: Boolean) = setNotificationSettingsUseCase.setNodeEventsEnabled(enabled)
+    fun setNodeEventsEnabled(enabled: Boolean) = notificationPrefs.setNodeEventsEnabled(enabled)
 
-    fun setLowBatteryEnabled(enabled: Boolean) = setNotificationSettingsUseCase.setLowBatteryEnabled(enabled)
+    fun setLowBatteryEnabled(enabled: Boolean) = notificationPrefs.setLowBatteryEnabled(enabled)
 
     // MeshLog retention period (bounded by MeshLogPrefsImpl constants)
     private val _meshLogRetentionDays = MutableStateFlow(meshLogPrefs.retentionDays.value)
@@ -157,28 +150,30 @@ class SettingsViewModel(
     }
 
     fun setProvideLocation(value: Boolean) {
-        myNodeNum?.let { setProvideLocationUseCase(it, value) }
+        myNodeNum?.let { uiPrefs.setShouldProvideNodeLocation(it, value) }
     }
 
     fun setTheme(theme: Int) {
-        setThemeUseCase(theme)
+        uiPrefs.setTheme(theme)
     }
 
-    fun setContrastLevel(level: Int) {
-        setContrastLevelUseCase(level)
+    val showFullMessageTimestamps = uiPrefs.showFullMessageTimestamps
+
+    fun setShowFullMessageTimestamps(show: Boolean) {
+        uiPrefs.setShowFullMessageTimestamps(show)
     }
 
     /** Set the application locale. Empty string means system default. */
     fun setLocale(languageTag: String) {
-        setLocaleUseCase(languageTag)
+        uiPrefs.setLocale(languageTag)
     }
 
     fun showAppIntro() {
-        setAppIntroCompletedUseCase(false)
+        uiPrefs.setAppIntroCompleted(false)
     }
 
-    fun unlockExcludedModules() {
-        _excludedModulesUnlocked.update { true }
+    fun unlockHiddenFeatures() {
+        hiddenFeaturesUnlock.unlock()
     }
 
     /**
@@ -197,4 +192,99 @@ class SettingsViewModel(
         val myNodeNum = myNodeNum ?: return
         exportDataUseCase(writer, myNodeNum, filterPortnum)
     }
+
+    /** Export the current device's node database as a JSON file at the given URI. */
+    fun saveNodeDbJson(uri: CommonUri) {
+        safeLaunch(tag = "saveNodeDbJson") { fileService.write(uri) { sink -> exportNodeDatabaseUseCase(sink) } }
+    }
+
+    // Node list layout preferences
+    val nodeListDensity = uiPrefs.nodeListDensity
+    val shouldShowPower = uiPrefs.shouldShowPower
+    val shouldShowLastHeard = uiPrefs.shouldShowLastHeard
+    val lastHeardIsRelative = uiPrefs.lastHeardIsRelative
+    val shouldShowLocation = uiPrefs.shouldShowLocation
+    val shouldShowHops = uiPrefs.shouldShowHops
+    val shouldShowSignal = uiPrefs.shouldShowSignal
+    val shouldShowChannel = uiPrefs.shouldShowChannel
+    val shouldShowRole = uiPrefs.shouldShowRole
+    val shouldShowTelemetry = uiPrefs.shouldShowTelemetry
+
+    fun setNodeListDensity(value: String) = uiPrefs.setNodeListDensity(value)
+
+    fun setShouldShowPower(value: Boolean) = uiPrefs.setShouldShowPower(value)
+
+    fun setShouldShowLastHeard(value: Boolean) = uiPrefs.setShouldShowLastHeard(value)
+
+    fun setLastHeardIsRelative(value: Boolean) = uiPrefs.setLastHeardIsRelative(value)
+
+    fun setShouldShowLocation(value: Boolean) = uiPrefs.setShouldShowLocation(value)
+
+    fun setShouldShowHops(value: Boolean) = uiPrefs.setShouldShowHops(value)
+
+    fun setShouldShowSignal(value: Boolean) = uiPrefs.setShouldShowSignal(value)
+
+    fun setShouldShowChannel(value: Boolean) = uiPrefs.setShouldShowChannel(value)
+
+    fun setShouldShowRole(value: Boolean) = uiPrefs.setShouldShowRole(value)
+
+    fun setShouldShowTelemetry(value: Boolean) = uiPrefs.setShouldShowTelemetry(value)
+
+    // Aggregated node list settings — nested combines because typed overloads max at 5 args
+    val nodeListSettings =
+        combine(
+            combine(
+                nodeListDensity,
+                shouldShowPower,
+                shouldShowLastHeard,
+                lastHeardIsRelative,
+                shouldShowLocation,
+            ) { density, power, lastHeard, heardRelative, location ->
+                NodeListSettingsState(
+                    density = NodeListDensity.fromName(density),
+                    showPower = power,
+                    showLastHeard = lastHeard,
+                    lastHeardIsRelative = heardRelative,
+                    showLocation = location,
+                )
+            },
+            combine(shouldShowHops, shouldShowSignal, shouldShowChannel, shouldShowRole, shouldShowTelemetry) {
+                    hops,
+                    signal,
+                    channel,
+                    role,
+                    telemetry,
+                ->
+                NodeListSettingsState(
+                    showHops = hops,
+                    showSignal = signal,
+                    showChannel = channel,
+                    showRole = role,
+                    showTelemetry = telemetry,
+                )
+            },
+        ) { first, second ->
+            first.copy(
+                showHops = second.showHops,
+                showSignal = second.showSignal,
+                showChannel = second.showChannel,
+                showRole = second.showRole,
+                showTelemetry = second.showTelemetry,
+            )
+        }
+            .stateInWhileSubscribed(initialValue = NodeListSettingsState())
 }
+
+/** Aggregated state for node list display settings to reduce recomposition overhead. */
+data class NodeListSettingsState(
+    val density: NodeListDensity = NodeListDensity.COMPLETE,
+    val showPower: Boolean = false,
+    val showLastHeard: Boolean = false,
+    val lastHeardIsRelative: Boolean = false,
+    val showLocation: Boolean = false,
+    val showHops: Boolean = false,
+    val showSignal: Boolean = false,
+    val showChannel: Boolean = false,
+    val showRole: Boolean = false,
+    val showTelemetry: Boolean = false,
+)

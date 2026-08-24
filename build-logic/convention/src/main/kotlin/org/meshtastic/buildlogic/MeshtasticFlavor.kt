@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.buildlogic
 
 import com.android.build.api.dsl.ApplicationExtension
@@ -24,7 +23,7 @@ import com.android.build.api.dsl.ProductFlavor
 
 @Suppress("EnumEntryName")
 enum class FlavorDimension {
-    marketplace
+    marketplace,
 }
 
 @Suppress("EnumEntryName")
@@ -38,33 +37,34 @@ fun configureFlavors(
     flavorConfigurationBlock: ProductFlavor.(flavor: MeshtasticFlavor) -> Unit = {},
 ) {
     commonExtension.apply {
-        FlavorDimension.entries.forEach { flavorDimension ->
-            flavorDimensions += flavorDimension.name
-        }
+        FlavorDimension.entries.forEach { flavorDimension -> flavorDimensions += flavorDimension.name }
 
         when (this) {
-            is ApplicationExtension -> productFlavors {
-                MeshtasticFlavor.entries.forEach { meshtasticFlavor ->
-                    register(meshtasticFlavor.name) {
-                        dimension = meshtasticFlavor.dimension.name
-                        flavorConfigurationBlock(this, meshtasticFlavor)
-                        if (meshtasticFlavor.default) {
-                            isDefault = true
+            is ApplicationExtension ->
+                productFlavors {
+                    MeshtasticFlavor.entries.forEach { meshtasticFlavor ->
+                        register(meshtasticFlavor.name) {
+                            dimension = meshtasticFlavor.dimension.name
+                            flavorConfigurationBlock(this, meshtasticFlavor)
+                            if (meshtasticFlavor.default) {
+                                isDefault = true
+                            }
                         }
                     }
                 }
-            }
-            is LibraryExtension -> productFlavors {
-                MeshtasticFlavor.entries.forEach { meshtasticFlavor ->
-                    register(meshtasticFlavor.name) {
-                        dimension = meshtasticFlavor.dimension.name
-                        flavorConfigurationBlock(this, meshtasticFlavor)
-                        if (meshtasticFlavor.default) {
-                            isDefault = true
+
+            is LibraryExtension ->
+                productFlavors {
+                    MeshtasticFlavor.entries.forEach { meshtasticFlavor ->
+                        register(meshtasticFlavor.name) {
+                            dimension = meshtasticFlavor.dimension.name
+                            flavorConfigurationBlock(this, meshtasticFlavor)
+                            if (meshtasticFlavor.default) {
+                                isDefault = true
+                            }
                         }
                     }
                 }
-            }
         }
     }
 }

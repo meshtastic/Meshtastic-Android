@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,13 +24,20 @@ enum class DeviceType {
     ;
 
     companion object {
-        fun fromAddress(address: String): DeviceType? = when (address.firstOrNull()) {
-            'x' -> BLE
-            's' -> USB
-            't' -> TCP
-            'm' -> USB // Treat mock as USB for UI purposes
-            'n' -> null
-            else -> null
-        }
+        fun fromAddress(address: String): DeviceType? =
+            when (InterfaceId.forIdChar(address.firstOrNull() ?: return null)) {
+                InterfaceId.BLUETOOTH -> BLE
+
+                InterfaceId.SERIAL,
+                InterfaceId.MOCK, // Mock/demo mode historically presents as USB.
+                -> USB
+
+                InterfaceId.TCP -> TCP
+
+                InterfaceId.NOP,
+                InterfaceId.REPLAY,
+                null,
+                -> null
+            }
     }
 }

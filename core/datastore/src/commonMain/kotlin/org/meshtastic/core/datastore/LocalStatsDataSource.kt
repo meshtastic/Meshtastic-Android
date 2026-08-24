@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,13 +16,12 @@
  */
 package org.meshtastic.core.datastore
 
-import androidx.datastore.core.DataStore
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import okio.IOException
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.datastore.di.CoreLocalStatsDataStore
 import org.meshtastic.proto.LocalStats
 
 /** Interface that handles saving and retrieving [LocalStats] data. */
@@ -36,9 +35,7 @@ interface LocalStatsDataSource {
 
 /** Implementation of [LocalStatsDataSource] using DataStore. */
 @Single
-open class LocalStatsDataSourceImpl(
-    @Named("CoreLocalStatsDataStore") private val localStatsStore: DataStore<LocalStats>,
-) : LocalStatsDataSource {
+open class LocalStatsDataSourceImpl(private val localStatsStore: CoreLocalStatsDataStore) : LocalStatsDataSource {
     override val localStatsFlow: Flow<LocalStats> =
         localStatsStore.data.catch { exception ->
             if (exception is IOException) {

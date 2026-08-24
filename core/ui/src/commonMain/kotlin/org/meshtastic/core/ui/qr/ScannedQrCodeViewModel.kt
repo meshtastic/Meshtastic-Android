@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,44 +17,35 @@
 package org.meshtastic.core.ui.qr
 
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.flow.map
 import org.koin.core.annotation.KoinViewModel
-import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
-import org.meshtastic.core.ui.util.getChannelList
+import org.meshtastic.core.repository.RadioController
+import org.meshtastic.core.ui.util.importChannelSet
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
-import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSet
-import org.meshtastic.proto.Config
-import org.meshtastic.proto.LocalConfig
+
+internal const val DEFAULT_MAX_CHANNELS = 8
 
 @KoinViewModel
 class ScannedQrCodeViewModel(
     private val radioConfigRepository: RadioConfigRepository,
     private val radioController: RadioController,
+    nodeRepository: NodeRepository,
 ) : ViewModel() {
 
     val channels = radioConfigRepository.channelSetFlow.stateInWhileSubscribed(initialValue = ChannelSet())
 
-    private val localConfig = radioConfigRepository.localConfigFlow.stateInWhileSubscribed(initialValue = LocalConfig())
+    val maxChannels =
+        nodeRepository.myNodeInfo
+            .map { it?.maxChannels?.takeIf { max -> max > 0 } ?: DEFAULT_MAX_CHANNELS }
+            .stateInWhileSubscribed(
+                initialValue = nodeRepository.myNodeInfo.value?.maxChannels?.takeIf { it > 0 } ?: DEFAULT_MAX_CHANNELS,
+            )
 
     /** Set the radio config (also updates our saved copy in preferences). */
-    fun setChannels(channelSet: ChannelSet) = safeLaunch(tag = "setChannels") {
-        getChannelList(channelSet.settings, channels.value.settings).forEach(::setChannel)
-        radioConfigRepository.replaceAllSettings(channelSet.settings)
-
-        val loraConfig = channelSet.lora_config
-        if (loraConfig != null && localConfig.value.lora != loraConfig) {
-            setConfig(Config(lora = loraConfig))
-        }
-    }
-
-    private fun setChannel(channel: Channel) {
-        safeLaunch(tag = "setChannel") { radioController.setLocalChannel(channel) }
-    }
-
-    // Set the radio config (also updates our saved copy in preferences)
-    private fun setConfig(config: Config) {
-        safeLaunch(tag = "setConfig") { radioController.setLocalConfig(config) }
-    }
+    fun setChannels(channelSet: ChannelSet) =
+        safeLaunch(tag = "setChannels") { importChannelSet(channelSet, radioController, radioConfigRepository) }
 }

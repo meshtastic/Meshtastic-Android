@@ -17,28 +17,34 @@
 package org.meshtastic.core.ble
 
 import co.touchlab.kermit.Logger
+import com.juul.kable.NotConnectedException
 import com.juul.kable.Peripheral
 import com.juul.kable.PeripheralBuilder
 import com.juul.kable.State
 import com.juul.kable.WriteType
 import com.juul.kable.characteristicOf
-import com.juul.kable.logs.Logging
 import com.juul.kable.writeWithoutResponse
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.TimeoutCancellationException
-import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.async
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.job
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
+import org.meshtastic.core.common.util.ioDispatcher
+import org.meshtastic.core.model.util.anonymize
+import kotlin.concurrent.Volatile
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.Uuid
@@ -48,6 +54,11 @@ class KableBleService(private val peripheral: Peripheral, private val serviceUui
     override fun hasCharacteristic(characteristic: BleCharacteristic): Boolean = peripheral.services.value?.any { svc ->
         svc.serviceUuid == serviceUuid && svc.characteristics.any { it.characteristicUuid == characteristic.uuid }
     } == true
+
+    override fun discoveredCharacteristicUuids(): List<Uuid> = peripheral.services.value
+        ?.find { it.serviceUuid == serviceUuid }
+        ?.characteristics
+        ?.map { it.characteristicUuid } ?: emptyList()
 
     override fun observe(characteristic: BleCharacteristic) =
         peripheral.observe(characteristicOf(serviceUuid, characteristic.uuid))
@@ -85,49 +96,45 @@ class KableBleService(private val peripheral: Peripheral, private val serviceUui
  *
  * Manages peripheral lifecycle, connection state tracking, and GATT service profile access.
  *
- * Connection attempts follow Kable's recommended pattern from the SensorTag sample: try a direct connect first, then
- * fall back to `autoConnect = true` on failure. Only two attempts are made per [connect] call — the caller
- * ([BleRadioTransport]) owns the macro-level retry/backoff loop.
+ * Connection attempts follow Kable's recommended pattern from the SensorTag sample: use a direct connect when a fresh
+ * advertisement is available, then fall back to `autoConnect = true` on failure. Advertisement-less devices start on
+ * the `autoConnect` path. At most two attempts are made per [connect] call — the caller ([BleRadioTransport]) owns the
+ * macro-level retry/backoff loop.
  */
-class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
+class KableBleConnection(private val scope: CoroutineScope, private val loggingConfig: BleLoggingConfig) :
+    BleConnection {
 
-    private var peripheral: Peripheral? = null
-    private var stateJob: Job? = null
-    private var connectionScope: CoroutineScope? = null
+    @Volatile private var peripheral: Peripheral? = null
+
+    @Volatile private var stateJob: Job? = null
+
+    @Volatile private var connectionScope: CoroutineScope? = null
 
     companion object {
         /** Settle delay between a direct connect failure and the autoConnect fallback attempt. */
         private val AUTOCONNECT_FALLBACK_DELAY = 1.seconds
     }
 
-    private val _deviceFlow = MutableSharedFlow<BleDevice?>(replay = 1)
-    override val deviceFlow: SharedFlow<BleDevice?> = _deviceFlow.asSharedFlow()
+    private val _deviceFlow = MutableStateFlow<BleDevice?>(null)
+    override val deviceFlow: StateFlow<BleDevice?> = _deviceFlow.asStateFlow()
 
     override val device: BleDevice?
-        get() = _deviceFlow.replayCache.firstOrNull()
+        get() = _deviceFlow.value
 
     private val _connectionState =
-        MutableSharedFlow<BleConnectionState>(
-            replay = 1,
-            extraBufferCapacity = 1,
-            onBufferOverflow = BufferOverflow.DROP_OLDEST,
-        )
-    override val connectionState: SharedFlow<BleConnectionState> = _connectionState.asSharedFlow()
+        MutableStateFlow<BleConnectionState>(BleConnectionState.Disconnected(DisconnectReason.Unknown))
+    override val connectionState: StateFlow<BleConnectionState> = _connectionState.asStateFlow()
 
-    @Suppress("CyclomaticComplexMethod", "LongMethod")
+    @Suppress("CyclomaticComplexMethod", "LongMethod", "ThrowsCount")
     override suspend fun connect(device: BleDevice) {
         val meshtasticDevice = device as? MeshtasticBleDevice ?: error("Unsupported BleDevice type: ${device::class}")
         var autoConnect = meshtasticDevice.advertisement == null
 
         /** Applies logging, observation exception handling, and platform config shared by both peripheral types. */
         fun PeripheralBuilder.commonConfig() {
-            logging {
-                engine = KermitLogEngine
-                level = Logging.Level.Events
-                identifier = device.address
-            }
+            logging { applyConfig(loggingConfig, identifier = device.address.anonymize()) }
             observationExceptionHandler { cause ->
-                Logger.w(cause) { "[${device.address}] Observation failure suppressed" }
+                Logger.w(cause) { "[${device.address.anonymize()}] Observation failure suppressed" }
             }
             platformConfig(device) { autoConnect }
         }
@@ -136,10 +143,17 @@ class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
             meshtasticDevice.advertisement?.let { adv -> Peripheral(adv) { commonConfig() } }
                 ?: createPeripheral(device.address) { commonConfig() }
 
-        cleanUpPeripheral(device.address)
-        peripheral = p
-
-        ActiveBleConnection.active = ActiveConnection(p, device.address)
+        // Install ownership of the new peripheral atomically. Cancellation between
+        // peripheral construction and field assignment would strand `p` (Kable allocates
+        // a per-peripheral scope + Bluetooth-state observer eagerly), so the cleanup,
+        // assignment, and ActiveBleConnection update must complete as a single unit.
+        // _deviceFlow.emit() is intentionally outside this block — making it
+        // non-cancellable could hang teardown on a slow collector.
+        withContext(NonCancellable) {
+            cleanUpPeripheral(device.address)
+            peripheral = p
+            ActiveBleConnection.active = ActiveConnection(p, device.address)
+        }
 
         _deviceFlow.emit(device)
 
@@ -159,11 +173,17 @@ class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
                 }
                 .launchIn(scope)
 
-        while (p.state.value !is State.Connected) {
+        // Bounded to at most two attempts: direct connect, then autoConnect fallback when a fresh
+        // advertisement was available. Advertisement-less devices start on the autoConnect path.
+        // The outer reconnect loop (BleRadioTransport) owns the macro retry budget — see class kdoc.
+        repeat(2) {
+            if (p.state.value is State.Connected) return
             autoConnect =
                 try {
                     connectionScope?.let { oldScope ->
-                        Logger.d { "[${device.address}] Cancelling previous connectionScope before reconnect" }
+                        Logger.d {
+                            "[${device.address.anonymize()}] Cancelling previous connectionScope before reconnect"
+                        }
                         oldScope.coroutineContext.job.cancel()
                     }
                     connectionScope = p.connect()
@@ -172,15 +192,28 @@ class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
                     throw e
                 } catch (@Suppress("TooGenericExceptionCaught", "SwallowedException") e: Exception) {
                     if (autoConnect) {
-                        // autoConnect already true and still failed — don't loop forever.
-                        Logger.w { "[${device.address}] autoConnect attempt failed, giving up" }
+                        // Already on the autoConnect path and still failing: surface a clear Disconnected
+                        // and let the outer reconnect loop (BleRadioTransport) own the macro retry budget.
+                        Logger.w {
+                            "[${device.address.anonymize()}] autoConnect also failed; deferring to outer reconnect loop"
+                        }
                         _connectionState.emit(BleConnectionState.Disconnected(DisconnectReason.ConnectionFailed))
                         throw e
                     }
-                    Logger.d { "[${device.address}] Direct connect failed, falling back to autoConnect" }
+                    Logger.d { "[${device.address.anonymize()}] Direct connect failed, falling back to autoConnect" }
                     delay(AUTOCONNECT_FALLBACK_DELAY)
                     true
                 }
+        }
+        // Bounded loop may exit without reaching Connected if both connect() calls
+        // returned without throwing but state hasn't settled. The original while loop
+        // would have kept iterating; the bounded loop defers to the outer reconnect policy.
+        // Guard against false-positive Connected by verifying state here.
+        if (p.state.value !is State.Connected) {
+            _connectionState.emit(BleConnectionState.Disconnected(DisconnectReason.ConnectionFailed))
+            throw NotConnectedException(
+                "Failed to establish connection after bounded attempts (state=${p.state.value})",
+            )
         }
     }
 
@@ -209,15 +242,23 @@ class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
         stateJob?.cancel()
         stateJob = null
 
+        // Capture the peripheral we own before clearing it so we can identity-check
+        // ActiveBleConnection below. A stale disconnect from an earlier connection
+        // attempt's exception handler must not clobber a newer connection that has
+        // already installed itself as active.
+        val owned = peripheral
         safeClosePeripheral("disconnect")
         peripheral = null
         connectionScope = null
 
-        ActiveBleConnection.active = null
+        if (owned != null && ActiveBleConnection.active?.peripheral === owned) {
+            ActiveBleConnection.active = null
+        }
 
         _deviceFlow.emit(null)
     }
 
+    @Suppress("ThrowsCount")
     override suspend fun <T> profile(
         serviceUuid: Uuid,
         timeout: Duration,
@@ -226,10 +267,43 @@ class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
         val p = peripheral ?: error("Not connected")
         val cScope = connectionScope ?: error("No active connection scope")
         val service = KableBleService(p, serviceUuid)
-        return withTimeout(timeout) { cScope.setup(service) }
+        return withTimeout(timeout) {
+            // Shared BLE profile guard: wait for Kable service discovery before handing out the service, and map a
+            // connection-scope shutdown during caller setup to NotConnectedException instead of waiting for timeout.
+            withContext(ioDispatcher) {
+                val profileExecution = async {
+                    p.services.first { it != null }
+                    cScope.setup(service)
+                }
+
+                val disconnectHandle =
+                    cScope.coroutineContext.job.invokeOnCompletion {
+                        profileExecution.cancel(CancellationException("Connection lost during BLE profile execution"))
+                    }
+
+                try {
+                    profileExecution.await()
+                } catch (e: CancellationException) {
+                    currentCoroutineContext().ensureActive()
+                    if (!cScope.coroutineContext.job.isActive) {
+                        throw NotConnectedException("Connection lost during BLE profile execution")
+                    }
+                    throw e
+                } finally {
+                    disconnectHandle.dispose()
+                    profileExecution.cancel()
+                }
+            }
+        }
     }
 
     override fun maximumWriteValueLength(writeType: BleWriteType): Int? = peripheral?.negotiatedMaxWriteLength()
+
+    override fun requestHighConnectionPriority(): Boolean = peripheral?.requestHighConnectionPriority() == true
+
+    override fun requestBalancedConnectionPriority(): Boolean = peripheral?.requestBalancedConnectionPriority() == true
+
+    override fun invalidateServiceCache(): Boolean = peripheral?.refreshGattCache() == true
 
     /** Ensures the previous peripheral's GATT resources are fully released. */
     private suspend fun cleanUpPeripheral(tag: String) {
@@ -246,6 +320,9 @@ class KableBleConnection(private val scope: CoroutineScope) : BleConnection {
     private suspend fun safeClosePeripheral(tag: String) {
         try {
             peripheral?.disconnect()
+        } catch (_: NotConnectedException) {
+            // Silence "Disconnect requested" which Kable throws if already disconnected.
+            // This is a common non-fatal reported in Crashlytics that is safe to ignore here.
         } catch (e: Exception) {
             Logger.w(e) { "[$tag] Failed to disconnect peripheral" }
         }

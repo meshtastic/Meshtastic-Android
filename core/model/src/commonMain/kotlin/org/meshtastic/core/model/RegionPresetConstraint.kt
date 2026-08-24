@@ -1,0 +1,117 @@
+/*
+ * Copyright (c) 2026 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+package org.meshtastic.core.model
+
+import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
+import org.meshtastic.proto.Config.LoRaConfig.RegionCode
+import org.meshtastic.proto.LoRaRegionPresetMap
+
+/**
+ * The modem presets the firmware advertised as legal for one LoRa region, decoded from a [LoRaRegionPresetMap].
+ *
+ * @property presets the presets that are legal in the region.
+ * @property defaultPreset the firmware's default preset for the region (always one of [presets]).
+ * @property licensedOnly true when the region's presets are for licensed operators only (e.g. amateur bands); the whole
+ *   group is gated, not individual presets.
+ */
+data class RegionPresetConstraint(
+    val presets: List<ModemPreset>,
+    val defaultPreset: ModemPreset,
+    val licensedOnly: Boolean,
+) {
+    /** True when an operator with the given licensing state may not select any preset in this region. */
+    fun isGated(isLicensed: Boolean): Boolean = licensedOnly && !isLicensed
+}
+
+/**
+ * Resolves the [RegionPresetConstraint] the firmware advertised for [region], or `null` when there is no constraint
+ * information and the client must therefore NOT restrict the preset list. A `null` result happens when:
+ * - the map is `null` (firmware older than 2.8 never sends it),
+ * - [region] is absent from `region_groups` (no firmware table entry — treated as unconstrained),
+ * - the referenced `group_index` is out of range (defensive against a malformed map), or
+ * - the referenced group has no presets (a degenerate/malformed group — must not collapse the picker to nothing).
+ */
+@Suppress("ReturnCount") // Guard clauses for defensive null checks and missing lookups are idiomatic
+fun LoRaRegionPresetMap?.constraintFor(region: RegionCode): RegionPresetConstraint? {
+    if (this == null) return null
+    val entry = region_groups.firstOrNull { it.region == region } ?: return null
+    val group = groups.getOrNull(entry.group_index)?.takeIf { it.presets.isNotEmpty() } ?: return null
+    return RegionPresetConstraint(
+        presets = group.presets,
+        defaultPreset = group.default_preset,
+        licensedOnly = group.licensed_only,
+    )
+}
+
+/**
+ * Returns the modem preset the LoRa form should hold for [region] given the currently-selected [current] preset.
+ *
+ * Keeps [current] when it is still legal in [region]; otherwise falls back to the region's default preset (and, if that
+ * is somehow not in the legal set, the first legal preset). Returns [current] unchanged when [region] is unconstrained.
+ * Licensing is intentionally NOT considered here — auto-swap is about legality; selectability is decided separately by
+ * [RegionPresetConstraint.isGated].
+ */
+fun LoRaRegionPresetMap?.repairPresetFor(region: RegionCode, current: ModemPreset): ModemPreset {
+    val constraint = constraintFor(region) ?: return current
+    return when {
+        current in constraint.presets -> current
+        constraint.defaultPreset in constraint.presets -> constraint.defaultPreset
+        else -> constraint.presets.firstOrNull() ?: current
+    }
+}
+
+/**
+ * Returns the modem preset the LoRa form should hold when the region changes from [previousRegion] to [newRegion] with
+ * [current] selected.
+ *
+ * Keeps [current] (legality-repaired via [repairPresetFor]) except at fresh setup: when [previousRegion] is UNSET and
+ * [current] is the [ModemPreset.LONG_FAST] placeholder a factory-flashed node reports (proto default), the region's
+ * advertised default is adopted instead (the firmware map's when present, else the app's built-in default). Any other
+ * preset at UNSET was set deliberately (e.g. a vendor build pinning USERPREFS_LORACONFIG_MODEM_PRESET) and is kept.
+ *
+ * A build that pins a preset can also advertise it as an UNSET map entry (firmware #11507), stating outright that the
+ * preset is deliberate; that keeps even a pinned LONG_FAST, which the placeholder heuristic alone cannot distinguish.
+ */
+fun LoRaRegionPresetMap?.presetForRegionChange(
+    previousRegion: RegionCode,
+    newRegion: RegionCode,
+    current: ModemPreset,
+): ModemPreset {
+    val repaired = repairPresetFor(newRegion, current)
+    val pinned = constraintFor(RegionCode.UNSET) != null
+    val freshSetup = previousRegion == RegionCode.UNSET && !pinned && current == ModemPreset.LONG_FAST
+    return if (freshSetup) {
+        // Re-repair the adopted default: a malformed map's advertised default may not be in its own legal set.
+        val preferred = constraintFor(newRegion)?.defaultPreset ?: defaultPresetFor(newRegion) ?: repaired
+        repairPresetFor(newRegion, preferred)
+    } else {
+        repaired
+    }
+}
+
+/**
+ * The app's built-in default modem presets for regions whose default differs from the global [ChannelOption.DEFAULT].
+ * Mirrors the per-region defaults newer firmware advertises in [LoRaRegionPresetMap], so the default channel and a
+ * fresh setup over old firmware (which sends no map) land on the same preset a new node would.
+ */
+private val REGION_DEFAULT_PRESETS = mapOf(RegionCode.US to ModemPreset.LONG_TURBO)
+
+/**
+ * The app's preferred default preset for [region], or `null` when it has no region-specific default and the caller
+ * should fall back to [ChannelOption.DEFAULT] / the current preset.
+ */
+fun defaultPresetFor(region: RegionCode): ModemPreset? = REGION_DEFAULT_PRESETS[region]

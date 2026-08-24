@@ -26,46 +26,42 @@ private val json = Json { ignoreUnknownKeys = true }
 
 class FirmwareManifestTest {
 
+    /**
+     * Regression for the manifest-never-parses bug: the real published `.mt.json` has `hwModel` as an **integer** (the
+     * HardwareModel enum value) plus assorted scalar/array metadata. A previous `hwModel: String` field threw
+     * `JsonDecodingException` on every real manifest, silently falling back to filename heuristics. The model now only
+     * consumes `files`, so the real shape must parse and resolve `app0`.
+     */
     @Test
-    fun `deserialize full manifest with all fields`() {
+    fun `real published manifest shape parses and resolves app0`() {
         val raw =
             """
             {
-              "hwModel": "HELTEC_V3",
-              "architecture": "esp32-s3",
+              "version": "2.7.25.104df5f",
+              "build_epoch": 1780963200,
+              "hwModel": 43,
               "platformioTarget": "heltec-v3",
               "mcu": "esp32s3",
+              "repo": "meshtastic/firmware",
+              "has_mui": false,
               "files": [
-                {
-                  "name": "firmware-heltec-v3-2.7.17.bin",
-                  "part_name": "app0",
-                  "md5": "abc123def456",
-                  "bytes": 2097152
-                },
-                {
-                  "name": "mt-esp32s3-ota.bin",
-                  "part_name": "app1",
-                  "md5": "789xyz",
-                  "bytes": 636928
-                },
-                {
-                  "name": "littlefs-heltec-v3-2.7.17.bin",
-                  "part_name": "spiffs",
-                  "md5": "000111",
-                  "bytes": 1048576
-                }
+                { "name": "firmware-heltec-v3-2.7.25.104df5f.elf", "md5": "a22e", "bytes": 22268744 },
+                { "name": "firmware-heltec-v3-2.7.25.104df5f.bin", "md5": "6a45", "bytes": 2108864, "part_name": "app0" },
+                { "name": "mt-esp32s3-ota.bin", "md5": "497d", "bytes": 636544, "part_name": "app1" }
+              ],
+              "part": [
+                { "name": "app0", "type": "app", "subtype": "ota_0", "offset": "0x10000", "size": "0x330000" }
               ]
             }
             """
                 .trimIndent()
 
         val manifest = json.decodeFromString<FirmwareManifest>(raw)
+        val otaEntry = manifest.files.firstOrNull { it.partName == "app0" }
 
-        assertEquals("HELTEC_V3", manifest.hwModel)
-        assertEquals("esp32-s3", manifest.architecture)
-        assertEquals("heltec-v3", manifest.platformioTarget)
-        assertEquals("esp32s3", manifest.mcu)
         assertEquals(3, manifest.files.size)
+        assertEquals("firmware-heltec-v3-2.7.25.104df5f.bin", otaEntry?.name)
+        assertEquals(2108864L, otaEntry?.bytes)
     }
 
     @Test
@@ -116,22 +112,18 @@ class FirmwareManifestTest {
     }
 
     @Test
-    fun `missing optional fields use defaults`() {
+    fun `missing files field uses default`() {
         val raw = """{}"""
         val manifest = json.decodeFromString<FirmwareManifest>(raw)
-        assertEquals("", manifest.hwModel)
-        assertEquals("", manifest.architecture)
-        assertEquals("", manifest.platformioTarget)
-        assertEquals("", manifest.mcu)
         assertTrue(manifest.files.isEmpty())
     }
 
     @Test
-    fun `unknown keys are ignored`() {
+    fun `unknown keys including scalar metadata are ignored`() {
         val raw =
             """
             {
-              "hwModel": "RAK4631",
+              "hwModel": 9,
               "unknown_field": "whatever",
               "files": [
                 { "name": "firmware.bin", "part_name": "app0", "extra": true }
@@ -141,7 +133,6 @@ class FirmwareManifestTest {
                 .trimIndent()
 
         val manifest = json.decodeFromString<FirmwareManifest>(raw)
-        assertEquals("RAK4631", manifest.hwModel)
         assertEquals(1, manifest.files.size)
         assertEquals("firmware.bin", manifest.files[0].name)
     }

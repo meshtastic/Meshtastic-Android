@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,14 +45,14 @@ actual fun getDatabaseBuilder(dbName: String): RoomDatabase.Builder<MeshtasticDa
         factory = { MeshtasticDatabaseConstructor.initialize() },
     )
         .configureCommon()
-        .setDriver(BundledSQLiteDriver())
+        .setDriver(BusyTimeoutSQLiteDriver(BundledSQLiteDriver()))
 }
 
 /** Returns a [RoomDatabase.Builder] configured for an in-memory iOS database. */
 actual fun getInMemoryDatabaseBuilder(): RoomDatabase.Builder<MeshtasticDatabase> =
     Room.inMemoryDatabaseBuilder<MeshtasticDatabase>(factory = { MeshtasticDatabaseConstructor.initialize() })
         .configureCommon()
-        .setDriver(BundledSQLiteDriver())
+        .setDriver(BusyTimeoutSQLiteDriver(BundledSQLiteDriver()))
 
 /** Returns the iOS directory where database files are stored. */
 actual fun getDatabaseDirectory(): Path = documentDirectory().toPath()

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@ import org.meshtastic.core.resources.ic_bluetooth_searching
 import org.meshtastic.core.resources.ic_cached
 import org.meshtastic.core.resources.ic_display_settings
 import org.meshtastic.core.resources.ic_memory
+import org.meshtastic.core.resources.ic_mesh_radio
 import org.meshtastic.core.resources.ic_nfc
 import org.meshtastic.core.resources.ic_settings_input_antenna
 import org.meshtastic.core.resources.ic_speaker_phone
@@ -60,3 +61,5 @@ val MeshtasticIcons.Memory: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_memory)
 val MeshtasticIcons.DisplaySettings: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_display_settings)
+val MeshtasticIcons.MeshRadio: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_mesh_radio)

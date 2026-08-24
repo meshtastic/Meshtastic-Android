@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,12 +38,16 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.toDistanceString
+import org.meshtastic.core.navigation.MapRoute
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.open_compass
+import org.meshtastic.core.resources.site_planner_estimate
+import org.meshtastic.core.ui.icon.CellTower
 import org.meshtastic.core.ui.icon.Compass
 import org.meshtastic.core.ui.icon.Distance
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.util.LocalInlineMapProvider
+import org.meshtastic.core.ui.util.LocalSitePlannerAvailable
 import org.meshtastic.feature.node.model.NodeDetailAction
 import org.meshtastic.proto.Config
 
@@ -78,6 +82,24 @@ internal fun PositionInlineContent(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
+    }
+    // Estimate RF coverage for this node in the Site Planner (Google flavor, position-gated).
+    if (LocalSitePlannerAvailable.current && node.validPosition != null) {
+        Spacer(Modifier.height(8.dp))
+        FilledTonalButton(
+            onClick = { onAction(NodeDetailAction.Navigate(MapRoute.Map(sitePlannerNodeNum = node.num))) },
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.large,
+        ) {
+            Icon(MeshtasticIcons.CellTower, null, Modifier.size(18.dp))
+            Spacer(Modifier.width(6.dp))
+            Text(
+                text = stringResource(Res.string.site_planner_estimate),
+                style = MaterialTheme.typography.labelLarge,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
     }
 }
 

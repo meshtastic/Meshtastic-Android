@@ -32,6 +32,16 @@ fun MutableList<NavKey>.replaceLast(route: NavKey) {
 }
 
 /**
+ * Pops the top entry unless it is the root, so a displayed back stack can never be drained empty. Returns true when an
+ * entry was removed.
+ */
+fun MutableList<NavKey>.popUnlessRoot(): Boolean {
+    if (size <= 1) return false
+    removeAt(lastIndex)
+    return true
+}
+
+/**
  * Replaces the entire back stack with the given routes in a way that minimizes structural changes and prevents the back
  * stack from temporarily becoming empty.
  */

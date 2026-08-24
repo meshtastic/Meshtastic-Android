@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.meshtastic.core.ui.theme.AppTheme
 
 @Composable
 fun PreferenceCategory(
@@ -55,6 +56,6 @@ fun PreferenceCategory(
 
 @Preview(showBackground = true)
 @Composable
-private fun PreferenceCategoryPreview() {
-    PreferenceCategory(text = "Advanced settings")
+fun PreferenceCategoryPreview() {
+    AppTheme { PreferenceCategory(text = "Advanced settings") }
 }

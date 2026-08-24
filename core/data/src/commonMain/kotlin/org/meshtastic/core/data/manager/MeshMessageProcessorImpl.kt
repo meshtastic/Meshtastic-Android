@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,27 +17,38 @@
 package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.ServiceScope
+import org.meshtastic.core.common.util.clampTimestampToNow
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.isLora
+import org.meshtastic.core.model.util.rxTimeOrNull
+import org.meshtastic.core.model.util.snrOrNull
+import org.meshtastic.core.model.util.toOneLineString
+import org.meshtastic.core.model.util.toPIIString
 import org.meshtastic.core.repository.FromRadioPacketHandler
+import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.MeshMessageProcessor
-import org.meshtastic.core.repository.MeshRouter
 import org.meshtastic.core.repository.NodeManager
-import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioSessionContext
+import org.meshtastic.core.repository.ReceivedRadioFrame
+import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.LogRecord
 import org.meshtastic.proto.MeshPacket
@@ -50,16 +61,13 @@ import kotlin.uuid.Uuid
 @Single
 class MeshMessageProcessorImpl(
     private val nodeManager: NodeManager,
-    private val serviceRepository: ServiceRepository,
+    private val serviceStateWriter: ServiceStateWriter,
     private val meshLogRepository: Lazy<MeshLogRepository>,
-    private val router: Lazy<MeshRouter>,
+    private val dataHandler: Lazy<MeshDataHandler>,
     private val fromRadioDispatcher: FromRadioPacketHandler,
-    @Named("ServiceScope") private val scope: CoroutineScope,
+    private val radioInterfaceService: RadioInterfaceService,
+    private val scope: ServiceScope,
 ) : MeshMessageProcessor {
-
-    private val mapsMutex = Mutex()
-    private val logUuidByPacketId = mutableMapOf<Int, String>()
-    private val logInsertJobByPacketId = mutableMapOf<Int, Job>()
 
     /**
      * Epoch-millisecond timestamp of the last local-node `lastHeard` DB write. Used to throttle updates to at most once
@@ -68,56 +76,83 @@ class MeshMessageProcessorImpl(
      */
     @Volatile private var lastLocalNodeRefreshMs = 0L
 
+    @Volatile private var lastLocalNodeRefreshGeneration = Long.MIN_VALUE
+
+    private data class BufferedMeshPacket(val packet: MeshPacket, val session: RadioSessionContext)
+
     private val earlyMutex = Mutex()
-    private val earlyReceivedPackets = ArrayDeque<MeshPacket>()
+    private val earlyFlushMutex = Mutex()
+    private val earlyReceivedPackets = ArrayDeque<BufferedMeshPacket>()
     private val maxEarlyPacketBuffer = 10240
 
-    override fun clearEarlyPackets() {
-        scope.launch { earlyMutex.withLock { earlyReceivedPackets.clear() } }
+    override suspend fun clearEarlyPackets() {
+        earlyFlushMutex.withLock { earlyMutex.withLock { earlyReceivedPackets.clear() } }
     }
 
     init {
-        nodeManager.isNodeDbReady
-            .onEach { ready ->
-                if (ready) {
-                    flushEarlyReceivedPackets("dbReady")
+        // Flush buffered packets only once BOTH the node DB is ready AND our own node number is known. Processing a
+        // received packet while myNodeNum is still null would key a local packet under its raw from_num instead of
+        // NODE_NUM_LOCAL (see [handleReceivedMeshPacket] / [processReceivedMeshPacket]), orphaning it from per-node
+        // queries. Emit the (ready, myNodeNum) pair — not the derived boolean — so distinctUntilChanged re-fires on
+        // every underlying state change (including a reconnect where myNodeNum transitions null -> value) rather than
+        // collapsing distinct states that happen to map to the same boolean.
+        combine(nodeManager.isNodeDbReady, nodeManager.myNodeNum) { ready, myNodeNum -> ready to myNodeNum }
+            .distinctUntilChanged()
+            .onEach { (ready, myNodeNum) ->
+                if (ready && myNodeNum != null) {
+                    flushEarlyReceivedPackets("ready")
                 }
             }
             .launchIn(scope)
     }
 
-    override fun handleFromRadio(bytes: ByteArray, myNodeNum: Int?) {
-        runCatching { FromRadio.ADAPTER.decode(bytes) }
-            .onSuccess { proto -> processFromRadio(proto, myNodeNum) }
-            .onFailure { primaryException ->
-                runCatching {
-                    val logRecord = LogRecord.ADAPTER.decode(bytes)
-                    processFromRadio(FromRadio(log_record = logRecord), myNodeNum)
-                }
-                    .onFailure { _ ->
-                        Logger.e(primaryException) {
-                            "Failed to parse radio packet (len=${bytes.size}). Not a valid FromRadio or LogRecord."
+    override suspend fun handleFromRadio(frame: ReceivedRadioFrame, myNodeNum: Int?) {
+        if (!radioInterfaceService.isSessionActive(frame.session)) {
+            Logger.d { "Dropping decoded work from stale transport session gen=${frame.session.generation}" }
+            return
+        }
+        val bytes = frame.payload.toByteArray()
+        val proto =
+            safeCatching { FromRadio.ADAPTER.decode(bytes) }
+                .getOrElse { primaryException ->
+                    safeCatching { FromRadio(log_record = LogRecord.ADAPTER.decode(bytes)) }
+                        .getOrElse {
+                            Logger.e(primaryException) {
+                                "Failed to parse radio packet (len=${bytes.size}). Not a valid FromRadio or LogRecord."
+                            }
+                            return
                         }
-                    }
-            }
+                }
+        processFromRadio(proto, myNodeNum, frame.session)
     }
 
-    private fun processFromRadio(proto: FromRadio, myNodeNum: Int?) {
-        // Any decoded FromRadio proves the radio link is alive — keep the local node fresh.
-        refreshLocalNodeLastHeard()
+    private suspend fun processFromRadio(proto: FromRadio, myNodeNum: Int?, session: RadioSessionContext) {
+        val admitted =
+            radioInterfaceService.runWhileSessionActive(session) {
+                safeCatching {
+                    // Audit log every incoming variant without allowing delayed work to cross a session boundary.
+                    logVariant(proto, session)
 
-        // Audit log every incoming variant
-        logVariant(proto)
-
-        val packet = proto.packet
-        if (packet != null) {
-            handleReceivedMeshPacket(packet, myNodeNum)
-        } else {
-            fromRadioDispatcher.handleFromRadio(proto)
+                    val packet = proto.packet
+                    if (packet != null) {
+                        handleReceivedMeshPacket(packet, myNodeNum, session)
+                    } else {
+                        // Packets refresh the local node in processReceivedMeshPacket; other variants need the
+                        // heartbeat.
+                        refreshLocalNodeLastHeard(session)
+                        fromRadioDispatcher.handleFromRadio(proto, session)
+                    }
+                }
+                    .onFailure {
+                        Logger.e(it) { "Dropped a FromRadio after a handler error; receive pipeline kept alive" }
+                    }
+            }
+        if (!admitted) {
+            Logger.d { "Dropping FromRadio from stale transport session gen=${session.generation}" }
         }
     }
 
-    private fun logVariant(proto: FromRadio) {
+    private fun logVariant(proto: FromRadio, session: RadioSessionContext) {
         val (type, message) =
             when {
                 proto.log_record != null -> "LogRecord" to proto.log_record.toString()
@@ -125,11 +160,11 @@ class MeshMessageProcessorImpl(
                 proto.xmodemPacket != null -> "XmodemPacket" to proto.xmodemPacket.toString()
                 proto.deviceuiConfig != null -> "DeviceUIConfig" to proto.deviceuiConfig.toString()
                 proto.fileInfo != null -> "FileInfo" to proto.fileInfo.toString()
-                proto.my_info != null -> "MyInfo" to proto.my_info.toString()
-                proto.node_info != null -> "NodeInfo" to proto.node_info.toString()
-                proto.config != null -> "Config" to proto.config.toString()
-                proto.moduleConfig != null -> "ModuleConfig" to proto.moduleConfig.toString()
-                proto.channel != null -> "Channel" to proto.channel.toString()
+                proto.my_info != null -> "MyInfo" to proto.my_info!!.toOneLineString()
+                proto.node_info != null -> "NodeInfo" to proto.node_info!!.toPIIString()
+                proto.config != null -> "Config" to proto.config!!.toOneLineString()
+                proto.moduleConfig != null -> "ModuleConfig" to proto.moduleConfig!!.toOneLineString()
+                proto.channel != null -> "Channel" to proto.channel!!.toOneLineString()
                 proto.clientNotification != null -> "ClientNotification" to proto.clientNotification.toString()
                 else -> return
             }
@@ -142,53 +177,93 @@ class MeshMessageProcessorImpl(
                 raw_message = message,
                 fromRadio = proto,
             ),
+            session,
         )
     }
 
-    override fun handleReceivedMeshPacket(packet: MeshPacket, myNodeNum: Int?) {
-        val rxTime =
-            if (packet.rx_time == 0) {
-                nowSeconds.toInt()
-            } else {
-                packet.rx_time
-            }
-        val preparedPacket = packet.copy(rx_time = rxTime)
+    /** Test seam for packet-only fixtures with explicit transport authority. */
+    internal suspend fun handleReceivedMeshPacket(packet: MeshPacket, myNodeNum: Int?, session: RadioSessionContext) {
+        // Single normalization point: every consumer downstream of this copy sees a stamped packet.
+        val preparedPacket = packet.copy(rx_time = packet.rxTimeOrNull() ?: nowSeconds.toInt())
 
-        if (nodeManager.isNodeDbReady.value) {
-            processReceivedMeshPacket(preparedPacket, myNodeNum)
+        // Require myNodeNum to be known before storing: processReceivedMeshPacket only keys a local packet under
+        // NODE_NUM_LOCAL when packet.from == myNodeNum. If myNodeNum is still null (early in a (re)connect, before
+        // MyNodeInfo resolves), a local packet would be stored under its raw from_num and become invisible to
+        // per-node chart queries while still appearing in the unfiltered Debug log. Buffer until both are ready;
+        // the init combine flushes the buffer once myNodeNum resolves.
+        if (!radioInterfaceService.isSessionActive(session)) {
+            Logger.d { "Dropping mesh packet from stale transport session gen=${session.generation}" }
+            return
+        }
+
+        if (nodeManager.isNodeDbReady.value && myNodeNum != null) {
+            processReceivedMeshPacket(preparedPacket, myNodeNum, session)
         } else {
-            scope.launch {
-                earlyMutex.withLock {
-                    val queueSize = earlyReceivedPackets.size
-                    if (queueSize >= maxEarlyPacketBuffer) {
-                        Logger.w { "Early packet buffer full ($queueSize), dropping oldest packet" }
-                        earlyReceivedPackets.removeFirstOrNull()
-                    }
-                    earlyReceivedPackets.addLast(preparedPacket)
-                }
+            // Production callers already hold the session lease in processFromRadio. Enqueue directly so packet FIFO
+            // does not depend on the ordering of separately launched mutex waiters.
+            enqueueBufferedPacket(BufferedMeshPacket(preparedPacket, session))
+            if (nodeManager.isNodeDbReady.value && nodeManager.myNodeNum.value != null) {
+                flushEarlyReceivedPackets("enqueue-ready")
             }
         }
+    }
+
+    private suspend fun enqueueBufferedPacket(buffered: BufferedMeshPacket) = earlyMutex.withLock {
+        discardBufferedPacketsFromOtherSessions(buffered.session)
+        val queueSize = earlyReceivedPackets.size
+        if (queueSize >= maxEarlyPacketBuffer) {
+            Logger.w { "Early packet buffer full ($queueSize), dropping oldest packet" }
+            earlyReceivedPackets.removeFirstOrNull()
+        }
+        earlyReceivedPackets.addLast(buffered)
+    }
+
+    private fun discardBufferedPacketsFromOtherSessions(activeSession: RadioSessionContext) {
+        val removed = earlyReceivedPackets.removeAll { queued -> queued.session != activeSession }
+        if (removed) Logger.d { "Discarded buffered packets from an earlier transport generation" }
     }
 
     private fun flushEarlyReceivedPackets(reason: String) {
-        scope.launch {
-            val packets =
-                earlyMutex.withLock {
-                    if (earlyReceivedPackets.isEmpty()) return@withLock emptyList<MeshPacket>()
-                    val list = earlyReceivedPackets.toList()
-                    earlyReceivedPackets.clear()
-                    list
-                }
-            if (packets.isEmpty()) return@launch
+        scope.launch { earlyFlushMutex.withLock { replayEarlyReceivedPackets(reason) } }
+    }
 
-            Logger.d { "replayEarlyPackets reason=$reason count=${packets.size}" }
-            val myNodeNum = nodeManager.myNodeNum.value
-            packets.forEach { processReceivedMeshPacket(it, myNodeNum) }
+    private suspend fun replayEarlyReceivedPackets(reason: String) {
+        var replayed = 0
+        while (nodeManager.isNodeDbReady.value) {
+            val myNodeNum = nodeManager.myNodeNum.value ?: return
+            val buffered = earlyMutex.withLock { earlyReceivedPackets.removeFirstOrNull() } ?: break
+
+            // Readiness can regress while a queued flush waits behind an earlier replay. Put the packet back at the
+            // front instead of keying it against a database that is being cleared or an unresolved local node number.
+            if (!isReplayReady(myNodeNum)) {
+                earlyMutex.withLock { earlyReceivedPackets.addFirst(buffered) }
+                return
+            }
+
+            if (processBufferedPacket(buffered, myNodeNum)) replayed += 1
         }
+        if (replayed > 0) Logger.d { "replayEarlyPackets reason=$reason count=$replayed" }
+    }
+
+    private fun isReplayReady(myNodeNum: Int): Boolean =
+        nodeManager.isNodeDbReady.value && nodeManager.myNodeNum.value == myNodeNum
+
+    private suspend fun processBufferedPacket(buffered: BufferedMeshPacket, myNodeNum: Int): Boolean {
+        val admitted =
+            radioInterfaceService.runWhileSessionActive(buffered.session) {
+                safeCatching { processReceivedMeshPacket(buffered.packet, myNodeNum, buffered.session) }
+                    .onFailure {
+                        Logger.e(it) { "Dropped a buffered early packet after a handler error; replay continued" }
+                    }
+            }
+        if (!admitted) {
+            Logger.d { "Dropping buffered packet from stale transport session gen=${buffered.session.generation}" }
+        }
+        return admitted
     }
 
     @Suppress("LongMethod")
-    private fun processReceivedMeshPacket(packet: MeshPacket, myNodeNum: Int?) {
+    private suspend fun processReceivedMeshPacket(packet: MeshPacket, myNodeNum: Int, session: RadioSessionContext) {
         val decoded = packet.decoded ?: return
         val log =
             MeshLog(
@@ -200,68 +275,56 @@ class MeshMessageProcessorImpl(
                 portNum = decoded.portnum.value,
                 fromRadio = FromRadio(packet = packet),
             )
-        val logJob = insertMeshLog(log)
+        val logJob = insertMeshLog(log, session)
 
-        scope.launch {
-            mapsMutex.withLock {
-                logInsertJobByPacketId[packet.id] = logJob
-                logUuidByPacketId[packet.id] = log.uuid
+        launchSessionBound(session, "mesh-packet emission") { serviceStateWriter.emitMeshPacket(packet) }
+
+        val from = packet.from
+        if (from == myNodeNum) {
+            persistNodeUpdate(
+                myNodeNum,
+                channel = packet.channel,
+                operation = "local sender-node packet update",
+            ) { node ->
+                applySenderPacketUpdate(node, packet, decoded).copy(lastHeard = nowSeconds.toInt())
             }
-        }
-
-        scope.handledLaunch { serviceRepository.emitMeshPacket(packet) }
-
-        myNodeNum?.let { myNum ->
-            val from = packet.from
-            val isOtherNode = myNum != from
-            nodeManager.updateNode(myNum, withBroadcast = isOtherNode) { node: Node ->
+        } else {
+            persistNodeUpdate(myNodeNum, operation = "local-node packet refresh") { node: Node ->
                 node.copy(lastHeard = nowSeconds.toInt())
             }
-            nodeManager.updateNode(from, withBroadcast = false, channel = packet.channel) { node: Node ->
-                val viaMqtt = packet.via_mqtt == true
-                val isDirect = packet.hop_start == packet.hop_limit
-
-                var snr = node.snr
-                var rssi = node.rssi
-                if (isDirect && packet.isLora() && !viaMqtt) {
-                    snr = packet.rx_snr
-                    rssi = packet.rx_rssi
-                }
-
-                val hopsAway =
-                    if (decoded.portnum == PortNum.RANGE_TEST_APP) {
-                        0
-                    } else if (viaMqtt) {
-                        -1
-                    } else if (packet.hop_start == 0 && (decoded.bitfield ?: 0) == 0) {
-                        -1
-                    } else if (packet.hop_limit > packet.hop_start) {
-                        -1
-                    } else {
-                        packet.hop_start - packet.hop_limit
-                    }
-
-                node.copy(
-                    lastHeard = packet.rx_time,
-                    viaMqtt = viaMqtt,
-                    lastTransport = packet.transport_mechanism.value,
-                    snr = snr,
-                    rssi = rssi,
-                    hopsAway = hopsAway,
-                )
-            }
-
-            try {
-                router.value.dataHandler.handleReceivedData(packet, myNum, log.uuid, logJob)
-            } finally {
-                scope.launch {
-                    mapsMutex.withLock {
-                        logUuidByPacketId.remove(packet.id)
-                        logInsertJobByPacketId.remove(packet.id)
-                    }
-                }
+            persistNodeUpdate(from, channel = packet.channel, operation = "sender-node packet update") { node ->
+                applySenderPacketUpdate(node, packet, decoded)
             }
         }
+
+        dataHandler.value.handleReceivedData(packet, myNodeNum, session, log.uuid, logJob)
+    }
+
+    private fun applySenderPacketUpdate(node: Node, packet: MeshPacket, decoded: org.meshtastic.proto.Data): Node {
+        val viaMqtt = packet.via_mqtt == true
+        val isDirect = packet.hop_start == packet.hop_limit
+        val updateRadioMetrics = isDirect && packet.isLora() && !viaMqtt
+        val hopsAway =
+            when {
+                decoded.portnum == PortNum.RANGE_TEST_APP -> 0
+                viaMqtt -> -1
+                packet.hop_start == 0 && (decoded.bitfield ?: 0) == 0 -> -1
+                packet.hop_limit > packet.hop_start -> -1
+                else -> packet.hop_start - packet.hop_limit
+            }
+        return node.copy(
+            // Packets reach here already stamped, so the fallback is unreachable by design and must stay that way:
+            // a packet that just arrived SHOULD refresh lastHeard, using the phone's clock when the radio had no
+            // time source. The fallback only guards a future caller that skips normalization from writing the epoch.
+            lastHeard = packet.rxTimeOrNull()?.let(::clampTimestampToNow) ?: node.lastHeard,
+            viaMqtt = viaMqtt,
+            lastTransport = packet.transport_mechanism.value,
+            // A packet carrying no snr must not clobber the node's last real reading either.
+            snr = if (updateRadioMetrics) packet.snrOrNull() ?: node.snr else node.snr,
+            // A packet carrying no rssi must not clobber the node's last real reading.
+            rssi = if (updateRadioMetrics) packet.rx_rssi ?: node.rssi else node.rssi,
+            hopsAway = hopsAway,
+        )
     }
 
     /**
@@ -275,16 +338,41 @@ class MeshMessageProcessorImpl(
      * To avoid flooding the DB on high-frequency variants (log records arrive many times per second when debug logging
      * is enabled), writes are throttled to at most once per [LOCAL_NODE_REFRESH_INTERVAL_MS].
      */
-    private fun refreshLocalNodeLastHeard() {
+    private suspend fun refreshLocalNodeLastHeard(session: RadioSessionContext) {
         val now = nowMillis
-        if (now - lastLocalNodeRefreshMs < LOCAL_NODE_REFRESH_INTERVAL_MS) return
-        lastLocalNodeRefreshMs = now
+        val sameGeneration = lastLocalNodeRefreshGeneration == session.generation
+        if (sameGeneration && now - lastLocalNodeRefreshMs < LOCAL_NODE_REFRESH_INTERVAL_MS) return
 
         val myNum = nodeManager.myNodeNum.value ?: return
-        nodeManager.updateNode(myNum, withBroadcast = false) { node: Node -> node.copy(lastHeard = nowSeconds.toInt()) }
+        val persisted =
+            persistNodeUpdate(myNum, operation = "local-node link refresh") { node: Node ->
+                node.copy(lastHeard = nowSeconds.toInt())
+            }
+        if (persisted) {
+            lastLocalNodeRefreshGeneration = session.generation
+            lastLocalNodeRefreshMs = now
+        }
     }
 
-    private fun insertMeshLog(log: MeshLog): Job = scope.handledLaunch { meshLogRepository.value.insert(log) }
+    private suspend fun persistNodeUpdate(
+        nodeNum: Int,
+        channel: Int = 0,
+        operation: String,
+        transform: (Node) -> Node,
+    ): Boolean = safeCatching { nodeManager.updateNodeAndPersist(nodeNum, channel, transform) }
+        .onFailure { Logger.e(it) { "Failed $operation; packet processing continued" } }
+        .isSuccess
+
+    private fun insertMeshLog(log: MeshLog, session: RadioSessionContext): Job =
+        launchSessionBound(session, "mesh-log insert") { meshLogRepository.value.insert(log) }
+
+    private fun launchSessionBound(session: RadioSessionContext, operation: String, block: suspend () -> Unit): Job =
+        scope.handledLaunch(start = CoroutineStart.UNDISPATCHED) {
+            val admitted = radioInterfaceService.runWithSessionLease(session) { block() }
+            if (!admitted) {
+                Logger.d { "Skipping $operation from stale transport session gen=${session.generation}" }
+            }
+        }
 
     companion object {
         /**

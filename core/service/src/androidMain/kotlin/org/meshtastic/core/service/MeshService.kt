@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,102 +14,93 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:Suppress("TooGenericExceptionCaught")
+
 package org.meshtastic.core.service
 
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.content.pm.ServiceInfo
-import android.os.Build
 import android.os.IBinder
+import android.os.PowerManager
 import androidx.core.app.ServiceCompat
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import org.koin.android.ext.android.inject
 import org.meshtastic.core.common.hasLocationPermission
-import org.meshtastic.core.common.util.toRemoteExceptions
-import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.common.util.isValidDeviceAddress
 import org.meshtastic.core.model.DeviceVersion
-import org.meshtastic.core.model.MeshUser
-import org.meshtastic.core.model.MyNodeInfo
-import org.meshtastic.core.model.NodeInfo
-import org.meshtastic.core.model.Position
-import org.meshtastic.core.model.RadioNotConnectedException
 import org.meshtastic.core.model.util.anonymize
-import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.MeshConnectionManager
-import org.meshtastic.core.repository.MeshLocationManager
-import org.meshtastic.core.repository.MeshRouter
-import org.meshtastic.core.repository.MeshServiceNotifications
-import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.RadioInterfaceService
-import org.meshtastic.core.repository.SERVICE_NOTIFY_ID
-import org.meshtastic.core.repository.ServiceBroadcasts
-import org.meshtastic.core.repository.ServiceRepository
-import org.meshtastic.proto.PortNum
 
 /**
  * Android foreground service that hosts the Meshtastic mesh radio connection.
  *
  * Acts as the lifecycle anchor for the [MeshServiceOrchestrator], which manages all manager initialization and
- * connection state. Exposes an AIDL binder for external client integration via [core:api].
+ * connection state.
  */
-// IMeshService is deprecated but still required for AIDL binding
-@Suppress("TooManyFunctions", "LargeClass", "DEPRECATION")
+@Suppress("LargeClass")
 class MeshService : Service() {
 
     private val radioInterfaceService: RadioInterfaceService by inject()
 
-    private val serviceRepository: ServiceRepository by inject()
-
-    private val serviceBroadcasts: ServiceBroadcasts by inject()
-
-    private val nodeManager: NodeManager by inject()
-
-    private val commandSender: CommandSender by inject()
-
-    private val locationManager: MeshLocationManager by inject()
-
     private val connectionManager: MeshConnectionManager by inject()
 
-    private val notifications: MeshServiceNotifications by inject()
+    private val notifications: MeshNotificationManager by inject()
 
     /** Android-typed accessor for the foreground service notification. */
-    private val androidNotifications: MeshServiceNotificationsImpl
-        get() = notifications as MeshServiceNotificationsImpl
+    private val androidNotifications: MeshNotificationManagerImpl
+        get() = notifications as MeshNotificationManagerImpl
 
     private val orchestrator: MeshServiceOrchestrator by inject()
 
-    private val router: MeshRouter by inject()
-
-    private val dispatchers: CoroutineDispatchers by inject()
-
-    private val serviceJob = Job()
-    private val serviceScope by lazy { CoroutineScope(dispatchers.io + serviceJob) }
+    private val conversationShortcutPublisher: ConversationShortcutPublisher by inject()
 
     private var isServiceInitialized = false
 
-    private val myNodeNum: Int
-        get() = nodeManager.myNodeNum.value ?: throw RadioNotConnectedException()
+    /**
+     * Scope for short-lived coroutines owned by this service (e.g. waiting for the selected-device address to load).
+     * Canceled in [onDestroy].
+     */
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+
+    /**
+     * Active job waiting for the selected-device address to be loaded from DataStore. Null when no wait is pending
+     * (either the address was already valid at [onStartCommand] time, or the wait already resolved).
+     */
+    private var addressWaitJob: Job? = null
+
+    /**
+     * Partial wake lock held while the foreground service is running. Prevents the CPU from being throttled while the
+     * TAK server's keepalive coroutines, socket writes, and mesh packet handlers need to run on a regular cadence.
+     * Without this, OEM battery optimizations can pause coroutines for long enough that connected TAK clients
+     * (ATAK/iTAK) time out waiting for data, even though the foreground service itself keeps the process alive.
+     */
+    private var wakeLock: PowerManager.WakeLock? = null
 
     companion object {
-        fun actionReceived(portNum: Int): String {
-            val portType = PortNum.fromValue(portNum)
-            val portStr = portType?.toString() ?: portNum.toString()
-            return actionReceived(portStr)
-        }
-
         fun createIntent(context: Context) = Intent(context, MeshService::class.java)
-
-        fun changeDeviceAddress(context: Context, service: IMeshService, address: String?) {
-            service.setDeviceAddress(address)
-            startService(context)
-        }
 
         val minDeviceVersion = DeviceVersion(DeviceVersion.MIN_FW_VERSION)
         val absoluteMinDeviceVersion = DeviceVersion(DeviceVersion.ABS_MIN_FW_VERSION)
+
+        private const val WAKE_LOCK_TIMEOUT_MS = 30L * 60L * 1_000L // 30 minutes
+
+        /**
+         * How long [onStartCommand] will keep the service alive waiting for the selected-device address flow to emit a
+         * valid value before concluding that no device is genuinely selected. Covers cold-start DataStore load time;
+         * only the initial null/blank value is treated as transient.
+         */
+        private const val DEVICE_ADDRESS_SETTLE_MS = 5_000L
     }
 
     override fun onCreate() {
@@ -120,81 +111,133 @@ class MeshService : Service() {
             orchestrator.start()
             isServiceInitialized = true
         } catch (e: IllegalStateException) {
-            // Koin throws IllegalStateException when the DI graph is not yet initialized.
-            // This can happen if the system restarts the service (e.g. after a crash or on boot)
-            // before Application.onCreate() has finished setting up Koin.
-            // In release builds, R8 may merge Koin's InstanceCreationException with unrelated
-            // exception classes (observed as io.ktor.http.URLDecodeException), so we cannot rely
-            // on the exception type alone. We catch IllegalStateException narrowly around the
-            // orchestrator/DI access — not around super.onCreate() — so framework exceptions
-            // still propagate normally.
             Logger.e(e) { "MeshService: DI not ready, stopping service" }
             stopSelf()
             return
         }
+
+        // Keep conversation shortcuts published for the whole service lifetime (not only during an Android Auto
+        // session) so message notifications can link to them and get Conversations-section treatment on phones.
+        conversationShortcutPublisher.startObserving(serviceScope)
     }
 
     @Suppress("ReturnCount")
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (!isServiceInitialized) {
+            // Also a never-reached-foreground path: stop promptly so the pending-start watchdog cannot fire.
             Logger.w { "onStartCommand called but service is not initialized (likely DI failure). Stopping." }
-            stopSelf()
+            stopServiceCleanly()
             return START_NOT_STICKY
         }
 
-        val a = radioInterfaceService.getDeviceAddress()
-        val wantForeground = a != null && a != "n"
-
+        // Queue the localized status render asynchronously. startForeground uses the last cached notification, or an
+        // immediate application-label fallback, and the renderer updates the same notification ID when it completes.
         connectionManager.updateStatusNotification()
         val notification = androidNotifications.getServiceNotification()
 
+        // Recomputed on every start command, which is load-bearing: MainActivity.onStart() re-issues startService()
+        // on each app open, so a service that began in the background with connectedDevice only (location is
+        // while-in-use restricted there) upgrades to connectedDevice|location the next time the user opens the app.
         val foregroundServiceType =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                var types = ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
-                if (hasLocationPermission()) {
-                    types = types or ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
-                }
-                types
-            } else {
-                0
-            }
+            ForegroundStartPolicy.foregroundServiceType(
+                hasLocationPermission = hasLocationPermission(),
+                appInForeground = isAppInForeground(),
+            )
 
-        @Suppress("TooGenericExceptionCaught")
-        try {
-            ServiceCompat.startForeground(this, SERVICE_NOTIFY_ID, notification, foregroundServiceType)
-        } catch (ex: SecurityException) {
-            // On Android 14+ starting a location FGS from the background can fail with SecurityException
-            // if the app is not in an allowed state. Retry without the location type if that was requested.
-            val connectedDeviceOnly =
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
-                } else {
-                    0
-                }
-            if (foregroundServiceType != connectedDeviceOnly) {
-                Logger.w(ex) {
-                    "Failed to start foreground service with location type, retrying with connectedDevice only"
-                }
-                try {
-                    ServiceCompat.startForeground(this, SERVICE_NOTIFY_ID, notification, connectedDeviceOnly)
-                } catch (retryEx: Exception) {
-                    Logger.e(retryEx) { "Failed to start foreground service even after retry" }
-                }
-            } else {
-                Logger.e(ex) { "SecurityException starting foreground service" }
-            }
-        } catch (ex: Exception) {
-            Logger.e(ex) { "Error starting foreground service" }
+        // Start foreground FIRST. Android requires startForeground() within ~5s of onStartCommand and before any
+        // potentially-blocking work. We never defer this — even when the selected-device address is not yet loaded.
+        if (!startForegroundSafely(notification, foregroundServiceType)) {
+            // We were reached via startForegroundService(), so ActivityManager has armed a ~5s watchdog that kills
+            // the process with ForegroundServiceDidNotStartInTimeException unless this service either enters the
+            // foreground or goes away. We could not enter the foreground, so we must go away — immediately, and
+            // without START_STICKY, which would only have the system restart us into the same restricted state.
+            Logger.w { "MeshService: could not enter foreground; stopping to release the pending-start watchdog" }
+            stopServiceCleanly()
             return START_NOT_STICKY
         }
 
-        return if (!wantForeground) {
-            Logger.i { "Stopping mesh service because no device is selected" }
-            ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
-            stopSelf()
-            START_NOT_STICKY
-        } else {
-            START_STICKY
+        val address = radioInterfaceService.getDeviceAddress()
+        if (isValidDeviceAddress(address)) {
+            // Address is already loaded and valid — proceed normally.
+            addressWaitJob?.cancel()
+            addressWaitJob = null
+            acquireWakeLock()
+            Logger.i { "MeshService: selected device ready (${address.anonymize}), staying foreground" }
+            return START_STICKY
+        }
+
+        // Address is currently null/blank/sentinel. This may be a transient state while DataStore emits the persisted
+        // value (cold-start race: RadioPrefsImpl.devAddr starts as null until the first DataStore emission). Make no
+        // irreversible stopSelf() decision here; wait briefly for the address flow to settle.
+        Logger.i { "MeshService: selected address not yet loaded (${address.anonymize}); waiting for address flow" }
+        scheduleDeviceAddressResolution()
+        return START_STICKY
+    }
+
+    /**
+     * Waits for [RadioInterfaceService.currentDeviceAddressFlow] to emit a valid device address. Resolves the transient
+     * null/blank window at cold start without busy-polling [RadioInterfaceService.getDeviceAddress].
+     * - On a valid emission: acquires the wake lock and the service continues as a normal foreground service.
+     * - On timeout (no valid address observed): concludes no device is genuinely selected and stops cleanly.
+     *
+     * Uses [first] with a predicate rather than `drop(1)` so we never skip an already-current valid StateFlow value: if
+     * the address arrived between the synchronous [onStartCommand] read and this subscription, [first] returns it
+     * immediately instead of waiting the full timeout and spuriously stopping a service that has a valid device.
+     */
+    private fun scheduleDeviceAddressResolution() {
+        addressWaitJob?.cancel()
+        addressWaitJob =
+            serviceScope.launch {
+                val resolved =
+                    withTimeoutOrNull(DEVICE_ADDRESS_SETTLE_MS) {
+                        radioInterfaceService.currentDeviceAddressFlow.first(::isValidDeviceAddress)
+                    }
+                if (isValidDeviceAddress(resolved)) {
+                    Logger.i { "MeshService: selected device resolved (${resolved.anonymize}) after address-flow wait" }
+                    acquireWakeLock()
+                } else {
+                    Logger.i { "MeshService: no device selected after address flow settled; stopping" }
+                    stopServiceCleanly()
+                }
+            }
+    }
+
+    /** Releases everything this service holds and stops it. Safe to call before it ever reached the foreground. */
+    private fun stopServiceCleanly() {
+        releaseWakeLock()
+        ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
+        stopSelf()
+    }
+
+    private fun acquireWakeLock() {
+        if (wakeLock?.isHeld == true) return
+        try {
+            val powerManager = getSystemService(POWER_SERVICE) as PowerManager
+            val lock =
+                powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "Meshtastic::MeshServiceWakeLock").apply {
+                    setReferenceCounted(false)
+                }
+            lock.acquire(WAKE_LOCK_TIMEOUT_MS)
+            wakeLock = lock
+            Logger.i { "Acquired partial wake lock for mesh service" }
+        } catch (e: SecurityException) {
+            Logger.w(e) { "Failed to acquire wake lock — WAKE_LOCK permission missing?" }
+        } catch (e: Exception) {
+            Logger.w(e) { "Failed to acquire wake lock" }
+        }
+    }
+
+    private fun releaseWakeLock() {
+        val lock = wakeLock ?: return
+        try {
+            if (lock.isHeld) {
+                lock.release()
+                Logger.i { "Released partial wake lock for mesh service" }
+            }
+        } catch (e: Exception) {
+            Logger.w(e) { "Failed to release wake lock" }
+        } finally {
+            wakeLock = null
         }
     }
 
@@ -203,196 +246,20 @@ class MeshService : Service() {
         Logger.i { "Mesh service: onTaskRemoved" }
     }
 
-    override fun onBind(intent: Intent?): IBinder = binder
+    // Required by Service — this is a started service (not bound), so always returns null.
+    override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
         Logger.i { "Destroying mesh service" }
+        conversationShortcutPublisher.stopObserving()
+        addressWaitJob?.cancel()
+        addressWaitJob = null
+        serviceScope.cancel()
+        releaseWakeLock()
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
         if (isServiceInitialized) {
             orchestrator.stop()
         }
-        serviceJob.cancel()
         super.onDestroy()
     }
-
-    private val binder =
-        object : IMeshService.Stub() {
-            @Suppress("OVERRIDE_DEPRECATION")
-            override fun setDeviceAddress(deviceAddr: String?) = toRemoteExceptions {
-                Logger.d { "Passing through device change to radio service: ${deviceAddr?.anonymize}" }
-                router.actionHandler.handleUpdateLastAddress(deviceAddr)
-                radioInterfaceService.setDeviceAddress(deviceAddr)
-            }
-
-            override fun subscribeReceiver(packageName: String, receiverName: String) {
-                serviceBroadcasts.subscribeReceiver(receiverName, packageName)
-            }
-
-            @Suppress("OVERRIDE_DEPRECATION")
-            override fun getUpdateStatus(): Int = -4
-
-            @Suppress("OVERRIDE_DEPRECATION")
-            override fun startFirmwareUpdate() {
-                // No-op: firmware update is handled by the in-app OTA system.
-            }
-
-            override fun getMyNodeInfo(): MyNodeInfo? = nodeManager.getMyNodeInfo()
-
-            override fun getMyId(): String = nodeManager.getMyId()
-
-            override fun getPacketId(): Int = commandSender.generatePacketId()
-
-            override fun setOwner(u: MeshUser) = toRemoteExceptions {
-                router.actionHandler.handleSetOwner(u, myNodeNum)
-            }
-
-            override fun setRemoteOwner(id: Int, destNum: Int, payload: ByteArray) = toRemoteExceptions {
-                router.actionHandler.handleSetRemoteOwner(id, destNum, payload)
-            }
-
-            override fun getRemoteOwner(id: Int, destNum: Int) = toRemoteExceptions {
-                router.actionHandler.handleGetRemoteOwner(id, destNum)
-            }
-
-            override fun send(p: DataPacket) = toRemoteExceptions { router.actionHandler.handleSend(p, myNodeNum) }
-
-            override fun getConfig(): ByteArray = toRemoteExceptions { commandSender.getCachedLocalConfig().encode() }
-
-            override fun setConfig(payload: ByteArray) = toRemoteExceptions {
-                router.actionHandler.handleSetConfig(payload, myNodeNum)
-            }
-
-            override fun setRemoteConfig(id: Int, num: Int, payload: ByteArray) = toRemoteExceptions {
-                router.actionHandler.handleSetRemoteConfig(id, num, payload)
-            }
-
-            override fun getRemoteConfig(id: Int, destNum: Int, config: Int) = toRemoteExceptions {
-                router.actionHandler.handleGetRemoteConfig(id, destNum, config)
-            }
-
-            override fun setModuleConfig(id: Int, num: Int, payload: ByteArray) = toRemoteExceptions {
-                router.actionHandler.handleSetModuleConfig(id, num, payload)
-            }
-
-            override fun getModuleConfig(id: Int, destNum: Int, config: Int) = toRemoteExceptions {
-                router.actionHandler.handleGetModuleConfig(id, destNum, config)
-            }
-
-            override fun setRingtone(destNum: Int, ringtone: String) = toRemoteExceptions {
-                router.actionHandler.handleSetRingtone(destNum, ringtone)
-            }
-
-            override fun getRingtone(id: Int, destNum: Int) = toRemoteExceptions {
-                router.actionHandler.handleGetRingtone(id, destNum)
-            }
-
-            override fun setCannedMessages(destNum: Int, messages: String) = toRemoteExceptions {
-                router.actionHandler.handleSetCannedMessages(destNum, messages)
-            }
-
-            override fun getCannedMessages(id: Int, destNum: Int) = toRemoteExceptions {
-                router.actionHandler.handleGetCannedMessages(id, destNum)
-            }
-
-            override fun setChannel(payload: ByteArray?) = toRemoteExceptions {
-                router.actionHandler.handleSetChannel(payload, myNodeNum)
-            }
-
-            override fun setRemoteChannel(id: Int, num: Int, payload: ByteArray?) = toRemoteExceptions {
-                router.actionHandler.handleSetRemoteChannel(id, num, payload)
-            }
-
-            override fun getRemoteChannel(id: Int, destNum: Int, index: Int) = toRemoteExceptions {
-                router.actionHandler.handleGetRemoteChannel(id, destNum, index)
-            }
-
-            override fun beginEditSettings(destNum: Int) = toRemoteExceptions {
-                router.actionHandler.handleBeginEditSettings(destNum)
-            }
-
-            override fun commitEditSettings(destNum: Int) = toRemoteExceptions {
-                router.actionHandler.handleCommitEditSettings(destNum)
-            }
-
-            override fun getChannelSet(): ByteArray = toRemoteExceptions {
-                commandSender.getCachedChannelSet().encode()
-            }
-
-            override fun getNodes(): List<NodeInfo> = nodeManager.getNodes()
-
-            override fun connectionState(): String = serviceRepository.connectionState.value.toString()
-
-            override fun startProvideLocation() {
-                locationManager.start(serviceScope) { commandSender.sendPosition(it) }
-            }
-
-            override fun stopProvideLocation() {
-                locationManager.stop()
-            }
-
-            override fun removeByNodenum(requestId: Int, nodeNum: Int) = toRemoteExceptions {
-                val myNodeNum = nodeManager.myNodeNum.value
-                if (myNodeNum != null) {
-                    router.actionHandler.handleRemoveByNodenum(nodeNum, requestId, myNodeNum)
-                } else {
-                    nodeManager.removeByNodenum(nodeNum)
-                }
-            }
-
-            override fun requestUserInfo(destNum: Int) = toRemoteExceptions {
-                if (destNum != myNodeNum) {
-                    commandSender.requestUserInfo(destNum)
-                }
-            }
-
-            override fun requestPosition(destNum: Int, position: Position) = toRemoteExceptions {
-                router.actionHandler.handleRequestPosition(destNum, position, myNodeNum)
-            }
-
-            override fun setFixedPosition(destNum: Int, position: Position) = toRemoteExceptions {
-                commandSender.setFixedPosition(destNum, position)
-            }
-
-            override fun requestTraceroute(requestId: Int, destNum: Int) = toRemoteExceptions {
-                commandSender.requestTraceroute(requestId, destNum)
-            }
-
-            override fun requestNeighborInfo(requestId: Int, destNum: Int) = toRemoteExceptions {
-                router.actionHandler.handleRequestNeighborInfo(requestId, destNum)
-            }
-
-            override fun requestShutdown(requestId: Int, destNum: Int) = toRemoteExceptions {
-                router.actionHandler.handleRequestShutdown(requestId, destNum)
-            }
-
-            override fun requestReboot(requestId: Int, destNum: Int) = toRemoteExceptions {
-                router.actionHandler.handleRequestReboot(requestId, destNum)
-            }
-
-            override fun rebootToDfu(destNum: Int) = toRemoteExceptions {
-                router.actionHandler.handleRebootToDfu(destNum)
-            }
-
-            override fun requestFactoryReset(requestId: Int, destNum: Int) = toRemoteExceptions {
-                router.actionHandler.handleRequestFactoryReset(requestId, destNum)
-            }
-
-            override fun requestNodedbReset(requestId: Int, destNum: Int, preserveFavorites: Boolean) =
-                toRemoteExceptions {
-                    router.actionHandler.handleRequestNodedbReset(requestId, destNum, preserveFavorites)
-                }
-
-            override fun getDeviceConnectionStatus(requestId: Int, destNum: Int) = toRemoteExceptions {
-                router.actionHandler.handleGetDeviceConnectionStatus(requestId, destNum)
-            }
-
-            override fun requestTelemetry(requestId: Int, destNum: Int, type: Int) = toRemoteExceptions {
-                router.actionHandler.handleRequestTelemetry(requestId, destNum, type)
-            }
-
-            override fun requestRebootOta(requestId: Int, destNum: Int, mode: Int, hash: ByteArray?) =
-                toRemoteExceptions {
-                    router.actionHandler.handleRequestRebootOta(requestId, destNum, mode, hash)
-                }
-        }
 }

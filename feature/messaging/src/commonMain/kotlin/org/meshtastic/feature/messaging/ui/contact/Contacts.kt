@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,9 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 package org.meshtastic.feature.messaging.ui.contact
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,10 +30,11 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -51,12 +55,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.paging.LoadState
-import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.itemKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -67,25 +71,30 @@ import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Contact
+import org.meshtastic.core.model.ContactKey
 import org.meshtastic.core.model.ContactSettings
 import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.model.util.formatMuteRemainingTime
-import org.meshtastic.core.model.util.getChannel
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.are_you_sure
 import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.channel_invalid
+import org.meshtastic.core.resources.channels
 import org.meshtastic.core.resources.close_selection
+import org.meshtastic.core.resources.collapsed
 import org.meshtastic.core.resources.conversations
 import org.meshtastic.core.resources.currently
 import org.meshtastic.core.resources.delete
 import org.meshtastic.core.resources.delete_messages
 import org.meshtastic.core.resources.delete_selection
+import org.meshtastic.core.resources.direct_messages
+import org.meshtastic.core.resources.expanded
 import org.meshtastic.core.resources.mark_as_read
 import org.meshtastic.core.resources.mute_1_week
 import org.meshtastic.core.resources.mute_8_hours
 import org.meshtastic.core.resources.mute_always
 import org.meshtastic.core.resources.mute_notifications
+import org.meshtastic.core.resources.mute_selected
 import org.meshtastic.core.resources.mute_status_always
 import org.meshtastic.core.resources.mute_status_muted_for_days
 import org.meshtastic.core.resources.mute_status_muted_for_hours
@@ -93,6 +102,7 @@ import org.meshtastic.core.resources.mute_status_unmuted
 import org.meshtastic.core.resources.okay
 import org.meshtastic.core.resources.select_all
 import org.meshtastic.core.resources.unmute
+import org.meshtastic.core.resources.unmute_selected
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.component.MeshtasticImportFAB
@@ -101,26 +111,23 @@ import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.core.ui.component.smartScrollToTop
 import org.meshtastic.core.ui.icon.Close
 import org.meshtastic.core.ui.icon.Delete
+import org.meshtastic.core.ui.icon.ExpandLess
+import org.meshtastic.core.ui.icon.ExpandMore
 import org.meshtastic.core.ui.icon.MarkChatRead
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.SelectAll
 import org.meshtastic.core.ui.icon.VolumeMute
 import org.meshtastic.core.ui.icon.VolumeUp
-import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
+import org.meshtastic.core.ui.util.parseDeepLinkOrInvalid
 import org.meshtastic.core.ui.util.rememberShowToastResource
 import org.meshtastic.proto.ChannelSet
-import org.meshtastic.proto.SharedContact
 import kotlin.time.Duration.Companion.days
 
 @Suppress("LongMethod", "CyclomaticComplexMethod", "LongParameterList")
 @Composable
 fun ContactsScreen(
     onNavigateToShare: () -> Unit,
-    sharedContactRequested: SharedContact?,
-    requestChannelSet: ChannelSet?,
     onHandleDeepLink: (CommonUri, onInvalid: () -> Unit) -> Unit,
-    onClearSharedContactRequested: () -> Unit,
-    onClearRequestChannelUrl: () -> Unit,
     viewModel: ContactsViewModel,
     onClickNodeChip: (Int) -> Unit,
     onNavigateToMessages: (String) -> Unit,
@@ -139,35 +146,16 @@ fun ContactsScreen(
     val selectedContactKeys = remember { mutableStateListOf<String>() }
     val isSelectionModeActive by remember { derivedStateOf { selectedContactKeys.isNotEmpty() } }
 
-    // State for contacts list
-    val pagedContacts = viewModel.contactListPaged.collectAsLazyPagingItems()
-
-    // Create channel placeholders (always show broadcast contacts, even when empty)
+    // State for contacts list. Channel placeholders (empty broadcast channels) are already merged in by the VM.
+    val contacts by viewModel.contactList.collectAsStateWithLifecycle()
     val channels by viewModel.channels.collectAsStateWithLifecycle()
-    val channelPlaceholders =
-        remember(channels.settings.size) {
-            (0 until channels.settings.size).map { ch ->
-                Contact(
-                    contactKey = "$ch^all",
-                    shortName = "$ch",
-                    longName = channels.getChannel(ch)?.name ?: "Channel $ch",
-                    lastMessageTime = null,
-                    lastMessageText = "",
-                    unreadCount = 0,
-                    messageCount = 0,
-                    isMuted = false,
-                    isUnmessageable = false,
-                    nodeColors = null,
-                )
-            }
-        }
 
     val contactsListState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(scrollToTopEvents) {
         scrollToTopEvents?.collectLatest { event ->
-            if (event is ScrollToTopEvent.ConversationsTabPressed) {
+            if (event == ScrollToTopEvent.ConversationsTabPressed) {
                 contactsListState.smartScrollToTop(coroutineScope)
             }
         }
@@ -175,19 +163,13 @@ fun ContactsScreen(
 
     // Derived state for selected contacts and count
     val selectedContacts =
-        remember(pagedContacts.itemCount, selectedContactKeys) {
-            (0 until pagedContacts.itemCount)
-                .mapNotNull { pagedContacts[it] }
-                .filter { it.contactKey in selectedContactKeys }
-        }
+        remember(contacts, selectedContactKeys) { contacts.filter { it.contactKey in selectedContactKeys } }
     // Get message count directly from repository for selected contacts
     var selectedCount by remember { mutableIntStateOf(0) }
     LaunchedEffect(selectedContactKeys.size, selectedContactKeys.joinToString(",")) {
         selectedCount = viewModel.getTotalMessageCount(selectedContactKeys.toList())
     }
     val isAllMuted = remember(selectedContacts) { selectedContacts.all { it.isMuted } }
-
-    requestChannelSet?.let { ScannedQrCodeDialog(it, onDismiss = { onClearRequestChannelUrl() }) }
 
     // Callback functions for item interaction
     val onContactClick: (Contact) -> Unit = { contact ->
@@ -207,7 +189,7 @@ fun ContactsScreen(
     val onNodeChipClick: (Contact) -> Unit = { contact ->
         if (contact.contactKey.contains("!")) {
             // if it's a node, look up the nodeNum including the !
-            val nodeKey = contact.contactKey.substring(1)
+            val nodeKey = ContactKey(contact.contactKey).addressString
             val node = viewModel.getNode(nodeKey)
             onNavigateToNodeDetails(node.num)
         } else {
@@ -254,15 +236,12 @@ fun ContactsScreen(
         floatingActionButton = {
             if (connectionState is ConnectionState.Connected) {
                 MeshtasticImportFAB(
-                    sharedContact = sharedContactRequested,
                     onImport = { uriString ->
-                        onHandleDeepLink(CommonUri.parse(uriString)) {
-                            scope.launch { showToast(Res.string.channel_invalid) }
-                        }
+                        val onInvalid: () -> Unit = { scope.launch { showToast(Res.string.channel_invalid) } }
+                        parseDeepLinkOrInvalid(uriString, onHandleDeepLink, onInvalid)
                     },
                     onShareChannels = onNavigateToShare,
-                    onDismissSharedContact = { onClearSharedContactRequested() },
-                    isContactContext = true,
+                    isContactContext = false,
                 )
             }
         },
@@ -277,17 +256,16 @@ fun ContactsScreen(
                     onDeleteSelected = { showDeleteDialog = true },
                     onSelectAll = {
                         selectedContactKeys.clear()
-                        selectedContactKeys.addAll(
-                            (0 until pagedContacts.itemCount).mapNotNull { pagedContacts[it]?.contactKey },
-                        )
+                        selectedContactKeys.addAll(contacts.map { it.contactKey })
                     },
                     isAllMuted = isAllMuted, // Pass the derived state
                 )
             }
 
-            ContactListViewPaged(
-                contacts = pagedContacts,
-                channelPlaceholders = channelPlaceholders,
+            val collapsedSections by viewModel.collapsedSections.collectAsStateWithLifecycle()
+
+            ContactListView(
+                contacts = contacts,
                 selectedList = selectedContactKeys,
                 activeContactKey = activeContactKey,
                 onClick = onContactClick,
@@ -295,6 +273,8 @@ fun ContactsScreen(
                 onNodeChipClick = onNodeChipClick,
                 listState = contactsListState,
                 channels = channels,
+                collapsedSections = collapsedSections,
+                onToggleSectionCollapse = viewModel::toggleSectionCollapse,
             )
         }
     }
@@ -381,7 +361,9 @@ private fun MuteNotificationsDialog(
                                         stringResource(Res.string.mute_status_unmuted)
                                     }
                                 }
+
                                 settings.muteUntil == Long.MAX_VALUE -> stringResource(Res.string.mute_status_always)
+
                                 else -> stringResource(Res.string.mute_status_unmuted)
                             }
                         Text(
@@ -462,11 +444,13 @@ private fun SelectionToolbar(
                         MeshtasticIcons.VolumeMute
                     },
                     contentDescription =
-                    if (isAllMuted) {
-                        "Unmute selected"
-                    } else {
-                        "Mute selected"
-                    },
+                    stringResource(
+                        if (isAllMuted) {
+                            Res.string.unmute_selected
+                        } else {
+                            Res.string.mute_selected
+                        },
+                    ),
                 )
             }
             IconButton(onClick = onDeleteSelected) {
@@ -480,58 +464,36 @@ private fun SelectionToolbar(
 }
 
 @Composable
-private fun ContactListViewPaged(
-    contacts: LazyPagingItems<Contact>,
-    channelPlaceholders: List<Contact>,
+private fun ContactListView(
+    contacts: List<Contact>,
     selectedList: List<String>,
     activeContactKey: String?,
     onClick: (Contact) -> Unit,
     onLongClick: (Contact) -> Unit,
     onNodeChipClick: (Contact) -> Unit,
     listState: LazyListState,
+    collapsedSections: Set<String>,
+    onToggleSectionCollapse: (String) -> Unit,
     modifier: Modifier = Modifier,
     channels: ChannelSet? = null,
 ) {
     val haptic = LocalHapticFeedback.current
-    Box(modifier = modifier.fillMaxSize()) {
-        if (contacts.loadState.refresh is LoadState.Loading && contacts.itemCount == 0) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-        } else {
-            ContactListContentInternal(
-                contacts = contacts,
-                channelPlaceholders = channelPlaceholders,
-                selectedList = selectedList,
-                activeContactKey = activeContactKey,
-                onClick = onClick,
-                onLongClick = onLongClick,
-                onNodeChipClick = onNodeChipClick,
-                listState = listState,
-                channels = channels,
-                haptic = haptic,
-            )
+    val (channelContacts, dmContacts) =
+        remember(contacts) {
+            val (channelPart, dmPart) = contacts.partition { it.section() == ContactSection.CHANNELS }
+            // Channels keep a fixed slot order (channel index); DMs stay in the query's recency order.
+            channelPart.sortedBy { ContactKey(it.contactKey).channel } to dmPart
         }
-    }
-}
-
-@Composable
-private fun ContactListContentInternal(
-    contacts: LazyPagingItems<Contact>,
-    channelPlaceholders: List<Contact>,
-    selectedList: List<String>,
-    activeContactKey: String?,
-    onClick: (Contact) -> Unit,
-    onLongClick: (Contact) -> Unit,
-    onNodeChipClick: (Contact) -> Unit,
-    listState: LazyListState,
-    channels: ChannelSet?,
-    haptic: HapticFeedback,
-    modifier: Modifier = Modifier,
-) {
-    val visiblePlaceholders = rememberVisiblePlaceholders(contacts, channelPlaceholders)
+    val channelsTitle = stringResource(Res.string.channels)
+    val dmTitle = stringResource(Res.string.direct_messages)
 
     LazyColumn(state = listState, modifier = modifier.fillMaxSize()) {
-        contactListPlaceholdersItems(
-            placeholders = visiblePlaceholders,
+        contactSection(
+            section = ContactSection.CHANNELS,
+            title = channelsTitle,
+            sectionContacts = channelContacts,
+            collapsed = ContactSection.CHANNELS.key in collapsedSections,
+            onToggleCollapse = onToggleSectionCollapse,
             selectedList = selectedList,
             activeContactKey = activeContactKey,
             onClick = onClick,
@@ -541,8 +503,12 @@ private fun ContactListContentInternal(
             haptic = haptic,
         )
 
-        contactListPagedItems(
-            contacts = contacts,
+        contactSection(
+            section = ContactSection.DIRECT_MESSAGES,
+            title = dmTitle,
+            sectionContacts = dmContacts,
+            collapsed = ContactSection.DIRECT_MESSAGES.key in collapsedSections,
+            onToggleCollapse = onToggleSectionCollapse,
             selectedList = selectedList,
             activeContactKey = activeContactKey,
             onClick = onClick,
@@ -551,13 +517,15 @@ private fun ContactListContentInternal(
             channels = channels,
             haptic = haptic,
         )
-
-        contactListAppendLoadingItem(contacts)
     }
 }
 
-private fun LazyListScope.contactListPlaceholdersItems(
-    placeholders: List<Contact>,
+private fun LazyListScope.contactSection(
+    section: ContactSection,
+    title: String,
+    sectionContacts: List<Contact>,
+    collapsed: Boolean,
+    onToggleCollapse: (String) -> Unit,
     selectedList: List<String>,
     activeContactKey: String?,
     onClick: (Contact) -> Unit,
@@ -566,35 +534,20 @@ private fun LazyListScope.contactListPlaceholdersItems(
     channels: ChannelSet?,
     haptic: HapticFeedback,
 ) {
-    items(count = placeholders.size, key = { index -> "${placeholders[index].contactKey}_placeholder" }) { index ->
-        val contact = placeholders[index]
-        ContactItem(
-            contact = contact,
-            selected = selectedList.contains(contact.contactKey),
-            isActive = contact.contactKey == activeContactKey,
-            onClick = { onClick(contact) },
-            onLongClick = {
-                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                onLongClick(contact)
-            },
-            onNodeChipClick = { onNodeChipClick(contact) },
-            channels = channels,
+    if (sectionContacts.isEmpty()) return
+
+    stickyHeader(key = "${section.key}_header") {
+        ContactSectionHeader(
+            title = title,
+            count = sectionContacts.size,
+            collapsed = collapsed,
+            onClick = { onToggleCollapse(section.key) },
         )
     }
-}
 
-private fun LazyListScope.contactListPagedItems(
-    contacts: LazyPagingItems<Contact>,
-    selectedList: List<String>,
-    activeContactKey: String?,
-    onClick: (Contact) -> Unit,
-    onLongClick: (Contact) -> Unit,
-    onNodeChipClick: (Contact) -> Unit,
-    channels: ChannelSet?,
-    haptic: HapticFeedback,
-) {
-    items(count = contacts.itemCount, key = contacts.itemKey { it.contactKey }) { index ->
-        contacts[index]?.let { contact ->
+    if (!collapsed) {
+        items(count = sectionContacts.size, key = { index -> sectionContacts[index].contactKey }) { index ->
+            val contact = sectionContacts[index]
             ContactItem(
                 contact = contact,
                 selected = selectedList.contains(contact.contactKey),
@@ -611,21 +564,28 @@ private fun LazyListScope.contactListPagedItems(
     }
 }
 
-private fun LazyListScope.contactListAppendLoadingItem(contacts: LazyPagingItems<Contact>) {
-    if (contacts.loadState.append is LoadState.Loading) {
-        item {
-            Box(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            }
-        }
-    }
-}
-
 @Composable
-private fun rememberVisiblePlaceholders(
-    contacts: LazyPagingItems<Contact>,
-    channelPlaceholders: List<Contact>,
-): List<Contact> = remember(contacts.itemCount, channelPlaceholders) {
-    val pagedKeys = (0 until contacts.itemCount).mapNotNull { contacts[it]?.contactKey }.toSet()
-    channelPlaceholders.filter { it.contactKey !in pagedKeys }
+private fun ContactSectionHeader(title: String, count: Int, collapsed: Boolean, onClick: () -> Unit) {
+    val expandStateDescription = stringResource(if (collapsed) Res.string.collapsed else Res.string.expanded)
+    Row(
+        modifier =
+        Modifier.fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface)
+            .clickable(role = Role.Button, onClick = onClick)
+            .semantics { stateDescription = expandStateDescription }
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = "$title ($count)",
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.weight(1f).semantics { heading() },
+        )
+        Icon(
+            imageVector = if (collapsed) MeshtasticIcons.ExpandMore else MeshtasticIcons.ExpandLess,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+        )
+    }
 }

@@ -108,9 +108,14 @@ class CoTXmlTest {
     // ── Structure ─────────────────────────────────────────────────────────────
 
     @Test
-    fun `toXml includes XML declaration`() {
+    fun `toXml does not include XML declaration - CoT stream protocol`() {
+        // The CoT TCP streaming protocol requires a concatenated sequence of <event> elements
+        // with NO XML declaration. A mid-stream <?xml ... ?> tag breaks ATAK's parser and
+        // causes the client to disconnect as soon as the first real event arrives.
         val message = CoTMessage.pli(uid = "!1234", callsign = "X", latitude = 0.0, longitude = 0.0)
-        assertTrue(message.toXml().startsWith("<?xml"), "XML should start with declaration")
+        val xml = message.toXml()
+        assertTrue(xml.startsWith("<event"), "XML should start with <event, not a declaration; got: $xml")
+        assertTrue(!xml.contains("<?xml"), "XML should NOT contain a declaration; got: $xml")
     }
 
     @Test

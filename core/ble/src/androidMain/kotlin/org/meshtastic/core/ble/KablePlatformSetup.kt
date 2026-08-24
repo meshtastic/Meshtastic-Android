@@ -21,7 +21,18 @@ import com.juul.kable.AndroidPeripheral
 import com.juul.kable.Peripheral
 import com.juul.kable.PeripheralBuilder
 import com.juul.kable.PooledThreadingStrategy
+import com.juul.kable.ScannerBuilder
 import com.juul.kable.toIdentifier
+import org.meshtastic.core.model.util.anonymize
+
+// Kable's default trySendBlocking can park the scan-callback (sometimes main) thread in dense BLE
+// environments, causing ANRs; preConflate drops excess advertisements instead (kable#654).
+internal actual fun ScannerBuilder.platformScanConfig() {
+    preConflate = true
+}
+
+/** Android's scanner filters on address in hardware, so Kable's `Filter.Address` works natively here. */
+internal actual val supportsNativeAddressScanFilter: Boolean = true
 
 /**
  * Shared thread pool for Kable BLE connections.
@@ -43,15 +54,21 @@ internal actual fun PeripheralBuilder.platformConfig(device: BleDevice, autoConn
 
     threadingStrategy = sharedThreadingStrategy
 
+    // We intentionally keep Kable's defaults for `transport` (Le) and `phy` (Le1M).
+    // Meshtastic radios (nRF52, ESP32-S3, RP2040+nRF) advertise BLE-only and don't support
+    // the LE 2M PHY in any first-party firmware, so changing these would be a regression risk
+    // with no upside. If a future hardware revision exposes 2M PHY, override `phy = Phy.Le2M`
+    // here after confirming the firmware advertises it.
+
     onServicesDiscovered {
         try {
             // Android defaults to 23 bytes MTU. Meshtastic packets can be 512 bytes.
             // Requesting the max MTU is critical for preventing dropped packets and stalls.
             @Suppress("MagicNumber")
             val negotiatedMtu = requestMtu(512)
-            Logger.i { "Negotiated MTU: $negotiatedMtu" }
+            Logger.i { "[${device.address.anonymize()}] Negotiated MTU: $negotiatedMtu" }
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-            Logger.w(e) { "Failed to request MTU" }
+            Logger.w(e) { "[${device.address.anonymize()}] Failed to request MTU" }
         }
     }
 }
@@ -65,4 +82,18 @@ private const val ATT_HEADER_SIZE = 3
 internal actual fun Peripheral.negotiatedMaxWriteLength(): Int? {
     val mtu = (this as? AndroidPeripheral)?.mtu?.value ?: return null
     return (mtu - ATT_HEADER_SIZE).takeIf { it > 0 }
+}
+
+internal actual fun Peripheral.requestHighConnectionPriority(): Boolean {
+    val androidPeripheral = this as? AndroidPeripheral ?: return false
+    return runCatching { androidPeripheral.requestConnectionPriority(AndroidPeripheral.Priority.High) }
+        .onFailure { Logger.w(it) { "requestConnectionPriority(High) threw" } }
+        .getOrDefault(false)
+}
+
+internal actual fun Peripheral.requestBalancedConnectionPriority(): Boolean {
+    val androidPeripheral = this as? AndroidPeripheral ?: return false
+    return runCatching { androidPeripheral.requestConnectionPriority(AndroidPeripheral.Priority.Balanced) }
+        .onFailure { Logger.w(it) { "requestConnectionPriority(Balanced) threw" } }
+        .getOrDefault(false)
 }

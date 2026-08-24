@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,11 +26,13 @@ import org.meshtastic.core.resources.UiText
  * @property message A high-level status message (e.g., "Downloading...").
  * @property progress A value between 0.0 and 1.0 representing completion percentage.
  * @property details Optional high-frequency detail text (e.g., "1.2 MiB/s, 45%").
+ * @property hint Optional persistent advisory shown alongside the progress (e.g. a slow-bootloader tip).
  */
 data class ProgressState(
     val message: UiText = UiText.DynamicString(""),
     val progress: Float = 0f,
     val details: String? = null,
+    val hint: UiText? = null,
 )
 
 /** State machine for the firmware update flow, observed by [FirmwareUpdateScreen]. */
@@ -50,6 +52,16 @@ sealed interface FirmwareUpdateState {
         val showBootloaderWarning: Boolean,
         val updateMethod: FirmwareUpdateMethod,
         val currentFirmwareVersion: String? = null,
+        /**
+         * True when reached while disconnected to re-flash a device stranded in bootloader mode after an interrupted
+         * update (see [FirmwareUpdateViewModel.checkForUpdates]). Drives recovery-specific copy and routing.
+         */
+        val isRecovery: Boolean = false,
+        /**
+         * Which USB maintenance affordances to show, precomputed by the ViewModel so the screen stays dumb and the
+         * decision stays unit-testable — the same shape as [showBootloaderWarning].
+         */
+        val maintenance: UsbMaintenanceGate = UsbMaintenanceGate(),
     ) : FirmwareUpdateState
 
     /** Firmware file is being downloaded from the release server. */
@@ -70,11 +82,34 @@ sealed interface FirmwareUpdateState {
     /** An error occurred at any stage of the update pipeline. */
     data class Error(val error: UiText) : FirmwareUpdateState
 
-    /** The firmware update completed and the device reconnected successfully. */
-    data object Success : FirmwareUpdateState
+    /**
+     * The firmware update completed and the device reconnected successfully.
+     *
+     * @property wasLowSpeedTransfer True if the upload ran at the MTU-capped low speed (stock bootloader), so the
+     *   Success screen can offer a one-time OTAFIX upgrade tip for faster future updates.
+     */
+    data class Success(val wasLowSpeedTransfer: Boolean = false, val deviceWasWiped: Boolean = false) :
+        FirmwareUpdateState
 
-    /** UF2 file is ready; waiting for the user to choose a save location (USB flow). */
-    data class AwaitingFileSave(val uf2Artifact: FirmwareArtifact, val fileName: String) : FirmwareUpdateState
+    /**
+     * Waiting for the user to point the app at the device's UF2 drive (USB flow).
+     *
+     * @property uf2Artifact The image to write, when it is already downloaded and verified. `null` on a maintenance
+     *   pass: erase and bootloader images are chosen from what the mounted volume reports about itself, so the image
+     *   cannot be known until the volume has been picked.
+     * @property fileName Display name of [uf2Artifact], or `null` for the same reason.
+     * @property step Which leg of a multi-pass sequence this is. Also the recomposition key for the instruction dialog,
+     *   so each pass re-shows its own instructions.
+     * @property retryMessage Set when a previous attempt at *this* pass failed. Once a destructive image has been
+     *   written the flow never abandons the user on an error screen — it re-publishes the same pass with an
+     *   explanation.
+     */
+    data class AwaitingFileSave(
+        val uf2Artifact: FirmwareArtifact?,
+        val fileName: String?,
+        val step: UsbFileSaveStep = UsbFileSaveStep.Firmware,
+        val retryMessage: UiText? = null,
+    ) : FirmwareUpdateState
 }
 
 private val FORMAT_ARG_REGEX = Regex(":?\\s*%1\\\$d%?")

@@ -20,13 +20,17 @@ import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.mock
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleScanner
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceHardware
-import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.repository.FirmwareUpdateStatusRepository
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.RadioPrefs
+import org.meshtastic.feature.firmware.ota.DefaultEsp32OtaUpdateEnvironment
 import org.meshtastic.feature.firmware.ota.Esp32OtaUpdateHandler
 import org.meshtastic.feature.firmware.ota.dfu.SecureDfuHandler
 import kotlin.test.Test
@@ -59,6 +63,12 @@ class DefaultFirmwareUpdateManagerTest {
     private val bleScanner: BleScanner = mock(MockMode.autofill)
     private val bleConnectionFactory: BleConnectionFactory = mock(MockMode.autofill)
     private val firmwareRetriever = FirmwareRetriever(fileHandler)
+    private val dispatchers =
+        CoroutineDispatchers(
+            io = Dispatchers.Unconfined,
+            main = Dispatchers.Unconfined,
+            default = Dispatchers.Unconfined,
+        )
 
     private val secureDfuHandler =
         SecureDfuHandler(
@@ -67,6 +77,7 @@ class DefaultFirmwareUpdateManagerTest {
             radioController = radioController,
             bleScanner = bleScanner,
             bleConnectionFactory = bleConnectionFactory,
+            dispatchers = dispatchers,
         )
 
     private val usbUpdateHandler =
@@ -82,8 +93,11 @@ class DefaultFirmwareUpdateManagerTest {
             firmwareFileHandler = fileHandler,
             radioController = radioController,
             nodeRepository = nodeRepository,
+            firmwareUpdateStatusRepository = FirmwareUpdateStatusRepository(),
+            environment = DefaultEsp32OtaUpdateEnvironment(),
             bleScanner = bleScanner,
             bleConnectionFactory = bleConnectionFactory,
+            dispatchers = dispatchers,
         )
 
     private fun createManager(address: String?): DefaultFirmwareUpdateManager {

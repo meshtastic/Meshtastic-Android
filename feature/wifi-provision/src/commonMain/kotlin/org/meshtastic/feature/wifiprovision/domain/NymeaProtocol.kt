@@ -75,6 +75,8 @@ internal data class NymeaResponse(
     @SerialName("c") val command: Int = -1,
     /** 0 = success; non-zero = error code. */
     @SerialName("r") val responseCode: Int = 0,
+    /** Optional payload (used by GetConnection and custom Connect responses). */
+    @SerialName("p") val connectionInfo: NymeaConnectionInfo? = null,
 )
 
 /** One entry in the GetNetworks (`c=0`) response payload. */
@@ -96,4 +98,19 @@ internal data class NymeaNetworksResponse(
     @SerialName("c") val command: Int = -1,
     @SerialName("r") val responseCode: Int = 0,
     @SerialName("p") val networks: List<NymeaNetworkEntry> = emptyList(),
+)
+
+/** Connection info payload (`p`) returned by GetConnection (`c=5`). */
+@Serializable
+internal data class NymeaConnectionInfo(
+    /** ESSID / network name (nymea key: `e`). */
+    @SerialName("e") val ssid: String = "",
+    /** BSSID / MAC address (nymea key: `m`). */
+    @SerialName("m") val bssid: String = "",
+    /** Signal strength in dBm (nymea key: `s`). */
+    @SerialName("s") val signalStrength: Int = 0,
+    /** 0 = open, 1 = protected (nymea key: `p`). */
+    @SerialName("p") val protection: Int = 0,
+    /** IPv4 address of current connection (nymea key: `i`). */
+    @SerialName("i") val ipAddress: String = "",
 )

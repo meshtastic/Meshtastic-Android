@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.repository.MeshServiceNotifications
+import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.PacketRepository
 
 /** A [BroadcastReceiver] that handles "Mark as read" actions from notifications. */
@@ -36,14 +36,14 @@ class MarkAsReadReceiver :
 
     private val packetRepository: PacketRepository by inject()
 
-    private val serviceNotifications: MeshServiceNotifications by inject()
+    private val serviceNotifications: MeshNotificationManager by inject()
 
     private val dispatchers: CoroutineDispatchers by inject()
 
     private val scope by lazy { CoroutineScope(dispatchers.io + SupervisorJob()) }
 
     companion object {
-        const val MARK_AS_READ_ACTION = "com.geeksville.mesh.MARK_AS_READ"
+        const val MARK_AS_READ_ACTION = "org.meshtastic.app.MARK_AS_READ"
         const val CONTACT_KEY = "contact_key"
     }
 

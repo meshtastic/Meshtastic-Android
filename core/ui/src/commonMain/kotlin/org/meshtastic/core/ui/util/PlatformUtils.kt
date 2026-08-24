@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,6 +47,16 @@ expect fun rememberSaveFileLauncher(
 @Composable expect fun rememberOpenFileLauncher(onUriReceived: (CommonUri?) -> Unit): (mimeType: String) -> Unit
 
 /**
+ * Returns a launcher that prompts the user to pick a *directory*. The callback receives a tree URI, or `null` if the
+ * user cancelled.
+ *
+ * Distinct from [rememberSaveFileLauncher] because a tree URI grants access to the picked directory's contents, which a
+ * single-document URI does not. Needed where the app must inspect a volume before writing to it — for example reading a
+ * UF2 bootloader's `INFO_UF2.TXT` to confirm which board it is and that the volume really is a bootloader drive.
+ */
+@Composable expect fun rememberOpenDocumentTreeLauncher(onTreeUriSelect: (CommonUri?) -> Unit): () -> Unit
+
+/**
  * Returns a suspend function that reads up to [maxChars] characters of text from a [CommonUri]. Returns `null` if the
  * file is empty or cannot be read.
  */
@@ -55,29 +65,66 @@ expect fun rememberSaveFileLauncher(
 /** Keeps the screen awake while [enabled] is true. No-op on platforms that don't support it. */
 @Composable expect fun KeepScreenOn(enabled: Boolean)
 
-/** Intercepts the platform back gesture/button while [enabled] is true. No-op on platforms without a system back. */
-@Composable expect fun PlatformBackHandler(enabled: Boolean, onBack: () -> Unit)
-
-/** Returns a launcher to request location permissions. */
-@Composable expect fun rememberRequestLocationPermission(onGranted: () -> Unit, onDenied: () -> Unit = {}): () -> Unit
-
 /** Returns a launcher to open the platform's location settings. */
 @Composable expect fun rememberOpenLocationSettings(): () -> Unit
 
-/** Returns a launcher to request Bluetooth scan + connect permissions. No-op on platforms without runtime BLE perms. */
-@Composable expect fun rememberRequestBluetoothPermission(onGranted: () -> Unit, onDenied: () -> Unit = {}): () -> Unit
+/** Returns a launcher to open the platform's Bluetooth settings. */
+@Composable expect fun rememberOpenBluetoothSettings(): () -> Unit
 
-/** Returns a launcher to request the POST_NOTIFICATIONS permission. No-op on platforms that don't require it. */
-@Composable
-expect fun rememberRequestNotificationPermission(onGranted: () -> Unit, onDenied: () -> Unit = {}): () -> Unit
-
-/**
- * Returns whether location permissions are currently granted. Always `true` on platforms without runtime permissions.
- */
-@Composable expect fun isLocationPermissionGranted(): Boolean
+/** Returns a launcher to open the platform's Wi-Fi settings. */
+@Composable expect fun rememberOpenWifiSettings(): () -> Unit
 
 /**
  * Returns whether GPS/location services are currently disabled at the system level. Always `false` on platforms where
  * this concept doesn't apply.
  */
 @Composable expect fun isGpsDisabled(): Boolean
+
+/**
+ * Returns whether Bluetooth is currently turned off at the system level (the adapter exists but is disabled). Always
+ * `false` on devices without Bluetooth and on platforms where the concept doesn't apply.
+ */
+@Composable expect fun isBluetoothDisabled(): Boolean
+
+/**
+ * Returns whether the device currently lacks any transport that can back the network-scan discovery (no active Wi-Fi,
+ * Ethernet, or VPN). Cellular alone is **not** sufficient — a carrier uplink does not place the device on the same
+ * segment as a Meshtastic node — so a cellular-only state surfaces the "connect to Wi-Fi" hint. The function name is
+ * historical: the original implementation checked Wi-Fi alone, later widened to Ethernet, and now also recognizes VPN
+ * (ZeroTier/Tailscale) as a valid reachability path for a TCP node. The name is retained to avoid churning the
+ * expect/actual contract and every consumer. Always `false` where the concept doesn't apply.
+ */
+@Composable expect fun isWifiUnavailable(): Boolean
+
+/** Returns a function that opens this app's system settings page (where the user can change any permission). */
+@Composable expect fun rememberOpenAppSettings(): () -> Unit
+
+/**
+ * Returns the reactive [PermissionUiState] for the location permissions, recomputed on `ON_RESUME`. On platforms
+ * without runtime permissions the status is always [PermissionStatus.GRANTED].
+ */
+@Composable expect fun rememberLocationPermissionState(): PermissionUiState
+
+/**
+ * Returns the reactive [PermissionUiState] for the Bluetooth scan/connect permissions. On pre-Android-12 devices BLE
+ * scanning is gated by the location permission, so the returned state delegates to [rememberLocationPermissionState].
+ */
+@Composable expect fun rememberBluetoothPermissionState(): PermissionUiState
+
+/**
+ * Returns the reactive [PermissionUiState] for the POST_NOTIFICATIONS permission. Always [PermissionStatus.GRANTED] on
+ * API levels / platforms that don't gate notifications behind a runtime permission.
+ */
+@Composable expect fun rememberNotificationPermissionState(): PermissionUiState
+
+/**
+ * Returns the reactive [PermissionUiState] for the ACCESS_LOCAL_NETWORK permission. Always [PermissionStatus.GRANTED]
+ * on API levels / platforms that don't gate local-network access behind a runtime permission.
+ */
+@Composable expect fun rememberLocalNetworkPermissionState(): PermissionUiState
+
+/**
+ * Returns the reactive [PermissionUiState] for the CAMERA permission. Always [PermissionStatus.GRANTED] on platforms
+ * that don't require a runtime camera permission.
+ */
+@Composable expect fun rememberCameraPermissionState(): PermissionUiState

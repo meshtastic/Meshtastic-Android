@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<event version="2.0" uid="a1b2c3d4-e5f6-7a8b-9c0d-e1f2a3b4c5d6" type="t-x-d-d" how="h-g-i-g-o" time="2026-03-15T19:30:00Z" start="2026-03-15T19:30:00Z" stale="2026-03-15T19:30:20Z">
+  <point lat="0" lon="0" hae="0" ce="9999999" le="9999999"/>
+  <detail><link relation="p-p" uid="d7e8f9a0-1b2c-3d4e-5f6a-7b8c9d0e1f2a" type="a-f-G-U-C-I"/><_flow-tags_ TAK-Server-00000000000000000000000000000001="2026-03-15T19:30:00Z"/></detail>
+</event>

@@ -71,7 +71,7 @@ private val manyNetworks =
     }
 
 private val noOp: () -> Unit = {}
-private val noOpProvision: (String, String) -> Unit = { _, _ -> }
+private val noOpProvision: (String, String, Boolean) -> Unit = { _, _, _ -> }
 
 // ---------------------------------------------------------------------------
 // Phase 1: BLE scanning
@@ -79,7 +79,7 @@ private val noOpProvision: (String, String) -> Unit = { _, _ -> }
 
 @PreviewLightDark
 @Composable
-private fun ScanningBlePreview() {
+fun ScanningBlePreview() {
     AppTheme { Surface(Modifier.fillMaxSize()) { ScanningBleContent() } }
 }
 
@@ -89,7 +89,7 @@ private fun ScanningBlePreview() {
 
 @PreviewLightDark
 @Composable
-private fun DeviceFoundPreview() {
+fun DeviceFoundPreview() {
     AppTheme {
         Surface(Modifier.fillMaxSize()) {
             DeviceFoundContent(deviceName = "mpwrd-nm-A1B2", onProceed = noOp, onCancel = noOp)
@@ -121,12 +121,13 @@ private fun ScanningNetworksPreview() {
 
 @PreviewLightDark
 @Composable
-private fun ConnectedWithNetworksPreview() {
+fun ConnectedWithNetworksPreview() {
     AppTheme {
         Surface(Modifier.fillMaxSize()) {
             ConnectedContent(
                 networks = sampleNetworks,
                 provisionStatus = ProvisionStatus.Idle,
+                ipAddress = null,
                 isProvisioning = false,
                 isScanning = false,
                 onScanNetworks = noOp,
@@ -145,6 +146,7 @@ private fun ConnectedEmptyNetworksPreview() {
             ConnectedContent(
                 networks = emptyList(),
                 provisionStatus = ProvisionStatus.Idle,
+                ipAddress = null,
                 isProvisioning = false,
                 isScanning = false,
                 onScanNetworks = noOp,
@@ -163,6 +165,7 @@ private fun ConnectedScanningPreview() {
             ConnectedContent(
                 networks = sampleNetworks,
                 provisionStatus = ProvisionStatus.Idle,
+                ipAddress = null,
                 isProvisioning = false,
                 isScanning = true,
                 onScanNetworks = noOp,
@@ -181,6 +184,7 @@ private fun ConnectedProvisioningPreview() {
             ConnectedContent(
                 networks = sampleNetworks,
                 provisionStatus = ProvisionStatus.Idle,
+                ipAddress = null,
                 isProvisioning = true,
                 isScanning = false,
                 onScanNetworks = noOp,
@@ -193,12 +197,13 @@ private fun ConnectedProvisioningPreview() {
 
 @PreviewLightDark
 @Composable
-private fun ConnectedSuccessPreview() {
+fun ConnectedSuccessPreview() {
     AppTheme {
         Surface(Modifier.fillMaxSize()) {
             ConnectedContent(
                 networks = sampleNetworks,
                 provisionStatus = ProvisionStatus.Success,
+                ipAddress = "10.10.10.61",
                 isProvisioning = false,
                 isScanning = false,
                 onScanNetworks = noOp,
@@ -211,12 +216,13 @@ private fun ConnectedSuccessPreview() {
 
 @PreviewLightDark
 @Composable
-private fun ConnectedFailedPreview() {
+fun ConnectedFailedPreview() {
     AppTheme {
         Surface(Modifier.fillMaxSize()) {
             ConnectedContent(
                 networks = sampleNetworks,
                 provisionStatus = ProvisionStatus.Failed,
+                ipAddress = null,
                 isProvisioning = false,
                 isScanning = false,
                 onScanNetworks = noOp,
@@ -239,6 +245,7 @@ private fun ConnectedLongSsidPreview() {
             ConnectedContent(
                 networks = edgeCaseNetworks,
                 provisionStatus = ProvisionStatus.Idle,
+                ipAddress = null,
                 isProvisioning = false,
                 isScanning = false,
                 onScanNetworks = noOp,
@@ -257,6 +264,7 @@ private fun ConnectedManyNetworksPreview() {
             ConnectedContent(
                 networks = manyNetworks,
                 provisionStatus = ProvisionStatus.Idle,
+                ipAddress = null,
                 isProvisioning = false,
                 isScanning = false,
                 onScanNetworks = noOp,
@@ -299,7 +307,7 @@ private fun ProvisionStatusCardProvisioningPreview() {
 
 @PreviewLightDark
 @Composable
-private fun ProvisionStatusCardSuccessPreview() {
+fun ProvisionStatusCardSuccessPreview() {
     AppTheme {
         Surface {
             Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
@@ -323,7 +331,7 @@ private fun ProvisionStatusCardFailedPreview() {
 
 @PreviewLightDark
 @Composable
-private fun NetworkRowPreview() {
+fun NetworkRowPreview() {
     AppTheme {
         Surface {
             Column(modifier = Modifier.fillMaxWidth()) {
@@ -353,6 +361,6 @@ private fun NetworkRowLongSsidPreview() {
 
 @PreviewLightDark
 @Composable
-private fun MpwrdDisclaimerBannerPreview() {
+fun MpwrdDisclaimerBannerPreview() {
     AppTheme { Surface { Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) { MpwrdDisclaimerBanner() } } }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,8 +18,12 @@
 
 package org.meshtastic.core.model.util
 
+import org.meshtastic.proto.Channel
+import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.ModuleConfig
+import org.meshtastic.proto.MyNodeInfo
 import org.meshtastic.proto.Telemetry
 
 /**
@@ -48,6 +52,24 @@ fun MeshPacket.toOneLineString(): String {
     return this.toString().replace(redactedFields.toRegex()) { "${it.groupValues[1]}=[REDACTED]" }.replace('\n', ' ')
 }
 
+fun Channel.toOneLineString(): String {
+    // Redact the channel preshared key (psk) from logs.
+    val redactedFields = """(psk)=[^,}]+"""
+    return this.toString().replace(redactedFields.toRegex()) { "${it.groupValues[1]}=[REDACTED]" }.replace('\n', ' ')
+}
+
+fun ModuleConfig.toOneLineString(): String {
+    // Redact MQTT credentials from logs.
+    val redactedFields = """(password|username)=[^,}]+"""
+    return this.toString().replace(redactedFields.toRegex()) { "${it.groupValues[1]}=[REDACTED]" }.replace('\n', ' ')
+}
+
+fun MyNodeInfo.toOneLineString(): String {
+    // Redact the hardware unique identifier from logs.
+    val redactedFields = """(device_id)=[^,}]+"""
+    return this.toString().replace(redactedFields.toRegex()) { "${it.groupValues[1]}=[REDACTED]" }.replace('\n', ' ')
+}
+
 fun Any.toPIIString() = if (!isDebug) {
     "<PII?>"
 } else {
@@ -57,29 +79,39 @@ fun Any.toPIIString() = if (!isDebug) {
 @Suppress("MagicNumber")
 fun ByteArray.toHexString() = joinToString("") { it.toUByte().toString(16).padStart(2, '0') }
 
-private const val MPS_TO_KMPH = 3.6f
-private const val KM_TO_MILES = 0.621371f
-
-fun Int.mpsToKmph(): Float {
-    // Convert meters per second to kilometers per hour
-    val kmph = this * MPS_TO_KMPH
-    return kmph
-}
-
-fun Int.mpsToMph(): Float {
-    // Convert meters per second to miles per hour
-    val mph = this * MPS_TO_KMPH * KM_TO_MILES
-    return mph
-}
-
 /** Returns true if this packet arrived via a LoRa transport mechanism. */
 fun MeshPacket.isLora(): Boolean = transport_mechanism == MeshPacket.TransportMechanism.TRANSPORT_LORA ||
     transport_mechanism == MeshPacket.TransportMechanism.TRANSPORT_LORA_ALT1 ||
     transport_mechanism == MeshPacket.TransportMechanism.TRANSPORT_LORA_ALT2 ||
     transport_mechanism == MeshPacket.TransportMechanism.TRANSPORT_LORA_ALT3
 
+/**
+ * Arrival time in epoch seconds, or null when the radio had no clock at reception.
+ *
+ * Firmware that gained explicit presence omits the field; older firmware still sends 0 for the same state. Both mean
+ * unknown — a 1970 arrival time is never a genuine reading. Folding 0 is safe here for exactly that reason; see
+ * [snrOrNull] for the fields where it is not.
+ */
+fun MeshPacket.rxTimeOrNull(): Int? = rx_time?.takeIf { it != 0 }
+
+/**
+ * Signal-to-noise ratio in dB for this reception, or null when the packet carries no SNR measurement (it did not arrive
+ * over LoRa, or the radio reported none).
+ *
+ * Deliberately does NOT fold 0 the way [rxTimeOrNull] does: 0 dB is a genuine, common reading — a signal at the noise
+ * floor, comfortably demodulable on every preset — so treating it as "absent" would hide real measurements and, worse,
+ * discard the only zero that can ever reach us. Under proto3 implicit presence a field at its zero value is never put
+ * on the wire, so an SNR-less packet from firmware predating the optional conversion already decodes to null for free.
+ * A 0 that survives to this accessor was written explicitly and means 0 dB.
+ *
+ * Presence cannot be inferred from [isLora] instead: `transport_mechanism` defaults to `TRANSPORT_INTERNAL` (0), so
+ * firmware that never sets it would have every reading suppressed.
+ */
+fun MeshPacket.snrOrNull(): Float? = rx_snr
+
 /** Returns true if this packet is a direct LoRa signal (not MQTT, and hop count matches). */
-fun MeshPacket.isDirectSignal(): Boolean = rx_time > 0 && hop_start == hop_limit && via_mqtt != true && isLora()
+fun MeshPacket.isDirectSignal(): Boolean =
+    rxTimeOrNull() != null && hop_start == hop_limit && via_mqtt != true && isLora()
 
 /** Returns true if this telemetry packet contains valid, plot-able environment metrics. */
 fun Telemetry.hasValidEnvironmentMetrics(): Boolean {
@@ -118,3 +150,13 @@ fun getInitials(fullName: String): String {
 }
 
 fun String.withoutEmojis(): String = filterNot { char -> char.isSurrogate() }
+
+private val OTA_PATTERN = Regex("\\bOTA\\b", RegexOption.IGNORE_CASE)
+
+/**
+ * OTA-status detector matching the firmware update preflight gate's criterion: any ClientNotification whose message
+ * contains "OTA" as a whole word (e.g. "Rebooting to BLE OTA", "Cannot start OTA: ...") is consumed by the firmware
+ * update flow and suppressed as a generic alert. Uses word-boundary matching so unrelated messages containing the
+ * substring (e.g. "ROTATE", "QUOTA") are not misclassified.
+ */
+fun ClientNotification.isOtaStatusNotification(): Boolean = message.isNotBlank() && OTA_PATTERN.containsMatchIn(message)

@@ -1,0 +1,151 @@
+/*
+ * Copyright (c) 2026 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+package org.meshtastic.app.map.prefs.map
+
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.doublePreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.floatPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
+import com.google.maps.android.compose.MapType
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import org.koin.core.annotation.Single
+import org.meshtastic.app.map.prefs.di.GoogleMapsDataStore
+import org.meshtastic.core.di.CoroutineDispatchers
+
+/** Interface for prefs specific to Google Maps. For general map prefs, see MapPrefs. */
+interface GoogleMapsPrefs {
+    val selectedGoogleMapType: StateFlow<String?>
+
+    fun setSelectedGoogleMapType(value: String?)
+
+    val selectedCustomTileUrl: StateFlow<String?>
+
+    fun setSelectedCustomTileUrl(value: String?)
+
+    suspend fun awaitMapSelection(): GoogleMapSelectionPrefs
+
+    val cameraPosition: Flow<GoogleCameraPosition?>
+
+    fun setCameraPosition(value: GoogleCameraPosition)
+}
+
+data class GoogleMapSelectionPrefs(val mapType: String, val customTileUrl: String?)
+
+data class GoogleCameraPosition(
+    val targetLat: Double,
+    val targetLng: Double,
+    val zoom: Float,
+    val tilt: Float,
+    val bearing: Float,
+)
+
+@Single
+class GoogleMapsPrefsImpl(private val dataStore: GoogleMapsDataStore, dispatchers: CoroutineDispatchers) :
+    GoogleMapsPrefs {
+    private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
+
+    override val selectedGoogleMapType: StateFlow<String?> =
+        dataStore.data
+            .map { it[KEY_SELECTED_GOOGLE_MAP_TYPE_PREF] ?: MapType.NORMAL.name }
+            .stateIn(scope, SharingStarted.Eagerly, MapType.NORMAL.name)
+
+    override fun setSelectedGoogleMapType(value: String?) {
+        scope.launch {
+            dataStore.edit { prefs ->
+                if (value == null) {
+                    prefs.remove(KEY_SELECTED_GOOGLE_MAP_TYPE_PREF)
+                } else {
+                    prefs[KEY_SELECTED_GOOGLE_MAP_TYPE_PREF] = value
+                }
+            }
+        }
+    }
+
+    override val selectedCustomTileUrl: StateFlow<String?> =
+        dataStore.data.map { it[KEY_SELECTED_CUSTOM_TILE_URL_PREF] }.stateIn(scope, SharingStarted.Eagerly, null)
+
+    override fun setSelectedCustomTileUrl(value: String?) {
+        scope.launch {
+            dataStore.edit { prefs ->
+                if (value == null) {
+                    prefs.remove(KEY_SELECTED_CUSTOM_TILE_URL_PREF)
+                } else {
+                    prefs[KEY_SELECTED_CUSTOM_TILE_URL_PREF] = value
+                }
+            }
+        }
+    }
+
+    override suspend fun awaitMapSelection(): GoogleMapSelectionPrefs = dataStore.data.first().let { preferences ->
+        GoogleMapSelectionPrefs(
+            mapType = preferences[KEY_SELECTED_GOOGLE_MAP_TYPE_PREF] ?: MapType.NORMAL.name,
+            customTileUrl = preferences[KEY_SELECTED_CUSTOM_TILE_URL_PREF],
+        )
+    }
+
+    override val cameraPosition: Flow<GoogleCameraPosition?> =
+        dataStore.data.map { preferences ->
+            val latitude = preferences.getCameraCoordinate(KEY_CAMERA_TARGET_LAT_PREF) ?: return@map null
+            val longitude = preferences.getCameraCoordinate(KEY_CAMERA_TARGET_LNG_PREF) ?: return@map null
+            GoogleCameraPosition(
+                targetLat = latitude,
+                targetLng = longitude,
+                zoom = preferences[KEY_CAMERA_ZOOM_PREF] ?: 7f,
+                tilt = preferences[KEY_CAMERA_TILT_PREF] ?: 0f,
+                bearing = preferences[KEY_CAMERA_BEARING_PREF] ?: 0f,
+            )
+        }
+
+    override fun setCameraPosition(value: GoogleCameraPosition) {
+        scope.launch {
+            dataStore.edit { preferences ->
+                preferences[KEY_CAMERA_TARGET_LAT_PREF] = value.targetLat
+                preferences[KEY_CAMERA_TARGET_LNG_PREF] = value.targetLng
+                preferences[KEY_CAMERA_ZOOM_PREF] = value.zoom
+                preferences[KEY_CAMERA_TILT_PREF] = value.tilt
+                preferences[KEY_CAMERA_BEARING_PREF] = value.bearing
+            }
+        }
+    }
+
+    // Coordinates were previously written as Float values. Reading the same preference name through the legacy
+    // floatPreferencesKey after ClassCastException preserves saved cameras for existing installs during migration.
+    private fun Preferences.getCameraCoordinate(key: Preferences.Key<Double>): Double? = try {
+        this[key]
+    } catch (_: ClassCastException) {
+        this[floatPreferencesKey(key.name)]?.toDouble()
+    }
+
+    companion object {
+        val KEY_SELECTED_GOOGLE_MAP_TYPE_PREF = stringPreferencesKey("selected_google_map_type")
+        val KEY_SELECTED_CUSTOM_TILE_URL_PREF = stringPreferencesKey("selected_custom_tile_url")
+        val KEY_CAMERA_TARGET_LAT_PREF = doublePreferencesKey("camera_target_lat")
+        val KEY_CAMERA_TARGET_LNG_PREF = doublePreferencesKey("camera_target_lng")
+        val KEY_CAMERA_ZOOM_PREF = floatPreferencesKey("camera_zoom")
+        val KEY_CAMERA_TILT_PREF = floatPreferencesKey("camera_tilt")
+        val KEY_CAMERA_BEARING_PREF = floatPreferencesKey("camera_bearing")
+    }
+}

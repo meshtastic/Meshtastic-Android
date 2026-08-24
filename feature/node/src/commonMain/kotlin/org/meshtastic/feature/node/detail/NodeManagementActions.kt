@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,17 +17,21 @@
 package org.meshtastic.feature.node.detail
 
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import org.koin.core.annotation.Single
-import org.meshtastic.core.common.util.ioDispatcher
+import org.meshtastic.core.common.util.handledLaunch
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.model.RadioController
-import org.meshtastic.core.model.service.ServiceAction
+import org.meshtastic.core.repository.LocalNodeUnavailableException
 import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.PacketQueueRejectedException
+import org.meshtastic.core.repository.PlatformAnalytics
+import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.favorite
 import org.meshtastic.core.resources.favorite_add
 import org.meshtastic.core.resources.favorite_remove
@@ -41,30 +45,33 @@ import org.meshtastic.core.resources.remove
 import org.meshtastic.core.resources.remove_node_text
 import org.meshtastic.core.resources.unmute
 import org.meshtastic.core.ui.util.AlertManager
+import org.meshtastic.core.ui.util.SnackbarManager
 
 @Single
 open class NodeManagementActions
 constructor(
     private val nodeRepository: NodeRepository,
-    private val serviceRepository: ServiceRepository,
     private val radioController: RadioController,
     private val alertManager: AlertManager,
+    private val analytics: PlatformAnalytics,
+    private val snackbarManager: SnackbarManager,
+    private val resolveUiText: suspend (UiText) -> String = { it.resolve() },
 ) {
-    open fun requestRemoveNode(scope: CoroutineScope, node: Node) {
+    open fun requestRemoveNode(scope: CoroutineScope, node: Node, onAfterRemove: () -> Unit = {}) {
         alertManager.showAlert(
             titleRes = Res.string.remove,
             messageRes = Res.string.remove_node_text,
-            onConfirm = { removeNode(scope, node.num) },
+            onConfirm = {
+                launchRadioMutation(scope, "removeNode", onSuccess = onAfterRemove) { removeNode(node.num) }
+            },
         )
     }
 
-    open fun removeNode(scope: CoroutineScope, nodeNum: Int) {
-        scope.launch(ioDispatcher) {
-            Logger.i { "Removing node '$nodeNum'" }
-            val packetId = radioController.getPacketId()
-            radioController.removeByNodenum(packetId, nodeNum)
-            nodeRepository.deleteNode(nodeNum)
-        }
+    open suspend fun removeNode(nodeNum: Int) {
+        Logger.i { "Removing node '$nodeNum'" }
+        val packetId = radioController.generatePacketId()
+        radioController.removeByNodenum(packetId, nodeNum)
+        nodeRepository.deleteNode(nodeNum)
     }
 
     open fun requestIgnoreNode(scope: CoroutineScope, node: Node) {
@@ -74,13 +81,13 @@ constructor(
             alertManager.showAlert(
                 titleRes = Res.string.ignore,
                 message = message,
-                onConfirm = { ignoreNode(scope, node) },
+                onConfirm = { launchRadioMutation(scope, "setIgnored") { setIgnored(node.num, !node.isIgnored) } },
             )
         }
     }
 
-    open fun ignoreNode(scope: CoroutineScope, node: Node) {
-        scope.launch(ioDispatcher) { serviceRepository.onServiceAction(ServiceAction.Ignore(node)) }
+    open suspend fun setIgnored(nodeNum: Int, ignored: Boolean) {
+        radioController.setIgnored(nodeNum, ignored)
     }
 
     open fun requestMuteNode(scope: CoroutineScope, node: Node) {
@@ -90,13 +97,13 @@ constructor(
             alertManager.showAlert(
                 titleRes = if (node.isMuted) Res.string.unmute else Res.string.mute_notifications,
                 message = message,
-                onConfirm = { muteNode(scope, node) },
+                onConfirm = { launchRadioMutation(scope, "toggleMuted") { toggleMuted(node.num) } },
             )
         }
     }
 
-    open fun muteNode(scope: CoroutineScope, node: Node) {
-        scope.launch(ioDispatcher) { serviceRepository.onServiceAction(ServiceAction.Mute(node)) }
+    open suspend fun toggleMuted(nodeNum: Int) {
+        radioController.toggleMuted(nodeNum)
     }
 
     open fun requestFavoriteNode(scope: CoroutineScope, node: Node) {
@@ -109,22 +116,52 @@ constructor(
             alertManager.showAlert(
                 titleRes = Res.string.favorite,
                 message = message,
-                onConfirm = { favoriteNode(scope, node) },
+                onConfirm = { launchRadioMutation(scope, "setFavorite") { setFavorite(node.num, !node.isFavorite) } },
             )
         }
     }
 
-    open fun favoriteNode(scope: CoroutineScope, node: Node) {
-        scope.launch(ioDispatcher) { serviceRepository.onServiceAction(ServiceAction.Favorite(node)) }
+    open suspend fun setFavorite(nodeNum: Int, favorite: Boolean) {
+        radioController.setFavorite(nodeNum, favorite)
+        analytics.trackAction("node_favorite", mapOf("favorite" to favorite))
     }
 
-    open fun setNodeNotes(scope: CoroutineScope, nodeNum: Int, notes: String) {
-        scope.launch(ioDispatcher) {
-            try {
-                nodeRepository.setNodeNotes(nodeNum, notes)
-            } catch (ex: Exception) {
-                Logger.e(ex) { "Set node notes error" }
-            }
+    private fun launchRadioMutation(
+        scope: CoroutineScope,
+        operation: String,
+        onSuccess: () -> Unit = {},
+        block: suspend () -> Unit,
+    ) {
+        scope.handledLaunch {
+            val succeeded =
+                try {
+                    block()
+                    true
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: PacketQueueRejectedException) {
+                    showNodeRequestFailure(
+                        e,
+                        "Node management operation '$operation' rejected by outbound packet queue",
+                        snackbarManager,
+                        resolveUiText,
+                    )
+                    false
+                } catch (e: LocalNodeUnavailableException) {
+                    showNodeRequestFailure(
+                        e,
+                        "Node management operation '$operation' deferred until local node identity is available",
+                        snackbarManager,
+                        resolveUiText,
+                    )
+                    false
+                }
+            if (succeeded) onSuccess()
         }
+    }
+
+    open suspend fun setNodeNotes(nodeNum: Int, notes: String) {
+        val failure = safeCatching { nodeRepository.setNodeNotes(nodeNum, notes) }.exceptionOrNull()
+        if (failure != null) Logger.e(failure) { "Set node notes error" }
     }
 }

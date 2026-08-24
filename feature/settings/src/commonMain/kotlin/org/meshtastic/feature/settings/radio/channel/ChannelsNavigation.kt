@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,14 +26,6 @@ import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 
 /** Navigation graph for for the top level ChannelScreen - [ChannelsRoute.Channels]. */
 fun EntryProviderScope<NavKey>.channelsGraph(backStack: NavBackStack<NavKey>) {
-    entry<ChannelsRoute.ChannelsGraph> {
-        ChannelScreen(
-            radioConfigViewModel = koinViewModel<RadioConfigViewModel>(),
-            onNavigate = { route -> backStack.add(route) },
-            onNavigateUp = dropUnlessResumed { backStack.removeLastOrNull() },
-        )
-    }
-
     entry<ChannelsRoute.Channels> {
         ChannelScreen(
             radioConfigViewModel = koinViewModel<RadioConfigViewModel>(),

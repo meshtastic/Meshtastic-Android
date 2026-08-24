@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,18 +40,23 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.signal_quality
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.util.LocalModemPreset
 
-const val MAX_VALID_SNR = 100F
-const val MAX_VALID_RSSI = 0
-
+/**
+ * Renders the node's signal quality, or nothing when it has no SNR reading to rate.
+ *
+ * Presence comes from [Node.snrOrNull]/[Node.rssiOrNull], not from threshold comparisons: the previous `rssi < 0` gate
+ * hid the whole row for a genuine 0 dBm reading, and `snr < 100f` would have hidden any reading at or above 100 dB.
+ */
 @Composable
 fun SignalInfo(
     modifier: Modifier = Modifier,
     node: Node,
     @Suppress("UNUSED_PARAMETER") contentColor: Color = MaterialTheme.colorScheme.onSurface,
 ) {
-    if (node.snr < MAX_VALID_SNR && node.rssi < MAX_VALID_RSSI) {
-        val quality = determineSignalQuality(node.snr, node.rssi)
+    val snr = node.snrOrNull
+    if (snr != null) {
+        val quality = determineSignalQuality(snr, LocalModemPreset.current)
         val signalColor = quality.color.invoke()
         Row(
             modifier = modifier,
@@ -66,9 +71,8 @@ fun SignalInfo(
             )
             Text(
                 text =
-                "${MetricFormatter.snr(
-                    node.snr,
-                )} · ${MetricFormatter.rssi(node.rssi)} · ${stringResource(quality.nameRes)}",
+                "${MetricFormatter.snr(snr)} · ${MetricFormatter.rssi(node.rssiOrNull)} · " +
+                    stringResource(quality.nameRes),
                 style =
                 MaterialTheme.typography.labelSmall.copy(
                     fontWeight = FontWeight.Bold,

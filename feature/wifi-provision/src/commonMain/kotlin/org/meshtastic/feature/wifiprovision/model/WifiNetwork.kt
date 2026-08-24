@@ -30,7 +30,10 @@ data class WifiNetwork(
 
 /** Result of a WiFi provisioning attempt. */
 sealed interface ProvisionResult {
-    data object Success : ProvisionResult
+    data class Success(
+        /** IPv4 address reported by nymea for the active Wi-Fi connection. */
+        val ipAddress: String? = null,
+    ) : ProvisionResult
 
     data class Failure(val errorCode: Int, val message: String) : ProvisionResult
 }

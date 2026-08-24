@@ -25,13 +25,21 @@ comment:
   require_changes: false  # Post a comment even if coverage doesn't change
 
 flags:
-  host-unit:
+  core:
     paths:
-      - .
+      - core/**
     carryforward: true
-  android-instrumented:
+  feature:
     paths:
-      - .
+      - feature/**
+    carryforward: true
+  app:
+    paths:
+      - androidApp/**
+    carryforward: true
+  desktop:
+    paths:
+      - desktopApp/**
     carryforward: true
 
 component_management:
@@ -52,17 +60,15 @@ component_management:
     - component_id: app
       name: App
       paths:
-        - app/**
+        - androidApp/**
     - component_id: desktop
       name: Desktop
       paths:
-        - desktop/**
+        - desktopApp/**
 
 ignore:
   - "**/build/**"
   - "**/*.pb.kt"          # Generated Protobuf code
-  - "**/*.aidl"           # AIDL interface files
-  - "**/aidl/**"           # Generated AIDL code
   - "core/resources/**"   # Centralized resources
   - "**/test/**"          # Unit tests
   - "**/androidTest/**"   # Instrumented tests

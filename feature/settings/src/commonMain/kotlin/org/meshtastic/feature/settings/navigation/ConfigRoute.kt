@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,9 +49,11 @@ enum class ConfigRoute(
     val route: Route,
     val icon: DrawableResource? = null,
     val type: Int = 0,
+    // Keep in sync with routes that issue multiple get requests; only single-response reads retain late responses.
+    val hasReadFanOut: Boolean = false,
 ) {
     USER(Res.string.user, SettingsRoute.User, Res.drawable.ic_person, 0),
-    CHANNELS(Res.string.channels, SettingsRoute.ChannelConfig, Res.drawable.ic_list, 0),
+    CHANNELS(Res.string.channels, SettingsRoute.ChannelConfig, Res.drawable.ic_list, 0, hasReadFanOut = true),
     DEVICE(
         Res.string.device,
         SettingsRoute.Device,
@@ -70,6 +72,7 @@ enum class ConfigRoute(
         SettingsRoute.Network,
         Res.drawable.ic_wifi,
         AdminMessage.ConfigType.NETWORK_CONFIG.value,
+        hasReadFanOut = true,
     ),
     DISPLAY(
         Res.string.display,
@@ -77,7 +80,13 @@ enum class ConfigRoute(
         Res.drawable.ic_display_settings,
         AdminMessage.ConfigType.DISPLAY_CONFIG.value,
     ),
-    LORA(Res.string.lora, SettingsRoute.LoRa, Res.drawable.ic_cell_tower, AdminMessage.ConfigType.LORA_CONFIG.value),
+    LORA(
+        Res.string.lora,
+        SettingsRoute.LoRa,
+        Res.drawable.ic_cell_tower,
+        AdminMessage.ConfigType.LORA_CONFIG.value,
+        hasReadFanOut = true,
+    ),
     BLUETOOTH(
         Res.string.bluetooth,
         SettingsRoute.Bluetooth,
@@ -95,9 +104,13 @@ enum class ConfigRoute(
     companion object {
         private fun filterExcludedFrom(metadata: DeviceMetadata?): List<ConfigRoute> = entries.filter {
             when {
-                metadata == null -> true // Include all routes if metadata is null
+                metadata == null -> true
+
+                // Include all routes if metadata is null
                 it == BLUETOOTH -> metadata.hasBluetooth == true
+
                 it == NETWORK -> metadata.hasWifi == true || metadata.hasEthernet == true
+
                 else -> true // Include all other routes by default
             }
         }

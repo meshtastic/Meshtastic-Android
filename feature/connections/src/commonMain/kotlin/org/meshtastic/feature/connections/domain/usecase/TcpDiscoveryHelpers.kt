@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,10 +17,15 @@
 package org.meshtastic.feature.connections.domain.usecase
 
 import org.meshtastic.core.common.database.DatabaseManager
+import org.meshtastic.core.common.util.safeCatchingAll
 import org.meshtastic.core.datastore.model.RecentAddress
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.network.repository.DiscoveredService
 import org.meshtastic.core.network.repository.NetworkRepository.Companion.toAddressString
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.demo_mode
+import org.meshtastic.core.resources.demo_mode_replay
+import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.feature.connections.model.DeviceListEntry
 
 private const val SUFFIX_LENGTH = 4
@@ -52,6 +57,9 @@ internal fun processTcpServices(
             }
             DeviceListEntry.Tcp(displayName, address)
         }
+        // mDNS can resolve two services to one host:port (e.g. re-announce before the old record expires). The device
+        // list keys on fullAddress, and duplicate LazyColumn keys are a hard crash.
+        .distinctBy { it.fullAddress }
         .sortedBy { it.name }
 }
 
@@ -87,6 +95,9 @@ internal fun buildRecentTcpEntries(
 ): List<DeviceListEntry.Tcp> = recentAddresses
     .filterNot { discoveredAddresses.contains(it.address) }
     .map { DeviceListEntry.Tcp(it.name, it.address) }
+    // The persisted list is not guaranteed unique: only add() dedupes, and legacy blobs bypass it. The device list
+    // keys on fullAddress, and duplicate LazyColumn keys are a hard crash.
+    .distinctBy { it.fullAddress }
     .map { entry ->
         entry.copy(node = findNodeByNameSuffix(entry.name, entry.fullAddress, nodeDb, databaseManager))
     }
@@ -109,4 +120,27 @@ internal fun findNodeByNameSuffix(
     } else {
         nodeDb.values.find { it.user.id.lowercase().endsWith(suffix) }
     }
+}
+
+/**
+ * The virtual devices offered behind the Demo Mode gate, shared so the common and Android discovery paths cannot
+ * diverge on visibility policy.
+ *
+ * [showReplay] is nested inside [showMock]: replay is an extra entry *within* Demo Mode, never a device on its own. It
+ * additionally requires the build to carry the capture asset (`RadioTransportFactory.isReplayTransportAvailable`) —
+ * without it the replay transport falls back to the plain mock, so the entry would advertise something it cannot do.
+ */
+internal suspend fun virtualDeviceEntries(showMock: Boolean, showReplay: Boolean): List<DeviceListEntry> {
+    if (!showMock) return emptyList()
+    val mock =
+        DeviceListEntry.Mock(safeCatchingAll { getStringSuspend(Res.string.demo_mode) }.getOrDefault("Demo Mode"))
+    val replay =
+        if (showReplay) {
+            val label =
+                safeCatchingAll { getStringSuspend(Res.string.demo_mode_replay) }.getOrDefault("Demo Mode (Replay)")
+            DeviceListEntry.Replay(label)
+        } else {
+            null
+        }
+    return listOfNotNull(mock, replay)
 }

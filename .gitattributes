@@ -1,0 +1,13 @@
+# Mark only generated/derived XML as linguist-generated to reduce Copilot PR summary costs.
+# Hand-edited resources (layouts, string values) are intentionally excluded so they remain
+# visible in diffs and code review.
+**/composeResources/**/values-*/*.xml linguist-generated=true
+.skills/compose-ui/strings-index.txt linguist-generated=true
+
+# Ensure assets are treated as binary
+*.png binary
+*.jpg binary
+*.webp binary
+*.mp3 binary
+*.wav binary
+*.ogg binary

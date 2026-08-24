@@ -16,26 +16,604 @@
  */
 package org.meshtastic.core.network.repository
 
+import dev.mokkery.MockMode
+import dev.mokkery.answering.returns
+import dev.mokkery.every
+import dev.mokkery.mock
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
+import okio.ByteString.Companion.toByteString
+import org.meshtastic.core.common.BuildConfigProvider
+import org.meshtastic.core.common.util.safeCatching
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.MqttJsonPayload
+import org.meshtastic.core.testing.FakeNodeRepository
+import org.meshtastic.core.testing.FakeRadioConfigRepository
+import org.meshtastic.mqtt.ConnectionState
+import org.meshtastic.mqtt.MqttEndpoint
+import org.meshtastic.mqtt.MqttException
+import org.meshtastic.mqtt.MqttLogLevel
+import org.meshtastic.mqtt.MqttMessage
+import org.meshtastic.mqtt.QoS
+import org.meshtastic.mqtt.ReasonCode
+import org.meshtastic.mqtt.packet.Subscription
+import org.meshtastic.proto.ChannelSet
+import org.meshtastic.proto.ChannelSettings
+import org.meshtastic.proto.Data
+import org.meshtastic.proto.LocalModuleConfig
+import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.ModuleConfig
+import org.meshtastic.proto.ServiceEnvelope
+import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertIs
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class MQTTRepositoryImplTest {
 
-    @Test
-    fun `test address parsing logic`() {
-        val address1 = "mqtt.example.com:1883"
-        val (host1, port1) = address1.split(":", limit = 2).let { it[0] to (it.getOrNull(1)?.toIntOrNull() ?: 1883) }
-        assertEquals("mqtt.example.com", host1)
-        assertEquals(1883, port1)
+    private val buildConfigProvider: BuildConfigProvider = mock(MockMode.autofill)
 
-        val address2 = "mqtt.example.com"
-        val (host2, port2) = address2.split(":", limit = 2).let { it[0] to (it.getOrNull(1)?.toIntOrNull() ?: 1883) }
-        assertEquals("mqtt.example.com", host2)
-        assertEquals(1883, port2)
+    @BeforeTest
+    fun setUp() {
+        every { buildConfigProvider.isDebug } returns true
     }
+
+    // region resolveEndpoint — every behavioral branch of address parsing.
+
+    @Test
+    fun `bare host without scheme is wrapped as plain Tcp on the standard MQTT port`() {
+        val endpoint = resolveEndpoint(rawAddress = "broker.example.com", tlsEnabled = false)
+
+        val tcp = assertIs<MqttEndpoint.Tcp>(endpoint)
+        assertEquals("broker.example.com", tcp.host)
+        assertEquals(1883, tcp.port)
+        assertEquals(false, tcp.tls)
+    }
+
+    @Test
+    fun `bare host with TLS enabled is wrapped as Tcp on the secure MQTT port`() {
+        val endpoint = resolveEndpoint(rawAddress = "broker.example.com", tlsEnabled = true)
+
+        val tcp = assertIs<MqttEndpoint.Tcp>(endpoint)
+        assertEquals("broker.example.com", tcp.host)
+        assertEquals(8883, tcp.port)
+        assertEquals(true, tcp.tls)
+    }
+
+    @Test
+    fun `host with explicit port is preserved when wrapped as Tcp`() {
+        val endpoint = resolveEndpoint(rawAddress = "broker.example.com:9001", tlsEnabled = false)
+
+        val tcp = assertIs<MqttEndpoint.Tcp>(endpoint)
+        assertEquals("broker.example.com", tcp.host)
+        assertEquals(9001, tcp.port)
+        assertEquals(false, tcp.tls)
+    }
+
+    @Test
+    fun `address with ws scheme is parsed as-is and tls flag is ignored`() {
+        val endpoint = resolveEndpoint(rawAddress = "ws://broker.example.com:8080/custom-path", tlsEnabled = true)
+
+        val ws = assertIs<MqttEndpoint.WebSocket>(endpoint)
+        assertEquals("ws://broker.example.com:8080/custom-path", ws.url)
+    }
+
+    @Test
+    fun `address with wss scheme is parsed as-is`() {
+        val endpoint = resolveEndpoint(rawAddress = "wss://broker.example.com/secure-mqtt", tlsEnabled = false)
+
+        val ws = assertIs<MqttEndpoint.WebSocket>(endpoint)
+        assertEquals("wss://broker.example.com/secure-mqtt", ws.url)
+    }
+
+    @Test
+    fun `address with mqtt tcp scheme is parsed as Tcp endpoint`() {
+        val endpoint = resolveEndpoint(rawAddress = "mqtt://broker.example.com:1883", tlsEnabled = false)
+
+        val tcp = assertIs<MqttEndpoint.Tcp>(endpoint)
+        assertEquals("broker.example.com", tcp.host)
+        assertEquals(1883, tcp.port)
+        assertEquals(false, tcp.tls)
+    }
+
+    @Test
+    fun `address with mqtts tcp scheme is parsed as Tcp endpoint with tls true`() {
+        val endpoint = resolveEndpoint(rawAddress = "mqtts://broker.example.com:8883", tlsEnabled = false)
+
+        val tcp = assertIs<MqttEndpoint.Tcp>(endpoint)
+        assertEquals("broker.example.com", tcp.host)
+        assertEquals(8883, tcp.port)
+        assertEquals(true, tcp.tls)
+    }
+
+    // endregion
+
+    // region effectiveTlsEnabled — TLS enforcement policy for the public server.
+
+    @Test
+    fun `default server forces TLS even when tlsEnabled is false`() {
+        assertEquals(true, effectiveTlsEnabled("mqtt.meshtastic.org", tlsEnabled = false))
+    }
+
+    @Test
+    fun `default server case-insensitive match forces TLS`() {
+        assertEquals(true, effectiveTlsEnabled("MQTT.MESHTASTIC.ORG", tlsEnabled = false))
+    }
+
+    @Test
+    fun `default server with explicit port still forces TLS`() {
+        assertEquals(true, effectiveTlsEnabled("mqtt.meshtastic.org:1883", tlsEnabled = false))
+    }
+
+    @Test
+    fun `default server with tcp scheme still forces TLS`() {
+        assertEquals(true, effectiveTlsEnabled("tcp://mqtt.meshtastic.org:1883", tlsEnabled = false))
+    }
+
+    @Test
+    fun `default server with ssl scheme still forces TLS`() {
+        assertEquals(true, effectiveTlsEnabled("ssl://mqtt.meshtastic.org", tlsEnabled = false))
+    }
+
+    @Test
+    fun `custom server respects tlsEnabled false`() {
+        assertEquals(false, effectiveTlsEnabled("mqtt.myserver.pt", tlsEnabled = false))
+    }
+
+    @Test
+    fun `custom server respects tlsEnabled true`() {
+        assertEquals(true, effectiveTlsEnabled("mqtt.myserver.pt", tlsEnabled = true))
+    }
+
+    // endregion
+
+    // region effectiveCredentials — firmware-parity credential defaulting.
+
+    @Test
+    fun `empty address substitutes the public broker's well-known credentials`() {
+        // Mirrors firmware PubSubConfig: lockdown-redacted (zeroed) configs must not connect anonymously.
+        val creds = effectiveCredentials(ModuleConfig.MQTTConfig(address = "", username = "", password = ""))
+        assertEquals("meshdev" to "large4cats", creds)
+    }
+
+    @Test
+    fun `null config substitutes the public broker's well-known credentials`() {
+        assertEquals("meshdev" to "large4cats", effectiveCredentials(null))
+    }
+
+    @Test
+    fun `empty address ignores stored credentials entirely - firmware parity`() {
+        val creds = effectiveCredentials(ModuleConfig.MQTTConfig(address = "", username = "custom", password = "pw"))
+        assertEquals("meshdev" to "large4cats", creds)
+    }
+
+    @Test
+    fun `explicit address uses the stored credentials as-is`() {
+        val config = ModuleConfig.MQTTConfig(address = "broker.example.com", username = "user", password = "pass")
+        assertEquals("user" to "pass", effectiveCredentials(config))
+    }
+
+    @Test
+    fun `explicit default server address uses the stored credentials as-is - firmware parity`() {
+        val config = ModuleConfig.MQTTConfig(address = "mqtt.meshtastic.org", username = "user", password = "pass")
+        assertEquals("user" to "pass", effectiveCredentials(config))
+    }
+
+    // endregion
+
+    // region extractHost — address canonicalization tests.
+
+    @Test
+    fun `extractHost bare hostname`() {
+        assertEquals("mqtt.meshtastic.org", extractHost("mqtt.meshtastic.org"))
+    }
+
+    @Test
+    fun `extractHost with port`() {
+        assertEquals("mqtt.meshtastic.org", extractHost("mqtt.meshtastic.org:8883"))
+    }
+
+    @Test
+    fun `extractHost with tcp scheme and port`() {
+        assertEquals("mqtt.meshtastic.org", extractHost("tcp://mqtt.meshtastic.org:1883"))
+    }
+
+    @Test
+    fun `extractHost with ssl scheme no port`() {
+        assertEquals("mqtt.meshtastic.org", extractHost("ssl://mqtt.meshtastic.org"))
+    }
+
+    @Test
+    fun `extractHost with path`() {
+        assertEquals("broker.example.com", extractHost("ws://broker.example.com:8080/mqtt"))
+    }
+
+    // endregion
+
+    @Test
+    fun `topic patterns are built from enabled channels with json topics and PKI`() = runTest {
+        val radioConfigRepository =
+            FakeRadioConfigRepository().apply {
+                setChannelSet(
+                    ChannelSet(
+                        settings =
+                        listOf(
+                            ChannelSettings(
+                                name = "alpha",
+                                downlink_enabled = true,
+                                psk = byteArrayOf(1).toByteString(),
+                            ),
+                            ChannelSettings(
+                                name = "beta",
+                                downlink_enabled = false,
+                                psk = byteArrayOf(2).toByteString(),
+                            ),
+                            ChannelSettings(
+                                name = "gamma",
+                                downlink_enabled = true,
+                                psk = byteArrayOf(3).toByteString(),
+                            ),
+                        ),
+                    ),
+                )
+                setLocalModuleConfigDirect(
+                    LocalModuleConfig(mqtt = ModuleConfig.MQTTConfig(root = "custom", json_enabled = true)),
+                )
+            }
+        val harness = createHarness(radioConfigRepository = radioConfigRepository)
+
+        val collector = startProxyCollection(harness.repository)
+        runCurrent()
+
+        val subscriptions = harness.client.subscribeCalls.single()
+        assertEquals(
+            listOf(
+                "custom/2/e/alpha/+",
+                "custom/2/json/alpha/+",
+                "custom/2/e/gamma/+",
+                "custom/2/json/gamma/+",
+                "custom/2/e/PKI/+",
+            ),
+            subscriptions.map { it.topicFilter },
+        )
+        assertTrue(subscriptions.all { it.maxQos == QoS.AT_LEAST_ONCE && it.noLocal })
+        assertTrue(
+            harness.setups.single().ownerId.startsWith("MeshtasticAndroidMqttProxy-!12345678-"),
+            "ownerId should be the node-scoped prefix plus a unique per-connection suffix, " +
+                "was: ${harness.setups.single().ownerId}",
+        )
+        assertEquals(MqttLogLevel.DEBUG, harness.setups.single().logLevel)
+
+        collector.cancelAndJoin()
+        runCurrent()
+        assertEquals(1, harness.client.closeCalls)
+    }
+
+    @Test
+    fun `json mqtt messages are decoded into text proxy messages`() = runTest {
+        val harness =
+            createHarness(
+                radioConfigRepository =
+                FakeRadioConfigRepository().apply {
+                    setLocalModuleConfigDirect(
+                        LocalModuleConfig(mqtt = ModuleConfig.MQTTConfig(json_enabled = true)),
+                    )
+                },
+            )
+        val jsonPayload = """{"type":"text","from":1,"to":2,"payload":"hello","hop_limit":3,"id":4,"time":5}"""
+
+        val nextMessage = backgroundScope.async { harness.repository.proxyMessageFlow.first() }
+        runCurrent()
+        harness.client.emitMessage(
+            MqttMessage(topic = "msh/2/json/alpha/node", payload = jsonPayload.encodeToByteArray(), retain = true),
+        )
+
+        val proxyMessage = nextMessage.await()
+        assertEquals("msh/2/json/alpha/node", proxyMessage.topic)
+        assertEquals(jsonPayload, proxyMessage.text)
+        assertEquals(true, proxyMessage.retained)
+        assertNull(proxyMessage.data_)
+    }
+
+    @Test
+    fun `protobuf mqtt messages are decoded into binary proxy messages`() = runTest {
+        val harness = createHarness()
+        val payload = byteArrayOf(0x01, 0x23, 0x45)
+
+        val nextMessage = backgroundScope.async { harness.repository.proxyMessageFlow.first() }
+        runCurrent()
+        harness.client.emitMessage(MqttMessage(topic = "msh/2/e/alpha/node", payload = payload, retain = false))
+
+        val proxyMessage = nextMessage.await()
+        assertEquals("msh/2/e/alpha/node", proxyMessage.topic)
+        assertContentEquals(payload, proxyMessage.data_?.toByteArray())
+        assertEquals(false, proxyMessage.retained)
+        assertNull(proxyMessage.text)
+    }
+
+    @Test
+    fun `connect retries after a transient failure and succeeds when the network recovers`() = runTest {
+        val harness = createHarness()
+        harness.client.failConnectWith(MqttException.ConnectionLost(ReasonCode.UNSPECIFIED_ERROR, "offline"))
+
+        val collector = startProxyCollection(harness.repository)
+        runCurrent()
+        assertEquals(1, harness.client.connectCalls.size)
+        assertEquals(0, harness.client.subscribeCalls.size)
+
+        advanceTimeBy(999)
+        runCurrent()
+        assertEquals(1, harness.client.connectCalls.size)
+
+        advanceTimeBy(1)
+        runCurrent()
+        assertEquals(2, harness.client.connectCalls.size)
+        assertEquals(1, harness.client.subscribeCalls.size)
+
+        collector.cancelAndJoin()
+        runCurrent()
+    }
+
+    @Test
+    fun `transport failure wrapped as ConnectionRejected retries instead of stopping the proxy`() = runTest {
+        // The MQTT library wraps ANY connect failure — timeout, TLS, socket EOF — as
+        // ConnectionRejected with UNSPECIFIED_ERROR. Treating those as unrecoverable stopped
+        // the proxy permanently and showed users a bogus "check credentials" dialog.
+        val harness = createHarness()
+        harness.client.failConnectWith(
+            MqttException.ConnectionRejected(ReasonCode.UNSPECIFIED_ERROR, "Connection failed: Connection timed out"),
+        )
+
+        val collector = startProxyCollection(harness.repository)
+        runCurrent()
+        assertEquals(1, harness.client.connectCalls.size)
+
+        advanceTimeBy(1_000)
+        runCurrent()
+        assertEquals(2, harness.client.connectCalls.size)
+        assertEquals(1, harness.client.subscribeCalls.size)
+
+        collector.cancelAndJoin()
+        runCurrent()
+    }
+
+    @Test
+    fun `credential rejection stops the proxy permanently`() = runTest {
+        val harness = createHarness()
+        harness.client.failConnectWith(
+            MqttException.ConnectionRejected(ReasonCode.BAD_USER_NAME_OR_PASSWORD, "Connection refused"),
+        )
+
+        val outcome = backgroundScope.async { safeCatching { harness.repository.proxyMessageFlow.collect {} } }
+        runCurrent()
+        advanceTimeBy(60_000)
+        runCurrent()
+
+        assertEquals(1, harness.client.connectCalls.size)
+        assertIs<MqttException.ConnectionRejected>(outcome.await().exceptionOrNull())
+    }
+
+    @Test
+    fun `only credential and identity reason codes classify as credential rejections`() {
+        val fatal =
+            listOf(
+                ReasonCode.BAD_USER_NAME_OR_PASSWORD,
+                ReasonCode.NOT_AUTHORIZED,
+                ReasonCode.BAD_AUTHENTICATION_METHOD,
+                ReasonCode.CLIENT_IDENTIFIER_NOT_VALID,
+                ReasonCode.BANNED,
+            )
+        val transient =
+            listOf(
+                ReasonCode.UNSPECIFIED_ERROR,
+                ReasonCode.SERVER_UNAVAILABLE,
+                ReasonCode.SERVER_BUSY,
+                ReasonCode.CONNECTION_RATE_EXCEEDED,
+            )
+
+        fatal.forEach { code ->
+            assertTrue(MqttException.ConnectionRejected(code, "x").isCredentialRejection(), "expected fatal: $code")
+        }
+        transient.forEach { code ->
+            assertFalse(
+                MqttException.ConnectionRejected(code, "x").isCredentialRejection(),
+                "expected transient: $code",
+            )
+        }
+    }
+
+    @Test
+    fun `subscription failures trigger reconnect retry`() = runTest {
+        val harness = createHarness()
+        harness.client.failSubscribeWith(MqttException.ConnectionLost(ReasonCode.UNSPECIFIED_ERROR, "suback timeout"))
+
+        val collector = startProxyCollection(harness.repository)
+        runCurrent()
+        assertEquals(1, harness.client.connectCalls.size)
+        assertEquals(1, harness.client.subscribeCalls.size)
+
+        advanceTimeBy(1_000)
+        runCurrent()
+        assertEquals(2, harness.client.connectCalls.size)
+        assertEquals(2, harness.client.subscribeCalls.size)
+
+        collector.cancelAndJoin()
+        runCurrent()
+    }
+
+    @Test
+    fun `connection state flow reflects active client state updates`() = runTest {
+        val harness = createHarness()
+        val collector = startProxyCollection(harness.repository)
+        runCurrent()
+        val disconnectError = MqttException.ConnectionLost(ReasonCode.UNSPECIFIED_ERROR, "link lost")
+
+        assertEquals(ConnectionState.Disconnected.Idle, harness.repository.connectionState.value)
+
+        harness.client.emitState(ConnectionState.Connecting)
+        runCurrent()
+        assertEquals(ConnectionState.Connecting, harness.repository.connectionState.value)
+
+        harness.client.emitState(ConnectionState.Connected)
+        runCurrent()
+        assertEquals(ConnectionState.Connected, harness.repository.connectionState.value)
+
+        harness.client.emitState(ConnectionState.Reconnecting(attempt = 2, lastError = disconnectError))
+        runCurrent()
+        val reconnecting = assertIs<ConnectionState.Reconnecting>(harness.repository.connectionState.value)
+        assertEquals(2, reconnecting.attempt)
+        assertEquals("link lost", reconnecting.lastError?.message)
+
+        harness.client.emitState(ConnectionState.Disconnected(reason = disconnectError))
+        runCurrent()
+        val disconnected = assertIs<ConnectionState.Disconnected>(harness.repository.connectionState.value)
+        assertEquals("link lost", disconnected.reason?.message)
+
+        collector.cancelAndJoin()
+        runCurrent()
+    }
+
+    @Test
+    fun `stale collector teardown closes only its session and preserves replacement state`() = runTest {
+        val firstClient = FakeMqttClientSession()
+        val replacementClient = FakeMqttClientSession()
+        val clients = ArrayDeque(listOf(firstClient, replacementClient))
+        val dispatcher = kotlinx.coroutines.test.StandardTestDispatcher(testScheduler)
+        val repository =
+            MQTTRepositoryImpl(
+                radioConfigRepository = defaultRadioConfigRepository(),
+                nodeRepository = FakeNodeRepository().apply { setMyId("!12345678") },
+                buildConfigProvider = buildConfigProvider,
+                dispatchers = CoroutineDispatchers(io = dispatcher, main = dispatcher, default = dispatcher),
+                mqttClientFactory = { clients.removeFirst() },
+            )
+
+        val firstCollector = startProxyCollection(repository)
+        runCurrent()
+        firstClient.emitState(ConnectionState.Connected)
+        runCurrent()
+        assertEquals(ConnectionState.Connected, repository.connectionState.value)
+
+        val replacementCollector = startProxyCollection(repository)
+        runCurrent()
+        replacementClient.emitState(ConnectionState.Connecting)
+        runCurrent()
+
+        assertEquals(1, firstClient.closeCalls, "installing a replacement must close the displaced session")
+        assertEquals(0, replacementClient.closeCalls)
+        assertEquals(ConnectionState.Connecting, repository.connectionState.value)
+
+        firstClient.emitState(ConnectionState.Connected)
+        firstCollector.cancelAndJoin()
+        runCurrent()
+
+        assertEquals(1, firstClient.closeCalls, "stale awaitClose must not close its client twice")
+        assertEquals(0, replacementClient.closeCalls, "stale awaitClose must not close the replacement")
+        assertEquals(ConnectionState.Connecting, repository.connectionState.value, "stale state must not win")
+
+        replacementClient.emitState(ConnectionState.Connected)
+        runCurrent()
+        assertEquals(ConnectionState.Connected, repository.connectionState.value)
+
+        replacementCollector.cancelAndJoin()
+        runCurrent()
+        assertEquals(1, replacementClient.closeCalls)
+        assertEquals(ConnectionState.Disconnected.Idle, repository.connectionState.value)
+    }
+
+    @Test
+    fun `replacing a session cancels its delayed connection retry`() = runTest {
+        val firstClient = FakeMqttClientSession()
+        val replacementClient = FakeMqttClientSession()
+        firstClient.failConnectWith(MqttException.ConnectionLost(ReasonCode.UNSPECIFIED_ERROR, "offline"))
+        val clients = ArrayDeque(listOf(firstClient, replacementClient))
+        val dispatcher = kotlinx.coroutines.test.StandardTestDispatcher(testScheduler)
+        val repository =
+            MQTTRepositoryImpl(
+                radioConfigRepository = defaultRadioConfigRepository(),
+                nodeRepository = FakeNodeRepository().apply { setMyId("!12345678") },
+                buildConfigProvider = buildConfigProvider,
+                dispatchers = CoroutineDispatchers(io = dispatcher, main = dispatcher, default = dispatcher),
+                mqttClientFactory = { clients.removeFirst() },
+            )
+
+        val firstCollector = startProxyCollection(repository)
+        runCurrent()
+        assertEquals(1, firstClient.connectCalls.size)
+
+        val replacementCollector = startProxyCollection(repository)
+        runCurrent()
+        assertEquals(1, firstClient.closeCalls)
+        assertEquals(1, replacementClient.connectCalls.size)
+
+        advanceTimeBy(1_000)
+        runCurrent()
+        assertEquals(1, firstClient.connectCalls.size, "retired session must not reconnect after its retry delay")
+
+        firstCollector.cancelAndJoin()
+        replacementCollector.cancelAndJoin()
+        runCurrent()
+    }
+
+    @Test
+    fun `queued publish resolves the active session after waiting for a permit`() = runTest {
+        val firstClient = FakeMqttClientSession()
+        val replacementClient = FakeMqttClientSession()
+        val clients = ArrayDeque(listOf(firstClient, replacementClient))
+        val dispatcher = kotlinx.coroutines.test.StandardTestDispatcher(testScheduler)
+        val repository =
+            MQTTRepositoryImpl(
+                radioConfigRepository = defaultRadioConfigRepository(),
+                nodeRepository = FakeNodeRepository().apply { setMyId("!12345678") },
+                buildConfigProvider = buildConfigProvider,
+                dispatchers = CoroutineDispatchers(io = dispatcher, main = dispatcher, default = dispatcher),
+                mqttClientFactory = { clients.removeFirst() },
+            )
+        val publishGate = CompletableDeferred<Unit>()
+        firstClient.blockPublishesUntil(publishGate)
+        val firstCollector = startProxyCollection(repository)
+        runCurrent()
+
+        repeat(20) { index -> repository.publish("busy/$index", byteArrayOf(index.toByte()), retained = false) }
+        runCurrent()
+        assertEquals(20, firstClient.publishStarted.size)
+
+        repository.publish("queued/after-replacement", byteArrayOf(42), retained = false)
+        runCurrent()
+        assertEquals(20, firstClient.publishStarted.size, "the target publish must still be waiting for a permit")
+
+        val replacementCollector = startProxyCollection(repository)
+        runCurrent()
+        publishGate.complete(Unit)
+        runCurrent()
+
+        assertFalse(firstClient.publishedMessages.any { it.topic == "queued/after-replacement" })
+        assertTrue(replacementClient.publishedMessages.any { it.topic == "queued/after-replacement" })
+
+        firstCollector.cancelAndJoin()
+        replacementCollector.cancelAndJoin()
+        runCurrent()
+    }
+
+    // region MqttJsonPayload — keep the existing JSON contract tests.
 
     @Test
     fun `test json payload parsing`() {
@@ -71,5 +649,191 @@ class MQTTRepositoryImplTest {
         assertTrue(jsonStr.contains("\"type\":\"text\""))
         assertTrue(jsonStr.contains("\"from\":12345678"))
         assertTrue(jsonStr.contains("\"payload\":\"Hello World\""))
+    }
+
+    // endregion
+
+    // region isUndeliverableDownlink — Tier 1 drop filter for MQTT client-proxy downlink packets.
+
+    private fun envelopeBytes(
+        channelId: String = "LongFast",
+        gatewayId: String = "!aabbccdd",
+        packet: MeshPacket? = MeshPacket(),
+    ): ByteArray =
+        ServiceEnvelope.ADAPTER.encode(ServiceEnvelope(packet = packet, channel_id = channelId, gateway_id = gatewayId))
+
+    @Test
+    fun `payload-less packet is undeliverable`() {
+        // The observed LongFast flood: a packet with neither decoded nor encrypted set.
+        val bytes = envelopeBytes(packet = MeshPacket(from = 1, to = 2))
+        assertTrue(isUndeliverableDownlink(bytes, myId = "!12345678"))
+    }
+
+    @Test
+    fun `decoded packet is deliverable`() {
+        val bytes = envelopeBytes(packet = MeshPacket(decoded = Data()))
+        assertFalse(isUndeliverableDownlink(bytes, myId = "!12345678"))
+    }
+
+    @Test
+    fun `encrypted packet is deliverable`() {
+        val bytes = envelopeBytes(packet = MeshPacket(encrypted = byteArrayOf(1, 2, 3).toByteString()))
+        assertFalse(isUndeliverableDownlink(bytes, myId = "!12345678"))
+    }
+
+    @Test
+    fun `PKI payload-less packet is deliverable - guard`() {
+        val bytes = envelopeBytes(channelId = "PKI", packet = MeshPacket(from = 1))
+        assertFalse(isUndeliverableDownlink(bytes, myId = "!12345678"))
+    }
+
+    @Test
+    fun `own echo payload-less packet is deliverable - guard`() {
+        val bytes = envelopeBytes(gatewayId = "!12345678", packet = MeshPacket(from = 1))
+        assertFalse(isUndeliverableDownlink(bytes, myId = "!12345678"))
+    }
+
+    @Test
+    fun `a different gateway's payload-less packet is undeliverable`() {
+        val bytes = envelopeBytes(gatewayId = "!deadbeef", packet = MeshPacket(from = 1))
+        assertTrue(isUndeliverableDownlink(bytes, myId = "!12345678"))
+    }
+
+    @Test
+    fun `null myId does not suppress dropping`() {
+        val bytes = envelopeBytes(gatewayId = "!deadbeef", packet = MeshPacket(from = 1))
+        assertTrue(isUndeliverableDownlink(bytes, myId = null))
+    }
+
+    @Test
+    fun `packet-less envelope is deliverable - fail open`() {
+        val bytes = envelopeBytes(packet = null)
+        assertFalse(isUndeliverableDownlink(bytes, myId = "!12345678"))
+    }
+
+    @Test
+    fun `garbage bytes are deliverable - fail open`() {
+        // Non-protobuf bytes must never be dropped.
+        val bytes = byteArrayOf(0xFF.toByte(), 0xFF.toByte(), 0xFF.toByte(), 0x42)
+        assertFalse(isUndeliverableDownlink(bytes, myId = "!12345678"))
+    }
+
+    @Test
+    fun `payload-less downlink stubs are dropped before forwarding`() = runTest {
+        val harness = createHarness()
+        val stub = envelopeBytes(packet = MeshPacket(from = 1, to = 2)) // no payload → dropped
+        val real = envelopeBytes(packet = MeshPacket(decoded = Data())) // has payload → forwarded
+
+        val nextMessage = backgroundScope.async { harness.repository.proxyMessageFlow.first() }
+        runCurrent()
+        harness.client.emitMessage(MqttMessage(topic = "msh/2/e/alpha/node", payload = stub, retain = false))
+        harness.client.emitMessage(MqttMessage(topic = "msh/2/e/alpha/node", payload = real, retain = false))
+
+        // first() returns the first *forwarded* message; the stub was dropped, so it must be `real`.
+        val proxyMessage = nextMessage.await()
+        assertContentEquals(real, proxyMessage.data_?.toByteArray())
+    }
+
+    // endregion
+
+    private fun TestScope.createHarness(
+        radioConfigRepository: FakeRadioConfigRepository = defaultRadioConfigRepository(),
+        nodeRepository: FakeNodeRepository = FakeNodeRepository().apply { setMyId("!12345678") },
+        client: FakeMqttClientSession = FakeMqttClientSession(),
+    ): RepositoryHarness {
+        val dispatcher = kotlinx.coroutines.test.StandardTestDispatcher(testScheduler)
+        val setups = mutableListOf<MqttClientSetup>()
+        val repository =
+            MQTTRepositoryImpl(
+                radioConfigRepository = radioConfigRepository,
+                nodeRepository = nodeRepository,
+                buildConfigProvider = buildConfigProvider,
+                dispatchers = CoroutineDispatchers(io = dispatcher, main = dispatcher, default = dispatcher),
+                mqttClientFactory = { setup ->
+                    setups += setup
+                    client
+                },
+            )
+        return RepositoryHarness(repository = repository, client = client, setups = setups)
+    }
+
+    private fun TestScope.startProxyCollection(repository: MQTTRepositoryImpl): Job =
+        backgroundScope.launch { repository.proxyMessageFlow.collect {} }
+
+    private fun defaultRadioConfigRepository(): FakeRadioConfigRepository = FakeRadioConfigRepository().apply {
+        setChannelSet(
+            ChannelSet(
+                settings =
+                listOf(
+                    ChannelSettings(
+                        name = "alpha",
+                        downlink_enabled = true,
+                        psk = byteArrayOf(1).toByteString(),
+                    ),
+                ),
+            ),
+        )
+    }
+
+    private data class RepositoryHarness(
+        val repository: MQTTRepositoryImpl,
+        val client: FakeMqttClientSession,
+        val setups: List<MqttClientSetup>,
+    )
+
+    private class FakeMqttClientSession : MqttClientSession {
+        private val mutableMessages = MutableSharedFlow<MqttMessage>(extraBufferCapacity = 8)
+        override val messages: Flow<MqttMessage> = mutableMessages
+        override val connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected.Idle)
+        val connectCalls = mutableListOf<MqttEndpoint>()
+        val subscribeCalls = mutableListOf<List<Subscription>>()
+        val publishStarted = mutableListOf<MqttMessage>()
+        val publishedMessages = mutableListOf<MqttMessage>()
+        var closeCalls = 0
+            private set
+
+        private val connectFailures = ArrayDeque<Throwable>()
+        private val subscribeFailures = ArrayDeque<Throwable>()
+        private var publishGate: CompletableDeferred<Unit>? = null
+
+        override suspend fun connect(endpoint: MqttEndpoint) {
+            connectCalls += endpoint
+            if (connectFailures.isNotEmpty()) throw connectFailures.removeFirst()
+        }
+
+        override suspend fun subscribe(subscriptions: List<Subscription>) {
+            subscribeCalls += subscriptions
+            if (subscribeFailures.isNotEmpty()) throw subscribeFailures.removeFirst()
+        }
+
+        override suspend fun publish(message: MqttMessage) {
+            publishStarted += message
+            publishGate?.await()
+            publishedMessages += message
+        }
+
+        override suspend fun close() {
+            closeCalls += 1
+        }
+
+        fun failConnectWith(throwable: Throwable) {
+            connectFailures.addLast(throwable)
+        }
+
+        fun failSubscribeWith(throwable: Throwable) {
+            subscribeFailures.addLast(throwable)
+        }
+
+        fun blockPublishesUntil(gate: CompletableDeferred<Unit>) {
+            publishGate = gate
+        }
+
+        suspend fun emitMessage(message: MqttMessage) {
+            mutableMessages.emit(message)
+        }
+
+        fun emitState(state: ConnectionState) {
+            connectionState.value = state
+        }
     }
 }

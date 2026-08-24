@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,9 +29,9 @@ import org.meshtastic.core.resources.ic_wifi
 val TopLevelDestination.icon: DrawableResource
     get() =
         when (this) {
-            TopLevelDestination.Conversations -> Res.drawable.ic_forum
+            TopLevelDestination.Messages -> Res.drawable.ic_forum
             TopLevelDestination.Nodes -> Res.drawable.ic_nodes
             TopLevelDestination.Map -> Res.drawable.ic_map
             TopLevelDestination.Settings -> Res.drawable.ic_settings
-            TopLevelDestination.Connections -> Res.drawable.ic_wifi
+            TopLevelDestination.Connect -> Res.drawable.ic_wifi
         }

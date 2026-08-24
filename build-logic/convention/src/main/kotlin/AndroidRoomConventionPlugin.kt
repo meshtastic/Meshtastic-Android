@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,9 +50,10 @@ class AndroidRoomConventionPlugin : Plugin<Project> {
                     sourceSets.getByName("commonMain").dependencies { implementation(roomRuntime) }
                 }
                 dependencies { add("kspAndroid", roomCompiler) }
+                dependencies { add("kspJvm", roomCompiler) }
             }
 
-            pluginManager.withPlugin("org.jetbrains.kotlin.android") {
+            pluginManager.withPlugin("com.android.library") {
                 val hasAndroidTest = projectDir.resolve("src/androidTest").exists()
                 dependencies {
                     "implementation"(roomRuntime)

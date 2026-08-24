@@ -20,10 +20,8 @@ plugins {
 }
 
 kotlin {
-    @Suppress("UnstableApiUsage")
     android {
         namespace = "org.meshtastic.feature.wifiprovision"
-        androidResources.enable = false
         withHostTest {}
     }
 
@@ -31,11 +29,13 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.core.ble)
             implementation(projects.core.common)
+            implementation(projects.core.di)
+            // For Any?.anonymize(), used to keep BLE addresses out of remote logs.
+            implementation(projects.core.model)
             implementation(projects.core.navigation)
             implementation(projects.core.resources)
             implementation(projects.core.ui)
 
-            implementation(libs.jetbrains.navigation3.ui)
             implementation(libs.kotlinx.serialization.json)
         }
     }

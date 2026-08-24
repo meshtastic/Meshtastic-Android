@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,5 +26,5 @@ interface AdminPacketHandler {
      * @param packet The received mesh packet.
      * @param myNodeNum The local node number.
      */
-    fun handleAdminMessage(packet: MeshPacket, myNodeNum: Int)
+    fun handleAdminMessage(packet: MeshPacket, myNodeNum: Int, session: RadioSessionContext)
 }

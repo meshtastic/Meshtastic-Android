@@ -1,0 +1,20 @@
+# Recurring defect class A — see "Presence vs sentinel zero" in .skills/code-review/SKILL.md.
+#
+# 0 dBm is the STRONGEST value on the RSSI scale, so defaulting a missing reading to 0 renders an unknown signal as an
+# excellent one. Keep the value nullable end-to-end and let `MetricFormatter.rssi(null)` render an em dash.
+#
+# Scope: this rule targets DEFAULTING a live reading (`?: 0`), not comparing a stored one. A `rssi == 0` test against
+# persisted data can be legitimate migration handling — `Reaction.kt` reads pre-schema-51 rows that stored 0 where the
+# column is now nullable, so there a 0 really is indistinguishable from "no reading". Broadening this rule to `== 0`
+# would flag that documented exception and nothing else, so it deliberately stops at the `?: 0` form.
+id: no-rssi-zero-default
+language: kotlin
+severity: error
+message: "0 dBm is the strongest RSSI, not \"unknown\" — keep the value nullable."
+rule:
+  any:
+    - pattern: "$X ?: 0"
+    - pattern: "($X ?: 0) != 0"
+constraints:
+  X:
+    regex: "(?i)rssi$"

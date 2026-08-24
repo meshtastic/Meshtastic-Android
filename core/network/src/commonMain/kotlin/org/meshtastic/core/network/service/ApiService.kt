@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,17 +19,76 @@ package org.meshtastic.core.network.service
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.isSuccess
+import kotlinx.serialization.json.Json
 import org.koin.core.annotation.Single
+import org.meshtastic.core.model.BootloaderOtaQuirksResponse
+import org.meshtastic.core.model.EventFirmwareResponse
+import org.meshtastic.core.model.FirmwareReleaseManifest
+import org.meshtastic.core.model.MaintenanceUf2Manifest
 import org.meshtastic.core.model.NetworkDeviceHardware
+import org.meshtastic.core.model.NetworkDeviceLinksResponse
+import org.meshtastic.core.model.NetworkFirmwareNightly
 import org.meshtastic.core.model.NetworkFirmwareReleases
+
+/**
+ * Pointer to the nightly preview build published by CI to meshtastic.github.io. Served from GitHub Pages raw content
+ * (not api.meshtastic.org) as `text/plain`, so it is parsed manually rather than via content negotiation.
+ */
+private const val NIGHTLY_INDEX_URL =
+    "https://raw.githubusercontent.com/meshtastic/meshtastic.github.io/master/firmware-nightly/index.json"
+
+private val firmwareJson = Json {
+    isLenient = true
+    ignoreUnknownKeys = true
+    coerceInputValues = true
+}
+
+/**
+ * Decodes a GitHub release manifest independently of Ktor content negotiation. GitHub release assets commonly use
+ * `application/octet-stream` even when their payload is JSON.
+ */
+internal fun decodeFirmwareReleaseManifest(body: String): FirmwareReleaseManifest = firmwareJson.decodeFromString(body)
 
 /** Client for the Meshtastic public API (device hardware catalog and firmware releases). */
 interface ApiService {
     /** Fetches the device hardware catalog from the Meshtastic API. */
     suspend fun getDeviceHardware(): List<NetworkDeviceHardware>
 
+    /** Fetches the resolved device-links catalog (msh.to purchase links) from the Meshtastic API. */
+    suspend fun getDeviceLinks(): NetworkDeviceLinksResponse
+
     /** Fetches the list of available firmware releases from the Meshtastic API. */
     suspend fun getFirmwareReleases(): NetworkFirmwareReleases
+
+    /** Fetches the target manifest referenced by a firmware release's `zip_url`. */
+    suspend fun getFirmwareReleaseManifest(manifestUrl: String): FirmwareReleaseManifest
+
+    /**
+     * Fetches the nightly preview build pointer from meshtastic.github.io. Returns null when no nightly is currently
+     * published (HTTP 404); throws on transport or server errors so callers can distinguish "gone" from "unreachable".
+     */
+    suspend fun getNightlyFirmware(): NetworkFirmwareNightly?
+
+    /** Fetches event-firmware display metadata (editions, welcome messages, links) from the Meshtastic API. */
+    suspend fun getEventFirmware(): EventFirmwareResponse
+
+    /**
+     * Fetches the nRF52 bootloader/OTA quirk catalog (advisory bootloader-upgrade flags and the SoftDevice-variant
+     * gating table) from the Meshtastic API. Decodes directly to the same model the bundled asset seed uses — the
+     * server serves this file verbatim, so there is nothing to transform.
+     */
+    suspend fun getBootloaderOtaQuirks(): BootloaderOtaQuirksResponse
+
+    /**
+     * Fetches the pinned maintenance-UF2 manifest (factory-erase and OTAFIX bootloader self-update images) from the
+     * Meshtastic API. Decodes directly to the same model the bundled asset seed uses — the server serves this file
+     * verbatim, so there is nothing to transform. Each image's own `sha256` is still checked against the downloaded
+     * bytes before any write; that is unaffected by how this manifest itself is fetched.
+     */
+    suspend fun getMaintenanceUf2Manifest(): MaintenanceUf2Manifest
 }
 
 /**
@@ -44,5 +103,27 @@ interface ApiService {
 class ApiServiceImpl(private val client: HttpClient) : ApiService {
     override suspend fun getDeviceHardware(): List<NetworkDeviceHardware> = client.get("resource/deviceHardware").body()
 
+    override suspend fun getDeviceLinks(): NetworkDeviceLinksResponse = client.get("resource/deviceLinks").body()
+
     override suspend fun getFirmwareReleases(): NetworkFirmwareReleases = client.get("github/firmware/list").body()
+
+    override suspend fun getFirmwareReleaseManifest(manifestUrl: String): FirmwareReleaseManifest =
+        decodeFirmwareReleaseManifest(client.get(manifestUrl).bodyAsText())
+
+    override suspend fun getNightlyFirmware(): NetworkFirmwareNightly? {
+        val response = client.get(NIGHTLY_INDEX_URL)
+        return when {
+            response.status == HttpStatusCode.NotFound -> null
+            response.status.isSuccess() -> firmwareJson.decodeFromString<NetworkFirmwareNightly>(response.bodyAsText())
+            else -> error("Unexpected HTTP ${response.status} fetching nightly firmware index")
+        }
+    }
+
+    override suspend fun getEventFirmware(): EventFirmwareResponse = client.get("resource/eventFirmware").body()
+
+    override suspend fun getBootloaderOtaQuirks(): BootloaderOtaQuirksResponse =
+        client.get("resource/bootloaderOtaQuirks").body()
+
+    override suspend fun getMaintenanceUf2Manifest(): MaintenanceUf2Manifest =
+        client.get("resource/maintenanceUf2").body()
 }

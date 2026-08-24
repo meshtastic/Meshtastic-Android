@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianLayerRangeProvider
-import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
+import com.patrykandpatrick.vico.compose.cartesian.data.lineModel
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import org.jetbrains.compose.resources.StringResource
@@ -107,7 +107,7 @@ private fun PaxMetricsChart(
 
         LaunchedEffect(totalSeries, bleSeries, wifiSeries) {
             modelProducer.runTransaction {
-                lineSeries {
+                lineModel {
                     series(x = bleSeries.map { it.first }, y = bleSeries.map { it.second })
                     series(x = wifiSeries.map { it.first }, y = wifiSeries.map { it.second })
                     series(x = totalSeries.map { it.first }, y = totalSeries.map { it.second })
@@ -231,7 +231,11 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel, onNavigateUp: () -> Uni
                     state = lazyListState,
                     contentPadding = PaddingValues(horizontal = 16.dp),
                 ) {
-                    itemsIndexed(paxMetrics) { _, (log, pax) ->
+                    itemsIndexed(
+                        paxMetrics,
+                        key = { _, (log, _) -> log.uuid },
+                        contentType = { _, _ -> "pax_metrics" },
+                    ) { _, (log, pax) ->
                         PaxMetricsItem(
                             log = log,
                             pax = pax,

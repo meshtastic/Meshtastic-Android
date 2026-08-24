@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,13 +26,20 @@ import kotlinx.coroutines.flow.mapLatest
 import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowSeconds
+import org.meshtastic.core.model.ContactKey
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.TracerouteOverlay
+import org.meshtastic.core.model.geofence.activeWaypointPackets
+import org.meshtastic.core.model.isFromLocal
+import org.meshtastic.core.model.util.DistanceUnit
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.NotificationPrefs
 import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.any
 import org.meshtastic.core.resources.eight_hours
@@ -41,6 +48,8 @@ import org.meshtastic.core.resources.one_hour
 import org.meshtastic.core.resources.two_days
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
+import org.meshtastic.proto.ChannelSet
+import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.Waypoint
 
@@ -56,11 +65,26 @@ open class BaseMapViewModel(
     protected val nodeRepository: NodeRepository,
     private val packetRepository: PacketRepository,
     private val radioController: RadioController,
+    private val radioConfigRepository: RadioConfigRepository,
+    private val notificationPrefs: NotificationPrefs,
 ) : ViewModel() {
 
     val myNodeInfo = nodeRepository.myNodeInfo
 
+    /**
+     * OS locale display units (metric/imperial) for distance/altitude/speed formatting across map surfaces. StateFlow
+     * kept for the existing collectAsState call sites; value is a one-time snapshot at construction and does not react
+     * to a mid-session locale change (ViewModel survives config changes).
+     */
+    val displayUnits: StateFlow<DisplayUnits> = MutableStateFlow(DistanceUnit.getFromLocale()).asStateFlow()
+
     val ourNodeInfo = nodeRepository.ourNodeInfo
+
+    /**
+     * Connected radio's channel set (primary-channel frequency + LoRa config); used to prefill a Site Planner estimate.
+     */
+    val channelSet: StateFlow<ChannelSet?> =
+        radioConfigRepository.channelSetFlow.stateInWhileSubscribed(initialValue = null)
 
     val myNodeNum
         get() = myNodeInfo.value?.myNodeNum
@@ -86,16 +110,19 @@ open class BaseMapViewModel(
     val waypoints: StateFlow<Map<Int, DataPacket>> =
         packetRepository
             .getWaypoints()
-            .mapLatest { list ->
-                list
-                    .filter { it.waypoint != null }
-                    .associateBy { packet -> packet.waypoint!!.id }
-                    .filterValues {
-                        val expire = it.waypoint?.expire ?: 0
-                        expire == 0 || expire.toLong() > nowSeconds
-                    }
-            }
+            // Shared with GeofenceMonitor via activeWaypointPackets — dedup by waypoint id + drop expired,
+            // so the map and the geofence engine can't drift (getWaypoints is a row-per-transmission firehose).
+            .mapLatest { list -> list.activeWaypointPackets(nowSeconds) }
             .stateInWhileSubscribed(initialValue = emptyMap())
+
+    /** Waypoint ids of foreign geofences the user opted in to crossing alerts for (see [NotificationPrefs]). */
+    val geofenceAlertOptIns: StateFlow<Set<Int>> = notificationPrefs.geofenceAlertOptIns
+
+    fun setGeofenceAlertOptIn(waypointId: Int, enabled: Boolean) =
+        notificationPrefs.setGeofenceAlertOptIn(waypointId, enabled)
+
+    /** True if the waypoint with [id] was created by this device (vs. received from another node over the mesh). */
+    fun isMyWaypoint(id: Int): Boolean = waypoints.value[id]?.isFromLocal(myNodeNum) == true
 
     private val showOnlyFavorites = MutableStateFlow(mapPrefs.showOnlyFavorites.value)
     val showOnlyFavoritesOnMap: StateFlow<Boolean> = showOnlyFavorites.asStateFlow()
@@ -142,19 +169,17 @@ open class BaseMapViewModel(
     }
 
     open fun getUser(userId: String?) =
-        nodeRepository.getUser(userId ?: org.meshtastic.core.model.DataPacket.ID_BROADCAST)
+        nodeRepository.getUser(userId ?: org.meshtastic.core.model.NodeAddress.ID_BROADCAST)
 
     fun getNodeOrFallback(nodeNum: Int): Node = nodeRepository.nodeDBbyNum.value[nodeNum] ?: Node(num = nodeNum)
 
     fun deleteWaypoint(id: Int) =
         safeLaunch(context = ioDispatcher, tag = "deleteWaypoint") { packetRepository.deleteWaypoint(id) }
 
-    fun sendWaypoint(wpt: Waypoint, contactKey: String = "0${DataPacket.ID_BROADCAST}") {
+    fun sendWaypoint(wpt: Waypoint, contactKey: String = "0${NodeAddress.ID_BROADCAST}") {
         // contactKey: unique contact key filter (channel)+(nodeId)
-        val channel = contactKey[0].digitToIntOrNull()
-        val dest = if (channel != null) contactKey.substring(1) else contactKey
-
-        val p = DataPacket(dest, channel ?: 0, wpt)
+        val parsedKey = ContactKey(contactKey)
+        val p = DataPacket(parsedKey.addressString, parsedKey.channel, wpt)
         if (wpt.id != 0) sendDataPacket(p)
     }
 
@@ -162,7 +187,7 @@ open class BaseMapViewModel(
         safeLaunch(context = ioDispatcher, tag = "sendDataPacket") { radioController.sendMessage(p) }
     }
 
-    fun generatePacketId(): Int = radioController.getPacketId()
+    fun generatePacketId(): Int = radioController.generatePacketId()
 
     data class MapFilterState(
         val onlyFavorites: Boolean,

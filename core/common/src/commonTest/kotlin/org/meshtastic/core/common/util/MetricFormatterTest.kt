@@ -74,6 +74,18 @@ class MetricFormatterTest {
     @Test
     fun snr() {
         assertEquals("5.5 dB", MetricFormatter.snr(5.5f))
+        assertEquals("-12.5 dB", MetricFormatter.snr(-12.5f))
+    }
+
+    @Test
+    fun snrAbsentIsUnknown() {
+        assertEquals("—", MetricFormatter.snr(null))
+    }
+
+    @Test
+    fun snrZeroIsARealReading() {
+        // Must not render as unknown: 0 dB is a signal at the noise floor, not a missing measurement.
+        assertEquals("0.0 dB", MetricFormatter.snr(0f))
     }
 
     @Test
@@ -117,7 +129,57 @@ class MetricFormatterTest {
     }
 
     @Test
+    fun rssiAbsentIsNotRenderedAsZero() {
+        assertEquals("—", MetricFormatter.rssi(null))
+    }
+
+    @Test
     fun snrNegative() {
         assertEquals("-5.5 dB", MetricFormatter.snr(-5.5f))
+    }
+
+    @Test
+    fun windSpeed() {
+        assertEquals("12.3 m/s", MetricFormatter.windSpeed(12.34f, isImperial = false))
+    }
+
+    @Test
+    fun windSpeedZero() {
+        assertEquals("0.0 m/s", MetricFormatter.windSpeed(0.0f, isImperial = false))
+    }
+
+    @Test
+    fun windSpeedImperial() {
+        assertEquals("27.6 mph", MetricFormatter.windSpeed(12.34f, isImperial = true))
+    }
+
+    @Test
+    fun rainfall() {
+        assertEquals("2.5 mm", MetricFormatter.rainfall(2.54f, isImperial = false))
+    }
+
+    @Test
+    fun rainfallZero() {
+        assertEquals("0.0 mm", MetricFormatter.rainfall(0.0f, isImperial = false))
+    }
+
+    @Test
+    fun rainfallImperial() {
+        assertEquals("0.10 in", MetricFormatter.rainfall(2.54f, isImperial = true, decimalPlaces = 2))
+    }
+
+    @Test
+    fun weight() {
+        assertEquals("1.50 kg", MetricFormatter.weight(1.5f, isImperial = false))
+    }
+
+    @Test
+    fun weightImperial() {
+        assertEquals("2.20 lb", MetricFormatter.weight(1.0f, isImperial = true))
+    }
+
+    @Test
+    fun weightZero() {
+        assertEquals("0.00 kg", MetricFormatter.weight(0.0f, isImperial = false))
     }
 }

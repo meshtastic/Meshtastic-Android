@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:Suppress("MatchingDeclarationName")
+
 package org.meshtastic.buildlogic
 
 import org.gradle.api.DefaultTask
@@ -95,10 +97,12 @@ internal enum class PluginType(val id: String, val ref: String, val style: Strin
 }
 
 /** Optimized and Isolated Projects compatible graph configuration. */
-internal fun Project.configureGraphTasks() {
+fun Project.configureGraphTasks() {
     if (!buildFile.exists()) return
 
-    val supportedConfigurations =
+    // Android uses bare "api"/"implementation"; KMP uses source-set-prefixed variants
+    // ("commonMainApi", "androidMainImplementation", etc.) — match both by suffix.
+    val explicitConfigs =
         providers
             .gradleProperty("graph.supportedConfigurations")
             .map { it.split(",").toSet() }
@@ -115,10 +119,16 @@ internal fun Project.configureGraphTasks() {
                     val deps = mutableMapOf<String, Set<Pair<String, String>>>()
                     val projectDeps = mutableSetOf<Pair<String, String>>()
                     configurations
-                        .filter { it.name in supportedConfigurations.get() }
+                        .filter { config ->
+                            config.name in explicitConfigs.get() ||
+                                config.name.endsWith("Api") ||
+                                config.name.endsWith("Implementation")
+                        }
                         .forEach { config ->
                             config.dependencies.withType<ProjectDependency>().forEach { dep ->
-                                projectDeps.add(config.name to dep.path)
+                                // Normalise to "api" or "implementation" for edge-type rendering.
+                                val isApi = config.name == "api" || config.name.endsWith("Api")
+                                projectDeps.add((if (isApi) "api" else "implementation") to dep.path)
                             }
                         }
                     deps[targetProjectPath] = projectDeps
@@ -134,9 +144,13 @@ internal fun Project.configureGraphTasks() {
                             pluginManager.hasPlugin("meshtastic.android.application") ||
                                 pluginManager.hasPlugin("meshtastic.android.application.compose") ->
                                 PluginType.AndroidApplication
-                            targetProjectPath.startsWith(":desktop") -> PluginType.ComposeDesktopApplication
+
+                            targetProjectPath.startsWith(":desktopApp") -> PluginType.ComposeDesktopApplication
+
                             pluginManager.hasPlugin("meshtastic.kmp.feature") -> PluginType.KmpFeature
+
                             targetProjectPath.startsWith(":feature:") -> PluginType.AndroidFeature
+
                             else -> PluginType.entries.firstOrNull { pluginManager.hasPlugin(it.id) } ?: Unknown
                         }
                     projectPlugins[targetProjectPath] = type

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,8 @@ package org.meshtastic.core.testing
 
 import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.common.database.DatabaseManager
+import org.meshtastic.core.database.DatabaseConstants.MAX_CACHE_LIMIT
+import org.meshtastic.core.database.DatabaseConstants.MIN_CACHE_LIMIT
 
 /** A test double for [DatabaseManager] that provides a simple implementation and tracks calls. */
 class FakeDatabaseManager :
@@ -27,12 +29,18 @@ class FakeDatabaseManager :
     override val cacheLimit: StateFlow<Int> = _cacheLimit
 
     var lastSwitchedAddress: String? = null
+    var lastAssociatedAddress: String? = null
+    var lastAssociatedNode: Int? = null
+    var lastAssociatedDeviceId: String? = null
     val existingDatabases = mutableSetOf<String>()
 
     init {
         registerResetAction {
             _cacheLimit.value = DEFAULT_CACHE_LIMIT
             lastSwitchedAddress = null
+            lastAssociatedAddress = null
+            lastAssociatedNode = null
+            lastAssociatedDeviceId = null
             existingDatabases.clear()
         }
     }
@@ -40,14 +48,28 @@ class FakeDatabaseManager :
     override fun getCurrentCacheLimit(): Int = _cacheLimit.value
 
     override fun setCacheLimit(limit: Int) {
-        _cacheLimit.value = limit
+        _cacheLimit.value = limit.coerceIn(MIN_CACHE_LIMIT, MAX_CACHE_LIMIT)
     }
 
     override suspend fun switchActiveDatabase(address: String?) {
         lastSwitchedAddress = address
     }
 
+    override suspend fun associateDevice(
+        address: String,
+        nodeNum: Int,
+        deviceId: String?,
+        isSessionActive: () -> Boolean,
+    ) {
+        if (lastSwitchedAddress != address || !isSessionActive()) return
+        lastAssociatedAddress = address
+        lastAssociatedNode = nodeNum
+        lastAssociatedDeviceId = deviceId
+    }
+
     override fun hasDatabaseFor(address: String?): Boolean = address != null && existingDatabases.contains(address)
+
+    override suspend fun cachedDeviceDbCount(): Int = existingDatabases.size
 
     companion object {
         private const val DEFAULT_CACHE_LIMIT = 100

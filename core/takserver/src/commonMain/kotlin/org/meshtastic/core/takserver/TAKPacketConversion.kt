@@ -31,14 +31,27 @@ import kotlin.random.Random
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 
+/**
+ * Legacy v1 CoT <-> TAKPacket conversion for firmware <= 2.7.x.
+ *
+ * Wire format: bare protobuf-encoded [TAKPacket] on `ATAK_PLUGIN` port 72, no zstd compression (the proto has an
+ * `is_compressed` flag but the firmware doesn't act on it). Supports only PLI and GeoChat payloads — shape, marker,
+ * route, casevac, emergency, and task CoT events return null and are dropped.
+ *
+ * For the SDK-backed path that handles all payload types with zstd dictionary compression on `ATAK_PLUGIN_V2` port 78,
+ * see [TAKPacketV2Conversion].
+ *
+ * [TAKMeshIntegration] picks between the two paths based on `Capabilities.supportsTakV2` (firmware >= 2.8.0).
+ */
 object TAKPacketConversion {
 
     fun CoTMessage.toTAKPacket(): TAKPacket? {
         val group =
             this.group?.let {
                 Group(
-                    role = MemberRole.fromValue(getMemberRoleValue(it.role)) ?: MemberRole.Unspecifed,
-                    team = Team.fromValue(getTeamValue(it.name)) ?: Team.Unspecifed_Color,
+                    role =
+                    MemberRole.fromValue(TakConversionHelpers.getMemberRoleValue(it.role)) ?: MemberRole.Unspecifed,
+                    team = Team.fromValue(TakConversionHelpers.getTeamValue(it.name)) ?: Team.Unspecifed_Color,
                 )
             }
 
@@ -120,7 +133,7 @@ object TAKPacketConversion {
         val timeNow = Clock.System.now()
         val staleTime = timeNow + DEFAULT_TAK_STALE_MINUTES.minutes
 
-        val (senderUid, messageId) = parseDeviceCallsign(rawDeviceCallsign)
+        val (senderUid, messageId) = TakConversionHelpers.parseDeviceCallsign(rawDeviceCallsign)
 
         val localPli = pli
         if (localPli != null) {
@@ -132,8 +145,8 @@ object TAKPacketConversion {
                 altitude = localPli.altitude.toDouble(),
                 speed = localPli.speed.toDouble(),
                 course = localPli.course.toDouble(),
-                team = teamToColorName(group?.team),
-                role = roleToName(group?.role),
+                team = TakConversionHelpers.teamToColorName(group?.team),
+                role = TakConversionHelpers.roleToName(group?.role),
                 battery = status?.battery ?: DEFAULT_TAK_BATTERY,
                 staleMinutes = DEFAULT_TAK_STALE_MINUTES,
             )
@@ -160,37 +173,16 @@ object TAKPacketConversion {
                 latitude = 0.0,
                 longitude = 0.0,
                 contact = CoTContact(callsign = senderCallsign, endpoint = DEFAULT_TAK_ENDPOINT),
-                group = CoTGroup(name = teamToColorName(group?.team), role = roleToName(group?.role)),
+                group =
+                CoTGroup(
+                    name = TakConversionHelpers.teamToColorName(group?.team),
+                    role = TakConversionHelpers.roleToName(group?.role),
+                ),
                 status = CoTStatus(battery = status?.battery ?: DEFAULT_TAK_BATTERY),
                 chat = CoTChat(chatroom = chatroom, senderCallsign = senderCallsign, message = localChat.message),
             )
         }
 
         return null
-    }
-
-    private fun parseDeviceCallsign(combined: String): Pair<String, String?> {
-        val parts = combined.split("|", limit = 2)
-        return if (parts.size == 2) {
-            Pair(parts[0], parts[1].ifEmpty { null })
-        } else {
-            Pair(combined, null)
-        }
-    }
-
-    private fun getTeamValue(name: String): Int =
-        Team.entries.find { it.name.equals(name, ignoreCase = true) }?.value ?: 0
-
-    private fun getMemberRoleValue(roleName: String): Int =
-        MemberRole.entries.find { it.name.equals(roleName.replace(" ", ""), ignoreCase = true) }?.value ?: 0
-
-    private fun teamToColorName(team: Team?): String {
-        if (team == null || team == Team.Unspecifed_Color) return DEFAULT_TAK_TEAM_NAME
-        return team.toTakTeamName()
-    }
-
-    private fun roleToName(role: MemberRole?): String {
-        if (role == null || role == MemberRole.Unspecifed) return DEFAULT_TAK_ROLE_NAME
-        return role.toTakRoleName()
     }
 }

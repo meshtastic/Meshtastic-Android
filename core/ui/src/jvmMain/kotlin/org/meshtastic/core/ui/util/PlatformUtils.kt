@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,15 +20,16 @@ package org.meshtastic.core.ui.util
 
 import androidx.compose.runtime.Composable
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.common.util.CommonUri
+import org.meshtastic.core.common.util.ioDispatcher
 import java.awt.Desktop
 import java.awt.FileDialog
 import java.awt.Frame
 import java.io.File
 import java.net.URI
+import javax.swing.JFileChooser
 
 /** JVM stub — NFC settings are not available on Desktop. */
 @Composable
@@ -76,7 +77,9 @@ actual fun rememberSaveFileLauncher(
 /** JVM — Opens a native file dialog to pick a file. */
 @Composable
 actual fun rememberOpenFileLauncher(onUriReceived: (CommonUri?) -> Unit): (mimeType: String) -> Unit = { _ ->
-    val dialog = FileDialog(null as? Frame, "Open File", FileDialog.LOAD)
+    // Explicit Frame? local disambiguates the FileDialog(Frame, ...) overload from FileDialog(Dialog, ...)
+    val parentFrame: Frame? = null
+    val dialog = FileDialog(parentFrame, "Open File", FileDialog.LOAD)
     dialog.isVisible = true
     val file = dialog.file
     val dir = dialog.directory
@@ -86,10 +89,22 @@ actual fun rememberOpenFileLauncher(onUriReceived: (CommonUri?) -> Unit): (mimeT
     }
 }
 
+/** JVM — Opens a native dialog to pick a directory. */
+@Composable
+actual fun rememberOpenDocumentTreeLauncher(onTreeUriSelect: (CommonUri?) -> Unit): () -> Unit = {
+    // AWT FileDialog cannot select directories portably; JFileChooser can.
+    val chooser = JFileChooser().apply { fileSelectionMode = JFileChooser.DIRECTORIES_ONLY }
+    if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+        onTreeUriSelect(CommonUri.parse(chooser.selectedFile.toURI().toString()))
+    } else {
+        onTreeUriSelect(null)
+    }
+}
+
 /** JVM — Reads text from a file URI. */
 @Composable
 actual fun rememberReadTextFromUri(): suspend (uri: CommonUri, maxChars: Int) -> String? = { uri, maxChars ->
-    withContext(Dispatchers.IO) {
+    withContext(ioDispatcher) {
         @Suppress("TooGenericExceptionCaught")
         try {
             val file = File(URI(uri.toString()))
@@ -115,33 +130,43 @@ actual fun KeepScreenOn(enabled: Boolean) {
     // No-op on JVM/Desktop
 }
 
-/** JVM no-op — Desktop has no system back gesture. */
-@Composable
-actual fun PlatformBackHandler(enabled: Boolean, onBack: () -> Unit) {
-    // No-op on JVM/Desktop — no system back button
-}
-
-@Composable
-actual fun rememberRequestLocationPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit = {
-    Logger.w { "Location permissions not implemented on Desktop" }
-    onDenied()
-}
-
 @Composable
 actual fun rememberOpenLocationSettings(): () -> Unit = { Logger.w { "Location settings not implemented on Desktop" } }
 
-/** JVM no-op — Desktop does not require runtime Bluetooth permissions. */
+/** JVM stub — Bluetooth settings are not available on Desktop. */
 @Composable
-actual fun rememberRequestBluetoothPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit = { onGranted() }
-
-/** JVM no-op — Desktop does not require runtime notification permissions. */
-@Composable
-actual fun rememberRequestNotificationPermission(onGranted: () -> Unit, onDenied: () -> Unit): () -> Unit = {
-    onGranted()
+actual fun rememberOpenBluetoothSettings(): () -> Unit = {
+    Logger.w { "Bluetooth settings not available on JVM/Desktop" }
 }
 
-/** JVM — location permission is always considered granted on Desktop. */
-@Composable actual fun isLocationPermissionGranted(): Boolean = true
+/** JVM stub — Wi-Fi settings are not available on Desktop. */
+@Composable
+actual fun rememberOpenWifiSettings(): () -> Unit = { Logger.w { "Wi-Fi settings not available on JVM/Desktop" } }
 
 /** JVM — GPS is never disabled on Desktop (concept doesn't apply). */
 @Composable actual fun isGpsDisabled(): Boolean = false
+
+/** JVM — Bluetooth adapter state is not surfaced on Desktop. */
+@Composable actual fun isBluetoothDisabled(): Boolean = false
+
+/** JVM — local-network availability is not gated on Desktop. */
+@Composable actual fun isWifiUnavailable(): Boolean = false
+
+/** JVM stub — app settings are not available on Desktop. */
+@Composable
+actual fun rememberOpenAppSettings(): () -> Unit = { Logger.w { "App settings not available on JVM/Desktop" } }
+
+/** JVM — Desktop does not gate location behind a runtime permission. */
+@Composable actual fun rememberLocationPermissionState(): PermissionUiState = grantedPermissionUiState()
+
+/** JVM — Desktop does not gate Bluetooth behind a runtime permission. */
+@Composable actual fun rememberBluetoothPermissionState(): PermissionUiState = grantedPermissionUiState()
+
+/** JVM — Desktop does not gate notifications behind a runtime permission. */
+@Composable actual fun rememberNotificationPermissionState(): PermissionUiState = grantedPermissionUiState()
+
+/** JVM — Desktop does not gate local-network access behind a runtime permission. */
+@Composable actual fun rememberLocalNetworkPermissionState(): PermissionUiState = grantedPermissionUiState()
+
+/** JVM — Desktop does not gate the camera behind a runtime permission. */
+@Composable actual fun rememberCameraPermissionState(): PermissionUiState = grantedPermissionUiState()

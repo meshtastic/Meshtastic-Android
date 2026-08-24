@@ -9,6 +9,7 @@
     "workarounds:all"
   ],
   "commitMessageTopic": "{{depName}}",
+  "osvVulnerabilityAlerts": true,
   "labels": [
     "dependencies"
   ],
@@ -57,6 +58,24 @@
       "automerge": true
     },
     {
+      "description": "Protobufs: only accept the dot-form snapshot scheme (X.Y.Z.N-g<sha>-SNAPSHOT) or plain releases. Legacy hyphen-SHA snapshots (e.g. 2.7.26-678281c-SNAPSHOT) tokenize their digit-leading SHA as a huge int that outranks the dot-form commit-count in Renovate's maven comparator, so without this constraint Renovate keeps proposing a downgrade to an old snapshot (see PR #6229). The snapshot repo has no delete API; legacy versions auto-prune after 90 days.",
+      "matchPackageNames": [
+        "org.meshtastic:protobufs"
+      ],
+      "allowedVersions": "/^\\d+\\.\\d+\\.\\d+(\\.\\d+-g[0-9a-f]+-SNAPSHOT)?$/"
+    },
+    {
+      "description": "Group CMP and the androidx.compose artifacts that track it so Renovate bumps them together (see PR #5180). Every artifact pinned to the `androidx-compose-bom-aligned` catalog ref must be listed here: bumping any one of them rewrites that shared ref, which AndroidCompose.kt's resolutionStrategy force-aligns across the whole androidx.compose group, so an ungrouped artifact silently drags the entire Android Compose stack out of step with CMP (see PR #6651, where a solo ui-text-google-fonts bump broke screenshot preview discovery).",
+      "groupName": "compose-multiplatform",
+      "matchPackageNames": [
+        "/^org\\.jetbrains\\.compose/",
+        "androidx.compose.runtime:runtime-tracing",
+        "androidx.compose.ui:ui-test-manifest",
+        "androidx.compose.material:material",
+        "androidx.compose.ui:ui-text-google-fonts"
+      ]
+    },
+    {
       "description": "Restrict sensitive infrastructure to manual minor updates",
       "matchUpdateTypes": [
         "minor"
@@ -77,11 +96,51 @@
       "automerge": false
     },
     {
+      "description": "Block the Gradle 9.7 line. 9.7.0 crashed CMP's proguardReleaseJars (ExecSpec stdout null); 9.7.1 fixed that but broke main CI twice over (bumped in #6777, reverted next day): the configuration-cache fingerprint crashes reloading its own same-key entries (IsInIdeaSyncValueSource CNFE), and CMP's Windows packaging trips an Isolated Projects violation (':desktopApp' cannot access Project.layout on ':'). Lift only after a 9.7.x/9.8 patch proves out on both counts. Matches by depName so the flatpak-manifest custom manager (customManagers below) is pinned identically and can never propose the blocked version on its own.",
+      "matchDepNames": [
+        "gradle"
+      ],
+      "matchManagers": [
+        "gradle-wrapper",
+        "custom.regex"
+      ],
+      "allowedVersions": "!/^9\\.7\\./"
+    },
+    {
       "description": "Disable automerge for major updates (safety net)",
       "matchUpdateTypes": [
         "major"
       ],
       "automerge": false
+    },
+    {
+      "description": "Coordinate the Kotlin-compiler-locked toolchain in one human-reviewed PR. Kotlin, KSP, Mokkery, and the Koin compiler plugin are version-locked to the Kotlin compiler and break when bumped out of lockstep (e.g. Mokkery 3.4.0 and kable 0.43.1 both required Kotlin 2.4.0 — PRs #5750/#5740). Supersedes the built-in group:kotlinMonorepo/group:kspMonorepo for these packages so they land together; automerge stays off so compiler bumps always get a human review plus a green CI build. The `[.:]` after kotlin intentionally excludes org.jetbrains.kotlinx (coroutines/serialization runtime), which is not compiler-locked.",
+      "groupName": "kotlin-toolchain",
+      "matchManagers": [
+        "gradle"
+      ],
+      "matchPackageNames": [
+        "/^org\\.jetbrains\\.kotlin[.:]/",
+        "/^com\\.google\\.devtools\\.ksp/",
+        "/^dev\\.mokkery/",
+        "/^io\\.insert-koin\\.compiler\\.plugin/"
+      ],
+      "automerge": false
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Mirror gradle-wrapper.properties bumps into the vendored Gradle distribution URL in the verify-flatpak offline manifest (see PRs #6777/#6782, where a wrapper bump without this file broke both build-flatpak arches). Shares depName 'gradle' with the gradle-wrapper manager so both files update in the same Renovate branch/PR. The sha256 line below the URL cannot be auto-updated (the gradle-version datasource has no digest support and the hosted app disallows postUpgradeTasks); the fail-fast guard in verify-flatpak.yml's generate-sources job holds that PR red until the sha256 is copied from distributionSha256Sum.",
+      "managerFilePatterns": [
+        "/^scripts/verify-flatpak/desktop-offline\\.yaml$/"
+      ],
+      "matchStrings": [
+        "services\\.gradle\\.org/distributions/gradle-(?<currentValue>\\d+(?:\\.\\d+)*)-bin\\.zip"
+      ],
+      "depNameTemplate": "gradle",
+      "datasourceTemplate": "gradle-version",
+      "versioningTemplate": "gradle"
     }
   ]
 }

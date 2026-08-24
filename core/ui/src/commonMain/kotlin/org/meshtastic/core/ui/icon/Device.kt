@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.ic_android
 import org.meshtastic.core.resources.ic_fingerprint
 import org.meshtastic.core.resources.ic_fork_left
+import org.meshtastic.core.resources.ic_foxhunt
 import org.meshtastic.core.resources.ic_home
 import org.meshtastic.core.resources.ic_icecream
 import org.meshtastic.core.resources.ic_memory
@@ -77,3 +78,5 @@ val MeshtasticIcons.Android: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_android)
 val MeshtasticIcons.HardwareModel: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_memory)
+val MeshtasticIcons.Foxhunt: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_foxhunt)

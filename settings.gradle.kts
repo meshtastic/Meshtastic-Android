@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,10 +15,78 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+pluginManagement {
+    includeBuild("build-logic/settings-plugin")
+    includeBuild("build-logic")
+    repositories {
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
+        mavenCentral()
+        gradlePluginPortal()
+        maven { url = uri("./offline-repository") }
+    }
+}
+
+plugins {
+    // Develocity + CCUD + build cache; shared with build-logic, versions from the catalog.
+    id("meshtastic.develocity")
+    id("org.gradle.toolchains.foojay-resolver") version "1.0.0"
+    // 0.1.7 fixed the Isolated Projects incompatibility (shares state via a BuildService instead of
+    // gradle.extensions) that previously required gating this behind an opt-in property.
+    id("org.meshtastic.flatpak.sources.settings") version "0.1.7"
+}
+
+@Suppress("UnstableApiUsage")
+dependencyResolutionManagement {
+    repositoriesMode = RepositoriesMode.FAIL_ON_PROJECT_REPOS
+    repositories {
+        // Only enable mavenLocal for local JitPack testing; never in CI.
+        if (providers.gradleProperty("useMavenLocal").isPresent) mavenLocal()
+        google {
+            content {
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
+            }
+        }
+        mavenCentral()
+        maven {
+            url = uri("https://central.sonatype.com/repository/maven-snapshots/")
+            mavenContent { snapshotsOnly() }
+        }
+        maven {
+            url = uri("https://jitpack.io")
+            content {
+                includeGroupByRegex("com\\.github\\..*")
+            }
+        }
+        maven { url = uri("./offline-repository") }
+    }
+}
+
+rootProject.name = "MeshtasticAndroid"
+
+// https://docs.gradle.org/current/userguide/declaring_dependencies.html#sec:type-safe-project-accessors
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+
+
+@Suppress("UnstableApiUsage")
+toolchainManagement {
+    jvm {
+        javaRepositories {
+            repository("foojay") {
+                resolverClass.set(org.gradle.toolchains.foojay.FoojayToolchainResolver::class.java)
+            }
+        }
+    }
+}
+
 include(
-    ":app",
-    ":core:api",
-    ":core:barcode",
     ":core:ble",
     ":core:common",
     ":core:data",
@@ -26,12 +94,12 @@ include(
     ":core:datastore",
     ":core:di",
     ":core:domain",
+    ":core:konsist",
     ":core:model",
     ":core:navigation",
     ":core:network",
     ":core:nfc",
     ":core:prefs",
-    ":core:proto",
     ":core:repository",
     ":core:service",
     ":core:resources",
@@ -44,59 +112,15 @@ include(
     ":feature:map",
     ":feature:node",
     ":feature:settings",
+    ":feature:discovery",
+    ":feature:docs",
     ":feature:firmware",
     ":feature:wifi-provision",
+    ":desktopApp",
+    ":androidApp",
+    ":core:barcode",
     ":feature:widget",
-    ":desktop",
+    ":screenshot-tests",
+    ":docs-screenshots",
+    ":baselineprofile",
 )
-rootProject.name = "MeshtasticAndroid"
-
-// https://docs.gradle.org/current/userguide/declaring_dependencies.html#sec:type-safe-project-accessors
-enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
-
-pluginManagement {
-    includeBuild("build-logic")
-    repositories {
-        google()
-        mavenCentral()
-        gradlePluginPortal()
-        maven { url = uri("https://jitpack.io") }
-    }
-}
-
-@Suppress("UnstableApiUsage")
-dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-    repositories {
-        // Only enable mavenLocal for local JitPack testing; never in CI.
-        if (providers.gradleProperty("useMavenLocal").isPresent) mavenLocal()
-        google()
-        mavenCentral()
-        maven {
-            url = uri("https://jitpack.io")
-            content {
-                includeGroupByRegex("com\\.github\\..*")
-            }
-        }
-    }
-}
-
-plugins {
-    id("org.gradle.toolchains.foojay-resolver") version "1.0.0"
-    id("com.gradle.develocity") version("4.4.0")
-    id("com.gradle.common-custom-user-data-gradle-plugin") version "2.6.0"
-}
-
-// Shared Develocity and Build Cache configuration
-apply(from = "gradle/develocity.settings.gradle")
-
-@Suppress("UnstableApiUsage")
-toolchainManagement {
-    jvm {
-        javaRepositories {
-            repository("foojay") {
-                resolverClass.set(org.gradle.toolchains.foojay.FoojayToolchainResolver::class.java)
-            }
-        }
-    }
-}

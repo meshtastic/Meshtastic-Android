@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,19 +22,23 @@ import co.touchlab.kermit.Logger
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.DateFormatter
+import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowInstant
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.model.MeshLog
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.getTracerouteResponse
 import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.core.model.util.toReadableString
@@ -202,6 +206,13 @@ class LogFilterManager {
     }
 }
 
+/**
+ * Throttle for the expensive mesh-log decode pipeline (see [DebugViewModel.meshLog]). Chosen to stay well under human
+ * perception for a debug log view while bounding decode frequency during a packet flood; not a correctness requirement,
+ * just a GC-thrash guard.
+ */
+private const val LOG_DECODE_DEBOUNCE_MS = 200L
+
 @KoinViewModel
 @Suppress("TooManyFunctions")
 class DebugViewModel(
@@ -212,9 +223,17 @@ class DebugViewModel(
     private val dispatchers: org.meshtastic.core.di.CoroutineDispatchers,
 ) : ViewModel() {
 
+    @OptIn(FlowPreview::class)
     val meshLog: StateFlow<ImmutableList<UiMeshLog>> =
         meshLogRepository
             .getAllLogs()
+            // Room re-emits this Flow on every insert into the mesh_log table. Under a packet
+            // flood (hostile mesh traffic, a runaway sender, etc.) that can fire many times a
+            // second; without throttling, mapLatest keeps restarting a full re-decode of up to
+            // DEFAULT_MAX_LOGS (5000) rows -- including proto toString() + node-DB lookups --
+            // faster than it can complete, thrashing the GC instead of making progress.
+            // Debouncing caps the decode rate independent of the insert rate.
+            .debounce(LOG_DECODE_DEBOUNCE_MS)
             .mapLatest { logs -> withContext(dispatchers.default) { toUiState(logs) } }
             .stateInWhileSubscribed(initialValue = persistentListOf())
 
@@ -293,32 +312,48 @@ class DebugViewModel(
         Logger.d { "DebugViewModel cleared" }
     }
 
-    private fun toUiState(databaseLogs: List<MeshLog>) = databaseLogs
-        .map {
-            UiMeshLog(
-                uuid = it.uuid,
-                messageType = it.message_type,
-                formattedReceivedDate = DateFormatter.formatDateTime(it.received_date),
-                logMessage = annotateMeshLogMessage(it),
-                decodedPayload = decodePayloadFromMeshLog(it),
-            )
-        }
-        .toImmutableList()
-
-    /** Transform the input [MeshLog] by enhancing the raw message with annotations. */
-    private fun annotateMeshLogMessage(meshLog: MeshLog): String = when (meshLog.message_type) {
-        "LogRecord" -> meshLog.fromRadio.log_record.toString().replace("\\n\"", "\"")
-        "Packet" -> meshLog.meshPacket?.let { packet -> annotatePacketLog(packet) } ?: meshLog.raw_message
-        "NodeInfo" ->
-            meshLog.nodeInfo?.let { nodeInfo -> annotateRawMessage(meshLog.raw_message, nodeInfo.num) }
-                ?: meshLog.raw_message
-        "MyNodeInfo" ->
-            meshLog.myNodeInfo?.let { nodeInfo -> annotateRawMessage(meshLog.raw_message, nodeInfo.my_node_num) }
-                ?: meshLog.raw_message
-        else -> meshLog.raw_message
+    private fun toUiState(databaseLogs: List<MeshLog>): ImmutableList<UiMeshLog> {
+        // Snapshot the node DB once per decode pass, not once per row. With up to
+        // DEFAULT_MAX_LOGS (5000) rows and meshes that can carry hundreds/thousands of nodes
+        // (see push_fake_nodedb), re-materializing `nodeDBbyNum.values.toList()` inside the
+        // per-row loop was an O(rows * nodes) hotspot that compounded the flood-induced
+        // re-decode thrash described above.
+        val nodeList = nodeRepository.nodeDBbyNum.value.values.toList()
+        val myNodeNum = nodeRepository.myNodeInfo.value?.myNodeNum
+        return databaseLogs
+            .map {
+                UiMeshLog(
+                    uuid = it.uuid,
+                    messageType = it.message_type,
+                    formattedReceivedDate = DateFormatter.formatDateTime(it.received_date),
+                    logMessage = annotateMeshLogMessage(it, nodeList, myNodeNum),
+                    decodedPayload = decodePayloadFromMeshLog(it),
+                )
+            }
+            .toImmutableList()
     }
 
-    private fun annotatePacketLog(packet: MeshPacket): String {
+    /** Transform the input [MeshLog] by enhancing the raw message with annotations. */
+    private fun annotateMeshLogMessage(meshLog: MeshLog, nodeList: List<Node>, myNodeNum: Int?): String =
+        when (meshLog.message_type) {
+            "LogRecord" -> meshLog.fromRadio.log_record.toString().replace("\\n\"", "\"")
+
+            "Packet" ->
+                meshLog.meshPacket?.let { packet -> annotatePacketLog(packet, nodeList, myNodeNum) }
+                    ?: meshLog.raw_message
+
+            "NodeInfo" ->
+                meshLog.nodeInfo?.let { nodeInfo -> annotateRawMessage(meshLog.raw_message, nodeInfo.num) }
+                    ?: meshLog.raw_message
+
+            "MyNodeInfo" ->
+                meshLog.myNodeInfo?.let { nodeInfo -> annotateRawMessage(meshLog.raw_message, nodeInfo.my_node_num) }
+                    ?: meshLog.raw_message
+
+            else -> meshLog.raw_message
+        }
+
+    private fun annotatePacketLog(packet: MeshPacket, nodeList: List<Node>, myNodeNum: Int?): String {
         val decoded = packet.decoded
         val basePacket = packet.copy(decoded = null)
         val baseText = basePacket.toString().trimEnd()
@@ -335,15 +370,14 @@ class DebugViewModel(
         val placeholder = "___RELAY_NODE___"
 
         if (relayNode != 0) {
-            val myNodeNum = nodeRepository.myNodeInfo.value?.myNodeNum
-            val nodeList = nodeRepository.nodeDBbyNum.value.values.toList()
-
             Packet.getRelayNode(relayNode, nodeList, myNodeNum)?.let { node ->
                 val relayId = node.user.id
                 val relayName = node.user.long_name
-                val regex = Regex("""\brelay_node: ${relayNode.toUInt()}\b""")
+                // Wire's toString prints `relay_node=245`; rows stored before the Wire
+                // migration carry protobuf-java's `relay_node: 245`. Match both.
+                val regex = Regex("""\brelay_node[=:] ?${relayNode.toUInt()}\b""")
                 if (regex.containsMatchIn(result)) {
-                    relayNodeAnnotation = "relay_node: $relayName ($relayId)"
+                    relayNodeAnnotation = "relay_node=$relayName ($relayId)"
                     result = regex.replace(result, placeholder)
                 }
             }
@@ -375,9 +409,13 @@ class DebugViewModel(
 
     /** Look for a single node ID integer in the string and annotate it with the hex equivalent if found. */
     private fun StringBuilder.annotateNodeId(nodeId: Int): Boolean {
-        val nodeIdStr = nodeId.toUInt().toString()
-        // Only match if whitespace before and after
-        val regex = Regex("""(?<=\s|^)${Regex.escape(nodeIdStr)}(?=\s|$)""")
+        // Wire's toString prints int fields SIGNED and `=`-delimited (`from=-1897181963,`),
+        // which is what users see since the Wire migration (#6520). Rows stored before it
+        // carry protobuf-java's text format: unsigned, colon-separated, whitespace-bounded
+        // (`from: 2397785333`). Match either representation at a value position.
+        val signed = Regex.escape(nodeId.toString())
+        val unsigned = Regex.escape(nodeId.toUInt().toString())
+        val regex = Regex("""(?<=[=\s]|^)($signed|$unsigned)(?=[,}\s]|$)""")
         if (!regex.containsMatchIn(this)) return false
         regex.findAll(this).toList().asReversed().forEach {
             val idx = it.range.last + 1
@@ -449,36 +487,48 @@ class DebugViewModel(
                 PortNum.TEXT_MESSAGE_APP.value,
                 PortNum.ALERT_APP.value,
                 -> payload.decodeToString()
+
                 PortNum.POSITION_APP.value ->
                     Position.ADAPTER.decodeOrNull(payload)?.let { Position.ADAPTER.toReadableString(it) }
                         ?: "Failed to decode Position"
+
                 PortNum.WAYPOINT_APP.value ->
                     Waypoint.ADAPTER.decodeOrNull(payload)?.let { Waypoint.ADAPTER.toReadableString(it) }
                         ?: "Failed to decode Waypoint"
+
                 PortNum.NODEINFO_APP.value ->
                     User.ADAPTER.decodeOrNull(payload)?.let { User.ADAPTER.toReadableString(it) }
                         ?: "Failed to decode User"
+
                 PortNum.TELEMETRY_APP.value ->
                     Telemetry.ADAPTER.decodeOrNull(payload)?.let { Telemetry.ADAPTER.toReadableString(it) }
                         ?: "Failed to decode Telemetry"
+
                 PortNum.ROUTING_APP.value ->
                     Routing.ADAPTER.decodeOrNull(payload)?.let { Routing.ADAPTER.toReadableString(it) }
                         ?: "Failed to decode Routing"
+
                 PortNum.ADMIN_APP.value ->
                     AdminMessage.ADAPTER.decodeOrNull(payload)?.let { AdminMessage.ADAPTER.toReadableString(it) }
                         ?: "Failed to decode AdminMessage"
+
                 PortNum.PAXCOUNTER_APP.value ->
                     Paxcount.ADAPTER.decodeOrNull(payload)?.let { Paxcount.ADAPTER.toReadableString(it) }
                         ?: "Failed to decode Paxcount"
+
                 PortNum.STORE_FORWARD_APP.value ->
                     StoreAndForward.ADAPTER.decodeOrNull(payload)?.let { StoreAndForward.ADAPTER.toReadableString(it) }
                         ?: "Failed to decode StoreAndForward"
+
                 PortNum.STORE_FORWARD_PLUSPLUS_APP.value ->
                     StoreForwardPlusPlus.ADAPTER.decodeOrNull(payload)?.let {
                         StoreForwardPlusPlus.ADAPTER.toReadableString(it)
                     } ?: "Failed to decode StoreForwardPlusPlus"
+
                 PortNum.NEIGHBORINFO_APP.value -> decodeNeighborInfo(payload)
+
                 PortNum.TRACEROUTE_APP.value -> decodeTraceroute(packet, payload)
+
                 else -> payload.joinToString(" ") { it.toHex() }
             }
         } catch (e: Exception) {
@@ -505,7 +555,9 @@ class DebugViewModel(
             if (info.neighbors.isNotEmpty()) {
                 appendLine("  neighbors:")
                 info.neighbors.forEach {
-                    appendLine("    - node_id: ${formatNodeWithShortName(it.node_id)} snr: ${it.snr}")
+                    appendLine(
+                        "    - node_id: ${formatNodeWithShortName(it.node_id)} snr: ${MetricFormatter.snr(it.snr)}",
+                    )
                 }
             }
         }

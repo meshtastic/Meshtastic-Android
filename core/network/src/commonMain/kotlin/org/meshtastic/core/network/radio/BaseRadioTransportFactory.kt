@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,9 +42,16 @@ abstract class BaseRadioTransportFactory(
             InterfaceId.TCP.id,
             InterfaceId.SERIAL.id,
             InterfaceId.BLUETOOTH.id,
-            InterfaceId.MOCK.id,
             '!',
             -> true
+
+            // Virtual transports stay inadmissible until deliberately enabled: `connections?address=m` is reachable
+            // from any web page through the verified meshtastic.org app link, so a drive-by deep link must not be able
+            // to swap a user's real radio for a fake one.
+            InterfaceId.MOCK.id,
+            InterfaceId.REPLAY.id,
+            -> mockTransportEnabled.value
+
             else -> isPlatformAddressValid(address)
         }
     }
@@ -67,6 +74,7 @@ abstract class BaseRadioTransportFactory(
                         address = bleAddress,
                     )
                 }
+
                 else -> createPlatformTransport(address, service)
             }
         transport.start()

@@ -15,12 +15,125 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Every commit on main arrives via the merge queue, which already ran lint,
+  # screenshot validation, rb-check, and the (coverage-free) test shards on this
+  # exact merge commit. This workflow:
+  #   - re-runs the test shards WITH coverage: Kover instrumentation lives here,
+  #     off the queue's critical path, and this is the sole source of Codecov
+  #     mainline coverage (PRs and the queue both skip it)
+  #   - builds the debug APKs for the snapshot release below with -SNAPSHOT
+  #     naming (the queue skips run_android_build; the PR already assembled them)
+  #   - builds the desktop distributables. Desktop packaging runs here post-merge
+  #     rather than in the merge queue: :desktopApp:test in the queue's shard-app
+  #     already covers compilation, and the 4-OS matrix (macos/windows queue
+  #     times) would slow every merge.
+  # run_lint: false skips lint, screenshot-check, and rb-check (queue-verified).
   validate-and-build:
     if: github.repository == 'meshtastic/Meshtastic-Android'
     uses: ./.github/workflows/reusable-check.yml
+    permissions:
+      contents: write      # dependency-graph submission (android-check)
+      pull-requests: write
     with:
-      run_lint: true
-      run_unit_tests: false
-      run_desktop_builds: false
+      run_lint: false
+      run_unit_tests: true
+      run_coverage: true
+      run_desktop_builds: true
       upload_artifacts: true
     secrets: inherit
+
+  # Republishes the debug APKs validate-and-build already produced as a rolling "snapshot"
+  # prerelease that moves to HEAD on every push to main, so testers get a stable download
+  # link instead of digging through Actions artifacts (which require a GitHub login and
+  # expire after 7 days).
+  publish-snapshot:
+    needs: validate-and-build
+    # !cancelled(): a desktop-matrix failure fails validate-and-build as a whole, but the
+    # Android APKs may still have built fine — attempt the snapshot regardless. If the
+    # APK build itself failed, the artifact download below fails and this job goes red.
+    if: github.repository == 'meshtastic/Meshtastic-Android' && !cancelled()
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    env:
+      # CROWDIN_GITHUB_TOKEN (a PAT), not the default GITHUB_TOKEN, because the repo's tag
+      # rulesets block the default token from creating/deleting tags — same token every other
+      # tag-touching workflow here uses.
+      GH_TOKEN: ${{ secrets.CROWDIN_GITHUB_TOKEN }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0 # git rev-list --count needs full history for the versionCode
+          token: ${{ secrets.CROWDIN_GITHUB_TOKEN }}
+          persist-credentials: false # no git push here; gh does the authed work via GH_TOKEN
+
+      - name: Download debug APKs
+        uses: actions/download-artifact@v8
+        with:
+          name: app-debug-apks
+          path: artifacts
+
+      # Desktop installers land in per-OS artifacts (desktop-app-<os>-<arch>). A matrix leg
+      # failing (e.g. one OS's packaging breaks) shouldn't block publishing the rest, so this
+      # doesn't fail the job if some/all are missing — see the !cancelled() gate above.
+      - name: Download desktop installers
+        uses: actions/download-artifact@v8
+        continue-on-error: true
+        with:
+          pattern: desktop-app-*
+          path: desktop-artifacts
+
+      # A moving tag reuses the same release URL forever, and Obtainium fingerprints the
+      # asset URL — so without a changing filename it would never detect a new build.
+      # Embed the (monotonic) versionCode in each APK name; same formula the app build uses.
+      - name: Rename APKs with versionCode
+        run: |
+          COMMIT_COUNT=$(git rev-list --count HEAD)
+          OFFSET=$(grep '^VERSION_CODE_OFFSET=' config.properties | cut -d'=' -f2)
+          VERSION_CODE=$((COMMIT_COUNT + OFFSET))
+          echo "VERSION_CODE=$VERSION_CODE" >> "$GITHUB_ENV"
+          mkdir -p upload
+          find artifacts -name '*.apk' | while read -r f; do
+            cp "$f" "upload/$(basename "$f" .apk)-${VERSION_CODE}.apk"
+          done
+          ls -l upload
+
+      # Desktop installer filenames already embed the OS/arch (jpackage) plus a "snapshot"
+      # version tag baked into the AppImage step, but stamp the versionCode on too so every
+      # asset in the release moves in lockstep and testers can tell builds apart at a glance.
+      - name: Stage desktop installers
+        run: |
+          mkdir -p desktop-artifacts
+          find desktop-artifacts -type f \( -name '*.dmg' -o -name '*.msi' -o -name '*.exe' \
+            -o -name '*.deb' -o -name '*.rpm' -o -name '*.AppImage' \) | while read -r f; do
+            base="$(basename "$f")"
+            ext="${base##*.}"
+            name="${base%.*}"
+            cp "$f" "upload/${name}-${VERSION_CODE}.${ext}"
+          done
+          ls -l upload
+
+      # Delete the previous snapshot release AND its tag, then recreate both at HEAD. This
+      # prunes the now-stale (differently-named) APKs so they don't pile up, and sidesteps the
+      # Releases API refusing to retarget an already-existing tag.
+      - name: Remove previous snapshot release
+        run: gh release delete snapshot --yes --cleanup-tag || true
+
+      - name: Publish snapshot release
+        run: |
+          cat > notes.md <<EOF
+          Automated debug build from the latest commit on \`main\` ($GITHUB_SHA), versionCode $VERSION_CODE.
+          Unsigned/debug-keyed, F-Droid and Google flavors. Not for production use — this release is replaced on every push to main.
+
+          Also includes unsigned desktop installers (macOS .dmg, Windows .msi/.exe, Linux .deb/.rpm/.AppImage)
+          built from the same commit, when that platform's build succeeded.
+
+          **Obtainium:** enable *Include prereleases*. Each build's APK filename carries the versionCode, so updates are detected.
+          EOF
+          gh release create snapshot upload/* \
+            --title "Snapshot $VERSION_CODE ($GITHUB_SHA)" \
+            --target "$GITHUB_SHA" \
+            --prerelease \
+            --notes-file notes.md

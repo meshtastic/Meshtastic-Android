@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,8 +18,10 @@ package org.meshtastic.feature.node.model
 
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.DeviceLink
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.util.rxTimeOrNull
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.FirmwareEdition
 import org.meshtastic.proto.MeshPacket
@@ -33,6 +35,7 @@ data class MetricsState(
     val displayUnits: Config.DisplayConfig.DisplayUnits = Config.DisplayConfig.DisplayUnits.METRIC,
     val node: Node? = null,
     val deviceMetrics: List<Telemetry> = emptyList(),
+    val localStats: List<Telemetry> = emptyList(),
     val signalMetrics: List<MeshPacket> = emptyList(),
     val powerMetrics: List<Telemetry> = emptyList(),
     val hostMetrics: List<Telemetry> = emptyList(),
@@ -42,16 +45,21 @@ data class MetricsState(
     val neighborInfoResults: List<MeshLog> = emptyList(),
     val positionLogs: List<Position> = emptyList(),
     val deviceHardware: DeviceHardware? = null,
+    /** msh.to vendor/marketplace links for this device's hardware, region-filtered and sorted (vendor first). */
+    val deviceLinks: List<DeviceLink> = emptyList(),
     val firmwareEdition: FirmwareEdition? = null,
     val latestStableFirmware: FirmwareRelease = FirmwareRelease(),
     val latestAlphaFirmware: FirmwareRelease = FirmwareRelease(),
     val paxMetrics: List<MeshLog> = emptyList(),
+    val airQualityMetrics: List<Telemetry> = emptyList(),
     /** The PlatformIO environment reported by the device (if known). */
     val reportedTarget: String? = null,
 ) {
     fun hasDeviceMetrics() = deviceMetrics.isNotEmpty()
 
     fun hasSignalMetrics() = signalMetrics.isNotEmpty()
+
+    fun hasLocalStats() = localStats.isNotEmpty()
 
     fun hasPowerMetrics() = powerMetrics.isNotEmpty()
 
@@ -65,11 +73,15 @@ data class MetricsState(
 
     fun hasPaxMetrics() = paxMetrics.isNotEmpty()
 
+    fun hasAirQualityMetrics() = airQualityMetrics.isNotEmpty()
+
     /** Finds the oldest timestamp (in seconds) among all collected metric types. */
     @Suppress("MagicNumber")
     fun oldestTimestampSeconds(): Long? {
-        val telemetryTimes = (deviceMetrics + powerMetrics + hostMetrics).map { it.time.toLong() }
-        val signalTimes = signalMetrics.map { it.rx_time.toLong() }
+        val telemetryTimes =
+            (deviceMetrics + localStats + powerMetrics + hostMetrics + airQualityMetrics).map { it.time.toLong() }
+        // Unstamped packets carry no timestamp to compare — dropping them beats letting the epoch win the min.
+        val signalTimes = signalMetrics.mapNotNull { it.rxTimeOrNull()?.toLong() }
         val logTimes =
             (tracerouteRequests + tracerouteResults + neighborInfoRequests + neighborInfoResults + paxMetrics).map {
                 it.received_date / 1000L

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ package org.meshtastic.core.model
 import org.meshtastic.proto.Config.LoRaConfig
 import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
 import org.meshtastic.proto.Config.LoRaConfig.RegionCode
-import kotlin.math.floor
+import kotlin.math.round
 
 /** hash a string into an integer using the djb2 algorithm by Dan Bernstein http://www.cse.yorku.ca/~oz/hash.html */
 private fun hash(name: String): UInt { // using UInt instead of Long to match RadioInterface.cpp results
@@ -40,6 +40,18 @@ private val ModemPreset.bandwidth: Float
         return 0f
     }
 
+/**
+ * The SNR (in dB) at or above which a packet sent with this modem preset can still be demodulated — i.e. the
+ * spreading-factor-determined demodulation floor. Signal quality should be judged relative to this limit, since the
+ * same SNR means very different things per preset: -15 dB is excellent on LongSlow (SF12) yet unusable on ShortFast
+ * (SF7).
+ *
+ * Values follow the Semtech SF -> SNR floor (SF7 -7.5 dB, stepping -2.5 dB per spreading factor up to SF12 -20 dB).
+ * Unknown/unset presets fall back to [ChannelOption.DEFAULT] (LongFast).
+ */
+val ModemPreset?.snrLimit: Float
+    get() = (ChannelOption.from(this) ?: ChannelOption.DEFAULT).snrLimit
+
 private fun LoRaConfig.bandwidth(regionInfo: RegionInfo?) = if (use_preset) {
     modem_preset.bandwidth * if (regionInfo?.wideLora == true) 3.25f else 1f
 } else {
@@ -54,6 +66,13 @@ private fun LoRaConfig.bandwidth(regionInfo: RegionInfo?) = if (use_preset) {
     }
 }
 
+/**
+ * Width of one frequency slot: modem bandwidth plus the region's per-side padding and inter-slot spacing (firmware
+ * `RadioInterface::applyModemConfig`).
+ */
+private fun LoRaConfig.freqSlotWidth(regionInfo: RegionInfo): Float =
+    regionInfo.spacing + regionInfo.padding * 2 + bandwidth(regionInfo)
+
 val LoRaConfig.numChannels: Int
     get() {
         val regionInfo = RegionInfo.fromRegionCode(region)
@@ -62,27 +81,39 @@ val LoRaConfig.numChannels: Int
         val bw = bandwidth(regionInfo)
         if (bw <= 0f) return 1 // Return 1 if bandwidth is zero or negative
 
-        val num = floor((regionInfo.freqEnd - regionInfo.freqStart) / bw)
-        // If the regional frequency range is smaller than the bandwidth, the firmware would
+        val num = round((regionInfo.freqEnd - regionInfo.freqStart + regionInfo.spacing) / freqSlotWidth(regionInfo))
+        // If the regional frequency range is smaller than the slot width, the firmware would
         // fall back to a default preset. In the app, we return 1 to avoid a crash.
         return if (num > 0) num.toInt() else 1
     }
 
-internal fun LoRaConfig.channelNum(primaryName: String): Int = when {
-    channel_num != 0 -> channel_num
-    numChannels == 0 -> 0
-    else -> (hash(primaryName) % numChannels.toUInt()).toInt() + 1
+internal fun LoRaConfig.channelNum(primaryName: String): Int {
+    val overrideSlot = RegionInfo.fromRegionCode(region)?.overrideSlot ?: 0
+    return when {
+        channel_num != 0 -> channel_num
+        numChannels == 0 -> 0
+        overrideSlot > 0 -> overrideSlot
+        else -> (hash(primaryName) % numChannels.toUInt()).toInt() + 1
+    }
 }
 
 internal fun LoRaConfig.radioFreq(channelNum: Int): Float {
     if (override_frequency != 0f) return override_frequency + frequency_offset
     val regionInfo = RegionInfo.fromRegionCode(region)
     return if (regionInfo != null) {
-        (regionInfo.freqStart + bandwidth(regionInfo) / 2) + (channelNum - 1) * bandwidth(regionInfo)
+        (regionInfo.freqStart + bandwidth(regionInfo) / 2 + regionInfo.padding) +
+            (channelNum - 1) * freqSlotWidth(regionInfo)
     } else {
         0f
     }
 }
+
+/**
+ * The firmware release that introduced the EU Lite/Narrow and amateur-band ITU regions and the LITE/NARROW/TINY/
+ * MEDIUM_TURBO presets. NB: the LITE/NARROW *enum values* were vendored into v2.7.23's protobufs, but the radio support
+ * (`modemPresetToParams` cases, preset tables, EU regions — firmware#10120) is untagged and ships in 2.8.
+ */
+private val FIRMWARE_2_8 = DeviceVersion("2.8.0")
 
 /**
  * Regulatory regions for radio usage
@@ -92,6 +123,14 @@ internal fun LoRaConfig.radioFreq(channelNum: Int): Float {
  * @property freqStart The starting frequency in MHz
  * @property freqEnd The ending frequency in MHz
  * @property wideLora Whether the region uses wide Lora
+ * @property spacing Gap between frequency slots (and at the start of the band) in MHz, from the firmware's region
+ *   profile
+ * @property padding Gap at each side of a frequency slot in MHz, from the firmware's region profile (coerces the modem
+ *   bandwidth up to the region's slot width, e.g. ham 15.625 kHz -> 20 kHz)
+ * @property overrideSlot The region's fixed default frequency slot (1-based), or 0 to derive the slot from the primary
+ *   channel-name hash as usual
+ * @property minFirmware The first firmware release whose region table contains this region, or null for regions all
+ *   supported firmware knows; [Capabilities.supportsRegion] gates the picker with it
  * @see
  *   [LoRaWAN Regional Parameters](https://lora-alliance.org/wp-content/uploads/2020/11/lorawan_regional_parameters_v1.0.3reva_0.pdf)
  */
@@ -102,6 +141,10 @@ enum class RegionInfo(
     val freqStart: Float,
     val freqEnd: Float,
     val wideLora: Boolean = false,
+    val spacing: Float = 0f,
+    val padding: Float = 0f,
+    val overrideSlot: Int = 0,
+    val minFirmware: DeviceVersion? = null,
 ) {
     /**
      * United States
@@ -197,13 +240,6 @@ enum class RegionInfo(
     UA_433(RegionCode.UA_433, "Ukraine 433MHz", 433.0f, 434.7f),
 
     /**
-     * Ukraine 868MHz 868,0-868,6 Mhz 25 mW
-     *
-     * @see [NKZRZI](https://nkrzi.gov.ua/images/upload/256/5810/PDF_UUZ_19_01_2016.pdf)
-     */
-    UA_868(RegionCode.UA_868, "Ukraine 868MHz", 868.0f, 868.6f),
-
-    /**
      * Malaysia 433MHz 433 - 435 MHz at 100mW, no restrictions.
      *
      * @see [MCMC](https://www.mcmc.gov.my/skmmgovmy/media/General/pdf/Short-Range-Devices-Specification.pdf)
@@ -286,6 +322,132 @@ enum class RegionInfo(
      */
     BR_902(RegionCode.BR_902, "Brazil 902MHz", 902.0f, 907.5f, wideLora = false),
 
+    /**
+     * European Union 865-868MHz (Lite): four 600 kHz slots at 865.7/866.3/866.9/867.5 MHz, 2.5% duty cycle.
+     *
+     * @see
+     *   [ETSI EN 300 220-2 V3.1.1](https://www.etsi.org/deliver/etsi_en/300200_300299/30022002/03.01.01_60/en_30022002v030101p.pdf)
+     */
+    EU_866(
+        RegionCode.EU_866,
+        "European Union 866MHz",
+        865.6f,
+        867.6f,
+        spacing = 0.4f,
+        padding = 0.0375f,
+        minFirmware = FIRMWARE_2_8,
+    ),
+
+    /** European Union 868MHz using the narrow presets; same band as [EU_868]. */
+    EU_N_868(
+        RegionCode.EU_N_868,
+        "European Union 868MHz (Narrow)",
+        869.4f,
+        869.65f,
+        padding = 0.0104f,
+        overrideSlot = 1,
+        minFirmware = FIRMWARE_2_8,
+    ),
+
+    /**
+     * ITU Region 1 (Europe, Africa, Middle East, former USSR) amateur 2m allocation. Licensed operators only.
+     *
+     * @see [IARU Region 1 Band Plan](https://www.iaru-r1.org/on-the-air/band-plans/)
+     */
+    ITU1_2M(
+        RegionCode.ITU1_2M,
+        "ITU Region 1 / Amateur 2m",
+        144.0f,
+        146.0f,
+        padding = 0.0022f,
+        overrideSlot = 26,
+        minFirmware = FIRMWARE_2_8,
+    ),
+
+    /**
+     * ITU Region 2 (Americas) amateur 2m allocation. Licensed operators only.
+     *
+     * @see [ARRL Band Plan](https://www.arrl.org/band-plan)
+     */
+    ITU2_2M(
+        RegionCode.ITU2_2M,
+        "ITU Region 2 / Amateur 2m",
+        144.0f,
+        148.0f,
+        padding = 0.0022f,
+        overrideSlot = 51,
+        minFirmware = FIRMWARE_2_8,
+    ),
+
+    /**
+     * ITU Region 3 (Asia/Pacific) amateur 2m allocation. Licensed operators only.
+     *
+     * @see
+     *   [IARU Region 3 Band Plan](https://www.iaru.org/wp-content/uploads/2020/01/R3-004-IARU-Region-3-Bandplan-rev.2.pdf)
+     */
+    ITU3_2M(
+        RegionCode.ITU3_2M,
+        "ITU Region 3 / Amateur 2m",
+        144.0f,
+        148.0f,
+        padding = 0.0022f,
+        overrideSlot = 33,
+        minFirmware = FIRMWARE_2_8,
+    ),
+
+    /**
+     * ITU Region 2 (Americas) amateur 1.25m '125cm' allocation. Licensed operators only. Some countries do not allocate
+     * 220-222 MHz (e.g. USA, Canada) — check local law.
+     */
+    ITU2_125CM(
+        RegionCode.ITU2_125CM,
+        "ITU Region 2 / Amateur 1.25m",
+        220.0f,
+        225.0f,
+        padding = 0.01875f,
+        overrideSlot = 37,
+        minFirmware = FIRMWARE_2_8,
+    ),
+
+    /** ITU Region 1 (Europe, Africa, Middle East, former USSR) amateur 70cm allocation. Licensed operators only. */
+    ITU1_70CM(
+        RegionCode.ITU1_70CM,
+        "ITU Region 1 / Amateur 70cm",
+        430.0f,
+        440.0f,
+        padding = 0.01875f,
+        overrideSlot = 37,
+        minFirmware = FIRMWARE_2_8,
+    ),
+
+    /**
+     * ITU Region 2 (Americas) amateur 70cm allocation. Licensed operators only. Some countries do not allocate 420-430
+     * MHz or 440-450 MHz — check local law.
+     */
+    ITU2_70CM(
+        RegionCode.ITU2_70CM,
+        "ITU Region 2 / Amateur 70cm",
+        420.0f,
+        450.0f,
+        padding = 0.01875f,
+        overrideSlot = 137,
+        minFirmware = FIRMWARE_2_8,
+    ),
+
+    /**
+     * ITU Region 3 (Asia/Pacific) amateur 70cm allocation. Licensed operators only. Some countries do not allocate
+     * 440-450 MHz — check local law.
+     */
+    ITU3_70CM(
+        RegionCode.ITU3_70CM,
+        "ITU Region 3 / Amateur 70cm",
+        430.0f,
+        450.0f,
+        padding = 0.01875f,
+        overrideSlot = 37,
+        minFirmware = FIRMWARE_2_8,
+    ),
+
     /** This needs to be last. Same as US. */
     UNSET(RegionCode.UNSET, "Please set a region", 902.0f, 928.0f),
     ;
@@ -295,18 +457,39 @@ enum class RegionInfo(
     }
 }
 
-enum class ChannelOption(val modemPreset: ModemPreset, val bandwidth: Float) {
-    // Grouped by range and speed for better readability
-    VERY_LONG_SLOW(ModemPreset.VERY_LONG_SLOW, 0.0625f),
-    LONG_TURBO(ModemPreset.LONG_TURBO, 0.500f),
-    LONG_FAST(ModemPreset.LONG_FAST, 0.250f),
-    LONG_MODERATE(ModemPreset.LONG_MODERATE, 0.125f),
-    LONG_SLOW(ModemPreset.LONG_SLOW, 0.125f),
-    MEDIUM_FAST(ModemPreset.MEDIUM_FAST, 0.250f),
-    MEDIUM_SLOW(ModemPreset.MEDIUM_SLOW, 0.250f),
-    SHORT_FAST(ModemPreset.SHORT_FAST, 0.250f),
-    SHORT_SLOW(ModemPreset.SHORT_SLOW, 0.250f),
-    SHORT_TURBO(ModemPreset.SHORT_TURBO, 0.500f),
+enum class ChannelOption(
+    val modemPreset: ModemPreset,
+    val bandwidth: Float,
+    val snrLimit: Float,
+    val minFirmware: DeviceVersion? = null,
+) {
+    // Grouped by range and speed for better readability.
+    // snrLimit = demodulation floor for the preset's spreading factor (see [ModemPreset.snrLimit]).
+    // minFirmware = first firmware release whose preset table has the entry ([Capabilities.supportsPreset]);
+    // older firmware silently falls back to LONG_FAST when sent an unknown preset.
+    VERY_LONG_SLOW(ModemPreset.VERY_LONG_SLOW, 0.0625f, snrLimit = -20f), // SF12
+    LONG_TURBO(ModemPreset.LONG_TURBO, 0.500f, snrLimit = -12.5f), // SF9
+    LONG_FAST(ModemPreset.LONG_FAST, 0.250f, snrLimit = -17.5f), // SF11
+    LONG_MODERATE(ModemPreset.LONG_MODERATE, 0.125f, snrLimit = -17.5f), // SF11
+
+    // SF12: physically -20 dB. NB: Meshtastic-Apple's snrLimit() returns -7.5 here, which is the SF7 value
+    // and an apparent bug — see meshtastic/Meshtastic-Android#5446.
+    LONG_SLOW(ModemPreset.LONG_SLOW, 0.125f, snrLimit = -20f), // SF12
+    MEDIUM_FAST(ModemPreset.MEDIUM_FAST, 0.250f, snrLimit = -12.5f), // SF9
+    MEDIUM_SLOW(ModemPreset.MEDIUM_SLOW, 0.250f, snrLimit = -15f), // SF10
+    MEDIUM_TURBO(ModemPreset.MEDIUM_TURBO, 0.500f, snrLimit = -12.5f, minFirmware = FIRMWARE_2_8), // SF9
+    SHORT_FAST(ModemPreset.SHORT_FAST, 0.250f, snrLimit = -7.5f), // SF7
+    SHORT_SLOW(ModemPreset.SHORT_SLOW, 0.250f, snrLimit = -10f), // SF8
+    SHORT_TURBO(ModemPreset.SHORT_TURBO, 0.500f, snrLimit = -7.5f), // SF7
+    LITE_FAST(ModemPreset.LITE_FAST, 0.125f, snrLimit = -12.5f, minFirmware = FIRMWARE_2_8),
+    LITE_SLOW(ModemPreset.LITE_SLOW, 0.125f, snrLimit = -15f, minFirmware = FIRMWARE_2_8),
+    NARROW_FAST(ModemPreset.NARROW_FAST, 0.0625f, snrLimit = -10f, minFirmware = FIRMWARE_2_8),
+    NARROW_SLOW(ModemPreset.NARROW_SLOW, 0.0625f, snrLimit = -12.5f, minFirmware = FIRMWARE_2_8),
+
+    // 15.625 kHz LoRa bandwidth (firmware modemPresetToParams; the proto's "20kHz" is the
+    // padded channel spacing, not the modem bandwidth used for numChannels/radioFreq math).
+    TINY_FAST(ModemPreset.TINY_FAST, 0.015625f, snrLimit = -7.5f, minFirmware = FIRMWARE_2_8), // SF7
+    TINY_SLOW(ModemPreset.TINY_SLOW, 0.015625f, snrLimit = -10f, minFirmware = FIRMWARE_2_8), // SF8
     ;
 
     companion object {

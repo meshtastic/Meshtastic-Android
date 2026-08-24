@@ -4,9 +4,9 @@
 Guidelines for building shared UI, adaptive layouts, and handling strings/resources in Meshtastic-Android. The codebase uses Material 3 Adaptive.
 
 ## 1. UI Components & Layouts
-- **Material 3 / Adaptive:** Use `currentWindowAdaptiveInfo(supportLargeAndXLargeWidth = true)` to support Large (1200dp) and XL (1600dp) breakpoints. Investigate 3-pane "Power User" scenes using Navigation 3 Scenes and draggable dividers for desktop/tablets.
+- **Material 3 / Adaptive:** Use `currentWindowAdaptiveInfo(supportLargeAndXLargeWidth = true)` to support Large (1200dp) and XL (1600dp) breakpoints. Investigate 3-pane "Power User" scenes using Navigation 3 Scenes and draggable dividers for desktopApp/tablets.
 - **Dialogs & Alerts:** Use centralized components like `AlertHost(alertManager)` from `core:ui/commonMain`. Do NOT trigger alerts inline or duplicate alert logic. Use `SharedDialogs(uiViewModel)` for general popups.
-- **Placeholders:** Use `PlaceholderScreen(name)` from `core:ui/commonMain` for unimplemented desktop/JVM features.
+- **Placeholders:** Use `PlaceholderScreen(name)` from `core:ui/commonMain` for unimplemented desktopApp/JVM features.
 - **Theme Picker:** Use `ThemePickerDialog` from `feature:settings/commonMain`.
 - **Platform Implementations:** Inject platform-specific behavior (e.g., Map providers) via `CompositionLocal` from the `app` or `desktop` shells. Do not tightly couple Google Maps/osmdroid dependencies to `commonMain`.
 
@@ -41,8 +41,9 @@ Choose the right tool for the job:
 
 - **Workflow to Add a String:**
   1. Add to `core/resources/src/commonMain/composeResources/values/strings.xml`.
-  2. Use the generated `org.meshtastic.core.resources.<key>` symbol.
-  3. Validate UI presentation.
+  2. Run `python3 scripts/sort-strings.py` — keeps the file sorted and regenerates `strings-index.txt`.
+  3. Use the generated `org.meshtastic.core.resources.<key>` symbol.
+  4. Validate UI presentation.
 
 ## 3. Tooling & Capabilities
 - **Image Loading:** Use `libs.coil` (Coil Compose) in feature modules. Configuration/Networking for Coil (`coil-network-ktor3`) happens strictly in the `app` and `desktop` host modules.
@@ -58,4 +59,4 @@ Choose the right tool for the job:
 ## Reference Anchors
 - **Shared Strings:** `core/resources/src/commonMain/composeResources/values/strings.xml`
 - **Platform abstraction contract:** `core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/util/MapViewProvider.kt`
-- **Provider wiring:** `app/src/main/kotlin/org/meshtastic/app/MainActivity.kt`
+- **Provider wiring:** `androidApp/src/main/kotlin/org/meshtastic/app/MainActivity.kt`

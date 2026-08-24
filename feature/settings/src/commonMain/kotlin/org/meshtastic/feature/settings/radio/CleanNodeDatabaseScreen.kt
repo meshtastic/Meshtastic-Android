@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,11 +27,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,6 +47,7 @@ import org.meshtastic.core.resources.clean_nodes_older_than
 import org.meshtastic.core.resources.clean_now
 import org.meshtastic.core.resources.clean_unknown_nodes
 import org.meshtastic.core.resources.nodes_queued_for_deletion
+import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.NodeChip
 
 /**
@@ -53,40 +55,56 @@ import org.meshtastic.core.ui.component.NodeChip
  * nodes to be deleted updates automatically as filter criteria change.
  */
 @Composable
-fun CleanNodeDatabaseScreen(viewModel: CleanNodeDatabaseViewModel) {
+fun CleanNodeDatabaseScreen(viewModel: CleanNodeDatabaseViewModel, onBack: () -> Unit) {
     val olderThanDays by viewModel.olderThanDays.collectAsStateWithLifecycle()
     val onlyUnknownNodes by viewModel.onlyUnknownNodes.collectAsStateWithLifecycle()
     val nodesToDelete by viewModel.nodesToDelete.collectAsStateWithLifecycle()
 
-    LaunchedEffect(olderThanDays, onlyUnknownNodes) { viewModel.getNodesToDelete() }
+    SideEffect(olderThanDays, onlyUnknownNodes) { viewModel.getNodesToDelete() }
 
-    Column(modifier = Modifier.padding(16.dp).verticalScroll(rememberScrollState())) {
-        Text(stringResource(Res.string.clean_node_database_title))
-        Text(stringResource(Res.string.clean_node_database_description), style = MaterialTheme.typography.bodySmall)
-        Spacer(modifier = Modifier.height(16.dp))
+    Scaffold(
+        topBar = {
+            MainAppBar(
+                title = stringResource(Res.string.clean_node_database_title),
+                ourNode = null,
+                showNodeChip = false,
+                canNavigateUp = true,
+                onNavigateUp = onBack,
+                actions = {},
+                onClickChip = {},
+            )
+        },
+    ) { paddingValues ->
+        Column(modifier = Modifier.padding(paddingValues).padding(16.dp).verticalScroll(rememberScrollState())) {
+            Text(stringResource(Res.string.clean_node_database_description), style = MaterialTheme.typography.bodySmall)
+            Spacer(modifier = Modifier.height(16.dp))
 
-        DaysThresholdFilter(
-            olderThanDays = olderThanDays,
-            onlyUnknownNodes = onlyUnknownNodes,
-            onDaysChanged = viewModel::onOlderThanDaysChanged,
-        )
+            DaysThresholdFilter(
+                olderThanDays = olderThanDays,
+                onlyUnknownNodes = onlyUnknownNodes,
+                onDaysChanged = viewModel::onOlderThanDaysChanged,
+            )
 
-        Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-        UnknownNodesFilter(onlyUnknownNodes = onlyUnknownNodes, onCheckedChanged = viewModel::onOnlyUnknownNodesChanged)
+            UnknownNodesFilter(
+                onlyUnknownNodes = onlyUnknownNodes,
+                onCheckedChanged = viewModel::onOnlyUnknownNodesChanged,
+            )
 
-        Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
-        NodesDeletionPreview(nodesToDelete = nodesToDelete)
+            NodesDeletionPreview(nodesToDelete = nodesToDelete)
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        Button(
-            onClick = { if (nodesToDelete.isNotEmpty()) viewModel.requestCleanNodes() },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = nodesToDelete.isNotEmpty(),
-        ) {
-            Text(stringResource(Res.string.clean_now))
+            Button(
+                onClick = { if (nodesToDelete.isNotEmpty()) viewModel.requestCleanNodes() },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = nodesToDelete.isNotEmpty(),
+            ) {
+                Text(stringResource(Res.string.clean_now))
+            }
         }
     }
 }

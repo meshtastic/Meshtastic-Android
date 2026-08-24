@@ -19,16 +19,35 @@ package org.meshtastic.core.repository.di
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Single
-import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.common.di.ApplicationCoroutineScope
+import org.meshtastic.core.repository.FirmwareUpdateStatusRepository
 import org.meshtastic.core.repository.HomoglyphPrefs
+import org.meshtastic.core.repository.MeshBeaconPrefs
+import org.meshtastic.core.repository.MeshBeaconRepository
 import org.meshtastic.core.repository.MessageQueue
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.NodeRestartTracker
 import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.PlatformAnalytics
+import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.usecase.SendMessageUseCase
 import org.meshtastic.core.repository.usecase.SendMessageUseCaseImpl
 
 @Module
 class CoreRepositoryModule {
+    @Single
+    fun provideMeshBeaconRepository(
+        @Provided meshBeaconPrefs: MeshBeaconPrefs,
+        @Provided applicationScope: ApplicationCoroutineScope,
+    ): MeshBeaconRepository = MeshBeaconRepository(meshBeaconPrefs, applicationScope)
+
+    @Single
+    fun provideFirmwareUpdateStatusRepository(): FirmwareUpdateStatusRepository = FirmwareUpdateStatusRepository()
+
+    @Single
+    fun provideNodeRestartTracker(@Provided applicationScope: ApplicationCoroutineScope): NodeRestartTracker =
+        NodeRestartTracker(applicationScope)
+
     @Single
     fun provideSendMessageUseCase(
         @Provided nodeRepository: NodeRepository,
@@ -36,6 +55,13 @@ class CoreRepositoryModule {
         @Provided radioController: RadioController,
         @Provided homoglyphEncodingPrefs: HomoglyphPrefs,
         @Provided messageQueue: MessageQueue,
-    ): SendMessageUseCase =
-        SendMessageUseCaseImpl(nodeRepository, packetRepository, radioController, homoglyphEncodingPrefs, messageQueue)
+        @Provided analytics: PlatformAnalytics,
+    ): SendMessageUseCase = SendMessageUseCaseImpl(
+        nodeRepository,
+        packetRepository,
+        radioController,
+        homoglyphEncodingPrefs,
+        messageQueue,
+        analytics,
+    )
 }

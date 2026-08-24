@@ -1,0 +1,294 @@
+title: Meshtastic Android
+description: "User and developer documentation for the Meshtastic Android, Desktop, and iOS applications."
+baseurl: ""
+url: ""
+
+# just-the-docs theme
+# Local builds use `gem "just-the-docs"` from Gemfile.
+# GitHub Pages uses remote_theme for hosted builds.
+theme: just-the-docs
+remote_theme: just-the-docs/just-the-docs@v0.11.0
+
+# Plugins
+plugins:
+  - jekyll-remote-theme
+  - jekyll-redirect-from
+
+# Navigation
+nav_enabled: true
+search_enabled: true
+search_tokenizer_separator: /[\s\-/]+/
+
+# Heading anchors (clickable § links)
+heading_anchors: true
+
+# Color scheme — loads _sass/color_schemes/meshtastic.scss
+color_scheme: meshtastic
+
+# Default front-matter for pages in subdirectories
+defaults:
+  - scope:
+      path: "en/user/"
+    values:
+      layout: default
+  - scope:
+      path: "en/developer/"
+    values:
+      layout: default
+  # Locale-translated pages are excluded from main nav but still rendered.
+  # They use a dedicated locale layout with a back-link to the English version.
+  # Auto-generated from Android app locales (values-* resource dirs).
+  - scope:
+      path: "ar-rSA"
+    values:
+      layout: locale_page
+      locale: ar-rSA
+      nav_exclude: true
+  - scope:
+      path: "be-rBY"
+    values:
+      layout: locale_page
+      locale: be-rBY
+      nav_exclude: true
+  - scope:
+      path: "bg-rBG"
+    values:
+      layout: locale_page
+      locale: bg-rBG
+      nav_exclude: true
+  - scope:
+      path: "ca-rES"
+    values:
+      layout: locale_page
+      locale: ca-rES
+      nav_exclude: true
+  - scope:
+      path: "cs-rCZ"
+    values:
+      layout: locale_page
+      locale: cs-rCZ
+      nav_exclude: true
+  - scope:
+      path: "de-rDE"
+    values:
+      layout: locale_page
+      locale: de-rDE
+      nav_exclude: true
+  - scope:
+      path: "el-rGR"
+    values:
+      layout: locale_page
+      locale: el-rGR
+      nav_exclude: true
+  - scope:
+      path: "es-rES"
+    values:
+      layout: locale_page
+      locale: es-rES
+      nav_exclude: true
+  - scope:
+      path: "et-rEE"
+    values:
+      layout: locale_page
+      locale: et-rEE
+      nav_exclude: true
+  - scope:
+      path: "fi-rFI"
+    values:
+      layout: locale_page
+      locale: fi-rFI
+      nav_exclude: true
+  - scope:
+      path: "fr-rFR"
+    values:
+      layout: locale_page
+      locale: fr-rFR
+      nav_exclude: true
+  - scope:
+      path: "ga-rIE"
+    values:
+      layout: locale_page
+      locale: ga-rIE
+      nav_exclude: true
+  - scope:
+      path: "gl-rES"
+    values:
+      layout: locale_page
+      locale: gl-rES
+      nav_exclude: true
+  - scope:
+      path: "iw-rIL"
+    values:
+      layout: locale_page
+      locale: iw-rIL
+      nav_exclude: true
+  - scope:
+      path: "hr-rHR"
+    values:
+      layout: locale_page
+      locale: hr-rHR
+      nav_exclude: true
+  - scope:
+      path: "ht-rHT"
+    values:
+      layout: locale_page
+      locale: ht-rHT
+      nav_exclude: true
+  - scope:
+      path: "hu-rHU"
+    values:
+      layout: locale_page
+      locale: hu-rHU
+      nav_exclude: true
+  - scope:
+      path: "is-rIS"
+    values:
+      layout: locale_page
+      locale: is-rIS
+      nav_exclude: true
+  - scope:
+      path: "it-rIT"
+    values:
+      layout: locale_page
+      locale: it-rIT
+      nav_exclude: true
+  - scope:
+      path: "ja-rJP"
+    values:
+      layout: locale_page
+      locale: ja-rJP
+      nav_exclude: true
+  - scope:
+      path: "ko-rKR"
+    values:
+      layout: locale_page
+      locale: ko-rKR
+      nav_exclude: true
+  - scope:
+      path: "lt-rLT"
+    values:
+      layout: locale_page
+      locale: lt-rLT
+      nav_exclude: true
+  - scope:
+      path: "nl-rNL"
+    values:
+      layout: locale_page
+      locale: nl-rNL
+      nav_exclude: true
+  - scope:
+      path: "no-rNO"
+    values:
+      layout: locale_page
+      locale: no-rNO
+      nav_exclude: true
+  - scope:
+      path: "pl-rPL"
+    values:
+      layout: locale_page
+      locale: pl-rPL
+      nav_exclude: true
+  - scope:
+      path: "pt-rPT"
+    values:
+      layout: locale_page
+      locale: pt-rPT
+      nav_exclude: true
+  - scope:
+      path: "pt-rBR"
+    values:
+      layout: locale_page
+      locale: pt-rBR
+      nav_exclude: true
+  - scope:
+      path: "ro-rRO"
+    values:
+      layout: locale_page
+      locale: ro-rRO
+      nav_exclude: true
+  - scope:
+      path: "ru-rRU"
+    values:
+      layout: locale_page
+      locale: ru-rRU
+      nav_exclude: true
+  - scope:
+      path: "sk-rSK"
+    values:
+      layout: locale_page
+      locale: sk-rSK
+      nav_exclude: true
+  - scope:
+      path: "sl-rSI"
+    values:
+      layout: locale_page
+      locale: sl-rSI
+      nav_exclude: true
+  - scope:
+      path: "sq-rAL"
+    values:
+      layout: locale_page
+      locale: sq-rAL
+      nav_exclude: true
+  - scope:
+      path: "sr-rLatn"
+    values:
+      layout: locale_page
+      locale: sr-rLatn
+      nav_exclude: true
+  - scope:
+      path: "srp"
+    values:
+      layout: locale_page
+      locale: srp
+      nav_exclude: true
+  - scope:
+      path: "sv-rSE"
+    values:
+      layout: locale_page
+      locale: sv-rSE
+      nav_exclude: true
+  - scope:
+      path: "tr-rTR"
+    values:
+      layout: locale_page
+      locale: tr-rTR
+      nav_exclude: true
+  - scope:
+      path: "uk-rUA"
+    values:
+      layout: locale_page
+      locale: uk-rUA
+      nav_exclude: true
+  - scope:
+      path: "zh-rCN"
+    values:
+      layout: locale_page
+      locale: zh-rCN
+      nav_exclude: true
+  - scope:
+      path: "zh-rTW"
+    values:
+      layout: locale_page
+      locale: zh-rTW
+      nav_exclude: true
+
+# Callouts (just-the-docs v0.11+)
+callouts:
+  tip:
+    title: Tip
+    color: green
+  note:
+    title: Note
+    color: blue
+  warning:
+    title: Warning
+    color: yellow
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - assets/screenshots/.gitkeep
+  - README.md
+  - "*.sh"
+

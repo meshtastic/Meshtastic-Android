@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,39 +37,44 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.database.DatabaseConstants
+import org.meshtastic.core.navigation.DiscoveryRoute
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.navigation.WifiProvisionRoute
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.acknowledgements
+import org.meshtastic.core.resources.about
 import org.meshtastic.core.resources.app_settings
 import org.meshtastic.core.resources.app_version
 import org.meshtastic.core.resources.bottom_nav_settings
-import org.meshtastic.core.resources.contrast
-import org.meshtastic.core.resources.device_db_cache_limit
-import org.meshtastic.core.resources.device_db_cache_limit_summary
+import org.meshtastic.core.resources.device_links
+import org.meshtastic.core.resources.discovery_local_mesh
+import org.meshtastic.core.resources.help_and_documentation
 import org.meshtastic.core.resources.info
 import org.meshtastic.core.resources.modules_already_unlocked
 import org.meshtastic.core.resources.modules_unlocked
+import org.meshtastic.core.resources.node_layout_section_title
 import org.meshtastic.core.resources.preferences_language
 import org.meshtastic.core.resources.remotely_administrating
 import org.meshtastic.core.resources.theme
 import org.meshtastic.core.resources.wifi_devices
-import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.icon.ChevronRight
+import org.meshtastic.core.ui.icon.Device
 import org.meshtastic.core.ui.icon.FormatPaint
+import org.meshtastic.core.ui.icon.HelpOutline
 import org.meshtastic.core.ui.icon.Info
 import org.meshtastic.core.ui.icon.Language
+import org.meshtastic.core.ui.icon.List
 import org.meshtastic.core.ui.icon.Memory
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.PermScanWifi
 import org.meshtastic.core.ui.icon.Wifi
 import org.meshtastic.core.ui.util.rememberShowToastResource
-import org.meshtastic.feature.settings.component.ContrastPickerDialog
+import org.meshtastic.feature.settings.component.CacheLimitPreference
 import org.meshtastic.feature.settings.component.ExpressiveSection
+import org.meshtastic.feature.settings.component.FullMessageTimestampsSetting
 import org.meshtastic.feature.settings.component.HomoglyphSetting
 import org.meshtastic.feature.settings.component.NotificationSection
 import org.meshtastic.feature.settings.component.ThemePickerDialog
@@ -97,24 +102,17 @@ fun DesktopSettingsScreen(
     val destNode by radioConfigViewModel.destNode.collectAsStateWithLifecycle()
     val localConfig by settingsViewModel.localConfig.collectAsStateWithLifecycle()
     val homoglyphEnabled by radioConfigViewModel.homoglyphEncodingEnabledFlow.collectAsStateWithLifecycle(false)
-    val excludedModulesUnlocked by settingsViewModel.excludedModulesUnlocked.collectAsStateWithLifecycle()
+    val hiddenFeaturesUnlocked by settingsViewModel.hiddenFeaturesUnlocked.collectAsStateWithLifecycle()
     val cacheLimit by settingsViewModel.dbCacheLimit.collectAsStateWithLifecycle()
     val isOtaCapable by settingsViewModel.isOtaCapable.collectAsStateWithLifecycle()
+    val showFullMessageTimestamps by settingsViewModel.showFullMessageTimestamps.collectAsStateWithLifecycle()
 
     var showThemePickerDialog by remember { mutableStateOf(false) }
     var showLanguagePickerDialog by remember { mutableStateOf(false) }
-    var showContrastPickerDialog by remember { mutableStateOf(false) }
     if (showThemePickerDialog) {
         ThemePickerDialog(
             onClickTheme = { settingsViewModel.setTheme(it) },
             onDismiss = { showThemePickerDialog = false },
-        )
-    }
-
-    if (showContrastPickerDialog) {
-        ContrastPickerDialog(
-            onClickContrast = { settingsViewModel.setContrastLevel(it) },
-            onDismiss = { showContrastPickerDialog = false },
         )
     }
 
@@ -183,14 +181,6 @@ fun DesktopSettingsScreen(
                     }
 
                     ListItem(
-                        text = stringResource(Res.string.contrast),
-                        leadingIcon = MeshtasticIcons.FormatPaint,
-                        trailingIcon = null,
-                    ) {
-                        showContrastPickerDialog = true
-                    }
-
-                    ListItem(
                         text = stringResource(Res.string.preferences_language),
                         leadingIcon = MeshtasticIcons.Language,
                         trailingIcon = null,
@@ -198,24 +188,45 @@ fun DesktopSettingsScreen(
                         showLanguagePickerDialog = true
                     }
 
+                    FullMessageTimestampsSetting(
+                        checked = showFullMessageTimestamps,
+                        onCheckedChange = settingsViewModel::setShowFullMessageTimestamps,
+                    )
+
                     HomoglyphSetting(
                         homoglyphEncodingEnabled = homoglyphEnabled,
                         onToggle = { radioConfigViewModel.toggleHomoglyphCharactersEncodingEnabled() },
                     )
 
-                    val cacheItems = remember {
-                        (DatabaseConstants.MIN_CACHE_LIMIT..DatabaseConstants.MAX_CACHE_LIMIT).map {
-                            it.toLong() to it.toString()
-                        }
-                    }
-                    DropDownPreference(
-                        title = stringResource(Res.string.device_db_cache_limit),
-                        enabled = true,
-                        items = cacheItems,
-                        selectedItem = cacheLimit.toLong(),
-                        onItemSelected = { selected -> settingsViewModel.setDbCacheLimit(selected.toInt()) },
-                        summary = stringResource(Res.string.device_db_cache_limit_summary),
+                    CacheLimitPreference(
+                        cacheLimit = cacheLimit,
+                        onCheckEvictionCount = { settingsViewModel.cachedDeviceCountExceeding(it) },
+                        onSetCacheLimit = { settingsViewModel.setDbCacheLimit(it) },
                     )
+                }
+
+                ExpressiveSection(title = stringResource(Res.string.node_layout_section_title)) {
+                    ListItem(
+                        text = stringResource(Res.string.node_layout_section_title),
+                        leadingIcon = MeshtasticIcons.List,
+                    ) {
+                        onNavigate(SettingsRoute.NodeList)
+                    }
+                }
+
+                ExpressiveSection(title = stringResource(Res.string.discovery_local_mesh)) {
+                    ListItem(
+                        text = stringResource(Res.string.discovery_local_mesh),
+                        leadingIcon = MeshtasticIcons.PermScanWifi,
+                    ) {
+                        onNavigate(DiscoveryRoute.DiscoveryGraph)
+                    }
+                }
+
+                ExpressiveSection(title = stringResource(Res.string.device_links)) {
+                    ListItem(text = stringResource(Res.string.device_links), leadingIcon = MeshtasticIcons.Device) {
+                        onNavigate(SettingsRoute.DeviceLinks)
+                    }
                 }
 
                 ExpressiveSection(title = stringResource(Res.string.wifi_devices)) {
@@ -233,10 +244,19 @@ fun DesktopSettingsScreen(
                     onToggleLowBattery = { settingsViewModel.setLowBatteryEnabled(it) },
                 )
 
+                ExpressiveSection(title = stringResource(Res.string.help_and_documentation)) {
+                    ListItem(
+                        text = stringResource(Res.string.help_and_documentation),
+                        leadingIcon = MeshtasticIcons.HelpOutline,
+                    ) {
+                        onNavigate(SettingsRoute.HelpDocs)
+                    }
+                }
+
                 DesktopAppInfoSection(
                     appVersionName = settingsViewModel.appVersionName,
-                    excludedModulesUnlocked = excludedModulesUnlocked,
-                    onUnlockExcludedModules = { settingsViewModel.unlockExcludedModules() },
+                    hiddenFeaturesUnlocked = hiddenFeaturesUnlocked,
+                    onUnlockHiddenFeatures = { settingsViewModel.unlockHiddenFeatures() },
                     onNavigateToAbout = { onNavigate(SettingsRoute.About) },
                 )
             }
@@ -244,17 +264,17 @@ fun DesktopSettingsScreen(
     }
 }
 
-/** Desktop App Info section: About link and version with excluded-modules unlock easter egg. */
+/** Desktop App Info section: About link and version with hidden-features unlock easter egg. */
 @Composable
 private fun DesktopAppInfoSection(
     appVersionName: String,
-    excludedModulesUnlocked: Boolean,
-    onUnlockExcludedModules: () -> Unit,
+    hiddenFeaturesUnlocked: Boolean,
+    onUnlockHiddenFeatures: () -> Unit,
     onNavigateToAbout: () -> Unit,
 ) {
     ExpressiveSection(title = stringResource(Res.string.info)) {
         ListItem(
-            text = stringResource(Res.string.acknowledgements),
+            text = stringResource(Res.string.about),
             leadingIcon = MeshtasticIcons.Info,
             trailingIcon = MeshtasticIcons.ChevronRight,
         ) {
@@ -262,9 +282,9 @@ private fun DesktopAppInfoSection(
         }
 
         DesktopAppVersionButton(
-            excludedModulesUnlocked = excludedModulesUnlocked,
+            hiddenFeaturesUnlocked = hiddenFeaturesUnlocked,
             appVersionName = appVersionName,
-            onUnlockExcludedModules = onUnlockExcludedModules,
+            onUnlockHiddenFeatures = onUnlockHiddenFeatures,
         )
     }
 }
@@ -275,9 +295,9 @@ private const val UNLOCK_TIMEOUT_SECONDS = 1
 
 @Composable
 private fun DesktopAppVersionButton(
-    excludedModulesUnlocked: Boolean,
+    hiddenFeaturesUnlocked: Boolean,
     appVersionName: String,
-    onUnlockExcludedModules: () -> Unit,
+    onUnlockHiddenFeatures: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val showToast = rememberShowToastResource()
@@ -299,14 +319,14 @@ private fun DesktopAppVersionButton(
         clickCount = clickCount.inc().coerceIn(0, UNLOCK_CLICK_COUNT)
 
         when {
-            clickCount == UNLOCKED_CLICK_COUNT && excludedModulesUnlocked -> {
+            clickCount == UNLOCKED_CLICK_COUNT && hiddenFeaturesUnlocked -> {
                 clickCount = 0
                 scope.launch { showToast(Res.string.modules_already_unlocked) }
             }
 
             clickCount == UNLOCK_CLICK_COUNT -> {
                 clickCount = 0
-                onUnlockExcludedModules()
+                onUnlockHiddenFeatures()
                 scope.launch { showToast(Res.string.modules_unlocked) }
             }
         }

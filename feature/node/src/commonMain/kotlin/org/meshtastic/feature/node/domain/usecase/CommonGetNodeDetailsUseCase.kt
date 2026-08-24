@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,15 +22,22 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onStart
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.TemperatureUnit
+import org.meshtastic.core.common.util.getSystemTemperatureUnit
 import org.meshtastic.core.database.entity.FirmwareRelease
+import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.DeviceLink
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.util.DistanceUnit
 import org.meshtastic.core.model.util.hasValidEnvironmentMetrics
 import org.meshtastic.core.model.util.isDirectSignal
 import org.meshtastic.core.repository.DeviceHardwareRepository
+import org.meshtastic.core.repository.DeviceLinkRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.NodeRepository
@@ -44,7 +51,6 @@ import org.meshtastic.feature.node.detail.NodeRequestActions
 import org.meshtastic.feature.node.metrics.EnvironmentMetricsState
 import org.meshtastic.feature.node.model.LogsType
 import org.meshtastic.feature.node.model.MetricsState
-import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceProfile
 import org.meshtastic.proto.FirmwareEdition
 import org.meshtastic.proto.MeshPacket
@@ -58,6 +64,7 @@ constructor(
     private val meshLogRepository: MeshLogRepository,
     private val radioConfigRepository: RadioConfigRepository,
     private val deviceHardwareRepository: DeviceHardwareRepository,
+    private val deviceLinkRepository: DeviceLinkRepository,
     private val firmwareReleaseRepository: FirmwareReleaseRepository,
     private val nodeRequestActions: NodeRequestActions,
 ) : GetNodeDetailsUseCase {
@@ -113,7 +120,25 @@ constructor(
                 IdentityGroup(ourNode, myInfo, profile)
             }
 
-        // 3. Metadata & Request Timestamps
+        // 3. Device Hardware (+ msh.to links) — non-blocking Flow derived from stable (hwModel, pioEnv) key.
+        val hardwareAndLinksFlow: Flow<Pair<DeviceHardware?, List<DeviceLink>>> =
+            combine(nodeFlow, identityFlow) { node, identity ->
+                val isLocal = node.num == identity.ourNode?.num
+                val pioEnv = if (isLocal) identity.myInfo?.pioEnv else null
+                HardwareKey(node.user.hw_model.value, pioEnv)
+            }
+                .distinctUntilChanged()
+                .flatMapLatest { key -> deviceHardwareRepository.observeDeviceHardware(key.hwModel, key.target) }
+                .onStart { emit(null) }
+                .mapLatest { hw ->
+                    val links =
+                        hw?.platformioTarget
+                            ?.takeIf { it.isNotBlank() }
+                            ?.let { deviceLinkRepository.getLinksForTarget(it) } ?: emptyList()
+                    hw to links
+                }
+
+        // 4. Metadata & Request Timestamps
         val metadataFlow =
             combine(
                 meshLogRepository
@@ -121,15 +146,17 @@ constructor(
                     .map { it?.firmware_edition }
                     .distinctUntilChanged()
                     .onStart { emit(null) },
-                firmwareReleaseRepository.stableRelease,
-                firmwareReleaseRepository.alphaRelease,
+                // Placeholders keep the first UI emission from waiting on the firmware cache/refresh pipeline —
+                // real values land via re-emission once the repository produces them.
+                firmwareReleaseRepository.stableRelease.onStart { emit(null) },
+                firmwareReleaseRepository.alphaRelease.onStart { emit(null) },
                 nodeRequestActions.lastTracerouteTime,
                 nodeRequestActions.lastRequestNeighborTimes.map { it[nodeId] },
             ) { edition, stable, alpha, trTime, niTime ->
                 MetadataGroup(edition = edition, stable = stable, alpha = alpha, trTime = trTime, niTime = niTime)
             }
 
-        // 4. Requests History (we still query request logs by the target nodeId)
+        // 5. Requests History (we still query request logs by the target nodeId)
         val requestsFlow =
             combine(
                 meshLogRepository.getRequestLogs(nodeId, PortNum.TRACEROUTE_APP).onStart { emit(emptyList()) },
@@ -139,34 +166,47 @@ constructor(
             }
 
         // Assemble final UI state
-        return combine(nodeFlow, metricsLogsFlow, identityFlow, metadataFlow, requestsFlow) {
-                node,
-                logs,
-                identity,
-                metadata,
-                requests,
-            ->
+        return combine(
+            nodeFlow,
+            metricsLogsFlow,
+            identityFlow,
+            metadataFlow,
+            requestsFlow,
+            hardwareAndLinksFlow,
+        ) { args: Array<Any?> ->
+            @Suppress("UNCHECKED_CAST")
+            val node = args[NODE_INDEX] as Node
+            val logs = args[LOGS_INDEX] as LogsGroup
+            val identity = args[IDENTITY_INDEX] as IdentityGroup
+            val metadata = args[METADATA_INDEX] as MetadataGroup
+
+            @Suppress("UNCHECKED_CAST")
+            val requests = args[REQUESTS_INDEX] as Pair<List<MeshLog>, List<MeshLog>>
+
+            @Suppress("UNCHECKED_CAST")
+            val hardwareAndLinks = args[HARDWARE_INDEX] as Pair<DeviceHardware?, List<DeviceLink>>
+            val (hw, deviceLinks) = hardwareAndLinks
+
             val (trReqs, niReqs) = requests
             val isLocal = node.num == identity.ourNode?.num
             val pioEnv = if (isLocal) identity.myInfo?.pioEnv else null
-            val hw = deviceHardwareRepository.getDeviceHardwareByModel(node.user.hw_model.value, pioEnv).getOrNull()
 
-            val moduleConfig = identity.profile.module_config
-            val displayUnits = identity.profile.config?.display?.units ?: Config.DisplayConfig.DisplayUnits.METRIC
+            val displayUnits = DistanceUnit.getFromLocale()
 
             val metricsState =
                 MetricsState(
                     node = node,
                     isLocal = isLocal,
                     deviceHardware = hw,
+                    deviceLinks = deviceLinks,
                     reportedTarget = pioEnv,
                     isManaged = identity.profile.config?.security?.is_managed ?: false,
-                    isFahrenheit =
-                    moduleConfig?.telemetry?.environment_display_fahrenheit == true ||
-                        (displayUnits == Config.DisplayConfig.DisplayUnits.IMPERIAL),
+                    isFahrenheit = getSystemTemperatureUnit() == TemperatureUnit.FAHRENHEIT,
                     displayUnits = displayUnits,
                     deviceMetrics = logs.telemetry.filter { it.device_metrics != null },
+                    localStats = logs.telemetry.filter { it.local_stats != null },
                     powerMetrics = logs.telemetry.filter { it.power_metrics != null },
+                    airQualityMetrics = logs.telemetry.filter { it.air_quality_metrics != null },
                     hostMetrics = logs.telemetry.filter { it.host_metrics != null },
                     signalMetrics = logs.packets.filter { it.isDirectSignal() },
                     positionLogs = logs.posPackets.mapNotNull { it.toPosition() },
@@ -189,8 +229,9 @@ constructor(
                     add(LogsType.POSITIONS)
                 }
                 if (environmentState.hasEnvironmentMetrics()) add(LogsType.ENVIRONMENT)
-                if (metricsState.hasSignalMetrics()) add(LogsType.SIGNAL)
+                if (metricsState.hasSignalMetrics() || metricsState.hasLocalStats()) add(LogsType.SIGNAL)
                 if (metricsState.hasPowerMetrics()) add(LogsType.POWER)
+                if (metricsState.hasAirQualityMetrics()) add(LogsType.AIR_QUALITY)
                 if (metricsState.hasTracerouteLogs()) add(LogsType.TRACEROUTE)
                 if (metricsState.hasNeighborInfoLogs()) add(LogsType.NEIGHBOR_INFO)
                 if (metricsState.hasHostMetrics()) add(LogsType.HOST)
@@ -215,6 +256,8 @@ constructor(
         }
     }
 
+    private data class HardwareKey(val hwModel: Int, val target: String?)
+
     private data class LogsGroup(
         val telemetry: List<Telemetry>,
         val packets: List<MeshPacket>,
@@ -233,4 +276,13 @@ constructor(
         val trTime: Long?,
         val niTime: Long?,
     )
+
+    private companion object {
+        const val NODE_INDEX = 0
+        const val LOGS_INDEX = 1
+        const val IDENTITY_INDEX = 2
+        const val METADATA_INDEX = 3
+        const val REQUESTS_INDEX = 4
+        const val HARDWARE_INDEX = 5
+    }
 }

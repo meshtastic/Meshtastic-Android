@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,13 +18,16 @@ package org.meshtastic.feature.messaging.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -36,25 +39,46 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.action_copy_message
+import org.meshtastic.core.resources.action_delete_message
+import org.meshtastic.core.resources.action_more_message_actions
+import org.meshtastic.core.resources.action_react_with_emoji
+import org.meshtastic.core.resources.action_select_message
+import org.meshtastic.core.resources.action_send_reply
+import org.meshtastic.core.resources.action_show_message_status
+import org.meshtastic.core.resources.action_toggle_translation
+import org.meshtastic.core.resources.action_translate_message
 import org.meshtastic.core.resources.copy
 import org.meshtastic.core.resources.delete
 import org.meshtastic.core.resources.device_metrics_label_value
 import org.meshtastic.core.resources.message_delivery_status
 import org.meshtastic.core.resources.more_reactions
 import org.meshtastic.core.resources.reply
+import org.meshtastic.core.resources.security_signed_message_info
+import org.meshtastic.core.resources.security_signed_verified
 import org.meshtastic.core.resources.select
+import org.meshtastic.core.resources.show_original
+import org.meshtastic.core.resources.show_translation
+import org.meshtastic.core.resources.timestamp
+import org.meshtastic.core.resources.translate
 import org.meshtastic.core.ui.icon.AddReaction
 import org.meshtastic.core.ui.icon.Copy
 import org.meshtastic.core.ui.icon.Delete
+import org.meshtastic.core.ui.icon.History
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.More
 import org.meshtastic.core.ui.icon.Reply
 import org.meshtastic.core.ui.icon.SelectAll
+import org.meshtastic.core.ui.icon.ShieldCheck
+import org.meshtastic.core.ui.icon.Translate
 
+@Suppress("LongMethod")
 @Composable
 fun MessageActionsContent(
     quickEmojis: List<String>,
@@ -64,14 +88,49 @@ fun MessageActionsContent(
     onCopy: () -> Unit,
     onSelect: () -> Unit,
     onDelete: () -> Unit,
+    onStatus: () -> Unit,
     statusString: Pair<StringResource, StringResource>? = null,
     status: MessageStatus? = null,
-    onStatus: (() -> Unit),
+    timestamp: String? = null,
+    xeddsaSigned: Boolean = false,
+    translationRowState: TranslationRowState? = null,
+    onTranslate: () -> Unit = {},
+    onToggleTranslation: () -> Unit = {},
 ) {
     Column {
         QuickEmojiRow(quickEmojis = quickEmojis, onReact = onReact, onMoreReactions = onMoreReactions)
 
         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+        if (xeddsaSigned) {
+            ListItem(
+                headlineContent = { Text(stringResource(Res.string.security_signed_verified)) },
+                supportingContent = { Text(stringResource(Res.string.security_signed_message_info)) },
+                leadingContent = {
+                    Icon(
+                        MeshtasticIcons.ShieldCheck,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                },
+            )
+        }
+
+        // The caller supplies the same compact or full timestamp shown in the conversation header.
+        if (timestamp != null) {
+            ListItem(
+                headlineContent = {
+                    Text(
+                        stringResource(
+                            Res.string.device_metrics_label_value,
+                            stringResource(Res.string.timestamp),
+                            timestamp,
+                        ),
+                    )
+                },
+                leadingContent = { Icon(MeshtasticIcons.History, contentDescription = null) },
+            )
+        }
 
         if (status != null) {
             val title =
@@ -83,54 +142,126 @@ fun MessageActionsContent(
                     Text(stringResource(Res.string.device_metrics_label_value, title, statusText.orEmpty()))
                 },
                 leadingContent = { MessageStatusIcon(status = status) },
-                modifier = Modifier.clickable(onClick = onStatus),
+                modifier =
+                Modifier.clickable(
+                    onClickLabel = stringResource(Res.string.action_show_message_status),
+                    role = Role.Button,
+                    onClick = onStatus,
+                ),
             )
         }
 
         ListItem(
             headlineContent = { Text(stringResource(Res.string.reply)) },
             leadingContent = { Icon(MeshtasticIcons.Reply, contentDescription = stringResource(Res.string.reply)) },
-            modifier = Modifier.clickable(onClick = onReply),
+            modifier =
+            Modifier.clickable(
+                onClickLabel = stringResource(Res.string.action_send_reply),
+                role = Role.Button,
+                onClick = onReply,
+            ),
         )
 
         ListItem(
             headlineContent = { Text(stringResource(Res.string.copy)) },
             leadingContent = { Icon(MeshtasticIcons.Copy, contentDescription = stringResource(Res.string.copy)) },
-            modifier = Modifier.clickable(onClick = onCopy),
+            modifier =
+            Modifier.clickable(
+                onClickLabel = stringResource(Res.string.action_copy_message),
+                role = Role.Button,
+                onClick = onCopy,
+            ),
         )
+
+        if (translationRowState != null) {
+            val headline =
+                when (translationRowState) {
+                    TranslationRowState.Translate -> stringResource(Res.string.translate)
+                    TranslationRowState.ShowOriginal -> stringResource(Res.string.show_original)
+                    TranslationRowState.ShowTranslation -> stringResource(Res.string.show_translation)
+                }
+            val onClickLabel =
+                when (translationRowState) {
+                    TranslationRowState.Translate -> stringResource(Res.string.action_translate_message)
+                    else -> stringResource(Res.string.action_toggle_translation)
+                }
+            ListItem(
+                headlineContent = { Text(headline) },
+                leadingContent = { Icon(MeshtasticIcons.Translate, contentDescription = headline) },
+                modifier =
+                Modifier.clickable(
+                    onClickLabel = onClickLabel,
+                    role = Role.Button,
+                    onClick =
+                    if (translationRowState == TranslationRowState.Translate) {
+                        onTranslate
+                    } else {
+                        onToggleTranslation
+                    },
+                ),
+            )
+        }
 
         ListItem(
             headlineContent = { Text(stringResource(Res.string.select)) },
             leadingContent = {
                 Icon(MeshtasticIcons.SelectAll, contentDescription = stringResource(Res.string.select))
             },
-            modifier = Modifier.clickable(onClick = onSelect),
+            modifier =
+            Modifier.clickable(
+                onClickLabel = stringResource(Res.string.action_select_message),
+                role = Role.Button,
+                onClick = onSelect,
+            ),
         )
 
         ListItem(
             headlineContent = { Text(stringResource(Res.string.delete)) },
             leadingContent = { Icon(MeshtasticIcons.Delete, contentDescription = stringResource(Res.string.delete)) },
-            modifier = Modifier.clickable(onClick = onDelete),
+            modifier =
+            Modifier.clickable(
+                onClickLabel = stringResource(Res.string.action_delete_message),
+                role = Role.Button,
+                onClick = onDelete,
+            ),
         )
     }
 }
 
-private const val MAX_EMOJI_ROW_SIZE = 6
+internal const val MAX_EMOJI_ROW_SIZE = 6
 
+/**
+ * Six one-tap reactions plus the full picker. [onMoreActions], when supplied, appends an overflow button — the inline
+ * bar uses it to reach the actions sheet, which is where the row itself lives when opened the other way round.
+ */
 @Composable
-private fun QuickEmojiRow(quickEmojis: List<String>, onReact: (String) -> Unit, onMoreReactions: () -> Unit) {
+internal fun QuickEmojiRow(
+    quickEmojis: List<String>,
+    onReact: (String) -> Unit,
+    onMoreReactions: () -> Unit,
+    onMoreActions: (() -> Unit)? = null,
+) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        // Scrollable so seven 44dp touch targets never clip on narrow (320dp) sheets.
+        modifier =
+        Modifier.fillMaxWidth()
+            .horizontalScroll(rememberScrollState())
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         quickEmojis.take(MAX_EMOJI_ROW_SIZE).forEach { emoji ->
             Box(
                 modifier =
-                Modifier.size(40.dp)
+                Modifier.defaultMinSize(minWidth = 44.dp, minHeight = 44.dp)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .clickable { onReact(emoji) },
+                    .clickable(
+                        onClickLabel = stringResource(Res.string.action_react_with_emoji),
+                        role = Role.Button,
+                    ) {
+                        onReact(emoji)
+                    },
                 contentAlignment = Alignment.Center,
             ) {
                 Text(text = emoji, style = MaterialTheme.typography.titleMedium)
@@ -139,7 +270,7 @@ private fun QuickEmojiRow(quickEmojis: List<String>, onReact: (String) -> Unit, 
 
         IconButton(
             onClick = onMoreReactions,
-            modifier = Modifier.size(40.dp).background(MaterialTheme.colorScheme.surfaceVariant, CircleShape),
+            modifier = Modifier.size(44.dp).background(MaterialTheme.colorScheme.surfaceVariant, CircleShape),
         ) {
             Icon(
                 MeshtasticIcons.AddReaction,
@@ -147,6 +278,20 @@ private fun QuickEmojiRow(quickEmojis: List<String>, onReact: (String) -> Unit, 
                 modifier = Modifier.size(20.dp),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+        }
+
+        if (onMoreActions != null) {
+            IconButton(
+                onClick = onMoreActions,
+                modifier = Modifier.size(44.dp).background(MaterialTheme.colorScheme.surfaceVariant, CircleShape),
+            ) {
+                Icon(
+                    MeshtasticIcons.More,
+                    contentDescription = stringResource(Res.string.action_more_message_actions),
+                    modifier = Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }

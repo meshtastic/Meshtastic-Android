@@ -16,6 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:label="@string/widget_local_stats_label"
     android:initialLayout="@layout/glance_default_loading_layout"
     android:previewLayout="@layout/widget_local_stats_preview"
     android:minWidth="110dp"

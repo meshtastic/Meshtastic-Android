@@ -17,26 +17,37 @@
 package org.meshtastic.core.service
 
 import android.app.NotificationChannel
+import android.app.PendingIntent
+import android.app.TaskStackBuilder
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.getSystemService
+import androidx.core.net.toUri
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.koin.core.annotation.Single
 import org.meshtastic.core.repository.Notification
 import org.meshtastic.core.repository.NotificationManager
+import org.meshtastic.core.resources.R.drawable
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.getString
+import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.resources.meshtastic_alerts_notifications
 import org.meshtastic.core.resources.meshtastic_low_battery_notifications
+import org.meshtastic.core.resources.meshtastic_mesh_beacon_notifications
 import org.meshtastic.core.resources.meshtastic_messages_notifications
 import org.meshtastic.core.resources.meshtastic_new_nodes_notifications
 import org.meshtastic.core.resources.meshtastic_service_notifications
+import org.meshtastic.proto.ClientNotification
 import android.app.NotificationManager as SystemNotificationManager
 
 @Single
 class AndroidNotificationManager(private val context: Context) : NotificationManager {
 
-    private val notificationManager = context.getSystemService<SystemNotificationManager>()!!
+    private val notificationManager =
+        checkNotNull(context.getSystemService<SystemNotificationManager>()) { "NotificationManager not found" }
 
     private data class ChannelConfig(val id: String, val importance: Int)
 
@@ -44,22 +55,29 @@ class AndroidNotificationManager(private val context: Context) : NotificationMan
      * Tracks whether notification channels have been created.
      *
      * Channels are **not** created in the constructor because this singleton is instantiated by Koin during
-     * [org.meshtastic.core.service.MeshService.onCreate] on the main thread. The CMP [getString] helper uses
-     * [kotlinx.coroutines.runBlocking] which can fail in that context, crashing the entire service startup chain.
-     * Instead, channels are lazily ensured before the first [dispatch] call. Note that
-     * [MeshServiceNotificationsImpl.initChannels] already creates a superset of these channels when the orchestrator
+     * [org.meshtastic.core.service.MeshService.onCreate] on the main thread, and channel names come from string
+     * resources. Instead, channels are lazily ensured before the first [dispatch] call. Note that
+     * [MeshNotificationManagerImpl.initChannels] already creates a superset of these channels when the orchestrator
      * starts, so this lazy path is only a safety net for notifications dispatched before orchestrator initialization.
+     *
+     * The mutex is load-bearing: resolving the names suspends, so without it two concurrent [dispatch] calls could both
+     * pass the flag check and post before the channels exist.
      */
     private var channelsInitialized = false
+    private val channelInitMutex = Mutex()
 
-    private fun ensureChannelsInitialized() {
-        if (channelsInitialized) return
+    private suspend fun ensureChannelsInitialized() = channelInitMutex.withLock {
+        if (channelsInitialized) return@withLock
         channelsInitialized = true
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channels =
                 listOf(
                     createChannel(Notification.Category.Message, Res.string.meshtastic_messages_notifications),
                     createChannel(Notification.Category.NodeEvent, Res.string.meshtastic_new_nodes_notifications),
+                    createChannel(
+                        Notification.Category.MeshBeacon,
+                        Res.string.meshtastic_mesh_beacon_notifications,
+                    ),
                     createChannel(Notification.Category.Battery, Res.string.meshtastic_low_battery_notifications),
                     createChannel(Notification.Category.Alert, Res.string.meshtastic_alerts_notifications),
                     createChannel(Notification.Category.Service, Res.string.meshtastic_service_notifications),
@@ -69,55 +87,114 @@ class AndroidNotificationManager(private val context: Context) : NotificationMan
         }
     }
 
-    private fun createChannel(
+    private suspend fun createChannel(
         category: Notification.Category,
         nameRes: org.jetbrains.compose.resources.StringResource,
     ): NotificationChannel {
         val channelConfig = category.channelConfig()
-        return NotificationChannel(channelConfig.id, getString(nameRes), channelConfig.importance)
+        return NotificationChannel(channelConfig.id, getStringSuspend(nameRes), channelConfig.importance)
     }
 
-    // Keep category-to-channel mapping aligned with MeshServiceNotificationsImpl.NotificationType IDs.
+    // Keep category-to-channel mapping aligned with MeshNotificationManagerImpl.NotificationType IDs.
     private fun Notification.Category.channelConfig(): ChannelConfig = when (this) {
         Notification.Category.Message ->
             ChannelConfig(
                 id = NotificationChannels.MESSAGES,
                 importance = SystemNotificationManager.IMPORTANCE_HIGH,
             )
+
         Notification.Category.NodeEvent ->
             ChannelConfig(
                 id = NotificationChannels.NEW_NODES,
                 importance = SystemNotificationManager.IMPORTANCE_DEFAULT,
             )
+
+        Notification.Category.MeshBeacon ->
+            ChannelConfig(
+                id = NotificationChannels.MESH_BEACON,
+                importance = SystemNotificationManager.IMPORTANCE_LOW,
+            )
+
         Notification.Category.Battery ->
             ChannelConfig(
                 id = NotificationChannels.LOW_BATTERY,
                 importance = SystemNotificationManager.IMPORTANCE_DEFAULT,
             )
+
         Notification.Category.Alert ->
             ChannelConfig(id = NotificationChannels.ALERTS, importance = SystemNotificationManager.IMPORTANCE_HIGH)
+
         Notification.Category.Service ->
             ChannelConfig(id = NotificationChannels.SERVICE, importance = SystemNotificationManager.IMPORTANCE_MIN)
     }
 
-    override fun dispatch(notification: Notification) {
+    override suspend fun dispatch(notification: Notification): Boolean = dispatch(notification, onlyAlertOnce = false)
+
+    override fun suppressClientNotificationModal(notification: ClientNotification): Boolean =
+        notification.isProtectedPositionAdvisory()
+
+    // The advisory's id already comes from ClientNotification.notificationId(), which is stable across repeats (see
+    // its kdoc) — so it lands in the same tray slot without a dedicated tag or fixed id; only onlyAlertOnce is needed
+    // to stop it from re-alerting on every update.
+    override suspend fun dispatchClientNotification(
+        notification: Notification,
+        clientNotification: ClientNotification,
+    ): Boolean = dispatch(notification, onlyAlertOnce = clientNotification.isProtectedPositionAdvisory())
+
+    private suspend fun dispatch(notification: Notification, onlyAlertOnce: Boolean): Boolean {
         ensureChannelsInitialized()
+        val channelId = notification.category.channelConfig().id
+        if (!canPostNotifications(channelId)) return false
+        val id = notification.id ?: notification.hashCode()
         val builder =
-            NotificationCompat.Builder(context, notification.category.channelConfig().id)
+            NotificationCompat.Builder(context, channelId)
                 .setContentTitle(notification.title)
                 .setContentText(notification.message)
-                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setSmallIcon(drawable.meshtastic_ic_notification)
                 .setAutoCancel(true)
                 .setSilent(notification.isSilent)
 
         notification.group?.let { builder.setGroup(it) }
+        if (onlyAlertOnce) builder.setOnlyAlertOnce(true)
 
         if (notification.type == Notification.Type.Error) {
             builder.setPriority(NotificationCompat.PRIORITY_HIGH)
         }
 
-        val id = notification.id ?: notification.hashCode()
-        notificationManager.notify(id, builder.build())
+        notification.deepLinkUri?.let { uri -> builder.setContentIntent(createDeepLinkPendingIntent(uri, id)) }
+
+        return try {
+            notificationManager.notify(id, builder.build())
+            true
+        } catch (_: SecurityException) {
+            false
+        }
+    }
+
+    private fun canPostNotifications(channelId: String): Boolean =
+        NotificationManagerCompat.from(context).areNotificationsEnabled() &&
+            (
+                Build.VERSION.SDK_INT < Build.VERSION_CODES.O ||
+                    notificationManager.getNotificationChannel(channelId)?.importance !=
+                    SystemNotificationManager.IMPORTANCE_NONE
+                )
+
+    /**
+     * Builds a [PendingIntent] that launches [MainActivity] with the given deep-link URI as [Intent.ACTION_VIEW], so
+     * the existing deep-link plumbing (`UIViewModel.handleDeepLink` → `DeepLinkRouter` → `MultiBackstack`) can
+     * synthesize the proper backstack and surface the target screen.
+     *
+     * Uses [Class.forName] to avoid pulling the `:androidApp` module into `:core:service` as a Gradle dep.
+     */
+    private fun createDeepLinkPendingIntent(uri: String, requestCode: Int): PendingIntent {
+        val deepLinkIntent =
+            Intent(Intent.ACTION_VIEW, uri.toUri(), context, Class.forName(MAIN_ACTIVITY_CLASS)).apply {
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+            }
+        return TaskStackBuilder.create(context).run {
+            addNextIntentWithParentStack(deepLinkIntent)
+            getPendingIntent(requestCode, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)!!
+        }
     }
 
     override fun cancel(id: Int) {
@@ -126,5 +203,13 @@ class AndroidNotificationManager(private val context: Context) : NotificationMan
 
     override fun cancelAll() {
         notificationManager.cancelAll()
+    }
+
+    private companion object {
+        /**
+         * Fully-qualified name of the host activity that handles `meshtastic://` deep-link intents. Kept as a string to
+         * avoid creating a module dependency from `:core:service` back onto `:androidApp`.
+         */
+        const val MAIN_ACTIVITY_CLASS = "org.meshtastic.app.MainActivity"
     }
 }

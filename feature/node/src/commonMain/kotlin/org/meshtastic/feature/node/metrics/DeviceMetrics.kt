@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ package org.meshtastic.feature.node.metrics
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -50,7 +51,7 @@ import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianLayerRangeProvider
-import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
+import com.patrykandpatrick.vico.compose.cartesian.data.lineModel
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import org.jetbrains.compose.resources.stringResource
@@ -191,7 +192,11 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
         },
         listPart = { modifier, selectedX, lazyListState, onCardClick ->
             LazyColumn(modifier = modifier.fillMaxSize(), state = lazyListState) {
-                itemsIndexed(data) { _, telemetry ->
+                itemsIndexed(
+                    data,
+                    key = { index, telemetry -> "${telemetry.time}_$index" },
+                    contentType = { _, _ -> "device_metrics" },
+                ) { _, telemetry ->
                     DeviceMetricsCard(
                         telemetry = telemetry,
                         isSelected = telemetry.time.toDouble() == selectedX,
@@ -274,7 +279,7 @@ private fun DeviceMetricsChart(
             modelProducer.runTransaction {
                 /* Series for Left Axis (0-100%) */
                 if (leftLayerSeriesStyles.isNotEmpty()) {
-                    lineSeries {
+                    lineModel {
                         if (batteryData.isNotEmpty()) {
                             series(
                                 x = batteryData.map { it.time },
@@ -297,7 +302,7 @@ private fun DeviceMetricsChart(
                 }
                 /* Series for Right Axis (Voltage) */
                 if (voltageData.isNotEmpty()) {
-                    lineSeries {
+                    lineModel {
                         series(
                             x = voltageData.map { it.time },
                             y = voltageData.map { it.device_metrics?.voltage ?: 0f },
@@ -399,7 +404,12 @@ private fun DeviceMetricsChartPreview() {
 
 @Composable
 @Suppress("LongMethod")
-private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick: () -> Unit) {
+private fun DeviceMetricsCard(
+    telemetry: Telemetry,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    timeTextOverride: String? = null,
+) {
     val deviceMetrics = telemetry.device_metrics
     val time = telemetry.time.toLong() * MS_PER_SEC
     val channelUtilizationLabel = stringResource(Res.string.channel_utilization)
@@ -412,7 +422,7 @@ private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick
             /* Time, Battery, and Voltage */
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(
-                    text = DateFormatter.formatDateTime(time),
+                    text = timeTextOverride ?: DateFormatter.formatDateTime(time),
                     style = MaterialTheme.typography.titleMediumEmphasized,
                     fontWeight = FontWeight.Bold,
                 )
@@ -435,8 +445,15 @@ private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            /* Channel Utilization and Air Utilization Tx */
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            /* Channel Utilization / Air Utilization Tx, and Uptime */
+            // FlowRow(SpaceBetween) so the uptime stays pinned right when it fits and drops onto its own line when the
+            // (localized) labels don't fit, instead of being crushed and wrapped one character per line.
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                itemVerticalAlignment = Alignment.CenterVertically,
+            ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (deviceMetrics?.channel_utilization != null) {
                         MetricValueRow(
@@ -466,7 +483,7 @@ private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick
                     text =
                     formatString(labelValueTemplate, uptimeLabel, formatUptime(deviceMetrics?.uptime_seconds ?: 0)),
                     color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                    style = MaterialTheme.typography.labelLarge,
                 )
             }
         }
@@ -476,8 +493,8 @@ private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick
 @PreviewLightDark
 @Suppress("detekt:MagicNumber") // Compose preview with fake data
 @Composable
-private fun DeviceMetricsCardPreview() {
-    val now = nowSeconds.toInt()
+fun DeviceMetricsCardPreview() {
+    val now = 1700000000
     val telemetry =
         Telemetry(
             time = now,
@@ -490,7 +507,14 @@ private fun DeviceMetricsCardPreview() {
                 uptime_seconds = 7200,
             ),
         )
-    AppTheme { DeviceMetricsCard(telemetry = telemetry, isSelected = false, onClick = {}) }
+    AppTheme {
+        DeviceMetricsCard(
+            telemetry = telemetry,
+            isSelected = false,
+            onClick = {},
+            timeTextOverride = "2023-11-14 22:13",
+        )
+    }
 }
 
 @PreviewLightDark
@@ -548,7 +572,11 @@ private fun DeviceMetricsScreenPreview() {
 
                 /* Device Metric Cards */
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    itemsIndexed(telemetries) { _, telemetry ->
+                    itemsIndexed(
+                        telemetries,
+                        key = { index, telemetry -> "${telemetry.time}_$index" },
+                        contentType = { _, _ -> "device_metrics" },
+                    ) { _, telemetry ->
                         DeviceMetricsCard(telemetry = telemetry, isSelected = false, onClick = {})
                     }
                 }

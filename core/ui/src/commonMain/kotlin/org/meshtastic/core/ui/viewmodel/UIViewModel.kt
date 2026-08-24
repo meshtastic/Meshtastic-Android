@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,14 +20,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation3.runtime.NavKey
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
@@ -37,25 +43,37 @@ import org.jetbrains.compose.resources.getString
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.database.entity.asDeviceVersion
+import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.EventFirmwareEdition
 import org.meshtastic.core.model.MeshActivity
 import org.meshtastic.core.model.MyNodeInfo
-import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.model.TracerouteMapAvailability
 import org.meshtastic.core.model.evaluateTracerouteMapAvailability
 import org.meshtastic.core.model.service.TracerouteResponse
 import org.meshtastic.core.model.util.dispatchMeshtasticUri
+import org.meshtastic.core.model.util.isOtaStatusNotification
 import org.meshtastic.core.navigation.DeepLinkRouter
+import org.meshtastic.core.repository.EventFirmwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
+import org.meshtastic.core.repository.FirmwareUpdateStatusRepository
+import org.meshtastic.core.repository.LockdownCoordinator
+import org.meshtastic.core.repository.LockdownPassphraseStore
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.NodeRestartTracker
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
+import org.meshtastic.core.repository.notificationId
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.client_notification
 import org.meshtastic.core.resources.compromised_keys
+import org.meshtastic.core.resources.getStringSuspend
+import org.meshtastic.core.resources.import_pending_channels_connect
+import org.meshtastic.core.resources.import_pending_contact_connect
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.core.ui.util.AlertManager
 import org.meshtastic.core.ui.util.ComposableContent
@@ -71,23 +89,55 @@ import org.meshtastic.proto.SharedContact
  * shared contacts, channel sets, unread counts, etc.).
  */
 @KoinViewModel
+@OptIn(ExperimentalCoroutinesApi::class)
 @Suppress("LongParameterList", "TooManyFunctions")
 class UIViewModel(
     private val nodeDB: NodeRepository,
     protected val serviceRepository: ServiceRepository,
     private val radioController: RadioController,
+    private val lockdownCoordinator: LockdownCoordinator,
     radioInterfaceService: RadioInterfaceService,
     meshLogRepository: MeshLogRepository,
     firmwareReleaseRepository: FirmwareReleaseRepository,
+    private val eventFirmwareRepository: EventFirmwareRepository,
+    private val firmwareUpdateStatusRepository: FirmwareUpdateStatusRepository,
     private val uiPrefs: UiPrefs,
     private val notificationManager: NotificationManager,
     packetRepository: PacketRepository,
     val alertManager: AlertManager,
     val snackbarManager: SnackbarManager,
+    nodeRestartTracker: NodeRestartTracker,
 ) : ViewModel() {
+
+    /** True while the connected node is expected to be mid-restart (reboot-applying config save or reboot command). */
+    val nodeRestartExpected: StateFlow<Boolean> = nodeRestartTracker.restartExpected
+
+    /**
+     * True while the handshake-stall watchdog is force-reconnecting the transport, so the UI can present the transient
+     * Disconnected window as an in-progress recovery rather than a user-visible disconnect. Same signal contract as
+     * [ConnectionsViewModel.connectionStatus]'s RECONNECTING case.
+     */
+    val watchdogReconnectInFlight: StateFlow<Boolean> =
+        combine(serviceRepository.connectionState, serviceRepository.connectionProgress) { state, progress ->
+            state is ConnectionState.Disconnected && progress == ServiceRepository.RECONNECTING_PROGRESS_TEXT
+        }
+            .distinctUntilChanged()
+            .stateInWhileSubscribed(initialValue = false)
 
     private val _navigationDeepLink = MutableSharedFlow<List<NavKey>>(replay = 1)
     val navigationDeepLink = _navigationDeepLink.asSharedFlow()
+
+    /**
+     * Clears the buffered deep link once its collector has applied it to the backstack.
+     *
+     * [_navigationDeepLink] replays its last value so a deep link emitted before the collector subscribes (e.g. on cold
+     * start) isn't lost. But this ViewModel is Activity-scoped and survives configuration changes, while the collecting
+     * `LaunchedEffect` does not — without this, a device rotation after a deep link re-subscribes and replays the same
+     * value, duplicate-appending it onto [MultiBackstack]'s current tab.
+     */
+    fun onDeepLinkHandled() {
+        _navigationDeepLink.resetReplayCache()
+    }
 
     /**
      * Unified handler for all Meshtastic deep links and OS intents.
@@ -110,20 +160,60 @@ class UIViewModel(
         uri.dispatchMeshtasticUri(
             onContact = { setSharedContactRequested(it) },
             onChannel = { setRequestChannelSet(it) },
-            onInvalid = onInvalid,
+            onInvalid = {
+                Logger.w { "Import URI rejected: ${uri.toSanitizedImportSummary()}" }
+                onInvalid()
+            },
         )
     }
 
     val theme: StateFlow<Int> = uiPrefs.theme
-    val contrastLevel: StateFlow<Int> = uiPrefs.contrastLevel
+
+    /** Opt-out for applying an event edition's ambient theme (accent + typeface) app-wide. */
+    val eventThemeEnabled: StateFlow<Boolean> = uiPrefs.eventThemeEnabled
+
+    fun setEventThemeEnabled(enabled: Boolean) = uiPrefs.setEventThemeEnabled(enabled)
 
     val firmwareEdition = meshLogRepository.getMyNodeInfo().map { nodeInfo -> nodeInfo?.firmware_edition }
+
+    val eventEdition: StateFlow<EventFirmwareEdition?> =
+        combine(firmwareEdition, connectionState) { edition, state ->
+            edition?.name?.takeIf { state is ConnectionState.Connected }
+        }
+            .distinctUntilChanged()
+            // Observe rather than read once, so a manifest refresh that lands after connecting reaches the branding
+            // already on screen instead of waiting for a reconnect.
+            .flatMapLatest { editionName ->
+                editionName?.let { eventFirmwareRepository.observeEdition(it) } ?: flowOf(null)
+            }
+            .stateInWhileSubscribed(initialValue = null)
 
     val clientNotification: StateFlow<ClientNotification?> = serviceRepository.clientNotification
 
     fun clearClientNotification(notification: ClientNotification) {
         serviceRepository.clearClientNotification()
-        notificationManager.cancel(notification.toString().hashCode())
+        notificationManager.cancel(notification.notificationId())
+    }
+
+    val lockdownState = serviceRepository.lockdownState
+    val lockdownTokenInfo = serviceRepository.lockdownTokenInfo
+
+    fun sendLockdownUnlock(
+        passphrase: String,
+        bootTtl: Int = DEFAULT_BOOT_TTL,
+        hourTtl: Int = 0,
+        maxSessionSeconds: Int = 0,
+        disable: Boolean = false,
+    ) {
+        lockdownCoordinator.submitPassphrase(passphrase, bootTtl, hourTtl, maxSessionSeconds, disable)
+    }
+
+    fun sendLockNow() {
+        lockdownCoordinator.lockNow()
+    }
+
+    fun clearLockdownState() {
+        serviceRepository.clearLockdownState()
     }
 
     /** Emits events for mesh network send/receive activity. */
@@ -133,7 +223,7 @@ class UIViewModel(
 
     private val _scrollToTopEventFlow =
         MutableSharedFlow<ScrollToTopEvent>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
-    val scrollToTopEventFlow: Flow<ScrollToTopEvent> = _scrollToTopEventFlow.asSharedFlow()
+    val scrollToTopEventFlow: Flow<ScrollToTopEvent> = _scrollToTopEventFlow.asFlow()
 
     fun emitScrollToTopEvent(event: ScrollToTopEvent) {
         _scrollToTopEventFlow.tryEmit(event)
@@ -188,7 +278,7 @@ class UIViewModel(
     }
 
     fun setDeviceAddress(address: String) {
-        radioController.setDeviceAddress(address)
+        safeLaunch(tag = "setDeviceAddress") { radioController.setDeviceAddress(address) }
     }
 
     val unreadMessageCount =
@@ -213,6 +303,14 @@ class UIViewModel(
         serviceRepository.clientNotification
             .filterNotNull()
             .onEach { notification ->
+                val firmwareUpdateStatus = firmwareUpdateStatusRepository.status.value
+                if (notification.isOtaStatusNotification() && firmwareUpdateStatus.isOtaUpdateActive) {
+                    Logger.i { "Suppressing OTA status ClientNotification generic alert during firmware update" }
+                    if (!firmwareUpdateStatus.isAwaitingOtaStatus) {
+                        clearClientNotification(notification)
+                    }
+                    return@onEach
+                }
                 val isCompromised = notification.low_entropy_key != null || notification.duplicated_public_key != null
                 showAlert(
                     titleRes = Res.string.client_notification,
@@ -235,6 +333,16 @@ class UIViewModel(
 
     fun setSharedContactRequested(contact: SharedContact?) {
         _sharedContactRequested.value = contact
+        if (contact != null) notifyImportPendingIfNotConnected(Res.string.import_pending_contact_connect)
+    }
+
+    /**
+     * The import dialogs in `SharedDialogs` only render while [ConnectionState.Connected], so a QR scanned while
+     * disconnected would otherwise queue silently with no feedback.
+     */
+    private fun notifyImportPendingIfNotConnected(messageRes: StringResource) {
+        if (connectionState.value is ConnectionState.Connected) return
+        safeLaunch(tag = "notifyImportPending") { snackbarManager.showSnackbar(message = getStringSuspend(messageRes)) }
     }
 
     /** Clears the pending shared contact request. */
@@ -252,6 +360,7 @@ class UIViewModel(
 
     fun setRequestChannelSet(channelSet: ChannelSet?) {
         _requestChannelSet.value = channelSet
+        if (channelSet != null) notifyImportPendingIfNotConnected(Res.string.import_pending_channels_connect)
     }
 
     val latestStableFirmwareRelease = firmwareReleaseRepository.stableRelease.mapNotNull { it?.asDeviceVersion() }
@@ -284,4 +393,19 @@ class UIViewModel(
     fun onAppIntroCompleted() {
         uiPrefs.setAppIntroCompleted(true)
     }
+
+    companion object {
+        private const val DEFAULT_BOOT_TTL = LockdownPassphraseStore.DEFAULT_BOOTS
+    }
+}
+
+internal fun CommonUri.toSanitizedImportSummary(): String {
+    val fragmentLength = fragment?.length ?: 0
+    val hasFragment = !fragment.isNullOrBlank()
+    val queryParameterCount = getQueryParameterNames().size
+    // pathSegments values are not logged: a malformed channel URL can still leak structure (e.g.
+    // a malformed "/e/" path). pathSegmentCount is enough to diagnose routing without exposing it.
+    return "rawLength=${toString().length} scheme=$scheme host=$host " +
+        "pathSegmentCount=${pathSegments.size} hasFragment=$hasFragment " +
+        "fragmentLength=$fragmentLength queryParameterCount=$queryParameterCount"
 }

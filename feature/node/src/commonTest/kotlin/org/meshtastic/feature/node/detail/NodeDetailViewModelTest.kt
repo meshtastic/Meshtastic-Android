@@ -19,20 +19,33 @@ package org.meshtastic.feature.node.detail
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import dev.mokkery.answering.returns
+import dev.mokkery.answering.throws
 import dev.mokkery.every
+import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verify
+import dev.mokkery.verify.VerifyMode.Companion.exactly
+import dev.mokkery.verifySuspend
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.meshtastic.core.domain.usecase.session.EnsureRemoteAdminSessionUseCase
+import org.meshtastic.core.domain.usecase.session.EnsureSessionResult
+import org.meshtastic.core.domain.usecase.session.ObserveRemoteAdminSessionStatusUseCase
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.model.SessionStatus
+import org.meshtastic.core.navigation.SettingsRoute
+import org.meshtastic.core.repository.LocalNodeUnavailableException
+import org.meshtastic.core.repository.PacketQueueRejectedException
+import org.meshtastic.core.repository.QueryController
 import org.meshtastic.feature.node.component.NodeMenuAction
 import org.meshtastic.feature.node.domain.usecase.GetNodeDetailsUseCase
 import org.meshtastic.proto.User
@@ -49,15 +62,19 @@ class NodeDetailViewModelTest {
     private lateinit var viewModel: NodeDetailViewModel
     private val nodeManagementActions: NodeManagementActions = mock()
     private val nodeRequestActions: NodeRequestActions = mock()
-    private val serviceRepository: ServiceRepository = mock()
+    private val queryController: QueryController = mock()
     private val getNodeDetailsUseCase: GetNodeDetailsUseCase = mock()
+    private val ensureRemoteAdminSession: EnsureRemoteAdminSessionUseCase = mock()
+    private val observeRemoteAdminSessionStatus: ObserveRemoteAdminSessionStatusUseCase = mock()
+    private val snackbarManager = RecordingSnackbarManager()
 
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
 
         every { getNodeDetailsUseCase(any()) } returns emptyFlow()
-
+        every { observeRemoteAdminSessionStatus(any()) } returns flowOf(SessionStatus.NoSession)
+        snackbarManager.messages.clear()
         viewModel = createViewModel(1234)
     }
 
@@ -65,8 +82,12 @@ class NodeDetailViewModelTest {
         savedStateHandle = SavedStateHandle(if (nodeId != null) mapOf("destNum" to nodeId) else emptyMap()),
         nodeManagementActions = nodeManagementActions,
         nodeRequestActions = nodeRequestActions,
-        serviceRepository = serviceRepository,
+        queryController = queryController,
         getNodeDetailsUseCase = getNodeDetailsUseCase,
+        ensureRemoteAdminSession = ensureRemoteAdminSession,
+        observeRemoteAdminSessionStatus = observeRemoteAdminSessionStatus,
+        snackbarManager = snackbarManager,
+        resolveUiText = resolveNodeDetailUiTextForTest,
     )
 
     @AfterTest
@@ -108,10 +129,86 @@ class NodeDetailViewModelTest {
     @Test
     fun `handleNodeMenuAction delegates to nodeRequestActions for Traceroute`() = runTest(testDispatcher) {
         val node = Node(num = 1234, user = User(id = "!1234", long_name = "Test Node"))
-        every { nodeRequestActions.requestTraceroute(any(), any(), any()) } returns Unit
+        everySuspend { nodeRequestActions.requestTraceroute(any(), any()) } returns Unit
 
         viewModel.handleNodeMenuAction(NodeMenuAction.TraceRoute(node))
 
-        verify { nodeRequestActions.requestTraceroute(any(), 1234, "Test Node") }
+        verifySuspend { nodeRequestActions.requestTraceroute(1234, "Test Node") }
+    }
+
+    @Test
+    fun `openRemoteAdmin navigates to settings when session is already active`() = runTest(testDispatcher) {
+        everySuspend { ensureRemoteAdminSession(1234) } returns EnsureSessionResult.AlreadyActive
+
+        viewModel.navigationEvents.test {
+            viewModel.openRemoteAdmin(1234)
+
+            assertEquals(SettingsRoute.Settings(1234), awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        verifySuspend { ensureRemoteAdminSession(1234) }
+    }
+
+    @Test
+    fun `openRemoteAdmin shows disconnected snackbar when radio is disconnected`() = runTest(testDispatcher) {
+        everySuspend { ensureRemoteAdminSession(1234) } returns EnsureSessionResult.Disconnected
+        val expectedMessage = "Connect to a radio to administer remote nodes."
+
+        viewModel.openRemoteAdmin(1234)
+        runCurrent()
+
+        assertEquals(listOf(expectedMessage), snackbarManager.messages)
+        verifySuspend { ensureRemoteAdminSession(1234) }
+    }
+
+    @Test
+    fun `openRemoteAdmin shows timeout snackbar when node is unreachable`() = runTest(testDispatcher) {
+        everySuspend { ensureRemoteAdminSession(1234) } returns EnsureSessionResult.Timeout
+        val expectedMessage = "Could not reach node — try again or move closer."
+
+        viewModel.openRemoteAdmin(1234)
+        runCurrent()
+
+        assertEquals(listOf(expectedMessage), snackbarManager.messages)
+        verifySuspend { ensureRemoteAdminSession(1234) }
+    }
+
+    @Test
+    fun `refreshMetadata surfaces queue rejection without throwing from view model scope`() = runTest(testDispatcher) {
+        everySuspend { queryController.refreshMetadata(1234) } throws
+            PacketQueueRejectedException("Metadata request")
+
+        viewModel.refreshMetadata(1234)
+        runCurrent()
+
+        assertEquals(listOf(NODE_REQUEST_SEND_FAILED_TEXT), snackbarManager.messages)
+        verifySuspend { queryController.refreshMetadata(1234) }
+    }
+
+    @Test
+    fun `openRemoteAdmin surfaces queue rejection and releases the in-flight guard`() = runTest(testDispatcher) {
+        everySuspend { ensureRemoteAdminSession(1234) } throws PacketQueueRejectedException("Metadata request")
+
+        viewModel.openRemoteAdmin(1234)
+        runCurrent()
+        viewModel.openRemoteAdmin(1234)
+        runCurrent()
+
+        assertEquals(listOf(NODE_REQUEST_SEND_FAILED_TEXT, NODE_REQUEST_SEND_FAILED_TEXT), snackbarManager.messages)
+        verifySuspend(exactly(2)) { ensureRemoteAdminSession(1234) }
+    }
+
+    @Test
+    fun `openRemoteAdmin surfaces local node loss and releases the in-flight guard`() = runTest(testDispatcher) {
+        everySuspend { ensureRemoteAdminSession(1234) } throws LocalNodeUnavailableException("Remote admin")
+
+        viewModel.openRemoteAdmin(1234)
+        runCurrent()
+        viewModel.openRemoteAdmin(1234)
+        runCurrent()
+
+        assertEquals(listOf(NODE_REQUEST_SEND_FAILED_TEXT, NODE_REQUEST_SEND_FAILED_TEXT), snackbarManager.messages)
+        verifySuspend(exactly(2)) { ensureRemoteAdminSession(1234) }
     }
 }

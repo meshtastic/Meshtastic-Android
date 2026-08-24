@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@ import org.meshtastic.core.common.util.bearing
 import org.meshtastic.core.common.util.latLongToMeter
 import org.meshtastic.core.model.util.onlineTimeThreshold
 import org.meshtastic.core.model.util.toDistanceString
+import org.meshtastic.proto.AirQualityMetrics
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.DeviceMetrics
@@ -58,10 +59,15 @@ data class Node(
     val isMuted: Boolean = false,
     val environmentMetrics: EnvironmentMetrics = EnvironmentMetrics(),
     val powerMetrics: PowerMetrics = PowerMetrics(),
+    val airQualityMetrics: AirQualityMetrics = AirQualityMetrics(),
     val paxcounter: Paxcount = Paxcount(),
     val publicKey: ByteString? = null,
     val notes: String = "",
+    /** User-editable labels per power-metrics channel (e.g. "Solar", "Battery"), indexed by channel - 1. */
+    val powerChannelLabels: List<String> = emptyList(),
     val manuallyVerified: Boolean = false,
+    /** True when this node signs its broadcasts via XEdDSA (NodeInfo.has_xeddsa_signed). Automatic trust. */
+    val signsPackets: Boolean = false,
     val nodeStatus: String? = null,
     /** The transport mechanism this node was last heard over (see [MeshPacket.TransportMechanism]). */
     val lastTransport: Int = 0,
@@ -69,18 +75,13 @@ data class Node(
     val capabilities: Capabilities by lazy { Capabilities(metadata?.firmware_version) }
 
     val isOnline: Boolean
-        get() = lastHeard > onlineTimeThreshold()
+        get() = isOnline(onlineTimeThreshold())
+
+    /** Injectable [threshold] keeps tests deterministic — the property getter re-reads the clock on every access. */
+    internal fun isOnline(threshold: Int): Boolean = lastHeard > threshold
 
     val colors: Pair<Int, Int>
-        get() { // returns foreground and background @ColorInt for each 'num'
-            val r = (num and 0xFF0000) shr 16
-            val g = (num and 0x00FF00) shr 8
-            val b = num and 0x0000FF
-            val brightness = ((r * 0.299) + (g * 0.587) + (b * 0.114)) / 255
-            val foreground = if (brightness > 0.5) 0xFF000000.toInt() else 0xFFFFFFFF.toInt()
-            val background = (0xFF shl 24) or (r shl 16) or (g shl 8) or b
-            return foreground to background
-        }
+        get() = nodeColorsFromNum(num)
 
     val isUnknownUser
         get() = user.hw_model == HardwareModel.UNSET
@@ -91,11 +92,28 @@ data class Node(
     val mismatchKey
         get() = (publicKey ?: user.public_key) == ERROR_BYTE_STRING
 
+    /**
+     * Last measured SNR in dB, or null when this node has no reading yet ([snr] still holds [SNR_UNSET]).
+     *
+     * Every read of [snr] should go through this: 0 dB is a real, good reading, and the raw sentinel rates as an
+     * *excellent* signal if it reaches the preset-relative quality bands. Threshold comparisons such as `snr < 100f`
+     * are not equivalent — they also discard any genuine reading at or above the threshold.
+     */
+    val snrOrNull: Float?
+        get() = snr.takeIf { it != SNR_UNSET }
+
+    /** Last measured RSSI in dBm, or null when this node has no reading yet. 0 dBm is a real reading. */
+    val rssiOrNull: Int?
+        get() = rssi.takeIf { it != RSSI_UNSET }
+
     val hasEnvironmentMetrics: Boolean
         get() = environmentMetrics != EnvironmentMetrics()
 
     val hasPowerMetrics: Boolean
         get() = powerMetrics != PowerMetrics()
+
+    val hasAirQualityMetrics: Boolean
+        get() = airQualityMetrics != AirQualityMetrics()
 
     val batteryLevel
         get() = deviceMetrics.battery_level
@@ -138,30 +156,16 @@ data class Node(
 
     fun gpsString(): String = GPSFormat.toDec(latitude, longitude)
 
-    @Suppress("CyclomaticComplexMethod")
     private fun EnvironmentMetrics.getDisplayStrings(isFahrenheit: Boolean): List<String> {
-        val temp =
-            if ((temperature ?: 0f) != 0f) {
-                MetricFormatter.temperature(temperature ?: 0f, isFahrenheit)
-            } else {
-                null
-            }
+        // These fields carry presence: `null` means "no sensor", so 0 °C / 0 V / 0 A / 0% are real readings and must
+        // still render. Humidity keeps its zero-guard because 0% RH is not physically reachable.
+        val temp = temperature?.let { MetricFormatter.temperature(it, isFahrenheit) }
         val humidity = if ((relative_humidity ?: 0f) != 0f) MetricFormatter.humidity(relative_humidity ?: 0f) else null
-        val soilTemperatureStr =
-            if ((soil_temperature ?: 0f) != 0f) {
-                MetricFormatter.temperature(soil_temperature ?: 0f, isFahrenheit)
-            } else {
-                null
-            }
+        val soilTemperatureStr = soil_temperature?.let { MetricFormatter.temperature(it, isFahrenheit) }
         val soilMoistureRange = 0..100
-        val soilMoisture =
-            if ((soil_moisture ?: Int.MIN_VALUE) in soilMoistureRange && (soil_temperature ?: 0f) != 0f) {
-                MetricFormatter.percent(soil_moisture ?: 0)
-            } else {
-                null
-            }
-        val voltage = if ((this.voltage ?: 0f) != 0f) MetricFormatter.voltage(this.voltage ?: 0f) else null
-        val current = if ((current ?: 0f) != 0f) MetricFormatter.current(current ?: 0f) else null
+        val soilMoisture = soil_moisture?.takeIf { it in soilMoistureRange }?.let { MetricFormatter.percent(it) }
+        val voltage = this.voltage?.let { MetricFormatter.voltage(it) }
+        val current = current?.let { MetricFormatter.current(it) }
         val iaq = if ((iaq ?: 0) != 0) "IAQ: $iaq" else null
 
         return listOfNotNull(
@@ -185,7 +189,18 @@ data class Node(
         private const val DEFAULT_ID_SUFFIX_LENGTH = 4
         private const val RELAY_NODE_SUFFIX_MASK = 0xFF
 
-        val ERROR_BYTE_STRING: ByteString = ByteArray(32) { 0 }.toByteString()
+        /** Size (in bytes) of a Curve25519 public key as used by meshtastic firmware. */
+        const val PUBLIC_KEY_SIZE: Int = 32
+
+        /**
+         * Sentinels stored when a node has no radio-metric reading. They exist because [snr]/[rssi] are not nullable
+         * (the Room columns behind them are NOT NULL); resolve them with [snrOrNull]/[rssiOrNull] rather than comparing
+         * against them at call sites.
+         */
+        const val SNR_UNSET: Float = Float.MAX_VALUE
+        const val RSSI_UNSET: Int = Int.MAX_VALUE
+
+        val ERROR_BYTE_STRING: ByteString = ByteArray(PUBLIC_KEY_SIZE) { 0 }.toByteString()
 
         fun getRelayNode(relayNodeId: Int, nodes: List<Node>, ourNodeNum: Int?): Node? {
             val relayNodeIdSuffix = relayNodeId and RELAY_NODE_SUFFIX_MASK
@@ -209,7 +224,7 @@ data class Node(
 
         /** Creates a fallback [Node] when the node is not found in the database. */
         fun createFallback(nodeNum: Int, fallbackNamePrefix: String): Node {
-            val userId = DataPacket.nodeNumToDefaultId(nodeNum)
+            val userId = NodeAddress.numToDefaultId(nodeNum)
             val safeUserId = userId.padStart(DEFAULT_ID_SUFFIX_LENGTH, '0').takeLast(DEFAULT_ID_SUFFIX_LENGTH)
             val longName = "$fallbackNamePrefix $safeUserId"
             val defaultUser =
@@ -228,3 +243,21 @@ fun Config.DeviceConfig.Role?.isUnmessageableRole(): Boolean = this in
         Config.DeviceConfig.Role.TRACKER,
         Config.DeviceConfig.Role.TAK_TRACKER,
     )
+
+/** Offset converting a negative [Node.num] into its unsigned 32-bit decimal representation. */
+private const val UNSIGNED_INT_OFFSET = 4294967296L
+
+private val Node.unsignedNum: Long
+    get() = num.toLong().let { if (it < 0) it + UNSIGNED_INT_OFFSET else it }
+
+/**
+ * Matches node search text (long/short name, hex id, decimal id) with Unicode-aware case folding.
+ *
+ * Must run in Kotlin, not SQL: SQLite's LIKE/UPPER/LOWER only case-fold ASCII a-z/A-Z, so a query like "kolså" can
+ * never match a stored name of "KOLSÅS" via a SQL WHERE clause (#6750).
+ */
+fun Node.matchesSearch(filter: String): Boolean = filter.isBlank() ||
+    user.long_name.contains(filter, ignoreCase = true) ||
+    user.short_name.contains(filter, ignoreCase = true) ||
+    user.id.contains(filter, ignoreCase = true) ||
+    unsignedNum.toString().contains(filter, ignoreCase = true)

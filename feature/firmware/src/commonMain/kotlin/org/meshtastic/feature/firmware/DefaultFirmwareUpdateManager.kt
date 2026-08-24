@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,6 +57,23 @@ class DefaultFirmwareUpdateManager(
             firmwareUri = firmwareUri,
         )
     }
+
+    override suspend fun recoverDfuDevice(
+        release: FirmwareRelease,
+        hardware: DeviceHardware,
+        address: String,
+        updateState: (FirmwareUpdateState) -> Unit,
+    ): FirmwareArtifact? =
+        // Recovery is inherently a BLE DFU operation — route straight to the DFU handler rather than the
+        // connection-type dispatch in getHandler(), which would fail with no live connection. The handler derives
+        // MAC+1 from address and its buttonless trigger already no-ops when the device is already in DFU mode.
+        secureDfuHandler.startUpdate(
+            release = release,
+            hardware = hardware,
+            target = address,
+            updateState = updateState,
+            firmwareUri = null,
+        )
 
     internal fun getHandler(hardware: DeviceHardware): FirmwareUpdateHandler = when {
         radioPrefs.isSerial() -> {

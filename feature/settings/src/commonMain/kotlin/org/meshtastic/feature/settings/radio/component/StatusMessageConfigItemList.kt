@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalFocusManager
@@ -39,6 +38,7 @@ import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.icon.Close
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
+import org.meshtastic.feature.settings.radio.RebootBehavior
 
 @Composable
 fun StatusMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
@@ -60,9 +60,8 @@ fun StatusMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
     val formState = rememberConfigState(initialValue = statusMessageConfig)
     val focusManager = LocalFocusManager.current
 
-    LaunchedEffect(statusMessageConfig) { formState.value = statusMessageConfig }
-
     RadioConfigScreenList(
+        rebootBehavior = RebootBehavior.NEVER,
         title = stringResource(Res.string.status_message),
         onBack = onBack,
         configState = formState,

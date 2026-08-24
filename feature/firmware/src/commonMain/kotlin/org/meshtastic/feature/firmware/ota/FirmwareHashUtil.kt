@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,4 +31,7 @@ object FirmwareHashUtil {
 
     /** Convert byte array to lowercase hex string. */
     fun bytesToHex(bytes: ByteArray): String = bytes.toByteString().hex()
+
+    /** Calculate the MD5 hex digest of raw bytes — used to verify a download against a firmware manifest's `md5`. */
+    fun calculateMd5Hex(data: ByteArray): String = data.toByteString().md5().hex()
 }

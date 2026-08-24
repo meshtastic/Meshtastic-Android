@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -94,4 +94,19 @@ inline fun <T, R> T.safeCatching(block: T.() -> R): Result<R> = try {
     throw e
 } catch (e: Exception) {
     Result.failure(e)
+}
+
+/**
+ * Like [safeCatching] but also catches JVM [Error]s (e.g. [ExceptionInInitializerError] raised by compose-resources'
+ * lazy skiko initialization on the desktop JVM test classpath). Still re-throws [CancellationException] so structured
+ * concurrency is preserved. Use when the block invokes code whose failure modes include static-initializer errors and
+ * the caller only needs a best-effort fallback.
+ */
+@Suppress("TooGenericExceptionCaught")
+inline fun <T> safeCatchingAll(block: () -> T): Result<T> = try {
+    Result.success(block())
+} catch (e: CancellationException) {
+    throw e
+} catch (t: Throwable) {
+    Result.failure(t)
 }

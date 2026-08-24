@@ -1,0 +1,64 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>ComplexCondition:MapViewModel.kt:MapViewModel$name.isBlank() || (urlTemplate.isBlank() &amp;&amp; localUri == null) || (localUri == null &amp;&amp; !isValidTileUrlTemplate(urlTemplate))</ID>
+    <ID>ComplexCondition:MapViewModel.kt:MapViewModel$normalized.name.isBlank() || (normalized.urlTemplate.isBlank() &amp;&amp; normalized.localUri == null) || (normalized.localUri == null &amp;&amp; !isValidTileUrlTemplate(normalized.urlTemplate))</ID>
+    <ID>ComposableParamOrder:MapView.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable private fun MapsDialog</ID>
+    <ID>CyclomaticComplexMethod:DiscoveryGoogleMap.kt:@OptIn(MapsComposeExperimentalApi::class) @Composable fun DiscoveryGoogleMap</ID>
+    <ID>CyclomaticComplexMethod:DiscoveryOsmMap.kt:@Composable fun DiscoveryOsmMap</ID>
+    <ID>CyclomaticComplexMethod:GeminiNanoDocAssistant.kt:GeminiNanoDocAssistant$override fun answerStream: kotlinx.coroutines.flow.Flow&lt;AIDocAssistantResult></ID>
+    <ID>CyclomaticComplexMethod:GeminiNanoDocAssistant.kt:GeminiNanoDocAssistant$private fun buildContext: ContextResult</ID>
+    <ID>CyclomaticComplexMethod:TracerouteOsmMap.kt:@Composable fun TracerouteOsmMap</ID>
+    <ID>LambdaParameterInRestartableEffect:LocationHandler.kt:onPermissionResult: (Boolean) -> Unit</ID>
+    <ID>LambdaParameterInRestartableEffect:TracerouteOsmMap.kt:onMappableCountChange: (shown: Int, total: Int) -> Unit</ID>
+    <ID>LongMethod:DiscoveryGoogleMap.kt:@OptIn(MapsComposeExperimentalApi::class) @Composable fun DiscoveryGoogleMap</ID>
+    <ID>LongMethod:DiscoveryOsmMap.kt:@Composable fun DiscoveryOsmMap</ID>
+    <ID>LongMethod:GeminiNanoDocAssistant.kt:GeminiNanoDocAssistant$override fun answerStream: kotlinx.coroutines.flow.Flow&lt;AIDocAssistantResult></ID>
+    <ID>LongMethod:GeminiNanoDocAssistant.kt:GeminiNanoDocAssistant$override suspend fun isSupported: Boolean</ID>
+    <ID>LongMethod:GeminiNanoDocAssistant.kt:GeminiNanoDocAssistant$private fun buildPrompt: String</ID>
+    <ID>LongMethod:MapFilterDropdown.kt:@Composable internal fun MapFilterDropdown</ID>
+    <ID>LongMethod:MapView.kt:@Composable private fun FdroidMainMapFilterDropdown</ID>
+    <ID>LongMethod:NodeTrackOsmMap.kt:@Composable fun NodeTrackOsmMap</ID>
+    <ID>LongMethod:TracerouteOsmMap.kt:@Composable fun TracerouteOsmMap</ID>
+    <ID>LoopWithTooManyJumpStatements:FdroidMapOverlayRenderer.kt:FdroidMapOverlayRenderer$for</ID>
+    <ID>LoopWithTooManyJumpStatements:GeminiNanoDocAssistant.kt:GeminiNanoDocAssistant$for</ID>
+    <ID>MatchingDeclarationName:MapView.kt:GoogleMapMode</ID>
+    <ID>ModifierMissing:DownloadButton.kt:@Composable fun DownloadButton</ID>
+    <ID>ModifierMissing:Main.kt:@Composable fun MainScreen</ID>
+    <ID>ModifierMissing:NodeMapScreen.kt:@Composable fun NodeMapScreen</ID>
+    <ID>ModifierMissing:WaypointMarkers.kt:@OptIn(MapsComposeExperimentalApi::class) @Composable fun WaypointMarkers</ID>
+    <ID>ReturnCount:GooglePlatformAnalytics.kt:GooglePlatformAnalytics.CrashlyticsLogWriter$override fun log</ID>
+    <ID>ReturnCount:MapViewModel.kt:MapViewModel$fun getTileProvider: TileProvider?</ID>
+    <ID>ReturnCount:MlKitDocTranslator.kt:MlKitDocTranslator$override suspend fun translatePage: TranslationResult</ID>
+    <ID>ReturnCount:MlKitMessageTranslator.kt:MlKitMessageTranslator$override suspend fun downloadLanguageModels: DownloadResult</ID>
+    <ID>ReturnCount:MlKitMessageTranslator.kt:MlKitMessageTranslator$override suspend fun translate: TranslationResult</ID>
+    <ID>SwallowedException:MapViewModel.kt:MapViewModel$e: Exception</ID>
+    <ID>ThrowsCount:MeshtasticAppFunctions.kt:MeshtasticAppFunctions$@AppFunction(isDescribedByKDoc = true) suspend fun getChannelInfo: GetChannelInfoResponse</ID>
+    <ID>ThrowsCount:MeshtasticAppFunctions.kt:MeshtasticAppFunctions$@AppFunction(isDescribedByKDoc = true) suspend fun getDeviceStatus: GetDeviceStatusResponse</ID>
+    <ID>ThrowsCount:MeshtasticAppFunctions.kt:MeshtasticAppFunctions$@AppFunction(isDescribedByKDoc = true) suspend fun getMeshMetrics: GetMeshMetricsResponse</ID>
+    <ID>ThrowsCount:MeshtasticAppFunctions.kt:MeshtasticAppFunctions$@AppFunction(isDescribedByKDoc = true) suspend fun getNodeDetails: GetNodeDetailsResponse</ID>
+    <ID>ThrowsCount:MeshtasticAppFunctions.kt:MeshtasticAppFunctions$@AppFunction(isDescribedByKDoc = true) suspend fun getNodeList: GetNodeListResponse</ID>
+    <ID>ThrowsCount:MeshtasticAppFunctions.kt:MeshtasticAppFunctions$@AppFunction(isDescribedByKDoc = true) suspend fun getRecentMessages: GetRecentMessagesResponse</ID>
+    <ID>ThrowsCount:MeshtasticAppFunctions.kt:MeshtasticAppFunctions$@AppFunction(isDescribedByKDoc = true) suspend fun sendMessage: SendMessageResponse</ID>
+    <ID>TooGenericExceptionCaught:FdroidMapOverlayRenderer.kt:FdroidMapOverlayRenderer$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:GeminiNanoDocAssistant.kt:GeminiNanoDocAssistant$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:MapView.kt:e: Exception</ID>
+    <ID>TooGenericExceptionCaught:MapView.kt:ex: Exception</ID>
+    <ID>TooGenericExceptionCaught:MapViewModel.kt:MapViewModel$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:MlKitDocTranslator.kt:MlKitDocTranslator$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:MlKitMessageTranslator.kt:MlKitMessageTranslator$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:SqlTileWriterExt.kt:SqlTileWriterExt$e: Exception</ID>
+    <ID>TooManyFunctions:GeminiNanoDocAssistant.kt:GeminiNanoDocAssistant : AIDocAssistant</ID>
+    <ID>TooManyFunctions:MapView.kt:org.meshtastic.app.map.MapView.kt</ID>
+    <ID>TooManyFunctions:MapViewModel.kt:MapViewModel : BaseMapViewModel</ID>
+    <ID>UtilityClassWithPublicConstructor:CustomTileSource.kt:CustomTileSource</ID>
+    <ID>ViewModelForwarding:MapView.kt:CustomTileProviderManagerSheet(mapViewModel = mapViewModel)</ID>
+    <ID>ViewModelForwarding:MapView.kt:FdroidMainMapFilterDropdown( expanded = mapFilterExpanded, onDismissRequest = { mapFilterExpanded = false }, mapFilterState = mapFilterState, mapViewModel = mapViewModel, )</ID>
+    <ID>ViewModelForwarding:MapView.kt:MainMapContent( nodeClusterItems = nodeClusterItems, mapFilterState = mapFilterState, navigateToNodeDetails = navigateToNodeDetails, displayableWaypoints = displayableWaypoints, myNodeNum = myNodeNum, onEditWaypointRequest = { editingWaypoint = it }, onDeleteWaypointRequest = { deletingWaypoint = it }, onShowGeofenceInfo = { geofenceInfoWaypoint = it }, selectedWaypointId = selectedWaypointId, mapLayers = mapLayers, mapViewModel = mapViewModel, cameraPositionState = cameraPositionState, coroutineScope = coroutineScope, onShowClusterItemsDialog = { showClusterItemsDialog = it }, )</ID>
+    <ID>ViewModelForwarding:MapView.kt:MapFilterDropdown( expanded = mapFilterMenuExpanded, onDismissRequest = { mapFilterMenuExpanded = false }, mapViewModel = mapViewModel, )</ID>
+    <ID>ViewModelForwarding:MapView.kt:MapLayerOverlay(layerItem, mapViewModel)</ID>
+    <ID>ViewModelForwarding:MapView.kt:MapTypeDropdown( expanded = mapTypeMenuExpanded, onDismissRequest = { mapTypeMenuExpanded = false }, mapViewModel = mapViewModel, onManageCustomTileProvidersClick = { mapTypeMenuExpanded = false showCustomTileManagerSheet = true }, )</ID>
+    <ID>ViewModelForwarding:MapView.kt:NodeMapFilterDropdown( expanded = mapFilterMenuExpanded, onDismissRequest = { mapFilterMenuExpanded = false }, mapViewModel = mapViewModel, )</ID>
+  </CurrentIssues>
+</SmellBaseline>

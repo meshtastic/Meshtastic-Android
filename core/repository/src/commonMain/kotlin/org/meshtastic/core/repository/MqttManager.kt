@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,10 +16,23 @@
  */
 package org.meshtastic.core.repository
 
+import kotlinx.coroutines.flow.StateFlow
+import org.meshtastic.core.model.MqttConnectionState
+import org.meshtastic.core.model.MqttProbeStatus
 import org.meshtastic.proto.MqttClientProxyMessage
 
 /** Interface for managing MQTT proxy communication. */
 interface MqttManager {
+    /** Observable MQTT proxy connection state for UI consumption. */
+    val mqttConnectionState: StateFlow<MqttConnectionState>
+
+    /**
+     * Observable phone-local proxy state: `true` while this phone is actively running the MQTT proxy (relaying broker
+     * traffic to the connected device). This reflects only the phone-side proxy lifecycle and is independent of the
+     * device's persisted MQTT config — [stop] and [startProxy] flip it without any device read/write round-trip.
+     */
+    val proxyActive: StateFlow<Boolean>
+
     /** Starts the MQTT proxy with the given settings. */
     fun startProxy(enabled: Boolean, proxyToClientEnabled: Boolean)
 
@@ -28,4 +41,16 @@ interface MqttManager {
 
     /** Handles an MQTT proxy message from the radio. */
     fun handleMqttProxyMessage(message: MqttClientProxyMessage)
+
+    /**
+     * Probe an MQTT broker to verify connectivity and credentials without joining the proxy lifecycle. Intended for UI
+     * "Test Connection" affordances.
+     *
+     * @param address Raw broker address as the user would type it (host, host:port, or full URL).
+     * @param tlsEnabled `true` upgrades bare addresses to `ssl://` (TLS, port 8883) instead of `tcp://` (plaintext,
+     *   port 1883); ignored when [address] already has a scheme.
+     * @param username Optional MQTT username.
+     * @param password Optional MQTT password.
+     */
+    suspend fun probe(address: String, tlsEnabled: Boolean, username: String?, password: String?): MqttProbeStatus
 }

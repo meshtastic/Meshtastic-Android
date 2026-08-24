@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,35 +29,94 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.isSensitiveData
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.copy
 import org.meshtastic.core.resources.okay
 import org.meshtastic.core.resources.qr_code
-import org.meshtastic.core.resources.url
+import org.meshtastic.core.resources.write_nfc
+import org.meshtastic.core.resources.write_nfc_failed
+import org.meshtastic.core.resources.write_nfc_subtext
+import org.meshtastic.core.resources.write_nfc_success
+import org.meshtastic.core.resources.write_nfc_text
 import org.meshtastic.core.ui.icon.Copy
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Nfc
+import org.meshtastic.core.ui.theme.SemanticColors
+import org.meshtastic.core.ui.util.LocalNfcScannerSupported
+import org.meshtastic.core.ui.util.LocalNfcWriterProvider
 import org.meshtastic.core.ui.util.SetScreenBrightness
 import org.meshtastic.core.ui.util.createClipEntry
+import org.meshtastic.core.ui.util.rememberQrCodePainter
 
-private const val QR_IMAGE_SIZE = 320
+private const val QR_DISPLAY_SIZE = 320
 
 @Composable
-fun QrDialog(title: String, uriString: String, qrPainter: Painter?, onDismiss: () -> Unit) {
+fun QrDialog(title: String, uriString: String, onDismiss: () -> Unit) {
     val clipboardManager = LocalClipboard.current
     val coroutineScope = rememberCoroutineScope()
-    val label = stringResource(Res.string.url)
+    // Render at the actual on-screen pixel size so low-density devices don't over-allocate bitmap memory.
+    val qrRenderSizePx = with(LocalDensity.current) { QR_DISPLAY_SIZE.dp.roundToPx() }
+    val qrPainter = rememberQrCodePainter(uriString, qrRenderSizePx)
+
+    val nfcSupported = LocalNfcScannerSupported.current
+    val nfcWriter = LocalNfcWriterProvider.current
+    var isWritingNfc by rememberSaveable { mutableStateOf(false) }
+    var showNfcDisabled by rememberSaveable { mutableStateOf(false) }
+    var writeSucceeded by rememberSaveable { mutableStateOf<Boolean?>(null) }
 
     SetScreenBrightness(1f)
+
+    if (isWritingNfc) {
+        nfcWriter(
+            uriString,
+            { success ->
+                isWritingNfc = false
+                writeSucceeded = success
+            },
+            {
+                isWritingNfc = false
+                showNfcDisabled = true
+            },
+        )
+        MeshtasticDialog(
+            onDismiss = { isWritingNfc = false },
+            titleRes = Res.string.write_nfc,
+            messageRes = Res.string.write_nfc_text,
+            dismissTextRes = Res.string.cancel,
+        )
+    }
+
+    writeSucceeded?.let { success ->
+        MeshtasticDialog(
+            onDismiss = { writeSucceeded = null },
+            titleRes = Res.string.write_nfc,
+            messageRes = if (success) Res.string.write_nfc_success else Res.string.write_nfc_failed,
+            messageColor = if (success) SemanticColors.Success else MaterialTheme.colorScheme.error,
+            onConfirm = { writeSucceeded = null },
+            confirmTextRes = Res.string.okay,
+        )
+    }
+
+    if (showNfcDisabled) {
+        NfcDisabledDialog(titleRes = Res.string.write_nfc, onDismiss = { showNfcDisabled = false })
+    }
 
     MeshtasticDialog(
         onDismiss = onDismiss,
@@ -66,14 +125,12 @@ fun QrDialog(title: String, uriString: String, qrPainter: Painter?, onDismiss: (
         onConfirm = onDismiss,
         text = {
             Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                if (qrPainter != null) {
-                    Image(
-                        painter = qrPainter,
-                        contentDescription = stringResource(Res.string.qr_code),
-                        modifier = Modifier.size(QR_IMAGE_SIZE.dp),
-                        contentScale = ContentScale.Fit,
-                    )
-                }
+                Image(
+                    painter = qrPainter,
+                    contentDescription = stringResource(Res.string.qr_code),
+                    modifier = Modifier.size(QR_DISPLAY_SIZE.dp),
+                    contentScale = ContentScale.Fit,
+                )
 
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
@@ -81,18 +138,38 @@ fun QrDialog(title: String, uriString: String, qrPainter: Painter?, onDismiss: (
                 ) {
                     Text(
                         text = uriString,
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.weight(1f).semantics { isSensitiveData = true },
                         style = MaterialTheme.typography.bodySmall,
                         overflow = TextOverflow.Visible,
                         softWrap = true,
                     )
+                    if (nfcSupported) {
+                        IconButton(onClick = { isWritingNfc = true }) {
+                            Icon(
+                                imageVector = MeshtasticIcons.Nfc,
+                                contentDescription = stringResource(Res.string.write_nfc),
+                            )
+                        }
+                    }
                     IconButton(
                         onClick = {
-                            coroutineScope.launch { clipboardManager.setClipEntry(createClipEntry(uriString)) }
+                            // The channel URL embeds channel PSKs, so mark the clip as sensitive.
+                            coroutineScope.launch {
+                                clipboardManager.setClipEntry(createClipEntry(uriString, sensitive = true))
+                            }
                         },
                     ) {
                         Icon(imageVector = MeshtasticIcons.Copy, contentDescription = stringResource(Res.string.copy))
                     }
+                }
+
+                if (nfcSupported) {
+                    Text(
+                        text = stringResource(Res.string.write_nfc_subtext),
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
             }
         },

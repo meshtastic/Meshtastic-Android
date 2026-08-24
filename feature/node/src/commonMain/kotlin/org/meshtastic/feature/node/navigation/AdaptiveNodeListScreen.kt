@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import kotlinx.coroutines.flow.Flow
 import org.koin.compose.viewmodel.koinViewModel
-import org.meshtastic.core.navigation.ChannelsRoute
+import org.meshtastic.core.navigation.ContactsRoute
 import org.meshtastic.core.navigation.NodesRoute
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.feature.node.list.NodeListScreen
@@ -32,15 +32,17 @@ fun AdaptiveNodeListScreen(
     backStack: NavBackStack<NavKey>,
     scrollToTopEvents: Flow<ScrollToTopEvent>,
     onHandleDeepLink: (org.meshtastic.core.common.util.CommonUri, onInvalid: () -> Unit) -> Unit = { _, _ -> },
+    onNavigateToConnections: () -> Unit = {},
 ) {
     val nodeListViewModel: NodeListViewModel = koinViewModel()
 
     NodeListScreen(
         viewModel = nodeListViewModel,
         navigateToNodeDetails = { nodeId -> backStack.add(NodesRoute.NodeDetail(nodeId)) },
-        onNavigateToChannels = { backStack.add(ChannelsRoute.ChannelsGraph) },
+        navigateToMessages = { key -> backStack.add(ContactsRoute.Messages(key)) },
         scrollToTopEvents = scrollToTopEvents,
         activeNodeId = null,
         onHandleDeepLink = onHandleDeepLink,
+        onNavigateToConnections = onNavigateToConnections,
     )
 }

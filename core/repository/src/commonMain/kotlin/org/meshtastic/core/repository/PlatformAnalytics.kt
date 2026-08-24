@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,6 +49,40 @@ interface PlatformAnalytics {
         nodes: Int,
         connectionRestored: Boolean,
     ) {
+        // Default no-op for platforms that don't support RUM (fdroid, desktop)
+    }
+
+    /**
+     * Tracks a key user interaction as a named custom RUM action. Auto-tracked tap targets are R8-obfuscated in release
+     * builds, so analytically important interactions must be reported explicitly with a stable name.
+     *
+     * @param name Stable snake_case action name (e.g. "message_send", "traceroute_request").
+     * @param attributes Optional structured attributes attached to the action.
+     */
+    fun trackAction(name: String, attributes: Map<String, Any> = emptyMap()) {
+        // Default no-op for platforms that don't support RUM (fdroid, desktop)
+    }
+
+    /**
+     * Starts tracking a screen as a RUM view, aligned with the Meshtastic-Apple Datadog integration (which auto-tracks
+     * SwiftUI views) so per-screen RUM data lines up across platforms.
+     *
+     * Starting a view implicitly stops any previously active view. Callers should pair each call with a matching
+     * [stopScreenView] using the same [key] when the screen is left.
+     *
+     * @param key A stable identifier that pairs this start with its matching [stopScreenView].
+     * @param name The route-derived view name (e.g. `org.meshtastic.core.navigation.NodesRoute.Nodes`).
+     */
+    fun startScreenView(key: String, name: String) {
+        // Default no-op for platforms that don't support RUM (fdroid, desktop)
+    }
+
+    /**
+     * Stops the RUM view previously started with [startScreenView] for the given [key].
+     *
+     * @param key The same identifier passed to the matching [startScreenView].
+     */
+    fun stopScreenView(key: String) {
         // Default no-op for platforms that don't support RUM (fdroid, desktop)
     }
 

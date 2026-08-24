@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,21 +18,17 @@
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.meshtastic.koin)
+    alias(libs.plugins.meshtastic.kotlinx.serialization)
 }
 
 kotlin {
-    @Suppress("UnstableApiUsage")
-    android {
-        namespace = "org.meshtastic.core.domain"
-        androidResources.enable = false
-        withHostTest { isIncludeAndroidResources = true }
-    }
+    android { withHostTest { isIncludeAndroidResources = true } }
 
     sourceSets {
         commonMain.dependencies {
             implementation(projects.core.repository)
             implementation(projects.core.model)
-            implementation(projects.core.proto)
+            implementation(libs.meshtastic.protobufs)
             implementation(projects.core.common)
             implementation(projects.core.database)
             implementation(projects.core.datastore)
@@ -42,6 +38,7 @@ kotlin {
             implementation(libs.okio)
             implementation(libs.kotlinx.datetime)
             implementation(libs.kotlinx.serialization.json)
+            implementation(libs.kotlinx.serialization.json.okio)
         }
         commonTest.dependencies { implementation(projects.core.testing) }
     }

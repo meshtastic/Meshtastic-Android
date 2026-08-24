@@ -7,20 +7,31 @@ This skill covers dependency injection (Koin Annotations 4.2.x) and JetBrains Na
 
 ### Guidelines
 1. **Annotations First:** Use `@Module`, `@ComponentScan`, and `@KoinViewModel` annotations directly in `commonMain` shared modules to encapsulate dependency graphs per feature.
-2. **App Root Assembly:** Don't assume feature/core `@Module` classes are active automatically. Ensure they are included by the app root module (`@Module(includes = [...])`) in `app/src/main/kotlin/org/meshtastic/app/di/AppKoinModule.kt` and `desktop/.../DesktopKoinModule.kt`.
+2. **App Root Assembly:** Don't assume feature/core `@Module` classes are active automatically. Ensure they are included by the app root module (`@Module(includes = [...])`) in `androidApp/src/main/kotlin/org/meshtastic/app/di/AppKoinModule.kt` and `desktopApp/.../DesktopKoinModule.kt`.
 3. **No Platform Bleed:** Don't put Android framework dependencies (`Context`, `Activity`, `Application`) into shared `commonMain` business logic. Inject interfaces instead.
 4. **Resolution:** Resolve app-layer wrappers via `koinViewModel()` or injected bindings within Compose navigation graphs.
 
 ### Anti-Patterns
-- **A1 Module Compile Safety:** Do **not** enable A1 `compileSafety`. We rely on Koin's A3 full-graph validation (`startKoin` / `VerifyModule`) because of our decoupled Clean Architecture design (interfaces in one module, implemented in another).
+- **A1 Module Compile Safety:** Do **not** enable `compileSafety`. It is a single boolean that enables A1 per-module checks — there is no separate A3 full-graph mode. Runtime graph verification is handled by `KoinVerificationTest` and `DesktopKoinTest` instead.
 - **Default Parameters:** Do **not** expect Koin to inject default parameters automatically. The K2 plugin's `skipDefaultValues = true` behavior skips parameters with default Kotlin values.
 
 ### Koin Startup Pattern (K2 Compiler Plugin)
-The project uses the **K2 Compiler Plugin** (`koin-compiler-plugin`, not KSP). The correct canonical startup for this path is:
+The project uses the **K2 Compiler Plugin** (`koin-compiler-plugin`, not KSP). The canonical startup uses the plugin's typed `startKoin<T>()` stub, which the plugin transforms at compile time via IR:
 ```kotlin
-startKoin { modules(AppKoinModule().module()) }
+// Bootstrap class — separate from @Module, references the root module graph
+@KoinApplication(modules = [AppKoinModule::class])
+object AndroidKoinApp
+
+// In Application.onCreate()
+startKoin<AndroidKoinApp> {
+    androidContext(this@MeshUtilApplication)
+    workManagerFactory()
+}
 ```
-Do **not** use `@KoinApplication` — that annotation is part of the **KSP annotations path** (`koin-ksp-compiler`) and generates a `startKoin()` extension via KSP. It is incompatible with the K2 plugin approach. The two paths are mutually exclusive; the project has deliberately chosen K2 for compile-time wiring without KSP overhead.
+- `@KoinApplication` goes on a **dedicated bootstrap object**, not on a `@Module` class.
+- `startKoin<T>()` (from `org.koin.plugin.module.dsl`) is a compiler plugin stub — if the plugin isn't applied, it throws `NotImplementedError`.
+- `stopKoin()` uses the standard runtime API (`org.koin.core.context.stopKoin`).
+- `compileSafety` must stay **disabled** — it enables A1 per-module checks that break our inverted-dependency architecture. There is no separate A3 full-graph flag.
 
 ## Navigation 3
 
@@ -38,7 +49,8 @@ Do **not** use `@KoinApplication` — that annotation is part of the **KSP annot
 - **Custom Backstack Mutation:** Do **not** mutate back navigation with custom stacks disconnected from the app backstack. Mutate `NavBackStack<NavKey>` directly with `add(...)` and `removeLastOrNull()`.
 
 ## Reference Anchors
-- **App Startup / Koin Bootstrap:** `app/src/main/kotlin/org/meshtastic/app/MeshUtilApplication.kt`
-- **DI App Wiring:** `app/src/main/kotlin/org/meshtastic/app/di/AppKoinModule.kt`
+- **App Startup / Koin Bootstrap:** `androidApp/src/main/kotlin/org/meshtastic/app/MeshUtilApplication.kt`
+- **DI Bootstrap Object:** `androidApp/src/main/kotlin/org/meshtastic/app/di/AndroidKoinApp.kt`
+- **DI App Wiring:** `androidApp/src/main/kotlin/org/meshtastic/app/di/AppKoinModule.kt`
 - **Shared Routes:** `core/navigation/src/commonMain/kotlin/org/meshtastic/core/navigation/Routes.kt`
-- **Desktop Nav Shell:** `desktop/src/main/kotlin/org/meshtastic/desktop/ui/DesktopMainScreen.kt`
+- **Desktop Nav Shell:** `desktopApp/src/main/kotlin/org/meshtastic/desktop/ui/DesktopMainScreen.kt`

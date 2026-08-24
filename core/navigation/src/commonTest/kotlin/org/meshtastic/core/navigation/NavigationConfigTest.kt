@@ -38,13 +38,11 @@ class NavigationConfigTest {
     private val allRouteInstances: List<NavKey> =
         listOf(
             // ChannelsRoute
-            ChannelsRoute.ChannelsGraph,
             ChannelsRoute.Channels,
             // ConnectionsRoute
-            ConnectionsRoute.ConnectionsGraph,
-            ConnectionsRoute.Connections,
+            ConnectionsRoute.Connections(),
+            ConnectionsRoute.Connections(address = "t192.168.1.1:4403"),
             // ContactsRoute
-            ContactsRoute.ContactsGraph,
             ContactsRoute.Contacts,
             ContactsRoute.Messages(contactKey = "test-contact", message = "hello"),
             ContactsRoute.Messages(contactKey = "test-contact"),
@@ -54,10 +52,7 @@ class NavigationConfigTest {
             MapRoute.Map(),
             MapRoute.Map(waypointId = 42),
             // NodesRoute
-            NodesRoute.NodesGraph,
             NodesRoute.Nodes,
-            NodesRoute.NodeDetailGraph(destNum = 1234),
-            NodesRoute.NodeDetailGraph(),
             NodesRoute.NodeDetail(destNum = 5678),
             NodesRoute.NodeDetail(),
             // NodeDetailRoute
@@ -73,8 +68,6 @@ class NavigationConfigTest {
             NodeDetailRoute.PaxMetrics(destNum = 100),
             NodeDetailRoute.NeighborInfoLog(destNum = 100),
             // SettingsRoute
-            SettingsRoute.SettingsGraph(),
-            SettingsRoute.SettingsGraph(destNum = 999),
             SettingsRoute.Settings(),
             SettingsRoute.Settings(destNum = 999),
             SettingsRoute.DeviceConfiguration,
@@ -104,11 +97,11 @@ class NavigationConfigTest {
             SettingsRoute.DetectionSensor,
             SettingsRoute.Paxcounter,
             SettingsRoute.StatusMessage,
-            SettingsRoute.TrafficManagement,
             SettingsRoute.TAK,
             SettingsRoute.CleanNodeDb,
             SettingsRoute.DebugPanel,
             SettingsRoute.About,
+            SettingsRoute.Acknowledgements,
             SettingsRoute.FilterSettings,
             // FirmwareRoute
             FirmwareRoute.FirmwareGraph,
@@ -183,10 +176,9 @@ class NavigationConfigTest {
         val routesWithDefaults: List<Pair<NavKey, NavKey>> =
             listOf(
                 MapRoute.Map() to MapRoute.Map(waypointId = null),
-                NodesRoute.NodeDetailGraph() to NodesRoute.NodeDetailGraph(destNum = null),
                 NodesRoute.NodeDetail() to NodesRoute.NodeDetail(destNum = null),
-                SettingsRoute.SettingsGraph() to SettingsRoute.SettingsGraph(destNum = null),
                 SettingsRoute.Settings() to SettingsRoute.Settings(destNum = null),
+                ConnectionsRoute.Connections() to ConnectionsRoute.Connections(address = null),
                 WifiProvisionRoute.WifiProvision() to WifiProvisionRoute.WifiProvision(address = null),
             )
 

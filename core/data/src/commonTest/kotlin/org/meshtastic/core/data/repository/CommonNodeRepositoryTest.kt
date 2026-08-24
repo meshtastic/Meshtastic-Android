@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,6 +39,7 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.testing.FakeLocalStatsDataSource
 import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -55,6 +56,7 @@ abstract class CommonNodeRepositoryTest {
 
     protected lateinit var repository: NodeRepositoryImpl
 
+    @BeforeTest
     fun setupRepo() {
         Dispatchers.setMain(testDispatcher)
         lifecycleOwner =

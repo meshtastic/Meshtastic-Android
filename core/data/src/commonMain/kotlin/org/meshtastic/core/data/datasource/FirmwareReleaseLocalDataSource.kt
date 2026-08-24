@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,43 +16,32 @@
  */
 package org.meshtastic.core.data.datasource
 
-import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 import org.meshtastic.core.database.DatabaseProvider
 import org.meshtastic.core.database.entity.FirmwareReleaseEntity
 import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.database.entity.asDeviceVersion
 import org.meshtastic.core.database.entity.asEntity
-import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.NetworkFirmwareRelease
 
 @Single
-class FirmwareReleaseLocalDataSource(
-    private val dbManager: DatabaseProvider,
-    private val dispatchers: CoroutineDispatchers,
-) {
-    private val firmwareReleaseDao
-        get() = dbManager.currentDb.value.firmwareReleaseDao()
+class FirmwareReleaseLocalDataSource(private val dbManager: DatabaseProvider) {
+    suspend fun deleteAllFirmwareReleases() {
+        dbManager.withDb { it.firmwareReleaseDao().deleteAll() }
+    }
 
-    suspend fun insertFirmwareReleases(
-        firmwareReleases: List<NetworkFirmwareRelease>,
-        releaseType: FirmwareReleaseType,
-    ) = withContext(dispatchers.io) {
-        firmwareReleases.forEach { firmwareRelease ->
-            firmwareReleaseDao.insert(firmwareRelease.asEntity(releaseType))
+    /** Transactionally replaces all rows of each given type with its API list; other types are untouched. */
+    suspend fun replaceFirmwareReleases(releasesByType: Map<FirmwareReleaseType, List<NetworkFirmwareRelease>>) {
+        dbManager.withDb {
+            it.firmwareReleaseDao()
+                .replaceByTypes(
+                    types = releasesByType.keys.toList(),
+                    releases = releasesByType.flatMap { (type, releases) -> releases.map { r -> r.asEntity(type) } },
+                )
         }
     }
 
-    suspend fun deleteAllFirmwareReleases() = withContext(dispatchers.io) { firmwareReleaseDao.deleteAll() }
-
-    suspend fun getLatestRelease(releaseType: FirmwareReleaseType): FirmwareReleaseEntity? =
-        withContext(dispatchers.io) {
-            val releases = firmwareReleaseDao.getReleasesByType(releaseType)
-            if (releases.isEmpty()) {
-                return@withContext null
-            } else {
-                val latestRelease = releases.maxBy { it.asDeviceVersion() }
-                return@withContext latestRelease
-            }
-        }
+    suspend fun getLatestRelease(releaseType: FirmwareReleaseType): FirmwareReleaseEntity? = dbManager.withReadDb {
+        it.firmwareReleaseDao().getReleasesByType(releaseType).maxByOrNull { entity -> entity.asDeviceVersion() }
+    }
 }

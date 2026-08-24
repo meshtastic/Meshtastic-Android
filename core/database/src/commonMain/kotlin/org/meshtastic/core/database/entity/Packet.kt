@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,28 +24,31 @@ import androidx.room3.PrimaryKey
 import androidx.room3.Relation
 import okio.ByteString
 import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.model.ContactKey
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.Reaction
 import org.meshtastic.core.model.util.getShortDateTime
 
 data class PacketEntity(
     @Embedded val packet: Packet,
-    @Relation(entity = ReactionEntity::class, parentColumn = "packet_id", entityColumn = "reply_id")
-    val reactions: List<ReactionEntity> = emptyList(),
+    @Relation(entity = ReactionEntity::class, parentColumns = ["packet_id"], entityColumns = ["reply_id"])
+    val reactions: List<ReactionEntity>,
 ) {
     suspend fun toMessage(getNode: suspend (userId: String?) -> Node) = with(packet) {
         val node = getNode(data.from)
-        val isFromLocal = node.user.id == DataPacket.ID_LOCAL || (myNodeNum != 0 && node.num == myNodeNum)
+        val isFromLocal = node.user.id == NodeAddress.ID_LOCAL || (myNodeNum != 0 && node.num == myNodeNum)
         Message(
             uuid = uuid,
             receivedTime = received_time,
             node = node,
             fromLocal = isFromLocal,
             text = data.text.orEmpty(),
-            time = getShortDateTime(data.time),
+            meshTime = data.time,
+            time = getShortDateTime(data.time.takeIf { it > 0 } ?: received_time),
             snr = snr,
             rssi = rssi,
             hopsAway = hopsAway,
@@ -53,15 +56,54 @@ data class PacketEntity(
             status = data.status,
             routingError = routingError,
             packetId = packetId,
-            emojis = reactions.filter { it.myNodeNum == myNodeNum || it.myNodeNum == 0 }.toReaction(getNode),
+            emojis =
+            reactions
+                .filter { it.myNodeNum == myNodeNum || it.myNodeNum == 0 }
+                .filter { it.belongsTo(packet) }
+                // myNodeNum is part of the reactions primary key, so the legacy 0 bucket can hold the same
+                // (user, emoji) as this node's. The UI keys reaction rows on that pair, so keep one — the
+                // current node's, which carries the live delivery status.
+                .sortedBy { it.myNodeNum == 0 }
+                .distinctBy { it.userId to it.emoji }
+                .toReaction(getNode),
             replyId = data.replyId,
             viaMqtt = data.viaMqtt,
             relayNode = data.relayNode,
             relays = data.relays,
             filtered = filtered,
             transportMechanism = data.transportMechanism,
+            xeddsaSigned = data.xeddsaSigned,
+            translatedText = translatedText,
+            showTranslated = showTranslated,
         )
     }
+}
+
+/**
+ * A reaction references its parent by mesh packet ID, which is only unique per sender. The wire format does not carry
+ * the parent's sender, but it does carry enough addressing information to keep reactions scoped to the conversation in
+ * which they were sent. Legacy rows without addressing metadata retain the historical ID-only behavior.
+ */
+@Suppress("ReturnCount")
+private fun ReactionEntity.belongsTo(packet: Packet): Boolean {
+    if (to == null || userId.isEmpty()) return true
+
+    val sender = NodeAddress.fromString(userId)
+    val recipient = NodeAddress.fromString(to)
+    val packetContact = ContactKey(packet.contact_key)
+    val isLegacyInboundPkiChannel =
+        packetContact.channel == NodeAddress.PKC_CHANNEL_INDEX &&
+            channel == 0 &&
+            status == MessageStatus.RECEIVED &&
+            recipient !is NodeAddress.Broadcast
+    if (packetContact.channel != channel && !isLegacyInboundPkiChannel) return false
+
+    val senderIsLocal =
+        status != MessageStatus.RECEIVED ||
+            sender is NodeAddress.Local ||
+            (myNodeNum != 0 && sender is NodeAddress.ByNum && sender.num == myNodeNum)
+    val reactionContact = if (recipient is NodeAddress.Broadcast || senderIsLocal) recipient else sender
+    return reactionContact == packetContact.address
 }
 
 @Suppress("ConstructorParameterNaming")
@@ -89,11 +131,16 @@ data class Packet(
     @ColumnInfo(name = "data") val data: DataPacket,
     @ColumnInfo(name = "packet_id", defaultValue = "0") val packetId: Int = 0,
     @ColumnInfo(name = "routing_error", defaultValue = "-1") var routingError: Int = -1,
-    @ColumnInfo(name = "snr", defaultValue = "0") val snr: Float = 0f,
-    @ColumnInfo(name = "rssi", defaultValue = "0") val rssi: Int = 0,
+    /** Null when the packet carried no snr. Rows written before schema 52 store 0 for both absent and 0 dB. */
+    @ColumnInfo(name = "snr") val snr: Float? = null,
+    /** Null when the radio reported no rssi. Rows written before schema 51 store 0 for both absent and 0 dBm. */
+    @ColumnInfo(name = "rssi") val rssi: Int? = null,
     @ColumnInfo(name = "hopsAway", defaultValue = "-1") val hopsAway: Int = -1,
     @ColumnInfo(name = "sfpp_hash") val sfpp_hash: ByteString? = null,
     @ColumnInfo(name = "filtered", defaultValue = "0") val filtered: Boolean = false,
+    @ColumnInfo(name = "message_text", defaultValue = "") val messageText: String = "",
+    @ColumnInfo(name = "translated_text") val translatedText: String? = null,
+    @ColumnInfo(name = "show_translated", defaultValue = "0") val showTranslated: Boolean = false,
 ) {
     companion object {
         const val RELAY_NODE_SUFFIX_MASK = 0xFF
@@ -128,6 +175,8 @@ data class ContactSettings(
     @ColumnInfo(name = "last_read_message_uuid") val lastReadMessageUuid: Long? = null,
     @ColumnInfo(name = "last_read_message_timestamp") val lastReadMessageTimestamp: Long? = null,
     @ColumnInfo(name = "filtering_disabled", defaultValue = "0") val filteringDisabled: Boolean = false,
+    /** Unsent composer text for this conversation. Empty when there is nothing in progress. */
+    @ColumnInfo(name = "draft", defaultValue = "''") val draft: String = "",
 ) {
     val isMuted
         get() = nowMillis <= muteUntil
@@ -145,8 +194,10 @@ data class ReactionEntity(
     @ColumnInfo(name = "user_id") val userId: String,
     val emoji: String,
     val timestamp: Long,
-    @ColumnInfo(name = "snr", defaultValue = "0") val snr: Float = 0f,
-    @ColumnInfo(name = "rssi", defaultValue = "0") val rssi: Int = 0,
+    /** Null when the packet carried no snr. Rows written before schema 52 store 0 for both absent and 0 dB. */
+    @ColumnInfo(name = "snr") val snr: Float? = null,
+    /** Null when the radio reported no rssi. Rows written before schema 51 store 0 for both absent and 0 dBm. */
+    @ColumnInfo(name = "rssi") val rssi: Int? = null,
     @ColumnInfo(name = "hopsAway", defaultValue = "-1") val hopsAway: Int = -1,
     @ColumnInfo(name = "packet_id", defaultValue = "0") val packetId: Int = 0,
     @ColumnInfo(name = "status", defaultValue = "0") val status: MessageStatus = MessageStatus.UNKNOWN,

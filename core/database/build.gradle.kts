@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,15 +19,11 @@ plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.meshtastic.android.room)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
-    alias(libs.plugins.kotlin.parcelize)
-    id("meshtastic.koin")
+    alias(libs.plugins.meshtastic.koin)
 }
 
 kotlin {
-    jvm()
-
     android {
-        namespace = "org.meshtastic.core.database"
         withHostTest { isIncludeAndroidResources = true }
         withDeviceTest { instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner" }
     }
@@ -36,12 +32,13 @@ kotlin {
         commonMain.dependencies {
             implementation(libs.androidx.sqlite.bundled)
             implementation(libs.androidx.datastore.preferences)
+            implementation(libs.kotlinx.atomicfu)
             implementation(libs.okio)
 
             api(projects.core.common)
             implementation(projects.core.di)
             api(projects.core.model)
-            implementation(projects.core.proto)
+            implementation(libs.meshtastic.protobufs)
             implementation(projects.core.resources)
             implementation(libs.androidx.room.paging)
             implementation(libs.kotlinx.serialization.json)
@@ -49,19 +46,18 @@ kotlin {
         }
         commonTest.dependencies {
             implementation(projects.core.testing)
-            implementation(libs.kotlinx.coroutines.test)
             implementation(libs.androidx.room.testing)
         }
 
-        val androidHostTest by getting {
+        getByName("androidHostTest") {
             dependencies {
                 implementation(libs.androidx.sqlite.bundled)
+                runtimeOnly(libs.androidx.sqlite.bundled.jvm)
                 implementation(libs.androidx.room.testing)
-                implementation(libs.androidx.test.ext.junit)
                 implementation(libs.junit)
             }
         }
-        val androidDeviceTest by getting {
+        getByName("androidDeviceTest") {
             dependencies {
                 implementation(libs.androidx.room.testing)
                 implementation(libs.androidx.test.ext.junit)
@@ -74,6 +70,9 @@ kotlin {
 dependencies {
     "kspJvm"(libs.androidx.room.compiler)
     "kspJvmTest"(libs.androidx.room.compiler)
+    // KSP resolves this via a detached configuration at task execution time,
+    // so we declare it explicitly to ensure offline/Flatpak builds can resolve it.
+    "kspJvm"(libs.ksp.symbol.processing.aa.embeddable)
     "kspAndroidHostTest"(libs.androidx.room.compiler)
     "kspAndroidDeviceTest"(libs.androidx.room.compiler)
 }

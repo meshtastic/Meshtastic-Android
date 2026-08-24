@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,15 +22,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.CommonUri
-import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.repository.DataPair
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
-import org.meshtastic.core.ui.util.getChannelList
+import org.meshtastic.core.repository.RadioController
+import org.meshtastic.core.ui.util.importChannelSet
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
-import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalConfig
@@ -86,17 +85,8 @@ class ChannelViewModel(
 
     /** Set the radio config (also updates our saved copy in preferences). */
     fun setChannels(channelSet: ChannelSet) = safeLaunch(tag = "setChannels") {
-        getChannelList(channelSet.settings, channels.value.settings).forEach(::setChannel)
-        radioConfigRepository.replaceAllSettings(channelSet.settings)
-
-        val newLoraConfig = channelSet.lora_config
-        if (localConfig.value.lora != newLoraConfig) {
-            setConfig(Config(lora = newLoraConfig))
-        }
-    }
-
-    fun setChannel(channel: Channel) {
-        safeLaunch(tag = "setChannel") { radioController.setLocalChannel(channel) }
+        importChannelSet(channelSet, radioController, radioConfigRepository)
+        analytics.trackAction("channel_update", mapOf("num_channels" to channelSet.settings.size))
     }
 
     // Set the radio config (also updates our saved copy in preferences)
@@ -106,6 +96,7 @@ class ChannelViewModel(
 
     fun trackShare() {
         analytics.track("share", DataPair("content_type", "channel"))
+        analytics.trackAction("channel_share")
     }
 
     private inline fun updateLoraConfig(crossinline body: (Config.LoRaConfig) -> Config.LoRaConfig) {

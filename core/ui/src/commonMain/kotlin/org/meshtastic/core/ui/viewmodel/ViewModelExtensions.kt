@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import org.meshtastic.core.common.log.expectedConditionLabel
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.unknown_error
@@ -122,14 +123,22 @@ fun safeLaunch(
         throw e
     } catch (e: Exception) {
         val label = tag ?: "safeLaunch"
-        Logger.e(e) { "[$label] Unhandled exception" }
+        // Expected conditions (Bluetooth off, permission not granted, …) still reach the user as an error
+        // event, but are logged at warn so neither Crashlytics nor Datadog RUM records them as a defect.
+        val expectedLabel = e.expectedConditionLabel()
+        if (expectedLabel != null) {
+            Logger.w(e) { "[$label] Expected condition: $expectedLabel" }
+        } else {
+            Logger.e(e) { "[$label] Unhandled exception" }
+        }
         val message = e.message?.let { UiText.DynamicString(it) } ?: UiText.Resource(Res.string.unknown_error)
         errorEvents?.tryEmit(message)
     }
 }
 
 /**
- * Creates and returns a [MutableSharedFlow] intended for one-shot error events. Expose as `SharedFlow` via
- * [asSharedFlow] in the ViewModel, and collect in the UI to show snackbars or toasts.
+ * Creates and returns a [MutableSharedFlow] intended for one-shot error events. Expose as `Flow` via
+ * [kotlinx.coroutines.flow.asFlow] in the ViewModel (hiding hot-flow semantics), and collect in the UI to show
+ * snackbars or toasts.
  */
 fun errorEventFlow(): MutableSharedFlow<UiText> = MutableSharedFlow(extraBufferCapacity = 1)

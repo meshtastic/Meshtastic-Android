@@ -19,4 +19,6 @@ package org.meshtastic.core.model.util
 /** No-op stubs for core:model on iOS. */
 actual fun getShortDateTime(time: Long): String = ""
 
-actual fun platformRandomBytes(size: Int): ByteArray = ByteArray(size)
+// Deliberately not a no-op: this backs channel PSK and private-key generation, so an all-zeros stub must not be
+// allowed to ship silently. Fail loudly until it is wired to SecRandomCopyBytes.
+actual fun platformRandomBytes(size: Int): ByteArray = error("platformRandomBytes is not implemented on iOS")

@@ -1,0 +1,149 @@
+name: Verify Flatpak Offline Build
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'scripts/verify-flatpak/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - '.github/workflows/verify-flatpak.yml'
+      # The desktop module's build config shapes the uber jar the flatpak wraps.
+      - 'desktopApp/**'
+      # The offline manifest pins the Gradle distribution independently of the wrapper —
+      # a wrapper bump without a manifest update breaks the offline build silently.
+      - 'gradle/wrapper/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: flatpak-verify-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  generate-sources:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          submodules: recursive
+
+      # Renovate mirrors wrapper bumps into the manifest's distribution URL but cannot
+      # rewrite its sha256, so on a wrapper bump this drift is expected: fail here in
+      # seconds instead of ~15 minutes into both build-flatpak arches ("Verification of
+      # Gradle distribution failed!", see #6777/#6782).
+      - name: Check vendored Gradle dist matches the wrapper
+        run: |
+          props=gradle/wrapper/gradle-wrapper.properties
+          manifest=scripts/verify-flatpak/desktop-offline.yaml
+          wrapper_dist=$(grep '^distributionUrl=' "$props" | sed 's|.*/||' || true)
+          wrapper_sha=$(grep '^distributionSha256Sum=' "$props" | cut -d= -f2 || true)
+          manifest_dist=$(grep -o 'gradle-[0-9][^/]*\.zip' "$manifest" || true)
+          manifest_sha=$(awk '/url:.*services\.gradle\.org\/distributions\//{getline; sub(/^[[:space:]]*sha256:[[:space:]]*/, ""); print}' "$manifest")
+          if [ -z "$wrapper_dist" ] || [ -z "$wrapper_sha" ]; then
+            echo "::error file=$props::Could not parse distributionUrl/distributionSha256Sum from $props; the guard in verify-flatpak.yml needs updating."
+            exit 1
+          fi
+          if [ "$wrapper_dist" != "$manifest_dist" ] || [ "$wrapper_sha" != "$manifest_sha" ]; then
+            echo "::error file=$manifest::Vendored Gradle dist is out of sync: $manifest pins '$manifest_dist' (sha256 '$manifest_sha') but $props pins '$wrapper_dist' (sha256 '$wrapper_sha'). Update the url and sha256 in $manifest; the correct sha256 is distributionSha256Sum in $props."
+            exit 1
+          fi
+          echo "OK: $manifest vendors $wrapper_dist, matching $props"
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 25
+          token: ${{ github.token }}
+
+      # JBR resolves its version list via the GitHub API — unauthenticated requests
+      # rate-limit on the shared runner IPs, so the token is required, not optional.
+      - uses: actions/setup-java@v5
+        with:
+          distribution: jetbrains
+          java-version: 25
+          token: ${{ github.token }}
+
+      - uses: gradle/actions/setup-gradle@v6
+        with:
+          develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+
+      - name: Generate flatpak-sources.json
+        run: |
+          ./gradlew --no-build-cache \
+            -Dgradle.user.home="$RUNNER_TEMP/flatpak-gradle-home" \
+            :desktopApp:packageUberJarForCurrentOS :captureFlatpakSources
+          cp build/flatpak-sources.json flatpak-sources.json
+          echo "### Flatpak Sources Summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "- URLs captured: $(jq length flatpak-sources.json)" >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: flatpak-sources
+          path: flatpak-sources.json
+
+  build-flatpak:
+    needs: generate-sources
+    runs-on: ${{ matrix.arch == 'aarch64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    timeout-minutes: 45
+    strategy:
+      matrix:
+        arch: [x86_64, aarch64]
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          submodules: recursive
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: flatpak-sources
+
+      - name: Clone the Flathub packaging repo
+        run: |
+          git clone --depth 1 --recurse-submodules \
+            https://github.com/flathub/org.meshtastic.MeshtasticDesktop.git \
+            "$RUNNER_TEMP/org.meshtastic.MeshtasticDesktop"
+
+      - name: Wire overlay manifest + sources
+        run: |
+          cp scripts/verify-flatpak/desktop-offline.yaml \
+            "$RUNNER_TEMP/org.meshtastic.MeshtasticDesktop/org.meshtastic.MeshtasticDesktop.yaml"
+          cp flatpak-sources.json \
+            "$RUNNER_TEMP/org.meshtastic.MeshtasticDesktop/flatpak-sources.json"
+          rsync -a --delete \
+            --exclude='/build/' --exclude='/.gradle/' \
+            --exclude='*/build/' --exclude='*/.gradle/' \
+            --exclude='/.idea/' --exclude='/local.properties' \
+            ./ "$RUNNER_TEMP/org.meshtastic.MeshtasticDesktop/meshtastic-android/"
+
+      - name: Install flatpak-builder
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq flatpak flatpak-builder
+          flatpak remote-add --user --if-not-exists flathub \
+            https://dl.flathub.org/repo/flathub.flatpakrepo
+
+      - name: Build flatpak offline
+        working-directory: ${{ runner.temp }}/org.meshtastic.MeshtasticDesktop
+        run: |
+          flatpak-builder --user --repo=repo --install-deps-from=flathub \
+            --force-clean builddir org.meshtastic.MeshtasticDesktop.yaml
+
+      - name: Export .flatpak bundle
+        working-directory: ${{ runner.temp }}/org.meshtastic.MeshtasticDesktop
+        env:
+          ARCH: ${{ matrix.arch }}
+        run: |
+          flatpak build-bundle repo "org.meshtastic.MeshtasticDesktop.${ARCH}.flatpak" \
+            org.meshtastic.MeshtasticDesktop \
+            --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo
+          echo "### ✅ Offline Flatpak build succeeded ($ARCH)" >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: meshtastic-desktop-flatpak-${{ matrix.arch }}
+          path: ${{ runner.temp }}/org.meshtastic.MeshtasticDesktop/org.meshtastic.MeshtasticDesktop.${{ matrix.arch }}.flatpak

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.ic_air
-import org.meshtastic.core.resources.ic_alt_route
 import org.meshtastic.core.resources.ic_blur_on
 import org.meshtastic.core.resources.ic_bolt
 import org.meshtastic.core.resources.ic_charging_station
@@ -29,7 +28,6 @@ import org.meshtastic.core.resources.ic_compress
 import org.meshtastic.core.resources.ic_data_array
 import org.meshtastic.core.resources.ic_electric_bolt
 import org.meshtastic.core.resources.ic_explore
-import org.meshtastic.core.resources.ic_grass
 import org.meshtastic.core.resources.ic_height
 import org.meshtastic.core.resources.ic_light_mode
 import org.meshtastic.core.resources.ic_line_axis
@@ -38,6 +36,8 @@ import org.meshtastic.core.resources.ic_power
 import org.meshtastic.core.resources.ic_satellite_alt
 import org.meshtastic.core.resources.ic_scale
 import org.meshtastic.core.resources.ic_social_distance
+import org.meshtastic.core.resources.ic_soil_moisture
+import org.meshtastic.core.resources.ic_soil_temperature
 import org.meshtastic.core.resources.ic_speed
 import org.meshtastic.core.resources.ic_stacked_line_chart
 import org.meshtastic.core.resources.ic_thermostat
@@ -49,7 +49,9 @@ val MeshtasticIcons.Humidity: ImageVector
 val MeshtasticIcons.Pressure: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_compress)
 val MeshtasticIcons.SoilMoisture: ImageVector
-    @Composable get() = vectorResource(Res.drawable.ic_grass)
+    @Composable get() = vectorResource(Res.drawable.ic_soil_moisture)
+val MeshtasticIcons.SoilTemperature: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_soil_temperature)
 val MeshtasticIcons.ElectricPower: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_electric_bolt)
 val MeshtasticIcons.Distance: ImageVector
@@ -87,7 +89,5 @@ val MeshtasticIcons.LightMode: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_light_mode)
 val MeshtasticIcons.ChargingStation: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_charging_station)
-val MeshtasticIcons.TrafficManagement: ImageVector
-    @Composable get() = vectorResource(Res.drawable.ic_alt_route)
 val MeshtasticIcons.VolumeUp: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_volume_up)

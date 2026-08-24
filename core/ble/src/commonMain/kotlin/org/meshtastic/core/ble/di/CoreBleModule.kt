@@ -18,7 +18,18 @@ package org.meshtastic.core.ble.di
 
 import org.koin.core.annotation.ComponentScan
 import org.koin.core.annotation.Module
+import org.koin.core.annotation.Single
+import org.meshtastic.core.ble.BleLoggingConfig
+import org.meshtastic.core.common.BuildConfigProvider
 
 @Module
 @ComponentScan("org.meshtastic.core.ble")
-class CoreBleModule
+class CoreBleModule {
+    /**
+     * Quiet by default in release; verbose (Kable [Events][com.juul.kable.logs.Logging.Level.Events]) in debug builds.
+     * Always single-line for grep/logcat friendliness.
+     */
+    @Single
+    fun provideBleLoggingConfig(buildConfig: BuildConfigProvider): BleLoggingConfig =
+        if (buildConfig.isDebug) BleLoggingConfig.Debug else BleLoggingConfig.Release
+}

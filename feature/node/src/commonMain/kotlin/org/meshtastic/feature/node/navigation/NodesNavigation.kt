@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,9 +34,11 @@ import org.meshtastic.core.navigation.NodeDetailRoute
 import org.meshtastic.core.navigation.NodesRoute
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.air_quality
 import org.meshtastic.core.resources.device
 import org.meshtastic.core.resources.environment
 import org.meshtastic.core.resources.host
+import org.meshtastic.core.resources.ic_air
 import org.meshtastic.core.resources.ic_cell_tower
 import org.meshtastic.core.resources.ic_group
 import org.meshtastic.core.resources.ic_groups
@@ -58,6 +60,7 @@ import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.feature.node.compass.CompassViewModel
 import org.meshtastic.feature.node.detail.NodeDetailScreen
 import org.meshtastic.feature.node.detail.NodeDetailViewModel
+import org.meshtastic.feature.node.metrics.AirQualityMetricsScreen
 import org.meshtastic.feature.node.metrics.DeviceMetricsScreen
 import org.meshtastic.feature.node.metrics.EnvironmentMetricsScreen
 import org.meshtastic.feature.node.metrics.HostMetricsLogScreen
@@ -78,45 +81,27 @@ fun EntryProviderScope<NavKey>.nodesGraph(
     backStack: NavBackStack<NavKey>,
     scrollToTopEvents: Flow<ScrollToTopEvent> = MutableSharedFlow(),
     onHandleDeepLink: (org.meshtastic.core.common.util.CommonUri, onInvalid: () -> Unit) -> Unit = { _, _ -> },
+    onNavigateToConnections: () -> Unit = {},
 ) {
-    entry<NodesRoute.NodesGraph>(metadata = { ListDetailSceneStrategy.listPane() }) {
-        AdaptiveNodeListScreen(
-            backStack = backStack,
-            scrollToTopEvents = scrollToTopEvents,
-            onHandleDeepLink = onHandleDeepLink,
-        )
-    }
-
     entry<NodesRoute.Nodes>(metadata = { ListDetailSceneStrategy.listPane() }) {
         AdaptiveNodeListScreen(
             backStack = backStack,
             scrollToTopEvents = scrollToTopEvents,
             onHandleDeepLink = onHandleDeepLink,
+            onNavigateToConnections = onNavigateToConnections,
         )
     }
 
-    nodeDetailGraph(backStack, scrollToTopEvents, onHandleDeepLink)
+    nodeDetailGraph(backStack)
 }
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Suppress("LongMethod")
-fun EntryProviderScope<NavKey>.nodeDetailGraph(
-    backStack: NavBackStack<NavKey>,
-    scrollToTopEvents: Flow<ScrollToTopEvent>,
-    onHandleDeepLink: (org.meshtastic.core.common.util.CommonUri, onInvalid: () -> Unit) -> Unit = { _, _ -> },
-) {
-    entry<NodesRoute.NodeDetailGraph>(metadata = { ListDetailSceneStrategy.listPane() }) { args ->
-        AdaptiveNodeListScreen(
-            backStack = backStack,
-            scrollToTopEvents = scrollToTopEvents,
-            onHandleDeepLink = onHandleDeepLink,
-        )
-    }
-
+fun EntryProviderScope<NavKey>.nodeDetailGraph(backStack: NavBackStack<NavKey>) {
     entry<NodesRoute.NodeDetail>(metadata = { ListDetailSceneStrategy.detailPane() }) { args ->
         val nodeDetailViewModel: NodeDetailViewModel = koinViewModel()
         val compassViewModel: CompassViewModel = koinViewModel()
-        val destNum = args.destNum ?: 0 // Handle nullable destNum if needed
+        val destNum = args.destNum ?: 0
         NodeDetailScreen(
             nodeId = destNum,
             viewModel = nodeDetailViewModel,
@@ -148,7 +133,12 @@ fun EntryProviderScope<NavKey>.nodeDetailGraph(
 
     entry<NodeDetailRoute.TracerouteMap>(metadata = { ListDetailSceneStrategy.extraPane() }) { args ->
         val tracerouteMapScreen = org.meshtastic.core.ui.util.LocalTracerouteMapScreenProvider.current
-        tracerouteMapScreen(args.destNum, args.requestId, args.logUuid) { backStack.removeLastOrNull() }
+        tracerouteMapScreen(
+            args.destNum,
+            args.requestId,
+            args.logUuid,
+            dropUnlessResumed { backStack.removeLastOrNull() },
+        )
     }
 
     // RemoteShell uses its own ViewModel and is wired up separately from the MetricsViewModel-based screens.
@@ -164,21 +154,32 @@ fun EntryProviderScope<NavKey>.nodeDetailGraph(
         when (routeInfo.routeClass) {
             NodeDetailRoute.DeviceMetrics::class ->
                 addNodeDetailScreenComposable<NodeDetailRoute.DeviceMetrics>(backStack, routeInfo) { it.destNum }
+
             NodeDetailRoute.PositionLog::class ->
                 addNodeDetailScreenComposable<NodeDetailRoute.PositionLog>(backStack, routeInfo) { it.destNum }
+
             NodeDetailRoute.EnvironmentMetrics::class ->
                 addNodeDetailScreenComposable<NodeDetailRoute.EnvironmentMetrics>(backStack, routeInfo) { it.destNum }
+
             NodeDetailRoute.SignalMetrics::class ->
                 addNodeDetailScreenComposable<NodeDetailRoute.SignalMetrics>(backStack, routeInfo) { it.destNum }
+
             NodeDetailRoute.PowerMetrics::class ->
                 addNodeDetailScreenComposable<NodeDetailRoute.PowerMetrics>(backStack, routeInfo) { it.destNum }
+
             NodeDetailRoute.HostMetricsLog::class ->
                 addNodeDetailScreenComposable<NodeDetailRoute.HostMetricsLog>(backStack, routeInfo) { it.destNum }
+
             NodeDetailRoute.PaxMetrics::class ->
                 addNodeDetailScreenComposable<NodeDetailRoute.PaxMetrics>(backStack, routeInfo) { it.destNum }
+
+            NodeDetailRoute.AirQualityMetrics::class ->
+                addNodeDetailScreenComposable<NodeDetailRoute.AirQualityMetrics>(backStack, routeInfo) { it.destNum }
+
             NodeDetailRoute.NeighborInfoLog::class ->
                 addNodeDetailScreenComposable<NodeDetailRoute.NeighborInfoLog>(backStack, routeInfo) { it.destNum }
             // NodeDetailRoute.RemoteShell is handled by the dedicated entry above.
+
             else -> Unit
         }
     }
@@ -261,6 +262,12 @@ enum class NodeDetailScreen(
         NodeDetailRoute.PaxMetrics::class,
         Res.drawable.ic_group,
         { metricsVM, onNavigateUp -> PaxMetricsScreen(metricsVM, onNavigateUp) },
+    ),
+    AIR_QUALITY(
+        Res.string.air_quality,
+        NodeDetailRoute.AirQualityMetrics::class,
+        Res.drawable.ic_air,
+        { metricsVM, onNavigateUp -> AirQualityMetricsScreen(metricsVM, onNavigateUp) },
     ),
     REMOTE_SHELL(
         Res.string.remote_shell,

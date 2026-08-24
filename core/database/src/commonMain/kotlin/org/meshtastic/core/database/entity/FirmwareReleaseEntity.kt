@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -73,5 +73,8 @@ fun FirmwareRelease.asDeviceVersion(): DeviceVersion = DeviceVersion(id.substrin
 enum class FirmwareReleaseType {
     STABLE,
     ALPHA,
+
+    /** Nightly preview from meshtastic.github.io's `firmware-nightly/` folder; gated behind the modules unlock. */
+    NIGHTLY,
     LOCAL,
 }

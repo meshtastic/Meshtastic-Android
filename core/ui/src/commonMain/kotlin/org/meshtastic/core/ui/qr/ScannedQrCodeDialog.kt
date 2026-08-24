@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -62,6 +62,8 @@ import org.meshtastic.core.resources.new_channel_rcvd
 import org.meshtastic.core.resources.replace
 import org.meshtastic.core.resources.replace_channels_and_settings_description
 import org.meshtastic.core.ui.component.ChannelSelection
+import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.util.getChannelPreviewForAdd
 import org.meshtastic.proto.ChannelSet
 
 @Composable
@@ -71,11 +73,13 @@ fun ScannedQrCodeDialog(
     viewModel: ScannedQrCodeViewModel = koinViewModel(),
 ) {
     val channels by viewModel.channels.collectAsStateWithLifecycle()
+    val maxChannels by viewModel.maxChannels.collectAsStateWithLifecycle()
 
     ScannedQrCodeDialog(
         channels = channels,
         incoming = incoming,
         onDismiss = onDismiss,
+        maxChannels = maxChannels,
         onConfirm = viewModel::setChannels,
     )
 }
@@ -88,12 +92,30 @@ fun ScannedQrCodeDialog(
     channels: ChannelSet,
     incoming: ChannelSet,
     onDismiss: () -> Unit,
+    maxChannels: Int = DEFAULT_MAX_CHANNELS,
     onConfirm: (ChannelSet) -> Unit,
 ) {
     var shouldReplace by rememberSaveable { mutableStateOf(incoming.lora_config != null) }
 
+    // Freeze the channel limit for the dialog's lifetime so a late myNodeInfo emission (which updates
+    // viewModel.maxChannels from the DEFAULT_MAX_CHANNELS seed to the real device value) cannot rebuild
+    // addPreview/channelSelections and silently wipe the user's checkbox toggles.
+    val effectiveMaxChannels = rememberSaveable { maxChannels }
+
+    // Filtered ADD-mode preview: existing channels plus only the unique incoming channels. Duplicate incoming channels
+    // are omitted entirely. REPLACE mode ignores this and uses the raw incoming set.
+    val addPreview =
+        remember(channels.settings, incoming.settings, channels.lora_config, effectiveMaxChannels) {
+            getChannelPreviewForAdd(
+                existing = channels.settings,
+                incoming = incoming.settings,
+                loraConfig = channels.lora_config ?: Channel.default.loraConfig,
+                maxChannels = effectiveMaxChannels,
+            )
+        }
+
     val channelSet =
-        remember(shouldReplace, channels, incoming) {
+        remember(shouldReplace, channels, incoming, addPreview.settings) {
             if (shouldReplace) {
                 // When replacing, apply the incoming LoRa configuration but preserve certain
                 // locally safe fields such as MQTT flags and TX power. This prevents QR codes
@@ -106,10 +128,7 @@ fun ScannedQrCodeDialog(
                     ),
                 )
             } else {
-                // To guarantee consistent ordering, using a LinkedHashSet which iterates through
-                // its entries according to the order an item was *first* inserted.
-                val result = (channels.settings + incoming.settings).distinct()
-                channels.copy(settings = result)
+                channels.copy(settings = addPreview.settings)
             }
         }
 
@@ -117,7 +136,15 @@ fun ScannedQrCodeDialog(
 
     /* Holds selections made by the user */
     val channelSelections =
-        remember(channelSet) { mutableStateListOf(elements = Array(size = channelSet.settings.size, init = { true })) }
+        remember(shouldReplace, channelSet.settings, addPreview.selections) {
+            val defaults =
+                if (shouldReplace) {
+                    List(channelSet.settings.size) { true }
+                } else {
+                    addPreview.selections
+                }
+            mutableStateListOf<Boolean>().apply { addAll(defaults) }
+        }
 
     val selectedChannelSet =
         if (shouldReplace) {
@@ -128,8 +155,10 @@ fun ScannedQrCodeDialog(
             channelSet.copy(
                 settings =
                 channelSet.settings.filterIndexed { i, _ ->
-                    val isExisting = i < channels.settings.size
-                    isExisting || channelSelections.getOrNull(i) == true
+                    // Primary (index 0) is always kept; existing secondaries can be dropped to free a slot for the
+                    // incoming channel when the radio is full (Apple FR-017 "replace a secondary, never the
+                    // primary").
+                    i == 0 || channelSelections.getOrNull(i) == true
                 },
             )
         }
@@ -201,14 +230,20 @@ fun ScannedQrCodeDialog(
                     )
                 }
 
-                itemsIndexed(channelSet.settings) { index, channel ->
-                    val isExisting = !shouldReplace && index < channels.settings.size
+                itemsIndexed(channelSet.settings, key = { index, _ -> index }, contentType = { _, _ -> "channel" }) {
+                        index,
+                        channel,
+                    ->
+                    val isPrimary = index == 0
                     val channelObj = Channel(channel, channelSet.lora_config ?: Channel.default.loraConfig)
                     ChannelSelection(
                         index = index,
                         title = channel.name.ifEmpty { modemPresetName },
-                        enabled = !isExisting,
-                        isSelected = if (isExisting) true else channelSelections[index],
+                        // Primary is always kept. In ADD mode existing secondaries become deselectable so the user can
+                        // drop one to make room for the incoming channel on a full radio; REPLACE keeps its prior
+                        // all-selectable behavior.
+                        enabled = if (shouldReplace) true else !isPrimary,
+                        isSelected = if (!shouldReplace && isPrimary) true else channelSelections[index],
                         onSelected = {
                             if (it || selectedChannelSet.settings.size > 1) {
                                 channelSelections[index] = it
@@ -294,7 +329,7 @@ fun ScannedQrCodeDialog(
                                 onDismiss()
                                 onConfirm(selectedChannelSet)
                             },
-                            enabled = selectedChannelSet.settings.size in 1..8,
+                            enabled = selectedChannelSet.settings.size in 1..effectiveMaxChannels,
                         ) {
                             Text(
                                 text = stringResource(Res.string.accept),
@@ -314,10 +349,14 @@ fun ScannedQrCodeDialog(
 @PreviewLightDark
 @Composable
 private fun ScannedQrCodeDialogPreview() {
-    ScannedQrCodeDialog(
-        channels = ChannelSet(settings = listOf(Channel.default.settings), lora_config = Channel.default.loraConfig),
-        incoming = ChannelSet(settings = listOf(Channel.default.settings), lora_config = Channel.default.loraConfig),
-        onDismiss = {},
-        onConfirm = {},
-    )
+    AppTheme {
+        ScannedQrCodeDialog(
+            channels =
+            ChannelSet(settings = listOf(Channel.default.settings), lora_config = Channel.default.loraConfig),
+            incoming =
+            ChannelSet(settings = listOf(Channel.default.settings), lora_config = Channel.default.loraConfig),
+            onDismiss = {},
+            onConfirm = {},
+        )
+    }
 }

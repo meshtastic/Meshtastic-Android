@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,29 +19,22 @@ package org.meshtastic.core.common.util
 import android.icu.util.LocaleData
 import android.icu.util.ULocale
 import android.os.Build
+import androidx.core.text.util.LocalePreferences
 import java.util.Locale
+
+actual fun currentLocaleCode(): String = Locale.getDefault().language
+
+actual fun currentRegionCode(): String = Locale.getDefault().country
+
+actual fun currentLocaleQualifier(): String {
+    val locale = Locale.getDefault()
+    val country = locale.country
+    return if (country.isNotEmpty()) "${locale.language}-r$country" else locale.language
+}
 
 @Suppress("MagicNumber")
 actual fun getSystemMeasurementSystem(): MeasurementSystem {
     val locale = Locale.getDefault()
-
-    // Android 14+ (API 34) introduced user-settable locale preferences.
-    if (Build.VERSION.SDK_INT >= 34) {
-        try {
-            val localePrefsClass = Class.forName("androidx.core.text.util.LocalePreferences")
-            val getMeasurementSystemMethod =
-                localePrefsClass.getMethod("getMeasurementSystem", Locale::class.java, Boolean::class.javaPrimitiveType)
-            val result = getMeasurementSystemMethod.invoke(null, locale, true) as String
-            return when (result) {
-                "us",
-                "uk",
-                -> MeasurementSystem.IMPERIAL
-                else -> MeasurementSystem.METRIC
-            }
-        } catch (@Suppress("TooGenericExceptionCaught") ignored: Exception) {
-            // Fallback
-        }
-    }
 
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
         when (LocaleData.getMeasurementSystem(ULocale.forLocale(locale))) {
@@ -55,7 +48,15 @@ actual fun getSystemMeasurementSystem(): MeasurementSystem {
             "MM",
             "GB",
             -> MeasurementSystem.IMPERIAL
+
             else -> MeasurementSystem.METRIC
         }
     }
+}
+
+// LocalePreferences resolves from CLDR data and, on Android 14+, the user's Regional preferences
+// override. Kelvin (a valid regional preference) falls back to Celsius, which the app can display.
+actual fun getSystemTemperatureUnit(): TemperatureUnit = when (LocalePreferences.getTemperatureUnit()) {
+    LocalePreferences.TemperatureUnit.FAHRENHEIT -> TemperatureUnit.FAHRENHEIT
+    else -> TemperatureUnit.CELSIUS
 }

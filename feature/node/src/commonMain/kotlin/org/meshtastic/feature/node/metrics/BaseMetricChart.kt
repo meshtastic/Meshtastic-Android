@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -133,17 +133,18 @@ fun GenericMetricChart(
                 bottomAxis = bottomAxis,
                 marker = marker,
                 markerVisibilityListener = markerVisibilityListener,
-                persistentMarkers = { _ -> if (selectedX != null && marker != null) marker at selectedX else null },
+                persistentMarkers = { _ -> if (selectedX != null && marker != null) marker at selectedX },
                 fadingEdges = rememberFadingEdges(),
                 decorations = decorations,
                 // Telemetry timestamps arrive at irregular intervals. Without an explicit
                 // x-step, Vico computes the GCD of consecutive x-value differences which can
                 // be as small as 1 second, making the chart logically enormous. A 60-second
                 // floor keeps the internal slot count reasonable for any practical interval.
-                getXStep = { model -> maxOf(model.getXDeltaGcd(), MIN_X_STEP_SECONDS) },
+                getXStep = { model, _, _ -> maxOf(model.getXDeltaGcd(), MIN_X_STEP_SECONDS) },
             ),
             modelProducer = modelProducer,
-            modifier = modifier,
+            // Guard against Vico's canvas restore underflow (see chartRestoreUnderflowGuard).
+            modifier = modifier.chartRestoreUnderflowGuard(),
             scrollState = vicoScrollState,
             zoomState = zoomState,
         )
@@ -159,26 +160,28 @@ fun GenericMetricChart(
  *
  * @param isEmpty Whether the chart data is empty — when true, nothing is rendered.
  * @param legendData Legend items shown below the chart.
- * @param key Optional key for the [CartesianChartModelProducer] (e.g. a selected channel). Pass a different value to
- *   recreate the producer.
  * @param hiddenSet Indices of hidden legend items (toggleable legend).
  * @param onToggle Callback when a legend item is toggled; when null, a read-only legend is rendered.
  * @param content Builder lambda receiving the [CartesianChartModelProducer] and a standard `Modifier.weight(1f)`
  *   suitable for the chart area.
+ *
+ * A single [CartesianChartModelProducer] is created per scaffold instance. Vico forbids swapping the producer attached
+ * to a live [CartesianChartHost] (it throws "A new `CartesianChartModelProducer` was provided…"), so callers must push
+ * new data through [CartesianChartModelProducer.runTransaction] instead of recreating the producer. Keying the scaffold
+ * on external state (e.g. a selected channel) caused exactly that crash, so the previous `key` parameter was removed.
  */
 @Composable
 fun MetricChartScaffold(
     isEmpty: Boolean,
     legendData: List<LegendData>,
     modifier: Modifier = Modifier,
-    key: Any? = Unit,
     hiddenSet: Set<Int> = emptySet(),
     onToggle: ((Int) -> Unit)? = null,
     content: @Composable ColumnScope.(CartesianChartModelProducer, Modifier) -> Unit,
 ) {
     Column(modifier = modifier) {
         if (isEmpty) return@Column
-        val modelProducer = remember(key) { CartesianChartModelProducer() }
+        val modelProducer = remember { CartesianChartModelProducer() }
         val chartModifier = Modifier.weight(1f).padding(horizontal = 8.dp).padding(bottom = 0.dp)
         content(modelProducer, chartModifier)
         Legend(
@@ -236,6 +239,7 @@ fun AdaptiveMetricLayout(
  *   cooldown traceroute button).
  * @param onExportCsv When non-null, a Save [IconButton] is rendered in the app bar that invokes this callback. This
  *   centralises the CSV export affordance so individual screens only need to provide the export logic.
+ * @param bottomContent Optional content pinned below the adaptive chart/list area.
  */
 @Composable
 @Suppress("LongMethod")
@@ -253,6 +257,8 @@ fun <T> BaseMetricScreen(
     chartPart: @Composable (Modifier, Double?, VicoScrollState, (Double) -> Unit) -> Unit,
     listPart: @Composable (Modifier, Double?, LazyListState, (Double) -> Unit) -> Unit,
     controlPart: @Composable () -> Unit = {},
+    bottomContent: @Composable () -> Unit = {},
+    modifier: Modifier = Modifier,
 ) {
     var displayInfoDialog by rememberSaveable { mutableStateOf(false) }
     var isChartExpanded by rememberSaveable { mutableStateOf(false) }
@@ -267,6 +273,7 @@ fun <T> BaseMetricScreen(
     var selectedX by remember { mutableStateOf<Double?>(null) }
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             MainAppBar(
                 title = nodeName,
@@ -329,6 +336,7 @@ fun <T> BaseMetricScreen(
 
             AdaptiveMetricLayout(
                 isChartExpanded = isChartExpanded,
+                modifier = Modifier.weight(1f),
                 chartPart = { modifier ->
                     chartPart(modifier, selectedX, vicoScrollState) { x ->
                         selectedX = x
@@ -347,6 +355,8 @@ fun <T> BaseMetricScreen(
                     }
                 },
             )
+
+            bottomContent()
         }
     }
 }

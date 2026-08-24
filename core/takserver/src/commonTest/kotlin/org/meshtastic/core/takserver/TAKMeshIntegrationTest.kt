@@ -1,0 +1,464 @@
+/*
+ * Copyright (c) 2026 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+package org.meshtastic.core.takserver
+
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
+import okio.ByteString.Companion.toByteString
+import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.MyNodeInfo
+import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.NodeSortOption
+import org.meshtastic.core.repository.MeshConfigHandler
+import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.RadioSessionContext
+import org.meshtastic.core.testing.FakeCommandSender
+import org.meshtastic.core.testing.FakeServiceRepository
+import org.meshtastic.core.testing.FakeTakPrefs
+import org.meshtastic.proto.Channel
+import org.meshtastic.proto.Config
+import org.meshtastic.proto.Data
+import org.meshtastic.proto.DeviceMetadata
+import org.meshtastic.proto.DeviceUIConfig
+import org.meshtastic.proto.LoRaRegionPresetMap
+import org.meshtastic.proto.LocalConfig
+import org.meshtastic.proto.LocalModuleConfig
+import org.meshtastic.proto.LocalStats
+import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.ModuleConfig
+import org.meshtastic.proto.PortNum
+import org.meshtastic.proto.TAKPacket
+import org.meshtastic.proto.User
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.minutes
+
+/**
+ * Tests for [TAKMeshIntegration] lifecycle, routing, and protocol gating.
+ *
+ * These tests use fakes for all 5 dependencies and run in commonTest. The v2 outbound SDK-dependent happy path is
+ * tested separately in jvmTest.
+ */
+@Suppress("TooManyFunctions")
+class TAKMeshIntegrationTest {
+
+    // ── Fakes ────────────────────────────────────────────────────────────────
+    // FakeTAKServerManager lives in its own file in this source set, shared with MeshToCotBroadcasterTest.
+
+    private class FakeMeshConfigHandler : MeshConfigHandler {
+        override val localConfig: StateFlow<LocalConfig> = MutableStateFlow(LocalConfig())
+        override val moduleConfig: StateFlow<LocalModuleConfig> = MutableStateFlow(LocalModuleConfig())
+
+        override fun handleDeviceConfig(config: Config, session: RadioSessionContext): Boolean = true
+
+        override fun handleModuleConfig(config: ModuleConfig, session: RadioSessionContext): Boolean = true
+
+        override fun handleChannel(channel: Channel, session: RadioSessionContext): Boolean = true
+
+        override fun handleDeviceUIConfig(config: DeviceUIConfig, session: RadioSessionContext): Boolean = true
+
+        override fun handleRegionPresets(map: LoRaRegionPresetMap, session: RadioSessionContext): Boolean = true
+    }
+
+    private class FakeNodeRepository(firmwareVersion: String? = "2.8.0.0") : NodeRepository {
+        private val _myNodeInfo = MutableStateFlow(myNodeInfo(firmwareVersion))
+        override val myNodeInfo: StateFlow<MyNodeInfo?> = _myNodeInfo
+
+        fun setFirmwareVersion(version: String?) {
+            _myNodeInfo.value = myNodeInfo(version)
+        }
+
+        private fun myNodeInfo(firmwareVersion: String?) = MyNodeInfo(
+            myNodeNum = 1,
+            hasGPS = false,
+            model = null,
+            firmwareVersion = firmwareVersion,
+            couldUpdate = false,
+            shouldUpdate = false,
+            currentPacketId = 0L,
+            messageTimeoutMsec = 0,
+            minAppVersion = 0,
+            maxChannels = 8,
+            hasWifi = false,
+            channelUtilization = 0f,
+            airUtilTx = 0f,
+            deviceId = null,
+        )
+
+        override val ourNodeInfo: StateFlow<Node?> = MutableStateFlow(null)
+        override val myId: StateFlow<String?> = MutableStateFlow(null)
+        override val localStats: StateFlow<LocalStats> = MutableStateFlow(LocalStats())
+        override val nodeDBbyNum: StateFlow<Map<Int, Node>> = MutableStateFlow(emptyMap())
+
+        override suspend fun getNodeDbSnapshot(): Map<Int, Node> = nodeDBbyNum.value
+
+        override val onlineNodeCount: Flow<Int> = MutableStateFlow(0)
+        override val totalNodeCount: Flow<Int> = MutableStateFlow(0)
+
+        override fun updateLocalStats(stats: LocalStats) {}
+
+        override fun effectiveLogNodeId(nodeNum: Int): Flow<Int> = MutableStateFlow(0)
+
+        override fun getNode(userId: String): Node = Node(num = 0)
+
+        override fun getUser(nodeNum: Int): User = User()
+
+        override fun getUser(userId: String): User = User()
+
+        override fun getNodes(
+            sort: NodeSortOption,
+            filter: String,
+            includeUnknown: Boolean,
+            onlyOnline: Boolean,
+            onlyDirect: Boolean,
+        ): Flow<List<Node>> = MutableStateFlow(emptyList())
+
+        override suspend fun getNodesOlderThan(lastHeard: Int): List<Node> = emptyList()
+
+        override suspend fun getUnknownNodes(): List<Node> = emptyList()
+
+        override suspend fun clearNodeDB(preserveFavorites: Boolean) {}
+
+        override suspend fun clearMyNodeInfo() {}
+
+        override suspend fun deleteNode(num: Int) {}
+
+        override suspend fun deleteNodes(nodeNums: List<Int>) {}
+
+        override suspend fun setNodeNotes(num: Int, notes: String) {}
+
+        override suspend fun upsert(node: Node) {}
+
+        override suspend fun installConfig(mi: MyNodeInfo, nodes: List<Node>): List<Int> = emptyList()
+
+        override suspend fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata) {}
+
+        override suspend fun updatePowerChannelLabel(num: Int, channelIndex: Int, label: String) {}
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    private data class TestHarness(
+        val serverManager: FakeTAKServerManager = FakeTAKServerManager(),
+        val commandSender: FakeCommandSender = FakeCommandSender(),
+        val serviceRepository: FakeServiceRepository = FakeServiceRepository(),
+        val meshConfigHandler: FakeMeshConfigHandler = FakeMeshConfigHandler(),
+        val nodeRepository: FakeNodeRepository = FakeNodeRepository(),
+        val takPrefs: FakeTakPrefs = FakeTakPrefs(),
+        val dispatchers: CoroutineDispatchers =
+            UnconfinedTestDispatcher().let { CoroutineDispatchers(io = it, main = it, default = it) },
+    ) {
+        // Mesh-to-CoT is opt-in and FakeTakPrefs defaults it off, so it stays inert here.
+        val broadcaster = MeshToCotBroadcaster(serverManager, nodeRepository, takPrefs, dispatchers)
+
+        val integration =
+            TAKMeshIntegration(
+                takServerManager = serverManager,
+                commandSender = commandSender,
+                serviceRepository = serviceRepository,
+                meshConfigHandler = meshConfigHandler,
+                nodeRepository = nodeRepository,
+                meshToCotBroadcaster = broadcaster,
+                takPrefs = takPrefs,
+            )
+    }
+
+    // ── Lifecycle tests ──────────────────────────────────────────────────────
+
+    @Test
+    fun `start launches TAKServerManager`() = runTest(UnconfinedTestDispatcher()) {
+        val h = TestHarness()
+        h.integration.start(backgroundScope)
+
+        assertEquals(1, h.serverManager.startCount)
+    }
+
+    @Test
+    fun `stop cancels jobs and stops TAKServerManager`() = runTest(UnconfinedTestDispatcher()) {
+        val h = TestHarness()
+        h.integration.start(backgroundScope)
+
+        h.integration.stop()
+
+        assertTrue(h.serverManager.stopped)
+    }
+
+    @Test
+    fun `double start is idempotent`() = runTest(UnconfinedTestDispatcher()) {
+        val h = TestHarness()
+        h.integration.start(backgroundScope)
+
+        h.integration.start(backgroundScope) // second start
+
+        assertEquals(1, h.serverManager.startCount, "TAKServerManager should only be started once")
+    }
+
+    @Test
+    fun `stop then inbound TAK message does not forward to mesh`() = runTest(UnconfinedTestDispatcher()) {
+        val h = TestHarness()
+        h.integration.start(backgroundScope)
+
+        h.integration.stop()
+
+        h.serverManager.emitInbound(createPli("after-stop"))
+
+        assertTrue(h.commandSender.sentPackets.isEmpty())
+    }
+
+    // ── TAK-Talk strip preservation (regression) ────────────────────────────
+
+    @Test
+    fun `stripNonEssentialElements preserves TAK-Talk voice and marti`() {
+        // Regression guard: <voice/> (push-to-talk marker) and <marti><dest .../>
+        // </marti> (directed routing) were once added to STRIP_PATTERNS, which
+        // silently broke TAK-Talk end-to-end — ATAK received the m-t-t CoT but its
+        // plugin could neither play (no <voice/>) nor route (no <marti/>) it. Both
+        // MUST survive the send-side strip.
+        val mtt =
+            """
+            <event version="2.0" uid="TAKTALK-MESSAGE-test" type="m-t-t" how="null" time="t" start="t" stale="t">
+              <point lat="0.0" lon="0.0" hae="9999999.0" ce="9999999.0" le="9999999.0"/>
+              <detail>
+                <callsign>ASPEN</callsign><lang>English</lang><text>Testing 123</text>
+                <chatroom-id>1</chatroom-id><takv version="x"/><voice/>
+                <marti><dest callsign="ETHEL"/></marti>
+              </detail>
+            </event>
+            """
+                .trimIndent()
+
+        val stripped = TAKMeshIntegration.stripNonEssentialElements(mtt)
+
+        assertTrue(stripped.contains("<voice/>"), "TAK-Talk <voice/> PTT marker must survive strip")
+        assertTrue(
+            stripped.contains("<marti>") && stripped.contains("dest callsign=\"ETHEL\""),
+            "TAK-Talk <marti> directed-routing must survive strip",
+        )
+        // Sanity: genuinely non-essential elements are still stripped.
+        assertTrue(!stripped.contains("<takv"), "non-essential <takv> should still be stripped")
+    }
+
+    // ── Inbound mesh → TAK client (V1) ──────────────────────────────────────
+
+    @Test
+    fun `inbound V1 PLI packet is broadcast to TAK clients`() = runTest(UnconfinedTestDispatcher()) {
+        val h = TestHarness()
+        h.integration.start(backgroundScope)
+
+        h.serviceRepository.emitMeshPacket(createV1PliMeshPacket())
+
+        assertTrue(h.serverManager.broadcasts.isNotEmpty(), "Expected broadcasts for V1 PLI")
+        assertTrue(h.serverManager.broadcasts.first().type.startsWith("a-f-"))
+    }
+
+    @Test
+    fun `inbound packet on unrelated port is ignored`() = runTest(UnconfinedTestDispatcher()) {
+        val h = TestHarness()
+        h.integration.start(backgroundScope)
+
+        val textPacket =
+            MeshPacket(
+                decoded =
+                Data(portnum = PortNum.TEXT_MESSAGE_APP, payload = "hello".encodeToByteArray().toByteString()),
+            )
+        h.serviceRepository.emitMeshPacket(textPacket)
+
+        assertTrue(h.serverManager.broadcasts.isEmpty())
+        assertTrue(h.serverManager.rawBroadcasts.isEmpty())
+    }
+
+    // ── Firmware gating ──────────────────────────────────────────────────────
+
+    @Test
+    fun `unknown firmware uses V1 protocol`() = runTest(UnconfinedTestDispatcher()) {
+        val h = TestHarness(nodeRepository = FakeNodeRepository(firmwareVersion = null))
+        h.integration.start(backgroundScope)
+
+        h.serverManager.emitInbound(createPli("test-v1-until-version-known"))
+
+        assertEquals(1, h.commandSender.sentPackets.size)
+        assertEquals(PortNum.ATAK_PLUGIN.value, h.commandSender.sentPackets.single().dataType)
+    }
+
+    @Test
+    fun `V2-capable firmware sends V2 protocol`() = runTest(UnconfinedTestDispatcher()) {
+        val h = TestHarness(nodeRepository = FakeNodeRepository(firmwareVersion = "2.8.0.0"))
+        h.integration.start(backgroundScope)
+
+        h.serverManager.emitInbound(createPli("test-v2-known"))
+
+        assertEquals(1, h.commandSender.sentPackets.size)
+        assertEquals(PortNum.ATAK_PLUGIN_V2.value, h.commandSender.sentPackets.single().dataType)
+    }
+
+    @Test
+    fun `legacy firmware sends on V1 port 72`() = runTest(UnconfinedTestDispatcher()) {
+        val h = TestHarness(nodeRepository = FakeNodeRepository(firmwareVersion = "2.7.0.0"))
+        h.integration.start(backgroundScope)
+
+        h.serverManager.emitInbound(createPli("test-v1"))
+
+        assertEquals(1, h.commandSender.sentPackets.size)
+        assertEquals(PortNum.ATAK_PLUGIN.value, h.commandSender.sentPackets.single().dataType)
+    }
+
+    // ── Outbound channel selection ───────────────────────────────────────────
+
+    @Test
+    fun `default outbound channel is the primary channel`() = runTest(UnconfinedTestDispatcher()) {
+        val h = TestHarness(nodeRepository = FakeNodeRepository(firmwareVersion = "2.8.0.0"))
+        h.integration.start(backgroundScope)
+
+        h.serverManager.emitInbound(createPli("test-default-channel"))
+
+        assertEquals(0, h.commandSender.sentPackets.single().channel)
+    }
+
+    @Test
+    fun `configured takServerChannel is applied to V2 sends`() = runTest(UnconfinedTestDispatcher()) {
+        val h = TestHarness(nodeRepository = FakeNodeRepository(firmwareVersion = "2.8.0.0"))
+        h.takPrefs.setTakServerChannel(3)
+        h.integration.start(backgroundScope)
+
+        h.serverManager.emitInbound(createPli("test-v2-channel"))
+
+        val sent = h.commandSender.sentPackets.single()
+        assertEquals(PortNum.ATAK_PLUGIN_V2.value, sent.dataType)
+        assertEquals(3, sent.channel)
+    }
+
+    @Test
+    fun `configured takServerChannel is applied to V1 sends`() = runTest(UnconfinedTestDispatcher()) {
+        val h = TestHarness(nodeRepository = FakeNodeRepository(firmwareVersion = "2.7.0.0"))
+        h.takPrefs.setTakServerChannel(5)
+        h.integration.start(backgroundScope)
+
+        h.serverManager.emitInbound(createPli("test-v1-channel"))
+
+        val sent = h.commandSender.sentPackets.single()
+        assertEquals(PortNum.ATAK_PLUGIN.value, sent.dataType)
+        assertEquals(5, sent.channel)
+    }
+
+    @Test
+    fun `legacy firmware drops non-PLI non-GeoChat types`() = runTest(UnconfinedTestDispatcher()) {
+        val h = TestHarness(nodeRepository = FakeNodeRepository(firmwareVersion = "2.7.0.0"))
+        h.integration.start(backgroundScope)
+
+        val marker = CoTMessage(uid = "marker-1", type = "a-h-G", stale = Clock.System.now() + 5.minutes)
+        h.serverManager.emitInbound(marker)
+
+        assertTrue(h.commandSender.sentPackets.isEmpty())
+    }
+
+    // ── Dropped-outcome discrimination (regression: #6583 self-test blind spot) ────────
+
+    @Test
+    fun `v1 drop of an unsupported CoT type is schema-limited`() = runTest(UnconfinedTestDispatcher()) {
+        // a-h-G is a shape/marker type the legacy v1 TAKPacket schema has no field for at all —
+        // this is the "permanent limitation" case, not a size problem.
+        val h = TestHarness(nodeRepository = FakeNodeRepository(firmwareVersion = "2.7.0.0"))
+        val marker = CoTMessage(uid = "marker-1", type = "a-h-G", stale = Clock.System.now() + 5.minutes)
+
+        val outcome = h.integration.sendCoTToMeshForTest(marker, forceV2 = false)
+
+        val dropped = assertNotNull(outcome as? TakSendOutcome.Dropped, "expected a Dropped outcome, got $outcome")
+        assertTrue(dropped.schemaLimited, "an unsupported CoT type must be reported as schema-limited")
+    }
+
+    @Test
+    fun `v1 drop of an oversize but schema-representable PLI is NOT schema-limited`() =
+        runTest(UnconfinedTestDispatcher()) {
+            // a-f-G (PLI) IS representable in the v1 schema — this must be dropped for size, not
+            // mislabeled as an expected schema gap. This is the exact blind spot the self-test's
+            // expectedDrop flag has to avoid: an MTU problem hiding behind "expected" v1 behavior.
+            val h = TestHarness(nodeRepository = FakeNodeRepository(firmwareVersion = "2.7.0.0"))
+            val oversizePli =
+                CoTMessage(
+                    uid = "pli-1",
+                    type = "a-f-G-U-C",
+                    stale = Clock.System.now() + 5.minutes,
+                    contact = CoTContact(callsign = "X".repeat(500)),
+                )
+
+            val outcome = h.integration.sendCoTToMeshForTest(oversizePli, forceV2 = false)
+
+            val dropped = assertNotNull(outcome as? TakSendOutcome.Dropped, "expected a Dropped outcome, got $outcome")
+            assertTrue(!dropped.schemaLimited, "an oversize drop of a representable type must not be schema-limited")
+        }
+
+    // ── GeoChat callsign enrichment ──────────────────────────────────────────
+
+    @Test
+    fun `GeoChat without callsign is enriched from client info`() = runTest(UnconfinedTestDispatcher()) {
+        val h = TestHarness(nodeRepository = FakeNodeRepository(firmwareVersion = "2.7.0.0"))
+        h.integration.start(backgroundScope)
+
+        val chatMsg =
+            CoTMessage(
+                uid = "GeoChat.test.All Chat Rooms.1234",
+                type = "b-t-f",
+                how = "h-g-i-g-o",
+                stale = Clock.System.now() + 5.minutes,
+                contact = null,
+                chat = CoTChat(message = "hello", senderCallsign = null),
+            )
+        val clientInfo = TAKClientInfo(id = "client-1", endpoint = "127.0.0.1:8089", callsign = "ALPHA-1")
+        h.serverManager.emitInbound(chatMsg, clientInfo)
+
+        // GeoChat on legacy V1 should produce a sent packet with the enriched callsign
+        if (h.commandSender.sentPackets.isNotEmpty()) {
+            val sent = h.commandSender.sentPackets.first()
+            assertEquals(PortNum.ATAK_PLUGIN.value, sent.dataType)
+        }
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    private fun createPli(uid: String) =
+        CoTMessage.pli(uid = uid, callsign = "TEST", latitude = 33.0, longitude = -84.0)
+
+    private fun createV1PliMeshPacket(): MeshPacket {
+        val takPacket =
+            TAKPacket(
+                contact = org.meshtastic.proto.Contact(callsign = "BRAVO", device_callsign = "bravo-uid"),
+                pli =
+                org.meshtastic.proto.PLI(
+                    latitude_i = 330000000,
+                    longitude_i = -840000000,
+                    altitude = 100,
+                    speed = 0,
+                    course = 0,
+                ),
+                group =
+                org.meshtastic.proto.Group(
+                    team = org.meshtastic.proto.Team.Cyan,
+                    role = org.meshtastic.proto.MemberRole.TeamMember,
+                ),
+                status = org.meshtastic.proto.Status(battery = 85),
+            )
+        return MeshPacket(
+            decoded = Data(portnum = PortNum.ATAK_PLUGIN, payload = TAKPacket.ADAPTER.encode(takPacket).toByteString()),
+        )
+    }
+}

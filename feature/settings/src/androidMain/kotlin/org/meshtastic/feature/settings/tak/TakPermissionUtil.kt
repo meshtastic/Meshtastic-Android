@@ -16,38 +16,34 @@
  */
 package org.meshtastic.feature.settings.tak
 
-import android.os.Build
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
+import org.meshtastic.core.ui.util.PermissionStatus
+import org.meshtastic.core.ui.util.rememberLocalNetworkPermissionState
 
-private const val SDK_INT_ANDROID_16 = 37
-
-@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 actual fun TakPermissionHandler(isTakServerEnabled: Boolean, onPermissionResult: (Boolean) -> Unit) {
-    if (Build.VERSION.SDK_INT >= SDK_INT_ANDROID_16) {
-        val permissionState =
-            rememberPermissionState("android.permission.ACCESS_LOCAL_NETWORK") { granted ->
-                // Callback fires after the system dialog is dismissed — report the result
-                // directly so onPermissionResult is the single authority for grant/deny.
-                if (isTakServerEnabled) onPermissionResult(granted)
-            }
+    // ACCESS_LOCAL_NETWORK runtime permission (Android 17 / API 37+) is required for the TAK Server's
+    // localhost socket binding (127.0.0.1:8087). It is also required globally for NSD/mDNS device discovery
+    // when targetSdk >= 37, and is requested up-front from the Connections screen, so it will usually
+    // already be granted by the time the user enables TAK. This composable handles the standalone case
+    // (e.g. user opens TAK settings before ever tapping the network-scan toggle).
+    val permission = rememberLocalNetworkPermissionState()
 
-        LaunchedEffect(isTakServerEnabled) {
-            if (isTakServerEnabled) {
-                if (permissionState.status.isGranted) {
-                    // Already granted — confirm immediately so the orchestrator may proceed.
-                    onPermissionResult(true)
-                } else {
-                    // Show system dialog; result is delivered via the callback above.
-                    permissionState.launchPermissionRequest()
-                }
-            }
+    // The launcher must run as a post-composition side effect — invoking it directly in the composition body crashes
+    // with "Launcher has not been initialized". Keying on the status enum re-runs only on real transitions: request
+    // once when never asked, and disable the server on any denial (preserving the prior request-once-then-disable
+    // behavior, now with PERMANENTLY_DENIED treated the same as a fresh denial).
+    LaunchedEffect(isTakServerEnabled, permission.status) {
+        if (!isTakServerEnabled) return@LaunchedEffect
+        when (permission.status) {
+            PermissionStatus.GRANTED -> onPermissionResult(true)
+
+            PermissionStatus.NOT_REQUESTED -> permission.request()
+
+            PermissionStatus.DENIED_CAN_RETRY,
+            PermissionStatus.PERMANENTLY_DENIED,
+            -> onPermissionResult(false)
         }
-    } else {
-        LaunchedEffect(isTakServerEnabled) { onPermissionResult(true) }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,10 +26,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedIconToggleButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -61,6 +61,7 @@ import org.meshtastic.feature.node.model.LogsType
 import org.meshtastic.feature.node.model.NodeDetailAction
 import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
 import org.meshtastic.proto.Config
+import org.meshtastic.proto.Telemetry
 
 @Composable
 fun DeviceActions(
@@ -74,6 +75,7 @@ fun DeviceActions(
     isFahrenheit: Boolean,
     modifier: Modifier = Modifier,
     isLocal: Boolean = false,
+    airQualityHistory: List<Telemetry> = emptyList(),
 ) {
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         SectionCard(title = Res.string.actions) {
@@ -95,6 +97,7 @@ fun DeviceActions(
             isFahrenheit = isFahrenheit,
             onAction = onAction,
             isLocal = isLocal,
+            airQualityHistory = airQualityHistory,
         )
     }
 }
@@ -136,7 +139,7 @@ private fun PrimaryActionsRow(node: Node, isLocal: Boolean, onAction: (NodeDetai
         }
 
         if (!isLocal) {
-            IconToggleButton(
+            OutlinedIconToggleButton(
                 checked = node.isFavorite,
                 onCheckedChange = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.Favorite(node))) },
             ) {

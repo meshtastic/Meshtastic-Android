@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,14 +53,32 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
+import org.meshtastic.core.common.util.isSameLocalDay
+import org.meshtastic.core.model.ContactKey
 import org.meshtastic.core.model.Message
-import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.Reaction
+import org.meshtastic.feature.messaging.component.DateSeparator
 import org.meshtastic.feature.messaging.component.MessageItem
 import org.meshtastic.feature.messaging.component.MessageStatusDialog
 import org.meshtastic.feature.messaging.component.ReactionDialog
 import org.meshtastic.feature.messaging.component.UnreadMessagesDivider
+import kotlin.math.abs
+
+private const val HEX_RADIX = 16
+
+/**
+ * Messages merge into one visual group only when they are from the same sender AND close in time. The group header
+ * carries the run's only timestamp, so a run must never span messages minutes apart from what the header shows.
+ */
+internal const val GROUPING_WINDOW_MILLIS = 10 * 60 * 1000L
+
+// Gap measured on displayTime (mesh time), not receivedTime: a backlog sync after being offline delivers hours of
+// conversation with near-identical receipt times, which would otherwise collapse into one block under a single header.
+internal fun isSameGroup(older: Message, newer: Message): Boolean = older.fromLocal == newer.fromLocal &&
+    (newer.fromLocal || older.node.num == newer.node.num) &&
+    abs(newer.displayTime - older.displayTime) <= GROUPING_WINDOW_MILLIS
 
 internal data class MessageListHandlers(
     val onUnreadChanged: (Long, Long) -> Unit,
@@ -69,6 +87,8 @@ internal data class MessageListHandlers(
     val onDeleteMessages: (List<Long>) -> Unit,
     val onSendMessage: (String, String) -> Unit,
     val onReply: (Message?) -> Unit,
+    val onTranslate: (Message) -> Unit = {},
+    val onToggleTranslation: (Message) -> Unit = {},
 )
 
 internal data class MessageListPagedState(
@@ -82,6 +102,9 @@ internal data class MessageListPagedState(
     val filteredCount: Int = 0,
     val showFiltered: Boolean = false,
     val filteringDisabled: Boolean = false,
+    val searchQuery: String = "",
+    val translationAvailable: Boolean = false,
+    val showFullMessageTimestamps: Boolean = false,
 )
 
 private fun MutableState<Set<Long>>.toggle(uuid: Long) {
@@ -106,14 +129,15 @@ internal fun MessageListPaged(
 
     // Optimization: Pre-calculate map for O(1) lookup in list items to avoid O(N) linear search during scrolling.
     val nodeMap = remember(state.nodes) { state.nodes.associateBy { it.num } }
+    val isDirectMessageConversation =
+        remember(state.contactKey) { ContactKey(state.contactKey).addressString != NodeAddress.ID_BROADCAST }
 
     var showStatusDialog by remember { mutableStateOf<Message?>(null) }
     showStatusDialog?.let { message ->
         MessageStatusDialog(
             message = message,
-            nodes = state.nodes,
-            ourNode = state.ourNode,
-            resendOption = message.status?.equals(MessageStatus.ERROR) ?: false,
+            isDirectMessage = isDirectMessageConversation,
+            resendOption = message.isStatusRetryable(isDirectMessageConversation),
             onResend = {
                 handlers.onDeleteMessages(listOf(message.uuid))
                 handlers.onSendMessage(message.text, state.contactKey)
@@ -133,8 +157,6 @@ internal fun MessageListPaged(
                 handlers.onSendReaction(reaction.emoji, reaction.replyId)
                 showReactionDialog = null
             },
-            nodes = state.nodes,
-            ourNode = state.ourNode,
         )
     }
 
@@ -162,6 +184,7 @@ internal fun MessageListPaged(
         inSelectionMode = inSelectionMode,
         coroutineScope = coroutineScope,
         haptics = haptics,
+        isDirectMessageConversation = isDirectMessageConversation,
         onShowStatusDialog = { showStatusDialog = it },
         onShowReactions = { showReactionDialog = it },
         modifier = modifier,
@@ -179,6 +202,7 @@ private fun MessageListPagedContent(
     inSelectionMode: Boolean,
     coroutineScope: CoroutineScope,
     haptics: HapticFeedback,
+    isDirectMessageConversation: Boolean,
     onShowStatusDialog: (Message) -> Unit,
     onShowReactions: (List<Reaction>) -> Unit,
     modifier: Modifier = Modifier,
@@ -214,30 +238,30 @@ private fun MessageListPagedContent(
                 val visuallyNextMessage = if (index > 0) state.messages[index - 1] else null
 
                 val hasSamePrev =
-                    if (message != null && visuallyPrevMessage != null) {
-                        visuallyPrevMessage.fromLocal == message.fromLocal &&
-                            (message.fromLocal || visuallyPrevMessage.node.num == message.node.num)
-                    } else {
-                        false
-                    }
+                    message != null && visuallyPrevMessage != null && isSameGroup(visuallyPrevMessage, message)
 
                 val hasSameNext =
-                    if (message != null && visuallyNextMessage != null) {
-                        visuallyNextMessage.fromLocal == message.fromLocal &&
-                            (message.fromLocal || visuallyNextMessage.node.num == message.node.num)
-                    } else {
-                        false
-                    }
+                    message != null && visuallyNextMessage != null && isSameGroup(message, visuallyNextMessage)
 
                 if (message != null) {
                     val isFirstUnread = state.hasUnreadMessages && unreadDividerIndex == index
                     val itemModifier = if (enableAnimations) Modifier.animateItem() else Modifier
+                    // The separator belongs above the first message of each local day. At the top of the loaded
+                    // range there is no older message to compare against, so only label it once paging has
+                    // confirmed there is nothing older — otherwise the label would move as pages arrive.
+                    val startsNewDay =
+                        if (visuallyPrevMessage != null) {
+                            !isSameLocalDay(visuallyPrevMessage.displayTime, message.displayTime)
+                        } else {
+                            state.messages.loadState.append.endOfPaginationReached
+                        }
 
-                    if (isFirstUnread) {
+                    if (isFirstUnread || startsNewDay) {
                         // Wrap in Column to prevent overlapping of divider and message item
                         // Apply animation to the container Column once
                         Column(modifier = itemModifier) {
-                            UnreadMessagesDivider()
+                            if (startsNewDay) DateSeparator(timestampMillis = message.displayTime)
+                            if (isFirstUnread) UnreadMessagesDivider()
                             RenderPagedChatMessageRow(
                                 message = message,
                                 state = state,
@@ -246,6 +270,7 @@ private fun MessageListPagedContent(
                                 inSelectionMode = inSelectionMode,
                                 coroutineScope = coroutineScope,
                                 haptics = haptics,
+                                isDirectMessageConversation = isDirectMessageConversation,
                                 listState = listState,
                                 onShowStatusDialog = onShowStatusDialog,
                                 onShowReactions = onShowReactions,
@@ -264,6 +289,7 @@ private fun MessageListPagedContent(
                             inSelectionMode = inSelectionMode,
                             coroutineScope = coroutineScope,
                             haptics = haptics,
+                            isDirectMessageConversation = isDirectMessageConversation,
                             listState = listState,
                             onShowStatusDialog = onShowStatusDialog,
                             onShowReactions = onShowReactions,
@@ -296,7 +322,7 @@ private fun MessageListPagedContent(
     }
 }
 
-@Suppress("LongParameterList")
+@Suppress("LongParameterList", "LongMethod")
 @Composable
 private fun RenderPagedChatMessageRow(
     message: Message,
@@ -306,6 +332,7 @@ private fun RenderPagedChatMessageRow(
     inSelectionMode: Boolean,
     coroutineScope: CoroutineScope,
     haptics: HapticFeedback,
+    isDirectMessageConversation: Boolean,
     listState: LazyListState,
     onShowStatusDialog: (Message) -> Unit,
     onShowReactions: (List<Reaction>) -> Unit,
@@ -321,6 +348,10 @@ private fun RenderPagedChatMessageRow(
             derivedStateOf { state.selectedIds.value.contains(message.uuid) }
         }
     val node = nodeMap[message.node.num] ?: message.node
+
+    // Resolve an @mention token ("!<hex>" = numeric node id) back to its node for live name + tap-to-open.
+    val resolveMention: (String) -> Node? =
+        remember(nodeMap) { { id -> id.removePrefix("!").toLongOrNull(HEX_RADIX)?.toInt()?.let { nodeMap[it] } } }
 
     MessageItem(
         modifier = modifier,
@@ -339,16 +370,18 @@ private fun RenderPagedChatMessageRow(
         onSelect = { state.selectedIds.toggle(message.uuid) },
         onDelete = { handlers.onDeleteMessages(listOf(message.uuid)) },
         onClickChip = handlers.onClickChip,
+        resolveMention = resolveMention,
         onStatusClick = { onShowStatusDialog(message) },
         onReply = { handlers.onReply(message) },
         emojis = message.emojis,
         showUserName = showUserName,
+        showFullMessageTimestamp = state.showFullMessageTimestamps,
         sendReaction = { emoji ->
             val hasReacted =
                 message.emojis.any { reaction ->
                     (
                         reaction.user.id == ourNode.user.id ||
-                            reaction.user.id == org.meshtastic.core.model.DataPacket.ID_LOCAL
+                            reaction.user.id == org.meshtastic.core.model.NodeAddress.ID_LOCAL
                         ) && reaction.emoji == emoji
                 }
             if (!hasReacted) {
@@ -371,6 +404,11 @@ private fun RenderPagedChatMessageRow(
         hasSamePrev = hasSamePrev,
         hasSameNext = hasSameNext,
         quickEmojis = quickEmojis,
+        searchQuery = state.searchQuery,
+        translationAvailable = state.translationAvailable,
+        isDirectMessage = isDirectMessageConversation,
+        onTranslate = { handlers.onTranslate(message) },
+        onToggleTranslation = { handlers.onToggleTranslation(message) },
     )
 }
 

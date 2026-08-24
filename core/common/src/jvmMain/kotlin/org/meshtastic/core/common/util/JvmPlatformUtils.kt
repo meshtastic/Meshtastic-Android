@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -84,8 +84,33 @@ actual fun getSystemMeasurementSystem(): MeasurementSystem =
         "MM",
         "GB",
         -> MeasurementSystem.IMPERIAL
+
         else -> MeasurementSystem.METRIC
     }
+
+// CLDR unitPreferenceData lists these regions as defaulting to Fahrenheit; everywhere else is Celsius.
+actual fun getSystemTemperatureUnit(): TemperatureUnit =
+    when (Locale.getDefault().country.uppercase(Locale.getDefault())) {
+        "US",
+        "BS",
+        "BZ",
+        "KY",
+        "PR",
+        "PW",
+        -> TemperatureUnit.FAHRENHEIT
+
+        else -> TemperatureUnit.CELSIUS
+    }
+
+actual fun currentLocaleCode(): String = Locale.getDefault().language
+
+actual fun currentRegionCode(): String = Locale.getDefault().country
+
+actual fun currentLocaleQualifier(): String {
+    val locale = Locale.getDefault()
+    val country = locale.country
+    return if (country.isNotEmpty()) "${locale.language}-r$country" else locale.language
+}
 
 actual fun String?.isValidAddress(): Boolean {
     val value = this?.trim()

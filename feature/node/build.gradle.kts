@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,14 +21,7 @@ plugins {
 }
 
 kotlin {
-    jvm()
-
-    @Suppress("UnstableApiUsage")
-    android {
-        namespace = "org.meshtastic.feature.node"
-        androidResources.enable = false
-        withHostTest { isIncludeAndroidResources = true }
-    }
+    android { withHostTest { isIncludeAndroidResources = true } }
 
     sourceSets {
         commonMain.dependencies {
@@ -40,7 +33,7 @@ kotlin {
             implementation(projects.core.domain)
             implementation(projects.core.model)
             implementation(projects.core.navigation)
-            implementation(projects.core.proto)
+            implementation(libs.meshtastic.protobufs)
             implementation(projects.core.repository)
             implementation(projects.core.resources)
             implementation(projects.core.service)
@@ -48,7 +41,6 @@ kotlin {
             implementation(projects.core.di)
             implementation(projects.feature.map)
 
-            implementation(libs.jetbrains.navigation3.ui)
             implementation(libs.markdown.renderer)
             implementation(libs.markdown.renderer.m3)
             implementation(libs.vico.compose)
@@ -62,5 +54,12 @@ kotlin {
         }
 
         androidMain.dependencies { implementation(libs.markdown.renderer.android) }
+
+        // Compose UI tests live in jvmTest, not commonTest: this module enables android host tests, and the
+        // androidHostTest stubs leave Build.FINGERPRINT null, which the Compose Robolectric idling strategy NPEs on.
+        jvmTest.dependencies {
+            implementation(libs.compose.multiplatform.ui.test)
+            implementation(compose.desktop.currentOs)
+        }
     }
 }

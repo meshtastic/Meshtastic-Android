@@ -1,0 +1,15 @@
+schema_version: "1.0"
+
+catalogs:
+  - name: "spec-kit-core"
+    description: "Core Spec Kit extensions"
+    url: "https://raw.githubusercontent.com/github/spec-kit/main/extensions/catalog.json"
+    install_allowed: true
+    extensions:
+      - git
+      - review
+
+
+
+
+

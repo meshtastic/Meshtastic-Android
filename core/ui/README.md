@@ -1,7 +1,7 @@
 # `:core:ui`
 
 ## Overview
-The `:core:ui` module contains shared Jetpack Compose components, themes, and utility functions used across the entire Meshtastic Android application. It ensures a consistent look and feel following Material 3 guidelines.
+The `:core:ui` module contains Compose Multiplatform components, themes, and utility functions shared across the Android and Desktop apps (and the iOS compile target). It ensures a consistent look and feel following Material 3 guidelines.
 
 ## Key Components
 
@@ -44,12 +44,24 @@ MeshtasticResourceDialog(
 )
 ```
 
-## Module dependency graph
+
+## Dependency Graph
 
 <!--region graph-->
 ```mermaid
 graph TB
   :core:ui[ui]:::kmp-library-compose
+  :core:ui -.-> :core:common
+  :core:ui -.-> :core:data
+  :core:ui -.-> :core:database
+  :core:ui -.-> :core:datastore
+  :core:ui -.-> :core:model
+  :core:ui -.-> :core:navigation
+  :core:ui -.-> :core:prefs
+  :core:ui -.-> :core:repository
+  :core:ui -.-> :core:resources
+  :core:ui -.-> :core:service
+  :core:ui -.-> :core:testing
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

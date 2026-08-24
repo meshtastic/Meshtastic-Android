@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,7 +48,7 @@ sealed class RadioResponseResult {
 
     data class ConnectionStatus(val status: DeviceConnectionStatus) : RadioResponseResult()
 
-    data class Error(val message: UiText) : RadioResponseResult()
+    data class Error(val message: UiText, val routingError: Routing.Error? = null) : RadioResponseResult()
 
     data object Success : RadioResponseResult()
 }
@@ -80,10 +80,16 @@ open class ProcessRadioResponseUseCase {
 
     private fun processRoutingResponse(packet: MeshPacket, data: Data, destNum: Int): RadioResponseResult? {
         val parsed = Routing.ADAPTER.decode(data.payload)
+        val routingError = parsed.error_reason
         return when {
-            parsed.error_reason != Routing.Error.NONE ->
-                RadioResponseResult.Error(UiText.Resource(getStringResFrom(parsed.error_reason?.value ?: 0)))
+            routingError != null && routingError != Routing.Error.NONE ->
+                RadioResponseResult.Error(
+                    message = UiText.Resource(getStringResFrom(routingError.value)),
+                    routingError = routingError,
+                )
+
             packet.from == destNum -> RadioResponseResult.Success
+
             else -> null
         }
     }

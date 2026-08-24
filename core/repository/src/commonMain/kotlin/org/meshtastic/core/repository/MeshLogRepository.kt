@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -73,7 +73,13 @@ interface MeshLogRepository {
     /** Deletes all logs associated with a specific [nodeNum] and [portNum]. */
     suspend fun deleteLogs(nodeNum: Int, portNum: Int)
 
-    /** Prunes the log database based on the configured [retentionDays]. */
+    /** Deletes only local stats telemetry logs for [nodeNum], preserving other telemetry logs. */
+    suspend fun deleteLocalStatsLogs(nodeNum: Int)
+
+    /**
+     * Prunes the log database based on the configured [retentionDays], which carries the [MeshLogRetention] sentinels:
+     * [MeshLogRetention.KEEP_FOREVER] deletes nothing and [MeshLogRetention.ONE_HOUR] keeps only the last hour.
+     */
     suspend fun deleteLogsOlderThan(retentionDays: Int)
 
     companion object {

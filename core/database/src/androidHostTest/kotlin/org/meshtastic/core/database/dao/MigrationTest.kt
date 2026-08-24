@@ -17,10 +17,11 @@
 package org.meshtastic.core.database.dao
 
 import androidx.room3.Room
+import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.toByteString
 import org.junit.After
 import org.junit.Before
@@ -32,6 +33,7 @@ import org.meshtastic.core.database.MeshtasticDatabaseConstructor
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.PortNum
 import org.robolectric.annotation.Config
@@ -59,13 +61,14 @@ class MigrationTest {
         )
 
     @Before
-    fun createDb(): Unit = runBlocking {
+    fun createDb(): Unit = runTest {
         val context = ApplicationProvider.getApplicationContext<android.content.Context>()
         database =
             Room.inMemoryDatabaseBuilder<MeshtasticDatabase>(
                 context = context,
                 factory = { MeshtasticDatabaseConstructor.initialize() },
             )
+                .setDriver(BundledSQLiteDriver())
                 .build()
         nodeInfoDao = database.nodeInfoDao().apply { setMyNodeInfo(myNodeInfo) }
         packetDao = database.packetDao()
@@ -77,7 +80,7 @@ class MigrationTest {
     }
 
     @Test
-    fun testMigrateChannelsByPSK_duplicatePSK() = runBlocking {
+    fun testMigrateChannelsByPSK_duplicatePSK() = runTest {
         // PSK \"AQ==\" is base64 for single byte 0x01
         val pskBytes = byteArrayOf(0x01).toByteString()
 
@@ -103,7 +106,7 @@ class MigrationTest {
     }
 
     @Test
-    fun testMigrateChannelsByPSK_reorder() = runBlocking {
+    fun testMigrateChannelsByPSK_reorder() = runTest {
         val pskA = byteArrayOf(0x01).toByteString()
         val pskB = byteArrayOf(0x02).toByteString()
 
@@ -122,7 +125,7 @@ class MigrationTest {
     }
 
     @Test
-    fun testMigrateChannelsByPSK_disambiguateByName() = runBlocking {
+    fun testMigrateChannelsByPSK_disambiguateByName() = runTest {
         val pskA = byteArrayOf(0x01).toByteString()
 
         insertPacket(channel = 0, text = "Msg A1")
@@ -141,7 +144,7 @@ class MigrationTest {
     }
 
     @Test
-    fun testMigrateChannelsByPSK_preferSameIndexIfStillAmbiguous() = runBlocking {
+    fun testMigrateChannelsByPSK_preferSameIndexIfStillAmbiguous() = runTest {
         val pskA = byteArrayOf(0x01).toByteString()
 
         insertPacket(channel = 0, text = "Msg A")
@@ -166,7 +169,7 @@ class MigrationTest {
                 contact_key = "$channel!broadcast",
                 received_time = nowMillis,
                 read = false,
-                data = DataPacket(to = DataPacket.ID_BROADCAST, channel = channel, text = text),
+                data = DataPacket(to = NodeAddress.ID_BROADCAST, channel = channel, text = text),
             )
         packetDao.insert(packet)
     }

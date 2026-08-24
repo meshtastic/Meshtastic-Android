@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonPrimitive
 import okio.FileSystem
 import okio.Path
+import org.meshtastic.core.datastore.di.asCorePreferencesDataStore
 import org.meshtastic.core.datastore.model.RecentAddress
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -39,10 +40,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
-@OptIn(ExperimentalUuidApi::class)
 class RecentAddressesDataSourceTest {
     private lateinit var tmpDir: Path
     private lateinit var dataSource: RecentAddressesDataSource
@@ -59,7 +58,7 @@ class RecentAddressesDataSourceTest {
                 scope = testScope,
                 produceFile = { tmpDir / "test.preferences_pb" },
             )
-        dataSource = RecentAddressesDataSource(dataStore)
+        dataSource = RecentAddressesDataSource(dataStore.asCorePreferencesDataStore())
     }
 
     @AfterTest
@@ -275,9 +274,11 @@ private class LegacyParsingHarness(private val rawJson: String) {
                             null
                         }
                     }
+
                     is JsonPrimitive -> {
                         item.contentOrNull?.let { RecentAddress(address = it, name = "Meshtastic") }
                     }
+
                     is JsonArray -> null
                 }
             },

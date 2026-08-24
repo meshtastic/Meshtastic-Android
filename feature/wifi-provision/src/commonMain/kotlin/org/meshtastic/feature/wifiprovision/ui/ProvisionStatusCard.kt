@@ -73,10 +73,13 @@ internal fun ProvisionStatusCard(provisionStatus: ProvisionStatus, isProvisionin
 @Composable
 private fun statusCardColors(provisionStatus: ProvisionStatus, isProvisioning: Boolean): Pair<Color, Color> = when {
     isProvisioning -> MaterialTheme.colorScheme.secondaryContainer to MaterialTheme.colorScheme.onSecondaryContainer
+
     provisionStatus == ProvisionStatus.Success ->
         MaterialTheme.colorScheme.primaryContainer to MaterialTheme.colorScheme.onPrimaryContainer
+
     provisionStatus == ProvisionStatus.Failed ->
         MaterialTheme.colorScheme.errorContainer to MaterialTheme.colorScheme.onErrorContainer
+
     else -> MaterialTheme.colorScheme.surfaceContainerHigh to MaterialTheme.colorScheme.onSurface
 }
 
@@ -85,8 +88,10 @@ private fun statusCardColors(provisionStatus: ProvisionStatus, isProvisioning: B
 private fun StatusIcon(provisionStatus: ProvisionStatus, isProvisioning: Boolean, tint: Color) {
     when {
         isProvisioning -> LoadingIndicator(modifier = Modifier.size(20.dp), color = tint)
+
         provisionStatus == ProvisionStatus.Success ->
             Icon(MeshtasticIcons.Success, contentDescription = null, modifier = Modifier.size(20.dp), tint = tint)
+
         provisionStatus == ProvisionStatus.Failed ->
             Icon(MeshtasticIcons.Error, contentDescription = null, modifier = Modifier.size(20.dp), tint = tint)
     }

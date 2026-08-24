@@ -37,8 +37,40 @@ import org.meshtastic.core.common.util.CommonUri
  * - `/settings/{destNum}/{page}` -> Specific settings page for a node
  * - `/wifi-provision` -> WiFi provisioning screen
  * - `/wifi-provision?address={mac}` -> WiFi provisioning targeting a specific device MAC address
+ * - `/connections?address={prefixedAddress}` -> Connections screen, auto-connecting to a prefixed device address (e.g.
+ *   `t192.168.1.1:4403` for TCP, `xAA:BB:CC:DD:EE:FF` for BLE) — lets external tooling trigger a connection.
+ *   `address=n` disconnects instead of connecting.
  */
 object DeepLinkRouter {
+    /**
+     * Canonical set of top-level path segments this router dispatches on. [route] refuses segments outside this set, so
+     * a new `when` branch stays dead (and its feature tests fail) until its segment is added here. Every entry must
+     * also be declared as an `android:pathPrefix` in the https App Links intent-filter in
+     * `androidApp/src/main/AndroidManifest.xml` — DeepLinkManifestConsistencyTest (androidApp unit tests) enforces that
+     * directly from this set.
+     */
+    val topLevelPathSegments: Set<String> =
+        setOf(
+            "share",
+            "messages",
+            "quickchat",
+            "connections",
+            "discovery",
+            "map",
+            "nodes",
+            "settings",
+            "channels",
+            "firmware",
+            "wifi-provision",
+        )
+
+    /**
+     * Legacy import path segments (`/e/` = channel set, `/v/` = shared contact, matched case-insensitively). These are
+     * handled by the `dispatchMeshtasticUri` fallback rather than this router, so [route] returns null for them without
+     * logging a warning.
+     */
+    private val legacyImportSegments = setOf("e", "v")
+
     /**
      * Synthesizes a backstack list from an incoming Meshtastic URI.
      *
@@ -47,29 +79,41 @@ object DeepLinkRouter {
      */
     fun route(uri: CommonUri): List<NavKey>? {
         val pathSegments = uri.pathSegments.filter { it.isNotBlank() }
+        val firstSegment = pathSegments.firstOrNull()?.lowercase()
 
-        if (pathSegments.isEmpty()) {
+        if (firstSegment !in topLevelPathSegments) {
+            // /e/ and /v/ are channel-set/contact import links, not navigation routes: returning null here lets
+            // callers fall back to dispatchMeshtasticUri (see UIViewModel.handleDeepLink), so don't warn on them.
+            if (firstSegment != null && firstSegment !in legacyImportSegments) {
+                Logger.w { "Unrecognized deep link segment: $firstSegment" }
+            }
             return null
         }
-
-        val firstSegment = pathSegments[0].lowercase()
 
         return when (firstSegment) {
             "share",
             "messages",
             "quickchat",
             -> routeContacts(uri, pathSegments)
-            "connections" -> listOf(ConnectionsRoute.ConnectionsGraph)
+
+            "connections" -> listOf(ConnectionsRoute.Connections(uri.getQueryParameter("address")))
+
+            "discovery" -> listOf(DiscoveryRoute.DiscoveryGraph)
+
             "map" -> routeMap(uri, pathSegments)
+
             "nodes" -> routeNodes(uri, pathSegments)
+
             "settings" -> routeSettings(pathSegments)
-            "channels" -> listOf(ChannelsRoute.ChannelsGraph)
+
+            "channels" -> listOf(ChannelsRoute.Channels)
+
             "firmware" -> routeFirmware(pathSegments)
+
             "wifi-provision" -> routeWifiProvision(uri)
-            else -> {
-                Logger.w { "Unrecognized deep link segment: $firstSegment" }
-                null
-            }
+
+            // Unreachable: gated on topLevelPathSegments above.
+            else -> null
         }
     }
 
@@ -78,24 +122,24 @@ object DeepLinkRouter {
         return when (firstSegment) {
             "share" -> {
                 val message = uri.getQueryParameter("message") ?: ""
-                listOf(ContactsRoute.ContactsGraph, ContactsRoute.Share(message))
+                listOf(ContactsRoute.Contacts, ContactsRoute.Share(message))
             }
+
             "quickchat" -> {
-                listOf(ContactsRoute.ContactsGraph, ContactsRoute.QuickChat)
+                listOf(ContactsRoute.Contacts, ContactsRoute.QuickChat)
             }
+
             "messages" -> {
                 val contactKey = if (segments.size > 1) segments[1] else uri.getQueryParameter("contactKey") ?: ""
                 val message = uri.getQueryParameter("message") ?: ""
                 if (contactKey.isNotBlank()) {
-                    listOf(
-                        ContactsRoute.ContactsGraph,
-                        ContactsRoute.Messages(contactKey = contactKey, message = message),
-                    )
+                    listOf(ContactsRoute.Contacts, ContactsRoute.Messages(contactKey = contactKey, message = message))
                 } else {
-                    listOf(ContactsRoute.ContactsGraph)
+                    listOf(ContactsRoute.Contacts)
                 }
             }
-            else -> listOf(ContactsRoute.ContactsGraph)
+
+            else -> listOf(ContactsRoute.Contacts)
         }
     }
 
@@ -110,20 +154,21 @@ object DeepLinkRouter {
         val destNum = destNumStr?.toIntOrNull()
 
         return if (destNum == null) {
-            listOf(NodesRoute.NodesGraph)
+            listOf(NodesRoute.Nodes)
         } else if (segments.size > 2) {
             val subRouteStr = segments[2].lowercase()
             val detailRouteFn = nodeDetailSubRoutes[subRouteStr]
             if (detailRouteFn != null) {
-                listOf(NodesRoute.NodesGraph, NodesRoute.NodeDetailGraph(destNum), detailRouteFn(destNum))
+                listOf(NodesRoute.Nodes, NodesRoute.NodeDetail(destNum), detailRouteFn(destNum))
             } else {
-                listOf(NodesRoute.NodesGraph, NodesRoute.NodeDetail(destNum))
+                listOf(NodesRoute.Nodes, NodesRoute.NodeDetail(destNum))
             }
         } else {
-            listOf(NodesRoute.NodesGraph, NodesRoute.NodeDetail(destNum))
+            listOf(NodesRoute.Nodes, NodesRoute.NodeDetail(destNum))
         }
     }
 
+    @Suppress("MagicNumber", "ReturnCount")
     private fun routeSettings(segments: List<String>): List<NavKey> {
         var destNum: Int? = null
         var subRouteStr: String? = null
@@ -142,14 +187,39 @@ object DeepLinkRouter {
         }
 
         if (subRouteStr == null) {
-            return listOf(SettingsRoute.SettingsGraph(destNum))
+            return listOf(SettingsRoute.Settings(destNum))
+        }
+
+        // Handle helpDocs/{pageId} pattern
+        if (subRouteStr == "helpdocs" || subRouteStr == "help-docs") {
+            val pageIdSegmentIndex = if (destNum != null) 3 else 2
+            return if (segments.size > pageIdSegmentIndex) {
+                val pageId = segments[pageIdSegmentIndex]
+                listOf(SettingsRoute.Settings(destNum), SettingsRoute.HelpDocs, SettingsRoute.HelpDocPage(pageId))
+            } else {
+                listOf(SettingsRoute.Settings(destNum), SettingsRoute.HelpDocs)
+            }
+        }
+
+        // Handle discovery session deep links: /settings/local-mesh-discovery/session/{sessionId}
+        if (subRouteStr in discoveryAliases && segments.size > 3 && segments[2].lowercase() == "session") {
+            val sessionId = segments[3].toLongOrNull()
+            return if (sessionId != null) {
+                listOf(
+                    SettingsRoute.Settings(destNum),
+                    DiscoveryRoute.DiscoveryGraph,
+                    DiscoveryRoute.DiscoverySummary(sessionId),
+                )
+            } else {
+                listOf(SettingsRoute.Settings(destNum), DiscoveryRoute.DiscoveryGraph)
+            }
         }
 
         val subRoute = settingsSubRoutes[subRouteStr]
         return if (subRoute != null) {
-            listOf(SettingsRoute.SettingsGraph(destNum), subRoute)
+            listOf(SettingsRoute.Settings(destNum), subRoute)
         } else {
-            listOf(SettingsRoute.SettingsGraph(destNum))
+            listOf(SettingsRoute.Settings(destNum))
         }
     }
 
@@ -196,13 +266,21 @@ object DeepLinkRouter {
             "detection-sensor" to SettingsRoute.DetectionSensor,
             "paxcounter" to SettingsRoute.Paxcounter,
             "status-message" to SettingsRoute.StatusMessage,
-            "traffic-management" to SettingsRoute.TrafficManagement,
             "tak" to SettingsRoute.TAK,
             "clean-node-db" to SettingsRoute.CleanNodeDb,
             "debug-panel" to SettingsRoute.DebugPanel,
             "about" to SettingsRoute.About,
+            "acknowledgements" to SettingsRoute.Acknowledgements,
+            "attributions" to SettingsRoute.Acknowledgements,
             "filter-settings" to SettingsRoute.FilterSettings,
+            "helpdocs" to SettingsRoute.HelpDocs,
+            "help-docs" to SettingsRoute.HelpDocs,
+            "local-mesh-discovery" to DiscoveryRoute.DiscoveryGraph,
+            "localmeshdiscovery" to DiscoveryRoute.DiscoveryGraph,
         )
+
+    /** URL path segments that map to the discovery feature. */
+    private val discoveryAliases = setOf("local-mesh-discovery", "localmeshdiscovery")
 
     private val nodeDetailSubRoutes: Map<String, (Int) -> Route> =
         mapOf(

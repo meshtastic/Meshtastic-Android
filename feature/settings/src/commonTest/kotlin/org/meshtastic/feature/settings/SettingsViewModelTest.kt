@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,9 +18,13 @@ package org.meshtastic.feature.settings
 
 import app.cash.turbine.test
 import dev.mokkery.MockMode
+import dev.mokkery.answering.calls
 import dev.mokkery.answering.returns
 import dev.mokkery.every
+import dev.mokkery.everySuspend
+import dev.mokkery.matcher.any
 import dev.mokkery.mock
+import dev.mokkery.verifySuspend
 import io.kotest.matchers.ints.shouldBeInRange
 import io.kotest.matchers.shouldBe
 import io.kotest.property.Arb
@@ -35,19 +39,18 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import okio.Buffer
+import okio.BufferedSink
+import okio.ByteString.Companion.encodeUtf8
 import org.meshtastic.core.common.BuildConfigProvider
+import org.meshtastic.core.common.state.HiddenFeaturesUnlock
+import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.domain.usecase.settings.ExportDataUseCase
+import org.meshtastic.core.domain.usecase.settings.ExportNodeDatabaseUseCase
 import org.meshtastic.core.domain.usecase.settings.IsOtaCapableUseCase
-import org.meshtastic.core.domain.usecase.settings.MeshLocationUseCase
-import org.meshtastic.core.domain.usecase.settings.SetAppIntroCompletedUseCase
-import org.meshtastic.core.domain.usecase.settings.SetContrastLevelUseCase
-import org.meshtastic.core.domain.usecase.settings.SetDatabaseCacheLimitUseCase
-import org.meshtastic.core.domain.usecase.settings.SetLocaleUseCase
 import org.meshtastic.core.domain.usecase.settings.SetMeshLogSettingsUseCase
-import org.meshtastic.core.domain.usecase.settings.SetNotificationSettingsUseCase
-import org.meshtastic.core.domain.usecase.settings.SetProvideLocationUseCase
-import org.meshtastic.core.domain.usecase.settings.SetThemeUseCase
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.testing.FakeAppPreferences
@@ -57,12 +60,18 @@ import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeNotificationPrefs
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.testing.TestDataFactory
+import org.meshtastic.proto.Data
+import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.LocalConfig
+import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.PortNum
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SettingsViewModelTest {
@@ -96,16 +105,9 @@ class SettingsViewModelTest {
         every { isOtaCapableUseCase() } returns flowOf(true)
 
         val uiPrefs = appPreferences.ui
-        val setThemeUseCase = SetThemeUseCase(uiPrefs)
-        val setContrastLevelUseCase = SetContrastLevelUseCase(uiPrefs)
-        val setLocaleUseCase = SetLocaleUseCase(uiPrefs)
-        val setAppIntroCompletedUseCase = SetAppIntroCompletedUseCase(uiPrefs)
-        val setProvideLocationUseCase = SetProvideLocationUseCase(uiPrefs)
-        val setDatabaseCacheLimitUseCase = SetDatabaseCacheLimitUseCase(databaseManager)
         val setMeshLogSettingsUseCase = SetMeshLogSettingsUseCase(meshLogRepository, appPreferences.meshLog)
-        val setNotificationSettingsUseCase = SetNotificationSettingsUseCase(notificationPrefs)
-        val meshLocationUseCase = MeshLocationUseCase(radioController)
         val exportDataUseCase = ExportDataUseCase(nodeRepository, meshLogRepository)
+        val exportNodeDatabaseUseCase = ExportNodeDatabaseUseCase(nodeRepository)
 
         viewModel =
             SettingsViewModel(
@@ -117,18 +119,12 @@ class SettingsViewModelTest {
                 databaseManager = databaseManager,
                 meshLogPrefs = appPreferences.meshLog,
                 notificationPrefs = notificationPrefs,
-                setThemeUseCase = setThemeUseCase,
-                setContrastLevelUseCase = setContrastLevelUseCase,
-                setLocaleUseCase = setLocaleUseCase,
-                setAppIntroCompletedUseCase = setAppIntroCompletedUseCase,
-                setProvideLocationUseCase = setProvideLocationUseCase,
-                setDatabaseCacheLimitUseCase = setDatabaseCacheLimitUseCase,
                 setMeshLogSettingsUseCase = setMeshLogSettingsUseCase,
-                setNotificationSettingsUseCase = setNotificationSettingsUseCase,
-                meshLocationUseCase = meshLocationUseCase,
                 exportDataUseCase = exportDataUseCase,
+                exportNodeDatabaseUseCase = exportNodeDatabaseUseCase,
                 isOtaCapableUseCase = isOtaCapableUseCase,
                 fileService = fileService,
+                hiddenFeaturesUnlock = HiddenFeaturesUnlock(),
             )
     }
 
@@ -146,15 +142,15 @@ class SettingsViewModelTest {
     @Test
     fun `isConnected flow emits updates using Turbine`() = runTest {
         viewModel.isConnected.test {
-            expectMostRecentItem() shouldBe true // Default in FakeRadioController is Connected (true)
-
-            radioController.setConnectionState(ConnectionState.Disconnected)
-            runCurrent()
-            expectMostRecentItem() shouldBe false
+            expectMostRecentItem() shouldBe false // Default in FakeRadioController is Disconnected
 
             radioController.setConnectionState(ConnectionState.Connected)
             runCurrent()
             expectMostRecentItem() shouldBe true
+
+            radioController.setConnectionState(ConnectionState.Disconnected)
+            runCurrent()
+            expectMostRecentItem() shouldBe false
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -189,10 +185,10 @@ class SettingsViewModelTest {
     }
 
     @Test
-    fun `unlockExcludedModules updates state`() = runTest {
-        viewModel.excludedModulesUnlocked.value shouldBe false
-        viewModel.unlockExcludedModules()
-        viewModel.excludedModulesUnlocked.value shouldBe true
+    fun `unlockHiddenFeatures updates state`() = runTest {
+        viewModel.hiddenFeaturesUnlocked.value shouldBe false
+        viewModel.unlockHiddenFeatures()
+        viewModel.hiddenFeaturesUnlocked.value shouldBe true
     }
 
     @Test
@@ -212,7 +208,7 @@ class SettingsViewModelTest {
     }
 
     @Test
-    fun `meshLocationUseCase calls work`() {
+    fun `startProvidingLocation and stopProvidingLocation delegate to RadioController`() {
         viewModel.startProvidingLocation()
         radioController.startProvideLocationCalled shouldBe true
 
@@ -232,6 +228,13 @@ class SettingsViewModelTest {
     fun `setTheme updates prefs`() = runTest {
         viewModel.setTheme(2)
         appPreferences.ui.theme.value shouldBe 2
+    }
+
+    @Test
+    fun `setShowFullMessageTimestamps updates prefs`() = runTest {
+        viewModel.setShowFullMessageTimestamps(true)
+
+        appPreferences.ui.showFullMessageTimestamps.value shouldBe true
     }
 
     @Test
@@ -259,8 +262,123 @@ class SettingsViewModelTest {
     }
 
     @Test
+    fun `saveDataCsv writes filtered export via file service`() = runTest {
+        val myNodeNum = 456
+        val senderNodeNum = 123
+        nodeRepository.setMyNodeInfo(TestDataFactory.createMyNodeInfo(myNodeNum = myNodeNum))
+        nodeRepository.setNodes(
+            listOf(TestDataFactory.createTestNode(num = senderNodeNum, longName = "Sender Node", shortName = "SN")),
+        )
+        meshLogRepository.setLogs(
+            listOf(
+                MeshLog(
+                    uuid = "match",
+                    message_type = "TEXT",
+                    received_date = 1_700_000_000_000,
+                    raw_message = "",
+                    fromNum = senderNodeNum,
+                    portNum = PortNum.TEXT_MESSAGE_APP.value,
+                    fromRadio =
+                    FromRadio(
+                        packet =
+                        MeshPacket(
+                            from = senderNodeNum,
+                            rx_snr = 5.0f,
+                            decoded =
+                            Data(
+                                portnum = PortNum.TEXT_MESSAGE_APP,
+                                payload = "Hello settings".encodeUtf8(),
+                            ),
+                        ),
+                    ),
+                ),
+                MeshLog(
+                    uuid = "filtered-out",
+                    message_type = "RANGE",
+                    received_date = 1_700_000_001_000,
+                    raw_message = "",
+                    fromNum = senderNodeNum,
+                    portNum = PortNum.RANGE_TEST_APP.value,
+                    fromRadio =
+                    FromRadio(
+                        packet =
+                        MeshPacket(
+                            from = senderNodeNum,
+                            rx_snr = 6.0f,
+                            decoded = Data(
+                                portnum = PortNum.RANGE_TEST_APP,
+                                payload = "Ignore me".encodeUtf8(),
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+        )
+
+        val buffer = Buffer()
+        everySuspend { fileService.write(any(), any()) } calls
+            { args ->
+                val block = args.arg<suspend (BufferedSink) -> Unit>(1)
+                block(buffer)
+                true
+            }
+
+        val uri = CommonUri.parse("content://test/export.csv")
+        viewModel.saveDataCsv(uri, filterPortnum = PortNum.TEXT_MESSAGE_APP.value)
+        runCurrent()
+
+        verifySuspend { fileService.write(uri, any()) }
+
+        val csvOutput = buffer.readUtf8()
+        assertTrue(csvOutput.startsWith("\"date\",\"time\",\"from\""))
+        assertTrue(csvOutput.contains("\"123\",\"Sender Node\""))
+        assertTrue(csvOutput.contains("Hello settings"))
+        assertFalse(csvOutput.contains("Ignore me"))
+    }
+
+    @Test
+    fun `saveNodeDbJson writes node database export via file service`() = runTest {
+        nodeRepository.setMyNodeInfo(TestDataFactory.createMyNodeInfo(myNodeNum = 456))
+        nodeRepository.setNodes(
+            listOf(TestDataFactory.createTestNode(num = 123, longName = "Sender Node", shortName = "SN")),
+        )
+
+        val buffer = Buffer()
+        everySuspend { fileService.write(any(), any()) } calls
+            { args ->
+                val block = args.arg<suspend (BufferedSink) -> Unit>(1)
+                block(buffer)
+                true
+            }
+
+        val uri = CommonUri.parse("content://test/nodedb.json")
+        viewModel.saveNodeDbJson(uri)
+        runCurrent()
+
+        verifySuspend { fileService.write(uri, any()) }
+
+        val jsonOutput = buffer.readUtf8()
+        assertTrue(jsonOutput.contains("\"schemaVersion\": 1"))
+        assertTrue(jsonOutput.contains("\"myNodeNum\": 456"))
+        assertTrue(jsonOutput.contains("\"num\": 123"))
+        assertTrue(jsonOutput.contains("\"longName\": \"Sender Node\""))
+    }
+
+    @Test
     fun `setDbCacheLimit updates manager`() = runTest {
         viewModel.setDbCacheLimit(200)
         databaseManager.cacheLimit.value shouldBe 10 // Clamped to MAX_CACHE_LIMIT
+    }
+
+    @Test
+    fun `cachedDeviceCountExceeding is zero when nothing would be evicted`() = runTest {
+        databaseManager.existingDatabases.addAll(listOf("a", "b", "c"))
+        viewModel.cachedDeviceCountExceeding(5) shouldBe 0
+    }
+
+    @Test
+    fun `cachedDeviceCountExceeding counts devices past the new limit`() = runTest {
+        databaseManager.existingDatabases.addAll(listOf("a", "b", "c", "d", "e"))
+        viewModel.cachedDeviceCountExceeding(2) shouldBe 3
     }
 }

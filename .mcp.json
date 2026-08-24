@@ -1,0 +1,9 @@
+{
+  "$comment": "Team-shared MCP servers (auth-free only — anything needing tokens stays in user-level config). context7 = live library docs lookup; used constantly for Kotlin/Compose/AGP version questions.",
+  "mcpServers": {
+    "context7": {
+      "type": "http",
+      "url": "https://mcp.context7.com/mcp"
+    }
+  }
+}

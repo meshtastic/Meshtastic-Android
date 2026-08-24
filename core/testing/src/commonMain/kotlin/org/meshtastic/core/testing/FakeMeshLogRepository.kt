@@ -19,8 +19,10 @@ package org.meshtastic.core.testing
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.repository.MeshLogRepository
+import org.meshtastic.core.repository.MeshLogRetention
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.MyNodeInfo
 import org.meshtastic.proto.PortNum
@@ -41,10 +43,14 @@ class FakeMeshLogRepository :
     var deleteAllCalled = false
         private set
 
+    var lastDeletedLocalStatsNodeNum: Int? = null
+        private set
+
     override fun reset() {
         super.reset()
         lastDeletedOlderThan = null
         deleteAllCalled = false
+        lastDeletedLocalStatsNodeNum = null
     }
 
     override fun getAllLogs(maxItem: Int): Flow<List<MeshLog>> = logsFlow.map { it.take(maxItem) }
@@ -53,9 +59,8 @@ class FakeMeshLogRepository :
 
     override fun getAllLogsUnbounded(): Flow<List<MeshLog>> = logsFlow
 
-    override fun getLogsFrom(nodeNum: Int, portNum: Int): Flow<List<MeshLog>> = logsFlow.map {
-        it.filter { log -> log.fromNum == nodeNum && log.portNum == portNum }
-    }
+    override fun getLogsFrom(nodeNum: Int, portNum: Int): Flow<List<MeshLog>> =
+        logsFlow.map { it.filter { log -> log.fromNum == nodeNum && log.portNum == portNum } }
 
     override fun getMeshPacketsFrom(nodeNum: Int, portNum: Int): Flow<List<MeshPacket>> = MutableStateFlow(emptyList())
 
@@ -83,11 +88,29 @@ class FakeMeshLogRepository :
         logsFlow.value = logsFlow.value.filterNot { it.fromNum == nodeNum && it.portNum == portNum }
     }
 
+    override suspend fun deleteLocalStatsLogs(nodeNum: Int) {
+        lastDeletedLocalStatsNodeNum = nodeNum
+        logsFlow.value =
+            logsFlow.value.filterNot { log ->
+                log.fromNum == nodeNum && log.portNum == PortNum.TELEMETRY_APP.value && log.hasLocalStatsTelemetry()
+            }
+    }
+
     override suspend fun deleteLogsOlderThan(retentionDays: Int) {
         lastDeletedOlderThan = retentionDays
+        val window = MeshLogRetention.windowOrNull(retentionDays) ?: return
+        val cutoff = nowMillis - window.inWholeMilliseconds
+        logsFlow.value = logsFlow.value.filter { it.received_date >= cutoff }
     }
 
     fun setLogs(logs: List<MeshLog>) {
         logsFlow.value = logs
     }
+
+    private fun MeshLog.hasLocalStatsTelemetry(): Boolean = runCatching {
+        val decoded = fromRadio.packet?.decoded ?: return false
+        if (decoded.want_response == true) return false
+        Telemetry.ADAPTER.decode(decoded.payload).local_stats != null
+    }
+        .getOrDefault(false)
 }

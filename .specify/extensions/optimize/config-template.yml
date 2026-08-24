@@ -1,0 +1,50 @@
+# Optimize Extension Configuration
+# Copy to: .specify/extensions/optimize/optimize-config.yml
+# All settings are optional — defaults from extension.yml apply when omitted.
+
+# Toggle analysis categories (for speckit.optimize.run)
+categories:
+  token_budget: true
+  rule_health: true
+  ai_interpretability: true
+  semantic_compression: true
+  coherence: true
+  governance_echo: true
+
+# Thresholds
+thresholds:
+  # Flag constitution if it exceeds this token estimate (chars / 4)
+  max_constitution_tokens: 3000
+
+  # Flag principle imbalance if largest / smallest rule count exceeds ratio
+  principle_balance_ratio: 3.0
+
+  # Flag if total governance tokens exceed this % of context window
+  governance_budget_percent: 15
+
+  # Token tracker: flag files growing faster than this % between runs
+  file_growth_percent: 20
+
+# Chars-per-token ratio for estimation (lower = more conservative estimate)
+# Common ratios: 4.0 (English prose), 3.5 (mixed markdown/code), 3.0 (code-heavy)
+chars_per_token: 4.0
+
+# Target AI context window size (tokens) for budget calculations
+target_context_window: 200000
+
+# Context window sizes shown in per-session budget table
+context_window_sizes: [8000, 32000, 128000, 200000, 1000000]
+
+# Token tracker: persist reports for historical trend analysis
+keep_history: true
+
+# Learn command settings
+learn:
+  # Minimum repeated corrections in a session before flagging as a pattern
+  min_corrections_to_flag: 2
+
+  # Include memory entry suggestions in learning report
+  include_memory_suggestions: true
+
+  # Include constitution rule suggestions in learning report
+  include_rule_suggestions: true

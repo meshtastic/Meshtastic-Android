@@ -25,7 +25,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.testing.FakeNodeRepository
-import org.meshtastic.core.testing.FakeServiceRepository
+import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.proto.SharedContact
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -39,12 +39,12 @@ class SharedContactViewModelTest {
     private val testDispatcher = UnconfinedTestDispatcher()
     private lateinit var viewModel: SharedContactViewModel
     private val nodeRepository = FakeNodeRepository()
-    private val serviceRepository = FakeServiceRepository()
+    private val radioController = FakeRadioController()
 
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        viewModel = SharedContactViewModel(nodeRepository, serviceRepository)
+        viewModel = SharedContactViewModel(nodeRepository, radioController)
     }
 
     @AfterTest
@@ -59,7 +59,7 @@ class SharedContactViewModelTest {
 
     @Test
     fun `unfilteredNodes reflects repository updates`() = runTest(testDispatcher) {
-        viewModel = SharedContactViewModel(nodeRepository, serviceRepository)
+        viewModel = SharedContactViewModel(nodeRepository, radioController)
 
         viewModel.unfilteredNodes.test {
             assertEquals(emptyList(), awaitItem())

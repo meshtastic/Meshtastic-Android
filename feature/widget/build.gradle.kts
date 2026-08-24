@@ -26,6 +26,10 @@ android {
     resourcePrefix = "widget_"
 
     defaultConfig { minSdk = 26 }
+
+    // Glance unit tests resolve Compose-resources strings through a real Context, so the merged
+    // Android resources and assets must be on the Robolectric test classpath.
+    testOptions { unitTests { isIncludeAndroidResources = true } }
 }
 
 dependencies {
@@ -42,5 +46,15 @@ dependencies {
 
     implementation(libs.compose.multiplatform.resources)
     implementation(libs.kermit)
-    implementation(libs.koin.annotations)
+
+    testImplementation(kotlin("test-junit"))
+    testImplementation(libs.androidx.glance.testing)
+    testImplementation(libs.androidx.glance.appwidget.testing)
+    testImplementation(libs.androidx.test.core)
+    testImplementation(libs.androidx.test.ext.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.robolectric)
+    // Robolectric's runner is JUnit 4; configureTestOptions() turns on useJUnitPlatform() for this
+    // task, so the vintage engine is what actually discovers and runs these tests.
+    testRuntimeOnly(libs.junit.vintage.engine)
 }

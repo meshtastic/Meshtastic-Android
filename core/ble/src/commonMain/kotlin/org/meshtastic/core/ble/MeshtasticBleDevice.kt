@@ -17,7 +17,7 @@
 package org.meshtastic.core.ble
 
 import com.juul.kable.Advertisement
-import com.juul.kable.ExperimentalApi
+import com.juul.kable.ExperimentalKableApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,8 +26,12 @@ import kotlinx.coroutines.flow.asStateFlow
  * Unified [BleDevice] implementation for all BLE devices — scanned, bonded, or both.
  *
  * When created from a live BLE scan, [advertisement] is populated and used for optimal peripheral construction via
- * `Peripheral(advertisement)`. When created from the OS bonded device list (address only), [advertisement] is `null`
- * and the peripheral is constructed via `createPeripheral(address)` with `autoConnect = true`.
+ * `Peripheral(advertisement)` with a direct (non-autoConnect) connection attempt.
+ *
+ * Bonded-only devices (address only, [advertisement] null) can still be constructed for display in the device list and
+ * as a bounded fallback when fresh scans miss. In that fallback, Kable creates an address-only peripheral so Android
+ * can wait for the device to advertise through its `autoConnect` path while the transport keeps the connection attempt
+ * bounded.
  *
  * @param address The device's MAC address (or platform identifier string).
  * @param name The device's display name, if known.
@@ -48,13 +52,15 @@ class MeshtasticBleDevice(
     override val isConnected: Boolean
         get() = _state.value is BleConnectionState.Connected || ActiveBleConnection.active?.address == address
 
-    @OptIn(ExperimentalApi::class)
-    override suspend fun readRssi(): Int {
+    override val rssi: Int? = advertisement?.rssi
+
+    @OptIn(ExperimentalKableApi::class)
+    override suspend fun readRssi(): Int? {
         val active = ActiveBleConnection.active
         return if (active != null && active.address == address) {
             active.peripheral.rssi()
         } else {
-            advertisement?.rssi ?: 0
+            advertisement?.rssi
         }
     }
 

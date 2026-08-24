@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@ import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.position_enabled
 import org.meshtastic.core.resources.precise_location
+import org.meshtastic.core.ui.theme.AppTheme
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
@@ -92,7 +93,7 @@ fun PositionPrecisionPreference(
 
                 val precisionMeters = precisionBitsToMeters(value).toInt()
                 Text(
-                    text = precisionMeters.toDistanceString(unit),
+                    text = "± ${precisionMeters.toDistanceString(unit)}",
                     modifier = Modifier.padding(bottom = 16.dp),
                     fontSize = MaterialTheme.typography.bodyLarge.fontSize,
                     overflow = TextOverflow.Ellipsis,
@@ -105,11 +106,13 @@ fun PositionPrecisionPreference(
 
 @Preview(showBackground = true)
 @Composable
-private fun PositionPrecisionPreferencePreview() {
-    PositionPrecisionPreference(
-        value = POSITION_PRECISION_DEFAULT,
-        enabled = true,
-        onValueChanged = {},
-        modifier = Modifier.padding(horizontal = 16.dp),
-    )
+fun PositionPrecisionPreferencePreview() {
+    AppTheme {
+        PositionPrecisionPreference(
+            value = POSITION_PRECISION_DEFAULT,
+            enabled = true,
+            onValueChanged = {},
+            modifier = Modifier.padding(horizontal = 16.dp),
+        )
+    }
 }

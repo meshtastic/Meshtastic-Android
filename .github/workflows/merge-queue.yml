@@ -7,31 +7,114 @@ on:
 permissions:
   contents: read
 
+# Note: github.ref is unique per merge-group entry (gh-readonly-queue/main/pr-N-<sha>),
+# so this group never dedupes across re-queues of the same PR — the cancel-superseded
+# job below handles that explicitly.
 concurrency:
   group: build-mq-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  android-check:
+  # When a PR is re-queued (an entry ahead of it failed or was removed), GitHub creates a
+  # new merge group but does NOT cancel the workflow runs of the destroyed one. Those stale
+  # runs sit queued/running and starve the runner pool. Cancel any older merge-queue run
+  # for the same PR — only the newest merge group per PR is ever valid.
+  # No checkout, no toolchain — just gh api + jq. ubuntu-slim starts sooner than a VM, which
+  # matters most here: every second before this runs is a second the superseded run keeps a slot.
+  cancel-superseded:
+    name: Cancel Superseded Queue Runs
     if: github.repository == 'meshtastic/Meshtastic-Android'
+    runs-on: ubuntu-slim
+    timeout-minutes: 5
+    permissions:
+      actions: write
+    steps:
+      - name: Cancel older merge-queue runs for the same PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # github.ref_name: gh-readonly-queue/main/pr-<num>-<base-sha>
+          PR_PREFIX=$(echo "${{ github.ref_name }}" | grep -oE 'gh-readonly-queue/.+/pr-[0-9]+-')
+          if [ -z "$PR_PREFIX" ]; then
+            echo "Could not parse PR from ref '${{ github.ref_name }}'; skipping."
+            exit 0
+          fi
+          for status in queued in_progress; do
+            gh api "repos/${{ github.repository }}/actions/runs?event=merge_group&status=${status}&per_page=100" \
+              --jq ".workflow_runs[] | select(.head_branch | startswith(\"$PR_PREFIX\")) | select(.id < ${{ github.run_id }}) | .id"
+          done | sort -u | while read -r run_id; do
+            echo "Cancelling superseded run $run_id"
+            gh run cancel "$run_id" --repo "${{ github.repository }}" || true
+          done
+
+  # Docs-only queue entries (changelog updates, markdown fixes) cannot affect the build;
+  # skip the heavy pipeline for them. Anything outside docs/ and *.md runs full CI.
+  # Mirrors the paths-ignore list in main-check.yml.
+  check-changes:
+    name: Check Changes
+    if: github.repository == 'meshtastic/Meshtastic-Android'
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 5
+    outputs:
+      android: ${{ steps.filter.outputs.android }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 1
+      - name: Diff merge group against its base
+        id: filter
+        run: |
+          git fetch --depth=1 origin "${{ github.event.merge_group.base_sha }}"
+          changed=$(git diff --name-only "${{ github.event.merge_group.base_sha }}" "${{ github.event.merge_group.head_sha }}")
+          echo "Changed files:"
+          echo "$changed"
+          if echo "$changed" | grep -qvE '^docs/|\.md$|^$'; then
+            echo "android=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "android=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  android-check:
+    needs: check-changes
+    if: github.repository == 'meshtastic/Meshtastic-Android' && needs.check-changes.outputs.android == 'true'
     uses: ./.github/workflows/reusable-check.yml
+    permissions:
+      contents: read
+      pull-requests: write
     with:
       run_lint: true
       run_unit_tests: true
+      # Coverage is produced by main-check on the identical merge commit right
+      # after the queue merges it — keeping Kover instrumentation and report
+      # generation out of the queue's critical-path test shards.
+      run_coverage: false
+      # The PR already assembled these APKs and main-check rebuilds them (with
+      # -SNAPSHOT naming) for the snapshot release; a merge-combination
+      # packaging break would surface there minutes later. Skipping saves a
+      # runner slot per queue entry.
+      run_android_build: false
       upload_artifacts: false
     secrets: inherit
 
+  # Pure gate job: no checkout, no toolchain, just reads `needs` results. ubuntu-slim is a
+  # container-backed single-CPU runner that starts faster than a VM (15-min job cap, x64 only).
   check-workflow-status:
     name: Check Workflow Status
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-slim
+    timeout-minutes: 5
     permissions: {}
     needs:
+      - check-changes
       - android-check
     if: always()
     steps:
       - name: Check Workflow Status
         run: |
-          if [[ "${{ needs.android-check.result }}" == "failure" || "${{ needs.android-check.result }}" == "cancelled" ]]; then
+          if [[ "${{ needs.check-changes.result }}" != "success" ]]; then
+            echo "::error::Change detection failed"
+            exit 1
+          fi
+          if [[ "${{ needs.check-changes.outputs.android }}" == "true" && ("${{ needs.android-check.result }}" == "failure" || "${{ needs.android-check.result }}" == "cancelled") ]]; then
             echo "::error::Android Check failed"
             exit 1
           fi

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,15 @@ import org.meshtastic.proto.Position
 /** Interface for managing the local node's location updates and reporting. */
 interface MeshLocationManager {
     /** Starts location updates and reports them via the given function. */
-    fun start(scope: CoroutineScope, sendPositionFn: (Position) -> Unit)
+    fun start(scope: CoroutineScope, sendPositionFn: suspend (Position) -> Unit)
+
+    /**
+     * Retries starting location updates using the previously-provided scope and callback.
+     *
+     * Call this after a permission grant or GPS enablement to re-check conditions and start location updates that were
+     * skipped on the initial [start] call.
+     */
+    fun restart()
 
     /** Stops location updates. */
     fun stop()

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,6 +43,7 @@ import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
+import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.ModuleConfig
@@ -57,6 +58,7 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val capabilities = remember(firmwareVersion) { Capabilities(firmwareVersion) }
 
     RadioConfigScreenList(
+        rebootBehavior = RebootBehavior.ALWAYS,
         title = stringResource(Res.string.telemetry),
         onBack = onBack,
         configState = formState,

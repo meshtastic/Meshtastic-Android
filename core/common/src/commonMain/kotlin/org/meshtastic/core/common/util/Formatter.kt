@@ -93,12 +93,15 @@ fun formatString(pattern: String, vararg args: Any?): String = buildString {
 
         when (conversion) {
             's' -> append(arg?.toString() ?: "null")
+
             'd' -> append((arg as? Number)?.toLong()?.toString() ?: arg?.toString() ?: "0")
+
             'f' -> {
                 val value = (arg as? Number)?.toDouble() ?: 0.0
                 val places = precision ?: DEFAULT_FLOAT_PRECISION
                 append(NumberFormatter.format(value, places))
             }
+
             'x',
             'X',
             -> {
@@ -111,6 +114,7 @@ fun formatString(pattern: String, vararg args: Any?): String = buildString {
                 val padWidth = width ?: 0
                 append(hex.padStart(padWidth, padChar))
             }
+
             else -> {
                 // Unknown conversion — reproduce original token
                 append('%')

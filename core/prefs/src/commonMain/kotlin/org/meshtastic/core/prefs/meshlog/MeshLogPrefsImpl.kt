@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,6 @@
  */
 package org.meshtastic.core.prefs.meshlog
 
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
@@ -25,19 +23,18 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.prefs.di.MeshLogDataStore
+import org.meshtastic.core.repository.MeshLogCleanupPolicy
 import org.meshtastic.core.repository.MeshLogPrefs
 
 @Single
-class MeshLogPrefsImpl(
-    @Named("MeshLogDataStore") private val dataStore: DataStore<Preferences>,
-    dispatchers: CoroutineDispatchers,
-) : MeshLogPrefs {
+class MeshLogPrefsImpl(private val dataStore: MeshLogDataStore, dispatchers: CoroutineDispatchers) : MeshLogPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
     override val retentionDays: StateFlow<Int> =
@@ -56,6 +53,13 @@ class MeshLogPrefsImpl(
 
     override fun setLoggingEnabled(enabled: Boolean) {
         scope.launch { dataStore.edit { it[KEY_LOGGING_ENABLED_PREF] = enabled } }
+    }
+
+    override suspend fun awaitCleanupPolicy(): MeshLogCleanupPolicy = dataStore.data.first().let { preferences ->
+        MeshLogCleanupPolicy(
+            loggingEnabled = preferences[KEY_LOGGING_ENABLED_PREF] ?: DEFAULT_LOGGING_ENABLED,
+            retentionDays = preferences[KEY_RETENTION_DAYS_PREF] ?: DEFAULT_RETENTION_DAYS,
+        )
     }
 
     companion object {

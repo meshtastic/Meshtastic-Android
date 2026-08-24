@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,13 +16,84 @@
  */
 package org.meshtastic.core.repository
 
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.MeshActivity
+
+/** A lifecycle lease held by one already-admitted operation for [session]. */
+interface RadioSessionLease {
+    val session: RadioSessionContext
+
+    /** True until this admitted operation releases the session and rollover may complete. */
+    fun isCurrent(): Boolean
+}
+
+/** Owns admission and revocation for work bound to one transport session. */
+interface RadioSessionAuthority {
+    /**
+     * The transport session that still owns lifecycle completion, or null after teardown drains every admitted
+     * operation. Implementations close admission before teardown, so [isSessionActive] and the run helpers reject new
+     * work immediately even while this flow temporarily retains the draining session.
+     */
+    val activeSession: StateFlow<RadioSessionContext?>
+
+    /**
+     * Returns whether [session] still owns transport admission. Implementations must make this reflect the admission
+     * gate, not only [activeSession], because the draining session may remain published after new work is rejected.
+     */
+    fun isSessionActive(session: RadioSessionContext): Boolean
+
+    /**
+     * Runs [block] only while [session] owns transport admission. Implementations must make the admission check and
+     * synchronous side effect atomic with teardown.
+     */
+    fun runIfSessionActive(session: RadioSessionContext, block: () -> Unit): Boolean
+
+    /**
+     * Acquires a lifecycle lease for suspend [block]. Once admitted, teardown closes admission to later work and waits
+     * for this block to finish before publishing session completion or starting a replacement transport. [block] may
+     * use [RadioSessionLease.isCurrent] for transaction-bound checks that must remain valid through commit even after
+     * teardown has closed new admission. Implementations must acquire and release the lease through the same admission
+     * state used by teardown; comparing only [activeSession] cannot satisfy the draining contract. Callers must keep
+     * the block bounded and must not invoke transport lifecycle methods from inside it.
+     */
+    suspend fun runWithSessionLease(session: RadioSessionContext, block: suspend (RadioSessionLease) -> Unit): Boolean
+
+    /**
+     * Runs [block] while holding the same lifecycle lease, without exposing the lease token. Implementations may
+     * serialize this convenience path to preserve handshake ordering; independently deferred work should use
+     * [runWithSessionLease] so it can acquire its own lease before its parent operation returns.
+     */
+    suspend fun runWhileSessionActive(session: RadioSessionContext, block: suspend () -> Unit): Boolean =
+        runWithSessionLease(session) { block() }
+}
+
+/** Writes raw protocol frames to the currently admitted transport. */
+interface RadioTransportWriter {
+    /** Sends [bytes] when a transport is available; callers that need admission evidence use [trySendToRadio]. */
+    fun sendToRadio(bytes: ByteArray) {
+        if (!trySendToRadio(bytes)) {
+            Logger.withTag("RadioTransportWriter").w {
+                "sendToRadio dropped ${bytes.size} bytes: no active transport accepted the frame"
+            }
+        }
+    }
+
+    /**
+     * Attempts to dispatch [bytes] to the active transport.
+     *
+     * Implementations must return promptly: enqueue transport work internally instead of blocking for I/O or delivery.
+     *
+     * @return `true` when an active transport accepted the bytes for asynchronous delivery, or `false` when no send
+     *   could be scheduled or confirmed.
+     */
+    fun trySendToRadio(bytes: ByteArray): Boolean
+}
 
 /**
  * Interface for the low-level radio interface that handles raw byte communication.
@@ -39,7 +110,10 @@ import org.meshtastic.core.model.MeshActivity
  *
  * @see ServiceRepository.connectionState
  */
-interface RadioInterfaceService : RadioTransportCallback {
+interface RadioInterfaceService :
+    RadioTransportCallback,
+    RadioSessionAuthority,
+    RadioTransportWriter {
     /** The device types supported by this platform's radio interface. */
     val supportedDeviceTypes: List<DeviceType>
 
@@ -65,20 +139,101 @@ interface RadioInterfaceService : RadioTransportCallback {
     /** Flow of the current device address. */
     val currentDeviceAddressFlow: StateFlow<String?>
 
-    /** Whether we are currently using a mock transport. */
-    fun isMockTransport(): Boolean
+    /**
+     * Monotonically increasing generation bumped on every transport start (including same-address reconnect). Consumers
+     * use this to discard state retained from a previous transport instance. Stub implementations that never start a
+     * real transport expose a constant zero flow.
+     */
+    val sessionGeneration: StateFlow<Long>
 
-    /** Flow of raw data received from the radio. */
-    val receivedData: SharedFlow<ByteArray>
+    /**
+     * Whether the virtual demo transports may be offered and bound right now.
+     *
+     * @see RadioTransportFactory.mockTransportEnabled
+     */
+    val mockTransportEnabled: StateFlow<Boolean>
+
+    /**
+     * Whether this build carries the packet capture the replay transport needs. False means selecting a replay address
+     * would fall back to the plain mock, so callers offering a replay device must hide it.
+     */
+    val isReplayTransportAvailable: Boolean
+
+    /**
+     * Flow of raw data received from the radio, bound to the transport session that admitted each frame.
+     *
+     * Emissions preserve the order in which bytes arrived from the hardware — this is required because the firmware
+     * handshake (initial config packet ordering) depends on strict FIFO delivery. Implementations MUST guarantee
+     * ordering; do not swap in a [SharedFlow] without preserving order.
+     */
+    val receivedData: Flow<ReceivedRadioFrame>
 
     /** Flow of radio activity events. */
-    val meshActivity: SharedFlow<MeshActivity>
+    val meshActivity: Flow<MeshActivity>
 
-    /** Sends a raw byte array to the radio. */
-    fun sendToRadio(bytes: ByteArray)
+    /**
+     * Drains any bytes currently buffered in [receivedData] without emitting them to collectors.
+     *
+     * Callers invoke this before attaching a fresh collector after a stop/start cycle so stale bytes buffered while no
+     * collector was attached do not get replayed ahead of the next session's handshake.
+     */
+    fun resetReceivedBuffer()
 
     /** Initiates the connection to the radio. */
     fun connect()
+
+    /**
+     * Explicitly tears down the active transport, sending a polite `ToRadio(disconnect = true)` goodbye frame first
+     * when a transport is live. Safe to call when nothing is connected — implementations must no-op in that case.
+     * Suspends until the teardown completes.
+     */
+    suspend fun disconnect()
+
+    /**
+     * Silent in-place transport restart for handshake stalls: tears down the active transport and re-establishes it in
+     * place, without touching the connection-request gate or the selected device address.
+     *
+     * Both transport families use this recovery path but with different trigger timings: TCP/USB reach it through the
+     * fast-path watchdog (~12s after the last meaningful handshake packet), while BLE reaches it after the
+     * retry-exhausted path (~30s/60s watchdog plus a ~15s retry window). In both cases the symptom is identical: the
+     * transport itself may still be physically [ConnectionState.Connected] (e.g. a TCP socket whose radio firmware has
+     * stopped responding to `want_config_id`, or a BLE link whose GATT peer has stalled), so flipping app-level state
+     * to [ConnectionState.Disconnected] alone leaves a split-brain: transport Connected + `connectionRequested=true` +
+     * a live `RadioTransport` handle, which then blocks same-node reconnect via [setDeviceAddress]'s fast-path. This
+     * method breaks that deadlock by cycling the transport in place.
+     *
+     * Contract:
+     * - Preserves the selected device address (does not modify [currentDeviceAddressFlow]).
+     * - Preserves the `connectionRequested` gate; **MUST NOT** clear it. Safe to call concurrently with an explicit
+     *   [disconnect] — the internal gate check makes it a no-op in that case.
+     * - Safe to call when no transport is running — implementations must no-op.
+     * - Does **NOT** bypass selected-device validation; the replacement transport is built from the same bonded address
+     *   via the normal start path.
+     * - Emits ordinary transport-level transitions through the existing [RadioTransportCallback] surface, so observers
+     *   see the transient [ConnectionState.DeviceSleep] state followed by [ConnectionState.Connected] when the
+     *   replacement transport connects. (No [ConnectionState.Connecting] is emitted at the transport layer — that is an
+     *   app-level state set by [MeshConnectionManager], not a transport callback.)
+     *
+     * Suspends until the teardown/restart cycle completes.
+     */
+    suspend fun restartTransport()
+
+    /**
+     * Requests that the next BLE transport connection invalidates Android's GATT service cache before service
+     * discovery. Used after OTA firmware updates where the device reboots with a potentially different BLE service
+     * table on the same MAC address.
+     *
+     * The flag is one-shot: consumed on the first connect after being set.
+     */
+    fun requestGattCacheInvalidationOnNextConnect()
+
+    /**
+     * Consumes and returns the GATT cache invalidation request. Returns `true` exactly once after
+     * [requestGattCacheInvalidationOnNextConnect] was called, then resets to `false`.
+     *
+     * Intended to be called by the BLE transport during connection setup.
+     */
+    fun consumeGattCacheInvalidationRequest(): Boolean
 
     /** Returns the current device address. */
     fun getDeviceAddress(): String?
@@ -90,7 +245,7 @@ interface RadioInterfaceService : RadioTransportCallback {
     fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String
 
     /** Flow of user-facing connection error messages (e.g. permission failures). */
-    val connectionError: SharedFlow<String>
+    val connectionError: Flow<String>
 
     /** The scope in which interface-related coroutines should run. */
     val serviceScope: CoroutineScope

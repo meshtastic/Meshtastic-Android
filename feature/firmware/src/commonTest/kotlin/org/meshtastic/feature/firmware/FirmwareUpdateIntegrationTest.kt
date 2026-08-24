@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,11 +32,18 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.meshtastic.core.common.state.FirmwareMaintenanceLock
+import org.meshtastic.core.common.state.HiddenFeaturesUnlock
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.datastore.BootloaderWarningDataSource
+import org.meshtastic.core.datastore.FirmwareRecoveryDataSource
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.MaintenanceUf2Manifest
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
+import org.meshtastic.core.repository.MaintenanceUf2Repository
+import org.meshtastic.core.repository.NodeRestartTracker
+import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioController
@@ -58,13 +65,17 @@ class FirmwareUpdateIntegrationTest {
 
     private val firmwareReleaseRepository: FirmwareReleaseRepository = mock(MockMode.autofill)
     private val deviceHardwareRepository: DeviceHardwareRepository = mock(MockMode.autofill)
+    private val maintenanceUf2Repository: MaintenanceUf2Repository = mock(MockMode.autofill)
     private val nodeRepository = FakeNodeRepository()
     private val radioController = FakeRadioController()
     private val radioPrefs: RadioPrefs = mock(MockMode.autofill)
     private val bootloaderWarningDataSource: BootloaderWarningDataSource = mock(MockMode.autofill)
+    private val firmwareRecoveryDataSource: FirmwareRecoveryDataSource = mock(MockMode.autofill)
     private val firmwareUpdateManager: FirmwareUpdateManager = mock(MockMode.autofill)
     private val usbManager: FirmwareUsbManager = mock(MockMode.autofill)
     private val fileHandler: FirmwareFileHandler = mock(MockMode.autofill)
+    private val firmwareRetriever: FirmwareRetriever = mock(MockMode.autofill)
+    private val analytics: PlatformAnalytics = mock(MockMode.autofill)
 
     private val stableRelease = FirmwareRelease(id = "1", title = "2.5.0", zipUrl = "url", releaseNotes = "")
     private val hardware = DeviceHardware(hwModel = 1, architecture = "esp32", platformioTarget = "tbeam")
@@ -83,6 +94,9 @@ class FirmwareUpdateIntegrationTest {
         everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any()) } returns
             Result.success(hardware)
         everySuspend { bootloaderWarningDataSource.isDismissed(any()) } returns false
+        everySuspend { maintenanceUf2Repository.reconcile() } returns Unit
+        everySuspend { maintenanceUf2Repository.getSnapshot() } returns MaintenanceUf2Manifest()
+        every { firmwareRecoveryDataSource.pending } returns flowOf(null)
         every { fileHandler.cleanupAllTemporaryFiles() } returns Unit
         everySuspend { fileHandler.deleteFile(any()) } returns Unit
 
@@ -101,13 +115,21 @@ class FirmwareUpdateIntegrationTest {
     private fun createViewModel() = FirmwareUpdateViewModel(
         firmwareReleaseRepository,
         deviceHardwareRepository,
+        maintenanceUf2Repository,
         nodeRepository,
         radioController,
         radioPrefs,
         bootloaderWarningDataSource,
+        firmwareRecoveryDataSource,
         firmwareUpdateManager,
         usbManager,
         fileHandler,
+        firmwareRetriever,
+        FirmwareMaintenanceLock(),
+        TestApplicationCoroutineScope(testDispatcher),
+        HiddenFeaturesUnlock(),
+        analytics,
+        NodeRestartTracker(TestApplicationCoroutineScope(testDispatcher)),
     )
 
     @Test
@@ -128,7 +150,7 @@ class FirmwareUpdateIntegrationTest {
                 @Suppress("UNCHECKED_CAST")
                 val updateState = it.args[3] as (FirmwareUpdateState) -> Unit
                 updateState(FirmwareUpdateState.Updating(ProgressState()))
-                updateState(FirmwareUpdateState.Success)
+                updateState(FirmwareUpdateState.Success())
                 null
             }
 

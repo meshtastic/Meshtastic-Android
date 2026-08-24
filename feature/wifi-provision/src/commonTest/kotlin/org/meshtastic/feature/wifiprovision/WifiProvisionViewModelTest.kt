@@ -25,6 +25,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.testing.FakeBleConnection
 import org.meshtastic.core.testing.FakeBleConnectionFactory
 import org.meshtastic.core.testing.FakeBleDevice
@@ -62,7 +63,15 @@ class WifiProvisionViewModelTest {
         scanner = FakeBleScanner()
         connection = FakeBleConnection()
         viewModel =
-            WifiProvisionViewModel(bleScanner = scanner, bleConnectionFactory = FakeBleConnectionFactory(connection))
+            WifiProvisionViewModel(
+                bleScanner = scanner,
+                bleConnectionFactory = FakeBleConnectionFactory(connection),
+                dispatchers = CoroutineDispatchers(
+                    io = testDispatcher,
+                    main = testDispatcher,
+                    default = testDispatcher,
+                ),
+            )
     }
 
     @AfterTest
@@ -81,6 +90,7 @@ class WifiProvisionViewModelTest {
         assertTrue(state.networks.isEmpty())
         assertNull(state.error)
         assertNull(state.deviceName)
+        assertNull(state.ipAddress)
         assertEquals(ProvisionStatus.Idle, state.provisionStatus)
     }
 
@@ -224,12 +234,13 @@ class WifiProvisionViewModelTest {
         advanceUntilIdle()
 
         // Now provision — enqueue success response
-        emitNymeaResponse("""{"c":1,"r":0}""")
+        emitNymeaResponse("""{"c":1,"r":0,"p":{"i":"10.10.10.61"}}""")
         viewModel.provisionWifi("Net", "password123")
         advanceUntilIdle()
 
         val state = viewModel.uiState.value
         assertEquals(Phase.Connected, state.phase)
+        assertEquals("10.10.10.61", state.ipAddress)
         assertEquals(ProvisionStatus.Success, state.provisionStatus)
     }
 
@@ -296,6 +307,7 @@ class WifiProvisionViewModelTest {
         assertEquals(Phase.Idle, state.phase)
         assertTrue(state.networks.isEmpty())
         assertNull(state.deviceName)
+        assertNull(state.ipAddress)
         assertEquals(ProvisionStatus.Idle, state.provisionStatus)
     }
 

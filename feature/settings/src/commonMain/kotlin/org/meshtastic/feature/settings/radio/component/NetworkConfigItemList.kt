@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -82,6 +82,7 @@ import org.meshtastic.core.ui.util.LocalBarcodeScannerProvider
 import org.meshtastic.core.ui.util.LocalNfcScannerProvider
 import org.meshtastic.core.ui.util.LocalNfcScannerSupported
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
+import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.proto.Config
 
 @Composable
@@ -149,6 +150,7 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(
+        rebootBehavior = RebootBehavior.ALWAYS,
         title = stringResource(Res.string.network),
         onBack = onBack,
         configState = formState,

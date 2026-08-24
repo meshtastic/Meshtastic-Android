@@ -42,4 +42,20 @@ interface FirmwareUpdateManager {
         updateState: (FirmwareUpdateState) -> Unit,
         firmwareUri: CommonUri? = null,
     ): FirmwareArtifact?
+
+    /**
+     * Recover a device stranded in nRF DFU/bootloader mode after an interrupted update, while the app is disconnected.
+     *
+     * Unlike [startUpdate], routing does not depend on the (absent) live connection — this always drives the BLE DFU
+     * handler, which derives the `MAC+1` bootloader address from [address] and tolerates a device that is already in
+     * DFU mode.
+     *
+     * @param address The device's normal mesh BLE address (transport prefix stripped).
+     */
+    suspend fun recoverDfuDevice(
+        release: FirmwareRelease,
+        hardware: DeviceHardware,
+        address: String,
+        updateState: (FirmwareUpdateState) -> Unit,
+    ): FirmwareArtifact?
 }

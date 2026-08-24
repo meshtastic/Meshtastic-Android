@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 
 package org.meshtastic.feature.node.component
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
@@ -34,13 +35,18 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.Clipboard
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.isSensitiveData
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -48,10 +54,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.common.util.Base64Factory
 import org.meshtastic.core.common.util.MetricFormatter
-import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.a11y_label_value
@@ -67,13 +73,18 @@ import org.meshtastic.core.resources.node_sort_last_heard
 import org.meshtastic.core.resources.public_key
 import org.meshtastic.core.resources.role
 import org.meshtastic.core.resources.rssi
+import org.meshtastic.core.resources.security_signed_node
+import org.meshtastic.core.resources.security_signed_node_desc
 import org.meshtastic.core.resources.short_name
 import org.meshtastic.core.resources.snr
 import org.meshtastic.core.resources.status_message
 import org.meshtastic.core.resources.supported
+import org.meshtastic.core.resources.transport
 import org.meshtastic.core.resources.uptime
 import org.meshtastic.core.resources.user_id
-import org.meshtastic.core.resources.via_mqtt
+import org.meshtastic.core.ui.component.SignedNodeDialog
+import org.meshtastic.core.ui.component.determineSignalQuality
+import org.meshtastic.core.ui.component.transportInfo
 import org.meshtastic.core.ui.icon.ArrowCircleUp
 import org.meshtastic.core.ui.icon.DeviceNumbers
 import org.meshtastic.core.ui.icon.History
@@ -81,23 +92,41 @@ import org.meshtastic.core.ui.icon.HopCount
 import org.meshtastic.core.ui.icon.KeyOff
 import org.meshtastic.core.ui.icon.Lock
 import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.core.ui.icon.MqttConnected
 import org.meshtastic.core.ui.icon.Notes
 import org.meshtastic.core.ui.icon.Person
 import org.meshtastic.core.ui.icon.Rssi
+import org.meshtastic.core.ui.icon.ShieldCheck
 import org.meshtastic.core.ui.icon.Snr
 import org.meshtastic.core.ui.icon.Verified
 import org.meshtastic.core.ui.icon.role
+import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
+import org.meshtastic.core.ui.util.LocalModemPreset
 import org.meshtastic.core.ui.util.createClipEntry
 import org.meshtastic.core.ui.util.formatAgo
+import org.meshtastic.proto.MeshPacket.TransportMechanism
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 
 @Composable
-fun NodeDetailsSection(node: Node, modifier: Modifier = Modifier) {
+fun NodeDetailsSection(
+    node: Node,
+    modifier: Modifier = Modifier,
+    deviceHardware: DeviceHardware? = null,
+    reportedTarget: String? = null,
+) {
     SectionCard(title = Res.string.details, modifier = modifier) {
-        Column {
+        Column(modifier = Modifier.animateContentSize()) {
             if (node.mismatchKey) {
                 MismatchKeyWarning(Modifier.padding(horizontal = 16.dp))
                 Spacer(Modifier.height(16.dp))
+            }
+            if (deviceHardware != null) {
+                DeviceHeroSection(
+                    bgColor = node.colors.second.toLong(),
+                    deviceHardware = deviceHardware,
+                    reportedTarget = reportedTarget,
+                )
+                SectionDivider()
             }
             MainNodeDetails(node)
         }
@@ -154,9 +183,13 @@ private fun MainNodeDetails(node: Node) {
             SectionDivider()
             SignalRow(node)
         }
-        if (node.viaMqtt || node.manuallyVerified) {
+        if (node.viaMqtt || node.lastTransport != TransportMechanism.TRANSPORT_INTERNAL.value) {
             SectionDivider()
-            MqttAndVerificationRow(node)
+            TransportRow(node)
+        }
+        if (node.manuallyVerified || node.signsPackets) {
+            SectionDivider()
+            VerificationRow(node)
         }
         val publicKey = node.publicKey ?: node.user.public_key
         if (publicKey.size > 0) {
@@ -199,7 +232,7 @@ private fun NodeIdentificationRow(node: Node) {
     Row(modifier = Modifier.fillMaxWidth()) {
         InfoItem(
             label = stringResource(Res.string.node_id),
-            value = DataPacket.nodeNumToDefaultId(node.num),
+            value = NodeAddress.numToDefaultId(node.num),
             icon = MeshtasticIcons.DeviceNumbers,
             modifier = Modifier.weight(1f),
         )
@@ -260,20 +293,26 @@ private fun UserAndUptimeRow(node: Node) {
 @Composable
 private fun SignalRow(node: Node) {
     Row(modifier = Modifier.fillMaxWidth()) {
-        if (node.snr != Float.MAX_VALUE) {
+        val snr = node.snrOrNull
+        if (snr != null) {
+            val quality = determineSignalQuality(snr, LocalModemPreset.current)
+            // Value-before-quality with " · " matches the node-list signal pill in SignalInfo.kt.
             InfoItem(
                 label = stringResource(Res.string.snr),
-                value = MetricFormatter.snr(node.snr),
+                value = "${MetricFormatter.snr(snr)} · ${stringResource(quality.nameRes)}",
+                valueColor = quality.color(),
                 icon = MeshtasticIcons.Snr,
                 modifier = Modifier.weight(1f),
             )
         } else {
             Spacer(Modifier.weight(1f))
         }
-        if (node.rssi != Int.MAX_VALUE) {
+        val rssi = node.rssiOrNull
+        if (rssi != null) {
+            // No quality word here: RSSI alone can't be rated without the noise floor - see determineSignalQuality.
             InfoItem(
                 label = stringResource(Res.string.rssi),
-                value = MetricFormatter.rssi(node.rssi),
+                value = MetricFormatter.rssi(rssi),
                 icon = MeshtasticIcons.Rssi,
                 modifier = Modifier.weight(1f),
             )
@@ -283,16 +322,27 @@ private fun SignalRow(node: Node) {
     }
 }
 
+/** How this node was last heard — LoRa / MQTT / UDP / API. Hidden for internally-generated (own) packets. */
 @Composable
-private fun MqttAndVerificationRow(node: Node) {
+private fun TransportRow(node: Node) {
+    val (icon, label) = transportInfo(node.lastTransport, node.viaMqtt) ?: return
     Row(modifier = Modifier.fillMaxWidth()) {
-        if (node.viaMqtt) {
-            InfoItem(
-                label = stringResource(Res.string.via_mqtt),
-                value = "Yes",
-                icon = MeshtasticIcons.MqttConnected,
-                modifier = Modifier.weight(1f),
-            )
+        InfoItem(
+            label = stringResource(Res.string.transport),
+            value = label,
+            icon = icon,
+            modifier = Modifier.weight(1f),
+        )
+        Spacer(Modifier.weight(1f))
+    }
+}
+
+/** Trust signals: automatic XEdDSA signing (left, tappable) and user-asserted key verification (right). */
+@Composable
+private fun VerificationRow(node: Node) {
+    Row(modifier = Modifier.fillMaxWidth()) {
+        if (node.signsPackets) {
+            SignedNodeItem(Modifier.weight(1f))
         } else {
             Spacer(Modifier.weight(1f))
         }
@@ -309,7 +359,23 @@ private fun MqttAndVerificationRow(node: Node) {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+/** "Signed node" trust cell — tap opens the plain-language explanation ([SignedNodeDialog]). */
+@Composable
+private fun SignedNodeItem(modifier: Modifier = Modifier) {
+    var showDialog by remember { mutableStateOf(false) }
+    if (showDialog) SignedNodeDialog(onDismiss = { showDialog = false })
+    InfoItem(
+        label = stringResource(Res.string.security_signed_node),
+        value = stringResource(Res.string.security_signed_node_desc),
+        icon = MeshtasticIcons.ShieldCheck,
+        modifier = modifier,
+        iconTint = MaterialTheme.colorScheme.StatusGreen,
+        iconSize = 20.dp,
+        onClick = { showDialog = true },
+    )
+}
+
+@OptIn(ExperimentalFoundationApi::class, ExperimentalEncodingApi::class)
 @Suppress("LongMethod", "MagicNumber")
 @Composable
 private fun PublicKeyItem(publicKeyBytes: ByteArray) {
@@ -320,7 +386,7 @@ private fun PublicKeyItem(publicKeyBytes: ByteArray) {
         if (isMismatch) {
             stringResource(Res.string.error)
         } else {
-            Base64Factory.encode(publicKeyBytes).trim()
+            Base64.Default.encode(publicKeyBytes).trim()
         }
     val label = stringResource(Res.string.public_key)
     val copyLabel = stringResource(Res.string.copy)
@@ -341,7 +407,10 @@ private fun PublicKeyItem(publicKeyBytes: ByteArray) {
                 role = Role.Button,
             )
             .padding(horizontal = 20.dp, vertical = 8.dp)
-            .semantics(mergeDescendants = true) { contentDescription = contentDescriptionText },
+            .semantics(mergeDescendants = true) {
+                contentDescription = contentDescriptionText
+                isSensitiveData = true
+            },
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(

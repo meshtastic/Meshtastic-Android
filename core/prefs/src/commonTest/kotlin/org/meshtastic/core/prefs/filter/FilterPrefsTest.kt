@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ import kotlinx.coroutines.test.runTest
 import okio.FileSystem
 import okio.Path
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.prefs.di.asFilterDataStore
 import org.meshtastic.core.repository.FilterPrefs
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -32,10 +33,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
-@OptIn(ExperimentalUuidApi::class)
 class FilterPrefsTest {
     private lateinit var tmpDir: Path
 
@@ -56,7 +55,7 @@ class FilterPrefsTest {
                 produceFile = { tmpDir / "test.preferences_pb" },
             )
         dispatchers = CoroutineDispatchers(testDispatcher, testDispatcher, testDispatcher)
-        filterPrefs = FilterPrefsImpl(dataStore, dispatchers)
+        filterPrefs = FilterPrefsImpl(dataStore.asFilterDataStore(), dispatchers)
     }
 
     @AfterTest

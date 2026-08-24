@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,15 +17,11 @@
 
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
-    id("meshtastic.koin")
+    alias(libs.plugins.meshtastic.koin)
 }
 
 kotlin {
-    android {
-        namespace = "org.meshtastic.core.prefs"
-        androidResources.enable = false
-        withHostTest {}
-    }
+    android { withHostTest {} }
 
     sourceSets {
         commonMain.dependencies {
@@ -38,7 +34,5 @@ kotlin {
             implementation(libs.kotlinx.collections.immutable)
             implementation(libs.kotlinx.coroutines.core)
         }
-
-        commonTest.dependencies { implementation(libs.kotlinx.coroutines.test) }
     }
 }

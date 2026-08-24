@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,3 +24,34 @@ enum class MeasurementSystem {
 
 /** returns the system's preferred measurement system. */
 expect fun getSystemMeasurementSystem(): MeasurementSystem
+
+/**
+ * The system's preferred temperature unit. Deliberately decoupled from [MeasurementSystem]: some locales mix systems
+ * (the UK measures road distance in miles but temperature in Celsius), so temperature must never be derived from the
+ * distance unit.
+ */
+enum class TemperatureUnit {
+    CELSIUS,
+    FAHRENHEIT,
+}
+
+/**
+ * Returns the temperature unit preferred by the OS locale, honoring the user's regional-preference override where the
+ * platform supports one (Android 14+ Settings > System > Languages > Regional preferences).
+ */
+expect fun getSystemTemperatureUnit(): TemperatureUnit
+
+/** Returns the device's current locale as a 2-letter ISO 639-1 language code (e.g. "en", "es", "fr"). */
+expect fun currentLocaleCode(): String
+
+/**
+ * Returns the device's current region as a 2-letter ISO 3166-1 alpha-2 country code (e.g. "US", "DE"), or an empty
+ * string when the region is unknown. Used to region-filter marketplace links.
+ */
+expect fun currentRegionCode(): String
+
+/**
+ * Returns the device locale as a CMP resource qualifier string. Examples: "pt-rBR", "zh-rCN", "fr" (no region when not
+ * specified). Use this to construct locale-qualified file resource paths like "files-$qualifier/docs/...".
+ */
+expect fun currentLocaleQualifier(): String

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,5 +16,11 @@
  */
 package org.meshtastic.core.model.util
 
+import org.meshtastic.core.common.log.ExpectedCondition
+
 /** Exception thrown when a Meshtastic URL cannot be parsed. */
-class MalformedMeshtasticUrlException(message: String) : Exception(message)
+class MalformedMeshtasticUrlException(message: String, cause: Throwable? = null) :
+    Exception(message, cause),
+    ExpectedCondition {
+    override val expectedConditionLabel: String = "malformed-meshtastic-url"
+}

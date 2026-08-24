@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 package org.meshtastic.feature.node.component
 
 import androidx.compose.foundation.layout.Column
@@ -25,6 +27,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -60,7 +63,7 @@ fun NotesSection(node: Node, onSaveNotes: (Int, String) -> Unit, modifier: Modif
             Column(modifier = Modifier.padding(20.dp)) {
                 Text(
                     text = stringResource(Res.string.notes),
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleMediumEmphasized,
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold,
                 )

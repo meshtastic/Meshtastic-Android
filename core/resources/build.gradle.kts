@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,13 +17,10 @@
 
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
-    id("meshtastic.kmp.library.compose")
+    alias(libs.plugins.meshtastic.kmp.library.compose)
 }
 
 kotlin {
-    jvm()
-
-    @Suppress("UnstableApiUsage")
     android {
         androidResources {
             enable = true

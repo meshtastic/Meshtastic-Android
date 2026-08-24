@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,24 +36,31 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.DateFormatter
+import org.meshtastic.core.common.util.MetricFormatter
+import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.formatString
-import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.util.TimeConstants.MS_PER_SEC
+import org.meshtastic.core.model.util.adcVoltage
+import org.meshtastic.core.model.util.oneWireTemperature
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.adc_voltage
 import org.meshtastic.core.resources.current
+import org.meshtastic.core.resources.device_metrics_label_value
 import org.meshtastic.core.resources.env_metrics_log
 import org.meshtastic.core.resources.gas_resistance
 import org.meshtastic.core.resources.humidity
 import org.meshtastic.core.resources.iaq
 import org.meshtastic.core.resources.iaq_definition
 import org.meshtastic.core.resources.lux
+import org.meshtastic.core.resources.metric_channel_label
 import org.meshtastic.core.resources.one_wire_temperature
 import org.meshtastic.core.resources.radiation
 import org.meshtastic.core.resources.rainfall_1h
@@ -85,6 +92,8 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Un
         viewModel.saveEnvironmentMetricsCSV(uri, filteredTelemetries)
     }
 
+    val isImperial = state.displayUnits == org.meshtastic.proto.Config.DisplayConfig.DisplayUnits.IMPERIAL
+
     BaseMetricScreen(
         onNavigateUp = onNavigateUp,
         telemetryType = TelemetryType.ENVIRONMENT,
@@ -108,6 +117,8 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Un
                 modifier = modifier,
                 telemetries = filteredTelemetries.reversed(),
                 graphData = graphData,
+                isFahrenheit = state.isFahrenheit,
+                isImperial = isImperial,
                 vicoScrollState = vicoScrollState,
                 selectedX = selectedX,
                 onPointSelected = onPointSelected,
@@ -115,10 +126,15 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Un
         },
         listPart = { modifier, selectedX, lazyListState, onCardClick ->
             LazyColumn(modifier = modifier.fillMaxSize(), state = lazyListState) {
-                itemsIndexed(filteredTelemetries) { _, telemetry ->
+                itemsIndexed(
+                    filteredTelemetries,
+                    key = { index, telemetry -> "${telemetry.time}_$index" },
+                    contentType = { _, _ -> "environment_metrics" },
+                ) { _, telemetry ->
                     EnvironmentMetricsCard(
                         telemetry = telemetry,
                         environmentDisplayFahrenheit = state.isFahrenheit,
+                        isImperial = isImperial,
                         isSelected = telemetry.time.toDouble() == selectedX,
                         onClick = { onCardClick(telemetry.time.toDouble()) },
                     )
@@ -142,7 +158,7 @@ private fun TemperatureDisplay(
                 Text(
                     text = formatString(textFormat, stringResource(Res.string.temperature), temperature),
                     color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                    style = MaterialTheme.typography.labelLarge,
                 )
             }
         }
@@ -165,9 +181,12 @@ private fun HumidityAndBarometricPressureDisplay(envMetrics: org.meshtastic.prot
                     MetricIndicator(Environment.HUMIDITY.color)
                     Spacer(Modifier.width(4.dp))
                     Text(
-                        text = formatString("%s %.2f%%", stringResource(Res.string.humidity), humidity),
+                        text =
+                        "${stringResource(
+                            Res.string.humidity,
+                        )} ${MetricFormatter.percent(humidity, decimalPlaces = 2)}",
                         color = MaterialTheme.colorScheme.onSurface,
-                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                        style = MaterialTheme.typography.labelLarge,
                         modifier = Modifier.padding(vertical = 0.dp),
                     )
                 }
@@ -178,9 +197,9 @@ private fun HumidityAndBarometricPressureDisplay(envMetrics: org.meshtastic.prot
                     MetricIndicator(Environment.BAROMETRIC_PRESSURE.color)
                     Spacer(Modifier.width(4.dp))
                     Text(
-                        text = formatString("%.2f hPa", pressure),
+                        text = MetricFormatter.pressure(pressure, decimalPlaces = 2),
                         color = MaterialTheme.colorScheme.onSurface,
-                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                        style = MaterialTheme.typography.labelLarge,
                         modifier = Modifier.padding(vertical = 0.dp),
                     )
                 }
@@ -214,7 +233,7 @@ private fun SoilMetricsDisplay(
                                 soilMoistureValue,
                             ),
                             color = MaterialTheme.colorScheme.onSurface,
-                            fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                            style = MaterialTheme.typography.labelLarge,
                         )
                     }
                 }
@@ -232,7 +251,7 @@ private fun SoilMetricsDisplay(
                                 soilTemperature,
                             ),
                             color = MaterialTheme.colorScheme.onSurface,
-                            fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                            style = MaterialTheme.typography.labelLarge,
                         )
                     }
                 }
@@ -256,7 +275,7 @@ private fun LuxUVLuxDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics)
                     Text(
                         text = formatString("%s %.0f lx", stringResource(Res.string.lux), luxValue),
                         color = MaterialTheme.colorScheme.onSurface,
-                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                        style = MaterialTheme.typography.labelLarge,
                     )
                 }
             }
@@ -268,7 +287,7 @@ private fun LuxUVLuxDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics)
                     Text(
                         text = formatString("%s %.0f UVlx", stringResource(Res.string.uv_lux), uvLuxValue),
                         color = MaterialTheme.colorScheme.onSurface,
-                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                        style = MaterialTheme.typography.labelLarge,
                     )
                 }
             }
@@ -286,17 +305,20 @@ private fun VoltageCurrentDisplay(envMetrics: org.meshtastic.proto.EnvironmentMe
             if (hasVoltage) {
                 val voltage = envMetrics.voltage!!
                 Text(
-                    text = formatString("%s %.2f V", stringResource(Res.string.voltage), voltage),
+                    text = "${stringResource(Res.string.voltage)} ${MetricFormatter.voltage(voltage)}",
                     color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                    style = MaterialTheme.typography.labelLarge,
                 )
             }
             if (hasCurrent) {
                 val currentValue = envMetrics.current!!
                 Text(
-                    text = formatString("%s %.2f mA", stringResource(Res.string.current), currentValue),
+                    text =
+                    "${stringResource(
+                        Res.string.current,
+                    )} ${MetricFormatter.current(currentValue, decimalPlaces = 2)}",
                     color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                    style = MaterialTheme.typography.labelLarge,
                 )
             }
         }
@@ -317,7 +339,7 @@ private fun GasCompositionDisplay(envMetrics: org.meshtastic.proto.EnvironmentMe
                     Text(
                         text = stringResource(Res.string.iaq),
                         color = MaterialTheme.colorScheme.onSurface,
-                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                        style = MaterialTheme.typography.labelLarge,
                     )
                     Spacer(Modifier.width(4.dp))
                     IndoorAirQuality(iaq = iaqValue, displayMode = IaqDisplayMode.Dot)
@@ -330,7 +352,7 @@ private fun GasCompositionDisplay(envMetrics: org.meshtastic.proto.EnvironmentMe
                     Text(
                         text = formatString("%s %.2f Ohm", stringResource(Res.string.gas_resistance), gasResistance),
                         color = MaterialTheme.colorScheme.onSurface,
-                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                        style = MaterialTheme.typography.labelLarge,
                     )
                 }
             }
@@ -349,7 +371,7 @@ private fun RadiationDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics
                     Text(
                         text = formatString("%s %.2f µR/h", stringResource(Res.string.radiation), radiation),
                         color = MaterialTheme.colorScheme.onSurface,
-                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                        style = MaterialTheme.typography.labelLarge,
                     )
                 }
             }
@@ -358,21 +380,21 @@ private fun RadiationDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics
 }
 
 @Composable
-private fun WindDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics) {
+private fun WindDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics, isImperial: Boolean) {
     val hasSpeed = envMetrics.wind_speed != null && !envMetrics.wind_speed!!.isNaN()
     val hasGust = envMetrics.wind_gust != null && !envMetrics.wind_gust!!.isNaN()
     val hasLull = envMetrics.wind_lull != null && !envMetrics.wind_lull!!.isNaN()
 
     if (hasSpeed || hasGust || hasLull) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            if (hasSpeed) WindSpeedRow(envMetrics)
-            if (hasGust || hasLull) WindGustLullRow(envMetrics, hasGust, hasLull)
+            if (hasSpeed) WindSpeedRow(envMetrics, isImperial)
+            if (hasGust || hasLull) WindGustLullRow(envMetrics, isImperial, hasGust, hasLull)
         }
     }
 }
 
 @Composable
-private fun WindSpeedRow(envMetrics: org.meshtastic.proto.EnvironmentMetrics) {
+private fun WindSpeedRow(envMetrics: org.meshtastic.proto.EnvironmentMetrics, isImperial: Boolean) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             MetricIndicator(Environment.WIND_SPEED.color)
@@ -380,46 +402,61 @@ private fun WindSpeedRow(envMetrics: org.meshtastic.proto.EnvironmentMetrics) {
             val dirText =
                 if (envMetrics.wind_direction != null) {
                     formatString(
-                        "%s %.1f m/s (%s %d°)",
+                        "%s %s (%s %d°)",
                         stringResource(Res.string.wind_speed),
-                        envMetrics.wind_speed!!,
+                        MetricFormatter.windSpeed(envMetrics.wind_speed!!, isImperial),
                         stringResource(Res.string.wind_direction),
                         envMetrics.wind_direction!!,
                     )
                 } else {
-                    formatString("%s %.1f m/s", stringResource(Res.string.wind_speed), envMetrics.wind_speed!!)
+                    formatString(
+                        "%s %s",
+                        stringResource(Res.string.wind_speed),
+                        MetricFormatter.windSpeed(envMetrics.wind_speed!!, isImperial),
+                    )
                 }
             Text(
                 text = dirText,
                 color = MaterialTheme.colorScheme.onSurface,
-                fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                style = MaterialTheme.typography.labelLarge,
             )
         }
     }
 }
 
 @Composable
-private fun WindGustLullRow(envMetrics: org.meshtastic.proto.EnvironmentMetrics, hasGust: Boolean, hasLull: Boolean) {
+private fun WindGustLullRow(
+    envMetrics: org.meshtastic.proto.EnvironmentMetrics,
+    isImperial: Boolean,
+    hasGust: Boolean,
+    hasLull: Boolean,
+) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         if (hasGust) {
             Text(
-                text = formatString("%s %.1f m/s", stringResource(Res.string.wind_gust), envMetrics.wind_gust!!),
+                text =
+                "${stringResource(Res.string.wind_gust)} ${
+                    MetricFormatter.windSpeed(envMetrics.wind_gust!!, isImperial)
+                }",
                 color = MaterialTheme.colorScheme.onSurface,
-                fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                style = MaterialTheme.typography.labelLarge,
             )
         }
         if (hasLull) {
             Text(
-                text = formatString("%s %.1f m/s", stringResource(Res.string.wind_lull), envMetrics.wind_lull!!),
+                text =
+                "${stringResource(Res.string.wind_lull)} ${
+                    MetricFormatter.windSpeed(envMetrics.wind_lull!!, isImperial)
+                }",
                 color = MaterialTheme.colorScheme.onSurface,
-                fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                style = MaterialTheme.typography.labelLarge,
             )
         }
     }
 }
 
 @Composable
-private fun RainfallDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics) {
+private fun RainfallDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics, isImperial: Boolean) {
     val has1h = envMetrics.rainfall_1h != null && !envMetrics.rainfall_1h!!.isNaN()
     val has24h = envMetrics.rainfall_24h != null && !envMetrics.rainfall_24h!!.isNaN()
 
@@ -427,53 +464,78 @@ private fun RainfallDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics)
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             if (has1h) {
                 Text(
-                    text = formatString("%s %.1f mm", stringResource(Res.string.rainfall_1h), envMetrics.rainfall_1h!!),
+                    text =
+                    "${stringResource(
+                        Res.string.rainfall_1h,
+                    )} ${MetricFormatter.rainfall(envMetrics.rainfall_1h!!, isImperial)}",
                     color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                    style = MaterialTheme.typography.labelLarge,
                 )
             }
             if (has24h) {
                 Text(
                     text =
-                    formatString("%s %.1f mm", stringResource(Res.string.rainfall_24h), envMetrics.rainfall_24h!!),
+                    "${stringResource(
+                        Res.string.rainfall_24h,
+                    )} ${MetricFormatter.rainfall(envMetrics.rainfall_24h!!, isImperial)}",
                     color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                    style = MaterialTheme.typography.labelLarge,
                 )
             }
         }
     }
 }
 
+/**
+ * One row per reporting 1-Wire probe. Values arrive already converted to the display unit by the view model, so they
+ * are only formatted here — a second conversion would double-count. An absent channel is `null`; 0°C is a real reading.
+ */
 @Composable
 private fun OneWireTemperatureDisplay(
     envMetrics: org.meshtastic.proto.EnvironmentMetrics,
     environmentDisplayFahrenheit: Boolean,
 ) {
-    val sensors = envMetrics.one_wire_temperature.filterNot { it.isNaN() }
-    if (sensors.isEmpty()) return
-    val oneWireEntries =
-        listOf(
-            Environment.ONE_WIRE_TEMP_1,
-            Environment.ONE_WIRE_TEMP_2,
-            Environment.ONE_WIRE_TEMP_3,
-            Environment.ONE_WIRE_TEMP_4,
-            Environment.ONE_WIRE_TEMP_5,
-            Environment.ONE_WIRE_TEMP_6,
-            Environment.ONE_WIRE_TEMP_7,
-            Environment.ONE_WIRE_TEMP_8,
+    val unit = if (environmentDisplayFahrenheit) "°F" else "°C"
+    Environment.oneWireTemperatures.forEachIndexed { idx, entry ->
+        val temp = envMetrics.oneWireTemperature(idx)?.takeIf { !it.isNaN() } ?: return@forEachIndexed
+        ChannelMetricRow(
+            color = entry.color,
+            label = stringResource(Res.string.one_wire_temperature),
+            channelNumber = idx + 1,
+            value = "${NumberFormatter.format(temp, 1)}$unit",
         )
-    val textFormat = if (environmentDisplayFahrenheit) "%s %d: %.1f°F" else "%s %d: %.1f°C"
-    sensors.forEachIndexed { idx, temp ->
-        val color = oneWireEntries.getOrNull(idx)?.color ?: Environment.ONE_WIRE_TEMP_1.color
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            MetricIndicator(color)
-            Spacer(Modifier.width(4.dp))
-            Text(
-                text = formatString(textFormat, stringResource(Res.string.one_wire_temperature), idx + 1, temp),
-                color = MaterialTheme.colorScheme.onSurface,
-                fontSize = MaterialTheme.typography.labelLarge.fontSize,
-            )
-        }
+    }
+}
+
+/** One row per reporting ADC channel. Volts need no unit conversion, and 0 V is a real reading. */
+@Composable
+private fun AdcVoltageDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics) {
+    Environment.adcVoltages.forEachIndexed { idx, entry ->
+        val volts = envMetrics.adcVoltage(idx)?.takeIf { !it.isNaN() } ?: return@forEachIndexed
+        ChannelMetricRow(
+            color = entry.color,
+            label = stringResource(Res.string.adc_voltage),
+            channelNumber = idx + 1,
+            value = MetricFormatter.voltage(volts),
+        )
+    }
+}
+
+@Composable
+private fun ChannelMetricRow(color: Color, label: String, channelNumber: Int, value: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        MetricIndicator(color)
+        Spacer(Modifier.width(4.dp))
+        Text(
+            text =
+            stringResource(
+                Res.string.device_metrics_label_value,
+                stringResource(Res.string.metric_channel_label, label, channelNumber),
+                value,
+            ),
+            color = MaterialTheme.colorScheme.onSurface,
+            style = MaterialTheme.typography.labelLarge,
+        )
     }
 }
 
@@ -481,23 +543,29 @@ private fun OneWireTemperatureDisplay(
 private fun EnvironmentMetricsCard(
     telemetry: Telemetry,
     environmentDisplayFahrenheit: Boolean,
+    isImperial: Boolean,
     isSelected: Boolean,
     onClick: () -> Unit,
 ) {
     SelectableMetricCard(isSelected = isSelected, onClick = onClick) {
-        EnvironmentMetricsContent(telemetry, environmentDisplayFahrenheit)
+        EnvironmentMetricsContent(telemetry, environmentDisplayFahrenheit, isImperial)
     }
 }
 
 @Composable
-private fun EnvironmentMetricsContent(telemetry: Telemetry, environmentDisplayFahrenheit: Boolean) {
+private fun EnvironmentMetricsContent(
+    telemetry: Telemetry,
+    environmentDisplayFahrenheit: Boolean,
+    isImperial: Boolean,
+    timeTextOverride: String? = null,
+) {
     val envMetrics = telemetry.environment_metrics ?: org.meshtastic.proto.EnvironmentMetrics()
     val time = telemetry.time.toLong() * MS_PER_SEC
     Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
         /* Time and Temperature */
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(
-                text = DateFormatter.formatDateTime(time),
+                text = timeTextOverride ?: DateFormatter.formatDateTime(time),
                 style = MaterialTheme.typography.titleMediumEmphasized,
                 fontWeight = FontWeight.Bold,
             )
@@ -516,16 +584,17 @@ private fun EnvironmentMetricsContent(telemetry: Telemetry, environmentDisplayFa
 
         VoltageCurrentDisplay(envMetrics)
         RadiationDisplay(envMetrics)
-        WindDisplay(envMetrics)
-        RainfallDisplay(envMetrics)
+        WindDisplay(envMetrics, isImperial)
+        RainfallDisplay(envMetrics, isImperial)
         OneWireTemperatureDisplay(envMetrics, environmentDisplayFahrenheit)
+        AdcVoltageDisplay(envMetrics)
     }
 }
 
 @PreviewLightDark
 @Suppress("MagicNumber") // Compose preview with fake data
 @Composable
-private fun PreviewEnvironmentMetricsContent() {
+fun PreviewEnvironmentMetricsContent() {
     val fakeEnvMetrics =
         org.meshtastic.proto.EnvironmentMetrics(
             temperature = 22.5f,
@@ -547,6 +616,15 @@ private fun PreviewEnvironmentMetricsContent() {
             rainfall_1h = 1.5f,
             rainfall_24h = 12.3f,
         )
-    val fakeTelemetry = Telemetry(time = nowSeconds.toInt(), environment_metrics = fakeEnvMetrics)
-    AppTheme { Surface { EnvironmentMetricsContent(telemetry = fakeTelemetry, environmentDisplayFahrenheit = false) } }
+    val fakeTelemetry = Telemetry(time = 1700000000, environment_metrics = fakeEnvMetrics)
+    AppTheme {
+        Surface {
+            EnvironmentMetricsContent(
+                telemetry = fakeTelemetry,
+                environmentDisplayFahrenheit = false,
+                isImperial = false,
+                timeTextOverride = "2023-11-14 22:13",
+            )
+        }
+    }
 }

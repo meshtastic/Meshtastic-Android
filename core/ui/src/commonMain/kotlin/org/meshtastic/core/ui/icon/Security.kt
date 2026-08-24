@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ import org.meshtastic.core.resources.ic_lock
 import org.meshtastic.core.resources.ic_lock_open
 import org.meshtastic.core.resources.ic_security
 import org.meshtastic.core.resources.ic_verified
+import org.meshtastic.core.resources.ic_verified_user
 
 val MeshtasticIcons.Verified: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_verified)
@@ -36,3 +37,5 @@ val MeshtasticIcons.KeyOff: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_key_off)
 val MeshtasticIcons.SecurityShield: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_security)
+val MeshtasticIcons.ShieldCheck: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_verified_user)

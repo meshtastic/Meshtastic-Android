@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,10 +21,98 @@ import androidx.compose.material3.ColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-val MeshtasticGreen = Color(0xFF67EA94)
-val MeshtasticAlt = Color(0xFF2C2D3C)
-val HyperlinkBlue = Color(0xFF43C3B0)
-val AnnotationColor = Color(0xFF039BE5)
+// ─── Brand Colors (Design Standards v1.3) ───
+val MeshtasticGreen = Color(0xFF67EA94) // Green 500 — Brand Accent
+val MeshtasticAlt = Color(0xFF2C2D3C) // Neutral 800 — Brand Primary
+
+// ─── Neutral Scale ───
+object NeutralPalette {
+    val N950 = Color(0xFF0F1017)
+    val N900 = Color(0xFF1A1B26)
+    val N800 = Color(0xFF2C2D3C)
+    val N700 = Color(0xFF3D3E50)
+    val N600 = Color(0xFF555668)
+    val N500 = Color(0xFF6E7082)
+    val N400 = Color(0xFF9496A6)
+    val N300 = Color(0xFFB8BAC8)
+    val N200 = Color(0xFFD5D6E0)
+    val N100 = Color(0xFFECEDF3)
+    val N50 = Color(0xFFF5F6FA)
+}
+
+// ─── Neutral Variant Scale (§7.3) ───
+object NeutralVariantPalette {
+    val NV900 = Color(0xFF1D1E2B)
+    val NV800 = Color(0xFF303245)
+    val NV700 = Color(0xFF444660)
+    val NV600 = Color(0xFF5C5E78)
+    val NV500 = Color(0xFF767892)
+    val NV400 = Color(0xFF9698B0)
+    val NV300 = Color(0xFFBDBFCF)
+    val NV200 = Color(0xFFDADBE7)
+    val NV100 = Color(0xFFEDEEF6)
+    val NV50 = Color(0xFFF6F7FC)
+}
+
+// ─── Green Scale (§7.4) ───
+object GreenPalette {
+    val G950 = Color(0xFF002E13)
+    val G900 = Color(0xFF003D1A)
+    val G800 = Color(0xFF005C2E)
+    val G700 = Color(0xFF2D8F52)
+    val G600 = Color(0xFF3FB86D)
+    val G500 = Color(0xFF67EA94)
+    val G400 = Color(0xFF8FF0B2)
+    val G300 = Color(0xFFB5F5CE)
+    val G200 = Color(0xFFCCFADD)
+    val G100 = Color(0xFFE5FCEE)
+    val G50 = Color(0xFFF0FEF5)
+}
+
+// ─── Accent Blue Scale (§7.5) ───
+object BluePalette {
+    val B950 = Color(0xFF001849)
+    val B900 = Color(0xFF002366)
+    val B800 = Color(0xFF1A3F8C)
+    val B700 = Color(0xFF2855A8)
+    val B600 = Color(0xFF5C6BC0)
+    val B500 = Color(0xFF7B8AD0)
+    val B400 = Color(0xFF9BA8E0)
+    val B300 = Color(0xFFB0BFF0)
+    val B200 = Color(0xFFD0D8F5)
+    val B100 = Color(0xFFE0E3F8)
+    val B50 = Color(0xFFE8EAF6)
+}
+
+// ─── Error Scale (§7.6) ───
+object ErrorPalette {
+    val E900 = Color(0xFF410002)
+    val E800 = Color(0xFF690005)
+    val E700 = Color(0xFF93000A)
+    val E600 = Color(0xFFBA1A1A)
+    val E500 = Color(0xFFE05252)
+    val E400 = Color(0xFFFF897D)
+    val E300 = Color(0xFFFFB4AB)
+    val E200 = Color(0xFFFFDAD6)
+    val E100 = Color(0xFFFDEAEA)
+}
+
+// ─── Semantic Colors (§7.7) ───
+object SemanticColors {
+    val Accent = Color(0xFF2855A8) // Blue 700
+    val AccentLight = Color(0xFFE0E3F8) // Blue 100
+    val Info = Color(0xFF5C6BC0) // Blue 600
+    val InfoLight = Color(0xFFE8EAF6) // Blue 50
+    val Warning = Color(0xFFE8A33E)
+    val WarningLight = Color(0xFFFFF3E0)
+    val Error = Color(0xFFE05252) // Error 500 — non-text indicators only
+    val ErrorLight = Color(0xFFFDEAEA) // Error 100
+    val Success = Color(0xFF3FB86D) // Green 600
+    val SuccessLight = Color(0xFFE5FCEE) // Green 100
+}
+
+val HyperlinkBlue = Color(0xFF5C6BC0) // Blue 600 (Info)
+val AnnotationColor = Color(0xFF2855A8) // Blue 700 (Accent)
 
 object TracerouteColors {
     // High-contrast pair that stays legible on light/dark tiles and for most color-blind users.
@@ -64,25 +152,36 @@ object GraphColors {
     val SkyBlue = Color(0xFF03A9F4)
     val Chartreuse = Color(0xFF76FF03)
     val Coral = Color(0xFFFF6E40)
+
+    // Muted second tier. The vivid hues above are exhausted, so multi-channel series that need their own identity draw
+    // from here: a chart marker resolves its label by series color, so no two plotted series may share one.
+    val Brown = Color(0xFF8D6E63)
+    val BlueGrey = Color(0xFF78909C)
+    val Olive = Color(0xFF9E9D24)
+    val DeepPurple = Color(0xFF7E57C2)
+    val SeaGreen = Color(0xFF2E9E5B)
+    val Maroon = Color(0xFFA13D63)
+    val Mustard = Color(0xFFC9A227)
+    val Slate = Color(0xFF4A6572)
 }
 
 object StatusColors {
     val ColorScheme.StatusGreen: Color
         @Composable
-        get() = // If it might change based on theme
+        get() =
             if (isSystemInDarkTheme()) {
-                Color(0xFF28A03B) // Example dark green
+                Color(0xFF3FB86D) // Green 600
             } else {
-                Color(0xFF30C047)
+                Color(0xFF3FB86D) // Green 600 (Success)
             }
 
     val ColorScheme.StatusYellow: Color
         @Composable
         get() =
             if (isSystemInDarkTheme()) {
-                Color(0xFFFFC107)
+                Color(0xFFE8A33E) // Warning
             } else {
-                Color(0xFFFFD54F)
+                Color(0xFFE8A33E) // Warning
             }
 
     val ColorScheme.StatusOrange: Color
@@ -96,23 +195,56 @@ object StatusColors {
 
     val ColorScheme.StatusRed: Color
         @Composable
-        get() = // If it might change based on theme
+        get() =
             if (isSystemInDarkTheme()) {
-                Color(0xFFB00020)
+                Color(0xFFE05252) // Error
             } else {
-                Color(0xFFF44336)
+                Color(0xFFE05252) // Error
             }
 
     val ColorScheme.StatusBlue: Color
         @Composable
-        get() = // If it might change based on theme
+        get() =
             if (isSystemInDarkTheme()) {
-                Color(0xFF2196F3)
+                Color(0xFF5C6BC0) // Info
             } else {
-                Color(0xFF42A5F5)
+                Color(0xFF5C6BC0) // Info
             }
+}
+
+@Suppress("MagicNumber")
+object DiscoveryMapColors {
+    val DirectNode = Color(0xFF4CAF50)
+    val MeshNode = Color(0xFF2196F3)
+    val UserPosition = Color(0xFFFF9800)
+    val DirectLine = Color(0x804CAF50)
 }
 
 object MessageItemColors {
     val Red = Color(0x4DFF0000)
+}
+
+/**
+ * Semantic palette for the six EPA AQI categories, following [StatusColors]' per-theme pattern.
+ *
+ * EPA publishes canonical category hex values (`#00E400` Good … `#7E0023` Hazardous), but those are billboard colors
+ * and several are unusable as text: `#FFFF00` Moderate scores 1.01:1 against our light `surface`. So EPA's *hue order*
+ * (green → yellow → orange → red → purple → maroon) is preserved while each category is re-toned per theme — dark tones
+ * for light surfaces, light tones for dark surfaces. `AqiSeverityColorsTest` pins every tone at WCAG AA text contrast
+ * (4.5:1) against both `surface` and `surfaceVariant` (the metric-log card background).
+ *
+ * Color is never the only signal: the category name is always rendered next to the AQI value.
+ */
+@Suppress("MagicNumber")
+object AqiSeverityColors {
+
+    /** The light-theme and dark-theme tone for one AQI category. */
+    data class Tones(val light: Color, val dark: Color)
+
+    val Good = Tones(light = Color(0xFF0F5C29), dark = Color(0xFF8DE0A6))
+    val Moderate = Tones(light = Color(0xFF6B5300), dark = Color(0xFFF5D07A))
+    val UnhealthySensitive = Tones(light = Color(0xFF7A2E00), dark = Color(0xFFFFB07A))
+    val Unhealthy = Tones(light = Color(0xFF8C0F16), dark = Color(0xFFFF9F98))
+    val VeryUnhealthy = Tones(light = Color(0xFF6B2F72), dark = Color(0xFFE0B4E6))
+    val Hazardous = Tones(light = Color(0xFF5E001A), dark = Color(0xFFF6A8C0))
 }

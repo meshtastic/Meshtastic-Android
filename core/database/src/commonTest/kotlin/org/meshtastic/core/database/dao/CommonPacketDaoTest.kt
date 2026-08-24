@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,12 +27,17 @@ import org.meshtastic.core.database.entity.ReactionEntity
 import org.meshtastic.core.database.getInMemoryDatabaseBuilder
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
+import org.meshtastic.core.model.NodeAddress
+import org.meshtastic.proto.Data
+import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
+import org.meshtastic.proto.Routing
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 abstract class CommonPacketDaoTest {
@@ -57,7 +62,7 @@ abstract class CommonPacketDaoTest {
     private val myNodeNum: Int
         get() = myNodeInfo.myNodeNum
 
-    private val testContactKeys = listOf("0${DataPacket.ID_BROADCAST}", "1!test1234")
+    private val testContactKeys = listOf("0${NodeAddress.ID_BROADCAST}", "1!test1234")
 
     private fun generateTestPackets(myNodeNum: Int) = testContactKeys.flatMap { contactKey ->
         List(SAMPLE_SIZE) {
@@ -70,7 +75,7 @@ abstract class CommonPacketDaoTest {
                 read = false,
                 data =
                 DataPacket(
-                    to = DataPacket.ID_BROADCAST,
+                    to = NodeAddress.ID_BROADCAST,
                     bytes = "Message $it!".encodeToByteArray().toByteString(),
                     dataType = PortNum.TEXT_MESSAGE_APP.value,
                 ),
@@ -91,11 +96,12 @@ abstract class CommonPacketDaoTest {
 
     @AfterTest
     fun closeDb() {
-        database.close()
+        if (::database.isInitialized) database.close()
     }
 
     @Test
     fun testGetMessagesFrom() = runTest {
+        createDb()
         val contactKey = testContactKeys.first()
         val messages = packetDao.getMessagesFrom(contactKey).first()
         assertEquals(SAMPLE_SIZE, messages.size)
@@ -105,18 +111,21 @@ abstract class CommonPacketDaoTest {
 
     @Test
     fun testGetMessageCount() = runTest {
+        createDb()
         val contactKey = testContactKeys.first()
         assertEquals(SAMPLE_SIZE, packetDao.getMessageCount(contactKey))
     }
 
     @Test
     fun testGetUnreadCount() = runTest {
+        createDb()
         val contactKey = testContactKeys.first()
         assertEquals(SAMPLE_SIZE, packetDao.getUnreadCount(contactKey))
     }
 
     @Test
     fun testClearUnreadCount() = runTest {
+        createDb()
         val contactKey = testContactKeys.first()
         packetDao.clearUnreadCount(contactKey, nowMillis + SAMPLE_SIZE)
         assertEquals(0, packetDao.getUnreadCount(contactKey))
@@ -124,12 +133,14 @@ abstract class CommonPacketDaoTest {
 
     @Test
     fun testClearAllUnreadCounts() = runTest {
+        createDb()
         packetDao.clearAllUnreadCounts()
         testContactKeys.forEach { assertEquals(0, packetDao.getUnreadCount(it)) }
     }
 
     @Test
     fun testUpdateMessageStatus() = runTest {
+        createDb()
         val contactKey = testContactKeys.first()
         val messages = packetDao.getMessagesFrom(contactKey).first()
         val packet = messages.first().packet.data
@@ -145,8 +156,187 @@ abstract class CommonPacketDaoTest {
         assertEquals(MessageStatus.DELIVERED, updatedMessages.first { it.packet.data.id == 999 }.packet.data.status)
     }
 
+    private suspend fun insertSentPacket(packetId: Int, status: MessageStatus): Long = packetDao.insertAndGetId(
+        Packet(
+            uuid = 0L,
+            myNodeNum = myNodeNum,
+            port_num = PortNum.TEXT_MESSAGE_APP.value,
+            contact_key = "sent",
+            received_time = nowMillis,
+            read = true,
+            packetId = packetId,
+            data =
+            DataPacket(
+                to = NodeAddress.ID_BROADCAST,
+                bytes = "Sent".encodeToByteArray().toByteString(),
+                dataType = PortNum.TEXT_MESSAGE_APP.value,
+                id = packetId,
+                status = status,
+            ),
+        ),
+    )
+
+    private suspend fun insertSentReaction(
+        packetId: Int,
+        status: MessageStatus,
+        ownerNodeNum: Int = myNodeNum,
+        replyId: Int = packetId,
+        emoji: String = "👍",
+    ) {
+        packetDao.insert(
+            ReactionEntity(
+                myNodeNum = ownerNodeNum,
+                replyId = replyId,
+                userId = "!local",
+                emoji = emoji,
+                timestamp = nowMillis,
+                packetId = packetId,
+                status = status,
+            ),
+        )
+    }
+
+    @Test
+    fun timeOutEnroutePacketFailsOnlyStillEnroutePackets() = runTest {
+        createDb()
+        val uuid = insertSentPacket(packetId = 8001, status = MessageStatus.ENROUTE)
+
+        assertTrue(packetDao.timeOutEnroutePacket(myNodeNum, uuid, TIMEOUT_ROUTING_ERROR))
+
+        val timedOut = packetDao.getPacketByPacketId(8001)
+        assertNotNull(timedOut)
+        assertEquals(MessageStatus.ERROR, timedOut.packet.data.status)
+        assertEquals(TIMEOUT_ROUTING_ERROR, timedOut.packet.routingError)
+    }
+
+    @Test
+    fun timeOutEnroutePacketLeavesAnAlreadyResolvedPacketAlone() = runTest {
+        createDb()
+        // The ACK that resolved this packet landed while a send-ack timeout was pending; the timeout must not
+        // overwrite the delivered status it sampled before the ACK arrived.
+        val uuid = insertSentPacket(packetId = 8002, status = MessageStatus.DELIVERED)
+
+        assertFalse(packetDao.timeOutEnroutePacket(myNodeNum, uuid, TIMEOUT_ROUTING_ERROR))
+
+        val untouched = packetDao.getPacketByPacketId(8002)
+        assertNotNull(untouched)
+        assertEquals(MessageStatus.DELIVERED, untouched.packet.data.status)
+    }
+
+    @Test
+    fun applyOutgoingQueueStatusLeavesAnAlreadyResolvedPacketAlone() = runTest {
+        createDb()
+        insertSentPacket(packetId = 8009, status = MessageStatus.DELIVERED)
+        val outgoing =
+            MeshPacket(
+                from = myNodeNum,
+                to = NodeAddress.NODENUM_BROADCAST,
+                id = 8009,
+                decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP),
+            )
+
+        val prior = assertNotNull(packetDao.applyOutgoingQueueStatus(outgoing, MessageStatus.ENROUTE))
+
+        assertEquals(MessageStatus.DELIVERED, prior.data.status)
+        assertEquals(MessageStatus.DELIVERED, packetDao.getPacketByPacketId(8009)?.packet?.data?.status)
+    }
+
+    @Test
+    fun applyOutgoingReactionQueueStatusIgnoresAmbiguousMeshIds() = runTest {
+        createDb()
+        insertSentReaction(packetId = 8011, replyId = 1, emoji = "👍", status = MessageStatus.QUEUED)
+        insertSentReaction(packetId = 8011, replyId = 2, emoji = "❤️", status = MessageStatus.QUEUED)
+
+        assertNull(packetDao.applyOutgoingReactionQueueStatus(8011, MessageStatus.ENROUTE))
+
+        val reactions = packetDao.findReactionsWithId(8011).associateBy { it.replyId }
+        assertEquals(MessageStatus.QUEUED, reactions.getValue(1).status)
+        assertEquals(MessageStatus.QUEUED, reactions.getValue(2).status)
+    }
+
+    @Test
+    fun queueStatusGuardRejectsStatusesOwnedByOtherTransitions() {
+        assertFalse(shouldApplyOutgoingQueueStatus(MessageStatus.DELIVERED, MessageStatus.QUEUED))
+        assertFalse(shouldApplyOutgoingQueueStatus(MessageStatus.SFPP_CONFIRMED, MessageStatus.SFPP_ROUTING))
+    }
+
+    @Test
+    fun getReactionsByStatusReturnsOnlyOwnedRowsWithThatStatus() = runTest {
+        createDb()
+        insertSentReaction(packetId = 8005, status = MessageStatus.ENROUTE)
+        insertSentReaction(packetId = 8006, status = MessageStatus.DELIVERED)
+        insertSentReaction(packetId = 8007, status = MessageStatus.ENROUTE, ownerNodeNum = myNodeNum + 1)
+
+        val enroute = packetDao.getReactionsByStatus(MessageStatus.ENROUTE)
+
+        assertEquals(listOf(8005), enroute.map { it.packetId })
+    }
+
+    @Test
+    fun timeOutEnrouteReactionFailsOnlyStillEnrouteReactions() = runTest {
+        createDb()
+        insertSentReaction(packetId = 8003, status = MessageStatus.ENROUTE)
+
+        assertTrue(packetDao.timeOutEnrouteReaction(myNodeNum, 8003, "!local", "👍", TIMEOUT_ROUTING_ERROR))
+
+        val timedOut = packetDao.getReactionByPacketId(8003)
+        assertNotNull(timedOut)
+        assertEquals(MessageStatus.ERROR, timedOut.status)
+        assertEquals(TIMEOUT_ROUTING_ERROR, timedOut.routingError)
+    }
+
+    @Test
+    fun timeOutEnrouteReactionLeavesAnAlreadyResolvedReactionAlone() = runTest {
+        createDb()
+        insertSentReaction(packetId = 8004, status = MessageStatus.DELIVERED)
+
+        assertFalse(packetDao.timeOutEnrouteReaction(myNodeNum, 8004, "!local", "👍", TIMEOUT_ROUTING_ERROR))
+
+        val untouched = packetDao.getReactionByPacketId(8004)
+        assertNotNull(untouched)
+        assertEquals(MessageStatus.DELIVERED, untouched.status)
+        assertEquals(0, untouched.routingError)
+    }
+
+    @Test
+    fun applyOutgoingReactionQueueStatusLeavesAnAlreadyResolvedReactionAlone() = runTest {
+        createDb()
+        insertSentReaction(packetId = 8010, status = MessageStatus.DELIVERED)
+
+        val prior = assertNotNull(packetDao.applyOutgoingReactionQueueStatus(8010, MessageStatus.ENROUTE))
+
+        assertEquals(MessageStatus.DELIVERED, prior.status)
+        assertEquals(MessageStatus.DELIVERED, packetDao.getReactionByPacketId(8010)?.status)
+    }
+
+    @Test
+    fun timeOutEnrouteReactionTargetsOnlyOnePersistedRowWhenMeshIdsCollide() = runTest {
+        createDb()
+        insertSentReaction(packetId = 8008, replyId = 1, emoji = "👍", status = MessageStatus.ENROUTE)
+        insertSentReaction(packetId = 8008, replyId = 2, emoji = "❤️", status = MessageStatus.ENROUTE)
+
+        assertTrue(packetDao.timeOutEnrouteReaction(myNodeNum, 1, "!local", "👍", TIMEOUT_ROUTING_ERROR))
+
+        val reactions = packetDao.findReactionsWithId(8008).associateBy { it.replyId }
+        assertEquals(MessageStatus.ERROR, reactions.getValue(1).status)
+        assertEquals(MessageStatus.ENROUTE, reactions.getValue(2).status)
+    }
+
+    @Test
+    fun timeOutEnroutePacketTargetsOnlyOnePersistedRowWhenMeshIdsCollide() = runTest {
+        createDb()
+        val firstUuid = insertSentPacket(packetId = 8003, status = MessageStatus.ENROUTE)
+        val secondUuid = insertSentPacket(packetId = 8003, status = MessageStatus.ENROUTE)
+
+        assertTrue(packetDao.timeOutEnroutePacket(myNodeNum, firstUuid, TIMEOUT_ROUTING_ERROR))
+
+        assertEquals(MessageStatus.ERROR, packetDao.getPacketByPersistedId(myNodeNum, firstUuid)?.data?.status)
+        assertEquals(MessageStatus.ENROUTE, packetDao.getPacketByPersistedId(myNodeNum, secondUuid)?.data?.status)
+    }
+
     @Test
     fun testGetQueuedPackets() = runTest {
+        createDb()
         val queuedPacket =
             Packet(
                 uuid = 0L,
@@ -157,14 +347,14 @@ abstract class CommonPacketDaoTest {
                 read = true,
                 data =
                 DataPacket(
-                    to = DataPacket.ID_BROADCAST,
+                    to = NodeAddress.ID_BROADCAST,
                     bytes = "Queued".encodeToByteArray().toByteString(),
                     dataType = PortNum.TEXT_MESSAGE_APP.value,
                     status = MessageStatus.QUEUED,
                 ),
             )
         packetDao.insert(queuedPacket)
-        val queued = packetDao.getQueuedPackets()
+        val queued = packetDao.getAllDataPackets().filter { it.status == MessageStatus.QUEUED }
         assertNotNull(queued)
         assertEquals(1, queued.size)
         assertEquals("Queued", queued.first().text)
@@ -172,6 +362,7 @@ abstract class CommonPacketDaoTest {
 
     @Test
     fun testDeleteMessages() = runTest {
+        createDb()
         val contactKey = testContactKeys.first()
         packetDao.deleteContacts(listOf(contactKey))
         assertEquals(0, packetDao.getMessageCount(contactKey))
@@ -179,6 +370,7 @@ abstract class CommonPacketDaoTest {
 
     @Test
     fun testGetContactKeys() = runTest {
+        createDb()
         val contacts = packetDao.getContactKeys().first()
         assertEquals(testContactKeys.size, contacts.size)
         testContactKeys.forEach { assertTrue(contacts.containsKey(it)) }
@@ -186,17 +378,18 @@ abstract class CommonPacketDaoTest {
 
     @Test
     fun testGetWaypoints() = runTest {
+        createDb()
         val waypointPacket =
             Packet(
                 uuid = 0L,
                 myNodeNum = myNodeNum,
                 port_num = PortNum.WAYPOINT_APP.value,
-                contact_key = "0${DataPacket.ID_BROADCAST}",
+                contact_key = "0${NodeAddress.ID_BROADCAST}",
                 received_time = nowMillis,
                 read = true,
                 data =
                 DataPacket(
-                    to = DataPacket.ID_BROADCAST,
+                    to = NodeAddress.ID_BROADCAST,
                     bytes = "Waypoint".encodeToByteArray().toByteString(),
                     dataType = PortNum.WAYPOINT_APP.value,
                 ),
@@ -209,6 +402,7 @@ abstract class CommonPacketDaoTest {
 
     @Test
     fun testUpsertReaction() = runTest {
+        createDb()
         val reaction =
             ReactionEntity(myNodeNum = myNodeNum, replyId = 123, userId = "!test", emoji = "👍", timestamp = nowMillis)
         packetDao.insert(reaction)
@@ -216,6 +410,7 @@ abstract class CommonPacketDaoTest {
 
     @Test
     fun testGetMessagesFromWithIncludeFiltered() = runTest {
+        createDb()
         val contactKey = "filter-test"
         val normalMessages = listOf("Msg 1", "Msg 2")
         val filteredMessages = listOf("Filtered 1")
@@ -231,7 +426,7 @@ abstract class CommonPacketDaoTest {
                     read = false,
                     data =
                     DataPacket(
-                        to = DataPacket.ID_BROADCAST,
+                        to = NodeAddress.ID_BROADCAST,
                         bytes = text.encodeToByteArray().toByteString(),
                         dataType = PortNum.TEXT_MESSAGE_APP.value,
                     ),
@@ -251,7 +446,7 @@ abstract class CommonPacketDaoTest {
                     read = true,
                     data =
                     DataPacket(
-                        to = DataPacket.ID_BROADCAST,
+                        to = NodeAddress.ID_BROADCAST,
                         bytes = text.encodeToByteArray().toByteString(),
                         dataType = PortNum.TEXT_MESSAGE_APP.value,
                     ),
@@ -271,7 +466,46 @@ abstract class CommonPacketDaoTest {
         assertFalse(excludingFiltered.any { it.packet.filtered })
     }
 
+    @Test
+    fun testGetPacketsByPacketIdsChunked() = runTest {
+        createDb()
+        // Regression test for SQLITE_MAX_VARIABLE_NUMBER (999) limit. Inserting >999 packets and
+        // looking them up by id must not throw; callers are expected to chunk, and each chunk
+        // must return the correct rows.
+        val totalPackets = 2000
+        val chunkSize = NodeInfoDao.MAX_BIND_PARAMS
+        val contactKey = "chunk-test"
+        val baseTime = nowMillis
+        val packetIds = (1..totalPackets).toList()
+
+        packetIds.forEach { id ->
+            packetDao.insert(
+                Packet(
+                    uuid = 0L,
+                    myNodeNum = myNodeNum,
+                    port_num = PortNum.TEXT_MESSAGE_APP.value,
+                    contact_key = contactKey,
+                    received_time = baseTime + id,
+                    read = false,
+                    data =
+                    DataPacket(
+                        to = NodeAddress.ID_BROADCAST,
+                        bytes = "Chunk $id".encodeToByteArray().toByteString(),
+                        dataType = PortNum.TEXT_MESSAGE_APP.value,
+                    ),
+                    packetId = id,
+                ),
+            )
+        }
+
+        val fetched = packetIds.chunked(chunkSize).flatMap { packetDao.getPacketsByPacketIds(it) }
+        assertEquals(totalPackets, fetched.size)
+        assertEquals(packetIds.toSet(), fetched.map { it.packet.packetId }.toSet())
+    }
+
     companion object {
         private const val SAMPLE_SIZE = 10
+
+        private val TIMEOUT_ROUTING_ERROR = Routing.Error.TIMEOUT.value
     }
 }

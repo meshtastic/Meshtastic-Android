@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,13 +23,13 @@ import org.meshtastic.core.ui.theme.AppTheme
 
 @PreviewLightDark
 @Composable
-private fun QuickChatItemPreview() {
+fun QuickChatItemPreview() {
     AppTheme { QuickChatItem(action = QuickChatAction(name = "TST", message = "Test", position = 0)) }
 }
 
 @PreviewLightDark
 @Composable
-private fun EditQuickChatDialogPreview() {
+fun EditQuickChatDialogPreview() {
     AppTheme {
         EditQuickChatDialog(
             action = QuickChatAction(name = "TST", message = "Test", position = 0),

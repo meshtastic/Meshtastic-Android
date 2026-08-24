@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,16 +20,10 @@ plugins {
 }
 
 kotlin {
-    @Suppress("UnstableApiUsage")
-    android {
-        namespace = "org.meshtastic.feature.map"
-        androidResources.enable = false
-        withHostTest { isIncludeAndroidResources = true }
-    }
+    android { withHostTest { isIncludeAndroidResources = true } }
 
     sourceSets {
         commonMain.dependencies {
-            implementation(libs.jetbrains.navigation3.ui)
             implementation(libs.kotlinx.collections.immutable)
             implementation(projects.core.data)
             implementation(projects.core.database)
@@ -37,7 +31,7 @@ kotlin {
             implementation(projects.core.model)
             implementation(projects.core.navigation)
             implementation(projects.core.prefs)
-            implementation(projects.core.proto)
+            implementation(libs.meshtastic.protobufs)
             implementation(projects.core.service)
             implementation(projects.core.resources)
             implementation(projects.core.ui)

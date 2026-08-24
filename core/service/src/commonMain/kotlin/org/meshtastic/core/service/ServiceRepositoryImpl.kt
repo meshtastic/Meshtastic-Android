@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,16 +18,16 @@ package org.meshtastic.core.service
 
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.asFlow
 import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.model.service.ServiceAction
+import org.meshtastic.core.model.service.LockdownState
+import org.meshtastic.core.model.service.LockdownTokenInfo
 import org.meshtastic.core.model.service.TracerouteResponse
+import org.meshtastic.core.repository.ConnectionStateHolder
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.MeshPacket
@@ -37,19 +37,19 @@ import org.meshtastic.proto.MeshPacket
  *
  * Manages reactive state for connection status, error messages, mesh packets, and service actions using only
  * KMP-compatible primitives (StateFlow, SharedFlow, Channel, Kermit Logger). This implementation can be used directly
- * on any KMP target — Android extends it with AIDL binding via [AndroidServiceRepository].
+ * on any KMP target.
  */
 @Suppress("TooManyFunctions")
 open class ServiceRepositoryImpl : ServiceRepository {
 
     // Canonical app-level connection state — written exclusively by MeshConnectionManager.
-    private val _connectionState: MutableStateFlow<ConnectionState> = MutableStateFlow(ConnectionState.Disconnected)
-    override val connectionState: StateFlow<ConnectionState>
-        get() = _connectionState
+    private val connectionStateHolder = ConnectionStateHolder()
+    override val connectionLifecycle = connectionStateHolder.connectionLifecycle
+    override val connectionState = connectionStateHolder.connectionState
+    override val connectionEpochs = connectionStateHolder.connectionEpochs
 
-    override fun setConnectionState(connectionState: ConnectionState) {
-        _connectionState.value = connectionState
-    }
+    override fun setConnectionState(connectionState: ConnectionState) =
+        connectionStateHolder.setConnectionState(connectionState)
 
     private val _clientNotification = MutableStateFlow<ClientNotification?>(null)
     override val clientNotification: StateFlow<ClientNotification?>
@@ -88,8 +88,8 @@ open class ServiceRepositoryImpl : ServiceRepository {
     }
 
     private val _meshPacketFlow = MutableSharedFlow<MeshPacket>(extraBufferCapacity = 64)
-    override val meshPacketFlow: SharedFlow<MeshPacket>
-        get() = _meshPacketFlow
+    override val meshPacketFlow: Flow<MeshPacket>
+        get() = _meshPacketFlow.asFlow()
 
     override suspend fun emitMeshPacket(packet: MeshPacket) {
         _meshPacketFlow.emit(packet)
@@ -119,10 +119,31 @@ open class ServiceRepositoryImpl : ServiceRepository {
         setNeighborInfoResponse(null)
     }
 
-    private val _serviceAction = Channel<ServiceAction>()
-    override val serviceAction: Flow<ServiceAction> = _serviceAction.receiveAsFlow()
+    private val _lockdownState = MutableStateFlow<LockdownState>(LockdownState.None)
+    override val lockdownState: StateFlow<LockdownState>
+        get() = _lockdownState
 
-    override suspend fun onServiceAction(action: ServiceAction) {
-        _serviceAction.send(action)
+    override fun setLockdownState(state: LockdownState) {
+        _lockdownState.value = state
+    }
+
+    override fun clearLockdownState() {
+        _lockdownState.value = LockdownState.None
+    }
+
+    private val _lockdownTokenInfo = MutableStateFlow<LockdownTokenInfo?>(null)
+    override val lockdownTokenInfo: StateFlow<LockdownTokenInfo?>
+        get() = _lockdownTokenInfo
+
+    override fun setLockdownTokenInfo(info: LockdownTokenInfo?) {
+        _lockdownTokenInfo.value = info
+    }
+
+    private val _sessionAuthorized = MutableStateFlow(false)
+    override val sessionAuthorized: StateFlow<Boolean>
+        get() = _sessionAuthorized
+
+    override fun setSessionAuthorized(authorized: Boolean) {
+        _sessionAuthorized.value = authorized
     }
 }

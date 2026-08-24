@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,64 +20,88 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import androidx.core.app.RemoteInput
+import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.model.DataPacket
-import org.meshtastic.core.model.RadioController
-import org.meshtastic.core.repository.MeshServiceNotifications
+import org.meshtastic.core.repository.MeshNotificationManager
+import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.usecase.SendMessageUseCase
 
 /**
  * A [BroadcastReceiver] that handles inline replies from notifications.
  *
  * This receiver is triggered when a user replies to a message directly from a notification. It extracts the reply text
- * and the contact key from the intent, sends the message using the [ServiceRepository], and then cancels the original
- * notification.
+ * and the contact key from the intent, sends the message through [SendMessageUseCase] — so notification replies get the
+ * same pipeline as in-app sends (history save, durable queue, transforms) — and then refreshes the conversation
+ * notification so the sent reply appears in place (falling back to dismissal if the send or refresh fails).
  */
 class ReplyReceiver :
     BroadcastReceiver(),
     KoinComponent {
-    private val radioController: RadioController by inject()
+    private val sendMessageUseCase: SendMessageUseCase by inject()
 
-    private val meshServiceNotifications: MeshServiceNotifications by inject()
+    private val meshServiceNotifications: MeshNotificationManager by inject()
+
+    private val packetRepository: PacketRepository by inject()
 
     private val dispatchers: CoroutineDispatchers by inject()
 
     private val scope by lazy { CoroutineScope(dispatchers.io + SupervisorJob()) }
 
     companion object {
+        private const val TAG = "ReplyReceiver"
         const val REPLY_ACTION = "org.meshtastic.app.REPLY_ACTION"
         const val CONTACT_KEY = "contactKey"
         const val KEY_TEXT_REPLY = "key_text_reply"
     }
 
+    @Suppress("TooGenericExceptionCaught") // a reply must never crash the receiver, whatever the radio throws
     override fun onReceive(context: Context, intent: Intent) {
         val remoteInput = RemoteInput.getResultsFromIntent(intent)
+        if (remoteInput == null) {
+            Logger.w(tag = TAG) { "reply received but RemoteInput was null" }
+            return
+        }
 
-        if (remoteInput != null) {
-            val contactKey = intent.getStringExtra(CONTACT_KEY) ?: ""
-            val message = remoteInput.getCharSequence(KEY_TEXT_REPLY)?.toString() ?: ""
+        val contactKey = intent.getStringExtra(CONTACT_KEY).orEmpty()
+        val message = remoteInput.getCharSequence(KEY_TEXT_REPLY)?.toString().orEmpty()
+        Logger.i(tag = TAG) { "reply for contactKey=$contactKey len=${message.length}" }
 
-            val pendingResult = goAsync()
-            scope.launch {
-                try {
-                    sendMessage(message, contactKey)
-                    meshServiceNotifications.cancelMessageNotification(contactKey)
-                } finally {
-                    pendingResult.finish()
-                }
+        val pendingResult: PendingResult? = goAsync()
+        scope.launch {
+            try {
+                // Send first so the reply isn't lost; the notification update can't break the send.
+                sendMessageUseCase(message, contactKey)
+                // Replying implies the conversation has been read — mark it so, like the mark-as-read action.
+                // Android Auto keys notification dismissal off read state, not just cancel().
+                packetRepository.clearUnreadCount(contactKey, nowMillis)
+                Logger.i(tag = TAG) { "reply sent + marked read" }
+                // Re-post the conversation silently with the sent reply appended — the MessagingStyle confirmation
+                // flow. This resolves the RemoteInput spinner with visible feedback instead of the notification
+                // vanishing. Fall back to dismissal so the spinner never hangs if the refresh itself fails.
+                safeCatching { meshServiceNotifications.refreshConversationAfterReply(contactKey) }
+                    .onFailure {
+                        Logger.e(tag = TAG, throwable = it) { "refresh after reply failed" }
+                        safeCatching { meshServiceNotifications.cancelMessageNotification(contactKey) }
+                    }
+            } catch (e: CancellationException) {
+                // Preserve structured concurrency — never treat cancellation as a failed send.
+                throw e
+            } catch (e: Exception) {
+                Logger.e(tag = TAG, throwable = e) { "reply send failed" }
+                // The send failed; dismiss so the RemoteInput spinner resolves rather than hanging forever.
+                safeCatching { meshServiceNotifications.cancelMessageNotification(contactKey) }
+                    .onFailure { Logger.e(tag = TAG, throwable = it) { "cancel notification failed" } }
+            } finally {
+                pendingResult?.finish()
             }
         }
-    }
-
-    private suspend fun sendMessage(str: String, contactKey: String) {
-        // contactKey: unique contact key filter (channel)+(nodeId)
-        val channel = contactKey.getOrNull(0)?.digitToIntOrNull()
-        val dest = if (channel != null) contactKey.substring(1) else contactKey
-        val p = DataPacket(dest, channel ?: 0, str)
-        radioController.sendMessage(p)
     }
 }

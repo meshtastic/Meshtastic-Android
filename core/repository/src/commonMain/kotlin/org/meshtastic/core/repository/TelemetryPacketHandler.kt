@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@ interface TelemetryPacketHandler {
      * @param packet The received mesh packet.
      * @param dataPacket The decoded data packet.
      * @param myNodeNum The local node number.
+     * @param session The immutable transport session that admitted [packet].
      */
-    fun handleTelemetry(packet: MeshPacket, dataPacket: DataPacket, myNodeNum: Int)
+    fun handleTelemetry(packet: MeshPacket, dataPacket: DataPacket, myNodeNum: Int, session: RadioSessionContext)
 }

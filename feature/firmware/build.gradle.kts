@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,22 +17,17 @@
 
 plugins {
     alias(libs.plugins.meshtastic.kmp.feature)
+    // Shares the bounded zip extraction (ZipExtraction.kt) between the Android and desktop JVM file handlers, which
+    // previously carried two independent copies of the same logic.
+    alias(libs.plugins.meshtastic.kmp.jvm.android)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
 }
 
 kotlin {
-    jvm()
-
-    @Suppress("UnstableApiUsage")
-    android {
-        namespace = "org.meshtastic.feature.firmware"
-        androidResources.enable = false
-        withHostTest { isIncludeAndroidResources = true }
-    }
+    android { withHostTest { isIncludeAndroidResources = true } }
 
     sourceSets {
         commonMain.dependencies {
-            implementation(libs.jetbrains.navigation3.ui)
             implementation(projects.core.ble)
             implementation(projects.core.common)
             implementation(projects.core.data)
@@ -43,7 +38,8 @@ kotlin {
             implementation(projects.core.navigation)
             implementation(projects.core.network)
             implementation(projects.core.prefs)
-            implementation(projects.core.proto)
+            implementation(projects.core.repository)
+            implementation(libs.meshtastic.protobufs)
             implementation(projects.core.service)
             implementation(projects.core.resources)
             implementation(projects.core.ui)
@@ -56,8 +52,16 @@ kotlin {
             implementation(libs.markdown.renderer.m3)
         }
 
-        androidMain.dependencies { implementation(libs.markdown.renderer.android) }
+        androidMain.dependencies {
+            implementation(libs.markdown.renderer.android)
+            // AndroidFirmwareUsbManager needs UsbSerialDriver to poke DTR on the erase image's CDC port.
+            // :core:network exposes usb-serial as `implementation`, so it is not on our classpath transitively —
+            // feature/connections declares it the same way for the same reason.
+            implementation(libs.usb.serial.android)
+        }
 
-        commonTest.dependencies { implementation(projects.core.testing) }
+        // performUsbUpdate resolves compose-resources strings, whose desktop implementation needs
+        // the skiko-awt runtime to read the system theme.
+        jvmTest.dependencies { implementation(compose.desktop.currentOs) }
     }
 }

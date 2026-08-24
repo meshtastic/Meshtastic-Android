@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.toList
 import org.koin.core.annotation.KoinViewModel
-import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.MeshLogRepository
@@ -43,7 +42,6 @@ class NodeMapViewModel(
     savedStateHandle: SavedStateHandle,
     nodeRepository: NodeRepository,
     meshLogRepository: MeshLogRepository,
-    buildConfigProvider: BuildConfigProvider,
     private val mapPrefs: MapPrefs,
 ) : ViewModel() {
     private val destNumFromRoute = savedStateHandle.get<Int>("destNum")
@@ -61,8 +59,6 @@ class NodeMapViewModel(
             .flatMapLatest { destNum -> nodeRepository.nodeDBbyNum.mapLatest { it[destNum] } }
             .distinctUntilChanged()
             .stateInWhileSubscribed(initialValue = null)
-
-    val applicationId = buildConfigProvider.applicationId
 
     private val ourNodeNumFlow = nodeRepository.myNodeInfo.map { it?.myNodeNum }.distinctUntilChanged()
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,11 +26,9 @@ import org.meshtastic.core.repository.RadioTransport
  * the service layer.
  */
 class NopRadioTransport(val address: String) : RadioTransport {
-    override fun handleSendToRadio(p: ByteArray) {
-        // No-op
-    }
+    override fun handleSendToRadio(p: ByteArray): Boolean = false
 
-    override fun close() {
+    override suspend fun close() {
         // No-op
     }
 }

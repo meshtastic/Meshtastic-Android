@@ -5,18 +5,18 @@ Meshtastic プロジェクトの詳細については、ぜひ公式ウェブサ
 
 <b>コミュニティとサポート</b>
 
-当プロジェクトは、現時点でベータ版です。 皆様からのフィードバックをお待ちしております！ If you have questions, feedback, or encounter any problems, please join our friendly and active community:
+当プロジェクトは、現時点でベータ版です。 皆様からのフィードバックをお待ちしております！ ご質問・フィードバック・問題がある場合は、フレンドリーで活発なコミュニティにぜひご参加ください：
 
-• <b>Discussion Forum:</b> <a href="https://github.com/orgs/meshtastic/discussions">https://github.com/orgs/meshtastic/discussions</a>
-• <b>Discord:</b> <a href="https://discord.gg/meshtastic">https://discord.gg/meshtastic</a>
-• <b>Report an Issue:</b> <a href="https://github.com/meshtastic/Meshtastic-Android/issues">https://github.com/meshtastic/Meshtastic-Android/issues</a>
+• <b>ディスカッションフォーラム：</b> <a href="https://github.com/orgs/meshtastic/discussions">https://github.com/orgs/meshtastic/discussions</a>
+• <b>Discord：</b> <a href="https://discord.gg/meshtastic">https://discord.gg/meshtastic</a>
+• <b>問題を報告：</b> <a href="https://github.com/meshtastic/Meshtastic-Android/issues">https://github.com/meshtastic/Meshtastic-Android/issues</a>
 
-<b>Documentation</b>
+<b>ドキュメント</b>
 
 このアプリと Meshtastic の機能と性能について詳しく知りたい場合は、ぜひ公式ドキュメントをご覧ください：
-<a href="https://meshtastic.org/docs/">View Documentation</a>
+<a href="https://meshtastic.org/docs/">ドキュメントを見る</a>
 
 <b>翻訳</b>
 
-You can help translate the app into your native language using Crowdin:
+Crowdin を使って、アプリの母国語への翻訳に協力できます：
 <a href="https://crowdin.meshtastic.org/android">https://crowdin.meshtastic.org/android</a>

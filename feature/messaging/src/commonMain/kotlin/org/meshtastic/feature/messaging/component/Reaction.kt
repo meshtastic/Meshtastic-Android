@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -34,11 +33,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.minimumInteractiveComponentSize
+import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -51,25 +55,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
-import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.Reaction
-import org.meshtastic.core.model.getStringResFrom
+import org.meshtastic.core.model.getMessageStatusDetailRes
+import org.meshtastic.core.model.getMessageStatusStringRes
+import org.meshtastic.core.model.isMessageStatusRetryable
 import org.meshtastic.core.model.util.getShortDateTime
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.delivery_confirmed
-import org.meshtastic.core.resources.error
-import org.meshtastic.core.resources.message_delivery_status
-import org.meshtastic.core.resources.message_status_delivered
-import org.meshtastic.core.resources.message_status_enroute
-import org.meshtastic.core.resources.message_status_queued
-import org.meshtastic.core.resources.message_status_unknown
 import org.meshtastic.core.resources.react
 import org.meshtastic.core.resources.you
-import org.meshtastic.core.ui.component.BottomSheetDialog
 import org.meshtastic.core.ui.component.Rssi
 import org.meshtastic.core.ui.component.Snr
 import org.meshtastic.core.ui.emoji.EmojiPickerDialog
@@ -93,7 +89,10 @@ internal fun ReactionItem(
     Surface(
         modifier =
         modifier
+            // Clickable wraps the M3 touch-target expansion, so the hit area meets the 44dp
+            // minimum while the drawn pill stays compact.
             .combinedClickable(onClick = onClick, onLongClick = onLongClick)
+            .minimumInteractiveComponentSize()
             .then(if (isSending) Modifier.graphicsLayer(alpha = 0.5f) else Modifier),
         color =
         when {
@@ -117,7 +116,7 @@ internal fun ReactionItem(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            Text(text = emoji, fontSize = 14.sp)
+            Text(text = emoji, style = MaterialTheme.typography.labelMedium)
             if (emojiCount > 1) {
                 Text(
                     text = emojiCount.toString(),
@@ -143,10 +142,10 @@ internal fun ReactionRow(
 
     AnimatedVisibility(emojiGroups.isNotEmpty(), modifier = modifier) {
         LazyRow(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            items(emojiGroups.entries.toList()) { entry ->
+            items(emojiGroups.entries.toList(), key = { it.key }) { entry ->
                 val emoji = entry.key
                 val reactions = entry.value
-                val localReaction = reactions.find { it.user.id == DataPacket.ID_LOCAL || it.user.id == myId }
+                val localReaction = reactions.find { it.user.id == NodeAddress.ID_LOCAL || it.user.id == myId }
                 ReactionItem(
                     emoji = emoji,
                     emojiCount = reactions.size,
@@ -188,6 +187,7 @@ internal fun AddReactionButton(modifier: Modifier = Modifier, onSendReaction: (S
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Suppress("LongMethod", "CyclomaticComplexity", "CyclomaticComplexMethod")
 @Composable
 internal fun ReactionDialog(
@@ -195,52 +195,42 @@ internal fun ReactionDialog(
     onDismiss: () -> Unit = {},
     myId: String? = null,
     onResend: (Reaction) -> Unit = {},
-    nodes: List<Node> = emptyList(),
-    ourNode: Node? = null,
-) = BottomSheetDialog(onDismiss = onDismiss, modifier = Modifier.fillMaxHeight(fraction = .3f)) {
+) = ModalBottomSheet(
+    onDismissRequest = onDismiss,
+    sheetState =
+    rememberBottomSheetState(
+        initialValue = SheetValue.Hidden,
+        enabledValues = setOf(SheetValue.Hidden, SheetValue.Expanded),
+    ),
+) {
     val groupedEmojis = reactions.groupBy { it.emoji }
     var selectedEmoji by remember { mutableStateOf<String?>(null) }
     val filteredReactions = selectedEmoji?.let { groupedEmojis[it] ?: emptyList() } ?: reactions
 
     var showStatusDialog by remember { mutableStateOf<Reaction?>(null) }
     showStatusDialog?.let { reaction ->
-        val title = if (reaction.routingError > 0) Res.string.error else Res.string.message_delivery_status
-        val text =
-            when (reaction.status) {
-                MessageStatus.RECEIVED -> Res.string.delivery_confirmed
-                MessageStatus.QUEUED -> Res.string.message_status_queued
-                MessageStatus.ENROUTE -> Res.string.message_status_enroute
-                MessageStatus.DELIVERED -> Res.string.message_status_delivered
-                MessageStatus.SFPP_ROUTING -> Res.string.message_status_enroute
-                MessageStatus.SFPP_CONFIRMED -> Res.string.delivery_confirmed
-                MessageStatus.ERROR -> getStringResFrom(reaction.routingError)
-                MessageStatus.UNKNOWN -> Res.string.message_status_unknown
-            }
-
-        val relayNodeName =
-            reaction.relayNode?.let { relayNodeId ->
-                Node.getRelayNode(relayNodeId, nodes, ourNode?.num)?.user?.long_name
-            }
+        val isDirectMessage = NodeAddress.fromString(reaction.to) !is NodeAddress.Broadcast
+        val (title, text) = getMessageStatusStringRes(reaction.status, reaction.routingError, isDirectMessage)
 
         DeliveryInfo(
             title = title,
             text = text,
-            resendOption = reaction.status == MessageStatus.ERROR,
+            detail = getMessageStatusDetailRes(reaction.status, reaction.routingError),
+            resendOption = isMessageStatusRetryable(reaction.status, reaction.routingError, isDirectMessage),
             onConfirm = {
                 onResend(reaction)
                 showStatusDialog = null
             },
             onDismiss = { showStatusDialog = null },
-            relayNodeName = relayNodeName,
             relays = reaction.relays,
         )
     }
 
     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-        items(groupedEmojis.entries.toList()) { entry ->
+        items(groupedEmojis.entries.toList(), key = { it.key }) { entry ->
             val emoji = entry.key
             val reactions = entry.value
-            val localReaction = reactions.find { it.user.id == DataPacket.ID_LOCAL || it.user.id == myId }
+            val localReaction = reactions.find { it.user.id == NodeAddress.ID_LOCAL || it.user.id == myId }
             val isSending =
                 localReaction?.status == MessageStatus.QUEUED || localReaction?.status == MessageStatus.ENROUTE
             Text(
@@ -265,14 +255,14 @@ internal fun ReactionDialog(
     HorizontalDivider(Modifier.padding(vertical = 8.dp))
 
     LazyColumn(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        items(filteredReactions) { reaction ->
+        items(filteredReactions, key = { reaction -> "${reaction.user.id}:${reaction.emoji}" }) { reaction ->
             Column(modifier = Modifier.padding(horizontal = 8.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    val isLocal = reaction.user.id == myId || reaction.user.id == DataPacket.ID_LOCAL
+                    val isLocal = reaction.user.id == myId || reaction.user.id == NodeAddress.ID_LOCAL
                     val displayName =
                         if (isLocal) {
                             "${reaction.user.long_name} (${stringResource(Res.string.you)})"
@@ -296,7 +286,9 @@ internal fun ReactionDialog(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    val isLocalOrPreDbUpdateReaction = (reaction.rssi == 0)
+                    // Local reactions now carry a null rssi; pre-schema-51 rows stored 0, so a legacy
+                    // 0 dBm reading stays indistinguishable from "no reading" and remains hidden.
+                    val isLocalOrPreDbUpdateReaction = reaction.rssi == null || reaction.rssi == 0
                     if (!isLocalOrPreDbUpdateReaction) {
                         if (reaction.hopsAway == 0) {
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

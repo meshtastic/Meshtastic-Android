@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,32 +28,29 @@ internal fun Project.configureAndroidCompose(commonExtension: CommonExtension) {
     // Third-party libraries (maps-compose, datadog, etc.) carry a transitive
     // compose-bom whose constraints conflict with CMP-published AndroidX artifacts.
     // Exclude it globally so CMP's own dependency graph wins.
-    configurations.configureEach {
-        exclude(mapOf("group" to "androidx.compose", "module" to "compose-bom"))
-    }
+    configurations.configureEach { exclude(mapOf("group" to "androidx.compose", "module" to "compose-bom")) }
 
-    // CMP publishes these core AndroidX groups at the CMP version tag.
-    // Material, Material3, and Adaptive follow separate AndroidX version numbers
-    // and must NOT be included here (see CMP release notes for the mapping table).
-    val cmpVersion = libs.version("compose-multiplatform")
-    val cmpAlignedGroups = setOf(
-        "androidx.compose.animation",
-        "androidx.compose.foundation",
-        "androidx.compose.runtime",
-        "androidx.compose.ui",
-    )
-
-    // The BOM exclusion above strips versions from transitive material deps
-    // (e.g. maps-compose-widgets, datadog). Pin the material group to the
-    // AndroidX version that matches this CMP release.
-    val materialVersion = libs.version("androidx-compose-material")
-
+    // CMP publishes these core AndroidX groups at an AndroidX version tag that
+    // tracks (but does not equal) the CMP version. The exact mapping lives in
+    // the CMP release notes; we mirror it via the `androidx-compose-bom-aligned`
+    // version ref in libs.versions.toml. Material, Material3, and Adaptive follow
+    // separate AndroidX version numbers and must NOT be included here.
+    val androidxComposeVersion = libs.version("androidx-compose-bom-aligned")
+    val cmpAlignedGroups =
+        setOf(
+            "androidx.compose.animation",
+            "androidx.compose.foundation",
+            "androidx.compose.runtime",
+            "androidx.compose.ui",
+        )
+    // `androidx.compose.material:material` is ALSO requested version-less by maps-compose-widgets,
+    // but it is pinned via an explicit versioned dependency in :androidApp rather than forced here —
+    // a force does not cross the project boundary, so consumers of the app's graph (e.g.
+    // :baselineprofile) would otherwise re-orphan it. Do not re-add a force for it here.
     configurations.configureEach {
         resolutionStrategy.eachDependency {
             if (requested.group in cmpAlignedGroups) {
-                useVersion(cmpVersion)
-            } else if (requested.group == "androidx.compose.material") {
-                useVersion(materialVersion)
+                useVersion(androidxComposeVersion)
             }
         }
     }

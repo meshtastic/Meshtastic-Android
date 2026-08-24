@@ -20,7 +20,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import org.koin.core.annotation.Single
 
-@Single
+@Single(binds = [NetworkMonitor::class])
 class JvmNetworkMonitor : NetworkMonitor {
     override val networkAvailable: Flow<Boolean> = flowOf(true)
 }

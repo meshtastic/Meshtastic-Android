@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,6 @@ import org.meshtastic.proto.FromRadio
 
 /** Interface for dispatching non-packet [FromRadio] variants to their respective handlers. */
 interface FromRadioPacketHandler {
-    /** Processes a [FromRadio] message. */
-    fun handleFromRadio(proto: FromRadio)
+    /** Processes a [FromRadio] message admitted by [session]. */
+    fun handleFromRadio(proto: FromRadio, session: RadioSessionContext)
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 @file:Suppress("TooManyFunctions")
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
 
 package org.meshtastic.feature.messaging.component
 
@@ -27,6 +28,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
@@ -35,18 +37,23 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuGroup
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,6 +61,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.isSensitiveData
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
@@ -61,20 +71,24 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.entity.QuickChatAction
-import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.alert_bell_text
+import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.cancel_reply
+import org.meshtastic.core.resources.clear
 import org.meshtastic.core.resources.clear_selection
 import org.meshtastic.core.resources.copy
 import org.meshtastic.core.resources.delete
 import org.meshtastic.core.resources.delete_messages
 import org.meshtastic.core.resources.delete_messages_title
+import org.meshtastic.core.resources.download
 import org.meshtastic.core.resources.filter_disable_for_contact
 import org.meshtastic.core.resources.filter_enable_for_contact
 import org.meshtastic.core.resources.filter_hide_count
+import org.meshtastic.core.resources.filter_settings
 import org.meshtastic.core.resources.filter_show_count
 import org.meshtastic.core.resources.navigate_back
 import org.meshtastic.core.resources.new_messages_below
@@ -85,8 +99,13 @@ import org.meshtastic.core.resources.quick_chat_show
 import org.meshtastic.core.resources.reply
 import org.meshtastic.core.resources.replying_to
 import org.meshtastic.core.resources.scroll_to_bottom
+import org.meshtastic.core.resources.search_messages
 import org.meshtastic.core.resources.select_all
+import org.meshtastic.core.resources.translation_download_message
+import org.meshtastic.core.resources.translation_download_title
+import org.meshtastic.core.resources.translation_downloading
 import org.meshtastic.core.resources.unknown
+import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.component.MeshtasticTextDialog
 import org.meshtastic.core.ui.component.NodeKeyStatusIcon
 import org.meshtastic.core.ui.component.SecurityIcon
@@ -98,15 +117,20 @@ import org.meshtastic.core.ui.icon.Copy
 import org.meshtastic.core.ui.icon.Delete
 import org.meshtastic.core.ui.icon.FilterList
 import org.meshtastic.core.ui.icon.FilterListOff
+import org.meshtastic.core.ui.icon.KeyboardArrowDown
+import org.meshtastic.core.ui.icon.KeyboardArrowUp
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.More
 import org.meshtastic.core.ui.icon.Muted
 import org.meshtastic.core.ui.icon.Reply
+import org.meshtastic.core.ui.icon.Search
 import org.meshtastic.core.ui.icon.SelectAll
+import org.meshtastic.core.ui.icon.Settings
 import org.meshtastic.core.ui.icon.Unmuted
 import org.meshtastic.core.ui.icon.Visibility
 import org.meshtastic.core.ui.icon.VisibilityOff
 import org.meshtastic.feature.messaging.DeliveryInfo
+import org.meshtastic.feature.messaging.TranslationDialogState
 import org.meshtastic.proto.ChannelSet
 
 // region ── ScrollToBottomFab ──
@@ -179,7 +203,7 @@ fun ReplySnippet(originalMessage: Message?, onClearReply: () -> Unit, ourNode: N
                     style = MaterialTheme.typography.labelMedium,
                 )
                 Text(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f).semantics { isSensitiveData = true },
                     text = message.text.ellipsize(SNIPPET_CHARACTER_LIMIT),
                     style = MaterialTheme.typography.bodySmall,
                     maxLines = 1,
@@ -215,6 +239,54 @@ fun DeleteMessageDialog(count: Int, onConfirm: () -> Unit, onDismiss: () -> Unit
         onConfirm = onConfirm,
         onDismiss = onDismiss,
     )
+}
+
+// endregion
+
+// region ── TranslationModelDownloadDialog ──
+
+/**
+ * A dialog asking the user to confirm the one-time download of on-device translation models, then showing indeterminate
+ * progress while they download. Rendered as nothing when [state] is [TranslationDialogState.Hidden].
+ *
+ * @param state The current dialog state from [org.meshtastic.feature.messaging.MessageViewModel].
+ * @param onConfirm Callback invoked when the user confirms the model download.
+ * @param onDismiss Callback invoked when the prompt is dismissed.
+ */
+@Composable
+internal fun TranslationModelDownloadDialog(
+    state: TranslationDialogState,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    when (state) {
+        is TranslationDialogState.Hidden -> {}
+
+        is TranslationDialogState.DownloadPrompt ->
+            MeshtasticTextDialog(
+                titleRes = Res.string.translation_download_title,
+                message = stringResource(Res.string.translation_download_message, state.estimatedSizeMb),
+                confirmTextRes = Res.string.download,
+                dismissTextRes = Res.string.cancel,
+                onConfirm = onConfirm,
+                onDismiss = onDismiss,
+            )
+
+        is TranslationDialogState.Downloading ->
+            MeshtasticDialog(
+                titleRes = Res.string.translation_download_title,
+                text = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                        Text(stringResource(Res.string.translation_downloading))
+                    }
+                },
+                dismissable = false,
+            )
+    }
 }
 
 // endregion
@@ -297,6 +369,8 @@ fun MessageTopBar(
     filteredCount: Int = 0,
     showFiltered: Boolean = false,
     onToggleShowFiltered: () -> Unit = {},
+    onNavigateToFilterSettings: () -> Unit = {},
+    onSearchClick: () -> Unit = {},
 ) = TopAppBar(
     title = {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -317,6 +391,12 @@ fun MessageTopBar(
         }
     },
     actions = {
+        IconButton(onClick = onSearchClick) {
+            Icon(
+                imageVector = MeshtasticIcons.Search,
+                contentDescription = stringResource(Res.string.search_messages),
+            )
+        }
         MessageTopBarActions(
             showQuickChat = showQuickChat,
             onToggleQuickChat = onToggleQuickChat,
@@ -328,6 +408,7 @@ fun MessageTopBar(
             filteredCount = filteredCount,
             showFiltered = showFiltered,
             onToggleShowFiltered = onToggleShowFiltered,
+            onNavigateToFilterSettings = onNavigateToFilterSettings,
         )
     },
 )
@@ -344,8 +425,9 @@ private fun MessageTopBarActions(
     filteredCount: Int,
     showFiltered: Boolean,
     onToggleShowFiltered: () -> Unit,
+    onNavigateToFilterSettings: () -> Unit,
 ) {
-    if (channelIndex == DataPacket.PKC_CHANNEL_INDEX) {
+    if (channelIndex == NodeAddress.PKC_CHANNEL_INDEX) {
         NodeKeyStatusIcon(hasPKC = true, mismatchKey = mismatchKey)
     }
     var expanded by remember { mutableStateOf(false) }
@@ -364,6 +446,7 @@ private fun MessageTopBarActions(
             filteredCount = filteredCount,
             showFiltered = showFiltered,
             onToggleShowFiltered = onToggleShowFiltered,
+            onNavigateToFilterSettings = onNavigateToFilterSettings,
         )
     }
 }
@@ -380,15 +463,21 @@ private fun OverFlowMenu(
     filteredCount: Int,
     showFiltered: Boolean,
     onToggleShowFiltered: () -> Unit,
+    onNavigateToFilterSettings: () -> Unit,
 ) {
     if (expanded) {
         DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
-            QuickChatToggleMenuItem(showQuickChat, onDismiss, onToggleQuickChat)
-            QuickChatOptionsMenuItem(onDismiss, onNavigateToQuickChatOptions)
-            if (filteredCount > 0 && !filteringDisabled) {
-                FilteredMessagesMenuItem(showFiltered, filteredCount, onDismiss, onToggleShowFiltered)
+            DropdownMenuGroup(shapes = MenuDefaults.groupShapes()) {
+                QuickChatToggleMenuItem(showQuickChat, onDismiss, onToggleQuickChat)
+                QuickChatOptionsMenuItem(onDismiss, onNavigateToQuickChatOptions)
             }
-            FilterToggleMenuItem(filteringDisabled, onDismiss, onToggleFilteringDisabled)
+            DropdownMenuGroup(shapes = MenuDefaults.groupShapes()) {
+                if (filteredCount > 0 && !filteringDisabled) {
+                    FilteredMessagesMenuItem(showFiltered, filteredCount, onDismiss, onToggleShowFiltered)
+                }
+                FilterToggleMenuItem(filteringDisabled, onDismiss, onToggleFilteringDisabled)
+                FilterSettingsMenuItem(onDismiss, onNavigateToFilterSettings)
+            }
         }
     }
 }
@@ -460,6 +549,19 @@ private fun FilterToggleMenuItem(filteringDisabled: Boolean, onDismiss: () -> Un
                 contentDescription = title,
             )
         },
+    )
+}
+
+@Composable
+private fun FilterSettingsMenuItem(onDismiss: () -> Unit, onNavigate: () -> Unit) {
+    val title = stringResource(Res.string.filter_settings)
+    DropdownMenuItem(
+        text = { Text(title) },
+        onClick = {
+            onDismiss()
+            onNavigate()
+        },
+        leadingIcon = { Icon(imageVector = MeshtasticIcons.Settings, contentDescription = title) },
     )
 }
 
@@ -565,26 +667,17 @@ fun UnreadMessagesDivider(modifier: Modifier = Modifier) {
 @Composable
 fun MessageStatusDialog(
     message: Message,
-    nodes: List<Node>,
-    ourNode: Node?,
     resendOption: Boolean,
     onResend: () -> Unit,
     onDismiss: () -> Unit,
+    isDirectMessage: Boolean = false,
 ) {
-    val (title, text) = message.getStatusStringRes()
-    val relayNodeName by
-        remember(message.relayNode, nodes, ourNode) {
-            derivedStateOf {
-                message.relayNode?.let { relayNodeId ->
-                    Node.getRelayNode(relayNodeId, nodes, ourNode?.num)?.user?.long_name
-                }
-            }
-        }
+    val (title, text) = message.getStatusStringRes(isDirectMessage)
     DeliveryInfo(
         title = title,
         resendOption = resendOption,
         text = text,
-        relayNodeName = relayNodeName,
+        detail = message.getStatusDetailRes(),
         relays = message.relays,
         onConfirm = onResend,
         onDismiss = onDismiss,
@@ -635,6 +728,88 @@ fun String.limitBytes(maxBytes: Int): String {
         validCharCount++
     }
     return this.substring(0, validCharCount)
+}
+
+// endregion
+
+// region ── MessageSearchBar ──
+
+/**
+ * M3 contextual search bar that replaces the standard MessageTopBar when search is active. Follows the M3 "find in
+ * page" pattern: back arrow + text field + "X of Y" counter + prev/next arrows + clear.
+ *
+ * This uses [TopAppBar] rather than [SearchBar] because we're filtering within an existing conversation (contextual
+ * search), not performing primary app-level navigation search.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MessageSearchBar(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    onClose: () -> Unit,
+    resultCount: Int,
+    currentIndex: Int = 0,
+    onPrevious: () -> Unit = {},
+    onNext: () -> Unit = {},
+    modifier: Modifier = Modifier,
+) {
+    TopAppBar(
+        modifier = modifier,
+        navigationIcon = {
+            IconButton(onClick = onClose) {
+                Icon(
+                    imageVector = MeshtasticIcons.ArrowBack,
+                    contentDescription = stringResource(Res.string.navigate_back),
+                )
+            }
+        },
+        title = {
+            TextField(
+                value = query,
+                onValueChange = onQueryChange,
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = {
+                    Text(text = stringResource(Res.string.search_messages), style = MaterialTheme.typography.bodyLarge)
+                },
+                singleLine = true,
+                textStyle = MaterialTheme.typography.bodyLarge,
+                colors =
+                TextFieldDefaults.colors(
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                ),
+            )
+        },
+        actions = {
+            if (query.isNotEmpty() && resultCount > 0) {
+                Text(
+                    text = "${currentIndex + 1} / $resultCount",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(end = 4.dp),
+                )
+                IconButton(onClick = onPrevious) {
+                    Icon(
+                        imageVector = MeshtasticIcons.KeyboardArrowUp,
+                        contentDescription = stringResource(Res.string.search_messages),
+                    )
+                }
+                IconButton(onClick = onNext) {
+                    Icon(
+                        imageVector = MeshtasticIcons.KeyboardArrowDown,
+                        contentDescription = stringResource(Res.string.search_messages),
+                    )
+                }
+            }
+            if (query.isNotEmpty()) {
+                IconButton(onClick = { onQueryChange("") }) {
+                    Icon(imageVector = MeshtasticIcons.Close, contentDescription = stringResource(Res.string.clear))
+                }
+            }
+        },
+    )
 }
 
 // endregion

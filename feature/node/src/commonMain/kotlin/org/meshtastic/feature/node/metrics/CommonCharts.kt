@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,11 +46,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
+import com.patrykandpatrick.vico.compose.cartesian.axis.BaseAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianValueFormatter
 import org.jetbrains.compose.resources.StringResource
@@ -61,6 +63,7 @@ import org.meshtastic.core.model.util.TimeConstants.MS_PER_SEC
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.close
 import org.meshtastic.core.resources.info
+import org.meshtastic.core.resources.metric_channel_label
 import org.meshtastic.core.resources.rssi
 import org.meshtastic.core.resources.snr
 import org.meshtastic.core.ui.icon.Info
@@ -94,12 +97,15 @@ object CommonCharts {
         when {
             dataSpanSeconds <= TimeConstants.ONE_HOUR.inWholeSeconds ->
                 DateFormatter.formatTimeWithSeconds(timestampMillis)
+
             dataSpanSeconds <= 2.days.inWholeSeconds -> DateFormatter.formatTime(timestampMillis)
+
             dataSpanSeconds <= 14.days.inWholeSeconds -> {
                 val dateStr = DateFormatter.formatDate(timestampMillis)
                 val timeStr = DateFormatter.formatTime(timestampMillis)
                 "$dateStr\n$timeStr"
             }
+
             else -> DateFormatter.formatDate(timestampMillis)
         }
     }
@@ -117,9 +123,16 @@ object CommonCharts {
         valueFormatter = dynamicTimeFormatter,
         itemPlacer = HorizontalAxis.ItemPlacer.aligned(spacing = { 1 }, addExtremeLabelPadding = true),
         labelRotationDegrees = LABEL_ROTATION_DEGREES,
+        // Vico caps `Size.Auto` at a fixed 64.dp, which truncates the rotated label above ~1.75x font scale.
+        // `min` is applied after that cap, so it is the only lever that restores the height; it scales with the
+        // font scale because the label is sized in sp.
+        size = BaseAxis.Size.Auto(min = (MIN_HEIGHT_PER_FONT_SCALE_DP * LocalDensity.current.fontScale).dp),
     )
 
     private const val LABEL_ROTATION_DEGREES = 45f
+
+    /** Measured need for the rotated label is ~37.2.dp per unit of font scale; 38 leaves a margin. */
+    private const val MIN_HEIGHT_PER_FONT_SCALE_DP = 38f
 }
 
 data class LegendData(
@@ -127,9 +140,15 @@ data class LegendData(
     val color: Color,
     val isLine: Boolean = false,
     val metricKey: Any? = null,
-    /** When non-null, overrides the resolved [nameRes] string in the legend label. */
-    val labelOverride: String? = null,
+    /** 1-based channel number appended to the resolved [nameRes], for multi-channel series. */
+    val channelNumber: Int? = null,
 )
+
+/** Resolves a legend's display label, appending [LegendData.channelNumber] when the series is one of several. */
+@Composable
+fun legendLabel(data: LegendData): String =
+    data.channelNumber?.let { stringResource(Res.string.metric_channel_label, stringResource(data.nameRes), it) }
+        ?: stringResource(data.nameRes)
 
 data class InfoDialogData(val titleRes: StringResource, val definitionRes: StringResource, val color: Color)
 
@@ -155,7 +174,7 @@ fun Legend(
     ) {
         legendData.forEachIndexed { index, data ->
             val isVisible = index !in hiddenSet
-            val label = data.labelOverride ?: stringResource(data.nameRes)
+            val label = legendLabel(data)
             if (onToggle != null) {
                 FilterChip(
                     selected = isVisible,
@@ -171,7 +190,7 @@ fun Legend(
                     Text(
                         text = label,
                         color = MaterialTheme.colorScheme.onSurface,
-                        fontSize = MaterialTheme.typography.labelSmall.fontSize,
+                        style = MaterialTheme.typography.labelSmall,
                     )
                 }
             }
@@ -250,9 +269,8 @@ fun MetricIndicator(color: Color, modifier: Modifier = Modifier) {
 }
 
 @PreviewLightDark
-@Suppress("unused") // Compose preview
 @Composable
-private fun LegendPreview() {
+fun LegendPreview() {
     val data =
         listOf(
             LegendData(nameRes = Res.string.rssi, color = Color.Red, isLine = true),

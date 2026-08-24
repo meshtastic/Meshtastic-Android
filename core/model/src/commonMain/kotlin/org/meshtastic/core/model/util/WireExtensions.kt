@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,7 +59,7 @@ fun <T : Message<T, *>> ProtoAdapter<T>.decodeOrNull(bytes: ByteArray?, logger: 
  * ```
  * val data = Data(portnum = PortNum.TEXT_MESSAGE_APP, payload = bytes)
  * if (!Data.ADAPTER.isWithinSizeLimit(data, MAX_PAYLOAD)) {
- *     throw RemoteException("Payload too large")
+ *     error("Payload too large")
  * }
  * ```
  *

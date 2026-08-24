@@ -1,0 +1,89 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MeshtasticAndroidDocKeywordIndex",
+  "description": "Build-time generated keyword index used by in-app docs search and Gemini Nano retrieval.",
+  "type": "array",
+  "minItems": 1,
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "id",
+      "title",
+      "section",
+      "resourcePath",
+      "navOrder",
+      "keywords",
+      "charCount"
+    ],
+    "properties": {
+      "id": {
+        "type": "string",
+        "description": "Stable page slug.",
+        "minLength": 1,
+        "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+        "examples": ["messages-and-channels", "architecture", "firmware"]
+      },
+      "title": {
+        "type": "string",
+        "description": "Human-readable page title shown in navigation and search.",
+        "minLength": 1,
+        "examples": ["Messages & Channels", "Architecture Overview"]
+      },
+      "section": {
+        "type": "string",
+        "description": "Top-level documentation section.",
+        "enum": ["user", "developer"]
+      },
+      "resourcePath": {
+        "type": "string",
+        "description": "Canonical packaged resource path for the page's primary render artifact.",
+        "minLength": 1,
+        "examples": [
+          "docs/user/messages-and-channels.html",
+          "docs/developer/architecture.html"
+        ]
+      },
+      "navOrder": {
+        "type": "integer",
+        "description": "Frontmatter-derived ordering value used for section sorting.",
+        "minimum": 0,
+        "examples": [1, 5, 999]
+      },
+      "keywords": {
+        "type": "array",
+        "description": "Normalized search and retrieval terms extracted or curated for the page.",
+        "minItems": 1,
+        "maxItems": 50,
+        "items": {
+          "type": "string",
+          "minLength": 2
+        },
+        "examples": [
+          ["channel", "message", "encryption", "direct", "broadcast"],
+          ["navigation", "navkey", "deeplink", "routes"]
+        ]
+      },
+      "aliases": {
+        "type": "array",
+        "description": "Optional alternate terms or renamed slugs used for matching.",
+        "default": [],
+        "maxItems": 20,
+        "items": {
+          "type": "string",
+          "minLength": 1
+        },
+        "examples": [
+          ["channels", "direct-messages"],
+          ["deeplinks", "navigation-3"]
+        ]
+      },
+      "charCount": {
+        "type": "integer",
+        "description": "Plain-text character count used for prompt budgeting.",
+        "minimum": 1,
+        "examples": [1820, 7345]
+      }
+    }
+  }
+}

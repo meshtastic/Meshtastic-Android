@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,40 +18,98 @@ package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import org.koin.core.annotation.Named
+import kotlinx.coroutines.flow.stateIn
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.ServiceScope
+import org.meshtastic.core.common.util.safeCatchingAll
+import org.meshtastic.core.model.MqttConnectionState
+import org.meshtastic.core.model.MqttProbeStatus
 import org.meshtastic.core.network.repository.MQTTRepository
+import org.meshtastic.core.network.repository.MQTT_KEEPALIVE_SECONDS
+import org.meshtastic.core.network.repository.isCredentialRejection
+import org.meshtastic.core.network.repository.mqttTlsConfig
+import org.meshtastic.core.network.repository.resolveEndpoint
 import org.meshtastic.core.repository.MqttManager
+import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketHandler
-import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.ServiceStateWriter
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.getStringSuspend
+import org.meshtastic.core.resources.mqtt_error_connection_lost
+import org.meshtastic.core.resources.mqtt_error_credentials_rejected
+import org.meshtastic.core.resources.mqtt_error_proxy_failed
+import org.meshtastic.core.resources.mqtt_error_rejected
+import org.meshtastic.core.resources.unknown
+import org.meshtastic.mqtt.ConnectionState
+import org.meshtastic.mqtt.MqttClient
+import org.meshtastic.mqtt.MqttException
+import org.meshtastic.mqtt.ProbeResult
+import org.meshtastic.mqtt.plus
+import org.meshtastic.mqtt.probe
+import org.meshtastic.mqtt.transport.tcp.TcpTransportFactory
+import org.meshtastic.mqtt.transport.ws.WebSocketTransportFactory
 import org.meshtastic.proto.MqttClientProxyMessage
 import org.meshtastic.proto.ToRadio
+import kotlin.uuid.Uuid
 
 @Single
 class MqttManagerImpl(
     private val mqttRepository: MQTTRepository,
     private val packetHandler: PacketHandler,
-    private val serviceRepository: ServiceRepository,
-    @Named("ServiceScope") private val scope: CoroutineScope,
+    private val serviceStateWriter: ServiceStateWriter,
+    private val nodeRepository: NodeRepository,
+    private val scope: ServiceScope,
 ) : MqttManager {
     private var mqttMessageFlow: Job? = null
+    private val _proxyActive = MutableStateFlow(false)
+
+    override val proxyActive: StateFlow<Boolean> = _proxyActive.asStateFlow()
+
+    override val mqttConnectionState: StateFlow<MqttConnectionState> =
+        combine(_proxyActive, mqttRepository.connectionState) { active, libState ->
+            if (!active) MqttConnectionState.Inactive else libState.toAppState()
+        }
+            .stateIn(scope, SharingStarted.Eagerly, MqttConnectionState.Inactive)
 
     override fun startProxy(enabled: Boolean, proxyToClientEnabled: Boolean) {
         if (mqttMessageFlow?.isActive == true) return
         if (enabled && proxyToClientEnabled) {
+            _proxyActive.value = true
             mqttMessageFlow =
                 mqttRepository.proxyMessageFlow
                     .onEach { message -> packetHandler.sendToRadio(ToRadio(mqttClientProxyMessage = message)) }
                     .catch { throwable ->
-                        serviceRepository.setErrorMessage(
-                            text = "MqttClientProxy failed: $throwable",
-                            severity = Severity.Warn,
-                        )
+                        _proxyActive.value = false
+                        // safeCatchingAll swallows the Skiko ExceptionInInitializerError that
+                        // compose-resources raises on headless JVM tests; production resolves the
+                        // localized string and the error is still surfaced either way.
+                        val message =
+                            safeCatchingAll {
+                                when {
+                                    throwable is MqttException.ConnectionRejected &&
+                                        throwable.isCredentialRejection() ->
+                                        getStringSuspend(Res.string.mqtt_error_credentials_rejected)
+
+                                    throwable is MqttException.ConnectionRejected ->
+                                        getStringSuspend(Res.string.mqtt_error_rejected, throwable.detail())
+
+                                    throwable is MqttException.ConnectionLost ->
+                                        getStringSuspend(Res.string.mqtt_error_connection_lost)
+
+                                    else -> getStringSuspend(Res.string.mqtt_error_proxy_failed, throwable.detail())
+                                }
+                            }
+                                .getOrDefault("")
+                        serviceStateWriter.setErrorMessage(text = message, severity = Severity.Warn)
                     }
                     .launchIn(scope)
         }
@@ -63,6 +121,7 @@ class MqttManagerImpl(
             mqttMessageFlow?.cancel()
             mqttMessageFlow = null
         }
+        _proxyActive.value = false
     }
 
     override fun handleMqttProxyMessage(message: MqttClientProxyMessage) {
@@ -73,10 +132,88 @@ class MqttManagerImpl(
             message.text != null -> {
                 mqttRepository.publish(topic, message.text!!.encodeToByteArray(), retained)
             }
+
             message.data_ != null -> {
                 mqttRepository.publish(topic, message.data_!!.toByteArray(), retained)
             }
+
             else -> {}
         }
     }
+
+    private fun ConnectionState.toAppState(): MqttConnectionState = when (this) {
+        is ConnectionState.Connecting -> MqttConnectionState.Connecting
+
+        is ConnectionState.Connected -> MqttConnectionState.Connected
+
+        is ConnectionState.Reconnecting ->
+            MqttConnectionState.Reconnecting(attempt = attempt, lastError = lastError?.message)
+
+        is ConnectionState.Disconnected ->
+            reason?.let { MqttConnectionState.Disconnected(reason = it.message) }
+                ?: MqttConnectionState.Disconnected.Idle
+    }
+
+    override suspend fun probe(
+        address: String,
+        tlsEnabled: Boolean,
+        username: String?,
+        password: String?,
+    ): MqttProbeStatus {
+        val endpoint = resolveEndpoint(address, tlsEnabled)
+        val result =
+            MqttClient.probe(endpoint = endpoint) {
+                // probe() requires a transportFactory in 0.4.0 (errors otherwise); mirror the live client,
+                // including its scoped private-CA trust hook — otherwise a probe would fail where a connect succeeds.
+                val tls = mqttTlsConfig()
+                transportFactory = TcpTransportFactory(tls) + WebSocketTransportFactory(tls)
+                // Mirror the live client's keepalive too: the library default is 0 (no keepalive),
+                // which some brokers reject — misleadingly, as CLIENT_IDENTIFIER_NOT_VALID.
+                keepAliveSeconds = MQTT_KEEPALIVE_SECONDS
+                // Per-connection random suffix: myId identifies the node (and is null →
+                // "unknown" before the node record loads), so two probes can collide on one
+                // client-id and evict each other (SESSION_TAKEN_OVER). See MQTTRepositoryImpl.
+                clientId = "MeshtasticAndroidMqttProbe-${nodeRepository.myId.value ?: "unknown"}-${Uuid.random()}"
+                val user = username?.takeUnless { it.isEmpty() }
+                val pass = password?.takeUnless { it.isEmpty() }
+                if (user != null) this.username = user
+                if (pass != null) password(pass)
+            }
+        return result.toAppStatus()
+    }
+
+    private fun ProbeResult.toAppStatus(): MqttProbeStatus = when (this) {
+        is ProbeResult.Success -> {
+            val info = serverInfo
+            val summary =
+                buildList {
+                    info.assignedClientIdentifier?.let { add("client=$it") }
+                    info.maximumQosOrdinal?.let { add("maxQoS=$it") }
+                    info.serverKeepAliveSeconds?.let { add("keepalive=${it}s") }
+                }
+                    .joinToString(", ")
+                    .ifEmpty { null }
+            MqttProbeStatus.Success(serverInfo = summary)
+        }
+
+        is ProbeResult.Rejected ->
+            MqttProbeStatus.Rejected(
+                reasonCode = reasonCode.value,
+                reason = message,
+                serverReference = serverReference,
+            )
+
+        is ProbeResult.DnsFailure -> MqttProbeStatus.DnsFailure(message = cause.message)
+
+        is ProbeResult.TcpFailure -> MqttProbeStatus.TcpFailure(message = cause.message)
+
+        is ProbeResult.TlsFailure -> MqttProbeStatus.TlsFailure(message = cause.message)
+
+        is ProbeResult.Timeout -> MqttProbeStatus.Timeout(timeoutMs = durationMs)
+
+        is ProbeResult.Other -> MqttProbeStatus.Other(message = cause.message)
+    }
 }
+
+/** Failure detail for a user-facing message; a throwable without a message still needs a placeholder to substitute. */
+private suspend fun Throwable.detail(): String = message ?: getStringSuspend(Res.string.unknown)

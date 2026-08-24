@@ -1,0 +1,135 @@
+name: Deploy Documentation
+
+# Publishes the main-branch docs snapshot to /main/ (and refreshed Dokka to
+# /api/) on the persistent gh-pages branch. The site root (latest release)
+# and /vX.Y.Z/ folders are owned by docs-release.yml and are left untouched.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      # Dokka sources (KDoc in source files)
+      - 'androidApp/src/**'
+      - 'core/**/src/**'
+      - 'feature/**/src/**'
+      - 'desktopApp/src/**'
+      # Docs site sources
+      - 'docs/**'
+      - 'feature/docs/**'
+      # Build infrastructure. Module scripts are included because they can add or
+      # drop exported `api` dependencies and reshape source sets, changing the
+      # generated reference without any edit under src/.
+      - 'build-logic/**'
+      - '**/build.gradle.kts'
+      - 'settings.gradle.kts'
+      - '.github/workflows/docs-deploy.yml'
+      - 'scripts/docs/**'
+
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# Shares the group with docs-release.yml so gh-pages pushes serialize.
+# cancel-in-progress must stay false: a snapshot deploy must never cancel an
+# in-flight release publish (GitHub still coalesces queued runs to one).
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.repository == 'meshtastic/Meshtastic-Android'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+        with:
+          submodules: true
+          fetch-depth: 0
+
+      - name: Gradle Setup
+        uses: ./.github/actions/gradle-setup
+        with:
+          gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '4.0.6'
+          bundler-cache: true
+          working-directory: docs
+
+      # Dokka is the slowest part of this workflow (~14 min) but KDoc changes far
+      # less often than the prose docs. Rebuild /api/ only when something that can
+      # actually change the generated reference was touched; otherwise the existing
+      # /api/ on gh-pages is left in place (the publisher overlays per channel).
+      # Manual runs always rebuild everything, so the diff is only needed on push.
+      - name: Detect Dokka-relevant changes
+        if: github.event_name != 'workflow_dispatch'
+        uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          token: ''
+          filters: |
+            # Positive patterns only. paths-filter evaluates each pattern as an
+            # independent predicate and ORs them together, so a '!excluded/**'
+            # entry would match every path outside that dir and make the filter
+            # always true. The modules in DOKKA_EXCLUDED_MODULES that live under
+            # these prefixes (:core:konsist) therefore still trigger a rebuild;
+            # they change rarely enough that the odd wasted run is fine.
+            dokka:
+              - 'androidApp/src/**'
+              - 'core/**/src/**'
+              - 'feature/**/src/**'
+              - 'desktopApp/src/**'
+              # Dokka config, module list and the plugin classpath. '**/build.gradle.kts'
+              # covers the root script as well as every module's, since a module script
+              # can change exported `api` deps or source sets with no src/ edit.
+              - 'build-logic/**'
+              - '**/build.gradle.kts'
+              - 'settings.gradle.kts'
+              - 'gradle/libs.versions.toml'
+
+      - name: Generate Docs Site (main channel)
+        run: ./gradlew generateDocsBundle validateDocsBundle publishDocsSite -Pdocs.channel=main -Pci=true
+
+      # Dokka (Gradle) and Jekyll (Ruby) are independent — Dokka's output is only
+      # copied in afterwards — so run them concurrently to overlap the two slowest
+      # steps (~14 min Dokka vs ~5 min Jekyll) instead of summing them.
+      - name: Build Dokka + Jekyll concurrently
+        env:
+          BUILD_DOKKA: ${{ steps.filter.outputs.dokka == 'true' || github.event_name == 'workflow_dispatch' }}
+        run: |
+          set -euo pipefail
+          BUNDLE_GEMFILE=docs/Gemfile bundle exec jekyll build \
+            --source build/_site/main \
+            --destination build/jekyll_site \
+            --baseurl /${{ github.event.repository.name }}/main &
+          jekyll_pid=$!
+          if [ "$BUILD_DOKKA" = "true" ]; then
+            ./gradlew dokkaGeneratePublicationHtml -Dorg.gradle.isolated-projects=false --no-configuration-cache
+          else
+            echo "No Dokka-relevant changes — skipping API reference rebuild."
+          fi
+          wait "$jekyll_pid"
+
+      - name: Stage channels
+        id: stage
+        env:
+          BUILD_DOKKA: ${{ steps.filter.outputs.dokka == 'true' || github.event_name == 'workflow_dispatch' }}
+        run: |
+          set -euo pipefail
+          mkdir -p build/pages_staging
+          cp -r build/jekyll_site build/pages_staging/main
+          channels="main"
+          if [ "$BUILD_DOKKA" = "true" ]; then
+            cp -r build/dokka/html build/pages_staging/api
+            channels="$channels api"
+          fi
+          echo "channels=$channels" >> "$GITHUB_OUTPUT"
+
+      - name: Publish to gh-pages
+        run: scripts/docs/publish-to-gh-pages.sh build/pages_staging ${{ steps.stage.outputs.channels }}

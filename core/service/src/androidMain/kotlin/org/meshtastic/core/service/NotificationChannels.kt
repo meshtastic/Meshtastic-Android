@@ -16,13 +16,14 @@
  */
 package org.meshtastic.core.service
 
-internal object NotificationChannels {
+object NotificationChannels {
     const val SERVICE = "my_service"
     const val MESSAGES = "my_messages"
     const val BROADCASTS = "my_broadcasts"
     const val WAYPOINTS = "my_waypoints"
     const val ALERTS = "my_alerts"
     const val NEW_NODES = "new_nodes"
+    const val MESH_BEACON = "mesh_beacon"
     const val LOW_BATTERY = "low_battery"
     const val LOW_BATTERY_REMOTE = "low_battery_remote"
     const val CLIENT = "client_notifications"

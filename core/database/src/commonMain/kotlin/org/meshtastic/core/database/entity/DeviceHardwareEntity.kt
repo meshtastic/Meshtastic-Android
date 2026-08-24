@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -72,8 +72,10 @@ fun DeviceHardwareEntity.asExternalModel() = DeviceHardware(
     partitionScheme = partitionScheme,
     platformioTarget = platformioTarget,
     requiresDfu = requiresDfu,
+    // Quirk/overlay fields are applied at read time by DeviceHardwareRepositoryImpl and never persisted.
     requiresBootloaderUpgradeForOta = null,
     bootloaderInfoUrl = null,
+    softDeviceVariant = null,
     supportLevel = supportLevel,
     tags = tags,
 )

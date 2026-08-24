@@ -112,8 +112,9 @@ abstract class CommonPerformUsbUpdateTest {
         )
 
         val awaitingState = states.filterIsInstance<FirmwareUpdateState.AwaitingFileSave>().first()
+        // A plain update always carries its artifact; only maintenance passes defer the filename to the volume read.
         assertTrue(
-            awaitingState.fileName.endsWith(".uf2"),
+            awaitingState.fileName?.endsWith(".uf2") == true,
             "Expected filename to end with .uf2, got: ${awaitingState.fileName}",
         )
     }

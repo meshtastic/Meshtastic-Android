@@ -1,0 +1,37 @@
+/*
+ * Copyright (c) 2026 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+package org.meshtastic.app.di
+
+import org.koin.core.annotation.Module
+import org.koin.core.annotation.Named
+import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.GOOGLE_SERVICES_AVAILABLE
+import org.meshtastic.core.ui.theme.EventFontResolver
+
+@Module(includes = [FdroidAiModule::class])
+class FlavorModule {
+    @Suppress("FunctionOnlyReturningConstant") // Flavor-dispatched: the google flavor returns a different value.
+    @Single
+    @Named(GOOGLE_SERVICES_AVAILABLE)
+    fun googleServicesAvailable(): Boolean = false
+
+    /** No Play Services font provider on F-Droid — event fonts stay off; UI falls back to the app typeface. */
+    @Single fun eventFontResolver(): EventFontResolver = EventFontResolver { null }
+
+    /** No analytics on F-Droid — the shared Ktor `HttpClient` gets no Datadog interceptor or event listener. */
+    @Single fun okHttpNetworkInstrumentation(): OkHttpNetworkInstrumentation = OkHttpNetworkInstrumentation.NONE
+}

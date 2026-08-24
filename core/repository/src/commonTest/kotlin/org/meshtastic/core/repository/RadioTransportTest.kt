@@ -16,37 +16,40 @@
  */
 package org.meshtastic.core.repository
 
+import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
 class RadioTransportTest {
 
     @Test
-    fun `RadioTransport can be implemented`() {
+    fun `RadioTransport can be implemented`() = runTest {
         var sentData: ByteArray? = null
         var closed = false
         var keepAliveCalled = false
 
         val transport =
             object : RadioTransport {
-                override fun handleSendToRadio(p: ByteArray) {
+                override fun handleSendToRadio(p: ByteArray): Boolean {
                     sentData = p
+                    return true
                 }
 
                 override fun keepAlive() {
                     keepAliveCalled = true
                 }
 
-                override fun close() {
+                override suspend fun close() {
                     closed = true
                 }
             }
 
         val testData = byteArrayOf(1, 2, 3)
-        transport.handleSendToRadio(testData)
+        val accepted = transport.handleSendToRadio(testData)
         transport.keepAlive()
         transport.close()
 
+        assertTrue(accepted)
         assertTrue(sentData!!.contentEquals(testData))
         assertTrue(keepAliveCalled)
         assertTrue(closed)

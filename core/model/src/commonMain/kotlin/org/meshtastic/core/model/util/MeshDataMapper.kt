@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ package org.meshtastic.core.model.util
 
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.proto.MeshPacket
 
 /**
@@ -35,21 +36,22 @@ open class MeshDataMapper(private val nodeIdLookup: NodeIdLookup) {
         return DataPacket(
             from = nodeIdLookup.toNodeID(packet.from),
             to = nodeIdLookup.toNodeID(packet.to),
-            time = packet.rx_time * 1000L,
+            time = (packet.rxTimeOrNull() ?: 0) * 1000L,
             id = packet.id,
             dataType = decoded.portnum.value,
             bytes = decoded.payload.toByteArray().toByteString(),
             hopLimit = packet.hop_limit,
-            channel = if (packet.pki_encrypted == true) DataPacket.PKC_CHANNEL_INDEX else packet.channel,
+            channel = if (packet.pki_encrypted == true) NodeAddress.PKC_CHANNEL_INDEX else packet.channel,
             wantAck = packet.want_ack == true,
             hopStart = packet.hop_start,
-            snr = packet.rx_snr,
+            snr = packet.snrOrNull(),
             rssi = packet.rx_rssi,
             replyId = decoded.reply_id,
             relayNode = packet.relay_node,
             viaMqtt = packet.via_mqtt == true,
             emoji = decoded.emoji,
             transportMechanism = packet.transport_mechanism.value,
+            xeddsaSigned = packet.xeddsa_signed,
         )
     }
 }

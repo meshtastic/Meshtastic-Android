@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,57 +50,72 @@ internal fun Project.configureKotlinAndroid(commonExtension: CommonExtension) {
             defaultConfig.targetSdk = targetSdkVersion
         }
 
-        val javaVersion = if (project.name in PUBLISHED_MODULES) JavaVersion.VERSION_17 else JavaVersion.VERSION_21
-        compileOptions.sourceCompatibility = javaVersion
-        compileOptions.targetCompatibility = javaVersion
+        compileOptions.sourceCompatibility = JavaVersion.VERSION_21
+        compileOptions.targetCompatibility = JavaVersion.VERSION_21
 
         testOptions.animationsDisabled = true
         testOptions.unitTests.isReturnDefaultValues = true
 
         // Exclude duplicate META-INF license files shipped by JUnit Platform JARs
-        packaging.resources.excludes.addAll(
-            listOf(
-                "META-INF/LICENSE.md",
-                "META-INF/LICENSE-notice.md",
-            ),
-        )
+        packaging.resources.excludes.addAll(listOf("META-INF/LICENSE.md", "META-INF/LICENSE-notice.md"))
     }
 
     configureMokkery()
     configureKotlin<KotlinAndroidProjectExtension>()
 }
 
+/**
+ * Whether the current build host can run the Kotlin/Native compiler.
+ *
+ * Kotlin/Native supports linux-x86_64, windows-x86_64, macos-arm64, and macos-x86_64. Other hosts (notably
+ * linux-aarch64 CI runners) must skip Apple-target registration to avoid configuration-time crashes when KSP / Dokka
+ * introspect the iOS compilations.
+ */
+private fun supportsKotlinNative(): Boolean {
+    val os = System.getProperty("os.name").orEmpty().lowercase()
+    val arch = System.getProperty("os.arch").orEmpty().lowercase()
+    val isX64 = arch == "amd64" || arch == "x86_64"
+    return when {
+        os.contains("mac") || os.contains("darwin") -> true
+        os.contains("linux") -> isX64
+        os.contains("windows") -> isX64
+        else -> false
+    }
+}
+
 /** Configure Kotlin Multiplatform options */
 internal fun Project.configureKotlinMultiplatform() {
-    // Skiko is an internal CMP implementation detail; third-party KMP libraries
-    // (e.g. coil3) can carry an older skiko transitive requirement that Gradle
-    // upgrades to the CMP-bundled version, triggering a "Skiko dependencies'
-    // versions are incompatible" warning from CMP's compatibility checker.
-    // Force the version to match CMP so the checker sees a consistent graph.
-    val skikoVersion = libs.version("skiko")
-    configurations.configureEach {
-        resolutionStrategy.eachDependency {
-            if (requested.group == "org.jetbrains.skiko") {
-                useVersion(skikoVersion)
-                because("Align Skiko with the version bundled by Compose Multiplatform")
-            }
-        }
-    }
+    // Note: we used to force `org.jetbrains.skiko` to a hard-coded version here to
+    // align coil3's older skiko requirement with CMP's. As of CMP 1.11.x the
+    // compose-desktop module publishes `{strictly <version>}` constraints on
+    // skiko, so Gradle resolves the conflict naturally. A hard-coded force would
+    // silently downgrade skiko on the next CMP bump and break the renderer —
+    // so we let CMP own the version.
 
     extensions.configure<KotlinMultiplatformExtension> {
         // Standard KMP targets for Meshtastic
         jvm()
 
-        // Configure the iOS targets for compile-only validation
-        // We only add these for modules that already have KMP structure
-        iosArm64()
-        iosSimulatorArm64()
+        // iOS targets for compile-only validation. Only register on hosts where
+        // Kotlin/Native can run — KSP attaches to every Kotlin target's compilation
+        // and crashes at configuration time on unsupported hosts (e.g. linux-aarch64)
+        // with "Could not create task ':…:kspKotlinIosArm64' > Unknown host target".
+        // Supported set: https://kotlinlang.org/docs/native-target-support.html
+        if (supportsKotlinNative()) {
+            iosArm64()
+            iosSimulatorArm64()
+        }
 
         // Configure the Android target if the plugin is applied
         pluginManager.withPlugin("com.android.kotlin.multiplatform.library") {
             extensions.findByType<KotlinMultiplatformAndroidLibraryTarget>()?.apply {
                 compileSdk = configProperties.getProperty("COMPILE_SDK").toInt()
                 minSdk = configProperties.getProperty("MIN_SDK").toInt()
+
+                // Default: disable Android resources for most KMP modules.
+                // Modules that need resources (e.g. core:resources) override this
+                // explicitly in their build.gradle.kts android {} block.
+                androidResources.enable = false
 
                 // Set the namespace automatically if not already set
                 if (namespace == null) {
@@ -117,12 +132,12 @@ internal fun Project.configureKotlinMultiplatform() {
     tasks.configureEach {
         val taskName = name.lowercase()
         if (taskName.contains("iosarm64") || taskName.contains("iossimulatorarm64")) {
-            if (
-                taskName.startsWith("link") && taskName.contains("test") ||
-                taskName == "iosarm64test" ||
-                taskName == "iossimulatorarm64test" ||
-                taskName.endsWith("testbinaries")
-            ) {
+            val isDisabledIosTask =
+                (taskName.startsWith("link") && taskName.contains("test")) ||
+                    taskName == "iosarm64test" ||
+                    taskName == "iossimulatorarm64test" ||
+                    taskName.endsWith("testbinaries")
+            if (isDisabledIosTask) {
                 enabled = false
             }
         }
@@ -170,32 +185,28 @@ internal fun Project.configureKmpTestDependencies() {
                 implementation(libs.library("kotest-assertions"))
                 implementation(libs.library("kotest-property"))
                 implementation(libs.library("turbine"))
+                implementation(libs.library("kotlinx-coroutines-test"))
             }
 
             // Configure androidHostTest lazily — the source set is created when the
             // module's build script calls `withHostTest { }`, which runs *after* the
             // convention plugin's `apply`.  Using `matching + configureEach` defers
             // configuration until the source set actually materialises.
-            matching { it.name == "androidHostTest" }.configureEach {
-                dependencies {
-                    // kotlin.test auto-selects kotlin-test-junit because testAndroidHostTest
-                    // does NOT use useJUnitPlatform() (see configureTestOptions).
-                    // No explicit kotlin("test") or kotlin("test-junit") override needed —
-                    // adding them would conflict with auto-selection and break resource merging.
-                    implementation(libs.library("kotest-assertions"))
-                    implementation(libs.library("kotest-property"))
-                    implementation(libs.library("turbine"))
-                    implementation(libs.library("robolectric"))
-                    implementation(libs.library("androidx-test-core"))
+            matching { it.name == "androidHostTest" }
+                .configureEach {
+                    dependencies {
+                        // kotlin.test auto-selects kotlin-test-junit because testAndroidHostTest
+                        // does NOT use useJUnitPlatform() (see configureTestOptions).
+                        // No explicit kotlin("test") or kotlin("test-junit") override needed —
+                        // adding them would conflict with auto-selection and break resource merging.
+                        implementation(libs.library("kotest-assertions"))
+                        implementation(libs.library("kotest-property"))
+                        implementation(libs.library("turbine"))
+                        implementation(libs.library("robolectric"))
+                        implementation(libs.library("androidx-test-core"))
+                        implementation(libs.library("androidx-test-ext-junit"))
+                    }
                 }
-            }
-
-            // Configure jvmTest lazily for the same reason.
-            matching { it.name == "jvmTest" }.configureEach {
-                dependencies {
-                    implementation(libs.library("kotest-runner-junit6"))
-                }
-            }
         }
     }
 }
@@ -205,28 +216,20 @@ internal fun Project.configureKotlinJvm() {
     configureKotlin<KotlinJvmProjectExtension>()
 }
 
-/** Modules published for external consumers — use Java 17 for broader compatibility. */
-private val PUBLISHED_MODULES = setOf("api", "model", "proto")
-
 /** Compiler args shared across all Kotlin targets (JVM, Android, iOS, etc.). */
-private val SHARED_COMPILER_ARGS = listOf(
-    "-opt-in=kotlin.uuid.ExperimentalUuidApi",
-    "-opt-in=kotlin.time.ExperimentalTime",
-    "-Xexpect-actual-classes",
-    "-Xcontext-parameters",
-    "-Xannotation-default-target=param-property",
-    "-Xskip-prerelease-check",
-)
+private val SHARED_COMPILER_ARGS =
+    listOf(
+        "-Xexpect-actual-classes",
+        "-Xskip-prerelease-check",
+        // No -Xbackend-threads: parallel codegen races and crashes release builds (KT-83578).
+    )
+
+private const val JDK_VERSION = 25
 
 /** Configure base Kotlin options */
 private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
-    val isPublishedModule = project.name in PUBLISHED_MODULES
-
     extensions.configure<T> {
-        val javaVersion = if (isPublishedModule) 17 else 21
-        // Using Java 17 for published modules for better compatibility with consumers (e.g. plugins, older environments),
-        // and Java 21 for the rest of the app.
-        jvmToolchain(javaVersion)
+        jvmToolchain(JDK_VERSION)
 
         if (this is KotlinMultiplatformExtension) {
             targets.configureEach {
@@ -234,9 +237,7 @@ private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
                 compilations.configureEach {
                     compileTaskProvider.configure {
                         compilerOptions {
-                            if (!isPublishedModule) {
-                                freeCompilerArgs.add("-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi")
-                            }
+                            freeCompilerArgs.add("-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi")
                             freeCompilerArgs.addAll(SHARED_COMPILER_ARGS)
                             if (isJvmTarget) {
                                 freeCompilerArgs.add("-jvm-default=no-compatibility")
@@ -252,13 +253,16 @@ private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
 
     tasks.withType<KotlinCompile>().configureEach {
         compilerOptions {
-            jvmTarget.set(if (isPublishedModule) JvmTarget.JVM_17 else JvmTarget.JVM_21)
+            jvmTarget.set(JvmTarget.JVM_21)
             allWarningsAsErrors.set(warningsAsErrors)
-            if (!isPublishedModule) {
+
+            // For non-KMP modules, configure compiler args here since they don't use targets.compilations.
+            // KMP modules already set these via the targets block above — only jvmTarget/warnings needed here.
+            if (T::class != KotlinMultiplatformExtension::class) {
                 freeCompilerArgs.add("-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi")
+                freeCompilerArgs.addAll(SHARED_COMPILER_ARGS)
+                freeCompilerArgs.add("-jvm-default=no-compatibility")
             }
-            freeCompilerArgs.addAll(SHARED_COMPILER_ARGS)
-            freeCompilerArgs.add("-jvm-default=no-compatibility")
         }
     }
 }

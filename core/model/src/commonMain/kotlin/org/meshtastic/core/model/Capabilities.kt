@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,14 +49,33 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
     /** Support for sharing contact information via QR codes. Supported since firmware v2.6.8. */
     val supportsQrCodeSharing = atLeast(V2_6_8)
 
+    /**
+     * Support for the RemoteShell module (PTY-over-mesh, REMOTE_SHELL_APP portnum). The proto is upstream but no
+     * firmware release ships the module, so it stays gated to [UNRELEASED].
+     */
+    val supportsRemoteShell = atLeast(UNRELEASED)
+
     /** Support for Status Message module. Supported since firmware v2.8.0. */
     val supportsStatusMessage = atLeast(V2_8_0)
 
-    /** Support for Traffic Management module. Supported since firmware v3.0.0. */
-    val supportsTrafficManagementConfig = atLeast(V3_0_0)
+    /**
+     * Support for TAK (ATAK) module configuration. Gated to firmware v2.8.0.
+     *
+     * The v2.7.19 gate this replaces was set on protobuf availability rather than firmware support: v2.7.x
+     * `AdminModule::handleSetModuleConfig()` has no case for the `tak` submessage, so the node ACKs the write and
+     * reboots without storing anything, and `NodeDB::saveToDisk()` never sets `has_tak`. The editor therefore appeared
+     * to save and always read back as unspecified (Meshtastic-Android#6430).
+     *
+     * The firmware write, persist and remote-admin read paths land in meshtastic/firmware#11216, labelled for 2.8.
+     */
+    val supportsTakConfig = atLeast(V2_8_0)
 
-    /** Support for TAK (ATAK) module configuration. Supported since firmware v2.7.19. */
-    val supportsTakConfig = atLeast(V2_7_19)
+    /**
+     * Support for the v2 TAK port (ATAK_PLUGIN_V2 = 78) with TAKPacketV2 + zstd dictionary compression. Supported since
+     * firmware v2.8.0. Firmware v2.7.x and earlier only support the legacy ATAK_PLUGIN port (72) with the original
+     * TAKPacket schema (PLI + GeoChat only, no compression), so the bridge falls back to that path for older nodes.
+     */
+    val supportsTakV2 = atLeast(V2_8_0)
 
     /** Support for location sharing on secondary channels. Supported since firmware v2.6.10. */
     val supportsSecondaryChannelLocation = atLeast(V2_6_10)
@@ -65,10 +84,36 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
     val supportsEsp32Ota = atLeast(V2_7_18)
 
     /**
-     * Support for the RemoteShell module (PTY-over-mesh, REMOTE_SHELL_APP portnum). Defined in protobufs HEAD
-     * (post-v2.7.21); gated to [UNRELEASED] until a firmware release ships it.
+     * Support for the LoRa region→preset compatibility map. Supported since firmware v2.8.0. Older firmware never sends
+     * the map, so the UI keeps the preset list unconstrained (preset *availability* is [supportsPreset]).
      */
-    val supportsRemoteShell = atLeast(UNRELEASED)
+    val supportsLoraRegionPresetMap = atLeast(V2_8_0)
+
+    /**
+     * Support for runtime lockdown mode (per-connection passphrase auth). Supported since firmware v2.8.0. Note:
+     * lockdown is also hardware-gated (nRF52 only) — the device advertises real support by sending a `LockdownStatus`,
+     * which is the authoritative signal and drives the actual UI state.
+     */
+    val supportsLockdown = atLeast(V2_8_0)
+
+    /**
+     * Support for the Mesh Beacon module (`ModuleConfig.MeshBeaconConfig` broadcast/listen). The proto is upstream but
+     * the firmware module traces to a community fork; gate the config editor to 2.8.0+ so older radios don't show a
+     * config they'd silently ignore.
+     */
+    val supportsMeshBeacon = atLeast(V2_8_0)
+
+    /**
+     * Whether this firmware's region table contains [region]. Regions declare the release that introduced them via
+     * [RegionInfo.minFirmware]; older firmware would treat an unknown region code as UNSET, so the picker hides it.
+     */
+    fun supportsRegion(region: RegionInfo): Boolean = region.minFirmware?.let { atLeast(it) } ?: true
+
+    /**
+     * Whether this firmware's preset table contains [preset] ([ChannelOption.minFirmware]); older firmware silently
+     * falls back to LONG_FAST when sent an unknown preset, so the picker hides it.
+     */
+    fun supportsPreset(preset: ChannelOption): Boolean = preset.minFirmware?.let { atLeast(it) } ?: true
 
     companion object {
         private val V2_6_8 = DeviceVersion("2.6.8")
@@ -76,9 +121,7 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
         private val V2_6_10 = DeviceVersion("2.6.10")
         private val V2_7_12 = DeviceVersion("2.7.12")
         private val V2_7_18 = DeviceVersion("2.7.18")
-        private val V2_7_19 = DeviceVersion("2.7.19")
         private val V2_8_0 = DeviceVersion("2.8.0")
-        private val V3_0_0 = DeviceVersion("3.0.0")
         private val UNRELEASED = DeviceVersion("9.9.9")
     }
 }

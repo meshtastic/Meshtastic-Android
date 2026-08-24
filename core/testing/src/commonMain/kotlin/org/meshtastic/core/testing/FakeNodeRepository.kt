@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.map
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeSortOption
+import org.meshtastic.core.model.mergePowerChannelLabel
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.LocalStats
@@ -90,11 +91,18 @@ class FakeNodeRepository :
             .let { nodes ->
                 when (sort) {
                     NodeSortOption.ALPHABETICAL -> nodes.sortedBy { it.user.long_name.lowercase() }
+
                     NodeSortOption.LAST_HEARD -> nodes.sortedByDescending { it.lastHeard }
-                    NodeSortOption.DISTANCE -> nodes.sortedBy { it.position.latitude_i } // Simplified
+
+                    NodeSortOption.DISTANCE -> nodes.sortedBy { it.position.latitude_i }
+
+                    // Simplified
                     NodeSortOption.HOPS_AWAY -> nodes.sortedBy { it.hopsAway }
+
                     NodeSortOption.CHANNEL -> nodes.sortedBy { it.channel }
+
                     NodeSortOption.VIA_MQTT -> nodes.sortedBy { if (it.viaMqtt) 0 else 1 }
+
                     NodeSortOption.VIA_FAVORITE -> nodes.sortedBy { if (it.isFavorite) 0 else 1 }
                 }
             }
@@ -123,6 +131,8 @@ class FakeNodeRepository :
 
     override suspend fun getUnknownNodes(): List<Node> = _nodeDBbyNum.value.values.filter { it.isUnknownUser }
 
+    override suspend fun getNodeDbSnapshot(): Map<Int, Node> = _nodeDBbyNum.value
+
     override suspend fun clearNodeDB(preserveFavorites: Boolean) {
         if (preserveFavorites) {
             _nodeDBbyNum.value = _nodeDBbyNum.value.filter { it.value.isFavorite }
@@ -148,13 +158,20 @@ class FakeNodeRepository :
         _nodeDBbyNum.value = _nodeDBbyNum.value + (num to node.copy(notes = notes))
     }
 
+    override suspend fun updatePowerChannelLabel(num: Int, channelIndex: Int, label: String) {
+        val node = _nodeDBbyNum.value[num] ?: return
+        val merged = mergePowerChannelLabel(node.powerChannelLabels, channelIndex, label)
+        _nodeDBbyNum.value = _nodeDBbyNum.value + (num to node.copy(powerChannelLabels = merged))
+    }
+
     override suspend fun upsert(node: Node) {
         _nodeDBbyNum.value = _nodeDBbyNum.value + (node.num to node)
     }
 
-    override suspend fun installConfig(mi: MyNodeInfo, nodes: List<Node>) {
+    override suspend fun installConfig(mi: MyNodeInfo, nodes: List<Node>): List<Int> {
         _myNodeInfo.value = mi
         _nodeDBbyNum.value = nodes.associateBy { it.num }
+        return emptyList()
     }
 
     override suspend fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata) {

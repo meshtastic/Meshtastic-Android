@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,12 +32,14 @@ import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianLayerRangeProvider
-import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
+import com.patrykandpatrick.vico.compose.cartesian.data.lineModel
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
-import org.jetbrains.compose.resources.stringResource
+import com.patrykandpatrick.vico.compose.common.data.ExtraStore
 import org.meshtastic.core.common.util.formatString
+import org.meshtastic.core.model.util.UnitConversions
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.adc_voltage
 import org.meshtastic.core.resources.baro_pressure
 import org.meshtastic.core.resources.humidity
 import org.meshtastic.core.resources.iaq
@@ -114,25 +116,70 @@ private val LEGEND_DATA_3 =
     )
 
 private val LEGEND_DATA_4 =
-    listOf(
-        Environment.ONE_WIRE_TEMP_1,
-        Environment.ONE_WIRE_TEMP_2,
-        Environment.ONE_WIRE_TEMP_3,
-        Environment.ONE_WIRE_TEMP_4,
-        Environment.ONE_WIRE_TEMP_5,
-        Environment.ONE_WIRE_TEMP_6,
-        Environment.ONE_WIRE_TEMP_7,
-        Environment.ONE_WIRE_TEMP_8,
-    )
-        .mapIndexed { index, entry ->
-            LegendData(
-                nameRes = Res.string.one_wire_temperature,
-                labelOverride = "1-Wire Temp ${index + 1}",
-                color = entry.color,
-                isLine = true,
-                metricKey = entry,
-            )
-        }
+    Environment.oneWireTemperatures.mapIndexed { index, entry ->
+        LegendData(
+            nameRes = Res.string.one_wire_temperature,
+            channelNumber = index + 1,
+            color = entry.color,
+            isLine = true,
+            metricKey = entry,
+        )
+    }
+
+private val LEGEND_DATA_5 =
+    Environment.adcVoltages.mapIndexed { index, entry ->
+        LegendData(
+            nameRes = Res.string.adc_voltage,
+            channelNumber = index + 1,
+            color = entry.color,
+            isLine = true,
+            metricKey = entry,
+        )
+    }
+
+private const val PRESSURE_DEFAULT_MIN = 950.0
+private const val PRESSURE_DEFAULT_MAX = 1050.0
+private const val PRESSURE_WINDOW_HPA = PRESSURE_DEFAULT_MAX - PRESSURE_DEFAULT_MIN
+
+/**
+ * Y-axis bounds for the barometric-pressure layer, given the plotted data's [dataMin]/[dataMax].
+ *
+ * Uses a fixed [PRESSURE_WINDOW_HPA]-wide window so a given pressure change is always the same visual size (design#53's
+ * "consistent scale"). Near sea level this is the standard [PRESSURE_DEFAULT_MIN]–[PRESSURE_DEFAULT_MAX]; for a node at
+ * altitude (lower station pressure) the same-width window slides down so readings aren't clipped. It only widens past
+ * the fixed width if a single node's readings genuinely span more than the window.
+ */
+internal fun pressureAxisRange(dataMin: Double, dataMax: Double): Pair<Double, Double> = when {
+    dataMax - dataMin > PRESSURE_WINDOW_HPA -> dataMin to dataMax
+    dataMin < PRESSURE_DEFAULT_MIN -> dataMin to (dataMin + PRESSURE_WINDOW_HPA)
+    dataMax > PRESSURE_DEFAULT_MAX -> (dataMax - PRESSURE_WINDOW_HPA) to dataMax
+    else -> PRESSURE_DEFAULT_MIN to PRESSURE_DEFAULT_MAX
+}
+
+/**
+ * Wind speed arrives in m/s; imperial locales chart it in mph to match the cards (design §10.5). Temperatures are
+ * already converted upstream by the view model, so they pass through here unchanged.
+ */
+internal fun chartValue(metric: Environment, telemetry: Telemetry, isImperial: Boolean): Float? =
+    metric.getValue(telemetry)?.let {
+        if (metric == Environment.WIND_SPEED && isImperial) UnitConversions.metersPerSecondToMph(it) else it
+    }
+
+/**
+ * Unit suffix for a plotted metric's axis and marker labels, in the user's display units, or "" for metrics whose unit
+ * would be noise on a shared axis. Includes any leading space, so it appends directly to a formatted value.
+ */
+internal fun unitSuffix(metric: Environment, isFahrenheit: Boolean, isImperial: Boolean): String = when {
+    metric == Environment.TEMPERATURE ||
+        metric == Environment.SOIL_TEMPERATURE ||
+        metric in Environment.oneWireTemperatures -> if (isFahrenheit) "°F" else "°C"
+
+    metric in Environment.adcVoltages -> " V"
+
+    metric == Environment.WIND_SPEED -> if (isImperial) " mph" else " m/s"
+
+    else -> ""
+}
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
@@ -140,6 +187,8 @@ fun EnvironmentMetricsChart(
     modifier: Modifier = Modifier,
     telemetries: List<Telemetry>,
     graphData: EnvironmentGraphingData,
+    isFahrenheit: Boolean,
+    isImperial: Boolean,
     vicoScrollState: VicoScrollState,
     selectedX: Double?,
     onPointSelected: (Double) -> Unit,
@@ -154,7 +203,7 @@ fun EnvironmentMetricsChart(
         val onSurfaceColor = MaterialTheme.colorScheme.onSurface
 
         val allLegendData =
-            (LEGEND_DATA_1 + LEGEND_DATA_2 + LEGEND_DATA_3 + LEGEND_DATA_4).filter {
+            (LEGEND_DATA_1 + LEGEND_DATA_2 + LEGEND_DATA_3 + LEGEND_DATA_4 + LEGEND_DATA_5).filter {
                 graphData.shouldPlot[(it.metricKey as? Environment)?.ordinal ?: 0]
             }
 
@@ -165,7 +214,12 @@ fun EnvironmentMetricsChart(
                 allLegendData.indices.filter { (allLegendData[it].metricKey as? Environment) in hiddenMetrics }.toSet()
             }
 
-        val colorToLabel = allLegendData.associate { it.color to (it.labelOverride ?: stringResource(it.nameRes)) }
+        val colorToLabel = allLegendData.associate { it.color to legendLabel(it) }
+        val colorToUnit =
+            allLegendData.associate { legend ->
+                val metric = legend.metricKey as? Environment
+                legend.color to (metric?.let { unitSuffix(it, isFahrenheit, isImperial) } ?: "")
+            }
 
         val showPressure =
             shouldPlot[Environment.BAROMETRIC_PRESSURE.ordinal] && Environment.BAROMETRIC_PRESSURE !in hiddenMetrics
@@ -201,11 +255,11 @@ fun EnvironmentMetricsChart(
                 }
             }
 
-        LaunchedEffect(pressureData, otherMetricsData) {
+        LaunchedEffect(pressureData, otherMetricsData, isImperial) {
             modelProducer.runTransaction {
                 /* Pressure on its own layer/axis */
                 if (showPressure && pressureData.isNotEmpty()) {
-                    lineSeries {
+                    lineModel {
                         series(
                             x = pressureData.map { it.time },
                             y = pressureData.map { Environment.BAROMETRIC_PRESSURE.getValue(it)!! },
@@ -216,8 +270,11 @@ fun EnvironmentMetricsChart(
                 otherMetrics.forEach { metric ->
                     val metricData = otherMetricsData[metric] ?: emptyList()
                     if (metricData.isNotEmpty()) {
-                        lineSeries {
-                            series(x = metricData.map { it.time }, y = metricData.map { metric.getValue(it)!! })
+                        lineModel {
+                            series(
+                                x = metricData.map { it.time },
+                                y = metricData.map { chartValue(metric, it, isImperial)!! },
+                            )
                         }
                     }
                 }
@@ -229,11 +286,21 @@ fun EnvironmentMetricsChart(
                 valueFormatter =
                 ChartStyling.createColoredMarkerValueFormatter { value, color ->
                     val label = colorToLabel[color] ?: ""
-                    formatString("%s: %.1f", label, value)
+                    formatString("%s: %.1f", label, value) + (colorToUnit[color] ?: "")
                 },
             )
 
-        val pressureRangeProvider = remember { CartesianLayerRangeProvider.fixed(minY = 700.0, maxY = 1200.0) }
+        // Fixed-width pressure window (design#53) so a given change is always the same visual size,
+        // sliding to the node's elevation so high-altitude readings aren't clipped. See [pressureAxisRange].
+        val pressureRangeProvider = remember {
+            object : CartesianLayerRangeProvider {
+                override fun getMinY(minY: Double, maxY: Double, extraStore: ExtraStore) =
+                    pressureAxisRange(minY, maxY).first
+
+                override fun getMaxY(minY: Double, maxY: Double, extraStore: ExtraStore) =
+                    pressureAxisRange(minY, maxY).second
+            }
+        }
         val layers = mutableListOf<LineCartesianLayer>()
         if (showPressure && pressureData.isNotEmpty()) {
             layers.add(
@@ -244,7 +311,7 @@ fun EnvironmentMetricsChart(
                     ),
                     verticalAxisPosition = Axis.Position.Vertical.Start,
                     // Fixed range per Oscar's UX guidance: barometric pressure should NOT autoscale,
-                    // otherwise trends (storms) are invisible. 700-1200 hPa covers sea-level to altitude.
+                    // otherwise trends (storms) are invisible.
                     rangeProvider = pressureRangeProvider,
                 ),
             )
@@ -256,6 +323,7 @@ fun EnvironmentMetricsChart(
                     Environment.RADIATION,
                     Environment.WIND_SPEED,
                     -> CartesianLayerRangeProvider.auto()
+
                     else -> null
                 }
             val lineStyle =
@@ -291,9 +359,14 @@ fun EnvironmentMetricsChart(
                 },
                 endAxis =
                 if (otherMetrics.isNotEmpty()) {
+                    // The end axis is shared, so it can only carry a unit when every metric on it uses the same
+                    // one.
+                    val endAxisUnit =
+                        otherMetrics.map { unitSuffix(it, isFahrenheit, isImperial) }.distinct().singleOrNull()
+                            ?: ""
                     VerticalAxis.rememberEnd(
                         label = ChartStyling.rememberAxisLabel(color = endAxisColor),
-                        valueFormatter = { _, value, _ -> formatString("%.0f", value) },
+                        valueFormatter = { _, value, _ -> formatString("%.0f", value) + endAxisUnit },
                     )
                 } else {
                     null

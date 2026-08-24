@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@ import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
+import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.ModuleConfig
@@ -43,7 +44,11 @@ fun RangeTestConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val rangeTestConfig = state.moduleConfig.range_test ?: ModuleConfig.RangeTestConfig()
     val formState = rememberConfigState(initialValue = rangeTestConfig)
 
+    val isPublicPrimaryChannel = (state.channelList.firstOrNull()?.psk?.size ?: 0) < 2
+    val canConfigure = state.connected && !isPublicPrimaryChannel
+
     RadioConfigScreenList(
+        rebootBehavior = RebootBehavior.ALWAYS,
         title = stringResource(Res.string.range_test),
         onBack = onBack,
         configState = formState,
@@ -51,7 +56,8 @@ fun RangeTestConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val config = ModuleConfig(range_test = it)
+            val safeConfig = if (isPublicPrimaryChannel) it.copy(enabled = false) else it
+            val config = ModuleConfig(range_test = safeConfig)
             viewModel.setModuleConfig(config)
         },
     ) {
@@ -60,7 +66,7 @@ fun RangeTestConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 SwitchPreference(
                     title = stringResource(Res.string.range_test_enabled),
                     checked = formState.value.enabled,
-                    enabled = state.connected,
+                    enabled = canConfigure || formState.value.enabled,
                     onCheckedChange = { formState.value = formState.value.copy(enabled = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
@@ -69,7 +75,7 @@ fun RangeTestConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 DropDownPreference(
                     title = stringResource(Res.string.sender_message_interval_seconds),
                     selectedItem = (formState.value.sender).toLong(),
-                    enabled = state.connected,
+                    enabled = canConfigure,
                     items = rangeItems.map { it.value to it.toDisplayString() },
                     onItemSelected = { formState.value = formState.value.copy(sender = it.toInt()) },
                 )
@@ -77,7 +83,7 @@ fun RangeTestConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 SwitchPreference(
                     title = stringResource(Res.string.save_csv_in_storage_esp32_only),
                     checked = formState.value.save,
-                    enabled = state.connected,
+                    enabled = canConfigure,
                     onCheckedChange = { formState.value = formState.value.copy(save = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )

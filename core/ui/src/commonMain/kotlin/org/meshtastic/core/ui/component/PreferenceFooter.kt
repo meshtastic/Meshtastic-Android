@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 fun PreferenceFooter(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    positiveEnabled: Boolean = true,
     negativeText: String? = null,
     onNegativeClicked: () -> Unit = {},
     positiveText: String? = null,
@@ -52,6 +53,7 @@ fun PreferenceFooter(
                 shapes = ButtonDefaults.shapesFor(mediumHeight),
                 modifier = Modifier.height(mediumHeight).weight(1f),
                 colors = ButtonDefaults.filledTonalButtonColors(),
+                enabled = enabled,
                 onClick = onNegativeClicked,
             ) {
                 Text(text = negativeText, style = ButtonDefaults.textStyleFor(mediumHeight))
@@ -63,7 +65,8 @@ fun PreferenceFooter(
                 shapes = ButtonDefaults.shapesFor(mediumHeight),
                 modifier = Modifier.height(mediumHeight).weight(1f),
                 colors = ButtonDefaults.buttonColors(),
-                onClick = { if (enabled) onPositiveClicked() },
+                enabled = enabled && positiveEnabled,
+                onClick = onPositiveClicked,
             ) {
                 Text(text = positiveText, style = ButtonDefaults.textStyleFor(mediumHeight))
             }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,12 +35,11 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.cancel
+import org.meshtastic.core.resources.import_export_label
 import org.meshtastic.core.resources.import_label
 import org.meshtastic.core.resources.input_channel_url
 import org.meshtastic.core.resources.input_shared_contact_url
-import org.meshtastic.core.resources.nfc_disabled
 import org.meshtastic.core.resources.okay
-import org.meshtastic.core.resources.open_settings
 import org.meshtastic.core.resources.scan_channels_nfc
 import org.meshtastic.core.resources.scan_channels_qr
 import org.meshtastic.core.resources.scan_nfc
@@ -48,10 +47,12 @@ import org.meshtastic.core.resources.scan_nfc_text
 import org.meshtastic.core.resources.scan_shared_contact_nfc
 import org.meshtastic.core.resources.scan_shared_contact_qr
 import org.meshtastic.core.resources.share_channels_qr
+import org.meshtastic.core.resources.share_connected_node
 import org.meshtastic.core.resources.url
 import org.meshtastic.core.ui.icon.LinkIcon
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Nfc
+import org.meshtastic.core.ui.icon.Person
 import org.meshtastic.core.ui.icon.QrCode2
 import org.meshtastic.core.ui.icon.QrCodeScanner
 import org.meshtastic.core.ui.theme.AppTheme
@@ -59,7 +60,6 @@ import org.meshtastic.core.ui.util.LocalBarcodeScannerProvider
 import org.meshtastic.core.ui.util.LocalBarcodeScannerSupported
 import org.meshtastic.core.ui.util.LocalNfcScannerProvider
 import org.meshtastic.core.ui.util.LocalNfcScannerSupported
-import org.meshtastic.core.ui.util.rememberOpenNfcSettings
 import org.meshtastic.proto.SharedContact
 
 /**
@@ -71,6 +71,7 @@ import org.meshtastic.proto.SharedContact
  * @param sharedContact Optional pending [SharedContact] to display an import dialog for.
  * @param onDismissSharedContact Callback to clear the pending shared contact.
  * @param onShareChannels Optional callback to trigger sharing channels.
+ * @param onShareContact Optional callback to trigger sharing the connected node as a contact.
  * @param isContactContext Hint to customize UI strings for contact importing context.
  * @param testTag Optional test tag for UI testing.
  * @param importDialog Composable to display the import dialog. Defaults to [SharedContactImportDialog].
@@ -83,6 +84,7 @@ fun MeshtasticImportFAB(
     sharedContact: SharedContact? = null,
     onDismissSharedContact: () -> Unit = {},
     onShareChannels: (() -> Unit)? = null,
+    onShareContact: (() -> Unit)? = null,
     isContactContext: Boolean = true,
     testTag: String? = null,
     importDialog: @Composable (SharedContact, () -> Unit) -> Unit = { contact, dismiss ->
@@ -95,9 +97,9 @@ fun MeshtasticImportFAB(
     var showUrlDialog by rememberSaveable { mutableStateOf(false) }
     var isNfcScanning by rememberSaveable { mutableStateOf(false) }
     var showNfcDisabledDialog by rememberSaveable { mutableStateOf(false) }
-    val openNfcSettings = rememberOpenNfcSettings()
 
-    val barcodeScanner = LocalBarcodeScannerProvider.current { contents -> contents?.let { onImport(it) } }
+    val barcodeScanner =
+        LocalBarcodeScannerProvider.current { contents -> normalizeImportContents(contents)?.let(onImport) }
     val nfcScanner = LocalNfcScannerProvider.current
     val isNfcSupported = LocalNfcScannerSupported.current
     val isBarcodeSupported = LocalBarcodeScannerSupported.current
@@ -105,10 +107,8 @@ fun MeshtasticImportFAB(
     if (isNfcScanning) {
         nfcScanner(
             { contents ->
-                contents?.let {
-                    onImport(it)
-                    isNfcScanning = false
-                }
+                isNfcScanning = false
+                normalizeImportContents(contents)?.let(onImport)
             },
             {
                 isNfcScanning = false
@@ -119,17 +119,7 @@ fun MeshtasticImportFAB(
     }
 
     if (showNfcDisabledDialog) {
-        MeshtasticDialog(
-            onDismiss = { showNfcDisabledDialog = false },
-            titleRes = Res.string.scan_nfc,
-            messageRes = Res.string.nfc_disabled,
-            onConfirm = {
-                openNfcSettings()
-                showNfcDisabledDialog = false
-            },
-            confirmTextRes = Res.string.open_settings,
-            dismissTextRes = Res.string.cancel,
-        )
+        NfcDisabledDialog(titleRes = Res.string.scan_nfc, onDismiss = { showNfcDisabledDialog = false })
     }
 
     if (showUrlDialog) {
@@ -140,8 +130,10 @@ fun MeshtasticImportFAB(
             ),
             onDismiss = { showUrlDialog = false },
             onConfirm = { contents ->
-                onImport(contents)
-                showUrlDialog = false
+                normalizeImportContents(contents)?.let {
+                    onImport(it)
+                    showUrlDialog = false
+                }
             },
         )
     }
@@ -199,15 +191,31 @@ fun MeshtasticImportFAB(
         )
     }
 
+    onShareContact?.let {
+        items.add(
+            MenuFABItem(
+                label = stringResource(Res.string.share_connected_node),
+                icon = MeshtasticIcons.Person,
+                onClick = it,
+                testTag = "share_contact",
+            ),
+        )
+    }
+
     MenuFAB(
         expanded = expanded,
         onExpandedChange = { expanded = it },
         items = items,
         modifier = modifier.padding(bottom = 16.dp),
-        contentDescription = stringResource(Res.string.import_label),
+        contentDescription = stringResource(importFabContentDescriptionRes(onShareChannels, onShareContact)),
         testTag = testTag,
     )
 }
+
+internal fun normalizeImportContents(contents: String?): String? = contents?.trim()?.takeIf { it.isNotEmpty() }
+
+private fun importFabContentDescriptionRes(onShareChannels: (() -> Unit)?, onShareContact: (() -> Unit)?) =
+    if (onShareChannels != null || onShareContact != null) Res.string.import_export_label else Res.string.import_label
 
 @Composable
 private fun NfcScanningDialog(onDismiss: () -> Unit) {
@@ -242,7 +250,7 @@ private fun InputUrlDialog(title: String, onDismiss: () -> Unit, onConfirm: (Str
 
 @Preview(showBackground = true, name = "Contact Context")
 @Composable
-private fun PreviewImportFABContact() {
+fun PreviewImportFABContact() {
     AppTheme {
         Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
             MeshtasticImportFAB(onImport = {}, modifier = Modifier.align(Alignment.BottomEnd), isContactContext = true)
@@ -252,7 +260,7 @@ private fun PreviewImportFABContact() {
 
 @Preview(showBackground = true, name = "Channel Context with Sharing")
 @Composable
-private fun PreviewImportFABChannel() {
+fun PreviewImportFABChannel() {
     AppTheme {
         Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
             MeshtasticImportFAB(

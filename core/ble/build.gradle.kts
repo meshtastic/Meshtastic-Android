@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,22 +17,16 @@
 
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
-    id("meshtastic.koin")
+    alias(libs.plugins.meshtastic.koin)
 }
 
 kotlin {
-    jvm()
-
-    @Suppress("UnstableApiUsage")
-    android {
-        namespace = "org.meshtastic.core.ble"
-        androidResources.enable = false
-        withHostTest { isIncludeAndroidResources = true }
-    }
+    android { withHostTest { isIncludeAndroidResources = true } }
 
     sourceSets {
         commonMain.dependencies {
-            implementation(projects.core.common)
+            // api: BleScanStartException implements core.common's ExpectedCondition in its public supertype list.
+            api(projects.core.common)
             implementation(projects.core.di)
             implementation(projects.core.model)
 
@@ -46,9 +40,6 @@ kotlin {
             implementation(libs.jetbrains.lifecycle.runtime)
         }
 
-        commonTest.dependencies {
-            implementation(libs.kotlinx.coroutines.test)
-            implementation(projects.core.testing)
-        }
+        commonTest.dependencies { implementation(projects.core.testing) }
     }
 }

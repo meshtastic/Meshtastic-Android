@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,19 @@ import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.Reaction
 import org.meshtastic.proto.ChannelSettings
+import org.meshtastic.proto.MeshPacket
+
+/** Stable identity of one persisted packet row within its owning node database. */
+data class PersistedPacketId(val myNodeNum: Int, val uuid: Long)
+
+/** A persisted packet paired with the stable row identity needed by durable background work. */
+data class PersistedPacket(val id: PersistedPacketId, val packet: DataPacket)
+
+/** Stable identity of one persisted reaction row within its owning node database. */
+data class PersistedReactionId(val myNodeNum: Int, val replyId: Int, val userId: String, val emoji: String)
+
+/** A persisted reaction paired with the exact row identity needed by durable background work. */
+data class PersistedReaction(val id: PersistedReactionId, val reaction: Reaction)
 
 /**
  * Repository interface for managing mesh packets and message history.
@@ -40,8 +53,8 @@ interface PacketRepository {
     /** Reactive flow of all conversation contacts, keyed by their contact identifier. */
     fun getContacts(): Flow<Map<String, DataPacket>>
 
-    /** Reactive paged flow of conversation contacts. */
-    fun getContactsPaged(): Flow<PagingData<DataPacket>>
+    /** Reactive paged flow of conversation contacts, each paired with its stored contact key. */
+    fun getContactsPaged(): Flow<PagingData<Pair<String, DataPacket>>>
 
     /** Returns the total number of messages in a conversation. */
     suspend fun getMessageCount(contact: String): Int
@@ -70,8 +83,30 @@ interface PacketRepository {
     /** Updates the identifier of the last read message in a conversation. */
     suspend fun updateLastReadMessage(contact: String, messageUuid: Long, lastReadTimestamp: Long)
 
-    /** Returns all packets currently queued for transmission. */
-    suspend fun getQueuedPackets(): List<DataPacket>
+    /** Returns all packets currently queued for transmission, including their stable persisted-row identities. */
+    suspend fun getQueuedPackets(): List<PersistedPacket>
+
+    /** Returns all sent packets still awaiting a routing ACK/NAK, including stable persisted-row identities. */
+    suspend fun getEnroutePackets(): List<PersistedPacket>
+
+    /** Returns all sent reactions still awaiting a routing ACK/NAK, including stable persisted-row identities. */
+    suspend fun getEnrouteReactions(): List<PersistedReaction>
+
+    /**
+     * Atomically marks a still-[MessageStatus.ENROUTE] packet as failed with [routingError], leaving it untouched if an
+     * ACK/NAK already resolved it.
+     *
+     * @return true if the packet was timed out.
+     */
+    suspend fun timeOutEnroutePacket(id: PersistedPacketId, routingError: Int): Boolean
+
+    /**
+     * Atomically marks a still-[MessageStatus.ENROUTE] reaction as failed with [routingError], leaving it untouched if
+     * an ACK/NAK already resolved it.
+     *
+     * @return true if a reaction was timed out.
+     */
+    suspend fun timeOutEnrouteReaction(id: PersistedReactionId, routingError: Int): Boolean
 
     /**
      * Persists a packet in the database.
@@ -90,7 +125,7 @@ interface PacketRepository {
         receivedTime: Long,
         read: Boolean = true,
         filtered: Boolean = false,
-    )
+    ): PersistedPacketId
 
     /**
      * Returns a reactive flow of messages for a conversation.
@@ -120,8 +155,54 @@ interface PacketRepository {
     /** Updates the transmission status of a packet. */
     suspend fun updateMessageStatus(d: DataPacket, m: MessageStatus)
 
+    /** Updates exactly one persisted packet row without relying on its mesh packet ID. */
+    suspend fun updateMessageStatus(id: PersistedPacketId, status: MessageStatus)
+
+    /**
+     * Atomically claims a stable row for sending. A returned packet with QUEUED status is owned by this caller and has
+     * already been persisted as ENROUTE; another status means the row was already handled.
+     */
+    suspend fun claimQueuedPacket(id: PersistedPacketId): PersistedPacket?
+
+    /** Legacy equivalent of [claimQueuedPacket], available only when the mesh packet ID identifies exactly one row. */
+    suspend fun claimQueuedPacketByPacketIdIfUnique(packetId: Int): PersistedPacket?
+
+    /** Restores the exact row to QUEUED only if it is still ENROUTE, without overwriting a racing ACK/NAK status. */
+    suspend fun rollbackEnroutePacket(id: PersistedPacketId): Boolean
+
+    /**
+     * Updates the single persisted row matching an outgoing mesh packet and returns its stable identity. Returns null
+     * when the row has not been persisted yet or when the mesh identity is ambiguous, so callers can retry without
+     * updating the wrong packet.
+     */
+    suspend fun updateOutgoingMessageStatus(packet: MeshPacket, status: MessageStatus): PersistedPacketId?
+
+    /**
+     * Resolves the single persisted row matching an outgoing mesh packet without changing its status. Returns null when
+     * the row is not present yet or the available packet identity is ambiguous.
+     */
+    suspend fun resolveOutgoingPacket(packet: MeshPacket): PersistedPacket?
+
+    /**
+     * Atomically resolves and conditionally applies a queue-stage packet status, returning the pre-update row. Returns
+     * null when the row is not persisted yet or when the mesh identity matches more than one row.
+     */
+    suspend fun applyOutgoingQueueStatus(packet: MeshPacket, status: MessageStatus): PersistedPacket?
+
+    /**
+     * Atomic reaction equivalent of [applyOutgoingQueueStatus]. Returns null when no non-received reaction row carries
+     * [packetId] or when [packetId] matches more than one such row.
+     */
+    suspend fun applyOutgoingReactionQueueStatus(packetId: Int, status: MessageStatus): PersistedReaction?
+
     /** Updates the identifier of a persisted packet. */
     suspend fun updateMessageId(d: DataPacket, id: Int)
+
+    /** Persists the on-device translation of a message and switches it to display the translation. */
+    suspend fun setMessageTranslation(uuid: Long, translatedText: String)
+
+    /** Toggles whether a translated message displays the translation or the original text. */
+    suspend fun setShowTranslated(uuid: Long, showTranslated: Boolean)
 
     /** Deletes messages by their database UUIDs. */
     suspend fun deleteMessages(uuidList: List<Long>)
@@ -150,6 +231,11 @@ interface PacketRepository {
     /** Disables or enables message filtering for a specific contact. */
     suspend fun setContactFilteringDisabled(contactKey: String, disabled: Boolean)
 
+    /** Persists unsent composer text for [contactKey] so it survives leaving the screen, and shows in the list. */
+    suspend fun setDraft(contactKey: String, draft: String)
+
+    suspend fun getDraft(contactKey: String): String
+
     /** Clears all packet and message history from the database. */
     suspend fun clearPacketDB()
 
@@ -161,6 +247,12 @@ interface PacketRepository {
 
     /** Returns a packet by its mesh-layer packet ID. */
     suspend fun getPacketByPacketId(packetId: Int): DataPacket?
+
+    /** Returns a packet by mesh-layer ID only when exactly one row has that ID in the current node database. */
+    suspend fun getPacketByPacketIdIfUnique(packetId: Int): DataPacket?
+
+    /** Returns exactly one persisted packet row by its node-scoped database identity. */
+    suspend fun getPacketByPersistedId(id: PersistedPacketId): DataPacket?
 
     /** Returns a packet by its internal database ID. */
     suspend fun getPacketById(id: Int): DataPacket?
@@ -216,4 +308,14 @@ interface PacketRepository {
 
     /** Updates the SFPP status of packets matching the given commit hash. */
     suspend fun updateSFPPStatusByHash(hash: ByteArray, status: MessageStatus, rxTime: Long)
+
+    /**
+     * Searches message history using full-text search.
+     *
+     * @param query The search text (will be sanitized for FTS5).
+     * @param contactKey Optional contact key to scope search to a single conversation.
+     * @param getNode Function to resolve node info by userId.
+     * @return Flow emitting matching messages.
+     */
+    fun searchMessages(query: String, contactKey: String? = null, getNode: (String?) -> Node): Flow<List<Message>>
 }

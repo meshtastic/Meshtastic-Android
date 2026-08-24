@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,9 @@ object UnitConversions {
 
     @Suppress("MagicNumber")
     fun celsiusToFahrenheit(celsius: Float): Float = (celsius * 1.8F) + 32
+
+    @Suppress("MagicNumber")
+    fun metersPerSecondToMph(metersPerSecond: Float): Float = metersPerSecond * 2.23694f
 
     /** Formats temperature as a string with the unit suffix. */
     fun Float.toTempString(isFahrenheit: Boolean): String {

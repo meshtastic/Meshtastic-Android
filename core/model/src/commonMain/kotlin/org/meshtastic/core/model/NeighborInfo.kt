@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
 package org.meshtastic.core.model
 
 import co.touchlab.kermit.Logger
+import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.NeighborInfo
@@ -43,7 +44,7 @@ fun NeighborInfo.getNeighborInfoResponse(getUser: (nodeNum: Int) -> String, head
                 append("• ")
                 append(getUser(n.node_id))
                 append(" (SNR: ")
-                append(n.snr)
+                append(MetricFormatter.snr(n.snr))
                 append(")\n")
             }
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,10 +16,6 @@
  */
 package org.meshtastic.core.model
 
-import org.meshtastic.core.common.util.CommonParcelable
-import org.meshtastic.core.common.util.CommonParcelize
-
-@CommonParcelize
 data class Contact(
     val contactKey: String,
     val shortName: String,
@@ -31,7 +27,9 @@ data class Contact(
     val isMuted: Boolean,
     val isUnmessageable: Boolean,
     val nodeColors: Pair<Int, Int>? = null,
-) : CommonParcelable
+    /** Unsent composer text for this conversation; empty when there is nothing in progress. */
+    val draft: String = "",
+)
 
 data class ContactSettings(
     val contactKey: String,
@@ -40,4 +38,5 @@ data class ContactSettings(
     val lastReadMessageTimestamp: Long? = null,
     val filteringDisabled: Boolean = false,
     val isMuted: Boolean = false,
+    val draft: String = "",
 )

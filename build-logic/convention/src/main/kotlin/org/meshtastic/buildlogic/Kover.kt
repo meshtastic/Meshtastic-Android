@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ package org.meshtastic.buildlogic
 import kotlinx.kover.gradle.plugin.dsl.KoverProjectExtension
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.project
 
 fun Project.configureKover() {
     val isCi = providers.gradleProperty("ci").map { it.toBoolean() }.getOrElse(false)
@@ -58,11 +59,11 @@ fun Project.configureKover() {
 }
 
 /**
- * Configure Kover aggregation in a way that is compatible with Gradle Isolated Projects. Instead of blindly adding all
- * subprojects, we only add those that have the Kover plugin applied.
+ * Configure Kover aggregation for the root project.
+ *
+ * Accepts an explicit list of subproject paths to avoid `subprojects {}` iteration, which is incompatible with Gradle
+ * Isolated Projects. The list should match the modules declared in `settings.gradle.kts`.
  */
-fun Project.configureKoverAggregation() {
-    subprojects.forEach { subproject ->
-        subproject.pluginManager.withPlugin("org.jetbrains.kotlinx.kover") { dependencies.add("kover", subproject) }
-    }
+fun Project.configureKoverAggregation(subprojectPaths: List<String>) {
+    subprojectPaths.forEach { path -> dependencies.add("kover", dependencies.project(path)) }
 }

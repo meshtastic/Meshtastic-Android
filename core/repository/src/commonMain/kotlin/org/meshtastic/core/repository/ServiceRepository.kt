@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,10 +18,10 @@ package org.meshtastic.core.repository
 
 import co.touchlab.kermit.Severity
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.model.service.ServiceAction
+import org.meshtastic.core.model.service.LockdownState
+import org.meshtastic.core.model.service.LockdownTokenInfo
 import org.meshtastic.core.model.service.TracerouteResponse
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.MeshPacket
@@ -41,7 +41,11 @@ import org.meshtastic.proto.MeshPacket
  * @see RadioInterfaceService.connectionState
  */
 @Suppress("TooManyFunctions")
-interface ServiceRepository {
+interface ServiceRepository :
+    ConnectionStateProvider,
+    TracerouteResponseProvider,
+    NeighborInfoResponseProvider,
+    ServiceStateWriter {
     /**
      * Canonical app-level connection state.
      *
@@ -57,7 +61,7 @@ interface ServiceRepository {
      *
      * @see RadioInterfaceService.connectionState
      */
-    val connectionState: StateFlow<ConnectionState>
+    override val connectionState: StateFlow<ConnectionState>
 
     /**
      * Updates the canonical app-level connection state.
@@ -67,7 +71,7 @@ interface ServiceRepository {
      *
      * @param connectionState The new [ConnectionState].
      */
-    fun setConnectionState(connectionState: ConnectionState)
+    override fun setConnectionState(connectionState: ConnectionState)
 
     /**
      * Reactive flow of high-level client notifications.
@@ -81,10 +85,10 @@ interface ServiceRepository {
      *
      * @param notification The [ClientNotification] to display or act upon.
      */
-    fun setClientNotification(notification: ClientNotification?)
+    override fun setClientNotification(notification: ClientNotification?)
 
     /** Clears the current client notification. */
-    fun clearClientNotification()
+    override fun clearClientNotification()
 
     /**
      * Reactive flow of human-readable error messages.
@@ -99,10 +103,10 @@ interface ServiceRepository {
      * @param text The error message text.
      * @param severity The [Severity] level of the error.
      */
-    fun setErrorMessage(text: String, severity: Severity = Severity.Error)
+    override fun setErrorMessage(text: String, severity: Severity)
 
     /** Clears the current error message. */
-    fun clearErrorMessage()
+    override fun clearErrorMessage()
 
     /**
      * Reactive flow of connection progress messages.
@@ -116,14 +120,16 @@ interface ServiceRepository {
      *
      * @param text The progress description (e.g., "Downloading Node DB...").
      */
-    fun setConnectionProgress(text: String)
+    override fun setConnectionProgress(text: String)
 
     /**
      * Flow of all raw [MeshPacket] objects received from the mesh.
      *
-     * Subscribing to this flow allows components to react to any incoming traffic.
+     * Subscribing to this flow allows components to react to any incoming traffic. The underlying implementation may be
+     * backed by a hot shared flow, but this API intentionally exposes only the [Flow] interface. That implementation
+     * detail is hidden via [kotlinx.coroutines.flow.SharedFlow.asFlow] (kotlinx.coroutines 1.11+).
      */
-    val meshPacketFlow: SharedFlow<MeshPacket>
+    val meshPacketFlow: Flow<MeshPacket>
 
     /**
      * Emits a mesh packet into the flow.
@@ -132,41 +138,65 @@ interface ServiceRepository {
      *
      * @param packet The received [MeshPacket].
      */
-    suspend fun emitMeshPacket(packet: MeshPacket)
+    override suspend fun emitMeshPacket(packet: MeshPacket)
 
     /** Reactive flow of the most recent traceroute result. */
-    val tracerouteResponse: StateFlow<TracerouteResponse?>
+    override val tracerouteResponse: StateFlow<TracerouteResponse?>
 
     /**
      * Sets the traceroute response.
      *
      * @param value The [TracerouteResponse] result.
      */
-    fun setTracerouteResponse(value: TracerouteResponse?)
+    override fun setTracerouteResponse(value: TracerouteResponse?)
 
     /** Clears the current traceroute response. */
-    fun clearTracerouteResponse()
+    override fun clearTracerouteResponse()
 
     /** Reactive flow of the most recent neighbor info response (formatted string). */
-    val neighborInfoResponse: StateFlow<String?>
+    override val neighborInfoResponse: StateFlow<String?>
 
     /**
      * Sets the neighbor info response.
      *
      * @param value The human-readable neighbor info string.
      */
-    fun setNeighborInfoResponse(value: String?)
+    override fun setNeighborInfoResponse(value: String?)
 
     /** Clears the current neighbor info response. */
-    fun clearNeighborInfoResponse()
+    override fun clearNeighborInfoResponse()
 
-    /** Flow of service actions requested by the UI (e.g., "Favorite Node", "Mute Node"). */
-    val serviceAction: Flow<ServiceAction>
+    companion object {
+        /**
+         * The cross-module contract for the WiFi/TCP handshake-watchdog recovery progress signal.
+         *
+         * [MeshConnectionManager] writes this exact literal to [connectionProgress] immediately before its recovery
+         * sibling transitions the transport to [ConnectionState.Disconnected], and `ConnectionsViewModel` (and its
+         * tests) compare incoming progress against it to surface `RECONNECTING` UI state instead of a final-feeling
+         * `NOT_CONNECTED`. The literal text and the U+2026 HORIZONTAL ELLIPSIS character MUST match exactly across both
+         * writers and readers — centralizing it here removes the prior cross-module string-contract hazard.
+         */
+        const val RECONNECTING_PROGRESS_TEXT = "Reconnecting\u2026"
+    }
 
-    /**
-     * Dispatches a service action to be handled by the background service.
-     *
-     * @param action The [ServiceAction] to perform.
-     */
-    suspend fun onServiceAction(action: ServiceAction)
+    /** Reactive flow of the current lockdown authentication state. */
+    val lockdownState: StateFlow<LockdownState>
+
+    /** Updates the lockdown state. */
+    fun setLockdownState(state: LockdownState)
+
+    /** Resets lockdown state to [LockdownState.None]. */
+    fun clearLockdownState()
+
+    /** Reactive flow of the most recent lockdown session token info. */
+    val lockdownTokenInfo: StateFlow<LockdownTokenInfo?>
+
+    /** Sets the lockdown token info from a successful UNLOCKED status. */
+    fun setLockdownTokenInfo(info: LockdownTokenInfo?)
+
+    /** True once the passphrase was accepted for the current BLE connection. */
+    val sessionAuthorized: StateFlow<Boolean>
+
+    /** Updates the session authorization flag. */
+    fun setSessionAuthorized(authorized: Boolean)
 }

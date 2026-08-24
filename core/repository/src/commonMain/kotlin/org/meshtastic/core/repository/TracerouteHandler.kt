@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@ interface TracerouteHandler {
      * @param packet The received mesh packet.
      * @param logUuid Optional UUID for the associated log entry.
      * @param logInsertJob Optional job for the log entry insertion, to ensure ordering.
+     * @param session The immutable transport session that admitted [packet].
      */
-    fun handleTraceroute(packet: MeshPacket, logUuid: String?, logInsertJob: Job?)
+    fun handleTraceroute(packet: MeshPacket, logUuid: String?, logInsertJob: Job?, session: RadioSessionContext)
 }

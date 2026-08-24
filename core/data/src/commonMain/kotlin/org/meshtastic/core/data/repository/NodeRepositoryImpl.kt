@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.PROCESS_LIFECYCLE
 import org.meshtastic.core.data.datasource.NodeInfoReadDataSource
 import org.meshtastic.core.data.datasource.NodeInfoWriteDataSource
 import org.meshtastic.core.database.entity.MetadataEntity
@@ -43,15 +44,15 @@ import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.datastore.LocalStatsDataSource
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.NodeSortOption
+import org.meshtastic.core.model.matchesSearch
 import org.meshtastic.core.model.util.onlineTimeThreshold
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.proto.DeviceMetadata
-import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.LocalStats
 import org.meshtastic.proto.User
 
@@ -59,7 +60,7 @@ import org.meshtastic.proto.User
 @Single
 @Suppress("TooManyFunctions")
 class NodeRepositoryImpl(
-    @Named("ProcessLifecycle") private val processLifecycle: Lifecycle,
+    @Named(PROCESS_LIFECYCLE) private val processLifecycle: Lifecycle,
     private val nodeInfoReadDataSource: NodeInfoReadDataSource,
     private val nodeInfoWriteDataSource: NodeInfoWriteDataSource,
     private val dispatchers: CoroutineDispatchers,
@@ -98,7 +99,13 @@ class NodeRepositoryImpl(
         processLifecycle.coroutineScope.launch { localStatsDataSource.setLocalStats(stats) }
     }
 
-    /** A reactive map from nodeNum to [Node] objects, representing the entire mesh. */
+    /**
+     * A reactive map from nodeNum to [Node] objects, representing the entire mesh.
+     *
+     * `SharingStarted.Eagerly` over the process lifecycle means a terminal upstream failure is unrecoverable for the
+     * process — re-navigation cannot restart the sharing coroutine. [NodeInfoReadDataSource] therefore restarts its DB
+     * flows after a recoverable Room pool failure, so this upstream never terminates on a pool wedge (#6608).
+     */
     override val nodeDBbyNum: StateFlow<Map<Int, Node>> =
         nodeInfoReadDataSource
             .nodeDBbyNumFlow()
@@ -138,29 +145,42 @@ class NodeRepositoryImpl(
 
     /** Returns the [Node] associated with a given [userId]. Falls back to a generic node if not found. */
     override fun getNode(userId: String): Node = nodeDBbyNum.value.values.find { it.user.id == userId }
-        ?: Node(num = DataPacket.idToDefaultNodeNum(userId) ?: 0, user = getUser(userId))
+        ?: Node(num = NodeAddress.idToNum(userId) ?: 0, user = getUser(userId))
 
     /** Returns the [User] info for a given [nodeNum]. */
-    override fun getUser(nodeNum: Int): User = getUser(DataPacket.nodeNumToDefaultId(nodeNum))
+    override fun getUser(nodeNum: Int): User = getUser(NodeAddress.numToDefaultId(nodeNum))
+
+    private val last4 = 4
 
     /** Returns the [User] info for a given [userId]. Falls back to a generic user if not found. */
-    override fun getUser(userId: String): User = nodeDBbyNum.value.values.find { it.user.id == userId }?.user
-        ?: User(
-            id = userId,
-            long_name =
-            if (userId == DataPacket.ID_LOCAL) {
-                ourNodeInfo.value?.user?.long_name ?: "Local"
+    override fun getUser(userId: String): User {
+        val found = nodeDBbyNum.value.values.find { it.user.id == userId }?.user
+        if (found != null && found.long_name.isNotBlank() && found.short_name.isNotBlank()) {
+            return found
+        }
+
+        val fallbackId = userId.takeLast(last4)
+        // Single equality check replaces two NodeAddress.fromString calls — getUser is called per paged contact
+        // and per text-message arrival, so the parser allocations add up.
+        val isLocal = userId == NodeAddress.ID_LOCAL
+        val defaultLong =
+            if (isLocal) {
+                ourNodeInfo.value?.user?.long_name?.takeIf { it.isNotBlank() } ?: "Local"
             } else {
-                "Meshtastic ${userId.takeLast(n = 4)}"
-            },
-            short_name =
-            if (userId == DataPacket.ID_LOCAL) {
-                ourNodeInfo.value?.user?.short_name ?: "Local"
+                "Meshtastic $fallbackId"
+            }
+        val defaultShort =
+            if (isLocal) {
+                ourNodeInfo.value?.user?.short_name?.takeIf { it.isNotBlank() } ?: "Local"
             } else {
-                userId.takeLast(n = 4)
-            },
-            hw_model = HardwareModel.UNSET,
-        )
+                fallbackId
+            }
+
+        return found?.copy(
+            long_name = found.long_name.takeIf { it.isNotBlank() } ?: defaultLong,
+            short_name = found.short_name.takeIf { it.isNotBlank() } ?: defaultShort,
+        ) ?: User(id = userId, long_name = defaultLong, short_name = defaultShort)
+    }
 
     /** Returns a flow of nodes filtered and sorted according to the parameters. */
     override fun getNodes(
@@ -172,12 +192,11 @@ class NodeRepositoryImpl(
     ): Flow<List<Node>> = nodeInfoReadDataSource
         .getNodesFlow(
             sort = sort.sqlValue,
-            filter = filter,
             includeUnknown = includeUnknown,
             hopsAwayMax = if (onlyDirect) 0 else -1,
             lastHeardMin = if (onlyOnline) onlineTimeThreshold() else -1,
         )
-        .mapLatest { list -> list.map { it.toModel() } }
+        .mapLatest { list -> list.map { it.toModel() }.filter { node -> node.matchesSearch(filter) } }
         .flowOn(dispatchers.io)
         .conflate()
 
@@ -186,7 +205,7 @@ class NodeRepositoryImpl(
         withContext(dispatchers.io) { nodeInfoWriteDataSource.upsert(node.toEntity()) }
 
     /** Installs initial configuration data (local info and remote nodes) into the database. */
-    override suspend fun installConfig(mi: MyNodeInfo, nodes: List<Node>) = withContext(dispatchers.io) {
+    override suspend fun installConfig(mi: MyNodeInfo, nodes: List<Node>): List<Int> = withContext(dispatchers.io) {
         nodeInfoWriteDataSource.installConfig(mi.toEntity(), nodes.map { it.toEntity() })
     }
 
@@ -198,22 +217,21 @@ class NodeRepositoryImpl(
     override suspend fun clearMyNodeInfo() = withContext(dispatchers.io) { nodeInfoWriteDataSource.clearMyNodeInfo() }
 
     /** Deletes a node and its metadata by [num]. */
-    override suspend fun deleteNode(num: Int) = withContext(dispatchers.io) {
-        nodeInfoWriteDataSource.deleteNode(num)
-        nodeInfoWriteDataSource.deleteMetadata(num)
-    }
+    override suspend fun deleteNode(num: Int) =
+        withContext(dispatchers.io) { nodeInfoWriteDataSource.deleteNodeAndMetadata(num) }
 
     /** Deletes multiple nodes and their metadata. */
-    override suspend fun deleteNodes(nodeNums: List<Int>) = withContext(dispatchers.io) {
-        nodeInfoWriteDataSource.deleteNodes(nodeNums)
-        nodeNums.forEach { nodeInfoWriteDataSource.deleteMetadata(it) }
-    }
+    override suspend fun deleteNodes(nodeNums: List<Int>) =
+        withContext(dispatchers.io) { nodeInfoWriteDataSource.deleteNodesAndMetadata(nodeNums) }
 
     override suspend fun getNodesOlderThan(lastHeard: Int): List<Node> =
         withContext(dispatchers.io) { nodeInfoReadDataSource.getNodesOlderThan(lastHeard).map { it.toModel() } }
 
     override suspend fun getUnknownNodes(): List<Node> =
         withContext(dispatchers.io) { nodeInfoReadDataSource.getUnknownNodes().map { it.toModel() } }
+
+    override suspend fun getNodeDbSnapshot(): Map<Int, Node> =
+        withContext(dispatchers.io) { nodeInfoReadDataSource.getNodeDbSnapshot().mapValues { (_, it) -> it.toModel() } }
 
     /** Persists hardware metadata for a node. */
     override suspend fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata) =
@@ -237,6 +255,9 @@ class NodeRepositoryImpl(
 
     override suspend fun setNodeNotes(num: Int, notes: String) =
         withContext(dispatchers.io) { nodeInfoWriteDataSource.setNodeNotes(num, notes) }
+
+    override suspend fun updatePowerChannelLabel(num: Int, channelIndex: Int, label: String) =
+        withContext(dispatchers.io) { nodeInfoWriteDataSource.updatePowerChannelLabel(num, channelIndex, label) }
 
     private fun MyNodeInfo.toEntity() = MyNodeEntity(
         myNodeNum = myNodeNum,
@@ -271,11 +292,13 @@ class NodeRepositoryImpl(
         isMuted = isMuted,
         environmentTelemetry = org.meshtastic.proto.Telemetry(environment_metrics = environmentMetrics),
         powerTelemetry = org.meshtastic.proto.Telemetry(power_metrics = powerMetrics),
+        airQualityTelemetry = org.meshtastic.proto.Telemetry(air_quality_metrics = airQualityMetrics),
         paxcounter = paxcounter,
         publicKey = publicKey,
         notes = notes,
         manuallyVerified = manuallyVerified,
         nodeStatus = nodeStatus,
         lastTransport = lastTransport,
+        signsPackets = signsPackets,
     )
 }

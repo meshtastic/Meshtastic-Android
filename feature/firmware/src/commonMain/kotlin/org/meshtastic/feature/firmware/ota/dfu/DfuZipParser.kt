@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,8 +48,27 @@ internal fun parseDfuZipEntries(entries: Map<String, ByteArray>): DfuZipPackage 
                 throw DfuException.InvalidPackage("Failed to parse manifest.json: $detail")
             }
 
+    // Require an application image rather than accepting whatever primaryEntry promotes. A bootloader- or
+    // SoftDevice-only package has imageCount == 1, so it slipped past the warning below and was uploaded with
+    // START_DFU's image type hard-coded to APPLICATION and the sd/bl sizes zeroed — the only thing standing between a
+    // renamed OTAFIX .zip and that path is validateNrf52LocalFirmware's "-ota.zip" suffix check. #5916 left multi-image
+    // *sequencing* out of scope; this only refuses what was never flashable.
     val entry =
-        manifest.manifest.primaryEntry ?: throw DfuException.InvalidPackage("No firmware entry found in manifest.json")
+        manifest.manifest.application
+            ?: manifest.manifest.primaryEntry?.let { found ->
+                throw DfuException.InvalidPackage(
+                    "manifest.json declares no 'application' image (found '${found.binFile}'). SoftDevice and " +
+                        "bootloader packages must not be flashed as an application image.",
+                )
+            }
+            ?: throw DfuException.InvalidPackage("No firmware entry found in manifest.json")
+
+    if (manifest.manifest.imageCount > 1) {
+        Logger.w {
+            "DFU: package declares ${manifest.manifest.imageCount} images; flashing only the primary " +
+                "(${entry.binFile}). Combined app+SoftDevice+bootloader packages are not supported."
+        }
+    }
 
     val initPacket =
         entries[entry.datFile] ?: throw DfuException.InvalidPackage("Init packet '${entry.datFile}' not found in zip")

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,6 +38,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.Clipboard
 import androidx.compose.ui.platform.LocalClipboard
@@ -47,6 +48,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
@@ -91,6 +93,10 @@ internal fun InfoItem(
     icon: ImageVector,
     modifier: Modifier = Modifier,
     valueStyle: TextStyle = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+    valueColor: Color = MaterialTheme.colorScheme.onSurface,
+    iconTint: Color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+    iconSize: Dp = 14.dp,
+    onClick: (() -> Unit)? = null,
 ) {
     val clipboard: Clipboard = LocalClipboard.current
     val coroutineScope = rememberCoroutineScope()
@@ -105,7 +111,7 @@ internal fun InfoItem(
             .combinedClickable(
                 onLongClick = { coroutineScope.launch { clipboard.setClipEntry(createClipEntry(value, label)) } },
                 onLongClickLabel = copyLabel, // Clear intent for accessibility
-                onClick = {},
+                onClick = onClick ?: {},
                 role = Role.Button,
             )
             .padding(horizontal = 20.dp, vertical = 8.dp)
@@ -115,12 +121,7 @@ internal fun InfoItem(
             },
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                modifier = Modifier.size(14.dp),
-                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
-            )
+            Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(iconSize), tint = iconTint)
             Spacer(Modifier.width(6.dp))
             Text(
                 text = label,
@@ -130,7 +131,7 @@ internal fun InfoItem(
             )
         }
         Spacer(Modifier.height(4.dp))
-        Text(text = value, style = valueStyle, color = MaterialTheme.colorScheme.onSurface)
+        Text(text = value, style = valueStyle, color = valueColor)
     }
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,8 +41,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.meshtastic.core.ui.theme.AppTheme
 import kotlin.jvm.JvmName
 
 @Composable
@@ -81,7 +83,16 @@ fun <T : Enum<T>> DropDownPreference(
     )
 }
 
-data class DropDownItem<T>(val value: T, val label: String, val icon: ImageVector? = null, val color: Color? = null)
+data class DropDownItem<T>(
+    val value: T,
+    val label: String,
+    val icon: ImageVector? = null,
+    val color: Color? = null,
+    /** When false, the item is shown greyed-out and cannot be selected. */
+    val enabled: Boolean = true,
+    /** Optional stable semantics tag for automated tests. */
+    val testTag: String? = null,
+)
 
 @JvmName("DropDownPreferencePairs")
 @Composable
@@ -169,6 +180,7 @@ fun <T> DropDownPreference(
             ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                 items.forEach { selectionOption ->
                     DropdownMenuItem(
+                        modifier = selectionOption.testTag?.let { Modifier.testTag(it) } ?: Modifier,
                         text = {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 if (selectionOption.icon != null) {
@@ -190,6 +202,7 @@ fun <T> DropDownPreference(
                                 Text(selectionOption.label)
                             }
                         },
+                        enabled = selectionOption.enabled,
                         onClick = {
                             onItemSelected(selectionOption.value)
                             expanded = false
@@ -207,13 +220,15 @@ internal expect fun Enum<*>.isDeprecatedEnumEntry(): Boolean
 
 @Preview(showBackground = true)
 @Composable
-private fun DropDownPreferencePreview() {
-    DropDownPreference(
-        title = "Settings",
-        summary = "Lorem ipsum dolor sit amet",
-        enabled = true,
-        items = listOf(DropDownItem("TEST1", "text1"), DropDownItem("TEST2", "text2")),
-        selectedItem = "TEST2",
-        onItemSelected = {},
-    )
+fun DropDownPreferencePreview() {
+    AppTheme {
+        DropDownPreference(
+            title = "Settings",
+            summary = "Lorem ipsum dolor sit amet",
+            enabled = true,
+            items = listOf(DropDownItem("TEST1", "text1"), DropDownItem("TEST2", "text2")),
+            selectedItem = "TEST2",
+            onItemSelected = {},
+        )
+    }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,19 +16,18 @@
  */
 package org.meshtastic.core.datastore
 
-import androidx.datastore.core.DataStore
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import okio.IOException
-import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.datastore.di.CoreLocalConfigDataStore
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalConfig
 
 /** Class that handles saving and retrieving [LocalConfig] data. */
 @Single
-class LocalConfigDataSource(@Named("CoreLocalConfigDataStore") private val localConfigStore: DataStore<LocalConfig>) {
+class LocalConfigDataSource(private val localConfigStore: CoreLocalConfigDataStore) {
     val localConfigFlow: Flow<LocalConfig> =
         localConfigStore.data.catch { exception ->
             // dataStore.data throws an IOException when an error is encountered when reading data

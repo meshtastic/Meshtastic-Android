@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,8 +22,13 @@ import org.meshtastic.core.resources.UiText
 sealed class ResponseState<out T> {
     data object Empty : ResponseState<Nothing>()
 
-    data class Loading(var total: Int = 1, var completed: Int = 0, var status: String? = null) :
-        ResponseState<Nothing>()
+    data class Loading(
+        var total: Int = 1,
+        var completed: Int = 0,
+        var status: String? = null,
+        /** Whether this request should obscure the current screen with the full-size progress UI. */
+        val showOverlay: Boolean = true,
+    ) : ResponseState<Nothing>()
 
     data class Success<T>(val result: T) : ResponseState<T>()
 

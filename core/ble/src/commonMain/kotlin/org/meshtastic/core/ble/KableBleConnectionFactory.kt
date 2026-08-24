@@ -20,12 +20,12 @@ import kotlinx.coroutines.CoroutineScope
 import org.koin.core.annotation.Single
 
 @Single
-class KableBleConnectionFactory : BleConnectionFactory {
+class KableBleConnectionFactory(private val loggingConfig: BleLoggingConfig) : BleConnectionFactory {
     /**
      * Creates a new [KableBleConnection].
      *
      * [tag] is unused because Kable's own log identifier is set per-peripheral inside [KableBleConnection.connect]
      * using the device address, which provides more precise context than a factory-time tag.
      */
-    override fun create(scope: CoroutineScope, tag: String): BleConnection = KableBleConnection(scope)
+    override fun create(scope: CoroutineScope, tag: String): BleConnection = KableBleConnection(scope, loggingConfig)
 }

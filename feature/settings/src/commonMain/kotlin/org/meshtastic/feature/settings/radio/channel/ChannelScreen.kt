@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,8 +63,9 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.model.util.getChannelUrl
+import org.meshtastic.core.model.defaultPresetFor
 import org.meshtastic.core.navigation.Route
+import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.add
 import org.meshtastic.core.resources.apply
@@ -89,12 +90,12 @@ import org.meshtastic.core.ui.icon.ChevronRight
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.QrCode
 import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
-import org.meshtastic.core.ui.util.rememberQrCodePainter
 import org.meshtastic.core.ui.util.rememberShowToastResource
 import org.meshtastic.feature.settings.channel.ChannelViewModel
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.getNavRouteFrom
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
+import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.feature.settings.radio.component.PacketResponseStateDialog
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
@@ -126,7 +127,7 @@ fun ChannelScreen(
 
     var showResetDialog by rememberSaveable { mutableStateOf(false) }
 
-    var shouldAddChannelsState by remember { mutableStateOf(true) }
+    val channelShareState = rememberChannelShareState()
 
     val requestChannelSet by viewModel.requestChannelSet.collectAsStateWithLifecycle()
 
@@ -135,6 +136,7 @@ fun ChannelScreen(
     if (isWaiting) {
         PacketResponseStateDialog(
             state = radioConfigState.responseState,
+            rebootBehavior = RebootBehavior.NEVER,
             onDismiss = {
                 isWaiting = false
                 radioConfigViewModel.clearPacketResponse()
@@ -199,8 +201,15 @@ fun ChannelScreen(
             messageRes = Res.string.are_you_sure_change_default,
             onConfirm = {
                 Logger.d { "Switching back to default channel" }
+                // The default channel takes the region's preferred preset (e.g. US -> LongTurbo) so its derived name,
+                // hash, and frequency match what a freshly-set-up node in that region would use.
+                val preset = defaultPresetFor(viewModel.region) ?: Channel.default.loraConfig.modem_preset
                 val lora =
-                    (Channel.default.loraConfig).copy(region = viewModel.region, tx_enabled = viewModel.txEnabled)
+                    Channel.default.loraConfig.copy(
+                        region = viewModel.region,
+                        modem_preset = preset,
+                        tx_enabled = viewModel.txEnabled,
+                    )
                 installSettings(Channel.default.settings, lora)
                 showResetDialog = false
             },
@@ -215,8 +224,7 @@ fun ChannelScreen(
 
     if (showShareDialog) {
         ChannelShareDialog(
-            channelSet = selectedChannelSet,
-            shouldAddChannel = shouldAddChannelsState,
+            uriString = channelShareState.uriString(selectedChannelSet),
             onDismiss = { showShareDialog = false },
         )
     }
@@ -250,21 +258,24 @@ fun ChannelScreen(
                         isWaiting = true
                         radioConfigViewModel.setResponseStateLoading(ConfigRoute.CHANNELS)
                     },
-                    onClickShare = { showShareDialog = true },
+                    onClickShare = {
+                        viewModel.trackShare()
+                        showShareDialog = true
+                    },
                 )
             }
             item {
                 SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
                     SegmentedButton(
                         label = { Text(text = stringResource(Res.string.replace)) },
-                        onClick = { shouldAddChannelsState = false },
-                        selected = !shouldAddChannelsState,
+                        onClick = { channelShareState.shouldAdd = false },
+                        selected = !channelShareState.shouldAdd,
                         shape = SegmentedButtonDefaults.itemShape(0, 2),
                     )
                     SegmentedButton(
                         label = { Text(text = stringResource(Res.string.add)) },
-                        onClick = { shouldAddChannelsState = true },
-                        selected = shouldAddChannelsState,
+                        onClick = { channelShareState.shouldAdd = true },
+                        selected = channelShareState.shouldAdd,
                         shape = SegmentedButtonDefaults.itemShape(1, 2),
                     )
                 }
@@ -272,10 +283,11 @@ fun ChannelScreen(
             item {
                 ModemPresetInfo(
                     modemPresetName = modemPresetName,
-                    onClick = {
-                        isWaiting = true
-                        radioConfigViewModel.setResponseStateLoading(ConfigRoute.LORA)
-                    },
+                    // Navigate straight to the LoRa screen: it re-reads the route on entry and renders from the
+                    // connect-time snapshot meanwhile, so pre-fetching behind a progress dialog here bought nothing
+                    // and could strand the user on an empty dialog when the read completed before the dialog
+                    // observed it.
+                    onClick = { onNavigate(SettingsRoute.LoRa) },
                 )
             }
             item {
@@ -295,19 +307,9 @@ fun ChannelScreen(
     }
 }
 
-private const val QR_CODE_SIZE = 960
-
 @Composable
-private fun ChannelShareDialog(channelSet: ChannelSet, shouldAddChannel: Boolean, onDismiss: () -> Unit) {
-    val commonUri = channelSet.getChannelUrl(false, shouldAddChannel)
-    val uriString = commonUri.toString()
-    val qrPainter = rememberQrCodePainter(uriString, QR_CODE_SIZE)
-    QrDialog(
-        title = stringResource(Res.string.share_channels_qr),
-        uriString = uriString,
-        qrPainter = qrPainter,
-        onDismiss = onDismiss,
-    )
+private fun ChannelShareDialog(uriString: String, onDismiss: () -> Unit) {
+    QrDialog(title = stringResource(Res.string.share_channels_qr), uriString = uriString, onDismiss = onDismiss)
 }
 
 @Composable

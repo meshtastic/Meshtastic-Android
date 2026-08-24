@@ -20,17 +20,13 @@ import co.touchlab.kermit.Logger
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.request.head
-import io.ktor.client.statement.bodyAsChannel
 import io.ktor.client.statement.bodyAsText
-import io.ktor.http.contentLength
 import io.ktor.http.isSuccess
-import io.ktor.utils.io.jvm.javaio.toInputStream
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.ioDispatcher
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.model.DeviceHardware
 import java.io.File
 import java.io.FileOutputStream
@@ -40,8 +36,6 @@ import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
-
-private const val DOWNLOAD_BUFFER_SIZE = 8192
 
 @Suppress("TooManyFunctions")
 @Single
@@ -92,33 +86,9 @@ class JvmFirmwareFileHandler(private val client: HttpClient) : FirmwareFileHandl
                 return@withContext null
             }
 
-            val body = response.bodyAsChannel()
-            val contentLength = response.contentLength() ?: -1L
-
             if (!tempDir.exists()) tempDir.mkdirs()
-
             val targetFile = File(tempDir, fileName)
-            body.toInputStream().use { input ->
-                FileOutputStream(targetFile).use { output ->
-                    val buffer = ByteArray(DOWNLOAD_BUFFER_SIZE)
-                    var bytesRead: Int
-                    var totalBytesRead = 0L
-
-                    while (input.read(buffer).also { bytesRead = it } != -1) {
-                        if (!isActive) throw CancellationException("Download cancelled")
-
-                        output.write(buffer, 0, bytesRead)
-                        totalBytesRead += bytesRead
-
-                        if (contentLength > 0) {
-                            onProgress(totalBytesRead.toFloat() / contentLength)
-                        }
-                    }
-                    if (contentLength != -1L && totalBytesRead != contentLength) {
-                        throw IOException("Incomplete download: expected $contentLength bytes, got $totalBytesRead")
-                    }
-                }
-            }
+            downloadResponseToFile(response, targetFile, onProgress)
             targetFile.toFirmwareArtifact()
         }
 
@@ -168,21 +138,32 @@ class JvmFirmwareFileHandler(private val client: HttpClient) : FirmwareFileHandl
         dest.toFirmwareArtifact()
     }
 
-    override suspend fun extractZipEntries(artifact: FirmwareArtifact): Map<String, ByteArray> =
-        withContext(ioDispatcher) {
-            val entries = mutableMapOf<String, ByteArray>()
-            val file = artifact.toLocalFileOrNull() ?: throw IOException("Cannot resolve artifact: ${artifact.uri}")
-            ZipInputStream(file.inputStream()).use { zip ->
-                var entry = zip.nextEntry
-                while (entry != null) {
-                    if (!entry.isDirectory) {
-                        entries[entry.name] = zip.readBytes()
-                    }
-                    zip.closeEntry()
-                    entry = zip.nextEntry
+    override suspend fun getDisplayName(uri: CommonUri): String? = withContext(ioDispatcher) {
+        val localFile = uri.toLocalFileOrNull()
+        localFile?.name?.takeIf { it.isNotBlank() }
+            ?: run {
+                val scheme = runCatching { URI(uri.toString()).scheme }.getOrNull()
+                if (scheme == "file") {
+                    uri.pathSegments.lastOrNull()?.takeIf { it.isNotBlank() }
+                } else {
+                    null
                 }
             }
-            entries
+    }
+
+    /**
+     * Fully expands [artifact] into memory, keyed by entry name.
+     *
+     * Shares [extractZipEntriesBounded] with the Android handler so the two cannot drift — they previously carried
+     * independent copies of this loop, and only one of them got bounded.
+     */
+    override suspend fun extractZipEntries(artifact: FirmwareArtifact): Map<String, ByteArray> =
+        withContext(ioDispatcher) {
+            val file = artifact.toLocalFileOrNull() ?: throw IOException("Cannot resolve artifact: ${artifact.uri}")
+            require(file.length() <= MAX_FIRMWARE_ZIP_BYTES) {
+                "Firmware archive is ${file.length()} bytes, over the $MAX_FIRMWARE_ZIP_BYTES limit"
+            }
+            file.inputStream().use { extractZipEntriesBounded(it) }
         }
 
     override suspend fun copyToUri(source: FirmwareArtifact, destinationUri: CommonUri): Long =
@@ -194,6 +175,40 @@ class JvmFirmwareFileHandler(private val client: HttpClient) : FirmwareFileHandl
             destinationFile.length()
         }
 
+    /**
+     * Always false on desktop: there is no Storage Access Framework to classify a volume with, and the multi-pass UF2
+     * maintenance flow is Android-only. Refusing is the fail-closed answer, consistent with [DesktopFirmwareUsbManager]
+     * reporting the CDC unblock unsupported.
+     */
+    override suspend fun isRemovableDestination(destinationUri: CommonUri): Boolean = false
+
+    override suspend fun isDestinationReadable(destinationUri: CommonUri): Boolean =
+        withContext(ioDispatcher) { destinationUri.toLocalFileOrNull()?.canRead() == true }
+
+    /**
+     * Directory-based equivalents of the Android tree operations. Reachable only if a desktop maintenance flow is ever
+     * built — [isRemovableDestination] refuses first today — but implemented rather than stubbed so the behaviour is
+     * obvious to whoever gets there.
+     */
+    override suspend fun readSiblingText(treeUri: CommonUri, fileName: String): String? = withContext(ioDispatcher) {
+        val dir = treeUri.toLocalFileOrNull() ?: return@withContext null
+        dir.listFiles()
+            ?.firstOrNull { it.name.equals(fileName, ignoreCase = true) }
+            ?.let { file -> safeCatching { file.readText() }.getOrNull() }
+    }
+
+    override suspend fun createDocumentInTree(treeUri: CommonUri, fileName: String, mimeType: String): CommonUri? =
+        withContext(ioDispatcher) {
+            val dir = treeUri.toLocalFileOrNull() ?: return@withContext null
+            safeCatching {
+                dir.mkdirs()
+                val target = File(dir, fileName)
+                target.createNewFile()
+                CommonUri.parse(target.toURI().toString())
+            }
+                .getOrNull()
+        }
+
     @Suppress("NestedBlockDepth", "ReturnCount")
     private fun extractFromZipFile(
         zipFile: File,
@@ -201,7 +216,7 @@ class JvmFirmwareFileHandler(private val client: HttpClient) : FirmwareFileHandl
         fileExtension: String,
         preferredFilename: String?,
     ): FirmwareArtifact? {
-        val target = hardware.platformioTarget.ifEmpty { hardware.hwModelSlug }
+        val target = hardware.effectiveTarget
         if (target.isEmpty() && preferredFilename == null) return null
 
         val targetLowerCase = target.lowercase()

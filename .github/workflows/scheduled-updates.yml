@@ -2,12 +2,21 @@ name: Scheduled Updates (Firmware, Hardware, Translations)
 
 on:
   schedule:
-    - cron: '0 */4 * * *' # Run every 4 hours (was hourly — reduced to cut cascade CI cost)
+    # Hourly. This job is cheap (curl + Crowdin + PR, no build) — the slow
+    # emulator/graph work lives in scheduled-baseline.yml on a daily cron.
+    - cron: '0 * * * *'
   workflow_dispatch:       # Allow manual triggering
+
+# Hourly cron + manual dispatch must never stack: overlapping runs race on the
+# scheduled-updates branch force-push. Later runs queue (at most one pending).
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
 
 jobs:
   update_assets:
     runs-on: ubuntu-24.04
+    timeout-minutes: 30
     if: github.repository == 'meshtastic/Meshtastic-Android'
     permissions:
       contents: write      # To commit files and push branches
@@ -15,46 +24,242 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7.0.1
         with:
           token: ${{ secrets.CROWDIN_GITHUB_TOKEN }}
 
       - name: Update firmware releases list
+        id: firmware
         run: |
-          firmware_file_path="app/src/main/assets/firmware_releases.json"
+          firmware_file_path="androidApp/src/main/assets/firmware_releases.json"
           temp_firmware_file="/tmp/new_firmware_releases.json"
-          
+
           echo "Fetching latest firmware releases..."
-          curl -s --fail https://api.meshtastic.org/github/firmware/list > "$temp_firmware_file"
-          
-          if ! jq empty "$temp_firmware_file" 2>/dev/null; then
-            echo "::error::Firmware API returned invalid JSON data. Skipping firmware update."
+          http_code=$(curl -s -o "$temp_firmware_file" -w '%{http_code}' https://api.meshtastic.org/github/firmware/list || true)
+          http_code="${http_code:-0}"
+
+          if [ "$http_code" -lt 200 ] || [ "$http_code" -ge 300 ]; then
+            echo "::warning::Firmware API returned HTTP $http_code. Skipping firmware update."
+            echo "status=error" >> "$GITHUB_OUTPUT"
+            echo "detail=HTTP $http_code from firmware API" >> "$GITHUB_OUTPUT"
+          elif ! jq empty "$temp_firmware_file" 2>/dev/null; then
+            echo "::warning::Firmware API returned invalid JSON data. Skipping firmware update."
+            echo "status=error" >> "$GITHUB_OUTPUT"
+            echo "detail=Invalid JSON response from firmware API" >> "$GITHUB_OUTPUT"
           else
-            if [ ! -f "$firmware_file_path" ] || ! jq --sort-keys . "$temp_firmware_file" | diff -q - <(jq --sort-keys . "$firmware_file_path"); then
+            # Drop `.pullRequests` before diffing and before writing: the API lists every open
+            # firmware PR, which turns over several times a day, and the app never reads the field
+            # (see NetworkFirmwareReleases). Keeping it churned an hourly PR carrying no real change.
+            if [ ! -f "$firmware_file_path" ] || ! jq --sort-keys 'del(.pullRequests)' "$temp_firmware_file" | diff -q - <(jq --sort-keys 'del(.pullRequests)' "$firmware_file_path"); then
               echo "Changes detected in firmware list or local file missing. Updating $firmware_file_path."
-              cp "$temp_firmware_file" "$firmware_file_path"
+              jq 'del(.pullRequests)' "$temp_firmware_file" > "$firmware_file_path"
+              echo "status=updated" >> "$GITHUB_OUTPUT"
             else
               echo "No changes detected in firmware list."
+              echo "status=unchanged" >> "$GITHUB_OUTPUT"
             fi
           fi
 
       - name: Update hardware list
+        id: hardware
         run: |
-          hardware_file_path="app/src/main/assets/device_hardware.json"
+          hardware_file_path="androidApp/src/main/assets/device_hardware.json"
           temp_hardware_file="/tmp/new_device_hardware.json"
 
           echo "Fetching latest device hardware data..."
-          curl -s --fail https://api.meshtastic.org/resource/deviceHardware > "$temp_hardware_file"
+          http_code=$(curl -s -o "$temp_hardware_file" -w '%{http_code}' https://api.meshtastic.org/resource/deviceHardware || true)
+          http_code="${http_code:-0}"
 
-          if ! jq empty "$temp_hardware_file" 2>/dev/null; then
-            echo "::error::Hardware API returned invalid JSON data. Skipping hardware update."
+          if [ "$http_code" -lt 200 ] || [ "$http_code" -ge 300 ]; then
+            echo "::warning::Hardware API returned HTTP $http_code. Skipping hardware update."
+            echo "status=error" >> "$GITHUB_OUTPUT"
+            echo "detail=HTTP $http_code from hardware API" >> "$GITHUB_OUTPUT"
+          elif ! jq empty "$temp_hardware_file" 2>/dev/null; then
+            echo "::warning::Hardware API returned invalid JSON data. Skipping hardware update."
+            echo "status=error" >> "$GITHUB_OUTPUT"
+            echo "detail=Invalid JSON response from hardware API" >> "$GITHUB_OUTPUT"
           else
             if [ ! -f "$hardware_file_path" ] || ! jq --sort-keys . "$temp_hardware_file" | diff -q - <(jq --sort-keys . "$hardware_file_path"); then
               echo "Changes detected in hardware list or local file missing. Updating $hardware_file_path."
               cp "$temp_hardware_file" "$hardware_file_path"
+              echo "status=updated" >> "$GITHUB_OUTPUT"
             else
               echo "No changes detected in hardware list."
+              echo "status=unchanged" >> "$GITHUB_OUTPUT"
             fi
+          fi
+
+      - name: Update event firmware metadata
+        id: event_firmware
+        run: |
+          event_firmware_file_path="androidApp/src/main/assets/event_firmware.json"
+          temp_event_firmware_file="/tmp/new_event_firmware.json"
+
+          echo "Fetching latest event firmware metadata..."
+          http_code=$(curl -s --max-time 90 -o "$temp_event_firmware_file" -w '%{http_code}' https://api.meshtastic.org/resource/eventFirmware || true)
+          http_code="${http_code:-0}"
+
+          if [ "$http_code" -lt 200 ] || [ "$http_code" -ge 300 ]; then
+            echo "::warning::Event firmware API returned HTTP $http_code. Skipping event firmware update."
+            echo "status=error" >> "$GITHUB_OUTPUT"
+            echo "detail=HTTP $http_code from event firmware API" >> "$GITHUB_OUTPUT"
+          elif ! jq empty "$temp_event_firmware_file" 2>/dev/null; then
+            echo "::warning::Event firmware API returned invalid JSON data. Skipping event firmware update."
+            echo "status=error" >> "$GITHUB_OUTPUT"
+            echo "detail=Invalid JSON response from event firmware API" >> "$GITHUB_OUTPUT"
+          else
+            if [ ! -f "$event_firmware_file_path" ] || ! jq --sort-keys . "$temp_event_firmware_file" | diff -q - <(jq --sort-keys . "$event_firmware_file_path"); then
+              echo "Changes detected in event firmware metadata or local file missing. Updating $event_firmware_file_path."
+              cp "$temp_event_firmware_file" "$event_firmware_file_path"
+              echo "status=updated" >> "$GITHUB_OUTPUT"
+            else
+              echo "No changes detected in event firmware metadata."
+              echo "status=unchanged" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
+      - name: Update device links list
+        id: device_links
+        run: |
+          device_links_file_path="androidApp/src/main/assets/device_links.json"
+          temp_device_links_file="/tmp/new_device_links.json"
+
+          echo "Fetching latest device links..."
+          http_code=$(curl -s --max-time 90 -o "$temp_device_links_file" -w '%{http_code}' https://api.meshtastic.org/resource/deviceLinks || true)
+          http_code="${http_code:-0}"
+
+          if [ "$http_code" -lt 200 ] || [ "$http_code" -ge 300 ]; then
+            echo "::warning::Device links API returned HTTP $http_code. Skipping device links update."
+            echo "status=error" >> "$GITHUB_OUTPUT"
+            echo "detail=HTTP $http_code from device links API" >> "$GITHUB_OUTPUT"
+          elif ! jq empty "$temp_device_links_file" 2>/dev/null; then
+            echo "::warning::Device links API returned invalid JSON data. Skipping device links update."
+            echo "status=error" >> "$GITHUB_OUTPUT"
+            echo "detail=Invalid JSON response from device links API" >> "$GITHUB_OUTPUT"
+          else
+            # This file is only the offline seed for the runtime cache, which refreshes
+            # itself from the same endpoint on a TTL. Guard against a degraded response
+            # (HTTP 200 but empty catalog) wiping the seed — mirrors the runtime, which
+            # ignores empty responses for the same reason.
+            link_count=$(jq -r 'if (.links | type) == "array" then (.links | length) else 0 end' "$temp_device_links_file" 2>/dev/null || echo 0)
+            if [ "$link_count" -eq 0 ]; then
+              echo "::warning::Device links API returned no links. Skipping to protect the bundled seed."
+              echo "status=error" >> "$GITHUB_OUTPUT"
+              echo "detail=empty links array from device links API" >> "$GITHUB_OUTPUT"
+            # Diff on `.links` only: the envelope carries a server-set `generatedAt`
+            # timestamp that changes on every response, so an hourly whole-document diff
+            # would open a churn PR even when the catalog is unchanged.
+            elif [ ! -f "$device_links_file_path" ] || ! jq --sort-keys '.links' "$temp_device_links_file" | diff -q - <(jq --sort-keys '.links' "$device_links_file_path"); then
+              echo "Changes detected in device links or local file missing. Updating $device_links_file_path."
+              # Pretty-print so the committed asset stays readable and future diffs stay
+              # minimal regardless of the API's response formatting.
+              jq . "$temp_device_links_file" > "$device_links_file_path"
+              echo "status=updated" >> "$GITHUB_OUTPUT"
+            else
+              echo "No changes detected in device links."
+              echo "status=unchanged" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
+      - name: Update bootloader OTA quirks
+        id: bootloader_quirks
+        run: |
+          quirks_file_path="androidApp/src/main/assets/device_bootloader_ota_quirks.json"
+          temp_quirks_file="/tmp/new_device_bootloader_ota_quirks.json"
+
+          echo "Fetching latest bootloader OTA quirks..."
+          http_code=$(curl -s --max-time 90 -o "$temp_quirks_file" -w '%{http_code}' https://api.meshtastic.org/resource/bootloaderOtaQuirks || true)
+          http_code="${http_code:-0}"
+
+          if [ "$http_code" -lt 200 ] || [ "$http_code" -ge 300 ]; then
+            echo "::warning::Bootloader quirks API returned HTTP $http_code. Skipping quirks update."
+            echo "status=error" >> "$GITHUB_OUTPUT"
+            echo "detail=HTTP $http_code from bootloader quirks API" >> "$GITHUB_OUTPUT"
+          elif ! jq empty "$temp_quirks_file" 2>/dev/null; then
+            echo "::warning::Bootloader quirks API returned invalid JSON data. Skipping quirks update."
+            echo "status=error" >> "$GITHUB_OUTPUT"
+            echo "detail=Invalid JSON response from bootloader quirks API" >> "$GITHUB_OUTPUT"
+          else
+            # This file is the offline seed for the runtime cache. Its softDeviceVariants
+            # table gates a destructive flash and must fail closed, so a degraded response
+            # (HTTP 200 but an empty table) must never wipe the seed.
+            variant_count=$(jq -r 'if (.softDeviceVariants | type) == "array" then (.softDeviceVariants | length) else 0 end' "$temp_quirks_file" 2>/dev/null || echo 0)
+            if [ "$variant_count" -eq 0 ]; then
+              echo "::warning::Bootloader quirks API returned no softDeviceVariants. Skipping to protect the bundled seed."
+              echo "status=error" >> "$GITHUB_OUTPUT"
+              echo "detail=empty softDeviceVariants from bootloader quirks API" >> "$GITHUB_OUTPUT"
+            elif [ ! -f "$quirks_file_path" ] || ! jq --sort-keys . "$temp_quirks_file" | diff -q - <(jq --sort-keys . "$quirks_file_path"); then
+              echo "Changes detected in bootloader quirks or local file missing. Updating $quirks_file_path."
+              jq . "$temp_quirks_file" > "$quirks_file_path"
+              echo "status=updated" >> "$GITHUB_OUTPUT"
+            else
+              echo "No changes detected in bootloader quirks."
+              echo "status=unchanged" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
+      - name: Update maintenance UF2 manifest
+        id: maintenance_uf2
+        run: |
+          uf2_file_path="androidApp/src/main/assets/maintenance_uf2.json"
+          temp_uf2_file="/tmp/new_maintenance_uf2.json"
+
+          echo "Fetching latest maintenance UF2 manifest..."
+          http_code=$(curl -s --max-time 90 -o "$temp_uf2_file" -w '%{http_code}' https://api.meshtastic.org/resource/maintenanceUf2 || true)
+          http_code="${http_code:-0}"
+
+          if [ "$http_code" -lt 200 ] || [ "$http_code" -ge 300 ]; then
+            echo "::warning::Maintenance UF2 API returned HTTP $http_code. Skipping manifest update."
+            echo "status=error" >> "$GITHUB_OUTPUT"
+            echo "detail=HTTP $http_code from maintenance UF2 API" >> "$GITHUB_OUTPUT"
+          elif ! jq empty "$temp_uf2_file" 2>/dev/null; then
+            echo "::warning::Maintenance UF2 API returned invalid JSON data. Skipping manifest update."
+            echo "status=error" >> "$GITHUB_OUTPUT"
+            echo "detail=Invalid JSON response from maintenance UF2 API" >> "$GITHUB_OUTPUT"
+          else
+            # The manifest's digest-pinned images gate destructive maintenance flashes;
+            # a degraded response (missing erase set or empty board map) must never
+            # replace the bundled seed.
+            board_count=$(jq -r 'if (.otafixByBoardId | type) == "object" then (.otafixByBoardId | length) else 0 end' "$temp_uf2_file" 2>/dev/null || echo 0)
+            has_erase=$(jq -r 'if (.erase | type) == "object" then 1 else 0 end' "$temp_uf2_file" 2>/dev/null || echo 0)
+            if [ "$board_count" -eq 0 ] || [ "$has_erase" -ne 1 ]; then
+              echo "::warning::Maintenance UF2 API response is missing the erase set or board map. Skipping to protect the bundled seed."
+              echo "status=error" >> "$GITHUB_OUTPUT"
+              echo "detail=degraded maintenance UF2 manifest (no erase set or empty board map)" >> "$GITHUB_OUTPUT"
+            elif [ ! -f "$uf2_file_path" ] || ! jq --sort-keys . "$temp_uf2_file" | diff -q - <(jq --sort-keys . "$uf2_file_path"); then
+              echo "Changes detected in maintenance UF2 manifest or local file missing. Updating $uf2_file_path."
+              jq . "$temp_uf2_file" > "$uf2_file_path"
+              echo "status=updated" >> "$GITHUB_OUTPUT"
+            else
+              echo "No changes detected in maintenance UF2 manifest."
+              echo "status=unchanged" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
+      - name: Refresh Obtainium configs and deep links
+        id: obtainium
+        env:
+          # Only for the API rate limit; the releases endpoint is public.
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          # Regenerates the deep-link tables and import files, then probes the live
+          # releases to confirm every apkFilterRegEx still matches published assets.
+          # A non-zero exit means an asset was renamed and the configs are broken —
+          # surface it as an error and skip the update rather than committing configs
+          # that resolve to nothing. Unreachable API exits 0 without touching files.
+          if python3 obtainium/generate-links.py --refresh; then
+            if git diff --quiet -- README.md docs/en/developer/test-builds.md obtainium; then
+              echo "No changes detected in Obtainium configs."
+              echo "status=unchanged" >> "$GITHUB_OUTPUT"
+            else
+              echo "Obtainium configs or channel status changed."
+              echo "status=updated" >> "$GITHUB_OUTPUT"
+            fi
+          else
+            echo "::warning::Obtainium config refresh failed — see the error above."
+            echo "status=error" >> "$GITHUB_OUTPUT"
+            echo "detail=an apkFilterRegEx no longer matches the published release assets" >> "$GITHUB_OUTPUT"
+            git checkout -- README.md docs/en/developer/test-builds.md obtainium
           fi
 
       - name: Sync with Crowdin
@@ -79,67 +284,157 @@ jobs:
           CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
 
       - name: Fix file permissions
-        run: sudo chown -R $USER:$USER .
+        run: sudo chown -R "$USER:$USER" .
 
-      - name: Gradle Setup
-        uses: ./.github/actions/gradle-setup
-        with:
-          gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-          cache_read_only: 'false'
-
-      - name: Update Graphs
-        run: ./gradlew graphUpdate
+      # Early warning for overlength store-listing translations just pulled from
+      # Crowdin. Non-blocking on purpose: a hard failure here would abort the job
+      # and stop the PR from being created. The hard gate is the check-metadata
+      # job in pull-request.yml, which runs against the PR this workflow opens.
+      - name: Check store metadata lengths
         continue-on-error: true
+        run: python3 scripts/check-metadata-length.py
+
+      - name: Build PR body
+        id: pr_body
+        env:
+          # Hoisted into env: (not interpolated directly in the script) so no step output can inject shell — see
+          # zizmor template-injection. Values are fixed strings today, but detail may carry API text in future.
+          FIRMWARE_STATUS: ${{ steps.firmware.outputs.status }}
+          FIRMWARE_DETAIL: ${{ steps.firmware.outputs.detail }}
+          HARDWARE_STATUS: ${{ steps.hardware.outputs.status }}
+          HARDWARE_DETAIL: ${{ steps.hardware.outputs.detail }}
+          EVENT_FIRMWARE_STATUS: ${{ steps.event_firmware.outputs.status }}
+          EVENT_FIRMWARE_DETAIL: ${{ steps.event_firmware.outputs.detail }}
+          DEVICE_LINKS_STATUS: ${{ steps.device_links.outputs.status }}
+          DEVICE_LINKS_DETAIL: ${{ steps.device_links.outputs.detail }}
+          BOOTLOADER_QUIRKS_STATUS: ${{ steps.bootloader_quirks.outputs.status }}
+          BOOTLOADER_QUIRKS_DETAIL: ${{ steps.bootloader_quirks.outputs.detail }}
+          MAINTENANCE_UF2_STATUS: ${{ steps.maintenance_uf2.outputs.status }}
+          MAINTENANCE_UF2_DETAIL: ${{ steps.maintenance_uf2.outputs.detail }}
+          OBTAINIUM_STATUS: ${{ steps.obtainium.outputs.status }}
+          OBTAINIUM_DETAIL: ${{ steps.obtainium.outputs.detail }}
+        run: |
+          firmware_status="$FIRMWARE_STATUS"
+          firmware_detail="$FIRMWARE_DETAIL"
+          hardware_status="$HARDWARE_STATUS"
+          hardware_detail="$HARDWARE_DETAIL"
+          event_firmware_status="$EVENT_FIRMWARE_STATUS"
+          event_firmware_detail="$EVENT_FIRMWARE_DETAIL"
+          device_links_status="$DEVICE_LINKS_STATUS"
+          device_links_detail="$DEVICE_LINKS_DETAIL"
+          bootloader_quirks_status="$BOOTLOADER_QUIRKS_STATUS"
+          bootloader_quirks_detail="$BOOTLOADER_QUIRKS_DETAIL"
+          maintenance_uf2_status="$MAINTENANCE_UF2_STATUS"
+          maintenance_uf2_detail="$MAINTENANCE_UF2_DETAIL"
+          obtainium_status="$OBTAINIUM_STATUS"
+          obtainium_detail="$OBTAINIUM_DETAIL"
+
+          body="This PR includes automated updates from the scheduled workflow:"
+          body+=$'\n'
+
+          # Firmware status
+          case "$firmware_status" in
+            updated)   body+=$'\n'"- ✅ \`firmware_releases.json\` updated from the Meshtastic API." ;;
+            unchanged) body+=$'\n'"- ✔️ \`firmware_releases.json\` checked — no changes detected." ;;
+            error)     body+=$'\n'"- ⚠️ \`firmware_releases.json\` skipped — ${firmware_detail}." ;;
+            *)         body+=$'\n'"- ❓ \`firmware_releases.json\` — unknown status." ;;
+          esac
+
+          # Hardware status
+          case "$hardware_status" in
+            updated)   body+=$'\n'"- ✅ \`device_hardware.json\` updated from the Meshtastic API." ;;
+            unchanged) body+=$'\n'"- ✔️ \`device_hardware.json\` checked — no changes detected." ;;
+            error)     body+=$'\n'"- ⚠️ \`device_hardware.json\` skipped — ${hardware_detail}." ;;
+            *)         body+=$'\n'"- ❓ \`device_hardware.json\` — unknown status." ;;
+          esac
+
+          # Event firmware status
+          case "$event_firmware_status" in
+            updated)   body+=$'\n'"- ✅ \`event_firmware.json\` updated from the Meshtastic API." ;;
+            unchanged) body+=$'\n'"- ✔️ \`event_firmware.json\` checked — no changes detected." ;;
+            error)     body+=$'\n'"- ⚠️ \`event_firmware.json\` skipped — ${event_firmware_detail}." ;;
+            *)         body+=$'\n'"- ❓ \`event_firmware.json\` — unknown status." ;;
+          esac
+
+          # Device links status
+          case "$device_links_status" in
+            updated)   body+=$'\n'"- ✅ \`device_links.json\` updated from the Meshtastic API." ;;
+            unchanged) body+=$'\n'"- ✔️ \`device_links.json\` checked — no changes detected." ;;
+            error)     body+=$'\n'"- ⚠️ \`device_links.json\` skipped — ${device_links_detail}." ;;
+            *)         body+=$'\n'"- ❓ \`device_links.json\` — unknown status." ;;
+          esac
+
+          # Bootloader OTA quirks status
+          case "$bootloader_quirks_status" in
+            updated)   body+=$'\n'"- ✅ \`device_bootloader_ota_quirks.json\` updated from the Meshtastic API." ;;
+            unchanged) body+=$'\n'"- ✔️ \`device_bootloader_ota_quirks.json\` checked — no changes detected." ;;
+            error)     body+=$'\n'"- ⚠️ \`device_bootloader_ota_quirks.json\` skipped — ${bootloader_quirks_detail}." ;;
+            *)         body+=$'\n'"- ❓ \`device_bootloader_ota_quirks.json\` — unknown status." ;;
+          esac
+
+          # Maintenance UF2 manifest status
+          case "$maintenance_uf2_status" in
+            updated)   body+=$'\n'"- ✅ \`maintenance_uf2.json\` updated from the Meshtastic API." ;;
+            unchanged) body+=$'\n'"- ✔️ \`maintenance_uf2.json\` checked — no changes detected." ;;
+            error)     body+=$'\n'"- ⚠️ \`maintenance_uf2.json\` skipped — ${maintenance_uf2_detail}." ;;
+            *)         body+=$'\n'"- ❓ \`maintenance_uf2.json\` — unknown status." ;;
+          esac
+
+          # Obtainium configs / deep links
+          case "$obtainium_status" in
+            updated)   body+=$'\n'"- ✅ Obtainium deep links and import files regenerated (channel status changed)." ;;
+            unchanged) body+=$'\n'"- ✔️ Obtainium configs checked against the live releases — no changes detected." ;;
+            error)     body+=$'\n'"- ⚠️ Obtainium configs skipped — ${obtainium_detail}." ;;
+            *)         body+=$'\n'"- ❓ Obtainium configs — unknown status." ;;
+          esac
+
+          # Crowdin (always attempted)
+          body+=$'\n'"- Source strings were uploaded to Crowdin."
+          body+=$'\n'"- Latest translations were downloaded from Crowdin (if available)."
+          body+=$'\n'
+          body+=$'\n'"Please review the changes."
+
+          # Write multi-line body to output
+          {
+            echo "content<<PREOF"
+            echo "$body"
+            echo "PREOF"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Create Pull Request if changes occurred
         uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.CROWDIN_GITHUB_TOKEN }}
           commit-message: |
-            chore: Scheduled updates (Firmware, Hardware, Translations, Graphs)
+            chore: Scheduled updates (Firmware, Hardware, Translations)
 
             Automated updates for:
             - Firmware releases list
             - Device hardware list
+            - Event firmware metadata
+            - Device links list
             - Crowdin source string uploads
             - Crowdin translation downloads
-            - Module dependency graphs
-          title: 'chore: Scheduled updates (Firmware, Hardware, Translations, Graphs)'
-          body: |
-            This PR includes automated updates from the scheduled workflow:
-
-            - Updated `firmware_releases.json` from the Meshtastic API (if changed).
-            - Updated `device_hardware.json` from the Meshtastic API (if changed).
-            - Source strings were uploaded to Crowdin.
-            - Latest translations were downloaded from Crowdin (if available).
-            - Updated module dependency graphs in README.md files (if changed).
-
-            Please review the changes.
+            - Obtainium deep links and import files
+          title: 'chore: Scheduled updates (Firmware, Hardware, Translations)'
+          body: ${{ steps.pr_body.outputs.content }}
           branch: 'scheduled-updates'
           base: 'main'
           delete-branch: true
           add-paths: |
-            app/src/main/assets/firmware_releases.json
-            app/src/main/assets/device_hardware.json
+            androidApp/src/main/assets/firmware_releases.json
+            androidApp/src/main/assets/device_hardware.json
+            androidApp/src/main/assets/event_firmware.json
+            androidApp/src/main/assets/device_links.json
+            androidApp/src/main/assets/device_bootloader_ota_quirks.json
+            androidApp/src/main/assets/maintenance_uf2.json
             fastlane/metadata/android/**
             **/strings.xml
-            **/README.md
+            docs/**/*.md
+            README.md
+            obtainium/**
           labels: |
             automation
             l10n
             firmware
             hardware
-
-  check-workflow-status:
-    name: Check Workflow Status
-    runs-on: ubuntu-24.04-arm
-    permissions: {}
-    needs:
-        - update_assets
-    if: always()
-    steps:
-      - name: Check Workflow Status
-        if: "contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')"
-        run: |
-          echo "One of the dependent jobs failed or was cancelled. Failing the workflow."
-          exit 1

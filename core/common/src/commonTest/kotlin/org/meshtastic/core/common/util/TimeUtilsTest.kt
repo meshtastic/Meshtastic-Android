@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
 package org.meshtastic.core.common.util
 
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class TimeUtilsTest {
@@ -31,5 +32,23 @@ class TimeUtilsTest {
     fun testNowSeconds() {
         val start = nowSeconds
         assertTrue(start > 0)
+    }
+
+    @Test
+    fun clampTimestampToNow_pastTimestamp_unchanged() {
+        val past = (nowSeconds - 3600).toInt()
+        assertEquals(past, clampTimestampToNow(past))
+    }
+
+    @Test
+    fun clampTimestampToNow_futureTimestamp_clampedToNow() {
+        val future = (nowSeconds + 86400).toInt()
+        val clamped = clampTimestampToNow(future)
+        assertTrue(clamped <= nowSeconds.toInt())
+    }
+
+    @Test
+    fun clampTimestampToNow_zero_unchanged() {
+        assertEquals(0, clampTimestampToNow(0))
     }
 }

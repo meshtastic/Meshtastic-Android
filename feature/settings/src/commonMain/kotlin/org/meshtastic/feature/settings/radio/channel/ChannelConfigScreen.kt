@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,12 +34,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -65,11 +67,13 @@ import org.meshtastic.core.ui.component.rememberDragDropState
 import org.meshtastic.core.ui.icon.Add
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
+import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.feature.settings.radio.ResponseState
 import org.meshtastic.feature.settings.radio.channel.component.ChannelCard
 import org.meshtastic.feature.settings.radio.channel.component.ChannelConfigHeader
 import org.meshtastic.feature.settings.radio.channel.component.ChannelLegend
 import org.meshtastic.feature.settings.radio.channel.component.ChannelLegendDialog
+import org.meshtastic.feature.settings.radio.channel.component.ChannelPskEditState
 import org.meshtastic.feature.settings.radio.channel.component.EditChannelDialog
 import org.meshtastic.feature.settings.radio.component.LoadingOverlay
 import org.meshtastic.feature.settings.radio.component.PacketResponseStateDialog
@@ -89,13 +93,18 @@ fun ChannelConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
             maxChannels = viewModel.maxChannels,
             firmwareVersion = state.metadata?.firmware_version ?: "0.0.0",
             enabled = state.connected,
+            isFetching = state.responseState is ResponseState.Loading,
             onPositiveClicked = { channelListInput -> viewModel.updateChannels(channelListInput, state.channelList) },
         )
 
         LoadingOverlay(state = state.responseState)
 
         if (state.responseState is ResponseState.Success || state.responseState is ResponseState.Error) {
-            PacketResponseStateDialog(state = state.responseState, onDismiss = viewModel::clearPacketResponse)
+            PacketResponseStateDialog(
+                state = state.responseState,
+                onDismiss = viewModel::clearPacketResponse,
+                rebootBehavior = RebootBehavior.NEVER,
+            )
         }
     }
 }
@@ -110,6 +119,7 @@ private fun ChannelConfigScreen(
     maxChannels: Int = 8,
     firmwareVersion: String,
     enabled: Boolean,
+    isFetching: Boolean = false,
     onPositiveClicked: (List<ChannelSettings>) -> Unit,
 ) {
     val primarySettings = settingsList.getOrNull(0) ?: return
@@ -122,12 +132,29 @@ private fun ChannelConfigScreen(
         rememberSaveable(saver = listSaver(save = { it.toList() }, restore = { it.toMutableStateList() })) {
             settingsList.toMutableStateList()
         }
+    val pskEditStatesInput =
+        rememberSaveable(saver = channelPskEditStatesSaver) {
+            List(settingsListInput.size) { ChannelPskEditState() }.toMutableStateList()
+        }
+
+    // A remote channel fetch streams channels in one response at a time AFTER the editor first composes
+    // (composition starts as soon as channel 0 lands), so the one-shot seed above goes stale and the list
+    // would only show the channels present at seed time (#6317 — the footer Cancel's replaceWith was the
+    // accidental workaround). Adopt the authoritative list while the fetch is in flight: the loading
+    // overlay blocks input during the fetch, so there are no user edits to clobber.
+    LaunchedEffect(settingsList, isFetching) {
+        if (isFetching) {
+            settingsListInput.replaceWith(settingsList)
+            pskEditStatesInput.replaceAll(settingsList.size, ChannelPskEditState())
+        }
+    }
 
     val listState = rememberLazyListState()
     val dragDropState =
         rememberDragDropState(listState) { fromIndex, toIndex ->
             if (toIndex in settingsListInput.indices && fromIndex in settingsListInput.indices) {
-                settingsListInput.apply { add(toIndex, removeAt(fromIndex)) }
+                settingsListInput.move(fromIndex, toIndex)
+                pskEditStatesInput.move(fromIndex, toIndex)
             }
         }
 
@@ -143,11 +170,14 @@ private fun ChannelConfigScreen(
         EditChannelDialog(
             channelSettings = settingsListInput.getOrNull(index) ?: ChannelSettings(),
             modemPresetName = modemPresetName,
-            onAddClick = {
+            initialPskEditState = pskEditStatesInput.getOrElse(index) { ChannelPskEditState() },
+            onAddClick = { settings, pskEditState ->
                 if (settingsListInput.size > index) {
-                    settingsListInput[index] = it
+                    settingsListInput[index] = settings
+                    pskEditStatesInput[index] = pskEditState
                 } else {
-                    settingsListInput.add(it)
+                    settingsListInput.add(settings)
+                    pskEditStatesInput.add(pskEditState)
                 }
                 showEditChannelDialog = null
             },
@@ -176,7 +206,8 @@ private fun ChannelConfigScreen(
                 FloatingActionButton(
                     onClick = {
                         if (maxChannels > settingsListInput.size) {
-                            settingsListInput.add(ChannelSettings(psk = Channel.default.settings.psk))
+                            settingsListInput.add(Channel.default.settings)
+                            pskEditStatesInput.add(ChannelPskEditState(canGeneratePskForName = true))
                             showEditChannelDialog = settingsListInput.lastIndex
                         }
                     },
@@ -231,7 +262,10 @@ private fun ChannelConfigScreen(
                             channelSettings = channel,
                             loraConfig = loraConfig,
                             onEditClick = { showEditChannelDialog = index },
-                            onDeleteClick = { settingsListInput.removeAt(index) },
+                            onDeleteClick = {
+                                settingsListInput.removeAt(index)
+                                pskEditStatesInput.removeAt(index)
+                            },
                             sharesLocation = locationChannel == index,
                         )
                     }
@@ -242,13 +276,16 @@ private fun ChannelConfigScreen(
                             negativeText = stringResource(Res.string.cancel),
                             onNegativeClicked = {
                                 focusManager.clearFocus()
-                                settingsListInput.clear()
-                                settingsListInput.addAll(settingsList)
+                                settingsListInput.replaceWith(settingsList)
+                                pskEditStatesInput.replaceAll(settingsList.size, ChannelPskEditState())
                             },
                             positiveText = stringResource(Res.string.send),
                             onPositiveClicked = {
                                 focusManager.clearFocus()
-                                onPositiveClicked(settingsListInput)
+                                val committedSettings = settingsListInput.toList()
+                                onPositiveClicked(committedSettings)
+                                settingsListInput.replaceWith(committedSettings)
+                                pskEditStatesInput.replaceAll(committedSettings.size, ChannelPskEditState())
                             },
                         )
                     }
@@ -272,6 +309,44 @@ private fun ChannelConfigScreen(
         }
     }
 }
+
+private val channelPskEditStatesSaver =
+    listSaver<SnapshotStateList<ChannelPskEditState>, Int>(
+        save = { states -> states.map { it.toSaveableFlags() } },
+        restore = { flags -> flags.map { it.toChannelPskEditState() }.toMutableStateList() },
+    )
+
+internal fun <T> MutableList<T>.move(fromIndex: Int, toIndex: Int) {
+    add(toIndex, removeAt(fromIndex))
+}
+
+internal fun <T> MutableList<T>.replaceWith(values: List<T>) {
+    clear()
+    addAll(values)
+}
+
+internal fun MutableList<ChannelPskEditState>.replaceAll(size: Int, value: ChannelPskEditState) {
+    clear()
+    repeat(size) { add(value) }
+}
+
+internal fun ChannelPskEditState.toSaveableFlags(): Int {
+    var flags = 0
+    if (canGeneratePskForName) flags = flags or CAN_GENERATE_PSK_FOR_NAME_FLAG
+    if (generatedPskForName) flags = flags or GENERATED_PSK_FOR_NAME_FLAG
+    if (pskExplicitlyEdited) flags = flags or PSK_EXPLICITLY_EDITED_FLAG
+    return flags
+}
+
+internal fun Int.toChannelPskEditState(): ChannelPskEditState = ChannelPskEditState(
+    canGeneratePskForName = this and CAN_GENERATE_PSK_FOR_NAME_FLAG != 0,
+    generatedPskForName = this and GENERATED_PSK_FOR_NAME_FLAG != 0,
+    pskExplicitlyEdited = this and PSK_EXPLICITLY_EDITED_FLAG != 0,
+)
+
+private const val CAN_GENERATE_PSK_FOR_NAME_FLAG = 1
+private const val GENERATED_PSK_FOR_NAME_FLAG = 1 shl 1
+private const val PSK_EXPLICITLY_EDITED_FLAG = 1 shl 2
 
 /**
  * Determines what [Channel] if any is enabled to conduct automatic location sharing.

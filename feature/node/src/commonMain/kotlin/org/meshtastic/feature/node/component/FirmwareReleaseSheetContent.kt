@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,6 +37,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.download
+import org.meshtastic.core.resources.firmware_version
 import org.meshtastic.core.resources.view_release
 import org.meshtastic.core.ui.icon.Download
 import org.meshtastic.core.ui.icon.LinkIcon
@@ -52,7 +53,10 @@ fun FirmwareReleaseSheetContent(firmwareRelease: FirmwareRelease, modifier: Modi
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Text(text = firmwareRelease.title, style = MaterialTheme.typography.titleLarge)
-        Text(text = "Version: ${firmwareRelease.id}", style = MaterialTheme.typography.bodyMedium)
+        Text(
+            text = stringResource(Res.string.firmware_version, firmwareRelease.id),
+            style = MaterialTheme.typography.bodyMedium,
+        )
         Markdown(modifier = Modifier.padding(8.dp), content = firmwareRelease.releaseNotes)
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Button(onClick = { openUrl(firmwareRelease.pageUrl) }, modifier = Modifier.weight(1f)) {

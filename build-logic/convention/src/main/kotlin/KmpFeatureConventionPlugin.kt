@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,7 +43,11 @@ class KmpFeatureConventionPlugin : Plugin<Project> {
                 sourceSets.getByName("commonMain").dependencies {
                     // Compose Multiplatform UI
                     implementation(libs.library("compose-multiplatform-animation"))
+                    implementation(libs.library("compose-multiplatform-foundation"))
                     implementation(libs.library("compose-multiplatform-material3"))
+
+                    // Navigation 3 (JetBrains KMP fork — safe in commonMain)
+                    implementation(libs.library("jetbrains-navigation3-ui"))
 
                     // Lifecycle & ViewModel (JetBrains KMP forks — safe in commonMain)
                     implementation(libs.library("jetbrains-lifecycle-viewmodel-compose"))
@@ -61,8 +65,6 @@ class KmpFeatureConventionPlugin : Plugin<Project> {
                 }
 
                 sourceSets.getByName("androidMain").dependencies {
-                    // Common Android Compose dependencies
-                    implementation(libs.library("accompanist-permissions"))
                     implementation(libs.library("androidx-activity-compose"))
 
                     implementation(libs.library("compose-multiplatform-ui"))

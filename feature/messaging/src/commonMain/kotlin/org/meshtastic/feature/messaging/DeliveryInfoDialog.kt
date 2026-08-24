@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,13 +35,12 @@ import org.meshtastic.core.resources.relays
 import org.meshtastic.core.resources.resend
 import org.meshtastic.core.ui.component.MeshtasticDialog
 
-@Suppress("UnusedParameter")
 @Composable
 fun DeliveryInfo(
     title: StringResource,
     resendOption: Boolean,
     text: StringResource? = null,
-    relayNodeName: String? = null,
+    detail: StringResource? = null,
     relays: Int = 0,
     onConfirm: (() -> Unit) = {},
     onDismiss: () -> Unit = {},
@@ -56,6 +55,14 @@ fun DeliveryInfo(
             text?.let {
                 Text(
                     text = stringResource(it),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+            detail?.let {
+                Text(
+                    text = stringResource(it),
+                    modifier = Modifier.padding(top = 8.dp),
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.bodyMedium,
                 )

@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.messaging.ui.contact
 
+import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
@@ -29,16 +30,18 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
-import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.proto.ChannelSet
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ContactsViewModelTest {
@@ -48,22 +51,23 @@ class ContactsViewModelTest {
     private val nodeRepository = FakeNodeRepository()
     private val packetRepository: PacketRepository = mock(MockMode.autofill)
     private val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
-    private val serviceRepository: ServiceRepository = mock(MockMode.autofill)
+    private val connectionStateProvider: ConnectionStateProvider = mock(MockMode.autofill)
 
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
 
-        every { serviceRepository.connectionState } returns MutableStateFlow(ConnectionState.Disconnected)
+        every { connectionStateProvider.connectionState } returns MutableStateFlow(ConnectionState.Disconnected)
         every { packetRepository.getUnreadCountTotal() } returns MutableStateFlow(0)
         every { radioConfigRepository.channelSetFlow } returns MutableStateFlow(ChannelSet())
 
         viewModel =
             ContactsViewModel(
+                savedStateHandle = SavedStateHandle(),
                 nodeRepository = nodeRepository,
                 packetRepository = packetRepository,
                 radioConfigRepository = radioConfigRepository,
-                serviceRepository = serviceRepository,
+                connectionStateProvider = connectionStateProvider,
             )
     }
 
@@ -83,12 +87,51 @@ class ContactsViewModelTest {
         every { packetRepository.getUnreadCountTotal() } returns countFlow
 
         // Re-init VM
-        viewModel = ContactsViewModel(nodeRepository, packetRepository, radioConfigRepository, serviceRepository)
+        viewModel =
+            ContactsViewModel(
+                SavedStateHandle(),
+                nodeRepository,
+                packetRepository,
+                radioConfigRepository,
+                connectionStateProvider,
+            )
 
         viewModel.unreadCountTotal.test {
             assertEquals(0, awaitItem())
             countFlow.value = 5
             assertEquals(5, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `toggleSectionCollapse flips section membership`() = runTest(testDispatcher) {
+        viewModel.collapsedSections.test {
+            assertEquals(emptySet(), awaitItem())
+
+            viewModel.toggleSectionCollapse(ContactSection.CHANNELS.key)
+            assertTrue(ContactSection.CHANNELS.key in awaitItem())
+
+            viewModel.toggleSectionCollapse(ContactSection.CHANNELS.key)
+            assertFalse(ContactSection.CHANNELS.key in awaitItem())
+
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `collapsedSections restores persisted state from SavedStateHandle`() = runTest(testDispatcher) {
+        viewModel =
+            ContactsViewModel(
+                SavedStateHandle(mapOf("collapsed_contact_sections" to ContactSection.DIRECT_MESSAGES.key)),
+                nodeRepository,
+                packetRepository,
+                radioConfigRepository,
+                connectionStateProvider,
+            )
+
+        viewModel.collapsedSections.test {
+            assertEquals(setOf(ContactSection.DIRECT_MESSAGES.key), awaitItem())
             cancelAndIgnoreRemainingEvents()
         }
     }

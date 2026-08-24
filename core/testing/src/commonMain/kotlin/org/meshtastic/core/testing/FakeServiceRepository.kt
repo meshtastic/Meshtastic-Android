@@ -20,11 +20,13 @@ import co.touchlab.kermit.Severity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asFlow
 import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.model.service.ServiceAction
+import org.meshtastic.core.model.service.LockdownState
+import org.meshtastic.core.model.service.LockdownTokenInfo
 import org.meshtastic.core.model.service.TracerouteResponse
+import org.meshtastic.core.repository.ConnectionStateHolder
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.MeshPacket
@@ -32,12 +34,13 @@ import org.meshtastic.proto.MeshPacket
 @Suppress("TooManyFunctions")
 class FakeServiceRepository : ServiceRepository {
     /** Canonical app-level connection state — the single source of truth for UI/feature tests. */
-    private val _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
-    override val connectionState: StateFlow<ConnectionState> = _connectionState
+    private val connectionStateHolder = ConnectionStateHolder()
+    override val connectionLifecycle = connectionStateHolder.connectionLifecycle
+    override val connectionState = connectionStateHolder.connectionState
+    override val connectionEpochs = connectionStateHolder.connectionEpochs
 
-    override fun setConnectionState(connectionState: ConnectionState) {
-        _connectionState.value = connectionState
-    }
+    override fun setConnectionState(connectionState: ConnectionState) =
+        connectionStateHolder.setConnectionState(connectionState)
 
     private val _clientNotification = MutableStateFlow<ClientNotification?>(null)
     override val clientNotification: StateFlow<ClientNotification?> = _clientNotification
@@ -69,7 +72,7 @@ class FakeServiceRepository : ServiceRepository {
     }
 
     private val _meshPacketFlow = MutableSharedFlow<MeshPacket>()
-    override val meshPacketFlow: SharedFlow<MeshPacket> = _meshPacketFlow
+    override val meshPacketFlow: Flow<MeshPacket> = _meshPacketFlow.asFlow()
 
     override suspend fun emitMeshPacket(packet: MeshPacket) {
         _meshPacketFlow.emit(packet)
@@ -97,10 +100,28 @@ class FakeServiceRepository : ServiceRepository {
         _neighborInfoResponse.value = null
     }
 
-    private val _serviceAction = MutableSharedFlow<ServiceAction>(replay = 1)
-    override val serviceAction: Flow<ServiceAction> = _serviceAction
+    private val _lockdownState = MutableStateFlow<LockdownState>(LockdownState.None)
+    override val lockdownState: StateFlow<LockdownState> = _lockdownState
 
-    override suspend fun onServiceAction(action: ServiceAction) {
-        _serviceAction.emit(action)
+    override fun setLockdownState(state: LockdownState) {
+        _lockdownState.value = state
+    }
+
+    override fun clearLockdownState() {
+        _lockdownState.value = LockdownState.None
+    }
+
+    private val _lockdownTokenInfo = MutableStateFlow<LockdownTokenInfo?>(null)
+    override val lockdownTokenInfo: StateFlow<LockdownTokenInfo?> = _lockdownTokenInfo
+
+    override fun setLockdownTokenInfo(info: LockdownTokenInfo?) {
+        _lockdownTokenInfo.value = info
+    }
+
+    private val _sessionAuthorized = MutableStateFlow(false)
+    override val sessionAuthorized: StateFlow<Boolean> = _sessionAuthorized
+
+    override fun setSessionAuthorized(authorized: Boolean) {
+        _sessionAuthorized.value = authorized
     }
 }

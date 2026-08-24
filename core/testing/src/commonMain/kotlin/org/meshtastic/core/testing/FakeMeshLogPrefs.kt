@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.testing
 
+import org.meshtastic.core.repository.MeshLogCleanupPolicy
 import org.meshtastic.core.repository.MeshLogPrefs
 
 class FakeMeshLogPrefs :
@@ -34,4 +35,7 @@ class FakeMeshLogPrefs :
     override fun setLoggingEnabled(enabled: Boolean) {
         _loggingEnabled.value = enabled
     }
+
+    override suspend fun awaitCleanupPolicy(): MeshLogCleanupPolicy =
+        MeshLogCleanupPolicy(loggingEnabled = loggingEnabled.value, retentionDays = retentionDays.value)
 }

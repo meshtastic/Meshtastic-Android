@@ -1,0 +1,17 @@
+# Review Extension Configuration
+#
+# Copy this file to your project as .specify/extensions/review/review-config.yml
+# and adjust settings as needed. All settings are optional — defaults apply
+# when omitted.
+
+# ── Agent Toggles ─────────────────────────────────────────────────────
+# Control which agents run during a full review (speckit.review.run).
+# Set to false to skip an agent. Direct agent commands (e.g.,
+# speckit.review.errors) always run regardless of this setting.
+agents:
+  code: true
+  comments: true
+  tests: true
+  errors: true
+  types: true
+  simplify: true

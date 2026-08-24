@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,3 +28,17 @@ fun normalizeAddress(addr: String?): String {
         else -> u.replace(":", "")
     }
 }
+
+/**
+ * True iff [normalized] (the output of [normalizeAddress]) is a no-device sentinel that DB naming collapses to the
+ * default database. Single source of truth for "no real device selected".
+ */
+fun isNoDeviceSentinel(normalized: String): Boolean = normalized == "DEFAULT" || normalized == ".N"
+
+/**
+ * True iff [address] refers to a real selected device. Rejects null/blank and all legacy no-device sentinels (`"n"`,
+ * `"null"`, `".n"`, `"default"`, case-insensitive) by delegating to [normalizeAddress] and [isNoDeviceSentinel]. Any
+ * input that [buildDbName] would collapse to `DEFAULT_DB_NAME` is rejected here too, so the foreground-service
+ * stay-alive decision and the DB name resolution can never diverge.
+ */
+fun isValidDeviceAddress(address: String?): Boolean = !isNoDeviceSentinel(normalizeAddress(address))

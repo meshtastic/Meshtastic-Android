@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,6 +46,6 @@ fun DistanceInfo(
 
 @PreviewLightDark
 @Composable
-private fun DistanceInfoPreview() {
+fun DistanceInfoPreview() {
     AppTheme { DistanceInfo(distance = "423 mi.") }
 }

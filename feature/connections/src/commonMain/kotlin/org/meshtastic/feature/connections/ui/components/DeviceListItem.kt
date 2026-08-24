@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,17 +14,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 package org.meshtastic.feature.connections.ui.components
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -34,17 +37,23 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.action_select_device
 import org.meshtastic.core.resources.add
 import org.meshtastic.core.resources.bluetooth
 import org.meshtastic.core.resources.network
@@ -73,17 +82,15 @@ fun DeviceListItem(
     onDelete: (() -> Unit)? = null,
     rssi: Int? = null,
 ) {
-    // Throttle the RSSI updates to match the connected device polling rate
-    var displayedRssi by remember { mutableIntStateOf(rssi ?: 0) }
-    LaunchedEffect(rssi) {
-        if (displayedRssi == 0) {
-            displayedRssi = rssi ?: 0
-        }
-    }
-    LaunchedEffect(Unit) {
+    // Throttle the RSSI updates to match the connected device polling rate. The value stays nullable end-to-end:
+    // 0 dBm is the strongest reading on this scale, so defaulting to it would render an unknown signal as excellent.
+    // Keyed by address so a recycled list slot drops the previous device's reading instead of showing it for a tick.
+    var displayedRssi by remember(device.address) { mutableStateOf(rssi) }
+    val currentRssi by rememberUpdatedState(rssi)
+    LaunchedEffect(device.address) {
         while (true) {
             delay(RSSI_UPDATE_RATE_MS)
-            displayedRssi = rssi ?: 0
+            displayedRssi = currentRssi
         }
     }
 
@@ -99,8 +106,12 @@ fun DeviceListItem(
                 }
 
             is DeviceListEntry.Usb -> MeshtasticIcons.Usb
+
             is DeviceListEntry.Tcp -> MeshtasticIcons.Wifi
+
             is DeviceListEntry.Mock -> MeshtasticIcons.Add
+
+            is DeviceListEntry.Replay -> MeshtasticIcons.Add
         }
 
     val contentDescription =
@@ -109,34 +120,40 @@ fun DeviceListItem(
             is DeviceListEntry.Usb -> stringResource(Res.string.serial)
             is DeviceListEntry.Tcp -> stringResource(Res.string.network)
             is DeviceListEntry.Mock -> stringResource(Res.string.add)
+            is DeviceListEntry.Replay -> stringResource(Res.string.add)
         }
 
+    val selectLabel = stringResource(Res.string.action_select_device)
+    val isSelected = connectionState is ConnectionState.Connected
     val clickableModifier =
         if (onDelete != null) {
-            Modifier.combinedClickable(onClick = onSelect, onLongClick = onDelete)
+            Modifier.semantics { selected = isSelected }
+                .combinedClickable(
+                    onClickLabel = selectLabel,
+                    role = Role.RadioButton,
+                    onClick = onSelect,
+                    onLongClick = onDelete,
+                )
         } else {
-            Modifier.clickable(onClick = onSelect)
+            Modifier.selectable(selected = isSelected, role = Role.RadioButton, onClick = onSelect)
+        }
+
+    val iconTint =
+        if (connectionState is ConnectionState.Connected) {
+            MaterialTheme.colorScheme.primary
+        } else {
+            MaterialTheme.colorScheme.onSurfaceVariant
         }
 
     ListItem(
         modifier = modifier.fillMaxWidth().then(clickableModifier).padding(vertical = 4.dp),
-        headlineContent = {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                device.node?.let { node -> NodeChip(node = node) }
-                    ?: Text(text = device.name, style = MaterialTheme.typography.titleLarge)
-            }
-        },
+        headlineContent = { DeviceHeadline(device = device) },
         leadingContent = {
             Icon(
                 imageVector = icon,
                 contentDescription = contentDescription,
                 modifier = Modifier.size(32.dp),
-                tint =
-                if (connectionState is ConnectionState.Connected) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                },
+                tint = iconTint,
             )
         },
         supportingContent = { Text(text = device.address, style = MaterialTheme.typography.bodyLarge) },
@@ -147,12 +164,42 @@ fun DeviceListItem(
                 }
 
                 if (connectionState is ConnectionState.Connecting) {
-                    CircularProgressIndicator(modifier = Modifier.size(32.dp))
+                    CircularWavyProgressIndicator(modifier = Modifier.size(32.dp))
                 } else {
                     RadioButton(selected = connectionState is ConnectionState.Connected, onClick = null)
                 }
             }
         },
         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+    )
+}
+
+/**
+ * Headline for a device row. When we have a [DeviceListEntry.node] in the local DB (i.e. we've previously connected and
+ * learned the device's mesh identity), render the colored [NodeChip] alongside the node's **long name** so users can
+ * distinguish devices that share a similar short/advertised name (see #5808). Otherwise fall back to the raw advertised
+ * name. The name is allowed to wrap to two lines so long names are legible rather than truncated at a single line.
+ */
+@Composable
+private fun DeviceHeadline(device: DeviceListEntry) {
+    val node = device.node
+    if (node != null) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            NodeChip(node = node)
+            DeviceName(text = node.user.long_name.ifBlank { device.name }, modifier = Modifier.weight(1f))
+        }
+    } else {
+        DeviceName(text = device.name)
+    }
+}
+
+@Composable
+private fun DeviceName(text: String, modifier: Modifier = Modifier) {
+    Text(
+        modifier = modifier,
+        text = text,
+        style = MaterialTheme.typography.titleLarge,
+        maxLines = 2,
+        overflow = TextOverflow.Ellipsis,
     )
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,12 +26,7 @@ import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
-import org.meshtastic.core.model.DeviceMetrics
-import org.meshtastic.core.model.EnvironmentMetrics
-import org.meshtastic.core.model.MeshUser
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.model.NodeInfo
-import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.util.onlineTimeThreshold
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.HardwareModel
@@ -43,35 +38,38 @@ import org.meshtastic.proto.Position as WirePosition
 
 data class NodeWithRelations(
     @Embedded val node: NodeEntity,
-    @Relation(entity = MetadataEntity::class, parentColumn = "num", entityColumn = "num")
-    val metadata: MetadataEntity? = null,
+    @Relation(entity = MetadataEntity::class, parentColumns = ["num"], entityColumns = ["num"])
+    val metadata: MetadataEntity?,
 ) {
-    fun toModel() = with(node) {
-        Node(
-            num = num,
-            metadata = metadata?.proto,
-            user = user,
-            position = position,
-            snr = snr,
-            rssi = rssi,
-            lastHeard = lastHeard,
-            deviceMetrics = deviceMetrics ?: org.meshtastic.proto.DeviceMetrics(),
-            channel = channel,
-            viaMqtt = viaMqtt,
-            hopsAway = hopsAway,
-            isFavorite = isFavorite,
-            isIgnored = isIgnored,
-            isMuted = isMuted,
-            environmentMetrics = environmentMetrics ?: org.meshtastic.proto.EnvironmentMetrics(),
-            powerMetrics = powerMetrics ?: org.meshtastic.proto.PowerMetrics(),
-            paxcounter = paxcounter,
-            publicKey = publicKey ?: user.public_key,
-            notes = notes,
-            manuallyVerified = manuallyVerified,
-            nodeStatus = nodeStatus,
-            lastTransport = lastTransport,
-        )
-    }
+    // Direct construction avoids the previous `node.toModel().copy(metadata = …, manuallyVerified = …)` pattern,
+    // which allocated the Node twice per DB row (once from toModel, once from copy). Hot path on every DB emission.
+    fun toModel() = Node(
+        num = node.num,
+        user = node.user,
+        position = node.position,
+        snr = node.snr,
+        rssi = node.rssi,
+        lastHeard = node.lastHeard,
+        deviceMetrics = node.deviceMetrics ?: org.meshtastic.proto.DeviceMetrics(),
+        channel = node.channel,
+        viaMqtt = node.viaMqtt,
+        hopsAway = node.hopsAway,
+        isFavorite = node.isFavorite,
+        isIgnored = node.isIgnored,
+        isMuted = node.isMuted,
+        environmentMetrics = node.environmentMetrics ?: org.meshtastic.proto.EnvironmentMetrics(),
+        powerMetrics = node.powerMetrics ?: org.meshtastic.proto.PowerMetrics(),
+        airQualityMetrics = node.airQualityMetrics ?: org.meshtastic.proto.AirQualityMetrics(),
+        paxcounter = node.paxcounter,
+        publicKey = node.publicKey ?: node.user.public_key,
+        notes = node.notes,
+        powerChannelLabels = node.powerChannelLabels,
+        nodeStatus = node.nodeStatus,
+        lastTransport = node.lastTransport,
+        metadata = metadata?.proto,
+        manuallyVerified = node.manuallyVerified,
+        signsPackets = node.signsPackets,
+    )
 
     fun toEntity() = with(node) {
         NodeEntity(
@@ -90,12 +88,15 @@ data class NodeWithRelations(
             isMuted = isMuted,
             environmentTelemetry = environmentTelemetry,
             powerTelemetry = powerTelemetry,
+            airQualityTelemetry = airQualityTelemetry,
             paxcounter = paxcounter,
             publicKey = publicKey ?: user.public_key,
             notes = notes,
+            powerChannelLabels = powerChannelLabels,
             manuallyVerified = manuallyVerified,
             nodeStatus = nodeStatus,
             lastTransport = lastTransport,
+            signsPackets = signsPackets,
         )
     }
 }
@@ -142,14 +143,19 @@ data class NodeEntity(
     @ColumnInfo(name = "environment_metrics", typeAffinity = ColumnInfo.BLOB)
     var environmentTelemetry: Telemetry = Telemetry(),
     @ColumnInfo(name = "power_metrics", typeAffinity = ColumnInfo.BLOB) var powerTelemetry: Telemetry = Telemetry(),
+    @ColumnInfo(name = "air_quality_metrics", typeAffinity = ColumnInfo.BLOB, defaultValue = "x''")
+    var airQualityTelemetry: Telemetry = Telemetry(),
     @ColumnInfo(typeAffinity = ColumnInfo.BLOB) var paxcounter: Paxcount = Paxcount(),
     @ColumnInfo(name = "public_key") var publicKey: ByteString? = null,
     @ColumnInfo(name = "notes", defaultValue = "") var notes: String = "",
+    @ColumnInfo(name = "power_channel_labels", defaultValue = "[]") var powerChannelLabels: List<String> = emptyList(),
     @ColumnInfo(name = "manually_verified", defaultValue = "0")
     var manuallyVerified: Boolean = false, // ONLY set true when scanned/imported manually
     @ColumnInfo(name = "node_status") var nodeStatus: String? = null,
     /** The transport mechanism this node was last heard over (see [MeshPacket.TransportMechanism]). */
     @ColumnInfo(name = "last_transport", defaultValue = "0") var lastTransport: Int = 0,
+    /** True when this node signs its broadcasts via XEdDSA (NodeInfo.has_xeddsa_signed). */
+    @ColumnInfo(name = "has_xeddsa_signed", defaultValue = "0") var signsPackets: Boolean = false,
 ) {
     val deviceMetrics: org.meshtastic.proto.DeviceMetrics?
         get() = deviceTelemetry.device_metrics
@@ -159,6 +165,9 @@ data class NodeEntity(
 
     val powerMetrics: org.meshtastic.proto.PowerMetrics?
         get() = powerTelemetry.power_metrics
+
+    val airQualityMetrics: org.meshtastic.proto.AirQualityMetrics?
+        get() = airQualityTelemetry.air_quality_metrics
 
     val isUnknownUser
         get() = user.hw_model == HardwareModel.UNSET
@@ -205,55 +214,13 @@ data class NodeEntity(
         isMuted = isMuted,
         environmentMetrics = environmentMetrics ?: org.meshtastic.proto.EnvironmentMetrics(),
         powerMetrics = powerMetrics ?: org.meshtastic.proto.PowerMetrics(),
+        airQualityMetrics = airQualityMetrics ?: org.meshtastic.proto.AirQualityMetrics(),
         paxcounter = paxcounter,
         publicKey = publicKey ?: user.public_key,
         notes = notes,
+        powerChannelLabels = powerChannelLabels,
         nodeStatus = nodeStatus,
         lastTransport = lastTransport,
-    )
-
-    fun toNodeInfo() = NodeInfo(
-        num = num,
-        user =
-        MeshUser(
-            id = user.id,
-            longName = user.long_name,
-            shortName = user.short_name,
-            hwModel = user.hw_model,
-            role = user.role.value,
-        )
-            .takeIf { user.id.isNotEmpty() },
-        position =
-        Position(
-            latitude = latitude,
-            longitude = longitude,
-            altitude = position.altitude ?: 0,
-            time = position.time,
-            satellitesInView = position.sats_in_view,
-            groundSpeed = position.ground_speed ?: 0,
-            groundTrack = position.ground_track ?: 0,
-            precisionBits = position.precision_bits,
-        )
-            .takeIf { it.isValid() },
-        snr = snr,
-        rssi = rssi,
-        lastHeard = lastHeard,
-        deviceMetrics =
-        DeviceMetrics(
-            time = deviceTelemetry.time,
-            batteryLevel = deviceMetrics?.battery_level ?: 0,
-            voltage = deviceMetrics?.voltage ?: 0f,
-            channelUtilization = deviceMetrics?.channel_utilization ?: 0f,
-            airUtilTx = deviceMetrics?.air_util_tx ?: 0f,
-            uptimeSeconds = deviceMetrics?.uptime_seconds ?: 0,
-        ),
-        channel = channel,
-        environmentMetrics =
-        EnvironmentMetrics.fromTelemetryProto(
-            environmentTelemetry.environment_metrics ?: org.meshtastic.proto.EnvironmentMetrics(),
-            environmentTelemetry.time,
-        ),
-        hopsAway = hopsAway,
-        nodeStatus = nodeStatus,
+        signsPackets = signsPackets,
     )
 }

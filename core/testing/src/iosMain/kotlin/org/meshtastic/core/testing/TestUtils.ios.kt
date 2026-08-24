@@ -16,4 +16,6 @@
  */
 package org.meshtastic.core.testing
 
-actual fun setupTestContext() {}
+actual fun setupTestContext() {
+    // No-op: iOS tests need no context setup.
+}

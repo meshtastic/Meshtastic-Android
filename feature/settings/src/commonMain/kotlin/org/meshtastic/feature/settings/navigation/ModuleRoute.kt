@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,6 @@ import org.meshtastic.core.resources.audio
 import org.meshtastic.core.resources.canned_message
 import org.meshtastic.core.resources.detection_sensor
 import org.meshtastic.core.resources.external_notification
-import org.meshtastic.core.resources.ic_alt_route
 import org.meshtastic.core.resources.ic_cloud
 import org.meshtastic.core.resources.ic_data_usage
 import org.meshtastic.core.resources.ic_group
@@ -41,6 +40,7 @@ import org.meshtastic.core.resources.ic_speed
 import org.meshtastic.core.resources.ic_terminal
 import org.meshtastic.core.resources.ic_usb
 import org.meshtastic.core.resources.ic_volume_up
+import org.meshtastic.core.resources.mesh_beacon
 import org.meshtastic.core.resources.mqtt
 import org.meshtastic.core.resources.neighbor_info
 import org.meshtastic.core.resources.paxcounter
@@ -51,7 +51,6 @@ import org.meshtastic.core.resources.status_message
 import org.meshtastic.core.resources.store_forward
 import org.meshtastic.core.resources.tak
 import org.meshtastic.core.resources.telemetry
-import org.meshtastic.core.resources.traffic_management
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceMetadata
@@ -63,6 +62,10 @@ enum class ModuleRoute(
     val type: Int = 0,
     val isSupported: (Capabilities) -> Boolean = { true },
     val isApplicable: (Config.DeviceConfig.Role?) -> Boolean = { true },
+    // False when the firmware has no ModuleConfigType to request this module per-request; the editor then relies on the
+    // connect-time config sync instead of a get (MeshBeacon: MeshBeaconConfig is in ModuleConfig but not in the enum).
+    val refreshable: Boolean = true,
+    val hasReadFanOut: Boolean = false,
 ) {
     MQTT(Res.string.mqtt, SettingsRoute.MQTT, Res.drawable.ic_cloud, AdminMessage.ModuleConfigType.MQTT_CONFIG.value),
     SERIAL(
@@ -76,6 +79,7 @@ enum class ModuleRoute(
         SettingsRoute.ExtNotification,
         Res.drawable.ic_notifications,
         AdminMessage.ModuleConfigType.EXTNOTIF_CONFIG.value,
+        hasReadFanOut = true,
     ),
     STORE_FORWARD(
         Res.string.store_forward,
@@ -100,6 +104,7 @@ enum class ModuleRoute(
         SettingsRoute.CannedMessage,
         Res.drawable.ic_message,
         AdminMessage.ModuleConfigType.CANNEDMSG_CONFIG.value,
+        hasReadFanOut = true,
     ),
     AUDIO(
         Res.string.audio,
@@ -144,13 +149,6 @@ enum class ModuleRoute(
         AdminMessage.ModuleConfigType.STATUSMESSAGE_CONFIG.value,
         isSupported = { it.supportsStatusMessage },
     ),
-    TRAFFIC_MANAGEMENT(
-        Res.string.traffic_management,
-        SettingsRoute.TrafficManagement,
-        Res.drawable.ic_alt_route,
-        AdminMessage.ModuleConfigType.TRAFFICMANAGEMENT_CONFIG.value,
-        isSupported = { it.supportsTrafficManagementConfig },
-    ),
     TAK(
         Res.string.tak,
         SettingsRoute.TAK,
@@ -159,27 +157,55 @@ enum class ModuleRoute(
         isSupported = { it.supportsTakConfig },
         isApplicable = { it == Config.DeviceConfig.Role.TAK || it == Config.DeviceConfig.Role.TAK_TRACKER },
     ),
+
+    // MeshBeaconConfig has no AdminMessage.ModuleConfigType value upstream — the editor reads from the connect-time
+    // config sync, so refreshable=false (no per-module get is issued). Gated to firmware that ships the beacon module.
+    MESH_BEACON(
+        Res.string.mesh_beacon,
+        SettingsRoute.MeshBeacon,
+        Res.drawable.ic_perm_scan_wifi,
+        isSupported = { it.supportsMeshBeacon },
+        refreshable = false,
+    ),
     ;
 
     val bitfield: Int
         get() =
             when (this) {
                 MQTT -> 0x0001
+
                 SERIAL -> 0x0002
+
                 EXT_NOTIFICATION -> 0x0004
+
                 STORE_FORWARD -> 0x0008
+
                 RANGE_TEST -> 0x0010
+
                 TELEMETRY -> 0x0020
+
                 CANNED_MESSAGE -> 0x0040
+
                 AUDIO -> 0x0080
+
                 REMOTE_HARDWARE -> 0x0100
+
                 NEIGHBOR_INFO -> 0x0200
+
                 AMBIENT_LIGHTING -> 0x0400
+
                 DETECTION_SENSOR -> 0x0800
+
                 PAXCOUNTER -> 0x1000
-                STATUS_MESSAGE -> 0x0000 // Not excludable yet
-                TRAFFIC_MANAGEMENT -> 0x0000 // Not excludable yet
-                TAK -> 0x0000 // Not excludable yet
+
+                STATUS_MESSAGE -> 0x0000
+
+                // Not excludable yet
+                TAK -> 0x0000
+
+                // Not excludable yet
+
+                MESH_BEACON -> 0x0000 // Not excludable yet
             }
 
     companion object {

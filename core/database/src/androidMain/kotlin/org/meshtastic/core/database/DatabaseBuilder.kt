@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,31 +24,32 @@ import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.room3.Room
 import androidx.room3.RoomDatabase
+import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
 import org.meshtastic.core.common.ContextServices
 import org.meshtastic.core.database.MeshtasticDatabase.Companion.configureCommon
 
-/** Returns a [RoomDatabase.Builder] configured for Android with the given [dbName]. */
+/**
+ * Returns a [RoomDatabase.Builder] configured for Android with the given [dbName]. All platforms use Room KMP's
+ * single-connection pool to avoid the reader-pool permit wedge; see [MeshtasticDatabase.configureCommon].
+ */
 actual fun getDatabaseBuilder(dbName: String): RoomDatabase.Builder<MeshtasticDatabase> {
-    val app = ContextServices.app
-    val dbFile = app.getDatabasePath(dbName)
+    val dbFile = ContextServices.app.getDatabasePath(dbName)
     return Room.databaseBuilder<MeshtasticDatabase>(
-        context = app.applicationContext,
         name = dbFile.absolutePath,
         factory = { MeshtasticDatabaseConstructor.initialize() },
     )
         .configureCommon()
+        .setDriver(BusyTimeoutSQLiteDriver(BundledSQLiteDriver()))
 }
 
 /** Returns a [RoomDatabase.Builder] configured for an in-memory Android database. */
 actual fun getInMemoryDatabaseBuilder(): RoomDatabase.Builder<MeshtasticDatabase> =
-    Room.inMemoryDatabaseBuilder<MeshtasticDatabase>(
-        context = ContextServices.app.applicationContext,
-        factory = { MeshtasticDatabaseConstructor.initialize() },
-    )
+    Room.inMemoryDatabaseBuilder<MeshtasticDatabase>(factory = { MeshtasticDatabaseConstructor.initialize() })
         .configureCommon()
+        .setDriver(BusyTimeoutSQLiteDriver(BundledSQLiteDriver()))
 
 /** Returns the Android directory where database files are stored. */
 actual fun getDatabaseDirectory(): Path {

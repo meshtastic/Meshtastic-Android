@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,45 +16,68 @@
  */
 package org.meshtastic.core.model
 
-import co.touchlab.kermit.Logger
+import kotlin.jvm.JvmInline
 
-/** Provide structured access to parse and compare device version strings */
-data class DeviceVersion(val asString: String) : Comparable<DeviceVersion> {
+/** Outcome of checking a device's firmware version against the app's minimum requirements. */
+enum class FirmwareCheckStatus {
+    /** Firmware meets the recommended minimum. */
+    OK,
 
-    /** The integer representation of the version (e.g., 2.7.12 -> 20712). Calculated once. */
-    @Suppress("TooGenericExceptionCaught", "SwallowedException")
-    val asInt: Int =
-        try {
-            verStringToInt(asString)
-        } catch (e: Exception) {
-            Logger.w { "Exception while parsing version '$asString', assuming version 0" }
-            0
-        }
+    /** Firmware is usable but below the recommended minimum; the user should be nudged to update. */
+    SHOULD_UPDATE,
+
+    /** Firmware is below the absolute minimum the app supports. */
+    TOO_OLD,
+
+    /** The version string could not be parsed (e.g. a blank/transient value during connection). Status is unknown. */
+    UNKNOWN,
+}
+
+/** Zero-overhead wrapper providing structured access to parse and compare device version strings. */
+@JvmInline
+value class DeviceVersion(val asString: String) : Comparable<DeviceVersion> {
+
+    /** The integer representation of the version (e.g., 2.7.12 → 20712). */
+    val asInt: Int
+        get() = parseVersion(asString)
+
+    /** True when the version string parsed to a real version (non-zero). */
+    val isValid: Boolean
+        get() = asInt > 0
 
     /**
-     * Convert a version string of the form 1.23.57 to a comparable integer of the form 12357.
+     * Classify this version against the app's firmware requirements.
      *
-     * Or throw an exception if the string can not be parsed
+     * An unparseable version (int 0) is [FirmwareCheckStatus.UNKNOWN], NOT [FirmwareCheckStatus.TOO_OLD] — a transient
+     * or garbled version string arriving mid-handshake must never be mistaken for ancient firmware (regression #3726).
      */
-    @Suppress("TooGenericExceptionThrown", "MagicNumber")
-    private fun verStringToInt(s: String): Int {
-        // Allow 1 to two digits per match
-        val versionString =
-            if (s.split(".").size == 2) {
-                "$s.0"
-            } else {
-                s
+    val checkStatus: FirmwareCheckStatus
+        get() =
+            when {
+                !isValid -> FirmwareCheckStatus.UNKNOWN
+                this < DeviceVersion(ABS_MIN_FW_VERSION) -> FirmwareCheckStatus.TOO_OLD
+                this < DeviceVersion(MIN_FW_VERSION) -> FirmwareCheckStatus.SHOULD_UPDATE
+                else -> FirmwareCheckStatus.OK
             }
-        val match =
-            Regex("(\\d{1,2}).(\\d{1,2}).(\\d{1,2})").find(versionString) ?: throw Exception("Can't parse version $s")
-        val (major, minor, build) = match.destructured
-        return major.toInt() * 10000 + minor.toInt() * 100 + build.toInt()
-    }
 
     override fun compareTo(other: DeviceVersion): Int = asInt.compareTo(other.asInt)
 
     companion object {
         const val MIN_FW_VERSION = "2.5.14"
         const val ABS_MIN_FW_VERSION = "2.3.15"
+
+        private val VERSION_REGEX = Regex("(\\d{1,2})\\.(\\d{1,2})\\.(\\d{1,2})")
+
+        /**
+         * Convert a version string of the form 1.23.57 to a comparable integer (12357). Returns 0 for unparseable
+         * strings.
+         */
+        @Suppress("MagicNumber")
+        private fun parseVersion(s: String): Int {
+            val versionString = if (s.count { it == '.' } == 1) "$s.0" else s
+            val match = VERSION_REGEX.find(versionString) ?: return 0
+            val (major, minor, build) = match.destructured
+            return major.toInt() * 10000 + minor.toInt() * 100 + build.toInt()
+        }
     }
 }

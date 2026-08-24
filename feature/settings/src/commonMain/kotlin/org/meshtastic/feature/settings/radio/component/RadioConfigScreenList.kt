@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
@@ -37,9 +38,11 @@ import com.squareup.wire.Message
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.discard_changes
+import org.meshtastic.core.resources.save_and_restart
 import org.meshtastic.core.resources.save_changes
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.PreferenceFooter
+import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.feature.settings.radio.ResponseState
 
 @Suppress("LongMethod")
@@ -53,6 +56,8 @@ fun <T : Message<T, *>> RadioConfigScreenList(
     enabled: Boolean,
     onSave: (T) -> Unit,
     modifier: Modifier = Modifier,
+    saveEnabled: Boolean = enabled,
+    rebootBehavior: RebootBehavior = RebootBehavior.MAY_RESTART,
     actions: @Composable () -> Unit = {},
     additionalDirtyCheck: () -> Boolean = { false },
     onDiscard: () -> Unit = {},
@@ -85,22 +90,29 @@ fun <T : Message<T, *>> RadioConfigScreenList(
 
                 item {
                     AnimatedVisibility(
+                        modifier = Modifier.fillMaxWidth(),
                         visible = showFooterButtons,
                         enter = fadeIn() + expandIn(),
                         exit = fadeOut() + shrinkOut(),
                     ) {
                         PreferenceFooter(
                             enabled = enabled && showFooterButtons,
+                            positiveEnabled = saveEnabled,
                             negativeText = stringResource(Res.string.discard_changes),
                             onNegativeClicked = {
                                 focusManager.clearFocus()
                                 configState.reset()
                                 onDiscard()
                             },
-                            positiveText = stringResource(Res.string.save_changes),
+                            positiveText =
+                            if (rebootBehavior == RebootBehavior.ALWAYS) {
+                                stringResource(Res.string.save_and_restart)
+                            } else {
+                                stringResource(Res.string.save_changes)
+                            },
                             onPositiveClicked = {
                                 focusManager.clearFocus()
-                                onSave(configState.value)
+                                if (saveEnabled) onSave(configState.value)
                             },
                         )
                     }
@@ -111,7 +123,11 @@ fun <T : Message<T, *>> RadioConfigScreenList(
         LoadingOverlay(state = responseState)
 
         if (responseState is ResponseState.Success || responseState is ResponseState.Error) {
-            PacketResponseStateDialog(state = responseState, onDismiss = onDismissPacketResponse)
+            PacketResponseStateDialog(
+                state = responseState,
+                onDismiss = onDismissPacketResponse,
+                rebootBehavior = rebootBehavior,
+            )
         }
     }
 }

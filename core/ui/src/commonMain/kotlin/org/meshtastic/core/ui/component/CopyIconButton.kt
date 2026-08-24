@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,11 +30,18 @@ import org.meshtastic.core.ui.icon.Copy
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.util.createClipEntry
 
+/**
+ * Copy-to-clipboard icon button.
+ *
+ * Set [sensitive] when [valueToCopy] is key material, so the clip is marked and the OS does not surface the value in
+ * its paste preview. See [createClipEntry].
+ */
 @Composable
 fun CopyIconButton(
     valueToCopy: String,
     modifier: Modifier = Modifier,
     label: String = stringResource(Res.string.copy),
+    sensitive: Boolean = false,
 ) {
     val clipboardManager = LocalClipboard.current
     val coroutineScope = rememberCoroutineScope()
@@ -42,7 +49,7 @@ fun CopyIconButton(
         modifier = modifier,
         onClick = {
             coroutineScope.launch {
-                val clipEntry = createClipEntry(valueToCopy)
+                val clipEntry = createClipEntry(valueToCopy, sensitive = sensitive)
                 clipboardManager.setClipEntry(clipEntry)
             }
         },

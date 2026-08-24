@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,6 +61,7 @@ sealed class OtaResponse {
 
             return when {
                 trimmed == "OK" -> Ok()
+
                 trimmed.startsWith("OK ") -> {
                     val parts = trimmed.substring(OK_PREFIX_LENGTH).split(" ")
                     when (parts.size) {
@@ -71,13 +72,19 @@ sealed class OtaResponse {
                                 rebootCount = parts[2].toIntOrNull(),
                                 gitHash = parts[3],
                             )
+
                         else -> Ok()
                     }
                 }
+
                 trimmed == "ERASING" -> Erasing
+
                 trimmed == "ACK" -> Ack
+
                 trimmed.startsWith("ERR ") -> Error(trimmed.substring(ERR_PREFIX_LENGTH))
+
                 trimmed == "ERR" -> Error("Unknown error")
+
                 else -> Error("Unknown response: $trimmed")
             }
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,31 +36,47 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.eygraber.uri.toKmpUri
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.format
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
+import org.koin.core.qualifier.named
+import org.meshtastic.core.common.di.GOOGLE_SERVICES_AVAILABLE
 import org.meshtastic.core.common.util.nowMillis
-import org.meshtastic.core.common.util.toDate
-import org.meshtastic.core.common.util.toInstant
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.navigation.WifiProvisionRoute
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.app_functions_settings
+import org.meshtastic.core.resources.app_functions_settings_summary
+import org.meshtastic.core.resources.app_settings
 import org.meshtastic.core.resources.bottom_nav_settings
+import org.meshtastic.core.resources.device_links
 import org.meshtastic.core.resources.export_configuration
+import org.meshtastic.core.resources.filter_settings
+import org.meshtastic.core.resources.help_and_documentation
 import org.meshtastic.core.resources.import_configuration
+import org.meshtastic.core.resources.node_layout_section_title
 import org.meshtastic.core.resources.preferences_language
 import org.meshtastic.core.resources.remotely_administrating
 import org.meshtastic.core.resources.wifi_devices
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MeshtasticDialog
+import org.meshtastic.core.ui.icon.Device
+import org.meshtastic.core.ui.icon.FilterList
+import org.meshtastic.core.ui.icon.HelpOutline
+import org.meshtastic.core.ui.icon.List
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.SettingsRemote
 import org.meshtastic.core.ui.icon.Wifi
 import org.meshtastic.feature.settings.component.AppInfoSection
-import org.meshtastic.feature.settings.component.AppearanceSection
-import org.meshtastic.feature.settings.component.ContrastPickerDialog
+import org.meshtastic.feature.settings.component.AppearanceSettingsContent
 import org.meshtastic.feature.settings.component.ExpressiveSection
-import org.meshtastic.feature.settings.component.PersistenceSection
-import org.meshtastic.feature.settings.component.PrivacySection
+import org.meshtastic.feature.settings.component.PersistenceSettingsContent
+import org.meshtastic.feature.settings.component.PrivacySettingsContent
 import org.meshtastic.feature.settings.component.ThemePickerDialog
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.ModuleRoute
@@ -70,8 +86,7 @@ import org.meshtastic.feature.settings.radio.component.EditDeviceProfileDialog
 import org.meshtastic.feature.settings.util.LanguageUtils
 import org.meshtastic.feature.settings.util.LanguageUtils.languageMap
 import org.meshtastic.proto.DeviceProfile
-import java.text.SimpleDateFormat
-import java.util.Locale
+import kotlin.time.Instant.Companion.fromEpochMilliseconds
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
@@ -80,17 +95,20 @@ fun SettingsScreen(
     viewModel: RadioConfigViewModel,
     onClickNodeChip: (Int) -> Unit = {},
     onNavigate: (Route) -> Unit = {},
+    onBack: (() -> Unit)? = null,
 ) {
-    val excludedModulesUnlocked by settingsViewModel.excludedModulesUnlocked.collectAsStateWithLifecycle()
+    val appFunctionsAvailable: Boolean = koinInject(qualifier = named(GOOGLE_SERVICES_AVAILABLE))
+    val hiddenFeaturesUnlocked by settingsViewModel.hiddenFeaturesUnlocked.collectAsStateWithLifecycle()
     val localConfig by settingsViewModel.localConfig.collectAsStateWithLifecycle()
     val ourNode by settingsViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val isConnected by settingsViewModel.isConnected.collectAsStateWithLifecycle(false)
     val isOtaCapable by settingsViewModel.isOtaCapable.collectAsStateWithLifecycle()
+    val showFullMessageTimestamps by settingsViewModel.showFullMessageTimestamps.collectAsStateWithLifecycle()
     val destNode by viewModel.destNode.collectAsStateWithLifecycle()
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
 
     var deviceProfile by remember { mutableStateOf<DeviceProfile?>(null) }
-    var showEditDeviceProfileDialog by rememberSaveable { mutableStateOf(false) }
+    var showEditDeviceProfileDialog by remember { mutableStateOf(false) }
 
     val importConfigLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -125,8 +143,16 @@ fun SettingsScreen(
                 } else {
                     deviceProfile = it
                     val nodeName = (it.short_name ?: "").ifBlank { "node" }
-                    val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
-                    val dateStr = dateFormat.format(nowMillis.toInstant().toDate())
+                    val dateStr =
+                        fromEpochMilliseconds(nowMillis)
+                            .toLocalDateTime(TimeZone.currentSystemDefault())
+                            .format(
+                                LocalDateTime.Format {
+                                    year()
+                                    monthNumber()
+                                    day()
+                                },
+                            )
                     val fileName = "Meshtastic_${nodeName}_${dateStr}_nodeConfig.cfg"
                     val intent =
                         Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
@@ -146,7 +172,10 @@ fun SettingsScreen(
 
     var showLanguagePickerDialog by rememberSaveable { mutableStateOf(false) }
     if (showLanguagePickerDialog) {
-        LanguagePickerDialog { showLanguagePickerDialog = false }
+        LanguagePickerDialog(
+            onDismiss = { showLanguagePickerDialog = false },
+            onSelect = { languageTag -> settingsViewModel.setLocale(languageTag) },
+        )
     }
 
     var showThemePickerDialog by rememberSaveable { mutableStateOf(false) }
@@ -157,16 +186,10 @@ fun SettingsScreen(
         )
     }
 
-    var showContrastPickerDialog by remember { mutableStateOf(false) }
-    if (showContrastPickerDialog) {
-        ContrastPickerDialog(
-            onClickContrast = { settingsViewModel.setContrastLevel(it) },
-            onDismiss = { showContrastPickerDialog = false },
-        )
-    }
-
     Scaffold(
         topBar = {
+            // Show back arrow when remotely administering (caller supplies onBack and we're not on the local node).
+            val showBack = onBack != null && !state.isLocal
             MainAppBar(
                 title = stringResource(Res.string.bottom_nav_settings),
                 subtitle =
@@ -178,8 +201,8 @@ fun SettingsScreen(
                 },
                 ourNode = ourNode,
                 showNodeChip = ourNode != null && isConnected && state.isLocal,
-                canNavigateUp = false,
-                onNavigateUp = {},
+                canNavigateUp = showBack,
+                onNavigateUp = { onBack?.invoke() },
                 actions = {},
                 onClickChip = { node -> onClickNodeChip(node.num) },
             )
@@ -222,51 +245,87 @@ fun SettingsScreen(
 
             // App-local settings are only relevant when configuring the local node
             if (state.isLocal) {
-                PrivacySection(
-                    analyticsAvailable = state.analyticsAvailable,
-                    analyticsEnabled = viewModel.analyticsAllowedFlow.collectAsStateWithLifecycle(true).value,
-                    onToggleAnalytics = { viewModel.toggleAnalyticsAllowed() },
-                    provideLocation = settingsViewModel.provideLocation.collectAsStateWithLifecycle().value,
-                    onToggleLocation = { settingsViewModel.setProvideLocation(it) },
-                    homoglyphEnabled = viewModel.homoglyphEncodingEnabledFlow.collectAsStateWithLifecycle(false).value,
-                    onToggleHomoglyph = { viewModel.toggleHomoglyphCharactersEncodingEnabled() },
-                    startProvideLocation = { settingsViewModel.startProvidingLocation() },
-                    stopProvideLocation = { settingsViewModel.stopProvidingLocation() },
-                )
-
-                AppearanceSection(
-                    onShowLanguagePicker = { showLanguagePickerDialog = true },
-                    onShowThemePicker = { showThemePickerDialog = true },
-                    onShowContrastPicker = { showContrastPickerDialog = true },
-                )
-
-                ExpressiveSection(title = stringResource(Res.string.wifi_devices)) {
+                ExpressiveSection(title = stringResource(Res.string.app_settings)) {
+                    PrivacySettingsContent(
+                        analyticsAvailable = appFunctionsAvailable,
+                        analyticsEnabled = viewModel.analyticsAllowedFlow.collectAsStateWithLifecycle(true).value,
+                        onToggleAnalytics = { viewModel.toggleAnalyticsAllowed() },
+                        provideLocation = settingsViewModel.provideLocation.collectAsStateWithLifecycle().value,
+                        onToggleLocation = { settingsViewModel.setProvideLocation(it) },
+                        homoglyphEnabled =
+                        viewModel.homoglyphEncodingEnabledFlow.collectAsStateWithLifecycle(false).value,
+                        onToggleHomoglyph = { viewModel.toggleHomoglyphCharactersEncodingEnabled() },
+                        startProvideLocation = { settingsViewModel.startProvidingLocation() },
+                        stopProvideLocation = { settingsViewModel.stopProvidingLocation() },
+                    )
+                    AppearanceSettingsContent(
+                        showFullMessageTimestamps = showFullMessageTimestamps,
+                        onShowFullMessageTimestampsChange = settingsViewModel::setShowFullMessageTimestamps,
+                        onShowLanguagePicker = { showLanguagePickerDialog = true },
+                        onShowThemePicker = { showThemePickerDialog = true },
+                    )
+                    PersistenceSettingsContent(
+                        cacheLimit = settingsViewModel.dbCacheLimit.collectAsStateWithLifecycle().value,
+                        onCheckCacheLimitEvictionCount = { settingsViewModel.cachedDeviceCountExceeding(it) },
+                        onSetCacheLimit = { settingsViewModel.setDbCacheLimit(it) },
+                        nodeShortName = ourNode?.user?.short_name ?: "",
+                        onExportData = { settingsViewModel.saveDataCsv(it.toKmpUri()) },
+                        onExportNodeDb = { settingsViewModel.saveNodeDbJson(it) },
+                    )
+                    ListItem(
+                        text = stringResource(Res.string.node_layout_section_title),
+                        leadingIcon = MeshtasticIcons.List,
+                    ) {
+                        onNavigate(SettingsRoute.NodeList)
+                    }
                     ListItem(text = stringResource(Res.string.wifi_devices), leadingIcon = MeshtasticIcons.Wifi) {
                         onNavigate(WifiProvisionRoute.WifiProvision())
                     }
+                    ListItem(
+                        text = stringResource(Res.string.filter_settings),
+                        leadingIcon = MeshtasticIcons.FilterList,
+                    ) {
+                        onNavigate(SettingsRoute.FilterSettings)
+                    }
+                    if (appFunctionsAvailable) {
+                        ListItem(
+                            text = stringResource(Res.string.app_functions_settings),
+                            supportingText = stringResource(Res.string.app_functions_settings_summary),
+                            leadingIcon = MeshtasticIcons.SettingsRemote,
+                        ) {
+                            onNavigate(SettingsRoute.AppFunctionsSettings)
+                        }
+                    }
                 }
-
-                PersistenceSection(
-                    cacheLimit = settingsViewModel.dbCacheLimit.collectAsStateWithLifecycle().value,
-                    onSetCacheLimit = { settingsViewModel.setDbCacheLimit(it) },
-                    nodeShortName = ourNode?.user?.short_name ?: "",
-                    onExportData = { settingsViewModel.saveDataCsv(it.toKmpUri()) },
-                )
 
                 AppInfoSection(
                     appVersionName = settingsViewModel.appVersionName,
-                    excludedModulesUnlocked = excludedModulesUnlocked,
-                    onUnlockExcludedModules = { settingsViewModel.unlockExcludedModules() },
+                    hiddenFeaturesUnlocked = hiddenFeaturesUnlocked,
+                    onUnlockHiddenFeatures = { settingsViewModel.unlockHiddenFeatures() },
                     onShowAppIntro = { settingsViewModel.showAppIntro() },
                     onNavigateToAbout = { onNavigate(SettingsRoute.About) },
                 )
+            }
+
+            ExpressiveSection(title = stringResource(Res.string.help_and_documentation)) {
+                ListItem(
+                    text = stringResource(Res.string.help_and_documentation),
+                    leadingIcon = MeshtasticIcons.HelpOutline,
+                ) {
+                    onNavigate(SettingsRoute.HelpDocs)
+                }
+                if (state.isLocal) {
+                    ListItem(text = stringResource(Res.string.device_links), leadingIcon = MeshtasticIcons.Device) {
+                        onNavigate(SettingsRoute.DeviceLinks)
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-private fun LanguagePickerDialog(onDismiss: () -> Unit) {
+private fun LanguagePickerDialog(onDismiss: () -> Unit, onSelect: (String) -> Unit) {
     MeshtasticDialog(
         title = stringResource(Res.string.preferences_language),
         onDismiss = onDismiss,
@@ -275,6 +334,7 @@ private fun LanguagePickerDialog(onDismiss: () -> Unit) {
                 languageMap().forEach { (languageTag, languageName) ->
                     ListItem(text = languageName, trailingIcon = null) {
                         LanguageUtils.setAppLocale(languageTag)
+                        onSelect(languageTag)
                         onDismiss()
                     }
                 }

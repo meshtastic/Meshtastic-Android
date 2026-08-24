@@ -32,9 +32,36 @@ class FakeNotificationPrefs : NotificationPrefs {
         nodeEventsEnabled.value = enabled
     }
 
+    override val nodeEventsAutoDisabledForEvent = MutableStateFlow(false)
+
+    override fun setNodeEventsAutoDisabledForEvent(disabled: Boolean) {
+        nodeEventsAutoDisabledForEvent.value = disabled
+    }
+
+    override fun applyEventFirmwareNodeEventDefault(isEventFirmware: Boolean) {
+        when {
+            isEventFirmware && !nodeEventsAutoDisabledForEvent.value && nodeEventsEnabled.value -> {
+                nodeEventsEnabled.value = false
+                nodeEventsAutoDisabledForEvent.value = true
+            }
+
+            !isEventFirmware && nodeEventsAutoDisabledForEvent.value -> {
+                nodeEventsEnabled.value = true
+                nodeEventsAutoDisabledForEvent.value = false
+            }
+        }
+    }
+
     override val lowBatteryEnabled = MutableStateFlow(true)
 
     override fun setLowBatteryEnabled(enabled: Boolean) {
         lowBatteryEnabled.value = enabled
+    }
+
+    override val geofenceAlertOptIns = MutableStateFlow<Set<Int>>(emptySet())
+
+    override fun setGeofenceAlertOptIn(waypointId: Int, enabled: Boolean) {
+        geofenceAlertOptIns.value =
+            geofenceAlertOptIns.value.toMutableSet().apply { if (enabled) add(waypointId) else remove(waypointId) }
     }
 }

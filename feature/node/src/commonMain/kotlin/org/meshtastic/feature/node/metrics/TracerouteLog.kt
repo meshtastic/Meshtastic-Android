@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -267,10 +268,12 @@ private fun TracerouteCardContent(time: String, summaryText: String, icon: Image
 private fun TracerouteCardMetrics(point: TraceroutePoint) {
     if (point.forwardHops == null && point.returnHops == null && point.roundTripSeconds == null) return
     Spacer(modifier = Modifier.height(4.dp))
-    Row(
+    // FlowRow so the three metric labels wrap onto additional lines when they don't fit the card width
+    // (e.g. long translated strings), rather than the last item being crushed and wrapped per character (#5743).
+    FlowRow(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         point.forwardHops?.let { hops ->
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -371,13 +374,16 @@ private fun RouteDiscovery?.getTextAndIcon(): Pair<String, ImageVector> = when {
     this == null -> {
         stringResource(Res.string.traceroute_no_response) to MeshtasticIcons.PersonOff
     }
+
     route.size <= 2 && route_back.size <= 2 -> {
         stringResource(Res.string.traceroute_direct) to MeshtasticIcons.Group
     }
+
     route.size == route_back.size -> {
         val hops = route.size - 2
         pluralStringResource(Res.plurals.traceroute_hops, hops, hops) to MeshtasticIcons.Route
     }
+
     else -> {
         val towards = maxOf(0, route.size - 2)
         val back = maxOf(0, route_back.size - 2)

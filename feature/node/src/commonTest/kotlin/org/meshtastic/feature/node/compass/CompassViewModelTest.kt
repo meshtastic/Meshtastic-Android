@@ -24,8 +24,10 @@ import dev.mokkery.mock
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.di.CoroutineDispatchers
@@ -37,6 +39,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -135,5 +138,145 @@ class CompassViewModelTest {
 
             cancelAndIgnoreRemainingEvents()
         }
+    }
+
+    @Test
+    fun `uiState uses PDOP only positional accuracy`() = runTest {
+        val state =
+            startAndGetUiState(
+                targetPosition =
+                org.meshtastic.proto.Position(
+                    latitude_i = 10000000,
+                    longitude_i = 10010000,
+                    time = 1,
+                    gps_accuracy = 5000,
+                    PDOP = 250,
+                ),
+            )
+
+        assertEquals("± 12 m", state.errorRadiusText)
+    }
+
+    @Test
+    fun `uiState uses HDOP and VDOP positional accuracy when PDOP is missing`() = runTest {
+        val state =
+            startAndGetUiState(
+                targetPosition =
+                org.meshtastic.proto.Position(
+                    latitude_i = 10000000,
+                    longitude_i = 10010000,
+                    time = 1,
+                    gps_accuracy = 5000,
+                    HDOP = 300,
+                    VDOP = 400,
+                ),
+            )
+
+        assertEquals("± 25 m", state.errorRadiusText)
+    }
+
+    @Test
+    fun `uiState uses HDOP only positional accuracy when VDOP is missing`() = runTest {
+        val state =
+            startAndGetUiState(
+                targetPosition =
+                org.meshtastic.proto.Position(
+                    latitude_i = 10000000,
+                    longitude_i = 10010000,
+                    time = 1,
+                    gps_accuracy = 5000,
+                    HDOP = 175,
+                ),
+            )
+
+        assertEquals("± 8 m", state.errorRadiusText)
+    }
+
+    @Test
+    fun `uiState falls back to precision bits positional accuracy`() = runTest {
+        val state =
+            startAndGetUiState(
+                targetPosition =
+                org.meshtastic.proto.Position(
+                    latitude_i = 10000000,
+                    longitude_i = 10010000,
+                    time = 1,
+                    precision_bits = 15,
+                ),
+            )
+
+        assertEquals("± 729 m", state.errorRadiusText)
+    }
+
+    @Test
+    fun `uiState leaves positional accuracy empty when no DOP or precision data exists`() = runTest {
+        val state =
+            startAndGetUiState(
+                targetPosition =
+                org.meshtastic.proto.Position(
+                    latitude_i = 10000000,
+                    longitude_i = 10010000,
+                    time = 1,
+                    gps_accuracy = 5000,
+                ),
+            )
+
+        assertNull(state.errorRadiusText)
+        assertNull(state.angularErrorDeg)
+    }
+
+    @Test
+    fun `uiState returns 180 degree angular error when distance is zero`() = runTest {
+        val state =
+            startAndGetUiState(
+                targetPosition =
+                org.meshtastic.proto.Position(
+                    latitude_i = 10000000,
+                    longitude_i = 10000000,
+                    time = 1,
+                    gps_accuracy = 5000,
+                    PDOP = 250,
+                ),
+                location = PhoneLocation(1.0, 1.0, 0.0, 1000L),
+            )
+
+        assertEquals("± 12 m", state.errorRadiusText)
+        assertNotNull(state.angularErrorDeg)
+        assertEquals(180f, state.angularErrorDeg)
+    }
+
+    @Test
+    fun `uiState handles angular error for very small distances`() = runTest {
+        val state =
+            startAndGetUiState(
+                targetPosition =
+                org.meshtastic.proto.Position(
+                    latitude_i = 10000100,
+                    longitude_i = 10000000,
+                    time = 1,
+                    gps_accuracy = 5000,
+                    PDOP = 250,
+                ),
+                location = PhoneLocation(1.0, 1.0, 0.0, 1000L),
+            )
+
+        assertEquals("± 12 m", state.errorRadiusText)
+        assertNotNull(state.angularErrorDeg)
+        assertEquals(85.4f, state.angularErrorDeg, 0.5f)
+    }
+
+    private suspend fun TestScope.startAndGetUiState(
+        targetPosition: org.meshtastic.proto.Position,
+        location: PhoneLocation = PhoneLocation(1.0, 1.0, 0.0, 1000L),
+    ): CompassUiState {
+        viewModel.start(
+            Node(num = 1234, user = User(id = "!1234"), position = targetPosition),
+            Config.DisplayConfig.DisplayUnits.METRIC,
+        )
+
+        locationFlow.value = PhoneLocationState(permissionGranted = true, providerEnabled = true, location = location)
+        runCurrent()
+
+        return viewModel.uiState.value
     }
 }

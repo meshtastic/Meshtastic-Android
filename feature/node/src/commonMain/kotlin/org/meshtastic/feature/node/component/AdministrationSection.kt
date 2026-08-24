@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,33 +14,55 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 package org.meshtastic.feature.node.component
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
+import org.koin.compose.koinInject
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.asDeviceVersion
 import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.SessionStatus
 import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.navigation.NodeDetailRoute
 import org.meshtastic.core.navigation.SettingsRoute
+import org.meshtastic.core.repository.EventFirmwareRepository
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.administration
+import org.meshtastic.core.resources.connect_radio_for_remote_admin
+import org.meshtastic.core.resources.establishing_session
 import org.meshtastic.core.resources.firmware
 import org.meshtastic.core.resources.firmware_edition
 import org.meshtastic.core.resources.ic_terminal
 import org.meshtastic.core.resources.installed_firmware_version
 import org.meshtastic.core.resources.latest_alpha_firmware
 import org.meshtastic.core.resources.latest_stable_firmware
+import org.meshtastic.core.resources.refresh_metadata
 import org.meshtastic.core.resources.remote_admin
 import org.meshtastic.core.resources.remote_shell
 import org.meshtastic.core.resources.request_metadata
+import org.meshtastic.core.resources.session_active
+import org.meshtastic.core.resources.session_refresh_required
+import org.meshtastic.core.ui.component.BasicListItem
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.icon.ForkLeft
 import org.meshtastic.core.ui.icon.Icecream
@@ -61,27 +83,38 @@ fun AdministrationSection(
     metricsState: MetricsState,
     onAction: (NodeDetailAction) -> Unit,
     onFirmwareSelect: (FirmwareRelease) -> Unit,
+    sessionStatus: SessionStatus,
+    isEnsuringSession: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    SectionCard(title = Res.string.administration, modifier = modifier) {
-        Column {
-            ListItem(
-                text = stringResource(Res.string.request_metadata),
-                leadingIcon = MeshtasticIcons.Memory,
-                trailingIcon = null,
-                onClick = {
-                    onAction(NodeDetailAction.TriggerServiceAction(ServiceAction.GetDeviceMetadata(node.num)))
-                },
-            )
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(24.dp)) {
+        SectionCard(title = Res.string.administration) {
+            Column {
+                // Local nodes don't need a session — they short-circuit straight to the settings screen.
+                if (metricsState.isLocal) {
+                    ListItem(
+                        text = stringResource(Res.string.remote_admin),
+                        leadingIcon = MeshtasticIcons.Settings,
+                        onClick = { onAction(NodeDetailAction.OpenRemoteAdmin(node.num)) },
+                    )
+                } else {
+                    RemoteAdminListItem(
+                        nodeNum = node.num,
+                        sessionStatus = sessionStatus,
+                        isEnsuringSession = isEnsuringSession,
+                        onAction = onAction,
+                    )
 
-            SectionDivider()
+                    SectionDivider()
 
-            ListItem(
-                text = stringResource(Res.string.remote_admin),
-                leadingIcon = MeshtasticIcons.Settings,
-                enabled = metricsState.isLocal || node.metadata != null,
-            ) {
-                onAction(NodeDetailAction.Navigate(SettingsRoute.Settings(node.num)))
+                    ListItem(
+                        text = stringResource(Res.string.refresh_metadata),
+                        leadingIcon = MeshtasticIcons.Memory,
+                        trailingIcon = null,
+                        enabled = !isEnsuringSession,
+                        onClick = { onAction(NodeDetailAction.RefreshMetadata(node.num)) },
+                    )
+                }
             }
 
             if (node.capabilities.supportsRemoteShell) {
@@ -95,12 +128,79 @@ fun AdministrationSection(
                 }
             }
         }
-    }
 
-    val firmwareVersion = node.metadata?.firmware_version
-    val firmwareEdition = metricsState.firmwareEdition
-    if (firmwareVersion != null || (firmwareEdition != null && metricsState.isLocal)) {
-        FirmwareSection(metricsState, firmwareEdition, firmwareVersion, onFirmwareSelect)
+        val firmwareVersion = node.metadata?.firmware_version
+        val firmwareEdition = metricsState.firmwareEdition
+        if (firmwareVersion != null || (firmwareEdition != null && metricsState.isLocal)) {
+            FirmwareSection(metricsState, firmwareEdition, firmwareVersion, onFirmwareSelect)
+        }
+    }
+}
+
+/**
+ * Single primary affordance for opening the remote-admin screen. Replaces the prior two-row, no-feedback flow that
+ * required the user to know they had to tap "Metadata" first to populate `node.metadata` before "Remote Administration"
+ * un-greyed out. The session passkey freshness — not the metadata insert — is the real gate (see
+ * `firmware/src/modules/AdminModule.cpp:1460-1481`), and is now reflected via an [AssistChip] + inline progress.
+ */
+@Composable
+private fun RemoteAdminListItem(
+    nodeNum: Int,
+    sessionStatus: SessionStatus,
+    isEnsuringSession: Boolean,
+    onAction: (NodeDetailAction) -> Unit,
+) {
+    val supportingTextRes =
+        when (sessionStatus) {
+            SessionStatus.NoSession -> Res.string.connect_radio_for_remote_admin
+            is SessionStatus.Active -> null
+            is SessionStatus.Stale -> Res.string.session_refresh_required
+        }
+    val chipLabelRes =
+        when (sessionStatus) {
+            SessionStatus.NoSession -> null
+            is SessionStatus.Active -> Res.string.session_active
+            is SessionStatus.Stale -> Res.string.session_refresh_required
+        }
+
+    Column {
+        BasicListItem(
+            text = stringResource(Res.string.remote_admin),
+            leadingIcon = MeshtasticIcons.Settings,
+            supportingText = supportingTextRes?.let { stringResource(it) },
+            enabled = !isEnsuringSession,
+            trailingContent =
+            chipLabelRes?.let { res ->
+                {
+                    AssistChip(
+                        onClick = { onAction(NodeDetailAction.OpenRemoteAdmin(nodeNum)) },
+                        label = { androidx.compose.material3.Text(stringResource(res)) },
+                        enabled = !isEnsuringSession,
+                        colors =
+                        if (sessionStatus is SessionStatus.Active) {
+                            AssistChipDefaults.assistChipColors(
+                                labelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            )
+                        } else {
+                            AssistChipDefaults.assistChipColors()
+                        },
+                    )
+                }
+            },
+            onClick = { onAction(NodeDetailAction.OpenRemoteAdmin(nodeNum)) },
+        )
+        AnimatedVisibility(visible = isEnsuringSession) {
+            Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)) {
+                LinearWavyProgressIndicator(modifier = Modifier.fillMaxWidth())
+                androidx.compose.material3.Text(
+                    text = stringResource(Res.string.establishing_session),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 4.dp),
+                )
+            }
+        }
     }
 }
 
@@ -119,11 +219,16 @@ private fun FirmwareSection(
                         FirmwareEdition.VANILLA -> MeshtasticIcons.Icecream
                         else -> MeshtasticIcons.ForkLeft
                     }
+                val eventFirmwareRepository = koinInject<EventFirmwareRepository>()
+                val displayName by
+                    produceState(edition.name, edition) {
+                        value = eventFirmwareRepository.getEdition(edition.name)?.displayName ?: edition.name
+                    }
 
                 ListItem(
                     text = stringResource(Res.string.firmware_edition),
                     leadingIcon = icon,
-                    supportingText = edition.name,
+                    supportingText = displayName,
                     copyable = true,
                     trailingIcon = null,
                 )

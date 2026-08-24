@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,11 +21,11 @@ import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.Config
 
 @Composable
-actual fun ExportSecurityConfigButton(
+actual fun SecurityKeyBackupActions(
     viewModel: RadioConfigViewModel,
     enabled: Boolean,
     securityConfig: Config.SecurityConfig,
 ) {
-    // Desktop currently does not implement a specific "export security config" button
-    // within the config screen. If it did, we'd add it here.
+    // Desktop currently does not implement key backup/restore within the config screen.
+    // If it did, we'd add it here.
 }

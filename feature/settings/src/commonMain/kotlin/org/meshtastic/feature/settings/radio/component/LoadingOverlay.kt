@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import org.meshtastic.core.common.util.formatString
+import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.feature.settings.radio.ResponseState
 
 private const val LOADING_OVERLAY_ALPHA = 0.8f
@@ -47,7 +47,8 @@ private const val PERCENTAGE_FACTOR = 100
 
 @Composable
 fun LoadingOverlay(state: ResponseState<*>, modifier: Modifier = Modifier) {
-    AnimatedVisibility(visible = state is ResponseState.Loading, enter = fadeIn(), exit = fadeOut()) {
+    val loading = state as? ResponseState.Loading
+    AnimatedVisibility(visible = loading?.showOverlay == true, enter = fadeIn(), exit = fadeOut()) {
         Box(
             modifier =
             modifier
@@ -61,9 +62,9 @@ fun LoadingOverlay(state: ResponseState<*>, modifier: Modifier = Modifier) {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(24.dp),
             ) {
-                if (state is ResponseState.Loading) {
+                if (loading != null) {
                     val clampedProgress =
-                        (state.completed.toFloat() / state.total.coerceAtLeast(1).toFloat()).coerceIn(0f, 1f)
+                        (loading.completed.toFloat() / loading.total.coerceAtLeast(1).toFloat()).coerceIn(0f, 1f)
                     val progress by animateFloatAsState(targetValue = clampedProgress, label = "loadingProgress")
 
                     Box(contentAlignment = Alignment.Center) {
@@ -73,13 +74,13 @@ fun LoadingOverlay(state: ResponseState<*>, modifier: Modifier = Modifier) {
                             trackColor = MaterialTheme.colorScheme.surfaceVariant,
                         )
                         Text(
-                            text = formatString("%.0f%%", progress * PERCENTAGE_FACTOR),
+                            text = MetricFormatter.percent(progress * PERCENTAGE_FACTOR, decimalPlaces = 0),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                         )
                     }
 
-                    state.status?.let { status ->
+                    loading.status?.let { status ->
                         Text(
                             text = status,
                             style = MaterialTheme.typography.bodyLarge,

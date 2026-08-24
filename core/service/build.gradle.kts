@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,16 +17,11 @@
 
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
-    id("meshtastic.koin")
+    alias(libs.plugins.meshtastic.koin)
 }
 
 kotlin {
-    @Suppress("UnstableApiUsage")
-    android {
-        namespace = "org.meshtastic.core.service"
-        androidResources.enable = false
-        withHostTest { isIncludeAndroidResources = true }
-    }
+    android { withHostTest { isIncludeAndroidResources = true } }
 
     sourceSets {
         commonMain.dependencies {
@@ -40,7 +35,8 @@ kotlin {
             implementation(projects.core.network)
             implementation(projects.core.ble)
             implementation(projects.core.prefs)
-            implementation(projects.core.proto)
+            implementation(projects.core.resources)
+            implementation(libs.meshtastic.protobufs)
             implementation(projects.core.takserver)
 
             implementation(libs.jetbrains.lifecycle.runtime)
@@ -50,21 +46,20 @@ kotlin {
         }
 
         androidMain.dependencies {
-            api(projects.core.api)
             implementation(libs.androidx.core.ktx)
             implementation(libs.androidx.work.runtime.ktx)
+            implementation(libs.androidx.security.crypto)
             implementation(libs.koin.android)
             implementation(libs.koin.androidx.workmanager)
         }
 
-        val androidHostTest by getting {
+        getByName("androidHostTest") {
             dependencies {
-                implementation(projects.core.testing)
-                implementation(libs.androidx.test.ext.junit)
+                implementation(libs.androidx.datastore.preferences)
                 implementation(libs.androidx.work.testing)
             }
         }
 
-        commonTest.dependencies { implementation(libs.kotlinx.coroutines.test) }
+        commonTest.dependencies { implementation(projects.core.testing) }
     }
 }

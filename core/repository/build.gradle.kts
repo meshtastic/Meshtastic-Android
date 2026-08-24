@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,26 +21,20 @@ plugins {
 }
 
 kotlin {
-    @Suppress("UnstableApiUsage")
-    android {
-        androidResources.enable = false
-        withHostTest {}
-    }
+    android { withHostTest {} }
 
     sourceSets {
         commonMain.dependencies {
             api(projects.core.model)
-            api(projects.core.proto)
+            api(libs.meshtastic.protobufs)
             implementation(projects.core.common)
             implementation(projects.core.database)
 
             implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kotlinx.atomicfu)
             implementation(libs.kermit)
             implementation(libs.androidx.paging.common)
         }
-        commonTest.dependencies {
-            implementation(projects.core.testing)
-            implementation(libs.kotlinx.coroutines.test)
-        }
+        commonTest.dependencies { implementation(projects.core.testing) }
     }
 }

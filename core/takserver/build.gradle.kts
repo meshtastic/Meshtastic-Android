@@ -18,19 +18,13 @@
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
-    id("meshtastic.kmp.jvm.android")
-    id("meshtastic.koin")
+    alias(libs.plugins.meshtastic.kmp.jvm.android)
+    alias(libs.plugins.meshtastic.koin)
 }
 
 kotlin {
     @Suppress("UnstableApiUsage")
-    android {
-        namespace = "org.meshtastic.core.takserver"
-        androidResources.enable = false
-        withHostTest { isIncludeAndroidResources = true }
-    }
-
-    jvm {}
+    android { withHostTest { isIncludeAndroidResources = true } }
 
     sourceSets {
         commonMain.dependencies {
@@ -38,7 +32,17 @@ kotlin {
             implementation(projects.core.common)
             implementation(projects.core.di)
             implementation(projects.core.model)
-            implementation(projects.core.proto)
+            implementation(libs.meshtastic.protobufs)
+
+            // org.meshtastic.proto.TAKPacketV2 and friends come from the
+            // protobufs SDK (api()-exported by :core:model for every target).
+            // The TAKPacket-SDK conversion pipeline (org.meshtastic.tak.*) is
+            // multiplatform since 0.7.0 but consumed only on JVM/Android — it's
+            // api()-exported by :core:model's jvmAndroidMain, and common code
+            // reaches it through the TakSdkCompressor/TakV2Compressor/CotSanitizer
+            // expect/actual seams (iOS keeps stub actuals). zstd compression and
+            // CoT XML now ride on the SDK's transitive kzstd + xmlutil, so there
+            // are no native zstd-jni/xpp3 deps to re-add per target.
 
             implementation(libs.okio)
             implementation(libs.kotlinx.serialization.json)
@@ -51,11 +55,6 @@ kotlin {
             implementation(libs.kermit)
         }
 
-        jvmAndroidMain.dependencies {}
-
-        commonTest.dependencies {
-            implementation(projects.core.testing)
-            implementation(libs.kotlinx.coroutines.test)
-        }
+        commonTest.dependencies { implementation(projects.core.testing) }
     }
 }

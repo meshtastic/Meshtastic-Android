@@ -16,7 +16,6 @@
  */
 package org.meshtastic.feature.node.detail
 
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.TelemetryType
@@ -26,18 +25,13 @@ interface NodeRequestActions {
     val lastTracerouteTime: StateFlow<Long?>
     val lastRequestNeighborTimes: StateFlow<Map<Int, Long>>
 
-    fun requestUserInfo(scope: CoroutineScope, destNum: Int, longName: String)
+    suspend fun requestUserInfo(destNum: Int, longName: String)
 
-    fun requestNeighborInfo(scope: CoroutineScope, destNum: Int, longName: String)
+    suspend fun requestNeighborInfo(destNum: Int, longName: String)
 
-    fun requestPosition(
-        scope: CoroutineScope,
-        destNum: Int,
-        longName: String,
-        position: Position = Position(0.0, 0.0, 0),
-    )
+    suspend fun requestPosition(destNum: Int, longName: String, position: Position = Position(0.0, 0.0, 0))
 
-    fun requestTelemetry(scope: CoroutineScope, destNum: Int, longName: String, type: TelemetryType)
+    suspend fun requestTelemetry(destNum: Int, longName: String, type: TelemetryType)
 
-    fun requestTraceroute(scope: CoroutineScope, destNum: Int, longName: String)
+    suspend fun requestTraceroute(destNum: Int, longName: String)
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -34,7 +35,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
@@ -46,10 +47,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
+import org.meshtastic.core.model.MeshActivity
 import org.meshtastic.core.navigation.ContactsRoute
 import org.meshtastic.core.navigation.MultiBackstack
 import org.meshtastic.core.navigation.NodesRoute
@@ -59,6 +62,8 @@ import org.meshtastic.core.resources.connected
 import org.meshtastic.core.resources.connecting
 import org.meshtastic.core.resources.device_sleeping
 import org.meshtastic.core.resources.disconnected
+import org.meshtastic.core.resources.node_restarting
+import org.meshtastic.core.resources.reconnecting
 import org.meshtastic.core.ui.navigation.icon
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 
@@ -68,7 +73,7 @@ import org.meshtastic.core.ui.viewmodel.UIViewModel
  * This implementation uses the [MultiBackstack] state holder to manage independent histories for each tab, aligning
  * with Navigation 3 best practices for state preservation during tab switching.
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun MeshtasticNavigationSuite(
     multiBackstack: MultiBackstack,
@@ -77,10 +82,12 @@ fun MeshtasticNavigationSuite(
     content: @Composable () -> Unit,
 ) {
     val connectionState by uiViewModel.connectionState.collectAsStateWithLifecycle()
+    val nodeRestartExpected by uiViewModel.nodeRestartExpected.collectAsStateWithLifecycle()
+    val watchdogReconnectInFlight by uiViewModel.watchdogReconnectInFlight.collectAsStateWithLifecycle()
     val unreadMessageCount by uiViewModel.unreadMessageCount.collectAsStateWithLifecycle()
     val selectedDevice by uiViewModel.currentDeviceAddressFlow.collectAsStateWithLifecycle()
 
-    val adaptiveInfo = currentWindowAdaptiveInfo(supportLargeAndXLargeWidth = true)
+    val adaptiveInfo = currentWindowAdaptiveInfoV2()
 
     val currentTabRoute = multiBackstack.currentTabRoute
     val topLevelDestination = TopLevelDestination.fromNavKey(currentTabRoute)
@@ -102,9 +109,11 @@ fun MeshtasticNavigationSuite(
                             destination = destination,
                             isSelected = isSelected,
                             connectionState = connectionState,
+                            nodeRestartExpected = nodeRestartExpected,
+                            watchdogReconnectInFlight = watchdogReconnectInFlight,
                             unreadMessageCount = unreadMessageCount,
                             selectedDevice = selectedDevice,
-                            uiViewModel = uiViewModel,
+                            meshActivityFlow = uiViewModel.meshActivity,
                         )
                     },
                     label =
@@ -141,22 +150,23 @@ private fun handleNavigation(
         val currentKey = multiBackstack.activeBackStack.lastOrNull()
         when (destination) {
             TopLevelDestination.Nodes -> {
-                val onNodesList = currentKey is NodesRoute.NodesGraph || currentKey is NodesRoute.Nodes
+                val onNodesList = currentKey is NodesRoute.Nodes
                 if (!onNodesList) {
                     multiBackstack.navigateTopLevel(destination.route)
                 } else {
                     uiViewModel.emitScrollToTopEvent(ScrollToTopEvent.NodesTabPressed)
                 }
             }
-            TopLevelDestination.Conversations -> {
-                val onConversationsList =
-                    currentKey is ContactsRoute.ContactsGraph || currentKey is ContactsRoute.Contacts
+
+            TopLevelDestination.Messages -> {
+                val onConversationsList = currentKey is ContactsRoute.Contacts
                 if (!onConversationsList) {
                     multiBackstack.navigateTopLevel(destination.route)
                 } else {
                     uiViewModel.emitScrollToTopEvent(ScrollToTopEvent.ConversationsTabPressed)
                 }
             }
+
             else -> {
                 if (currentKey != destination.route) {
                     multiBackstack.navigateTopLevel(destination.route)
@@ -176,9 +186,22 @@ private fun NavigationIconContent(
     connectionState: ConnectionState,
     unreadMessageCount: Int,
     selectedDevice: String?,
-    uiViewModel: UIViewModel,
+    meshActivityFlow: Flow<MeshActivity>,
+    nodeRestartExpected: Boolean = false,
+    watchdogReconnectInFlight: Boolean = false,
 ) {
-    val isConnectionsRoute = destination == TopLevelDestination.Connections
+    val isConnectionsRoute = destination == TopLevelDestination.Connect
+    // An expected node restart (reboot-applying config save) presents as an in-progress state, not a scary
+    // red disconnect: the icon borrows the Connecting treatment and the tooltip says "Restarting". A
+    // watchdog-forced handshake recovery gets the same treatment with a "Reconnecting…" tooltip.
+    val restarting = nodeRestartExpected && connectionState != ConnectionState.Connected
+    val reconnecting = watchdogReconnectInFlight && !restarting
+    val presentedState =
+        if ((restarting || reconnecting) && connectionState == ConnectionState.Disconnected) {
+            ConnectionState.Connecting
+        } else {
+            connectionState
+        }
 
     TooltipBox(
         positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
@@ -186,12 +209,7 @@ private fun NavigationIconContent(
             PlainTooltip {
                 Text(
                     if (isConnectionsRoute) {
-                        when (connectionState) {
-                            ConnectionState.Connected -> stringResource(Res.string.connected)
-                            ConnectionState.Connecting -> stringResource(Res.string.connecting)
-                            ConnectionState.DeviceSleep -> stringResource(Res.string.device_sleeping)
-                            ConnectionState.Disconnected -> stringResource(Res.string.disconnected)
-                        }
+                        connectionTooltipLabel(restarting, reconnecting, connectionState)
                     } else {
                         stringResource(destination.label)
                     },
@@ -202,14 +220,14 @@ private fun NavigationIconContent(
     ) {
         if (isConnectionsRoute) {
             AnimatedConnectionsNavIcon(
-                connectionState = connectionState,
+                connectionState = presentedState,
                 deviceType = DeviceType.fromAddress(selectedDevice ?: "NoDevice"),
-                meshActivityFlow = uiViewModel.meshActivity,
+                meshActivityFlow = meshActivityFlow,
             )
         } else {
             BadgedBox(
                 badge = {
-                    if (destination == TopLevelDestination.Conversations) {
+                    if (destination == TopLevelDestination.Messages) {
                         var lastNonZeroCount by remember { mutableIntStateOf(unreadMessageCount) }
                         if (unreadMessageCount > 0) {
                             lastNonZeroCount = unreadMessageCount
@@ -234,4 +252,18 @@ private fun NavigationIconContent(
             }
         }
     }
+}
+
+@Composable
+private fun connectionTooltipLabel(
+    restarting: Boolean,
+    reconnecting: Boolean,
+    connectionState: ConnectionState,
+): String = when {
+    restarting -> stringResource(Res.string.node_restarting)
+    reconnecting -> stringResource(Res.string.reconnecting)
+    connectionState == ConnectionState.Connected -> stringResource(Res.string.connected)
+    connectionState == ConnectionState.Connecting -> stringResource(Res.string.connecting)
+    connectionState == ConnectionState.DeviceSleep -> stringResource(Res.string.device_sleeping)
+    else -> stringResource(Res.string.disconnected)
 }

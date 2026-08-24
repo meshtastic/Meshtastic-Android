@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,47 +17,112 @@
 package org.meshtastic.core.data.repository
 
 import co.touchlab.kermit.Logger
+import kotlinx.atomicfu.atomic
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.safeCatching
-import org.meshtastic.core.data.datasource.BootloaderOtaQuirksJsonDataSource
-import org.meshtastic.core.data.datasource.DeviceHardwareJsonDataSource
+import org.meshtastic.core.data.datasource.BundledAssetReader
 import org.meshtastic.core.data.datasource.DeviceHardwareLocalDataSource
+import org.meshtastic.core.data.datasource.decode
+import org.meshtastic.core.data.util.SingleFlightRefresher
+import org.meshtastic.core.data.util.staleWhileRevalidateFlow
 import org.meshtastic.core.database.entity.DeviceHardwareEntity
 import org.meshtastic.core.database.entity.asExternalModel
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.BootloaderOtaQuirk
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.NetworkDeviceHardware
+import org.meshtastic.core.model.SoftDeviceVariant
+import org.meshtastic.core.model.SoftDeviceVariantEntry
 import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.network.DeviceHardwareRemoteDataSource
+import org.meshtastic.core.repository.BootloaderOtaQuirksRepository
 import org.meshtastic.core.repository.DeviceHardwareRepository
+import org.meshtastic.core.repository.DeviceLinkRepository
+import kotlin.time.Duration.Companion.minutes
 
-// Annotating with Singleton to ensure a single instance manages the cache
+/**
+ * Bounds catalog refreshes when a model is missing or permanently incomplete. A successful full-catalog response is
+ * authoritative for [successTtlMs]; failed attempts may retry after [retryIntervalMs]. This prevents packet-driven UI
+ * lookups from turning an unsupported model into a continuous hardware + device-link network refresh loop.
+ */
+internal class DeviceHardwareRefreshGate(private val retryIntervalMs: Long, private val successTtlMs: Long) {
+    private val lastAttemptMs = atomic(NO_TIMESTAMP)
+    private val lastSuccessMs = atomic(NO_TIMESTAMP)
+
+    fun shouldRefresh(nowMs: Long, forceRefresh: Boolean, cacheNeedsRefresh: Boolean): Boolean = when {
+        forceRefresh -> true
+        !cacheNeedsRefresh -> false
+        isWithin(nowMs, lastSuccessMs.value, successTtlMs) -> false
+        else -> !isWithin(nowMs, lastAttemptMs.value, retryIntervalMs)
+    }
+
+    fun recordAttempt(nowMs: Long) {
+        lastAttemptMs.value = nowMs
+    }
+
+    fun recordSuccess(nowMs: Long) {
+        lastSuccessMs.value = nowMs
+    }
+
+    private fun isWithin(nowMs: Long, timestampMs: Long, intervalMs: Long): Boolean =
+        timestampMs != NO_TIMESTAMP && nowMs >= timestampMs && nowMs - timestampMs < intervalMs
+
+    private companion object {
+        private const val NO_TIMESTAMP = -1L
+    }
+}
+
 @Single
 class DeviceHardwareRepositoryImpl(
     private val remoteDataSource: DeviceHardwareRemoteDataSource,
     private val localDataSource: DeviceHardwareLocalDataSource,
-    private val jsonDataSource: DeviceHardwareJsonDataSource,
-    private val bootloaderOtaQuirksJsonDataSource: BootloaderOtaQuirksJsonDataSource,
+    private val assetReader: BundledAssetReader,
+    private val json: Json,
+    private val deviceLinkRepository: DeviceLinkRepository,
+    private val bootloaderOtaQuirksRepository: BootloaderOtaQuirksRepository,
     private val dispatchers: CoroutineDispatchers,
 ) : DeviceHardwareRepository {
 
     /**
+     * Shared full-table refresh; a caller that stops waiting (the node-details path bounds its wait) can't abort it.
+     */
+    private val refreshGate =
+        DeviceHardwareRefreshGate(
+            retryIntervalMs = FAILED_REFRESH_RETRY_INTERVAL_MS,
+            successTtlMs = CACHE_EXPIRATION_TIME_MS,
+        )
+
+    private val refresher =
+        SingleFlightRefresher(dispatchers.io, "DeviceHardwareRepository") {
+            refreshGate.recordAttempt(nowMillis)
+            Logger.d { "DeviceHardwareRepository: fetching from remote API" }
+            val remoteHardware = remoteDataSource.getAllDeviceHardware()
+            Logger.d { "DeviceHardwareRepository: remote returned ${remoteHardware.size} entries" }
+            if (remoteHardware.isNotEmpty()) {
+                localDataSource.replaceAllDeviceHardware(remoteHardware)
+                refreshGate.recordSuccess(nowMillis)
+            } else {
+                Logger.w { "DeviceHardwareRepository: remote catalog was empty; retaining cached data" }
+            }
+            // Refresh msh.to device links and the bootloader/OTA quirk catalog after a hardware refresh. When the
+            // hardware fetch itself succeeds, its freshness is recorded before either of these — so neither one
+            // failing can cause another full hardware fetch on the next packet-driven lookup.
+            deviceLinkRepository.reconcile()
+            bootloaderOtaQuirksRepository.reconcile()
+        }
+
+    /**
      * Retrieves device hardware information by its model ID and optional target string.
      *
-     * This function implements a cache-aside pattern with a fallback mechanism:
-     * 1. Check for a valid, non-expired local cache entry.
-     * 2. If not found or expired, fetch fresh data from the remote API.
-     * 3. If the remote fetch fails, attempt to use stale data from the cache.
-     * 4. If the cache is empty, fall back to loading data from a bundled JSON asset.
-     *
-     * @param hwModel The hardware model identifier.
-     * @param target Optional PlatformIO target environment name to disambiguate multiple variants.
-     * @param forceRefresh If true, the local cache will be invalidated and data will be fetched remotely.
-     * @return A [Result] containing the [DeviceHardware] on success (or null if not found), or an exception on failure.
+     * Pipeline:
+     * 1. If the local DB is empty, seed it from the bundled JSON asset (instant baseline).
+     * 2. If the cached entry is stale or missing, refresh from the remote API with a timeout.
+     * 3. Return the best available data from the DB (never blocks longer than [NETWORK_REFRESH_TIMEOUT_MS]).
      */
-    @Suppress("LongMethod", "detekt:CyclomaticComplexMethod")
     override suspend fun getDeviceHardwareByModel(
         hwModel: Int,
         target: String?,
@@ -68,190 +133,146 @@ class DeviceHardwareRepositoryImpl(
                 " target=$target, forceRefresh=$forceRefresh)"
         }
 
-        val quirks = loadQuirks()
-
         if (forceRefresh) {
-            Logger.d { "DeviceHardwareRepository: forceRefresh=true, clearing local device hardware cache" }
-            localDataSource.deleteAllDeviceHardware()
-        } else {
-            // 1. Attempt to retrieve from cache first
-            var cachedEntities = localDataSource.getByHwModel(hwModel)
-
-            // Fallback to target-only lookup if hwModel-based lookup yielded nothing
-            if (cachedEntities.isEmpty() && target != null) {
-                Logger.d {
-                    "DeviceHardwareRepository: no cache for hwModel=$hwModel, trying target lookup for $target"
-                }
-                val byTarget = localDataSource.getByTarget(target)
-                if (byTarget != null) {
-                    cachedEntities = listOf(byTarget)
-                }
-            }
-
-            if (cachedEntities.isNotEmpty() && cachedEntities.all { !it.isStale() }) {
-                Logger.d { "DeviceHardwareRepository: using fresh cached device hardware for hwModel=$hwModel" }
-                val matched = disambiguate(cachedEntities, target)
-                return@withContext Result.success(
-                    applyBootloaderQuirk(hwModel, matched?.asExternalModel(), quirks, target),
-                )
-            }
-            Logger.d { "DeviceHardwareRepository: no fresh cache for hwModel=$hwModel, attempting remote fetch" }
+            Logger.d { "DeviceHardwareRepository: forceRefresh=true, bypassing refresh gate" }
         }
 
-        // 2. Fetch from remote API
-        safeCatching {
-            Logger.d { "DeviceHardwareRepository: fetching device hardware from remote API" }
-            val remoteHardware = remoteDataSource.getAllDeviceHardware()
-            Logger.d {
-                "DeviceHardwareRepository: remote API returned ${remoteHardware.size} device hardware entries"
-            }
+        ensureSeeded()
 
-            localDataSource.insertAllDeviceHardware(remoteHardware)
-            var fromDb = localDataSource.getByHwModel(hwModel)
-
-            // Fallback to target lookup after remote fetch
-            if (fromDb.isEmpty() && target != null) {
-                val byTarget = localDataSource.getByTarget(target)
-                if (byTarget != null) fromDb = listOf(byTarget)
-            }
-
-            Logger.d {
-                "DeviceHardwareRepository: lookup after remote fetch for hwModel=$hwModel returned" +
-                    " ${fromDb.size} entries"
-            }
-            disambiguate(fromDb, target)?.asExternalModel()
+        var entities = lookupEntities(hwModel, target)
+        val cacheNeedsRefresh = entities.isEmpty() || entities.any { it.isStale() }
+        if (refreshGate.shouldRefresh(nowMillis, forceRefresh, cacheNeedsRefresh)) {
+            refresher.refresh(maxWaitMs = NETWORK_REFRESH_TIMEOUT_MS)
+            entities = lookupEntities(hwModel, target)
         }
-            .onSuccess {
-                // Successfully fetched and found the model
-                return@withContext Result.success(applyBootloaderQuirk(hwModel, it, quirks, target))
-            }
-            .onFailure { e ->
-                Logger.w(e) {
-                    "DeviceHardwareRepository: failed to fetch device hardware from server for hwModel=$hwModel"
-                }
 
-                // 3. Attempt to use stale cache as a fallback, but only if it looks complete.
-                var staleEntities = localDataSource.getByHwModel(hwModel)
-                if (staleEntities.isEmpty() && target != null) {
-                    val byTarget = localDataSource.getByTarget(target)
-                    if (byTarget != null) staleEntities = listOf(byTarget)
-                }
-
-                if (staleEntities.isNotEmpty() && staleEntities.all { !it.isIncomplete() }) {
-                    Logger.d { "DeviceHardwareRepository: using stale cached device hardware for hwModel=$hwModel" }
-                    val matched = disambiguate(staleEntities, target)
-                    return@withContext Result.success(
-                        applyBootloaderQuirk(hwModel, matched?.asExternalModel(), quirks, target),
-                    )
-                }
-
-                // 4. Fallback to bundled JSON if cache is empty or incomplete
-                Logger.d {
-                    "DeviceHardwareRepository: cache ${if (staleEntities.isEmpty()) "empty" else "incomplete"} " +
-                        "for hwModel=$hwModel, falling back to bundled JSON asset"
-                }
-                return@withContext loadFromBundledJson(hwModel, target, quirks)
-            }
+        Result.success(resolveHardware(hwModel, entities, target))
     }
 
-    private suspend fun loadFromBundledJson(
+    /**
+     * Non-blocking Flow that emits cached/bundled hardware data immediately, then refreshes from the network if stale.
+     * Safe to use inside Flow `combine` transforms.
+     */
+    override fun observeDeviceHardware(hwModel: Int, target: String?): Flow<DeviceHardware?> = staleWhileRevalidateFlow(
+        loadFromCache = {
+            ensureSeeded()
+            resolveHardware(hwModel, lookupEntities(hwModel, target), target)
+        },
+        shouldFetch = { cached ->
+            val cacheNeedsRefresh = cached == null || lookupEntities(hwModel, target).any { it.isStale() }
+            refreshGate.shouldRefresh(nowMillis, forceRefresh = false, cacheNeedsRefresh)
+        },
+        fetch = { refresher.refresh() },
+        context = dispatchers.io,
+        networkTimeoutMs = null,
+        tag = "DeviceHardwareRepository",
+    )
+
+    /** Looks up entities by hwModel, falling back to a target-only lookup when needed. */
+    private suspend fun lookupEntities(hwModel: Int, target: String?): List<DeviceHardwareEntity> =
+        localDataSource.getByHwModel(hwModel).ifEmpty {
+            target?.let { listOfNotNull(localDataSource.getByTarget(it)) } ?: emptyList()
+        }
+
+    /** Seeds the local DB from bundled JSON if completely empty. */
+    private suspend fun ensureSeeded() {
+        if (!localDataSource.hasAnyEntries()) {
+            safeCatching {
+                Logger.d { "DeviceHardwareRepository: seeding cache from bundled JSON" }
+                val jsonHardware =
+                    assetReader.decode<List<NetworkDeviceHardware>>("device_hardware.json", json).orEmpty()
+                localDataSource.insertAllDeviceHardware(jsonHardware)
+            }
+                .onFailure { e -> Logger.w(e) { "DeviceHardwareRepository: failed to seed cache from bundled JSON" } }
+        }
+    }
+
+    /** Resolves entities into a [DeviceHardware] domain model with quirk application. */
+    private suspend fun resolveHardware(
         hwModel: Int,
+        entities: List<DeviceHardwareEntity>,
         target: String?,
-        quirks: List<BootloaderOtaQuirk>,
-    ): Result<DeviceHardware?> = safeCatching {
-        Logger.d { "DeviceHardwareRepository: loading device hardware from bundled JSON for hwModel=$hwModel" }
-        val jsonHardware = jsonDataSource.loadDeviceHardwareFromJsonAsset()
-        Logger.d {
-            "DeviceHardwareRepository: bundled JSON returned ${jsonHardware.size} device hardware entries"
-        }
-
-        localDataSource.insertAllDeviceHardware(jsonHardware)
-        var baseList = localDataSource.getByHwModel(hwModel)
-
-        // Fallback to target lookup after JSON load
-        if (baseList.isEmpty() && target != null) {
-            val byTarget = localDataSource.getByTarget(target)
-            if (byTarget != null) baseList = listOf(byTarget)
-        }
-
-        Logger.d {
-            "DeviceHardwareRepository: lookup after JSON load for hwModel=$hwModel returned ${baseList.size} entries"
-        }
-
-        val matched = disambiguate(baseList, target)
-        applyBootloaderQuirk(hwModel, matched?.asExternalModel(), quirks, target)
+    ): DeviceHardware? {
+        val matched = disambiguate(entities, target)
+        val snapshot = bootloaderOtaQuirksRepository.getSnapshot()
+        val withQuirk = applyBootloaderQuirk(hwModel, matched?.asExternalModel(), snapshot.devices, target)
+        return applySoftDeviceVariant(hwModel, withQuirk, snapshot.softDeviceVariants, target)
     }
-        .also { result ->
-            result.exceptionOrNull()?.let { e ->
-                Logger.e(e) {
-                    "DeviceHardwareRepository: failed to load device hardware from bundled JSON for hwModel=$hwModel"
-                }
+
+    /**
+     * Overlays the SoftDevice variant, requiring the reported target to be one this model is actually mapped for.
+     *
+     * Deliberately stricter than [applyBootloaderQuirk] and deliberately not routed through [disambiguate]: both of
+     * those fall back to "close enough" (`firstOrNull()`), which is right for an advisory warning and wrong here.
+     * `hwModel` is not unique — hwModel 94 (`HELTEC_MESH_POCKET`) has two nRF52840 targets — and a plausible-but-wrong
+     * variant writes an erase image into the SoftDevice. Every unresolvable case (asset absent, asset malformed, model
+     * unmapped, reported target not in the row) therefore lands on `null`, and callers must refuse on `null`.
+     */
+    private fun applySoftDeviceVariant(
+        hwModel: Int,
+        base: DeviceHardware?,
+        entries: List<SoftDeviceVariantEntry>,
+        reportedTarget: String?,
+    ): DeviceHardware? = base?.let { hw ->
+        val effectiveTarget = reportedTarget?.takeIf { it.isNotBlank() }
+        val modelEntries = entries.filter { it.hwModel == hwModel }
+        val matched =
+            when {
+                effectiveTarget != null ->
+                    modelEntries.firstOrNull { entry ->
+                        entry.platformioTargets.any { it.equals(effectiveTarget, ignoreCase = true) }
+                    }
+
+                // No reported target: hw.platformioTarget may be disambiguate()'s arbitrary firstOrNull() pick,
+                // so it must not select between rows. Resolve only when every row for this model agrees anyway;
+                // a multi-variant model without a device-reported target stays unresolved (callers refuse on null).
+                modelEntries.map { it.softDevice }.distinct().size == 1 -> modelEntries.first()
+
+                else -> null
             }
-        }
-
-    private fun disambiguate(entities: List<DeviceHardwareEntity>, target: String?): DeviceHardwareEntity? = when {
-        entities.isEmpty() -> null
-        target == null -> entities.first()
-        else -> {
-            entities.find { it.platformioTarget == target }
-                ?: entities.find { it.platformioTarget.equals(target, ignoreCase = true) }
-                ?: entities.first()
-        }
+        hw.copy(softDeviceVariant = SoftDeviceVariant.fromWire(matched?.softDevice))
     }
 
-    /** Returns true if the cached entity is missing important fields and should be refreshed. */
+    private fun disambiguate(entities: List<DeviceHardwareEntity>, target: String?): DeviceHardwareEntity? =
+        when (target) {
+            null -> entities.firstOrNull()
+
+            else ->
+                entities.find { it.platformioTarget == target }
+                    ?: entities.find { it.platformioTarget.equals(target, ignoreCase = true) }
+                    ?: entities.firstOrNull()
+        }
+
     private fun DeviceHardwareEntity.isIncomplete(): Boolean =
         displayName.isBlank() || platformioTarget.isBlank() || images.isNullOrEmpty()
 
-    /**
-     * Extension function to check if the cached entity is stale.
-     *
-     * We treat entries with missing critical fields (e.g., no images or target) as stale so that they can be
-     * automatically healed from newer JSON snapshots even if their timestamp is recent.
-     */
     private fun DeviceHardwareEntity.isStale(): Boolean =
         isIncomplete() || (nowMillis - this.lastUpdated) > CACHE_EXPIRATION_TIME_MS
-
-    private fun loadQuirks(): List<BootloaderOtaQuirk> {
-        val quirks = bootloaderOtaQuirksJsonDataSource.loadBootloaderOtaQuirksFromJsonAsset()
-        Logger.d { "DeviceHardwareRepository: loaded ${quirks.size} bootloader quirks" }
-        return quirks
-    }
 
     private fun applyBootloaderQuirk(
         hwModel: Int,
         base: DeviceHardware?,
         quirks: List<BootloaderOtaQuirk>,
         reportedTarget: String? = null,
-    ): DeviceHardware? {
-        if (base == null) return null
-
+    ): DeviceHardware? = base?.let { hw ->
         val matchedQuirk = quirks.firstOrNull { it.hwModel == hwModel }
-        val result =
+        val withQuirk =
             if (matchedQuirk != null) {
-                Logger.d {
-                    "DeviceHardwareRepository: applying quirk: " +
-                        "requiresBootloaderUpgradeForOta=${matchedQuirk.requiresBootloaderUpgradeForOta}, " +
-                        "infoUrl=${matchedQuirk.infoUrl}"
-                }
-                base.copy(
+                hw.copy(
                     requiresBootloaderUpgradeForOta = matchedQuirk.requiresBootloaderUpgradeForOta,
                     bootloaderInfoUrl = matchedQuirk.infoUrl,
                 )
             } else {
-                base
+                hw
             }
-
-        // If the device reported a specific build environment via pio_env, trust it for firmware retrieval
-        return if (reportedTarget != null) {
-            Logger.d { "DeviceHardwareRepository: using reported target $reportedTarget for hardware info" }
-            result.copy(platformioTarget = reportedTarget)
-        } else {
-            result
-        }
+        reportedTarget?.let { withQuirk.copy(platformioTarget = it) } ?: withQuirk
     }
 
     companion object {
         private val CACHE_EXPIRATION_TIME_MS = TimeConstants.ONE_DAY.inWholeMilliseconds
+        private val FAILED_REFRESH_RETRY_INTERVAL_MS = 15.minutes.inWholeMilliseconds
+
+        /** Maximum time a blocking lookup waits for an in-flight refresh before returning cached/bundled data. */
+        private const val NETWORK_REFRESH_TIMEOUT_MS = 5_000L
     }
 }

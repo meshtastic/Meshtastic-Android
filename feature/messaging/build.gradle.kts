@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,17 +18,8 @@
 plugins { alias(libs.plugins.meshtastic.kmp.feature) }
 
 kotlin {
-    jvm()
-
-    @Suppress("UnstableApiUsage")
-    android {
-        namespace = "org.meshtastic.feature.messaging"
-        androidResources.enable = false
-    }
-
     sourceSets {
         commonMain.dependencies {
-            implementation(libs.compose.multiplatform.foundation)
             implementation(projects.core.common)
             implementation(projects.core.data)
             implementation(projects.core.database)
@@ -36,14 +27,14 @@ kotlin {
             implementation(projects.core.model)
             implementation(projects.core.navigation)
             implementation(projects.core.prefs)
-            implementation(projects.core.proto)
+            implementation(libs.meshtastic.protobufs)
             implementation(projects.core.resources)
             implementation(projects.core.service)
             implementation(projects.core.ui)
 
-            implementation(libs.jetbrains.navigation3.ui)
             implementation(libs.androidx.paging.common)
             implementation(libs.androidx.paging.compose)
+            implementation(libs.kotlinx.collections.immutable)
 
             // JetBrains Material 3 Adaptive (multiplatform ListDetailPaneScaffold)
             implementation(libs.jetbrains.compose.material3.adaptive)
@@ -59,3 +50,5 @@ kotlin {
         jvmTest.dependencies { implementation(compose.desktop.currentOs) }
     }
 }
+
+// Gradle's KMP variant resolution follows `available-at` redirects in module

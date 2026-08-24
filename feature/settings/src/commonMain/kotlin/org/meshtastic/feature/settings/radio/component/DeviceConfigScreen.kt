@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,6 +59,7 @@ import org.meshtastic.core.resources.are_you_sure
 import org.meshtastic.core.resources.button_gpio
 import org.meshtastic.core.resources.buzzer_gpio
 import org.meshtastic.core.resources.cancel
+import org.meshtastic.core.resources.clear_time_zone
 import org.meshtastic.core.resources.config_device_doubleTapAsButtonPress_summary
 import org.meshtastic.core.resources.config_device_ledHeartbeatEnabled_summary
 import org.meshtastic.core.resources.config_device_tripleClickAsAdHocPing_summary
@@ -141,10 +142,15 @@ private val Config.DeviceConfig.RebroadcastMode.description: StringResource
     get() =
         when (this) {
             Config.DeviceConfig.RebroadcastMode.ALL -> Res.string.rebroadcast_mode_all_desc
+
             Config.DeviceConfig.RebroadcastMode.ALL_SKIP_DECODING -> Res.string.rebroadcast_mode_all_skip_decoding_desc
+
             Config.DeviceConfig.RebroadcastMode.LOCAL_ONLY -> Res.string.rebroadcast_mode_local_only_desc
+
             Config.DeviceConfig.RebroadcastMode.KNOWN_ONLY -> Res.string.rebroadcast_mode_known_only_desc
+
             Config.DeviceConfig.RebroadcastMode.NONE -> Res.string.rebroadcast_mode_none_desc
+
             Config.DeviceConfig.RebroadcastMode.CORE_PORTNUMS_ONLY ->
                 Res.string.rebroadcast_mode_core_portnums_only_desc
         }
@@ -269,7 +275,10 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
                     onValueChanged = { formState.value = formState.value.copy(tzdef = it) },
                     trailingIcon = {
                         IconButton(onClick = { formState.value = formState.value.copy(tzdef = "") }) {
-                            Icon(imageVector = MeshtasticIcons.Close, contentDescription = null)
+                            Icon(
+                                imageVector = MeshtasticIcons.Close,
+                                contentDescription = stringResource(Res.string.clear_time_zone),
+                            )
                         }
                     },
                 )
@@ -282,7 +291,10 @@ fun DeviceConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit
                     shape = RectangleShape,
                     onClick = { formState.value = formState.value.copy(tzdef = appTzPosixString) },
                 ) {
-                    Icon(imageVector = MeshtasticIcons.PhoneAndroid, contentDescription = null)
+                    Icon(
+                        imageVector = MeshtasticIcons.PhoneAndroid,
+                        contentDescription = stringResource(Res.string.config_device_use_phone_tz),
+                    )
 
                     Spacer(modifier = Modifier.width(8.dp))
 

@@ -20,8 +20,7 @@ import co.touchlab.kermit.Logger
 import io.ktor.client.plugins.logging.Logger as KtorLogger
 
 /**
- * Bridges Ktor's HTTP client logging to [Kermit][Logger] so HTTP request/response events appear in the standard app
- * logs rather than going to [System.out] via Ktor's default [io.ktor.client.plugins.logging.Logger.DEFAULT].
+ * Bridges Ktor's HTTP client logging to [Kermit][Logger].
  *
  * Usage:
  * ```
@@ -34,7 +33,5 @@ import io.ktor.client.plugins.logging.Logger as KtorLogger
  * ```
  */
 object KermitHttpLogger : KtorLogger {
-    override fun log(message: String) {
-        Logger.d { message }
-    }
+    override fun log(message: String) = Logger.withTag("HttpClient").d { message }
 }

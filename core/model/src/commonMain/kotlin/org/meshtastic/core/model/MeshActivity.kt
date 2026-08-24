@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ package org.meshtastic.core.model
 
 /** Represents activity on the mesh network. */
 sealed class MeshActivity {
-    /** Data is being sent to the radio. */
+    /** The active transport accepted a local outbound handoff; this does not confirm radio or mesh delivery. */
     data object Send : MeshActivity()
 
     /** Data is being received from the radio. */

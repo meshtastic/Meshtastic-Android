@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,18 +43,19 @@ class SequentialJob {
      */
     fun launch(scope: CoroutineScope, timeoutMs: Long = 0, block: suspend CoroutineScope.() -> Unit) {
         cancel()
-        val newJob = scope.handledLaunch {
-            if (timeoutMs > 0) {
-                try {
-                    withTimeout(timeoutMs, block)
-                } catch (e: TimeoutCancellationException) {
-                    Logger.w { "SequentialJob timed out after ${timeoutMs}ms" }
-                    throw e
+        val newJob =
+            scope.handledLaunch {
+                if (timeoutMs > 0) {
+                    try {
+                        withTimeout(timeoutMs, block)
+                    } catch (e: TimeoutCancellationException) {
+                        Logger.w { "SequentialJob timed out after ${timeoutMs}ms" }
+                        throw e
+                    }
+                } else {
+                    block()
                 }
-            } else {
-                block()
             }
-        }
         job.value = newJob
 
         newJob.invokeOnCompletion { job.compareAndSet(newJob, null) }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@ package org.meshtastic.core.data.repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.withContext
@@ -36,26 +35,27 @@ class TracerouteSnapshotRepositoryImpl(
     private val dispatchers: CoroutineDispatchers,
 ) : TracerouteSnapshotRepository {
 
-    override fun getSnapshotPositions(logUuid: String): Flow<Map<Int, Position>> = dbManager.currentDb
-        .flatMapLatest { it.tracerouteNodePositionDao().getByLogUuid(logUuid) }
+    override fun getSnapshotPositions(logUuid: String): Flow<Map<Int, Position>> = dbManager
+        .observeCurrentDb { it.tracerouteNodePositionDao().getByLogUuid(logUuid) }
         .distinctUntilChanged()
         .mapLatest { list -> list.associate { it.nodeNum to it.position } }
         .flowOn(dispatchers.io)
         .conflate()
 
-    override suspend fun upsertSnapshotPositions(logUuid: String, requestId: Int, positions: Map<Int, Position>) =
+    override suspend fun upsertSnapshotPositions(logUuid: String, requestId: Int, positions: Map<Int, Position>) {
         withContext(dispatchers.io) {
-            val dao = dbManager.currentDb.value.tracerouteNodePositionDao()
-            dao.deleteByLogUuid(logUuid)
-            if (positions.isEmpty()) return@withContext
-            val entities = positions.map { (nodeNum, position) ->
-                TracerouteNodePositionEntity(
-                    logUuid = logUuid,
-                    requestId = requestId,
-                    nodeNum = nodeNum,
-                    position = position,
-                )
-            }
-            dao.insertAll(entities)
+            val entities =
+                positions.map { (nodeNum, position) ->
+                    TracerouteNodePositionEntity(
+                        logUuid = logUuid,
+                        requestId = requestId,
+                        nodeNum = nodeNum,
+                        position = position,
+                    )
+                }
+            // Single transactional DAO call — delete + insert is atomic. An authoritative empty result deliberately
+            // deletes the previous snapshot instead of retaining stale positions.
+            dbManager.withDb { it.tracerouteNodePositionDao().replaceByLogUuid(logUuid, entities) }
         }
+    }
 }

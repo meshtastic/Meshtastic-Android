@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,12 +18,7 @@
 plugins { alias(libs.plugins.meshtastic.kmp.library) }
 
 kotlin {
-    @Suppress("UnstableApiUsage")
-    android {
-        namespace = "org.meshtastic.core.testing"
-        androidResources.enable = false
-        withHostTest {}
-    }
+    android { withHostTest {} }
 
     sourceSets {
         commonMain.dependencies {
@@ -32,9 +27,10 @@ kotlin {
             // Heavy modules (database, data, domain) should depend on core:testing, not vice versa.
             api(projects.core.model)
             api(projects.core.repository)
-            api(projects.core.database)
-            api(projects.core.ble)
+            implementation(projects.core.database)
+            implementation(projects.core.ble)
             implementation(projects.core.datastore)
+            implementation(libs.kotlinx.atomicfu)
             implementation(libs.androidx.room.runtime)
             api(libs.kermit)
 

@@ -1,0 +1,66 @@
+schema_version: "1.0"
+
+extension:
+  id: "optimize"
+  name: "Optimize Extension"
+  version: "1.0.0"
+  description: "Audits and optimizes AI governance — token budgets, rule health, interpretability, compression, coherence, echo detection, token tracking, and session learning."
+  author: "sakitA"
+  repository: "https://github.com/sakitA/spec-kit-optimize"
+  license: "MIT"
+  homepage: "https://github.com/sakitA/spec-kit-optimize"
+
+requires:
+  speckit_version: ">=0.1.0"
+
+  commands:
+    - "speckit.constitution"
+
+provides:
+  commands:
+    - name: "speckit.optimize.run"
+      file: "commands/speckit.optimize.run.md"
+      description: "Audit and optimize governance documents for AI context efficiency"
+
+    - name: "speckit.optimize.tokens"
+      file: "commands/speckit.optimize.tokens.md"
+      description: "Track and report token usage across extensions and governance files"
+
+    - name: "speckit.optimize.learn"
+      file: "commands/speckit.optimize.learn.md"
+      description: "Analyze AI session patterns to suggest constitution rules or memory entries"
+
+  config:
+    - name: "optimize-config.yml"
+      template: "config-template.yml"
+      description: "Optimization thresholds and category toggles"
+      required: false
+
+tags:
+  - "constitution"
+  - "optimization"
+  - "token-budget"
+  - "governance"
+  - "audit"
+  - "learning"
+
+defaults:
+  categories:
+    token_budget: true
+    rule_health: true
+    ai_interpretability: true
+    semantic_compression: true
+    coherence: true
+    governance_echo: true
+  thresholds:
+    max_constitution_tokens: 3000
+    principle_balance_ratio: 3.0
+    governance_budget_percent: 15
+    file_growth_percent: 20
+  chars_per_token: 4.0
+  target_context_window: 200000
+  context_window_sizes: [8000, 32000, 128000, 200000, 1000000]
+  learn:
+    min_corrections_to_flag: 2
+    include_memory_suggestions: true
+    include_rule_suggestions: true

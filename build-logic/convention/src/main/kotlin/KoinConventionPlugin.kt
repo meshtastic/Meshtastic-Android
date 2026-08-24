@@ -27,13 +27,14 @@ class KoinConventionPlugin : Plugin<Project> {
         with(target) {
             apply(plugin = libs.plugin("koin-compiler").get().pluginId)
 
-            // Configure Koin K2 Compiler Plugin (0.4.0+)
+            // Configure Koin K2 Compiler Plugin (1.1.0+)
             extensions.configure(KoinGradleExtension::class.java) {
-                // Meshtastic heavily utilizes dependency inversion across KMP modules. Koin's A1
-                // per-module safety checks strictly enforce that all dependencies must be explicitly
-                // provided or included locally. This breaks decoupled Clean Architecture designs.
-                // We disable compile safety globally to properly rely on Koin's A3 full-graph
-                // validation which perfectly handles inverted dependencies at the composition root.
+                // 1.1.0 moved validation to the entry points, which suits this graph's shape, but
+                // its definition index still can't resolve two structural patterns here: modules
+                // reached through FlavorModule's nested `includes` are invisible to it, and DSL
+                // declarations (desktopApp's whole root, workManagerFactory()) are never indexed at
+                // all. Every entry point therefore fails on definitions that exist. Runtime graph
+                // verification is handled by KoinVerificationTest instead.
                 compileSafety.set(false)
             }
 
@@ -47,8 +48,18 @@ class KoinConventionPlugin : Plugin<Project> {
                 }
             }
 
-            pluginManager.withPlugin("org.jetbrains.kotlin.android") {
+            pluginManager.withPlugin("com.android.application") {
                 // If this is *only* an Android module (no KMP plugin)
+                if (!pluginManager.hasPlugin("org.jetbrains.kotlin.multiplatform")) {
+                    dependencies {
+                        add("implementation", koinCore)
+                        add("implementation", koinAnnotations)
+                    }
+                }
+            }
+
+            pluginManager.withPlugin("com.android.library") {
+                // If this is *only* an Android library module (no KMP plugin)
                 if (!pluginManager.hasPlugin("org.jetbrains.kotlin.multiplatform")) {
                     dependencies {
                         add("implementation", koinCore)

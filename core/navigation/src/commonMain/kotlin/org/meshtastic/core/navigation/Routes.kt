@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,23 +27,23 @@ interface Graph : Route
 
 @Serializable
 sealed interface ChannelsRoute : Route {
-    @Serializable data object ChannelsGraph : ChannelsRoute, Graph
-
-    @Serializable data object Channels : ChannelsRoute
+    @Serializable data object Channels : ChannelsRoute, Graph
 }
 
 @Serializable
 sealed interface ConnectionsRoute : Route {
-    @Serializable data object ConnectionsGraph : ConnectionsRoute, Graph
-
-    @Serializable data object Connections : ConnectionsRoute
+    /**
+     * @param address Optional prefixed device address (e.g. `t192.168.1.1:4403`, `xAA:BB:CC:DD:EE:FF`) to auto-connect
+     *   to when this route is deep-linked into, e.g. `/connections?address=t192.168.1.1:4403`.
+     */
+    @Serializable data class Connections(val address: String? = null) :
+        ConnectionsRoute,
+        Graph
 }
 
 @Serializable
 sealed interface ContactsRoute : Route {
-    @Serializable data object ContactsGraph : ContactsRoute, Graph
-
-    @Serializable data object Contacts : ContactsRoute
+    @Serializable data object Contacts : ContactsRoute, Graph
 
     @Serializable data class Messages(val contactKey: String, val message: String = "") : ContactsRoute
 
@@ -54,18 +54,12 @@ sealed interface ContactsRoute : Route {
 
 @Serializable
 sealed interface MapRoute : Route {
-    @Serializable data class Map(val waypointId: Int? = null) : MapRoute
+    @Serializable data class Map(val waypointId: Int? = null, val sitePlannerNodeNum: Int? = null) : MapRoute
 }
 
 @Serializable
 sealed interface NodesRoute : Route {
-    @Serializable data object NodesGraph : NodesRoute, Graph
-
-    @Serializable data object Nodes : NodesRoute
-
-    @Serializable data class NodeDetailGraph(val destNum: Int? = null) :
-        NodesRoute,
-        Graph
+    @Serializable data object Nodes : NodesRoute, Graph
 
     @Serializable data class NodeDetail(val destNum: Int? = null) : NodesRoute
 }
@@ -91,6 +85,8 @@ sealed interface NodeDetailRoute : Route {
 
     @Serializable data class PaxMetrics(val destNum: Int) : NodeDetailRoute
 
+    @Serializable data class AirQualityMetrics(val destNum: Int) : NodeDetailRoute
+
     @Serializable data class NeighborInfoLog(val destNum: Int) : NodeDetailRoute
 
     @Serializable data class RemoteShell(val destNum: Int) : NodeDetailRoute
@@ -98,11 +94,9 @@ sealed interface NodeDetailRoute : Route {
 
 @Serializable
 sealed interface SettingsRoute : Route {
-    @Serializable data class SettingsGraph(val destNum: Int? = null) :
+    @Serializable data class Settings(val destNum: Int? = null) :
         SettingsRoute,
         Graph
-
-    @Serializable data class Settings(val destNum: Int? = null) : SettingsRoute
 
     @Serializable data object DeviceConfiguration : SettingsRoute
 
@@ -164,9 +158,9 @@ sealed interface SettingsRoute : Route {
 
     @Serializable data object StatusMessage : SettingsRoute
 
-    @Serializable data object TrafficManagement : SettingsRoute
-
     @Serializable data object TAK : SettingsRoute
+
+    @Serializable data object MeshBeacon : SettingsRoute
 
     // endregion
 
@@ -174,11 +168,29 @@ sealed interface SettingsRoute : Route {
 
     @Serializable data object CleanNodeDb : SettingsRoute
 
+    @Serializable data object TakServer : SettingsRoute
+
     @Serializable data object DebugPanel : SettingsRoute
 
     @Serializable data object About : SettingsRoute
 
+    @Serializable data object Acknowledgements : SettingsRoute
+
     @Serializable data object FilterSettings : SettingsRoute
+
+    @Serializable data object NodeList : SettingsRoute
+
+    @Serializable data object DeviceLinks : SettingsRoute
+
+    @Serializable data object AppFunctionsSettings : SettingsRoute
+
+    // endregion
+
+    // region help & documentation routes
+
+    @Serializable data object HelpDocs : SettingsRoute
+
+    @Serializable data class HelpDocPage(val pageId: String) : SettingsRoute
 
     // endregion
 }
@@ -195,4 +207,19 @@ sealed interface WifiProvisionRoute : Route {
     @Serializable data object WifiProvisionGraph : WifiProvisionRoute, Graph
 
     @Serializable data class WifiProvision(val address: String? = null) : WifiProvisionRoute
+}
+
+@Serializable
+sealed interface DiscoveryRoute : Route {
+    @Serializable data object DiscoveryGraph : DiscoveryRoute, Graph
+
+    @Serializable data object DiscoveryScan : DiscoveryRoute
+
+    @Serializable data class DiscoverySummary(val sessionId: Long) : DiscoveryRoute
+
+    @Serializable data object DiscoveryHistory : DiscoveryRoute
+
+    @Serializable data class DiscoveryHistoryDetail(val sessionId: Long) : DiscoveryRoute
+
+    @Serializable data class DiscoveryMap(val sessionId: Long) : DiscoveryRoute
 }

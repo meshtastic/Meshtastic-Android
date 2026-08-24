@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@ import okio.BufferedSink
 import org.koin.core.annotation.Single
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.util.positionToMeter
+import org.meshtastic.core.model.util.snrOrNull
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.proto.PortNum
@@ -37,6 +38,12 @@ constructor(
     private val nodeRepository: NodeRepository,
     private val meshLogRepository: MeshLogRepository,
 ) {
+    companion object {
+        private const val BYTE_MASK = 0xFF
+        private const val HEX_PAD_WIDTH = 2
+        private const val HEX_RADIX = 16
+    }
+
     /**
      * Writes all persisted packet data to the provided [BufferedSink].
      *
@@ -55,7 +62,7 @@ constructor(
 
         @Suppress("MaxLineLength")
         sink.writeUtf8(
-            "\"date\",\"time\",\"from\",\"sender name\",\"sender lat\",\"sender long\",\"rx lat\",\"rx long\",\"rx elevation\",\"rx snr\",\"distance(m)\",\"hop limit\",\"payload\"\n",
+            "\"date\",\"time\",\"from\",\"sender name\",\"sender lat\",\"sender long\",\"rx lat\",\"rx long\",\"rx elevation\",\"rx snr\",\"distance(m)\",\"hop limit\",\"hop start\",\"relay node\",\"payload\"\n",
         )
 
         meshLogRepository.getAllLogsInReceiveOrder(Int.MAX_VALUE).first().forEach { packet ->
@@ -70,9 +77,12 @@ constructor(
                     }
                 }
 
+                // Rows are limited to receptions that carried an SNR measurement. Gating on `snrOrNull()` rather than
+                // `rx_snr != 0f` keeps a genuine 0 dB reading in the export.
+                val rxSnrOrNull = proto.snrOrNull()
                 if (
                     (filterPortnum == null || (proto.decoded?.portnum?.value ?: 0) == filterPortnum) &&
-                    proto.rx_snr != 0.0f
+                    rxSnrOrNull != null
                 ) {
                     val timeZone = TimeZone.currentSystemDefault()
                     val rxDateTimeObj = Instant.fromEpochMilliseconds(packet.received_date).toLocalDateTime(timeZone)
@@ -91,7 +101,7 @@ constructor(
                     val rxLat = rxPos?.latitude ?: ""
                     val rxLong = rxPos?.longitude ?: ""
                     val rxAlt = rxPos?.altitude ?: ""
-                    val rxSnr = proto.rx_snr
+                    val rxSnr = rxSnrOrNull
 
                     val dist =
                         if (senderPos == null || rxPos == null) {
@@ -101,6 +111,15 @@ constructor(
                         }
 
                     val hopLimit = proto.hop_limit
+                    // hop_start lets a reader derive hops-away (hop_start - hop_limit) alongside hop_limit.
+                    val hopStart = proto.hop_start
+                    // relay_node carries only the last byte of the relaying node's NodeNum (0 means unset).
+                    // Emit it as a hex byte so it can be matched against the tail of a node id (e.g. !a1b2c3d4 ->
+                    // "d4").
+                    val relayNode =
+                        proto.relay_node
+                            .takeIf { it != 0 }
+                            ?.let { (it and BYTE_MASK).toString(HEX_RADIX).padStart(HEX_PAD_WIDTH, '0') } ?: ""
                     val decoded = proto.decoded
                     val encrypted = proto.encrypted
                     val payload =
@@ -110,13 +129,15 @@ constructor(
                                 "<${decoded?.portnum}>"
 
                             decoded != null -> decoded.payload.utf8().replace("\"", "\"\"")
+
                             encrypted != null -> "${encrypted.size} encrypted bytes"
+
                             else -> ""
                         }
 
                     @Suppress("MaxLineLength")
                     sink.writeUtf8(
-                        "$rxDateTime,\"$rxFrom\",\"$senderName\",\"$senderLat\",\"$senderLong\",\"$rxLat\",\"$rxLong\",\"$rxAlt\",\"$rxSnr\",\"$dist\",\"$hopLimit\",\"$payload\"\n",
+                        "$rxDateTime,\"$rxFrom\",\"$senderName\",\"$senderLat\",\"$senderLong\",\"$rxLat\",\"$rxLong\",\"$rxAlt\",\"$rxSnr\",\"$dist\",\"$hopLimit\",\"$hopStart\",\"$relayNode\",\"$payload\"\n",
                     )
                 }
             }

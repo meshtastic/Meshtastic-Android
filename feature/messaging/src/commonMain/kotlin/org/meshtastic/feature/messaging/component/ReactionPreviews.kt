@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,11 +29,11 @@ import org.meshtastic.proto.User
 
 @PreviewLightDark
 @Composable
-private fun ReactionItemPreview() {
+fun ReactionItemPreview() {
     AppTheme {
         Column(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
-            ReactionItem(emoji = "\uD83D\uDE42")
-            ReactionItem(emoji = "\uD83D\uDE42", emojiCount = 2)
+            ReactionItem(emoji = "+1")
+            ReactionItem(emoji = "+1", emojiCount = 2)
             AddReactionButton()
         }
     }

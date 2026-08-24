@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,10 +26,13 @@ import org.meshtastic.core.resources.ic_groups
 import org.meshtastic.core.resources.ic_person
 import org.meshtastic.core.resources.ic_person_add
 import org.meshtastic.core.resources.ic_person_off
+import org.meshtastic.core.resources.ic_person_question
 import org.meshtastic.core.resources.ic_person_search
 
 val MeshtasticIcons.PersonOff: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_person_off)
+val MeshtasticIcons.PersonQuestion: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_person_question)
 val MeshtasticIcons.Group: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_group)
 val MeshtasticIcons.AccountCircle: ImageVector

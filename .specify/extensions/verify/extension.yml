@@ -1,0 +1,59 @@
+schema_version: "1.0"
+
+extension:
+  id: "verify"
+  name: "Verify Extension"
+  version: "1.0.3"
+  description: "Post-implementation quality gate that validates implementation against specification artifacts."
+  author: "ismaelJimenez"
+  repository: "https://github.com/ismaelJimenez/spec-kit-verify"
+  license: "MIT"
+  homepage: "https://github.com/ismaelJimenez/spec-kit-verify"
+
+requires:
+  speckit_version: ">=0.1.0"
+
+  commands:
+    - "speckit.implement"
+    - "speckit.tasks"
+    - "speckit.analyze"
+
+provides:
+  commands:
+    - name: "speckit.verify.run"
+      file: "commands/verify.md"
+      description: "Validate implementation matches specification artifacts"
+
+  scripts:
+    - name: "load-config.sh"
+      file: "scripts/bash/load-config.sh"
+      description: "Load and validate verify extension configuration"
+      executable: true
+    - name: "load-config.ps1"
+      file: "scripts/powershell/load-config.ps1"
+      description: "Load and validate verify extension configuration"
+      executable: true
+
+  config:
+    - name: "verify-config.yml"
+      template: "config-template.yml"
+      description: "Verify extension configuration"
+      required: false
+
+hooks:
+  after_implement:
+    command: "speckit.verify.run"
+    optional: true
+    prompt: "Run verify to validate implementation against specification?"
+    description: "Post-implementation verification gate"
+
+tags:
+  - "quality"
+  - "verification"
+  - "review"
+  - "compliance"
+  - "spec-alignment"
+
+defaults:
+  report:
+    max_findings: 50

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -104,6 +104,10 @@ class CompassViewModel(
             }
     }
 
+    /**
+     * Marks the update job cancelled immediately. Provider listeners are unregistered by their `awaitClose` handlers as
+     * cancellation propagates through the flows.
+     */
     fun stop() {
         updatesJob?.cancel()
         updatesJob = null
@@ -123,7 +127,8 @@ class CompassViewModel(
         val isAligned = isAligned(trueHeading, bearingDegrees)
         val lastUpdateText = targetPositionTimeSec?.let { formatElapsed(it) }
         val angularErrorDeg = calculateAngularError(positionalAccuracyMeters, distanceMeters)
-        val errorRadiusText = positionalAccuracyMeters?.toInt()?.toDistanceString(current.displayUnits)
+        val errorRadiusText =
+            positionalAccuracyMeters?.toInt()?.let { "± ${it.toDistanceString(current.displayUnits)}" }
 
         return current.copy(
             heading = trueHeading,
@@ -215,9 +220,12 @@ class CompassViewModel(
         val dop: Float? =
             when {
                 pdop > 0 -> pdop / HUNDRED
+
                 hdop > 0 && vdop > 0 ->
                     sqrt((hdop / HUNDRED).toDouble().pow(2.0) + (vdop / HUNDRED).toDouble().pow(2.0)).toFloat()
+
                 hdop > 0 -> hdop / HUNDRED
+
                 else -> null
             }
 

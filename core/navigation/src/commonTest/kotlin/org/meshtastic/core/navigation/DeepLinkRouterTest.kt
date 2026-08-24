@@ -47,25 +47,25 @@ class DeepLinkRouterTest {
     @Test
     fun `share with message`() {
         assertEquals(
-            listOf(ContactsRoute.ContactsGraph, ContactsRoute.Share("hello world")),
+            listOf(ContactsRoute.Contacts, ContactsRoute.Share("hello world")),
             route("/share?message=hello%20world"),
         )
     }
 
     @Test
     fun `share without message defaults to empty string`() {
-        assertEquals(listOf(ContactsRoute.ContactsGraph, ContactsRoute.Share("")), route("/share"))
+        assertEquals(listOf(ContactsRoute.Contacts, ContactsRoute.Share("")), route("/share"))
     }
 
     @Test
     fun `quickchat routes to QuickChat`() {
-        assertEquals(listOf(ContactsRoute.ContactsGraph, ContactsRoute.QuickChat), route("/quickchat"))
+        assertEquals(listOf(ContactsRoute.Contacts, ContactsRoute.QuickChat), route("/quickchat"))
     }
 
     @Test
     fun `messages with contactKey path segment`() {
         assertEquals(
-            listOf(ContactsRoute.ContactsGraph, ContactsRoute.Messages(contactKey = "abc123", message = "")),
+            listOf(ContactsRoute.Contacts, ContactsRoute.Messages(contactKey = "abc123", message = "")),
             route("/messages/abc123"),
         )
     }
@@ -73,7 +73,7 @@ class DeepLinkRouterTest {
     @Test
     fun `messages with contactKey query param`() {
         assertEquals(
-            listOf(ContactsRoute.ContactsGraph, ContactsRoute.Messages(contactKey = "contact1", message = "")),
+            listOf(ContactsRoute.Contacts, ContactsRoute.Messages(contactKey = "contact1", message = "")),
             route("/messages?contactKey=contact1"),
         )
     }
@@ -81,14 +81,14 @@ class DeepLinkRouterTest {
     @Test
     fun `messages with contactKey and message`() {
         assertEquals(
-            listOf(ContactsRoute.ContactsGraph, ContactsRoute.Messages(contactKey = "contact1", message = "hi")),
+            listOf(ContactsRoute.Contacts, ContactsRoute.Messages(contactKey = "contact1", message = "hi")),
             route("/messages/contact1?message=hi"),
         )
     }
 
     @Test
     fun `messages without contactKey returns graph only`() {
-        assertEquals(listOf(ContactsRoute.ContactsGraph), route("/messages"))
+        assertEquals(listOf(ContactsRoute.Contacts), route("/messages"))
     }
 
     // endregion
@@ -96,8 +96,21 @@ class DeepLinkRouterTest {
     // region connections
 
     @Test
-    fun `connections routes to ConnectionsGraph`() {
-        assertEquals(listOf(ConnectionsRoute.ConnectionsGraph), route("/connections"))
+    fun `connections routes to Connections`() {
+        assertEquals(listOf(ConnectionsRoute.Connections()), route("/connections"))
+    }
+
+    @Test
+    fun `connections with address query param routes to Connections with address`() {
+        assertEquals(
+            listOf(ConnectionsRoute.Connections("t192.168.1.1:4403")),
+            route("/connections?address=t192.168.1.1:4403"),
+        )
+    }
+
+    @Test
+    fun `connections with n address routes to Connections with disconnect sentinel`() {
+        assertEquals(listOf(ConnectionsRoute.Connections("n")), route("/connections?address=n"))
     }
 
     // endregion
@@ -129,21 +142,21 @@ class DeepLinkRouterTest {
     // region nodes
 
     @Test
-    fun `nodes root returns NodesGraph`() {
-        assertEquals(listOf(NodesRoute.NodesGraph), route("/nodes"))
+    fun `nodes root returns Nodes`() {
+        assertEquals(listOf(NodesRoute.Nodes), route("/nodes"))
     }
 
     @Test
     fun `nodes with destNum returns NodeDetail`() {
-        assertEquals(listOf(NodesRoute.NodesGraph, NodesRoute.NodeDetail(destNum = 1234)), route("/nodes/1234"))
+        assertEquals(listOf(NodesRoute.Nodes, NodesRoute.NodeDetail(destNum = 1234)), route("/nodes/1234"))
     }
 
     @Test
     fun `nodes with destNum and device-metrics sub-route`() {
         assertEquals(
             listOf(
-                NodesRoute.NodesGraph,
-                NodesRoute.NodeDetailGraph(destNum = 1234),
+                NodesRoute.Nodes,
+                NodesRoute.NodeDetail(destNum = 1234),
                 NodeDetailRoute.DeviceMetrics(destNum = 1234),
             ),
             route("/nodes/1234/device-metrics"),
@@ -154,8 +167,8 @@ class DeepLinkRouterTest {
     fun `nodes with destNum and map sub-route`() {
         assertEquals(
             listOf(
-                NodesRoute.NodesGraph,
-                NodesRoute.NodeDetailGraph(destNum = 5678),
+                NodesRoute.Nodes,
+                NodesRoute.NodeDetail(destNum = 5678),
                 NodeDetailRoute.PositionLog(destNum = 5678),
             ),
             route("/nodes/5678/map"),
@@ -165,11 +178,7 @@ class DeepLinkRouterTest {
     @Test
     fun `nodes with destNum and position sub-route`() {
         assertEquals(
-            listOf(
-                NodesRoute.NodesGraph,
-                NodesRoute.NodeDetailGraph(destNum = 100),
-                NodeDetailRoute.PositionLog(destNum = 100),
-            ),
+            listOf(NodesRoute.Nodes, NodesRoute.NodeDetail(destNum = 100), NodeDetailRoute.PositionLog(destNum = 100)),
             route("/nodes/100/position"),
         )
     }
@@ -178,8 +187,8 @@ class DeepLinkRouterTest {
     fun `nodes with destNum and environment sub-route`() {
         assertEquals(
             listOf(
-                NodesRoute.NodesGraph,
-                NodesRoute.NodeDetailGraph(destNum = 100),
+                NodesRoute.Nodes,
+                NodesRoute.NodeDetail(destNum = 100),
                 NodeDetailRoute.EnvironmentMetrics(destNum = 100),
             ),
             route("/nodes/100/environment"),
@@ -190,8 +199,8 @@ class DeepLinkRouterTest {
     fun `nodes with destNum and signal sub-route`() {
         assertEquals(
             listOf(
-                NodesRoute.NodesGraph,
-                NodesRoute.NodeDetailGraph(destNum = 100),
+                NodesRoute.Nodes,
+                NodesRoute.NodeDetail(destNum = 100),
                 NodeDetailRoute.SignalMetrics(destNum = 100),
             ),
             route("/nodes/100/signal"),
@@ -201,11 +210,7 @@ class DeepLinkRouterTest {
     @Test
     fun `nodes with destNum and power sub-route`() {
         assertEquals(
-            listOf(
-                NodesRoute.NodesGraph,
-                NodesRoute.NodeDetailGraph(destNum = 100),
-                NodeDetailRoute.PowerMetrics(destNum = 100),
-            ),
+            listOf(NodesRoute.Nodes, NodesRoute.NodeDetail(destNum = 100), NodeDetailRoute.PowerMetrics(destNum = 100)),
             route("/nodes/100/power"),
         )
     }
@@ -214,8 +219,8 @@ class DeepLinkRouterTest {
     fun `nodes with destNum and traceroute sub-route`() {
         assertEquals(
             listOf(
-                NodesRoute.NodesGraph,
-                NodesRoute.NodeDetailGraph(destNum = 100),
+                NodesRoute.Nodes,
+                NodesRoute.NodeDetail(destNum = 100),
                 NodeDetailRoute.TracerouteLog(destNum = 100),
             ),
             route("/nodes/100/traceroute"),
@@ -226,8 +231,8 @@ class DeepLinkRouterTest {
     fun `nodes with destNum and host-metrics sub-route`() {
         assertEquals(
             listOf(
-                NodesRoute.NodesGraph,
-                NodesRoute.NodeDetailGraph(destNum = 100),
+                NodesRoute.Nodes,
+                NodesRoute.NodeDetail(destNum = 100),
                 NodeDetailRoute.HostMetricsLog(destNum = 100),
             ),
             route("/nodes/100/host-metrics"),
@@ -237,11 +242,7 @@ class DeepLinkRouterTest {
     @Test
     fun `nodes with destNum and pax sub-route`() {
         assertEquals(
-            listOf(
-                NodesRoute.NodesGraph,
-                NodesRoute.NodeDetailGraph(destNum = 100),
-                NodeDetailRoute.PaxMetrics(destNum = 100),
-            ),
+            listOf(NodesRoute.Nodes, NodesRoute.NodeDetail(destNum = 100), NodeDetailRoute.PaxMetrics(destNum = 100)),
             route("/nodes/100/pax"),
         )
     }
@@ -250,8 +251,8 @@ class DeepLinkRouterTest {
     fun `nodes with destNum and neighbors sub-route`() {
         assertEquals(
             listOf(
-                NodesRoute.NodesGraph,
-                NodesRoute.NodeDetailGraph(destNum = 100),
+                NodesRoute.Nodes,
+                NodesRoute.NodeDetail(destNum = 100),
                 NodeDetailRoute.NeighborInfoLog(destNum = 100),
             ),
             route("/nodes/100/neighbors"),
@@ -260,20 +261,17 @@ class DeepLinkRouterTest {
 
     @Test
     fun `nodes with destNum and unknown sub-route falls back to NodeDetail`() {
-        assertEquals(
-            listOf(NodesRoute.NodesGraph, NodesRoute.NodeDetail(destNum = 1234)),
-            route("/nodes/1234/unknown-sub"),
-        )
+        assertEquals(listOf(NodesRoute.Nodes, NodesRoute.NodeDetail(destNum = 1234)), route("/nodes/1234/unknown-sub"))
     }
 
     @Test
-    fun `nodes with non-numeric destNum returns NodesGraph only`() {
-        assertEquals(listOf(NodesRoute.NodesGraph), route("/nodes/not-a-number"))
+    fun `nodes with non-numeric destNum returns Nodes only`() {
+        assertEquals(listOf(NodesRoute.Nodes), route("/nodes/not-a-number"))
     }
 
     @Test
     fun `nodes with destNum query param`() {
-        assertEquals(listOf(NodesRoute.NodesGraph, NodesRoute.NodeDetail(destNum = 9999)), route("/nodes?destNum=9999"))
+        assertEquals(listOf(NodesRoute.Nodes, NodesRoute.NodeDetail(destNum = 9999)), route("/nodes?destNum=9999"))
     }
 
     // endregion
@@ -281,31 +279,49 @@ class DeepLinkRouterTest {
     // region settings
 
     @Test
-    fun `settings root returns SettingsGraph`() {
-        assertEquals(listOf(SettingsRoute.SettingsGraph(destNum = null)), route("/settings"))
+    fun `settings root returns Settings`() {
+        assertEquals(listOf(SettingsRoute.Settings(destNum = null)), route("/settings"))
     }
 
     @Test
     fun `settings with destNum`() {
-        assertEquals(listOf(SettingsRoute.SettingsGraph(destNum = 1234)), route("/settings/1234"))
+        assertEquals(listOf(SettingsRoute.Settings(destNum = 1234)), route("/settings/1234"))
     }
 
     @Test
     fun `settings with destNum and sub-route`() {
+        assertEquals(listOf(SettingsRoute.Settings(destNum = 1234), SettingsRoute.About), route("/settings/1234/about"))
+    }
+
+    @Test
+    fun `settings about resolves to the About screen`() {
+        assertEquals(listOf(SettingsRoute.Settings(destNum = null), SettingsRoute.About), route("/settings/about"))
+    }
+
+    @Test
+    fun `settings acknowledgements resolves to the Acknowledgements screen`() {
         assertEquals(
-            listOf(SettingsRoute.SettingsGraph(destNum = 1234), SettingsRoute.About),
-            route("/settings/1234/about"),
+            listOf(SettingsRoute.Settings(destNum = null), SettingsRoute.Acknowledgements),
+            route("/settings/acknowledgements"),
+        )
+    }
+
+    @Test
+    fun `settings attributions is an alias for Acknowledgements`() {
+        assertEquals(
+            listOf(SettingsRoute.Settings(destNum = null), SettingsRoute.Acknowledgements),
+            route("/settings/attributions"),
         )
     }
 
     @Test
     fun `settings with sub-route without destNum`() {
-        assertEquals(listOf(SettingsRoute.SettingsGraph(destNum = null), SettingsRoute.LoRa), route("/settings/lora"))
+        assertEquals(listOf(SettingsRoute.Settings(destNum = null), SettingsRoute.LoRa), route("/settings/lora"))
     }
 
     @Test
-    fun `settings with unknown sub-route returns SettingsGraph only`() {
-        assertEquals(listOf(SettingsRoute.SettingsGraph(destNum = null)), route("/settings/nonexistent-page"))
+    fun `settings with unknown sub-route returns Settings only`() {
+        assertEquals(listOf(SettingsRoute.Settings(destNum = null)), route("/settings/nonexistent-page"))
     }
 
     @Test
@@ -339,17 +355,18 @@ class DeepLinkRouterTest {
                 "detection-sensor" to SettingsRoute.DetectionSensor,
                 "paxcounter" to SettingsRoute.Paxcounter,
                 "status-message" to SettingsRoute.StatusMessage,
-                "traffic-management" to SettingsRoute.TrafficManagement,
                 "tak" to SettingsRoute.TAK,
                 "clean-node-db" to SettingsRoute.CleanNodeDb,
                 "debug-panel" to SettingsRoute.DebugPanel,
                 "about" to SettingsRoute.About,
+                "acknowledgements" to SettingsRoute.Acknowledgements,
+                "attributions" to SettingsRoute.Acknowledgements,
                 "filter-settings" to SettingsRoute.FilterSettings,
             )
 
         expectedSubRoutes.forEach { (slug, expectedRoute) ->
             assertEquals(
-                listOf(SettingsRoute.SettingsGraph(destNum = null), expectedRoute),
+                listOf(SettingsRoute.Settings(destNum = null), expectedRoute),
                 route("/settings/$slug"),
                 "Settings sub-route '$slug' did not resolve to $expectedRoute",
             )
@@ -361,8 +378,8 @@ class DeepLinkRouterTest {
     // region channels
 
     @Test
-    fun `channels routes to ChannelsGraph`() {
-        assertEquals(listOf(ChannelsRoute.ChannelsGraph), route("/channels"))
+    fun `channels routes to Channels`() {
+        assertEquals(listOf(ChannelsRoute.Channels), route("/channels"))
     }
 
     // endregion
@@ -398,12 +415,46 @@ class DeepLinkRouterTest {
 
     // endregion
 
+    // region discovery deep links
+
+    @Test
+    fun `discovery settings sub-route navigates to discovery graph`() {
+        val result = route("/settings/local-mesh-discovery")
+        assertEquals(listOf(SettingsRoute.Settings(null), DiscoveryRoute.DiscoveryGraph), result)
+    }
+
+    @Test
+    fun `discovery session deep link resolves session ID`() {
+        val result = route("/settings/local-mesh-discovery/session/42")
+        assertEquals(
+            listOf(SettingsRoute.Settings(null), DiscoveryRoute.DiscoveryGraph, DiscoveryRoute.DiscoverySummary(42L)),
+            result,
+        )
+    }
+
+    @Test
+    fun `discovery alias localmeshdiscovery resolves session ID`() {
+        val result = route("/settings/localmeshdiscovery/session/99")
+        assertEquals(
+            listOf(SettingsRoute.Settings(null), DiscoveryRoute.DiscoveryGraph, DiscoveryRoute.DiscoverySummary(99L)),
+            result,
+        )
+    }
+
+    @Test
+    fun `discovery session with invalid ID falls back to graph`() {
+        val result = route("/settings/local-mesh-discovery/session/notanumber")
+        assertEquals(listOf(SettingsRoute.Settings(null), DiscoveryRoute.DiscoveryGraph), result)
+    }
+
+    // endregion
+
     // region case insensitivity
 
     @Test
     fun `route segments are case insensitive`() {
-        assertEquals(listOf(NodesRoute.NodesGraph), route("/Nodes"))
-        assertEquals(listOf(ConnectionsRoute.ConnectionsGraph), route("/CONNECTIONS"))
+        assertEquals(listOf(NodesRoute.Nodes), route("/Nodes"))
+        assertEquals(listOf(ConnectionsRoute.Connections()), route("/CONNECTIONS"))
     }
 
     // endregion

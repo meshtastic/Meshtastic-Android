@@ -17,6 +17,7 @@
 package org.meshtastic.core.repository
 
 import kotlinx.coroutines.flow.StateFlow
+import org.meshtastic.core.model.DeviceType
 
 /** Reactive interface for analytics-related preferences. */
 interface AnalyticsPrefs {
@@ -45,6 +46,9 @@ interface FilterPrefs {
     fun setFilterWords(words: Set<String>)
 }
 
+/** Persisted policy used by background mesh-log cleanup. */
+data class MeshLogCleanupPolicy(val loggingEnabled: Boolean, val retentionDays: Int)
+
 /** Reactive interface for mesh log preferences. */
 interface MeshLogPrefs {
     val retentionDays: StateFlow<Int>
@@ -55,9 +59,14 @@ interface MeshLogPrefs {
 
     fun setLoggingEnabled(enabled: Boolean)
 
+    /** Both cleanup settings from one persisted snapshot; suspends until the store's initial load completes. */
+    suspend fun awaitCleanupPolicy(): MeshLogCleanupPolicy
+
     companion object {
         const val DEFAULT_RETENTION_DAYS = 30
-        const val MIN_RETENTION_DAYS = -1
+
+        /** The lowest selectable setting is the one-hour sentinel, not a day count. */
+        const val MIN_RETENTION_DAYS = MeshLogRetention.ONE_HOUR
         const val MAX_RETENTION_DAYS = 365
     }
 }
@@ -65,8 +74,11 @@ interface MeshLogPrefs {
 /** Reactive interface for emoji preferences. */
 interface CustomEmojiPrefs {
     val customEmojiFrequency: StateFlow<String?>
+    val preferredSkinToneIndex: StateFlow<Int>
 
     fun setCustomEmojiFrequency(frequency: String?)
+
+    fun setPreferredSkinToneIndex(index: Int)
 }
 
 /** Reactive interface for general UI preferences. */
@@ -79,10 +91,6 @@ interface UiPrefs {
     val theme: StateFlow<Int>
 
     fun setTheme(value: Int)
-
-    val contrastLevel: StateFlow<Int>
-
-    fun setContrastLevel(value: Int)
 
     val locale: StateFlow<String>
 
@@ -124,9 +132,85 @@ interface UiPrefs {
 
     fun setShowQuickChat(show: Boolean)
 
+    /** Whether conversation message headers and actions always show both the date and time. */
+    val showFullMessageTimestamps: StateFlow<Boolean>
+
+    fun setShowFullMessageTimestamps(show: Boolean)
+
+    /**
+     * Whether to apply an event edition's ambient theme (accent wash + custom typeface) app-wide (opt-out; default on).
+     */
+    val eventThemeEnabled: StateFlow<Boolean>
+
+    fun setEventThemeEnabled(enabled: Boolean)
+
+    /** Whether BLE scanning should auto-start when the Connections screen is opened. */
+    val bleAutoScan: StateFlow<Boolean>
+
+    fun setBleAutoScan(enabled: Boolean)
+
+    /** Whether NSD network scanning should auto-start when the Connections screen is opened. */
+    val networkAutoScan: StateFlow<Boolean>
+
+    fun setNetworkAutoScan(enabled: Boolean)
+
+    /** User-selected Connections transport pane, or null when the screen should derive a default. */
+    val selectedConnectionTransport: StateFlow<DeviceType?>
+
+    fun setSelectedConnectionTransport(type: DeviceType)
+
+    /** Keys for firmware-update notifications already scheduled on this device. */
+    val firmwareUpdateNotificationKeys: StateFlow<Set<String>>
+
+    /** Records a notification key after the platform notification has been scheduled successfully. */
+    fun recordFirmwareUpdateNotificationKey(key: String)
+
     fun shouldProvideNodeLocation(nodeNum: Int): StateFlow<Boolean>
 
     fun setShouldProvideNodeLocation(nodeNum: Int, provide: Boolean)
+
+    // Node list layout preferences
+
+    /** Active density mode stored as the enum name (e.g. "COMPLETE", "COMPACT"). */
+    val nodeListDensity: StateFlow<String>
+
+    fun setNodeListDensity(value: String)
+
+    val shouldShowPower: StateFlow<Boolean>
+
+    fun setShouldShowPower(value: Boolean)
+
+    val shouldShowLastHeard: StateFlow<Boolean>
+
+    fun setShouldShowLastHeard(value: Boolean)
+
+    val lastHeardIsRelative: StateFlow<Boolean>
+
+    fun setLastHeardIsRelative(value: Boolean)
+
+    val shouldShowLocation: StateFlow<Boolean>
+
+    fun setShouldShowLocation(value: Boolean)
+
+    val shouldShowHops: StateFlow<Boolean>
+
+    fun setShouldShowHops(value: Boolean)
+
+    val shouldShowSignal: StateFlow<Boolean>
+
+    fun setShouldShowSignal(value: Boolean)
+
+    val shouldShowChannel: StateFlow<Boolean>
+
+    fun setShouldShowChannel(value: Boolean)
+
+    val shouldShowRole: StateFlow<Boolean>
+
+    fun setShouldShowRole(value: Boolean)
+
+    val shouldShowTelemetry: StateFlow<Boolean>
+
+    fun setShouldShowTelemetry(value: Boolean)
 }
 
 /** Reactive interface for notification preferences. */
@@ -139,12 +223,38 @@ interface NotificationPrefs {
 
     fun setNodeEventsEnabled(enabled: Boolean)
 
+    val nodeEventsAutoDisabledForEvent: StateFlow<Boolean>
+
+    /**
+     * Applies the node-event notification default for the connected firmware, as a single atomic update.
+     *
+     * The decision reads both [nodeEventsEnabled] and [nodeEventsAutoDisabledForEvent] and conditionally writes both,
+     * so it cannot be expressed as separate reads and setter calls: the setters are asynchronous and the StateFlows lag
+     * them, so a caller doing it by hand can read stale values or clobber a concurrent user toggle.
+     *
+     * On event firmware, node events are disabled and the restore is claimed — but only if they were actually on, so a
+     * user who had already turned them off is not re-enabled later. On vanilla firmware, a previously claimed restore
+     * is honored and released.
+     */
+    fun applyEventFirmwareNodeEventDefault(isEventFirmware: Boolean)
+
+    fun setNodeEventsAutoDisabledForEvent(disabled: Boolean)
+
     val lowBatteryEnabled: StateFlow<Boolean>
 
     fun setLowBatteryEnabled(enabled: Boolean)
+
+    /**
+     * Waypoint ids of foreign (not locally-created) geofences the user has opted in to receiving crossing alerts for.
+     * Geofences are mesh-broadcast, so by default only the creator is alerted; this is the per-geofence opt-in.
+     */
+    val geofenceAlertOptIns: StateFlow<Set<Int>>
+
+    fun setGeofenceAlertOptIn(waypointId: Int, enabled: Boolean)
 }
 
 /** Reactive interface for general map preferences. */
+@Suppress("TooManyFunctions")
 interface MapPrefs {
     val mapStyle: StateFlow<Int>
 
@@ -169,7 +279,33 @@ interface MapPrefs {
     val lastHeardTrackFilter: StateFlow<Long>
 
     fun setLastHeardTrackFilter(seconds: Long)
+
+    /** URIs of imported map layers the user has toggled off; a layer is visible unless its URI is in this set. */
+    val hiddenLayerUrls: StateFlow<Set<String>>
+
+    /** Atomically mutate [hiddenLayerUrls]; [transform] runs against the persisted value, avoiding lost updates. */
+    fun updateHiddenLayerUrls(transform: (Set<String>) -> Set<String>)
+
+    /** Persisted [hiddenLayerUrls]; suspends for the first disk load to avoid a cold-start empty default. */
+    suspend fun awaitHiddenLayerUrls(): Set<String>
+
+    /** Persisted network (URL-backed) map layers, each encoded as `id|:|name|:|uri`. */
+    val networkMapLayers: StateFlow<Set<String>>
+
+    /** Atomically mutate [networkMapLayers]; [transform] runs against the persisted value, avoiding lost updates. */
+    fun updateNetworkMapLayers(transform: (Set<String>) -> Set<String>)
+
+    /** Persisted [networkMapLayers]; suspends for the first disk load to avoid a cold-start empty default. */
+    suspend fun awaitNetworkMapLayers(): Set<String>
+
+    /** Persist the F-Droid map camera as one atomic preference update. */
+    fun setCameraPosition(position: MapCameraPosition)
+
+    /** Load the complete persisted camera, or null before the map has ever been positioned. */
+    suspend fun awaitCameraPosition(): MapCameraPosition?
 }
+
+data class MapCameraPosition(val latitude: Double, val longitude: Double, val zoom: Double)
 
 /** Reactive interface for map consent. */
 interface MapConsentPrefs {
@@ -181,8 +317,15 @@ interface MapConsentPrefs {
 /** Reactive interface for map tile provider settings. */
 interface MapTileProviderPrefs {
     val customTileProviders: StateFlow<String?>
+    val selectedCustomTileProviderId: StateFlow<String?>
 
-    fun setCustomTileProviders(providers: String?)
+    suspend fun awaitCustomTileProviders(): String?
+
+    suspend fun awaitSelectedCustomTileProviderId(): String?
+
+    suspend fun setCustomTileProviders(providers: String?)
+
+    suspend fun setSelectedCustomTileProviderId(providerId: String?)
 }
 
 /** Reactive interface for radio settings. */
@@ -213,9 +356,8 @@ interface MeshPrefs {
 
     fun setDeviceAddress(address: String?)
 
-    fun shouldProvideNodeLocation(nodeNum: Int?): StateFlow<Boolean>
-
-    fun setShouldProvideNodeLocation(nodeNum: Int?, provide: Boolean)
+    /** Persisted selected-device address; suspends for the first disk load instead of returning the flow's default. */
+    suspend fun awaitDeviceAddress(): String?
 
     fun getStoreForwardLastRequest(address: String?): StateFlow<Int>
 
@@ -227,11 +369,71 @@ interface TakPrefs {
     val isTakServerEnabled: StateFlow<Boolean>
 
     fun setTakServerEnabled(enabled: Boolean)
+
+    /**
+     * Whether mesh nodes are synthesized into CoT contacts for connected TAK clients. Opt-in and default off; only
+     * takes effect while [isTakServerEnabled] is also true.
+     */
+    val isMeshToCotEnabled: StateFlow<Boolean>
+
+    fun setMeshToCotEnabled(enabled: Boolean)
+
+    /**
+     * Meshtastic channel index used for outbound TAK traffic (TAK client -> mesh). Parity with iOS's `takServerChannel`
+     * setting and the legacy ATAK plugin's channel option. Defaults to 0 (the primary channel).
+     */
+    val takServerChannel: StateFlow<Int>
+
+    fun setTakServerChannel(index: Int)
+}
+
+/** Reactive interface for App Functions (system AI integration) preferences. */
+interface AppFunctionsPrefs {
+    val masterEnabled: StateFlow<Boolean>
+
+    fun setMasterEnabled(enabled: Boolean)
+
+    val sendMessageEnabled: StateFlow<Boolean>
+
+    fun setSendMessageEnabled(enabled: Boolean)
+
+    val getMeshStatusEnabled: StateFlow<Boolean>
+
+    fun setGetMeshStatusEnabled(enabled: Boolean)
+
+    val getNodeListEnabled: StateFlow<Boolean>
+
+    fun setGetNodeListEnabled(enabled: Boolean)
+
+    val getChannelInfoEnabled: StateFlow<Boolean>
+
+    fun setGetChannelInfoEnabled(enabled: Boolean)
+
+    val getDeviceStatusEnabled: StateFlow<Boolean>
+
+    fun setGetDeviceStatusEnabled(enabled: Boolean)
+
+    val getNodeDetailsEnabled: StateFlow<Boolean>
+
+    fun setGetNodeDetailsEnabled(enabled: Boolean)
+
+    val getMeshMetricsEnabled: StateFlow<Boolean>
+
+    fun setGetMeshMetricsEnabled(enabled: Boolean)
+
+    val getRecentMessagesEnabled: StateFlow<Boolean>
+
+    fun setGetRecentMessagesEnabled(enabled: Boolean)
+
+    val getUnreadSummaryEnabled: StateFlow<Boolean>
+
+    fun setGetUnreadSummaryEnabled(enabled: Boolean)
 }
 
 /** Consolidated interface for all application preferences. */
 interface AppPreferences {
     val analytics: AnalyticsPrefs
+    val appFunctions: AppFunctionsPrefs
     val homoglyph: HomoglyphPrefs
     val filter: FilterPrefs
     val meshLog: MeshLogPrefs
@@ -243,4 +445,38 @@ interface AppPreferences {
     val radio: RadioPrefs
     val mesh: MeshPrefs
     val tak: TakPrefs
+    val discovery: DiscoveryPrefs
+}
+
+/** Reactive interface for Local Mesh Discovery scan preferences. */
+interface DiscoveryPrefs {
+    val dwellMinutes: StateFlow<Int>
+
+    fun setDwellMinutes(minutes: Int)
+
+    val selectedPresets: StateFlow<Set<String>>
+
+    fun setSelectedPresets(presets: Set<String>)
+
+    val aiEnabled: StateFlow<Boolean>
+
+    fun setAiEnabled(enabled: Boolean)
+
+    val topologyOverlayEnabled: StateFlow<Boolean>
+
+    fun setTopologyOverlayEnabled(enabled: Boolean)
+
+    companion object {
+        const val DEFAULT_DWELL_MINUTES = 15
+    }
+}
+
+/**
+ * Reactive persistence for received Mesh Beacon invitations. Records are opaque, self-describing strings (see
+ * `MeshBeaconOffer.encode`) so this prefs layer stays free of proto/model types.
+ */
+interface MeshBeaconPrefs {
+    val storedBeacons: StateFlow<List<String>>
+
+    fun setStoredBeacons(records: List<String>)
 }

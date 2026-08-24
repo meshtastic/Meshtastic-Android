@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,12 +25,14 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
@@ -53,6 +55,7 @@ import org.meshtastic.core.ui.util.annotatedStringFromHtml
  * @param titleRes The title string resource of the dialog.
  * @param message Optional plain text message.
  * @param messageRes Optional string resource message.
+ * @param messageColor Optional color for the plain text message; [Color.Unspecified] uses the default text color.
  * @param html Optional HTML formatted message.
  * @param icon Optional leading icon.
  * @param text Optional custom composable content for the body.
@@ -66,6 +69,7 @@ import org.meshtastic.core.ui.util.annotatedStringFromHtml
  * @param dismissable Whether the dialog can be dismissed by clicking outside or pressing back.
  */
 @Composable
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 fun MeshtasticDialog(
     modifier: Modifier = Modifier,
@@ -73,6 +77,7 @@ fun MeshtasticDialog(
     titleRes: StringResource? = null,
     message: String? = null,
     messageRes: StringResource? = null,
+    messageColor: Color = Color.Unspecified,
     html: String? = null,
     icon: ImageVector? = null,
     text: @Composable (() -> Unit)? = null,
@@ -90,20 +95,21 @@ fun MeshtasticDialog(
     val confirmButtonText = confirmText ?: confirmTextRes?.let { stringResource(it) }
     val dismissButtonText = dismissText ?: dismissTextRes?.let { stringResource(it) }
 
-    val htmlAnnotated = html?.let {
-        annotatedStringFromHtml(
-            it,
-            linkStyles =
-            TextLinkStyles(
-                style =
-                SpanStyle(
-                    textDecoration = TextDecoration.Underline,
-                    fontStyle = FontStyle.Italic,
-                    color = MaterialTheme.colorScheme.primary,
+    val htmlAnnotated =
+        html?.let {
+            annotatedStringFromHtml(
+                it,
+                linkStyles =
+                TextLinkStyles(
+                    style =
+                    SpanStyle(
+                        textDecoration = TextDecoration.Underline,
+                        fontStyle = FontStyle.Italic,
+                        color = MaterialTheme.colorScheme.primary,
+                    ),
                 ),
-            ),
-        )
-    }
+            )
+        }
 
     AlertDialog(
         onDismissRequest = { if (dismissable) onDismiss?.invoke() },
@@ -136,7 +142,7 @@ fun MeshtasticDialog(
                 text = titleText,
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.headlineSmallEmphasized,
             )
         },
         text = {
@@ -146,7 +152,7 @@ fun MeshtasticDialog(
                 } else if (htmlAnnotated != null) {
                     Text(text = htmlAnnotated)
                 } else if (messageText != null) {
-                    Text(text = messageText)
+                    Text(text = messageText, color = messageColor)
                 }
 
                 if (choices.isNotEmpty()) {
@@ -166,7 +172,7 @@ fun MeshtasticDialog(
                 }
             }
         },
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(28.dp),
     )
 }
 

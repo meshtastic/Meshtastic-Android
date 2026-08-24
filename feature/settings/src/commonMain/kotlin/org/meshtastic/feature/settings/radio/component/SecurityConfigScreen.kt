@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,19 +21,22 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.util.encodeToString
+import org.meshtastic.core.model.util.platformRandomBytes
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.admin_key
 import org.meshtastic.core.resources.admin_keys
@@ -42,15 +45,16 @@ import org.meshtastic.core.resources.config_security_admin_key
 import org.meshtastic.core.resources.config_security_debug_log_api_enabled
 import org.meshtastic.core.resources.config_security_is_managed
 import org.meshtastic.core.resources.config_security_private_key
+import org.meshtastic.core.resources.config_security_private_key_remote
 import org.meshtastic.core.resources.config_security_public_key
 import org.meshtastic.core.resources.config_security_serial_enabled
 import org.meshtastic.core.resources.debug_log_api_enabled
 import org.meshtastic.core.resources.direct_message_key
-import org.meshtastic.core.resources.legacy_admin_channel
 import org.meshtastic.core.resources.logs
 import org.meshtastic.core.resources.managed_mode
 import org.meshtastic.core.resources.private_key
 import org.meshtastic.core.resources.public_key
+import org.meshtastic.core.resources.redacted
 import org.meshtastic.core.resources.regenerate_keys_confirmation
 import org.meshtastic.core.resources.regenerate_private_key
 import org.meshtastic.core.resources.security
@@ -63,12 +67,13 @@ import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Warning
+import org.meshtastic.feature.settings.lockdown.LockdownModeSetting
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
+import org.meshtastic.feature.settings.radio.RebootBehavior
 import org.meshtastic.proto.Config
-import kotlin.random.Random
 
 @Composable
-expect fun ExportSecurityConfigButton(
+expect fun SecurityKeyBackupActions(
     viewModel: RadioConfigViewModel,
     enabled: Boolean,
     securityConfig: Config.SecurityConfig,
@@ -78,17 +83,10 @@ expect fun ExportSecurityConfigButton(
 @Suppress("LongMethod")
 fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
+    val firmwareVersion = state.metadata?.firmware_version
+    val capabilities = remember(firmwareVersion) { Capabilities(firmwareVersion) }
     val securityConfig = state.radioConfig.security ?: Config.SecurityConfig()
     val formState = rememberConfigState(initialValue = securityConfig)
-
-    var publicKey by rememberSaveable { mutableStateOf(formState.value.public_key) }
-    LaunchedEffect(formState.value.private_key) {
-        if (formState.value.private_key != securityConfig.private_key) {
-            publicKey = ByteString.EMPTY
-        } else if (formState.value.private_key == securityConfig.private_key) {
-            publicKey = securityConfig.public_key
-        }
-    }
 
     var showKeyGenerationDialog by rememberSaveable { mutableStateOf(false) }
     PrivateKeyRegenerateDialog(
@@ -104,6 +102,7 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
 
     val focusManager = LocalFocusManager.current
     RadioConfigScreenList(
+        rebootBehavior = RebootBehavior.ALWAYS,
         title = stringResource(Res.string.security),
         onBack = onBack,
         configState = formState,
@@ -116,34 +115,26 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
         },
     ) {
         item {
+            PacketAuthenticitySetting(
+                selectedPolicy = formState.value.packet_signature_policy,
+                connected = state.connected,
+                supported = state.metadata?.has_xeddsa,
+                onPolicyChange = { policy -> formState.value = formState.value.copy(packet_signature_policy = policy) },
+            )
+        }
+        item {
             TitledCard(title = stringResource(Res.string.direct_message_key)) {
-                EditBase64Preference(
-                    title = stringResource(Res.string.public_key),
-                    summary = stringResource(Res.string.config_security_public_key),
-                    value = publicKey,
+                SecurityPublicKeyPreference(
+                    securityConfig = securityConfig,
+                    formState = formState,
                     enabled = state.connected,
-                    readOnly = true,
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChange = {
-                        if (it.size == 32) {
-                            formState.value = formState.value.copy(public_key = it)
-                        }
-                    },
-                    trailingIcon = { CopyIconButton(valueToCopy = formState.value.public_key.encodeToString()) },
                 )
                 HorizontalDivider()
-                EditBase64Preference(
-                    title = stringResource(Res.string.private_key),
-                    summary = stringResource(Res.string.config_security_private_key),
-                    value = formState.value.private_key,
+                SecurityPrivateKeyPreference(
+                    securityConfig = securityConfig,
+                    formState = formState,
                     enabled = state.connected,
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChange = {
-                        if (it.size == 32) {
-                            formState.value = formState.value.copy(private_key = it)
-                        }
-                    },
-                    trailingIcon = { CopyIconButton(valueToCopy = formState.value.private_key.encodeToString()) },
+                    isLocal = state.isLocal,
                 )
                 HorizontalDivider()
                 NodeActionButton(
@@ -153,11 +144,15 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                     icon = MeshtasticIcons.Warning,
                     onClick = { showKeyGenerationDialog = true },
                 )
-                ExportSecurityConfigButton(
-                    viewModel = viewModel,
-                    enabled = state.connected,
-                    securityConfig = securityConfig,
-                )
+                // Backup/restore operates on this phone's own key file, so it is meaningless for a remote node
+                // whose private key we never receive.
+                if (state.isLocal) {
+                    SecurityKeyBackupActions(
+                        viewModel = viewModel,
+                        enabled = state.connected,
+                        securityConfig = securityConfig,
+                    )
+                }
             }
         }
         item {
@@ -205,16 +200,114 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
-                SwitchPreference(
-                    title = stringResource(Res.string.legacy_admin_channel),
-                    checked = formState.value.admin_channel_enabled,
-                    enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy(admin_channel_enabled = it) },
+                val lockdownState by viewModel.lockdownState.collectAsStateWithLifecycle()
+                val tokenInfo by viewModel.lockdownTokenInfo.collectAsStateWithLifecycle()
+                LockdownModeSetting(
+                    supported = capabilities.supportsLockdown,
+                    lockdownState = lockdownState,
+                    tokenInfo = tokenInfo,
+                    connected = state.connected,
                     containerColor = CardDefaults.cardColors().containerColor,
+                    onEnable = { passphrase, boots, hours, sessionMinutes ->
+                        viewModel.submitLockdownPassphrase(
+                            passphrase = passphrase,
+                            boots = boots,
+                            hours = hours,
+                            maxSessionSeconds = sessionMinutes * SECONDS_PER_MINUTE,
+                        )
+                    },
+                    onDisable = { passphrase ->
+                        viewModel.submitLockdownPassphrase(passphrase = passphrase, disable = true)
+                    },
+                    onLockNow = { viewModel.sendLockNow() },
                 )
             }
         }
     }
+}
+
+internal const val SECURITY_PUBLIC_KEY_COPY_TEST_TAG = "security_public_key_copy"
+
+/**
+ * Public keys come from the device. Editing the private key invalidates that derived value until the device responds
+ * with the matching key pair, so display and copy must use the same resolved value.
+ */
+internal fun resolvedPublicKey(securityConfig: Config.SecurityConfig, editedPrivateKey: ByteString): ByteString =
+    if (editedPrivateKey == securityConfig.private_key) securityConfig.public_key else ByteString.EMPTY
+
+@Composable
+internal fun SecurityPublicKeyPreference(
+    securityConfig: Config.SecurityConfig,
+    formState: ConfigState<Config.SecurityConfig>,
+    enabled: Boolean,
+    publicKeyCopyButton: @Composable (ByteString) -> Unit = { publicKey ->
+        CopyIconButton(
+            valueToCopy = publicKey.encodeToString(),
+            modifier = Modifier.testTag(SECURITY_PUBLIC_KEY_COPY_TEST_TAG),
+        )
+    },
+) {
+    val focusManager = LocalFocusManager.current
+    val publicKey = resolvedPublicKey(securityConfig, formState.value.private_key)
+
+    EditBase64Preference(
+        title = stringResource(Res.string.public_key),
+        summary = stringResource(Res.string.config_security_public_key),
+        value = publicKey,
+        enabled = enabled,
+        readOnly = true,
+        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+        onValueChange = {
+            if (it.size == 32) {
+                formState.value = formState.value.copy(public_key = it)
+            }
+        },
+        trailingIcon = { publicKeyCopyButton(publicKey) },
+    )
+}
+
+/**
+ * Firmware withholds the private key from remote admin responses, so a remote node reports an empty one. The field
+ * stays writable: a remote set of a new key is still honoured, and a set that omits it leaves the node's key alone.
+ */
+internal fun isPrivateKeyRedacted(securityConfig: Config.SecurityConfig, isLocal: Boolean): Boolean =
+    !isLocal && securityConfig.private_key.size != PRIVATE_KEY_SIZE
+
+@Composable
+internal fun SecurityPrivateKeyPreference(
+    securityConfig: Config.SecurityConfig,
+    formState: ConfigState<Config.SecurityConfig>,
+    enabled: Boolean,
+    isLocal: Boolean,
+) {
+    val focusManager = LocalFocusManager.current
+    val privateKey = formState.value.private_key
+    val redacted = isPrivateKeyRedacted(securityConfig, isLocal) && privateKey.size != PRIVATE_KEY_SIZE
+
+    EditBase64Preference(
+        title = stringResource(Res.string.private_key),
+        summary =
+        if (redacted) {
+            stringResource(Res.string.config_security_private_key_remote)
+        } else {
+            stringResource(Res.string.config_security_private_key)
+        },
+        value = privateKey,
+        enabled = enabled,
+        placeholderText = if (redacted) stringResource(Res.string.redacted) else null,
+        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+        onValueChange = {
+            if (it.size == PRIVATE_KEY_SIZE) {
+                formState.value = formState.value.copy(private_key = it)
+            }
+        },
+        trailingIcon =
+        if (privateKey.size == PRIVATE_KEY_SIZE) {
+            { CopyIconButton(valueToCopy = privateKey.encodeToString(), sensitive = true) }
+        } else {
+            null
+        },
+    )
 }
 
 @Suppress("MagicNumber")
@@ -230,8 +323,9 @@ fun PrivateKeyRegenerateDialog(
             titleRes = Res.string.regenerate_private_key,
             messageRes = Res.string.regenerate_keys_confirmation,
             onConfirm = {
-                // Generate a random "f" value
-                val f = ByteArray(32).apply { Random.nextBytes(this) }
+                // Generate a random "f" value. This is long-term key material, so it must come from the platform CSPRNG
+                // — kotlin.random.Random is a small-state, clock-seeded PRNG and is not acceptable here.
+                val f = platformRandomBytes(PRIVATE_KEY_SIZE)
                 // Adjust the value to make it valid as an "s" value for eval().
                 // According to the specification we need to mask off the 3
                 // right-most bits of f[0], mask off the left-most bit of f[31],
@@ -244,3 +338,8 @@ fun PrivateKeyRegenerateDialog(
         )
     }
 }
+
+/** X25519 private key length in bytes. */
+private const val PRIVATE_KEY_SIZE = 32
+
+private const val SECONDS_PER_MINUTE = 60

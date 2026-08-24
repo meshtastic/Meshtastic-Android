@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,9 +33,14 @@ open class MyNodeEntity(
     val minAppVersion: Int,
     val maxChannels: Int,
     val hasWifi: Boolean,
-    val deviceId: String? = "unknown",
+    val deviceId: String? = DEVICE_ID_UNKNOWN,
     val pioEnv: String? = null,
 ) {
+    companion object {
+        /** Placeholder for hardware that doesn't report a factory-burned device id. */
+        const val DEVICE_ID_UNKNOWN = "unknown"
+    }
+
     /** A human readable description of the software/hardware version */
     val firmwareString: String
         get() = "$model $firmwareVersion"

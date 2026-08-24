@@ -23,37 +23,45 @@ import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.TakPrefs
+import org.meshtastic.core.takserver.MeshToCotBroadcaster
 import org.meshtastic.core.takserver.TAKMeshIntegration
 import org.meshtastic.core.takserver.TAKServer
 import org.meshtastic.core.takserver.TAKServerManager
 import org.meshtastic.core.takserver.TAKServerManagerImpl
-import org.meshtastic.core.takserver.fountain.CoTHandler
-import org.meshtastic.core.takserver.fountain.GenericCoTHandler
+import org.meshtastic.core.takserver.createTAKServer
 
 @Module
 class CoreTakServerModule {
-    @Single fun provideTAKServer(dispatchers: CoroutineDispatchers): TAKServer = TAKServer(dispatchers = dispatchers)
+    @Single
+    fun provideTAKServer(dispatchers: CoroutineDispatchers): TAKServer = createTAKServer(dispatchers = dispatchers)
 
     @Single fun provideTAKServerManager(takServer: TAKServer): TAKServerManager = TAKServerManagerImpl(takServer)
 
     @Single
-    fun provideGenericCoTHandler(commandSender: CommandSender, takServerManager: TAKServerManager): CoTHandler =
-        GenericCoTHandler(commandSender, takServerManager)
+    fun provideMeshToCotBroadcaster(
+        takServerManager: TAKServerManager,
+        nodeRepository: NodeRepository,
+        takPrefs: TakPrefs,
+        dispatchers: CoroutineDispatchers,
+    ): MeshToCotBroadcaster = MeshToCotBroadcaster(takServerManager, nodeRepository, takPrefs, dispatchers)
 
     @Single
     fun provideTAKMeshIntegration(
         takServerManager: TAKServerManager,
         commandSender: CommandSender,
-        nodeRepository: NodeRepository,
         serviceRepository: ServiceRepository,
         meshConfigHandler: MeshConfigHandler,
-        cotHandler: CoTHandler,
+        nodeRepository: NodeRepository,
+        meshToCotBroadcaster: MeshToCotBroadcaster,
+        takPrefs: TakPrefs,
     ): TAKMeshIntegration = TAKMeshIntegration(
         takServerManager,
         commandSender,
-        nodeRepository,
         serviceRepository,
         meshConfigHandler,
-        cotHandler,
+        nodeRepository,
+        meshToCotBroadcaster,
+        takPrefs,
     )
 }

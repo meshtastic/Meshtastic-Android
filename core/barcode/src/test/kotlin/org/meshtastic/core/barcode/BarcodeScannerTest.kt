@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 package org.meshtastic.core.barcode
 
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.v2.runComposeUiTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,21 +23,22 @@ import org.meshtastic.core.database.entity.NodeEntity
 interface NodeInfoWriteDataSource {
     suspend fun upsert(node: NodeEntity)
 
-    suspend fun installConfig(mi: MyNodeEntity, nodes: List<NodeEntity>)
+    /** @return node numbers removed by identity migration (see `NodeInfoDao.installConfig`). */
+    suspend fun installConfig(mi: MyNodeEntity, nodes: List<NodeEntity>): List<Int>
 
     suspend fun clearNodeDB(preserveFavorites: Boolean)
 
     suspend fun clearMyNodeInfo()
 
-    suspend fun deleteNode(num: Int)
+    suspend fun deleteNodeAndMetadata(num: Int)
 
-    suspend fun deleteNodes(nodeNums: List<Int>)
-
-    suspend fun deleteMetadata(num: Int)
+    suspend fun deleteNodesAndMetadata(nodeNums: List<Int>)
 
     suspend fun upsert(metadata: MetadataEntity)
 
     suspend fun setNodeNotes(num: Int, notes: String)
+
+    suspend fun updatePowerChannelLabel(num: Int, channelIndex: Int, label: String)
 
     suspend fun backfillDenormalizedNames()
 }

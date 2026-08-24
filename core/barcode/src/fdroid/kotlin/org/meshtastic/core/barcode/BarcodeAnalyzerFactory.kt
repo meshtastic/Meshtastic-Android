@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,9 @@
 package org.meshtastic.core.barcode
 
 import androidx.camera.core.ImageAnalysis
+import com.google.zxing.BarcodeFormat
 import com.google.zxing.BinaryBitmap
+import com.google.zxing.DecodeHintType
 import com.google.zxing.MultiFormatReader
 import com.google.zxing.PlanarYUVLuminanceSource
 import com.google.zxing.common.HybridBinarizer
@@ -29,18 +31,25 @@ import java.nio.ByteBuffer
  * This is the F-Droid flavor implementation; the Google flavor uses ML Kit instead.
  */
 internal fun createBarcodeAnalyzer(onResult: (String) -> Unit): ImageAnalysis.Analyzer {
-    val reader = MultiFormatReader()
+    val reader =
+        MultiFormatReader().apply {
+            // Without this, MultiFormatReader tries every supported format (DataMatrix,
+            // PDF417, Aztec, Code128/39, EAN/UPC, ...) on every camera frame even though
+            // this analyzer only ever wants QR codes — narrowing it is a meaningful
+            // per-frame CPU/battery win during an active scan session.
+            setHints(mapOf(DecodeHintType.POSSIBLE_FORMATS to listOf(BarcodeFormat.QR_CODE)))
+        }
 
     return ImageAnalysis.Analyzer { imageProxy ->
         try {
-            val buffer: ByteBuffer = imageProxy.planes[0].buffer
+            val lumaPlane = imageProxy.planes[0]
+            val buffer: ByteBuffer = lumaPlane.buffer.duplicate()
             val data = ByteArray(buffer.remaining())
             buffer.get(data)
 
             val width = imageProxy.width
             val height = imageProxy.height
-
-            val source = PlanarYUVLuminanceSource(data, width, height, 0, 0, width, height, false)
+            val source = PlanarYUVLuminanceSource(data, lumaPlane.rowStride, height, 0, 0, width, height, false)
             val binaryBitmap = BinaryBitmap(HybridBinarizer(source))
 
             val result = reader.decodeWithState(binaryBitmap)

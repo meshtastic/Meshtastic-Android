@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,16 +18,10 @@
 plugins {
     alias(libs.plugins.meshtastic.kmp.feature)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
+    alias(libs.plugins.meshtastic.kmp.jvm.android)
 }
 
 kotlin {
-    jvm()
-
-    android {
-        namespace = "org.meshtastic.feature.settings"
-        androidResources.enable = false
-    }
-
     sourceSets {
         commonMain.dependencies {
             implementation(projects.core.common)
@@ -37,7 +31,8 @@ kotlin {
             implementation(projects.core.domain)
             implementation(projects.core.model)
             implementation(projects.core.navigation)
-            implementation(projects.core.proto)
+            implementation(projects.core.network)
+            implementation(libs.meshtastic.protobufs)
             implementation(projects.core.repository)
             implementation(projects.core.service)
             implementation(projects.core.resources)
@@ -45,9 +40,10 @@ kotlin {
             implementation(projects.core.di)
             implementation(projects.core.takserver)
 
+            implementation(libs.kotlinx.atomicfu)
             implementation(libs.kotlinx.collections.immutable)
             implementation(libs.aboutlibraries.compose.m3)
-            implementation(libs.jetbrains.navigation3.ui)
+            implementation(libs.coil)
         }
 
         androidMain.dependencies {
@@ -57,7 +53,8 @@ kotlin {
         }
 
         commonTest.dependencies {
-            implementation(project(":core:datastore"))
+            implementation(projects.core.datastore)
+            implementation(projects.core.testing)
             implementation(libs.compose.multiplatform.ui.test)
         }
 

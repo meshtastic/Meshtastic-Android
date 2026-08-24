@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,12 +16,12 @@
  */
 package org.meshtastic.feature.settings.component
 
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.analytics_okay
-import org.meshtastic.core.resources.app_settings
 import org.meshtastic.core.resources.location_disabled
 import org.meshtastic.core.resources.provide_location_to_mesh
 import org.meshtastic.core.ui.component.SwitchListItem
@@ -29,13 +29,12 @@ import org.meshtastic.core.ui.icon.BugReport
 import org.meshtastic.core.ui.icon.LocationOn
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.util.isGpsDisabled
-import org.meshtastic.core.ui.util.isLocationPermissionGranted
-import org.meshtastic.core.ui.util.rememberRequestLocationPermission
+import org.meshtastic.core.ui.util.rememberLocationPermissionState
 import org.meshtastic.core.ui.util.rememberShowToastResource
 
 /** Section managing privacy settings like analytics and location sharing. */
 @Composable
-fun PrivacySection(
+internal fun ColumnScope.PrivacySettingsContent(
     analyticsAvailable: Boolean,
     analyticsEnabled: Boolean,
     onToggleAnalytics: () -> Unit,
@@ -47,45 +46,43 @@ fun PrivacySection(
     stopProvideLocation: () -> Unit,
 ) {
     val showToast = rememberShowToastResource()
-    val isLocationGranted = isLocationPermissionGranted()
+    val locationPermission = rememberLocationPermissionState()
     val isGpsOff = isGpsDisabled()
-    val requestLocationPermission =
-        rememberRequestLocationPermission(onGranted = { startProvideLocation() }, onDenied = {})
 
-    LaunchedEffect(provideLocation, isLocationGranted, isGpsOff) {
+    // Key on the boolean grant rather than the full status so a first denial doesn't immediately re-prompt: request()
+    // covers both the never-asked and re-promptable cases, and is a harmless no-op once permanently denied.
+    LaunchedEffect(provideLocation, locationPermission.isGranted, isGpsOff) {
         if (provideLocation) {
-            if (isLocationGranted) {
+            if (locationPermission.isGranted) {
                 if (!isGpsOff) {
                     startProvideLocation()
                 } else {
                     showToast(Res.string.location_disabled)
                 }
             } else {
-                requestLocationPermission()
+                locationPermission.request()
             }
         } else {
             stopProvideLocation()
         }
     }
 
-    ExpressiveSection(title = stringResource(Res.string.app_settings)) {
-        if (analyticsAvailable) {
-            SwitchListItem(
-                text = stringResource(Res.string.analytics_okay),
-                checked = analyticsEnabled,
-                leadingIcon = MeshtasticIcons.BugReport,
-                onClick = onToggleAnalytics,
-            )
-        }
-
+    if (analyticsAvailable) {
         SwitchListItem(
-            text = stringResource(Res.string.provide_location_to_mesh),
-            leadingIcon = MeshtasticIcons.LocationOn,
-            enabled = !isGpsOff,
-            checked = provideLocation,
-            onClick = { onToggleLocation(!provideLocation) },
+            text = stringResource(Res.string.analytics_okay),
+            checked = analyticsEnabled,
+            leadingIcon = MeshtasticIcons.BugReport,
+            onClick = onToggleAnalytics,
         )
-
-        HomoglyphSetting(homoglyphEncodingEnabled = homoglyphEnabled, onToggle = onToggleHomoglyph)
     }
+
+    SwitchListItem(
+        text = stringResource(Res.string.provide_location_to_mesh),
+        leadingIcon = MeshtasticIcons.LocationOn,
+        enabled = !isGpsOff,
+        checked = provideLocation,
+        onClick = { onToggleLocation(!provideLocation) },
+    )
+
+    HomoglyphSetting(homoglyphEncodingEnabled = homoglyphEnabled, onToggle = onToggleHomoglyph)
 }

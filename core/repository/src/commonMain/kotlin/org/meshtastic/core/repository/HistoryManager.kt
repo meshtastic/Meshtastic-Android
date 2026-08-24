@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,12 +27,16 @@ interface HistoryManager {
      * @param myNodeNum The local node number.
      * @param storeForwardConfig The store-and-forward module configuration.
      * @param transport The transport method being used (for logging).
+     * @param expectedConnectionVersion The connected lifecycle generation that owns this request.
+     * @throws LocalNodeUnavailableException when no device is selected or the local node number is unknown.
+     * @throws PacketQueueRejectedException when the expected lifecycle generation is stale or queue admission fails.
      */
-    fun requestHistoryReplay(
+    suspend fun requestHistoryReplay(
         trigger: String,
         myNodeNum: Int?,
         storeForwardConfig: ModuleConfig.StoreForwardConfig?,
         transport: String,
+        expectedConnectionVersion: Long,
     )
 
     /**

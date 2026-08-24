@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -71,8 +70,9 @@ fun MapReportingPreference(
     enabled: Boolean,
 ) {
     Column {
-        var showMapReportingWarning by rememberSaveable { mutableStateOf(mapReportingEnabled) }
-        LaunchedEffect(mapReportingEnabled) { showMapReportingWarning = mapReportingEnabled }
+        // Tracks the switch locally so the consent card can show before the config round-trips; re-keyed on
+        // [mapReportingEnabled] so an externally-changed config wins over a stale local toggle.
+        var showMapReportingWarning by rememberSaveable(mapReportingEnabled) { mutableStateOf(mapReportingEnabled) }
         SwitchPreference(
             title = stringResource(Res.string.map_reporting),
             summary = stringResource(Res.string.map_reporting_summary),
@@ -120,7 +120,7 @@ fun MapReportingPreference(
                     val precisionMeters = precisionBitsToMeters(positionPrecision).toInt()
                     val unit = DistanceUnit.Companion.getFromLocale()
                     Text(
-                        text = precisionMeters.toDistanceString(unit),
+                        text = "± ${precisionMeters.toDistanceString(unit)}",
                         modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
                         fontSize = MaterialTheme.typography.bodyLarge.fontSize,
                         overflow = TextOverflow.Companion.Ellipsis,

@@ -1,0 +1,122 @@
+# Supported documentation locales.
+# Each entry maps a regional qualifier code to its native name.
+# Pages land at docs/{code}/user/*.md via Crowdin sync.
+# Synced with Android app locales (values-* resource dirs).
+
+ar-rSA:
+  name: "العربية"
+  dir: rtl
+be-rBY:
+  name: "Беларуская"
+  dir: ltr
+bg-rBG:
+  name: "Български"
+  dir: ltr
+ca-rES:
+  name: "Català"
+  dir: ltr
+cs-rCZ:
+  name: "Čeština"
+  dir: ltr
+de-rDE:
+  name: "Deutsch"
+  dir: ltr
+el-rGR:
+  name: "Ελληνικά"
+  dir: ltr
+es-rES:
+  name: "Español"
+  dir: ltr
+et-rEE:
+  name: "Eesti"
+  dir: ltr
+fi-rFI:
+  name: "Suomi"
+  dir: ltr
+fr-rFR:
+  name: "Français"
+  dir: ltr
+ga-rIE:
+  name: "Gaeilge"
+  dir: ltr
+gl-rES:
+  name: "Galego"
+  dir: ltr
+iw-rIL:
+  name: "עברית"
+  dir: rtl
+hr-rHR:
+  name: "Hrvatski"
+  dir: ltr
+ht-rHT:
+  name: "Kreyòl Ayisyen"
+  dir: ltr
+hu-rHU:
+  name: "Magyar"
+  dir: ltr
+is-rIS:
+  name: "Íslenska"
+  dir: ltr
+it-rIT:
+  name: "Italiano"
+  dir: ltr
+ja-rJP:
+  name: "日本語"
+  dir: ltr
+ko-rKR:
+  name: "한국어"
+  dir: ltr
+lt-rLT:
+  name: "Lietuvių"
+  dir: ltr
+nl-rNL:
+  name: "Nederlands"
+  dir: ltr
+no-rNO:
+  name: "Norsk"
+  dir: ltr
+pl-rPL:
+  name: "Polski"
+  dir: ltr
+pt-rBR:
+  name: "Português (Brasil)"
+  dir: ltr
+pt-rPT:
+  name: "Português"
+  dir: ltr
+ro-rRO:
+  name: "Română"
+  dir: ltr
+ru-rRU:
+  name: "Русский"
+  dir: ltr
+sk-rSK:
+  name: "Slovenčina"
+  dir: ltr
+sl-rSI:
+  name: "Slovenščina"
+  dir: ltr
+sq-rAL:
+  name: "Shqip"
+  dir: ltr
+sr-rLatn:
+  name: "Српски (Latinica)"
+  dir: ltr
+srp:
+  name: "Српски (Ћирилица)"
+  dir: ltr
+sv-rSE:
+  name: "Svenska"
+  dir: ltr
+tr-rTR:
+  name: "Türkçe"
+  dir: ltr
+uk-rUA:
+  name: "Українська"
+  dir: ltr
+zh-rCN:
+  name: "中文 (简体)"
+  dir: ltr
+zh-rTW:
+  name: "中文 (繁體)"
+  dir: ltr

@@ -20,7 +20,7 @@ import android.net.ConnectivityManager
 import kotlinx.coroutines.flow.Flow
 import org.koin.core.annotation.Single
 
-@Single
+@Single(binds = [NetworkMonitor::class])
 class AndroidNetworkMonitor(private val connectivityManager: ConnectivityManager) : NetworkMonitor {
     override val networkAvailable: Flow<Boolean> = connectivityManager.networkAvailable()
 }

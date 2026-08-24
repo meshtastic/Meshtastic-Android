@@ -1,0 +1,299 @@
+{
+  "devices": [
+    {
+      "hwModel": 18,
+      "hwModelSlug": "NANO_G2_ULTRA",
+      "requiresBootloaderUpgradeForOta": true,
+      "infoUrl": "https://meshtastic.org/docs/getting-started/flashing-firmware/nrf52/update-nrf52-bootloader/"
+    },
+    {
+      "hwModel": 9,
+      "hwModelSlug": "RAK4631",
+      "requiresBootloaderUpgradeForOta": true,
+      "infoUrl": "https://meshtastic.org/docs/getting-started/flashing-firmware/nrf52/update-nrf52-bootloader/"
+    },
+    {
+      "hwModel": 96,
+      "hwModelSlug": "NOMADSTAR_METEOR_PRO",
+      "requiresBootloaderUpgradeForOta": true,
+      "infoUrl": "https://meshtastic.org/docs/getting-started/flashing-firmware/nrf52/update-nrf52-bootloader/"
+    }
+  ],
+  "softDeviceVariants": [
+    {
+      "hwModel": 7,
+      "hwModelSlug": "T_ECHO",
+      "platformioTargets": [
+        "t-echo"
+      ],
+      "softDevice": "6.1.1"
+    },
+    {
+      "hwModel": 9,
+      "hwModelSlug": "RAK4631",
+      "platformioTargets": [
+        "rak4631",
+        "rak_wismesh_pocket",
+        "rak_wismesh_repeater_mini"
+      ],
+      "softDevice": "6.1.1"
+    },
+    {
+      "hwModel": 18,
+      "hwModelSlug": "NANO_G2_ULTRA",
+      "platformioTargets": [
+        "nano-g2-ultra"
+      ],
+      "softDevice": "6.1.1"
+    },
+    {
+      "hwModel": 21,
+      "hwModelSlug": "WIO_WM1110",
+      "platformioTargets": [
+        "wio-tracker-wm1110"
+      ],
+      "softDevice": "7.3.0"
+    },
+    {
+      "hwModel": 22,
+      "hwModelSlug": "WISMESH_HUB",
+      "platformioTargets": [
+        "rak2560"
+      ],
+      "softDevice": "6.1.1"
+    },
+    {
+      "hwModel": 29,
+      "hwModelSlug": "CANARYONE",
+      "platformioTargets": [
+        "canaryone"
+      ],
+      "softDevice": "6.1.1"
+    },
+    {
+      "hwModel": 33,
+      "hwModelSlug": "T_ECHO_PLUS",
+      "platformioTargets": [
+        "t-echo-plus"
+      ],
+      "softDevice": "6.1.1"
+    },
+    {
+      "hwModel": 63,
+      "hwModelSlug": "NRF52_PROMICRO_DIY",
+      "platformioTargets": [
+        "nrf52_promicro_diy_tcxo"
+      ],
+      "softDevice": "6.1.1"
+    },
+    {
+      "hwModel": 69,
+      "hwModelSlug": "HELTEC_MESH_NODE_T114",
+      "platformioTargets": [
+        "heltec-mesh-node-t114"
+      ],
+      "softDevice": "6.1.1"
+    },
+    {
+      "hwModel": 71,
+      "hwModelSlug": "TRACKER_T1000_E",
+      "platformioTargets": [
+        "tracker-t1000-e"
+      ],
+      "softDevice": "7.3.0"
+    },
+    {
+      "hwModel": 84,
+      "hwModelSlug": "WISMESH_TAP",
+      "platformioTargets": [
+        "rak_wismeshtap"
+      ],
+      "softDevice": "6.1.1"
+    },
+    {
+      "hwModel": 88,
+      "hwModelSlug": "XIAO_NRF52_KIT",
+      "platformioTargets": [
+        "seeed_xiao_nrf52840_kit"
+      ],
+      "softDevice": "7.3.0"
+    },
+    {
+      "hwModel": 89,
+      "hwModelSlug": "THINKNODE_M1",
+      "platformioTargets": [
+        "thinknode_m1"
+      ],
+      "softDevice": "6.1.1"
+    },
+    {
+      "hwModel": 93,
+      "hwModelSlug": "MUZI_BASE",
+      "platformioTargets": [
+        "muzi-base"
+      ],
+      "softDevice": "6.1.1"
+    },
+    {
+      "hwModel": 94,
+      "hwModelSlug": "HELTEC_MESH_POCKET",
+      "platformioTargets": [
+        "heltec-mesh-pocket-10000",
+        "heltec-mesh-pocket-5000"
+      ],
+      "softDevice": "6.1.1"
+    },
+    {
+      "hwModel": 95,
+      "hwModelSlug": "SEEED_SOLAR_NODE",
+      "platformioTargets": [
+        "seeed_solar_node"
+      ],
+      "softDevice": "7.3.0"
+    },
+    {
+      "hwModel": 96,
+      "hwModelSlug": "NOMADSTAR_METEOR_PRO",
+      "platformioTargets": [
+        "rak4631_nomadstar_meteor_pro"
+      ],
+      "softDevice": "6.1.1"
+    },
+    {
+      "hwModel": 99,
+      "hwModelSlug": "SEEED_WIO_TRACKER_L1",
+      "platformioTargets": [
+        "seeed_wio_tracker_L1"
+      ],
+      "softDevice": "7.3.0"
+    },
+    {
+      "hwModel": 100,
+      "hwModelSlug": "SEEED_WIO_TRACKER_L1_EINK",
+      "platformioTargets": [
+        "seeed_wio_tracker_L1_eink"
+      ],
+      "softDevice": "7.3.0"
+    },
+    {
+      "hwModel": 101,
+      "hwModelSlug": "MUZI_R1_NEO",
+      "platformioTargets": [
+        "r1-neo"
+      ],
+      "softDevice": "6.1.1"
+    },
+    {
+      "hwModel": 105,
+      "hwModelSlug": "WISMESH_TAG",
+      "platformioTargets": [
+        "rak_wismeshtag"
+      ],
+      "softDevice": "6.1.1"
+    },
+    {
+      "hwModel": 108,
+      "hwModelSlug": "HELTEC_MESH_SOLAR",
+      "platformioTargets": [
+        "heltec-mesh-solar"
+      ],
+      "softDevice": "6.1.1"
+    },
+    {
+      "hwModel": 109,
+      "hwModelSlug": "T_ECHO_LITE",
+      "platformioTargets": [
+        "t-echo-lite"
+      ],
+      "softDevice": "6.1.1"
+    },
+    {
+      "hwModel": 115,
+      "hwModelSlug": "THINKNODE_M3",
+      "platformioTargets": [
+        "thinknode_m3"
+      ],
+      "softDevice": "6.1.1"
+    },
+    {
+      "hwModel": 117,
+      "hwModelSlug": "RAK3401",
+      "platformioTargets": [
+        "rak3401-1watt",
+        "rak_wismesh_repeater_mini_hp"
+      ],
+      "softDevice": "6.1.1"
+    },
+    {
+      "hwModel": 119,
+      "hwModelSlug": "THINKNODE_M4",
+      "platformioTargets": [
+        "thinknode_m4"
+      ],
+      "softDevice": "6.1.1"
+    },
+    {
+      "hwModel": 120,
+      "hwModelSlug": "THINKNODE_M6",
+      "platformioTargets": [
+        "thinknode_m6"
+      ],
+      "softDevice": "6.1.1"
+    },
+    {
+      "hwModel": 127,
+      "hwModelSlug": "HELTEC_MESH_NODE_T096",
+      "platformioTargets": [
+        "heltec-mesh-node-t096"
+      ],
+      "softDevice": "6.1.1"
+    },
+    {
+      "hwModel": 128,
+      "hwModelSlug": "MESH_TRACKER_X1",
+      "platformioTargets": [
+        "seeed_mesh_tracker_X1"
+      ],
+      "softDevice": "7.3.0"
+    },
+    {
+      "hwModel": 130,
+      "hwModelSlug": "THINKNODE_M8",
+      "platformioTargets": [
+        "thinknode_m8"
+      ]
+    },
+    {
+      "hwModel": 133,
+      "hwModelSlug": "HELTEC_MESH_NODE_T1",
+      "platformioTargets": [
+        "heltec-mesh-node-t1"
+      ],
+      "softDevice": "6.1.1"
+    },
+    {
+      "hwModel": 136,
+      "hwModelSlug": "T_ECHO_CARD",
+      "platformioTargets": [
+        "t-echo-card"
+      ],
+      "softDevice": "6.1.1"
+    },
+    {
+      "hwModel": 139,
+      "hwModelSlug": "HELTEC_MESH_TOWER_V2",
+      "platformioTargets": [
+        "heltec-mesh-tower-v2"
+      ],
+      "softDevice": "6.1.1"
+    },
+    {
+      "hwModel": 144,
+      "hwModelSlug": "SEEED_WIO_TRACKER_L1_PRO_1W",
+      "platformioTargets": [
+        "seeed_wio_tracker_L1_Pro_1W"
+      ],
+      "softDevice": "7.3.0"
+    }
+  ]
+}

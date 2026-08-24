@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,9 +20,15 @@ import org.meshtastic.core.database.entity.FirmwareReleaseType
 
 data class FirmwareUpdateActions(
     val onReleaseTypeSelect: (FirmwareReleaseType) -> Unit,
-    val onStartUpdate: () -> Unit,
+    /** Starts the update; `true` means the user opted into wiping the device as part of it (default off in the UI). */
+    val onStartUpdate: (Boolean) -> Unit,
     val onPickFile: () -> Unit,
     val onSaveFile: (String) -> Unit,
+    /** Pick the device's UF2 volume for a maintenance pass, which vets the drive before writing to it. */
+    val onPickVolume: () -> Unit,
+    val onBootloaderUpgrade: () -> Unit,
+    val onConfirmLocalFile: () -> Unit,
+    val onDismissLocalFile: () -> Unit,
     val onRetry: () -> Unit,
     val onCancel: () -> Unit,
     val onDone: () -> Unit,

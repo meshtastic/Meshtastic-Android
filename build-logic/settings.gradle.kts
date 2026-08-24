@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,25 +16,9 @@
  */
 
 pluginManagement {
+    includeBuild("settings-plugin")
     repositories {
-        gradlePluginPortal()
-        google()
         mavenCentral()
-        maven {
-            url = uri("https://jitpack.io")
-            content {
-                includeGroupByRegex("com\\.github\\..*")
-            }
-        }
-    }
-}
-
-plugins {
-    id("com.gradle.develocity") version("4.4.0")
-}
-
-dependencyResolutionManagement {
-    repositories {
         gradlePluginPortal()
         google {
             content {
@@ -43,13 +27,26 @@ dependencyResolutionManagement {
                 includeGroupByRegex("androidx.*")
             }
         }
+        maven { url = uri("../offline-repository") }
+    }
+}
+
+plugins {
+    id("meshtastic.develocity")
+}
+
+dependencyResolutionManagement {
+    repositories {
         mavenCentral()
-        maven {
-            url = uri("https://jitpack.io")
+        gradlePluginPortal()
+        google {
             content {
-                includeGroupByRegex("com\\.github\\..*")
+                includeGroupByRegex("com\\.android.*")
+                includeGroupByRegex("com\\.google.*")
+                includeGroupByRegex("androidx.*")
             }
         }
+        maven { url = uri("../offline-repository") }
     }
     versionCatalogs {
         create("libs") {
@@ -57,9 +54,6 @@ dependencyResolutionManagement {
         }
     }
 }
-
-// Shared Develocity and Build Cache configuration
-apply(from = "../gradle/develocity.settings.gradle")
 
 rootProject.name = "build-logic"
 include(":convention")

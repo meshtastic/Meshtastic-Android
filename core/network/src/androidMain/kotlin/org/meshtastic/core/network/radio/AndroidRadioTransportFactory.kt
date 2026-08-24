@@ -19,11 +19,15 @@ package org.meshtastic.core.network.radio
 import android.content.Context
 import android.hardware.usb.UsbManager
 import android.provider.Settings
+import co.touchlab.kermit.Logger
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import org.koin.core.annotation.Single
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.common.BuildConfigProvider
+import org.meshtastic.core.common.state.HiddenFeaturesUnlock
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
@@ -43,6 +47,7 @@ class AndroidRadioTransportFactory(
     private val buildConfigProvider: BuildConfigProvider,
     private val usbRepository: UsbRepository,
     private val usbManager: UsbManager,
+    hiddenFeaturesUnlock: HiddenFeaturesUnlock,
     scanner: BleScanner,
     bluetoothRepository: BluetoothRepository,
     connectionFactory: BleConnectionFactory,
@@ -51,8 +56,34 @@ class AndroidRadioTransportFactory(
 
     override val supportedDeviceTypes: List<DeviceType> = listOf(DeviceType.BLE, DeviceType.TCP, DeviceType.USB)
 
-    override fun isMockTransport(): Boolean =
-        buildConfigProvider.isDebug || Settings.System.getString(context.contentResolver, "firebase.test.lab") == "true"
+    /**
+     * Demo Mode gate.
+     *
+     * Debug builds and Firebase Test Lab get it unconditionally, as before. Release builds get it only after the user
+     * performs the hidden-features gesture (five taps on the Settings app-version row) — the same deliberate,
+     * process-scoped unlock that reveals the firmware-excluded module screens. That keeps a permanently visible fake
+     * radio out of the picker for ordinary users while making Demo Mode genuinely reachable in a shipped build, which
+     * is what a Play reviewer with no LoRa hardware needs.
+     *
+     * [HiddenFeaturesUnlock.unlocked] is a hot [StateFlow], so no scope is needed to observe it here.
+     */
+    override val mockTransportEnabled: StateFlow<Boolean> =
+        if (buildConfigProvider.isDebug || isFirebaseTestLab()) {
+            MutableStateFlow(true)
+        } else {
+            hiddenFeaturesUnlock.unlocked
+        }
+
+    private fun isFirebaseTestLab(): Boolean =
+        Settings.System.getString(context.contentResolver, "firebase.test.lab") == "true"
+
+    /**
+     * Probed once: the asset is baked into the APK, so its presence cannot change while the process lives. Empty counts
+     * as absent to match [createReplayTransport]'s own guard.
+     */
+    override val isReplayTransportAvailable: Boolean by lazy {
+        runCatching { context.assets.open(REPLAY_ASSET_NAME).use { it.read() != -1 } }.getOrDefault(false)
+    }
 
     override fun isPlatformAddressValid(address: String): Boolean {
         val interfaceId = address.firstOrNull()?.let { InterfaceId.forIdChar(it) } ?: return false
@@ -60,13 +91,18 @@ class AndroidRadioTransportFactory(
         return when (interfaceId) {
             InterfaceId.MOCK,
             InterfaceId.NOP,
+            InterfaceId.REPLAY,
             InterfaceId.TCP,
             -> true
+
             InterfaceId.SERIAL -> {
                 val deviceMap = usbRepository.serialDevices.value
-                val driver = deviceMap[rest] ?: deviceMap.values.firstOrNull()
+                // Older installs may still hold the former path-based USB address. When exactly one serial device is
+                // present, retain the historical self-healing fallback instead of rejecting an otherwise usable radio.
+                val driver = resolveSerialDevice(deviceMap, rest)
                 driver != null && usbManager.hasPermission(driver.device)
             }
+
             InterfaceId.BLUETOOTH -> true // Handled by base class
         }
     }
@@ -77,6 +113,9 @@ class AndroidRadioTransportFactory(
 
         return when (interfaceId) {
             InterfaceId.MOCK -> MockRadioTransport(callback = service, scope = service.serviceScope, address = rest)
+
+            InterfaceId.REPLAY -> createReplayTransport(service, rest)
+
             InterfaceId.TCP ->
                 TcpRadioTransport(
                     callback = service,
@@ -84,17 +123,50 @@ class AndroidRadioTransportFactory(
                     dispatchers = dispatchers,
                     address = rest,
                 )
+
             InterfaceId.SERIAL ->
                 SerialRadioTransport(
                     callback = service,
                     scope = service.serviceScope,
-                    usbRepository = usbRepository,
+                    serialDevices = usbRepository.serialDevices,
+                    createSerialConnection = usbRepository::createSerialConnection,
                     address = rest,
                 )
+
             InterfaceId.NOP,
             null,
             -> NopRadioTransport(rest)
+
             InterfaceId.BLUETOOTH -> error("BLE addresses should be handled by BaseRadioTransportFactory")
         }
+    }
+
+    /**
+     * Replay selection ("r"). Replays the bundled burningmesh capture asset on-device via [ReplayRadioTransport] —
+     * realistic ~200-node traffic for perf / benchmark / populated-UI work. The asset only ships in debug (and
+     * benchmark) builds; when it is absent we fall back to the lightweight synthetic [MockRadioTransport] so selecting
+     * the entry still yields a working virtual device.
+     */
+    private fun createReplayTransport(service: RadioInterfaceService, rest: String): RadioTransport {
+        val replayFrames =
+            runCatching { context.assets.open(REPLAY_ASSET_NAME).use { it.readBytes() } }
+                .getOrNull()
+                ?.takeIf { it.isNotEmpty() }
+        return if (replayFrames != null) {
+            Logger.i { "Replay device → replaying $REPLAY_ASSET_NAME (${replayFrames.size} bytes)" }
+            ReplayRadioTransport(
+                callback = service,
+                scope = service.serviceScope,
+                address = rest,
+                frames = replayFrames,
+            )
+        } else {
+            Logger.w { "Replay device selected but $REPLAY_ASSET_NAME asset is missing — falling back to mock" }
+            MockRadioTransport(callback = service, scope = service.serviceScope, address = rest)
+        }
+    }
+
+    private companion object {
+        const val REPLAY_ASSET_NAME = "burningmesh.fromradio"
     }
 }

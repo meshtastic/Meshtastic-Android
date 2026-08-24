@@ -25,16 +25,16 @@ import kotlinx.coroutines.test.runTest
 import okio.FileSystem
 import okio.Path
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.prefs.di.asUiDataStore
 import org.meshtastic.core.repository.NotificationPrefs
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
-@OptIn(ExperimentalUuidApi::class)
 class NotificationPrefsTest {
     private lateinit var tmpDir: Path
 
@@ -55,7 +55,7 @@ class NotificationPrefsTest {
                 produceFile = { tmpDir / "test.preferences_pb" },
             )
         dispatchers = CoroutineDispatchers(testDispatcher, testDispatcher, testDispatcher)
-        notificationPrefs = NotificationPrefsImpl(dataStore, dispatchers)
+        notificationPrefs = NotificationPrefsImpl(dataStore.asUiDataStore(), dispatchers)
     }
 
     @AfterTest
@@ -86,9 +86,109 @@ class NotificationPrefsTest {
         assertFalse(notificationPrefs.nodeEventsEnabled.value)
     }
 
+    // ---------- applyEventFirmwareNodeEventDefault ----------
+
+    @Test
+    fun `event firmware disables node events and claims the restore`() = testScope.runTest {
+        notificationPrefs.applyEventFirmwareNodeEventDefault(isEventFirmware = true)
+
+        assertFalse(notificationPrefs.nodeEventsEnabled.value)
+        assertTrue(notificationPrefs.nodeEventsAutoDisabledForEvent.value)
+    }
+
+    @Test
+    fun `event firmware leaves an already-off preference alone and claims nothing`() = testScope.runTest {
+        // The user turned node events off themselves. Claiming the restore here would make the next vanilla
+        // connection switch them back on, discarding a choice we never made.
+        notificationPrefs.setNodeEventsEnabled(false)
+
+        notificationPrefs.applyEventFirmwareNodeEventDefault(isEventFirmware = true)
+
+        assertFalse(notificationPrefs.nodeEventsEnabled.value)
+        assertFalse(notificationPrefs.nodeEventsAutoDisabledForEvent.value)
+    }
+
+    @Test
+    fun `vanilla firmware restores node events only when the restore was claimed`() = testScope.runTest {
+        notificationPrefs.applyEventFirmwareNodeEventDefault(isEventFirmware = true)
+        assertFalse(notificationPrefs.nodeEventsEnabled.value)
+
+        notificationPrefs.applyEventFirmwareNodeEventDefault(isEventFirmware = false)
+
+        assertTrue(notificationPrefs.nodeEventsEnabled.value)
+        assertFalse(notificationPrefs.nodeEventsAutoDisabledForEvent.value)
+    }
+
+    @Test
+    fun `vanilla firmware does not enable node events the user had turned off`() = testScope.runTest {
+        // The full round trip of the bug this guards: off by the user, connect to event firmware, back to vanilla.
+        notificationPrefs.setNodeEventsEnabled(false)
+
+        notificationPrefs.applyEventFirmwareNodeEventDefault(isEventFirmware = true)
+        notificationPrefs.applyEventFirmwareNodeEventDefault(isEventFirmware = false)
+
+        assertFalse(notificationPrefs.nodeEventsEnabled.value)
+        assertFalse(notificationPrefs.nodeEventsAutoDisabledForEvent.value)
+    }
+
+    @Test
+    fun `repeated event firmware connections do not re-disable a manual re-enable`() = testScope.runTest {
+        notificationPrefs.applyEventFirmwareNodeEventDefault(isEventFirmware = true)
+        // User re-enables mid-event; the restore is still claimed, so reconnects must respect their choice.
+        notificationPrefs.setNodeEventsEnabled(true)
+
+        notificationPrefs.applyEventFirmwareNodeEventDefault(isEventFirmware = true)
+
+        assertTrue(notificationPrefs.nodeEventsEnabled.value)
+    }
+
     @Test
     fun `setting lowBatteryEnabled updates preference`() = testScope.runTest {
         notificationPrefs.setLowBatteryEnabled(false)
         assertFalse(notificationPrefs.lowBatteryEnabled.value)
+    }
+
+    @Test
+    fun `geofenceAlertOptIns defaults to empty`() =
+        testScope.runTest { assertTrue(notificationPrefs.geofenceAlertOptIns.value.isEmpty()) }
+
+    @Test
+    fun `geofenceAlertOptIns adds and removes waypoint ids`() = testScope.runTest {
+        notificationPrefs.setGeofenceAlertOptIn(42, enabled = true)
+        notificationPrefs.setGeofenceAlertOptIn(7, enabled = true)
+        assertEquals(setOf(7, 42), notificationPrefs.geofenceAlertOptIns.value)
+
+        notificationPrefs.setGeofenceAlertOptIn(42, enabled = false)
+        assertEquals(setOf(7), notificationPrefs.geofenceAlertOptIns.value)
+    }
+
+    @Test
+    fun `geofenceAlertOptIns caps size and evicts oldest`() = testScope.runTest {
+        val max = NotificationPrefsImpl.MAX_GEOFENCE_OPT_INS
+        (1..max + 2).forEach { notificationPrefs.setGeofenceAlertOptIn(it, enabled = true) }
+
+        val ids = notificationPrefs.geofenceAlertOptIns.value
+        assertEquals(max, ids.size)
+        assertFalse(1 in ids) // oldest two evicted
+        assertFalse(2 in ids)
+        assertTrue(max + 2 in ids) // newest kept
+    }
+
+    @Test
+    fun `geofenceAlertOptIns retoggle refreshes eviction order`() = testScope.runTest {
+        val max = NotificationPrefsImpl.MAX_GEOFENCE_OPT_INS
+        (1..max).forEach { notificationPrefs.setGeofenceAlertOptIn(it, enabled = true) } // 1 = oldest
+
+        notificationPrefs.setGeofenceAlertOptIn(
+            1,
+            enabled = true,
+        ) // re-toggle → 1 becomes most-recent, 2 now oldest
+        notificationPrefs.setGeofenceAlertOptIn(max + 1, enabled = true) // forces one eviction
+
+        val ids = notificationPrefs.geofenceAlertOptIns.value
+        assertEquals(max, ids.size)
+        assertTrue(1 in ids) // retoggled id survived
+        assertFalse(2 in ids) // 2 became the oldest and was evicted
+        assertTrue(max + 1 in ids)
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,6 +38,11 @@ dependencies {
     // This allows the use of the 'libs' type-safe accessor in the Kotlin source of the plugins
     implementation(files(libs.javaClass.superclass.protectionDomain.codeSource.location))
 
+    // Self-updating embedded Gradle Kotlin version
+    val gradleKotlinVersion = KotlinVersion.CURRENT.toString()
+
+    // ── Convention plugin compile dependencies ──────────────────────────────
+    // These are standard compile-time dependencies used by our convention plugins.
     compileOnly(libs.android.gradleApiPlugin)
     compileOnly(libs.serialization.gradlePlugin)
     compileOnly(libs.android.tools.common)
@@ -49,14 +54,15 @@ dependencies {
     compileOnly(libs.firebase.crashlytics.gradlePlugin)
     compileOnly(libs.google.services.gradlePlugin)
     compileOnly(libs.koin.gradlePlugin)
-    implementation(libs.kover.gradlePlugin)
+    compileOnly(libs.kover.gradlePlugin)
+    // Mokkery needs `implementation` because convention plugins reference its types at compile time
     implementation(libs.mokkery.gradlePlugin)
     compileOnly(libs.kotlin.gradlePlugin)
     compileOnly(libs.ksp.gradlePlugin)
     compileOnly(libs.androidx.room.gradlePlugin)
-    compileOnly(libs.secrets.gradlePlugin)
     compileOnly(libs.spotless.gradlePlugin)
-    compileOnly(libs.test.retry.gradlePlugin)
+    compileOnly(libs.develocity.gradlePlugin)
+    compileOnly(libs.aboutlibraries.gradlePlugin)
 
     detektPlugins(libs.detekt.formatting)
 }
@@ -68,33 +74,39 @@ tasks {
     }
 }
 
+// Isolated Projects forbids reaching into another project; ".." escapes the included build
+// to the repo root, where the shared config lives.
+val repoConfigDir = isolated.rootProject.projectDirectory.dir("../config")
+
 spotless {
     ratchetFrom("origin/main")
     kotlin {
         target("src/*/kotlin/**/*.kt", "src/*/java/**/*.kt")
-        targetExclude("**/build/**/*.kt")
+        // secrets_gradle_plugin is vendored third-party code (Apache-2.0) keeping Google's header.
+        targetExclude("**/build/**/*.kt", "**/secrets_gradle_plugin/**")
         ktfmt().kotlinlangStyle().configure { it.setMaxWidth(120) }
-        ktlint(libs.versions.ktlint.get())
-            .setEditorConfigPath(rootProject.file("../config/spotless/.editorconfig").path)
-        licenseHeaderFile(rootProject.file("../config/spotless/copyright.kt"))
+        ktlint(libs.versions.ktlint.get()).setEditorConfigPath(repoConfigDir.file("spotless/.editorconfig").asFile.path)
+        licenseHeaderFile(repoConfigDir.file("spotless/copyright.kt").asFile)
     }
     kotlinGradle {
         target("**/*.gradle.kts")
         ktfmt().kotlinlangStyle().configure { it.setMaxWidth(120) }
-        ktlint(libs.versions.ktlint.get())
-            .setEditorConfigPath(rootProject.file("../config/spotless/.editorconfig").path)
-        licenseHeaderFile(rootProject.file("../config/spotless/copyright.kts"), "(^(?![\\/ ]\\*).*$)")
+        ktlint(libs.versions.ktlint.get()).setEditorConfigPath(repoConfigDir.file("spotless/.editorconfig").asFile.path)
+        licenseHeaderFile(repoConfigDir.file("spotless/copyright.kts").asFile, "(^(?![\\/ ]\\*).*$)")
     }
 }
 
 detekt {
     toolVersion = libs.versions.detekt.get()
-    config.setFrom(rootProject.file("../config/detekt/detekt.yml"))
+    config.setFrom(repoConfigDir.file("detekt/detekt.yml").asFile)
     buildUponDefaultConfig = true
     allRules = false
     baseline = file("detekt-baseline.xml")
     source.setFrom(files("src/main/java", "src/main/kotlin"))
 }
+
+// Vendored third-party code stays as close to upstream as possible — don't lint it to house style.
+tasks.withType<dev.detekt.gradle.Detekt>().configureEach { exclude("**/secrets_gradle_plugin/**") }
 
 gradlePlugin {
     plugins {
@@ -121,6 +133,15 @@ gradlePlugin {
         register("androidLibraryCompose") {
             id = "meshtastic.android.library.compose"
             implementationClass = "AndroidLibraryComposeConventionPlugin"
+        }
+        register("androidSecrets") {
+            id = "meshtastic.android.secrets"
+            implementationClass =
+                "com.google.android.libraries.mapsplatform.secrets_gradle_plugin.SecretsPlugin"
+        }
+        register("androidScreenshot") {
+            id = "meshtastic.android.screenshot"
+            implementationClass = "AndroidScreenshotConventionPlugin"
         }
         register("androidApplicationCompose") {
             id = "meshtastic.android.application.compose"
@@ -185,6 +206,16 @@ gradlePlugin {
         register("root") {
             id = "meshtastic.root"
             implementationClass = "RootConventionPlugin"
+        }
+
+        register("docs") {
+            id = "meshtastic.docs"
+            implementationClass = "org.meshtastic.buildlogic.DocsTasks"
+        }
+
+        register("aboutLibraries") {
+            id = "meshtastic.aboutlibraries"
+            implementationClass = "AboutLibrariesConventionPlugin"
         }
     }
 }

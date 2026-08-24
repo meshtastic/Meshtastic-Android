@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,10 @@ interface QuickChatActionDao {
 
     @Query("Select * from quick_chat order by position asc")
     fun getAll(): Flow<List<QuickChatAction>>
+
+    /** Snapshot used by DatabaseMerger to fold one transport's DB into another for the same node. */
+    @Query("Select * from quick_chat order by position asc")
+    suspend fun getAllSnapshot(): List<QuickChatAction>
 
     @Upsert suspend fun upsert(action: QuickChatAction)
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import qrcode.QRCode
+import qrcode.raw.ErrorCorrectionLevel
 
 /**
  * Generates a QR code painter directly using the Skia/Compose canvas API in pure Kotlin.
@@ -37,7 +38,10 @@ import qrcode.QRCode
 @Suppress("MagicNumber")
 @Composable
 fun rememberQrCodePainter(text: String, size: Int = 512): Painter {
-    val qrCode = androidx.compose.runtime.remember(text) { QRCode.ofSquares().build(text) }
+    val qrCode =
+        androidx.compose.runtime.remember(text) {
+            QRCode.ofSquares().withErrorCorrectionLevel(ErrorCorrectionLevel.HIGH).build(text)
+        }
     val rawMatrix = androidx.compose.runtime.remember(qrCode) { qrCode.rawData }
     val matrixSize = androidx.compose.runtime.remember(qrCode) { rawMatrix.size }
     val quietZone = 4 // QR standard quiet zone is 4 modules on all sides

@@ -1,0 +1,41 @@
+name: Submit Dependency Graph
+
+# PR runs can only generate-and-upload (fork tokens lack contents: write). This submits what
+# they saved, from the base repo's trusted context. Never checks out PR code — the snapshot
+# artifact is the only input.
+on:
+  workflow_run:
+    workflows: ['Pull Request CI']
+    types: [completed]
+
+permissions:
+  actions: read
+  contents: write
+
+# head_branch alone would collide across forks that share a branch name (e.g. two "patch-1"s).
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.workflow_run.head_repository.full_name }}-${{ github.event.workflow_run.head_branch }}
+  cancel-in-progress: true
+
+jobs:
+  submit-dependency-graph:
+    # failed runs may have partial graphs; skip
+    if: github.repository == 'meshtastic/Meshtastic-Android' && github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 10
+    steps:
+      # skipped android-check (docs-only/bot PRs) uploads nothing — don't fail red on that
+      - name: Check the run saved a dependency graph
+        id: probe
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          count=$(gh api --paginate "repos/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}/artifacts?per_page=100" \
+            --jq '[.artifacts[] | select(.name | startswith("dependency-graph"))] | length' | paste -sd+ | bc)
+          echo "count=$count" >> "$GITHUB_OUTPUT"
+
+      - name: Download and submit dependency graph
+        if: steps.probe.outputs.count != '0'
+        uses: gradle/actions/dependency-submission@v6
+        with:
+          dependency-graph: download-and-submit

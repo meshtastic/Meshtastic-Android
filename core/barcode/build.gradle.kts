@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,14 +29,13 @@ configure<LibraryExtension> {
 }
 
 dependencies {
-    implementation(project(":core:resources"))
+    implementation(projects.core.resources)
     implementation(projects.core.ui)
 
     implementation(libs.androidx.activity.compose)
     implementation(libs.compose.multiplatform.material3)
     implementation(libs.compose.multiplatform.runtime)
     implementation(libs.compose.multiplatform.ui)
-    implementation(libs.accompanist.permissions)
     implementation(libs.kermit)
 
     // ML Kit is used for the Google flavor, while ZXing is used for F-Droid to avoid GMS dependencies.

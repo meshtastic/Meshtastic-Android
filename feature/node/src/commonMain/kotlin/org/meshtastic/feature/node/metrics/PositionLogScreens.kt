@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,12 +23,21 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.clear
+import org.meshtastic.core.resources.clear_position_track_message
+import org.meshtastic.core.resources.clear_position_track_title
+import org.meshtastic.core.resources.delete
+import org.meshtastic.core.resources.export_gpx
 import org.meshtastic.core.resources.position_log
+import org.meshtastic.core.ui.component.MeshtasticResourceDialog
 import org.meshtastic.core.ui.icon.Delete
+import org.meshtastic.core.ui.icon.FileDownload
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.core.ui.util.LocalNodeTrackMapProvider
@@ -40,6 +49,8 @@ fun PositionLogScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
     val positions = state.positionLogs
 
     val exportPositionLauncher = rememberSaveFileLauncher { uri -> viewModel.savePositionCSV(uri, positions) }
+    val nodeName = state.node?.user?.long_name ?: ""
+    val exportGpxLauncher = rememberSaveFileLauncher { uri -> viewModel.savePositionGpx(uri, positions, nodeName) }
 
     val trackMap = LocalNodeTrackMapProvider.current
     val destNum = state.node?.num ?: 0
@@ -48,15 +59,19 @@ fun PositionLogScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
         onNavigateUp = onNavigateUp,
         telemetryType = null,
         titleRes = Res.string.position_log,
-        nodeName = state.node?.user?.long_name ?: "",
+        nodeName = nodeName,
         data = positions,
         timeProvider = { it.time.toDouble() },
         onExportCsv = { exportPositionLauncher("position.csv", "text/csv") },
         extraActions = {
             if (positions.isNotEmpty()) {
-                IconButton(onClick = { viewModel.clearPosition() }) {
-                    Icon(imageVector = MeshtasticIcons.Delete, contentDescription = stringResource(Res.string.clear))
+                IconButton(onClick = { exportGpxLauncher("track.gpx", "application/gpx+xml") }) {
+                    Icon(
+                        imageVector = MeshtasticIcons.FileDownload,
+                        contentDescription = stringResource(Res.string.export_gpx),
+                    )
                 }
+                ClearPositionTrackButton(onConfirm = { viewModel.clearPosition() })
             }
             if (!state.isLocal) {
                 IconButton(onClick = { viewModel.requestPosition() }) {
@@ -70,7 +85,11 @@ fun PositionLogScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
         },
         listPart = { modifier, selectedX, lazyListState, onCardClick ->
             LazyColumn(modifier = modifier.fillMaxSize(), state = lazyListState) {
-                itemsIndexed(positions) { _, position ->
+                itemsIndexed(
+                    positions,
+                    key = { index, position -> "${position.time}_$index" },
+                    contentType = { _, _ -> "position_log" },
+                ) { _, position ->
                     PositionCard(
                         position = position,
                         displayUnits = state.displayUnits,
@@ -81,4 +100,25 @@ fun PositionLogScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
             }
         },
     )
+}
+
+/** Trash-can action that asks for confirmation before invoking [onConfirm] to delete the position track. */
+@Composable
+private fun ClearPositionTrackButton(onConfirm: () -> Unit) {
+    var showDialog by rememberSaveable { mutableStateOf(false) }
+    IconButton(onClick = { showDialog = true }) {
+        Icon(imageVector = MeshtasticIcons.Delete, contentDescription = stringResource(Res.string.clear))
+    }
+    if (showDialog) {
+        MeshtasticResourceDialog(
+            titleRes = Res.string.clear_position_track_title,
+            messageRes = Res.string.clear_position_track_message,
+            confirmTextRes = Res.string.delete,
+            onConfirm = {
+                showDialog = false
+                onConfirm()
+            },
+            onDismiss = { showDialog = false },
+        )
+    }
 }

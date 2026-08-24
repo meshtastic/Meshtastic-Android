@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,8 +22,6 @@ plugins {
 }
 
 kotlin {
-    android { namespace = "org.meshtastic.core.navigation" }
-
     sourceSets {
         commonMain.dependencies {
             implementation(projects.core.common)
@@ -32,5 +30,7 @@ kotlin {
             implementation(libs.jetbrains.navigation3.ui)
             implementation(libs.kermit)
         }
+
+        commonTest.dependencies { implementation(projects.core.testing) }
     }
 }
