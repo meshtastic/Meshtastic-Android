@@ -22,6 +22,7 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 * fix(map): raise android-maps-utils to 5.1.1 so KML import survives xmlutil 1.0.x by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6811
 * fix(database): give every SQLite connection a busy timeout by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6809
 * fix(firmware): show the erase wait and upload retries during Legacy DFU by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6812
+* fix(map): parse KMZ archives in the F-Droid map overlay renderer by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6834
 <!-- UNRELEASED_END -->
 
 <!-- RELEASED_START -->
