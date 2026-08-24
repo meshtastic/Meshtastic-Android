@@ -36,6 +36,7 @@ import org.meshtastic.core.domain.usecase.session.ObserveRemoteAdminSessionStatu
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.SessionStatus
+import org.meshtastic.core.navigation.NodeDetailRoute
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.repository.LocalNodeUnavailableException
@@ -191,15 +192,25 @@ class NodeDetailViewModel(
      * Ensure a remote-admin session passkey is fresh, then request navigation to the remote-admin screen. Surfaces a
      * snackbar with the appropriate guidance on [EnsureSessionResult.Disconnected] or [EnsureSessionResult.Timeout].
      */
-    fun openRemoteAdmin(destNum: Int) {
+    fun openRemoteAdmin(destNum: Int) =
+        ensureSessionThenNavigate(destNum, "openRemoteAdmin") { SettingsRoute.Settings(destNum) }
+
+    /**
+     * The shell is gated by the node's `security.admin_key` list, the same list the admin passkey exchange goes
+     * through, so it needs the identical session check - just a different destination.
+     */
+    fun openRemoteShell(destNum: Int) =
+        ensureSessionThenNavigate(destNum, "openRemoteShell") { NodeDetailRoute.RemoteShell(destNum) }
+
+    private fun ensureSessionThenNavigate(destNum: Int, tag: String, destination: () -> Route) {
         // Atomic check-and-flip prevents a double-tap from queuing two passkey exchanges + two navigation events.
         if (!isEnsuringSession.compareAndSet(expect = false, update = true)) return
-        safeLaunch(tag = "openRemoteAdmin") {
+        safeLaunch(tag = tag) {
             try {
                 when (ensureRemoteAdminSession(destNum)) {
                     EnsureSessionResult.AlreadyActive,
                     EnsureSessionResult.Refreshed,
-                    -> _navigationEvents.trySend(SettingsRoute.Settings(destNum))
+                    -> _navigationEvents.trySend(destination())
 
                     EnsureSessionResult.Disconnected -> {
                         val text = Res.string.connect_radio_for_remote_admin

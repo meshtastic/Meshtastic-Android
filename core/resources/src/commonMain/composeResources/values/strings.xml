@@ -1520,6 +1520,8 @@
     <string name="remote_hardware_config">Remote Hardware Config</string>
     <string name="remote_hardware_enabled">Remote Hardware enabled</string>
     <string name="remote_shell">Remote Shell</string>
+    <string name="remote_shell_open">Open terminal</string>
+    <string name="remote_shell_requires_session">Requires an active remote admin session with this node</string>
     <string name="remotely_administrating">"[Remote] %1$s"</string>
     <!-- REMOVE -->
     <string name="remove">Remove</string>

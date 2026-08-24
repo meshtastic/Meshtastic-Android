@@ -39,6 +39,8 @@ internal fun handleNodeAction(
 
         is NodeDetailAction.OpenRemoteAdmin -> viewModel.openRemoteAdmin(action.nodeNum)
 
+        is NodeDetailAction.OpenRemoteShell -> viewModel.openRemoteShell(action.nodeNum)
+
         is NodeDetailAction.RefreshMetadata -> viewModel.refreshMetadata(action.nodeNum)
 
         is NodeDetailAction.HandleNodeMenuAction -> {

@@ -35,14 +35,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.koinInject
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.asDeviceVersion
 import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.SessionStatus
-import org.meshtastic.core.navigation.NodeDetailRoute
 import org.meshtastic.core.repository.EventFirmwareRepository
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.administration
@@ -50,13 +48,11 @@ import org.meshtastic.core.resources.connect_radio_for_remote_admin
 import org.meshtastic.core.resources.establishing_session
 import org.meshtastic.core.resources.firmware
 import org.meshtastic.core.resources.firmware_edition
-import org.meshtastic.core.resources.ic_terminal
 import org.meshtastic.core.resources.installed_firmware_version
 import org.meshtastic.core.resources.latest_alpha_firmware
 import org.meshtastic.core.resources.latest_stable_firmware
 import org.meshtastic.core.resources.refresh_metadata
 import org.meshtastic.core.resources.remote_admin
-import org.meshtastic.core.resources.remote_shell
 import org.meshtastic.core.resources.session_active
 import org.meshtastic.core.resources.session_refresh_required
 import org.meshtastic.core.ui.component.BasicListItem
@@ -111,17 +107,6 @@ fun AdministrationSection(
                         enabled = !isEnsuringSession,
                         onClick = { onAction(NodeDetailAction.RefreshMetadata(node.num)) },
                     )
-                }
-            }
-
-            if (node.capabilities.supportsRemoteShell) {
-                SectionDivider()
-
-                ListItem(
-                    text = stringResource(Res.string.remote_shell),
-                    leadingIcon = vectorResource(Res.drawable.ic_terminal),
-                ) {
-                    onAction(NodeDetailAction.Navigate(NodeDetailRoute.RemoteShell(node.num)))
                 }
             }
         }

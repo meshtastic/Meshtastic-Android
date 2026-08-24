@@ -97,11 +97,12 @@ fun RemoteShellScreen(viewModel: RemoteShellViewModel, onNavigateUp: () -> Unit,
     var terminalSize by remember { mutableStateOf(IntSize.Zero) }
     val (cols, rows) = rememberTerminalGrid(terminalSize)
 
-    LaunchedEffect(cols, rows) {
-        if (cols <= 0 || rows <= 0) return@LaunchedEffect
-        viewModel.resize(cols, rows)
-        viewModel.openSession()
-    }
+    val measured = cols > 0 && rows > 0
+    LaunchedEffect(cols, rows) { if (measured) viewModel.resize(cols, rows) }
+
+    // Keyed on whether we have a measurement, not on its value: the IME resizes the viewport, and reopening the
+    // session every time the keyboard moves would churn a session per keystroke burst.
+    LaunchedEffect(measured) { if (measured) viewModel.openSession() }
 
     val focusRequester = remember { FocusRequester() }
     LaunchedEffect(Unit) {

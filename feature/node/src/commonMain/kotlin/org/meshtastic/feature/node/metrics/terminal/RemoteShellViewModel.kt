@@ -53,6 +53,10 @@ import kotlin.concurrent.Volatile
 private const val MAX_OUTPUT_LINES = 500
 
 /** Default PTY column count sent in OPEN/RESIZE frames. */
+
+// How long to wait for OPEN_OK before calling the session failed.
+private const val OPEN_TIMEOUT_MS = 20_000L
+
 private const val DEFAULT_COLS = 80
 
 /** Default PTY row count sent in OPEN/RESIZE frames. */
@@ -329,6 +333,8 @@ class RemoteShellViewModel(
 
     private var flushJob: Job? = null
 
+    private var openWatchdogJob: Job? = null
+
     private val _flushWindowMs = MutableStateFlow(DEFAULT_FLUSH_WINDOW_MS)
     val flushWindowMs: StateFlow<Long> = _flushWindowMs.asStateFlow()
 
@@ -400,8 +406,26 @@ class RemoteShellViewModel(
                 ),
             )
             Logger.d { "RemoteShell OPEN → destNum=$destNum sessionId=$newSessionId" }
+            armOpenWatchdog()
             startHeartbeatLoop()
         }
+    }
+
+    /**
+     * A node that has not authorized us drops OPEN without replying, and so does one out of range, so the screen would
+     * otherwise sit blank forever. Name the likely cause instead: the device requires this phone's public key in its
+     * `security.admin_key` list, the same gate remote administration goes through.
+     */
+    private fun armOpenWatchdog() {
+        openWatchdogJob?.cancel()
+        openWatchdogJob =
+            viewModelScope.launch {
+                delay(OPEN_TIMEOUT_MS)
+                if (_sessionState.value != SessionState.OPENING) return@launch
+                appendOutput("[no reply from the node]")
+                appendOutput("[it must list this phone's public key as an admin key, and be in range]")
+                _sessionState.update { SessionState.ERROR }
+            }
     }
 
     fun closeSession() {
@@ -630,6 +654,8 @@ class RemoteShellViewModel(
     private suspend fun handleInOrderFrame(frame: RemoteShell) {
         when (frame.op) {
             RemoteShell.OpCode.OPEN_OK -> {
+                openWatchdogJob?.cancel()
+                openWatchdogJob = null
                 _sessionState.update { SessionState.OPEN }
                 val payload = frame.payload.toByteArray()
                 if (payload.size >= UINT32_BYTES) {
