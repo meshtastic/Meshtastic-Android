@@ -319,6 +319,7 @@
     <string name="connecting">Connecting</string>
     <string name="connection_status">Current connections:</string>
     <string name="connections">Connection</string>
+    <string name="contact_draft_prefix">Draft: %1$s</string>
     <string name="contrast">Contrast</string>
     <string name="contrast_high">High</string>
     <string name="contrast_medium">Medium</string>

@@ -508,6 +508,13 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
         }
     }
 
+    override suspend fun setDraft(contactKey: String, draft: String) {
+        withContext(dispatchers.io) { dbManager.withDb { it.packetDao().setDraft(contactKey, draft) } }
+    }
+
+    override suspend fun getDraft(contactKey: String): String =
+        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().getDraft(contactKey).orEmpty() }
+
     override suspend fun clearPacketDB() {
         withContext(dispatchers.io) { dbManager.withDb { it.packetDao().deleteAll() } }
     }
@@ -533,6 +540,7 @@ class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val 
         lastReadMessageTimestamp = lastReadMessageTimestamp,
         filteringDisabled = filteringDisabled,
         isMuted = isMuted,
+        draft = draft,
     )
 
     private fun Reaction.toEntity(myNodeNum: Int) = RoomReaction(

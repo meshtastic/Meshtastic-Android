@@ -175,6 +175,8 @@ data class ContactSettings(
     @ColumnInfo(name = "last_read_message_uuid") val lastReadMessageUuid: Long? = null,
     @ColumnInfo(name = "last_read_message_timestamp") val lastReadMessageTimestamp: Long? = null,
     @ColumnInfo(name = "filtering_disabled", defaultValue = "0") val filteringDisabled: Boolean = false,
+    /** Unsent composer text for this conversation. Empty when there is nothing in progress. */
+    @ColumnInfo(name = "draft", defaultValue = "''") val draft: String = "",
 ) {
     val isMuted
         get() = nowMillis <= muteUntil

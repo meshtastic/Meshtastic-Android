@@ -157,6 +157,69 @@ class MeshtasticDatabaseMigrationTest {
     }
 
     /**
+     * 55→56 adds `contact_settings.draft`. [migrateAll] only proves the resulting schema validates from an empty
+     * database; this proves an existing install's per-conversation state survives the addition — mute, last-read and
+     * filtering are what stop a notification firing for a muted channel or re-announcing a message already read, so
+     * they must not revert to defaults on upgrade. The new column must arrive as an empty string, because the draft UI
+     * treats blank as "nothing in progress" and NULL would surface as a phantom draft row.
+     */
+    @Test
+    fun draftColumnAddedWithoutDisturbingContactSettings() = runTest {
+        helper.createDatabase(DRAFT_COLUMN_FROM_VERSION).use { connection ->
+            connection.execSQL(
+                "INSERT INTO contact_settings (contact_key, muteUntil, last_read_message_uuid, " +
+                    "last_read_message_timestamp, filtering_disabled) VALUES ('0^all', 9999, 7, 5000, 1)",
+            )
+            connection.execSQL("INSERT INTO contact_settings (contact_key, muteUntil) VALUES ('0!abcdef01', 0)")
+        }
+
+        helper.runMigrationsAndValidate(
+            DRAFT_COLUMN_TO_VERSION,
+            listOf(MeshtasticDatabase.MIGRATION_52_53),
+        ).use { connection ->
+            assertEquals(
+                listOf("0!abcdef01", "0^all"),
+                queryColumn(connection, "SELECT contact_key FROM contact_settings ORDER BY contact_key"),
+            )
+            assertEquals(
+                listOf("9999"),
+                queryColumn(connection, "SELECT muteUntil FROM contact_settings " + "WHERE contact_key = '0^all'"),
+            )
+            assertEquals(
+                listOf("7"),
+                queryColumn(
+                    connection,
+                    "SELECT last_read_message_uuid FROM contact_settings " + "WHERE contact_key = '0^all'",
+                ),
+            )
+            assertEquals(
+                listOf("5000"),
+                queryColumn(
+                    connection,
+                    "SELECT last_read_message_timestamp FROM contact_settings " + "WHERE contact_key = '0^all'",
+                ),
+            )
+            assertEquals(
+                listOf("1"),
+                queryColumn(
+                    connection,
+                    "SELECT filtering_disabled FROM contact_settings " + "WHERE contact_key = '0^all'",
+                ),
+            )
+            // Empty, never NULL — blank is what the UI reads as "no draft".
+            assertEquals(
+                listOf("", ""),
+                queryColumn(connection, "SELECT draft FROM contact_settings ORDER BY contact_key"),
+            )
+            connection.execSQL("UPDATE contact_settings SET draft = 'half typed' WHERE contact_key = '0^all'")
+            assertEquals(
+                listOf("half typed"),
+                queryColumn(connection, "SELECT draft FROM contact_settings WHERE contact_key = '0^all'"),
+            )
+        }
+    }
+
+    /**
      * 50→51 makes the three `rssi` columns nullable, which Room implements by recreating `packet`, `reactions` and
      * `discovered_node` (DROP + RENAME). [migrateAll] only proves the resulting schema validates from an empty
      * database; this proves existing rows survive the rebuild with their values — including a legacy `rssi = 0`, which
@@ -243,6 +306,8 @@ class MeshtasticDatabaseMigrationTest {
         const val FTS_REBUILD_TO_VERSION = 53
         const val MAINTENANCE_UF2_FROM_VERSION = 54
         const val MAINTENANCE_UF2_TO_VERSION = 55
+        const val DRAFT_COLUMN_FROM_VERSION = 55
+        const val DRAFT_COLUMN_TO_VERSION = 56
 
         /** Room's runtime FTS content-sync triggers, verbatim from the generated MeshtasticDatabase_Impl. */
         val FTS_SYNC_TRIGGERS =
