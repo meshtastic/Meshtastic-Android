@@ -16,10 +16,14 @@
  */
 package org.meshtastic.feature.messaging.component
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -30,6 +34,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -46,9 +51,16 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsPropertyKey
@@ -59,6 +71,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -89,6 +102,7 @@ import org.meshtastic.core.ui.emoji.EmojiPickerDialog
 import org.meshtastic.core.ui.icon.FormatQuote
 import org.meshtastic.core.ui.icon.HopCount
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Reply
 import org.meshtastic.core.ui.icon.ShieldCheck
 import org.meshtastic.core.ui.theme.MessageItemColors
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
@@ -300,135 +314,211 @@ fun MessageItem(
             }
         }
     }
-    Surface(
-        modifier =
-        Modifier.align(if (message.fromLocal) Alignment.End else Alignment.Start)
-            // Reserve space on the opposite side and cap the width so bubbles never span the
-            // whole screen (keeps sender sides scannable on phones and wide layouts alike).
-            .padding(
-                start = if (!message.fromLocal) 0.dp else 36.dp,
-                end = if (message.fromLocal) 0.dp else 36.dp,
-            )
-            .widthIn(max = 480.dp)
-            .combinedClickable(
-                onClick = onClick,
-                onLongClick = {
-                    onLongClick()
-                    if (!inSelectionMode) {
-                        activeSheet = ActiveSheet.Actions
-                    }
-                },
-                onDoubleClick = onDoubleClick,
-            )
-            .then(messageModifier)
-            .semantics(mergeDescendants = true) {
-                contentDescription = messageA11yText
-                role = Role.Button
-                isSensitiveData = true
-            },
-        color = containerColor,
-        contentColor = contentColor,
-        shape = messageShape,
-        border = cardBorder,
+    // Double-tap opens the quick reactions inline instead of firing one straight onto the mesh — a reaction is a
+    // real
+    // packet on a duty-cycled radio, so the gesture picks, it does not send.
+    var showQuickReactions by remember { mutableStateOf(false) }
+    AnimatedVisibility(
+        visible = showQuickReactions && !inSelectionMode,
+        modifier = Modifier.align(if (message.fromLocal) Alignment.End else Alignment.Start),
     ) {
-        Column(modifier = Modifier.width(IntrinsicSize.Max)) {
-            OriginalMessageSnippet(
-                modifier = Modifier.fillMaxWidth(),
-                message = message,
-                ourNode = ourNode,
-                onNavigateToOriginalMessage = onNavigateToOriginalMessage,
+        Surface(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp),
+            shape = RoundedCornerShape(QUICK_REACTION_BAR_CORNER),
+            tonalElevation = 3.dp,
+            shadowElevation = 2.dp,
+        ) {
+            QuickEmojiRow(
+                quickEmojis = quickEmojis,
+                onReact = { emoji ->
+                    showQuickReactions = false
+                    sendReaction(emoji)
+                },
+                onMoreReactions = {
+                    showQuickReactions = false
+                    activeSheet = ActiveSheet.Emoji
+                },
             )
+        }
+    }
 
-            Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
-                if (searchQuery.isNotEmpty()) {
-                    HighlightedText(
-                        text = message.text,
-                        query = searchQuery,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = contentColor,
-                    )
-                } else {
-                    val mentionDisplayName =
-                        remember(resolveMention) {
-                            { id: String ->
-                                resolveMention(id)?.let { it.user.long_name.ifEmpty { it.user.short_name } }
+    val haptics = LocalHapticFeedback.current
+    val swipeThresholdPx = with(LocalDensity.current) { REPLY_SWIPE_THRESHOLD.toPx() }
+    // Drag toward the reading direction, so the gesture reads the same way under RTL.
+    val swipeSign = if (LocalLayoutDirection.current == LayoutDirection.Rtl) -1f else 1f
+    val swipeOffset = remember(message.uuid) { Animatable(0f) }
+    var swipeArmed by remember(message.uuid) { mutableStateOf(false) }
+
+    Box(modifier = Modifier.fillMaxWidth()) {
+        ReplySwipeAffordance(
+            progress = (swipeOffset.value * swipeSign / swipeThresholdPx).coerceIn(0f, 1f),
+            modifier = Modifier.align(if (message.fromLocal) Alignment.CenterEnd else Alignment.CenterStart),
+        )
+        Surface(
+            modifier =
+            Modifier.align(if (message.fromLocal) Alignment.CenterEnd else Alignment.CenterStart)
+                .graphicsLayer { translationX = swipeOffset.value }
+                .pointerInput(message.uuid, inSelectionMode) {
+                    if (inSelectionMode) return@pointerInput
+                    detectHorizontalDragGestures(
+                        onDragEnd = {
+                            val reached = swipeOffset.value * swipeSign >= swipeThresholdPx
+                            swipeArmed = false
+                            coroutineScope.launch {
+                                swipeOffset.animateTo(0f)
+                                if (reached) onReply()
                             }
+                        },
+                        onDragCancel = {
+                            swipeArmed = false
+                            coroutineScope.launch { swipeOffset.animateTo(0f) }
+                        },
+                    ) { change, dragAmount ->
+                        // Only claim the gesture once it is unambiguously horizontal, so the list still
+                        // scrolls.
+                        val next = (swipeOffset.value + dragAmount) * swipeSign
+                        if (next > 0f) change.consume()
+                        val clamped = next.coerceIn(0f, swipeThresholdPx * REPLY_SWIPE_OVERDRAG) * swipeSign
+                        coroutineScope.launch { swipeOffset.snapTo(clamped) }
+                        val reached = clamped * swipeSign >= swipeThresholdPx
+                        if (reached != swipeArmed) {
+                            swipeArmed = reached
+                            if (reached) haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                         }
-                    AutoLinkText(
-                        text = bodyText,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = contentColor,
-                        mentionName = mentionDisplayName,
-                        onMentionClick = { id -> resolveMention(id)?.let(onClickChip) },
-                    )
+                    }
                 }
+                // Reserve space on the opposite side and cap the width so bubbles never span the
+                // whole screen (keeps sender sides scannable on phones and wide layouts alike).
+                .padding(
+                    start = if (!message.fromLocal) 0.dp else 36.dp,
+                    end = if (message.fromLocal) 0.dp else 36.dp,
+                )
+                .widthIn(max = 480.dp)
+                .combinedClickable(
+                    onClick = onClick,
+                    onLongClick = {
+                        onLongClick()
+                        if (!inSelectionMode) {
+                            activeSheet = ActiveSheet.Actions
+                        }
+                    },
+                    onDoubleClick = {
+                        onDoubleClick()
+                        if (!inSelectionMode) showQuickReactions = !showQuickReactions
+                    },
+                )
+                .then(messageModifier)
+                .semantics(mergeDescendants = true) {
+                    contentDescription = messageA11yText
+                    role = Role.Button
+                    isSensitiveData = true
+                },
+            color = containerColor,
+            contentColor = contentColor,
+            shape = messageShape,
+            border = cardBorder,
+        ) {
+            Column(modifier = Modifier.width(IntrinsicSize.Max)) {
+                OriginalMessageSnippet(
+                    modifier = Modifier.fillMaxWidth(),
+                    message = message,
+                    ourNode = ourNode,
+                    onNavigateToOriginalMessage = onNavigateToOriginalMessage,
+                )
 
-                Row(
-                    modifier = Modifier.padding(top = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                ) {
-                    if (!message.fromLocal) {
-                        // All mesh diagnostics (signature, signal or hops, transport) grouped in one compact run.
-                        DiagnosticsRow {
-                            // XEdDSA is only set on verified broadcasts, never DMs — so this never shows on a DM.
-                            if (message.xeddsaSigned) {
-                                Icon(
-                                    imageVector = MeshtasticIcons.ShieldCheck,
-                                    contentDescription = stringResource(Res.string.security_signed_verified),
-                                    modifier = Modifier.size(14.dp),
-                                    tint = MaterialTheme.colorScheme.StatusGreen,
-                                )
+                Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
+                    if (searchQuery.isNotEmpty()) {
+                        HighlightedText(
+                            text = message.text,
+                            query = searchQuery,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = contentColor,
+                        )
+                    } else {
+                        val mentionDisplayName =
+                            remember(resolveMention) {
+                                { id: String ->
+                                    resolveMention(id)?.let { it.user.long_name.ifEmpty { it.user.short_name } }
+                                }
                             }
-                            TransportIcon(
-                                transport = message.transportMechanism,
-                                viaMqtt = message.viaMqtt,
-                                modifier = Modifier.size(14.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                            if (message.hopsAway == 0 && !message.viaMqtt) {
-                                Snr(message.snr)
-                                Rssi(message.rssi)
-                            } else {
-                                Icon(
-                                    imageVector = MeshtasticIcons.HopCount,
-                                    contentDescription = null,
+                        AutoLinkText(
+                            text = bodyText,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = contentColor,
+                            mentionName = mentionDisplayName,
+                            onMentionClick = { id -> resolveMention(id)?.let(onClickChip) },
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier.padding(top = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        if (!message.fromLocal) {
+                            // All mesh diagnostics (signature, signal or hops, transport) grouped in one compact
+                            // run.
+                            DiagnosticsRow {
+                                // XEdDSA is only set on verified broadcasts, never DMs — so this never shows on a
+                                // DM.
+                                if (message.xeddsaSigned) {
+                                    Icon(
+                                        imageVector = MeshtasticIcons.ShieldCheck,
+                                        contentDescription = stringResource(Res.string.security_signed_verified),
+                                        modifier = Modifier.size(14.dp),
+                                        tint = MaterialTheme.colorScheme.StatusGreen,
+                                    )
+                                }
+                                TransportIcon(
+                                    transport = message.transportMechanism,
+                                    viaMqtt = message.viaMqtt,
                                     modifier = Modifier.size(14.dp),
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
-                                Text(
-                                    text = if (message.hopsAway >= 0) message.hopsAway.toString() else "?",
-                                    style = metadataStyle,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
+                                if (message.hopsAway == 0 && !message.viaMqtt) {
+                                    Snr(message.snr)
+                                    Rssi(message.rssi)
+                                } else {
+                                    Icon(
+                                        imageVector = MeshtasticIcons.HopCount,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(14.dp),
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                    Text(
+                                        text = if (message.hopsAway >= 0) message.hopsAway.toString() else "?",
+                                        style = metadataStyle,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
                             }
                         }
-                    }
-                    if (containsBel) {
-                        Text(text = "\uD83D\uDD14")
-                    }
-                    if (message.filtered) {
-                        Text(
-                            text = stringResource(Res.string.filter_message_label),
-                            style = metadataStyle,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                    if (showsTranslation) {
-                        Text(
-                            text = stringResource(Res.string.message_translated_label),
-                            style = metadataStyle,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                    if (message.fromLocal) {
-                        MessageStatusLabel(
-                            status = message.status ?: MessageStatus.UNKNOWN,
-                            text = stringResource(statusString.second),
-                            metadataStyle = metadataStyle,
-                            isWarning = isDirectImplicitAck || isRetryableFailure,
-                            onStatusClick = onStatusClick,
-                        )
+                        if (containsBel) {
+                            Text(text = "\uD83D\uDD14")
+                        }
+                        if (message.filtered) {
+                            Text(
+                                text = stringResource(Res.string.filter_message_label),
+                                style = metadataStyle,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        if (showsTranslation) {
+                            Text(
+                                text = stringResource(Res.string.message_translated_label),
+                                style = metadataStyle,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        if (message.fromLocal) {
+                            MessageStatusLabel(
+                                status = message.status ?: MessageStatus.UNKNOWN,
+                                text = stringResource(statusString.second),
+                                metadataStyle = metadataStyle,
+                                isWarning = isDirectImplicitAck || isRetryableFailure,
+                                onStatusClick = onStatusClick,
+                            )
+                        }
                     }
                 }
             }
@@ -447,6 +537,26 @@ fun MessageItem(
         myId = ourNode.user.id,
         onSendReaction = sendReaction,
         onShowReactions = onShowReactions,
+    )
+}
+
+/** Drag distance at which a horizontal swipe on a bubble commits to a reply. */
+private val REPLY_SWIPE_THRESHOLD = 64.dp
+
+/** How far past the threshold the bubble may still be dragged, so the gesture has some give. */
+private const val REPLY_SWIPE_OVERDRAG = 1.5f
+
+private val QUICK_REACTION_BAR_CORNER = 20.dp
+
+/** Reply arrow revealed behind a bubble as it is dragged; [progress] runs 0..1 up to the commit threshold. */
+@Composable
+private fun ReplySwipeAffordance(progress: Float, modifier: Modifier = Modifier) {
+    if (progress <= 0f) return
+    Icon(
+        imageVector = MeshtasticIcons.Reply,
+        contentDescription = null,
+        modifier = modifier.padding(horizontal = 14.dp).size(20.dp).alpha(progress),
+        tint = MaterialTheme.colorScheme.onSurfaceVariant,
     )
 }
 

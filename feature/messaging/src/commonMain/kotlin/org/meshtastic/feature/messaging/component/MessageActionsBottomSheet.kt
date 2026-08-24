@@ -226,10 +226,10 @@ fun MessageActionsContent(
     }
 }
 
-private const val MAX_EMOJI_ROW_SIZE = 6
+internal const val MAX_EMOJI_ROW_SIZE = 6
 
 @Composable
-private fun QuickEmojiRow(quickEmojis: List<String>, onReact: (String) -> Unit, onMoreReactions: () -> Unit) {
+internal fun QuickEmojiRow(quickEmojis: List<String>, onReact: (String) -> Unit, onMoreReactions: () -> Unit) {
     Row(
         // Scrollable so seven 44dp touch targets never clip on narrow (320dp) sheets.
         modifier =

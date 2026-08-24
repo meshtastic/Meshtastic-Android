@@ -309,6 +309,8 @@ current
 currently
 datadog_link
 date
+date_separator_today
+date_separator_yesterday
 dbm_value
 ### DEBUG ###
 debug

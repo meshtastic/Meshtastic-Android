@@ -53,11 +53,13 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
+import org.meshtastic.core.common.util.isSameLocalDay
 import org.meshtastic.core.model.ContactKey
 import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.Reaction
+import org.meshtastic.feature.messaging.component.DateSeparator
 import org.meshtastic.feature.messaging.component.MessageItem
 import org.meshtastic.feature.messaging.component.MessageStatusDialog
 import org.meshtastic.feature.messaging.component.ReactionDialog
@@ -244,12 +246,22 @@ private fun MessageListPagedContent(
                 if (message != null) {
                     val isFirstUnread = state.hasUnreadMessages && unreadDividerIndex == index
                     val itemModifier = if (enableAnimations) Modifier.animateItem() else Modifier
+                    // The separator belongs above the first message of each local day. At the top of the loaded
+                    // range there is no older message to compare against, so only label it once paging has
+                    // confirmed there is nothing older — otherwise the label would move as pages arrive.
+                    val startsNewDay =
+                        if (visuallyPrevMessage != null) {
+                            !isSameLocalDay(visuallyPrevMessage.displayTime, message.displayTime)
+                        } else {
+                            state.messages.loadState.append.endOfPaginationReached
+                        }
 
-                    if (isFirstUnread) {
+                    if (isFirstUnread || startsNewDay) {
                         // Wrap in Column to prevent overlapping of divider and message item
                         // Apply animation to the container Column once
                         Column(modifier = itemModifier) {
-                            UnreadMessagesDivider()
+                            if (startsNewDay) DateSeparator(timestampMillis = message.displayTime)
+                            if (isFirstUnread) UnreadMessagesDivider()
                             RenderPagedChatMessageRow(
                                 message = message,
                                 state = state,
