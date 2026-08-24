@@ -1,13 +1,13 @@
 ---
 title: Seaded — raadio ja kasutaja
-parent: User Guide
+parent: Kasutusjuhend
 nav_order: 7
 last_updated: 2026-07-27
 description: Configure your radio hardware, LoRa presets, user profile, position sharing, power management, and security.
 aliases:
   - sätted
-  - radio-config
-  - user-config
+  - raadio-sätted
+  - kasutaja-sätted
   - lora
 ---
 
@@ -17,13 +17,13 @@ Configure your radio hardware and user identity parameters.
 
 ## Kasutaja seaded
 
-### User Profile
+### Kasutajaprofiil
 
-| Setting           | Kirjeldus                                                                             |
-| ----------------- | ------------------------------------------------------------------------------------- |
-| Täis nimi         | Your display name (up to 39 characters)                            |
-| Lühi nimi         | 4-character abbreviated name                                                          |
-| Licensed Operator | Enable if you hold an amateur radio license (enables higher power) |
+| Sätted                    | Kirjeldus                                                                             |
+| ------------------------- | ------------------------------------------------------------------------------------- |
+| Täis nimi                 | Your display name (up to 39 characters)                            |
+| Lühi nimi                 | 4-character abbreviated name                                                          |
+| Litsentseeritud operaator | Enable if you hold an amateur radio license (enables higher power) |
 
 ### Applying Changes
 
@@ -33,7 +33,7 @@ Pärast sätete muutmist puuduta nuppu **Salvesta**, et konfiguratsioon raadioss
 
 ### Seadme sätted
 
-| Setting                                       | Kirjeldus                                                               | Vaikimisi |
+| Sätted                                        | Kirjeldus                                                               | Vaikimisi |
 | --------------------------------------------- | ----------------------------------------------------------------------- | --------- |
 | Roll                                          | Node behavior (Client, Router, etc.) | Klient    |
 | Kordusülekannete režiim                       | How the node retransmits messages                                       | Kõik      |
@@ -42,14 +42,14 @@ Pärast sätete muutmist puuduta nuppu **Salvesta**, et konfiguratsioon raadioss
 
 ### LoRa sätted
 
-| Setting          | Kirjeldus                                                               | Vaikimisi                                       |
+| Sätted           | Kirjeldus                                                               | Vaikimisi                                       |
 | ---------------- | ----------------------------------------------------------------------- | ----------------------------------------------- |
 | Regioon          | Sagedusribade reguleerimispiirkond                                      | Määramata (tuleb seadistada) |
 | Modemi vaikesäte | Speed/range tradeoff                                                    | LongFast                                        |
 | Hüppete limiit   | Maks uuesti saadetud hüpet                                              | 3                                               |
-| TX võimsus       | Transmission power (dBm); 0 = max allowed for region | 0 (region max)               |
+| TX võimsus       | Transmission power (dBm); 0 = max allowed for region | 0 (regiooni maks)            |
 | Sagedusnihe      | Sageduse peenhäälestamine (MHz)                      | 0                                               |
-| Kanali ribalaius | Bandwidth setting                                                       | Default for preset                              |
+| Kanali ribalaius | Ribalaiuse säte                                                         | Default for preset                              |
 
 > ⚠️ **Tähtis:** Enne edastamist **peate** oma piirkonna määrama. Operating without the correct region may violate local radio regulations. Lisateabe saamiseks vaadake [regiooni seadistamise juhendit](https://meshtastic.org/docs/getting-started/initial-config) aadressil meshtastic.org.
 
@@ -57,22 +57,22 @@ Pärast sätete muutmist puuduta nuppu **Salvesta**, et konfiguratsioon raadioss
 
 > 💡 **Vihje:** **SNR-i piirväärtused** on meelega negatiivsed. LoRa can decode signals _below_ the noise floor, so a more-negative limit means the preset tolerates a weaker, noisier signal (more range). See [How the Signal Meter Works](signal-meter) for the full explanation.
 
-| Preset             | Range                   | Kiirus                   | SNR Limit | Best For                                                                                          |
-| ------------------ | ----------------------- | ------------------------ | --------- | ------------------------------------------------------------------------------------------------- |
-| Short Turbo        | ~1 km   | 21,9 kbps                | −7,5 dB   | Dense urban with line-of-sight; data-heavy applications                                           |
-| Short Fast         | ~3 km   | 10,9 kbps                | −7,5 dB   | Linnaosad; hooned mõne kvartali raadiuses                                                         |
-| Short Slow         | ~5 km   | 5.5 kbps | −10 dB    | Äärelinna lühimaa; mõõdukas hoonestustihedus                                                      |
-| Medium Fast        | ~5 km   | 5.5 kbps | −12,5 dB  | Suburban areas; moderate building density                                                         |
-| Medium Slow        | ~8 km   | 1,1 kbps                 | −15 dB    | Suburban/rural; moderate range with slower speed                                                  |
-| Long Turbo         | ~10 km  | 4,4 kbps                 | −12,5 dB  | Sarnane ulatus kui Pikk Kauge, aga 500 kHz ribalaiusega; kiirem läbilaskevõime                    |
-| Long Fast          | ~10 km  | 1,1 kbps                 | −17,5 dB  | **General use (default)** — balanced range and speed                           |
-| Long Moderate      | ~20 km  | 0,34 kbps                | −17,5 dB  | Maapiirkond, mõningase maastikuga; aeg-ajalt kasutatav                                            |
-| Lite Fast          | ~5 km   | 5,5 kbps                 | −12,5 dB  | EL 866 MHz SRD sagedusala (125 kHz ribalaius); võrreldav Medium Fast           |
-| Lite Slow          | ~10 km  | 1,1 kbps                 | −15 dB    | EL 866 MHz SRD sagedusala (125 kHz ribalaius); võrreldav Long Fast             |
-| Narrow Fast        | ~5 km   | 2,7 kbps                 | −10 dB    | EL 868 MHz sagedusala (62,5 kHz sagedusriba); väldib häireid teiste seadmetega |
-| Narrow Slow        | ~10 km  | 1,1 kbps                 | −12,5 dB  | EL 868 MHz sagedusala (62,5 kHz ribalaius); võrreldav Long Fast                |
-| ~~Long Slow~~      | ~30 km  | 0,18 kbps                | −20 dB    | ⚠️ **Vananenud** — endiselt valitav, kuid võidakse tulevases püsivara versioonis eemaldada        |
-| ~~Very Long Slow~~ | ~40+ km | 0,09 kbps                | −20 dB    | ⚠️ **Vananenud** — endiselt valitav, kuid võidakse tulevases püsivara versioonis eemaldada        |
+| Preset             | Range                   | Kiirus                   | SNR limiit | Parim                                                                                             |
+| ------------------ | ----------------------- | ------------------------ | ---------- | ------------------------------------------------------------------------------------------------- |
+| Short Turbo        | ~1 km   | 21,9 kbps                | −7,5 dB    | Dense urban with line-of-sight; data-heavy applications                                           |
+| Short Fast         | ~3 km   | 10,9 kbps                | −7,5 dB    | Linnaosad; hooned mõne kvartali raadiuses                                                         |
+| Short Slow         | ~5 km   | 5.5 kbps | −10 dB     | Äärelinna lühimaa; mõõdukas hoonestustihedus                                                      |
+| Medium Fast        | ~5 km   | 5.5 kbps | −12,5 dB   | Suburban areas; moderate building density                                                         |
+| Medium Slow        | ~8 km   | 1,1 kbps                 | −15 dB     | Suburban/rural; moderate range with slower speed                                                  |
+| Long Turbo         | ~10 km  | 4,4 kbps                 | −12,5 dB   | Sarnane ulatus kui Pikk Kauge, aga 500 kHz ribalaiusega; kiirem läbilaskevõime                    |
+| Long Fast          | ~10 km  | 1,1 kbps                 | −17,5 dB   | **General use (default)** — balanced range and speed                           |
+| Long Moderate      | ~20 km  | 0,34 kbps                | −17,5 dB   | Maapiirkond, mõningase maastikuga; aeg-ajalt kasutatav                                            |
+| Lite Fast          | ~5 km   | 5,5 kbps                 | −12,5 dB   | EL 866 MHz SRD sagedusala (125 kHz ribalaius); võrreldav Medium Fast           |
+| Lite Slow          | ~10 km  | 1,1 kbps                 | −15 dB     | EL 866 MHz SRD sagedusala (125 kHz ribalaius); võrreldav Long Fast             |
+| Narrow Fast        | ~5 km   | 2,7 kbps                 | −10 dB     | EL 868 MHz sagedusala (62,5 kHz sagedusriba); väldib häireid teiste seadmetega |
+| Narrow Slow        | ~10 km  | 1,1 kbps                 | −12,5 dB   | EL 868 MHz sagedusala (62,5 kHz ribalaius); võrreldav Long Fast                |
+| ~~Long Slow~~      | ~30 km  | 0,18 kbps                | −20 dB     | ⚠️ **Vananenud** — endiselt valitav, kuid võidakse tulevases püsivara versioonis eemaldada        |
+| ~~Very Long Slow~~ | ~40+ km | 0,09 kbps                | −20 dB     | ⚠️ **Vananenud** — endiselt valitav, kuid võidakse tulevases püsivara versioonis eemaldada        |
 
 > ℹ️ **Märkus:** Selles tabelis kasutatakse üldlevinud lühinimesid. Rakenduse eelseadistatud rippmenüüs on need järgmised: **Short Range - Fast**, **Long Range - Fast**, **Lite - Fast**, **Narrow - Fast**, jne.
 
@@ -87,7 +87,7 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 
 - **Linnavõrk (palju sõlmi, lühikesed vahemaad):** Kasutage valikut **Long Fast** (vaikimisi) või **Short Fast**. Suurem kiirus tähendab väiksemat eetriaega, kui kanalit jagavad paljud sõlmed.
 - **Rural/sparse mesh (few nodes, long distances):** Use **Long Moderate**. Range matters more than speed when nodes are far apart.
-- **EU 866/868 MHz regulatory compliance:** Use **Lite Fast**, **Lite Slow**, **Narrow Fast**, or **Narrow Slow** — these are optimized for the EU SRD/868 MHz bands with narrower bandwidths.
+- **Vastavus EL 866/868 MHz regulatsioonidele:** Kasuta **Lite Fast**, **Lite Slow**, **Narrow Fast** või **Narrow Slow** – need on optimeeritud kitsama ribalaiusega EL SRD/868 MHz sagedusaladele.
 - **Fikseeritud taristuühendused:** Kasutage **Short Turbo** või **Long Turbo** spetsiaalsete punkt-punkti ühenduste jaoks, millel on head antennid ja otsenähtavus.
 - **Mixed environments:** Stick with **Long Fast** — it's the community default and ensures compatibility with others in your area.
 
@@ -97,17 +97,17 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 
 ### Ekraani sätted
 
-| Setting             | Kirjeldus                                                                        |
+| Sätted              | Kirjeldus                                                                        |
 | ------------------- | -------------------------------------------------------------------------------- |
 | Screen Timeout      | Time before display sleeps                                                       |
 | Display Units       | Meetriline või Imperial                                                          |
 | OLED Type           | Auto, SSD1306, SH1106, SH1107                                                    |
 | Compass Orientation | Rotation offset for compass display (0°, 90°, 180°, 270°)     |
-| ~~Compass North~~   | ⚠️ **Vananenud** — asendatud kompassi suunaga; nähtav endiselt vanemas püsivaras |
+| ~~Kompass lõuna~~   | ⚠️ **Vananenud** — asendatud kompassi suunaga; nähtav endiselt vanemas püsivaras |
 
 ### Asukoha sätted
 
-| Setting                                   | Kirjeldus                          |
+| Sätted                                    | Kirjeldus                          |
 | ----------------------------------------- | ---------------------------------- |
 | GPS lubatud                               | GPS lubamine/keelamine             |
 | GPS värskendamise intervall               | Kui tihti GPS asukohta leida       |
@@ -117,17 +117,17 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 
 ### Toite sätted
 
-| Setting                                 | Kirjeldus                               |
+| Sätted                                  | Kirjeldus                               |
 | --------------------------------------- | --------------------------------------- |
 | Power Saving                            | Enable low-power sleep mode             |
 | Shutdown After (s)   | Auto-shutdown idle timer                |
-| ADC Multiplier                          | Aku pinge kalibreerimistegur            |
+| ADC kordaja                             | Aku pinge kalibreerimistegur            |
 | Oota sinihammast(id) | Time to wait for BLE connection at boot |
 | Mesh SDS Timeout (s) | Ülisügava une ajalõpp                   |
 
 ### Võrgu sätted
 
-| Setting       | Kirjeldus                                  |
+| Sätted        | Kirjeldus                                  |
 | ------------- | ------------------------------------------ |
 | WiFi lubatud  | Luba WiFi (ESP32 seade) |
 | WiFi SSID     | Network name to connect to                 |
@@ -139,7 +139,7 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 
 ### Sinihamba sätted
 
-| Setting            | Kirjeldus                                                           |
+| Sätted             | Kirjeldus                                                           |
 | ------------------ | ------------------------------------------------------------------- |
 | Sinihammas lubatud | Enable/disable BLE radio                                            |
 | Sidumisreziim      | Määratud PIN kood, juhuslik PIN kood või PIN koodi pole             |
@@ -147,7 +147,7 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 
 ### Turva sätted
 
-| Setting                 | Kirjeldus                                                                                                                                                                                                                              |
+| Sätted                  | Kirjeldus                                                                                                                                                                                                                              |
 | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Avalik võti             | Sinu sõlme avalik võti (kirjutuskaitstud)                                                                                                                                                                           |
 | Administraatori võti    | Kaughalduse võti                                                                                                                                                                                                                       |
@@ -171,7 +171,7 @@ Seaded kasutavad standardseid eelistuste juhtelemente – rippmenüüsid, lülit
 | Toggle   | ![Lülitus](../../assets/screenshots/settings_switch.png)     |
 | Slider   | ![Liugur](../../assets/screenshots/settings_slider.png)      |
 
-## Related Topics
+## Seotud teemad
 
 - [Seaded — moodulid ja admin](settings-module-admin) — valikulised funktsioonimoodulid ja seadme haldamine
 - [Signal Meter](signal-meter) — how modem presets affect signal quality thresholds

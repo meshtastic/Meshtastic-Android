@@ -1,13 +1,13 @@
 ---
 title: Getting Started
-parent: User Guide
+parent: Kasutusjuhend
 nav_order: 1
 last_updated: 2026-07-08
 description: Esimese käivitamise seadistus — õigused, sissejuhatav voog ja järgmised sammud pärast raadio ühendamist.
 aliases:
   - first-launch
   - seadistamine
-  - intro
+  - sissejuhatus
 ---
 
 # Getting Started
@@ -32,7 +32,7 @@ Puuduta **Alusta** seadistusvoo jätkamiseks.
 
 ## Permissions
 
-Rakendus küsib seadistamise ajal mitmeid lube. Each one serves a specific purpose, and some are required for core functionality.
+Rakendus küsib seadistamise ajal mitmeid lube. Igal neist on kindel eesmärk ja mõned on vajalikud põhifunktsioonide täitmiseks.
 
 ### Sinihamba load
 
@@ -51,7 +51,7 @@ Meshtastic kasutab sinu asukohta ka järgmiseks:
 
 - Kuvatakse asukoht kärgvõrgu kaardil
 - Calculating distances to other nodes
-- GPS koordinaatide jagamine teiste võrgusilma liikmetega (kui lubatud)
+- GPS koordinaatide jagamine teiste kärgvõrgu liikmetega (kui lubatud)
 
 Grant **"While using the app"** or **"Always"** depending on your preference:
 

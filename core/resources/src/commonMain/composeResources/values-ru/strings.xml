@@ -674,6 +674,7 @@
     <string name="firmware_event_ended_button">Обновление прошивки</string>
     <string name="firmware_maintenance_cdc_unblock_failed">Файл стирания был скопирован, но устройство не начало стирание. Пока ничего не изменилось. Отключи устройство, дважды нажми кнопку сброса и повтори попытку.</string>
     <string name="firmware_maintenance_copy_failed">Не удалось скопировать файл на диск устройства. Убедите, что диск всё ещё подключён, и повтори попытку.</string>
+    <string name="firmware_maintenance_data_unavailable">Список образов для стирания сейчас недоступен. Проверь подключение и повтори попытку или используй веб-флешер на flasher.meshtastic.org.</string>
     <string name="firmware_maintenance_erase_action">Очистить и переустановить</string>
     <string name="firmware_maintenance_erase_confirm_button">Очистить устройство</string>
     <string name="firmware_maintenance_erase_confirm_text">Это полностью сотрёт данные на %1$s, включая каналы, ключи и все настройки, затем переустановит прошивку. Это действие необратимо, и резервной копии нет.\n\nТебе будет предложено дважды выбрать диск устройства: сначала для файла стирания, затем для прошивки.</string>
@@ -745,6 +746,7 @@
     <string name="firmware_update_open_flasher">Открыть флешер Meshtastic</string>
     <string name="firmware_update_ota_failed">Ошибка обновления OTA: %1$s</string>
     <string name="firmware_update_ota_unsupported_reason">OTA загрузчик этого устройства отклонил запрошенный метод обновления: %1$s</string>
+    <string name="firmware_update_preparing_flash">Подготовка устройства: стирание флеш-памяти. Это может занять до минуты...</string>
     <string name="firmware_update_rak4631_bootloader_hint">Для RAK WisBlock RAK4631 загрузчик .zip от производителя необходимо прошить с помощью последовательного инструмента DFU, такого как adafruit-nrfutil — копирование этого .zip на диск устройства не сработает. Либо подключи это устройство по USB и используйте обновление загрузчика в этом приложении.</string>
     <string name="firmware_update_rebooting">Перезагрузка в DFU...</string>
     <string name="firmware_update_release_notes">Список изменений</string>
@@ -753,6 +755,7 @@
     <string name="firmware_update_requires_uf2">Для %1$s требуется файл .uf2.</string>
     <string name="firmware_update_retrieval_failed">Не удалось получить файл прошивки.</string>
     <string name="firmware_update_retry">Повторить</string>
+    <string name="firmware_update_retrying_upload">Устройство не ответило. Повторная попытка передачи (попытка %1$d/%2$d)...</string>
     <string name="firmware_update_save_dfu_file">Пожалуйста, сохраните файл .uf2 на DFU-носитель вашего устройства.</string>
     <string name="firmware_update_searching_device">Поиск OTA устройства в сети...</string>
     <string name="firmware_update_select_file">Выберите локальный файл</string>

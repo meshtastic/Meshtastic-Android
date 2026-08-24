@@ -1,6 +1,6 @@
 ---
 title: Tõlgi rakendus
-parent: User Guide
+parent: Kasutusjuhend
 nav_order: 17
 last_updated: 2026-06-25
 description: Kuidas rakendust ja selle dokumentatsiooni Crowdini kaudu tõlgitakse ja tõlgete panustamise juhised.
@@ -18,11 +18,11 @@ Tõlgete koostamisele kaasaaitamine aitab Meshtasticut laiemale publikule kätte
 
 ## Mida tõlgitakse
 
-| Resource          | Allika asukoht                                                      | Sõnumid                                                                   |
-| ----------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| UI strings        | `core/resources/src/commonMain/composeResources/values/strings.xml` | Buttons, labels, messages, and all user-visible text                      |
-| User Guide pages  | `docs/en/user/*.md`                                                 | Rakendusesisene dokumentatsioon kuvatakse jaotises Abi ja dokumentatsioon |
-| Fastlane metadata | `fastlane/metadata/android/en-US/`                                  | App Store listing title, description, and changelogs                      |
+| Resource             | Allika asukoht                                                      | Sõnumid                                                                   |
+| -------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| UI strings           | `core/resources/src/commonMain/composeResources/values/strings.xml` | Buttons, labels, messages, and all user-visible text                      |
+| Kasutusjuhendi lehed | `docs/en/user/*.md`                                                 | Rakendusesisene dokumentatsioon kuvatakse jaotises Abi ja dokumentatsioon |
+| Fastlane metadata    | `fastlane/metadata/android/en-US/`                                  | App Store listing title, description, and changelogs                      |
 
 > ⚠️ **Märkus:** Arendaja juhend ainult inglise keeles. Kaastöölistele suunatud koodikeskset dokumentatsiooni ei tõlgita.
 
@@ -36,7 +36,7 @@ Tõlgete koostamisele kaasaaitamine aitab Meshtasticut laiemale publikule kätte
 4. **Review context.** Many strings include screenshots or context comments — check these to understand where the text appears in the app.
 5. **Submit.** Approved translations are automatically merged into the next release.
 
-> 💡 \*\*Vihje." Hoia tõlked lühikesed. UI strings often appear in buttons, chips, or narrow columns. If a translation is significantly longer than the English original, consider abbreviating where the meaning stays clear.
+> 💡 \*\*Vihje." Hoia tõlked lühikesed. UI strings often appear in buttons, chips, or narrow columns. Kui tõlge on oluliselt pikem kui ingliskeelne originaal, kaaluge lühendamist kohtades, kus tähendus jääb selgeks.
 
 ---
 
@@ -65,7 +65,7 @@ core/resources/src/commonMain/composeResources/
 └── ...
 ```
 
-In-app documentation follows a similar pattern under `docs/`:
+Rakendusesisene dokumentatsioon järgib sarnast mustrit jaotises `docs/`:
 
 ```
 docs/

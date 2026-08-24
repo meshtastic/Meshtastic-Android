@@ -1,14 +1,14 @@
 ---
 title: Sõlme mõõdikud
-parent: User Guide
+parent: Kasutusjuhend
 nav_order: 5
 last_updated: 2026-07-08
-description: Telemetry dashboards for each mesh node — device health, environment sensors, air quality, signal quality, power, traceroute, and position history.
+description: Telemeetria armatuurlauad iga võrgusõlme kohta – seadme tervis, keskkonnaandurid, õhu kvaliteet, signaali kvaliteet, võimsus, marsruut ja asukoha ajalugu.
 aliases:
   - meetriline
-  - telemetry
+  - telemeetria
   - sõlme-mõõdikud
-  - signal
+  - signaal
 ---
 
 # Sõlme mõõdikud
@@ -43,7 +43,7 @@ Environmental sensor data (requires compatible hardware):
 | Gaasi surve                          | BME680                |
 | IAQ (Air Quality) | BME680                |
 
-Environment metrics are charted over time for easy trend analysis — temperature, humidity, and pressure each get their own line chart with the measurement unit displayed on the Y axis.
+Keskkonnanäitajaid joonistatakse aja jooksul lihtsaks trendianalüüsiks – temperatuur, niiskus ja rõhk saavad igaüks oma joondiagrammi, mille mõõtühik kuvatakse Y-teljel.
 
 BME680 **IAQ (siseõhu kvaliteet)** indeks on üksik väärtus vahemikus 0–500+, mis on tuletatud gaasitakistusest ja näidatud värvikoodiga skaalal _Suurepärane_ kuni _Ohtlikult saastunud_:
 
@@ -62,18 +62,18 @@ Air Quality is a dedicated metrics view for nodes equipped with a particulate-ma
 | PM10                  | µg/m³      | Particulate matter up to 10 microns                                                                                                                                                                                                                   |
 | AQI                   | EPA indeks | EPA **NowCast** õhukvaliteedi indeks on arvutatud hiljutise PM2.5 ajaloo põhjal ja sellel on värvikoodiga raskusastme silt. Kuvatakse PM2.5 kõrval, kui on kogunenud piisavalt näite. |
 | CO₂                   | ppm        | Süsinikdioksiidi kontsentratsioon                                                                                                                                                                                                                     |
-| CO₂ temperature       | °C / °F    | Temperature reported by the CO₂ sensor itself (e.g. SCD4x)                                                                                                                                         |
-| CO₂ humidity          | %          | Relative humidity reported by the CO₂ sensor                                                                                                                                                                                                          |
+| CO₂ temperatuur       | °C / °F    | Temperature reported by the CO₂ sensor itself (e.g. SCD4x)                                                                                                                                         |
+| CO₂ niiskus           | %          | Relative humidity reported by the CO₂ sensor                                                                                                                                                                                                          |
 
 CO₂ näidud on vastavalt raskusastmele värvikoodiga kodeeritud, et õhukvaliteeti oleks kiirelt loetav:
 
-| Band         | CO₂ Range (ppm) | Värv        |
-| ------------ | ---------------------------------- | ----------- |
-| Hea          | < 1000    | Roheline    |
-| Stuffy       | < 2000    | Merevaik    |
-| Kehv         | < 5000    | Oranž       |
-| Ebaturvaline | < 30000   | Punane      |
-| Evakueeru    | ≥ 30000                            | Tume punane |
+| Band         | CO₂ ulatus (ppm) | Värv        |
+| ------------ | ----------------------------------- | ----------- |
+| Hea          | < 1000     | Roheline    |
+| Stuffy       | < 2000     | Merevaik    |
+| Kehv         | < 5000     | Oranž       |
+| Ebaturvaline | < 30000    | Punane      |
+| Evakueeru    | ≥ 30000                             | Tume punane |
 
 ![Õhukvaliteedi näidud koos värvikoodiga CO₂ sisalduse raskusastme kohta](../../assets/screenshots/node-metrics_air_quality.png)
 
@@ -101,12 +101,12 @@ Radio signal quality information:
 
 Signaali kvaliteeti hinnatakse **SNR-i põhjal, mis on seotud aktiivse LoRa modemi eelseadistuse demodulatsiooni alumise piiriga**, mitte fikseeritud läviväärtuste põhjal – antud SNR tähendab erinevatel eelseadistustel erinevat väärtust (nt −15 dB on LongSlow režiimil hea, kuid ShortFast režiimil mittekasutatav). RSSI on kuvatud, aga see ei ole osa hinnangust. Letting `limit` be the preset's SNR limit:
 
-| Quality  | Criteria                                                         |
-| -------- | ---------------------------------------------------------------- |
-| Hea      | SNR above the preset's limit                                     |
-| Rahuldav | less than 5.5 dB below the limit                 |
-| Halb     | 5.5 dB to 7.5 dB below the limit |
-| Puudub   | more than 7.5 dB below the limit                 |
+| Kvaliteet | Kriteerium                                |
+| --------- | ----------------------------------------- |
+| Hea       | SNR above the preset's limit              |
+| Rahuldav  | vähem kui 5,5 dB piirväärtusest allpool   |
+| Halb      | 5,5 dB kuni 7,5 dB piirväärtusest allpool |
+| Puudub    | üle 7,5 dB piirväärtusest allpool         |
 
 See [Understanding the Signal Meter](signal-meter) for the full explanation.
 
@@ -127,10 +127,10 @@ Power management telemetry (requires INA sensor or compatible hardware):
 Traceroute näitab sõnumi teed läbi kärgvõrgu:
 
 1. Sõlme üksikasjade ekraanil puuduta **Traceroute**.
-2. The app sends a traceroute request to the target node.
+2. Rakendus saadab sihtsõlmele traceroute-päringu.
 3. Tulemused näitavad iga hüpet koos SNR/RSSI väärtustega.
 
-### Reading Traceroute Results
+### Traceroute'i tulemuste lugemine
 
 ```
 You → Node A (SNR: 8.5) → Node B (SNR: 5.2) → Target
@@ -165,7 +165,7 @@ Asukoha vahekaart kuvab GPS-i jagavate sõlmede asukohaandmeid:
 
 > ⚠️ **Märkus:** Mõõdikud on saadaval ainult siis, kui need on kaugsõlme poolt esitatud. Mõõdikud värskendatakse iga sõlme telemeetria sätetes seadistatud intervallidega.
 
-## Related Topics
+## Seotud teemad
 
 - [Nodes](nodes) — node list, filtering, and sorting
 - [Telemeetria & Sensorid](telemetry-and-sensors) — toetatud andurid ja seadistus

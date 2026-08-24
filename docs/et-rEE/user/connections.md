@@ -1,6 +1,6 @@
 ---
 title: Ühendus
-parent: User Guide
+parent: Kasutusjuhend
 nav_order: 2
 last_updated: 2026-07-08
 description: Ühenda oma telefon või arvuti Meshtastic raadioga Bluetoothi, USB või TCP/IP kaudu.
@@ -35,14 +35,14 @@ Sinihamba, võrgu ja USB-transpordi vahel vahetamiseks (üks on korraga aktiivne
 
 > 💡 **Vihje:** Kui sinu seadet ei kuvata, kontrolli, kas sinihamba ​​ja asukoha load on antud ning et raadio poleks juba teise seadmega ühendatud.
 
-### Connection Status
+### Ühenduse olek
 
-| Icon | Olek             | Kirjeldus                  |
-| ---- | ---------------- | -------------------------- |
-| 🟢   | Ühendatud        | Aktiivne raadioside loodud |
-| 🟡   | Ühendan          | Kätlemine on pooleli       |
-| 🔴   | Ühendus katkenud | No active connection       |
-| ⚪    | Pole seadistatud | Seadet pole valitud        |
+| Ikoon | Olek             | Kirjeldus                  |
+| ----- | ---------------- | -------------------------- |
+| 🟢    | Ühendatud        | Aktiivne raadioside loodud |
+| 🟡    | Ühendan          | Kätlemine on pooleli       |
+| 🔴    | Ühendus katkenud | No active connection       |
+| ⚪     | Pole seadistatud | Seadet pole valitud        |
 
 Ühenduse loomisel näitab olekuindikaator ühenduse praegust olekut:
 
@@ -109,7 +109,7 @@ On Desktop (Linux/macOS/Windows), the app supports:
 
 Platvormipõhiste üksikasjade ja kiirklahvide kohta vaata [Töölauarakendus] (desktop).
 
-## Related Topics
+## Seotud teemad
 
 - [Alustamine](onboarding) — esmakäivituse seadistamine ja load
 - [Seaded — Raadio ja kasutaja](settings-radio-user) — sinihamba ​​ja võrgu seadistus
