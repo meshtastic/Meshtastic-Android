@@ -135,8 +135,11 @@ class MessageViewModel(
         draftContactKey = contactKey
         _draftMessage.value = null
         safeLaunch(context = ioDispatcher, tag = "loadDraft") {
-            val restored = savedStateHandle.get<String>(KEY_DRAFT_MESSAGE)
-            _draftMessage.value = restored?.takeIf { it.isNotEmpty() } ?: packetRepository.getDraft(contactKey)
+            val restored = savedStateHandle.get<String>(draftKey(contactKey))
+            val loaded = restored?.takeIf { it.isNotEmpty() } ?: packetRepository.getDraft(contactKey)
+            // Two loads can be in flight after a fast switch between conversations; only the one still current may
+            // publish, or one conversation's unsent text surfaces in another.
+            if (draftContactKey == contactKey) _draftMessage.value = loaded
         }
     }
 
@@ -152,13 +155,13 @@ class MessageViewModel(
     fun setDraftMessage(text: String) {
         if (_draftMessage.value == null) return
         _draftMessage.value = text
-        val contactKey = draftContactKey
+        val contactKey = draftContactKey ?: return
         pendingDraftPersistence?.cancel()
         pendingDraftPersistence =
             viewModelScope.launch {
                 delay(DRAFT_PERSISTENCE_DELAY_MS)
-                savedStateHandle[KEY_DRAFT_MESSAGE] = text
-                contactKey?.let { withContext(ioDispatcher) { packetRepository.setDraft(it, text) } }
+                savedStateHandle[draftKey(contactKey)] = text
+                withContext(ioDispatcher) { packetRepository.setDraft(contactKey, text) }
             }
     }
 
@@ -166,8 +169,8 @@ class MessageViewModel(
         _draftMessage.value = ""
         pendingDraftPersistence?.cancel()
         pendingDraftPersistence = null
-        savedStateHandle[KEY_DRAFT_MESSAGE] = ""
         draftContactKey?.let { contactKey ->
+            savedStateHandle[draftKey(contactKey)] = ""
             safeLaunch(context = ioDispatcher, tag = "clearDraft") { packetRepository.setDraft(contactKey, "") }
         }
     }
@@ -475,6 +478,9 @@ class MessageViewModel(
         private const val SEARCH_DEBOUNCE_MS = 300L
         private const val MIN_SEARCH_LENGTH = 2
         private const val DRAFT_PERSISTENCE_DELAY_MS = 300L
-        private const val KEY_DRAFT_MESSAGE = "draftMessage"
+        private const val KEY_DRAFT_MESSAGE_PREFIX = "draftMessage:"
+
+        /** Saved-state drafts are keyed per conversation; one shared entry would leak text between them. */
+        private fun draftKey(contactKey: String) = KEY_DRAFT_MESSAGE_PREFIX + contactKey
     }
 }

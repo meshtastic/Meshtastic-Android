@@ -840,7 +840,7 @@ private fun MessageInput(
             trailingIcon = {
                 // Colour, not just enablement, carries "this will send" — a greyed-out icon reads as broken rather
                 // than as waiting for input.
-                val sendEnabled = canSend || mentionActive
+                val sendEnabled = isEnabled && (canSend || mentionActive)
                 IconButton(onClick = onSendAction, enabled = sendEnabled) {
                     Icon(
                         imageVector = MeshtasticIcons.Send,

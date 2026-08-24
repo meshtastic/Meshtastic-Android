@@ -541,7 +541,7 @@ interface PacketDao {
         updateDraft(contact, draft)
     }
 
-    @Query("SELECT draft FROM contact_settings WHERE contact_key = :contact")
+    @Query("SELECT draft FROM contact_settings WHERE contact_key = :contact LIMIT 1")
     suspend fun getDraft(contact: String): String?
 
     @Transaction
