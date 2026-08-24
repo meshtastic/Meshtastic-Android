@@ -196,6 +196,15 @@ class MeshNotificationManagerImplConversationTest {
                 (android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT),
             "a NEW_TASK-style flag launches outside the bubble and collapses it",
         )
+        // The other half of that rule: the platform can only add those flags itself if the PendingIntent is mutable.
+        assertTrue(
+            shadowIntent.flags and android.app.PendingIntent.FLAG_IMMUTABLE == 0,
+            "an immutable PendingIntent stops the platform applying the bubble's own launch flags",
+        )
+        assertTrue(
+            shadowIntent.flags and android.app.PendingIntent.FLAG_MUTABLE != 0,
+            "bubble PendingIntents are the documented exception to preferring FLAG_IMMUTABLE",
+        )
     }
 
     @Test

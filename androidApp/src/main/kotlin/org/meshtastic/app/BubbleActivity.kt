@@ -16,15 +16,17 @@
  */
 package org.meshtastic.app
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.getValue
+import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.androidx.viewmodel.ext.android.viewModel
-import org.koin.compose.viewmodel.koinViewModel
+import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.MODE_DYNAMIC
 import org.meshtastic.core.ui.viewmodel.UIViewModel
@@ -35,13 +37,17 @@ import org.meshtastic.feature.messaging.MessageViewModel
  * Hosts a single conversation inside a notification bubble.
  *
  * Bubbles require their activity to be resizeable, embeddable and document-launched, which the launcher activity cannot
- * be without changing how the whole app behaves in recents — so this is a separate, deliberately small host. It renders
- * only [MessageScreen]: a bubble is a conversation, and every route out of one (node details, quick chat, filter
- * settings) belongs in the full app, so those simply collapse the bubble instead.
+ * be without changing how the whole app behaves in recents — so this is a separate, deliberately small host rendering
+ * only [MessageScreen].
+ *
+ * Anything that navigates out of the conversation hands off to the full app rather than just closing: a bubble that
+ * vanished when you asked for node details would look like a crash. Only back — which for a bubble means "collapse me"
+ * — finishes on its own.
  */
 class BubbleActivity : AppCompatActivity() {
 
     private val model: UIViewModel by viewModel()
+    private val messageViewModel: MessageViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,6 +57,7 @@ class BubbleActivity : AppCompatActivity() {
             finish()
             return
         }
+        messageViewModel.setContactKey(contactKey)
 
         setContent {
             val theme by model.theme.collectAsStateWithLifecycle()
@@ -61,18 +68,28 @@ class BubbleActivity : AppCompatActivity() {
                     else -> isSystemInDarkTheme()
                 }
             AppTheme(dynamicColor = theme == MODE_DYNAMIC, darkTheme = dark) {
-                val messageViewModel: MessageViewModel = koinViewModel(key = "bubble-messages-$contactKey")
-                messageViewModel.setContactKey(contactKey)
                 MessageScreen(
                     contactKey = contactKey,
                     message = "",
                     viewModel = messageViewModel,
-                    navigateToNodeDetails = { finish() },
-                    navigateToQuickChatOptions = { finish() },
-                    navigateToFilterSettings = { finish() },
+                    navigateToNodeDetails = { nodeNum -> openInApp("nodes/$nodeNum") },
+                    // Quick chat and message filters have no deep link of their own, so the full app opens on this
+                    // conversation — the screen those menu items live on.
+                    navigateToQuickChatOptions = { openInApp("messages/$contactKey") },
+                    navigateToFilterSettings = { openInApp("messages/$contactKey") },
                     onNavigateBack = { finish() },
                 )
             }
         }
+    }
+
+    /** Opens [path] in the full app and collapses this bubble behind it. */
+    private fun openInApp(path: String) {
+        startActivity(
+            Intent(Intent.ACTION_VIEW, "$DEEP_LINK_BASE_URI/$path".toUri(), this, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            },
+        )
+        finish()
     }
 }

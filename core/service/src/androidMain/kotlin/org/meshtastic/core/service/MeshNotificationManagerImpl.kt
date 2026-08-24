@@ -985,15 +985,17 @@ class MeshNotificationManagerImpl(
      */
     private fun createBubbleMetadata(contactKey: String, icon: IconCompat): NotificationCompat.BubbleMetadata {
         val deepLinkUri = "$DEEP_LINK_BASE_URI/messages/$contactKey".toUri()
-        // No task flags: the platform launches this into the bubble's own task, and a NEW_TASK-style flag
-        // (including NEW_DOCUMENT) makes it launch outside and collapse the bubble instead.
+        // Two halves of one rule. The intent carries no task flags, because the platform is the thing that applies
+        // FLAG_ACTIVITY_NEW_DOCUMENT and FLAG_ACTIVITY_MULTIPLE_TASK for a bubble — setting them here instead
+        // launches outside the bubble and collapses it. And the PendingIntent must be MUTABLE precisely so the
+        // platform can add them; this is the documented exception to preferring FLAG_IMMUTABLE everywhere else.
         val intent = Intent(Intent.ACTION_VIEW, deepLinkUri, context, Class.forName(BUBBLE_ACTIVITY_CLASS))
         val pendingIntent =
             PendingIntent.getActivity(
                 context,
                 contactKey.hashCode(),
                 intent,
-                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+                PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
             )
         return NotificationCompat.BubbleMetadata.Builder(pendingIntent, icon)
             .setDesiredHeight(BUBBLE_DESIRED_HEIGHT_DP)
