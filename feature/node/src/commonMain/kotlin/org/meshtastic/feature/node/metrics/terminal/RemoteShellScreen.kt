@@ -16,8 +16,12 @@
  */
 package org.meshtastic.feature.node.metrics.terminal
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
@@ -30,6 +34,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -81,6 +86,7 @@ import org.meshtastic.core.ui.component.MainAppBar
 fun RemoteShellScreen(viewModel: RemoteShellViewModel, onNavigateUp: () -> Unit, modifier: Modifier = Modifier) {
     val outputLines by viewModel.outputLines.collectAsStateWithLifecycle()
     val pendingInput by viewModel.pendingInput.collectAsStateWithLifecycle()
+    val sessionState by viewModel.sessionState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) { viewModel.openSession() }
 
@@ -90,10 +96,6 @@ fun RemoteShellScreen(viewModel: RemoteShellViewModel, onNavigateUp: () -> Unit,
         delay(FOCUS_REQUEST_DELAY_MS)
         focusRequester.requestFocus()
     }
-
-    // The sink's value must be state-backed. With a constant "" the field's internal buffer is not cleared
-    // synchronously, so a callback that lands first re-delivers characters we already consumed. Forward only the delta.
-    var sinkText by remember { mutableStateOf("") }
 
     val listState = rememberLazyListState()
     val lastIndex = outputLines.size // pending-input row sits one past the output
@@ -114,69 +116,160 @@ fun RemoteShellScreen(viewModel: RemoteShellViewModel, onNavigateUp: () -> Unit,
             )
         },
     ) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize().padding(paddingValues).imePadding()) {
-            LazyColumn(
-                state = listState,
-                modifier = Modifier.fillMaxSize().padding(TERMINAL_PADDING).clickable { focusRequester.requestFocus() },
-            ) {
-                items(outputLines) { line -> TerminalLine(text = line) }
-                item { TerminalLine(text = pendingInput + CURSOR, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+        Column(modifier = Modifier.fillMaxSize().padding(paddingValues).imePadding()) {
+            SessionStatusBar(state = sessionState, onReconnect = { viewModel.openSession() })
+
+            Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                LazyColumn(
+                    state = listState,
+                    modifier =
+                    Modifier.fillMaxSize().padding(TERMINAL_PADDING).clickable { focusRequester.requestFocus() },
+                ) {
+                    // The caret belongs after the prompt, not under it, so the trailing line carries the pending input.
+                    items(outputLines.dropLast(1)) { line -> TerminalLine(text = line) }
+                    item { TerminalLine(text = outputLines.lastOrNull().orEmpty() + pendingInput + CURSOR) }
+                }
+
+                KeyboardSink(
+                    focusRequester = focusRequester,
+                    onChar = { viewModel.dispatchTypedChar(it) },
+                    onEnter = viewModel::typeEnter,
+                    onBackspace = viewModel::typeBackspace,
+                    onTab = { viewModel.typeKey('\t') },
+                )
             }
 
-            // Zero-size sink that holds focus so both hardware and soft-keyboard input is captured.
-            // onKeyEvent covers hardware keys; onValueChange covers soft keyboards, which may fire neither.
-            BasicTextField(
-                value = sinkText,
-                onValueChange = { newText ->
-                    val consumed = sinkText
-                    if (newText.length < consumed.length) {
-                        repeat(consumed.length - newText.length) { viewModel.typeBackspace() }
-                    } else {
-                        val fresh = if (newText.startsWith(consumed)) newText.substring(consumed.length) else newText
-                        fresh.forEach { char ->
-                            when {
-                                char == '\n' || char == '\r' -> viewModel.typeEnter()
-                                char == '\b' -> viewModel.typeBackspace()
-                                char == '\t' -> viewModel.typeKey('\t')
-                                char.isISOControl() -> Unit
-                                else -> viewModel.typeKey(char)
-                            }
-                        }
-                    }
-                    sinkText = if (newText.length > SINK_TRIM_LENGTH) "" else newText
-                },
-                modifier =
-                Modifier.size(
-                    1.dp,
-                ).align(Alignment.BottomStart).focusRequester(focusRequester).onKeyEvent { event ->
-                    if (event.type != KeyEventType.KeyDown) return@onKeyEvent false
-                    when (event.key) {
-                        Key.Enter,
-                        Key.NumPadEnter,
-                        -> {
-                            viewModel.typeEnter()
-                            true
-                        }
-
-                        Key.Tab -> {
-                            viewModel.typeKey('\t')
-                            true
-                        }
-
-                        Key.Backspace -> {
-                            viewModel.typeBackspace()
-                            true
-                        }
-
-                        else -> false
-                    }
-                },
-                textStyle = TextStyle(color = Color.Transparent, fontSize = 1.sp),
-                cursorBrush = SolidColor(Color.Transparent),
-            )
+            ControlKeyBar(onSend = { viewModel.typeControlSequence(it) })
         }
     }
 }
+
+/**
+ * Zero-size field that holds keyboard focus so both hardware keys and the soft keyboard reach the session.
+ *
+ * The value is state-backed and never cleared outright: Compose hands back the field's whole content, and a reset only
+ * lands on the next recomposition, so a callback arriving first would re-deliver characters already sent. We track what
+ * we consumed and forward the delta, mapping a shrinking field to backspaces.
+ */
+@Composable
+private fun KeyboardSink(
+    focusRequester: FocusRequester,
+    onChar: (Char) -> Unit,
+    onEnter: () -> Unit,
+    onBackspace: () -> Unit,
+    onTab: () -> Unit,
+) {
+    var sinkText by remember { mutableStateOf("") }
+    BasicTextField(
+        value = sinkText,
+        onValueChange = { newText ->
+            val consumed = sinkText
+            if (newText.length < consumed.length) {
+                repeat(consumed.length - newText.length) { onBackspace() }
+            } else {
+                val fresh = if (newText.startsWith(consumed)) newText.substring(consumed.length) else newText
+                fresh.forEach(onChar)
+            }
+            sinkText = if (newText.length > SINK_TRIM_LENGTH) "" else newText
+        },
+        modifier =
+        Modifier.size(1.dp).focusRequester(focusRequester).onKeyEvent { event ->
+            if (event.type != KeyEventType.KeyDown) return@onKeyEvent false
+            when (event.key) {
+                Key.Enter,
+                Key.NumPadEnter,
+                -> {
+                    onEnter()
+                    true
+                }
+
+                Key.Tab -> {
+                    onTab()
+                    true
+                }
+
+                Key.Backspace -> {
+                    onBackspace()
+                    true
+                }
+
+                else -> false
+            }
+        },
+        textStyle = TextStyle(color = Color.Transparent, fontSize = 1.sp),
+        cursorBrush = SolidColor(Color.Transparent),
+    )
+}
+
+/** Routes one typed character, keeping control bytes out of the stream the PTY sees as text. */
+private fun RemoteShellViewModel.dispatchTypedChar(char: Char) {
+    when {
+        char == '\n' || char == '\r' -> typeEnter()
+        char == '\b' -> typeBackspace()
+        char == '\t' -> typeKey('\t')
+        char.isISOControl() -> Unit
+        else -> typeKey(char)
+    }
+}
+
+/** Reports what the session is actually doing; without it a refused or stalled session is just a blank screen. */
+@Composable
+private fun SessionStatusBar(state: RemoteShellViewModel.SessionState, onReconnect: () -> Unit) {
+    if (state == RemoteShellViewModel.SessionState.OPEN) return
+    val label =
+        when (state) {
+            RemoteShellViewModel.SessionState.IDLE -> "Not connected"
+            RemoteShellViewModel.SessionState.OPENING -> "Opening session\u2026"
+            RemoteShellViewModel.SessionState.CLOSING -> "Closing\u2026"
+            RemoteShellViewModel.SessionState.CLOSED -> "Session closed"
+            RemoteShellViewModel.SessionState.ERROR -> "Session failed"
+            RemoteShellViewModel.SessionState.OPEN -> return
+        }
+    val reconnectable =
+        state == RemoteShellViewModel.SessionState.CLOSED ||
+            state == RemoteShellViewModel.SessionState.ERROR ||
+            state == RemoteShellViewModel.SessionState.IDLE
+    Row(
+        modifier =
+        Modifier.fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .padding(horizontal = TERMINAL_PADDING, vertical = STATUS_BAR_PADDING),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.weight(1f),
+        )
+        if (reconnectable) {
+            TextButton(onClick = onReconnect) { Text(text = "Reconnect") }
+        }
+    }
+}
+
+/** Keys a soft keyboard has no room for and a shell cannot do without. */
+@Composable
+private fun ControlKeyBar(onSend: (String) -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = TERMINAL_PADDING),
+        horizontalArrangement = Arrangement.spacedBy(CONTROL_KEY_SPACING),
+    ) {
+        CONTROL_KEYS.forEach { (label, sequence) ->
+            TextButton(onClick = { onSend(sequence) }) { Text(text = label, fontFamily = FontFamily.Monospace) }
+        }
+    }
+}
+
+private val CONTROL_KEYS =
+    listOf(
+        "^C" to "\u0003",
+        "^D" to "\u0004",
+        "TAB" to "\t",
+        "ESC" to "\u001b",
+        "\u2191" to "\u001b[A",
+        "\u2193" to "\u001b[B",
+    )
 
 @Composable
 private fun TerminalLine(text: String, color: Color = MaterialTheme.colorScheme.onSurface) {
@@ -196,6 +289,10 @@ private const val SINK_TRIM_LENGTH = 256
 private const val CURSOR = "█"
 
 private val TERMINAL_PADDING = 8.dp
+
+private val STATUS_BAR_PADDING = 4.dp
+
+private val CONTROL_KEY_SPACING = 4.dp
 
 private val TERMINAL_FONT_SIZE = 13.sp
 

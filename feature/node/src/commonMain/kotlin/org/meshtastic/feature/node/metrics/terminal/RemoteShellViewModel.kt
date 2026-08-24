@@ -458,6 +458,17 @@ class RemoteShellViewModel(
         }
     }
 
+    /**
+     * Sends a control byte or escape sequence immediately, bypassing the keystroke debounce.
+     *
+     * Ctrl-C is worthless if it waits behind a 500 ms batch window.
+     */
+    fun typeControlSequence(text: String) {
+        inputBuffer.append(text)
+        _pendingInput.value = inputBuffer.toString()
+        flushBuffer()
+    }
+
     /** Appends `\r` and flushes immediately (Enter key on mobile). */
     fun typeEnter() {
         inputBuffer.append('\r')
