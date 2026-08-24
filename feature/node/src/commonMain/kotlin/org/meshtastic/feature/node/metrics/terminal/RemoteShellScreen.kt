@@ -31,6 +31,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -52,8 +53,11 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -88,7 +92,16 @@ fun RemoteShellScreen(viewModel: RemoteShellViewModel, onNavigateUp: () -> Unit,
     val pendingInput by viewModel.pendingInput.collectAsStateWithLifecycle()
     val sessionState by viewModel.sessionState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(Unit) { viewModel.openSession() }
+    // The remote PTY wraps to whatever size we declare, so measure the viewport in monospace cells rather than
+    // shipping a hardcoded 80x24. Opening waits for the measurement so OPEN carries the real size.
+    var terminalSize by remember { mutableStateOf(IntSize.Zero) }
+    val (cols, rows) = rememberTerminalGrid(terminalSize)
+
+    LaunchedEffect(cols, rows) {
+        if (cols <= 0 || rows <= 0) return@LaunchedEffect
+        viewModel.resize(cols, rows)
+        viewModel.openSession()
+    }
 
     val focusRequester = remember { FocusRequester() }
     LaunchedEffect(Unit) {
@@ -98,8 +111,7 @@ fun RemoteShellScreen(viewModel: RemoteShellViewModel, onNavigateUp: () -> Unit,
     }
 
     val listState = rememberLazyListState()
-    val lastIndex = outputLines.size // pending-input row sits one past the output
-    LaunchedEffect(lastIndex, pendingInput) { if (lastIndex >= 0) listState.animateScrollToItem(lastIndex) }
+    LaunchedEffect(outputLines.size, pendingInput) { listState.animateScrollToItem(outputLines.size) }
 
     Scaffold(
         modifier = modifier,
@@ -119,15 +131,20 @@ fun RemoteShellScreen(viewModel: RemoteShellViewModel, onNavigateUp: () -> Unit,
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues).imePadding()) {
             SessionStatusBar(state = sessionState, onReconnect = { viewModel.openSession() })
 
-            Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
-                LazyColumn(
-                    state = listState,
-                    modifier =
-                    Modifier.fillMaxSize().padding(TERMINAL_PADDING).clickable { focusRequester.requestFocus() },
-                ) {
-                    // The caret belongs after the prompt, not under it, so the trailing line carries the pending input.
-                    items(outputLines.dropLast(1)) { line -> TerminalLine(text = line) }
-                    item { TerminalLine(text = outputLines.lastOrNull().orEmpty() + pendingInput + CURSOR) }
+            Box(modifier = Modifier.weight(1f).fillMaxWidth().onSizeChanged { terminalSize = it }) {
+                SelectionContainer {
+                    LazyColumn(
+                        state = listState,
+                        modifier =
+                        Modifier.fillMaxSize().padding(TERMINAL_PADDING).clickable {
+                            focusRequester.requestFocus()
+                        },
+                    ) {
+                        // The caret belongs after the prompt, not under it, so the trailing line carries the pending
+                        // input.
+                        items(outputLines.dropLast(1)) { line -> TerminalLine(text = line) }
+                        item { TerminalLine(text = outputLines.lastOrNull().orEmpty() + pendingInput + CURSOR) }
+                    }
                 }
 
                 KeyboardSink(
@@ -270,6 +287,18 @@ private val CONTROL_KEYS =
         "\u2191" to "\u001b[A",
         "\u2193" to "\u001b[B",
     )
+
+/** Viewport size in monospace cells, so the remote PTY can be told how wide to wrap. */
+@Composable
+private fun rememberTerminalGrid(size: IntSize): Pair<Int, Int> {
+    val textMeasurer = rememberTextMeasurer()
+    val cell =
+        remember(textMeasurer) {
+            textMeasurer.measure("0", TextStyle(fontFamily = FontFamily.Monospace, fontSize = TERMINAL_FONT_SIZE)).size
+        }
+    if (cell.width <= 0 || cell.height <= 0) return 0 to 0
+    return (size.width / cell.width) to (size.height / cell.height)
+}
 
 @Composable
 private fun TerminalLine(text: String, color: Color = MaterialTheme.colorScheme.onSurface) {
