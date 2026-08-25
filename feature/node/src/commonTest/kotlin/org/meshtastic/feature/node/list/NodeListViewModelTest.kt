@@ -130,13 +130,22 @@ class NodeListViewModelTest {
     fun `nodesUiState follows a mid-session units change`() = runTest {
         val vm = createViewModel()
         vm.nodesUiState.test {
-            assertEquals(MeasurementSystem.METRIC, awaitItem().distanceUnits)
+            val initial = awaitItem()
+            assertEquals(MeasurementSystem.METRIC, initial.distanceUnits)
+            assertEquals(false, initial.tempInFahrenheit)
 
-            localeUnitsProvider.set(system = MeasurementSystem.IMPERIAL, temperature = TemperatureUnit.FAHRENHEIT)
+            // The provider exposes these as independent flows, so verify each transition without assuming atomicity.
+            localeUnitsProvider.set(system = MeasurementSystem.IMPERIAL)
 
-            val updated = awaitItem()
-            assertEquals(MeasurementSystem.IMPERIAL, updated.distanceUnits)
-            assertEquals(true, updated.tempInFahrenheit)
+            val distanceUpdated = awaitItem()
+            assertEquals(MeasurementSystem.IMPERIAL, distanceUpdated.distanceUnits)
+            assertEquals(false, distanceUpdated.tempInFahrenheit)
+
+            localeUnitsProvider.set(temperature = TemperatureUnit.FAHRENHEIT)
+
+            val temperatureUpdated = awaitItem()
+            assertEquals(MeasurementSystem.IMPERIAL, temperatureUpdated.distanceUnits)
+            assertEquals(true, temperatureUpdated.tempInFahrenheit)
 
             cancelAndIgnoreRemainingEvents()
         }
