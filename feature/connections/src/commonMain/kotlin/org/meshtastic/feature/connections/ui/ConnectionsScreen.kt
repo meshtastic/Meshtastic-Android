@@ -87,6 +87,7 @@ import org.meshtastic.core.resources.firmware_update_open
 import org.meshtastic.core.resources.firmware_update_open_flasher
 import org.meshtastic.core.resources.firmware_version
 import org.meshtastic.core.resources.local_network_permission
+import org.meshtastic.core.resources.local_network_permission_blocked_rationale
 import org.meshtastic.core.resources.local_network_permission_rationale
 import org.meshtastic.core.resources.location_permission
 import org.meshtastic.core.resources.nearby_devices_permission
@@ -602,6 +603,23 @@ fun ConnectionsScreen(
                                 message = stringResource(Res.string.ble_scan_needs_location_services),
                                 actionLabel = stringResource(Res.string.open_location_settings),
                                 onAction = openLocationSettings,
+                            )
+                        }
+                        // The BLE pane's missing-permission card, for the transport whose discovery Android 17 gates.
+                        // Without it the network pane repeats the BLE bug it was just fixed for: an empty list and a
+                        // hint about the network, when the app was never allowed to look. Manual entry still works,
+                        // which is why the copy points at it rather than presenting this as a dead end.
+                        if (activeTransport == DeviceType.TCP && !localNetworkPermission.isGranted) {
+                            PermissionRecoveryCard(
+                                state = localNetworkPermission,
+                                rationale =
+                                stringResource(
+                                    if (localNetworkPermission.status == PermissionStatus.PERMANENTLY_DENIED) {
+                                        Res.string.local_network_permission_blocked_rationale
+                                    } else {
+                                        Res.string.local_network_permission_rationale
+                                    },
+                                ),
                             )
                         }
                         if (

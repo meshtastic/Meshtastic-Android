@@ -108,8 +108,6 @@ internal fun PermissionScreenLayout(
                 onConfigure = onPrimaryAction,
                 configureButtonText = stringResource(primaryLabelRes),
                 skipButtonText = stringResource(Res.string.skip),
-                // Nothing left to skip once the permission is held — the primary action just advances.
-                showSkipButton = status != PermissionStatus.GRANTED,
             )
         },
     ) { innerPadding ->
