@@ -25,42 +25,29 @@ import org.meshtastic.core.resources.configure_notification_permissions
 import org.meshtastic.core.resources.incoming_messages
 import org.meshtastic.core.resources.low_battery
 import org.meshtastic.core.resources.new_nodes
-import org.meshtastic.core.resources.next
+import org.meshtastic.core.resources.notification_permission_blocked_notice
+import org.meshtastic.core.resources.notification_permission_denied_notice
 import org.meshtastic.core.resources.notification_permissions_description
 import org.meshtastic.core.resources.notifications_for_channel_and_direct_messages
 import org.meshtastic.core.resources.notifications_for_low_battery_alerts
 import org.meshtastic.core.resources.notifications_for_newly_discovered_nodes
-import org.meshtastic.core.resources.settings
 import org.meshtastic.core.ui.icon.BatteryAlert
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Message
 import org.meshtastic.core.ui.icon.Speaker
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.util.PermissionStatus
 
 /**
- * Screen for configuring notification permissions during the app introduction. It explains why notification permissions
- * are needed and provides options to grant them or skip.
+ * Screen for configuring notification permissions during the app introduction. Explains why they are needed and offers
+ * the recovery that matches [status].
  *
- * @param showNextButton Indicates whether to show a "Next" button (if permissions are already granted) or a "Configure"
- *   button.
+ * @param status Live permission status; drives the primary action and the denied/blocked notice.
  * @param onSkip Callback invoked if the user chooses to skip notification permission setup.
- * @param onConfigure Callback invoked when the user proceeds to configure or grant permissions.
- * @param onOpenSettings Callback invoked when the user taps the settings link.
+ * @param onPrimaryAction Callback for the status-driven primary action (request, open settings, or advance).
  */
 @Composable
-internal fun NotificationsScreen(
-    showNextButton: Boolean,
-    onSkip: () -> Unit,
-    onConfigure: () -> Unit,
-    onOpenSettings: () -> Unit,
-) {
-    val annotatedString =
-        createClickableAnnotatedString(
-            fullTextRes = Res.string.notification_permissions_description,
-            linkTextRes = Res.string.settings,
-            tag = SETTINGS_TAG,
-        )
-
+internal fun NotificationsScreen(status: PermissionStatus, onSkip: () -> Unit, onPrimaryAction: () -> Unit) {
     val features =
         listOf(
             FeatureUIData(
@@ -82,12 +69,14 @@ internal fun NotificationsScreen(
 
     PermissionScreenLayout(
         headlineRes = Res.string.app_notifications,
-        annotatedDescription = annotatedString,
+        descriptionRes = Res.string.notification_permissions_description,
         features = features,
+        status = status,
+        deniedNoticeRes = Res.string.notification_permission_denied_notice,
+        blockedNoticeRes = Res.string.notification_permission_blocked_notice,
+        configureButtonTextRes = Res.string.configure_notification_permissions,
         onSkip = onSkip,
-        onConfigure = onConfigure,
-        configureButtonTextRes = if (showNextButton) Res.string.next else Res.string.configure_notification_permissions,
-        onAnnotationClick = { onOpenSettings() },
+        onPrimaryAction = onPrimaryAction,
     )
 }
 
@@ -95,6 +84,6 @@ internal fun NotificationsScreen(
 @Composable
 private fun NotificationsScreenPreview() {
     AppTheme {
-        Surface { NotificationsScreen(showNextButton = false, onSkip = {}, onConfigure = {}, onOpenSettings = {}) }
+        Surface { NotificationsScreen(status = PermissionStatus.NOT_REQUESTED, onSkip = {}, onPrimaryAction = {}) }
     }
 }

@@ -17,19 +17,31 @@
 package org.meshtastic.feature.intro
 
 import androidx.compose.runtime.staticCompositionLocalOf
+import org.meshtastic.core.ui.util.PermissionUiState
 
-/** Platform-agnostic permission state for the intro flow. */
-interface IntroPermissionState {
-    val isGranted: Boolean
-
-    fun launchRequest()
-}
-
-/** Aggregated permission states needed by the intro onboarding flow. */
+/**
+ * Aggregated permission states needed by the intro onboarding flow.
+ *
+ * Each entry is the full [PermissionUiState] — status, request action, and open-settings action — deliberately *not*
+ * narrowed to a granted/not-granted boolean. The distinction is load-bearing: once a permission reaches
+ * [org.meshtastic.core.ui.util.PermissionStatus.PERMANENTLY_DENIED] the system stops showing its dialog, so a screen
+ * that only knows `isGranted` renders a primary button that silently does nothing when tapped. Carrying the status lets
+ * each screen offer the recovery that will actually work.
+ */
 interface IntroPermissions {
-    val bluetooth: IntroPermissionState
-    val location: IntroPermissionState
-    val notification: IntroPermissionState?
+    val bluetooth: PermissionUiState
+
+    val location: PermissionUiState
+
+    /** Null on platforms / API levels where notifications are not gated by a runtime permission (pre-Android 13). */
+    val notification: PermissionUiState?
+
+    /**
+     * True where BLE scanning is gated by the location permission rather than the Android 12 "Nearby devices"
+     * permissions (API < 31). The Bluetooth screen asks for a different permission on those devices, so it must say so
+     * rather than naming a permission the user will never see.
+     */
+    val bluetoothRequiresLocation: Boolean
 }
 
 /** Provides platform-specific permission states to the intro nav graph. */

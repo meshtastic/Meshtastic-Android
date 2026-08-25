@@ -140,6 +140,10 @@ bluetooth_feature_config_description
 bluetooth_feature_discovery
 bluetooth_feature_discovery_description
 bluetooth_permission
+bluetooth_permission_blocked_notice
+bluetooth_permission_blocked_notice_pre31
+bluetooth_permission_denied_notice
+bluetooth_permission_denied_notice_pre31
 bluetooth_scan_location_services_disabled
 bluetooth_scan_missing_permission
 bluetooth_scan_start_failed
@@ -960,6 +964,8 @@ local_stats_updated_at
 local_stats_uptime
 local_stats_utilization
 location_disabled
+location_permission_blocked_notice
+location_permission_denied_notice
 location_sharing
 ### LOCKDOWN ###
 lockdown_backoff
@@ -1308,6 +1314,8 @@ none_quality
 not_connected
 note
 notes
+notification_permission_blocked_notice
+notification_permission_denied_notice
 notification_permissions_description
 ### NOTIFICATIONS ###
 notifications_for_channel_and_direct_messages
@@ -1378,6 +1386,7 @@ paxcounter_config
 paxcounter_enabled
 periodic_position_broadcast
 permission_missing_31
+permission_missing_pre31
 phone_location
 phone_location_description
 pin_selected

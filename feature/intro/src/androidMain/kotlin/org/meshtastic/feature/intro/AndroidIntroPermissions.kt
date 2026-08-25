@@ -18,34 +18,16 @@ package org.meshtastic.feature.intro
 
 import org.meshtastic.core.ui.util.PermissionUiState
 
+/**
+ * Android [IntroPermissions], holding the hoisted states from [AppIntroductionScreen] verbatim.
+ *
+ * There is deliberately no adaptation layer here. An earlier version wrapped each [PermissionUiState] in a
+ * granted/not-granted facade, which discarded the status the screens need to choose between re-requesting and routing
+ * to app settings — and left the primary button inert once a permission was permanently denied.
+ */
 internal class AndroidIntroPermissions(
-    private val bluetoothState: PermissionUiState,
-    private val locationState: PermissionUiState,
-    private val notificationState: PermissionUiState?,
-) : IntroPermissions {
-    override val bluetooth: IntroPermissionState =
-        object : IntroPermissionState {
-            override val isGranted: Boolean
-                get() = bluetoothState.isGranted
-
-            override fun launchRequest() = bluetoothState.request()
-        }
-
-    override val location: IntroPermissionState =
-        object : IntroPermissionState {
-            override val isGranted: Boolean
-                get() = locationState.isGranted
-
-            override fun launchRequest() = locationState.request()
-        }
-
-    override val notification: IntroPermissionState? =
-        notificationState?.let { state ->
-            object : IntroPermissionState {
-                override val isGranted: Boolean
-                    get() = state.isGranted
-
-                override fun launchRequest() = state.request()
-            }
-        }
-}
+    override val bluetooth: PermissionUiState,
+    override val location: PermissionUiState,
+    override val notification: PermissionUiState?,
+    override val bluetoothRequiresLocation: Boolean,
+) : IntroPermissions

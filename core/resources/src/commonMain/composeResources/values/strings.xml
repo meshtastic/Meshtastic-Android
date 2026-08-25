@@ -158,6 +158,10 @@
     <string name="bluetooth_feature_discovery">Discovery</string>
     <string name="bluetooth_feature_discovery_description">Find and identify Meshtastic devices near you.</string>
     <string name="bluetooth_permission">Bluetooth</string>
+    <string name="bluetooth_permission_blocked_notice">Nearby devices access is turned off and Android will not ask again. Turn it on in app settings to connect over Bluetooth, or connect over Wi-Fi or USB instead.</string>
+    <string name="bluetooth_permission_blocked_notice_pre31">Location permission is turned off and Android will not ask again. Turn it on in app settings to scan for Bluetooth devices, or connect over Wi-Fi or USB instead.</string>
+    <string name="bluetooth_permission_denied_notice">Without Nearby devices access, Meshtastic cannot find or connect to your radio over Bluetooth. You can still connect over Wi-Fi or USB.</string>
+    <string name="bluetooth_permission_denied_notice_pre31">Without Location permission, Android blocks Bluetooth scanning, so Meshtastic cannot find your radio. You can still connect over Wi-Fi or USB.</string>
     <string name="bluetooth_scan_location_services_disabled">Location services are off. Turn them on to scan for nearby devices.</string>
     <string name="bluetooth_scan_missing_permission">Bluetooth scan needs permission. Grant the Nearby devices (or Location) permission to find devices.</string>
     <string name="bluetooth_scan_start_failed">Bluetooth scan couldn't start. Try again, or toggle Bluetooth if the problem continues.</string>
@@ -990,6 +994,8 @@
     <string name="local_stats_uptime">Uptime: %1$s</string>
     <string name="local_stats_utilization">ChUtil: %1$s% | AirTX: %2$s%</string>
     <string name="location_disabled">Location access is turned off, can not provide position to mesh.</string>
+    <string name="location_permission_blocked_notice">Location access is turned off and Android will not ask again. Turn it on in app settings whenever you want the map and position sharing back.</string>
+    <string name="location_permission_denied_notice">Without location access, the map will not show where you are and Meshtastic cannot share your position with the mesh. Everything else keeps working, and you can turn it on later.</string>
     <string name="location_sharing">Location Sharing</string>
     <!-- LOCKDOWN -->
     <string name="lockdown_backoff">Try again in %1$d seconds.</string>
@@ -1344,6 +1350,8 @@
     <string name="not_connected">Not connected</string>
     <string name="note">Note</string>
     <string name="notes">Notes</string>
+    <string name="notification_permission_blocked_notice">Notifications are turned off and Android will not ask again. Turn them on in app settings to hear about new messages and alerts.</string>
+    <string name="notification_permission_denied_notice">Without notifications, Meshtastic cannot alert you to new messages, new nodes, or a low battery while the app is in the background.</string>
     <string name="notification_permissions_description">Meshtastic uses notifications to keep you updated on new messages and other important events. You can update your notification permissions at any time from settings.</string>
     <!-- NOTIFICATIONS -->
     <string name="notifications_for_channel_and_direct_messages">Notifications for channel and direct messages.</string>
@@ -1414,6 +1422,7 @@
     <string name="paxcounter_enabled">Paxcounter enabled</string>
     <string name="periodic_position_broadcast">Periodic position broadcast</string>
     <string name="permission_missing_31">Meshtastic needs "Nearby devices" permissions enabled to find and connect to devices via Bluetooth. You can disable when not in use.</string>
+    <string name="permission_missing_pre31">Meshtastic needs Location permission to find and connect to devices via Bluetooth. On this version of Android, location access is what unlocks Bluetooth scanning — Meshtastic does not use it to track you.</string>
     <string name="phone_location">Phone Location</string>
     <string name="phone_location_description">Meshtastic uses your phone's location to enable a number of features. You can update your location permissions at any time from settings.</string>
     <string name="pin_selected">Pin</string>

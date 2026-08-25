@@ -26,17 +26,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
-
-/** Tag used for identifying clickable annotations in text, specifically for linking to settings. */
-internal const val SETTINGS_TAG = "settings_link_tag"
 
 /**
  * Displays a row for a feature, including an icon, an optional title, and a subtitle.
@@ -64,38 +56,6 @@ internal fun FeatureRow(feature: FeatureUIData) {
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-        }
-    }
-}
-
-/**
- * Creates an [AnnotatedString] with a clickable portion.
- *
- * @param fullTextRes String resource for the entire text.
- * @param linkTextRes String resource for the portion of text that should be clickable.
- * @param tag A tag to identify the annotation.
- * @return An [AnnotatedString] with the specified portion styled and annotated.
- */
-@Composable
-internal fun createClickableAnnotatedString(
-    fullTextRes: StringResource,
-    linkTextRes: StringResource,
-    tag: String,
-): AnnotatedString {
-    val fullText = stringResource(fullTextRes)
-    val linkText = stringResource(linkTextRes)
-    val startIndex = fullText.indexOf(linkText)
-
-    return buildAnnotatedString {
-        append(fullText)
-        if (startIndex != -1) {
-            val endIndex = startIndex + linkText.length
-            addStyle(
-                style = SpanStyle(color = MaterialTheme.colorScheme.primary, textDecoration = TextDecoration.Underline),
-                start = startIndex,
-                end = endIndex,
-            )
-            addStringAnnotation(tag = tag, annotation = linkText, start = startIndex, end = endIndex)
         }
     }
 }

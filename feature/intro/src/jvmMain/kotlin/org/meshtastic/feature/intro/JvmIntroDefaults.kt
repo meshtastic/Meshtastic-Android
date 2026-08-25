@@ -16,18 +16,17 @@
  */
 package org.meshtastic.feature.intro
 
+import org.meshtastic.core.ui.util.PermissionUiState
+import org.meshtastic.core.ui.util.grantedPermissionUiState
+
 /** JVM/Desktop stub: permissions are always granted (desktop doesn't need BLE/location onboarding). */
 internal object JvmIntroPermissions : IntroPermissions {
-    private val grantedState =
-        object : IntroPermissionState {
-            override val isGranted: Boolean = true
+    private val granted: PermissionUiState = grantedPermissionUiState()
 
-            override fun launchRequest() = Unit
-        }
-
-    override val bluetooth: IntroPermissionState = grantedState
-    override val location: IntroPermissionState = grantedState
-    override val notification: IntroPermissionState = grantedState
+    override val bluetooth: PermissionUiState = granted
+    override val location: PermissionUiState = granted
+    override val notification: PermissionUiState = granted
+    override val bluetoothRequiresLocation: Boolean = false
 }
 
 /** JVM/Desktop stub: settings navigation is a no-op. */

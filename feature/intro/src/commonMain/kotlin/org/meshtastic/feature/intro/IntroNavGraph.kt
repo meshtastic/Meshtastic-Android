@@ -19,6 +19,8 @@ package org.meshtastic.feature.intro
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
+import org.meshtastic.core.ui.util.PermissionStatus
+import org.meshtastic.core.ui.util.PermissionUiState
 
 /** Navigation graph for the application introduction / onboarding flow. */
 @Suppress("LongMethod")
@@ -36,60 +38,51 @@ internal fun EntryProviderScope<NavKey>.introGraph(
         }
     }
 
+    /** The one action behind every permission screen's primary button, resolved by [introPermissionAction]. */
+    fun onPrimaryAction(state: PermissionUiState, current: NavKey) {
+        when (introPermissionAction(state.status)) {
+            IntroPermissionAction.ADVANCE -> navigateToNext(current)
+            IntroPermissionAction.OPEN_SETTINGS -> state.openAppSettings()
+            IntroPermissionAction.REQUEST -> state.request()
+        }
+    }
+
     entry<Welcome> { WelcomeScreen(onGetStarted = { navigateToNext(Welcome) }) }
 
     entry<Bluetooth> {
         val permissions = LocalIntroPermissions.current
-        val settingsNavigator = LocalIntroSettingsNavigator.current
-        val isGranted = permissions.bluetooth.isGranted
         BluetoothScreen(
-            showNextButton = isGranted,
+            status = permissions.bluetooth.status,
+            requiresLocation = permissions.bluetoothRequiresLocation,
             onSkip = { navigateToNext(Bluetooth) },
-            onConfigure = {
-                if (isGranted) {
-                    navigateToNext(Bluetooth)
-                } else {
-                    permissions.bluetooth.launchRequest()
-                }
-            },
-            onOpenSettings = { settingsNavigator.openAppSettings() },
+            onPrimaryAction = { onPrimaryAction(permissions.bluetooth, Bluetooth) },
         )
     }
 
     entry<Location> {
         val permissions = LocalIntroPermissions.current
-        val settingsNavigator = LocalIntroSettingsNavigator.current
-        val isGranted = permissions.location.isGranted
         LocationScreen(
-            showNextButton = isGranted,
+            status = permissions.location.status,
             onSkip = { navigateToNext(Location) },
-            onConfigure = {
-                if (isGranted) {
-                    navigateToNext(Location)
-                } else {
-                    permissions.location.launchRequest()
-                }
-            },
-            onOpenSettings = { settingsNavigator.openAppSettings() },
+            onPrimaryAction = { onPrimaryAction(permissions.location, Location) },
         )
     }
 
     entry<Notifications> {
         val permissions = LocalIntroPermissions.current
-        val settingsNavigator = LocalIntroSettingsNavigator.current
         val notificationPermission = permissions.notification
-        val isGranted = notificationPermission?.isGranted ?: true
+        // Null means the platform doesn't gate notifications at runtime, so there is nothing to configure here.
+        val status = notificationPermission?.status ?: PermissionStatus.GRANTED
         NotificationsScreen(
-            showNextButton = isGranted,
+            status = status,
             onSkip = onDone,
-            onConfigure = {
-                if (notificationPermission != null && !isGranted) {
-                    notificationPermission.launchRequest()
+            onPrimaryAction = {
+                if (notificationPermission == null) {
+                    navigateToNext(Notifications, permissionsGranted = true)
                 } else {
-                    navigateToNext(Notifications, permissionsGranted = isGranted)
+                    onPrimaryAction(notificationPermission, Notifications)
                 }
             },
-            onOpenSettings = { settingsNavigator.openAppSettings() },
         )
     }
 
