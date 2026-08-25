@@ -1004,7 +1004,9 @@
     <string name="location_disabled">Location access is turned off, can not provide position to mesh.</string>
     <string name="location_permission">Location permission</string>
     <string name="location_permission_blocked_notice">Location access is turned off and Android will not ask again. Turn it on in app settings whenever you want the map and position sharing back.</string>
+    <string name="location_permission_blocked_toast">Location permission is off. Turn it on in app settings to share your position.</string>
     <string name="location_permission_denied_notice">Without location access, the map will not show where you are and Meshtastic cannot share your position with the mesh. Everything else keeps working, and you can turn it on later.</string>
+    <string name="location_permission_rationale">Meshtastic uses your location to place you on the map, measure distance to nodes, and — only if you turn it on — share your position with the mesh. Declining leaves everything else working.</string>
     <string name="location_sharing">Location Sharing</string>
     <!-- LOCKDOWN -->
     <string name="lockdown_backoff">Try again in %1$d seconds.</string>
@@ -1363,6 +1365,7 @@
     <string name="notes">Notes</string>
     <string name="notification_permission_blocked_notice">Notifications are turned off and Android will not ask again. Turn them on in app settings to hear about new messages and alerts.</string>
     <string name="notification_permission_denied_notice">Without notifications, Meshtastic cannot alert you to new messages, new nodes, or a low battery while the app is in the background.</string>
+    <string name="notification_permission_rationale">Notifications are how Meshtastic reaches you when the app is not open: new messages, newly discovered nodes, and a radio running low on battery. Nothing else changes if you decline.</string>
     <string name="notification_permissions_description">Meshtastic uses notifications to keep you updated on new messages and other important events. You can update your notification permissions at any time from settings.</string>
     <!-- NOTIFICATIONS -->
     <string name="notifications_for_channel_and_direct_messages">Notifications for channel and direct messages.</string>
@@ -1433,8 +1436,21 @@
     <string name="paxcounter_config">Paxcounter Config</string>
     <string name="paxcounter_enabled">Paxcounter enabled</string>
     <string name="periodic_position_broadcast">Periodic position broadcast</string>
+    <!-- PERMISSION -->
+    <string name="permission_camera_summary">Scan channel and contact QR codes</string>
+    <string name="permission_local_network_summary">Find radios on your Wi-Fi network</string>
+    <string name="permission_location_summary">Show your position on the map and share it with the mesh</string>
+    <string name="permission_location_summary_pre31">Find your radio over Bluetooth, place you on the map, and share your position with the mesh</string>
     <string name="permission_missing_31">Meshtastic needs "Nearby devices" permissions enabled to find and connect to devices via Bluetooth. You can disable when not in use.</string>
     <string name="permission_missing_pre31">Meshtastic needs Location permission to find and connect to devices via Bluetooth. On this version of Android, location access is what unlocks Bluetooth scanning — Meshtastic does not use it to track you.</string>
+    <string name="permission_nearby_devices_summary">Find and connect to your radio over Bluetooth</string>
+    <string name="permission_notifications_summary">Alert you to messages, new nodes and low battery</string>
+    <string name="permission_state_allowed">Allowed</string>
+    <string name="permission_state_blocked">Blocked — tap to open system settings</string>
+    <string name="permission_state_denied">Denied — tap to allow</string>
+    <string name="permission_state_not_applicable">Not required on this version of Android</string>
+    <string name="permission_state_not_asked">Not asked yet</string>
+    <string name="permissions">Permissions</string>
     <string name="phone_location">Phone Location</string>
     <string name="phone_location_description">Meshtastic uses your phone's location to enable a number of features. You can update your location permissions at any time from settings.</string>
     <string name="pin_selected">Pin</string>

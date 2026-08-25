@@ -104,14 +104,27 @@ fun permissionGateAction(status: PermissionStatus): PermissionGateAction = when 
  * instances.
  */
 @Stable
-class PermissionUiState(val status: PermissionStatus, val request: () -> Unit, val openAppSettings: () -> Unit) {
+class PermissionUiState(
+    val status: PermissionStatus,
+    val request: () -> Unit,
+    val openAppSettings: () -> Unit,
+    /**
+     * False where the permission is not gated at runtime on this platform or API level — POST_NOTIFICATIONS before
+     * Android 13, ACCESS_LOCAL_NETWORK before Android 17, everything on desktop.
+     *
+     * Such a state reports [PermissionStatus.GRANTED], which is the right answer for a feature deciding whether it may
+     * proceed but the wrong one for a screen listing permissions: "Allowed" implies the user chose to allow it, and
+     * offers a control that would do nothing. A permissions list reads this to say "not required here" instead.
+     */
+    val isRuntimeGated: Boolean = true,
+) {
     val isGranted: Boolean
         get() = status == PermissionStatus.GRANTED
 }
 
 /** A constant [PermissionUiState] for platforms / API levels where a permission is not gated at runtime. */
 fun grantedPermissionUiState(): PermissionUiState =
-    PermissionUiState(status = PermissionStatus.GRANTED, request = {}, openAppSettings = {})
+    PermissionUiState(status = PermissionStatus.GRANTED, request = {}, openAppSettings = {}, isRuntimeGated = false)
 
 /**
  * Reduces the per-permission grant [results] of a permission group to a single granted flag.

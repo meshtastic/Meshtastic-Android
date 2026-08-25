@@ -19,16 +19,26 @@ package org.meshtastic.feature.settings.component
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.analytics_okay
 import org.meshtastic.core.resources.location_disabled
+import org.meshtastic.core.resources.location_permission
+import org.meshtastic.core.resources.location_permission_blocked_toast
+import org.meshtastic.core.resources.location_permission_rationale
 import org.meshtastic.core.resources.provide_location_to_mesh
+import org.meshtastic.core.ui.component.PermissionRationaleDialog
 import org.meshtastic.core.ui.component.SwitchListItem
 import org.meshtastic.core.ui.icon.BugReport
 import org.meshtastic.core.ui.icon.LocationOn
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.util.PermissionGateAction
 import org.meshtastic.core.ui.util.isGpsDisabled
+import org.meshtastic.core.ui.util.permissionGateAction
 import org.meshtastic.core.ui.util.rememberLocationPermissionState
 import org.meshtastic.core.ui.util.rememberShowToastResource
 
@@ -49,21 +59,48 @@ internal fun ColumnScope.PrivacySettingsContent(
     val locationPermission = rememberLocationPermissionState()
     val isGpsOff = isGpsDisabled()
 
-    // Key on the boolean grant rather than the full status so a first denial doesn't immediately re-prompt: request()
-    // covers both the never-asked and re-promptable cases, and is a harmless no-op once permanently denied.
-    LaunchedEffect(provideLocation, locationPermission.isGranted, isGpsOff) {
-        if (provideLocation) {
-            if (locationPermission.isGranted) {
-                if (!isGpsOff) {
-                    startProvideLocation()
-                } else {
-                    showToast(Res.string.location_disabled)
-                }
-            } else {
+    var showLocationRationale by remember { mutableStateOf(false) }
+
+    if (showLocationRationale) {
+        PermissionRationaleDialog(
+            titleRes = Res.string.location_permission,
+            rationaleRes = Res.string.location_permission_rationale,
+            icon = MeshtasticIcons.LocationOn,
+            onConfirm = {
+                showLocationRationale = false
                 locationPermission.request()
-            }
-        } else {
+            },
+            onDismiss = {
+                showLocationRationale = false
+                // The user declined again, so the toggle must not stay on describing something that is not happening.
+                onToggleLocation(false)
+            },
+        )
+    }
+
+    // Keyed on the full status, not just the grant. The previous version called request() for every not-granted case
+    // and noted in a comment that it was "a harmless no-op once permanently denied" — but a no-op is the whole control
+    // when it is the only thing the switch does: it flipped, nothing happened, and nothing said why.
+    LaunchedEffect(provideLocation, locationPermission.status, isGpsOff) {
+        if (!provideLocation) {
             stopProvideLocation()
+            return@LaunchedEffect
+        }
+        when (permissionGateAction(locationPermission.status)) {
+            PermissionGateAction.PROCEED ->
+                if (!isGpsOff) startProvideLocation() else showToast(Res.string.location_disabled)
+
+            PermissionGateAction.REQUEST -> locationPermission.request()
+
+            PermissionGateAction.SHOW_RATIONALE -> showLocationRationale = true
+
+            // Requesting here would do nothing at all, so send the user where the switch can actually be honoured and
+            // put it back until it can be.
+            PermissionGateAction.OPEN_SETTINGS -> {
+                onToggleLocation(false)
+                showToast(Res.string.location_permission_blocked_toast)
+                locationPermission.openAppSettings()
+            }
         }
     }
 

@@ -974,7 +974,9 @@ local_stats_utilization
 location_disabled
 location_permission
 location_permission_blocked_notice
+location_permission_blocked_toast
 location_permission_denied_notice
+location_permission_rationale
 location_sharing
 ### LOCKDOWN ###
 lockdown_backoff
@@ -1327,6 +1329,7 @@ note
 notes
 notification_permission_blocked_notice
 notification_permission_denied_notice
+notification_permission_rationale
 notification_permissions_description
 ### NOTIFICATIONS ###
 notifications_for_channel_and_direct_messages
@@ -1397,8 +1400,21 @@ paxcounter
 paxcounter_config
 paxcounter_enabled
 periodic_position_broadcast
+### PERMISSION ###
+permission_camera_summary
+permission_local_network_summary
+permission_location_summary
+permission_location_summary_pre31
 permission_missing_31
 permission_missing_pre31
+permission_nearby_devices_summary
+permission_notifications_summary
+permission_state_allowed
+permission_state_blocked
+permission_state_denied
+permission_state_not_applicable
+permission_state_not_asked
+permissions
 phone_location
 phone_location_description
 pin_selected
