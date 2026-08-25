@@ -128,6 +128,7 @@ battery
 battery_ina_2xx_i2c_address
 ble_devices
 ble_rssi_threshold_defaults_to_80
+ble_scan_needs_location_services
 blue
 ### BLUETOOTH ###
 bluetooth
@@ -142,8 +143,12 @@ bluetooth_feature_discovery_description
 bluetooth_permission
 bluetooth_permission_blocked_notice
 bluetooth_permission_blocked_notice_pre31
+bluetooth_permission_blocked_rationale
+bluetooth_permission_blocked_rationale_pre31
 bluetooth_permission_denied_notice
 bluetooth_permission_denied_notice_pre31
+bluetooth_permission_rationale
+bluetooth_permission_rationale_pre31
 bluetooth_scan_location_services_disabled
 bluetooth_scan_missing_permission
 bluetooth_scan_start_failed
@@ -949,7 +954,9 @@ load_indexed
 loading
 ### LOCAL ###
 local_mbtiles_file
+local_network_permission
 local_network_permission_denied_hint
+local_network_permission_rationale
 local_stats_bad
 local_stats_battery
 local_stats_diagnostics_prefix
@@ -963,7 +970,9 @@ local_stats_traffic
 local_stats_updated_at
 local_stats_uptime
 local_stats_utilization
+### LOCATION ###
 location_disabled
+location_permission
 location_permission_blocked_notice
 location_permission_denied_notice
 location_sharing
@@ -1211,6 +1220,7 @@ name
 name_cannot_be_empty
 navigate_back
 navigate_into_label
+nearby_devices_permission
 need_hardware
 need_hardware_description
 neighbor_info
@@ -1312,6 +1322,7 @@ noise_floor_no_reading
 none
 none_quality
 not_connected
+not_now
 note
 notes
 notification_permission_blocked_notice
@@ -1340,6 +1351,7 @@ only_favorites
 ### OPEN ###
 open_bluetooth_settings
 open_compass
+open_location_settings
 open_settings
 open_source_description
 open_source_libraries

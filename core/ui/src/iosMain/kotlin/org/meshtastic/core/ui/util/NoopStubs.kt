@@ -61,6 +61,8 @@ actual fun KeepScreenOn(enabled: Boolean) {
 
 @Composable actual fun rememberOpenWifiSettings(): () -> Unit = {}
 
+actual val bleScanRequiresLocationServices: Boolean = false
+
 @Composable actual fun isGpsDisabled(): Boolean = false
 
 @Composable actual fun isBluetoothDisabled(): Boolean = false

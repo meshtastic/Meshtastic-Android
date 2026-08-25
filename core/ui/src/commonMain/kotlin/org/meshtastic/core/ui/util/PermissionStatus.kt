@@ -56,6 +56,45 @@ fun computePermissionStatus(granted: Boolean, hasRequested: Boolean, shouldShowR
     }
 
 /**
+ * The step a feature should take when the user asks for something a runtime permission gates.
+ *
+ * This is the decision tree from the Android permissions guidance
+ * (https://developer.android.com/training/permissions/requesting) expressed as data, so a call site can honour it with
+ * an exhaustive `when` instead of an ad-hoc boolean check. The branch that is easiest to miss — and the one this type
+ * exists to make unmissable — is [SHOW_RATIONALE]: the guidance requires an educational UI *before* a re-request, and
+ * that request is the one that can turn a recoverable denial into a permanent one.
+ */
+enum class PermissionGateAction {
+    /** The permission is held; run the gated action. */
+    PROCEED,
+
+    /** Never asked. The guidance says to request directly here — a rationale before the first prompt is noise. */
+    REQUEST,
+
+    /**
+     * Denied at least once while the system will still prompt. Show an educational UI naming what the feature does and
+     * what stays disabled if declined, with a way to back out, and only re-request if the user agrees.
+     */
+    SHOW_RATIONALE,
+
+    /** The system will no longer show its dialog; requesting is a silent no-op. Offer the app's settings page. */
+    OPEN_SETTINGS,
+}
+
+/**
+ * Maps a [PermissionStatus] to the [PermissionGateAction] a caller should take.
+ *
+ * Pure and platform-agnostic so the mapping can be unit-tested in `commonTest`, and so every gated feature shares one
+ * implementation of the guidance rather than each re-deriving it.
+ */
+fun permissionGateAction(status: PermissionStatus): PermissionGateAction = when (status) {
+    PermissionStatus.GRANTED -> PermissionGateAction.PROCEED
+    PermissionStatus.NOT_REQUESTED -> PermissionGateAction.REQUEST
+    PermissionStatus.DENIED_CAN_RETRY -> PermissionGateAction.SHOW_RATIONALE
+    PermissionStatus.PERMANENTLY_DENIED -> PermissionGateAction.OPEN_SETTINGS
+}
+
+/**
  * A reactive snapshot of a runtime permission plus the actions a caller can take. Produced by the
  * `rememberXxxPermissionState()` composables and recomputed on `ON_RESUME` so it stays fresh when the user returns from
  * a permission dialog or the system settings screen.

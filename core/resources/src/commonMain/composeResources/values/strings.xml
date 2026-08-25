@@ -146,6 +146,7 @@
     <string name="battery_ina_2xx_i2c_address">Battery INA_2XX I2C address</string>
     <string name="ble_devices">Bluetooth Devices</string>
     <string name="ble_rssi_threshold_defaults_to_80">BLE RSSI threshold (defaults to -80)</string>
+    <string name="ble_scan_needs_location_services">Bluetooth scanning also needs location services switched on for this version of Android. Your position is not used.</string>
     <string name="blue">Blue</string>
     <!-- BLUETOOTH -->
     <string name="bluetooth">Bluetooth</string>
@@ -160,8 +161,12 @@
     <string name="bluetooth_permission">Bluetooth</string>
     <string name="bluetooth_permission_blocked_notice">Nearby devices access is turned off and Android will not ask again. Turn it on in app settings to connect over Bluetooth, or connect over Wi-Fi or USB instead.</string>
     <string name="bluetooth_permission_blocked_notice_pre31">Location permission is turned off and Android will not ask again. Turn it on in app settings to scan for Bluetooth devices, or connect over Wi-Fi or USB instead.</string>
+    <string name="bluetooth_permission_blocked_rationale">Nearby devices access is off and Android will not ask again. Turn it on in app settings to scan and connect over Bluetooth.</string>
+    <string name="bluetooth_permission_blocked_rationale_pre31">Location permission is off and Android will not ask again. Turn it on in app settings to scan and connect over Bluetooth.</string>
     <string name="bluetooth_permission_denied_notice">Without Nearby devices access, Meshtastic cannot find or connect to your radio over Bluetooth. You can still connect over Wi-Fi or USB.</string>
     <string name="bluetooth_permission_denied_notice_pre31">Without Location permission, Android blocks Bluetooth scanning, so Meshtastic cannot find your radio. You can still connect over Wi-Fi or USB.</string>
+    <string name="bluetooth_permission_rationale">Meshtastic needs Nearby devices access to find your radio and connect to it. It is used only to talk to your own devices, never to work out where you are. Without it, Bluetooth is unavailable — Wi-Fi and USB still work.</string>
+    <string name="bluetooth_permission_rationale_pre31">Meshtastic needs Location permission because this version of Android treats Bluetooth scanning as a location capability. Your position is never read or shared for this. Without it, Bluetooth is unavailable — Wi-Fi and USB still work.</string>
     <string name="bluetooth_scan_location_services_disabled">Location services are off. Turn them on to scan for nearby devices.</string>
     <string name="bluetooth_scan_missing_permission">Bluetooth scan needs permission. Grant the Nearby devices (or Location) permission to find devices.</string>
     <string name="bluetooth_scan_start_failed">Bluetooth scan couldn't start. Try again, or toggle Bluetooth if the problem continues.</string>
@@ -979,7 +984,9 @@
     <string name="loading">Loading</string>
     <!-- LOCAL -->
     <string name="local_mbtiles_file">Local MBTiles File</string>
+    <string name="local_network_permission">Local network permission</string>
     <string name="local_network_permission_denied_hint">Local network access is turned off for Meshtastic. If this radio is on your local network, the connection will fail until you allow local network access in system settings.</string>
+    <string name="local_network_permission_rationale">Meshtastic needs local network access to find radios on your Wi-Fi. It only looks on the network you are already connected to. Without it, you can still reach a radio by typing its address.</string>
     <string name="local_stats_bad">Bad %1$d</string>
     <string name="local_stats_battery">Battery: %1$d%</string>
     <string name="local_stats_diagnostics_prefix">Diagnostics: %1$s</string>
@@ -993,7 +1000,9 @@
     <string name="local_stats_updated_at">%1$s</string>
     <string name="local_stats_uptime">Uptime: %1$s</string>
     <string name="local_stats_utilization">ChUtil: %1$s% | AirTX: %2$s%</string>
+    <!-- LOCATION -->
     <string name="location_disabled">Location access is turned off, can not provide position to mesh.</string>
+    <string name="location_permission">Location permission</string>
     <string name="location_permission_blocked_notice">Location access is turned off and Android will not ask again. Turn it on in app settings whenever you want the map and position sharing back.</string>
     <string name="location_permission_denied_notice">Without location access, the map will not show where you are and Meshtastic cannot share your position with the mesh. Everything else keeps working, and you can turn it on later.</string>
     <string name="location_sharing">Location Sharing</string>
@@ -1247,6 +1256,7 @@
     <string name="name_cannot_be_empty">Name cannot be empty.</string>
     <string name="navigate_back">Navigate Back</string>
     <string name="navigate_into_label">Navigate Into</string>
+    <string name="nearby_devices_permission">Nearby devices permission</string>
     <string name="need_hardware">Need Hardware?</string>
     <string name="need_hardware_description">Meshtastic requires a compatible device. Our backers and partners offer ready-to-use hardware. Here are some of the most popular options.</string>
     <string name="neighbor_info">Neighbor Info</string>
@@ -1348,6 +1358,7 @@
     <string name="none">None (disable)</string>
     <string name="none_quality">None</string>
     <string name="not_connected">Not connected</string>
+    <string name="not_now">Not now</string>
     <string name="note">Note</string>
     <string name="notes">Notes</string>
     <string name="notification_permission_blocked_notice">Notifications are turned off and Android will not ask again. Turn them on in app settings to hear about new messages and alerts.</string>
@@ -1376,6 +1387,7 @@
     <!-- OPEN -->
     <string name="open_bluetooth_settings">Open Bluetooth settings</string>
     <string name="open_compass">Open Compass</string>
+    <string name="open_location_settings">Open location settings</string>
     <string name="open_settings">Open settings</string>
     <string name="open_source_description">Meshtastic is built with the following open source libraries. Tap any library to view its license.</string>
     <string name="open_source_libraries">Open Source Libraries</string>
