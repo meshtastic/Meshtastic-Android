@@ -66,6 +66,7 @@ jetbrains-adaptive = "1.3.0-beta02"
 # with 5.0.0 every KML/KMZ map import dies with NoSuchMethodError (fatal in prod, 2.8.0–2.8.1).
 # 5.1.1 is built against xmlutil 1.0.x's compat builder. Guarded by KmlParserLinkageTest.
 android-maps-utils = "5.1.1"
+maplibre-compose = "0.14.0"
 maps-compose = "8.5.0"
 
 # ML Kit
@@ -210,6 +211,16 @@ koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
 koin-test = { module = "io.insert-koin:koin-test", version.ref = "koin" }
 koin-annotations = { module = "io.insert-koin:koin-annotations", version.ref = "koin" }
 android-maps-utils = { module = "com.google.maps.android:android-maps-utils", version.ref = "android-maps-utils" }
+maplibre-compose = { module = "org.maplibre.compose:maplibre-compose", version.ref = "maplibre-compose" }
+maplibre-compose-material3 = { module = "org.maplibre.compose:maplibre-compose-material3", version.ref = "maplibre-compose" }
+# Desktop-only native runtimes. Each publishes the maplibre-native FFI blob for one OS/arch; the
+# desktopApp picks the one matching the host at packaging time. No macos-x64 artifact is published
+# upstream, which matches our release matrix (macos-latest is arm64).
+maplibre-compose-runtime-metal-macos-arm64 = { module = "org.maplibre.compose:maplibre-compose-runtime-metal-macos-arm64", version.ref = "maplibre-compose" }
+maplibre-compose-runtime-vulkan-linux-arm64 = { module = "org.maplibre.compose:maplibre-compose-runtime-vulkan-linux-arm64", version.ref = "maplibre-compose" }
+maplibre-compose-runtime-vulkan-linux-x64 = { module = "org.maplibre.compose:maplibre-compose-runtime-vulkan-linux-x64", version.ref = "maplibre-compose" }
+maplibre-compose-runtime-vulkan-windows-arm64 = { module = "org.maplibre.compose:maplibre-compose-runtime-vulkan-windows-arm64", version.ref = "maplibre-compose" }
+maplibre-compose-runtime-vulkan-windows-x64 = { module = "org.maplibre.compose:maplibre-compose-runtime-vulkan-windows-x64", version.ref = "maplibre-compose" }
 maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "maps-compose" }
 maps-compose-utils = { module = "com.google.maps.android:maps-compose-utils", version.ref = "maps-compose" }
 maps-compose-widgets = { module = "com.google.maps.android:maps-compose-widgets", version.ref = "maps-compose" }

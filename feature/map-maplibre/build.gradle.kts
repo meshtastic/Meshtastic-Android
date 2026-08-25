@@ -19,27 +19,40 @@ plugins {
     alias(libs.plugins.meshtastic.kotlinx.serialization)
 }
 
+// MapLibre map surfaces for the flavors that are not Google Maps: the F-Droid Android flavor and
+// the desktop app. Deliberately a separate module rather than source sets inside `:feature:map` —
+// that module compiles into BOTH Android flavors, so MapLibre living there would pull
+// maplibre-native's .so payload into the Play Store build for no reason. Nothing here may be
+// depended on by `androidApp`'s `google` flavor.
 kotlin {
-    // Desktop needs this module: MapScreen and the shared map view models are common code, and
-    // :feature:map-maplibre renders them on the JVM target.
     jvm()
 
-    android { withHostTest { isIncludeAndroidResources = true } }
+    @Suppress("UnstableApiUsage")
+    android {
+        namespace = "org.meshtastic.feature.map.maplibre"
+        androidResources.enable = false
+        withHostTest { isIncludeAndroidResources = true }
+    }
 
     sourceSets {
         commonMain.dependencies {
-            implementation(libs.kotlinx.collections.immutable)
+            implementation(projects.core.common)
             implementation(projects.core.data)
-            implementation(projects.core.database)
-            implementation(projects.core.datastore)
+            implementation(projects.core.di)
             implementation(projects.core.model)
             implementation(projects.core.navigation)
             implementation(projects.core.prefs)
-            implementation(libs.meshtastic.protobufs)
-            implementation(projects.core.service)
+            implementation(projects.core.repository)
             implementation(projects.core.resources)
+            implementation(projects.core.service)
             implementation(projects.core.ui)
-            implementation(projects.core.di)
+            implementation(projects.feature.map)
+
+            implementation(libs.kotlinx.collections.immutable)
+            implementation(libs.meshtastic.protobufs)
+
+            api(libs.maplibre.compose)
+            api(libs.maplibre.compose.material3)
         }
     }
 }
