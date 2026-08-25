@@ -53,22 +53,29 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
@@ -664,35 +671,94 @@ private fun LazyListScope.contactSection(
 /**
  * One-handed row actions: swipe toward the reading direction to mute, away from it to delete.
  *
- * `confirmValueChange` always returns false, so the row never actually dismisses — it fires the action and springs
- * back. Mute is instant and undoable from a snackbar; delete is not, because [ContactsViewModel.deleteContacts] hard
- * deletes the conversation's packets with nothing to restore from, so it routes into the same confirmation dialog the
- * selection toolbar uses.
+ * The action fires from `onDismiss`, which the box raises once per settle. It must not fire from `confirmValueChange`:
+ * that runs from the fling's `calculateSnapOffset`, so it is called once per frame — a single swipe fired mute nine
+ * times, leaving the result decided by frame-count parity and stacking a snackbar per call. It is also deprecated in
+ * `AnchoredDraggable`, which directs callers at the anchor set instead.
+ *
+ * `SwipeToDismissBox` disables its own gestures while the row is settled in a dismissed direction, so animating home is
+ * what re-arms the next swipe rather than mere decoration.
+ *
+ * Mute is instant and undoable from a snackbar; delete is not, because [ContactsViewModel.deleteContacts] hard deletes
+ * the conversation's packets with nothing to restore from, so it routes into the same confirmation dialog the selection
+ * toolbar uses.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SwipeableContactRow(
+internal fun SwipeableContactRow(
     contact: Contact,
     enabled: Boolean,
     onMute: () -> Unit,
     onDelete: () -> Unit,
     content: @Composable () -> Unit,
 ) {
-    val dismissState =
-        rememberSwipeToDismissBoxState(
-            confirmValueChange = { value ->
-                when (value) {
-                    SwipeToDismissBoxValue.StartToEnd -> onMute()
-                    SwipeToDismissBoxValue.EndToStart -> onDelete()
-                    SwipeToDismissBoxValue.Settled -> Unit
+    // These outlive a recomposition, so without them the callbacks would stay the ones captured the first time — and
+    // they read the contact's mute state, which is exactly what a swipe changes.
+    val currentOnMute by rememberUpdatedState(onMute)
+    val currentOnDelete by rememberUpdatedState(onDelete)
+    val dismissState = rememberSwipeToDismissBoxState()
+    val haptics = LocalHapticFeedback.current
+    LaunchedEffect(dismissState) {
+        // A tick the moment the swipe becomes eligible, so the row can be committed or dragged back without
+        // watching it. `snapshotFlow` is distinct-until-changed, so re-crossing the threshold ticks again.
+        snapshotFlow { dismissState.targetValue }
+            .collect { target ->
+                if (target != SwipeToDismissBoxValue.Settled) {
+                    haptics.performHapticFeedback(HapticFeedbackType.GestureThresholdActivate)
                 }
-                false
-            },
-        )
+            }
+    }
+    // Kept stable on purpose: the box raises `onDismiss` from a `LaunchedEffect` keyed on the lambda, so a fresh one
+    // each recomposition would re-fire the action for a row that is still settled open.
+    val onDismiss = remember {
+        { direction: SwipeToDismissBoxValue ->
+            when (direction) {
+                SwipeToDismissBoxValue.StartToEnd -> currentOnMute()
+                SwipeToDismissBoxValue.EndToStart -> currentOnDelete()
+                SwipeToDismissBoxValue.Settled -> Unit
+            }
+        }
+    }
+    LaunchedEffect(dismissState) {
+        snapshotFlow { dismissState.settledValue }
+            .collect { settled ->
+                if (settled == SwipeToDismissBoxValue.Settled) return@collect
+                // `AnchoredDraggableState` serialises mutations, so the first attempt can lose to the gesture's own
+                // settle still holding the mutex; retrying wins uncontended rather than leaving the row stranded.
+                while (dismissState.currentValue != SwipeToDismissBoxValue.Settled) {
+                    try {
+                        dismissState.reset()
+                    } catch (interrupted: CancellationException) {
+                        // Ours to retry unless the effect itself is going away.
+                        if (!currentCoroutineContext().isActive) throw interrupted
+                    }
+                }
+            }
+    }
+    // The same two actions without the gesture: a swipe is unusable under a screen reader, and Material asks for a
+    // non-swipe route to anything a swipe can reach.
+    val muteLabel =
+        stringResource(if (contact.isMuted) Res.string.swipe_action_unmute else Res.string.swipe_action_mute)
+    val deleteLabel = stringResource(Res.string.swipe_action_delete)
+    val rowActions =
+        remember(muteLabel, deleteLabel) {
+            listOf(
+                CustomAccessibilityAction(muteLabel) {
+                    currentOnMute()
+                    true
+                },
+                CustomAccessibilityAction(deleteLabel) {
+                    currentOnDelete()
+                    true
+                },
+            )
+        }
     SwipeToDismissBox(
         state = dismissState,
         backgroundContent = { SwipeBackground(dismissState.dismissDirection, contact.isMuted) },
+        modifier = Modifier.semantics { customActions = rowActions },
         gesturesEnabled = enabled,
+        onDismiss = onDismiss,
         content = { content() },
     )
 }

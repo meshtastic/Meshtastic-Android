@@ -41,14 +41,16 @@ class SnackbarManagerTest {
     }
 
     @Test
-    fun showSnackbar_with_action_defaults_to_indefinite_duration() = runTest {
+    fun showSnackbar_with_action_defaults_to_long_duration() = runTest {
         snackbarManager.events.test {
             snackbarManager.showSnackbar(message = "Deleted", actionLabel = "Undo")
 
             val event = awaitItem()
             assertEquals("Deleted", event.message)
             assertEquals("Undo", event.actionLabel)
-            assertEquals(SnackbarDuration.Indefinite, event.duration)
+            // Not Indefinite: the host collects events one at a time and suspends for the snackbar's lifetime, so an
+            // action snackbar that never times out would hold every later snackbar behind it.
+            assertEquals(SnackbarDuration.Long, event.duration)
         }
     }
 
