@@ -16,11 +16,6 @@
  */
 package org.meshtastic.feature.map.maplibre.geojson
 
-import kotlin.math.PI
-import kotlin.math.asin
-import kotlin.math.atan2
-import kotlin.math.cos
-import kotlin.math.sin
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
@@ -29,6 +24,11 @@ import org.maplibre.spatialk.geojson.FeatureCollection
 import org.maplibre.spatialk.geojson.Polygon
 import org.maplibre.spatialk.geojson.Position
 import org.meshtastic.core.model.Node
+import kotlin.math.PI
+import kotlin.math.asin
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.sin
 
 /** Mean Earth radius, metres (IUGG). */
 private const val EARTH_RADIUS_M = 6371008.8
@@ -42,10 +42,15 @@ private const val RAD_TO_DEG = 180.0 / PI
 /**
  * Walks [distanceMeters] from ([latitude], [longitude]) along [bearingDegrees] on a sphere.
  *
- * Great-circle rather than a flat offset: a 23 km precision circle at high latitude is visibly
- * lopsided if you just add degrees.
+ * Great-circle rather than a flat offset: a 23 km precision circle at high latitude is visibly lopsided if you just add
+ * degrees.
  */
-internal fun destination(latitude: Double, longitude: Double, distanceMeters: Double, bearingDegrees: Double): Position {
+internal fun destination(
+    latitude: Double,
+    longitude: Double,
+    distanceMeters: Double,
+    bearingDegrees: Double,
+): Position {
     val angular = distanceMeters / EARTH_RADIUS_M
     val bearing = bearingDegrees * DEG_TO_RAD
     val lat1 = latitude * DEG_TO_RAD
@@ -60,8 +65,8 @@ internal fun destination(latitude: Double, longitude: Double, distanceMeters: Do
 /**
  * A closed polygon ring approximating a circle of [radiusMeters] on the ground.
  *
- * MapLibre circle radii are screen-space, so a ground-truth circle has to be a real polygon —
- * otherwise the "precision" it communicates would change every time the user zooms.
+ * MapLibre circle radii are screen-space, so a ground-truth circle has to be a real polygon — otherwise the "precision"
+ * it communicates would change every time the user zooms.
  */
 internal fun circlePolygon(
     latitude: Double,
@@ -69,33 +74,29 @@ internal fun circlePolygon(
     radiusMeters: Double,
     steps: Int = CIRCLE_STEPS,
 ): Polygon {
-    val ring =
-        (0 until steps).map { i ->
-            destination(latitude, longitude, radiusMeters, i * (360.0 / steps))
-        }
+    val ring = (0 until steps).map { i -> destination(latitude, longitude, radiusMeters, i * (360.0 / steps)) }
     return Polygon(listOf(ring + ring.first()))
 }
 
 /**
  * Ground circles for every node broadcasting a degraded position.
  *
- * Nodes at full precision contribute nothing, so an empty collection here means "no one is
- * obscuring their location", not "the layer failed".
+ * Nodes at full precision contribute nothing, so an empty collection here means "no one is obscuring their location",
+ * not "the layer failed".
  */
-fun precisionCirclesToFeatureCollection(nodes: List<Node>): FeatureCollection<Polygon, JsonObject?> =
-    FeatureCollection(
-        nodes.mapNotNull { node ->
-            node.validPosition ?: return@mapNotNull null
-            val radius = precisionMeters(node.position.precision_bits ?: 0) ?: return@mapNotNull null
-            val (_, background) = node.colors
-            Feature(
-                geometry = circlePolygon(node.latitude, node.longitude, radius),
-                properties =
-                buildJsonObject {
-                    put(NodeFeatureKeys.NODE_NUM, node.num)
-                    put(NodeFeatureKeys.BACKGROUND, background.toCssHex())
-                    put(NodeFeatureKeys.PRECISION_METERS, radius)
-                },
-            )
-        },
-    )
+fun precisionCirclesToFeatureCollection(nodes: List<Node>): FeatureCollection<Polygon, JsonObject?> = FeatureCollection(
+    nodes.mapNotNull { node ->
+        node.validPosition ?: return@mapNotNull null
+        val radius = precisionMeters(node.position.precision_bits ?: 0) ?: return@mapNotNull null
+        val (_, background) = node.colors
+        Feature(
+            geometry = circlePolygon(node.latitude, node.longitude, radius),
+            properties =
+            buildJsonObject {
+                put(NodeFeatureKeys.NODE_NUM, node.num)
+                put(NodeFeatureKeys.BACKGROUND, background.toCssHex())
+                put(NodeFeatureKeys.PRECISION_METERS, radius)
+            },
+        )
+    },
+)

@@ -33,9 +33,8 @@ internal fun RasterTileSpec.toTileSetOptions(): TileSetOptions =
 /**
  * Renders a raster basemap.
  *
- * Vector basemaps are handed to MapLibre as a style URL and need nothing here; raster ones are
- * drawn as an ordinary layer over the empty style, which keeps both kinds interchangeable from the
- * caller's point of view.
+ * Vector basemaps are handed to MapLibre as a style URL and need nothing here; raster ones are drawn as an ordinary
+ * layer over the empty style, which keeps both kinds interchangeable from the caller's point of view.
  */
 @Composable
 internal fun RasterBasemapLayer(basemap: Basemap.Raster) {
@@ -49,6 +48,7 @@ internal fun MapOverlayLayers(overlays: List<MapOverlay>) {
     overlays.forEach { overlay ->
         when (overlay) {
             is MapOverlay.Hillshade -> HillshadeOverlayLayer(overlay)
+
             is MapOverlay.Raster -> {
                 val source = rememberRasterSource(tiles = overlay.spec.tiles, options = overlay.spec.toTileSetOptions())
                 RasterLayer(id = "overlay-${overlay.id}", source = source)

@@ -18,9 +18,9 @@ package org.meshtastic.feature.map.maplibre
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -45,8 +45,8 @@ import org.meshtastic.feature.map.maplibre.style.MapOverlays
 /**
  * MapLibre implementation of [MapViewProvider], shared by the F-Droid flavor and the desktop app.
  *
- * Not a Koin `@Single`: the two call sites construct it directly, which keeps this module free of
- * any assumption about how the host app wires its graph.
+ * Not a Koin `@Single`: the two call sites construct it directly, which keeps this module free of any assumption about
+ * how the host app wires its graph.
  */
 class MapLibreMapViewProvider : MapViewProvider {
 

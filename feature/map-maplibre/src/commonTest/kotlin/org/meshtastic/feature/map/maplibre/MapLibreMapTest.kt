@@ -16,12 +16,6 @@
  */
 package org.meshtastic.feature.map.maplibre
 
-import kotlin.math.abs
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
 import org.meshtastic.core.model.Node
 import org.meshtastic.feature.map.BaseMapViewModel
 import org.meshtastic.feature.map.LastHeardFilter
@@ -33,6 +27,12 @@ import org.meshtastic.feature.map.maplibre.style.Basemap
 import org.meshtastic.feature.map.maplibre.style.Basemaps
 import org.meshtastic.feature.map.maplibre.style.MapOverlays
 import org.meshtastic.proto.Position
+import kotlin.math.abs
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 private fun node(
     num: Int,
@@ -84,7 +84,10 @@ class BasemapRegistryTest {
     fun `hillshade is terrarium encoded`() {
         // MapLibre defaults raster-DEM to Mapbox Terrain-RGB, and the mismatch fails silently:
         // shading still renders, it is just wrong. Pin the encoding here.
-        assertEquals(MapOverlays.Hillshade.encoding, org.meshtastic.feature.map.maplibre.style.MapOverlay.DemEncoding.TERRARIUM)
+        assertEquals(
+            MapOverlays.Hillshade.encoding,
+            org.meshtastic.feature.map.maplibre.style.MapOverlay.DemEncoding.TERRARIUM,
+        )
     }
 
     @Test
@@ -130,16 +133,14 @@ class PrecisionCircleTest {
 }
 
 class MapGeometryTest {
-    private fun filters(
-        onlyFavorites: Boolean = false,
-        lastHeard: LastHeardFilter = LastHeardFilter.Any,
-    ) = BaseMapViewModel.MapFilterState(
-        onlyFavorites = onlyFavorites,
-        showWaypoints = true,
-        showPrecisionCircle = true,
-        lastHeardFilter = lastHeard,
-        lastHeardTrackFilter = LastHeardFilter.Any,
-    )
+    private fun filters(onlyFavorites: Boolean = false, lastHeard: LastHeardFilter = LastHeardFilter.Any) =
+        BaseMapViewModel.MapFilterState(
+            onlyFavorites = onlyFavorites,
+            showWaypoints = true,
+            showPrecisionCircle = true,
+            lastHeardFilter = lastHeard,
+            lastHeardTrackFilter = LastHeardFilter.Any,
+        )
 
     @Test
     fun `nodes without a fix never reach the map`() {

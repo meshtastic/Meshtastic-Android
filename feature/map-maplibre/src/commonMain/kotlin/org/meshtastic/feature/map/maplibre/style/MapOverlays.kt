@@ -17,8 +17,8 @@
 package org.meshtastic.feature.map.maplibre.style
 
 /**
- * Overlays that composite on top of whichever [Basemap] is selected. Unlike basemaps these are
- * independently toggleable and may be stacked.
+ * Overlays that composite on top of whichever [Basemap] is selected. Unlike basemaps these are independently toggleable
+ * and may be stacked.
  */
 sealed interface MapOverlay {
     val id: String
@@ -50,17 +50,17 @@ sealed interface MapOverlay {
 /**
  * Overlay registry.
  *
- * Terrain shading is the one addition the OSMdroid map never had, and it earns its place here: LoRa
- * range is terrain-limited, so hillshade explains a failed link in a way a flat basemap cannot.
+ * Terrain shading is the one addition the OSMdroid map never had, and it earns its place here: LoRa range is
+ * terrain-limited, so hillshade explains a failed link in a way a flat basemap cannot.
  */
 object MapOverlays {
 
     /**
      * AWS Open Data terrain tiles (the former Mazen/Tilezen set) — free, keyless, global.
      *
-     * The encoding MUST stay [MapOverlay.DemEncoding.TERRARIUM]: MapLibre defaults raster-DEM
-     * sources to Mapbox Terrain-RGB, and feeding Terrarium PNGs to that decoder yields silently
-     * wrong elevations — plausible-looking shading, no error anywhere.
+     * The encoding MUST stay [MapOverlay.DemEncoding.TERRARIUM]: MapLibre defaults raster-DEM sources to Mapbox
+     * Terrain-RGB, and feeding Terrarium PNGs to that decoder yields silently wrong elevations — plausible-looking
+     * shading, no error anywhere.
      */
     val Hillshade =
         MapOverlay.Hillshade(
@@ -78,9 +78,8 @@ object MapOverlays {
     /**
      * NOAA nowCOAST NEXRAD reflectivity, carried over from the OSMdroid map.
      *
-     * WMS is not an XYZ scheme, so this leans on MapLibre's `{bbox-epsg-3857}` placeholder, which
-     * expands to the tile's projected bounds. Kept at 1.1.0 with `SRS` (not `CRS`) to match the
-     * request the OSMdroid source was making.
+     * WMS is not an XYZ scheme, so this leans on MapLibre's `{bbox-epsg-3857}` placeholder, which expands to the tile's
+     * projected bounds. Kept at 1.1.0 with `SRS` (not `CRS`) to match the request the OSMdroid source was making.
      */
     val NoaaRadar =
         MapOverlay.Raster(
@@ -107,20 +106,25 @@ object MapOverlays {
     fun byId(id: String?): MapOverlay? = all.firstOrNull { it.id == id }
 
     /**
-     * OpenWeatherMap precipitation. Carried over from the OSMdroid map, where it was wired up with
-     * an empty appid and so never actually rendered; it stays behind a caller-supplied key rather
-     * than shipping another broken entry in the layer menu.
+     * OpenWeatherMap precipitation. Carried over from the OSMdroid map, where it was wired up with an empty appid and
+     * so never actually rendered; it stays behind a caller-supplied key rather than shipping another broken entry in
+     * the layer menu.
      */
-    fun openWeatherPrecipitation(apiKey: String): MapOverlay.Raster? = apiKey.takeIf { it.isNotBlank() }?.let { key ->
-        MapOverlay.Raster(
-            id = "owm-precipitation",
-            label = "Precipitation",
-            spec =
-            RasterTileSpec(
-                tiles = listOf("https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=$key"),
-                maxZoom = 19,
-                attributionHtml = "&copy; OpenWeather",
-            ),
-        )
-    }
+    fun openWeatherPrecipitation(apiKey: String): MapOverlay.Raster? = apiKey
+        .takeIf { it.isNotBlank() }
+        ?.let { key ->
+            MapOverlay.Raster(
+                id = "owm-precipitation",
+                label = "Precipitation",
+                spec =
+                RasterTileSpec(
+                    tiles =
+                    listOf(
+                        "https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=$key",
+                    ),
+                    maxZoom = 19,
+                    attributionHtml = "&copy; OpenWeather",
+                ),
+            )
+        }
 }

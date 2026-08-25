@@ -25,8 +25,8 @@ import org.meshtastic.feature.map.LastHeardFilter
 /**
  * Applies the map's filter chips to the node list.
  *
- * Pure so it can be tested without a renderer: the filter rules are the part users notice when
- * they go wrong, and they should not need a GPU to verify.
+ * Pure so it can be tested without a renderer: the filter rules are the part users notice when they go wrong, and they
+ * should not need a GPU to verify.
  */
 fun filterNodesForMap(nodes: List<Node>, filterState: BaseMapViewModel.MapFilterState, nowSeconds: Long): List<Node> =
     nodes
@@ -40,8 +40,8 @@ fun filterNodesForMap(nodes: List<Node>, filterState: BaseMapViewModel.MapFilter
 /**
  * Bounding box covering every supplied node, or null when fewer than one node has a fix.
  *
- * Returning null rather than a degenerate box at (0, 0) is deliberate — the OSMdroid map's habit
- * of flying through the Atlantic on startup came from treating "no data yet" as a real location.
+ * Returning null rather than a degenerate box at (0, 0) is deliberate — the OSMdroid map's habit of flying through the
+ * Atlantic on startup came from treating "no data yet" as a real location.
  */
 fun nodesBoundingBox(nodes: List<Node>): BoundingBox? {
     val located = nodes.filter { it.validPosition != null }

@@ -45,12 +45,12 @@ import org.maplibre.spatialk.geojson.Feature
 import org.maplibre.spatialk.geojson.FeatureCollection
 import org.maplibre.spatialk.geojson.LineString
 import org.maplibre.spatialk.geojson.Point
-import org.maplibre.spatialk.geojson.Position as GeoPosition
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.ui.util.DiscoveryMapNode
 import org.meshtastic.feature.map.maplibre.geojson.nodesToFeatureCollection
 import org.meshtastic.feature.map.maplibre.layers.TracerouteLayers
 import org.meshtastic.feature.map.maplibre.style.Basemaps
+import org.maplibre.spatialk.geojson.Position as GeoPosition
 import org.meshtastic.proto.Position as ProtoPosition
 
 private const val DEG_SCALE = 1e-7
@@ -235,8 +235,7 @@ fun MapLibreTracerouteMap(
         SymbolLayer(
             id = "traceroute-hop-labels",
             source = hopSource,
-            textField =
-            feature[org.meshtastic.feature.map.maplibre.geojson.NodeFeatureKeys.SHORT_NAME].asString(),
+            textField = feature[org.meshtastic.feature.map.maplibre.geojson.NodeFeatureKeys.SHORT_NAME].asString(),
             textColor = const(Color.White),
             textAllowOverlap = const(true),
         )
@@ -251,13 +250,8 @@ fun MapLibreDiscoveryMap(
     nodes: List<DiscoveryMapNode>,
     modifier: Modifier = Modifier,
 ) {
-    val cameraState =
-        rememberCameraState(
-            CameraPosition(
-                target = GeoPosition(longitude = userLongitude, latitude = userLatitude),
-                zoom = DETAIL_ZOOM,
-            ),
-        )
+    val scanner = GeoPosition(longitude = userLongitude, latitude = userLatitude)
+    val cameraState = rememberCameraState(CameraPosition(target = scanner, zoom = DETAIL_ZOOM))
 
     MaplibreMap(baseStyle = defaultStyle, cameraState = cameraState, modifier = modifier) {
         val discovered =
@@ -267,8 +261,7 @@ fun MapLibreDiscoveryMap(
                     FeatureCollection(
                         nodes.map { node ->
                             Feature<Point, JsonObject?>(
-                                geometry =
-                                Point(GeoPosition(longitude = node.longitude, latitude = node.latitude)),
+                                geometry = Point(GeoPosition(longitude = node.longitude, latitude = node.latitude)),
                                 properties =
                                 buildJsonObject {
                                     put("shortName", node.shortName.orEmpty())
@@ -302,8 +295,7 @@ fun MapLibreDiscoveryMap(
                     FeatureCollection(
                         listOf(
                             Feature<Point, JsonObject?>(
-                                geometry =
-                                Point(GeoPosition(longitude = userLongitude, latitude = userLatitude)),
+                                geometry = Point(GeoPosition(longitude = userLongitude, latitude = userLatitude)),
                                 properties = buildJsonObject { put("role", "scanner") },
                             ),
                         ),

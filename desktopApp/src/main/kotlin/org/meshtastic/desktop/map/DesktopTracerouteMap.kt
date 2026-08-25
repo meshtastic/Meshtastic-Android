@@ -31,9 +31,8 @@ import org.meshtastic.proto.Position
 /**
  * Desktop adapter for the traceroute map seam.
  *
- * Mirrors the F-Droid adapter: the seam hands over an overlay plus snapshot positions, and the
- * shared selection helper resolves those into placeable nodes so both platforms count "mappable
- * hops" the same way.
+ * Mirrors the F-Droid adapter: the seam hands over an overlay plus snapshot positions, and the shared selection helper
+ * resolves those into placeable nodes so both platforms count "mappable hops" the same way.
  */
 @Composable
 fun DesktopTracerouteMap(

@@ -42,8 +42,8 @@ object WaypointFeatureKeys {
 /**
  * Waypoint markers.
  *
- * The emoji `icon` is emitted as a string and drawn through a text field rather than an image
- * layer — MapLibre renders it with the glyph stack, so there is no sprite sheet to maintain.
+ * The emoji `icon` is emitted as a string and drawn through a text field rather than an image layer — MapLibre renders
+ * it with the glyph stack, so there is no sprite sheet to maintain.
  */
 fun waypointsToFeatureCollection(waypoints: Collection<DataPacket>): FeatureCollection<Point, JsonObject?> =
     FeatureCollection(
@@ -85,9 +85,8 @@ private fun StringBuilder.appendCodePointCompat(codePoint: Int) {
 /**
  * Geofence zones attached to waypoints, as real ground polygons.
  *
- * Circles are tessellated with the same helper the precision circles use, so a geofence drawn here
- * and the [org.meshtastic.core.model.geofence.Geofence.contains] test the alert engine runs agree
- * about where the boundary is.
+ * Circles are tessellated with the same helper the precision circles use, so a geofence drawn here and the
+ * [org.meshtastic.core.model.geofence.Geofence.contains] test the alert engine runs agree about where the boundary is.
  */
 fun geofencesToFeatureCollection(waypoints: Collection<DataPacket>): FeatureCollection<Geometry, JsonObject?> =
     FeatureCollection(

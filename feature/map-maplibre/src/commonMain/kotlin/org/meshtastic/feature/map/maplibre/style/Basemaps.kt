@@ -19,8 +19,8 @@ package org.meshtastic.feature.map.maplibre.style
 /**
  * Tile-scheme description for one raster source.
  *
- * MapLibre substitutes `{z}`/`{x}`/`{y}` by placeholder name, not position, so an ArcGIS-style
- * `.../tile/{z}/{y}/{x}` template works unchanged — no TMS flag needed for those.
+ * MapLibre substitutes `{z}`/`{x}`/`{y}` by placeholder name, not position, so an ArcGIS-style `.../tile/{z}/{y}/{x}`
+ * template works unchanged — no TMS flag needed for those.
  */
 data class RasterTileSpec(
     val tiles: List<String>,
@@ -36,8 +36,8 @@ data class RasterTileSpec(
 }
 
 /**
- * A selectable basemap. Vector entries hand MapLibre a style URL; raster entries are rendered as a
- * background plus a single raster layer over an empty style, so both kinds compose identically.
+ * A selectable basemap. Vector entries hand MapLibre a style URL; raster entries are rendered as a background plus a
+ * single raster layer over an empty style, so both kinds compose identically.
  */
 sealed interface Basemap {
     val id: String
@@ -55,18 +55,19 @@ sealed interface Basemap {
 /**
  * Basemaps offered by the MapLibre map, in menu order.
  *
- * The three vector styles come from OpenFreeMap, which requires no API key, no registration and
- * imposes no request limits. Only `liberty` is actively maintained upstream; `positron` and `dark`
- * descend from the abandoned OpenMapTiles style set, so if either rots the fix is to vendor its
- * style JSON rather than chase the URL.
+ * The three vector styles come from OpenFreeMap, which requires no API key, no registration and imposes no request
+ * limits. Only `liberty` is actively maintained upstream; `positron` and `dark` descend from the abandoned OpenMapTiles
+ * style set, so if either rots the fix is to vendor its style JSON rather than chase the URL.
  *
- * The raster entries are a 1:1 carry-over of the OSMdroid tile sources so nothing a user had
- * selected disappears in the swap.
+ * The raster entries are a 1:1 carry-over of the OSMdroid tile sources so nothing a user had selected disappears in the
+ * swap.
  */
 object Basemaps {
-    val Liberty = Basemap.Vector(id = "liberty", label = "Liberty", styleUri = "https://tiles.openfreemap.org/styles/liberty")
+    val Liberty =
+        Basemap.Vector(id = "liberty", label = "Liberty", styleUri = "https://tiles.openfreemap.org/styles/liberty")
 
-    val Positron = Basemap.Vector(id = "positron", label = "Positron", styleUri = "https://tiles.openfreemap.org/styles/positron")
+    val Positron =
+        Basemap.Vector(id = "positron", label = "Positron", styleUri = "https://tiles.openfreemap.org/styles/positron")
 
     val Dark = Basemap.Vector(id = "dark", label = "Dark", styleUri = "https://tiles.openfreemap.org/styles/dark")
 
@@ -101,7 +102,9 @@ object Basemaps {
             spec =
             RasterTileSpec(
                 tiles =
-                listOf("https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile/{z}/{y}/{x}"),
+                listOf(
+                    "https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile/{z}/{y}/{x}",
+                ),
                 maxZoom = 16,
                 attributionHtml = "USGS The National Map",
             ),

@@ -41,9 +41,9 @@ private val ReturnGreen = Color(0xFF43A047)
 /**
  * Forward and return traceroute paths.
  *
- * The two directions almost always traverse the same hops, so they are nudged apart with a
- * screen-space translate rather than by offsetting the geometry: the separation then stays legible
- * at every zoom instead of collapsing as you zoom out.
+ * The two directions almost always traverse the same hops, so they are nudged apart with a screen-space translate
+ * rather than by offsetting the geometry: the separation then stays legible at every zoom instead of collapsing as you
+ * zoom out.
  */
 @Composable
 internal fun TracerouteLayers(forwardRoute: List<Int>, returnRoute: List<Int>, nodeLookup: Map<Int, Node>) {
@@ -74,8 +74,8 @@ internal fun TracerouteLayers(forwardRoute: List<Int>, returnRoute: List<Int>, n
 /**
  * Turns a hop list into a single line.
  *
- * Hops with no known position are skipped rather than breaking the line, matching what the
- * OSMdroid overlay drew: a route through an unlocated relay still reads as continuous.
+ * Hops with no known position are skipped rather than breaking the line, matching what the OSMdroid overlay drew: a
+ * route through an unlocated relay still reads as continuous.
  */
 internal fun routeToFeatureCollection(
     route: List<Int>,
@@ -89,12 +89,7 @@ internal fun routeToFeatureCollection(
         }
     if (positions.size < 2) return FeatureCollection(emptyList())
     return FeatureCollection(
-        listOf(
-            Feature(
-                geometry = LineString(positions),
-                properties = buildJsonObject { put("hops", route.size) },
-            ),
-        ),
+        listOf(Feature(geometry = LineString(positions), properties = buildJsonObject { put("hops", route.size) })),
     )
 }
 

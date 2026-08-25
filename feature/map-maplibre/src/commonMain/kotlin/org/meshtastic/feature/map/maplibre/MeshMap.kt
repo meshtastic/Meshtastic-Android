@@ -46,8 +46,8 @@ private fun Basemap.toBaseStyle(): BaseStyle = when (this) {
 /**
  * The mesh map, rendered by MapLibre.
  *
- * Shared by the F-Droid Android flavor and the desktop app — the two differ only in what they hand
- * in, not in what gets drawn.
+ * Shared by the F-Droid Android flavor and the desktop app — the two differ only in what they hand in, not in what gets
+ * drawn.
  */
 @Composable
 fun MeshMap(
@@ -98,9 +98,7 @@ fun MeshMap(
                     val current = cameraState.position
                     // A cluster that cannot report an expansion zoom answers with a sentinel (0 on
                     // Android and desktop, -1 on iOS), so clamp — never zoom out on a tap.
-                    cameraState.animateTo(
-                        current.copy(target = centre, zoom = maxOf(expansionZoom, current.zoom)),
-                    )
+                    cameraState.animateTo(current.copy(target = centre, zoom = maxOf(expansionZoom, current.zoom)))
                 }
             },
         )

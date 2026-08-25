@@ -47,15 +47,14 @@ private const val CLUSTER_RADIUS = 50
 private const val CLUSTER_MAX_ZOOM = 14
 
 /**
- * The mesh node layers: ground-truth precision circles underneath, then clusters, then individual
- * node chips.
+ * The mesh node layers: ground-truth precision circles underneath, then clusters, then individual node chips.
  *
- * Clustering is MapLibre's own — `point_count` is computed inside the source — which is why the
- * OSMdroid clustering code has no counterpart here.
+ * Clustering is MapLibre's own — `point_count` is computed inside the source — which is why the OSMdroid clustering
+ * code has no counterpart here.
  *
- * @param onClusterZoom invoked with the cluster centre and the zoom that breaks it apart; the
- *   caller owns the camera. MapLibre reports a sentinel when a cluster cannot compute an expansion
- *   zoom, so the caller must clamp against the current zoom rather than trusting the value.
+ * @param onClusterZoom invoked with the cluster centre and the zoom that breaks it apart; the caller owns the camera.
+ *   MapLibre reports a sentinel when a cluster cannot compute an expansion zoom, so the caller must clamp against the
+ *   current zoom rather than trusting the value.
  */
 @Composable
 @Suppress("LongMethod")
@@ -81,8 +80,7 @@ internal fun NodeLayers(
     val nodeSource =
         rememberGeoJsonSource(
             data = GeoJsonData.Features(nodesToFeatureCollection(nodes, myNodeNum)),
-            options =
-            GeoJsonOptions(cluster = true, clusterRadius = CLUSTER_RADIUS, clusterMaxZoom = CLUSTER_MAX_ZOOM),
+            options = GeoJsonOptions(cluster = true, clusterRadius = CLUSTER_RADIUS, clusterMaxZoom = CLUSTER_MAX_ZOOM),
         )
 
     CircleLayer(

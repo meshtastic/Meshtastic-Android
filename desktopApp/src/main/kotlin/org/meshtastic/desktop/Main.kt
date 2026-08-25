@@ -72,6 +72,11 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
+import org.maplibre.compose.desktop.DesktopRuntimeOptions
+import org.maplibre.compose.desktop.MapLibre
+import org.maplibre.compose.desktop.ProvideMapHost
+import org.maplibre.compose.desktop.desktopCachePath
+import org.maplibre.compose.desktop.rememberAwtComposeGpuHost
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.common.log.InMemoryLogBuffer
 import org.meshtastic.core.common.util.CommonUri
@@ -91,33 +96,28 @@ import org.meshtastic.core.resources.desktop_update_available_title
 import org.meshtastic.core.resources.desktop_update_download
 import org.meshtastic.core.service.MeshServiceOrchestrator
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.util.LocalDiscoveryMapProvider
 import org.meshtastic.core.ui.util.LocalEventBranding
+import org.meshtastic.core.ui.util.LocalInlineMapProvider
+import org.meshtastic.core.ui.util.LocalMapViewProvider
+import org.meshtastic.core.ui.util.LocalNodeTrackMapProvider
+import org.meshtastic.core.ui.util.LocalTracerouteMapProvider
 import org.meshtastic.core.ui.util.rememberOpenUrl
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.desktop.data.DesktopPreferencesDataSource
 import org.meshtastic.desktop.di.desktopModule
 import org.meshtastic.desktop.di.desktopPlatformModule
+import org.meshtastic.desktop.map.DesktopTracerouteMap
 import org.meshtastic.desktop.notification.DesktopOS
 import org.meshtastic.desktop.ui.DesktopMainScreen
-import java.awt.Desktop
-import java.util.Locale
-import kotlin.system.exitProcess
-import coil3.util.Logger as CoilLogger
-import org.maplibre.compose.desktop.DesktopRuntimeOptions
-import org.maplibre.compose.desktop.MapLibre
-import org.maplibre.compose.desktop.ProvideMapHost
-import org.maplibre.compose.desktop.desktopCachePath
-import org.maplibre.compose.desktop.rememberAwtComposeGpuHost
-import org.meshtastic.core.ui.util.LocalDiscoveryMapProvider
-import org.meshtastic.core.ui.util.LocalInlineMapProvider
-import org.meshtastic.core.ui.util.LocalMapViewProvider
-import org.meshtastic.core.ui.util.LocalNodeTrackMapProvider
-import org.meshtastic.core.ui.util.LocalTracerouteMapProvider
-import org.meshtastic.desktop.map.DesktopTracerouteMap
 import org.meshtastic.feature.map.maplibre.MapLibreDiscoveryMap
 import org.meshtastic.feature.map.maplibre.MapLibreInlineMap
 import org.meshtastic.feature.map.maplibre.MapLibreMapViewProvider
 import org.meshtastic.feature.map.maplibre.MapLibreNodeTrackMap
+import java.awt.Desktop
+import java.util.Locale
+import kotlin.system.exitProcess
+import coil3.util.Logger as CoilLogger
 
 /** Meshtastic Desktop — the first non-Android target for the shared KMP module graph. */
 private const val MEMORY_CACHE_MAX_BYTES = 64L * 1024L * 1024L // 64 MiB

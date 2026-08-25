@@ -330,12 +330,14 @@ dependencies {
         val isArm = osArch.contains("aarch64") || osArch.contains("arm64")
         when {
             osName.contains("mac") -> runtimeOnly(libs.maplibre.compose.runtime.metal.macos.arm64)
+
             osName.contains("win") ->
                 if (isArm) {
                     runtimeOnly(libs.maplibre.compose.runtime.vulkan.windows.arm64)
                 } else {
                     runtimeOnly(libs.maplibre.compose.runtime.vulkan.windows.x64)
                 }
+
             else ->
                 if (isArm) {
                     runtimeOnly(libs.maplibre.compose.runtime.vulkan.linux.arm64)

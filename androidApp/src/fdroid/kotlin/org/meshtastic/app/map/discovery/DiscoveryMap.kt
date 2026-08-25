@@ -28,9 +28,4 @@ fun DiscoveryMap(
     userLongitude: Double,
     nodes: List<DiscoveryMapNode>,
     modifier: Modifier = Modifier,
-) = MapLibreDiscoveryMap(
-    userLatitude = userLatitude,
-    userLongitude = userLongitude,
-    nodes = nodes,
-    modifier = modifier,
-)
+) = MapLibreDiscoveryMap(userLatitude = userLatitude, userLongitude = userLongitude, nodes = nodes, modifier = modifier)

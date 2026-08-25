@@ -26,9 +26,8 @@ import org.maplibre.spatialk.geojson.Position
 import org.meshtastic.core.model.Node
 
 /**
- * Property keys carried on node features. MapLibre styles nodes by reading these back out through
- * feature expressions, so every value the map needs to draw a node must be written here — a layer
- * cannot reach into the ViewModel.
+ * Property keys carried on node features. MapLibre styles nodes by reading these back out through feature expressions,
+ * so every value the map needs to draw a node must be written here — a layer cannot reach into the ViewModel.
  */
 object NodeFeatureKeys {
     const val NODE_NUM = "nodeNum"
@@ -46,8 +45,8 @@ object NodeFeatureKeys {
 /**
  * Radius, in metres, of the uncertainty circle firmware implies for a given `precision_bits`.
  *
- * Carried over verbatim from the OSMdroid marker so the circle keeps the exact size users already
- * calibrate their trust against. Anything outside 10..19 means "not degraded" and draws no circle.
+ * Carried over verbatim from the OSMdroid marker so the circle keeps the exact size users already calibrate their trust
+ * against. Anything outside 10..19 means "not degraded" and draws no circle.
  */
 @Suppress("MagicNumber")
 fun precisionMeters(precisionBits: Int): Double? = when (precisionBits) {
@@ -74,8 +73,8 @@ internal fun Int.toCssHex(): String {
 /**
  * Projects nodes into a GeoJSON [FeatureCollection] for the clustered node source.
  *
- * Nodes without a usable fix are dropped rather than emitted at (0, 0) — that is what produced the
- * "flying through the ocean" jump on the OSMdroid map.
+ * Nodes without a usable fix are dropped rather than emitted at (0, 0) — that is what produced the "flying through the
+ * ocean" jump on the OSMdroid map.
  */
 fun nodesToFeatureCollection(nodes: List<Node>, myNodeNum: Int? = null): FeatureCollection<Point, JsonObject?> =
     FeatureCollection(
