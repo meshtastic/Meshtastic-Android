@@ -70,6 +70,7 @@ import org.jetbrains.compose.resources.decodeToSvgPainter
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.maplibre.compose.desktop.DesktopRuntimeOptions
@@ -99,6 +100,7 @@ import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.LocalDiscoveryMapProvider
 import org.meshtastic.core.ui.util.LocalEventBranding
 import org.meshtastic.core.ui.util.LocalInlineMapProvider
+import org.meshtastic.core.ui.util.LocalMapMainScreenProvider
 import org.meshtastic.core.ui.util.LocalMapViewProvider
 import org.meshtastic.core.ui.util.LocalNodeTrackMapProvider
 import org.meshtastic.core.ui.util.LocalTracerouteMapProvider
@@ -110,6 +112,8 @@ import org.meshtastic.desktop.di.desktopPlatformModule
 import org.meshtastic.desktop.map.DesktopTracerouteMap
 import org.meshtastic.desktop.notification.DesktopOS
 import org.meshtastic.desktop.ui.DesktopMainScreen
+import org.meshtastic.feature.map.MapScreen
+import org.meshtastic.feature.map.SharedMapViewModel
 import org.meshtastic.feature.map.maplibre.MapLibreDiscoveryMap
 import org.meshtastic.feature.map.maplibre.MapLibreInlineMap
 import org.meshtastic.feature.map.maplibre.MapLibreMapViewProvider
@@ -414,6 +418,18 @@ private fun ApplicationScope.MeshtasticWindow(
             CompositionLocalProvider(
                 LocalEventBranding provides eventEdition,
                 LocalMapViewProvider provides MapLibreMapViewProvider(),
+                // mapGraph renders the Map tab through this seam, not through LocalMapViewProvider
+                // directly; without it the tab falls back to the "Map" placeholder.
+                LocalMapMainScreenProvider provides
+                    { onClickNodeChip, navigateToNodeDetails, waypointId, sitePlannerNodeNum ->
+                        MapScreen(
+                            viewModel = koinViewModel<SharedMapViewModel>(),
+                            onClickNodeChip = onClickNodeChip,
+                            navigateToNodeDetails = navigateToNodeDetails,
+                            waypointId = waypointId,
+                            sitePlannerNodeNum = sitePlannerNodeNum,
+                        )
+                    },
                 LocalInlineMapProvider provides { node, modifier -> MapLibreInlineMap(node, modifier) },
                 LocalNodeTrackMapProvider provides
                     { destNum, positions, modifier, selectedPositionTime, onPositionSelect ->
