@@ -103,6 +103,21 @@ import java.awt.Desktop
 import java.util.Locale
 import kotlin.system.exitProcess
 import coil3.util.Logger as CoilLogger
+import org.maplibre.compose.desktop.DesktopRuntimeOptions
+import org.maplibre.compose.desktop.MapLibre
+import org.maplibre.compose.desktop.ProvideMapHost
+import org.maplibre.compose.desktop.desktopCachePath
+import org.maplibre.compose.desktop.rememberAwtComposeGpuHost
+import org.meshtastic.core.ui.util.LocalDiscoveryMapProvider
+import org.meshtastic.core.ui.util.LocalInlineMapProvider
+import org.meshtastic.core.ui.util.LocalMapViewProvider
+import org.meshtastic.core.ui.util.LocalNodeTrackMapProvider
+import org.meshtastic.core.ui.util.LocalTracerouteMapProvider
+import org.meshtastic.desktop.map.DesktopTracerouteMap
+import org.meshtastic.feature.map.maplibre.MapLibreDiscoveryMap
+import org.meshtastic.feature.map.maplibre.MapLibreInlineMap
+import org.meshtastic.feature.map.maplibre.MapLibreMapViewProvider
+import org.meshtastic.feature.map.maplibre.MapLibreNodeTrackMap
 
 /** Meshtastic Desktop — the first non-Android target for the shared KMP module graph. */
 private const val MEMORY_CACHE_MAX_BYTES = 64L * 1024L * 1024L // 64 MiB
@@ -132,6 +147,10 @@ fun main(args: Array<String>) {
     // exitProcessOnExit = false is what makes the shutdown block below reachable at all: with the default (true),
     // application() calls System.exit(0) itself as soon as the Compose loop ends, and control never returns here.
     // Do not "simplify" this back to a bare application {} — that silently disables every teardown that follows.
+    // Must happen before any map composes: the desktop renderer needs its tile cache and native
+    // runtime configured process-wide, not per window.
+    MapLibre.configure(DesktopRuntimeOptions(cachePath = desktopCachePath("org.meshtastic.MeshtasticDesktop")))
+
     application(exitProcessOnExit = false) {
         val koinApp = remember {
             // Keep console output and also capture into the in-memory buffer the Debug screen views/exports.
@@ -390,8 +409,33 @@ private fun ApplicationScope.MeshtasticWindow(
         val eventEdition by uiViewModel.eventEdition.collectAsState()
 
         CoilImageLoaderSetup()
-        CompositionLocalProvider(LocalEventBranding provides eventEdition) {
-            AppTheme(darkTheme = isDarkTheme) { DesktopMainScreen(uiViewModel, multiBackstack) }
+        // Each window hands MapLibre its own GPU context; the map composites into Compose from there.
+        ProvideMapHost(host = rememberAwtComposeGpuHost(window)) {
+            CompositionLocalProvider(
+                LocalEventBranding provides eventEdition,
+                LocalMapViewProvider provides MapLibreMapViewProvider(),
+                LocalInlineMapProvider provides { node, modifier -> MapLibreInlineMap(node, modifier) },
+                LocalNodeTrackMapProvider provides
+                    { destNum, positions, modifier, selectedPositionTime, onPositionSelected ->
+                        MapLibreNodeTrackMap(
+                            destNum = destNum,
+                            positions = positions,
+                            modifier = modifier,
+                            selectedPositionTime = selectedPositionTime,
+                            onPositionSelected = onPositionSelected,
+                        )
+                    },
+                LocalDiscoveryMapProvider provides
+                    { userLatitude, userLongitude, nodes, modifier ->
+                        MapLibreDiscoveryMap(userLatitude, userLongitude, nodes, modifier)
+                    },
+                LocalTracerouteMapProvider provides
+                    { overlay, nodePositions, onMappableCountChanged, modifier ->
+                        DesktopTracerouteMap(overlay, nodePositions, onMappableCountChanged, modifier)
+                    },
+            ) {
+                AppTheme(darkTheme = isDarkTheme) { DesktopMainScreen(uiViewModel, multiBackstack) }
+            }
         }
     }
 }
