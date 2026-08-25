@@ -19,6 +19,7 @@ package org.meshtastic.desktop.map
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.compose.viewmodel.koinViewModel
@@ -42,6 +43,9 @@ fun DesktopTracerouteMap(
     modifier: Modifier = Modifier,
 ) {
     val viewModel: SharedMapViewModel = koinViewModel()
+    // The effect below restarts on hop-count changes; capturing the callback keeps a recomposition
+    // with a fresh lambda from firing a stale one.
+    val reportCount by rememberUpdatedState(onMappableCountChange)
     val nodes by viewModel.nodes.collectAsStateWithLifecycle()
 
     val selection =
@@ -52,7 +56,7 @@ fun DesktopTracerouteMap(
         )
 
     LaunchedEffect(selection.nodeLookup.size, selection.overlayNodeNums.size) {
-        onMappableCountChange(
+        reportCount(
             selection.overlayNodeNums.count { selection.nodeLookup.containsKey(it) },
             selection.overlayNodeNums.size,
         )

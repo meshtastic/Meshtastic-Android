@@ -17,7 +17,6 @@
 package org.meshtastic.feature.map.maplibre.layers
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import kotlinx.serialization.json.JsonObject
@@ -34,9 +33,7 @@ import org.maplibre.spatialk.geojson.FeatureCollection
 import org.maplibre.spatialk.geojson.LineString
 import org.maplibre.spatialk.geojson.Position
 import org.meshtastic.core.model.Node
-
-private val ForwardBlue = Color(0xFF1E88E5)
-private val ReturnGreen = Color(0xFF43A047)
+import org.meshtastic.feature.map.maplibre.style.MapColors
 
 /**
  * Forward and return traceroute paths.
@@ -55,7 +52,7 @@ internal fun TracerouteLayers(forwardRoute: List<Int>, returnRoute: List<Int>, n
         source = forward,
         cap = const(LineCap.Round),
         join = const(LineJoin.Round),
-        color = const(ForwardBlue),
+        color = const(MapColors.RouteForward),
         width = const(4.dp),
         translate = const(DpOffset(0.dp, (-ROUTE_SEPARATION_DP).dp)),
     )
@@ -65,7 +62,7 @@ internal fun TracerouteLayers(forwardRoute: List<Int>, returnRoute: List<Int>, n
         source = back,
         cap = const(LineCap.Round),
         join = const(LineJoin.Round),
-        color = const(ReturnGreen),
+        color = const(MapColors.RouteReturn),
         width = const(4.dp),
         translate = const(DpOffset(0.dp, ROUTE_SEPARATION_DP.dp)),
     )

@@ -26,23 +26,6 @@ import org.maplibre.spatialk.geojson.Position
 import org.meshtastic.core.model.Node
 
 /**
- * Property keys carried on node features. MapLibre styles nodes by reading these back out through feature expressions,
- * so every value the map needs to draw a node must be written here — a layer cannot reach into the ViewModel.
- */
-object NodeFeatureKeys {
-    const val NODE_NUM = "nodeNum"
-    const val SHORT_NAME = "shortName"
-    const val LONG_NAME = "longName"
-    const val IS_FAVORITE = "isFavorite"
-    const val IS_ONLINE = "isOnline"
-    const val IS_SELF = "isSelf"
-    const val FOREGROUND = "fg"
-    const val BACKGROUND = "bg"
-    const val LAST_HEARD = "lastHeard"
-    const val PRECISION_METERS = "precisionMeters"
-}
-
-/**
  * Radius, in metres, of the uncertainty circle firmware implies for a given `precision_bits`.
  *
  * Carried over verbatim from the OSMdroid marker so the circle keeps the exact size users already calibrate their trust

@@ -18,11 +18,10 @@ package org.meshtastic.feature.map.maplibre
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -116,7 +115,7 @@ private fun BasemapMenu(expanded: Boolean, selected: Basemap, onDismiss: () -> U
         Basemaps.all.forEach { basemap ->
             DropdownMenuItem(
                 text = { Text(text = basemap.label) },
-                leadingIcon = { if (basemap.id == selected.id) Icon(Icons.Default.Check, contentDescription = null) },
+                leadingIcon = { RadioButton(selected = basemap.id == selected.id, onClick = { onSelect(basemap) }) },
                 onClick = { onSelect(basemap) },
             )
         }
@@ -129,7 +128,7 @@ private fun OverlayMenu(enabled: List<MapOverlay>, onToggle: (MapOverlay) -> Uni
         DropdownMenuItem(
             text = { Text(text = overlay.label) },
             leadingIcon = {
-                if (enabled.any { it.id == overlay.id }) Icon(Icons.Default.Check, contentDescription = null)
+                Checkbox(checked = enabled.any { it.id == overlay.id }, onCheckedChange = { onToggle(overlay) })
             },
             onClick = { onToggle(overlay) },
         )

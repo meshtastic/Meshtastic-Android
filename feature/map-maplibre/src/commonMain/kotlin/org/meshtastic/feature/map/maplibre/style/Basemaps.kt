@@ -133,11 +133,13 @@ object Basemaps {
             RasterTileSpec(
                 tiles =
                 listOf(
-                    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}.jpg",
+                    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map" +
+                        "/MapServer/tile/{z}/{y}/{x}.jpg",
                 ),
                 maxZoom = 20,
                 attributionHtml =
-                "Esri, HERE, Garmin, FAO, NOAA, USGS, &copy; OpenStreetMap contributors, and the GIS User Community",
+                "Esri, HERE, Garmin, FAO, NOAA, USGS, &copy; OpenStreetMap contributors, " +
+                    "and the GIS User Community",
             ),
         )
 
@@ -149,7 +151,8 @@ object Basemaps {
             RasterTileSpec(
                 tiles =
                 listOf(
-                    "https://clarity.maptiles.arcgis.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}.jpg",
+                    "https://clarity.maptiles.arcgis.com/arcgis/rest/services/World_Imagery" +
+                        "/MapServer/tile/{z}/{y}/{x}.jpg",
                 ),
                 maxZoom = 20,
                 attributionHtml = "Esri, Maxar, Earthstar Geographics, and the GIS User Community",

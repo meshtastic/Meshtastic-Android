@@ -39,5 +39,5 @@ fun NodeTrackMap(
     positions = positions,
     modifier = modifier,
     selectedPositionTime = selectedPositionTime,
-    onPositionSelected = onPositionSelect,
+    onPositionSelect = onPositionSelect,
 )

@@ -42,6 +42,7 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.feature.map.maplibre.geojson.NodeFeatureKeys
 import org.meshtastic.feature.map.maplibre.geojson.nodesToFeatureCollection
 import org.meshtastic.feature.map.maplibre.geojson.precisionCirclesToFeatureCollection
+import org.meshtastic.feature.map.maplibre.style.MapColors
 
 private const val CLUSTER_RADIUS = 50
 private const val CLUSTER_MAX_ZOOM = 14
@@ -87,7 +88,7 @@ internal fun NodeLayers(
         id = "node-clusters",
         source = nodeSource,
         filter = feature.has("point_count"),
-        color = const(Color(0xFF2C2D3C)),
+        color = const(MapColors.Slate),
         opacity = const(CLUSTER_OPACITY),
         strokeColor = const(Color.White),
         strokeWidth = const(2.dp),

@@ -35,9 +35,7 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.feature.map.maplibre.geojson.WaypointFeatureKeys
 import org.meshtastic.feature.map.maplibre.geojson.geofencesToFeatureCollection
 import org.meshtastic.feature.map.maplibre.geojson.waypointsToFeatureCollection
-
-/** Matches the orange the OSMdroid geofence overlay used, so the zones stay recognisable. */
-private val GeofenceOrange = Color(0xFFFF8C00)
+import org.meshtastic.feature.map.maplibre.style.MapColors
 
 private const val GEOFENCE_FILL_OPACITY = 0.12f
 
@@ -53,11 +51,11 @@ internal fun WaypointLayers(waypoints: Collection<DataPacket>, onWaypointClick: 
     FillLayer(
         id = "geofence-fill",
         source = geofenceSource,
-        color = const(GeofenceOrange),
+        color = const(MapColors.Highlight),
         opacity = const(GEOFENCE_FILL_OPACITY),
     )
 
-    LineLayer(id = "geofence-outline", source = geofenceSource, color = const(GeofenceOrange), width = const(2.dp))
+    LineLayer(id = "geofence-outline", source = geofenceSource, color = const(MapColors.Highlight), width = const(2.dp))
 
     val waypointSource = rememberGeoJsonSource(data = GeoJsonData.Features(waypointsToFeatureCollection(waypoints)))
 

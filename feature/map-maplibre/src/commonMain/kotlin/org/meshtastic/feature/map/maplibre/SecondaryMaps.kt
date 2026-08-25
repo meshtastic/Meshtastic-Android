@@ -47,9 +47,12 @@ import org.maplibre.spatialk.geojson.LineString
 import org.maplibre.spatialk.geojson.Point
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.ui.util.DiscoveryMapNode
+import org.meshtastic.feature.map.maplibre.geojson.NodeFeatureKeys
 import org.meshtastic.feature.map.maplibre.geojson.nodesToFeatureCollection
 import org.meshtastic.feature.map.maplibre.layers.TracerouteLayers
+import org.meshtastic.feature.map.maplibre.style.Basemap
 import org.meshtastic.feature.map.maplibre.style.Basemaps
+import org.meshtastic.feature.map.maplibre.style.MapColors
 import org.maplibre.spatialk.geojson.Position as GeoPosition
 import org.meshtastic.proto.Position as ProtoPosition
 
@@ -57,13 +60,35 @@ private const val DEG_SCALE = 1e-7
 private const val DETAIL_ZOOM = 13.0
 private const val TRACK_POINT_KEY = "positionTime"
 
+/** A timestamped point on a node's position track. */
+private typealias TrackPoint = Pair<GeoPosition, Int>
+
 private val defaultStyle: BaseStyle
-    get() = BaseStyle.Uri((Basemaps.default as org.meshtastic.feature.map.maplibre.style.Basemap.Vector).styleUri)
+    get() = BaseStyle.Uri((Basemaps.default as Basemap.Vector).styleUri)
+
+private fun ProtoPosition.toTrackPoint(): TrackPoint? {
+    val latitude = (latitude_i ?: 0) * DEG_SCALE
+    val longitude = (longitude_i ?: 0) * DEG_SCALE
+    return if (latitude == 0.0 && longitude == 0.0) {
+        null
+    } else {
+        GeoPosition(longitude = longitude, latitude = latitude) to (time ?: 0)
+    }
+}
+
+private fun pointFeatures(points: List<TrackPoint>) = FeatureCollection(
+    points.map { (position, time) ->
+        Feature<Point, JsonObject?>(
+            geometry = Point(position),
+            properties = buildJsonObject { put(TRACK_POINT_KEY, time) },
+        )
+    },
+)
 
 /** Single-node mini-map embedded in the node detail sheet. */
 @Composable
 fun MapLibreInlineMap(node: Node, modifier: Modifier = Modifier) {
-    val position = node.validPosition
+    if (node.validPosition == null) return
     val cameraState =
         rememberCameraState(
             CameraPosition(
@@ -71,7 +96,6 @@ fun MapLibreInlineMap(node: Node, modifier: Modifier = Modifier) {
                 zoom = DETAIL_ZOOM,
             ),
         )
-    if (position == null) return
 
     MaplibreMap(baseStyle = defaultStyle, cameraState = cameraState, modifier = modifier) {
         val source = rememberGeoJsonSource(data = GeoJsonData.Features(nodesToFeatureCollection(listOf(node))))
@@ -93,118 +117,95 @@ fun MapLibreNodeTrackMap(
     positions: List<ProtoPosition>,
     modifier: Modifier = Modifier,
     selectedPositionTime: Int? = null,
-    onPositionSelected: ((Int) -> Unit)? = null,
+    onPositionSelect: ((Int) -> Unit)? = null,
 ) {
-    val coordinates =
-        positions.mapNotNull { p ->
-            val lat = (p.latitude_i ?: 0) * DEG_SCALE
-            val lon = (p.longitude_i ?: 0) * DEG_SCALE
-            if (lat == 0.0 && lon == 0.0) null else GeoPosition(longitude = lon, latitude = lat) to (p.time ?: 0)
-        }
-
+    val points = positions.mapNotNull { it.toTrackPoint() }
     val cameraState = rememberCameraState()
 
-    // Frame the whole track once it is known. Without this the camera opens at (0, 0), which is the
+    // Frame the whole track once it is known. Without this the camera opens at (0, 0) — the
     // black-ocean start the OSMdroid track map suffered from.
-    LaunchedEffect(coordinates.size) {
-        if (coordinates.isNotEmpty()) {
-            val lats = coordinates.map { it.first.latitude }
-            val lons = coordinates.map { it.first.longitude }
-            cameraState.jumpTo(
+    LaunchedEffect(points.size) {
+        if (points.isNotEmpty()) {
+            val latitudes = points.map { it.first.latitude }
+            val longitudes = points.map { it.first.longitude }
+            cameraState.position =
                 CameraPosition(
                     target =
                     GeoPosition(
-                        longitude = (lons.min() + lons.max()) / 2,
-                        latitude = (lats.min() + lats.max()) / 2,
+                        longitude = (longitudes.min() + longitudes.max()) / 2,
+                        latitude = (latitudes.min() + latitudes.max()) / 2,
                     ),
                     zoom = DETAIL_ZOOM,
-                ),
-            )
+                )
         }
     }
 
-    if (coordinates.isEmpty()) return
+    if (points.isEmpty()) return
 
     MaplibreMap(baseStyle = defaultStyle, cameraState = cameraState, modifier = modifier) {
-        val lineSource =
-            rememberGeoJsonSource(
-                data =
-                GeoJsonData.Features(
-                    FeatureCollection(
-                        listOf(
-                            Feature<LineString, JsonObject?>(
-                                geometry = LineString(coordinates.map { it.first }),
-                                properties = buildJsonObject { put("destNum", destNum) },
-                            ),
-                        ),
-                    ),
-                ),
-            )
-        LineLayer(
-            id = "track-line",
-            source = lineSource,
-            cap = const(LineCap.Round),
-            join = const(LineJoin.Round),
-            color = const(Color(0xFF1E88E5)),
-            width = const(3.dp),
-        )
-
-        val pointSource =
-            rememberGeoJsonSource(
-                data =
-                GeoJsonData.Features(
-                    FeatureCollection(
-                        coordinates.map { (position, time) ->
-                            Feature<Point, JsonObject?>(
-                                geometry = Point(position),
-                                properties = buildJsonObject { put(TRACK_POINT_KEY, time) },
-                            )
-                        },
-                    ),
-                ),
-            )
-        CircleLayer(
-            id = "track-points",
-            source = pointSource,
-            color = const(Color.White),
-            radius = const(5.dp),
-            strokeColor = const(Color(0xFF1E88E5)),
-            strokeWidth = const(2.dp),
-            onClick = { features ->
-                features.firstOrNull()?.properties?.get(TRACK_POINT_KEY)?.let { time ->
-                    onPositionSelected?.invoke(time.jsonPrimitive.int)
-                    ClickResult.Consume
-                } ?: ClickResult.Pass
-            },
-        )
-
-        selectedPositionTime?.let { selected ->
-            val selectedSource =
-                rememberGeoJsonSource(
-                    data =
-                    GeoJsonData.Features(
-                        FeatureCollection(
-                            coordinates
-                                .filter { it.second == selected }
-                                .map { (position, time) ->
-                                    Feature<Point, JsonObject?>(
-                                        geometry = Point(position),
-                                        properties = buildJsonObject { put(TRACK_POINT_KEY, time) },
-                                    )
-                                },
-                        ),
-                    ),
-                )
-            CircleLayer(
-                id = "track-selected",
-                source = selectedSource,
-                color = const(Color(0xFFFF8C00)),
-                radius = const(8.dp),
-                strokeColor = const(Color.White),
-                strokeWidth = const(2.dp),
-            )
-        }
+        TrackLineLayer(destNum = destNum, points = points)
+        TrackPointLayer(points = points, onPositionSelect = onPositionSelect)
+        selectedPositionTime?.let { selected -> SelectedTrackPointLayer(points = points, selectedTime = selected) }
     }
+}
+
+@Composable
+private fun TrackLineLayer(destNum: Int, points: List<TrackPoint>) {
+    val source =
+        rememberGeoJsonSource(
+            data =
+            GeoJsonData.Features(
+                FeatureCollection(
+                    listOf(
+                        Feature<LineString, JsonObject?>(
+                            geometry = LineString(points.map { it.first }),
+                            properties = buildJsonObject { put("destNum", destNum) },
+                        ),
+                    ),
+                ),
+            ),
+        )
+    LineLayer(
+        id = "track-line",
+        source = source,
+        cap = const(LineCap.Round),
+        join = const(LineJoin.Round),
+        color = const(MapColors.RouteForward),
+        width = const(3.dp),
+    )
+}
+
+@Composable
+private fun TrackPointLayer(points: List<TrackPoint>, onPositionSelect: ((Int) -> Unit)?) {
+    val source = rememberGeoJsonSource(data = GeoJsonData.Features(pointFeatures(points)))
+    CircleLayer(
+        id = "track-points",
+        source = source,
+        color = const(Color.White),
+        radius = const(5.dp),
+        strokeColor = const(MapColors.RouteForward),
+        strokeWidth = const(2.dp),
+        onClick = { features ->
+            features.firstOrNull()?.properties?.get(TRACK_POINT_KEY)?.let { time ->
+                onPositionSelect?.invoke(time.jsonPrimitive.int)
+                ClickResult.Consume
+            } ?: ClickResult.Pass
+        },
+    )
+}
+
+@Composable
+private fun SelectedTrackPointLayer(points: List<TrackPoint>, selectedTime: Int) {
+    val source =
+        rememberGeoJsonSource(data = GeoJsonData.Features(pointFeatures(points.filter { it.second == selectedTime })))
+    CircleLayer(
+        id = "track-selected",
+        source = source,
+        color = const(MapColors.Highlight),
+        radius = const(8.dp),
+        strokeColor = const(Color.White),
+        strokeWidth = const(2.dp),
+    )
 }
 
 /** Traceroute result map: forward and return paths plus the hops they pass through. */
@@ -227,7 +228,7 @@ fun MapLibreTracerouteMap(
         CircleLayer(
             id = "traceroute-hops",
             source = hopSource,
-            color = const(Color(0xFF2C2D3C)),
+            color = const(MapColors.Slate),
             radius = const(10.dp),
             strokeColor = const(Color.White),
             strokeWidth = const(2.dp),
@@ -235,7 +236,7 @@ fun MapLibreTracerouteMap(
         SymbolLayer(
             id = "traceroute-hop-labels",
             source = hopSource,
-            textField = feature[org.meshtastic.feature.map.maplibre.geojson.NodeFeatureKeys.SHORT_NAME].asString(),
+            textField = feature[NodeFeatureKeys.SHORT_NAME].asString(),
             textColor = const(Color.White),
             textAllowOverlap = const(true),
         )
@@ -254,61 +255,70 @@ fun MapLibreDiscoveryMap(
     val cameraState = rememberCameraState(CameraPosition(target = scanner, zoom = DETAIL_ZOOM))
 
     MaplibreMap(baseStyle = defaultStyle, cameraState = cameraState, modifier = modifier) {
-        val discovered =
-            rememberGeoJsonSource(
-                data =
-                GeoJsonData.Features(
-                    FeatureCollection(
-                        nodes.map { node ->
-                            Feature<Point, JsonObject?>(
-                                geometry = Point(GeoPosition(longitude = node.longitude, latitude = node.latitude)),
-                                properties =
-                                buildJsonObject {
-                                    put("shortName", node.shortName.orEmpty())
-                                    put("snr", node.snr)
-                                },
-                            )
-                        },
-                    ),
-                ),
-            )
-        CircleLayer(
-            id = "discovery-nodes",
-            source = discovered,
-            color = const(Color(0xFF43A047)),
-            radius = const(9.dp),
-            strokeColor = const(Color.White),
-            strokeWidth = const(2.dp),
-        )
-        SymbolLayer(
-            id = "discovery-labels",
-            source = discovered,
-            textField = feature["shortName"].asString(),
-            textColor = const(Color.White),
-            textAllowOverlap = const(true),
-        )
+        DiscoveredNodeLayers(nodes)
+        ScannerLayer(scanner)
+    }
+}
 
-        val scanner =
-            rememberGeoJsonSource(
-                data =
-                GeoJsonData.Features(
-                    FeatureCollection(
-                        listOf(
-                            Feature<Point, JsonObject?>(
-                                geometry = Point(GeoPosition(longitude = userLongitude, latitude = userLatitude)),
-                                properties = buildJsonObject { put("role", "scanner") },
-                            ),
+@Composable
+private fun DiscoveredNodeLayers(nodes: List<DiscoveryMapNode>) {
+    val source =
+        rememberGeoJsonSource(
+            data =
+            GeoJsonData.Features(
+                FeatureCollection(
+                    nodes.map { node ->
+                        Feature<Point, JsonObject?>(
+                            geometry = Point(GeoPosition(longitude = node.longitude, latitude = node.latitude)),
+                            properties =
+                            buildJsonObject {
+                                put(NodeFeatureKeys.SHORT_NAME, node.shortName.orEmpty())
+                                put("snr", node.snr)
+                            },
+                        )
+                    },
+                ),
+            ),
+        )
+    CircleLayer(
+        id = "discovery-nodes",
+        source = source,
+        color = const(MapColors.RouteReturn),
+        radius = const(9.dp),
+        strokeColor = const(Color.White),
+        strokeWidth = const(2.dp),
+    )
+    SymbolLayer(
+        id = "discovery-labels",
+        source = source,
+        textField = feature[NodeFeatureKeys.SHORT_NAME].asString(),
+        textColor = const(Color.White),
+        textAllowOverlap = const(true),
+    )
+}
+
+@Composable
+private fun ScannerLayer(scanner: GeoPosition) {
+    val source =
+        rememberGeoJsonSource(
+            data =
+            GeoJsonData.Features(
+                FeatureCollection(
+                    listOf(
+                        Feature<Point, JsonObject?>(
+                            geometry = Point(scanner),
+                            properties = buildJsonObject { put("role", "scanner") },
                         ),
                     ),
                 ),
-            )
-        CircleLayer(
-            id = "discovery-scanner",
-            source = scanner,
-            color = const(Color(0xFFFF8C00)),
-            radius = const(11.dp),
-            strokeColor = const(Color.White),
-            strokeWidth = const(3.dp),
+            ),
         )
-    }
+    CircleLayer(
+        id = "discovery-scanner",
+        source = source,
+        color = const(MapColors.Highlight),
+        radius = const(11.dp),
+        strokeColor = const(Color.White),
+        strokeWidth = const(3.dp),
+    )
 }

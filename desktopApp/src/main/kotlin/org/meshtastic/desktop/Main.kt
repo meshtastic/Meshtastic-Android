@@ -416,13 +416,13 @@ private fun ApplicationScope.MeshtasticWindow(
                 LocalMapViewProvider provides MapLibreMapViewProvider(),
                 LocalInlineMapProvider provides { node, modifier -> MapLibreInlineMap(node, modifier) },
                 LocalNodeTrackMapProvider provides
-                    { destNum, positions, modifier, selectedPositionTime, onPositionSelected ->
+                    { destNum, positions, modifier, selectedPositionTime, onPositionSelect ->
                         MapLibreNodeTrackMap(
                             destNum = destNum,
                             positions = positions,
                             modifier = modifier,
                             selectedPositionTime = selectedPositionTime,
-                            onPositionSelected = onPositionSelected,
+                            onPositionSelect = onPositionSelect,
                         )
                     },
                 LocalDiscoveryMapProvider provides

@@ -36,6 +36,9 @@ private const val EARTH_RADIUS_M = 6371008.8
 /** Vertices used to approximate a ground circle. 64 keeps the edge smooth at city zoom levels. */
 private const val CIRCLE_STEPS = 64
 
+/** Degrees in a full turn, divided across [CIRCLE_STEPS] vertices. */
+private const val FULL_TURN_DEG = 360.0
+
 private const val DEG_TO_RAD = PI / 180.0
 private const val RAD_TO_DEG = 180.0 / PI
 
@@ -74,8 +77,12 @@ internal fun circlePolygon(
     radiusMeters: Double,
     steps: Int = CIRCLE_STEPS,
 ): Polygon {
-    val ring = (0 until steps).map { i -> destination(latitude, longitude, radiusMeters, i * (360.0 / steps)) }
-    return Polygon(listOf(ring + ring.first()))
+    val ring = (0 until steps).map { i -> destination(latitude, longitude, radiusMeters, i * (FULL_TURN_DEG / steps)) }
+    // Close the ring explicitly. `ring + ring.first()` would resolve to the Iterable overload of
+    // plus, because a spatial-k Position is itself a collection of coordinates, and silently
+    // flatten the appended point into loose doubles.
+    val closed = ring.toMutableList().also { it.add(ring.first()) }
+    return Polygon(listOf(closed))
 }
 
 /**
