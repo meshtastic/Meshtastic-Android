@@ -33,7 +33,7 @@ class IntroPermissionActionTest {
     }
 
     @Test
-    fun `a single denial still requests, because the system will still prompt`() {
+    fun `a single denial still requests because the system will still prompt`() {
         assertEquals(IntroPermissionAction.REQUEST, introPermissionAction(PermissionStatus.DENIED_CAN_RETRY))
     }
 
@@ -42,7 +42,7 @@ class IntroPermissionActionTest {
      * denial with no dialog, so the primary button must route to app settings instead of looking broken.
      */
     @Test
-    fun `permanent denial routes to app settings, never a no-op request`() {
+    fun `permanent denial routes to app settings rather than a no-op request`() {
         assertEquals(IntroPermissionAction.OPEN_SETTINGS, introPermissionAction(PermissionStatus.PERMANENTLY_DENIED))
     }
 
