@@ -37,15 +37,15 @@ Before starting, configure these controls:
 
 | Control                | Kirjeldus                                                                                                                                                                                                                         |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **LoRa preset picker** | Select one or more presets to scan. Otsing peatub kordamööda iga valitud eelseadistuse juures, et kuulata liiklust.                                                                               |
+| **LoRa preset picker** | Vali skannimiseks üks või mitu eelseadistust. Otsing peatub kordamööda iga valitud eelseadistuse juures, et kuulata liiklust.                                                                     |
 | **Kuulamisaeg**        | Time to listen on each preset. Vali 1, 5, 15, 30, 45, 60, 90, 120 või 180 minutit. Pikemad kuulamisajad koguvad rohkem pakette ja annavad selgema pildi, kuid võtavad kauem aega. |
 | **Keep screen awake**  | Valikuline lüliti, mis takistab ekraani pika skannimise ajal magamaminekut.                                                                                                                                       |
 
 The **Start** button stays disabled — with an explanation of why — until the scan can run. Common reasons it's disabled:
 
 - The device is **not connected**.
-- **No presets** have been selected to scan.
-- The selected preset uses **2.4 GHz**, which your hardware doesn't support.
+- Skannimiseks pole **ühtegi eelseadet** valitud.
+- Valitud eelseadistus kasutab **2,4 GHz** sagedust, mida sinu riistvara ei toeta.
 
 ### Live Progress
 
@@ -175,7 +175,7 @@ Kui see on lubatud, levitab sõlm perioodiliselt oma naabri-tabelit. Teised sõl
 
 Sõlmede loend ise on võimas avastusvahend, kui kasutada selle filtreerimis- ja sortimisfunktsioone tõhusalt.
 
-### Finding New Nodes
+### Otsin uusi sõlmi
 
 - Sorteeri **Viimati kuuldud** järgi, et näha kõige hiljutisemaid aktiivseid sõlmi ülaosas.
 - Enable **Include unknown** to see nodes that have appeared on the mesh but haven't sent user info yet — these are often newly powered-on devices.

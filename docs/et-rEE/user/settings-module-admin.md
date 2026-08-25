@@ -7,7 +7,7 @@ description: Muuda valikulisi funktsioonimooduleid (MQTT, telemeetria, salvestat
 aliases:
   - moodul
   - mooduli sätted
-  - administration
+  - administratsioon
 ---
 
 # Sätted - moodulid & admin
@@ -76,7 +76,7 @@ Juhib raadio riistvara summeri-, LED- või vibratsioonihoiatusi. Kasulik seadmet
 
 ### Salvesta & edasta moodul
 
-Buffers messages for nodes that were temporarily offline, then replays them when those nodes reconnect. Essential for meshes where nodes go in and out of range regularly — ensures messages aren't lost during brief disconnections.
+Puhverdab ajutiselt võrguühenduseta olnud sõlmede sõnumeid ja esitab need uuesti, kui need sõlmed taasühenduvad. Hädavajalik kärgvõrgu jaoks, kus sõlmed regulaarselt levialasse lähevad ja levialast välja lähevad — tagab, et lühikeste katkestuste ajal sõnumid kaotsi ei lähe.
 
 | Sätted                                     | Kirjeldus                                                                                                                                        |
 | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -101,7 +101,7 @@ Automatiseeritud vahemiku testimise tööriist sõlmede vahelise ühenduse kvali
 
 ### Telemeetria moodul
 
-Controls what telemetry data your node shares with the mesh. Telemeetria sisaldab seadme tervist (aku, tööaeg) ja keskkonnaandurite andmeid (temperatuur, niiskus, rõhk).
+Juhib, milliseid telemeetriaandmeid sõlm võrguga jagab. Telemeetria sisaldab seadme tervist (aku, tööaeg) ja keskkonnaandurite andmeid (temperatuur, niiskus, rõhk).
 
 | Sätted                       | Kirjeldus                               |
 | ---------------------------- | --------------------------------------- |
@@ -114,12 +114,12 @@ Vaata [Telemeetria & Sensorid](telemetry-and-sensors) toetatud andurite ja säte
 
 ### Eelsalvestatud sõnumi moodul
 
-Seadme füüsiliste nuppude kaudu ligipääsetavad eelseadistatud sõnumid (pöördnuppude, klaviatuuride või sarnase sisendriistvaraga raadiote puhul). Define a list of quick-send messages that can be transmitted without a phone connected — ideal for field use.
+Seadme füüsiliste nuppude kaudu ligipääsetavad eelseadistatud sõnumid (pöördnuppude, klaviatuuride või sarnase sisendriistvaraga raadiote puhul). Määra nimekiri kiirsõnumitest, mida saab edastada ilma telefoni ühendamata – ideaalne välitöödeks.
 
 | Sätted                  | Kirjeldus                                                          |
 | ----------------------- | ------------------------------------------------------------------ |
 | ~~Lubatud~~             | ⚠️ **Vananenud** — praegune püsivara võib seda lülitit ignoreerida |
-| Sõnumid                 | Newline-separated list of messages                                 |
+| Sõnumid                 | Reavahetusega eraldatud sõnumite loend                             |
 | Saada kelluke           | Esita saatmisel kellukese heli                                     |
 | Rotary Encoder          | Enable rotary encoder input                                        |
 | Üles/alla/vajuta sisend | GPIO sisendi kontaktide määramine                                  |
@@ -128,13 +128,13 @@ Seadme füüsiliste nuppude kaudu ligipääsetavad eelseadistatud sõnumid (pö�
 
 Codec2 audio support for low-bandwidth voice communication over the mesh. See on **eksperimentaalne** funktsioon, mis kodeerib hääle Codec2 koodeki abil väga väikesteks andmepakettideks.
 
-| Sätted          | Kirjeldus                        |
-| --------------- | -------------------------------- |
-| Lubatud         | Aktiveeri audio moodul           |
-| Codec2 Rate     | Audio quality/bandwidth tradeoff |
-| I2S Word Select | GPIO sisend I2S WS jaoks         |
-| I2S Data In     | GPIO sisend I2S DIN jaoks        |
-| I2S Data Out    | GPIO sisend I2S DOUT jaoks       |
+| Sätted            | Kirjeldus                        |
+| ----------------- | -------------------------------- |
+| Lubatud           | Aktiveeri audio moodul           |
+| Codec2 Rate       | Audio quality/bandwidth tradeoff |
+| I2S sõna valimine | GPIO sisend I2S WS jaoks         |
+| I2S Data In       | GPIO sisend I2S DIN jaoks        |
+| I2S Data Out      | GPIO sisend I2S DOUT jaoks       |
 
 > ⚠️ **Märkus:** Heli jaoks on vaja spetsiaalset riistvara (I2S mikrofon ja kõlar). Voice quality is very low-bandwidth — think "understandable radio voice," not phone-call quality.
 
@@ -174,7 +174,7 @@ Juhib toetatud riistvaral NeoPixeli või muid adresseeritavaid RGB LEDe. Saab ka
 
 ### Tuvastusanduri moodul
 
-Turns your node into a motion or door sensor alert system. Kui GPIO sisend tuvastab oleku muutuse (liikumine tuvastatud, uks avatud), levitab sõlm kärgvõrgu kaudu hoiatusteate.
+Muudab sõlme liikumis- või ukseanduri hoiatussüsteemiks. Kui GPIO sisend tuvastab oleku muutuse (liikumine tuvastatud, uks avatud), levitab sõlm kärgvõrgu kaudu hoiatusteate.
 
 | Sätted                                     | Kirjeldus                                                                                                         |
 | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
@@ -189,14 +189,14 @@ Turns your node into a motion or door sensor alert system. Kui GPIO sisend tuvas
 
 ### Paxloenduri moodul
 
-Inimeste loendur WiFi ja BLE päringute abil. Counts nearby devices by passively listening for probe requests that phones and laptops emit when scanning for networks. Available only on ESP32 devices.
+Inimeste loendur WiFi ja BLE päringute abil. Loendab lähedalasuvaid seadmeid, kuulates passiivselt sondimistaotlusi, mida telefonid ja sülearvutid võrkude skannimisel edastavad. Available only on ESP32 devices.
 
 | Sätted                                     | Kirjeldus                     |
 | ------------------------------------------ | ----------------------------- |
 | Lubatud                                    | Aktiveeri inimeste loendamine |
-| Värskendusintervall(id) | How often to report counts    |
+| Värskendusintervall(id) | Kui tihti loendeid esitada    |
 
-> 💡 **Vihje:** Paxloendur on kasulik jalakäijate liikluse hindamiseks matkaradade alguses, ürituste toimumiskohtades või muudes kohtades. Counts are approximate — one person may carry multiple devices.
+> 💡 **Vihje:** Paxloendur on kasulik jalakäijate liikluse hindamiseks matkaradade alguses, ürituste toimumiskohtades või muudes kohtades. Arvud on ligikaudsed – üks inimene võib kaasas kanda mitut seadet.
 
 ### TAK moodul
 
@@ -208,7 +208,7 @@ Meeskonna teadlikkuse komplekti integratsioon ATAKi ja WinTAKi koostalitlusvõim
 
 Administraatori võtit jagavate sõlmede kaugkonfigureerimine:
 
-1. Select the target node in the node list.
+1. Vali sõlmede loendist sihtsõlm.
 2. Mine selle sõlme **Seadetesse**.
 3. Muuda seadistust.
 4. Puuduta **Salvesta** – muudatused saadetakse kärgvõrgu kaudu.

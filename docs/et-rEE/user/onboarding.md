@@ -75,7 +75,7 @@ Märguanded teavitavad teid järgmisest:
 On supported devices, the app may request permission for critical alerts:
 
 - Need on kõrge prioriteediga märguanded, mis võivad režiimist „Ära sega” läbi murda
-- Useful for emergency mesh alerts or urgent messages
+- Kasulik hädaolukorra võrguhoiatuste või kiireloomuliste sõnumite jaoks
 - Võid selle sammu **vahele jätta**, kui te kõrge prioriteediga märguandeid ei vaja
 - Seadistada või tühistada hiljem Androidi teavitusseadetes
 

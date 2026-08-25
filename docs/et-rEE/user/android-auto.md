@@ -23,7 +23,7 @@ Meshtastic integreerub Android Autoga, nii et saad sõidu ajal oma kärgvõrguga
 
 Kui telefon on ühendatud Android Auto peakomplektiga (või arenduses kasutatava töölaua peakomplekti emulaatoriga), esitleb beetaversioon Meshtasticut Android Car App Library abil loodud sõnumsiderakendusena, millel on vahekaartidega avakuva, mis on optimeeritud sõiduohutuks ja hõlpsasti kasutatavaks:
 
-- **Messages** — recent conversations, with hands-free reading and replies.
+- **Sõnumid** – hiljutised vestlused koos käed-vabad lugemise ja vastustega.
 - **Nodes** — the mesh node list, with a node-detail view.
 - **Olek** — praegune ühendus ja võrgu olek.
 
@@ -33,9 +33,9 @@ The car app does not add a new connection of its own. See kasutab Meshtastici ra
 
 ## Sõnumid
 
-The Messages tab lists your recent conversations. While driving, you can:
+Vahekaardil Sõnumid on loetletud teie viimased vestlused. While driving, you can:
 
-- **Have messages read aloud** so you don't need to look at the screen.
+- **Lase sõnumid ette lugeda**, et sa ei peaks ekraani vaatama.
 - **Reply by voice or text** using your head unit's reply control, dictating your response hands-free.
 
 ## Sõlmed

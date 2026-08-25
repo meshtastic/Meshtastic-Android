@@ -942,6 +942,7 @@
     <string name="latitude">Laiuskraad</string>
     <!-- LAYER -->
     <string name="layer_subtitle">%1$s • %2$s</string>
+    <string name="layer_type_coverage">Katvuse hinnang</string>
     <string name="layer_type_network">Võrgukiht</string>
     <string name="learn_more">Lisateave</string>
     <string name="led_heartbeat">Südamelöögi LED</string>
@@ -951,6 +952,8 @@
     <!-- LICENSED -->
     <string name="licensed_amateur_radio">Litsentseeritud raadioamatöör (Ham)</string>
     <string name="licensed_amateur_radio_text">Selle valiku lubamine keelab krüpteerimise ja ei ühildu Meshtastic vaikevõrguga.</string>
+    <string name="licensed_mode_enable_confirm">Litsentsitud režiimi lubamine</string>
+    <string name="licensed_mode_enable_title">Litsentsitud (ERAU) režiimi lubamine?</string>
     <string name="licensed_mode_enable_warning">Litsentsitud režiim eemaldab kanali krüpteerimisvõtmed ja keelab administraatori kanali, seega saadetakse kogu liiklus tavalise tekstina, mida igaüks saab lugeda – ja see püsivara ei saa seda allkirjastada, seega ei saa teised sõlmed kontrollida, kas see pärineb sinult. See ei ühildu Meshtasticu vaikevõrguga ja vastutad endiselt oma amatöörraadio litsentsi nõuete ja kohalike eeskirjade täitmise eest.</string>
     <string name="licensed_mode_enable_warning_signed">Litsentsitud režiim eemaldab kanali krüpteerimisvõtmed ja keelab administraatori kanali, seega saadetakse kogu liiklus tavalise tekstina, mida igaüks saab lugeda – kuid see on digitaalselt allkirjastatud, võimaldades teistel sõlmedel kontrollida, kas see pärineb sinult. Sõlme number võib üks kord muutuda, et see vastaks identiteedivõtmele, seega võivad lemmikud, sõnumiajalugu, kaughaldus ja teised sõlmed seda esialgu uuena käsitleda; sina vastutad endiselt oma amatöörraadio litsentsi nõuete ja kohalike eeskirjade täitmise eest.</string>
     <!-- LOAD -->
@@ -1070,6 +1073,7 @@
     <string name="map_type_satellite">Sateliit</string>
     <string name="map_type_terrain">Maastik</string>
     <string name="mark_as_read">Märgi loetuks</string>
+    <string name="mark_unread_selected">Märgi lugemata</string>
     <string name="match_all">Sobib mõni | kõik</string>
     <string name="match_any">Sobib mõni | kõik</string>
     <string name="max">Maksimaalselt</string>
@@ -1130,12 +1134,37 @@
     <string name="message_delivery_status">Sõnumi edastamise olek</string>
     <string name="message_device_managed">Seda raadio on hallatud ja muudab ainult kaughaldur.</string>
     <string name="message_input_label">Sõnum</string>
+    <string name="message_routing_error_admin_bad_session_key">Admin sessioon aegunud</string>
+    <string name="message_routing_error_admin_bad_session_key_detail">Administraatori seansi võti puudub, on aegunud või kehtetu. Enne uuesti proovimist taotle uut seanssi.</string>
     <string name="message_routing_error_admin_public_key_unauthorized">Administraatori võti pole autoriseeritud</string>
     <string name="message_routing_error_admin_public_key_unauthorized_detail">Kaugsõlm ei autoriseeri teie administraatori võtit.</string>
+    <string name="message_routing_error_bad_request">Kehtetu päring</string>
+    <string name="message_routing_error_bad_request_detail">Sihtkoht lükkas selle taotluse kehtetuks.</string>
+    <string name="message_routing_error_duty_cycle_limit">Töötsükli piirang</string>
+    <string name="message_routing_error_duty_cycle_limit_detail">Kohalikud eetriaja piirangud blokeerivad ajutiselt saatmist. Oota enne uuesti proovimist.</string>
+    <string name="message_routing_error_got_nak_detail">Sõlm lükkas selle teate tagasi. Proovi uuesti, kui marsruut muutub.</string>
+    <string name="message_routing_error_max_retransmit">Kärgvõrku edastamine ebaõnnestus</string>
+    <string name="message_routing_error_max_retransmit_detail">Ükski sõlm ei kinnitanud seda teadet. Proovi uuesti, kui signaal on parem või võrgu leviala suurem.</string>
+    <string name="message_routing_error_no_channel">Kanali/võtme mittevastavus</string>
+    <string name="message_routing_error_no_channel_detail">Saatja või saaja ei saanud selle sõnumi jaoks sobivat kanalit/võtit kasutada.</string>
+    <string name="message_routing_error_no_interface">Raadioliides puudub</string>
+    <string name="message_routing_error_no_interface_detail">Saatjal puudub selle sõnumi jaoks kasutatav raadioliides.</string>
+    <string name="message_routing_error_no_response">Rakendus ei vasta</string>
+    <string name="message_routing_error_no_response_detail">Sihtkoht sai päringu kätte, kuid ükski rakendus ega moodul ei vastanud. Proovi uuesti, kui saaja on kättesaadav.</string>
+    <string name="message_routing_error_no_route_detail">Kärgvõrgust ei leitud marsruuti sihtsõlmeni. Proovi uuesti, kui on saadaval rohkem sõlmi.</string>
     <string name="message_routing_error_not_authorized">Pole autoriseeritud</string>
     <string name="message_routing_error_not_authorized_detail">Sihtkoht keeldus sellest taotlusest, kuna see pole autoriseeritud.</string>
+    <string name="message_routing_error_pki_failed">Krüptitud sõnumi saatmine ebaõnnestus</string>
+    <string name="message_routing_error_pki_failed_detail">Krüptitud saatmisteed ei saanud kasutada. Oota, kuni sõlme teave või võtmed sünkroonitakse, ja proovi seejärel uuesti.</string>
     <string name="message_routing_error_pki_send_fail_public_key">Saaja võti pole saadaval</string>
+    <string name="message_routing_error_pki_send_fail_public_key_detail">Sõlmel pole veel saaja avalikku võtit. Oota, kuni sõlme teave sünkroonitakse ja proovi seejärel uuesti.</string>
     <string name="message_routing_error_pki_unknown_pubkey">Saaja vajab sinu võtit</string>
+    <string name="message_routing_error_pki_unknown_pubkey_detail">Saaja ei tea veel sinu avalikku võtit. Sõlm võib oma teavet automaatselt jagada; proovi pärast sünkroonimist uuesti.</string>
+    <string name="message_routing_error_rate_limit_exceeded">Piiratud määr</string>
+    <string name="message_routing_error_rate_limit_exceeded_detail">Sõnumeid saadetakse liiga kiiresti. Oota enne uuesti proovimist.</string>
+    <string name="message_routing_error_timeout_detail">Kinnitust ei saabunud õigeaegselt. Proovi uuesti, kui signaal on parem või võrgu leviala on laiem.</string>
+    <string name="message_routing_error_too_large">Sõnum on saatmiseks liiga pikk</string>
+    <string name="message_routing_error_too_large_detail">Lühenda sõnumit ja saada see uuesti.</string>
     <string name="message_status_delivered">Kärgvõrku kohale jõudnud</string>
     <string name="message_status_enroute">Saadan...</string>
     <string name="message_status_queued">Saatmise järjekorras</string>
@@ -1276,6 +1305,7 @@
     <string name="node_list_help_title">Sõlmede loendi abi</string>
     <string name="node_list_long_click_label">Sõlme valikud</string>
     <string name="node_number">Sõlme number</string>
+    <string name="node_request_send_failed">Päringut ei õnnestunud saata. Proovi uuesti.</string>
     <string name="node_restarting">Taaskäivitan…</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_button">Sõlmede filter</string>
@@ -1430,6 +1460,7 @@
     <string name="primary">Peamine</string>
     <string name="primary_channel_feature">Pidev asukoha ja telemeetria edastamine</string>
     <string name="private_key">Salajane võti</string>
+    <string name="project_information">Projekti teave</string>
     <string name="provide_location_to_mesh">Jaga telefoni asukohta mesh-võrku</string>
     <string name="provider_name_exists">Teenusepakkuja nimi on olemas.</string>
     <string name="proxy_to_client_enabled">Kliendi proksi lubatud</string>
@@ -1538,13 +1569,22 @@
     <!-- ROUTING -->
     <string name="routing_error_admin_bad_session_key">Admin sessioon aegunud</string>
     <string name="routing_error_admin_public_key_unauthorized">Administraatori võti pole autoriseeritud</string>
+    <string name="routing_error_bad_request">Kehtetu päring</string>
+    <string name="routing_error_duty_cycle_limit">Töötsükli piirang</string>
     <string name="routing_error_got_nak">Negatiivne kinnitus</string>
+    <string name="routing_error_max_retransmit">Kärgvõrku edastamine ebaõnnestus</string>
+    <string name="routing_error_no_channel">Kanali/võtme mittevastavus</string>
+    <string name="routing_error_no_interface">Raadioliides puudub</string>
+    <string name="routing_error_no_response">Rakendus ei vasta</string>
     <string name="routing_error_no_route">Marsruuti pole</string>
     <string name="routing_error_none">Kinnitatud</string>
     <string name="routing_error_not_authorized">Pole autoriseeritud</string>
+    <string name="routing_error_pki_failed">Krüptitud sõnumi saatmine ebaõnnestus</string>
     <string name="routing_error_pki_send_fail_public_key">Saaja võti pole saadaval</string>
     <string name="routing_error_pki_unknown_pubkey">Saaja vajab sinu võtit</string>
+    <string name="routing_error_rate_limit_exceeded">Piiratud määr</string>
     <string name="routing_error_timeout">Aegunud</string>
+    <string name="routing_error_too_large">Sõnum on saatmiseks liiga pikk</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Vastuvõetud signaali tugevuse indikaator (RSSI), mõõt mida kasutatakse antenni poolt vastuvõetava võimsustaseme määramiseks. Kõrgem RSSI väärtus näitab üldiselt tugevamat ja stabiilsemat ühendust.</string>
     <string name="rsyslog_server">rsyslog server</string>
@@ -1623,6 +1663,7 @@
     <!-- SHARE -->
     <string name="share">Jaga</string>
     <string name="share_channels_qr">Jaga kanalite QR koodi</string>
+    <string name="share_connected_node">Jaga ühendatud sõlme</string>
     <string name="share_contact">Jaga kontakti</string>
     <string name="share_location">Jaga asukohta</string>
     <string name="share_location_description">Kasuta oma telefoni GPS asukoha saatmiseks oma sõlmele, selle asemel, et kasutada sõlme riistvaralist GPS.</string>
@@ -1633,6 +1674,8 @@
     <string name="should_update_firmware">Soovitatav püsivara värskendamine.</string>
     <!-- SHOW -->
     <string name="show_all_key_title">Krüpteerimisvõtmete nimed</string>
+    <string name="show_full_message_timestamps">Kuva täieliku sõnumi ajatemplid</string>
+    <string name="show_full_message_timestamps_summary">Kuva vestluste päistes ja sõnumitoimingutes alati kuupäev ja kellaaeg</string>
     <string name="show_iaq_legend">Näita õhukvaliteedi ajalugu</string>
     <string name="show_layer">Näita kiht</string>
     <string name="show_original">Näita originaali</string>
@@ -1672,6 +1715,7 @@
     <string name="site_planner_use_current_location">Kasuta praegust asukohta</string>
     <string name="site_planner_use_map_center">Kasuta kaardi keskpunkti</string>
     <string name="site_planner_use_node_location">Kasuta praegust sõlme asukohta</string>
+    <string name="site_planner_webview_updating">Süsteemi WebView värskendatakse. Palun proovi hetke pärast uuesti.</string>
     <string name="skip">Jäta vahele</string>
     <string name="slot">Pesa</string>
     <string name="smart_position">Nutikas asukoht</string>
@@ -1717,10 +1761,14 @@
     <string name="tak_role_unspecified">Määramata</string>
     <string name="tak_server">TAK server</string>
     <string name="tak_server_channel">TAK kärgvõrgu kanal</string>
+    <string name="tak_server_channel_desc">Väljuva TAK liikluse jaoks kasutatakse Meshtastic kanalit</string>
     <string name="tak_server_channel_option">%1$d: %2$s</string>
     <string name="tak_server_enabled">Kohaliku TAK-serveri lubamine</string>
+    <string name="tak_server_enabled_desc">Käivitab kohaliku TLS serveri pordil 8089 ATAK ühenduste jaoks</string>
+    <string name="tak_server_export_data_package_desc">Selle serveriga ühenduse loomiseks genereeri ATAKile .zip fail</string>
     <string name="tak_server_loading">…</string>
     <string name="tak_server_mesh_to_cot">Kärgvõrgust CoTi konverter</string>
+    <string name="tak_server_mesh_to_cot_desc">Näita Meshtastici sõlmi ATAK kaardil kontaktidena</string>
     <string name="tak_server_section">Server</string>
     <string name="tak_server_status">Staatus</string>
     <plurals name="tak_server_status_connected">
@@ -1738,6 +1786,7 @@
     <string name="tak_server_test_protocol_v1_label">V1 (pärand püsivara &lt; 2.8.0 — PLI + ainult vestlus)</string>
     <string name="tak_server_test_protocol_v2_label">V2 (püsivara ≥ 2.8.0)</string>
     <string name="tak_server_test_result_bytes">%1$dB ✓</string>
+    <string name="tak_server_test_result_expected_drop">Ei ole v1 skeemis (oodatud)</string>
     <string name="tak_server_test_result_unknown_error">✗</string>
     <string name="tak_server_test_results_v2">%1$d sooritatud, %2$d oodatav kukkumine, %3$d ebaõnnestus %4$d/%5$d</string>
     <string name="tak_server_test_run">Käivita</string>
@@ -1820,6 +1869,7 @@
     <string name="translation_downloading">Tõlkemudeli allalaadimine…</string>
     <string name="translation_failed">Sõnumit ei õnnestunud tõlkida</string>
     <string name="translation_model_download_failed">Tõlkemudeli allalaadimine ebaõnnestus</string>
+    <string name="translation_not_required">Sõnum on juba teie keeles</string>
     <string name="transmit_over_lora">Saada LoRa kaudu</string>
     <!-- TRANSPORT -->
     <string name="transport">Transport</string>
@@ -1858,6 +1908,7 @@
     <string name="update_interval">GPS-i küsimise intervall</string>
     <string name="update_interval_seconds">Uuenduste sagedus (sekundit)</string>
     <string name="updated">Uuendatud</string>
+    <string name="uplink_enabled">MQTT üleslaadimine lubatud</string>
     <string name="uplink_feature_description">Võrgusõlme sõnumid saadetakse avalikku internetti mis tahes sõlme konfigureeritud ligipääsu kaudu.</string>
     <string name="uptime">Töötamise aeg</string>
     <!-- URL -->
@@ -1899,6 +1950,7 @@
     <string name="website">Veebisait</string>
     <string name="weight">Kaal</string>
     <string name="what_is_meshtastic">Mis on Meshtastic?</string>
+    <string name="what_is_meshtastic_description">Avatud lähtekoodiga, võrgust sõltumatu, detsentraliseeritud kärgvõrk, mis töötab taskukohaste ja väikese energiatarbega raadioside abil.</string>
     <!-- WIFI -->
     <string name="wifi_config">WiFi valikud</string>
     <string name="wifi_devices">WiFi ühenduse loomine mPWRD-OS-i jaoks</string>

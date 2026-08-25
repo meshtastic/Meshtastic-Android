@@ -51,7 +51,7 @@ Otsesõnumid (DM-id) on punkt-punkti krüptitud suhtlus kahe konkreetse sõlme v
 
 ### Sending a Direct Message
 
-1. Open the **Messages** tab.
+1. Ava vahekaart **Sõnumid**.
 2. Vali kontaktide loendist sõlm või puuduta sõlme loendis.
 3. Tippi oma sõnum ja puuduta nuppu **Saada**.
 
@@ -62,7 +62,7 @@ Olekumärgis kuvatakse ainult **sinu enda** väljaminevate sõnumite all (teiste
 | Olek                              | Tähendus                                                                                                                                           |
 | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Saadan…                           | Järjekorras või juba raadiole antud, pole veel kumbagi teed lahendatud (nii järjekorras kui ka teel olles kuvatakse sama tekst) |
-| Saajale kätte toimetatud          | The strongest confirmation for a direct message — an acknowledgment came back                                                                      |
+| Saajale kätte toimetatud          | Kõige tugevam kinnitus otsesõnumile – vastus tuli                                                                                                  |
 | Kärgvõrku kohale jõudnud          | Kanali leviedastuse puhul jõuab sõnum kärgvõrku (leviedastustel puudub saajapõhine kinnitus)                                    |
 | Vahendatud, saaja pole kinnitanud | Otsesõnumi puhul kuvatakse hoiatusvärviga – sõnum edastati, kuid kinnitust pole veel tulnud                                                        |
 | Marsruutimine SF++ ahela kaudu…   | Being routed/buffered by the Store & Forward Plus Plus chain                                                                   |
@@ -73,29 +73,29 @@ Olekumärgis kuvatakse ainult **sinu enda** väljaminevate sõnumite all (teiste
 
 Kui sõnumit ei õnnestu kohale toimetada, näitab veaindikaator, mis valesti läks:
 
-| Tõrge                        | Tähendab                                     | What to Do                                                                                                                            |
-| ---------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| No Route                     | No path exists to the destination node       | The recipient may be offline or out of mesh range. Try later or move closer.                          |
-| Got NAK                      | Järgmise-hüppe sõlm keeldus edastamast       | Vahendussõlm võib olla ülekoormatud. Wait and retry.                                                  |
-| Aegunud                      | No acknowledgment within retry window        | The recipient may be just out of range. Proovi hüppe limiiti suurendada või paremasse asukohta minna. |
-| No radio interface           | No radio interface available to send         | Check that your radio is connected and available.                                                                     |
-| Failed to deliver to mesh    | All retry attempts exhausted                 | Move closer, improve signal, or wait for mesh conditions to improve.                                                  |
-| Channel/key mismatch         | Destination channel/key does not match       | Verify both nodes share the same channel and PSK.                                                                     |
-| Message is too large to send | Sõnum ületab maksimaalset sõnumi mahtu       | Shorten the message and try again.                                                                                    |
-| No app response              | App or plugin did not respond to the request | Retry or check the destination app or module state.                                                                   |
-| Duty cycle limiit            | Regional airtime limit reached               | Wait for the duty cycle window to reset.                                                                              |
-| Invalid request              | Malformed or invalid request                 | Retry after updating or restarting the app if this persists.                                                          |
+| Tõrge                          | Tähendab                                        | Mida teha                                                                                                                             |
+| ------------------------------ | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| No Route                       | Sihtkoha sõlmeni pole teed olemas               | Saaja võib olla võrguühenduseta või võrguühenduse levialast väljas. Try later or move closer.         |
+| Sain NAKi                      | Järgmise-hüppe sõlm keeldus edastamast          | Vahendussõlm võib olla ülekoormatud. Wait and retry.                                                  |
+| Aegunud                        | Uuesti proovimise aja jooksul kinnitust ei tule | The recipient may be just out of range. Proovi hüppe limiiti suurendada või paremasse asukohta minna. |
+| No radio interface             | No radio interface available to send            | Check that your radio is connected and available.                                                                     |
+| Failed to deliver to mesh      | All retry attempts exhausted                    | Move closer, improve signal, or wait for mesh conditions to improve.                                                  |
+| Channel/key mismatch           | Destination channel/key does not match          | Verify both nodes share the same channel and PSK.                                                                     |
+| Sõnum on saatmiseks liiga pikk | Sõnum ületab maksimaalset sõnumi mahtu          | Lühenda sõnumit ja proovi uuesti.                                                                                     |
+| No app response                | App or plugin did not respond to the request    | Proovi uuesti või kontrolli sihtrakenduse või -mooduli olekut.                                                        |
+| Töötsükli piirang              | Regional airtime limit reached                  | Oota, kuni töötsükli aken lähtestub.                                                                                  |
+| Invalid request                | Malformed or invalid request                    | Retry after updating or restarting the app if this persists.                                                          |
 
-> 💡 **Vihje:** Enamik kohaletoimetamise vigu laheneb iseenesest. If a node is intermittently reachable, the mesh will retry. For persistent "No Route" errors, check that intermediate Router nodes are online.
+> 💡 **Vihje:** Enamik kohaletoimetamise vigu laheneb iseenesest. If a node is intermittently reachable, the mesh will retry. Püsivate „Marsruuti pole” vigade korral kontrolli, kas ruuteri vahesõlmed on võrgus.
 
 ## Sõnumi omadused
 
-### Quick Chat
+### Kiirvestlus
 
 Eelsalvestatud sõnumid kiireks suhtluseks:
 
 - Juurdepääs läbi sõnumi sisestamise alas oleva kiirvestluse nupu
-- Choose from built-in phrases or custom messages
+- Valige sisseehitatud fraaside või kohandatud sõnumite hulgast
 - Kohanda kiirvestluse sõnumeid menüüs **Seaded → Kiirvestlus**
 - Kasulik, kui trükkimine on ebapraktiline (kindad, väike ekraan, kiireloomuline)
 
@@ -118,11 +118,11 @@ Saad otsida mis tahes vestluse kogu ajaloost otse vestlusekraanilt:
 
 ![Sõnumite otsinguriba tulemuste loenduri ja eelmise/järgmise noolega](../../assets/screenshots/messages_search_bar.png)
 
-> 💡 **Vihje:** Otsing toimub täisteksti põhjal ja jääb vestlusse, kust sa selle avasid – see ei otsi teistest kanalitest ega kontaktide hulgast. It matches against the messages already stored on your device, so it works fully offline.
+> 💡 **Vihje:** Otsing toimub täisteksti põhjal ja jääb vestlusse, kust sa selle avasid – see ei otsi teistest kanalitest ega kontaktide hulgast. See võrdleb seadmesse juba salvestatud sõnumeid, seega töötab see täielikult võrguühenduseta.
 
-### Message Bubbles
+### Sõnumimullid
 
-Messages appear as chat bubbles — sent messages on the right, received messages on the left. Iga mull näitab saatjat, ajatempli ja kohaletoimetamise olekut. Messages with replies include a quoted preview of the original message above the response.
+Sõnumid kuvatakse vestlusmullidena – saadetud sõnumid paremal, vastuvõetud sõnumid vasakul. Iga mull näitab saatjat, ajatempli ja kohaletoimetamise olekut. Messages with replies include a quoted preview of the original message above the response.
 
 ### Teksti vormindamine
 
@@ -148,11 +148,11 @@ Type `@` while composing to mention a node — a picker suggests matching contac
 
 React to messages with emoji:
 
-- **Long-press** a message to open the actions menu
+- **Pikk vajutus** sõnumil avab toimingute menüü
 - Emotikoni valimiseks puuduta **Lisa reaktsioon**
-- Reactions appear below the message bubble
-- Multiple users can react to the same message
-- React to your own messages or others' messages
+- Reaktsioonid kuvatakse sõnumimulli all
+- Mitu kasutajat saavad samale sõnumile reageerida
+- Reageeri oma või teiste sõnumitele
 
 ![Emotikonide reaktsioonimärgid kuvatakse sõnumi all](../../assets/screenshots/messages_reaction.png)
 
@@ -162,17 +162,17 @@ React to messages with emoji:
 
 Juurdepääsuks vajuta pikalt mis tahes sõnumit:
 
-- **Copy** — copy message text to clipboard
-- **Reply** — quote the message in your response
+- **Kopeeri** – kopeeri sõnumi tekst lõikelauale
+- **Vasta** – tsiteeri oma vastuses sõnumit
 - **React** — add an emoji reaction
 - **Tõlgi** – tõlgi vastuvõetud sõnum oma seadme keelde ja vaheta algse ja tõlgitud teksti vahel (ainult Google Play versioon; kasutab seadmesisest tõlget)
-- **Delete** — remove a message you sent (local deletion)
+- **Kustuta** — saadetud sõnumi eemaldamine (lokaalne kustutamine)
 
 ### Sõnumi prioriteet
 
-Messages are queued and transmitted based on priority:
+Sõnumid pannakse järjekorda ja edastatakse prioriteedi alusel:
 
-1. Emergency/alert messages (highest)
+1. Hädaolukorra/hoiatusteated (kõrgeim)
 2. Otsesõnum
 3. Kanalite levitamine (madalaim)
 
@@ -180,8 +180,8 @@ Messages are queued and transmitted based on priority:
 
 - **Maximum length:** 200 bytes (approximately 200 characters for ASCII text)
 - 200-baidine piirang kehtib rakendusesisese helilooja kohta – kärgvõrgu kandevõime piirang ise on ~233 baiti, seega võivad teiste saatjate (nt rakenduse funktsioonide või Android Auto) sõnumid saabuda veidi kauem
-- **Rate limiting:** The mesh enforces airtime fairness; heavy message volume may be throttled
-- **Delivery:** Messages are retried automatically if no acknowledgment is received
+- **Kiiruse piiramine:** Võrk tagab eetriaja õigluse; suurte sõnumite mahtu võidakse piirata
+- **Kohaletoimetamine:** Kui kinnitust ei ole saabunud, proovitakse sõnumeid automaatselt uuesti saata
 
 ## Parimad tavad
 
