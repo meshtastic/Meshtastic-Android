@@ -10,15 +10,11 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 ### Unreleased (not yet in any build)
 
 #### 🏗️ Features
-* feat(messaging): swipe to reply, double-tap reactions, day separators by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6850
-* feat(messaging): per-contact drafts and a quieter composer by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6851
-* feat(messaging): name the sender on the jump-to-latest control by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6856
-* feat(notifications): offer conversations as bubbles by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6858
-* feat(messaging): mark unread, swipe row actions, and pinned conversations by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6857
+* feat(messaging): close the quick reaction bar on a tap outside it by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6865
 #### 🛠️ Fixes
-* fix(messaging): clear and suppress notifications for the conversation on screen by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6849
+* fix(messaging): fire swipe row actions once per swipe, and let the snackbar go by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6863
 
-### Internal (v2.8.2-internal.1)
+### Internal (v2.8.2-internal.2)
 Changes since [`v2.8.1`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.1):
 
 #### 🏗️ Features
@@ -27,6 +23,11 @@ Changes since [`v2.8.1`](https://github.com/meshtastic/Meshtastic-Android/releas
 * feat(privacy): shield sensitive UI content from non-tool accessibility services by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6794
 * feat(hardware): fetch bootloader OTA quirks from the API, seeded from the bundled asset by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6802
 * feat(hardware): fetch the maintenance UF2 manifest from the API, digest-pinned by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6803
+* feat(messaging): swipe to reply, double-tap reactions, day separators by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6850
+* feat(messaging): per-contact drafts and a quieter composer by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6851
+* feat(messaging): name the sender on the jump-to-latest control by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6856
+* feat(notifications): offer conversations as bubbles by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6858
+* feat(messaging): mark unread, swipe row actions, and pinned conversations by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6857
 #### 🛠️ Fixes
 * fix(navigation): clear deep-link replay cache once applied to the backstack by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6796
 * fix(ui): give feedback when a contact or channel import arrives while disconnected by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6798
@@ -42,6 +43,7 @@ Changes since [`v2.8.1`](https://github.com/meshtastic/Meshtastic-Android/releas
 * fix(connection): extend BLE handshake deadlines while config progress flows by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6848
 * fix(map): survive the WebView provider update race in Site Planner by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6846
 * fix(mqtt): tolerate object-typed payload in MQTT JSON messages by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6839
+* fix(messaging): clear and suppress notifications for the conversation on screen by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6849
 <!-- UNRELEASED_END -->
 
 <!-- RELEASED_START -->
