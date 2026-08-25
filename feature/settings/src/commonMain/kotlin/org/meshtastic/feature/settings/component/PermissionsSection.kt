@@ -26,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.app_notifications
@@ -51,12 +52,17 @@ import org.meshtastic.core.resources.permission_state_denied
 import org.meshtastic.core.resources.permission_state_not_applicable
 import org.meshtastic.core.resources.permission_state_not_asked
 import org.meshtastic.core.resources.permissions
+import org.meshtastic.core.resources.permissions_all_allowed
+import org.meshtastic.core.resources.permissions_need_attention
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.PermissionRationaleDialog
 import org.meshtastic.core.ui.icon.AppSettingsAlt
 import org.meshtastic.core.ui.icon.Bluetooth
+import org.meshtastic.core.ui.icon.ExpandLess
+import org.meshtastic.core.ui.icon.ExpandMore
 import org.meshtastic.core.ui.icon.Language
 import org.meshtastic.core.ui.icon.LocationOn
+import org.meshtastic.core.ui.icon.Lock
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Notifications
 import org.meshtastic.core.ui.icon.QrCodeScanner
@@ -120,6 +126,12 @@ internal fun ColumnScope.PermissionsSettingsContent() {
             bluetoothIsLocation = bluetoothIsLocation,
         )
 
+    // Rows that need nothing from the user are collapsed by default. Five rows reading "Allowed" is a wall every
+    // healthy user scrolls past on every visit to pay for a recovery path a minority needs — so the section leads with
+    // the one fact that matters and opens itself only when something is actually wrong.
+    val needingAttention = rows.count { it.state.isRuntimeGated && !it.state.isGranted }
+    var expanded by remember(needingAttention) { mutableStateOf(needingAttention > 0) }
+
     var pendingRationale by remember { mutableStateOf<PermissionRow?>(null) }
 
     pendingRationale?.let { row ->
@@ -136,7 +148,22 @@ internal fun ColumnScope.PermissionsSettingsContent() {
     }
 
     ExpressiveSection(title = stringResource(Res.string.permissions)) {
-        rows.forEach { row -> PermissionListItem(row = row, onShowRationale = { pendingRationale = row }) }
+        ListItem(
+            text = stringResource(Res.string.permissions),
+            supportingText =
+            if (needingAttention == 0) {
+                stringResource(Res.string.permissions_all_allowed)
+            } else {
+                pluralStringResource(Res.plurals.permissions_need_attention, needingAttention, needingAttention)
+            },
+            supportingTextColor = if (needingAttention == 0) Color.Unspecified else MaterialTheme.colorScheme.error,
+            leadingIcon = MeshtasticIcons.Lock,
+            trailingIcon = if (expanded) MeshtasticIcons.ExpandLess else MeshtasticIcons.ExpandMore,
+            onClick = { expanded = !expanded },
+        )
+        if (expanded) {
+            rows.forEach { row -> PermissionListItem(row = row, onShowRationale = { pendingRationale = row }) }
+        }
     }
 }
 

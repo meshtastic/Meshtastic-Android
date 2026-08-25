@@ -1445,7 +1445,7 @@
     <string name="permission_location_summary">Show your position on the map and share it with the mesh</string>
     <string name="permission_location_summary_pre31">Find your radio over Bluetooth, place you on the map, and share your position with the mesh</string>
     <string name="permission_missing_31">Meshtastic needs "Nearby devices" permissions enabled to find and connect to devices via Bluetooth. You can disable when not in use.</string>
-    <string name="permission_missing_pre31">Meshtastic needs Location permission to find and connect to devices via Bluetooth. On this version of Android, location access is what unlocks Bluetooth scanning — Meshtastic does not use it to track you.</string>
+    <string name="permission_missing_pre31">On this version of Android, one Location permission covers two things: it is what unlocks Bluetooth scanning, and it places you on the mesh map. Sharing your position with the mesh stays off until you turn it on yourself.</string>
     <string name="permission_nearby_devices_summary">Find and connect to your radio over Bluetooth</string>
     <string name="permission_notifications_summary">Alert you to messages, new nodes and low battery</string>
     <string name="permission_state_allowed">Allowed</string>
@@ -1453,7 +1453,15 @@
     <string name="permission_state_denied">Denied — tap to allow</string>
     <string name="permission_state_not_applicable">Not required on this version of Android</string>
     <string name="permission_state_not_asked">Not asked yet</string>
+    <!-- PERMISSIONS -->
     <string name="permissions">Permissions</string>
+    <string name="permissions_all_allowed">All allowed</string>
+    <string name="permissions_hide">Hide permissions</string>
+    <plurals name="permissions_need_attention">
+        <item quantity="one">%1$d needs attention</item>
+        <item quantity="other">%1$d need attention</item>
+    </plurals>
+    <string name="permissions_show">Show permissions</string>
     <string name="phone_location">Phone Location</string>
     <string name="phone_location_description">Meshtastic uses your phone's location to enable a number of features. You can update your location permissions at any time from settings.</string>
     <string name="pin_selected">Pin</string>

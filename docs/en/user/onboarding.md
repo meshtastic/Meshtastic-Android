@@ -43,7 +43,7 @@ Grant both permissions when prompted. Without Bluetooth, you'll need to use USB 
 
 ### Location Permission
 
-> ⚠️ **Is location required for Bluetooth?** On **Android 11 and older**, yes — those releases treat a Bluetooth scan as a location capability, so the app asks for Location instead of "Nearby devices", and system **Location Services** must also be switched on for a scan to return anything. On **Android 12 and newer** the two are separate: "Nearby devices" is declared `neverForLocation`, and declining Location does not stop you finding or connecting to a radio.
+> ⚠️ **Is location required for Bluetooth?** On **Android 11 and older**, yes — those releases treat a Bluetooth scan as a location capability, so the app asks for Location instead of "Nearby devices", and system **Location Services** must also be switched on for a scan to return anything. There you will see **one** location step rather than two, on the Bluetooth screen, because it is a single system permission and asking twice would spend both of the denials Android allows before it stops prompting for good. On **Android 12 and newer** the two are separate: "Nearby devices" is declared `neverForLocation`, and declining Location does not stop you finding or connecting to a radio.
 
 Meshtastic also uses your location for:
 - Showing your position on the mesh map
@@ -75,7 +75,7 @@ On supported devices, the app may request permission for critical alerts:
 
 ### Reviewing permissions later
 
-**Settings → Permissions** lists every runtime permission the app uses, what it is for, and where it currently stands:
+**Settings → Permissions** summarizes where every runtime permission stands. It reads *All allowed* when nothing needs you, and names the count when something does — opening itself automatically in that case. Tap the row to see the full list at any time:
 
 | State | What tapping the row does |
 |---|---|

@@ -1417,7 +1417,12 @@ permission_state_blocked
 permission_state_denied
 permission_state_not_applicable
 permission_state_not_asked
+### PERMISSIONS ###
 permissions
+permissions_all_allowed
+permissions_hide
+permissions_need_attention
+permissions_show
 phone_location
 phone_location_description
 pin_selected

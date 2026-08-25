@@ -27,10 +27,21 @@ class IntroViewModel : ViewModel() {
     /**
      * Determines the next navigation key based on the current key and the state of permissions. The flow hierarchy is:
      * Core Connection -> Shared Location -> Notifications -> Done.
+     *
+     * @param bluetoothRequiresLocation true on API < 31, where BLE scanning is gated by ACCESS_FINE_LOCATION rather
+     *   than the Android 12 "Nearby devices" permissions. There the Bluetooth screen has *already asked for the
+     *   location permission*, so following it with a Location screen asks the user for the same system permission twice
+     *   in a row — and a user who declines both has spent both of Android's allowed denials before ever seeing the app,
+     *   landing on USER_FIXED with no dialog available again. The Bluetooth screen covers both uses on those releases,
+     *   so the second ask is dropped rather than duplicated.
      */
-    fun getNextKey(currentKey: NavKey, allPermissionsGranted: Boolean): NavKey? = when (currentKey) {
+    fun getNextKey(
+        currentKey: NavKey,
+        allPermissionsGranted: Boolean,
+        bluetoothRequiresLocation: Boolean = false,
+    ): NavKey? = when (currentKey) {
         is Welcome -> Bluetooth
-        is Bluetooth -> Location
+        is Bluetooth -> if (bluetoothRequiresLocation) Notifications else Location
         is Location -> Notifications
         is Notifications -> if (allPermissionsGranted) CriticalAlerts else null
         is CriticalAlerts -> null

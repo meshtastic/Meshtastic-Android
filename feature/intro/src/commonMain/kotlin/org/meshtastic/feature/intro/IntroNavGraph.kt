@@ -29,8 +29,12 @@ internal fun EntryProviderScope<NavKey>.introGraph(
     viewModel: IntroViewModel,
     onDone: () -> Unit,
 ) {
-    fun navigateToNext(current: NavKey, permissionsGranted: Boolean = true) {
-        val next = viewModel.getNextKey(current, permissionsGranted)
+    fun navigateToNext(
+        current: NavKey,
+        permissionsGranted: Boolean = true,
+        bluetoothRequiresLocation: Boolean = false,
+    ) {
+        val next = viewModel.getNextKey(current, permissionsGranted, bluetoothRequiresLocation)
         if (next != null) {
             backStack.add(next)
         } else {
@@ -39,10 +43,13 @@ internal fun EntryProviderScope<NavKey>.introGraph(
     }
 
     /** The one action behind every permission screen's primary button, resolved by [introPermissionAction]. */
-    fun onPrimaryAction(state: PermissionUiState, current: NavKey) {
+    fun onPrimaryAction(state: PermissionUiState, current: NavKey, bluetoothRequiresLocation: Boolean = false) {
         when (introPermissionAction(state.status)) {
-            IntroPermissionAction.ADVANCE -> navigateToNext(current)
+            IntroPermissionAction.ADVANCE ->
+                navigateToNext(current, bluetoothRequiresLocation = bluetoothRequiresLocation)
+
             IntroPermissionAction.OPEN_SETTINGS -> state.openAppSettings()
+
             IntroPermissionAction.REQUEST -> state.request()
         }
     }
@@ -54,8 +61,14 @@ internal fun EntryProviderScope<NavKey>.introGraph(
         BluetoothScreen(
             status = permissions.bluetooth.status,
             requiresLocation = permissions.bluetoothRequiresLocation,
-            onSkip = { navigateToNext(Bluetooth) },
-            onPrimaryAction = { onPrimaryAction(permissions.bluetooth, Bluetooth) },
+            onSkip = { navigateToNext(Bluetooth, bluetoothRequiresLocation = permissions.bluetoothRequiresLocation) },
+            onPrimaryAction = {
+                onPrimaryAction(
+                    state = permissions.bluetooth,
+                    current = Bluetooth,
+                    bluetoothRequiresLocation = permissions.bluetoothRequiresLocation,
+                )
+            },
         )
     }
 

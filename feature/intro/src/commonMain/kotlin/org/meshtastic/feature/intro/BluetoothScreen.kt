@@ -31,10 +31,15 @@ import org.meshtastic.core.resources.bluetooth_permission_denied_notice
 import org.meshtastic.core.resources.bluetooth_permission_denied_notice_pre31
 import org.meshtastic.core.resources.configure_bluetooth_permissions
 import org.meshtastic.core.resources.configure_location_permissions
+import org.meshtastic.core.resources.mesh_map_location
+import org.meshtastic.core.resources.mesh_map_location_description
 import org.meshtastic.core.resources.permission_missing_31
 import org.meshtastic.core.resources.permission_missing_pre31
+import org.meshtastic.core.resources.share_location
+import org.meshtastic.core.resources.share_location_description
 import org.meshtastic.core.ui.icon.Antenna
 import org.meshtastic.core.ui.icon.Bluetooth
+import org.meshtastic.core.ui.icon.LocationOn
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.PermissionStatus
@@ -56,19 +61,7 @@ internal fun BluetoothScreen(
     onSkip: () -> Unit,
     onPrimaryAction: () -> Unit,
 ) {
-    val features =
-        listOf(
-            FeatureUIData(
-                icon = MeshtasticIcons.Bluetooth,
-                titleRes = Res.string.bluetooth_feature_discovery,
-                subtitleRes = Res.string.bluetooth_feature_discovery_description,
-            ),
-            FeatureUIData(
-                icon = MeshtasticIcons.Antenna,
-                titleRes = Res.string.bluetooth_feature_config,
-                subtitleRes = Res.string.bluetooth_feature_config_description,
-            ),
-        )
+    val features = bluetoothScreenFeatures(requiresLocation)
 
     PermissionScreenLayout(
         headlineRes = Res.string.bluetooth_permission,
@@ -97,6 +90,49 @@ internal fun BluetoothScreen(
         onSkip = onSkip,
         onPrimaryAction = onPrimaryAction,
     )
+}
+
+/**
+ * What Bluetooth access buys, plus what the *same* grant buys on API < 31 where it is the location permission.
+ *
+ * Split out so [BluetoothScreen] stays within the complexity budget and this stays about the platform difference.
+ */
+@Composable
+private fun bluetoothScreenFeatures(requiresLocation: Boolean): List<FeatureUIData> = buildList {
+    add(
+        FeatureUIData(
+            icon = MeshtasticIcons.Bluetooth,
+            titleRes = Res.string.bluetooth_feature_discovery,
+            subtitleRes = Res.string.bluetooth_feature_discovery_description,
+        ),
+    )
+    add(
+        FeatureUIData(
+            icon = MeshtasticIcons.Antenna,
+            titleRes = Res.string.bluetooth_feature_config,
+            subtitleRes = Res.string.bluetooth_feature_config_description,
+        ),
+    )
+    // On API < 31 this screen asks for ACCESS_FINE_LOCATION and the Location screen is skipped, because
+    // asking twice for one system permission would burn both of Android's allowed denials inside onboarding.
+    // The location-backed features have to be named here instead, or the user grants a permission whose real
+    // scope they were never shown.
+    if (requiresLocation) {
+        add(
+            FeatureUIData(
+                icon = MeshtasticIcons.LocationOn,
+                titleRes = Res.string.mesh_map_location,
+                subtitleRes = Res.string.mesh_map_location_description,
+            ),
+        )
+        add(
+            FeatureUIData(
+                icon = MeshtasticIcons.LocationOn,
+                titleRes = Res.string.share_location,
+                subtitleRes = Res.string.share_location_description,
+            ),
+        )
+    }
 }
 
 @PreviewLightDark
