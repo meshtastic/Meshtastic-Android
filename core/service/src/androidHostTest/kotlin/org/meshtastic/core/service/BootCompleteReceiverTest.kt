@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.service
 
+import android.Manifest
 import android.app.Application
 import android.content.BroadcastReceiver
 import android.content.Intent
@@ -39,6 +40,8 @@ import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.MeshPrefs
+import org.meshtastic.core.repository.Notification
+import org.meshtastic.core.repository.NotificationManager
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
@@ -81,6 +84,43 @@ class BootCompleteReceiverTest {
         val startedServices = shadowOf(application).allStartedServices
         assertEquals(1, startedServices.size)
         assertEquals(MeshService::class.java.name, startedServices.single().component?.className)
+    }
+
+    @Test
+    fun `a BLE device is not reconnected without the Bluetooth permission, and the user is told`() = runTest {
+        // Starting here would spin an invisible retry loop: the transport treats the failure as transient, drops the
+        // reason, and never gives up. Nobody is present at boot to notice, so the notification is the only signal.
+        val persistedAddress = CompletableDeferred<String?>()
+        val dispatcher = StandardTestDispatcher(testScheduler)
+        installDependencies(DeferredMeshPrefs { persistedAddress.await() }, dispatcher)
+        val application = testApplication(hasBluetoothConnect = false)
+
+        dispatchBootCompleted(BootCompleteReceiver(), application)
+        runCurrent()
+        persistedAddress.complete("xAA:BB:CC:DD:EE:FF")
+        advanceUntilIdle()
+
+        assertTrue(shadowOf(application).allStartedServices.isEmpty(), "must not start a service that cannot connect")
+        assertEquals(1, recordingNotifications.dispatched.size)
+        assertEquals(Notification.Type.Warning, recordingNotifications.dispatched.single().type)
+        assertTrue(recordingNotifications.dispatched.single().deepLinkUri?.contains("connections") == true)
+        assertTrue(recordingNotifications.dispatched.single().message.contains("Bluetooth"))
+    }
+
+    @Test
+    fun `a TCP device still reconnects without the Bluetooth permission`() = runTest {
+        val persistedAddress = CompletableDeferred<String?>()
+        val dispatcher = StandardTestDispatcher(testScheduler)
+        installDependencies(DeferredMeshPrefs { persistedAddress.await() }, dispatcher)
+        val application = testApplication(hasBluetoothConnect = false)
+
+        dispatchBootCompleted(BootCompleteReceiver(), application)
+        runCurrent()
+        persistedAddress.complete("t192.168.1.100")
+        advanceUntilIdle()
+
+        assertEquals(1, shadowOf(application).allStartedServices.size)
+        assertTrue(recordingNotifications.dispatched.isEmpty())
     }
 
     @Test
@@ -165,6 +205,7 @@ class BootCompleteReceiverTest {
             modules(
                 module {
                     single { meshPrefs }
+                    single<NotificationManager> { recordingNotifications }
                     single {
                         CoroutineDispatchers(io = ioDispatcher, main = defaultDispatcher, default = defaultDispatcher)
                     }
@@ -173,8 +214,35 @@ class BootCompleteReceiverTest {
         }
     }
 
-    private fun testApplication(): Application =
-        ApplicationProvider.getApplicationContext<Application>().also { shadowOf(it).clearStartedServices() }
+    /** Captures what the receiver tried to tell the user when it declined to start the service. */
+    private val recordingNotifications = RecordingNotificationManager()
+
+    private class RecordingNotificationManager : NotificationManager {
+        val dispatched = mutableListOf<Notification>()
+
+        override suspend fun dispatch(notification: Notification): Boolean {
+            dispatched += notification
+            return true
+        }
+
+        override fun cancel(id: Int) = Unit
+
+        override fun cancelAll() = Unit
+    }
+
+    /**
+     * Grants BLUETOOTH_CONNECT unless told otherwise. Robolectric denies runtime permissions by default, and a boot
+     * reconnect for a BLE device is now gated on holding it.
+     */
+    private fun testApplication(hasBluetoothConnect: Boolean = true): Application =
+        ApplicationProvider.getApplicationContext<Application>().also { application ->
+            shadowOf(application).clearStartedServices()
+            if (hasBluetoothConnect) {
+                shadowOf(application).grantPermissions(Manifest.permission.BLUETOOTH_CONNECT)
+            } else {
+                shadowOf(application).denyPermissions(Manifest.permission.BLUETOOTH_CONNECT)
+            }
+        }
 
     private fun dispatchBootCompleted(
         receiver: BootCompleteReceiver,

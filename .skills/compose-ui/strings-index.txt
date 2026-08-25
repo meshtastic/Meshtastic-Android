@@ -156,6 +156,8 @@ bluetooth_scan_too_frequent
 bold_heading
 bonding_failed_permissions
 bonding_failed_retry
+boot_reconnect_blocked_message
+boot_reconnect_blocked_title
 bottom_nav_settings
 broadcast_interval
 busy_noise_floor
