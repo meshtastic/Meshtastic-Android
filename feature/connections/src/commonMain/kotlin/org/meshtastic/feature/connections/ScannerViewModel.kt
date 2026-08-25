@@ -690,6 +690,23 @@ open class ScannerViewModel(
         changeDeviceAddress(entry.fullAddress)
     }
 
+    // ── Companion device association (Android-only; every default below is an inert no-op) ────
+
+    /**
+     * Whether the connected radio should be offered the one-time companion-device association prompt: a platform
+     * (Android 12+) companion record that keeps background service starts legal for this radio. Combined with the
+     * connected-state gate in the UI, because the association chooser scans and therefore needs the radio present.
+     */
+    open val companionAssociationPromptVisible: StateFlow<Boolean> = MutableStateFlow(false).asStateFlow()
+
+    /** Requests a companion association for the currently selected BLE radio. */
+    open fun requestCompanionAssociationForSelectedDevice() {}
+
+    /** Permanently retires the companion-association prompt; associations made while pairing are unaffected. */
+    fun dismissCompanionAssociationPrompt() {
+        uiPrefs.setCompanionAssociationPromptDismissed(true)
+    }
+
     /** Platform hook for requesting USB permission before connecting; default is a no-op. */
     protected open fun requestPermission(entry: DeviceListEntry.Usb) = Unit
 

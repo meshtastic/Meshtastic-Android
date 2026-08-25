@@ -254,6 +254,9 @@
     <string name="collapse_chart">Collapse chart</string>
     <string name="collapsed">Collapsed</string>
     <string name="communicate_off_the_grid">Communicate off-the-grid with your friends and community without cell service.</string>
+    <string name="companion_association_dismiss">Dismiss companion pairing suggestion</string>
+    <string name="companion_association_prompt">Let Android remember this radio as a companion device. This keeps the connection service reliable when the app is in the background.</string>
+    <string name="companion_association_set_up">Set up</string>
     <!-- COMPASS -->
     <string name="compass_bearing">Bearing: %1$s</string>
     <string name="compass_bearing_na">Bearing: N/A</string>

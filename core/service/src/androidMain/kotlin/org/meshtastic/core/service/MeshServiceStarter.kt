@@ -31,9 +31,13 @@ import co.touchlab.kermit.Logger
  * trigger, and the dominant one — the user opening the app — fires on every `MainActivity.onStart()`. A background
  * retry has no exemption the original caller lacked, so it can only fail again.
  */
-fun MeshService.Companion.startService(context: Context, trigger: ServiceStartTrigger) {
+fun MeshService.Companion.startService(
+    context: Context,
+    trigger: ServiceStartTrigger,
+    hasCompanionAssociation: Boolean = false,
+) {
     val appInForeground = isAppInForeground()
-    if (!ForegroundStartPolicy.isForegroundStartAllowed(trigger, appInForeground)) {
+    if (!ForegroundStartPolicy.isForegroundStartAllowed(trigger, appInForeground, hasCompanionAssociation)) {
         Logger.i {
             "Skipping MeshService start: trigger=$trigger is not permitted to start a foreground service while " +
                 "backgrounded. Waiting for the next user-visible start."
@@ -41,7 +45,10 @@ fun MeshService.Companion.startService(context: Context, trigger: ServiceStartTr
         return
     }
 
-    Logger.i { "Starting MeshService (trigger=$trigger, appInForeground=$appInForeground)" }
+    Logger.i {
+        "Starting MeshService (trigger=$trigger, appInForeground=$appInForeground, " +
+            "hasCompanionAssociation=$hasCompanionAssociation)"
+    }
     try {
         context.startForegroundService(createIntent(context))
     } catch (ex: IllegalStateException) {

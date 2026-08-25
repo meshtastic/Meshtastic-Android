@@ -72,6 +72,16 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
 
+    <!--
+      API 31+ (exactly coextensive with the Android 12 background-start restriction): lets a radio
+      with a Companion Device Manager association start MeshService in the foreground from the
+      background, e.g. when the selected-device change completes after the app was backgrounded.
+      Deliberately NOT paired with REQUEST_COMPANION_RUN_IN_BACKGROUND /
+      REQUEST_COMPANION_USE_DATA_IN_BACKGROUND — the foreground service makes those broad
+      battery-leniency grants unnecessary.
+    -->
+    <uses-permission android:name="android.permission.REQUEST_COMPANION_START_FOREGROUND_SERVICES_FROM_BACKGROUND" />
+
     <!-- Needed to open our bluetooth connection to our paired device (after reboot) -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
@@ -87,6 +97,11 @@
 
     <uses-feature
         android:name="android.hardware.bluetooth_le"
+        android:required="false" />
+
+    <!-- Companion Device Manager is optional: association is additive on devices that support it -->
+    <uses-feature
+        android:name="android.software.companion_device_setup"
         android:required="false" />
 
     <uses-feature

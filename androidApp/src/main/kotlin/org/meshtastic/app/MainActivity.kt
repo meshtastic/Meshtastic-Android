@@ -31,6 +31,8 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.ReportDrawnWhen
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -41,8 +43,10 @@ import androidx.compose.runtime.remember
 import androidx.core.content.IntentCompat
 import androidx.core.net.toUri
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import co.touchlab.kermit.Logger
 import com.eygraber.uri.toKmpUri
 import kotlinx.coroutines.launch
@@ -58,6 +62,7 @@ import org.meshtastic.app.node.component.InlineMap
 import org.meshtastic.app.node.metrics.getTracerouteMapOverlayInsets
 import org.meshtastic.app.ui.MainScreen
 import org.meshtastic.core.barcode.rememberBarcodeScanner
+import org.meshtastic.core.ble.CompanionAssociationRepository
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.network.repository.UsbRepository
 import org.meshtastic.core.nfc.NfcScannerEffect
@@ -109,6 +114,18 @@ class MainActivity : AppCompatActivity() {
     private val model: UIViewModel by viewModel()
 
     private val usbRepository: UsbRepository by inject()
+
+    private val companionAssociationRepository: CompanionAssociationRepository by inject()
+
+    /**
+     * Launches the Companion Device Manager chooser dialogs that [CompanionAssociationRepository.associate] emits. The
+     * result payload is deliberately ignored: on confirm the platform records the association itself, so the single
+     * source of truth stays `hasAssociationFor` — the revision bump just tells observers to re-query it.
+     */
+    private val companionChooserLauncher =
+        registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {
+            companionAssociationRepository.notifyAssociationsChanged()
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -164,6 +181,16 @@ class MainActivity : AppCompatActivity() {
                         val introViewModel = koinViewModel<IntroViewModel>()
                         AppIntroductionScreen(onDone = { model.onAppIntroCompleted() }, viewModel = introViewModel)
                     }
+                }
+            }
+        }
+
+        // Companion association choosers may only appear over a visible activity; anything emitted while stopped is
+        // simply dropped by the STARTED gate, which is correct — the flows that request them re-offer naturally.
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                companionAssociationRepository.chooserRequests.collect { sender ->
+                    companionChooserLauncher.launch(IntentSenderRequest.Builder(sender).build())
                 }
             }
         }
