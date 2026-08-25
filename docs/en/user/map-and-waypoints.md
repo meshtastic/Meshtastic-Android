@@ -2,7 +2,7 @@
 title: Map & Waypoints
 parent: User Guide
 nav_order: 6
-last_updated: 2026-07-08
+last_updated: 2026-08-25
 description: View node positions on the map, create and share waypoints, manage map layers and Site Planner, and control position sharing and privacy.
 aliases:
   - map
@@ -92,7 +92,7 @@ Since waypoints (and their geofences) are broadcast to the whole mesh, only the 
 
 ## Map Layers
 
-Tap the layers icon on the map to open **Manage Map Layers**, where you can import your own overlays in `.kml`, `.kmz`, or GeoJSON format — either by opening a file with Meshtastic or sharing it into the app from another app. Imported layers are listed with a toggle to show/hide each one and an option to remove it. This is available on both the Google Play and F-Droid builds.
+Tap the layers icon on the map to open **Manage Map Layers**, where you can import your own overlays in `.kml`, `.kmz`, or GeoJSON format — either by opening a file with Meshtastic or sharing it into the app from another app. Imported layers are listed with a toggle to show/hide each one and an option to remove it. This is available on both the Google Play and F-Droid builds; on F-Droid and Desktop, `.kml`/`.kmz` rendering is temporarily unavailable (see [Map Sources](#map-sources)).
 
 ### Site Planner
 
@@ -115,9 +115,25 @@ Configure position behavior in **Settings → Position**.
 
 ## Map Sources
 
-The base map depends on your app flavor: **Google Play** builds use Google Maps, while **F-Droid** and Desktop builds use OpenStreetMap. On top of the base map, additional tile sources are available as overlays or alternatives:
-- Satellite imagery (where available)
-- Offline tiles (download map areas for offline use)
+The base map depends on your app flavor. **Google Play** builds use Google Maps. **F-Droid** and **Desktop** builds use MapLibre, and offer a base map picker from the map toolbar:
+
+| Base map | Notes |
+| --- | --- |
+| Liberty | Default. Vector street map |
+| Positron | Low-contrast vector map; keeps node markers legible over it |
+| Dark | Vector map suited to dark themes |
+| OpenStreetMap | Classic raster street tiles |
+| OpenTopoMap | Raster topographic |
+| USGS Topo / USGS Imagery | US coverage only |
+| Esri Topo / Esri Imagery | Topographic and satellite imagery |
+
+Overlays can be toggled on top of any base map:
+
+- **Hillshade** — terrain relief. Useful for understanding why a link fails, since LoRa range is limited by terrain
+- **Weather radar** — NOAA NEXRAD reflectivity (US coverage)
+
+{: .note }
+> Offline tile downloads and `.kml`/`.kmz` layer import are temporarily unavailable on F-Droid and Desktop while they are rebuilt on MapLibre. GeoJSON layers and Site Planner coverage overlays work as before.
 
 ## Related Topics
 

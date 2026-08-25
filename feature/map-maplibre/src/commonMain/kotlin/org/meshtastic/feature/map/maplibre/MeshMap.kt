@@ -29,6 +29,8 @@ import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.compose.style.BaseStyle
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.feature.map.BaseMapViewModel
+import org.meshtastic.feature.map.maplibre.layers.CustomLayer
+import org.meshtastic.feature.map.maplibre.layers.CustomLayers
 import org.meshtastic.feature.map.maplibre.layers.MapOverlayLayers
 import org.meshtastic.feature.map.maplibre.layers.NodeLayers
 import org.meshtastic.feature.map.maplibre.layers.RasterBasemapLayer
@@ -56,6 +58,7 @@ fun MeshMap(
     modifier: Modifier = Modifier,
     basemap: Basemap = Basemaps.default,
     overlays: List<MapOverlay> = emptyList(),
+    customLayers: List<CustomLayer> = emptyList(),
     onWaypointClick: (Int) -> Unit = {},
 ) {
     val nodes by viewModel.nodesWithPosition.collectAsStateWithLifecycle()
@@ -83,6 +86,7 @@ fun MeshMap(
             RasterBasemapLayer(basemap)
         }
         MapOverlayLayers(overlays)
+        CustomLayers(customLayers)
 
         if (filterState.showWaypoints) {
             WaypointLayers(waypoints = waypoints.values, onWaypointClick = onWaypointClick)

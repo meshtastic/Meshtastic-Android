@@ -2,7 +2,7 @@
 title: Desktop App
 parent: User Guide
 nav_order: 14
-last_updated: 2026-07-07
+last_updated: 2026-08-25
 description: Install and use the Meshtastic Desktop app on Linux, macOS, and Windows — connections, feature parity, and keyboard shortcuts.
 aliases:
   - desktop
@@ -64,7 +64,7 @@ Bluetooth Low Energy is supported on Desktop via the [Kable](https://github.com/
 |---------|---------|---------|-------|
 | Messaging | ✓ | ✓ | Full parity |
 | Node List | ✓ | ✓ | Full parity |
-| Map | ✓ | ◐ | Map tab exists on desktop, but the interactive map view is Android-only |
+| Map | ✓ | ✓ | Interactive MapLibre map, with base map and overlay pickers |
 | Settings | ✓ | ✓ | Full parity |
 | Bluetooth (BLE) | ✓ | ✓ | Via Kable on desktop |
 | Firmware Update | ✓ | ✓ | In-app USB, BLE, and Wi-Fi (ESP32) update all work the same as Android |
@@ -135,7 +135,7 @@ Requirements:
 
 ## Known Limitations
 
-- The interactive map view is Android-only — the Map tab is present but does not render a map on desktop
+- Offline tile downloads and `.kml`/`.kmz` layer import are not yet available on desktop
 - Some Android-specific features (widgets, specific notification channels) are unavailable
 - Performance may vary on low-spec hardware running Compose Desktop
 - BLE bonding is not yet supported on desktop (pairing works without bonding)

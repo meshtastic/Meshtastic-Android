@@ -16,10 +16,25 @@
  */
 package org.meshtastic.app.map
 
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.koin.compose.koinInject
 import org.meshtastic.core.ui.util.MapViewProvider
 import org.meshtastic.feature.map.maplibre.MapLibreMapViewProvider
+import org.meshtastic.feature.map.maplibre.layers.CustomLayer
 
-fun getMapViewProvider(): MapViewProvider = MapLibreMapViewProvider()
+fun getMapViewProvider(): MapViewProvider = MapLibreMapViewProvider(
+    customLayers = {
+        val layersManager: MapLayersManager = koinInject()
+        val layers by layersManager.mapLayers.collectAsStateWithLifecycle()
+        layers
+            .filter { it.isVisible }
+            // KML/KMZ still needs converting to GeoJSON before MapLibre can read it; GeoJSON and
+            // Site Planner coverage estimates are already in a format it fetches directly.
+            .filter { it.layerType != LayerType.KML }
+            .mapNotNull { item -> item.uri?.let { uri -> CustomLayer(id = item.id, uri = uri.toString()) } }
+    },
+)
 
 /** Site Planner (coverage-estimate) — the F-Droid map renders imported coverage as a GeoJSON layer (see #6138). */
 @Suppress("FunctionOnlyReturningConstant") // Flavor-dispatched: the google flavor returns a different value.

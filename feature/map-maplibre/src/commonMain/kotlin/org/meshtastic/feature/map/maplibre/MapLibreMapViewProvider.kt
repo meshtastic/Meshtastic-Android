@@ -36,6 +36,7 @@ import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.ui.util.MapViewProvider
 import org.meshtastic.feature.map.SharedMapViewModel
 import org.meshtastic.feature.map.component.MapControlsOverlay
+import org.meshtastic.feature.map.maplibre.layers.CustomLayer
 import org.meshtastic.feature.map.maplibre.style.Basemap
 import org.meshtastic.feature.map.maplibre.style.Basemaps
 import org.meshtastic.feature.map.maplibre.style.MapOverlay
@@ -47,7 +48,13 @@ import org.meshtastic.feature.map.maplibre.style.MapOverlays
  * Not a Koin `@Single`: the two call sites construct it directly, which keeps this module free of any assumption about
  * how the host app wires its graph.
  */
-class MapLibreMapViewProvider : MapViewProvider {
+class MapLibreMapViewProvider(
+    /**
+     * Supplies the user's imported overlays. A composable supplier rather than a value so the host can collect its own
+     * state; desktop has no importer yet and uses the default.
+     */
+    private val customLayers: @Composable () -> List<CustomLayer> = { emptyList() },
+) : MapViewProvider {
 
     @Composable
     override fun MapView(
@@ -73,6 +80,7 @@ class MapLibreMapViewProvider : MapViewProvider {
                 modifier = Modifier.fillMaxSize(),
                 basemap = basemap,
                 overlays = overlays,
+                customLayers = customLayers(),
             )
 
             MapControlsOverlay(
