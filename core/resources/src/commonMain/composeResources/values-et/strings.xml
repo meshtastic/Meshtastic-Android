@@ -35,6 +35,7 @@
     <!-- ACTION -->
     <string name="action_copy_message">Kopeeri sõnum</string>
     <string name="action_delete_message">Kustuta sõnum</string>
+    <string name="action_more_message_actions">Rohkem sõnumitoiminguid</string>
     <string name="action_react_with_emoji">Vasta emotikoniga</string>
     <string name="action_select_device">Vali seade</string>
     <string name="action_select_message">Vali sõnum</string>
@@ -318,6 +319,9 @@
     <string name="connecting">Ühendan</string>
     <string name="connection_status">Praegused ühendused:</string>
     <string name="connections">Ühendus</string>
+    <string name="contact_draft_prefix">Mustand: %1$s</string>
+    <string name="contact_muted_snackbar">Vaigistatud: %1$s</string>
+    <string name="contact_pinned">Naelutatud</string>
     <string name="contrast">Kontrastsus</string>
     <string name="contrast_high">Kõrge</string>
     <string name="contrast_medium">Keskmine</string>
@@ -335,6 +339,8 @@
     <string name="current">Pinge</string>
     <string name="currently">Praegu:</string>
     <string name="date">Kuupäev</string>
+    <string name="date_separator_today">Täna</string>
+    <string name="date_separator_yesterday">Eile</string>
     <string name="dbm_value">%1$d dBm</string>
     <!-- DEBUG -->
     <string name="debug">Silumine</string>
@@ -676,6 +682,10 @@
     <string name="firmware_maintenance_no_release">Vali esmalt püsivara versioon, et seadet saaks pärast kustutamist uuesti taastada.</string>
     <string name="firmware_maintenance_not_a_bootloader_volume">See ketas ei ole seadme uuendusketas. Vali ketas, mis kuvatakse, kui seade on uuendusrežiimis (see sisaldab faili nimega INFO_UF2.TXT).</string>
     <string name="firmware_maintenance_select_drive">Vali seadme värskendusketas</string>
+    <string name="firmware_maintenance_softdevice_conflict">Seade teatab oodatust erinevast sinihamba seotusest, seega pole selle kustutamine ohutu. Palun teata sellest koos oma seadme mudeliga.</string>
+    <string name="firmware_maintenance_unknown_board">Selle seadme alglaadurile pole sellel rakendusel uuendust.</string>
+    <string name="firmware_maintenance_unknown_softdevice">See rakendus ei saa kinnitada, millist sinihamba protokolli see seade kasutab, seega pole selle kustutamine ohutu. Kasuta selle asemel veebipõhist uuendust aadressil flasher.meshtastic.org.</string>
+    <string name="firmware_maintenance_unsupported_device">See seade ei toeta rakenduse sisest kustutamist.</string>
     <string name="firmware_maintenance_upgrade_bootloader_action">Uuenda alglaadurit</string>
     <string name="firmware_maintenance_upgrade_confirm_text">See paigaldab seadmesse %1$s uuendatud alglaaduri, mis muudab tulevased Bluetoothi ​​värskendused palju kiiremaks. Püsivara paigaldatakse pärast uuesti.\n\nÄrge ühendage seadet selle töötamise ajal lahti.</string>
     <string name="firmware_maintenance_upgrade_confirm_title">Kas uuendada alglaadurit?</string>
@@ -736,6 +746,7 @@
     <string name="firmware_update_open_flasher">Ava Meshtastic uuendaja</string>
     <string name="firmware_update_ota_failed">Üle-õhu värskendus ebaõnnestus: %1$s</string>
     <string name="firmware_update_ota_unsupported_reason">Selle seadme OTA laadur lükkas tagasi taotletud värskendusmeetodi: %1$s</string>
+    <string name="firmware_update_preparing_flash">Seadme ettevalmistamine: välkmälu kustutamine. See võib võtta kuni minuti...</string>
     <string name="firmware_update_rak4631_bootloader_hint">RAK WisBlock RAK4631 puhul tuleb tootja alglaaduri .zip-fail paigaldada jadapordi DFU-tööriistaga, näiteks adafruit-nrfutil – selle .zip-faili kopeerimine seadme kettale ei toimi. Teise võimalusena ühendage seade USB kaudu ja kasutage selle rakenduse alglaaduri uuendust.</string>
     <string name="firmware_update_rebooting">Taaskäivitamine DFU reziimi...</string>
     <string name="firmware_update_release_notes">Väljalaske märkmed</string>
@@ -744,6 +755,7 @@
     <string name="firmware_update_requires_uf2">%1$s nõuab sihtmärgile vastavat .uf2 faili.</string>
     <string name="firmware_update_retrieval_failed">Püsivara faili ei õnnestunud hankida.</string>
     <string name="firmware_update_retry">Proovi uuesti</string>
+    <string name="firmware_update_retrying_upload">Seade ei vastanud. Üleslaadimist proovitakse uuesti (katse %1$d/%2$d)...</string>
     <string name="firmware_update_save_dfu_file">Palun salvesta .uf2-fail oma seadme DFU-kettale.</string>
     <string name="firmware_update_searching_device">Otsin võrgust OTA seadet...</string>
     <string name="firmware_update_select_file">Vali kohalik fail</string>
@@ -753,6 +765,7 @@
     <string name="firmware_update_starting_dfu">DFU käivitamine...</string>
     <string name="firmware_update_starting_ota">Alustan üle-õhu värskendust...</string>
     <string name="firmware_update_success">Värskendus õnnestus!</string>
+    <string name="firmware_update_success_wiped">Seade lähtestati tehase vaikesätetele ja see tuleb uuesti seadistada (ja siduda).</string>
     <string name="firmware_update_taking_a_while">See võib võtta minuti...</string>
     <string name="firmware_update_target">Sihtkoht: %1$s</string>
     <string name="firmware_update_title">Püsivara uuendus</string>
@@ -871,6 +884,7 @@
     <string name="import_known_shared_contact_text">Hoiatus: See kontakt on olemas, importimine kirjutab eelmise kontakti kirje üle.</string>
     <string name="import_label">Lae</string>
     <string name="import_pending_channels_connect">Kanali seaded on vastu võetud. Nende importimiseks looge ühendus seadmega.</string>
+    <string name="import_pending_contact_connect">Kontakt vastu võetud. Ühenda seadmega, et see importida.</string>
     <string name="import_shared_contact">Impordi jagatud kontakt?</string>
     <string name="incoming_messages">Sissetulevad sõnumid</string>
     <string name="indoor_air_quality_iaq">Siseõhu kvaliteet (IAQ)</string>
@@ -893,6 +907,7 @@
     <string name="ipv4_mode">IPv4 režiim</string>
     <string name="json_output_enabled">JSON väljund lubatud</string>
     <string name="jump_to_latest_from">%1$s</string>
+    <string name="jump_to_latest_from_and_more">%1$s +%2$d</string>
     <!-- KEY -->
     <string name="key_backup_deleted">Taastevõtmed kustutaud</string>
     <string name="key_backup_not_found">Taastevõtmeid selles seadmes ei leitud</string>
@@ -927,6 +942,7 @@
     <string name="latitude">Laiuskraad</string>
     <!-- LAYER -->
     <string name="layer_subtitle">%1$s • %2$s</string>
+    <string name="layer_type_network">Võrgukiht</string>
     <string name="learn_more">Lisateave</string>
     <string name="led_heartbeat">Südamelöögi LED</string>
     <string name="led_state">LED olek</string>
@@ -1188,6 +1204,7 @@
     <string name="name_cannot_be_empty">Nimi ei tohi olla tühi.</string>
     <string name="navigate_back">Liigu tagasi</string>
     <string name="navigate_into_label">Mine asukohta</string>
+    <string name="need_hardware">Vajad raudvara?</string>
     <string name="need_hardware_description">Meshtastic vajab ühilduvat seadet. Meie toetajad ja partnerid pakuvad kasutusvalmis riistvara. Siin on mõned populaarseimad valikud.</string>
     <string name="neighbor_info">Naabruse teave</string>
     <string name="neighbor_info_config">Naabruskonna teabe sätted</string>
@@ -1360,6 +1377,7 @@
     <string name="permission_missing_31">Meshtastic vajab seadmete leidmiseks ja nendega sinihamba ​​kaudu ühenduse loomiseks „Lähi-seadmed” luba. Saate selle keelata, kui seda ei kasutata.</string>
     <string name="phone_location">Telefoni asukoht</string>
     <string name="phone_location_description">Meshtastic kasutab teie telefoni asukohta mitmete funktsioonide lubamiseks. Saate oma asukohalubasid igal ajal seadetes muuta.</string>
+    <string name="pin_selected">Klemm</string>
     <string name="play">Mängi ette</string>
     <plurals name="plurals_hours">
         <item quantity="one">%1$d tund</item>
@@ -1518,6 +1536,7 @@
     <string name="rotary_encoder_1_enabled">Pöördvalik #1 lubatud</string>
     <string name="router_role_confirmation_text">Olen lugenud &lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;Seadme rolli dokumenti&lt;/a&gt; ja blogi postitust &lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt; Kuidas valida seadmele õige roll&lt;/a&gt;.</string>
     <!-- ROUTING -->
+    <string name="routing_error_admin_bad_session_key">Admin sessioon aegunud</string>
     <string name="routing_error_admin_public_key_unauthorized">Administraatori võti pole autoriseeritud</string>
     <string name="routing_error_got_nak">Negatiivne kinnitus</string>
     <string name="routing_error_no_route">Marsruuti pole</string>
@@ -1820,6 +1839,7 @@
     <string name="type">Tüüp</string>
     <string name="type_a_message">Sisesta sõnum</string>
     <string name="udp_enabled">UDP levitamine</string>
+    <string name="undo">Võta tagasi</string>
     <!-- UNKNOWN -->
     <string name="unknown">Tundmatu</string>
     <string name="unknown_age">Tundmatu vanus</string>
@@ -1831,6 +1851,7 @@
     <string name="unmonitored_or_infrastructure">Jälgimata või infrastruktuuripõhine</string>
     <string name="unmute">Eemalda vaigistus</string>
     <string name="unmute_selected">Lõpeta valitud vaigistus</string>
+    <string name="unpin_selected">Eemalda</string>
     <string name="unrecognized">Tundmatu</string>
     <string name="unset">Tühistatud - 0</string>
     <string name="up_down_select_input_enabled">Üles/Alla/Vali sisend lubatud</string>
@@ -1877,6 +1898,7 @@
     <string name="waypoint_received">Vastuvõetud teekonnapunkt %1$s</string>
     <string name="website">Veebisait</string>
     <string name="weight">Kaal</string>
+    <string name="what_is_meshtastic">Mis on Meshtastic?</string>
     <!-- WIFI -->
     <string name="wifi_config">WiFi valikud</string>
     <string name="wifi_devices">WiFi ühenduse loomine mPWRD-OS-i jaoks</string>

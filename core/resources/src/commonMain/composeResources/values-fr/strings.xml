@@ -294,6 +294,7 @@
     <string name="connecting">Connexion en cours</string>
     <string name="connection_status">Connexions actuelles :</string>
     <string name="connections">Connexion</string>
+    <string name="contact_muted_snackbar">Muet %1$s</string>
     <string name="contrast">Contraste</string>
     <string name="contrast_high">Haut</string>
     <string name="contrast_medium">Milieu</string>
@@ -439,11 +440,13 @@
     <string name="discovery_start_scan">Démarrer l'analyse</string>
     <string name="discovery_start_scan_disabled">Bouton de démarrage d'analyse désactivé. %1$s</string>
     <string name="discovery_start_scan_reason_24ghz_unsupported">le matériel radio ne supporte pas le 2.4 GHz</string>
+    <string name="discovery_stat_analysis">Analyse</string>
     <string name="discovery_stat_channel_utilization">Utilisation du canal</string>
     <string name="discovery_stat_date">Date</string>
     <string name="discovery_stat_direct">Direct</string>
     <string name="discovery_stat_messages">Messages</string>
     <string name="discovery_stat_selected">Sélectionné</string>
+    <string name="discovery_stat_session_overview">Aperçu de la session</string>
     <string name="discovery_summary_not_available">Analyse IA non disponible</string>
     <string name="discovery_time_remaining">%1$s restants</string>
     <string name="discovery_view_map">Voir la carte</string>
@@ -484,6 +487,7 @@
     <string name="edit_custom_tile_source">Modifier le réseau de tuile personnalisée</string>
     <string name="eight_hours">8 Heures</string>
     <!-- EMOJI -->
+    <string name="emoji_category_activities">Activités</string>
     <string name="emoji_load_error">Impossible de charger les émojis</string>
     <string name="emoji_no_results">Aucun émoji trouvé</string>
     <string name="emoji_recently_used">Récemment utilisé</string>
@@ -553,6 +557,7 @@
     <string name="firmware_edition">Version du micrologiciel</string>
     <string name="firmware_event_ended_banner">%1$s est déprécié. Utilisez un micrologiciel Meshtastic standard pour restaurer les fonctionnalités normales.</string>
     <string name="firmware_event_ended_button">Mettre à jour le micrologiciel</string>
+    <string name="firmware_maintenance_upgrade_confirm_title">Mettre à jour le chargeur de démarrage ?</string>
     <string name="firmware_old">Le micrologiciel de la radio est trop ancien pour communiquer avec cette application. Pour des informations, voir <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Guide d'installation du micrologiciel</a>.</string>
     <string name="firmware_recovery_banner">Fin de la mise à jour %1$s</string>
     <string name="firmware_recovery_ble_failed">Impossible de terminer la mise à jour via le Bluetooth. Le programme d'amorçage par défaut ne peut pas correctement effectuer une mise à jour OTA. Connectez l'appareil sur un ordinateur via USB et tentez de flasher en utilisant les outils DFU du vendeur (par exemple, adafruit-nrfutil) pour restaurer l'appareil.</string>
@@ -712,6 +717,7 @@
     <string name="ignore_remove">Supprimer '%1$s' de la liste des ignorés ? Votre radio va redémarrer après avoir effectué ce changement.</string>
     <!-- IMPORT -->
     <string name="import_configuration">Importer la configuration</string>
+    <string name="import_export_label">Importer / Exporter</string>
     <string name="import_known_shared_contact_text">Avertissement : Ce contact est connu, l'importation écrasera les informations précédentes.</string>
     <string name="import_label">Importer</string>
     <string name="import_shared_contact">Importer le contact partagé ?</string>
