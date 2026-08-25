@@ -74,16 +74,6 @@ import kotlin.time.Duration.Companion.seconds
 
 internal val BLE_SCAN_START_FAILURE_RETRY_COOLDOWN = 15.seconds
 
-/**
- * Scan-start failures whose cause is already rendered as a live, actionable card on the Connections screen, so a modal
- * message about them would only interrupt the user to repeat what is behind the dialog.
- */
-private val SELF_EVIDENT_SCAN_FAILURES =
-    setOf(
-        BleScanStartFailureReason.MissingScanPermission,
-        BleScanStartFailureReason.BluetoothDisabled,
-        BleScanStartFailureReason.LocationServicesDisabled,
-    )
 private const val BLE_SCAN_START_FAILURE_MESSAGE_FALLBACK =
     "Bluetooth scan couldn't start. Try again, or toggle Bluetooth if the problem continues."
 
@@ -506,37 +496,47 @@ open class ScannerViewModel(
         }
         val retryCooldownSeconds = retryCooldown.roundedUpWholeSeconds()
 
-        // Missing permission, Bluetooth off and location services off each have a persistent, actionable card on the
-        // Connections screen driven by live system state. Raising a modal for them as well would interrupt the user to
-        // restate what is already on screen behind the dialog — and, unlike the card, hand them no way to fix it.
-        // MissingScanPermission additionally flips the refusal flag, because the platform can refuse a scan the app
-        // believes it is permitted to run and the card alone would not appear.
+        // The platform can refuse a scan the app believes it is permitted to run — a partial grant, or an OEM quirk —
+        // and the Connections screen's permission card, driven by the app's own view of the grant, would not appear.
         if (exception.reason == BleScanStartFailureReason.MissingScanPermission) {
             _blePermissionRefusal.value = true
         }
-        if (exception.reason in SELF_EVIDENT_SCAN_FAILURES) return
 
-        val errorMessage =
-            safeCatchingAll {
-                when (exception.reason) {
-                    BleScanStartFailureReason.ApplicationRegistrationFailed ->
-                        getStringSuspend(Res.string.bluetooth_scan_start_failed)
-
-                    BleScanStartFailureReason.ScanningTooFrequently ->
-                        getPluralStringSuspend(
-                            Res.plurals.bluetooth_scan_too_frequent,
-                            retryCooldownSeconds.coerceAtMost(Int.MAX_VALUE.toLong()).toInt(),
-                            retryCooldownSeconds,
-                        )
-
-                    BleScanStartFailureReason.MissingScanPermission,
-                    BleScanStartFailureReason.BluetoothDisabled,
-                    BleScanStartFailureReason.LocationServicesDisabled,
-                    -> return
-                }
-            }
-                .getOrDefault(untranslatedScanStartFailureMessage(exception.reason, retryCooldownSeconds))
+        val errorMessage = scanFailureMessageOrNull(exception.reason, retryCooldownSeconds) ?: return
         serviceRepository.setErrorMessage(text = errorMessage, severity = Severity.Warn)
+    }
+
+    /**
+     * The message to raise for a scan-start failure, or `null` for the failures the Connections screen already renders
+     * as live, actionable cards.
+     *
+     * Missing permission, Bluetooth off and location services off each have such a card, driven by system state the UI
+     * observes directly. A modal for those would interrupt the user to restate what is on screen behind the dialog —
+     * and, unlike the card, hand them no way to act on it. What remains is genuinely transient and has no card to fall
+     * back on, so it still gets a message.
+     */
+    private suspend fun scanFailureMessageOrNull(
+        reason: BleScanStartFailureReason,
+        retryCooldownSeconds: Long,
+    ): String? = when (reason) {
+        BleScanStartFailureReason.MissingScanPermission,
+        BleScanStartFailureReason.BluetoothDisabled,
+        BleScanStartFailureReason.LocationServicesDisabled,
+        -> null
+
+        BleScanStartFailureReason.ApplicationRegistrationFailed ->
+            safeCatchingAll { getStringSuspend(Res.string.bluetooth_scan_start_failed) }
+                .getOrDefault(untranslatedScanStartFailureMessage(reason, retryCooldownSeconds))
+
+        BleScanStartFailureReason.ScanningTooFrequently ->
+            safeCatchingAll {
+                getPluralStringSuspend(
+                    Res.plurals.bluetooth_scan_too_frequent,
+                    retryCooldownSeconds.coerceAtMost(Int.MAX_VALUE.toLong()).toInt(),
+                    retryCooldownSeconds,
+                )
+            }
+                .getOrDefault(untranslatedScanStartFailureMessage(reason, retryCooldownSeconds))
     }
 
     private fun startBleScanRetryCooldown(cooldown: Duration) {

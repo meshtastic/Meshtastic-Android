@@ -109,67 +109,15 @@ internal fun ColumnScope.PermissionsSettingsContent() {
     // that does not exist on that device.
     val bluetoothIsLocation = bleScanRequiresLocationServices
 
-    val rows = buildList {
-        // Pre-Android-12 the Bluetooth gate *is* ACCESS_FINE_LOCATION. Two rows there would offer two controls for
-        // one system grant and let them contradict each other on screen, so a single Location row stands for both.
-        if (bluetoothIsLocation) {
-            add(
-                PermissionRow(
-                    titleRes = Res.string.location_permission,
-                    summaryRes = Res.string.permission_location_summary_pre31,
-                    rationaleRes = Res.string.bluetooth_permission_rationale_pre31,
-                    icon = MeshtasticIcons.LocationOn,
-                    state = location,
-                ),
-            )
-        } else {
-            add(
-                PermissionRow(
-                    titleRes = Res.string.nearby_devices_permission,
-                    summaryRes = Res.string.permission_nearby_devices_summary,
-                    rationaleRes = Res.string.bluetooth_permission_rationale,
-                    icon = MeshtasticIcons.Bluetooth,
-                    state = bluetooth,
-                ),
-            )
-            add(
-                PermissionRow(
-                    titleRes = Res.string.location_permission,
-                    summaryRes = Res.string.permission_location_summary,
-                    rationaleRes = Res.string.location_permission_rationale,
-                    icon = MeshtasticIcons.LocationOn,
-                    state = location,
-                ),
-            )
-        }
-        add(
-            PermissionRow(
-                titleRes = Res.string.app_notifications,
-                summaryRes = Res.string.permission_notifications_summary,
-                rationaleRes = Res.string.notification_permission_rationale,
-                icon = MeshtasticIcons.Notifications,
-                state = notifications,
-            ),
+    val rows =
+        permissionRows(
+            bluetooth = bluetooth,
+            location = location,
+            notifications = notifications,
+            camera = camera,
+            localNetwork = localNetwork,
+            bluetoothIsLocation = bluetoothIsLocation,
         )
-        add(
-            PermissionRow(
-                titleRes = Res.string.camera_permission,
-                summaryRes = Res.string.permission_camera_summary,
-                rationaleRes = Res.string.camera_permission_rationale,
-                icon = MeshtasticIcons.QrCodeScanner,
-                state = camera,
-            ),
-        )
-        add(
-            PermissionRow(
-                titleRes = Res.string.local_network_permission,
-                summaryRes = Res.string.permission_local_network_summary,
-                rationaleRes = Res.string.local_network_permission_rationale,
-                icon = MeshtasticIcons.Language,
-                state = localNetwork,
-            ),
-        )
-    }
 
     var pendingRationale by remember { mutableStateOf<PermissionRow?>(null) }
 
@@ -189,6 +137,82 @@ internal fun ColumnScope.PermissionsSettingsContent() {
     ExpressiveSection(title = stringResource(Res.string.permissions)) {
         rows.forEach { row -> PermissionListItem(row = row, onShowRationale = { pendingRationale = row }) }
     }
+}
+
+/**
+ * The permission rows to show, in the order a user is most likely to need them.
+ *
+ * Split out of [PermissionsSettingsContent] so that composable stays about rendering and this stays about which
+ * permissions exist on the platform actually running.
+ */
+@Composable
+private fun permissionRows(
+    bluetooth: PermissionUiState,
+    location: PermissionUiState,
+    notifications: PermissionUiState,
+    camera: PermissionUiState,
+    localNetwork: PermissionUiState,
+    bluetoothIsLocation: Boolean,
+): List<PermissionRow> = buildList {
+    // Pre-Android-12 the Bluetooth gate *is* ACCESS_FINE_LOCATION. Two rows there would offer two controls for
+    // one system grant and let them contradict each other on screen, so a single Location row stands for both.
+    if (bluetoothIsLocation) {
+        add(
+            PermissionRow(
+                titleRes = Res.string.location_permission,
+                summaryRes = Res.string.permission_location_summary_pre31,
+                rationaleRes = Res.string.bluetooth_permission_rationale_pre31,
+                icon = MeshtasticIcons.LocationOn,
+                state = location,
+            ),
+        )
+    } else {
+        add(
+            PermissionRow(
+                titleRes = Res.string.nearby_devices_permission,
+                summaryRes = Res.string.permission_nearby_devices_summary,
+                rationaleRes = Res.string.bluetooth_permission_rationale,
+                icon = MeshtasticIcons.Bluetooth,
+                state = bluetooth,
+            ),
+        )
+        add(
+            PermissionRow(
+                titleRes = Res.string.location_permission,
+                summaryRes = Res.string.permission_location_summary,
+                rationaleRes = Res.string.location_permission_rationale,
+                icon = MeshtasticIcons.LocationOn,
+                state = location,
+            ),
+        )
+    }
+    add(
+        PermissionRow(
+            titleRes = Res.string.app_notifications,
+            summaryRes = Res.string.permission_notifications_summary,
+            rationaleRes = Res.string.notification_permission_rationale,
+            icon = MeshtasticIcons.Notifications,
+            state = notifications,
+        ),
+    )
+    add(
+        PermissionRow(
+            titleRes = Res.string.camera_permission,
+            summaryRes = Res.string.permission_camera_summary,
+            rationaleRes = Res.string.camera_permission_rationale,
+            icon = MeshtasticIcons.QrCodeScanner,
+            state = camera,
+        ),
+    )
+    add(
+        PermissionRow(
+            titleRes = Res.string.local_network_permission,
+            summaryRes = Res.string.permission_local_network_summary,
+            rationaleRes = Res.string.local_network_permission_rationale,
+            icon = MeshtasticIcons.Language,
+            state = localNetwork,
+        ),
+    )
 }
 
 @Composable
