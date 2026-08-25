@@ -23,11 +23,19 @@ package org.meshtastic.feature.map.maplibre.style
 sealed interface MapOverlay {
     val id: String
 
+    /** Menu label; proper nouns and short descriptors, deliberately untranslated. */
+    val label: String
+
     /** Terrain shading derived from a raster-DEM source. */
-    data class Hillshade(override val id: String, val spec: RasterTileSpec, val encoding: DemEncoding) : MapOverlay
+    data class Hillshade(
+        override val id: String,
+        override val label: String,
+        val spec: RasterTileSpec,
+        val encoding: DemEncoding,
+    ) : MapOverlay
 
     /** A plain raster overlay, e.g. weather imagery. */
-    data class Raster(override val id: String, val spec: RasterTileSpec) : MapOverlay
+    data class Raster(override val id: String, override val label: String, val spec: RasterTileSpec) : MapOverlay
 
     /** Elevation encodings we support. Kept local so the registry stays free of MapLibre types. */
     enum class DemEncoding {
@@ -57,6 +65,7 @@ object MapOverlays {
     val Hillshade =
         MapOverlay.Hillshade(
             id = "hillshade",
+            label = "Hillshade",
             spec =
             RasterTileSpec(
                 tiles = listOf("https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png"),
@@ -76,6 +85,7 @@ object MapOverlays {
     val NoaaRadar =
         MapOverlay.Raster(
             id = "noaa-radar",
+            label = "Weather radar",
             spec =
             RasterTileSpec(
                 tiles =
@@ -104,6 +114,7 @@ object MapOverlays {
     fun openWeatherPrecipitation(apiKey: String): MapOverlay.Raster? = apiKey.takeIf { it.isNotBlank() }?.let { key ->
         MapOverlay.Raster(
             id = "owm-precipitation",
+            label = "Precipitation",
             spec =
             RasterTileSpec(
                 tiles = listOf("https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=$key"),

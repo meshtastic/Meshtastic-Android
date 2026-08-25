@@ -42,11 +42,14 @@ data class RasterTileSpec(
 sealed interface Basemap {
     val id: String
 
+    /** Menu label. Every one is a proper noun, so these are deliberately not translated. */
+    val label: String
+
     /** Vector style served as a MapLibre style document. */
-    data class Vector(override val id: String, val styleUri: String) : Basemap
+    data class Vector(override val id: String, override val label: String, val styleUri: String) : Basemap
 
     /** Classic XYZ raster tiles — everything the OSMdroid map used to serve. */
-    data class Raster(override val id: String, val spec: RasterTileSpec) : Basemap
+    data class Raster(override val id: String, override val label: String, val spec: RasterTileSpec) : Basemap
 }
 
 /**
@@ -61,15 +64,16 @@ sealed interface Basemap {
  * selected disappears in the swap.
  */
 object Basemaps {
-    val Liberty = Basemap.Vector(id = "liberty", styleUri = "https://tiles.openfreemap.org/styles/liberty")
+    val Liberty = Basemap.Vector(id = "liberty", label = "Liberty", styleUri = "https://tiles.openfreemap.org/styles/liberty")
 
-    val Positron = Basemap.Vector(id = "positron", styleUri = "https://tiles.openfreemap.org/styles/positron")
+    val Positron = Basemap.Vector(id = "positron", label = "Positron", styleUri = "https://tiles.openfreemap.org/styles/positron")
 
-    val Dark = Basemap.Vector(id = "dark", styleUri = "https://tiles.openfreemap.org/styles/dark")
+    val Dark = Basemap.Vector(id = "dark", label = "Dark", styleUri = "https://tiles.openfreemap.org/styles/dark")
 
     val OpenStreetMap =
         Basemap.Raster(
             id = "osm",
+            label = "OpenStreetMap",
             spec =
             RasterTileSpec(
                 tiles = listOf("https://tile.openstreetmap.org/{z}/{x}/{y}.png"),
@@ -81,6 +85,7 @@ object Basemaps {
     val OpenTopo =
         Basemap.Raster(
             id = "opentopo",
+            label = "OpenTopoMap",
             spec =
             RasterTileSpec(
                 tiles = listOf("https://tile.opentopomap.org/{z}/{x}/{y}.png"),
@@ -92,6 +97,7 @@ object Basemaps {
     val UsgsTopo =
         Basemap.Raster(
             id = "usgs-topo",
+            label = "USGS Topo",
             spec =
             RasterTileSpec(
                 tiles =
@@ -104,6 +110,7 @@ object Basemaps {
     val UsgsSatellite =
         Basemap.Raster(
             id = "usgs-sat",
+            label = "USGS Imagery",
             spec =
             RasterTileSpec(
                 tiles =
@@ -118,6 +125,7 @@ object Basemaps {
     val EsriTopo =
         Basemap.Raster(
             id = "esri-topo",
+            label = "Esri Topo",
             spec =
             RasterTileSpec(
                 tiles =
@@ -133,6 +141,7 @@ object Basemaps {
     val EsriImagery =
         Basemap.Raster(
             id = "esri-imagery",
+            label = "Esri Imagery",
             spec =
             RasterTileSpec(
                 tiles =

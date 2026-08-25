@@ -18,15 +18,14 @@ package org.meshtastic.app.map.node
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import org.koin.compose.viewmodel.koinViewModel
-import org.meshtastic.feature.map.node.NodeMapViewModel
+import org.meshtastic.feature.map.maplibre.MapLibreNodeTrackMap
 import org.meshtastic.proto.Position
 
 /**
- * Flavor-unified entry point for the embeddable node-track map. Resolves [destNum] to obtain
- * [NodeMapViewModel.mapStyleId], then delegates to the OSMDroid implementation ([NodeTrackOsmMap]).
+ * Flavor-unified entry point for the embeddable node-track map. MapLibre implementation.
  *
- * Supports optional synchronized selection via [selectedPositionTime] and [onPositionSelect].
+ * The OSMdroid version resolved a `mapStyleId` through [org.meshtastic.feature.map.node.NodeMapViewModel];
+ * MapLibre carries its style with the map, so the track map no longer needs a view model at all.
  */
 @Composable
 fun NodeTrackMap(
@@ -35,14 +34,10 @@ fun NodeTrackMap(
     modifier: Modifier = Modifier,
     selectedPositionTime: Int? = null,
     onPositionSelect: ((Int) -> Unit)? = null,
-) {
-    val vm = koinViewModel<NodeMapViewModel>()
-    vm.setDestNum(destNum)
-    NodeTrackOsmMap(
-        positions = positions,
-        mapStyleId = vm.mapStyleId,
-        modifier = modifier,
-        selectedPositionTime = selectedPositionTime,
-        onPositionSelect = onPositionSelect,
-    )
-}
+) = MapLibreNodeTrackMap(
+    destNum = destNum,
+    positions = positions,
+    modifier = modifier,
+    selectedPositionTime = selectedPositionTime,
+    onPositionSelected = onPositionSelect,
+)

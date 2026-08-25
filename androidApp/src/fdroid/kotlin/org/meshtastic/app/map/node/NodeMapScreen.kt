@@ -24,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.meshtastic.core.ui.component.MainAppBar
+import org.meshtastic.feature.map.maplibre.MapLibreNodeTrackMap
 import org.meshtastic.feature.map.node.NodeMapViewModel
 
 @Composable
@@ -44,9 +45,9 @@ fun NodeMapScreen(nodeMapViewModel: NodeMapViewModel, onNavigateUp: () -> Unit) 
             )
         },
     ) { paddingValues ->
-        NodeTrackOsmMap(
+        MapLibreNodeTrackMap(
+            destNum = node?.num ?: 0,
             positions = positions,
-            mapStyleId = nodeMapViewModel.mapStyleId,
             modifier = Modifier.fillMaxSize().padding(paddingValues),
         )
     }

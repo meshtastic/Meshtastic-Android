@@ -19,14 +19,18 @@ package org.meshtastic.app.map.discovery
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import org.meshtastic.core.ui.util.DiscoveryMapNode
+import org.meshtastic.feature.map.maplibre.MapLibreDiscoveryMap
 
-/** Flavor-unified entry point for the discovery map. OSMDroid implementation. */
+/** Flavor-unified entry point for the discovery map. MapLibre implementation. */
 @Composable
 fun DiscoveryMap(
     userLatitude: Double,
     userLongitude: Double,
     nodes: List<DiscoveryMapNode>,
     modifier: Modifier = Modifier,
-) {
-    DiscoveryOsmMap(userLatitude = userLatitude, userLongitude = userLongitude, nodes = nodes, modifier = modifier)
-}
+) = MapLibreDiscoveryMap(
+    userLatitude = userLatitude,
+    userLongitude = userLongitude,
+    nodes = nodes,
+    modifier = modifier,
+)

@@ -321,12 +321,9 @@ dependencies {
     googleImplementation(libs.androidx.appfunctions)
     add("kspGoogle", libs.androidx.appfunctions.compiler)
 
-    fdroidImplementation(libs.osmdroid.android)
-    fdroidImplementation(libs.geopackage.android) {
-        because("6.7.5 depends on 16 KB page-size compatible SQLite Android Bindings")
-        exclude(group = "com.j256.ormlite")
-    }
-    fdroidImplementation(libs.osmbonuspack)
+    // MapLibre replaces OSMdroid on this flavor; the module also backs the desktop app, and is
+    // deliberately NOT visible to `google`, which stays on Google Maps.
+    fdroidImplementation(projects.feature.mapMaplibre)
 
     testImplementation(kotlin("test-junit"))
     testImplementation(libs.androidx.work.testing)
