@@ -71,6 +71,8 @@ import org.meshtastic.core.resources.bluetooth_permission_blocked_rationale
 import org.meshtastic.core.resources.bluetooth_permission_blocked_rationale_pre31
 import org.meshtastic.core.resources.bluetooth_permission_rationale
 import org.meshtastic.core.resources.bluetooth_permission_rationale_pre31
+import org.meshtastic.core.resources.bonding_failed_permissions
+import org.meshtastic.core.resources.close
 import org.meshtastic.core.resources.connections
 import org.meshtastic.core.resources.disconnect
 import org.meshtastic.core.resources.firmware_event_ended_banner
@@ -91,6 +93,7 @@ import org.meshtastic.core.resources.nearby_devices_permission
 import org.meshtastic.core.resources.no_device_selected
 import org.meshtastic.core.resources.open_bluetooth_settings
 import org.meshtastic.core.resources.open_location_settings
+import org.meshtastic.core.resources.open_settings
 import org.meshtastic.core.resources.open_wifi_settings
 import org.meshtastic.core.resources.rssi
 import org.meshtastic.core.resources.set_your_region
@@ -103,6 +106,7 @@ import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.PermissionRationaleDialog
 import org.meshtastic.core.ui.component.PermissionRecoveryCard
 import org.meshtastic.core.ui.component.RecoveryCard
+import org.meshtastic.core.ui.icon.AppSettingsAlt
 import org.meshtastic.core.ui.icon.Bluetooth
 import org.meshtastic.core.ui.icon.Language
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -172,6 +176,7 @@ fun ConnectionsScreen(
     val isBleScanning by scanModel.isBleScanning.collectAsStateWithLifecycle()
     val isNetworkScanning by scanModel.isNetworkScanning.collectAsStateWithLifecycle()
     val activeTransport by scanModel.activeTransport.collectAsStateWithLifecycle()
+    val blePermissionRefusal by scanModel.blePermissionRefusal.collectAsStateWithLifecycle()
     val bleAutoScan by scanModel.bleAutoScan.collectAsStateWithLifecycle()
     val networkAutoScan by scanModel.networkAutoScan.collectAsStateWithLifecycle()
 
@@ -218,6 +223,11 @@ fun ConnectionsScreen(
 
             PendingTcpConnectResolution.KEEP_WAITING -> Unit
         }
+    }
+
+    // A completed connection is proof the refusal is behind us, whatever the system reported at the time.
+    LaunchedEffect(connectionState) {
+        if (connectionState is ConnectionState.Connected) scanModel.clearBlePermissionRefusal()
     }
 
     // Adapter-state, distinct from permission state: a permission can be granted while Bluetooth is off or the device
@@ -552,6 +562,24 @@ fun ConnectionsScreen(
                                 } else {
                                     bluetoothRationale
                                 },
+                            )
+                        }
+                        // The platform refused a bond or scan while the app holds the grant — a partial grant, or an
+                        // OEM quirk. Only shown when the two disagree: the card above already covers a plain missing
+                        // permission, and with a better action than "go look in settings".
+                        if (
+                            activeTransport == DeviceType.BLE && blePermissionRefusal && bluetoothPermission.isGranted
+                        ) {
+                            RecoveryCard(
+                                message = stringResource(Res.string.bonding_failed_permissions),
+                                actionLabel = stringResource(Res.string.open_settings),
+                                onAction = {
+                                    scanModel.clearBlePermissionRefusal()
+                                    bluetoothPermission.openAppSettings()
+                                },
+                                actionIcon = MeshtasticIcons.AppSettingsAlt,
+                                onDismiss = { scanModel.clearBlePermissionRefusal() },
+                                dismissContentDescription = stringResource(Res.string.close),
                             )
                         }
                         if (activeTransport == DeviceType.BLE && bluetoothPermission.isGranted && bluetoothDisabled) {

@@ -59,9 +59,6 @@ import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.bluetooth_disabled
-import org.meshtastic.core.resources.bluetooth_scan_location_services_disabled
-import org.meshtastic.core.resources.bluetooth_scan_missing_permission
 import org.meshtastic.core.resources.bluetooth_scan_start_failed
 import org.meshtastic.core.resources.bluetooth_scan_too_frequent
 import org.meshtastic.core.resources.getPluralStringSuspend
@@ -76,6 +73,17 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 internal val BLE_SCAN_START_FAILURE_RETRY_COOLDOWN = 15.seconds
+
+/**
+ * Scan-start failures whose cause is already rendered as a live, actionable card on the Connections screen, so a modal
+ * message about them would only interrupt the user to repeat what is behind the dialog.
+ */
+private val SELF_EVIDENT_SCAN_FAILURES =
+    setOf(
+        BleScanStartFailureReason.MissingScanPermission,
+        BleScanStartFailureReason.BluetoothDisabled,
+        BleScanStartFailureReason.LocationServicesDisabled,
+    )
 private const val BLE_SCAN_START_FAILURE_MESSAGE_FALLBACK =
     "Bluetooth scan couldn't start. Try again, or toggle Bluetooth if the problem continues."
 
@@ -208,6 +216,28 @@ open class ScannerViewModel(
     private val scanGeneration = MutableStateFlow(0)
 
     // ── Network scanning (NSD gating) ─────────────────────────────────────────────────────────
+    private val _blePermissionRefusal = MutableStateFlow(false)
+
+    /**
+     * Set when the platform refused a Bluetooth operation for lack of a permission the app believes it holds — the only
+     * permission failure the Connections screen cannot infer from [PermissionStatus] alone.
+     *
+     * Everything else (never granted, denied, adapter off, location services off) is already visible as a live,
+     * actionable card on that screen, so those paths deliberately raise no message at all: a modal that repeats what
+     * the screen behind it already says, and offers no way to act on it, is an interruption rather than an aid.
+     */
+    val blePermissionRefusal: StateFlow<Boolean> = _blePermissionRefusal.asStateFlow()
+
+    /** Records a platform-level permission refusal. Called from the transport-specific bond/connect paths. */
+    protected fun reportBlePermissionRefusal() {
+        _blePermissionRefusal.value = true
+    }
+
+    /** Clears the refusal once the user has been given, and acted on, a recovery affordance. */
+    fun clearBlePermissionRefusal() {
+        _blePermissionRefusal.value = false
+    }
+
     private val _isNetworkScanning = MutableStateFlow(false)
 
     /** Whether an NSD network scan is currently active. */
@@ -475,12 +505,20 @@ open class ScannerViewModel(
             "BLE scan could not start: ${exception.reason.androidCode} (${exception.reason.description})"
         }
         val retryCooldownSeconds = retryCooldown.roundedUpWholeSeconds()
+
+        // Missing permission, Bluetooth off and location services off each have a persistent, actionable card on the
+        // Connections screen driven by live system state. Raising a modal for them as well would interrupt the user to
+        // restate what is already on screen behind the dialog — and, unlike the card, hand them no way to fix it.
+        // MissingScanPermission additionally flips the refusal flag, because the platform can refuse a scan the app
+        // believes it is permitted to run and the card alone would not appear.
+        if (exception.reason == BleScanStartFailureReason.MissingScanPermission) {
+            _blePermissionRefusal.value = true
+        }
+        if (exception.reason in SELF_EVIDENT_SCAN_FAILURES) return
+
         val errorMessage =
             safeCatchingAll {
                 when (exception.reason) {
-                    BleScanStartFailureReason.MissingScanPermission ->
-                        getStringSuspend(Res.string.bluetooth_scan_missing_permission)
-
                     BleScanStartFailureReason.ApplicationRegistrationFailed ->
                         getStringSuspend(Res.string.bluetooth_scan_start_failed)
 
@@ -491,10 +529,10 @@ open class ScannerViewModel(
                             retryCooldownSeconds,
                         )
 
-                    BleScanStartFailureReason.BluetoothDisabled -> getStringSuspend(Res.string.bluetooth_disabled)
-
-                    BleScanStartFailureReason.LocationServicesDisabled ->
-                        getStringSuspend(Res.string.bluetooth_scan_location_services_disabled)
+                    BleScanStartFailureReason.MissingScanPermission,
+                    BleScanStartFailureReason.BluetoothDisabled,
+                    BleScanStartFailureReason.LocationServicesDisabled,
+                    -> return
                 }
             }
                 .getOrDefault(untranslatedScanStartFailureMessage(exception.reason, retryCooldownSeconds))

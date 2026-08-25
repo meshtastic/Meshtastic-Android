@@ -42,7 +42,6 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -155,18 +154,22 @@ class AndroidScannerViewModelBondingTest {
     }
 
     @Test
-    fun `security exception does not arm the transport and surfaces an error`() = runTest(harness.testDispatcher) {
-        // Missing BLUETOOTH_CONNECT: connecting would fail the same way, so surface the error and do NOT arm.
-        harness.bluetoothRepository.failBondWithSecurityException()
+    fun `security exception does not arm the transport and flags a permission refusal`() =
+        runTest(harness.testDispatcher) {
+            // Missing BLUETOOTH_CONNECT: connecting would fail the same way, so flag the refusal and do NOT arm.
+            harness.bluetoothRepository.failBondWithSecurityException()
 
-        viewModel.onSelected(ScannerViewModelHarness.unbondedBleEntry(mac))
-        testScheduler.advanceUntilIdle()
+            viewModel.onSelected(ScannerViewModelHarness.unbondedBleEntry(mac))
+            testScheduler.advanceUntilIdle()
 
-        assertEquals(1, harness.bluetoothRepository.bondCalls.size)
-        assertNull(harness.radioController.lastSetDeviceAddress)
-        runUntilSettled { harness.serviceRepository.errorMessage.value != null }
-        assertNotNull(harness.serviceRepository.errorMessage.value)
-    }
+            assertEquals(1, harness.bluetoothRepository.bondCalls.size)
+            assertNull(harness.radioController.lastSetDeviceAddress)
+            runUntilSettled { viewModel.blePermissionRefusal.value }
+            // Reported as state, not a modal, so the Connections screen can render it with a recovery action attached.
+            // The old alert named the fix ("grant nearby device permissions") and offered no way to perform it.
+            assertTrue(viewModel.blePermissionRefusal.value)
+            assertNull(harness.serviceRepository.errorMessage.value)
+        }
 
     @Test
     fun `CancellationException from bond propagates without arming transport`() = runTest(harness.testDispatcher) {
