@@ -132,12 +132,15 @@ internal fun PermissionScreenLayout(
                 modifier = Modifier.padding(horizontal = 16.dp),
             )
             Spacer(modifier = Modifier.height(16.dp))
+            // Directly under the description, above the feature list. Placed last it sat below up to four feature
+            // rows in a scrolling column — off-screen on a typical phone, so a user who had just declined saw the
+            // button label change and no reason why. It renders only after a denial, so the happy path pays nothing.
+            PermissionNotice(status = status, deniedNoticeRes = deniedNoticeRes, blockedNoticeRes = blockedNoticeRes)
             features.forEach { feature ->
                 FeatureRow(feature = feature)
                 Spacer(modifier = Modifier.height(16.dp))
             }
             additionalContent?.invoke()
-            PermissionNotice(status = status, deniedNoticeRes = deniedNoticeRes, blockedNoticeRes = blockedNoticeRes)
         }
     }
 }
@@ -167,23 +170,28 @@ private fun PermissionNotice(
     val icon =
         if (status == PermissionStatus.PERMANENTLY_DENIED) MeshtasticIcons.AppSettingsAlt else MeshtasticIcons.Info
 
-    Surface(
-        shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.surfaceContainerHighest,
-        modifier = Modifier.fillMaxWidth().semantics { liveRegion = LiveRegionMode.Polite },
-    ) {
-        Row(
-            modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+    // Column rather than a bare Surface plus Spacer: the notice now sits mid-list, so it owns the gap below it, and a
+    // composable may only emit from one source at its top level.
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Surface(
+            shape = MaterialTheme.shapes.medium,
+            color = MaterialTheme.colorScheme.surfaceContainerHighest,
+            modifier = Modifier.fillMaxWidth().semantics { liveRegion = LiveRegionMode.Polite },
         ) {
-            Icon(imageVector = icon, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text(
-                text = stringResource(noticeRes),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.weight(1f),
-            )
+            Row(
+                modifier = Modifier.padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Icon(imageVector = icon, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    text = stringResource(noticeRes),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(1f),
+                )
+            }
         }
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }

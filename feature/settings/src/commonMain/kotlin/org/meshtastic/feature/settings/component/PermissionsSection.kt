@@ -53,6 +53,7 @@ import org.meshtastic.core.resources.permission_state_not_asked
 import org.meshtastic.core.resources.permissions
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.PermissionRationaleDialog
+import org.meshtastic.core.ui.icon.AppSettingsAlt
 import org.meshtastic.core.ui.icon.Bluetooth
 import org.meshtastic.core.ui.icon.Language
 import org.meshtastic.core.ui.icon.LocationOn
@@ -215,19 +216,21 @@ private fun permissionRows(
     )
 }
 
+/** The one-line state a permissions row reports, kept out of the row composable's complexity budget. */
+private fun permissionStateLabel(status: PermissionStatus, gated: Boolean): StringResource = when {
+    !gated -> Res.string.permission_state_not_applicable
+    status == PermissionStatus.GRANTED -> Res.string.permission_state_allowed
+    status == PermissionStatus.NOT_REQUESTED -> Res.string.permission_state_not_asked
+    status == PermissionStatus.DENIED_CAN_RETRY -> Res.string.permission_state_denied
+    else -> Res.string.permission_state_blocked
+}
+
 @Composable
 private fun PermissionListItem(row: PermissionRow, onShowRationale: () -> Unit) {
     val state = row.state
     val gated = state.isRuntimeGated
 
-    val statusRes =
-        when {
-            !gated -> Res.string.permission_state_not_applicable
-            state.status == PermissionStatus.GRANTED -> Res.string.permission_state_allowed
-            state.status == PermissionStatus.NOT_REQUESTED -> Res.string.permission_state_not_asked
-            state.status == PermissionStatus.DENIED_CAN_RETRY -> Res.string.permission_state_denied
-            else -> Res.string.permission_state_blocked
-        }
+    val statusRes = permissionStateLabel(state.status, gated)
 
     // Only a blocked permission is coloured. Denied is a choice the user made and is free to keep — colouring it red
     // would read as a scolding, which the permissions guidance explicitly warns against.
@@ -238,8 +241,23 @@ private fun PermissionListItem(row: PermissionRow, onShowRationale: () -> Unit) 
             Color.Unspecified
         }
 
+    // A chevron promises in-app navigation. Every action here that is not a request leaves for the system settings
+    // app, so those rows say so instead.
+    val leavesTheApp =
+        gated &&
+            permissionGateAction(state.status) in
+            setOf(PermissionGateAction.PROCEED, PermissionGateAction.OPEN_SETTINGS)
+
     ListItem(
         text = stringResource(row.titleRes),
+        trailingIcon =
+        if (!gated) {
+            null
+        } else if (leavesTheApp) {
+            MeshtasticIcons.AppSettingsAlt
+        } else {
+            null
+        },
         supportingText = "${stringResource(row.summaryRes)}\n${stringResource(statusRes)}",
         supportingTextColor = statusColor,
         leadingIcon = row.icon,

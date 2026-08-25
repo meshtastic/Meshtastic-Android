@@ -89,8 +89,6 @@ import org.meshtastic.core.resources.firmware_version
 import org.meshtastic.core.resources.local_network_permission
 import org.meshtastic.core.resources.local_network_permission_blocked_rationale
 import org.meshtastic.core.resources.local_network_permission_rationale
-import org.meshtastic.core.resources.location_permission
-import org.meshtastic.core.resources.nearby_devices_permission
 import org.meshtastic.core.resources.no_device_selected
 import org.meshtastic.core.resources.open_bluetooth_settings
 import org.meshtastic.core.resources.open_location_settings
@@ -287,48 +285,6 @@ fun ConnectionsScreen(
                 Res.string.bluetooth_permission_blocked_rationale
             },
         )
-    val bluetoothPermissionTitle =
-        if (bleScanRequiresLocationServices) Res.string.location_permission else Res.string.nearby_devices_permission
-
-    // Set when the user asks to scan after a single denial. The permissions guidance requires an educational UI
-    // *before* the re-request, because that prompt is the one whose "Deny" becomes permanent.
-    var showBluetoothRationale by remember { mutableStateOf(false) }
-
-    // Same guidance, same shape, for the network-scan toggle.
-    var showLocalNetworkRationale by remember { mutableStateOf(false) }
-
-    if (showLocalNetworkRationale) {
-        PermissionRationaleDialog(
-            titleRes = Res.string.local_network_permission,
-            rationaleRes = Res.string.local_network_permission_rationale,
-            icon = MeshtasticIcons.Language,
-            onConfirm = {
-                showLocalNetworkRationale = false
-                scanModel.persistNetworkAutoScanIntent(true)
-                localNetworkPermission.request()
-            },
-            onDismiss = { showLocalNetworkRationale = false },
-        )
-    }
-
-    if (showBluetoothRationale) {
-        PermissionRationaleDialog(
-            titleRes = bluetoothPermissionTitle,
-            rationaleRes =
-            if (bleScanRequiresLocationServices) {
-                Res.string.bluetooth_permission_rationale_pre31
-            } else {
-                Res.string.bluetooth_permission_rationale
-            },
-            icon = MeshtasticIcons.Bluetooth,
-            onConfirm = {
-                showBluetoothRationale = false
-                bluetoothPermission.request()
-            },
-            onDismiss = { showBluetoothRationale = false },
-        )
-    }
-
     // Auto-start BLE discovery when the screen is visible (lifecycle ≥ STARTED) and the user has previously opted in.
     // ScannerViewModel skips screen-entry discovery when a selected device can reconnect through the transport's
     // fresh-advertisement scan. LifecycleStartEffect stops scanning on ON_STOP (app backgrounded) and restarts on
@@ -336,15 +292,18 @@ fun ConnectionsScreen(
     // Keyed on the active pane so a persisted TCP/USB pane loaded after first composition disposes this effect and
     // stops an initially eligible BLE scan. The toggle handler starts/stops scans directly; this effect owns lifecycle
     // cleanup, while the LaunchedEffect below handles async preference loading without disposing the lifecycle owner.
-    LifecycleStartEffect(activeTransport) {
-        if (activeTransport == DeviceType.BLE && bleAutoScan && !isBleScanning) {
+    // Keyed on the grant as well as the pane, mirroring the network pair below: a tap on Scan that resolved to a
+    // permission request persists the intent, and this is what turns the resulting grant into the scan the user
+    // already asked for rather than a second trip to the button.
+    LifecycleStartEffect(activeTransport, bluetoothPermission.isGranted) {
+        if (activeTransport == DeviceType.BLE && bleAutoScan && bluetoothPermission.isGranted && !isBleScanning) {
             scanModel.startBleAutoScan()
         }
         onStopOrDispose { scanModel.stopBleScan() }
     }
 
-    LaunchedEffect(activeTransport, bleAutoScan) {
-        if (activeTransport == DeviceType.BLE && bleAutoScan && !isBleScanning) {
+    LaunchedEffect(activeTransport, bluetoothPermission.isGranted, bleAutoScan) {
+        if (activeTransport == DeviceType.BLE && bleAutoScan && bluetoothPermission.isGranted && !isBleScanning) {
             scanModel.startBleAutoScan()
         }
     }
@@ -700,11 +659,22 @@ fun ConnectionsScreen(
                                                 }
 
                                             // Never asked: go straight to the system dialog. A rationale before the
-                                            // first prompt adds friction without adding information.
-                                            PermissionGateAction.REQUEST -> bluetoothPermission.request()
+                                            // first prompt adds friction without adding information. Persist the
+                                            // intent so the grant starts the scan the user already asked for, instead
+                                            // of making them tap Scan a second time.
+                                            PermissionGateAction.REQUEST -> {
+                                                scanModel.persistBleAutoScanIntent(true)
+                                                bluetoothPermission.request()
+                                            }
 
-                                            // Denied once. Explain before re-prompting — the next "Deny" is permanent.
-                                            PermissionGateAction.SHOW_RATIONALE -> showBluetoothRationale = true
+                                            // Denied once. The educational UI the guidance asks for is already on
+                                            // screen — the permission card above this list carries the same rationale
+                                            // and its own Grant button, and can be ignored, which a modal cannot.
+                                            // Repeating it in a dialog is friction, not information.
+                                            PermissionGateAction.SHOW_RATIONALE -> {
+                                                scanModel.persistBleAutoScanIntent(true)
+                                                bluetoothPermission.request()
+                                            }
 
                                             // The system won't prompt again, so requesting would do nothing visible.
                                             PermissionGateAction.OPEN_SETTINGS -> bluetoothPermission.openAppSettings()
@@ -727,8 +697,12 @@ fun ConnectionsScreen(
                                                 localNetworkPermission.request()
                                             }
 
-                                            // Denied once — explain before the prompt that could make it permanent.
-                                            PermissionGateAction.SHOW_RATIONALE -> showLocalNetworkRationale = true
+                                            // As on the Bluetooth pane: the card above this list is the rationale,
+                                            // and it is already visible whenever this branch is reachable.
+                                            PermissionGateAction.SHOW_RATIONALE -> {
+                                                scanModel.persistNetworkAutoScanIntent(true)
+                                                localNetworkPermission.request()
+                                            }
 
                                             PermissionGateAction.OPEN_SETTINGS ->
                                                 localNetworkPermission.openAppSettings()

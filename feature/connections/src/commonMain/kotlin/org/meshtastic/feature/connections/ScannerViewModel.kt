@@ -80,18 +80,23 @@ private const val BLE_SCAN_START_FAILURE_MESSAGE_FALLBACK =
  * How long to block scan restarts after a scan-start failure.
  *
  * A cooldown only helps where retrying too soon is itself the problem — Android's scan-start quota, or a registration
- * failure that needs time to settle. [BleScanStartFailureReason.BluetoothDisabled] and
- * [BleScanStartFailureReason.LocationServicesDisabled] instead clear the moment the user flips a system toggle, so
- * holding the scan button dead for 15s after they have fixed it would just look broken.
+ * failure that needs time to settle. [BleScanStartFailureReason.BluetoothDisabled],
+ * [BleScanStartFailureReason.LocationServicesDisabled] and [BleScanStartFailureReason.MissingScanPermission] instead
+ * clear the moment the user flips a system toggle or answers a permission dialog, so holding the scan button dead for
+ * 15s after they have fixed it would just look broken.
+ *
+ * MissingScanPermission sat on the wrong side of that line and defeated the whole in-context grant flow: a tap on Scan
+ * armed the cooldown, the user granted the permission seconds later, and the scan they had just asked for was refused
+ * by our own rate limiter with nothing on screen to say so.
  */
 private fun effectiveBleScanRetryCooldown(reason: BleScanStartFailureReason, retryAfter: Duration?): Duration =
     when (reason) {
         BleScanStartFailureReason.BluetoothDisabled,
         BleScanStartFailureReason.LocationServicesDisabled,
+        BleScanStartFailureReason.MissingScanPermission,
         -> retryAfter ?: Duration.ZERO
 
         BleScanStartFailureReason.ApplicationRegistrationFailed,
-        BleScanStartFailureReason.MissingScanPermission,
         BleScanStartFailureReason.ScanningTooFrequently,
         ->
             maxOf(BLE_SCAN_START_FAILURE_RETRY_COOLDOWN, retryAfter ?: Duration.ZERO)
@@ -395,6 +400,10 @@ open class ScannerViewModel(
         stopNetworkScan()
 
         _isBleScanning.value = true
+        // A scan that starts is evidence the last refusal is behind us. Cleared optimistically rather than on connect:
+        // the failure handler below re-sets it if the platform refuses again, and leaving it set would park an error
+        // card above a device list that is visibly working.
+        _blePermissionRefusal.value = false
         val generation = scanGeneration.value + 1
         scanGeneration.value = generation
 
@@ -606,6 +615,18 @@ open class ScannerViewModel(
     fun persistNetworkAutoScanIntent(enabled: Boolean) {
         uiPrefs.setNetworkAutoScan(enabled)
         if (enabled) uiPrefs.setBleAutoScan(false)
+    }
+
+    /**
+     * Records that the user asked for a BLE scan before the scan could legally start — the mirror of
+     * [persistNetworkAutoScanIntent].
+     *
+     * Used when a tap on Scan resolves to a permission request instead of a scan. Without it the grant lands and
+     * nothing happens: the user answered the dialog they asked for and still has to tap Scan a second time.
+     */
+    fun persistBleAutoScanIntent(enabled: Boolean) {
+        uiPrefs.setBleAutoScan(enabled)
+        if (enabled) uiPrefs.setNetworkAutoScan(false)
     }
 
     // ── Device selection / disconnect ───────────────────────────────────────────────────────

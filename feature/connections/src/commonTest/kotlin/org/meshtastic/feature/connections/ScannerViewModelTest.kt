@@ -23,6 +23,7 @@ import dev.mokkery.matcher.any
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.resetMain
@@ -294,6 +295,27 @@ class ScannerViewModelTest {
         assertEquals(true, viewModel.blePermissionRefusal.value)
 
         viewModel.clearBlePermissionRefusal()
+        assertEquals(false, viewModel.blePermissionRefusal.value)
+    }
+
+    @Test
+    fun `a scan that starts clears a stale permission refusal`() = runTest {
+        warmScanFailureStrings()
+        every { bleScanner.scan(any(), any()) } returns
+            flow {
+                throw BleScanStartException(
+                    reason = BleScanStartFailureReason.MissingScanPermission,
+                    cause = IllegalStateException("Bluetooth scan permission missing"),
+                )
+            }
+        viewModel.startBleScan()
+        assertEquals(true, viewModel.blePermissionRefusal.value)
+
+        // Immediately retryable, with no cooldown: the user answers a permission dialog, not a rate limit. A cooldown
+        // here would refuse the very scan the grant was for.
+        every { bleScanner.scan(any(), any()) } returns emptyFlow()
+        viewModel.startBleScan()
+
         assertEquals(false, viewModel.blePermissionRefusal.value)
     }
 
