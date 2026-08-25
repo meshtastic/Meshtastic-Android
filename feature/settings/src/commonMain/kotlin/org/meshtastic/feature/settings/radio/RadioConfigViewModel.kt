@@ -57,6 +57,7 @@ import org.meshtastic.core.domain.usecase.settings.ProcessRadioResponseUseCase
 import org.meshtastic.core.domain.usecase.settings.RadioConfigUseCase
 import org.meshtastic.core.domain.usecase.settings.RadioResponseResult
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.HamName
 import org.meshtastic.core.model.MqttConnectionState
 import org.meshtastic.core.model.MqttProbeStatus
 import org.meshtastic.core.model.MyNodeInfo
@@ -446,12 +447,13 @@ open class RadioConfigViewModel(
     private fun setHamMode(destNum: Int, user: User) {
         safeLaunch(tag = "setHamMode") {
             _radioConfigState.update { it.copy(userConfig = user) }
-            // The form's long-name field carries the callsign while licensed (iOS parity).
-            // When meshtastic/protobufs#941 ships, add long_name here.
+            // While licensed the form's long name is the composed `CALLSIGN//Long name`; firmware rebuilds that same
+            // composition from the two HamParameters fields, so send the halves rather than the whole.
+            val (callSign, longName) = HamName.split(user.long_name)
             expectRestartIfLocal(RebootBehavior.ALWAYS)
             radioConfigUseCase.setHamMode(
                 destNum,
-                HamParameters(call_sign = user.long_name, short_name = user.short_name),
+                HamParameters(call_sign = callSign, short_name = user.short_name, long_name = longName),
                 onRequestId = ::registerWriteRequestId,
             )
         }
