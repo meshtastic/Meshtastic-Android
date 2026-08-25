@@ -34,6 +34,13 @@ enum class LocalNetworkGateAction {
     REQUEST_PERMISSION,
 
     /**
+     * Denied once, and the system will still prompt. Explain first: the next prompt is the one whose "Deny" becomes
+     * permanent, and the permissions guidance requires an educational UI before a re-request. Declining the explanation
+     * must still run the connect — the never-block policy above does not bend for a dialog the user dismissed.
+     */
+    SHOW_RATIONALE,
+
+    /**
      * The system will no longer prompt. Surface the warning that names the fix (system settings), then run the connect
      * anyway — the target may not be local, and the OS enforces the permission at the socket regardless.
      */
@@ -51,7 +58,7 @@ fun localNetworkGateAction(status: PermissionStatus): LocalNetworkGateAction = w
     PermissionStatus.GRANTED -> LocalNetworkGateAction.PROCEED
     PermissionStatus.PERMANENTLY_DENIED -> LocalNetworkGateAction.PROCEED_WITH_WARNING
     PermissionStatus.NOT_REQUESTED -> LocalNetworkGateAction.REQUEST_PERMISSION
-    PermissionStatus.DENIED_CAN_RETRY -> LocalNetworkGateAction.REQUEST_PERMISSION
+    PermissionStatus.DENIED_CAN_RETRY -> LocalNetworkGateAction.SHOW_RATIONALE
 }
 
 /** How a connect stashed behind an in-flight permission request should be resolved once the status moves. */

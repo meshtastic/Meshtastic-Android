@@ -987,7 +987,7 @@
     <!-- LOCAL -->
     <string name="local_mbtiles_file">Local MBTiles File</string>
     <string name="local_network_permission">Local network permission</string>
-    <string name="local_network_permission_blocked_rationale">Local network access is off and Android will not ask again. Turn it on in app settings to find radios on your Wi-Fi, or add one by address below.</string>
+    <string name="local_network_permission_blocked_rationale">Local network access is off and Android will not ask again. A radio on your Wi-Fi cannot be found or reached until you turn it on in app settings. A radio on a public address or over a VPN is unaffected.</string>
     <string name="local_network_permission_denied_hint">Local network access is turned off for Meshtastic. If this radio is on your local network, the connection will fail until you allow local network access in system settings.</string>
     <string name="local_network_permission_rationale">Meshtastic needs local network access to find radios on your Wi-Fi. It only looks on the network you are already connected to. Without it, you can still reach a radio by typing its address.</string>
     <string name="local_stats_bad">Bad %1$d</string>
@@ -1822,6 +1822,7 @@
     <string name="tak_server_loading">…</string>
     <string name="tak_server_mesh_to_cot">Mesh to CoT Converter</string>
     <string name="tak_server_mesh_to_cot_desc">Show Meshtastic nodes on the ATAK map as contacts</string>
+    <string name="tak_server_permission_blocked">The TAK server needs local network access to accept connections, and Android will not ask again. It has been turned off for now — turn the permission on in app settings and switch it back on.</string>
     <string name="tak_server_section">Server</string>
     <string name="tak_server_status">Status</string>
     <plurals name="tak_server_status_connected">

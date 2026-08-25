@@ -1774,6 +1774,7 @@ tak_server_export_data_package_desc
 tak_server_loading
 tak_server_mesh_to_cot
 tak_server_mesh_to_cot_desc
+tak_server_permission_blocked
 tak_server_section
 tak_server_status
 tak_server_status_connected

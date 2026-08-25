@@ -18,32 +18,88 @@ package org.meshtastic.feature.settings.tak
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import org.meshtastic.core.ui.util.PermissionStatus
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.local_network_permission
+import org.meshtastic.core.resources.local_network_permission_rationale
+import org.meshtastic.core.resources.open_settings
+import org.meshtastic.core.resources.tak_server_permission_blocked
+import org.meshtastic.core.ui.component.MeshtasticDialog
+import org.meshtastic.core.ui.component.PermissionRationaleDialog
+import org.meshtastic.core.ui.icon.AppSettingsAlt
+import org.meshtastic.core.ui.icon.Language
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.util.PermissionGateAction
+import org.meshtastic.core.ui.util.permissionGateAction
 import org.meshtastic.core.ui.util.rememberLocalNetworkPermissionState
 
 @Composable
 actual fun TakPermissionHandler(isTakServerEnabled: Boolean, onPermissionResult: (Boolean) -> Unit) {
-    // ACCESS_LOCAL_NETWORK runtime permission (Android 17 / API 37+) is required for the TAK Server's
-    // localhost socket binding (127.0.0.1:8087). It is also required globally for NSD/mDNS device discovery
-    // when targetSdk >= 37, and is requested up-front from the Connections screen, so it will usually
-    // already be granted by the time the user enables TAK. This composable handles the standalone case
-    // (e.g. user opens TAK settings before ever tapping the network-scan toggle).
+    // ACCESS_LOCAL_NETWORK (Android 17 / API 37+) is required for the TAK Server's localhost socket binding
+    // (127.0.0.1:8087). It is also required for NSD/mDNS device discovery when targetSdk >= 37 and is requested from
+    // the Connections screen, so it will usually already be granted by the time the user enables TAK. This composable
+    // handles the standalone case — a user who opens TAK settings before ever tapping the network-scan toggle.
     val permission = rememberLocalNetworkPermissionState()
+    val currentOnPermissionResult by rememberUpdatedState(onPermissionResult)
+
+    var showRationale by remember { mutableStateOf(false) }
+    var showBlocked by remember { mutableStateOf(false) }
 
     // The launcher must run as a post-composition side effect — invoking it directly in the composition body crashes
-    // with "Launcher has not been initialized". Keying on the status enum re-runs only on real transitions: request
-    // once when never asked, and disable the server on any denial (preserving the prior request-once-then-disable
-    // behavior, now with PERMANENTLY_DENIED treated the same as a fresh denial).
+    // with "Launcher has not been initialized". Keying on the status enum re-runs only on real transitions.
     LaunchedEffect(isTakServerEnabled, permission.status) {
         if (!isTakServerEnabled) return@LaunchedEffect
-        when (permission.status) {
-            PermissionStatus.GRANTED -> onPermissionResult(true)
+        when (permissionGateAction(permission.status)) {
+            PermissionGateAction.PROCEED -> currentOnPermissionResult(true)
 
-            PermissionStatus.NOT_REQUESTED -> permission.request()
+            PermissionGateAction.REQUEST -> permission.request()
 
-            PermissionStatus.DENIED_CAN_RETRY,
-            PermissionStatus.PERMANENTLY_DENIED,
-            -> onPermissionResult(false)
+            // Previously this disabled the server outright, same as a permanent denial. It is not the same: the
+            // system will still prompt here, and the user has been given no reason to answer differently than last
+            // time. Explain first, then let them decide.
+            PermissionGateAction.SHOW_RATIONALE -> showRationale = true
+
+            // Still disables the server — it genuinely cannot bind its socket — but no longer silently. Turning a
+            // feature off and saying nothing leaves the user with a switch that will not stay on and no way to learn
+            // why, which is exactly the dead end this whole change set is about.
+            PermissionGateAction.OPEN_SETTINGS -> {
+                currentOnPermissionResult(false)
+                showBlocked = true
+            }
         }
+    }
+
+    if (showRationale) {
+        PermissionRationaleDialog(
+            titleRes = Res.string.local_network_permission,
+            rationaleRes = Res.string.local_network_permission_rationale,
+            icon = MeshtasticIcons.Language,
+            onConfirm = {
+                showRationale = false
+                permission.request()
+            },
+            onDismiss = {
+                showRationale = false
+                currentOnPermissionResult(false)
+            },
+        )
+    }
+
+    if (showBlocked) {
+        MeshtasticDialog(
+            titleRes = Res.string.local_network_permission,
+            messageRes = Res.string.tak_server_permission_blocked,
+            icon = MeshtasticIcons.AppSettingsAlt,
+            confirmTextRes = Res.string.open_settings,
+            onConfirm = {
+                showBlocked = false
+                permission.openAppSettings()
+            },
+            onDismiss = { showBlocked = false },
+        )
     }
 }

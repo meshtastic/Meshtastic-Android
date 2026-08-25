@@ -43,7 +43,6 @@ import org.meshtastic.core.resources.bluetooth_scan_start_failed
 import org.meshtastic.core.resources.bluetooth_scan_too_frequent
 import org.meshtastic.core.resources.getPluralStringSuspend
 import org.meshtastic.core.resources.getStringSuspend
-import org.meshtastic.core.resources.local_network_permission_denied_hint
 import org.meshtastic.core.testing.FakeBleDevice
 import org.meshtastic.feature.connections.model.DeviceListEntry
 import org.meshtastic.feature.connections.model.DiscoveredDevices
@@ -199,20 +198,6 @@ class ScannerViewModelTest {
             "Bluetooth scan couldn't start. Try again, or toggle Bluetooth if the problem continues.",
             serviceRepository.errorMessage.value,
         )
-    }
-
-    @Test
-    fun `warnLocalNetworkPermissionDenied surfaces the settings hint as a warning`() = runTest {
-        // Computing the expectation first also pre-warms the resource, keeping the production lookup observable
-        // synchronously (see warmScanFailureStrings). The safeCatchingAll-with-fallback shape matches production,
-        // so the expected text is identical whether resources resolve or the fallback fires.
-        val expected =
-            safeCatchingAll { getStringSuspend(Res.string.local_network_permission_denied_hint) }
-                .getOrDefault(LOCAL_NETWORK_PERMISSION_DENIED_HINT_FALLBACK)
-
-        viewModel.warnLocalNetworkPermissionDenied()
-
-        assertEquals(expected, serviceRepository.errorMessage.value)
     }
 
     @Test

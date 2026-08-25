@@ -193,6 +193,9 @@ fun ConnectionsScreen(
     // A connect issued while the prompt is up is stashed with the status it saw; the LaunchedEffect below resolves it
     // on the status transition the request produces — grant runs it, a denial warns and runs it anyway.
     var pendingTcpConnect by remember { mutableStateOf<Pair<PermissionStatus, () -> Unit>?>(null) }
+    // A connect held back only while an educational dialog is up. Distinct from pendingTcpConnect, which waits on the
+    // system prompt: this one has not asked the OS anything yet, and must still run if the user dismisses the dialog.
+    var rationaleTcpConnect by remember { mutableStateOf<(() -> Unit)?>(null) }
     val gateTcpConnect: (connect: () -> Unit) -> Unit = { connect ->
         when (localNetworkGateAction(localNetworkPermission.status)) {
             LocalNetworkGateAction.PROCEED -> connect()
@@ -202,11 +205,30 @@ fun ConnectionsScreen(
                 localNetworkPermission.request()
             }
 
-            LocalNetworkGateAction.PROCEED_WITH_WARNING -> {
-                scanModel.warnLocalNetworkPermissionDenied()
-                connect()
-            }
+            LocalNetworkGateAction.SHOW_RATIONALE -> rationaleTcpConnect = connect
+
+            // The pane already carries a permission card naming the fix, so no modal here. The connect runs regardless
+            // — a public-IP or VPN radio was never subject to this permission, and the OS enforces it at the socket.
+            LocalNetworkGateAction.PROCEED_WITH_WARNING -> connect()
         }
+    }
+
+    rationaleTcpConnect?.let { connect ->
+        PermissionRationaleDialog(
+            titleRes = Res.string.local_network_permission,
+            rationaleRes = Res.string.local_network_permission_rationale,
+            icon = MeshtasticIcons.Language,
+            onConfirm = {
+                rationaleTcpConnect = null
+                pendingTcpConnect = localNetworkPermission.status to connect
+                localNetworkPermission.request()
+            },
+            // Declining the explanation is not declining the connection. Never-block means never-block.
+            onDismiss = {
+                rationaleTcpConnect = null
+                connect()
+            },
+        )
     }
     LaunchedEffect(localNetworkPermission.status) {
         val pending = pendingTcpConnect ?: return@LaunchedEffect
@@ -216,9 +238,10 @@ fun ConnectionsScreen(
                 pending.second()
             }
 
+            // Warning-free for the same reason as above: the denial that just landed also made the pane's permission
+            // card appear, and it says the same thing with a button attached.
             PendingTcpConnectResolution.CONNECT_WITH_WARNING -> {
                 pendingTcpConnect = null
-                scanModel.warnLocalNetworkPermissionDenied()
                 pending.second()
             }
 
