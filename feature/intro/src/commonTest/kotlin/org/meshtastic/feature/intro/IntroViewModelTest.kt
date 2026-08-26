@@ -47,6 +47,17 @@ class IntroViewModelTest {
         assertEquals(Location, next)
     }
 
+    /**
+     * On API < 31 the Bluetooth screen asks for ACCESS_FINE_LOCATION itself, so a Location screen after it would ask
+     * for the same system permission twice in a row — and a user who declines both is USER_FIXED before reaching the
+     * app, with no dialog available again.
+     */
+    @Test
+    fun testBluetoothSkipsLocationWhenItAlreadyAskedForIt() {
+        val next = viewModel.getNextKey(Bluetooth, allPermissionsGranted = false, bluetoothRequiresLocation = true)
+        assertEquals(Notifications, next)
+    }
+
     @Test
     fun testLocationNavigatesToNotifications() {
         val next = viewModel.getNextKey(Location, allPermissionsGranted = false)

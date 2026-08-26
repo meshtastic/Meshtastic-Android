@@ -25,66 +25,142 @@ import org.meshtastic.core.resources.bluetooth_feature_config_description
 import org.meshtastic.core.resources.bluetooth_feature_discovery
 import org.meshtastic.core.resources.bluetooth_feature_discovery_description
 import org.meshtastic.core.resources.bluetooth_permission
+import org.meshtastic.core.resources.bluetooth_permission_blocked_notice
+import org.meshtastic.core.resources.bluetooth_permission_blocked_notice_pre31
+import org.meshtastic.core.resources.bluetooth_permission_denied_notice
+import org.meshtastic.core.resources.bluetooth_permission_denied_notice_pre31
 import org.meshtastic.core.resources.configure_bluetooth_permissions
-import org.meshtastic.core.resources.next
+import org.meshtastic.core.resources.configure_location_permissions
+import org.meshtastic.core.resources.mesh_map_location
+import org.meshtastic.core.resources.mesh_map_location_description
 import org.meshtastic.core.resources.permission_missing_31
-import org.meshtastic.core.resources.settings
+import org.meshtastic.core.resources.permission_missing_pre31
+import org.meshtastic.core.resources.share_location
+import org.meshtastic.core.resources.share_location_description
 import org.meshtastic.core.ui.icon.Antenna
 import org.meshtastic.core.ui.icon.Bluetooth
+import org.meshtastic.core.ui.icon.LocationOn
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.util.PermissionStatus
 
 /**
- * Screen for configuring Bluetooth permissions during the app introduction. It explains why Bluetooth permissions are
- * needed and provides options to grant them or skip.
+ * Screen for configuring Bluetooth permissions during the app introduction. Explains why they are needed and offers the
+ * recovery that matches [status].
  *
- * @param showNextButton Indicates whether to show a "Next" button (if permissions are already granted) or a "Configure"
- *   button.
+ * @param status Live permission status; drives the primary action and the denied/blocked notice.
+ * @param requiresLocation True on API < 31, where BLE scanning is gated by the location permission instead of "Nearby
+ *   devices". The copy follows, because naming a permission the user will never be shown is worse than saying nothing.
  * @param onSkip Callback invoked if the user chooses to skip Bluetooth permission setup.
- * @param onConfigure Callback invoked when the user proceeds to configure or grant permissions.
- * @param onOpenSettings Callback invoked when the user taps the settings link.
+ * @param onPrimaryAction Callback for the status-driven primary action (request, open settings, or advance).
  */
 @Composable
 internal fun BluetoothScreen(
-    showNextButton: Boolean,
+    status: PermissionStatus,
+    requiresLocation: Boolean,
     onSkip: () -> Unit,
-    onConfigure: () -> Unit,
-    onOpenSettings: () -> Unit,
+    onPrimaryAction: () -> Unit,
 ) {
-    val annotatedString =
-        createClickableAnnotatedString(
-            fullTextRes = Res.string.permission_missing_31,
-            linkTextRes = Res.string.settings,
-            tag = SETTINGS_TAG,
-        )
-
-    val features =
-        listOf(
-            FeatureUIData(
-                icon = MeshtasticIcons.Bluetooth,
-                titleRes = Res.string.bluetooth_feature_discovery,
-                subtitleRes = Res.string.bluetooth_feature_discovery_description,
-            ),
-            FeatureUIData(
-                icon = MeshtasticIcons.Antenna,
-                titleRes = Res.string.bluetooth_feature_config,
-                subtitleRes = Res.string.bluetooth_feature_config_description,
-            ),
-        )
+    val features = bluetoothScreenFeatures(requiresLocation)
 
     PermissionScreenLayout(
         headlineRes = Res.string.bluetooth_permission,
-        annotatedDescription = annotatedString,
+        descriptionRes =
+        if (requiresLocation) Res.string.permission_missing_pre31 else Res.string.permission_missing_31,
         features = features,
+        status = status,
+        deniedNoticeRes =
+        if (requiresLocation) {
+            Res.string.bluetooth_permission_denied_notice_pre31
+        } else {
+            Res.string.bluetooth_permission_denied_notice
+        },
+        blockedNoticeRes =
+        if (requiresLocation) {
+            Res.string.bluetooth_permission_blocked_notice_pre31
+        } else {
+            Res.string.bluetooth_permission_blocked_notice
+        },
+        configureButtonTextRes =
+        if (requiresLocation) {
+            Res.string.configure_location_permissions
+        } else {
+            Res.string.configure_bluetooth_permissions
+        },
         onSkip = onSkip,
-        onConfigure = onConfigure,
-        configureButtonTextRes = if (showNextButton) Res.string.next else Res.string.configure_bluetooth_permissions,
-        onAnnotationClick = { onOpenSettings() },
+        onPrimaryAction = onPrimaryAction,
     )
+}
+
+/**
+ * What Bluetooth access buys, plus what the *same* grant buys on API < 31 where it is the location permission.
+ *
+ * Split out so [BluetoothScreen] stays within the complexity budget and this stays about the platform difference.
+ */
+@Composable
+private fun bluetoothScreenFeatures(requiresLocation: Boolean): List<FeatureUIData> = buildList {
+    add(
+        FeatureUIData(
+            icon = MeshtasticIcons.Bluetooth,
+            titleRes = Res.string.bluetooth_feature_discovery,
+            subtitleRes = Res.string.bluetooth_feature_discovery_description,
+        ),
+    )
+    add(
+        FeatureUIData(
+            icon = MeshtasticIcons.Antenna,
+            titleRes = Res.string.bluetooth_feature_config,
+            subtitleRes = Res.string.bluetooth_feature_config_description,
+        ),
+    )
+    // On API < 31 this screen asks for ACCESS_FINE_LOCATION and the Location screen is skipped, because
+    // asking twice for one system permission would burn both of Android's allowed denials inside onboarding.
+    // The location-backed features have to be named here instead, or the user grants a permission whose real
+    // scope they were never shown.
+    if (requiresLocation) {
+        add(
+            FeatureUIData(
+                icon = MeshtasticIcons.LocationOn,
+                titleRes = Res.string.mesh_map_location,
+                subtitleRes = Res.string.mesh_map_location_description,
+            ),
+        )
+        add(
+            FeatureUIData(
+                icon = MeshtasticIcons.LocationOn,
+                titleRes = Res.string.share_location,
+                subtitleRes = Res.string.share_location_description,
+            ),
+        )
+    }
 }
 
 @PreviewLightDark
 @Composable
 private fun BluetoothScreenPreview() {
-    AppTheme { Surface { BluetoothScreen(showNextButton = false, onSkip = {}, onConfigure = {}, onOpenSettings = {}) } }
+    AppTheme {
+        Surface {
+            BluetoothScreen(
+                status = PermissionStatus.NOT_REQUESTED,
+                requiresLocation = false,
+                onSkip = {},
+                onPrimaryAction = {},
+            )
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun BluetoothScreenBlockedPreview() {
+    AppTheme {
+        Surface {
+            BluetoothScreen(
+                status = PermissionStatus.PERMANENTLY_DENIED,
+                requiresLocation = false,
+                onSkip = {},
+                onPrimaryAction = {},
+            )
+        }
+    }
 }

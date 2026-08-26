@@ -55,9 +55,13 @@ fun Throwable.classifyBleException(): BleExceptionInfo? = when (this) {
         BleExceptionInfo(isPermanent = false, message = "GATT request rejected (busy)")
 
     is UnmetRequirementException ->
-        // Bluetooth disabled or runtime permission missing. Both can resolve without re-selecting the
-        // device (user re-enables BT, or grants permission). Surface as transient so the transport keeps
-        // retrying; UI can show a hint based on the message.
+        // Kable raises this only for the two preconditions its UnmetRequirementReason enumerates: Bluetooth
+        // disabled
+        // and location services disabled. A missing runtime permission is NOT one of them — Android throws
+        // SecurityException for that, which falls through to the caller's generic handling. Both reasons here
+        // resolve
+        // without re-selecting the device, so surface them as transient and let the transport keep retrying; the
+        // Connections screen carries a live card for each.
         BleExceptionInfo(isPermanent = false, message = message ?: "Bluetooth LE unavailable")
 
     else -> null

@@ -144,6 +144,8 @@ actual fun rememberOpenBluetoothSettings(): () -> Unit = {
 actual fun rememberOpenWifiSettings(): () -> Unit = { Logger.w { "Wi-Fi settings not available on JVM/Desktop" } }
 
 /** JVM — GPS is never disabled on Desktop (concept doesn't apply). */
+actual val bleScanRequiresLocationServices: Boolean = false
+
 @Composable actual fun isGpsDisabled(): Boolean = false
 
 /** JVM — Bluetooth adapter state is not surfaced on Desktop. */

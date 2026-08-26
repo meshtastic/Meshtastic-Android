@@ -25,43 +25,33 @@ import org.meshtastic.core.resources.distance_filters
 import org.meshtastic.core.resources.distance_filters_description
 import org.meshtastic.core.resources.distance_measurements
 import org.meshtastic.core.resources.distance_measurements_description
+import org.meshtastic.core.resources.location_permission_blocked_notice
+import org.meshtastic.core.resources.location_permission_denied_notice
 import org.meshtastic.core.resources.mesh_map_location
 import org.meshtastic.core.resources.mesh_map_location_description
-import org.meshtastic.core.resources.next
 import org.meshtastic.core.resources.phone_location
 import org.meshtastic.core.resources.phone_location_description
-import org.meshtastic.core.resources.settings
 import org.meshtastic.core.resources.share_location
 import org.meshtastic.core.resources.share_location_description
 import org.meshtastic.core.ui.icon.HardwareModel
 import org.meshtastic.core.ui.icon.LocationOn
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.util.PermissionStatus
 
 /**
- * Screen for configuring location permissions during the app introduction. It explains why location permissions are
- * needed and provides options to grant them or skip.
+ * Screen for configuring location permissions during the app introduction. Explains why they are needed and offers the
+ * recovery that matches [status].
  *
- * @param showNextButton Indicates whether to show a "Next" button (if permissions are already granted) or a "Configure"
- *   button.
+ * Declining here is genuinely optional — every location-backed feature re-asks in context (the map, the compass, the
+ * "provide location to mesh" toggle), so the notice says "later" rather than "never".
+ *
+ * @param status Live permission status; drives the primary action and the denied/blocked notice.
  * @param onSkip Callback invoked if the user chooses to skip location permission setup.
- * @param onConfigure Callback invoked when the user proceeds to configure or grant permissions.
- * @param onOpenSettings Callback invoked when the user taps the settings link.
+ * @param onPrimaryAction Callback for the status-driven primary action (request, open settings, or advance).
  */
 @Composable
-internal fun LocationScreen(
-    showNextButton: Boolean,
-    onSkip: () -> Unit,
-    onConfigure: () -> Unit,
-    onOpenSettings: () -> Unit,
-) {
-    val annotatedString =
-        createClickableAnnotatedString(
-            fullTextRes = Res.string.phone_location_description,
-            linkTextRes = Res.string.settings,
-            tag = SETTINGS_TAG,
-        )
-
+internal fun LocationScreen(status: PermissionStatus, onSkip: () -> Unit, onPrimaryAction: () -> Unit) {
     val features =
         listOf(
             FeatureUIData(
@@ -88,17 +78,27 @@ internal fun LocationScreen(
 
     PermissionScreenLayout(
         headlineRes = Res.string.phone_location,
-        annotatedDescription = annotatedString,
+        descriptionRes = Res.string.phone_location_description,
         features = features,
+        status = status,
+        deniedNoticeRes = Res.string.location_permission_denied_notice,
+        blockedNoticeRes = Res.string.location_permission_blocked_notice,
+        configureButtonTextRes = Res.string.configure_location_permissions,
         onSkip = onSkip,
-        onConfigure = onConfigure,
-        configureButtonTextRes = if (showNextButton) Res.string.next else Res.string.configure_location_permissions,
-        onAnnotationClick = { onOpenSettings() },
+        onPrimaryAction = onPrimaryAction,
     )
 }
 
 @PreviewLightDark
 @Composable
 private fun LocationScreenPreview() {
-    AppTheme { Surface { LocationScreen(showNextButton = false, onSkip = {}, onConfigure = {}, onOpenSettings = {}) } }
+    AppTheme { Surface { LocationScreen(status = PermissionStatus.NOT_REQUESTED, onSkip = {}, onPrimaryAction = {}) } }
+}
+
+@PreviewLightDark
+@Composable
+private fun LocationScreenDeniedPreview() {
+    AppTheme {
+        Surface { LocationScreen(status = PermissionStatus.DENIED_CAN_RETRY, onSkip = {}, onPrimaryAction = {}) }
+    }
 }

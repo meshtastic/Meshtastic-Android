@@ -39,11 +39,9 @@ class LocalNetworkGateTest {
     }
 
     @Test
-    fun `retryable denial prompts again`() {
-        assertEquals(
-            LocalNetworkGateAction.REQUEST_PERMISSION,
-            localNetworkGateAction(PermissionStatus.DENIED_CAN_RETRY),
-        )
+    fun `retryable denial explains before prompting again`() {
+        // The next system prompt is the one whose "Deny" becomes permanent, so it must not be reached blind.
+        assertEquals(LocalNetworkGateAction.SHOW_RATIONALE, localNetworkGateAction(PermissionStatus.DENIED_CAN_RETRY))
     }
 
     @Test

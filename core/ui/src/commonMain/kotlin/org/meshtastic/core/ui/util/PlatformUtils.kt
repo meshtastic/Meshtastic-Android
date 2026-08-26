@@ -81,6 +81,13 @@ expect fun rememberSaveFileLauncher(
 @Composable expect fun isGpsDisabled(): Boolean
 
 /**
+ * True where a BLE scan additionally requires system **Location Services** to be switched on, over and above holding
+ * the permission — Android 11 and lower. On those releases a scan with location turned off returns zero results and
+ * reports no error, which is indistinguishable from "no devices nearby" unless the UI says otherwise.
+ */
+expect val bleScanRequiresLocationServices: Boolean
+
+/**
  * Returns whether Bluetooth is currently turned off at the system level (the adapter exists but is disabled). Always
  * `false` on devices without Bluetooth and on platforms where the concept doesn't apply.
  */

@@ -33,23 +33,28 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.grant_permission
 import org.meshtastic.core.resources.open_settings
 import org.meshtastic.core.ui.icon.AppSettingsAlt
+import org.meshtastic.core.ui.icon.Bluetooth
 import org.meshtastic.core.ui.icon.Close
 import org.meshtastic.core.ui.icon.ErrorOutline
+import org.meshtastic.core.ui.icon.Info
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.PermissionStatus
 import org.meshtastic.core.ui.util.PermissionUiState
 
 /**
- * A reusable error-state card: an `errorContainer` message box plus one full-width recovery action. Generalizes the
- * compass warning/recovery pattern so any feature can present context plus a single corrective action (request a
- * permission, open Bluetooth/Wi-Fi/app settings, etc.).
+ * A reusable recovery card: a message box plus one full-width corrective action. Generalizes the compass
+ * warning/recovery pattern so any feature can present context plus a single corrective action (request a permission,
+ * open Bluetooth/Wi-Fi/app settings, etc.).
  *
+ * @param tone whether this reads as an error or as an offer; see [RecoveryTone].
  * @param message the user-facing explanation of what is wrong.
  * @param actionLabel the recovery button label.
  * @param onAction invoked when the recovery button is tapped.
@@ -68,12 +73,29 @@ fun RecoveryCard(
     actionIcon: ImageVector? = null,
     onDismiss: (() -> Unit)? = null,
     dismissContentDescription: String? = null,
+    tone: RecoveryTone = RecoveryTone.ERROR,
 ) {
+    val containerColor =
+        when (tone) {
+            RecoveryTone.ERROR -> MaterialTheme.colorScheme.errorContainer
+            RecoveryTone.INFORMATIONAL -> MaterialTheme.colorScheme.surfaceContainerHighest
+        }
+    val contentColor =
+        when (tone) {
+            RecoveryTone.ERROR -> MaterialTheme.colorScheme.onErrorContainer
+            RecoveryTone.INFORMATIONAL -> MaterialTheme.colorScheme.onSurfaceVariant
+        }
+    val leadingIcon =
+        when (tone) {
+            RecoveryTone.ERROR -> MeshtasticIcons.ErrorOutline
+            RecoveryTone.INFORMATIONAL -> MeshtasticIcons.Info
+        }
+
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Surface(
             tonalElevation = 2.dp,
             shape = MaterialTheme.shapes.medium,
-            color = MaterialTheme.colorScheme.errorContainer,
+            color = containerColor,
             modifier = Modifier.fillMaxWidth(),
         ) {
             Row(
@@ -81,14 +103,10 @@ fun RecoveryCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                Icon(
-                    imageVector = MeshtasticIcons.ErrorOutline,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onErrorContainer,
-                )
+                Icon(imageVector = leadingIcon, contentDescription = null, tint = contentColor)
                 Text(
                     text = message,
-                    color = MaterialTheme.colorScheme.onErrorContainer,
+                    color = contentColor,
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.weight(1f),
                 )
@@ -97,7 +115,7 @@ fun RecoveryCard(
                         Icon(
                             imageVector = MeshtasticIcons.Close,
                             contentDescription = dismissContentDescription,
-                            tint = MaterialTheme.colorScheme.onErrorContainer,
+                            tint = contentColor,
                         )
                     }
                 }
@@ -115,7 +133,8 @@ fun RecoveryCard(
 }
 
 /**
- * A [RecoveryCard] specialized for a missing runtime permission, presenting a context-correct recovery action:
+ * A [RecoveryCard] specialized for a missing runtime permission, presenting a context-correct recovery action — and a
+ * context-correct tone, since only a permanent denial actually leaves the user stuck:
  * - [PermissionStatus.NOT_REQUESTED] / [PermissionStatus.DENIED_CAN_RETRY] — shows a "Grant permission" button that
  *   re-launches the in-context request.
  * - [PermissionStatus.PERMANENTLY_DENIED] — shows an "Open settings" button (user-initiated recovery) because the
@@ -135,19 +154,25 @@ internal fun PermissionRecoveryCard(
     if (status == PermissionStatus.GRANTED) return
 
     if (status == PermissionStatus.PERMANENTLY_DENIED) {
+        // The only genuinely stuck state: the system will not prompt again, so the feature stays off until the user
+        // goes elsewhere to fix it. That earns the error treatment.
         RecoveryCard(
             message = rationale,
             actionLabel = stringResource(Res.string.open_settings),
             onAction = onOpenSettings,
             modifier = modifier,
             actionIcon = MeshtasticIcons.AppSettingsAlt,
+            tone = RecoveryTone.ERROR,
         )
     } else {
+        // Never asked, or declined once and still askable. Nothing is broken and the user has done nothing wrong —
+        // a red error wash here would be pressure on a decision the guidance says to respect.
         RecoveryCard(
             message = rationale,
             actionLabel = stringResource(Res.string.grant_permission),
             onAction = onRequest,
             modifier = modifier,
+            tone = RecoveryTone.INFORMATIONAL,
         )
     }
 }
@@ -162,4 +187,68 @@ fun PermissionRecoveryCard(state: PermissionUiState, rationale: String, modifier
         onOpenSettings = state.openAppSettings,
         modifier = modifier,
     )
+}
+
+/**
+ * Previews below are captured by the screenshot suite. They exist because the tone rule this file encodes — error only
+ * for a permanent denial, informational for everything else — is a visual contract, and a visual contract that only
+ * unit tests guard is one nobody notices breaking.
+ */
+@Suppress("PreviewPublic") // Captured by :screenshot-tests, which must be able to import it.
+@PreviewLightDark
+@Composable
+fun RecoveryCardPreview() {
+    AppTheme {
+        Surface {
+            RecoveryCard(
+                message = "Bluetooth is off. Turn it on to scan for nearby devices.",
+                actionLabel = "Open Bluetooth settings",
+                onAction = {},
+                actionIcon = MeshtasticIcons.Bluetooth,
+                modifier = Modifier.padding(16.dp),
+            )
+        }
+    }
+}
+
+@Suppress("PreviewPublic") // Captured by :screenshot-tests, which must be able to import it.
+@PreviewLightDark
+@Composable
+fun PermissionRecoveryCardNotRequestedPreview() {
+    PermissionRecoveryCardPreviewScaffold(PermissionStatus.NOT_REQUESTED)
+}
+
+@Suppress("PreviewPublic") // Captured by :screenshot-tests, which must be able to import it.
+@PreviewLightDark
+@Composable
+fun PermissionRecoveryCardDeniedPreview() {
+    PermissionRecoveryCardPreviewScaffold(PermissionStatus.DENIED_CAN_RETRY)
+}
+
+@Suppress("PreviewPublic") // Captured by :screenshot-tests, which must be able to import it.
+@PreviewLightDark
+@Composable
+fun PermissionRecoveryCardBlockedPreview() {
+    PermissionRecoveryCardPreviewScaffold(PermissionStatus.PERMANENTLY_DENIED)
+}
+
+/**
+ * Shared scaffold so the three state previews differ by exactly one input. A diff between two of these references is
+ * then unambiguously the tone or the action label, never incidental layout drift.
+ */
+@Composable
+private fun PermissionRecoveryCardPreviewScaffold(status: PermissionStatus) {
+    AppTheme {
+        Surface {
+            PermissionRecoveryCard(
+                status = status,
+                rationale =
+                "Meshtastic needs Nearby devices access to find your radio and connect to it. Without it, " +
+                    "Bluetooth is unavailable — Wi-Fi and USB still work.",
+                onRequest = {},
+                onOpenSettings = {},
+                modifier = Modifier.padding(16.dp),
+            )
+        }
+    }
 }

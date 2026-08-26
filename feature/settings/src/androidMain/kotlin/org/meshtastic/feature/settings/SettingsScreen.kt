@@ -75,6 +75,7 @@ import org.meshtastic.core.ui.icon.Wifi
 import org.meshtastic.feature.settings.component.AppInfoSection
 import org.meshtastic.feature.settings.component.AppearanceSettingsContent
 import org.meshtastic.feature.settings.component.ExpressiveSection
+import org.meshtastic.feature.settings.component.PermissionsSettingsContent
 import org.meshtastic.feature.settings.component.PersistenceSettingsContent
 import org.meshtastic.feature.settings.component.PrivacySettingsContent
 import org.meshtastic.feature.settings.component.ThemePickerDialog
@@ -245,6 +246,10 @@ fun SettingsScreen(
 
             // App-local settings are only relevant when configuring the local node
             if (state.isLocal) {
+                // Ahead of the app settings block: onboarding runs once, so this is the only place a user who skipped
+                // or declined a permission can find their way back to it.
+                PermissionsSettingsContent()
+
                 ExpressiveSection(title = stringResource(Res.string.app_settings)) {
                     PrivacySettingsContent(
                         analyticsAvailable = appFunctionsAvailable,

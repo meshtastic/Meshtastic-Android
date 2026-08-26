@@ -88,4 +88,34 @@ class PermissionStatusTest {
         assertFalse(isPermissionGroupGranted(results = listOf(true, false), requireAll = true))
         assertFalse(isPermissionGroupGranted(results = listOf(false, false), requireAll = true))
     }
+
+    @Test
+    fun `a held permission proceeds`() {
+        assertEquals(PermissionGateAction.PROCEED, permissionGateAction(PermissionStatus.GRANTED))
+    }
+
+    @Test
+    fun `a first request skips the rationale`() {
+        // The guidance is explicit that an unrequested permission can be asked for directly; a dialog before the
+        // system dialog is friction with nothing extra to say.
+        assertEquals(PermissionGateAction.REQUEST, permissionGateAction(PermissionStatus.NOT_REQUESTED))
+    }
+
+    @Test
+    fun `a re-request must be preceded by a rationale`() {
+        // The clause this whole type exists to make unmissable: shouldShowRequestPermissionRationale is true here, and
+        // the prompt that follows is the one whose "Deny" becomes permanent.
+        assertEquals(PermissionGateAction.SHOW_RATIONALE, permissionGateAction(PermissionStatus.DENIED_CAN_RETRY))
+    }
+
+    @Test
+    fun `a permanent denial offers settings rather than a silent no-op request`() {
+        assertEquals(PermissionGateAction.OPEN_SETTINGS, permissionGateAction(PermissionStatus.PERMANENTLY_DENIED))
+    }
+
+    @Test
+    fun `every status maps to a distinct gate action`() {
+        val actions = PermissionStatus.entries.map { permissionGateAction(it) }
+        assertEquals(PermissionStatus.entries.size, actions.toSet().size, "each status needs its own recovery")
+    }
 }

@@ -37,7 +37,6 @@ import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.bonding_failed_permissions
 import org.meshtastic.core.resources.bonding_failed_retry
 import org.meshtastic.core.resources.usb_permission_denied
 import org.meshtastic.feature.connections.model.AndroidUsbDeviceData
@@ -83,13 +82,12 @@ class AndroidScannerViewModel(
                     Logger.i { "Bonding complete for ${entry.device.address.anonymize}, selecting device..." }
                     true
                 } catch (ex: SecurityException) {
-                    // No BLUETOOTH_CONNECT permission — connecting would fail the same way, so surface the
-                    // error and do not arm the transport.
+                    // No BLUETOOTH_CONNECT permission — connecting would fail the same way, so flag the refusal and do
+                    // not arm the transport. Reported as state rather than a modal: the Connections screen turns this
+                    // into a card with the recovery action attached, where the old alert named the fix and then left
+                    // the user to find it themselves.
                     Logger.w(ex) { "Bonding failed for ${entry.device.address.anonymize} Permissions not granted" }
-                    serviceRepository.setErrorMessage(
-                        text = getString(Res.string.bonding_failed_permissions),
-                        severity = Severity.Warn,
-                    )
+                    reportBlePermissionRefusal()
                     false
                 } catch (ex: CancellationException) {
                     throw ex
