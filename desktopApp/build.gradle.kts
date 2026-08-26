@@ -25,6 +25,13 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.compose.multiplatform)
+    // Adds `:desktopApp:hotRun` — the app relaunched with live recomposition on source edits.
+    // Needs the JetBrains Runtime for enhanced class redefinition, which the jvmToolchain block
+    // below already pins (vendor JETBRAINS, resolved by the foojay resolver in settings.gradle.kts).
+    // Version-less because the Compose Multiplatform plugin already carries hot-reload on the
+    // build classpath; requesting a version fails resolution ("already on the classpath with an
+    // unknown version"), the same reason Mokkery is applied bare below.
+    id("org.jetbrains.compose.hot-reload")
     alias(libs.plugins.meshtastic.detekt)
     alias(libs.plugins.meshtastic.spotless)
     alias(libs.plugins.meshtastic.koin)
