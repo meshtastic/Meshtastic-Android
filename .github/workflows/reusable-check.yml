@@ -43,6 +43,8 @@ on:
       # the two must stay separate.
       GOOGLE_MAPS_API_KEY_DEBUG:
         required: false
+      GSERVICES:
+        required: false
 
 env:
   DATADOG_APPLICATION_ID: ${{ secrets.DATADOG_APPLICATION_ID }}
@@ -471,6 +473,27 @@ jobs:
             echo "Injected debug Maps API key into secrets.properties."
           else
             echo "::warning::GOOGLE_MAPS_API_KEY_DEBUG is unset (fork PR, or the secret is not configured yet) -- the google-flavor map will be blank."
+          fi
+
+      # androidApp/google-services.json is a tracked *placeholder* (project_id "xxx"); the real
+      # config only ever landed via release.yml. AnalyticsConventionPlugin applies the
+      # google-services and crashlytics plugins for the google flavor on every build type, so
+      # snapshot and PR debug APKs initialised Firebase against a project that does not exist and
+      # reported nothing -- while docs/en/developer/test-builds.md recommends that flavor to
+      # testers precisely because "crashes and errors get reported back". Crash collection stays
+      # runtime-gated on the user's consent either way (see GooglePlatformAnalytics).
+      #
+      # Unset -- fork PRs receive no secrets -- leaves the placeholder in place.
+      - name: Load Firebase config for google-flavor debug builds
+        env:
+          GSERVICES: ${{ secrets.GSERVICES }}
+        run: |
+          if [ -n "$GSERVICES" ]; then
+            rm -f ./androidApp/google-services.json
+            echo "$GSERVICES" > ./androidApp/google-services.json
+            echo "Injected the real google-services.json."
+          else
+            echo "::warning::GSERVICES is unset (fork PR, or the secret is not configured) -- Firebase reporting will be inert in these builds."
           fi
 
       - name: Build Android APKs
