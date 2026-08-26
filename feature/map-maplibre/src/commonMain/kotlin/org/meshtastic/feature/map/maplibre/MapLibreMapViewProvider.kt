@@ -49,6 +49,7 @@ import org.maplibre.compose.location.rememberSystemSettingsLauncher
 import org.meshtastic.core.model.isLocked
 import org.meshtastic.core.model.isModifiableBy
 import org.meshtastic.core.repository.MapPrefs
+import org.meshtastic.core.repository.MapTileProviderPrefs
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.manage_map_layers
 import org.meshtastic.core.resources.map_tile_source
@@ -85,6 +86,16 @@ class MapLibreMapViewProvider(
      * state; desktop has no importer yet and uses the default.
      */
     private val customLayers: @Composable () -> List<CustomLayer> = { emptyList() },
+    /**
+     * Supplies the user's own raster tile sources. Composable for the same reason as [customLayers]; the F-Droid app
+     * reads them from its tile-provider store, and desktop has no editor for them yet.
+     */
+    private val customBasemaps: @Composable () -> List<Basemap.Raster> = { emptyList() },
+    /**
+     * Extra content for the foot of the basemap menu — the F-Droid app puts its tile-source editor there. A slot rather
+     * than a callback so the host owns whatever UI it opens; desktop leaves it empty.
+     */
+    private val basemapMenuExtra: @Composable () -> Unit = {},
 ) : MapViewProvider {
 
     @Composable
@@ -95,10 +106,7 @@ class MapLibreMapViewProvider(
         sitePlannerNodeNum: Int?,
     ) {
         val viewModel: SharedMapViewModel = koinViewModel()
-        val mapPrefs: MapPrefs = koinInject()
-
-        val styleIndex by mapPrefs.mapStyle.collectAsStateWithLifecycle()
-        val basemap = Basemaps.all.getOrElse(styleIndex) { Basemaps.default }
+        val basemaps = rememberBasemapSelection(customBasemaps())
 
         val cameraState = rememberCameraState()
         val location = rememberLocationControls(cameraState)
@@ -120,7 +128,7 @@ class MapLibreMapViewProvider(
                 viewModel = viewModel,
                 navigateToNodeDetails = navigateToNodeDetails,
                 modifier = Modifier.fillMaxSize(),
-                basemap = basemap,
+                basemap = basemaps.current,
                 overlays = overlays,
                 customLayers = customLayers(),
                 cameraState = cameraState,
@@ -143,7 +151,7 @@ class MapLibreMapViewProvider(
                         onDismissRequest = { filterMenuExpanded = false },
                     )
                 },
-                mapTypeContent = { BasemapMenu(basemap = basemap, onSelect = mapPrefs::setMapStyle) },
+                mapTypeContent = { BasemapMenu(selection = basemaps, extra = basemapMenuExtra) },
                 layersContent = { OverlayMenu(selected = overlays, onSelectedChange = { overlays = it }) },
                 // The site planner is launched from the F-Droid app's own scaffold and has no desktop host.
                 onSitePlannerClick = null,
@@ -222,6 +230,45 @@ private fun WaypointDialogs(viewModel: SharedMapViewModel, selectedId: Int?, onS
             )
         }
     }
+}
+
+/** The basemap in use, everything selectable, and how to change it. */
+@Stable
+private class BasemapSelection(val current: Basemap, val entries: List<Basemap>, val onSelect: (Basemap) -> Unit)
+
+/**
+ * Resolves the active basemap from the built-in list plus any [customs] the host supplies.
+ *
+ * Two preferences back this, matching how the Google flavor stores it: an index into the built-in list, and a separate
+ * id for a user-defined source. Keeping them apart means a custom source being added or removed cannot silently repoint
+ * the built-in selection, which an index over a mixed list would.
+ */
+@Composable
+private fun rememberBasemapSelection(customs: List<Basemap.Raster>): BasemapSelection {
+    val mapPrefs: MapPrefs = koinInject()
+    val tilePrefs: MapTileProviderPrefs = koinInject()
+    val scope = rememberCoroutineScope()
+
+    val styleIndex by mapPrefs.mapStyle.collectAsStateWithLifecycle()
+    val selectedCustomId by tilePrefs.selectedCustomTileProviderId.collectAsStateWithLifecycle()
+
+    val current =
+        customs.firstOrNull { it.id == selectedCustomId } ?: Basemaps.all.getOrElse(styleIndex) { Basemaps.default }
+
+    return BasemapSelection(
+        current = current,
+        entries = Basemaps.all + customs,
+        onSelect = { chosen ->
+            scope.launch {
+                if (customs.any { it.id == chosen.id }) {
+                    tilePrefs.setSelectedCustomTileProviderId(chosen.id)
+                } else {
+                    tilePrefs.setSelectedCustomTileProviderId(null)
+                    mapPrefs.setMapStyle(Basemaps.all.indexOf(chosen))
+                }
+            }
+        },
+    )
 }
 
 /** State and callbacks backing the locate and compass buttons. */
@@ -328,7 +375,7 @@ private fun FilterMenu(viewModel: BaseMapViewModel, expanded: Boolean, onDismiss
 }
 
 @Composable
-private fun BasemapMenu(basemap: Basemap, onSelect: (Int) -> Unit) {
+private fun BasemapMenu(selection: BasemapSelection, extra: @Composable () -> Unit = {}) {
     var expanded by remember { mutableStateOf(false) }
 
     Box {
@@ -338,16 +385,17 @@ private fun BasemapMenu(basemap: Basemap, onSelect: (Int) -> Unit) {
             onClick = { expanded = true },
         )
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            Basemaps.all.forEach { entry ->
+            selection.entries.forEach { entry ->
                 BasemapItem(
                     basemap = entry,
-                    selected = entry.id == basemap.id,
+                    selected = entry.id == selection.current.id,
                     onClick = {
-                        onSelect(Basemaps.all.indexOf(entry))
+                        selection.onSelect(entry)
                         expanded = false
                     },
                 )
             }
+            extra()
         }
     }
 }
