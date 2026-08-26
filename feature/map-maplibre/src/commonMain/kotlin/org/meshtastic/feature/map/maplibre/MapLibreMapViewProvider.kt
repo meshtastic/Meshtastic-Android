@@ -98,6 +98,11 @@ class MapLibreMapViewProvider(
      * Android-only; a host that leaves this empty simply cannot create or edit waypoints. See [WaypointEditRequest].
      */
     private val waypointEditor: @Composable (WaypointEditRequest) -> Unit = {},
+    /**
+     * Runs a Site Planner session. Null hides the button entirely — the planner lives in the app and has no desktop
+     * host, so desktop leaves it out. See [SitePlannerSession].
+     */
+    private val sitePlanner: (@Composable (SitePlannerSession) -> Unit)? = null,
 ) : MapViewProvider {
 
     @Composable
@@ -116,10 +121,13 @@ class MapLibreMapViewProvider(
         val waypoints = rememberWaypointEditing()
         var infoWaypointId by remember { mutableStateOf<Int?>(null) }
         var clusterMembers by remember { mutableStateOf(emptyList<ClusterMember>()) }
+        var plannerOpen by remember { mutableStateOf(false) }
 
         // Honour the deep link the navigation graph passes in; previously ignored here, so a waypoint link opened the
         // map and then showed nothing.
         LaunchedEffect(waypointId) { waypointId?.let { infoWaypointId = it } }
+        // Same treatment for the Site Planner deep link, which this provider also used to drop on the floor.
+        LaunchedEffect(sitePlannerNodeNum) { if (sitePlannerNodeNum != null) plannerOpen = true }
 
         var overlays by remember { mutableStateOf(emptyList<MapOverlay>()) }
 
@@ -147,15 +155,21 @@ class MapLibreMapViewProvider(
                 overlays = overlays,
                 onOverlaysChange = { overlays = it },
                 basemapMenuExtra = basemapMenuExtra,
+                onSitePlannerClick = sitePlanner?.let { { plannerOpen = true } },
             )
 
-            ClusterMembersDialog(
+            ClusterMembersSlot(
                 members = clusterMembers,
-                onMemberClick = { nodeNum ->
-                    clusterMembers = emptyList()
-                    navigateToNodeDetails(nodeNum)
-                },
-                onDismissRequest = { clusterMembers = emptyList() },
+                onPick = navigateToNodeDetails,
+                onClear = { clusterMembers = emptyList() },
+            )
+
+            SitePlannerSlot(
+                open = plannerOpen,
+                nodeNum = sitePlannerNodeNum,
+                cameraState = cameraState,
+                planner = sitePlanner,
+                onDismiss = { plannerOpen = false },
             )
 
             WaypointDialogs(
@@ -167,6 +181,42 @@ class MapLibreMapViewProvider(
             )
         }
     }
+}
+
+/** The cluster list, which clears the selection whichever way it is dismissed. */
+@Composable
+private fun ClusterMembersSlot(members: List<ClusterMember>, onPick: (Int) -> Unit, onClear: () -> Unit) {
+    ClusterMembersDialog(
+        members = members,
+        onMemberClick = { nodeNum ->
+            onClear()
+            onPick(nodeNum)
+        },
+        onDismissRequest = onClear,
+    )
+}
+
+/** Runs the host's Site Planner while [open], handing it the map centre and a way to move the map. */
+@Composable
+private fun SitePlannerSlot(
+    open: Boolean,
+    nodeNum: Int?,
+    cameraState: CameraState,
+    planner: (@Composable (SitePlannerSession) -> Unit)?,
+    onDismiss: () -> Unit,
+) {
+    if (!open || planner == null) return
+
+    val scope = rememberCoroutineScope()
+
+    planner(
+        SitePlannerSession(
+            nodeNum = nodeNum,
+            mapCenter = { cameraState.position.target },
+            moveTo = { target -> scope.launch { cameraState.animateTo(cameraState.position.copy(target = target)) } },
+            onDismiss = onDismiss,
+        ),
+    )
 }
 
 /**
@@ -183,6 +233,7 @@ private fun MapToolbar(
     overlays: List<MapOverlay>,
     onOverlaysChange: (List<MapOverlay>) -> Unit,
     basemapMenuExtra: @Composable () -> Unit,
+    onSitePlannerClick: (() -> Unit)?,
 ) {
     var filterMenuExpanded by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
@@ -199,8 +250,7 @@ private fun MapToolbar(
         },
         mapTypeContent = { BasemapMenu(selection = basemaps, extra = basemapMenuExtra) },
         layersContent = { OverlayMenu(selected = overlays, onSelectedChange = onOverlaysChange) },
-        // The site planner is launched from the F-Droid app's own scaffold and has no desktop host.
-        onSitePlannerClick = null,
+        onSitePlannerClick = onSitePlannerClick,
         isLocationTrackingEnabled = location.following,
         onToggleLocationTracking = location.onToggleFollow,
     )
