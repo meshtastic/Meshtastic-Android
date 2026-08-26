@@ -30,6 +30,10 @@ import org.meshtastic.proto.Waypoint
  * set shared with desktop. A host with no editor simply cannot create or edit waypoints, which is today's desktop.
  *
  * @property waypoint The waypoint to edit. A new one carries `id == 0` and only its coordinates.
+ * @property onBeginBoxAuthoring Hands the draft back so the user can define its geofence bounding box by tapping the
+ *   map, which only the map can offer. The editor closes; the map re-opens it with the box applied.
+ *   `EditWaypointDialog` has taken this callback all along — the F-Droid host simply never passed it, so the button did
+ *   nothing.
  */
 @Stable
 class WaypointEditRequest(
@@ -37,4 +41,5 @@ class WaypointEditRequest(
     val onSend: (Waypoint) -> Unit,
     val onDelete: (Waypoint) -> Unit,
     val onDismiss: () -> Unit,
+    val onBeginBoxAuthoring: (Waypoint) -> Unit,
 )

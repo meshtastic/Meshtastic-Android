@@ -22,10 +22,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.JsonObject
 import org.maplibre.compose.camera.CameraState
 import org.maplibre.compose.camera.rememberCameraState
+import org.maplibre.compose.expressions.dsl.const
+import org.maplibre.compose.layers.CircleLayer
 import org.maplibre.compose.location.BearingUpdate
 import org.maplibre.compose.location.LocationPuck
 import org.maplibre.compose.location.LocationState
@@ -36,11 +41,15 @@ import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.compose.material3.LocationPuckDefaults
 import org.maplibre.compose.util.ClickResult
 import org.maplibre.compose.util.MaplibreComposable
+import org.maplibre.spatialk.geojson.Feature
+import org.maplibre.spatialk.geojson.FeatureCollection
+import org.maplibre.spatialk.geojson.Point
 import org.maplibre.spatialk.geojson.Position
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.feature.map.BaseMapViewModel
 import org.meshtastic.feature.map.maplibre.component.MeshMapOrnaments
 import org.meshtastic.feature.map.maplibre.geojson.ClusterMember
+import org.meshtastic.feature.map.maplibre.geojson.rememberFeatureSource
 import org.meshtastic.feature.map.maplibre.layers.CustomLayer
 import org.meshtastic.feature.map.maplibre.layers.CustomLayers
 import org.meshtastic.feature.map.maplibre.layers.MapOverlayLayers
@@ -49,6 +58,7 @@ import org.meshtastic.feature.map.maplibre.layers.RasterBasemapLayer
 import org.meshtastic.feature.map.maplibre.layers.WaypointLayers
 import org.meshtastic.feature.map.maplibre.style.Basemap
 import org.meshtastic.feature.map.maplibre.style.Basemaps
+import org.meshtastic.feature.map.maplibre.style.MapColors
 import org.meshtastic.feature.map.maplibre.style.MapOverlay
 import org.meshtastic.feature.map.maplibre.style.toBaseStyle
 import org.meshtastic.feature.map.maplibre.style.zoomRange
@@ -72,6 +82,10 @@ fun MeshMap(
     onClusterMembers: (List<ClusterMember>) -> Unit = {},
     /** Called with the pressed position on a long press, which is how a new waypoint gets placed. */
     onMapLongClick: (Position) -> Unit = {},
+    /** Called with the tapped position. Used to collect the two corners of a waypoint's geofence bounding box. */
+    onMapClick: (Position) -> Unit = {},
+    /** The first corner of a box being authored, drawn so the tap reads as registered. */
+    boxCorner: Position? = null,
     /**
      * Hoisted so the host can read the bearing for a compass and steer the camera itself. Defaults to a map-owned state
      * for callers that only want the map to frame itself.
@@ -130,6 +144,11 @@ fun MeshMap(
             onMapLongClick(position)
             ClickResult.Consume
         },
+        // Pass, not Consume: a tap has to keep reaching the layers underneath or nothing on the map is selectable.
+        onMapClick = { position, _ ->
+            onMapClick(position)
+            ClickResult.Pass
+        },
         overlay = MeshMapOrnaments,
     ) {
         if (basemap is Basemap.Raster) {
@@ -158,8 +177,9 @@ fun MeshMap(
             },
         )
 
-        // Declared last so the user's own position draws above the mesh.
+        // Declared last so the user's own position and an in-progress box corner draw above the mesh.
         UserLocationPuck(locationState = locationState, cameraState = cameraState, visible = followLocation)
+        BoxCornerMarker(boxCorner)
     }
 }
 
@@ -194,5 +214,30 @@ private fun UserLocationPuck(locationState: LocationState?, cameraState: CameraS
         cameraState = cameraState,
         bearing = locationState.mostAccurateBearing(),
         colors = LocationPuckDefaults.colors(),
+    )
+}
+
+/**
+ * The first corner tapped while authoring a geofence box.
+ *
+ * The flow commits on the second tap, so there is never a both-corners-uncommitted state to preview a rectangle from —
+ * the Google flavor marks the single corner for the same reason.
+ */
+@Composable
+@MaplibreComposable
+private fun BoxCornerMarker(corner: Position?) {
+    if (corner == null) return
+
+    val source =
+        rememberFeatureSource(
+            FeatureCollection(listOf(Feature<Point, JsonObject?>(geometry = Point(corner), properties = null))),
+        )
+    CircleLayer(
+        id = "box-corner",
+        source = source,
+        color = const(MapColors.Highlight),
+        radius = const(8.dp),
+        strokeColor = const(Color.White),
+        strokeWidth = const(2.dp),
     )
 }

@@ -17,7 +17,9 @@
 package org.meshtastic.feature.map.maplibre
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
@@ -26,7 +28,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 import org.maplibre.compose.camera.CameraState
@@ -44,12 +48,14 @@ import org.meshtastic.feature.map.SharedMapViewModel
 import org.meshtastic.feature.map.component.MapControlsOverlay
 import org.meshtastic.feature.map.maplibre.component.BasemapMenu
 import org.meshtastic.feature.map.maplibre.component.BasemapSelection
+import org.meshtastic.feature.map.maplibre.component.BoxAuthoringBar
 import org.meshtastic.feature.map.maplibre.component.ClusterMembersDialog
 import org.meshtastic.feature.map.maplibre.component.FilterMenu
 import org.meshtastic.feature.map.maplibre.component.MapLayersButton
 import org.meshtastic.feature.map.maplibre.component.MapZoom
 import org.meshtastic.feature.map.maplibre.component.OfflineMapTarget
 import org.meshtastic.feature.map.maplibre.component.WaypointDialogs
+import org.meshtastic.feature.map.maplibre.component.WaypointEditing
 import org.meshtastic.feature.map.maplibre.component.rememberBasemapSelection
 import org.meshtastic.feature.map.maplibre.component.rememberWaypointEditing
 import org.meshtastic.feature.map.maplibre.geojson.ClusterMember
@@ -110,14 +116,7 @@ class MapLibreMapViewProvider(
         val location = rememberLocationControls(cameraState)
 
         val waypoints = rememberWaypointEditing()
-        var infoWaypointId by remember { mutableStateOf<Int?>(null) }
-        var clusterMembers by remember { mutableStateOf(emptyList<ClusterMember>()) }
-        var plannerOpen by remember { mutableStateOf(false) }
-
-        // Deep links, both of which this provider used to drop on the floor.
-        LaunchedEffect(waypointId) { waypointId?.let { infoWaypointId = it } }
-        LaunchedEffect(sitePlannerNodeNum) { if (sitePlannerNodeNum != null) plannerOpen = true }
-        var overlays by remember { mutableStateOf(emptyList<MapOverlay>()) }
+        val screen = rememberMapScreenState(waypointId = waypointId, sitePlannerNodeNum = sitePlannerNodeNum)
 
         // Following the user means the screen is the thing being watched — the Google flavor holds it awake for the
         // same reason, and a map that sleeps mid-walk is the one complaint a location-follow feature always draws.
@@ -129,16 +128,18 @@ class MapLibreMapViewProvider(
                 navigateToNodeDetails = navigateToNodeDetails,
                 modifier = Modifier.fillMaxSize(),
                 basemap = basemaps.current,
-                overlays = overlays,
+                overlays = screen.overlays,
                 customLayers = customLayers(),
                 cameraState = cameraState,
                 locationState = location.state,
                 followLocation = location.following,
                 bearingUpdate = location.bearingUpdate,
                 frameOnNodes = rememberRestoredCamera(cameraState) == false,
-                onWaypointClick = { infoWaypointId = it },
-                onClusterMembers = { clusterMembers = it },
+                onWaypointClick = { screen.infoWaypointId = it },
+                onClusterMembers = { screen.clusterMembers = it },
                 onMapLongClick = waypoints.onLongPress,
+                onMapClick = waypoints.onMapTap,
+                boxCorner = waypoints.firstCorner,
             )
 
             MapZoom(cameraState = cameraState, basemap = basemaps.current)
@@ -147,32 +148,75 @@ class MapLibreMapViewProvider(
                 basemaps = basemaps,
                 location = location,
                 cameraState = cameraState,
-                overlays = overlays,
-                onOverlaysChange = { overlays = it },
+                overlays = screen.overlays,
+                onOverlaysChange = { screen.overlays = it },
                 basemapMenuExtra = basemapMenuExtra,
                 layersSheetExtra = layersSheetExtra,
-                onSitePlannerClick = sitePlanner?.let { { plannerOpen = true } },
+                onSitePlannerClick = sitePlanner?.let { { screen.plannerOpen = true } },
             )
 
-            ClusterMembersSlot(clusterMembers, navigateToNodeDetails) { clusterMembers = emptyList() }
+            ClusterMembersSlot(screen.clusterMembers, navigateToNodeDetails) { screen.clusterMembers = emptyList() }
 
             SitePlannerSlot(
-                open = plannerOpen,
+                open = screen.plannerOpen,
                 nodeNum = sitePlannerNodeNum,
                 cameraState = cameraState,
                 planner = sitePlanner,
-                onDismiss = { plannerOpen = false },
+                onDismiss = { screen.plannerOpen = false },
             )
+
+            BoxAuthoringSlot(editing = waypoints, cameraState = cameraState)
 
             WaypointDialogs(
                 viewModel = viewModel,
-                selectedId = infoWaypointId,
-                onSelectedIdChange = { infoWaypointId = it },
+                selectedId = screen.infoWaypointId,
+                onSelectedIdChange = { screen.infoWaypointId = it },
                 editing = waypoints,
                 editor = waypointEditor,
             )
         }
     }
+}
+
+/** Everything the main map screen holds open over the map: dialogs, sheets and the chosen overlays. */
+@Stable
+private class MapScreenState {
+    var infoWaypointId by mutableStateOf<Int?>(null)
+    var clusterMembers by mutableStateOf(emptyList<ClusterMember>())
+    var plannerOpen by mutableStateOf(false)
+    var overlays by mutableStateOf(emptyList<MapOverlay>())
+}
+
+/** Holds the screen's open-thing state, and opens whatever the incoming deep link named. */
+@Composable
+private fun rememberMapScreenState(waypointId: Int?, sitePlannerNodeNum: Int?): MapScreenState {
+    val state = remember { MapScreenState() }
+
+    // Both of these this provider used to drop on the floor.
+    LaunchedEffect(waypointId, sitePlannerNodeNum) {
+        waypointId?.let { state.infoWaypointId = it }
+        if (sitePlannerNodeNum != null) state.plannerOpen = true
+    }
+    return state
+}
+
+/**
+ * The instruction bar shown while a geofence box is being drawn.
+ *
+ * While it is up the map itself is the editor, so this sits at the foot of the map rather than alongside the waypoint
+ * dialogs — clear of the zoom pair and the attribution row that share that edge.
+ */
+@Composable
+private fun BoxScope.BoxAuthoringSlot(editing: WaypointEditing, cameraState: CameraState) {
+    if (editing.boxDraft == null) return
+
+    BoxAuthoringBar(
+        onCancel = editing.onCancelBox,
+        onUseVisibleRegion = { cameraState.viewport?.visibleBoundingBox?.let(editing.onUseVisibleRegion) },
+        modifier =
+        Modifier.align(Alignment.BottomCenter)
+            .padding(start = AUTHORING_BAR_SIDE.dp, end = AUTHORING_BAR_SIDE.dp, bottom = AUTHORING_BAR_BOTTOM.dp),
+    )
 }
 
 /** The cluster list, which clears the selection whichever way it is dismissed. */
@@ -339,3 +383,7 @@ private fun rememberLocationControls(cameraState: CameraState): LocationControls
         },
     )
 }
+
+/** Clear of the zoom pair and the attribution row, which share the foot of the map. */
+private const val AUTHORING_BAR_BOTTOM = 72
+private const val AUTHORING_BAR_SIDE = 16

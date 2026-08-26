@@ -55,6 +55,7 @@ fun getMapViewProvider(): MapViewProvider = MapLibreMapViewProvider(
             onSend = request.onSend,
             onDelete = request.onDelete,
             onDismissRequest = request.onDismiss,
+            onBeginBoxAuthoring = request.onBeginBoxAuthoring,
         )
     },
     // sitePlannerAvailable() has returned true on this flavor all along, but nothing consumed it — the MapLibre map

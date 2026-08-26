@@ -18,6 +18,7 @@ package org.meshtastic.feature.map.maplibre
 
 import org.maplibre.spatialk.geojson.Position
 import org.meshtastic.core.model.Node
+import org.meshtastic.feature.map.maplibre.component.boundingBoxFromCorners
 import org.meshtastic.feature.map.maplibre.geojson.MapChipGlyph
 import org.meshtastic.feature.map.maplibre.geojson.MapChipKey
 import org.meshtastic.feature.map.maplibre.geojson.featureValue
@@ -137,5 +138,29 @@ class PositionsBoundingBoxTest {
         assertEquals(-107.59, box.east)
         assertEquals(34.07, box.south)
         assertEquals(34.14, box.north)
+    }
+}
+
+/** Two corner taps become a proto bounding box, whichever order they arrive in. */
+class BoundingBoxFromCornersTest {
+
+    private fun corner(latitude: Double, longitude: Double) = Position(longitude = longitude, latitude = latitude)
+
+    @Test
+    fun `corners are normalised into south-west and north-east`() {
+        val box = boundingBoxFromCorners(corner(34.14, -107.59), corner(34.07, -107.62))
+
+        assertEquals(340700000, box.latitude_south_i)
+        assertEquals(341400000, box.latitude_north_i)
+        assertEquals(-1076200000, box.longitude_west_i)
+        assertEquals(-1075900000, box.longitude_east_i)
+    }
+
+    @Test
+    fun `tap order does not matter`() {
+        val a = corner(34.14, -107.59)
+        val b = corner(34.07, -107.62)
+
+        assertEquals(boundingBoxFromCorners(a, b), boundingBoxFromCorners(b, a))
     }
 }
