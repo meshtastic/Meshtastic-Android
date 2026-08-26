@@ -53,10 +53,7 @@ import org.meshtastic.core.repository.MapTileProviderPrefs
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.manage_map_layers
 import org.meshtastic.core.resources.map_tile_source
-import org.meshtastic.core.resources.only_favorites
 import org.meshtastic.core.resources.selected_map_type
-import org.meshtastic.core.resources.show_precision_circle
-import org.meshtastic.core.resources.show_waypoints
 import org.meshtastic.core.ui.icon.Check
 import org.meshtastic.core.ui.icon.Layers
 import org.meshtastic.core.ui.icon.Map
@@ -66,6 +63,7 @@ import org.meshtastic.feature.map.SharedMapViewModel
 import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.component.MapControlsOverlay
 import org.meshtastic.feature.map.maplibre.component.ClusterMembersDialog
+import org.meshtastic.feature.map.maplibre.component.FilterMenu
 import org.meshtastic.feature.map.maplibre.component.MapLayersButton
 import org.meshtastic.feature.map.maplibre.component.OfflineMapTarget
 import org.meshtastic.feature.map.maplibre.component.WaypointDialogs
@@ -405,30 +403,6 @@ private fun rememberLocationControls(cameraState: CameraState): LocationControls
             }
         },
     )
-}
-
-@Composable
-private fun FilterMenu(expanded: Boolean, onDismissRequest: () -> Unit) {
-    val viewModel: SharedMapViewModel = koinViewModel()
-    val filterState by viewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
-
-    DropdownMenu(expanded = expanded, onDismissRequest = onDismissRequest) {
-        CheckableItem(
-            label = stringResource(Res.string.only_favorites),
-            checked = filterState.onlyFavorites,
-            onClick = viewModel::toggleOnlyFavorites,
-        )
-        CheckableItem(
-            label = stringResource(Res.string.show_waypoints),
-            checked = filterState.showWaypoints,
-            onClick = viewModel::toggleShowWaypointsOnMap,
-        )
-        CheckableItem(
-            label = stringResource(Res.string.show_precision_circle),
-            checked = filterState.showPrecisionCircle,
-            onClick = viewModel::toggleShowPrecisionCircleOnMap,
-        )
-    }
 }
 
 @Composable
