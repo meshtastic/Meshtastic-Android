@@ -19,39 +19,88 @@ package org.meshtastic.feature.map.maplibre.layers
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import org.maplibre.compose.expressions.ast.Expression
+import org.maplibre.compose.expressions.dsl.asNumber
+import org.maplibre.compose.expressions.dsl.asString
+import org.maplibre.compose.expressions.dsl.coalesce
 import org.maplibre.compose.expressions.dsl.const
+import org.maplibre.compose.expressions.dsl.convertToColor
+import org.maplibre.compose.expressions.dsl.dp
+import org.maplibre.compose.expressions.dsl.eq
+import org.maplibre.compose.expressions.dsl.feature
+import org.maplibre.compose.expressions.dsl.or
+import org.maplibre.compose.expressions.value.BooleanValue
+import org.maplibre.compose.expressions.value.GeometryType
 import org.maplibre.compose.layers.CircleLayer
 import org.maplibre.compose.layers.FillLayer
 import org.maplibre.compose.layers.LineLayer
 import org.maplibre.compose.sources.GeoJsonData
 import org.maplibre.compose.sources.rememberGeoJsonSource
 
-/** Fill, outline and point styling for every visible imported overlay. */
+/**
+ * Fill, outline and point styling for every visible imported overlay.
+ *
+ * Styled per feature from the [simplestyle spec](https://github.com/mapbox/simplestyle-spec) the way the Google flavor
+ * styles the same imports — `fill`, `stroke`, `fill-opacity`, `stroke-opacity`, `stroke-width`, falling back to `color`
+ * for either colour and to the defaults below. This map used to paint every import one flat blue, so a contour set
+ * imported as stacked bands, or a KML whose whole point was its colours, arrived unreadable.
+ */
 @Composable
 internal fun CustomLayers(layers: List<CustomLayer>) {
     layers.forEach { layer ->
         val source = rememberGeoJsonSource(data = GeoJsonData.Uri(layer.uri))
 
-        // One source, three layers: a GeoJSON import can mix polygons, lines and points, and a
-        // layer silently ignores geometry it cannot draw.
+        val fill = coalesce(feature["fill"].asString(), feature["color"].asString())
+        val stroke = coalesce(feature["stroke"].asString(), feature["color"].asString())
+        val strokeColor = stroke.convertToColor(const(CustomLayerBlue))
+        val strokeWidth = coalesce(feature["stroke-width"].asNumber(), const(DEFAULT_STROKE_WIDTH)).dp
+
+        // One source, three layers, each filtered to the geometry it can actually draw. Unfiltered, the fill layer
+        // painted a LineString's vertices as a solid wedge and the circle layer put a dot on every polygon corner —
+        // invisible while every import was one flat translucent blue, obvious the moment they carry their own colours.
         FillLayer(
             id = "custom-${layer.id}-fill",
             source = source,
-            color = const(CustomLayerBlue),
-            opacity = const(CUSTOM_FILL_OPACITY),
-            outlineColor = const(CustomLayerBlue),
+            filter = geometryIsOneOf(GeometryType.Polygon, GeometryType.MultiPolygon),
+            color = fill.convertToColor(const(CustomLayerBlue)),
+            opacity = coalesce(feature["fill-opacity"].asNumber(), const(DEFAULT_FILL_OPACITY)),
         )
-        LineLayer(id = "custom-${layer.id}-line", source = source, color = const(CustomLayerBlue), width = const(2.dp))
+        LineLayer(
+            id = "custom-${layer.id}-line",
+            source = source,
+            // Polygons are here too, for their rings: `fill-outline-color` is always a hairline, so an import asking
+            // for a 5dp border would silently get one pixel. The Google flavor honours the width, and so does this.
+            filter =
+            geometryIsOneOf(
+                GeometryType.LineString,
+                GeometryType.MultiLineString,
+                GeometryType.Polygon,
+                GeometryType.MultiPolygon,
+            ),
+            color = strokeColor,
+            opacity = coalesce(feature["stroke-opacity"].asNumber(), const(1f)),
+            width = strokeWidth,
+        )
         CircleLayer(
             id = "custom-${layer.id}-point",
             source = source,
-            color = const(CustomLayerBlue),
-            radius = const(5.dp),
+            filter = geometryIsOneOf(GeometryType.Point, GeometryType.MultiPoint),
+            color = strokeColor,
+            radius = const(POINT_RADIUS.dp),
             strokeColor = const(Color.White),
             strokeWidth = const(1.dp),
         )
     }
 }
 
+/** What an import with no colours of its own is drawn in. */
 private val CustomLayerBlue = Color(0xFF3F51B5)
-private const val CUSTOM_FILL_OPACITY = 0.25f
+
+/** True for a feature whose geometry is any of [types]. */
+private fun geometryIsOneOf(vararg types: GeometryType): Expression<BooleanValue> =
+    types.map { feature.geometryType() eq const(it) }.reduce { left, right -> left or right }
+
+/** simplestyle-spec fallbacks, matching the Google flavor's own: 0.35 lets stacked contour bands read as a gradient. */
+private const val DEFAULT_FILL_OPACITY = 0.35f
+private const val DEFAULT_STROKE_WIDTH = 2f
+private const val POINT_RADIUS = 5

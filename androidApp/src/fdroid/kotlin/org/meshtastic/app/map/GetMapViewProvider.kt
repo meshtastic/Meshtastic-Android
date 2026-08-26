@@ -27,18 +27,13 @@ import org.meshtastic.core.ui.util.MapViewProvider
 import org.meshtastic.feature.map.SharedMapViewModel
 import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.maplibre.MapLibreMapViewProvider
-import org.meshtastic.feature.map.maplibre.layers.CustomLayer
 
 fun getMapViewProvider(): MapViewProvider = MapLibreMapViewProvider(
     customLayers = {
         val layersManager: MapLayersManager = koinInject()
         val layers by layersManager.mapLayers.collectAsStateWithLifecycle()
-        layers
-            .filter { it.isVisible }
-            // KML/KMZ still needs converting to GeoJSON before MapLibre can read it; GeoJSON and
-            // Site Planner coverage estimates are already in a format it fetches directly.
-            .filter { it.layerType != LayerType.KML }
-            .mapNotNull { item -> item.uri?.let { uri -> CustomLayer(id = item.id, uri = uri.toString()) } }
+        // KML and KMZ are converted to GeoJSON on the way through; everything else MapLibre fetches directly.
+        rememberRenderableLayers(layers.filter { it.isVisible })
     },
     customBasemaps = { customRasterBasemaps() },
     basemapMenuExtra = { CustomTileSourcesMenuItem() },
