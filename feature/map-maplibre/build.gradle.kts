@@ -54,5 +54,10 @@ kotlin {
             api(libs.maplibre.compose)
             api(libs.maplibre.compose.material3)
         }
+
+        // maplibre-compose 0.15.0 no longer brings the MapLibre Android SDK along transitively —
+        // Android renders through maplibre-native FFI now, so the backend ships as its own
+        // artifact. runtimeOnly because nothing compiles against it; it only has to reach the APK.
+        androidMain.dependencies { runtimeOnly(libs.maplibre.compose.runtime.opengl.android) }
     }
 }

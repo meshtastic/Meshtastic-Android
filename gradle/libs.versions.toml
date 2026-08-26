@@ -211,6 +211,12 @@ koin-annotations = { module = "io.insert-koin:koin-annotations", version.ref = "
 android-maps-utils = { module = "com.google.maps.android:android-maps-utils", version.ref = "android-maps-utils" }
 maplibre-compose = { module = "org.maplibre.compose:maplibre-compose", version.ref = "maplibre-compose" }
 maplibre-compose-material3 = { module = "org.maplibre.compose:maplibre-compose-material3", version.ref = "maplibre-compose" }
+# Android native runtime. 0.15.0 moved Android onto the same maplibre-native FFI stack as desktop,
+# so the MapLibre Android SDK is no longer a transitive dependency and a render backend must be
+# named explicitly. OpenGL ES rather than Vulkan: it is what the pre-0.15 Android SDK used, and it
+# is available on every device our MIN_SDK=26 reaches, whereas the Vulkan backend needs a working
+# Vulkan 1.0 driver. Swap to -vulkan-android to take that path instead.
+maplibre-compose-runtime-opengl-android = { module = "org.maplibre.compose:maplibre-compose-runtime-opengl-android", version.ref = "maplibre-compose" }
 # Desktop-only native runtimes. Each publishes the maplibre-native FFI blob for one OS/arch; the
 # desktopApp picks the one matching the host at packaging time. No macos-x64 artifact is published
 # upstream, which matches our release matrix (macos-latest is arm64).
