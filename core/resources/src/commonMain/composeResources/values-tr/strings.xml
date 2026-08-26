@@ -290,6 +290,7 @@
     <!-- LOAD -->
     <string name="load">Yükle</string>
     <!-- LOCAL -->
+    <!-- LOCATION -->
     <string name="location_disabled">Konum erişimi kapalı, konum ağ ile paylaşılamıyor.</string>
     <!-- LOCKDOWN -->
     <string name="lockdown_submit">Gönder</string>
@@ -423,6 +424,8 @@
     <string name="paxcounter">Pax sayacı</string>
     <string name="paxcounter_config">Pax sayacı Ayarı</string>
     <string name="paxcounter_enabled">Pax sayacı etkin</string>
+    <!-- PERMISSION -->
+    <!-- PERMISSIONS -->
     <string name="pin_selected">Pin</string>
     <!-- POSITION -->
     <string name="position">Konum</string>

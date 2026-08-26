@@ -2,7 +2,7 @@
 title: 連線
 parent: 使用者指南
 nav_order: 2
-last_updated: 2026-07-08
+last_updated: 2026-08-25
 description: 透過藍牙、USB 或 TCP/IP 將您的手機或電腦連接至 Meshtastic 無線電裝置。
 aliases:
   - 藍牙
@@ -33,7 +33,18 @@ Use the transport selector — a segmented button row below the connection card 
 
 ![Transport selector](../../assets/screenshots/connections_transport_filters.png)
 
-> 💡 提示：若裝置未顯示，請確認已授予藍牙與位置權限，且該無線電裝置尚未連接至其他裝置。
+> 💡 **Tip:** If your device doesn't appear, check that the radio is not already connected to another device or out of range.
+
+The screen names anything on the app's side that is blocking a scan, with the fix attached:
+
+| What you see                                        | 代表意義                                                                                                                                                                       |
+| --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A card asking for **Nearby devices**                | The permission has not been granted. **Grant permission** requests it; once Android stops prompting, the button becomes **Open settings**. |
+| **Bluetooth is off**                                | The adapter is disabled — the card opens Bluetooth settings.                                                                                               |
+| **Bluetooth scanning also needs location services** | Android 11 and older only: the permission is held but the system location toggle is off.                                                   |
+| No card, empty list                                 | Nothing on this side is blocking the scan — the radio is out of range, off, or already connected elsewhere.                                                |
+
+Tapping **Scan** after you have declined the permission once explains what it is for before asking again, and lets you decline again without being cornered.
 
 ### 連線狀態
 

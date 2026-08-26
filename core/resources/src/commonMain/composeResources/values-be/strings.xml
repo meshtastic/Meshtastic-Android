@@ -143,6 +143,7 @@
     <!-- LICENSED -->
     <!-- LOAD -->
     <!-- LOCAL -->
+    <!-- LOCATION -->
     <!-- LOCKDOWN -->
     <!-- LOG -->
     <string name="logs">Журнал</string>
@@ -211,6 +212,8 @@
     <!-- PACKET -->
     <string name="password">Пароль</string>
     <!-- PAX -->
+    <!-- PERMISSION -->
+    <!-- PERMISSIONS -->
     <string name="phone_location">Месцазнаходжанне тэлефона</string>
     <string name="play">Граць</string>
     <!-- POSITION -->

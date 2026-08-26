@@ -790,6 +790,7 @@
     <string name="local_stats_updated_at">%1$s</string>
     <string name="local_stats_uptime">Doba provozu: %1$s</string>
     <string name="local_stats_utilization">ChUtil: %1$s% | AirTX: %2$s%</string>
+    <!-- LOCATION -->
     <string name="location_disabled">Přístup k poloze zařízení nebyl povolen, není možné poskytnout polohu zařízení do Mesh sítě.</string>
     <string name="location_sharing">Sdílení polohy</string>
     <!-- LOCKDOWN -->
@@ -1151,7 +1152,9 @@
     <string name="paxcounter_config">Nastavení Paxcounteru</string>
     <string name="paxcounter_enabled">Paxcounter povolen</string>
     <string name="periodic_position_broadcast">Pravidelné vysílání polohy</string>
+    <!-- PERMISSION -->
     <string name="permission_missing_31">Meshtastic potřebuje mít povoleno oprávnění ‚Blízká zařízení‘, aby mohl vyhledávat a připojovat zařízení přes Bluetooth. Když jej nepoužíváte, můžete jej vypnout.</string>
+    <!-- PERMISSIONS -->
     <string name="phone_location">Poloha telefonu</string>
     <string name="phone_location_description">Meshtastic využívá polohu telefonu pro některé funkce. Oprávnění k poloze si můžete kdykoli upravit v nastavení.</string>
     <plurals name="plurals_hours">

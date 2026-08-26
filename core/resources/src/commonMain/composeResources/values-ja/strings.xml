@@ -903,6 +903,7 @@
     <string name="local_stats_updated_at">%1$s</string>
     <string name="local_stats_uptime">稼働時間： %1$s</string>
     <string name="local_stats_utilization">ChUtil: %1$s% | AirTX: %2$s%</string>
+    <!-- LOCATION -->
     <string name="location_disabled">位置情報が無効なため、メッシュネットワークに位置情報を提供できません。</string>
     <string name="location_sharing">位置情報の共有</string>
     <!-- LOCKDOWN -->
@@ -1290,7 +1291,10 @@
     <string name="paxcounter_config">Paxcounter 設定</string>
     <string name="paxcounter_enabled">Paxcounter を有効化</string>
     <string name="periodic_position_broadcast">定期的な位置情報ブロードキャスト</string>
+    <!-- PERMISSION -->
     <string name="permission_missing_31">Meshtastic が Bluetooth でデバイスを検出して接続するには、「付近のデバイス」の権限を有効にする必要があります。使用しないときは無効にできます。</string>
+    <!-- PERMISSIONS -->
+    <string name="permissions">権限</string>
     <string name="phone_location">スマートフォンの位置情報</string>
     <string name="phone_location_description">Meshtastic は、さまざまな機能を有効にするためにスマートフォンの位置情報を使用します。位置情報の権限は、設定からいつでも更新できます。</string>
     <string name="play">再生</string>

@@ -2,7 +2,7 @@
 title: Начало работы
 parent: Руководство пользователя
 nav_order: 1
-last_updated: 2026-07-08
+last_updated: 2026-08-25
 description: Настройка при первом запуске — разрешения, процесс знакомства с приложением и следующие шаги после подключения твоей радиостанции.
 aliases:
   - first-launch
@@ -16,7 +16,7 @@ aliases:
 
 ## Первый запуск
 
-Когда ты запускаешь приложение впервые, то будет предложено пройти через начальный процесс, который поможет настроить основные разрешения и параметры. Каждый шаг нужно выполнить по порядку, или же можешь пропустить его и настроить разрешения позже в настройках Android.
+Когда ты запускаешь приложение впервые, то будет предложено пройти через начальный процесс, который поможет настроить основные разрешения и параметры. Each step can be completed in order, or skipped — nothing here is a one-time offer. Every permission can be reviewed and granted later from **Settings → Permissions** inside the app.
 
 ### Экран приветствия
 
@@ -45,7 +45,7 @@ Bluetooth является основным методом соединения 
 
 ### Разрешение на доступ к местоположению
 
-> ⚠️ **Почему для Bluetooth требуется местоположение?** Android требует разрешение на определение местоположения для обнаружения устройств Bluetooth Low Energy поблизости. Это требование системы Android, а не специфический выбор Meshtastic.
+> ⚠️ **Is location required for Bluetooth?** On **Android 11 and older**, yes — those releases treat a Bluetooth scan as a location capability, so the app asks for Location instead of "Nearby devices", and system **Location Services** must also be switched on for a scan to return anything. There you will see **one** location step rather than two, on the Bluetooth screen, because it is a single system permission — and asking twice for it would push you toward the point where Android stops offering the dialog at all (a second denial on Android 11; the "Don't ask again" checkbox on Android 10 and older). On **Android 12 and newer** the two are separate: "Nearby devices" is declared `neverForLocation`, and declining Location does not stop you finding or connecting to a radio.
 
 Meshtastic также использует местоположение для:
 
@@ -58,7 +58,7 @@ Meshtastic также использует местоположение для:
 - **При использовании приложения** — обновление местоположения происходит только когда приложение открыто
 - **Всегда** — включает обновления позиции в фоновом режиме для активного присутствия в сети
 
-Если доступ будет запрещен, сканирование Bluetooth не будет работать, и нода не будет сообщать о положении.
+Declining leaves the rest of the app working: on Android 12 and newer, Bluetooth is unaffected and only the map position and position sharing are disabled. On Android 11 and older, Bluetooth scanning also stops, because that is the permission Android gates it behind.
 
 ### Разрешение на уведомления
 
@@ -79,11 +79,27 @@ Meshtastic также использует местоположение для:
 - Вы можете **пропустить** этот шаг, если не нужны уведомления о прорывах
 - Настроить или отменить можно позже в настройках уведомлений Android
 
+### Reviewing permissions later
+
+**Settings → Permissions** summarizes where every runtime permission stands. It reads _All allowed_ when nothing needs you, and names the count when something does — opening itself automatically in that case. Tap the row to see the full list at any time:
+
+| Состояние                                   | What tapping the row does                                                                    |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| **Allowed**                                 | Opens the system page, so you can review or revoke it                                        |
+| **Not asked yet**                           | Requests it                                                                                  |
+| **Denied — tap to allow**                   | Explains what the permission is for, then asks again if you agree                            |
+| **Blocked — tap to open system settings**   | Android will no longer show its dialog, so this opens the page where you can turn it back on |
+| **Not required on this version of Android** | Nothing — the permission does not exist on your device                                       |
+
+This matters most for notifications. The app used to ask for them in exactly one place — the setup flow — so declining there meant no message, new-node, or low-battery alerts, with nothing in the app that could ask again. Android itself stops showing the dialog once you have declined firmly (a second denial on Android 11 and newer), at which point this row switches to **Blocked** and sends you to the system settings page instead.
+
 ## После настройки
 
 Как только разрешения предоставлены, приложение переходит к основному интерфейсу. Ваше первое действие должно заключаться в подключении к радиостанции Meshtastic — см. [Подключения](connections) для подробных инструкций.
 
-> 💡 **Совет:** Если ты пропустил какие-либо разрешения во время настройки, то можешь выдать их позже через **Настройки Android → Приложения → Meshtastic → Разрешения**. Приложение снова запросит у тебя разрешение, если отсутствующее разрешение блокирует функцию, которую ты пытаешься использовать.
+> 💡 **Tip:** If you skipped any permissions during setup, open **Settings → Permissions** in the app. Every runtime permission is listed there with its current state and a way back to it — including notifications, which the system will not prompt for a second time on its own.
+
+Features also ask in context. Tapping **Scan** on the Connections screen with Bluetooth permission missing explains what it is for and offers to request it; once Android stops prompting, the same control opens the system settings page instead of doing nothing.
 
 ## Что дальше?
 

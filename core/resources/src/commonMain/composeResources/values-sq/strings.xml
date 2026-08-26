@@ -126,6 +126,7 @@
     <!-- LICENSED -->
     <!-- LOAD -->
     <!-- LOCAL -->
+    <!-- LOCATION -->
     <string name="location_disabled">Aksesimi në vendndodhje është i fikur, nuk mund të ofrohet pozita për rrjetin mesh.</string>
     <!-- LOCKDOWN -->
     <string name="locked">I bllokuar</string>
@@ -197,6 +198,8 @@
     <!-- OUTPUT -->
     <!-- PACKET -->
     <!-- PAX -->
+    <!-- PERMISSION -->
+    <!-- PERMISSIONS -->
     <!-- POSITION -->
     <!-- POWER -->
     <string name="preferences_language">Gjuhë</string>

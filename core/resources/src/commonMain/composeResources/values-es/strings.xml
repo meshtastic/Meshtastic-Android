@@ -432,6 +432,7 @@ Rango de Valores 0 - 500.</string>
     <string name="load">Carga</string>
     <string name="load_indexed">Carga %1$d</string>
     <!-- LOCAL -->
+    <!-- LOCATION -->
     <string name="location_disabled">El acceso a la localización está desactivado, no se puede proporcionar la posición a la malla.</string>
     <string name="location_sharing">Compartir ubicación</string>
     <!-- LOCKDOWN -->
@@ -626,7 +627,9 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="paxcounter_config">Configuración del Contador de Paquetes</string>
     <string name="paxcounter_enabled">Activar el Contador de Paquetes</string>
     <string name="periodic_position_broadcast">Transmisión periódica de posición</string>
+    <!-- PERMISSION -->
     <string name="permission_missing_31">Meshtastic necesita activar los permisos "Dispositivos cercanos" para encontrar y conectarse a dispositivos mediante Bluetooth. Puede desactivar cuando no esté en uso.</string>
+    <!-- PERMISSIONS -->
     <string name="phone_location">Ubicación del teléfono</string>
     <string name="phone_location_description">Meshtastic utiliza la ubicación de tu teléfono para habilitar varias características. Puedes actualizar los permisos de ubicación en cualquier momento desde la configuración.</string>
     <string name="pin_selected">Pin</string>

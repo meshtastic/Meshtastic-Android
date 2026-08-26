@@ -217,6 +217,7 @@
     <!-- LICENSED -->
     <!-- LOAD -->
     <!-- LOCAL -->
+    <!-- LOCATION -->
     <string name="location_disabled">Vrijgave positie niet actief, onmogelijk de positie aan het netwerk te geven.</string>
     <!-- LOCKDOWN -->
     <string name="locked">Vergrendeld</string>
@@ -321,6 +322,8 @@
     <string name="paxcounter">Paxcounter</string>
     <string name="paxcounter_config">Paxcounter Configuratie</string>
     <string name="paxcounter_enabled">Paxcounter ingeschakeld</string>
+    <!-- PERMISSION -->
+    <!-- PERMISSIONS -->
     <!-- POSITION -->
     <string name="position">Positie</string>
     <string name="position_enabled">Positie ingeschakeld</string>

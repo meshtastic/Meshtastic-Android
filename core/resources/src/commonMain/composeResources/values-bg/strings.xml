@@ -646,6 +646,7 @@
     <string name="local_stats_traffic">Трафик: TX %1$d / RX %2$d (D: %3$d)</string>
     <string name="local_stats_updated_at">%1$s</string>
     <string name="local_stats_uptime">Време на работа: %1$s</string>
+    <!-- LOCATION -->
     <string name="location_disabled">Достъпът до местоположението е изключен, не може да предостави позиция на мрежата.</string>
     <string name="location_sharing">Споделяне на местоположение</string>
     <!-- LOCKDOWN -->
@@ -919,7 +920,9 @@
     <string name="paxcounter_config">Конфигуриране на Paxcounter</string>
     <string name="paxcounter_enabled">Paxcounter е активиран</string>
     <string name="periodic_position_broadcast">Периодично излъчване на позиция</string>
+    <!-- PERMISSION -->
     <string name="permission_missing_31">Meshtastic се нуждае от активирани разрешения за "Устройства наблизо", за да намира и да се свързва с устройства чрез Bluetooth. Можете да ги дезактивирате, когато не се използват.</string>
+    <!-- PERMISSIONS -->
     <string name="phone_location">Местоположение на телефона</string>
     <string name="phone_location_description">Meshtastic използва местоположението на телефона ви, за да активира редица функции. Можете да актуализирате разрешенията си за местоположение по всяко време от настройките.</string>
     <string name="pin_selected">ПИН</string>

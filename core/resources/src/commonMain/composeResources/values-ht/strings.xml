@@ -121,6 +121,7 @@
     <!-- LICENSED -->
     <!-- LOAD -->
     <!-- LOCAL -->
+    <!-- LOCATION -->
     <string name="location_disabled">Aksè lokasyon enfim, pa ka bay pozisyon mesh la.</string>
     <!-- LOCKDOWN -->
     <string name="locked">Loken</string>
@@ -190,6 +191,8 @@
     <!-- OUTPUT -->
     <!-- PACKET -->
     <!-- PAX -->
+    <!-- PERMISSION -->
+    <!-- PERMISSIONS -->
     <!-- POSITION -->
     <!-- POWER -->
     <string name="preferences_language">Lang</string>

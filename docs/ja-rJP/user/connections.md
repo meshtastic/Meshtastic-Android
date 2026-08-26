@@ -2,7 +2,7 @@
 title: コネクション
 parent: User Guide
 nav_order: 2
-last_updated: 2026-07-08
+last_updated: 2026-08-25
 description: スマートフォンやデスクトップを、Bluetooth・USB・TCP/IP で Meshtastic 無線機に接続します。
 aliases:
   - bluetooth
@@ -33,7 +33,18 @@ Bluetooth Low Energy は、Android で標準的かつ最も一般的な接続方
 
 ![接続方式のセレクター](../../assets/screenshots/connections_transport_filters.png)
 
-> 💡 **ヒント：** デバイスが表示されない場合は、Bluetooth と位置情報の権限が許可されているか、また無線機が別のデバイスにすでに接続されていないかを確認してください。
+> 💡 **Tip:** If your device doesn't appear, check that the radio is not already connected to another device or out of range.
+
+The screen names anything on the app's side that is blocking a scan, with the fix attached:
+
+| What you see                                        | 意味                                                                                                                                                                         |
+| --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A card asking for **Nearby devices**                | The permission has not been granted. **Grant permission** requests it; once Android stops prompting, the button becomes **Open settings**. |
+| **Bluetooth is off**                                | The adapter is disabled — the card opens Bluetooth settings.                                                                                               |
+| **Bluetooth scanning also needs location services** | Android 11 and older only: the permission is held but the system location toggle is off.                                                   |
+| No card, empty list                                 | Nothing on this side is blocking the scan — the radio is out of range, off, or already connected elsewhere.                                                |
+
+Tapping **Scan** after you have declined the permission once explains what it is for before asking again, and lets you decline again without being cornered.
 
 ### 接続ステータス
 

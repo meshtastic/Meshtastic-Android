@@ -830,6 +830,7 @@
     <string name="local_stats_updated_at">%1$s</string>
     <string name="local_stats_uptime">Laufzeit: %1$s</string>
     <string name="local_stats_utilization">Kanalauslastung: %1$s% | Sendezeit: %2$s%</string>
+    <!-- LOCATION -->
     <string name="location_disabled">Standortzugriff ist deaktiviert, es kann kein Standort zum Mesh bereitgestellt werden.</string>
     <string name="location_sharing">Standortfreigabe</string>
     <!-- LOCKDOWN -->
@@ -1187,7 +1188,9 @@
     <string name="paxcounter_config">Einstellung Besucherzähler</string>
     <string name="paxcounter_enabled">Besucherzähler aktiviert</string>
     <string name="periodic_position_broadcast">Regelmäßige Standortübertragung</string>
+    <!-- PERMISSION -->
     <string name="permission_missing_31">Meshtastic benötigt die Berechtigung „Geräte in der Nähe“, um Geräte über Bluetooth zu finden und eine Verbindung zu ihnen herzustellen. Sie können die Funktion deaktivieren, wenn sie nicht verwendet wird.</string>
+    <!-- PERMISSIONS -->
     <string name="phone_location">Telefonstandort</string>
     <string name="phone_location_description">Meshtastic nutzt den Standort Ihres Telefons, um einige Funktionen zu aktivieren. Sie können Ihre Standortberechtigungen jederzeit in den Einstellungen aktualisieren.</string>
     <string name="pin_selected">PIN Nummer</string>

@@ -133,6 +133,7 @@
     <!-- LICENSED -->
     <!-- LOAD -->
     <!-- LOCAL -->
+    <!-- LOCATION -->
     <string name="location_disabled">Η πρόσβαση στην τοποθεσία είναι απενεργοποιημένη, δεν μπορεί να παρέχει θέση στο πλέγμα.</string>
     <!-- LOCKDOWN -->
     <string name="locked">Κλειδωμένο</string>
@@ -194,6 +195,8 @@
     <!-- PACKET -->
     <string name="password">Κωδικός πρόσβασης</string>
     <!-- PAX -->
+    <!-- PERMISSION -->
+    <!-- PERMISSIONS -->
     <!-- POSITION -->
     <string name="position">Τοποθεσία</string>
     <string name="position_log">Τοποθεσία</string>

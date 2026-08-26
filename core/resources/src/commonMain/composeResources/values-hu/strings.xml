@@ -428,6 +428,7 @@
     <string name="load">Terhelés</string>
     <string name="load_indexed">Terhelés %1$d</string>
     <!-- LOCAL -->
+    <!-- LOCATION -->
     <string name="location_disabled">A földrajzi helyhez való hozzáférés le van tiltva, nem lehet pozíciót közölni a mesh hálózattal.</string>
     <string name="location_sharing">Helymegosztás</string>
     <!-- LOCKDOWN -->
@@ -629,7 +630,9 @@
     <string name="paxcounter_config">Paxcounter beállításai</string>
     <string name="paxcounter_enabled">Paxcounter engedélyezve</string>
     <string name="periodic_position_broadcast">Időszakos pozíció-sugárzás</string>
+    <!-- PERMISSION -->
     <string name="permission_missing_31">A Meshtastic-nek engedélyezni kell a „Közeli eszközök” hozzáférést, hogy Bluetooth-on keresztül eszközöket találjon és csatlakozzon. Használaton kívül kikapcsolható.</string>
+    <!-- PERMISSIONS -->
     <string name="phone_location">Telefon helyzete</string>
     <string name="phone_location_description">A Meshtastic a telefonod helyzetét használja több funkció engedélyezéséhez. A helyhozzáférést bármikor módosíthatod a beállításokban.</string>
     <string name="play">Lejátszás</string>

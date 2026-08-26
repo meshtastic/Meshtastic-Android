@@ -410,6 +410,7 @@
     <!-- LOAD -->
     <string name="loading">Ładowanie</string>
     <!-- LOCAL -->
+    <!-- LOCATION -->
     <string name="location_disabled">Brak dostępu do lokalizacji, nie można udostępnić pozycji w sieci mesh.</string>
     <string name="location_sharing">Udostępnianie lokalizacji</string>
     <!-- LOCKDOWN -->
@@ -589,7 +590,9 @@
     <string name="password">Hasło</string>
     <!-- PAX -->
     <string name="paxcounter">Paxcounter</string>
+    <!-- PERMISSION -->
     <string name="permission_missing_31">Meshtastic potrzebuje uprawnienia "Urządzenia w pobliżu" w celu znalezienia i połączenia się z urządzeniem poprzez Bluetooth. Możesz wyłączyć, gdy nie jest używane.</string>
+    <!-- PERMISSIONS -->
     <string name="phone_location">Lokalizacja telefonu</string>
     <string name="pin_selected">Pin</string>
     <string name="play">Odtwórz</string>

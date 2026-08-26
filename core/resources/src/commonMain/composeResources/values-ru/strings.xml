@@ -988,6 +988,7 @@
     <string name="local_stats_updated_at">%1$s</string>
     <string name="local_stats_uptime">Время работы: %1$s</string>
     <string name="local_stats_utilization">ChUtil: %1$s% | AirTX: %2$s%</string>
+    <!-- LOCATION -->
     <string name="location_disabled">Доступ к местоположению выключен, невозможно отправлять координаты в сеть.</string>
     <string name="location_sharing">Поделиться местоположением</string>
     <!-- LOCKDOWN -->
@@ -1369,6 +1370,7 @@
     <!-- OPEN -->
     <string name="open_bluetooth_settings">Открыть настройки Bluetooth</string>
     <string name="open_compass">Открыть компас</string>
+    <string name="open_location_settings">Открыть настройки геолокации</string>
     <string name="open_settings">Открыть настройки</string>
     <string name="open_source_description">Meshtastic создан с использованием следующих библиотек с открытым исходным кодом. Нажмите на любую библиотеку, чтобы просмотреть ее лицензию.</string>
     <string name="open_source_libraries">Библиотеки с открытым исходным кодом</string>
@@ -1414,7 +1416,16 @@
     <string name="paxcounter_config">Настройки Paxcounter</string>
     <string name="paxcounter_enabled">Paxcounter включен</string>
     <string name="periodic_position_broadcast">Периодическое вещание позиции</string>
+    <!-- PERMISSION -->
     <string name="permission_missing_31">Meshtastic требует разрешение на поиск и подключение к устройствам через Bluetooth. Вы можете отключить его, когда он не используется.</string>
+    <string name="permission_state_allowed">Разрешено</string>
+    <string name="permission_state_not_asked">Ещё не спрашивали</string>
+    <!-- PERMISSIONS -->
+    <string name="permissions">Разрешения</string>
+    <string name="permissions_all_allowed">Все разрешено</string>
+    <string name="permissions_hide">Скрыть разрешения</string>
+    <string name="permissions_nothing_needed">Ничто не требует вашего внимания</string>
+    <string name="permissions_show">Показать разрешения</string>
     <string name="phone_location">Местоположение телефона</string>
     <string name="phone_location_description">Meshtastic использует местоположение вашего телефона, чтобы включить ряд функций. Вы можете обновить права доступа к вашему местоположению в любое время из настроек.</string>
     <string name="pin_selected">PIN-код</string>
@@ -1787,6 +1798,7 @@
     <string name="tak_server_loading">...</string>
     <string name="tak_server_mesh_to_cot">Конвертер сети в CoT</string>
     <string name="tak_server_mesh_to_cot_desc">Показывать ноды Meshtastic на карте ATAK как контакты</string>
+    <string name="tak_server_permission_blocked">Сервер TAK нуждается в доступе к локальной сети для приёма подключений, и Android больше не будет спрашивать. Сейчас доступ отключен — включи разрешение в настройках приложения и снова включи сервер.</string>
     <string name="tak_server_section">Сервер</string>
     <string name="tak_server_status">Статус</string>
     <plurals name="tak_server_status_connected">

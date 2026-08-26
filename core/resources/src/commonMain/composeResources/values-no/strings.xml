@@ -127,6 +127,7 @@
     <!-- LICENSED -->
     <!-- LOAD -->
     <!-- LOCAL -->
+    <!-- LOCATION -->
     <string name="location_disabled">Lokasjonstilgang er slått av,kan ikke gi posisjon til mesh.</string>
     <!-- LOCKDOWN -->
     <string name="locked">Låst</string>
@@ -199,6 +200,8 @@
     <!-- OUTPUT -->
     <!-- PACKET -->
     <!-- PAX -->
+    <!-- PERMISSION -->
+    <!-- PERMISSIONS -->
     <!-- POSITION -->
     <!-- POWER -->
     <string name="preferences_language">Språk</string>

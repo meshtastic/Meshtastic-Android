@@ -918,6 +918,7 @@
     <string name="local_stats_updated_at">%1$s</string>
     <string name="local_stats_uptime">运行时间： %1$s</string>
     <string name="local_stats_utilization">字符: %1$s% | 空中发射节点: %2$s%</string>
+    <!-- LOCATION -->
     <string name="location_disabled">位置访问已关闭，无法向网络提供位置信息</string>
     <string name="location_sharing">位置共享</string>
     <!-- LOCKDOWN -->
@@ -1305,7 +1306,9 @@
     <string name="paxcounter_config">Paxcount 配置</string>
     <string name="paxcounter_enabled">启用 Paxcount</string>
     <string name="periodic_position_broadcast">定期广播</string>
+    <!-- PERMISSION -->
     <string name="permission_missing_31">Meshtastic需要启用“附近的设备”权限，以便通过蓝牙查找并连接设备。不使用时，您可以将其禁用。</string>
+    <!-- PERMISSIONS -->
     <string name="phone_location">手机位置</string>
     <string name="phone_location_description">Meshtastic 通过使用您的手机定位功能来实现多项功能。您可随时通过设置菜单调整定位权限。</string>
     <string name="pin_selected">PIN</string>
