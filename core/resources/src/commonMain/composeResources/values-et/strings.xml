@@ -179,7 +179,6 @@
     </plurals>
     <string name="calculating">Arvutan…</string>
     <string name="call_sign">Kutsung</string>
-    <string name="call_sign_summary">Sinu amatöörraadio kutsung, kuni 8 tähemärki</string>
     <string name="camera_permission">Luba kaamera</string>
     <string name="camera_permission_rationale">QR-koodide skaneerimiseks luba kaamera juurdepääs.</string>
     <string name="camera_unavailable">Kaamera ei käivitunud. Proovi uuesti või sulge skanner ja ava see uuesti.</string>

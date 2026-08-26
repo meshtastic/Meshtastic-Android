@@ -163,7 +163,6 @@
     <string name="buzzer_gpio">GPIO du buzzer</string>
     <string name="calculating">Calcul en cours…</string>
     <string name="call_sign">Indicatif d'appel</string>
-    <string name="call_sign_summary">Votre indicatif d'appel radio amateur, jusqu'à 8 caractères</string>
     <string name="camera_permission">Autorisation de la caméra</string>
     <string name="camera_permission_rationale">Autoriser l'accès à l'appareil photo pour scanner les codes QR.</string>
     <string name="camera_unavailable">La caméra n'a pas pu démarrer. Essayez à nouveau, ou fermez le scanner et rouvrez-le.</string>

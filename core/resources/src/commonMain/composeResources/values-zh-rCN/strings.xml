@@ -167,7 +167,6 @@
     <string name="buzzer_gpio">蜂鸣器 GPIO</string>
     <string name="calculating">正在计算……</string>
     <string name="call_sign">短号</string>
-    <string name="call_sign_summary">业余无线电呼号最多 8 个字符</string>
     <string name="camera_permission">相机权限</string>
     <string name="camera_permission_rationale">允许访问相机以扫描二维码。</string>
     <string name="camera_unavailable">相机无法启动请重试。</string>

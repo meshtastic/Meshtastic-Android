@@ -183,7 +183,6 @@
     </plurals>
     <string name="calculating">Вычисление…</string>
     <string name="call_sign">Позывной</string>
-    <string name="call_sign_summary">Твой позывной радиолюбителя, до 8 символов</string>
     <string name="camera_permission">Разрешение камеры</string>
     <string name="camera_permission_rationale">Разреши доступ к камере, для сканирования QR-кодов.</string>
     <string name="camera_unavailable">Камера не может запуститься. Попробуй снова или закрой сканер и открой заново.</string>

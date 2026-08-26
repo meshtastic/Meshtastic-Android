@@ -138,7 +138,6 @@
     <string name="buzzer_gpio">GPIO за зумер</string>
     <string name="calculating">Изчисляване…</string>
     <string name="call_sign">Опознавателен знак</string>
-    <string name="call_sign_summary">Вашият радиолюбителски опознавателен знак, до 8 знака</string>
     <string name="camera_permission">Разрешение за камерата</string>
     <string name="camera_permission_rationale">Разрешаване на достъп до камерата за сканиране на QR кодове.</string>
     <string name="cancel">Отказ</string>

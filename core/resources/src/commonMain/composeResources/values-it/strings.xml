@@ -167,7 +167,6 @@
     <string name="buzzer_gpio">GPIO del Buzzer</string>
     <string name="calculating">Calcolo…</string>
     <string name="call_sign">Identificativo di chiamata</string>
-    <string name="call_sign_summary">Il tuo identificativo di chiamata di radioamatore, fino a 8 caratteri</string>
     <string name="camera_permission">Autorizzazione fotocamera</string>
     <string name="camera_permission_rationale">Consenti l'accesso alla fotocamera per scansionare i codici QR.</string>
     <string name="camera_unavailable">Impossibile avviare la fotocamera. Riprovare o chiudere lo scanner e riaprirlo.</string>
