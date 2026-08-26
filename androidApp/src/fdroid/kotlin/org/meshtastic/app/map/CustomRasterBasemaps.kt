@@ -16,10 +16,13 @@
  */
 package org.meshtastic.app.map
 
+import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.core.net.toFile
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.compose.koinInject
+import org.meshtastic.app.map.model.CustomTileProviderConfig
 import org.meshtastic.app.map.repository.CustomTileProviderRepository
 import org.meshtastic.feature.map.maplibre.style.Basemap
 import org.meshtastic.feature.map.maplibre.style.RasterTileSpec
@@ -33,15 +36,21 @@ import org.meshtastic.feature.map.maplibre.style.RasterTileSpec
 fun customRasterBasemaps(): List<Basemap.Raster> {
     val tileProviders: CustomTileProviderRepository = koinInject()
     val configs by tileProviders.getCustomTileProviders().collectAsStateWithLifecycle(emptyList())
-    // Local (MBTiles-style) sources are skipped: MapLibre needs a URL template it can fetch, and serving a
-    // local file to it is a separate piece of work.
-    return configs
-        .filterNot { it.isLocal }
-        .map { config ->
-            Basemap.Raster(
-                id = config.id,
-                label = config.name,
-                spec = RasterTileSpec(tiles = listOf(config.urlTemplate)),
-            )
-        }
+    return configs.mapNotNull { config ->
+        val tiles = config.tileUrl() ?: return@mapNotNull null
+        Basemap.Raster(id = config.id, label = config.name, spec = RasterTileSpec(tiles = listOf(tiles)))
+    }
+}
+
+/**
+ * The tile URL for a source, or null if it cannot be resolved.
+ *
+ * A local archive becomes MapLibre's own `mbtiles://` scheme over the file's absolute path — the native MBTiles source
+ * opens it with SQLite directly and takes no tile placeholders. `localUri` is a `file://` URI of a copy in app storage,
+ * written when the archive was picked, so it resolves to a real path.
+ */
+private fun CustomTileProviderConfig.tileUrl(): String? = if (isLocal) {
+    localUri?.let { uri -> runCatching { Uri.parse(uri).toFile().absolutePath }.getOrNull()?.let(::mbTilesUrl) }
+} else {
+    urlTemplate.takeIf { it.isNotBlank() }
 }
