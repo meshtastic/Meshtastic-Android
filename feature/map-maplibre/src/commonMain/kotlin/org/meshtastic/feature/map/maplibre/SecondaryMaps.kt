@@ -36,6 +36,8 @@ import org.maplibre.compose.expressions.value.LineJoin
 import org.maplibre.compose.layers.CircleLayer
 import org.maplibre.compose.layers.LineLayer
 import org.maplibre.compose.layers.SymbolLayer
+import org.maplibre.compose.map.GestureOptions
+import org.maplibre.compose.map.MapOptions
 import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.compose.sources.GeoJsonData
 import org.maplibre.compose.sources.rememberGeoJsonSource
@@ -97,7 +99,12 @@ fun MapLibreInlineMap(node: Node, modifier: Modifier = Modifier) {
             ),
         )
 
-    MaplibreMap(baseStyle = defaultStyle, cameraState = cameraState, modifier = modifier) {
+    MaplibreMap(
+        baseStyle = defaultStyle,
+        cameraState = cameraState,
+        modifier = modifier,
+        options = SecondaryMapOptions,
+    ) {
         val source = rememberGeoJsonSource(data = GeoJsonData.Features(nodesToFeatureCollection(listOf(node))))
         CircleLayer(
             id = "inline-node",
@@ -142,7 +149,12 @@ fun MapLibreNodeTrackMap(
 
     if (points.isEmpty()) return
 
-    MaplibreMap(baseStyle = defaultStyle, cameraState = cameraState, modifier = modifier) {
+    MaplibreMap(
+        baseStyle = defaultStyle,
+        cameraState = cameraState,
+        modifier = modifier,
+        options = SecondaryMapOptions,
+    ) {
         TrackLineLayer(destNum = destNum, points = points)
         TrackPointLayer(points = points, onPositionSelect = onPositionSelect)
         selectedPositionTime?.let { selected -> SelectedTrackPointLayer(points = points, selectedTime = selected) }
@@ -221,7 +233,12 @@ fun MapLibreTracerouteMap(
 
     LaunchedEffect(hops.size) { nodesBoundingBox(hops)?.let { cameraState.jumpTo(boundingBox = it) } }
 
-    MaplibreMap(baseStyle = defaultStyle, cameraState = cameraState, modifier = modifier) {
+    MaplibreMap(
+        baseStyle = defaultStyle,
+        cameraState = cameraState,
+        modifier = modifier,
+        options = SecondaryMapOptions,
+    ) {
         TracerouteLayers(forwardRoute = forwardRoute, returnRoute = returnRoute, nodeLookup = nodeLookup)
 
         val hopSource = rememberGeoJsonSource(data = GeoJsonData.Features(nodesToFeatureCollection(hops)))
@@ -254,7 +271,12 @@ fun MapLibreDiscoveryMap(
     val scanner = GeoPosition(longitude = userLongitude, latitude = userLatitude)
     val cameraState = rememberCameraState(CameraPosition(target = scanner, zoom = DETAIL_ZOOM))
 
-    MaplibreMap(baseStyle = defaultStyle, cameraState = cameraState, modifier = modifier) {
+    MaplibreMap(
+        baseStyle = defaultStyle,
+        cameraState = cameraState,
+        modifier = modifier,
+        options = SecondaryMapOptions,
+    ) {
         DiscoveredNodeLayers(nodes)
         ScannerLayer(scanner)
     }
@@ -322,3 +344,14 @@ private fun ScannerLayer(scanner: GeoPosition) {
         strokeWidth = const(3.dp),
     )
 }
+
+/**
+ * Gesture set for the small informational maps.
+ *
+ * Tilt is off. These are compact, often only a couple of hundred pixels tall, and they carry no toolbar — so a stray
+ * two-finger drag pitches the map with nothing on screen to put it back. The Google flavor makes the same call with
+ * `tiltGesturesEnabled = isMainMode`, and the OSMdroid map never had tilt at all. Rotation stays, which is what Google
+ * does too.
+ */
+private val SecondaryMapOptions =
+    MapOptions(gestureOptions = GestureOptions(isDragRotateTiltEnabled = false, isTwoFingerTiltEnabled = false))
