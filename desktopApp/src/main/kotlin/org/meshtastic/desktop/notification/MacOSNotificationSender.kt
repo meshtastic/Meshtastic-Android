@@ -117,7 +117,36 @@ private class JnaMacNotificationBridge : MacNotificationBridge {
     }
 
     override val isAvailable: Boolean
+        get() = objcLoaded && hasBundleIdentity
+
+    private val objcLoaded: Boolean
         get() = objc != null && objcGetClass != null && selRegisterName != null && objcMsgSend != null
+
+    /**
+     * Whether the running process has an application bundle.
+     *
+     * `+[UNUserNotificationCenter currentNotificationCenter]` raises `NSInternalInconsistencyException`
+     * ("bundleProxyForCurrentProcess is nil") when it does not, which aborts the process with SIGABRT — an Objective-C
+     * exception unwinds through the JNA frame into `libc++abi`, so the `runCatching` below never sees it and cannot
+     * degrade gracefully. Running from Gradle (`:desktopApp:run`, or `hotRun`) is exactly that case: the main bundle is
+     * the JDK's `bin/` directory. Probing the bundle identity first turns an unbundled launch into "no notifications"
+     * instead of a crash on the first incoming message.
+     *
+     * Resolved once — a process cannot acquire a bundle identity while running.
+     */
+    private val hasBundleIdentity: Boolean by lazy {
+        if (!objcLoaded) {
+            false
+        } else {
+            val bundleClass = classRef("NSBundle")
+            val mainBundle = bundleClass?.let { msg(it, selector("mainBundle")) }
+            val identifier = mainBundle?.let { msg(it, selector("bundleIdentifier")) }
+            if (identifier == null) {
+                Logger.w { "No application bundle identity — macOS notifications disabled for this process" }
+            }
+            identifier != null
+        }
+    }
 
     override fun requestAuthorization(options: Long): Boolean = runCatching {
         val centerClass = classRef("UNUserNotificationCenter") ?: return false
