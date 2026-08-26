@@ -93,7 +93,7 @@
   <div class="breadcrumbs"><a href="../../index.html">feature-intro</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.feature.intro</a><span class="delimiter">/</span><span class="current">IntroPermissions</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Intro</span><wbr><span><span>Permissions</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:intro/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">IntroPermissions</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/feature/intro/src/commonMain/kotlin/org/meshtastic/feature/intro/IntroPermissions.kt#L29">source</a>)</span></span></div><p class="paragraph">Aggregated permission states needed by the intro onboarding flow.</p></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:intro/commonMain"><div class="symbol monospace"><span class="token keyword">interface </span><a href="index.html">IntroPermissions</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/feature/intro/src/commonMain/kotlin/org/meshtastic/feature/intro/IntroPermissions.kt#L31">source</a>)</span></span></div><p class="paragraph">Aggregated permission states needed by the intro onboarding flow.</p><p class="paragraph">Each entry is the full <a href="../../../../core/ui/org.meshtastic.core.ui.util/-permission-ui-state/index.html">PermissionUiState</a> — status, request action, and open-settings action — deliberately <i>not</i> narrowed to a granted/not-granted boolean. The distinction is load-bearing: once a permission reaches <a href="../../../../core/ui/org.meshtastic.core.ui.util/-permission-status/-p-e-r-m-a-n-e-n-t-l-y_-d-e-n-i-e-d/index.html">org.meshtastic.core.ui.util.PermissionStatus.PERMANENTLY_DENIED</a> the system stops showing its dialog, so a screen that only knows <code class="lang-kotlin">isGranted</code> renders a primary button that silently does nothing when tapped. Carrying the status lets each screen offer the recovery that will actually work.</p></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
@@ -110,7 +110,22 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:intro/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">val </span><a href="bluetooth.html">bluetooth</a><span class="token operator">: </span><a href="../-intro-permission-state/index.html">IntroPermissionState</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:intro/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">val </span><a href="bluetooth.html">bluetooth</a><span class="token operator">: </span><a href="../../../../core/ui/org.meshtastic.core.ui.util/-permission-ui-state/index.html">PermissionUiState</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1417047737%2FProperties%2F672703905" anchor-label="bluetoothRequiresLocation" id="1417047737%2FProperties%2F672703905" data-filterable-set=":feature:intro/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:intro/commonMain" data-filterable-set=":feature:intro/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="bluetooth-requires-location.html"><span>bluetooth</span><wbr><span>Requires</span><wbr><span><span>Location</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1417047737%2FProperties%2F672703905"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:intro/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">val </span><a href="bluetooth-requires-location.html">bluetoothRequiresLocation</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">True where BLE scanning is gated by the location permission rather than the Android 12 "Nearby devices" permissions (API &lt; 31). The Bluetooth screen asks for a different permission on those devices, so it must say so rather than naming a permission the user will never see.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -125,7 +140,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:intro/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">val </span><a href="location.html">location</a><span class="token operator">: </span><a href="../-intro-permission-state/index.html">IntroPermissionState</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:intro/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">val </span><a href="location.html">location</a><span class="token operator">: </span><a href="../../../../core/ui/org.meshtastic.core.ui.util/-permission-ui-state/index.html">PermissionUiState</a></div></div></div>
                 </div>
               </div>
             </div>
@@ -140,7 +155,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:intro/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">val </span><a href="notification.html">notification</a><span class="token operator">: </span><a href="../-intro-permission-state/index.html">IntroPermissionState</a><span class="token operator">?</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:intro/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">val </span><a href="notification.html">notification</a><span class="token operator">: </span><a href="../../../../core/ui/org.meshtastic.core.ui.util/-permission-ui-state/index.html">PermissionUiState</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Null on platforms / API levels where notifications are not gated by a runtime permission (pre-Android 13).</p></div></div></div>
                 </div>
               </div>
             </div>
