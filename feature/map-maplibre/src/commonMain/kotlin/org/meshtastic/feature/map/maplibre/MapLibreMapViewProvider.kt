@@ -76,6 +76,7 @@ import org.meshtastic.feature.map.maplibre.style.Basemap
 import org.meshtastic.feature.map.maplibre.style.Basemaps
 import org.meshtastic.feature.map.maplibre.style.MapOverlay
 import org.meshtastic.feature.map.maplibre.style.MapOverlays
+import org.meshtastic.feature.map.maplibre.style.zoomRange
 
 /**
  * MapLibre implementation of [MapViewProvider], shared by the F-Droid flavor and the desktop app.
@@ -252,8 +253,8 @@ private fun MapToolbar(
 
     MapControlsOverlay(
         onToggleFilterMenu = { filterMenuExpanded = !filterMenuExpanded },
-        onZoomIn = { scope.launch { cameraState.zoomBy(ZOOM_STEP) } },
-        onZoomOut = { scope.launch { cameraState.zoomBy(-ZOOM_STEP) } },
+        onZoomIn = { scope.launch { cameraState.zoomBy(ZOOM_STEP, basemaps.current.zoomRange()) } },
+        onZoomOut = { scope.launch { cameraState.zoomBy(-ZOOM_STEP, basemaps.current.zoomRange()) } },
         bearing = cameraState.position.bearing.toFloat(),
         followPhoneBearing = location.followingBearing,
         onCompassClick = location.onCompassClick,
@@ -527,13 +528,9 @@ private fun CheckableItem(label: String, checked: Boolean, onClick: () -> Unit) 
  * Steps the camera zoom, clamped to the range MaplibreMap accepts so the buttons stop at the ends rather than animating
  * to a level the map will refuse.
  */
-private suspend fun CameraState.zoomBy(delta: Double) {
-    val target = (position.zoom + delta).coerceIn(MIN_ZOOM, MAX_ZOOM)
+private suspend fun CameraState.zoomBy(delta: Double, range: ClosedFloatingPointRange<Float>) {
+    val target = (position.zoom + delta).coerceIn(range.start.toDouble(), range.endInclusive.toDouble())
     if (target != position.zoom) animateTo(position.copy(zoom = target))
 }
 
 private const val ZOOM_STEP = 1.0
-
-/** MaplibreMap's own default zoomRange. */
-private const val MIN_ZOOM = 0.0
-private const val MAX_ZOOM = 20.0

@@ -167,3 +167,21 @@ object Basemaps {
 
     fun byId(id: String?): Basemap = all.firstOrNull { it.id == id } ?: default
 }
+
+/**
+ * The zoom levels this basemap actually has data for.
+ *
+ * The OSMdroid map took these from the tile source itself, so the map would not let you zoom past what the server could
+ * serve. Several of these sources stop well short of the map's default ceiling — USGS and Esri at 16, OSM at 19 — and
+ * zooming beyond that gets blank or stretched tiles.
+ *
+ * Vector styles carry their own zoom handling and overzoom cleanly, so they keep the map's default range.
+ */
+internal fun Basemap.zoomRange(): ClosedFloatingPointRange<Float> = when (this) {
+    is Basemap.Vector -> DEFAULT_MIN_ZOOM..DEFAULT_MAX_ZOOM
+    is Basemap.Raster -> spec.minZoom.toFloat()..spec.maxZoom.toFloat()
+}
+
+/** MaplibreMap's own default zoom range. */
+internal const val DEFAULT_MIN_ZOOM = 0f
+internal const val DEFAULT_MAX_ZOOM = 20f

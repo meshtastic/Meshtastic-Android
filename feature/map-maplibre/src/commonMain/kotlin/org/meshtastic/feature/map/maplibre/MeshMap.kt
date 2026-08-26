@@ -51,6 +51,7 @@ import org.meshtastic.feature.map.maplibre.layers.WaypointLayers
 import org.meshtastic.feature.map.maplibre.style.Basemap
 import org.meshtastic.feature.map.maplibre.style.Basemaps
 import org.meshtastic.feature.map.maplibre.style.MapOverlay
+import org.meshtastic.feature.map.maplibre.style.zoomRange
 
 /** Vector basemaps arrive as a style document; raster ones draw over an empty one. */
 private fun Basemap.toBaseStyle(): BaseStyle = when (this) {
@@ -129,6 +130,8 @@ fun MeshMap(
         baseStyle = basemap.toBaseStyle(),
         cameraState = cameraState,
         modifier = modifier,
+        // Honour what the source can actually serve, as the OSMdroid map did.
+        zoomRange = basemap.zoomRange(),
         onMapLongClick = { position, _ ->
             onMapLongClick(position)
             ClickResult.Consume
