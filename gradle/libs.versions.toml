@@ -4,7 +4,7 @@ xmlutil = "1.0.2.1"
 # Android
 agp = "9.3.2"
 appcompat = "1.8.0"
-appfunctions = "1.0.0-alpha10"
+appfunctions = "1.0.0-alpha11"
 
 # androidx
 androidx-sqlite-bundled = "2.7.0"
