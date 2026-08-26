@@ -177,6 +177,10 @@ internal fun NodeLayers(
         textColor = feature[NodeFeatureKeys.FOREGROUND].convertToColor(const(MaterialTheme.colorScheme.onSurface)),
         textAllowOverlap = const(true),
     )
+
+    // Drawn last so it sits over the dot and its (blank) label: short names the basemap font cannot draw get a real
+    // chip instead. The chip is wider and taller than the dot, so it covers it — no filtering needed on either.
+    NodeChipImageLayers(nodes = nodes, source = nodeSource, onNodeClick = onNodeClick)
 }
 
 private const val PRECISION_FILL_OPACITY = 0.15f

@@ -82,3 +82,37 @@ fun nodesToFeatureCollection(nodes: List<Node>, myNodeNum: Int? = null): Feature
             )
         },
     )
+
+/**
+ * True when a short name contains characters no basemap glyph font will have.
+ *
+ * Node short names are frequently emoji, and the vector basemaps serve Noto Sans and nothing else — the text layer
+ * silently draws nothing for those. Anything from the arrows block upwards is treated as beyond the font, which covers
+ * emoji, dingbats and symbols while leaving Latin, accented Latin and Greek/Cyrillic to the text layer.
+ */
+internal fun String.needsChipImage(): Boolean = toCodePoints().any { it >= BEYOND_TEXT_FONT }
+
+private fun String.toCodePoints(): List<Int> {
+    val out = mutableListOf<Int>()
+    var i = 0
+    while (i < length) {
+        val c = this[i]
+        if (c.isHighSurrogate() && i + 1 < length && this[i + 1].isLowSurrogate()) {
+            out +=
+                SURROGATE_BASE +
+                ((c.code - HIGH_SURROGATE_START) shl SURROGATE_SHIFT) +
+                (this[i + 1].code - LOW_SURROGATE_START)
+            i += 2
+        } else {
+            out += c.code
+            i += 1
+        }
+    }
+    return out
+}
+
+private const val BEYOND_TEXT_FONT = 0x2190
+private const val SURROGATE_BASE = 0x10000
+private const val HIGH_SURROGATE_START = 0xD800
+private const val LOW_SURROGATE_START = 0xDC00
+private const val SURROGATE_SHIFT = 10
