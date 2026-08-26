@@ -1075,6 +1075,7 @@
     <string name="map">Mesh Map</string>
     <string name="map_cache_info">Cache Capacity: %1$d MB\nCache Usage: %2$d MB</string>
     <string name="map_cache_manager">Cache Manager</string>
+    <string name="map_cache_megabytes">%1$s MB</string>
     <string name="map_cache_size">Current Cache size</string>
     <string name="map_cache_tiles">%1$d tiles</string>
     <string name="map_clear_tiles">Clear Downloaded Tiles</string>

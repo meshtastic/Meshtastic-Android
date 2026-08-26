@@ -45,10 +45,12 @@ import org.maplibre.compose.offline.OfflinePack
 import org.maplibre.compose.offline.OfflinePackDefinition
 import org.maplibre.compose.offline.rememberOfflineManager
 import org.maplibre.spatialk.geojson.BoundingBox
+import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.delete
 import org.meshtastic.core.resources.map_cache_manager
+import org.meshtastic.core.resources.map_cache_megabytes
 import org.meshtastic.core.resources.map_cache_size
 import org.meshtastic.core.resources.map_cache_tiles
 import org.meshtastic.core.resources.map_select_download_region
@@ -85,35 +87,16 @@ internal fun OfflineMapsSection(target: OfflineMapTarget, onShowRegion: (Boundin
     val estimate = target.bounds()?.tileCount(range.first, range.last) ?: 0L
     val storedTiles =
         packs.sumOf { pack -> (pack.downloadProgress as? DownloadProgress.Healthy)?.completedTileCount ?: 0L }
+    // Resource bytes, not tile bytes: a pack also holds the style, its glyphs and its sprites, and all of it occupies
+    // the same disk the user is being asked about.
+    val storedBytes =
+        packs.sumOf { pack -> (pack.downloadProgress as? DownloadProgress.Healthy)?.completedResourceBytes ?: 0L }
 
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
         Text(text = stringResource(Res.string.map_cache_manager), style = MaterialTheme.typography.titleMedium)
 
-        Text(
-            text =
-            stringResource(Res.string.map_cache_size) +
-                ": " +
-                stringResource(Res.string.map_cache_tiles, storedTiles.toInt()),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-
-        // The OSMdroid map showed the cost before committing, which matters more here than it looks: the same two
-        // extra zoom levels are a couple of hundred tiles over a neighbourhood and tens of thousands over a state.
-        Text(
-            text = stringResource(Res.string.map_select_download_region),
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(top = 8.dp),
-        )
-        Text(
-            text =
-            stringResource(Res.string.map_tile_download_estimate) +
-                " " +
-                stringResource(Res.string.map_cache_tiles, estimate.toInt()) +
-                "  (z${range.first}\u2013${range.last})",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        CacheUsageLine(storedBytes = storedBytes, storedTiles = storedTiles)
+        DownloadEstimateLines(estimate = estimate, range = range)
 
         Button(
             onClick = { scope.launch { manager.downloadVisibleArea(target) } },
@@ -139,6 +122,49 @@ internal fun OfflineMapsSection(target: OfflineMapTarget, onShowRegion: (Boundin
                 )
             }
         }
+    }
+}
+
+/**
+ * How much disk the downloaded packs occupy.
+ *
+ * The OSMdroid map reported this in MB, which is the number that answers "is this filling my phone". No capacity beside
+ * it: OSMdroid had one bounded SQLite cache, whereas MapLibre has explicitly downloaded packs the user deletes by hand
+ * plus a separate ambient cache, and quoting a ceiling that governs neither would be a lie.
+ */
+@Composable
+private fun CacheUsageLine(storedBytes: Long, storedTiles: Long) {
+    Text(
+        text =
+        stringResource(Res.string.map_cache_size) +
+            ": " +
+            stringResource(Res.string.map_cache_megabytes, storedBytes.megabytes()) +
+            " · " +
+            stringResource(Res.string.map_cache_tiles, storedTiles.toInt()),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+}
+
+/**
+ * What the next download will cost, before committing to it.
+ *
+ * The OSMdroid map showed this, and it matters more than it looks: the same two extra zoom levels are a couple of
+ * hundred tiles over a neighbourhood and tens of thousands over a state.
+ */
+@Composable
+private fun DownloadEstimateLines(estimate: Long, range: IntRange) {
+    Column(modifier = Modifier.padding(top = 8.dp)) {
+        Text(text = stringResource(Res.string.map_select_download_region), style = MaterialTheme.typography.bodyMedium)
+        Text(
+            text =
+            stringResource(Res.string.map_tile_download_estimate) +
+                " " +
+                stringResource(Res.string.map_cache_tiles, estimate.toInt()) +
+                "  (z${range.first}\u2013${range.last})",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 
@@ -246,17 +272,30 @@ private fun DownloadProgress.fraction(): Float = when (this) {
 }
 
 private fun DownloadProgress.summary(): String = when (this) {
-    is DownloadProgress.Healthy -> "${status.name} · $completedTileCount tiles"
+    is DownloadProgress.Healthy ->
+        "${status.name} · $completedTileCount tiles · ${completedResourceBytes.megabytes()} MB"
+
     is DownloadProgress.Error -> message
+
     is DownloadProgress.TileLimitExceeded -> "Tile limit reached ($limit)"
+
     DownloadProgress.Unknown -> "—"
 }
+
+/**
+ * Bytes as megabytes, to one decimal place.
+ *
+ * Decimal megabytes rather than mebibytes: this number sits next to a phone's own storage figures, and those are
+ * decimal.
+ */
+internal fun Long.megabytes(): String = NumberFormatter.format(this.toDouble() / BYTES_PER_MEGABYTE, 1)
 
 private fun Double.round(): String {
     val scaled = (this * COORD_SCALE).toInt() / COORD_SCALE
     return scaled.toString()
 }
 
+private const val BYTES_PER_MEGABYTE = 1_000_000.0
 private const val PACK_ROW_TEXT_FRACTION = 0.8f
 private const val PACK_EXTRA_ZOOM_LEVELS = 2
 
