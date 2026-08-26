@@ -197,11 +197,14 @@ class GooglePlatformAnalytics(private val context: Context, private val analytic
         Trace.enable(traceConfig)
 
         // Session Replay is Android-only debug tooling — iOS ships no Session Replay at all. Enabled for
-        // debug builds only, and masks all text inputs to protect message content.
+        // debug builds only, and MASK_ALL so no message content is ever recorded: MASK_ALL_INPUTS,
+        // which this used before, masks input fields only and leaves rendered text — a conversation on
+        // screen, a node's position — in the replay. That was inert while CI debug builds carried fake
+        // datadog tokens; it stops being inert the moment they carry real ones.
         if (BuildConfig.DEBUG) {
             val sessionReplayConfig =
                 SessionReplayConfiguration.Builder(sampleRate)
-                    .setTextAndInputPrivacy(TextAndInputPrivacy.MASK_ALL_INPUTS)
+                    .setTextAndInputPrivacy(TextAndInputPrivacy.MASK_ALL)
                     .build()
             SessionReplay.enable(sessionReplayConfig)
         }
