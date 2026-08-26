@@ -185,9 +185,12 @@ private fun MapToolbar(
     basemapMenuExtra: @Composable () -> Unit,
 ) {
     var filterMenuExpanded by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     MapControlsOverlay(
         onToggleFilterMenu = { filterMenuExpanded = !filterMenuExpanded },
+        onZoomIn = { scope.launch { cameraState.zoomBy(ZOOM_STEP) } },
+        onZoomOut = { scope.launch { cameraState.zoomBy(-ZOOM_STEP) } },
         bearing = cameraState.position.bearing.toFloat(),
         followPhoneBearing = location.followingBearing,
         onCompassClick = location.onCompassClick,
@@ -419,3 +422,18 @@ private fun CheckableItem(label: String, checked: Boolean, onClick: () -> Unit) 
         onClick = onClick,
     )
 }
+
+/**
+ * Steps the camera zoom, clamped to the range MaplibreMap accepts so the buttons stop at the ends rather than animating
+ * to a level the map will refuse.
+ */
+private suspend fun CameraState.zoomBy(delta: Double) {
+    val target = (position.zoom + delta).coerceIn(MIN_ZOOM, MAX_ZOOM)
+    if (target != position.zoom) animateTo(position.copy(zoom = target))
+}
+
+private const val ZOOM_STEP = 1.0
+
+/** MaplibreMap's own default zoomRange. */
+private const val MIN_ZOOM = 0.0
+private const val MAX_ZOOM = 20.0

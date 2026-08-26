@@ -37,12 +37,16 @@ import org.meshtastic.core.resources.orient_north
 import org.meshtastic.core.resources.refresh
 import org.meshtastic.core.resources.site_planner
 import org.meshtastic.core.resources.toggle_my_position
+import org.meshtastic.core.resources.zoom_in
+import org.meshtastic.core.resources.zoom_out
+import org.meshtastic.core.ui.icon.Add
 import org.meshtastic.core.ui.icon.CellTower
 import org.meshtastic.core.ui.icon.LocationDisabled
 import org.meshtastic.core.ui.icon.MapCompass
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.MyLocation
 import org.meshtastic.core.ui.icon.Refresh
+import org.meshtastic.core.ui.icon.Remove
 import org.meshtastic.core.ui.icon.Tune
 import org.meshtastic.core.ui.theme.StatusColors.StatusBlue
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
@@ -75,6 +79,12 @@ fun MapControlsOverlay(
     mapTypeContent: @Composable () -> Unit = {},
     layersContent: @Composable () -> Unit = {},
     onSitePlannerClick: (() -> Unit)? = null,
+    /**
+     * Zoom controls. Null hides them, which is what the Google flavor wants — Google Maps draws its own through
+     * MapUiSettings(zoomControlsEnabled). MapLibre publishes no zoom ornament, so its map supplies these.
+     */
+    onZoomIn: (() -> Unit)? = null,
+    onZoomOut: (() -> Unit)? = null,
     isLocationTrackingEnabled: Boolean = false,
     onToggleLocationTracking: () -> Unit = {},
     showRefresh: Boolean = false,
@@ -88,6 +98,22 @@ fun MapControlsOverlay(
     ) {
         // Compass
         CompassButton(onClick = onCompassClick, bearing = bearing, isFollowing = followPhoneBearing)
+
+        // Zoom controls (optional; MapLibre has no built-in ones)
+        onZoomIn?.let { onClick ->
+            MapButton(
+                icon = MeshtasticIcons.Add,
+                contentDescription = stringResource(Res.string.zoom_in),
+                onClick = onClick,
+            )
+        }
+        onZoomOut?.let { onClick ->
+            MapButton(
+                icon = MeshtasticIcons.Remove,
+                contentDescription = stringResource(Res.string.zoom_out),
+                onClick = onClick,
+            )
+        }
 
         // Filter button + dropdown
         Box {

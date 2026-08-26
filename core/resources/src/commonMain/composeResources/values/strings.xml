@@ -597,6 +597,7 @@
     <string name="downlink_enabled">MQTT Downlink Enabled</string>
     <string name="downlink_feature_description">Messages from a public internet gateway are forwarded to the local mesh. Due to the zero-hop policy, traffic from the default MQTT server will not propagate further than this device.</string>
     <string name="download">Download</string>
+    <string name="download_this_area">Download this area</string>
     <string name="duplicated_public_key_title">Duplicate Public Key Detected</string>
     <string name="dynamic">Dynamic</string>
     <string name="easily_set_up_private_mesh_networks">Easily set up private mesh networks for secure and reliable communication in remote areas.</string>
@@ -1381,6 +1382,8 @@
     <string name="now">Now</string>
     <string name="ntp_server">NTP server</string>
     <string name="number_of_records">Number of records</string>
+    <string name="offline_maps">Offline maps</string>
+    <string name="offline_maps_empty">No areas downloaded yet</string>
     <string name="ok_to_mqtt">Ok to MQTT</string>
     <string name="okay">OK</string>
     <string name="oled_type">OLED type</string>
@@ -2081,5 +2084,7 @@
     <string name="you">You</string>
     <string name="zh_CN" translatable="false">简体中文</string>
     <string name="zh_TW" translatable="false">繁體中文</string>
+    <string name="zoom_in">Zoom in</string>
+    <string name="zoom_out">Zoom out</string>
 </resources>
 

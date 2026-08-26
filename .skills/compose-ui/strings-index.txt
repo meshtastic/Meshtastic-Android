@@ -567,6 +567,7 @@ double_tap_as_button_press
 downlink_enabled
 downlink_feature_description
 download
+download_this_area
 duplicated_public_key_title
 dynamic
 easily_set_up_private_mesh_networks
@@ -1345,6 +1346,8 @@ notifications_on_message_receipt
 now
 ntp_server
 number_of_records
+offline_maps
+offline_maps_empty
 ok_to_mqtt
 okay
 oled_type
@@ -2024,3 +2027,5 @@ write_nfc_text
 you
 zh_CN
 zh_TW
+zoom_in
+zoom_out
