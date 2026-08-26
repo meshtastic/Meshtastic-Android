@@ -269,6 +269,7 @@
     <string name="licensed_amateur_radio_text">Ativar esta opção desativa a encriptação e não é compatível com a rede Meshtastic normal.</string>
     <!-- LOAD -->
     <!-- LOCAL -->
+    <!-- LOCATION -->
     <string name="location_disabled">Acesso à localização desativado, não é possível fornecer a localização na mesh.</string>
     <!-- LOCKDOWN -->
     <string name="locked">Bloqueado</string>
@@ -397,6 +398,8 @@
     <string name="paxcounter">Contador de pessoas</string>
     <string name="paxcounter_config">Configuração do contador de pessoas</string>
     <string name="paxcounter_enabled">Ativar contador de pessoas</string>
+    <!-- PERMISSION -->
+    <!-- PERMISSIONS -->
     <!-- POSITION -->
     <string name="position">Posição</string>
     <string name="position_enabled">Posição ativada</string>

@@ -112,6 +112,7 @@
     <!-- LICENSED -->
     <!-- LOAD -->
     <!-- LOCAL -->
+    <!-- LOCATION -->
     <string name="location_disabled">Pristup lokaciji je isključen, Vaš Android ne može pružiti lokaciju mesh mreži.</string>
     <!-- LOCKDOWN -->
     <string name="locked">Zaključano</string>
@@ -177,6 +178,8 @@
     <!-- OUTPUT -->
     <!-- PACKET -->
     <!-- PAX -->
+    <!-- PERMISSION -->
+    <!-- PERMISSIONS -->
     <!-- POSITION -->
     <!-- POWER -->
     <string name="preferences_language">Jezik</string>

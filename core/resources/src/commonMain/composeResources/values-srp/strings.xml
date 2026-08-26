@@ -252,6 +252,7 @@
     <!-- LICENSED -->
     <!-- LOAD -->
     <!-- LOCAL -->
+    <!-- LOCATION -->
     <string name="location_disabled">Приступ локацији је искључен, не може се обезбедити позиција мрежи.</string>
     <!-- LOCKDOWN -->
     <string name="locked">Закључано</string>
@@ -355,6 +356,8 @@
     <!-- PACKET -->
     <string name="password">Лозинка</string>
     <!-- PAX -->
+    <!-- PERMISSION -->
+    <!-- PERMISSIONS -->
     <!-- POSITION -->
     <string name="position">Позиција</string>
     <string name="position_flags">Заставице позиције</string>

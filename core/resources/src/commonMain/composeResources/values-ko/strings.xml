@@ -272,6 +272,7 @@
     <string name="licensed_amateur_radio_text">이 옵션을 활성화하면 암호화가 비활성화되며 기본 Meshtastic 네트워크와 호환되지 않습니다.</string>
     <!-- LOAD -->
     <!-- LOCAL -->
+    <!-- LOCATION -->
     <string name="location_disabled">위치 접근 권한 해제, 메시에 위치를 제공할 수 없습니다.</string>
     <!-- LOCKDOWN -->
     <string name="lockdown_hide_passphrase">숨기기</string>
@@ -409,6 +410,8 @@
     <string name="paxcounter">팍스카운터</string>
     <string name="paxcounter_config">팍스카운터 설정</string>
     <string name="paxcounter_enabled">팍스카운터 활성화</string>
+    <!-- PERMISSION -->
+    <!-- PERMISSIONS -->
     <string name="pin_selected">핀</string>
     <!-- POSITION -->
     <string name="position">위치</string>

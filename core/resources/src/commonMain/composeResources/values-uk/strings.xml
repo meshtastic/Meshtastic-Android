@@ -647,6 +647,7 @@
     <string name="local_stats_noise">Шум %1$d dBm</string>
     <string name="local_stats_traffic">Трафік: TX %1$d / RX %2$d (D: %3$d)</string>
     <string name="local_stats_updated_at">%1$s</string>
+    <!-- LOCATION -->
     <string name="location_disabled">Доступ до місцезнаходження вимкнено, неможливо транслювати позицію.</string>
     <!-- LOCKDOWN -->
     <string name="lockdown_enable_ack">Я розумію</string>
@@ -924,7 +925,9 @@
     <string name="paxcounter">Лічильник пристроїв</string>
     <string name="paxcounter_config">Конфігурація лічильника пристроїв</string>
     <string name="paxcounter_enabled">Лічильник пристроїв активований</string>
+    <!-- PERMISSION -->
     <string name="permission_missing_31">Для пошуку та підключення до пристроїв через Bluetooth програмі Meshtastic потрібен дозвіл «Пристрої поблизу». Ви можете вимкнути його, коли не користуєтеся програмою.</string>
+    <!-- PERMISSIONS -->
     <string name="phone_location">Геопозиція телефона</string>
     <string name="phone_location_description">Meshtastic використовує геопозицію вашого телефона для роботи низки функцій. Ви можете змінити дозволи на доступ до місцезнаходження в будь-який час у налаштуваннях.</string>
     <string name="pin_selected">Контакт</string>

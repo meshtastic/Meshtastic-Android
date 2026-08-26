@@ -982,6 +982,7 @@
     <string name="local_stats_updated_at">%1$s</string>
     <string name="local_stats_uptime">Töös: %1$s</string>
     <string name="local_stats_utilization">ChUtil: %1$s% | AirTX: %2$s%</string>
+    <!-- LOCATION -->
     <string name="location_disabled">Juurdepääs asukohale on välja lülitatud, ei saa asukohta teistele jagada.</string>
     <string name="location_sharing">Asukoha jagamine</string>
     <!-- LOCKDOWN -->
@@ -1404,7 +1405,9 @@
     <string name="paxcounter_config">Paxcounter sätted</string>
     <string name="paxcounter_enabled">Paxcounter lubatud</string>
     <string name="periodic_position_broadcast">Perioodiline asukoha jagamine</string>
+    <!-- PERMISSION -->
     <string name="permission_missing_31">Meshtastic vajab seadmete leidmiseks ja nendega sinihamba ​​kaudu ühenduse loomiseks „Lähi-seadmed” luba. Saate selle keelata, kui seda ei kasutata.</string>
+    <!-- PERMISSIONS -->
     <string name="phone_location">Telefoni asukoht</string>
     <string name="phone_location_description">Meshtastic kasutab teie telefoni asukohta mitmete funktsioonide lubamiseks. Saate oma asukohalubasid igal ajal seadetes muuta.</string>
     <string name="pin_selected">Klemm</string>

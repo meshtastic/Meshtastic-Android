@@ -107,6 +107,7 @@
     <!-- LICENSED -->
     <!-- LOAD -->
     <!-- LOCAL -->
+    <!-- LOCATION -->
     <string name="location_disabled">שירותי מיקום כבויים, לא ניתן לספק מיקום לרשת משטסטיק.</string>
     <!-- LOCKDOWN -->
     <string name="locked">נעול</string>
@@ -165,6 +166,8 @@
     <!-- OUTPUT -->
     <!-- PACKET -->
     <!-- PAX -->
+    <!-- PERMISSION -->
+    <!-- PERMISSIONS -->
     <!-- POSITION -->
     <!-- POWER -->
     <string name="preferences_language">שפה</string>

@@ -367,6 +367,7 @@
     <string name="load">Carregar</string>
     <string name="load_indexed">Carga %1$d</string>
     <!-- LOCAL -->
+    <!-- LOCATION -->
     <string name="location_disabled">Localização desativada, não será possível informar sua posição.</string>
     <!-- LOCKDOWN -->
     <string name="locked">Bloqueado</string>
@@ -528,7 +529,9 @@
     <string name="paxcounter">Medidor de Fluxo de Pessoas</string>
     <string name="paxcounter_config">Configuração do Contador de Pessoas</string>
     <string name="paxcounter_enabled">Contador de Pessoas ativado</string>
+    <!-- PERMISSION -->
     <string name="permission_missing_31">Meshtastic precisa das permissões de "Dispositivos próximos" habilitadas para localizar e conectar a dispositivos via Bluetooth. Você pode desativar quando não estiver em uso.</string>
+    <!-- PERMISSIONS -->
     <string name="phone_location">Localização do Telefone</string>
     <string name="phone_location_description">Meshtastic usa a localização do seu telefone para habilitar vários recursos. Você pode atualizar as permissões de localização a qualquer momento a partir das configurações.</string>
     <!-- POSITION -->

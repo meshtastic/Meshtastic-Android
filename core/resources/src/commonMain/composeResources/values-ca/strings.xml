@@ -107,6 +107,7 @@
     <!-- LICENSED -->
     <!-- LOAD -->
     <!-- LOCAL -->
+    <!-- LOCATION -->
     <string name="location_disabled">Accés al posicionament deshabilitat, no es pot proveir la posició a la xarxa.</string>
     <!-- LOCKDOWN -->
     <string name="locked">Bloquejat</string>
@@ -178,6 +179,8 @@
     <!-- OUTPUT -->
     <!-- PACKET -->
     <!-- PAX -->
+    <!-- PERMISSION -->
+    <!-- PERMISSIONS -->
     <!-- POSITION -->
     <!-- POWER -->
     <string name="preferences_language">Idioma</string>

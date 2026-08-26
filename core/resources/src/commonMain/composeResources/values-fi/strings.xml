@@ -146,6 +146,7 @@
     <string name="battery_ina_2xx_i2c_address">INA_2XX-akun valvontapiirin I2C-osoite</string>
     <string name="ble_devices">Bluetooth-laitteet</string>
     <string name="ble_rssi_threshold_defaults_to_80">BLE-signaalin RSSI-kynnysarvo (oletus -80)</string>
+    <string name="ble_scan_needs_location_services">Bluetooth-laitteiden haku edellyttää tässä Android-versiossa myös sijaintipalvelujen käyttöä. Sijaintiasi ei käytetä.</string>
     <string name="blue">Sininen</string>
     <!-- BLUETOOTH -->
     <string name="bluetooth">Bluetooth</string>
@@ -158,6 +159,14 @@
     <string name="bluetooth_feature_discovery">Haku</string>
     <string name="bluetooth_feature_discovery_description">Etsi ja tunnista lähelläsi olevia Meshtastic-laitteita.</string>
     <string name="bluetooth_permission">Bluetooth</string>
+    <string name="bluetooth_permission_blocked_notice">Lähistön laitteet -käyttöoikeus on poistettu käytöstä, eikä Android enää pyydä sitä. Ota se käyttöön sovelluksen asetuksissa, jotta voit muodostaa Bluetooth-yhteyden, tai käytä sen sijaan Wi-Fi- tai USB-yhteyttä.</string>
+    <string name="bluetooth_permission_blocked_notice_pre31">Sijaintikäyttöoikeus on poistettu käytöstä, eikä Android enää pyydä sitä. Ota se käyttöön sovelluksen asetuksissa, jotta voit etsiä Bluetooth-laitteita, tai käytä sen sijaan Wi-Fi- tai USB-yhteyttä.</string>
+    <string name="bluetooth_permission_blocked_rationale">Lähistön laitteet -käyttöoikeus on poistettu käytöstä, eikä Android enää pyydä sitä. Ota se käyttöön sovelluksen asetuksissa, jotta voit etsiä laitteita ja muodostaa Bluetooth-yhteyden.</string>
+    <string name="bluetooth_permission_blocked_rationale_pre31">Sijaintikäyttöoikeus on poistettu käytöstä, eikä Android enää pyydä sitä. Ota se käyttöön sovelluksen asetuksissa, jotta voit etsiä laitteita ja muodostaa Bluetooth-yhteyden.</string>
+    <string name="bluetooth_permission_denied_notice">Ilman Lähistön laitteet -käyttöoikeutta Meshtastic ei voi löytää radiotasi eikä muodostaa siihen Bluetooth-yhteyttä. Voit silti käyttää Wi-Fi- tai USB-yhteyttä.</string>
+    <string name="bluetooth_permission_denied_notice_pre31">Ilman sijaintikäyttöoikeutta Android estää Bluetooth-laitteiden haun, joten Meshtastic ei voi löytää radiotasi. Voit silti käyttää Wi-Fi- tai USB-yhteyttä.</string>
+    <string name="bluetooth_permission_rationale">Meshtastic tarvitsee Lähistön laitteet -käyttöoikeuden löytääkseen radiosi ja muodostaakseen siihen yhteyden. Käyttöoikeutta käytetään vain omien laitteidesi kanssa, eikä sillä selvitetä sijaintiasi. Ilman sitä Bluetooth ei ole käytettävissä, mutta Wi-Fi ja USB toimivat edelleen.</string>
+    <string name="bluetooth_permission_rationale_pre31">Meshtastic tarvitsee sijaintikäyttöoikeuden, koska tässä Android-versiossa Bluetooth-laitteiden haku käsitellään sijaintiominaisuutena. Sijaintiasi ei lueta eikä jaeta tätä varten. Ilman käyttöoikeutta Bluetooth ei ole käytettävissä, mutta Wi-Fi ja USB toimivat edelleen.</string>
     <string name="bluetooth_scan_location_services_disabled">Sijaintipalvelut ovat pois käytöstä. Ota ne käyttöön etsiäksesi lähistöllä olevia laitteita.</string>
     <string name="bluetooth_scan_missing_permission">Bluetooth-laitteiden haku edellyttää käyttöoikeutta. Myönnä lähistön laitteet (tai sijainti) käyttöoikeus, jotta laitteita voidaan etsiä.</string>
     <string name="bluetooth_scan_start_failed">Bluetooth-skannaus ei onnistunut. Yritä uudelleen tai ota bluetooth-yhteys uudelleen käyttöön jos ongelma jatkuu.</string>
@@ -168,6 +177,8 @@
     <string name="bold_heading">Lihavoitu otsikko</string>
     <string name="bonding_failed_permissions">Pariliitos epäonnistui. Myönnä lupa lähellä olevien laitteiden käyttöön ja yritä uudelleen.</string>
     <string name="bonding_failed_retry">Paritus ei onnistunut. Yritä uudelleen.</string>
+    <string name="boot_reconnect_blocked_message">Lähistön laitteet -käyttöoikeus on poistettu käytöstä, joten radioosi ei voida muodostaa Bluetooth-yhteyttä. Napauta ottaaksesi käyttöoikeuden uudelleen käyttöön.</string>
+    <string name="boot_reconnect_blocked_title">Meshtastic ei voi muodostaa yhteyttä uudelleen</string>
     <string name="bottom_nav_settings">Asetukset</string>
     <string name="broadcast_interval">Lähetyksen aikaväli</string>
     <string name="busy_noise_floor">Kanava varattu</string>
@@ -969,7 +980,10 @@
     <string name="loading">Ladataan</string>
     <!-- LOCAL -->
     <string name="local_mbtiles_file">Paikallinen MBTiles-karttatiedosto</string>
+    <string name="local_network_permission">Paikallisverkon käyttöoikeus</string>
+    <string name="local_network_permission_blocked_rationale">Paikallisverkon käyttöoikeus on poistettu käytöstä, eikä Android enää pyydä sitä. Wi-Fi-verkossasi olevaa radiota ei voida löytää eikä siihen voida muodostaa yhteyttä, ennen kuin otat käyttöoikeuden käyttöön sovelluksen asetuksissa. Julkisessa verkossa tai VPN:n kautta oleva radio toimii normaalisti.</string>
     <string name="local_network_permission_denied_hint">Meshtasticin paikallisverkon käyttöoikeus on poistettu käytöstä. Jos tämä radio on paikallisverkossasi, yhteys epäonnistuu, kunnes sallit paikallisverkon käytön järjestelmän asetuksissa.</string>
+    <string name="local_network_permission_rationale">Meshtastic tarvitsee paikallisverkon käyttöoikeuden löytääkseen Wi-Fi-verkossasi olevat radiot. Sovellus etsii vain verkosta, johon olet jo yhdistetty. Ilman käyttöoikeutta voit silti muodostaa yhteyden radioon kirjoittamalla sen osoitteen.</string>
     <string name="local_stats_bad">Huonot %1$d</string>
     <string name="local_stats_battery">Akku: %1$d%</string>
     <string name="local_stats_diagnostics_prefix">Vianmääritys: %1$s</string>
@@ -983,7 +997,13 @@
     <string name="local_stats_updated_at">%1$s</string>
     <string name="local_stats_uptime">Käyttöaika: %1$s</string>
     <string name="local_stats_utilization">Kanavan käyttöaste: %1$s% | Lähetysajan käyttöaste: %2$s%</string>
+    <!-- LOCATION -->
     <string name="location_disabled">Sijainnin käyttöoikeus on poistettu käytöstä, joten emme voi tarjota sijaintia mesh-verkkoon.</string>
+    <string name="location_permission">Sijaintikäyttöoikeus</string>
+    <string name="location_permission_blocked_notice">Sijaintikäyttöoikeus on poistettu käytöstä, eikä Android enää pyydä sitä. Ota se käyttöön sovelluksen asetuksissa aina, kun haluat käyttää karttaa ja sijainnin jakamista.</string>
+    <string name="location_permission_blocked_toast">Sijaintikäyttöoikeus on poistettu käytöstä. Ota se käyttöön sovelluksen asetuksissa, jotta voit jakaa sijaintisi.</string>
+    <string name="location_permission_denied_notice">Ilman sijaintikäyttöoikeutta kartta ei näytä sijaintiasi, eikä Meshtastic voi jakaa sijaintiasi mesh-verkkoon. Kaikki muu toimii edelleen, ja voit ottaa käyttöoikeuden käyttöön myöhemmin.</string>
+    <string name="location_permission_rationale">Meshtastic käyttää sijaintiasi näyttääkseen sijaintisi kartalla, mitatakseen etäisyyden radioihin ja – vain jos otat sen käyttöön – jakaakseen sijaintisi mesh-verkkoon. Jos et myönnä käyttöoikeutta, kaikki muu toimii edelleen.</string>
     <string name="location_sharing">Sijainnin jakaminen</string>
     <!-- LOCKDOWN -->
     <string name="lockdown_backoff">Yritä uudelleen %1$d sekunnin kuluttua.</string>
@@ -1234,6 +1254,7 @@
     <string name="name_cannot_be_empty">Nimi ei voi olla tyhjä.</string>
     <string name="navigate_back">Siirry takaisin</string>
     <string name="navigate_into_label">Siirry kohtaan</string>
+    <string name="nearby_devices_permission">Lähistön laitteet -käyttöoikeus</string>
     <string name="need_hardware">Tarvitsetko laitteiston?</string>
     <string name="need_hardware_description">Meshtastic vaatii yhteensopivan laitteen. Tukijamme ja yhteistyökumppanimme tarjoavat käyttövalmiita laitteita. Tässä on muutamia suosituimmista vaihtoehdoista.</string>
     <string name="neighbor_info">Naapuritieto</string>
@@ -1334,8 +1355,12 @@
     <string name="none">Ei mitään (ei käytössä)</string>
     <string name="none_quality">ei mitään</string>
     <string name="not_connected">Ei yhdistetty</string>
+    <string name="not_now">Ei nyt</string>
     <string name="note">Merkintä</string>
     <string name="notes">Viestit</string>
+    <string name="notification_permission_blocked_notice">Ilmoitukset on poistettu käytöstä, eikä Android enää pyydä käyttöoikeutta. Ota se käyttöön sovelluksen asetuksissa, jotta saat tiedon uusista viesteistä ja ilmoituksista.</string>
+    <string name="notification_permission_denied_notice">Ilman ilmoituksia Meshtastic ei voi ilmoittaa uusista viesteistä, uusista radioista tai akun alhaisesta varaustasosta, kun sovellus on taustalla.</string>
+    <string name="notification_permission_rationale">Ilmoitusten avulla Meshtastic voi tavoittaa sinut, kun sovellus ei ole avoinna: uusista viesteistä, uusista löydetyistä radioista ja radion alhaisesta varaustasosta. Jos et myönnä käyttöoikeutta, mikään muu ei muutu.</string>
     <string name="notification_permissions_description">Meshtastic käyttää ilmoituksia tiedottaakseen uusista viesteistä ja muista tärkeistä tapahtumista. Voit muuttaa ilmoitusasetuksia milloin tahansa.</string>
     <!-- NOTIFICATIONS -->
     <string name="notifications_for_channel_and_direct_messages">Kanavailmoitukset ja yksityisviestit.</string>
@@ -1360,6 +1385,7 @@
     <!-- OPEN -->
     <string name="open_bluetooth_settings">Avaa bluetooth-asetukset</string>
     <string name="open_compass">Avaa kompassi</string>
+    <string name="open_location_settings">Avaa sijaintiasetukset</string>
     <string name="open_settings">Avaa asetukset</string>
     <string name="open_source_description">Meshtastic on rakennettu seuraavilla avoimen lähdekoodin kirjastoilla. Napauta mitä tahansa kirjastoa nähdäksesi sen lisenssin.</string>
     <string name="open_source_libraries">Avoimen lähteen kirjastot</string>
@@ -1405,7 +1431,30 @@
     <string name="paxcounter_config">PAX-laskurin asetukset</string>
     <string name="paxcounter_enabled">PAX-laskuri käytössä</string>
     <string name="periodic_position_broadcast">Sijainnin toistuva lähetys</string>
+    <!-- PERMISSION -->
+    <string name="permission_camera_summary">Skannaa kanava- ja yhteystietojen QR-koodit</string>
+    <string name="permission_local_network_summary">Etsi radiot Wi-Fi-verkostasi</string>
+    <string name="permission_location_summary">Näytä sijaintisi kartalla ja jaa se mesh-verkon kanssa</string>
+    <string name="permission_location_summary_pre31">Etsi radiosi Bluetoothin kautta, näytä sijaintisi kartalla ja jaa sijaintisi mesh-verkon kanssa</string>
     <string name="permission_missing_31">Meshtastic tarvitsee "lähistön laitteet" -oikeudet, jotta se voi löytää ja yhdistää laitteisiin Bluetoothin kautta. Voit poistaa oikeuden käytöstä, kun et käytä sovellusta.</string>
+    <string name="permission_missing_pre31">Tässä Android-versiossa yksi sijaintikäyttöoikeus kattaa kaksi asiaa: se mahdollistaa Bluetooth-laitteiden haun ja näyttää sijaintisi mesh-kartalla. Sijainnin jakaminen mesh-verkkoon pysyy pois käytöstä, kunnes otat sen itse käyttöön.</string>
+    <string name="permission_nearby_devices_summary">Etsi radio ja muodosta siihen Bluetooth-yhteys</string>
+    <string name="permission_notifications_summary">Ilmoita viesteistä, uusista radioista ja akun alhaisesta varaustasosta</string>
+    <string name="permission_state_allowed">Sallittu</string>
+    <string name="permission_state_blocked">Estetty - napauta avataksesi järjestelmän asetukset</string>
+    <string name="permission_state_denied">Estetty - napauta salliaksesi</string>
+    <string name="permission_state_not_applicable">Ei vaadita tässä Android-versiossa</string>
+    <string name="permission_state_not_asked">Ei vielä kysytty</string>
+    <!-- PERMISSIONS -->
+    <string name="permissions">Käyttöoikeudet</string>
+    <string name="permissions_all_allowed">Kaikki sallittu</string>
+    <string name="permissions_hide">Piilota käyttöoikeudet</string>
+    <plurals name="permissions_need_attention">
+        <item quantity="one">%1$d vaatii huomiota</item>
+        <item quantity="other">%1$d vaatii huomiota</item>
+    </plurals>
+    <string name="permissions_nothing_needed">Mikään ei vaadi huomiotasi</string>
+    <string name="permissions_show">Näytä käyttöoikeudet</string>
     <string name="phone_location">Puhelimen sijainti</string>
     <string name="phone_location_description">Meshtastic hyödyntää puhelimen sijaintia tarjotakseen erilaisia toimintoja. Voit muuttaa sijaintioikeuksia koska tahansa asetuksista.</string>
     <string name="pin_selected">PIN</string>
@@ -1770,6 +1819,7 @@
     <string name="tak_server_loading">…</string>
     <string name="tak_server_mesh_to_cot">Mesh to CoT -muunnin</string>
     <string name="tak_server_mesh_to_cot_desc">Näytä Meshtastic-radiot ATAK-kartalla yhteystietoina</string>
+    <string name="tak_server_permission_blocked">TAK-palvelin tarvitsee paikallisverkon käyttöoikeuden yhteyksien vastaanottamiseen, eikä Android enää pyydä sitä. Käyttöoikeus on nyt poistettu käytöstä – ota se käyttöön sovelluksen asetuksissa ja ota TAK-palvelin uudelleen käyttöön.</string>
     <string name="tak_server_section">Palvelin</string>
     <string name="tak_server_status">Tila</string>
     <plurals name="tak_server_status_connected">

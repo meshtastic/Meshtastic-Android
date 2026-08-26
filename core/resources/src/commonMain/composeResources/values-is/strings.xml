@@ -97,6 +97,7 @@
     <!-- LICENSED -->
     <!-- LOAD -->
     <!-- LOCAL -->
+    <!-- LOCATION -->
     <string name="location_disabled">Aðgangur að staðsetningu ekki leyfður, staðsetning ekki send út á mesh.</string>
     <!-- LOCKDOWN -->
     <string name="locked">Læst</string>
@@ -146,6 +147,8 @@
     <!-- OUTPUT -->
     <!-- PACKET -->
     <!-- PAX -->
+    <!-- PERMISSION -->
+    <!-- PERMISSIONS -->
     <!-- POSITION -->
     <!-- POWER -->
     <string name="preferences_language">Tungumál</string>

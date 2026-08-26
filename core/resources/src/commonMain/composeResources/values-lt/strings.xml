@@ -124,6 +124,7 @@
     <!-- LICENSED -->
     <!-- LOAD -->
     <!-- LOCAL -->
+    <!-- LOCATION -->
     <string name="location_disabled">Vietos prieigos funkcija išjungta, negalima pateikti pozicijos tinklui.</string>
     <!-- LOCKDOWN -->
     <string name="locked">Užrakintas</string>
@@ -197,6 +198,8 @@
     <!-- OUTPUT -->
     <!-- PACKET -->
     <!-- PAX -->
+    <!-- PERMISSION -->
+    <!-- PERMISSIONS -->
     <!-- POSITION -->
     <!-- POWER -->
     <string name="preferences_language">Kalba</string>
