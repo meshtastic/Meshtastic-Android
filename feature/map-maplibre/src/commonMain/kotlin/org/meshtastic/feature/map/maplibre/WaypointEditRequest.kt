@@ -1,0 +1,40 @@
+/*
+ * Copyright (c) 2026 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+package org.meshtastic.feature.map.maplibre
+
+import androidx.compose.runtime.Stable
+import org.meshtastic.proto.Waypoint
+
+/**
+ * A waypoint the map is asking its host to present an editor for.
+ *
+ * The map owns everything except the editor itself: it decides when to ask, assigns a packet id and default icon, and
+ * performs the send or delete. All the host has to do is show a dialog and call back.
+ *
+ * The editor is host-supplied because the only one that exists — `EditWaypointDialog` — drives
+ * `android.app.DatePickerDialog` and `android.widget.TimePicker` for the expiry picker, so it cannot live in a source
+ * set shared with desktop. A host with no editor simply cannot create or edit waypoints, which is today's desktop.
+ *
+ * @property waypoint The waypoint to edit. A new one carries `id == 0` and only its coordinates.
+ */
+@Stable
+class WaypointEditRequest(
+    val waypoint: Waypoint,
+    val onSend: (Waypoint) -> Unit,
+    val onDelete: (Waypoint) -> Unit,
+    val onDismiss: () -> Unit,
+)

@@ -19,9 +19,12 @@ package org.meshtastic.app.map
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.map.component.CustomTileSourcesMenuItem
 import org.meshtastic.app.map.repository.CustomTileProviderRepository
 import org.meshtastic.core.ui.util.MapViewProvider
+import org.meshtastic.feature.map.SharedMapViewModel
+import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.maplibre.MapLibreMapViewProvider
 import org.meshtastic.feature.map.maplibre.layers.CustomLayer
 import org.meshtastic.feature.map.maplibre.style.Basemap
@@ -54,6 +57,21 @@ fun getMapViewProvider(): MapViewProvider = MapLibreMapViewProvider(
             }
     },
     basemapMenuExtra = { CustomTileSourcesMenuItem() },
+    // EditWaypointDialog drives android.app.DatePickerDialog for the expiry picker, so it cannot live in the map
+    // module's shared source set. The flavor supplies it; desktop goes without until there is a multiplatform
+    // editor.
+    waypointEditor = { request ->
+        val viewModel: SharedMapViewModel = koinViewModel()
+        val displayUnits by viewModel.displayUnits.collectAsStateWithLifecycle()
+        EditWaypointDialog(
+            waypoint = request.waypoint,
+            displayUnits = displayUnits,
+            myNodeNum = viewModel.myNodeNum,
+            onSend = request.onSend,
+            onDelete = request.onDelete,
+            onDismissRequest = request.onDismiss,
+        )
+    },
 )
 
 /** Site Planner (coverage-estimate) — the F-Droid map renders imported coverage as a GeoJSON layer (see #6138). */

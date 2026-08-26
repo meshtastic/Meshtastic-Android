@@ -35,6 +35,9 @@ import org.maplibre.compose.location.updateCamera
 import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.compose.material3.LocationPuckDefaults
 import org.maplibre.compose.style.BaseStyle
+import org.maplibre.compose.util.ClickResult
+import org.maplibre.compose.util.MaplibreComposable
+import org.maplibre.spatialk.geojson.Position
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.feature.map.BaseMapViewModel
 import org.meshtastic.feature.map.maplibre.geojson.ClusterMember
@@ -71,6 +74,8 @@ fun MeshMap(
     onWaypointClick: (Int) -> Unit = {},
     /** Called with the nodes of a tapped cluster that cannot be zoomed apart any further. */
     onClusterMembers: (List<ClusterMember>) -> Unit = {},
+    /** Called with the pressed position on a long press, which is how a new waypoint gets placed. */
+    onMapLongClick: (Position) -> Unit = {},
     /**
      * Hoisted so the host can read the bearing for a compass and steer the camera itself. Defaults to a map-owned state
      * for callers that only want the map to frame itself.
@@ -107,17 +112,22 @@ fun MeshMap(
 
     // Follows position whenever tracking is on; touches bearing only when the caller asks for it, so a user who
     // has rotated the map is not straightened out behind their back.
-    if (locationState != null) {
-        LocationTrackingEffect(
-            locationState = locationState,
-            enabled = followLocation,
-            trackBearing = bearingUpdate != BearingUpdate.IGNORE,
-        ) {
-            updateCamera(camera = cameraState, updateBearing = bearingUpdate)
-        }
-    }
+    FollowUserLocation(
+        locationState = locationState,
+        cameraState = cameraState,
+        followLocation = followLocation,
+        bearingUpdate = bearingUpdate,
+    )
 
-    MaplibreMap(baseStyle = basemap.toBaseStyle(), cameraState = cameraState, modifier = modifier) {
+    MaplibreMap(
+        baseStyle = basemap.toBaseStyle(),
+        cameraState = cameraState,
+        modifier = modifier,
+        onMapLongClick = { position, _ ->
+            onMapLongClick(position)
+            ClickResult.Consume
+        },
+    ) {
         if (basemap is Basemap.Raster) {
             RasterBasemapLayer(basemap)
         }
@@ -145,14 +155,40 @@ fun MeshMap(
         )
 
         // Declared last so the user's own position draws above the mesh.
-        if (locationState != null && followLocation) {
-            LocationPuck(
-                idPrefix = "user-location",
-                location = locationState.location,
-                cameraState = cameraState,
-                bearing = locationState.mostAccurateBearing(),
-                colors = LocationPuckDefaults.colors(),
-            )
-        }
+        UserLocationPuck(locationState = locationState, cameraState = cameraState, visible = followLocation)
     }
+}
+
+/** Keeps the camera on the user while tracking is on. No-op without a location source. */
+@Composable
+private fun FollowUserLocation(
+    locationState: LocationState?,
+    cameraState: CameraState,
+    followLocation: Boolean,
+    bearingUpdate: BearingUpdate,
+) {
+    if (locationState == null) return
+
+    LocationTrackingEffect(
+        locationState = locationState,
+        enabled = followLocation,
+        trackBearing = bearingUpdate != BearingUpdate.IGNORE,
+    ) {
+        updateCamera(camera = cameraState, updateBearing = bearingUpdate)
+    }
+}
+
+/** The user's position, accuracy and heading. Drawn only while tracking, so switching it off leaves no stale dot. */
+@Composable
+@MaplibreComposable
+private fun UserLocationPuck(locationState: LocationState?, cameraState: CameraState, visible: Boolean) {
+    if (locationState == null || !visible) return
+
+    LocationPuck(
+        idPrefix = "user-location",
+        location = locationState.location,
+        cameraState = cameraState,
+        bearing = locationState.mostAccurateBearing(),
+        colors = LocationPuckDefaults.colors(),
+    )
 }

@@ -46,8 +46,6 @@ import org.maplibre.compose.location.rememberDefaultLocationProvider
 import org.maplibre.compose.location.rememberDefaultOrientationProvider
 import org.maplibre.compose.location.rememberLocationState
 import org.maplibre.compose.location.rememberSystemSettingsLauncher
-import org.meshtastic.core.model.isLocked
-import org.meshtastic.core.model.isModifiableBy
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.MapTileProviderPrefs
 import org.meshtastic.core.resources.Res
@@ -60,13 +58,12 @@ import org.meshtastic.core.ui.icon.Layers
 import org.meshtastic.core.ui.icon.Map
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.util.MapViewProvider
-import org.meshtastic.feature.map.BaseMapViewModel
 import org.meshtastic.feature.map.SharedMapViewModel
-import org.meshtastic.feature.map.component.DeleteWaypointDialog
 import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.component.MapControlsOverlay
-import org.meshtastic.feature.map.component.WaypointInfoDialog
 import org.meshtastic.feature.map.maplibre.component.ClusterMembersDialog
+import org.meshtastic.feature.map.maplibre.component.WaypointDialogs
+import org.meshtastic.feature.map.maplibre.component.rememberWaypointEditing
 import org.meshtastic.feature.map.maplibre.geojson.ClusterMember
 import org.meshtastic.feature.map.maplibre.layers.CustomLayer
 import org.meshtastic.feature.map.maplibre.style.Basemap
@@ -96,6 +93,11 @@ class MapLibreMapViewProvider(
      * than a callback so the host owns whatever UI it opens; desktop leaves it empty.
      */
     private val basemapMenuExtra: @Composable () -> Unit = {},
+    /**
+     * Presents an editor for the waypoint the map hands over. Host-supplied because the only editor that exists is
+     * Android-only; a host that leaves this empty simply cannot create or edit waypoints. See [WaypointEditRequest].
+     */
+    private val waypointEditor: @Composable (WaypointEditRequest) -> Unit = {},
 ) : MapViewProvider {
 
     @Composable
@@ -111,6 +113,7 @@ class MapLibreMapViewProvider(
         val cameraState = rememberCameraState()
         val location = rememberLocationControls(cameraState)
 
+        val waypoints = rememberWaypointEditing()
         var infoWaypointId by remember { mutableStateOf<Int?>(null) }
         var clusterMembers by remember { mutableStateOf(emptyList<ClusterMember>()) }
 
@@ -119,9 +122,6 @@ class MapLibreMapViewProvider(
         LaunchedEffect(waypointId) { waypointId?.let { infoWaypointId = it } }
 
         var overlays by remember { mutableStateOf(emptyList<MapOverlay>()) }
-        // Owned here, not inside FilterMenu: the button that opens it lives in MapControlsOverlay and only reports
-        // the press back through onToggleFilterMenu.
-        var filterMenuExpanded by remember { mutableStateOf(false) }
 
         Box(modifier = modifier.fillMaxSize()) {
             MeshMap(
@@ -137,26 +137,16 @@ class MapLibreMapViewProvider(
                 bearingUpdate = location.bearingUpdate,
                 onWaypointClick = { infoWaypointId = it },
                 onClusterMembers = { clusterMembers = it },
+                onMapLongClick = waypoints.onLongPress,
             )
 
-            MapControlsOverlay(
-                onToggleFilterMenu = { filterMenuExpanded = !filterMenuExpanded },
-                bearing = cameraState.position.bearing.toFloat(),
-                followPhoneBearing = location.followingBearing,
-                onCompassClick = location.onCompassClick,
-                filterDropdownContent = {
-                    FilterMenu(
-                        viewModel = viewModel,
-                        expanded = filterMenuExpanded,
-                        onDismissRequest = { filterMenuExpanded = false },
-                    )
-                },
-                mapTypeContent = { BasemapMenu(selection = basemaps, extra = basemapMenuExtra) },
-                layersContent = { OverlayMenu(selected = overlays, onSelectedChange = { overlays = it }) },
-                // The site planner is launched from the F-Droid app's own scaffold and has no desktop host.
-                onSitePlannerClick = null,
-                isLocationTrackingEnabled = location.following,
-                onToggleLocationTracking = location.onToggleFollow,
+            MapToolbar(
+                basemaps = basemaps,
+                location = location,
+                cameraState = cameraState,
+                overlays = overlays,
+                onOverlaysChange = { overlays = it },
+                basemapMenuExtra = basemapMenuExtra,
             )
 
             ClusterMembersDialog(
@@ -172,64 +162,45 @@ class MapLibreMapViewProvider(
                 viewModel = viewModel,
                 selectedId = infoWaypointId,
                 onSelectedIdChange = { infoWaypointId = it },
+                editing = waypoints,
+                editor = waypointEditor,
             )
         }
     }
 }
 
 /**
- * Waypoint detail and deletion dialogs for the tapped waypoint.
+ * The floating map toolbar.
  *
- * Owns the deletion step itself so the caller only has to track which waypoint is open.
+ * Owns the filter menu's open state, which the shared overlay cannot: the button that opens it and the dropdown it
+ * opens are separate parameters, so something has to hold the flag between them.
  */
 @Composable
-private fun WaypointDialogs(viewModel: SharedMapViewModel, selectedId: Int?, onSelectedIdChange: (Int?) -> Unit) {
-    val waypoints by viewModel.waypoints.collectAsStateWithLifecycle()
-    val displayUnits by viewModel.displayUnits.collectAsStateWithLifecycle()
-    val alertOptIns by viewModel.geofenceAlertOptIns.collectAsStateWithLifecycle()
-    val isConnected by viewModel.isConnected.collectAsStateWithLifecycle()
+private fun MapToolbar(
+    basemaps: BasemapSelection,
+    location: LocationControls,
+    cameraState: CameraState,
+    overlays: List<MapOverlay>,
+    onOverlaysChange: (List<MapOverlay>) -> Unit,
+    basemapMenuExtra: @Composable () -> Unit,
+) {
+    var filterMenuExpanded by remember { mutableStateOf(false) }
 
-    var deletingId by remember { mutableStateOf<Int?>(null) }
-
-    selectedId?.let { id ->
-        waypoints[id]?.waypoint?.let { waypoint ->
-            WaypointInfoDialog(
-                waypoint = waypoint,
-                displayUnits = displayUnits,
-                alertsEnabled = waypoint.id in alertOptIns,
-                onToggleAlerts = { viewModel.setGeofenceAlertOptIn(waypoint.id, it) },
-                onDismissRequest = { onSelectedIdChange(null) },
-                onDeleteForMe =
-                if (!waypoint.isLocked) {
-                    {
-                        onSelectedIdChange(null)
-                        deletingId = waypoint.id
-                    }
-                } else {
-                    null
-                },
-            )
-        }
-    }
-
-    deletingId?.let { id ->
-        waypoints[id]?.waypoint?.let { waypoint ->
-            DeleteWaypointDialog(
-                // Deleting for everyone re-broadcasts an expiry, so it needs a live connection.
-                canDeleteForEveryone = waypoint.isModifiableBy(viewModel.myNodeNum) && isConnected && waypoint.id != 0,
-                onDeleteForMe = {
-                    viewModel.deleteWaypoint(waypoint.id)
-                    deletingId = null
-                },
-                onDeleteForEveryone = {
-                    viewModel.sendWaypoint(waypoint.copy(expire = 1))
-                    viewModel.deleteWaypoint(waypoint.id)
-                    deletingId = null
-                },
-                onDismissRequest = { deletingId = null },
-            )
-        }
-    }
+    MapControlsOverlay(
+        onToggleFilterMenu = { filterMenuExpanded = !filterMenuExpanded },
+        bearing = cameraState.position.bearing.toFloat(),
+        followPhoneBearing = location.followingBearing,
+        onCompassClick = location.onCompassClick,
+        filterDropdownContent = {
+            FilterMenu(expanded = filterMenuExpanded, onDismissRequest = { filterMenuExpanded = false })
+        },
+        mapTypeContent = { BasemapMenu(selection = basemaps, extra = basemapMenuExtra) },
+        layersContent = { OverlayMenu(selected = overlays, onSelectedChange = onOverlaysChange) },
+        // The site planner is launched from the F-Droid app's own scaffold and has no desktop host.
+        onSitePlannerClick = null,
+        isLocationTrackingEnabled = location.following,
+        onToggleLocationTracking = location.onToggleFollow,
+    )
 }
 
 /** The basemap in use, everything selectable, and how to change it. */
@@ -352,7 +323,8 @@ private fun rememberLocationControls(cameraState: CameraState): LocationControls
 }
 
 @Composable
-private fun FilterMenu(viewModel: BaseMapViewModel, expanded: Boolean, onDismissRequest: () -> Unit) {
+private fun FilterMenu(expanded: Boolean, onDismissRequest: () -> Unit) {
+    val viewModel: SharedMapViewModel = koinViewModel()
     val filterState by viewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
 
     DropdownMenu(expanded = expanded, onDismissRequest = onDismissRequest) {
