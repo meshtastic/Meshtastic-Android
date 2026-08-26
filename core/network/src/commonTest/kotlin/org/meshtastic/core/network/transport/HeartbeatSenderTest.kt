@@ -81,6 +81,37 @@ class HeartbeatSenderTest {
     }
 
     @Test
+    fun `sender demotes repeated rejections and an accepted handoff resets warning severity`() = runTest {
+        var admitted = false
+        val loggedRejections = mutableListOf<Pair<HeartbeatRejectionLogLevel, String>>()
+        val sender =
+            HeartbeatSender(
+                sendToRadio = { admitted },
+                logTag = "test",
+                rejectionLogger = { level, message -> loggedRejections += level to message },
+            )
+
+        repeat(HeartbeatRejectionLogPolicy.DEFAULT_WARN_LIMIT) { assertFalse(sender.sendHeartbeat()) }
+        assertFalse(sender.sendHeartbeat())
+        assertEquals(
+            listOf(HeartbeatRejectionLogLevel.Warn, HeartbeatRejectionLogLevel.Warn, HeartbeatRejectionLogLevel.Debug),
+            loggedRejections.map { it.first },
+        )
+
+        admitted = true
+        assertTrue(sender.sendHeartbeat())
+        assertEquals(3, loggedRejections.size, "an accepted handoff must not emit a rejection log")
+
+        admitted = false
+        assertFalse(sender.sendHeartbeat())
+        assertEquals(HeartbeatRejectionLogLevel.Warn, loggedRejections.last().first)
+        assertTrue(
+            loggedRejections.all { it.second == "[test] Heartbeat handoff was rejected by the transport" },
+            "the sender must dispatch the production rejection message through the severity seam",
+        )
+    }
+
+    @Test
     fun `heartbeat loop emits at the configured interval`() = runTest {
         val sentPackets = mutableListOf<ByteArray>()
         val sender = HeartbeatSender(sendToRadio = { sentPackets.add(it) })

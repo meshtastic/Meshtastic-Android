@@ -131,6 +131,64 @@ class BleRadioTransportTest {
     }
 
     @Test
+    fun `offline heartbeat owns rejection logging while an ordinary send keeps the transport warning`() = runTest {
+        val transportRejections = mutableListOf<String>()
+        val bleTransport =
+            BleRadioTransport(
+                scope = backgroundScope,
+                scanner = scanner,
+                bluetoothRepository = bluetoothRepository,
+                connectionFactory = connectionFactory,
+                callback = service,
+                address = address,
+            )
+        bleTransport.sendRejectionLogger = { transportRejections += it }
+
+        try {
+            bleTransport.keepAlive()
+            runCurrent()
+            assertTrue(
+                transportRejections.isEmpty(),
+                "HeartbeatSender must be the sole owner of expected offline rejection severity",
+            )
+
+            assertFalse(bleTransport.handleSendToRadio(byteArrayOf(1, 2, 3)))
+            assertEquals(1, transportRejections.size)
+            assertTrue("toRadio characteristic unavailable" in transportRejections.single())
+        } finally {
+            bleTransport.close()
+        }
+    }
+
+    @Test
+    fun `BLE write backlog rejection retains a transport warning on every rejection`() = runTest {
+        val device = FakeBleDevice(address = address, name = "Test Device")
+        bluetoothRepository.bond(device)
+        scanner.emitDevice(device)
+        val transportRejections = mutableListOf<String>()
+        val bleTransport = bleTransportOn(this, FakeRadioInterfaceService())
+        bleTransport.sendRejectionLogger = { transportRejections += it }
+        bleTransport.start()
+
+        try {
+            advanceTimeBy(4_000L)
+            // Keep the production queue bound private. Four admitted writes fill the current bounded queue; the test
+            // then verifies the externally observable behavior rather than widening a production constant for access.
+            repeat(4) { assertTrue(bleTransport.handleSendToRadio(byteArrayOf(it.toByte()))) }
+
+            repeat(3) { attempt -> assertFalse(bleTransport.handleSendToRadio(byteArrayOf((99 + attempt).toByte()))) }
+            assertEquals(3, transportRejections.size)
+            assertTrue(
+                transportRejections.all { "BLE write backlog is full" in it },
+                "backlog pressure must stay warning-worthy on every rejected admission",
+            )
+            runCurrent()
+        } finally {
+            bleTransport.close()
+        }
+    }
+
+    @Test
     fun `close drains every write admitted by the active BLE profile generation`() = runTest {
         val device = FakeBleDevice(address = address, name = "Test Device")
         bluetoothRepository.bond(device)
