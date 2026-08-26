@@ -16,6 +16,8 @@
  */
 package org.meshtastic.app.map
 
+import java.util.Locale
+
 /** Building the GeoJSON a parsed KML becomes: geometry, simplestyle properties, and the escaping both need. */
 internal fun pointGeometry(position: String) = KmlGeometry("Point", position, isPolygonal = false)
 
@@ -84,7 +86,12 @@ internal fun String.toCssColor(): Pair<String, String>? {
         null
     } else {
         val opacity = bytes[ALPHA]!!.toDouble() / MAX_CHANNEL
-        "#%02x%02x%02x".format(bytes[RED], bytes[GREEN], bytes[BLUE]) to "%.3f".format(opacity)
+        // Locale.US, not the default: this is JSON, not display text. `%f` follows the device locale, so on a
+        // comma-decimal phone the default would emit `"fill-opacity":0,498` — invalid JSON, which makes MapLibre
+        // reject the whole converted file and every KML import silently draw nothing. Machine formats want
+        // locale-invariant, which is the opposite of what NumberFormatter is for.
+        String.format(Locale.US, "#%02x%02x%02x", bytes[RED], bytes[GREEN], bytes[BLUE]) to
+            String.format(Locale.US, "%.3f", opacity)
     }
 }
 

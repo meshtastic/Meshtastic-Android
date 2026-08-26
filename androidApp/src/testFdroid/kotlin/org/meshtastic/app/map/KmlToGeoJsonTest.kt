@@ -22,6 +22,7 @@ import org.robolectric.RobolectricTestRunner
 import java.io.BufferedInputStream
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+import java.util.Locale
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import kotlin.test.assertContains
@@ -270,6 +271,81 @@ class KmlToGeoJsonTest {
             )
 
         assertNotNull(KmlToGeoJson.convert(BufferedInputStream(ByteArrayInputStream(archive))))
+    }
+
+    @Test
+    fun `a comma-decimal locale still emits valid json`() {
+        // `%f` follows the device locale, so on a German phone the default would write 0,498 — invalid JSON, and
+        // MapLibre rejects the whole file, so every KML import would silently draw nothing.
+        val original = Locale.getDefault()
+        try {
+            Locale.setDefault(Locale.GERMANY)
+            val result =
+                assertNotNull(
+                    convert(
+                        """
+                        <kml><Document>
+                          <Style id="zone"><PolyStyle><color>7f00ff00</color></PolyStyle></Style>
+                          <Placemark><styleUrl>#zone</styleUrl><Polygon><outerBoundaryIs><LinearRing>
+                            <coordinates>0,0 1,0 1,1 0,0</coordinates>
+                          </LinearRing></outerBoundaryIs></Polygon></Placemark>
+                        </Document></kml>
+                        """,
+                    ),
+                )
+
+            // The whole point: a dot, not a comma, in the property this locale would have written as 0,498.
+            assertContains(result, """"fill-opacity":0.498""")
+            assertTrue(""""fill-opacity":0,""" !in result, result)
+        } finally {
+            Locale.setDefault(original)
+        }
+    }
+
+    @Test
+    fun `an icon or label colour is not mistaken for the line colour`() {
+        // Google Earth exports carry these alongside a real LineStyle, or with no LineStyle at all.
+        val result =
+            assertNotNull(
+                convert(
+                    """
+                    <kml><Document>
+                      <Style id="pin">
+                        <IconStyle><color>ff00ffff</color><scale>1.2</scale></IconStyle>
+                        <LabelStyle><color>ffffffff</color></LabelStyle>
+                      </Style>
+                      <Placemark><styleUrl>#pin</styleUrl>
+                        <LineString><coordinates>0,0 1,1</coordinates></LineString>
+                      </Placemark>
+                    </Document></kml>
+                    """,
+                ),
+            )
+
+        assertTrue(""""stroke":""" !in result, result)
+    }
+
+    @Test
+    fun `a line style is still read when an icon style sits beside it`() {
+        val result =
+            assertNotNull(
+                convert(
+                    """
+                    <kml><Document>
+                      <Style id="both">
+                        <IconStyle><color>ff00ffff</color></IconStyle>
+                        <LineStyle><color>ff0000ff</color><width>3</width></LineStyle>
+                      </Style>
+                      <Placemark><styleUrl>#both</styleUrl>
+                        <LineString><coordinates>0,0 1,1</coordinates></LineString>
+                      </Placemark>
+                    </Document></kml>
+                    """,
+                ),
+            )
+
+        assertContains(result, """"stroke":"#ff0000"""")
+        assertContains(result, """"stroke-width":3.0""")
     }
 
     @Test

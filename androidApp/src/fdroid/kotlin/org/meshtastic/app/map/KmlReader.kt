@@ -37,18 +37,20 @@ internal class KmlGeometry(val type: String, val coordinates: String, val isPoly
 internal fun XmlPullParser.readStyle(): Pair<String, KmlStyle>? {
     val id = getAttributeValue(null, "id")
     var style = KmlStyle()
-    var inPolyStyle = false
+    // Which sub-style the reader is inside. A Google Earth export routinely carries an IconStyle and a LabelStyle in
+    // the same Style, each with its own <color>; taking any colour as the line colour painted routes in the icon's.
+    var enclosing: String? = null
     var done = id == null
 
     while (!done && next() != XmlPullParser.END_DOCUMENT) {
         val tag = name
         when {
-            eventType == XmlPullParser.START_TAG && tag == "PolyStyle" -> inPolyStyle = true
+            eventType == XmlPullParser.START_TAG && tag in SUB_STYLES -> enclosing = tag
 
             eventType == XmlPullParser.START_TAG ->
-                style = style.withStyleElement(tag = tag, inPolyStyle = inPolyStyle) { nextText().trim() }
+                style = style.withStyleElement(tag = tag, enclosing = enclosing) { nextText().trim() }
 
-            eventType == XmlPullParser.END_TAG && tag == "PolyStyle" -> inPolyStyle = false
+            eventType == XmlPullParser.END_TAG && tag in SUB_STYLES -> enclosing = null
 
             eventType == XmlPullParser.END_TAG && tag == "Style" -> done = true
 
@@ -58,15 +60,20 @@ internal fun XmlPullParser.readStyle(): Pair<String, KmlStyle>? {
     return id?.let { it to style }
 }
 
+/** The `<Style>` children that own a colour or a width. Anything else in a Style is skipped. */
+private val SUB_STYLES = setOf("LineStyle", "PolyStyle", "IconStyle", "LabelStyle", "BalloonStyle", "ListStyle")
+
 /**
- * Folds one `<Style>` child into the style being built. An element this app cannot carry leaves it untouched.
+ * Folds one element of a `<Style>` sub-style into the style being built.
  *
- * `<fill>0</fill>` is how KML says "no fill", so it means outline only rather than a fill of nothing.
+ * Only LineStyle and PolyStyle contribute: an IconStyle or LabelStyle colour says nothing about how a route or a zone
+ * is drawn. `<fill>0</fill>` is how KML says "no fill", so it means outline only rather than a fill of nothing.
  */
-private fun KmlStyle.withStyleElement(tag: String, inPolyStyle: Boolean, value: () -> String): KmlStyle = when (tag) {
-    "color" -> value().let { if (inPolyStyle) copy(fillColor = it) else copy(lineColor = it) }
-    "width" -> copy(lineWidth = value().toFloatOrNull())
-    "fill" -> copy(filled = value() != "0")
+private fun KmlStyle.withStyleElement(tag: String, enclosing: String?, value: () -> String): KmlStyle = when {
+    tag == "color" && enclosing == "PolyStyle" -> copy(fillColor = value())
+    tag == "color" && enclosing == "LineStyle" -> copy(lineColor = value())
+    tag == "width" && enclosing == "LineStyle" -> copy(lineWidth = value().toFloatOrNull())
+    tag == "fill" && enclosing == "PolyStyle" -> copy(filled = value() != "0")
     else -> this
 }
 
