@@ -38,13 +38,15 @@ on:
         required: false
       DATADOG_CLIENT_TOKEN:
         required: false
-      GOOGLE_MAPS_API_KEY:
+      # Debug-only Maps key -- deliberately not the release GOOGLE_MAPS_API_KEY that
+      # release.yml uses. See the "Load Maps API key" step in android-check for why
+      # the two must stay separate.
+      GOOGLE_MAPS_API_KEY_DEBUG:
         required: false
 
 env:
   DATADOG_APPLICATION_ID: ${{ secrets.DATADOG_APPLICATION_ID }}
   DATADOG_CLIENT_TOKEN: ${{ secrets.DATADOG_CLIENT_TOKEN }}
-  MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
   GITHUB_TOKEN: ${{ github.token }}
   # Only main writes the Gradle caches. merge_group scopes are throwaway branches
   # (per gradle/actions docs) — writes there had no reader.
@@ -446,6 +448,30 @@ jobs:
         run: |
           BASE=$(grep '^VERSION_NAME_BASE=' config.properties | cut -d'=' -f2)
           echo "VERSION_NAME=${BASE}-SNAPSHOT" >> "$GITHUB_ENV"
+
+      # androidApp/src/google/AndroidManifest.xml resolves ${MAPS_API_KEY} from
+      # secrets.properties (the secrets plugin injects it at variant level). With no
+      # such file the build falls back to secrets.defaults.properties' placeholder
+      # DEFAULT_API_KEY, so every snapshot/PR google-flavor APK shipped a blank map
+      # (#6883) -- the very flavor docs/en/developer/test-builds.md tells testers to use.
+      #
+      # A debug-only key, never the release one: config/debug.keystore is checked in
+      # (#6615), so the debug applicationId + SHA-1 pair every debug APK presents is
+      # forgeable by anyone who clones this repo. Pointing it at the production key
+      # would hand production Maps quota to the world; the debug key is restricted to
+      # those debug coordinates and quota-capped on its own.
+      #
+      # Unset -- fork PRs receive no secrets -- leaves today's placeholder behaviour.
+      - name: Load Maps API key for google-flavor debug builds
+        env:
+          GOOGLE_MAPS_API_KEY_DEBUG: ${{ secrets.GOOGLE_MAPS_API_KEY_DEBUG }}
+        run: |
+          if [ -n "$GOOGLE_MAPS_API_KEY_DEBUG" ]; then
+            echo "MAPS_API_KEY=$GOOGLE_MAPS_API_KEY_DEBUG" >> ./secrets.properties
+            echo "Injected debug Maps API key into secrets.properties."
+          else
+            echo "::warning::GOOGLE_MAPS_API_KEY_DEBUG is unset (fork PR, or the secret is not configured yet) -- the google-flavor map will be blank."
+          fi
 
       - name: Build Android APKs
         # -Dorg.gradle.isolated-projects=false: the dependency-graph plugin injected by setup-gradle force-resolves
