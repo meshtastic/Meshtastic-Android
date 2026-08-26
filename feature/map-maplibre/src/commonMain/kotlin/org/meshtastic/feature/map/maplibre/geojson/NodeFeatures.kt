@@ -89,6 +89,8 @@ fun nodesToFeatureCollection(nodes: List<Node>, myNodeNum: Int? = null): Feature
  *
  * @param outlined draws a white border, as the discovery map's chips have. Node chips have none, matching
  *   [org.meshtastic.core.ui.component.NodeChip].
+ * @param glyph drawn instead of [label], for the discovery map's sensor and social markers. The Google discovery map
+ *   substitutes an icon for the name the same way.
  */
 internal data class MapChipKey(
     val label: String,
@@ -96,7 +98,17 @@ internal data class MapChipKey(
     val foreground: Int,
     val struckThrough: Boolean = false,
     val outlined: Boolean = false,
+    val glyph: MapChipGlyph? = null,
 )
+
+/** The icons a chip can carry in place of its text. */
+internal enum class MapChipGlyph {
+    /** A node whose traffic is mostly environment telemetry. */
+    SENSOR,
+
+    /** A node whose traffic is mostly messages. */
+    SOCIAL,
+}
 
 /**
  * The value a feature carries so one layer can pick that marker's chip image.
@@ -104,7 +116,7 @@ internal data class MapChipKey(
  * Every field that changes the pixels is in the key: a short name is not unique, and neither is a colour.
  */
 internal fun MapChipKey.featureValue(): String =
-    "$label ${background.toString(HEX_RADIX)} ${foreground.toString(HEX_RADIX)} $struckThrough $outlined"
+    "$label ${background.toString(HEX_RADIX)} ${foreground.toString(HEX_RADIX)} $struckThrough $outlined $glyph"
 
 internal fun Node.toNodeChip(): MapChipKey {
     val (foreground, background) = colors

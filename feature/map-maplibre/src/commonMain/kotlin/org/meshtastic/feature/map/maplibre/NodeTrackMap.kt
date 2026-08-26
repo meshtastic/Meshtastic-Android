@@ -17,7 +17,6 @@
 package org.meshtastic.feature.map.maplibre
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -56,6 +55,7 @@ import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.Node
 import org.meshtastic.feature.map.LastHeardFilter
 import org.meshtastic.feature.map.SharedMapViewModel
+import org.meshtastic.feature.map.maplibre.component.MapZoom
 import org.meshtastic.feature.map.maplibre.component.SecondaryMapControls
 import org.meshtastic.feature.map.maplibre.component.TrackFilterMenu
 import org.meshtastic.feature.map.maplibre.component.TrackPointCard
@@ -127,7 +127,7 @@ fun MapLibreNodeTrackMap(
     LaunchedEffect(allPoints.size, hasViewport) {
         if (hasViewport && allPoints.isNotEmpty()) {
             positionsBoundingBox(allPoints.map { it.first })?.let { box ->
-                cameraState.jumpTo(boundingBox = box, padding = PaddingValues(FIT_PADDING.dp))
+                cameraState.jumpTo(boundingBox = box, padding = SecondaryMapFitPadding)
             }
         }
     }
@@ -162,6 +162,7 @@ fun MapLibreNodeTrackMap(
                 if (node != null) NewestPositionChip(node = node, newest = points.last())
             }
         }
+        MapZoom(cameraState = cameraState, basemap = basemaps.current)
         SecondaryMapControls(
             cameraState = cameraState,
             basemaps = basemaps,
@@ -312,9 +313,3 @@ private fun NewestPositionChip(node: Node, newest: TrackPoint) {
 
 /** Alpha the oldest end of a track fades to. */
 private const val OLDEST_ALPHA = 0.25f
-
-/**
- * Breathing room around the fitted track. Wide enough for the chip on the newest point, which extends half its width
- * past the point itself and was otherwise clipped by the edge of the map.
- */
-private const val FIT_PADDING = 72

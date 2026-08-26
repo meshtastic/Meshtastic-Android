@@ -23,9 +23,12 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
@@ -53,6 +56,10 @@ import org.maplibre.compose.sources.Source
 import org.maplibre.compose.util.ClickResult
 import org.maplibre.compose.util.FeaturesClickHandler
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Person
+import org.meshtastic.core.ui.icon.Temperature
+import org.meshtastic.feature.map.maplibre.geojson.MapChipGlyph
 import org.meshtastic.feature.map.maplibre.geojson.MapChipKey
 import org.meshtastic.feature.map.maplibre.geojson.NodeFeatureKeys
 import org.meshtastic.feature.map.maplibre.geojson.featureValue
@@ -149,31 +156,62 @@ private fun rememberChipImages(chips: List<MapChipKey>): Map<String, ChipImage> 
     val density = LocalDensity.current
     val textStyle = MaterialTheme.typography.labelLarge
 
-    return remember(chips, measurer, density, textStyle) {
-        chips.associate { chip -> chip.featureValue() to chip.rasterize(measurer, textStyle, density) }
+    // Vector painters have to be built in composition, so they are resolved here and handed to the rasterizer rather
+    // than looked up inside it.
+    val glyphs =
+        mapOf(
+            MapChipGlyph.SENSOR to rememberVectorPainter(MeshtasticIcons.Temperature),
+            MapChipGlyph.SOCIAL to rememberVectorPainter(MeshtasticIcons.Person),
+        )
+
+    return remember(chips, measurer, density, textStyle, glyphs) {
+        chips.associate { chip -> chip.featureValue() to chip.rasterize(measurer, textStyle, density, glyphs) }
     }
 }
 
-private fun MapChipKey.rasterize(measurer: TextMeasurer, textStyle: TextStyle, density: Density): ChipImage {
+private fun MapChipKey.rasterize(
+    measurer: TextMeasurer,
+    textStyle: TextStyle,
+    density: Density,
+    glyphs: Map<MapChipGlyph, Painter>,
+): ChipImage {
     val style =
         textStyle.copy(textDecoration = TextDecoration.LineThrough.takeIf { struckThrough }, color = Color(foreground))
-    val layout = measurer.measure(AnnotatedString(label), style, density = density)
+    // A chip carrying a glyph shows the icon instead of the name, so it measures no text.
+    val layout = if (glyph == null) measurer.measure(AnnotatedString(label), style, density = density) else null
 
     // NodeChip is a Card with 8dp of horizontal padding around text that is at least 64dp wide and 28dp tall. Sizing
-    // the sprite the same way is what keeps a map chip the size of the chip in the node list.
-    val width = with(density) { maxOf(MIN_WIDTH_DP.dp, layout.size.width.toDp() + HORIZONTAL_PADDING_DP.dp * 2) }
+    // the sprite the same way is what keeps a map chip the size of the chip in the node list. An icon chip needs no
+    // room for text, so it is a square badge instead.
+    val width =
+        with(density) {
+            layout?.let { maxOf(MIN_WIDTH_DP.dp, it.size.width.toDp() + HORIZONTAL_PADDING_DP.dp * 2) } ?: HEIGHT_DP.dp
+        }
     val cornerRadiusPx = with(density) { CORNER_RADIUS_DP.dp.toPx() }
-
     val borderPx = if (outlined) with(density) { BORDER_DP.dp.toPx() } else 0f
-    return ChipImage(painter = ChipPainter(this, layout, cornerRadiusPx, borderPx), size = DpSize(width, HEIGHT_DP.dp))
+
+    return ChipImage(
+        painter =
+        ChipPainter(
+            chip = this,
+            layout = layout,
+            cornerRadiusPx = cornerRadiusPx,
+            borderPx = borderPx,
+            glyphPainter = glyph?.let(glyphs::get),
+            glyphSizePx = with(density) { GLYPH_DP.dp.toPx() },
+        ),
+        size = DpSize(width, HEIGHT_DP.dp),
+    )
 }
 
-/** Draws the chip: the node's colour behind, its name centred in its own foreground colour. */
+/** Draws the chip: the marker's colour behind, and its name or its icon centred in the foreground colour. */
 private class ChipPainter(
     private val chip: MapChipKey,
-    private val layout: TextLayoutResult,
+    private val layout: TextLayoutResult?,
     private val cornerRadiusPx: Float,
     private val borderPx: Float,
+    private val glyphPainter: Painter?,
+    private val glyphSizePx: Float,
 ) : Painter() {
     // Never read: the caller always names an explicit size, which is what makes the chip's width follow its text.
     override val intrinsicSize: Size = Size.Unspecified
@@ -190,10 +228,20 @@ private class ChipPainter(
                 style = Stroke(width = borderPx),
             )
         }
-        drawText(
-            textLayoutResult = layout,
-            topLeft = Offset(x = (size.width - layout.size.width) / 2f, y = (size.height - layout.size.height) / 2f),
-        )
+        if (glyphPainter != null) {
+            val glyph = Size(glyphSizePx, glyphSizePx)
+            translate(left = (size.width - glyphSizePx) / 2f, top = (size.height - glyphSizePx) / 2f) {
+                with(glyphPainter) { draw(glyph, colorFilter = ColorFilter.tint(Color(chip.foreground))) }
+            }
+        } else if (layout != null) {
+            drawText(
+                textLayoutResult = layout,
+                topLeft = Offset(
+                    x = (size.width - layout.size.width) / 2f,
+                    y = (size.height - layout.size.height) / 2f,
+                ),
+            )
+        }
     }
 }
 
@@ -215,6 +263,9 @@ private const val HORIZONTAL_PADDING_DP = 8
 
 /** Border width for an outlined chip, matching the discovery map's own 1dp. */
 private const val BORDER_DP = 1
+
+/** Icon size inside a glyph chip, matching the discovery marker's own 16dp. */
+private const val GLYPH_DP = 16
 
 /**
  * A ceiling on how many chip images one layer will hold.

@@ -67,8 +67,10 @@ import org.meshtastic.core.resources.unknown
 import org.meshtastic.core.resources.you
 import org.meshtastic.core.ui.util.DiscoveryMapNode
 import org.meshtastic.core.ui.util.DiscoveryNeighborType
+import org.meshtastic.feature.map.maplibre.component.MapZoom
 import org.meshtastic.feature.map.maplibre.component.SecondaryMapControls
 import org.meshtastic.feature.map.maplibre.component.rememberBasemapSelection
+import org.meshtastic.feature.map.maplibre.geojson.MapChipGlyph
 import org.meshtastic.feature.map.maplibre.geojson.MapChipKey
 import org.meshtastic.feature.map.maplibre.geojson.NodeFeatureKeys
 import org.meshtastic.feature.map.maplibre.geojson.featureValue
@@ -94,8 +96,7 @@ private const val INLINE_ZOOM = 15.0
 /**
  * Single-node mini-map embedded in the node detail sheet.
  *
- * No toolbar: it is a thumbnail a couple of hundred dp tall, and a floating toolbar would cover the node it exists to
- * show. It still follows the basemap preference, so it matches the map the user was just looking at.
+ * Follows the basemap preference, so it matches the map the user was just looking at.
  */
 @Composable
 fun MapLibreInlineMap(
@@ -116,6 +117,9 @@ fun MapLibreInlineMap(
         }
     }
 
+    // No controls at all, which is the one place this map deviates from the Google mini-map: that one turns on Google's
+    // own zoom buttons, but Google draws them small and flat, while ours is a floating toolbar nearly 100dp tall — a
+    // third of this thumbnail. The map pinch-zooms, so the buttons cost more than they buy here.
     MaplibreMap(
         baseStyle = basemaps.current.toBaseStyle(),
         cameraState = cameraState,
@@ -128,7 +132,7 @@ fun MapLibreInlineMap(
         val source = rememberFeatureSource(nodesToFeatureCollection(listOf(node)))
 
         // The node-detail sheet is where a degraded position matters most — it is the screen a user opens to ask how
-        // precisely this node is placed. The Google mini-map draws the circle; this one used to leave it out.
+        // precisely this node is placed. The Google mini-map draws the circle; this one left it out.
         NodePrecisionLayer(id = "inline-precision", nodes = listOf(node))
         NodeChipLayer(id = "inline-node", source = source, nodes = listOf(node))
     }
@@ -161,9 +165,7 @@ fun MapLibreTracerouteMap(
         if (hasViewport) {
             // Padded, as the Google flavor pads its own bounds fit: an edge-to-edge fit puts the outermost hops under
             // the toolbar and the legend.
-            nodesBoundingBox(hops)?.let {
-                cameraState.jumpTo(boundingBox = it, padding = PaddingValues(FIT_PADDING.dp))
-            }
+            nodesBoundingBox(hops)?.let { cameraState.jumpTo(boundingBox = it, padding = SecondaryMapFitPadding) }
         }
     }
 
@@ -179,6 +181,7 @@ fun MapLibreTracerouteMap(
             TracerouteLayers(forwardRoute = forwardRoute, returnRoute = returnRoute, nodeLookup = nodeLookup)
             TracerouteHopLayers(hops)
         }
+        MapZoom(cameraState = cameraState, basemap = basemaps.current)
         SecondaryMapControls(
             cameraState = cameraState,
             basemaps = basemaps,
@@ -213,9 +216,10 @@ fun MapLibreDiscoveryMap(
     val basemaps = rememberBasemapSelection(customBasemaps())
     var selectedIndex by remember { mutableStateOf<Int?>(null) }
 
-    // A discovered node can be heard without ever reporting a position. Drawing those at (0, 0) puts a chip in the
-    // Gulf of Guinea and stretches the bounds fit across an ocean, so they are dropped once, here, and every layer
-    // and the tap lookup below all read the same list. The Google discovery map filters the same way.
+    // A discovered node can be heard without ever reporting a position, and drawing one at (0, 0) would put a chip in
+    // the Gulf of Guinea and stretch the bounds fit across an ocean. DiscoveryMapScreen already drops those, as does
+    // the Google discovery map — this does not depend on that, and gives every layer and the tap lookup below one
+    // list to agree on.
     val located = remember(nodes) { nodes.filter { it.latitude != 0.0 || it.longitude != 0.0 } }
 
     // Frame the scanner together with everything it heard, which is the OSMdroid map's behaviour and the only view
@@ -225,7 +229,7 @@ fun MapLibreDiscoveryMap(
     LaunchedEffect(located.size, hasViewport) {
         if (hasViewport) {
             discoveryBoundingBox(scanner, located)?.let {
-                cameraState.jumpTo(boundingBox = it, padding = PaddingValues(FIT_PADDING.dp))
+                cameraState.jumpTo(boundingBox = it, padding = SecondaryMapFitPadding)
             }
         }
     }
@@ -243,6 +247,7 @@ fun MapLibreDiscoveryMap(
             DiscoveredNodeLayers(nodes = located, onNodeClick = { selectedIndex = it })
             ScannerLayer(scanner = scanner, label = stringResource(Res.string.you))
         }
+        MapZoom(cameraState = cameraState, basemap = basemaps.current)
         SecondaryMapControls(
             cameraState = cameraState,
             basemaps = basemaps,
@@ -364,7 +369,12 @@ private fun DiscoveredNodeLayers(nodes: List<DiscoveryMapNode>, onNodeClick: (In
     )
 }
 
-/** Green when the scanner heard this node itself, blue when it arrived through the mesh. */
+/**
+ * Green when the scanner heard this node itself, blue when it arrived through the mesh.
+ *
+ * A node whose traffic is mostly environment telemetry shows a thermometer and one that mostly talks shows a person,
+ * instead of its short name — the same substitution the Google discovery map makes.
+ */
 private fun DiscoveryMapNode.toMapChip() = MapChipKey(
     label = shortName?.takeIf { it.isNotBlank() } ?: UNKNOWN_CHIP_LABEL,
     background =
@@ -375,6 +385,7 @@ private fun DiscoveryMapNode.toMapChip() = MapChipKey(
     },
     foreground = Color.White.toArgb(),
     outlined = true,
+    glyph = if (isSensorNode) MapChipGlyph.SENSOR else MapChipGlyph.SOCIAL,
 )
 
 /** The scanner's own position, labelled — the Google discovery map puts a "You" chip here. */
@@ -415,8 +426,14 @@ internal val SecondaryMapOptions =
 /** Keeps a floating toolbar clear of the top edge, matching the main map's own inset. */
 internal const val TOOLBAR_INSET = 8
 
-/** Breathing room around a bounds fit, so the outermost points are not under the toolbar or the legend. */
-private const val FIT_PADDING = 48
+/**
+ * Breathing room around a bounds fit, per edge, so the outermost points do not land under the chrome.
+ *
+ * Asymmetric because the chrome is: the toolbar floats at the top, the zoom pair and the attribution button share the
+ * lower trailing corner, and a node chip extends half its own width past the point it marks. An even inset wide enough
+ * for the worst edge would waste the other three.
+ */
+internal val SecondaryMapFitPadding = PaddingValues(start = 48.dp, top = 64.dp, end = 88.dp, bottom = 56.dp)
 
 /** Inset for a detail card at the foot of a map. */
 internal const val CARD_INSET = 8

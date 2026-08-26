@@ -47,6 +47,7 @@ import org.meshtastic.feature.map.maplibre.component.BasemapSelection
 import org.meshtastic.feature.map.maplibre.component.ClusterMembersDialog
 import org.meshtastic.feature.map.maplibre.component.FilterMenu
 import org.meshtastic.feature.map.maplibre.component.MapLayersButton
+import org.meshtastic.feature.map.maplibre.component.MapZoom
 import org.meshtastic.feature.map.maplibre.component.OfflineMapTarget
 import org.meshtastic.feature.map.maplibre.component.WaypointDialogs
 import org.meshtastic.feature.map.maplibre.component.rememberBasemapSelection
@@ -55,7 +56,6 @@ import org.meshtastic.feature.map.maplibre.geojson.ClusterMember
 import org.meshtastic.feature.map.maplibre.layers.CustomLayer
 import org.meshtastic.feature.map.maplibre.style.Basemap
 import org.meshtastic.feature.map.maplibre.style.MapOverlay
-import org.meshtastic.feature.map.maplibre.style.zoomRange
 
 /**
  * MapLibre implementation of [MapViewProvider], shared by the F-Droid flavor and the desktop app.
@@ -140,6 +140,8 @@ class MapLibreMapViewProvider(
                 onClusterMembers = { clusterMembers = it },
                 onMapLongClick = waypoints.onLongPress,
             )
+
+            MapZoom(cameraState = cameraState, basemap = basemaps.current)
 
             MapToolbar(
                 basemaps = basemaps,
@@ -231,8 +233,6 @@ private fun MapToolbar(
 
     MapControlsOverlay(
         onToggleFilterMenu = { filterMenuExpanded = !filterMenuExpanded },
-        onZoomIn = { scope.launch { cameraState.zoomBy(ZOOM_STEP, basemaps.current.zoomRange()) } },
-        onZoomOut = { scope.launch { cameraState.zoomBy(-ZOOM_STEP, basemaps.current.zoomRange()) } },
         bearing = cameraState.position.bearing.toFloat(),
         followPhoneBearing = location.followingBearing,
         onCompassClick = location.onCompassClick,

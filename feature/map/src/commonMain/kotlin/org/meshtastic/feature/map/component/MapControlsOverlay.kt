@@ -37,16 +37,12 @@ import org.meshtastic.core.resources.orient_north
 import org.meshtastic.core.resources.refresh
 import org.meshtastic.core.resources.site_planner
 import org.meshtastic.core.resources.toggle_my_position
-import org.meshtastic.core.resources.zoom_in
-import org.meshtastic.core.resources.zoom_out
-import org.meshtastic.core.ui.icon.Add
 import org.meshtastic.core.ui.icon.CellTower
 import org.meshtastic.core.ui.icon.LocationDisabled
 import org.meshtastic.core.ui.icon.MapCompass
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.MyLocation
 import org.meshtastic.core.ui.icon.Refresh
-import org.meshtastic.core.ui.icon.Remove
 import org.meshtastic.core.ui.icon.Tune
 import org.meshtastic.core.ui.theme.StatusColors.StatusBlue
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
@@ -55,6 +51,8 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusRed
  * Shared map controls overlay using [HorizontalFloatingToolbar] for Material 3 Expressive styling. Provides compass,
  * filter button, location tracking button, and optional slots for flavor-specific content (map type selector, layers,
  * refresh).
+ *
+ * Zoom is deliberately not here — it lives in [MapZoomControls], in the lower corner where Google Maps draws its own.
  *
  * @param onToggleFilterMenu Callback to open/close the filter dropdown.
  * @param filterDropdownContent Composable rendered inside a [Box] alongside the filter button — typically a
@@ -80,12 +78,6 @@ fun MapControlsOverlay(
     mapTypeContent: @Composable () -> Unit = {},
     layersContent: @Composable () -> Unit = {},
     onSitePlannerClick: (() -> Unit)? = null,
-    /**
-     * Zoom controls. Null hides them, which is what the Google flavor wants — Google Maps draws its own through
-     * MapUiSettings(zoomControlsEnabled). MapLibre publishes no zoom ornament, so its map supplies these.
-     */
-    onZoomIn: (() -> Unit)? = null,
-    onZoomOut: (() -> Unit)? = null,
     isLocationTrackingEnabled: Boolean = false,
     /** Null hides the button, for maps with no location plumbing behind it — the node-track map. */
     onToggleLocationTracking: (() -> Unit)? = null,
@@ -100,8 +92,6 @@ fun MapControlsOverlay(
     ) {
         // Compass
         CompassButton(onClick = onCompassClick, bearing = bearing, isFollowing = followPhoneBearing)
-
-        ZoomButtons(onZoomIn = onZoomIn, onZoomOut = onZoomOut)
 
         // Filter button + dropdown (optional)
         onToggleFilterMenu?.let { onClick ->
@@ -153,25 +143,6 @@ fun MapControlsOverlay(
                 onClick = onClick,
             )
         }
-    }
-}
-
-/** MapLibre publishes no zoom ornament, so its maps supply these; Google Maps draws its own and passes nulls. */
-@Composable
-private fun ZoomButtons(onZoomIn: (() -> Unit)?, onZoomOut: (() -> Unit)?) {
-    onZoomIn?.let { onClick ->
-        MapButton(
-            icon = MeshtasticIcons.Add,
-            contentDescription = stringResource(Res.string.zoom_in),
-            onClick = onClick,
-        )
-    }
-    onZoomOut?.let { onClick ->
-        MapButton(
-            icon = MeshtasticIcons.Remove,
-            contentDescription = stringResource(Res.string.zoom_out),
-            onClick = onClick,
-        )
     }
 }
 

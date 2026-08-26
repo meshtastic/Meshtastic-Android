@@ -18,6 +18,7 @@ package org.meshtastic.feature.map.maplibre
 
 import org.maplibre.spatialk.geojson.Position
 import org.meshtastic.core.model.Node
+import org.meshtastic.feature.map.maplibre.geojson.MapChipGlyph
 import org.meshtastic.feature.map.maplibre.geojson.MapChipKey
 import org.meshtastic.feature.map.maplibre.geojson.featureValue
 import org.meshtastic.feature.map.maplibre.geojson.toNodeChip
@@ -75,6 +76,15 @@ class NodeChipKeyTest {
         val outlined = plain.copy(outlined = true)
 
         assertNotEquals(plain.featureValue(), outlined.featureValue())
+    }
+
+    @Test
+    fun `a glyph chip differs from the same chip drawn with its text`() {
+        val labelled = MapChipKey(label = "SWAR", background = 1, foreground = 2)
+        val sensor = labelled.copy(glyph = MapChipGlyph.SENSOR)
+        val social = labelled.copy(glyph = MapChipGlyph.SOCIAL)
+
+        assertEquals(3, listOf(labelled, sensor, social).map { it.featureValue() }.distinct().size)
     }
 
     @Test
