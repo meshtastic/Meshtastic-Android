@@ -24,8 +24,16 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
+import org.maplibre.compose.camera.CameraState
 import org.maplibre.compose.camera.rememberCameraState
+import org.maplibre.compose.location.BearingUpdate
+import org.maplibre.compose.location.LocationPuck
+import org.maplibre.compose.location.LocationState
+import org.maplibre.compose.location.LocationTrackingEffect
+import org.maplibre.compose.location.mostAccurateBearing
+import org.maplibre.compose.location.updateCamera
 import org.maplibre.compose.map.MaplibreMap
+import org.maplibre.compose.material3.LocationPuckDefaults
 import org.maplibre.compose.style.BaseStyle
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.feature.map.BaseMapViewModel
@@ -60,13 +68,26 @@ fun MeshMap(
     overlays: List<MapOverlay> = emptyList(),
     customLayers: List<CustomLayer> = emptyList(),
     onWaypointClick: (Int) -> Unit = {},
+    /**
+     * Hoisted so the host can read the bearing for a compass and steer the camera itself. Defaults to a map-owned state
+     * for callers that only want the map to frame itself.
+     */
+    cameraState: CameraState = rememberCameraState(),
+    /** Location and orientation state to draw a puck for and optionally follow. Null disables both. */
+    locationState: LocationState? = null,
+    /**
+     * Whether the user has asked to be followed. Gates both the camera and the puck, so switching tracking off leaves
+     * no stale dot behind — and matches the Google flavor, which shows the dot only while tracking.
+     */
+    followLocation: Boolean = false,
+    /** How a location update should affect camera bearing. [BearingUpdate.IGNORE] follows position only. */
+    bearingUpdate: BearingUpdate = BearingUpdate.IGNORE,
 ) {
     val nodes by viewModel.nodesWithPosition.collectAsStateWithLifecycle()
     val waypoints by viewModel.waypoints.collectAsStateWithLifecycle()
     val filterState by viewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
     val myNodeInfo by viewModel.myNodeInfo.collectAsStateWithLifecycle()
 
-    val cameraState = rememberCameraState()
     val scope = rememberCoroutineScope()
 
     val visibleNodes = filterNodesForMap(nodes, filterState, nowSeconds)
@@ -78,6 +99,18 @@ fun MeshMap(
         nodesBoundingBox(visibleNodes)?.let { box ->
             hasFramed.value = true
             scope.launch { cameraState.jumpTo(boundingBox = box) }
+        }
+    }
+
+    // Follows position whenever tracking is on; touches bearing only when the caller asks for it, so a user who
+    // has rotated the map is not straightened out behind their back.
+    if (locationState != null) {
+        LocationTrackingEffect(
+            locationState = locationState,
+            enabled = followLocation,
+            trackBearing = bearingUpdate != BearingUpdate.IGNORE,
+        ) {
+            updateCamera(camera = cameraState, updateBearing = bearingUpdate)
         }
     }
 
@@ -106,5 +139,16 @@ fun MeshMap(
                 }
             },
         )
+
+        // Declared last so the user's own position draws above the mesh.
+        if (locationState != null && followLocation) {
+            LocationPuck(
+                idPrefix = "user-location",
+                location = locationState.location,
+                cameraState = cameraState,
+                bearing = locationState.mostAccurateBearing(),
+                colors = LocationPuckDefaults.colors(),
+            )
+        }
     }
 }
