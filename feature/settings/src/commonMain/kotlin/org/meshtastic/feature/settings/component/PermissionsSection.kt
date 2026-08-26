@@ -54,6 +54,7 @@ import org.meshtastic.core.resources.permission_state_not_asked
 import org.meshtastic.core.resources.permissions
 import org.meshtastic.core.resources.permissions_all_allowed
 import org.meshtastic.core.resources.permissions_need_attention
+import org.meshtastic.core.resources.permissions_nothing_needed
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.PermissionRationaleDialog
 import org.meshtastic.core.ui.icon.AppSettingsAlt
@@ -129,7 +130,17 @@ internal fun ColumnScope.PermissionsSettingsContent() {
     // Rows that need nothing from the user are collapsed by default. Five rows reading "Allowed" is a wall every
     // healthy user scrolls past on every visit to pay for a recovery path a minority needs — so the section leads with
     // the one fact that matters and opens itself only when something is actually wrong.
-    val needingAttention = rows.count { it.state.isRuntimeGated && !it.state.isGranted }
+    //
+    // "Needs attention" deliberately excludes NOT_REQUESTED. A permission the app has never asked for is not a
+    // problem: a fresh install driven over USB legitimately holds none of these, and counting them would greet that
+    // user with "5 need attention" about an app that is working perfectly.
+    val gatedRows = rows.filter { it.state.isRuntimeGated }
+    val needingAttention =
+        gatedRows.count {
+            it.state.status == PermissionStatus.DENIED_CAN_RETRY ||
+                it.state.status == PermissionStatus.PERMANENTLY_DENIED
+        }
+    val anyBlocked = gatedRows.any { it.state.status == PermissionStatus.PERMANENTLY_DENIED }
     var expanded by remember(needingAttention) { mutableStateOf(needingAttention > 0) }
 
     var pendingRationale by remember { mutableStateOf<PermissionRow?>(null) }
@@ -151,12 +162,19 @@ internal fun ColumnScope.PermissionsSettingsContent() {
         ListItem(
             text = stringResource(Res.string.permissions),
             supportingText =
-            if (needingAttention == 0) {
-                stringResource(Res.string.permissions_all_allowed)
-            } else {
-                pluralStringResource(Res.plurals.permissions_need_attention, needingAttention, needingAttention)
+            when {
+                needingAttention > 0 ->
+                    pluralStringResource(Res.plurals.permissions_need_attention, needingAttention, needingAttention)
+
+                gatedRows.all { it.state.isGranted } -> stringResource(Res.string.permissions_all_allowed)
+
+                // Some were never asked for. "All allowed" would be untrue, and anything alarming would be the
+                // accusation this whole pass is about removing.
+                else -> stringResource(Res.string.permissions_nothing_needed)
             },
-            supportingTextColor = if (needingAttention == 0) Color.Unspecified else MaterialTheme.colorScheme.error,
+            // Same rule the individual rows follow: only a permanent denial is coloured, because only a permanent
+            // denial actually leaves the user stuck. A retryable denial is a choice they are free to keep.
+            supportingTextColor = if (anyBlocked) MaterialTheme.colorScheme.error else Color.Unspecified,
             leadingIcon = MeshtasticIcons.Lock,
             trailingIcon = if (expanded) MeshtasticIcons.ExpandLess else MeshtasticIcons.ExpandMore,
             onClick = { expanded = !expanded },

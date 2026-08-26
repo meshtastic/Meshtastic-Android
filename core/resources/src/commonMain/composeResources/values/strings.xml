@@ -1461,6 +1461,7 @@
         <item quantity="one">%1$d needs attention</item>
         <item quantity="other">%1$d need attention</item>
     </plurals>
+    <string name="permissions_nothing_needed">Nothing needs your attention</string>
     <string name="permissions_show">Show permissions</string>
     <string name="phone_location">Phone Location</string>
     <string name="phone_location_description">Meshtastic uses your phone's location to enable a number of features. You can update your location permissions at any time from settings.</string>

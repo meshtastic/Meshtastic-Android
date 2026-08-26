@@ -1422,6 +1422,7 @@ permissions
 permissions_all_allowed
 permissions_hide
 permissions_need_attention
+permissions_nothing_needed
 permissions_show
 phone_location
 phone_location_description
