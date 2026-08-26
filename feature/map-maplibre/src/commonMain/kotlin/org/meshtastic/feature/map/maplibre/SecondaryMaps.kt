@@ -31,10 +31,14 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.camera.rememberCameraState
+import org.maplibre.compose.expressions.dsl.asBoolean
 import org.maplibre.compose.expressions.dsl.asString
 import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.expressions.dsl.feature
+import org.maplibre.compose.expressions.dsl.not
+import org.maplibre.compose.expressions.value.LineCap
 import org.maplibre.compose.layers.CircleLayer
+import org.maplibre.compose.layers.LineLayer
 import org.maplibre.compose.layers.SymbolLayer
 import org.maplibre.compose.map.GestureOptions
 import org.maplibre.compose.map.MapOptions
@@ -42,9 +46,11 @@ import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.spatialk.geojson.BoundingBox
 import org.maplibre.spatialk.geojson.Feature
 import org.maplibre.spatialk.geojson.FeatureCollection
+import org.maplibre.spatialk.geojson.LineString
 import org.maplibre.spatialk.geojson.Point
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.ui.util.DiscoveryMapNode
+import org.meshtastic.core.ui.util.DiscoveryNeighborType
 import org.meshtastic.feature.map.maplibre.component.SecondaryMapControls
 import org.meshtastic.feature.map.maplibre.component.rememberBasemapSelection
 import org.meshtastic.feature.map.maplibre.geojson.NodeFeatureKeys
@@ -216,6 +222,7 @@ fun MapLibreDiscoveryMap(
             zoomRange = basemaps.current.zoomRange(),
         ) {
             (basemaps.current as? Basemap.Raster)?.let { RasterBasemapLayer(it) }
+            DiscoveryTopologyLayer(scanner = scanner, nodes = nodes)
             DiscoveredNodeLayers(nodes)
             ScannerLayer(scanner)
         }
@@ -225,6 +232,51 @@ fun MapLibreDiscoveryMap(
             modifier = Modifier.align(Alignment.TopCenter).padding(top = TOOLBAR_INSET.dp),
         )
     }
+}
+
+/**
+ * A line from the scanner to each node it heard, coloured by how it was heard.
+ *
+ * The OSMdroid map draws these, and they carry the point of a discovery scan: markers alone say where nodes are, the
+ * lines say which of them answered directly and which arrived through the mesh. Drawn before the markers so the lines
+ * pass under them.
+ */
+@Composable
+private fun DiscoveryTopologyLayer(scanner: GeoPosition, nodes: List<DiscoveryMapNode>) {
+    val links =
+        FeatureCollection(
+            nodes
+                .filter { it.latitude != 0.0 || it.longitude != 0.0 }
+                .map { node ->
+                    Feature<LineString, JsonObject?>(
+                        geometry =
+                        LineString(
+                            listOf(scanner, GeoPosition(longitude = node.longitude, latitude = node.latitude)),
+                        ),
+                        properties =
+                        buildJsonObject { put(DIRECT_KEY, node.neighborType == DiscoveryNeighborType.DIRECT) },
+                    )
+                },
+        )
+    val source = rememberFeatureSource(links)
+
+    LineLayer(
+        id = "discovery-direct-links",
+        source = source,
+        filter = feature[DIRECT_KEY].asBoolean(),
+        cap = const(LineCap.Round),
+        color = const(MapColors.RouteReturn),
+        width = const(3.dp),
+    )
+    LineLayer(
+        id = "discovery-mesh-links",
+        source = source,
+        filter = !feature[DIRECT_KEY].asBoolean(),
+        cap = const(LineCap.Round),
+        color = const(MapColors.Slate),
+        width = const(2.dp),
+        opacity = const(MESH_LINK_OPACITY),
+    )
 }
 
 @Composable
@@ -320,3 +372,7 @@ private fun discoveryBoundingBox(scanner: GeoPosition, nodes: List<DiscoveryMapN
         north = latitudes.max(),
     )
 }
+
+/** Whether the scanner heard this node itself, rather than through the mesh. */
+private const val DIRECT_KEY = "direct"
+private const val MESH_LINK_OPACITY = 0.7f
