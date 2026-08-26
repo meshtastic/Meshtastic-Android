@@ -141,6 +141,11 @@
     <string name="bluetooth_feature_discovery">Objevujte</string>
     <string name="bluetooth_feature_discovery_description">Najděte a identifikujte zařízení Meshtastic ve svém okolí.</string>
     <string name="bluetooth_permission">Bluetooth</string>
+    <string name="bluetooth_permission_blocked_notice">Přístup k zařízením v okolí je vypnutý a Android se už nezeptá. Zapněte ho v nastavení aplikace pro připojení přes Bluetooth, nebo použijte Wi-Fi či USB.</string>
+    <string name="bluetooth_permission_blocked_notice_pre31">Oprávnění k poloze je vypnuté a Android se už nezeptá. Zapněte ho v nastavení aplikace pro vyhledávání Bluetooth zařízení, nebo se připojte přes Wi-Fi či USB.</string>
+    <string name="bluetooth_permission_blocked_rationale">Přístup k zařízením v okolí je vypnutý a Android se už nezeptá. Zapněte ho v nastavení aplikace pro vyhledávání a připojení přes Bluetooth.</string>
+    <string name="bluetooth_permission_blocked_rationale_pre31">Oprávnění k poloze je vypnuté a Android se už znovu nezeptá. Zapněte ho v nastavení aplikace, abyste mohli vyhledávat a připojovat zařízení přes Bluetooth.</string>
+    <string name="bluetooth_permission_rationale">Meshtastic potřebuje přístup k zařízením v okolí, aby našel vaše rádio a mohl se k němu připojit. Toto oprávnění slouží pouze ke komunikaci s vašimi vlastními zařízeními a nikdy se nepoužívá ke zjišťování vaší polohy. Bez tohoto oprávnění nebude Bluetooth dostupné – Wi-Fi a USB budou nadále fungovat.</string>
     <string name="bluetooth_scan_location_services_disabled">Služby určování polohy jsou vypnuté. Zapněte je pro vyhledávání blízkých zařízení.</string>
     <string name="bluetooth_scan_missing_permission">Vyhledávání zařízení přes Bluetooth vyžaduje oprávnění. Povolte oprávnění „Blízká zařízení“ (nebo „Poloha“), aby bylo možné vyhledávat zařízení.</string>
     <string name="bluetooth_scan_start_failed">Nepodařilo se spustit skenování přes Bluetooth. Zkuste to znovu nebo Bluetooth vypněte a znovu zapněte, pokud problém přetrvává.</string>
@@ -153,6 +158,8 @@
     <string name="bold_heading">Tučný nadpis</string>
     <string name="bonding_failed_permissions">Párování se nezdařilo. Povolte oprávnění k přístupu k blízkým zařízením a zkuste to znovu.</string>
     <string name="bonding_failed_retry">Párování nebylo dokončeno. Zkuste zařízení spárovat znovu.</string>
+    <string name="boot_reconnect_blocked_message">Přístup k zařízením v okolí je vypnutý, takže rádio není dostupné přes Bluetooth. Klepnutím ho znovu povolíte.</string>
+    <string name="boot_reconnect_blocked_title">Meshtastic se nemůže znovu připojit</string>
     <string name="bottom_nav_settings">Nastavení</string>
     <string name="broadcast_interval">Interval vysílání</string>
     <string name="button_gpio">Tlačítko GPIO</string>
@@ -778,6 +785,7 @@
     <string name="load">Zatížení</string>
     <string name="loading">Načítám</string>
     <!-- LOCAL -->
+    <string name="local_network_permission_blocked_rationale">Přístup k místní síti je vypnutý a Android se už nezeptá. Rádio v síti Wi-Fi nelze najít ani k němu přistupovat, dokud tento přístup nezapnete v nastavení aplikace. Rádio na veřejné adrese nebo přes VPN to neovlivní.</string>
     <string name="local_stats_bad">Poškozené %1$d</string>
     <string name="local_stats_battery">Baterie: %1$d%</string>
     <string name="local_stats_diagnostics_prefix">Diagnostika: %1$s</string>
@@ -792,6 +800,8 @@
     <string name="local_stats_utilization">ChUtil: %1$s% | AirTX: %2$s%</string>
     <!-- LOCATION -->
     <string name="location_disabled">Přístup k poloze zařízení nebyl povolen, není možné poskytnout polohu zařízení do Mesh sítě.</string>
+    <string name="location_permission">Oprávnění k poloze</string>
+    <string name="location_permission_rationale">Meshtastic používá vaši polohu pro zobrazení na mapě, měření vzdálenosti k uzlům a po zapnutí i pro její sdílení v mesh síti. Po zamítnutí oprávnění ostatní funkce fungují dál.</string>
     <string name="location_sharing">Sdílení polohy</string>
     <!-- LOCKDOWN -->
     <string name="lockdown_backoff">Zkuste to znovu za %1$d sekund.</string>
@@ -997,6 +1007,7 @@
     <string name="nag_timeout_seconds">Interval opakovaného zvonění</string>
     <string name="name">Jméno</string>
     <string name="navigate_back">Přejít zpět</string>
+    <string name="nearby_devices_permission">Oprávnění k zařízením v okolí</string>
     <string name="need_hardware">Potřebujete zařízení?</string>
     <string name="need_hardware_description">Pro používání Meshtastic potřebujete kompatibilní zařízení. Naši podporovatelé a partneři nabízejí zařízení připravená k použití. Zde jsou některé z nejoblíbenějších možností.</string>
     <string name="neighbor_info">Informace o sousedech</string>
@@ -1088,6 +1099,7 @@
     <string name="none">Žádný (zakázat)</string>
     <string name="none_quality">Žádný</string>
     <string name="not_connected">Nepřipojeno</string>
+    <string name="not_now">Teď ne</string>
     <string name="note">Poznámka</string>
     <string name="notes">Poznámka</string>
     <string name="notification_permissions_description">Meshtastic vás pomocí oznámení upozorní na nové zprávy a důležité události. Nastavení oznámení si můžete kdykoli upravit.</string>
@@ -1153,8 +1165,23 @@
     <string name="paxcounter_enabled">Paxcounter povolen</string>
     <string name="periodic_position_broadcast">Pravidelné vysílání polohy</string>
     <!-- PERMISSION -->
+    <string name="permission_camera_summary">Skenovat QR kódy kanálů a kontaktů</string>
+    <string name="permission_location_summary">Zobrazit svou polohu na mapě a sdílet ji přes mesh síť</string>
     <string name="permission_missing_31">Meshtastic potřebuje mít povoleno oprávnění ‚Blízká zařízení‘, aby mohl vyhledávat a připojovat zařízení přes Bluetooth. Když jej nepoužíváte, můžete jej vypnout.</string>
+    <string name="permission_nearby_devices_summary">Najít a připojit se k vašemu rádiu přes Bluetooth</string>
+    <string name="permission_notifications_summary">Upozorňovat na zprávy, nové uzly a vybitou baterii</string>
+    <string name="permission_state_blocked">Blokováno — klepnutím otevřete nastavení systému</string>
+    <string name="permission_state_denied">Zamítnuto — klepnutím povolíte</string>
+    <string name="permission_state_not_applicable">V této verzi Androidu není vyžadováno</string>
     <!-- PERMISSIONS -->
+    <string name="permissions">Oprávnění</string>
+    <plurals name="permissions_need_attention">
+        <item quantity="one">%1$d vyžaduje pozornost</item>
+        <item quantity="few">%1$d vyžaduje pozornost</item>
+        <item quantity="many">%1$d vyžadují pozornost</item>
+        <item quantity="other">%1$d vyžadují pozornost</item>
+    </plurals>
+    <string name="permissions_nothing_needed">Nic nevyžaduje vaši pozornost</string>
     <string name="phone_location">Poloha telefonu</string>
     <string name="phone_location_description">Meshtastic využívá polohu telefonu pro některé funkce. Oprávnění k poloze si můžete kdykoli upravit v nastavení.</string>
     <plurals name="plurals_hours">
