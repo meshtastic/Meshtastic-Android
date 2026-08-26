@@ -53,7 +53,12 @@ jobs:
     # APK build itself failed, the artifact download below fails and this job goes red.
     if: github.repository == 'meshtastic/Meshtastic-Android' && !cancelled()
     runs-on: ubuntu-24.04-arm
-    timeout-minutes: 10
+    # ~1.5 GB of assets, uploaded one at a time with up to 3 attempts each (see "Upload
+    # snapshot assets"). Sized for the worst case that still succeeds -- every asset failing
+    # twice before landing -- which is 45 uploads plus 7m30s of backoff. The 2026-08-26
+    # failure was already 3m25s into uploading when it died, on top of ~2m of checkout and
+    # artifact download, so the old 10-minute budget had no room for even one retry.
+    timeout-minutes: 35
     permissions:
       contents: write
     env:
@@ -132,8 +137,44 @@ jobs:
 
           **Obtainium:** enable *Include prereleases*. Each build's APK filename carries the versionCode, so updates are detected.
           EOF
-          gh release create snapshot upload/* \
+          gh release create snapshot \
             --title "Snapshot $VERSION_CODE ($GITHUB_SHA)" \
             --target "$GITHUB_SHA" \
             --prerelease \
             --notes-file notes.md
+
+      # Uploaded per file, with retries, rather than as assets on the `gh release create`
+      # above. uploads.github.com intermittently 400s on a multi-hundred-MB asset, and this
+      # release is ~1.5 GB across 15 of them, so a single flake is close to routine. Passed
+      # to `create`, one such 400 aborts the whole command -- gh then deletes the release it
+      # was staging, and because the previous release and tag are already gone by that point
+      # main is left with no snapshot at all until the next push. That is exactly what
+      # happened on 2026-08-26 (run 33015261548, the aarch64 AppImage).
+      #
+      # Trade-off: `create` no longer publishes only once every asset has landed, so there is
+      # now a window where the release exists while assets are still arriving. For a rolling
+      # prerelease that is replaced on every push to main, a briefly-incomplete release beats
+      # an absent one.
+      #
+      # --clobber makes a retry idempotent: an attempt that uploaded the asset and then failed
+      # reporting it does not leave the next attempt colliding with its own partial upload.
+      #
+      # `timeout 8m` bounds a single attempt. Uploading per file is sequential where the old
+      # `gh release create upload/*` was concurrent, so the step is already slower than the
+      # code it replaces; without a per-attempt cap one stalled upload could then spend the
+      # whole job budget by itself and the job would be cancelled mid-release -- the same
+      # half-published outcome this step exists to avoid. 8 minutes is far beyond what a
+      # ~120 MB asset needs, so it fires only on a genuine stall.
+      - name: Upload snapshot assets
+        run: |
+          for f in upload/*; do
+            for attempt in 1 2 3; do
+              if timeout 8m gh release upload snapshot "$f" --clobber; then
+                continue 2
+              fi
+              echo "::warning::Upload of $(basename "$f") failed (attempt ${attempt}/3)."
+              sleep $((attempt * 10))
+            done
+            echo "::error::Upload of $(basename "$f") failed after 3 attempts."
+            exit 1
+          done
