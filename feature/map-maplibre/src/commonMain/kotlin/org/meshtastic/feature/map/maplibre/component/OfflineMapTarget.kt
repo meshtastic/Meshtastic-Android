@@ -16,29 +16,26 @@
  */
 package org.meshtastic.feature.map.maplibre.component
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.maplibre.compose.offline.DownloadProgress
@@ -48,6 +45,7 @@ import org.maplibre.compose.offline.OfflinePack
 import org.maplibre.compose.offline.OfflinePackDefinition
 import org.maplibre.compose.offline.rememberOfflineManager
 import org.maplibre.spatialk.geojson.BoundingBox
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.delete
 import org.meshtastic.core.resources.download_this_area
@@ -55,34 +53,25 @@ import org.meshtastic.core.resources.offline_maps
 import org.meshtastic.core.resources.offline_maps_empty
 import org.meshtastic.core.ui.icon.Delete
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.PlayArrow
 
 /** What the map must tell the offline sheet: which style to pack, and which region is on screen. */
-internal class OfflineMapTarget(val styleUrl: String?, val bounds: () -> BoundingBox?, val zoom: () -> Double)
+internal class OfflineMapTarget(
+    val styleUrl: String?,
+    val bounds: () -> BoundingBox?,
+    val zoom: () -> Double,
+    /** Moves the map onto a downloaded region, so a pack in the list can actually be gone to. */
+    val showRegion: (BoundingBox) -> Unit,
+)
 
 /**
- * Menu entry for downloading the visible area for offline use.
+ * Offline downloads, as a section of the layers sheet.
  *
- * Disabled for raster basemaps: an offline pack is defined against a style document, and a raster basemap draws over
+ * Only usable with a vector basemap: a pack is defined against a style document, and a raster basemap draws over
  * `BaseStyle.Empty` and so has no style URL to pack.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun OfflineMapsMenuItem(target: OfflineMapTarget) {
-    var sheetVisible by remember { mutableStateOf(false) }
-
-    DropdownMenuItem(
-        text = { Text(text = stringResource(Res.string.offline_maps)) },
-        onClick = { sheetVisible = true },
-        enabled = target.styleUrl != null,
-    )
-
-    if (sheetVisible) {
-        ModalBottomSheet(onDismissRequest = { sheetVisible = false }) { OfflineMapsSheet(target = target) }
-    }
-}
-
-@Composable
-private fun OfflineMapsSheet(target: OfflineMapTarget) {
+internal fun OfflineMapsSection(target: OfflineMapTarget, onShowRegion: (BoundingBox) -> Unit) {
     val manager = rememberOfflineManager()
     val scope = rememberCoroutineScope()
     val packs = manager.packs
@@ -105,21 +94,38 @@ private fun OfflineMapsSheet(target: OfflineMapTarget) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         } else {
-            packs.forEach { pack -> OfflinePackRow(pack = pack, onDelete = { scope.launch { manager.delete(pack) } }) }
+            packs.forEach { pack ->
+                OfflinePackRow(
+                    pack = pack,
+                    onShow = { bounds -> onShowRegion(bounds) },
+                    onToggle = { manager.resume(pack) },
+                    onDelete = { scope.launch { manager.delete(pack) } },
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun OfflinePackRow(pack: OfflinePack, onDelete: () -> Unit) {
+private fun OfflinePackRow(
+    pack: OfflinePack,
+    onShow: (BoundingBox) -> Unit,
+    onToggle: () -> Unit,
+    onDelete: () -> Unit,
+) {
     val progress = pack.downloadProgress
+    val bounds = (pack.definition as? OfflinePackDefinition.TilePyramid)?.bounds
 
     Row(
         modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        Column(modifier = Modifier.fillMaxWidth(PACK_ROW_TEXT_FRACTION)) {
+        Column(
+            modifier =
+            Modifier.fillMaxWidth(PACK_ROW_TEXT_FRACTION)
+                .then(if (bounds != null) Modifier.clickable { onShow(bounds) } else Modifier),
+        ) {
             Text(text = pack.label(), style = MaterialTheme.typography.bodyLarge)
             if (progress is DownloadProgress.Healthy && progress.status != DownloadStatus.Complete) {
                 LinearProgressIndicator(
@@ -134,31 +140,58 @@ private fun OfflinePackRow(pack: OfflinePack, onDelete: () -> Unit) {
                 )
             }
         }
-        IconButton(onClick = onDelete) {
-            Icon(imageVector = MeshtasticIcons.Delete, contentDescription = stringResource(Res.string.delete))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            val status = (progress as? DownloadProgress.Healthy)?.status
+            if (status == DownloadStatus.Paused) {
+                IconButton(onClick = onToggle) {
+                    Icon(
+                        imageVector = MeshtasticIcons.PlayArrow,
+                        contentDescription = stringResource(Res.string.download_this_area),
+                    )
+                }
+            }
+            IconButton(onClick = onDelete) {
+                Icon(imageVector = MeshtasticIcons.Delete, contentDescription = stringResource(Res.string.delete))
+            }
         }
     }
 }
 
 /**
- * Packs the region currently on screen.
+ * Packs the region currently on screen, from the current zoom a couple of levels deeper.
  *
- * The zoom range runs from the current level inward rather than all the way to the maximum: a pack covers every tile in
- * its range, so reaching for the deepest zoom over a city-sized box is how you accidentally download gigabytes.
+ * What bounds the download is the *width* of the zoom range, not an absolute ceiling: a pack covers every tile in its
+ * range, but the visible box shrinks as you zoom in, so two extra levels costs roughly the same work at any zoom. An
+ * absolute cap is worse than useless here — it silently inverts the range once you are past it, which MapLibre rejects
+ * outright with "offline region zoom range is invalid".
+ *
+ * Errors are caught rather than thrown: `create` reports a native failure by throwing, and this runs in a UI-scoped
+ * coroutine, so letting it escape takes the window's event thread down with it.
+ *
+ * A created pack is paused until [OfflineManager.resume] is called, so this does both.
  */
-private suspend fun OfflineManager.downloadVisibleArea(target: OfflineMapTarget) {
-    val styleUrl = target.styleUrl ?: return
-    val bounds = target.bounds() ?: return
-    val currentZoom = target.zoom().toInt().coerceAtLeast(0)
+private suspend fun OfflineManager.downloadVisibleArea(target: OfflineMapTarget): Boolean {
+    val styleUrl = target.styleUrl
+    val bounds = target.bounds()
+    if (styleUrl == null || bounds == null) return false
 
-    create(
-        OfflinePackDefinition.TilePyramid(
-            styleUrl = styleUrl,
-            bounds = bounds,
-            minZoom = currentZoom,
-            maxZoom = (currentZoom + PACK_EXTRA_ZOOM_LEVELS).coerceAtMost(PACK_MAX_ZOOM),
-        ),
-    )
+    val currentZoom = target.zoom().toInt().coerceIn(MIN_PACK_ZOOM, MAX_PACK_ZOOM)
+    val maxZoom = (currentZoom + PACK_EXTRA_ZOOM_LEVELS).coerceAtMost(MAX_PACK_ZOOM)
+
+    return safeCatching {
+        create(
+            OfflinePackDefinition.TilePyramid(
+                styleUrl = styleUrl,
+                bounds = bounds,
+                // coerceAtMost, not the raw value: at the top of the range maxZoom stops climbing, and minZoom
+                // must never overtake it.
+                minZoom = currentZoom.coerceAtMost(maxZoom),
+                maxZoom = maxZoom,
+            ),
+        )
+    }
+        .onFailure { error -> Logger.w(error) { "Could not create an offline pack" } }
+        .isSuccess
 }
 
 private fun OfflinePack.label(): String {
@@ -193,5 +226,8 @@ private fun Double.round(): String {
 
 private const val PACK_ROW_TEXT_FRACTION = 0.8f
 private const val PACK_EXTRA_ZOOM_LEVELS = 2
-private const val PACK_MAX_ZOOM = 16
+
+/** MaplibreMap's own default zoomRange, which an offline region may not exceed. */
+private const val MIN_PACK_ZOOM = 0
+private const val MAX_PACK_ZOOM = 20
 private const val COORD_SCALE = 100.0

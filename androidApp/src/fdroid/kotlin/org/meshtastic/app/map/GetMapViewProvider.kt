@@ -21,6 +21,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.map.component.CustomTileSourcesMenuItem
+import org.meshtastic.app.map.component.ImportedLayersSlot
 import org.meshtastic.app.map.component.SitePlannerSlot
 import org.meshtastic.app.map.repository.CustomTileProviderRepository
 import org.meshtastic.core.ui.util.MapViewProvider
@@ -76,6 +77,8 @@ fun getMapViewProvider(): MapViewProvider = MapLibreMapViewProvider(
     // sitePlannerAvailable() has returned true on this flavor all along, but nothing consumed it — the MapLibre map
     // never offered the button and dropped the sitePlannerNodeNum deep link. Both are wired now.
     sitePlanner = { session -> SitePlannerSlot(session) },
+    // The same imported-layer manager the Google flavour opens from its layers button.
+    layersSheetExtra = { ImportedLayersSlot() },
 )
 
 /** Site Planner (coverage-estimate) — the F-Droid map renders imported coverage as a GeoJSON layer (see #6138). */

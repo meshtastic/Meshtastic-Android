@@ -20,8 +20,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuGroup
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -52,8 +54,10 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.manage_map_layers
 import org.meshtastic.core.resources.map_tile_source
 import org.meshtastic.core.resources.only_favorites
+import org.meshtastic.core.resources.selected_map_type
 import org.meshtastic.core.resources.show_precision_circle
 import org.meshtastic.core.resources.show_waypoints
+import org.meshtastic.core.ui.icon.Check
 import org.meshtastic.core.ui.icon.Layers
 import org.meshtastic.core.ui.icon.Map
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -62,8 +66,8 @@ import org.meshtastic.feature.map.SharedMapViewModel
 import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.component.MapControlsOverlay
 import org.meshtastic.feature.map.maplibre.component.ClusterMembersDialog
+import org.meshtastic.feature.map.maplibre.component.MapLayersButton
 import org.meshtastic.feature.map.maplibre.component.OfflineMapTarget
-import org.meshtastic.feature.map.maplibre.component.OfflineMapsMenuItem
 import org.meshtastic.feature.map.maplibre.component.WaypointDialogs
 import org.meshtastic.feature.map.maplibre.component.rememberWaypointEditing
 import org.meshtastic.feature.map.maplibre.geojson.ClusterMember
@@ -105,6 +109,11 @@ class MapLibreMapViewProvider(
      * host, so desktop leaves it out. See [SitePlannerSession].
      */
     private val sitePlanner: (@Composable (SitePlannerSession) -> Unit)? = null,
+    /**
+     * Extra content for the foot of the layers sheet. The F-Droid app puts its imported-layer manager there, which the
+     * Google flavor reaches through the same button; adding a layer needs a file picker, so it cannot live here.
+     */
+    private val layersSheetExtra: @Composable () -> Unit = {},
 ) : MapViewProvider {
 
     @Composable
@@ -157,6 +166,7 @@ class MapLibreMapViewProvider(
                 overlays = overlays,
                 onOverlaysChange = { overlays = it },
                 basemapMenuExtra = basemapMenuExtra,
+                layersSheetExtra = layersSheetExtra,
                 onSitePlannerClick = sitePlanner?.let { { plannerOpen = true } },
             )
 
@@ -235,6 +245,7 @@ private fun MapToolbar(
     overlays: List<MapOverlay>,
     onOverlaysChange: (List<MapOverlay>) -> Unit,
     basemapMenuExtra: @Composable () -> Unit,
+    layersSheetExtra: @Composable () -> Unit,
     onSitePlannerClick: (() -> Unit)?,
 ) {
     var filterMenuExpanded by remember { mutableStateOf(false) }
@@ -252,18 +263,17 @@ private fun MapToolbar(
         },
         mapTypeContent = { BasemapMenu(selection = basemaps, extra = basemapMenuExtra) },
         layersContent = {
-            OverlayMenu(
-                selected = overlays,
-                onSelectedChange = onOverlaysChange,
-                extra = {
-                    OfflineMapsMenuItem(
-                        OfflineMapTarget(
-                            styleUrl = (basemaps.current as? Basemap.Vector)?.styleUri,
-                            bounds = { cameraState.viewport?.visibleBoundingBox },
-                            zoom = { cameraState.position.zoom },
-                        ),
-                    )
-                },
+            MapLayersButton(
+                overlays = overlays,
+                onOverlaysChange = onOverlaysChange,
+                offlineTarget =
+                OfflineMapTarget(
+                    styleUrl = (basemaps.current as? Basemap.Vector)?.styleUri,
+                    bounds = { cameraState.viewport?.visibleBoundingBox },
+                    zoom = { cameraState.position.zoom },
+                    showRegion = { box -> scope.launch { cameraState.animateTo(boundingBox = box) } },
+                ),
+                extra = layersSheetExtra,
             )
         },
         onSitePlannerClick = onSitePlannerClick,
@@ -274,7 +284,12 @@ private fun MapToolbar(
 
 /** The basemap in use, everything selectable, and how to change it. */
 @Stable
-private class BasemapSelection(val current: Basemap, val entries: List<Basemap>, val onSelect: (Basemap) -> Unit)
+private class BasemapSelection(
+    val current: Basemap,
+    val builtIns: List<Basemap>,
+    val customs: List<Basemap>,
+    val onSelect: (Basemap) -> Unit,
+)
 
 /**
  * Resolves the active basemap from the built-in list plus any [customs] the host supplies.
@@ -297,7 +312,8 @@ private fun rememberBasemapSelection(customs: List<Basemap.Raster>): BasemapSele
 
     return BasemapSelection(
         current = current,
-        entries = Basemaps.all + customs,
+        builtIns = Basemaps.all,
+        customs = customs,
         onSelect = { chosen ->
             scope.launch {
                 if (customs.any { it.id == chosen.id }) {
@@ -426,15 +442,24 @@ private fun BasemapMenu(selection: BasemapSelection, extra: @Composable () -> Un
             onClick = { expanded = true },
         )
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            selection.entries.forEach { entry ->
-                BasemapItem(
-                    basemap = entry,
-                    selected = entry.id == selection.current.id,
-                    onClick = {
+            DropdownMenuGroup(shapes = MenuDefaults.groupShapes()) {
+                selection.builtIns.forEach { entry ->
+                    BasemapItem(entry, entry.id == selection.current.id) {
                         selection.onSelect(entry)
                         expanded = false
-                    },
-                )
+                    }
+                }
+            }
+            // Second group, as the Google flavor does: the user's own sources read as a separate list.
+            if (selection.customs.isNotEmpty()) {
+                DropdownMenuGroup(shapes = MenuDefaults.groupShapes()) {
+                    selection.customs.forEach { entry ->
+                        BasemapItem(entry, entry.id == selection.current.id) {
+                            selection.onSelect(entry)
+                            expanded = false
+                        }
+                    }
+                }
             }
             extra()
         }
@@ -480,8 +505,13 @@ private fun OverlayMenu(
 private fun BasemapItem(basemap: Basemap, selected: Boolean, onClick: () -> Unit) {
     DropdownMenuItem(
         text = { Text(text = basemap.label) },
-        leadingIcon = { RadioButton(selected = selected, onClick = onClick) },
         onClick = onClick,
+        trailingIcon =
+        if (selected) {
+            { Icon(MeshtasticIcons.Check, contentDescription = stringResource(Res.string.selected_map_type)) }
+        } else {
+            null
+        },
     )
 }
 
