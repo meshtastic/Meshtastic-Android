@@ -832,6 +832,7 @@ gps_receive_gpio
 gps_transmit_gpio
 grant_permission
 green
+ham_long_name_summary
 hardware
 hardware_model
 heading

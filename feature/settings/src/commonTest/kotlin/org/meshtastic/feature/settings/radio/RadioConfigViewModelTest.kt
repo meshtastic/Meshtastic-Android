@@ -959,6 +959,28 @@ class RadioConfigViewModelTest {
     }
 
     @Test
+    fun `saveUserConfig splits a composed ham name into call sign and long name`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        nodeRepository.setNodes(listOf(node))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
+        viewModel = createViewModel()
+
+        // The User form carries the composed name firmware builds; set_ham_mode wants the halves back.
+        val user = User(long_name = "KK7ABC//Attic Heltec", short_name = "KK7A", is_licensed = true)
+        everySuspend { radioConfigUseCase.setHamMode(any(), any(), any()) } returns 42
+
+        viewModel.saveUserConfig(user)
+
+        verifySuspend {
+            radioConfigUseCase.setHamMode(
+                123,
+                HamParameters(call_sign = "KK7ABC", short_name = "KK7A", long_name = "Attic Heltec"),
+                any(),
+            )
+        }
+    }
+
+    @Test
     fun `saveUserConfig sends setOwner for unlicensed user`() = runTest {
         val node = Node(num = 123, user = User(id = "!123"))
         nodeRepository.setNodes(listOf(node))

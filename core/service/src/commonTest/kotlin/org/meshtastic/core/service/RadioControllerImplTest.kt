@@ -1558,14 +1558,42 @@ class RadioControllerImplTest {
                 sentMessage = (it.args[3] as () -> AdminMessage)()
             }
 
-        controller.setHamMode(123, HamParameters(call_sign = "KK7ABC", short_name = "KK7A"), 42)
+        controller.setHamMode(
+            123,
+            HamParameters(call_sign = "KK7ABC", short_name = "KK7A", long_name = "Attic Heltec"),
+            42,
+        )
 
         val ham = sentMessage?.set_ham_mode
         assertEquals("KK7ABC", ham?.call_sign)
         assertEquals("KK7A", ham?.short_name)
+        assertEquals("Attic Heltec", ham?.long_name)
         // Current LoRa values are echoed so a re-send never wipes the node's overrides.
         assertEquals(20, ham?.tx_power)
         assertEquals(915.5f, ham?.frequency)
+        // The optimistic name has to match what firmware composes, or the node reads as renamed until its NodeInfo
+        // lands and silently corrects it.
+        verify {
+            nodeManager.handleReceivedUser(
+                123,
+                existingUser.copy(long_name = "KK7ABC//Attic Heltec", short_name = "KK7A", is_licensed = true),
+                0,
+                false,
+            )
+        }
+    }
+
+    @Test
+    fun setHamModeWithoutALongNameNamesTheNodeAfterTheCallSignAlone() = runTest {
+        val controller = createController(scope = backgroundScope, myNodeNum = 123)
+        val existingUser = User(id = "!0000007b", long_name = "Old Name", short_name = "OLD")
+        every { nodeManager.nodeDBbyNodeNum } returns mapOf(123 to Node(num = 123, user = existingUser))
+        every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(LocalConfig())
+        everySuspend { commandSender.sendAdmin(any(), any(), any(), any()) } returns Unit
+
+        controller.setHamMode(123, HamParameters(call_sign = "KK7ABC", short_name = "KK7A"), 42)
+
+        // long_name is optional: firmware leaves the bare call sign rather than a dangling "//".
         verify {
             nodeManager.handleReceivedUser(
                 123,

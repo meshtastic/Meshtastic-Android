@@ -30,6 +30,7 @@ import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
+import org.meshtastic.core.model.HamName
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.repository.AdminController
 import org.meshtastic.core.repository.AdminEditScope
@@ -110,7 +111,7 @@ internal class AdminControllerImpl(
         nodeManager.handleReceivedUser(
             destNum,
             currentUser.copy(
-                long_name = hamParameters.call_sign,
+                long_name = HamName.compose(hamParameters.call_sign, hamParameters.long_name),
                 short_name = hamParameters.short_name,
                 is_licensed = true,
             ),

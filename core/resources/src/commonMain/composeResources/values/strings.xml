@@ -190,7 +190,7 @@
     </plurals>
     <string name="calculating">Calculating…</string>
     <string name="call_sign">Call sign</string>
-    <string name="call_sign_summary">Your amateur radio call sign, up to 8 characters</string>
+    <string name="call_sign_summary">Your amateur radio call sign, up to 7 characters</string>
     <string name="camera_permission">Camera permission</string>
     <string name="camera_permission_rationale">Allow camera access to scan QR codes.</string>
     <string name="camera_unavailable">Camera could not start. Try again, or close the scanner and reopen it.</string>
@@ -862,6 +862,7 @@
     <string name="gps_transmit_gpio">GPS Transmit GPIO</string>
     <string name="grant_permission">Grant permission</string>
     <string name="green">Green</string>
+    <string name="ham_long_name_summary">Optional. Appended to your call sign, e.g. KD2ABC//Attic Heltec</string>
     <string name="hardware">Hardware</string>
     <string name="hardware_model">Hardware model</string>
     <string name="heading">Heading</string>

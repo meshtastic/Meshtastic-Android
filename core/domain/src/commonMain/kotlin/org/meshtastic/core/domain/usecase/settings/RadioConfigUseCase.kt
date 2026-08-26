@@ -52,8 +52,8 @@ open class RadioConfigUseCase constructor(private val radioController: RadioCont
     }
 
     /**
-     * Enables amateur-radio (ham) mode on the locally connected node via `set_ham_mode`. At protobufs 2.7.25 only
-     * `call_sign` and `short_name` are user-supplied; `long_name` becomes settable when meshtastic/protobufs#941 ships.
+     * Enables amateur-radio (ham) mode on the locally connected node via `set_ham_mode`. `call_sign`, `short_name` and
+     * the optional `long_name` are user-supplied; `tx_power`/`frequency` are filled in by the controller.
      *
      * @param destNum The node number to update (must be the local node).
      * @param hamParameters The ham onboarding parameters.
