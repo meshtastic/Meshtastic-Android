@@ -39,8 +39,7 @@ import org.maplibre.compose.layers.SymbolLayer
 import org.maplibre.compose.map.GestureOptions
 import org.maplibre.compose.map.MapOptions
 import org.maplibre.compose.map.MaplibreMap
-import org.maplibre.compose.sources.GeoJsonData
-import org.maplibre.compose.sources.rememberGeoJsonSource
+import org.maplibre.spatialk.geojson.BoundingBox
 import org.maplibre.spatialk.geojson.Feature
 import org.maplibre.spatialk.geojson.FeatureCollection
 import org.maplibre.spatialk.geojson.Point
@@ -50,6 +49,7 @@ import org.meshtastic.feature.map.maplibre.component.SecondaryMapControls
 import org.meshtastic.feature.map.maplibre.component.rememberBasemapSelection
 import org.meshtastic.feature.map.maplibre.geojson.NodeFeatureKeys
 import org.meshtastic.feature.map.maplibre.geojson.nodesToFeatureCollection
+import org.meshtastic.feature.map.maplibre.geojson.rememberFeatureSource
 import org.meshtastic.feature.map.maplibre.layers.RasterBasemapLayer
 import org.meshtastic.feature.map.maplibre.layers.TracerouteLayers
 import org.meshtastic.feature.map.maplibre.style.Basemap
@@ -92,7 +92,7 @@ fun MapLibreInlineMap(
     ) {
         (basemaps.current as? Basemap.Raster)?.let { RasterBasemapLayer(it) }
 
-        val source = rememberGeoJsonSource(data = GeoJsonData.Features(nodesToFeatureCollection(listOf(node))))
+        val source = rememberFeatureSource(nodesToFeatureCollection(listOf(node)))
         CircleLayer(
             id = "inline-node",
             source = source,
@@ -159,7 +159,7 @@ fun MapLibreTracerouteMap(
 
 @Composable
 private fun TracerouteHopLayers(hops: List<Node>) {
-    val hopSource = rememberGeoJsonSource(data = GeoJsonData.Features(nodesToFeatureCollection(hops)))
+    val hopSource = rememberFeatureSource(nodesToFeatureCollection(hops))
     CircleLayer(
         id = "traceroute-hops",
         source = hopSource,
@@ -195,6 +195,18 @@ fun MapLibreDiscoveryMap(
     val cameraState = rememberCameraState(CameraPosition(target = scanner, zoom = DETAIL_ZOOM))
     val basemaps = rememberBasemapSelection(customBasemaps())
 
+    // Frame the scanner together with everything it heard, which is the OSMdroid map's behaviour and the only view
+    // that answers the question this map is opened to answer. Opening at a fixed zoom on the scanner put every
+    // discovered node off screen. Waits for a viewport, since fitting a bounding box needs one.
+    val hasViewport = cameraState.viewport != null
+    LaunchedEffect(nodes.size, hasViewport) {
+        if (hasViewport) {
+            discoveryBoundingBox(scanner, nodes)?.let {
+                cameraState.jumpTo(boundingBox = it, padding = PaddingValues(FIT_PADDING.dp))
+            }
+        }
+    }
+
     Box(modifier = modifier) {
         MaplibreMap(
             baseStyle = basemaps.current.toBaseStyle(),
@@ -218,21 +230,18 @@ fun MapLibreDiscoveryMap(
 @Composable
 private fun DiscoveredNodeLayers(nodes: List<DiscoveryMapNode>) {
     val source =
-        rememberGeoJsonSource(
-            data =
-            GeoJsonData.Features(
-                FeatureCollection(
-                    nodes.map { node ->
-                        Feature<Point, JsonObject?>(
-                            geometry = Point(GeoPosition(longitude = node.longitude, latitude = node.latitude)),
-                            properties =
-                            buildJsonObject {
-                                put(NodeFeatureKeys.SHORT_NAME, node.shortName.orEmpty())
-                                put("snr", node.snr)
-                            },
-                        )
-                    },
-                ),
+        rememberFeatureSource(
+            FeatureCollection(
+                nodes.map { node ->
+                    Feature<Point, JsonObject?>(
+                        geometry = Point(GeoPosition(longitude = node.longitude, latitude = node.latitude)),
+                        properties =
+                        buildJsonObject {
+                            put(NodeFeatureKeys.SHORT_NAME, node.shortName.orEmpty())
+                            put("snr", node.snr)
+                        },
+                    )
+                },
             ),
         )
     CircleLayer(
@@ -255,15 +264,12 @@ private fun DiscoveredNodeLayers(nodes: List<DiscoveryMapNode>) {
 @Composable
 private fun ScannerLayer(scanner: GeoPosition) {
     val source =
-        rememberGeoJsonSource(
-            data =
-            GeoJsonData.Features(
-                FeatureCollection(
-                    listOf(
-                        Feature<Point, JsonObject?>(
-                            geometry = Point(scanner),
-                            properties = buildJsonObject { put("role", "scanner") },
-                        ),
+        rememberFeatureSource(
+            FeatureCollection(
+                listOf(
+                    Feature<Point, JsonObject?>(
+                        geometry = Point(scanner),
+                        properties = buildJsonObject { put("role", "scanner") },
                     ),
                 ),
             ),
@@ -294,3 +300,23 @@ internal const val TOOLBAR_INSET = 8
 
 /** Breathing room around a bounds fit, so the outermost points are not under the toolbar or the legend. */
 private const val FIT_PADDING = 48
+
+/**
+ * A box covering the scanner and every node it heard.
+ *
+ * Only nodes with real coordinates count — a discovered node can be heard without ever reporting a position, and
+ * folding a (0, 0) into the box would stretch it into the Atlantic.
+ */
+private fun discoveryBoundingBox(scanner: GeoPosition, nodes: List<DiscoveryMapNode>): BoundingBox? {
+    val located = nodes.filter { it.latitude != 0.0 || it.longitude != 0.0 }
+    if (located.isEmpty()) return null
+
+    val latitudes = located.map { it.latitude } + scanner.latitude
+    val longitudes = located.map { it.longitude } + scanner.longitude
+    return BoundingBox(
+        west = longitudes.min(),
+        south = latitudes.min(),
+        east = longitudes.max(),
+        north = latitudes.max(),
+    )
+}

@@ -34,9 +34,7 @@ import org.maplibre.compose.expressions.dsl.step
 import org.maplibre.compose.layers.CircleLayer
 import org.maplibre.compose.layers.FillLayer
 import org.maplibre.compose.layers.SymbolLayer
-import org.maplibre.compose.sources.GeoJsonData
 import org.maplibre.compose.sources.GeoJsonOptions
-import org.maplibre.compose.sources.rememberGeoJsonSource
 import org.maplibre.compose.util.ClickResult
 import org.maplibre.spatialk.geojson.Point
 import org.maplibre.spatialk.geojson.Position
@@ -45,6 +43,7 @@ import org.meshtastic.feature.map.maplibre.geojson.ClusterMember
 import org.meshtastic.feature.map.maplibre.geojson.NodeFeatureKeys
 import org.meshtastic.feature.map.maplibre.geojson.nodesToFeatureCollection
 import org.meshtastic.feature.map.maplibre.geojson.precisionCirclesToFeatureCollection
+import org.meshtastic.feature.map.maplibre.geojson.rememberFeatureSource
 import org.meshtastic.feature.map.maplibre.geojson.toClusterMembers
 import org.meshtastic.feature.map.maplibre.style.MapColors
 
@@ -77,8 +76,7 @@ internal fun NodeLayers(
     onClusterMembers: (List<ClusterMember>) -> Unit,
 ) {
     if (showPrecisionCircles) {
-        val precisionSource =
-            rememberGeoJsonSource(data = GeoJsonData.Features(precisionCirclesToFeatureCollection(nodes)))
+        val precisionSource = rememberFeatureSource(precisionCirclesToFeatureCollection(nodes))
         FillLayer(
             id = "node-precision-fill",
             source = precisionSource,
@@ -93,8 +91,8 @@ internal fun NodeLayers(
     val clusterScope = rememberCoroutineScope()
 
     val nodeSource =
-        rememberGeoJsonSource(
-            data = GeoJsonData.Features(nodesToFeatureCollection(nodes, myNodeNum)),
+        rememberFeatureSource(
+            nodesToFeatureCollection(nodes, myNodeNum),
             options = GeoJsonOptions(cluster = true, clusterRadius = CLUSTER_RADIUS, clusterMaxZoom = CLUSTER_MAX_ZOOM),
         )
 

@@ -40,13 +40,12 @@ import org.maplibre.compose.expressions.dsl.image
 import org.maplibre.compose.layers.FillLayer
 import org.maplibre.compose.layers.LineLayer
 import org.maplibre.compose.layers.SymbolLayer
-import org.maplibre.compose.sources.GeoJsonData
-import org.maplibre.compose.sources.rememberGeoJsonSource
 import org.maplibre.compose.util.ClickResult
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.feature.map.maplibre.geojson.WaypointFeatureKeys
 import org.meshtastic.feature.map.maplibre.geojson.geofencesToFeatureCollection
 import org.meshtastic.feature.map.maplibre.geojson.iconGlyph
+import org.meshtastic.feature.map.maplibre.geojson.rememberFeatureSource
 import org.meshtastic.feature.map.maplibre.geojson.waypointsToFeatureCollection
 import org.meshtastic.feature.map.maplibre.style.MapColors
 
@@ -59,7 +58,7 @@ private const val GEOFENCE_FILL_OPACITY = 0.12f
  */
 @Composable
 internal fun WaypointLayers(waypoints: Collection<DataPacket>, onWaypointClick: (Int) -> Unit) {
-    val geofenceSource = rememberGeoJsonSource(data = GeoJsonData.Features(geofencesToFeatureCollection(waypoints)))
+    val geofenceSource = rememberFeatureSource(geofencesToFeatureCollection(waypoints))
 
     FillLayer(
         id = "geofence-fill",
@@ -70,7 +69,7 @@ internal fun WaypointLayers(waypoints: Collection<DataPacket>, onWaypointClick: 
 
     LineLayer(id = "geofence-outline", source = geofenceSource, color = const(MapColors.Highlight), width = const(2.dp))
 
-    val waypointSource = rememberGeoJsonSource(data = GeoJsonData.Features(waypointsToFeatureCollection(waypoints)))
+    val waypointSource = rememberFeatureSource(waypointsToFeatureCollection(waypoints))
 
     // One layer per distinct glyph, rather than one text layer for all of them. A waypoint icon is an arbitrary code
     // point from the mesh, and the basemap's font has no emoji coverage — asking for them as text renders nothing at

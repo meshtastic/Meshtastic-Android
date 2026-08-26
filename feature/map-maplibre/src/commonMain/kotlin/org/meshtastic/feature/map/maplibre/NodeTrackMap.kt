@@ -42,8 +42,6 @@ import org.maplibre.compose.expressions.value.LineJoin
 import org.maplibre.compose.layers.CircleLayer
 import org.maplibre.compose.layers.LineLayer
 import org.maplibre.compose.map.MaplibreMap
-import org.maplibre.compose.sources.GeoJsonData
-import org.maplibre.compose.sources.rememberGeoJsonSource
 import org.maplibre.compose.util.ClickResult
 import org.maplibre.spatialk.geojson.Feature
 import org.maplibre.spatialk.geojson.FeatureCollection
@@ -55,6 +53,7 @@ import org.meshtastic.feature.map.SharedMapViewModel
 import org.meshtastic.feature.map.maplibre.component.SecondaryMapControls
 import org.meshtastic.feature.map.maplibre.component.TrackFilterMenu
 import org.meshtastic.feature.map.maplibre.component.rememberBasemapSelection
+import org.meshtastic.feature.map.maplibre.geojson.rememberFeatureSource
 import org.meshtastic.feature.map.maplibre.layers.RasterBasemapLayer
 import org.meshtastic.feature.map.maplibre.style.Basemap
 import org.meshtastic.feature.map.maplibre.style.MapColors
@@ -185,15 +184,12 @@ private fun pointFeatures(points: List<TrackPoint>) = FeatureCollection(
 @Composable
 private fun TrackLineLayer(destNum: Int, points: List<TrackPoint>) {
     val source =
-        rememberGeoJsonSource(
-            data =
-            GeoJsonData.Features(
-                FeatureCollection(
-                    listOf(
-                        Feature<LineString, JsonObject?>(
-                            geometry = LineString(points.map { it.first }),
-                            properties = buildJsonObject { put("destNum", destNum) },
-                        ),
+        rememberFeatureSource(
+            FeatureCollection(
+                listOf(
+                    Feature<LineString, JsonObject?>(
+                        geometry = LineString(points.map { it.first }),
+                        properties = buildJsonObject { put("destNum", destNum) },
                     ),
                 ),
             ),
@@ -210,7 +206,7 @@ private fun TrackLineLayer(destNum: Int, points: List<TrackPoint>) {
 
 @Composable
 private fun TrackPointLayer(points: List<TrackPoint>, onPositionSelect: ((Int) -> Unit)?) {
-    val source = rememberGeoJsonSource(data = GeoJsonData.Features(pointFeatures(points)))
+    val source = rememberFeatureSource(pointFeatures(points))
     CircleLayer(
         id = "track-points",
         source = source,
@@ -229,8 +225,7 @@ private fun TrackPointLayer(points: List<TrackPoint>, onPositionSelect: ((Int) -
 
 @Composable
 private fun SelectedTrackPointLayer(points: List<TrackPoint>, selectedTime: Int) {
-    val source =
-        rememberGeoJsonSource(data = GeoJsonData.Features(pointFeatures(points.filter { it.second == selectedTime })))
+    val source = rememberFeatureSource(pointFeatures(points.filter { it.second == selectedTime }))
     CircleLayer(
         id = "track-selected",
         source = source,

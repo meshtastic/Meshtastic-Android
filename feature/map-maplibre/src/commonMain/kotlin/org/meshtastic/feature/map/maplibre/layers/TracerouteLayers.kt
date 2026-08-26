@@ -26,13 +26,12 @@ import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.expressions.value.LineCap
 import org.maplibre.compose.expressions.value.LineJoin
 import org.maplibre.compose.layers.LineLayer
-import org.maplibre.compose.sources.GeoJsonData
-import org.maplibre.compose.sources.rememberGeoJsonSource
 import org.maplibre.spatialk.geojson.Feature
 import org.maplibre.spatialk.geojson.FeatureCollection
 import org.maplibre.spatialk.geojson.LineString
 import org.maplibre.spatialk.geojson.Position
 import org.meshtastic.core.model.Node
+import org.meshtastic.feature.map.maplibre.geojson.rememberFeatureSource
 import org.meshtastic.feature.map.maplibre.style.MapColors
 
 /**
@@ -44,8 +43,8 @@ import org.meshtastic.feature.map.maplibre.style.MapColors
  */
 @Composable
 internal fun TracerouteLayers(forwardRoute: List<Int>, returnRoute: List<Int>, nodeLookup: Map<Int, Node>) {
-    val forward = rememberGeoJsonSource(data = GeoJsonData.Features(routeToFeatureCollection(forwardRoute, nodeLookup)))
-    val back = rememberGeoJsonSource(data = GeoJsonData.Features(routeToFeatureCollection(returnRoute, nodeLookup)))
+    val forward = rememberFeatureSource(routeToFeatureCollection(forwardRoute, nodeLookup))
+    val back = rememberFeatureSource(routeToFeatureCollection(returnRoute, nodeLookup))
 
     LineLayer(
         id = "traceroute-forward",
