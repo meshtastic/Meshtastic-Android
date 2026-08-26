@@ -46,6 +46,8 @@ import org.maplibre.compose.location.rememberDefaultLocationProvider
 import org.maplibre.compose.location.rememberDefaultOrientationProvider
 import org.maplibre.compose.location.rememberLocationState
 import org.maplibre.compose.location.rememberSystemSettingsLauncher
+import org.meshtastic.core.model.isLocked
+import org.meshtastic.core.model.isModifiableBy
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.manage_map_layers
@@ -59,8 +61,10 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.util.MapViewProvider
 import org.meshtastic.feature.map.BaseMapViewModel
 import org.meshtastic.feature.map.SharedMapViewModel
+import org.meshtastic.feature.map.component.DeleteWaypointDialog
 import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.component.MapControlsOverlay
+import org.meshtastic.feature.map.component.WaypointInfoDialog
 import org.meshtastic.feature.map.maplibre.layers.CustomLayer
 import org.meshtastic.feature.map.maplibre.style.Basemap
 import org.meshtastic.feature.map.maplibre.style.Basemaps
@@ -97,6 +101,12 @@ class MapLibreMapViewProvider(
         val cameraState = rememberCameraState()
         val location = rememberLocationControls(cameraState)
 
+        var infoWaypointId by remember { mutableStateOf<Int?>(null) }
+
+        // Honour the deep link the navigation graph passes in; previously ignored here, so a waypoint link opened the
+        // map and then showed nothing.
+        LaunchedEffect(waypointId) { waypointId?.let { infoWaypointId = it } }
+
         var overlays by remember { mutableStateOf(emptyList<MapOverlay>()) }
         // Owned here, not inside FilterMenu: the button that opens it lives in MapControlsOverlay and only reports
         // the press back through onToggleFilterMenu.
@@ -114,6 +124,7 @@ class MapLibreMapViewProvider(
                 locationState = location.state,
                 followLocation = location.following,
                 bearingUpdate = location.bearingUpdate,
+                onWaypointClick = { infoWaypointId = it },
             )
 
             MapControlsOverlay(
@@ -134,6 +145,67 @@ class MapLibreMapViewProvider(
                 onSitePlannerClick = null,
                 isLocationTrackingEnabled = location.following,
                 onToggleLocationTracking = location.onToggleFollow,
+            )
+
+            WaypointDialogs(
+                viewModel = viewModel,
+                selectedId = infoWaypointId,
+                onSelectedIdChange = { infoWaypointId = it },
+            )
+        }
+    }
+}
+
+/**
+ * Waypoint detail and deletion dialogs for the tapped waypoint.
+ *
+ * Owns the deletion step itself so the caller only has to track which waypoint is open.
+ */
+@Composable
+private fun WaypointDialogs(viewModel: SharedMapViewModel, selectedId: Int?, onSelectedIdChange: (Int?) -> Unit) {
+    val waypoints by viewModel.waypoints.collectAsStateWithLifecycle()
+    val displayUnits by viewModel.displayUnits.collectAsStateWithLifecycle()
+    val alertOptIns by viewModel.geofenceAlertOptIns.collectAsStateWithLifecycle()
+    val isConnected by viewModel.isConnected.collectAsStateWithLifecycle()
+
+    var deletingId by remember { mutableStateOf<Int?>(null) }
+
+    selectedId?.let { id ->
+        waypoints[id]?.waypoint?.let { waypoint ->
+            WaypointInfoDialog(
+                waypoint = waypoint,
+                displayUnits = displayUnits,
+                alertsEnabled = waypoint.id in alertOptIns,
+                onToggleAlerts = { viewModel.setGeofenceAlertOptIn(waypoint.id, it) },
+                onDismissRequest = { onSelectedIdChange(null) },
+                onDeleteForMe =
+                if (!waypoint.isLocked) {
+                    {
+                        onSelectedIdChange(null)
+                        deletingId = waypoint.id
+                    }
+                } else {
+                    null
+                },
+            )
+        }
+    }
+
+    deletingId?.let { id ->
+        waypoints[id]?.waypoint?.let { waypoint ->
+            DeleteWaypointDialog(
+                // Deleting for everyone re-broadcasts an expiry, so it needs a live connection.
+                canDeleteForEveryone = waypoint.isModifiableBy(viewModel.myNodeNum) && isConnected && waypoint.id != 0,
+                onDeleteForMe = {
+                    viewModel.deleteWaypoint(waypoint.id)
+                    deletingId = null
+                },
+                onDeleteForEveryone = {
+                    viewModel.sendWaypoint(waypoint.copy(expire = 1))
+                    viewModel.deleteWaypoint(waypoint.id)
+                    deletingId = null
+                },
+                onDismissRequest = { deletingId = null },
             )
         }
     }
