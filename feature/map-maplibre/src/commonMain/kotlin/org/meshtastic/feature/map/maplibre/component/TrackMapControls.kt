@@ -27,23 +27,21 @@ import kotlinx.coroutines.launch
 import org.maplibre.compose.camera.CameraState
 import org.meshtastic.feature.map.component.MapControlsOverlay
 import org.meshtastic.feature.map.maplibre.ZOOM_STEP
-import org.meshtastic.feature.map.maplibre.style.Basemaps
 import org.meshtastic.feature.map.maplibre.style.zoomRange
 import org.meshtastic.feature.map.maplibre.zoomBy
 
 /**
- * Toolbar for the node-track map: compass, zoom and the track's own age filter.
+ * Toolbar for the node-track map: compass, zoom, basemap and the track's own age filter.
  *
  * The same floating toolbar the main map uses, so the two read as one control language, but with only the buttons a
  * track map can honour. Location tracking is absent — the track map has no location plumbing, and a button that does
- * nothing is worse than no button. Basemap selection is absent for now, and is the remaining gap against both
- * predecessors here.
+ * nothing is worse than no button.
  */
 @Composable
-internal fun TrackMapControls(cameraState: CameraState, modifier: Modifier = Modifier) {
+internal fun TrackMapControls(cameraState: CameraState, basemaps: BasemapSelection, modifier: Modifier = Modifier) {
     var filterMenuExpanded by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
-    val zoomRange = Basemaps.default.zoomRange()
+    val zoomRange = basemaps.current.zoomRange()
 
     MapControlsOverlay(
         modifier = modifier,
@@ -55,6 +53,7 @@ internal fun TrackMapControls(cameraState: CameraState, modifier: Modifier = Mod
         onCompassClick = { scope.launch { cameraState.animateTo(cameraState.position.copy(bearing = 0.0)) } },
         onZoomIn = { scope.launch { cameraState.zoomBy(ZOOM_STEP, zoomRange) } },
         onZoomOut = { scope.launch { cameraState.zoomBy(-ZOOM_STEP, zoomRange) } },
+        mapTypeContent = { BasemapMenu(selection = basemaps) },
         onToggleLocationTracking = null,
     )
 }

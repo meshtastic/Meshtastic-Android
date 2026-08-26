@@ -20,10 +20,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuGroup
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -34,10 +31,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
-import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.maplibre.compose.camera.CameraState
 import org.maplibre.compose.camera.rememberCameraState
@@ -48,30 +43,26 @@ import org.maplibre.compose.location.rememberDefaultLocationProvider
 import org.maplibre.compose.location.rememberDefaultOrientationProvider
 import org.maplibre.compose.location.rememberLocationState
 import org.maplibre.compose.location.rememberSystemSettingsLauncher
-import org.meshtastic.core.repository.MapPrefs
-import org.meshtastic.core.repository.MapTileProviderPrefs
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.manage_map_layers
-import org.meshtastic.core.resources.map_tile_source
-import org.meshtastic.core.resources.selected_map_type
-import org.meshtastic.core.ui.icon.Check
 import org.meshtastic.core.ui.icon.Layers
-import org.meshtastic.core.ui.icon.Map
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.util.MapViewProvider
 import org.meshtastic.feature.map.SharedMapViewModel
 import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.component.MapControlsOverlay
+import org.meshtastic.feature.map.maplibre.component.BasemapMenu
+import org.meshtastic.feature.map.maplibre.component.BasemapSelection
 import org.meshtastic.feature.map.maplibre.component.ClusterMembersDialog
 import org.meshtastic.feature.map.maplibre.component.FilterMenu
 import org.meshtastic.feature.map.maplibre.component.MapLayersButton
 import org.meshtastic.feature.map.maplibre.component.OfflineMapTarget
 import org.meshtastic.feature.map.maplibre.component.WaypointDialogs
+import org.meshtastic.feature.map.maplibre.component.rememberBasemapSelection
 import org.meshtastic.feature.map.maplibre.component.rememberWaypointEditing
 import org.meshtastic.feature.map.maplibre.geojson.ClusterMember
 import org.meshtastic.feature.map.maplibre.layers.CustomLayer
 import org.meshtastic.feature.map.maplibre.style.Basemap
-import org.meshtastic.feature.map.maplibre.style.Basemaps
 import org.meshtastic.feature.map.maplibre.style.MapOverlay
 import org.meshtastic.feature.map.maplibre.style.MapOverlays
 import org.meshtastic.feature.map.maplibre.style.zoomRange
@@ -280,51 +271,6 @@ private fun MapToolbar(
     )
 }
 
-/** The basemap in use, everything selectable, and how to change it. */
-@Stable
-private class BasemapSelection(
-    val current: Basemap,
-    val builtIns: List<Basemap>,
-    val customs: List<Basemap>,
-    val onSelect: (Basemap) -> Unit,
-)
-
-/**
- * Resolves the active basemap from the built-in list plus any [customs] the host supplies.
- *
- * Two preferences back this, matching how the Google flavor stores it: an index into the built-in list, and a separate
- * id for a user-defined source. Keeping them apart means a custom source being added or removed cannot silently repoint
- * the built-in selection, which an index over a mixed list would.
- */
-@Composable
-private fun rememberBasemapSelection(customs: List<Basemap.Raster>): BasemapSelection {
-    val mapPrefs: MapPrefs = koinInject()
-    val tilePrefs: MapTileProviderPrefs = koinInject()
-    val scope = rememberCoroutineScope()
-
-    val styleIndex by mapPrefs.mapStyle.collectAsStateWithLifecycle()
-    val selectedCustomId by tilePrefs.selectedCustomTileProviderId.collectAsStateWithLifecycle()
-
-    val current =
-        customs.firstOrNull { it.id == selectedCustomId } ?: Basemaps.all.getOrElse(styleIndex) { Basemaps.default }
-
-    return BasemapSelection(
-        current = current,
-        builtIns = Basemaps.all,
-        customs = customs,
-        onSelect = { chosen ->
-            scope.launch {
-                if (customs.any { it.id == chosen.id }) {
-                    tilePrefs.setSelectedCustomTileProviderId(chosen.id)
-                } else {
-                    tilePrefs.setSelectedCustomTileProviderId(null)
-                    mapPrefs.setMapStyle(Basemaps.all.indexOf(chosen))
-                }
-            }
-        },
-    )
-}
-
 /** State and callbacks backing the locate and compass buttons. */
 @Stable
 private class LocationControls(
@@ -406,41 +352,6 @@ private fun rememberLocationControls(cameraState: CameraState): LocationControls
 }
 
 @Composable
-private fun BasemapMenu(selection: BasemapSelection, extra: @Composable () -> Unit = {}) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Box {
-        MapButton(
-            icon = MeshtasticIcons.Map,
-            contentDescription = stringResource(Res.string.map_tile_source),
-            onClick = { expanded = true },
-        )
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            DropdownMenuGroup(shapes = MenuDefaults.groupShapes()) {
-                selection.builtIns.forEach { entry ->
-                    BasemapItem(entry, entry.id == selection.current.id) {
-                        selection.onSelect(entry)
-                        expanded = false
-                    }
-                }
-            }
-            // Second group, as the Google flavor does: the user's own sources read as a separate list.
-            if (selection.customs.isNotEmpty()) {
-                DropdownMenuGroup(shapes = MenuDefaults.groupShapes()) {
-                    selection.customs.forEach { entry ->
-                        BasemapItem(entry, entry.id == selection.current.id) {
-                            selection.onSelect(entry)
-                            expanded = false
-                        }
-                    }
-                }
-            }
-            extra()
-        }
-    }
-}
-
-@Composable
 private fun OverlayMenu(
     selected: List<MapOverlay>,
     onSelectedChange: (List<MapOverlay>) -> Unit,
@@ -473,20 +384,6 @@ private fun OverlayMenu(
             extra()
         }
     }
-}
-
-@Composable
-private fun BasemapItem(basemap: Basemap, selected: Boolean, onClick: () -> Unit) {
-    DropdownMenuItem(
-        text = { Text(text = basemap.label) },
-        onClick = onClick,
-        trailingIcon =
-        if (selected) {
-            { Icon(MeshtasticIcons.Check, contentDescription = stringResource(Res.string.selected_map_type)) }
-        } else {
-            null
-        },
-    )
 }
 
 @Composable

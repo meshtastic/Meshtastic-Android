@@ -23,14 +23,11 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.map.component.CustomTileSourcesMenuItem
 import org.meshtastic.app.map.component.ImportedLayersSlot
 import org.meshtastic.app.map.component.SitePlannerSlot
-import org.meshtastic.app.map.repository.CustomTileProviderRepository
 import org.meshtastic.core.ui.util.MapViewProvider
 import org.meshtastic.feature.map.SharedMapViewModel
 import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.maplibre.MapLibreMapViewProvider
 import org.meshtastic.feature.map.maplibre.layers.CustomLayer
-import org.meshtastic.feature.map.maplibre.style.Basemap
-import org.meshtastic.feature.map.maplibre.style.RasterTileSpec
 
 fun getMapViewProvider(): MapViewProvider = MapLibreMapViewProvider(
     customLayers = {
@@ -43,21 +40,7 @@ fun getMapViewProvider(): MapViewProvider = MapLibreMapViewProvider(
             .filter { it.layerType != LayerType.KML }
             .mapNotNull { item -> item.uri?.let { uri -> CustomLayer(id = item.id, uri = uri.toString()) } }
     },
-    customBasemaps = {
-        val tileProviders: CustomTileProviderRepository = koinInject()
-        val configs by tileProviders.getCustomTileProviders().collectAsStateWithLifecycle(emptyList())
-        // Local (MBTiles-style) sources are skipped: MapLibre needs a URL template it can fetch, and serving a
-        // local file to it is a separate piece of work.
-        configs
-            .filterNot { it.isLocal }
-            .map { config ->
-                Basemap.Raster(
-                    id = config.id,
-                    label = config.name,
-                    spec = RasterTileSpec(tiles = listOf(config.urlTemplate)),
-                )
-            }
-    },
+    customBasemaps = { customRasterBasemaps() },
     basemapMenuExtra = { CustomTileSourcesMenuItem() },
     // EditWaypointDialog drives android.app.DatePickerDialog for the expiry picker, so it cannot live in the map
     // module's shared source set. The flavor supplies it; desktop goes without until there is a multiplatform

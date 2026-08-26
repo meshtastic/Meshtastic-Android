@@ -34,7 +34,6 @@ import org.maplibre.compose.location.mostAccurateBearing
 import org.maplibre.compose.location.updateCamera
 import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.compose.material3.LocationPuckDefaults
-import org.maplibre.compose.style.BaseStyle
 import org.maplibre.compose.util.ClickResult
 import org.maplibre.compose.util.MaplibreComposable
 import org.maplibre.spatialk.geojson.Position
@@ -51,13 +50,8 @@ import org.meshtastic.feature.map.maplibre.layers.WaypointLayers
 import org.meshtastic.feature.map.maplibre.style.Basemap
 import org.meshtastic.feature.map.maplibre.style.Basemaps
 import org.meshtastic.feature.map.maplibre.style.MapOverlay
+import org.meshtastic.feature.map.maplibre.style.toBaseStyle
 import org.meshtastic.feature.map.maplibre.style.zoomRange
-
-/** Vector basemaps arrive as a style document; raster ones draw over an empty one. */
-private fun Basemap.toBaseStyle(): BaseStyle = when (this) {
-    is Basemap.Vector -> BaseStyle.Uri(styleUri)
-    is Basemap.Raster -> BaseStyle.Empty
-}
 
 /**
  * The mesh map, rendered by MapLibre.

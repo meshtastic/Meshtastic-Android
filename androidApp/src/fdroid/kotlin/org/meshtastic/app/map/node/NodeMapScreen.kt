@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.meshtastic.app.map.customRasterBasemaps
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.feature.map.maplibre.MapLibreNodeTrackMap
 import org.meshtastic.feature.map.node.NodeMapViewModel
@@ -49,6 +50,7 @@ fun NodeMapScreen(nodeMapViewModel: NodeMapViewModel, onNavigateUp: () -> Unit) 
             destNum = node?.num ?: 0,
             positions = positions,
             modifier = Modifier.fillMaxSize().padding(paddingValues),
+            customBasemaps = { customRasterBasemaps() },
         )
     }
 }

@@ -16,6 +16,8 @@
  */
 package org.meshtastic.feature.map.maplibre.style
 
+import org.maplibre.compose.style.BaseStyle
+
 /**
  * Tile-scheme description for one raster source.
  *
@@ -166,6 +168,12 @@ object Basemaps {
     val default: Basemap = Liberty
 
     fun byId(id: String?): Basemap = all.firstOrNull { it.id == id } ?: default
+}
+
+/** Vector basemaps arrive as a style document; raster ones draw over an empty one. */
+internal fun Basemap.toBaseStyle(): BaseStyle = when (this) {
+    is Basemap.Vector -> BaseStyle.Uri(styleUri)
+    is Basemap.Raster -> BaseStyle.Empty
 }
 
 /**

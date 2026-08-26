@@ -53,7 +53,12 @@ import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.feature.map.LastHeardFilter
 import org.meshtastic.feature.map.SharedMapViewModel
 import org.meshtastic.feature.map.maplibre.component.TrackMapControls
+import org.meshtastic.feature.map.maplibre.component.rememberBasemapSelection
+import org.meshtastic.feature.map.maplibre.layers.RasterBasemapLayer
+import org.meshtastic.feature.map.maplibre.style.Basemap
 import org.meshtastic.feature.map.maplibre.style.MapColors
+import org.meshtastic.feature.map.maplibre.style.toBaseStyle
+import org.meshtastic.feature.map.maplibre.style.zoomRange
 import org.maplibre.spatialk.geojson.Position as GeoPosition
 import org.meshtastic.proto.Position as ProtoPosition
 
@@ -68,6 +73,9 @@ private typealias TrackPoint = Pair<GeoPosition, Int>
  * Carries its own controls. The Google flavor reaches this screen through the main map's own composable, so the track
  * map inherits the full toolbar — including the age filter, which is a separate preference from the main map's. Here
  * the track map is its own composable, so the toolbar has to be asked for explicitly.
+ *
+ * @param customBasemaps The host's own tile sources, for the basemap menu. Supplied by the host because reaching them
+ *   means reaching the F-Droid flavor's tile-provider repository, which the desktop host has no equivalent of.
  */
 @Composable
 fun MapLibreNodeTrackMap(
@@ -76,9 +84,14 @@ fun MapLibreNodeTrackMap(
     modifier: Modifier = Modifier,
     selectedPositionTime: Int? = null,
     onPositionSelect: ((Int) -> Unit)? = null,
+    customBasemaps: @Composable () -> List<Basemap.Raster> = { emptyList() },
 ) {
     val allPoints = remember(positions) { positions.mapNotNull { it.toTrackPoint() } }
     val cameraState = rememberCameraState()
+
+    // The basemap is a shared preference, so a track opens on whatever the main map is set to. The OSMdroid track map
+    // resolved the same preference; hardcoding the default meant picking Dark on the main map and getting Liberty here.
+    val basemaps = rememberBasemapSelection(customBasemaps())
 
     val viewModel: SharedMapViewModel = koinViewModel()
     val filterState by viewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
@@ -100,11 +113,14 @@ fun MapLibreNodeTrackMap(
     // disappears along with the points, leaving no way back.
     Box(modifier = modifier) {
         MaplibreMap(
-            baseStyle = defaultStyle,
+            baseStyle = basemaps.current.toBaseStyle(),
             cameraState = cameraState,
             modifier = Modifier.fillMaxSize(),
             options = SecondaryMapOptions,
+            zoomRange = basemaps.current.zoomRange(),
         ) {
+            (basemaps.current as? Basemap.Raster)?.let { RasterBasemapLayer(it) }
+
             // A LineString needs two coordinates; a filter tight enough to leave one point would otherwise throw.
             if (points.size > 1) TrackLineLayer(destNum = destNum, points = points)
             if (points.isNotEmpty()) {
@@ -116,6 +132,7 @@ fun MapLibreNodeTrackMap(
         }
         TrackMapControls(
             cameraState = cameraState,
+            basemaps = basemaps,
             modifier = Modifier.align(Alignment.TopCenter).padding(top = TOOLBAR_INSET.dp),
         )
     }
