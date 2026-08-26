@@ -16,8 +16,12 @@
  */
 package org.meshtastic.feature.map.maplibre
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -36,30 +40,40 @@ import org.maplibre.compose.map.MapOptions
 import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.compose.sources.GeoJsonData
 import org.maplibre.compose.sources.rememberGeoJsonSource
-import org.maplibre.compose.style.BaseStyle
 import org.maplibre.spatialk.geojson.Feature
 import org.maplibre.spatialk.geojson.FeatureCollection
 import org.maplibre.spatialk.geojson.Point
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.ui.util.DiscoveryMapNode
+import org.meshtastic.feature.map.maplibre.component.SecondaryMapControls
+import org.meshtastic.feature.map.maplibre.component.rememberBasemapSelection
 import org.meshtastic.feature.map.maplibre.geojson.NodeFeatureKeys
 import org.meshtastic.feature.map.maplibre.geojson.nodesToFeatureCollection
+import org.meshtastic.feature.map.maplibre.layers.RasterBasemapLayer
 import org.meshtastic.feature.map.maplibre.layers.TracerouteLayers
 import org.meshtastic.feature.map.maplibre.style.Basemap
-import org.meshtastic.feature.map.maplibre.style.Basemaps
 import org.meshtastic.feature.map.maplibre.style.MapColors
+import org.meshtastic.feature.map.maplibre.style.toBaseStyle
+import org.meshtastic.feature.map.maplibre.style.zoomRange
 import org.maplibre.spatialk.geojson.Position as GeoPosition
 
 internal const val DEG_SCALE = 1e-7
 internal const val DETAIL_ZOOM = 13.0
 
-internal val defaultStyle: BaseStyle
-    get() = BaseStyle.Uri((Basemaps.default as Basemap.Vector).styleUri)
-
-/** Single-node mini-map embedded in the node detail sheet. */
+/**
+ * Single-node mini-map embedded in the node detail sheet.
+ *
+ * No toolbar: it is a thumbnail a couple of hundred dp tall, and a floating toolbar would cover the node it exists to
+ * show. It still follows the basemap preference, so it matches the map the user was just looking at.
+ */
 @Composable
-fun MapLibreInlineMap(node: Node, modifier: Modifier = Modifier) {
+fun MapLibreInlineMap(
+    node: Node,
+    modifier: Modifier = Modifier,
+    customBasemaps: @Composable () -> List<Basemap.Raster> = { emptyList() },
+) {
     if (node.validPosition == null) return
+    val basemaps = rememberBasemapSelection(customBasemaps())
     val cameraState =
         rememberCameraState(
             CameraPosition(
@@ -69,11 +83,14 @@ fun MapLibreInlineMap(node: Node, modifier: Modifier = Modifier) {
         )
 
     MaplibreMap(
-        baseStyle = defaultStyle,
+        baseStyle = basemaps.current.toBaseStyle(),
         cameraState = cameraState,
         modifier = modifier,
         options = SecondaryMapOptions,
+        zoomRange = basemaps.current.zoomRange(),
     ) {
+        (basemaps.current as? Basemap.Raster)?.let { RasterBasemapLayer(it) }
+
         val source = rememberGeoJsonSource(data = GeoJsonData.Features(nodesToFeatureCollection(listOf(node))))
         CircleLayer(
             id = "inline-node",
@@ -86,65 +103,102 @@ fun MapLibreInlineMap(node: Node, modifier: Modifier = Modifier) {
     }
 }
 
-/** Traceroute result map: forward and return paths plus the hops they pass through. */
+/**
+ * Traceroute result map: forward and return paths plus the hops they pass through.
+ *
+ * The Google flavor reaches this through its main map composable, so it arrives with the toolbar and the basemap
+ * already chosen. Here it is its own composable and has to ask for both. No filter: a traceroute is the route it is,
+ * and there is nothing on it the main map's filters apply to.
+ */
 @Composable
 fun MapLibreTracerouteMap(
     forwardRoute: List<Int>,
     returnRoute: List<Int>,
     nodeLookup: Map<Int, Node>,
     modifier: Modifier = Modifier,
+    customBasemaps: @Composable () -> List<Basemap.Raster> = { emptyList() },
 ) {
     val cameraState = rememberCameraState()
+    val basemaps = rememberBasemapSelection(customBasemaps())
     val hops = (forwardRoute + returnRoute).distinct().mapNotNull { nodeLookup[it] }
 
     LaunchedEffect(hops.size) { nodesBoundingBox(hops)?.let { cameraState.jumpTo(boundingBox = it) } }
 
-    MaplibreMap(
-        baseStyle = defaultStyle,
-        cameraState = cameraState,
-        modifier = modifier,
-        options = SecondaryMapOptions,
-    ) {
-        TracerouteLayers(forwardRoute = forwardRoute, returnRoute = returnRoute, nodeLookup = nodeLookup)
-
-        val hopSource = rememberGeoJsonSource(data = GeoJsonData.Features(nodesToFeatureCollection(hops)))
-        CircleLayer(
-            id = "traceroute-hops",
-            source = hopSource,
-            color = const(MapColors.Slate),
-            radius = const(10.dp),
-            strokeColor = const(Color.White),
-            strokeWidth = const(2.dp),
-        )
-        SymbolLayer(
-            id = "traceroute-hop-labels",
-            source = hopSource,
-            textField = feature[NodeFeatureKeys.SHORT_NAME].asString(),
-            textColor = const(Color.White),
-            textAllowOverlap = const(true),
+    Box(modifier = modifier) {
+        MaplibreMap(
+            baseStyle = basemaps.current.toBaseStyle(),
+            cameraState = cameraState,
+            modifier = Modifier.fillMaxSize(),
+            options = SecondaryMapOptions,
+            zoomRange = basemaps.current.zoomRange(),
+        ) {
+            (basemaps.current as? Basemap.Raster)?.let { RasterBasemapLayer(it) }
+            TracerouteLayers(forwardRoute = forwardRoute, returnRoute = returnRoute, nodeLookup = nodeLookup)
+            TracerouteHopLayers(hops)
+        }
+        SecondaryMapControls(
+            cameraState = cameraState,
+            basemaps = basemaps,
+            modifier = Modifier.align(Alignment.TopCenter).padding(top = TOOLBAR_INSET.dp),
         )
     }
 }
 
-/** Discovery scan summary map: the scanner plus everything it heard. */
+@Composable
+private fun TracerouteHopLayers(hops: List<Node>) {
+    val hopSource = rememberGeoJsonSource(data = GeoJsonData.Features(nodesToFeatureCollection(hops)))
+    CircleLayer(
+        id = "traceroute-hops",
+        source = hopSource,
+        color = const(MapColors.Slate),
+        radius = const(10.dp),
+        strokeColor = const(Color.White),
+        strokeWidth = const(2.dp),
+    )
+    SymbolLayer(
+        id = "traceroute-hop-labels",
+        source = hopSource,
+        textField = feature[NodeFeatureKeys.SHORT_NAME].asString(),
+        textColor = const(Color.White),
+        textAllowOverlap = const(true),
+    )
+}
+
+/**
+ * Discovery scan summary map: the scanner plus everything it heard.
+ *
+ * Same treatment as the traceroute map, and for the same reason: satellite imagery is often the useful backdrop for
+ * asking why one node was heard and another was not, and until now this map could not show it.
+ */
 @Composable
 fun MapLibreDiscoveryMap(
     userLatitude: Double,
     userLongitude: Double,
     nodes: List<DiscoveryMapNode>,
     modifier: Modifier = Modifier,
+    customBasemaps: @Composable () -> List<Basemap.Raster> = { emptyList() },
 ) {
     val scanner = GeoPosition(longitude = userLongitude, latitude = userLatitude)
     val cameraState = rememberCameraState(CameraPosition(target = scanner, zoom = DETAIL_ZOOM))
+    val basemaps = rememberBasemapSelection(customBasemaps())
 
-    MaplibreMap(
-        baseStyle = defaultStyle,
-        cameraState = cameraState,
-        modifier = modifier,
-        options = SecondaryMapOptions,
-    ) {
-        DiscoveredNodeLayers(nodes)
-        ScannerLayer(scanner)
+    Box(modifier = modifier) {
+        MaplibreMap(
+            baseStyle = basemaps.current.toBaseStyle(),
+            cameraState = cameraState,
+            modifier = Modifier.fillMaxSize(),
+            options = SecondaryMapOptions,
+            zoomRange = basemaps.current.zoomRange(),
+        ) {
+            (basemaps.current as? Basemap.Raster)?.let { RasterBasemapLayer(it) }
+            DiscoveredNodeLayers(nodes)
+            ScannerLayer(scanner)
+        }
+        SecondaryMapControls(
+            cameraState = cameraState,
+            basemaps = basemaps,
+            modifier = Modifier.align(Alignment.TopCenter).padding(top = TOOLBAR_INSET.dp),
+        )
     }
 }
 
@@ -221,3 +275,6 @@ private fun ScannerLayer(scanner: GeoPosition) {
  */
 internal val SecondaryMapOptions =
     MapOptions(gestureOptions = GestureOptions(isDragRotateTiltEnabled = false, isTwoFingerTiltEnabled = false))
+
+/** Keeps a floating toolbar clear of the top edge, matching the main map's own inset. */
+internal const val TOOLBAR_INSET = 8

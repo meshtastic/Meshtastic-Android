@@ -31,24 +31,28 @@ import org.meshtastic.feature.map.maplibre.style.zoomRange
 import org.meshtastic.feature.map.maplibre.zoomBy
 
 /**
- * Toolbar for the node-track map: compass, zoom, basemap and the track's own age filter.
+ * Toolbar for the maps outside the main one: compass, zoom, basemap, and a filter where there is something to filter.
  *
- * The same floating toolbar the main map uses, so the two read as one control language, but with only the buttons a
- * track map can honour. Location tracking is absent — the track map has no location plumbing, and a button that does
- * nothing is worse than no button.
+ * The same floating toolbar the main map uses, so they read as one control language, but with only the buttons these
+ * maps can honour. Location tracking is absent — none of them has location plumbing, and a button that does nothing is
+ * worse than no button. [filterMenu] is null for the traceroute and discovery maps: neither has anything to hide, and
+ * the main map's own filter menu would mean nothing on either.
  */
 @Composable
-internal fun TrackMapControls(cameraState: CameraState, basemaps: BasemapSelection, modifier: Modifier = Modifier) {
+internal fun SecondaryMapControls(
+    cameraState: CameraState,
+    basemaps: BasemapSelection,
+    modifier: Modifier = Modifier,
+    filterMenu: (@Composable (expanded: Boolean, onDismissRequest: () -> Unit) -> Unit)? = null,
+) {
     var filterMenuExpanded by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val zoomRange = basemaps.current.zoomRange()
 
     MapControlsOverlay(
         modifier = modifier,
-        onToggleFilterMenu = { filterMenuExpanded = !filterMenuExpanded },
-        filterDropdownContent = {
-            TrackFilterMenu(expanded = filterMenuExpanded, onDismissRequest = { filterMenuExpanded = false })
-        },
+        onToggleFilterMenu = filterMenu?.let { { filterMenuExpanded = !filterMenuExpanded } },
+        filterDropdownContent = { filterMenu?.invoke(filterMenuExpanded) { filterMenuExpanded = false } },
         bearing = cameraState.position.bearing.toFloat(),
         onCompassClick = { scope.launch { cameraState.animateTo(cameraState.position.copy(bearing = 0.0)) } },
         onZoomIn = { scope.launch { cameraState.zoomBy(ZOOM_STEP, zoomRange) } },

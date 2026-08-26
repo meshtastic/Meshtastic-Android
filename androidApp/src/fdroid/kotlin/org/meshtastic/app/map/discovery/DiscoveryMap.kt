@@ -18,6 +18,7 @@ package org.meshtastic.app.map.discovery
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import org.meshtastic.app.map.customRasterBasemaps
 import org.meshtastic.core.ui.util.DiscoveryMapNode
 import org.meshtastic.feature.map.maplibre.MapLibreDiscoveryMap
 
@@ -28,4 +29,10 @@ fun DiscoveryMap(
     userLongitude: Double,
     nodes: List<DiscoveryMapNode>,
     modifier: Modifier = Modifier,
-) = MapLibreDiscoveryMap(userLatitude = userLatitude, userLongitude = userLongitude, nodes = nodes, modifier = modifier)
+) = MapLibreDiscoveryMap(
+    userLatitude = userLatitude,
+    userLongitude = userLongitude,
+    nodes = nodes,
+    modifier = modifier,
+    customBasemaps = { customRasterBasemaps() },
+)

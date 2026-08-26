@@ -70,8 +70,9 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 @Suppress("LongParameterList")
 @Composable
 fun MapControlsOverlay(
-    onToggleFilterMenu: () -> Unit,
     modifier: Modifier = Modifier,
+    /** Null hides the button, for maps with nothing worth filtering — a traceroute or a discovery scan. */
+    onToggleFilterMenu: (() -> Unit)? = null,
     bearing: Float = 0f,
     onCompassClick: () -> Unit = {},
     followPhoneBearing: Boolean = false,
@@ -100,30 +101,18 @@ fun MapControlsOverlay(
         // Compass
         CompassButton(onClick = onCompassClick, bearing = bearing, isFollowing = followPhoneBearing)
 
-        // Zoom controls (optional; MapLibre has no built-in ones)
-        onZoomIn?.let { onClick ->
-            MapButton(
-                icon = MeshtasticIcons.Add,
-                contentDescription = stringResource(Res.string.zoom_in),
-                onClick = onClick,
-            )
-        }
-        onZoomOut?.let { onClick ->
-            MapButton(
-                icon = MeshtasticIcons.Remove,
-                contentDescription = stringResource(Res.string.zoom_out),
-                onClick = onClick,
-            )
-        }
+        ZoomButtons(onZoomIn = onZoomIn, onZoomOut = onZoomOut)
 
-        // Filter button + dropdown
-        Box {
-            MapButton(
-                icon = MeshtasticIcons.Tune,
-                contentDescription = stringResource(Res.string.map_filter),
-                onClick = onToggleFilterMenu,
-            )
-            filterDropdownContent()
+        // Filter button + dropdown (optional)
+        onToggleFilterMenu?.let { onClick ->
+            Box {
+                MapButton(
+                    icon = MeshtasticIcons.Tune,
+                    contentDescription = stringResource(Res.string.map_filter),
+                    onClick = onClick,
+                )
+                filterDropdownContent()
+            }
         }
 
         // Map type selector (flavor-specific)
@@ -164,6 +153,25 @@ fun MapControlsOverlay(
                 onClick = onClick,
             )
         }
+    }
+}
+
+/** MapLibre publishes no zoom ornament, so its maps supply these; Google Maps draws its own and passes nulls. */
+@Composable
+private fun ZoomButtons(onZoomIn: (() -> Unit)?, onZoomOut: (() -> Unit)?) {
+    onZoomIn?.let { onClick ->
+        MapButton(
+            icon = MeshtasticIcons.Add,
+            contentDescription = stringResource(Res.string.zoom_in),
+            onClick = onClick,
+        )
+    }
+    onZoomOut?.let { onClick ->
+        MapButton(
+            icon = MeshtasticIcons.Remove,
+            contentDescription = stringResource(Res.string.zoom_out),
+            onClick = onClick,
+        )
     }
 }
 

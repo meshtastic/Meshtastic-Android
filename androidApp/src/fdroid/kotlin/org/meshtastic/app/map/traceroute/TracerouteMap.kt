@@ -23,6 +23,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.compose.viewmodel.koinViewModel
+import org.meshtastic.app.map.customRasterBasemaps
 import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.feature.map.SharedMapViewModel
 import org.meshtastic.feature.map.maplibre.MapLibreTracerouteMap
@@ -64,5 +65,6 @@ fun TracerouteMap(
         returnRoute = tracerouteOverlay?.returnRoute.orEmpty(),
         nodeLookup = selection.nodeLookup,
         modifier = modifier,
+        customBasemaps = { customRasterBasemaps() },
     )
 }

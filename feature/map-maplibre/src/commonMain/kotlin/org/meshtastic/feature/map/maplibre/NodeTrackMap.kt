@@ -52,7 +52,8 @@ import org.maplibre.spatialk.geojson.Point
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.feature.map.LastHeardFilter
 import org.meshtastic.feature.map.SharedMapViewModel
-import org.meshtastic.feature.map.maplibre.component.TrackMapControls
+import org.meshtastic.feature.map.maplibre.component.SecondaryMapControls
+import org.meshtastic.feature.map.maplibre.component.TrackFilterMenu
 import org.meshtastic.feature.map.maplibre.component.rememberBasemapSelection
 import org.meshtastic.feature.map.maplibre.layers.RasterBasemapLayer
 import org.meshtastic.feature.map.maplibre.style.Basemap
@@ -130,10 +131,13 @@ fun MapLibreNodeTrackMap(
                 }
             }
         }
-        TrackMapControls(
+        SecondaryMapControls(
             cameraState = cameraState,
             basemaps = basemaps,
             modifier = Modifier.align(Alignment.TopCenter).padding(top = TOOLBAR_INSET.dp),
+            filterMenu = { expanded, onDismissRequest ->
+                TrackFilterMenu(expanded = expanded, onDismissRequest = onDismissRequest)
+            },
         )
     }
 }
@@ -236,5 +240,3 @@ private fun SelectedTrackPointLayer(points: List<TrackPoint>, selectedTime: Int)
         strokeWidth = const(2.dp),
     )
 }
-
-private const val TOOLBAR_INSET = 8
