@@ -33,16 +33,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.grant_permission
 import org.meshtastic.core.resources.open_settings
 import org.meshtastic.core.ui.icon.AppSettingsAlt
+import org.meshtastic.core.ui.icon.Bluetooth
 import org.meshtastic.core.ui.icon.Close
 import org.meshtastic.core.ui.icon.ErrorOutline
 import org.meshtastic.core.ui.icon.Info
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.PermissionStatus
 import org.meshtastic.core.ui.util.PermissionUiState
 
@@ -184,4 +187,68 @@ fun PermissionRecoveryCard(state: PermissionUiState, rationale: String, modifier
         onOpenSettings = state.openAppSettings,
         modifier = modifier,
     )
+}
+
+/**
+ * Previews below are captured by the screenshot suite. They exist because the tone rule this file encodes — error only
+ * for a permanent denial, informational for everything else — is a visual contract, and a visual contract that only
+ * unit tests guard is one nobody notices breaking.
+ */
+@Suppress("PreviewPublic") // Captured by :screenshot-tests, which must be able to import it.
+@PreviewLightDark
+@Composable
+fun RecoveryCardPreview() {
+    AppTheme {
+        Surface {
+            RecoveryCard(
+                message = "Bluetooth is off. Turn it on to scan for nearby devices.",
+                actionLabel = "Open Bluetooth settings",
+                onAction = {},
+                actionIcon = MeshtasticIcons.Bluetooth,
+                modifier = Modifier.padding(16.dp),
+            )
+        }
+    }
+}
+
+@Suppress("PreviewPublic") // Captured by :screenshot-tests, which must be able to import it.
+@PreviewLightDark
+@Composable
+fun PermissionRecoveryCardNotRequestedPreview() {
+    PermissionRecoveryCardPreviewScaffold(PermissionStatus.NOT_REQUESTED)
+}
+
+@Suppress("PreviewPublic") // Captured by :screenshot-tests, which must be able to import it.
+@PreviewLightDark
+@Composable
+fun PermissionRecoveryCardDeniedPreview() {
+    PermissionRecoveryCardPreviewScaffold(PermissionStatus.DENIED_CAN_RETRY)
+}
+
+@Suppress("PreviewPublic") // Captured by :screenshot-tests, which must be able to import it.
+@PreviewLightDark
+@Composable
+fun PermissionRecoveryCardBlockedPreview() {
+    PermissionRecoveryCardPreviewScaffold(PermissionStatus.PERMANENTLY_DENIED)
+}
+
+/**
+ * Shared scaffold so the three state previews differ by exactly one input. A diff between two of these references is
+ * then unambiguously the tone or the action label, never incidental layout drift.
+ */
+@Composable
+private fun PermissionRecoveryCardPreviewScaffold(status: PermissionStatus) {
+    AppTheme {
+        Surface {
+            PermissionRecoveryCard(
+                status = status,
+                rationale =
+                "Meshtastic needs Nearby devices access to find your radio and connect to it. Without it, " +
+                    "Bluetooth is unavailable — Wi-Fi and USB still work.",
+                onRequest = {},
+                onOpenSettings = {},
+                modifier = Modifier.padding(16.dp),
+            )
+        }
+    }
 }
