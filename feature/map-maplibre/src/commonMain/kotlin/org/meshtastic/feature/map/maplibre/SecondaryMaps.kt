@@ -23,18 +23,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.int
-import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.camera.rememberCameraState
 import org.maplibre.compose.expressions.dsl.asString
 import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.expressions.dsl.feature
-import org.maplibre.compose.expressions.value.LineCap
-import org.maplibre.compose.expressions.value.LineJoin
 import org.maplibre.compose.layers.CircleLayer
-import org.maplibre.compose.layers.LineLayer
 import org.maplibre.compose.layers.SymbolLayer
 import org.maplibre.compose.map.GestureOptions
 import org.maplibre.compose.map.MapOptions
@@ -42,10 +37,8 @@ import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.compose.sources.GeoJsonData
 import org.maplibre.compose.sources.rememberGeoJsonSource
 import org.maplibre.compose.style.BaseStyle
-import org.maplibre.compose.util.ClickResult
 import org.maplibre.spatialk.geojson.Feature
 import org.maplibre.spatialk.geojson.FeatureCollection
-import org.maplibre.spatialk.geojson.LineString
 import org.maplibre.spatialk.geojson.Point
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.ui.util.DiscoveryMapNode
@@ -56,36 +49,12 @@ import org.meshtastic.feature.map.maplibre.style.Basemap
 import org.meshtastic.feature.map.maplibre.style.Basemaps
 import org.meshtastic.feature.map.maplibre.style.MapColors
 import org.maplibre.spatialk.geojson.Position as GeoPosition
-import org.meshtastic.proto.Position as ProtoPosition
 
-private const val DEG_SCALE = 1e-7
-private const val DETAIL_ZOOM = 13.0
-private const val TRACK_POINT_KEY = "positionTime"
+internal const val DEG_SCALE = 1e-7
+internal const val DETAIL_ZOOM = 13.0
 
-/** A timestamped point on a node's position track. */
-private typealias TrackPoint = Pair<GeoPosition, Int>
-
-private val defaultStyle: BaseStyle
+internal val defaultStyle: BaseStyle
     get() = BaseStyle.Uri((Basemaps.default as Basemap.Vector).styleUri)
-
-private fun ProtoPosition.toTrackPoint(): TrackPoint? {
-    val latitude = (latitude_i ?: 0) * DEG_SCALE
-    val longitude = (longitude_i ?: 0) * DEG_SCALE
-    return if (latitude == 0.0 && longitude == 0.0) {
-        null
-    } else {
-        GeoPosition(longitude = longitude, latitude = latitude) to (time ?: 0)
-    }
-}
-
-private fun pointFeatures(points: List<TrackPoint>) = FeatureCollection(
-    points.map { (position, time) ->
-        Feature<Point, JsonObject?>(
-            geometry = Point(position),
-            properties = buildJsonObject { put(TRACK_POINT_KEY, time) },
-        )
-    },
-)
 
 /** Single-node mini-map embedded in the node detail sheet. */
 @Composable
@@ -115,109 +84,6 @@ fun MapLibreInlineMap(node: Node, modifier: Modifier = Modifier) {
             strokeWidth = const(2.dp),
         )
     }
-}
-
-/** Historic position track for one node, with tap-to-select synchronised to the caller's list. */
-@Composable
-fun MapLibreNodeTrackMap(
-    destNum: Int,
-    positions: List<ProtoPosition>,
-    modifier: Modifier = Modifier,
-    selectedPositionTime: Int? = null,
-    onPositionSelect: ((Int) -> Unit)? = null,
-) {
-    val points = positions.mapNotNull { it.toTrackPoint() }
-    val cameraState = rememberCameraState()
-
-    // Frame the whole track once it is known. Without this the camera opens at (0, 0) — the
-    // black-ocean start the OSMdroid track map suffered from.
-    LaunchedEffect(points.size) {
-        if (points.isNotEmpty()) {
-            val latitudes = points.map { it.first.latitude }
-            val longitudes = points.map { it.first.longitude }
-            cameraState.position =
-                CameraPosition(
-                    target =
-                    GeoPosition(
-                        longitude = (longitudes.min() + longitudes.max()) / 2,
-                        latitude = (latitudes.min() + latitudes.max()) / 2,
-                    ),
-                    zoom = DETAIL_ZOOM,
-                )
-        }
-    }
-
-    if (points.isEmpty()) return
-
-    MaplibreMap(
-        baseStyle = defaultStyle,
-        cameraState = cameraState,
-        modifier = modifier,
-        options = SecondaryMapOptions,
-    ) {
-        TrackLineLayer(destNum = destNum, points = points)
-        TrackPointLayer(points = points, onPositionSelect = onPositionSelect)
-        selectedPositionTime?.let { selected -> SelectedTrackPointLayer(points = points, selectedTime = selected) }
-    }
-}
-
-@Composable
-private fun TrackLineLayer(destNum: Int, points: List<TrackPoint>) {
-    val source =
-        rememberGeoJsonSource(
-            data =
-            GeoJsonData.Features(
-                FeatureCollection(
-                    listOf(
-                        Feature<LineString, JsonObject?>(
-                            geometry = LineString(points.map { it.first }),
-                            properties = buildJsonObject { put("destNum", destNum) },
-                        ),
-                    ),
-                ),
-            ),
-        )
-    LineLayer(
-        id = "track-line",
-        source = source,
-        cap = const(LineCap.Round),
-        join = const(LineJoin.Round),
-        color = const(MapColors.RouteForward),
-        width = const(3.dp),
-    )
-}
-
-@Composable
-private fun TrackPointLayer(points: List<TrackPoint>, onPositionSelect: ((Int) -> Unit)?) {
-    val source = rememberGeoJsonSource(data = GeoJsonData.Features(pointFeatures(points)))
-    CircleLayer(
-        id = "track-points",
-        source = source,
-        color = const(Color.White),
-        radius = const(5.dp),
-        strokeColor = const(MapColors.RouteForward),
-        strokeWidth = const(2.dp),
-        onClick = { features ->
-            features.firstOrNull()?.properties?.get(TRACK_POINT_KEY)?.let { time ->
-                onPositionSelect?.invoke(time.jsonPrimitive.int)
-                ClickResult.Consume
-            } ?: ClickResult.Pass
-        },
-    )
-}
-
-@Composable
-private fun SelectedTrackPointLayer(points: List<TrackPoint>, selectedTime: Int) {
-    val source =
-        rememberGeoJsonSource(data = GeoJsonData.Features(pointFeatures(points.filter { it.second == selectedTime })))
-    CircleLayer(
-        id = "track-selected",
-        source = source,
-        color = const(MapColors.Highlight),
-        radius = const(8.dp),
-        strokeColor = const(Color.White),
-        strokeWidth = const(2.dp),
-    )
 }
 
 /** Traceroute result map: forward and return paths plus the hops they pass through. */
@@ -353,5 +219,5 @@ private fun ScannerLayer(scanner: GeoPosition) {
  * `tiltGesturesEnabled = isMainMode`, and the OSMdroid map never had tilt at all. Rotation stays, which is what Google
  * does too.
  */
-private val SecondaryMapOptions =
+internal val SecondaryMapOptions =
     MapOptions(gestureOptions = GestureOptions(isDragRotateTiltEnabled = false, isTwoFingerTiltEnabled = false))

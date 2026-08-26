@@ -86,7 +86,8 @@ fun MapControlsOverlay(
     onZoomIn: (() -> Unit)? = null,
     onZoomOut: (() -> Unit)? = null,
     isLocationTrackingEnabled: Boolean = false,
-    onToggleLocationTracking: () -> Unit = {},
+    /** Null hides the button, for maps with no location plumbing behind it — the node-track map. */
+    onToggleLocationTracking: (() -> Unit)? = null,
     showRefresh: Boolean = false,
     isRefreshing: Boolean = false,
     onRefresh: () -> Unit = {},
@@ -155,12 +156,14 @@ fun MapControlsOverlay(
             }
         }
 
-        // Location tracking button
-        MapButton(
-            icon = if (isLocationTrackingEnabled) MeshtasticIcons.LocationDisabled else MeshtasticIcons.MyLocation,
-            contentDescription = stringResource(Res.string.toggle_my_position),
-            onClick = onToggleLocationTracking,
-        )
+        // Location tracking button (optional)
+        onToggleLocationTracking?.let { onClick ->
+            MapButton(
+                icon = if (isLocationTrackingEnabled) MeshtasticIcons.LocationDisabled else MeshtasticIcons.MyLocation,
+                contentDescription = stringResource(Res.string.toggle_my_position),
+                onClick = onClick,
+            )
+        }
     }
 }
 

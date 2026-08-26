@@ -497,14 +497,3 @@ private fun CheckableItem(label: String, checked: Boolean, onClick: () -> Unit) 
         onClick = onClick,
     )
 }
-
-/**
- * Steps the camera zoom, clamped to the range MaplibreMap accepts so the buttons stop at the ends rather than animating
- * to a level the map will refuse.
- */
-private suspend fun CameraState.zoomBy(delta: Double, range: ClosedFloatingPointRange<Float>) {
-    val target = (position.zoom + delta).coerceIn(range.start.toDouble(), range.endInclusive.toDouble())
-    if (target != position.zoom) animateTo(position.copy(zoom = target))
-}
-
-private const val ZOOM_STEP = 1.0

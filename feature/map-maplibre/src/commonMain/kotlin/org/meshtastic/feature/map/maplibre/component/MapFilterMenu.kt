@@ -71,6 +71,23 @@ internal fun FilterMenu(expanded: Boolean, onDismissRequest: () -> Unit) {
     }
 }
 
+/**
+ * The age cutoff for a single node's position track.
+ *
+ * A separate preference from the main map's, and separately applied: the main map hides stale *nodes*, this trims old
+ * *points* off one node's history. Only the one control, because nothing else in the main map's menu means anything on
+ * a track — there are no other nodes to favourite, no waypoints and no precision circles.
+ */
+@Composable
+internal fun TrackFilterMenu(expanded: Boolean, onDismissRequest: () -> Unit) {
+    val viewModel: SharedMapViewModel = koinViewModel()
+    val filterState by viewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
+
+    DropdownMenu(expanded = expanded, onDismissRequest = onDismissRequest) {
+        LastHeardSlider(selected = filterState.lastHeardTrackFilter, onSelect = viewModel::setLastHeardTrackFilter)
+    }
+}
+
 /** The age cutoff for nodes on the map, presented as the Google flavor does: a slider over [LastHeardFilter]. */
 @Composable
 private fun LastHeardSlider(selected: LastHeardFilter, onSelect: (LastHeardFilter) -> Unit) {
