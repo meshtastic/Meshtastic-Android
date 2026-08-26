@@ -23,8 +23,39 @@
 <p><img src="../../assets/screenshots/connections_transport_filters.png" alt="Transport selector" /></p>
 
 <blockquote>
-  <p>💡 <strong>Tip:</strong> If your device doesn’t appear, check that Bluetooth and Location permissions are granted, and that the radio is not already connected to another device.</p>
+  <p>💡 <strong>Tip:</strong> If your device doesn’t appear, check that the radio is not already connected to another device or out of range.</p>
 </blockquote>
+
+<p>The screen names anything on the app’s side that is blocking a scan, with the fix attached:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>What you see</th>
+      <th>What it means</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>A card asking for <strong>Nearby devices</strong></td>
+      <td>The permission has not been granted. <strong>Grant permission</strong> requests it; once Android stops prompting, the button becomes <strong>Open settings</strong>.</td>
+    </tr>
+    <tr>
+      <td><strong>Bluetooth is off</strong></td>
+      <td>The adapter is disabled — the card opens Bluetooth settings.</td>
+    </tr>
+    <tr>
+      <td><strong>Bluetooth scanning also needs location services</strong></td>
+      <td>Android 11 and older only: the permission is held but the system location toggle is off.</td>
+    </tr>
+    <tr>
+      <td>No card, empty list</td>
+      <td>Nothing on this side is blocking the scan — the radio is out of range, off, or already connected elsewhere.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Tapping <strong>Scan</strong> after you have declined the permission once explains what it is for before asking again, and lets you decline again without being cornered.</p>
 
 <h3 id="connection-status">Connection Status</h3>
 

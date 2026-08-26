@@ -4,7 +4,7 @@
 
 <h2 id="first-launch">First Launch</h2>
 
-<p>When you open the app for the first time, you’ll be guided through an introductory flow that helps configure essential permissions and settings. Each step can be completed in order, or you can skip and configure permissions later in Android settings.</p>
+<p>When you open the app for the first time, you’ll be guided through an introductory flow that helps configure essential permissions and settings. Each step can be completed in order, or skipped — nothing here is a one-time offer. Every permission can be reviewed and granted later from <strong>Settings → Permissions</strong> inside the app.</p>
 
 <h3 id="welcome-screen">Welcome Screen</h3>
 
@@ -38,7 +38,7 @@
 <h3 id="location-permission">Location Permission</h3>
 
 <blockquote>
-  <p>⚠️ <strong>Why is location required for Bluetooth?</strong> Android requires location permission to discover nearby Bluetooth Low Energy devices. This is an Android system requirement, not a Meshtastic-specific choice.</p>
+  <p>⚠️ <strong>Is location required for Bluetooth?</strong> On <strong>Android 11 and older</strong>, yes — those releases treat a Bluetooth scan as a location capability, so the app asks for Location instead of “Nearby devices”, and system <strong>Location Services</strong> must also be switched on for a scan to return anything. There you will see <strong>one</strong> location step rather than two, on the Bluetooth screen, because it is a single system permission — and asking twice for it would push you toward the point where Android stops offering the dialog at all (a second denial on Android 11; the “Don’t ask again” checkbox on Android 10 and older). On <strong>Android 12 and newer</strong> the two are separate: “Nearby devices” is declared <code class="language-plaintext highlighter-rouge">neverForLocation</code>, and declining Location does not stop you finding or connecting to a radio.</p>
 </blockquote>
 
 <p>Meshtastic also uses your location for:</p>
@@ -56,7 +56,7 @@
   <li><strong>Always</strong> — enables background position updates for always-on mesh presence</li>
 </ul>
 
-<p>If denied, Bluetooth scanning will not function and your node will not report a position.</p>
+<p>Declining leaves the rest of the app working: on Android 12 and newer, Bluetooth is unaffected and only the map position and position sharing are disabled. On Android 11 and older, Bluetooth scanning also stops, because that is the permission Android gates it behind.</p>
 
 <h3 id="notifications-permission">Notifications Permission</h3>
 
@@ -83,13 +83,52 @@
   <li>Configure or revoke later in Android notification settings</li>
 </ul>
 
+<h3 id="reviewing-permissions-later">Reviewing permissions later</h3>
+
+<p><strong>Settings → Permissions</strong> summarizes where every runtime permission stands. It reads <em>All allowed</em> when nothing needs you, and names the count when something does — opening itself automatically in that case. Tap the row to see the full list at any time:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>State</th>
+      <th>What tapping the row does</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Allowed</strong></td>
+      <td>Opens the system page, so you can review or revoke it</td>
+    </tr>
+    <tr>
+      <td><strong>Not asked yet</strong></td>
+      <td>Requests it</td>
+    </tr>
+    <tr>
+      <td><strong>Denied — tap to allow</strong></td>
+      <td>Explains what the permission is for, then asks again if you agree</td>
+    </tr>
+    <tr>
+      <td><strong>Blocked — tap to open system settings</strong></td>
+      <td>Android will no longer show its dialog, so this opens the page where you can turn it back on</td>
+    </tr>
+    <tr>
+      <td><strong>Not required on this version of Android</strong></td>
+      <td>Nothing — the permission does not exist on your device</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>This matters most for notifications. The app used to ask for them in exactly one place — the setup flow — so declining there meant no message, new-node, or low-battery alerts, with nothing in the app that could ask again. Android itself stops showing the dialog once you have declined firmly (a second denial on Android 11 and newer), at which point this row switches to <strong>Blocked</strong> and sends you to the system settings page instead.</p>
+
 <h2 id="after-setup">After Setup</h2>
 
 <p>Once permissions are granted, the app transitions to the main interface. Your first action should be connecting to a Meshtastic radio — see <a href="connections">Connections</a> for detailed instructions.</p>
 
 <blockquote>
-  <p>💡 <strong>Tip:</strong> If you skipped any permissions during setup, you can grant them later through <strong>Android Settings → Apps → Meshtastic → Permissions</strong>. The app will prompt you again if a missing permission blocks a feature you try to use.</p>
+  <p>💡 <strong>Tip:</strong> If you skipped any permissions during setup, open <strong>Settings → Permissions</strong> in the app. Every runtime permission is listed there with its current state and a way back to it — including notifications, which the system will not prompt for a second time on its own.</p>
 </blockquote>
+
+<p>Features also ask in context. Tapping <strong>Scan</strong> on the Connections screen with Bluetooth permission missing explains what it is for and offers to request it; once Android stops prompting, the same control opens the system settings page instead of doing nothing.</p>
 
 <h2 id="whats-next">What’s Next?</h2>
 
