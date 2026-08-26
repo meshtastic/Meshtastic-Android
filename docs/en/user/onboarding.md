@@ -43,7 +43,7 @@ Grant both permissions when prompted. Without Bluetooth, you'll need to use USB 
 
 ### Location Permission
 
-> ⚠️ **Is location required for Bluetooth?** On **Android 11 and older**, yes — those releases treat a Bluetooth scan as a location capability, so the app asks for Location instead of "Nearby devices", and system **Location Services** must also be switched on for a scan to return anything. There you will see **one** location step rather than two, on the Bluetooth screen, because it is a single system permission and asking twice would spend both of the denials Android allows before it stops prompting for good. On **Android 12 and newer** the two are separate: "Nearby devices" is declared `neverForLocation`, and declining Location does not stop you finding or connecting to a radio.
+> ⚠️ **Is location required for Bluetooth?** On **Android 11 and older**, yes — those releases treat a Bluetooth scan as a location capability, so the app asks for Location instead of "Nearby devices", and system **Location Services** must also be switched on for a scan to return anything. There you will see **one** location step rather than two, on the Bluetooth screen, because it is a single system permission — and asking twice for it would push you toward the point where Android stops offering the dialog at all (a second denial on Android 11; the "Don't ask again" checkbox on Android 10 and older). On **Android 12 and newer** the two are separate: "Nearby devices" is declared `neverForLocation`, and declining Location does not stop you finding or connecting to a radio.
 
 Meshtastic also uses your location for:
 - Showing your position on the mesh map
@@ -85,7 +85,7 @@ On supported devices, the app may request permission for critical alerts:
 | **Blocked — tap to open system settings** | Android will no longer show its dialog, so this opens the page where you can turn it back on |
 | **Not required on this version of Android** | Nothing — the permission does not exist on your device |
 
-This is the way back to notifications in particular: Android only ever prompts for them once, so declining during setup used to mean no message, new-node, or low-battery alerts for good.
+This matters most for notifications. The app used to ask for them in exactly one place — the setup flow — so declining there meant no message, new-node, or low-battery alerts, with nothing in the app that could ask again. Android itself stops showing the dialog once you have declined firmly (a second denial on Android 11 and newer), at which point this row switches to **Blocked** and sends you to the system settings page instead.
 
 ## After Setup
 

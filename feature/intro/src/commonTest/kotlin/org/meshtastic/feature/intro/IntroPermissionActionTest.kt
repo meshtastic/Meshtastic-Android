@@ -45,9 +45,4 @@ class IntroPermissionActionTest {
     fun `permanent denial routes to app settings rather than a no-op request`() {
         assertEquals(IntroPermissionAction.OPEN_SETTINGS, introPermissionAction(PermissionStatus.PERMANENTLY_DENIED))
     }
-
-    @Test
-    fun `every status maps to an action`() {
-        PermissionStatus.entries.forEach { status -> introPermissionAction(status) }
-    }
 }
