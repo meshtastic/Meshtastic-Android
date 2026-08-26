@@ -47,8 +47,6 @@ on:
         required: false
 
 env:
-  DATADOG_APPLICATION_ID: ${{ secrets.DATADOG_APPLICATION_ID }}
-  DATADOG_CLIENT_TOKEN: ${{ secrets.DATADOG_CLIENT_TOKEN }}
   GITHUB_TOKEN: ${{ github.token }}
   # Only main writes the Gradle caches. merge_group scopes are throwaway branches
   # (per gradle/actions docs) — writes there had no reader.
@@ -451,11 +449,14 @@ jobs:
           BASE=$(grep '^VERSION_NAME_BASE=' config.properties | cut -d'=' -f2)
           echo "VERSION_NAME=${BASE}-SNAPSHOT" >> "$GITHUB_ENV"
 
-      # androidApp/src/google/AndroidManifest.xml resolves ${MAPS_API_KEY} from
-      # secrets.properties (the secrets plugin injects it at variant level). With no
-      # such file the build falls back to secrets.defaults.properties' placeholder
-      # DEFAULT_API_KEY, so every snapshot/PR google-flavor APK shipped a blank map
-      # (#6883) -- the very flavor docs/en/developer/test-builds.md tells testers to use.
+      # androidApp/src/google/AndroidManifest.xml resolves ${MAPS_API_KEY} from the secrets
+      # plugin. With nothing injected the build falls back to secrets.defaults.properties'
+      # placeholder DEFAULT_API_KEY, so every snapshot/PR google-flavor APK shipped a blank
+      # map (#6883) -- the very flavor docs/en/developer/test-builds.md tells testers to use.
+      #
+      # google.properties, not secrets.properties: the plugin injects the latter into EVERY
+      # variant, so the fdroid APK -- which has no Maps code at all -- embedded the real key
+      # too. The plugin reads <flavorName>.properties, so this reaches google variants only.
       #
       # A debug-only key, never the release one: config/debug.keystore is checked in
       # (#6615), so the debug applicationId + SHA-1 pair every debug APK presents is
@@ -469,8 +470,8 @@ jobs:
           GOOGLE_MAPS_API_KEY_DEBUG: ${{ secrets.GOOGLE_MAPS_API_KEY_DEBUG }}
         run: |
           if [ -n "$GOOGLE_MAPS_API_KEY_DEBUG" ]; then
-            echo "MAPS_API_KEY=$GOOGLE_MAPS_API_KEY_DEBUG" >> ./secrets.properties
-            echo "Injected debug Maps API key into secrets.properties."
+            echo "MAPS_API_KEY=$GOOGLE_MAPS_API_KEY_DEBUG" >> ./google.properties
+            echo "Injected debug Maps API key into google.properties."
           else
             echo "::warning::GOOGLE_MAPS_API_KEY_DEBUG is unset (fork PR, or the secret is not configured yet) -- the google-flavor map will be blank."
           fi
@@ -494,6 +495,35 @@ jobs:
             echo "Injected the real google-services.json."
           else
             echo "::warning::GSERVICES is unset (fork PR, or the secret is not configured) -- Firebase reporting will be inert in these builds."
+          fi
+
+      # Same gap as the Maps key (#6883) and the Firebase config: secrets.defaults.properties
+      # ships fake datadog tokens and only release.yml ever wrote real ones, so snapshot and
+      # PR debug APKs reported nothing to Datadog.
+      #
+      # google.properties for the same reason as the Maps key above: Datadog code lives only
+      # in androidApp/src/google, but a secrets.properties write reaches every variant and
+      # would embed these tokens in the fdroid APK as well.
+      #
+      # This traffic stays separable from production: GooglePlatformAnalytics initialises the
+      # SDK with env "Local" for debuggable builds (vs "Production") and variant "google", and
+      # main-branch builds additionally carry -SNAPSHOT in the RUM version via VERSION_NAME.
+      # Collection is still gated on the user's analytics consent at runtime.
+      #
+      # Unset -- fork PRs receive no secrets -- leaves the fake tokens in place.
+      - name: Load Datadog tokens for google-flavor debug builds
+        env:
+          DATADOG_APPLICATION_ID: ${{ secrets.DATADOG_APPLICATION_ID }}
+          DATADOG_CLIENT_TOKEN: ${{ secrets.DATADOG_CLIENT_TOKEN }}
+        run: |
+          if [ -n "$DATADOG_APPLICATION_ID" ] && [ -n "$DATADOG_CLIENT_TOKEN" ]; then
+            {
+              echo "datadogApplicationId=$DATADOG_APPLICATION_ID"
+              echo "datadogClientToken=$DATADOG_CLIENT_TOKEN"
+            } >> ./google.properties
+            echo "Injected Datadog tokens into google.properties."
+          else
+            echo "::warning::Datadog secrets are unset (fork PR, or not configured) -- Datadog reporting will be inert in these builds."
           fi
 
       - name: Build Android APKs
