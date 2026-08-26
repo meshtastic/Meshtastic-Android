@@ -33,6 +33,7 @@ keystore.properties
 
 # Secrets
 /secrets.properties
+/google.properties
 /fastlane/play-store-credentials.json
 **/google-services.json
 
