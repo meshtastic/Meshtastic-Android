@@ -65,6 +65,8 @@ import org.meshtastic.feature.map.component.DeleteWaypointDialog
 import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.component.MapControlsOverlay
 import org.meshtastic.feature.map.component.WaypointInfoDialog
+import org.meshtastic.feature.map.maplibre.component.ClusterMembersDialog
+import org.meshtastic.feature.map.maplibre.geojson.ClusterMember
 import org.meshtastic.feature.map.maplibre.layers.CustomLayer
 import org.meshtastic.feature.map.maplibre.style.Basemap
 import org.meshtastic.feature.map.maplibre.style.Basemaps
@@ -102,6 +104,7 @@ class MapLibreMapViewProvider(
         val location = rememberLocationControls(cameraState)
 
         var infoWaypointId by remember { mutableStateOf<Int?>(null) }
+        var clusterMembers by remember { mutableStateOf(emptyList<ClusterMember>()) }
 
         // Honour the deep link the navigation graph passes in; previously ignored here, so a waypoint link opened the
         // map and then showed nothing.
@@ -125,6 +128,7 @@ class MapLibreMapViewProvider(
                 followLocation = location.following,
                 bearingUpdate = location.bearingUpdate,
                 onWaypointClick = { infoWaypointId = it },
+                onClusterMembers = { clusterMembers = it },
             )
 
             MapControlsOverlay(
@@ -145,6 +149,15 @@ class MapLibreMapViewProvider(
                 onSitePlannerClick = null,
                 isLocationTrackingEnabled = location.following,
                 onToggleLocationTracking = location.onToggleFollow,
+            )
+
+            ClusterMembersDialog(
+                members = clusterMembers,
+                onMemberClick = { nodeNum ->
+                    clusterMembers = emptyList()
+                    navigateToNodeDetails(nodeNum)
+                },
+                onDismissRequest = { clusterMembers = emptyList() },
             )
 
             WaypointDialogs(

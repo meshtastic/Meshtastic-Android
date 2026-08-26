@@ -37,6 +37,7 @@ import org.maplibre.compose.material3.LocationPuckDefaults
 import org.maplibre.compose.style.BaseStyle
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.feature.map.BaseMapViewModel
+import org.meshtastic.feature.map.maplibre.geojson.ClusterMember
 import org.meshtastic.feature.map.maplibre.layers.CustomLayer
 import org.meshtastic.feature.map.maplibre.layers.CustomLayers
 import org.meshtastic.feature.map.maplibre.layers.MapOverlayLayers
@@ -68,6 +69,8 @@ fun MeshMap(
     overlays: List<MapOverlay> = emptyList(),
     customLayers: List<CustomLayer> = emptyList(),
     onWaypointClick: (Int) -> Unit = {},
+    /** Called with the nodes of a tapped cluster that cannot be zoomed apart any further. */
+    onClusterMembers: (List<ClusterMember>) -> Unit = {},
     /**
      * Hoisted so the host can read the bearing for a compass and steer the camera itself. Defaults to a map-owned state
      * for callers that only want the map to frame itself.
@@ -130,6 +133,7 @@ fun MeshMap(
             myNodeNum = myNodeInfo?.myNodeNum,
             showPrecisionCircles = filterState.showPrecisionCircle,
             onNodeClick = navigateToNodeDetails,
+            onClusterMembers = onClusterMembers,
             onClusterZoom = { centre, expansionZoom ->
                 scope.launch {
                     val current = cameraState.position

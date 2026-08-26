@@ -41,11 +41,18 @@ import org.maplibre.compose.util.ClickResult
 import org.maplibre.spatialk.geojson.Point
 import org.maplibre.spatialk.geojson.Position
 import org.meshtastic.core.model.Node
+import org.meshtastic.feature.map.maplibre.geojson.ClusterMember
 import org.meshtastic.feature.map.maplibre.geojson.NodeFeatureKeys
 import org.meshtastic.feature.map.maplibre.geojson.nodesToFeatureCollection
 import org.meshtastic.feature.map.maplibre.geojson.precisionCirclesToFeatureCollection
+import org.meshtastic.feature.map.maplibre.geojson.toClusterMembers
 import org.meshtastic.feature.map.maplibre.style.MapColors
 
+// GeoJsonSource.NO_EXPANSION_ZOOM says the same thing, but its companion is private. A cluster that cannot be
+// expanded answers with a sentinel: 0 on Android and desktop, -1 on iOS.
+private const val NO_EXPANSION_ZOOM = 0.0
+private const val CLUSTER_LEAF_LIMIT = 100L
+private const val CLUSTER_LEAF_OFFSET = 0L
 private const val CLUSTER_RADIUS = 50
 private const val CLUSTER_MAX_ZOOM = 14
 
@@ -67,6 +74,7 @@ internal fun NodeLayers(
     showPrecisionCircles: Boolean,
     onNodeClick: (Int) -> Unit,
     onClusterZoom: (Position, Double) -> Unit,
+    onClusterMembers: (List<ClusterMember>) -> Unit,
 ) {
     if (showPrecisionCircles) {
         val precisionSource =
@@ -113,7 +121,18 @@ internal fun NodeLayers(
                     val centre = (clusterFeature.geometry as? Point)?.coordinates
                     if (centre != null) {
                         clusterScope.launch {
-                            onClusterZoom(centre, nodeSource.getClusterExpansionZoom(clusterFeature))
+                            // A cluster that can still be broken apart is worth zooming into. One that cannot is
+                            // nodes sitting on the same spot, so zooming would do nothing — list them instead.
+                            val expansionZoom = nodeSource.getClusterExpansionZoom(clusterFeature)
+                            if (expansionZoom <= NO_EXPANSION_ZOOM) {
+                                onClusterMembers(
+                                    nodeSource
+                                        .getClusterLeaves(clusterFeature, CLUSTER_LEAF_LIMIT, CLUSTER_LEAF_OFFSET)
+                                        .toClusterMembers(),
+                                )
+                            } else {
+                                onClusterZoom(centre, expansionZoom)
+                            }
                         }
                     }
                     ClickResult.Consume
