@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.core.net.toFile
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import co.touchlab.kermit.Logger
 import org.koin.compose.koinInject
 import org.meshtastic.app.map.model.CustomTileProviderConfig
 import org.meshtastic.app.map.repository.CustomTileProviderRepository
@@ -48,9 +49,22 @@ fun customRasterBasemaps(): List<Basemap.Raster> {
  * A local archive becomes MapLibre's own `mbtiles://` scheme over the file's absolute path — the native MBTiles source
  * opens it with SQLite directly and takes no tile placeholders. `localUri` is a `file://` URI of a copy in app storage,
  * written when the archive was picked, so it resolves to a real path.
+ *
+ * The file must still be there. Handing MapLibre a path to a file that has gone does not fail softly: the native
+ * MBTiles source aborts and takes the process with it — SIGABRT on a thread named MBTilesFileSour, with no Kotlin frame
+ * to catch. An archive can disappear between sessions, so the check is not paranoia; the Google flavour guards its own
+ * MBTiles provider the same way.
  */
 private fun CustomTileProviderConfig.tileUrl(): String? = if (isLocal) {
-    localUri?.let { uri -> runCatching { Uri.parse(uri).toFile().absolutePath }.getOrNull()?.let(::mbTilesUrl) }
+    localUri?.let { uri ->
+        val archive = runCatching { Uri.parse(uri).toFile() }.getOrNull()
+        if (archive != null && archive.exists()) {
+            mbTilesUrl(archive.absolutePath)
+        } else {
+            Logger.withTag("CustomBasemaps").w { "Skipping a local tile source whose archive is gone" }
+            null
+        }
+    }
 } else {
     urlTemplate.takeIf { it.isNotBlank() }
 }
