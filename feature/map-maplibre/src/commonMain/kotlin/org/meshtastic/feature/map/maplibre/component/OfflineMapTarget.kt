@@ -48,12 +48,17 @@ import org.maplibre.spatialk.geojson.BoundingBox
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.delete
-import org.meshtastic.core.resources.download_this_area
-import org.meshtastic.core.resources.offline_maps
+import org.meshtastic.core.resources.map_cache_manager
+import org.meshtastic.core.resources.map_cache_size
+import org.meshtastic.core.resources.map_cache_tiles
+import org.meshtastic.core.resources.map_select_download_region
+import org.meshtastic.core.resources.map_start_download
+import org.meshtastic.core.resources.map_tile_download_estimate
 import org.meshtastic.core.resources.offline_maps_empty
 import org.meshtastic.core.ui.icon.Delete
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.PlayArrow
+import org.meshtastic.feature.map.maplibre.tileCount
 
 /** What the map must tell the offline sheet: which style to pack, and which region is on screen. */
 internal class OfflineMapTarget(
@@ -76,15 +81,46 @@ internal fun OfflineMapsSection(target: OfflineMapTarget, onShowRegion: (Boundin
     val scope = rememberCoroutineScope()
     val packs = manager.packs
 
+    val range = target.zoomRange()
+    val estimate = target.bounds()?.tileCount(range.first, range.last) ?: 0L
+    val storedTiles =
+        packs.sumOf { pack -> (pack.downloadProgress as? DownloadProgress.Healthy)?.completedTileCount ?: 0L }
+
     Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
-        Text(text = stringResource(Res.string.offline_maps), style = MaterialTheme.typography.titleMedium)
+        Text(text = stringResource(Res.string.map_cache_manager), style = MaterialTheme.typography.titleMedium)
+
+        Text(
+            text =
+            stringResource(Res.string.map_cache_size) +
+                ": " +
+                stringResource(Res.string.map_cache_tiles, storedTiles.toInt()),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+
+        // The OSMdroid map showed the cost before committing, which matters more here than it looks: the same two
+        // extra zoom levels are a couple of hundred tiles over a neighbourhood and tens of thousands over a state.
+        Text(
+            text = stringResource(Res.string.map_select_download_region),
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(top = 8.dp),
+        )
+        Text(
+            text =
+            stringResource(Res.string.map_tile_download_estimate) +
+                " " +
+                stringResource(Res.string.map_cache_tiles, estimate.toInt()) +
+                "  (z${range.first}\u2013${range.last})",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
 
         Button(
             onClick = { scope.launch { manager.downloadVisibleArea(target) } },
-            enabled = target.styleUrl != null && target.bounds() != null,
+            enabled = target.styleUrl != null && estimate > 0L,
             modifier = Modifier.padding(vertical = 8.dp),
         ) {
-            Text(text = stringResource(Res.string.download_this_area))
+            Text(text = stringResource(Res.string.map_start_download))
         }
 
         if (packs.isEmpty()) {
@@ -146,7 +182,7 @@ private fun OfflinePackRow(
                 IconButton(onClick = onToggle) {
                     Icon(
                         imageVector = MeshtasticIcons.PlayArrow,
-                        contentDescription = stringResource(Res.string.download_this_area),
+                        contentDescription = stringResource(Res.string.map_start_download),
                     )
                 }
             }
@@ -175,18 +211,15 @@ private suspend fun OfflineManager.downloadVisibleArea(target: OfflineMapTarget)
     val bounds = target.bounds()
     if (styleUrl == null || bounds == null) return false
 
-    val currentZoom = target.zoom().toInt().coerceIn(MIN_PACK_ZOOM, MAX_PACK_ZOOM)
-    val maxZoom = (currentZoom + PACK_EXTRA_ZOOM_LEVELS).coerceAtMost(MAX_PACK_ZOOM)
+    val range = target.zoomRange()
 
     return safeCatching {
         create(
             OfflinePackDefinition.TilePyramid(
                 styleUrl = styleUrl,
                 bounds = bounds,
-                // coerceAtMost, not the raw value: at the top of the range maxZoom stops climbing, and minZoom
-                // must never overtake it.
-                minZoom = currentZoom.coerceAtMost(maxZoom),
-                maxZoom = maxZoom,
+                minZoom = range.first,
+                maxZoom = range.last,
             ),
         )
     }
@@ -231,3 +264,15 @@ private const val PACK_EXTRA_ZOOM_LEVELS = 2
 private const val MIN_PACK_ZOOM = 0
 private const val MAX_PACK_ZOOM = 20
 private const val COORD_SCALE = 100.0
+
+/**
+ * The zoom levels a download covers: the current level plus a couple deeper.
+ *
+ * Deliberately the only place this is worked out. Computing it twice is what produced an inverted range — an absolute
+ * ceiling below the current zoom — which MapLibre rejects outright.
+ */
+private fun OfflineMapTarget.zoomRange(): IntRange {
+    val current = zoom().toInt().coerceIn(MIN_PACK_ZOOM, MAX_PACK_ZOOM)
+    val max = (current + PACK_EXTRA_ZOOM_LEVELS).coerceAtMost(MAX_PACK_ZOOM)
+    return current.coerceAtMost(max)..max
+}
