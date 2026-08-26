@@ -20,7 +20,7 @@ Sinihamba madal voolutarve on Androidi vaike- ja levinuim ühendusviis.
 1. Veendu, et Meshtastic seade on sisse lülitatud ja sidumisrežiimis.
 2. Ava rakendus ja navigeeri vahekaardile **Ühendused**.
 3. Puuduta valikut **Otsi sinihamba seadmeid** – kuvatakse lähedalasuvad Meshtasticu raadiod.
-4. Select your device from the list.
+4. Vali loendist oma seade.
 5. Nõustu Bluetoothi ​​sidumise taotlusega, kui see kuvatakse.
 
 ![Sinihamba seadmete otsimine, leitud raadio on loendis](../../assets/screenshots/connections_bluetooth_scan.png)
@@ -37,7 +37,7 @@ Sinihamba, võrgu ja USB-transpordi vahel vahetamiseks (üks on korraga aktiivne
  ----- | ---------------- | -------------------------- |
  🟢    | Ühendatud        | Aktiivne raadioside loodud |
  🟡    | Ühendan          | Kätlemine on pooleli       |
- 🔴    | Ühendus katkenud | No active connection       |
+ 🔴    | Ühendus katkenud | Aktiivset ühendust pole    |
  ⚪     | Pole seadistatud | Seadet pole valitud        |
 
 Ühenduse loomisel näitab olekuindikaator ühenduse praegust olekut:
@@ -72,7 +72,7 @@ Mõned Meshtastic raadiod toetavad WiFi/Etherneti ühendust, võimaldades TCP-p�
 
 ### Connecting over the Network
 
-1. Make sure the radio is on the same local network as your phone/desktop.
+1. Veendu, et raadio on samas kohtvõrgus kui sinu telefon/lauaarvuti.
 2. Valige ühenduse loomise ekraanil transpordivalikus **Võrk**.
 3. Choose the radio one of two ways:
    - **Võrguseadmete otsimine** – lülita see sisse, et automaatselt avastada raadioid, mis reklaamivad end kohalikus võrgus (mDNS / `_meshtastic._tcp`). Leitud seadmed kuvatakse loendis; ühenduse loomiseks puuduta neist ühte.
@@ -83,13 +83,13 @@ Mõned Meshtastic raadiod toetavad WiFi/Etherneti ühendust, võimaldades TCP-p�
 
 ### Millal kasutada TCP
 
-- Radio is on the same local network
+- Raadio on samas kohalikus võrgus
 - Testing with a simulated radio
 - Asukohad kus sinihambal on häireid
 
 ## Reconnection Behavior
 
-The app reconnects to the **last selected device** on startup. Transporti saab ühenduskuvalt igal ajal vahetada.
+Rakendus loob käivitamisel uuesti ühenduse **viimati valitud seadmega**. Transporti saab ühenduskuvalt igal ajal vahetada.
 
 Ühenduse katkestamiseks puuduta ühenduse loomise ekraanil katkestamise nuppu:
 
