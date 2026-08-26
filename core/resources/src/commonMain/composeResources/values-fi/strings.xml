@@ -190,6 +190,7 @@
     </plurals>
     <string name="calculating">Lasketaan…</string>
     <string name="call_sign">Kutsutunnus</string>
+    <string name="call_sign_summary">Radioamatöörikutsusi, enintään 7 merkkiä</string>
     <string name="camera_permission">Kameran käyttöoikeudet</string>
     <string name="camera_permission_rationale">Salli kameran käyttö QR-koodien skannaamista varten.</string>
     <string name="camera_unavailable">Kameraa ei voitu käynnistää. Yritä uudelleen tai sulje skanneri ja avaa se uudelleen.</string>
@@ -857,6 +858,7 @@
     <string name="gps_transmit_gpio">GPS lähetyksen GPIO-pinni</string>
     <string name="grant_permission">Myönnä käyttöoikeus</string>
     <string name="green">Vihreä</string>
+    <string name="ham_long_name_summary">Valinnainen. Lisätään kutsumerkkisi perään, esimerkiksi OH2ABC//Tukiasema</string>
     <string name="hardware">Laite</string>
     <string name="hardware_model">Laitteen malli</string>
     <string name="heading">Suunta</string>

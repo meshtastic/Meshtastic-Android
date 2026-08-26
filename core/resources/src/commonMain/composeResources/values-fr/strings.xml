@@ -113,6 +113,7 @@
     <string name="app_too_old">Mise à jour de l’application requise</string>
     <string name="app_version">Version</string>
     <string name="apply">Appliquer</string>
+    <string name="apps">Applications</string>
     <!-- AQI -->
     <string name="aqi_good">Bon</string>
     <string name="aqi_very_unhealthy"></string>
@@ -226,6 +227,8 @@
     <string name="close">Fermer</string>
     <string name="close_selection">Fermer le choix</string>
     <string name="co2">CO₂</string>
+    <string name="co2_humidity">CO₂ Humidité</string>
+    <string name="co2_temperature">CO₂ Température</string>
     <string name="codec_2_enabled">CODEC 2 activé</string>
     <string name="codec2_sample_rate">Taux d'échantillonnage CODEC2</string>
     <string name="coding_rate">Taux de codage</string>
@@ -276,6 +279,7 @@
     <string name="config_position_flags_summary">Champs optionnels à inclure dans les messages de position. Plus il y en a, plus le message est grand, plus cela augmentant le temps d'occupation du réseau et le risque de perte.</string>
     <string name="config_position_gps_update_interval_summary">À quelle fréquence devrions-nous essayer d'obtenir une position GPS (&lt;10sec le GPS est maintenu allumé).</string>
     <string name="config_power_is_power_saving_summary">Sera en veille profonde autant que possible, pour les rôles traceurs et capteur, cela inclura également la radio LoRa. N'utilisez pas ce paramètre si vous voulez utiliser votre appareil avec les applications de téléphone ou si vous utilisez un appareil sans bouton utilisateur.</string>
+    <string name="config_saved_restarting">Le nœud est en cours de redémarrage et sera brièvement inaccessible.</string>
     <string name="config_security_admin_key">Clé publique autorisée à envoyer des messages d’administration à ce nœud.</string>
     <string name="config_security_debug_log_api_enabled">Afficher en direct les journaux de débogage via le port série, consulter/exporter les journaux sans position via Bluetooth.</string>
     <string name="config_security_is_managed">L'appareil est géré par un administrateur de maillage, l'utilisateur ne peut accéder à aucun des paramètres de l'appareil.</string>
@@ -297,12 +301,14 @@
     <string name="connection_status">Connexions actuelles :</string>
     <string name="connections">Connexion</string>
     <string name="contact_muted_snackbar">Muet %1$s</string>
+    <string name="contact_pinned">Épinglé</string>
     <string name="contrast">Contraste</string>
     <string name="contrast_high">Haut</string>
     <string name="contrast_medium">Milieu</string>
     <string name="contrast_standard">Standard</string>
     <string name="conversations">Conversations</string>
     <string name="copy">Copier</string>
+    <string name="copyright_notice">Meshtastic® Copyright Meshtastic LLC</string>
     <string name="create_your_own_networks">Créez votre propre réseau</string>
     <string name="critical_alert">Alerte Critique !</string>
     <string name="critical_alerts">Alertes critiques</string>
@@ -340,6 +346,7 @@
     <string name="debug_search_prev">Occurrence précédente</string>
     <string name="debug_store_logs_summary">Désactiver pour passer l'écriture des journaux de maillage sur le disque</string>
     <string name="debug_store_logs_title">Stocker les journaux de maillage</string>
+    <string name="debug_tab_app_logs">Journal de l'application</string>
     <string name="deep_link_connect_message">Un lien demande à cette application de se connecter à l'appareil %1$s. Ne continuez que si vous avez confiance en l'origine du lien.</string>
     <string name="deep_link_connect_title">Se connecter à cet appareil ?</string>
     <string name="deep_link_disconnect_message">Un lien demande à cette application de se déconnecter de votre appareil. Continuez uniquement si vous faites confiance à l'origine du lien.</string>
@@ -350,6 +357,7 @@
     <string name="delete_custom_tile_source">Supprimer le réseau de tuile personnalisée</string>
     <string name="delete_for_everyone">Supprimer pour tout le monde</string>
     <string name="delete_for_me">Supprimer pour moi</string>
+    <string name="delete_key_backup">Supprimer la sauvegarde des clés</string>
     <string name="delete_key_backup_confirmation">Supprime la sauvegarde de la clé chiffrée stockée sur cet appareil. Cette opération est irréversible.</string>
     <plurals name="delete_messages">
         <item quantity="one">Supprimer le message ?</item>
@@ -442,13 +450,22 @@
     <string name="discovery_start_scan">Démarrer l'analyse</string>
     <string name="discovery_start_scan_disabled">Bouton de démarrage d'analyse désactivé. %1$s</string>
     <string name="discovery_start_scan_reason_24ghz_unsupported">le matériel radio ne supporte pas le 2.4 GHz</string>
+    <string name="discovery_start_scan_reason_no_presets">Aucun préréglage sélectionné</string>
+    <string name="discovery_start_scan_reason_not_connected">Appareil non connecté</string>
     <string name="discovery_stat_analysis">Analyse</string>
     <string name="discovery_stat_channel_utilization">Utilisation du canal</string>
     <string name="discovery_stat_date">Date</string>
     <string name="discovery_stat_direct">Direct</string>
+    <string name="discovery_stat_failure_rate">Taux d'erreur</string>
     <string name="discovery_stat_messages">Messages</string>
+    <string name="discovery_stat_online_total_nodes">Nœuds en ligne / Total</string>
     <string name="discovery_stat_selected">Sélectionné</string>
     <string name="discovery_stat_session_overview">Aperçu de la session</string>
+    <string name="discovery_stat_status">Statut</string>
+    <string name="discovery_stat_success_rate">Taux de réussite</string>
+    <string name="discovery_stat_unique_nodes">Nœuds uniques</string>
+    <string name="discovery_stat_unselected">Non sélectionné</string>
+    <string name="discovery_stop_scan">Arrêter le scan</string>
     <string name="discovery_summary_not_available">Analyse IA non disponible</string>
     <string name="discovery_time_remaining">%1$s restants</string>
     <string name="discovery_view_map">Voir la carte</string>
@@ -468,14 +485,21 @@
     <string name="dns">DNS</string>
     <!-- DOC -->
     <string name="doc_clear_search">Effacer la recherche</string>
+    <string name="doc_search_placeholder">Rechercher dans la documentation</string>
+    <string name="doc_section_developer">Guide du développeur</string>
     <string name="doc_section_user">Guide de l'utilisateur</string>
+    <string name="doc_title_android_auto">Android Auto</string>
     <string name="doc_title_connections">Connexions</string>
+    <string name="doc_title_debug_logs">Journaux de débogage</string>
     <string name="doc_title_desktop">Application pour ordinateur</string>
     <string name="doc_title_discovery">Découverte</string>
     <string name="doc_title_firmware">Mises à jour du firmware</string>
     <string name="doc_title_mqtt">MQTT</string>
+    <string name="doc_title_node_metrics">Métriques du nœud</string>
     <string name="doc_title_nodes">Nœuds</string>
     <string name="doc_title_onboarding">Commencer</string>
+    <string name="doc_title_tak">Intégration TAK</string>
+    <string name="documentation">Documentation</string>
     <string name="done">Terminé</string>
     <string name="dont_show_again_for_device">Ne plus afficher pour cet appareil</string>
     <string name="double_tap_as_button_press">Double clic comme appui sur le bouton</string>
@@ -490,6 +514,8 @@
     <string name="eight_hours">8 Heures</string>
     <!-- EMOJI -->
     <string name="emoji_category_activities">Activités</string>
+    <string name="emoji_category_flags">Marqueurs</string>
+    <string name="emoji_category_symbols">Symboles</string>
     <string name="emoji_load_error">Impossible de charger les émojis</string>
     <string name="emoji_no_results">Aucun émoji trouvé</string>
     <string name="emoji_recently_used">Récemment utilisé</string>
@@ -520,6 +546,7 @@
     <string name="ethernet_ip">IP Ethernet :</string>
     <string name="exchange_position">Demander position</string>
     <string name="expand_chart">Agrandir le graphique</string>
+    <string name="expanded">Étendu</string>
     <string name="expires">Expire</string>
     <!-- EXPORT -->
     <string name="export_configuration">Exporter la configuration</string>
@@ -559,6 +586,9 @@
     <string name="firmware_edition">Version du micrologiciel</string>
     <string name="firmware_event_ended_banner">%1$s est déprécié. Utilisez un micrologiciel Meshtastic standard pour restaurer les fonctionnalités normales.</string>
     <string name="firmware_event_ended_button">Mettre à jour le micrologiciel</string>
+    <string name="firmware_maintenance_erase_action">Effacer et réinstaller</string>
+    <string name="firmware_maintenance_erase_confirm_title">Effacer ce périphérique ?</string>
+    <string name="firmware_maintenance_upgrade_bootloader_action">Mise à jour du bootloader</string>
     <string name="firmware_maintenance_upgrade_confirm_title">Mettre à jour le chargeur de démarrage ?</string>
     <string name="firmware_old">Le micrologiciel de la radio est trop ancien pour communiquer avec cette application. Pour des informations, voir <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Guide d'installation du micrologiciel</a>.</string>
     <string name="firmware_recovery_banner">Fin de la mise à jour %1$s</string>
@@ -673,8 +703,11 @@
     <string name="geofence_alerts_opt_in">Me notifier des franchissements</string>
     <string name="geofence_alerts_opt_in_desc">Recevoir une alerte lorsque les nœuds entrent ou quittent cette zone géographique</string>
     <string name="geofence_box_author_confirm">Confirmer la zone</string>
+    <string name="geofence_favorites_only">Favoris uniquement</string>
     <string name="geofence_off">Éteint</string>
+    <string name="geofence_remove_area">Supprimer la zone</string>
     <string name="get_started">Commencer</string>
+    <string name="github_repository">Dépôt GitHub</string>
     <string name="good">Bon</string>
     <!-- GPIO -->
     <string name="gpio">GPIO</string>
