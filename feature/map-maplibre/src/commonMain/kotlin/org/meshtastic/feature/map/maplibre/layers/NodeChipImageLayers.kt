@@ -46,6 +46,7 @@ import org.maplibre.compose.util.ClickResult
 import org.meshtastic.core.model.Node
 import org.meshtastic.feature.map.maplibre.geojson.NodeFeatureKeys
 import org.meshtastic.feature.map.maplibre.geojson.needsChipImage
+import org.meshtastic.feature.map.maplibre.geojson.toCssHex
 
 /**
  * Node chips drawn as images, for the nodes the text layer cannot draw.
@@ -75,10 +76,15 @@ internal fun NodeChipImageLayers(nodes: List<Node>, source: Source, onNodeClick:
 
     chips.forEach { chip ->
         SymbolLayer(
-            id = "node-chip-image-${chip.name.imageKey()}",
+            // The id carries the colour as well as the name: two nodes can share a short name and never share a
+            // colour, and a duplicate layer id is rejected outright ("already owned by a different live layer
+            // descriptor"), which took out every chip on the map rather than just the clashing one.
+            id = "node-chip-image-${chip.id()}",
             source = source,
             filter =
-            !feature.has("point_count") and (feature[NodeFeatureKeys.SHORT_NAME].asString() eq const(chip.name)),
+            !feature.has("point_count") and
+                (feature[NodeFeatureKeys.SHORT_NAME].asString() eq const(chip.name)) and
+                (feature[NodeFeatureKeys.BACKGROUND].asString() eq const(chip.backgroundHex)),
             iconImage = image(rememberChipPainter(chip), DpSize(CHIP_WIDTH_DP.dp, CHIP_HEIGHT_DP.dp)),
             iconAllowOverlap = const(true),
             onClick = { features ->
@@ -92,10 +98,14 @@ internal fun NodeChipImageLayers(nodes: List<Node>, source: Source, onNodeClick:
 }
 
 /** One distinct chip appearance: the same name in the same colours only needs drawing once. */
-private data class ChipKey(val name: String, val background: Int, val foreground: Int)
+private data class ChipKey(val name: String, val background: Int, val foreground: Int) {
+    /** The colour as the feature carries it, so the filter can compare against the property directly. */
+    val backgroundHex: String = background.toCssHex()
+}
 
-/** A layer id has to be stable and safe, and a short name can be anything — so key on its code points. */
-private fun String.imageKey(): String = map { it.code.toString(HEX_RADIX) }.joinToString("-")
+/** A layer id must be unique and safe, and a short name can be anything — so key on code points plus the colour. */
+private fun ChipKey.id(): String =
+    name.map { it.code.toString(HEX_RADIX) }.joinToString("-") + "-" + background.toString(HEX_RADIX)
 
 /** Draws a chip the way NodeChip does: rounded rectangle, node colour, name centred inside. */
 @Composable
