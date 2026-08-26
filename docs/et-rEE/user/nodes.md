@@ -13,7 +13,7 @@ aliases:
 
 # Sõlmed
 
-The Nodes screen displays all devices visible on your mesh network.
+Sõlmede ekraanil kuvatakse kõik teie võrgus nähtavad seadmed.
 
 ## Sõlmede loend
 
@@ -90,7 +90,7 @@ From the node list, you can:
 - **Long-press** for quick actions:
   - Mark/remove favorite
   - Teavituste vaigistamine/vaigistuse tühistamine
-  - Send a direct message
+  - Saada otsesõnum
   - Trace route
   - Ignore/unignore
   - Remove node
@@ -105,7 +105,7 @@ Sõlmede filtreerimiseks nime või lühinime järgi tipi otsinguväljal. Filter 
 
 | Filtreeri                  | Kirjeldus                                                                            |
 | -------------------------- | ------------------------------------------------------------------------------------ |
-| **Only online**            | Näita ainult viimase 2 tunni jooksul kuuldud sõlmi                                   |
+| **Ainult ühenduses**       | Näita ainult viimase 2 tunni jooksul kuuldud sõlmi                                   |
 | **Only direct**            | Kuva ainult otseühendustega (mitte releeühendusega) sõlmi         |
 | **Include unknown**        | Näita sõlmi, mis pole veel kasutajainfot saatnud                                     |
 | **Exclude infrastructure** | Hide infrastructure-role nodes (Router, Router Late, Client Base) |

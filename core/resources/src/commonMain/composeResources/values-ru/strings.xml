@@ -324,6 +324,8 @@
     <string name="connection_status">Текущие подключения:</string>
     <string name="connections">Соединения</string>
     <string name="contact_draft_prefix">Черновик: %1$s</string>
+    <string name="contact_muted_snackbar">Заглушен %1$s</string>
+    <string name="contact_pinned">Закрепить</string>
     <string name="contrast">Контрастность</string>
     <string name="contrast_high">Высокий</string>
     <string name="contrast_medium">Средний</string>
@@ -911,6 +913,7 @@
     <string name="ipv4_mode">Режим IPv4</string>
     <string name="json_output_enabled">Вывод JSON включен</string>
     <string name="jump_to_latest_from">%1$s</string>
+    <string name="jump_to_latest_from_and_more">%1$s +%2$d</string>
     <!-- KEY -->
     <string name="key_backup_deleted">Резервная копия ключа удалена</string>
     <string name="key_backup_not_found">Для этой ноды не найдено резервной копии ключа</string>
@@ -1080,6 +1083,7 @@
     <string name="map_type_satellite">Спутниковая</string>
     <string name="map_type_terrain">Ландшафт</string>
     <string name="mark_as_read">Пометить прочитанным</string>
+    <string name="mark_unread_selected">Отметить непрочитанным</string>
     <string name="match_all">Совпадение всех | Любой</string>
     <string name="match_any">Совпадение любой | Все</string>
     <string name="max">Макс</string>
@@ -1907,6 +1911,7 @@
     <string name="type">Тип</string>
     <string name="type_a_message">Написать сообщение</string>
     <string name="udp_enabled">UDP трансляция</string>
+    <string name="undo">Отменить</string>
     <!-- UNKNOWN -->
     <string name="unknown">Неизвестно</string>
     <string name="unknown_age">Неизвестный возраст</string>
@@ -1918,6 +1923,7 @@
     <string name="unmonitored_or_infrastructure">Неконтролируемая или инфраструктура</string>
     <string name="unmute">Включить микрофон</string>
     <string name="unmute_selected">Вернуть звук выбранному</string>
+    <string name="unpin_selected">Открепить</string>
     <string name="unrecognized">Нераспознанный</string>
     <string name="unset">Не задано - 0</string>
     <string name="up_down_select_input_enabled">Вверх/Вниз/Выбирать включён</string>

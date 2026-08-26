@@ -13,7 +13,7 @@ aliases:
 
 # Sõlme mõõdikud
 
-The node detail screen provides comprehensive telemetry and metrics for each node on your mesh.
+Sõlme detailvaates on iga kärgvõrgu sõlme kohta põhjalikud telemeetria ja mõõdikud.
 
 ## Seadme mõõdikud
 
@@ -79,7 +79,7 @@ CO₂ näidud on vastavalt raskusastmele värvikoodiga kodeeritud, et õhukvalit
 
 An air-quality log/metrics button appears on the node detail screen **only when the node has reported air-quality telemetry**. From the Air Quality view you can:
 
-- Select a **time frame** for the charts.
+- Vali diagrammide jaoks **ajaraam**.
 - Filtreeri **mõõdikute kiipide** abil — kuvatakse ainult andmeid sisaldavad mõõdikud.
 - **Refresh / request** the latest air-quality telemetry.
 - **Ekspordi CSV** analüüsimiseks arvutustabeli vaates.
@@ -155,7 +155,7 @@ Näitab, milliseid sõlmi antud sõlm otse kuuleb, kasulik kärgvõrgus topoloog
 
 1. Mine **Seadmed**.
 2. Puuduta sõlme, mida soovite kontrollida.
-3. Select the metric category from the detail tabs.
+3. Vali detailvaadete vahekaartidelt mõõdiku kategooria.
 
 ![Sõlme detailid — kohalik seade](../../assets/screenshots/nodes_detail_local.png)
 

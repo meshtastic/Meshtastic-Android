@@ -20,7 +20,7 @@ Tõlgete koostamisele kaasaaitamine aitab Meshtasticut laiemale publikule kätte
 
 | Resource             | Allika asukoht                                                      | Sõnumid                                                                   |
 | -------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| UI strings           | `core/resources/src/commonMain/composeResources/values/strings.xml` | Buttons, labels, messages, and all user-visible text                      |
+| UI strings           | `core/resources/src/commonMain/composeResources/values/strings.xml` | Nupud, sildid, sõnumid ja kogu kasutajale nähtav tekst                    |
 | Kasutusjuhendi lehed | `docs/en/user/*.md`                                                 | Rakendusesisene dokumentatsioon kuvatakse jaotises Abi ja dokumentatsioon |
 | Fastlane metadata    | `fastlane/metadata/android/en-US/`                                  | App Store listing title, description, and changelogs                      |
 

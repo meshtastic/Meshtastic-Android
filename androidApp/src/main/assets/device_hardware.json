@@ -1636,6 +1636,23 @@
     "partitionScheme": "16MB"
   },
   {
+    "hwModel": 145,
+    "hwModelSlug": "MESHNOLOGY_W12",
+    "platformioTarget": "meshnology_w12",
+    "architecture": "esp32-s3",
+    "activelySupported": false,
+    "supportLevel": 1,
+    "displayName": "Meshnology W12",
+    "tags": [
+      "Meshnology"
+    ],
+    "images": [
+      "meshnology_w12.svg"
+    ],
+    "requiresDfu": true,
+    "partitionScheme": "16MB"
+  },
+  {
     "hwModel": 144,
     "hwModelSlug": "SEEED_WIO_TRACKER_L1_PRO_1W",
     "platformioTarget": "seeed_wio_tracker_L1_Pro_1W",

@@ -53,9 +53,9 @@ Rakendus kasutab loomulikku skaleerimist – lühikesed vahemaad jäävad meetri
 ### Where these appear
 
 - **Node list** — distance and bearing to each node
-- **Node detail** — altitude, distance from your position
+- **Sõlme detail** — kõrgus, kaugus asukohast
 - **Kaart** — teekonnapunktide vahemaad, traceroute'i hüppevahemaad
-- **Compass** — distance to selected node
+- **Kompass** — kaugus valitud sõlmeni
 
 ## Kiirus
 

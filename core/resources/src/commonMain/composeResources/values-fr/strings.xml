@@ -20,6 +20,7 @@
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Message de %1$s: %2$s</string>
     <string name="a11y_node_battery">batterie : %1$d%%</string>
+    <string name="a11y_node_distance_away">À %1$s</string>
     <string name="a11y_node_favorite">favori</string>
     <string name="a11y_node_hops_away">À %1$d sauts</string>
     <string name="a11y_node_last_heard">dernier entendu %1$s</string>

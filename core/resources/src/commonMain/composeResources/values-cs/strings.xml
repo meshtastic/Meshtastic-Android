@@ -1078,6 +1078,8 @@
     <string name="nodes_at_this_location">Uzly na tomto místě</string>
     <string name="nodes_empty_disconnected_hint">Připojte se k zařízení a vyhledejte okolní uzly.</string>
     <string name="nodes_empty_disconnected_title">Není připojeno žádné zařízení</string>
+    <string name="nodes_empty_searching_hint">Zde se budou postupně zobrazovat nalezené uzly v okolí.</string>
+    <string name="nodes_empty_searching_title">Vyhledávání uzlů</string>
     <string name="nodes_queued_for_deletion">%1$d uzlů zařazeno k odstranění:</string>
     <string name="noise_floor">Úroveň šumu</string>
     <string name="noise_floor_definition">Úroveň okolního rádiového šumu naměřená přijímačem. Nižší hodnoty obvykle znamenají klidnější rádiové prostředí; −85 dBm je orientační hodnota pro silné rušení, nikoli pevná hranice.</string>
@@ -1327,6 +1329,7 @@
     <string name="scanning_network">Vyhledávání…</string>
     <string name="screen_on_for">Obrazovka zapnutá po dobu</string>
     <string name="search_emoji">Hledat emoji...</string>
+    <string name="search_messages">Hledat zprávy…</string>
     <string name="secondary">Sekundární</string>
     <string name="secondary_channel_position_feature">Vypnutí odesílání polohy na primárním kanálu umožní pravidelné vysílání polohy na prvním sekundárním kanálu, kde je odesílání polohy povoleno. V opačném případě je nutné polohu vyžádat ručně.</string>
     <string name="secondary_no_telemetry">Žádné pravidelné telemetrické vysílání</string>
