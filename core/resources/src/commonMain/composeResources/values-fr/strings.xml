@@ -28,6 +28,7 @@
     <string name="a11y_node_online">en ligne</string>
     <string name="a11y_node_role">rôle %1$s</string>
     <string name="a11y_node_signal">signal %1$s</string>
+    <string name="a11y_nodes_at_hop">Saut %1$d : %2$d nœuds</string>
     <string name="about">A propros</string>
     <string name="accept">Accepter</string>
     <string name="acknowledgements">Remerciements</string>
@@ -40,6 +41,7 @@
     <string name="action_select_network">Sélectionner le réseau</string>
     <string name="action_send_reply">Envoyer une réponse</string>
     <string name="action_show_message_status">Afficher le statut du message</string>
+    <string name="action_toggle_translation">Basculer entre le texte original et le texte traduit</string>
     <string name="action_translate_message">Traduire le message</string>
     <string name="actions">Actions</string>
     <string name="adc_multiplier_override">Remplacer le multiplicateur ADC</string>
