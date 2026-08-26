@@ -165,6 +165,13 @@ configure<ApplicationExtension> {
         configureEach {
             versionName = "${defaultConfig.versionName} (${defaultConfig.versionCode}) $name"
             if (name == "google") {
+                // Only the unit-test manifest merge needs this. The secrets plugin injects
+                // MAPS_API_KEY at *variant* level (from secrets.properties, else
+                // secrets.defaults.properties), which overrides this for the app manifest -- but
+                // variant-level placeholders do not reach the unit-test component, so with no
+                // flavor-level value mergeGoogleDebugUnitTestManifest fails on the unsubstituted
+                // ${MAPS_API_KEY} in src/google/AndroidManifest.xml. This value is never shipped;
+                // what a real build carries comes from the plugin. See #6883.
                 manifestPlaceholders["MAPS_API_KEY"] = "dummy"
             }
         }
