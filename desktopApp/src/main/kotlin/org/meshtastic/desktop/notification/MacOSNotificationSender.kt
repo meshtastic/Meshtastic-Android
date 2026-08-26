@@ -132,20 +132,34 @@ private class JnaMacNotificationBridge : MacNotificationBridge {
      * the JDK's `bin/` directory. Probing the bundle identity first turns an unbundled launch into "no notifications"
      * instead of a crash on the first incoming message.
      *
+     * Tested by bundle *path*, not by `bundleIdentifier`. The identifier is not a reliable signal: the JetBrains
+     * Runtime ships its own `Info.plist`, so a Gradle-launched process has a perfectly good identifier while
+     * `bundleProxyForCurrentProcess` is still nil, and the crash happens anyway. The path is the thing that actually
+     * differs — a packaged app sits in `Foo.app`, this sits in the JDK's `Contents/Home/bin`, which is precisely what
+     * the exception message reports.
+     *
      * Resolved once — a process cannot acquire a bundle identity while running.
      */
     private val hasBundleIdentity: Boolean by lazy {
         if (!objcLoaded) {
             false
         } else {
-            val bundleClass = classRef("NSBundle")
-            val mainBundle = bundleClass?.let { msg(it, selector("mainBundle")) }
-            val identifier = mainBundle?.let { msg(it, selector("bundleIdentifier")) }
-            if (identifier == null) {
-                Logger.w { "No application bundle identity — macOS notifications disabled for this process" }
+            val path = mainBundlePath()
+            val bundled = path != null && path.endsWith(APP_BUNDLE_SUFFIX)
+            if (!bundled) {
+                Logger.w { "Not running from an application bundle — macOS notifications disabled for this process" }
             }
-            identifier != null
+            bundled
         }
+    }
+
+    /** Filesystem path of the running process's main bundle, or null if it cannot be read. */
+    private fun mainBundlePath(): String? {
+        val bundleClass = classRef("NSBundle")
+        val mainBundle = bundleClass?.let { msg(it, selector("mainBundle")) }
+        val path = mainBundle?.let { msg(it, selector("bundlePath")) }
+        val utf8 = path?.let { msg(it, selector("UTF8String")) }
+        return utf8?.getString(0)
     }
 
     override fun requestAuthorization(options: Long): Boolean = runCatching {
@@ -227,3 +241,6 @@ private class JnaMacNotificationBridge : MacNotificationBridge {
         val objcMsgSend: Function?,
     )
 }
+
+/** macOS application bundles are directories with this suffix; a Gradle-launched JVM is not one. */
+private const val APP_BUNDLE_SUFFIX = ".app"
