@@ -21,6 +21,7 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
@@ -66,15 +67,18 @@ internal fun NodePulseLayer(nodes: List<Node>, source: Source) {
         }
     }
 
-    val fraction = progress.value
-    if (heardJustNow.isEmpty() || fraction >= PULSE_FINISHED) return
+    // The layer stays mounted and idles at zero opacity rather than existing only while a pulse runs. Layer addition
+    // is queued onto the map thread, so a layer that lives for a single second can be removed again before it is ever
+    // added — which is what the first attempt did, and why nothing drew at all.
+    val fraction by progress.asState()
+    val idle = heardJustNow.isEmpty() || fraction >= PULSE_FINISHED
 
     CircleLayer(
         id = "node-pulse",
         source = source,
         filter = !feature.has("point_count") and (feature[NodeFeatureKeys.LAST_HEARD].asNumber() gt const(cutoff)),
         color = const(MapColors.Highlight),
-        opacity = const((PULSE_FINISHED - fraction) * PULSE_PEAK_OPACITY),
+        opacity = const(if (idle) 0f else (PULSE_FINISHED - fraction) * PULSE_PEAK_OPACITY),
         radius = const(lerp(PULSE_START_DP.dp, PULSE_END_DP.dp, fraction)),
     )
 }
