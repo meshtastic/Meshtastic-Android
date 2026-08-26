@@ -73,11 +73,8 @@ import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
-import org.maplibre.compose.desktop.DesktopRuntimeOptions
-import org.maplibre.compose.desktop.MapLibre
 import org.maplibre.compose.desktop.ProvideMapHost
-import org.maplibre.compose.desktop.desktopCachePath
-import org.maplibre.compose.desktop.rememberAwtComposeGpuHost
+import org.maplibre.compose.desktop.rememberAwtComposeMapHost
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.common.log.InMemoryLogBuffer
 import org.meshtastic.core.common.util.CommonUri
@@ -151,9 +148,8 @@ fun main(args: Array<String>) {
     // exitProcessOnExit = false is what makes the shutdown block below reachable at all: with the default (true),
     // application() calls System.exit(0) itself as soon as the Compose loop ends, and control never returns here.
     // Do not "simplify" this back to a bare application {} — that silently disables every teardown that follows.
-    // Must happen before any map composes: the desktop renderer needs its tile cache and native
-    // runtime configured process-wide, not per window.
-    MapLibre.configure(DesktopRuntimeOptions(cachePath = desktopCachePath("org.meshtastic.MeshtasticDesktop")))
+    // maplibre-compose 0.15.0 made MapLibre.configure() optional — the first map applies a default
+    // cache configuration process-wide, so there is nothing to set up ahead of composition.
 
     application(exitProcessOnExit = false) {
         val koinApp = remember {
@@ -414,7 +410,7 @@ private fun ApplicationScope.MeshtasticWindow(
 
         CoilImageLoaderSetup()
         // Each window hands MapLibre its own GPU context; the map composites into Compose from there.
-        ProvideMapHost(host = rememberAwtComposeGpuHost(window)) {
+        ProvideMapHost(host = rememberAwtComposeMapHost(window)) {
             CompositionLocalProvider(
                 LocalEventBranding provides eventEdition,
                 LocalMapViewProvider provides MapLibreMapViewProvider(),

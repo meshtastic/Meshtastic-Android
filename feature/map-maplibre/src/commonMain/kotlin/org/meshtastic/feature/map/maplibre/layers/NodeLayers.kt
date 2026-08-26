@@ -18,8 +18,10 @@ package org.meshtastic.feature.map.maplibre.layers
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonPrimitive
 import org.maplibre.compose.expressions.dsl.asNumber
@@ -78,6 +80,10 @@ internal fun NodeLayers(
         )
     }
 
+    // getClusterExpansionZoom became a suspend function in maplibre-compose 0.15.0 (feature queries
+    // no longer block the caller), and onClick is not a suspending callback.
+    val clusterScope = rememberCoroutineScope()
+
     val nodeSource =
         rememberGeoJsonSource(
             data = GeoJsonData.Features(nodesToFeatureCollection(nodes, myNodeNum)),
@@ -106,7 +112,9 @@ internal fun NodeLayers(
                 ?.let { clusterFeature ->
                     val centre = (clusterFeature.geometry as? Point)?.coordinates
                     if (centre != null) {
-                        onClusterZoom(centre, nodeSource.getClusterExpansionZoom(clusterFeature))
+                        clusterScope.launch {
+                            onClusterZoom(centre, nodeSource.getClusterExpansionZoom(clusterFeature))
+                        }
                     }
                     ClickResult.Consume
                 } ?: ClickResult.Pass
