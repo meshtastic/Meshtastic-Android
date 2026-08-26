@@ -213,13 +213,18 @@ fun MapLibreDiscoveryMap(
     val basemaps = rememberBasemapSelection(customBasemaps())
     var selectedIndex by remember { mutableStateOf<Int?>(null) }
 
+    // A discovered node can be heard without ever reporting a position. Drawing those at (0, 0) puts a chip in the
+    // Gulf of Guinea and stretches the bounds fit across an ocean, so they are dropped once, here, and every layer
+    // and the tap lookup below all read the same list. The Google discovery map filters the same way.
+    val located = remember(nodes) { nodes.filter { it.latitude != 0.0 || it.longitude != 0.0 } }
+
     // Frame the scanner together with everything it heard, which is the OSMdroid map's behaviour and the only view
     // that answers the question this map is opened to answer. Opening at a fixed zoom on the scanner put every
     // discovered node off screen. Waits for a viewport, since fitting a bounding box needs one.
     val hasViewport = cameraState.viewport != null
-    LaunchedEffect(nodes.size, hasViewport) {
+    LaunchedEffect(located.size, hasViewport) {
         if (hasViewport) {
-            discoveryBoundingBox(scanner, nodes)?.let {
+            discoveryBoundingBox(scanner, located)?.let {
                 cameraState.jumpTo(boundingBox = it, padding = PaddingValues(FIT_PADDING.dp))
             }
         }
@@ -234,8 +239,8 @@ fun MapLibreDiscoveryMap(
             zoomRange = basemaps.current.zoomRange(),
         ) {
             (basemaps.current as? Basemap.Raster)?.let { RasterBasemapLayer(it) }
-            DiscoveryTopologyLayer(scanner = scanner, nodes = nodes)
-            DiscoveredNodeLayers(nodes = nodes, onNodeClick = { selectedIndex = it })
+            DiscoveryTopologyLayer(scanner = scanner, nodes = located)
+            DiscoveredNodeLayers(nodes = located, onNodeClick = { selectedIndex = it })
             ScannerLayer(scanner = scanner, label = stringResource(Res.string.you))
         }
         SecondaryMapControls(
@@ -247,7 +252,7 @@ fun MapLibreDiscoveryMap(
         // The signal figures the Google map shows in a marker snippet. A MapLibre marker is a layer feature and has no
         // snippet, so the tapped node's numbers go at the foot of the map.
         DiscoveryNodeCard(
-            node = nodes.getOrNull(selectedIndex ?: -1),
+            node = located.getOrNull(selectedIndex ?: -1),
             // Clear of the logo and attribution row, which the styles are licensed on condition of showing.
             modifier =
             Modifier.align(Alignment.BottomStart)
@@ -283,7 +288,7 @@ private fun DiscoveryNodeCard(node: DiscoveryMapNode?, modifier: Modifier = Modi
 }
 
 /**
- * A line from the scanner to each node it heard, coloured by how it was heard.
+ * A line from the scanner to each located node it heard, coloured by how it was heard.
  *
  * The OSMdroid map draws these, and they carry the point of a discovery scan: markers alone say where nodes are, the
  * lines say which of them answered directly and which arrived through the mesh. Drawn before the markers so the lines
@@ -293,18 +298,13 @@ private fun DiscoveryNodeCard(node: DiscoveryMapNode?, modifier: Modifier = Modi
 private fun DiscoveryTopologyLayer(scanner: GeoPosition, nodes: List<DiscoveryMapNode>) {
     val links =
         FeatureCollection(
-            nodes
-                .filter { it.latitude != 0.0 || it.longitude != 0.0 }
-                .map { node ->
-                    Feature<LineString, JsonObject?>(
-                        geometry =
-                        LineString(
-                            listOf(scanner, GeoPosition(longitude = node.longitude, latitude = node.latitude)),
-                        ),
-                        properties =
-                        buildJsonObject { put(DIRECT_KEY, node.neighborType == DiscoveryNeighborType.DIRECT) },
-                    )
-                },
+            nodes.map { node ->
+                Feature<LineString, JsonObject?>(
+                    geometry =
+                    LineString(listOf(scanner, GeoPosition(longitude = node.longitude, latitude = node.latitude))),
+                    properties = buildJsonObject { put(DIRECT_KEY, node.neighborType == DiscoveryNeighborType.DIRECT) },
+                )
+            },
         )
     val source = rememberFeatureSource(links)
 
@@ -429,18 +429,12 @@ internal const val CARD_INSET = 8
 internal const val ORNAMENT_CLEARANCE = 40
 private const val CARD_PADDING = 8
 
-/**
- * A box covering the scanner and every node it heard.
- *
- * Only nodes with real coordinates count — a discovered node can be heard without ever reporting a position, and
- * folding a (0, 0) into the box would stretch it into the Atlantic.
- */
+/** A box covering the scanner and every located node it heard. Callers pass an already-filtered list. */
 private fun discoveryBoundingBox(scanner: GeoPosition, nodes: List<DiscoveryMapNode>): BoundingBox? {
-    val located = nodes.filter { it.latitude != 0.0 || it.longitude != 0.0 }
-    if (located.isEmpty()) return null
+    if (nodes.isEmpty()) return null
 
     return positionsBoundingBox(
-        located.map { GeoPosition(longitude = it.longitude, latitude = it.latitude) } + listOf(scanner),
+        nodes.map { GeoPosition(longitude = it.longitude, latitude = it.latitude) } + listOf(scanner),
     )
 }
 

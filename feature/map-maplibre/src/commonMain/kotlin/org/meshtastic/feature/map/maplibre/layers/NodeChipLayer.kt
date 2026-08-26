@@ -66,8 +66,8 @@ import org.meshtastic.feature.map.maplibre.geojson.toNodeChip
  * MapLibre cannot lay out a chip: `iconTextFit` sizes a sprite around a text layer, but the sprite it stretches can
  * only be tinted per feature if it is a signed distance field — and maplibre-compose's `drawAsSdf` uploads the
  * *unconverted* bitmap while telling MapLibre to read it as an SDF, so that route renders garbage (`ImageManager`
- * computes `toSdf()`, stores it in a map nothing reads, and passes the raw bitmap to `addImage`). Reported upstream; do
- * not reach for `drawAsSdf` here until it is fixed.
+ * computes `toSdf()`, stores it in a map nothing reads, and passes the raw bitmap to `addImage`). Present on upstream
+ * main as of 2026-08-26 and not yet reported; do not reach for `drawAsSdf` here until it is.
  *
  * So the whole chip is rasterized instead, exactly as the Google flavor rasterizes a `NodeChip` per marker. One image
  * per *distinct* chip, and a single layer that picks between them with a `match` on the chip key the feature carries —
