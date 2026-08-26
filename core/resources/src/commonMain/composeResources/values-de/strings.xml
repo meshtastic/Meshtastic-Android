@@ -166,7 +166,6 @@
     <string name="buzzer_gpio">GPIO Summer</string>
     <string name="calculating">Wird berechnet...</string>
     <string name="call_sign">Rufzeichen</string>
-    <string name="call_sign_summary">Dein Amateurfunk Rufzeichen, bis zu 8 Zeichen</string>
     <string name="camera_permission">Kamera-Berechtigungen</string>
     <string name="camera_permission_rationale">Kamera-Zugriff zum Scannen von QR-Codes erlauben.</string>
     <string name="camera_unavailable">Kamera konnte nicht gestartet werden. Versuche es erneut, oder schließe den Scanner und öffne ihn erneut.</string>

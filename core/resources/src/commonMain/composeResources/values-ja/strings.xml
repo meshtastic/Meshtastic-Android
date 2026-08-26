@@ -167,7 +167,6 @@
     <string name="buzzer_gpio">ブザー GPIO</string>
     <string name="calculating">計算中…</string>
     <string name="call_sign">コールサイン</string>
-    <string name="call_sign_summary">アマチュア無線のコールサイン（最大8文字）</string>
     <string name="camera_permission">カメラの権限</string>
     <string name="camera_permission_rationale">QR コードをスキャンするために、カメラへのアクセスを許可してください。</string>
     <string name="camera_unavailable">カメラを起動できませんでした。もう一度試すか、スキャナーを閉じて開き直してください。</string>

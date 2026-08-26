@@ -190,7 +190,6 @@
     </plurals>
     <string name="calculating">Lasketaan…</string>
     <string name="call_sign">Kutsutunnus</string>
-    <string name="call_sign_summary">Amatööriradion kutsutunnuksesi, enintään 8 merkkiä</string>
     <string name="camera_permission">Kameran käyttöoikeudet</string>
     <string name="camera_permission_rationale">Salli kameran käyttö QR-koodien skannaamista varten.</string>
     <string name="camera_unavailable">Kameraa ei voitu käynnistää. Yritä uudelleen tai sulje skanneri ja avaa se uudelleen.</string>
