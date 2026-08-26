@@ -17,6 +17,7 @@
 package org.meshtastic.feature.map.maplibre
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -122,7 +123,19 @@ fun MapLibreTracerouteMap(
     val basemaps = rememberBasemapSelection(customBasemaps())
     val hops = (forwardRoute + returnRoute).distinct().mapNotNull { nodeLookup[it] }
 
-    LaunchedEffect(hops.size) { nodesBoundingBox(hops)?.let { cameraState.jumpTo(boundingBox = it) } }
+    // Wait for the map to report a viewport before fitting. Fitting a bounding box needs a viewport size, and on
+    // first composition there is none yet — the fit silently landed on a default, which is why this map used to open
+    // zoomed past the ends of the route it exists to show.
+    val hasViewport = cameraState.viewport != null
+    LaunchedEffect(hops.size, hasViewport) {
+        if (hasViewport) {
+            // Padded, as the Google flavor pads its own bounds fit: an edge-to-edge fit puts the outermost hops under
+            // the toolbar and the legend.
+            nodesBoundingBox(hops)?.let {
+                cameraState.jumpTo(boundingBox = it, padding = PaddingValues(FIT_PADDING.dp))
+            }
+        }
+    }
 
     Box(modifier = modifier) {
         MaplibreMap(
@@ -278,3 +291,6 @@ internal val SecondaryMapOptions =
 
 /** Keeps a floating toolbar clear of the top edge, matching the main map's own inset. */
 internal const val TOOLBAR_INSET = 8
+
+/** Breathing room around a bounds fit, so the outermost points are not under the toolbar or the legend. */
+private const val FIT_PADDING = 48
