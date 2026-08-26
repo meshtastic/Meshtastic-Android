@@ -75,7 +75,7 @@ mlkit-language-id = "17.0.6"
 mlkit-translate = "17.0.3"
 
 # CameraX
-camerax = "1.6.1"
+camerax = "1.6.2"
 
 # Networking
 ktor = "3.5.2"
