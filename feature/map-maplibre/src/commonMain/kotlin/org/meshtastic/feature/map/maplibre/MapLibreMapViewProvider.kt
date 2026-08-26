@@ -62,6 +62,8 @@ import org.meshtastic.feature.map.SharedMapViewModel
 import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.component.MapControlsOverlay
 import org.meshtastic.feature.map.maplibre.component.ClusterMembersDialog
+import org.meshtastic.feature.map.maplibre.component.OfflineMapTarget
+import org.meshtastic.feature.map.maplibre.component.OfflineMapsMenuItem
 import org.meshtastic.feature.map.maplibre.component.WaypointDialogs
 import org.meshtastic.feature.map.maplibre.component.rememberWaypointEditing
 import org.meshtastic.feature.map.maplibre.geojson.ClusterMember
@@ -249,7 +251,21 @@ private fun MapToolbar(
             FilterMenu(expanded = filterMenuExpanded, onDismissRequest = { filterMenuExpanded = false })
         },
         mapTypeContent = { BasemapMenu(selection = basemaps, extra = basemapMenuExtra) },
-        layersContent = { OverlayMenu(selected = overlays, onSelectedChange = onOverlaysChange) },
+        layersContent = {
+            OverlayMenu(
+                selected = overlays,
+                onSelectedChange = onOverlaysChange,
+                extra = {
+                    OfflineMapsMenuItem(
+                        OfflineMapTarget(
+                            styleUrl = (basemaps.current as? Basemap.Vector)?.styleUri,
+                            bounds = { cameraState.viewport?.visibleBoundingBox },
+                            zoom = { cameraState.position.zoom },
+                        ),
+                    )
+                },
+            )
+        },
         onSitePlannerClick = onSitePlannerClick,
         isLocationTrackingEnabled = location.following,
         onToggleLocationTracking = location.onToggleFollow,
@@ -426,7 +442,11 @@ private fun BasemapMenu(selection: BasemapSelection, extra: @Composable () -> Un
 }
 
 @Composable
-private fun OverlayMenu(selected: List<MapOverlay>, onSelectedChange: (List<MapOverlay>) -> Unit) {
+private fun OverlayMenu(
+    selected: List<MapOverlay>,
+    onSelectedChange: (List<MapOverlay>) -> Unit,
+    extra: @Composable () -> Unit = {},
+) {
     var expanded by remember { mutableStateOf(false) }
 
     Box {
@@ -451,6 +471,7 @@ private fun OverlayMenu(selected: List<MapOverlay>, onSelectedChange: (List<MapO
                     },
                 )
             }
+            extra()
         }
     }
 }
