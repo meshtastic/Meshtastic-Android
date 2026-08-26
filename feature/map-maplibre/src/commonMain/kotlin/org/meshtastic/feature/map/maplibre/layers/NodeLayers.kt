@@ -119,6 +119,7 @@ internal fun NodeLayers(
         filter = feature.has("point_count"),
         textField = feature["point_count_abbreviated"].asString(),
         textColor = const(Color.White),
+        textFont = const(listOf("Noto Sans Regular")),
     )
 
     CircleLayer(
@@ -142,6 +143,7 @@ internal fun NodeLayers(
         source = nodeSource,
         filter = !feature.has("point_count"),
         textField = feature[NodeFeatureKeys.SHORT_NAME].asString(),
+        textFont = const(listOf("Noto Sans Regular")),
         textColor = feature[NodeFeatureKeys.FOREGROUND].convertToColor(const(MaterialTheme.colorScheme.onSurface)),
         textAllowOverlap = const(true),
     )

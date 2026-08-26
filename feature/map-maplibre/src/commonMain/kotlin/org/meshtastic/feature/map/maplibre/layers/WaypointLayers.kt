@@ -63,6 +63,7 @@ internal fun WaypointLayers(waypoints: Collection<DataPacket>, onWaypointClick: 
         id = "waypoint-icon",
         source = waypointSource,
         textField = feature[WaypointFeatureKeys.ICON].asString(),
+        textFont = const(listOf("Noto Sans Regular")),
         textSize = const(WAYPOINT_ICON_EM.em),
         textAllowOverlap = const(true),
         onClick = { features ->
@@ -77,6 +78,7 @@ internal fun WaypointLayers(waypoints: Collection<DataPacket>, onWaypointClick: 
         id = "waypoint-label",
         source = waypointSource,
         textField = feature[WaypointFeatureKeys.NAME].asString(),
+        textFont = const(listOf("Noto Sans Regular")),
         textColor = const(Color.White),
         textHaloColor = const(Color.Black),
         textHaloWidth = const(1.dp),
