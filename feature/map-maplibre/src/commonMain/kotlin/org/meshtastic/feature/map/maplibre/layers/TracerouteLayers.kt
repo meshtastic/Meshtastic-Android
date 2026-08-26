@@ -31,8 +31,8 @@ import org.maplibre.spatialk.geojson.FeatureCollection
 import org.maplibre.spatialk.geojson.LineString
 import org.maplibre.spatialk.geojson.Position
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.ui.theme.TracerouteColors
 import org.meshtastic.feature.map.maplibre.geojson.rememberFeatureSource
-import org.meshtastic.feature.map.maplibre.style.MapColors
 
 /**
  * Forward and return traceroute paths.
@@ -40,6 +40,9 @@ import org.meshtastic.feature.map.maplibre.style.MapColors
  * The two directions almost always traverse the same hops, so they are nudged apart with a screen-space translate
  * rather than by offsetting the geometry: the separation then stays legible at every zoom instead of collapsing as you
  * zoom out.
+ *
+ * The colours come from [TracerouteColors] because the traceroute screen's own legend reads the same object. Naming an
+ * orange line blue in a second place is how this map came to contradict the legend sitting on top of it.
  */
 @Composable
 internal fun TracerouteLayers(forwardRoute: List<Int>, returnRoute: List<Int>, nodeLookup: Map<Int, Node>) {
@@ -51,8 +54,8 @@ internal fun TracerouteLayers(forwardRoute: List<Int>, returnRoute: List<Int>, n
         source = forward,
         cap = const(LineCap.Round),
         join = const(LineJoin.Round),
-        color = const(MapColors.RouteForward),
-        width = const(4.dp),
+        color = const(TracerouteColors.OutgoingRoute),
+        width = const(FORWARD_WIDTH_DP.dp),
         translate = const(DpOffset(0.dp, (-ROUTE_SEPARATION_DP).dp)),
     )
 
@@ -61,8 +64,8 @@ internal fun TracerouteLayers(forwardRoute: List<Int>, returnRoute: List<Int>, n
         source = back,
         cap = const(LineCap.Round),
         join = const(LineJoin.Round),
-        color = const(MapColors.RouteReturn),
-        width = const(4.dp),
+        color = const(TracerouteColors.ReturnRoute),
+        width = const(RETURN_WIDTH_DP.dp),
         translate = const(DpOffset(0.dp, ROUTE_SEPARATION_DP.dp)),
     )
 }
@@ -90,3 +93,9 @@ internal fun routeToFeatureCollection(
 }
 
 private const val ROUTE_SEPARATION_DP = 3
+
+/**
+ * The outbound leg is drawn thicker than the return, as on the Google map, so the two read apart where they overlap.
+ */
+private const val FORWARD_WIDTH_DP = 5
+private const val RETURN_WIDTH_DP = 4

@@ -78,41 +78,44 @@ fun nodesToFeatureCollection(nodes: List<Node>, myNodeNum: Int? = null): Feature
                     put(NodeFeatureKeys.BACKGROUND, background.toCssHex())
                     put(NodeFeatureKeys.LAST_HEARD, node.lastHeard)
                     put(NodeFeatureKeys.PRECISION_METERS, precisionMeters(node.position.precision_bits ?: 0) ?: 0.0)
+                    put(NodeFeatureKeys.CHIP, node.toNodeChip().featureValue())
                 },
             )
         },
     )
 
 /**
- * True when a short name contains characters no basemap glyph font will have.
+ * One distinct chip appearance. Two markers that look identical only need drawing once.
  *
- * Node short names are frequently emoji, and the vector basemaps serve Noto Sans and nothing else — the text layer
- * silently draws nothing for those. Anything from the arrows block upwards is treated as beyond the font, which covers
- * emoji, dingbats and symbols while leaving Latin, accented Latin and Greek/Cyrillic to the text layer.
+ * @param outlined draws a white border, as the discovery map's chips have. Node chips have none, matching
+ *   [org.meshtastic.core.ui.component.NodeChip].
  */
-internal fun String.needsChipImage(): Boolean = toCodePoints().any { it >= BEYOND_TEXT_FONT }
+internal data class MapChipKey(
+    val label: String,
+    val background: Int,
+    val foreground: Int,
+    val struckThrough: Boolean = false,
+    val outlined: Boolean = false,
+)
 
-private fun String.toCodePoints(): List<Int> {
-    val out = mutableListOf<Int>()
-    var i = 0
-    while (i < length) {
-        val c = this[i]
-        if (c.isHighSurrogate() && i + 1 < length && this[i + 1].isLowSurrogate()) {
-            out +=
-                SURROGATE_BASE +
-                ((c.code - HIGH_SURROGATE_START) shl SURROGATE_SHIFT) +
-                (this[i + 1].code - LOW_SURROGATE_START)
-            i += 2
-        } else {
-            out += c.code
-            i += 1
-        }
-    }
-    return out
+/**
+ * The value a feature carries so one layer can pick that marker's chip image.
+ *
+ * Every field that changes the pixels is in the key: a short name is not unique, and neither is a colour.
+ */
+internal fun MapChipKey.featureValue(): String =
+    "$label ${background.toString(HEX_RADIX)} ${foreground.toString(HEX_RADIX)} $struckThrough $outlined"
+
+internal fun Node.toNodeChip(): MapChipKey {
+    val (foreground, background) = colors
+    return MapChipKey(
+        // Matches NodeChip, which shows "???" rather than an empty badge for a node that has not sent a name yet.
+        label = user.short_name.ifEmpty { UNNAMED_LABEL },
+        background = background,
+        foreground = foreground,
+        struckThrough = isIgnored,
+    )
 }
 
-private const val BEYOND_TEXT_FONT = 0x2190
-private const val SURROGATE_BASE = 0x10000
-private const val HIGH_SURROGATE_START = 0xD800
-private const val LOW_SURROGATE_START = 0xDC00
-private const val SURROGATE_SHIFT = 10
+private const val UNNAMED_LABEL = "???"
+private const val HEX_RADIX = 16

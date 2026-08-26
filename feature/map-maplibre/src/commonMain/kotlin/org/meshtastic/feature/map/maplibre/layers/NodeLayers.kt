@@ -16,14 +16,11 @@
  */
 package org.meshtastic.feature.map.maplibre.layers
 
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.int
-import kotlinx.serialization.json.jsonPrimitive
 import org.maplibre.compose.expressions.dsl.asNumber
 import org.maplibre.compose.expressions.dsl.asString
 import org.maplibre.compose.expressions.dsl.const
@@ -76,14 +73,7 @@ internal fun NodeLayers(
     onClusterMembers: (List<ClusterMember>) -> Unit,
 ) {
     if (showPrecisionCircles) {
-        val precisionSource = rememberFeatureSource(precisionCirclesToFeatureCollection(nodes))
-        FillLayer(
-            id = "node-precision-fill",
-            source = precisionSource,
-            color = feature[NodeFeatureKeys.BACKGROUND].convertToColor(const(Color.Gray)),
-            opacity = const(PRECISION_FILL_OPACITY),
-            outlineColor = feature[NodeFeatureKeys.BACKGROUND].convertToColor(const(Color.Gray)),
-        )
+        NodePrecisionLayer(id = "node-precision", nodes = nodes)
     }
 
     // getClusterExpansionZoom became a suspend function in maplibre-compose 0.15.0 (feature queries
@@ -150,35 +140,13 @@ internal fun NodeLayers(
     // Under the chips, so a pulse reads as a halo around the node rather than covering it.
     NodePulseLayer(nodes = nodes, source = nodeSource)
 
-    CircleLayer(
+    NodeChipLayer(
         id = "node-chip",
         source = nodeSource,
-        filter = !feature.has("point_count"),
-        color = feature[NodeFeatureKeys.BACKGROUND].convertToColor(const(Color.Gray)),
-        radius = const(14.dp),
-        strokeColor = const(Color.White),
-        strokeWidth = const(2.dp),
-        onClick = { features ->
-            features.firstOrNull()?.properties?.get(NodeFeatureKeys.NODE_NUM)?.let { nodeNum ->
-                onNodeClick(nodeNum.jsonPrimitive.int)
-                ClickResult.Consume
-            } ?: ClickResult.Pass
-        },
+        nodes = nodes,
+        onNodeClick = onNodeClick,
+        chipFilter = !feature.has("point_count"),
     )
-
-    SymbolLayer(
-        id = "node-chip-label",
-        source = nodeSource,
-        filter = !feature.has("point_count"),
-        textField = feature[NodeFeatureKeys.SHORT_NAME].asString(),
-        textFont = const(listOf("Noto Sans Regular")),
-        textColor = feature[NodeFeatureKeys.FOREGROUND].convertToColor(const(MaterialTheme.colorScheme.onSurface)),
-        textAllowOverlap = const(true),
-    )
-
-    // Drawn last so it sits over the dot and its (blank) label: short names the basemap font cannot draw get a real
-    // chip instead. The chip is wider and taller than the dot, so it covers it — no filtering needed on either.
-    NodeChipImageLayers(nodes = nodes, source = nodeSource, onNodeClick = onNodeClick)
 }
 
 private const val PRECISION_FILL_OPACITY = 0.15f
@@ -186,3 +154,21 @@ private const val CLUSTER_OPACITY = 0.9f
 private const val CLUSTER_STEP_SMALL = 10
 private const val CLUSTER_STEP_MEDIUM = 50
 private const val CLUSTER_STEP_LARGE = 200
+
+/**
+ * The ground-truth circle a degraded position implies, in the node's own colour.
+ *
+ * Its own source: the circles are tessellated polygons, not the node points, so they cannot share the clustered source
+ * the markers use. Shared with the node-detail mini-map, which asks the same question about one node.
+ */
+@Composable
+internal fun NodePrecisionLayer(id: String, nodes: List<Node>) {
+    val source = rememberFeatureSource(precisionCirclesToFeatureCollection(nodes))
+    FillLayer(
+        id = "$id-fill",
+        source = source,
+        color = feature[NodeFeatureKeys.BACKGROUND].convertToColor(const(Color.Gray)),
+        opacity = const(PRECISION_FILL_OPACITY),
+        outlineColor = feature[NodeFeatureKeys.BACKGROUND].convertToColor(const(Color.Gray)),
+    )
+}

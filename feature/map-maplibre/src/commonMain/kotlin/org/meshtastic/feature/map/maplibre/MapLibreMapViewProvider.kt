@@ -18,10 +18,6 @@ package org.meshtastic.feature.map.maplibre
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
@@ -32,7 +28,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.maplibre.compose.camera.CameraState
 import org.maplibre.compose.camera.rememberCameraState
@@ -43,13 +38,9 @@ import org.maplibre.compose.location.rememberDefaultLocationProvider
 import org.maplibre.compose.location.rememberDefaultOrientationProvider
 import org.maplibre.compose.location.rememberLocationState
 import org.maplibre.compose.location.rememberSystemSettingsLauncher
-import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.manage_map_layers
-import org.meshtastic.core.ui.icon.Layers
-import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.util.KeepScreenOn
 import org.meshtastic.core.ui.util.MapViewProvider
 import org.meshtastic.feature.map.SharedMapViewModel
-import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.component.MapControlsOverlay
 import org.meshtastic.feature.map.maplibre.component.BasemapMenu
 import org.meshtastic.feature.map.maplibre.component.BasemapSelection
@@ -64,7 +55,6 @@ import org.meshtastic.feature.map.maplibre.geojson.ClusterMember
 import org.meshtastic.feature.map.maplibre.layers.CustomLayer
 import org.meshtastic.feature.map.maplibre.style.Basemap
 import org.meshtastic.feature.map.maplibre.style.MapOverlay
-import org.meshtastic.feature.map.maplibre.style.MapOverlays
 import org.meshtastic.feature.map.maplibre.style.zoomRange
 
 /**
@@ -127,8 +117,11 @@ class MapLibreMapViewProvider(
         // Deep links, both of which this provider used to drop on the floor.
         LaunchedEffect(waypointId) { waypointId?.let { infoWaypointId = it } }
         LaunchedEffect(sitePlannerNodeNum) { if (sitePlannerNodeNum != null) plannerOpen = true }
-
         var overlays by remember { mutableStateOf(emptyList<MapOverlay>()) }
+
+        // Following the user means the screen is the thing being watched — the Google flavor holds it awake for the
+        // same reason, and a map that sleeps mid-walk is the one complaint a location-follow feature always draws.
+        KeepScreenOn(location.following)
 
         Box(modifier = modifier.fillMaxSize()) {
             MeshMap(
@@ -159,11 +152,7 @@ class MapLibreMapViewProvider(
                 onSitePlannerClick = sitePlanner?.let { { plannerOpen = true } },
             )
 
-            ClusterMembersSlot(
-                members = clusterMembers,
-                onPick = navigateToNodeDetails,
-                onClear = { clusterMembers = emptyList() },
-            )
+            ClusterMembersSlot(clusterMembers, navigateToNodeDetails) { clusterMembers = emptyList() }
 
             SitePlannerSlot(
                 open = plannerOpen,
@@ -348,49 +337,5 @@ private fun rememberLocationControls(cameraState: CameraState): LocationControls
                 scope.launch { cameraState.animateTo(cameraState.position.copy(bearing = 0.0)) }
             }
         },
-    )
-}
-
-@Composable
-private fun OverlayMenu(
-    selected: List<MapOverlay>,
-    onSelectedChange: (List<MapOverlay>) -> Unit,
-    extra: @Composable () -> Unit = {},
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Box {
-        MapButton(
-            icon = MeshtasticIcons.Layers,
-            contentDescription = stringResource(Res.string.manage_map_layers),
-            onClick = { expanded = true },
-        )
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            MapOverlays.all.forEach { overlay ->
-                CheckableItem(
-                    label = overlay.label,
-                    checked = selected.any { it.id == overlay.id },
-                    onClick = {
-                        onSelectedChange(
-                            if (selected.any { it.id == overlay.id }) {
-                                selected.filterNot { it.id == overlay.id }
-                            } else {
-                                selected + overlay
-                            },
-                        )
-                    },
-                )
-            }
-            extra()
-        }
-    }
-}
-
-@Composable
-private fun CheckableItem(label: String, checked: Boolean, onClick: () -> Unit) {
-    DropdownMenuItem(
-        text = { Text(text = label) },
-        leadingIcon = { Checkbox(checked = checked, onCheckedChange = { onClick() }) },
-        onClick = onClick,
     )
 }

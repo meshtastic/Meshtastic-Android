@@ -21,19 +21,26 @@ import androidx.compose.ui.graphics.Color
 /**
  * Colours shared across the MapLibre map surfaces.
  *
- * Named here rather than inline so the same blue means "outbound route" on every screen, and so a theme pass has one
- * place to change.
+ * Named here rather than inline so a theme pass has one place to change. Route colours are not here: those live in
+ * [org.meshtastic.core.ui.theme.TracerouteColors], which the traceroute screen's own legend also reads — naming them
+ * twice is how the lines came to disagree with the legend describing them.
  */
 internal object MapColors {
     /** Cluster bubbles and traceroute hop markers. */
     val Slate = Color(0xFF2C2D3C)
 
-    /** Outbound traceroute leg, and the node position track. */
-    val RouteForward = Color(0xFF1E88E5)
-
-    /** Return traceroute leg, and discovered nodes. */
-    val RouteReturn = Color(0xFF43A047)
-
     /** Geofence zones and the currently selected track point — carried over from the OSMdroid map. */
     val Highlight = Color(0xFFFF8C00)
+
+    /** A node the scanner heard itself. The same green the Google discovery map uses. */
+    val DiscoveryDirect = Color(0xFF4CAF50)
+
+    /**
+     * A node that reached the scanner through the mesh. Blue, as on the Google discovery map — the distinction is the
+     * point of the screen, so it belongs on the markers and not only on the links.
+     */
+    val DiscoveryMesh = Color(0xFF2196F3)
+
+    /** The scanner itself. */
+    val DiscoveryUser = Color(0xFFFF9800)
 }

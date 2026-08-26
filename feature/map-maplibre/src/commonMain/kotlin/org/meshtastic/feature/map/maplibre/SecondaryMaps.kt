@@ -17,45 +17,66 @@
 package org.meshtastic.feature.map.maplibre
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.int
+import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
+import org.jetbrains.compose.resources.stringResource
 import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.camera.rememberCameraState
 import org.maplibre.compose.expressions.dsl.asBoolean
-import org.maplibre.compose.expressions.dsl.asString
 import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.expressions.dsl.feature
 import org.maplibre.compose.expressions.dsl.not
 import org.maplibre.compose.expressions.value.LineCap
-import org.maplibre.compose.layers.CircleLayer
 import org.maplibre.compose.layers.LineLayer
-import org.maplibre.compose.layers.SymbolLayer
 import org.maplibre.compose.map.GestureOptions
 import org.maplibre.compose.map.MapOptions
 import org.maplibre.compose.map.MaplibreMap
+import org.maplibre.compose.util.ClickResult
 import org.maplibre.spatialk.geojson.BoundingBox
 import org.maplibre.spatialk.geojson.Feature
 import org.maplibre.spatialk.geojson.FeatureCollection
 import org.maplibre.spatialk.geojson.LineString
 import org.maplibre.spatialk.geojson.Point
+import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.rssi
+import org.meshtastic.core.resources.snr
+import org.meshtastic.core.resources.unknown
+import org.meshtastic.core.resources.you
 import org.meshtastic.core.ui.util.DiscoveryMapNode
 import org.meshtastic.core.ui.util.DiscoveryNeighborType
 import org.meshtastic.feature.map.maplibre.component.SecondaryMapControls
 import org.meshtastic.feature.map.maplibre.component.rememberBasemapSelection
+import org.meshtastic.feature.map.maplibre.geojson.MapChipKey
 import org.meshtastic.feature.map.maplibre.geojson.NodeFeatureKeys
+import org.meshtastic.feature.map.maplibre.geojson.featureValue
 import org.meshtastic.feature.map.maplibre.geojson.nodesToFeatureCollection
 import org.meshtastic.feature.map.maplibre.geojson.rememberFeatureSource
+import org.meshtastic.feature.map.maplibre.layers.MapChipLayer
+import org.meshtastic.feature.map.maplibre.layers.NodeChipLayer
+import org.meshtastic.feature.map.maplibre.layers.NodePrecisionLayer
 import org.meshtastic.feature.map.maplibre.layers.RasterBasemapLayer
 import org.meshtastic.feature.map.maplibre.layers.TracerouteLayers
 import org.meshtastic.feature.map.maplibre.style.Basemap
@@ -66,6 +87,9 @@ import org.maplibre.spatialk.geojson.Position as GeoPosition
 
 internal const val DEG_SCALE = 1e-7
 internal const val DETAIL_ZOOM = 13.0
+
+/** Tighter than [DETAIL_ZOOM]: the node-detail mini-map shows one node, and the Google flavor opens it at 15. */
+private const val INLINE_ZOOM = 15.0
 
 /**
  * Single-node mini-map embedded in the node detail sheet.
@@ -81,13 +105,16 @@ fun MapLibreInlineMap(
 ) {
     if (node.validPosition == null) return
     val basemaps = rememberBasemapSelection(customBasemaps())
-    val cameraState =
-        rememberCameraState(
-            CameraPosition(
-                target = GeoPosition(longitude = node.longitude, latitude = node.latitude),
-                zoom = DETAIL_ZOOM,
-            ),
-        )
+    val target = GeoPosition(longitude = node.longitude, latitude = node.latitude)
+    val cameraState = rememberCameraState(CameraPosition(target = target, zoom = INLINE_ZOOM))
+
+    // Follows the node as fresh positions arrive, as the Google mini-map does. Guarded on the current target so the
+    // first composition — which rememberCameraState has already centred — does not animate to where the camera is.
+    LaunchedEffect(target) {
+        if (cameraState.position.target != target) {
+            cameraState.animateTo(cameraState.position.copy(target = target))
+        }
+    }
 
     MaplibreMap(
         baseStyle = basemaps.current.toBaseStyle(),
@@ -99,14 +126,11 @@ fun MapLibreInlineMap(
         (basemaps.current as? Basemap.Raster)?.let { RasterBasemapLayer(it) }
 
         val source = rememberFeatureSource(nodesToFeatureCollection(listOf(node)))
-        CircleLayer(
-            id = "inline-node",
-            source = source,
-            color = const(Color(node.colors.second)),
-            radius = const(10.dp),
-            strokeColor = const(Color.White),
-            strokeWidth = const(2.dp),
-        )
+
+        // The node-detail sheet is where a degraded position matters most — it is the screen a user opens to ask how
+        // precisely this node is placed. The Google mini-map draws the circle; this one used to leave it out.
+        NodePrecisionLayer(id = "inline-precision", nodes = listOf(node))
+        NodeChipLayer(id = "inline-node", source = source, nodes = listOf(node))
     }
 }
 
@@ -163,24 +187,11 @@ fun MapLibreTracerouteMap(
     }
 }
 
+/** Every hop the route passes through, as the node chip it is elsewhere in the app. */
 @Composable
 private fun TracerouteHopLayers(hops: List<Node>) {
     val hopSource = rememberFeatureSource(nodesToFeatureCollection(hops))
-    CircleLayer(
-        id = "traceroute-hops",
-        source = hopSource,
-        color = const(MapColors.Slate),
-        radius = const(10.dp),
-        strokeColor = const(Color.White),
-        strokeWidth = const(2.dp),
-    )
-    SymbolLayer(
-        id = "traceroute-hop-labels",
-        source = hopSource,
-        textField = feature[NodeFeatureKeys.SHORT_NAME].asString(),
-        textColor = const(Color.White),
-        textAllowOverlap = const(true),
-    )
+    NodeChipLayer(id = "traceroute-hops", source = hopSource, nodes = hops)
 }
 
 /**
@@ -200,6 +211,7 @@ fun MapLibreDiscoveryMap(
     val scanner = GeoPosition(longitude = userLongitude, latitude = userLatitude)
     val cameraState = rememberCameraState(CameraPosition(target = scanner, zoom = DETAIL_ZOOM))
     val basemaps = rememberBasemapSelection(customBasemaps())
+    var selectedIndex by remember { mutableStateOf<Int?>(null) }
 
     // Frame the scanner together with everything it heard, which is the OSMdroid map's behaviour and the only view
     // that answers the question this map is opened to answer. Opening at a fixed zoom on the scanner put every
@@ -223,14 +235,50 @@ fun MapLibreDiscoveryMap(
         ) {
             (basemaps.current as? Basemap.Raster)?.let { RasterBasemapLayer(it) }
             DiscoveryTopologyLayer(scanner = scanner, nodes = nodes)
-            DiscoveredNodeLayers(nodes)
-            ScannerLayer(scanner)
+            DiscoveredNodeLayers(nodes = nodes, onNodeClick = { selectedIndex = it })
+            ScannerLayer(scanner = scanner, label = stringResource(Res.string.you))
         }
         SecondaryMapControls(
             cameraState = cameraState,
             basemaps = basemaps,
             modifier = Modifier.align(Alignment.TopCenter).padding(top = TOOLBAR_INSET.dp),
         )
+
+        // The signal figures the Google map shows in a marker snippet. A MapLibre marker is a layer feature and has no
+        // snippet, so the tapped node's numbers go at the foot of the map.
+        DiscoveryNodeCard(
+            node = nodes.getOrNull(selectedIndex ?: -1),
+            // Clear of the logo and attribution row, which the styles are licensed on condition of showing.
+            modifier =
+            Modifier.align(Alignment.BottomStart)
+                .padding(start = CARD_INSET.dp, end = CARD_INSET.dp, bottom = ORNAMENT_CLEARANCE.dp),
+        )
+    }
+}
+
+/** Name and signal for the discovered node the user tapped. Draws nothing when nothing is selected. */
+@Composable
+private fun DiscoveryNodeCard(node: DiscoveryMapNode?, modifier: Modifier = Modifier) {
+    if (node == null) return
+
+    Card(modifier = modifier) {
+        Column(modifier = Modifier.padding(CARD_PADDING.dp)) {
+            Text(
+                text = node.longName ?: node.shortName ?: stringResource(Res.string.unknown),
+                style = MaterialTheme.typography.labelLarge,
+            )
+            Text(
+                text =
+                stringResource(Res.string.snr) +
+                    ": " +
+                    MetricFormatter.snr(node.snr) +
+                    "   " +
+                    stringResource(Res.string.rssi) +
+                    ": " +
+                    MetricFormatter.rssi(node.rssi),
+                style = MaterialTheme.typography.labelMedium,
+            )
+        }
     }
 }
 
@@ -265,7 +313,7 @@ private fun DiscoveryTopologyLayer(scanner: GeoPosition, nodes: List<DiscoveryMa
         source = source,
         filter = feature[DIRECT_KEY].asBoolean(),
         cap = const(LineCap.Round),
-        color = const(MapColors.RouteReturn),
+        color = const(MapColors.DiscoveryDirect),
         width = const(3.dp),
     )
     LineLayer(
@@ -273,67 +321,84 @@ private fun DiscoveryTopologyLayer(scanner: GeoPosition, nodes: List<DiscoveryMa
         source = source,
         filter = !feature[DIRECT_KEY].asBoolean(),
         cap = const(LineCap.Round),
-        color = const(MapColors.Slate),
+        color = const(MapColors.DiscoveryMesh),
         width = const(2.dp),
         opacity = const(MESH_LINK_OPACITY),
     )
 }
 
+/**
+ * Every node the scan heard, as a chip in the colour of how it was heard.
+ *
+ * Green for direct, blue through the mesh — the Google discovery map's own pairing. Tapping one reports it so the
+ * caller can show the signal figures, which is what that map puts in a marker snippet.
+ */
 @Composable
-private fun DiscoveredNodeLayers(nodes: List<DiscoveryMapNode>) {
+private fun DiscoveredNodeLayers(nodes: List<DiscoveryMapNode>, onNodeClick: (Int) -> Unit) {
+    val chips = nodes.map { it.toMapChip() }
     val source =
         rememberFeatureSource(
             FeatureCollection(
-                nodes.map { node ->
+                nodes.mapIndexed { index, node ->
                     Feature<Point, JsonObject?>(
                         geometry = Point(GeoPosition(longitude = node.longitude, latitude = node.latitude)),
                         properties =
                         buildJsonObject {
-                            put(NodeFeatureKeys.SHORT_NAME, node.shortName.orEmpty())
-                            put("snr", node.snr)
+                            put(DISCOVERY_INDEX_KEY, index)
+                            put(NodeFeatureKeys.CHIP, chips[index].featureValue())
                         },
                     )
                 },
             ),
         )
-    CircleLayer(
+    MapChipLayer(
         id = "discovery-nodes",
         source = source,
-        color = const(MapColors.RouteReturn),
-        radius = const(9.dp),
-        strokeColor = const(Color.White),
-        strokeWidth = const(2.dp),
-    )
-    SymbolLayer(
-        id = "discovery-labels",
-        source = source,
-        textField = feature[NodeFeatureKeys.SHORT_NAME].asString(),
-        textColor = const(Color.White),
-        textAllowOverlap = const(true),
+        chips = chips,
+        onClick = { features ->
+            features.firstOrNull()?.properties?.get(DISCOVERY_INDEX_KEY)?.let { index ->
+                onNodeClick(index.jsonPrimitive.int)
+                ClickResult.Consume
+            } ?: ClickResult.Pass
+        },
     )
 }
 
+/** Green when the scanner heard this node itself, blue when it arrived through the mesh. */
+private fun DiscoveryMapNode.toMapChip() = MapChipKey(
+    label = shortName?.takeIf { it.isNotBlank() } ?: UNKNOWN_CHIP_LABEL,
+    background =
+    if (neighborType == DiscoveryNeighborType.DIRECT) {
+        MapColors.DiscoveryDirect.toArgb()
+    } else {
+        MapColors.DiscoveryMesh.toArgb()
+    },
+    foreground = Color.White.toArgb(),
+    outlined = true,
+)
+
+/** The scanner's own position, labelled — the Google discovery map puts a "You" chip here. */
 @Composable
-private fun ScannerLayer(scanner: GeoPosition) {
+private fun ScannerLayer(scanner: GeoPosition, label: String) {
+    val chip =
+        MapChipKey(
+            label = label,
+            background = MapColors.DiscoveryUser.toArgb(),
+            foreground = Color.White.toArgb(),
+            outlined = true,
+        )
     val source =
         rememberFeatureSource(
             FeatureCollection(
                 listOf(
                     Feature<Point, JsonObject?>(
                         geometry = Point(scanner),
-                        properties = buildJsonObject { put("role", "scanner") },
+                        properties = buildJsonObject { put(NodeFeatureKeys.CHIP, chip.featureValue()) },
                     ),
                 ),
             ),
         )
-    CircleLayer(
-        id = "discovery-scanner",
-        source = source,
-        color = const(MapColors.Highlight),
-        radius = const(11.dp),
-        strokeColor = const(Color.White),
-        strokeWidth = const(3.dp),
-    )
+    MapChipLayer(id = "discovery-scanner", source = source, chips = listOf(chip))
 }
 
 /**
@@ -353,6 +418,17 @@ internal const val TOOLBAR_INSET = 8
 /** Breathing room around a bounds fit, so the outermost points are not under the toolbar or the legend. */
 private const val FIT_PADDING = 48
 
+/** Inset for a detail card at the foot of a map. */
+internal const val CARD_INSET = 8
+
+/**
+ * Height to leave for the map's logo and attribution row, which the styles are licensed on condition of showing.
+ *
+ * See [org.meshtastic.feature.map.maplibre.component.MeshMapOrnaments].
+ */
+internal const val ORNAMENT_CLEARANCE = 40
+private const val CARD_PADDING = 8
+
 /**
  * A box covering the scanner and every node it heard.
  *
@@ -363,16 +439,15 @@ private fun discoveryBoundingBox(scanner: GeoPosition, nodes: List<DiscoveryMapN
     val located = nodes.filter { it.latitude != 0.0 || it.longitude != 0.0 }
     if (located.isEmpty()) return null
 
-    val latitudes = located.map { it.latitude } + scanner.latitude
-    val longitudes = located.map { it.longitude } + scanner.longitude
-    return BoundingBox(
-        west = longitudes.min(),
-        south = latitudes.min(),
-        east = longitudes.max(),
-        north = latitudes.max(),
+    return positionsBoundingBox(
+        located.map { GeoPosition(longitude = it.longitude, latitude = it.latitude) } + listOf(scanner),
     )
 }
 
 /** Whether the scanner heard this node itself, rather than through the mesh. */
 private const val DIRECT_KEY = "direct"
+
+/** Index into the discovery node list, so a tap can name which node was hit. */
+private const val DISCOVERY_INDEX_KEY = "discoveryIndex"
+private const val UNKNOWN_CHIP_LABEL = "?"
 private const val MESH_LINK_OPACITY = 0.7f

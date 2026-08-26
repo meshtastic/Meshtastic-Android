@@ -38,34 +38,41 @@ fun filterNodesForMap(nodes: List<Node>, filterState: BaseMapViewModel.MapFilter
         }
 
 /**
- * Bounding box covering every supplied node, or null when fewer than one node has a fix.
+ * Bounding box covering every supplied node, or null when no node has a fix.
  *
  * Returning null rather than a degenerate box at (0, 0) is deliberate — the OSMdroid map's habit of flying through the
  * Atlantic on startup came from treating "no data yet" as a real location.
  */
-fun nodesBoundingBox(nodes: List<Node>): BoundingBox? {
-    val located = nodes.filter { it.validPosition != null }
-    if (located.isEmpty()) return null
+fun nodesBoundingBox(nodes: List<Node>): BoundingBox? = positionsBoundingBox(
+    nodes.filter { it.validPosition != null }.map { Position(longitude = it.longitude, latitude = it.latitude) },
+)
 
-    var south = Double.MAX_VALUE
-    var north = -Double.MAX_VALUE
-    var west = Double.MAX_VALUE
-    var east = -Double.MAX_VALUE
+/**
+ * Bounding box covering [positions], or null when there are none.
+ *
+ * A single point, or several stacked on one spot, yields a zero-area box the camera cannot fit to — a stationary node's
+ * whole position track is exactly that — so a degenerate box is padded out to something framable.
+ */
+fun positionsBoundingBox(positions: List<Position>): BoundingBox? {
+    if (positions.isEmpty()) return null
 
-    located.forEach { node ->
-        south = minOf(south, node.latitude)
-        north = maxOf(north, node.latitude)
-        west = minOf(west, node.longitude)
-        east = maxOf(east, node.longitude)
+    var south = positions.first().latitude
+    var north = south
+    var west = positions.first().longitude
+    var east = west
+
+    positions.forEach { position ->
+        south = minOf(south, position.latitude)
+        north = maxOf(north, position.latitude)
+        west = minOf(west, position.longitude)
+        east = maxOf(east, position.longitude)
     }
 
-    // A single node, or several stacked on one spot, yields a zero-area box that the camera cannot
-    // fit to. Pad it out to something it can frame.
     if (south == north && west == east) {
-        south -= SINGLE_NODE_PAD_DEG
-        north += SINGLE_NODE_PAD_DEG
-        west -= SINGLE_NODE_PAD_DEG
-        east += SINGLE_NODE_PAD_DEG
+        south -= SINGLE_POINT_PAD_DEG
+        north += SINGLE_POINT_PAD_DEG
+        west -= SINGLE_POINT_PAD_DEG
+        east += SINGLE_POINT_PAD_DEG
     }
 
     return BoundingBox(
@@ -74,4 +81,4 @@ fun nodesBoundingBox(nodes: List<Node>): BoundingBox? {
     )
 }
 
-private const val SINGLE_NODE_PAD_DEG = 0.01
+private const val SINGLE_POINT_PAD_DEG = 0.01

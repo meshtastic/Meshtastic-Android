@@ -17,6 +17,7 @@
 package org.meshtastic.feature.map.maplibre
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -34,26 +35,36 @@ import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import org.koin.compose.viewmodel.koinViewModel
-import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.camera.rememberCameraState
+import org.maplibre.compose.expressions.dsl.asNumber
 import org.maplibre.compose.expressions.dsl.const
+import org.maplibre.compose.expressions.dsl.feature
+import org.maplibre.compose.expressions.dsl.interpolate
+import org.maplibre.compose.expressions.dsl.linear
 import org.maplibre.compose.expressions.value.LineCap
 import org.maplibre.compose.expressions.value.LineJoin
 import org.maplibre.compose.layers.CircleLayer
 import org.maplibre.compose.layers.LineLayer
 import org.maplibre.compose.map.MaplibreMap
+import org.maplibre.compose.sources.GeoJsonOptions
 import org.maplibre.compose.util.ClickResult
 import org.maplibre.spatialk.geojson.Feature
 import org.maplibre.spatialk.geojson.FeatureCollection
 import org.maplibre.spatialk.geojson.LineString
 import org.maplibre.spatialk.geojson.Point
 import org.meshtastic.core.common.util.nowSeconds
+import org.meshtastic.core.model.Node
 import org.meshtastic.feature.map.LastHeardFilter
 import org.meshtastic.feature.map.SharedMapViewModel
 import org.meshtastic.feature.map.maplibre.component.SecondaryMapControls
 import org.meshtastic.feature.map.maplibre.component.TrackFilterMenu
+import org.meshtastic.feature.map.maplibre.component.TrackPointCard
 import org.meshtastic.feature.map.maplibre.component.rememberBasemapSelection
+import org.meshtastic.feature.map.maplibre.geojson.NodeFeatureKeys
+import org.meshtastic.feature.map.maplibre.geojson.featureValue
 import org.meshtastic.feature.map.maplibre.geojson.rememberFeatureSource
+import org.meshtastic.feature.map.maplibre.geojson.toNodeChip
+import org.meshtastic.feature.map.maplibre.layers.NodeChipLayer
 import org.meshtastic.feature.map.maplibre.layers.RasterBasemapLayer
 import org.meshtastic.feature.map.maplibre.style.Basemap
 import org.meshtastic.feature.map.maplibre.style.MapColors
@@ -63,6 +74,9 @@ import org.maplibre.spatialk.geojson.Position as GeoPosition
 import org.meshtastic.proto.Position as ProtoPosition
 
 private const val TRACK_POINT_KEY = "positionTime"
+
+/** How far along the track a point sits: 0 for the oldest, 1 for the newest. Drives the age fade. */
+private const val TRACK_AGE_KEY = "age"
 
 /** A timestamped point on a node's position track. */
 private typealias TrackPoint = Pair<GeoPosition, Int>
@@ -78,6 +92,7 @@ private typealias TrackPoint = Pair<GeoPosition, Int>
  *   means reaching the F-Droid flavor's tile-provider repository, which the desktop host has no equivalent of.
  */
 @Composable
+@Suppress("LongMethod")
 fun MapLibreNodeTrackMap(
     destNum: Int,
     positions: List<ProtoPosition>,
@@ -86,7 +101,10 @@ fun MapLibreNodeTrackMap(
     onPositionSelect: ((Int) -> Unit)? = null,
     customBasemaps: @Composable () -> List<Basemap.Raster> = { emptyList() },
 ) {
-    val allPoints = remember(positions) { positions.mapNotNull { it.toTrackPoint() } }
+    // Oldest first, as the Google flavor sorts its own track. Everything downstream reads order as age: the gradient
+    // runs from the start of the line, the fade runs from index 0, and the chip goes on the last point. The view model
+    // hands these over newest-first for its list, so an unsorted track drew the whole thing backwards.
+    val allPoints = remember(positions) { positions.mapNotNull { it.toTrackPoint() }.sortedBy { it.second } }
     val cameraState = rememberCameraState()
 
     // The basemap is a shared preference, so a track opens on whatever the main map is set to. The OSMdroid track map
@@ -95,19 +113,30 @@ fun MapLibreNodeTrackMap(
 
     val viewModel: SharedMapViewModel = koinViewModel()
     val filterState by viewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
+    val nodes by viewModel.nodes.collectAsStateWithLifecycle()
+    val displayUnits by viewModel.displayUnits.collectAsStateWithLifecycle()
+
+    val node = remember(nodes, destNum) { nodes.firstOrNull { it.num == destNum } }
     val trackFilter = filterState.lastHeardTrackFilter
     val points = remember(allPoints, trackFilter) { allPoints.olderThanCutoffRemoved(trackFilter) }
 
-    // Frame the whole track once it is known. Without this the camera opens at (0, 0) — the black-ocean start the
-    // OSMdroid track map suffered from. Keyed on the unfiltered track so tightening the filter does not yank the
-    // camera around under the user.
-    LaunchedEffect(allPoints.size) {
-        if (allPoints.isNotEmpty()) {
-            cameraState.position = CameraPosition(target = allPoints.center(), zoom = DETAIL_ZOOM)
+    // Frame the whole track, not just its midpoint: a fixed zoom on the centre cropped long tracks at both ends. Keyed
+    // on the unfiltered track so tightening the filter does not yank the camera around under the user, and gated on a
+    // viewport because fitting a bounding box needs one — before the map reports its size the fit lands on a default.
+    val hasViewport = cameraState.viewport != null
+    LaunchedEffect(allPoints.size, hasViewport) {
+        if (hasViewport && allPoints.isNotEmpty()) {
+            positionsBoundingBox(allPoints.map { it.first })?.let { box ->
+                cameraState.jumpTo(boundingBox = box, padding = PaddingValues(FIT_PADDING.dp))
+            }
         }
     }
 
     if (allPoints.isEmpty()) return
+
+    // The colour the rest of the app draws this node in. The track used to be a flat blue, which said nothing about
+    // whose track it was — the Google flavor fades the node's own colour along it, and so does this now.
+    val trackColor = node?.let { Color(it.colors.second) } ?: MapColors.Slate
 
     // The map and its toolbar stay up even when the filter empties the track — otherwise the control that emptied it
     // disappears along with the points, leaving no way back.
@@ -122,12 +151,15 @@ fun MapLibreNodeTrackMap(
             (basemaps.current as? Basemap.Raster)?.let { RasterBasemapLayer(it) }
 
             // A LineString needs two coordinates; a filter tight enough to leave one point would otherwise throw.
-            if (points.size > 1) TrackLineLayer(destNum = destNum, points = points)
+            if (points.size > 1) TrackLineLayer(points = points, color = trackColor)
             if (points.isNotEmpty()) {
-                TrackPointLayer(points = points, onPositionSelect = onPositionSelect)
+                TrackPointLayer(points = points, color = trackColor, onPositionSelect = onPositionSelect)
                 selectedPositionTime?.let { selected ->
                     SelectedTrackPointLayer(points = points, selectedTime = selected)
                 }
+                // The newest position gets the node's chip, as it does on the Google map: the head of the track is
+                // where the node is now, and that is the one point worth naming.
+                if (node != null) NewestPositionChip(node = node, newest = points.last())
             }
         }
         SecondaryMapControls(
@@ -137,6 +169,18 @@ fun MapLibreNodeTrackMap(
             filterMenu = { expanded, onDismissRequest ->
                 TrackFilterMenu(expanded = expanded, onDismissRequest = onDismissRequest)
             },
+        )
+
+        // What the Google flavor puts in a marker info window. MapLibre draws markers as layer features, which have no
+        // info window, so the detail for the selected point goes at the foot of the map instead.
+        TrackPointCard(
+            position = positions.firstOrNull { it.time == selectedPositionTime },
+            displayUnits = displayUnits,
+            // Clear of the logo and attribution along the bottom edge, which the styles are licensed on condition of
+            // showing. See MeshMapOrnaments.
+            modifier =
+            Modifier.align(Alignment.BottomStart)
+                .padding(start = CARD_INSET.dp, end = CARD_INSET.dp, bottom = ORNAMENT_CLEARANCE.dp),
         )
     }
 }
@@ -163,57 +207,66 @@ private fun List<TrackPoint>.olderThanCutoffRemoved(filter: LastHeardFilter): Li
     return filter { (_, time) -> time > cutoff }
 }
 
-private fun List<TrackPoint>.center(): GeoPosition {
-    val latitudes = map { it.first.latitude }
-    val longitudes = map { it.first.longitude }
-    return GeoPosition(
-        longitude = (longitudes.min() + longitudes.max()) / 2,
-        latitude = (latitudes.min() + latitudes.max()) / 2,
-    )
-}
-
 private fun pointFeatures(points: List<TrackPoint>) = FeatureCollection(
-    points.map { (position, time) ->
+    points.mapIndexed { index, (position, time) ->
         Feature<Point, JsonObject?>(
             geometry = Point(position),
-            properties = buildJsonObject { put(TRACK_POINT_KEY, time) },
+            properties =
+            buildJsonObject {
+                put(TRACK_POINT_KEY, time)
+                put(TRACK_AGE_KEY, if (points.size > 1) index.toDouble() / (points.size - 1) else 1.0)
+            },
         )
     },
 )
 
+/**
+ * The track itself, fading from faint at the oldest end to solid at the newest.
+ *
+ * `line-gradient` needs the source to compute line-distance metrics, which is what `lineMetrics` turns on; without it
+ * the gradient is silently ignored and the line draws in its base colour.
+ */
 @Composable
-private fun TrackLineLayer(destNum: Int, points: List<TrackPoint>) {
+private fun TrackLineLayer(points: List<TrackPoint>, color: Color) {
     val source =
         rememberFeatureSource(
             FeatureCollection(
                 listOf(
-                    Feature<LineString, JsonObject?>(
-                        geometry = LineString(points.map { it.first }),
-                        properties = buildJsonObject { put("destNum", destNum) },
-                    ),
+                    Feature<LineString, JsonObject?>(geometry = LineString(points.map { it.first }), properties = null),
                 ),
             ),
+            options = GeoJsonOptions(lineMetrics = true),
         )
     LineLayer(
         id = "track-line",
         source = source,
         cap = const(LineCap.Round),
         join = const(LineJoin.Round),
-        color = const(MapColors.RouteForward),
         width = const(3.dp),
+        gradient =
+        interpolate(
+            linear(),
+            feature.lineProgress(),
+            0 to const(color.copy(alpha = OLDEST_ALPHA)),
+            1 to const(color),
+        ),
     )
 }
 
+/** Every recorded position, oldest faintest. Tapping one reports it so the caller's list can follow along. */
 @Composable
-private fun TrackPointLayer(points: List<TrackPoint>, onPositionSelect: ((Int) -> Unit)?) {
+private fun TrackPointLayer(points: List<TrackPoint>, color: Color, onPositionSelect: ((Int) -> Unit)?) {
     val source = rememberFeatureSource(pointFeatures(points))
     CircleLayer(
         id = "track-points",
         source = source,
-        color = const(Color.White),
+        color = const(color),
         radius = const(5.dp),
-        strokeColor = const(MapColors.RouteForward),
+        strokeColor = const(Color.White),
         strokeWidth = const(2.dp),
+        // Faded rather than fully transparent at the oldest end. The Google flavor takes its alpha straight to zero,
+        // which makes the first point of a track invisible and untappable.
+        opacity = interpolate(linear(), feature[TRACK_AGE_KEY].asNumber(), 0 to const(OLDEST_ALPHA), 1 to const(1f)),
         onClick = { features ->
             features.firstOrNull()?.properties?.get(TRACK_POINT_KEY)?.let { time ->
                 onPositionSelect?.invoke(time.jsonPrimitive.int)
@@ -235,3 +288,33 @@ private fun SelectedTrackPointLayer(points: List<TrackPoint>, selectedTime: Int)
         strokeWidth = const(2.dp),
     )
 }
+
+/** The node's own chip, at the head of the track. */
+@Composable
+private fun NewestPositionChip(node: Node, newest: TrackPoint) {
+    val source =
+        rememberFeatureSource(
+            FeatureCollection(
+                listOf(
+                    Feature<Point, JsonObject?>(
+                        geometry = Point(newest.first),
+                        properties =
+                        buildJsonObject {
+                            put(NodeFeatureKeys.NODE_NUM, node.num)
+                            put(NodeFeatureKeys.CHIP, node.toNodeChip().featureValue())
+                        },
+                    ),
+                ),
+            ),
+        )
+    NodeChipLayer(id = "track-head", source = source, nodes = listOf(node))
+}
+
+/** Alpha the oldest end of a track fades to. */
+private const val OLDEST_ALPHA = 0.25f
+
+/**
+ * Breathing room around the fitted track. Wide enough for the chip on the newest point, which extends half its width
+ * past the point itself and was otherwise clipped by the edge of the map.
+ */
+private const val FIT_PADDING = 72

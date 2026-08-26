@@ -97,7 +97,10 @@ private const val RECENTLY_HEARD_SECONDS = 5L
 private const val PULSE_MILLIS = 1000
 private const val PULSE_FINISHED = 1f
 
-/** Starts level with the node chip and grows past it, so the chip is never obscured. */
-private const val PULSE_START_DP = 14
-private const val PULSE_END_DP = 34
+/**
+ * Starts just inside the node chip and grows well past it, so the halo emerges from behind the chip rather than being
+ * swallowed by it. A chip is 64x28dp, so its half-diagonal is about 35dp — the range has to clear that to be seen.
+ */
+private const val PULSE_START_DP = 18
+private const val PULSE_END_DP = 48
 private const val PULSE_PEAK_OPACITY = 0.6f
