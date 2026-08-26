@@ -66,7 +66,7 @@ fun waypointsToFeatureCollection(waypoints: Collection<DataPacket>): FeatureColl
     )
 
 /** Firmware stores a waypoint icon as a Unicode code point; 0 means "no icon chosen". */
-private fun iconGlyph(codePoint: Int?): String {
+internal fun iconGlyph(codePoint: Int?): String {
     val cp = codePoint ?: 0
     return if (cp == 0) "📍" else buildString { appendCodePointCompat(cp) }
 }
