@@ -147,6 +147,9 @@ internal fun NodeLayers(
         textFont = const(listOf("Noto Sans Regular")),
     )
 
+    // Under the chips, so a pulse reads as a halo around the node rather than covering it.
+    NodePulseLayer(nodes = nodes, source = nodeSource)
+
     CircleLayer(
         id = "node-chip",
         source = nodeSource,
