@@ -40,6 +40,7 @@ import org.maplibre.compose.util.MaplibreComposable
 import org.maplibre.spatialk.geojson.Position
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.feature.map.BaseMapViewModel
+import org.meshtastic.feature.map.maplibre.component.MeshMapOrnaments
 import org.meshtastic.feature.map.maplibre.geojson.ClusterMember
 import org.meshtastic.feature.map.maplibre.layers.CustomLayer
 import org.meshtastic.feature.map.maplibre.layers.CustomLayers
@@ -127,6 +128,7 @@ fun MeshMap(
             onMapLongClick(position)
             ClickResult.Consume
         },
+        overlay = MeshMapOrnaments,
     ) {
         if (basemap is Basemap.Raster) {
             RasterBasemapLayer(basemap)
