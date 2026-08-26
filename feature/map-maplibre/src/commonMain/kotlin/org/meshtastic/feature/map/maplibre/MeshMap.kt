@@ -91,6 +91,11 @@ fun MeshMap(
     followLocation: Boolean = false,
     /** How a location update should affect camera bearing. [BearingUpdate.IGNORE] follows position only. */
     bearingUpdate: BearingUpdate = BearingUpdate.IGNORE,
+    /**
+     * Whether to frame the mesh once positions arrive. False when the caller has restored a remembered camera, so the
+     * user's own view is not yanked away from them.
+     */
+    frameOnNodes: Boolean = true,
 ) {
     val nodes by viewModel.nodesWithPosition.collectAsStateWithLifecycle()
     val waypoints by viewModel.waypoints.collectAsStateWithLifecycle()
@@ -104,7 +109,7 @@ fun MeshMap(
     // Frame the mesh once, the first time positions arrive. Re-fitting on every node update would
     // yank the camera away from wherever the user had panned to.
     val hasFramed = remember { mutableStateOf(false) }
-    if (!hasFramed.value) {
+    if (frameOnNodes && !hasFramed.value) {
         nodesBoundingBox(visibleNodes)?.let { box ->
             hasFramed.value = true
             scope.launch { cameraState.jumpTo(boundingBox = box) }

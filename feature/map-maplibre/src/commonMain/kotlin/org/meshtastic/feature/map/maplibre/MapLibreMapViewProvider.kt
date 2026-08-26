@@ -134,10 +134,8 @@ class MapLibreMapViewProvider(
         var clusterMembers by remember { mutableStateOf(emptyList<ClusterMember>()) }
         var plannerOpen by remember { mutableStateOf(false) }
 
-        // Honour the deep link the navigation graph passes in; previously ignored here, so a waypoint link opened the
-        // map and then showed nothing.
+        // Deep links, both of which this provider used to drop on the floor.
         LaunchedEffect(waypointId) { waypointId?.let { infoWaypointId = it } }
-        // Same treatment for the Site Planner deep link, which this provider also used to drop on the floor.
         LaunchedEffect(sitePlannerNodeNum) { if (sitePlannerNodeNum != null) plannerOpen = true }
 
         var overlays by remember { mutableStateOf(emptyList<MapOverlay>()) }
@@ -154,6 +152,7 @@ class MapLibreMapViewProvider(
                 locationState = location.state,
                 followLocation = location.following,
                 bearingUpdate = location.bearingUpdate,
+                frameOnNodes = rememberRestoredCamera(cameraState) == false,
                 onWaypointClick = { infoWaypointId = it },
                 onClusterMembers = { clusterMembers = it },
                 onMapLongClick = waypoints.onLongPress,
