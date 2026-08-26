@@ -23,6 +23,7 @@ import org.meshtastic.feature.map.maplibre.geojson.circlePolygon
 import org.meshtastic.feature.map.maplibre.geojson.destination
 import org.meshtastic.feature.map.maplibre.geojson.nodesToFeatureCollection
 import org.meshtastic.feature.map.maplibre.geojson.precisionMeters
+import org.meshtastic.feature.map.maplibre.layers.heardJustNow
 import org.meshtastic.feature.map.maplibre.style.Basemap
 import org.meshtastic.feature.map.maplibre.style.Basemaps
 import org.meshtastic.feature.map.maplibre.style.MapOverlays
@@ -196,5 +197,29 @@ class NodeFeatureTest {
         val collection = nodesToFeatureCollection(listOf(node(7, 45.0, -122.0)), myNodeNum = 7)
         val properties = assertNotNull(collection.features.single().properties)
         assertEquals("true", properties["isSelf"].toString())
+    }
+
+    @Test
+    fun `a node heard seconds ago pulses`() {
+        val nodes = listOf(node(1, 45.0, -122.0, lastHeard = 9_998), node(2, 45.1, -122.1, lastHeard = 9_000))
+
+        val pulsing = nodes.heardJustNow(now = 10_000)
+
+        assertEquals(listOf(1), pulsing.map { it.num })
+    }
+
+    @Test
+    fun `nothing pulses when nothing has been heard`() {
+        val nodes = listOf(node(1, 45.0, -122.0, lastHeard = 1_000), node(2, 45.1, -122.1, lastHeard = 2_000))
+
+        assertTrue(nodes.heardJustNow(now = 10_000).isEmpty())
+    }
+
+    @Test
+    fun `a node whose clock runs ahead still counts as just heard`() {
+        // Device clocks drift. A lastHeard in the future must not be read as "heard a very long time ago".
+        val nodes = listOf(node(1, 45.0, -122.0, lastHeard = 10_600))
+
+        assertEquals(listOf(1), nodes.heardJustNow(now = 10_000).map { it.num })
     }
 }
