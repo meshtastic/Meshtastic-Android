@@ -17,9 +17,13 @@
 package org.meshtastic.app.ai.appfunctions
 
 import android.content.Context
+import androidx.appfunctions.AppFunctionException
 import androidx.appfunctions.AppFunctionManager
+import androidx.appfunctions.metadata.AppFunctionName
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
@@ -32,6 +36,9 @@ import org.meshtastic.core.repository.AppFunctionsPrefs
  * [AppFunctionManager].
  *
  * When the master toggle is off, all functions are disabled regardless of individual toggles.
+ *
+ * Writes are driven by a read-back of the system's own state, so a pass that lands while the functions are still being
+ * indexed (first launch) converges on a retry instead of leaving the system on its defaults forever.
  */
 class AppFunctionStateSync(
     private val context: Context,
@@ -68,25 +75,53 @@ class AppFunctionStateSync(
             .launchIn(scope)
     }
 
-    private suspend fun syncStates(states: List<Pair<String, Boolean>>) {
+    private suspend fun syncStates(desired: List<Pair<String, Boolean>>) {
         val manager = AppFunctionManager.getInstance(context) ?: return
 
-        for ((functionId, enabled) in states) {
-            val state =
-                if (enabled) {
-                    AppFunctionManager.APP_FUNCTION_STATE_ENABLED
-                } else {
-                    AppFunctionManager.APP_FUNCTION_STATE_DISABLED
+        repeat(MAX_SYNC_ATTEMPTS) { attempt ->
+            val pending = pendingWrites(desired, readStates(manager, desired.map { it.first }))
+            if (pending.isEmpty()) return
+
+            for ((functionId, enabled) in pending) {
+                val state =
+                    if (enabled) {
+                        AppFunctionManager.APP_FUNCTION_STATE_ENABLED
+                    } else {
+                        AppFunctionManager.APP_FUNCTION_STATE_DISABLED
+                    }
+                try {
+                    manager.setAppFunctionEnabled(functionId, state)
+                } catch (e: AppFunctionException) {
+                    // Usually "not indexed yet" on first launch; the read-back drives the retry.
+                    Logger.d(e) { "AppFunction $functionId not writable yet" }
                 }
-            try {
-                manager.setAppFunctionEnabled(functionId, state)
-            } catch (_: Exception) {
-                // Function may not be indexed yet (first launch)
             }
+            if (attempt < MAX_SYNC_ATTEMPTS - 1) delay(RETRY_DELAY_MS)
         }
     }
 
+    /** System state per function id, or null when it cannot be read — in which case every write is attempted. */
+    private suspend fun readStates(manager: AppFunctionManager, functionIds: List<String>): Map<String, Boolean>? =
+        try {
+            manager.getAppFunctionStates(functionIds.map { AppFunctionName(context.packageName, it) }).associate {
+                it.functionName.functionIdentifier to it.isEnabled
+            }
+        } catch (e: AppFunctionException) {
+            Logger.d(e) { "AppFunction states unreadable; writing all toggles" }
+            null
+        }
+
     companion object {
+        private const val MAX_SYNC_ATTEMPTS = 3
+        private const val RETRY_DELAY_MS = 2_000L
+
+        /** Toggles whose system state does not already match what prefs ask for. */
+        internal fun pendingWrites(
+            desired: List<Pair<String, Boolean>>,
+            actual: Map<String, Boolean>?,
+        ): List<Pair<String, Boolean>> =
+            if (actual == null) desired else desired.filter { (id, enabled) -> actual[id] != enabled }
+
         private const val CLASS_PREFIX = "org.meshtastic.app.ai.appfunctions.MeshtasticAppFunctions#"
 
         const val SEND_MESSAGE_ID = "${CLASS_PREFIX}sendMessage"
