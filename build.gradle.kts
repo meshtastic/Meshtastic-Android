@@ -42,49 +42,44 @@ plugins {
 }
 
 plugins.withId("org.meshtastic.flatpak.sources") {
-    // The generated `libs` accessor isn't resolvable in this script, but the runtime catalog API is —
-    // reading the version here (instead of a hand-maintained literal) closes the trap that already bit
-    // once: the block was pinned to 1.11.1 long after the catalog moved on, so the arm64 offline flatpak
-    // build kept resolving (and shipping) URLs for a version nothing in the project used anymore.
-    val composeMultiplatformVersion =
-        extensions.getByType<org.gradle.api.artifacts.VersionCatalogsExtension>()
-            .named("libs")
-            .findVersion("compose-multiplatform")
-            .get()
-            .requiredVersion
+    // The version catalog, reached through the API rather than the generated `libs` accessor. The
+    // accessor genuinely does not resolve in this script — it fails with a receiver-type mismatch,
+    // which is why this block used to carry copies of versions the catalog already held: it sat at
+    // compose-multiplatform 1.11.1 long after the catalog moved to 1.12.0-rc01, shipping URLs for a
+    // version nothing in the project used. The catalog itself is right here, so anything we already
+    // own is read rather than duplicated.
+    val catalog = extensions.getByType<org.gradle.api.artifacts.VersionCatalogsExtension>().named("libs")
+    val composeVersion = catalog.findVersion("compose-multiplatform").get().requiredVersion
+
+    fun catalogCoordinate(alias: String): String =
+        catalog.findLibrary(alias).get().get().let {
+            "${it.module.group}:${it.module.name}:${it.versionConstraint.requiredVersion}"
+        }
+
+    val platforms = setOf("linux-x64", "linux-arm64")
+
+    // desktopApp picks exactly one maplibre native runtime, by build-host arch, so an x86_64 generation
+    // host never resolves the arm64 blob and the arm64 offline build had no URL to fetch. These name the
+    // same catalog aliases desktopApp itself uses, so the two cannot disagree, and a target platform
+    // added below with no matching catalog entry fails here at configure time rather than eleven minutes
+    // into an offline build.
+    val maplibreRuntimes = platforms.map { catalogCoordinate("maplibre-compose-runtime-vulkan-$it") }
+
     extensions.configure<org.meshtastic.flatpak.sources.FlatpakSourcesExtension> {
         outputFile.set(layout.buildDirectory.file("flatpak-sources.json"))
         mustRunAfterTasks.set(listOf(":desktopApp:assemble", ":desktopApp:packageUberJarForCurrentOS"))
+        targetPlatforms.set(platforms)
         // Force-resolve platform-specific native artifacts not resolved on the generation host (the
         // manifest is generated on an x86_64 runner, but the offline build also needs to run on arm64).
         //
-        // Since plugin 0.2.0 each coordinate resolves TRANSITIVELY, so only direct dependencies belong
-        // here — desktop-jvm-{platform} brings org.jetbrains.skiko:skiko-awt-runtime-{platform} along
-        // by itself (its version previously had to be tracked by hand against desktop-jvm's POM).
-        targetPlatforms.set(setOf("linux-x64", "linux-arm64"))
-        //
-        // maplibre-compose's desktop renderer is the same shape of problem: desktopApp picks exactly one
-        // native runtime, by build-host arch, so an x86_64 generation host never resolves the arm64 blob
-        // and the arm64 offline build had no URL to fetch. KEEP this version in sync with
-        // `maplibre-compose` in gradle/libs.versions.toml, for the same reason the two above say so.
-        //
-        // Its arch-specific transitives need naming too: force-resolution here is non-transitive
-        // (`isTransitive = false` in FlatpakSourcesPlugin), which is also why skiko above does not ride
-        // along with desktop-jvm. Read the maplibre-compose-runtime-vulkan-linux-*.pom pair and list every
-        // dependency they classify per arch — currently the native FFI runtime and the two LWJGL modules.
-        // location-runtime-linux carries no classifier and needs no entry.
-        //
-        // The two use different classifier conventions, so only one can use the token: the FFI runtime
-        // says natives-linux-x64/natives-linux-arm64 (matches), while LWJGL says plain natives-linux for
-        // x64 (does not — the token would name an artifact that is a 404). Hence four LWJGL literals; a
-        // template with no token simply resolves to itself once per platform.
-        //
-        // maplibre-native-ffi's version is its own, independent of maplibre-compose's — take it from those
-        // same POMs on every maplibre bump rather than assuming it moved in step.
-        platformDependencies.set(setOf(
-            "org.jetbrains.compose.desktop:desktop-jvm-{platform}:$composeMultiplatformVersion",
-            "org.maplibre.compose:maplibre-compose-runtime-vulkan-{platform}:0.15.0",
-        ))
+        // Since plugin 0.2.0 each coordinate resolves transitively, so only direct dependencies belong
+        // here: desktop-jvm-{platform} brings skiko-awt-runtime-{platform}, and the maplibre runtimes
+        // bring the maplibre-native-ffi and LWJGL natives with them. Those three were spelled out here
+        // until 0.2.0, versions and classifiers copied by hand out of POMs this project does not own —
+        // which went stale silently and cost two arm64 build failures on #6901.
+        platformDependencies.set(
+            maplibreRuntimes + setOf("org.jetbrains.compose.desktop:desktop-jvm-{platform}:$composeVersion"),
+        )
     }
 }
 

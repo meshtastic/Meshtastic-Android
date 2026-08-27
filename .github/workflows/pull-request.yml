@@ -244,6 +244,16 @@ jobs:
       # release assets?) is the --refresh probe in scheduled-updates.yml.
       - name: Check Obtainium generated links are current
         run: python3 obtainium/generate-links.py --check
+      # The flatpak offline manifest is generated on x86_64 but consumed by an arm64 builder, so the
+      # root build.gradle.kts has to force-resolve every artifact the two arches resolve differently.
+      # Three of those versions are upstream's (skiko, the maplibre native FFI runtime, LWJGL) and are
+      # deliberately not catalog entries, so Renovate cannot see them and a bump elsewhere silently
+      # strands them; a miss surfaces as `Could not find <jar>` eleven minutes into the arm64 build
+      # (#6901). This reads the upstream POMs and fails in seconds instead. It lives here rather than in
+      # verify-flatpak.yml because that workflow's path filter excludes gradle/libs.versions.toml — a
+      # dependency bump, the very thing that causes this drift, would never have run it.
+      - name: Check flatpak platform dependencies match upstream POMs
+        run: python3 scripts/verify-flatpak/check-platform-deps.py
       # Flathub/AppStream needs a <release> entry for the version being shipped; a stale
       # <releases> block degrades (or fails) the Flathub listing. Fails the PR that bumps
       # VERSION_NAME_BASE until the matching entry is added.
