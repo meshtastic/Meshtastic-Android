@@ -269,10 +269,8 @@ jobs:
           config: 'crowdin.yml'
           crowdin_branch_name: 'main'
           upload_sources: true
-          upload_sources_args: '--preserve-hierarchy'
           upload_translations: false
           download_translations: true
-          download_translations_args: '--preserve-hierarchy'
           create_pull_request: false
           commit_message: 'chore(l10n): New Crowdin Translations from scheduled update'
           push_translations: false
