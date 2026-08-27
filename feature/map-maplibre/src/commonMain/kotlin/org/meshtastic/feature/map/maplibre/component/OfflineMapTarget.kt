@@ -122,9 +122,13 @@ internal fun OfflineMapsSection(target: OfflineMapTarget, onShowRegion: (Boundin
                 OfflinePackRow(
                     pack = pack,
                     onShow = { bounds -> onShowRegion(bounds) },
-                    // Off the main thread: unlike create and delete, resume is not a suspending call — it does its
-                    // work inline on whoever calls it, and from a click handler that is the main thread. Starting a
-                    // pack this way froze the UI long enough for Android to raise "isn't responding".
+                    // Off the main thread as hygiene, not as an ANR fix — an earlier version of this comment
+                    // claimed the latter and was wrong. `resume` (and `pause`, and `setTileCountLimit`) are plain
+                    // `void` where `create`/`delete` suspend, but the void ones still do no native work inline:
+                    // `resume` reduces to a `post` onto the offline runtime's owner thread, which takes a lock only
+                    // long enough to append to a queue and signal. That lock is released before the owner thread runs
+                    // anything, so all this dispatch buys is keeping the acquisition off the frame path. What starves
+                    // the main thread on this screen is the map's own per-emit rebuild, not this call.
                     onToggle = { scope.launch(ioDispatcher) { manager.resume(pack) } },
                     onDelete = { scope.launch { manager.delete(pack) } },
                 )
@@ -238,7 +242,8 @@ private fun OfflinePackRow(
  * Errors are caught rather than thrown: `create` reports a native failure by throwing, and this runs in a UI-scoped
  * coroutine, so letting it escape takes the window's event thread down with it.
  *
- * A created pack is paused until [OfflineManager.resume] is called, so this does both.
+ * Creates the pack only. A created pack is paused, and stays that way until the user presses play on its row —
+ * [OfflineManager.resume] is deliberately not called here, so a download never starts itself.
  */
 private suspend fun OfflineManager.downloadVisibleArea(target: OfflineMapTarget): Boolean {
     val styleUrl = target.styleUrl
