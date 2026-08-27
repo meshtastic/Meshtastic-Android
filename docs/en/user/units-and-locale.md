@@ -2,7 +2,7 @@
 title: Units, Measurement & Locale
 parent: User Guide
 nav_order: 16
-last_updated: 2026-08-19
+last_updated: 2026-08-27
 description: How the app formats temperature, distance, speed, and other measurements based on your device locale.
 ---
 
@@ -17,6 +17,8 @@ The Meshtastic app automatically displays temperatures, distances, speeds, and t
 Meshtastic radios always transmit data in **metric units** (meters, °C, m/s, hPa, etc.). When the app receives this data, it converts and displays values in whatever unit system your device's locale specifies.
 
 On Android, your measurement preferences are determined by your system **Language & Region** settings. On Desktop (JVM), the app uses the JVM's default `Locale`.
+
+Units follow your device's **region**, not the display language. Choosing a plain language — like **English** in the app's own Language setting or Android's per-app language — keeps the region your device is set to; only a choice that names a region of its own (like **English (Canada)**) brings that region's units with it. On Android 16+, the system-wide **Measurement system** preference overrides the region entirely.
 
 > 💡 **Tip:** You never need to toggle units inside the app. Change your system measurement preferences and every screen in Meshtastic updates automatically — node details, telemetry charts, weather, altitude, and more.
 
@@ -114,9 +116,10 @@ The app also uses **relative time** where it makes sense — for example, "5 min
 On Android, your measurement system (metric vs imperial) is tied to your region setting:
 
 1. Open **Android Settings → System → Language & Region**
-2. Change your **Region** or **Measurement units** preference
-3. On Android 14+, temperature can be overridden on its own under **Regional preferences → Temperature**
-4. Return to Meshtastic — values update immediately
+2. Change your **Region**
+3. On Android 16+, **Measurement system** overrides the region for every measurement
+4. On Android 14+, temperature can be overridden on its own under **Regional preferences → Temperature**
+5. Return to Meshtastic — values update immediately
 
 > 💡 **Tip:** All measurement formatting is handled centrally and respects your platform's locale, so units stay consistent everywhere in the app.
 

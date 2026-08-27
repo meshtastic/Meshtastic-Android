@@ -55,3 +55,47 @@ expect fun currentRegionCode(): String
  * specified). Use this to construct locale-qualified file resource paths like "files-$qualifier/docs/...".
  */
 expect fun currentLocaleQualifier(): String
+
+/**
+ * The Unicode locale extension key carrying the user's measurement-system override.
+ *
+ * Android 16 exposes it as Settings > System > Language & region > Measurement system, which appends `-u-ms-…` to the
+ * locale.
+ */
+internal const val MEASUREMENT_SYSTEM_EXTENSION = "ms"
+
+/**
+ * Maps the `ms` Unicode extension to a [MeasurementSystem], or null when the user set no override.
+ *
+ * Read this before any region lookup. ICU parses the extension into the locale but resolves the measurement system from
+ * region data alone, so the override is silently dropped unless it is honored here — the user turns their phone to
+ * metric and the app keeps printing feet.
+ */
+internal fun measurementSystemOverride(extensionValue: String?): MeasurementSystem? = when (extensionValue) {
+    "metric" -> MeasurementSystem.METRIC
+
+    "ussystem",
+    "uksystem",
+    -> MeasurementSystem.IMPERIAL
+
+    else -> null
+}
+
+/**
+ * Maps a region code to its measurement system, for platforms with no ICU measurement data.
+ *
+ * Metric is the fallback: it is what all but a handful of regions use, and an unrecognized or absent region must never
+ * silently become imperial.
+ */
+internal fun measurementSystemForRegion(region: String): MeasurementSystem = when (region.uppercase()) {
+    // Liberia and Myanmar sit alongside the US in CLDR's measurementData; the UK is its own
+    // system there, but it measures road distance in miles, so it groups with imperial for
+    // distance. Temperature is decoupled — see TemperatureUnit.
+    "US",
+    "LR",
+    "MM",
+    "GB",
+    -> MeasurementSystem.IMPERIAL
+
+    else -> MeasurementSystem.METRIC
+}

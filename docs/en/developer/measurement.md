@@ -2,7 +2,7 @@
 title: Measurement & Formatting
 parent: Developer Guide
 nav_order: 9
-last_updated: 2026-08-19
+last_updated: 2026-08-27
 aliases:
   - measurement
   - metric-formatter
@@ -99,6 +99,8 @@ Three measurements convert away from metric for display, each gated by a boolean
 | `rainfall` | `isImperial` | `getSystemMeasurementSystem()` | mm ÷ 25.4 → in |
 
 The two source functions (in `core/common/.../util/MeasurementSystem.kt`) are deliberately separate: some locales mix systems (the UK uses miles for distance but Celsius for temperature), so temperature must never be derived from the distance unit. On Android, `getSystemTemperatureUnit()` delegates to `androidx.core.text.util.LocalePreferences`, which resolves CLDR locale data and honors the Android 14+ Regional preferences temperature override.
+
+Both functions resolve the locale the same way, in order: the `ms` Unicode extension (the Android 16+ Measurement system preference) wins outright; a locale with no region — the in-app language picker offers bare tags like `en` — takes its region from the system configuration rather than letting ICU guess one from the language; and anything still unclassified falls back to metric, never imperial. The Android and Desktop implementations share the region table and the override reader in `commonMain`, so the two clients cannot disagree about the same locale.
 
 Everything else (voltage, current, pressure, SNR, RSSI, humidity, percent) displays in its native metric units. The user-facing [Units & Locale](../user/units-and-locale) page explains what end users see.
 
