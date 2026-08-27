@@ -1,18 +1,36 @@
 <!--
 SYNC IMPACT REPORT
 ==================
-Version change: 1.3.2 → 1.3.3
+Version change: 1.3.3 → 1.3.4
 Modified principles:
-  - IV. Privacy First: "core/proto read-only submodule" → "org.meshtastic:protobufs Maven dependency" (protos are no longer a submodule)
-Modified sections:
-  - Architecture Constraints: Data Protocol de-submoduled; Language & Toolchain Kotlin 2.3+ → 2.4+
+  - I. Kotlin Multiplatform Core: "androidMain/desktopMain" → "androidMain/jvmMain" (no desktopMain source set exists)
+  - VI. Documentation Freshness: rewrote the governance rules to describe the tooling that
+    exists. The docs checks are three Node scripts run on demand, not CI gates: there is no
+    docs-governance workflow, no blocking staleness gate and no skip-docs-check label, and
+    no workflow references check-doc-coverage.js, validate-doc-links.js or
+    check-doc-freshness.js. Doc paths are docs/en/user/ and docs/en/developer/, not
+    docs/user/ and docs/developer/. sync-android-docs.js discovers slugs from the source
+    tree (discoverSlugs), so the KNOWN_*_SLUGS sets are no longer hand-maintained.
+Modified sections: None.
 Added sections: None.
 Removed sections: None.
 Templates requiring updates:
-  - .skills/speckit/SKILL.md (constitution version + principle count 6 → 7; added VI. Documentation Freshness)
-  - .specify/templates/{plan,checklist}-template.md (Constitution Check: added Documentation Freshness; renumbered Verify Before Push → VII)
-  - .specify/templates/{plan,spec,tasks,checklist}-template.md (proto submodule → Maven dependency)
-Follow-up TODOs: None.
+  - .skills/speckit/SKILL.md (version 1.3.3 → 1.3.4; principle VI no longer "blocking CI gate")
+  - .specify/templates/{plan,checklist}-template.md (drop the skip-docs-check label from the
+    Principle VI gate; it does not exist)
+Root cause (recorded because this was not aspirational text):
+  docs-governance.yml existed — 419 lines, built by the app-docs-markdown spec (tasks T206,
+  T250, T262, T280, still marked [X] complete in
+  specs/20260507-161858-app-docs-markdown/tasks.md). It was deleted on 2026-06-28 by #6000
+  "chore(ci): prune dead workflows", six days after this constitution was last amended, in the
+  same commit that removed dependency-submission.yml, models_issue_triage.yml,
+  models_pr_triage.yml and moderate.yml — exactly the workflows
+  .specify/memory/agent-governance.md was still listing. One CI prune, no governance update,
+  two documents left asserting a gate that had stopped running.
+Follow-up TODOs:
+  - Principle VI's checks are advisory by construction. Restoring the gate means restoring a
+    workflow that was deliberately pruned as dead, so that is a decision to take rather than a
+    repair to make; if it is taken, re-amend this principle to match.
 -->
 
 # Meshtastic Android (KMP) Constitution
@@ -27,8 +45,8 @@ MUST be used in place of JVM/Android-specific APIs:
 - MUST use Okio (not `java.io`), Ktor (not `java.net`/OkHttp in common), Mutex/atomicfu
   (not `java.util.concurrent`), Room KMP, DataStore KMP, and Koin 4.2+.
 - MUST NOT import `java.*` or `android.*` in any `commonMain` module.
-- Platform-specific implementations belong in `androidMain`/`desktopMain` actual
-  declarations only.
+- Platform-specific implementations belong in `androidMain`/`jvmMain` actual
+  declarations only (there is no `desktopMain` source set; Desktop is the `jvm` target).
 <!-- Rationale: Multi-platform parity (Android, Desktop, iOS). Framework bleed in commonMain breaks compilability on non-Android targets. -->
 
 ### II. Zero Lint Tolerance
@@ -99,20 +117,30 @@ Governance rules:
 
 - Every doc page MUST include a `last_updated` frontmatter field (YYYY-MM-DD).
   Update this field whenever page content changes.
-- PRs that modify user-facing UI source files MUST update the corresponding doc page(s)
-  or apply the `skip-docs-check` label with justification. The docs staleness check is a
-  **blocking** CI gate.
-- Internal cross-references between doc pages and image paths MUST be validated; broken
-  links fail the `docs-governance` workflow.
-- Every user-facing feature module MUST have corresponding documentation in `docs/user/`
-  or `docs/developer/`. Coverage is checked by `scripts/check-doc-coverage.js`.
-- Pages older than 180 days without updates trigger an advisory freshness warning.
-- New doc pages MUST be registered in `DocBundleLoader.kt` (in-app index), and added to
-  the `KNOWN_*_SLUGS` sets in `sync-android-docs.js` (Docusaurus link resolution).
-  Jekyll picks up new pages automatically via `_config.yml` scope-based defaults.
+- A PR that changes user-facing behaviour MUST update the corresponding page(s) under
+  `docs/en/user/` or `docs/en/developer/`, or state in the PR description why no page
+  changed.
+- Every user-facing feature module MUST have a corresponding page under `docs/en/user/`
+  or `docs/en/developer/`.
+- New doc pages MUST be registered in `DocBundleLoader.kt` (the in-app index) with a
+  `navOrder`. Jekyll picks new pages up automatically via `_config.yml` scope-based
+  defaults, and `sync-android-docs.js` discovers slugs from the source tree — neither
+  needs a manual registration step.
 - Image references MUST use root-relative paths (`/assets/screenshots/filename.png`) so
   they resolve correctly in both Jekyll and the in-app renderer. The sync script rewrites
   these to Docusaurus paths automatically.
+- English pages are the only ones written by hand. `docs/<locale>/user/` is downloaded
+  from Crowdin (`crowdin.yml`) — never hand-edit a locale page; deleting an English page
+  means deleting its locale copies in the same commit.
+
+Verification tooling (run on demand; **none of these is wired into CI** — an inaccurate
+page will not fail a build, which is why the rules above are on the author):
+
+```bash
+node scripts/check-doc-coverage.js    # every user-facing feature module has a page
+node scripts/validate-doc-links.js    # internal cross-references and image paths resolve
+node scripts/check-doc-freshness.js   # advisory: pages >180 days old, or missing last_updated
+```
 <!-- Rationale: Documentation drift misleads users and increases support burden. Three distinct consumers means changes must be verified across all delivery channels. -->
 
 ### VII. Verify Before Push
@@ -194,4 +222,4 @@ summary derived from this constitution. The files `.github/copilot-instructions.
 Constitution Check confirming all seven principles were evaluated. Complexity violations
 require explicit justification in the Complexity Tracking table of the plan document.
 
-**Version**: 1.3.3 | **Ratified**: 2026-05-07 | **Last Amended**: 2026-06-22
+**Version**: 1.3.4 | **Ratified**: 2026-05-07 | **Last Amended**: 2026-08-27
