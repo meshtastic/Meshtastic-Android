@@ -39,7 +39,7 @@ plugins {
     // 0.1.7 fixed the Isolated Projects incompatibility (shares state via a BuildService instead of
     // gradle.extensions) that previously required gating this behind an opt-in property.
     // 0.2.0 resolves platformDependencies transitively — see the collapsed list in build.gradle.kts.
-    id("org.meshtastic.flatpak.sources.settings") version "0.2.0"
+    id("org.meshtastic.flatpak.sources.settings") version "0.2.1"
 }
 
 @Suppress("UnstableApiUsage")
