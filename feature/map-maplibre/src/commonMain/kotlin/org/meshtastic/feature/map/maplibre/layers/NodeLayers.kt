@@ -21,6 +21,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.int
+import kotlinx.serialization.json.jsonPrimitive
 import org.maplibre.compose.expressions.dsl.asNumber
 import org.maplibre.compose.expressions.dsl.asString
 import org.maplibre.compose.expressions.dsl.const
@@ -140,6 +142,25 @@ internal fun NodeLayers(
     // Under the chips, so a pulse reads as a halo around the node rather than covering it.
     NodePulseLayer(nodes = nodes, source = nodeSource)
 
+    // Under the chips, and normally invisible behind them: a chip is 64x28dp and covers this entirely. It exists for
+    // the node whose chip image did not fit under NodeChipLayer's ceiling — without it such a node resolves to a
+    // transparent sprite and is both unseeable and untappable, which is worse than the plain dot chips replaced.
+    CircleLayer(
+        id = "node-dot",
+        source = nodeSource,
+        filter = !feature.has("point_count"),
+        color = feature[NodeFeatureKeys.BACKGROUND].convertToColor(const(Color.Gray)),
+        radius = const(NODE_DOT_RADIUS.dp),
+        strokeColor = const(Color.White),
+        strokeWidth = const(2.dp),
+        onClick = { features ->
+            features.firstOrNull()?.properties?.get(NodeFeatureKeys.NODE_NUM)?.let { nodeNum ->
+                onNodeClick(nodeNum.jsonPrimitive.int)
+                ClickResult.Consume
+            } ?: ClickResult.Pass
+        },
+    )
+
     NodeChipLayer(
         id = "node-chip",
         source = nodeSource,
@@ -148,6 +169,9 @@ internal fun NodeLayers(
         chipFilter = !feature.has("point_count"),
     )
 }
+
+/** Small enough that a chip drawn over it hides it completely. */
+private const val NODE_DOT_RADIUS = 12
 
 private const val PRECISION_FILL_OPACITY = 0.15f
 private const val CLUSTER_OPACITY = 0.9f

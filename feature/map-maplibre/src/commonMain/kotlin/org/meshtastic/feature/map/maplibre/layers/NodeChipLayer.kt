@@ -271,6 +271,7 @@ private const val GLYPH_DP = 16
  * A ceiling on how many chip images one layer will hold.
  *
  * Each distinct chip is a bitmap uploaded to the style, so this bounds both the memory and the size of the `match`
- * expression. Far above any real mesh in view; it exists so a pathological node list degrades instead of stalling.
+ * expression. Far above any real mesh in view; it exists so a pathological node list degrades instead of stalling — and
+ * what it degrades to is the plain coloured dot `NodeLayers` draws underneath, which stays visible and tappable.
  */
 private const val MAX_CHIP_IMAGES = 250

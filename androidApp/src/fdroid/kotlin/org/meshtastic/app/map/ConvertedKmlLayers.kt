@@ -39,8 +39,9 @@ private const val CONVERTED_DIR = "kml-geojson"
  * in the cache and handed over as that file's URI — MapLibre has no KML source, and until now these were filtered out
  * entirely: the import appeared in the layers sheet, could be toggled on, and drew nothing at all.
  *
- * Conversion is keyed by layer id *and* refresh token, so re-importing or refreshing a layer reconverts rather than
- * serving a stale file. The result is cached in memory for the session and on disk beyond it.
+ * Conversion is keyed by layer id *and* refresh token, so a refresh reconverts and a visibility toggle does not. The
+ * result is cached in memory for the session, and the file it writes is reused across sessions — an existing file for a
+ * given id-and-token cannot be stale, because a refresh changes the token and so changes the filename.
  */
 @Composable
 internal fun rememberRenderableLayers(layers: List<MapLayerItem>): List<CustomLayer> {
@@ -79,6 +80,11 @@ private fun MapLayerItem.conversionKey(): String = "$id@$refreshToken"
 private suspend fun convertKmlLayer(context: Context, layer: MapLayerItem): String? = withContext(Dispatchers.IO) {
     val source = layer.uri ?: return@withContext null
     runCatching {
+        val target =
+            File(File(context.cacheDir, CONVERTED_DIR).apply { mkdirs() }, "${layer.conversionKey()}.geojson")
+        // A file already here was converted from this same layer at this same token, so it is still good.
+        if (target.length() > 0L) return@runCatching Uri.fromFile(target).toString()
+
         val geoJson =
             context.contentResolver.openInputStream(source)?.use { stream ->
                 KmlToGeoJson.convert(BufferedInputStream(stream))
@@ -87,9 +93,12 @@ private suspend fun convertKmlLayer(context: Context, layer: MapLayerItem): Stri
             Logger.withTag("KmlLayers").w { "Nothing mappable in an imported KML layer" }
             return@runCatching null
         }
-        val target =
-            File(File(context.cacheDir, CONVERTED_DIR).apply { mkdirs() }, "${layer.conversionKey()}.geojson")
-        target.writeText(geoJson)
+        // Written beside the target and moved into place, so a conversion cut short by leaving the screen
+        // cannot
+        // leave a half-file that the check above would then trust.
+        val partial = File(target.parentFile, "${target.name}.part")
+        partial.writeText(geoJson)
+        partial.renameTo(target)
         Uri.fromFile(target).toString()
     }
         .onFailure { Logger.withTag("KmlLayers").w(it) { "Could not convert an imported KML layer" } }
