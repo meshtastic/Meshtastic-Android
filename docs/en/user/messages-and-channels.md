@@ -55,6 +55,28 @@ Direct messages (DMs) are point-to-point encrypted communications between two sp
 2. Select a node from your contacts list or tap a node in the node list.
 3. Type your message and tap **Send**.
 
+### Managing the Conversation List
+
+The **Messages** tab lists your conversations. Each row carries what you need to triage it at a
+glance, and the list itself is directly actionable:
+
+- **Unsent drafts survive.** Type into a conversation and leave without sending, and the text is
+  still there when you come back. The row shows it as `Draft: …` in place of the last message —
+  an unsent draft is the thing the row is waiting on *you* for.
+- **Unread badge.** A count sits on the row until you open the conversation.
+- **Swipe right to mute** (swipe again to unmute) and **swipe left to delete**. Deleting asks
+  first; muting shows a snackbar with **Undo**.
+- **Long-press to select** one or more conversations, then use the action bar to **Pin**,
+  **Mark unread**, mute or delete them together. Pinned conversations carry a pin marker and stay
+  at the top of the list.
+
+### Conversation Bubbles
+
+On Android 11 and later, a message notification can be opened as a floating **bubble** that
+stays on top of whatever else you are doing. Tap the bubble icon on the notification to promote
+a conversation; Android remembers the choice per conversation, and the system Bubbles settings
+control whether they are offered at all.
+
 ### Message States
 
 A status label appears under **your own** outgoing messages only (incoming messages from others show no status label):
@@ -146,15 +168,36 @@ Type `@` while composing to mention a node — a picker suggests matching contac
 ### Reactions
 
 React to messages with emoji:
-- **Long-press** a message to open the actions menu
-- Tap **Add Reaction** to choose an emoji
+- **Double-tap** a message — or long-press it — to raise a quick reaction bar above the bubble
+- Tap an emoji in the bar to send it; tap **more** to open the full picker, or anywhere outside
+  the bar to dismiss it without sending
 - Reactions appear below the message bubble
 - Multiple users can react to the same message
 - React to your own messages or others' messages
 
+> ⚠️ **Note:** Opening the bar sends nothing. A reaction is a real mesh packet, so it only goes
+> out when you pick an emoji.
+
 ![Emoji reaction badges displayed beneath a message](../../assets/screenshots/messages_reaction.png)
 
 > 💡 **Tip:** Reactions are lightweight — they use minimal mesh bandwidth compared to full text messages.
+
+### Replying
+
+**Swipe a message to the right** to reply to it — the composer opens with that message quoted.
+Swiping past the reply threshold arms the action; releasing before it simply springs back.
+Reply is also in the long-press actions menu.
+
+### Day Separators
+
+Messages are grouped by day. The separator above the first message of each day reads **Today**
+or **Yesterday** for the two most recent days, and the date itself for older ones.
+
+### Jump to Latest
+
+Scrolling back through a conversation raises a jump-to-latest control. When messages arrive
+while you are scrolled up, it names who they are from — a single sender by name, or the first
+sender plus a count when several people have written.
 
 ### Message Actions
 

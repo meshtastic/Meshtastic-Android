@@ -2,7 +2,7 @@
 title: Transport
 parent: Developer Guide
 nav_order: 5
-last_updated: 2026-07-07
+last_updated: 2026-08-27
 aliases:
   - ble
   - serial
@@ -72,12 +72,23 @@ The `RadioTransportFactory` interface abstracts transport creation:
 ```kotlin
 interface RadioTransportFactory {
     val supportedDeviceTypes: List<DeviceType>
+
+    /** Whether the virtual demo transports (`m` mock / `r` replay) may be offered right now. */
+    val mockTransportEnabled: StateFlow<Boolean>
+
+    /** Whether this build ships a packet capture to replay, rather than degrading to plain mock. */
+    val isReplayTransportAvailable: Boolean
+
     fun createTransport(address: String, service: RadioInterfaceService): RadioTransport
-    fun isMockTransport(): Boolean
     fun isAddressValid(address: String?): Boolean
     fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String
 }
 ```
+
+`mockTransportEnabled` is a flow, not a one-shot check: the Android Demo Mode gesture (five taps
+on the Settings app-version row) unlocks the demo transports mid-session, and the device list has
+to notice. Every consumer must read that one flow — the visibility path and the `isAddressValid`
+admission path have to agree, or the demo entry appears and then refuses to connect.
 
 Platform-specific implementations:
 - **Android:** Supports BLE + USB + TCP

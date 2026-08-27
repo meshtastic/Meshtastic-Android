@@ -2,7 +2,7 @@
 title: Testing
 parent: Developer Guide
 nav_order: 7
-last_updated: 2026-06-11
+last_updated: 2026-08-27
 aliases:
   - tests
   - unit-tests
@@ -81,7 +81,7 @@ The Macrobenchmark generator (`BaselineProfileGenerator`) and the before/after b
 ./gradlew :androidApp:benchmarkGoogleReleaseBaselineProfile  # Quantify the cold-start win
 ```
 
-The generated profile is merged into `androidApp/src/google/generated/baselineProfiles/` and packaged into release builds via `androidx.profileinstaller`.
+The generated profile is merged into `androidApp/src/googleRelease/generated/baselineProfiles/` and packaged into release builds via `androidx.profileinstaller`.
 
 > ⚠️ **Warning:** The journey currently covers cold start only (launch → first frame), because CI has no paired radio. Post-connection screens (node list, map, message thread) are not yet AOT-compiled; extend the journey once a fake transport or connected device is wired into the harness.
 
@@ -137,7 +137,7 @@ Tests run automatically on:
 - Push to `main`
 - Pre-release validation
 
-CI runs on GitHub-hosted Ubuntu 24.04 runners (most jobs use the `ubuntu-24.04-arm` ARM runners, a few use `ubuntu-24.04`) with JDK 25 and Gradle caching.
+Every job in `reusable-check.yml` runs on `ubuntu-24.04` with JDK 25 and Gradle caching; only the desktop and Flatpak-source jobs use a matrix. The ARM (`ubuntu-24.04-arm`) and container-backed `ubuntu-slim` runners carry the lightweight utility workflows instead — see `.skills/testing-ci/SKILL.md` for the four-tier rule.
 
 ---
 

@@ -2,7 +2,7 @@
 title: Settings — Modules & Admin
 parent: User Guide
 nav_order: 8
-last_updated: 2026-07-08
+last_updated: 2026-08-27
 description: Configure optional feature modules (MQTT, telemetry, canned messages, TAK, and more) and perform device administration.
 aliases:
   - modules
@@ -198,6 +198,25 @@ People counter using WiFi and BLE probe requests. Counts nearby devices by passi
 
 > 💡 **Tip:** Paxcounter is useful for estimating foot traffic at trailheads, event venues, or other locations. Counts are approximate — one person may carry multiple devices.
 
+### Status Message Module
+
+Publishes a short free-text status line for your node, which other nodes can display alongside it.
+
+| Setting | Description |
+|---------|-------------|
+| The actual status string | Up to 80 characters. The **✕** in the field clears it. |
+
+Saving takes effect immediately — this is one of the few module settings that never asks the
+node to reboot.
+
+> ℹ️ **Note:** The screen only appears for firmware that reports support for the status-message
+> module. If you do not see it in the module list, your node's firmware does not have it.
+
+### Mesh Beacon Module
+
+Broadcasts an invitation to your mesh, and receives invitations from others. See
+[Discovery](discovery) for the full walkthrough.
+
 ### TAK Module
 
 Team Awareness Kit integration for interoperability with ATAK and WinTAK. See [TAK Integration](tak) for detailed setup and usage.
@@ -230,6 +249,21 @@ Remotely reboot a connected or administered node.
 ### Debug Panel
 
 Opens the **Packets** and **App logs** tabs for viewing, filtering, and exporting diagnostic output. See [Debug Logs](debug-logs) for the full walkthrough.
+
+### About
+
+**Settings → About** carries the app's own identity rather than the radio's:
+
+- **What is Meshtastic?** — a short description of the project.
+- **Apps** — a link to the GitHub repository, the running app version, and
+  **Acknowledgements** (below).
+- **Project information** — links to the website and to this documentation.
+- **Need Hardware?** — a rotating carousel of popular devices, linking out to where to buy one.
+
+### Acknowledgements
+
+Reached from **About**, this lists every open-source library the app ships, with its license,
+generated at build time by AboutLibraries. It was previously called the license screen.
 
 ### Troubleshooting Remote Admin
 
