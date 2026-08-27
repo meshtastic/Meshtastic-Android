@@ -146,6 +146,7 @@
     <string name="battery_ina_2xx_i2c_address">I2C-адрес INA_2XX батареи</string>
     <string name="ble_devices">Устройства Bluetooth</string>
     <string name="ble_rssi_threshold_defaults_to_80">BLE RSSI порог (по умолчанию -80)</string>
+    <string name="ble_scan_needs_location_services">Для сканирования через Bluetooth на этой версии Android тоже нужно включить определение местоположения. Твоё местоположение не используется.</string>
     <string name="blue">Синий</string>
     <!-- BLUETOOTH -->
     <string name="bluetooth">Bluetooth</string>
@@ -158,6 +159,10 @@
     <string name="bluetooth_feature_discovery">Обнаружение</string>
     <string name="bluetooth_feature_discovery_description">Найдите и определите устройства Meshtastic рядом с вами.</string>
     <string name="bluetooth_permission">Bluetooth</string>
+    <string name="bluetooth_permission_blocked_notice">Доступ к ближайшим устройствам отключен, и Android больше не будет спрашивать. Включи его в настройках приложения, чтобы подключаться через Bluetooth, или используй Wi-Fi или USB.</string>
+    <string name="bluetooth_permission_blocked_notice_pre31">Разрешение на определение местоположения выключено, и Android больше не будет спрашивать. Включи его в настройках приложения, чтобы сканировать устройства Bluetooth, или подключись через Wi-Fi или USB.</string>
+    <string name="bluetooth_permission_blocked_rationale">Доступ к ближайшим устройствам выключен, и Android больше не будет спрашивать. Включи его в настройках приложения чтобы сканировать и подключаться по Bluetooth.</string>
+    <string name="bluetooth_permission_blocked_rationale_pre31">Разрешение на определение местоположения выключено, и Android больше не будет спрашивать. Включи его в настройках приложения, чтобы сканировать и подключаться через Bluetooth.</string>
     <string name="bluetooth_scan_location_services_disabled">Службы определения местоположения отключены. Включите их, чтобы искать ближайшие устройства.</string>
     <string name="bluetooth_scan_missing_permission">Сканирование Bluetooth требует разрешения. Дайте разрешение на поиск устройств поблизости (или местоположения).</string>
     <string name="bluetooth_scan_start_failed">Невозможно запустить сканирование Bluetooth. Попробуй снова или включи/выключи Bluetooth, если проблема не исчезнет.</string>
@@ -1343,6 +1348,7 @@
     <string name="none">Нет (выключить)</string>
     <string name="none_quality">Отсутствует</string>
     <string name="not_connected">Нет соединения</string>
+    <string name="not_now">Не сейчас</string>
     <string name="note">Примечание</string>
     <string name="notes">Заметки</string>
     <string name="notification_permissions_description">Meshtastic использует уведомления, чтобы держать вас в курсе новых сообщений и других важных событий. Вы можете обновить разрешения уведомлений в любое время из настроек.</string>
@@ -1417,7 +1423,12 @@
     <string name="periodic_position_broadcast">Периодическое вещание позиции</string>
     <!-- PERMISSION -->
     <string name="permission_missing_31">Meshtastic требует разрешение на поиск и подключение к устройствам через Bluetooth. Вы можете отключить его, когда он не используется.</string>
+    <string name="permission_nearby_devices_summary">Найти и подключиться к ноде через Bluetooth</string>
+    <string name="permission_notifications_summary">Оповещать о сообщениях, новых нодах и низком заряде батареи</string>
     <string name="permission_state_allowed">Разрешено</string>
+    <string name="permission_state_blocked">Заблокировано — нажми, чтобы открыть системные настройки</string>
+    <string name="permission_state_denied">Отклонено — нажмите для разрешения</string>
+    <string name="permission_state_not_applicable">Не требуется для этой версии Android</string>
     <string name="permission_state_not_asked">Ещё не спрашивали</string>
     <!-- PERMISSIONS -->
     <string name="permissions">Разрешения</string>
