@@ -1560,7 +1560,7 @@
     "hwModelSlug": "THINKNODE_M9",
     "platformioTarget": "thinknode_m9",
     "architecture": "esp32-s3",
-    "activelySupported": false,
+    "activelySupported": true,
     "supportLevel": 1,
     "partitionScheme": "16MB",
     "displayName": "Elecrow ThinkNode M9",
@@ -1633,6 +1633,56 @@
       "meshnology_w10.svg"
     ],
     "requiresDfu": true,
+    "partitionScheme": "16MB"
+  },
+  {
+    "hwModel": 141,
+    "hwModelSlug": "HELTEC_RC32",
+    "platformioTarget": "heltec-rc32",
+    "architecture": "esp32-s3",
+    "activelySupported": false,
+    "supportLevel": 1,
+    "displayName": "Heltec RC32",
+    "tags": [
+      "Heltec"
+    ],
+    "images": [
+      "heltec_rc32.svg"
+    ],
+    "requiresDfu": true,
+    "partitionScheme": "16MB"
+  },
+  {
+    "hwModel": 142,
+    "hwModelSlug": "HELTEC_RC52",
+    "platformioTarget": "heltec-rc52",
+    "architecture": "nrf52840",
+    "activelySupported": false,
+    "supportLevel": 1,
+    "displayName": "Heltec RC52",
+    "tags": [
+      "Heltec"
+    ],
+    "images": [
+      "heltec-rc52.svg"
+    ],
+    "requiresDfu": true
+  },
+  {
+    "hwModel": 143,
+    "hwModelSlug": "HELTEC_RCC6",
+    "platformioTarget": "heltec-rcc6",
+    "architecture": "esp32-c6",
+    "activelySupported": false,
+    "supportLevel": 1,
+    "displayName": "Heltec RCC6",
+    "tags": [
+      "Heltec"
+    ],
+    "images": [
+      "heltec_rcc6.svg"
+    ],
+    "requiresDfu": false,
     "partitionScheme": "16MB"
   },
   {

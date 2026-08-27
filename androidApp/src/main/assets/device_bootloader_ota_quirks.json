@@ -288,6 +288,14 @@
       "softDevice": "6.1.1"
     },
     {
+      "hwModel": 142,
+      "hwModelSlug": "HELTEC_RC52",
+      "platformioTargets": [
+        "heltec-rc52"
+      ],
+      "softDevice": "6.1.1"
+    },
+    {
       "hwModel": 144,
       "hwModelSlug": "SEEED_WIO_TRACKER_L1_PRO_1W",
       "platformioTargets": [
