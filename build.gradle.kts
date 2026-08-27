@@ -68,11 +68,19 @@ plugins.withId("org.meshtastic.flatpak.sources") {
         // and the arm64 offline build had no URL to fetch. KEEP this version in sync with
         // `maplibre-compose` in gradle/libs.versions.toml, for the same reason the two above say so.
         //
-        // Its LWJGL natives need naming too, and cannot use {platform}: force-resolution here is
-        // non-transitive (see FlatpakSourcesPlugin), and LWJGL classifies x64 as plain `natives-linux`
-        // rather than `natives-linux-x64`, so the token would expand to an artifact that does not exist.
-        // Two literals instead; a template with no token resolves to itself once per platform. Track
-        // whatever the maplibre-compose-runtime-vulkan-linux-* POMs declare if maplibre is bumped.
+        // Its arch-specific transitives need naming too: force-resolution here is non-transitive
+        // (`isTransitive = false` in FlatpakSourcesPlugin), which is also why skiko above does not ride
+        // along with desktop-jvm. Read the maplibre-compose-runtime-vulkan-linux-*.pom pair and list every
+        // dependency they classify per arch — currently the native FFI runtime and the two LWJGL modules.
+        // location-runtime-linux carries no classifier and needs no entry.
+        //
+        // The two use different classifier conventions, so only one can use the token: the FFI runtime
+        // says natives-linux-x64/natives-linux-arm64 (matches), while LWJGL says plain natives-linux for
+        // x64 (does not — the token would name an artifact that is a 404). Hence four LWJGL literals; a
+        // template with no token simply resolves to itself once per platform.
+        //
+        // maplibre-native-ffi's version is its own, independent of maplibre-compose's — take it from those
+        // same POMs on every maplibre bump rather than assuming it moved in step.
         platformDependencies.set(setOf(
             "org.jetbrains.compose.desktop:desktop-jvm-{platform}:$composeMultiplatformVersion",
             "org.maplibre.compose:maplibre-compose-runtime-vulkan-{platform}:0.15.0",
