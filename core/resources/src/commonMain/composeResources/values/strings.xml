@@ -240,6 +240,7 @@
     <string name="chirpy_thinking">Chirpy is routing through the mesh… 📡</string>
     <string name="choose_contrast">Contrast level</string>
     <string name="choose_theme">Choose theme</string>
+    <string name="choose_units">Choose units</string>
     <!-- CLEAN -->
     <string name="clean_node_database_confirmation">This will remove %1$d nodes from your database. This action cannot be undone.</string>
     <string name="clean_node_database_description">Caution: This removes nodes from in-app and on-device databases.\nSelections are additive.</string>
@@ -1954,6 +1955,10 @@
     <string name="type_a_message">Type a message</string>
     <string name="udp_enabled">UDP broadcasting</string>
     <string name="undo">Undo</string>
+    <string name="units">Units</string>
+    <string name="units_follow_system">System default</string>
+    <string name="units_imperial">Imperial</string>
+    <string name="units_metric">Metric</string>
     <!-- UNKNOWN -->
     <string name="unknown">Unknown</string>
     <string name="unknown_age">Unknown Age</string>

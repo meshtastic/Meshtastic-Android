@@ -23,14 +23,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.common.util.getSystemMeasurementSystem
+import org.koin.compose.koinInject
+import org.meshtastic.core.common.util.LocaleUnitsProvider
+import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.position_enabled
@@ -56,7 +59,13 @@ fun PositionPrecisionPreference(
     onValueChanged: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val unit = remember { getSystemMeasurementSystem() }
+    val unit =
+        if (LocalInspectionMode.current) {
+            // Previews and screenshot tests render with no Koin application; the value itself is arbitrary there.
+            MeasurementSystem.METRIC
+        } else {
+            koinInject<LocaleUnitsProvider>().measurementSystem.collectAsStateWithLifecycle().value
+        }
 
     Column(modifier = modifier) {
         SwitchPreference(

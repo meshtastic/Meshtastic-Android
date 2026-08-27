@@ -16,12 +16,14 @@
  */
 package org.meshtastic.core.common.util
 
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.stateIn
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.di.ApplicationCoroutineScope
 
@@ -33,16 +35,22 @@ import org.meshtastic.core.common.di.ApplicationCoroutineScope
  * forgot the priming step, or was never given the notifier at all, silently kept stale units. Owning the read in one
  * place also makes the value injectable, so a test can flip metric to imperial instead of asserting on plumbing.
  *
- * Both flows emit the current value on collection and again on every change.
+ * The user's in-app units choice ([UnitsOverride]) is folded in here, so every consumer honors it by construction — a
+ * call site that read the OS directly would follow the locale but ignore the setting, splitting the app the way mixed
+ * unit sources always have.
+ *
+ * Both values are [StateFlow]s: they emit the current value on collection, again on every change, and expose a
+ * synchronous `.value` for the few call sites that format outside a collector.
  */
 interface LocaleUnitsProvider {
-    val measurementSystem: Flow<MeasurementSystem>
-    val temperatureUnit: Flow<TemperatureUnit>
+    val measurementSystem: StateFlow<MeasurementSystem>
+    val temperatureUnit: StateFlow<TemperatureUnit>
 }
 
 @Single
 class LocaleUnitsProviderImpl(
     localeChangeNotifier: LocaleChangeNotifier,
+    overrideSource: UnitsOverrideSource,
     applicationCoroutineScope: ApplicationCoroutineScope,
 ) : LocaleUnitsProvider {
 
@@ -57,9 +65,54 @@ class LocaleUnitsProviderImpl(
             replay = 0,
         )
 
-    override val measurementSystem: Flow<MeasurementSystem> =
-        reads.onStart { emit(Unit) }.map { getSystemMeasurementSystem() }.distinctUntilChanged()
+    override val measurementSystem: StateFlow<MeasurementSystem> =
+        combine(
+            reads.onStart { emit(Unit) }.map { getSystemMeasurementSystem() }.distinctUntilChanged(),
+            overrideSource.override,
+        ) { os, override ->
+            when (override) {
+                UnitsOverride.SYSTEM -> os
+                UnitsOverride.METRIC -> MeasurementSystem.METRIC
+                UnitsOverride.IMPERIAL -> MeasurementSystem.IMPERIAL
+            }
+        }
+            .stateIn(
+                scope = applicationCoroutineScope,
+                started = SharingStarted.Eagerly,
+                initialValue = initialMeasurementSystem(overrideSource.override.value),
+            )
 
-    override val temperatureUnit: Flow<TemperatureUnit> =
-        reads.onStart { emit(Unit) }.map { getSystemTemperatureUnit() }.distinctUntilChanged()
+    /**
+     * A forced system carries its temperature with it (metric → °C, imperial → °F), overriding even an explicit OS
+     * regional temperature preference — a user who forces one system wants one system, not a blend. [SYSTEM] keeps the
+     * OS resolution, where distance and temperature are deliberately decoupled (see [TemperatureUnit]).
+     */
+    override val temperatureUnit: StateFlow<TemperatureUnit> =
+        combine(
+            reads.onStart { emit(Unit) }.map { getSystemTemperatureUnit() }.distinctUntilChanged(),
+            overrideSource.override,
+        ) { os, override ->
+            when (override) {
+                UnitsOverride.SYSTEM -> os
+                UnitsOverride.METRIC -> TemperatureUnit.CELSIUS
+                UnitsOverride.IMPERIAL -> TemperatureUnit.FAHRENHEIT
+            }
+        }
+            .stateIn(
+                scope = applicationCoroutineScope,
+                started = SharingStarted.Eagerly,
+                initialValue = initialTemperatureUnit(overrideSource.override.value),
+            )
+
+    private fun initialMeasurementSystem(override: UnitsOverride): MeasurementSystem = when (override) {
+        UnitsOverride.SYSTEM -> getSystemMeasurementSystem()
+        UnitsOverride.METRIC -> MeasurementSystem.METRIC
+        UnitsOverride.IMPERIAL -> MeasurementSystem.IMPERIAL
+    }
+
+    private fun initialTemperatureUnit(override: UnitsOverride): TemperatureUnit = when (override) {
+        UnitsOverride.SYSTEM -> getSystemTemperatureUnit()
+        UnitsOverride.METRIC -> TemperatureUnit.CELSIUS
+        UnitsOverride.IMPERIAL -> TemperatureUnit.FAHRENHEIT
+    }
 }

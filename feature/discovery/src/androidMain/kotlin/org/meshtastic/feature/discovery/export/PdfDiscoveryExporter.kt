@@ -77,7 +77,7 @@ class PdfDiscoveryExporter : DiscoveryExporter {
                 renderer.advanceLine()
                 renderer.drawSubheading("Discovered Nodes (${nodes.size})")
                 for (node in nodes) {
-                    renderer.drawBody(DiscoveryReportFormatter.formatNodeLine(node))
+                    renderer.drawBody(DiscoveryReportFormatter.formatNodeLine(node, data.measurementSystem))
                 }
             }
             renderer.advanceSection()

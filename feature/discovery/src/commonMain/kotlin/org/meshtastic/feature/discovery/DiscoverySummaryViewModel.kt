@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.koin.core.annotation.InjectedParam
 import org.koin.core.annotation.KoinViewModel
+import org.meshtastic.core.common.util.LocaleUnitsProvider
 import org.meshtastic.core.database.dao.DiscoveryDao
 import org.meshtastic.core.database.entity.DiscoveredNodeEntity
 import org.meshtastic.core.database.entity.DiscoveryPresetResultEntity
@@ -44,6 +45,7 @@ class DiscoverySummaryViewModel(
     private val rankingEngine: DiscoveryRankingEngine,
     private val aiProvider: DiscoverySummaryAiProvider,
     private val exporter: DiscoveryExporter,
+    private val localeUnitsProvider: LocaleUnitsProvider,
 ) : ViewModel() {
 
     val session: StateFlow<DiscoverySessionEntity?> =
@@ -91,6 +93,7 @@ class DiscoverySummaryViewModel(
                     session = currentSession,
                     presetResults = results,
                     nodesByPreset = _nodesByPreset.value,
+                    measurementSystem = localeUnitsProvider.measurementSystem.value,
                 )
             _exportResult.value = exporter.export(exportData)
         }

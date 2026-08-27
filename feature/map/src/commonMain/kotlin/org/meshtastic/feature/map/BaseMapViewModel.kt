@@ -26,7 +26,6 @@ import kotlinx.coroutines.flow.mapLatest
 import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.common.util.LocaleUnitsProvider
 import org.meshtastic.core.common.util.MeasurementSystem
-import org.meshtastic.core.common.util.getSystemMeasurementSystem
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.ContactKey
@@ -74,11 +73,10 @@ open class BaseMapViewModel(
     val myNodeInfo = nodeRepository.myNodeInfo
 
     /**
-     * OS locale display units (metric/imperial) for distance/altitude/speed formatting across map surfaces. Re-read on
-     * every locale change, because this ViewModel survives the configuration change one triggers.
+     * Display units (metric/imperial) for distance/altitude/speed formatting across map surfaces. Tracks locale changes
+     * and the in-app units setting, because this ViewModel survives the configuration change either triggers.
      */
-    val displayUnits: StateFlow<MeasurementSystem> =
-        localeUnitsProvider.measurementSystem.stateInWhileSubscribed(initialValue = getSystemMeasurementSystem())
+    val displayUnits: StateFlow<MeasurementSystem> = localeUnitsProvider.measurementSystem
 
     val ourNodeInfo = nodeRepository.ourNodeInfo
 

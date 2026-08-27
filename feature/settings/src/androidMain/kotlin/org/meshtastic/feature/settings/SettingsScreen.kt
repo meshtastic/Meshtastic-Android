@@ -79,6 +79,7 @@ import org.meshtastic.feature.settings.component.PermissionsSettingsContent
 import org.meshtastic.feature.settings.component.PersistenceSettingsContent
 import org.meshtastic.feature.settings.component.PrivacySettingsContent
 import org.meshtastic.feature.settings.component.ThemePickerDialog
+import org.meshtastic.feature.settings.component.UnitsPickerDialog
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.ModuleRoute
 import org.meshtastic.feature.settings.radio.RadioConfigItemList
@@ -180,6 +181,13 @@ fun SettingsScreen(
     }
 
     var showThemePickerDialog by rememberSaveable { mutableStateOf(false) }
+    var showUnitsPickerDialog by rememberSaveable { mutableStateOf(false) }
+    if (showUnitsPickerDialog) {
+        UnitsPickerDialog(
+            onClickUnits = { settingsViewModel.setUnitsOverride(it) },
+            onDismiss = { showUnitsPickerDialog = false },
+        )
+    }
     if (showThemePickerDialog) {
         ThemePickerDialog(
             onClickTheme = { settingsViewModel.setTheme(it) },
@@ -268,6 +276,7 @@ fun SettingsScreen(
                         onShowFullMessageTimestampsChange = settingsViewModel::setShowFullMessageTimestamps,
                         onShowLanguagePicker = { showLanguagePickerDialog = true },
                         onShowThemePicker = { showThemePickerDialog = true },
+                        onShowUnitsPicker = { showUnitsPickerDialog = true },
                     )
                     PersistenceSettingsContent(
                         cacheLimit = settingsViewModel.dbCacheLimit.collectAsStateWithLifecycle().value,

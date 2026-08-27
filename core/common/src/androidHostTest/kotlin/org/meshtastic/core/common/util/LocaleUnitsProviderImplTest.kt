@@ -20,6 +20,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
@@ -62,9 +64,16 @@ class LocaleUnitsProviderImplTest {
             override val localeChanges: Flow<Unit> = changes
         }
 
+    private val override = MutableStateFlow(UnitsOverride.SYSTEM)
+    private val overrideSource =
+        object : UnitsOverrideSource {
+            override val override: StateFlow<UnitsOverride> = this@LocaleUnitsProviderImplTest.override
+        }
+
     @Before
     fun setUp() {
         originalLocale = Locale.getDefault()
+        override.value = UnitsOverride.SYSTEM
     }
 
     @After
@@ -76,7 +85,7 @@ class LocaleUnitsProviderImplTest {
     @Test
     fun `emits the current value before any change arrives`() = runTest(UnconfinedTestDispatcher()) {
         Locale.setDefault(Locale.US)
-        val provider = LocaleUnitsProviderImpl(notifier, TestScope(backgroundScope))
+        val provider = LocaleUnitsProviderImpl(notifier, overrideSource, TestScope(backgroundScope))
 
         assertEquals(MeasurementSystem.IMPERIAL, provider.measurementSystem.first())
         assertEquals(TemperatureUnit.FAHRENHEIT, provider.temperatureUnit.first())
@@ -85,7 +94,7 @@ class LocaleUnitsProviderImplTest {
     @Test
     fun `re-reads the locale when a change arrives`() = runTest(UnconfinedTestDispatcher()) {
         Locale.setDefault(Locale.US)
-        val provider = LocaleUnitsProviderImpl(notifier, TestScope(backgroundScope))
+        val provider = LocaleUnitsProviderImpl(notifier, overrideSource, TestScope(backgroundScope))
 
         val seen = mutableListOf<MeasurementSystem>()
         val collector = launch { provider.measurementSystem.take(2).toList(seen) }
@@ -101,7 +110,7 @@ class LocaleUnitsProviderImplTest {
     @Test
     fun `a change that leaves the units alone emits nothing further`() = runTest(UnconfinedTestDispatcher()) {
         Locale.setDefault(Locale.US)
-        val provider = LocaleUnitsProviderImpl(notifier, TestScope(backgroundScope))
+        val provider = LocaleUnitsProviderImpl(notifier, overrideSource, TestScope(backgroundScope))
 
         val seen = mutableListOf<MeasurementSystem>()
         val collector = launch { provider.measurementSystem.toList(seen) }
@@ -110,5 +119,54 @@ class LocaleUnitsProviderImplTest {
 
         assertEquals(listOf(MeasurementSystem.IMPERIAL), seen)
         collector.cancel()
+    }
+
+    /** The in-app choice must beat the locale, or the setting is a lie on the devices that need it most (#6840). */
+    @Test
+    fun `the units override beats the locale`() = runTest(UnconfinedTestDispatcher()) {
+        Locale.setDefault(Locale.US)
+        override.value = UnitsOverride.METRIC
+        val provider = LocaleUnitsProviderImpl(notifier, overrideSource, TestScope(backgroundScope))
+
+        assertEquals(MeasurementSystem.METRIC, provider.measurementSystem.first())
+        assertEquals(TemperatureUnit.CELSIUS, provider.temperatureUnit.first())
+    }
+
+    @Test
+    fun `flipping the override mid-session reaches an observer`() = runTest(UnconfinedTestDispatcher()) {
+        Locale.setDefault(Locale.US)
+        override.value = UnitsOverride.SYSTEM
+        val provider = LocaleUnitsProviderImpl(notifier, overrideSource, TestScope(backgroundScope))
+
+        val seen = mutableListOf<MeasurementSystem>()
+        val collector = launch { provider.measurementSystem.take(2).toList(seen) }
+        override.value = UnitsOverride.METRIC
+        collector.join()
+
+        assertEquals(listOf(MeasurementSystem.IMPERIAL, MeasurementSystem.METRIC), seen)
+    }
+
+    // A forced system carries its temperature with it, overriding even an explicit OS regional preference.
+    @Test
+    fun `a forced system overrides the OS temperature preference`() = runTest(UnconfinedTestDispatcher()) {
+        Locale.setDefault(Locale.forLanguageTag("en-US-u-mu-celsius"))
+        override.value = UnitsOverride.IMPERIAL
+        val provider = LocaleUnitsProviderImpl(notifier, overrideSource, TestScope(backgroundScope))
+
+        assertEquals(TemperatureUnit.FAHRENHEIT, provider.temperatureUnit.first())
+    }
+
+    @Test
+    fun `returning to system default restores the locale resolution`() = runTest(UnconfinedTestDispatcher()) {
+        Locale.setDefault(Locale.GERMANY)
+        override.value = UnitsOverride.IMPERIAL
+        val provider = LocaleUnitsProviderImpl(notifier, overrideSource, TestScope(backgroundScope))
+
+        val seen = mutableListOf<MeasurementSystem>()
+        val collector = launch { provider.measurementSystem.take(2).toList(seen) }
+        override.value = UnitsOverride.SYSTEM
+        collector.join()
+
+        assertEquals(listOf(MeasurementSystem.IMPERIAL, MeasurementSystem.METRIC), seen)
     }
 }

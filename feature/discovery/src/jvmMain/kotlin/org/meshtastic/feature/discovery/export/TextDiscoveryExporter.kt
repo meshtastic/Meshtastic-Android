@@ -56,7 +56,7 @@ class TextDiscoveryExporter : DiscoveryExporter {
                 appendLine()
                 appendLine("  Discovered Nodes (${nodes.size}):")
                 for (node in nodes) {
-                    appendLine("    ${DiscoveryReportFormatter.formatNodeLine(node)}")
+                    appendLine("    ${DiscoveryReportFormatter.formatNodeLine(node, data.measurementSystem)}")
                 }
             }
             appendLine()

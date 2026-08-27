@@ -92,6 +92,11 @@ interface UiPrefs {
 
     fun setTheme(value: Int)
 
+    /** The in-app units choice as a [org.meshtastic.core.common.util.UnitsOverride] value; 0 follows the OS locale. */
+    val unitsOverride: StateFlow<Int>
+
+    fun setUnitsOverride(value: Int)
+
     val locale: StateFlow<String>
 
     fun setLocale(languageTag: String)

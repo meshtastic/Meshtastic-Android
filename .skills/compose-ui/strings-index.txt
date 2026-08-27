@@ -216,6 +216,7 @@ chirpy_suggested_pages_help
 chirpy_thinking
 choose_contrast
 choose_theme
+choose_units
 ### CLEAN ###
 clean_node_database_confirmation
 clean_node_database_description
@@ -1897,6 +1898,10 @@ type
 type_a_message
 udp_enabled
 undo
+units
+units_follow_system
+units_imperial
+units_metric
 ### UNKNOWN ###
 unknown
 unknown_age

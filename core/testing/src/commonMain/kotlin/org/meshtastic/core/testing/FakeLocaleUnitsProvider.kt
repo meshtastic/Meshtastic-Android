@@ -16,8 +16,8 @@
  */
 package org.meshtastic.core.testing
 
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.common.util.LocaleUnitsProvider
 import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.common.util.TemperatureUnit
@@ -34,8 +34,8 @@ class FakeLocaleUnitsProvider(
     private val systemState = MutableStateFlow(system)
     private val temperatureState = MutableStateFlow(temperature)
 
-    override val measurementSystem: Flow<MeasurementSystem> = systemState
-    override val temperatureUnit: Flow<TemperatureUnit> = temperatureState
+    override val measurementSystem: StateFlow<MeasurementSystem> = systemState
+    override val temperatureUnit: StateFlow<TemperatureUnit> = temperatureState
 
     /** Acts out the user changing their regional preferences mid-session. */
     fun set(system: MeasurementSystem = systemState.value, temperature: TemperatureUnit = temperatureState.value) {

@@ -30,6 +30,7 @@ import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.common.state.HiddenFeaturesUnlock
 import org.meshtastic.core.common.util.CommonUri
+import org.meshtastic.core.common.util.UnitsOverride
 import org.meshtastic.core.domain.usecase.settings.ExportDataUseCase
 import org.meshtastic.core.domain.usecase.settings.ExportNodeDatabaseUseCase
 import org.meshtastic.core.domain.usecase.settings.IsOtaCapableUseCase
@@ -155,6 +156,10 @@ class SettingsViewModel(
 
     fun setTheme(theme: Int) {
         uiPrefs.setTheme(theme)
+    }
+
+    fun setUnitsOverride(override: UnitsOverride) {
+        uiPrefs.setUnitsOverride(override.value)
     }
 
     val showFullMessageTimestamps = uiPrefs.showFullMessageTimestamps

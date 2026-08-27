@@ -8,7 +8,7 @@ description: How the app formats temperature, distance, speed, and other measure
 
 # Units, Measurement & Locale
 
-The Meshtastic app automatically displays temperatures, distances, speeds, and times in the units your device is configured to use — no settings to change inside the app.
+The Meshtastic app automatically displays temperatures, distances, speeds, and times in the units your device is configured to use. If your device's settings can't express the units you want, an in-app **Units** setting overrides them.
 
 ---
 
@@ -20,7 +20,7 @@ On Android, your measurement preferences are determined by your system **Languag
 
 Units follow your device's **region**, not the display language. Choosing a plain language — like **English** in the app's own Language setting or Android's per-app language — keeps the region your device is set to; only a choice that names a region of its own (like **English (Canada)**) brings that region's units with it. On Android 16+, the system-wide **Measurement system** preference overrides the region entirely.
 
-> 💡 **Tip:** You never need to toggle units inside the app. Change your system measurement preferences and every screen in Meshtastic updates automatically — node details, telemetry charts, weather, altitude, and more.
+> 💡 **Tip:** By default there is nothing to configure — change your system measurement preferences and every screen in Meshtastic updates automatically. If your device offers no working region or measurement setting (some manufacturer builds don't), set **Settings → Units** in the app instead.
 
 ---
 
@@ -111,15 +111,29 @@ All timestamps throughout the app — last heard, message times, telemetry logs,
 
 The app also uses **relative time** where it makes sense — for example, "5 min ago" or "2 hours ago" in the node list — which is automatically localised into your device language.
 
-## Changing Your Measurement System (Android)
+## Changing Your Measurement System
 
-On Android, your measurement system (metric vs imperial) is tied to your region setting:
+By default the app follows your device, and your measurement system (metric vs imperial) is tied to your region setting:
 
 1. Open **Android Settings → System → Language & Region**
 2. Change your **Region**
 3. On Android 16+, **Measurement system** overrides the region for every measurement
 4. On Android 14+, temperature can be overridden on its own under **Regional preferences → Temperature**
 5. Return to Meshtastic — values update immediately
+
+### Overriding the units in the app
+
+Not every device can express every preference — some manufacturer builds ship no regional preferences at all, some
+offer only one English variant, and UK regions are imperial for distance even if you'd rather read altitude in
+metres. For those cases the app has its own switch:
+
+1. Open **Meshtastic Settings → Units**
+2. Choose **System default**, **Metric**, or **Imperial**
+3. Every screen updates immediately — no restart needed
+
+**System default** follows your device as described above. Forcing **Metric** or **Imperial** applies to
+everything, temperature included (metric → °C, imperial → °F), even where the device's own regional preferences say
+otherwise. The setting exists on Android and Desktop alike.
 
 > 💡 **Tip:** All measurement formatting is handled centrally and respects your platform's locale, so units stay consistent everywhere in the app.
 
