@@ -2,7 +2,7 @@
 title: Telemetry & Sensors
 parent: User Guide
 nav_order: 9
-last_updated: 2026-05-13
+last_updated: 2026-08-27
 description: Sensor data on the mesh — supported environment, air quality, and power sensors, plus configuration and viewing guides.
 aliases:
   - sensors
@@ -52,6 +52,15 @@ Supported environmental sensors:
 | BME680 | Gas Resistance / IAQ | Volatile organic compounds |
 | PMSA003I | PM1.0, PM2.5, PM10 | Particulate matter |
 | SEN55 | PM, NOx, VOC, Temp, Humidity | Multi-sensor |
+
+### Soil
+
+| Metric | Unit | Notes |
+|--------|------|-------|
+| Soil Temp | °C / °F | Reported alongside soil moisture by soil probes |
+| Soil Moist | % | Volumetric water content |
+
+Both appear as info cards on the node detail screen, next to the other environment readings.
 
 ### Light & UV
 
