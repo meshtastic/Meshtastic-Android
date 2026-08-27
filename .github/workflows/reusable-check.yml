@@ -99,7 +99,13 @@ jobs:
           develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           job_summary_pr_comment: ${{ env.GRADLE_PR_COMMENT }}
           cache_read_only: ${{ env.GRADLE_CACHE_READ_ONLY }}
-          cache_configuration_cache: 'true' # VERSION_CODE pinned -> entries actually reuse
+          # Disabled on Gradle 9.7.1: restoring an entry written by another runner crashes
+          # fingerprint deserialization (IsInIdeaSyncValueSource CNFE, settings-plugin
+          # classloader scope) and the job dies in ~10s before any test. A cross-machine
+          # restore is the only thing that triggers it, so it is 100% red in CI and not
+          # reproducible from a local store/reuse pair. Re-enable when that is fixed
+          # upstream; VERSION_CODE is still pinned above so entries would reuse.
+          cache_configuration_cache: 'false'
           install_jetbrains_jdk: 'true'
 
       - name: Lint, Analysis & KMP Smoke Compile
@@ -130,7 +136,13 @@ jobs:
           develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           job_summary_pr_comment: ${{ env.GRADLE_PR_COMMENT }}
           cache_read_only: ${{ env.GRADLE_CACHE_READ_ONLY }}
-          cache_configuration_cache: 'true' # VERSION_CODE pinned -> entries actually reuse
+          # Disabled on Gradle 9.7.1: restoring an entry written by another runner crashes
+          # fingerprint deserialization (IsInIdeaSyncValueSource CNFE, settings-plugin
+          # classloader scope) and the job dies in ~10s before any test. A cross-machine
+          # restore is the only thing that triggers it, so it is 100% red in CI and not
+          # reproducible from a local store/reuse pair. Re-enable when that is fixed
+          # upstream; VERSION_CODE is still pinned above so entries would reuse.
+          cache_configuration_cache: 'false'
 
       - name: Screenshot Test Validation
         # -Dorg.gradle.isolated-projects=false: AGP's screenshot plugin iterates BuildServicesRegistry at
@@ -294,7 +306,13 @@ jobs:
           develocity_access_key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           job_summary_pr_comment: ${{ env.GRADLE_PR_COMMENT }}
           cache_read_only: ${{ env.GRADLE_CACHE_READ_ONLY }}
-          cache_configuration_cache: 'true' # VERSION_CODE pinned -> entries actually reuse
+          # Disabled on Gradle 9.7.1: restoring an entry written by another runner crashes
+          # fingerprint deserialization (IsInIdeaSyncValueSource CNFE, settings-plugin
+          # classloader scope) and the job dies in ~10s before any test. A cross-machine
+          # restore is the only thing that triggers it, so it is 100% red in CI and not
+          # reproducible from a local store/reuse pair. Re-enable when that is fixed
+          # upstream; VERSION_CODE is still pinned above so entries would reuse.
+          cache_configuration_cache: 'false'
           # Shards run different task graphs; kover flips the graph again.
           cache_key_suffix: ${{ matrix.shard.name }}${{ inputs.run_coverage && '-kover' || '' }}
 
@@ -593,7 +611,18 @@ jobs:
         # packageDistributionForCurrentOS (debug build type, no ProGuard) produces real
         # installers (dmg/msi+exe/deb+rpm+AppImage-dir) so the snapshot release below can
         # ship something testers can actually install, not just an unpacked app dir.
-        run: ./gradlew :desktopApp:packageDistributionForCurrentOS :desktopApp:proguardReleaseJars -Pci=true
+        # On Gradle 9.7.1 CMP's Windows MSI/WiX packaging reads Project.layout on the root project
+        # from ':desktopApp'. Isolated Projects and the configuration cache reject that
+        # independently, so both have to go — disabling only IP still fails as "1 problem was found
+        # storing the configuration cache", and Gradle refuses --no-configuration-cache while IP is
+        # still on. This job never persists a CC entry (cache_configuration_cache defaults to
+        # false), so dropping the cache costs nothing.
+        # Flags, not -D properties: -Dorg.gradle.isolated-projects=false took effect on macOS and
+        # both Linux runners but NOT on windows-latest, which still died on "Configuration Cache
+        # cannot be disabled when Isolated Projects is enabled". --no-isolated-projects is
+        # unambiguous; it needs 9.7+, which is exactly what this PR moves us to, so a pin-back below
+        # 9.7 has to revert this line with it.
+        run: ./gradlew :desktopApp:packageDistributionForCurrentOS :desktopApp:proguardReleaseJars -Pci=true --no-isolated-projects --no-configuration-cache
 
       # CMP's TargetFormat.AppImage is jpackage's "app-image" — an unpacked directory, not
       # a Linux .AppImage. Wrap it into a real AppImage, same as the release workflow.
