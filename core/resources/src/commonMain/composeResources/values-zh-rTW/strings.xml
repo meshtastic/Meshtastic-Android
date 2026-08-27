@@ -1362,6 +1362,10 @@
     <string name="type">類別</string>
     <string name="type_a_message">請輸入訊息</string>
     <string name="udp_enabled">UDP 廣播</string>
+    <!-- UNITS -->
+    <string name="units_follow_system">系統預設</string>
+    <string name="units_imperial">英制（英里/英尺）</string>
+    <string name="units_metric">公制（公里/公尺）</string>
     <!-- UNKNOWN -->
     <string name="unknown">不明</string>
     <string name="unknown_age">未知年齡</string>

@@ -1659,6 +1659,10 @@
     <string name="type">Typ</string>
     <string name="type_a_message">Napište zprávu</string>
     <string name="udp_enabled">UDP vysílání</string>
+    <!-- UNITS -->
+    <string name="units_follow_system">Podle systému</string>
+    <string name="units_imperial">Imperiální</string>
+    <string name="units_metric">Metrický</string>
     <!-- UNKNOWN -->
     <string name="unknown">Neznámé</string>
     <string name="unknown_age">Neznámé stáří</string>

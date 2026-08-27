@@ -890,6 +890,8 @@
     <string name="tx_power_dbm">Adásteljesítmény</string>
     <string name="type">Típus</string>
     <string name="type_a_message">Írj üzenetet</string>
+    <!-- UNITS -->
+    <string name="units_follow_system">Rendszer alapértelmezett</string>
     <!-- UNKNOWN -->
     <string name="unknown">Ismeretlen</string>
     <string name="unknown_age">Ismeretlen ideje</string>

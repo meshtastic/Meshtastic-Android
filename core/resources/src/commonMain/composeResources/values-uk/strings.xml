@@ -1292,6 +1292,8 @@
     <string name="tx_power_dbm">Потужність передачі</string>
     <string name="type">Тип</string>
     <string name="type_a_message">Введіть повідомлення</string>
+    <!-- UNITS -->
+    <string name="units_follow_system">Системна</string>
     <!-- UNKNOWN -->
     <string name="unknown">Невідомий</string>
     <string name="unknown_age">Невідомий вік</string>

@@ -1499,6 +1499,9 @@
     <string name="tx_power_dbm">Puissance d'émission</string>
     <string name="type">Type</string>
     <string name="type_a_message">Composer un message</string>
+    <!-- UNITS -->
+    <string name="units_follow_system">Valeur par défaut du système</string>
+    <string name="units_metric">Métrique</string>
     <!-- UNKNOWN -->
     <string name="unknown">Inconnu</string>
     <string name="unknown_age">Age inconnu</string>

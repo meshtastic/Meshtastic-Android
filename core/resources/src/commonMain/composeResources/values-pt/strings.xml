@@ -566,6 +566,8 @@
     <string name="two_days">48 Horas</string>
     <string name="two_weeks">2sem</string>
     <string name="type">Tipo</string>
+    <!-- UNITS -->
+    <string name="units_follow_system">Padrão do sistema</string>
     <!-- UNKNOWN -->
     <string name="unknown_age">Idade desconhecida</string>
     <string name="unknown_username">Nome de utilizador desconhecido</string>

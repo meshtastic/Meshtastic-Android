@@ -277,6 +277,8 @@
     <!-- TRANSLATION -->
     <!-- TRANSPORT -->
     <string name="two_days">48 Èdtan</string>
+    <!-- UNITS -->
+    <string name="units_follow_system">Sistèm default</string>
     <!-- UNKNOWN -->
     <string name="unknown_username">Non itilizatè enkoni</string>
     <string name="unrecognized">Inkonu</string>

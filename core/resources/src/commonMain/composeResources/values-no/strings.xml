@@ -300,6 +300,8 @@
     <string name="twenty_four_hours">24t</string>
     <string name="two_days">48 Timer</string>
     <string name="two_weeks">2U</string>
+    <!-- UNITS -->
+    <string name="units_follow_system">System standard</string>
     <!-- UNKNOWN -->
     <string name="unknown_username">Ukjent Brukernavn</string>
     <string name="unrecognized">Ikke gjenkjent</string>

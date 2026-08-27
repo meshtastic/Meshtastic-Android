@@ -813,6 +813,8 @@
     <string name="tx_enabled">Nadawanie włączone</string>
     <string name="tx_power_dbm">Moc nadawania</string>
     <string name="type">Typ</string>
+    <!-- UNITS -->
+    <string name="units_follow_system">Domyślny systemu</string>
     <!-- UNKNOWN -->
     <string name="unknown">Nieznany</string>
     <string name="unknown_age">Unknown Age</string>

@@ -744,6 +744,8 @@
     <string name="two_weeks">2S</string>
     <string name="type">Tipo</string>
     <string name="type_a_message">Digite uma mensagem</string>
+    <!-- UNITS -->
+    <string name="units_follow_system">Padrão do sistema</string>
     <!-- UNKNOWN -->
     <string name="unknown">Desconhecido</string>
     <string name="unknown_age">Idade Desconhecida</string>

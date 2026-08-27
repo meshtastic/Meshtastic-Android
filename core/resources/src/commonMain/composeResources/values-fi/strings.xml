@@ -1942,6 +1942,10 @@
     <string name="type_a_message">Kirjoita viesti</string>
     <string name="udp_enabled">UDP-lähetys</string>
     <string name="undo">Kumoa</string>
+    <!-- UNITS -->
+    <string name="units_follow_system">Järjestelmän oletus</string>
+    <string name="units_imperial">Tuumajärjestelmä</string>
+    <string name="units_metric">Metrijärjestelmä</string>
     <!-- UNKNOWN -->
     <string name="unknown">Tuntematon</string>
     <string name="unknown_age">Tuntematon ikä</string>

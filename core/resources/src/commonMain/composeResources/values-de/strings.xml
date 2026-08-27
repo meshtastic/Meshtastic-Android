@@ -1620,6 +1620,10 @@
     <string name="type">Typ</string>
     <string name="type_a_message">Eine Nachricht schreiben</string>
     <string name="udp_enabled">UDP Übertragung</string>
+    <!-- UNITS -->
+    <string name="units_follow_system">System</string>
+    <string name="units_imperial">Angelsächsisch</string>
+    <string name="units_metric">Metrisch</string>
     <!-- UNKNOWN -->
     <string name="unknown">Unbekannt</string>
     <string name="unknown_age">Alter unbekannt</string>

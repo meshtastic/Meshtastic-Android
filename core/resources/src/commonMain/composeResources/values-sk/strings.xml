@@ -487,6 +487,8 @@
     <string name="two_days">48 Hodín</string>
     <string name="two_weeks">2 týždne</string>
     <string name="type">Typ</string>
+    <!-- UNITS -->
+    <string name="units_follow_system">Predvolená systémom</string>
     <!-- UNKNOWN -->
     <string name="unknown_age">Neznámy vek</string>
     <string name="unknown_username">Neznáme užívateľské meno</string>

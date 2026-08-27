@@ -243,6 +243,7 @@
     <string name="twenty_four_hours">24 ساعة</string>
     <string name="two_days">48 ساعات</string>
     <string name="two_weeks">أسبوعين</string>
+    <!-- UNITS -->
     <!-- UNKNOWN -->
     <string name="unknown_age">عمر غير معروف</string>
     <string name="unknown_username">اسم المستخدم غير معروف</string>

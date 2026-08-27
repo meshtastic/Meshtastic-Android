@@ -1746,6 +1746,10 @@
     <string name="type">Tipo</string>
     <string name="type_a_message">Inserisci un messaggio</string>
     <string name="udp_enabled">Trasmissione UDP</string>
+    <!-- UNITS -->
+    <string name="units_follow_system">Predefinito di sistema</string>
+    <string name="units_imperial">Imperiale</string>
+    <string name="units_metric">Metrico</string>
     <!-- UNKNOWN -->
     <string name="unknown">Sconosciuto</string>
     <string name="unknown_age">Età sconosciuta</string>

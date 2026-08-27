@@ -882,6 +882,9 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="tx_power_dbm">Potencia de transmisión</string>
     <string name="type">Tipo</string>
     <string name="type_a_message">Escribe un mensaje</string>
+    <!-- UNITS -->
+    <string name="units_follow_system">Predeterminado del sistema</string>
+    <string name="units_metric">Métrico</string>
     <!-- UNKNOWN -->
     <string name="unknown">Desconocido</string>
     <string name="unknown_age">Edad desconocida</string>

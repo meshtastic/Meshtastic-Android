@@ -1341,6 +1341,8 @@
     <string name="tx_power_dbm">Sändningseffekt</string>
     <string name="type">Typ</string>
     <string name="type_a_message">Skriv ett meddelande</string>
+    <!-- UNITS -->
+    <string name="units_follow_system">Systemets standard</string>
     <!-- UNKNOWN -->
     <string name="unknown">Okänd</string>
     <string name="unknown_age">Okänd ålder</string>

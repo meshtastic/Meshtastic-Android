@@ -1738,6 +1738,9 @@
     <string name="type">種別</string>
     <string name="type_a_message">メッセージを入力</string>
     <string name="udp_enabled">UDP ブロードキャスト</string>
+    <!-- UNITS -->
+    <string name="units_follow_system">システムのデフォルト</string>
+    <string name="units_metric">メートル法</string>
     <!-- UNKNOWN -->
     <string name="unknown">不明</string>
     <string name="unknown_age">年齢不明</string>

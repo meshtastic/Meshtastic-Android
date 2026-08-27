@@ -601,6 +601,8 @@
     <string name="two_weeks">2H</string>
     <string name="type">Tip</string>
     <string name="type_a_message">Mesaj yaz</string>
+    <!-- UNITS -->
+    <string name="units_follow_system">Sistem varsayılanı</string>
     <!-- UNKNOWN -->
     <string name="unknown">Bilinmeyen</string>
     <string name="unknown_age">Bilinmeyen Yaş</string>
