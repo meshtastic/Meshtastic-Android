@@ -256,13 +256,16 @@ private fun SitePlannerSlot(
 }
 
 /**
- * The floating map toolbar.
+ * The floating map toolbar, centred along the top edge.
+ *
+ * Centred because that is where the Google flavor and every other MapLibre surface here put it — this one map was flush
+ * against the leading edge, which read as a different app on the same phone.
  *
  * Owns the filter menu's open state, which the shared overlay cannot: the button that opens it and the dropdown it
  * opens are separate parameters, so something has to hold the flag between them.
  */
 @Composable
-private fun MapToolbar(
+private fun BoxScope.MapToolbar(
     basemaps: BasemapSelection,
     location: LocationControls,
     cameraState: CameraState,
@@ -276,6 +279,7 @@ private fun MapToolbar(
     val scope = rememberCoroutineScope()
 
     MapControlsOverlay(
+        modifier = Modifier.align(Alignment.TopCenter).padding(top = TOOLBAR_INSET.dp),
         onToggleFilterMenu = { filterMenuExpanded = !filterMenuExpanded },
         bearing = cameraState.position.bearing.toFloat(),
         followPhoneBearing = location.followingBearing,
