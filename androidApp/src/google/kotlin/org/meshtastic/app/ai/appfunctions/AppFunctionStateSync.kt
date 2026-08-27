@@ -21,6 +21,7 @@ import androidx.appfunctions.AppFunctionException
 import androidx.appfunctions.AppFunctionManager
 import androidx.appfunctions.metadata.AppFunctionName
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
@@ -71,8 +72,19 @@ class AppFunctionStateSync(
         combine(prefs.masterEnabled, combine(functions.map { it.enabled }) { it.toList() }) { master, toggles ->
             functions.mapIndexed { index, fn -> fn.id to (master && toggles[index]) }
         }
-            .onEach { states -> syncStates(states) }
+            .onEach { states -> syncStatesSafely(states) }
             .launchIn(scope)
+    }
+
+    /** Anything escaping [syncStates] would cancel the collector, leaving sync dead for the process lifetime. */
+    private suspend fun syncStatesSafely(desired: List<Pair<String, Boolean>>) {
+        try {
+            syncStates(desired)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+            Logger.e(e) { "AppFunction sync pass failed" }
+        }
     }
 
     private suspend fun syncStates(desired: List<Pair<String, Boolean>>) {
