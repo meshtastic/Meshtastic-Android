@@ -248,9 +248,9 @@ private fun BoxCornerMarker(corner: Position?) {
     if (corner == null) return
 
     val source =
-        rememberFeatureSource(
-            FeatureCollection(listOf(Feature<Point, JsonObject?>(geometry = Point(corner), properties = null))),
-        )
+        rememberFeatureSource(corner) {
+            FeatureCollection(listOf(Feature<Point, JsonObject?>(geometry = Point(corner), properties = null)))
+        }
     CircleLayer(
         id = "box-corner",
         source = source,

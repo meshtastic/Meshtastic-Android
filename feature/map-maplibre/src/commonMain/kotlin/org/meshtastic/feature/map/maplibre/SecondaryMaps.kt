@@ -129,7 +129,7 @@ fun MapLibreInlineMap(
     ) {
         (basemaps.current as? Basemap.Raster)?.let { RasterBasemapLayer(it) }
 
-        val source = rememberFeatureSource(nodesToFeatureCollection(listOf(node)))
+        val source = rememberFeatureSource(node) { nodesToFeatureCollection(listOf(node)) }
 
         // The node-detail sheet is where a degraded position matters most — it is the screen a user opens to ask how
         // precisely this node is placed. The Google mini-map draws the circle; this one left it out.
@@ -161,7 +161,7 @@ fun MapLibreTracerouteMap(
     // first composition there is none yet — the fit silently landed on a default, which is why this map used to open
     // zoomed past the ends of the route it exists to show.
     val hasViewport = cameraState.viewport != null
-    LaunchedEffect(hops.size, hasViewport) {
+    LaunchedEffect(hops, hasViewport) {
         if (hasViewport) {
             // Padded, as the Google flavor pads its own bounds fit: an edge-to-edge fit puts the outermost hops under
             // the toolbar and the legend.
@@ -193,7 +193,7 @@ fun MapLibreTracerouteMap(
 /** Every hop the route passes through, as the node chip it is elsewhere in the app. */
 @Composable
 private fun TracerouteHopLayers(hops: List<Node>) {
-    val hopSource = rememberFeatureSource(nodesToFeatureCollection(hops))
+    val hopSource = rememberFeatureSource(hops) { nodesToFeatureCollection(hops) }
     NodeChipLayer(id = "traceroute-hops", source = hopSource, nodes = hops)
 }
 
@@ -214,7 +214,10 @@ fun MapLibreDiscoveryMap(
     val scanner = GeoPosition(longitude = userLongitude, latitude = userLatitude)
     val cameraState = rememberCameraState(CameraPosition(target = scanner, zoom = DETAIL_ZOOM))
     val basemaps = rememberBasemapSelection(customBasemaps())
-    var selectedIndex by remember { mutableStateOf<Int?>(null) }
+    // The node itself, not its index. The feature carries an index into `located`, which is only meaningful for
+    // the composition that built it — a scan that reports another node afterwards renumbers the list, and a held
+    // index would then describe somebody else. Resolving at tap time closes that window.
+    var selectedNode by remember { mutableStateOf<DiscoveryMapNode?>(null) }
 
     // A discovered node can be heard without ever reporting a position, and drawing one at (0, 0) would put a chip in
     // the Gulf of Guinea and stretch the bounds fit across an ocean. DiscoveryMapScreen already drops those, as does
@@ -226,7 +229,7 @@ fun MapLibreDiscoveryMap(
     // that answers the question this map is opened to answer. Opening at a fixed zoom on the scanner put every
     // discovered node off screen. Waits for a viewport, since fitting a bounding box needs one.
     val hasViewport = cameraState.viewport != null
-    LaunchedEffect(located.size, hasViewport) {
+    LaunchedEffect(located, hasViewport) {
         if (hasViewport) {
             discoveryBoundingBox(scanner, located)?.let {
                 cameraState.jumpTo(boundingBox = it, padding = SecondaryMapFitPadding)
@@ -244,7 +247,7 @@ fun MapLibreDiscoveryMap(
         ) {
             (basemaps.current as? Basemap.Raster)?.let { RasterBasemapLayer(it) }
             DiscoveryTopologyLayer(scanner = scanner, nodes = located)
-            DiscoveredNodeLayers(nodes = located, onNodeClick = { selectedIndex = it })
+            DiscoveredNodeLayers(nodes = located, onNodeClick = { selectedNode = located.getOrNull(it) })
             ScannerLayer(scanner = scanner, label = stringResource(Res.string.you))
         }
         MapZoom(cameraState = cameraState, basemap = basemaps.current)
@@ -257,7 +260,7 @@ fun MapLibreDiscoveryMap(
         // The signal figures the Google map shows in a marker snippet. A MapLibre marker is a layer feature and has no
         // snippet, so the tapped node's numbers go at the foot of the map.
         DiscoveryNodeCard(
-            node = located.getOrNull(selectedIndex ?: -1),
+            node = selectedNode,
             // Clear of the logo and attribution row, which the styles are licensed on condition of showing.
             modifier =
             Modifier.align(Alignment.BottomStart)
@@ -301,17 +304,21 @@ private fun DiscoveryNodeCard(node: DiscoveryMapNode?, modifier: Modifier = Modi
  */
 @Composable
 private fun DiscoveryTopologyLayer(scanner: GeoPosition, nodes: List<DiscoveryMapNode>) {
-    val links =
-        FeatureCollection(
-            nodes.map { node ->
-                Feature<LineString, JsonObject?>(
-                    geometry =
-                    LineString(listOf(scanner, GeoPosition(longitude = node.longitude, latitude = node.latitude))),
-                    properties = buildJsonObject { put(DIRECT_KEY, node.neighborType == DiscoveryNeighborType.DIRECT) },
-                )
-            },
-        )
-    val source = rememberFeatureSource(links)
+    val source =
+        rememberFeatureSource(scanner, nodes) {
+            FeatureCollection(
+                nodes.map { node ->
+                    Feature<LineString, JsonObject?>(
+                        geometry =
+                        LineString(
+                            listOf(scanner, GeoPosition(longitude = node.longitude, latitude = node.latitude)),
+                        ),
+                        properties =
+                        buildJsonObject { put(DIRECT_KEY, node.neighborType == DiscoveryNeighborType.DIRECT) },
+                    )
+                },
+            )
+        }
 
     LineLayer(
         id = "discovery-direct-links",
@@ -340,9 +347,9 @@ private fun DiscoveryTopologyLayer(scanner: GeoPosition, nodes: List<DiscoveryMa
  */
 @Composable
 private fun DiscoveredNodeLayers(nodes: List<DiscoveryMapNode>, onNodeClick: (Int) -> Unit) {
-    val chips = nodes.map { it.toMapChip() }
+    val chips = remember(nodes) { nodes.map { it.toMapChip() } }
     val source =
-        rememberFeatureSource(
+        rememberFeatureSource(nodes) {
             FeatureCollection(
                 nodes.mapIndexed { index, node ->
                     Feature<Point, JsonObject?>(
@@ -354,8 +361,8 @@ private fun DiscoveredNodeLayers(nodes: List<DiscoveryMapNode>, onNodeClick: (In
                         },
                     )
                 },
-            ),
-        )
+            )
+        }
     MapChipLayer(
         id = "discovery-nodes",
         source = source,
@@ -399,7 +406,7 @@ private fun ScannerLayer(scanner: GeoPosition, label: String) {
             outlined = true,
         )
     val source =
-        rememberFeatureSource(
+        rememberFeatureSource(scanner, chip) {
             FeatureCollection(
                 listOf(
                     Feature<Point, JsonObject?>(
@@ -407,8 +414,8 @@ private fun ScannerLayer(scanner: GeoPosition, label: String) {
                         properties = buildJsonObject { put(NodeFeatureKeys.CHIP, chip.featureValue()) },
                     ),
                 ),
-            ),
-        )
+            )
+        }
     MapChipLayer(id = "discovery-scanner", source = source, chips = listOf(chip))
 }
 

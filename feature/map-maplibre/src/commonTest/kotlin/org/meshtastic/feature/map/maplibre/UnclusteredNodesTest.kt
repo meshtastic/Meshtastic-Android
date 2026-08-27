@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.map.maplibre
 
+import org.maplibre.spatialk.geojson.BoundingBox
 import org.meshtastic.core.model.Node
 import org.meshtastic.proto.Position
 import kotlin.test.Test
@@ -82,5 +83,35 @@ class UnclusteredNodesTest {
     fun `above the cluster ceiling nothing is clustered at all`() {
         // The source stops clustering past its max zoom, so every node is drawn individually whatever the density.
         assertEquals(2500, unclustered(pile(2500), zoom = MAX_CLUSTER_ZOOM + 1).size)
+    }
+
+    @Test
+    fun `isolation ranking puts the loneliest nodes first so the chip budget reaches them`() {
+        // The chip budget is spent down this order, so the nodes certain to be drawn on their own have to come first.
+        val nodes = pile(30) + node(9999, latitude = 36.60, longitude = -115.60)
+
+        val ranked = nodesByIsolation(nodes, zoom = 10, radiusPx = RADIUS_PX)
+
+        assertEquals(9999, ranked.first().num)
+        assertEquals(nodes.size, ranked.size)
+    }
+
+    @Test
+    fun `isolation ranking survives being narrowed to the viewport afterwards`() {
+        // Ranked over the whole mesh and filtered to the viewport second: a node at the edge of the screen with
+        // neighbours just off it is not in fact alone, and the filter has to leave that order alone.
+        // At zoom 10 a degree is roughly 1456 tile pixels, so 0.01 deg sits inside the 50px cluster radius and
+        // 0.16 deg sits well outside it.
+        val offScreenPile = pile(30, latitude = 36.13, longitude = -115.16)
+        val onScreenEdge = node(8888, latitude = 36.13, longitude = -115.15)
+        val onScreenLoner = node(9999, latitude = 36.13, longitude = -115.00)
+
+        val ranked = nodesByIsolation(offScreenPile + onScreenEdge + onScreenLoner, zoom = 10, radiusPx = RADIUS_PX)
+        // West edge falls between the pile and the node beside it, so only the latter two are on screen.
+        val onScreen = BoundingBox(west = -115.155, south = 36.12, east = -114.99, north = 36.14)
+
+        val visible = nodesInView(ranked, onScreen)
+
+        assertEquals(listOf(9999, 8888), visible.map { it.num })
     }
 }

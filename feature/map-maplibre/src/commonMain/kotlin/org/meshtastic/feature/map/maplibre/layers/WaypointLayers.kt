@@ -58,7 +58,7 @@ private const val GEOFENCE_FILL_OPACITY = 0.12f
  */
 @Composable
 internal fun WaypointLayers(waypoints: Collection<DataPacket>, onWaypointClick: (Int) -> Unit) {
-    val geofenceSource = rememberFeatureSource(geofencesToFeatureCollection(waypoints))
+    val geofenceSource = rememberFeatureSource(waypoints) { geofencesToFeatureCollection(waypoints) }
 
     FillLayer(
         id = "geofence-fill",
@@ -69,7 +69,7 @@ internal fun WaypointLayers(waypoints: Collection<DataPacket>, onWaypointClick: 
 
     LineLayer(id = "geofence-outline", source = geofenceSource, color = const(MapColors.Highlight), width = const(2.dp))
 
-    val waypointSource = rememberFeatureSource(waypointsToFeatureCollection(waypoints))
+    val waypointSource = rememberFeatureSource(waypoints) { waypointsToFeatureCollection(waypoints) }
 
     // One layer per distinct glyph, rather than one text layer for all of them. A waypoint icon is an arbitrary code
     // point from the mesh, and the basemap's font has no emoji coverage — asking for them as text renders nothing at

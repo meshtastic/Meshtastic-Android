@@ -124,7 +124,7 @@ fun MapLibreNodeTrackMap(
     // on the unfiltered track so tightening the filter does not yank the camera around under the user, and gated on a
     // viewport because fitting a bounding box needs one — before the map reports its size the fit lands on a default.
     val hasViewport = cameraState.viewport != null
-    LaunchedEffect(allPoints.size, hasViewport) {
+    LaunchedEffect(allPoints, hasViewport) {
         if (hasViewport && allPoints.isNotEmpty()) {
             positionsBoundingBox(allPoints.map { it.first })?.let { box ->
                 cameraState.jumpTo(boundingBox = box, padding = SecondaryMapFitPadding)
@@ -177,7 +177,13 @@ fun MapLibreNodeTrackMap(
         TrackPointCard(
             // Guarded on the selection rather than compared straight through: a position whose `time` is absent is
             // also null, so an unselected map matched it and the card appeared for a point nobody tapped.
-            position = selectedPositionTime?.let { selected -> positions.firstOrNull { it.time == selected } },
+            //
+            // Resolved against the filtered track, not the whole list: tightening the age filter takes the selected
+            // point off the map, and the card describing it was outliving the dot it belonged to.
+            position =
+            selectedPositionTime
+                ?.takeIf { selected -> points.any { it.second == selected } }
+                ?.let { selected -> positions.firstOrNull { it.time == selected } },
             displayUnits = displayUnits,
             // Clear of the logo and attribution along the bottom edge, which the styles are licensed on condition of
             // showing. See MeshMapOrnaments.
@@ -237,14 +243,13 @@ private fun pointFeatures(points: List<TrackPoint>) = FeatureCollection(
 @Composable
 private fun TrackLineLayer(points: List<TrackPoint>, color: Color) {
     val source =
-        rememberFeatureSource(
+        rememberFeatureSource(points, options = GeoJsonOptions(lineMetrics = true)) {
             FeatureCollection(
                 listOf(
                     Feature<LineString, JsonObject?>(geometry = LineString(points.map { it.first }), properties = null),
                 ),
-            ),
-            options = GeoJsonOptions(lineMetrics = true),
-        )
+            )
+        }
     LineLayer(
         id = "track-line",
         source = source,
@@ -264,7 +269,7 @@ private fun TrackLineLayer(points: List<TrackPoint>, color: Color) {
 /** Every recorded position, oldest faintest. Tapping one reports it so the caller's list can follow along. */
 @Composable
 private fun TrackPointLayer(points: List<TrackPoint>, color: Color, onPositionSelect: ((Int) -> Unit)?) {
-    val source = rememberFeatureSource(pointFeatures(points))
+    val source = rememberFeatureSource(points) { pointFeatures(points) }
     CircleLayer(
         id = "track-points",
         source = source,
@@ -275,18 +280,24 @@ private fun TrackPointLayer(points: List<TrackPoint>, color: Color, onPositionSe
         // Faded rather than fully transparent at the oldest end. The Google flavor takes its alpha straight to zero,
         // which makes the first point of a track invisible and untappable.
         opacity = interpolate(linear(), feature[TRACK_AGE_KEY].asNumber(), 0 to const(OLDEST_ALPHA), 1 to const(1f)),
+        // Where points overlap the newest one wins, rather than whichever the query happened to return first —
+        // the same reason the node chips resolve a stacked tap by rank instead of by query order.
         onClick = { features ->
-            features.firstOrNull()?.properties?.get(TRACK_POINT_KEY)?.let { time ->
-                onPositionSelect?.invoke(time.jsonPrimitive.int)
-                ClickResult.Consume
-            } ?: ClickResult.Pass
+            features
+                .mapNotNull { it.properties?.get(TRACK_POINT_KEY)?.jsonPrimitive?.int }
+                .maxOrNull()
+                ?.let { time ->
+                    onPositionSelect?.invoke(time)
+                    ClickResult.Consume
+                } ?: ClickResult.Pass
         },
     )
 }
 
 @Composable
 private fun SelectedTrackPointLayer(points: List<TrackPoint>, selectedTime: Int) {
-    val source = rememberFeatureSource(pointFeatures(points.filter { it.second == selectedTime }))
+    val source =
+        rememberFeatureSource(points, selectedTime) { pointFeatures(points.filter { it.second == selectedTime }) }
     CircleLayer(
         id = "track-selected",
         source = source,
@@ -301,7 +312,7 @@ private fun SelectedTrackPointLayer(points: List<TrackPoint>, selectedTime: Int)
 @Composable
 private fun NewestPositionChip(node: Node, newest: TrackPoint) {
     val source =
-        rememberFeatureSource(
+        rememberFeatureSource(node, newest) {
             FeatureCollection(
                 listOf(
                     Feature<Point, JsonObject?>(
@@ -313,8 +324,8 @@ private fun NewestPositionChip(node: Node, newest: TrackPoint) {
                         },
                     ),
                 ),
-            ),
-        )
+            )
+        }
     NodeChipLayer(id = "track-head", source = source, nodes = listOf(node))
 }
 

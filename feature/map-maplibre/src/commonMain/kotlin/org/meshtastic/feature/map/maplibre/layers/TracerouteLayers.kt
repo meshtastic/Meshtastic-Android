@@ -46,8 +46,8 @@ import org.meshtastic.feature.map.maplibre.geojson.rememberFeatureSource
  */
 @Composable
 internal fun TracerouteLayers(forwardRoute: List<Int>, returnRoute: List<Int>, nodeLookup: Map<Int, Node>) {
-    val forward = rememberFeatureSource(routeToFeatureCollection(forwardRoute, nodeLookup))
-    val back = rememberFeatureSource(routeToFeatureCollection(returnRoute, nodeLookup))
+    val forward = rememberFeatureSource(forwardRoute, nodeLookup) { routeToFeatureCollection(forwardRoute, nodeLookup) }
+    val back = rememberFeatureSource(returnRoute, nodeLookup) { routeToFeatureCollection(returnRoute, nodeLookup) }
 
     LineLayer(
         id = "traceroute-forward",

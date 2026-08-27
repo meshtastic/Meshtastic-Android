@@ -111,7 +111,11 @@ internal fun NodeLayers(
             )
         }
     if (showPrecisionCircles) {
-        NodePrecisionLayer(id = "node-precision", nodes = unclustered)
+        // Narrowed to the viewport as well, for the reason the chips are: a circle is a 64-vertex polygon, and zoomed
+        // in far enough that nothing clusters, every node in the mesh is "unclustered" — so the whole mesh was being
+        // tessellated to draw the handful of circles actually on screen.
+        val visibleUnclustered = remember(unclustered, visibleBounds) { nodesInView(unclustered, visibleBounds) }
+        NodePrecisionLayer(id = "node-precision", nodes = visibleUnclustered)
     }
 
     // Every node the source draws on its own needs an image, or it falls through to a bare dot. Which nodes those are
@@ -119,10 +123,13 @@ internal fun NodeLayers(
     // node predicted wrongly would then have nothing to draw at all. It orders instead: loneliest first, so the nodes
     // that are certainly drawn come first, the ones near the cluster threshold (where the prediction is least sure)
     // come next, and the budget only runs out on nodes buried mid-cluster that are never drawn.
-    val chipNodes =
-        remember(nodes, visibleBounds, zoom) {
-            nodesByIsolation(nodesInView(nodes, visibleBounds), zoom, CLUSTER_RADIUS)
-        }
+    //
+    // Ranked over the whole mesh rather than over the visible subset, then narrowed. Two reasons: isolation is a
+    // spatial property, so a node at the edge of the viewport with neighbours just outside it is not in fact alone;
+    // and this keeps the O(n) grid pass keyed on the zoom rather than on the viewport, which changes every frame of
+    // a pan. Narrowing afterwards is an order-preserving filter.
+    val rankedNodes = remember(nodes, zoom) { nodesByIsolation(nodes, zoom, CLUSTER_RADIUS) }
+    val chipNodes = remember(rankedNodes, visibleBounds) { nodesInView(rankedNodes, visibleBounds) }
 
     // getClusterExpansionZoom became a suspend function in maplibre-compose 0.15.0 (feature queries
     // no longer block the caller), and onClick is not a suspending callback.
@@ -130,7 +137,8 @@ internal fun NodeLayers(
 
     val nodeSource =
         rememberFeatureSource(
-            nodesToFeatureCollection(nodes, myNodeNum),
+            nodes,
+            myNodeNum,
             options =
             GeoJsonOptions(
                 cluster = true,
@@ -138,7 +146,9 @@ internal fun NodeLayers(
                 clusterMaxZoom = CLUSTER_MAX_ZOOM,
                 clusterMinPoints = CLUSTER_MIN_POINTS,
             ),
-        )
+        ) {
+            nodesToFeatureCollection(nodes, myNodeNum)
+        }
 
     CircleLayer(
         id = "node-clusters",
@@ -239,7 +249,7 @@ private const val CLUSTER_STEP_LARGE = 200
  */
 @Composable
 internal fun NodePrecisionLayer(id: String, nodes: List<Node>) {
-    val source = rememberFeatureSource(precisionCirclesToFeatureCollection(nodes))
+    val source = rememberFeatureSource(nodes) { precisionCirclesToFeatureCollection(nodes) }
     FillLayer(
         id = "$id-fill",
         source = source,
