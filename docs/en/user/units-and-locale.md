@@ -145,6 +145,10 @@ metres. For those cases the app has its own switch:
 everything, temperature included (metric → °C, imperial → °F), even where the device's own regional preferences say
 otherwise. The setting exists on Android and Desktop alike.
 
+Not every English region is fully metric. **English (United Kingdom)** uses miles and feet for distance, so the node list shows miles and altitude in feet. For metric distances, choose a fully metric region such as English (Canada), English (Ireland), or English (New Zealand).
+
+Some phones do not offer the **Regional preferences** menu at all and list only English (United States). On those devices there is currently no way to select metric units for the app.
+
 > 💡 **Tip:** All measurement formatting is handled centrally and respects your platform's locale, so units stay consistent everywhere in the app.
 
 ## Related Topics
