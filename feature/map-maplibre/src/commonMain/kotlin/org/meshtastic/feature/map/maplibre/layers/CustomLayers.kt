@@ -17,6 +17,7 @@
 package org.meshtastic.feature.map.maplibre.layers
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import org.maplibre.compose.expressions.ast.Expression
@@ -48,49 +49,58 @@ import org.maplibre.compose.sources.rememberGeoJsonSource
 @Composable
 internal fun CustomLayers(layers: List<CustomLayer>) {
     layers.forEach { layer ->
-        val source = rememberGeoJsonSource(data = GeoJsonData.Uri(layer.uri))
-
-        val fill = coalesce(feature["fill"].asString(), feature["color"].asString())
-        val stroke = coalesce(feature["stroke"].asString(), feature["color"].asString())
-        val strokeColor = stroke.convertToColor(const(CustomLayerBlue))
-        val strokeWidth = coalesce(feature["stroke-width"].asNumber(), const(DEFAULT_STROKE_WIDTH)).dp
-
-        // One source, three layers, each filtered to the geometry it can actually draw. Unfiltered, the fill layer
-        // painted a LineString's vertices as a solid wedge and the circle layer put a dot on every polygon corner —
-        // invisible while every import was one flat translucent blue, obvious the moment they carry their own colours.
-        FillLayer(
-            id = "custom-${layer.id}-fill",
-            source = source,
-            filter = geometryIsOneOf(GeometryType.Polygon, GeometryType.MultiPolygon),
-            color = fill.convertToColor(const(CustomLayerBlue)),
-            opacity = coalesce(feature["fill-opacity"].asNumber(), const(DEFAULT_FILL_OPACITY)),
-        )
-        LineLayer(
-            id = "custom-${layer.id}-line",
-            source = source,
-            // Polygons are here too, for their rings: `fill-outline-color` is always a hairline, so an import asking
-            // for a 5dp border would silently get one pixel. The Google flavor honours the width, and so does this.
-            filter =
-            geometryIsOneOf(
-                GeometryType.LineString,
-                GeometryType.MultiLineString,
-                GeometryType.Polygon,
-                GeometryType.MultiPolygon,
-            ),
-            color = strokeColor,
-            opacity = coalesce(feature["stroke-opacity"].asNumber(), const(1f)),
-            width = strokeWidth,
-        )
-        CircleLayer(
-            id = "custom-${layer.id}-point",
-            source = source,
-            filter = geometryIsOneOf(GeometryType.Point, GeometryType.MultiPoint),
-            color = strokeColor,
-            radius = const(POINT_RADIUS.dp),
-            strokeColor = const(Color.White),
-            strokeWidth = const(1.dp),
-        )
+        // Keyed on the refresh token as well as the id: a refreshed network layer keeps its URI, so the source's data
+        // is unchanged and nothing would re-fetch. Changing the key rebuilds the source, which does. The Google
+        // flavour keys its own MapEffect the same way.
+        key(layer.id, layer.refreshToken) { ImportedLayer(layer) }
     }
+}
+
+/** One imported overlay: a source, and the three layers that between them can draw anything in it. */
+@Composable
+private fun ImportedLayer(layer: CustomLayer) {
+    val source = rememberGeoJsonSource(data = GeoJsonData.Uri(layer.uri))
+
+    val fill = coalesce(feature["fill"].asString(), feature["color"].asString())
+    val stroke = coalesce(feature["stroke"].asString(), feature["color"].asString())
+    val strokeColor = stroke.convertToColor(const(CustomLayerBlue))
+    val strokeWidth = coalesce(feature["stroke-width"].asNumber(), const(DEFAULT_STROKE_WIDTH)).dp
+
+    // One source, three layers, each filtered to the geometry it can actually draw. Unfiltered, the fill layer
+    // painted a LineString's vertices as a solid wedge and the circle layer put a dot on every polygon corner —
+    // invisible while every import was one flat translucent blue, obvious the moment they carry their own colours.
+    FillLayer(
+        id = "custom-${layer.id}-fill",
+        source = source,
+        filter = geometryIsOneOf(GeometryType.Polygon, GeometryType.MultiPolygon),
+        color = fill.convertToColor(const(CustomLayerBlue)),
+        opacity = coalesce(feature["fill-opacity"].asNumber(), const(DEFAULT_FILL_OPACITY)),
+    )
+    LineLayer(
+        id = "custom-${layer.id}-line",
+        source = source,
+        // Polygons are here too, for their rings: `fill-outline-color` is always a hairline, so an import asking
+        // for a 5dp border would silently get one pixel. The Google flavor honours the width, and so does this.
+        filter =
+        geometryIsOneOf(
+            GeometryType.LineString,
+            GeometryType.MultiLineString,
+            GeometryType.Polygon,
+            GeometryType.MultiPolygon,
+        ),
+        color = strokeColor,
+        opacity = coalesce(feature["stroke-opacity"].asNumber(), const(1f)),
+        width = strokeWidth,
+    )
+    CircleLayer(
+        id = "custom-${layer.id}-point",
+        source = source,
+        filter = geometryIsOneOf(GeometryType.Point, GeometryType.MultiPoint),
+        color = strokeColor,
+        radius = const(POINT_RADIUS.dp),
+        strokeColor = const(Color.White),
+        strokeWidth = const(1.dp),
+    )
 }
 
 /** What an import with no colours of its own is drawn in. */

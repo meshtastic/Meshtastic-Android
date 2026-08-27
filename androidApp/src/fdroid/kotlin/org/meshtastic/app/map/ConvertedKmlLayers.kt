@@ -62,8 +62,13 @@ internal fun rememberRenderableLayers(layers: List<MapLayerItem>): List<CustomLa
     // A KML layer is absent until its conversion finishes, and for good if the file held nothing mappable.
     return layers.mapNotNull { layer ->
         when {
-            layer.layerType != LayerType.KML -> layer.uri?.let { CustomLayer(id = layer.id, uri = it.toString()) }
-            else -> converted[layer.conversionKey()]?.let { CustomLayer(id = layer.id, uri = it) }
+            layer.layerType != LayerType.KML ->
+                layer.uri?.let { CustomLayer(id = layer.id, uri = it.toString(), refreshToken = layer.refreshToken) }
+
+            else ->
+                converted[layer.conversionKey()]?.let {
+                    CustomLayer(id = layer.id, uri = it, refreshToken = layer.refreshToken)
+                }
         }
     }
 }

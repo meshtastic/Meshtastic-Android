@@ -23,5 +23,8 @@ package org.meshtastic.feature.map.maplibre.layers
  * these; this module never touches the filesystem.
  *
  * @param uri a `file://`, `https://` or data URI MapLibre can fetch GeoJSON from.
+ * @param refreshToken bumped by the host when the user asks to refresh this layer. A network layer keeps the same URI
+ *   across a refresh, so without something that changes there is nothing to tell the map its contents moved on — see
+ *   [CustomLayers][org.meshtastic.feature.map.maplibre.layers.CustomLayers].
  */
-data class CustomLayer(val id: String, val uri: String)
+data class CustomLayer(val id: String, val uri: String, val refreshToken: Int = 0)
