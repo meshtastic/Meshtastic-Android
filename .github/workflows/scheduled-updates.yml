@@ -263,7 +263,7 @@ jobs:
           fi
 
       - name: Sync with Crowdin
-        uses: crowdin/github-action@v2
+        uses: crowdin/github-action@v3
         with:
           base_url: 'https://meshtastic.crowdin.com/api/v2'
           config: 'crowdin.yml'
