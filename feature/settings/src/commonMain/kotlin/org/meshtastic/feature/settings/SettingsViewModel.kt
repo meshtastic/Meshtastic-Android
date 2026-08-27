@@ -158,6 +158,8 @@ class SettingsViewModel(
         uiPrefs.setTheme(theme)
     }
 
+    val unitsOverride = uiPrefs.unitsOverride
+
     fun setUnitsOverride(override: UnitsOverride) {
         uiPrefs.setUnitsOverride(override.value)
     }

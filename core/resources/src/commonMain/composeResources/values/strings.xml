@@ -1955,10 +1955,12 @@
     <string name="type_a_message">Type a message</string>
     <string name="udp_enabled">UDP broadcasting</string>
     <string name="undo">Undo</string>
+    <!-- UNITS -->
     <string name="units">Units</string>
     <string name="units_follow_system">System default</string>
     <string name="units_imperial">Imperial</string>
     <string name="units_metric">Metric</string>
+    <string name="units_scope_summary">How this app displays distance, altitude, speed, and temperature. Your device's own screen follows its Display config instead.</string>
     <!-- UNKNOWN -->
     <string name="unknown">Unknown</string>
     <string name="unknown_age">Unknown Age</string>

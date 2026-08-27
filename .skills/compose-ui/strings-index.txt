@@ -1898,10 +1898,12 @@ type
 type_a_message
 udp_enabled
 undo
+### UNITS ###
 units
 units_follow_system
 units_imperial
 units_metric
+units_scope_summary
 ### UNKNOWN ###
 unknown
 unknown_age

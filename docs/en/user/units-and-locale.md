@@ -24,6 +24,12 @@ Units follow your device's **region**, not the display language. Choosing a plai
 
 ---
 
+## The Radio's Own Screen Is Separate
+
+**Device → Display → Units** configures the screen on the radio, not the app. So do **Use 12-Hour Clock** and **Always Point North** — all three apply to the node's display only. Temperature on that screen has its own setting, [**Telemetry → Display Fahrenheit**](https://meshtastic.org/docs/configuration/module/telemetry#display-fahrenheit).
+
+If your node list shows miles while the radio's screen shows kilometres, this is why: the two are set in different places. Changing the device setting will never alter what the app displays. See the [Display Config](https://meshtastic.org/docs/configuration/radio/display) guide on meshtastic.org for the device-side options.
+
 ## Temperature
 
 Temperature values from environment sensors are transmitted as **°C** and displayed based on your device's temperature unit preference.
@@ -121,6 +127,10 @@ By default the app follows your device, and your measurement system (metric vs i
 4. On Android 14+, temperature can be overridden on its own under **Regional preferences → Temperature**
 5. Return to Meshtastic — values update immediately
 
+Not every English region is fully metric. **English (United Kingdom)** uses miles and feet for distance, so the node list shows miles and altitude in feet. For metric distances, set the app's **Units** setting to Metric (below), or choose a fully metric region such as English (Canada), English (Ireland), or English (New Zealand).
+
+Some phones do not offer the **Regional preferences** menu at all and list only English (United States). On those devices, use the app's **Units** setting below.
+
 ### Overriding the units in the app
 
 Not every device can express every preference — some manufacturer builds ship no regional preferences at all, some
@@ -143,6 +153,7 @@ otherwise. The setting exists on Android and Desktop alike.
 - [Telemetry & Sensors](telemetry-and-sensors) — the sensors that produce these measurements
 - [Measurement & Formatting](../developer/measurement) — developer reference for the formatting utilities
 - [Settings — Radio & User](settings-radio-user) — region setting that drives unit selection
+- [Display Config](https://meshtastic.org/docs/configuration/radio/display) — units, clock, and compass settings for the radio's own screen, on meshtastic.org
 
 ---
 

@@ -44,6 +44,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.core.qualifier.named
 import org.meshtastic.core.common.di.GOOGLE_SERVICES_AVAILABLE
+import org.meshtastic.core.common.util.UnitsOverride
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
@@ -79,6 +80,7 @@ import org.meshtastic.feature.settings.component.PermissionsSettingsContent
 import org.meshtastic.feature.settings.component.PersistenceSettingsContent
 import org.meshtastic.feature.settings.component.PrivacySettingsContent
 import org.meshtastic.feature.settings.component.ThemePickerDialog
+import org.meshtastic.feature.settings.component.UnitsOption
 import org.meshtastic.feature.settings.component.UnitsPickerDialog
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.ModuleRoute
@@ -182,8 +184,10 @@ fun SettingsScreen(
 
     var showThemePickerDialog by rememberSaveable { mutableStateOf(false) }
     var showUnitsPickerDialog by rememberSaveable { mutableStateOf(false) }
+    val unitsOverride = UnitsOverride.fromValue(settingsViewModel.unitsOverride.collectAsStateWithLifecycle().value)
     if (showUnitsPickerDialog) {
         UnitsPickerDialog(
+            current = unitsOverride,
             onClickUnits = { settingsViewModel.setUnitsOverride(it) },
             onDismiss = { showUnitsPickerDialog = false },
         )
@@ -276,6 +280,7 @@ fun SettingsScreen(
                         onShowFullMessageTimestampsChange = settingsViewModel::setShowFullMessageTimestamps,
                         onShowLanguagePicker = { showLanguagePickerDialog = true },
                         onShowThemePicker = { showThemePickerDialog = true },
+                        unitsSummary = stringResource(UnitsOption.entries.first { it.override == unitsOverride }.label),
                         onShowUnitsPicker = { showUnitsPickerDialog = true },
                     )
                     PersistenceSettingsContent(

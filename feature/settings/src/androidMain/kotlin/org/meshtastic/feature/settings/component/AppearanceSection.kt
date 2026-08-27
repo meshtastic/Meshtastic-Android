@@ -47,6 +47,7 @@ internal fun ColumnScope.AppearanceSettingsContent(
     onShowFullMessageTimestampsChange: (Boolean) -> Unit,
     onShowLanguagePicker: () -> Unit,
     onShowThemePicker: () -> Unit,
+    unitsSummary: String,
     onShowUnitsPicker: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -79,7 +80,12 @@ internal fun ColumnScope.AppearanceSettingsContent(
         onShowThemePicker()
     }
 
-    ListItem(text = stringResource(Res.string.units), leadingIcon = MeshtasticIcons.Distance, trailingIcon = null) {
+    ListItem(
+        text = stringResource(Res.string.units),
+        supportingText = unitsSummary,
+        leadingIcon = MeshtasticIcons.Distance,
+        trailingIcon = null,
+    ) {
         onShowUnitsPicker()
     }
 
@@ -99,6 +105,7 @@ fun AppearanceSectionPreview() {
                 onShowFullMessageTimestampsChange = {},
                 onShowLanguagePicker = {},
                 onShowThemePicker = {},
+                unitsSummary = "System default",
                 onShowUnitsPicker = {},
             )
         }
