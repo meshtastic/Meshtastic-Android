@@ -1,23 +1,21 @@
 #!/usr/bin/env python3
-"""Check the flatpak platform-dependency list against the POMs it is supposed to mirror.
+"""Check the flatpak platform-dependency list still declares every per-architecture root.
 
 `flatpak-sources.json` is generated on an x86_64 runner, so it only ever contains the URLs an x86_64
 resolution needs. The arm64 Flatpak then builds *offline* against that manifest, so every artifact it
-resolves differently has to be force-resolved during generation — that is what the
-`platformDependencies` block in the root build.gradle.kts is for.
+resolves differently has to be force-resolved during generation — that is what the `platformDependencies`
+block in the root build.gradle.kts is for.
 
-Force-resolution there is non-transitive, so each arch-specific artifact needs naming individually,
-version and classifier included. The build script derives what it can from the version catalog, but the
-rest belongs to upstream POMs, not to us, and nothing stopped those going stale: they are read by no
-tool, Renovate cannot see inside them (and should not — the right value is "what the parent POM says",
-not "latest"), and a miss surfaces as `Could not find <jar>` eleven minutes into the arm64 build.
+Since flatpak-sources 0.2.0 those coordinates resolve transitively, so a platform artifact's own natives
+come along by themselves and no longer need declaring; this used to check that they were, and that half is
+gone. What transitive resolution cannot supply is a **root**. If desktopApp starts resolving a
+per-architecture runtime that nothing here declares, there is no root to expand from, nothing warns, and
+the miss surfaces as `Could not find <jar>` eleven minutes into the arm64 build. That is exactly how the
+maplibre desktop runtime was missed on #6901, so it is what this still guards.
 
-This derives the list that *should* be there and fails in seconds if the real one disagrees, in the
-same spirit as the vendored-Gradle-distribution guard in verify-flatpak.yml. It runs from the
-check-metadata job in pull-request.yml rather than from verify-flatpak.yml, whose path filter excludes
-gradle/libs.versions.toml — a dependency bump, which is what causes this drift, would never have run it.
+Offline and deterministic: it reads the two build scripts and the version catalog, nothing else.
 
-Run from the repository root, with network access:
+Run from the repository root:
 
     python3 scripts/verify-flatpak/check-platform-deps.py
 """
@@ -25,18 +23,12 @@ Run from the repository root, with network access:
 from __future__ import annotations
 
 import re
-import urllib.error
-import urllib.request
-import xml.etree.ElementTree as ElementTree
 from pathlib import Path
 from typing import NoReturn
 
-MAVEN_CENTRAL = "https://repo1.maven.org/maven2"
-POM_NAMESPACE = {"m": "http://maven.apache.org/POM/4.0.0"}
-
-# Suffixes that mark an *architecture*, so an artifact carrying one is built per CPU. An OS-only
-# suffix does not count: `location-runtime-linux` is the same jar on both Linux arches, so the
-# generation host's own resolution already captures it.
+# Suffixes that mark an *architecture*, so an artifact carrying one is built per CPU. An OS-only suffix
+# does not count: `location-runtime-linux` is the same jar on both Linux arches, so the generation host's
+# own resolution already captures it.
 ARCH_SUFFIXES = ("arm64", "aarch64", "x64", "x86_64")
 
 CATALOG = Path("gradle/libs.versions.toml")
@@ -57,7 +49,7 @@ def catalog_libraries() -> dict[str, str]:
     versions = catalog_versions()
     table = text.split("[libraries]", 1)[1].split("\n[", 1)[0]
     libraries = {}
-    for alias, body in re.findall(r'^([\w.-]+)\s*=\s*\{([^}]*)\}', table, re.MULTILINE):
+    for alias, body in re.findall(r"^([\w.-]+)\s*=\s*\{([^}]*)\}", table, re.MULTILINE):
         module = re.search(r'module\s*=\s*"([^"]+)"', body)
         ref = re.search(r'version\.ref\s*=\s*"([^"]+)"', body)
         literal = re.search(r'version\s*=\s*"([^"]+)"', body)
@@ -134,57 +126,11 @@ def expand(templates: set[str], platforms: set[str]) -> set[str]:
     return {template.replace("{platform}", platform) for template in templates for platform in platforms}
 
 
-class Unreachable(Exception):
-    """Maven Central could not be read at all, which is not the same as an artifact being absent."""
-
-
 def substitute(coordinate: str, versions: dict[str, str]) -> str:
     """A coordinate template with its `$name` version interpolations replaced by real versions."""
     for name, version in versions.items():
         coordinate = coordinate.replace(f"${name}", version)
     return coordinate
-
-
-def fetch_pom(coordinate: str) -> ElementTree.Element | None:
-    """The POM for `group:artifact:version[:classifier]`, or None if Maven Central says it is absent.
-
-    Raises [Unreachable] for anything that is not a 404, so an outage is never reported as a version
-    that does not exist — the two need opposite responses from the caller.
-    """
-    group, artifact, version = coordinate.split(":")[:3]
-    url = f"{MAVEN_CENTRAL}/{group.replace('.', '/')}/{artifact}/{version}/{artifact}-{version}.pom"
-    try:
-        with urllib.request.urlopen(url, timeout=30) as response:  # noqa: S310 - fixed https host
-            return ElementTree.fromstring(response.read())
-    except urllib.error.HTTPError as error:
-        if error.code == 404:
-            return None
-        raise Unreachable(f"{url}: HTTP {error.code}") from error
-    except (urllib.error.URLError, ElementTree.ParseError) as error:
-        raise Unreachable(f"{url}: {error}") from error
-
-
-def arch_specific_dependencies(pom: ElementTree.Element) -> set[str]:
-    """The dependencies of `pom` that are built per platform, as full coordinates.
-
-    Two shapes count. Any classifier at all: in this dependency graph a classifier always names a
-    native payload, and the two arches disagree even when one of them is spelled without an arch
-    (LWJGL calls x64 plain `natives-linux`). And an artifactId ending in an architecture, which is how
-    skiko and compose-desktop name theirs. Everything else resolves identically on both arches and the
-    generation host's own resolution already captured it.
-    """
-    found = set()
-    for dependency in pom.findall(".//m:dependencies/m:dependency", POM_NAMESPACE):
-        group = dependency.findtext("m:groupId", "", POM_NAMESPACE)
-        artifact = dependency.findtext("m:artifactId", "", POM_NAMESPACE)
-        version = dependency.findtext("m:version", "", POM_NAMESPACE)
-        classifier = dependency.findtext("m:classifier", "", POM_NAMESPACE)
-        if not (group and artifact and version):
-            continue
-        per_platform = bool(classifier) or any(artifact.endswith(f"-{suffix}") for suffix in ARCH_SUFFIXES)
-        if per_platform:
-            found.add(f"{group}:{artifact}:{version}" + (f":{classifier}" if classifier else ""))
-    return found
 
 
 def fail(problems: list[str]) -> NoReturn:
@@ -223,34 +169,15 @@ def main() -> None:
                 f"{module}* is pinned to {sorted(pinned)} but gradle/libs.versions.toml sets {key} = {expected}"
             )
 
-    # Anything desktopApp resolves per Linux arch has to be declared, or the arm64 build has no URL for
-    # it at all — that is how the maplibre runtime got missed in the first place.
+    # The one thing transitive resolution cannot do for us: supply a root. Anything desktopApp resolves per
+    # Linux arch has to be declared, or the arm64 build has no URL for it and nothing warns.
     for runtime in sorted(desktop_linux_runtimes()):
         if runtime not in coordinates:
             problems.append(f"desktopApp resolves {runtime} on Linux, which is not declared")
 
-    # And everything arch-specific those roots depend on, because force-resolution is non-transitive.
-    roots = sorted({c for c in coordinates if len(c.split(":")) == 3} | desktop_linux_runtimes())
-    try:
-        for root in roots:
-            pom = fetch_pom(root)
-            if pom is None:
-                problems.append(f"{root} is declared but has no published POM — is the version right?")
-                continue
-            for needed in sorted(arch_specific_dependencies(pom)):
-                if needed not in coordinates:
-                    problems.append(f"{root} needs {needed}, which is not declared")
-    except Unreachable as error:
-        # Nothing can be concluded without the POMs, and blocking every PR on a Maven Central outage is
-        # worse than letting the arm64 build go back to being the slow backstop it was before this check.
-        if problems:
-            fail(problems)
-        print(f"SKIPPED: could not reach Maven Central ({error}); transitive coverage not verified.")
-        raise SystemExit(0) from error
-
     if problems:
         fail(problems)
-    print(f"OK: {len(coordinates)} platform coordinates declared, all arch-specific transitives covered.")
+    print(f"OK: {len(coordinates)} platform coordinates declared, covering every per-arch runtime desktopApp resolves.")
 
 
 if __name__ == "__main__":
