@@ -44,12 +44,27 @@ internal fun parseCoordinates(raw: String): List<String>? {
     val positions =
         raw.trim().split(WHITESPACE).mapNotNull { tuple ->
             val parts = tuple.split(',')
-            val longitude = parts.getOrNull(0)?.trim()?.toDoubleOrNull()
-            val latitude = parts.getOrNull(1)?.trim()?.toDoubleOrNull()
+            val longitude = parts.getOrNull(0)?.trim()?.toDoubleOrNull()?.takeIf { it.isValidOrdinate(MAX_LONGITUDE) }
+            val latitude = parts.getOrNull(1)?.trim()?.toDoubleOrNull()?.takeIf { it.isValidOrdinate(MAX_LATITUDE) }
             if (longitude == null || latitude == null) null else "[$longitude,$latitude]"
         }
     return positions.ifEmpty { null }
 }
+
+/** GeoJSON's ordinate bounds, per RFC 7946. */
+private const val MAX_LONGITUDE = 180.0
+private const val MAX_LATITUDE = 90.0
+
+/**
+ * Whether an ordinate is one this converter will write, checked before the number reaches the JSON.
+ *
+ * `toDoubleOrNull` accepts "NaN" and "Infinity", and these coordinates are interpolated into the output as text — so a
+ * single such ordinate emits a bare `NaN` token and makes the *whole* converted file unparseable, taking every other
+ * placemark in it down too. That is the same shape of failure as writing `0,498` for a decimal under a comma-decimal
+ * locale. Out-of-range values go on the same pass: a coordinate outside RFC 7946's bounds is corrupt input rather than
+ * a place on Earth.
+ */
+private fun Double.isValidOrdinate(limit: Double): Boolean = isFinite() && this in -limit..limit
 
 /** One GeoJSON feature, with the placemark's text and the style's colours as simplestyle properties. */
 internal fun KmlGeometry.toFeature(placemark: Placemark, style: KmlStyle?): String {

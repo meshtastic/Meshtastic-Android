@@ -53,9 +53,13 @@ import org.meshtastic.core.resources.map_cache_manager
 import org.meshtastic.core.resources.map_cache_megabytes
 import org.meshtastic.core.resources.map_cache_size
 import org.meshtastic.core.resources.map_cache_tiles
+import org.meshtastic.core.resources.map_download_status_complete
+import org.meshtastic.core.resources.map_download_status_downloading
+import org.meshtastic.core.resources.map_download_status_paused
 import org.meshtastic.core.resources.map_select_download_region
 import org.meshtastic.core.resources.map_start_download
 import org.meshtastic.core.resources.map_tile_download_estimate
+import org.meshtastic.core.resources.map_tile_limit_reached
 import org.meshtastic.core.resources.offline_maps_empty
 import org.meshtastic.core.ui.icon.Delete
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -256,7 +260,7 @@ private suspend fun OfflineManager.downloadVisibleArea(target: OfflineMapTarget)
 private fun OfflinePack.label(): String {
     val definition = definition
     val bounds = (definition as? OfflinePackDefinition.TilePyramid)?.bounds
-    val centre = bounds?.let { "${it.south.round()}, ${it.west.round()}" } ?: "—"
+    val centre = bounds?.let { "${it.south.round()}, ${it.west.round()}" } ?: EM_DASH
     return "$centre  z${definition.minZoom}–${definition.maxZoom ?: definition.minZoom}"
 }
 
@@ -271,15 +275,34 @@ private fun DownloadProgress.fraction(): Float = when (this) {
     else -> 0f
 }
 
+/**
+ * One line describing a pack's state, assembled from resources rather than written in English.
+ *
+ * `status.name` went straight into the UI before, so every locale read the library's own enum constants. The tile count
+ * and byte size reuse the strings the cache figures above already use, which keeps one set of units to translate.
+ */
+@Composable
 private fun DownloadProgress.summary(): String = when (this) {
     is DownloadProgress.Healthy ->
-        "${status.name} · $completedTileCount tiles · ${completedResourceBytes.megabytes()} MB"
+        listOf(
+            stringResource(
+                when (status) {
+                    DownloadStatus.Paused -> Res.string.map_download_status_paused
+                    DownloadStatus.Downloading -> Res.string.map_download_status_downloading
+                    DownloadStatus.Complete -> Res.string.map_download_status_complete
+                },
+            ),
+            stringResource(Res.string.map_cache_tiles, completedTileCount.toInt()),
+            stringResource(Res.string.map_cache_megabytes, completedResourceBytes.megabytes()),
+        )
+            .joinToString(SUMMARY_SEPARATOR)
 
+    // Upstream's message, which is not ours to localise, and more useful than a generic failure line.
     is DownloadProgress.Error -> message
 
-    is DownloadProgress.TileLimitExceeded -> "Tile limit reached ($limit)"
+    is DownloadProgress.TileLimitExceeded -> stringResource(Res.string.map_tile_limit_reached, limit.toInt())
 
-    DownloadProgress.Unknown -> "—"
+    DownloadProgress.Unknown -> EM_DASH
 }
 
 /**
@@ -315,3 +338,9 @@ private fun OfflineMapTarget.zoomRange(): IntRange {
     val max = (current + PACK_EXTRA_ZOOM_LEVELS).coerceAtMost(MAX_PACK_ZOOM)
     return current.coerceAtMost(max)..max
 }
+
+/** The separator between the parts of a pack's summary line. */
+private const val SUMMARY_SEPARATOR = " \u00b7 "
+
+/** Stands in for a value there is nothing to show for; a symbol, so it needs no translation. */
+private const val EM_DASH = "\u2014"

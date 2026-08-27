@@ -1082,6 +1082,9 @@
     <string name="map_download_complete">Download complete!</string>
     <string name="map_download_errors">Download complete with %1$d errors</string>
     <string name="map_download_region">Download Region</string>
+    <string name="map_download_status_complete">Complete</string>
+    <string name="map_download_status_downloading">Downloading</string>
+    <string name="map_download_status_paused">Paused</string>
     <string name="map_filter">Map Filter\n</string>
     <string name="map_layer_formats">Map layers support .kml, .kmz, or GeoJSON formats.</string>
     <string name="map_node_popup_details">%1$s&lt;br&gt;Last heard: %2$s&lt;br&gt;Last position: %3$s&lt;br&gt;Battery: %4$s</string>
@@ -1098,6 +1101,7 @@
     <string name="map_style_selection">Map style selection</string>
     <string name="map_subDescription">bearing: %1$d° distance: %2$s</string>
     <string name="map_tile_download_estimate">Tile download estimate:</string>
+    <string name="map_tile_limit_reached">Tile limit reached (%1$d)</string>
     <string name="map_tile_source">Tile Source</string>
     <string name="map_type_hybrid">Hybrid</string>
     <string name="map_type_normal">Normal</string>

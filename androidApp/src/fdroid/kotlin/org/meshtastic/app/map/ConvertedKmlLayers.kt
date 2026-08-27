@@ -26,6 +26,7 @@ import androidx.compose.ui.platform.LocalContext
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.feature.map.maplibre.layers.CustomLayer
 import java.io.BufferedInputStream
 import java.io.File
@@ -79,11 +80,11 @@ private fun MapLayerItem.conversionKey(): String = "$id@$refreshToken"
 /** Converts one KML or KMZ import to a GeoJSON file in the cache, returning its URI. Null if nothing was mappable. */
 private suspend fun convertKmlLayer(context: Context, layer: MapLayerItem): String? = withContext(Dispatchers.IO) {
     val source = layer.uri ?: return@withContext null
-    runCatching {
+    safeCatching {
         val target =
             File(File(context.cacheDir, CONVERTED_DIR).apply { mkdirs() }, "${layer.conversionKey()}.geojson")
         // A file already here was converted from this same layer at this same token, so it is still good.
-        if (target.length() > 0L) return@runCatching Uri.fromFile(target).toString()
+        if (target.length() > 0L) return@safeCatching Uri.fromFile(target).toString()
 
         val geoJson =
             context.contentResolver.openInputStream(source)?.use { stream ->
@@ -91,7 +92,7 @@ private suspend fun convertKmlLayer(context: Context, layer: MapLayerItem): Stri
             }
         if (geoJson == null) {
             Logger.withTag("KmlLayers").w { "Nothing mappable in an imported KML layer" }
-            return@runCatching null
+            return@safeCatching null
         }
         // Written beside the target and moved into place, so a conversion cut short by leaving the screen
         // cannot

@@ -17,9 +17,11 @@
 package org.meshtastic.feature.map.maplibre.component
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -70,7 +72,15 @@ internal fun ClusterMembersDialog(
 
 @Composable
 private fun ClusterMemberRow(member: ClusterMember, onClick: () -> Unit) {
-    Column(modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 8.dp)) {
+    // A member with no long name renders one line of bodyLarge, which lands under the 48dp minimum touch target.
+    Column(
+        modifier =
+        Modifier.fillMaxWidth()
+            .heightIn(min = MIN_TOUCH_TARGET.dp)
+            .clickable(onClick = onClick)
+            .padding(vertical = 8.dp),
+        verticalArrangement = Arrangement.Center,
+    ) {
         Text(
             text = member.longName.ifBlank { member.shortName },
             style = MaterialTheme.typography.bodyLarge,
@@ -85,3 +95,6 @@ private fun ClusterMemberRow(member: ClusterMember, onClick: () -> Unit) {
         }
     }
 }
+
+/** Material's minimum touch target, matching the 48dp `minTouchTargetSize` the shared nav display uses. */
+private const val MIN_TOUCH_TARGET = 48

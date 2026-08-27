@@ -49,8 +49,13 @@ fun waypointsToFeatureCollection(waypoints: Collection<DataPacket>): FeatureColl
     FeatureCollection(
         waypoints.mapNotNull { packet ->
             val waypoint = packet.waypoint ?: return@mapNotNull null
-            val latitude = (waypoint.latitude_i ?: 0) * DEG_SCALE
-            val longitude = (waypoint.longitude_i ?: 0) * DEG_SCALE
+            // Both axes required, not just "not null island". Substituting 0 for one absent ordinate put a marker on
+            // the equator or the prime meridian at the other's position — a confident pin in the wrong place, which is
+            // worse than no pin. A waypoint genuinely at 0,0 is also dropped, as it was before.
+            val latitudeI = waypoint.latitude_i ?: return@mapNotNull null
+            val longitudeI = waypoint.longitude_i ?: return@mapNotNull null
+            val latitude = latitudeI * DEG_SCALE
+            val longitude = longitudeI * DEG_SCALE
             if (latitude == 0.0 && longitude == 0.0) return@mapNotNull null
             Feature(
                 geometry = Point(Position(longitude = longitude, latitude = latitude)),
@@ -65,11 +70,20 @@ fun waypointsToFeatureCollection(waypoints: Collection<DataPacket>): FeatureColl
         },
     )
 
-/** Firmware stores a waypoint icon as a Unicode code point; 0 means "no icon chosen". */
+/**
+ * Firmware stores a waypoint icon as a Unicode code point; 0 means "no icon chosen".
+ *
+ * Anything that is not a Unicode scalar value falls back to the default pin. The field is an `Int` carrying whatever
+ * the sending node put there, and a negative, out-of-range, or surrogate value would otherwise be appended as a broken
+ * or unpaired character that renders as tofu on the map.
+ */
 internal fun iconGlyph(codePoint: Int?): String {
     val cp = codePoint ?: 0
-    return if (cp == 0) "📍" else buildString { appendCodePointCompat(cp) }
+    return if (cp == 0 || !cp.isUnicodeScalarValue()) "📍" else buildString { appendCodePointCompat(cp) }
 }
+
+@Suppress("MagicNumber")
+private fun Int.isUnicodeScalarValue(): Boolean = this in 1..0x10FFFF && this !in 0xD800..0xDFFF
 
 private fun StringBuilder.appendCodePointCompat(codePoint: Int) {
     @Suppress("MagicNumber")

@@ -373,4 +373,92 @@ class KmlToGeoJsonTest {
         assertEquals(1, Regex("\"type\":\"Feature\"").findAll(result).count())
         assertContains(result, """"coordinates":[5.0,6.0]""")
     }
+
+    @Test
+    fun `an inline placemark style is applied in preference to a styleUrl`() {
+        // KML lets a Placemark carry its own Style, and says it wins over a shared one. The top-level scan cannot see
+        // such a Style, because the placemark reader has already consumed to the Placemark's end tag.
+        val result =
+            assertNotNull(
+                convert(
+                    """
+                    <kml><Document>
+                      <Style id="shared"><LineStyle><color>ff0000ff</color></LineStyle></Style>
+                      <Placemark>
+                        <styleUrl>#shared</styleUrl>
+                        <Style><LineStyle><color>ff00ff00</color><width>4</width></LineStyle></Style>
+                        <LineString><coordinates>1,2 3,4</coordinates></LineString>
+                      </Placemark>
+                    </Document></kml>
+                    """,
+                ),
+            )
+
+        assertContains(result, """"stroke":"#00ff00"""")
+        assertContains(result, """"stroke-width":4""")
+    }
+
+    @Test
+    fun `an inline style is read without swallowing the geometry beside it`() {
+        val result =
+            assertNotNull(
+                convert(
+                    """
+                    <kml><Document><Placemark>
+                      <Style><PolyStyle><color>ffffff00</color></PolyStyle></Style>
+                      <Point><coordinates>7,8</coordinates></Point>
+                    </Placemark></Document></kml>
+                    """,
+                ),
+            )
+
+        assertContains(result, """"coordinates":[7.0,8.0]""")
+    }
+
+    @Test
+    fun `non-finite coordinates are rejected rather than written into the json`() {
+        // toDoubleOrNull accepts these, and they are interpolated straight into the output — one of them would emit a
+        // bare NaN token and make the whole file unparseable, taking every other placemark down with it.
+        assertNull(
+            convert(
+                "<kml><Document><Placemark><Point><coordinates>NaN,5</coordinates></Point></Placemark></Document></kml>",
+            ),
+        )
+        assertNull(
+            convert(
+                "<kml><Document><Placemark><Point><coordinates>Infinity,-Infinity</coordinates></Point>" +
+                    "</Placemark></Document></kml>",
+            ),
+        )
+    }
+
+    @Test
+    fun `out-of-range coordinates are rejected`() {
+        assertNull(
+            convert(
+                "<kml><Document><Placemark><Point><coordinates>200,10</coordinates></Point></Placemark></Document></kml>",
+            ),
+        )
+        assertNull(
+            convert(
+                "<kml><Document><Placemark><Point><coordinates>10,95</coordinates></Point></Placemark></Document></kml>",
+            ),
+        )
+    }
+
+    @Test
+    fun `a bad position does not discard the good positions beside it`() {
+        val result =
+            assertNotNull(
+                convert(
+                    """
+                    <kml><Document><Placemark>
+                      <LineString><coordinates>1,2 NaN,4 5,6</coordinates></LineString>
+                    </Placemark></Document></kml>
+                    """,
+                ),
+            )
+
+        assertContains(result, """[[1.0,2.0],[5.0,6.0]]""")
+    }
 }

@@ -18,6 +18,7 @@ package org.meshtastic.app.map
 
 import android.util.Xml
 import co.touchlab.kermit.Logger
+import org.meshtastic.core.common.util.safeCatching
 import org.xmlpull.v1.XmlPullParser
 import java.io.InputStream
 import java.util.zip.ZipInputStream
@@ -51,7 +52,7 @@ internal object KmlToGeoJson {
         val kml = if (source.isKmzArchive()) source.firstKmlEntry() else source
         val features =
             kml?.let { stream ->
-                runCatching { parsePlacemarks(stream) }
+                safeCatching { parsePlacemarks(stream) }
                     .onFailure { failure -> Logger.withTag(TAG).w(failure) { "Could not read an imported KML" } }
                     .getOrDefault(emptyList())
             }
@@ -110,8 +111,9 @@ internal object KmlToGeoJson {
         }
 
         return placemarks.flatMap { placemark ->
-            // A StyleMap points at the styles for normal and highlighted; only the normal one is ever drawn here.
-            val resolved = placemark.styleUrl?.let { styles[styleMaps[it] ?: it] }
+            // An inline Style outranks a styleUrl, per the KML reference. A StyleMap points at the styles for
+            // normal and highlighted; only the normal one is ever drawn here.
+            val resolved = placemark.inlineStyle ?: placemark.styleUrl?.let { styles[styleMaps[it] ?: it] }
             placemark.geometries.map { geometry -> geometry.toFeature(placemark, resolved) }
         }
     }

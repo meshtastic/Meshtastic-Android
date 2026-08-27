@@ -92,7 +92,7 @@ Since waypoints (and their geofences) are broadcast to the whole mesh, only the 
 
 ## Map Layers
 
-Tap the layers icon on the map to open **Manage Map Layers**, where you can import your own overlays in `.kml`, `.kmz`, or GeoJSON format — either by opening a file with Meshtastic or sharing it into the app from another app. Imported layers are listed with a toggle to show/hide each one and an option to remove it. This is available on both the Google Play and F-Droid builds; on F-Droid and Desktop, `.kml`/`.kmz` rendering is temporarily unavailable (see [Map Sources](#map-sources)).
+Tap the layers icon on the map to open **Manage Map Layers**, where you can import your own overlays in `.kml`, `.kmz`, or GeoJSON format — either by opening a file with Meshtastic or sharing it into the app from another app. Imported layers are listed with a toggle to show/hide each one and an option to remove it. This is available on both the Google Play and F-Droid builds; on Desktop, `.kml`/`.kmz` rendering is temporarily unavailable (see [Map Sources](#map-sources)).
 
 ### Site Planner
 
@@ -133,7 +133,7 @@ Overlays can be toggled on top of any base map:
 - **Weather radar** — NOAA NEXRAD reflectivity (US coverage)
 
 {: .note }
-> Offline tile downloads and `.kml`/`.kmz` layer import are temporarily unavailable on F-Droid and Desktop while they are rebuilt on MapLibre. GeoJSON layers and Site Planner coverage overlays work as before.
+> `.kml`/`.kmz` layer import is temporarily unavailable on Desktop while it is rebuilt on MapLibre. GeoJSON layers, Site Planner coverage overlays and offline tile downloads work as before.
 
 ## Related Topics
 

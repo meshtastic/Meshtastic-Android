@@ -1046,6 +1046,9 @@ map_clear_tiles
 map_download_complete
 map_download_errors
 map_download_region
+map_download_status_complete
+map_download_status_downloading
+map_download_status_paused
 map_filter
 map_layer_formats
 map_node_popup_details
@@ -1062,6 +1065,7 @@ map_start_download
 map_style_selection
 map_subDescription
 map_tile_download_estimate
+map_tile_limit_reached
 map_tile_source
 map_type_hybrid
 map_type_normal

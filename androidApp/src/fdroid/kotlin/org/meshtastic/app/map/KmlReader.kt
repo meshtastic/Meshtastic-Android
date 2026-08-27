@@ -26,7 +26,13 @@ internal data class KmlStyle(
     val filled: Boolean = true,
 )
 
-internal class Placemark(val name: String?, val description: String?, val styleUrl: String?) {
+internal class Placemark(
+    val name: String?,
+    val description: String?,
+    val styleUrl: String?,
+    /** A `<Style>` written inside the Placemark. Takes precedence over [styleUrl], as KML specifies. */
+    val inlineStyle: KmlStyle? = null,
+) {
     val geometries = mutableListOf<KmlGeometry>()
 }
 
@@ -36,11 +42,22 @@ internal class KmlGeometry(val type: String, val coordinates: String, val isPoly
 /** A `<Style>` id and what this app can use of it. Null when the style has no id to reference it by. */
 internal fun XmlPullParser.readStyle(): Pair<String, KmlStyle>? {
     val id = getAttributeValue(null, "id")
+    val style = readStyleBody()
+    return id?.let { it to style }
+}
+
+/**
+ * The colours and width of a `<Style>`, read through to its end tag.
+ *
+ * Split out from [readStyle] because a Placemark may carry its own `<Style>` with no id at all, and that one still has
+ * to be read — it is the only styling such a placemark has.
+ */
+internal fun XmlPullParser.readStyleBody(): KmlStyle {
     var style = KmlStyle()
     // Which sub-style the reader is inside. A Google Earth export routinely carries an IconStyle and a LabelStyle in
     // the same Style, each with its own <color>; taking any colour as the line colour painted routes in the icon's.
     var enclosing: String? = null
-    var done = id == null
+    var done = false
 
     while (!done && next() != XmlPullParser.END_DOCUMENT) {
         val tag = name
@@ -57,7 +74,7 @@ internal fun XmlPullParser.readStyle(): Pair<String, KmlStyle>? {
             else -> Unit
         }
     }
-    return id?.let { it to style }
+    return style
 }
 
 /** The `<Style>` children that own a colour or a width. Anything else in a Style is skipped. */
@@ -123,6 +140,7 @@ private class PlacemarkReader {
     private var name: String? = null
     private var description: String? = null
     private var styleUrl: String? = null
+    private var inlineStyle: KmlStyle? = null
     private val geometries = mutableListOf<KmlGeometry>()
     private var pendingType: String? = null
     private var polygonTaken = false
@@ -134,6 +152,10 @@ private class PlacemarkReader {
             "description" -> description = parser.nextText().trim()
 
             "styleUrl" -> styleUrl = parser.nextText().trim()
+
+            // An inline Style is consumed here or not at all: the top-level scan never sees it, because this reader
+            // has already run to the Placemark's end tag by then.
+            "Style" -> inlineStyle = parser.readStyleBody()
 
             in GEOMETRY_TAGS -> {
                 pendingType = tag
@@ -154,7 +176,9 @@ private class PlacemarkReader {
     }
 
     fun build(): Placemark =
-        Placemark(name = name, description = description, styleUrl = styleUrl).also { it.geometries += geometries }
+        Placemark(name = name, description = description, styleUrl = styleUrl, inlineStyle = inlineStyle).also {
+            it.geometries += geometries
+        }
 }
 
 /** The geometry elements this reader understands. Everything else in a Placemark is skipped. */

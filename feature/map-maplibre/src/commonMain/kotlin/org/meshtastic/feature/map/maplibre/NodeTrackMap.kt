@@ -175,7 +175,9 @@ fun MapLibreNodeTrackMap(
         // What the Google flavor puts in a marker info window. MapLibre draws markers as layer features, which have no
         // info window, so the detail for the selected point goes at the foot of the map instead.
         TrackPointCard(
-            position = positions.firstOrNull { it.time == selectedPositionTime },
+            // Guarded on the selection rather than compared straight through: a position whose `time` is absent is
+            // also null, so an unselected map matched it and the card appeared for a point nobody tapped.
+            position = selectedPositionTime?.let { selected -> positions.firstOrNull { it.time == selected } },
             displayUnits = displayUnits,
             // Clear of the logo and attribution along the bottom edge, which the styles are licensed on condition of
             // showing. See MeshMapOrnaments.
@@ -187,8 +189,13 @@ fun MapLibreNodeTrackMap(
 }
 
 private fun ProtoPosition.toTrackPoint(): TrackPoint? {
-    val latitude = (latitude_i ?: 0) * DEG_SCALE
-    val longitude = (longitude_i ?: 0) * DEG_SCALE
+    // Both axes required — one absent ordinate substituted as 0 dragged the track to the equator or the prime
+    // meridian and drew a leg there that the node never travelled.
+    val latitudeI = latitude_i
+    val longitudeI = longitude_i
+    if (latitudeI == null || longitudeI == null) return null
+    val latitude = latitudeI * DEG_SCALE
+    val longitude = longitudeI * DEG_SCALE
     return if (latitude == 0.0 && longitude == 0.0) {
         null
     } else {

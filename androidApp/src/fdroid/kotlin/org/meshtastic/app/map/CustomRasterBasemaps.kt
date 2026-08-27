@@ -25,6 +25,7 @@ import co.touchlab.kermit.Logger
 import org.koin.compose.koinInject
 import org.meshtastic.app.map.model.CustomTileProviderConfig
 import org.meshtastic.app.map.repository.CustomTileProviderRepository
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.feature.map.maplibre.style.Basemap
 import org.meshtastic.feature.map.maplibre.style.RasterTileSpec
 
@@ -57,7 +58,7 @@ fun customRasterBasemaps(): List<Basemap.Raster> {
  */
 private fun CustomTileProviderConfig.tileUrl(): String? = if (isLocal) {
     localUri?.let { uri ->
-        val archive = runCatching { Uri.parse(uri).toFile() }.getOrNull()
+        val archive = safeCatching { Uri.parse(uri).toFile() }.getOrNull()
         if (archive != null && archive.exists()) {
             mbTilesUrl(archive.absolutePath)
         } else {
