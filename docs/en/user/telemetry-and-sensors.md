@@ -51,7 +51,7 @@ Supported environmental sensors:
 |--------|--------|-------|
 | BME680 | Gas Resistance / IAQ | Volatile organic compounds |
 | PMSA003I | PM1.0, PM2.5, PM10 | Particulate matter |
-| SEN55 | PM, NOx, VOC, Temp, Humidity | Multi-sensor |
+| SEN55 | PM, Temp, Humidity | Multi-sensor. Its NOx and VOC indices are recorded and included in a CSV export, but are not yet shown as cards or charts |
 
 ### Soil
 
@@ -76,30 +76,31 @@ Nodes with INA-series power sensors can report:
 
 | Metric | Description |
 |--------|-------------|
-| Bus Voltage | Supply rail voltage |
-| Current | Power consumption (mA) |
-| Power | Calculated power (mW) |
+| Voltage | Per-channel voltage reading |
+| Current | Per-channel current draw, in mA |
+
+Up to three channels are reported (ch1–ch3), and each can be given its own label — Solar or Battery, say — from the node detail screen. There is no separate wattage reading; the app charts voltage and current, and does not compute power from them.
 
 Useful for monitoring solar charging or battery health on remote nodes.
 
 ## Configuring Telemetry
 
 1. Navigate to **Settings → Module Config → Telemetry**.
-2. Set reporting intervals:
-   - **Device Metrics Interval** — how often to broadcast device metrics
-   - **Environment Metrics Interval** — how often to broadcast sensor data
-3. Enable specific sensor types as needed.
+2. Each metric group has its own enable toggle and its own interval:
+   - **Device Metrics** — battery, channel and airtime utilisation
+   - **Environment Metrics** — temperature, humidity, pressure and the other sensor readings
+   - **Air Quality Metrics** — particulate and CO₂ readings
+   - **Power Metrics** — the per-channel voltage and current readings
 
-### Recommended Intervals
+   Environment metrics additionally have an on-screen toggle and a Fahrenheit toggle for the
+   device's own display.
 
-| Use Case | Device (s) | Environment (s) |
-|----------|-----------|-----------------|
-| Urban mesh (many nodes) | 3600 | 3600 |
-| Rural mesh (few nodes) | 900 | 900 |
-| Weather station | 900 | 300 |
-| Battery conservation | 7200 | 7200 |
+### Choosing an Interval
 
-> ℹ️ **Note:** Shorter intervals increase airtime usage and battery drain across the mesh.
+> 💡 **Tip:** These are nominal values, not hard schedules. On a congested mesh the firmware
+> automatically backs off to longer intervals based on how many nodes are online, so you do not
+> need to hand-tune them for mesh size. Lengthen them deliberately only to save battery.
+
 
 ## Air Quality Metrics
 

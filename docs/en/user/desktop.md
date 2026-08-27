@@ -129,7 +129,7 @@ cd Meshtastic-Android
 ```
 
 Requirements:
-- JDK 21
+- JDK 25 (Gradle can provision the toolchain itself via foojay)
 - No Android SDK required for desktop-only builds
 
 ## Known Limitations

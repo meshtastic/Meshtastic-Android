@@ -87,6 +87,12 @@ USB connections provide a wired alternative, useful for desktop or when Bluetoot
 
 Some Meshtastic radios support WiFi/Ethernet connectivity, allowing TCP-based connections over your local network. Get the radio onto your network first — using the radio's own WiFi settings (via the firmware web interface or another connection) — then connect to it from the app.
 
+> ℹ️ **Note:** **Settings → Wi-Fi Provisioning for mPWRD-OS** is a separate, narrower tool. It provisions WiFi
+> credentials over Bluetooth to **mPWRD-OS** devices only, using their own protocol — it does not
+> configure WiFi on an ordinary Meshtastic radio. It scans over BLE, lists the networks the device
+> can see (including an option for a hidden SSID), takes the password, and reports success or
+> failure. Available on both Android and Desktop.
+
 ### Connecting over the Network
 
 1. Make sure the radio is on the same local network as your phone/desktop.

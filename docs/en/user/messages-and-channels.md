@@ -39,7 +39,7 @@ Channels support multiple encryption levels:
 ### Adding a Channel
 
 1. Navigate to **Settings → Channels**.
-2. Tap **Add Channel** or scan a QR code.
+2. Tap the **+** button to add a channel, or import one by scanning a channel QR code.
 3. Configure the channel name and encryption key.
 4. Share the channel URL/QR code with others who need access.
 
@@ -67,8 +67,11 @@ glance, and the list itself is directly actionable:
 - **Swipe right to mute** (swipe again to unmute) and **swipe left to delete**. Deleting asks
   first; muting shows a snackbar with **Undo**.
 - **Long-press to select** one or more conversations, then use the action bar to **Pin**,
-  **Mark unread**, mute or delete them together. Pinned conversations carry a pin marker and stay
-  at the top of the list.
+  **Mark unread**, mute or delete them together. Pinned conversations carry a pin marker and rise
+  to the top of **their own section**.
+- **The list is split into Channels and Direct Messages**, each with a collapsible header and each
+  sorted independently — so a pinned direct message rises within its own section, not above the
+  Channels one.
 
 ### Conversation Bubbles
 
@@ -83,7 +86,7 @@ A status label appears under **your own** outgoing messages only (incoming messa
 
 | State | Meaning |
 |-------|---------|
-| Sending… | Queued or already handed to the radio, not yet resolved either way (queued and en-route both show this same text) |
+| Sending… | Queued or already handed to the radio, not yet resolved either way. Both stages share this text, but the icon and colour change as it progresses — a yellow upload cloud while queued, a blue arrow once the radio has it |
 | Delivered to recipient | The strongest confirmation for a direct message — an acknowledgment came back |
 | Delivered to mesh | For a channel broadcast, the message reached the mesh (broadcasts have no per-recipient ack) |
 | Relayed, not confirmed by recipient | For a direct message, shown in a warning color — the message was relayed but no acknowledgment has come back yet |
@@ -98,10 +101,15 @@ When a message fails to deliver, the error indicator shows what went wrong:
 | Error | Meaning | What to Do |
 |-------|---------|------------|
 | No Route | No path exists to the destination node | The recipient may be offline or out of mesh range. Try later or move closer. |
-| Got NAK | The next-hop node refused to relay | The relay node may be congested. Wait and retry. |
-| Timeout | No acknowledgment within retry window | The recipient may be just out of range. Try increasing hop limit or moving to a better position. |
 | No radio interface | No radio interface available to send | Check that your radio is connected and available. |
-| Failed to deliver to mesh | All retry attempts exhausted | Move closer, improve signal, or wait for mesh conditions to improve. |
+| Failed to deliver to mesh | Retries exhausted. The same label covers three underlying causes — a relay refusing (NAK), a plain timeout, and running out of retransmits | Move closer, improve signal, or wait for conditions to improve. Tap the error for the specific cause. |
+| Rate limited | The mesh is throttling you for sending too fast | Wait before sending again. |
+| Not authorized | The destination refused the request | Check you have the right channel and keys for that node. |
+| Recipient needs your key | Direct-message encryption could not complete because the other node does not have your public key yet | Exchange node info — the key travels with it. Common on a first DM to a new contact. |
+| Recipient key unavailable | You do not have the recipient's public key | Wait for their node info to arrive, or ask them to broadcast it. |
+| Could not send encrypted message | Encryption failed for this direct message | Verify both nodes have exchanged keys and are on compatible firmware. |
+| Admin session expired | A remote-admin session timed out | Reopen the remote node's settings to start a new session. |
+| Admin key not authorized | The target node does not accept your admin key | Verify the admin key matches on both nodes. |
 | Channel/key mismatch | Destination channel/key does not match | Verify both nodes share the same channel and PSK. |
 | Message is too large to send | Message exceeds maximum payload size | Shorten the message and try again. |
 | No app response | App or plugin did not respond to the request | Retry or check the destination app or module state. |
@@ -196,12 +204,14 @@ or **Yesterday** for the two most recent days, and the date itself for older one
 ### Jump to Latest
 
 Scrolling back through a conversation raises a jump-to-latest control. When messages arrive
-while you are scrolled up, it names who they are from — a single sender by name, or the first
-sender plus a count when several people have written.
+while you are scrolled up, it names the most recent sender and adds a count of the other unread
+messages. That count is messages, not people — five unread from one person reads as their name
+**+4**.
 
 ### Message Actions
 
-Long-press any message to access:
+Long-press or double-tap a message to open the quick reaction bar, then tap **More** (the
+overflow icon on that bar) to reach:
 - **Copy** — copy message text to clipboard
 - **Reply** — quote the message in your response
 - **React** — add an emoji reaction
@@ -210,10 +220,11 @@ Long-press any message to access:
 
 ### Message Priority
 
-Messages are queued and transmitted based on priority:
-1. Emergency/alert messages (highest)
-2. Direct messages
-3. Channel broadcasts (lowest)
+The app sends every message you compose at the same, default priority — there is no
+emergency or alert tier to choose, and nothing in the app raises a direct message above a
+channel broadcast. Any prioritising between them happens in firmware, not here. (The app
+does mark some of its own internal traffic, such as admin and traceroute packets, as
+reliable or background, but that is not something you control from the message composer.)
 
 ### Message Limits
 
