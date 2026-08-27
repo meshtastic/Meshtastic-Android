@@ -45,6 +45,10 @@ plugins.withId("org.meshtastic.flatpak.sources") {
         // Force-resolve platform-specific native artifacts not resolved on the generation host (the
         // manifest is generated on an x86_64 runner, but the offline build also needs to run on arm64).
         //
+        // Since plugin 0.2.0 each coordinate resolves TRANSITIVELY, so only direct dependencies belong
+        // here — desktop-jvm-{platform} brings org.jetbrains.skiko:skiko-awt-runtime-{platform} along
+        // by itself (its version previously had to be tracked by hand against desktop-jvm's POM).
+        //
         // KEEP desktop-jvm's version IN SYNC with the compose-multiplatform entry in
         // gradle/libs.versions.toml — that's exactly the maintenance trap that caused this to break once
         // already: this block was pinned to 1.11.1 and never updated when the catalog moved to
@@ -53,13 +57,8 @@ plugins.withId("org.meshtastic.flatpak.sources") {
         // would auto-track it, but that accessor isn't resolvable in this project's script — tried and
         // confirmed via a direct `./gradlew help` failure — so it has to stay a literal that a human/agent
         // updates by hand alongside any compose-multiplatform bump.)
-        //
-        // skiko isn't in this catalog at all — its version must track whatever desktop-jvm-<platform>'s
-        // own POM declares for org.jetbrains.skiko:skiko-awt-runtime-<platform> (0.150.1 for
-        // compose-multiplatform 1.12.0-rc01); check that POM again if this version is bumped.
         targetPlatforms.set(setOf("linux-x64", "linux-arm64"))
         platformDependencies.set(setOf(
-            "org.jetbrains.skiko:skiko-awt-runtime-{platform}:0.150.1",
             "org.jetbrains.compose.desktop:desktop-jvm-{platform}:1.12.0-rc01",
         ))
     }
