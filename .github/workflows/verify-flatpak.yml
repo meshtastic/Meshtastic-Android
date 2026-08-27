@@ -29,9 +29,17 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  generate-sources:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 20
+  # One job per arch: splitting generation from the build cost a second runner-queue wait
+  # (8-14 min measured, against ~9 min of generation) — the fan-in serialization
+  # reusable-check.yml documents avoiding. Each leg now captures sources on its own arch.
+  verify-flatpak:
+    name: Verify Flatpak Offline Build (${{ matrix.arch }})
+    runs-on: ${{ matrix.arch == 'aarch64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    timeout-minutes: 60
+    strategy:
+      matrix:
+        arch: [x86_64, aarch64]
+      fail-fast: false
     steps:
       - uses: actions/checkout@v7.0.1
         with:
@@ -39,8 +47,8 @@ jobs:
 
       # Renovate mirrors wrapper bumps into the manifest's distribution URL but cannot
       # rewrite its sha256, so on a wrapper bump this drift is expected: fail here in
-      # seconds instead of ~15 minutes into both build-flatpak arches ("Verification of
-      # Gradle distribution failed!", see #6777/#6782).
+      # seconds instead of ~15 minutes into the build ("Verification of Gradle
+      # distribution failed!", see #6777/#6782).
       - name: Check vendored Gradle dist matches the wrapper
         run: |
           props=gradle/wrapper/gradle-wrapper.properties
@@ -67,46 +75,37 @@ jobs:
 
       # JBR resolves its version list via the GitHub API — unauthenticated requests
       # rate-limit on the shared runner IPs, so the token is required, not optional.
+      # Non-fatal, matching .github/actions/gradle-setup: Gradle falls back to Foojay.
       - uses: actions/setup-java@v6
+        id: setup-jbr
+        continue-on-error: true
         with:
           distribution: jetbrains
           java-version: 25
           token: ${{ github.token }}
 
+      - name: JBR setup failed — Gradle will auto-provision via Foojay
+        if: steps.setup-jbr.outcome == 'failure'
+        run: echo "::warning::JBR setup-java failed; falling back to Foojay toolchain provisioning."
+
       - uses: gradle/actions/setup-gradle@v6
         with:
           develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
 
+      # Isolated Gradle user home (rationale in release.yml): capture only sees cache
+      # MISSES, so caching this directory would empty the manifest, not speed it up.
       - name: Generate flatpak-sources.json
         run: |
           ./gradlew --no-build-cache \
             -Dgradle.user.home="$RUNNER_TEMP/flatpak-gradle-home" \
             :desktopApp:packageUberJarForCurrentOS :captureFlatpakSources
           cp build/flatpak-sources.json flatpak-sources.json
-          echo "### Flatpak Sources Summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Flatpak Sources Summary (${{ matrix.arch }})" >> "$GITHUB_STEP_SUMMARY"
           echo "- URLs captured: $(jq length flatpak-sources.json)" >> "$GITHUB_STEP_SUMMARY"
 
-      - uses: actions/upload-artifact@v7
-        with:
-          name: flatpak-sources
-          path: flatpak-sources.json
-
-  build-flatpak:
-    needs: generate-sources
-    runs-on: ${{ matrix.arch == 'aarch64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
-    timeout-minutes: 45
-    strategy:
-      matrix:
-        arch: [x86_64, aarch64]
-      fail-fast: false
-    steps:
-      - uses: actions/checkout@v7.0.1
-        with:
-          submodules: recursive
-
-      - uses: actions/download-artifact@v8
-        with:
-          name: flatpak-sources
+      # flatpak-builder re-downloads the whole closure anyway; a second copy just eats disk.
+      - name: Reclaim the isolated Gradle home
+        run: rm -rf "$RUNNER_TEMP/flatpak-gradle-home"
 
       - name: Clone the Flathub packaging repo
         run: |
@@ -114,6 +113,8 @@ jobs:
             https://github.com/flathub/org.meshtastic.MeshtasticDesktop.git \
             "$RUNNER_TEMP/org.meshtastic.MeshtasticDesktop"
 
+      # Excludes are unanchored (`build/`, not `/build/`): generation now runs in this job,
+      # and a leading slash would let every nested module's build output through.
       - name: Wire overlay manifest + sources
         run: |
           cp scripts/verify-flatpak/desktop-offline.yaml \
@@ -121,8 +122,7 @@ jobs:
           cp flatpak-sources.json \
             "$RUNNER_TEMP/org.meshtastic.MeshtasticDesktop/flatpak-sources.json"
           rsync -a --delete \
-            --exclude='/build/' --exclude='/.gradle/' \
-            --exclude='*/build/' --exclude='*/.gradle/' \
+            --exclude='build/' --exclude='.gradle/' \
             --exclude='/.idea/' --exclude='/local.properties' \
             ./ "$RUNNER_TEMP/org.meshtastic.MeshtasticDesktop/meshtastic-android/"
 
@@ -138,8 +138,12 @@ jobs:
         run: |
           flatpak-builder --user --repo=repo --install-deps-from=flathub \
             --force-clean builddir org.meshtastic.MeshtasticDesktop.yaml
+          echo "### ✅ Offline Flatpak build succeeded (${{ matrix.arch }})" >> "$GITHUB_STEP_SUMMARY"
 
+      # The build succeeding IS the verification; bundling costs ~2 min per arch for an
+      # artifact nobody installs from a PR. Kept for dispatch, where a tester wants it.
       - name: Export .flatpak bundle
+        if: github.event_name != 'pull_request'
         working-directory: ${{ runner.temp }}/org.meshtastic.MeshtasticDesktop
         env:
           ARCH: ${{ matrix.arch }}
@@ -147,9 +151,9 @@ jobs:
           flatpak build-bundle repo "org.meshtastic.MeshtasticDesktop.${ARCH}.flatpak" \
             org.meshtastic.MeshtasticDesktop \
             --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo
-          echo "### ✅ Offline Flatpak build succeeded ($ARCH)" >> "$GITHUB_STEP_SUMMARY"
 
       - uses: actions/upload-artifact@v7
+        if: github.event_name != 'pull_request'
         with:
           name: meshtastic-desktop-flatpak-${{ matrix.arch }}
           path: ${{ runner.temp }}/org.meshtastic.MeshtasticDesktop/org.meshtastic.MeshtasticDesktop.${{ matrix.arch }}.flatpak
