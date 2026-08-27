@@ -60,7 +60,6 @@ import org.maplibre.compose.layers.SymbolLayer
 import org.maplibre.compose.sources.Source
 import org.maplibre.compose.util.ClickResult
 import org.maplibre.compose.util.FeaturesClickHandler
-import org.maplibre.spatialk.geojson.BoundingBox
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Person
@@ -70,7 +69,6 @@ import org.meshtastic.feature.map.maplibre.geojson.MapChipKey
 import org.meshtastic.feature.map.maplibre.geojson.NodeFeatureKeys
 import org.meshtastic.feature.map.maplibre.geojson.featureValue
 import org.meshtastic.feature.map.maplibre.geojson.toNodeChip
-import org.meshtastic.feature.map.maplibre.nodesInView
 
 /**
  * Node markers drawn as chips — the rounded, node-coloured badge with the short name in it that
@@ -99,11 +97,12 @@ internal fun NodeChipLayer(
     nodes: List<Node>,
     onNodeClick: ((Int) -> Unit)? = null,
     chipFilter: Expression<BooleanValue> = nil(),
-    visibleBounds: BoundingBox? = null,
 ) = MapChipLayer(
     id = id,
     source = source,
-    chips = remember(nodes, visibleBounds) { nodesInView(nodes, visibleBounds).map { it.toNodeChip() } },
+    // Already ordered by how likely each node is to be drawn on its own; MapChipLayer keeps as many as it can
+    // afford.
+    chips = remember(nodes) { nodes.map { it.toNodeChip() } },
     filter = chipFilter,
     onClick =
     onNodeClick?.let { click ->

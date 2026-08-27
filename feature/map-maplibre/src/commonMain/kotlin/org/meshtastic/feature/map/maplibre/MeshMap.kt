@@ -63,6 +63,7 @@ import org.meshtastic.feature.map.maplibre.style.MapColors
 import org.meshtastic.feature.map.maplibre.style.MapOverlay
 import org.meshtastic.feature.map.maplibre.style.toBaseStyle
 import org.meshtastic.feature.map.maplibre.style.zoomRange
+import kotlin.math.floor
 
 /**
  * The mesh map, rendered by MapLibre.
@@ -158,6 +159,9 @@ fun MeshMap(
             // Padded so a modest pan keeps the same nodes in view, and the chips are not redrawn for every frame of a
             // drag. Without a viewport at all — the first composition — every node is a candidate, as before.
             visibleBounds = cameraState.viewport?.visibleBoundingBox?.padded(CHIP_VIEW_PADDING),
+            // Floored: clustering indexes per whole zoom level, so the set only changes when the level does — and a
+            // pinch does not recompute it for every fractional step in between.
+            zoom = floor(cameraState.position.zoom).toInt(),
             myNodeNum = myNodeInfo?.myNodeNum,
             showPrecisionCircles = filterState.showPrecisionCircle,
             onNodeClick = navigateToNodeDetails,

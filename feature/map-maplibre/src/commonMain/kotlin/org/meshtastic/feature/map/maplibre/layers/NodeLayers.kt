@@ -17,6 +17,7 @@
 package org.meshtastic.feature.map.maplibre.layers
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -45,7 +46,10 @@ import org.meshtastic.feature.map.maplibre.geojson.nodesToFeatureCollection
 import org.meshtastic.feature.map.maplibre.geojson.precisionCirclesToFeatureCollection
 import org.meshtastic.feature.map.maplibre.geojson.rememberFeatureSource
 import org.meshtastic.feature.map.maplibre.geojson.toClusterMembers
+import org.meshtastic.feature.map.maplibre.nodesByIsolation
+import org.meshtastic.feature.map.maplibre.nodesInView
 import org.meshtastic.feature.map.maplibre.style.MapColors
+import org.meshtastic.feature.map.maplibre.unclusteredNodes
 
 // GeoJsonSource.NO_EXPANSION_ZOOM says the same thing, but its companion is private. A cluster that cannot be
 // expanded answers with a sentinel: 0 on Android and desktop, -1 on iOS.
@@ -91,10 +95,34 @@ internal fun NodeLayers(
     onClusterZoom: (Position, Double) -> Unit,
     onClusterMembers: (List<ClusterMember>) -> Unit,
     visibleBounds: BoundingBox? = null,
+    zoom: Int = 0,
 ) {
+    // What clustering will leave standing on its own. Both the precision circles and the chips are only wanted for
+    // these: a node folded into a cluster is not drawn, so decorating it paints something nobody asked about — at
+    // event density 2,500 translucent circles stack into one opaque disc over the whole venue.
+    val unclustered =
+        remember(nodes, zoom) {
+            unclusteredNodes(
+                nodes = nodes,
+                zoom = zoom,
+                radiusPx = CLUSTER_RADIUS,
+                minPoints = CLUSTER_MIN_POINTS,
+                maxClusterZoom = CLUSTER_MAX_ZOOM,
+            )
+        }
     if (showPrecisionCircles) {
-        NodePrecisionLayer(id = "node-precision", nodes = nodes)
+        NodePrecisionLayer(id = "node-precision", nodes = unclustered)
     }
+
+    // Every node the source draws on its own needs an image, or it falls through to a bare dot. Which nodes those are
+    // is decided inside the source and can only be predicted from outside, so this does not gamble on a filter — a
+    // node predicted wrongly would then have nothing to draw at all. It orders instead: loneliest first, so the nodes
+    // that are certainly drawn come first, the ones near the cluster threshold (where the prediction is least sure)
+    // come next, and the budget only runs out on nodes buried mid-cluster that are never drawn.
+    val chipNodes =
+        remember(nodes, visibleBounds, zoom) {
+            nodesByIsolation(nodesInView(nodes, visibleBounds), zoom, CLUSTER_RADIUS)
+        }
 
     // getClusterExpansionZoom became a suspend function in maplibre-compose 0.15.0 (feature queries
     // no longer block the caller), and onClick is not a suspending callback.
@@ -188,10 +216,9 @@ internal fun NodeLayers(
     NodeChipLayer(
         id = "node-chip",
         source = nodeSource,
-        nodes = nodes,
+        nodes = chipNodes,
         onNodeClick = onNodeClick,
         chipFilter = !feature.has("point_count"),
-        visibleBounds = visibleBounds,
     )
 }
 
