@@ -60,10 +60,20 @@ jobs:
             # silently the moment the build reads another one.
             desktop:
               - 'desktopApp/**'
+              - 'scripts/build-appimage.sh'
+              # Shared build machinery that shapes the packaged output.
+              - 'build-logic/**'
               - 'gradle/wrapper/**'
               - 'gradle/libs.versions.toml'
-              - 'build-logic/**'
-              - 'scripts/build-appimage.sh'
+              # Root inputs the packaging tasks actually read: config.properties supplies the
+              # version metadata baked into the installers (ProjectExtensions.kt, VersionInfo.kt),
+              # and the rest change plugin resolution, configuration, or how gradlew is invoked.
+              - 'build.gradle.kts'
+              - 'settings.gradle.kts'
+              - 'gradle.properties'
+              - 'config.properties'
+              - 'gradlew'
+              - 'gradlew.bat'
               - '.github/workflows/reusable-check.yml'
               - '.github/actions/gradle-setup/**'
             android:
@@ -253,7 +263,10 @@ jobs:
   # that compilation never reaches — and only runs when the desktop filter matches.
   validate-and-build:
     needs: check-changes
-    if: needs.check-changes.outputs.android == 'true'
+    # `desktop` as well as `android`: scripts/build-appimage.sh is in the desktop filter but
+    # deliberately not the android one, so gating on android alone would skip this whole
+    # workflow for an AppImage-only change and the desktop matrix would never run.
+    if: needs.check-changes.outputs.android == 'true' || needs.check-changes.outputs.desktop == 'true'
     uses: ./.github/workflows/reusable-check.yml
     permissions:
       contents: read
