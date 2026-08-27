@@ -23,11 +23,7 @@ plugins {
     alias(libs.plugins.meshtastic.android.screenshot)
 }
 
-configure<LibraryExtension> {
-    namespace = "org.meshtastic.screenshot.tests"
-
-    testOptions { screenshotTests { imageDifferenceThreshold = 0.0005f } }
-}
+configure<LibraryExtension> { namespace = "org.meshtastic.screenshot.tests" }
 
 dependencies {
     implementation(projects.core.ui)

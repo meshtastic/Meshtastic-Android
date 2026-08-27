@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 import com.android.build.api.dsl.LibraryExtension
+import com.android.compose.screenshot.tasks.PreviewScreenshotValidationTask
 import com.gradle.develocity.agent.gradle.test.DevelocityTestConfiguration
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -30,8 +31,10 @@ import org.meshtastic.buildlogic.libs
  * Owns the shared CST configuration: the `enableScreenshotTest` experimental flag, the test-retry opt-out (CST's custom
  * runner is incompatible with test retry), and the Compose Multiplatform + screenshot-validation dependencies.
  * Configuration-only: apply it ALONGSIDE `meshtastic.android.library[.compose]` and `com.android.compose.screenshot`,
- * which the module declares itself. The `screenshotTests { imageDifferenceThreshold }` block stays in the module
- * scripts — it is a DSL extension of the screenshot plugin, reachable there via generated accessors only.
+ * which the module declares itself. It also owns the image-difference tolerance, which used to live in the module
+ * scripts as `testOptions { screenshotTests { imageDifferenceThreshold } }` — alpha16 deleted that DSL and
+ * conventions the engine threshold to 0f (pixel-exact), which fails 33 of our references. The task property the
+ * DSL used to feed is still public, so the same tolerance is set directly on it here.
  */
 class AndroidScreenshotConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -39,6 +42,10 @@ class AndroidScreenshotConventionPlugin : Plugin<Project> {
             pluginManager.withPlugin("com.android.compose.screenshot") {
                 extensions.configure<LibraryExtension> {
                     experimentalProperties["android.experimental.enableScreenshotTest"] = true
+                }
+
+                tasks.withType<PreviewScreenshotValidationTask>().configureEach {
+                    testEngineInput.threshold.set(IMAGE_DIFFERENCE_THRESHOLD)
                 }
 
                 // CST screenshot tests use a custom runner incompatible with test retry
@@ -61,5 +68,9 @@ class AndroidScreenshotConventionPlugin : Plugin<Project> {
                     .configureEach { project.dependencies.add(name, libs.library("screenshot-validation-api")) }
             }
         }
+    }
+
+    private companion object {
+        const val IMAGE_DIFFERENCE_THRESHOLD = 0.0005f
     }
 }

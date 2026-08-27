@@ -20,6 +20,9 @@ plugins {
     alias(libs.plugins.android.kotlin.multiplatform.library) apply false
     alias(libs.plugins.compose.compiler) apply false
     alias(libs.plugins.compose.multiplatform) apply false
+    // On the root classpath (never applied here) so AndroidScreenshotConventionPlugin can
+    // reference PreviewScreenshotValidationTask — build-logic's compileOnly is not enough.
+    alias(libs.plugins.compose.screenshot) apply false
     alias(libs.plugins.datadog) apply false
     alias(libs.plugins.devtools.ksp) apply false
     alias(libs.plugins.koin.compiler) apply false
