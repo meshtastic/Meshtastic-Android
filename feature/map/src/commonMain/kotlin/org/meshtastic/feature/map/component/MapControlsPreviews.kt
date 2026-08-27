@@ -50,3 +50,17 @@ fun MapControlsOverlayPreview() {
         }
     }
 }
+
+@PreviewLightDark
+@Composable
+@Suppress("PreviewPublic")
+fun MapZoomControlsPreview() {
+    AppTheme {
+        Box(
+            modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface).padding(16.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            MapZoomControls(onZoomIn = {}, onZoomOut = {})
+        }
+    }
+}
