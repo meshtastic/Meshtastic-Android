@@ -20,7 +20,11 @@ package org.meshtastic.core.model.util
 
 import org.meshtastic.core.common.util.MeasureUnitKind
 import org.meshtastic.core.common.util.MeasurementSystem
+import org.meshtastic.core.common.util.formatElevationLocalized
+import org.meshtastic.core.common.util.formatLengthLocalized
 import org.meshtastic.core.common.util.formatMeasure
+import org.meshtastic.core.common.util.formatRainfallLocalized
+import org.meshtastic.core.common.util.formatSpeedLocalized
 import kotlin.math.roundToInt
 
 @Suppress("MagicNumber")
@@ -69,6 +73,9 @@ private const val MILE_THRESHOLD = 1609
  * at all. It also disagreed with the requested system on the locales ICU reports as US but CLDR has no road entry for.
  */
 fun Int.toDistanceString(system: MeasurementSystem): String {
+    formatLengthLocalized(this.toDouble(), system)?.let {
+        return it
+    }
     val unit =
         if (system == MeasurementSystem.METRIC) {
             if (this < KILOMETER_THRESHOLD) DistanceUnit.METER else DistanceUnit.KILOMETER
@@ -79,12 +86,22 @@ fun Int.toDistanceString(system: MeasurementSystem): String {
     return valueInUnit.toString(unit)
 }
 
+/**
+ * Formats an altitude/elevation in metres for display, in the whole metres or feet of [system].
+ *
+ * Elevation stays in the small unit at any magnitude — 7,431 ft, never 1.4 mi — which is also what CLDR's default
+ * length precision renders, so engine and fallback agree.
+ */
+fun Int.toElevationString(system: MeasurementSystem): String =
+    formatElevationLocalized(this.toDouble(), system) ?: this.metersIn(system).toString(system)
+
 @Suppress("MagicNumber")
-fun Float.toSpeedString(system: MeasurementSystem): String = if (system == MeasurementSystem.METRIC) {
-    formatMeasure(this * 3.6, MeasureUnitKind.KILOMETER_PER_HOUR, 0)
-} else {
-    formatMeasure(this * 2.23694, MeasureUnitKind.MILE_PER_HOUR, 0)
-}
+fun Float.toSpeedString(system: MeasurementSystem): String = formatSpeedLocalized(this.toDouble(), system)
+    ?: if (system == MeasurementSystem.METRIC) {
+        formatMeasure(this * 3.6, MeasureUnitKind.KILOMETER_PER_HOUR, 0)
+    } else {
+        formatMeasure(this * 2.23694, MeasureUnitKind.MILE_PER_HOUR, 0)
+    }
 
 /**
  * Converts a speed already expressed in km/h (e.g. protobuf `Position.ground_speed`) to [system]'s unit, rounded to a
@@ -96,8 +113,9 @@ fun Int.kmhIn(system: MeasurementSystem): Int =
     if (system == MeasurementSystem.IMPERIAL) (this * 0.621371f).roundToInt() else this
 
 @Suppress("MagicNumber")
-fun Float.toSmallDistanceString(system: MeasurementSystem): String = if (system == MeasurementSystem.IMPERIAL) {
-    formatMeasure(this / 25.4, MeasureUnitKind.INCH, 2)
-} else {
-    formatMeasure(this.toDouble(), MeasureUnitKind.MILLIMETER, 0)
-}
+fun Float.toSmallDistanceString(system: MeasurementSystem): String = formatRainfallLocalized(this.toDouble(), system)
+    ?: if (system == MeasurementSystem.IMPERIAL) {
+        formatMeasure(this / 25.4, MeasureUnitKind.INCH, 2)
+    } else {
+        formatMeasure(this.toDouble(), MeasureUnitKind.MILLIMETER, 0)
+    }

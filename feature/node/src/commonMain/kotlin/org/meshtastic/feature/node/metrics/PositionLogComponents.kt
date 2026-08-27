@@ -43,8 +43,7 @@ import org.meshtastic.core.model.util.GeoConstants.DEG_D
 import org.meshtastic.core.model.util.GeoConstants.HEADING_DEG
 import org.meshtastic.core.model.util.TimeConstants.MS_PER_SEC
 import org.meshtastic.core.model.util.kmhIn
-import org.meshtastic.core.model.util.metersIn
-import org.meshtastic.core.model.util.toString
+import org.meshtastic.core.model.util.toElevationString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.alt
 import org.meshtastic.core.resources.heading
@@ -119,7 +118,7 @@ fun PositionCard(position: Position, displayUnits: MeasurementSystem, isSelected
                         color = GraphColors.Purple,
                         text =
                         "${stringResource(Res.string.alt)}: ${
-                            (position.altitude ?: 0).metersIn(displayUnits).toString(displayUnits)
+                            (position.altitude ?: 0).toElevationString(displayUnits)
                         }",
                     )
                     if (position.ground_speed != null && position.ground_speed != 0) {

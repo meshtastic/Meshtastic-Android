@@ -69,7 +69,7 @@ actual fun getSystemMeasurementSystem(): MeasurementSystem {
  * a user in a metric country to feet. Picking a language must not pick a measurement system, so the region comes from
  * the system configuration, which no per-app locale overrides.
  */
-private fun Locale.withSystemRegionIfMissing(): Locale {
+internal fun Locale.withSystemRegionIfMissing(): Locale {
     if (country.isNotEmpty()) return this
 
     val systemLocales = Resources.getSystem().configuration.locales
