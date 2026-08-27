@@ -13,6 +13,12 @@ on:
       # The offline manifest pins the Gradle distribution independently of the wrapper —
       # a wrapper bump without a manifest update breaks the offline build silently.
       - 'gradle/wrapper/**'
+      # build.gradle.kts reads compose-multiplatform from the catalog (#6911), so a
+      # catalog-only bump changes the manifest's platform URLs. Deliberately the whole
+      # file and not a key filter: nearly every Renovate PR lands here so this over-runs,
+      # but a filter naming today's keys goes stale silently the moment the manifest
+      # reads another one — which is the failure #6911 existed to remove.
+      - 'gradle/libs.versions.toml'
   workflow_dispatch:
 
 permissions:
