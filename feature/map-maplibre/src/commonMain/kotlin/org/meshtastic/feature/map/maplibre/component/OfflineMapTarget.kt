@@ -36,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.maplibre.compose.offline.DownloadProgress
@@ -121,7 +122,10 @@ internal fun OfflineMapsSection(target: OfflineMapTarget, onShowRegion: (Boundin
                 OfflinePackRow(
                     pack = pack,
                     onShow = { bounds -> onShowRegion(bounds) },
-                    onToggle = { manager.resume(pack) },
+                    // Off the main thread: unlike create and delete, resume is not a suspending call — it does its
+                    // work inline on whoever calls it, and from a click handler that is the main thread. Starting a
+                    // pack this way froze the UI long enough for Android to raise "isn't responding".
+                    onToggle = { scope.launch(Dispatchers.IO) { manager.resume(pack) } },
                     onDelete = { scope.launch { manager.delete(pack) } },
                 )
             }
