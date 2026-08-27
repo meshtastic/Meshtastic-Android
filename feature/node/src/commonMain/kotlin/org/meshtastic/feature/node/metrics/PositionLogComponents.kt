@@ -114,13 +114,16 @@ fun PositionCard(position: Position, displayUnits: MeasurementSystem, isSelected
                 itemVerticalAlignment = Alignment.CenterVertically,
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    MetricValueRow(
-                        color = GraphColors.Purple,
-                        text =
-                        "${stringResource(Res.string.alt)}: ${
-                            (position.altitude ?: 0).toElevationString(displayUnits)
-                        }",
-                    )
+                    val altitude = position.altitude
+                    if (altitude != null) {
+                        MetricValueRow(
+                            color = GraphColors.Purple,
+                            text =
+                            "${stringResource(Res.string.alt)}: ${
+                                altitude.toElevationString(displayUnits)
+                            }",
+                        )
+                    }
                     if (position.ground_speed != null && position.ground_speed != 0) {
                         Spacer(Modifier.width(12.dp))
                         val speedRes =

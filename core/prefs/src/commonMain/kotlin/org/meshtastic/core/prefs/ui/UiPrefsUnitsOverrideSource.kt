@@ -16,30 +16,33 @@
  */
 package org.meshtastic.core.prefs.ui
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.di.ApplicationCoroutineScope
 import org.meshtastic.core.common.util.UnitsOverride
 import org.meshtastic.core.common.util.UnitsOverrideSource
-import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.UiPrefs
 
 /**
  * Adapts the stored units preference to the [UnitsOverrideSource] that `core:common`'s unit provider consumes.
  *
  * The indirection exists for the dependency direction: the provider lives in `core:common`, which the preferences
- * modules depend on, so the provider cannot see [UiPrefs] itself.
+ * modules depend on, so the provider cannot see [UiPrefs] itself. The eager collector runs in the application scope,
+ * whose owner cancels it with the application — this class owns no scope of its own.
  */
 @Single
-class UiPrefsUnitsOverrideSource(uiPrefs: UiPrefs, dispatchers: CoroutineDispatchers) : UnitsOverrideSource {
-    private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
+class UiPrefsUnitsOverrideSource(uiPrefs: UiPrefs, applicationCoroutineScope: ApplicationCoroutineScope) :
+    UnitsOverrideSource {
 
     override val override: StateFlow<UnitsOverride> =
         uiPrefs.unitsOverride
             .map { UnitsOverride.fromValue(it) }
-            .stateIn(scope, SharingStarted.Eagerly, UnitsOverride.fromValue(uiPrefs.unitsOverride.value))
+            .stateIn(
+                scope = applicationCoroutineScope,
+                started = SharingStarted.Eagerly,
+                initialValue = UnitsOverride.fromValue(uiPrefs.unitsOverride.value),
+            )
 }

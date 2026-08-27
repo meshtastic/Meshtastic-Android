@@ -21,14 +21,25 @@ import android.icu.number.NumberFormatter
 import android.icu.number.Precision
 import android.icu.util.MeasureUnit
 import android.os.Build
+import kotlinx.atomicfu.atomic
+import kotlinx.atomicfu.update
 import java.util.Locale
-import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Formatters are immutable and reusable but not free to build; the working set is tiny (locale × system × usage), so a
- * map keyed by all three amortizes construction across every node card on a scrolling list.
+ * map keyed by all three amortizes construction across every node card on a scrolling list. Copy-on-write over an
+ * atomic reference: a race can build the same formatter twice, and either result is equivalent.
  */
-private val formatterCache = ConcurrentHashMap<String, LocalizedNumberFormatter>()
+private val formatterCache = atomic(mapOf<String, LocalizedNumberFormatter>())
+
+private inline fun cachedFormatter(key: String, build: () -> LocalizedNumberFormatter): LocalizedNumberFormatter {
+    formatterCache.value[key]?.let {
+        return it
+    }
+    val built = build()
+    formatterCache.update { it + (key to built) }
+    return built
+}
 
 /**
  * ICU units this engine renders. `android.icu` classes are touched only behind the SDK guard and inside `runCatching` —
@@ -64,7 +75,7 @@ actual fun formatElevationLocalized(meters: Double, system: MeasurementSystem): 
     return runCatching {
         val locale = unitsLocale(system)
         val formatter =
-            formatterCache.getOrPut("${locale.toLanguageTag()}|elevation|$unit") {
+            cachedFormatter("${locale.toLanguageTag()}|elevation|$unit") {
                 NumberFormatter.with().unit(unit.toMeasureUnit()).precision(Precision.integer()).locale(locale)
             }
         formatter.format(value).toString()
@@ -85,7 +96,7 @@ private fun formatWithUsage(value: Double, system: MeasurementSystem, unit: IcuU
     return runCatching {
         val locale = unitsLocale(system)
         val formatter =
-            formatterCache.getOrPut("${locale.toLanguageTag()}|$usage|$unit") {
+            cachedFormatter("${locale.toLanguageTag()}|$usage|$unit") {
                 NumberFormatter.with().usage(usage).unit(unit.toMeasureUnit()).locale(locale)
             }
         formatter.format(value).toString()
