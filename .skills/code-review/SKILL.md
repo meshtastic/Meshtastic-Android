@@ -132,7 +132,7 @@ Kermit is the only logging API, and on the **google** flavor its writers fan eve
 
 ### Analyse impact before judging test coverage
 
-"There are tests" is not coverage. For each non-trivial production change, map: **changed behaviour** (the concrete code path) → **observable surfaces** (public API, protocol handling, persisted rows, DataStore, Compose state, notifications, service lifecycle, transport, MQTT, widgets, Auto, desktop, R8-shaped release behaviour) → **regression risks** (ordering, reconnect/retry, process death, schema compatibility with rows an older build wrote, cross-module call sites, flavor and platform differences) → **the test that should exist and does not**.
+"There are tests" is not coverage. For each non-trivial production change, map: **changed behaviour** (the concrete code path) → **observable surfaces** (public API, protocol handling, persisted rows, DataStore, Compose state, notifications, service lifecycle, transport, MQTT, widgets, desktop, R8-shaped release behaviour) → **regression risks** (ordering, reconnect/retry, process death, schema compatibility with rows an older build wrote, cross-module call sites, flavor and platform differences) → **the test that should exist and does not**.
 
 A bug fix needs a test that fails *without* the fix. An updated screenshot golden, Room schema JSON, or regenerated baseline profile proves serialisation, not behaviour. Don't demand a test category for a surface the change cannot reach.
 

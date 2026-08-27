@@ -2,7 +2,7 @@
 title: Architecture
 parent: Developer Guide
 nav_order: 1
-last_updated: 2026-06-11
+last_updated: 2026-08-27
 aliases:
   - layers
   - module-architecture
@@ -63,7 +63,6 @@ Each `feature/` module owns a vertical slice of functionality:
 | `feature:wifi-provision` | WiFi provisioning |
 | `feature:widget` | Android home screen widgets |
 | `feature:discovery` | Mesh network discovery |
-| `feature:car` | Android Auto / Car App Library — google flavor only, conditionally registered in the google `FlavorModule` |
 
 Feature modules:
 - Use the `meshtastic.kmp.feature` convention plugin

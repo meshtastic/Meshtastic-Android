@@ -2,7 +2,7 @@
 title: Desktop App
 parent: User Guide
 nav_order: 14
-last_updated: 2026-07-07
+last_updated: 2026-08-27
 description: Install and use the Meshtastic Desktop app on Linux, macOS, and Windows — connections, feature parity, and keyboard shortcuts.
 aliases:
   - desktop
@@ -70,7 +70,6 @@ Bluetooth Low Energy is supported on Desktop via the [Kable](https://github.com/
 | Firmware Update | ✓ | ✓ | In-app USB, BLE, and Wi-Fi (ESP32) update all work the same as Android |
 | Notifications | ✓ | ✓ | Native OS notifications |
 | Widgets | ✓ | ✗ | Android-only |
-| Android Auto | ✓ | ✗ | Android-only — not available on Desktop or iOS |
 | AI Assistant (Chirpy) | ✓* | ✗ | Google flavor Android only |
 | App Functions (system AI) | ✓† | ✗ | Google flavor Android only |
 

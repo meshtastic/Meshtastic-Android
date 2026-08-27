@@ -153,7 +153,6 @@ Each module has its own README with details on its responsibilities, API surface
 | [feature/discovery](feature/discovery/README.md) | Mesh network discovery (scanner, AI summaries, Mesh Beacon) |
 | [feature/docs](feature/docs/README.md) | In-app documentation browser with Chirpy AI assistant |
 | [feature/widget](feature/widget/README.md) | Android home-screen Glance widget (live mesh stats) |
-| [feature/car](feature/car/README.md) | Android Auto integration (Car App Library, `google` flavor) |
 | [baselineprofile](baselineprofile/README.md) | Macrobenchmark Baseline Profile generation for `:androidApp` |
 
 ## Translations

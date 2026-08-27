@@ -2,7 +2,7 @@
 title: Codebase
 parent: Developer Guide
 nav_order: 2
-last_updated: 2026-07-08
+last_updated: 2026-08-27
 aliases:
   - repository-layout
   - project-structure
@@ -33,8 +33,7 @@ Meshtastic-Android/
 │   ├── docs/
 │   ├── wifi-provision/
 │   ├── widget/
-│   ├── discovery/
-│   └── car/
+│   └── discovery/
 ├── core/                   # Core infrastructure modules (KMP)
 │   ├── barcode/
 │   ├── ble/

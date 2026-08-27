@@ -2,7 +2,7 @@
 title: Messages & Channels
 parent: User Guide
 nav_order: 3
-last_updated: 2026-07-11
+last_updated: 2026-08-27
 description: Send and receive messages, manage channels, configure encryption, search conversations, and use quick chat, reactions, and message actions.
 aliases:
   - channels
@@ -175,7 +175,7 @@ Messages are queued and transmitted based on priority:
 ### Message Limits
 
 - **Maximum length:** 200 bytes (approximately 200 characters for ASCII text)
-- The 200-byte cap applies to the in-app composer — the mesh payload limit itself is ~233 bytes, so messages from other senders (e.g., App Functions or Android Auto) may arrive slightly longer
+- The 200-byte cap applies to the in-app composer — the mesh payload limit itself is ~233 bytes, so messages from other senders (e.g., App Functions) may arrive slightly longer
 - **Rate limiting:** The mesh enforces airtime fairness; heavy message volume may be throttled
 - **Delivery:** Messages are retried automatically if no acknowledgment is received
 
