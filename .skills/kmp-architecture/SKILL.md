@@ -7,12 +7,12 @@ Guidelines on managing Kotlin Multiplatform (KMP) source-sets, expected abstract
 - **`commonMain`:** All business logic, DB entities, API network logic, ViewModels, and UI rendering. NO `java.*` or `android.*` imports.
 - **`androidMain`:** Android framework integration (`Context`, system services, NFC hardware, BLE Android bindings).
 - **`jvmMain` / `jvmAndroidMain`:** Shared JVM code between Android and Desktop. Uses the `meshtastic.kmp.jvm.android` convention plugin to bridge `jvm` and `android` source sets without manual `dependsOn` hacks.
-- **`app` / `desktop`:** Host shells. Responsible for Koin DI root wiring, `MainKoinModule`, host-level UI themes, and running the `MeshtasticNavDisplay`.
+- **`androidApp` / `desktopApp`:** Host shells. Responsible for Koin DI root wiring (`MainKoinModule`/`AppKoinModule`, `DesktopKoinModule`), host-level UI themes, and running the `MeshtasticNavDisplay`.
 
 ## 2. Bridging Strategies
-- **Interface + DI (Preferred):** Expose an interface in `core:repository` or `core:ui` (e.g. `LocationRepository`, `MapViewProvider`), implement it in `androidMain` or the host `app`, and bind it via Koin or `CompositionLocal`.
+- **Interface + DI (Preferred):** Expose an interface in `core:repository` or `core:ui` (e.g. `LocationRepository`, `MapViewProvider`), implement it in `androidMain` or the host `androidApp`, and bind it via Koin or `CompositionLocal`.
 - **`expect`/`actual` (Restricted):** Use only when a platform API cannot be abstracted cleanly (e.g. low-level File I/O mappings, `uppercase()` Locale helpers). Avoid deep class hierarchies using `expect`/`actual`.
-  - **Naming:** Keep `expect` in `FileIo.kt`, but put shared helpers in `FileIoUtils.kt` to prevent JVM duplicate class errors.
+  - **Naming:** An `expect` declaration and its shared helpers must live in differently named files within the same package, or the JVM target fails with duplicate class errors. Live example: `LogExporter.kt` (expect) alongside `LogFormatter.kt` (shared helpers).
 - **Shared Helpers:** Do not duplicate pure Kotlin logic between `androidMain` and `jvmMain`. Extract to a `commonMain` helper.
 
 ## 3. Core Libraries & Constraints

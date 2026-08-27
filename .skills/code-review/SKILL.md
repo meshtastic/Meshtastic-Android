@@ -43,7 +43,7 @@ Seeding a fake's backing store and then asserting the value comes back passes ev
 ### D. Room schema bump without a migration test
 **Every schema-version increment ships a migration test that proves existing rows survive.**
 
-- [ ] A new `core/database/schemas/<n>.json` is accompanied by an `(n-1)→n` test in `core/database/src/androidHostTest/.../*MigrationTest.kt`.
+- [ ] A new `core/database/schemas/org.meshtastic.core.database.MeshtasticDatabase/<n>.json` is accompanied by an `(n-1)→n` test in `core/database/src/androidHostTest/.../*MigrationTest.kt`.
 - [ ] The test inserts rows at the old version, migrates, and asserts **row count and column values** are preserved — not merely that the migration runs.
 - [ ] Columns going nullable assert that pre-existing values are retained and that the new `NULL` state is reachable (this is class A at the storage layer).
 
@@ -77,7 +77,7 @@ When reviewing code, meticulously verify the following categories. Flag any devi
 
 ### 4. Dependency Injection (Koin Annotations)
 - [ ] **Annotation Usage:** Ensure Koin is configured via annotations (`@Single`, `@Factory`, `@KoinViewModel`).
-- [ ] **Root Assembly:** Confirm that the root Koin DI graph is only assembled in host shells (`app` and `desktop`).
+- [ ] **Root Assembly:** Confirm that the root Koin DI graph is only assembled in host shells (`androidApp` and `desktopApp`).
 
 ### 5. Networking, DB & I/O
 - [ ] **Ktor Strictly:** Check that Ktor is used for all HTTP networking. Flag and reject any usage of OkHttp.

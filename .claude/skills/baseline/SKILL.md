@@ -11,8 +11,8 @@ The repo's verify-before-push gate, codified. CLAUDE.md/AGENTS.md mandate this b
 ## 1. Bootstrap (don't skip — agent workspaces often lack these)
 ```bash
 [ -z "$ANDROID_HOME" ] && export ANDROID_HOME="$HOME/Library/Android/sdk"
-[ -f local.properties ] || cp secrets.defaults.properties local.properties
 ```
+No secrets copy is needed — `secrets.defaults.properties` is the plugin's own fallback.
 
 ## 2. Decide the command from what changed
 ```bash
