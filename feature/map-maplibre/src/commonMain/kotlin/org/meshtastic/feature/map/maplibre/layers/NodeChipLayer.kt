@@ -40,17 +40,22 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonPrimitive
 import org.maplibre.compose.expressions.ast.Expression
+import org.maplibre.compose.expressions.dsl.asBoolean
 import org.maplibre.compose.expressions.dsl.asString
 import org.maplibre.compose.expressions.dsl.case
+import org.maplibre.compose.expressions.dsl.condition
 import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.expressions.dsl.feature
 import org.maplibre.compose.expressions.dsl.image
 import org.maplibre.compose.expressions.dsl.nil
 import org.maplibre.compose.expressions.dsl.switch
 import org.maplibre.compose.expressions.value.BooleanValue
+import org.maplibre.compose.expressions.value.FloatValue
 import org.maplibre.compose.layers.SymbolLayer
 import org.maplibre.compose.sources.Source
 import org.maplibre.compose.util.ClickResult
@@ -103,13 +108,48 @@ internal fun NodeChipLayer(
     onClick =
     onNodeClick?.let { click ->
         { features ->
-            features.firstOrNull()?.properties?.get(NodeFeatureKeys.NODE_NUM)?.let { nodeNum ->
-                click(nodeNum.jsonPrimitive.int)
-                ClickResult.Consume
-            } ?: ClickResult.Pass
+            // The chip the user sees on top is the one they meant. Query order is not that order, so pick by
+            // the same
+            // rank [chipSortKey] draws by, matching the Google flavor, where the highest zIndex marker takes
+            // the tap.
+            features
+                .maxByOrNull { it.properties.chipRank() }
+                ?.properties
+                ?.get(NodeFeatureKeys.NODE_NUM)
+                ?.let { nodeNum ->
+                    click(nodeNum.jsonPrimitive.int)
+                    ClickResult.Consume
+                } ?: ClickResult.Pass
         }
     },
 )
+
+/**
+ * How far up the stack a node's chip is drawn, mirroring the Google flavor's `NodeClusterItem.zIndex`: this node and
+ * favorites ride above everything else, and nothing distinguishes the rest.
+ */
+internal fun JsonObject?.chipRank(): Int = when {
+    this == null -> CHIP_RANK_ORDINARY
+    this[NodeFeatureKeys.IS_SELF]?.jsonPrimitive?.booleanOrNull == true -> CHIP_RANK_PROMINENT
+    this[NodeFeatureKeys.IS_FAVORITE]?.jsonPrimitive?.booleanOrNull == true -> CHIP_RANK_PROMINENT
+    else -> CHIP_RANK_ORDINARY
+}
+
+/**
+ * The same ranking as an expression, for the layer's `symbol-sort-key`.
+ *
+ * With `icon-allow-overlap` on, the spec draws **higher** sort keys over lower ones (it is the other way round when
+ * overlap is disallowed, which is what makes this easy to get backwards). Without it the draw order is the source
+ * order, so which of two overlapping chips is legible was arbitrary and could change on any data refresh.
+ */
+private fun chipSortKey(): Expression<FloatValue> = switch(
+    condition(feature[NodeFeatureKeys.IS_SELF].asBoolean(), const(CHIP_RANK_PROMINENT.toFloat())),
+    condition(feature[NodeFeatureKeys.IS_FAVORITE].asBoolean(), const(CHIP_RANK_PROMINENT.toFloat())),
+    fallback = const(CHIP_RANK_ORDINARY.toFloat()),
+)
+
+internal const val CHIP_RANK_PROMINENT = 5
+internal const val CHIP_RANK_ORDINARY = 4
 
 /**
  * The chip layer itself: one rasterized image per distinct chip, picked per feature by the [MapChipKey.featureValue]
@@ -141,6 +181,7 @@ internal fun MapChipLayer(
             fallback = image(blank, DpSize(1.dp, 1.dp)),
         ),
         iconAllowOverlap = const(true),
+        sortKey = chipSortKey(),
         onClick = onClick,
     )
 }

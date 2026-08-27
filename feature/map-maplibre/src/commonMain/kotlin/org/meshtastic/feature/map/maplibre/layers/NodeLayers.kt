@@ -53,7 +53,22 @@ private const val NO_EXPANSION_ZOOM = 0.0
 private const val CLUSTER_LEAF_LIMIT = 100L
 private const val CLUSTER_LEAF_OFFSET = 0L
 private const val CLUSTER_RADIUS = 50
-private const val CLUSTER_MAX_ZOOM = 14
+
+/**
+ * Cluster all the way in, rather than stopping at some mid zoom.
+ *
+ * The Google flavor's algorithm has no zoom ceiling, so a pile of nodes on one spot stays a cluster however far you
+ * zoom, and stays tappable. Stopping at 14 left every zoom above it — where a dense site actually gets looked at — with
+ * chips silently stacked on each other and no way to reach the ones underneath. 20 is the deepest any basemap here goes
+ * ([Basemaps]).
+ */
+private const val CLUSTER_MAX_ZOOM = 20
+
+/**
+ * Matches the Google flavor's `MIN_CLUSTER_SIZE`: fewer than this many together are drawn as themselves rather than
+ * collapsed into a bubble. Two nearby nodes turning into a cluster hides more than it explains.
+ */
+private const val CLUSTER_MIN_POINTS = 10
 
 /**
  * The mesh node layers: ground-truth precision circles underneath, then clusters, then individual node chips.
@@ -88,7 +103,13 @@ internal fun NodeLayers(
     val nodeSource =
         rememberFeatureSource(
             nodesToFeatureCollection(nodes, myNodeNum),
-            options = GeoJsonOptions(cluster = true, clusterRadius = CLUSTER_RADIUS, clusterMaxZoom = CLUSTER_MAX_ZOOM),
+            options =
+            GeoJsonOptions(
+                cluster = true,
+                clusterRadius = CLUSTER_RADIUS,
+                clusterMaxZoom = CLUSTER_MAX_ZOOM,
+                clusterMinPoints = CLUSTER_MIN_POINTS,
+            ),
         )
 
     CircleLayer(
