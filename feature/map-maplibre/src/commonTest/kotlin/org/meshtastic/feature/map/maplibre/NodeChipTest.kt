@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.map.maplibre
 
+import org.maplibre.spatialk.geojson.BoundingBox
 import org.maplibre.spatialk.geojson.Position
 import org.meshtastic.core.model.Node
 import org.meshtastic.feature.map.maplibre.component.boundingBoxFromCorners
@@ -162,5 +163,60 @@ class BoundingBoxFromCornersTest {
         val b = corner(34.07, -107.62)
 
         assertEquals(boundingBoxFromCorners(a, b), boundingBoxFromCorners(b, a))
+    }
+}
+
+/**
+ * Which nodes are worth a chip image.
+ *
+ * A DEF CON-scale mesh holds thousands of nodes while a phone shows a few dozen; spending the image budget on the whole
+ * list left the nodes actually on screen falling back to plain dots.
+ */
+class NodesInViewTest {
+
+    private fun at(latitude: Double, longitude: Double) =
+        Node(num = (latitude * 1000).toInt(), position = protoPosition(latitude, longitude))
+
+    private fun protoPosition(latitude: Double, longitude: Double) =
+        org.meshtastic.proto.Position(latitude_i = (latitude * 1e7).toInt(), longitude_i = (longitude * 1e7).toInt())
+
+    private val box = BoundingBox(west = -108.0, south = 34.0, east = -107.0, north = 35.0)
+
+    @Test
+    fun `no bounds means every node counts`() {
+        val nodes = listOf(at(0.0, 0.0), at(80.0, 170.0))
+        assertEquals(nodes, nodesInView(nodes, null))
+    }
+
+    @Test
+    fun `a node outside the box is dropped`() {
+        val inside = at(34.5, -107.5)
+        val outside = at(40.0, -100.0)
+
+        assertEquals(listOf(inside), nodesInView(listOf(inside, outside), box))
+    }
+
+    @Test
+    fun `a node exactly on an edge counts as inside`() {
+        val corner = at(34.0, -108.0)
+        assertEquals(listOf(corner), nodesInView(listOf(corner), box))
+    }
+
+    @Test
+    fun `padding grows the box by a fraction of its own span on every side`() {
+        val padded = box.padded(0.5)
+
+        assertEquals(-108.5, padded.west)
+        assertEquals(-106.5, padded.east)
+        assertEquals(33.5, padded.south)
+        assertEquals(35.5, padded.north)
+    }
+
+    @Test
+    fun `padding is what lets a node just off screen keep its chip`() {
+        val justOutside = at(35.2, -107.5)
+
+        assertEquals(emptyList(), nodesInView(listOf(justOutside), box))
+        assertEquals(listOf(justOutside), nodesInView(listOf(justOutside), box.padded(0.5)))
     }
 }

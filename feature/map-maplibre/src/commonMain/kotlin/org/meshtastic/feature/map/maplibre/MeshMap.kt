@@ -46,6 +46,7 @@ import org.maplibre.spatialk.geojson.FeatureCollection
 import org.maplibre.spatialk.geojson.Point
 import org.maplibre.spatialk.geojson.Position
 import org.meshtastic.core.common.util.nowSeconds
+import org.meshtastic.core.model.Node
 import org.meshtastic.feature.map.BaseMapViewModel
 import org.meshtastic.feature.map.maplibre.component.MeshMapOrnaments
 import org.meshtastic.feature.map.maplibre.geojson.ClusterMember
@@ -112,18 +113,9 @@ fun MeshMap(
     val myNodeInfo by viewModel.myNodeInfo.collectAsStateWithLifecycle()
 
     val scope = rememberCoroutineScope()
-
     val visibleNodes = filterNodesForMap(nodes, filterState, nowSeconds)
 
-    // Frame the mesh once, the first time positions arrive. Re-fitting on every node update would
-    // yank the camera away from wherever the user had panned to.
-    val hasFramed = remember { mutableStateOf(false) }
-    if (frameOnNodes && !hasFramed.value) {
-        nodesBoundingBox(visibleNodes)?.let { box ->
-            hasFramed.value = true
-            scope.launch { cameraState.jumpTo(boundingBox = box) }
-        }
-    }
+    FrameOnce(enabled = frameOnNodes, nodes = visibleNodes, cameraState = cameraState)
 
     // Follows position whenever tracking is on; touches bearing only when the caller asks for it, so a user who
     // has rotated the map is not straightened out behind their back.
@@ -163,6 +155,9 @@ fun MeshMap(
 
         NodeLayers(
             nodes = visibleNodes,
+            // Padded so a modest pan keeps the same nodes in view, and the chips are not redrawn for every frame of a
+            // drag. Without a viewport at all — the first composition — every node is a candidate, as before.
+            visibleBounds = cameraState.viewport?.visibleBoundingBox?.padded(CHIP_VIEW_PADDING),
             myNodeNum = myNodeInfo?.myNodeNum,
             showPrecisionCircles = filterState.showPrecisionCircle,
             onNodeClick = navigateToNodeDetails,
@@ -180,6 +175,26 @@ fun MeshMap(
         // Declared last so the user's own position and an in-progress box corner draw above the mesh.
         UserLocationPuck(locationState = locationState, cameraState = cameraState, visible = followLocation)
         BoxCornerMarker(boxCorner)
+    }
+}
+
+/**
+ * Frames the mesh once, the first time positions arrive.
+ *
+ * Once only: re-fitting on every node update would yank the camera away from wherever the user had panned to, and on a
+ * mesh that is still filling in that would be continuous.
+ */
+@Composable
+private fun FrameOnce(enabled: Boolean, nodes: List<Node>, cameraState: CameraState) {
+    if (!enabled) return
+
+    val scope = rememberCoroutineScope()
+    val hasFramed = remember { mutableStateOf(false) }
+    if (!hasFramed.value) {
+        nodesBoundingBox(nodes)?.let { box ->
+            hasFramed.value = true
+            scope.launch { cameraState.jumpTo(boundingBox = box) }
+        }
     }
 }
 
@@ -241,3 +256,11 @@ private fun BoxCornerMarker(corner: Position?) {
         strokeWidth = const(2.dp),
     )
 }
+
+/**
+ * How far past the screen edge a node still counts as "in view" for chip drawing, as a fraction of the visible span.
+ *
+ * Half a screen in each direction: enough that a flick does not immediately invalidate the chip set, small enough that
+ * a dense mesh does not blow the image budget on nodes well off screen.
+ */
+private const val CHIP_VIEW_PADDING = 0.5

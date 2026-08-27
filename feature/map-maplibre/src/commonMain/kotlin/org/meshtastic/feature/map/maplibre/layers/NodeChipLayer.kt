@@ -55,6 +55,7 @@ import org.maplibre.compose.layers.SymbolLayer
 import org.maplibre.compose.sources.Source
 import org.maplibre.compose.util.ClickResult
 import org.maplibre.compose.util.FeaturesClickHandler
+import org.maplibre.spatialk.geojson.BoundingBox
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Person
@@ -64,6 +65,7 @@ import org.meshtastic.feature.map.maplibre.geojson.MapChipKey
 import org.meshtastic.feature.map.maplibre.geojson.NodeFeatureKeys
 import org.meshtastic.feature.map.maplibre.geojson.featureValue
 import org.meshtastic.feature.map.maplibre.geojson.toNodeChip
+import org.meshtastic.feature.map.maplibre.nodesInView
 
 /**
  * Node markers drawn as chips — the rounded, node-coloured badge with the short name in it that
@@ -82,6 +84,8 @@ import org.meshtastic.feature.map.maplibre.geojson.toNodeChip
  *
  * @param chipFilter narrows which features get a chip. The main map passes the unclustered-only test; the smaller maps
  *   have no clusters and pass nothing.
+ * @param visibleBounds limits which nodes get an image at all, so the budget is spent on what is on screen rather than
+ *   on whatever happens to come first in a mesh of thousands. Null means no limit, for the maps that show a handful.
  */
 @Composable
 internal fun NodeChipLayer(
@@ -90,10 +94,11 @@ internal fun NodeChipLayer(
     nodes: List<Node>,
     onNodeClick: ((Int) -> Unit)? = null,
     chipFilter: Expression<BooleanValue> = nil(),
+    visibleBounds: BoundingBox? = null,
 ) = MapChipLayer(
     id = id,
     source = source,
-    chips = nodes.map { it.toNodeChip() },
+    chips = remember(nodes, visibleBounds) { nodesInView(nodes, visibleBounds).map { it.toNodeChip() } },
     filter = chipFilter,
     onClick =
     onNodeClick?.let { click ->

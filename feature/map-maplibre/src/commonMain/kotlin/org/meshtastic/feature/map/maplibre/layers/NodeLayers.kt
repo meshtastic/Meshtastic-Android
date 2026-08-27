@@ -35,6 +35,7 @@ import org.maplibre.compose.layers.FillLayer
 import org.maplibre.compose.layers.SymbolLayer
 import org.maplibre.compose.sources.GeoJsonOptions
 import org.maplibre.compose.util.ClickResult
+import org.maplibre.spatialk.geojson.BoundingBox
 import org.maplibre.spatialk.geojson.Point
 import org.maplibre.spatialk.geojson.Position
 import org.meshtastic.core.model.Node
@@ -63,6 +64,7 @@ private const val CLUSTER_MAX_ZOOM = 14
  * @param onClusterZoom invoked with the cluster centre and the zoom that breaks it apart; the caller owns the camera.
  *   MapLibre reports a sentinel when a cluster cannot compute an expansion zoom, so the caller must clamp against the
  *   current zoom rather than trusting the value.
+ * @param visibleBounds what the camera can see, padded. Chips are only drawn for nodes inside it — see [NodeChipLayer].
  */
 @Composable
 @Suppress("LongMethod")
@@ -73,6 +75,7 @@ internal fun NodeLayers(
     onNodeClick: (Int) -> Unit,
     onClusterZoom: (Position, Double) -> Unit,
     onClusterMembers: (List<ClusterMember>) -> Unit,
+    visibleBounds: BoundingBox? = null,
 ) {
     if (showPrecisionCircles) {
         NodePrecisionLayer(id = "node-precision", nodes = nodes)
@@ -167,6 +170,7 @@ internal fun NodeLayers(
         nodes = nodes,
         onNodeClick = onNodeClick,
         chipFilter = !feature.has("point_count"),
+        visibleBounds = visibleBounds,
     )
 }
 

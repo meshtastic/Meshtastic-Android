@@ -82,3 +82,37 @@ fun positionsBoundingBox(positions: List<Position>): BoundingBox? {
 }
 
 private const val SINGLE_POINT_PAD_DEG = 0.01
+
+/**
+ * The nodes inside [bounds], or all of them when there are none to compare against.
+ *
+ * Used to decide which nodes are worth rasterizing a chip for. A mesh can hold thousands of nodes while a phone screen
+ * shows a few dozen, and drawing an image for every one of them spends the whole image budget on nodes nobody is
+ * looking at — at DEF CON scale that meant the nodes actually on screen fell back to plain dots.
+ *
+ * [bounds] should be padded (see [padded]) so panning a little does not change the answer.
+ */
+fun nodesInView(nodes: List<Node>, bounds: BoundingBox?): List<Node> {
+    if (bounds == null) return nodes
+    return nodes.filter { node ->
+        node.latitude >= bounds.south &&
+            node.latitude <= bounds.north &&
+            node.longitude >= bounds.west &&
+            node.longitude <= bounds.east
+    }
+}
+
+/**
+ * This box grown by [fraction] of its own span on every side.
+ *
+ * So that a small pan keeps the same nodes in view, and the set only changes — and chips are only redrawn — once the
+ * camera has moved a real distance.
+ */
+fun BoundingBox.padded(fraction: Double): BoundingBox {
+    val latitudePad = (north - south) * fraction
+    val longitudePad = (east - west) * fraction
+    return BoundingBox(
+        southwest = Position(longitude = west - longitudePad, latitude = south - latitudePad),
+        northeast = Position(longitude = east + longitudePad, latitude = north + latitudePad),
+    )
+}
