@@ -2,7 +2,7 @@
 title: TAK Integration
 parent: User Guide
 nav_order: 10
-last_updated: 2026-08-19
+last_updated: 2026-08-27
 description: Interoperate with ATAK and WinTAK — CoT position sharing, TAK roles, and plugin setup.
 aliases:
   - tak
@@ -25,28 +25,26 @@ The TAK module allows Meshtastic nodes to:
 
 ### Prerequisites
 
-- ATAK (Android Team Awareness Kit) or WinTAK installed
-- Meshtastic ATAK Plugin installed
-- TAK module enabled on your Meshtastic radio
+- ATAK (Android Team Awareness Kit), iTAK, or WinTAK installed
+- Your node's **Device Role** set to **TAK** or **TAK Tracker** — this is what makes the TAK
+  module appear in Module Config at all
+
+> ⚠️ **Warning:** The old **Meshtastic ATAK Plugin** is no longer part of this path and cannot
+> work. It bridged through the cross-process AIDL API, which was removed in app 2.8.0; the mesh
+> service is now in-process only. Do not install it. Interop today runs over the app's own local
+> TAK server plus the Mesh to CoT Converter, both described below, with stock ATAK/iTAK/WinTAK.
 
 ### Configuration
 
-1. Navigate to **Settings → Module Config → TAK**.
-2. Enable the TAK module.
-3. Configure the TAK team/group settings:
+Navigate to **Settings → Module Config → TAK**. The module's own settings are your TAK identity —
+there is no separate enable switch here, because the device Role above is what turns TAK on:
 
 ![Module toggle switch](../../assets/screenshots/settings_switch.png)
 
 | Setting | Description |
 |---------|-------------|
-| Enabled | Activate TAK interop |
-| Mode | TAK-compatible output mode |
-
-### ATAK Plugin Setup
-
-1. Install the Meshtastic ATAK Plugin from the plugin repository.
-2. Open ATAK and enable the Meshtastic plugin.
-3. The plugin bridges messages between ATAK and your mesh network.
+| Team | Your TAK team colour |
+| Role | Your member role within that team |
 
 ### Local TAK Server
 
@@ -56,6 +54,10 @@ The app can also run a **local TAK server** so ATAK/iTAK on the **same device** 
 
 - **Enable Local TAK Server** — starts the loopback-only mTLS server on port **8089** for ATAK/iTAK connections from the same device.
 - **TAK Mesh Channel** — selects which Meshtastic channel outgoing TAK traffic is sent on (default: the primary channel, index 0). Incoming TAK traffic is accepted from any channel. Matches the equivalent setting on iOS and in the legacy ATAK plugin.
+- **Mesh to CoT Converter** — off by default, and shown under the server toggle. With the server
+  running, this synthesizes a CoT contact for every node in your node database, so ordinary
+  Meshtastic nodes appear on the ATAK map as contacts. **This is what replaced the old plugin's
+  node visibility** — without it, only TAK-role nodes show up.
 - **Export TAK Data Package** — generates a `.zip` data package that ATAK/iTAK can import to connect to this server.
 
 ## TAK Roles
