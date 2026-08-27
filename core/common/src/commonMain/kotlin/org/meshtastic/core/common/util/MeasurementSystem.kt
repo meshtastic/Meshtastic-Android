@@ -55,3 +55,71 @@ expect fun currentRegionCode(): String
  * specified). Use this to construct locale-qualified file resource paths like "files-$qualifier/docs/...".
  */
 expect fun currentLocaleQualifier(): String
+
+/**
+ * The Unicode locale extension key carrying the user's measurement-system override.
+ *
+ * Android 16 exposes it as Settings > System > Language & region > Measurement system, which appends `-u-ms-…` to the
+ * locale.
+ */
+internal const val MEASUREMENT_SYSTEM_EXTENSION = "ms"
+
+/**
+ * Maps the `ms` Unicode extension to a [MeasurementSystem], or null when the user set no override.
+ *
+ * Read this before any region lookup. ICU parses the extension into the locale but resolves the measurement system from
+ * region data alone, so the override is silently dropped unless it is honored here — the user turns their phone to
+ * metric and the app keeps printing feet.
+ */
+internal fun measurementSystemOverride(extensionValue: String?): MeasurementSystem? = when (extensionValue) {
+    "metric" -> MeasurementSystem.METRIC
+
+    "ussystem",
+    "uksystem",
+    -> MeasurementSystem.IMPERIAL
+
+    else -> null
+}
+
+/**
+ * Maps a region code to its measurement system, for platforms with no ICU measurement data.
+ *
+ * Metric is the fallback: it is what all but a handful of regions use, and an unrecognized or absent region must never
+ * silently become imperial.
+ */
+internal fun measurementSystemForRegion(region: String): MeasurementSystem = when (region.uppercase()) {
+    // Liberia and Myanmar sit alongside the US in CLDR's measurementData; the UK is its own
+    // system there, but it measures road distance in miles, so it groups with imperial for
+    // distance. Temperature is decoupled — see TemperatureUnit.
+    "US",
+    "LR",
+    "MM",
+    "GB",
+    -> MeasurementSystem.IMPERIAL
+
+    else -> MeasurementSystem.METRIC
+}
+
+/**
+ * The user's in-app units choice. [SYSTEM] follows the OS locale; the other two force one system everywhere.
+ *
+ * This exists because following the OS is not reachable for everyone: One UI ships no regional-preferences page, some
+ * OEM builds offer no region choice at all (#6840), the UK's CLDR data is imperial for every length usage even though
+ * altitude there is conventionally metres, and Android 16's Measurement system setting never reaches devices that
+ * stopped at 15. The override is the escape hatch those users cannot get from the platform.
+ */
+enum class UnitsOverride(val value: Int) {
+    SYSTEM(0),
+    METRIC(1),
+    IMPERIAL(2),
+    ;
+
+    companion object {
+        fun fromValue(value: Int): UnitsOverride = entries.firstOrNull { it.value == value } ?: SYSTEM
+    }
+}
+
+/** Where the user's units choice is read from; implemented over the UI preferences store. */
+interface UnitsOverrideSource {
+    val override: kotlinx.coroutines.flow.StateFlow<UnitsOverride>
+}

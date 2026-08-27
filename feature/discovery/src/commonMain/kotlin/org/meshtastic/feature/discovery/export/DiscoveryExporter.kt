@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.discovery.export
 
+import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.database.entity.DiscoveredNodeEntity
 import org.meshtastic.core.database.entity.DiscoveryPresetResultEntity
 import org.meshtastic.core.database.entity.DiscoverySessionEntity
@@ -24,6 +25,8 @@ data class DiscoveryExportData(
     val session: DiscoverySessionEntity,
     val presetResults: List<DiscoveryPresetResultEntity>,
     val nodesByPreset: Map<Long, List<DiscoveredNodeEntity>>,
+    /** Captured at export time so the report renders in the units the user was looking at. */
+    val measurementSystem: MeasurementSystem,
 )
 
 interface DiscoveryExporter {

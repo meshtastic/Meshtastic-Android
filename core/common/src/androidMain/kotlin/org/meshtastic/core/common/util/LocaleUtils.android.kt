@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.common.util
 
+import android.content.res.Resources
 import android.icu.util.LocaleData
 import android.icu.util.ULocale
 import android.os.Build
@@ -32,31 +33,60 @@ actual fun currentLocaleQualifier(): String {
     return if (country.isNotEmpty()) "${locale.language}-r$country" else locale.language
 }
 
-@Suppress("MagicNumber")
 actual fun getSystemMeasurementSystem(): MeasurementSystem {
     val locale = Locale.getDefault()
 
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-        when (LocaleData.getMeasurementSystem(ULocale.forLocale(locale))) {
-            LocaleData.MeasurementSystem.SI -> MeasurementSystem.METRIC
-            else -> MeasurementSystem.IMPERIAL
-        }
-    } else {
-        when (locale.country.uppercase(locale)) {
-            "US",
-            "LR",
-            "MM",
-            "GB",
-            -> MeasurementSystem.IMPERIAL
+    val override = measurementSystemOverride(locale.getUnicodeLocaleType(MEASUREMENT_SYSTEM_EXTENSION))
+    if (override != null) return override
 
+    val resolved = locale.withSystemRegionIfMissing()
+
+    // getMeasurementSystem is API 28+; below that the region table is the only source available.
+    return if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
+        measurementSystemForRegion(resolved.country)
+    } else {
+        when (LocaleData.getMeasurementSystem(ULocale.forLocale(resolved))) {
+            LocaleData.MeasurementSystem.SI -> MeasurementSystem.METRIC
+
+            LocaleData.MeasurementSystem.US -> MeasurementSystem.IMPERIAL
+
+            // ICU's third bucket. The UK measures road distance in miles, so it groups with
+            // imperial for distance; its Celsius temperatures come from getSystemTemperatureUnit().
+            LocaleData.MeasurementSystem.UK -> MeasurementSystem.IMPERIAL
+
+            // Anything ICU cannot classify is metric. Never fall through to imperial: that is what
+            // made a region-less locale print feet for most of the world.
             else -> MeasurementSystem.METRIC
         }
     }
 }
 
+/**
+ * Returns this locale with the device's region filled in when it carries none.
+ *
+ * [Locale.getDefault] is the *app* locale, and the in-app language picker offers bare tags like `en`. ICU completes a
+ * missing region from likely-subtags, which turns `en` into `en_US` — so choosing English in Settings silently switched
+ * a user in a metric country to feet. Picking a language must not pick a measurement system, so the region comes from
+ * the system configuration, which no per-app locale overrides.
+ */
+internal fun Locale.withSystemRegionIfMissing(): Locale {
+    if (country.isNotEmpty()) return this
+
+    val systemLocales = Resources.getSystem().configuration.locales
+    val region =
+        (0 until systemLocales.size()).asSequence().map { systemLocales[it].country }.firstOrNull { it.isNotEmpty() }
+
+    // Builder rejects locales carrying legacy or ill-formed fields, and a system locale can lack a
+    // region of its own; the unmodified locale is the safe answer in both cases.
+    return region?.let { code -> runCatching { Locale.Builder().setLocale(this).setRegion(code).build() }.getOrNull() }
+        ?: this
+}
+
 // LocalePreferences resolves from CLDR data and, on Android 14+, the user's Regional preferences
 // override. Kelvin (a valid regional preference) falls back to Celsius, which the app can display.
-actual fun getSystemTemperatureUnit(): TemperatureUnit = when (LocalePreferences.getTemperatureUnit()) {
-    LocalePreferences.TemperatureUnit.FAHRENHEIT -> TemperatureUnit.FAHRENHEIT
-    else -> TemperatureUnit.CELSIUS
-}
+// The same region fill as distance, so a language-only app locale cannot split the two systems.
+actual fun getSystemTemperatureUnit(): TemperatureUnit =
+    when (LocalePreferences.getTemperatureUnit(Locale.getDefault().withSystemRegionIfMissing())) {
+        LocalePreferences.TemperatureUnit.FAHRENHEIT -> TemperatureUnit.FAHRENHEIT
+        else -> TemperatureUnit.CELSIUS
+    }

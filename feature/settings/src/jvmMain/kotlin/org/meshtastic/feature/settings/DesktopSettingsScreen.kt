@@ -37,6 +37,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.UnitsOverride
 import org.meshtastic.core.navigation.DiscoveryRoute
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
@@ -56,12 +57,14 @@ import org.meshtastic.core.resources.node_layout_section_title
 import org.meshtastic.core.resources.preferences_language
 import org.meshtastic.core.resources.remotely_administrating
 import org.meshtastic.core.resources.theme
+import org.meshtastic.core.resources.units
 import org.meshtastic.core.resources.wifi_devices
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.icon.ChevronRight
 import org.meshtastic.core.ui.icon.Device
+import org.meshtastic.core.ui.icon.Distance
 import org.meshtastic.core.ui.icon.FormatPaint
 import org.meshtastic.core.ui.icon.HelpOutline
 import org.meshtastic.core.ui.icon.Info
@@ -78,6 +81,8 @@ import org.meshtastic.feature.settings.component.FullMessageTimestampsSetting
 import org.meshtastic.feature.settings.component.HomoglyphSetting
 import org.meshtastic.feature.settings.component.NotificationSection
 import org.meshtastic.feature.settings.component.ThemePickerDialog
+import org.meshtastic.feature.settings.component.UnitsOption
+import org.meshtastic.feature.settings.component.UnitsPickerDialog
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.ModuleRoute
 import org.meshtastic.feature.settings.radio.RadioConfigItemList
@@ -109,6 +114,15 @@ fun DesktopSettingsScreen(
 
     var showThemePickerDialog by remember { mutableStateOf(false) }
     var showLanguagePickerDialog by remember { mutableStateOf(false) }
+    var showUnitsPickerDialog by remember { mutableStateOf(false) }
+    val unitsOverride = UnitsOverride.fromValue(settingsViewModel.unitsOverride.collectAsStateWithLifecycle().value)
+    if (showUnitsPickerDialog) {
+        UnitsPickerDialog(
+            current = unitsOverride,
+            onClickUnits = { settingsViewModel.setUnitsOverride(it) },
+            onDismiss = { showUnitsPickerDialog = false },
+        )
+    }
     if (showThemePickerDialog) {
         ThemePickerDialog(
             onClickTheme = { settingsViewModel.setTheme(it) },
@@ -186,6 +200,16 @@ fun DesktopSettingsScreen(
                         trailingIcon = null,
                     ) {
                         showLanguagePickerDialog = true
+                    }
+
+                    ListItem(
+                        text = stringResource(Res.string.units),
+                        supportingText =
+                        stringResource(UnitsOption.entries.first { it.override == unitsOverride }.label),
+                        leadingIcon = MeshtasticIcons.Distance,
+                        trailingIcon = null,
+                    ) {
+                        showUnitsPickerDialog = true
                     }
 
                     FullMessageTimestampsSetting(

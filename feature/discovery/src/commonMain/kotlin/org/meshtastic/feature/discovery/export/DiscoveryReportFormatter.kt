@@ -17,9 +17,9 @@
 package org.meshtastic.feature.discovery.export
 
 import org.meshtastic.core.common.util.DateFormatter
+import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.common.util.NumberFormatter
-import org.meshtastic.core.common.util.getSystemMeasurementSystem
 import org.meshtastic.core.database.entity.DiscoveredNodeEntity
 import org.meshtastic.core.database.entity.DiscoveryPresetResultEntity
 import org.meshtastic.core.database.entity.DiscoverySessionEntity
@@ -58,14 +58,14 @@ internal object DiscoveryReportFormatter {
         }
     }
 
-    fun formatNodeLine(node: DiscoveredNodeEntity): String = buildString {
+    fun formatNodeLine(node: DiscoveredNodeEntity, measurementSystem: MeasurementSystem): String = buildString {
         append(node.longName ?: node.shortName ?: "!${node.nodeNum.toString(radix = 16)}")
         append(" | ${node.neighborType}")
         append(" | SNR: ${MetricFormatter.snr(node.snr)}")
         append(" | RSSI: ${MetricFormatter.rssi(node.rssi)}")
         val distance = node.distanceFromUser
         if (distance != null) {
-            append(" | ${distance.roundToInt().toDistanceString(getSystemMeasurementSystem())}")
+            append(" | ${distance.roundToInt().toDistanceString(measurementSystem)}")
         }
     }
 

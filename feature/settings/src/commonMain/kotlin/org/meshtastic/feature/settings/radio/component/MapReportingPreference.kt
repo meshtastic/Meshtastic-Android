@@ -32,10 +32,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.common.util.getSystemMeasurementSystem
+import org.koin.compose.koinInject
+import org.meshtastic.core.common.util.LocaleUnitsProvider
+import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.i_agree
@@ -118,7 +122,14 @@ fun MapReportingPreference(
                         steps = POSITION_PRECISION_MAX - POSITION_PRECISION_MIN - 1,
                     )
                     val precisionMeters = precisionBitsToMeters(positionPrecision).toInt()
-                    val unit = getSystemMeasurementSystem()
+                    val unit =
+                        if (LocalInspectionMode.current) {
+                            // Previews and screenshot tests render with no Koin application; the value itself is
+                            // arbitrary there.
+                            MeasurementSystem.METRIC
+                        } else {
+                            koinInject<LocaleUnitsProvider>().measurementSystem.collectAsStateWithLifecycle().value
+                        }
                     Text(
                         text = "± ${precisionMeters.toDistanceString(unit)}",
                         modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),

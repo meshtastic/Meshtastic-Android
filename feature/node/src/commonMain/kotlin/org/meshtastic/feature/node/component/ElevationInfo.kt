@@ -22,8 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.MeasurementSystem
-import org.meshtastic.core.model.util.metersIn
-import org.meshtastic.core.model.util.toString
+import org.meshtastic.core.model.util.toElevationString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.altitude
 import org.meshtastic.core.resources.elevation_suffix
@@ -43,7 +42,7 @@ fun ElevationInfo(
         icon = MeshtasticIcons.Elevation,
         contentDescription = stringResource(Res.string.altitude),
         label = stringResource(Res.string.altitude),
-        text = altitude.metersIn(system).toString(system) + " " + suffix,
+        text = altitude.toElevationString(system) + " " + suffix,
         contentColor = contentColor,
     )
 }

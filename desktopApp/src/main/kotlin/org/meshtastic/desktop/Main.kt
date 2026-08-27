@@ -212,7 +212,7 @@ private fun ApplicationScope.ThemeAndLocaleProvider(uiViewModel: UIViewModel) {
     val uiPrefs = koinInject<UiPrefs>()
     val themePref by uiPrefs.theme.collectAsState(initial = -1)
     val localePref by uiPrefs.locale.collectAsState(initial = "")
-    Locale.setDefault(localePref.takeIf { it.isNotEmpty() }?.let(Locale::forLanguageTag) ?: systemLocale)
+    Locale.setDefault(resolveLocale(localePref, systemLocale))
 
     val isDarkTheme =
         when (themePref) {

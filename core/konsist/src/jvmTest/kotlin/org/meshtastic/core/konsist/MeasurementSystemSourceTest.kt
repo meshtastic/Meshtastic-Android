@@ -80,4 +80,31 @@ class MeasurementSystemSourceTest {
                 offenders.joinToString("\n"),
         )
     }
+
+    /**
+     * Direct reads of the OS resolution bypass the user's in-app units choice: such a call site follows the locale but
+     * ignores the setting, splitting the app between two unit sources. Everything outside `core/common` (where the
+     * provider itself lives) takes units from `LocaleUnitsProvider`.
+     */
+    @Test
+    fun `OS unit resolution is only read inside the provider`() {
+        val offenders =
+            Konsist.scopeFromProduction()
+                .files
+                .filterNot { it.isNestedAgentWorktree() }
+                .filterNot { "/core/common/" in it.scanPath }
+                .filter {
+                    "getSystemMeasurementSystem(" in it.text ||
+                        "getSystemTemperatureUnit(" in it.text ||
+                        "DistanceUnit.getFromLocale(" in it.text
+                }
+                .map { it.scanPath }
+
+        assertTrue(
+            offenders.isEmpty(),
+            "Units come from LocaleUnitsProvider (which folds in the in-app override), never from the OS " +
+                "resolution directly. Offending files:\n" +
+                offenders.joinToString("\n"),
+        )
+    }
 }

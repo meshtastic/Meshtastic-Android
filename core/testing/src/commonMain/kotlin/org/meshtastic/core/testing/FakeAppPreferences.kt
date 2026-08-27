@@ -92,6 +92,12 @@ class FakeUiPrefs : UiPrefs {
         theme.value = value
     }
 
+    override val unitsOverride = MutableStateFlow(0)
+
+    override fun setUnitsOverride(value: Int) {
+        unitsOverride.value = value
+    }
+
     override val locale = MutableStateFlow("en")
 
     override fun setLocale(languageTag: String) {

@@ -21,6 +21,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 import java.util.Locale
 import kotlin.test.assertEquals
@@ -39,6 +40,7 @@ class TemperatureUnitTest {
     @After
     fun tearDown() {
         Locale.setDefault(originalLocale)
+        RuntimeEnvironment.setQualifiers("en-rUS")
     }
 
     @Test
@@ -66,6 +68,19 @@ class TemperatureUnitTest {
     @Test
     fun `regional preference override wins over region default`() {
         Locale.setDefault(Locale.forLanguageTag("en-US-u-mu-celsius"))
+        assertEquals(TemperatureUnit.CELSIUS, getSystemTemperatureUnit())
+    }
+
+    // The in-app language picker offers bare tags like "en". Temperature takes the region from the
+    // system configuration then, the same as distance, so picking a language cannot split the two.
+    @Test
+    fun `region-less app language takes the temperature region from the device`() {
+        RuntimeEnvironment.setQualifiers("en-rUS")
+        Locale.setDefault(Locale.forLanguageTag("en"))
+        assertEquals(TemperatureUnit.FAHRENHEIT, getSystemTemperatureUnit())
+
+        RuntimeEnvironment.setQualifiers("fr-rFR")
+        Locale.setDefault(Locale.forLanguageTag("en"))
         assertEquals(TemperatureUnit.CELSIUS, getSystemTemperatureUnit())
     }
 }

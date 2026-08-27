@@ -59,6 +59,15 @@ class UiPrefsImpl(private val dataStore: UiDataStore, dispatchers: CoroutineDisp
         scope.launch { dataStore.edit { it[KEY_THEME] = value } }
     }
 
+    // Eagerly, unlike most prefs here: LocaleUnitsProvider folds this into every unit the app renders, so the window
+    // in which a fresh process shows OS units to a user who overrode them should close as early as possible.
+    override val unitsOverride: StateFlow<Int> =
+        dataStore.data.map { it[KEY_UNITS_OVERRIDE] ?: 0 }.stateIn(scope, SharingStarted.Eagerly, 0)
+
+    override fun setUnitsOverride(value: Int) {
+        scope.launch { dataStore.edit { it[KEY_UNITS_OVERRIDE] = value } }
+    }
+
     override val locale: StateFlow<String> =
         dataStore.data.map { it[KEY_LOCALE] ?: "" }.stateIn(scope, SharingStarted.Eagerly, "")
 
@@ -310,6 +319,7 @@ class UiPrefsImpl(private val dataStore: UiDataStore, dispatchers: CoroutineDisp
 
         val KEY_APP_INTRO_COMPLETED = booleanPreferencesKey("app_intro_completed")
         val KEY_THEME = intPreferencesKey("theme")
+        private val KEY_UNITS_OVERRIDE = intPreferencesKey("units_override")
         val KEY_LOCALE = stringPreferencesKey("locale")
         val KEY_NODE_SORT = intPreferencesKey("node-sort-option")
         val KEY_INCLUDE_UNKNOWN = booleanPreferencesKey("include-unknown")

@@ -31,8 +31,10 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.app_settings
 import org.meshtastic.core.resources.preferences_language
 import org.meshtastic.core.resources.theme
+import org.meshtastic.core.resources.units
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.icon.ChevronRight
+import org.meshtastic.core.ui.icon.Distance
 import org.meshtastic.core.ui.icon.FormatPaint
 import org.meshtastic.core.ui.icon.Language
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -45,6 +47,8 @@ internal fun ColumnScope.AppearanceSettingsContent(
     onShowFullMessageTimestampsChange: (Boolean) -> Unit,
     onShowLanguagePicker: () -> Unit,
     onShowThemePicker: () -> Unit,
+    unitsSummary: String,
+    onShowUnitsPicker: () -> Unit,
 ) {
     val context = LocalContext.current
     val settingsLauncher =
@@ -76,6 +80,15 @@ internal fun ColumnScope.AppearanceSettingsContent(
         onShowThemePicker()
     }
 
+    ListItem(
+        text = stringResource(Res.string.units),
+        supportingText = unitsSummary,
+        leadingIcon = MeshtasticIcons.Distance,
+        trailingIcon = null,
+    ) {
+        onShowUnitsPicker()
+    }
+
     FullMessageTimestampsSetting(
         checked = showFullMessageTimestamps,
         onCheckedChange = onShowFullMessageTimestampsChange,
@@ -92,6 +105,8 @@ fun AppearanceSectionPreview() {
                 onShowFullMessageTimestampsChange = {},
                 onShowLanguagePicker = {},
                 onShowThemePicker = {},
+                unitsSummary = "System default",
+                onShowUnitsPicker = {},
             )
         }
     }

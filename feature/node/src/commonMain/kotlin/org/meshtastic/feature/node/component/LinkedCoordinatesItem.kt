@@ -32,8 +32,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.GPSFormat
 import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.model.util.metersIn
-import org.meshtastic.core.model.util.toString
+import org.meshtastic.core.model.util.toElevationString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.copy
 import org.meshtastic.core.resources.elevation_suffix
@@ -59,7 +58,7 @@ fun LinkedCoordinatesItem(node: Node, displayUnits: MeasurementSystem = Measurem
     val elevationText =
         node.validPosition?.altitude?.let { altitude ->
             val suffix = stringResource(Res.string.elevation_suffix)
-            " • ${altitude.metersIn(displayUnits).toString(displayUnits)} $suffix"
+            " • ${altitude.toElevationString(displayUnits)} $suffix"
         } ?: ""
 
     val copyLabel = stringResource(Res.string.copy)
