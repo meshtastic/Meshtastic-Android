@@ -4,6 +4,12 @@ parent: User Guide
 nav_order: 16
 last_updated: 2026-08-27
 description: How the app formats temperature, distance, speed, and other measurements based on your device locale.
+aliases:
+  - measurement
+  - units
+  - locale
+  - metric
+  - imperial
 ---
 
 # Units, Measurement & Locale

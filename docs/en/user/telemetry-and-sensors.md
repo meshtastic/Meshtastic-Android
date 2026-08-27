@@ -99,7 +99,7 @@ Useful for monitoring solar charging or battery health on remote nodes.
 | Weather station | 900 | 300 |
 | Battery conservation | 7200 | 7200 |
 
-> ⚠️ **Note:** Shorter intervals increase airtime usage and battery drain across the mesh.
+> ℹ️ **Note:** Shorter intervals increase airtime usage and battery drain across the mesh.
 
 ## Air Quality Metrics
 

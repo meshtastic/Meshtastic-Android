@@ -105,7 +105,7 @@ Once configured:
 - Position updates flow bidirectionally between Meshtastic and TAK
 - TAK Tracker nodes broadcast PLI automatically — their positions appear on ATAK maps without any ATAK-side configuration
 
-> ⚠️ **Note:** TAK integration requires specific node roles and module configuration. Standard client nodes don't automatically participate in TAK operations.
+> ℹ️ **Note:** TAK integration requires specific node roles and module configuration. Standard client nodes don't automatically participate in TAK operations.
 
 ## Troubleshooting
 

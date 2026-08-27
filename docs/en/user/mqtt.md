@@ -98,7 +98,7 @@ MQTT uses protobuf message format:
 |--------|-------------|----------|
 | **Protobuf** | Binary Meshtastic protobuf encoding | Node-to-node mesh bridging |
 
-> ⚠️ **Note:** JSON output support was removed from firmware. The `json_enabled` setting is still visible in the app for legacy compatibility but has no effect on current firmware versions.
+> ℹ️ **Note:** JSON output support was removed from firmware. The `json_enabled` setting is still visible in the app for legacy compatibility but has no effect on current firmware versions.
 
 ## Encryption & Privacy
 
@@ -108,7 +108,7 @@ Understanding the layered encryption model:
 2. **MQTT encryption** (the module setting) adds an additional encryption layer for transit to the broker. This protects metadata and routing information.
 3. **TLS** encrypts the TCP connection to the broker itself, preventing network-level eavesdropping.
 
-> 🔒 **Important:** The default public channel has a well-known key. Messages on the default channel sent via MQTT are effectively **unencrypted** — anyone can decode them. Always use a custom PSK for private communications.
+> 🔒 **Security:** The default public channel has a well-known key. Messages on the default channel sent via MQTT are effectively **unencrypted** — anyone can decode them. Always use a custom PSK for private communications.
 
 ## Best Practices
 

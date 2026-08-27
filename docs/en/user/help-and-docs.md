@@ -39,7 +39,7 @@ A page open in the browser:
 
 > 🔒 **Privacy:** On supported Google-flavor devices, Chirpy runs **on-device** using Gemini Nano — your questions never leave your phone. A small model downloads on first use.
 
-> ⚠️ **Note:** On F-Droid, Desktop, and iOS builds, Chirpy falls back to a **keyword search** over the documentation rather than a generative model. If your device doesn't support on-device AI, the assistant is hidden and you can still browse and search the docs normally.
+> ℹ️ **Note:** On F-Droid, Desktop, and iOS builds, Chirpy falls back to a **keyword search** over the documentation rather than a generative model. If your device doesn't support on-device AI, the assistant is hidden and you can still browse and search the docs normally.
 
 ## Related Topics
 

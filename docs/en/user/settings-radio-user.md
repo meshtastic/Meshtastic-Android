@@ -2,7 +2,7 @@
 title: Settings — Radio & User
 parent: User Guide
 nav_order: 7
-last_updated: 2026-07-27
+last_updated: 2026-08-27
 description: Configure your radio hardware, LoRa presets, user profile, position sharing, power management, and security.
 aliases:
   - settings
@@ -23,7 +23,7 @@ Configure your radio hardware and user identity parameters.
 |---------|-------------|
 | Long Name | Your display name (up to 39 characters) |
 | Short Name | 4-character abbreviated name |
-| Licensed Operator | Enable if you hold an amateur radio license (enables higher power) |
+| Licensed Operator | Enable if you hold an amateur radio license (permits higher power). Turning it on relabels **Long Name** as **Call Sign** and adds a separate Long Name field, and is staged behind a confirmation dialog |
 
 ### Applying Changes
 
@@ -48,7 +48,7 @@ After modifying settings, tap **Save** to write the configuration to your radio.
 | Modem Preset | Speed/range tradeoff | LongFast |
 | Hop Limit | Maximum retransmit hops | 3 |
 | TX Power | Transmission power (dBm); 0 = max allowed for region | 0 (region max) |
-| Frequency Offset | Fine-tune frequency (MHz) | 0 |
+| Frequency Override | Overrides the computed operating frequency outright (MHz). It does not offset the calculated value — leave at 0 unless you know you need a specific frequency | 0 (use calculated) |
 | Channel Bandwidth | Bandwidth setting | Default for preset |
 
 > ⚠️ **Important:** You **must** set your region before transmitting. Operating without the correct region may violate local radio regulations. See the [region configuration guide](https://meshtastic.org/docs/getting-started/initial-config) on meshtastic.org for details.
@@ -103,13 +103,13 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 | Display Units | Metric or Imperial |
 | OLED Type | Auto, SSD1306, SH1106, SH1107 |
 | Compass Orientation | Rotation offset for compass display (0°, 90°, 180°, 270°) |
-| ~~Compass North~~ | ⚠️ **Deprecated** — replaced by Compass Orientation; still visible in older firmware |
+| Always Point North | Locks the compass rose north-up instead of rotating it with your heading. Independent of Compass Orientation — neither replaces the other |
 
 ### Position Config
 
 | Setting | Description |
 |---------|-------------|
-| GPS Enabled | Enable/disable GPS |
+| GPS Mode | Three-state: GPS enabled, disabled, or not present. Not a simple on/off |
 | GPS Update Interval | How often to acquire GPS fix |
 | Position Broadcast (s) | How often to share position |
 | Smart Position | Enable movement-based broadcasting |
@@ -160,6 +160,31 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 | Restore Keys | Write the backed-up keys back to the node (available once a backup exists) |
 | Delete Key Backup | Remove the stored key backup from this device |
 | Protection Level | Packet authenticity — how unsigned or relayed packets are treated: **Strict**, **Balanced**, or **Compatible** (requires supporting firmware; Strict asks for confirmation) |
+
+#### Lockdown Mode
+
+Lockdown encrypts the device's storage and requires a passphrase for each connection. It needs
+supporting firmware; the row does not appear otherwise.
+
+Enabling it asks you to set and confirm a passphrase, and to acknowledge that **it locks the debug
+(SWD) port on hardware that supports locking**. You can turn lockdown off again at any time with
+the passphrase, and a full device erase restores the hardware regardless.
+
+Alongside the passphrase you set the limits that end a session automatically:
+
+| Field | What it does |
+|---|---|
+| Boots remaining | How many device boots the unlocked state survives |
+| Hours until expiry | Wall-clock lifetime of the unlocked state |
+| Session cap (minutes) | Maximum length of a single unlocked connection |
+
+Once active, the row reads *Active — storage encrypted, this connection authenticated* when
+unlocked, or *Active — enter your passphrase to unlock this connection* when not. **Lock Now**
+ends the current session immediately. Repeated wrong passphrases are rate-limited with a
+back-off before you can try again.
+
+> ⚠️ **Warning:** There is no passphrase recovery. Losing it means erasing the device to get it
+> back, which destroys its keys, channels and settings.
 
 ![Password field](../../assets/screenshots/settings_password_field.png)
 

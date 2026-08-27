@@ -34,7 +34,7 @@ Channels support multiple encryption levels:
 | 🔓 | Default / Open | Uses the well-known default key. **Any Meshtastic device** on the same preset can read these messages. |
 | ⚠️ | Insecure + Position | Open channel that also broadcasts your GPS position. Use with caution in public meshes. |
 
-> 🔒 **Security Tip:** Always configure a unique PSK for private communications. The default channel is intentionally open so new users can discover the mesh — but you should create a separate encrypted channel for anything sensitive.
+> 🔒 **Security:** Always configure a unique PSK for private communications. The default channel is intentionally open so new users can discover the mesh — but you should create a separate encrypted channel for anything sensitive.
 
 ### Adding a Channel
 
@@ -175,7 +175,7 @@ React to messages with emoji:
 - Multiple users can react to the same message
 - React to your own messages or others' messages
 
-> ⚠️ **Note:** Opening the bar sends nothing. A reaction is a real mesh packet, so it only goes
+> ℹ️ **Note:** Opening the bar sends nothing. A reaction is a real mesh packet, so it only goes
 > out when you pick an emoji.
 
 ![Emoji reaction badges displayed beneath a message](../../assets/screenshots/messages_reaction.png)
@@ -185,7 +185,7 @@ React to messages with emoji:
 ### Replying
 
 **Swipe a message to the right** to reply to it — the composer opens with that message quoted.
-Swiping past the reply threshold arms the action; releasing before it simply springs back.
+Swiping past the reply threshold arms the action; releasing before it springs back with nothing sent.
 Reply is also in the long-press actions menu.
 
 ### Day Separators

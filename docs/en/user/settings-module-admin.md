@@ -39,10 +39,21 @@ Bridges mesh messages to and from an MQTT broker for internet connectivity. This
 | Username | Authentication username |
 | Password | Authentication password |
 | Encryption | Encrypt MQTT payloads |
-| ~~JSON Output~~ | ⚠️ **Deprecated** — JSON support removed from firmware; field is ignored |
+| JSON Output | Publish and consume MQTT messages as JSON. Marked deprecated in the protobuf schema, but it is still the only toggle for this behaviour and the firmware still honours it |
 | TLS | Use secure connection |
 | Root Topic | Base MQTT topic path |
-| Map Report | Publish position for public map |
+| Proxy to client enabled | Let a connected phone carry the node's MQTT traffic, instead of the node reaching the broker itself |
+| MQTT proxy on this phone | The phone-side half of the above: whether *this* phone is currently acting as that relay. See [MQTT](mqtt) |
+| Map Report | Publish position to the public map — see below |
+
+**Map Report** expands into its own group:
+
+| Setting | Description |
+|---------|-------------|
+| Enabled | Publish to the public map at all |
+| Share location | Explicit consent to include your position. Map reporting will not save without it |
+| Position precision | How coarsely your position is published |
+| Publish interval | How often to report. Must be **at least 3600 s (1 hour)** — the app blocks saving below that |
 
 See [MQTT](mqtt) for a detailed usage guide including encryption, privacy, and broker setup.
 
@@ -91,6 +102,10 @@ Buffers messages for nodes that were temporarily offline, then replays them when
 
 ### Range Test Module
 
+> ⚠️ **Warning:** Range Test only works on a secured primary channel. While your primary channel
+> still uses the default public key, the Enabled, Interval and Save-CSV controls stay disabled, and
+> saving force-disables the module if the channel has reverted to public.
+
 Automated range testing tool for evaluating link quality between nodes. When enabled, the node periodically transmits test messages with incrementing counters. A receiver node logs these messages, allowing you to walk or drive away and later analyze at what distance messages stopped arriving.
 
 | Setting | Description |
@@ -136,7 +151,7 @@ Codec2 audio support for low-bandwidth voice communication over the mesh. This i
 | I2S Data In | GPIO pin for I2S DIN |
 | I2S Data Out | GPIO pin for I2S DOUT |
 
-> ⚠️ **Note:** Audio requires specific hardware (I2S microphone and speaker). Voice quality is very low-bandwidth — think "understandable radio voice," not phone-call quality.
+> ℹ️ **Note:** Audio requires specific hardware (I2S microphone and speaker). Voice quality is very low-bandwidth — think "understandable radio voice," not phone-call quality.
 
 ### Remote Hardware Module
 
@@ -195,6 +210,8 @@ People counter using WiFi and BLE probe requests. Counts nearby devices by passi
 |---------|-------------|
 | Enabled | Activate people counting |
 | Update Interval (s) | How often to report counts |
+| WiFi RSSI threshold | Ignore WiFi probes weaker than this, so distant devices are not counted (defaults to −80 dBm) |
+| BLE RSSI threshold | The same cut-off for BLE advertisements (defaults to −80 dBm) |
 
 > 💡 **Tip:** Paxcounter is useful for estimating foot traffic at trailheads, event venues, or other locations. Counts are approximate — one person may carry multiple devices.
 
@@ -204,7 +221,7 @@ Publishes a short free-text status line for your node, which other nodes can dis
 
 | Setting | Description |
 |---------|-------------|
-| The actual status string | Up to 80 characters. The **✕** in the field clears it. |
+| The actual status string | Up to 80 characters. The **✕** in the field clears it. (That is the app's own label for the field, verbatim.) |
 
 Saving takes effect immediately — this is one of the few module settings that never asks the
 node to reboot.
@@ -218,6 +235,9 @@ Broadcasts an invitation to your mesh, and receives invitations from others. See
 [Discovery](discovery) for the full walkthrough.
 
 ### TAK Module
+
+> ℹ️ **Note:** This module only appears in the list once the node's **Device Role** (Device Config)
+> is set to **TAK** or **TAK Tracker**. Change the role first, or the entry will not be there.
 
 Team Awareness Kit integration for interoperability with ATAK and WinTAK. See [TAK Integration](tak) for detailed setup and usage.
 
@@ -254,11 +274,13 @@ Opens the **Packets** and **App logs** tabs for viewing, filtering, and exportin
 
 **Settings → About** carries the app's own identity rather than the radio's:
 
+Three sections:
+
 - **What is Meshtastic?** — a short description of the project.
-- **Apps** — a link to the GitHub repository, the running app version, and
+- **Apps** — opens with **Need Hardware?**, a rotating carousel of popular devices that links out
+  to where to buy one, then the GitHub repository, the running app version, and
   **Acknowledgements** (below).
 - **Project information** — links to the website and to this documentation.
-- **Need Hardware?** — a rotating carousel of popular devices, linking out to where to buy one.
 
 ### Acknowledgements
 

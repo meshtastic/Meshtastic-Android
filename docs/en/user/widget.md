@@ -35,7 +35,7 @@ Tap the widget to open the app, or use its refresh control to request fresh stat
 3. Find **Meshtastic** in the list and drag the **Local Stats** widget to your home screen.
 4. Resize it as needed — the layout adapts to the available space.
 
-> ⚠️ **Note:** The widget is Android-only. It is not available on the Desktop or iOS builds.
+> ℹ️ **Note:** The widget is Android-only. It is not available on the Desktop or iOS builds.
 
 ## Related Topics
 

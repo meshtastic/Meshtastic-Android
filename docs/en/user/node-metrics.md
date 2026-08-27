@@ -162,7 +162,7 @@ The position tab shows location data for nodes that share GPS:
 
 ![Position inline content](../../assets/screenshots/nodes_position.png)
 
-> ⚠️ **Note:** Metrics are only available when they have been reported by the remote node. Metrics update at intervals configured on each node's telemetry settings.
+> ℹ️ **Note:** Metrics are only available when they have been reported by the remote node. Metrics update at intervals configured on each node's telemetry settings.
 
 ## Related Topics
 

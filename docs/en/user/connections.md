@@ -2,7 +2,7 @@
 title: Connections
 parent: User Guide
 nav_order: 2
-last_updated: 2026-08-25
+last_updated: 2026-08-27
 description: Connect your phone or desktop to a Meshtastic radio via Bluetooth, USB, or TCP/IP.
 aliases:
   - bluetooth
@@ -52,10 +52,12 @@ Tapping **Scan** after you have declined the permission once explains what it is
 |------|-------|-------------|
 | 🟢 | Connected | Active radio link established |
 | 🟡 | Connecting | Handshake in progress |
-| 🔴 | Disconnected | No active connection |
-| ⚪ | Not configured | No device selected |
+| 🔴 | Disconnected | No active connection; the app keeps trying to reconnect |
+| ⚪ | Device sleeping | The radio is in light sleep — the app is waiting for it to wake and reconnect, not failing |
 
-When connecting, a status indicator shows the current connection state:
+These are the four states the app models. "Device sleeping" is normal on power-saving configurations and needs no action.
+
+When connecting, a status indicator shows the current connection state — tap **Stop Connecting** to abandon the attempt:
 
 ![Connecting status](../../assets/screenshots/connections_connecting.png)
 
@@ -79,7 +81,7 @@ USB connections provide a wired alternative, useful for desktop or when Bluetoot
 2. The app will prompt for USB permission — tap **Allow**.
 3. The connection is established automatically.
 
-> ⚠️ **Note:** USB connections require OTG support on Android devices.
+> ℹ️ **Note:** USB connections require OTG support on Android devices.
 
 ## TCP/IP (Network)
 
