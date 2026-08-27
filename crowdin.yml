@@ -1,3 +1,7 @@
+# Explicit because CLI 5 removed --preserve-hierarchy (it is now the default);
+# pinning it here keeps the layout independent of that default.
+preserve_hierarchy: true
+
 files:
   - source: /**/composeResources/values/strings.xml
     translation: /%original_path%-%two_letters_code%/strings.xml
