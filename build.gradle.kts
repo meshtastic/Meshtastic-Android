@@ -62,8 +62,20 @@ plugins.withId("org.meshtastic.flatpak.sources") {
         // here — desktop-jvm-{platform} brings org.jetbrains.skiko:skiko-awt-runtime-{platform} along
         // by itself (its version previously had to be tracked by hand against desktop-jvm's POM).
         targetPlatforms.set(setOf("linux-x64", "linux-arm64"))
+        //
+        // maplibre-compose's desktop renderer is the same shape of problem: desktopApp picks exactly one
+        // native runtime, by build-host arch, so an x86_64 generation host never resolves the arm64 blob
+        // and the arm64 offline build had no URL to fetch. KEEP this version in sync with
+        // `maplibre-compose` in gradle/libs.versions.toml, for the same reason the two above say so.
+        //
+        // Its LWJGL natives need naming too, and cannot use {platform}: force-resolution here is
+        // non-transitive (see FlatpakSourcesPlugin), and LWJGL classifies x64 as plain `natives-linux`
+        // rather than `natives-linux-x64`, so the token would expand to an artifact that does not exist.
+        // Two literals instead; a template with no token resolves to itself once per platform. Track
+        // whatever the maplibre-compose-runtime-vulkan-linux-* POMs declare if maplibre is bumped.
         platformDependencies.set(setOf(
             "org.jetbrains.compose.desktop:desktop-jvm-{platform}:$composeMultiplatformVersion",
+            "org.maplibre.compose:maplibre-compose-runtime-vulkan-{platform}:0.15.0",
         ))
     }
 }
