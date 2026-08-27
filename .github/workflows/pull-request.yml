@@ -23,6 +23,7 @@ jobs:
     outputs:
       android: ${{ steps.filter.outputs.android }}
       screenshots: ${{ steps.filter.outputs.screenshots }}
+      desktop: ${{ steps.filter.outputs.desktop }}
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: dorny/paths-filter@v4
@@ -48,6 +49,33 @@ jobs:
               - 'compose_compiler_config.conf'
               - '.github/workflows/**'
               - '.github/actions/**'
+            # Desktop packaging only runs post-merge on main, so windows-latest never saw a
+            # PR — that is how #6777's Gradle 9.7.1 bump went green here and reddened main
+            # (CMP's MSI/WiX path reads Project.layout on the root project from ':desktopApp',
+            # and only Windows trips it). Narrow gate rather than always-on: the 4-OS matrix is
+            # ~40 runner-minutes, and macOS bills at 10x.
+            # libs.versions.toml is in deliberately, whole-file: #6904 was a one-line CMP bump
+            # in the catalog, and CMP's packaging is exactly what breaks. Same over-run trade
+            # verify-flatpak already accepts (#6911) — a filter naming today's keys goes stale
+            # silently the moment the build reads another one.
+            desktop:
+              - 'desktopApp/**'
+              - 'scripts/build-appimage.sh'
+              # Shared build machinery that shapes the packaged output.
+              - 'build-logic/**'
+              - 'gradle/wrapper/**'
+              - 'gradle/libs.versions.toml'
+              # Root inputs the packaging tasks actually read: config.properties supplies the
+              # version metadata baked into the installers (ProjectExtensions.kt, VersionInfo.kt),
+              # and the rest change plugin resolution, configuration, or how gradlew is invoked.
+              - 'build.gradle.kts'
+              - 'settings.gradle.kts'
+              - 'gradle.properties'
+              - 'config.properties'
+              - 'gradlew'
+              - 'gradlew.bat'
+              - '.github/workflows/reusable-check.yml'
+              - '.github/actions/gradle-setup/**'
             android:
               # CI/workflow implementation
               - '.github/workflows/**'
@@ -229,12 +257,16 @@ jobs:
           fi
 
   # 2. VALIDATION & BUILD: Delegate to reusable-check.yml
-  # We disable coverage and desktop builds for PRs to keep feedback fast
-  # (< 10 mins). Desktop compilation is already covered by the :desktopApp:test
-  # task in the shard-app test shard.
+  # Coverage stays off for PRs to keep feedback fast (< 10 mins); mainline coverage comes
+  # from main-check. Desktop *compilation* is covered on every PR by :desktopApp:test in the
+  # shard-app shard, so the desktop matrix here is about packaging — the jpackage/WiX path
+  # that compilation never reaches — and only runs when the desktop filter matches.
   validate-and-build:
     needs: check-changes
-    if: needs.check-changes.outputs.android == 'true'
+    # `desktop` as well as `android`: scripts/build-appimage.sh is in the desktop filter but
+    # deliberately not the android one, so gating on android alone would skip this whole
+    # workflow for an AppImage-only change and the desktop matrix would never run.
+    if: needs.check-changes.outputs.android == 'true' || needs.check-changes.outputs.desktop == 'true'
     uses: ./.github/workflows/reusable-check.yml
     permissions:
       contents: read
@@ -244,6 +276,10 @@ jobs:
       run_screenshot_tests: ${{ needs.check-changes.outputs.screenshots == 'true' }}
       run_unit_tests: true
       run_coverage: false
+      # Installers (dmg/msi+exe/deb+rpm+AppImage) upload on every run that builds them —
+      # upload_artifacts is already true here — so reviewers can install a PR's desktop build
+      # instead of waiting for the post-merge snapshot.
+      run_desktop_builds: ${{ needs.check-changes.outputs.desktop == 'true' }}
       upload_artifacts: true
     secrets: inherit
 
