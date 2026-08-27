@@ -96,17 +96,6 @@
       "automerge": false
     },
     {
-      "description": "Block the Gradle 9.7 line. 9.7.0 crashed CMP's proguardReleaseJars (ExecSpec stdout null); 9.7.1 fixed that but broke main CI twice over (bumped in #6777, reverted next day): the configuration-cache fingerprint crashes reloading its own same-key entries (IsInIdeaSyncValueSource CNFE), and CMP's Windows packaging trips an Isolated Projects violation (':desktopApp' cannot access Project.layout on ':'). Lift only after a 9.7.x/9.8 patch proves out on both counts. Matches by depName so the flatpak-manifest custom manager (customManagers below) is pinned identically and can never propose the blocked version on its own.",
-      "matchDepNames": [
-        "gradle"
-      ],
-      "matchManagers": [
-        "gradle-wrapper",
-        "custom.regex"
-      ],
-      "allowedVersions": "!/^9\\.7\\./"
-    },
-    {
       "description": "Disable automerge for major updates (safety net)",
       "matchUpdateTypes": [
         "major"
