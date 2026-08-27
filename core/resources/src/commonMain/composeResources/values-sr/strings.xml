@@ -509,6 +509,9 @@
     <string name="two_days">48 Сати</string>
     <string name="two_weeks">2n</string>
     <string name="tx_enabled">Трансмитер укључен</string>
+    <!-- UNITS -->
+    <string name="units_follow_system">Прати систем</string>
+    <string name="units_metric">Метрика</string>
     <!-- UNKNOWN -->
     <string name="unknown">Непознато</string>
     <string name="unknown_age">Непозната старост</string>

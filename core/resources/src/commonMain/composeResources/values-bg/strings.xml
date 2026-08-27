@@ -1259,6 +1259,10 @@
     <string name="tx_power_dbm">Мощност на предаване</string>
     <string name="type">Тип</string>
     <string name="type_a_message">Въведете съобщение</string>
+    <!-- UNITS -->
+    <string name="units_follow_system">По подразбиране на системата</string>
+    <string name="units_imperial">Имперски</string>
+    <string name="units_metric">Метрични</string>
     <!-- UNKNOWN -->
     <string name="unknown">Неизвестно</string>
     <string name="unknown_age">Неизвестна възраст</string>

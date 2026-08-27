@@ -201,6 +201,8 @@
     <!-- TRAFFIC -->
     <!-- TRANSLATION -->
     <!-- TRANSPORT -->
+    <!-- UNITS -->
+    <string name="units_follow_system">Grunnstilling kerfis</string>
     <!-- UNKNOWN -->
     <string name="unknown_username">Óþekkt notendanafn</string>
     <!-- URL -->

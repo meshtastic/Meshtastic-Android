@@ -239,6 +239,8 @@
     <!-- TRANSLATION -->
     <!-- TRANSPORT -->
     <string name="two_days">48 Sati</string>
+    <!-- UNITS -->
+    <string name="units_follow_system">Sistemski zadano</string>
     <!-- UNKNOWN -->
     <string name="unknown_username">Nepoznati korisnik</string>
     <!-- URL -->

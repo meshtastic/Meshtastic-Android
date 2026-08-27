@@ -273,6 +273,8 @@
     <string name="transport_lora">LoRa</string>
     <string name="transport_mqtt">MQTT</string>
     <string name="two_days">48 Ώρες</string>
+    <!-- UNITS -->
+    <string name="units_follow_system">Προκαθορισμένο του συστήματος</string>
     <!-- UNKNOWN -->
     <string name="unknown_username">Άγνωστο Όνομα Χρήστη</string>
     <!-- URL -->

@@ -1934,6 +1934,9 @@
     <string name="type_a_message">Написать сообщение</string>
     <string name="udp_enabled">UDP трансляция</string>
     <string name="undo">Отменить</string>
+    <!-- UNITS -->
+    <string name="units_follow_system">По умолчанию</string>
+    <string name="units_metric">Метрическая</string>
     <!-- UNKNOWN -->
     <string name="unknown">Неизвестно</string>
     <string name="unknown_age">Неизвестный возраст</string>

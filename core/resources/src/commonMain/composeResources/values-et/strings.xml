@@ -1892,6 +1892,9 @@
     <string name="type_a_message">Sisesta sõnum</string>
     <string name="udp_enabled">UDP levitamine</string>
     <string name="undo">Võta tagasi</string>
+    <!-- UNITS -->
+    <string name="units_follow_system">Süsteemi vaikesäte</string>
+    <string name="units_metric">Meetriline</string>
     <!-- UNKNOWN -->
     <string name="unknown">Tundmatu</string>
     <string name="unknown_age">Tundmatu vanus</string>

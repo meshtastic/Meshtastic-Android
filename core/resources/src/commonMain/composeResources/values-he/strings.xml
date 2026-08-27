@@ -61,7 +61,6 @@
     <plurals name="delete_messages">
         <item quantity="one">מחק הודעה?</item>
         <item quantity="two">מחק %1$s הודעות?</item>
-        <item quantity="many">מחק %1$s הודעות?</item>
         <item quantity="other">מחק %1$s הודעות?</item>
     </plurals>
     <string name="description">תיאור</string>
@@ -221,6 +220,8 @@
     <!-- TRAFFIC -->
     <!-- TRANSLATION -->
     <!-- TRANSPORT -->
+    <!-- UNITS -->
+    <string name="units_follow_system">ברירות מחדל</string>
     <!-- UNKNOWN -->
     <string name="unknown_username">שם המשתמש אינו מוכר</string>
     <!-- URL -->

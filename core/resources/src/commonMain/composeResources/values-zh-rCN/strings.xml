@@ -1755,6 +1755,10 @@
     <string name="type">类型</string>
     <string name="type_a_message">输入一条消息</string>
     <string name="udp_enabled">UDP 广播</string>
+    <!-- UNITS -->
+    <string name="units_follow_system">系统默认设置</string>
+    <string name="units_imperial">英制</string>
+    <string name="units_metric">公制</string>
     <!-- UNKNOWN -->
     <string name="unknown">未知</string>
     <string name="unknown_age">未知时长</string>

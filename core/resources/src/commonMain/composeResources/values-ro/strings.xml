@@ -1163,6 +1163,8 @@
     <string name="tx_power_dbm">Putere transmisie</string>
     <string name="type">Tip</string>
     <string name="type_a_message">Scrie un mesaj</string>
+    <!-- UNITS -->
+    <string name="units_follow_system">Setarea telefonului</string>
     <!-- UNKNOWN -->
     <string name="unknown">Necunoscut</string>
     <string name="unknown_age">Vârstă necunoscută</string>

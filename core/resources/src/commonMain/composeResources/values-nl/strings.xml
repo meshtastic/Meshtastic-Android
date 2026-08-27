@@ -472,6 +472,8 @@
     <string name="two_days">48 Uur</string>
     <string name="two_weeks">2W</string>
     <string name="type">Type</string>
+    <!-- UNITS -->
+    <string name="units_follow_system">Systeemstandaard</string>
     <!-- UNKNOWN -->
     <string name="unknown_age">Onbekende Leeftijd</string>
     <string name="unknown_username">Onbekende Gebruikersnaam</string>
