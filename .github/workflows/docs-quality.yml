@@ -1,0 +1,101 @@
+name: Docs Quality Gates
+
+# Restores the enforcing half of the old docs-governance.yml, which was removed in #6000
+# ("prune dead workflows") along with four genuinely dead workflows. Its two advisory jobs —
+# docs staleness and preview staleness — only ever posted PR comments and are not restored;
+# this is the job that actually failed a build.
+#
+# Path-filtered so it runs only when something it checks can break: the docs themselves, the
+# in-app index that must list them, or the scripts doing the checking.
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "docs/en/**"
+      - "feature/docs/src/commonMain/kotlin/org/meshtastic/feature/docs/data/DocBundleLoader.kt"
+      - "scripts/check-doc-coverage.js"
+      - "scripts/check-doc-freshness.js"
+      - "scripts/validate-doc-links.js"
+      - "scripts/lib/frontmatter.js"
+      - ".github/workflows/docs-quality.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Docs quality gates
+    # Lightweight, but it fetches a Node toolchain, so it takes the ARM tier rather than
+    # ubuntu-slim. No workflow currently runs Node; ubuntu-slim's suitability for setup-node
+    # is untested and this is not the place to find out.
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 10
+
+    steps:
+      # `pull_request`, never `pull_request_target`: this checks out and executes
+      # fork-supplied code (node scripts/*.js), so it must run with the read-only token and
+      # no secrets. The original carried this same warning; keep it.
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+
+      - name: Validate internal links
+        run: node scripts/validate-doc-links.js docs/en
+
+      - name: Check doc coverage
+        run: node scripts/check-doc-coverage.js .
+
+      - name: Validate DocBundleLoader registry
+        # Both directions matter, and they fail differently:
+        #   page with no entry   -> the page ships in the bundle but is unreachable in-app
+        #   entry with no page   -> the in-app index offers a link that resolves to nothing
+        run: |
+          loader="feature/docs/src/commonMain/kotlin/org/meshtastic/feature/docs/data/DocBundleLoader.kt"
+          status=0
+
+          # Match the page's own resourcePath, not the bare slug: every page also carries an
+          # alias list, so a loose slug search passes when some *other* page happens to alias
+          # this one's name (docs/en/user/measurement.md would match units-and-locale's alias).
+          for f in docs/en/user/*.md docs/en/developer/*.md; do
+            [ -e "$f" ] || continue
+            resource="en/${f#docs/en/}"
+            resource="${resource%.md}.html"
+            if ! grep -qF "\"$resource\"" "$loader"; then
+              echo "::error file=$f::no page definition in DocBundleLoader.kt references \"$resource\", so this page is unreachable in the in-app docs browser."
+              status=1
+            fi
+          done
+
+          grep -oE '"en/(user|developer)/[a-z0-9-]+\.html"' "$loader" \
+            | tr -d '"' \
+            | while read -r page; do
+                md="docs/${page%.html}.md"
+                if [ ! -f "$md" ]; then
+                  echo "::error file=$loader::DocBundleLoader references '$page' but $md does not exist."
+                  exit 1
+                fi
+              done || status=1
+
+          if [ "$status" -ne 0 ]; then
+            echo "FAILED: the in-app doc index and docs/en/ are out of sync."
+            exit 1
+          fi
+          echo "DocBundleLoader and docs/en/ agree in both directions."
+
+      - name: Check doc freshness
+        # Advisory, as it always was: a page being old is a prompt to look, not a defect.
+        continue-on-error: true
+        run: node scripts/check-doc-freshness.js docs/en --max-age-days=180
