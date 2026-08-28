@@ -118,10 +118,8 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.map.component.ClusterItemsListDialog
 import org.meshtastic.app.map.component.CustomMapLayersSheet
 import org.meshtastic.app.map.component.CustomTileProviderManagerSheet
-import org.meshtastic.app.map.component.MapFilterDropdown
 import org.meshtastic.app.map.component.MapTypeDropdown
 import org.meshtastic.app.map.component.NodeClusterMarkers
-import org.meshtastic.app.map.component.NodeMapFilterDropdown
 import org.meshtastic.app.map.component.WaypointMarkers
 import org.meshtastic.app.map.model.NodeClusterItem
 import org.meshtastic.core.common.util.MeasurementSystem
@@ -177,6 +175,9 @@ import org.meshtastic.feature.map.component.DeleteWaypointDialog
 import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.component.MapControlsOverlay
+import org.meshtastic.feature.map.component.MapFilterActions
+import org.meshtastic.feature.map.component.MapFilterMenu
+import org.meshtastic.feature.map.component.NodeTrackFilterMenu
 import org.meshtastic.feature.map.component.WaypointInfoDialog
 import org.meshtastic.feature.map.includes
 import org.meshtastic.feature.map.tracerouteNodeSelection
@@ -846,16 +847,24 @@ fun MapView(
             onToggleFilterMenu = { mapFilterMenuExpanded = true },
             filterDropdownContent = {
                 if (mode is GoogleMapMode.NodeTrack) {
-                    NodeMapFilterDropdown(
+                    NodeTrackFilterMenu(
                         expanded = mapFilterMenuExpanded,
                         onDismissRequest = { mapFilterMenuExpanded = false },
-                        mapViewModel = mapViewModel,
+                        selected = mapFilterState.lastHeardTrackFilter,
+                        onSelect = mapViewModel::setLastHeardTrackFilter,
                     )
                 } else {
-                    MapFilterDropdown(
+                    MapFilterMenu(
                         expanded = mapFilterMenuExpanded,
                         onDismissRequest = { mapFilterMenuExpanded = false },
-                        mapViewModel = mapViewModel,
+                        filterState = mapFilterState,
+                        actions =
+                        MapFilterActions(
+                            onToggleOnlyFavorites = mapViewModel::toggleOnlyFavorites,
+                            onToggleShowWaypoints = mapViewModel::toggleShowWaypointsOnMap,
+                            onToggleShowPrecisionCircle = mapViewModel::toggleShowPrecisionCircleOnMap,
+                            onSelectLastHeard = mapViewModel::setLastHeardFilter,
+                        ),
                     )
                 }
             },

@@ -48,11 +48,12 @@ import org.meshtastic.core.ui.util.MapViewProvider
 import org.meshtastic.feature.map.SharedMapViewModel
 import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.MapControlsOverlay
+import org.meshtastic.feature.map.component.MapFilterActions
+import org.meshtastic.feature.map.component.MapFilterMenu
 import org.meshtastic.feature.map.maplibre.component.BasemapMenu
 import org.meshtastic.feature.map.maplibre.component.BasemapSelection
 import org.meshtastic.feature.map.maplibre.component.BoxAuthoringBar
 import org.meshtastic.feature.map.maplibre.component.ClusterMembersDialog
-import org.meshtastic.feature.map.maplibre.component.FilterMenu
 import org.meshtastic.feature.map.maplibre.component.MapLayersButton
 import org.meshtastic.feature.map.maplibre.component.MapZoom
 import org.meshtastic.feature.map.maplibre.component.OfflineMapTarget
@@ -290,7 +291,20 @@ private fun BoxScope.MapToolbar(
         followPhoneBearing = location.followingBearing,
         onCompassClick = location.onCompassClick,
         filterDropdownContent = {
-            FilterMenu(expanded = filterMenuExpanded, onDismissRequest = { filterMenuExpanded = false })
+            val filterViewModel: SharedMapViewModel = koinViewModel()
+            val filterState by filterViewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
+            MapFilterMenu(
+                expanded = filterMenuExpanded,
+                onDismissRequest = { filterMenuExpanded = false },
+                filterState = filterState,
+                actions =
+                MapFilterActions(
+                    onToggleOnlyFavorites = filterViewModel::toggleOnlyFavorites,
+                    onToggleShowWaypoints = filterViewModel::toggleShowWaypointsOnMap,
+                    onToggleShowPrecisionCircle = filterViewModel::toggleShowPrecisionCircleOnMap,
+                    onSelectLastHeard = filterViewModel::setLastHeardFilter,
+                ),
+            )
         },
         mapTypeContent = { BasemapMenu(selection = basemaps, extra = basemapMenuExtra) },
         layersContent = {

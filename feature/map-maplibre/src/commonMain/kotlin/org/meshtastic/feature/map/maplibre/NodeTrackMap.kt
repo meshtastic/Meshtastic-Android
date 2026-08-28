@@ -52,8 +52,8 @@ import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.Node
 import org.meshtastic.feature.map.LastHeardFilter
 import org.meshtastic.feature.map.SharedMapViewModel
+import org.meshtastic.feature.map.component.NodeTrackFilterMenu
 import org.meshtastic.feature.map.includes
-import org.meshtastic.feature.map.maplibre.component.TrackFilterMenu
 import org.meshtastic.feature.map.maplibre.component.TrackPointCard
 import org.meshtastic.feature.map.maplibre.component.rememberBasemapSelection
 import org.meshtastic.feature.map.maplibre.geojson.NodeFeatureKeys
@@ -145,7 +145,12 @@ fun MapLibreNodeTrackMap(
             cameraState = cameraState,
             basemaps = basemaps,
             filterMenu = { expanded, onDismissRequest ->
-                TrackFilterMenu(expanded = expanded, onDismissRequest = onDismissRequest)
+                NodeTrackFilterMenu(
+                    expanded = expanded,
+                    onDismissRequest = onDismissRequest,
+                    selected = filterState.lastHeardTrackFilter,
+                    onSelect = viewModel::setLastHeardTrackFilter,
+                )
             },
         )
 
