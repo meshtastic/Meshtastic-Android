@@ -19,6 +19,7 @@ package org.meshtastic.feature.map.maplibre.layers
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
+import org.meshtastic.feature.map.MapNodePolicy
 import org.meshtastic.feature.map.maplibre.geojson.NodeFeatureKeys
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -38,23 +39,23 @@ class ChipRankTest {
 
     @Test
     fun `this node and favorites outrank everything else`() {
-        assertEquals(CHIP_RANK_PROMINENT, properties(self = true).chipRank())
-        assertEquals(CHIP_RANK_PROMINENT, properties(favorite = true).chipRank())
-        assertEquals(CHIP_RANK_ORDINARY, properties().chipRank())
-        assertTrue(CHIP_RANK_PROMINENT > CHIP_RANK_ORDINARY)
+        assertEquals(MapNodePolicy.PRIORITY_PROMINENT, properties(self = true).chipRank())
+        assertEquals(MapNodePolicy.PRIORITY_PROMINENT, properties(favorite = true).chipRank())
+        assertEquals(MapNodePolicy.PRIORITY_ORDINARY, properties().chipRank())
+        assertTrue(MapNodePolicy.PRIORITY_PROMINENT > MapNodePolicy.PRIORITY_ORDINARY)
     }
 
     @Test
     fun `properties that are absent rank as ordinary rather than throwing`() {
         // Query results are not guaranteed to carry every key, and a missing flag must not decide a tap by accident.
-        assertEquals(CHIP_RANK_ORDINARY, null.chipRank())
-        assertEquals(CHIP_RANK_ORDINARY, buildJsonObject {}.chipRank())
+        assertEquals(MapNodePolicy.PRIORITY_ORDINARY, null.chipRank())
+        assertEquals(MapNodePolicy.PRIORITY_ORDINARY, buildJsonObject {}.chipRank())
     }
 
     @Test
     fun `a favorite beats an ordinary node when both are under the same tap`() {
         val stacked = listOf(properties(), properties(favorite = true), properties())
 
-        assertEquals(CHIP_RANK_PROMINENT, stacked.maxOf { it.chipRank() })
+        assertEquals(MapNodePolicy.PRIORITY_PROMINENT, stacked.maxOf { it.chipRank() })
     }
 }

@@ -19,29 +19,12 @@ package org.meshtastic.feature.map.maplibre
 import org.maplibre.spatialk.geojson.BoundingBox
 import org.maplibre.spatialk.geojson.Position
 import org.meshtastic.core.model.Node
-import org.meshtastic.feature.map.BaseMapViewModel
-import org.meshtastic.feature.map.LastHeardFilter
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.floor
 import kotlin.math.ln
 import kotlin.math.pow
 import kotlin.math.tan
-
-/**
- * Applies the map's filter chips to the node list.
- *
- * Pure so it can be tested without a renderer: the filter rules are the part users notice when they go wrong, and they
- * should not need a GPU to verify.
- */
-fun filterNodesForMap(nodes: List<Node>, filterState: BaseMapViewModel.MapFilterState, nowSeconds: Long): List<Node> =
-    nodes
-        .filter { node -> node.validPosition != null }
-        .filter { node -> !filterState.onlyFavorites || node.isFavorite }
-        .filter { node ->
-            val window = filterState.lastHeardFilter.seconds
-            window == LastHeardFilter.Any.seconds || (nowSeconds - node.lastHeard) <= window
-        }
 
 /**
  * Bounding box covering every supplied node, or null when no node has a fix.

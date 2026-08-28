@@ -64,6 +64,7 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Person
 import org.meshtastic.core.ui.icon.Temperature
+import org.meshtastic.feature.map.MapNodePolicy
 import org.meshtastic.feature.map.maplibre.geojson.MapChipGlyph
 import org.meshtastic.feature.map.maplibre.geojson.MapChipKey
 import org.meshtastic.feature.map.maplibre.geojson.NodeFeatureKeys
@@ -128,10 +129,10 @@ internal fun NodeChipLayer(
  * favorites ride above everything else, and nothing distinguishes the rest.
  */
 internal fun JsonObject?.chipRank(): Int = when {
-    this == null -> CHIP_RANK_ORDINARY
-    this[NodeFeatureKeys.IS_SELF]?.jsonPrimitive?.booleanOrNull == true -> CHIP_RANK_PROMINENT
-    this[NodeFeatureKeys.IS_FAVORITE]?.jsonPrimitive?.booleanOrNull == true -> CHIP_RANK_PROMINENT
-    else -> CHIP_RANK_ORDINARY
+    this == null -> MapNodePolicy.PRIORITY_ORDINARY
+    this[NodeFeatureKeys.IS_SELF]?.jsonPrimitive?.booleanOrNull == true -> MapNodePolicy.PRIORITY_PROMINENT
+    this[NodeFeatureKeys.IS_FAVORITE]?.jsonPrimitive?.booleanOrNull == true -> MapNodePolicy.PRIORITY_PROMINENT
+    else -> MapNodePolicy.PRIORITY_ORDINARY
 }
 
 /**
@@ -142,13 +143,10 @@ internal fun JsonObject?.chipRank(): Int = when {
  * order, so which of two overlapping chips is legible was arbitrary and could change on any data refresh.
  */
 private fun chipSortKey(): Expression<FloatValue> = switch(
-    condition(feature[NodeFeatureKeys.IS_SELF].asBoolean(), const(CHIP_RANK_PROMINENT.toFloat())),
-    condition(feature[NodeFeatureKeys.IS_FAVORITE].asBoolean(), const(CHIP_RANK_PROMINENT.toFloat())),
-    fallback = const(CHIP_RANK_ORDINARY.toFloat()),
+    condition(feature[NodeFeatureKeys.IS_SELF].asBoolean(), const(MapNodePolicy.PRIORITY_PROMINENT.toFloat())),
+    condition(feature[NodeFeatureKeys.IS_FAVORITE].asBoolean(), const(MapNodePolicy.PRIORITY_PROMINENT.toFloat())),
+    fallback = const(MapNodePolicy.PRIORITY_ORDINARY.toFloat()),
 )
-
-internal const val CHIP_RANK_PROMINENT = 5
-internal const val CHIP_RANK_ORDINARY = 4
 
 /**
  * The chip layer itself: one rasterized image per distinct chip, picked per feature by the [MapChipKey.featureValue]

@@ -172,6 +172,7 @@ import org.meshtastic.core.ui.util.formatPositionTime
 import org.meshtastic.core.ui.util.rememberLocationPermissionState
 import org.meshtastic.feature.map.BaseMapViewModel.MapFilterState
 import org.meshtastic.feature.map.LastHeardFilter
+import org.meshtastic.feature.map.MapNodePolicy
 import org.meshtastic.feature.map.component.DeleteWaypointDialog
 import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.MapButton
@@ -377,14 +378,7 @@ fun MapView(
     val displayableWaypoints = waypoints.values.mapNotNull { it.waypoint }
     val selectedWaypointId by mapViewModel.selectedWaypointId.collectAsStateWithLifecycle()
 
-    val filteredNodes =
-        allNodes
-            .filter { node -> !mapFilterState.onlyFavorites || node.isFavorite || node.num == ourNodeInfo?.num }
-            .filter { node ->
-                mapFilterState.lastHeardFilter.seconds == 0L ||
-                    (nowSeconds - node.lastHeard) <= mapFilterState.lastHeardFilter.seconds ||
-                    node.num == ourNodeInfo?.num
-            }
+    val filteredNodes = MapNodePolicy.visibleNodes(allNodes, mapFilterState, nowSeconds, ourNodeInfo?.num)
 
     LaunchedEffect(mode, cameraInitialization, isMapLoaded, filteredNodes) {
         if (

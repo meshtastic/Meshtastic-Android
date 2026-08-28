@@ -48,6 +48,7 @@ import org.maplibre.spatialk.geojson.Position
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.Node
 import org.meshtastic.feature.map.BaseMapViewModel
+import org.meshtastic.feature.map.MapNodePolicy
 import org.meshtastic.feature.map.maplibre.component.MeshMapOrnaments
 import org.meshtastic.feature.map.maplibre.geojson.ClusterMember
 import org.meshtastic.feature.map.maplibre.geojson.rememberFeatureSource
@@ -114,7 +115,7 @@ fun MeshMap(
     val myNodeInfo by viewModel.myNodeInfo.collectAsStateWithLifecycle()
 
     val scope = rememberCoroutineScope()
-    val visibleNodes = filterNodesForMap(nodes, filterState, nowSeconds)
+    val visibleNodes = MapNodePolicy.visibleNodes(nodes, filterState, nowSeconds, myNodeInfo?.myNodeNum)
 
     FrameOnce(enabled = frameOnNodes, nodes = visibleNodes, cameraState = cameraState)
 

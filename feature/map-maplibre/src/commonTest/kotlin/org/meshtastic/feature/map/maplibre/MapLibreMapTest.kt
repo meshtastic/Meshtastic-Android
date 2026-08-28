@@ -177,25 +177,6 @@ class MapGeometryTest {
         )
 
     @Test
-    fun `nodes without a fix never reach the map`() {
-        val nodes = listOf(node(1, 0.0, 0.0), node(2, 45.0, -122.0))
-        assertEquals(listOf(2), filterNodesForMap(nodes, filters(), nowSeconds = 0).map { it.num })
-    }
-
-    @Test
-    fun `favourites filter keeps only favourites`() {
-        val nodes = listOf(node(1, 45.0, -122.0), node(2, 45.1, -122.1, isFavorite = true))
-        assertEquals(listOf(2), filterNodesForMap(nodes, filters(onlyFavorites = true), nowSeconds = 0).map { it.num })
-    }
-
-    @Test
-    fun `last heard filter drops nodes outside the window`() {
-        val nodes = listOf(node(1, 45.0, -122.0, lastHeard = 0), node(2, 45.1, -122.1, lastHeard = 9_000))
-        val kept = filterNodesForMap(nodes, filters(lastHeard = LastHeardFilter.OneHour), nowSeconds = 10_000)
-        assertEquals(listOf(2), kept.map { it.num })
-    }
-
-    @Test
     fun `no located nodes yields no bounding box`() {
         assertNull(nodesBoundingBox(emptyList()))
         assertNull(nodesBoundingBox(listOf(node(1, 0.0, 0.0))))
