@@ -63,23 +63,32 @@ GPS の対地速度は、ロケールで優先される速度単位で表示さ�
 
 ## 風力
 
-環境センサーの風速と突風のデータは **m/s** で送信され、表示用に変換されます。
+Wind speed, gust and lull are transmitted by the sensor as **m/s** and converted for display — the app shows the unit weather forecasts use in your region, not the raw sensor unit.
 
- あなたの設定       | 表示     |
- ------------ | ------ |
- メートル法        | 5 m/s  |
- ヤード・ポンド法（米国） | 11 mph |
+ あなたの設定       | 表示                        |
+ ------------ | ------------------------- |
+ メートル法        | 18.0 km/h |
+ ヤード・ポンド法（米国） | 11.2 mph  |
 
-風の測定値は、「**ノードの詳細**」の環境セクションと「**環境テレメトリ**」のグラフに表示されます。
+All three read in the same unit wherever they appear: the Node Detail environment section, the Environment Telemetry log, and the charts.
+
+## Weight
+
+Readings from a connected scale are transmitted in **kg** and converted for display.
+
+ あなたの設定       | 表示                      |
+ ------------ | ----------------------- |
+ メートル法        | 1.50 kg |
+ ヤード・ポンド法（米国） | 3.31 lb |
 
 ## 降水量
 
 降水量の測定値（1 時間および 24 時間の合計）は **mm** で送信され、表示用に変換されます。
 
- あなたの設定       | 表示                     |
- ------------ | ---------------------- |
- メートル法        | 12 mm                  |
- ヤード・ポンド法（米国） | 0.5 in |
+ Your Setting                     | You See                 |
+ -------------------------------- | ----------------------- |
+ Metric                           | 12.0 mm |
+ Imperial (US) | 0.47 in |
 
 ## 変わらない単位
 
@@ -89,7 +98,7 @@ GPS の対地速度は、ロケールで優先される速度単位で表示さ�
  ------------- | ----- | ----------- |
  大気圧           | hPa   | 国際的な気象標準    |
  方位／進行方向       | °（度）  | 普遍的な航法の慣例   |
- 放射線           | μR/hr | 標準的な線量測定の単位 |
+ 放射線           | µR/h  | 標準的な線量測定の単位 |
  GPS 座標        | 十進法の度 | 普遍的な地理標準    |
  湿度、バッテリー、土壌水分 | %     | 普遍的         |
 

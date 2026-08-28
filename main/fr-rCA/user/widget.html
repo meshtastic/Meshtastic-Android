@@ -12,12 +12,16 @@
   <li><strong>AirUtil</strong> — airtime utilization (how much of the duty cycle your radio is transmitting)</li>
   <li><strong>Traffic</strong> — packets transmitted / received, and duplicates seen</li>
   <li><strong>Relays</strong> — packets relayed and relay cancellations (shown when the radio is relaying)</li>
+  <li><strong>Noise floor</strong> — the measured background noise level</li>
+  <li><strong>Dropped</strong> — packets the radio discarded</li>
+  <li><strong>Heap</strong> — free versus total memory on the radio, drawn as a bar</li>
+  <li><strong>Nodes</strong> — how many nodes are online, out of the total known</li>
 </ul>
 
 <p>Tap the widget to open the app, or use its refresh control to request fresh stats.</p>
 
 <blockquote>
-  <p>💡 <strong>Tip:</strong> The values reflect the radio you are currently connected to. If the app isn’t connected to a radio, the widget shows the last known stats until it reconnects.</p>
+  <p>💡 <strong>Tip:</strong> The values reflect the radio you are currently connected to. If the radio disconnects, the widget replaces the stats with a status line — <strong>Disconnected</strong>, <strong>Connecting</strong>, or <strong>Device sleeping</strong>. It does not keep the last-known numbers on screen.</p>
 </blockquote>
 
 <h2 id="adding-the-widget">Adding the Widget</h2>
@@ -25,12 +29,12 @@
 <ol>
   <li>Long-press an empty area of your Android home screen.</li>
   <li>Tap <strong>Widgets</strong>.</li>
-  <li>Find <strong>Meshtastic</strong> in the list and drag the <strong>Local Stats</strong> widget to your home screen.</li>
+  <li>Find <strong>Meshtastic</strong> in the list and drag its widget to your home screen. The app ships one widget, so the picker entry is just the app name.</li>
   <li>Resize it as needed — the layout adapts to the available space.</li>
 </ol>
 
 <blockquote>
-  <p>⚠️ <strong>Note:</strong> The widget is Android-only. It is not available on the Desktop or iOS builds.</p>
+  <p>ℹ️ <strong>Note:</strong> The widget is Android-only. It is not available on the Desktop or iOS builds.</p>
 </blockquote>
 
 <h2 id="related-topics">Related Topics</h2>

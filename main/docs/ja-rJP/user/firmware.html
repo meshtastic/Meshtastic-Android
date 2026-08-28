@@ -31,7 +31,28 @@ Android ユーザーにとって最も一般的な更新方法です：
 
 ![ファームウェアの更新を確認中](../../assets/screenshots/firmware_checking.png)
 
-&gt; ⚠️ **警告：** ファームウェア更新を中断すると、デバイスが起動不能になることがあります。 無線機のバッテリーが十分にある（50% 以上を推奨）ことを確認し、処理の間ずっと Bluetooth の通信範囲内に置いてください。
+&gt; ⚠️ **警告：** ファームウェア更新を中断すると、デバイスが起動不能になることがあります。 Keep the radio charged and stay in Bluetooth range for the whole update. The app itself only blocks the update below **10%** battery; 50% or more is the safe habit, not an enforced limit.
+
+#### Erase device during update
+
+Where the app offers it, an **Erase device during update** checkbox appears next to the update button. It is a per-update opt-in and is never remembered.
+
+ Method         | What erasing does                                                                                                                      |
+ -------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+ BLE / WiFi OTA | Factory-resets the device once the update is verified. All settings and Bluetooth pairing are removed. |
+ USB            | Wipes the device's flash completely, then installs the selected firmware from scratch.                                 |
+
+It is not offered for a local firmware file, during a recovery update, or on USB devices whose board does not support the erase step. Afterwards the device needs setting up — and pairing — again.
+
+### OTA via WiFi (network-connected ESP32)
+
+When an ESP32 radio is connected over the network rather than Bluetooth, the app offers **WiFi OTA**, which pushes the same update over TCP:
+
+1. Connect to the radio over the network (see [Connections](connections)).
+2. Open the Firmware Update screen and pick a version.
+3. Tap **Update**. Keep the radio and phone on the same network for the whole transfer.
+
+WiFi OTA takes the ESP32 `-update.bin` image rather than the `.uf2` a USB update uses; the app selects the right artifact for you.
 
 ![ファームウェアの免責事項](../../assets/screenshots/firmware_disclaimer.png)
 
@@ -94,9 +115,9 @@ The app reads `INFO_UF2.TXT` from the drive you select to confirm it really is t
 
 更新が固まったように見える場合：
 
-- 手を加える前に、少なくとも 5 分待つ
-- 本当に止まっている場合は、無線機の電源を入れ直す
-- もう一度更新を試みる
+- Give it a minute. After writing the image the app waits up to **60 seconds** for the radio to come back and report its new version, so a pause at the verify step is expected.
+- If it is still stuck after that, power-cycle the radio.
+- Attempt the update again.
 
 ![ファームウェア更新のエラー](../../assets/screenshots/firmware_error.png)
 
@@ -111,11 +132,15 @@ The app reads `INFO_UF2.TXT` from the drive you select to confirm it really is t
 
 ### 互換性の警告
 
-次の場合、アプリが警告を表示することがあります：
+On connecting, the app compares the radio's firmware against two thresholds and reacts differently to each:
 
-- 接続中の無線機のファームウェアが、対応する最小バージョンを下回っている
-- アプリとファームウェアの間でメジャーバージョンが一致していない
-- 非推奨の機能に移行が必要
+ Firmware version                                                                                                | What you see                                     | What happens                                                                                                         |
+ --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
+ Below **2.3.15**                                                                | **Firmware update required.**    | The app disconnects from the radio. It will not operate against firmware this old.   |
+ **2.3.15** up to, but not including, **2.5.14** | **Firmware Update Recommended.** | Advisory only — dismiss it and carry on. The dialog names the latest stable release. |
+ **2.5.14** or newer                                                             | Nothing                                          | —                                                                                                                    |
+
+A version string the app cannot parse is ignored rather than treated as too old, so a transient read never disconnects a working radio.
 
 &gt; ⚠️ **重要：** 互換性を確保するため、ファームウェア更新の前、または同時に、必ず Meshtastic アプリを更新してください。
 

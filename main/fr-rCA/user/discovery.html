@@ -18,7 +18,7 @@
 <p>Open it from <strong>Settings → Advanced → Local Mesh Discovery</strong>. On desktop, it has its own <strong>Settings → Local Mesh Discovery</strong> entry.</p>
 
 <blockquote>
-  <p>⚠️ <strong>Note:</strong> Discovery temporarily changes your radio’s LoRa settings while it scans, then restores your original configuration when it finishes. Your device must be connected to run a scan.</p>
+  <p>ℹ️ <strong>Note:</strong> Discovery temporarily changes your radio’s LoRa settings while it scans, then restores your original configuration when it finishes. Your device must be connected to run a scan.</p>
 </blockquote>
 
 <h3 id="setting-up-a-scan">Setting Up a Scan</h3>
@@ -145,7 +145,7 @@
 </ul>
 
 <blockquote>
-  <p>💡 <strong>Tip:</strong> On Android, Discovery can generate an on-device AI summary (Gemini Nano) of your results. If the on-device model isn’t available, an algorithmic summary is used instead — so you always get a readable interpretation of the scan.</p>
+  <p>💡 <strong>Tip:</strong> On <strong>Google Play</strong> builds, Discovery can generate an on-device AI summary (Gemini Nano) of your results. F-Droid builds always use the algorithmic summary — the proprietary ML Kit dependency is deliberately excluded from that flavor — so you get a readable interpretation of the scan either way.</p>
 </blockquote>
 
 <hr />
@@ -263,7 +263,7 @@
 </ul>
 
 <blockquote>
-  <p>⚠️ <strong>Note:</strong> Neighbor Info increases airtime usage because every enabled node periodically broadcasts its neighbor list. On busy meshes with many nodes, consider longer broadcast intervals (3600 seconds or more) to avoid congestion.</p>
+  <p>ℹ️ <strong>Note:</strong> Neighbor Info increases airtime usage because every enabled node periodically broadcasts its neighbor list. On busy meshes with many nodes, consider longer broadcast intervals (3600 seconds or more) to avoid congestion.</p>
 </blockquote>
 
 <hr />
@@ -305,6 +305,16 @@
   <li><strong>Enable Neighbor Info on key nodes</strong> — especially routers and repeaters, to build a picture of the backbone.</li>
   <li><strong>Check the map</strong> — node positions on the <a href="map-and-waypoints">Map</a> combined with signal data help you understand why some links are strong and others are weak.</li>
   <li><strong>Compare signal over time</strong> — use the <a href="signal-meter">Signal Meter</a> guide to interpret SNR and RSSI values correctly.</li>
+</ul>
+
+<h2 id="related-topics">Related Topics</h2>
+
+<ul>
+  <li><a href="nodes">Nodes</a> — the node list these scans populate</li>
+  <li><a href="map-and-waypoints">Map &amp; Waypoints</a> — see discovered nodes geographically</li>
+  <li><a href="signal-meter">Signal Meter</a> — interpret the SNR and RSSI a scan reports</li>
+  <li><a href="settings-module-admin">Settings — Modules &amp; Admin</a> — configure the Mesh Beacon and Neighbor Info modules</li>
+  <li><a href="messages-and-channels">Messages &amp; Channels</a> — join a mesh you found and start talking</li>
 </ul>
 
 <hr />

@@ -51,8 +51,8 @@
       <td>Encrypt MQTT payloads</td>
     </tr>
     <tr>
-      <td><del>JSON Output</del></td>
-      <td>⚠️ <strong>Deprecated</strong> — JSON support removed from firmware; field is ignored</td>
+      <td>JSON Output</td>
+      <td>Publish and consume MQTT messages as JSON. Marked deprecated in the protobuf schema, but it is still the only toggle for this behaviour and the firmware still honours it</td>
     </tr>
     <tr>
       <td>TLS</td>
@@ -63,8 +63,45 @@
       <td>Base MQTT topic path</td>
     </tr>
     <tr>
+      <td>Proxy pour le client activé</td>
+      <td>Let a connected phone carry the node’s MQTT traffic, instead of the node reaching the broker itself</td>
+    </tr>
+    <tr>
+      <td>MQTT proxy on this phone</td>
+      <td>The phone-side half of the above: whether <em>this</em> phone is currently acting as that relay. See <a href="mqtt">MQTT</a></td>
+    </tr>
+    <tr>
       <td>Map Report</td>
-      <td>Publish position for public map</td>
+      <td>Publish position to the public map — see below</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Map Report</strong> expands into its own group:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Setting</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Activé</td>
+      <td>Publish to the public map at all</td>
+    </tr>
+    <tr>
+      <td>Share location</td>
+      <td>Explicit consent to include your position. Map reporting will not save without it</td>
+    </tr>
+    <tr>
+      <td>Position precision</td>
+      <td>How coarsely your position is published</td>
+    </tr>
+    <tr>
+      <td>Publish interval</td>
+      <td>How often to report. Must be <strong>at least 3600 s (1 hour)</strong> — the app blocks saving below that</td>
     </tr>
   </tbody>
 </table>
@@ -84,24 +121,32 @@
   </thead>
   <tbody>
     <tr>
-      <td>Activé</td>
+      <td>Série activée</td>
       <td>Activate serial communication</td>
     </tr>
     <tr>
-      <td>Écho</td>
+      <td>Écho activé</td>
       <td>Echo received serial data back</td>
     </tr>
     <tr>
-      <td>Mode</td>
-      <td>Text, Protobuf, or NMEA output</td>
+      <td>Mode série</td>
+      <td>Which protocol the port speaks — Default, Simple, Proto, Text message, NMEA, CalTopo, WS85 weather station, VE.Direct, MeshSolar config, Log, or Log (text only)</td>
     </tr>
     <tr>
-      <td>RX/TX Pins</td>
-      <td>GPIO pins for serial connection</td>
+      <td>RX / TX</td>
+      <td>GPIO pins for the serial connection</td>
     </tr>
     <tr>
-      <td>Vitesse en bauds</td>
-      <td>Serial communication speed</td>
+      <td>Vitesse de transmission série</td>
+      <td>Port speed</td>
+    </tr>
+    <tr>
+      <td>Délai d’expiration</td>
+      <td>How long to wait before considering an incoming message complete</td>
+    </tr>
+    <tr>
+      <td>Outrepasser le port série de la console</td>
+      <td>Take over the port the debug console normally uses</td>
     </tr>
   </tbody>
 </table>
@@ -109,6 +154,9 @@
 <h3 id="external-notification-module">External Notification Module</h3>
 
 <p>Controls buzzer, LED, or vibration alerts on your radio hardware. Useful for devices that need to physically signal when a message arrives — particularly helpful for unattended or outdoor installations.</p>
+
+<p>There are two independent triggers — an incoming <strong>message</strong>, and a received <strong>bell</strong> character —
+and each can drive the LED, the buzzer and the vibration motor separately, giving six toggles.</p>
 
 <table>
   <thead>
@@ -119,40 +167,52 @@
   </thead>
   <tbody>
     <tr>
-      <td>Activé</td>
-      <td>Activate notifications</td>
+      <td>Notifications externes activées</td>
+      <td>Master toggle for the module</td>
     </tr>
     <tr>
-      <td>Message d’alerte</td>
-      <td>Notify on incoming messages</td>
+      <td>Alert message LED / buzzer / vibra</td>
+      <td>Which outputs fire on an incoming message</td>
     </tr>
     <tr>
-      <td>Message d’alerte buzzer</td>
-      <td>Use buzzer for messages</td>
+      <td>Alert bell LED / buzzer / vibra</td>
+      <td>Which outputs fire on a received bell character</td>
     </tr>
     <tr>
-      <td>Alert Message Vibra</td>
-      <td>Use vibration for messages</td>
+      <td>LED extérieure (GPIO)</td>
+      <td>Pin the LED is wired to</td>
     </tr>
     <tr>
-      <td>Bip d’alerte</td>
-      <td>Notify on bell character</td>
+      <td>Sortie LED active à l’état haut</td>
+      <td>Whether the LED pin is active high or low</td>
     </tr>
     <tr>
-      <td>Output (GPIO)</td>
-      <td>Pin for notification output</td>
+      <td>Buzzer extérieur (GPIO)</td>
+      <td>Pin the buzzer is wired to</td>
     </tr>
     <tr>
-      <td>Actif</td>
-      <td>High or Low active</td>
+      <td>Sortie vibreur (GPIO)</td>
+      <td>Pin the vibration motor is wired to</td>
     </tr>
     <tr>
-      <td>Duration (ms)</td>
-      <td>Notification length</td>
+      <td>Utiliser le buzzer PWM</td>
+      <td>Drive the buzzer with PWM, which allows tones rather than a single pitch</td>
     </tr>
     <tr>
-      <td>Use I2S as Buzzer</td>
-      <td>Use I2S audio output</td>
+      <td>Utiliser l’I2S comme buzzer</td>
+      <td>Send the alert through an I2S audio output instead</td>
+    </tr>
+    <tr>
+      <td>Durée de sortie (en millisecondes)</td>
+      <td>How long a single alert lasts</td>
+    </tr>
+    <tr>
+      <td>Durée de répétition de la sortie (secondes)</td>
+      <td>Keep repeating the alert for this long until it is acknowledged. 0 disables nagging</td>
+    </tr>
+    <tr>
+      <td>Sonnerie</td>
+      <td>The tone played on a PWM buzzer, in RTTTL. Can be imported from a file</td>
     </tr>
   </tbody>
 </table>
@@ -202,6 +262,12 @@
 
 <h3 id="range-test-module">Range Test Module</h3>
 
+<blockquote>
+  <p>⚠️ <strong>Warning:</strong> Range Test only works on a secured primary channel. While your primary channel
+still uses the default public key, the Enabled, Interval and Save-CSV controls stay disabled, and
+saving force-disables the module if the channel has reverted to public.</p>
+</blockquote>
+
 <p>Automated range testing tool for evaluating link quality between nodes. When enabled, the node periodically transmits test messages with incrementing counters. A receiver node logs these messages, allowing you to walk or drive away and later analyze at what distance messages stopped arriving.</p>
 
 <table>
@@ -231,6 +297,9 @@
 
 <p>Controls what telemetry data your node shares with the mesh. Telemetry includes device health (battery, uptime) and environmental sensor data (temperature, humidity, pressure).</p>
 
+<p>Each of the four metric groups has its own enable toggle and its own interval, so you can report
+battery health often and sensors rarely.</p>
+
 <table>
   <thead>
     <tr>
@@ -240,20 +309,48 @@
   </thead>
   <tbody>
     <tr>
-      <td>Device Metrics Interval</td>
-      <td>How often to report device metrics</td>
+      <td>Envoyer la télémétrie de l’appareil</td>
+      <td>Master toggle for device metrics. Only shown on firmware 2.7.12 and newer</td>
     </tr>
     <tr>
-      <td>Environment Metrics Interval</td>
-      <td>How often to report environment sensors</td>
+      <td>Intervalle de mise à jour des mesures</td>
+      <td>How often to report battery, uptime and channel utilisation</td>
     </tr>
     <tr>
-      <td>Qualité de l’air activée</td>
-      <td>Report particulate sensor data</td>
+      <td>Module de métriques de l’environnement activé</td>
+      <td>Report the attached environment sensors</td>
     </tr>
     <tr>
-      <td>Power Metrics Enabled</td>
-      <td>Report power usage</td>
+      <td>Intervalle de mise à jour des mesures d’environnement</td>
+      <td>How often to report them</td>
+    </tr>
+    <tr>
+      <td>Mesures d’environnement à l’écran activées</td>
+      <td>Also show these readings on the device’s own display</td>
+    </tr>
+    <tr>
+      <td>Les mesures environnementales utilisent Fahrenheit</td>
+      <td>Use °F on the device’s display. This is the radio’s screen only — the app follows your phone’s locale, see <a href="units-and-locale">Units &amp; Locale</a></td>
+    </tr>
+    <tr>
+      <td>Module de mesure de la qualité de l’air activé</td>
+      <td>Report particulate and CO₂ sensor data</td>
+    </tr>
+    <tr>
+      <td>Intervalle de mise à jour des mesures de qualité d’air</td>
+      <td>How often to report them</td>
+    </tr>
+    <tr>
+      <td>Module de mesure de puissance activé</td>
+      <td>Report the per-channel voltage and current readings</td>
+    </tr>
+    <tr>
+      <td>Intervalle de mise à jour des mesures d’alimentation</td>
+      <td>How often to report them</td>
+    </tr>
+    <tr>
+      <td>Indicateurs d’alimentation à l’écran activés</td>
+      <td>Also show power readings on the device’s display</td>
     </tr>
   </tbody>
 </table>
@@ -273,24 +370,36 @@
   </thead>
   <tbody>
     <tr>
-      <td><del>Enabled</del></td>
-      <td>⚠️ <strong>Deprecated</strong> — current firmware may ignore this toggle</td>
+      <td><del>Canned message enabled</del></td>
+      <td>⚠️ <strong>Deprecated</strong> in the protobuf schema</td>
     </tr>
     <tr>
       <td>Messages</td>
       <td>Newline-separated list of messages</td>
     </tr>
     <tr>
-      <td>Envoyer un bip</td>
-      <td>Play bell sound on send</td>
+      <td>Envoyer une sonnerie</td>
+      <td>Send a bell character alongside the message, so a receiving node’s External Notification module can sound</td>
     </tr>
     <tr>
-      <td>Rotary Encoder</td>
-      <td>Enable rotary encoder input</td>
+      <td>Rotary encoder enabled</td>
+      <td>Use a rotary encoder as the input device</td>
     </tr>
     <tr>
-      <td>Up/Down/Press Pins</td>
-      <td>GPIO pin assignments for input</td>
+      <td>GPIO pin for rotary encoder A / B / press</td>
+      <td>The three pins the encoder is wired to</td>
+    </tr>
+    <tr>
+      <td>Generate input event on press / CW / CCW</td>
+      <td>Which key event each encoder action produces</td>
+    </tr>
+    <tr>
+      <td>Entrée Haut/Bas/Select activée</td>
+      <td>A separate, simpler input scheme using up/down/select buttons rather than an encoder</td>
+    </tr>
+    <tr>
+      <td><del>Allow input source</del></td>
+      <td>⚠️ <strong>Deprecated</strong> in the protobuf schema</td>
     </tr>
   </tbody>
 </table>
@@ -316,6 +425,10 @@
       <td>Audio quality/bandwidth tradeoff</td>
     </tr>
     <tr>
+      <td>Broche PTT</td>
+      <td>GPIO pin for the push-to-talk button</td>
+    </tr>
+    <tr>
       <td>I2S Word Select</td>
       <td>GPIO pin for I2S WS</td>
     </tr>
@@ -327,11 +440,15 @@
       <td>I2S Data Out</td>
       <td>GPIO pin for I2S DOUT</td>
     </tr>
+    <tr>
+      <td>I2S Clock (SCK)</td>
+      <td>GPIO pin for the I2S bit clock</td>
+    </tr>
   </tbody>
 </table>
 
 <blockquote>
-  <p>⚠️ <strong>Note:</strong> Audio requires specific hardware (I2S microphone and speaker). Voice quality is very low-bandwidth — think “understandable radio voice,” not phone-call quality.</p>
+  <p>ℹ️ <strong>Note:</strong> Audio requires specific hardware (I2S microphone and speaker). Voice quality is very low-bandwidth — think “understandable radio voice,” not phone-call quality.</p>
 </blockquote>
 
 <h3 id="remote-hardware-module">Remote Hardware Module</h3>
@@ -475,7 +592,7 @@
 <table>
   <thead>
     <tr>
-      <th>Setting</th>
+      <th>Paramètre</th>
       <th>Description</th>
     </tr>
   </thead>
@@ -488,6 +605,14 @@
       <td>Update Interval (s)</td>
       <td>How often to report counts</td>
     </tr>
+    <tr>
+      <td>WiFi RSSI threshold</td>
+      <td>Ignore WiFi probes weaker than this, so distant devices are not counted (defaults to −80 dBm)</td>
+    </tr>
+    <tr>
+      <td>BLE RSSI threshold</td>
+      <td>The same cut-off for BLE advertisements (defaults to −80 dBm)</td>
+    </tr>
   </tbody>
 </table>
 
@@ -495,7 +620,44 @@
   <p>💡 <strong>Tip:</strong> Paxcounter is useful for estimating foot traffic at trailheads, event venues, or other locations. Counts are approximate — one person may carry multiple devices.</p>
 </blockquote>
 
+<h3 id="status-message-module">Status Message Module</h3>
+
+<p>Publishes a short free-text status line for your node, which other nodes can display alongside it.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Paramètre</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>La chaîne de statut actuelle</td>
+      <td>Up to 80 characters. The <strong>✕</strong> in the field clears it. (That is the app’s own label for the field, verbatim.)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Saving takes effect immediately — this is one of the few module settings that never asks the
+node to reboot.</p>
+
+<blockquote>
+  <p>ℹ️ <strong>Note:</strong> The screen only appears for firmware that reports support for the status-message
+module. If you do not see it in the module list, your node’s firmware does not have it.</p>
+</blockquote>
+
+<h3 id="mesh-beacon-module">Mesh Beacon Module</h3>
+
+<p>Broadcasts an invitation to your mesh, and receives invitations from others. See
+<a href="discovery">Discovery</a> for the full walkthrough.</p>
+
 <h3 id="tak-module">TAK Module</h3>
+
+<blockquote>
+  <p>ℹ️ <strong>Note:</strong> This module only appears in the list once the node’s <strong>Device Role</strong> (Device Config)
+is set to <strong>TAK</strong> or <strong>TAK Tracker</strong>. Change the role first, or the entry will not be there.</p>
+</blockquote>
 
 <p>Team Awareness Kit integration for interoperability with ATAK and WinTAK. See <a href="tak">TAK Integration</a> for detailed setup and usage.</p>
 
@@ -518,7 +680,13 @@
 
 <h3 id="nettoyer-la-base-de-données-des-nœuds">Nettoyer la base de données des nœuds</h3>
 
-<p>Removes stale nodes from your local database that haven’t been heard in a configurable time window.</p>
+<p>Prunes your local node database. Two independent controls:</p>
+
+<ul>
+  <li>An <strong>age slider</strong> — remove nodes not heard from within that window.</li>
+  <li><strong>Clean unknown nodes only</strong> — restrict the purge to nodes that never sent their user info,
+leaving named nodes alone regardless of age.</li>
+</ul>
 
 <h3 id="factory-reset">Factory Reset</h3>
 
@@ -531,6 +699,25 @@
 <h3 id="panneau-de-débogage">Panneau de débogage</h3>
 
 <p>Opens the <strong>Packets</strong> and <strong>App logs</strong> tabs for viewing, filtering, and exporting diagnostic output. See <a href="debug-logs">Debug Logs</a> for the full walkthrough.</p>
+
+<h3 id="a-propros">A propros</h3>
+
+<p><strong>Settings → About</strong> carries the app’s own identity rather than the radio’s:</p>
+
+<p>Three sections:</p>
+
+<ul>
+  <li><strong>What is Meshtastic?</strong> — a short description of the project.</li>
+  <li><strong>Apps</strong> — opens with <strong>Need Hardware?</strong>, a rotating carousel of popular devices that links out
+to where to buy one, then the GitHub repository, the running app version, and
+<strong>Acknowledgements</strong> (below).</li>
+  <li><strong>Project information</strong> — links to the website and to this documentation.</li>
+</ul>
+
+<h3 id="remerciements">Remerciements</h3>
+
+<p>Reached from <strong>About</strong>, this lists every open-source library the app ships, with its license,
+generated at build time by AboutLibraries. It was previously called the license screen.</p>
 
 <h3 id="troubleshooting-remote-admin">Troubleshooting Remote Admin</h3>
 

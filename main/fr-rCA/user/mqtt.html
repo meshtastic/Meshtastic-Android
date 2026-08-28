@@ -67,8 +67,8 @@
       <td>Activé</td>
     </tr>
     <tr>
-      <td><del>JSON Output</del></td>
-      <td>⚠️ <strong>Deprecated</strong> — JSON packet support has been removed from firmware; this field is ignored</td>
+      <td>JSON Output</td>
+      <td>Also publish and consume the <code class="language-plaintext highlighter-rouge">/2/json/</code> topic. Deprecated in the protobuf schema, but still the only toggle for this behaviour — and the app’s own proxy honours it</td>
       <td>Désactivé</td>
     </tr>
     <tr>
@@ -84,9 +84,22 @@
   </tbody>
 </table>
 
+<h3 id="connection-status-and-test-connection">Connection Status and Test Connection</h3>
+
+<p>The top of the MQTT settings screen shows the live broker connection — <strong>Connected</strong>,
+<strong>Connecting</strong>, <strong>Reconnecting</strong>, <strong>Disconnected</strong>, or <strong>Inactive</strong>.</p>
+
+<p><strong>Test connection</strong> probes the broker before you commit the settings to the radio, and
+distinguishes the failure modes: the hostname not resolving, the TCP connection being refused,
+TLS failing, the attempt timing out, or the broker rejecting your credentials with a reason.</p>
+
 <h3 id="mqtt-proxy-on-this-phone">MQTT Proxy on This Phone</h3>
 
 <p>If your node has no internet access of its own, it can use the connected phone as its MQTT gateway: enable <strong>MQTT</strong> and <strong>Proxy to client enabled</strong> in the module config, and the app relays MQTT traffic between the radio and the broker over your phone’s internet connection.</p>
+
+<blockquote>
+  <p>ℹ️ <strong>Note:</strong> The proxy relay is mobile-only. On the Desktop app the MQTT settings are present, but no relay runs behind them.</p>
+</blockquote>
 
 <p>The <strong>MQTT proxy on this phone</strong> toggle at the top of the MQTT settings screen shows whether this relay is currently running and lets you cut it off (or restart it) immediately — without editing and re-saving the device’s MQTT configuration.</p>
 
@@ -149,7 +162,7 @@
 
 <h2 id="message-formats">Message Formats</h2>
 
-<p>MQTT uses protobuf message format:</p>
+<p>MQTT carries two payload formats:</p>
 
 <table>
   <thead>
@@ -165,11 +178,18 @@
       <td>Binary Meshtastic protobuf encoding</td>
       <td>Node-to-node mesh bridging</td>
     </tr>
+    <tr>
+      <td><strong>JSON</strong></td>
+      <td>Human-readable JSON on the <code class="language-plaintext highlighter-rouge">/2/json/</code> topic</td>
+      <td>Consumers outside the mesh (dashboards, home automation)</td>
+    </tr>
   </tbody>
 </table>
 
 <blockquote>
-  <p>⚠️ <strong>Note:</strong> JSON output support was removed from firmware. The <code class="language-plaintext highlighter-rouge">json_enabled</code> setting is still visible in the app for legacy compatibility but has no effect on current firmware versions.</p>
+  <p>ℹ️ <strong>Note:</strong> <code class="language-plaintext highlighter-rouge">json_enabled</code> is marked deprecated in the protobuf schema, but it has not been
+replaced and it is not ignored. When it is on, the app’s own MQTT proxy subscribes to the
+<code class="language-plaintext highlighter-rouge">/2/json/</code> topic and decodes those payloads.</p>
 </blockquote>
 
 <h2 id="encryption--privacy">Encryption &amp; Privacy</h2>
@@ -183,7 +203,7 @@
 </ol>
 
 <blockquote>
-  <p>🔒 <strong>Important:</strong> The default public channel has a well-known key. Messages on the default channel sent via MQTT are effectively <strong>unencrypted</strong> — anyone can decode them. Always use a custom PSK for private communications.</p>
+  <p>🔒 <strong>Security:</strong> The default public channel has a well-known key. Messages on the default channel sent via MQTT are effectively <strong>unencrypted</strong> — anyone can decode them. Always use a custom PSK for private communications.</p>
 </blockquote>
 
 <h2 id="best-practices">Best Practices</h2>

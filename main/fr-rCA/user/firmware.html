@@ -27,8 +27,45 @@
 <p><img src="../../assets/screenshots/firmware_checking.png" alt="Firmware checking for updates" /></p>
 
 <blockquote>
-  <p>⚠️ <strong>Warning:</strong> Interrupting a firmware update can brick your device. Ensure your radio has sufficient battery (&gt;50% recommended) and maintain Bluetooth proximity during the entire process.</p>
+  <p>⚠️ <strong>Warning:</strong> Interrupting a firmware update can brick your device. Keep the radio charged and stay in Bluetooth range for the whole update. The app itself only blocks the update below <strong>10%</strong> battery; 50% or more is the safe habit, not an enforced limit.</p>
 </blockquote>
+
+<h4 id="erase-device-during-update">Erase device during update</h4>
+
+<p>Where the app offers it, an <strong>Erase device during update</strong> checkbox appears next to the update button. It is a per-update opt-in and is never remembered.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Method</th>
+      <th>What erasing does</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>BLE / WiFi OTA</td>
+      <td>Factory-resets the device once the update is verified. All settings and Bluetooth pairing are removed.</td>
+    </tr>
+    <tr>
+      <td>USB</td>
+      <td>Wipes the device’s flash completely, then installs the selected firmware from scratch.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>It is not offered for a local firmware file, during a recovery update, or on USB devices whose board does not support the erase step. Afterwards the device needs setting up — and pairing — again.</p>
+
+<h3 id="ota-via-wifi-network-connected-esp32">OTA via WiFi (network-connected ESP32)</h3>
+
+<p>When an ESP32 radio is connected over the network rather than Bluetooth, the app offers <strong>WiFi OTA</strong>, which pushes the same update over TCP:</p>
+
+<ol>
+  <li>Connect to the radio over the network (see <a href="connections">Connections</a>).</li>
+  <li>Open the Firmware Update screen and pick a version.</li>
+  <li>Tap <strong>Update</strong>. Keep the radio and phone on the same network for the whole transfer.</li>
+</ol>
+
+<p>WiFi OTA takes the ESP32 <code class="language-plaintext highlighter-rouge">-update.bin</code> image rather than the <code class="language-plaintext highlighter-rouge">.uf2</code> a USB update uses; the app selects the right artifact for you.</p>
 
 <p><img src="../../assets/screenshots/firmware_disclaimer.png" alt="Firmware disclaimer" /></p>
 
@@ -117,9 +154,9 @@
 <p>If the update appears frozen:</p>
 
 <ul>
-  <li>Wait at least 5 minutes before intervening</li>
-  <li>If truly stuck, power-cycle the radio</li>
-  <li>Attempt the update again</li>
+  <li>Give it a minute. After writing the image the app waits up to <strong>60 seconds</strong> for the radio to come back and report its new version, so a pause at the verify step is expected.</li>
+  <li>If it is still stuck after that, power-cycle the radio.</li>
+  <li>Attempt the update again.</li>
 </ul>
 
 <p><img src="../../assets/screenshots/firmware_error.png" alt="Firmware update error" /></p>
@@ -137,13 +174,36 @@
 
 <h3 id="compatibility-warnings">Compatibility Warnings</h3>
 
-<p>The app may show warnings when:</p>
+<p>On connecting, the app compares the radio’s firmware against two thresholds and reacts differently to each:</p>
 
-<ul>
-  <li>Connected radio firmware is below minimum supported version</li>
-  <li>Major version mismatch between app and firmware</li>
-  <li>Deprecated features need migration</li>
-</ul>
+<table>
+  <thead>
+    <tr>
+      <th>Version du microprogramme</th>
+      <th>What you see</th>
+      <th>What happens</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Below <strong>2.3.15</strong></td>
+      <td><strong>Firmware update required.</strong></td>
+      <td>The app disconnects from the radio. It will not operate against firmware this old.</td>
+    </tr>
+    <tr>
+      <td><strong>2.3.15</strong> up to, but not including, <strong>2.5.14</strong></td>
+      <td><strong>Firmware Update Recommended.</strong></td>
+      <td>Advisory only — dismiss it and carry on. The dialog names the latest stable release.</td>
+    </tr>
+    <tr>
+      <td><strong>2.5.14</strong> or newer</td>
+      <td>Nothing</td>
+      <td>—</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>A version string the app cannot parse is ignored rather than treated as too old, so a transient read never disconnects a working radio.</p>
 
 <blockquote>
   <p>⚠️ <strong>Important:</strong> Always update the Meshtastic app before or alongside firmware updates to ensure compatibility.</p>

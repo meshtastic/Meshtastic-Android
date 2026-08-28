@@ -17,18 +17,22 @@
 <h3 id="prerequisites">Prerequisites</h3>
 
 <ul>
-  <li>ATAK (Android Team Awareness Kit) or WinTAK installed</li>
-  <li>Meshtastic ATAK Plugin installed</li>
-  <li>TAK module enabled on your Meshtastic radio</li>
+  <li>ATAK (Android Team Awareness Kit), iTAK, or WinTAK installed</li>
+  <li>Your node’s <strong>Device Role</strong> set to <strong>TAK</strong> or <strong>TAK Tracker</strong> — this is what makes the TAK
+module appear in Module Config at all</li>
 </ul>
+
+<blockquote>
+  <p>⚠️ <strong>Warning:</strong> The old <strong>Meshtastic ATAK Plugin</strong> is no longer part of this path and cannot
+work. It bridged through the cross-process AIDL API, which was removed in app 2.8.0; the mesh
+service is now in-process only. Do not install it. Interop today runs over the app’s own local
+TAK server plus the Mesh to CoT Converter, both described below, with stock ATAK/iTAK/WinTAK.</p>
+</blockquote>
 
 <h3 id="configuration">Configuration</h3>
 
-<ol>
-  <li>Navigate to <strong>Settings → Module Config → TAK</strong>.</li>
-  <li>Enable the TAK module.</li>
-  <li>Configure the TAK team/group settings:</li>
-</ol>
+<p>Navigate to <strong>Settings → Module Config → TAK</strong>. The module’s own settings are your TAK identity —
+there is no separate enable switch here, because the device Role above is what turns TAK on:</p>
 
 <p><img src="../../assets/screenshots/settings_switch.png" alt="Module toggle switch" /></p>
 
@@ -41,23 +45,15 @@
   </thead>
   <tbody>
     <tr>
-      <td>Activé</td>
-      <td>Activate TAK interop</td>
+      <td>Team</td>
+      <td>Your TAK team colour</td>
     </tr>
     <tr>
-      <td>Mode</td>
-      <td>TAK-compatible output mode</td>
+      <td>Rôle</td>
+      <td>Your member role within that team</td>
     </tr>
   </tbody>
 </table>
-
-<h3 id="atak-plugin-setup">ATAK Plugin Setup</h3>
-
-<ol>
-  <li>Install the Meshtastic ATAK Plugin from the plugin repository.</li>
-  <li>Open ATAK and enable the Meshtastic plugin.</li>
-  <li>The plugin bridges messages between ATAK and your mesh network.</li>
-</ol>
 
 <h3 id="local-tak-server">Local TAK Server</h3>
 
@@ -68,6 +64,10 @@
 <ul>
   <li><strong>Enable Local TAK Server</strong> — starts the loopback-only mTLS server on port <strong>8089</strong> for ATAK/iTAK connections from the same device.</li>
   <li><strong>TAK Mesh Channel</strong> — selects which Meshtastic channel outgoing TAK traffic is sent on (default: the primary channel, index 0). Incoming TAK traffic is accepted from any channel. Matches the equivalent setting on iOS and in the legacy ATAK plugin.</li>
+  <li><strong>Mesh to CoT Converter</strong> — off by default, and shown under the server toggle. With the server
+running, this synthesizes a CoT contact for every node in your node database, so ordinary
+Meshtastic nodes appear on the ATAK map as contacts. <strong>This is what replaced the old plugin’s
+node visibility</strong> — without it, only TAK-role nodes show up.</li>
   <li><strong>Export TAK Data Package</strong> — generates a <code class="language-plaintext highlighter-rouge">.zip</code> data package that ATAK/iTAK can import to connect to this server.</li>
 </ul>
 
@@ -171,7 +171,7 @@
 </ul>
 
 <blockquote>
-  <p>⚠️ <strong>Note:</strong> TAK integration requires specific node roles and module configuration. Standard client nodes don’t automatically participate in TAK operations.</p>
+  <p>ℹ️ <strong>Note:</strong> TAK integration requires specific node roles. Standard client nodes don’t automatically participate in TAK operations — though with <strong>Mesh to CoT Converter</strong> enabled they still appear on the ATAK map as contacts.</p>
 </blockquote>
 
 <h2 id="troubleshooting">Troubleshooting</h2>
@@ -187,8 +187,8 @@
   <tbody>
     <tr>
       <td>Node doesn’t appear on ATAK map</td>
-      <td>TAK module disabled or wrong role</td>
-      <td>Verify TAK module is enabled and node role is TAK or TAK Tracker</td>
+      <td>Wrong device role, or Mesh to CoT Converter off</td>
+      <td>Set the node’s Device Role to TAK or TAK Tracker. For ordinary (non-TAK-role) nodes to appear, also enable <strong>Mesh to CoT Converter</strong> under the TAK Server settings</td>
     </tr>
     <tr>
       <td>Position updates are stale</td>
@@ -196,9 +196,9 @@
       <td>Check GPS status; reduce position broadcast interval in Position Config</td>
     </tr>
     <tr>
-      <td>ATAK plugin shows “disconnected”</td>
-      <td>BLE connection lost or plugin crashed</td>
-      <td>Reconnect Bluetooth in Meshtastic app, then restart ATAK plugin</td>
+      <td>ATAK shows “disconnected”</td>
+      <td>The local TAK server is off, or ATAK is pointed elsewhere</td>
+      <td>Check <strong>Enable Local TAK Server</strong> is on, and that ATAK is connecting to <code class="language-plaintext highlighter-rouge">127.0.0.1:8089</code> — re-import the exported data package if unsure</td>
     </tr>
     <tr>
       <td>Shapes, markers, or routes not bridging</td>

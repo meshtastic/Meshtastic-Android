@@ -29,17 +29,28 @@ Module settings use a card-based layout with toggle switches, dropdowns, text fi
 
 Bridges mesh messages to and from an MQTT broker for internet connectivity. This is how you extend your mesh beyond radio range or integrate with home automation systems.
 
- Setting           | Description                                                              |
- ----------------- | ------------------------------------------------------------------------ |
- Activé            | Toggle MQTT bridge                                                       |
- Serveur           | MQTT broker address                                                      |
- Nom d'utilisateur | Authentication username                                                  |
- Mot de passe      | Authentication password                                                  |
- Chiffrement       | Encrypt MQTT payloads                                                    |
- ~~JSON Output~~   | ⚠️ **Deprecated** — JSON support removed from firmware; field is ignored |
- TLS               | Use secure connection                                                    |
- Root Topic        | Base MQTT topic path                                                     |
- Map Report        | Publish position for public map                                          |
+ Setting                     | Description                                                                                                                                                                               |
+ --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+ Activé                      | Toggle MQTT bridge                                                                                                                                                                        |
+ Serveur                     | MQTT broker address                                                                                                                                                                       |
+ Nom d'utilisateur           | Authentication username                                                                                                                                                                   |
+ Mot de passe                | Authentication password                                                                                                                                                                   |
+ Chiffrement                 | Encrypt MQTT payloads                                                                                                                                                                     |
+ JSON Output                 | Publish and consume MQTT messages as JSON. Marked deprecated in the protobuf schema, but it is still the only toggle for this behaviour and the firmware still honours it |
+ TLS                         | Use secure connection                                                                                                                                                                     |
+ Root Topic                  | Base MQTT topic path                                                                                                                                                                      |
+ Proxy pour le client activé | Let a connected phone carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                       |
+ MQTT proxy on this phone    | The phone-side half of the above: whether _this_ phone is currently acting as that relay. See [MQTT](mqtt)                                                |
+ Map Report                  | Publish position to the public map — see below                                                                                                                                            |
+
+**Map Report** expands into its own group:
+
+ Setting            | Description                                                                                                                     |
+ ------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+ Activé             | Publish to the public map at all                                                                                                |
+ Share location     | Explicit consent to include your position. Map reporting will not save without it                               |
+ Position precision | How coarsely your position is published                                                                                         |
+ Publish interval   | How often to report. Must be **at least 3600 s (1 hour)** — the app blocks saving below that |
 
 See [MQTT](mqtt) for a detailed usage guide including encryption, privacy, and broker setup.
 
@@ -47,29 +58,37 @@ See [MQTT](mqtt) for a detailed usage guide including encryption, privacy, and b
 
 Enables serial port communication for external device integrations (GPS modules, sensors, or custom hardware). When enabled, the node's serial port can send and receive protobuf or text data, allowing external microcontrollers or computers to interact with the mesh.
 
- Setting          | Description                     |
- ---------------- | ------------------------------- |
- Activé           | Activate serial communication   |
- Écho             | Echo received serial data back  |
- Mode             | Text, Protobuf, or NMEA output  |
- RX/TX Pins       | GPIO pins for serial connection |
- Vitesse en bauds | Serial communication speed      |
+ Setting                                 | Description                                                                                                                                                                                         |
+ --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+ Série activée                           | Activate serial communication                                                                                                                                                                       |
+ Écho activé                             | Echo received serial data back                                                                                                                                                                      |
+ Mode série                              | Which protocol the port speaks — Default, Simple, Proto, Text message, NMEA, CalTopo, WS85 weather station, VE.Direct, MeshSolar config, Log, or Log (text only) |
+ RX / TX                                 | GPIO pins for the serial connection                                                                                                                                                                 |
+ Vitesse de transmission série           | Port speed                                                                                                                                                                                          |
+ Délai d'expiration                      | How long to wait before considering an incoming message complete                                                                                                                                    |
+ Outrepasser le port série de la console | Take over the port the debug console normally uses                                                                                                                                                  |
 
 ### External Notification Module
 
 Controls buzzer, LED, or vibration alerts on your radio hardware. Useful for devices that need to physically signal when a message arrives — particularly helpful for unattended or outdoor installations.
 
- Setting                          | Description                 |
- -------------------------------- | --------------------------- |
- Activé                           | Activate notifications      |
- Message d'alerte                 | Notify on incoming messages |
- Message d'alerte buzzer          | Use buzzer for messages     |
- Alert Message Vibra              | Use vibration for messages  |
- Bip d'alerte                     | Notify on bell character    |
- Output (GPIO) | Pin for notification output |
- Actif                            | High or Low active          |
- Duration (ms) | Notification length         |
- Use I2S as Buzzer                | Use I2S audio output        |
+There are two independent triggers — an incoming **message**, and a received **bell** character —
+and each can drive the LED, the buzzer and the vibration motor separately, giving six toggles.
+
+ Setting                                                        | Description                                                                                         |
+ -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+ Notifications externes activées                                | Master toggle for the module                                                                        |
+ Alert message LED / buzzer / vibra                             | Which outputs fire on an incoming message                                                           |
+ Alert bell LED / buzzer / vibra                                | Which outputs fire on a received bell character                                                     |
+ LED extérieure (GPIO)                       | Pin the LED is wired to                                                                             |
+ Sortie LED active à l’état haut                                | Whether the LED pin is active high or low                                                           |
+ Buzzer extérieur (GPIO)                     | Pin the buzzer is wired to                                                                          |
+ Sortie vibreur (GPIO)                       | Pin the vibration motor is wired to                                                                 |
+ Utiliser le buzzer PWM                                         | Drive the buzzer with PWM, which allows tones rather than a single pitch                            |
+ Utiliser l'I2S comme buzzer                                    | Send the alert through an I2S audio output instead                                                  |
+ Durée de sortie (en millisecondes)          | How long a single alert lasts                                                                       |
+ Durée de répétition de la sortie (secondes) | Keep repeating the alert for this long until it is acknowledged. 0 disables nagging |
+ Sonnerie                                                       | The tone played on a PWM buzzer, in RTTTL. Can be imported from a file              |
 
 ### Store &amp; Forward Module
 
@@ -88,6 +107,10 @@ Buffers messages for nodes that were temporarily offline, then replays them when
 
 ### Range Test Module
 
+&gt; ⚠️ **Warning:** Range Test only works on a secured primary channel. While your primary channel
+&gt; still uses the default public key, the Enabled, Interval and Save-CSV controls stay disabled, and
+&gt; saving force-disables the module if the channel has reverted to public.
+
 Automated range testing tool for evaluating link quality between nodes. When enabled, the node periodically transmits test messages with incrementing counters. A receiver node logs these messages, allowing you to walk or drive away and later analyze at what distance messages stopped arriving.
 
  Setting                                | Description                       |
@@ -100,12 +123,22 @@ Automated range testing tool for evaluating link quality between nodes. When ena
 
 Controls what telemetry data your node shares with the mesh. Telemetry includes device health (battery, uptime) and environmental sensor data (temperature, humidity, pressure).
 
- Setting                      | Description                             |
- ---------------------------- | --------------------------------------- |
- Device Metrics Interval      | How often to report device metrics      |
- Environment Metrics Interval | How often to report environment sensors |
- Qualité de l'air activée     | Report particulate sensor data          |
- Power Metrics Enabled        | Report power usage                      |
+Each of the four metric groups has its own enable toggle and its own interval, so you can report
+battery health often and sensors rarely.
+
+ Setting                                                | Description                                                                                                                                                                       |
+ ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+ Envoyer la télémétrie de l'appareil                    | Master toggle for device metrics. Only shown on firmware 2.7.12 and newer                                                         |
+ Intervalle de mise à jour des mesures                  | How often to report battery, uptime and channel utilisation                                                                                                                       |
+ Module de métriques de l'environnement activé          | Report the attached environment sensors                                                                                                                                           |
+ Intervalle de mise à jour des mesures d'environnement  | How often to report them                                                                                                                                                          |
+ Mesures d'environnement à l'écran activées             | Also show these readings on the device's own display                                                                                                                              |
+ Les mesures environnementales utilisent Fahrenheit     | Use °F on the device's display. This is the radio's screen only — the app follows your phone's locale, see [Units &amp; Locale](units-and-locale) |
+ Module de mesure de la qualité de l'air activé         | Report particulate and CO₂ sensor data                                                                                                                                            |
+ Intervalle de mise à jour des mesures de qualité d'air | How often to report them                                                                                                                                                          |
+ Module de mesure de puissance activé                   | Report the per-channel voltage and current readings                                                                                                                               |
+ Intervalle de mise à jour des mesures d'alimentation   | How often to report them                                                                                                                                                          |
+ Indicateurs d'alimentation à l'écran activés           | Also show power readings on the device's display                                                                                                                                  |
 
 See [Telemetry &amp; Sensors](telemetry-and-sensors) for supported sensors and configuration recommendations.
 
@@ -113,27 +146,32 @@ See [Telemetry &amp; Sensors](telemetry-and-sensors) for supported sensors and c
 
 Pre-configured messages accessible from the device's physical buttons (for radios with rotary encoders, keypads, or similar input hardware). Define a list of quick-send messages that can be transmitted without a phone connected — ideal for field use.
 
- Setting            | Description                                                 |
- ------------------ | ----------------------------------------------------------- |
- ~~Enabled~~        | ⚠️ **Deprecated** — current firmware may ignore this toggle |
- Messages           | Newline-separated list of messages                          |
- Envoyer un bip     | Play bell sound on send                                     |
- Rotary Encoder     | Enable rotary encoder input                                 |
- Up/Down/Press Pins | GPIO pin assignments for input                              |
+ Setting                                   | Description                                                                                               |
+ ----------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+ ~~Canned message enabled~~                | ⚠️ **Deprecated** in the protobuf schema                                                                  |
+ Messages                                  | Newline-separated list of messages                                                                        |
+ Envoyer une sonnerie                      | Send a bell character alongside the message, so a receiving node's External Notification module can sound |
+ Rotary encoder enabled                    | Use a rotary encoder as the input device                                                                  |
+ GPIO pin for rotary encoder A / B / press | The three pins the encoder is wired to                                                                    |
+ Generate input event on press / CW / CCW  | Which key event each encoder action produces                                                              |
+ Entrée Haut/Bas/Select activée            | A separate, simpler input scheme using up/down/select buttons rather than an encoder                      |
+ ~~Allow input source~~                    | ⚠️ **Deprecated** in the protobuf schema                                                                  |
 
 ### Audio Module
 
 Codec2 audio support for low-bandwidth voice communication over the mesh. This is an **experimental** feature that encodes voice into very small data packets using the Codec2 codec.
 
- Setting         | Description                      |
- --------------- | -------------------------------- |
- Activé          | Activate audio module            |
- Codec2 Rate     | Audio quality/bandwidth tradeoff |
- I2S Word Select | GPIO pin for I2S WS              |
- I2S Data In     | GPIO pin for I2S DIN             |
- I2S Data Out    | GPIO pin for I2S DOUT            |
+ Setting                            | Description                          |
+ ---------------------------------- | ------------------------------------ |
+ Activé                             | Activate audio module                |
+ Codec2 Rate                        | Audio quality/bandwidth tradeoff     |
+ Broche PTT                         | GPIO pin for the push-to-talk button |
+ I2S Word Select                    | GPIO pin for I2S WS                  |
+ I2S Data In                        | GPIO pin for I2S DIN                 |
+ I2S Data Out                       | GPIO pin for I2S DOUT                |
+ I2S Clock (SCK) | GPIO pin for the I2S bit clock       |
 
-&gt; ⚠️ **Note:** Audio requires specific hardware (I2S microphone and speaker). Voice quality is very low-bandwidth — think "understandable radio voice," not phone-call quality.
+&gt; ℹ️ **Note:** Audio requires specific hardware (I2S microphone and speaker). Voice quality is very low-bandwidth — think "understandable radio voice," not phone-call quality.
 
 ### Remote Hardware Module
 
@@ -188,14 +226,38 @@ Turns your node into a motion or door sensor alert system. When a GPIO pin detec
 
 People counter using WiFi and BLE probe requests. Counts nearby devices by passively listening for probe requests that phones and laptops emit when scanning for networks. Available only on ESP32 devices.
 
- Setting                                | Description                |
- -------------------------------------- | -------------------------- |
- Activé                                 | Activate people counting   |
- Update Interval (s) | How often to report counts |
+ Paramètre                              | Description                                                                                                      |
+ -------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+ Activé                                 | Activate people counting                                                                                         |
+ Update Interval (s) | How often to report counts                                                                                       |
+ WiFi RSSI threshold                    | Ignore WiFi probes weaker than this, so distant devices are not counted (defaults to −80 dBm) |
+ BLE RSSI threshold                     | The same cut-off for BLE advertisements (defaults to −80 dBm)                                 |
 
 &gt; 💡 **Tip:** Paxcounter is useful for estimating foot traffic at trailheads, event venues, or other locations. Counts are approximate — one person may carry multiple devices.
 
+### Status Message Module
+
+Publishes a short free-text status line for your node, which other nodes can display alongside it.
+
+ Paramètre                    | Description                                                                                                                                                                      |
+ ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+ La chaîne de statut actuelle | Up to 80 characters. The **✕** in the field clears it. (That is the app's own label for the field, verbatim.) |
+
+Saving takes effect immediately — this is one of the few module settings that never asks the
+node to reboot.
+
+&gt; ℹ️ **Note:** The screen only appears for firmware that reports support for the status-message
+&gt; module. If you do not see it in the module list, your node's firmware does not have it.
+
+### Mesh Beacon Module
+
+Broadcasts an invitation to your mesh, and receives invitations from others. See
+[Discovery](discovery) for the full walkthrough.
+
 ### TAK Module
+
+&gt; ℹ️ **Note:** This module only appears in the list once the node's **Device Role** (Device Config)
+&gt; is set to **TAK** or **TAK Tracker**. Change the role first, or the entry will not be there.
 
 Team Awareness Kit integration for interoperability with ATAK and WinTAK. See [TAK Integration](tak) for detailed setup and usage.
 
@@ -214,7 +276,11 @@ Remotely configure nodes that share your admin key:
 
 ### Nettoyer la base de données des nœuds
 
-Removes stale nodes from your local database that haven't been heard in a configurable time window.
+Prunes your local node database. Two independent controls:
+
+- An **age slider** — remove nodes not heard from within that window.
+- **Clean unknown nodes only** — restrict the purge to nodes that never sent their user info,
+  leaving named nodes alone regardless of age.
 
 ### Factory Reset
 
@@ -227,6 +293,23 @@ Remotely reboot a connected or administered node.
 ### Panneau de débogage
 
 Opens the **Packets** and **App logs** tabs for viewing, filtering, and exporting diagnostic output. See [Debug Logs](debug-logs) for the full walkthrough.
+
+### A propros
+
+**Settings → About** carries the app's own identity rather than the radio's:
+
+Three sections:
+
+- **What is Meshtastic?** — a short description of the project.
+- **Apps** — opens with **Need Hardware?**, a rotating carousel of popular devices that links out
+  to where to buy one, then the GitHub repository, the running app version, and
+  **Acknowledgements** (below).
+- **Project information** — links to the website and to this documentation.
+
+### Remerciements
+
+Reached from **About**, this lists every open-source library the app ships, with its license,
+generated at build time by AboutLibraries. It was previously called the license screen.
 
 ### Troubleshooting Remote Admin
 

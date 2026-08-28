@@ -44,14 +44,16 @@ Kun napautat **Hae** sen jälkeen, kun olet kerran hylännyt käyttöoikeuspyynn
 
 ### Yhteyden tila
 
- Ikoni | Tila          | Kuvaus                             |
- ----- | ------------- | ---------------------------------- |
- 🟢    | Yhdistetty    | Aktiivinen radiolinkki muodostettu |
- 🟡    | Yhdistetään   | Yhteyden muodostus käynnissä       |
- 🔴    | Ei yhdistetty | Ei aktiivista yhteyttä             |
- ⚪     | Ei määritetty | Ei laitetta valittuna              |
+ Ikoni | Tila                 | Kuvaus                                                                                     |
+ ----- | -------------------- | ------------------------------------------------------------------------------------------ |
+ 🟢    | Yhdistetty           | Aktiivinen radiolinkki muodostettu                                                         |
+ 🟡    | Yhdistetään          | Yhteyden muodostus käynnissä                                                               |
+ 🔴    | Ei yhdistetty        | No active connection; the app keeps trying to reconnect                                    |
+ ⚪     | Laite on lepotilassa | The radio is in light sleep — the app is waiting for it to wake and reconnect, not failing |
 
-Yhdistettäessä tilailmaisin näyttää nykyisen yhteyden tilan:
+These are the four states the app models. "Device sleeping" is normal on power-saving configurations and needs no action.
+
+When connecting, a status indicator shows the current connection state — tap **Stop Connecting** to abandon the attempt:
 
 ![Yhdistämisen tila](../../assets/screenshots/connections_connecting.png)
 
@@ -75,11 +77,17 @@ USB-yhteydet tarjoavat langallisen vaihtoehdon, hyödyllinen työpöytäkäytös
 2. Sovellus pyytää USB-oikeuksia — paina **Salli**.
 3. Yhteys muodostetaan automaattisesti.
 
-&gt; ⚠️ **Huom:** USB-yhteydet vaativat OTG-tuen Android-laitteissa.
+&gt; ℹ️ **Note:** USB connections require OTG support on Android devices.
 
 ## TCP/IP (Verkko)
 
 Jotkin Meshtastic-radiot tukevat WiFi tai Ethernet-yhteyttä, mikä mahdollistaa TCP-pohjaiset yhteydet lähiverkkosi kautta. Liitä radio ensin verkkoon käyttämällä radion omia WiFi-asetuksia (laiteohjelmiston verkkokäyttöliittymän tai muun yhteystavan kautta) — yhdistä siihen sitten sovelluksesta.
+
+&gt; ℹ️ **Note:** **Settings → Wi-Fi Provisioning for mPWRD-OS** is a separate, narrower tool. It provisions WiFi
+&gt; credentials over Bluetooth to **mPWRD-OS** devices only, using their own protocol — it does not
+&gt; configure WiFi on an ordinary Meshtastic radio. It scans over BLE, lists the networks the device
+&gt; can see (including an option for a hidden SSID), takes the password, and reports success or
+&gt; failure. Available on both Android and Desktop.
 
 ### Yhdistäminen verkon kautta
 

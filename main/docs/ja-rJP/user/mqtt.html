@@ -38,20 +38,31 @@ MQTT モジュールは、ノードを MQTT サーバーに接続し、次のこ
 
 ![MQTT のトグルスイッチ](../../assets/screenshots/settings_switch.png)
 
- 設定項目        | 説明                                                        | デフォルト                                               |
- ----------- | --------------------------------------------------------- | --------------------------------------------------- |
- サーバーアドレス    | MQTT サーバーのホスト名                                            | mqtt.meshtastic.org |
- ユーザー名       | サーバーの認証                                                   | meshdev                                             |
- パスワード       | サーバーの認証                                                   | large4cats                                          |
- ルートトピック     | メッセージのベーストピック                                             | msh                                                 |
- 暗号化         | MQTT ペイロードを暗号化                                            | 有効                                                  |
- ~~JSON 出力~~ | ⚠️ **非推奨**：JSON パケットのサポートはファームウェアから削除されました。このフィールドは無視されます | 無効                                                  |
- TLS         | サーバーへのセキュアな接続                                             | 無効                                                  |
- マップ報告       | 公開マップに位置を報告                                               | 無効                                                  |
+ 設定項目        | 説明                                                                                                                                                                                  | デフォルト                                               |
+ ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+ サーバーアドレス    | MQTT サーバーのホスト名                                                                                                                                                                      | mqtt.meshtastic.org |
+ ユーザー名       | サーバーの認証                                                                                                                                                                             | meshdev                                             |
+ パスワード       | サーバーの認証                                                                                                                                                                             | large4cats                                          |
+ ルートトピック     | メッセージのベーストピック                                                                                                                                                                       | msh                                                 |
+ 暗号化         | MQTT ペイロードを暗号化                                                                                                                                                                      | 有効                                                  |
+ JSON Output | Also publish and consume the `/2/json/` topic. Deprecated in the protobuf schema, but still the only toggle for this behaviour — and the app's own proxy honours it | 無効                                                  |
+ TLS         | サーバーへのセキュアな接続                                                                                                                                                                       | 無効                                                  |
+ マップ報告       | 公開マップに位置を報告                                                                                                                                                                         | 無効                                                  |
+
+### Connection Status and Test Connection
+
+The top of the MQTT settings screen shows the live broker connection — **Connected**,
+**Connecting**, **Reconnecting**, **Disconnected**, or **Inactive**.
+
+**Test connection** probes the broker before you commit the settings to the radio, and
+distinguishes the failure modes: the hostname not resolving, the TCP connection being refused,
+TLS failing, the attempt timing out, or the broker rejecting your credentials with a reason.
 
 ### このスマートフォンでの MQTT プロキシ
 
 ノード自体がインターネットに接続できない場合、接続中のスマートフォンを MQTT ゲートウェイとして使えます。モジュール設定で「**MQTT**」と「**クライアントへのプロキシを有効化**」を有効にすると、アプリがスマートフォンのインターネット接続を通じて、無線機とサーバーの間で MQTT の通信を中継します。
+
+&gt; ℹ️ **Note:** The proxy relay is mobile-only. On the Desktop app the MQTT settings are present, but no relay runs behind them.
 
 MQTT 設定画面の上部にある「**このスマートフォンでの MQTT プロキシ**」トグルは、この中継が現在動作しているかどうかを示し、デバイスの MQTT 設定を編集して保存し直すことなく、すぐに停止（または再開）できます。
 
@@ -92,13 +103,16 @@ MQTT 設定画面の上部にある「**このスマートフォンでの MQTT �
 
 ## メッセージ形式
 
-MQTT は protobuf のメッセージ形式を使用します：
+MQTT carries two payload formats:
 
- 形式           | 説明                              | 用途           |
- ------------ | ------------------------------- | ------------ |
- **Protobuf** | バイナリの Meshtastic protobuf エンコード | ノード間のメッシュ橋渡し |
+ 形式           | 説明                                          | 用途                                                                          |
+ ------------ | ------------------------------------------- | --------------------------------------------------------------------------- |
+ **Protobuf** | バイナリの Meshtastic protobuf エンコード             | ノード間のメッシュ橋渡し                                                                |
+ **JSON**     | Human-readable JSON on the `/2/json/` topic | Consumers outside the mesh (dashboards, home automation) |
 
-&gt; ⚠️ **注意：** JSON 出力のサポートはファームウェアから削除されました。 `json_enabled` の設定は、以前との互換性のためにアプリ上には表示されますが、現在のファームウェアバージョンには影響しません。
+&gt; ℹ️ **Note:** `json_enabled` is marked deprecated in the protobuf schema, but it has not been
+&gt; replaced and it is not ignored. When it is on, the app's own MQTT proxy subscribes to the
+&gt; `/2/json/` topic and decodes those payloads.
 
 ## 暗号化とプライバシー
 
@@ -108,7 +122,7 @@ MQTT は protobuf のメッセージ形式を使用します：
 2. **MQTT の暗号化**（モジュールの設定）は、サーバーへの転送のために追加の暗号化レイヤーを加えます。 これはメタデータやルーティング情報を保護します。
 3. **TLS** はサーバーへの TCP 接続自体を暗号化し、ネットワークレベルの盗聴を防ぎます。
 
-&gt; 🔒 **重要：** デフォルトの公開チャンネルは、よく知られた鍵を使用しています。 デフォルトチャンネルで MQTT 経由で送信されるメッセージは、実質的に**暗号化されていません**。誰でも解読できます。 プライベートな通信には、必ずカスタムの PSK を使用してください。
+&gt; 🔒 **Security:** The default public channel has a well-known key. デフォルトチャンネルで MQTT 経由で送信されるメッセージは、実質的に**暗号化されていません**。誰でも解読できます。 プライベートな通信には、必ずカスタムの PSK を使用してください。
 
 ## ベストプラクティス
 

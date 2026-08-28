@@ -4,19 +4,36 @@
 
 <h2 id="first-launch">First Launch</h2>
 
-<p>When you open the app for the first time, you’ll be guided through an introductory flow that helps configure essential permissions and settings. Each step can be completed in order, or skipped — nothing here is a one-time offer. Every permission can be reviewed and granted later from <strong>Settings → Permissions</strong> inside the app.</p>
+<p>When you open the app for the first time, you’ll be guided through an introductory flow that helps configure essential permissions and settings. Complete each step in order or skip it — nothing here is a one-time offer. Every permission can be reviewed and granted later from <strong>Settings → Permissions</strong> inside the app.</p>
 
 <h3 id="welcome-screen">Welcome Screen</h3>
 
-<p>The welcome screen introduces Meshtastic and its core capabilities:</p>
+<p>The welcome screen introduces Meshtastic with three feature rows:</p>
 
-<ul>
-  <li>Off-grid mesh communication</li>
-  <li>No cellular or internet required</li>
-  <li>End-to-end encrypted messaging</li>
-</ul>
+<table>
+  <thead>
+    <tr>
+      <th> </th>
+      <th> </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Stay Connected Anywhere</strong></td>
+      <td>Communiquez en dehors du réseau avec vos amis et votre communauté sans service cellulaire.</td>
+    </tr>
+    <tr>
+      <td><strong>Create Your Own Networks</strong></td>
+      <td>Installez facilement des réseaux de maillage privé pour une communication sûre et fiable dans les régions éloignées.</td>
+    </tr>
+    <tr>
+      <td><strong>Track and Share Locations</strong></td>
+      <td>Partagez votre position en temps réel et gardez votre groupe coordonné avec les fonctionnalités GPS intégrées.</td>
+    </tr>
+  </tbody>
+</table>
 
-<p>Tap <strong>Get Started</strong> to proceed through the setup flow.</p>
+<p>Tap <strong>Get started</strong> to proceed through the setup flow.</p>
 
 <p><img src="../../assets/screenshots/onboarding_welcome.png" alt="Welcome screen" /></p>
 
@@ -49,12 +66,7 @@
   <li>Sharing your GPS coordinates with other mesh members (if enabled)</li>
 </ul>
 
-<p>Grant <strong>“While using the app”</strong> or <strong>“Always”</strong> depending on your preference:</p>
-
-<ul>
-  <li><strong>While using the app</strong> — position updates only when the app is open</li>
-  <li><strong>Always</strong> — enables background position updates for always-on mesh presence</li>
-</ul>
+<p>Grant <strong>“While using the app”</strong>. The app does not request background location — <code class="language-plaintext highlighter-rouge">ACCESS_BACKGROUND_LOCATION</code> is not in its manifest — so Android will not offer an “Always” option, and position updates happen while the app is in the foreground or running its foreground service.</p>
 
 <p>Declining leaves the rest of the app working: on Android 12 and newer, Bluetooth is unaffected and only the map position and position sharing are disabled. On Android 11 and older, Bluetooth scanning also stops, because that is the permission Android gates it behind.</p>
 
@@ -74,18 +86,13 @@
 
 <h3 id="critical-alerts-permission">Critical Alerts Permission</h3>
 
-<p>On supported devices, the app may request permission for critical alerts:</p>
+<p>Critical alerts are high-priority notifications that break through Do Not Disturb — for emergency mesh alerts and urgent messages.</p>
 
-<ul>
-  <li>These are high-priority notifications that can break through Do Not Disturb mode</li>
-  <li>Useful for emergency mesh alerts or urgent messages</li>
-  <li>You can <strong>skip</strong> this step if you don’t need breakthrough notifications</li>
-  <li>Configure or revoke later in Android notification settings</li>
-</ul>
+<p>This step is not a runtime permission prompt. There is no grant/deny dialog: the button opens the Android system settings page for the app’s <strong>Alerts</strong> notification channel, where you turn the breakthrough behaviour on yourself. You can <strong>skip</strong> it, and reach the same page later from Android notification settings.</p>
 
 <h3 id="reviewing-permissions-later">Reviewing permissions later</h3>
 
-<p><strong>Settings → Permissions</strong> summarizes where every runtime permission stands. It reads <em>All allowed</em> when nothing needs you, and names the count when something does — opening itself automatically in that case. Tap the row to see the full list at any time:</p>
+<p><strong>Settings → Permissions</strong> summarizes where every runtime permission stands. It covers five: <strong>Nearby devices</strong> (Bluetooth), <strong>Location</strong>, <strong>Notifications</strong>, <strong>Camera</strong> (scanning channel and contact QR codes) and <strong>Local network</strong> (finding radios over Wi-Fi by mDNS) — the last two are never asked for during setup, only when a feature first needs them. It reads <em>All allowed</em> when nothing needs you, and names the count when something does — opening itself automatically in that case. Tap the row to see the full list at any time:</p>
 
 <table>
   <thead>
@@ -130,18 +137,16 @@
 
 <p>Features also ask in context. Tapping <strong>Scan</strong> on the Connections screen with Bluetooth permission missing explains what it is for and offers to request it; once Android stops prompting, the same control opens the system settings page instead of doing nothing.</p>
 
-<h2 id="whats-next">What’s Next?</h2>
+<p>New to Meshtastic? The <a href="https://meshtastic.org/docs/getting-started">getting started guide</a> on meshtastic.org covers hardware selection, initial radio configuration, and your first mesh setup.</p>
 
-<p>Once connected to a radio, explore:</p>
+<h2 id="related-topics">Related Topics</h2>
 
 <ul>
-  <li><a href="connections">Connections</a> — pair your first radio device</li>
+  <li><a href="connections">Connections</a> — pair your first radio</li>
   <li><a href="messages-and-channels">Messages &amp; Channels</a> — send your first message</li>
-  <li><a href="nodes">Nodes</a> — see who’s on your mesh</li>
+  <li><a href="nodes">Nodes</a> — see who else is on your mesh</li>
   <li><a href="map-and-waypoints">Map &amp; Waypoints</a> — view node positions</li>
-  <li><a href="settings-radio-user">Settings</a> — configure your radio and user profile</li>
+  <li><a href="settings-radio-user">Settings — Radio &amp; User</a> — configure your radio and user profile</li>
 </ul>
-
-<p>New to Meshtastic? The <a href="https://meshtastic.org/docs/getting-started">getting started guide</a> on meshtastic.org covers hardware selection, initial radio configuration, and your first mesh setup.</p>
 
 <hr />

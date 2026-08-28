@@ -47,14 +47,14 @@
 </table>
 
 <blockquote>
-  <p>🔒 <strong>Security Tip:</strong> Always configure a unique PSK for private communications. The default channel is intentionally open so new users can discover the mesh — but you should create a separate encrypted channel for anything sensitive.</p>
+  <p>🔒 <strong>Security:</strong> Always configure a unique PSK for private communications. The default channel is intentionally open so new users can discover the mesh — but you should create a separate encrypted channel for anything sensitive.</p>
 </blockquote>
 
 <h3 id="adding-a-channel">Adding a Channel</h3>
 
 <ol>
   <li>Navigate to <strong>Settings → Channels</strong>.</li>
-  <li>Tap <strong>Add Channel</strong> or scan a QR code.</li>
+  <li>Tap the <strong>+</strong> button to add a channel, or import one by scanning a channel QR code.</li>
   <li>Configure the channel name and encryption key.</li>
   <li>Share the channel URL/QR code with others who need access.</li>
 </ol>
@@ -73,6 +73,33 @@
   <li>Type your message and tap <strong>Send</strong>.</li>
 </ol>
 
+<h3 id="managing-the-conversation-list">Managing the Conversation List</h3>
+
+<p>The <strong>Messages</strong> tab lists your conversations. Each row carries what you need to triage it at a
+glance, and the list itself is directly actionable:</p>
+
+<ul>
+  <li><strong>Unsent drafts survive.</strong> Type into a conversation and leave without sending, and the text is
+still there when you come back. The row shows it as <code class="language-plaintext highlighter-rouge">Draft: …</code> in place of the last message —
+an unsent draft is the thing the row is waiting on <em>you</em> for.</li>
+  <li><strong>Unread badge.</strong> A count sits on the row until you open the conversation.</li>
+  <li><strong>Swipe right to mute</strong> (swipe again to unmute) and <strong>swipe left to delete</strong>. Deleting asks
+first; muting shows a snackbar with <strong>Undo</strong>.</li>
+  <li><strong>Long-press to select</strong> one or more conversations, then use the action bar to <strong>Pin</strong>,
+<strong>Mark unread</strong>, mute or delete them together. Pinned conversations carry a pin marker and rise
+to the top of <strong>their own section</strong>.</li>
+  <li><strong>The list is split into Channels and Direct Messages</strong>, each with a collapsible header and each
+sorted independently — so a pinned direct message rises within its own section, not above the
+Channels one.</li>
+</ul>
+
+<h3 id="conversation-bubbles">Conversation Bubbles</h3>
+
+<p>On Android 11 and later, a message notification can be opened as a floating <strong>bubble</strong> that
+stays on top of whatever else you are doing. Tap the bubble icon on the notification to promote
+a conversation; Android remembers the choice per conversation, and the system Bubbles settings
+control whether they are offered at all.</p>
+
 <h3 id="message-states">Message States</h3>
 
 <p>A status label appears under <strong>your own</strong> outgoing messages only (incoming messages from others show no status label):</p>
@@ -87,7 +114,7 @@
   <tbody>
     <tr>
       <td>Sending…</td>
-      <td>Queued or already handed to the radio, not yet resolved either way (queued and en-route both show this same text)</td>
+      <td>Queued or already handed to the radio, not yet resolved either way. Both stages share this text, but the icon and colour change as it progresses — a yellow upload cloud while queued, a blue arrow once the radio has it</td>
     </tr>
     <tr>
       <td>Delivered to recipient</td>
@@ -135,24 +162,49 @@
       <td>The recipient may be offline or out of mesh range. Try later or move closer.</td>
     </tr>
     <tr>
-      <td>Got NAK</td>
-      <td>The next-hop node refused to relay</td>
-      <td>The relay node may be congested. Wait and retry.</td>
-    </tr>
-    <tr>
-      <td>Délai d’expiration</td>
-      <td>No acknowledgment within retry window</td>
-      <td>The recipient may be just out of range. Try increasing hop limit or moving to a better position.</td>
-    </tr>
-    <tr>
       <td>No radio interface</td>
       <td>No radio interface available to send</td>
       <td>Check that your radio is connected and available.</td>
     </tr>
     <tr>
       <td>Failed to deliver to mesh</td>
-      <td>All retry attempts exhausted</td>
-      <td>Move closer, improve signal, or wait for mesh conditions to improve.</td>
+      <td>Retries exhausted. The same label covers three underlying causes — a relay refusing (NAK), a plain timeout, and running out of retransmits</td>
+      <td>Move closer, improve signal, or wait for conditions to improve. Tap the error for the specific cause.</td>
+    </tr>
+    <tr>
+      <td>Rate limited</td>
+      <td>The mesh is throttling you for sending too fast</td>
+      <td>Wait before sending again.</td>
+    </tr>
+    <tr>
+      <td>Not authorized</td>
+      <td>The destination refused the request</td>
+      <td>Check you have the right channel and keys for that node.</td>
+    </tr>
+    <tr>
+      <td>Recipient needs your key</td>
+      <td>Direct-message encryption could not complete because the other node does not have your public key yet</td>
+      <td>Exchange node info — the key travels with it. Common on a first DM to a new contact.</td>
+    </tr>
+    <tr>
+      <td>Recipient key unavailable</td>
+      <td>You do not have the recipient’s public key</td>
+      <td>Wait for their node info to arrive, or ask them to broadcast it.</td>
+    </tr>
+    <tr>
+      <td>Could not send encrypted message</td>
+      <td>Encryption failed for this direct message</td>
+      <td>Verify both nodes have exchanged keys and are on compatible firmware.</td>
+    </tr>
+    <tr>
+      <td>Admin session expired</td>
+      <td>A remote-admin session timed out</td>
+      <td>Reopen the remote node’s settings to start a new session.</td>
+    </tr>
+    <tr>
+      <td>Admin key not authorized</td>
+      <td>The target node does not accept your admin key</td>
+      <td>Verify the admin key matches on both nodes.</td>
     </tr>
     <tr>
       <td>Channel/key mismatch</td>
@@ -284,12 +336,18 @@
 <p>React to messages with emoji:</p>
 
 <ul>
-  <li><strong>Long-press</strong> a message to open the actions menu</li>
-  <li>Tap <strong>Add Reaction</strong> to choose an emoji</li>
+  <li><strong>Double-tap</strong> a message — or long-press it — to raise a quick reaction bar above the bubble</li>
+  <li>Tap an emoji in the bar to send it; tap <strong>more</strong> to open the full picker, or anywhere outside
+the bar to dismiss it without sending</li>
   <li>Reactions appear below the message bubble</li>
   <li>Multiple users can react to the same message</li>
   <li>React to your own messages or others’ messages</li>
 </ul>
+
+<blockquote>
+  <p>ℹ️ <strong>Note:</strong> Opening the bar sends nothing. A reaction is a real mesh packet, so it only goes
+out when you pick an emoji.</p>
+</blockquote>
 
 <p><img src="../../assets/screenshots/messages_reaction.png" alt="Emoji reaction badges displayed beneath a message" /></p>
 
@@ -297,9 +355,28 @@
   <p>💡 <strong>Tip:</strong> Reactions are lightweight — they use minimal mesh bandwidth compared to full text messages.</p>
 </blockquote>
 
+<h3 id="replying">Replying</h3>
+
+<p><strong>Swipe a message to the right</strong> to reply to it — the composer opens with that message quoted.
+Swiping past the reply threshold arms the action; releasing before it springs back with nothing sent.
+Reply is also in the actions menu, reached by long-pressing and then tapping <strong>More</strong>.</p>
+
+<h3 id="day-separators">Day Separators</h3>
+
+<p>Messages are grouped by day. The separator above the first message of each day reads <strong>Today</strong>
+or <strong>Yesterday</strong> for the two most recent days, and the date itself for older ones.</p>
+
+<h3 id="jump-to-latest">Jump to Latest</h3>
+
+<p>Scrolling back through a conversation raises a jump-to-latest control. When messages arrive
+while you are scrolled up, it names the most recent sender and adds a count of the other unread
+messages. That count is messages, not people — five unread from one person reads as their name
+<strong>+4</strong>.</p>
+
 <h3 id="message-actions">Message Actions</h3>
 
-<p>Long-press any message to access:</p>
+<p>Long-press or double-tap a message to open the quick reaction bar, then tap <strong>More</strong> (the
+overflow icon on that bar) to reach:</p>
 
 <ul>
   <li><strong>Copy</strong> — copy message text to clipboard</li>
@@ -311,19 +388,17 @@
 
 <h3 id="message-priority">Message Priority</h3>
 
-<p>Messages are queued and transmitted based on priority:</p>
-
-<ol>
-  <li>Emergency/alert messages (highest)</li>
-  <li>Direct messages</li>
-  <li>Channel broadcasts (lowest)</li>
-</ol>
+<p>The app sends every message you compose at the same, default priority — there is no
+emergency or alert tier to choose, and nothing in the app raises a direct message above a
+channel broadcast. Any prioritising between them happens in firmware, not here. (The app
+does mark some of its own internal traffic, such as admin and traceroute packets, as
+reliable or background, but that is not something you control from the message composer.)</p>
 
 <h3 id="message-limits">Message Limits</h3>
 
 <ul>
   <li><strong>Maximum length:</strong> 200 bytes (approximately 200 characters for ASCII text)</li>
-  <li>The 200-byte cap applies to the in-app composer — the mesh payload limit itself is ~233 bytes, so messages from other senders (e.g., App Functions or Android Auto) may arrive slightly longer</li>
+  <li>The 200-byte cap applies to the in-app composer — the mesh payload limit itself is ~233 bytes, so messages from other senders (e.g., App Functions) may arrive slightly longer</li>
   <li><strong>Rate limiting:</strong> The mesh enforces airtime fairness; heavy message volume may be throttled</li>
   <li><strong>Delivery:</strong> Messages are retried automatically if no acknowledgment is received</li>
 </ul>

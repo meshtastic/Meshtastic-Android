@@ -125,11 +125,37 @@
     </tr>
     <tr>
       <td>SEN55</td>
-      <td>PM, NOx, VOC, Temp, Humidity</td>
-      <td>Multi-sensor</td>
+      <td>PM, Temp, Humidity</td>
+      <td>Multi-sensor. Its NOx and VOC indices are recorded and included in a CSV export, but are not yet shown as cards or charts</td>
     </tr>
   </tbody>
 </table>
+
+<h3 id="soil">Soil</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Métrique</th>
+      <th>Unit</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Temp sol</td>
+      <td>°C / °F</td>
+      <td>Reported alongside soil moisture by soil probes</td>
+    </tr>
+    <tr>
+      <td>Hum sol</td>
+      <td>%</td>
+      <td>Volumetric water content</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Both appear as info cards on the node detail screen, next to the other environment readings.</p>
 
 <h3 id="light--uv">Light &amp; UV</h3>
 
@@ -169,19 +195,17 @@
   </thead>
   <tbody>
     <tr>
-      <td>Bus Voltage</td>
-      <td>Supply rail voltage</td>
+      <td>Tension</td>
+      <td>Per-channel voltage reading</td>
     </tr>
     <tr>
       <td>Actif</td>
-      <td>Power consumption (mA)</td>
-    </tr>
-    <tr>
-      <td>Alimentation</td>
-      <td>Calculated power (mW)</td>
+      <td>Per-channel current draw, in mA</td>
     </tr>
   </tbody>
 </table>
+
+<p>Up to three channels are reported (ch1–ch3), and each can be given its own label — Solar or Battery, say — from the node detail screen. There is no separate wattage reading; the app charts voltage and current, and does not compute power from them.</p>
 
 <p>Useful for monitoring solar charging or battery health on remote nodes.</p>
 
@@ -189,51 +213,27 @@
 
 <ol>
   <li>Navigate to <strong>Settings → Module Config → Telemetry</strong>.</li>
-  <li>Set reporting intervals:
+  <li>
+    <p>Each metric group has its own enable toggle and its own interval:</p>
+
     <ul>
-      <li><strong>Device Metrics Interval</strong> — how often to broadcast device metrics</li>
-      <li><strong>Environment Metrics Interval</strong> — how often to broadcast sensor data</li>
+      <li><strong>Device Metrics</strong> — battery, channel and airtime utilisation</li>
+      <li><strong>Environment Metrics</strong> — temperature, humidity, pressure and the other sensor readings</li>
+      <li><strong>Air Quality Metrics</strong> — particulate and CO₂ readings</li>
+      <li><strong>Power Metrics</strong> — the per-channel voltage and current readings</li>
     </ul>
+
+    <p>Environment metrics additionally have an on-screen toggle and a Fahrenheit toggle for the
+device’s own display.</p>
   </li>
-  <li>Enable specific sensor types as needed.</li>
 </ol>
 
-<h3 id="recommended-intervals">Recommended Intervals</h3>
-
-<table>
-  <thead>
-    <tr>
-      <th>Use Case</th>
-      <th>Device (s)</th>
-      <th>Environment (s)</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Urban mesh (many nodes)</td>
-      <td>3600</td>
-      <td>3600</td>
-    </tr>
-    <tr>
-      <td>Rural mesh (few nodes)</td>
-      <td>900</td>
-      <td>900</td>
-    </tr>
-    <tr>
-      <td>Weather station</td>
-      <td>900</td>
-      <td>300</td>
-    </tr>
-    <tr>
-      <td>Battery conservation</td>
-      <td>7200</td>
-      <td>7200</td>
-    </tr>
-  </tbody>
-</table>
+<h3 id="choosing-an-interval">Choosing an Interval</h3>
 
 <blockquote>
-  <p>⚠️ <strong>Note:</strong> Shorter intervals increase airtime usage and battery drain across the mesh.</p>
+  <p>💡 <strong>Tip:</strong> These are nominal values, not hard schedules. On a congested mesh the firmware
+automatically backs off to longer intervals based on how many nodes are online, so you do not
+need to hand-tune them for mesh size. Lengthen them deliberately only to save battery.</p>
 </blockquote>
 
 <h2 id="air-quality-metrics">Air Quality Metrics</h2>
@@ -243,8 +243,8 @@
 <table>
   <thead>
     <tr>
-      <th>Metric</th>
-      <th>Unit</th>
+      <th>Métrique</th>
+      <th>Unité</th>
       <th>Description</th>
     </tr>
   </thead>

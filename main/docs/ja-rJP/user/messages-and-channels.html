@@ -30,12 +30,12 @@ Meshtastic は、**チャンネルブロードキャスト**と**ダイレクト
  🔓   | デフォルト／オープン       | よく知られたデフォルトの鍵を使用します。 同じプリセットの**あらゆる Meshtastic デバイス**が、これらのメッセージを読めます。 |
  ⚠️   | 非セキュア＋位置情報       | GPS 位置情報も一斉送信するオープンチャンネルです。 公開メッシュでは注意して使用してください。                      |
 
-&gt; 🔒 **セキュリティのヒント：** プライベートな通信には、必ず固有の PSK を設定してください。 デフォルトチャンネルは、新規ユーザーがメッシュを見つけられるよう意図的にオープンになっています。ただし、機密性の高い内容には別途、暗号化されたチャンネルを作成してください。
+&gt; 🔒 **Security:** Always configure a unique PSK for private communications. デフォルトチャンネルは、新規ユーザーがメッシュを見つけられるよう意図的にオープンになっています。ただし、機密性の高い内容には別途、暗号化されたチャンネルを作成してください。
 
 ### チャンネルを追加する
 
 1. 「**設定 → チャンネル**」に移動します。
-2. 「**チャンネルを追加**」をタップするか、QR コードをスキャンします。
+2. Tap the **+** button to add a channel, or import one by scanning a channel QR code.
 3. チャンネル名と暗号化鍵を設定します。
 4. アクセスが必要な相手に、チャンネルの URL／QR コードを共有します。
 
@@ -51,36 +51,66 @@ Meshtastic は、**チャンネルブロードキャスト**と**ダイレクト
 2. 連絡先リストからノードを選択するか、ノードリストでノードをタップします。
 3. メッセージを入力し、「**送信**」をタップします。
 
+### Managing the Conversation List
+
+The **Messages** tab lists your conversations. Each row carries what you need to triage it at a
+glance, and the list itself is directly actionable:
+
+- **Unsent drafts survive.** Type into a conversation and leave without sending, and the text is
+  still there when you come back. The row shows it as `Draft: …` in place of the last message —
+  an unsent draft is the thing the row is waiting on _you_ for.
+- **Unread badge.** A count sits on the row until you open the conversation.
+- **Swipe right to mute** (swipe again to unmute) and **swipe left to delete**. Deleting asks
+  first; muting shows a snackbar with **Undo**.
+- **Long-press to select** one or more conversations, then use the action bar to **Pin**,
+  **Mark unread**, mute or delete them together. Pinned conversations carry a pin marker and rise
+  to the top of **their own section**.
+- **The list is split into Channels and Direct Messages**, each with a collapsible header and each
+  sorted independently — so a pinned direct message rises within its own section, not above the
+  Channels one.
+
+### Conversation Bubbles
+
+On Android 11 and later, a message notification can be opened as a floating **bubble** that
+stays on top of whatever else you are doing. Tap the bubble icon on the notification to promote
+a conversation; Android remembers the choice per conversation, and the system Bubbles settings
+control whether they are offered at all.
+
 ### メッセージの状態
 
 ステータスラベルは、**自分が**送信したメッセージの下にのみ表示されます（他のユーザーからの受信メッセージにはステータスラベルは表示されません）：
 
- 状態                   | 意味                                                                         |
- -------------------- | -------------------------------------------------------------------------- |
- 送信中…                 | キューに入っているか、すでに無線機に渡された状態で、まだどちらとも確定していません（キュー内と送信中のどちらも同じ表示になります）          |
- 受信者に配信済み             | ダイレクトメッセージで最も確実な確認です。受信確認が返ってきています                                         |
- メッシュに配信済み            | チャンネルブロードキャストでは、メッセージがメッシュに届いたことを示します（ブロードキャストには受信者ごとの確認応答はありません）          |
- 中継済み、受信者による確認なし      | ダイレクトメッセージでは警告色で表示されます。メッセージは中継されましたが、まだ受信確認が返ってきていません                     |
- SF++ チェーン経由でルーティング中… | Store &amp; Forward Plus Plus チェーンによってルーティング／バッファリングされています |
- SF++ チェーンで確認済み       | SF++ チェーン経由で配信が確認されました                                                     |
- エラー                  | 配信に失敗しました。具体的な理由はステータスをタップして確認してください（下記の「配信エラー」を参照）                        |
+ 状態                   | 意味                                                                                                                                                                                                                                        |
+ -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+ 送信中…                 | Queued or already handed to the radio, not yet resolved either way. Both stages share this text, but the icon and colour change as it progresses — a yellow upload cloud while queued, a blue arrow once the radio has it |
+ 受信者に配信済み             | ダイレクトメッセージで最も確実な確認です。受信確認が返ってきています                                                                                                                                                                                                        |
+ メッシュに配信済み            | チャンネルブロードキャストでは、メッセージがメッシュに届いたことを示します（ブロードキャストには受信者ごとの確認応答はありません）                                                                                                                                                                         |
+ 中継済み、受信者による確認なし      | ダイレクトメッセージでは警告色で表示されます。メッセージは中継されましたが、まだ受信確認が返ってきていません                                                                                                                                                                                    |
+ SF++ チェーン経由でルーティング中… | Store &amp; Forward Plus Plus チェーンによってルーティング／バッファリングされています                                                                                                                                                                |
+ SF++ チェーンで確認済み       | SF++ チェーン経由で配信が確認されました                                                                                                                                                                                                                    |
+ エラー                  | 配信に失敗しました。具体的な理由はステータスをタップして確認してください（下記の「配信エラー」を参照）                                                                                                                                                                                       |
 
 ### 配信エラー
 
 メッセージの配信に失敗すると、エラーインジケーターが何が問題だったかを示します：
 
- エラー                  | 意味                                           | 対処方法                                                                                 |
- -------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------ |
- ルートなし                | 宛先ノードへの経路が存在しません                             | 受信者がオフラインか、メッシュの範囲外の可能性があります。 時間をおくか、距離を縮めてください。                                     |
- NAK を受信              | 次のホップのノードが中継を拒否しました                          | 中継ノードが混雑している可能性があります。 しばらく待ってから再試行してください。                                            |
- タイムアウト               | 再試行の時間内に受信確認がありませんでした                        | 受信者がちょうど範囲外にいる可能性があります。 ホップ数上限を増やすか、より良い場所に移動してみてください。                               |
- No radio interface   | 送信に使える無線インターフェースがありません                       | Check that your radio is connected and available.                    |
- メッシュへの配信に失敗しました      | すべての再試行を使い切りました                              | Move closer, improve signal, or wait for mesh conditions to improve. |
- Channel/key mismatch | Destination channel/key does not match       | Verify both nodes share the same channel and PSK.                    |
- メッセージが大きすぎて送信できません   | メッセージが最大ペイロードサイズを超えています                      | Shorten the message and try again.                                   |
- No app response      | App or plugin did not respond to the request | Retry or check the destination app or module state.                  |
- Duty cycle limit     | 地域ごとの電波利用時間の上限に達しました                         | Wait for the duty cycle window to reset.                             |
- Invalid request      | Malformed or invalid request                 | Retry after updating or restarting the app if this persists.         |
+ エラー                      | 意味                                                                                                                                                                            | 対処方法                                                                                                                                  |
+ ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+ ルートなし                    | 宛先ノードへの経路が存在しません                                                                                                                                                              | 受信者がオフラインか、メッシュの範囲外の可能性があります。 時間をおくか、距離を縮めてください。                                                                                      |
+ No radio interface       | 送信に使える無線インターフェースがありません                                                                                                                                                        | Check that your radio is connected and available.                                                                     |
+ メッシュへの配信に失敗しました          | Retries exhausted. The same label covers three underlying causes — a relay refusing (NAK), a plain timeout, and running out of retransmits | Move closer, improve signal, or wait for conditions to improve. Tap the error for the specific cause. |
+ Rate limited             | The mesh is throttling you for sending too fast                                                                                                                               | Wait before sending again.                                                                                            |
+ Not authorized           | The destination refused the request                                                                                                                                           | Check you have the right channel and keys for that node.                                                              |
+ 受信者にあなたの鍵が必要です           | Direct-message encryption could not complete because the other node does not have your public key yet                                                                         | Exchange node info — the key travels with it. Common on a first DM to a new contact.                  |
+ 受信者の鍵を利用できません            | You do not have the recipient's public key                                                                                                                                    | Wait for their node info to arrive, or ask them to broadcast it.                                                      |
+ 暗号化メッセージを送信できませんでした      | Encryption failed for this direct message                                                                                                                                     | Verify both nodes have exchanged keys and are on compatible firmware.                                                 |
+ Admin session expired    | A remote-admin session timed out                                                                                                                                              | Reopen the remote node's settings to start a new session.                                                             |
+ Admin key not authorized | The target node does not accept your admin key                                                                                                                                | 両方のノードで管理者鍵が一致しているか確認してください。                                                                                                          |
+ Channel/key mismatch     | Destination channel/key does not match                                                                                                                                        | Verify both nodes share the same channel and PSK.                                                                     |
+ メッセージが大きすぎて送信できません       | メッセージが最大ペイロードサイズを超えています                                                                                                                                                       | Shorten the message and try again.                                                                                    |
+ No app response          | App or plugin did not respond to the request                                                                                                                                  | Retry or check the destination app or module state.                                                                   |
+ Duty cycle limit         | 地域ごとの電波利用時間の上限に達しました                                                                                                                                                          | Wait for the duty cycle window to reset.                                                                              |
+ Invalid request          | Malformed or invalid request                                                                                                                                                  | Retry after updating or restarting the app if this persists.                                                          |
 
 &gt; 💡 **ヒント：** ほとんどの配信エラーは自然に解消します。 ノードに断続的に到達できる場合、メッシュは再試行します。 「ルートなし」エラーが続く場合は、中間のルーターノードがオンラインになっているか確認してください。
 
@@ -144,19 +174,42 @@ Meshtastic は、**チャンネルブロードキャスト**と**ダイレクト
 
 絵文字でメッセージにリアクションできます：
 
-- メッセージを**長押し**すると操作メニューが開きます
-- 「**リアクションを追加**」をタップして絵文字を選びます
+- **Double-tap** a message — or long-press it — to raise a quick reaction bar above the bubble
+- Tap an emoji in the bar to send it; tap **more** to open the full picker, or anywhere outside
+  the bar to dismiss it without sending
 - リアクションはメッセージの吹き出しの下に表示されます
 - 複数のユーザーが同じメッセージにリアクションできます
 - 自分のメッセージにも、他の人のメッセージにもリアクションできます
+
+&gt; ℹ️ **Note:** Opening the bar sends nothing. A reaction is a real mesh packet, so it only goes
+&gt; out when you pick an emoji.
 
 ![メッセージの下に表示された絵文字リアクションのバッジ](../../assets/screenshots/messages_reaction.png)
 
 &gt; 💡 **ヒント：** リアクションは軽量で、通常のテキストメッセージに比べてメッシュの帯域をほとんど消費しません。
 
+### Replying
+
+**Swipe a message to the right** to reply to it — the composer opens with that message quoted.
+Swiping past the reply threshold arms the action; releasing before it springs back with nothing sent.
+Reply is also in the actions menu, reached by long-pressing and then tapping **More**.
+
+### Day Separators
+
+Messages are grouped by day. The separator above the first message of each day reads **Today**
+or **Yesterday** for the two most recent days, and the date itself for older ones.
+
+### Jump to Latest
+
+Scrolling back through a conversation raises a jump-to-latest control. When messages arrive
+while you are scrolled up, it names the most recent sender and adds a count of the other unread
+messages. That count is messages, not people — five unread from one person reads as their name
+**+4**.
+
 ### メッセージの操作
 
-任意のメッセージを長押しすると、次の操作を利用できます：
+Long-press or double-tap a message to open the quick reaction bar, then tap **More** (the
+overflow icon on that bar) to reach:
 
 - **コピー：** メッセージのテキストをクリップボードにコピーします
 - **返信：** そのメッセージを引用して返信します
@@ -166,16 +219,16 @@ Meshtastic は、**チャンネルブロードキャスト**と**ダイレクト
 
 ### メッセージの優先度
 
-メッセージは優先度に基づいてキューに入れられ、送信されます：
-
-1. 緊急／警報メッセージ（最高）
-2. ダイレクトメッセージ
-3. チャンネルブロードキャスト（最低）
+The app sends every message you compose at the same, default priority — there is no
+emergency or alert tier to choose, and nothing in the app raises a direct message above a
+channel broadcast. Any prioritising between them happens in firmware, not here. (The app
+does mark some of its own internal traffic, such as admin and traceroute packets, as
+reliable or background, but that is not something you control from the message composer.)
 
 ### メッセージの制限
 
 - **最大長：** 200 バイト（ASCII テキストで約 200 文字）
-- 200 バイトの上限はアプリ内の入力欄に適用されます。メッシュのペイロード上限自体は約 233 バイトのため、他の送信元（アプリ機能や Android Auto など）からのメッセージは、これより少し長い場合があります
+- The 200-byte cap applies to the in-app composer — the mesh payload limit itself is ~233 bytes, so messages from other senders (e.g., App Functions) may arrive slightly longer
 - **レート制限：** メッシュは電波利用時間の公平性を確保するため、大量のメッセージは制限されることがあります
 - **配信：** 受信確認がない場合、メッセージは自動的に再送されます
 

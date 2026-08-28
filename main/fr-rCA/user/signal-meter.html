@@ -2,7 +2,7 @@
 
 <p>The Meshtastic signal meter — the familiar bars or status color in the app — is calculated very differently than the “bars” on a traditional cell phone or WiFi router.</p>
 
-<p>Most consumer devices simply measure how “loud” a signal is. However, because Meshtastic uses <strong>LoRa (Long Range)</strong> technology, its signal meter measures how <strong>clear</strong> the signal is, relative to the specific settings your mesh is using.</p>
+<p>Most consumer devices measure how “loud” a signal is. However, because Meshtastic uses <strong>LoRa (Long Range)</strong> technology, its signal meter measures how <strong>clear</strong> the signal is, relative to the specific settings your mesh is using.</p>
 
 <hr />
 
@@ -31,7 +31,7 @@
 
 <h2 id="2-the-magic-of-lora-hearing-below-the-noise-floor">2. The Magic of LoRa: Hearing “Below the Noise Floor”</h2>
 
-<p>For standard radios (like FM or WiFi), if the background noise is louder than the signal (a negative SNR), the receiver just hears static.</p>
+<p>For standard radios (like FM or WiFi), if the background noise is louder than the signal (a negative SNR), the receiver hears only static.</p>
 
 <p>LoRa is special. It uses <strong>“Spread Spectrum”</strong> modulation, which allows the radio to mathematically pull a signal out of the air even when it is buried deep <em>underneath</em> the background noise. This is why you will frequently see <strong>negative SNR numbers</strong> in Meshtastic (e.g., -10 dB, which means the signal is 10 decibels weaker than the background static).</p>
 

@@ -81,17 +81,19 @@
     <tr>
       <td>🔴</td>
       <td>Déconnecté</td>
-      <td>No active connection</td>
+      <td>No active connection; the app keeps trying to reconnect</td>
     </tr>
     <tr>
       <td>⚪</td>
-      <td>Not configured</td>
-      <td>Aucun appareil sélectionné</td>
+      <td>Appareil en veille</td>
+      <td>The radio is in light sleep — the app is waiting for it to wake and reconnect, not failing</td>
     </tr>
   </tbody>
 </table>
 
-<p>When connecting, a status indicator shows the current connection state:</p>
+<p>These are the four states the app models. “Device sleeping” is normal on power-saving configurations and needs no action.</p>
+
+<p>When connecting, a status indicator shows the current connection state — tap <strong>Stop Connecting</strong> to abandon the attempt:</p>
 
 <p><img src="../../assets/screenshots/connections_connecting.png" alt="Connecting status" /></p>
 
@@ -120,12 +122,20 @@
 </ol>
 
 <blockquote>
-  <p>⚠️ <strong>Note:</strong> USB connections require OTG support on Android devices.</p>
+  <p>ℹ️ <strong>Note:</strong> USB connections require OTG support on Android devices.</p>
 </blockquote>
 
 <h2 id="tcpip-network">TCP/IP (Network)</h2>
 
 <p>Some Meshtastic radios support WiFi/Ethernet connectivity, allowing TCP-based connections over your local network. Get the radio onto your network first — using the radio’s own WiFi settings (via the firmware web interface or another connection) — then connect to it from the app.</p>
+
+<blockquote>
+  <p>ℹ️ <strong>Note:</strong> <strong>Settings → Wi-Fi Provisioning for mPWRD-OS</strong> is a separate, narrower tool. It provisions WiFi
+credentials over Bluetooth to <strong>mPWRD-OS</strong> devices only, using their own protocol — it does not
+configure WiFi on an ordinary Meshtastic radio. It scans over BLE, lists the networks the device
+can see (including an option for a hidden SSID), takes the password, and reports success or
+failure. Available on both Android and Desktop.</p>
+</blockquote>
 
 <h3 id="connecting-over-the-network">Connecting over the Network</h3>
 

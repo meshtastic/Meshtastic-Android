@@ -23,28 +23,26 @@ TAK モジュールを使うと、Meshtastic のノードは次のことがで�
 
 ### 前提条件
 
-- ATAK（Android Team Awareness Kit）または WinTAK がインストールされていること
-- Meshtastic ATAK プラグインがインストールされていること
-- Meshtastic 無線機で TAK モジュールが有効になっていること
+- ATAK (Android Team Awareness Kit), iTAK, or WinTAK installed
+- Your node's **Device Role** set to **TAK** or **TAK Tracker** — this is what makes the TAK
+  module appear in Module Config at all
+
+&gt; ⚠️ **Warning:** The old **Meshtastic ATAK Plugin** is no longer part of this path and cannot
+&gt; work. It bridged through the cross-process AIDL API, which was removed in app 2.8.0; the mesh
+&gt; service is now in-process only. Do not install it. Interop today runs over the app's own local
+&gt; TAK server plus the Mesh to CoT Converter, both described below, with stock ATAK/iTAK/WinTAK.
 
 ### 設定
 
-1. 「**設定 → モジュール設定 → TAK**」に移動します。
-2. TAK モジュールを有効にします。
-3. TAK のチーム／グループ設定を構成します：
+「**設定 → モジュール設定 → TAK**」に移動します。 The module's own settings are your TAK identity —
+there is no separate enable switch here, because the device Role above is what turns TAK on:
 
 ![モジュールのトグルスイッチ](../../assets/screenshots/settings_switch.png)
 
- 設定項目 | 説明           |
- ---- | ------------ |
- 有効   | TAK 相互運用を有効化 |
- モード  | TAK 互換の出力モード |
-
-### ATAK プラグインのセットアップ
-
-1. プラグインリポジトリから Meshtastic ATAK プラグインをインストールします。
-2. ATAK を開き、Meshtastic プラグインを有効にします。
-3. プラグインは、ATAK とメッシュネットワークの間でメッセージを橋渡しします。
+ 設定項目 | 説明                                |
+ ---- | --------------------------------- |
+ Team | Your TAK team colour              |
+ 役割   | Your member role within that team |
 
 ### ローカル TAK サーバー
 
@@ -54,6 +52,10 @@ TAK モジュールを使うと、Meshtastic のノードは次のことがで�
 
 - **ローカル TAK サーバーを有効化**：同じデバイスからの ATAK／iTAK 接続用に、ポート **8089** でループバック専用の mTLS サーバーを起動します。
 - **TAK Mesh Channel** — selects which Meshtastic channel outgoing TAK traffic is sent on (default: the primary channel, index 0). Incoming TAK traffic is accepted from any channel. Matches the equivalent setting on iOS and in the legacy ATAK plugin.
+- **Mesh to CoT Converter** — off by default, and shown under the server toggle. With the server
+  running, this synthesizes a CoT contact for every node in your node database, so ordinary
+  Meshtastic nodes appear on the ATAK map as contacts. **This is what replaced the old plugin's
+  node visibility** — without it, only TAK-role nodes show up.
 - **TAK データパッケージをエクスポート**：ATAK／iTAK がこのサーバーに接続するためにインポートできる `.zip` データパッケージを生成します。
 
 ## TAK の役割
@@ -104,17 +106,17 @@ Meshtastic は 2 つの TAK ワイヤ形式に対応しており、接続中の�
 - 位置の更新が、Meshtastic と TAK の間で双方向に流れます
 - TAK Tracker のノードは自動的に PLI をブロードキャストします。ATAK 側の設定なしで、その位置が ATAK のマップに表示されます
 
-&gt; ⚠️ **注意：** TAK 連携には、特定のノードの役割とモジュールの設定が必要です。 標準のクライアントノードは、自動的には TAK の運用に参加しません。
+&gt; ℹ️ **Note:** TAK integration requires specific node roles. Standard client nodes don't automatically participate in TAK operations — though with **Mesh to CoT Converter** enabled they still appear on the ATAK map as contacts.
 
 ## トラブルシューティング
 
- 問題                    | 原因                                                                    | 解決策                                                                          |
- --------------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
- ノードが ATAK のマップに表示されない | TAK モジュールが無効、または役割が正しくない                                              | TAK モジュールが有効で、ノードの役割が TAK または TAK Tracker になっているか確認する                        |
- 位置の更新が古い              | GPS 測位が失われた、または間隔が長すぎる                                                | GPS の状態を確認し、位置情報設定で位置のブロードキャスト間隔を短くする                                        |
- ATAK プラグインが「切断」と表示する  | BLE 接続が失われた、またはプラグインがクラッシュした                                          | Meshtastic アプリで Bluetooth を再接続し、その後 ATAK プラグインを再起動する                         |
- 図形、マーカー、ルートが橋渡しされない   | 送信側のノードがレガシーな V1（ファームウェア 2.7.x 以前）である | V2 ワイヤ形式にするため、送信側のノードのファームウェアを 2.8.0 以降に更新する |
- CoT データが流れない          | チャンネルの不一致                                                             | すべての TAK ノードが、暗号化が一致した同じチャンネル上にある必要がある                                       |
+ 問題                        | 原因                                                                    | 解決策                                                                                                                                                                                                   |
+ ------------------------- | --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+ ノードが ATAK のマップに表示されない     | Wrong device role, or Mesh to CoT Converter off                       | Set the node's Device Role to TAK or TAK Tracker. For ordinary (non-TAK-role) nodes to appear, also enable **Mesh to CoT Converter** under the TAK Server settings |
+ 位置の更新が古い                  | GPS 測位が失われた、または間隔が長すぎる                                                | GPS の状態を確認し、位置情報設定で位置のブロードキャスト間隔を短くする                                                                                                                                                                 |
+ ATAK shows "disconnected" | The local TAK server is off, or ATAK is pointed elsewhere             | Check **Enable Local TAK Server** is on, and that ATAK is connecting to `127.0.0.1:8089` — re-import the exported data package if unsure                                                              |
+ 図形、マーカー、ルートが橋渡しされない       | 送信側のノードがレガシーな V1（ファームウェア 2.7.x 以前）である | V2 ワイヤ形式にするため、送信側のノードのファームウェアを 2.8.0 以降に更新する                                                                                                                          |
+ CoT データが流れない              | チャンネルの不一致                                                             | すべての TAK ノードが、暗号化が一致した同じチャンネル上にある必要がある                                                                                                                                                                |
 
 ## セキュリティに関する注意
 

@@ -23,8 +23,12 @@
       <td>4-character abbreviated name</td>
     </tr>
     <tr>
+      <td>Non joignable par message</td>
+      <td>Marks the node as one nobody should try to message — for an unmonitored or infrastructure node. Other clients hide it from the contact list. Needs supporting firmware</td>
+    </tr>
+    <tr>
       <td>Licensed Operator</td>
-      <td>Enable if you hold an amateur radio license (enables higher power)</td>
+      <td>Enable if you hold an amateur radio license (permits higher power). Turning it on relabels <strong>Long Name</strong> as <strong>Call Sign</strong> and adds a separate Long Name field, and is staged behind a confirmation dialog</td>
     </tr>
   </tbody>
 </table>
@@ -48,12 +52,12 @@
   <tbody>
     <tr>
       <td>Rôle</td>
-      <td>Node behavior (Client, Router, etc.)</td>
+      <td>Node behavior (Client, Router, etc.) — each option carries its own description in the picker. Choosing Router asks for confirmation</td>
       <td>Client</td>
     </tr>
     <tr>
       <td>Mode de réémission</td>
-      <td>How the node retransmits messages</td>
+      <td>How the node retransmits messages; each mode is described in the picker</td>
       <td>Tout</td>
     </tr>
     <tr>
@@ -63,8 +67,28 @@
     </tr>
     <tr>
       <td>Double-tap Button</td>
-      <td>Action for double-tap button press</td>
+      <td>Treat a double tap as a button press</td>
       <td>Désactivé</td>
+    </tr>
+    <tr>
+      <td>Triple clic pour faire un ping Ad Hoc</td>
+      <td>Send an ad-hoc position ping on a triple click</td>
+      <td>Désactivé</td>
+    </tr>
+    <tr>
+      <td>LED de vérification de fonctionnement (heartbeat)</td>
+      <td>Blink the status LED periodically</td>
+      <td>Activé</td>
+    </tr>
+    <tr>
+      <td>Fuseau horaire</td>
+      <td>POSIX time-zone string for the device clock, with buttons to copy your phone’s zone or clear it</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td>Button / Buzzer GPIO</td>
+      <td>Advanced: which pins the button and buzzer are wired to</td>
+      <td>—</td>
     </tr>
   </tbody>
 </table>
@@ -101,14 +125,64 @@
       <td>0 (region max)</td>
     </tr>
     <tr>
-      <td>Décalage de fréquence</td>
-      <td>Fine-tune frequency (MHz)</td>
-      <td>0</td>
+      <td>Remplacer la fréquence</td>
+      <td>Overrides the computed operating frequency outright (MHz). It does not offset the calculated value — leave at 0 unless you know you need a specific frequency</td>
+      <td>0 (use calculated)</td>
     </tr>
     <tr>
       <td>Channel Bandwidth</td>
       <td>Bandwidth setting</td>
       <td>Default for preset</td>
+    </tr>
+    <tr>
+      <td>Utiliser un préréglage</td>
+      <td>On by default. Turn it off to set Spread Factor, Coding Rate and Bandwidth by hand instead of taking them from the modem preset</td>
+      <td>On</td>
+    </tr>
+    <tr>
+      <td>Facteur de propagation</td>
+      <td>Manual mode only: 7–12. Higher spreads further but slower</td>
+      <td>From preset</td>
+    </tr>
+    <tr>
+      <td>Taux de codage</td>
+      <td>Manual mode only: 5–8. More redundancy costs airtime</td>
+      <td>From preset</td>
+    </tr>
+    <tr>
+      <td>Slot de fréquence</td>
+      <td>Which slot within the region’s band to use. 0 derives it from the primary channel name</td>
+      <td>0 (automatic)</td>
+    </tr>
+    <tr>
+      <td>Transmission activée</td>
+      <td>Turning this off makes the node receive-only</td>
+      <td>On</td>
+    </tr>
+    <tr>
+      <td>Autoriser le dépassement du temps d’émission autorisé par heure</td>
+      <td>Ignore the region’s duty-cycle limit. Only legal where you are permitted to</td>
+      <td>Éteint</td>
+    </tr>
+    <tr>
+      <td>Ignorer MQTT</td>
+      <td>Drop packets that arrived from MQTT rather than over the air</td>
+      <td>Éteint</td>
+    </tr>
+    <tr>
+      <td>OK vers MQTT</td>
+      <td>Allow your packets to be forwarded to MQTT by gateways</td>
+      <td>Éteint</td>
+    </tr>
+    <tr>
+      <td>Gain RX Boosté</td>
+      <td>Extra receive gain on SX126x radios; costs a little current</td>
+      <td>Éteint</td>
+    </tr>
+    <tr>
+      <td>Ventilateur PA désactivé</td>
+      <td>Turn off the power-amplifier fan on hardware that has one</td>
+      <td>Éteint</td>
     </tr>
   </tbody>
 </table>
@@ -268,6 +342,8 @@
 
 <h3 id="configuration-de-lécran">Configuration de l’écran</h3>
 
+<p>These control the <strong>radio’s own screen</strong>, not the app’s.</p>
+
 <table>
   <thead>
     <tr>
@@ -277,29 +353,57 @@
   </thead>
   <tbody>
     <tr>
-      <td>Délai d’extinction de l’écran</td>
-      <td>Time before display sleeps</td>
+      <td>Écran allumé pour</td>
+      <td>How long the display stays lit before sleeping</td>
     </tr>
     <tr>
-      <td>Unités affichées</td>
-      <td>Metric or Imperial</td>
+      <td>Intervalle du carrousel</td>
+      <td>How often the device cycles between screens on its own</td>
+    </tr>
+    <tr>
+      <td>Mode d’affichage</td>
+      <td>Screen layout/density used by the firmware</td>
+    </tr>
+    <tr>
+      <td>Unités d’affichage</td>
+      <td>Metric or Imperial on the device’s screen</td>
+    </tr>
+    <tr>
+      <td>Utiliser le format horaire 12h</td>
+      <td>Show the device clock as 12-hour rather than 24-hour</td>
+    </tr>
+    <tr>
+      <td>Bold heading</td>
+      <td>Draw the screen’s heading text in bold</td>
+    </tr>
+    <tr>
+      <td>Inverser l’écran</td>
+      <td>Rotate the display 180° for an inverted mounting</td>
     </tr>
     <tr>
       <td>Type d’OLED</td>
       <td>Auto, SSD1306, SH1106, SH1107</td>
     </tr>
     <tr>
-      <td>Compass Orientation</td>
-      <td>Rotation offset for compass display (0°, 90°, 180°, 270°)</td>
+      <td>Réveil par appui ou mouvement</td>
+      <td>Light the screen when the device is tapped or moved</td>
     </tr>
     <tr>
-      <td><del>Compass North</del></td>
-      <td>⚠️ <strong>Deprecated</strong> — replaced by Compass Orientation; still visible in older firmware</td>
+      <td>Orientation de la boussole</td>
+      <td>Rotation offset for the compass rose (0°, 90°, 180°, 270°)</td>
+    </tr>
+    <tr>
+      <td>Toujours pointer vers le nord</td>
+      <td>Locks the compass rose north-up instead of rotating it with your heading. Independent of Compass orientation — neither replaces the other</td>
     </tr>
   </tbody>
 </table>
 
 <h3 id="configuration-de-la-position">Configuration de la position</h3>
+
+<blockquote>
+  <p>⚠️ <strong>Warning:</strong> Saving this screen always reboots the radio.</p>
+</blockquote>
 
 <table>
   <thead>
@@ -310,24 +414,40 @@
   </thead>
   <tbody>
     <tr>
-      <td>GPS Enabled</td>
-      <td>Enable/disable GPS</td>
+      <td>Mode GPS (matériel physique)</td>
+      <td>Three-state: GPS enabled, disabled, or not present. Not a simple on/off</td>
     </tr>
     <tr>
-      <td>Intervalle de mise à jour GPS</td>
-      <td>How often to acquire GPS fix</td>
+      <td>Fréquence de récupération GPS</td>
+      <td>How often the radio asks its GPS for a fix</td>
     </tr>
     <tr>
-      <td>Position Broadcast (s)</td>
-      <td>How often to share position</td>
+      <td>Intervalle de diffusion</td>
+      <td>How often the position is shared with the mesh</td>
     </tr>
     <tr>
       <td>Position Intelligente</td>
-      <td>Enable movement-based broadcasting</td>
+      <td>Broadcast based on movement rather than purely on the clock</td>
+    </tr>
+    <tr>
+      <td>Intervalle intelligent</td>
+      <td>With Smart Position on, the shortest gap between broadcasts</td>
+    </tr>
+    <tr>
+      <td>Distance intelligente</td>
+      <td>With Smart Position on, how far you must move before broadcasting</td>
     </tr>
     <tr>
       <td>Position fixe</td>
-      <td>Use a manually set position</td>
+      <td>Use a manually entered latitude, longitude and altitude instead of the GPS</td>
+    </tr>
+    <tr>
+      <td>Champs de position</td>
+      <td>A group of toggles choosing which fields ride along with a position — altitude, its reference and precision, satellites in view, timestamp, and so on</td>
+    </tr>
+    <tr>
+      <td>GPS EN / Receive / Transmit GPIO</td>
+      <td>Advanced: the pins the GPS module is wired to</td>
     </tr>
   </tbody>
 </table>
@@ -343,29 +463,45 @@
   </thead>
   <tbody>
     <tr>
-      <td>Power Saving</td>
-      <td>Enable low-power sleep mode</td>
+      <td>Activer le mode économie d’énergie</td>
+      <td>Let the radio sleep aggressively between activity</td>
     </tr>
     <tr>
-      <td>Shutdown After (s)</td>
-      <td>Auto-shutdown idle timer</td>
+      <td>Arrêt en cas de perte d’alimentation</td>
+      <td>Power the device down after external power disappears</td>
     </tr>
     <tr>
-      <td>ADC Multiplier</td>
-      <td>Battery voltage calibration factor</td>
+      <td>Durée du sommeil extra profond</td>
+      <td>How long the deepest sleep state lasts</td>
     </tr>
     <tr>
-      <td>Wait Bluetooth (s)</td>
-      <td>Time to wait for BLE connection at boot</td>
+      <td>Durée minimale de réveil</td>
+      <td>The shortest time the radio stays awake once woken</td>
     </tr>
     <tr>
-      <td>Mesh SDS Timeout (s)</td>
-      <td>Super-deep-sleep timeout</td>
+      <td>Durée d’attente max du Bluetooth</td>
+      <td>How long to wait for a phone to connect before sleeping</td>
+    </tr>
+    <tr>
+      <td>Remplacer le multiplicateur ADC</td>
+      <td>Turn on a manual correction for battery-voltage readings</td>
+    </tr>
+    <tr>
+      <td>Facteur de remplacement du multiplicateur ADC</td>
+      <td>The correction factor itself, used only when the override is on</td>
+    </tr>
+    <tr>
+      <td>Adresse I2C de la batterie INA_2XX</td>
+      <td>Address of an external INA-series power sensor, if fitted</td>
     </tr>
   </tbody>
 </table>
 
 <h3 id="configuration-du-réseau">Configuration du réseau</h3>
+
+<blockquote>
+  <p>⚠️ <strong>Warning:</strong> Saving this screen always reboots the radio.</p>
+</blockquote>
 
 <table>
   <thead>
@@ -376,23 +512,39 @@
   </thead>
   <tbody>
     <tr>
-      <td>WiFi Enabled</td>
-      <td>Enable WiFi radio (ESP32 devices)</td>
+      <td>WiFi activé</td>
+      <td>Enable the WiFi radio (ESP32 devices)</td>
     </tr>
     <tr>
-      <td>WiFi SSID</td>
-      <td>Network name to connect to</td>
+      <td>SSID</td>
+      <td>Network name to connect to. <strong>Scan WiFi QR code</strong> fills this and the password from a standard WiFi QR code</td>
     </tr>
     <tr>
-      <td>WiFi PSK</td>
+      <td>Mot de passe</td>
       <td>Mot de passe du réseau</td>
+    </tr>
+    <tr>
+      <td>Ethernet activé</td>
+      <td>Use a wired connection on hardware that has one</td>
+    </tr>
+    <tr>
+      <td>Mode IPv4</td>
+      <td>DHCP, or a static address configured with the four fields below</td>
+    </tr>
+    <tr>
+      <td>Wifi IP / Subnet / Gateway / DNS</td>
+      <td>The static address, only used when IPv4 mode is static</td>
+    </tr>
+    <tr>
+      <td>UDP broadcasting</td>
+      <td>Share mesh traffic with other nodes over the local network</td>
     </tr>
     <tr>
       <td>Serveur NTP</td>
       <td>Time synchronization server</td>
     </tr>
     <tr>
-      <td>Syslog Server</td>
+      <td>Serveur Rsyslog</td>
       <td>Remote logging server</td>
     </tr>
   </tbody>
@@ -420,7 +572,7 @@
     </tr>
     <tr>
       <td>Code PIN fixe</td>
-      <td>PIN code for pairing (default: 123456)</td>
+      <td>PIN code for pairing. Must be <strong>exactly six digits</strong> — the field rejects anything else</td>
     </tr>
   </tbody>
 </table>
@@ -441,11 +593,19 @@
     </tr>
     <tr>
       <td>Clé Admin</td>
-      <td>Key for remote administration</td>
+      <td>Keys permitted to administer this node remotely — up to three</td>
     </tr>
     <tr>
       <td>Clé privée</td>
-      <td>Your node’s private key (handle securely)</td>
+      <td>Your node’s private key (handle securely). Shown redacted when you are viewing another node over remote admin — the firmware does not send it</td>
+    </tr>
+    <tr>
+      <td>Régénérer la clé privée</td>
+      <td>Issues a new keypair for this node, behind a confirmation. Every peer that knew your old key must learn the new one</td>
+    </tr>
+    <tr>
+      <td>Clé de message direct</td>
+      <td>The key used for direct-message encryption</td>
     </tr>
     <tr>
       <td><del>Admin Channel Enabled</del></td>
@@ -461,7 +621,7 @@
     </tr>
     <tr>
       <td>Mode géré</td>
-      <td>Restrict non-admin channel changes</td>
+      <td>Restrict non-admin channel changes. Only selectable once an Admin Key is set</td>
     </tr>
     <tr>
       <td>Sauvegarder les clés</td>
@@ -481,6 +641,50 @@
     </tr>
   </tbody>
 </table>
+
+<h4 id="lockdown-mode">Lockdown Mode</h4>
+
+<p>Lockdown encrypts the device’s storage and requires a passphrase for each connection. It needs
+supporting firmware; the row does not appear otherwise.</p>
+
+<p>Enabling it asks you to set and confirm a passphrase, and to acknowledge that <strong>it locks the debug
+(SWD) port on hardware that supports locking</strong>. You can turn lockdown off again at any time with
+the passphrase, and a full device erase restores the hardware regardless.</p>
+
+<p>Alongside the passphrase you set the limits that end a session automatically:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Field</th>
+      <th>What it does</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Boots remaining</td>
+      <td>How many device boots the unlocked state survives</td>
+    </tr>
+    <tr>
+      <td>Heures jusqu’à expiration</td>
+      <td>Wall-clock lifetime of the unlocked state</td>
+    </tr>
+    <tr>
+      <td>Limite de sessions (minutes)</td>
+      <td>Maximum length of a single unlocked connection</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Once active, the row reads <em>Active — storage encrypted, this connection authenticated</em> when
+unlocked, or <em>Active — enter your passphrase to unlock this connection</em> when not. <strong>Lock Now</strong>
+ends the current session immediately. Repeated wrong passphrases are rate-limited with a
+back-off before you can try again.</p>
+
+<blockquote>
+  <p>⚠️ <strong>Warning:</strong> There is no passphrase recovery. Losing it means erasing the device to get it
+back, which destroys its keys, channels and settings.</p>
+</blockquote>
 
 <p><img src="../../assets/screenshots/settings_password_field.png" alt="Password field" /></p>
 

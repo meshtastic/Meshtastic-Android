@@ -65,7 +65,6 @@ Bluetooth Low Energy is supported on Desktop via the [Kable](https://github.com/
  固件更新                                         | ✓       | ✓       | In-app USB, BLE, and Wi-Fi (ESP32) update all work the same as Android |
  Notifications                                | ✓       | ✓       | Native OS notifications                                                                   |
  Widgets                                      | ✓       | ✗       | Android-only                                                                              |
- Android Auto                                 | ✓       | ✗       | Android-only — not available on Desktop or iOS                                            |
  AI Assistant (Chirpy)     | ✓\*     | ✗       | Google flavor Android only                                                                |
  App Functions (system AI) | ✓†      | ✗       | Google flavor Android only                                                                |
 
@@ -126,7 +125,7 @@ cd Meshtastic-Android
 
 Requirements:
 
-- JDK 21
+- JDK 25 (Gradle can provision the toolchain itself via foojay)
 - No Android SDK required for desktop-only builds
 
 ## Known Limitations

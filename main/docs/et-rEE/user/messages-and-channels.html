@@ -30,12 +30,12 @@ Kanalid toetavad mitut krüpteerimistaset:
  🔓    | Vaikimisi / Avatud                   | Kasutab teada-tuntud vaikevõtit. **Iga Meshtastic seade** saab sama eelseadistusega neid sõnumeid lugeda. |
  ⚠️    | Insecure + Position                  | Ava kanal, mis levitab ka sinu GPS asukohta. Use with caution in public meshes.                           |
 
-&gt; 🔒 **Turvanõuanne:** Privaatse suhtluse jaoks konfi alati unikaalne PSK. Vaikimisi kanal on tahtlikult avatud, et uued kasutajad saaksid kärgvõrku avastada – aga kõige tundliku jaoks peaksite looma eraldi krüptitud kanali.
+&gt; 🔒 **Security:** Always configure a unique PSK for private communications. Vaikimisi kanal on tahtlikult avatud, et uued kasutajad saaksid kärgvõrku avastada – aga kõige tundliku jaoks peaksite looma eraldi krüptitud kanali.
 
 ### Lisa kanal
 
 1. Mine **Sätted → Kanalid**.
-2. Puuduta **Lisa kanal** või skanni QR-koodi.
+2. Tap the **+** button to add a channel, or import one by scanning a channel QR code.
 3. Konfigureeri kanali nime ja krüpteerimisvõtit.
 4. Jaga kanali URL-i/QR-koodi teistega, kes seda vajavad.
 
@@ -51,36 +51,66 @@ Otsesõnumid (DM-id) on punkt-punkti krüptitud suhtlus kahe konkreetse sõlme v
 2. Vali kontaktide loendist sõlm või puuduta sõlme loendis.
 3. Tippi oma sõnum ja puuduta nuppu **Saada**.
 
+### Managing the Conversation List
+
+The **Messages** tab lists your conversations. Each row carries what you need to triage it at a
+glance, and the list itself is directly actionable:
+
+- **Unsent drafts survive.** Type into a conversation and leave without sending, and the text is
+  still there when you come back. The row shows it as `Draft: …` in place of the last message —
+  an unsent draft is the thing the row is waiting on _you_ for.
+- **Unread badge.** A count sits on the row until you open the conversation.
+- **Swipe right to mute** (swipe again to unmute) and **swipe left to delete**. Deleting asks
+  first; muting shows a snackbar with **Undo**.
+- **Long-press to select** one or more conversations, then use the action bar to **Pin**,
+  **Mark unread**, mute or delete them together. Pinned conversations carry a pin marker and rise
+  to the top of **their own section**.
+- **The list is split into Channels and Direct Messages**, each with a collapsible header and each
+  sorted independently — so a pinned direct message rises within its own section, not above the
+  Channels one.
+
+### Conversation Bubbles
+
+On Android 11 and later, a message notification can be opened as a floating **bubble** that
+stays on top of whatever else you are doing. Tap the bubble icon on the notification to promote
+a conversation; Android remembers the choice per conversation, and the system Bubbles settings
+control whether they are offered at all.
+
 ### Sõnumi olek
 
 Olekumärgis kuvatakse ainult **sinu enda** väljaminevate sõnumite all (teiste sissetulevate sõnumite puhul olekumärgist ei kuvata):
 
- Olek                              | Tähendus                                                                                                                                           |
- --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
- Saadan…                           | Järjekorras või juba raadiole antud, pole veel kumbagi teed lahendatud (nii järjekorras kui ka teel olles kuvatakse sama tekst) |
- Saajale kätte toimetatud          | Kõige tugevam kinnitus otsesõnumile – vastus tuli                                                                                                  |
- Kärgvõrku kohale jõudnud          | Kanali leviedastuse puhul jõuab sõnum kärgvõrku (leviedastustel puudub saajapõhine kinnitus)                                    |
- Vahendatud, saaja pole kinnitanud | Otsesõnumi puhul kuvatakse hoiatusvärviga – sõnum edastati, kuid kinnitust pole veel tulnud                                                        |
- Marsruutimine SF++ ahela kaudu…   | Being routed/buffered by the Store &amp; Forward Plus Plus chain                                                                   |
- Kinnitatud SF++ ahel              | Kinnitatud kohaletoimetamine SF++ keti kaudu                                                                                                       |
- Tõrge                             | Kohaletoimetamine ebaõnnestus – puuduta konkreetse põhjuse olekut (vt allpool jaotist „Kohaletoimetamise vead”)                 |
+ Olek                              | Tähendus                                                                                                                                                                                                                                  |
+ --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+ Saadan…                           | Queued or already handed to the radio, not yet resolved either way. Both stages share this text, but the icon and colour change as it progresses — a yellow upload cloud while queued, a blue arrow once the radio has it |
+ Saajale kätte toimetatud          | Kõige tugevam kinnitus otsesõnumile – vastus tuli                                                                                                                                                                                         |
+ Kärgvõrku kohale jõudnud          | Kanali leviedastuse puhul jõuab sõnum kärgvõrku (leviedastustel puudub saajapõhine kinnitus)                                                                                                                           |
+ Vahendatud, saaja pole kinnitanud | Otsesõnumi puhul kuvatakse hoiatusvärviga – sõnum edastati, kuid kinnitust pole veel tulnud                                                                                                                                               |
+ Marsruutimine SF++ ahela kaudu…   | Being routed/buffered by the Store &amp; Forward Plus Plus chain                                                                                                                                                          |
+ Kinnitatud SF++ ahel              | Kinnitatud kohaletoimetamine SF++ keti kaudu                                                                                                                                                                                              |
+ Tõrge                             | Kohaletoimetamine ebaõnnestus – puuduta konkreetse põhjuse olekut (vt allpool jaotist „Kohaletoimetamise vead”)                                                                                                        |
 
 ### Delivery Errors
 
 Kui sõnumit ei õnnestu kohale toimetada, näitab veaindikaator, mis valesti läks:
 
- Tõrge                          | Tähendab                                        | Mida teha                                                                                                                             |
- ------------------------------ | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
- No Route                       | Sihtkoha sõlmeni pole teed olemas               | Saaja võib olla võrguühenduseta või võrguühenduse levialast väljas. Try later or move closer.         |
- Sain NAKi                      | Järgmise-hüppe sõlm keeldus edastamast          | Vahendussõlm võib olla ülekoormatud. Wait and retry.                                                  |
- Aegunud                        | Uuesti proovimise aja jooksul kinnitust ei tule | The recipient may be just out of range. Proovi hüppe limiiti suurendada või paremasse asukohta minna. |
- No radio interface             | No radio interface available to send            | Check that your radio is connected and available.                                                                     |
- Failed to deliver to mesh      | All retry attempts exhausted                    | Move closer, improve signal, or wait for mesh conditions to improve.                                                  |
- Channel/key mismatch           | Destination channel/key does not match          | Verify both nodes share the same channel and PSK.                                                                     |
- Sõnum on saatmiseks liiga pikk | Sõnum ületab maksimaalset sõnumi mahtu          | Lühenda sõnumit ja proovi uuesti.                                                                                     |
- No app response                | App or plugin did not respond to the request    | Proovi uuesti või kontrolli sihtrakenduse või -mooduli olekut.                                                        |
- Töötsükli piirang              | Regional airtime limit reached                  | Oota, kuni töötsükli aken lähtestub.                                                                                  |
- Invalid request                | Malformed or invalid request                    | Retry after updating or restarting the app if this persists.                                                          |
+ Tõrge                            | Tähendab                                                                                                                                                                      | Mida teha                                                                                                                             |
+ -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+ No Route                         | Sihtkoha sõlmeni pole teed olemas                                                                                                                                             | Saaja võib olla võrguühenduseta või võrguühenduse levialast väljas. Try later or move closer.         |
+ No radio interface               | No radio interface available to send                                                                                                                                          | Check that your radio is connected and available.                                                                     |
+ Failed to deliver to mesh        | Retries exhausted. The same label covers three underlying causes — a relay refusing (NAK), a plain timeout, and running out of retransmits | Move closer, improve signal, or wait for conditions to improve. Tap the error for the specific cause. |
+ Rate limited                     | The mesh is throttling you for sending too fast                                                                                                                               | Wait before sending again.                                                                                            |
+ Not authorized                   | The destination refused the request                                                                                                                                           | Check you have the right channel and keys for that node.                                                              |
+ Recipient needs your key         | Direct-message encryption could not complete because the other node does not have your public key yet                                                                         | Exchange node info — the key travels with it. Common on a first DM to a new contact.                  |
+ Recipient key unavailable        | You do not have the recipient's public key                                                                                                                                    | Wait for their node info to arrive, or ask them to broadcast it.                                                      |
+ Could not send encrypted message | Encryption failed for this direct message                                                                                                                                     | Verify both nodes have exchanged keys and are on compatible firmware.                                                 |
+ Admin session expired            | A remote-admin session timed out                                                                                                                                              | Reopen the remote node's settings to start a new session.                                                             |
+ Admin key not authorized         | The target node does not accept your admin key                                                                                                                                | Verify the admin key matches on both nodes.                                                                           |
+ Channel/key mismatch             | Destination channel/key does not match                                                                                                                                        | Verify both nodes share the same channel and PSK.                                                                     |
+ Sõnum on saatmiseks liiga pikk   | Sõnum ületab maksimaalset sõnumi mahtu                                                                                                                                        | Lühenda sõnumit ja proovi uuesti.                                                                                     |
+ No app response                  | App or plugin did not respond to the request                                                                                                                                  | Proovi uuesti või kontrolli sihtrakenduse või -mooduli olekut.                                                        |
+ Töötsükli piirang                | Regional airtime limit reached                                                                                                                                                | Oota, kuni töötsükli aken lähtestub.                                                                                  |
+ Invalid request                  | Malformed or invalid request                                                                                                                                                  | Retry after updating or restarting the app if this persists.                                                          |
 
 &gt; 💡 **Vihje:** Enamik kohaletoimetamise vigu laheneb iseenesest. If a node is intermittently reachable, the mesh will retry. Püsivate „Marsruuti pole” vigade korral kontrolli, kas ruuteri vahesõlmed on võrgus.
 
@@ -144,19 +174,42 @@ Type `@` while composing to mention a node — a picker suggests matching contac
 
 React to messages with emoji:
 
-- **Pikk vajutus** sõnumil avab toimingute menüü
-- Emotikoni valimiseks puuduta **Lisa reaktsioon**
+- **Double-tap** a message — or long-press it — to raise a quick reaction bar above the bubble
+- Tap an emoji in the bar to send it; tap **more** to open the full picker, or anywhere outside
+  the bar to dismiss it without sending
 - Reaktsioonid kuvatakse sõnumimulli all
 - Mitu kasutajat saavad samale sõnumile reageerida
 - Reageeri oma või teiste sõnumitele
+
+&gt; ℹ️ **Note:** Opening the bar sends nothing. A reaction is a real mesh packet, so it only goes
+&gt; out when you pick an emoji.
 
 ![Emotikonide reaktsioonimärgid kuvatakse sõnumi all](../../assets/screenshots/messages_reaction.png)
 
 &gt; 💡 **Vihje:** Reaktsioonid on kerged – need kasutavad täistekstisõnumitega võrreldes minimaalselt võrgu ribalaiust.
 
+### Replying
+
+**Swipe a message to the right** to reply to it — the composer opens with that message quoted.
+Swiping past the reply threshold arms the action; releasing before it springs back with nothing sent.
+Reply is also in the actions menu, reached by long-pressing and then tapping **More**.
+
+### Day Separators
+
+Messages are grouped by day. The separator above the first message of each day reads **Today**
+or **Yesterday** for the two most recent days, and the date itself for older ones.
+
+### Jump to Latest
+
+Scrolling back through a conversation raises a jump-to-latest control. When messages arrive
+while you are scrolled up, it names the most recent sender and adds a count of the other unread
+messages. That count is messages, not people — five unread from one person reads as their name
+**+4**.
+
 ### Message Actions
 
-Juurdepääsuks vajuta pikalt mis tahes sõnumit:
+Long-press or double-tap a message to open the quick reaction bar, then tap **More** (the
+overflow icon on that bar) to reach:
 
 - **Kopeeri** – kopeeri sõnumi tekst lõikelauale
 - **Vasta** – tsiteeri oma vastuses sõnumit
@@ -166,16 +219,16 @@ Juurdepääsuks vajuta pikalt mis tahes sõnumit:
 
 ### Sõnumi prioriteet
 
-Sõnumid pannakse järjekorda ja edastatakse prioriteedi alusel:
-
-1. Hädaolukorra/hoiatusteated (kõrgeim)
-2. Otsesõnum
-3. Kanalite levitamine (madalaim)
+The app sends every message you compose at the same, default priority — there is no
+emergency or alert tier to choose, and nothing in the app raises a direct message above a
+channel broadcast. Any prioritising between them happens in firmware, not here. (The app
+does mark some of its own internal traffic, such as admin and traceroute packets, as
+reliable or background, but that is not something you control from the message composer.)
 
 ### Message Limits
 
 - **Maximum length:** 200 bytes (approximately 200 characters for ASCII text)
-- 200-baidine piirang kehtib rakendusesisese helilooja kohta – kärgvõrgu kandevõime piirang ise on ~233 baiti, seega võivad teiste saatjate (nt rakenduse funktsioonide või Android Auto) sõnumid saabuda veidi kauem
+- The 200-byte cap applies to the in-app composer — the mesh payload limit itself is ~233 bytes, so messages from other senders (e.g., App Functions) may arrive slightly longer
 - **Kiiruse piiramine:** Võrk tagab eetriaja õigluse; suurte sõnumite mahtu võidakse piirata
 - **Kohaletoimetamine:** Kui kinnitust ei ole saabunud, proovitakse sõnumeid automaatselt uuesti saata
 

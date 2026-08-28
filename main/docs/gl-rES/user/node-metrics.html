@@ -112,13 +112,15 @@ Local Stats from your connected radio are also shown in Signal Quality when avai
 
 Power management telemetry (requires INA sensor or compatible hardware):
 
- Metric      | Descrición              |
- ----------- | ----------------------- |
- Bus Voltage | Supply voltage          |
- Current     | Power draw in milliamps |
- Power       | Calculated wattage      |
+ Metric  | Descrición                     |
+ ------- | ------------------------------ |
+ Voltage | Per-channel voltage reading    |
+ Current | Per-channel draw, in milliamps |
 
-## Traza-ruta
+Up to three channels (ch1–ch3) are charted, each with a label you can edit. The app does not
+derive a wattage figure from them.
+
+## Traceroute
 
 Traceroute shows the path a message takes through the mesh:
 
@@ -159,7 +161,7 @@ The position tab shows location data for nodes that share GPS:
 
 ![Position inline content](../../assets/screenshots/nodes_position.png)
 
-&gt; ⚠️ **Note:** Metrics are only available when they have been reported by the remote node. Metrics update at intervals configured on each node's telemetry settings.
+&gt; ℹ️ **Note:** Metrics are only available when they have been reported by the remote node. Metrics update at intervals configured on each node's telemetry settings.
 
 ## Related Topics
 

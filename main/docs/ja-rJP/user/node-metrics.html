@@ -112,11 +112,13 @@ CO₂ の測定値は、大気質をひと目で把握できるよう、深刻�
 
 電力管理のテレメトリです（INA センサーまたは対応ハードウェアが必要）：
 
- メトリクス | 説明           |
- ----- | ------------ |
- バス電圧  | 供給電圧         |
- 電流    | 消費電流（ミリアンペア） |
- 電力    | 計算されたワット数    |
+ メトリクス | 説明                             |
+ ----- | ------------------------------ |
+ 電圧    | Per-channel voltage reading    |
+ 電流    | Per-channel draw, in milliamps |
+
+Up to three channels (ch1–ch3) are charted, each with a label you can edit. The app does not
+derive a wattage figure from them.
 
 ## ルート追跡
 
@@ -159,7 +161,7 @@ CO₂ の測定値は、大気質をひと目で把握できるよう、深刻�
 
 ![位置のインラインコンテンツ](../../assets/screenshots/nodes_position.png)
 
-&gt; ⚠️ **注意：** メトリクスは、リモートノードが報告した場合にのみ利用できます。 メトリクスは、各ノードのテレメトリ設定で構成された間隔で更新されます。
+&gt; ℹ️ **Note:** Metrics are only available when they have been reported by the remote node. メトリクスは、各ノードのテレメトリ設定で構成された間隔で更新されます。
 
 ## 関連トピック
 

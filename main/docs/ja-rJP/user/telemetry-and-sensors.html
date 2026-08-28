@@ -43,11 +43,20 @@ Meshtastic のノードは、メッシュネットワーク全体でセンサー
 
 ### 大気質
 
- センサー     | メトリクス                                              | 備考       |
- -------- | -------------------------------------------------- | -------- |
- BME680   | ガス抵抗／IAQ                                           | 揮発性有機化合物 |
- PMSA003I | PM1.0, PM2.5, PM10 | 粒子状物質    |
- SEN55    | PM、NOx、VOC、温度、湿度                                   | マルチセンサー  |
+ センサー     | メトリクス                                              | 備考                                                                                                                                        |
+ -------- | -------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+ BME680   | ガス抵抗／IAQ                                           | 揮発性有機化合物                                                                                                                                  |
+ PMSA003I | PM1.0, PM2.5, PM10 | 粒子状物質                                                                                                                                     |
+ SEN55    | PM, Temp, Humidity                                 | Multi-sensor. Its NOx and VOC indices are recorded and included in a CSV export, but are not yet shown as cards or charts |
+
+### Soil
+
+ メートル法 | 単位      | 備考                                              |
+ ----- | ------- | ----------------------------------------------- |
+ 土壌温度  | °C / °F | Reported alongside soil moisture by soil probes |
+ 土壌水分  | %       | Volumetric water content                        |
+
+Both appear as info cards on the node detail screen, next to the other environment readings.
 
 ### 光と UV
 
@@ -61,38 +70,39 @@ Meshtastic のノードは、メッシュネットワーク全体でセンサー
 
 INA シリーズの電力センサーを搭載したノードは、次を報告できます：
 
- メトリクス | 説明          |
- ----- | ----------- |
- バス電圧  | 供給レールの電圧    |
- 電流    | 消費電流（mA）    |
- 電力    | 計算された電力（mW） |
+ メトリクス | 説明                              |
+ ----- | ------------------------------- |
+ 電圧    | Per-channel voltage reading     |
+ 電流    | Per-channel current draw, in mA |
+
+Up to three channels are reported (ch1–ch3), and each can be given its own label — Solar or Battery, say — from the node detail screen. There is no separate wattage reading; the app charts voltage and current, and does not compute power from them.
 
 リモートノードの太陽光充電やバッテリーの状態を監視するのに便利です。
 
 ## テレメトリを設定する
 
 1. 「**設定 → モジュール設定 → テレメトリ**」に移動します。
-2. 報告間隔を設定します：
-   - **デバイスメトリクスの間隔**：デバイスメトリクスをブロードキャストする頻度
-   - **環境メトリクスの間隔**：センサーデータをブロードキャストする頻度
-3. 必要に応じて、特定のセンサーの種類を有効にします。
+2. Each metric group has its own enable toggle and its own interval:
 
-### 推奨の間隔
+   - **Device Metrics** — battery, channel and airtime utilisation
+   - **Environment Metrics** — temperature, humidity, pressure and the other sensor readings
+   - **Air Quality Metrics** — particulate and CO₂ readings
+   - **Power Metrics** — the per-channel voltage and current readings
 
- 用途               | デバイス（秒） | 環境（秒） |
- ---------------- | ------- | ----- |
- 都市部のメッシュ（多数のノード） | 3600    | 3600  |
- 地方のメッシュ（少数のノード）  | 900     | 900   |
- 気象観測所            | 900     | 300   |
- バッテリー節約          | 7200    | 7200  |
+   Environment metrics additionally have an on-screen toggle and a Fahrenheit toggle for the
+   device's own display.
 
-&gt; ⚠️ **注意：** 間隔を短くすると、メッシュ全体で電波利用時間の消費とバッテリーの消耗が増えます。
+### Choosing an Interval
+
+&gt; 💡 **Tip:** These are nominal values, not hard schedules. On a congested mesh the firmware
+&gt; automatically backs off to longer intervals based on how many nodes are online, so you do not
+&gt; need to hand-tune them for mesh size. Lengthen them deliberately only to save battery.
 
 ## 大気質メトリクス
 
 粒子状物質センサーまたは CO₂ センサーを搭載したノードは、大気質データを報告します：
 
- メトリクス                 | 単位    | 説明       |
+ Metric                | Unit  | 説明       |
  --------------------- | ----- | -------- |
  PM1.0 | µg/m³ | 超微小粒子状物質 |
  PM2.5 | µg/m³ | 微小粒子状物質  |

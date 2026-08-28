@@ -31,7 +31,28 @@ Android 使用者最常用的更新方式：
 
 ![Firmware checking for updates](../../assets/screenshots/firmware_checking.png)
 
-&gt; ⚠️ 警告：中斷韌體更新可能導致裝置變磚。 請確認無線電裝置電量充足（建議 50% 以上），並在整個更新過程中保持藍牙通訊距離。
+&gt; ⚠️ 警告：中斷韌體更新可能導致裝置變磚。 Keep the radio charged and stay in Bluetooth range for the whole update. The app itself only blocks the update below **10%** battery; 50% or more is the safe habit, not an enforced limit.
+
+#### Erase device during update
+
+Where the app offers it, an **Erase device during update** checkbox appears next to the update button. It is a per-update opt-in and is never remembered.
+
+ Method         | What erasing does                                                                                                                      |
+ -------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+ BLE / WiFi OTA | Factory-resets the device once the update is verified. All settings and Bluetooth pairing are removed. |
+ USB            | Wipes the device's flash completely, then installs the selected firmware from scratch.                                 |
+
+It is not offered for a local firmware file, during a recovery update, or on USB devices whose board does not support the erase step. Afterwards the device needs setting up — and pairing — again.
+
+### OTA via WiFi (network-connected ESP32)
+
+When an ESP32 radio is connected over the network rather than Bluetooth, the app offers **WiFi OTA**, which pushes the same update over TCP:
+
+1. Connect to the radio over the network (see [Connections](connections)).
+2. Open the Firmware Update screen and pick a version.
+3. Tap **Update**. Keep the radio and phone on the same network for the whole transfer.
+
+WiFi OTA takes the ESP32 `-update.bin` image rather than the `.uf2` a USB update uses; the app selects the right artifact for you.
 
 ![Firmware disclaimer](../../assets/screenshots/firmware_disclaimer.png)
 
@@ -94,9 +115,9 @@ Once the update succeeds:
 
 若更新似乎停滯不動：
 
-- 請至少等待 5 分鐘再採取行動
-- 若確實卡住，請將無線電裝置重新開關機
-- 再次嘗試更新
+- Give it a minute. After writing the image the app waits up to **60 seconds** for the radio to come back and report its new version, so a pause at the verify step is expected.
+- If it is still stuck after that, power-cycle the radio.
+- Attempt the update again.
 
 ![Firmware update error](../../assets/screenshots/firmware_error.png)
 
@@ -111,11 +132,15 @@ Once the update succeeds:
 
 ### 相容性警告
 
-應用程式在以下情況可能顯示警告：
+On connecting, the app compares the radio's firmware against two thresholds and reacts differently to each:
 
-- 已連接的無線電裝置韌體低於最低支援版本
-- 應用程式與韌體之間的主要版本不相符
-- 已棄用的功能需要進行遷移
+ Firmware version                                                                                                | What you see                                     | What happens                                                                                                         |
+ --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
+ Below **2.3.15**                                                                | **Firmware update required.**    | The app disconnects from the radio. It will not operate against firmware this old.   |
+ **2.3.15** up to, but not including, **2.5.14** | **Firmware Update Recommended.** | Advisory only — dismiss it and carry on. The dialog names the latest stable release. |
+ **2.5.14** or newer                                                             | Nothing                                          | —                                                                                                                    |
+
+A version string the app cannot parse is ignored rather than treated as too old, so a transient read never disconnects a working radio.
 
 &gt; ⚠️ 重要：請在韌體更新之前或同時更新 Meshtastic 應用程式，以確保相容性。
 
