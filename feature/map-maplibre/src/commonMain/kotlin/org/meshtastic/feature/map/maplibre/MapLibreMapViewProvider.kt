@@ -82,15 +82,23 @@ class MapLibreMapViewProvider(
      */
     private val customLayers: @Composable () -> List<CustomLayer> = { emptyList() },
     /**
-     * Supplies the user's own raster tile sources. Composable for the same reason as [customLayers]; the F-Droid app
-     * reads them from its tile-provider store, and desktop has no editor for them yet.
+     * Supplies the user's own raster tile sources. Composable for the same reason as [customLayers]. The default reads
+     * the shared store, so every host gets them; the F-Droid app overrides only to add local MBTiles archives, which
+     * need a file picker.
      */
     private val customBasemaps: @Composable () -> List<Basemap.Raster> = { customRasterBasemaps() },
     /**
-     * Extra content for the foot of the basemap menu — the F-Droid app puts its tile-source editor there. A slot rather
-     * than a callback so the host owns whatever UI it opens; desktop leaves it empty.
+     * Extra content for the foot of the basemap menu. Defaults to the shared tile-source editor, so desktop offers it
+     * too; the F-Droid app overrides only to add the MBTiles file picker.
      */
     private val basemapMenuExtra: @Composable () -> Unit = { CustomTileSourcesMenuItem() },
+    /**
+     * Whether this host can actually download offline map packs.
+     *
+     * Off by default. MapLibre's offline API compiles everywhere and on desktop it creates a pack and reports it
+     * without ever downloading a tile, so the control has to be opt-in per host rather than shown wherever it builds.
+     */
+    private val offlineMapsSupported: Boolean = false,
     /**
      * Presents an editor for the waypoint the map hands over. Defaults to the shared [EditWaypointDialog], so every
      * host gets waypoint creation without wiring anything; a host overrides this only to present its own editor. See
@@ -161,6 +169,7 @@ class MapLibreMapViewProvider(
                 onOverlaysChange = { screen.overlays = it },
                 basemapMenuExtra = basemapMenuExtra,
                 layersSheetExtra = layersSheetExtra,
+                offlineMapsSupported = offlineMapsSupported,
                 onSitePlannerClick = sitePlanner?.let { { screen.plannerOpen = true } },
             )
 
@@ -299,6 +308,7 @@ private fun BoxScope.MapToolbar(
     onOverlaysChange: (List<MapOverlay>) -> Unit,
     basemapMenuExtra: @Composable () -> Unit,
     layersSheetExtra: @Composable () -> Unit,
+    offlineMapsSupported: Boolean,
     onSitePlannerClick: (() -> Unit)?,
 ) {
     var filterMenuExpanded by remember { mutableStateOf(false) }
@@ -338,6 +348,7 @@ private fun BoxScope.MapToolbar(
                     zoom = { cameraState.position.zoom },
                     showRegion = { box -> scope.launch { cameraState.animateTo(boundingBox = box) } },
                 ),
+                offlineMapsSupported = offlineMapsSupported,
                 extra = layersSheetExtra,
             )
         },

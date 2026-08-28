@@ -38,6 +38,8 @@ fun getMapViewProvider(): MapViewProvider = MapLibreMapViewProvider(
     // waypointEditor is not passed: EditWaypointDialog is multiplatform now and the provider defaults to it.
     // sitePlannerAvailable() has returned true on this flavor all along, but nothing consumed it — the MapLibre map
     // never offered the button and dropped the sitePlannerNodeNum deep link. Both are wired now.
+    // MapLibre's offline packs actually download here; on desktop they never do, so the default is off.
+    offlineMapsSupported = true,
     sitePlanner = { session -> SitePlannerSlot(session) },
     // The same imported-layer manager the Google flavour opens from its layers button.
     layersSheetExtra = { ImportedLayersSlot() },

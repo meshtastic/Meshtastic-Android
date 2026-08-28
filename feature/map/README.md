@@ -51,7 +51,9 @@ Rules both renderers must agree on, so a behaviour difference between the flavor
 - **Waypoints**: Create and share points of interest.
 - **Per-Node Track Overlay**: Embedded map in `PositionLogScreens.kt` (`feature:node`) showing a node's GPS track history.
 - **Traceroute Visualization**: Dedicated map view showing route segments between mesh nodes.
-- **Offline Maps**: Downloadable MapLibre offline packs, managed from the layers sheet in `:feature:map-maplibre`. The `google` flavor has no download; it imports pre-made MBTiles instead.
+- **Tile sources**: `MapTileCatalogue` in this module defines every raster base map and overlay — URL templates, zoom ranges, attribution — so both renderers draw the same set from one definition. `tileUrl()` resolves a single tile for renderers that ask per tile rather than taking a template (the Google map does; MapLibre substitutes its own).
+- **Custom tile sources**: `CustomTileProviderConfig`, `CustomTileProviderRepository` and `CustomTileProviderManager` all live here, so Desktop offers them too. Local `.mbtiles` archives are Android-only, injected as a resolver rather than duplicated.
+- **Offline Maps**: Downloadable MapLibre offline packs, managed from the layers sheet in `:feature:map-maplibre`, and gated on `offlineMapsSupported` — the API compiles everywhere but only downloads on Android. The `google` flavor has no download; it imports pre-made MBTiles instead.
 
 
 ## Dependency Graph

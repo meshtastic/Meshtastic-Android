@@ -49,6 +49,10 @@ import org.meshtastic.feature.map.tiles.MapTileCatalogue
  * The sheet holds three things: the built-in raster overlays, offline downloads, and whatever layer management the host
  * contributes — on Android that is the imported GeoJSON/KML manager, which lives in the app because adding a layer
  * needs a file picker.
+ *
+ * Offline downloads are shown only where [offlineMapsSupported]. MapLibre's offline API compiles on every target, and
+ * on desktop it will happily create a pack and report it — but the pack never downloads a tile, so the section would
+ * offer a control that quietly does nothing. Better to not offer it.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,6 +60,7 @@ internal fun MapLayersButton(
     overlays: List<MapOverlay>,
     onOverlaysChange: (List<MapOverlay>) -> Unit,
     offlineTarget: OfflineMapTarget,
+    offlineMapsSupported: Boolean,
     extra: @Composable () -> Unit,
 ) {
     var sheetVisible by remember { mutableStateOf(false) }
@@ -72,6 +77,7 @@ internal fun MapLayersButton(
                 overlays = overlays,
                 onOverlaysChange = onOverlaysChange,
                 offlineTarget = offlineTarget,
+                offlineMapsSupported = offlineMapsSupported,
                 onDismiss = { sheetVisible = false },
                 extra = extra,
             )
@@ -84,6 +90,7 @@ private fun MapLayersSheet(
     overlays: List<MapOverlay>,
     onOverlaysChange: (List<MapOverlay>) -> Unit,
     offlineTarget: OfflineMapTarget,
+    offlineMapsSupported: Boolean,
     onDismiss: () -> Unit,
     extra: @Composable () -> Unit,
 ) {
@@ -100,15 +107,17 @@ private fun MapLayersSheet(
             onToggle = { id -> MapOverlays.byId(id)?.let { onOverlaysChange(overlays.toggling(it)) } },
         )
 
-        HorizontalDivider()
+        if (offlineMapsSupported) {
+            HorizontalDivider()
 
-        OfflineMapsSection(
-            target = offlineTarget,
-            onShowRegion = { bounds ->
-                onDismiss()
-                offlineTarget.showRegion(bounds)
-            },
-        )
+            OfflineMapsSection(
+                target = offlineTarget,
+                onShowRegion = { bounds ->
+                    onDismiss()
+                    offlineTarget.showRegion(bounds)
+                },
+            )
+        }
 
         HorizontalDivider()
 

@@ -64,7 +64,7 @@ Bluetooth Low Energy is supported on Desktop via the [Kable](https://github.com/
 |---------|---------|---------|-------|
 | Messaging | ✓ | ✓ | Full parity |
 | Node List | ✓ | ✓ | Full parity |
-| Map | ✓ | ✓ | Interactive MapLibre map, with base map and overlay pickers |
+| Map | ✓ | ✓ | Interactive MapLibre map, with base map and overlay pickers and custom tile sources |
 | Settings | ✓ | ✓ | Full parity |
 | Bluetooth (BLE) | ✓ | ✓ | Via Kable on desktop |
 | Firmware Update | ✓ | ✓ | In-app USB, BLE, and Wi-Fi (ESP32) update all work the same as Android |
@@ -134,7 +134,9 @@ Requirements:
 
 ## Known Limitations
 
-- Offline tile downloads and `.kml`/`.kmz` layer import are not yet available on desktop
+- Offline tile downloads, local `.mbtiles` archives, and `.kml`/`.kmz`/GeoJSON layer import are not
+  yet available on desktop. Custom network tile sources are — see
+  [Map & Waypoints](map-and-waypoints#adding-your-own-tile-source)
 - Some Android-specific features (widgets, specific notification channels) are unavailable
 - Performance may vary on low-spec hardware running Compose Desktop
 - BLE bonding is not yet supported on desktop (pairing works without bonding)

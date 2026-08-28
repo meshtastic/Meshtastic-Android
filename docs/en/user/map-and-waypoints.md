@@ -115,11 +115,14 @@ Configure position behavior in **Settings → Position**.
 
 ## Map Sources
 
-The base map depends on your app flavor. **Google Play** builds use Google Maps. **F-Droid** and **Desktop** builds use MapLibre, and offer a base map picker from the map toolbar:
+Every build offers a base map picker from the map toolbar. **Google Play** builds open on Google's own
+map types; **F-Droid** and **Desktop** builds open on MapLibre's vector styles. Below those, all three
+offer the same raster base maps:
 
 | Base map | Notes |
 | --- | --- |
-| Liberty | Default. Vector street map |
+| Normal / Satellite / Terrain / Hybrid | Google Play only — Google's own map types |
+| Liberty | Default on F-Droid and Desktop. Vector street map |
 | Positron | Low-contrast vector map; keeps node markers legible over it |
 | Dark | Vector map suited to dark themes |
 | OpenStreetMap | Classic raster street tiles |
@@ -127,18 +130,32 @@ The base map depends on your app flavor. **Google Play** builds use Google Maps.
 | USGS Topo / USGS Imagery | US coverage only |
 | Esri Topo / Esri Imagery | Topographic and satellite imagery |
 
-Overlays can be toggled on top of any base map:
+Overlays can be toggled on top of any base map, from the layers sheet:
 
-- **Hillshade** — terrain relief. Useful for understanding why a link fails, since LoRa range is limited by terrain
 - **Weather radar** — NOAA NEXRAD reflectivity (US coverage)
+- **Hillshade** — terrain relief, on **F-Droid** and **Desktop** only. Useful for understanding why a
+  link fails, since LoRa range is limited by terrain
 
-Offline tiles are **F-Droid only**: download map areas for offline use from the layers sheet.
-**Google Play** builds have no offline download — they import pre-made MBTiles files instead.
+### Adding your own tile source
+
+Any XYZ tile endpoint can be added as a base map, on every flavor and on desktop. Open **Manage custom
+tile sources** at the foot of the base map picker and paste a URL template using `{z}`, `{x}` and `{y}`
+— plus `{s}` if the provider uses rotating subdomains. A national mapping service, for example:
+
+```
+https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg
+```
+
+Tiles are cached on disk, so panning does not re-download what you were just looking at.
+
+On **Android**, the same screen also imports a local `.mbtiles` archive for fully offline use.
+
+Offline area downloads are **F-Droid only**: cache the visible region from the layers sheet.
+**Google Play** builds import pre-made MBTiles files instead, and **Desktop** has neither.
 
 {: .note }
-> On **Desktop**, `.kml`/`.kmz` layer import is temporarily unavailable while it is rebuilt on
-> MapLibre. On F-Droid, GeoJSON layers, `.kml`/`.kmz` import and Site Planner coverage overlays are
-> unchanged.
+> On **Desktop**, `.kml`/`.kmz` and GeoJSON layer import is not yet available. On F-Droid, GeoJSON
+> layers, `.kml`/`.kmz` import and Site Planner coverage overlays are unchanged.
 
 ## Related Topics
 
