@@ -171,13 +171,14 @@ import org.meshtastic.core.ui.util.formatAgo
 import org.meshtastic.core.ui.util.formatPositionTime
 import org.meshtastic.core.ui.util.rememberLocationPermissionState
 import org.meshtastic.feature.map.BaseMapViewModel.MapFilterState
-import org.meshtastic.feature.map.LastHeardFilter
+import org.meshtastic.feature.map.MapBounds
 import org.meshtastic.feature.map.MapNodePolicy
 import org.meshtastic.feature.map.component.DeleteWaypointDialog
 import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.component.MapControlsOverlay
 import org.meshtastic.feature.map.component.WaypointInfoDialog
+import org.meshtastic.feature.map.includes
 import org.meshtastic.feature.map.tracerouteNodeSelection
 import org.meshtastic.proto.BoundingBox
 import org.meshtastic.proto.Position
@@ -392,9 +393,11 @@ fun MapView(
                 if (points.size == 1) {
                     CameraUpdateFactory.newLatLngZoom(points.first(), 12f)
                 } else {
-                    val bounds = LatLngBounds.builder()
-                    points.forEach(bounds::include)
-                    CameraUpdateFactory.newLatLngBounds(bounds.build(), 80)
+                    // Shared with the MapLibre map, which pads a degenerate box rather than handing the camera
+                    // something it cannot fit to.
+                    val bounds = MapBounds.aroundNodes(filteredNodes)?.toLatLngBounds()
+                    if (bounds == null) return@LaunchedEffect
+                    CameraUpdateFactory.newLatLngBounds(bounds, 80)
                 }
             cameraPositionState.move(cameraUpdate)
             mapViewModel.onInitialNodeBoundsApplied()
@@ -426,12 +429,7 @@ fun MapView(
         if (mode is GoogleMapMode.NodeTrack) {
             val lastHeardTrackFilter = mapFilterState.lastHeardTrackFilter
             remember(mode.positions, lastHeardTrackFilter) {
-                mode.positions
-                    .filter {
-                        lastHeardTrackFilter == LastHeardFilter.Any ||
-                            it.time > nowSeconds - lastHeardTrackFilter.seconds
-                    }
-                    .sortedBy { it.time }
+                mode.positions.filter { lastHeardTrackFilter.includes(it.time, nowSeconds) }.sortedBy { it.time }
             }
         } else {
             emptyList()
@@ -1612,3 +1610,6 @@ private fun boundingBoxFromCorners(a: LatLng, b: LatLng): BoundingBox = Bounding
 )
 
 // endregion
+
+/** A shared [MapBounds] as the box the Google map wants. */
+private fun MapBounds.toLatLngBounds(): LatLngBounds = LatLngBounds(LatLng(south, west), LatLng(north, east))

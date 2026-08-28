@@ -35,6 +35,8 @@ import org.maplibre.compose.layers.CircleLayer
 import org.maplibre.compose.sources.Source
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.Node
+import org.meshtastic.feature.map.RECENTLY_HEARD_SECONDS
+import org.meshtastic.feature.map.heardJustNow
 import org.meshtastic.feature.map.maplibre.geojson.NodeFeatureKeys
 import org.meshtastic.feature.map.maplibre.style.MapColors
 
@@ -90,10 +92,9 @@ internal fun NodePulseLayer(nodes: List<Node>, source: Source) {
  * as just-heard: device clocks drift, and a node reporting a time slightly in the future has still just been heard
  * from.
  */
-internal fun List<Node>.heardJustNow(now: Long): List<Node> = filter { now - it.lastHeard <= RECENTLY_HEARD_SECONDS }
+internal fun List<Node>.heardJustNow(now: Long): List<Node> = filter { heardJustNow(it.lastHeard, now) }
 
 /** Pulse only for nodes heard within this many seconds, matching the Google flavor's own window. */
-private const val RECENTLY_HEARD_SECONDS = 5L
 private const val PULSE_MILLIS = 1000
 private const val PULSE_FINISHED = 1f
 

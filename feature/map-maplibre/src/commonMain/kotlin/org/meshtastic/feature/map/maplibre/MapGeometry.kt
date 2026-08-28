@@ -19,6 +19,8 @@ package org.meshtastic.feature.map.maplibre
 import org.maplibre.spatialk.geojson.BoundingBox
 import org.maplibre.spatialk.geojson.Position
 import org.meshtastic.core.model.Node
+import org.meshtastic.feature.map.MapBounds
+import org.meshtastic.feature.map.MapPoint
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.floor
@@ -26,51 +28,18 @@ import kotlin.math.ln
 import kotlin.math.pow
 import kotlin.math.tan
 
-/**
- * Bounding box covering every supplied node, or null when no node has a fix.
- *
- * Returning null rather than a degenerate box at (0, 0) is deliberate — the OSMdroid map's habit of flying through the
- * Atlantic on startup came from treating "no data yet" as a real location.
- */
-fun nodesBoundingBox(nodes: List<Node>): BoundingBox? = positionsBoundingBox(
-    nodes.filter { it.validPosition != null }.map { Position(longitude = it.longitude, latitude = it.latitude) },
+/** [MapBounds.aroundNodes] as the box MapLibre wants. */
+fun nodesBoundingBox(nodes: List<Node>): BoundingBox? = MapBounds.aroundNodes(nodes)?.toBoundingBox()
+
+/** [MapBounds.around] as the box MapLibre wants. */
+fun positionsBoundingBox(positions: List<Position>): BoundingBox? =
+    MapBounds.around(positions.map { MapPoint(latitude = it.latitude, longitude = it.longitude) })?.toBoundingBox()
+
+/** This box in MapLibre's own type. The conversion is the only part of it that belongs to a renderer. */
+private fun MapBounds.toBoundingBox(): BoundingBox = BoundingBox(
+    southwest = Position(longitude = west, latitude = south),
+    northeast = Position(longitude = east, latitude = north),
 )
-
-/**
- * Bounding box covering [positions], or null when there are none.
- *
- * A single point, or several stacked on one spot, yields a zero-area box the camera cannot fit to — a stationary node's
- * whole position track is exactly that — so a degenerate box is padded out to something framable.
- */
-fun positionsBoundingBox(positions: List<Position>): BoundingBox? {
-    if (positions.isEmpty()) return null
-
-    var south = positions.first().latitude
-    var north = south
-    var west = positions.first().longitude
-    var east = west
-
-    positions.forEach { position ->
-        south = minOf(south, position.latitude)
-        north = maxOf(north, position.latitude)
-        west = minOf(west, position.longitude)
-        east = maxOf(east, position.longitude)
-    }
-
-    if (south == north && west == east) {
-        south -= SINGLE_POINT_PAD_DEG
-        north += SINGLE_POINT_PAD_DEG
-        west -= SINGLE_POINT_PAD_DEG
-        east += SINGLE_POINT_PAD_DEG
-    }
-
-    return BoundingBox(
-        southwest = Position(longitude = west, latitude = south),
-        northeast = Position(longitude = east, latitude = north),
-    )
-}
-
-private const val SINGLE_POINT_PAD_DEG = 0.01
 
 /**
  * The nodes clustering will leave standing on their own at [zoom].

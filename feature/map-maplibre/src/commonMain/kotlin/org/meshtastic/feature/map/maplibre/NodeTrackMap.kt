@@ -52,6 +52,7 @@ import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.Node
 import org.meshtastic.feature.map.LastHeardFilter
 import org.meshtastic.feature.map.SharedMapViewModel
+import org.meshtastic.feature.map.includes
 import org.meshtastic.feature.map.maplibre.component.TrackFilterMenu
 import org.meshtastic.feature.map.maplibre.component.TrackPointCard
 import org.meshtastic.feature.map.maplibre.component.rememberBasemapSelection
@@ -185,16 +186,9 @@ private fun ProtoPosition.toTrackPoint(): TrackPoint? {
     }
 }
 
-/**
- * Drops points recorded longer ago than [filter] allows.
- *
- * Matches the Google flavor: the cutoff is the position's own timestamp, not when the node was last heard from. A track
- * is a history, so filtering it by the node's liveness would show all of it or none of it.
- */
-private fun List<TrackPoint>.olderThanCutoffRemoved(filter: LastHeardFilter): List<TrackPoint> {
-    if (filter == LastHeardFilter.Any) return this
-    val cutoff = nowSeconds - filter.seconds
-    return filter { (_, time) -> time > cutoff }
+/** Drops points recorded longer ago than [filter] allows. */
+private fun List<TrackPoint>.olderThanCutoffRemoved(filter: LastHeardFilter): List<TrackPoint> = filter { (_, time) ->
+    filter.includes(time, nowSeconds)
 }
 
 private fun pointFeatures(points: List<TrackPoint>) = FeatureCollection(

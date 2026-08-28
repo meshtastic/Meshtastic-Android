@@ -32,9 +32,7 @@ import kotlinx.coroutines.launch
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.ui.component.NodeChip
-
-/** Pulse only for nodes heard within this many seconds. */
-private const val RECENTLY_HEARD_SECONDS = 5
+import org.meshtastic.feature.map.heardJustNow
 
 /** Peak alpha of the pulse highlight before it fades out. */
 private const val PULSE_MAX_ALPHA = 0.3f
@@ -44,7 +42,7 @@ fun PulsingNodeChip(node: Node, modifier: Modifier = Modifier) {
     val animatedProgress = remember { Animatable(0f) }
 
     LaunchedEffect(node) {
-        if ((nowSeconds - node.lastHeard) <= RECENTLY_HEARD_SECONDS) {
+        if (heardJustNow(node.lastHeard, nowSeconds)) {
             launch {
                 animatedProgress.snapTo(0f)
                 animatedProgress.animateTo(
