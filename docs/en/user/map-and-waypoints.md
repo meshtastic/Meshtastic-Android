@@ -96,7 +96,7 @@ Tap the layers icon on the map to open **Manage Map Layers**, where you can impo
 
 ### Site Planner
 
-**Site Planner** estimates RF coverage for a transmitter and draws it on the map as a color-coded overlay. Open it from a map control, or from a node's detail page via **Estimate coverage** (shown only for nodes with a known position). Configure the transmitter (location, frequency, TX power, antenna gain and height), the receiver (sensitivity, height), and simulation options (max range, high-resolution terrain, color palette), then run the estimate. Like map layers, Site Planner works on both the Google Play and F-Droid builds, but not on Desktop.
+**Site Planner** estimates RF coverage for a transmitter and draws it on the map as a color-coded overlay. Open it from a map control, or from a node's detail page via **Estimate coverage** (shown only for nodes with a known position). Configure the transmitter (location, frequency, TX power, antenna gain and height), the receiver (sensitivity, height), and simulation options (max range, high-resolution terrain, color palette), then run the estimate. Like map layers, Site Planner works on both the Google Play and F-Droid builds, where the finished estimate is drawn on the map as a coverage overlay. On **Desktop** the same form is shown but the planner opens in your browser, so the estimate is viewed there rather than added to the map.
 
 ## Position Sharing
 

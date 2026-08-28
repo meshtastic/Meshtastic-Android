@@ -66,7 +66,7 @@ Bluetooth Low Energy is supported on Desktop via the [Kable](https://github.com/
 | Node List | ✓ | ✓ | Full parity |
 | Map | ✓ | ✓ | Interactive MapLibre map, with base map and overlay pickers and custom tile sources. No offline downloads or layer import |
 | Map layers (`.kml`/`.kmz`/GeoJSON) | ✓ | ✗ | Needs a file picker desktop does not have yet |
-| Site Planner | ✓ | ✗ | Coverage estimates run in a WebView, which desktop has no equivalent for |
+| Site Planner | ✓ | ✓* | *Opens in your browser on desktop; the estimate is not drawn on the desktop map |
 | Settings | ✓ | ✓ | Full parity |
 | Bluetooth (BLE) | ✓ | ✓ | Via Kable on desktop |
 | Firmware Update | ✓ | ✓ | In-app USB, BLE, and Wi-Fi (ESP32) update all work the same as Android |
@@ -137,7 +137,8 @@ Requirements:
 ## Known Limitations
 
 - Offline tile downloads, local `.mbtiles` archives, and `.kml`/`.kmz`/GeoJSON layer import are not
-  yet available on desktop. Custom network tile sources are — see
+  yet available on desktop. Site Planner opens in your browser rather than in the app, so its
+  coverage estimate is viewed there rather than drawn on the map. Custom network tile sources are — see
   [Map & Waypoints](map-and-waypoints#adding-your-own-tile-source)
 - Some Android-specific features (widgets, specific notification channels) are unavailable
 - Performance may vary on low-spec hardware running Compose Desktop
