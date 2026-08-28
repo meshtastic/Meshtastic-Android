@@ -88,7 +88,7 @@ private suspend fun convertKmlLayer(context: Context, layer: MapLayerItem): Stri
 
         val geoJson =
             context.contentResolver.openInputStream(source)?.use { stream ->
-                KmlToGeoJson.convert(BufferedInputStream(stream))
+                convertKmlSource(BufferedInputStream(stream))
             }
         if (geoJson == null) {
             Logger.withTag("KmlLayers").w { "Nothing mappable in an imported KML layer" }

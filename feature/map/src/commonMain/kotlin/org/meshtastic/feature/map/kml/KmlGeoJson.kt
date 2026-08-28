@@ -14,9 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.app.map
+package org.meshtastic.feature.map.kml
 
-import java.util.Locale
+import kotlin.math.roundToLong
 
 /** Building the GeoJSON a parsed KML becomes: geometry, simplestyle properties, and the escaping both need. */
 internal fun pointGeometry(position: String) = KmlGeometry("Point", position, isPolygonal = false)
@@ -101,12 +101,12 @@ internal fun String.toCssColor(): Pair<String, String>? {
         null
     } else {
         val opacity = bytes[ALPHA]!!.toDouble() / MAX_CHANNEL
-        // Locale.US, not the default: this is JSON, not display text. `%f` follows the device locale, so on a
-        // comma-decimal phone the default would emit `"fill-opacity":0,498` — invalid JSON, which makes MapLibre
-        // reject the whole converted file and every KML import silently draw nothing. Machine formats want
-        // locale-invariant, which is the opposite of what NumberFormatter is for.
-        String.format(Locale.US, "#%02x%02x%02x", bytes[RED], bytes[GREEN], bytes[BLUE]) to
-            String.format(Locale.US, "%.3f", opacity)
+        // Rendered digit by digit rather than through a format string. This is JSON, not display text, and a
+        // locale-aware `%f` writes `"fill-opacity":0,498` on a comma-decimal device — invalid JSON, which makes
+        // MapLibre reject the whole converted file so every KML import silently draws nothing. The previous
+        // implementation pinned Locale.US to avoid that; building the text by hand cannot regress into it, and works
+        // the same on every platform.
+        "#${bytes[RED]!!.hexByte()}${bytes[GREEN]!!.hexByte()}${bytes[BLUE]!!.hexByte()}" to opacity.toFixed()
     }
 }
 
@@ -120,7 +120,7 @@ internal fun String.jsonString(): String {
             character == '\n' -> escaped.append("\\n")
             character == '\r' -> escaped.append("\\r")
             character == '\t' -> escaped.append("\\t")
-            character < ' ' -> escaped.append("\\u%04x".format(character.code))
+            character < ' ' -> escaped.append("\\u").append(character.code.toString(HEX).padStart(ESCAPE_DIGITS, '0'))
             else -> escaped.append(character)
         }
     }
@@ -128,6 +128,9 @@ internal fun String.jsonString(): String {
 }
 
 private val WHITESPACE = Regex("\\s+")
+
+/** A JSON `\uXXXX` escape is always four hex digits. */
+private const val ESCAPE_DIGITS = 4
 
 private const val KML_COLOR_LENGTH = 8
 private const val BYTE_CHARS = 2
@@ -143,3 +146,15 @@ private const val RED = 3
 /** A GeoJSON ring needs three distinct positions before it can be closed into a polygon. */
 internal const val MIN_RING_POSITIONS = 3
 internal const val MIN_LINE_POSITIONS = 2
+
+/** One byte as two lowercase hex digits, the way a CSS colour wants it. */
+private fun Int.hexByte(): String = toString(HEX).padStart(BYTE_CHARS, '0')
+
+/** Three decimal places, written out rather than formatted, so no locale can put a comma in the JSON. */
+private fun Double.toFixed(): String {
+    val scaled = (this * OPACITY_SCALE).roundToLong()
+    return "${scaled / OPACITY_SCALE}.${(scaled % OPACITY_SCALE).toString().padStart(OPACITY_DECIMALS, '0')}"
+}
+
+private const val OPACITY_SCALE = 1000L
+private const val OPACITY_DECIMALS = 3

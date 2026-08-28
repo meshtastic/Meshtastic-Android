@@ -14,33 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.app.map
+package org.meshtastic.feature.map.kml
 
-import org.xmlpull.v1.XmlPullParser
-
-/** A KML `<Style>`: the colours and width this app can carry through to simplestyle. */
-internal data class KmlStyle(
-    val lineColor: String? = null,
-    val lineWidth: Float? = null,
-    val fillColor: String? = null,
-    val filled: Boolean = true,
-)
-
-internal class Placemark(
-    val name: String?,
-    val description: String?,
-    val styleUrl: String?,
-    /** A `<Style>` written inside the Placemark. Takes precedence over [styleUrl], as KML specifies. */
-    val inlineStyle: KmlStyle? = null,
-) {
-    val geometries = mutableListOf<KmlGeometry>()
-}
-
-/** A parsed geometry, held as its GeoJSON type and already-formatted coordinates. */
-internal class KmlGeometry(val type: String, val coordinates: String, val isPolygonal: Boolean)
+import nl.adaptivity.xmlutil.EventType
+import nl.adaptivity.xmlutil.XmlReader
+import nl.adaptivity.xmlutil.readSimpleElement
 
 /** A `<Style>` id and what this app can use of it. Null when the style has no id to reference it by. */
-internal fun XmlPullParser.readStyle(): Pair<String, KmlStyle>? {
+internal fun XmlReader.readStyle(): Pair<String, KmlStyle>? {
     val id = getAttributeValue(null, "id")
     val style = readStyleBody()
     return id?.let { it to style }
@@ -52,24 +33,30 @@ internal fun XmlPullParser.readStyle(): Pair<String, KmlStyle>? {
  * Split out from [readStyle] because a Placemark may carry its own `<Style>` with no id at all, and that one still has
  * to be read — it is the only styling such a placemark has.
  */
-internal fun XmlPullParser.readStyleBody(): KmlStyle {
+internal fun XmlReader.readStyleBody(): KmlStyle {
     var style = KmlStyle()
     // Which sub-style the reader is inside. A Google Earth export routinely carries an IconStyle and a LabelStyle in
     // the same Style, each with its own <color>; taking any colour as the line colour painted routes in the icon's.
     var enclosing: String? = null
     var done = false
 
-    while (!done && next() != XmlPullParser.END_DOCUMENT) {
-        val tag = name
-        when {
-            eventType == XmlPullParser.START_TAG && tag in SUB_STYLES -> enclosing = tag
+    while (!done) {
+        when (next()) {
+            EventType.START_ELEMENT ->
+                if (localName in SUB_STYLES) {
+                    enclosing = localName
+                } else {
+                    style = style.withStyleElement(localName, enclosing) { readSimpleElement().trim() }
+                }
 
-            eventType == XmlPullParser.START_TAG ->
-                style = style.withStyleElement(tag = tag, enclosing = enclosing) { nextText().trim() }
+            EventType.END_ELEMENT ->
+                when (localName) {
+                    in SUB_STYLES -> enclosing = null
+                    "Style" -> done = true
+                    else -> Unit
+                }
 
-            eventType == XmlPullParser.END_TAG && tag in SUB_STYLES -> enclosing = null
-
-            eventType == XmlPullParser.END_TAG && tag == "Style" -> done = true
+            EventType.END_DOCUMENT -> done = true
 
             else -> Unit
         }
@@ -85,6 +72,9 @@ private val SUB_STYLES = setOf("LineStyle", "PolyStyle", "IconStyle", "LabelStyl
  *
  * Only LineStyle and PolyStyle contribute: an IconStyle or LabelStyle colour says nothing about how a route or a zone
  * is drawn. `<fill>0</fill>` is how KML says "no fill", so it means outline only rather than a fill of nothing.
+ *
+ * [value] is called only for an element that contributes, so an element we ignore is left unconsumed — exactly as it
+ * was under the pull parser this replaced.
  */
 private fun KmlStyle.withStyleElement(tag: String, enclosing: String?, value: () -> String): KmlStyle = when {
     tag == "color" && enclosing == "PolyStyle" -> copy(fillColor = value())
@@ -95,20 +85,24 @@ private fun KmlStyle.withStyleElement(tag: String, enclosing: String?, value: ()
 }
 
 /** A `<StyleMap>` id and the style id its `normal` pair points at. */
-internal fun XmlPullParser.readStyleMap(): Pair<String, String>? {
+internal fun XmlReader.readStyleMap(): Pair<String, String>? {
     val id = getAttributeValue(null, "id")
     var key: String? = null
     var target: String? = null
     var done = id == null
 
-    while (!done && next() != XmlPullParser.END_DOCUMENT) {
-        when {
-            eventType == XmlPullParser.START_TAG && name == "key" -> key = nextText().trim()
+    while (!done) {
+        when (next()) {
+            EventType.START_ELEMENT ->
+                when (localName) {
+                    "key" -> key = readSimpleElement().trim()
+                    "styleUrl" -> if (key == "normal") target = readSimpleElement().trim()
+                    else -> Unit
+                }
 
-            eventType == XmlPullParser.START_TAG && name == "styleUrl" ->
-                if (key == "normal") target = nextText().trim()
+            EventType.END_ELEMENT -> if (localName == "StyleMap") done = true
 
-            eventType == XmlPullParser.END_TAG && name == "StyleMap" -> done = true
+            EventType.END_DOCUMENT -> done = true
 
             else -> Unit
         }
@@ -116,14 +110,15 @@ internal fun XmlPullParser.readStyleMap(): Pair<String, String>? {
     return if (id != null && target != null) id to target else null
 }
 
-internal fun XmlPullParser.readPlacemark(): Placemark {
+internal fun XmlReader.readPlacemark(): Placemark {
     val reader = PlacemarkReader()
     var done = false
 
-    while (!done && next() != XmlPullParser.END_DOCUMENT) {
-        when {
-            eventType == XmlPullParser.START_TAG -> reader.onStartTag(this, name)
-            eventType == XmlPullParser.END_TAG && name == "Placemark" -> done = true
+    while (!done) {
+        when (next()) {
+            EventType.START_ELEMENT -> reader.onStartElement(this, localName)
+            EventType.END_ELEMENT -> if (localName == "Placemark") done = true
+            EventType.END_DOCUMENT -> done = true
             else -> Unit
         }
     }
@@ -145,24 +140,24 @@ private class PlacemarkReader {
     private var pendingType: String? = null
     private var polygonTaken = false
 
-    fun onStartTag(parser: XmlPullParser, tag: String) {
+    fun onStartElement(reader: XmlReader, tag: String) {
         when (tag) {
-            "name" -> name = parser.nextText().trim()
+            "name" -> name = reader.readSimpleElement().trim()
 
-            "description" -> description = parser.nextText().trim()
+            "description" -> description = reader.readSimpleElement().trim()
 
-            "styleUrl" -> styleUrl = parser.nextText().trim()
+            "styleUrl" -> styleUrl = reader.readSimpleElement().trim()
 
             // An inline Style is consumed here or not at all: the top-level scan never sees it, because this reader
             // has already run to the Placemark's end tag by then.
-            "Style" -> inlineStyle = parser.readStyleBody()
+            "Style" -> inlineStyle = reader.readStyleBody()
 
             in GEOMETRY_TAGS -> {
                 pendingType = tag
                 polygonTaken = false
             }
 
-            "coordinates" -> takeCoordinates(parser.nextText())
+            "coordinates" -> takeCoordinates(reader.readSimpleElement())
 
             else -> Unit
         }
