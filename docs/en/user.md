@@ -27,7 +27,7 @@ Keep the last 5–8 entries and archive older ones by removing them.
 
 **August 2026** — Android Auto support was removed from every build variant, and its page with it.
 
-**July 2026** — [Discovery](user/discovery) — New Mesh Beacon: broadcast invitations to your mesh and receive Mesh invitations from others, with one-tap join or a preset-seeded Discovery scan.
+**July 2026** — [Local Mesh Discovery](user/discovery) — New Mesh Beacon: broadcast invitations to your mesh and receive Mesh invitations from others, with one-tap join or a preset-seeded Discovery scan.
 
 **July 2026** — [Settings — Radio & User](user/settings-radio-user) — Security config now offers encrypted on-device key backup/restore and a packet-authenticity Protection Level (Strict / Balanced / Compatible).
 

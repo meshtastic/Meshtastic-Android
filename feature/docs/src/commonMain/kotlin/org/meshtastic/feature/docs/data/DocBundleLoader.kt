@@ -361,7 +361,7 @@ class DefaultDocBundleLoader : DocBundleLoader {
                 CoreRes.string.doc_keywords_discovery,
                 "en/user/discovery.html",
                 12,
-                listOf("mesh-discovery", "local-discovery", "network-scan"),
+                listOf("discovery", "local-mesh-discovery", "mesh-discovery", "local-discovery", "network-scan"),
                 2800,
                 "discovery",
             ),
