@@ -38,26 +38,26 @@ aliases:
 
 ### Функции записи
 
-| Функция                          | Что она возвращает                                          |
-| -------------------------------- | ----------------------------------------------------------- |
-| **Получить состояние сети**      | Общее состояние сети.                       |
-| **Получить список нод**          | Список узлов в твоей сети.                  |
-| **Получить информацию о канале** | Информация о твоих каналах.                 |
-| **Get Device Status**            | Status of your connected radio.             |
-| **Get Node Details**             | Detailed information about a specific node. |
-| **Get Recent Messages**          | Recent messages from your conversations.    |
-| **Get Unread Summary**           | A summary of unread messages.               |
-| **Get Mesh Metrics**             | Telemetry and metrics from your mesh.       |
+| Функция                           | Что она возвращает                                       |
+| --------------------------------- | -------------------------------------------------------- |
+| **Получить состояние сети**       | Общее состояние сети.                    |
+| **Получить список нод**           | Список узлов в твоей сети.               |
+| **Получить информацию о канале**  | Информация о твоих каналах.              |
+| **Получить состояние устройства** | Состояние подключенного радиоустройства. |
+| **Получить детали ноды**          | Подробная информация о конкретной ноде.  |
+| **Получить последние сообщения**  | Последние сообщения из твоих разговоров. |
+| **Получить обзор непрочитанного** | Сводка непрочитанных сообщений.          |
+| **Получить метрики сети**         | Телеметрия и метрики твоей сети.         |
 
-## Privacy
+## Приватность
 
-> 🔒 **Privacy:** The **Send Message** function lets an assistant send messages to your mesh on your behalf. Only enable functions you trust the assistant to use. The read functions expose node, message, and metric data to the assistant — enable only what you're comfortable sharing. Each function has its own toggle, and the master toggle turns all of them off at once.
+> 🔒 **Приватность:** Функция **Отправить сообщение** позволяет помощнику отправлять сообщения в твоей сети от твоего имени. Включай только те функции, по которым ты доверяешь ассистенту. Функции чтения предоставляют ассистенту данные о ноде, сообщениях и метриках — включай только то, чем готов делиться. У каждой функции есть свой переключатель, а главный переключатель выключает их все сразу.
 
-## Related Topics
+## Связанные темы
 
-- [Messages & Channels](messages-and-channels) — sending messages directly in the app
-- [Nodes](nodes) — the node list the read functions draw from
-- [Node Metrics](node-metrics) — the telemetry behind Get Mesh Metrics
+- [Сообщения и каналы](messages-and-channels) — отправка сообщений прямо в приложении
+- [Ноды](nodes) — список нод, из которого берут данные функции чтения
+- [Метрики нод](node-metrics) — телеметрия за Получение метрик сети
 
 ---
 

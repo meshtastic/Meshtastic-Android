@@ -32,19 +32,19 @@ Mooduli seaded kasutavad kaardipõhist paigutust koos lülitite, rippmenüüde, 
 
 Sildab võrgusõnumeid MQTT vahendajasse ja sealt internetiühenduse loomiseks. This is how you extend your mesh beyond radio range or integrate with home automation systems.
 
-| Sätted                   | Kirjeldus                                                                                                                                                                                 |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Lubatud                  | Lükka MQTT sild sisse                                                                                                                                                                     |
-| Server                   | MQTT vahendaja aadress                                                                                                                                                                    |
-| Kasutajatunnus           | Authentication username                                                                                                                                                                   |
-| Parool                   | Authentication password                                                                                                                                                                   |
-| Encryption               | Krüpteeri MQTT kasutus                                                                                                                                                                    |
-| JSON Output              | Publish and consume MQTT messages as JSON. Marked deprecated in the protobuf schema, but it is still the only toggle for this behaviour and the firmware still honours it |
-| TLS                      | Use secure connection                                                                                                                                                                     |
-| Root Topic               | Baas MQTT teema teekond                                                                                                                                                                   |
-| Proxy to client enabled  | Let a connected phone carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                       |
-| MQTT proxy on this phone | The phone-side half of the above: whether _this_ phone is currently acting as that relay. See [MQTT](mqtt)                                                |
-| Kaardiaruanne            | Publish position to the public map — see below                                                                                                                                            |
+| Sätted                           | Kirjeldus                                                                                                                                                                                 |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Lubatud                          | Lükka MQTT sild sisse                                                                                                                                                                     |
+| Server                           | MQTT vahendaja aadress                                                                                                                                                                    |
+| Kasutajatunnus                   | Authentication username                                                                                                                                                                   |
+| Parool                           | Authentication password                                                                                                                                                                   |
+| Encryption                       | Krüpteeri MQTT kasutus                                                                                                                                                                    |
+| JSON Output                      | Publish and consume MQTT messages as JSON. Marked deprecated in the protobuf schema, but it is still the only toggle for this behaviour and the firmware still honours it |
+| TLS                              | Use secure connection                                                                                                                                                                     |
+| Root Topic                       | Baas MQTT teema teekond                                                                                                                                                                   |
+| Kliendi proksi lubatud           | Let a connected phone carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                       |
+| Selle telefoni MQTT puhverserver | The phone-side half of the above: whether _this_ phone is currently acting as that relay. See [MQTT](mqtt)                                                |
+| Kaardiaruanne                    | Publish position to the public map — see below                                                                                                                                            |
 
 **Map Report** expands into its own group:
 
@@ -61,15 +61,15 @@ Vaata [MQTT](mqtt) üksikasjalikumat kasutusjuhendit, mis sisaldab teavet krüpt
 
 Võimaldab jadapordi sidet väliste seadmete integreerimiseks (GPS-moodulid, andurid või kohandatud riistvara). Kui lubatud, saab sõlme jadaühendus saata ja vastu võtta protobuf- või tekstiandmeid, võimaldades välistel mikrokontrolleritel või arvutitel võrguga suhelda.
 
-| Sätted                       | Kirjeldus                                                                                                                                                                                           |
-| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Serial enabled               | Aktiveeri jadapordi ühendus                                                                                                                                                                         |
-| Echo enabled                 | Kaja sai jadaandmed tagasi                                                                                                                                                                          |
-| Serial mode                  | Which protocol the port speaks — Default, Simple, Proto, Text message, NMEA, CalTopo, WS85 weather station, VE.Direct, MeshSolar config, Log, or Log (text only) |
-| RX / TX                      | GPIO pins for the serial connection                                                                                                                                                                 |
-| Serial baud rate             | Port speed                                                                                                                                                                                          |
-| Timeout                      | How long to wait before considering an incoming message complete                                                                                                                                    |
-| Override console serial port | Take over the port the debug console normally uses                                                                                                                                                  |
+| Sätted                        | Kirjeldus                                                                                                                                                                                           |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Jadaport lubatud              | Aktiveeri jadapordi ühendus                                                                                                                                                                         |
+| Kaja lubatud                  | Kaja sai jadaandmed tagasi                                                                                                                                                                          |
+| Jadapordi režiim              | Which protocol the port speaks — Default, Simple, Proto, Text message, NMEA, CalTopo, WS85 weather station, VE.Direct, MeshSolar config, Log, or Log (text only) |
+| RX / TX                       | GPIO pins for the serial connection                                                                                                                                                                 |
+| Jadapordi kiirus              | Port speed                                                                                                                                                                                          |
+| Aegunud                       | How long to wait before considering an incoming message complete                                                                                                                                    |
+| Konsooli jadapordi alistamine | Take over the port the debug console normally uses                                                                                                                                                  |
 
 ### Välise teavitusmoodul
 
@@ -78,20 +78,20 @@ Juhib raadio riistvara summeri-, LED- või vibratsioonihoiatusi. Kasulik seadmet
 There are two independent triggers — an incoming **message**, and a received **bell** character —
 and each can drive the LED, the buzzer and the vibration motor separately, giving six toggles.
 
-| Sätted                                            | Kirjeldus                                                                                           |
-| ------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| External notification enabled                     | Master toggle for the module                                                                        |
-| Alert message LED / buzzer / vibra                | Which outputs fire on an incoming message                                                           |
-| Alert bell LED / buzzer / vibra                   | Which outputs fire on a received bell character                                                     |
-| Output LED (GPIO)              | Pin the LED is wired to                                                                             |
-| Output LED active high                            | Whether the LED pin is active high or low                                                           |
-| Output buzzer (GPIO)           | Pin the buzzer is wired to                                                                          |
-| Output vibra (GPIO)            | Pin the vibration motor is wired to                                                                 |
-| Use PWM buzzer                                    | Drive the buzzer with PWM, which allows tones rather than a single pitch                            |
-| Use I2S as buzzer                                 | Send the alert through an I2S audio output instead                                                  |
-| Output duration (milliseconds) | How long a single alert lasts                                                                       |
-| Nag timeout (seconds)          | Keep repeating the alert for this long until it is acknowledged. 0 disables nagging |
-| Ringtone                                          | The tone played on a PWM buzzer, in RTTTL. Can be imported from a file              |
+| Sätted                                              | Kirjeldus                                                                                           |
+| --------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Luba Välised teated                                 | Master toggle for the module                                                                        |
+| Alert message LED / buzzer / vibra                  | Which outputs fire on an incoming message                                                           |
+| Alert bell LED / buzzer / vibra                     | Which outputs fire on a received bell character                                                     |
+| Väljund LED (GPIO)               | Pin the LED is wired to                                                                             |
+| Väljund LED aktiivne                                | Whether the LED pin is active high or low                                                           |
+| Väljund summer (GPIO)            | Pin the buzzer is wired to                                                                          |
+| Väljund värin (GPIO)             | Pin the vibration motor is wired to                                                                 |
+| Kasuta PWM summerit                                 | Drive the buzzer with PWM, which allows tones rather than a single pitch                            |
+| Kasuta I2S summerina                                | Send the alert through an I2S audio output instead                                                  |
+| Väljundi kestvus (millisekundit) | How long a single alert lasts                                                                       |
+| Häire ajalõpp (sekundit)         | Keep repeating the alert for this long until it is acknowledged. 0 disables nagging |
+| Helin                                               | The tone played on a PWM buzzer, in RTTTL. Can be imported from a file              |
 
 ### Salvesta & edasta moodul
 
@@ -129,19 +129,19 @@ Juhib, milliseid telemeetriaandmeid sõlm võrguga jagab. Telemeetria sisaldab s
 Each of the four metric groups has its own enable toggle and its own interval, so you can report
 battery health often and sensors rarely.
 
-| Sätted                                | Kirjeldus                                                                                                                                                                         |
-| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Send Device Telemetry                 | Master toggle for device metrics. Only shown on firmware 2.7.12 and newer                                                         |
-| Device metrics update interval        | How often to report battery, uptime and channel utilisation                                                                                                                       |
-| Environment metrics module enabled    | Report the attached environment sensors                                                                                                                                           |
-| Environment metrics update interval   | How often to report them                                                                                                                                                          |
-| Environment metrics on-screen enabled | Also show these readings on the device's own display                                                                                                                              |
-| Environment metrics use Fahrenheit    | Use °F on the device's display. This is the radio's screen only — the app follows your phone's locale, see [Units & Locale](units-and-locale) |
-| Air quality metrics module enabled    | Report particulate and CO₂ sensor data                                                                                                                                            |
-| Air quality metrics update interval   | How often to report them                                                                                                                                                          |
-| Power metrics module enabled          | Report the per-channel voltage and current readings                                                                                                                               |
-| Power metrics update interval         | How often to report them                                                                                                                                                          |
-| Power metrics on-screen enabled       | Also show power readings on the device's display                                                                                                                                  |
+| Sätted                                          | Kirjeldus                                                                                                                                                                         |
+| ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Saada seadme telemeetria                        | Master toggle for device metrics. Only shown on firmware 2.7.12 and newer                                                         |
+| Seadme mõõdikute värskendamise intervall        | How often to report battery, uptime and channel utilisation                                                                                                                       |
+| Keskkonnamõõdikute lubamine                     | Report the attached environment sensors                                                                                                                                           |
+| Keskkonnamõõdikute värskendamise intervall      | How often to report them                                                                                                                                                          |
+| Keskkonnamõõdikute ekraanil kuvamine lubatud    | Also show these readings on the device's own display                                                                                                                              |
+| Keskkonnamõõdikud kasutavad Fahrenheiti         | Use °F on the device's display. This is the radio's screen only — the app follows your phone's locale, see [Units & Locale](units-and-locale) |
+| Õhukvaliteedi moodul on lubatud                 | Report particulate and CO₂ sensor data                                                                                                                                            |
+| Õhukvaliteedi näidikute värskendamise intervall | How often to report them                                                                                                                                                          |
+| Toitemõõdiku moodul on lubatud                  | Report the per-channel voltage and current readings                                                                                                                               |
+| Toitemõõdikute värskendamise intervall          | How often to report them                                                                                                                                                          |
+| Toitemõõdiku ekraanil kuvamine lubatud          | Also show power readings on the device's display                                                                                                                                  |
 
 Vaata [Telemeetria & Sensorid](telemetry-and-sensors) toetatud andurite ja sätete soovituste kohta.
 
@@ -153,11 +153,11 @@ Seadme füüsiliste nuppude kaudu ligipääsetavad eelseadistatud sõnumid (pö�
 | ----------------------------------------- | --------------------------------------------------------------------------------------------------------- |
 | ~~Canned message enabled~~                | ⚠️ **Deprecated** in the protobuf schema                                                                  |
 | Sõnumid                                   | Reavahetusega eraldatud sõnumite loend                                                                    |
-| Send bell                                 | Send a bell character alongside the message, so a receiving node's External Notification module can sound |
+| Saada Kõll                                | Send a bell character alongside the message, so a receiving node's External Notification module can sound |
 | Rotary encoder enabled                    | Use a rotary encoder as the input device                                                                  |
 | GPIO pin for rotary encoder A / B / press | The three pins the encoder is wired to                                                                    |
 | Generate input event on press / CW / CCW  | Which key event each encoder action produces                                                              |
-| Up/Down/Select input enabled              | A separate, simpler input scheme using up/down/select buttons rather than an encoder                      |
+| Üles/Alla/Vali sisend lubatud             | A separate, simpler input scheme using up/down/select buttons rather than an encoder                      |
 | ~~Allow input source~~                    | ⚠️ **Deprecated** in the protobuf schema                                                                  |
 
 ### Audio moodul
@@ -198,7 +198,7 @@ Levitab teavet otse kuuldud naabrite kohta, võimaldades kärgvõrgu topoloogia 
 | Värskendusintervall(id) | Kui tihti naabrite nimekirja levitada                                                                                                       |
 | Transmit Over LoRa                         | Edasta naabriinfot ka LoRa kaudu, mitte ainult MQTT/telefoni kaudu. Vaikimisi võtit ja nime kasutavat kanalit pole saadaval |
 
-Vaata [Avasta](Discovery) kuidas kasutada naabri-andmeid kärgvõrgu topoloogia uurimiseks.
+See [Local Mesh Discovery](discovery) for how to use neighbor data for mesh topology exploration.
 
 ### Ambientvalguse moodul
 
@@ -229,7 +229,7 @@ Muudab sõlme liikumis- või ukseanduri hoiatussüsteemiks. Kui GPIO sisend tuva
 
 Inimeste loendur WiFi ja BLE päringute abil. Loendab lähedalasuvaid seadmeid, kuulates passiivselt sondimistaotlusi, mida telefonid ja sülearvutid võrkude skannimisel edastavad. Available only on ESP32 devices.
 
-| Setting                                    | Description                                                                                                      |
+| Sätted                                     | Kirjeldus                                                                                                        |
 | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
 | Lubatud                                    | Aktiveeri inimeste loendamine                                                                                    |
 | Värskendusintervall(id) | Kui tihti loendeid esitada                                                                                       |
@@ -242,9 +242,9 @@ Inimeste loendur WiFi ja BLE päringute abil. Loendab lähedalasuvaid seadmeid, 
 
 Publishes a short free-text status line for your node, which other nodes can display alongside it.
 
-| Setting                  | Description                                                                                                                                                                      |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| The actual status string | Up to 80 characters. The **✕** in the field clears it. (That is the app's own label for the field, verbatim.) |
+| Sätted                | Kirjeldus                                                                                                                                                                        |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tegeliku oleku string | Up to 80 characters. The **✕** in the field clears it. (That is the app's own label for the field, verbatim.) |
 
 Saving takes effect immediately — this is one of the few module settings that never asks the
 node to reboot.
@@ -255,7 +255,7 @@ node to reboot.
 ### Mesh Beacon Module
 
 Broadcasts an invitation to your mesh, and receives invitations from others. See
-[Discovery](discovery) for the full walkthrough.
+[Local Mesh Discovery](discovery) for the full walkthrough.
 
 ### TAK moodul
 
@@ -297,7 +297,7 @@ Taastab kõik seaded tehase vaikeväärtustele. **Seda ei saa tagasi võtta.**
 
 Avab vahekaardid **Paketid** ja **Rakenduse logid** diagnostilise väljundi vaatamiseks, filtreerimiseks ja eksportimiseks. See [Debug Logs](debug-logs) for the full walkthrough.
 
-### About
+### Teave
 
 **Settings → About** carries the app's own identity rather than the radio's:
 
@@ -309,7 +309,7 @@ Three sections:
   **Acknowledgements** (below).
 - **Project information** — links to the website and to this documentation.
 
-### Acknowledgements
+### Tänusõnad
 
 Reached from **About**, this lists every open-source library the app ships, with its license,
 generated at build time by AboutLibraries. It was previously called the license screen.

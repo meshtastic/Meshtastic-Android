@@ -44,7 +44,7 @@ there is no separate enable switch here, because the device Role above is what t
 
 | Asetus | Kuvaus                            |
 | ------ | --------------------------------- |
-| Team   | Your TAK team colour              |
+| Tiimi  | Your TAK team colour              |
 | Rooli  | Your member role within that team |
 
 ### Paikallinen TAK-palvelin
@@ -65,7 +65,7 @@ Sovellus voi käyttää myös **paikallista TAK-palvelinta**, jolloin samalla la
 
 TAK-rooleilla määritetyt radiot käyttäytyvät eri tavalla kuin tavalliset client-laitteet:
 
-| Role            | Kuvaus                                                                                                                                                                                                                                                                                                             |
+| Rooli           | Kuvaus                                                                                                                                                                                                                                                                                                             |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **TAK**         | Täysi TAK-yhteentoimivuus — lähettää ja vastaanottaa CoT-dataa, chat-viestejä ja PLI-päivityksiä. Toimii tavallisen clientin lisäksi TAK-siltana.                                                                                                                                  |
 | **TAK Tracker** | Vain sijaintitietoihin perustuva TAK-lähtö — lähettää automaattisesti PLI-dataa säännöllisin väliajoin ilman käyttäjän toimintaa. Optimoitu valvomattomiin sijaintilähettimiin (ajoneuvot, laitteet ja reittipisteet). Ei välitä chat-viestejä. |

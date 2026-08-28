@@ -91,7 +91,7 @@ Wind speed, gust and lull are transmitted by the sensor as **m/s** and converted
 
 All three read in the same unit wherever they appear: the Node Detail environment section, the Environment Telemetry log, and the charts.
 
-## Weight
+## Paino
 
 Readings from a connected scale are transmitted in **kg** and converted for display.
 
@@ -104,10 +104,10 @@ Readings from a connected scale are transmitted in **kg** and converted for disp
 
 Sademittaukset (1 tunnin ja 24 tunnin yhteismäärät) lähetetään muodossa **mm** ja muunnetaan näyttöä varten.
 
-| Your Setting                     | You See                 |
-| -------------------------------- | ----------------------- |
-| Metric                           | 12.0 mm |
-| Imperial (US) | 0.47 in |
+| Asetuksesi                            | Näet                    |
+| ------------------------------------- | ----------------------- |
+| Metrijärjestelmä                      | 12.0 mm |
+| Imperiaalinen (US) | 0.47 in |
 
 ## Yksiköt, jotka eivät muutu
 

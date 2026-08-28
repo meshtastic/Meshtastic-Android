@@ -55,10 +55,10 @@ Supported environmental sensors:
 
 ### Soil
 
-| Metric     | Unit    | Notes                                           |
-| ---------- | ------- | ----------------------------------------------- |
-| Soil Temp  | °C / °F | Reported alongside soil moisture by soil probes |
-| Soil Moist | %       | Volumetric water content                        |
+| Metric             | Unit    | Нотатки                                         |
+| ------------------ | ------- | ----------------------------------------------- |
+| Температура ґрунту | °C / °F | Reported alongside soil moisture by soil probes |
+| Вологість ґрунту   | %       | Volumetric water content                        |
 
 Both appear as info cards on the node detail screen, next to the other environment readings.
 
@@ -76,7 +76,7 @@ Nodes with INA-series power sensors can report:
 
 | Metric   | Опис                            |
 | -------- | ------------------------------- |
-| Voltage  | Per-channel voltage reading     |
+| Напруга  | Per-channel voltage reading     |
 | Поточний | Per-channel current draw, in mA |
 
 Up to three channels are reported (ch1–ch3), and each can be given its own label — Solar or Battery, say — from the node detail screen. There is no separate wattage reading; the app charts voltage and current, and does not compute power from them.

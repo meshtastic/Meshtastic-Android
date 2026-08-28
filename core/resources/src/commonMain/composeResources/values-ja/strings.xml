@@ -530,7 +530,7 @@
     <string name="doc_title_connections">接続</string>
     <string name="doc_title_debug_logs">デバッグログ</string>
     <string name="doc_title_desktop">デスクトップアプリ</string>
-    <string name="doc_title_discovery">探索</string>
+    <string name="doc_title_discovery">ローカルメッシュ探索</string>
     <string name="doc_title_firmware">ファームウェア更新</string>
     <string name="doc_title_help">ヘルプとアプリ内ドキュメント</string>
     <string name="doc_title_map">マップとウェイポイント</string>

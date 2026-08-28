@@ -47,24 +47,24 @@ aliases:
 
 ### LoRa設定
 
-| 設定項目                | 説明                                                                                                                                                                                               | デフォルト                                 |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------- |
-| リージョン               | 周波数帯の規制リージョン                                                                                                                                                                                     | 未設定（要設定）                              |
-| モデムプリセット            | 速度と距離のトレードオフ                                                                                                                                                                                     | LongFast                              |
-| ホップ数上限              | 再送信の最大ホップ数                                                                                                                                                                                       | 3                                     |
-| 送信出力                | 送信出力（dBm）。0 = リージョンで許可された最大値                                                                                                                                                                     | 0（リージョン最大）                            |
-| 周波数の上書き             | Overrides the computed operating frequency outright (MHz). It does not offset the calculated value — leave at 0 unless you know you need a specific frequency | 0 (use calculated) |
-| チャンネル帯域幅            | 帯域幅の設定                                                                                                                                                                                           | プリセットのデフォルト                           |
-| プリセットを使用            | On by default. Turn it off to set Spread Factor, Coding Rate and Bandwidth by hand instead of taking them from the modem preset                                                  | On                                    |
-| 拡散率                 | Manual mode only: 7–12. Higher spreads further but slower                                                                                                        | From preset                           |
-| 符号化レート              | Manual mode only: 5–8. More redundancy costs airtime                                                                                                             | From preset                           |
-| 周波数スロット             | Which slot within the region's band to use. 0 derives it from the primary channel name                                                                                           | 0 (automatic)      |
-| Transmit Enabled    | Turning this off makes the node receive-only                                                                                                                                                     | On                                    |
-| Override Duty Cycle | Ignore the region's duty-cycle limit. Only legal where you are permitted to                                                                                                      | Off                                   |
-| Ignore MQTT         | Drop packets that arrived from MQTT rather than over the air                                                                                                                                     | Off                                   |
-| OK to MQTT          | Allow your packets to be forwarded to MQTT by gateways                                                                                                                                           | Off                                   |
-| RX Boosted Gain     | Extra receive gain on SX126x radios; costs a little current                                                                                                                                      | Off                                   |
-| PA fan disabled     | Turn off the power-amplifier fan on hardware that has one                                                                                                                                        | Off                                   |
+| 設定項目          | 説明                                                                                                                                                                                               | デフォルト                                 |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------- |
+| リージョン         | 周波数帯の規制リージョン                                                                                                                                                                                     | 未設定（要設定）                              |
+| モデムプリセット      | 速度と距離のトレードオフ                                                                                                                                                                                     | LongFast                              |
+| ホップ数上限        | 再送信の最大ホップ数                                                                                                                                                                                       | 3                                     |
+| 送信出力          | 送信出力（dBm）。0 = リージョンで許可された最大値                                                                                                                                                                     | 0（リージョン最大）                            |
+| 周波数の上書き       | Overrides the computed operating frequency outright (MHz). It does not offset the calculated value — leave at 0 unless you know you need a specific frequency | 0 (use calculated) |
+| チャンネル帯域幅      | 帯域幅の設定                                                                                                                                                                                           | プリセットのデフォルト                           |
+| プリセットを使用      | On by default. Turn it off to set Spread Factor, Coding Rate and Bandwidth by hand instead of taking them from the modem preset                                                  | On                                    |
+| 拡散率           | Manual mode only: 7–12. Higher spreads further but slower                                                                                                        | From preset                           |
+| 符号化レート        | Manual mode only: 5–8. More redundancy costs airtime                                                                                                             | From preset                           |
+| 周波数スロット       | Which slot within the region's band to use. 0 derives it from the primary channel name                                                                                           | 0 (automatic)      |
+| 送信を有効化        | Turning this off makes the node receive-only                                                                                                                                                     | On                                    |
+| デューティサイクルを上書き | Ignore the region's duty-cycle limit. Only legal where you are permitted to                                                                                                      | オフ                                    |
+| MQTT を無視      | Drop packets that arrived from MQTT rather than over the air                                                                                                                                     | オフ                                    |
+| MQTTを許可       | Allow your packets to be forwarded to MQTT by gateways                                                                                                                                           | オフ                                    |
+| RX ブーストゲイン    | Extra receive gain on SX126x radios; costs a little current                                                                                                                                      | オフ                                    |
+| PAファン無効       | Turn off the power-amplifier fan on hardware that has one                                                                                                                                        | オフ                                    |
 
 > ⚠️ **重要：** 送信する前に、必ずリージョンを設定する**必要があります**。 正しいリージョンを設定せずに運用すると、現地の無線規制に違反するおそれがあります。 詳しくは、meshtastic.org の [リージョン設定ガイド](https://meshtastic.org/docs/getting-started/initial-config) を参照してください。
 
@@ -114,48 +114,48 @@ aliases:
 
 These control the **radio's own screen**, not the app's.
 
-| 設定項目                  | 説明                                                                                                                                                        |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Screen on for         | How long the display stays lit before sleeping                                                                                                            |
-| Carousel interval     | How often the device cycles between screens on its own                                                                                                    |
-| Display mode          | Screen layout/density used by the firmware                                                                                                                |
-| Display units         | Metric or Imperial on the device's screen                                                                                                                 |
-| Use 12h clock format  | Show the device clock as 12-hour rather than 24-hour                                                                                                      |
-| Bold heading          | Draw the screen's heading text in bold                                                                                                                    |
-| Flip screen           | Rotate the display 180° for an inverted mounting                                                                                                          |
-| OLED type             | 自動、SSD1306、SH1106、SH1107                                                                                                                                  |
-| Wake on tap or motion | Light the screen when the device is tapped or moved                                                                                                       |
-| Compass orientation   | Rotation offset for the compass rose (0°, 90°, 180°, 270°)                                                                             |
-| Always point north    | Locks the compass rose north-up instead of rotating it with your heading. Independent of Compass orientation — neither replaces the other |
+| 設定項目         | 説明                                                                                                                                                        |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 画面オンの時間      | How long the display stays lit before sleeping                                                                                                            |
+| カルーセルの間隔     | How often the device cycles between screens on its own                                                                                                    |
+| 表示モード        | Screen layout/density used by the firmware                                                                                                                |
+| 表示単位         | Metric or Imperial on the device's screen                                                                                                                 |
+| 12時間の時計形式を使用 | Show the device clock as 12-hour rather than 24-hour                                                                                                      |
+| Bold heading | Draw the screen's heading text in bold                                                                                                                    |
+| 画面反転         | Rotate the display 180° for an inverted mounting                                                                                                          |
+| OLED タイプ     | 自動、SSD1306、SH1106、SH1107                                                                                                                                  |
+| タップまたは動作で起動  | Light the screen when the device is tapped or moved                                                                                                       |
+| コンパスの向き      | Rotation offset for the compass rose (0°, 90°, 180°, 270°)                                                                             |
+| 常に北を上にする     | Locks the compass rose north-up instead of rotating it with your heading. Independent of Compass orientation — neither replaces the other |
 
 ### 位置情報設定
 
 > ⚠️ **Warning:** Saving this screen always reboots the radio.
 
-| 設定項目                                            | 説明                                                                                                                                                    |
-| ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GPS Mode (Physical Hardware) | Three-state: GPS enabled, disabled, or not present. Not a simple on/off                                               |
-| GPS Polling Interval                            | How often the radio asks its GPS for a fix                                                                                                            |
-| Broadcast Interval                              | How often the position is shared with the mesh                                                                                                        |
-| スマート位置                                          | Broadcast based on movement rather than purely on the clock                                                                                           |
-| Smart Interval                                  | With Smart Position on, the shortest gap between broadcasts                                                                                           |
-| Smart Distance                                  | With Smart Position on, how far you must move before broadcasting                                                                                     |
-| 固定位置                                            | Use a manually entered latitude, longitude and altitude instead of the GPS                                                                            |
-| Position Flags                                  | A group of toggles choosing which fields ride along with a position — altitude, its reference and precision, satellites in view, timestamp, and so on |
-| GPS EN / Receive / Transmit GPIO                | Advanced: the pins the GPS module is wired to                                                                                         |
+| 設定項目                             | 説明                                                                                                                                                    |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GPS モード（物理ハードウェア）                | Three-state: GPS enabled, disabled, or not present. Not a simple on/off                                               |
+| GPS ポーリング間隔                      | How often the radio asks its GPS for a fix                                                                                                            |
+| ブロードキャスト間隔                       | How often the position is shared with the mesh                                                                                                        |
+| スマート位置                           | Broadcast based on movement rather than purely on the clock                                                                                           |
+| スマート間隔                           | With Smart Position on, the shortest gap between broadcasts                                                                                           |
+| スマート距離                           | With Smart Position on, how far you must move before broadcasting                                                                                     |
+| 固定位置                             | Use a manually entered latitude, longitude and altitude instead of the GPS                                                                            |
+| 位置情報フラグ                          | A group of toggles choosing which fields ride along with a position — altitude, its reference and precision, satellites in view, timestamp, and so on |
+| GPS EN / Receive / Transmit GPIO | Advanced: the pins the GPS module is wired to                                                                                         |
 
 ### 電源設定
 
-| 設定項目                                             | 説明                                                              |
-| ------------------------------------------------ | --------------------------------------------------------------- |
-| Enable power saving mode                         | Let the radio sleep aggressively between activity               |
-| Shutdown on power loss                           | Power the device down after external power disappears           |
-| Super deep sleep duration                        | How long the deepest sleep state lasts                          |
-| Minimum wake time                                | The shortest time the radio stays awake once woken              |
-| Wait for Bluetooth duration                      | How long to wait for a phone to connect before sleeping         |
-| ADC multiplier override                          | Turn on a manual correction for battery-voltage readings        |
-| ADC multiplier override ratio                    | The correction factor itself, used only when the override is on |
-| Battery INA_2XX I2C address | Address of an external INA-series power sensor, if fitted       |
+| 設定項目                                        | 説明                                                              |
+| ------------------------------------------- | --------------------------------------------------------------- |
+| 省電力モードを有効化                                  | Let the radio sleep aggressively between activity               |
+| 電源喪失時にシャットダウン                               | Power the device down after external power disappears           |
+| スーパーディープスリープの時間                             | How long the deepest sleep state lasts                          |
+| 最小起動時間                                      | The shortest time the radio stays awake once woken              |
+| Bluetooth 待機時間                              | How long to wait for a phone to connect before sleeping         |
+| ADC倍率のオーバーライド                               | Turn on a manual correction for battery-voltage readings        |
+| ADC倍率のオーバーライド比                              | The correction factor itself, used only when the override is on |
+| バッテリー INA_2XX I2C アドレス | Address of an external INA-series power sensor, if fitted       |
 
 ### ネットワーク設定
 
@@ -163,15 +163,15 @@ These control the **radio's own screen**, not the app's.
 
 | 設定項目                             | 説明                                                                                                                         |
 | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| WiFi enabled                     | Enable the WiFi radio (ESP32 devices)                                                                   |
+| Wi-Fiを有効化                        | Enable the WiFi radio (ESP32 devices)                                                                   |
 | SSID                             | Network name to connect to. **Scan WiFi QR code** fills this and the password from a standard WiFi QR code |
-| Password                         | ネットワークのパスワード                                                                                                               |
-| Ethernet enabled                 | Use a wired connection on hardware that has one                                                                            |
-| IPv4 mode                        | DHCP, or a static address configured with the four fields below                                                            |
+| パスワード                            | ネットワークのパスワード                                                                                                               |
+| イーサネット有効                         | Use a wired connection on hardware that has one                                                                            |
+| IPv4 モード                         | DHCP, or a static address configured with the four fields below                                                            |
 | Wifi IP / Subnet / Gateway / DNS | The static address, only used when IPv4 mode is static                                                                     |
-| UDP broadcasting                 | Share mesh traffic with other nodes over the local network                                                                 |
-| NTP server                       | 時刻同期サーバー                                                                                                                   |
-| rsyslog server                   | リモートログサーバー                                                                                                                 |
+| UDP ブロードキャスト                     | Share mesh traffic with other nodes over the local network                                                                 |
+| NTPサーバー                          | 時刻同期サーバー                                                                                                                   |
+| rsyslogサーバー                      | リモートログサーバー                                                                                                                 |
 
 ![IP アドレスの入力欄](../../assets/screenshots/settings_ipv4_field.png)
 
@@ -185,21 +185,21 @@ These control the **radio's own screen**, not the app's.
 
 ### セキュリティ設定
 
-| 設定項目                   | 説明                                                                                                                                                                               |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 公開鍵                    | ノードの公開鍵（読み取り専用）                                                                                                                                                                  |
-| 管理者鍵                   | Keys permitted to administer this node remotely — up to three                                                                                                                    |
-| 秘密鍵                    | Your node's private key (handle securely). Shown redacted when you are viewing another node over remote admin — the firmware does not send it |
-| Regenerate Private Key | Issues a new keypair for this node, behind a confirmation. Every peer that knew your old key must learn the new one                                              |
-| Direct Message Key     | The key used for direct-message encryption                                                                                                                                       |
-| ~~管理チャンネルを有効化~~        | ⚠️ 削除されました：管理者キーを設定すると自動的に構成されるようになりました                                                                                                                                          |
-| デバッグログ                 | シリアル／Bluetooth 経由でライブのデバッグログを出力                                                                                                                                                  |
-| シリアルを有効化               | シリアルコンソールへのアクセスを有効化（デバイスの設定から移動）                                                                                                                                                 |
-| 管理モード                  | Restrict non-admin channel changes. Only selectable once an Admin Key is set                                                                                     |
-| 鍵をバックアップ               | ノードの鍵の暗号化されたバックアップを、このデバイスに保存します（Android のみ）                                                                                                                                     |
-| 鍵を復元                   | バックアップした鍵をノードに書き戻します（バックアップがある場合に利用可能）                                                                                                                                           |
-| 鍵のバックアップを削除            | このデバイスに保存されている鍵のバックアップを削除します                                                                                                                                                     |
-| 保護レベル                  | パケットの真正性。署名のないパケットや中継されたパケットをどう扱うか：**厳格**、**バランス**、**互換**（対応するファームウェアが必要。厳格は確認を求めます）                                                                                             |
+| 設定項目            | 説明                                                                                                                                                                               |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 公開鍵             | ノードの公開鍵（読み取り専用）                                                                                                                                                                  |
+| 管理者鍵            | Keys permitted to administer this node remotely — up to three                                                                                                                    |
+| 秘密鍵             | Your node's private key (handle securely). Shown redacted when you are viewing another node over remote admin — the firmware does not send it |
+| 秘密鍵を再生成         | Issues a new keypair for this node, behind a confirmation. Every peer that knew your old key must learn the new one                                              |
+| ダイレクトメッセージの鍵    | The key used for direct-message encryption                                                                                                                                       |
+| ~~管理チャンネルを有効化~~ | ⚠️ 削除されました：管理者キーを設定すると自動的に構成されるようになりました                                                                                                                                          |
+| デバッグログ          | シリアル／Bluetooth 経由でライブのデバッグログを出力                                                                                                                                                  |
+| シリアルを有効化        | シリアルコンソールへのアクセスを有効化（デバイスの設定から移動）                                                                                                                                                 |
+| 管理モード           | Restrict non-admin channel changes. Only selectable once an Admin Key is set                                                                                     |
+| 鍵をバックアップ        | ノードの鍵の暗号化されたバックアップを、このデバイスに保存します（Android のみ）                                                                                                                                     |
+| 鍵を復元            | バックアップした鍵をノードに書き戻します（バックアップがある場合に利用可能）                                                                                                                                           |
+| 鍵のバックアップを削除     | このデバイスに保存されている鍵のバックアップを削除します                                                                                                                                                     |
+| 保護レベル           | パケットの真正性。署名のないパケットや中継されたパケットをどう扱うか：**厳格**、**バランス**、**互換**（対応するファームウェアが必要。厳格は確認を求めます）                                                                                             |
 
 #### Lockdown Mode
 
@@ -212,11 +212,11 @@ the passphrase, and a full device erase restores the hardware regardless.
 
 Alongside the passphrase you set the limits that end a session automatically:
 
-| Field                                    | What it does                                      |
-| ---------------------------------------- | ------------------------------------------------- |
-| Boots remaining                          | How many device boots the unlocked state survives |
-| Hours until expiry                       | Wall-clock lifetime of the unlocked state         |
-| Session cap (minutes) | Maximum length of a single unlocked connection    |
+| Field      | 内容                                                |
+| ---------- | ------------------------------------------------- |
+| 残りの起動回数    | How many device boots the unlocked state survives |
+| 有効期限までの時間  | Wall-clock lifetime of the unlocked state         |
+| セッション上限（分） | Maximum length of a single unlocked connection    |
 
 Once active, the row reads _Active — storage encrypted, this connection authenticated_ when
 unlocked, or _Active — enter your passphrase to unlock this connection_ when not. **Lock Now**

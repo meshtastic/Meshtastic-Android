@@ -45,6 +45,6 @@ aliases:
 
 - [Метрики нод](node-metrics) — полная статистика сигнала и локальная статистика внутри приложения
 - [Подключения](connections) — подключиться к радиоустройству, чтобы виджет показывал статистику
-- [Discovery](discovery) — использование канала и времени передачи через сеть
+- [Local Mesh Discovery](discovery) — channel and airtime utilization across the mesh
 
 ---

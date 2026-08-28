@@ -172,7 +172,7 @@ derive a wattage figure from them.
 - [ノード](nodes)：ノードリスト、絞り込み、並べ替え
 - [テレメトリとセンサー](telemetry-and-sensors)：対応センサーと設定
 - [信号メーター](signal-meter)：SNR と RSSI から信号品質を計算する方法
-- [探索](discovery)：ルート追跡の詳細と隣接ノード情報
+- [Local Mesh Discovery](discovery) — traceroute details and neighbor info
 - [単位とロケール](units-and-locale)：温度・距離・速度の表示形式
 
 ---

@@ -22,11 +22,11 @@ aliases:
 
 The welcome screen introduces Meshtastic with three feature rows:
 
-|                               |                                                                                                                |
-| ----------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| **Stay Connected Anywhere**   | Communicate off-the-grid with your friends and community without cell service.                 |
-| **Create Your Own Networks**  | Easily set up private mesh networks for secure and reliable communication in remote areas.     |
-| **Track and Share Locations** | Share your location in real-time and keep your group coordinated with integrated GPS features. |
+|                               |                                                                                                                          |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| **Stay Connected Anywhere**   | Общайтесь вне сети со своими друзьями и сообществом без использования сотовой связи.                     |
+| **Create Your Own Networks**  | Легко создать частные сети для защищённой и надежной связи в удаленных районах.                          |
+| **Track and Share Locations** | Делитесь своим местоположением в режиме реального времени и поддерживайте работу группы с функциями GPS. |
 
 Tap **Get started** to proceed through the setup flow.
 
@@ -99,7 +99,7 @@ Features also ask in context. Tapping **Scan** on the Connections screen with Bl
 
 Новичок в Meshtastic? Руководство [по началу работы](https://meshtastic.org/docs/getting-started) на meshtastic.org охватывает выбор оборудования, начальную настройку радиостанции и первую установку сети.
 
-## Related Topics
+## Связанные темы
 
 - [Connections](connections) — pair your first radio
 - [Сообщения и каналы](messages-and-channels) — отправь  своё первое сообщение

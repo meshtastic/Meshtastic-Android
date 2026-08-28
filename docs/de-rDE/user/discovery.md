@@ -1,10 +1,12 @@
 ---
-title: Entdecken
+title: Local Mesh Discovery
 parent: User Guide
 nav_order: 12
-last_updated: 2026-08-27
+last_updated: 2026-08-28
 description: Explore your mesh network — the Local Mesh Discovery scanner, traceroute paths, neighbor maps, and node discovery tools.
 aliases:
+  - discovery
+  - local-mesh-discovery
   - mesh-discovery
   - local-discovery
   - network-scan
@@ -12,7 +14,7 @@ aliases:
   - neighbor-info
 ---
 
-# Entdecken
+# Local Mesh Discovery
 
 Discovery-Tools helfen Ihnen zu verstehen, **wie** Ihr Mesh-Netzwerk vernetzt ist – welche Knoten einander erreichen können, welche Wege Nachrichten nehmen und wo Engpässe oder Schwachstellen bestehen.
 

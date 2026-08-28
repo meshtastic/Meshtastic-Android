@@ -140,7 +140,7 @@ You → Node A (SNR: 8.5) → Node B (SNR: 5.2) → Target
 
 Each hop represents a relay node that forwarded the message.
 
-## Position Log
+## Гісторыя месцазнаходжання
 
 Historical position data for nodes that share their location:
 
@@ -172,7 +172,7 @@ The position tab shows location data for nodes that share GPS:
 - [Nodes](nodes) — node list, filtering, and sorting
 - [Telemetry & Sensors](telemetry-and-sensors) — supported sensors and configuration
 - [Signal Meter](signal-meter) — how signal quality is calculated from SNR and RSSI
-- [Discovery](discovery) — traceroute details and neighbor info
+- [Local Mesh Discovery](discovery) — traceroute details and neighbor info
 - [Units & Locale](units-and-locale) — temperature, distance, and speed display formats
 
 ---

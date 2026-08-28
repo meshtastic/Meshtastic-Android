@@ -23,7 +23,7 @@ Configure your radio hardware and user identity parameters.
 | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Long Name         | Your display name (up to 39 characters)                                                                                                                                                                                   |
 | Short Name        | 4-character abbreviated name                                                                                                                                                                                                                 |
-| Unmessageable     | Marks the node as one nobody should try to message — for an unmonitored or infrastructure node. Other clients hide it from the contact list. Needs supporting firmware                                       |
+| Niet berichtbaar  | Marks the node as one nobody should try to message — for an unmonitored or infrastructure node. Other clients hide it from the contact list. Needs supporting firmware                                       |
 | Licensed Operator | Enable if you hold an amateur radio license (permits higher power). Turning it on relabels **Long Name** as **Call Sign** and adds a separate Long Name field, and is staged behind a confirmation dialog |
 
 ### Applying Changes
@@ -47,24 +47,24 @@ After modifying settings, tap **Save** to write the configuration to your radio.
 
 ### LoRa Configuratie
 
-| Setting             | Beschrijving                                                                                                                                                                                     | Standaard                                 |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------- |
-| Regio               | Regulatory region for frequency bands                                                                                                                                                            | Unset (must configure) |
-| Modem Preset        | Speed/range tradeoff                                                                                                                                                                             | LongFast                                  |
-| Hop Limit           | Maximum retransmit hops                                                                                                                                                                          | 3                                         |
-| TX Power            | Transmission power (dBm); 0 = max allowed for region                                                                                                                          | 0 (region max)         |
-| Frequency Override  | Overrides the computed operating frequency outright (MHz). It does not offset the calculated value — leave at 0 unless you know you need a specific frequency | 0 (use calculated)     |
-| Channel Bandwidth   | Bandwidth setting                                                                                                                                                                                | Default for preset                        |
-| Use Preset          | On by default. Turn it off to set Spread Factor, Coding Rate and Bandwidth by hand instead of taking them from the modem preset                                                  | On                                        |
-| Spread Factor       | Manual mode only: 7–12. Higher spreads further but slower                                                                                                        | From preset                               |
-| Coding Rate         | Manual mode only: 5–8. More redundancy costs airtime                                                                                                             | From preset                               |
-| Frequency Slot      | Which slot within the region's band to use. 0 derives it from the primary channel name                                                                                           | 0 (automatic)          |
-| Transmit Enabled    | Turning this off makes the node receive-only                                                                                                                                                     | On                                        |
-| Override Duty Cycle | Ignore the region's duty-cycle limit. Only legal where you are permitted to                                                                                                      | Off                                       |
-| Ignore MQTT         | Drop packets that arrived from MQTT rather than over the air                                                                                                                                     | Off                                       |
-| OK to MQTT          | Allow your packets to be forwarded to MQTT by gateways                                                                                                                                           | Off                                       |
-| RX Boosted Gain     | Extra receive gain on SX126x radios; costs a little current                                                                                                                                      | Off                                       |
-| PA fan disabled     | Turn off the power-amplifier fan on hardware that has one                                                                                                                                        | Off                                       |
+| Setting                | Beschrijving                                                                                                                                                                                     | Standaard                                 |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------- |
+| Regio                  | Regulatory region for frequency bands                                                                                                                                                            | Unset (must configure) |
+| Modem Preset           | Speed/range tradeoff                                                                                                                                                                             | LongFast                                  |
+| Hop Limit              | Maximum retransmit hops                                                                                                                                                                          | 3                                         |
+| TX Power               | Transmission power (dBm); 0 = max allowed for region                                                                                                                          | 0 (region max)         |
+| Frequency Override     | Overrides the computed operating frequency outright (MHz). It does not offset the calculated value — leave at 0 unless you know you need a specific frequency | 0 (use calculated)     |
+| Channel Bandwidth      | Bandwidth setting                                                                                                                                                                                | Default for preset                        |
+| Use Preset             | On by default. Turn it off to set Spread Factor, Coding Rate and Bandwidth by hand instead of taking them from the modem preset                                                  | On                                        |
+| Spread Factor          | Manual mode only: 7–12. Higher spreads further but slower                                                                                                        | From preset                               |
+| Coding Rate            | Manual mode only: 5–8. More redundancy costs airtime                                                                                                             | From preset                               |
+| Frequency Slot         | Which slot within the region's band to use. 0 derives it from the primary channel name                                                                                           | 0 (automatic)          |
+| Transmit Enabled       | Turning this off makes the node receive-only                                                                                                                                                     | On                                        |
+| Overschrijf Duty Cycle | Ignore the region's duty-cycle limit. Only legal where you are permitted to                                                                                                      | Off                                       |
+| Negeer MQTT            | Drop packets that arrived from MQTT rather than over the air                                                                                                                                     | Off                                       |
+| OK to MQTT             | Allow your packets to be forwarded to MQTT by gateways                                                                                                                                           | Off                                       |
+| RX Boosted Gain        | Extra receive gain on SX126x radios; costs a little current                                                                                                                                      | Off                                       |
+| PA fan disabled        | Turn off the power-amplifier fan on hardware that has one                                                                                                                                        | Off                                       |
 
 > ⚠️ **Important:** You **must** set your region before transmitting. Operating without the correct region may violate local radio regulations. See the [region configuration guide](https://meshtastic.org/docs/getting-started/initial-config) on meshtastic.org for details.
 
@@ -118,14 +118,14 @@ These control the **radio's own screen**, not the app's.
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Screen on for         | How long the display stays lit before sleeping                                                                                                            |
 | Carousel interval     | How often the device cycles between screens on its own                                                                                                    |
-| Display mode          | Screen layout/density used by the firmware                                                                                                                |
-| Display units         | Metric or Imperial on the device's screen                                                                                                                 |
+| Weergavemodus         | Screen layout/density used by the firmware                                                                                                                |
+| Geef eenheden weer    | Metric or Imperial on the device's screen                                                                                                                 |
 | Use 12h clock format  | Show the device clock as 12-hour rather than 24-hour                                                                                                      |
 | Bold heading          | Draw the screen's heading text in bold                                                                                                                    |
-| Flip screen           | Rotate the display 180° for an inverted mounting                                                                                                          |
+| Scherm omdraaien      | Rotate the display 180° for an inverted mounting                                                                                                          |
 | OLED type             | Auto, SSD1306, SH1106, SH1107                                                                                                                             |
 | Wake on tap or motion | Light the screen when the device is tapped or moved                                                                                                       |
-| Compass orientation   | Rotation offset for the compass rose (0°, 90°, 180°, 270°)                                                                             |
+| Kompas oriëntatie     | Rotation offset for the compass rose (0°, 90°, 180°, 270°)                                                                             |
 | Always point north    | Locks the compass rose north-up instead of rotating it with your heading. Independent of Compass orientation — neither replaces the other |
 
 ### Positie Configuratie
@@ -148,7 +148,7 @@ These control the **radio's own screen**, not the app's.
 
 | Setting                                          | Beschrijving                                                    |
 | ------------------------------------------------ | --------------------------------------------------------------- |
-| Enable power saving mode                         | Let the radio sleep aggressively between activity               |
+| Energiebesparingsmodus inschakelen               | Let the radio sleep aggressively between activity               |
 | Shutdown on power loss                           | Power the device down after external power disappears           |
 | Super deep sleep duration                        | How long the deepest sleep state lasts                          |
 | Minimum wake time                                | The shortest time the radio stays awake once woken              |
@@ -163,11 +163,11 @@ These control the **radio's own screen**, not the app's.
 
 | Setting                          | Beschrijving                                                                                                               |
 | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| WiFi enabled                     | Enable the WiFi radio (ESP32 devices)                                                                   |
+| Wifi ingeschakeld                | Enable the WiFi radio (ESP32 devices)                                                                   |
 | SSID                             | Network name to connect to. **Scan WiFi QR code** fills this and the password from a standard WiFi QR code |
-| Password                         | Network password                                                                                                           |
-| Ethernet enabled                 | Use a wired connection on hardware that has one                                                                            |
-| IPv4 mode                        | DHCP, or a static address configured with the four fields below                                                            |
+| Wachtwoord                       | Network password                                                                                                           |
+| Ethernet ingeschakeld            | Use a wired connection on hardware that has one                                                                            |
+| IPv4 modus                       | DHCP, or a static address configured with the four fields below                                                            |
 | Wifi IP / Subnet / Gateway / DNS | The static address, only used when IPv4 mode is static                                                                     |
 | UDP broadcasting                 | Share mesh traffic with other nodes over the local network                                                                 |
 | NTP server                       | Time synchronization server                                                                                                |

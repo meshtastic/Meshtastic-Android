@@ -159,7 +159,7 @@ Kaikkien linkkien selattava hakemisto löytyy myös kohdasta **Asetukset → Ohj
 - [Radion mittarit](node-metrics) — yksityiskohtaiset telemetriakoontinäytöt jokaiselle radiolle
 - [Viestit ja kanavat](messages-and-channels) — lähetä yksityisviesti radiolle
 - [Kartta ja reittipisteet](map-and-waypoints) — tarkastele radioiden sijainteja kartalla
-- [Haku](discovery) — reitinselvitys- ja naapuritiedot verkon topologian tutkimiseen
+- [Local Mesh Discovery](discovery) — traceroute and neighbor info for topology exploration
 - [Signaalimittari](signal-meter) — ymmärrä, mitä signaalipalkit tarkoittavat
 
 ---

@@ -555,7 +555,7 @@
     <string name="doc_title_connections">Ühendus</string>
     <string name="doc_title_debug_logs">Arendaja logid</string>
     <string name="doc_title_desktop">Töölauarakendus</string>
-    <string name="doc_title_discovery">Avastamine</string>
+    <string name="doc_title_discovery">Kohalik kärgvõrgu avastaja</string>
     <string name="doc_title_firmware">Püsivara värskendused</string>
     <string name="doc_title_help">Abi &amp; Rakendusesisesed dokumendid</string>
     <string name="doc_title_map">Kaart &amp; Teekonnapunktid</string>

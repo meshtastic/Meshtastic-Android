@@ -101,7 +101,7 @@ Kui on küsimusi konkreetse stringi konteksti kohta või vajad abi alustamiseks,
 
 Tänan teid Meshtasticu haardeala laiendamise eest!
 
-## Related Topics
+## Seotud teemad
 
 - [Units & Locale](units-and-locale) — how the app picks number, date, and unit formats for your region
 - [Help & Documentation](help-and-docs) — the in-app docs browser these pages are published to

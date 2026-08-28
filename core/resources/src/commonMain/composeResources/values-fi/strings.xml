@@ -568,7 +568,7 @@
     <string name="doc_title_connections">Yhteydet</string>
     <string name="doc_title_debug_logs">Virheenjäljityslokitiedot</string>
     <string name="doc_title_desktop">Työpöytäsovellus</string>
-    <string name="doc_title_discovery">Haku</string>
+    <string name="doc_title_discovery">Paikallisen mesh-verkon skannaus</string>
     <string name="doc_title_firmware">Laiteohjelmiston päivitykset</string>
     <string name="doc_title_help">Ohjeet &amp; sovelluksen sisäinen dokumentaatio</string>
     <string name="doc_title_map">Kartta &amp; reittipisteet</string>

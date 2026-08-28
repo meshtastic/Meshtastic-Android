@@ -42,7 +42,7 @@ Bridges mesh messages to and from an MQTT broker for internet connectivity. This
 | JSON Output              | Publish and consume MQTT messages as JSON. Marked deprecated in the protobuf schema, but it is still the only toggle for this behaviour and the firmware still honours it |
 | TLS                      | Use secure connection                                                                                                                                                                     |
 | 根主題                      | Base MQTT topic path                                                                                                                                                                      |
-| Proxy to client enabled  | Let a connected phone carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                       |
+| 啟用對客戶端的代理                | Let a connected phone carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                       |
 | MQTT proxy on this phone | The phone-side half of the above: whether _this_ phone is currently acting as that relay. See [MQTT](mqtt)                                                |
 | Map Report               | Publish position to the public map — see below                                                                                                                                            |
 
@@ -61,15 +61,15 @@ See [MQTT](mqtt) for a detailed usage guide including encryption, privacy, and b
 
 Enables serial port communication for external device integrations (GPS modules, sensors, or custom hardware). When enabled, the node's serial port can send and receive protobuf or text data, allowing external microcontrollers or computers to interact with the mesh.
 
-| 設定                           | 描述說明                                                                                                                                                                                                |
-| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Serial enabled               | Activate serial communication                                                                                                                                                                       |
-| Echo enabled                 | Echo received serial data back                                                                                                                                                                      |
-| Serial mode                  | Which protocol the port speaks — Default, Simple, Proto, Text message, NMEA, CalTopo, WS85 weather station, VE.Direct, MeshSolar config, Log, or Log (text only) |
-| RX / TX                      | GPIO pins for the serial connection                                                                                                                                                                 |
-| Serial baud rate             | Port speed                                                                                                                                                                                          |
-| Timeout                      | How long to wait before considering an incoming message complete                                                                                                                                    |
-| Override console serial port | Take over the port the debug console normally uses                                                                                                                                                  |
+| 設定           | 描述說明                                                                                                                                                                                                |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 啟用序列埠        | Activate serial communication                                                                                                                                                                       |
+| 啟用 Echo      | Echo received serial data back                                                                                                                                                                      |
+| 序列埠模式        | Which protocol the port speaks — Default, Simple, Proto, Text message, NMEA, CalTopo, WS85 weather station, VE.Direct, MeshSolar config, Log, or Log (text only) |
+| RX / TX      | GPIO pins for the serial connection                                                                                                                                                                 |
+| 序列埠鮑率        | Port speed                                                                                                                                                                                          |
+| Timeout - 超時 | How long to wait before considering an incoming message complete                                                                                                                                    |
+| 覆蓋控制台序列埠     | Take over the port the debug console normally uses                                                                                                                                                  |
 
 ### External Notification Module
 
@@ -78,20 +78,20 @@ Controls buzzer, LED, or vibration alerts on your radio hardware. Useful for dev
 There are two independent triggers — an incoming **message**, and a received **bell** character —
 and each can drive the LED, the buzzer and the vibration motor separately, giving six toggles.
 
-| 設定                                                | 描述說明                                                                                                |
-| ------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| External notification enabled                     | Master toggle for the module                                                                        |
-| Alert message LED / buzzer / vibra                | Which outputs fire on an incoming message                                                           |
-| Alert bell LED / buzzer / vibra                   | Which outputs fire on a received bell character                                                     |
-| Output LED (GPIO)              | Pin the LED is wired to                                                                             |
-| Output LED active high                            | Whether the LED pin is active high or low                                                           |
-| Output buzzer (GPIO)           | Pin the buzzer is wired to                                                                          |
-| Output vibra (GPIO)            | Pin the vibration motor is wired to                                                                 |
-| Use PWM buzzer                                    | Drive the buzzer with PWM, which allows tones rather than a single pitch                            |
-| Use I2S as buzzer                                 | Send the alert through an I2S audio output instead                                                  |
-| Output duration (milliseconds) | How long a single alert lasts                                                                       |
-| Nag timeout (seconds)          | Keep repeating the alert for this long until it is acknowledged. 0 disables nagging |
-| Ringtone                                          | The tone played on a PWM buzzer, in RTTTL. Can be imported from a file              |
+| 設定                                 | 描述說明                                                                                                |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------- |
+| 啟用外部通知                             | Master toggle for the module                                                                        |
+| Alert message LED / buzzer / vibra | Which outputs fire on an incoming message                                                           |
+| Alert bell LED / buzzer / vibra    | Which outputs fire on a received bell character                                                     |
+| 輸出LED（GPIO）                        | Pin the LED is wired to                                                                             |
+| 輸出LED 高電平觸發                        | Whether the LED pin is active high or low                                                           |
+| 輸出蜂鳴（GPIO）                         | Pin the buzzer is wired to                                                                          |
+| 輸出振動（GPIO）                         | Pin the vibration motor is wired to                                                                 |
+| 使用PWM調製的蜂鳴                         | Drive the buzzer with PWM, which allows tones rather than a single pitch                            |
+| 使用 I2S 控制蜂鳴器                       | Send the alert through an I2S audio output instead                                                  |
+| 輸出持續時間（毫秒）                         | How long a single alert lasts                                                                       |
+| 通知逾時時間（秒）                          | Keep repeating the alert for this long until it is acknowledged. 0 disables nagging |
+| 鈴聲                                 | The tone played on a PWM buzzer, in RTTTL. Can be imported from a file              |
 
 ### Store & Forward Module
 
@@ -129,19 +129,19 @@ Controls what telemetry data your node shares with the mesh. Telemetry includes 
 Each of the four metric groups has its own enable toggle and its own interval, so you can report
 battery health often and sensors rarely.
 
-| 設定                                    | 描述說明                                                                                                                                                                              |
-| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Send Device Telemetry                 | Master toggle for device metrics. Only shown on firmware 2.7.12 and newer                                                         |
-| Device metrics update interval        | How often to report battery, uptime and channel utilisation                                                                                                                       |
-| Environment metrics module enabled    | Report the attached environment sensors                                                                                                                                           |
-| Environment metrics update interval   | How often to report them                                                                                                                                                          |
-| Environment metrics on-screen enabled | Also show these readings on the device's own display                                                                                                                              |
-| Environment metrics use Fahrenheit    | Use °F on the device's display. This is the radio's screen only — the app follows your phone's locale, see [Units & Locale](units-and-locale) |
-| Air quality metrics module enabled    | Report particulate and CO₂ sensor data                                                                                                                                            |
-| Air quality metrics update interval   | How often to report them                                                                                                                                                          |
-| Power metrics module enabled          | Report the per-channel voltage and current readings                                                                                                                               |
-| Power metrics update interval         | How often to report them                                                                                                                                                          |
-| Power metrics on-screen enabled       | Also show power readings on the device's display                                                                                                                                  |
+| 設定          | 描述說明                                                                                                                                                                              |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 傳送裝置遙測資料    | Master toggle for device metrics. Only shown on firmware 2.7.12 and newer                                                         |
+| 裝置資訊更新間隔    | How often to report battery, uptime and channel utilisation                                                                                                                       |
+| 啟用環境資訊模組    | Report the attached environment sensors                                                                                                                                           |
+| 環境資訊更新間隔    | How often to report them                                                                                                                                                          |
+| 在螢幕上顯示環境資訊  | Also show these readings on the device's own display                                                                                                                              |
+| 環境指標以華氏溫度顯示 | Use °F on the device's display. This is the radio's screen only — the app follows your phone's locale, see [Units & Locale](units-and-locale) |
+| 啟用空氣品質模組    | Report particulate and CO₂ sensor data                                                                                                                                            |
+| 空氣品質資訊更新間隔  | How often to report them                                                                                                                                                          |
+| 啟用電池資訊模組    | Report the per-channel voltage and current readings                                                                                                                               |
+| 電源資訊更新間隔    | How often to report them                                                                                                                                                          |
+| 在螢幕上顯示電量資訊  | Also show power readings on the device's display                                                                                                                                  |
 
 See [Telemetry & Sensors](telemetry-and-sensors) for supported sensors and configuration recommendations.
 
@@ -153,11 +153,11 @@ Pre-configured messages accessible from the device's physical buttons (for radio
 | ----------------------------------------- | --------------------------------------------------------------------------------------------------------- |
 | ~~Canned message enabled~~                | ⚠️ **Deprecated** in the protobuf schema                                                                  |
 | 訊息                                        | Newline-separated list of messages                                                                        |
-| Send bell                                 | Send a bell character alongside the message, so a receiving node's External Notification module can sound |
+| 發送振鈴                                      | Send a bell character alongside the message, so a receiving node's External Notification module can sound |
 | Rotary encoder enabled                    | Use a rotary encoder as the input device                                                                  |
 | GPIO pin for rotary encoder A / B / press | The three pins the encoder is wired to                                                                    |
 | Generate input event on press / CW / CCW  | Which key event each encoder action produces                                                              |
-| Up/Down/Select input enabled              | A separate, simpler input scheme using up/down/select buttons rather than an encoder                      |
+| 啟用上下選擇輸入                                  | A separate, simpler input scheme using up/down/select buttons rather than an encoder                      |
 | ~~Allow input source~~                    | ⚠️ **Deprecated** in the protobuf schema                                                                  |
 
 ### Audio Module
@@ -168,7 +168,7 @@ Codec2 audio support for low-bandwidth voice communication over the mesh. This i
 | ---------------------------------- | ------------------------------------ |
 | 已啟用                                | Activate audio module                |
 | Codec2 Rate                        | Audio quality/bandwidth tradeoff     |
-| PTT Pin                            | GPIO pin for the push-to-talk button |
+| PTT 腳位                             | GPIO pin for the push-to-talk button |
 | I2S 字元選擇                           | GPIO pin for I2S WS                  |
 | I2S Data In                        | GPIO pin for I2S DIN                 |
 | I2S Data Out                       | GPIO pin for I2S DOUT                |
@@ -198,7 +198,7 @@ Broadcasts information about directly heard neighbors, enabling mesh topology ma
 | Update Interval (s) | How often to broadcast neighbor list                                                                                                 |
 | 透過 LoRa 傳輸                             | Also broadcast neighbor info over LoRa, not just MQTT/phone. Unavailable on a channel using the default key and name |
 
-See [Discovery](discovery) for how to use neighbor data for mesh topology exploration.
+See [Local Mesh Discovery](discovery) for how to use neighbor data for mesh topology exploration.
 
 ### Ambient Lighting Module
 
@@ -229,7 +229,7 @@ Turns your node into a motion or door sensor alert system. When a GPIO pin detec
 
 People counter using WiFi and BLE probe requests. Counts nearby devices by passively listening for probe requests that phones and laptops emit when scanning for networks. Available only on ESP32 devices.
 
-| Setting                                | Description                                                                                                      |
+| 設定                                     | 描述說明                                                                                                             |
 | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | 已啟用                                    | Activate people counting                                                                                         |
 | Update Interval (s) | How often to report counts                                                                                       |
@@ -242,9 +242,9 @@ People counter using WiFi and BLE probe requests. Counts nearby devices by passi
 
 Publishes a short free-text status line for your node, which other nodes can display alongside it.
 
-| Setting                  | Description                                                                                                                                                                      |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| The actual status string | Up to 80 characters. The **✕** in the field clears it. (That is the app's own label for the field, verbatim.) |
+| 設定     | 描述說明                                                                                                                                                                             |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 實際狀態字串 | Up to 80 characters. The **✕** in the field clears it. (That is the app's own label for the field, verbatim.) |
 
 Saving takes effect immediately — this is one of the few module settings that never asks the
 node to reboot.
@@ -255,7 +255,7 @@ node to reboot.
 ### Mesh Beacon Module
 
 Broadcasts an invitation to your mesh, and receives invitations from others. See
-[Discovery](discovery) for the full walkthrough.
+[Local Mesh Discovery](discovery) for the full walkthrough.
 
 ### TAK Module
 
@@ -297,7 +297,7 @@ Remotely reboot a connected or administered node.
 
 Opens the **Packets** and **App logs** tabs for viewing, filtering, and exporting diagnostic output. See [Debug Logs](debug-logs) for the full walkthrough.
 
-### About
+### About（關於）
 
 **Settings → About** carries the app's own identity rather than the radio's:
 
@@ -309,7 +309,7 @@ Three sections:
   **Acknowledgements** (below).
 - **Project information** — links to the website and to this documentation.
 
-### Acknowledgements
+### 致謝
 
 Reached from **About**, this lists every open-source library the app ships, with its license,
 generated at build time by AboutLibraries. It was previously called the license screen.

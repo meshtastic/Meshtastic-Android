@@ -76,7 +76,7 @@ Nodes with INA-series power sensors can report:
 
 | Metric      | Leírás                          |
 | ----------- | ------------------------------- |
-| Voltage     | Per-channel voltage reading     |
+| Feszültség  | Per-channel voltage reading     |
 | Áramerősség | Per-channel current draw, in mA |
 
 Up to three channels are reported (ch1–ch3), and each can be given its own label — Solar or Battery, say — from the node detail screen. There is no separate wattage reading; the app charts voltage and current, and does not compute power from them.

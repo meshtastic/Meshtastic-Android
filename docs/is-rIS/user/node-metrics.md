@@ -124,7 +124,7 @@ Power management telemetry (requires INA sensor or compatible hardware):
 Up to three channels (ch1–ch3) are charted, each with a label you can edit. The app does not
 derive a wattage figure from them.
 
-## Traceroute
+## Ferilkönnun
 
 Traceroute shows the path a message takes through the mesh:
 
@@ -172,7 +172,7 @@ The position tab shows location data for nodes that share GPS:
 - [Nodes](nodes) — node list, filtering, and sorting
 - [Telemetry & Sensors](telemetry-and-sensors) — supported sensors and configuration
 - [Signal Meter](signal-meter) — how signal quality is calculated from SNR and RSSI
-- [Discovery](discovery) — traceroute details and neighbor info
+- [Local Mesh Discovery](discovery) — traceroute details and neighbor info
 - [Units & Locale](units-and-locale) — temperature, distance, and speed display formats
 
 ---

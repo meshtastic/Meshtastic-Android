@@ -1,10 +1,12 @@
 ---
-title: Upptäckt
+title: Local Mesh Discovery
 parent: User Guide
 nav_order: 12
-last_updated: 2026-08-27
+last_updated: 2026-08-28
 description: Explore your mesh network — the Local Mesh Discovery scanner, traceroute paths, neighbor maps, and node discovery tools.
 aliases:
+  - discovery
+  - local-mesh-discovery
   - mesh-discovery
   - local-discovery
   - network-scan
@@ -12,7 +14,7 @@ aliases:
   - neighbor-info
 ---
 
-# Upptäckt
+# Local Mesh Discovery
 
 Discovery tools help you understand **how** your mesh network is connected — which nodes can hear each other, what paths messages take, and where bottlenecks or weak links exist.
 

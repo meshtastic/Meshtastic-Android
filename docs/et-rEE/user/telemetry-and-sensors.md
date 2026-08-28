@@ -55,10 +55,10 @@ Supported environmental sensors:
 
 ### Soil
 
-| Metric     | Ühik    | Notes                                           |
-| ---------- | ------- | ----------------------------------------------- |
-| Soil Temp  | °C / °F | Reported alongside soil moisture by soil probes |
-| Soil Moist | %       | Volumetric water content                        |
+| Meetriline          | Ühik    | Sõnumid                                         |
+| ------------------- | ------- | ----------------------------------------------- |
+| Pinnase temperatuur | °C / °F | Reported alongside soil moisture by soil probes |
+| Pinnase niiskus     | %       | Volumetric water content                        |
 
 Both appear as info cards on the node detail screen, next to the other environment readings.
 
@@ -76,7 +76,7 @@ Nodes with INA-series power sensors can report:
 
 | Meetriline | Kirjeldus                       |
 | ---------- | ------------------------------- |
-| Voltage    | Per-channel voltage reading     |
+| Vool       | Per-channel voltage reading     |
 | Pinge      | Per-channel current draw, in mA |
 
 Up to three channels are reported (ch1–ch3), and each can be given its own label — Solar or Battery, say — from the node detail screen. There is no separate wattage reading; the app charts voltage and current, and does not compute power from them.
@@ -106,7 +106,7 @@ Kasulik päikesepaneelide laadimise või aku seisundi jälgimiseks kaugsõlmedes
 
 Nodes with particulate matter or CO₂ sensors report air quality data:
 
-| Metric                | Unit  | Kirjeldus                         |
+| Meetriline            | Ühik  | Kirjeldus                         |
 | --------------------- | ----- | --------------------------------- |
 | PM1.0 | µg/m³ | Ultrafine particulate matter      |
 | PM2.5 | µg/m³ | Fine particulate matter           |

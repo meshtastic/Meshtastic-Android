@@ -114,19 +114,19 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 
 These control the **radio's own screen**, not the app's.
 
-| Setting               | Açıklaması                                                                                                                                                |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Screen on for         | How long the display stays lit before sleeping                                                                                                            |
-| Carousel interval     | How often the device cycles between screens on its own                                                                                                    |
-| Display mode          | Screen layout/density used by the firmware                                                                                                                |
-| Display units         | Metric or Imperial on the device's screen                                                                                                                 |
-| Use 12h clock format  | Show the device clock as 12-hour rather than 24-hour                                                                                                      |
-| Bold heading          | Draw the screen's heading text in bold                                                                                                                    |
-| Flip screen           | Rotate the display 180° for an inverted mounting                                                                                                          |
-| OLED type             | Auto, SSD1306, SH1106, SH1107                                                                                                                             |
-| Wake on tap or motion | Light the screen when the device is tapped or moved                                                                                                       |
-| Compass orientation   | Rotation offset for the compass rose (0°, 90°, 180°, 270°)                                                                             |
-| Always point north    | Locks the compass rose north-up instead of rotating it with your heading. Independent of Compass orientation — neither replaces the other |
+| Setting                   | Açıklaması                                                                                                                                                |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Screen on for             | How long the display stays lit before sleeping                                                                                                            |
+| Carousel interval         | How often the device cycles between screens on its own                                                                                                    |
+| Görüntü Modu              | Screen layout/density used by the firmware                                                                                                                |
+| Görüntü Birimleri         | Metric or Imperial on the device's screen                                                                                                                 |
+| 12h saat formatını kullan | Show the device clock as 12-hour rather than 24-hour                                                                                                      |
+| Bold heading              | Draw the screen's heading text in bold                                                                                                                    |
+| Ekranı Çevir              | Rotate the display 180° for an inverted mounting                                                                                                          |
+| OLED type                 | Auto, SSD1306, SH1106, SH1107                                                                                                                             |
+| Wake on tap or motion     | Light the screen when the device is tapped or moved                                                                                                       |
+| Pusula yönü               | Rotation offset for the compass rose (0°, 90°, 180°, 270°)                                                                             |
+| Always point north        | Locks the compass rose north-up instead of rotating it with your heading. Independent of Compass orientation — neither replaces the other |
 
 ### Konum Ayarı
 
@@ -146,16 +146,16 @@ These control the **radio's own screen**, not the app's.
 
 ### Güç Ayarı
 
-| Setting                                          | Açıklaması                                                      |
-| ------------------------------------------------ | --------------------------------------------------------------- |
-| Enable power saving mode                         | Let the radio sleep aggressively between activity               |
-| Shutdown on power loss                           | Power the device down after external power disappears           |
-| Super deep sleep duration                        | How long the deepest sleep state lasts                          |
-| Minimum wake time                                | The shortest time the radio stays awake once woken              |
-| Wait for Bluetooth duration                      | How long to wait for a phone to connect before sleeping         |
-| ADC multiplier override                          | Turn on a manual correction for battery-voltage readings        |
-| ADC multiplier override ratio                    | The correction factor itself, used only when the override is on |
-| Battery INA_2XX I2C address | Address of an external INA-series power sensor, if fitted       |
+| Setting                                       | Açıklaması                                                      |
+| --------------------------------------------- | --------------------------------------------------------------- |
+| Güç tasarrufu modunu etkinleştir              | Let the radio sleep aggressively between activity               |
+| Shutdown on power loss                        | Power the device down after external power disappears           |
+| Super deep sleep duration                     | How long the deepest sleep state lasts                          |
+| Minimum wake time                             | The shortest time the radio stays awake once woken              |
+| Wait for Bluetooth duration                   | How long to wait for a phone to connect before sleeping         |
+| ADC multiplier override                       | Turn on a manual correction for battery-voltage readings        |
+| ADC çarpanını geçersiz kılma oranı            | The correction factor itself, used only when the override is on |
+| Pilin INA_2XX I2C adresi | Address of an external INA-series power sensor, if fitted       |
 
 ### Ağ Ayarı
 
@@ -163,15 +163,15 @@ These control the **radio's own screen**, not the app's.
 
 | Setting                          | Açıklaması                                                                                                                 |
 | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| WiFi enabled                     | Enable the WiFi radio (ESP32 devices)                                                                   |
+| WiFi etkin                       | Enable the WiFi radio (ESP32 devices)                                                                   |
 | SSID                             | Network name to connect to. **Scan WiFi QR code** fills this and the password from a standard WiFi QR code |
-| Password                         | Ağ şifresi                                                                                                                 |
-| Ethernet enabled                 | Use a wired connection on hardware that has one                                                                            |
-| IPv4 mode                        | DHCP, or a static address configured with the four fields below                                                            |
+| Şifre                            | Ağ şifresi                                                                                                                 |
+| Ethernet etkin                   | Use a wired connection on hardware that has one                                                                            |
+| IPv4 modu                        | DHCP, or a static address configured with the four fields below                                                            |
 | Wifi IP / Subnet / Gateway / DNS | The static address, only used when IPv4 mode is static                                                                     |
 | UDP broadcasting                 | Share mesh traffic with other nodes over the local network                                                                 |
-| NTP server                       | Time synchronization server                                                                                                |
-| rsyslog server                   | Remote logging server                                                                                                      |
+| NTP sunucusu                     | Time synchronization server                                                                                                |
+| rsyslog sunucusu                 | Remote logging server                                                                                                      |
 
 ![IP address field](../../assets/screenshots/settings_ipv4_field.png)
 

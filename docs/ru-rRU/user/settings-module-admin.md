@@ -32,19 +32,19 @@ aliases:
 
 Мосты передают сообщения туда и обратно от брокера MQTT для подключения к интернету. Ты так расширишь сеть за пределы радиуса действия или интегрируешь её с системами домашней автоматизации.
 
-| Настройка                | Описание                                                                                                                                                                                  |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Включено                 | Переключить MQTT мост                                                                                                                                                                     |
-| Сервер                   | Адрес MQTT брокера                                                                                                                                                                        |
-| Имя пользователя         | Имя пользователя для аутентификации                                                                                                                                                       |
-| Пароль                   | Пароль аутентификации                                                                                                                                                                     |
-| Шифрование               | Зашифровать MQTT-пейлоады                                                                                                                                                                 |
-| JSON Output              | Publish and consume MQTT messages as JSON. Marked deprecated in the protobuf schema, but it is still the only toggle for this behaviour and the firmware still honours it |
-| TLS                      | Использовать защищённое соединение                                                                                                                                                        |
-| Корневая тема            | Базовый путь темы MQTT                                                                                                                                                                    |
-| Proxy to client enabled  | Let a connected phone carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                       |
-| MQTT proxy on this phone | The phone-side half of the above: whether _this_ phone is currently acting as that relay. See [MQTT](mqtt)                                                |
-| Отчет карты              | Publish position to the public map — see below                                                                                                                                            |
+| Настройка                    | Описание                                                                                                                                                                                  |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Включено                     | Переключить MQTT мост                                                                                                                                                                     |
+| Сервер                       | Адрес MQTT брокера                                                                                                                                                                        |
+| Имя пользователя             | Имя пользователя для аутентификации                                                                                                                                                       |
+| Пароль                       | Пароль аутентификации                                                                                                                                                                     |
+| Шифрование                   | Зашифровать MQTT-пейлоады                                                                                                                                                                 |
+| Вывод JSON                   | Publish and consume MQTT messages as JSON. Marked deprecated in the protobuf schema, but it is still the only toggle for this behaviour and the firmware still honours it |
+| TLS                          | Использовать защищённое соединение                                                                                                                                                        |
+| Корневая тема                | Базовый путь темы MQTT                                                                                                                                                                    |
+| Прокси клиенту включен       | Let a connected phone carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                       |
+| MQTT-прокси на этом телефоне | The phone-side half of the above: whether _this_ phone is currently acting as that relay. See [MQTT](mqtt)                                                |
+| Отчет карты                  | Publish position to the public map — see below                                                                                                                                            |
 
 **Map Report** expands into its own group:
 
@@ -61,15 +61,15 @@ aliases:
 
 Позволяет общаться через последовательный порт с внешними устройствами (GPS-модулями, датчиками или собственной техникой). Когда включено, последовательный порт ноды может отправлять и получать данные в формате protobuf или текст, что позволяет внешним микроконтроллерам или компьютерам взаимодействовать с сетью.
 
-| Настройка                    | Описание                                                                                                                                                                                            |
-| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Serial enabled               | Включить последовательное соединение                                                                                                                                                                |
-| Echo enabled                 | Echo получил обратно последовательные данные                                                                                                                                                        |
-| Serial mode                  | Which protocol the port speaks — Default, Simple, Proto, Text message, NMEA, CalTopo, WS85 weather station, VE.Direct, MeshSolar config, Log, or Log (text only) |
-| RX / TX                      | GPIO pins for the serial connection                                                                                                                                                                 |
-| Serial baud rate             | Port speed                                                                                                                                                                                          |
-| Timeout                      | How long to wait before considering an incoming message complete                                                                                                                                    |
-| Override console serial port | Take over the port the debug console normally uses                                                                                                                                                  |
+| Настройка                       | Описание                                                                                                                                                                                            |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| COM-порт включен                | Включить последовательное соединение                                                                                                                                                                |
+| Echo включен                    | Echo получил обратно последовательные данные                                                                                                                                                        |
+| Режим COM-порта                 | Which protocol the port speaks — Default, Simple, Proto, Text message, NMEA, CalTopo, WS85 weather station, VE.Direct, MeshSolar config, Log, or Log (text only) |
+| RX / TX                         | GPIO pins for the serial connection                                                                                                                                                                 |
+| Скорость COM-порта              | Port speed                                                                                                                                                                                          |
+| Время ожидания истекло          | How long to wait before considering an incoming message complete                                                                                                                                    |
+| Переопределить COM-порт консоли | Take over the port the debug console normally uses                                                                                                                                                  |
 
 ### Модуль внешних уведомлений
 
@@ -80,14 +80,14 @@ and each can drive the LED, the buzzer and the vibration motor separately, givin
 
 | Настройка                                                  | Описание                                                                                            |
 | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| External notification enabled                              | Master toggle for the module                                                                        |
+| Внешние уведомления включены                               | Master toggle for the module                                                                        |
 | Alert message LED / buzzer / vibra                         | Which outputs fire on an incoming message                                                           |
 | Alert bell LED / buzzer / vibra                            | Which outputs fire on a received bell character                                                     |
-| Output LED (GPIO)                       | Pin the LED is wired to                                                                             |
-| Output LED active high                                     | Whether the LED pin is active high or low                                                           |
-| Output buzzer (GPIO)                    | Pin the buzzer is wired to                                                                          |
-| Output vibra (GPIO)                     | Pin the vibration motor is wired to                                                                 |
-| Use PWM buzzer                                             | Drive the buzzer with PWM, which allows tones rather than a single pitch                            |
+| Выход LED (GPIO)                        | Pin the LED is wired to                                                                             |
+| Вывод светодиода активный высокий                          | Whether the LED pin is active high or low                                                           |
+| Выход Буззера (GPIO)                    | Pin the buzzer is wired to                                                                          |
+| Вибросигнал (GPIO)                      | Pin the vibration motor is wired to                                                                 |
+| Использовать PWM-звукоизлучатель                           | Drive the buzzer with PWM, which allows tones rather than a single pitch                            |
 | Использовать I2S как буззер                                | Send the alert through an I2S audio output instead                                                  |
 | Продолжительность вывода (миллисекунды) | How long a single alert lasts                                                                       |
 | Таймаут Nag (в секундах)                | Keep repeating the alert for this long until it is acknowledged. 0 disables nagging |
@@ -137,7 +137,7 @@ battery health often and sensors rarely.
 | Интервал обновления метрик среды            | How often to report them                                                                                                                                                          |
 | Показатели окружения на экране включены     | Also show these readings on the device's own display                                                                                                                              |
 | Использовать метрику окружения в Fahrenheit | Use °F on the device's display. This is the radio's screen only — the app follows your phone's locale, see [Units & Locale](units-and-locale) |
-| Air quality metrics module enabled          | Report particulate and CO₂ sensor data                                                                                                                                            |
+| Модуль измерения качества воздуха включен   | Report particulate and CO₂ sensor data                                                                                                                                            |
 | Интервал обновления данных качества воздуха | How often to report them                                                                                                                                                          |
 | Модуль метрик питания включен               | Report the per-channel voltage and current readings                                                                                                                               |
 | Интервал обновления метрик электропитания   | How often to report them                                                                                                                                                          |
@@ -168,7 +168,7 @@ battery health often and sensors rarely.
 | ---------------------------------- | ------------------------------------------------------ |
 | Включено                           | Активировать модуль аудио                              |
 | Частота кодирования                | Компромисс между качеством звука и полосой пропускания |
-| PTT Pin                            | GPIO pin for the push-to-talk button                   |
+| Пин PTT                            | GPIO pin for the push-to-talk button                   |
 | Выбор слов I2S                     | GPIO контакт для I2S WS                                |
 | I2S Вход данных                    | Пин GPIO для I2S DIN                                   |
 | I2S Выход данных                   | Пин GPIO для I2S DOUT                                  |
@@ -198,7 +198,7 @@ battery health often and sensors rarely.
 | Интервал обновления (с) | Как часто транслировать список соседей                                                                                                           |
 | Передача через LoRa                        | Также транслировать информацию соседей по LoRa, а не только MQTT/телефон. Недоступно на канале используя ключ по умолчанию и имя |
 
-Смотрите [Discovery](discovery) за тем как использовать соседние данные для сеточно топологического исследования.
+See [Local Mesh Discovery](discovery) for how to use neighbor data for mesh topology exploration.
 
 ### Модуль окружающего освещения
 
@@ -255,7 +255,7 @@ node to reboot.
 ### Mesh Beacon Module
 
 Broadcasts an invitation to your mesh, and receives invitations from others. See
-[Discovery](discovery) for the full walkthrough.
+[Local Mesh Discovery](discovery) for the full walkthrough.
 
 ### Модуль TAK
 
@@ -297,7 +297,7 @@ Prunes your local node database. Two independent controls:
 
 Открывает вкладки **Пакет** и **Журналы приложений** для просмотра, фильтрации и экспорта диагностических выходов. См. [Отладочные журналы](debug-logs) для полного прохождения.
 
-### About
+### О приложении
 
 **Settings → About** carries the app's own identity rather than the radio's:
 
@@ -309,7 +309,7 @@ Three sections:
   **Acknowledgements** (below).
 - **Project information** — links to the website and to this documentation.
 
-### Acknowledgements
+### Благодарности
 
 Reached from **About**, this lists every open-source library the app ships, with its license,
 generated at build time by AboutLibraries. It was previously called the license screen.

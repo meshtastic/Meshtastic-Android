@@ -106,7 +106,7 @@ Useful for monitoring solar charging or battery health on remote nodes.
 
 Nodes with particulate matter or CO₂ sensors report air quality data:
 
-| Metric                | Unit  | Descrizione                  |
+| Metrico               | Unit  | Descrizione                  |
 | --------------------- | ----- | ---------------------------- |
 | PM1.0 | µg/m³ | Ultrafine particulate matter |
 | PM2.5 | µg/m³ | Fine particulate matter      |

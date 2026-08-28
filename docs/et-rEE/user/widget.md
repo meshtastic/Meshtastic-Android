@@ -45,6 +45,6 @@ Tap the widget to open the app, or use its refresh control to request fresh stat
 
 - [Node Metrics](node-metrics) — the full Signal Quality and Local Stats history inside the app
 - [Ühendused](connections) — loo ühendus raadioga, et vidinal oleks statistikat kuvada
-- [Avasta](Discovery) — kanali ja eetriaja kasutamine kärgvõrgu ulatuses
+- [Local Mesh Discovery](discovery) — channel and airtime utilization across the mesh
 
 ---

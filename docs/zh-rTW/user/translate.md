@@ -101,7 +101,7 @@ If you have questions about a specific string's context or need help getting sta
 
 感謝您協助擴展 Meshtastic 的觸及範圍！
 
-## Related Topics
+## 相關主題
 
 - [Units & Locale](units-and-locale) — how the app picks number, date, and unit formats for your region
 - [Help & Documentation](help-and-docs) — the in-app docs browser these pages are published to

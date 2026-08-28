@@ -128,7 +128,7 @@ aliases:
 
 - [ノード](nodes)：ノードリストの表示と絞り込み
 - [ノードメトリクス](node-metrics)：各ノードの信号品質と位置履歴
-- [探索](discovery)：メッシュのトポロジーを把握するためのルート追跡と隣接ノード情報
+- [Local Mesh Discovery](discovery) — traceroute and neighbor info for understanding mesh topology
 - [単位とロケール](units-and-locale)：距離と座標の表示形式
 
 ---

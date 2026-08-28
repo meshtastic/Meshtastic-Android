@@ -23,7 +23,7 @@ Configure your radio hardware and user identity parameters.
 | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Dlouhé jméno      | Your display name (up to 39 characters)                                                                                                                                                                                   |
 | Krátké jméno      | 4-character abbreviated name                                                                                                                                                                                                                 |
-| Unmessageable     | Marks the node as one nobody should try to message — for an unmonitored or infrastructure node. Other clients hide it from the contact list. Needs supporting firmware                                       |
+| Nepřijímá zprávy  | Marks the node as one nobody should try to message — for an unmonitored or infrastructure node. Other clients hide it from the contact list. Needs supporting firmware                                       |
 | Licensed Operator | Enable if you hold an amateur radio license (permits higher power). Turning it on relabels **Long Name** as **Call Sign** and adds a separate Long Name field, and is staged behind a confirmation dialog |
 
 ### Applying Changes
@@ -34,37 +34,37 @@ After modifying settings, tap **Save** to write the configuration to your radio.
 
 ### Nastavení zařízení
 
-| Nastavení                                  | Popis                                                                                                                                                                                  | Výchozí  |
-| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
-| Role                                       | Node behavior (Client, Router, etc.) — each option carries its own description in the picker. Choosing Router asks for confirmation | Client   |
-| Režim opětovného vysílání                  | How the node retransmits messages; each mode is described in the picker                                                                                                                | Vše      |
-| Node Info Broadcast (s) | Interval for broadcasting node info                                                                                                                                                    | 10800    |
-| Double-tap Button                          | Treat a double tap as a button press                                                                                                                                                   | Disabled |
-| Triple Click Ad Hoc Ping                   | Send an ad-hoc position ping on a triple click                                                                                                                                         | Disabled |
-| LED Heartbeat                              | Blink the status LED periodically                                                                                                                                                      | Enabled  |
-| Time Zone                                  | POSIX time-zone string for the device clock, with buttons to copy your phone's zone or clear it                                                                                        | —        |
-| Button / Buzzer GPIO                       | Advanced: which pins the button and buzzer are wired to                                                                                                                | —        |
+| Nastavení                                        | Popis                                                                                                                                                                                  | Výchozí  |
+| ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| Role                                             | Node behavior (Client, Router, etc.) — each option carries its own description in the picker. Choosing Router asks for confirmation | Client   |
+| Režim opětovného vysílání                        | How the node retransmits messages; each mode is described in the picker                                                                                                                | Vše      |
+| Node Info Broadcast (s)       | Interval for broadcasting node info                                                                                                                                                    | 10800    |
+| Double-tap Button                                | Treat a double tap as a button press                                                                                                                                                   | Disabled |
+| Okamžitý ping (trojitý stisk) | Send an ad-hoc position ping on a triple click                                                                                                                                         | Disabled |
+| Blikání LED při provozu                          | Blink the status LED periodically                                                                                                                                                      | Povoleno |
+| Časové pásmo                                     | POSIX time-zone string for the device clock, with buttons to copy your phone's zone or clear it                                                                                        | —        |
+| Button / Buzzer GPIO                             | Advanced: which pins the button and buzzer are wired to                                                                                                                | —        |
 
 ### LoRa nastavení
 
-| Nastavení           | Popis                                                                                                                                                                                            | Výchozí                                   |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------- |
-| Region              | Regulatory region for frequency bands                                                                                                                                                            | Unset (must configure) |
-| Předvolba modemu    | Speed/range tradeoff                                                                                                                                                                             | LongFast                                  |
-| Hop Limit           | Maximum retransmit hops                                                                                                                                                                          | 3                                         |
-| TX Power            | Transmission power (dBm); 0 = max allowed for region                                                                                                                          | 0 (region max)         |
-| Frequency Override  | Overrides the computed operating frequency outright (MHz). It does not offset the calculated value — leave at 0 unless you know you need a specific frequency | 0 (use calculated)     |
-| Channel Bandwidth   | Bandwidth setting                                                                                                                                                                                | Default for preset                        |
-| Use Preset          | On by default. Turn it off to set Spread Factor, Coding Rate and Bandwidth by hand instead of taking them from the modem preset                                                  | On                                        |
-| Spread Factor       | Manual mode only: 7–12. Higher spreads further but slower                                                                                                        | From preset                               |
-| Coding Rate         | Manual mode only: 5–8. More redundancy costs airtime                                                                                                             | From preset                               |
-| Frequency Slot      | Which slot within the region's band to use. 0 derives it from the primary channel name                                                                                           | 0 (automatic)          |
-| Transmit Enabled    | Turning this off makes the node receive-only                                                                                                                                                     | On                                        |
-| Override Duty Cycle | Ignore the region's duty-cycle limit. Only legal where you are permitted to                                                                                                      | Off                                       |
-| Ignore MQTT         | Drop packets that arrived from MQTT rather than over the air                                                                                                                                     | Off                                       |
-| OK to MQTT          | Allow your packets to be forwarded to MQTT by gateways                                                                                                                                           | Off                                       |
-| RX Boosted Gain     | Extra receive gain on SX126x radios; costs a little current                                                                                                                                      | Off                                       |
-| PA fan disabled     | Turn off the power-amplifier fan on hardware that has one                                                                                                                                        | Off                                       |
+| Nastavení                                          | Popis                                                                                                                                                                                            | Výchozí                                   |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------- |
+| Region                                             | Regulatory region for frequency bands                                                                                                                                                            | Unset (must configure) |
+| Předvolba modemu                                   | Speed/range tradeoff                                                                                                                                                                             | LongFast                                  |
+| Hop Limit                                          | Maximum retransmit hops                                                                                                                                                                          | 3                                         |
+| TX Power                                           | Transmission power (dBm); 0 = max allowed for region                                                                                                                          | 0 (region max)         |
+| Ruční nastavení frekvence                          | Overrides the computed operating frequency outright (MHz). It does not offset the calculated value — leave at 0 unless you know you need a specific frequency | 0 (use calculated)     |
+| Channel Bandwidth                                  | Bandwidth setting                                                                                                                                                                                | Default for preset                        |
+| Použít předvolbu                                   | On by default. Turn it off to set Spread Factor, Coding Rate and Bandwidth by hand instead of taking them from the modem preset                                                  | On                                        |
+| Spread Factor                                      | Manual mode only: 7–12. Higher spreads further but slower                                                                                                        | From preset                               |
+| Coding Rate                                        | Manual mode only: 5–8. More redundancy costs airtime                                                                                                             | From preset                               |
+| Frekvenční slot                                    | Which slot within the region's band to use. 0 derives it from the primary channel name                                                                                           | 0 (automatic)          |
+| Vysílání povoleno                                  | Turning this off makes the node receive-only                                                                                                                                                     | On                                        |
+| Přepsat pracovní cyklus                            | Ignore the region's duty-cycle limit. Only legal where you are permitted to                                                                                                      | Vypnuto                                   |
+| Ignorovat MQTT                                     | Drop packets that arrived from MQTT rather than over the air                                                                                                                                     | Vypnuto                                   |
+| OK do MQTT                                         | Allow your packets to be forwarded to MQTT by gateways                                                                                                                                           | Vypnuto                                   |
+| Zvýšené zesílení přijímače (RX) | Extra receive gain on SX126x radios; costs a little current                                                                                                                                      | Vypnuto                                   |
+| PA fan disabled                                    | Turn off the power-amplifier fan on hardware that has one                                                                                                                                        | Vypnuto                                   |
 
 > ⚠️ **Important:** You **must** set your region before transmitting. Operating without the correct region may violate local radio regulations. See the [region configuration guide](https://meshtastic.org/docs/getting-started/initial-config) on meshtastic.org for details.
 
@@ -114,48 +114,48 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 
 These control the **radio's own screen**, not the app's.
 
-| Nastavení             | Popis                                                                                                                                                     |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Screen on for         | How long the display stays lit before sleeping                                                                                                            |
-| Carousel interval     | How often the device cycles between screens on its own                                                                                                    |
-| Display mode          | Screen layout/density used by the firmware                                                                                                                |
-| Display units         | Metric or Imperial on the device's screen                                                                                                                 |
-| Use 12h clock format  | Show the device clock as 12-hour rather than 24-hour                                                                                                      |
-| Bold heading          | Draw the screen's heading text in bold                                                                                                                    |
-| Flip screen           | Rotate the display 180° for an inverted mounting                                                                                                          |
-| OLED type             | Auto, SSD1306, SH1106, SH1107                                                                                                                             |
-| Wake on tap or motion | Light the screen when the device is tapped or moved                                                                                                       |
-| Compass orientation   | Rotation offset for the compass rose (0°, 90°, 180°, 270°)                                                                             |
-| Always point north    | Locks the compass rose north-up instead of rotating it with your heading. Independent of Compass orientation — neither replaces the other |
+| Nastavení                        | Popis                                                                                                                                                     |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Obrazovka zapnutá po dobu        | How long the display stays lit before sleeping                                                                                                            |
+| Interval přepínání obrazovek     | How often the device cycles between screens on its own                                                                                                    |
+| Režim obrazovky                  | Screen layout/density used by the firmware                                                                                                                |
+| Zobrazení jednotek               | Metric or Imperial on the device's screen                                                                                                                 |
+| Použít 12h formát hodin          | Show the device clock as 12-hour rather than 24-hour                                                                                                      |
+| Bold heading                     | Draw the screen's heading text in bold                                                                                                                    |
+| Překlopit obrazovku              | Rotate the display 180° for an inverted mounting                                                                                                          |
+| Typ OLED displeje                | Auto, SSD1306, SH1106, SH1107                                                                                                                             |
+| Probuzení klepnutím nebo pohybem | Light the screen when the device is tapped or moved                                                                                                       |
+| Orientace kompasu                | Rotation offset for the compass rose (0°, 90°, 180°, 270°)                                                                             |
+| Vždy ukazovat na sever           | Locks the compass rose north-up instead of rotating it with your heading. Independent of Compass orientation — neither replaces the other |
 
 ### Nastavení pozice
 
 > ⚠️ **Warning:** Saving this screen always reboots the radio.
 
-| Nastavení                                       | Popis                                                                                                                                                 |
-| ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GPS Mode (Physical Hardware) | Three-state: GPS enabled, disabled, or not present. Not a simple on/off                                               |
-| GPS Polling Interval                            | How often the radio asks its GPS for a fix                                                                                                            |
-| Broadcast Interval                              | How often the position is shared with the mesh                                                                                                        |
-| Chytrá poloha                                   | Broadcast based on movement rather than purely on the clock                                                                                           |
-| Smart Interval                                  | With Smart Position on, the shortest gap between broadcasts                                                                                           |
-| Smart Distance                                  | With Smart Position on, how far you must move before broadcasting                                                                                     |
-| Pevná poloha                                    | Use a manually entered latitude, longitude and altitude instead of the GPS                                                                            |
-| Position Flags                                  | A group of toggles choosing which fields ride along with a position — altitude, its reference and precision, satellites in view, timestamp, and so on |
-| GPS EN / Receive / Transmit GPIO                | Advanced: the pins the GPS module is wired to                                                                                         |
+| Nastavení                                    | Popis                                                                                                                                                 |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Režim GPS (fyzický modul) | Three-state: GPS enabled, disabled, or not present. Not a simple on/off                                               |
+| Interval aktualizace GPS                     | How often the radio asks its GPS for a fix                                                                                                            |
+| Interval vysílání                            | How often the position is shared with the mesh                                                                                                        |
+| Chytrá poloha                                | Broadcast based on movement rather than purely on the clock                                                                                           |
+| Chytrý Interval                              | With Smart Position on, the shortest gap between broadcasts                                                                                           |
+| Chytrá vzdálenost                            | With Smart Position on, how far you must move before broadcasting                                                                                     |
+| Pevná poloha                                 | Use a manually entered latitude, longitude and altitude instead of the GPS                                                                            |
+| Příznaky polohy                              | A group of toggles choosing which fields ride along with a position — altitude, its reference and precision, satellites in view, timestamp, and so on |
+| GPS EN / Receive / Transmit GPIO             | Advanced: the pins the GPS module is wired to                                                                                         |
 
 ### Nastavení napájení
 
-| Nastavení                                        | Popis                                                           |
-| ------------------------------------------------ | --------------------------------------------------------------- |
-| Enable power saving mode                         | Let the radio sleep aggressively between activity               |
-| Shutdown on power loss                           | Power the device down after external power disappears           |
-| Super deep sleep duration                        | How long the deepest sleep state lasts                          |
-| Minimum wake time                                | The shortest time the radio stays awake once woken              |
-| Wait for Bluetooth duration                      | How long to wait for a phone to connect before sleeping         |
-| ADC multiplier override                          | Turn on a manual correction for battery-voltage readings        |
-| ADC multiplier override ratio                    | The correction factor itself, used only when the override is on |
-| Battery INA_2XX I2C address | Address of an external INA-series power sensor, if fitted       |
+| Nastavení                                       | Popis                                                           |
+| ----------------------------------------------- | --------------------------------------------------------------- |
+| Povolit úsporný režim                           | Let the radio sleep aggressively between activity               |
+| Vypnutí při ztrátě napájení                     | Power the device down after external power disappears           |
+| Doba super hlubokého spánku                     | How long the deepest sleep state lasts                          |
+| Minimální doba probuzení                        | The shortest time the radio stays awake once woken              |
+| Doba čekání na Bluetooth                        | How long to wait for a phone to connect before sleeping         |
+| Přepsání násobiče ADC                           | Turn on a manual correction for battery-voltage readings        |
+| Vlastní hodnota násobiče pro ADC                | The correction factor itself, used only when the override is on |
+| Adresa INA_2XX I2C baterie | Address of an external INA-series power sensor, if fitted       |
 
 ### Nastavení sítě
 
@@ -163,13 +163,13 @@ These control the **radio's own screen**, not the app's.
 
 | Nastavení                        | Popis                                                                                                                      |
 | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| WiFi enabled                     | Enable the WiFi radio (ESP32 devices)                                                                   |
+| WiFi povoleno                    | Enable the WiFi radio (ESP32 devices)                                                                   |
 | SSID                             | Network name to connect to. **Scan WiFi QR code** fills this and the password from a standard WiFi QR code |
-| Password                         | Network password                                                                                                           |
-| Ethernet enabled                 | Use a wired connection on hardware that has one                                                                            |
-| IPv4 mode                        | DHCP, or a static address configured with the four fields below                                                            |
+| Heslo                            | Network password                                                                                                           |
+| Ethernet povolen                 | Use a wired connection on hardware that has one                                                                            |
+| Režim IPv4                       | DHCP, or a static address configured with the four fields below                                                            |
 | Wifi IP / Subnet / Gateway / DNS | The static address, only used when IPv4 mode is static                                                                     |
-| UDP broadcasting                 | Share mesh traffic with other nodes over the local network                                                                 |
+| UDP vysílání                     | Share mesh traffic with other nodes over the local network                                                                 |
 | NTP server                       | Time synchronization server                                                                                                |
 | rsyslog server                   | Remote logging server                                                                                                      |
 
@@ -190,8 +190,8 @@ These control the **radio's own screen**, not the app's.
 | Veřejný klíč              | Your node's public key (read-only)                                                                                                                                                          |
 | Administrátorský klíč     | Keys permitted to administer this node remotely — up to three                                                                                                                                                  |
 | Soukromý klíč             | Your node's private key (handle securely). Shown redacted when you are viewing another node over remote admin — the firmware does not send it                               |
-| Regenerate Private Key    | Issues a new keypair for this node, behind a confirmation. Every peer that knew your old key must learn the new one                                                                            |
-| Direct Message Key        | The key used for direct-message encryption                                                                                                                                                                     |
+| Obnovit soukromý klíč     | Issues a new keypair for this node, behind a confirmation. Every peer that knew your old key must learn the new one                                                                            |
+| Klíč pro přímé zprávy     | The key used for direct-message encryption                                                                                                                                                                     |
 | ~~Admin Channel Enabled~~ | ⚠️ Removed — now configured automatically when an admin key is set                                                                                                                                             |
 | Debug Log                 | Output live debug logging over serial/bluetooth                                                                                                                                                                |
 | Serial Enabled            | Enable serial console access (moved from Device Config)                                                                                                                                     |
@@ -214,9 +214,9 @@ Alongside the passphrase you set the limits that end a session automatically:
 
 | Field                                    | What it does                                      |
 | ---------------------------------------- | ------------------------------------------------- |
-| Boots remaining                          | How many device boots the unlocked state survives |
-| Hours until expiry                       | Wall-clock lifetime of the unlocked state         |
-| Session cap (minutes) | Maximum length of a single unlocked connection    |
+| Zbývající počet restartů                 | How many device boots the unlocked state survives |
+| Hodiny do vypršení platnosti             | Wall-clock lifetime of the unlocked state         |
+| Limit relace (minuty) | Maximum length of a single unlocked connection    |
 
 Once active, the row reads _Active — storage encrypted, this connection authenticated_ when
 unlocked, or _Active — enter your passphrase to unlock this connection_ when not. **Lock Now**

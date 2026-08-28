@@ -101,7 +101,7 @@ Jos sinulla on kysyttävää tietyn merkkijonon asiayhteydestä tai tarvitset ap
 
 Kiitos, että autat laajentamaan Meshtasticin tavoittavuutta!
 
-## Related Topics
+## Aiheeseen liittyvät aiheet
 
 - [Units & Locale](units-and-locale) — how the app picks number, date, and unit formats for your region
 - [Help & Documentation](help-and-docs) — the in-app docs browser these pages are published to

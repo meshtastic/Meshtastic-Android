@@ -118,61 +118,61 @@ Power management telemetry (requires INA sensor or compatible hardware):
 
 | Meetriline | Kirjeldus                      |
 | ---------- | ------------------------------ |
-| Voltage    | Per-channel voltage reading    |
+| Vool       | Per-channel voltage reading    |
 | Pinge      | Per-channel draw, in milliamps |
 
 Up to three channels (ch1–ch3) are charted, each with a label you can edit. The app does not
 derive a wattage figure from them.
 
-## Traceroute
+## Marsruudi
 
-Traceroute shows the path a message takes through the mesh:
+Traceroute näitab sõnumi teed läbi kärgvõrgu:
 
-1. From the node detail screen, tap **Traceroute**.
-2. The app sends a traceroute request to the target node.
-3. Results show each hop with SNR/RSSI values.
+1. Sõlme üksikasjade ekraanil puuduta **Traceroute**.
+2. Rakendus saadab sihtsõlmele traceroute-päringu.
+3. Tulemused näitavad iga hüpet koos SNR/RSSI väärtustega.
 
-### Reading Traceroute Results
+### Traceroute'i tulemuste lugemine
 
 ```
-You → Node A (SNR: 8.5) → Node B (SNR: 5.2) → Target
+Sina → seade A (SNR: 8,5) → seade B (SNR: 5,2) → sihtkoht
 ```
 
-Each hop represents a relay node that forwarded the message.
+Iga hüpe esindab vahendussõlme, mis sõnumi edastas.
 
-## Position Log
+## Asukoha logi
 
-Historical position data for nodes that share their location:
+Asukohta jagavate sõlmede ajaloolised asukohaandmed:
 
-- GPS coordinates
-- Altitude
-- Speed (if moving)
+- GPS koordinaadid
+- Kõrgus
+- Kiirus (kui liigub)
 - Timestamp for each position report
 
-## Neighbor Info
+## Naabruse teave
 
-Shows which nodes a given node can directly hear, useful for understanding mesh topology.
+Näitab, milliseid sõlmi antud sõlm otse kuuleb, kasulik kärgvõrgu topoloogia mõistmiseks.
 
 ## Viewing Metrics
 
-1. Navigate to **Nodes**.
-2. Tap the node you want to inspect.
-3. Select the metric category from the detail tabs.
+1. Mine **Seadmed**.
+2. Puuduta sõlme, mida soovite kontrollida.
+3. Vali detailvaadete vahekaartidelt mõõdiku kategooria.
 
-![Node detail — local device](../../assets/screenshots/nodes_detail_local.png)
+![Sõlme detailid — kohalik seade](../../assets/screenshots/nodes_detail_local.png)
 
-The position tab shows location data for nodes that share GPS:
+Asukoha vahekaart kuvab GPS-i jagavate sõlmede asukohaandmeid:
 
-![Position inline content](../../assets/screenshots/nodes_position.png)
+![Asukoha tekstisisene sisu](../../assets/screenshots/nodes_position.png)
 
-> ℹ️ **Note:** Metrics are only available when they have been reported by the remote node. Metrics update at intervals configured on each node's telemetry settings.
+> ℹ️ **Note:** Metrics are only available when they have been reported by the remote node. Mõõdikud värskendatakse iga sõlme telemeetria sätetes seadistatud intervallidega.
 
-## Related Topics
+## Seotud teemad
 
 - [Nodes](nodes) — node list, filtering, and sorting
-- [Telemetry & Sensors](telemetry-and-sensors) — supported sensors and configuration
+- [Telemeetria & Sensorid](telemetry-and-sensors) — toetatud andurid ja seadistus
 - [Signal Meter](signal-meter) — how signal quality is calculated from SNR and RSSI
-- [Discovery](discovery) — traceroute details and neighbor info
-- [Units & Locale](units-and-locale) — temperature, distance, and speed display formats
+- [Local Mesh Discovery](discovery) — traceroute details and neighbor info
+- [Ühikud ja lokaat](units-and-locale) — temperatuuri, kauguse ja kiiruse kuvamise ühikud
 
 ---

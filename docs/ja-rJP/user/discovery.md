@@ -1,10 +1,12 @@
 ---
-title: 探索
+title: ローカルメッシュ探索
 parent: User Guide
 nav_order: 12
-last_updated: 2026-08-27
+last_updated: 2026-08-28
 description: メッシュネットワークを探索します。ローカルメッシュ探索スキャナー、ルート追跡の経路、隣接ノードのマップ、ノード探索ツールを説明します。
 aliases:
+  - discovery
+  - local-mesh-discovery
   - mesh-discovery
   - local-discovery
   - network-scan
@@ -12,7 +14,7 @@ aliases:
   - neighbor-info
 ---
 
-# 探索
+# ローカルメッシュ探索
 
 探索ツールは、メッシュネットワークが**どのように**つながっているか（どのノードが互いに受信できるか、メッセージがどの経路を通るか、ボトルネックや弱いリンクがどこにあるか）を把握するのに役立ちます。
 

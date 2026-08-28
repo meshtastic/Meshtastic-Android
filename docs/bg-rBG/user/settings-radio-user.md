@@ -23,7 +23,7 @@ Configure your radio hardware and user identity parameters.
 | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Дълго име         | Your display name (up to 39 characters)                                                                                                                                                                                   |
 | Кратко име        | 4-character abbreviated name                                                                                                                                                                                                                 |
-| Unmessageable     | Marks the node as one nobody should try to message — for an unmonitored or infrastructure node. Other clients hide it from the contact list. Needs supporting firmware                                       |
+| Без съобщения     | Marks the node as one nobody should try to message — for an unmonitored or infrastructure node. Other clients hide it from the contact list. Needs supporting firmware                                       |
 | Licensed Operator | Enable if you hold an amateur radio license (permits higher power). Turning it on relabels **Long Name** as **Call Sign** and adds a separate Long Name field, and is staged behind a confirmation dialog |
 
 ### Applying Changes
@@ -41,30 +41,30 @@ After modifying settings, tap **Save** to write the configuration to your radio.
 | Node Info Broadcast (s) | Interval for broadcasting node info                                                                                                                                                    | 10800           |
 | Double-tap Button                          | Treat a double tap as a button press                                                                                                                                                   | Disabled        |
 | Triple Click Ad Hoc Ping                   | Send an ad-hoc position ping on a triple click                                                                                                                                         | Disabled        |
-| LED Heartbeat                              | Blink the status LED periodically                                                                                                                                                      | Enabled         |
-| Time Zone                                  | POSIX time-zone string for the device clock, with buttons to copy your phone's zone or clear it                                                                                        | —               |
+| LED Heartbeat                              | Blink the status LED periodically                                                                                                                                                      | Активиран       |
+| Часова зона                                | POSIX time-zone string for the device clock, with buttons to copy your phone's zone or clear it                                                                                        | —               |
 | Button / Buzzer GPIO                       | Advanced: which pins the button and buzzer are wired to                                                                                                                | —               |
 
 ### Конфигуриране на LoRa
 
-| Настройка                    | Описание                                                                                                                                                                                         | По подразбиране                           |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------- |
-| Регион                       | Regulatory region for frequency bands                                                                                                                                                            | Unset (must configure) |
-| Предварително настроен модем | Speed/range tradeoff                                                                                                                                                                             | LongFast                                  |
-| Лимит на отскоци             | Maximum retransmit hops                                                                                                                                                                          | 3                                         |
-| TX Power                     | Transmission power (dBm); 0 = max allowed for region                                                                                                                          | 0 (region max)         |
-| Frequency Override           | Overrides the computed operating frequency outright (MHz). It does not offset the calculated value — leave at 0 unless you know you need a specific frequency | 0 (use calculated)     |
-| Channel Bandwidth            | Bandwidth setting                                                                                                                                                                                | Default for preset                        |
-| Use Preset                   | On by default. Turn it off to set Spread Factor, Coding Rate and Bandwidth by hand instead of taking them from the modem preset                                                  | On                                        |
-| Spread Factor                | Manual mode only: 7–12. Higher spreads further but slower                                                                                                        | From preset                               |
-| Coding Rate                  | Manual mode only: 5–8. More redundancy costs airtime                                                                                                             | From preset                               |
-| Frequency Slot               | Which slot within the region's band to use. 0 derives it from the primary channel name                                                                                           | 0 (automatic)          |
-| Transmit Enabled             | Turning this off makes the node receive-only                                                                                                                                                     | On                                        |
-| Override Duty Cycle          | Ignore the region's duty-cycle limit. Only legal where you are permitted to                                                                                                      | Off                                       |
-| Ignore MQTT                  | Drop packets that arrived from MQTT rather than over the air                                                                                                                                     | Off                                       |
-| OK to MQTT                   | Allow your packets to be forwarded to MQTT by gateways                                                                                                                                           | Off                                       |
-| RX Boosted Gain              | Extra receive gain on SX126x radios; costs a little current                                                                                                                                      | Off                                       |
-| PA fan disabled              | Turn off the power-amplifier fan on hardware that has one                                                                                                                                        | Off                                       |
+| Настройка                                      | Описание                                                                                                                                                                                         | По подразбиране                           |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------- |
+| Регион                                         | Regulatory region for frequency bands                                                                                                                                                            | Unset (must configure) |
+| Предварително настроен модем                   | Speed/range tradeoff                                                                                                                                                                             | LongFast                                  |
+| Лимит на отскоци                               | Maximum retransmit hops                                                                                                                                                                          | 3                                         |
+| TX Power                                       | Transmission power (dBm); 0 = max allowed for region                                                                                                                          | 0 (region max)         |
+| Frequency Override                             | Overrides the computed operating frequency outright (MHz). It does not offset the calculated value — leave at 0 unless you know you need a specific frequency | 0 (use calculated)     |
+| Channel Bandwidth                              | Bandwidth setting                                                                                                                                                                                | Default for preset                        |
+| Използване на предварително зададени настройки | On by default. Turn it off to set Spread Factor, Coding Rate and Bandwidth by hand instead of taking them from the modem preset                                                  | On                                        |
+| Spread Factor                                  | Manual mode only: 7–12. Higher spreads further but slower                                                                                                        | From preset                               |
+| Coding Rate                                    | Manual mode only: 5–8. More redundancy costs airtime                                                                                                             | From preset                               |
+| Честотен слот                                  | Which slot within the region's band to use. 0 derives it from the primary channel name                                                                                           | 0 (automatic)          |
+| Предаването е активирано                       | Turning this off makes the node receive-only                                                                                                                                                     | On                                        |
+| Override Duty Cycle                            | Ignore the region's duty-cycle limit. Only legal where you are permitted to                                                                                                      | Off                                       |
+| Игнориране на MQTT                             | Drop packets that arrived from MQTT rather than over the air                                                                                                                                     | Off                                       |
+| OK to MQTT                                     | Allow your packets to be forwarded to MQTT by gateways                                                                                                                                           | Off                                       |
+| RX Boosted Gain                                | Extra receive gain on SX126x radios; costs a little current                                                                                                                                      | Off                                       |
+| PA fan disabled                                | Turn off the power-amplifier fan on hardware that has one                                                                                                                                        | Off                                       |
 
 > ⚠️ **Important:** You **must** set your region before transmitting. Operating without the correct region may violate local radio regulations. See the [region configuration guide](https://meshtastic.org/docs/getting-started/initial-config) on meshtastic.org for details.
 
@@ -114,48 +114,48 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 
 These control the **radio's own screen**, not the app's.
 
-| Настройка             | Описание                                                                                                                                                  |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Screen on for         | How long the display stays lit before sleeping                                                                                                            |
-| Carousel interval     | How often the device cycles between screens on its own                                                                                                    |
-| Display mode          | Screen layout/density used by the firmware                                                                                                                |
-| Display units         | Metric or Imperial on the device's screen                                                                                                                 |
-| Use 12h clock format  | Show the device clock as 12-hour rather than 24-hour                                                                                                      |
-| Bold heading          | Draw the screen's heading text in bold                                                                                                                    |
-| Flip screen           | Rotate the display 180° for an inverted mounting                                                                                                          |
-| OLED type             | Auto, SSD1306, SH1106, SH1107                                                                                                                             |
-| Wake on tap or motion | Light the screen when the device is tapped or moved                                                                                                       |
-| Compass orientation   | Rotation offset for the compass rose (0°, 90°, 180°, 270°)                                                                             |
-| Always point north    | Locks the compass rose north-up instead of rotating it with your heading. Independent of Compass orientation — neither replaces the other |
+| Настройка                            | Описание                                                                                                                                                  |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Екранът е включен за                 | How long the display stays lit before sleeping                                                                                                            |
+| Carousel interval                    | How often the device cycles between screens on its own                                                                                                    |
+| Режим на дисплея                     | Screen layout/density used by the firmware                                                                                                                |
+| Показвани единици                    | Metric or Imperial on the device's screen                                                                                                                 |
+| Използване на 12ч формат             | Show the device clock as 12-hour rather than 24-hour                                                                                                      |
+| Bold heading                         | Draw the screen's heading text in bold                                                                                                                    |
+| Обръщане на екрана                   | Rotate the display 180° for an inverted mounting                                                                                                          |
+| Тип на OLED                          | Auto, SSD1306, SH1106, SH1107                                                                                                                             |
+| Събуждане при докосване или движение | Light the screen when the device is tapped or moved                                                                                                       |
+| Ориентация на компаса                | Rotation offset for the compass rose (0°, 90°, 180°, 270°)                                                                             |
+| Always point north                   | Locks the compass rose north-up instead of rotating it with your heading. Independent of Compass orientation — neither replaces the other |
 
 ### Конфигуриране на позицията
 
 > ⚠️ **Warning:** Saving this screen always reboots the radio.
 
-| Настройка                                       | Описание                                                                                                                                              |
-| ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GPS Mode (Physical Hardware) | Three-state: GPS enabled, disabled, or not present. Not a simple on/off                                               |
-| GPS Polling Interval                            | How often the radio asks its GPS for a fix                                                                                                            |
-| Broadcast Interval                              | How often the position is shared with the mesh                                                                                                        |
-| Интелигентна позиция                            | Broadcast based on movement rather than purely on the clock                                                                                           |
-| Smart Interval                                  | With Smart Position on, the shortest gap between broadcasts                                                                                           |
-| Smart Distance                                  | With Smart Position on, how far you must move before broadcasting                                                                                     |
-| Фиксирана позиция                               | Use a manually entered latitude, longitude and altitude instead of the GPS                                                                            |
-| Position Flags                                  | A group of toggles choosing which fields ride along with a position — altitude, its reference and precision, satellites in view, timestamp, and so on |
-| GPS EN / Receive / Transmit GPIO                | Advanced: the pins the GPS module is wired to                                                                                         |
+| Настройка                                           | Описание                                                                                                                                              |
+| --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Режим на GPS (физически хардуер) | Three-state: GPS enabled, disabled, or not present. Not a simple on/off                                               |
+| GPS Polling Interval                                | How often the radio asks its GPS for a fix                                                                                                            |
+| Интервал на излъчване                               | How often the position is shared with the mesh                                                                                                        |
+| Интелигентна позиция                                | Broadcast based on movement rather than purely on the clock                                                                                           |
+| Smart Interval                                      | With Smart Position on, the shortest gap between broadcasts                                                                                           |
+| Smart Distance                                      | With Smart Position on, how far you must move before broadcasting                                                                                     |
+| Фиксирана позиция                                   | Use a manually entered latitude, longitude and altitude instead of the GPS                                                                            |
+| Position Flags                                      | A group of toggles choosing which fields ride along with a position — altitude, its reference and precision, satellites in view, timestamp, and so on |
+| GPS EN / Receive / Transmit GPIO                    | Advanced: the pins the GPS module is wired to                                                                                         |
 
 ### Конфигуриране на захранването
 
-| Настройка                                        | Описание                                                        |
-| ------------------------------------------------ | --------------------------------------------------------------- |
-| Enable power saving mode                         | Let the radio sleep aggressively between activity               |
-| Shutdown on power loss                           | Power the device down after external power disappears           |
-| Super deep sleep duration                        | How long the deepest sleep state lasts                          |
-| Minimum wake time                                | The shortest time the radio stays awake once woken              |
-| Wait for Bluetooth duration                      | How long to wait for a phone to connect before sleeping         |
-| ADC multiplier override                          | Turn on a manual correction for battery-voltage readings        |
-| ADC multiplier override ratio                    | The correction factor itself, used only when the override is on |
-| Battery INA_2XX I2C address | Address of an external INA-series power sensor, if fitted       |
+| Настройка                                           | Описание                                                        |
+| --------------------------------------------------- | --------------------------------------------------------------- |
+| Активиране на енергоспестяващ режим                 | Let the radio sleep aggressively between activity               |
+| Изключване при загуба на захранване                 | Power the device down after external power disappears           |
+| Продължителност на супер дълбок сън                 | How long the deepest sleep state lasts                          |
+| Минимално време за събуждане                        | The shortest time the radio stays awake once woken              |
+| Wait for Bluetooth duration                         | How long to wait for a phone to connect before sleeping         |
+| ADC multiplier override                             | Turn on a manual correction for battery-voltage readings        |
+| ADC multiplier override ratio                       | The correction factor itself, used only when the override is on |
+| I2C адрес на батерията INA_2XX | Address of an external INA-series power sensor, if fitted       |
 
 ### Конфигуриране на мрежата
 
@@ -163,15 +163,15 @@ These control the **radio's own screen**, not the app's.
 
 | Настройка                        | Описание                                                                                                                   |
 | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| WiFi enabled                     | Enable the WiFi radio (ESP32 devices)                                                                   |
+| Wi-Fi е активиран                | Enable the WiFi radio (ESP32 devices)                                                                   |
 | SSID                             | Network name to connect to. **Scan WiFi QR code** fills this and the password from a standard WiFi QR code |
-| Password                         | Парола за мрежата                                                                                                          |
-| Ethernet enabled                 | Use a wired connection on hardware that has one                                                                            |
-| IPv4 mode                        | DHCP, or a static address configured with the four fields below                                                            |
+| Парола                           | Парола за мрежата                                                                                                          |
+| Ethernet е активиран             | Use a wired connection on hardware that has one                                                                            |
+| Режим на IPv4                    | DHCP, or a static address configured with the four fields below                                                            |
 | Wifi IP / Subnet / Gateway / DNS | The static address, only used when IPv4 mode is static                                                                     |
 | UDP broadcasting                 | Share mesh traffic with other nodes over the local network                                                                 |
-| NTP server                       | Time synchronization server                                                                                                |
-| rsyslog server                   | Remote logging server                                                                                                      |
+| NTP сървър                       | Time synchronization server                                                                                                |
+| rsyslog сървър                   | Remote logging server                                                                                                      |
 
 ![IP address field](../../assets/screenshots/settings_ipv4_field.png)
 
@@ -185,21 +185,21 @@ These control the **radio's own screen**, not the app's.
 
 ### Конфигуриране на сигурността
 
-| Настройка                 | Описание                                                                                                                                                                                                       |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Публичен ключ             | Your node's public key (read-only)                                                                                                                                                          |
-| Администраторски ключ     | Keys permitted to administer this node remotely — up to three                                                                                                                                                  |
-| Частен ключ               | Your node's private key (handle securely). Shown redacted when you are viewing another node over remote admin — the firmware does not send it                               |
-| Regenerate Private Key    | Issues a new keypair for this node, behind a confirmation. Every peer that knew your old key must learn the new one                                                                            |
-| Direct Message Key        | The key used for direct-message encryption                                                                                                                                                                     |
-| ~~Admin Channel Enabled~~ | ⚠️ Removed — now configured automatically when an admin key is set                                                                                                                                             |
-| Debug Log                 | Output live debug logging over serial/bluetooth                                                                                                                                                                |
-| Serial Enabled            | Enable serial console access (moved from Device Config)                                                                                                                                     |
-| Управляем режим           | Restrict non-admin channel changes. Only selectable once an Admin Key is set                                                                                                                   |
-| Backup Keys               | Save an encrypted backup of the node's keys on this device (Android only)                                                                                                                   |
-| Restore Keys              | Write the backed-up keys back to the node (available once a backup exists)                                                                                                                  |
-| Delete Key Backup         | Remove the stored key backup from this device                                                                                                                                                                  |
-| Protection Level          | Packet authenticity — how unsigned or relayed packets are treated: **Strict**, **Balanced**, or **Compatible** (requires supporting firmware; Strict asks for confirmation) |
+| Настройка                    | Описание                                                                                                                                                                                                       |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Публичен ключ                | Your node's public key (read-only)                                                                                                                                                          |
+| Администраторски ключ        | Keys permitted to administer this node remotely — up to three                                                                                                                                                  |
+| Частен ключ                  | Your node's private key (handle securely). Shown redacted when you are viewing another node over remote admin — the firmware does not send it                               |
+| Регенериране на частния ключ | Issues a new keypair for this node, behind a confirmation. Every peer that knew your old key must learn the new one                                                                            |
+| Direct Message Key           | The key used for direct-message encryption                                                                                                                                                                     |
+| ~~Admin Channel Enabled~~    | ⚠️ Removed — now configured automatically when an admin key is set                                                                                                                                             |
+| Debug Log                    | Output live debug logging over serial/bluetooth                                                                                                                                                                |
+| Serial Enabled               | Enable serial console access (moved from Device Config)                                                                                                                                     |
+| Управляем режим              | Restrict non-admin channel changes. Only selectable once an Admin Key is set                                                                                                                   |
+| Backup Keys                  | Save an encrypted backup of the node's keys on this device (Android only)                                                                                                                   |
+| Restore Keys                 | Write the backed-up keys back to the node (available once a backup exists)                                                                                                                  |
+| Delete Key Backup            | Remove the stored key backup from this device                                                                                                                                                                  |
+| Protection Level             | Packet authenticity — how unsigned or relayed packets are treated: **Strict**, **Balanced**, or **Compatible** (requires supporting firmware; Strict asks for confirmation) |
 
 #### Lockdown Mode
 
@@ -212,7 +212,7 @@ the passphrase, and a full device erase restores the hardware regardless.
 
 Alongside the passphrase you set the limits that end a session automatically:
 
-| Field                                    | What it does                                      |
+| Field                                    | Какво прави                                       |
 | ---------------------------------------- | ------------------------------------------------- |
 | Boots remaining                          | How many device boots the unlocked state survives |
 | Hours until expiry                       | Wall-clock lifetime of the unlocked state         |

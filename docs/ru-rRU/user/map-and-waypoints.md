@@ -128,7 +128,7 @@ aliases:
 
 - [Ноды](nodes) — просмотр и фильтрация списка нод
 - [Метрики нод](node-metrics) — качество сигнала и история местоположения для отдельных нод
-- [Обнаружение](discovery) — трассировка и информация о соседях для понимания топологии mesh-сети
+- [Local Mesh Discovery](discovery) — traceroute and neighbor info for understanding mesh topology
 - [Единицы измерения и регион](units-and-locale) — форматы отображения расстояний и координат
 
 ---

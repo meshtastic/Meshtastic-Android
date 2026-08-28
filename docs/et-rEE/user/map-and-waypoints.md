@@ -128,7 +128,7 @@ Baaskaart sõltub rakenduse stiilist: **Google Play** versioonid kasutavad Googl
 
 - [Sõlmed](nodes) — vaata ja filtreeri oma sõlmede loendit
 - [Node Metrics](node-metrics) — signal quality and position history for individual nodes
-- [Avasta](Discovery) - traceroute'i ja naabri info kärgvõrgu topoloogia mõistmiseks
+- [Local Mesh Discovery](discovery) — traceroute and neighbor info for understanding mesh topology
 - [Ühikud ja lokaat](units-and-locale) — kauguse ja koordinaatide kuvamise ühikud
 
 ---

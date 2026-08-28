@@ -19,12 +19,12 @@ Configure your radio hardware and user identity parameters.
 
 ### User Profile
 
-| Setting           | Beskrivning                                                                                                                                                                                                                                  |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Långt namn        | Your display name (up to 39 characters)                                                                                                                                                                                   |
-| Kort namn         | 4-character abbreviated name                                                                                                                                                                                                                 |
-| Unmessageable     | Marks the node as one nobody should try to message — for an unmonitored or infrastructure node. Other clients hide it from the contact list. Needs supporting firmware                                       |
-| Licensed Operator | Enable if you hold an amateur radio license (permits higher power). Turning it on relabels **Long Name** as **Call Sign** and adds a separate Long Name field, and is staged behind a confirmation dialog |
+| Setting              | Beskrivning                                                                                                                                                                                                                                  |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Långt namn           | Your display name (up to 39 characters)                                                                                                                                                                                   |
+| Kort namn            | 4-character abbreviated name                                                                                                                                                                                                                 |
+| Meddelanden läses ej | Marks the node as one nobody should try to message — for an unmonitored or infrastructure node. Other clients hide it from the contact list. Needs supporting firmware                                       |
+| Licensed Operator    | Enable if you hold an amateur radio license (permits higher power). Turning it on relabels **Long Name** as **Call Sign** and adds a separate Long Name field, and is staged behind a confirmation dialog |
 
 ### Applying Changes
 
@@ -34,37 +34,37 @@ After modifying settings, tap **Save** to write the configuration to your radio.
 
 ### Enhetskonfiguration
 
-| Setting                                    | Beskrivning                                                                                                                                                                            | Förvald  |
-| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
-| Roll                                       | Node behavior (Client, Router, etc.) — each option carries its own description in the picker. Choosing Router asks for confirmation | Client   |
-| Återutsändningsläge                        | How the node retransmits messages; each mode is described in the picker                                                                                                                | Alla     |
-| Node Info Broadcast (s) | Interval for broadcasting node info                                                                                                                                                    | 10800    |
-| Double-tap Button                          | Treat a double tap as a button press                                                                                                                                                   | Disabled |
-| Triple Click Ad Hoc Ping                   | Send an ad-hoc position ping on a triple click                                                                                                                                         | Disabled |
-| LED Heartbeat                              | Blink the status LED periodically                                                                                                                                                      | Enabled  |
-| Time Zone                                  | POSIX time-zone string for the device clock, with buttons to copy your phone's zone or clear it                                                                                        | —        |
-| Button / Buzzer GPIO                       | Advanced: which pins the button and buzzer are wired to                                                                                                                | —        |
+| Setting                                    | Beskrivning                                                                                                                                                                            | Förvald   |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| Roll                                       | Node behavior (Client, Router, etc.) — each option carries its own description in the picker. Choosing Router asks for confirmation | Client    |
+| Återutsändningsläge                        | How the node retransmits messages; each mode is described in the picker                                                                                                                | Alla      |
+| Node Info Broadcast (s) | Interval for broadcasting node info                                                                                                                                                    | 10800     |
+| Double-tap Button                          | Treat a double tap as a button press                                                                                                                                                   | Disabled  |
+| Triple Click Ad Hoc Ping                   | Send an ad-hoc position ping on a triple click                                                                                                                                         | Disabled  |
+| LED pulsering                              | Blink the status LED periodically                                                                                                                                                      | Aktiverad |
+| Tidszon                                    | POSIX time-zone string for the device clock, with buttons to copy your phone's zone or clear it                                                                                        | —         |
+| Button / Buzzer GPIO                       | Advanced: which pins the button and buzzer are wired to                                                                                                                | —         |
 
 ### LoRa Config
 
-| Setting                | Beskrivning                                                                                                                                                                                      | Förvald                                   |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------- |
-| Region                 | Regulatory region for frequency bands                                                                                                                                                            | Unset (must configure) |
-| Modem-förinställningar | Speed/range tradeoff                                                                                                                                                                             | LongFast                                  |
-| Hoppgräns              | Maximum retransmit hops                                                                                                                                                                          | 3                                         |
-| TX Power               | Transmission power (dBm); 0 = max allowed for region                                                                                                                          | 0 (region max)         |
-| Frequency Override     | Overrides the computed operating frequency outright (MHz). It does not offset the calculated value — leave at 0 unless you know you need a specific frequency | 0 (use calculated)     |
-| Channel Bandwidth      | Bandwidth setting                                                                                                                                                                                | Default for preset                        |
-| Use Preset             | On by default. Turn it off to set Spread Factor, Coding Rate and Bandwidth by hand instead of taking them from the modem preset                                                  | On                                        |
-| Spread Factor          | Manual mode only: 7–12. Higher spreads further but slower                                                                                                        | From preset                               |
-| Coding Rate            | Manual mode only: 5–8. More redundancy costs airtime                                                                                                             | From preset                               |
-| Frequency Slot         | Which slot within the region's band to use. 0 derives it from the primary channel name                                                                                           | 0 (automatic)          |
-| Transmit Enabled       | Turning this off makes the node receive-only                                                                                                                                                     | On                                        |
-| Override Duty Cycle    | Ignore the region's duty-cycle limit. Only legal where you are permitted to                                                                                                      | Off                                       |
-| Ignore MQTT            | Drop packets that arrived from MQTT rather than over the air                                                                                                                                     | Off                                       |
-| OK to MQTT             | Allow your packets to be forwarded to MQTT by gateways                                                                                                                                           | Off                                       |
-| RX Boosted Gain        | Extra receive gain on SX126x radios; costs a little current                                                                                                                                      | Off                                       |
-| PA fan disabled        | Turn off the power-amplifier fan on hardware that has one                                                                                                                                        | Off                                       |
+| Setting                       | Beskrivning                                                                                                                                                                                      | Förvald                                   |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------- |
+| Region                        | Regulatory region for frequency bands                                                                                                                                                            | Unset (must configure) |
+| Modem-förinställningar        | Speed/range tradeoff                                                                                                                                                                             | LongFast                                  |
+| Hoppgräns                     | Maximum retransmit hops                                                                                                                                                                          | 3                                         |
+| TX Power                      | Transmission power (dBm); 0 = max allowed for region                                                                                                                          | 0 (region max)         |
+| Åsidosätt                     | Overrides the computed operating frequency outright (MHz). It does not offset the calculated value — leave at 0 unless you know you need a specific frequency | 0 (use calculated)     |
+| Channel Bandwidth             | Bandwidth setting                                                                                                                                                                                | Default for preset                        |
+| Använd förinställning         | On by default. Turn it off to set Spread Factor, Coding Rate and Bandwidth by hand instead of taking them from the modem preset                                                  | On                                        |
+| Spridningsfaktor              | Manual mode only: 7–12. Higher spreads further but slower                                                                                                        | From preset                               |
+| Kodningshastighet             | Manual mode only: 5–8. More redundancy costs airtime                                                                                                             | From preset                               |
+| Frekvens-slot                 | Which slot within the region's band to use. 0 derives it from the primary channel name                                                                                           | 0 (automatic)          |
+| Sändning aktiverad            | Turning this off makes the node receive-only                                                                                                                                                     | On                                        |
+| Ersätt gräns för driftsperiod | Ignore the region's duty-cycle limit. Only legal where you are permitted to                                                                                                      | Av                                        |
+| Ignorera MQTT                 | Drop packets that arrived from MQTT rather than over the air                                                                                                                                     | Av                                        |
+| OK till MQTT                  | Allow your packets to be forwarded to MQTT by gateways                                                                                                                                           | Av                                        |
+| RX förstärkt gain             | Extra receive gain on SX126x radios; costs a little current                                                                                                                                      | Av                                        |
+| PA fan disabled               | Turn off the power-amplifier fan on hardware that has one                                                                                                                                        | Av                                        |
 
 > ⚠️ **Important:** You **must** set your region before transmitting. Operating without the correct region may violate local radio regulations. See the [region configuration guide](https://meshtastic.org/docs/getting-started/initial-config) on meshtastic.org for details.
 
@@ -114,19 +114,19 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 
 These control the **radio's own screen**, not the app's.
 
-| Setting               | Beskrivning                                                                                                                                               |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Screen on for         | How long the display stays lit before sleeping                                                                                                            |
-| Carousel interval     | How often the device cycles between screens on its own                                                                                                    |
-| Display mode          | Screen layout/density used by the firmware                                                                                                                |
-| Display units         | Metric or Imperial on the device's screen                                                                                                                 |
-| Use 12h clock format  | Show the device clock as 12-hour rather than 24-hour                                                                                                      |
-| Bold heading          | Draw the screen's heading text in bold                                                                                                                    |
-| Flip screen           | Rotate the display 180° for an inverted mounting                                                                                                          |
-| OLED type             | Auto, SSD1306, SH1106, SH1107                                                                                                                             |
-| Wake on tap or motion | Light the screen when the device is tapped or moved                                                                                                       |
-| Compass orientation   | Rotation offset for the compass rose (0°, 90°, 180°, 270°)                                                                             |
-| Always point north    | Locks the compass rose north-up instead of rotating it with your heading. Independent of Compass orientation — neither replaces the other |
+| Setting                       | Beskrivning                                                                                                                                               |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Håll skärmen tänd             | How long the display stays lit before sleeping                                                                                                            |
+| Carousel interval             | How often the device cycles between screens on its own                                                                                                    |
+| Visningsläge                  | Screen layout/density used by the firmware                                                                                                                |
+| Visa enheter                  | Metric or Imperial on the device's screen                                                                                                                 |
+| Använd 12-timmarsformat       | Show the device clock as 12-hour rather than 24-hour                                                                                                      |
+| Bold heading                  | Draw the screen's heading text in bold                                                                                                                    |
+| Vänd skärmen                  | Rotate the display 180° for an inverted mounting                                                                                                          |
+| OLED-typ                      | Auto, SSD1306, SH1106, SH1107                                                                                                                             |
+| Vakna vid tryck eller rörelse | Light the screen when the device is tapped or moved                                                                                                       |
+| Kompassriktning               | Rotation offset for the compass rose (0°, 90°, 180°, 270°)                                                                             |
+| Peka alltid mot norr          | Locks the compass rose north-up instead of rotating it with your heading. Independent of Compass orientation — neither replaces the other |
 
 ### Position Config
 
@@ -134,28 +134,28 @@ These control the **radio's own screen**, not the app's.
 
 | Setting                                         | Beskrivning                                                                                                                                           |
 | ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GPS Mode (Physical Hardware) | Three-state: GPS enabled, disabled, or not present. Not a simple on/off                                               |
-| GPS Polling Interval                            | How often the radio asks its GPS for a fix                                                                                                            |
-| Broadcast Interval                              | How often the position is shared with the mesh                                                                                                        |
+| GPS-läge (fysisk maskinvara) | Three-state: GPS enabled, disabled, or not present. Not a simple on/off                                               |
+| Intervall för hämtning av GPS-position          | How often the radio asks its GPS for a fix                                                                                                            |
+| Sändningsintervall                              | How often the position is shared with the mesh                                                                                                        |
 | Smart position                                  | Broadcast based on movement rather than purely on the clock                                                                                           |
-| Smart Interval                                  | With Smart Position on, the shortest gap between broadcasts                                                                                           |
-| Smart Distance                                  | With Smart Position on, how far you must move before broadcasting                                                                                     |
+| Smart intervall                                 | With Smart Position on, the shortest gap between broadcasts                                                                                           |
+| Smart distans                                   | With Smart Position on, how far you must move before broadcasting                                                                                     |
 | Fast plats                                      | Use a manually entered latitude, longitude and altitude instead of the GPS                                                                            |
-| Position Flags                                  | A group of toggles choosing which fields ride along with a position — altitude, its reference and precision, satellites in view, timestamp, and so on |
+| Positionsflaggor                                | A group of toggles choosing which fields ride along with a position — altitude, its reference and precision, satellites in view, timestamp, and so on |
 | GPS EN / Receive / Transmit GPIO                | Advanced: the pins the GPS module is wired to                                                                                         |
 
 ### Ströminställningar
 
-| Setting                                          | Beskrivning                                                     |
-| ------------------------------------------------ | --------------------------------------------------------------- |
-| Enable power saving mode                         | Let the radio sleep aggressively between activity               |
-| Shutdown on power loss                           | Power the device down after external power disappears           |
-| Super deep sleep duration                        | How long the deepest sleep state lasts                          |
-| Minimum wake time                                | The shortest time the radio stays awake once woken              |
-| Wait for Bluetooth duration                      | How long to wait for a phone to connect before sleeping         |
-| ADC multiplier override                          | Turn on a manual correction for battery-voltage readings        |
-| ADC multiplier override ratio                    | The correction factor itself, used only when the override is on |
-| Battery INA_2XX I2C address | Address of an external INA-series power sensor, if fitted       |
+| Setting                                            | Beskrivning                                                     |
+| -------------------------------------------------- | --------------------------------------------------------------- |
+| Aktivera strömsparläge                             | Let the radio sleep aggressively between activity               |
+| Stäng av vid strömförlust                          | Power the device down after external power disappears           |
+| Tid för djup strömsparläge                         | How long the deepest sleep state lasts                          |
+| Minimum wake time                                  | The shortest time the radio stays awake once woken              |
+| Vänta in Bluetooth (sekunder)   | How long to wait for a phone to connect before sleeping         |
+| ADC multiplier override                            | Turn on a manual correction for battery-voltage readings        |
+| ADC multiplier override ratio                      | The correction factor itself, used only when the override is on |
+| Batteriets INA_2XX I2C-adress | Address of an external INA-series power sensor, if fitted       |
 
 ### Network Config
 
@@ -163,15 +163,15 @@ These control the **radio's own screen**, not the app's.
 
 | Setting                          | Beskrivning                                                                                                                |
 | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| WiFi enabled                     | Enable the WiFi radio (ESP32 devices)                                                                   |
+| WiFi är aktiverat                | Enable the WiFi radio (ESP32 devices)                                                                   |
 | SSID                             | Network name to connect to. **Scan WiFi QR code** fills this and the password from a standard WiFi QR code |
-| Password                         | Nätverkslösenord                                                                                                           |
-| Ethernet enabled                 | Use a wired connection on hardware that has one                                                                            |
-| IPv4 mode                        | DHCP, or a static address configured with the four fields below                                                            |
+| Lösenord                         | Nätverkslösenord                                                                                                           |
+| Ethernet är aktiverat            | Use a wired connection on hardware that has one                                                                            |
+| IPv4-läge                        | DHCP, or a static address configured with the four fields below                                                            |
 | Wifi IP / Subnet / Gateway / DNS | The static address, only used when IPv4 mode is static                                                                     |
 | UDP broadcasting                 | Share mesh traffic with other nodes over the local network                                                                 |
-| NTP server                       | Time synchronization server                                                                                                |
-| rsyslog server                   | Remote logging server                                                                                                      |
+| NTP-server                       | Time synchronization server                                                                                                |
+| rsyslog-server                   | Remote logging server                                                                                                      |
 
 ![IP address field](../../assets/screenshots/settings_ipv4_field.png)
 
@@ -185,21 +185,21 @@ These control the **radio's own screen**, not the app's.
 
 ### Security Config
 
-| Setting                   | Beskrivning                                                                                                                                                                                                    |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Publik nyckel             | Your node's public key (read-only)                                                                                                                                                          |
-| Admin-nyckel              | Keys permitted to administer this node remotely — up to three                                                                                                                                                  |
-| Privat nyckel             | Your node's private key (handle securely). Shown redacted when you are viewing another node over remote admin — the firmware does not send it                               |
-| Regenerate Private Key    | Issues a new keypair for this node, behind a confirmation. Every peer that knew your old key must learn the new one                                                                            |
-| Direct Message Key        | The key used for direct-message encryption                                                                                                                                                                     |
-| ~~Admin Channel Enabled~~ | ⚠️ Removed — now configured automatically when an admin key is set                                                                                                                                             |
-| Debug Log                 | Output live debug logging over serial/bluetooth                                                                                                                                                                |
-| Serial Enabled            | Enable serial console access (moved from Device Config)                                                                                                                                     |
-| Hanterat läge             | Restrict non-admin channel changes. Only selectable once an Admin Key is set                                                                                                                   |
-| Säkerhetskopiera nycklar  | Save an encrypted backup of the node's keys on this device (Android only)                                                                                                                   |
-| Restore Keys              | Write the backed-up keys back to the node (available once a backup exists)                                                                                                                  |
-| Delete Key Backup         | Remove the stored key backup from this device                                                                                                                                                                  |
-| Protection Level          | Packet authenticity — how unsigned or relayed packets are treated: **Strict**, **Balanced**, or **Compatible** (requires supporting firmware; Strict asks for confirmation) |
+| Setting                     | Beskrivning                                                                                                                                                                                                    |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Publik nyckel               | Your node's public key (read-only)                                                                                                                                                          |
+| Admin-nyckel                | Keys permitted to administer this node remotely — up to three                                                                                                                                                  |
+| Privat nyckel               | Your node's private key (handle securely). Shown redacted when you are viewing another node over remote admin — the firmware does not send it                               |
+| Förnya nyckel               | Issues a new keypair for this node, behind a confirmation. Every peer that knew your old key must learn the new one                                                                            |
+| Knapp för direktmeddelanden | The key used for direct-message encryption                                                                                                                                                                     |
+| ~~Admin Channel Enabled~~   | ⚠️ Removed — now configured automatically when an admin key is set                                                                                                                                             |
+| Debug Log                   | Output live debug logging over serial/bluetooth                                                                                                                                                                |
+| Serial Enabled              | Enable serial console access (moved from Device Config)                                                                                                                                     |
+| Hanterat läge               | Restrict non-admin channel changes. Only selectable once an Admin Key is set                                                                                                                   |
+| Säkerhetskopiera nycklar    | Save an encrypted backup of the node's keys on this device (Android only)                                                                                                                   |
+| Restore Keys                | Write the backed-up keys back to the node (available once a backup exists)                                                                                                                  |
+| Delete Key Backup           | Remove the stored key backup from this device                                                                                                                                                                  |
+| Protection Level            | Packet authenticity — how unsigned or relayed packets are treated: **Strict**, **Balanced**, or **Compatible** (requires supporting firmware; Strict asks for confirmation) |
 
 #### Lockdown Mode
 

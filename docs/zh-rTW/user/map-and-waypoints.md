@@ -128,7 +128,7 @@ The base map depends on your app flavor: **Google Play** builds use Google Maps,
 
 - 〔節點〕(nodes) — 檢視與篩選您的節點清單
 - 〔節點數據〕(node-metrics) — 各節點的訊號品質與位置歷史記錄
-- 〔探索〕(discovery) — 路由追蹤與鄰近節點資訊，用於了解 mesh 網路拓撲
+- [Local Mesh Discovery](discovery) — traceroute and neighbor info for understanding mesh topology
 - 〔單位與地區設定〕(units-and-locale) — 距離與座標的顯示格式
 
 ---

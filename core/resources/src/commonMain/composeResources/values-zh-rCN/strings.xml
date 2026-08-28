@@ -536,7 +536,7 @@
     <string name="doc_title_connections">连接数</string>
     <string name="doc_title_debug_logs">调试日志</string>
     <string name="doc_title_desktop">桌面应用</string>
-    <string name="doc_title_discovery">发现</string>
+    <string name="doc_title_discovery">本地网状网络发现</string>
     <string name="doc_title_firmware">固件升级</string>
     <string name="doc_title_help">帮助 &amp; 应用内文档</string>
     <string name="doc_title_map">地图 &amp; 路径点</string>

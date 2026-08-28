@@ -1,10 +1,12 @@
 ---
-title: Haku
+title: Paikallisen mesh-verkon skannaus
 parent: Käyttöopas
 nav_order: 12
-last_updated: 2026-08-27
+last_updated: 2026-08-28
 description: Tutki mesh-verkkoasi — paikallinen verkon haku, reitinselvitykset, naapurikartat ja radion hakuun liittyvät työkalut.
 aliases:
+  - discovery
+  - local-mesh-discovery
   - mesh-verkon haku
   - paikallinen haku
   - verkkohaku
@@ -12,7 +14,7 @@ aliases:
   - naapuritieto
 ---
 
-# Haku
+# Paikallisen mesh-verkon skannaus
 
 Hakutyökalut auttavat ymmärtämään **miten** mesh-verkko on yhteydessä — mitkä radiot kuulevat toisensa, mitä reittejä viestit kulkevat ja missä on pullonkauloja tai heikkoja yhteyksiä.
 
