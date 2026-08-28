@@ -31,13 +31,20 @@ package org.meshtastic.core.common.util
 @Suppress("TooManyFunctions")
 object MetricFormatter {
 
+    /**
+     * The degree symbol for the display unit, for callers that already hold a converted value and only need to label it
+     * — chart axes, and the telemetry rows fed by an upstream conversion. Defined here so a symbol has one definition:
+     * wind drifted between screens precisely because its unit was written out twice.
+     */
+    fun degreeSymbol(isFahrenheit: Boolean): String = if (isFahrenheit) FAHRENHEIT_SYMBOL else CELSIUS_SYMBOL
+
     fun temperature(celsius: Float, isFahrenheit: Boolean): String {
         val value = if (isFahrenheit) celsius * FAHRENHEIT_SCALE + FAHRENHEIT_OFFSET else celsius
-        val unit = if (isFahrenheit) "°F" else "°C"
-        return "${NumberFormatter.format(value, 1)}$unit"
+        return "${NumberFormatter.format(value, 1)}${degreeSymbol(isFahrenheit)}"
     }
 
-    fun voltage(volts: Float, decimalPlaces: Int = 2): String = "${NumberFormatter.format(volts, decimalPlaces)} V"
+    fun voltage(volts: Float, decimalPlaces: Int = 2): String =
+        "${NumberFormatter.format(volts, decimalPlaces)} $VOLT_SYMBOL"
 
     fun current(milliAmps: Float, decimalPlaces: Int = 1): String =
         "${NumberFormatter.format(milliAmps, decimalPlaces)} mA"
@@ -90,6 +97,11 @@ object MetricFormatter {
 
 /** Shown in place of a metric the radio did not report. A symbol, so it needs no translation. */
 private const val UNKNOWN_VALUE = "—"
+
+/** Display symbols. Fixed rather than translated — see the note on [MetricFormatter]. */
+const val CELSIUS_SYMBOL = "°C"
+const val FAHRENHEIT_SYMBOL = "°F"
+const val VOLT_SYMBOL = "V"
 
 private const val FAHRENHEIT_SCALE = 1.8f
 private const val FAHRENHEIT_OFFSET = 32

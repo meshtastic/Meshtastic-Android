@@ -91,7 +91,7 @@ private const val LABELLED_VALUE = "%s %s"
  * only labels them — converting again here would double-count, exactly as the 1-Wire rows warn. That is why these rows
  * cannot use `MetricFormatter.temperature`, which converts.
  */
-private fun degreeUnit(isFahrenheit: Boolean) = if (isFahrenheit) "°F" else "°C"
+private fun degreeUnit(isFahrenheit: Boolean) = MetricFormatter.degreeSymbol(isFahrenheit)
 
 @Composable
 fun EnvironmentMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
@@ -515,7 +515,7 @@ private fun OneWireTemperatureDisplay(
     envMetrics: org.meshtastic.proto.EnvironmentMetrics,
     environmentDisplayFahrenheit: Boolean,
 ) {
-    val unit = if (environmentDisplayFahrenheit) "°F" else "°C"
+    val unit = MetricFormatter.degreeSymbol(environmentDisplayFahrenheit)
     Environment.oneWireTemperatures.forEachIndexed { idx, entry ->
         val temp = envMetrics.oneWireTemperature(idx)?.takeIf { !it.isNaN() } ?: return@forEachIndexed
         ChannelMetricRow(
