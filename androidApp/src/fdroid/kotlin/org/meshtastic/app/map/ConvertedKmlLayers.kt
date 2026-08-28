@@ -27,7 +27,6 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.withContext
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.safeCatching
-import org.meshtastic.feature.map.geojson.geoJsonIconUrls
 import org.meshtastic.feature.map.maplibre.layers.CustomLayer
 import java.io.BufferedInputStream
 import java.io.File
@@ -49,7 +48,6 @@ private const val CONVERTED_DIR = "kml-geojson"
 internal fun rememberRenderableLayers(layers: List<MapLayerItem>): List<CustomLayer> {
     val context = LocalContext.current
     val converted = remember { mutableStateMapOf<String, String>() }
-    val icons = remember { mutableStateMapOf<String, Set<String>>() }
 
     val kmlLayers = layers.filter { it.layerType == LayerType.KML && it.uri != null }
 
@@ -64,52 +62,17 @@ internal fun rememberRenderableLayers(layers: List<MapLayerItem>): List<CustomLa
     }
 
     // A KML layer is absent until its conversion finishes, and for good if the file held nothing mappable.
-    val renderable =
-        layers.mapNotNull { layer ->
-            when {
-                layer.layerType != LayerType.KML ->
-                    layer.uri?.let {
-                        CustomLayer(id = layer.id, uri = it.toString(), refreshToken = layer.refreshToken)
-                    }
+    return layers.mapNotNull { layer ->
+        when {
+            layer.layerType != LayerType.KML ->
+                layer.uri?.let { CustomLayer(id = layer.id, uri = it.toString(), refreshToken = layer.refreshToken) }
 
-                else ->
-                    converted[layer.conversionKey()]?.let {
-                        CustomLayer(id = layer.id, uri = it, refreshToken = layer.refreshToken)
-                    }
-            }
-        }
-
-    // The renderer has to know a layer's icons before it composes, and the only place they exist is the GeoJSON
-    // itself. Reading the finished document rather than threading the set out of the KML converter means an imported
-    // GeoJSON that names its own icons gets them too, and a cached conversion does not have to remember them.
-    val localLayers = layers.filterNot { it.isNetwork }.associateBy { it.id }
-    val iconKey = renderable.joinToString(",") { "${it.id}@${it.refreshToken}" }
-    LaunchedEffect(iconKey) {
-        renderable.forEach { layer ->
-            val key = "${layer.id}@${layer.refreshToken}"
-            if (icons.containsKey(key) || localLayers[layer.id] == null) return@forEach
-            icons[key] = scanLayerIcons(context, layer.uri)
+            else ->
+                converted[layer.conversionKey()]?.let {
+                    CustomLayer(id = layer.id, uri = it, refreshToken = layer.refreshToken)
+                }
         }
     }
-
-    return renderable.map { layer -> layer.copy(icons = icons["${layer.id}@${layer.refreshToken}"].orEmpty()) }
-}
-
-/**
- * The icons a rendered layer's GeoJSON asks for, or none if it cannot be read.
- *
- * Network layers are skipped by the caller: their document lives behind a URL MapLibre fetches itself, and pulling it
- * down a second time here to look for icons is not worth it.
- */
-private suspend fun scanLayerIcons(context: Context, uri: String): Set<String> = withContext(ioDispatcher) {
-    safeCatching {
-        context.contentResolver.openInputStream(Uri.parse(uri))?.use { stream ->
-            geoJsonIconUrls(stream.readBytes().decodeToString())
-        }
-    }
-        .onFailure { Logger.withTag("KmlLayers").w(it) { "Could not read icons from an imported layer" } }
-        .getOrNull()
-        .orEmpty()
 }
 
 private fun MapLayerItem.conversionKey(): String = "$id@$refreshToken"
