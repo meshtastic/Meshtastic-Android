@@ -1136,7 +1136,6 @@
     <string name="mesh_beacon_on_region">Transmit region</string>
     <string name="mesh_beacon_preset_indicator">Advertised by a nearby beacon</string>
     <string name="mesh_beacon_preset_none">None</string>
-    <string name="mesh_beacon_send_as_node">Broadcast as node number (0 = this node)</string>
     <string name="mesh_beacon_target">Target %1$d</string>
     <string name="mesh_beacon_target_add">Add target</string>
     <string name="mesh_beacon_target_channel_index">Channel index</string>

@@ -43,7 +43,6 @@ import org.meshtastic.core.resources.mesh_beacon_offer_preset_setting
 import org.meshtastic.core.resources.mesh_beacon_offer_region_setting
 import org.meshtastic.core.resources.mesh_beacon_on_preset
 import org.meshtastic.core.resources.mesh_beacon_on_region
-import org.meshtastic.core.resources.mesh_beacon_send_as_node
 import org.meshtastic.core.resources.mesh_beacon_target_add
 import org.meshtastic.core.resources.mesh_beacon_target_channel_index
 import org.meshtastic.core.resources.mesh_beacon_target_remove
@@ -72,9 +71,8 @@ private fun Int.hasFlag(flag: Int): Boolean = (this and flag) != 0
  * config sync (there is no `ModuleConfigType` beacon value to request per-module) and writes via
  * `AdminMessage.setModuleConfig`. Flag edits are read-modify-write so `FLAG_LEGACY_SPLIT` and any unknown bits survive.
  *
- * The repeated `broadcast_targets` list is editable ([BroadcastTargetsCard]); the single-target `broadcast_on_*`
- * scalars are shown only as the fallback when no targets are set (Apple parity). `broadcast_on_channel` is preserved
- * verbatim through the Wire `copy()` round-trip (no scalar editor — the targets list supersedes it).
+ * The repeated `broadcast_targets` list ([BroadcastTargetsCard]) is the only way to name a beacon destination. An empty
+ * list means one beacon on the node's running preset and region over the primary channel.
  */
 @Suppress("LongMethod")
 @Composable
@@ -209,42 +207,12 @@ fun MeshBeaconConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, 
                 onChange = { formState.value = formState.value.copy(broadcast_targets = it) },
             )
         }
-        item {
-            TitledCard(title = stringResource(Res.string.mesh_beacon_on_region)) {
-                // Single-target transmit scalars are the fallback used only when no multi-target list is set (Apple
-                // shows these two only when broadcast_targets is empty). broadcast_send_as_node applies either way.
-                if (formState.value.broadcast_targets.isEmpty()) {
-                    DropDownPreference(
-                        title = stringResource(Res.string.mesh_beacon_on_region),
-                        selectedItem = formState.value.broadcast_on_region,
-                        enabled = state.connected,
-                        onItemSelected = { formState.value = formState.value.copy(broadcast_on_region = it) },
-                    )
-                    HorizontalDivider()
-                    DropDownPreference(
-                        title = stringResource(Res.string.mesh_beacon_on_preset),
-                        selectedItem = formState.value.broadcast_on_preset ?: ModemPreset.LONG_FAST,
-                        enabled = state.connected,
-                        onItemSelected = { formState.value = formState.value.copy(broadcast_on_preset = it) },
-                    )
-                    HorizontalDivider()
-                }
-                SignedIntegerEditTextPreference(
-                    title = stringResource(Res.string.mesh_beacon_send_as_node),
-                    value = formState.value.broadcast_send_as_node,
-                    enabled = state.connected,
-                    keyboardActions = KeyboardActions.Default,
-                    onValueChanged = { formState.value = formState.value.copy(broadcast_send_as_node = it) },
-                )
-            }
-        }
     }
 }
 
 /**
- * Editor for the repeated `broadcast_targets` list (Apple FR-014 multi-target). Each target carries its own
- * region/preset and an optional `channel_index`; rows can be added and removed. When the list is non-empty it
- * supersedes the single-target `broadcast_on_*` scalars.
+ * Editor for the repeated `broadcast_targets` list (Apple FR-014). Each target carries its own region/preset and an
+ * optional `channel_index`; rows can be added and removed. One beacon copy is sent per distinct destination.
  */
 @Composable
 private fun BroadcastTargetsCard(
