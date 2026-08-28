@@ -14,11 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.app.map.component
+package org.meshtastic.feature.map.component
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -30,49 +31,56 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.app.map.model.NodeClusterItem
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.close
 import org.meshtastic.core.resources.nodes_at_this_location
-import org.meshtastic.core.resources.okay
 import org.meshtastic.core.ui.component.NodeChip
 
+/**
+ * Lists the nodes sharing one spot, when zooming in further will not separate them.
+ *
+ * Renders nothing when [members] is empty, so callers can hand it state directly without a guard.
+ */
 @Composable
-fun ClusterItemsListDialog(
-    items: List<NodeClusterItem>,
-    onDismiss: () -> Unit,
-    onItemClick: (NodeClusterItem) -> Unit,
+fun ClusterMembersDialog(
+    members: List<ClusterMemberEntry>,
+    onMemberClick: (Int) -> Unit,
+    onDismissRequest: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
+    if (members.isEmpty()) return
+
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = onDismissRequest,
+        modifier = modifier,
         title = { Text(text = stringResource(Res.string.nodes_at_this_location)) },
         text = {
-            // Use a LazyColumn for potentially long lists of items
             LazyColumn(contentPadding = PaddingValues(vertical = 8.dp)) {
-                // Dedup by node.num: it's the LazyColumn key and must be unique, but filteredNodes can
-                // contain the same node from two sources (or a num=0 placeholder). See NodeListScreen.
-                items(items.distinctBy { it.node.num }, key = { it.node.num }) { item ->
-                    ClusterDialogListItem(item = item, onClick = { onItemClick(item) })
+                // Deduped by node number: it is the key and must be unique, and a node can reach the map from two
+                // sources, or arrive as a `num = 0` placeholder.
+                items(items = members.distinctBy { it.nodeNum }, key = { it.nodeNum }) { member ->
+                    ClusterMemberRow(member = member, onClick = { onMemberClick(member.nodeNum) })
                 }
             }
         },
-        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.okay)) } },
+        confirmButton = { TextButton(onClick = onDismissRequest) { Text(stringResource(Res.string.close)) } },
     )
 }
 
 @Composable
-private fun ClusterDialogListItem(item: NodeClusterItem, onClick: () -> Unit, modifier: Modifier = Modifier) {
+private fun ClusterMemberRow(member: ClusterMemberEntry, onClick: () -> Unit) {
     ListItem(
-        leadingContent = { NodeChip(node = item.node) },
-        headlineContent = { Text(item.nodeTitle) },
-        supportingContent = {
-            if (item.nodeSnippet.isNotBlank()) {
-                Text(item.nodeSnippet)
-            }
-        },
+        leadingContent = member.node?.let { { NodeChip(node = it) } },
+        headlineContent = { Text(member.title) },
+        supportingContent = { if (member.subtitle.isNotBlank()) Text(member.subtitle) },
         modifier =
-        modifier
-            .fillMaxWidth()
+        Modifier.fillMaxWidth()
+            // A member with only one line of text lands under the minimum touch target without this.
+            .heightIn(min = MIN_TOUCH_TARGET.dp)
             .clickable(onClick = onClick)
-            .padding(horizontal = 8.dp, vertical = 4.dp), // Add some padding around list items
+            .padding(horizontal = 8.dp, vertical = 4.dp),
     )
 }
+
+/** Material's minimum touch target, matching the 48dp the shared nav display uses. */
+private const val MIN_TOUCH_TARGET = 48

@@ -46,6 +46,8 @@ import org.maplibre.compose.location.rememberSystemSettingsLauncher
 import org.meshtastic.core.ui.util.KeepScreenOn
 import org.meshtastic.core.ui.util.MapViewProvider
 import org.meshtastic.feature.map.SharedMapViewModel
+import org.meshtastic.feature.map.component.ClusterMemberEntry
+import org.meshtastic.feature.map.component.ClusterMembersDialog
 import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.MapControlsOverlay
 import org.meshtastic.feature.map.component.MapFilterActions
@@ -53,7 +55,6 @@ import org.meshtastic.feature.map.component.MapFilterMenu
 import org.meshtastic.feature.map.maplibre.component.BasemapMenu
 import org.meshtastic.feature.map.maplibre.component.BasemapSelection
 import org.meshtastic.feature.map.maplibre.component.BoxAuthoringBar
-import org.meshtastic.feature.map.maplibre.component.ClusterMembersDialog
 import org.meshtastic.feature.map.maplibre.component.MapLayersButton
 import org.meshtastic.feature.map.maplibre.component.MapZoom
 import org.meshtastic.feature.map.maplibre.component.OfflineMapTarget
@@ -225,11 +226,28 @@ private fun BoxScope.BoxAuthoringSlot(editing: WaypointEditing, cameraState: Cam
     )
 }
 
-/** The cluster list, which clears the selection whichever way it is dismissed. */
+/**
+ * The cluster list, which clears the selection whichever way it is dismissed.
+ *
+ * The members arrive as cluster leaf features, carrying their own names; the node is looked up so the row can draw the
+ * chip the rest of the app draws, and stays null for a node the database no longer has.
+ */
 @Composable
 private fun ClusterMembersSlot(members: List<ClusterMember>, onPick: (Int) -> Unit, onClear: () -> Unit) {
+    val viewModel: SharedMapViewModel = koinViewModel()
+    val nodes by viewModel.nodes.collectAsStateWithLifecycle()
+    val byNum = remember(nodes) { nodes.associateBy { it.num } }
+
     ClusterMembersDialog(
-        members = members,
+        members =
+        members.map { member ->
+            ClusterMemberEntry(
+                nodeNum = member.nodeNum,
+                title = member.longName.ifBlank { member.shortName },
+                subtitle = if (member.longName.isBlank()) "" else member.shortName,
+                node = byNum[member.nodeNum],
+            )
+        },
         onMemberClick = { nodeNum ->
             onClear()
             onPick(nodeNum)

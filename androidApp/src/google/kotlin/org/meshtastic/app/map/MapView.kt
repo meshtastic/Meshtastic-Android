@@ -115,7 +115,6 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
-import org.meshtastic.app.map.component.ClusterItemsListDialog
 import org.meshtastic.app.map.component.CustomMapLayersSheet
 import org.meshtastic.app.map.component.CustomTileProviderManagerSheet
 import org.meshtastic.app.map.component.MapTypeDropdown
@@ -171,6 +170,8 @@ import org.meshtastic.core.ui.util.rememberLocationPermissionState
 import org.meshtastic.feature.map.BaseMapViewModel.MapFilterState
 import org.meshtastic.feature.map.MapBounds
 import org.meshtastic.feature.map.MapNodePolicy
+import org.meshtastic.feature.map.component.ClusterMemberEntry
+import org.meshtastic.feature.map.component.ClusterMembersDialog
 import org.meshtastic.feature.map.component.DeleteWaypointDialog
 import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.MapButton
@@ -998,14 +999,22 @@ fun MapView(
             onUseMapCenter = { cameraPositionState.position.target.let { it.latitude to it.longitude } },
         )
     }
-    showClusterItemsDialog?.let {
-        ClusterItemsListDialog(
-            items = it,
-            onDismiss = { showClusterItemsDialog = null },
-            onItemClick = { item ->
-                navigateToNodeDetails(item.node.num)
+    showClusterItemsDialog?.let { items ->
+        ClusterMembersDialog(
+            members =
+            items.map {
+                ClusterMemberEntry(
+                    nodeNum = it.node.num,
+                    title = it.nodeTitle,
+                    subtitle = it.nodeSnippet,
+                    node = it.node,
+                )
+            },
+            onMemberClick = { nodeNum ->
+                navigateToNodeDetails(nodeNum)
                 showClusterItemsDialog = null
             },
+            onDismissRequest = { showClusterItemsDialog = null },
         )
     }
     if (showCustomTileManagerSheet) {
