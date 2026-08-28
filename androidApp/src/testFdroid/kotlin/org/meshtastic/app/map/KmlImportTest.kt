@@ -37,7 +37,7 @@ import kotlin.test.assertTrue
  * `0,498` into the JSON and made every import silently draw nothing.
  */
 @RunWith(RobolectricTestRunner::class)
-class KmlToGeoJsonTest {
+class KmlImportTest {
 
     private fun convert(kml: String): String? =
         convertKmlSource(BufferedInputStream(ByteArrayInputStream(kml.toByteArray())))
