@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.app.map
+package org.meshtastic.feature.map.component
 
 import org.meshtastic.core.model.Node
 import org.meshtastic.proto.Position

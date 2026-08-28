@@ -14,17 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.app.map
+package org.meshtastic.feature.map.component
 
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.primaryChannel
-import org.meshtastic.feature.map.component.SitePlannerParams
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
 import kotlin.math.pow
 
 /** A planner session and, for Node Details routes, the node whose location shortcut it must retain. */
-internal class SitePlannerLaunch(val initialParams: SitePlannerParams, private val selectedNode: Node? = null) {
+class SitePlannerLaunch(val initialParams: SitePlannerParams, private val selectedNode: Node? = null) {
     fun nodeLocation(connectedNode: Node?): Pair<Double, Double>? = (selectedNode ?: connectedNode)
         ?.takeIf { it.validPosition != null }
         ?.let { node -> node.latitude to node.longitude }
@@ -73,14 +72,3 @@ private fun sensitivityDbmFor(preset: ModemPreset?): Double = when (preset) {
     ModemPreset.VERY_LONG_SLOW -> -147.5
     else -> SitePlannerParams.DEFAULT_RX_SENSITIVITY_DBM
 }
-
-/**
- * Whether Site Planner is offered at all.
- *
- * Android only, and true on both flavors: the Google map draws the coverage estimate through its data layer and the
- * MapLibre map as a GeoJSON layer (#6138). It was flavor-dispatched while only one flavor could render the overlay, and
- * each copy ended up claiming the other returned something different. Desktop takes the `LocalSitePlannerAvailable`
- * default of false, because the estimate runs in a WebView it has no equivalent for.
- */
-@Suppress("FunctionOnlyReturningConstant")
-fun sitePlannerAvailable(): Boolean = true

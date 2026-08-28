@@ -36,8 +36,6 @@ fun getMapViewProvider(): MapViewProvider = MapLibreMapViewProvider(
     // Everything but the picker is common now; Android is just the platform that has one.
     basemapMenuExtra = { CustomTileSourcesMenuItem(onAddLocalMbTiles = rememberMbTilesImport()) },
     // waypointEditor is not passed: EditWaypointDialog is multiplatform now and the provider defaults to it.
-    // sitePlannerAvailable() has returned true on this flavor all along, but nothing consumed it — the MapLibre map
-    // never offered the button and dropped the sitePlannerNodeNum deep link. Both are wired now.
     // MapLibre's offline packs actually download here; on desktop they never do, so the default is off.
     offlineMapsSupported = true,
     sitePlanner = { session -> SitePlannerSlot(session) },

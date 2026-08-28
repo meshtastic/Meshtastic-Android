@@ -53,7 +53,6 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import org.meshtastic.app.intro.AnalyticsIntro
 import org.meshtastic.app.map.getMapViewProvider
-import org.meshtastic.app.map.sitePlannerAvailable
 import org.meshtastic.app.node.component.InlineMap
 import org.meshtastic.app.node.metrics.getTracerouteMapOverlayInsets
 import org.meshtastic.app.ui.MainScreen
@@ -224,7 +223,7 @@ class MainActivity : AppCompatActivity() {
             LocalNfcScannerSupported provides true,
             LocalAnalyticsIntroProvider provides { AnalyticsIntro() },
             LocalMapViewProvider provides getMapViewProvider(),
-            LocalSitePlannerAvailable provides sitePlannerAvailable(),
+            LocalSitePlannerAvailable provides true,
             LocalInlineMapProvider provides { node, modifier -> InlineMap(node, modifier) },
             LocalNodeTrackMapProvider provides
                 { destNum, positions, modifier, selectedPositionTime, onPositionSelected ->

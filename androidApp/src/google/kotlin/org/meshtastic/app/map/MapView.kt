@@ -182,7 +182,9 @@ import org.meshtastic.feature.map.component.MapFilterActions
 import org.meshtastic.feature.map.component.MapFilterMenu
 import org.meshtastic.feature.map.component.NodeTrackFilterMenu
 import org.meshtastic.feature.map.component.RasterOverlayToggles
+import org.meshtastic.feature.map.component.SitePlannerLaunch
 import org.meshtastic.feature.map.component.WaypointInfoDialog
+import org.meshtastic.feature.map.component.toSitePlannerParams
 import org.meshtastic.feature.map.includes
 import org.meshtastic.feature.map.tiles.mapAttributionText
 import org.meshtastic.feature.map.tracerouteNodeSelection
@@ -941,15 +943,9 @@ fun MapView(
                     onClick = { showLayersBottomSheet = true },
                 )
             },
-            // Google flavor only: hands params to the hosted Site Planner and imports the returned coverage.
-            onSitePlannerClick =
-            if (sitePlannerAvailable()) {
-                {
-                    sitePlannerLaunch =
-                        SitePlannerLaunch(initialParams = ourNodeInfo.toSitePlannerParams(channelSet))
-                }
-            } else {
-                null
+            // Hands params to the hosted Site Planner and imports the returned coverage.
+            onSitePlannerClick = {
+                sitePlannerLaunch = SitePlannerLaunch(initialParams = ourNodeInfo.toSitePlannerParams(channelSet))
             },
             isLocationTrackingEnabled = isLocationTrackingEnabled,
             onToggleLocationTracking = {
