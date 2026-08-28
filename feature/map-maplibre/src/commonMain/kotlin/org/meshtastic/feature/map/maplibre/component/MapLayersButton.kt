@@ -97,7 +97,7 @@ private fun MapLayersSheet(
         MapOverlays.all.forEach { overlay ->
             val checked = overlays.any { it.id == overlay.id }
             ListItem(
-                headlineContent = { Text(text = overlay.label) },
+                headlineContent = { Text(text = stringResource(overlay.label)) },
                 trailingContent = {
                     Checkbox(checked = checked, onCheckedChange = { onOverlaysChange(overlays.toggling(overlay)) })
                 },

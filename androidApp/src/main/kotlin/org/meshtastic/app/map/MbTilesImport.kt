@@ -19,8 +19,8 @@ package org.meshtastic.app.map
 import android.content.Context
 import android.net.Uri
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.meshtastic.core.common.util.ioDispatcher
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -38,31 +38,30 @@ private const val TAG = "MbTilesImport"
  *
  * Returns null if the copy fails, so a source is never stored pointing at a file that was never written.
  */
-internal suspend fun importMbTiles(context: Context, uri: Uri, fileName: String): String? =
-    withContext(Dispatchers.IO) {
-        // Every call below blocks, and an MBTiles archive is routinely hundreds of megabytes, so running on the
-        // caller's dispatcher would freeze the UI for the whole copy — `suspend` alone does not move work off it.
-        try {
-            val input = context.contentResolver.openInputStream(uri)
-            if (input == null) {
-                Logger.withTag(TAG).w { "Could not open the picked MBTiles file" }
-                null
-            } else {
-                val directory = File(context.filesDir, MBTILES_DIR).apply { if (!exists()) mkdirs() }
-                val target = File(directory, fileName)
-                input.use { source -> FileOutputStream(target).use { sink -> source.copyTo(sink) } }
-                target.absolutePath
-            }
-        } catch (e: IOException) {
-            Logger.withTag(TAG).e(e) { "Could not copy the picked MBTiles file into app storage" }
+internal suspend fun importMbTiles(context: Context, uri: Uri, fileName: String): String? = withContext(ioDispatcher) {
+    // Every call below blocks, and an MBTiles archive is routinely hundreds of megabytes, so running on the
+    // caller's dispatcher would freeze the UI for the whole copy — `suspend` alone does not move work off it.
+    try {
+        val input = context.contentResolver.openInputStream(uri)
+        if (input == null) {
+            Logger.withTag(TAG).w { "Could not open the picked MBTiles file" }
             null
-        } catch (e: SecurityException) {
-            // Not an IOException: the picker's URI grant can be gone by the time the copy runs, and the throw would
-            // otherwise escape a function whose contract is to return null on failure.
-            Logger.withTag(TAG).e(e) { "Lost permission to read the picked MBTiles file" }
-            null
+        } else {
+            val directory = File(context.filesDir, MBTILES_DIR).apply { if (!exists()) mkdirs() }
+            val target = File(directory, fileName)
+            input.use { source -> FileOutputStream(target).use { sink -> source.copyTo(sink) } }
+            target.absolutePath
         }
+    } catch (e: IOException) {
+        Logger.withTag(TAG).e(e) { "Could not copy the picked MBTiles file into app storage" }
+        null
+    } catch (e: SecurityException) {
+        // Not an IOException: the picker's URI grant can be gone by the time the copy runs, and the throw would
+        // otherwise escape a function whose contract is to return null on failure.
+        Logger.withTag(TAG).e(e) { "Lost permission to read the picked MBTiles file" }
+        null
     }
+}
 
 /** The URL form MapLibre's MBTiles source accepts: its own scheme over an absolute path, with no tile placeholders. */
 internal fun mbTilesUrl(absolutePath: String): String = "mbtiles://$absolutePath"

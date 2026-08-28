@@ -1053,6 +1053,9 @@ map_filter
 map_layer_formats
 map_node_popup_details
 map_offline_manager
+map_overlay_hillshade
+map_overlay_precipitation
+map_overlay_weather_radar
 map_purge_fail
 map_purge_success
 map_reporting

@@ -24,8 +24,8 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.feature.map.maplibre.layers.CustomLayer
 import java.io.BufferedInputStream
@@ -78,7 +78,7 @@ internal fun rememberRenderableLayers(layers: List<MapLayerItem>): List<CustomLa
 private fun MapLayerItem.conversionKey(): String = "$id@$refreshToken"
 
 /** Converts one KML or KMZ import to a GeoJSON file in the cache, returning its URI. Null if nothing was mappable. */
-private suspend fun convertKmlLayer(context: Context, layer: MapLayerItem): String? = withContext(Dispatchers.IO) {
+private suspend fun convertKmlLayer(context: Context, layer: MapLayerItem): String? = withContext(ioDispatcher) {
     val source = layer.uri ?: return@withContext null
     safeCatching {
         val target =

@@ -16,6 +16,12 @@
  */
 package org.meshtastic.feature.map.maplibre.style
 
+import org.jetbrains.compose.resources.StringResource
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.map_overlay_hillshade
+import org.meshtastic.core.resources.map_overlay_precipitation
+import org.meshtastic.core.resources.map_overlay_weather_radar
+
 /**
  * Overlays that composite on top of whichever [Basemap] is selected. Unlike basemaps these are independently toggleable
  * and may be stacked.
@@ -23,19 +29,24 @@ package org.meshtastic.feature.map.maplibre.style
 sealed interface MapOverlay {
     val id: String
 
-    /** Menu label; proper nouns and short descriptors, deliberately untranslated. */
-    val label: String
+    /**
+     * Menu label. A resource, not a literal: unlike the basemaps — whose labels are provider and style names
+     * (OpenStreetMap, Liberty, Esri) that stay the same in every language — these describe what the overlay shows, and
+     * a phrase like weather radar is ordinary UI text that has to translate.
+     */
+    val label: StringResource
 
     /** Terrain shading derived from a raster-DEM source. */
     data class Hillshade(
         override val id: String,
-        override val label: String,
+        override val label: StringResource,
         val spec: RasterTileSpec,
         val encoding: DemEncoding,
     ) : MapOverlay
 
     /** A plain raster overlay, e.g. weather imagery. */
-    data class Raster(override val id: String, override val label: String, val spec: RasterTileSpec) : MapOverlay
+    data class Raster(override val id: String, override val label: StringResource, val spec: RasterTileSpec) :
+        MapOverlay
 
     /** Elevation encodings we support. Kept local so the registry stays free of MapLibre types. */
     enum class DemEncoding {
@@ -65,7 +76,7 @@ object MapOverlays {
     val Hillshade =
         MapOverlay.Hillshade(
             id = "hillshade",
-            label = "Hillshade",
+            label = Res.string.map_overlay_hillshade,
             spec =
             RasterTileSpec(
                 tiles = listOf("https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png"),
@@ -84,7 +95,7 @@ object MapOverlays {
     val NoaaRadar =
         MapOverlay.Raster(
             id = "noaa-radar",
-            label = "Weather radar",
+            label = Res.string.map_overlay_weather_radar,
             spec =
             RasterTileSpec(
                 tiles =
@@ -115,7 +126,7 @@ object MapOverlays {
         ?.let { key ->
             MapOverlay.Raster(
                 id = "owm-precipitation",
-                label = "Precipitation",
+                label = Res.string.map_overlay_precipitation,
                 spec =
                 RasterTileSpec(
                     tiles =
