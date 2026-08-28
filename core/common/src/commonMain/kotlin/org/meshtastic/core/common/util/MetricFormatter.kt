@@ -63,10 +63,16 @@ object MetricFormatter {
      */
     fun rssi(value: Int?): String = if (value == null) UNKNOWN_VALUE else "$value dBm"
 
+    /**
+     * Wind arrives from the sensor in m/s and is shown in the unit a reader expects for weather: km/h for metric, mph
+     * for imperial. m/s is the meteorological observation standard, but public forecasts across most metric regions
+     * quote km/h, so that is what the app displays. The charts convert the same way — see `chartValue` — so a reading
+     * reads identically on the node card and on its graph.
+     */
     fun windSpeed(metersPerSecond: Float, isImperial: Boolean, decimalPlaces: Int = 1): String = if (isImperial) {
         formatMeasure((metersPerSecond * MPH_PER_MPS).toDouble(), MeasureUnitKind.MILE_PER_HOUR, decimalPlaces)
     } else {
-        formatMeasure(metersPerSecond.toDouble(), MeasureUnitKind.METER_PER_SECOND, decimalPlaces)
+        formatMeasure((metersPerSecond * KPH_PER_MPS).toDouble(), MeasureUnitKind.KILOMETER_PER_HOUR, decimalPlaces)
     }
 
     fun rainfall(millimeters: Float, isImperial: Boolean, decimalPlaces: Int = 1): String = if (isImperial) {
@@ -88,5 +94,6 @@ private const val UNKNOWN_VALUE = "—"
 private const val FAHRENHEIT_SCALE = 1.8f
 private const val FAHRENHEIT_OFFSET = 32
 private const val MPH_PER_MPS = 2.23694f
+private const val KPH_PER_MPS = 3.6f
 private const val MM_PER_INCH = 25.4f
 private const val LBS_PER_KG = 2.20462f

@@ -27,7 +27,6 @@ import org.meshtastic.core.model.util.UnitConversions.toTempString
 import org.meshtastic.core.model.util.adcVoltage
 import org.meshtastic.core.model.util.oneWireTemperature
 import org.meshtastic.core.model.util.toSmallDistanceString
-import org.meshtastic.core.model.util.toSpeedString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.adc_voltage
 import org.meshtastic.core.resources.current
@@ -192,7 +191,7 @@ internal fun EnvironmentMetrics(node: Node, displayUnits: MeasurementSystem, isF
                 add(
                     VectorMetricInfo(
                         label = Res.string.wind,
-                        value = ws.toSpeedString(displayUnits),
+                        value = MetricFormatter.windSpeed(ws, displayUnits == MeasurementSystem.IMPERIAL),
                         icon = MeshtasticIcons.WindDirection,
                         rotateIcon = normalizedBearing.toFloat(),
                     )

@@ -81,6 +81,18 @@ import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.rememberSaveFileLauncher
 import org.meshtastic.proto.Telemetry
 
+/** "<label> <value>" — the value arrives already formatted and unit-suffixed, so no numeric format here. */
+private const val LABELLED_VALUE = "%s %s"
+
+/**
+ * The degree symbol for the display unit.
+ *
+ * Temperatures on this screen arrive from `MetricsViewModel.filteredEnvironmentMetrics` **already converted**, so this
+ * only labels them — converting again here would double-count, exactly as the 1-Wire rows warn. That is why these rows
+ * cannot use `MetricFormatter.temperature`, which converts.
+ */
+private fun degreeUnit(isFahrenheit: Boolean) = if (isFahrenheit) "°F" else "°C"
+
 @Composable
 fun EnvironmentMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -152,12 +164,17 @@ private fun TemperatureDisplay(
 ) {
     envMetrics.temperature?.let { temperature ->
         if (!temperature.isNaN()) {
-            val textFormat = if (environmentDisplayFahrenheit) "%s %.1f°F" else "%s %.1f°C"
+            val unit = degreeUnit(environmentDisplayFahrenheit)
             Row(verticalAlignment = Alignment.CenterVertically) {
                 MetricIndicator(Environment.TEMPERATURE.color)
                 Spacer(Modifier.width(4.dp))
                 Text(
-                    text = formatString(textFormat, stringResource(Res.string.temperature), temperature),
+                    text =
+                    formatString(
+                        LABELLED_VALUE,
+                        stringResource(Res.string.temperature),
+                        "${NumberFormatter.format(temperature, 1)}$unit",
+                    ),
                     color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.labelLarge,
                 )
@@ -219,7 +236,6 @@ private fun SoilMetricsDisplay(
         (envMetrics.soil_moisture != null && envMetrics.soil_moisture != Int.MIN_VALUE)
     ) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            val soilTemperatureTextFormat = if (environmentDisplayFahrenheit) "%s %.1f°F" else "%s %.1f°C"
             val soilMoistureTextFormat = "%s %d%%"
             envMetrics.soil_moisture?.let { soilMoistureValue ->
                 if (soilMoistureValue != Int.MIN_VALUE) {
@@ -247,9 +263,12 @@ private fun SoilMetricsDisplay(
                         Text(
                             text =
                             formatString(
-                                soilTemperatureTextFormat,
+                                LABELLED_VALUE,
                                 stringResource(Res.string.soil_temperature),
-                                soilTemperature,
+                                "${NumberFormatter.format(
+                                    soilTemperature,
+                                    1,
+                                )}${degreeUnit(environmentDisplayFahrenheit)}",
                             ),
                             color = MaterialTheme.colorScheme.onSurface,
                             style = MaterialTheme.typography.labelLarge,

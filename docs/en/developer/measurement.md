@@ -61,7 +61,7 @@ MetricFormatter.rssi(-97)     // "-97 dBm"
 // Environment
 MetricFormatter.pressure(1013.25f)  // "1013.3 hPa"
 MetricFormatter.humidity(65.0f)     // "65%"
-MetricFormatter.windSpeed(3.7f, isImperial = false)  // "3.7 m/s"
+MetricFormatter.windSpeed(3.7f, isImperial = false)  // "13.3 km/h"
 MetricFormatter.windSpeed(3.7f, isImperial = true)   // "8.3 mph"
 MetricFormatter.rainfall(12.3f, isImperial = false)  // "12.3 mm"
 MetricFormatter.rainfall(12.3f, isImperial = true)   // "0.5 in"
@@ -95,7 +95,7 @@ Three measurements convert away from metric for display, each gated by a boolean
 | Measurement | Flag | Source | Conversion |
 |---|---|---|---|
 | `temperature` | `isFahrenheit` | `getSystemTemperatureUnit()` | `°F = °C × 1.8 + 32` |
-| `windSpeed` | `isImperial` | `getSystemMeasurementSystem()` | m/s × 2.23694 → mph |
+| `windSpeed` | `isImperial` | `getSystemMeasurementSystem()` | m/s × 3.6 → km/h, or × 2.23694 → mph |
 | `rainfall` | `isImperial` | `getSystemMeasurementSystem()` | mm ÷ 25.4 → in |
 
 The two source functions (in `core/common/.../util/MeasurementSystem.kt`) are deliberately separate: some locales mix systems (the UK uses miles for distance but Celsius for temperature), so temperature must never be derived from the distance unit. On Android, `getSystemTemperatureUnit()` delegates to `androidx.core.text.util.LocalePreferences`, which resolves CLDR locale data and honors the Android 14+ Regional preferences temperature override.
