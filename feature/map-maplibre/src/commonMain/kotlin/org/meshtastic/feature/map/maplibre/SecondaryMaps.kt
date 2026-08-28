@@ -19,7 +19,6 @@ package org.meshtastic.feature.map.maplibre
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
@@ -51,7 +50,6 @@ import org.maplibre.compose.expressions.value.LineCap
 import org.maplibre.compose.layers.LineLayer
 import org.maplibre.compose.map.GestureOptions
 import org.maplibre.compose.map.MapOptions
-import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.compose.util.ClickResult
 import org.maplibre.spatialk.geojson.BoundingBox
 import org.maplibre.spatialk.geojson.Feature
@@ -67,9 +65,7 @@ import org.meshtastic.core.resources.unknown
 import org.meshtastic.core.resources.you
 import org.meshtastic.core.ui.util.DiscoveryMapNode
 import org.meshtastic.core.ui.util.DiscoveryNeighborType
-import org.meshtastic.feature.map.maplibre.component.MapZoom
 import org.meshtastic.feature.map.maplibre.component.MapZoomCompact
-import org.meshtastic.feature.map.maplibre.component.SecondaryMapControls
 import org.meshtastic.feature.map.maplibre.component.rememberBasemapSelection
 import org.meshtastic.feature.map.maplibre.geojson.MapChipGlyph
 import org.meshtastic.feature.map.maplibre.geojson.MapChipKey
@@ -80,12 +76,9 @@ import org.meshtastic.feature.map.maplibre.geojson.rememberFeatureSource
 import org.meshtastic.feature.map.maplibre.layers.MapChipLayer
 import org.meshtastic.feature.map.maplibre.layers.NodeChipLayer
 import org.meshtastic.feature.map.maplibre.layers.NodePrecisionLayer
-import org.meshtastic.feature.map.maplibre.layers.RasterBasemapLayer
 import org.meshtastic.feature.map.maplibre.layers.TracerouteLayers
 import org.meshtastic.feature.map.maplibre.style.Basemap
 import org.meshtastic.feature.map.maplibre.style.MapColors
-import org.meshtastic.feature.map.maplibre.style.toBaseStyle
-import org.meshtastic.feature.map.maplibre.style.zoomRange
 import org.maplibre.spatialk.geojson.Position as GeoPosition
 
 internal const val DEG_SCALE = 1e-7
@@ -123,15 +116,7 @@ fun MapLibreInlineMap(
     // is a gesture the column also wants. Whichever wins, the other feels broken. The buttons are what make giving
     // the gestures up affordable — without them this map would have no way in at all.
     Box(modifier = modifier) {
-        MaplibreMap(
-            baseStyle = basemaps.current.toBaseStyle(),
-            cameraState = cameraState,
-            modifier = Modifier.fillMaxSize(),
-            options = InlineMapOptions,
-            zoomRange = basemaps.current.zoomRange(),
-        ) {
-            (basemaps.current as? Basemap.Raster)?.let { RasterBasemapLayer(it) }
-
+        SecondaryMapSurface(basemaps = basemaps, cameraState = cameraState, options = InlineMapOptions) {
             val source = rememberFeatureSource(node) { nodesToFeatureCollection(listOf(node)) }
 
             // The node-detail sheet is where a degraded position matters most — it is the screen a user opens to ask
@@ -163,36 +148,16 @@ fun MapLibreTracerouteMap(
     val basemaps = rememberBasemapSelection(customBasemaps())
     val hops = (forwardRoute + returnRoute).distinct().mapNotNull { nodeLookup[it] }
 
-    // Wait for the map to report a viewport before fitting. Fitting a bounding box needs a viewport size, and on
-    // first composition there is none yet — the fit silently landed on a default, which is why this map used to open
-    // zoomed past the ends of the route it exists to show.
-    val hasViewport = cameraState.viewport != null
-    LaunchedEffect(hops, hasViewport) {
-        if (hasViewport) {
-            // Padded, as the Google flavor pads its own bounds fit: an edge-to-edge fit puts the outermost hops under
-            // the toolbar and the legend.
-            nodesBoundingBox(hops)?.let { cameraState.jumpTo(boundingBox = it, padding = SecondaryMapFitPadding) }
-        }
-    }
+    // Keyed on the hops: the route is what this map exists to frame, so a different route should re-frame it. The
+    // padding is what keeps the outermost hops clear of the toolbar and the legend.
+    FitBoundsOnceVisible(cameraState = cameraState, key = hops) { nodesBoundingBox(hops) }
 
     Box(modifier = modifier) {
-        MaplibreMap(
-            baseStyle = basemaps.current.toBaseStyle(),
-            cameraState = cameraState,
-            modifier = Modifier.fillMaxSize(),
-            options = SecondaryMapOptions,
-            zoomRange = basemaps.current.zoomRange(),
-        ) {
-            (basemaps.current as? Basemap.Raster)?.let { RasterBasemapLayer(it) }
+        SecondaryMapSurface(basemaps = basemaps, cameraState = cameraState) {
             TracerouteLayers(forwardRoute = forwardRoute, returnRoute = returnRoute, nodeLookup = nodeLookup)
             TracerouteHopLayers(hops)
         }
-        MapZoom(cameraState = cameraState, basemap = basemaps.current)
-        SecondaryMapControls(
-            cameraState = cameraState,
-            basemaps = basemaps,
-            modifier = Modifier.align(Alignment.TopCenter).padding(top = TOOLBAR_INSET.dp),
-        )
+        SecondaryMapChrome(cameraState = cameraState, basemaps = basemaps)
     }
 }
 
@@ -233,35 +198,16 @@ fun MapLibreDiscoveryMap(
 
     // Frame the scanner together with everything it heard, which is the OSMdroid map's behaviour and the only view
     // that answers the question this map is opened to answer. Opening at a fixed zoom on the scanner put every
-    // discovered node off screen. Waits for a viewport, since fitting a bounding box needs one.
-    val hasViewport = cameraState.viewport != null
-    LaunchedEffect(located, hasViewport) {
-        if (hasViewport) {
-            discoveryBoundingBox(scanner, located)?.let {
-                cameraState.jumpTo(boundingBox = it, padding = SecondaryMapFitPadding)
-            }
-        }
-    }
+    // discovered node off screen. Keyed on the located nodes, so a scan that hears another one re-frames to include it.
+    FitBoundsOnceVisible(cameraState = cameraState, key = located) { discoveryBoundingBox(scanner, located) }
 
     Box(modifier = modifier) {
-        MaplibreMap(
-            baseStyle = basemaps.current.toBaseStyle(),
-            cameraState = cameraState,
-            modifier = Modifier.fillMaxSize(),
-            options = SecondaryMapOptions,
-            zoomRange = basemaps.current.zoomRange(),
-        ) {
-            (basemaps.current as? Basemap.Raster)?.let { RasterBasemapLayer(it) }
+        SecondaryMapSurface(basemaps = basemaps, cameraState = cameraState) {
             DiscoveryTopologyLayer(scanner = scanner, nodes = located)
             DiscoveredNodeLayers(nodes = located, onNodeClick = { selectedNode = located.getOrNull(it) })
             ScannerLayer(scanner = scanner, label = stringResource(Res.string.you))
         }
-        MapZoom(cameraState = cameraState, basemap = basemaps.current)
-        SecondaryMapControls(
-            cameraState = cameraState,
-            basemaps = basemaps,
-            modifier = Modifier.align(Alignment.TopCenter).padding(top = TOOLBAR_INSET.dp),
-        )
+        SecondaryMapChrome(cameraState = cameraState, basemaps = basemaps)
 
         // The signal figures the Google map shows in a marker snippet. A MapLibre marker is a layer feature and has no
         // snippet, so the tapped node's numbers go at the foot of the map.

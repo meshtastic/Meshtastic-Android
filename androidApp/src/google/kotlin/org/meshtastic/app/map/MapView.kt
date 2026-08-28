@@ -728,9 +728,7 @@ fun MapView(
                         if (updatedWp.id == 0) {
                             finalWp = finalWp.copy(id = mapViewModel.generatePacketId())
                         }
-                        if (updatedWp.icon == 0) {
-                            finalWp = finalWp.copy(icon = 0x1F4CD)
-                        }
+                        finalWp = finalWp.copy(icon = finalWp.icon.waypointIconOrDefault())
                         mapViewModel.sendWaypoint(finalWp)
                         editingWaypoint = null
                     },

@@ -28,6 +28,7 @@ import org.maplibre.spatialk.geojson.BoundingBox
 import org.maplibre.spatialk.geojson.Position
 import org.meshtastic.core.model.isLocked
 import org.meshtastic.core.model.isModifiableBy
+import org.meshtastic.core.model.util.waypointIconOrDefault
 import org.meshtastic.feature.map.SharedMapViewModel
 import org.meshtastic.feature.map.component.DeleteWaypointDialog
 import org.meshtastic.feature.map.component.WaypointInfoDialog
@@ -293,10 +294,7 @@ private const val MIN_CORNER_DELTA_DEG = 1e-4
 
 /** A new waypoint arrives with id 0 and no icon; it needs both before it goes on air. */
 private fun Waypoint.readyToSend(nextPacketId: () -> Int): Waypoint =
-    copy(id = if (id == 0) nextPacketId() else id, icon = if (icon == 0) DEFAULT_WAYPOINT_ICON else icon)
+    copy(id = if (id == 0) nextPacketId() else id, icon = icon.waypointIconOrDefault())
 
 /** Waypoint coordinates travel as degrees scaled by 1e7. */
 private const val DEG_SCALE = 1e-7
-
-/** Round pushpin — what the Google flavor stamps on a waypoint saved without one. */
-private const val DEFAULT_WAYPOINT_ICON = 0x1F4CD

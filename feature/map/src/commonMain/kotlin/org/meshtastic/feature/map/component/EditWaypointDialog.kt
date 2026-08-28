@@ -80,6 +80,7 @@ import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.common.util.systemTimeZone
 import org.meshtastic.core.model.geofence.GeofenceRadiusPresets
 import org.meshtastic.core.model.isLocked
+import org.meshtastic.core.model.util.PUSHPIN_CODE_POINT
 import org.meshtastic.core.model.util.firstCodePointOrNull
 import org.meshtastic.core.model.util.toCodePointString
 import org.meshtastic.core.model.util.toDistanceString
@@ -110,6 +111,7 @@ import org.meshtastic.core.ui.icon.CalendarMonth
 import org.meshtastic.core.ui.icon.Lock
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.proto.Waypoint
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Instant
 
@@ -134,7 +136,7 @@ fun EditWaypointDialog(
 ) {
     var waypointInput by remember { mutableStateOf(waypoint) }
     val title = if (waypoint.id == 0) Res.string.waypoint_new else Res.string.waypoint_edit
-    val defaultEmoji = 0x1F4CD // 📍 Round Pushpin
+    val defaultEmoji = PUSHPIN_CODE_POINT
     val currentEmojiCodepoint = if (waypointInput.icon == 0) defaultEmoji else waypointInput.icon
     var showEmojiPickerView by remember { mutableStateOf(false) }
 
@@ -142,24 +144,18 @@ fun EditWaypointDialog(
 
     var selectedDateString by remember { mutableStateOf("") }
     var selectedTimeString by remember { mutableStateOf("") }
-    var isExpiryEnabled by remember {
-        mutableStateOf(waypointInput.expire != 0 && waypointInput.expire != Int.MAX_VALUE)
-    }
+    var isExpiryEnabled by remember { mutableStateOf(waypointInput.expire.isExpirySet()) }
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
 
     LaunchedEffect(waypointInput.expire, isExpiryEnabled) {
         val expireValue = waypointInput.expire
         if (isExpiryEnabled) {
-            if (expireValue != 0 && expireValue != Int.MAX_VALUE) {
-                val millis = kotlin.time.Instant.fromEpochSeconds(expireValue.toLong()).toEpochMilliseconds()
-                selectedDateString = DateFormatter.formatDate(millis)
-                selectedTimeString = DateFormatter.formatTime(millis)
-            } else {
-                val futureInstant = kotlin.time.Clock.System.now() + 8.hours
-                selectedDateString = DateFormatter.formatDate(futureInstant.toEpochMilliseconds())
-                selectedTimeString = DateFormatter.formatTime(futureInstant.toEpochMilliseconds())
-                waypointInput = waypointInput.copy(expire = futureInstant.epochSeconds.toInt())
+            val instant = expireValue.expiryInstantOrDefault()
+            selectedDateString = DateFormatter.formatDate(instant.toEpochMilliseconds())
+            selectedTimeString = DateFormatter.formatTime(instant.toEpochMilliseconds())
+            if (!expireValue.isExpirySet()) {
+                waypointInput = waypointInput.copy(expire = instant.epochSeconds.toInt())
             }
         } else {
             selectedDateString = ""
@@ -258,10 +254,9 @@ fun EditWaypointDialog(
                             onCheckedChange = { checked ->
                                 isExpiryEnabled = checked
                                 if (checked) {
-                                    val expireValue = waypointInput.expire
-                                    if (expireValue == 0 || expireValue == Int.MAX_VALUE) {
-                                        val futureInstant = kotlin.time.Clock.System.now() + 8.hours
-                                        waypointInput = waypointInput.copy(expire = futureInstant.epochSeconds.toInt())
+                                    if (!waypointInput.expire.isExpirySet()) {
+                                        val default = waypointInput.expire.expiryInstantOrDefault()
+                                        waypointInput = waypointInput.copy(expire = default.epochSeconds.toInt())
                                     }
                                 } else {
                                     waypointInput = waypointInput.copy(expire = Int.MAX_VALUE)
@@ -271,15 +266,7 @@ fun EditWaypointDialog(
                     }
 
                     if (isExpiryEnabled) {
-                        val currentInstant =
-                            (waypointInput.expire).let {
-                                if (it != 0 && it != Int.MAX_VALUE) {
-                                    kotlin.time.Instant.fromEpochSeconds(it.toLong())
-                                } else {
-                                    kotlin.time.Clock.System.now() + 8.hours
-                                }
-                            }
-                        val ldt = currentInstant.toLocalDateTime(tz)
+                        val ldt = waypointInput.expire.expiryInstantOrDefault().toLocalDateTime(tz)
 
                         // The pickers are Material 3's own, so this dialog builds for desktop as well as Android.
                         // They replace `android.app.DatePickerDialog`/`TimePickerDialog`, which are what kept this
@@ -565,3 +552,24 @@ private fun ExpiryTimePickerDialog(initial: LocalDateTime, onPick: (Int, Int) ->
         TimePicker(state = state)
     }
 }
+
+/**
+ * Whether this `expire` value names a real expiry.
+ *
+ * The wire field carries two sentinels rather than being nullable: `0` for a waypoint that never had one set, and
+ * `Int.MAX_VALUE` for one explicitly marked as never expiring. Neither is a timestamp, and treating either as one puts
+ * the expiry in 1970 or in 2038.
+ */
+internal fun Int.isExpirySet(): Boolean = this != 0 && this != Int.MAX_VALUE
+
+/**
+ * This `expire` value as an instant, or the default the editor offers when there is none.
+ *
+ * Eight hours out, which is what the expiry switch and both pickers seed themselves with — they used to each spell out
+ * the same fallback, so it could drift in one of the three.
+ */
+internal fun Int.expiryInstantOrDefault(): Instant =
+    if (isExpirySet()) Instant.fromEpochSeconds(toLong()) else Clock.System.now() + DEFAULT_EXPIRY
+
+/** How far ahead a newly enabled expiry is set. */
+private val DEFAULT_EXPIRY = 8.hours

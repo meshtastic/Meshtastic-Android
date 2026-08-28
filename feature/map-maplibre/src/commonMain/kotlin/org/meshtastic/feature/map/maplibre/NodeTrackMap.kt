@@ -17,10 +17,8 @@
 package org.meshtastic.feature.map.maplibre
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -44,7 +42,6 @@ import org.maplibre.compose.expressions.value.LineCap
 import org.maplibre.compose.expressions.value.LineJoin
 import org.maplibre.compose.layers.CircleLayer
 import org.maplibre.compose.layers.LineLayer
-import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.compose.sources.GeoJsonOptions
 import org.maplibre.compose.util.ClickResult
 import org.maplibre.spatialk.geojson.Feature
@@ -55,8 +52,6 @@ import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.Node
 import org.meshtastic.feature.map.LastHeardFilter
 import org.meshtastic.feature.map.SharedMapViewModel
-import org.meshtastic.feature.map.maplibre.component.MapZoom
-import org.meshtastic.feature.map.maplibre.component.SecondaryMapControls
 import org.meshtastic.feature.map.maplibre.component.TrackFilterMenu
 import org.meshtastic.feature.map.maplibre.component.TrackPointCard
 import org.meshtastic.feature.map.maplibre.component.rememberBasemapSelection
@@ -65,11 +60,8 @@ import org.meshtastic.feature.map.maplibre.geojson.featureValue
 import org.meshtastic.feature.map.maplibre.geojson.rememberFeatureSource
 import org.meshtastic.feature.map.maplibre.geojson.toNodeChip
 import org.meshtastic.feature.map.maplibre.layers.NodeChipLayer
-import org.meshtastic.feature.map.maplibre.layers.RasterBasemapLayer
 import org.meshtastic.feature.map.maplibre.style.Basemap
 import org.meshtastic.feature.map.maplibre.style.MapColors
-import org.meshtastic.feature.map.maplibre.style.toBaseStyle
-import org.meshtastic.feature.map.maplibre.style.zoomRange
 import org.maplibre.spatialk.geojson.Position as GeoPosition
 import org.meshtastic.proto.Position as ProtoPosition
 
@@ -121,15 +113,9 @@ fun MapLibreNodeTrackMap(
     val points = remember(allPoints, trackFilter) { allPoints.olderThanCutoffRemoved(trackFilter) }
 
     // Frame the whole track, not just its midpoint: a fixed zoom on the centre cropped long tracks at both ends. Keyed
-    // on the unfiltered track so tightening the filter does not yank the camera around under the user, and gated on a
-    // viewport because fitting a bounding box needs one — before the map reports its size the fit lands on a default.
-    val hasViewport = cameraState.viewport != null
-    LaunchedEffect(allPoints, hasViewport) {
-        if (hasViewport && allPoints.isNotEmpty()) {
-            positionsBoundingBox(allPoints.map { it.first })?.let { box ->
-                cameraState.jumpTo(boundingBox = box, padding = SecondaryMapFitPadding)
-            }
-        }
+    // on the *unfiltered* track, so tightening the age filter does not yank the camera around under the user.
+    FitBoundsOnceVisible(cameraState = cameraState, key = allPoints) {
+        positionsBoundingBox(allPoints.map { it.first })
     }
 
     if (allPoints.isEmpty()) return
@@ -141,15 +127,7 @@ fun MapLibreNodeTrackMap(
     // The map and its toolbar stay up even when the filter empties the track — otherwise the control that emptied it
     // disappears along with the points, leaving no way back.
     Box(modifier = modifier) {
-        MaplibreMap(
-            baseStyle = basemaps.current.toBaseStyle(),
-            cameraState = cameraState,
-            modifier = Modifier.fillMaxSize(),
-            options = SecondaryMapOptions,
-            zoomRange = basemaps.current.zoomRange(),
-        ) {
-            (basemaps.current as? Basemap.Raster)?.let { RasterBasemapLayer(it) }
-
+        SecondaryMapSurface(basemaps = basemaps, cameraState = cameraState) {
             // A LineString needs two coordinates; a filter tight enough to leave one point would otherwise throw.
             if (points.size > 1) TrackLineLayer(points = points, color = trackColor)
             if (points.isNotEmpty()) {
@@ -162,11 +140,9 @@ fun MapLibreNodeTrackMap(
                 if (node != null) NewestPositionChip(node = node, newest = points.last())
             }
         }
-        MapZoom(cameraState = cameraState, basemap = basemaps.current)
-        SecondaryMapControls(
+        SecondaryMapChrome(
             cameraState = cameraState,
             basemaps = basemaps,
-            modifier = Modifier.align(Alignment.TopCenter).padding(top = TOOLBAR_INSET.dp),
             filterMenu = { expanded, onDismissRequest ->
                 TrackFilterMenu(expanded = expanded, onDismissRequest = onDismissRequest)
             },
