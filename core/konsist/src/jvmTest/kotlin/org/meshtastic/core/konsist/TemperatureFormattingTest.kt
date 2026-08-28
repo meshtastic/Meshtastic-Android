@@ -21,18 +21,21 @@ import kotlin.test.Test
 import kotlin.test.assertTrue
 
 /**
- * Temperature is formatted by `MetricFormatter.temperature` or `UnitConversions.toTempString`, never by a hand-written
- * format template.
+ * A temperature's *number* is rendered by [org.meshtastic.core.common.util.NumberFormatter] — directly, or through
+ * `MetricFormatter.temperature`/`UnitConversions.toTempString` — never by a `%f` conversion in a hand-written template.
  *
- * A template like `"%.1f°F"` looks harmless and is not: it picks the *unit symbol* by branching on the Fahrenheit
- * preference while passing the value through untouched, so a Fahrenheit reader is shown the Celsius number under an °F
- * label. It also formats the number with `%f`, which ignores the locale's decimal separator — the thing
- * [org.meshtastic.core.common.util.NumberFormatter] exists to get right. The Environment Telemetry log shipped exactly
- * this for both ambient and soil temperature; both were read as merely a formatting nit until the missing conversion
- * was spotted.
+ * `%.1f` formats with a fixed decimal point, so a locale that writes `0,0` gets `0.0` and disagrees with every other
+ * number on the same screen. The Environment Telemetry log shipped `"%s %.1f°C"` for both ambient and soil temperature
+ * and read wrong for exactly those readers.
  *
- * Sibling rule to [MeasurementSystemSourceTest]: that one governs *which* unit system is chosen, this one governs
- * whether the chosen system is actually applied to the number.
+ * The rule deliberately says nothing about *conversion*, because who converts differs by screen and both answers are
+ * legitimate: the node detail card takes raw Celsius and converts at the call site, while this log screen receives
+ * values already converted by `MetricsViewModel.filteredEnvironmentMetrics` and must only label them. Requiring
+ * `MetricFormatter.temperature` everywhere would double-convert the second kind — a mistake made while writing this
+ * very rule, and the reason the pattern below matches only the number format and not the conversion.
+ *
+ * Sibling to [MeasurementSystemSourceTest]: that rule governs which unit system is chosen, this one governs how the
+ * number is written once it is.
  */
 class TemperatureFormattingTest {
 
@@ -63,9 +66,9 @@ class TemperatureFormattingTest {
 
         assertTrue(
             offenders.isEmpty(),
-            "A \"%.1f°C\"/\"%.1f°F\" template branches on the unit but not the value, so it labels a Celsius " +
-                "reading as Fahrenheit, and it bypasses NumberFormatter's locale-aware decimal separator. Use " +
-                "MetricFormatter.temperature(celsius, isFahrenheit) or Float.toTempString(isFahrenheit). " +
+            "A \"%.1f°C\"/\"%.1f°F\" template writes the number with a fixed decimal point, ignoring the " +
+                "locale's separator. Format it with NumberFormatter.format(value, 1) and append the degree symbol, " +
+                "or use MetricFormatter.temperature(celsius, isFahrenheit) where the value still needs converting. " +
                 "Offending files:\n" +
                 offenders.joinToString("\n"),
         )
