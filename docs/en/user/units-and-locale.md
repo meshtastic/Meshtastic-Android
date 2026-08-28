@@ -89,7 +89,16 @@ Wind speed, gust and lull are transmitted by the sensor as **m/s** and converted
 | Metric | 18.0 km/h |
 | Imperial (US) | 11.2 mph |
 
-Wind readings appear in the **Node Detail** environment section and the **Environment Telemetry** charts.
+Wind speed, gust and lull all read in the same unit, on the Node Detail environment section and in the Environment Telemetry log alike.
+
+## Weight
+
+Readings from a connected scale are transmitted in **kg** and converted for display.
+
+| Your Setting | You See |
+|---|---|
+| Metric | 1.50 kg |
+| Imperial (US) | 3.31 lb |
 
 ## Rainfall
 
@@ -97,8 +106,8 @@ Rainfall measurements (1-hour and 24-hour totals) are transmitted as **mm** and 
 
 | Your Setting | You See |
 |---|---|
-| Metric | 12 mm |
-| Imperial (US) | 0.5 in |
+| Metric | 12.0 mm |
+| Imperial (US) | 0.47 in |
 
 ## Units That Never Change
 
@@ -108,7 +117,7 @@ Some units are international standards and are displayed the same way regardless
 |---|---|---|
 | Barometric pressure | hPa | International meteorological standard |
 | Heading / bearing | ° (degrees) | Universal navigation convention |
-| Radiation | μR/hr | Standard dosimetry unit |
+| Radiation | µR/h | Standard dosimetry unit |
 | GPS coordinates | decimal degrees | Universal geographic standard |
 | Humidity, battery, soil moisture | % | Universal |
 
