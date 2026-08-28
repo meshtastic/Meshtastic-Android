@@ -37,6 +37,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
@@ -48,6 +49,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
+import androidx.compose.material3.TimePickerDialog
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
@@ -511,10 +513,7 @@ private fun Waypoint.normalizeGeofenceNotifications(): Waypoint = when {
 }
 
 /**
- * The expiry date, picked with Material 3's own date picker.
- *
- * Wrapped in an [AlertDialog] by hand because Compose Multiplatform's material3 ships `DatePicker` but no
- * `DatePickerDialog` — verified against 1.12.0-alpha03, which has `TimePickerDialog` and no date equivalent.
+ * The expiry date, picked with Material 3's own dialog.
  *
  * The picker works in UTC-midnight milliseconds, so the value is converted through [TimeZone.UTC] on the way in and
  * out. Reading it back in the local zone would land on the previous day for anyone west of Greenwich.
@@ -526,7 +525,7 @@ private fun ExpiryDatePickerDialog(initial: LocalDateTime, onPick: (LocalDate) -
         rememberDatePickerState(
             initialSelectedDateMillis = initial.date.atStartOfDayIn(TimeZone.UTC).toEpochMilliseconds(),
         )
-    AlertDialog(
+    DatePickerDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(
@@ -540,8 +539,9 @@ private fun ExpiryDatePickerDialog(initial: LocalDateTime, onPick: (LocalDate) -
             }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) } },
-        text = { DatePicker(state = state) },
-    )
+    ) {
+        DatePicker(state = state)
+    }
 }
 
 /**
@@ -554,12 +554,14 @@ private fun ExpiryDatePickerDialog(initial: LocalDateTime, onPick: (LocalDate) -
 @Composable
 private fun ExpiryTimePickerDialog(initial: LocalDateTime, onPick: (Int, Int) -> Unit, onDismiss: () -> Unit) {
     val state = rememberTimePickerState(initialHour = initial.hour, initialMinute = initial.minute)
-    AlertDialog(
+    TimePickerDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(onClick = { onPick(state.hour, state.minute) }) { Text(stringResource(Res.string.save)) }
         },
+        title = { Text(stringResource(Res.string.time)) },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) } },
-        text = { TimePicker(state = state) },
-    )
+    ) {
+        TimePicker(state = state)
+    }
 }
