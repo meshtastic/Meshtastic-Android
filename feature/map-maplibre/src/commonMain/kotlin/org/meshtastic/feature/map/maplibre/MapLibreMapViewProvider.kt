@@ -31,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 import org.maplibre.compose.camera.CameraState
@@ -45,6 +46,7 @@ import org.maplibre.compose.location.rememberSystemSettingsLauncher
 import org.meshtastic.core.ui.util.KeepScreenOn
 import org.meshtastic.core.ui.util.MapViewProvider
 import org.meshtastic.feature.map.SharedMapViewModel
+import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.MapControlsOverlay
 import org.meshtastic.feature.map.maplibre.component.BasemapMenu
 import org.meshtastic.feature.map.maplibre.component.BasemapSelection
@@ -86,10 +88,13 @@ class MapLibreMapViewProvider(
      */
     private val basemapMenuExtra: @Composable () -> Unit = {},
     /**
-     * Presents an editor for the waypoint the map hands over. Host-supplied because the only editor that exists is
-     * Android-only; a host that leaves this empty simply cannot create or edit waypoints. See [WaypointEditRequest].
+     * Presents an editor for the waypoint the map hands over. Defaults to the shared [EditWaypointDialog], so every
+     * host gets waypoint creation without wiring anything; a host overrides this only to present its own editor. See
+     * [WaypointEditRequest].
      */
-    private val waypointEditor: @Composable (WaypointEditRequest) -> Unit = {},
+    private val waypointEditor: @Composable (WaypointEditRequest) -> Unit = { request ->
+        DefaultWaypointEditor(request)
+    },
     /**
      * Runs a Site Planner session. Null hides the button entirely — the planner lives in the app and has no desktop
      * host, so desktop leaves it out. See [SitePlannerSession].
@@ -391,3 +396,27 @@ private fun rememberLocationControls(cameraState: CameraState): LocationControls
 /** Clear of the zoom pair and the attribution row, which share the foot of the map. */
 private const val AUTHORING_BAR_BOTTOM = 72
 private const val AUTHORING_BAR_SIDE = 16
+
+/**
+ * The editor every host gets unless it supplies its own.
+ *
+ * A default rather than a required argument because there is now one editor that builds everywhere:
+ * `EditWaypointDialog` moved out of `androidMain` when its expiry picker stopped depending on
+ * `android.app.DatePickerDialog`. While it was Android-only this slot had to be empty by default, and the desktop map —
+ * which passed nothing — could not create a waypoint at all: the long press fired and set a pending waypoint that
+ * nothing ever rendered.
+ */
+@Composable
+private fun DefaultWaypointEditor(request: WaypointEditRequest) {
+    val viewModel: SharedMapViewModel = koinViewModel()
+    val displayUnits by viewModel.displayUnits.collectAsStateWithLifecycle()
+    EditWaypointDialog(
+        waypoint = request.waypoint,
+        displayUnits = displayUnits,
+        myNodeNum = viewModel.myNodeNum,
+        onSend = request.onSend,
+        onDelete = request.onDelete,
+        onDismissRequest = request.onDismiss,
+        onBeginBoxAuthoring = request.onBeginBoxAuthoring,
+    )
+}

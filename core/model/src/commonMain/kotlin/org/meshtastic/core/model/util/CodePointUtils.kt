@@ -65,3 +65,22 @@ fun Int.toCodePointString(fallback: Int = PUSHPIN_CODE_POINT): String {
     )
         .concatToString()
 }
+
+/**
+ * The first Unicode code point in this string, combining a surrogate pair into the single value it encodes.
+ *
+ * The multiplatform counterpart to `String.codePointAt(0)`, which is JVM-only: reading `this[0].code` instead would
+ * return a lone high surrogate for every emoji outside the basic plane, and a waypoint icon is usually exactly that.
+ * Returns null for an empty string rather than throwing, since the caller is handling user-picked text.
+ */
+fun String.firstCodePointOrNull(): Int? {
+    val high = firstOrNull() ?: return null
+    val low = getOrNull(1)
+    return if (high.isHighSurrogate() && low != null && low.isLowSurrogate()) {
+        MIN_SUPPLEMENTARY_CODE_POINT +
+            ((high.code - MIN_HIGH_SURROGATE) shl SURROGATE_SHIFT) +
+            (low.code - MIN_LOW_SURROGATE)
+    } else {
+        high.code
+    }
+}

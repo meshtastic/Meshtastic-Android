@@ -19,6 +19,7 @@ package org.meshtastic.core.model.util
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class CodePointUtilsTest {
@@ -84,5 +85,21 @@ class CodePointUtilsTest {
         assertEquals("?", (-1).toCodePointString(fallback = '?'.code))
         // A bogus fallback must not propagate the throw either.
         assertEquals("📍", (-1).toCodePointString(fallback = -2))
+    }
+
+    @Test
+    fun `firstCodePointOrNull combines a surrogate pair`() {
+        // A pushpin is outside the basic plane, so reading the first char alone would return a lone high surrogate.
+        assertEquals(PUSHPIN_CODE_POINT, PUSHPIN_CODE_POINT.toCodePointString().firstCodePointOrNull())
+    }
+
+    @Test
+    fun `firstCodePointOrNull reads a basic-plane character as itself`() {
+        assertEquals('A'.code, "A".firstCodePointOrNull())
+    }
+
+    @Test
+    fun `firstCodePointOrNull returns null for an empty string rather than throwing`() {
+        assertNull("".firstCodePointOrNull())
     }
 }

@@ -25,9 +25,9 @@ import org.meshtastic.proto.Waypoint
  * The map owns everything except the editor itself: it decides when to ask, assigns a packet id and default icon, and
  * performs the send or delete. All the host has to do is show a dialog and call back.
  *
- * The editor is host-supplied because the only one that exists — `EditWaypointDialog` — drives
- * `android.app.DatePickerDialog` and `android.widget.TimePicker` for the expiry picker, so it cannot live in a source
- * set shared with desktop. A host with no editor simply cannot create or edit waypoints, which is today's desktop.
+ * The editor is a slot so a host can substitute its own, but it no longer has to supply one: `EditWaypointDialog`
+ * builds for every target since its expiry picker moved from `android.app.DatePickerDialog` to Material 3's, so the
+ * provider defaults to it and desktop creates waypoints like anything else.
  *
  * @property waypoint The waypoint to edit. A new one carries `id == 0` and only its coordinates.
  * @property onBeginBoxAuthoring Hands the draft back so the user can define its geofence bounding box by tapping the

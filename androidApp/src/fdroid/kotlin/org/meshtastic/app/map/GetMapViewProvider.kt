@@ -19,13 +19,10 @@ package org.meshtastic.app.map
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.compose.koinInject
-import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.map.component.CustomTileSourcesMenuItem
 import org.meshtastic.app.map.component.ImportedLayersSlot
 import org.meshtastic.app.map.component.SitePlannerSlot
 import org.meshtastic.core.ui.util.MapViewProvider
-import org.meshtastic.feature.map.SharedMapViewModel
-import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.maplibre.MapLibreMapViewProvider
 
 fun getMapViewProvider(): MapViewProvider = MapLibreMapViewProvider(
@@ -37,22 +34,7 @@ fun getMapViewProvider(): MapViewProvider = MapLibreMapViewProvider(
     },
     customBasemaps = { customRasterBasemaps() },
     basemapMenuExtra = { CustomTileSourcesMenuItem() },
-    // EditWaypointDialog drives android.app.DatePickerDialog for the expiry picker, so it cannot live in the map
-    // module's shared source set. The flavor supplies it; desktop goes without until there is a multiplatform
-    // editor.
-    waypointEditor = { request ->
-        val viewModel: SharedMapViewModel = koinViewModel()
-        val displayUnits by viewModel.displayUnits.collectAsStateWithLifecycle()
-        EditWaypointDialog(
-            waypoint = request.waypoint,
-            displayUnits = displayUnits,
-            myNodeNum = viewModel.myNodeNum,
-            onSend = request.onSend,
-            onDelete = request.onDelete,
-            onDismissRequest = request.onDismiss,
-            onBeginBoxAuthoring = request.onBeginBoxAuthoring,
-        )
-    },
+    // waypointEditor is not passed: EditWaypointDialog is multiplatform now and the provider defaults to it.
     // sitePlannerAvailable() has returned true on this flavor all along, but nothing consumed it — the MapLibre map
     // never offered the button and dropped the sitePlannerNodeNum deep link. Both are wired now.
     sitePlanner = { session -> SitePlannerSlot(session) },
