@@ -9,8 +9,22 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+#### 🏗️ Features
+* feat(settings): send the optional ham long_name alongside the call sign by @vidplace7 in https://github.com/meshtastic/Meshtastic-Android/pull/6875
+* feat(appfunctions): reconcile system state instead of blind-writing it by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6908
+* feat(units): resolve units from the device region, add a Units setting, render through ICU by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6916
+* feat(connections): notice when transmit is disabled by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6945
+#### 🖥️ Desktop
+* fix(desktop): disable macOS notifications when the process has no app bundle by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6876
+* fix(desktop): test the bundle path, not the identifier, before notifying by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6885
 #### 🛠️ Fixes
 * Stabilize Mid-Session Locale Unit State Test by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6870
+* Demote Repeated Offline Heartbeat Rejection Logs to Debug by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6872
+* Use Scan-Only Probes After Prolonged Bonded BLE Reconnect Failures by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6871
+* fix(permissions): recover from a skipped, denied, or revoked permission instead of dead-ending by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6880
+* fix(node): convert temperature before labelling it °F, and show wind in km/h by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6925
+* fix(settings): drop the beacon single-target scalars protobufs reserved by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6942
+* fix(node): scroll traceroute/log history detail popups by @beecho01 in https://github.com/meshtastic/Meshtastic-Android/pull/6708
 
 ### Internal (v2.8.2-internal.3)
 Changes since [`v2.8.1`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.1):
