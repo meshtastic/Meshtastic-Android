@@ -136,7 +136,7 @@ On connecting, the app compares the radio's firmware against two thresholds and 
 | Firmware version | What you see | What happens |
 |---|---|---|
 | Below **2.3.15** | **Firmware update required.** | The app disconnects from the radio. It will not operate against firmware this old. |
-| **2.3.15** up to **2.5.14** | **Firmware Update Recommended.** | Advisory only — dismiss it and carry on. The dialog names the latest stable release. |
+| **2.3.15** up to, but not including, **2.5.14** | **Firmware Update Recommended.** | Advisory only — dismiss it and carry on. The dialog names the latest stable release. |
 | **2.5.14** or newer | Nothing | — |
 
 A version string the app cannot parse is ignored rather than treated as too old, so a transient read never disconnects a working radio.

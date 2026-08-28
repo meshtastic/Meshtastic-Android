@@ -2,7 +2,7 @@
 title: App Functions
 parent: User Guide
 nav_order: 19
-last_updated: 2026-06-11
+last_updated: 2026-08-27
 description: Expose mesh capabilities to the Android system and on-device AI assistants (e.g. Gemini) so they can run mesh workflows without opening the app.
 aliases:
   - app-functions

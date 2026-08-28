@@ -43,7 +43,7 @@ Seeding a fake's backing store and then asserting the value comes back passes ev
 ### D. Room schema bump without a migration test
 **Every schema-version increment ships a migration test that proves existing rows survive.**
 
-- [ ] A new `core/database/schemas/org.meshtastic.core.database.MeshtasticDatabase/<n>.json` is accompanied by an `(n-1)→n` test in `core/database/src/androidHostTest/.../*MigrationTest.kt`.
+- [ ] A new `core/database/schemas/org.meshtastic.core.database.MeshtasticDatabase/<n>.json` is accompanied by an `(n-1)→n` case in `core/database/src/jvmTest/.../MeshtasticDatabaseMigrationTest.kt` — the androidHostTest `*MigrationTest.kt` files cover DAO behaviour, not schema versions.
 - [ ] The test inserts rows at the old version, migrates, and asserts **row count and column values** are preserved — not merely that the migration runs.
 - [ ] Columns going nullable assert that pre-existing values are retained and that the new `NULL` state is reachable (this is class A at the storage layer).
 

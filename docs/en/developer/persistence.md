@@ -2,7 +2,7 @@
 title: Persistence
 parent: Developer Guide
 nav_order: 6
-last_updated: 2026-07-08
+last_updated: 2026-08-27
 aliases:
   - room
   - database

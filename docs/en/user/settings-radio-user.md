@@ -159,8 +159,6 @@ These control the **radio's own screen**, not the app's.
 
 ### Network Config
 
-| Setting | Description |
-|---------|-------------|
 > ⚠️ **Warning:** Saving this screen always reboots the radio.
 
 | Setting | Description |

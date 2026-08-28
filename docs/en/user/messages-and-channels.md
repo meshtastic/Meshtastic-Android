@@ -194,7 +194,7 @@ React to messages with emoji:
 
 **Swipe a message to the right** to reply to it — the composer opens with that message quoted.
 Swiping past the reply threshold arms the action; releasing before it springs back with nothing sent.
-Reply is also in the long-press actions menu.
+Reply is also in the actions menu, reached by long-pressing and then tapping **More**.
 
 ### Day Separators
 
