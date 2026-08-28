@@ -91,7 +91,7 @@ Wind speed, gust and lull are transmitted by the sensor as **m/s** and converted
 
 All three read in the same unit wherever they appear: the Node Detail environment section, the Environment Telemetry log, and the charts.
 
-## Weight
+## Тегло
 
 Readings from a connected scale are transmitted in **kg** and converted for display.
 
@@ -106,7 +106,7 @@ Rainfall measurements (1-hour and 24-hour totals) are transmitted as **mm** and 
 
 | Your Setting                     | You See                 |
 | -------------------------------- | ----------------------- |
-| Metric                           | 12.0 mm |
+| Метрични                         | 12.0 mm |
 | Imperial (US) | 0.47 in |
 
 ## Units That Never Change

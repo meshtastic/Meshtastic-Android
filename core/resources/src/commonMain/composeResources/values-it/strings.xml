@@ -536,7 +536,7 @@
     <string name="doc_title_connections">Connessioni</string>
     <string name="doc_title_debug_logs">Log di debug</string>
     <string name="doc_title_desktop">App desktop</string>
-    <string name="doc_title_discovery">Discovery</string>
+    <string name="doc_title_discovery">Discovery della mesh locale</string>
     <string name="doc_title_firmware">Aggiornamenti firmware</string>
     <string name="doc_title_help">Aiuto &amp; Documentazione In-App</string>
     <string name="doc_title_map">Mappa &amp; Waypoint</string>

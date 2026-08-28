@@ -22,11 +22,11 @@ When you open the app for the first time, you'll be guided through an introducto
 
 The welcome screen introduces Meshtastic with three feature rows:
 
-|                               |                                                                                                                |
-| ----------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| **Stay Connected Anywhere**   | Communicate off-the-grid with your friends and community without cell service.                 |
-| **Create Your Own Networks**  | Easily set up private mesh networks for secure and reliable communication in remote areas.     |
-| **Track and Share Locations** | Share your location in real-time and keep your group coordinated with integrated GPS features. |
+|                               |                                                                                                                  |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| **Stay Connected Anywhere**   | Комуникирайте извън мрежата с вашите приятели и общността без клетъчна услуга.                   |
+| **Create Your Own Networks**  | Настройте лесно частни mesh мрежи за сигурна и надеждна комуникация в отдалечени райони.         |
+| **Track and Share Locations** | Споделяйте местоположението си в реално време и координирайте групата си с вградени GPS функции. |
 
 Tap **Get started** to proceed through the setup flow.
 
@@ -99,7 +99,7 @@ Features also ask in context. Tapping **Scan** on the Connections screen with Bl
 
 New to Meshtastic? The [getting started guide](https://meshtastic.org/docs/getting-started) on meshtastic.org covers hardware selection, initial radio configuration, and your first mesh setup.
 
-## Related Topics
+## Свързани теми
 
 - [Connections](connections) — pair your first radio
 - [Messages & Channels](messages-and-channels) — send your first message

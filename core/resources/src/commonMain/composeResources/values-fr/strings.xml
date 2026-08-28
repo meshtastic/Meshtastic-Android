@@ -491,7 +491,7 @@
     <string name="doc_title_connections">Connexions</string>
     <string name="doc_title_debug_logs">Journaux de débogage</string>
     <string name="doc_title_desktop">Application pour ordinateur</string>
-    <string name="doc_title_discovery">Découverte</string>
+    <string name="doc_title_discovery">Découverte de maille locale</string>
     <string name="doc_title_firmware">Mises à jour du firmware</string>
     <string name="doc_title_mqtt">MQTT</string>
     <string name="doc_title_node_metrics">Métriques du nœud</string>

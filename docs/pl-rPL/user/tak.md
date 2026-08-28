@@ -65,7 +65,7 @@ The app can also run a **local TAK server** so ATAK/iTAK on the **same device** 
 
 Nodes configured with TAK-related roles behave differently from standard clients:
 
-| Role            | Opis                                                                                                                                                                                                                                                                                |
+| Rola            | Opis                                                                                                                                                                                                                                                                                |
 | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **TAK**         | Full TAK interoperability — sends and receives CoT data, chat messages, and PLI updates. Functions as a standard client plus TAK bridge.                                                                                                            |
 | **TAK Tracker** | Position-only TAK output — automatically broadcasts PLI at regular intervals without user interaction. Optimized for unattended position beacons (vehicles, equipment, waypoints). Does not relay chat messages. |

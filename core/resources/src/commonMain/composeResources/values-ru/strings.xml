@@ -566,7 +566,7 @@
     <string name="doc_title_connections">Соединения</string>
     <string name="doc_title_debug_logs">Журнал отладки</string>
     <string name="doc_title_desktop">Десктопное приложение</string>
-    <string name="doc_title_discovery">Обнаружение</string>
+    <string name="doc_title_discovery">Локальное обнаружение сети</string>
     <string name="doc_title_firmware">Обновления прошивки</string>
     <string name="doc_title_help">Справка и документация в приложении</string>
     <string name="doc_title_map">Карта и путевые точки</string>

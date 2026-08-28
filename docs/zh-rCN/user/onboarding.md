@@ -22,11 +22,11 @@ When you open the app for the first time, you'll be guided through an introducto
 
 The welcome screen introduces Meshtastic with three feature rows:
 
-|                               |                                                                                                                |
-| ----------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| **Stay Connected Anywhere**   | Communicate off-the-grid with your friends and community without cell service.                 |
-| **Create Your Own Networks**  | Easily set up private mesh networks for secure and reliable communication in remote areas.     |
-| **Track and Share Locations** | Share your location in real-time and keep your group coordinated with integrated GPS features. |
+|                               |                                |
+| ----------------------------- | ------------------------------ |
+| **Stay Connected Anywhere**   | 在没有手机服务的情况下与您的朋友和社区进行网外通信。     |
+| **Create Your Own Networks**  | 轻松建立私人网格网络，以便在偏远地区进行安全和可靠的通信。  |
+| **Track and Share Locations** | 实时分享您的位置，并通过集成的GPS功能保持团队的协调一致。 |
 
 Tap **Get started** to proceed through the setup flow.
 

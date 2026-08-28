@@ -68,7 +68,7 @@ Enables serial port communication for external device integrations (GPS modules,
 | Serial mode                  | Which protocol the port speaks — Default, Simple, Proto, Text message, NMEA, CalTopo, WS85 weather station, VE.Direct, MeshSolar config, Log, or Log (text only) |
 | RX / TX                      | GPIO pins for the serial connection                                                                                                                                                                 |
 | Serial baud rate             | Port speed                                                                                                                                                                                          |
-| Timeout                      | How long to wait before considering an incoming message complete                                                                                                                                    |
+| Isteklo vreme                | How long to wait before considering an incoming message complete                                                                                                                                    |
 | Override console serial port | Take over the port the debug console normally uses                                                                                                                                                  |
 
 ### External Notification Module
@@ -91,7 +91,7 @@ and each can drive the LED, the buzzer and the vibration motor separately, givin
 | Use I2S as buzzer                                 | Send the alert through an I2S audio output instead                                                  |
 | Output duration (milliseconds) | How long a single alert lasts                                                                       |
 | Nag timeout (seconds)          | Keep repeating the alert for this long until it is acknowledged. 0 disables nagging |
-| Ringtone                                          | The tone played on a PWM buzzer, in RTTTL. Can be imported from a file              |
+| Мелодија звона                                    | The tone played on a PWM buzzer, in RTTTL. Can be imported from a file              |
 
 ### Store & Forward Module
 
@@ -198,7 +198,7 @@ Broadcasts information about directly heard neighbors, enabling mesh topology ma
 | Update Interval (s) | How often to broadcast neighbor list                                                                                                 |
 | Transmit Over LoRa                     | Also broadcast neighbor info over LoRa, not just MQTT/phone. Unavailable on a channel using the default key and name |
 
-See [Discovery](discovery) for how to use neighbor data for mesh topology exploration.
+See [Local Mesh Discovery](discovery) for how to use neighbor data for mesh topology exploration.
 
 ### Ambient Lighting Module
 
@@ -229,7 +229,7 @@ Turns your node into a motion or door sensor alert system. When a GPIO pin detec
 
 People counter using WiFi and BLE probe requests. Counts nearby devices by passively listening for probe requests that phones and laptops emit when scanning for networks. Available only on ESP32 devices.
 
-| Setting                                | Description                                                                                                      |
+| Setting                                | Опис                                                                                                             |
 | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | Омогућено                              | Activate people counting                                                                                         |
 | Update Interval (s) | How often to report counts                                                                                       |
@@ -242,7 +242,7 @@ People counter using WiFi and BLE probe requests. Counts nearby devices by passi
 
 Publishes a short free-text status line for your node, which other nodes can display alongside it.
 
-| Setting                  | Description                                                                                                                                                                      |
+| Setting                  | Опис                                                                                                                                                                             |
 | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | The actual status string | Up to 80 characters. The **✕** in the field clears it. (That is the app's own label for the field, verbatim.) |
 
@@ -255,7 +255,7 @@ node to reboot.
 ### Mesh Beacon Module
 
 Broadcasts an invitation to your mesh, and receives invitations from others. See
-[Discovery](discovery) for the full walkthrough.
+[Local Mesh Discovery](discovery) for the full walkthrough.
 
 ### TAK Module
 
@@ -297,7 +297,7 @@ Remotely reboot a connected or administered node.
 
 Opens the **Packets** and **App logs** tabs for viewing, filtering, and exporting diagnostic output. See [Debug Logs](debug-logs) for the full walkthrough.
 
-### About
+### O nama
 
 **Settings → About** carries the app's own identity rather than the radio's:
 

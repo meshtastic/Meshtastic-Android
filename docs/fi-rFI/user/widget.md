@@ -45,6 +45,6 @@ Avaa sovellus napauttamalla widgetiä tai pyydä uudet tilastot sen päivityspai
 
 - [Radion mittarit](node-metrics) — täydellinen signaalin laatu- ja paikalliset tilastot -historia sovelluksessa
 - [Yhteydet](connections) — yhdistä radioon, jotta widgetillä on näytettäviä tilastoja
-- [Haku](discovery) — kanavan ja lähetysajan käyttöaste koko verkossa
+- [Local Mesh Discovery](discovery) — channel and airtime utilization across the mesh
 
 ---

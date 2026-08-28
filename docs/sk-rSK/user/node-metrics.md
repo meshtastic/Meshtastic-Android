@@ -118,13 +118,13 @@ Power management telemetry (requires INA sensor or compatible hardware):
 
 | Metric  | Popis                          |
 | ------- | ------------------------------ |
-| Voltage | Per-channel voltage reading    |
+| Napätie | Per-channel voltage reading    |
 | Prúd    | Per-channel draw, in milliamps |
 
 Up to three channels (ch1–ch3) are charted, each with a label you can edit. The app does not
 derive a wattage figure from them.
 
-## Traceroute
+## Trasovanie
 
 Traceroute shows the path a message takes through the mesh:
 
@@ -140,16 +140,16 @@ You → Node A (SNR: 8.5) → Node B (SNR: 5.2) → Target
 
 Each hop represents a relay node that forwarded the message.
 
-## Position Log
+## Log pozície
 
 Historical position data for nodes that share their location:
 
 - GPS coordinates
-- Altitude
+- Nadmorská výška
 - Speed (if moving)
 - Timestamp for each position report
 
-## Neighbor Info
+## Informácia o susedoch
 
 Shows which nodes a given node can directly hear, useful for understanding mesh topology.
 
@@ -172,7 +172,7 @@ The position tab shows location data for nodes that share GPS:
 - [Nodes](nodes) — node list, filtering, and sorting
 - [Telemetry & Sensors](telemetry-and-sensors) — supported sensors and configuration
 - [Signal Meter](signal-meter) — how signal quality is calculated from SNR and RSSI
-- [Discovery](discovery) — traceroute details and neighbor info
+- [Local Mesh Discovery](discovery) — traceroute details and neighbor info
 - [Units & Locale](units-and-locale) — temperature, distance, and speed display formats
 
 ---

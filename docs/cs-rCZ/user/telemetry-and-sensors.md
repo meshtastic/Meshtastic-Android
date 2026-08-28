@@ -55,7 +55,7 @@ Supported environmental sensors:
 
 ### Soil
 
-| Metric     | Unit    | Notes                                           |
+| Metrický   | Unit    | Poznámka                                        |
 | ---------- | ------- | ----------------------------------------------- |
 | Soil Temp  | °C / °F | Reported alongside soil moisture by soil probes |
 | Soil Moist | %       | Volumetric water content                        |
@@ -76,7 +76,7 @@ Nodes with INA-series power sensors can report:
 
 | Metrický | Popis                           |
 | -------- | ------------------------------- |
-| Voltage  | Per-channel voltage reading     |
+| Napětí   | Per-channel voltage reading     |
 | Proud    | Per-channel current draw, in mA |
 
 Up to three channels are reported (ch1–ch3), and each can be given its own label — Solar or Battery, say — from the node detail screen. There is no separate wattage reading; the app charts voltage and current, and does not compute power from them.
@@ -106,7 +106,7 @@ Useful for monitoring solar charging or battery health on remote nodes.
 
 Nodes with particulate matter or CO₂ sensors report air quality data:
 
-| Metric                | Unit  | Popis                        |
+| Metrický              | Unit  | Popis                        |
 | --------------------- | ----- | ---------------------------- |
 | PM1.0 | µg/m³ | Ultrafine particulate matter |
 | PM2.5 | µg/m³ | Fine particulate matter      |

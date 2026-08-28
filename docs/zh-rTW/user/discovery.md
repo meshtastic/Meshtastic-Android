@@ -1,10 +1,12 @@
 ---
-title: 尋找
+title: Local Mesh Discovery
 parent: 使用者指南
 nav_order: 12
-last_updated: 2026-08-27
+last_updated: 2026-08-28
 description: Explore your mesh network — the Local Mesh Discovery scanner, traceroute paths, neighbor maps, and node discovery tools.
 aliases:
+  - discovery
+  - local-mesh-discovery
   - mesh-探索
   - 本地-探索
   - 網路-掃描
@@ -12,7 +14,7 @@ aliases:
   - 鄰居資訊
 ---
 
-# 尋找
+# Local Mesh Discovery
 
 探索工具可協助您了解 mesh 網路的連線方式——哪些節點彼此可以收到訊號、訊息所經過的路徑，以及哪裡存在瓶頸或訊號薄弱的連結。
 

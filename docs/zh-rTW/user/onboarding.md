@@ -160,11 +160,11 @@ When you open the app for the first time, you'll be guided through an introducto
 
 The welcome screen introduces Meshtastic with three feature rows:
 
-|                               |                                                                                                                |
-| ----------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| **Stay Connected Anywhere**   | Communicate off-the-grid with your friends and community without cell service.                 |
-| **Create Your Own Networks**  | Easily set up private mesh networks for secure and reliable communication in remote areas.     |
-| **Track and Share Locations** | Share your location in real-time and keep your group coordinated with integrated GPS features. |
+|                               |                                  |
+| ----------------------------- | -------------------------------- |
+| **Stay Connected Anywhere**   | 無需手機訊號，也能與您的朋友和社群離線通訊。           |
+| **Create Your Own Networks**  | 輕鬆設定私有網狀網絡，以實現偏遠地區安全可靠的通訊。       |
+| **Track and Share Locations** | 透過整合的 GPS 功能，即時分享你的位置，並保持團隊協調一致。 |
 
 Tap **Get started** to proceed through the setup flow.
 
@@ -237,7 +237,7 @@ Features also ask in context. Tapping **Scan** on the Connections screen with Bl
 
 New to Meshtastic? The [getting started guide](https://meshtastic.org/docs/getting-started) on meshtastic.org covers hardware selection, initial radio configuration, and your first mesh setup.
 
-## Related Topics
+## 相關主題
 
 - [Connections](connections) — pair your first radio
 - [Messages & Channels](messages-and-channels) — send your first message

@@ -118,61 +118,61 @@ aliases:
 
 | Метрическая | Описание                       |
 | ----------- | ------------------------------ |
-| Voltage     | Per-channel voltage reading    |
+| Напряжение  | Per-channel voltage reading    |
 | Ток         | Per-channel draw, in milliamps |
 
 Up to three channels (ch1–ch3) are charted, each with a label you can edit. The app does not
 derive a wattage figure from them.
 
-## Traceroute
+## Трассировка маршрута
 
-Traceroute shows the path a message takes through the mesh:
+Трассировка показывает путь сообщения через mesh-сеть:
 
-1. From the node detail screen, tap **Traceroute**.
-2. The app sends a traceroute request to the target node.
-3. Results show each hop with SNR/RSSI values.
+1. На экране сведений о ноде нажмите **"Трассировка"**.
+2. Приложение отправляет запрос трассировки целевой ноде.
+3. Результаты показывают каждый хоп со значениями SNR/RSSI.
 
-### Reading Traceroute Results
+### Чтение результатов трассировки
 
 ```
-You → Node A (SNR: 8.5) → Node B (SNR: 5.2) → Target
+Ты → Нода A (SNR: 8.5) → Нода B (SNR: 5.2) → Цель
 ```
 
-Each hop represents a relay node that forwarded the message.
+Каждый хоп обозначает ретранслирующую ноду, которая переслала сообщение.
 
-## Position Log
+## Журнал местоположения
 
-Historical position data for nodes that share their location:
+Исторические данные о местоположении для нод, которые делятся своими координатами:
 
-- GPS coordinates
-- Altitude
-- Speed (if moving)
-- Timestamp for each position report
+- GPS координаты
+- Высота
+- Скорость (при движении)
+- Временная метка для каждого отчёта о местоположении
 
-## Neighbor Info
+## Информация об окружении
 
-Shows which nodes a given node can directly hear, useful for understanding mesh topology.
+Показывает, какие ноды данная нода может слышать напрямую — полезно для понимания топологии mesh-сети.
 
-## Viewing Metrics
+## Просмотр метрик
 
-1. Navigate to **Nodes**.
-2. Tap the node you want to inspect.
-3. Select the metric category from the detail tabs.
+1. Перейдите в раздел **Ноды**.
+2. Нажмите на ноду, которую хотите просмотреть.
+3. Выберите категорию метрик на вкладках с подробностями.
 
-![Node detail — local device](../../assets/screenshots/nodes_detail_local.png)
+![Сведения о ноде — локальное устройство](../../assets/screenshots/nodes_detail_local.png)
 
-The position tab shows location data for nodes that share GPS:
+Вкладка "Местоположение" показывает координаты нод, которые передают GPS-данные:
 
-![Position inline content](../../assets/screenshots/nodes_position.png)
+![Встроенное содержимое о местоположении](../../assets/screenshots/nodes_position.png)
 
-> ℹ️ **Note:** Metrics are only available when they have been reported by the remote node. Metrics update at intervals configured on each node's telemetry settings.
+> ℹ️ **Note:** Metrics are only available when they have been reported by the remote node. Метрики обновляются с интервалами, настроенными в параметрах телеметрии каждой ноды.
 
-## Related Topics
+## Связанные темы
 
-- [Nodes](nodes) — node list, filtering, and sorting
-- [Telemetry & Sensors](telemetry-and-sensors) — supported sensors and configuration
-- [Signal Meter](signal-meter) — how signal quality is calculated from SNR and RSSI
-- [Discovery](discovery) — traceroute details and neighbor info
-- [Units & Locale](units-and-locale) — temperature, distance, and speed display formats
+- [Ноды](nodes) — список нод, фильтрация и сортировка
+- [Телеметрия и датчики](telemetry-and-sensors) — поддерживаемые датчики и настройка
+- [Измеритель сигнал](signal-meter) — как рассчитывается качество сигнала на основе SNR и RSSI
+- [Local Mesh Discovery](discovery) — traceroute details and neighbor info
+- [Единицы измерения и регион](units-and-locale) — форматы отображения температуры, расстояния и скорости
 
 ---

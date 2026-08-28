@@ -37,14 +37,14 @@ aliases:
 
 > ⚠️ **Предупреждение:** Прерывание обновления прошивки может вывести твоё устройство из строя. Keep the radio charged and stay in Bluetooth range for the whole update. The app itself only blocks the update below **10%** battery; 50% or more is the safe habit, not an enforced limit.
 
-#### Erase device during update
+#### Очистить устройство при обновлении
 
 Where the app offers it, an **Erase device during update** checkbox appears next to the update button. It is a per-update opt-in and is never remembered.
 
 | Method         | What erasing does                                                                                                                      |
 | -------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
 | BLE / WiFi OTA | Factory-resets the device once the update is verified. All settings and Bluetooth pairing are removed. |
-| USB            | Wipes the device's flash completely, then installs the selected firmware from scratch.                                 |
+| USB            | Полностью стирает флэш-память устройства, а затем устанавливает выбранную прошивку с нуля.                             |
 
 It is not offered for a local firmware file, during a recovery update, or on USB devices whose board does not support the erase step. Afterwards the device needs setting up — and pairing — again.
 
@@ -138,7 +138,7 @@ WiFi OTA takes the ESP32 `-update.bin` image rather than the `.uf2` a USB update
 
 On connecting, the app compares the radio's firmware against two thresholds and reacts differently to each:
 
-| Firmware version                                                                                                | What you see                                     | What happens                                                                                                         |
+| Версия прошивки                                                                                                 | What you see                                     | What happens                                                                                                         |
 | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
 | Below **2.3.15**                                                                | **Firmware update required.**    | The app disconnects from the radio. It will not operate against firmware this old.   |
 | **2.3.15** up to, but not including, **2.5.14** | **Firmware Update Recommended.** | Advisory only — dismiss it and carry on. The dialog names the latest stable release. |

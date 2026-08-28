@@ -106,7 +106,7 @@ Rainfall measurements (1-hour and 24-hour totals) are transmitted as **mm** and 
 
 | Your Setting                     | You See                 |
 | -------------------------------- | ----------------------- |
-| Metric                           | 12.0 mm |
+| Метрика                          | 12.0 mm |
 | Imperial (US) | 0.47 in |
 
 ## Units That Never Change

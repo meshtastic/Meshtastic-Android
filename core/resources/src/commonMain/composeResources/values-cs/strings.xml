@@ -226,6 +226,7 @@
     <string name="chirpy_thinking">Chirpy směruje komunikaci přes mesh síť…📡</string>
     <string name="choose_contrast">Úroveň kontrastu</string>
     <string name="choose_theme">Vyberte vzhled</string>
+    <string name="choose_units">Vybrat jednotky</string>
     <!-- CLEAN -->
     <string name="clean_node_database_confirmation">Tímto odstraníte %1$d uzlů z databáze. Tuto akci nelze vrátit zpět.</string>
     <string name="clean_node_database_description">Varování: Tímto odstraníte uzly z databází v aplikaci i v zařízení.\nVybrané položky se sčítají (kombinují).</string>
@@ -502,7 +503,7 @@
     <string name="doc_title_connections">Připojení</string>
     <string name="doc_title_debug_logs">Protokoly ladění</string>
     <string name="doc_title_desktop">Aplikace pro stolní počítače</string>
-    <string name="doc_title_discovery">Objevujte</string>
+    <string name="doc_title_discovery">Vyhledávání zařízení v místní mesh síti</string>
     <string name="doc_title_firmware">Aktualizace firmware</string>
     <string name="doc_title_help">Nápověda a dokumentace v aplikaci</string>
     <string name="doc_title_map">Mapa a trasové body</string>
@@ -1659,9 +1660,11 @@
     <string name="type_a_message">Napište zprávu</string>
     <string name="udp_enabled">UDP vysílání</string>
     <!-- UNITS -->
+    <string name="units">Jednotky</string>
     <string name="units_follow_system">Podle systému</string>
     <string name="units_imperial">Imperiální</string>
     <string name="units_metric">Metrický</string>
+    <string name="units_scope_summary">Určuje, jak aplikace zobrazuje vzdálenost, nadmořskou výšku, rychlost a teplotu. Displej samotného zařízení se řídí jeho vlastním nastavením displeje.</string>
     <!-- UNKNOWN -->
     <string name="unknown">Neznámé</string>
     <string name="unknown_age">Neznámé stáří</string>

@@ -45,6 +45,6 @@ Android では、Meshtastic はホーム画面の**ウィジェット**を提供
 
 - [ノードメトリクス](node-metrics)：アプリ内の完全な信号品質とローカル統計の履歴
 - [コネクション](connections)：ウィジェットに表示する統計が得られるよう、無線機に接続する
-- [探索](discovery)：メッシュ全体のチャンネル利用率と電波利用率
+- [Local Mesh Discovery](discovery) — channel and airtime utilization across the mesh
 
 ---

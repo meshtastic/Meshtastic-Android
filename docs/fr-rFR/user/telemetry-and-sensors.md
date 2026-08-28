@@ -55,10 +55,10 @@ Supported environmental sensors:
 
 ### Soil
 
-| Metric     | Unit    | Notes                                           |
-| ---------- | ------- | ----------------------------------------------- |
-| Soil Temp  | °C / °F | Reported alongside soil moisture by soil probes |
-| Soil Moist | %       | Volumetric water content                        |
+| Métrique | Unit    | Notes                                           |
+| -------- | ------- | ----------------------------------------------- |
+| Temp sol | °C / °F | Reported alongside soil moisture by soil probes |
+| Hum sol  | %       | Volumetric water content                        |
 
 Both appear as info cards on the node detail screen, next to the other environment readings.
 
@@ -76,7 +76,7 @@ Nodes with INA-series power sensors can report:
 
 | Metric  | Description                     |
 | ------- | ------------------------------- |
-| Voltage | Per-channel voltage reading     |
+| Tension | Per-channel voltage reading     |
 | Actif   | Per-channel current draw, in mA |
 
 Up to three channels are reported (ch1–ch3), and each can be given its own label — Solar or Battery, say — from the node detail screen. There is no separate wattage reading; the app charts voltage and current, and does not compute power from them.
@@ -106,7 +106,7 @@ Useful for monitoring solar charging or battery health on remote nodes.
 
 Nodes with particulate matter or CO₂ sensors report air quality data:
 
-| Metric                | Unit  | Description                  |
+| Métrique              | Unité | Description                  |
 | --------------------- | ----- | ---------------------------- |
 | PM1.0 | µg/m³ | Ultrafine particulate matter |
 | PM2.5 | µg/m³ | Fine particulate matter      |

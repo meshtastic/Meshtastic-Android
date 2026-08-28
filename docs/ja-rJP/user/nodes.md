@@ -159,7 +159,7 @@ aliases:
 - [ノードメトリクス](node-metrics)：各ノードの詳細なテレメトリダッシュボード
 - [メッセージとチャンネル](messages-and-channels)：ノードにダイレクトメッセージを送信
 - [マップとウェイポイント](map-and-waypoints)：ノードの位置を地図上で確認
-- [探索](discovery)：トポロジー探索のための経路トレースと隣接ノード情報
+- [Local Mesh Discovery](discovery) — traceroute and neighbor info for topology exploration
 - [信号メーター](signal-meter)：信号バーの意味を理解する
 
 ---

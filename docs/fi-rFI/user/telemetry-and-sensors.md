@@ -55,10 +55,10 @@ Tuetut ympäristöanturit:
 
 ### Soil
 
-| Metric     | Yksikkö | Notes                                           |
-| ---------- | ------- | ----------------------------------------------- |
-| Soil Temp  | °C / °F | Reported alongside soil moisture by soil probes |
-| Soil Moist | %       | Volumetric water content                        |
+| Metrijärjestelmä   | Yksikkö | Viestit                                         |
+| ------------------ | ------- | ----------------------------------------------- |
+| Maaperän lämpötila | °C / °F | Reported alongside soil moisture by soil probes |
+| Maaperän kosteus   | %       | Volumetric water content                        |
 
 Both appear as info cards on the node detail screen, next to the other environment readings.
 
@@ -76,7 +76,7 @@ INA-sarjan virta-antureilla varustetut radiot voivat raportoida:
 
 | Metrijärjestelmä | Kuvaus                          |
 | ---------------- | ------------------------------- |
-| Voltage          | Per-channel voltage reading     |
+| Jännite          | Per-channel voltage reading     |
 | Virta            | Per-channel current draw, in mA |
 
 Up to three channels are reported (ch1–ch3), and each can be given its own label — Solar or Battery, say — from the node detail screen. There is no separate wattage reading; the app charts voltage and current, and does not compute power from them.
@@ -106,12 +106,12 @@ Hyödyllinen aurinkolatauksen tai etäradioiden akun kunnon seurantaan.
 
 Hiukkas- tai CO₂-antureilla varustetut radiot raportoivat ilmanlaatutietoja:
 
-| Metric                | Unit  | Kuvaus                    |
-| --------------------- | ----- | ------------------------- |
-| PM1.0 | µg/m³ | Erittäin pienet hiukkaset |
-| PM2.5 | µg/m³ | Pienhiukkaset             |
-| PM10                  | µg/m³ | Karkeat hiukkaset         |
-| CO₂                   | ppm   | Hiilidioksidipitoisuus    |
+| Metrijärjestelmä      | Yksikkö | Kuvaus                    |
+| --------------------- | ------- | ------------------------- |
+| PM1.0 | µg/m³   | Erittäin pienet hiukkaset |
+| PM2.5 | µg/m³   | Pienhiukkaset             |
+| PM10                  | µg/m³   | Karkeat hiukkaset         |
+| CO₂                   | ppm     | Hiilidioksidipitoisuus    |
 
 Myös CO₂ anturit, kuten SCD4x, ilmoittavat oman lämpötilansa ja ilmankosteutensa, jotka näytetään edellä olevien mittausten yhteydessä. PM2.5-historiasta sovellus laskee lisäksi **EPA NowCast AQI** -arvon.
 

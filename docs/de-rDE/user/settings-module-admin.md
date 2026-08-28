@@ -61,15 +61,15 @@ See [MQTT](mqtt) for a detailed usage guide including encryption, privacy, and b
 
 Enables serial port communication for external device integrations (GPS modules, sensors, or custom hardware). When enabled, the node's serial port can send and receive protobuf or text data, allowing external microcontrollers or computers to interact with the mesh.
 
-| Einstellung                      | Beschreibung                                                                                                                                                                                        |
-| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Serielle Schnittstelle aktiviert | Activate serial communication                                                                                                                                                                       |
-| Echo enabled                     | Echo received serial data back                                                                                                                                                                      |
-| Serial mode                      | Which protocol the port speaks — Default, Simple, Proto, Text message, NMEA, CalTopo, WS85 weather station, VE.Direct, MeshSolar config, Log, or Log (text only) |
-| RX / TX                          | GPIO pins for the serial connection                                                                                                                                                                 |
-| Serial baud rate                 | Port speed                                                                                                                                                                                          |
-| Timeout                          | How long to wait before considering an incoming message complete                                                                                                                                    |
-| Override console serial port     | Take over the port the debug console normally uses                                                                                                                                                  |
+| Einstellung                                   | Beschreibung                                                                                                                                                                                        |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Serielle Schnittstelle aktiviert              | Activate serial communication                                                                                                                                                                       |
+| Echo aktiviert                                | Echo received serial data back                                                                                                                                                                      |
+| Serieller Modus                               | Which protocol the port speaks — Default, Simple, Proto, Text message, NMEA, CalTopo, WS85 weather station, VE.Direct, MeshSolar config, Log, or Log (text only) |
+| RX / TX                                       | GPIO pins for the serial connection                                                                                                                                                                 |
+| Serielle Baudrate                             | Port speed                                                                                                                                                                                          |
+| Zeitlimit erreicht                            | How long to wait before considering an incoming message complete                                                                                                                                    |
+| Seriellen Anschluss der Konsole überschreiben | Take over the port the debug console normally uses                                                                                                                                                  |
 
 ### External Notification Module
 
@@ -80,18 +80,18 @@ and each can drive the LED, the buzzer and the vibration motor separately, givin
 
 | Einstellung                                       | Beschreibung                                                                                        |
 | ------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| External notification enabled                     | Master toggle for the module                                                                        |
+| Externe Benachrichtigungen aktiviert              | Master toggle for the module                                                                        |
 | Alert message LED / buzzer / vibra                | Which outputs fire on an incoming message                                                           |
 | Alert bell LED / buzzer / vibra                   | Which outputs fire on a received bell character                                                     |
-| Output LED (GPIO)              | Pin the LED is wired to                                                                             |
-| Output LED active high                            | Whether the LED pin is active high or low                                                           |
-| Output buzzer (GPIO)           | Pin the buzzer is wired to                                                                          |
-| Output vibra (GPIO)            | Pin the vibration motor is wired to                                                                 |
-| Use PWM buzzer                                    | Drive the buzzer with PWM, which allows tones rather than a single pitch                            |
-| Use I2S as buzzer                                 | Send the alert through an I2S audio output instead                                                  |
-| Output duration (milliseconds) | How long a single alert lasts                                                                       |
-| Nag timeout (seconds)          | Keep repeating the alert for this long until it is acknowledged. 0 disables nagging |
-| Ringtone                                          | The tone played on a PWM buzzer, in RTTTL. Can be imported from a file              |
+| Ausgabe LED (GPIO)             | Pin the LED is wired to                                                                             |
+| Ausgabe LED aktiv hoch                            | Whether the LED pin is active high or low                                                           |
+| Ausgabe Summer (GPIO)          | Pin the buzzer is wired to                                                                          |
+| Ausgabe Vibration (GPIO)       | Pin the vibration motor is wired to                                                                 |
+| Benutze PWM Summer                                | Drive the buzzer with PWM, which allows tones rather than a single pitch                            |
+| I2S als Buzzer verwenden                          | Send the alert through an I2S audio output instead                                                  |
+| Ausgabedauer (GPIO)            | How long a single alert lasts                                                                       |
+| Nervige Verzögerung (Sekunden) | Keep repeating the alert for this long until it is acknowledged. 0 disables nagging |
+| Klingelton                                        | The tone played on a PWM buzzer, in RTTTL. Can be imported from a file              |
 
 ### Store & Forward Module
 
@@ -129,19 +129,19 @@ Controls what telemetry data your node shares with the mesh. Telemetry includes 
 Each of the four metric groups has its own enable toggle and its own interval, so you can report
 battery health often and sensors rarely.
 
-| Einstellung                           | Beschreibung                                                                                                                                                                      |
-| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Send Device Telemetry                 | Master toggle for device metrics. Only shown on firmware 2.7.12 and newer                                                         |
-| Device metrics update interval        | How often to report battery, uptime and channel utilisation                                                                                                                       |
-| Environment metrics module enabled    | Report the attached environment sensors                                                                                                                                           |
-| Environment metrics update interval   | How often to report them                                                                                                                                                          |
-| Environment metrics on-screen enabled | Also show these readings on the device's own display                                                                                                                              |
-| Environment metrics use Fahrenheit    | Use °F on the device's display. This is the radio's screen only — the app follows your phone's locale, see [Units & Locale](units-and-locale) |
-| Air quality metrics module enabled    | Report particulate and CO₂ sensor data                                                                                                                                            |
-| Air quality metrics update interval   | How often to report them                                                                                                                                                          |
-| Power metrics module enabled          | Report the per-channel voltage and current readings                                                                                                                               |
-| Power metrics update interval         | How often to report them                                                                                                                                                          |
-| Power metrics on-screen enabled       | Also show power readings on the device's display                                                                                                                                  |
+| Einstellung                               | Beschreibung                                                                                                                                                                      |
+| ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Gerätetelemetrie senden                   | Master toggle for device metrics. Only shown on firmware 2.7.12 and newer                                                         |
+| Aktualisierungsintervall für Gerätedaten  | How often to report battery, uptime and channel utilisation                                                                                                                       |
+| Modul Umweltdaten aktiviert               | Report the attached environment sensors                                                                                                                                           |
+| Aktualisierungsintervall für Umweltdaten  | How often to report them                                                                                                                                                          |
+| Umweltdatenanzeige aktiviert              | Also show these readings on the device's own display                                                                                                                              |
+| Umweltdaten in Fahrenheit                 | Use °F on the device's display. This is the radio's screen only — the app follows your phone's locale, see [Units & Locale](units-and-locale) |
+| Modul Luftqualität aktiviert              | Report particulate and CO₂ sensor data                                                                                                                                            |
+| Aktualisierungsintervall der Luftqualität | How often to report them                                                                                                                                                          |
+| Modul Energiedaten aktiviert              | Report the per-channel voltage and current readings                                                                                                                               |
+| Aktualisierungsintervall für Energiedaten | How often to report them                                                                                                                                                          |
+| Energiedatenanzeige aktiviert             | Also show power readings on the device's display                                                                                                                                  |
 
 See [Telemetry & Sensors](telemetry-and-sensors) for supported sensors and configuration recommendations.
 
@@ -153,11 +153,11 @@ Pre-configured messages accessible from the device's physical buttons (for radio
 | ----------------------------------------- | --------------------------------------------------------------------------------------------------------- |
 | ~~Canned message enabled~~                | ⚠️ **Deprecated** in the protobuf schema                                                                  |
 | Nachrichten                               | Newline-separated list of messages                                                                        |
-| Send bell                                 | Send a bell character alongside the message, so a receiving node's External Notification module can sound |
+| Glocke senden                             | Send a bell character alongside the message, so a receiving node's External Notification module can sound |
 | Rotary encoder enabled                    | Use a rotary encoder as the input device                                                                  |
 | GPIO pin for rotary encoder A / B / press | The three pins the encoder is wired to                                                                    |
 | Generate input event on press / CW / CCW  | Which key event each encoder action produces                                                              |
-| Up/Down/Select input enabled              | A separate, simpler input scheme using up/down/select buttons rather than an encoder                      |
+| Up/Down/Select Eingang aktiviert          | A separate, simpler input scheme using up/down/select buttons rather than an encoder                      |
 | ~~Allow input source~~                    | ⚠️ **Deprecated** in the protobuf schema                                                                  |
 
 ### Audio Module
@@ -168,7 +168,7 @@ Codec2 audio support for low-bandwidth voice communication over the mesh. This i
 | ---------------------------------- | ------------------------------------ |
 | Aktiviert                          | Activate audio module                |
 | Codec2 Rate                        | Audio quality/bandwidth tradeoff     |
-| PTT Pin                            | GPIO pin for the push-to-talk button |
+| GPIO PTT                           | GPIO pin for the push-to-talk button |
 | I2S Wortauswahl                    | GPIO pin for I2S WS                  |
 | I2S Data In                        | GPIO pin for I2S DIN                 |
 | I2S Data Out                       | GPIO pin for I2S DOUT                |
@@ -198,7 +198,7 @@ Broadcasts information about directly heard neighbors, enabling mesh topology ma
 | Update Interval (s) | How often to broadcast neighbor list                                                                                                 |
 | Übertragen über LoRa                   | Also broadcast neighbor info over LoRa, not just MQTT/phone. Unavailable on a channel using the default key and name |
 
-See [Discovery](discovery) for how to use neighbor data for mesh topology exploration.
+See [Local Mesh Discovery](discovery) for how to use neighbor data for mesh topology exploration.
 
 ### Ambient Lighting Module
 
@@ -229,7 +229,7 @@ Turns your node into a motion or door sensor alert system. When a GPIO pin detec
 
 People counter using WiFi and BLE probe requests. Counts nearby devices by passively listening for probe requests that phones and laptops emit when scanning for networks. Available only on ESP32 devices.
 
-| Setting                                | Description                                                                                                      |
+| Einstellung                            | Beschreibung                                                                                                     |
 | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | Aktiviert                              | Activate people counting                                                                                         |
 | Update Interval (s) | How often to report counts                                                                                       |
@@ -242,9 +242,9 @@ People counter using WiFi and BLE probe requests. Counts nearby devices by passi
 
 Publishes a short free-text status line for your node, which other nodes can display alongside it.
 
-| Setting                  | Description                                                                                                                                                                      |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| The actual status string | Up to 80 characters. The **✕** in the field clears it. (That is the app's own label for the field, verbatim.) |
+| Einstellung                     | Beschreibung                                                                                                                                                                     |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Die aktuelle Statuszeichenkette | Up to 80 characters. The **✕** in the field clears it. (That is the app's own label for the field, verbatim.) |
 
 Saving takes effect immediately — this is one of the few module settings that never asks the
 node to reboot.
@@ -255,7 +255,7 @@ node to reboot.
 ### Mesh Beacon Module
 
 Broadcasts an invitation to your mesh, and receives invitations from others. See
-[Discovery](discovery) for the full walkthrough.
+[Local Mesh Discovery](discovery) for the full walkthrough.
 
 ### TAK Module
 
@@ -297,7 +297,7 @@ Remotely reboot a connected or administered node.
 
 Opens the **Packets** and **App logs** tabs for viewing, filtering, and exporting diagnostic output. See [Debug Logs](debug-logs) for the full walkthrough.
 
-### About
+### Über
 
 **Settings → About** carries the app's own identity rather than the radio's:
 
@@ -309,7 +309,7 @@ Three sections:
   **Acknowledgements** (below).
 - **Project information** — links to the website and to this documentation.
 
-### Acknowledgements
+### Danksagungen
 
 Reached from **About**, this lists every open-source library the app ships, with its license,
 generated at build time by AboutLibraries. It was previously called the license screen.

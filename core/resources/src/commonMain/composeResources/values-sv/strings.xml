@@ -394,7 +394,6 @@
     <string name="doc_title_connections">Anslutningar</string>
     <string name="doc_title_debug_logs">Debug-loggar</string>
     <string name="doc_title_desktop">Skrivbordsapplikation</string>
-    <string name="doc_title_discovery">Upptäckt</string>
     <string name="doc_title_measurement">Mätvärden &amp; Formatering</string>
     <string name="doc_title_messages">Meddelanden &amp; Kanaler</string>
     <string name="doc_title_mqtt">MQTT</string>

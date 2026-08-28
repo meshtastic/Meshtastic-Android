@@ -1,10 +1,12 @@
 ---
-title: Avastamine
+title: Kohalik kärgvõrgu avastaja
 parent: Kasutusjuhend
 nav_order: 12
-last_updated: 2026-08-27
+last_updated: 2026-08-28
 description: Avasta oma kärgvõrku – kohalik kärgvõrgu avastaja skanner, traceroute'i teed, naabri-kaardid ja sõlmede avastamise tööriistad.
 aliases:
+  - discovery
+  - local-mesh-discovery
   - kärgvõrgu-avastamine
   - kohalik-avastamine
   - võrguskannimine
@@ -12,7 +14,7 @@ aliases:
   - naabri-info
 ---
 
-# Avastamine
+# Kohalik kärgvõrgu avastaja
 
 Avastamistööriistad aitavad mõista, **kuidas** kärgvõrk on ühendatud – millised sõlmed üksteist kuulevad, milliseid teid sõnumid läbivad ja kus esinevad kitsaskohad või nõrgad lülid.
 

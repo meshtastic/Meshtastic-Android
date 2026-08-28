@@ -118,13 +118,13 @@ Power management telemetry (requires INA sensor or compatible hardware):
 
 | 公制（公里/公尺） | 描述說明                           |
 | --------- | ------------------------------ |
-| Voltage   | Per-channel voltage reading    |
+| 電壓        | Per-channel voltage reading    |
 | 目前        | Per-channel draw, in milliamps |
 
 Up to three channels (ch1–ch3) are charted, each with a label you can edit. The app does not
 derive a wattage figure from them.
 
-## Traceroute
+## 路由追蹤
 
 Traceroute shows the path a message takes through the mesh:
 
@@ -138,18 +138,18 @@ Traceroute shows the path a message takes through the mesh:
 You → Node A (SNR: 8.5) → Node B (SNR: 5.2) → Target
 ```
 
-Each hop represents a relay node that forwarded the message.
+每個跳躍點代表一個轉送該訊息的中繼節點。
 
-## Position Log
+## 定位日誌
 
 Historical position data for nodes that share their location:
 
-- GPS coordinates
-- Altitude
+- GPS 座標
+- 海拔高度
 - Speed (if moving)
 - Timestamp for each position report
 
-## Neighbor Info
+## 鄰近節點資訊
 
 Shows which nodes a given node can directly hear, useful for understanding mesh topology.
 
@@ -167,12 +167,12 @@ The position tab shows location data for nodes that share GPS:
 
 > ℹ️ **Note:** Metrics are only available when they have been reported by the remote node. Metrics update at intervals configured on each node's telemetry settings.
 
-## Related Topics
+## 相關主題
 
 - [Nodes](nodes) — node list, filtering, and sorting
 - [Telemetry & Sensors](telemetry-and-sensors) — supported sensors and configuration
 - [Signal Meter](signal-meter) — how signal quality is calculated from SNR and RSSI
-- [Discovery](discovery) — traceroute details and neighbor info
+- [Local Mesh Discovery](discovery) — traceroute details and neighbor info
 - [Units & Locale](units-and-locale) — temperature, distance, and speed display formats
 
 ---

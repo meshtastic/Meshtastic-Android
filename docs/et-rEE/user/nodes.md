@@ -159,7 +159,7 @@ Täielik ja sirvitav kataloog kõikidest linkidest on saadaval ka menüüs **Sea
 - [Node Metrics](node-metrics) — detailed telemetry dashboards for each node
 - [Sõnumid ja kanalid](messages-and-channels) — saada otsesõnum sõlmele
 - [Kaart ja teekonnapunktid](map-and-waypoints) — vaata sõlmede geograafilisi asukohti
-- [Avasta](Discovery) - traceroute ja naabri-info kärgvõrgu topoloogia uurimiseks
+- [Local Mesh Discovery](discovery) — traceroute and neighbor info for topology exploration
 - [Signal Meter](signal-meter) — understand what the signal bars mean
 
 ---
