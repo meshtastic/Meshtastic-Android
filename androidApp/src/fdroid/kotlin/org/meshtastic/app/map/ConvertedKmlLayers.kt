@@ -88,7 +88,9 @@ private suspend fun convertKmlLayer(context: Context, layer: MapLayerItem): Stri
 
         val geoJson =
             context.contentResolver.openInputStream(source)?.use { stream ->
-                convertKmlSource(BufferedInputStream(stream))
+                // The archive's own images are dropped here: the MapLibre renderer has no icon support yet, so
+                // nothing would read them. They are extracted for the Google map, which does.
+                convertKmlSource(BufferedInputStream(stream))?.geoJson
             }
         if (geoJson == null) {
             Logger.withTag("KmlLayers").w { "Nothing mappable in an imported KML layer" }

@@ -1506,10 +1506,15 @@ private fun parseMapLayer(layerType: LayerType, stream: InputStream): DataLayer?
     // with
     // NoSuchMethodError in 2.8.0–2.8.1 — a version floor and a canary test were all that held it.
     LayerType.KML ->
-        convertKmlSource(BufferedInputStream(stream))
-            ?.let { geoJson -> GeoJsonParser().parse(geoJson.byteInputStream()) }
-            ?.toLayer()
-            ?.applySimpleStyleSpec()
+        convertKmlSource(BufferedInputStream(stream))?.let { imported ->
+            GeoJsonParser()
+                .parse(imported.geoJson.byteInputStream())
+                ?.toLayer()
+                ?.applySimpleStyleSpec()
+                // A KMZ carries its icons inside the archive, and a placemark names them by their path in it. The
+                // renderer resolves those through its image cache, which is seeded from this property.
+                ?.let { layer -> layer.copy(properties = layer.properties + ("images" to imported.images)) }
+        }
 
     LayerType.GEOJSON,
     LayerType.COVERAGE,

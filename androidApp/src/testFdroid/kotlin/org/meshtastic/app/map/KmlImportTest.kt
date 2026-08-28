@@ -40,7 +40,7 @@ import kotlin.test.assertTrue
 class KmlImportTest {
 
     private fun convert(kml: String): String? =
-        convertKmlSource(BufferedInputStream(ByteArrayInputStream(kml.toByteArray())))
+        convertKmlSource(BufferedInputStream(ByteArrayInputStream(kml.toByteArray())))?.geoJson
 
     private fun kmz(kml: String, entryName: String = "doc.kml"): ByteArray {
         val bytes = ByteArrayOutputStream()
@@ -55,7 +55,7 @@ class KmlImportTest {
     @Test
     fun `a kmz is unzipped and read`() {
         val archive = kmz("<kml><Placemark><Point><coordinates>-107.6,34.1</coordinates></Point></Placemark></kml>")
-        val result = assertNotNull(convertKmlSource(BufferedInputStream(ByteArrayInputStream(archive))))
+        val result = assertNotNull(convertKmlSource(BufferedInputStream(ByteArrayInputStream(archive)))?.geoJson)
 
         assertContains(result, """"coordinates":[-107.6,34.1]""")
     }
@@ -68,7 +68,7 @@ class KmlImportTest {
                 entryName = "files/export.kml",
             )
 
-        assertNotNull(convertKmlSource(BufferedInputStream(ByteArrayInputStream(archive))))
+        assertNotNull(convertKmlSource(BufferedInputStream(ByteArrayInputStream(archive)))?.geoJson)
     }
 
     @Test

@@ -16,39 +16,53 @@
  */
 package org.meshtastic.app.map
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import org.meshtastic.feature.map.kml.KmlToGeoJson
 import java.io.InputStream
 import java.util.zip.ZipInputStream
 
 /**
- * Reads an imported KML or KMZ and hands back the GeoJSON MapLibre can draw.
+ * Reads an imported KML or KMZ and hands back the GeoJSON MapLibre and Google Maps can both draw.
  *
  * The conversion itself is [KmlToGeoJson] in `feature/map`, which is common code and takes the document as text. What
- * stays here is the part that is genuinely a file: sniffing whether the import is a zip, and pulling the KML out of it.
- * Shared by both flavours — the MapLibre map renders the GeoJSON directly, the Google map hands it to maps-utils'
- * GeoJSON pipeline.
+ * stays here is the part that is genuinely a file: sniffing whether the import is a zip, pulling the KML out of it, and
+ * decoding the images packed beside it.
  *
  * [source] must be mark-capable — wrap it in a [java.io.BufferedInputStream] — because a KMZ is recognised by sniffing
  * its first bytes rather than by trusting a file extension the content resolver often gets wrong.
  */
-fun convertKmlSource(source: InputStream): String? {
-    val kml = if (source.isKmzArchive()) source.firstKmlEntry() else source
-    return kml?.let { KmlToGeoJson.convert(it.readBytes().decodeToString()) }
+fun convertKmlSource(source: InputStream): ImportedKml? = if (source.isKmzArchive()) {
+    source.readArchive()
+} else {
+    KmlToGeoJson.convert(source.readBytes().decodeToString())?.let { ImportedKml(it, emptyMap()) }
 }
 
 /**
- * The first `.kml` entry in a KMZ.
+ * The KML in an archive, and every image beside it.
  *
- * By convention that is `doc.kml` at the archive root, but exporters disagree and some nest it, so the first entry with
- * the extension wins rather than a fixed name.
+ * By convention the document is `doc.kml` at the root, but exporters disagree and some nest it, so the first entry with
+ * the extension wins rather than a fixed name. The zip is walked once: a second pass would mean holding the whole
+ * archive in memory or reopening a stream the caller does not own.
  */
-private fun InputStream.firstKmlEntry(): InputStream? {
-    val zip = ZipInputStream(this)
-    var entry = zip.nextEntry
-    var found = false
-    while (entry != null && !found) {
-        found = !entry.isDirectory && entry.name.endsWith(".kml", ignoreCase = true)
-        if (!found) entry = zip.nextEntry
+private fun InputStream.readArchive(): ImportedKml? {
+    var kml: String? = null
+    val images = mutableMapOf<String, Bitmap>()
+
+    ZipInputStream(this).use { zip ->
+        generateSequence { zip.nextEntry }
+            .filterNot { it.isDirectory }
+            .forEach { entry ->
+                val bytes = zip.readBytes()
+                when {
+                    kml == null && entry.name.endsWith(".kml", ignoreCase = true) -> kml = bytes.decodeToString()
+
+                    // Anything else that decodes as an image is one a placemark may name; anything that does not is
+                    // some other file the exporter packed, and is skipped without complaint.
+                    else -> BitmapFactory.decodeByteArray(bytes, 0, bytes.size)?.let { images[entry.name] = it }
+                }
+            }
     }
-    return if (found) zip else null
+
+    return kml?.let { document -> KmlToGeoJson.convert(document)?.let { ImportedKml(it, images) } }
 }
