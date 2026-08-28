@@ -66,11 +66,15 @@ jobs:
           loader="feature/docs/src/commonMain/kotlin/org/meshtastic/feature/docs/data/DocBundleLoader.kt"
           status=0
 
+          # Match the page's own resourcePath, not the bare slug: every page also carries an
+          # alias list, so a loose slug search passes when some *other* page happens to alias
+          # this one's name (docs/en/user/measurement.md would match units-and-locale's alias).
           for f in docs/en/user/*.md docs/en/developer/*.md; do
             [ -e "$f" ] || continue
-            slug=$(basename "$f" .md)
-            if ! grep -q "\"$slug\"" "$loader"; then
-              echo "::error file=$f::'$slug' has no UserPageDef/DeveloperPageDef in DocBundleLoader.kt, so it is unreachable in the in-app docs browser."
+            resource="en/${f#docs/en/}"
+            resource="${resource%.md}.html"
+            if ! grep -qF "\"$resource\"" "$loader"; then
+              echo "::error file=$f::no page definition in DocBundleLoader.kt references \"$resource\", so this page is unreachable in the in-app docs browser."
               status=1
             fi
           done
