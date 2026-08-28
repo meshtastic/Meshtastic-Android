@@ -537,7 +537,6 @@
     <string name="dns">Служба доменных имен (DNS)</string>
     <!-- DOC -->
     <string name="doc_clear_search">Очистить условия поиска</string>
-    <string name="doc_keywords_android_auto">android auto,car,head unit,driving,hands free,messaging</string>
     <string name="doc_keywords_app_functions">system ai,gemini,assistant,functions,automation,voice</string>
     <string name="doc_keywords_connections">bluetooth,usb,tcp,pairing,serial,wifi</string>
     <string name="doc_keywords_debug_logs">debug,logs,logcat,export,bug report,issue,troubleshooting,diagnostics</string>
@@ -563,7 +562,6 @@
     <string name="doc_search_placeholder">Поиск по документации…</string>
     <string name="doc_section_developer">Руководство разработчика</string>
     <string name="doc_section_user">Руководство пользователя</string>
-    <string name="doc_title_android_auto">Android авто</string>
     <string name="doc_title_app_functions">Функции прилож-я</string>
     <string name="doc_title_connections">Соединения</string>
     <string name="doc_title_debug_logs">Журнал отладки</string>

@@ -2,7 +2,7 @@
 title: MQTT
 parent: 使用者指南
 nav_order: 11
-last_updated: 2026-05-13
+last_updated: 2026-08-27
 description: 將您的 mesh 網路橋接至網際網路 — MQTT 代理伺服器設定、加密層級與地圖回報。
 aliases:
   - MQTT
@@ -41,20 +41,31 @@ MQTT 模組可將您的節點連接至 MQTT 代理伺服器，實現以下功能
 
 ![MQTT toggle switch](../../assets/screenshots/settings_switch.png)
 
-| 設定          | 描述說明                            | 默認                                                  |
-| ----------- | ------------------------------- | --------------------------------------------------- |
-| 伺服器位址       | MQTT 代理伺服器主機名稱                  | mqtt.meshtastic.org |
-| 使用者名稱       | 代理伺服器驗證                         | meshdev                                             |
-| 密碼          | 代理伺服器驗證                         | large4cats                                          |
-| 根主題         | 訊息的基礎主題                         | msh                                                 |
-| 加密          | 加密 MQTT 承載內容                    | 已啟用                                                 |
-| ~~JSON 輸出~~ | ⚠️ 已棄用——韌體已移除 JSON 封包支援；此欄位將被忽略 | 已停用                                                 |
-| TLS         | 與代理伺服器的安全連線                     | 已停用                                                 |
-| 地圖回報        | 將位置回報至公開地圖                      | 已停用                                                 |
+| 設定          | 描述說明                                                                                                                                                                                | 默認                                                  |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| 伺服器位址       | MQTT 代理伺服器主機名稱                                                                                                                                                                      | mqtt.meshtastic.org |
+| 使用者名稱       | 代理伺服器驗證                                                                                                                                                                             | meshdev                                             |
+| 密碼          | 代理伺服器驗證                                                                                                                                                                             | large4cats                                          |
+| 根主題         | 訊息的基礎主題                                                                                                                                                                             | msh                                                 |
+| 加密          | 加密 MQTT 承載內容                                                                                                                                                                        | 已啟用                                                 |
+| JSON Output | Also publish and consume the `/2/json/` topic. Deprecated in the protobuf schema, but still the only toggle for this behaviour — and the app's own proxy honours it | 已停用                                                 |
+| TLS         | 與代理伺服器的安全連線                                                                                                                                                                         | 已停用                                                 |
+| 地圖回報        | 將位置回報至公開地圖                                                                                                                                                                          | 已停用                                                 |
+
+### Connection Status and Test Connection
+
+The top of the MQTT settings screen shows the live broker connection — **Connected**,
+**Connecting**, **Reconnecting**, **Disconnected**, or **Inactive**.
+
+**Test connection** probes the broker before you commit the settings to the radio, and
+distinguishes the failure modes: the hostname not resolving, the TCP connection being refused,
+TLS failing, the attempt timing out, or the broker rejecting your credentials with a reason.
 
 ### MQTT Proxy on This Phone
 
 If your node has no internet access of its own, it can use the connected phone as its MQTT gateway: enable **MQTT** and **Proxy to client enabled** in the module config, and the app relays MQTT traffic between the radio and the broker over your phone's internet connection.
+
+> ℹ️ **Note:** The proxy relay is mobile-only. On the Desktop app the MQTT settings are present, but no relay runs behind them.
 
 The **MQTT proxy on this phone** toggle at the top of the MQTT settings screen shows whether this relay is currently running and lets you cut it off (or restart it) immediately — without editing and re-saving the device's MQTT configuration.
 
@@ -95,13 +106,16 @@ The **MQTT proxy on this phone** toggle at the top of the MQTT settings screen s
 
 ## 訊息格式
 
-MQTT 使用 protobuf 訊息格式：
+MQTT carries two payload formats:
 
-| 格式           | 描述說明                       | 使用情境        |
-| ------------ | -------------------------- | ----------- |
-| **Protobuf** | 二進位 Meshtastic protobuf 編碼 | 節點間 mesh 橋接 |
+| 格式           | 描述說明                                        | 使用情境                                                                        |
+| ------------ | ------------------------------------------- | --------------------------------------------------------------------------- |
+| **Protobuf** | 二進位 Meshtastic protobuf 編碼                  | 節點間 mesh 橋接                                                                 |
+| **JSON**     | Human-readable JSON on the `/2/json/` topic | Consumers outside the mesh (dashboards, home automation) |
 
-> ⚠️ 注意：韌體已移除 JSON 輸出支援。 Json_enabled 設定在應用程式中仍會顯示，以維持舊版相容性，但對目前的韌體版本不會產生任何效果。
+> ℹ️ **Note:** `json_enabled` is marked deprecated in the protobuf schema, but it has not been
+> replaced and it is not ignored. When it is on, the app's own MQTT proxy subscribes to the
+> `/2/json/` topic and decodes those payloads.
 
 ## 加密與隱私
 
@@ -111,7 +125,7 @@ MQTT 使用 protobuf 訊息格式：
 2. MQTT 加密（模組設定）在傳輸至代理伺服器的過程中新增額外的加密層。 此設定可保護中繼資料與路由資訊。
 3. TLS 對連接至代理伺服器的 TCP 連線進行加密，防止網路層級的竊聽。
 
-> 🔒 重要：預設公開頻道使用眾所周知的金鑰。 透過 MQTT 傳送的預設頻道訊息實際上等同於未加密 — 任何人均可解碼。 私人通訊請務必使用自訂 PSK。
+> 🔒 **Security:** The default public channel has a well-known key. 透過 MQTT 傳送的預設頻道訊息實際上等同於未加密 — 任何人均可解碼。 私人通訊請務必使用自訂 PSK。
 
 ## 最佳實踐
 

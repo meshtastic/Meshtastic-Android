@@ -2,7 +2,7 @@
 title: Avastamine
 parent: Kasutusjuhend
 nav_order: 12
-last_updated: 2026-07-27
+last_updated: 2026-08-27
 description: Avasta oma kärgvõrku – kohalik kärgvõrgu avastaja skanner, traceroute'i teed, naabri-kaardid ja sõlmede avastamise tööriistad.
 aliases:
   - kärgvõrgu-avastamine
@@ -29,7 +29,7 @@ Kohalik kärgvõrdu avastaja on spetsiaalne skaneerimisrežiim, mis aitab leida 
 
 Ava see menüüst **Seaded → Lisateave → Kohaliku võrgu tuvastamine**. Töölaual on sellel omaette kirje **Seaded → Kohaliku võrgu avastamine**.
 
-> ⚠️ **Märkus:** Discovery muudab skannimise ajal ajutiselt raadio LoRa seadeid ja taastab pärast skannimise lõppu algse konfiguratsiooni. Skannimise käivitamiseks peab seade olema ühendatud.
+> ℹ️ **Note:** Discovery temporarily changes your radio's LoRa settings while it scans, then restores your original configuration when it finishes. Skannimise käivitamiseks peab seade olema ühendatud.
 
 ### Skannimise seadistamine
 
@@ -84,7 +84,7 @@ Tulemustest saadaolevad lisafunktsioonid:
 - **Avastuskaart** – skanni käigus leitud sõlmede kaart.
 - **Aruande eksport** – ekspordi aruanne PDF-failina Androidis või tekstina muudel platvormidel.
 
-> 💡 **Vihje:** Androidis saab Discovery genereerida tulemustest seadmesisese TI kokkuvõtte (Gemini Nano). If the on-device model isn't available, an algorithmic summary is used instead — so you always get a readable interpretation of the scan.
+> 💡 **Tip:** On **Google Play** builds, Discovery can generate an on-device AI summary (Gemini Nano) of your results. F-Droid builds always use the algorithmic summary — the proprietary ML Kit dependency is deliberately excluded from that flavor — so you get a readable interpretation of the scan either way.
 
 ---
 
@@ -167,7 +167,7 @@ Kui see on lubatud, levitab sõlm perioodiliselt oma naabri-tabelit. Teised sõl
 - Iga naabri-kirje näitab otse kuuldud sõlme ja selle signaali kvaliteeti.
 - Kogu kärgvõrgu topoloogia mõistmiseks kombineerige mitme sõlme naaberandmeid.
 
-> ⚠️ **Märkus:** Naabriinfo suurendab eetriaega, kuna iga lubatud sõlm levitab perioodiliselt oma naabrite nimekirja. Paljude sõlmedega tiheda liiklusega kärgvõrgu puhul kaaluge ummikute vältimiseks pikemaid levitamise intervalle (3600 sekundit või rohkem).
+> ℹ️ **Note:** Neighbor Info increases airtime usage because every enabled node periodically broadcasts its neighbor list. Paljude sõlmedega tiheda liiklusega kärgvõrgu puhul kaaluge ummikute vältimiseks pikemaid levitamise intervalle (3600 sekundit või rohkem).
 
 ---
 
@@ -201,6 +201,14 @@ Filtreerimis- ja sortimisvalikute kohta leiate lisateavet jaotisest [Nodes](node
 - **Luba naabriinfo funktsioon võtmesõlmedes** – eriti ruuterites ja repiiterites, et saada ülevaade magistraalvõrgust.
 - **Kontrolli kaarti** — sõlmede asukohad [Kaart] (map-and-waypoints) koos signaaliandmetega aitavad sul mõista, miks mõned ühendused on tugevad ja teised nõrgad.
 - **Compare signal over time** — use the [Signal Meter](signal-meter) guide to interpret SNR and RSSI values correctly.
+
+## Seotud teemad
+
+- [Nodes](nodes) — the node list these scans populate
+- [Map & Waypoints](map-and-waypoints) — see discovered nodes geographically
+- [Signal Meter](signal-meter) — interpret the SNR and RSSI a scan reports
+- [Settings — Modules & Admin](settings-module-admin) — configure the Mesh Beacon and Neighbor Info modules
+- [Messages & Channels](messages-and-channels) — join a mesh you found and start talking
 
 ---
 

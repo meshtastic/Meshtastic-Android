@@ -2,7 +2,7 @@
 title: 訊息與頻道
 parent: 使用者指南
 nav_order: 3
-last_updated: 2026-07-11
+last_updated: 2026-08-27
 description: Send and receive messages, manage channels, configure encryption, search conversations, and use quick chat, reactions, and message actions.
 aliases:
   - 頻道
@@ -34,12 +34,12 @@ Meshtastic 支援兩種通訊模式：頻道廣播與私訊。
 | 🔓 | 預設／開放           | 使用眾所周知的預設金鑰。 使用相同預設值的任何 Meshtastic 裝置均可讀取這些訊息。 |
 | ⚠️ | 不安全 + 位置        | 開放頻道，同時廣播您的 GPS 位置。 在公開 mesh 網路中使用時請謹慎。        |
 
-> 🔒 安全提示：私人通訊請務必設定專屬的 PSK。 預設頻道刻意設計為開放，以便新使用者能探索 mesh 網路 — 但對於任何敏感內容，請另行建立獨立的加密頻道。
+> 🔒 **Security:** Always configure a unique PSK for private communications. 預設頻道刻意設計為開放，以便新使用者能探索 mesh 網路 — 但對於任何敏感內容，請另行建立獨立的加密頻道。
 
 ### 新增頻道
 
 1. 前往「設定 → 頻道」。
-2. 點選「新增頻道」或掃描 QR Code。
+2. Tap the **+** button to add a channel, or import one by scanning a channel QR code.
 3. 設定頻道名稱與加密金鑰。設定頻道名稱與加密金鑰。
 4. 將頻道網址或 QR Code 分享給需要加入的人。
 
@@ -55,36 +55,66 @@ Meshtastic 支援兩種通訊模式：頻道廣播與私訊。
 2. 從聯絡人清單中選取節點，或在節點清單中點選節點。
 3. 輸入訊息後點選「傳送」。
 
+### Managing the Conversation List
+
+The **Messages** tab lists your conversations. Each row carries what you need to triage it at a
+glance, and the list itself is directly actionable:
+
+- **Unsent drafts survive.** Type into a conversation and leave without sending, and the text is
+  still there when you come back. The row shows it as `Draft: …` in place of the last message —
+  an unsent draft is the thing the row is waiting on _you_ for.
+- **Unread badge.** A count sits on the row until you open the conversation.
+- **Swipe right to mute** (swipe again to unmute) and **swipe left to delete**. Deleting asks
+  first; muting shows a snackbar with **Undo**.
+- **Long-press to select** one or more conversations, then use the action bar to **Pin**,
+  **Mark unread**, mute or delete them together. Pinned conversations carry a pin marker and rise
+  to the top of **their own section**.
+- **The list is split into Channels and Direct Messages**, each with a collapsible header and each
+  sorted independently — so a pinned direct message rises within its own section, not above the
+  Channels one.
+
+### Conversation Bubbles
+
+On Android 11 and later, a message notification can be opened as a floating **bubble** that
+stays on top of whatever else you are doing. Tap the bubble icon on the notification to promote
+a conversation; Android remembers the choice per conversation, and the system Bubbles settings
+control whether they are offered at all.
+
 ### 訊息狀態
 
 A status label appears under **your own** outgoing messages only (incoming messages from others show no status label):
 
-| 狀態                                  | 含義                                                                                                                                   |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| Sending…                            | Queued or already handed to the radio, not yet resolved either way (queued and en-route both show this same text) |
-| Delivered to recipient              | The strongest confirmation for a direct message — an acknowledgment came back                                                        |
-| 已傳送至 Mesh                           | For a channel broadcast, the message reached the mesh (broadcasts have no per-recipient ack)                      |
-| Relayed, not confirmed by recipient | For a direct message, shown in a warning color — the message was relayed but no acknowledgment has come back yet                     |
-| 透過 SF++ 鏈路由…                        | Being routed/buffered by the Store & Forward Plus Plus chain                                                     |
-| 已在 SF++ 鏈上確認                        | Confirmed delivered via the SF++ chain                                                                                               |
-| 錯誤                                  | Delivery failed — tap the status for the specific reason (see Delivery Errors below)                              |
+| 狀態                                  | 含義                                                                                                                                                                                                                                        |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Sending…                            | Queued or already handed to the radio, not yet resolved either way. Both stages share this text, but the icon and colour change as it progresses — a yellow upload cloud while queued, a blue arrow once the radio has it |
+| Delivered to recipient              | The strongest confirmation for a direct message — an acknowledgment came back                                                                                                                                                             |
+| 已傳送至 Mesh                           | For a channel broadcast, the message reached the mesh (broadcasts have no per-recipient ack)                                                                                                                           |
+| Relayed, not confirmed by recipient | For a direct message, shown in a warning color — the message was relayed but no acknowledgment has come back yet                                                                                                                          |
+| 透過 SF++ 鏈路由…                        | Being routed/buffered by the Store & Forward Plus Plus chain                                                                                                                                                          |
+| 已在 SF++ 鏈上確認                        | Confirmed delivered via the SF++ chain                                                                                                                                                                                                    |
+| 錯誤                                  | Delivery failed — tap the status for the specific reason (see Delivery Errors below)                                                                                                                                   |
 
 ### 傳遞錯誤
 
 當訊息傳遞失敗時，錯誤指示器將顯示問題原因：
 
-| 錯誤                           | 含義                                           | 處理方式                                                                                 |
-| ---------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------ |
-| 無路由                          | 無法找到通往目標節點的路徑                                | 收件者可能已離線或超出 mesh 網路範圍。 請稍後再試，或靠近對方後重新傳送。                                             |
-| 收到 NAK                       | 下一個跳躍點節點拒絕轉送                                 | 中繼節點可能發生壅塞。 請稍候後重試。                                                                  |
-| Timeout - 超時                 | 在重試時間內未收到確認回應                                | 收件者可能剛好超出訊號範圍。 請嘗試提高跳躍限制，或移動至訊號較佳的位置。                                                |
-| No radio interface           | 無可用的無線電介面進行傳送                                | Check that your radio is connected and available.                    |
-| Failed to deliver to mesh    | 所有重試次數均已用盡                                   | Move closer, improve signal, or wait for mesh conditions to improve. |
-| Channel/key mismatch         | Destination channel/key does not match       | Verify both nodes share the same channel and PSK.                    |
-| Message is too large to send | 訊息超過最大承載大小                                   | Shorten the message and try again.                                   |
-| No app response              | App or plugin did not respond to the request | Retry or check the destination app or module state.                  |
-| Duty cycle limit             | 已達地區無線電佔用時間上限                                | Wait for the duty cycle window to reset.                             |
-| Invalid request              | Malformed or invalid request                 | Retry after updating or restarting the app if this persists.         |
+| 錯誤                               | 含義                                                                                                                                                                            | 處理方式                                                                                                                                  |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| 無路由                              | 無法找到通往目標節點的路徑                                                                                                                                                                 | 收件者可能已離線或超出 mesh 網路範圍。 請稍後再試，或靠近對方後重新傳送。                                                                                              |
+| No radio interface               | 無可用的無線電介面進行傳送                                                                                                                                                                 | Check that your radio is connected and available.                                                                     |
+| Failed to deliver to mesh        | Retries exhausted. The same label covers three underlying causes — a relay refusing (NAK), a plain timeout, and running out of retransmits | Move closer, improve signal, or wait for conditions to improve. Tap the error for the specific cause. |
+| Rate limited                     | The mesh is throttling you for sending too fast                                                                                                                               | Wait before sending again.                                                                                            |
+| Not authorized                   | The destination refused the request                                                                                                                                           | Check you have the right channel and keys for that node.                                                              |
+| Recipient needs your key         | Direct-message encryption could not complete because the other node does not have your public key yet                                                                         | Exchange node info — the key travels with it. Common on a first DM to a new contact.                  |
+| Recipient key unavailable        | You do not have the recipient's public key                                                                                                                                    | Wait for their node info to arrive, or ask them to broadcast it.                                                      |
+| Could not send encrypted message | Encryption failed for this direct message                                                                                                                                     | Verify both nodes have exchanged keys and are on compatible firmware.                                                 |
+| Admin session expired            | A remote-admin session timed out                                                                                                                                              | Reopen the remote node's settings to start a new session.                                                             |
+| Admin key not authorized         | The target node does not accept your admin key                                                                                                                                | Verify the admin key matches on both nodes.                                                                           |
+| Channel/key mismatch             | Destination channel/key does not match                                                                                                                                        | Verify both nodes share the same channel and PSK.                                                                     |
+| Message is too large to send     | 訊息超過最大承載大小                                                                                                                                                                    | Shorten the message and try again.                                                                                    |
+| No app response                  | App or plugin did not respond to the request                                                                                                                                  | Retry or check the destination app or module state.                                                                   |
+| Duty cycle limit                 | 已達地區無線電佔用時間上限                                                                                                                                                                 | Wait for the duty cycle window to reset.                                                                              |
+| Invalid request                  | Malformed or invalid request                                                                                                                                                  | Retry after updating or restarting the app if this persists.                                                          |
 
 > 💡 提示：大多數傳遞錯誤會自動解決。 若節點間歇性可到達，mesh 網路將自動重試。 若持續出現「無路由」錯誤，請確認中間的路由器節點是否在線。
 
@@ -148,19 +178,42 @@ Type `@` while composing to mention a node — a picker suggests matching contac
 
 以表情符號對訊息作出回應：
 
-- 長按訊息以開啟動作選單
-- 點選「新增回應」以選擇表情符號
+- **Double-tap** a message — or long-press it — to raise a quick reaction bar above the bubble
+- Tap an emoji in the bar to send it; tap **more** to open the full picker, or anywhere outside
+  the bar to dismiss it without sending
 - 訊息回應顯示於訊息泡泡下方
 - 多位使用者可對同一則訊息作出回應
 - 可對自己或他人的訊息作出回應
+
+> ℹ️ **Note:** Opening the bar sends nothing. A reaction is a real mesh packet, so it only goes
+> out when you pick an emoji.
 
 ![Emoji reaction badges displayed beneath a message](../../assets/screenshots/messages_reaction.png)
 
 > 💡 提示：訊息回應非常輕量 — 相較於完整文字訊息，佔用極少的 mesh 網路頻寬。
 
+### Replying
+
+**Swipe a message to the right** to reply to it — the composer opens with that message quoted.
+Swiping past the reply threshold arms the action; releasing before it springs back with nothing sent.
+Reply is also in the actions menu, reached by long-pressing and then tapping **More**.
+
+### Day Separators
+
+Messages are grouped by day. The separator above the first message of each day reads **Today**
+or **Yesterday** for the two most recent days, and the date itself for older ones.
+
+### Jump to Latest
+
+Scrolling back through a conversation raises a jump-to-latest control. When messages arrive
+while you are scrolled up, it names the most recent sender and adds a count of the other unread
+messages. That count is messages, not people — five unread from one person reads as their name
+**+4**.
+
 ### 訊息動作
 
-長按任意訊息可使用以下功能：
+Long-press or double-tap a message to open the quick reaction bar, then tap **More** (the
+overflow icon on that bar) to reach:
 
 - 複製 — 將訊息文字複製至剪貼簿
 - 回覆 — 在回覆中引用該訊息
@@ -170,16 +223,16 @@ Type `@` while composing to mention a node — a picker suggests matching contac
 
 ### 訊息優先順序
 
-訊息依優先順序排入佇列並傳送：
-
-1. 緊急／警示訊息（最高）
-2. 私訊
-3. 頻道廣播（最低）
+The app sends every message you compose at the same, default priority — there is no
+emergency or alert tier to choose, and nothing in the app raises a direct message above a
+channel broadcast. Any prioritising between them happens in firmware, not here. (The app
+does mark some of its own internal traffic, such as admin and traceroute packets, as
+reliable or background, but that is not something you control from the message composer.)
 
 ### 訊息限制
 
 - **Maximum length:** 200 bytes (approximately 200 characters for ASCII text)
-- The 200-byte cap applies to the in-app composer — the mesh payload limit itself is ~233 bytes, so messages from other senders (e.g., App Functions or Android Auto) may arrive slightly longer
+- The 200-byte cap applies to the in-app composer — the mesh payload limit itself is ~233 bytes, so messages from other senders (e.g., App Functions) may arrive slightly longer
 - 速率限制：mesh 網路會執行無線電佔用時間公平性管制；大量訊息可能會被節流
 - 傳遞：若未收到確認回應，訊息將自動重試
 

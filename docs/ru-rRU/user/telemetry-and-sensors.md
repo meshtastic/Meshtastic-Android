@@ -2,7 +2,7 @@
 title: Телеметрия и датчики
 parent: Руководство пользователя
 nav_order: 9
-last_updated: 2026-05-13
+last_updated: 2026-08-27
 description: Данные датчиков в mesh-сети — поддерживаемые датчики окружающей среды, качества воздуха и питания, а также руководства по настройке и просмотру.
 aliases:
   - sensors
@@ -47,11 +47,20 @@ aliases:
 
 ### Качество воздуха
 
-| Sensor   | Метрика                                            | Заметки                         |
-| -------- | -------------------------------------------------- | ------------------------------- |
-| BME680   | Сопротивление газа / IAQ                           | Летучие органические соединения |
-| PMSA003I | PM1.0, PM2.5, PM10 | Взвешенные частицы              |
-| SEN55    | PM, NOx, VOC, температура, влажность               | Мультисенсор                    |
+| Sensor   | Метрика                                            | Заметки                                                                                                                                   |
+| -------- | -------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| BME680   | Сопротивление газа / IAQ                           | Летучие органические соединения                                                                                                           |
+| PMSA003I | PM1.0, PM2.5, PM10 | Взвешенные частицы                                                                                                                        |
+| SEN55    | PM, Temp, Humidity                                 | Multi-sensor. Its NOx and VOC indices are recorded and included in a CSV export, but are not yet shown as cards or charts |
+
+### Soil
+
+| Metric     | Единица | Notes                                           |
+| ---------- | ------- | ----------------------------------------------- |
+| Soil Temp  | °C / °F | Reported alongside soil moisture by soil probes |
+| Soil Moist | %       | Volumetric water content                        |
+
+Both appear as info cards on the node detail screen, next to the other environment readings.
 
 ### Освещённость и УФ
 
@@ -65,43 +74,44 @@ aliases:
 
 Ноды с датчиками питания серии INA могут сообщать:
 
-| Метрика         | Описание                                    |
-| --------------- | ------------------------------------------- |
-| Напряжение шины | Напряжение линии питания                    |
-| Ток             | Потребляемый ток (мА)    |
-| Питание         | Расчётная мощность (мВт) |
+| Метрическая | Описание                        |
+| ----------- | ------------------------------- |
+| Voltage     | Per-channel voltage reading     |
+| Ток         | Per-channel current draw, in mA |
+
+Up to three channels are reported (ch1–ch3), and each can be given its own label — Solar or Battery, say — from the node detail screen. There is no separate wattage reading; the app charts voltage and current, and does not compute power from them.
 
 Полезно для мониторинга солнечной зарядки или состояния батареи на удалённых нодах.
 
 ## Настройка телеметрии
 
 1. Перейдите в **Настройки → Конфигурация модулей → Телеметрия**.
-2. Установите интервалы передачи:
-   - **Интервал метрик устройства** — как часто передавать метрики устройства
-   - **Интервал метрик окружающей среды** — как часто передавать данные датчиков
-3. Включайте нужные типы датчиков по необходимости.
+2. Each metric group has its own enable toggle and its own interval:
 
-### Рекомендуемые интервалы
+   - **Device Metrics** — battery, channel and airtime utilisation
+   - **Environment Metrics** — temperature, humidity, pressure and the other sensor readings
+   - **Air Quality Metrics** — particulate and CO₂ readings
+   - **Power Metrics** — the per-channel voltage and current readings
 
-| Сценарий использования                             | Устройство (сек.) | Окружающая среда (сек.) |
-| -------------------------------------------------- | ---------------------------------------------------- | ---------------------------------------------------------- |
-| Городская mesh-сеть (много нод) | 3600                                                 | 3600                                                       |
-| Сельская mesh-сеть (мало нод)   | 900                                                  | 900                                                        |
-| Метеостанция                                       | 900                                                  | 300                                                        |
-| Экономия заряда батареи                            | 7200                                                 | 7200                                                       |
+   Environment metrics additionally have an on-screen toggle and a Fahrenheit toggle for the
+   device's own display.
 
-> ⚠️ **Примечание**: Более короткие интервалы увеличивают использование эфирного времени и расход батареи во всей mesh-сети.
+### Choosing an Interval
+
+> 💡 **Tip:** These are nominal values, not hard schedules. On a congested mesh the firmware
+> automatically backs off to longer intervals based on how many nodes are online, so you do not
+> need to hand-tune them for mesh size. Lengthen them deliberately only to save battery.
 
 ## Метрики качества воздуха
 
 Ноды с датчиками взвешенных частиц или CO₂ передают данные о качестве воздуха:
 
-| Метрическая           | Единица | Описание                        |
-| --------------------- | ------- | ------------------------------- |
-| PM1.0 | мкг/м³  | Ультрамелкие взвешенные частицы |
-| PM2.5 | мкг/м³  | Мелкие взвешенные частицы       |
-| PM10                  | мкг/м³  | Крупные взвешенные частицы      |
-| CO₂                   | ppm     | Концентрация углекислого газа   |
+| Metric                | Unit   | Описание                        |
+| --------------------- | ------ | ------------------------------- |
+| PM1.0 | мкг/м³ | Ультрамелкие взвешенные частицы |
+| PM2.5 | мкг/м³ | Мелкие взвешенные частицы       |
+| PM10                  | мкг/м³ | Крупные взвешенные частицы      |
+| CO₂                   | ppm    | Концентрация углекислого газа   |
 
 Датчики CO₂, такие как SCD4x, также сообщают собственную температуру и влажность, которые отображаются вместе с указанными выше показаниями. На основе истории PM2.5 приложение дополнительно вычисляет значение **AQI EPA по методу NowCast**.
 

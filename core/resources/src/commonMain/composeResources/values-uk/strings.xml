@@ -358,7 +358,6 @@
     <string name="dns">DNS</string>
     <!-- DOC -->
     <string name="doc_clear_search">Очистити пошук</string>
-    <string name="doc_keywords_android_auto">android auto,car,head unit,driving,hands free,messaging</string>
     <string name="doc_keywords_app_functions">system ai,gemini,assistant,functions,automation,voice</string>
     <string name="doc_keywords_connections">bluetooth,usb,tcp,pairing,serial,wifi</string>
     <string name="doc_keywords_desktop">desktop,linux,macos,windows,serial</string>
@@ -377,7 +376,6 @@
     <string name="doc_keywords_tak">tak,atak,cursor-on-target,team-awareness</string>
     <string name="doc_section_developer">Посібник для розробників</string>
     <string name="doc_section_user">Посібник користувача</string>
-    <string name="doc_title_android_auto">Android Auto</string>
     <string name="doc_title_mqtt">MQTT</string>
     <string name="doc_title_nodes">Вузли</string>
     <string name="done">Готово</string>

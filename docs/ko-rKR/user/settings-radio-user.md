@@ -2,7 +2,7 @@
 title: Settings — Radio & User
 parent: User Guide
 nav_order: 7
-last_updated: 2026-07-27
+last_updated: 2026-08-27
 description: Configure your radio hardware, LoRa presets, user profile, position sharing, power management, and security.
 aliases:
   - 설정
@@ -19,11 +19,12 @@ Configure your radio hardware and user identity parameters.
 
 ### User Profile
 
-| Setting           | 설명                                                                                    |
-| ----------------- | ------------------------------------------------------------------------------------- |
-| 긴 이름              | Your display name (up to 39 characters)                            |
-| 짧은 이름             | 4-character abbreviated name                                                          |
-| Licensed Operator | Enable if you hold an amateur radio license (enables higher power) |
+| Setting           | 설명                                                                                                                                                                                                                                           |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 긴 이름              | Your display name (up to 39 characters)                                                                                                                                                                                   |
+| 짧은 이름             | 4-character abbreviated name                                                                                                                                                                                                                 |
+| 메시지 제한            | Marks the node as one nobody should try to message — for an unmonitored or infrastructure node. Other clients hide it from the contact list. Needs supporting firmware                                       |
+| Licensed Operator | Enable if you hold an amateur radio license (permits higher power). Turning it on relabels **Long Name** as **Call Sign** and adds a separate Long Name field, and is staged behind a confirmation dialog |
 
 ### Applying Changes
 
@@ -33,23 +34,37 @@ After modifying settings, tap **Save** to write the configuration to your radio.
 
 ### 장치 설정
 
-| Setting                                    | 설명                                                                      | 기본값      |
-| ------------------------------------------ | ----------------------------------------------------------------------- | -------- |
-| 역할                                         | Node behavior (Client, Router, etc.) | Client   |
-| 중계 모드                                      | How the node retransmits messages                                       | All      |
-| Node Info Broadcast (s) | Interval for broadcasting node info                                     | 10800    |
-| Double-tap Button                          | Action for double-tap button press                                      | Disabled |
+| Setting                                    | 설명                                                                                                                                                                                     | 기본값      |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| 역할                                         | Node behavior (Client, Router, etc.) — each option carries its own description in the picker. Choosing Router asks for confirmation | Client   |
+| 중계 모드                                      | How the node retransmits messages; each mode is described in the picker                                                                                                                | All      |
+| Node Info Broadcast (s) | Interval for broadcasting node info                                                                                                                                                    | 10800    |
+| Double-tap Button                          | Treat a double tap as a button press                                                                                                                                                   | Disabled |
+| Triple Click Ad Hoc Ping                   | Send an ad-hoc position ping on a triple click                                                                                                                                         | Disabled |
+| LED Heartbeat                              | Blink the status LED periodically                                                                                                                                                      | 활성화      |
+| Time Zone                                  | POSIX time-zone string for the device clock, with buttons to copy your phone's zone or clear it                                                                                        | —        |
+| Button / Buzzer GPIO                       | Advanced: which pins the button and buzzer are wired to                                                                                                                | —        |
 
 ### LoRa 설정
 
-| Setting           | 설명                                                                      | 기본값                                       |
-| ----------------- | ----------------------------------------------------------------------- | ----------------------------------------- |
-| 지역                | Regulatory region for frequency bands                                   | Unset (must configure) |
-| 모뎀 프리셋            | Speed/range tradeoff                                                    | LongFast                                  |
-| Hop  제한           | Maximum retransmit hops                                                 | 3                                         |
-| TX Power          | Transmission power (dBm); 0 = max allowed for region | 0 (region max)         |
-| 주파수 오프셋           | Fine-tune frequency (MHz)                            | 0                                         |
-| Channel Bandwidth | Bandwidth setting                                                       | Default for preset                        |
+| Setting             | 설명                                                                                                                                                                                               | 기본값                                       |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------- |
+| 지역                  | Regulatory region for frequency bands                                                                                                                                                            | Unset (must configure) |
+| 모뎀 프리셋              | Speed/range tradeoff                                                                                                                                                                             | LongFast                                  |
+| Hop  제한             | Maximum retransmit hops                                                                                                                                                                          | 3                                         |
+| TX Power            | Transmission power (dBm); 0 = max allowed for region                                                                                                                          | 0 (region max)         |
+| Frequency Override  | Overrides the computed operating frequency outright (MHz). It does not offset the calculated value — leave at 0 unless you know you need a specific frequency | 0 (use calculated)     |
+| Channel Bandwidth   | Bandwidth setting                                                                                                                                                                                | Default for preset                        |
+| 프리셋 사용              | On by default. Turn it off to set Spread Factor, Coding Rate and Bandwidth by hand instead of taking them from the modem preset                                                  | On                                        |
+| Spread Factor       | Manual mode only: 7–12. Higher spreads further but slower                                                                                                        | From preset                               |
+| Coding rate         | Manual mode only: 5–8. More redundancy costs airtime                                                                                                             | From preset                               |
+| 주파수 슬롯              | Which slot within the region's band to use. 0 derives it from the primary channel name                                                                                           | 0 (automatic)          |
+| Transmit Enabled    | Turning this off makes the node receive-only                                                                                                                                                     | On                                        |
+| Override Duty Cycle | Ignore the region's duty-cycle limit. Only legal where you are permitted to                                                                                                      | Off                                       |
+| Ignore MQTT         | Drop packets that arrived from MQTT rather than over the air                                                                                                                                     | Off                                       |
+| OK to MQTT          | Allow your packets to be forwarded to MQTT by gateways                                                                                                                                           | Off                                       |
+| RX Boosted Gain     | Extra receive gain on SX126x radios; costs a little current                                                                                                                                      | Off                                       |
+| PA fan disabled     | Turn off the power-amplifier fan on hardware that has one                                                                                                                                        | Off                                       |
 
 > ⚠️ **Important:** You **must** set your region before transmitting. Operating without the correct region may violate local radio regulations. See the [region configuration guide](https://meshtastic.org/docs/getting-started/initial-config) on meshtastic.org for details.
 
@@ -97,69 +112,119 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 
 ### 화면 설정
 
-| Setting             | 설명                                                                                   |
-| ------------------- | ------------------------------------------------------------------------------------ |
-| 화면 끄기 시간            | Time before display sleeps                                                           |
-| 단위 표시               | Metric or Imperial                                                                   |
-| OLED 타입             | Auto, SSD1306, SH1106, SH1107                                                        |
-| Compass Orientation | Rotation offset for compass display (0°, 90°, 180°, 270°)         |
-| ~~Compass North~~   | ⚠️ **Deprecated** — replaced by Compass Orientation; still visible in older firmware |
+These control the **radio's own screen**, not the app's.
+
+| Setting               | 설명                                                                                                                                                        |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Screen on for         | How long the display stays lit before sleeping                                                                                                            |
+| Carousel interval     | How often the device cycles between screens on its own                                                                                                    |
+| Display mode          | Screen layout/density used by the firmware                                                                                                                |
+| Display units         | Metric or Imperial on the device's screen                                                                                                                 |
+| Use 12h clock format  | Show the device clock as 12-hour rather than 24-hour                                                                                                      |
+| Bold heading          | Draw the screen's heading text in bold                                                                                                                    |
+| Flip screen           | Rotate the display 180° for an inverted mounting                                                                                                          |
+| OLED type             | Auto, SSD1306, SH1106, SH1107                                                                                                                             |
+| Wake on tap or motion | Light the screen when the device is tapped or moved                                                                                                       |
+| Compass orientation   | Rotation offset for the compass rose (0°, 90°, 180°, 270°)                                                                             |
+| Always point north    | Locks the compass rose north-up instead of rotating it with your heading. Independent of Compass orientation — neither replaces the other |
 
 ### 위치 설정
 
-| Setting                                   | 설명                                 |
-| ----------------------------------------- | ---------------------------------- |
-| GPS Enabled                               | Enable/disable GPS                 |
-| GPS Update Interval                       | How often to acquire GPS fix       |
-| Position Broadcast (s) | How often to share position        |
-| Smart Position                            | Enable movement-based broadcasting |
-| Fixed Position                            | Use a manually set position        |
+> ⚠️ **Warning:** Saving this screen always reboots the radio.
+
+| Setting                                         | 설명                                                                                                                                                    |
+| ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GPS Mode (Physical Hardware) | Three-state: GPS enabled, disabled, or not present. Not a simple on/off                                               |
+| GPS Polling Interval                            | How often the radio asks its GPS for a fix                                                                                                            |
+| Broadcast Interval                              | How often the position is shared with the mesh                                                                                                        |
+| Smart Position                                  | Broadcast based on movement rather than purely on the clock                                                                                           |
+| Smart Interval                                  | With Smart Position on, the shortest gap between broadcasts                                                                                           |
+| Smart Distance                                  | With Smart Position on, how far you must move before broadcasting                                                                                     |
+| Fixed Position                                  | Use a manually entered latitude, longitude and altitude instead of the GPS                                                                            |
+| Position Flags                                  | A group of toggles choosing which fields ride along with a position — altitude, its reference and precision, satellites in view, timestamp, and so on |
+| GPS EN / Receive / Transmit GPIO                | Advanced: the pins the GPS module is wired to                                                                                         |
 
 ### 전원 설정
 
-| Setting                                 | 설명                                      |
-| --------------------------------------- | --------------------------------------- |
-| Power Saving                            | Enable low-power sleep mode             |
-| Shutdown After (s)   | Auto-shutdown idle timer                |
-| ADC Multiplier                          | Battery voltage calibration factor      |
-| Wait Bluetooth (s)   | Time to wait for BLE connection at boot |
-| Mesh SDS Timeout (s) | Super-deep-sleep timeout                |
+| Setting                                          | 설명                                                              |
+| ------------------------------------------------ | --------------------------------------------------------------- |
+| Enable power saving mode                         | Let the radio sleep aggressively between activity               |
+| Shutdown on power loss                           | Power the device down after external power disappears           |
+| Super deep sleep duration                        | How long the deepest sleep state lasts                          |
+| Minimum wake time                                | The shortest time the radio stays awake once woken              |
+| Wait for Bluetooth duration                      | How long to wait for a phone to connect before sleeping         |
+| ADC multiplier override                          | Turn on a manual correction for battery-voltage readings        |
+| ADC multiplier override ratio                    | The correction factor itself, used only when the override is on |
+| Battery INA_2XX I2C address | Address of an external INA-series power sensor, if fitted       |
 
 ### 네트워크 설정
 
-| Setting       | 설명                                                   |
-| ------------- | ---------------------------------------------------- |
-| WiFi Enabled  | Enable WiFi radio (ESP32 devices) |
-| WiFi SSID     | Network name to connect to                           |
-| WiFi PSK      | 네트워크 암호                                              |
-| NTP 서버        | Time synchronization server                          |
-| Syslog Server | Remote logging server                                |
+> ⚠️ **Warning:** Saving this screen always reboots the radio.
+
+| Setting                          | 설명                                                                                                                         |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| WiFi enabled                     | Enable the WiFi radio (ESP32 devices)                                                                   |
+| SSID                             | Network name to connect to. **Scan WiFi QR code** fills this and the password from a standard WiFi QR code |
+| Password                         | 네트워크 암호                                                                                                                    |
+| Ethernet enabled                 | Use a wired connection on hardware that has one                                                                            |
+| IPv4 mode                        | DHCP, or a static address configured with the four fields below                                                            |
+| Wifi IP / Subnet / Gateway / DNS | The static address, only used when IPv4 mode is static                                                                     |
+| UDP broadcasting                 | Share mesh traffic with other nodes over the local network                                                                 |
+| NTP server                       | Time synchronization server                                                                                                |
+| rsyslog server                   | Remote logging server                                                                                                      |
 
 ![IP address field](../../assets/screenshots/settings_ipv4_field.png)
 
 ### 블루투스 설정
 
-| Setting           | 설명                                                                        |
-| ----------------- | ------------------------------------------------------------------------- |
-| Bluetooth Enabled | Enable/disable BLE radio                                                  |
-| Pairing Mode      | Fixed PIN, Random PIN, or No PIN                                          |
-| 고정 PIN            | PIN code for pairing (default: 123456) |
+| Setting           | 설명                                                                                                     |
+| ----------------- | ------------------------------------------------------------------------------------------------------ |
+| Bluetooth Enabled | Enable/disable BLE radio                                                                               |
+| Pairing Mode      | Fixed PIN, Random PIN, or No PIN                                                                       |
+| 고정 PIN            | PIN code for pairing. Must be **exactly six digits** — the field rejects anything else |
 
 ### 보안 설정
 
 | Setting                   | 설명                                                                                                                                                                                                             |
 | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 공개 키                      | Your node's public key (read-only)                                                                                                                                                          |
-| Admin 키                   | Key for remote administration                                                                                                                                                                                  |
-| 개인 키                      | Your node's private key (handle securely)                                                                                                                                                   |
+| Admin 키                   | Keys permitted to administer this node remotely — up to three                                                                                                                                                  |
+| 개인 키                      | Your node's private key (handle securely). Shown redacted when you are viewing another node over remote admin — the firmware does not send it                               |
+| Regenerate Private Key    | Issues a new keypair for this node, behind a confirmation. Every peer that knew your old key must learn the new one                                                                            |
+| Direct Message Key        | The key used for direct-message encryption                                                                                                                                                                     |
 | ~~Admin Channel Enabled~~ | ⚠️ Removed — now configured automatically when an admin key is set                                                                                                                                             |
 | Debug Log                 | Output live debug logging over serial/bluetooth                                                                                                                                                                |
 | Serial Enabled            | Enable serial console access (moved from Device Config)                                                                                                                                     |
-| 관리 모드                     | Restrict non-admin channel changes                                                                                                                                                                             |
+| 관리 모드                     | Restrict non-admin channel changes. Only selectable once an Admin Key is set                                                                                                                   |
 | Backup Keys               | Save an encrypted backup of the node's keys on this device (Android only)                                                                                                                   |
 | Restore Keys              | Write the backed-up keys back to the node (available once a backup exists)                                                                                                                  |
 | Delete Key Backup         | Remove the stored key backup from this device                                                                                                                                                                  |
 | Protection Level          | Packet authenticity — how unsigned or relayed packets are treated: **Strict**, **Balanced**, or **Compatible** (requires supporting firmware; Strict asks for confirmation) |
+
+#### Lockdown Mode
+
+Lockdown encrypts the device's storage and requires a passphrase for each connection. It needs
+supporting firmware; the row does not appear otherwise.
+
+Enabling it asks you to set and confirm a passphrase, and to acknowledge that **it locks the debug
+(SWD) port on hardware that supports locking**. You can turn lockdown off again at any time with
+the passphrase, and a full device erase restores the hardware regardless.
+
+Alongside the passphrase you set the limits that end a session automatically:
+
+| Field                                    | What it does                                      |
+| ---------------------------------------- | ------------------------------------------------- |
+| Boots remaining                          | How many device boots the unlocked state survives |
+| Hours until expiry                       | Wall-clock lifetime of the unlocked state         |
+| Session cap (minutes) | Maximum length of a single unlocked connection    |
+
+Once active, the row reads _Active — storage encrypted, this connection authenticated_ when
+unlocked, or _Active — enter your passphrase to unlock this connection_ when not. **Lock Now**
+ends the current session immediately. Repeated wrong passphrases are rate-limited with a
+back-off before you can try again.
+
+> ⚠️ **Warning:** There is no passphrase recovery. Losing it means erasing the device to get it
+> back, which destroys its keys, channels and settings.
 
 ![Password field](../../assets/screenshots/settings_password_field.png)
 

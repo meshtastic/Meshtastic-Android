@@ -2,7 +2,7 @@
 title: TAK-integraatio
 parent: Käyttöopas
 nav_order: 10
-last_updated: 2026-08-19
+last_updated: 2026-08-28
 description: ATAK:n ja WinTAK:n yhteentoimivuus — CoT-sijaintijako, TAK-roolit ja lisäosien käyttöönotto.
 aliases:
   - tak
@@ -26,28 +26,26 @@ TAK-moduuli mahdollistaa Meshtastic-radioille:
 
 ### Edellytykset
 
-- ATAK (Android Team Awareness Kit) tai WinTAK asennettuna
-- Meshtastic ATAK -lisäosa asennettuna
-- TAK-moduuli käytössä Meshtastic-radiossasi
+- ATAK (Android Team Awareness Kit), iTAK, or WinTAK installed
+- Your node's **Device Role** set to **TAK** or **TAK Tracker** — this is what makes the TAK
+  module appear in Module Config at all
+
+> ⚠️ **Warning:** The old **Meshtastic ATAK Plugin** is no longer part of this path and cannot
+> work. It bridged through the cross-process AIDL API, which was removed in app 2.8.0; the mesh
+> service is now in-process only. Do not install it. Interop today runs over the app's own local
+> TAK server plus the Mesh to CoT Converter, both described below, with stock ATAK/iTAK/WinTAK.
 
 ### Asetukset
 
-1. Siirry kohtaan **Asetukset → Moduulin asetukset → TAK**.
-2. Ota TAK-moduuli käyttöön.
-3. Määritä TAK-tiimin/ryhmän asetukset:
+Siirry kohtaan **Asetukset → Moduulin asetukset → TAK**. The module's own settings are your TAK identity —
+there is no separate enable switch here, because the device Role above is what turns TAK on:
 
 ![Moduulin kytkin](../../assets/screenshots/settings_switch.png)
 
-| Asetus   | Kuvaus                           |
-| -------- | -------------------------------- |
-| Käytössä | Ota TAK-yhteentoimivuus käyttöön |
-| Tila     | TAK-yhteensopiva lähtötila       |
-
-### ATAK-lisäosan asennus
-
-1. Asenna Meshtastic ATAK -lisäosa lisäosien lähteestä.
-2. Avaa ATAK ja ota Meshtastic-lisäosa käyttöön.
-3. Lisäosa välittää viestejä ATAK:n ja mesh-verkkosi välillä.
+| Asetus | Kuvaus                            |
+| ------ | --------------------------------- |
+| Team   | Your TAK team colour              |
+| Rooli  | Your member role within that team |
 
 ### Paikallinen TAK-palvelin
 
@@ -57,13 +55,17 @@ Sovellus voi käyttää myös **paikallista TAK-palvelinta**, jolloin samalla la
 
 - **Ota paikallinen TAK-palvelin käyttöön** – käynnistää vain paikallisia yhteyksiä kuuntelevan mTLS-palvelimen portissa **8089** samalla laitteella toimivaa ATAK-/iTAK-yhteyttä varten.
 - **TAK-mesh-kanava** – valitsee, mitä Meshtastic-kanavaa käytetään lähtevään TAK-liikenteeseen (oletuksena ensisijainen kanava, indeksi 0) Saapuva TAK-liikenne hyväksytään miltä tahansa kanavalta. Vastaa iOS:n ja vanhan ATAK-liitännäisen vastaavaa asetusta.
+- **Mesh to CoT Converter** — off by default, and shown under the server toggle. With the server
+  running, this synthesizes a CoT contact for every node in your node database, so ordinary
+  Meshtastic nodes appear on the ATAK map as contacts. **This is what replaced the old plugin's
+  node visibility** — without it, only TAK-role nodes show up.
 - **Vie TAK-tietopaketti** — luo `.zip`-tietopaketin, jonka ATAK/iTAK voi tuoda muodostaakseen yhteyden tähän palvelimeen.
 
 ## TAK-roolit
 
 TAK-rooleilla määritetyt radiot käyttäytyvät eri tavalla kuin tavalliset client-laitteet:
 
-| Rooli           | Kuvaus                                                                                                                                                                                                                                                                                                             |
+| Role            | Kuvaus                                                                                                                                                                                                                                                                                                             |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **TAK**         | Täysi TAK-yhteentoimivuus — lähettää ja vastaanottaa CoT-dataa, chat-viestejä ja PLI-päivityksiä. Toimii tavallisen clientin lisäksi TAK-siltana.                                                                                                                                  |
 | **TAK Tracker** | Vain sijaintitietoihin perustuva TAK-lähtö — lähettää automaattisesti PLI-dataa säännöllisin väliajoin ilman käyttäjän toimintaa. Optimoitu valvomattomiin sijaintilähettimiin (ajoneuvot, laitteet ja reittipisteet). Ei välitä chat-viestejä. |
@@ -107,17 +109,17 @@ Kun asetukset on määritetty:
 - Sijaintipäivitykset kulkevat kaksisuuntaisesti Meshtasticin ja TAK-järjestelmän välillä
 - TAK Tracker -radiot lähettävät PLI-sijaintia automaattisesti — niiden sijainti näkyy ATAK-kartoilla ilman erillistä ATAK-asetusta
 
-> ⚠️ **Huom:** TAK-integraatio vaatii tietyt laiteroolit ja moduuliasetukset. Tavalliset client-laitteet eivät osallistu TAK-toimintoihin automaattisesti.
+> ℹ️ **Note:** TAK integration requires specific node roles. Standard client nodes don't automatically participate in TAK operations — though with **Mesh to CoT Converter** enabled they still appear on the ATAK map as contacts.
 
 ## Vianetsintä
 
-| Ongelma                                      | Syy                                                                                                                                   | Ratkaisu                                                                                                                                      |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| Radio ei näy ATAK-kartalla                   | TAK-moduuli pois käytöstä tai väärä rooli                                                                                             | Varmista, että TAK-moduuli on käytössä ja rooli on joko TAK tai TAK Tracker                                                                   |
-| Sijaintipäivitykset ovat vanhentuneita       | GPS-signaali katkennut tai lähetysväli liian pitkä                                                                                    | Tarkista GPS-tila; lyhennä sijaintilähetyksen väliä kohdassa Sijainnin asetukset                                                              |
-| ATAK-lisäosa näyttää “yhteys katkennut”      | Bluetooth-yhteys katkennut tai lisäosa on kaatunut                                                                                    | Yhdistä Bluetooth uudelleen Meshtastic-sovelluksessa ja käynnistä ATAK-lisäosa uudelleen                                                      |
-| Muotoja, merkintöjä tai reittejä ei välitetä | Lähettävä radio käyttää vanhaa V1-protokollaa (laiteohjelmisto 2.7.x tai vanhempi) | Päivitä lähettävän radion laiteohjelmisto versioon 2.8.0 tai uudempaan, jotta V2-siirtomuoto on käytettävissä |
-| CoT-data ei kulje                            | Kanava ei täsmää                                                                                                                      | Kaikkien TAK-laitteiden täytyy olla samalla kanavalla ja yhteensopivalla salauksella                                                          |
+| Ongelma                                      | Syy                                                                                                                                   | Ratkaisu                                                                                                                                                                                              |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Radio ei näy ATAK-kartalla                   | Wrong device role, or Mesh to CoT Converter off                                                                                       | Set the node's Device Role to TAK or TAK Tracker. For ordinary (non-TAK-role) nodes to appear, also enable **Mesh to CoT Converter** under the TAK Server settings |
+| Sijaintipäivitykset ovat vanhentuneita       | GPS-signaali katkennut tai lähetysväli liian pitkä                                                                                    | Tarkista GPS-tila; lyhennä sijaintilähetyksen väliä kohdassa Sijainnin asetukset                                                                                                                      |
+| ATAK shows "disconnected"                    | The local TAK server is off, or ATAK is pointed elsewhere                                                                             | Check **Enable Local TAK Server** is on, and that ATAK is connecting to `127.0.0.1:8089` — re-import the exported data package if unsure                                                              |
+| Muotoja, merkintöjä tai reittejä ei välitetä | Lähettävä radio käyttää vanhaa V1-protokollaa (laiteohjelmisto 2.7.x tai vanhempi) | Päivitä lähettävän radion laiteohjelmisto versioon 2.8.0 tai uudempaan, jotta V2-siirtomuoto on käytettävissä                                                         |
+| CoT-data ei kulje                            | Kanava ei täsmää                                                                                                                      | Kaikkien TAK-laitteiden täytyy olla samalla kanavalla ja yhteensopivalla salauksella                                                                                                                  |
 
 ## Tietoturvahuomiot
 

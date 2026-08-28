@@ -2,7 +2,7 @@
 title: Map & Waypoints
 parent: Ръководство за потребители
 nav_order: 6
-last_updated: 2026-07-08
+last_updated: 2026-08-27
 description: View node positions on the map, create and share waypoints, manage map layers and Site Planner, and control position sharing and privacy.
 aliases:
   - map
@@ -120,8 +120,9 @@ Configure position behavior in **Settings → Position**.
 
 The base map depends on your app flavor: **Google Play** builds use Google Maps, while **F-Droid** and Desktop builds use OpenStreetMap. On top of the base map, additional tile sources are available as overlays or alternatives:
 
-- Satellite imagery (where available)
-- Offline tiles (download map areas for offline use)
+- Satellite imagery — on both Google Play and F-Droid
+- Offline tiles — **F-Droid only**. Download map areas for offline use through OSMdroid's tile
+  cache. Google Play and Desktop builds have no offline download
 
 ## Свързани теми
 

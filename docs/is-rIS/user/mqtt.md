@@ -2,7 +2,7 @@
 title: MQTT
 parent: User Guide
 nav_order: 11
-last_updated: 2026-05-13
+last_updated: 2026-08-27
 description: Bridge your mesh to the internet — MQTT broker setup, encryption layers, and map reporting.
 aliases:
   - mqtt
@@ -41,20 +41,31 @@ A gateway node with internet access (WiFi or Ethernet) publishes mesh messages t
 
 ![MQTT toggle switch](../../assets/screenshots/settings_switch.png)
 
-| Setting         | Lýsing                                                                                        | Default                                             |
-| --------------- | --------------------------------------------------------------------------------------------- | --------------------------------------------------- |
-| Server Address  | MQTT broker hostname                                                                          | mqtt.meshtastic.org |
-| Username        | Broker authentication                                                                         | meshdev                                             |
-| Password        | Broker authentication                                                                         | large4cats                                          |
-| Root Topic      | Base topic for messages                                                                       | msh                                                 |
-| Encryption      | Encrypt MQTT payload                                                                          | Enabled                                             |
-| ~~JSON Output~~ | ⚠️ **Deprecated** — JSON packet support has been removed from firmware; this field is ignored | Disabled                                            |
-| TLS             | Secure connection to broker                                                                   | Disabled                                            |
-| Map Reporting   | Report position to public map                                                                 | Disabled                                            |
+| Setting        | Lýsing                                                                                                                                                                              | Default                                             |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| Server Address | MQTT broker hostname                                                                                                                                                                | mqtt.meshtastic.org |
+| Username       | Broker authentication                                                                                                                                                               | meshdev                                             |
+| Password       | Broker authentication                                                                                                                                                               | large4cats                                          |
+| Root Topic     | Base topic for messages                                                                                                                                                             | msh                                                 |
+| Encryption     | Encrypt MQTT payload                                                                                                                                                                | Enabled                                             |
+| JSON Output    | Also publish and consume the `/2/json/` topic. Deprecated in the protobuf schema, but still the only toggle for this behaviour — and the app's own proxy honours it | Disabled                                            |
+| TLS            | Secure connection to broker                                                                                                                                                         | Disabled                                            |
+| Map Reporting  | Report position to public map                                                                                                                                                       | Disabled                                            |
+
+### Connection Status and Test Connection
+
+The top of the MQTT settings screen shows the live broker connection — **Connected**,
+**Connecting**, **Reconnecting**, **Disconnected**, or **Inactive**.
+
+**Test connection** probes the broker before you commit the settings to the radio, and
+distinguishes the failure modes: the hostname not resolving, the TCP connection being refused,
+TLS failing, the attempt timing out, or the broker rejecting your credentials with a reason.
 
 ### MQTT Proxy on This Phone
 
 If your node has no internet access of its own, it can use the connected phone as its MQTT gateway: enable **MQTT** and **Proxy to client enabled** in the module config, and the app relays MQTT traffic between the radio and the broker over your phone's internet connection.
+
+> ℹ️ **Note:** The proxy relay is mobile-only. On the Desktop app the MQTT settings are present, but no relay runs behind them.
 
 The **MQTT proxy on this phone** toggle at the top of the MQTT settings screen shows whether this relay is currently running and lets you cut it off (or restart it) immediately — without editing and re-saving the device's MQTT configuration.
 
@@ -95,13 +106,16 @@ Configure per-channel which directions are active to control message flow and ai
 
 ## Message Formats
 
-MQTT uses protobuf message format:
+MQTT carries two payload formats:
 
-| Format       | Lýsing                              | Use case                   |
-| ------------ | ----------------------------------- | -------------------------- |
-| **Protobuf** | Binary Meshtastic protobuf encoding | Node-to-node mesh bridging |
+| Format       | Lýsing                                      | Use case                                                                    |
+| ------------ | ------------------------------------------- | --------------------------------------------------------------------------- |
+| **Protobuf** | Binary Meshtastic protobuf encoding         | Node-to-node mesh bridging                                                  |
+| **JSON**     | Human-readable JSON on the `/2/json/` topic | Consumers outside the mesh (dashboards, home automation) |
 
-> ⚠️ **Note:** JSON output support was removed from firmware. The `json_enabled` setting is still visible in the app for legacy compatibility but has no effect on current firmware versions.
+> ℹ️ **Note:** `json_enabled` is marked deprecated in the protobuf schema, but it has not been
+> replaced and it is not ignored. When it is on, the app's own MQTT proxy subscribes to the
+> `/2/json/` topic and decodes those payloads.
 
 ## Encryption & Privacy
 
@@ -111,7 +125,7 @@ Understanding the layered encryption model:
 2. **MQTT encryption** (the module setting) adds an additional encryption layer for transit to the broker. This protects metadata and routing information.
 3. **TLS** encrypts the TCP connection to the broker itself, preventing network-level eavesdropping.
 
-> 🔒 **Important:** The default public channel has a well-known key. Messages on the default channel sent via MQTT are effectively **unencrypted** — anyone can decode them. Always use a custom PSK for private communications.
+> 🔒 **Security:** The default public channel has a well-known key. Messages on the default channel sent via MQTT are effectively **unencrypted** — anyone can decode them. Always use a custom PSK for private communications.
 
 ## Best Practices
 

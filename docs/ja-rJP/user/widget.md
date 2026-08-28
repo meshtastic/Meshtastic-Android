@@ -2,7 +2,7 @@
 title: ホーム画面ウィジェット
 parent: User Guide
 nav_order: 20
-last_updated: 2026-06-25
+last_updated: 2026-08-27
 description: Meshtastic のホーム画面ウィジェットを追加すると、アプリを開かずに、接続中の無線機のローカル統計をひと目で確認できます。
 aliases:
   - widget
@@ -23,19 +23,23 @@ Android では、Meshtastic はホーム画面の**ウィジェット**を提供
 - **AirUtil**：電波利用率（無線機がデューティサイクルのうちどれだけ送信しているか）
 - **Traffic**：送受信したパケットと、検出した重複
 - **Relays**：中継したパケットと、中継のキャンセル（無線機が中継しているときに表示）
+- **Noise floor** — the measured background noise level
+- **Dropped** — packets the radio discarded
+- **Heap** — free versus total memory on the radio, drawn as a bar
+- **Nodes** — how many nodes are online, out of the total known
 
 ウィジェットをタップするとアプリが開きます。更新コントロールを使うと、最新の統計を要求できます。
 
-> 💡 **ヒント：** 値は、現在接続している無線機を反映します。 アプリが無線機に接続していない場合、ウィジェットは再接続するまで、最後に分かっている統計を表示します。
+> 💡 **ヒント：** 値は、現在接続している無線機を反映します。 If the radio disconnects, the widget replaces the stats with a status line — **Disconnected**, **Connecting**, or **Device sleeping**. It does not keep the last-known numbers on screen.
 
 ## ウィジェットを追加する
 
 1. Android のホーム画面の空いている場所を長押しします。
 2. 「**ウィジェット**」をタップします。
-3. リストで **Meshtastic** を見つけ、「**Local Stats**」ウィジェットをホーム画面にドラッグします。
+3. Find **Meshtastic** in the list and drag its widget to your home screen. The app ships one widget, so the picker entry is just the app name.
 4. 必要に応じてサイズを変更します。レイアウトは利用可能なスペースに合わせて調整されます。
 
-> ⚠️ **注意：** このウィジェットは Android 専用です。 デスクトップ版や iOS 版では利用できません。
+> ℹ️ **Note:** The widget is Android-only. デスクトップ版や iOS 版では利用できません。
 
 ## 関連トピック
 

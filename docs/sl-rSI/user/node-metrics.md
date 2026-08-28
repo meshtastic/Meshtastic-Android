@@ -2,7 +2,7 @@
 title: Node Metrics
 parent: User Guide
 nav_order: 5
-last_updated: 2026-07-08
+last_updated: 2026-08-27
 description: Telemetry dashboards for each mesh node — device health, environment sensors, air quality, signal quality, power, traceroute, and position history.
 aliases:
   - metrics
@@ -116,11 +116,13 @@ Local Stats from your connected radio are also shown in Signal Quality when avai
 
 Power management telemetry (requires INA sensor or compatible hardware):
 
-| Metric      | Opis                    |
-| ----------- | ----------------------- |
-| Bus Voltage | Supply voltage          |
-| Current     | Power draw in milliamps |
-| Power       | Calculated wattage      |
+| Metric  | Opis                           |
+| ------- | ------------------------------ |
+| Voltage | Per-channel voltage reading    |
+| Current | Per-channel draw, in milliamps |
+
+Up to three channels (ch1–ch3) are charted, each with a label you can edit. The app does not
+derive a wattage figure from them.
 
 ## Pot
 
@@ -163,7 +165,7 @@ The position tab shows location data for nodes that share GPS:
 
 ![Position inline content](../../assets/screenshots/nodes_position.png)
 
-> ⚠️ **Note:** Metrics are only available when they have been reported by the remote node. Metrics update at intervals configured on each node's telemetry settings.
+> ℹ️ **Note:** Metrics are only available when they have been reported by the remote node. Metrics update at intervals configured on each node's telemetry settings.
 
 ## Related Topics
 

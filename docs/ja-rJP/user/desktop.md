@@ -2,7 +2,7 @@
 title: デスクトップアプリ
 parent: User Guide
 nav_order: 14
-last_updated: 2026-07-07
+last_updated: 2026-08-27
 description: Linux、macOS、Windows で Meshtastic デスクトップアプリをインストールして使う方法。接続、機能の対応状況、キーボードショートカットを説明します。
 aliases:
   - desktop
@@ -70,7 +70,6 @@ Bluetooth Low Energy は、[Kable](https://github.com/JuulLabs/kable) ライブ�
 | ファームウェアの更新        | ✓       | ✓      | アプリ内の USB、BLE、Wi-Fi（ESP32）更新はすべて、Android と同じように動作します |
 | 通知                | ✓       | ✓      | OS ネイティブの通知                                          |
 | ウィジェット            | ✓       | ✗      | Android のみ                                           |
-| Android Auto      | ✓       | ✗      | Android のみ。デスクトップや iOS では利用できません                     |
 | AI アシスタント（Chirpy） | ✓\*     | ✗      | Google 版の Android のみ                                 |
 | アプリ機能（システム AI）    | ✓†      | ✗      | Google 版の Android のみ                                 |
 
@@ -131,7 +130,7 @@ cd Meshtastic-Android
 
 要件：
 
-- JDK 21
+- JDK 25 (Gradle can provision the toolchain itself via foojay)
 - デスクトップのみのビルドに Android SDK は不要です
 
 ## 既知の制限

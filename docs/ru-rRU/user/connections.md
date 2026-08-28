@@ -2,7 +2,7 @@
 title: Соединения
 parent: Руководство пользователя
 nav_order: 2
-last_updated: 2026-08-25
+last_updated: 2026-08-27
 description: Подключи свой телефон или компьютер к устройству Meshtastic через Bluetooth, USB или TCP/IP.
 aliases:
   - bluetooth
@@ -48,14 +48,16 @@ Tapping **Scan** after you have declined the permission once explains what it is
 
 ### Статус подключения
 
-| Иконка | Состояние    | Описание                 |
-| ------ | ------------ | ------------------------ |
-| 🟢     | Подключено   | Подключение активно      |
-| 🟡     | Подключение  | Выполняется рукопожатие  |
-| 🔴     | Отключено    | Нет активного соединения |
-| ⚪      | Не настроено | Устройство не выбрано    |
+| Иконка | Состояние       | Описание                                                                                   |
+| ------ | --------------- | ------------------------------------------------------------------------------------------ |
+| 🟢     | Подключено      | Подключение активно                                                                        |
+| 🟡     | Подключение     | Выполняется рукопожатие                                                                    |
+| 🔴     | Отключено       | No active connection; the app keeps trying to reconnect                                    |
+| ⚪      | Устройство спит | The radio is in light sleep — the app is waiting for it to wake and reconnect, not failing |
 
-При подключении индикатор состояния показывает текущее состояние соединения:
+These are the four states the app models. "Device sleeping" is normal on power-saving configurations and needs no action.
+
+When connecting, a status indicator shows the current connection state — tap **Stop Connecting** to abandon the attempt:
 
 ![Состояние подключения](../../assets/screenshots/connections_connecting.png)
 
@@ -79,11 +81,17 @@ Tapping **Scan** after you have declined the permission once explains what it is
 2. Приложение запросит разрешение на доступ к USB — нажми **Разрешить**.
 3. Соединение устанавливается автоматически.
 
-> ⚠️ **Примечание:** Для подключения USB требуется поддержка OTG на устройствах Android.
+> ℹ️ **Note:** USB connections require OTG support on Android devices.
 
 ## TCP/IP (Сеть)
 
 Некоторые радиостанции Meshtastic поддерживают подключение по WiFi/Ethernet, что позволяет устанавливать TCP-соединения через локальную сеть. Сначала подключи радиоустройство к своей сети — используя его собственные настройки Wi-Fi (через веб-интерфейс прошивки или другое подключение) — затем подключайся к нему через приложение.
+
+> ℹ️ **Note:** **Settings → Wi-Fi Provisioning for mPWRD-OS** is a separate, narrower tool. It provisions WiFi
+> credentials over Bluetooth to **mPWRD-OS** devices only, using their own protocol — it does not
+> configure WiFi on an ordinary Meshtastic radio. It scans over BLE, lists the networks the device
+> can see (including an option for a hidden SSID), takes the password, and reports success or
+> failure. Available on both Android and Desktop.
 
 ### Подключение к сети
 

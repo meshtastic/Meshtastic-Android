@@ -2,7 +2,7 @@
 title: マップとウェイポイント
 parent: User Guide
 nav_order: 6
-last_updated: 2026-07-08
+last_updated: 2026-08-27
 description: マップ上でノードの位置を確認し、ウェイポイントの作成・共有、マップレイヤーとサイトプランナーの管理、位置共有とプライバシーの制御を行います。
 aliases:
   - map
@@ -120,8 +120,9 @@ aliases:
 
 ベースマップはアプリの版によって異なります。**Google Play** 版は Google マップを、**F-Droid** 版とデスクトップ版は OpenStreetMap を使用します。 ベースマップの上に、オーバーレイまたは代替として、追加のタイルソースを利用できます：
 
-- 衛星画像（利用可能な場合）
-- オフラインタイル（オフラインで使うためにマップのエリアをダウンロード）
+- Satellite imagery — on both Google Play and F-Droid
+- Offline tiles — **F-Droid only**. Download map areas for offline use through OSMdroid's tile
+  cache. Google Play and Desktop builds have no offline download
 
 ## 関連トピック
 

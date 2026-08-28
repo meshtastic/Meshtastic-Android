@@ -240,6 +240,7 @@
     <string name="chirpy_thinking">Chirpy reitittää viestiä mesh-verkon kautta… 📡</string>
     <string name="choose_contrast">Kontrastin taso</string>
     <string name="choose_theme">Valitse teema</string>
+    <string name="choose_units">Valitse yksiköt</string>
     <!-- CLEAN -->
     <string name="clean_node_database_confirmation">Tämä poistaa %1$d laitetta tietokannasta. Toimintoa ei voi peruuttaa.</string>
     <string name="clean_node_database_description">Varoitus: Tämä poistaa laitteet sovelluksen sekä laitteen tietokannoista.\nValinnat lisätään aiempiin.</string>
@@ -538,7 +539,6 @@
     <string name="dns">DNS</string>
     <!-- DOC -->
     <string name="doc_clear_search">Tyhjennä haku</string>
-    <string name="doc_keywords_android_auto">android auto, auto, auton tietokeskus, ajaminen, handsfree, viestintä</string>
     <string name="doc_keywords_app_functions">järjestelmätekoäly, gemini, avustaja, toiminnot, automaatio, ääni</string>
     <string name="doc_keywords_connections">bluetooth, usb, tcp, pariliitos, sarjaportti, wifi</string>
     <string name="doc_keywords_debug_logs">debug, lokitiedot, logcat, vienti, vikaraportti, ongelma, vianmääritys, diagnostiikka</string>
@@ -564,7 +564,6 @@
     <string name="doc_search_placeholder">Hae documentaatiosta…</string>
     <string name="doc_section_developer">Kehittäjän opas</string>
     <string name="doc_section_user">Käyttöopas</string>
-    <string name="doc_title_android_auto">Android Auto</string>
     <string name="doc_title_app_functions">Sovelluksen ominaisuudet</string>
     <string name="doc_title_connections">Yhteydet</string>
     <string name="doc_title_debug_logs">Virheenjäljityslokitiedot</string>
@@ -1943,9 +1942,11 @@
     <string name="udp_enabled">UDP-lähetys</string>
     <string name="undo">Kumoa</string>
     <!-- UNITS -->
+    <string name="units">Yksiköt</string>
     <string name="units_follow_system">Järjestelmän oletus</string>
     <string name="units_imperial">Tuumajärjestelmä</string>
     <string name="units_metric">Metrijärjestelmä</string>
+    <string name="units_scope_summary">Määrittää, miten sovellus näyttää etäisyyden, korkeuden, nopeuden ja lämpötilan. Radion oma näyttö käyttää sen sijaan omia näyttöasetuksiaan.</string>
     <!-- UNKNOWN -->
     <string name="unknown">Tuntematon</string>
     <string name="unknown_age">Tuntematon ikä</string>

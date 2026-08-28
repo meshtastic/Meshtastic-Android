@@ -4,6 +4,12 @@ parent: User Guide
 nav_order: 16
 last_updated: 2026-08-27
 description: How the app formats temperature, distance, speed, and other measurements based on your device locale.
+aliases:
+  - measurement
+  - units
+  - locale
+  - metric
+  - imperial
 ---
 
 # Units, Measurement & Locale
@@ -76,23 +82,32 @@ GPS ground speed is displayed in your locale's preferred speed unit.
 
 ## Wind
 
-Wind speed and gust data from environment sensors are transmitted as **m/s** and converted for display.
+Wind speed, gust and lull are transmitted by the sensor as **m/s** and converted for display — the app shows the unit weather forecasts use in your region, not the raw sensor unit.
 
-| Your Setting                     | You See |
-| -------------------------------- | ------- |
-| Метрика                          | 5 m/s   |
-| Imperial (US) | 11 mph  |
+| Your Setting                     | You See                   |
+| -------------------------------- | ------------------------- |
+| Метрика                          | 18.0 km/h |
+| Imperial (US) | 11.2 mph  |
 
-Wind readings appear in the **Node Detail** environment section and the **Environment Telemetry** charts.
+All three read in the same unit wherever they appear: the Node Detail environment section, the Environment Telemetry log, and the charts.
+
+## Weight
+
+Readings from a connected scale are transmitted in **kg** and converted for display.
+
+| Your Setting                     | You See                 |
+| -------------------------------- | ----------------------- |
+| Метрика                          | 1.50 kg |
+| Imperial (US) | 3.31 lb |
 
 ## Rainfall
 
 Rainfall measurements (1-hour and 24-hour totals) are transmitted as **mm** and converted for display.
 
-| Your Setting                     | You See                |
-| -------------------------------- | ---------------------- |
-| Метрика                          | 12 mm                  |
-| Imperial (US) | 0.5 in |
+| Your Setting                     | You See                 |
+| -------------------------------- | ----------------------- |
+| Metric                           | 12.0 mm |
+| Imperial (US) | 0.47 in |
 
 ## Units That Never Change
 
@@ -102,7 +117,7 @@ Some units are international standards and are displayed the same way regardless
 | -------------------------------- | ------------------------------ | ------------------------------------- |
 | Barometric pressure              | hPa                            | International meteorological standard |
 | Heading / bearing                | ° (degrees) | Universal navigation convention       |
-| Radiation                        | μR/hr                          | Standard dosimetry unit               |
+| Radiation                        | µR/h                           | Standard dosimetry unit               |
 | GPS coordinates                  | decimal degrees                | Universal geographic standard         |
 | Humidity, battery, soil moisture | %                              | Universal                             |
 

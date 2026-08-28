@@ -4,6 +4,12 @@ parent: Kasutusjuhend
 nav_order: 16
 last_updated: 2026-08-27
 description: Kuidas rakendus vormindab temperatuuri, vahemaad, kiirust ja muid mõõtmisi vastavalt seadme lokaadile.
+aliases:
+  - measurement
+  - units
+  - locale
+  - metric
+  - imperial
 ---
 
 # Ühikud, mõõtühikud ja lokaat
@@ -76,23 +82,32 @@ GPSi maapealne kiirus kuvatakse lokaadi eelistatud kiiruseühikus.
 
 ## Tuul
 
-Wind speed and gust data from environment sensors are transmitted as **m/s** and converted for display.
+Wind speed, gust and lull are transmitted by the sensor as **m/s** and converted for display — the app shows the unit weather forecasts use in your region, not the raw sensor unit.
 
-| Sinu sätted                      | Teadmiseks |
-| -------------------------------- | ---------- |
-| Meetriline                       | 5 m/s      |
-| Imperial (US) | 11 mph     |
+| Sinu sätted                      | Teadmiseks                |
+| -------------------------------- | ------------------------- |
+| Meetriline                       | 18.0 km/h |
+| Imperial (US) | 11.2 mph  |
 
-Wind readings appear in the **Node Detail** environment section and the **Environment Telemetry** charts.
+All three read in the same unit wherever they appear: the Node Detail environment section, the Environment Telemetry log, and the charts.
+
+## Weight
+
+Readings from a connected scale are transmitted in **kg** and converted for display.
+
+| Sinu sätted                      | Teadmiseks              |
+| -------------------------------- | ----------------------- |
+| Meetriline                       | 1.50 kg |
+| Imperial (US) | 3.31 lb |
 
 ## Rainfall
 
 Rainfall measurements (1-hour and 24-hour totals) are transmitted as **mm** and converted for display.
 
-| Sinu sätted                      | Teadmiseks |
-| -------------------------------- | ---------- |
-| Meetriline                       | 12 mm      |
-| Imperial (US) | 0,5 in     |
+| Your Setting                     | You See                 |
+| -------------------------------- | ----------------------- |
+| Metric                           | 12.0 mm |
+| Imperial (US) | 0.47 in |
 
 ## Units That Never Change
 
@@ -102,7 +117,7 @@ Mõned ühikud on rahvusvahelised standardid ja neid kuvatakse ühtemoodi olenem
 | --------------------------- | ------------------------------ | ------------------------------------- |
 | Baromeetrii rõhk            | hPa                            | International meteorological standard |
 | Heading / bearing           | ° (degrees) | Universal navigation convention       |
-| Radiatsioon                 | μR/hr                          | Standard dosimetry unit               |
+| Radiatsioon                 | µR/h                           | Standard dosimetry unit               |
 | GPS koordinaadid            | decimal degrees                | Universal geographic standard         |
 | Niiskus, aku, mulla niiskus | %                              | Universal                             |
 

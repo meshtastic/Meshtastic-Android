@@ -2,7 +2,7 @@
 title: Настолно приложение
 parent: Ръководство за потребители
 nav_order: 14
-last_updated: 2026-07-07
+last_updated: 2026-08-27
 description: Install and use the Meshtastic Desktop app on Linux, macOS, and Windows — connections, feature parity, and keyboard shortcuts.
 aliases:
   - desktop
@@ -70,7 +70,6 @@ Bluetooth Low Energy is supported on Desktop via the [Kable](https://github.com/
 | Актуализация на фърмуера                     | ✓       | ✓       | In-app USB, BLE, and Wi-Fi (ESP32) update all work the same as Android |
 | Известия                                     | ✓       | ✓       | Native OS notifications                                                                   |
 | Widgets                                      | ✓       | ✗       | Android-only                                                                              |
-| Android Auto                                 | ✓       | ✗       | Android-only — not available on Desktop or iOS                                            |
 | AI Assistant (Chirpy)     | ✓\*     | ✗       | Google flavor Android only                                                                |
 | App Functions (system AI) | ✓†      | ✗       | Google flavor Android only                                                                |
 
@@ -131,7 +130,7 @@ cd Meshtastic-Android
 
 Изисквания:
 
-- JDK 21
+- JDK 25 (Gradle can provision the toolchain itself via foojay)
 - No Android SDK required for desktop-only builds
 
 ## Известни ограничения

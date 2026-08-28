@@ -2,7 +2,7 @@
 title: Справка и встроенная документация
 parent: Руководство пользователя
 nav_order: 21
-last_updated: 2026-06-25
+last_updated: 2026-08-27
 description: Просматривайте эту документацию внутри приложения, выполняйте по ней поиск и задавайте вопросы о Meshtastic ассистенту Chirpy — встроенному ИИ-помощнику на устройстве.
 aliases:
   - help
@@ -39,7 +39,7 @@ aliases:
 
 > 🔒 **Приватность:** На поддерживаемых устройствах Google-версии Chirpy работает на самом устройстве с помощью Gemini Nano — твои вопросы никогда не покидают твой телефон. Небольшая модель загружается при первом использовании.
 
-> ⚠️ **Примечание:** В сборках для F-Droid, настольного приложения и iOS Chirpy переключается на **поиск по ключевым словам** в документации вместо генеративной модели. Если твоё устройство не поддерживает встроенный ИИ, ассистент скрыт, и ты по-прежнему можешь просматривать и искать документацию обычным способом.
+> ℹ️ **Note:** Chirpy is Google-flavor Android only. On F-Droid, Desktop and iOS builds the assistant button does not appear at all — the same is true on a Google-flavor device whose hardware cannot run the on-device model. Browsing and the docs browser's own search work normally on every platform.
 
 ## Связанные темы
 

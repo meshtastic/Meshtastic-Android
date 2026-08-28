@@ -2,7 +2,7 @@
 title: Ühendus
 parent: Kasutusjuhend
 nav_order: 2
-last_updated: 2026-08-25
+last_updated: 2026-08-27
 description: Ühenda oma telefon või arvuti Meshtastic raadioga Bluetoothi, USB või TCP/IP kaudu.
 aliases:
   - sinihammas
@@ -48,14 +48,16 @@ Tapping **Scan** after you have declined the permission once explains what it is
 
 ### Ühenduse olek
 
-| Ikoon | Olek             | Kirjeldus                  |
-| ----- | ---------------- | -------------------------- |
-| 🟢    | Ühendatud        | Aktiivne raadioside loodud |
-| 🟡    | Ühendan          | Kätlemine on pooleli       |
-| 🔴    | Ühendus katkenud | Aktiivset ühendust pole    |
-| ⚪     | Pole seadistatud | Seadet pole valitud        |
+| Ikoon | Olek                 | Kirjeldus                                                                                  |
+| ----- | -------------------- | ------------------------------------------------------------------------------------------ |
+| 🟢    | Ühendatud            | Aktiivne raadioside loodud                                                                 |
+| 🟡    | Ühendan              | Kätlemine on pooleli                                                                       |
+| 🔴    | Ühendus katkenud     | No active connection; the app keeps trying to reconnect                                    |
+| ⚪     | Seade on unerežiimis | The radio is in light sleep — the app is waiting for it to wake and reconnect, not failing |
 
-Ühenduse loomisel näitab olekuindikaator ühenduse praegust olekut:
+These are the four states the app models. "Device sleeping" is normal on power-saving configurations and needs no action.
+
+When connecting, a status indicator shows the current connection state — tap **Stop Connecting** to abandon the attempt:
 
 ![Ühenduse olek](../../assets/screenshots/connections_connecting.png)
 
@@ -79,11 +81,17 @@ USB ühendused pakuvad juhtmega alternatiivi, mis on kasulik lauaarvutite puhul 
 2. Rakendus küsib USB luba – puuduta **Luba**.
 3. The connection is established automatically.
 
-> ⚠️ **Märkus:** USB ühenduste jaoks on Android-seadmetes vaja OTG tuge.
+> ℹ️ **Note:** USB connections require OTG support on Android devices.
 
 ## TCP/IP (võrk)
 
 Mõned Meshtastic raadiod toetavad WiFi/Etherneti ühendust, võimaldades TCP-põhiseid ühendusi kohaliku võrgu kaudu. Ühenda raadio esmalt oma võrku – kasutades raadio enda WiFi-seadeid (püsivara veebiliidese või muu ühenduse kaudu) – ja seejärel loo ühendus rakenduse kaudu.
+
+> ℹ️ **Note:** **Settings → Wi-Fi Provisioning for mPWRD-OS** is a separate, narrower tool. It provisions WiFi
+> credentials over Bluetooth to **mPWRD-OS** devices only, using their own protocol — it does not
+> configure WiFi on an ordinary Meshtastic radio. It scans over BLE, lists the networks the device
+> can see (including an option for a hidden SSID), takes the password, and reports success or
+> failure. Available on both Android and Desktop.
 
 ### Connecting over the Network
 
