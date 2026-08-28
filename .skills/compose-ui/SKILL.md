@@ -8,7 +8,7 @@ Guidelines for building shared UI, adaptive layouts, and handling strings/resour
 - **Dialogs & Alerts:** Use centralized components like `AlertHost(alertManager)` from `core:ui/commonMain`. Do NOT trigger alerts inline or duplicate alert logic. Use `SharedDialogs(uiViewModel)` for general popups.
 - **Placeholders:** Use `PlaceholderScreen(name)` from `core:ui/commonMain` for unimplemented desktopApp/JVM features.
 - **Theme Picker:** Use `ThemePickerDialog` from `feature:settings/commonMain`.
-- **Platform Implementations:** Inject platform-specific behavior (e.g., Map providers) via `CompositionLocal` from the `app` or `desktop` shells. Do not tightly couple Google Maps/osmdroid dependencies to `commonMain`.
+- **Platform Implementations:** Inject platform-specific behavior (e.g., Map providers) via `CompositionLocal` from the `androidApp` or `desktopApp` shells. Do not tightly couple Google Maps/osmdroid dependencies to `commonMain`.
 
 ## 2. Strings & Resources
 - **Multiplatform Resources:** MUST use `core:resources` (e.g., `stringResource(Res.string.your_key)`). Never use hardcoded strings.
@@ -46,7 +46,7 @@ Choose the right tool for the job:
   4. Validate UI presentation.
 
 ## 3. Tooling & Capabilities
-- **Image Loading:** Use `libs.coil` (Coil Compose) in feature modules. Configuration/Networking for Coil (`coil-network-ktor3`) happens strictly in the `app` and `desktop` host modules.
+- **Image Loading:** Use `libs.coil` (Coil Compose) in feature modules. Configuration/Networking for Coil (`coil-network-ktor3`) happens strictly in the `androidApp` and `desktopApp` host modules.
 - **QR Codes:** Use `rememberQrCodePainter` from `core:ui/commonMain` powered by `qrcode-kotlin`. No ZXing or Android Bitmap APIs in shared code.
 
 ## 4. Compose Previews

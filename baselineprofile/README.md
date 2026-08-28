@@ -10,7 +10,7 @@ JIT cost on first launch. Targets the **google** flavor (the variant most users 
 ./gradlew :androidApp:generateGoogleReleaseBaselineProfile
 ```
 
-Output is merged into `androidApp/src/google/generated/baselineProfiles/baseline-prof.txt`.
+Output is merged into `androidApp/src/googleRelease/generated/baselineProfiles/baseline-prof.txt`.
 **Commit that file** — release builds package it via `androidx.profileinstaller`.
 
 ## Quantify the win

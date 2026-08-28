@@ -34,6 +34,12 @@ Things that trip up first-time contributors — check these before requesting re
 Keep the last 5–8 entries and trim older ones from the bottom.
 -->
 
+**August 2026** — Android Auto removed from all build variants (#6779). `feature/car` is gone — the module, its Car App Library dependencies, the `automotive_app_desc.xml` manifest entry and the `google` flavor's `FlavorModule` registration.
+
+**August 2026** — [Testing](developer/testing) — CI gained a fourth runner tier: `ubuntu-slim` (#6674, #6677) now carries the lightweight jobs. It is single-CPU, unprivileged, x64-only and capped at 15 minutes, so anything needing `sudo`, Docker or a full-history clone stays on `ubuntu-24.04-arm`. Picking rules are in `.github/instructions/ci-workflows.instructions.md`.
+
+**August 2026** — Flatpak sources are generated inside each architecture's own offline build (#6919) rather than committed, and the flatpak-sources plugin resolves platform dependencies transitively (0.2.x), so the hand-tracked entries are gone.
+
 **July 2026** — [Test Builds & Obtainium](developer/test-builds) — New page, replacing the root `obtainium-test-builds.md`. Distributable Obtainium configurations now live in `obtainium/` (importable export, one-tap link generator, config-site submission).
 
 **July 2026** — Map layer stack (`MapLayer.kt`, `MapLayersManager`, GeoJSON/KML import, Site Planner) extracted from the Google flavor into shared `androidApp/src/main` source (#6148) — F-Droid now renders imported overlays via a new OSMdroid-based renderer, so both flavors compile one implementation.
@@ -46,11 +52,6 @@ Keep the last 5–8 entries and trim older ones from the bottom.
 
 **June 2026** — [Testing](developer/testing) — Split the screenshot pipeline: the new generate-only `:docs-screenshots` module holds doc-framed compositions, while `:screenshot-tests` stays the CI visual-regression gate — so reframing a doc image no longer churns a test baseline.
 
-**June 2026** — New feature modules: `feature:discovery` (mesh network discovery, #5275) and `feature:car` (Android Auto / Car App Library, google flavor only, #5633).
-
-**June 2026** — [Testing](developer/testing) — Added the `:baselineprofile` module (#5735): a Macrobenchmark cold-start journey generates a Baseline Profile for `:androidApp` to AOT-compile hot startup paths.
-
-**June 2026** — [Persistence](developer/persistence) — FTS5 full-text message search (#5373): a `PacketFts` virtual table mirrors `Packet.messageText`, kept in sync by Room-managed triggers.
 
 <!-- DEV_WHATS_NEW_END -->
 

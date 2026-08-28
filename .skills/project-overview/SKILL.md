@@ -5,7 +5,7 @@ Module directory, namespacing conventions, environment setup, and troubleshootin
 
 - **Build System:** Gradle (Kotlin DSL). JDK 25 REQUIRED. Target SDK: API 36. Min SDK: API 26.
 - **Flavors:** `fdroid` (OSS only) · `google` (Maps + DataDog analytics)
-- **Android-only Modules:** `core:barcode` (CameraX), `feature:widget` (Glance home-screen widget), `feature:car` (Android Auto via the Car App Library, `google` flavor only), and `baselineprofile` (Macrobenchmark). Shared contracts are abstracted into `core:ui/commonMain`.
+- **Android-only Modules:** `core:barcode` (CameraX), `feature:widget` (Glance home-screen widget), and `baselineprofile` (Macrobenchmark). Shared contracts are abstracted into `core:ui/commonMain`.
 
 ## Codebase Map
 
@@ -14,7 +14,7 @@ Module directory, namespacing conventions, environment setup, and troubleshootin
 | `androidApp/` | Main application module. Contains `MainActivity`, Koin DI modules, and app-level logic. Uses package `org.meshtastic.app`. |
 | `build-logic/` | Convention plugins for shared build configuration (e.g., `meshtastic.kmp.feature`, `meshtastic.kmp.library`, `meshtastic.kmp.jvm.android`, `meshtastic.koin`). |
 | `config/` | Detekt static analysis rules (`config/detekt/detekt.yml`) and Spotless formatting config (`config/spotless/.editorconfig`). |
-| `docs/` | Architecture docs and agent playbooks. See `docs/kmp-status.md` and `docs/roadmap.md` for current status. |
+| `docs/` | The user + developer documentation bundle, not agent docs. `docs/en/` is the English source (`user/`, `developer/`); `docs/<locale>/user/` are Crowdin translations; the rest is the Jekyll site scaffolding. Consumed three ways — in-app via `syncDocsToComposeResources`, GitHub Pages via `docs-deploy.yml`, and meshtastic.org via `scripts/sync-android-docs.js`. |
 | `core/model` | Domain models and common data structures. |
 | `core:common` | Low-level utilities, I/O abstractions (Okio), and common types. |
 | `core:database` | Room KMP database implementation. |
@@ -34,7 +34,7 @@ Module directory, namespacing conventions, environment setup, and troubleshootin
 | `core/ble/` | Bluetooth Low Energy stack using Kable. |
 | `core/resources/` | Centralized string and image resources (Compose Multiplatform). |
 | `core/testing/` | Shared test doubles, fakes, and utilities for `commonTest` across all KMP modules. |
-| `feature/` | Feature modules (e.g., `settings`, `map`, `messaging`, `node`, `intro`, `connections`, `firmware`, `wifi-provision`, `discovery`, `docs`, `widget`, `car`). Most are KMP and use the `meshtastic.kmp.feature` convention plugin; `widget` (Glance) and `car` (Android Auto, `google` flavor only) are Android-only. |
+| `feature/` | Feature modules (e.g., `settings`, `map`, `messaging`, `node`, `intro`, `connections`, `firmware`, `wifi-provision`, `discovery`, `docs`, `widget`). Most are KMP and use the `meshtastic.kmp.feature` convention plugin; `widget` (Glance) is Android-only. |
 | `baselineprofile/` | Macrobenchmark Baseline Profile generation for `:androidApp` (AOT-compiled cold-start journey). Android-only. |
 | `feature/wifi-provision` | KMP WiFi provisioning via BLE (Nymea protocol). Uses `core:ble` Kable abstractions. |
 | `feature/firmware` | Fully KMP firmware update system: Unified OTA (BLE + WiFi), native Nordic Secure DFU protocol (pure KMP), USB/UF2 updates, and `FirmwareRetriever` with manifest-based resolution. Desktop is a first-class target. |
@@ -46,9 +46,13 @@ Module directory, namespacing conventions, environment setup, and troubleshootin
 
 ## Environment Setup
 1. **JDK 25 MUST be used** to prevent Gradle sync/build failures.
-2. **Secrets:** Copy `secrets.defaults.properties` to `local.properties`:
+2. **Secrets (optional):** `androidApp/build.gradle.kts` configures the secrets plugin as
+   `propertiesFileName = "secrets.properties"` with `defaultPropertiesFileName =
+   "secrets.defaults.properties"`, so a clone builds every flavor with no secrets file at
+   all — the tracked defaults supply placeholders. Create `secrets.properties` in the repo
+   root (git-ignored) only to override one:
    ```properties
-   MAPS_API_KEY=dummy_key
+   MAPS_API_KEY=<your real key>       # without this, Google Maps tiles do not load
    datadogApplicationId=dummy_id
    datadogClientToken=dummy_token
    ```
@@ -67,10 +71,10 @@ Agents **MUST** perform these steps automatically at the start of every session 
    ```
    All `./gradlew` invocations must include `ANDROID_HOME` in the environment. If the SDK cannot be found, ask the user for the path.
 
-2. **Init secrets:** If `local.properties` does not exist, copy `secrets.defaults.properties` to `local.properties`. Without this the `google` flavor build fails:
-   ```bash
-   [ -f local.properties ] || cp secrets.defaults.properties local.properties
-   ```
+2. **Secrets:** nothing to do. `secrets.defaults.properties` is tracked and is the
+   plugin's declared fallback, so no bootstrap step is required for any flavor.
+   `local.properties` is not read for secrets (only the vendored plugin's unused default
+   constant still names it).
 
 ## Troubleshooting
 - **Build Failures:** Check `gradle/libs.versions.toml` for dependency conflicts.

@@ -5,7 +5,7 @@ The `:core:resources` module is the centralized source for all UI strings and lo
 
 ## Key Features
 
-- **Single Source of Truth**: All UI strings must be defined in this module, not in the `app` module or feature modules.
+- **Single Source of Truth**: All UI strings must be defined in this module, not in the `androidApp`/`desktopApp` hosts or in feature modules.
 - **Type-Safety**: Generates a `Res` object that allows accessing strings like `Res.string.your_key` with compile-time checking.
 
 ## Usage

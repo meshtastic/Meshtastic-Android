@@ -18,7 +18,7 @@ If you have questions or feedback please [Join our discussion forum](https://git
 
 ## Features
 
-Highlights from the 2.8.0 release:
+Highlights of the 2.8 line:
 
 - **Mesh network discovery** to surface nodes and channels around you, with **Mesh Beacon** invitations for joining nearby meshes.
 - **Waypoint geofences** — draw zones on the map and get alerts when nodes cross them.
@@ -122,6 +122,8 @@ Each module has its own README with details on its responsibilities, API surface
 
 | Module | Description |
 |---|---|
+| [androidApp](androidApp/README.md) | Android application host — activity, manifest, flavors, root Koin graph |
+| [desktopApp](desktopApp/README.md) | Compose Desktop host — window, transports, packaging |
 | [core/domain](core/domain/README.md) | Business-logic use cases (radio config, sessions, exports) |
 | [core/repository](core/repository/README.md) | Data & infrastructure contracts (RadioTransport, NodeRepository, ServiceRepository) |
 | [core/takserver](core/takserver/README.md) | Meshtastic ↔ TAK (ATAK/iTAK) bridge — CoT server & conversion |
@@ -140,7 +142,7 @@ Each module has its own README with details on its responsibilities, API surface
 | [core/testing](core/testing/README.md) | Shared test fakes & utilities |
 | [core/konsist](core/konsist/README.md) | Konsist architecture-rule tests (KMP boundary guards) |
 | [core/nfc](core/nfc/README.md) | NFC support |
-| [core/prefs](core/prefs/README.md) | Legacy preference helpers |
+| [core/prefs](core/prefs/README.md) | Type-safe preferences over multiplatform DataStore |
 | [core/barcode](core/barcode/README.md) | Barcode / QR scanning |
 | [feature/messaging](feature/messaging/README.md) | Messaging UI feature |
 | [feature/map](feature/map/README.md) | Map UI feature |
@@ -153,7 +155,6 @@ Each module has its own README with details on its responsibilities, API surface
 | [feature/discovery](feature/discovery/README.md) | Mesh network discovery (scanner, AI summaries, Mesh Beacon) |
 | [feature/docs](feature/docs/README.md) | In-app documentation browser with Chirpy AI assistant |
 | [feature/widget](feature/widget/README.md) | Android home-screen Glance widget (live mesh stats) |
-| [feature/car](feature/car/README.md) | Android Auto integration (Car App Library, `google` flavor) |
 | [baselineprofile](baselineprofile/README.md) | Macrobenchmark Baseline Profile generation for `:androidApp` |
 
 ## Translations

@@ -131,7 +131,7 @@ reviews:
       instructions: >
         New string resources must be alphabetically sorted (scripts/sort-strings.py). Flag out-of-order additions.
     - path: baselineprofile/
-      instructions: Keep baseline profile generation tied to the `google` flavor and connected devices/emulators, and commit the generated profile output to `androidApp/src/google/generated/baselineProfiles/baseline-prof.txt`.
+      instructions: Keep baseline profile generation tied to the `google` flavor and connected devices/emulators, and commit the generated profile output to `androidApp/src/googleRelease/generated/baselineProfiles/baseline-prof.txt`.
     - path: docs/
       instructions: Treat non-English locale folders as Crowdin-managed output; edit the English sources under `docs/en/` and register new pages through `feature/docs/` instead of hand-editing translated locale directories.
     - path: screenshot-tests/

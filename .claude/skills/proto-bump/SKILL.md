@@ -84,5 +84,5 @@ New proto versions usually add fields/messages the app doesn't consume yet. Diff
 - Write the PR per `.github/copilot-pull-request-instructions.md`: WHY-first; 🛠️ (or 🌟 if it unlocks a user-facing feature); link the upstream release notes (real URL only); "Testing Performed" = the gradle-runner run including `allTests`.
 - Never hand-edit or vendor generated proto — this repo consumes the Maven artifact only.
 - Keep the change minimal: a bump PR is a catalog edit + the force block (Mode B) + necessary call-site adaptations, not a feature.
-- Branch off `main` (the 2.8.0 line) unless told otherwise.
+- Branch off `main` unless told otherwise.
 - After a successful change, update the relevant memory pointer (protobufs-sdk-alignment / lora-region-preset-map) so the next session knows the new baseline.
