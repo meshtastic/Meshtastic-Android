@@ -118,16 +118,16 @@ fun MapLibreInlineMap(
         }
     }
 
-    // Zoom controls at the compact size. The full-size pair is a floating toolbar nearly 100dp tall, half of this
-    // 200dp thumbnail, which is why this map shipped without one — but the Google mini-map does show zoom buttons, so
-    // going without was a parity gap rather than a considered difference. Google shows only the buttons, having
-    // disabled the zoom and scroll gestures; this keeps the gestures and adds the buttons.
+    // Buttons instead of gestures, which is the trade the Google mini-map makes and for a reason that applies here
+    // too: this map sits inside the node detail sheet's vertically scrolling column, and a pan or zoom gesture on it
+    // is a gesture the column also wants. Whichever wins, the other feels broken. The buttons are what make giving
+    // the gestures up affordable — without them this map would have no way in at all.
     Box(modifier = modifier) {
         MaplibreMap(
             baseStyle = basemaps.current.toBaseStyle(),
             cameraState = cameraState,
             modifier = Modifier.fillMaxSize(),
-            options = SecondaryMapOptions,
+            options = InlineMapOptions,
             zoomRange = basemaps.current.zoomRange(),
         ) {
             (basemaps.current as? Basemap.Raster)?.let { RasterBasemapLayer(it) }
@@ -435,6 +435,33 @@ private fun ScannerLayer(scanner: GeoPosition, label: String) {
  */
 internal val SecondaryMapOptions =
     MapOptions(gestureOptions = GestureOptions(isDragRotateTiltEnabled = false, isTwoFingerTiltEnabled = false))
+
+/**
+ * Gestures off entirely, for the mini-map embedded in the node detail sheet.
+ *
+ * That sheet scrolls vertically, and every gesture this map would claim — a drag to pan, a pinch or wheel to zoom — is
+ * one the column is also trying to read. The Google flavor resolves it the same way, turning off scroll, zoom, rotate
+ * and tilt in its own `InlineMap` and leaving the zoom buttons as the only way in. Keyboard pan and zoom stay: they
+ * cost the column nothing and are the desktop's route to the same thing.
+ */
+internal val InlineMapOptions =
+    MapOptions(
+        gestureOptions =
+        GestureOptions(
+            isDragPanEnabled = false,
+            isDragRotateTiltEnabled = false,
+            isPinchZoomEnabled = false,
+            isTwoFingerRotateEnabled = false,
+            isTwoFingerTiltEnabled = false,
+            isTwoFingerTapZoomEnabled = false,
+            isScrollZoomEnabled = false,
+            isDoubleClickZoomEnabled = false,
+            isQuickZoomEnabled = false,
+            isFlingEnabled = false,
+            isPinchZoomVelocityEnabled = false,
+            isRotateVelocityEnabled = false,
+        ),
+    )
 
 /** Keeps a floating toolbar clear of the top edge, matching the main map's own inset. */
 internal const val TOOLBAR_INSET = 8

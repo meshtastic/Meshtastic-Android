@@ -16,6 +16,9 @@
  */
 package org.meshtastic.feature.map.maplibre.style
 
+import kotlinx.serialization.json.put
+import kotlinx.serialization.json.putJsonArray
+import kotlinx.serialization.json.putJsonObject
 import org.maplibre.compose.style.BaseStyle
 
 /**
@@ -170,11 +173,43 @@ object Basemaps {
     fun byId(id: String?): Basemap = all.firstOrNull { it.id == id } ?: default
 }
 
-/** Vector basemaps arrive as a style document; raster ones draw over an empty one. */
+/** Vector basemaps arrive as a style document; raster ones draw over a bare one that still declares its fonts. */
 internal fun Basemap.toBaseStyle(): BaseStyle = when (this) {
     is Basemap.Vector -> BaseStyle.Uri(styleUri)
-    is Basemap.Raster -> BaseStyle.Empty
+    is Basemap.Raster -> RasterBaseStyle
 }
+
+/**
+ * Where a style gets its font glyphs. The vector styles above declare this same endpoint themselves; it is keyless and
+ * unmetered, which is why the basemaps use OpenFreeMap in the first place.
+ */
+private const val GLYPHS_URL = "https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf"
+
+/**
+ * The style a raster basemap draws its tiles over.
+ *
+ * Deliberately not `BaseStyle.Empty`, which is what this used to be. That document declares no `glyphs`, so a style
+ * built on it can load no font at all, and a symbol layer carrying text has nothing to render with. The three vector
+ * styles bring their own glyph endpoint, which is why the same layers drew there and nowhere else.
+ *
+ * The cost was not limited to the text. Confirmed by running the desktop app against the same camera on both: with
+ * `BaseStyle.Empty` a raster basemap drew its tiles and **no mesh data at all** — not the node chips, and not even the
+ * cluster bubbles, which are plain circles with no text in them. The first text layer to fail is `waypoint-label`,
+ * composed ahead of the node layers, and everything added after it is lost with it.
+ *
+ * No sources or layers of its own — the basemap itself is added at runtime as a raster layer over the top of this.
+ */
+private val RasterBaseStyle: BaseStyle =
+    BaseStyle.Json {
+        put("version", STYLE_SPEC_VERSION)
+        put("name", "Meshtastic raster basemap")
+        put("glyphs", GLYPHS_URL)
+        putJsonObject("sources") {}
+        putJsonArray("layers") {}
+    }
+
+/** The MapLibre/Mapbox style specification version every style document here declares. */
+private const val STYLE_SPEC_VERSION = 8
 
 /**
  * The zoom levels this basemap actually has data for.

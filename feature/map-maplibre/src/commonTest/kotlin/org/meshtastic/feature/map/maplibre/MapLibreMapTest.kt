@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.map.maplibre
 
+import org.maplibre.compose.style.BaseStyle
 import org.meshtastic.core.model.Node
 import org.meshtastic.feature.map.BaseMapViewModel
 import org.meshtastic.feature.map.LastHeardFilter
@@ -27,6 +28,7 @@ import org.meshtastic.feature.map.maplibre.layers.heardJustNow
 import org.meshtastic.feature.map.maplibre.style.Basemap
 import org.meshtastic.feature.map.maplibre.style.Basemaps
 import org.meshtastic.feature.map.maplibre.style.MapOverlays
+import org.meshtastic.feature.map.maplibre.style.toBaseStyle
 import org.meshtastic.proto.Position
 import kotlin.math.abs
 import kotlin.test.Test
@@ -90,6 +92,18 @@ class BasemapRegistryTest {
             MapOverlays.Hillshade.encoding,
             org.meshtastic.feature.map.maplibre.style.MapOverlay.DemEncoding.TERRARIUM,
         )
+    }
+
+    @Test
+    fun `every raster basemap draws over a style that declares a glyph source`() {
+        // A style with no `glyphs` can load no font, and the first text symbol layer that fails takes every layer
+        // added after it down too — which on a raster basemap meant the mesh drew nothing at all, cluster bubbles
+        // included. The vector styles carry their own glyph endpoint, so only the raster path needs this.
+        Basemaps.all.filterIsInstance<Basemap.Raster>().forEach { basemap ->
+            val style = basemap.toBaseStyle()
+            assertTrue(style is BaseStyle.Json, "${basemap.id} must draw over a style document we control")
+            assertTrue(style.json.contains("glyphs"), "${basemap.id} draws over a style with no glyph source")
+        }
     }
 
     @Test
