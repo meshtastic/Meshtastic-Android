@@ -43,6 +43,7 @@ import org.meshtastic.app.map.prefs.map.GoogleMapsPrefs
 import org.meshtastic.app.map.tiles.MapTileHttpClient
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.testing.FakeBuildConfigProvider
 import org.meshtastic.core.testing.FakeLocaleUnitsProvider
 import org.meshtastic.core.testing.FakeMapPrefs
 import org.meshtastic.core.testing.FakeMapTileProviderPrefs
@@ -277,7 +278,7 @@ class GoogleCustomTileSelectionTest {
             radioController = FakeRadioController(),
             customTileProviderRepository = repository,
             mapTileProviderPrefs = mapTileProviderPrefs,
-            mapTileHttpClient = MapTileHttpClient(application),
+            mapTileHttpClient = MapTileHttpClient(application, FakeBuildConfigProvider()),
             uiPrefs = FakeUiPrefs(),
             notificationPrefs = FakeNotificationPrefs(),
             savedStateHandle = SavedStateHandle(),

@@ -21,6 +21,7 @@ import okhttp3.Cache
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.BuildConfigProvider
 import java.io.File
 
 /** Roughly a few thousand tiles — enough that panning around a working area stops re-downloading. */
@@ -39,15 +40,33 @@ private const val FALLBACK_MAX_AGE_SECONDS = 60 * 60
  * they want a far larger budget than anything else the app fetches.
  */
 @Single
-class MapTileHttpClient(private val context: Context) {
+class MapTileHttpClient(private val context: Context, private val buildConfig: BuildConfigProvider) {
 
     /** Built on first use: nothing needs a tile cache until a raster source is actually selected. */
     val client: OkHttpClient by lazy {
         OkHttpClient.Builder()
             .cache(Cache(File(context.cacheDir, "map-tiles"), TILE_CACHE_BYTES))
             .addNetworkInterceptor(FallbackCachePolicy)
+            .addInterceptor(IdentifyingUserAgent(buildConfig))
             .build()
     }
+}
+
+/**
+ * Names the app on every tile request.
+ *
+ * OpenStreetMap's tile usage policy requires an identifying User-Agent and blocks clients that send a generic library
+ * default, which `okhttp/x.y` is. The OSMdroid map this replaces set the same requirement through its tile source
+ * policy flags; nothing carried it over when the fetch moved to OkHttp.
+ */
+private class IdentifyingUserAgent(private val buildConfig: BuildConfigProvider) : Interceptor {
+    override fun intercept(chain: Interceptor.Chain): okhttp3.Response = chain.proceed(
+        chain
+            .request()
+            .newBuilder()
+            .header("User-Agent", "Meshtastic-Android/${buildConfig.versionName} (${buildConfig.applicationId})")
+            .build(),
+    )
 }
 
 /**

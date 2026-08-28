@@ -122,6 +122,7 @@ import org.meshtastic.app.map.component.MapTypeDropdown
 import org.meshtastic.app.map.component.NodeClusterMarkers
 import org.meshtastic.app.map.component.WaypointMarkers
 import org.meshtastic.app.map.model.NodeClusterItem
+import org.meshtastic.app.map.tiles.RasterBasemap
 import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.Node
@@ -183,6 +184,7 @@ import org.meshtastic.feature.map.component.NodeTrackFilterMenu
 import org.meshtastic.feature.map.component.RasterOverlayToggles
 import org.meshtastic.feature.map.component.WaypointInfoDialog
 import org.meshtastic.feature.map.includes
+import org.meshtastic.feature.map.tiles.mapAttributionText
 import org.meshtastic.feature.map.tracerouteNodeSelection
 import org.meshtastic.proto.BoundingBox
 import org.meshtastic.proto.Position
@@ -245,6 +247,10 @@ private const val BOX_AUTHORING_MIN_CORNER_DELTA = 1e-4
 
 /** Above the raster basemap at -1, below every marker and shape the mesh draws at 0 and up. */
 private const val OVERLAY_Z_INDEX = -0.5f
+
+/** Clears Google's own logo and the zoom controls, both of which sit along the bottom edge. */
+private val ATTRIBUTION_BOTTOM_PADDING = 4.dp
+private const val ATTRIBUTION_SCRIM_ALPHA = 0.7f
 
 @Suppress("CyclomaticComplexMethod", "LongMethod")
 @OptIn(MapsComposeExperimentalApi::class, ExperimentalMaterial3Api::class)
@@ -858,6 +864,31 @@ fun MapView(
         val visibleNetworkLayers = mapLayers.filter { it.isNetwork && it.isVisible }
         val showRefresh = visibleNetworkLayers.isNotEmpty()
         val isRefreshingLayers = visibleNetworkLayers.any { it.isRefreshing }
+
+        // Tile credit. OpenStreetMap's and Esri's tile policies both require it, and unlike MapLibre — which has an
+        // attribution ornament of its own — the Google map has nowhere to put it but here.
+        val attributionText =
+            remember(currentRasterBasemap, enabledOverlayIds) {
+                mapAttributionText(
+                    basemap = (currentRasterBasemap as? RasterBasemap.Remote)?.spec,
+                    overlays = mapViewModel.availableOverlays.filter { it.id in enabledOverlayIds }.map { it.spec },
+                )
+            }
+        if (attributionText.isNotEmpty()) {
+            Text(
+                text = attributionText,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier =
+                Modifier.align(Alignment.BottomCenter)
+                    .padding(bottom = ATTRIBUTION_BOTTOM_PADDING)
+                    .background(
+                        MaterialTheme.colorScheme.surface.copy(alpha = ATTRIBUTION_SCRIM_ALPHA),
+                        MaterialTheme.shapes.extraSmall,
+                    )
+                    .padding(horizontal = 6.dp, vertical = 2.dp),
+            )
+        }
 
         MapControlsOverlay(
             modifier = Modifier.align(Alignment.TopCenter).padding(top = 8.dp),
