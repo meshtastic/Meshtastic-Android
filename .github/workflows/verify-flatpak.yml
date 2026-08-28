@@ -41,7 +41,7 @@ jobs:
         arch: [x86_64, aarch64]
       fail-fast: false
     steps:
-      - uses: actions/checkout@v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: recursive
 
@@ -67,7 +67,7 @@ jobs:
           fi
           echo "OK: $manifest vendors $wrapper_dist, matching $props"
 
-      - uses: actions/setup-java@v6
+      - uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6
         with:
           distribution: temurin
           java-version: 25
@@ -76,7 +76,7 @@ jobs:
       # JBR resolves its version list via the GitHub API — unauthenticated requests
       # rate-limit on the shared runner IPs, so the token is required, not optional.
       # Non-fatal, matching .github/actions/gradle-setup: Gradle falls back to Foojay.
-      - uses: actions/setup-java@v6
+      - uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6
         id: setup-jbr
         continue-on-error: true
         with:
@@ -88,7 +88,7 @@ jobs:
         if: steps.setup-jbr.outcome == 'failure'
         run: echo "::warning::JBR setup-java failed; falling back to Foojay toolchain provisioning."
 
-      - uses: gradle/actions/setup-gradle@v6
+      - uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6
         with:
           develocity-access-key: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
 
@@ -152,7 +152,7 @@ jobs:
             org.meshtastic.MeshtasticDesktop \
             --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo
 
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         if: github.event_name != 'pull_request'
         with:
           name: meshtastic-desktop-flatpak-${{ matrix.arch }}

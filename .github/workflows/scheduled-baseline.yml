@@ -25,7 +25,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           token: ${{ secrets.CROWDIN_GITHUB_TOKEN }}
 
@@ -58,7 +58,7 @@ jobs:
       - name: Generate Baseline Profile
         id: generate_baseline
         continue-on-error: true # Emulator flakiness must not block the graphs PR.
-        uses: reactivecircus/android-emulator-runner@v2
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2
         with:
           api-level: 34
           target: google_apis # google flavor needs GMS (Maps) on the device image
@@ -130,7 +130,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Create Pull Request if changes occurred
-        uses: peter-evans/create-pull-request@v8
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8
         with:
           token: ${{ secrets.CROWDIN_GITHUB_TOKEN }}
           commit-message: |

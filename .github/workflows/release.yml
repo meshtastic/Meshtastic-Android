@@ -92,7 +92,7 @@ jobs:
       APP_VERSION_CODE: ${{ steps.calculate_version_code.outputs.versionCode }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ inputs.tag_name }}
           fetch-depth: 0
@@ -132,7 +132,7 @@ jobs:
     needs: [prepare-build-info]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ inputs.tag_name }}
           fetch-depth: 0
@@ -184,7 +184,7 @@ jobs:
 
       - name: Upload Google AAB artifact
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: google-aab
           path: androidApp/build/outputs/bundle/googleRelease/androidApp-google-release.aab
@@ -192,7 +192,7 @@ jobs:
 
       - name: Upload Google APK artifact
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: google-apk
           path: androidApp/build/outputs/apk/google/release/*.apk
@@ -200,13 +200,13 @@ jobs:
 
       - name: Attest Google AAB provenance
         if: success()
-        uses: actions/attest-build-provenance@v4
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4
         with:
           subject-path: androidApp/build/outputs/bundle/googleRelease/androidApp-google-release.aab
 
       - name: Attest Google APK provenance
         if: success()
-        uses: actions/attest-build-provenance@v4
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4
         with:
           subject-path: androidApp/build/outputs/apk/google/release/*.apk
 
@@ -216,7 +216,7 @@ jobs:
     needs: [prepare-build-info]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ inputs.tag_name }}
           fetch-depth: 0
@@ -255,7 +255,7 @@ jobs:
 
       - name: Upload F-Droid APK artifact
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: fdroid-apk
           path: androidApp/build/outputs/apk/fdroid/release/*.apk
@@ -263,7 +263,7 @@ jobs:
 
       - name: Attest F-Droid APK provenance
         if: success()
-        uses: actions/attest-build-provenance@v4
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4
         with:
           subject-path: androidApp/build/outputs/apk/fdroid/release/*.apk
 
@@ -281,7 +281,7 @@ jobs:
       SIGN_WINDOWS: ${{ secrets.AZURE_TRUSTED_SIGNING_ENDPOINT != '' && 'true' || 'false' }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ inputs.tag_name }}
           fetch-depth: 0
@@ -337,7 +337,7 @@ jobs:
       # if that ever becomes necessary.
       - name: Sign Windows installers (Azure Trusted Signing)
         if: runner.os == 'Windows' && env.SIGN_WINDOWS == 'true'
-        uses: azure/artifact-signing-action@v2.0.0
+        uses: azure/artifact-signing-action@c7ab2a863ab5f9a846ddb8265964877ef296ee82 # v2.0.0
         with:
           azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
@@ -396,7 +396,7 @@ jobs:
 
       - name: Upload Desktop Artifacts
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: desktop-${{ runner.os }}-${{ runner.arch }}
           path: |
@@ -412,7 +412,7 @@ jobs:
 
       - name: Attest Desktop artifact provenance
         if: success()
-        uses: actions/attest-build-provenance@v4
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4
         with:
           subject-path: |
             desktopApp/build/compose/binaries/main-release/*/*.dmg
@@ -436,7 +436,7 @@ jobs:
         os: [ubuntu-24.04, ubuntu-24.04-arm]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ inputs.tag_name }}
           fetch-depth: 0
@@ -471,7 +471,7 @@ jobs:
 
       - name: Upload Flatpak source artifacts
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: flatpak-multisrc-${{ runner.arch }}
           path: flatpak-sources.json
@@ -484,7 +484,7 @@ jobs:
     needs: [create-flatpak-src]
     steps:
       - name: Download Flatpak source artifacts
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           pattern: flatpak-multisrc-*
           path: flatpak-multisrc
@@ -503,7 +503,7 @@ jobs:
 
       - name: Upload combined Flatpak source artifact
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: flatpak-sources
           path: flatpak-sources.json
@@ -511,7 +511,7 @@ jobs:
       
       - name: Attest combined Flatpak source artifact provenance
         if: success()
-        uses: actions/attest@v4
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
         with:
           subject-path: flatpak-sources.json
 
@@ -531,12 +531,12 @@ jobs:
       attestations: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ inputs.tag_name }}
 
       - name: Download all artifacts
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           path: ./artifacts
 
@@ -570,7 +570,7 @@ jobs:
             --jq '.body' > release-notes.md
 
       - name: Create or Update GitHub Release
-        uses: softprops/action-gh-release@v3
+        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3
         with:
           tag_name: ${{ inputs.tag_name }}
           target_commitish: ${{ inputs.commit_sha || github.sha }}

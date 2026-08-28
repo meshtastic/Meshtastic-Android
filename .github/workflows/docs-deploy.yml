@@ -44,7 +44,7 @@ jobs:
     timeout-minutes: 45
     steps:
       - name: Checkout
-        uses: actions/checkout@v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: true
           fetch-depth: 0
@@ -69,7 +69,7 @@ jobs:
       # Manual runs always rebuild everything, so the diff is only needed on push.
       - name: Detect Dokka-relevant changes
         if: github.event_name != 'workflow_dispatch'
-        uses: dorny/paths-filter@v4
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4
         id: filter
         with:
           token: ''
