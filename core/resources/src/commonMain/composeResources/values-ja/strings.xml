@@ -1025,7 +1025,6 @@
     <string name="mesh_beacon_on_region">送信リージョン</string>
     <string name="mesh_beacon_preset_indicator">近くのビーコンによって告知</string>
     <string name="mesh_beacon_preset_none">なし</string>
-    <string name="mesh_beacon_send_as_node">発信元のノード番号（0 = このノード）</string>
     <string name="mesh_beacon_target">ターゲット %1$d</string>
     <string name="mesh_beacon_target_add">ターゲットを追加</string>
     <string name="mesh_beacon_target_channel_index">チャンネルインデックス</string>

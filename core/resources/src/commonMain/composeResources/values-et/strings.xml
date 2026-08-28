@@ -1107,7 +1107,6 @@
     <string name="mesh_beacon_on_region">Edasta regioon</string>
     <string name="mesh_beacon_preset_indicator">Reklaamitud lähedal asuvast majakast</string>
     <string name="mesh_beacon_preset_none">Puudub</string>
-    <string name="mesh_beacon_send_as_node">Levita sõlme numbrina (0 = see sõlm)</string>
     <string name="mesh_beacon_target">Sihtmärk %1$d</string>
     <string name="mesh_beacon_target_add">Lisa sihtmärk</string>
     <string name="mesh_beacon_target_channel_index">Kanali loend</string>

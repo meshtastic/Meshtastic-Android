@@ -1122,7 +1122,6 @@
     <string name="mesh_beacon_on_region">Передать регион</string>
     <string name="mesh_beacon_preset_indicator">Рекламируется ближайшим маяком</string>
     <string name="mesh_beacon_preset_none">Отсутствует</string>
-    <string name="mesh_beacon_send_as_node">Транслировать как номер ноды (0 = эта нода)</string>
     <string name="mesh_beacon_target">Цель %1$d</string>
     <string name="mesh_beacon_target_add">Добавить цель</string>
     <string name="mesh_beacon_target_channel_index">Индекс канала</string>

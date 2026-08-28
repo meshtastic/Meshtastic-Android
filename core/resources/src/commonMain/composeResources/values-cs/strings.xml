@@ -976,7 +976,6 @@
     <string name="mesh_beacon_on_preset">Vysílací profil</string>
     <string name="mesh_beacon_on_region">Vysílací region</string>
     <string name="mesh_beacon_preset_none">Žádný</string>
-    <string name="mesh_beacon_send_as_node">Vysílat jako číslo uzlu (0 = tento uzel)</string>
     <string name="mesh_beacon_target">Cíl: %1$d</string>
     <string name="mesh_beacon_target_add">Přidat cíl</string>
     <string name="mesh_beacon_targets">Cíle vysílání</string>
