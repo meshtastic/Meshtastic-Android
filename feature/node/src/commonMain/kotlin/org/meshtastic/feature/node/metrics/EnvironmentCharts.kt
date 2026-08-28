@@ -157,12 +157,18 @@ internal fun pressureAxisRange(dataMin: Double, dataMax: Double): Pair<Double, D
 }
 
 /**
- * Wind speed arrives in m/s; imperial locales chart it in mph to match the cards (design §10.5). Temperatures are
- * already converted upstream by the view model, so they pass through here unchanged.
+ * Wind speed arrives in m/s and is charted in the unit the cards show — km/h for metric, mph for imperial — so a
+ * reading and its graph never disagree. Temperatures are already converted upstream by the view model, so they pass
+ * through here unchanged.
  */
 internal fun chartValue(metric: Environment, telemetry: Telemetry, isImperial: Boolean): Float? =
     metric.getValue(telemetry)?.let {
-        if (metric == Environment.WIND_SPEED && isImperial) UnitConversions.metersPerSecondToMph(it) else it
+        if (metric == Environment.WIND_SPEED) {
+            // Wind is plotted in the same unit the cards show — km/h or mph, never the sensor's raw m/s.
+            if (isImperial) UnitConversions.metersPerSecondToMph(it) else UnitConversions.metersPerSecondToKph(it)
+        } else {
+            it
+        }
     }
 
 /**
@@ -176,7 +182,7 @@ internal fun unitSuffix(metric: Environment, isFahrenheit: Boolean, isImperial: 
 
     metric in Environment.adcVoltages -> " V"
 
-    metric == Environment.WIND_SPEED -> if (isImperial) " mph" else " m/s"
+    metric == Environment.WIND_SPEED -> if (isImperial) " mph" else " km/h"
 
     else -> ""
 }
