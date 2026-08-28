@@ -174,8 +174,11 @@ internal fun rememberWaypointEditing(): WaypointEditing {
     val box = rememberBoxAuthoring(onApplyBox = { pending = it }, onReopenEditor = { pending = it })
 
     return WaypointEditing(
+        // Not while a box is being drawn: the map is the editor for the duration, and every press on it belongs to
+        // that flow. Without this a long press mid-box drops an unrelated waypoint into it, which is the one part of
+        // the Google flavor's own guard (`isMainMode && isConnected && boxAuthoringDraft == null`) this had missed.
         onLongPress = { position ->
-            if (isConnected) {
+            if (isConnected && box.draft == null) {
                 pending =
                     Waypoint(
                         latitude_i = (position.latitude / DEG_SCALE).toInt(),
