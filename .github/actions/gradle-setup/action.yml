@@ -19,7 +19,7 @@ inputs:
   job_summary_pr_comment:
     description: |
       Job summary as a PR comment: never | always | on-failure. Needs `pull-requests: write`;
-      no-ops on fork PRs (read-only token).
+      no-ops on fork PRs (read-only token). Forced to `never` on Windows — see below.
     default: 'never'
   dependency_graph:
     description: |
@@ -120,7 +120,12 @@ runs:
         # Skip cleanup there — a slightly larger cache beats no cache at all.
         cache-cleanup: ${{ runner.os == 'Windows' && 'never' || 'on-success' }}
         add-job-summary: always
-        add-job-summary-as-pr-comment: ${{ inputs.job_summary_pr_comment }}
+        # Windows-only: the post step exits while the octokit sockets from comment
+        # minimization are still live, and Node 24.18.0 aborts in libuv teardown
+        # there (nodejs/node#56645), failing jobs whose build already passed.
+        # Nothing else in this post step does HTTP on a PR — the cache is
+        # read-only off main and dependency-graph defaults to disabled.
+        add-job-summary-as-pr-comment: ${{ runner.os == 'Windows' && 'never' || inputs.job_summary_pr_comment }}
         dependency-graph: ${{ inputs.dependency_graph }}
         gradle-home-cache-includes: |
           caches
