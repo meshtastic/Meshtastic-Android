@@ -15,12 +15,12 @@ Määritä radion laitteisto ja käyttäjätunnistetiedot.
 
 ### Käyttäjäprofiili
 
- Asetus                   | Kuvaus                                                                                                                                                                                                                                       |
- ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
- Pitkä nimi               | Näyttönimesi (enintään 39 merkkiä)                                                                                                                                                                                        |
- Lyhytnimi                | 4-merkkinen lyhytnimi                                                                                                                                                                                                                        |
- Ei vastaanota viestejä   | Marks the node as one nobody should try to message — for an unmonitored or infrastructure node. Other clients hide it from the contact list. Needs supporting firmware                                       |
- Lisensoitu radioamatööri | Enable if you hold an amateur radio license (permits higher power). Turning it on relabels **Long Name** as **Call Sign** and adds a separate Long Name field, and is staged behind a confirmation dialog |
+ Asetus                   | Kuvaus                                                                                                                                                                                                                                                                                        |
+ ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+ Pitkä nimi               | Näyttönimesi (enintään 39 merkkiä)                                                                                                                                                                                                                                         |
+ Lyhytnimi                | 4-merkkinen lyhytnimi                                                                                                                                                                                                                                                                         |
+ Ei vastaanota viestejä   | Merkitsee radion sellaiseksi, jolle kenenkään ei pitäisi yrittää lähettää viestejä – tarkoitettu valvomattomalle tai infrastruktuuriradiolle. Muut sovellukset piilottavat sen yhteystietoluettelosta. Edellyttää yhteensopivaa laiteohjelmistoa              |
+ Lisensoitu radioamatööri | Ota käyttöön, jos sinulla on radioamatöörilupa (sallii suuremman lähetystehon). Käyttöönotto muuttaa **Pitkä nimi** -kentän **Kutsumerkki**-kentäksi ja lisää erillisen **Pitkä nimi** -kentän. Muutos vahvistetaan ensin valintaikkunassa |
 
 ### Muutosten käyttöönotto
 
@@ -30,16 +30,16 @@ Asetusten muuttamisen jälkeen napauta **Tallenna** kirjoittaaksesi määritykse
 
 ### Laitteen asetukset
 
- Asetus                                     | Kuvaus                                                                                                                                                                               | Oletus      |
- ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------- |
- Rooli                                      | Radion rooli (Client, Router jne.) — each option carries its own description in the picker. Choosing Router asks for confirmation | Client      |
- Uudelleenlähetyksen tila                   | How the node retransmits messages; each mode is described in the picker                                                                                                              | Kaikki      |
- Radiotiedon lähetys (s) | Radion tietojen lähetysväli                                                                                                                                                          | 10800       |
- Kaksoisnapautuspainike                     | Treat a double tap as a button press                                                                                                                                                 | Ei käytössä |
- Kolmoisklikkaus Ad Hoc -pingille           | Send an ad-hoc position ping on a triple click                                                                                                                                       | Ei käytössä |
- Ledin valvontasignaali                     | Blink the status LED periodically                                                                                                                                                    | Käytössä    |
- Aikavyöhyke                                | POSIX time-zone string for the device clock, with buttons to copy your phone's zone or clear it                                                                                      | —           |
- Button / Buzzer GPIO                       | Advanced: which pins the button and buzzer are wired to                                                                                                              | —           |
+ Asetus                                     | Kuvaus                                                                                                                                                                                             | Oletus      |
+ ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+ Rooli                                      | Radion rooli (Client, Router jne.) – jokaisella vaihtoehdolla on oma kuvaus valintaluettelossa. Reititin-tilan valitseminen pyytää vahvistuksen | Client      |
+ Uudelleenlähetyksen tila                   | How the node retransmits messages; each mode is described in the picker                                                                                                                            | Kaikki      |
+ Radiotiedon lähetys (s) | Radion tietojen lähetysväli                                                                                                                                                                        | 10800       |
+ Kaksoisnapautuspainike                     | Treat a double tap as a button press                                                                                                                                                               | Ei käytössä |
+ Kolmoisklikkaus Ad Hoc -pingille           | Send an ad-hoc position ping on a triple click                                                                                                                                                     | Ei käytössä |
+ Ledin valvontasignaali                     | Blink the status LED periodically                                                                                                                                                                  | Käytössä    |
+ Aikavyöhyke                                | POSIX time-zone string for the device clock, with buttons to copy your phone's zone or clear it                                                                                                    | —           |
+ Button / Buzzer GPIO                       | Advanced: which pins the button and buzzer are wired to                                                                                                                            | —           |
 
 ### LoRa:n asetukset
 
