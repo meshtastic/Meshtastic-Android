@@ -2,7 +2,7 @@
 title: Settings — Radio & User
 parent: User Guide
 nav_order: 7
-last_updated: 2026-07-27
+last_updated: 2026-08-27
 description: Configure your radio hardware, LoRa presets, user profile, position sharing, power management, and security.
 aliases:
   - impostazioni
@@ -19,11 +19,12 @@ Configure your radio hardware and user identity parameters.
 
 ### User Profile
 
-| Impostazione      | Descrizione                                                                           |
-| ----------------- | ------------------------------------------------------------------------------------- |
-| Nome Lungo        | Your display name (up to 39 characters)                            |
-| Nome Breve        | 4-character abbreviated name                                                          |
-| Licensed Operator | Enable if you hold an amateur radio license (enables higher power) |
+| Impostazione      | Descrizione                                                                                                                                                                                                                                  |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Nome Lungo        | Your display name (up to 39 characters)                                                                                                                                                                                   |
+| Nome Breve        | 4-character abbreviated name                                                                                                                                                                                                                 |
+| Non messaggiabile | Marks the node as one nobody should try to message — for an unmonitored or infrastructure node. Other clients hide it from the contact list. Needs supporting firmware                                       |
+| Licensed Operator | Enable if you hold an amateur radio license (permits higher power). Turning it on relabels **Long Name** as **Call Sign** and adds a separate Long Name field, and is staged behind a confirmation dialog |
 
 ### Applying Changes
 
@@ -33,23 +34,37 @@ After modifying settings, tap **Save** to write the configuration to your radio.
 
 ### Configurazione Dispositivo
 
-| Impostazione                               | Descrizione                                                             | Predefinito |
-| ------------------------------------------ | ----------------------------------------------------------------------- | ----------- |
-| Ruolo                                      | Node behavior (Client, Router, etc.) | Client      |
-| Modalità Ritrasmissione                    | How the node retransmits messages                                       | Tutti       |
-| Node Info Broadcast (s) | Interval for broadcasting node info                                     | 10800       |
-| Double-tap Button                          | Action for double-tap button press                                      | Disabled    |
+| Impostazione                               | Descrizione                                                                                                                                                                            | Predefinito |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| Ruolo                                      | Node behavior (Client, Router, etc.) — each option carries its own description in the picker. Choosing Router asks for confirmation | Client      |
+| Modalità Ritrasmissione                    | How the node retransmits messages; each mode is described in the picker                                                                                                                | Tutti       |
+| Node Info Broadcast (s) | Interval for broadcasting node info                                                                                                                                                    | 10800       |
+| Double-tap Button                          | Treat a double tap as a button press                                                                                                                                                   | Disabled    |
+| Triple Click Ad Hoc Ping                   | Send an ad-hoc position ping on a triple click                                                                                                                                         | Disabled    |
+| Battito Cuore Led                          | Blink the status LED periodically                                                                                                                                                      | Abilitato   |
+| Fuso Orario                                | POSIX time-zone string for the device clock, with buttons to copy your phone's zone or clear it                                                                                        | —           |
+| Button / Buzzer GPIO                       | Advanced: which pins the button and buzzer are wired to                                                                                                                | —           |
 
 ### Configurazione LoRa
 
-| Impostazione         | Descrizione                                                             | Predefinito                               |
-| -------------------- | ----------------------------------------------------------------------- | ----------------------------------------- |
-| Regione              | Regulatory region for frequency bands                                   | Unset (must configure) |
-| Configurazione Modem | Speed/range tradeoff                                                    | LongFast                                  |
-| Limite di hop        | Maximum retransmit hops                                                 | 3                                         |
-| TX Power             | Transmission power (dBm); 0 = max allowed for region | 0 (region max)         |
-| Offset Di Frequenza  | Fine-tune frequency (MHz)                            | 0                                         |
-| Channel Bandwidth    | Bandwidth setting                                                       | Default for preset                        |
+| Impostazione                   | Descrizione                                                                                                                                                                                      | Predefinito                               |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------- |
+| Regione                        | Regulatory region for frequency bands                                                                                                                                                            | Unset (must configure) |
+| Configurazione Modem           | Speed/range tradeoff                                                                                                                                                                             | LongFast                                  |
+| Limite di hop                  | Maximum retransmit hops                                                                                                                                                                          | 3                                         |
+| TX Power                       | Transmission power (dBm); 0 = max allowed for region                                                                                                                          | 0 (region max)         |
+| Sovrascrivi Frequenza          | Overrides the computed operating frequency outright (MHz). It does not offset the calculated value — leave at 0 unless you know you need a specific frequency | 0 (use calculated)     |
+| Channel Bandwidth              | Bandwidth setting                                                                                                                                                                                | Default for preset                        |
+| Usa Preset                     | On by default. Turn it off to set Spread Factor, Coding Rate and Bandwidth by hand instead of taking them from the modem preset                                                  | On                                        |
+| Spread Factor                  | Manual mode only: 7–12. Higher spreads further but slower                                                                                                        | From preset                               |
+| Coding Rate                    | Manual mode only: 5–8. More redundancy costs airtime                                                                                                             | From preset                               |
+| Slot di Frequenza              | Which slot within the region's band to use. 0 derives it from the primary channel name                                                                                           | 0 (automatic)          |
+| Trasmissione Abilitata         | Turning this off makes the node receive-only                                                                                                                                                     | On                                        |
+| Ignora limite di Duty Cycle    | Ignore the region's duty-cycle limit. Only legal where you are permitted to                                                                                                      | Disattivato                               |
+| Ignora MQTT                    | Drop packets that arrived from MQTT rather than over the air                                                                                                                                     | Disattivato                               |
+| OK per MQTT                    | Allow your packets to be forwarded to MQTT by gateways                                                                                                                                           | Disattivato                               |
+| Migliora guadagno in Ricezione | Extra receive gain on SX126x radios; costs a little current                                                                                                                                      | Disattivato                               |
+| Ventola PA disabilitata        | Turn off the power-amplifier fan on hardware that has one                                                                                                                                        | Disattivato                               |
 
 > ⚠️ **Important:** You **must** set your region before transmitting. Operating without the correct region may violate local radio regulations. See the [region configuration guide](https://meshtastic.org/docs/getting-started/initial-config) on meshtastic.org for details.
 
@@ -97,69 +112,119 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 
 ### Configurazione Schermo
 
-| Impostazione         | Descrizione                                                                          |
-| -------------------- | ------------------------------------------------------------------------------------ |
-| Timeout Schermo      | Time before display sleeps                                                           |
-| Mostra Unità         | Metric or Imperial                                                                   |
-| Tipo OLED            | Auto, SSD1306, SH1106, SH1107                                                        |
-| Orientamento bussola | Rotation offset for compass display (0°, 90°, 180°, 270°)         |
-| ~~Compass North~~    | ⚠️ **Deprecated** — replaced by Compass Orientation; still visible in older firmware |
+These control the **radio's own screen**, not the app's.
+
+| Impostazione                               | Descrizione                                                                                                                                               |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tieni lo schermo acceso per                | How long the display stays lit before sleeping                                                                                                            |
+| Durata di ogni schermata                   | How often the device cycles between screens on its own                                                                                                    |
+| Modalità schermo                           | Screen layout/density used by the firmware                                                                                                                |
+| Unità di misura visualizzata               | Metric or Imperial on the device's screen                                                                                                                 |
+| Usa formato orologio 12h                   | Show the device clock as 12-hour rather than 24-hour                                                                                                      |
+| Bold heading                               | Draw the screen's heading text in bold                                                                                                                    |
+| Capovolgi schermo                          | Rotate the display 180° for an inverted mounting                                                                                                          |
+| Tipo OLED                                  | Auto, SSD1306, SH1106, SH1107                                                                                                                             |
+| Accendi lo schermo al tocco o al movimento | Light the screen when the device is tapped or moved                                                                                                       |
+| Orientamento bussola                       | Rotation offset for the compass rose (0°, 90°, 180°, 270°)                                                                             |
+| Punta sempre a nord                        | Locks the compass rose north-up instead of rotating it with your heading. Independent of Compass orientation — neither replaces the other |
 
 ### Configurazione Posizione
 
-| Impostazione                              | Descrizione                        |
-| ----------------------------------------- | ---------------------------------- |
-| GPS Enabled                               | Enable/disable GPS                 |
-| Intervallo di aggiornamento GPS           | How often to acquire GPS fix       |
-| Position Broadcast (s) | How often to share position        |
-| Posizione Smart                           | Enable movement-based broadcasting |
-| Posizione Fissa                           | Use a manually set position        |
+> ⚠️ **Warning:** Saving this screen always reboots the radio.
+
+| Impostazione                                      | Descrizione                                                                                                                                           |
+| ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Modalità GPS (Hardware Fisico) | Three-state: GPS enabled, disabled, or not present. Not a simple on/off                                               |
+| Intervallo Interrogazione GPS                     | How often the radio asks its GPS for a fix                                                                                                            |
+| Intervallo Di Trasmissione                        | How often the position is shared with the mesh                                                                                                        |
+| Posizione Smart                                   | Broadcast based on movement rather than purely on the clock                                                                                           |
+| Intervallo Intelligente                           | With Smart Position on, the shortest gap between broadcasts                                                                                           |
+| Distanza Intelligente                             | With Smart Position on, how far you must move before broadcasting                                                                                     |
+| Posizione Fissa                                   | Use a manually entered latitude, longitude and altitude instead of the GPS                                                                            |
+| Flag Di Posizione                                 | A group of toggles choosing which fields ride along with a position — altitude, its reference and precision, satellites in view, timestamp, and so on |
+| GPS EN / Receive / Transmit GPIO                  | Advanced: the pins the GPS module is wired to                                                                                         |
 
 ### Configurazione Alimentazione
 
-| Impostazione                            | Descrizione                             |
-| --------------------------------------- | --------------------------------------- |
-| Risparmio energetico                    | Enable low-power sleep mode             |
-| Shutdown After (s)   | Auto-shutdown idle timer                |
-| ADC Multiplier                          | Battery voltage calibration factor      |
-| Wait Bluetooth (s)   | Time to wait for BLE connection at boot |
-| Mesh SDS Timeout (s) | Super-deep-sleep timeout                |
+| Impostazione                                              | Descrizione                                                     |
+| --------------------------------------------------------- | --------------------------------------------------------------- |
+| Abilita modalità risparmio energetico                     | Let the radio sleep aggressively between activity               |
+| Spegnimento in mancanza di alimentazione                  | Power the device down after external power disappears           |
+| Durata super deep sleep                                   | How long the deepest sleep state lasts                          |
+| Tempo minimo di risveglio                                 | The shortest time the radio stays awake once woken              |
+| Durata attesa Bluetooth                                   | How long to wait for a phone to connect before sleeping         |
+| Sovrascrivi moltiplicatore ADC                            | Turn on a manual correction for battery-voltage readings        |
+| Sovrascrivi rapporto moltiplicatore ADC                   | The correction factor itself, used only when the override is on |
+| Indirizzo INA_2XX I2C della batteria | Address of an external INA-series power sensor, if fitted       |
 
 ### Configurazione Della Rete
 
-| Impostazione   | Descrizione                                          |
-| -------------- | ---------------------------------------------------- |
-| WiFi abilitato | Enable WiFi radio (ESP32 devices) |
-| SSID WiFi      | Network name to connect to                           |
-| WiFi PSK       | Password di rete                                     |
-| Server NTP     | Time synchronization server                          |
-| Syslog Server  | Remote logging server                                |
+> ⚠️ **Warning:** Saving this screen always reboots the radio.
+
+| Impostazione                     | Descrizione                                                                                                                |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| WiFi abilitato                   | Enable the WiFi radio (ESP32 devices)                                                                   |
+| SSID                             | Network name to connect to. **Scan WiFi QR code** fills this and the password from a standard WiFi QR code |
+| Password                         | Password di rete                                                                                                           |
+| Ethernet abilitato               | Use a wired connection on hardware that has one                                                                            |
+| Modalità IPv4                    | DHCP, or a static address configured with the four fields below                                                            |
+| Wifi IP / Subnet / Gateway / DNS | The static address, only used when IPv4 mode is static                                                                     |
+| Trasmissione UDP                 | Share mesh traffic with other nodes over the local network                                                                 |
+| Server NTP                       | Time synchronization server                                                                                                |
+| server rsyslog                   | Remote logging server                                                                                                      |
 
 ![IP address field](../../assets/screenshots/settings_ipv4_field.png)
 
 ### Configurazione Bluetooth
 
-| Impostazione            | Descrizione                                                               |
-| ----------------------- | ------------------------------------------------------------------------- |
-| Bluetooth Enabled       | Enable/disable BLE radio                                                  |
-| Modalità di abbinamento | Fixed PIN, Random PIN, or No PIN                                          |
-| PIN Fisso               | PIN code for pairing (default: 123456) |
+| Impostazione            | Descrizione                                                                                            |
+| ----------------------- | ------------------------------------------------------------------------------------------------------ |
+| Bluetooth Enabled       | Enable/disable BLE radio                                                                               |
+| Modalità di abbinamento | Fixed PIN, Random PIN, or No PIN                                                                       |
+| PIN Fisso               | PIN code for pairing. Must be **exactly six digits** — the field rejects anything else |
 
 ### Configurazione Sicurezza
 
-| Impostazione              | Descrizione                                                                                                                                                                                                    |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Chiave Pubblica           | Your node's public key (read-only)                                                                                                                                                          |
-| Chiave Amministratore     | Key for remote administration                                                                                                                                                                                  |
-| Chiave Privata            | Your node's private key (handle securely)                                                                                                                                                   |
-| ~~Admin Channel Enabled~~ | ⚠️ Removed — now configured automatically when an admin key is set                                                                                                                                             |
-| Log di debug              | Output live debug logging over serial/bluetooth                                                                                                                                                                |
-| Serial Enabled            | Enable serial console access (moved from Device Config)                                                                                                                                     |
-| Modalità Gestita          | Restrict non-admin channel changes                                                                                                                                                                             |
-| Backup chiavi             | Save an encrypted backup of the node's keys on this device (Android only)                                                                                                                   |
-| Restore Keys              | Write the backed-up keys back to the node (available once a backup exists)                                                                                                                  |
-| Delete Key Backup         | Remove the stored key backup from this device                                                                                                                                                                  |
-| Protection Level          | Packet authenticity — how unsigned or relayed packets are treated: **Strict**, **Balanced**, or **Compatible** (requires supporting firmware; Strict asks for confirmation) |
+| Impostazione                | Descrizione                                                                                                                                                                                                    |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Chiave Pubblica             | Your node's public key (read-only)                                                                                                                                                          |
+| Chiave Amministratore       | Keys permitted to administer this node remotely — up to three                                                                                                                                                  |
+| Chiave Privata              | Your node's private key (handle securely). Shown redacted when you are viewing another node over remote admin — the firmware does not send it                               |
+| Rigenera Chiavi Private     | Issues a new keypair for this node, behind a confirmation. Every peer that knew your old key must learn the new one                                                                            |
+| Chiave per Messaggi Diretti | The key used for direct-message encryption                                                                                                                                                                     |
+| ~~Admin Channel Enabled~~   | ⚠️ Removed — now configured automatically when an admin key is set                                                                                                                                             |
+| Log di debug                | Output live debug logging over serial/bluetooth                                                                                                                                                                |
+| Serial Enabled              | Enable serial console access (moved from Device Config)                                                                                                                                     |
+| Modalità Gestita            | Restrict non-admin channel changes. Only selectable once an Admin Key is set                                                                                                                   |
+| Backup chiavi               | Save an encrypted backup of the node's keys on this device (Android only)                                                                                                                   |
+| Restore Keys                | Write the backed-up keys back to the node (available once a backup exists)                                                                                                                  |
+| Delete Key Backup           | Remove the stored key backup from this device                                                                                                                                                                  |
+| Protection Level            | Packet authenticity — how unsigned or relayed packets are treated: **Strict**, **Balanced**, or **Compatible** (requires supporting firmware; Strict asks for confirmation) |
+
+#### Lockdown Mode
+
+Lockdown encrypts the device's storage and requires a passphrase for each connection. It needs
+supporting firmware; the row does not appear otherwise.
+
+Enabling it asks you to set and confirm a passphrase, and to acknowledge that **it locks the debug
+(SWD) port on hardware that supports locking**. You can turn lockdown off again at any time with
+the passphrase, and a full device erase restores the hardware regardless.
+
+Alongside the passphrase you set the limits that end a session automatically:
+
+| Field                                          | What it does                                      |
+| ---------------------------------------------- | ------------------------------------------------- |
+| Avvii rimanenti                                | How many device boots the unlocked state survives |
+| Ore alla scadenza                              | Wall-clock lifetime of the unlocked state         |
+| Limite di sessione (minuti) | Maximum length of a single unlocked connection    |
+
+Once active, the row reads _Active — storage encrypted, this connection authenticated_ when
+unlocked, or _Active — enter your passphrase to unlock this connection_ when not. **Lock Now**
+ends the current session immediately. Repeated wrong passphrases are rate-limited with a
+back-off before you can try again.
+
+> ⚠️ **Warning:** There is no passphrase recovery. Losing it means erasing the device to get it
+> back, which destroys its keys, channels and settings.
 
 ![Password field](../../assets/screenshots/settings_password_field.png)
 

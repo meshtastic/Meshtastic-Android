@@ -541,7 +541,6 @@
     <string name="dns">DNS</string>
     <!-- DOC -->
     <string name="doc_clear_search">Clear search</string>
-    <string name="doc_keywords_android_auto">android auto,car,head unit,driving,hands free,messaging</string>
     <string name="doc_keywords_app_functions">system ai,gemini,assistant,functions,automation,voice</string>
     <string name="doc_keywords_connections">bluetooth,usb,tcp,pairing,serial,wifi</string>
     <string name="doc_keywords_debug_logs">debug,logs,logcat,export,bug report,issue,troubleshooting,diagnostics</string>
@@ -567,12 +566,11 @@
     <string name="doc_search_placeholder">Search documentation…</string>
     <string name="doc_section_developer">Developer Guide</string>
     <string name="doc_section_user">User Guide</string>
-    <string name="doc_title_android_auto">Android Auto</string>
     <string name="doc_title_app_functions">App Functions</string>
     <string name="doc_title_connections">Connections</string>
     <string name="doc_title_debug_logs">Debug Logs</string>
     <string name="doc_title_desktop">Desktop App</string>
-    <string name="doc_title_discovery">Discovery</string>
+    <string name="doc_title_discovery">Local Mesh Discovery</string>
     <string name="doc_title_firmware">Firmware Updates</string>
     <string name="doc_title_help">Help &amp; In-App Docs</string>
     <string name="doc_title_map">Map &amp; Waypoints</string>
@@ -1147,7 +1145,6 @@
     <string name="mesh_beacon_on_region">Transmit region</string>
     <string name="mesh_beacon_preset_indicator">Advertised by a nearby beacon</string>
     <string name="mesh_beacon_preset_none">None</string>
-    <string name="mesh_beacon_send_as_node">Broadcast as node number (0 = this node)</string>
     <string name="mesh_beacon_target">Target %1$d</string>
     <string name="mesh_beacon_target_add">Add target</string>
     <string name="mesh_beacon_target_channel_index">Channel index</string>
@@ -1946,6 +1943,8 @@
     <string name="translation_failed">Unable to translate message</string>
     <string name="translation_model_download_failed">Translation model download failed</string>
     <string name="translation_not_required">Message is already in your language</string>
+    <string name="transmit_disabled">Transmit is disabled</string>
+    <string name="transmit_disabled_summary">This device can receive but will not send anything over LoRa.</string>
     <string name="transmit_over_lora">Transmit over LoRa</string>
     <!-- TRANSPORT -->
     <string name="transport">Transport</string>

@@ -36,6 +36,9 @@ import com.patrykandpatrick.vico.compose.cartesian.data.lineModel
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.common.data.ExtraStore
+import org.meshtastic.core.common.util.MeasureUnitKind
+import org.meshtastic.core.common.util.MetricFormatter
+import org.meshtastic.core.common.util.VOLT_SYMBOL
 import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.model.util.UnitConversions
 import org.meshtastic.core.resources.Res
@@ -157,12 +160,18 @@ internal fun pressureAxisRange(dataMin: Double, dataMax: Double): Pair<Double, D
 }
 
 /**
- * Wind speed arrives in m/s; imperial locales chart it in mph to match the cards (design §10.5). Temperatures are
- * already converted upstream by the view model, so they pass through here unchanged.
+ * Wind speed arrives in m/s and is charted in the unit the cards show — km/h for metric, mph for imperial — so a
+ * reading and its graph never disagree. Temperatures are already converted upstream by the view model, so they pass
+ * through here unchanged.
  */
 internal fun chartValue(metric: Environment, telemetry: Telemetry, isImperial: Boolean): Float? =
     metric.getValue(telemetry)?.let {
-        if (metric == Environment.WIND_SPEED && isImperial) UnitConversions.metersPerSecondToMph(it) else it
+        if (metric == Environment.WIND_SPEED) {
+            // Wind is plotted in the same unit the cards show — km/h or mph, never the sensor's raw m/s.
+            if (isImperial) UnitConversions.metersPerSecondToMph(it) else UnitConversions.metersPerSecondToKph(it)
+        } else {
+            it
+        }
     }
 
 /**
@@ -172,11 +181,14 @@ internal fun chartValue(metric: Environment, telemetry: Telemetry, isImperial: B
 internal fun unitSuffix(metric: Environment, isFahrenheit: Boolean, isImperial: Boolean): String = when {
     metric == Environment.TEMPERATURE ||
         metric == Environment.SOIL_TEMPERATURE ||
-        metric in Environment.oneWireTemperatures -> if (isFahrenheit) "°F" else "°C"
+        metric in Environment.oneWireTemperatures -> MetricFormatter.degreeSymbol(isFahrenheit)
 
-    metric in Environment.adcVoltages -> " V"
+    metric in Environment.adcVoltages -> " $VOLT_SYMBOL"
 
-    metric == Environment.WIND_SPEED -> if (isImperial) " mph" else " m/s"
+    // Taken from the same source the cards format with, so an axis and its readings cannot drift apart —
+    // which is exactly how the chart kept m/s while the cards moved to km/h.
+    metric == Environment.WIND_SPEED ->
+        " " + (if (isImperial) MeasureUnitKind.MILE_PER_HOUR else MeasureUnitKind.KILOMETER_PER_HOUR).symbol
 
     else -> ""
 }

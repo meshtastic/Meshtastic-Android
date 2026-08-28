@@ -2,7 +2,7 @@
 title: Asetukset — Radio ja käyttäjä
 parent: Käyttöopas
 nav_order: 7
-last_updated: 2026-07-27
+last_updated: 2026-08-27
 description: Määritä radion laitteisto, LoRa-esiasetukset, käyttäjäprofiili, sijainnin jakaminen, virranhallinta ja tietoturva.
 aliases:
   - asetukset
@@ -19,11 +19,12 @@ Määritä radion laitteisto ja käyttäjätunnistetiedot.
 
 ### Käyttäjäprofiili
 
-| Asetus                   | Kuvaus                                                                                                  |
-| ------------------------ | ------------------------------------------------------------------------------------------------------- |
-| Pitkä nimi               | Näyttönimesi (enintään 39 merkkiä)                                                   |
-| Lyhytnimi                | 4-merkkinen lyhytnimi                                                                                   |
-| Lisensoitu radioamatööri | Ota käyttöön, jos sinulla on radioamatöörilupa (mahdollistaa suuremman lähetystehon) |
+| Asetus                   | Kuvaus                                                                                                                                                                                                                                       |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Pitkä nimi               | Näyttönimesi (enintään 39 merkkiä)                                                                                                                                                                                        |
+| Lyhytnimi                | 4-merkkinen lyhytnimi                                                                                                                                                                                                                        |
+| Ei vastaanota viestejä   | Marks the node as one nobody should try to message — for an unmonitored or infrastructure node. Other clients hide it from the contact list. Needs supporting firmware                                       |
+| Lisensoitu radioamatööri | Enable if you hold an amateur radio license (permits higher power). Turning it on relabels **Long Name** as **Call Sign** and adds a separate Long Name field, and is staged behind a confirmation dialog |
 
 ### Muutosten käyttöönotto
 
@@ -33,23 +34,37 @@ Asetusten muuttamisen jälkeen napauta **Tallenna** kirjoittaaksesi määritykse
 
 ### Laitteen asetukset
 
-| Asetus                                     | Kuvaus                                                                | Oletus      |
-| ------------------------------------------ | --------------------------------------------------------------------- | ----------- |
-| Rooli                                      | Radion rooli (Client, Router jne.) | Client      |
-| Uudelleenlähetyksen tila                   | Miten radio välittää viestejä eteenpäin                               | Kaikki      |
-| Radiotiedon lähetys (s) | Radion tietojen lähetysväli                                           | 10800       |
-| Kaksoisnapautuspainike                     | Toiminto painikkeen kaksoisnapautukselle                              | Ei käytössä |
+| Asetus                                     | Kuvaus                                                                                                                                                                               | Oletus      |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------- |
+| Rooli                                      | Radion rooli (Client, Router jne.) — each option carries its own description in the picker. Choosing Router asks for confirmation | Client      |
+| Uudelleenlähetyksen tila                   | How the node retransmits messages; each mode is described in the picker                                                                                                              | Kaikki      |
+| Radiotiedon lähetys (s) | Radion tietojen lähetysväli                                                                                                                                                          | 10800       |
+| Kaksoisnapautuspainike                     | Treat a double tap as a button press                                                                                                                                                 | Ei käytössä |
+| Kolmoisklikkaus Ad Hoc -pingille           | Send an ad-hoc position ping on a triple click                                                                                                                                       | Ei käytössä |
+| Ledin valvontasignaali                     | Blink the status LED periodically                                                                                                                                                    | Käytössä    |
+| Aikavyöhyke                                | POSIX time-zone string for the device clock, with buttons to copy your phone's zone or clear it                                                                                      | —           |
+| Button / Buzzer GPIO                       | Advanced: which pins the button and buzzer are wired to                                                                                                              | —           |
 
 ### LoRa:n asetukset
 
-| Asetus                | Kuvaus                                                                                | Oletus                                           |
-| --------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------ |
-| Alue                  | Taajuusalueiden sääntelyalue                                                          | Ei asetettu (on määritettävä) |
-| Modeemin esiasetus    | Nopeuden ja kantaman välinen kompromissi                                              | LongFast                                         |
-| Hyppyraja             | Suurin hyppyjen määrä                                                                 | 3                                                |
-| Lähetysteho           | Lähetysteho (dBm): 0 = alueen sallima enimmäisteho | 0 (alueen enimmäisteho)       |
-| Taajuuspoikkeama      | Taajuuden hienosäätö (MHz)                                         | 0                                                |
-| Kanavan kaistanleveys | Kaistanleveysasetus                                                                   | Esiasetuksen oletusarvo                          |
+| Asetus                                             | Kuvaus                                                                                                                                                                                           | Oletus                                           |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------ |
+| Alue                                               | Taajuusalueiden sääntelyalue                                                                                                                                                                     | Ei asetettu (on määritettävä) |
+| Modeemin esiasetus                                 | Nopeuden ja kantaman välinen kompromissi                                                                                                                                                         | LongFast                                         |
+| Hyppyraja                                          | Suurin hyppyjen määrä                                                                                                                                                                            | 3                                                |
+| Lähetysteho                                        | Lähetysteho (dBm): 0 = alueen sallima enimmäisteho                                                                                                            | 0 (alueen enimmäisteho)       |
+| Taajuuden ohitus                                   | Overrides the computed operating frequency outright (MHz). It does not offset the calculated value — leave at 0 unless you know you need a specific frequency | 0 (use calculated)            |
+| Kanavan kaistanleveys                              | Kaistanleveysasetus                                                                                                                                                                              | Esiasetuksen oletusarvo                          |
+| Käytä esiasetusta                                  | On by default. Turn it off to set Spread Factor, Coding Rate and Bandwidth by hand instead of taking them from the modem preset                                                  | On                                               |
+| Levennyskerroin (Spread Factor) | Manual mode only: 7–12. Higher spreads further but slower                                                                                                        | From preset                                      |
+| Koodausnopeus                                      | Manual mode only: 5–8. More redundancy costs airtime                                                                                                             | From preset                                      |
+| Taajuuspaikka                                      | Which slot within the region's band to use. 0 derives it from the primary channel name                                                                                           | 0 (automatic)                 |
+| Lähetys käytössä                                   | Turning this off makes the node receive-only                                                                                                                                                     | On                                               |
+| Ohita käyttöaste (Duty Cycle)   | Ignore the region's duty-cycle limit. Only legal where you are permitted to                                                                                                      | Pois                                             |
+| Ohita MQTT                                         | Drop packets that arrived from MQTT rather than over the air                                                                                                                                     | Pois                                             |
+| MQTT päällä                                        | Allow your packets to be forwarded to MQTT by gateways                                                                                                                                           | Pois                                             |
+| RX tehostettu vahvistus                            | Extra receive gain on SX126x radios; costs a little current                                                                                                                                      | Pois                                             |
+| PA tuuletin pois käytöstä                          | Turn off the power-amplifier fan on hardware that has one                                                                                                                                        | Pois                                             |
 
 > ⚠️ **Tärkeää:** Sinun **täytyy** määrittää alueesi ennen lähettämistä. Lähettäminen väärällä alueasetuksella voi rikkoa paikallisia radiomääräyksiä. Katso [alueasetusten määritysopas](https://meshtastic.org/docs/getting-started/initial-config) meshtastic.org-sivustolta saadaksesi lisätietoja.
 
@@ -97,69 +112,119 @@ Modeemiesiasetus määrittää tärkeimmän kompromissin **kantaman** ja **tiedo
 
 ### Näytön asetukset
 
-| Asetus                | Kuvaus                                                                                                            |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| Näytön aikakatkaisu   | Aika ennen näytön siirtymistä lepotilaan                                                                          |
-| Näyttöyksiköt         | Metrinen tai imperiaalinen järjestelmä                                                                            |
-| OLED-tyyppi           | Auto, SSD1306, SH1106, SH1107                                                                                     |
-| Kompassin suunta      | Kompassinäytön kiertosäätö (0°, 90°, 180°, 270°)                                               |
-| ~~Kompassipohjoinen~~ | ⚠️ **Vanhentunut** — korvattu Kompassin suunta -asetuksella; näkyy edelleen vanhemmissa laiteohjelmistoversioissa |
+These control the **radio's own screen**, not the app's.
+
+| Asetus                              | Kuvaus                                                                                                                                                    |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Näytön päälläoloaika                | How long the display stays lit before sleeping                                                                                                            |
+| Karusellin aikaväli                 | How often the device cycles between screens on its own                                                                                                    |
+| Näyttötila                          | Screen layout/density used by the firmware                                                                                                                |
+| Näyttöyksiköt                       | Metric or Imperial on the device's screen                                                                                                                 |
+| Käytä 12 tunnin kelloa              | Show the device clock as 12-hour rather than 24-hour                                                                                                      |
+| Bold heading                        | Draw the screen's heading text in bold                                                                                                                    |
+| Käännä näyttö                       | Rotate the display 180° for an inverted mounting                                                                                                          |
+| OLED-tyyppi                         | Auto, SSD1306, SH1106, SH1107                                                                                                                             |
+| Herätä napautuksesta tai liikkeestä | Light the screen when the device is tapped or moved                                                                                                       |
+| Kompassin suuntaus                  | Rotation offset for the compass rose (0°, 90°, 180°, 270°)                                                                             |
+| Osoita aina pohjoiseen              | Locks the compass rose north-up instead of rotating it with your heading. Independent of Compass orientation — neither replaces the other |
 
 ### Sijainnin asetukset
 
-| Asetus                                   | Kuvaus                                     |
-| ---------------------------------------- | ------------------------------------------ |
-| GPS-käytössä                             | Ota GPS käyttöön tai poista käytöstä       |
-| GPS-päivitysväli                         | Kuinka usein GPS-paikannusta päivitetään   |
-| Sijainnin lähetys (s) | Kuinka usein sijaintia jaetaan             |
-| Älykäs sijainti                          | Ota liikkeeseen perustuva lähetys käyttöön |
-| Kiinteä sijainti                         | Käytä manuaalisesti asetettua sijaintia    |
+> ⚠️ **Warning:** Saving this screen always reboots the radio.
+
+| Asetus                                            | Kuvaus                                                                                                                                                |
+| ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GPS-tila (fyysinen laitteisto) | Three-state: GPS enabled, disabled, or not present. Not a simple on/off                                               |
+| GPS-kyselyn aikaväli                              | How often the radio asks its GPS for a fix                                                                                                            |
+| Lähetyksen aikaväli                               | How often the position is shared with the mesh                                                                                                        |
+| Älykäs sijainti                                   | Broadcast based on movement rather than purely on the clock                                                                                           |
+| Älykäs aikaväli                                   | With Smart Position on, the shortest gap between broadcasts                                                                                           |
+| Älykäs etäisyys                                   | With Smart Position on, how far you must move before broadcasting                                                                                     |
+| Kiinteä sijainti                                  | Use a manually entered latitude, longitude and altitude instead of the GPS                                                                            |
+| Sijaintimerkinnät                                 | A group of toggles choosing which fields ride along with a position — altitude, its reference and precision, satellites in view, timestamp, and so on |
+| GPS EN / Receive / Transmit GPIO                  | Advanced: the pins the GPS module is wired to                                                                                         |
 
 ### Virran asetukset
 
-| Asetus                                        | Kuvaus                                                        |
-| --------------------------------------------- | ------------------------------------------------------------- |
-| Virransäästö                                  | Ota vähän virtaa kuluttava lepotila käyttöön                  |
-| Sammuta jälkeen (s)        | Automaattisen sammutuksen ajastin                             |
-| ADC-kerroin                                   | Akun jännitteen kalibrointikerroin                            |
-| Odota Bluetoothia (s)      | Aika Bluetooth-yhteyden odottamiseen käynnistyksen yhteydessä |
-| Mesh SDS -aikakatkaisu (s) | Erittäin syvän lepotilan aikakatkaisu                         |
+| Asetus                                                      | Kuvaus                                                          |
+| ----------------------------------------------------------- | --------------------------------------------------------------- |
+| Ota virransäästötila käyttöön                               | Let the radio sleep aggressively between activity               |
+| Sammuta virran katketessa                                   | Power the device down after external power disappears           |
+| Super-syväunen kesto                                        | How long the deepest sleep state lasts                          |
+| Vähimmäisherätyksen kesto                                   | The shortest time the radio stays awake once woken              |
+| Bluetoothin odotusaika                                      | How long to wait for a phone to connect before sleeping         |
+| ADC-kertoimen ohitus                                        | Turn on a manual correction for battery-voltage readings        |
+| Korvaava AD-muuntimen kerroin                               | The correction factor itself, used only when the override is on |
+| INA_2XX-akun valvontapiirin I2C-osoite | Address of an external INA-series power sensor, if fitted       |
 
 ### Verkon asetukset
 
-| Asetus          | Kuvaus                                                      |
-| --------------- | ----------------------------------------------------------- |
-| WiFi käytössä   | Ota WiFi-radio käyttöön (ESP32-laitteet) |
-| WiFi SSID       | Verkon nimi, johon yhdistetään                              |
-| WiFi PSK        | Verkon salasana                                             |
-| NTP-palvelin    | Ajan synkronointipalvelin (NTP-palvelin) |
-| Syslog-palvelin | Etätietojen palvelin                                        |
+> ⚠️ **Warning:** Saving this screen always reboots the radio.
+
+| Asetus                           | Kuvaus                                                                                                                     |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| WiFi käytössä                    | Enable the WiFi radio (ESP32 devices)                                                                   |
+| SSID                             | Network name to connect to. **Scan WiFi QR code** fills this and the password from a standard WiFi QR code |
+| Salasana                         | Verkon salasana                                                                                                            |
+| Ethernet käytössä                | Use a wired connection on hardware that has one                                                                            |
+| IPv4-tila                        | DHCP, or a static address configured with the four fields below                                                            |
+| Wifi IP / Subnet / Gateway / DNS | The static address, only used when IPv4 mode is static                                                                     |
+| UDP-lähetys                      | Share mesh traffic with other nodes over the local network                                                                 |
+| NTP palvelin                     | Ajan synkronointipalvelin (NTP-palvelin)                                                                |
+| rsyslog-palvelin                 | Etätietojen palvelin                                                                                                       |
 
 ![IP-osoitekenttä](../../assets/screenshots/settings_ipv4_field.png)
 
 ### Bluetooth asetukset
 
-| Asetus             | Kuvaus                                                                            |
-| ------------------ | --------------------------------------------------------------------------------- |
-| Bluetooth käytössä | Ota Bluetooth-radio käyttöön tai poista käytöstä                                  |
-| Pariliitostila     | Kiinteä PIN-koodi, satunnainen PIN-koodi tai ei PIN-koodia                        |
-| Kiinteä PIN-koodi  | PIN-koodi pariliitosta varten (oletus: 123456) |
+| Asetus             | Kuvaus                                                                                                 |
+| ------------------ | ------------------------------------------------------------------------------------------------------ |
+| Bluetooth käytössä | Ota Bluetooth-radio käyttöön tai poista käytöstä                                                       |
+| Pariliitostila     | Kiinteä PIN-koodi, satunnainen PIN-koodi tai ei PIN-koodia                                             |
+| Kiinteä PIN-koodi  | PIN code for pairing. Must be **exactly six digits** — the field rejects anything else |
 
 ### Turvallisuusasetukset
 
 | Asetus                      | Kuvaus                                                                                                                                                                                                                                        |
 | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Julkinen avain              | Radiosi julkinen avain (vain luku)                                                                                                                                                                                         |
-| Ylläpitäjän avain           | Avain etähallintaa varten                                                                                                                                                                                                                     |
-| Yksityinen avain            | Radiosi yksityinen avain (käsittele turvallisesti)                                                                                                                                                                         |
+| Ylläpitäjän avain           | Keys permitted to administer this node remotely — up to three                                                                                                                                                                                 |
+| Yksityinen avain            | Your node's private key (handle securely). Shown redacted when you are viewing another node over remote admin — the firmware does not send it                                                              |
+| Luo uusi yksityinen avain   | Issues a new keypair for this node, behind a confirmation. Every peer that knew your old key must learn the new one                                                                                                           |
+| Suoran viestin avain        | The key used for direct-message encryption                                                                                                                                                                                                    |
 | ~~Ylläpitokanava käytössä~~ | ⚠️ Poistettu — määritetään nyt automaattisesti, kun ylläpitoavain asetetaan                                                                                                                                                                   |
 | Virheenkorjausloki          | Tulosta reaaliaikainen virheenkorjausloki sarjaportin tai bluetoothin kautta                                                                                                                                                                  |
 | Sarjaportti käytössä        | Ota sarjakonsoliyhteys käyttöön (siirretty laiteasetuksista)                                                                                                                                                               |
-| Hallintatila                | Rajoita muutokset muihin kuin ylläpitokanaviin                                                                                                                                                                                                |
+| Hallintatila                | Restrict non-admin channel changes. Only selectable once an Admin Key is set                                                                                                                                                  |
 | Varmuuskopioi avaimet       | Tallenna radion avaimista salattu varmuuskopio tälle laitteelle (vain Android)                                                                                                                                             |
 | Palauta avaimet             | Kirjoita varmuuskopioidut avaimet takaisin radioon (käytettävissä, kun varmuuskopio on olemassa)                                                                                                                           |
 | Poista avaimen varmuuskopio | Poista tälle laitteelle tallennettu avainten varmuuskopio                                                                                                                                                                                     |
 | Suojaustaso                 | Pakettien aitous – miten allekirjoittamattomia tai välitettyjä paketteja käsitellään: **Tiukka**, **Tasapainoinen** tai **Yhteensopiva** (edellyttää tuettua laiteohjelmistoa; Tiukka pyytää vahvistuksen) |
+
+#### Lockdown Mode
+
+Lockdown encrypts the device's storage and requires a passphrase for each connection. It needs
+supporting firmware; the row does not appear otherwise.
+
+Enabling it asks you to set and confirm a passphrase, and to acknowledge that **it locks the debug
+(SWD) port on hardware that supports locking**. You can turn lockdown off again at any time with
+the passphrase, and a full device erase restores the hardware regardless.
+
+Alongside the passphrase you set the limits that end a session automatically:
+
+| Field                                                 | Mitä se tekee                                     |
+| ----------------------------------------------------- | ------------------------------------------------- |
+| Jäljellä olevat käynnistykset                         | How many device boots the unlocked state survives |
+| Tuntia vanhenemiseen saakka                           | Wall-clock lifetime of the unlocked state         |
+| Istunnon enimmäiskesto (minuuttia) | Maximum length of a single unlocked connection    |
+
+Once active, the row reads _Active — storage encrypted, this connection authenticated_ when
+unlocked, or _Active — enter your passphrase to unlock this connection_ when not. **Lock Now**
+ends the current session immediately. Repeated wrong passphrases are rate-limited with a
+back-off before you can try again.
+
+> ⚠️ **Warning:** There is no passphrase recovery. Losing it means erasing the device to get it
+> back, which destroys its keys, channels and settings.
 
 ![Salasanakenttä](../../assets/screenshots/settings_password_field.png)
 

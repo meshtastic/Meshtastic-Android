@@ -2,7 +2,7 @@
 title: Settings — Radio & User
 parent: User Guide
 nav_order: 7
-last_updated: 2026-07-27
+last_updated: 2026-08-27
 description: Configure your radio hardware, LoRa presets, user profile, position sharing, power management, and security.
 aliases:
   - beállítások
@@ -19,11 +19,12 @@ Configure your radio hardware and user identity parameters.
 
 ### User Profile
 
-| Setting           | Leírás                                                                                |
-| ----------------- | ------------------------------------------------------------------------------------- |
-| Hosszú név        | Your display name (up to 39 characters)                            |
-| Rövid név         | 4-character abbreviated name                                                          |
-| Licensed Operator | Enable if you hold an amateur radio license (enables higher power) |
+| Setting           | Leírás                                                                                                                                                                                                                                       |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Hosszú név        | Your display name (up to 39 characters)                                                                                                                                                                                   |
+| Rövid név         | 4-character abbreviated name                                                                                                                                                                                                                 |
+| Nem üzenetképes   | Marks the node as one nobody should try to message — for an unmonitored or infrastructure node. Other clients hide it from the contact list. Needs supporting firmware                                       |
+| Licensed Operator | Enable if you hold an amateur radio license (permits higher power). Turning it on relabels **Long Name** as **Call Sign** and adds a separate Long Name field, and is staged behind a confirmation dialog |
 
 ### Applying Changes
 
@@ -33,23 +34,37 @@ After modifying settings, tap **Save** to write the configuration to your radio.
 
 ### Eszközbeállítások
 
-| Setting                                    | Leírás                                                                  | Alapértelmezett |
-| ------------------------------------------ | ----------------------------------------------------------------------- | --------------- |
-| Szerepkör                                  | Node behavior (Client, Router, etc.) | Kliens          |
-| Újrasugárzási mód                          | How the node retransmits messages                                       | Összes          |
-| Node Info Broadcast (s) | Interval for broadcasting node info                                     | 10800           |
-| Double-tap Button                          | Action for double-tap button press                                      | Disabled        |
+| Setting                                    | Leírás                                                                                                                                                                                 | Alapértelmezett |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| Szerepkör                                  | Node behavior (Client, Router, etc.) — each option carries its own description in the picker. Choosing Router asks for confirmation | Kliens          |
+| Újrasugárzási mód                          | How the node retransmits messages; each mode is described in the picker                                                                                                                | Összes          |
+| Node Info Broadcast (s) | Interval for broadcasting node info                                                                                                                                                    | 10800           |
+| Double-tap Button                          | Treat a double tap as a button press                                                                                                                                                   | Disabled        |
+| Háromszori kattintás – ad hoc ping         | Send an ad-hoc position ping on a triple click                                                                                                                                         | Disabled        |
+| LED ütemjelzés                             | Blink the status LED periodically                                                                                                                                                      | Engedélyezve    |
+| Időzóna                                    | POSIX time-zone string for the device clock, with buttons to copy your phone's zone or clear it                                                                                        | —               |
+| Button / Buzzer GPIO                       | Advanced: which pins the button and buzzer are wired to                                                                                                                | —               |
 
 ### LoRa beállítások
 
-| Setting            | Leírás                                                                  | Alapértelmezett                           |
-| ------------------ | ----------------------------------------------------------------------- | ----------------------------------------- |
-| Régió              | Regulatory region for frequency bands                                   | Unset (must configure) |
-| Modem-előbeállítás | Speed/range tradeoff                                                    | LongFast                                  |
-| Hop Limit          | Maximum retransmit hops                                                 | 3                                         |
-| TX Power           | Transmission power (dBm); 0 = max allowed for region | 0 (region max)         |
-| Frequency Offset   | Fine-tune frequency (MHz)                            | 0                                         |
-| Channel Bandwidth  | Bandwidth setting                                                       | Default for preset                        |
+| Setting                      | Leírás                                                                                                                                                                                           | Alapértelmezett                           |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------- |
+| Régió                        | Regulatory region for frequency bands                                                                                                                                                            | Unset (must configure) |
+| Modem-előbeállítás           | Speed/range tradeoff                                                                                                                                                                             | LongFast                                  |
+| Hop Limit                    | Maximum retransmit hops                                                                                                                                                                          | 3                                         |
+| TX Power                     | Transmission power (dBm); 0 = max allowed for region                                                                                                                          | 0 (region max)         |
+| Frekvencia felülbírálása     | Overrides the computed operating frequency outright (MHz). It does not offset the calculated value — leave at 0 unless you know you need a specific frequency | 0 (use calculated)     |
+| Channel Bandwidth            | Bandwidth setting                                                                                                                                                                                | Default for preset                        |
+| Előbeállítás használata      | On by default. Turn it off to set Spread Factor, Coding Rate and Bandwidth by hand instead of taking them from the modem preset                                                  | On                                        |
+| Szórási Faktor               | Manual mode only: 7–12. Higher spreads further but slower                                                                                                        | From preset                               |
+| Kódolási ráta                | Manual mode only: 5–8. More redundancy costs airtime                                                                                                             | From preset                               |
+| Frekvencia sáv               | Which slot within the region's band to use. 0 derives it from the primary channel name                                                                                           | 0 (automatic)          |
+| Adás engedélyezve            | Turning this off makes the node receive-only                                                                                                                                                     | On                                        |
+| Duty Cycle felülbírálása     | Ignore the region's duty-cycle limit. Only legal where you are permitted to                                                                                                      | Off                                       |
+| MQTT figyelmen kívül hagyása | Drop packets that arrived from MQTT rather than over the air                                                                                                                                     | Off                                       |
+| MQTT jóváhagyás              | Allow your packets to be forwarded to MQTT by gateways                                                                                                                                           | Off                                       |
+| RX fokozott erősítés         | Extra receive gain on SX126x radios; costs a little current                                                                                                                                      | Off                                       |
+| PA ventilátor letiltva       | Turn off the power-amplifier fan on hardware that has one                                                                                                                                        | Off                                       |
 
 > ⚠️ **Important:** You **must** set your region before transmitting. Operating without the correct region may violate local radio regulations. See the [region configuration guide](https://meshtastic.org/docs/getting-started/initial-config) on meshtastic.org for details.
 
@@ -97,69 +112,119 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 
 ### Kijelző beállítások
 
-| Setting             | Leírás                                                                               |
-| ------------------- | ------------------------------------------------------------------------------------ |
-| Screen Timeout      | Time before display sleeps                                                           |
-| Display Units       | Metric or Imperial                                                                   |
-| OLED Type           | Auto, SSD1306, SH1106, SH1107                                                        |
-| Compass Orientation | Rotation offset for compass display (0°, 90°, 180°, 270°)         |
-| ~~Compass North~~   | ⚠️ **Deprecated** — replaced by Compass Orientation; still visible in older firmware |
+These control the **radio's own screen**, not the app's.
+
+| Setting                           | Leírás                                                                                                                                                    |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Kijelző bekapcsolva ennyi ideig   | How long the display stays lit before sleeping                                                                                                            |
+| Karusszel időköz                  | How often the device cycles between screens on its own                                                                                                    |
+| Kijelző mód                       | Screen layout/density used by the firmware                                                                                                                |
+| Mértékegységek megjelenítése      | Metric or Imperial on the device's screen                                                                                                                 |
+| 12 órás időformátum használata    | Show the device clock as 12-hour rather than 24-hour                                                                                                      |
+| Bold heading                      | Draw the screen's heading text in bold                                                                                                                    |
+| Kijelző megfordítása              | Rotate the display 180° for an inverted mounting                                                                                                          |
+| OLED típus                        | Auto, SSD1306, SH1106, SH1107                                                                                                                             |
+| Érintésre vagy mozgásra ébresztés | Light the screen when the device is tapped or moved                                                                                                       |
+| Iránytű tájolás                   | Rotation offset for the compass rose (0°, 90°, 180°, 270°)                                                                             |
+| Mindig észak felé mutasson        | Locks the compass rose north-up instead of rotating it with your heading. Independent of Compass orientation — neither replaces the other |
 
 ### Pozíció beállítások
 
-| Setting                                   | Leírás                             |
-| ----------------------------------------- | ---------------------------------- |
-| GPS Enabled                               | Enable/disable GPS                 |
-| GPS Update Interval                       | How often to acquire GPS fix       |
-| Position Broadcast (s) | How often to share position        |
-| Intelligens pozíció                       | Enable movement-based broadcasting |
-| Rögzített pozíció                         | Use a manually set position        |
+> ⚠️ **Warning:** Saving this screen always reboots the radio.
+
+| Setting                                      | Leírás                                                                                                                                                |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GPS mód (fizikai hardver) | Three-state: GPS enabled, disabled, or not present. Not a simple on/off                                               |
+| GPS Polling Interval                         | How often the radio asks its GPS for a fix                                                                                                            |
+| Sugárzási időköz                             | How often the position is shared with the mesh                                                                                                        |
+| Intelligens pozíció                          | Broadcast based on movement rather than purely on the clock                                                                                           |
+| Smart Interval                               | With Smart Position on, the shortest gap between broadcasts                                                                                           |
+| Smart Distance                               | With Smart Position on, how far you must move before broadcasting                                                                                     |
+| Rögzített pozíció                            | Use a manually entered latitude, longitude and altitude instead of the GPS                                                                            |
+| Pozíció jelzők (flags)    | A group of toggles choosing which fields ride along with a position — altitude, its reference and precision, satellites in view, timestamp, and so on |
+| GPS EN / Receive / Transmit GPIO             | Advanced: the pins the GPS module is wired to                                                                                         |
 
 ### Energia-beállítások
 
-| Setting                                 | Leírás                                  |
-| --------------------------------------- | --------------------------------------- |
-| Power Saving                            | Enable low-power sleep mode             |
-| Shutdown After (s)   | Auto-shutdown idle timer                |
-| ADC Multiplier                          | Battery voltage calibration factor      |
-| Wait Bluetooth (s)   | Time to wait for BLE connection at boot |
-| Mesh SDS Timeout (s) | Super-deep-sleep timeout                |
+| Setting                                          | Leírás                                                          |
+| ------------------------------------------------ | --------------------------------------------------------------- |
+| Energiatakarékos mód engedélyezése               | Let the radio sleep aggressively between activity               |
+| Leállítás áramszünet esetén                      | Power the device down after external power disappears           |
+| Szuper mélyalvás időtartama                      | How long the deepest sleep state lasts                          |
+| Minimális ébrenléti idő                          | The shortest time the radio stays awake once woken              |
+| Bluetooth-várakozás időtartama                   | How long to wait for a phone to connect before sleeping         |
+| ADC szorzó felülbírálása                         | Turn on a manual correction for battery-voltage readings        |
+| ADC szorzó felülbírálási arány                   | The correction factor itself, used only when the override is on |
+| Akkumulátor INA_2XX I2C-cím | Address of an external INA-series power sensor, if fitted       |
 
 ### Hálózati beállítások
 
-| Setting       | Leírás                                               |
-| ------------- | ---------------------------------------------------- |
-| WiFi Enabled  | Enable WiFi radio (ESP32 devices) |
-| WiFi SSID     | Network name to connect to                           |
-| WiFi PSK      | Network password                                     |
-| NTP Server    | Time synchronization server                          |
-| Syslog Server | Remote logging server                                |
+> ⚠️ **Warning:** Saving this screen always reboots the radio.
+
+| Setting                          | Leírás                                                                                                                     |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| WiFi engedélyezve                | Enable the WiFi radio (ESP32 devices)                                                                   |
+| SSID                             | Network name to connect to. **Scan WiFi QR code** fills this and the password from a standard WiFi QR code |
+| Jelszó                           | Network password                                                                                                           |
+| Ethernet engedélyezve            | Use a wired connection on hardware that has one                                                                            |
+| IPv4 mód                         | DHCP, or a static address configured with the four fields below                                                            |
+| Wifi IP / Subnet / Gateway / DNS | The static address, only used when IPv4 mode is static                                                                     |
+| UDP broadcasting                 | Share mesh traffic with other nodes over the local network                                                                 |
+| NTP szerver                      | Time synchronization server                                                                                                |
+| rsyslog szerver                  | Remote logging server                                                                                                      |
 
 ![IP address field](../../assets/screenshots/settings_ipv4_field.png)
 
 ### Bluetooth beállítások
 
-| Setting           | Leírás                                                                    |
-| ----------------- | ------------------------------------------------------------------------- |
-| Bluetooth Enabled | Enable/disable BLE radio                                                  |
-| Pairing Mode      | Fixed PIN, Random PIN, or No PIN                                          |
-| Rögzített PIN     | PIN code for pairing (default: 123456) |
+| Setting           | Leírás                                                                                                 |
+| ----------------- | ------------------------------------------------------------------------------------------------------ |
+| Bluetooth Enabled | Enable/disable BLE radio                                                                               |
+| Pairing Mode      | Fixed PIN, Random PIN, or No PIN                                                                       |
+| Rögzített PIN     | PIN code for pairing. Must be **exactly six digits** — the field rejects anything else |
 
 ### Biztonsági beállítások
 
-| Setting                   | Leírás                                                                                                                                                                                                         |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Nyilvános kulcs           | Your node's public key (read-only)                                                                                                                                                          |
-| Admin kulcs               | Key for remote administration                                                                                                                                                                                  |
-| Privát kulcs              | Your node's private key (handle securely)                                                                                                                                                   |
-| ~~Admin Channel Enabled~~ | ⚠️ Removed — now configured automatically when an admin key is set                                                                                                                                             |
-| Debug Log                 | Output live debug logging over serial/bluetooth                                                                                                                                                                |
-| Serial Enabled            | Enable serial console access (moved from Device Config)                                                                                                                                     |
-| Felügyelt mód             | Restrict non-admin channel changes                                                                                                                                                                             |
-| Backup Keys               | Save an encrypted backup of the node's keys on this device (Android only)                                                                                                                   |
-| Restore Keys              | Write the backed-up keys back to the node (available once a backup exists)                                                                                                                  |
-| Delete Key Backup         | Remove the stored key backup from this device                                                                                                                                                                  |
-| Protection Level          | Packet authenticity — how unsigned or relayed packets are treated: **Strict**, **Balanced**, or **Compatible** (requires supporting firmware; Strict asks for confirmation) |
+| Setting                     | Leírás                                                                                                                                                                                                         |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Nyilvános kulcs             | Your node's public key (read-only)                                                                                                                                                          |
+| Admin kulcs                 | Keys permitted to administer this node remotely — up to three                                                                                                                                                  |
+| Privát kulcs                | Your node's private key (handle securely). Shown redacted when you are viewing another node over remote admin — the firmware does not send it                               |
+| Privát kulcs újragenerálása | Issues a new keypair for this node, behind a confirmation. Every peer that knew your old key must learn the new one                                                                            |
+| Közvetlen üzenet kulcsa     | The key used for direct-message encryption                                                                                                                                                                     |
+| ~~Admin Channel Enabled~~   | ⚠️ Removed — now configured automatically when an admin key is set                                                                                                                                             |
+| Debug Log                   | Output live debug logging over serial/bluetooth                                                                                                                                                                |
+| Serial Enabled              | Enable serial console access (moved from Device Config)                                                                                                                                     |
+| Felügyelt mód               | Restrict non-admin channel changes. Only selectable once an Admin Key is set                                                                                                                   |
+| Backup Keys                 | Save an encrypted backup of the node's keys on this device (Android only)                                                                                                                   |
+| Restore Keys                | Write the backed-up keys back to the node (available once a backup exists)                                                                                                                  |
+| Delete Key Backup           | Remove the stored key backup from this device                                                                                                                                                                  |
+| Protection Level            | Packet authenticity — how unsigned or relayed packets are treated: **Strict**, **Balanced**, or **Compatible** (requires supporting firmware; Strict asks for confirmation) |
+
+#### Lockdown Mode
+
+Lockdown encrypts the device's storage and requires a passphrase for each connection. It needs
+supporting firmware; the row does not appear otherwise.
+
+Enabling it asks you to set and confirm a passphrase, and to acknowledge that **it locks the debug
+(SWD) port on hardware that supports locking**. You can turn lockdown off again at any time with
+the passphrase, and a full device erase restores the hardware regardless.
+
+Alongside the passphrase you set the limits that end a session automatically:
+
+| Field                                    | What it does                                      |
+| ---------------------------------------- | ------------------------------------------------- |
+| Boots remaining                          | How many device boots the unlocked state survives |
+| Hours until expiry                       | Wall-clock lifetime of the unlocked state         |
+| Session cap (minutes) | Maximum length of a single unlocked connection    |
+
+Once active, the row reads _Active — storage encrypted, this connection authenticated_ when
+unlocked, or _Active — enter your passphrase to unlock this connection_ when not. **Lock Now**
+ends the current session immediately. Repeated wrong passphrases are rate-limited with a
+back-off before you can try again.
+
+> ⚠️ **Warning:** There is no passphrase recovery. Losing it means erasing the device to get it
+> back, which destroys its keys, channels and settings.
 
 ![Password field](../../assets/screenshots/settings_password_field.png)
 

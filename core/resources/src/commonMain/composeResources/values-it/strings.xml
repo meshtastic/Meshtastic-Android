@@ -507,7 +507,6 @@
     <string name="dns">DNS</string>
     <!-- DOC -->
     <string name="doc_clear_search">Azzera ricerca</string>
-    <string name="doc_keywords_android_auto">android auto,auto,head unit,guida,vivavoce,messaggi</string>
     <string name="doc_keywords_app_functions">system ai,gemini,assistente,funzioni,automazione,voce</string>
     <string name="doc_keywords_connections">bluetooth,usb,tcp,accoppiamento,seriale,wifi,connessione</string>
     <string name="doc_keywords_debug_logs">debug,log,logcat,esportazione,segnalazione bug,problema,risoluzione problemi,diagnostica</string>
@@ -533,12 +532,11 @@
     <string name="doc_search_placeholder">Cerca nella documentazione…</string>
     <string name="doc_section_developer">Guida per sviluppatori</string>
     <string name="doc_section_user">Guida utente</string>
-    <string name="doc_title_android_auto">Android Auto</string>
     <string name="doc_title_app_functions">Funzioni dell'app</string>
     <string name="doc_title_connections">Connessioni</string>
     <string name="doc_title_debug_logs">Log di debug</string>
     <string name="doc_title_desktop">App desktop</string>
-    <string name="doc_title_discovery">Discovery</string>
+    <string name="doc_title_discovery">Discovery della mesh locale</string>
     <string name="doc_title_firmware">Aggiornamenti firmware</string>
     <string name="doc_title_help">Aiuto &amp; Documentazione In-App</string>
     <string name="doc_title_map">Mappa &amp; Waypoint</string>

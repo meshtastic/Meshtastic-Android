@@ -21,8 +21,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 JDK 25 is required. **Bootstrap before any Gradle task** (don't wait to be told) — full details in `.skills/project-overview/SKILL.md`:
 ```bash
 [ -z "$ANDROID_HOME" ] && export ANDROID_HOME="$HOME/Library/Android/sdk"  # often unset in agent workspaces
-[ -f local.properties ] || cp secrets.defaults.properties local.properties # google flavor fails without it
 ```
+No secrets step is needed: `androidApp/build.gradle.kts` points the secrets plugin at
+`secrets.properties` and falls back to the tracked `secrets.defaults.properties`, so the
+`google` flavor builds with neither file present. Create `secrets.properties` only if you
+want real Google Maps tiles (`MAPS_API_KEY=…`). `local.properties` is not read for secrets.
 
 **Baseline verification — run before every push** (CI has failed on skipped local checks):
 ```bash

@@ -79,7 +79,7 @@ jobs:
       APP_VERSION_CODE: ${{ steps.calculate_version_code.outputs.versionCode }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ inputs.commit_sha || inputs.tag_name }}
           fetch-depth: 0
@@ -124,7 +124,7 @@ jobs:
       USER_FRACTION: ${{ (inputs.channel == 'production' && '0.1') || (inputs.channel == 'open' && '0.5') || '1.0' }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ inputs.commit_sha || inputs.tag_name }}
 
@@ -156,7 +156,7 @@ jobs:
       # reusable workflow is caller-associated, so it resolves to the caller's
       # workflow too. A cross-repo caller would need explicit repo+ref inputs.
       - name: Checkout preflight script from caller commit
-        uses: actions/checkout@v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.sha }}
           path: .workflow-ref
@@ -220,7 +220,7 @@ jobs:
       actions: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ inputs.commit_sha || inputs.tag_name }}
           fetch-depth: 0
@@ -413,7 +413,7 @@ jobs:
     needs: [ update-github-release ]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ inputs.commit_sha || inputs.tag_name }}
 

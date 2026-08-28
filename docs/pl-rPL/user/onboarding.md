@@ -2,7 +2,7 @@
 title: Getting Started
 parent: User Guide
 nav_order: 1
-last_updated: 2026-08-25
+last_updated: 2026-08-27
 description: First-launch setup — permissions, onboarding flow, and next steps after connecting your radio.
 aliases:
   - first-launch
@@ -16,17 +16,19 @@ Welcome to Meshtastic! This guide walks you through the initial setup of the Mes
 
 ## First Launch
 
-When you open the app for the first time, you'll be guided through an introductory flow that helps configure essential permissions and settings. Each step can be completed in order, or skipped — nothing here is a one-time offer. Every permission can be reviewed and granted later from **Settings → Permissions** inside the app.
+When you open the app for the first time, you'll be guided through an introductory flow that helps configure essential permissions and settings. Complete each step in order or skip it — nothing here is a one-time offer. Every permission can be reviewed and granted later from **Settings → Permissions** inside the app.
 
 ### Welcome Screen
 
-The welcome screen introduces Meshtastic and its core capabilities:
+The welcome screen introduces Meshtastic with three feature rows:
 
-- Off-grid mesh communication
-- No cellular or internet required
-- End-to-end encrypted messaging
+|                               |                                                                                                                                           |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| **Stay Connected Anywhere**   | Communicate off-the-grid with your friends and community without cell service.                                            |
+| **Create Your Own Networks**  | Easily set up private mesh networks for secure and reliable communication in remote areas.                                |
+| **Track and Share Locations** | Udostępniaj swoją lokalizację w czasie rzeczywistym i koordynuj działania swojej grupy dzięki zintegrowanym funkcjom GPS. |
 
-Tap **Get Started** to proceed through the setup flow.
+Tap **Get started** to proceed through the setup flow.
 
 ![Welcome screen](../../assets/screenshots/onboarding_welcome.png)
 
@@ -53,10 +55,7 @@ Meshtastic also uses your location for:
 - Calculating distances to other nodes
 - Sharing your GPS coordinates with other mesh members (if enabled)
 
-Grant **"While using the app"** or **"Always"** depending on your preference:
-
-- **While using the app** — position updates only when the app is open
-- **Always** — enables background position updates for always-on mesh presence
+Grant **"While using the app"**. The app does not request background location — `ACCESS_BACKGROUND_LOCATION` is not in its manifest — so Android will not offer an "Always" option, and position updates happen while the app is in the foreground or running its foreground service.
 
 Declining leaves the rest of the app working: on Android 12 and newer, Bluetooth is unaffected and only the map position and position sharing are disabled. On Android 11 and older, Bluetooth scanning also stops, because that is the permission Android gates it behind.
 
@@ -72,16 +71,13 @@ Notifications alert you to:
 
 ### Critical Alerts Permission
 
-On supported devices, the app may request permission for critical alerts:
+Critical alerts are high-priority notifications that break through Do Not Disturb — for emergency mesh alerts and urgent messages.
 
-- These are high-priority notifications that can break through Do Not Disturb mode
-- Useful for emergency mesh alerts or urgent messages
-- You can **skip** this step if you don't need breakthrough notifications
-- Configure or revoke later in Android notification settings
+This step is not a runtime permission prompt. There is no grant/deny dialog: the button opens the Android system settings page for the app's **Alerts** notification channel, where you turn the breakthrough behaviour on yourself. You can **skip** it, and reach the same page later from Android notification settings.
 
 ### Reviewing permissions later
 
-**Settings → Permissions** summarizes where every runtime permission stands. It reads _All allowed_ when nothing needs you, and names the count when something does — opening itself automatically in that case. Tap the row to see the full list at any time:
+**Settings → Permissions** summarizes where every runtime permission stands. It covers five: **Nearby devices** (Bluetooth), **Location**, **Notifications**, **Camera** (scanning channel and contact QR codes) and **Local network** (finding radios over Wi-Fi by mDNS) — the last two are never asked for during setup, only when a feature first needs them. It reads _All allowed_ when nothing needs you, and names the count when something does — opening itself automatically in that case. Tap the row to see the full list at any time:
 
 | State                                       | What tapping the row does                                                                    |
 | ------------------------------------------- | -------------------------------------------------------------------------------------------- |
@@ -101,16 +97,14 @@ Once permissions are granted, the app transitions to the main interface. Your fi
 
 Features also ask in context. Tapping **Scan** on the Connections screen with Bluetooth permission missing explains what it is for and offers to request it; once Android stops prompting, the same control opens the system settings page instead of doing nothing.
 
-## What's Next?
-
-Once connected to a radio, explore:
-
-- [Connections](connections) — pair your first radio device
-- [Messages & Channels](messages-and-channels) — send your first message
-- [Nodes](nodes) — see who's on your mesh
-- [Map & Waypoints](map-and-waypoints) — view node positions
-- [Settings](settings-radio-user) — configure your radio and user profile
-
 New to Meshtastic? The [getting started guide](https://meshtastic.org/docs/getting-started) on meshtastic.org covers hardware selection, initial radio configuration, and your first mesh setup.
+
+## Related Topics
+
+- [Connections](connections) — pair your first radio
+- [Messages & Channels](messages-and-channels) — send your first message
+- [Nodes](nodes) — see who else is on your mesh
+- [Map & Waypoints](map-and-waypoints) — view node positions
+- [Settings — Radio & User](settings-radio-user) — configure your radio and user profile
 
 ---

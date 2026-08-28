@@ -2,7 +2,7 @@
 title: Интеграция TAK
 parent: Руководство пользователя
 nav_order: 10
-last_updated: 2026-08-19
+last_updated: 2026-08-28
 description: Взаимодействие с ATAK и WinTAK — передача данных CoT о местоположении, роли TAK и настройка плагина.
 aliases:
   - tak
@@ -26,28 +26,26 @@ Meshtastic интегрируется с экосистемой Team Awareness K
 
 ### Необходимые условия
 
-- Установлен ATAK (Android Team Awareness Kit) или WinTAK
-- Установлен Meshtastic ATAK Plugin
-- Модуль TAK включён на вашем радио Meshtastic
+- ATAK (Android Team Awareness Kit), iTAK, or WinTAK installed
+- Your node's **Device Role** set to **TAK** or **TAK Tracker** — this is what makes the TAK
+  module appear in Module Config at all
+
+> ⚠️ **Warning:** The old **Meshtastic ATAK Plugin** is no longer part of this path and cannot
+> work. It bridged through the cross-process AIDL API, which was removed in app 2.8.0; the mesh
+> service is now in-process only. Do not install it. Interop today runs over the app's own local
+> TAK server plus the Mesh to CoT Converter, both described below, with stock ATAK/iTAK/WinTAK.
 
 ### Настройки
 
-1. Перейдите в **Настройки → Конфигурация модулей → TAK**.
-2. Включите модуль TAK.
-3. Настройте параметры команды/группы TAK:
+Перейдите в **Настройки → Конфигурация модулей → TAK**. The module's own settings are your TAK identity —
+there is no separate enable switch here, because the device Role above is what turns TAK on:
 
 ![Переключатель модуля](../../assets/screenshots/settings_switch.png)
 
-| Настройка    | Описание                          |
-| ------------ | --------------------------------- |
-| Включено     | Активировано взаимодействие с TAK |
-| Режим обмена | Режим вывода, совместимый с TAK   |
-
-### Настройка плагина ATAK
-
-1. Установите Meshtastic ATAK Plugin из репозитория плагинов.
-2. Откройте ATAK и включите плагин Meshtastic.
-3. Плагин соединяет сообщения между ATAK и твоей mesh-сетью.
+| Настройка | Описание                          |
+| --------- | --------------------------------- |
+| Командой  | Your TAK team colour              |
+| Роль      | Your member role within that team |
 
 ### Локальный TAK-сервер
 
@@ -57,6 +55,10 @@ Meshtastic интегрируется с экосистемой Team Awareness K
 
 - **Включить локальный TAK-сервер** — запускает mTLS-сервер только на локальную петлю на порту **8089** для подключений ATAK/iTAK с того же устройства.
 - **TAK Mesh Channel** — выбирает, в какой канал Meshtastic отправляется исходящий трафик TAK (по умолчанию: основной канал, индекс 0). Входящий трафик TAK принимается с любого канала. Соответствует аналогичной настройке на iOS и в устаревшем плагине ATAK.
+- **Mesh to CoT Converter** — off by default, and shown under the server toggle. With the server
+  running, this synthesizes a CoT contact for every node in your node database, so ordinary
+  Meshtastic nodes appear on the ATAK map as contacts. **This is what replaced the old plugin's
+  node visibility** — without it, only TAK-role nodes show up.
 - **Экспорт пакета данных TAK** — создаёт пакет данных `.zip`, который ATAK/iTAK может импортировать для подключения к этому серверу.
 
 ## Роли TAK
@@ -107,17 +109,17 @@ Meshtastic поддерживает два формата передачи да�
 - Обновления местоположения передаются двунаправленно между Meshtastic и TAK
 - Ноды TAK Tracker автоматически передают PLI — их координаты отображаются на картах ATAK без какой-либо настройки на стороне ATAK
 
-> ⚠️ **Примечание:** Для интеграции с TAK требуются определённые роли нод и настройка модуля. Стандартные клиентские ноды не участвуют в операциях TAK автоматически.
+> ℹ️ **Note:** TAK integration requires specific node roles. Standard client nodes don't automatically participate in TAK operations — though with **Mesh to CoT Converter** enabled they still appear on the ATAK map as contacts.
 
 ## Устранение неполадок
 
-| Проблема                                   | Причина                                                                                                                   | Решение                                                                                                             |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| Нода не отображается на карте ATAK         | Модуль TAK отключён или выбрана неверная роль                                                                             | Убедитесь, что модуль TAK включён, а роль ноды — TAK или TAK Tracker                                                |
-| Данные о местоположении устарели           | Потерян сигнал GPS или слишком большой интервал                                                                           | Проверьте состояние GPS; уменьшите интервал передачи координат в настройках Position Config                         |
-| Плагин ATAK показывает "не подключён"      | Потеряно соединение BLE или произошёл сбой плагина                                                                        | Переподключите Bluetooth в приложении Meshtastic, затем перезапустите плагин ATAK                                   |
-| Фигуры, маркеры или маршруты не передаются | Отправляющая нода использует устаревший V1 (прошивка 2.7.x или старше) | Обновите прошивку отправляющей ноды до 2.8.0+ для использования формата передачи V2 |
-| Данные CoT не передаются                   | Несовпадение каналов                                                                                                      | Все ноды TAK должны находиться на одном канале с одинаковым шифрованием                                             |
+| Проблема                                   | Причина                                                                                                                   | Решение                                                                                                                                                                                               |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Нода не отображается на карте ATAK         | Wrong device role, or Mesh to CoT Converter off                                                                           | Set the node's Device Role to TAK or TAK Tracker. For ordinary (non-TAK-role) nodes to appear, also enable **Mesh to CoT Converter** under the TAK Server settings |
+| Данные о местоположении устарели           | Потерян сигнал GPS или слишком большой интервал                                                                           | Проверьте состояние GPS; уменьшите интервал передачи координат в настройках Position Config                                                                                                           |
+| ATAK shows "disconnected"                  | The local TAK server is off, or ATAK is pointed elsewhere                                                                 | Check **Enable Local TAK Server** is on, and that ATAK is connecting to `127.0.0.1:8089` — re-import the exported data package if unsure                                                              |
+| Фигуры, маркеры или маршруты не передаются | Отправляющая нода использует устаревший V1 (прошивка 2.7.x или старше) | Обновите прошивку отправляющей ноды до 2.8.0+ для использования формата передачи V2                                                                                   |
+| Данные CoT не передаются                   | Несовпадение каналов                                                                                                      | Все ноды TAK должны находиться на одном канале с одинаковым шифрованием                                                                                                                               |
 
 ## Соображения безопасности
 

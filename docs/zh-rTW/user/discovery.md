@@ -1,10 +1,12 @@
 ---
-title: 尋找
+title: Local Mesh Discovery
 parent: 使用者指南
 nav_order: 12
-last_updated: 2026-07-27
+last_updated: 2026-08-28
 description: Explore your mesh network — the Local Mesh Discovery scanner, traceroute paths, neighbor maps, and node discovery tools.
 aliases:
+  - discovery
+  - local-mesh-discovery
   - mesh-探索
   - 本地-探索
   - 網路-掃描
@@ -12,7 +14,7 @@ aliases:
   - 鄰居資訊
 ---
 
-# 尋找
+# Local Mesh Discovery
 
 探索工具可協助您了解 mesh 網路的連線方式——哪些節點彼此可以收到訊號、訊息所經過的路徑，以及哪裡存在瓶頸或訊號薄弱的連結。
 
@@ -29,7 +31,7 @@ Local Mesh Discovery is a dedicated scanning mode that helps you find the best L
 
 Open it from **Settings → Advanced → Local Mesh Discovery**. On desktop, it has its own **Settings → Local Mesh Discovery** entry.
 
-> ⚠️ **Note:** Discovery temporarily changes your radio's LoRa settings while it scans, then restores your original configuration when it finishes. Your device must be connected to run a scan.
+> ℹ️ **Note:** Discovery temporarily changes your radio's LoRa settings while it scans, then restores your original configuration when it finishes. Your device must be connected to run a scan.
 
 ### Setting Up a Scan
 
@@ -84,7 +86,7 @@ Additional features available from the results:
 - **Discovery Map** — a map of the nodes found during the scan.
 - **Report export** — export a report as a PDF on Android, or as text on other platforms.
 
-> 💡 **Tip:** On Android, Discovery can generate an on-device AI summary (Gemini Nano) of your results. If the on-device model isn't available, an algorithmic summary is used instead — so you always get a readable interpretation of the scan.
+> 💡 **Tip:** On **Google Play** builds, Discovery can generate an on-device AI summary (Gemini Nano) of your results. F-Droid builds always use the algorithmic summary — the proprietary ML Kit dependency is deliberately excluded from that flavor — so you get a readable interpretation of the scan either way.
 
 ---
 
@@ -167,7 +169,7 @@ The tools below are available at any time from the node list and node detail scr
 - 每筆鄰近節點記錄會顯示可直接收到訊號的節點及其訊號品質。
 - 結合多個節點的鄰近節點資料，以了解完整的 mesh 網路拓撲。
 
-> ⚠️ 注意：鄰近節點資訊會增加無線電佔用時間，因為每個已啟用的節點會定期廣播其鄰近節點清單。 在節點眾多的繁忙 mesh 網路中，建議設定較長的廣播間隔（3600 秒以上）以避免壅塞。
+> ℹ️ **Note:** Neighbor Info increases airtime usage because every enabled node periodically broadcasts its neighbor list. 在節點眾多的繁忙 mesh 網路中，建議設定較長的廣播間隔（3600 秒以上）以避免壅塞。
 
 ---
 
@@ -201,6 +203,14 @@ The tools below are available at any time from the node list and node detail scr
 - 在關鍵節點上啟用鄰近節點資訊 — 尤其是路由器與中繼器，以建立骨幹網路的整體概況。
 - 查看地圖 —〔地圖〕(map-and-waypoints) 上的節點位置結合訊號資料，有助於了解為何某些連結訊號強，而其他連結訊號弱。
 - 比較訊號變化趨勢 — 請參閱〔訊號儀表〕(signal-meter) 指南，以正確解讀 SNR 與 RSSI 數值。
+
+## 相關主題
+
+- [Nodes](nodes) — the node list these scans populate
+- [Map & Waypoints](map-and-waypoints) — see discovered nodes geographically
+- [Signal Meter](signal-meter) — interpret the SNR and RSSI a scan reports
+- [Settings — Modules & Admin](settings-module-admin) — configure the Mesh Beacon and Neighbor Info modules
+- [Messages & Channels](messages-and-channels) — join a mesh you found and start talking
 
 ---
 

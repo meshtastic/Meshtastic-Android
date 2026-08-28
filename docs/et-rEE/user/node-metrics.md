@@ -2,7 +2,7 @@
 title: Sõlme mõõdikud
 parent: Kasutusjuhend
 nav_order: 5
-last_updated: 2026-07-08
+last_updated: 2026-08-27
 description: Telemeetria armatuurlauad iga võrgusõlme kohta – seadme tervis, keskkonnaandurid, õhu kvaliteet, signaali kvaliteet, võimsus, marsruut ja asukoha ajalugu.
 aliases:
   - meetriline
@@ -116,11 +116,13 @@ Kohalik statistika ühendatud raadiost kuvatakse ka signaali kvaliteedi all, kui
 
 Power management telemetry (requires INA sensor or compatible hardware):
 
-| Meetriline  | Kirjeldus               |
-| ----------- | ----------------------- |
-| Bus Voltage | Supply voltage          |
-| Pinge       | Power draw in milliamps |
-| Toide       | Calculated wattage      |
+| Meetriline | Kirjeldus                      |
+| ---------- | ------------------------------ |
+| Vool       | Per-channel voltage reading    |
+| Pinge      | Per-channel draw, in milliamps |
+
+Up to three channels (ch1–ch3) are charted, each with a label you can edit. The app does not
+derive a wattage figure from them.
 
 ## Marsruudi
 
@@ -133,7 +135,7 @@ Traceroute näitab sõnumi teed läbi kärgvõrgu:
 ### Traceroute'i tulemuste lugemine
 
 ```
-You → Node A (SNR: 8.5) → Node B (SNR: 5.2) → Target
+Sina → seade A (SNR: 8,5) → seade B (SNR: 5,2) → sihtkoht
 ```
 
 Iga hüpe esindab vahendussõlme, mis sõnumi edastas.
@@ -144,12 +146,12 @@ Asukohta jagavate sõlmede ajaloolised asukohaandmed:
 
 - GPS koordinaadid
 - Kõrgus
-- Speed (if moving)
+- Kiirus (kui liigub)
 - Timestamp for each position report
 
 ## Naabruse teave
 
-Näitab, milliseid sõlmi antud sõlm otse kuuleb, kasulik kärgvõrgus topoloogia mõistmiseks.
+Näitab, milliseid sõlmi antud sõlm otse kuuleb, kasulik kärgvõrgu topoloogia mõistmiseks.
 
 ## Viewing Metrics
 
@@ -163,14 +165,14 @@ Asukoha vahekaart kuvab GPS-i jagavate sõlmede asukohaandmeid:
 
 ![Asukoha tekstisisene sisu](../../assets/screenshots/nodes_position.png)
 
-> ⚠️ **Märkus:** Mõõdikud on saadaval ainult siis, kui need on kaugsõlme poolt esitatud. Mõõdikud värskendatakse iga sõlme telemeetria sätetes seadistatud intervallidega.
+> ℹ️ **Note:** Metrics are only available when they have been reported by the remote node. Mõõdikud värskendatakse iga sõlme telemeetria sätetes seadistatud intervallidega.
 
 ## Seotud teemad
 
 - [Nodes](nodes) — node list, filtering, and sorting
 - [Telemeetria & Sensorid](telemetry-and-sensors) — toetatud andurid ja seadistus
 - [Signal Meter](signal-meter) — how signal quality is calculated from SNR and RSSI
-- [Avasta](Discovery) — traceroute'i üksikasjad ja naabri teave
+- [Local Mesh Discovery](discovery) — traceroute details and neighbor info
 - [Ühikud ja lokaat](units-and-locale) — temperatuuri, kauguse ja kiiruse kuvamise ühikud
 
 ---

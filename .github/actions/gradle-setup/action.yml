@@ -19,7 +19,7 @@ inputs:
   job_summary_pr_comment:
     description: |
       Job summary as a PR comment: never | always | on-failure. Needs `pull-requests: write`;
-      no-ops on fork PRs (read-only token).
+      no-ops on fork PRs (read-only token). Forced to `never` on Windows — see below.
     default: 'never'
   dependency_graph:
     description: |
@@ -46,10 +46,10 @@ runs:
       run: mkdir -p ~/.gradle && cp .github/ci-gradle.properties ~/.gradle/gradle.properties
 
     - name: Validate Gradle Wrapper
-      uses: gradle/actions/wrapper-validation@v6
+      uses: gradle/actions/wrapper-validation@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6
 
     - name: Set up JDK 25
-      uses: actions/setup-java@v6
+      uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6
       with:
         java-version: '25'
         distribution: ${{ inputs.jdk_distribution }}
@@ -58,7 +58,7 @@ runs:
     - name: Restore cached JetBrains JDK 25
       if: inputs.install_jetbrains_jdk == 'true'
       id: cache-jbr
-      uses: actions/cache@v6
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
       with:
         path: ${{ runner.tool_cache }}/Java_JetBrains_jdk
         key: jbr-25-${{ runner.os }}-${{ runner.arch }}
@@ -67,7 +67,7 @@ runs:
       if: inputs.install_jetbrains_jdk == 'true' && steps.cache-jbr.outputs.cache-hit != 'true'
       id: setup-jbr
       continue-on-error: true
-      uses: actions/setup-java@v6
+      uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6
       with:
         java-version: '25'
         distribution: 'jetbrains'
@@ -86,7 +86,7 @@ runs:
     # FROM-CACHE locally. Keyed on the version catalog: over-invalidates on
     # unrelated bumps, but konan re-downloads are exactly what it prevents.
     - name: Cache Kotlin/Native toolchain
-      uses: actions/cache@v6
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
       with:
         path: ~/.konan
         key: konan-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('gradle/libs.versions.toml') }}
@@ -99,7 +99,7 @@ runs:
     # `<gradle-home>/~/.m2/...` and never matched anything.) Keyed on the
     # version catalog, which pins the Robolectric version.
     - name: Cache Robolectric android-all jars
-      uses: actions/cache@v6
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
       with:
         path: ~/.m2/repository/org/robolectric
         key: robolectric-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('gradle/libs.versions.toml') }}
@@ -107,7 +107,7 @@ runs:
           robolectric-${{ runner.os }}-${{ runner.arch }}-
 
     - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@v6
+      uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6
       with:
         cache-read-only: ${{ inputs.cache_read_only }}
         cache-encryption-key: ${{ inputs.gradle_encryption_key }}
@@ -120,7 +120,12 @@ runs:
         # Skip cleanup there — a slightly larger cache beats no cache at all.
         cache-cleanup: ${{ runner.os == 'Windows' && 'never' || 'on-success' }}
         add-job-summary: always
-        add-job-summary-as-pr-comment: ${{ inputs.job_summary_pr_comment }}
+        # Windows-only: the post step exits while the octokit sockets from comment
+        # minimization are still live, and Node 24.18.0 aborts in libuv teardown
+        # there (nodejs/node#56645), failing jobs whose build already passed.
+        # Nothing else in this post step does HTTP on a PR — the cache is
+        # read-only off main and dependency-graph defaults to disabled.
+        add-job-summary-as-pr-comment: ${{ runner.os == 'Windows' && 'never' || inputs.job_summary_pr_comment }}
         dependency-graph: ${{ inputs.dependency_graph }}
         gradle-home-cache-includes: |
           caches
@@ -147,7 +152,7 @@ runs:
       # Gates: opted in; key present (undecryptable otherwise — keeps keyless fork PRs off
       # these entries); not merge_group (throwaway cache scope).
       if: inputs.cache_configuration_cache == 'true' && inputs.gradle_encryption_key != '' && github.event_name != 'merge_group'
-      uses: actions/cache@v6
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
       with:
         path: ${{ github.workspace }}/.gradle/configuration-cache
         key: gradle-cc-${{ runner.os }}-${{ runner.arch }}-${{ github.job }}${{ inputs.cache_key_suffix && format('-{0}', inputs.cache_key_suffix) || '' }}-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('settings.gradle.kts', '**/build.gradle.kts', 'build-logic/**', 'gradle/*.gradle', 'gradle/libs.versions.toml', 'gradle.properties', 'config.properties', '.github/ci-gradle.properties') }}

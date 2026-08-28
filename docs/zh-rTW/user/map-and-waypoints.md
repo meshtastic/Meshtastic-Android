@@ -2,7 +2,7 @@
 title: 地圖與航點
 parent: 使用者指南
 nav_order: 6
-last_updated: 2026-07-08
+last_updated: 2026-08-27
 description: View node positions on the map, create and share waypoints, manage map layers and Site Planner, and control position sharing and privacy.
 aliases:
   - map
@@ -120,14 +120,15 @@ Tap the layers icon on the map to open **Manage Map Layers**, where you can impo
 
 The base map depends on your app flavor: **Google Play** builds use Google Maps, while **F-Droid** and Desktop builds use OpenStreetMap. On top of the base map, additional tile sources are available as overlays or alternatives:
 
-- 衛星影像（視可用性而定）
-- 離線圖磚（下載地圖區域以供離線使用）
+- Satellite imagery — on both Google Play and F-Droid
+- Offline tiles — **F-Droid only**. Download map areas for offline use through OSMdroid's tile
+  cache. Google Play and Desktop builds have no offline download
 
 ## 相關主題
 
 - 〔節點〕(nodes) — 檢視與篩選您的節點清單
 - 〔節點數據〕(node-metrics) — 各節點的訊號品質與位置歷史記錄
-- 〔探索〕(discovery) — 路由追蹤與鄰近節點資訊，用於了解 mesh 網路拓撲
+- [Local Mesh Discovery](discovery) — traceroute and neighbor info for understanding mesh topology
 - 〔單位與地區設定〕(units-and-locale) — 距離與座標的顯示格式
 
 ---

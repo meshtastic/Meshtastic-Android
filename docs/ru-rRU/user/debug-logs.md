@@ -2,7 +2,7 @@
 title: Отладочные журналы
 parent: Инструкция пользователя
 nav_order: 22
-last_updated: 2026-07-08
+last_updated: 2026-08-27
 description: Просматривайте и экспортируйте отладочные журналы приложения из самого приложения, а также прикрепляйте их к задаче на GitHub для помощи в диагностике ошибок — без необходимости в adb.
 aliases:
   - debug-logs
@@ -44,7 +44,7 @@ aliases:
 
 Прикрепите этот файл к своей задаче на GitHub.
 
-> 🔒 **Приватность**: Экспорты автоматически **удаляют** приватные ключи, ключи администратора и сеансовые ключи доступа перед записью в файл. Ключи каналов (PSKs) **не** удаляются, а журналы также могут содержать имена узлов, координаты и другие идентифицирующие данные — бегло просмотрите файл перед публикацией и, если сомневаетесь, делитесь им конфиденциально.
+> 🔒 **Privacy:** Exports automatically **redact** private keys, admin keys, session passkeys and channel PSKs before writing the file. Logs can still contain node names, positions, and other identifying details — glance through the file before sharing it publicly, and share privately if you have any doubt.
 
 ## Desktop
 

@@ -31,13 +31,20 @@ package org.meshtastic.core.common.util
 @Suppress("TooManyFunctions")
 object MetricFormatter {
 
+    /**
+     * The degree symbol for the display unit, for callers that already hold a converted value and only need to label it
+     * — chart axes, and the telemetry rows fed by an upstream conversion. Defined here so a symbol has one definition:
+     * wind drifted between screens precisely because its unit was written out twice.
+     */
+    fun degreeSymbol(isFahrenheit: Boolean): String = if (isFahrenheit) FAHRENHEIT_SYMBOL else CELSIUS_SYMBOL
+
     fun temperature(celsius: Float, isFahrenheit: Boolean): String {
         val value = if (isFahrenheit) celsius * FAHRENHEIT_SCALE + FAHRENHEIT_OFFSET else celsius
-        val unit = if (isFahrenheit) "°F" else "°C"
-        return "${NumberFormatter.format(value, 1)}$unit"
+        return "${NumberFormatter.format(value, 1)}${degreeSymbol(isFahrenheit)}"
     }
 
-    fun voltage(volts: Float, decimalPlaces: Int = 2): String = "${NumberFormatter.format(volts, decimalPlaces)} V"
+    fun voltage(volts: Float, decimalPlaces: Int = 2): String =
+        "${NumberFormatter.format(volts, decimalPlaces)} $VOLT_SYMBOL"
 
     fun current(milliAmps: Float, decimalPlaces: Int = 1): String =
         "${NumberFormatter.format(milliAmps, decimalPlaces)} mA"
@@ -63,10 +70,16 @@ object MetricFormatter {
      */
     fun rssi(value: Int?): String = if (value == null) UNKNOWN_VALUE else "$value dBm"
 
+    /**
+     * Wind arrives from the sensor in m/s and is shown in the unit a reader expects for weather: km/h for metric, mph
+     * for imperial. m/s is the meteorological observation standard, but public forecasts across most metric regions
+     * quote km/h, so that is what the app displays. The charts convert the same way — see `chartValue` — so a reading
+     * reads identically on the node card and on its graph.
+     */
     fun windSpeed(metersPerSecond: Float, isImperial: Boolean, decimalPlaces: Int = 1): String = if (isImperial) {
         formatMeasure((metersPerSecond * MPH_PER_MPS).toDouble(), MeasureUnitKind.MILE_PER_HOUR, decimalPlaces)
     } else {
-        formatMeasure(metersPerSecond.toDouble(), MeasureUnitKind.METER_PER_SECOND, decimalPlaces)
+        formatMeasure((metersPerSecond * KPH_PER_MPS).toDouble(), MeasureUnitKind.KILOMETER_PER_HOUR, decimalPlaces)
     }
 
     fun rainfall(millimeters: Float, isImperial: Boolean, decimalPlaces: Int = 1): String = if (isImperial) {
@@ -85,8 +98,14 @@ object MetricFormatter {
 /** Shown in place of a metric the radio did not report. A symbol, so it needs no translation. */
 private const val UNKNOWN_VALUE = "—"
 
+/** Display symbols. Fixed rather than translated — see the note on [MetricFormatter]. */
+const val CELSIUS_SYMBOL = "°C"
+const val FAHRENHEIT_SYMBOL = "°F"
+const val VOLT_SYMBOL = "V"
+
 private const val FAHRENHEIT_SCALE = 1.8f
 private const val FAHRENHEIT_OFFSET = 32
 private const val MPH_PER_MPS = 2.23694f
+private const val KPH_PER_MPS = 3.6f
 private const val MM_PER_INCH = 25.4f
 private const val LBS_PER_KG = 2.20462f

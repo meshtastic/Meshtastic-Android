@@ -2,7 +2,7 @@
 title: TAK integratsioon
 parent: Kasutusjuhend
 nav_order: 10
-last_updated: 2026-08-19
+last_updated: 2026-08-28
 description: Koostöö ATAKi ja WinTAKiga — CoT asukoha jagamine, TAK rollid ja pluginate seadistamine.
 aliases:
   - tak
@@ -26,28 +26,26 @@ TAK moodul võimaldab Meshtastic sõlmedel:
 
 ### Prerequisites
 
-- ATAK (Android Team Awareness Kit) või WinTAK on paigaldatud
-- Meshtastic ATAK plugin on paigaldatud
-- TAK moodul on sinu Meshtastic raadios lubatud
+- ATAK (Android Team Awareness Kit), iTAK, or WinTAK installed
+- Your node's **Device Role** set to **TAK** or **TAK Tracker** — this is what makes the TAK
+  module appear in Module Config at all
+
+> ⚠️ **Warning:** The old **Meshtastic ATAK Plugin** is no longer part of this path and cannot
+> work. It bridged through the cross-process AIDL API, which was removed in app 2.8.0; the mesh
+> service is now in-process only. Do not install it. Interop today runs over the app's own local
+> TAK server plus the Mesh to CoT Converter, both described below, with stock ATAK/iTAK/WinTAK.
 
 ### Sätted
 
-1. Mine menüüsse **Seaded → Mooduli konfiguratsioon → TAK**.
-2. Luba TAK moodul.
-3. TAK meeskonna/grupi seadistamine:
+Mine menüüsse **Seaded → Mooduli konfiguratsioon → TAK**. The module's own settings are your TAK identity —
+there is no separate enable switch here, because the device Role above is what turns TAK on:
 
 ![Mooduli lüliti](/assets/screenshots/settings_switch.png)
 
-| Sätted  | Kirjeldus                    |
-| ------- | ---------------------------- |
-| Lubatud | TAK-i interopi aktiveerimine |
-| Režiim  | TAK ühilduv väljundrežiim    |
-
-### ATAK plugina sätted
-
-1. Paigalda pluginate hoidlast Meshtastic ATAK plugin.
-2. Ava ATAK ja luba Meshtastic plugin.
-3. Plugin sildab sõnumeid ATAKi ja kärgvõrgu vahel.
+| Sätted | Kirjeldus                         |
+| ------ | --------------------------------- |
+| Tiim   | Your TAK team colour              |
+| Roll   | Your member role within that team |
 
 ### Lokaalne TAK server
 
@@ -57,6 +55,10 @@ Rakendus saab käitada ka **kohalikku TAK serverit**, nii et **samal seadmel** o
 
 - **Luba kohalik TAK server** – käivitab pordil **8089** ainult tagasihelistamise eesmärgil toimiva mTLS-serveri sama seadme ATAK/iTAK-ühenduste jaoks.
 - **TAK kärgvõrgu kanal** — valib, millisel Meshtastic kanalil väljaminev TAK liiklus saadetakse (vaikimisi: peamine kanal, indeks 0). Sissetulevat TAK liiklust võetakse vastu igalt kanalilt. Vastab iOS-i ja pärand-ATAK-i pistikprogrammi samaväärsele sättele.
+- **Mesh to CoT Converter** — off by default, and shown under the server toggle. With the server
+  running, this synthesizes a CoT contact for every node in your node database, so ordinary
+  Meshtastic nodes appear on the ATAK map as contacts. **This is what replaced the old plugin's
+  node visibility** — without it, only TAK-role nodes show up.
 - **Ekspordi TAK andmepakett** — genereerib `.zip`-andmepaketi, mille ATAK/iTAK saab selle serveriga ühenduse loomiseks importida.
 
 ## TAK rollid
@@ -107,17 +109,17 @@ Kui on seadistatud:
 - Asukohavärskendused liiguvad Meshtasticu ja TAKi vahel kahesuunaliselt
 - TAK jälgimisseadme sõlmed levitavad PLId automaatselt – nende asukohad kuvatakse ATAK kaartidel ilma ATAK poolse konfita
 
-> ⚠️ **Märkus:** TAK-i integratsioon nõuab spetsiifilisi sõlmerolle ja mooduli seadistust. Standardsed kliendisõlmed ei osale automaatselt TAK operatsioonides.
+> ℹ️ **Note:** TAK integration requires specific node roles. Standard client nodes don't automatically participate in TAK operations — though with **Mesh to CoT Converter** enabled they still appear on the ATAK map as contacts.
 
 ## Veaotsing
 
-| Probleem                                    | Põhjus                                                                                                               | Lahendus                                                                                                   |
-| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| Sõlme ei kuvata ATAK kaardile               | TAK moodul on keelatud või vale roll                                                                                 | Veendu, et TAK moodul on lubatud ja sõlme roll on TAK või TAK jälgimisseade                                |
-| Asukohavärskendused on aegunud              | GPS asukoht kadunud või intervall liiga pikk                                                                         | Kontrolli GPSi olekut; vähenda asukoha konfis asukoha levitamise intervalli                                |
-| ATAK plugin kuvab teadet „ühendus katkenud” | BLE connection lost or plugin crashed                                                                                | Ühenda Meshtastic rakenduses sinihammas uuesti ja seejärel taaskäivita ATAK plugin                         |
-| Shapes, markers, or routes not bridging     | Saatja sõlm kasutab pärandversiooni V1 (püsivara 2.7.x või vanem) | Värskenda saatva sõlme püsivara versioonile 2.8.0+ sõnumivormingu V2 jaoks |
-| CoT andmed ei liigu                         | Kanali mittevastavus                                                                                                 | Kõik TAK-sõlmed peavad olema samal kanalil ja sama krüpteeringuga                                          |
+| Probleem                                | Põhjus                                                                                                               | Lahendus                                                                                                                                                                                              |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Sõlme ei kuvata ATAK kaardile           | Wrong device role, or Mesh to CoT Converter off                                                                      | Set the node's Device Role to TAK or TAK Tracker. For ordinary (non-TAK-role) nodes to appear, also enable **Mesh to CoT Converter** under the TAK Server settings |
+| Asukohavärskendused on aegunud          | GPS asukoht kadunud või intervall liiga pikk                                                                         | Kontrolli GPSi olekut; vähenda asukoha konfis asukoha levitamise intervalli                                                                                                                           |
+| ATAK shows "disconnected"               | The local TAK server is off, or ATAK is pointed elsewhere                                                            | Check **Enable Local TAK Server** is on, and that ATAK is connecting to `127.0.0.1:8089` — re-import the exported data package if unsure                                                              |
+| Shapes, markers, or routes not bridging | Saatja sõlm kasutab pärandversiooni V1 (püsivara 2.7.x või vanem) | Värskenda saatva sõlme püsivara versioonile 2.8.0+ sõnumivormingu V2 jaoks                                                                                            |
+| CoT andmed ei liigu                     | Kanali mittevastavus                                                                                                 | Kõik TAK-sõlmed peavad olema samal kanalil ja sama krüpteeringuga                                                                                                                                     |
 
 ## Security Considerations
 

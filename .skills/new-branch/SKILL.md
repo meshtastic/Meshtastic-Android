@@ -16,8 +16,8 @@ This replaces the ad-hoc prose that used to be retyped at the start of every ses
 1. **Clean worktree.** If `git status --porcelain` is non-empty, ask the user before proceeding.
 2. **Upstream remote present.** `git remote -v` must list `upstream` pointing at
    `meshtastic/Meshtastic-Android`. If only `origin` exists on a fork, treat `origin` as upstream.
-3. **Secrets bootstrapped.** If `local.properties` is missing, copy `secrets.defaults.properties`
-   (required for `google` flavor builds).
+3. **Secrets:** nothing to bootstrap — `secrets.defaults.properties` is tracked and is the
+   secrets plugin's fallback, so every flavor builds without a local secrets file.
 
 ## Standard Recipe
 
@@ -61,7 +61,6 @@ Never use plain `--force`. Always `--force-with-lease` to avoid clobbering colla
 
 ## Post-Branch Checklist
 - [ ] Branch name follows conventional prefix.
-- [ ] `local.properties` exists.
 - [ ] `ANDROID_HOME` exported (see AGENTS.md workspace bootstrap).
 - [ ] Optional: run `./gradlew assembleDebug` once to catch environment regressions before editing.
 

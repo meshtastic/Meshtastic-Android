@@ -2,7 +2,7 @@
 title: Настройки — Модули и администрирование
 parent: Руководство пользователя
 nav_order: 8
-last_updated: 2026-07-08
+last_updated: 2026-08-27
 description: Настрой дополнительные функциональные модули (MQTT, телеметрия, готовые сообщения, TAK и другие) и выполняй администрирование устройств.
 aliases:
   - modules
@@ -32,17 +32,28 @@ aliases:
 
 Мосты передают сообщения туда и обратно от брокера MQTT для подключения к интернету. Ты так расширишь сеть за пределы радиуса действия или интегрируешь её с системами домашней автоматизации.
 
-| Настройка        | Описание                                                                |
-| ---------------- | ----------------------------------------------------------------------- |
-| Включено         | Переключить MQTT мост                                                   |
-| Сервер           | Адрес MQTT брокера                                                      |
-| Имя пользователя | Имя пользователя для аутентификации                                     |
-| Пароль           | Пароль аутентификации                                                   |
-| Шифрование       | Зашифровать MQTT-пейлоады                                               |
-| ~~Вывод JSON~~   | ⚠️ **Устарело** — поддержка JSON удалена из прошивки; поле игнорируется |
-| TLS              | Использовать защищённое соединение                                      |
-| Корневая тема    | Базовый путь темы MQTT                                                  |
-| Отчет карты      | Опубликовать позицию на публичной карте                                 |
+| Настройка                    | Описание                                                                                                                                                                                  |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Включено                     | Переключить MQTT мост                                                                                                                                                                     |
+| Сервер                       | Адрес MQTT брокера                                                                                                                                                                        |
+| Имя пользователя             | Имя пользователя для аутентификации                                                                                                                                                       |
+| Пароль                       | Пароль аутентификации                                                                                                                                                                     |
+| Шифрование                   | Зашифровать MQTT-пейлоады                                                                                                                                                                 |
+| Вывод JSON                   | Publish and consume MQTT messages as JSON. Marked deprecated in the protobuf schema, but it is still the only toggle for this behaviour and the firmware still honours it |
+| TLS                          | Использовать защищённое соединение                                                                                                                                                        |
+| Корневая тема                | Базовый путь темы MQTT                                                                                                                                                                    |
+| Прокси клиенту включен       | Let a connected phone carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                       |
+| MQTT-прокси на этом телефоне | The phone-side half of the above: whether _this_ phone is currently acting as that relay. See [MQTT](mqtt)                                                |
+| Отчет карты                  | Publish position to the public map — see below                                                                                                                                            |
+
+**Map Report** expands into its own group:
+
+| Настройка          | Описание                                                                                                                        |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| Включено           | Publish to the public map at all                                                                                                |
+| Share location     | Explicit consent to include your position. Map reporting will not save without it                               |
+| Position precision | How coarsely your position is published                                                                                         |
+| Publish interval   | How often to report. Must be **at least 3600 s (1 hour)** — the app blocks saving below that |
 
 См. [MQTT](mqtt) для подробного руководства по использованию, включая шифрование, конфиденциальность и настройку брокера.
 
@@ -50,29 +61,37 @@ aliases:
 
 Позволяет общаться через последовательный порт с внешними устройствами (GPS-модулями, датчиками или собственной техникой). Когда включено, последовательный порт ноды может отправлять и получать данные в формате protobuf или текст, что позволяет внешним микроконтроллерам или компьютерам взаимодействовать с сетью.
 
-| Настройка                                  | Описание                                     |
-| ------------------------------------------ | -------------------------------------------- |
-| Включено                                   | Включить последовательное соединение         |
-| Эхо                                        | Echo получил обратно последовательные данные |
-| Режим обмена                               | Вывод в формате текста, Protobuf или NMEA    |
-| Пины RX/TX                                 | GPIO-пины для последовательного соединения   |
-| Скорость передачи (бод) | Скорость последовательного соединения        |
+| Настройка                       | Описание                                                                                                                                                                                            |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| COM-порт включен                | Включить последовательное соединение                                                                                                                                                                |
+| Echo включен                    | Echo получил обратно последовательные данные                                                                                                                                                        |
+| Режим COM-порта                 | Which protocol the port speaks — Default, Simple, Proto, Text message, NMEA, CalTopo, WS85 weather station, VE.Direct, MeshSolar config, Log, or Log (text only) |
+| RX / TX                         | GPIO pins for the serial connection                                                                                                                                                                 |
+| Скорость COM-порта              | Port speed                                                                                                                                                                                          |
+| Время ожидания истекло          | How long to wait before considering an incoming message complete                                                                                                                                    |
+| Переопределить COM-порт консоли | Take over the port the debug console normally uses                                                                                                                                                  |
 
 ### Модуль внешних уведомлений
 
 Управляет зуммером, светодиодом или вибрацией на вашем радиооборудовании. Полезно для устройств, которым нужно физически сигнализировать о приходе сообщения — особенно удобно для неоснащенных персоналом или уличных установок.
 
-| Настройка                                 | Описание                            |
-| ----------------------------------------- | ----------------------------------- |
-| Включено                                  | Включить уведомления                |
-| Включить уведомление о входящем сообщении | Уведомлять о входящих сообщениях    |
-| Зуммер при уведомлении                    | Использовать буззер для сообщений   |
-| Вибрация при уведомлении                  | Использовать вибрацию для сообщений |
-| Уведомлять при 🔔                         | Уведомлять о символе колокола       |
-| Вывод (GPIO)           | Пин для вывода уведомления          |
-| Активный выход                            | Высокая или низкая активность       |
-| Длительность (мс)      | Длительность уведомления            |
-| Использовать I2S как буззер               | Использовать аудиовывод I2S         |
+There are two independent triggers — an incoming **message**, and a received **bell** character —
+and each can drive the LED, the buzzer and the vibration motor separately, giving six toggles.
+
+| Настройка                                                  | Описание                                                                                            |
+| ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Внешние уведомления включены                               | Master toggle for the module                                                                        |
+| Alert message LED / buzzer / vibra                         | Which outputs fire on an incoming message                                                           |
+| Alert bell LED / buzzer / vibra                            | Which outputs fire on a received bell character                                                     |
+| Выход LED (GPIO)                        | Pin the LED is wired to                                                                             |
+| Вывод светодиода активный высокий                          | Whether the LED pin is active high or low                                                           |
+| Выход Буззера (GPIO)                    | Pin the buzzer is wired to                                                                          |
+| Вибросигнал (GPIO)                      | Pin the vibration motor is wired to                                                                 |
+| Использовать PWM-звукоизлучатель                           | Drive the buzzer with PWM, which allows tones rather than a single pitch                            |
+| Использовать I2S как буззер                                | Send the alert through an I2S audio output instead                                                  |
+| Продолжительность вывода (миллисекунды) | How long a single alert lasts                                                                       |
+| Таймаут Nag (в секундах)                | Keep repeating the alert for this long until it is acknowledged. 0 disables nagging |
+| Рингтон                                                    | The tone played on a PWM buzzer, in RTTTL. Can be imported from a file              |
 
 ### Модуль Store & Forward
 
@@ -91,6 +110,10 @@ aliases:
 
 ### Модуль проверки дальности
 
+> ⚠️ **Warning:** Range Test only works on a secured primary channel. While your primary channel
+> still uses the default public key, the Enabled, Interval and Save-CSV controls stay disabled, and
+> saving force-disables the module if the channel has reverted to public.
+
 Автоматизированный инструмент для проверки дальности и оценки качества связи между нодами. Когда включено, нода периодически отправляет сообщения с увеличивающимся счетчиком. Приёмная нода записывает эти сообщения, что позволяет тебе уйти пешком или уехать на машине, а потом проанализировать, на каком расстоянии сообщения перестали приходить.
 
 | Настройка                                | Описание                                      |
@@ -103,12 +126,22 @@ aliases:
 
 Контролирует какими телеметрическими данными ваш узел делится с сеткой. Телеметрия включает данные о состоянии устройства (заряд батареи, время работы) и данные с датчиков окружающей среды (температура, влажность, давление).
 
-| Настройка                             | Описание                                       |
-| ------------------------------------- | ---------------------------------------------- |
-| Интервал обновления метрик устройства | Как часто сообщать о показателях устройства    |
-| Интервал обновления метрик среды      | Как часто сообщать о датчиках окружающей среды |
-| Телеметрия воздуха                    | Сообщить данные датчика частиц                 |
-| Включены метрики энергии              | Сообщать об энергопотреблении                  |
+Each of the four metric groups has its own enable toggle and its own interval, so you can report
+battery health often and sensors rarely.
+
+| Настройка                                   | Описание                                                                                                                                                                          |
+| ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Отправлять телеметрию устройства            | Master toggle for device metrics. Only shown on firmware 2.7.12 and newer                                                         |
+| Интервал обновления метрик устройства       | How often to report battery, uptime and channel utilisation                                                                                                                       |
+| Модуль метрик окружения включен             | Report the attached environment sensors                                                                                                                                           |
+| Интервал обновления метрик среды            | How often to report them                                                                                                                                                          |
+| Показатели окружения на экране включены     | Also show these readings on the device's own display                                                                                                                              |
+| Использовать метрику окружения в Fahrenheit | Use °F on the device's display. This is the radio's screen only — the app follows your phone's locale, see [Units & Locale](units-and-locale) |
+| Модуль измерения качества воздуха включен   | Report particulate and CO₂ sensor data                                                                                                                                            |
+| Интервал обновления данных качества воздуха | How often to report them                                                                                                                                                          |
+| Модуль метрик питания включен               | Report the per-channel voltage and current readings                                                                                                                               |
+| Интервал обновления метрик электропитания   | How often to report them                                                                                                                                                          |
+| Включить метрики питания на экране          | Also show power readings on the device's display                                                                                                                                  |
 
 Посмотрите [Телеметрия и датчики](telemetry-and-sensors) — для получения информации о поддерживаемых датчиках и рекомендациях по настройке.
 
@@ -116,27 +149,32 @@ aliases:
 
 Предварительно настроенные сообщения, доступные через физические кнопки устройства (для радиостанций с поворотными энкодерами, кнопочными панелями или аналогичным оборудованием ввода). Определите список быстрых сообщений, которые могут быть переданы без подключённого телефона — идеально подходит для использования в поле.
 
-| Настройка               | Описание                                                                 |
-| ----------------------- | ------------------------------------------------------------------------ |
-| ~~Включено~~            | ⚠️ **Устарело** — текущая прошивка может игнорировать этот переключатель |
-| Сообщения               | Список сообщений, разделённых новой строкой                              |
-| Отправлять 🔔           | Воспроизвести звук колокола при отправке                                 |
-| Поворотный энкодер      | Включить ввод поворотного энкодера                                       |
-| Пины поворота и нажатия | Задания GPIO PIN-кода для ввода                                          |
+| Настройка                                 | Описание                                                                                                  |
+| ----------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| ~~Canned message enabled~~                | ⚠️ **Deprecated** in the protobuf schema                                                                  |
+| Сообщения                                 | Список сообщений, разделённых новой строкой                                                               |
+| Отправить колокольчик                     | Send a bell character alongside the message, so a receiving node's External Notification module can sound |
+| Rotary encoder enabled                    | Use a rotary encoder as the input device                                                                  |
+| GPIO pin for rotary encoder A / B / press | The three pins the encoder is wired to                                                                    |
+| Generate input event on press / CW / CCW  | Which key event each encoder action produces                                                              |
+| Вверх/Вниз/Выбирать включён               | A separate, simpler input scheme using up/down/select buttons rather than an encoder                      |
+| ~~Allow input source~~                    | ⚠️ **Deprecated** in the protobuf schema                                                                  |
 
 ### Звуковой модуль
 
 Поддержка аудио Codec2 для низкополосной голосовой связи через сетку. Это **экспериментальная функция**, которая кодирует голос в очень маленькие пакеты данных с помощью кодека Codec2.
 
-| Настройка           | Описание                                               |
-| ------------------- | ------------------------------------------------------ |
-| Включено            | Активировать модуль аудио                              |
-| Частота кодирования | Компромисс между качеством звука и полосой пропускания |
-| Выбор слов I2S      | GPIO контакт для I2S WS                                |
-| I2S Вход данных     | Пин GPIO для I2S DIN                                   |
-| I2S Выход данных    | Пин GPIO для I2S DOUT                                  |
+| Настройка                          | Описание                                               |
+| ---------------------------------- | ------------------------------------------------------ |
+| Включено                           | Активировать модуль аудио                              |
+| Частота кодирования                | Компромисс между качеством звука и полосой пропускания |
+| Пин PTT                            | GPIO pin for the push-to-talk button                   |
+| Выбор слов I2S                     | GPIO контакт для I2S WS                                |
+| I2S Вход данных                    | Пин GPIO для I2S DIN                                   |
+| I2S Выход данных                   | Пин GPIO для I2S DOUT                                  |
+| I2S Clock (SCK) | GPIO pin for the I2S bit clock                         |
 
-> ⚠️ Примечание: Для работы аудио требуется специальное аппаратное обеспечение (I2S-микрофон и динамик). Качество голоса очень низкополосное — представьте себе «разборчивую радиосвязь», а не качество телефонного звонка.
+> ℹ️ **Note:** Audio requires specific hardware (I2S microphone and speaker). Качество голоса очень низкополосное — представьте себе «разборчивую радиосвязь», а не качество телефонного звонка.
 
 ### Удаленный аппаратный модуль
 
@@ -160,7 +198,7 @@ aliases:
 | Интервал обновления (с) | Как часто транслировать список соседей                                                                                                           |
 | Передача через LoRa                        | Также транслировать информацию соседей по LoRa, а не только MQTT/телефон. Недоступно на канале используя ключ по умолчанию и имя |
 
-Смотрите [Discovery](discovery) за тем как использовать соседние данные для сеточно топологического исследования.
+See [Local Mesh Discovery](discovery) for how to use neighbor data for mesh topology exploration.
 
 ### Модуль окружающего освещения
 
@@ -191,14 +229,38 @@ aliases:
 
 Подсчёт количества людей по Wi-Fi и BLE-запросам от устройств. Засчитывает ближайшие устройства, пассивно прослушивая зондирующие запросы, чтобы телефоны и ноутбуки излучали при сканировании сетей. Доступно только на устройствах ESP32.
 
-| Настройка                                  | Описание                         |
-| ------------------------------------------ | -------------------------------- |
-| Включено                                   | Активировать подсчет людей       |
-| Интервал обновления (с) | Как часто сообщать подсчитывания |
+| Настройка                                  | Описание                                                                                                         |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| Включено                                   | Активировать подсчет людей                                                                                       |
+| Интервал обновления (с) | Как часто сообщать подсчитывания                                                                                 |
+| WiFi RSSI threshold                        | Ignore WiFi probes weaker than this, so distant devices are not counted (defaults to −80 dBm) |
+| BLE RSSI threshold                         | The same cut-off for BLE advertisements (defaults to −80 dBm)                                 |
 
 > 💡 **Совет:** Paxcounter полезен для приблизительной оценки пешеходного потока в местах начала маршрутов, на мероприятийных площадках или в других локациях. Счетчики приблизительны — один человек может иметь несколько устройств.
 
+### Status Message Module
+
+Publishes a short free-text status line for your node, which other nodes can display alongside it.
+
+| Настройка                     | Описание                                                                                                                                                                         |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Строка фактического состояния | Up to 80 characters. The **✕** in the field clears it. (That is the app's own label for the field, verbatim.) |
+
+Saving takes effect immediately — this is one of the few module settings that never asks the
+node to reboot.
+
+> ℹ️ **Note:** The screen only appears for firmware that reports support for the status-message
+> module. If you do not see it in the module list, your node's firmware does not have it.
+
+### Mesh Beacon Module
+
+Broadcasts an invitation to your mesh, and receives invitations from others. See
+[Local Mesh Discovery](discovery) for the full walkthrough.
+
 ### Модуль TAK
+
+> ℹ️ **Note:** This module only appears in the list once the node's **Device Role** (Device Config)
+> is set to **TAK** or **TAK Tracker**. Change the role first, or the entry will not be there.
 
 Интеграция Team Awareness Kit для совместимости с ATAK и WinTAK. См. [TAK Integration](tak) для детальной настройки и использования.
 
@@ -217,7 +279,11 @@ aliases:
 
 ### Очистить базу данных нод
 
-Удаляет устаревшие узлы из локальной базы данных, которые не были услышаны в настраиваемом окне времени.
+Prunes your local node database. Two independent controls:
+
+- An **age slider** — remove nodes not heard from within that window.
+- **Clean unknown nodes only** — restrict the purge to nodes that never sent their user info,
+  leaving named nodes alone regardless of age.
 
 ### Сброс к заводским настройкам
 
@@ -230,6 +296,23 @@ aliases:
 ### Панель отладки
 
 Открывает вкладки **Пакет** и **Журналы приложений** для просмотра, фильтрации и экспорта диагностических выходов. См. [Отладочные журналы](debug-logs) для полного прохождения.
+
+### О приложении
+
+**Settings → About** carries the app's own identity rather than the radio's:
+
+Three sections:
+
+- **What is Meshtastic?** — a short description of the project.
+- **Apps** — opens with **Need Hardware?**, a rotating carousel of popular devices that links out
+  to where to buy one, then the GitHub repository, the running app version, and
+  **Acknowledgements** (below).
+- **Project information** — links to the website and to this documentation.
+
+### Благодарности
+
+Reached from **About**, this lists every open-source library the app ships, with its license,
+generated at build time by AboutLibraries. It was previously called the license screen.
 
 ### Устранение неполадок удалённого администрирования
 

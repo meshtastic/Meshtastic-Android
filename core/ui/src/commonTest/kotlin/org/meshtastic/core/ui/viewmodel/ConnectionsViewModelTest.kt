@@ -53,6 +53,7 @@ import org.meshtastic.core.testing.FakeRadioPrefs
 import org.meshtastic.core.testing.FakeServiceRepository
 import org.meshtastic.core.testing.FakeUiPrefs
 import org.meshtastic.core.testing.TestDataFactory
+import org.meshtastic.proto.Config
 import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.User
@@ -100,19 +101,21 @@ class ConnectionsViewModelTest {
         uiPrefs.hasShownNotPairedWarning.value = false
         uiPrefs.firmwareUpdateNotificationKeys.value = emptySet()
 
-        viewModel =
-            ConnectionsViewModel(
-                radioConfigRepository = radioConfigRepository,
-                serviceRepository = serviceRepository,
-                nodeRepository = nodeRepository,
-                nodeRestartTracker = nodeRestartTracker,
-                uiPrefs = uiPrefs,
-                deviceHardwareRepository = deviceHardwareRepository,
-                firmwareReleaseRepository = firmwareReleaseRepository,
-                radioPrefs = radioPrefs,
-                notificationManager = notificationManager,
-            )
+        viewModel = newViewModel()
     }
+
+    /** Rebuilt per test so a test can stub [radioConfigRepository] differently before construction. */
+    private fun newViewModel() = ConnectionsViewModel(
+        radioConfigRepository = radioConfigRepository,
+        serviceRepository = serviceRepository,
+        nodeRepository = nodeRepository,
+        nodeRestartTracker = nodeRestartTracker,
+        uiPrefs = uiPrefs,
+        deviceHardwareRepository = deviceHardwareRepository,
+        firmwareReleaseRepository = firmwareReleaseRepository,
+        radioPrefs = radioPrefs,
+        notificationManager = notificationManager,
+    )
 
     @AfterTest
     fun tearDown() {
@@ -122,6 +125,26 @@ class ConnectionsViewModelTest {
     @Test
     fun testInitialization() {
         assertNotNull(viewModel)
+    }
+
+    @Test
+    fun `txDisabled follows the LoRa tx_enabled flag and stays false before config arrives`() = runTest {
+        val configFlow = MutableStateFlow(LocalConfig())
+        every { radioConfigRepository.localConfigFlow } returns configFlow
+        val vm = newViewModel()
+
+        vm.txDisabled.test {
+            // No lora config yet: absence of the flag is not a disabled transmitter.
+            assertEquals(false, awaitItem())
+
+            configFlow.value = LocalConfig(lora = Config.LoRaConfig(tx_enabled = false))
+            assertEquals(true, awaitItem())
+
+            configFlow.value = LocalConfig(lora = Config.LoRaConfig(tx_enabled = true))
+            assertEquals(false, awaitItem())
+
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test

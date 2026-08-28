@@ -82,7 +82,7 @@ camerax = "1.6.2"
 ktor = "3.5.2"
 
 # Other
-aboutlibraries = "15.1.1"
+aboutlibraries = "15.2.0"
 jserialcomm = "2.11.4"
 coil = "3.6.0"
 datadog-gradle = "1.30.0"
@@ -93,17 +93,17 @@ devtools-ksp = "2.3.11"
 firebase-crashlytics-gradle = "3.0.8"
 google-services-gradle = "4.5.0"
 markdown = "0.7.9"
-markdownRenderer = "0.44.0"
+markdownRenderer = "0.45.0"
 okio = "3.18.1"
 uri-kmp = "0.0.21"
 spotless = "8.10.1"
-vico = "3.3.0"
+vico = "3.3.1"
 kable = "0.44.3"
 mqttastic = "0.8.1"
 jmdns = "3.6.3"
 qrcode-kotlin = "4.5.0"
 takpacket-sdk = "0.9.1"
-meshtastic-protobufs = "2.7.26.155-g1b4cb00-SNAPSHOT"
+meshtastic-protobufs = "2.7.26.159-g7b2464c-SNAPSHOT"
 
 # Gradle Plugins
 ccud = "2.8.0"
@@ -240,7 +240,7 @@ qrcode-kotlin = { module = "io.github.g0dkar:qrcode-kotlin", version.ref = "qrco
 kotlin-gradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 dokka-gradlePlugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
 
-kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version = "0.5.1" }
+kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version = "0.5.2" }
 kotlinx-atomicfu = { module = "org.jetbrains.kotlinx:atomicfu", version = "0.33.0" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines-android" }
 kotlinx-coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines-android" }

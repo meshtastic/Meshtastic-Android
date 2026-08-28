@@ -1,10 +1,12 @@
 ---
-title: Откриване
+title: Local Mesh Discovery
 parent: Ръководство за потребители
 nav_order: 12
-last_updated: 2026-07-27
+last_updated: 2026-08-28
 description: Explore your mesh network — the Local Mesh Discovery scanner, traceroute paths, neighbor maps, and node discovery tools.
 aliases:
+  - discovery
+  - local-mesh-discovery
   - mesh-discovery
   - local-discovery
   - network-scan
@@ -12,7 +14,7 @@ aliases:
   - neighbor-info
 ---
 
-# Откриване
+# Local Mesh Discovery
 
 Discovery tools help you understand **how** your mesh network is connected — which nodes can hear each other, what paths messages take, and where bottlenecks or weak links exist.
 
@@ -29,7 +31,7 @@ Local Mesh Discovery is a dedicated scanning mode that helps you find the best L
 
 Open it from **Settings → Advanced → Local Mesh Discovery**. On desktop, it has its own **Settings → Local Mesh Discovery** entry.
 
-> ⚠️ **Note:** Discovery temporarily changes your radio's LoRa settings while it scans, then restores your original configuration when it finishes. Your device must be connected to run a scan.
+> ℹ️ **Note:** Discovery temporarily changes your radio's LoRa settings while it scans, then restores your original configuration when it finishes. Your device must be connected to run a scan.
 
 ### Setting Up a Scan
 
@@ -84,7 +86,7 @@ Additional features available from the results:
 - **Discovery Map** — a map of the nodes found during the scan.
 - **Report export** — export a report as a PDF on Android, or as text on other platforms.
 
-> 💡 **Tip:** On Android, Discovery can generate an on-device AI summary (Gemini Nano) of your results. If the on-device model isn't available, an algorithmic summary is used instead — so you always get a readable interpretation of the scan.
+> 💡 **Tip:** On **Google Play** builds, Discovery can generate an on-device AI summary (Gemini Nano) of your results. F-Droid builds always use the algorithmic summary — the proprietary ML Kit dependency is deliberately excluded from that flavor — so you get a readable interpretation of the scan either way.
 
 ---
 
@@ -167,7 +169,7 @@ Once enabled, your node periodically broadcasts its neighbor table. Other nodes 
 - Each neighbor entry shows the node that was directly heard and its signal quality.
 - Combine neighbor data from multiple nodes to understand the full mesh topology.
 
-> ⚠️ **Note:** Neighbor Info increases airtime usage because every enabled node periodically broadcasts its neighbor list. On busy meshes with many nodes, consider longer broadcast intervals (3600 seconds or more) to avoid congestion.
+> ℹ️ **Note:** Neighbor Info increases airtime usage because every enabled node periodically broadcasts its neighbor list. On busy meshes with many nodes, consider longer broadcast intervals (3600 seconds or more) to avoid congestion.
 
 ---
 
@@ -201,6 +203,14 @@ See [Nodes](nodes) for full details on filtering and sorting options.
 - **Enable Neighbor Info on key nodes** — especially routers and repeaters, to build a picture of the backbone.
 - **Check the map** — node positions on the [Map](map-and-waypoints) combined with signal data help you understand why some links are strong and others are weak.
 - **Compare signal over time** — use the [Signal Meter](signal-meter) guide to interpret SNR and RSSI values correctly.
+
+## Свързани теми
+
+- [Nodes](nodes) — the node list these scans populate
+- [Map & Waypoints](map-and-waypoints) — see discovered nodes geographically
+- [Signal Meter](signal-meter) — interpret the SNR and RSSI a scan reports
+- [Settings — Modules & Admin](settings-module-admin) — configure the Mesh Beacon and Neighbor Info modules
+- [Messages & Channels](messages-and-channels) — join a mesh you found and start talking
 
 ---
 

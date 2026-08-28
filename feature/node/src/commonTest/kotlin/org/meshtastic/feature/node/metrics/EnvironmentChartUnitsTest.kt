@@ -31,10 +31,10 @@ class EnvironmentChartUnitsTest {
     // ---- chartValue ----
 
     @Test
-    fun windSpeedMetricStaysMetersPerSecond() {
+    fun windSpeedMetricIsConvertedToKph() {
         val t = telemetry(EnvironmentMetrics(wind_speed = 10f))
 
-        assertEquals(10f, chartValue(Environment.WIND_SPEED, t, isImperial = false)!!, 0.001f)
+        assertEquals(36f, chartValue(Environment.WIND_SPEED, t, isImperial = false)!!, 0.001f)
     }
 
     @Test
@@ -71,7 +71,7 @@ class EnvironmentChartUnitsTest {
 
     @Test
     fun windSpeedSuffixFollowsMeasurementSystem() {
-        assertEquals(" m/s", unitSuffix(Environment.WIND_SPEED, isFahrenheit = false, isImperial = false))
+        assertEquals(" km/h", unitSuffix(Environment.WIND_SPEED, isFahrenheit = false, isImperial = false))
         assertEquals(" mph", unitSuffix(Environment.WIND_SPEED, isFahrenheit = false, isImperial = true))
     }
 

@@ -36,6 +36,12 @@ Keep the last 5–8 entries and trim older ones from the bottom.
 
 **August 2026** — New module `feature/map-maplibre`: the F-Droid flavor and Desktop now render every map surface (main map, node track, traceroute, discovery, inline mini-map) through `maplibre-compose` from one multiplatform module, and `osmdroid` is gone. The July entry below describes the renderer it replaced. `EditWaypointDialog` moved to `feature/map/commonMain` on Material 3 date/time pickers so Desktop can create waypoints; the shared rules the two renderers must agree on live in `MapNodePolicy`, `MapBounds` and `MapTimeWindows`, and the position-precision radius in `core/model/util/PositionPrecision.kt`.
 
+**August 2026** — Android Auto removed from all build variants (#6779). `feature/car` is gone — the module, its Car App Library dependencies, the `automotive_app_desc.xml` manifest entry and the `google` flavor's `FlavorModule` registration.
+
+**August 2026** — [Testing](developer/testing) — CI gained a fourth runner tier: `ubuntu-slim` (#6674, #6677) now carries the lightweight jobs. It is single-CPU, unprivileged, x64-only and capped at 15 minutes, so anything needing `sudo`, Docker or a full-history clone stays on `ubuntu-24.04-arm`. Picking rules are in `.github/instructions/ci-workflows.instructions.md`.
+
+**August 2026** — Flatpak sources are generated inside each architecture's own offline build (#6919) rather than committed, and the flatpak-sources plugin resolves platform dependencies transitively (0.2.x), so the hand-tracked entries are gone.
+
 **July 2026** — [Test Builds & Obtainium](developer/test-builds) — New page, replacing the root `obtainium-test-builds.md`. Distributable Obtainium configurations now live in `obtainium/` (importable export, one-tap link generator, config-site submission).
 
 **July 2026** — Map layer stack (`MapLayer.kt`, `MapLayersManager`, GeoJSON/KML import, Site Planner) extracted from the Google flavor into shared `androidApp/src/main` source (#6148) — F-Droid now renders imported overlays via a new OSMdroid-based renderer, so both flavors compile one implementation.
@@ -48,7 +54,6 @@ Keep the last 5–8 entries and trim older ones from the bottom.
 
 **June 2026** — [Testing](developer/testing) — Split the screenshot pipeline: the new generate-only `:docs-screenshots` module holds doc-framed compositions, while `:screenshot-tests` stays the CI visual-regression gate — so reframing a doc image no longer churns a test baseline.
 
-**June 2026** — New feature modules: `feature:discovery` (mesh network discovery, #5275) and `feature:car` (Android Auto / Car App Library, google flavor only, #5633).
 
 <!-- DEV_WHATS_NEW_END -->
 

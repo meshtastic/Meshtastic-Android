@@ -142,12 +142,12 @@ class MetricFormatterTest {
 
     @Test
     fun windSpeed() {
-        assertEquals("12.3 m/s", MetricFormatter.windSpeed(12.34f, isImperial = false))
+        assertEquals("44.4 km/h", MetricFormatter.windSpeed(12.34f, isImperial = false))
     }
 
     @Test
     fun windSpeedZero() {
-        assertEquals("0.0 m/s", MetricFormatter.windSpeed(0.0f, isImperial = false))
+        assertEquals("0.0 km/h", MetricFormatter.windSpeed(0.0f, isImperial = false))
     }
 
     @Test

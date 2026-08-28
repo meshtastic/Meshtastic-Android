@@ -2,7 +2,7 @@
 title: 桌面版應用程式
 parent: 使用者指南
 nav_order: 14
-last_updated: 2026-07-07
+last_updated: 2026-08-27
 description: 在 Linux、macOS 及 Windows 上安裝並使用 Meshtastic 桌面版應用程式——涵蓋連線方式、功能對等性與鍵盤快速鍵。
 aliases:
   - 桌面
@@ -70,7 +70,6 @@ Meshtastic 桌面版應用程式透過 Kotlin Multiplatform 與 Android 版共�
 | 韌體更新                                         | ✓       | ✓   | In-app USB, BLE, and Wi-Fi (ESP32) update all work the same as Android |
 | 通知                                           | ✓       | ✓   | 原生作業系統通知                                                                                  |
 | 小工具                                          | ✓       | ✗   | 僅限 Android                                                                                |
-| Android Auto                                 | ✓       | ✗   | Android-only — not available on Desktop or iOS                                            |
 | AI 助理（Chirpy）                                | ✓\*     | ✗   | 僅限 Google 版 Android                                                                       |
 | App Functions (system AI) | ✓†      | ✗   | 僅限 Google 版 Android                                                                       |
 
@@ -131,7 +130,7 @@ cd Meshtastic-Android
 
 需求：
 
-- JDK 21
+- JDK 25 (Gradle can provision the toolchain itself via foojay)
 - 純桌面版建置不需要 Android SDK
 
 ## 已知限制

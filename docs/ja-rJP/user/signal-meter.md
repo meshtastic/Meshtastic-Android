@@ -2,7 +2,7 @@
 title: Meshtastic の信号メーターの仕組み
 parent: User Guide
 nav_order: 15
-last_updated: 2026-07-08
+last_updated: 2026-08-27
 description: 信号メーターが、LoRa モデムプリセットに対する SNR から品質をどう評価するかを説明します。スペクトラム拡散、プリセット、バーが実際に意味するもの。
 aliases:
   - signal
@@ -15,7 +15,7 @@ aliases:
 
 Meshtastic の信号メーター（アプリでおなじみのバーやステータスの色）は、従来の携帯電話や WiFi ルーターの「バー」とはまったく異なる方法で計算されます。
 
-ほとんどの一般向けデバイスは、単に信号がどれだけ「大きい」かを測定します。 しかし Meshtastic は **LoRa（Long Range）**技術を使用しているため、その信号メーターは、メッシュが使用している具体的な設定を基準に、信号がどれだけ**明瞭か**を測定します。
+Most consumer devices measure how "loud" a signal is. しかし Meshtastic は **LoRa（Long Range）**技術を使用しているため、その信号メーターは、メッシュが使用している具体的な設定を基準に、信号がどれだけ**明瞭か**を測定します。
 
 ---
 
@@ -38,7 +38,7 @@ LoRa の無線チップは、メッセージを受信するたびに 2 つの測
 
 ## 2. LoRa の魔法：「ノイズフロアの下」を聞き取る
 
-標準的な無線（FM や WiFi など）では、背景ノイズが信号より大きい（負の SNR）場合、受信機にはノイズしか聞こえません。
+For standard radios (like FM or WiFi), if the background noise is louder than the signal (a negative SNR), the receiver hears only static.
 
 LoRa は特別です。 \*\*「スペクトラム拡散」\*\*変調を使用しており、信号が背景ノイズ&#x306E;_&#x4E0B;_&#x6DF1;くに埋もれていても、無線機が数学的に信号を取り出せます。 そのため Meshtastic では、**負の SNR 値**が頻繁に見られます（例：-10 dB。これは信号が背景ノイズより 10 デシベル弱いことを意味します）。
 

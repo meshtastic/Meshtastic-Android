@@ -2,7 +2,7 @@
 title: Seaded — raadio ja kasutaja
 parent: Kasutusjuhend
 nav_order: 7
-last_updated: 2026-07-27
+last_updated: 2026-08-27
 description: Configure your radio hardware, LoRa presets, user profile, position sharing, power management, and security.
 aliases:
   - sätted
@@ -19,11 +19,12 @@ Configure your radio hardware and user identity parameters.
 
 ### Kasutajaprofiil
 
-| Sätted                    | Kirjeldus                                                                             |
-| ------------------------- | ------------------------------------------------------------------------------------- |
-| Täis nimi                 | Your display name (up to 39 characters)                            |
-| Lühi nimi                 | 4-character abbreviated name                                                          |
-| Litsentseeritud operaator | Enable if you hold an amateur radio license (enables higher power) |
+| Sätted                    | Kirjeldus                                                                                                                                                                                                                                    |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Täis nimi                 | Your display name (up to 39 characters)                                                                                                                                                                                   |
+| Lühi nimi                 | 4-character abbreviated name                                                                                                                                                                                                                 |
+| Ei võta sõnumeid vastu    | Marks the node as one nobody should try to message — for an unmonitored or infrastructure node. Other clients hide it from the contact list. Needs supporting firmware                                       |
+| Litsentseeritud operaator | Enable if you hold an amateur radio license (permits higher power). Turning it on relabels **Long Name** as **Call Sign** and adds a separate Long Name field, and is staged behind a confirmation dialog |
 
 ### Applying Changes
 
@@ -33,23 +34,37 @@ Pärast sätete muutmist puuduta nuppu **Salvesta**, et konfiguratsioon raadioss
 
 ### Seadme sätted
 
-| Sätted                                        | Kirjeldus                                                               | Vaikimisi |
-| --------------------------------------------- | ----------------------------------------------------------------------- | --------- |
-| Roll                                          | Node behavior (Client, Router, etc.) | Klient    |
-| Kordusülekannete režiim                       | How the node retransmits messages                                       | Kõik      |
-| Sõlme(de) teabe levitamine | Sõlme teabe levitamise intervall                                        | 10800     |
-| Topeltpuudutusnupp                            | Toiming topeltpuudutuse nupu korral                                     | Keelatud  |
+| Sätted                                        | Kirjeldus                                                                                                                                                                              | Vaikimisi |
+| --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| Roll                                          | Node behavior (Client, Router, etc.) — each option carries its own description in the picker. Choosing Router asks for confirmation | Klient    |
+| Kordusülekannete režiim                       | How the node retransmits messages; each mode is described in the picker                                                                                                                | Kõik      |
+| Sõlme(de) teabe levitamine | Sõlme teabe levitamise intervall                                                                                                                                                       | 10800     |
+| Topeltpuudutusnupp                            | Treat a double tap as a button press                                                                                                                                                   | Keelatud  |
+| Kolmekordne klõps Ad Hoc Ping                 | Send an ad-hoc position ping on a triple click                                                                                                                                         | Keelatud  |
+| Südamelöögi LED                               | Blink the status LED periodically                                                                                                                                                      | Lubatud   |
+| Ajavöönd                                      | POSIX time-zone string for the device clock, with buttons to copy your phone's zone or clear it                                                                                        | —         |
+| Button / Buzzer GPIO                          | Advanced: which pins the button and buzzer are wired to                                                                                                                | —         |
 
 ### LoRa sätted
 
-| Sätted           | Kirjeldus                                                               | Vaikimisi                                       |
-| ---------------- | ----------------------------------------------------------------------- | ----------------------------------------------- |
-| Regioon          | Sagedusribade reguleerimispiirkond                                      | Määramata (tuleb seadistada) |
-| Modemi vaikesäte | Speed/range tradeoff                                                    | LongFast                                        |
-| Hüppete limiit   | Maks uuesti saadetud hüpet                                              | 3                                               |
-| TX võimsus       | Transmission power (dBm); 0 = max allowed for region | 0 (regiooni maks)            |
-| Sagedusnihe      | Sageduse peenhäälestamine (MHz)                      | 0                                               |
-| Kanali ribalaius | Ribalaiuse säte                                                         | Default for preset                              |
+| Sätted                   | Kirjeldus                                                                                                                                                                                        | Vaikimisi                                       |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------- |
+| Regioon                  | Sagedusribade reguleerimispiirkond                                                                                                                                                               | Määramata (tuleb seadistada) |
+| Modemi vaikesäte         | Speed/range tradeoff                                                                                                                                                                             | LongFast                                        |
+| Hüppete limiit           | Maks uuesti saadetud hüpet                                                                                                                                                                       | 3                                               |
+| TX võimsus               | Transmission power (dBm); 0 = max allowed for region                                                                                                                          | 0 (regiooni maks)            |
+| Tühista sagedus          | Overrides the computed operating frequency outright (MHz). It does not offset the calculated value — leave at 0 unless you know you need a specific frequency | 0 (use calculated)           |
+| Kanali ribalaius         | Ribalaiuse säte                                                                                                                                                                                  | Default for preset                              |
+| Kasuta eelseadistust     | On by default. Turn it off to set Spread Factor, Coding Rate and Bandwidth by hand instead of taking them from the modem preset                                                  | On                                              |
+| Levitustegur             | Manual mode only: 7–12. Higher spreads further but slower                                                                                                        | From preset                                     |
+| Kodeerimiskiirus         | Manual mode only: 5–8. More redundancy costs airtime                                                                                                             | From preset                                     |
+| Sageduspesa              | Which slot within the region's band to use. 0 derives it from the primary channel name                                                                                           | 0 (automatic)                |
+| Edastus lubatud          | Turning this off makes the node receive-only                                                                                                                                                     | On                                              |
+| Töötsükli tühistamine    | Ignore the region's duty-cycle limit. Only legal where you are permitted to                                                                                                      | Väljas                                          |
+| Keela MQTT               | Drop packets that arrived from MQTT rather than over the air                                                                                                                                     | Väljas                                          |
+| MQTT kasutuses           | Allow your packets to be forwarded to MQTT by gateways                                                                                                                                           | Väljas                                          |
+| RX võimendatud võimendus | Extra receive gain on SX126x radios; costs a little current                                                                                                                                      | Väljas                                          |
+| PA ventilaator keelatud  | Turn off the power-amplifier fan on hardware that has one                                                                                                                                        | Väljas                                          |
 
 > ⚠️ **Tähtis:** Enne edastamist **peate** oma piirkonna määrama. Operating without the correct region may violate local radio regulations. Lisateabe saamiseks vaadake [regiooni seadistamise juhendit](https://meshtastic.org/docs/getting-started/initial-config) aadressil meshtastic.org.
 
@@ -97,69 +112,119 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 
 ### Ekraani sätted
 
-| Sätted              | Kirjeldus                                                                        |
-| ------------------- | -------------------------------------------------------------------------------- |
-| Screen Timeout      | Time before display sleeps                                                       |
-| Display Units       | Meetriline või Imperial                                                          |
-| OLED Type           | Auto, SSD1306, SH1106, SH1107                                                    |
-| Compass Orientation | Rotation offset for compass display (0°, 90°, 180°, 270°)     |
-| ~~Kompass lõuna~~   | ⚠️ **Vananenud** — asendatud kompassi suunaga; nähtav endiselt vanemas püsivaras |
+These control the **radio's own screen**, not the app's.
+
+| Sätted                            | Kirjeldus                                                                                                                                                 |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ekraan sisse lülitatud            | How long the display stays lit before sleeping                                                                                                            |
+| Karusselli intervall              | How often the device cycles between screens on its own                                                                                                    |
+| Ekraani režiim                    | Screen layout/density used by the firmware                                                                                                                |
+| Ekraani ühikud                    | Metric or Imperial on the device's screen                                                                                                                 |
+| Kasuta 12 tunni formaati          | Show the device clock as 12-hour rather than 24-hour                                                                                                      |
+| Bold heading                      | Draw the screen's heading text in bold                                                                                                                    |
+| Keera ekraani                     | Rotate the display 180° for an inverted mounting                                                                                                          |
+| OLED tüüp                         | Auto, SSD1306, SH1106, SH1107                                                                                                                             |
+| Ärata puudutusega või liigutusega | Light the screen when the device is tapped or moved                                                                                                       |
+| Kompassi suund                    | Rotation offset for the compass rose (0°, 90°, 180°, 270°)                                                                             |
+| Suund alati põhi                  | Locks the compass rose north-up instead of rotating it with your heading. Independent of Compass orientation — neither replaces the other |
 
 ### Asukoha sätted
 
-| Sätted                                    | Kirjeldus                          |
-| ----------------------------------------- | ---------------------------------- |
-| GPS lubatud                               | GPS lubamine/keelamine             |
-| GPS värskendamise intervall               | Kui tihti GPS asukohta leida       |
-| Asukoha(de) levitamine | How often to share position        |
-| Nutikas asukoht                           | Liikumispõhise levitamise lubamine |
-| Määratud asukoht                          | Use a manually set position        |
+> ⚠️ **Warning:** Saving this screen always reboots the radio.
+
+| Sätted                                    | Kirjeldus                                                                                                                                             |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GPS-režiim (riistvara) | Three-state: GPS enabled, disabled, or not present. Not a simple on/off                                               |
+| GPS-i küsimise intervall                  | How often the radio asks its GPS for a fix                                                                                                            |
+| Levitamise inteintervall                  | How often the position is shared with the mesh                                                                                                        |
+| Nutikas asukoht                           | Broadcast based on movement rather than purely on the clock                                                                                           |
+| Nutikas intervall                         | With Smart Position on, the shortest gap between broadcasts                                                                                           |
+| Nutikas kaugus                            | With Smart Position on, how far you must move before broadcasting                                                                                     |
+| Määratud asukoht                          | Use a manually entered latitude, longitude and altitude instead of the GPS                                                                            |
+| Asukoha lipp                              | A group of toggles choosing which fields ride along with a position — altitude, its reference and precision, satellites in view, timestamp, and so on |
+| GPS EN / Receive / Transmit GPIO          | Advanced: the pins the GPS module is wired to                                                                                         |
 
 ### Toite sätted
 
-| Sätted                                  | Kirjeldus                               |
-| --------------------------------------- | --------------------------------------- |
-| Power Saving                            | Enable low-power sleep mode             |
-| Shutdown After (s)   | Auto-shutdown idle timer                |
-| ADC kordaja                             | Aku pinge kalibreerimistegur            |
-| Oota sinihammast(id) | Time to wait for BLE connection at boot |
-| Mesh SDS Timeout (s) | Ülisügava une ajalõpp                   |
+| Sätted                                       | Kirjeldus                                                       |
+| -------------------------------------------- | --------------------------------------------------------------- |
+| Luba energiasäästurežiim                     | Let the radio sleep aggressively between activity               |
+| Väljalülitamine voolukatkestuse korral       | Power the device down after external power disappears           |
+| Super sügava une kestus                      | How long the deepest sleep state lasts                          |
+| Minimaalne ärkveloleku aeg                   | The shortest time the radio stays awake once woken              |
+| Oota Bluetoothi ​​kestust                    | How long to wait for a phone to connect before sleeping         |
+| ADC kordaja tühistamine                      | Turn on a manual correction for battery-voltage readings        |
+| Asenda ADC kordistaja suhe                   | The correction factor itself, used only when the override is on |
+| Aku INA_2XX I2C aadress | Address of an external INA-series power sensor, if fitted       |
 
 ### Võrgu sätted
 
-| Sätted        | Kirjeldus                                  |
-| ------------- | ------------------------------------------ |
-| WiFi lubatud  | Luba WiFi (ESP32 seade) |
-| WiFi SSID     | Network name to connect to                 |
-| WiFi PSK      | Network password                           |
-| NTP server    | Time synchronization server                |
-| Syslog Server | Kauglogimise server                        |
+> ⚠️ **Warning:** Saving this screen always reboots the radio.
+
+| Sätted                           | Kirjeldus                                                                                                                  |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Wifi lubatud                     | Enable the WiFi radio (ESP32 devices)                                                                   |
+| SSID                             | Network name to connect to. **Scan WiFi QR code** fills this and the password from a standard WiFi QR code |
+| Parool                           | Network password                                                                                                           |
+| Ethernet lubatud                 | Use a wired connection on hardware that has one                                                                            |
+| IPv4 režiim                      | DHCP, or a static address configured with the four fields below                                                            |
+| Wifi IP / Subnet / Gateway / DNS | The static address, only used when IPv4 mode is static                                                                     |
+| UDP levitamine                   | Share mesh traffic with other nodes over the local network                                                                 |
+| NTP server                       | Time synchronization server                                                                                                |
+| rsyslog server                   | Kauglogimise server                                                                                                        |
 
 ![IP aadressi väli](../../assets/screenshots/settings_ipv4_field.png)
 
 ### Sinihamba sätted
 
-| Sätted             | Kirjeldus                                                           |
-| ------------------ | ------------------------------------------------------------------- |
-| Sinihammas lubatud | Enable/disable BLE radio                                            |
-| Sidumisreziim      | Määratud PIN kood, juhuslik PIN kood või PIN koodi pole             |
-| Fikseeritud PIN    | Sidumise PIN (vaikimisi: 123456) |
+| Sätted             | Kirjeldus                                                                                              |
+| ------------------ | ------------------------------------------------------------------------------------------------------ |
+| Sinihammas lubatud | Enable/disable BLE radio                                                                               |
+| Sidumisreziim      | Määratud PIN kood, juhuslik PIN kood või PIN koodi pole                                                |
+| Fikseeritud PIN    | PIN code for pairing. Must be **exactly six digits** — the field rejects anything else |
 
 ### Turva sätted
 
 | Sätted                  | Kirjeldus                                                                                                                                                                                                                              |
 | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Avalik võti             | Sinu sõlme avalik võti (kirjutuskaitstud)                                                                                                                                                                           |
-| Administraatori võti    | Kaughalduse võti                                                                                                                                                                                                                       |
-| Salajane võti           | Sinu sõlme privaatvõti (käsitsege turvaliselt)                                                                                                                                                                      |
+| Administraatori võti    | Keys permitted to administer this node remotely — up to three                                                                                                                                                                          |
+| Salajane võti           | Your node's private key (handle securely). Shown redacted when you are viewing another node over remote admin — the firmware does not send it                                                       |
+| Loo uus privaatvõti     | Issues a new keypair for this node, behind a confirmation. Every peer that knew your old key must learn the new one                                                                                                    |
+| Otsesõnumi võti         | The key used for direct-message encryption                                                                                                                                                                                             |
 | ~~Admin kanal lubatud~~ | ⚠️ Eemaldatud — nüüd seadistatakse automaatselt, kui administraatori võti on määratud                                                                                                                                                  |
 | Arendaja logi           | Edasta reaalajas arendajalogi jadapordi/sinihamba ​​kaudu                                                                                                                                                                              |
 | Jadaühendus lubatud     | Luba jadapordi konsoolile juurdepääs (teisaldatud seadme konfist)                                                                                                                                                   |
-| Hallatud režiim         | Piira mitte-administraatori kanali muudatusi                                                                                                                                                                                           |
+| Hallatud režiim         | Restrict non-admin channel changes. Only selectable once an Admin Key is set                                                                                                                                           |
 | Taastevõtmed            | Salvesta sõlme võtmete krüpteeritud varukoopia sellesse seadmesse (ainult Android)                                                                                                                                  |
 | Taasta võtmed           | Kirjuta varundatud võtmed tagasi sõlme (saadaval siis, kui varukoopia on olemas)                                                                                                                                    |
 | Kustuta taastevõtmed    | Eemalda salvestatud võtme varukoopia sellest seadmest                                                                                                                                                                                  |
 | Protection Level        | Pakettide autentsus – kuidas käsitletakse allkirjastamata või vahendatud pakette: **range**, **tasakaalustatud** või **ühilduv** (nõuab toetavat püsivara; range režiimi puhul küsitakse kinnitust) |
+
+#### Lockdown Mode
+
+Lockdown encrypts the device's storage and requires a passphrase for each connection. It needs
+supporting firmware; the row does not appear otherwise.
+
+Enabling it asks you to set and confirm a passphrase, and to acknowledge that **it locks the debug
+(SWD) port on hardware that supports locking**. You can turn lockdown off again at any time with
+the passphrase, and a full device erase restores the hardware regardless.
+
+Alongside the passphrase you set the limits that end a session automatically:
+
+| Field                                      | What it does                                      |
+| ------------------------------------------ | ------------------------------------------------- |
+| Käivitusi alles                            | How many device boots the unlocked state survives |
+| Tunde kuni kehtivusaja lõpuni              | Wall-clock lifetime of the unlocked state         |
+| Seansi limiit (minutid) | Maximum length of a single unlocked connection    |
+
+Once active, the row reads _Active — storage encrypted, this connection authenticated_ when
+unlocked, or _Active — enter your passphrase to unlock this connection_ when not. **Lock Now**
+ends the current session immediately. Repeated wrong passphrases are rate-limited with a
+back-off before you can try again.
+
+> ⚠️ **Warning:** There is no passphrase recovery. Losing it means erasing the device to get it
+> back, which destroys its keys, channels and settings.
 
 ![Parooli väli](../../assets/screenshots/settings_password_field.png)
 

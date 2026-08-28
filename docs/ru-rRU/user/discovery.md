@@ -1,10 +1,12 @@
 ---
-title: Обнаружение
+title: Локальное обнаружение сети
 parent: Руководство пользователя
 nav_order: 12
-last_updated: 2026-07-27
+last_updated: 2026-08-28
 description: Исследуйте свою mesh-сеть — сканер локального обнаружения mesh-сети, трассировка путей, карты соседей и инструменты обнаружения нодов.
 aliases:
+  - discovery
+  - local-mesh-discovery
   - mesh-discovery
   - local-discovery
   - network-scan
@@ -12,7 +14,7 @@ aliases:
   - neighbor-info
 ---
 
-# Обнаружение
+# Локальное обнаружение сети
 
 Инструменты обнаружения помогают понять, **как** твоя mesh-сетевая структура соединена — какие ноды могут слышать друг друга, по каким путям проходят сообщения и где существуют узкие места или слабые звенья.
 
@@ -29,7 +31,7 @@ aliases:
 
 Открой это через **Настройки → Дополнительно → Локальное обнаружение сети**. В приложении для ПК  у него есть собственный пункт **Настройки → Локальное обнаружение сети**.
 
-> ⚠️ **Примечание**: Обнаружение временно изменяет настройки LoRa твоего радио во время сканирования, а затем восстанавливает исходную конфигурацию после завершения. Твоё устройство должно быть подключено для запуска сканирования.
+> ℹ️ **Note:** Discovery temporarily changes your radio's LoRa settings while it scans, then restores your original configuration when it finishes. Твоё устройство должно быть подключено для запуска сканирования.
 
 ### Настройка сканирования
 
@@ -84,7 +86,7 @@ aliases:
 - **Карта обнаружения** — карта нод, найденных во время сканирования.
 - **Экспорт отчёта** — экспортируйте отчёт в формате PDF на Android или в виде текста на других платформах.
 
-> 💡 **Совет:** На Android "Обнаружение" может создавать на устройстве сводку твоих результатов с помощью ИИ (Gemini Nano). Если модель на устройстве недоступна, вместо неё используется алгоритмическая сводка — так что ты всегда получаешь читаемую интерпретацию сканирования.
+> 💡 **Tip:** On **Google Play** builds, Discovery can generate an on-device AI summary (Gemini Nano) of your results. F-Droid builds always use the algorithmic summary — the proprietary ML Kit dependency is deliberately excluded from that flavor — so you get a readable interpretation of the scan either way.
 
 ---
 
@@ -167,7 +169,7 @@ aliases:
 - Каждая запись о соседе показывает ноду, которая была услышана напрямую, и качество её сигнала.
 - Объединяйте данные о соседях от нескольких нод, чтобы понять полную топологию mesh-сети.
 
-> ⚠️ **Примечание:** Информация о соседях увеличивает использование эфирного времени, поскольку каждая включённая нода периодически передаёт свой список соседей. В загруженных mesh-сетях с большим количеством нод рассмотрите более длинные интервалы передачи (3600 секунд или более), чтобы избежать перегрузки.
+> ℹ️ **Note:** Neighbor Info increases airtime usage because every enabled node periodically broadcasts its neighbor list. В загруженных mesh-сетях с большим количеством нод рассмотрите более длинные интервалы передачи (3600 секунд или более), чтобы избежать перегрузки.
 
 ---
 
@@ -201,6 +203,14 @@ aliases:
 - **Включите информацию о соседях на ключевых нодах** — особенно на роутерах и ретрансляторах, чтобы составить картину магистральной сети.
 - **Проверьте карту** — расположение нод на [Карте](map-and-waypoints) в сочетании с данными о сигнале помогает тебе понять, почему одни соединения сильные, а другие слабые.
 - **Сравнивайте сигнал с течением времени** — используйте руководство по [Измерителю сигнала](signal-meter) для правильной интерпретации значений SNR и RSSI.
+
+## Связанные темы
+
+- [Nodes](nodes) — the node list these scans populate
+- [Map & Waypoints](map-and-waypoints) — see discovered nodes geographically
+- [Signal Meter](signal-meter) — interpret the SNR and RSSI a scan reports
+- [Settings — Modules & Admin](settings-module-admin) — configure the Mesh Beacon and Neighbor Info modules
+- [Messages & Channels](messages-and-channels) — join a mesh you found and start talking
 
 ---
 

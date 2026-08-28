@@ -2,7 +2,7 @@
 title: Настройки - Радио и пользователь
 parent: Руководство пользователя
 nav_order: 7
-last_updated: 2026-07-27
+last_updated: 2026-08-27
 description: Настройте ваше радиоустройство, пресеты LoRa, пользовательский профиль, обмен местоположением, управление питанием и безопасность.
 aliases:
   - настройки
@@ -19,11 +19,12 @@ aliases:
 
 ### Профиль пользователя
 
-| Настройка                | Описание                                                                                                            |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------- |
-| Полное имя               | Ваше отображаемое имя (до 39 символов)                                                           |
-| Короткое имя             | 4-символьное сокращённое имя                                                                                        |
-| Лицензированный оператор | Включите, если у вас есть лицензия радиолюбителя (позволяет использовать более высокую мощность) |
+| Настройка                | Описание                                                                                                                                                                                                                                     |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Полное имя               | Ваше отображаемое имя (до 39 символов)                                                                                                                                                                                    |
+| Короткое имя             | 4-символьное сокращённое имя                                                                                                                                                                                                                 |
+| Без сообщений            | Marks the node as one nobody should try to message — for an unmonitored or infrastructure node. Other clients hide it from the contact list. Needs supporting firmware                                       |
+| Лицензированный оператор | Enable if you hold an amateur radio license (permits higher power). Turning it on relabels **Long Name** as **Call Sign** and adds a separate Long Name field, and is staged behind a confirmation dialog |
 
 ### Применение изменений
 
@@ -33,23 +34,37 @@ aliases:
 
 ### Настройки устройства
 
-| Настройка                | Описание                                                                                  | По умолчанию |
-| ------------------------ | ----------------------------------------------------------------------------------------- | ------------ |
-| Роль                     | Поведение ноды (Client, Router и т.д.) | Client       |
-| Режим ретрансляции       | Как нода повторно передает сообщения                                                      | Всё          |
-| Передача информации ноды | Интервал для передачи информации ноды                                                     | 10800        |
-| Двойное нажатие кнопки   | Действие при двойном нажатии кнопки                                                       | Включено     |
+| Настройка                    | Описание                                                                                                                                                                                                 | По умолчанию |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
+| Роль                         | Поведение ноды (Client, Router и т.д.) — each option carries its own description in the picker. Choosing Router asks for confirmation | Client       |
+| Режим ретрансляции           | How the node retransmits messages; each mode is described in the picker                                                                                                                                  | Всё          |
+| Передача информации ноды     | Интервал для передачи информации ноды                                                                                                                                                                    | 10800        |
+| Двойное нажатие кнопки       | Treat a double tap as a button press                                                                                                                                                                     | Включено     |
+| Маякнуть при тройном нажатии | Send an ad-hoc position ping on a triple click                                                                                                                                                           | Включено     |
+| Сердцебиение светодиодом     | Blink the status LED periodically                                                                                                                                                                        | Включено     |
+| Часовой пояс                 | POSIX time-zone string for the device clock, with buttons to copy your phone's zone or clear it                                                                                                          | —            |
+| Button / Buzzer GPIO         | Advanced: which pins the button and buzzer are wired to                                                                                                                                  | —            |
 
 ### Настройка LoRa
 
-| Настройка                 | Описание                                                                            | По умолчанию                                             |
-| ------------------------- | ----------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| Регион / Страна           | Область регулирования для диапазонов частот                                         | Не установлено (необходимо настроить) |
-| Режим работы модема       | Компромисс между скоростью и дальностью                                             | LongFast                                                 |
-| Лимит хопов               | Максимальное количество ретрансляций                                                | 3                                                        |
-| Мощность передачи         | Мощность передачи (дБм); 0 = максимально разрешённая для региона | 0 (максимум региона)                  |
-| Частотное смещение        | Точная настройка частоты (МГц)                                   | 0                                                        |
-| Полоса пропускания канала | Настройка пропускной способности                                                    | По умолчанию для предустановки                           |
+| Настройка                   | Описание                                                                                                                                                                                         | По умолчанию                                             |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------- |
+| Регион / Страна             | Область регулирования для диапазонов частот                                                                                                                                                      | Не установлено (необходимо настроить) |
+| Режим работы модема         | Компромисс между скоростью и дальностью                                                                                                                                                          | LongFast                                                 |
+| Лимит хопов                 | Максимальное количество ретрансляций                                                                                                                                                             | 3                                                        |
+| Мощность передачи           | Мощность передачи (дБм); 0 = максимально разрешённая для региона                                                                                                              | 0 (максимум региона)                  |
+| Переопределить частоту      | Overrides the computed operating frequency outright (MHz). It does not offset the calculated value — leave at 0 unless you know you need a specific frequency | 0 (use calculated)                    |
+| Полоса пропускания канала   | Настройка пропускной способности                                                                                                                                                                 | По умолчанию для предустановки                           |
+| Использовать шаблон         | On by default. Turn it off to set Spread Factor, Coding Rate and Bandwidth by hand instead of taking them from the modem preset                                                  | On                                                       |
+| Коэффициент распространения | Manual mode only: 7–12. Higher spreads further but slower                                                                                                        | From preset                                              |
+| Частота кодирования         | Manual mode only: 5–8. More redundancy costs airtime                                                                                                             | From preset                                              |
+| Частота слота               | Which slot within the region's band to use. 0 derives it from the primary channel name                                                                                           | 0 (automatic)                         |
+| Передача включена           | Turning this off makes the node receive-only                                                                                                                                                     | On                                                       |
+| Переопределить рабочий цикл | Ignore the region's duty-cycle limit. Only legal where you are permitted to                                                                                                      | Выкл                                                     |
+| Игнорировать MQTT           | Drop packets that arrived from MQTT rather than over the air                                                                                                                                     | Выкл                                                     |
+| ОК в MQTT                   | Allow your packets to be forwarded to MQTT by gateways                                                                                                                                           | Выкл                                                     |
+| Усиление RX                 | Extra receive gain on SX126x radios; costs a little current                                                                                                                                      | Выкл                                                     |
+| PA вентилятор выключен      | Turn off the power-amplifier fan on hardware that has one                                                                                                                                        | Выкл                                                     |
 
 > ⚠️ **Важно:** Вы **обязаны** установить свой регион перед отправкой. Работа без правильного региона может нарушать местные правила радиопользования. Смотрите [руководство по настройке региона](https://meshtastic.org/docs/getting-started/initial-config) на сайте meshtastic.org для получения подробной информации.
 
@@ -97,69 +112,119 @@ aliases:
 
 ### Параметры дисплея
 
-| Настройка          | Описание                                                                              |
-| ------------------ | ------------------------------------------------------------------------------------- |
-| Время ожидания     | Время до перехода в спящий режим                                                      |
-| Единицы измерения  | Метрическая или имперская                                                             |
-| Тип OLED-дисплея   | Авто, SSD1306, SH1106, SH1107                                                         |
-| Ориентация компаса | Смещение вращения для отображения компаса (0°, 90°, 180°, 270°)    |
-| ~~Север компаса~~  | ⚠️ **Устарело** — заменено на ориентацию компаса; по-прежнему видно в старой прошивке |
+These control the **radio's own screen**, not the app's.
+
+| Настройка                               | Описание                                                                                                                                                  |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Включать экран на                       | How long the display stays lit before sleeping                                                                                                            |
+| Интервал карусели                       | How often the device cycles between screens on its own                                                                                                    |
+| Режим экрана                            | Screen layout/density used by the firmware                                                                                                                |
+| Система измерения                       | Metric or Imperial on the device's screen                                                                                                                 |
+| Использовать 12-часовой формат времени  | Show the device clock as 12-hour rather than 24-hour                                                                                                      |
+| Bold heading                            | Draw the screen's heading text in bold                                                                                                                    |
+| Повернуть экран                         | Rotate the display 180° for an inverted mounting                                                                                                          |
+| Тип OLED                                | Авто, SSD1306, SH1106, SH1107                                                                                                                             |
+| Включать экран при касании или движении | Light the screen when the device is tapped or moved                                                                                                       |
+| Направление компаса                     | Rotation offset for the compass rose (0°, 90°, 180°, 270°)                                                                             |
+| Всегда указывать на север               | Locks the compass rose north-up instead of rotating it with your heading. Independent of Compass orientation — neither replaces the other |
 
 ### Настройки местоположения
 
-| Настройка               | Описание                                |
-| ----------------------- | --------------------------------------- |
-| GPS включен             | Включение/отключение GPS                |
-| Интервал обновления GPS | Как часто получать GPS-фиксацию         |
-| Вещание позиции         | Как часто делиться местоположением      |
-| Умная позиция           | Включить трансляцию при движении        |
-| Фиксированная позиция   | Использовать вручную заданное положение |
+> ⚠️ **Warning:** Saving this screen always reboots the radio.
+
+| Настройка                                              | Описание                                                                                                                                              |
+| ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Режим GPS (физическое оборудование) | Three-state: GPS enabled, disabled, or not present. Not a simple on/off                                               |
+| Интервал опроса GPS                                    | How often the radio asks its GPS for a fix                                                                                                            |
+| Период рассылки                                        | How often the position is shared with the mesh                                                                                                        |
+| Умная позиция                                          | Broadcast based on movement rather than purely on the clock                                                                                           |
+| Умный интервал                                         | With Smart Position on, the shortest gap between broadcasts                                                                                           |
+| Умное расстояние                                       | With Smart Position on, how far you must move before broadcasting                                                                                     |
+| Фиксированная позиция                                  | Use a manually entered latitude, longitude and altitude instead of the GPS                                                                            |
+| Флаги позиции                                          | A group of toggles choosing which fields ride along with a position — altitude, its reference and precision, satellites in view, timestamp, and so on |
+| GPS EN / Receive / Transmit GPIO                       | Advanced: the pins the GPS module is wired to                                                                                         |
 
 ### Настройка питания
 
-| Настройка               | Описание                                          |
-| ----------------------- | ------------------------------------------------- |
-| Энергосбережение        | Включить спящий режим с низким энергопотреблением |
-| Завершение работы через | Таймер автоотключения при простое                 |
-| Множитель ADC           | Коэффициент калибровки напряжения батареи         |
-| Ожидание Bluetooth      | Время ожидания подключения BLE при загрузке       |
-| Тайм-аут Mesh SDS       | Тайм-аут сверхглубокого сна                       |
+| Настройка                                      | Описание                                                        |
+| ---------------------------------------------- | --------------------------------------------------------------- |
+| Включить режим энергосбережения                | Let the radio sleep aggressively between activity               |
+| Выключение при потере мощности                 | Power the device down after external power disappears           |
+| Длительность супер-глубокого сна               | How long the deepest sleep state lasts                          |
+| Минимальное время бодрствования                | The shortest time the radio stays awake once woken              |
+| Длительность ожидания Bluetooth                | How long to wait for a phone to connect before sleeping         |
+| Коэффициент переопределения ADC                | Turn on a manual correction for battery-voltage readings        |
+| Коэффициент переопределения ADC                | The correction factor itself, used only when the override is on |
+| I2C-адрес INA_2XX батареи | Address of an external INA-series power sensor, if fitted       |
 
 ### Настройка сети
 
-| Настройка     | Описание                                                        |
-| ------------- | --------------------------------------------------------------- |
-| WiFi включен  | Включить радиомодуль WiFi (устройства ESP32) |
-| WiFi SSID     | Имя сети для подключения                                        |
-| WiFi PSK      | Пароль сети                                                     |
-| NTP-сервер    | Сервер синхронизации времени                                    |
-| Syslog-сервер | Удалённый сервер логирования                                    |
+> ⚠️ **Warning:** Saving this screen always reboots the radio.
+
+| Настройка                        | Описание                                                                                                                   |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| WiFi включен                     | Enable the WiFi radio (ESP32 devices)                                                                   |
+| Название сети                    | Network name to connect to. **Scan WiFi QR code** fills this and the password from a standard WiFi QR code |
+| Пароль                           | Пароль сети                                                                                                                |
+| Ethernet включен                 | Use a wired connection on hardware that has one                                                                            |
+| Режим IPv4                       | DHCP, or a static address configured with the four fields below                                                            |
+| Wifi IP / Subnet / Gateway / DNS | The static address, only used when IPv4 mode is static                                                                     |
+| UDP трансляция                   | Share mesh traffic with other nodes over the local network                                                                 |
+| NTP-сервер                       | Сервер синхронизации времени                                                                                               |
+| Сервер rsyslog                   | Удалённый сервер логирования                                                                                               |
 
 ![Поле IP-адреса](../../assets/screenshots/settings_ipv4_field.png)
 
 ### Настройка Bluetooth
 
-| Настройка             | Описание                                                                         |
-| --------------------- | -------------------------------------------------------------------------------- |
-| Bluetooth включен     | Включение/отключение BLE радиостанции                                            |
-| Режим сопряжения      | Фиксированный PIN, случайный PIN или без PIN                                     |
-| Фиксированный PIN-код | PIN-код для сопряжения (по умолчанию: 123456) |
+| Настройка             | Описание                                                                                               |
+| --------------------- | ------------------------------------------------------------------------------------------------------ |
+| Bluetooth включен     | Включение/отключение BLE радиостанции                                                                  |
+| Режим сопряжения      | Фиксированный PIN, случайный PIN или без PIN                                                           |
+| Фиксированный PIN-код | PIN code for pairing. Must be **exactly six digits** — the field rejects anything else |
 
 ### Настройки безопасности
 
 | Настройка                        | Описание                                                                                                                                                                                                                          |
 | -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Публичный ключ                   | Публичный ключ твоей ноды (только для чтения)                                                                                                                                                                  |
-| Ключ администратора              | Ключ для удалённого администрирования                                                                                                                                                                                             |
-| Приватный ключ                   | Приватный ключ твоей ноды (обращайся с ним осторожно)                                                                                                                                                          |
+| Ключ администратора              | Keys permitted to administer this node remotely — up to three                                                                                                                                                                     |
+| Приватный ключ                   | Your node's private key (handle securely). Shown redacted when you are viewing another node over remote admin — the firmware does not send it                                                  |
+| Пересоздать приватный ключ       | Issues a new keypair for this node, behind a confirmation. Every peer that knew your old key must learn the new one                                                                                               |
+| Ключ прямого сообщения           | The key used for direct-message encryption                                                                                                                                                                                        |
 | ~~Канал администратора включен~~ | ⚠️ Удалено — теперь настраивается автоматически при установке ключа администратора                                                                                                                                                |
 | Журнал отладки                   | Выводить живой отладочный лог через последовательный порт/Bluetooth                                                                                                                                                               |
 | Последовательная включена        | Включить доступ к последовательной консоли (перемещено из настроек устройства)                                                                                                                                 |
-| Управляемый режим                | Ограничить изменения канала для неадминистраторов                                                                                                                                                                                 |
+| Управляемый режим                | Restrict non-admin channel changes. Only selectable once an Admin Key is set                                                                                                                                      |
 | Резервное копирование            | Сохранить зашифрованную резервную копию ключей ноды на этом устройстве (только для Android)                                                                                                                    |
 | Восстановить ключи               | Запишисать сохранённые ключи обратно на ноду (доступно, как только есть резервная копия)                                                                                                                       |
 | Удалить резервную копию ключа    | Удалить сохранённую резервную копию ключа с этого устройства                                                                                                                                                                      |
 | Уровень защиты                   | Подлинность пакета — как обрабатываются неподписанные или пересылаемые пакеты: **Строго**, **Сбалансировано** или **Совместимо** (требуется поддержка прошивкой; Строго требует подтверждения) |
+
+#### Lockdown Mode
+
+Lockdown encrypts the device's storage and requires a passphrase for each connection. It needs
+supporting firmware; the row does not appear otherwise.
+
+Enabling it asks you to set and confirm a passphrase, and to acknowledge that **it locks the debug
+(SWD) port on hardware that supports locking**. You can turn lockdown off again at any time with
+the passphrase, and a full device erase restores the hardware regardless.
+
+Alongside the passphrase you set the limits that end a session automatically:
+
+| Field                                          | Что она делает                                    |
+| ---------------------------------------------- | ------------------------------------------------- |
+| Осталось загрузок                              | How many device boots the unlocked state survives |
+| Часов до истечения                             | Wall-clock lifetime of the unlocked state         |
+| Ограничение сессии (минуты) | Maximum length of a single unlocked connection    |
+
+Once active, the row reads _Active — storage encrypted, this connection authenticated_ when
+unlocked, or _Active — enter your passphrase to unlock this connection_ when not. **Lock Now**
+ends the current session immediately. Repeated wrong passphrases are rate-limited with a
+back-off before you can try again.
+
+> ⚠️ **Warning:** There is no passphrase recovery. Losing it means erasing the device to get it
+> back, which destroys its keys, channels and settings.
 
 ![Поле пароля](../../assets/screenshots/settings_password_field.png)
 

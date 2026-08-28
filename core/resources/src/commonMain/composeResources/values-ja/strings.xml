@@ -501,7 +501,6 @@
     <string name="dns">DNS</string>
     <!-- DOC -->
     <string name="doc_clear_search">検索をクリア</string>
-    <string name="doc_keywords_android_auto">Android Auto,車,カーナビ,運転,ハンズフリー,メッセージ,android auto,car,head unit,driving,hands free,messaging</string>
     <string name="doc_keywords_app_functions">システムAI,Gemini,アシスタント,機能,自動化,音声,system ai,gemini,assistant,functions,automation,voice</string>
     <string name="doc_keywords_connections">Bluetooth,接続,ペアリング,シリアル,WiFi,bluetooth,usb,tcp,pairing,serial,wifi</string>
     <string name="doc_keywords_debug_logs">デバッグ,ログ,logcat,エクスポート,バグ報告,問題,トラブルシューティング,診断,debug,logs,logcat,export,bug report,issue,troubleshooting,diagnostics</string>
@@ -527,12 +526,11 @@
     <string name="doc_search_placeholder">ドキュメントを検索…</string>
     <string name="doc_section_developer">開発者ガイド</string>
     <string name="doc_section_user">ユーザーガイド</string>
-    <string name="doc_title_android_auto">Android Auto</string>
     <string name="doc_title_app_functions">アプリ機能</string>
     <string name="doc_title_connections">接続</string>
     <string name="doc_title_debug_logs">デバッグログ</string>
     <string name="doc_title_desktop">デスクトップアプリ</string>
-    <string name="doc_title_discovery">探索</string>
+    <string name="doc_title_discovery">ローカルメッシュ探索</string>
     <string name="doc_title_firmware">ファームウェア更新</string>
     <string name="doc_title_help">ヘルプとアプリ内ドキュメント</string>
     <string name="doc_title_map">マップとウェイポイント</string>

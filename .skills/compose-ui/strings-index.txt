@@ -511,7 +511,6 @@ distance_measurements_description
 dns
 ### DOC ###
 doc_clear_search
-doc_keywords_android_auto
 doc_keywords_app_functions
 doc_keywords_connections
 doc_keywords_debug_logs
@@ -537,7 +536,6 @@ doc_keywords_widget
 doc_search_placeholder
 doc_section_developer
 doc_section_user
-doc_title_android_auto
 doc_title_app_functions
 doc_title_connections
 doc_title_debug_logs
@@ -1889,6 +1887,8 @@ translation_downloading
 translation_failed
 translation_model_download_failed
 translation_not_required
+transmit_disabled
+transmit_disabled_summary
 transmit_over_lora
 ### TRANSPORT ###
 transport

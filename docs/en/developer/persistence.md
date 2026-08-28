@@ -2,7 +2,7 @@
 title: Persistence
 parent: Developer Guide
 nav_order: 6
-last_updated: 2026-07-08
+last_updated: 2026-08-27
 aliases:
   - room
   - database
@@ -54,7 +54,7 @@ The primary structured data store:
 | `DiscoveredNodeEntity` | Nodes found during a discovery preset scan |
 | `DeviceLinkEntity` | Cached `msh.to` device links from the Meshtastic API |
 
-> 💡 **Note:** Waypoints, telemetry, and channel data are stored within the `Packet` entity (using the `port_num` field to distinguish packet types) rather than in separate tables.
+> ℹ️ **Note:** Waypoints, telemetry, and channel data are stored within the `Packet` entity (using the `port_num` field to distinguish packet types) rather than in separate tables.
 
 ## DataStore Preferences
 

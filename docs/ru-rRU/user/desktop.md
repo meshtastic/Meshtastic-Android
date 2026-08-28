@@ -2,7 +2,7 @@
 title: Настольное приложение
 parent: Руководство пользователя
 nav_order: 14
-last_updated: 2026-07-07
+last_updated: 2026-08-27
 description: Установка и использование приложения Meshtastic Desktop на Linux, macOS и Windows — подключения, функционал и сочетания клавиш.
 aliases:
   - desktop
@@ -70,7 +70,6 @@ Bluetooth Low Energy поддерживается в настольном при
 | Обновление прошивки                                  | ✓       | ✓       | Внутри приложенное обновление по USB, BLE и Wi-Fi (ESP32) работает так же, как на Android   |
 | Уведомления                                          | ✓       | ✓       | Системные уведомления                                                                                          |
 | Виджеты                                              | ✓       | ✗       | Только Android                                                                                                 |
-| Android Auto                                         | ✓       | ✗       | Только Android — недоступно в настольном приложении или iOS                                                    |
 | AI-ассистент (Chirpy)             | ✓\*     | ✗       | Только в Google-версии для Android                                                                             |
 | Функции приложения (системный ИИ) | ✓†      | ✗       | Только в Google-версии для Android                                                                             |
 
@@ -131,7 +130,7 @@ cd Meshtastic-Android
 
 Требования:
 
-- JDK 21
+- JDK 25 (Gradle can provision the toolchain itself via foojay)
 - Для сборки только настольной версии Android SDK не требуется
 
 ## Известные ограничения

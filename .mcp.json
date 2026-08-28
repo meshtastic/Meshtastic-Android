@@ -1,9 +1,13 @@
 {
-  "$comment": "Team-shared MCP servers (auth-free only — anything needing tokens stays in user-level config). context7 = live library docs lookup; used constantly for Kotlin/Compose/AGP version questions.",
+  "$comment": "Team-shared MCP servers (auth-free only — anything needing tokens stays in user-level config). context7 = live library docs lookup; used constantly for Kotlin/Compose/AGP version questions. compose-hot-reload = drive the running :desktopApp (screenshot, semantic tree, click/type/scroll, logs, reload) instead of rebuilding a distributable to eyeball a change; needs `:desktopApp:hotRun` alive in another terminal, and CMP 1.12+ for the server to exist.",
   "mcpServers": {
     "context7": {
       "type": "http",
       "url": "https://mcp.context7.com/mcp"
+    },
+    "compose-hot-reload": {
+      "command": "./gradlew",
+      "args": ["--no-daemon", "--quiet", "--console=plain", ":desktopApp:hotMcpServer"]
     }
   }
 }

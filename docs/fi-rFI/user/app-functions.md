@@ -2,7 +2,7 @@
 title: Sovellustoiminnot
 parent: Käyttöopas
 nav_order: 19
-last_updated: 2026-06-11
+last_updated: 2026-08-28
 description: Tuo mesh-ominaisuudet Android-järjestelmälle ja laitteessa toimiville tekoälyavustajille (esim. Gemini), jotta ne voivat suorittaa mesh-toimintoja ilman sovelluksen avaamista.
 aliases:
   - sovellustoiminnot
@@ -15,9 +15,9 @@ aliases:
 
 Sovellustoiminnot tuovat Meshtastic-ominaisuudet Android-järjestelmälle ja laitteessa toimiville tekoälyavustajille (kuten Gemini) Android App Functions -rajapinnan kautta. Kun ne ovat käytössä, avustaja voi löytää ja käynnistää mesh-toimintoja puolestasi — esimerkiksi lähettää viestin tai tarkistaa mesh-tilan — ilman että avaat sovellusta.
 
-> ⚠️ **Huom:** Sovellustoiminnot ovat saatavilla vain **Google-version Android-laitteissa**.
-
-> ⚠️ **Huom:** Tämä on erillinen in-app **Chirpy** -avustajasta. Sovellustoiminnot mahdollistavat sen, että _järjestelmän_ tekoälyavustaja voi toimia mesh-verkon kautta; Chirpy on Meshtastic-sovelluksen sisäinen keskusteluavustaja.
+> ℹ️ **Note:** App Functions are available on **Google-flavor Android builds only**.
+>
+> This is separate from the in-app **Chirpy** assistant. Sovellustoiminnot mahdollistavat sen, että _järjestelmän_ tekoälyavustaja voi toimia mesh-verkon kautta; Chirpy on Meshtastic-sovelluksen sisäinen keskusteluavustaja.
 
 ## Sovellustoimintojen käyttöönotto
 

@@ -2,7 +2,7 @@
 title: Kaart ja teekonnapunktid
 parent: Kasutusjuhend
 nav_order: 6
-last_updated: 2026-07-08
+last_updated: 2026-08-27
 description: Vaata sõlmede asukohti kaardil, loo ja jaga teekonnapunkte ning halda asukoha jagamist ja privaatsust.
 aliases:
   - kaart
@@ -120,14 +120,15 @@ Asukoha käitumist saab seadistada menüüs **Seaded → Asukoht**.
 
 Baaskaart sõltub rakenduse stiilist: **Google Play** versioonid kasutavad Google Mapsi, **F-Droid** ja töölaua versioonid aga OpenStreetMapi. Põhikaardi peal on saadaval täiendavad paaniallikad pealiskihtide või alternatiividena:
 
-- Satellite imagery (where available)
-- Võrguühenduseta paanid (lae kaardialad alla võrguühenduseta kasutamiseks)
+- Satellite imagery — on both Google Play and F-Droid
+- Offline tiles — **F-Droid only**. Download map areas for offline use through OSMdroid's tile
+  cache. Google Play and Desktop builds have no offline download
 
 ## Seotud teemad
 
 - [Sõlmed](nodes) — vaata ja filtreeri oma sõlmede loendit
 - [Node Metrics](node-metrics) — signal quality and position history for individual nodes
-- [Avasta](Discovery) - traceroute'i ja naabri info kärgvõrgu topoloogia mõistmiseks
+- [Local Mesh Discovery](discovery) — traceroute and neighbor info for understanding mesh topology
 - [Ühikud ja lokaat](units-and-locale) — kauguse ja koordinaatide kuvamise ühikud
 
 ---

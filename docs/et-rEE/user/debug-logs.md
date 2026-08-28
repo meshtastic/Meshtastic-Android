@@ -2,7 +2,7 @@
 title: Arendaja logid
 parent: Kasutaja juhis
 nav_order: 22
-last_updated: 2026-07-08
+last_updated: 2026-08-27
 description: Vaata ja ekspordi rakenduse arendajalogi rakenduse seest ning lisa GitHubi probleemile jäädvustus vigade diagnoosimiseks – adb-d pole vaja.
 aliases:
   - arendaja-logid
@@ -44,7 +44,7 @@ Praeguste logide faili salvestamiseks puuduta ikooni **allalaadimine**. Süsteem
 
 Attach that file to your GitHub issue.
 
-> 🔒 **Privaatsus:** Ekspordib automaatselt **redigeeri** privaatvõtmed, administraatori võtmed ja seansi paroolid enne faili kirjutamist. Kanali PSKid **ei** redigeerita ja logid võivad sisaldada ka sõlmede nimesid, asukohti ja muid tuvastavaid üksikasju – enne avalikult jagamist vaadake fail üle ja jaga seda privaatselt, kui teil on kahtlusi.
+> 🔒 **Privacy:** Exports automatically **redact** private keys, admin keys, session passkeys and channel PSKs before writing the file. Logs can still contain node names, positions, and other identifying details — glance through the file before sharing it publicly, and share privately if you have any doubt.
 
 ## Töölaud
 

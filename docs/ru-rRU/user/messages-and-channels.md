@@ -2,7 +2,7 @@
 title: Сообщения и каналы
 parent: Руководство пользователя
 nav_order: 3
-last_updated: 2026-07-11
+last_updated: 2026-08-27
 description: Отправляйте и получайте сообщения, управляйте каналами, настраивайте шифрование, ищите по перепискам, а также используйте быстрый чат, реакции и действия с сообщениями.
 aliases:
   - channels
@@ -34,12 +34,12 @@ Meshtastic поддерживает два режима связи: **вещан
 | 🔓     | По умолчанию / Открытый              | Использует общеизвестный ключ по умолчанию. **Любое устройство Meshtastic** с той же пред установкой может читать эти сообщения.          |
 | ⚠️     | Незащищённый + Местоположение        | Открытый канал, который также передаёт ваше GPS-местоположение. Используйте с осторожностью в общественных ячеистых сетях.                |
 
-> 🔒 **Совет по безопасности:** Всегда настраивайте уникальный PSK для личных сообщений. Канал по умолчанию намеренно открыт, чтобы новые пользователи могли обнаружить mesh-сеть — но вам следует создать отдельный зашифрованный канал для любой конфиденциальной информации.
+> 🔒 **Security:** Always configure a unique PSK for private communications. Канал по умолчанию намеренно открыт, чтобы новые пользователи могли обнаружить mesh-сеть — но вам следует создать отдельный зашифрованный канал для любой конфиденциальной информации.
 
 ### Добавление канала
 
 1. Перейдите в **Настройки → Каналы**.
-2. Нажмите **Добавить канал** или сканируйте QR-код.
+2. Tap the **+** button to add a channel, or import one by scanning a channel QR code.
 3. Настройте имя канала и ключ шифрования.
 4. Поделитесь URL-адресом/QR-кодом канала с теми, кому нужен доступ.
 
@@ -55,36 +55,66 @@ Meshtastic поддерживает два режима связи: **вещан
 2. Выберите ноду из списка контактов или нажмите на ноду в списке нод.
 3. Введите сообщение и нажмите **"Отправить"**.
 
+### Managing the Conversation List
+
+The **Messages** tab lists your conversations. Each row carries what you need to triage it at a
+glance, and the list itself is directly actionable:
+
+- **Unsent drafts survive.** Type into a conversation and leave without sending, and the text is
+  still there when you come back. The row shows it as `Draft: …` in place of the last message —
+  an unsent draft is the thing the row is waiting on _you_ for.
+- **Unread badge.** A count sits on the row until you open the conversation.
+- **Swipe right to mute** (swipe again to unmute) and **swipe left to delete**. Deleting asks
+  first; muting shows a snackbar with **Undo**.
+- **Long-press to select** one or more conversations, then use the action bar to **Pin**,
+  **Mark unread**, mute or delete them together. Pinned conversations carry a pin marker and rise
+  to the top of **their own section**.
+- **The list is split into Channels and Direct Messages**, each with a collapsible header and each
+  sorted independently — so a pinned direct message rises within its own section, not above the
+  Channels one.
+
+### Conversation Bubbles
+
+On Android 11 and later, a message notification can be opened as a floating **bubble** that
+stays on top of whatever else you are doing. Tap the bubble icon on the notification to promote
+a conversation; Android remembers the choice per conversation, and the system Bubbles settings
+control whether they are offered at all.
+
 ### Состояние сообщения
 
 Метка статуса отображается только **под твоими** исходящими сообщениями (входящие сообщения от других не имеют метки статуса):
 
-| Состояние                             | Значение                                                                                                                                                             |
-| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Отправка…                             | В очереди или уже передано на радио, результат ещё не определён (для статусов "в очереди" и "в пути»" отображается одинаковый текст)              |
-| Доставлено получателю                 | Самое надёжное подтверждение для личного сообщения — получено подтверждение о доставке                                                                               |
-| Отправлено в сеть                     | Для широковещательного сообщения в канале — сообщение достигло mesh-сети (у широковещательных сообщений нет подтверждений для каждого получателя) |
-| Передано, не подтверждено получателем | Для личного сообщения, отображается предупреждающим цветом — сообщение было ретранслировано, но подтверждение ещё не получено                                        |
-| Маршрутизация по SF++ цепочке…        | Находится в процессе маршрутизации/буферизации в цепочке Store & Forward Plus Plus                                                               |
-| Подтверждено в цепочке SF++           | Подтверждена доставка через цепочку SF++                                                                                                                             |
-| Ошибки                                | Ошибка доставки — нажмите на статус, чтобы узнать конкретную причину (см. раздел «Ошибки доставки» ниже)                          |
+| Состояние                             | Значение                                                                                                                                                                                                                                  |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Отправка…                             | Queued or already handed to the radio, not yet resolved either way. Both stages share this text, but the icon and colour change as it progresses — a yellow upload cloud while queued, a blue arrow once the radio has it |
+| Доставлено получателю                 | Самое надёжное подтверждение для личного сообщения — получено подтверждение о доставке                                                                                                                                                    |
+| Отправлено в сеть                     | Для широковещательного сообщения в канале — сообщение достигло mesh-сети (у широковещательных сообщений нет подтверждений для каждого получателя)                                                                      |
+| Передано, не подтверждено получателем | Для личного сообщения, отображается предупреждающим цветом — сообщение было ретранслировано, но подтверждение ещё не получено                                                                                                             |
+| Маршрутизация по SF++ цепочке…        | Находится в процессе маршрутизации/буферизации в цепочке Store & Forward Plus Plus                                                                                                                                    |
+| Подтверждено в цепочке SF++           | Подтверждена доставка через цепочку SF++                                                                                                                                                                                                  |
+| Ошибки                                | Ошибка доставки — нажмите на статус, чтобы узнать конкретную причину (см. раздел «Ошибки доставки» ниже)                                                                                               |
 
 ### Ошибки доставки
 
 Когда сообщение не удаётся доставить, индикатор ошибки показывает, что пошло не так:
 
-| Ошибки                                                     | Значение                                                  | Что делать                                                                                                                                                                          |
-| ---------------------------------------------------------- | --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Нет маршрута                                               | Путь к целевой ноде отсутствует                           | Получатель может быть не в сети или вне зоны действия mesh-сети. Повторите попытку позже или подойдите ближе.                                       |
-| Получен NAK                                                | Следующая нода отказалась ретранслировать                 | Ретранслирующая нода может быть перегружена. Подождите и повторите попытку.                                                                         |
-| Время ожидания истекло                                     | Нет подтверждения в пределах окна повторных попыток       | Получатель, возможно, находится сразу за пределами зоны досягаемости. Попробуйте увеличить лимит хопов или переместиться в место с лучшим сигналом. |
-| Нет радиоинтерфейса                                        | Нет доступного радиоинтерфейса для отправки               | Проверь, подключено ли твоё радио и доступно ли оно.                                                                                                                |
-| Не удалось доставить в сеть                                | Все попытки повторной отправки исчерпаны                  | Подойди ближе, улучшите сигнал или просто дождись улучшения условий mesh-сети.                                                                                      |
-| Несовпадение канала/ключа                                  | Канал/ключ назначения не совпадает                        | Убедитесь, что обе ноды используют один и тот же канал и PSK.                                                                                                       |
-| Слишком большое сообщение для отправки                     | Сообщение превышает максимальный размер полезной нагрузки | Сократи сообщение и повтори попытку.                                                                                                                                |
-| Нет ответа приложения                                      | Приложение или плагин не ответили на запрос               | Повтори попытку или проверь состояние приложения или модуля назначения.                                                                                             |
-| Ограничение рабочего цикла (Dity cycle) | Достигнут региональный лимит эфирного времени             | Дождись сброса окна рабочего цикла.                                                                                                                                 |
-| Неверный запрос                                            | Повреждённый или неверный запрос                          | Если проблема сохраняется, повтори попытку после обновления или перезапуска приложения.                                                                             |
+| Ошибки                                                     | Значение                                                                                                                                                                      | Что делать                                                                                                                                    |
+| ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Нет маршрута                                               | Путь к целевой ноде отсутствует                                                                                                                                               | Получатель может быть не в сети или вне зоны действия mesh-сети. Повторите попытку позже или подойдите ближе. |
+| Нет радиоинтерфейса                                        | Нет доступного радиоинтерфейса для отправки                                                                                                                                   | Проверь, подключено ли твоё радио и доступно ли оно.                                                                          |
+| Не удалось доставить в сеть                                | Retries exhausted. The same label covers three underlying causes — a relay refusing (NAK), a plain timeout, and running out of retransmits | Move closer, improve signal, or wait for conditions to improve. Tap the error for the specific cause.         |
+| Ограничение скорости                                       | The mesh is throttling you for sending too fast                                                                                                                               | Wait before sending again.                                                                                                    |
+| Не авторизовано                                            | The destination refused the request                                                                                                                                           | Check you have the right channel and keys for that node.                                                                      |
+| Получателю нужен ваш ключ                                  | Direct-message encryption could not complete because the other node does not have your public key yet                                                                         | Exchange node info — the key travels with it. Common on a first DM to a new contact.                          |
+| Ключ получателя недоступен                                 | You do not have the recipient's public key                                                                                                                                    | Wait for their node info to arrive, or ask them to broadcast it.                                                              |
+| Не удалось отправить зашифрованное сообщение               | Encryption failed for this direct message                                                                                                                                     | Verify both nodes have exchanged keys and are on compatible firmware.                                                         |
+| Сеанс администратора истёк                                 | A remote-admin session timed out                                                                                                                                              | Reopen the remote node's settings to start a new session.                                                                     |
+| Ключ администратора не авторизован                         | The target node does not accept your admin key                                                                                                                                | Проверьте соответствие ключа администратора на обоих узлах.                                                                   |
+| Несовпадение канала/ключа                                  | Канал/ключ назначения не совпадает                                                                                                                                            | Убедитесь, что обе ноды используют один и тот же канал и PSK.                                                                 |
+| Слишком большое сообщение для отправки                     | Сообщение превышает максимальный размер полезной нагрузки                                                                                                                     | Сократи сообщение и повтори попытку.                                                                                          |
+| Нет ответа приложения                                      | Приложение или плагин не ответили на запрос                                                                                                                                   | Повтори попытку или проверь состояние приложения или модуля назначения.                                                       |
+| Ограничение рабочего цикла (Dity cycle) | Достигнут региональный лимит эфирного времени                                                                                                                                 | Дождись сброса окна рабочего цикла.                                                                                           |
+| Неверный запрос                                            | Повреждённый или неверный запрос                                                                                                                                              | Если проблема сохраняется, повтори попытку после обновления или перезапуска приложения.                                       |
 
 > 💡 **Совет:** Большинство ошибок доставки разрешаются сами собой. Если нода доступна с перебоями, mesh-сеть будет повторять попытки. При постоянных ошибках «Нет маршрута» проверьте, что промежуточные ноды-роутеры находятся в сети.
 
@@ -148,19 +178,42 @@ Meshtastic поддерживает два режима связи: **вещан
 
 Реагируйте на сообщения с помощью эмодзи:
 
-- **Нажмите и удерживайте** сообщение, чтобы открыть меню действий
-- Нажмите **"Добавить реакцию"**, чтобы выбрать эмодзи
+- **Double-tap** a message — or long-press it — to raise a quick reaction bar above the bubble
+- Tap an emoji in the bar to send it; tap **more** to open the full picker, or anywhere outside
+  the bar to dismiss it without sending
 - Реакции появляются под пузырьком сообщения
 - Несколько пользователей могут отреагировать на одно и то же сообщение
 - Реагируйте на свои сообщения или сообщения других
+
+> ℹ️ **Note:** Opening the bar sends nothing. A reaction is a real mesh packet, so it only goes
+> out when you pick an emoji.
 
 ![Значки реакций-эмодзи, отображаемые под сообщением](../../assets/screenshots/messages_reaction.png)
 
 > 💡 **Совет:** Реакции очень лёгкие — они потребляют гораздо меньше трафика mesh-сети по сравнению с полными текстовыми сообщениями.
 
+### Replying
+
+**Swipe a message to the right** to reply to it — the composer opens with that message quoted.
+Swiping past the reply threshold arms the action; releasing before it springs back with nothing sent.
+Reply is also in the actions menu, reached by long-pressing and then tapping **More**.
+
+### Day Separators
+
+Messages are grouped by day. The separator above the first message of each day reads **Today**
+or **Yesterday** for the two most recent days, and the date itself for older ones.
+
+### Jump to Latest
+
+Scrolling back through a conversation raises a jump-to-latest control. When messages arrive
+while you are scrolled up, it names the most recent sender and adds a count of the other unread
+messages. That count is messages, not people — five unread from one person reads as their name
+**+4**.
+
 ### Действия с сообщениями
 
-Нажмите и удерживайте любое сообщение, чтобы получить доступ к:
+Long-press or double-tap a message to open the quick reaction bar, then tap **More** (the
+overflow icon on that bar) to reach:
 
 - **Копировать** — скопировать текст сообщения в буфер обмена
 - **Ответить** — процитировать сообщение в твоём ответе
@@ -170,16 +223,16 @@ Meshtastic поддерживает два режима связи: **вещан
 
 ### Приоритет сообщений
 
-Сообщения ставятся в очередь и передаются в соответствии с приоритетом:
-
-1. Экстренные/аварийные сообщения (наивысший)
-2. Личные сообщения
-3. Широковещательные сообщения в канале (самый низкий)
+The app sends every message you compose at the same, default priority — there is no
+emergency or alert tier to choose, and nothing in the app raises a direct message above a
+channel broadcast. Any prioritising between them happens in firmware, not here. (The app
+does mark some of its own internal traffic, such as admin and traceroute packets, as
+reliable or background, but that is not something you control from the message composer.)
 
 ### Ограничения сообщений
 
 - **Максимальная длина**: 200 байт (примерно 200 символов для текста в ASCII)
-- Ограничение в 200 байт применяется к встроенному редактору сообщений — сам лимит полезной нагрузки в mesh-сети составляет ~233 байта, поэтому сообщения от других отправителей (например, App Functions или Android Auto) могут быть немного длиннее
+- The 200-byte cap applies to the in-app composer — the mesh payload limit itself is ~233 bytes, so messages from other senders (e.g., App Functions) may arrive slightly longer
 - **Ограничение скорости**: Mesh-сеть обеспечивает справедливое распределение эфирного времени; большой объем сообщений может быть ограничен
 - **Доставка**: Сообщения автоматически повторяются при отсутствии подтверждения
 

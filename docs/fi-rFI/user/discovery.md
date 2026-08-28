@@ -1,10 +1,12 @@
 ---
-title: Haku
+title: Paikallisen mesh-verkon skannaus
 parent: Käyttöopas
 nav_order: 12
-last_updated: 2026-07-27
+last_updated: 2026-08-28
 description: Tutki mesh-verkkoasi — paikallinen verkon haku, reitinselvitykset, naapurikartat ja radion hakuun liittyvät työkalut.
 aliases:
+  - discovery
+  - local-mesh-discovery
   - mesh-verkon haku
   - paikallinen haku
   - verkkohaku
@@ -12,7 +14,7 @@ aliases:
   - naapuritieto
 ---
 
-# Haku
+# Paikallisen mesh-verkon skannaus
 
 Hakutyökalut auttavat ymmärtämään **miten** mesh-verkko on yhteydessä — mitkä radiot kuulevat toisensa, mitä reittejä viestit kulkevat ja missä on pullonkauloja tai heikkoja yhteyksiä.
 
@@ -29,7 +31,7 @@ Paikallinen verkon haku on erillinen skannaustila, joka auttaa löytämään par
 
 Avaa se kohdasta **Asetukset → Lisäasetukset → Paikallinen mesh-haku**. Työpöytäversiossa sille on oma kohta kohdassa **Asetukset → Paikallinen mesh-haku**.
 
-> ⚠️ **Huom:** Haku muuttaa radiosi LoRa-asetuksia väliaikaisesti skannauksen ajaksi ja palauttaa alkuperäisen konfiguraation sen päätyttyä. Laitteen täytyy olla yhdistettynä, jotta skannaus voidaan suorittaa.
+> ℹ️ **Note:** Discovery temporarily changes your radio's LoRa settings while it scans, then restores your original configuration when it finishes. Laitteen täytyy olla yhdistettynä, jotta skannaus voidaan suorittaa.
 
 ### Skannauksen asetukset
 
@@ -84,7 +86,7 @@ Tuloksista saatavilla olevat lisätoiminnot:
 - **Haun kartta** — kartta skannauksessa löydetyistä radioista.
 - **Raportin vienti** — vie raportti PDF-tiedostona Androidilla tai tekstinä muilla alustoilla.
 
-> 💡 **Vinkki:** Androidilla haku voi luoda laitteessa toimivan tekoälyyhteenvedon (Gemini Nano) tuloksistasi. Jos laitteessa toimivaa mallia ei ole käytettävissä, käytetään algoritmista yhteenvetoa — näin saat aina luettavan tulkinnan skannauksesta.
+> 💡 **Tip:** On **Google Play** builds, Discovery can generate an on-device AI summary (Gemini Nano) of your results. F-Droid builds always use the algorithmic summary — the proprietary ML Kit dependency is deliberately excluded from that flavor — so you get a readable interpretation of the scan either way.
 
 ---
 
@@ -167,7 +169,7 @@ Kun toiminto on käytössä, radio lähettää säännöllisesti naapuritiedot. 
 - Jokainen naapurimerkintä näyttää radion, joka on kuultu suoraan, sekä sen signaalilaadun.
 - Yhdistä naapuritiedot useista radioista ymmärtääksesi koko mesh-verkon topologian.
 
-> ⚠️ Huom: Naapuritieto lisää lähetysajan käyttöä, koska jokainen käytössä oleva radio lähettää säännöllisesti naapurilistansa. Vilkkaissa verkoissa, joissa on paljon radioita, harkitse pidempiä lähetysvälejä (3600 sekuntia tai enemmän) ruuhkautumisen välttämiseksi.
+> ℹ️ **Note:** Neighbor Info increases airtime usage because every enabled node periodically broadcasts its neighbor list. Vilkkaissa verkoissa, joissa on paljon radioita, harkitse pidempiä lähetysvälejä (3600 sekuntia tai enemmän) ruuhkautumisen välttämiseksi.
 
 ---
 
@@ -201,6 +203,14 @@ Katso [Radiot](nodes) saadaksesi lisätietoa suodatus- ja lajitteluasetuksista.
 - Ota naapuritieto käyttöön keskeisissä radioissa — erityisesti reitittimissä ja toistimissa, jotta saat näkyvyyden runkoverkkoon.
 - Tarkista kartta — [Kartta](map-and-waypoints) yhdessä signaalitiedon kanssa auttaa ymmärtämään, miksi jotkin yhteydet ovat vahvoja ja toiset heikkoja.
 - Seuraa signaalin muutoksia ajan kuluessa — käytä [Signaalimittari](signal-meter) -opasta tulkitaksesi SNR- ja RSSI-arvot oikein.
+
+## Aiheeseen liittyvät aiheet
+
+- [Nodes](nodes) — the node list these scans populate
+- [Map & Waypoints](map-and-waypoints) — see discovered nodes geographically
+- [Signal Meter](signal-meter) — interpret the SNR and RSSI a scan reports
+- [Settings — Modules & Admin](settings-module-admin) — configure the Mesh Beacon and Neighbor Info modules
+- [Messages & Channels](messages-and-channels) — join a mesh you found and start talking
 
 ---
 

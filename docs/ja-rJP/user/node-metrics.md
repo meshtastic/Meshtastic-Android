@@ -2,7 +2,7 @@
 title: ノードメトリクス
 parent: User Guide
 nav_order: 5
-last_updated: 2026-07-08
+last_updated: 2026-08-27
 description: 各メッシュノードのテレメトリダッシュボード。デバイスの状態、環境センサー、大気質、信号品質、電力、ルート追跡、位置履歴を表示します。
 aliases:
   - metrics
@@ -116,11 +116,13 @@ CO₂ の測定値は、大気質をひと目で把握できるよう、深刻�
 
 電力管理のテレメトリです（INA センサーまたは対応ハードウェアが必要）：
 
-| メトリクス | 説明           |
-| ----- | ------------ |
-| バス電圧  | 供給電圧         |
-| 電流    | 消費電流（ミリアンペア） |
-| 電力    | 計算されたワット数    |
+| メトリクス | 説明                             |
+| ----- | ------------------------------ |
+| 電圧    | Per-channel voltage reading    |
+| 電流    | Per-channel draw, in milliamps |
+
+Up to three channels (ch1–ch3) are charted, each with a label you can edit. The app does not
+derive a wattage figure from them.
 
 ## ルート追跡
 
@@ -163,14 +165,14 @@ CO₂ の測定値は、大気質をひと目で把握できるよう、深刻�
 
 ![位置のインラインコンテンツ](../../assets/screenshots/nodes_position.png)
 
-> ⚠️ **注意：** メトリクスは、リモートノードが報告した場合にのみ利用できます。 メトリクスは、各ノードのテレメトリ設定で構成された間隔で更新されます。
+> ℹ️ **Note:** Metrics are only available when they have been reported by the remote node. メトリクスは、各ノードのテレメトリ設定で構成された間隔で更新されます。
 
 ## 関連トピック
 
 - [ノード](nodes)：ノードリスト、絞り込み、並べ替え
 - [テレメトリとセンサー](telemetry-and-sensors)：対応センサーと設定
 - [信号メーター](signal-meter)：SNR と RSSI から信号品質を計算する方法
-- [探索](discovery)：ルート追跡の詳細と隣接ノード情報
+- [Local Mesh Discovery](discovery) — traceroute details and neighbor info
 - [単位とロケール](units-and-locale)：温度・距離・速度の表示形式
 
 ---

@@ -2,7 +2,7 @@
 title: Desktop App
 parent: Kasutusjuhend
 nav_order: 14
-last_updated: 2026-07-07
+last_updated: 2026-08-27
 description: Meshtastic arvuti rakendus pakub samu võrgusuhtluse funktsioone Linuxis, macOS-is ja Windowsis.
 aliases:
   - töölaud
@@ -70,7 +70,6 @@ Sinihamba madal voolutarve on lauaarvutites toetatud [Kable](https://github.com/
 | Püsivara uuendus                                       | ✓       | ✓       | Rakendusesisese USB, BLE ja Wi-Fi (ESP32) värskendused toimivad samamoodi nagu Androidis |
 | Märguanded                                             | ✓       | ✓       | Emakeelsed op.süsteemi märguanded                                                           |
 | Widgets                                                | ✓       | ✗       | Android-only                                                                                                |
-| Android auto                                           | ✓       | ✗       | Android-only — not available on Desktop or iOS                                                              |
 | TI assistent (Chirpy)               | ✓\*     | ✗       | Google flavor Android only                                                                                  |
 | Rakenduse funktsioonid (süstemi TI) | ✓†      | ✗       | Google flavor Android only                                                                                  |
 
@@ -131,7 +130,7 @@ cd Meshtastic-Android
 
 Nõuded:
 
-- JDK 21
+- JDK 25 (Gradle can provision the toolchain itself via foojay)
 - No Android SDK required for desktop-only builds
 
 ## Known Limitations

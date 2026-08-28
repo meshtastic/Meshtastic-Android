@@ -11,6 +11,11 @@ The entire release process is managed by a single, manually-triggered GitHub Act
     1.  `base_version`: The base version number you are releasing (e.g., `2.8.0`).
     2.  `channel`: The release channel you are targeting (`internal`, `closed`, `open`, or `production`).
     3.  `dry_run`: If `true`, calculates the tag but does not push it or start the release (default: `false`).
+    4.  `no_review_in_flight`: **Promotions only, and a hard gate.** Every promotion creates a
+        new Play submission, which *cancels and restarts* any review already in flight. The
+        workflow fails immediately unless this is checked, so open Play Console → Publishing
+        overview → Submission activity first: if anything reads "In review", wait. Internal
+        releases and dry runs are exempt (Play internal testing skips full review).
 -   **Automation:** The workflow handles everything automatically:
     -   **Syncs Assets:** Fetches the latest firmware/hardware lists, protobuf definitions, and translations (Crowdin).
     -   **Generates Changelog:** Creates a clean changelog from commits since the last production release and commits it to the repo.
@@ -59,7 +64,25 @@ After testing is complete on all pre-release channels, you can create the final 
 
 1.  **Verify Android:** Check the Google Play Console to ensure the build is available on the correct track.
 2.  **Verify Desktop:** Download and smoke-test at least one installer (DMG, MSI, or AppImage) from the GitHub Release.
-3.  **Merge:** Merge the release branch (if one was used for stabilization) back into `main`.
+3.  **Verify the desktop store submissions** *(production only — see below)*: the Microsoft Store
+    submission in Partner Center, and the pull request opened against `microsoft/winget-pkgs`.
+4.  **Merge:** Merge the release branch (if one was used for stabilization) back into `main`.
+
+### Desktop Store Publishing (production only)
+
+Publishing a **production** release also fires two workflows, both keyed on the GitHub
+`release: released` event:
+
+| Workflow | Target | Credentials |
+|---|---|---|
+| `msstore-publish.yml` | Microsoft Store, via the Partner Center API using the MSStore CLI (#6864 replaced the deprecated `microsoft/store-submission` action) | `MSSTORE_*` secrets |
+| `winget-publish.yml` | A PR against `microsoft/winget-pkgs` | `WINGET_TOKEN` PAT |
+
+Neither fires for drafts or pre-releases, so internal/closed/open promotions are ignored.
+`released` also fires when `promote.yml` flips an existing pre-release to a full release — but
+because that edit uses the workflow's own `GITHUB_TOKEN`, and events caused by `GITHUB_TOKEN`
+never start workflow runs, `promote.yml` dispatches both workflows explicitly as well. Each also
+accepts a manual `workflow_dispatch` with a `tag`, which is the retry path if either fails.
 
 ## Desktop Release Details
 

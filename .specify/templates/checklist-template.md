@@ -27,7 +27,7 @@
 - [ ] CHK003 — Principle III (CMP UI): Compose Multiplatform composables? `NumberFormatter.format()` for floats? Navigation 3 patterns? [Consistency]
 - [ ] CHK004 — Principle IV (Privacy First): No PII/location/key logging? Generated proto not hand-edited? [Consistency]
 - [ ] CHK005 — Principle V (Design Standards): UI reviewed against Meshtastic design standards? Cross-platform features linked to upstream spec in `meshtastic/design/features/`? [Consistency]
-- [ ] CHK006 — Principle VI (Documentation Freshness): User-facing changes update `docs/` (with `last_updated`) or justified `skip-docs-check`? [Consistency]
+- [ ] CHK006 — Principle VI (Documentation Freshness): User-facing changes update `docs/en/` (with `last_updated`), or the PR says why not? `validate-doc-links.js` + `check-doc-coverage.js` run locally? [Consistency]
 - [ ] CHK007 — Principle VII (Verify Before Push): Full verification passing locally? [Consistency]
 
 ## [Category 1]

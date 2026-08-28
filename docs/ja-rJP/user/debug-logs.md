@@ -2,7 +2,7 @@
 title: デバッグログ
 parent: ユーザーガイド
 nav_order: 22
-last_updated: 2026-07-08
+last_updated: 2026-08-27
 description: アプリのデバッグログをアプリ内で表示・エクスポートし、バグの診断に役立つよう GitHub の issue にキャプチャを添付できます。adb は不要です。
 aliases:
   - debug-logs
@@ -44,7 +44,7 @@ aliases:
 
 そのファイルを GitHub の issue に添付してください。
 
-> 🔒 **プライバシー：** エクスポートは、ファイルに書き込む前に、秘密鍵・管理者鍵・セッションパスキーを自動的に**秘匿化**します。 チャンネルの PSK は**秘匿化されません**。また、ログにはノード名、位置、その他の識別情報が含まれることがあります。公開して共有する前にファイルにざっと目を通し、少しでも不安があれば非公開で共有してください。
+> 🔒 **Privacy:** Exports automatically **redact** private keys, admin keys, session passkeys and channel PSKs before writing the file. Logs can still contain node names, positions, and other identifying details — glance through the file before sharing it publicly, and share privately if you have any doubt.
 
 ## デスクトップ
 

@@ -2,7 +2,7 @@
 title: Kartta ja reittipisteet
 parent: Käyttöopas
 nav_order: 6
-last_updated: 2026-07-08
+last_updated: 2026-08-27
 description: Näytä radioiden sijainnit kartalla, luo ja jaa reittipisteitä, hallitse karttatasoja ja Site Planneria sekä säädä sijainnin jakamista ja tietosuoja-asetuksia.
 aliases:
   - kartta
@@ -120,14 +120,15 @@ Määritä sijaintikäyttäytyminen kohdassa **Asetukset → Sijainti**.
 
 Kartan pohja riippuu sovellusversiosta: **Google Play** -versio käyttää Google Mapsia, kun taas **F-Droid**- ja työpöytäversiot käyttävät OpenStreetMapia. Pohjakartan lisäksi käytettävissä on muita karttatasoja peitekerroksina tai vaihtoehtoisina karttoina:
 
-- Satelliittikuvat (jos saatavilla)
-- Offline-kartat (lataa alueet offline-käyttöä varten)
+- Satellite imagery — on both Google Play and F-Droid
+- Offline tiles — **F-Droid only**. Download map areas for offline use through OSMdroid's tile
+  cache. Google Play and Desktop builds have no offline download
 
 ## Aiheeseen liittyvät aiheet
 
 - [Radiot](nodes) — tarkastele ja suodata radiolistaa
 - [Radion mittarit](node-metrics) — signaalin laatu ja sijaintihistoria yksittäisille radioille
-- [Haku](discovery) — reitinselvitys ja naapuritiedot mesh-verkon ymmärtämiseen
+- [Local Mesh Discovery](discovery) — traceroute and neighbor info for understanding mesh topology
 - [Yksiköt ja kieliasetukset](units-and-locale) — etäisyys- ja koordinaattien näyttömuodot
 
 ---

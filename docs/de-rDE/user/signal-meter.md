@@ -2,7 +2,7 @@
 title: Wie das Meshtastic Signal Meter funktioniert
 parent: User Guide
 nav_order: 15
-last_updated: 2026-07-08
+last_updated: 2026-08-27
 description: Wie das Signal Meter die Qualität von SNR relativ zum Modem preset bewertet - spread spectrum, presets, und was die Balken wirklich bedeuten.
 aliases:
   - Signal
@@ -15,7 +15,7 @@ aliases:
 
 Die Meshtastic-Signalanzeige – die vertrauten Balken oder die Statusfarbe in der App – wird ganz anders berechnet als die „Balken“ bei einem herkömmlichen Mobiltelefon oder WLAN-Router.
 
-Die meisten Endgeräte messen einfach, wie "laut" ein Signal ist. Da Meshtastic jedoch die **LoRa Technologie (Long Range)** verwendet, misst die Signalanzeige, wie **klar** das Signal ist – und zwar im Verhältnis zu den spezifischen Einstellungen, die in Ihrem Mesh-Netzwerk genutzt werden.
+Most consumer devices measure how "loud" a signal is. Da Meshtastic jedoch die **LoRa Technologie (Long Range)** verwendet, misst die Signalanzeige, wie **klar** das Signal ist – und zwar im Verhältnis zu den spezifischen Einstellungen, die in Ihrem Mesh-Netzwerk genutzt werden.
 
 ---
 
@@ -38,7 +38,7 @@ Wenn dich ein Freund auf einem ohrenbetäubend lauten Rockkonzert anschreit, ist
 
 ## 2. Die Magie von LoRa: Empfangen "Unter dem Lärmboden"
 
-Für standard Radios (wie FM oder WLAN) gilt, wenn das Hintergrundrauschen lauter ist, als das Signal (ein negativer SNR), hört der Empfänger nur Rauschen.
+For standard radios (like FM or WiFi), if the background noise is louder than the signal (a negative SNR), the receiver hears only static.
 
 LoRa ist speziell. Es nutzt die **„Spread-Spectrum“**-Modulation, die es dem Funkgerät ermöglicht, ein Signal mathematisch aus der Luft zu extrahieren, selbst wenn es tief _unterhalb_ des Hintergrundrauschens liegt. Das ist der Grund weshalb du häufig **negative SNR Werte** (z.B. -10 dB, was bedeutet, dass das Signal 10 Dezibel schwächer ist, als das Hintergrundrauschen) in Meshtastic sehen wirst.
 

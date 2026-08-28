@@ -2,7 +2,7 @@
 title: Rakenduse funktsioonid
 parent: Kasutaja juhis
 nav_order: 19
-last_updated: 2026-06-11
+last_updated: 2026-08-28
 description: Ava kärgvõrgu funktsioonid Androidi süsteemile ja seadme tehisintellektil põhinevatele assistentidele (nt Gemini), et nad saaksid kärgvõrgu töövooge käivitada rakendust avamata.
 aliases:
   - rakenduse funktsioonid
@@ -15,9 +15,9 @@ aliases:
 
 Rakendusfunktsioonid avaldavad Meshtasticu võimalused Androidi süsteemile ja seadmesisestele TI assistentidele (näiteks Gemini) Androidi rakenduste funktsioonide API kaudu. Kui need on lubatud, saab assistent sinu eest kärgvõrgu töövooge avastada ja käivitada – näiteks sõnumi saata või kärgvõrgu olekut kontrollida – ilma, et peaksid rakendust avama.
 
-> ⚠️ **Märkus:** Rakenduse funktsioonid on saadaval ainult **Google'i-tüüpi Androidi versioonides**.
-
-> ⚠️ **Märkus:** See on eraldi rakenduse sisesest **Chirpy** assistendist. Rakenduse funktsioonid lasevad _süsteemi_ TI assistendil kärgvõrgu kallal tegutseda; Chirpy on vestlusassistent Meshtasticu rakenduses endas.
+> ℹ️ **Note:** App Functions are available on **Google-flavor Android builds only**.
+>
+> This is separate from the in-app **Chirpy** assistant. Rakenduse funktsioonid lasevad _süsteemi_ TI assistendil kärgvõrgu kallal tegutseda; Chirpy on vestlusassistent Meshtasticu rakenduses endas.
 
 ## Luba rakenduse funktsioonid
 

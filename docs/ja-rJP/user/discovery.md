@@ -1,10 +1,12 @@
 ---
-title: 探索
+title: ローカルメッシュ探索
 parent: User Guide
 nav_order: 12
-last_updated: 2026-07-27
+last_updated: 2026-08-28
 description: メッシュネットワークを探索します。ローカルメッシュ探索スキャナー、ルート追跡の経路、隣接ノードのマップ、ノード探索ツールを説明します。
 aliases:
+  - discovery
+  - local-mesh-discovery
   - mesh-discovery
   - local-discovery
   - network-scan
@@ -12,7 +14,7 @@ aliases:
   - neighbor-info
 ---
 
-# 探索
+# ローカルメッシュ探索
 
 探索ツールは、メッシュネットワークが**どのように**つながっているか（どのノードが互いに受信できるか、メッセージがどの経路を通るか、ボトルネックや弱いリンクがどこにあるか）を把握するのに役立ちます。
 
@@ -29,7 +31,7 @@ aliases:
 
 「**設定 → 詳細設定 → ローカルメッシュ探索**」から開きます。 デスクトップでは、独自の「**設定 → ローカルメッシュ探索**」の項目があります。
 
-> ⚠️ **注意：** 探索は、スキャン中に無線機の LoRa 設定を一時的に変更し、完了時に元の構成に戻します。 スキャンを実行するには、デバイスが接続されている必要があります。
+> ℹ️ **Note:** Discovery temporarily changes your radio's LoRa settings while it scans, then restores your original configuration when it finishes. スキャンを実行するには、デバイスが接続されている必要があります。
 
 ### スキャンを設定する
 
@@ -84,7 +86,7 @@ aliases:
 - **探索マップ**：スキャン中に見つかったノードのマップ。
 - **レポートのエクスポート**：Android では PDF として、他のプラットフォームではテキストとしてレポートをエクスポートします。
 
-> 💡 **ヒント：** Android では、探索が結果のオンデバイス AI 要約（Gemini Nano）を生成できます。 オンデバイスのモデルが利用できない場合は、代わりにアルゴリズムによる要約が使われるため、常にスキャンの読みやすい解釈が得られます。
+> 💡 **Tip:** On **Google Play** builds, Discovery can generate an on-device AI summary (Gemini Nano) of your results. F-Droid builds always use the algorithmic summary — the proprietary ML Kit dependency is deliberately excluded from that flavor — so you get a readable interpretation of the scan either way.
 
 ---
 
@@ -167,7 +169,7 @@ aliases:
 - 各隣接ノードの項目には、直接受信したノードとその信号品質が表示されます。
 - 複数のノードの隣接ノードデータを組み合わせて、メッシュ全体のトポロジーを把握します。
 
-> ⚠️ **注意：** 隣接ノード情報は、有効にした各ノードが隣接ノードのリストを定期的にブロードキャストするため、電波利用時間の消費が増えます。 ノードの多い混雑したメッシュでは、輻輳を避けるために、より長いブロードキャスト間隔（3600 秒以上）を検討してください。
+> ℹ️ **Note:** Neighbor Info increases airtime usage because every enabled node periodically broadcasts its neighbor list. ノードの多い混雑したメッシュでは、輻輳を避けるために、より長いブロードキャスト間隔（3600 秒以上）を検討してください。
 
 ---
 
@@ -201,6 +203,14 @@ aliases:
 - **主要なノードで隣接ノード情報を有効に**：特にルーターやリピーターで有効にして、バックボーンの全体像を組み立てます。
 - **マップを確認**：[マップ](map-and-waypoints) 上のノードの位置と信号データを組み合わせると、なぜあるリンクは強く、別のリンクは弱いのかが分かります。
 - **信号を時系列で比較**：[信号メーター](signal-meter) のガイドを使って、SNR と RSSI の値を正しく解釈します。
+
+## 関連トピック
+
+- [Nodes](nodes) — the node list these scans populate
+- [Map & Waypoints](map-and-waypoints) — see discovered nodes geographically
+- [Signal Meter](signal-meter) — interpret the SNR and RSSI a scan reports
+- [Settings — Modules & Admin](settings-module-admin) — configure the Mesh Beacon and Neighbor Info modules
+- [Messages & Channels](messages-and-channels) — join a mesh you found and start talking
 
 ---
 

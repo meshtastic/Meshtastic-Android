@@ -2,7 +2,7 @@
 title: Обновления прошивки
 parent: Руководство пользователя
 nav_order: 13
-last_updated: 2026-07-07
+last_updated: 2026-08-27
 description: Обновляйте прошивку своего радио по Bluetooth или USB — процесс OTA, каналы версий, предполётные проверки и восстановление.
 aliases:
   - firmware
@@ -35,7 +35,28 @@ aliases:
 
 ![Проверка обновлений прошивки](../../assets/screenshots/firmware_checking.png)
 
-> ⚠️ **Предупреждение:** Прерывание обновления прошивки может вывести твоё устройство из строя. Убедись, что твоё радио имеет достаточный заряд батареи (рекомендуется >50%) и сохраняйте близость Bluetooth на протяжении всего процесса.
+> ⚠️ **Предупреждение:** Прерывание обновления прошивки может вывести твоё устройство из строя. Keep the radio charged and stay in Bluetooth range for the whole update. The app itself only blocks the update below **10%** battery; 50% or more is the safe habit, not an enforced limit.
+
+#### Очистить устройство при обновлении
+
+Where the app offers it, an **Erase device during update** checkbox appears next to the update button. It is a per-update opt-in and is never remembered.
+
+| Method         | What erasing does                                                                                                                      |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| BLE / WiFi OTA | Factory-resets the device once the update is verified. All settings and Bluetooth pairing are removed. |
+| USB            | Полностью стирает флэш-память устройства, а затем устанавливает выбранную прошивку с нуля.                             |
+
+It is not offered for a local firmware file, during a recovery update, or on USB devices whose board does not support the erase step. Afterwards the device needs setting up — and pairing — again.
+
+### OTA via WiFi (network-connected ESP32)
+
+When an ESP32 radio is connected over the network rather than Bluetooth, the app offers **WiFi OTA**, which pushes the same update over TCP:
+
+1. Connect to the radio over the network (see [Connections](connections)).
+2. Open the Firmware Update screen and pick a version.
+3. Tap **Update**. Keep the radio and phone on the same network for the whole transfer.
+
+WiFi OTA takes the ESP32 `-update.bin` image rather than the `.uf2` a USB update uses; the app selects the right artifact for you.
 
 ![Предупреждение о прошивке](../../assets/screenshots/firmware_disclaimer.png)
 
@@ -98,9 +119,9 @@ aliases:
 
 Если обновление кажется зависшим:
 
-- Подождите не менее 5 минут, прежде чем предпринимать действия
-- Если действительно зависло, перезагрузите радио выключением и включением питания
-- Попробуйте обновление снова
+- Give it a minute. After writing the image the app waits up to **60 seconds** for the radio to come back and report its new version, so a pause at the verify step is expected.
+- If it is still stuck after that, power-cycle the radio.
+- Attempt the update again.
 
 ![Ошибка обновления прошивки](../../assets/screenshots/firmware_error.png)
 
@@ -115,11 +136,15 @@ aliases:
 
 ### Предупреждения о совместимости
 
-Приложение может показывать предупреждения, когда:
+On connecting, the app compares the radio's firmware against two thresholds and reacts differently to each:
 
-- Прошивка подключённого радио ниже минимально поддерживаемой версии
-- Несовпадение мажорных версий приложения и прошивки
-- Устаревшие функции требуют миграции
+| Версия прошивки                                                                                                 | What you see                                     | What happens                                                                                                         |
+| --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| Below **2.3.15**                                                                | **Firmware update required.**    | The app disconnects from the radio. It will not operate against firmware this old.   |
+| **2.3.15** up to, but not including, **2.5.14** | **Firmware Update Recommended.** | Advisory only — dismiss it and carry on. The dialog names the latest stable release. |
+| **2.5.14** or newer                                                             | Nothing                                          | —                                                                                                                    |
+
+A version string the app cannot parse is ignored rather than treated as too old, so a transient read never disconnects a working radio.
 
 > ⚠️ **Важно:** Всегда обновляйте приложение Meshtastic до или одновременно с обновлением прошивки, чтобы обеспечить совместимость.
 

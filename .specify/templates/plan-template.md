@@ -53,9 +53,10 @@
 - **V. Design Standards Compliance**: For any user-facing UI, record how the design was
   checked against the Meshtastic Client Design Standards. For cross-platform features,
   link the upstream behavior spec from `meshtastic/design/features/` or justify N/A.
-- **VI. Documentation Freshness**: If user-facing UI changes, confirm the corresponding
-  `docs/` page(s) are updated (with `last_updated` frontmatter) or the `skip-docs-check`
-  label is applied with justification.
+- **VI. Documentation Freshness**: If user-facing behaviour changes, confirm the corresponding
+  `docs/en/` page(s) are updated (with `last_updated` frontmatter), or state why none did.
+  Nothing enforces this in CI — run `node scripts/validate-doc-links.js` and
+  `node scripts/check-doc-coverage.js` yourself.
 - **VII. Verify Before Push**: Record the exact local verification commands and the expected
   post-push CI check command (`gh pr checks` or `gh run list`) before implementation starts.
 

@@ -2,7 +2,7 @@
 title: Перевод приложения
 parent: Руководство пользователя
 nav_order: 17
-last_updated: 2026-06-25
+last_updated: 2026-08-27
 description: Как приложение и его документация переводятся через Crowdin и рекомендации по внесению переводов.
 aliases:
   - translate
@@ -24,7 +24,7 @@ aliases:
 | Страницы руководства пользователя | `docs/en/user/*.md`                                                 | Встроенная документация, отображаемая в разделе «Справка и документация» |
 | Метаданные Fastlane               | `fastlane/metadata/android/en-US/`                                  | Название, описание и журналы изменений в App Store                       |
 
-> ⚠️ **Примечание:** Страницы руководства для разработчиков только на английском. Документация, ориентированная на код и для участников, не переводится.
+> ℹ️ **Note:** Developer Guide pages are English-only. Документация, ориентированная на код и для участников, не переводится.
 
 ---
 
@@ -100,3 +100,11 @@ docs/
 Если у тебя есть вопросы о контексте конкретной строки или нужна помощь для начала работы, создайте обсуждение на странице [Meshtastic GitHub Discussions](https://github.com/orgs/meshtastic/discussions).
 
 Спасибо за помощь в расширении охвата Meshtastic!
+
+## Связанные темы
+
+- [Units & Locale](units-and-locale) — how the app picks number, date, and unit formats for your region
+- [Help & Documentation](help-and-docs) — the in-app docs browser these pages are published to
+- [Onboarding](onboarding) — where a new user first meets the translated strings
+
+---

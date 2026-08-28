@@ -526,7 +526,6 @@
     <string name="dns">DNS</string>
     <!-- DOC -->
     <string name="doc_clear_search">Puhasta otsing</string>
-    <string name="doc_keywords_android_auto">android auto,auto,peakomplekt,sõitmine,käed-vabad seadmed,sõnumside</string>
     <string name="doc_keywords_app_functions">süsteemi ti, gemini, assistent, funktsioonid, automatiseerimine, hääl</string>
     <string name="doc_keywords_connections">sinihammas,usb,tcp,pairing,serial,wifi</string>
     <string name="doc_keywords_debug_logs">arendaja,logid,logcat,eksport,veateade,probleem,tõrkeotsing,diagnostika</string>
@@ -552,12 +551,11 @@
     <string name="doc_search_placeholder">Otsi dokumentatsiooni…</string>
     <string name="doc_section_developer">Arendaja juhis</string>
     <string name="doc_section_user">Kasutusjuhend</string>
-    <string name="doc_title_android_auto">Android auto</string>
     <string name="doc_title_app_functions">Rakenduse funktsioonid</string>
     <string name="doc_title_connections">Ühendus</string>
     <string name="doc_title_debug_logs">Arendaja logid</string>
     <string name="doc_title_desktop">Töölauarakendus</string>
-    <string name="doc_title_discovery">Avastamine</string>
+    <string name="doc_title_discovery">Kohalik kärgvõrgu avastaja</string>
     <string name="doc_title_firmware">Püsivara värskendused</string>
     <string name="doc_title_help">Abi &amp; Rakendusesisesed dokumendid</string>
     <string name="doc_title_map">Kaart &amp; Teekonnapunktid</string>

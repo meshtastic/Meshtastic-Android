@@ -4,10 +4,9 @@
 
 ## Build, Test & Lint (essentials)
 
-Requires JDK 25 and `ANDROID_HOME`. Per fresh clone:
-```bash
-[ -f local.properties ] || cp secrets.defaults.properties local.properties
-```
+Requires JDK 25 and `ANDROID_HOME`. No secrets step: the secrets plugin reads
+`secrets.properties` and falls back to the tracked `secrets.defaults.properties`, so the
+`google` flavor builds without either. Add `secrets.properties` only for real Maps tiles.
 ```bash
 ./gradlew spotlessApply spotlessCheck detekt assembleDebug test allTests   # full local verification (run before push)
 ./gradlew :core:data:allTests                                # single KMP module

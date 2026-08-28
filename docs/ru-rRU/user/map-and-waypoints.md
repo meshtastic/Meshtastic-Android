@@ -2,7 +2,7 @@
 title: Карта и путевые точки
 parent: Руководство пользователя
 nav_order: 6
-last_updated: 2026-07-08
+last_updated: 2026-08-27
 description: Просматривайте расположение нод на карте, создавайте и делитесь путевыми точками, управляйте слоями карты и планировщиком участков, а также контролируйте передачу геоданных и приватность.
 aliases:
   - map
@@ -120,14 +120,15 @@ aliases:
 
 Основная карта зависит от варианта сборки: сборки для **Google Play** используют Google Maps, а сборки **F-Droid** и настольные — OpenStreetMap. Поверх основной карты доступны дополнительные источники плиток в качестве наложений или альтернатив:
 
-- Спутниковый снимки (где доступно)
-- Офлайн-плитки (загружайте области карт для использования офлайн)
+- Satellite imagery — on both Google Play and F-Droid
+- Offline tiles — **F-Droid only**. Download map areas for offline use through OSMdroid's tile
+  cache. Google Play and Desktop builds have no offline download
 
 ## Связанные темы
 
 - [Ноды](nodes) — просмотр и фильтрация списка нод
 - [Метрики нод](node-metrics) — качество сигнала и история местоположения для отдельных нод
-- [Обнаружение](discovery) — трассировка и информация о соседях для понимания топологии mesh-сети
+- [Local Mesh Discovery](discovery) — traceroute and neighbor info for understanding mesh topology
 - [Единицы измерения и регион](units-and-locale) — форматы отображения расстояний и координат
 
 ---

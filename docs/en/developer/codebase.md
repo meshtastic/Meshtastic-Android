@@ -34,8 +34,7 @@ Meshtastic-Android/
 │   ├── docs/
 │   ├── wifi-provision/
 │   ├── widget/
-│   ├── discovery/
-│   └── car/
+│   └── discovery/
 ├── core/                   # Core infrastructure modules (KMP)
 │   ├── barcode/
 │   ├── ble/
@@ -96,13 +95,24 @@ All build files use Kotlin DSL (`.gradle.kts`). Configuration:
 
 ### Convention Plugins
 
-Located in `build-logic/convention/src/main/kotlin/`:
+Located in `build-logic/convention/src/main/kotlin/`, registered in
+`build-logic/convention/build.gradle.kts`. There are 24 plugin ids; these are the ones a module
+build applies most often:
 
 | Plugin | Purpose |
 |--------|---------|
 | `meshtastic.kmp.feature` | Standard feature module setup |
+| `meshtastic.kmp.library` | Shared KMP library module |
+| `meshtastic.kmp.library.compose` | KMP library that also ships Compose UI |
 | `meshtastic.kmp.jvm.android` | JVM + Android target configuration |
+| `meshtastic.koin` | Koin Annotations + K2 compiler plugin |
 | `meshtastic.kotlinx.serialization` | Serialization plugin setup |
+| `meshtastic.android.room` | Room KMP setup and schema location |
+| `meshtastic.android.screenshot` | Compose Preview screenshot testing |
+
+The rest cover the application and library variants, lint, detekt, spotless, Dokka, Kover,
+AboutLibraries, analytics, secrets, the docs tasks and the root aggregate — read the `register(…)`
+block rather than assuming a plugin does or does not exist.
 
 ### Build Variants (Android)
 

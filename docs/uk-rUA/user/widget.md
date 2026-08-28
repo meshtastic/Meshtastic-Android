@@ -2,7 +2,7 @@
 title: Home Screen Widget
 parent: Посібник користувача
 nav_order: 20
-last_updated: 2026-06-25
+last_updated: 2026-08-27
 description: Add the Meshtastic home screen widget to glance at your connected radio's local stats without opening the app.
 aliases:
   - widget
@@ -23,24 +23,28 @@ The widget displays the **connected radio's** current local stats:
 - **AirUtil** — airtime utilization (how much of the duty cycle your radio is transmitting)
 - **Traffic** — packets transmitted / received, and duplicates seen
 - **Relays** — packets relayed and relay cancellations (shown when the radio is relaying)
+- **Noise floor** — the measured background noise level
+- **Dropped** — packets the radio discarded
+- **Heap** — free versus total memory on the radio, drawn as a bar
+- **Nodes** — how many nodes are online, out of the total known
 
 Tap the widget to open the app, or use its refresh control to request fresh stats.
 
-> 💡 **Tip:** The values reflect the radio you are currently connected to. If the app isn't connected to a radio, the widget shows the last known stats until it reconnects.
+> 💡 **Tip:** The values reflect the radio you are currently connected to. If the radio disconnects, the widget replaces the stats with a status line — **Disconnected**, **Connecting**, or **Device sleeping**. It does not keep the last-known numbers on screen.
 
 ## Adding the Widget
 
 1. Long-press an empty area of your Android home screen.
 2. Tap **Widgets**.
-3. Find **Meshtastic** in the list and drag the **Local Stats** widget to your home screen.
+3. Find **Meshtastic** in the list and drag its widget to your home screen. The app ships one widget, so the picker entry is just the app name.
 4. Resize it as needed — the layout adapts to the available space.
 
-> ⚠️ **Note:** The widget is Android-only. It is not available on the Desktop or iOS builds.
+> ℹ️ **Note:** The widget is Android-only. It is not available on the Desktop or iOS builds.
 
 ## Related Topics
 
 - [Node Metrics](node-metrics) — the full Signal Quality and Local Stats history inside the app
 - [Connections](connections) — connect to a radio so the widget has stats to show
-- [Discovery](discovery) — channel and airtime utilization across the mesh
+- [Local Mesh Discovery](discovery) — channel and airtime utilization across the mesh
 
 ---

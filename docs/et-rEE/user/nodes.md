@@ -2,7 +2,7 @@
 title: Sõlmed
 parent: Kasutusjuhend
 nav_order: 4
-last_updated: 2026-07-27
+last_updated: 2026-08-27
 description: Browse, filter, and sort mesh nodes — view details, signal quality, roles, and quick actions.
 aliases:
   - sõlmede loend
@@ -103,14 +103,14 @@ Sõlmede filtreerimiseks nime või lühinime järgi tipi otsinguväljal. Filter 
 
 ### Filter Toggles
 
-| Filtreeri                  | Kirjeldus                                                                            |
-| -------------------------- | ------------------------------------------------------------------------------------ |
-| **Ainult ühenduses**       | Näita ainult viimase 2 tunni jooksul kuuldud sõlmi                                   |
-| **Only direct**            | Kuva ainult otseühendustega (mitte releeühendusega) sõlmi         |
-| **Include unknown**        | Näita sõlmi, mis pole veel kasutajainfot saatnud                                     |
-| **Exclude infrastructure** | Hide infrastructure-role nodes (Router, Router Late, Client Base) |
-| **Välista MQTT**           | Peida ainult MQTT internetisilla kaudu kuuldavad sõlmed                              |
-| **Kuva ignoreeritud**      | Kuva sõlmed, mille olete varem sulgenud või vaigistanud                              |
+| Filtreeri                  | Kirjeldus                                                                                                                                                                                         |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Ainult ühenduses**       | Näita ainult viimase 2 tunni jooksul kuuldud sõlmi                                                                                                                                                |
+| **Only direct**            | Kuva ainult otseühendustega (mitte releeühendusega) sõlmi                                                                                                                      |
+| **Include unknown**        | Show nodes that haven't sent user info yet. **On by default**, so a node heard before its info arrives stays visible and messageable; these carry a badge marking them incomplete |
+| **Exclude infrastructure** | Hide infrastructure-role nodes (Router, Router Late, Client Base, and legacy Repeater nodes)                                                                                   |
+| **Välista MQTT**           | Peida ainult MQTT internetisilla kaudu kuuldavad sõlmed                                                                                                                                           |
+| **Kuva ignoreeritud**      | Kuva sõlmed, mille olete varem sulgenud või vaigistanud                                                                                                                                           |
 
 ### Sorteerimisvalikud
 
@@ -159,7 +159,7 @@ Täielik ja sirvitav kataloog kõikidest linkidest on saadaval ka menüüs **Sea
 - [Node Metrics](node-metrics) — detailed telemetry dashboards for each node
 - [Sõnumid ja kanalid](messages-and-channels) — saada otsesõnum sõlmele
 - [Kaart ja teekonnapunktid](map-and-waypoints) — vaata sõlmede geograafilisi asukohti
-- [Avasta](Discovery) - traceroute ja naabri-info kärgvõrgu topoloogia uurimiseks
+- [Local Mesh Discovery](discovery) — traceroute and neighbor info for topology exploration
 - [Signal Meter](signal-meter) — understand what the signal bars mean
 
 ---
