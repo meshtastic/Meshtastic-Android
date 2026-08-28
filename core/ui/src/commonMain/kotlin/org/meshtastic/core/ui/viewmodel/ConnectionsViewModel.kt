@@ -144,6 +144,16 @@ class ConnectionsViewModel(
             .stateInWhileSubscribed(initialValue = false)
 
     /**
+     * Whether the device is configured not to transmit. Null-safe against the pre-config [LocalConfig] so the notice
+     * cannot flash before the device's config arrives.
+     */
+    val txDisabled: StateFlow<Boolean> =
+        radioConfigRepository.localConfigFlow
+            .map { it.lora?.tx_enabled == false }
+            .distinctUntilChanged()
+            .stateInWhileSubscribed(initialValue = false)
+
+    /**
      * Single source of truth for the UI's "connection status" pill/banner. Derived from [connectionState],
      * [ServiceRepository.connectionProgress], and [regionUnset]; kept here rather than in the composable so the mapping
      * is observable and testable.

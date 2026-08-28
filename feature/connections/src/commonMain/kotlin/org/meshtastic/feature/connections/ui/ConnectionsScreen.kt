@@ -96,6 +96,8 @@ import org.meshtastic.core.resources.open_settings
 import org.meshtastic.core.resources.open_wifi_settings
 import org.meshtastic.core.resources.rssi
 import org.meshtastic.core.resources.set_your_region
+import org.meshtastic.core.resources.transmit_disabled
+import org.meshtastic.core.resources.transmit_disabled_summary
 import org.meshtastic.core.resources.unknown
 import org.meshtastic.core.resources.unknown_device
 import org.meshtastic.core.resources.wifi_unavailable
@@ -107,6 +109,7 @@ import org.meshtastic.core.ui.component.PermissionRecoveryCard
 import org.meshtastic.core.ui.component.RecoveryCard
 import org.meshtastic.core.ui.icon.AppSettingsAlt
 import org.meshtastic.core.ui.icon.Bluetooth
+import org.meshtastic.core.ui.icon.CellTower
 import org.meshtastic.core.ui.icon.Language
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.NoDevice
@@ -162,6 +165,7 @@ fun ConnectionsScreen(
     val ourNode by connectionsViewModel.ourNodeForDisplay.collectAsStateWithLifecycle()
     val firmwareUpdateNotice by connectionsViewModel.firmwareUpdateNotice.collectAsStateWithLifecycle()
     val regionUnset by connectionsViewModel.regionUnset.collectAsStateWithLifecycle()
+    val txDisabled by connectionsViewModel.txDisabled.collectAsStateWithLifecycle()
     val sessionAuthorized by connectionsViewModel.sessionAuthorized.collectAsStateWithLifecycle()
 
     val selectedDevice by scanModel.selectedNotNullFlow.collectAsStateWithLifecycle()
@@ -495,17 +499,14 @@ fun ConnectionsScreen(
                                 )
                             }
 
-                        // Region warning sits outside the animated card so it does not affect the
+                        // Config warnings sit outside the animated card so they do not affect the
                         // CONNECTED ↔ CONNECTING ↔ NO_DEVICE size transition.
                         val isPhysicalDevice =
                             selectedDevice != InterfaceId.MOCK.id.toString() &&
                                 selectedDevice != InterfaceId.REPLAY.id.toString()
-                        if (
-                            uiState == ConnectionUiState.CONNECTED_WITH_NODE &&
-                            regionUnset &&
-                            sessionAuthorized &&
-                            isPhysicalDevice
-                        ) {
+                        val canShowConfigWarnings =
+                            uiState == ConnectionUiState.CONNECTED_WITH_NODE && sessionAuthorized && isPhysicalDevice
+                        if (canShowConfigWarnings && regionUnset) {
                             Spacer(modifier = Modifier.height(8.dp))
                             Card(modifier = Modifier.fillMaxWidth()) {
                                 ListItem(
@@ -515,6 +516,20 @@ fun ConnectionsScreen(
                                     // renders from the connect-time snapshot meanwhile, so pre-fetching behind a
                                     // progress dialog here bought nothing and could strand the user on an empty
                                     // dialog when the read completed before the dialog observed it.
+                                    onClick = { onConfigNavigate(SettingsRoute.LoRa) },
+                                )
+                            }
+                        }
+
+                        // Transmit-disabled notice. Suppressed while the region is unset: that already disables
+                        // transmit and has its own card above, so showing both would blame one root cause twice.
+                        if (canShowConfigWarnings && txDisabled && !regionUnset) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Card(modifier = Modifier.fillMaxWidth()) {
+                                ListItem(
+                                    leadingIcon = MeshtasticIcons.CellTower,
+                                    text = stringResource(Res.string.transmit_disabled),
+                                    supportingText = stringResource(Res.string.transmit_disabled_summary),
                                     onClick = { onConfigNavigate(SettingsRoute.LoRa) },
                                 )
                             }

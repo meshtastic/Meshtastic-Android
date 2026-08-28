@@ -1876,6 +1876,8 @@ translation_downloading
 translation_failed
 translation_model_download_failed
 translation_not_required
+transmit_disabled
+transmit_disabled_summary
 transmit_over_lora
 ### TRANSPORT ###
 transport
