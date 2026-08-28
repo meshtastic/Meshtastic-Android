@@ -104,7 +104,7 @@ internal fun WaypointDialogs(
         waypoints[id]?.waypoint?.let { waypoint ->
             WaypointRemoval(
                 // Deleting for everyone re-broadcasts an expiry, so it needs a live connection.
-                canDeleteForEveryone = waypoint.isModifiableBy(viewModel.myNodeNum) && isConnected && waypoint.id != 0,
+                canDeleteForEveryone = waypoint.removableForEveryone(viewModel.myNodeNum, isConnected),
                 onDeleteForMe = { viewModel.deleteWaypoint(waypoint.id) },
                 onDeleteForEveryone = {
                     viewModel.sendWaypoint(waypoint.copy(expire = 1))
@@ -194,6 +194,12 @@ internal fun rememberWaypointEditing(): WaypointEditing {
             pending = null
         },
         onDelete = { toDelete ->
+            // Tell the mesh, not just ourselves. This dropped only the local copy, so deleting from inside the editor
+            // left the waypoint on everyone else's map — while deleting the same waypoint from its info dialog, two
+            // taps away, removed it properly. The Google flavor broadcasts from both.
+            if (toDelete.removableForEveryone(viewModel.myNodeNum, isConnected)) {
+                viewModel.sendWaypoint(toDelete.copy(expire = 1))
+            }
             viewModel.deleteWaypoint(toDelete.id)
             pending = null
         },
@@ -298,3 +304,12 @@ private fun Waypoint.readyToSend(nextPacketId: () -> Int): Waypoint =
 
 /** Waypoint coordinates travel as degrees scaled by 1e7. */
 private const val DEG_SCALE = 1e-7
+
+/**
+ * Whether removing this waypoint can be broadcast to the mesh rather than only dropped locally.
+ *
+ * Removal travels as an expiry the other nodes honour, so it needs a waypoint we are allowed to modify, one that has
+ * been sent at all, and a live connection to send it over.
+ */
+private fun Waypoint.removableForEveryone(myNodeNum: Int?, isConnected: Boolean): Boolean =
+    isModifiableBy(myNodeNum) && isConnected && id != 0

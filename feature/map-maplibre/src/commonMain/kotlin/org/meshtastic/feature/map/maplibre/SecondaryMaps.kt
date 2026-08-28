@@ -65,7 +65,7 @@ import org.meshtastic.core.resources.unknown
 import org.meshtastic.core.resources.you
 import org.meshtastic.core.ui.util.DiscoveryMapNode
 import org.meshtastic.core.ui.util.DiscoveryNeighborType
-import org.meshtastic.feature.map.maplibre.component.MapZoomCompact
+import org.meshtastic.feature.map.maplibre.component.MapZoom
 import org.meshtastic.feature.map.maplibre.component.rememberBasemapSelection
 import org.meshtastic.feature.map.maplibre.geojson.MapChipGlyph
 import org.meshtastic.feature.map.maplibre.geojson.MapChipKey
@@ -115,6 +115,9 @@ fun MapLibreInlineMap(
     // too: this map sits inside the node detail sheet's vertically scrolling column, and a pan or zoom gesture on it
     // is a gesture the column also wants. Whichever wins, the other feels broken. The buttons are what make giving
     // the gestures up affordable — without them this map would have no way in at all.
+    //
+    // The same control every other map uses, at the same size. A shrunken variant was tried and looked out of place
+    // against the rest of the map chrome for the ~25% of height it saved.
     Box(modifier = modifier) {
         SecondaryMapSurface(basemaps = basemaps, cameraState = cameraState, options = InlineMapOptions) {
             val source = rememberFeatureSource(node) { nodesToFeatureCollection(listOf(node)) }
@@ -125,7 +128,7 @@ fun MapLibreInlineMap(
             NodeChipLayer(id = "inline-node", source = source, nodes = listOf(node))
         }
 
-        MapZoomCompact(cameraState = cameraState, basemap = basemaps.current)
+        MapZoom(cameraState = cameraState, basemap = basemaps.current)
     }
 }
 

@@ -61,31 +61,3 @@ internal fun BoxScope.MapZoom(cameraState: CameraState, basemap: Basemap) {
         modifier = Modifier.align(Alignment.BottomEnd).padding(end = ZOOM_INSET.dp, bottom = ZOOM_BOTTOM_INSET.dp),
     )
 }
-
-/**
- * Lift for the compact pair. The mini-map keeps MapLibre's default ornaments, so the attribution button still shares
- * this corner; this clears it without the extra room the full-size control needs.
- */
-private const val COMPACT_ZOOM_BOTTOM_INSET = 44
-
-/**
- * The same controls, sized for the node-detail mini-map.
- *
- * That map is 200dp tall, so the full-size pair would take up half of it — which is why it shipped with no zoom control
- * at all. The Google flavor does show one there (`MapUiSettings(zoomControlsEnabled = true)` in its own `InlineMap`),
- * and in fact shows *only* that: it disables the zoom and scroll gestures outright. This map keeps its gestures and
- * adds the buttons, so it ends up with both ways in rather than one.
- */
-@Composable
-internal fun BoxScope.MapZoomCompact(cameraState: CameraState, basemap: Basemap) {
-    val scope = rememberCoroutineScope()
-    val zoomRange = basemap.zoomRange()
-
-    MapZoomControls(
-        onZoomIn = { scope.launch { cameraState.zoomBy(ZOOM_STEP, zoomRange) } },
-        onZoomOut = { scope.launch { cameraState.zoomBy(-ZOOM_STEP, zoomRange) } },
-        modifier =
-        Modifier.align(Alignment.BottomEnd).padding(end = ZOOM_INSET.dp, bottom = COMPACT_ZOOM_BOTTOM_INSET.dp),
-        compact = true,
-    )
-}
