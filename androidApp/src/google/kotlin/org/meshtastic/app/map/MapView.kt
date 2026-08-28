@@ -93,8 +93,6 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberUpdatedMarkerState
 import com.google.maps.android.compose.widgets.ScaleBar
 import com.google.maps.android.data.parser.geojson.GeoJsonParser
-import com.google.maps.android.data.parser.kml.KmlParser
-import com.google.maps.android.data.parser.kml.KmzParser
 import com.google.maps.android.data.renderer.UrlIconProvider
 import com.google.maps.android.data.renderer.mapper.toLayer
 import com.google.maps.android.data.renderer.mapview.MapViewRenderer
@@ -104,6 +102,8 @@ import com.google.maps.android.data.renderer.model.Geometry
 import com.google.maps.android.data.renderer.model.LineString
 import com.google.maps.android.data.renderer.model.LineStyle
 import com.google.maps.android.data.renderer.model.MultiGeometry
+import com.google.maps.android.data.renderer.model.PointGeometry
+import com.google.maps.android.data.renderer.model.PointStyle
 import com.google.maps.android.data.renderer.model.PolygonStyle
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -186,6 +186,7 @@ import org.meshtastic.feature.map.component.SitePlannerLaunch
 import org.meshtastic.feature.map.component.WaypointInfoDialog
 import org.meshtastic.feature.map.component.toSitePlannerParams
 import org.meshtastic.feature.map.includes
+import org.meshtastic.feature.map.kml.ICON_URL_PROPERTY
 import org.meshtastic.feature.map.tiles.mapAttributionText
 import org.meshtastic.feature.map.tracerouteNodeSelection
 import org.meshtastic.proto.BoundingBox
@@ -1500,11 +1501,15 @@ private fun MapLayerOverlay(layerItem: MapLayerItem, mapViewModel: MapViewModel)
  * Parse a custom overlay into the maps-utils platform-agnostic [DataLayer] model; null if the format is unrecognized.
  */
 private fun parseMapLayer(layerType: LayerType, stream: InputStream): DataLayer? = when (layerType) {
-    LayerType.KML -> {
-        val buffered = BufferedInputStream(stream)
-        val kml = if (buffered.isKmzArchive()) KmzParser().parse(buffered) else KmlParser().parse(buffered)
-        kml.toLayer()
-    }
+    // Converted with the app's own reader rather than maps-utils'. The two parsers disagreed about nothing that
+    // matters here, but keeping both meant keeping the maps-utils/xmlutil pairing that made every KML import die
+    // with
+    // NoSuchMethodError in 2.8.0–2.8.1 — a version floor and a canary test were all that held it.
+    LayerType.KML ->
+        convertKmlSource(BufferedInputStream(stream))
+            ?.let { geoJson -> GeoJsonParser().parse(geoJson.byteInputStream()) }
+            ?.toLayer()
+            ?.applySimpleStyleSpec()
 
     LayerType.GEOJSON,
     LayerType.COVERAGE,
@@ -1567,9 +1572,9 @@ private fun RenderedMapLayer.safeHide() {
  * MultiPolygon features (the mapper styles any multi-geometry as a line). Rebuild each feature's style from its
  * properties so the coverage draws in its dBm colors instead of the default black outline.
  */
-private fun DataLayer.applySimpleStyleSpec(): DataLayer = copy(features = features.map { it.applySimpleStyleSpec() })
+internal fun DataLayer.applySimpleStyleSpec(): DataLayer = copy(features = features.map { it.applySimpleStyleSpec() })
 
-private fun Feature.applySimpleStyleSpec(): Feature {
+internal fun Feature.applySimpleStyleSpec(): Feature {
     val fill = cssColor("fill") ?: cssColor("color")
     val fillOpacity = stringProperty("fill-opacity")?.toFloatOrNull()
     val strokeOpacity = stringProperty("stroke-opacity")?.toFloatOrNull()
@@ -1591,9 +1596,20 @@ private fun Feature.applySimpleStyleSpec(): Feature {
 
         geometry.isLinear() -> copy(style = LineStyle(color = stroke ?: AndroidColor.BLACK, width = strokeWidth))
 
-        else -> this // Points keep the default marker; mixed geometry collections keep the mapper's style.
+        // A KML icon reaches us as the `icon-url` the converter writes; maps-utils' GeoJSON mapper reads no icon
+        // property at all, so without this the Google map would silently lose the icons it has always drawn.
+        geometry.isPointLike() ->
+            stringProperty(ICON_URL_PROPERTY)
+                ?.takeIf { it.isNotBlank() }
+                ?.let { copy(style = PointStyle(iconUrl = it)) } ?: this
+
+        else -> this // Mixed geometry collections keep the mapper's style.
     }
 }
+
+/** Point or MultiPoint (a multi-geometry whose members are all points). */
+private fun Geometry.isPointLike(): Boolean = this is PointGeometry ||
+    (this is MultiGeometry && geometries.isNotEmpty() && geometries.all { it is PointGeometry })
 
 /** Polygon or MultiPolygon (a multi-geometry whose members are all polygons). */
 private fun Geometry.isPolygonal(): Boolean =

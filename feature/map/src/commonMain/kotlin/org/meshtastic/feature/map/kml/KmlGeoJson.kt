@@ -91,7 +91,7 @@ internal fun String.jsonString(): String {
  * `marker-color` and `marker-size`, and nothing for an arbitrary image. This is an extension of ours, so it is declared
  * in one place and documented as such.
  */
-internal const val ICON_URL_PROPERTY = "icon-url"
+const val ICON_URL_PROPERTY = "icon-url"
 
 /** A JSON `\uXXXX` escape is always four hex digits. */
 private const val ESCAPE_DIGITS = 4

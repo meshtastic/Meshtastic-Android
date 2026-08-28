@@ -25,11 +25,13 @@ import java.util.zip.ZipInputStream
  *
  * The conversion itself is [KmlToGeoJson] in `feature/map`, which is common code and takes the document as text. What
  * stays here is the part that is genuinely a file: sniffing whether the import is a zip, and pulling the KML out of it.
+ * Shared by both flavours — the MapLibre map renders the GeoJSON directly, the Google map hands it to maps-utils'
+ * GeoJSON pipeline.
  *
  * [source] must be mark-capable — wrap it in a [java.io.BufferedInputStream] — because a KMZ is recognised by sniffing
  * its first bytes rather than by trusting a file extension the content resolver often gets wrong.
  */
-internal fun convertKmlSource(source: InputStream): String? {
+fun convertKmlSource(source: InputStream): String? {
     val kml = if (source.isKmzArchive()) source.firstKmlEntry() else source
     return kml?.let { KmlToGeoJson.convert(it.readBytes().decodeToString()) }
 }

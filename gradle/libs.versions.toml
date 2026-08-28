@@ -61,10 +61,11 @@ androidx-compose-bom-aligned = "1.12.0"
 jetbrains-adaptive = "1.3.0-beta02"
 
 # Google
-# 5.1.1 floor is load-bearing: 5.0.0's data.parser KmlParser is compiled against xmlutil 0.91.x's
-# removed policyBuilder() API, and the app's xmlutil 1.0.x (CoT XML) wins conflict resolution — so
-# with 5.0.0 every KML/KMZ map import dies with NoSuchMethodError (fatal in prod, 2.8.0–2.8.1).
-# 5.1.1 is built against xmlutil 1.0.x's compat builder. Guarded by KmlParserLinkageTest.
+# The 5.1.1 floor was load-bearing while the app parsed KML through maps-utils: 5.0.0's data.parser
+# KmlParser is compiled against xmlutil 0.91.x's removed policyBuilder(), and the app's xmlutil 1.0.x
+# won conflict resolution, so every KML/KMZ import died with NoSuchMethodError (fatal in prod,
+# 2.8.0–2.8.1). KML is now read by the app's own xmlutil-based converter and that parser is unused, so
+# the pairing — and the canary test that guarded it — is gone. The floor stays as a plain minimum.
 android-maps-utils = "5.1.1"
 maplibre-compose = "0.15.0"
 maps-compose = "8.5.0"
