@@ -124,7 +124,7 @@ The base map depends on your app flavor: **Google Play** builds use Google Maps,
 
 - [Nodes](nodes) — view and filter your node list
 - [Node Metrics](node-metrics) — signal quality and position history for individual nodes
-- [Discovery](discovery) — traceroute and neighbor info for understanding mesh topology
+- [Local Mesh Discovery](discovery) — traceroute and neighbor info for understanding mesh topology
 - [Units & Locale](units-and-locale) — distance and coordinate display formats
 
 ---

@@ -570,7 +570,7 @@
     <string name="doc_title_connections">Connections</string>
     <string name="doc_title_debug_logs">Debug Logs</string>
     <string name="doc_title_desktop">Desktop App</string>
-    <string name="doc_title_discovery">Discovery</string>
+    <string name="doc_title_discovery">Local Mesh Discovery</string>
     <string name="doc_title_firmware">Firmware Updates</string>
     <string name="doc_title_help">Help &amp; In-App Docs</string>
     <string name="doc_title_map">Map &amp; Waypoints</string>
