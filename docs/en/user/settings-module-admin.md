@@ -63,27 +63,35 @@ Enables serial port communication for external device integrations (GPS modules,
 
 | Setting | Description |
 |---------|-------------|
-| Enabled | Activate serial communication |
-| Echo | Echo received serial data back |
-| Mode | Text, Protobuf, or NMEA output |
-| RX/TX Pins | GPIO pins for serial connection |
-| Baud Rate | Serial communication speed |
+| Serial enabled | Activate serial communication |
+| Echo enabled | Echo received serial data back |
+| Serial mode | Which protocol the port speaks — Default, Simple, Proto, Text message, NMEA, CalTopo, WS85 weather station, VE.Direct, MeshSolar config, Log, or Log (text only) |
+| RX / TX | GPIO pins for the serial connection |
+| Serial baud rate | Port speed |
+| Timeout | How long to wait before considering an incoming message complete |
+| Override console serial port | Take over the port the debug console normally uses |
 
 ### External Notification Module
 
 Controls buzzer, LED, or vibration alerts on your radio hardware. Useful for devices that need to physically signal when a message arrives — particularly helpful for unattended or outdoor installations.
 
+There are two independent triggers — an incoming **message**, and a received **bell** character —
+and each can drive the LED, the buzzer and the vibration motor separately, giving six toggles.
+
 | Setting | Description |
 |---------|-------------|
-| Enabled | Activate notifications |
-| Alert Message | Notify on incoming messages |
-| Alert Message Buzzer | Use buzzer for messages |
-| Alert Message Vibra | Use vibration for messages |
-| Alert Bell | Notify on bell character |
-| Output (GPIO) | Pin for notification output |
-| Active | High or Low active |
-| Duration (ms) | Notification length |
-| Use I2S as Buzzer | Use I2S audio output |
+| External notification enabled | Master toggle for the module |
+| Alert message LED / buzzer / vibra | Which outputs fire on an incoming message |
+| Alert bell LED / buzzer / vibra | Which outputs fire on a received bell character |
+| Output LED (GPIO) | Pin the LED is wired to |
+| Output LED active high | Whether the LED pin is active high or low |
+| Output buzzer (GPIO) | Pin the buzzer is wired to |
+| Output vibra (GPIO) | Pin the vibration motor is wired to |
+| Use PWM buzzer | Drive the buzzer with PWM, which allows tones rather than a single pitch |
+| Use I2S as buzzer | Send the alert through an I2S audio output instead |
+| Output duration (milliseconds) | How long a single alert lasts |
+| Nag timeout (seconds) | Keep repeating the alert for this long until it is acknowledged. 0 disables nagging |
+| Ringtone | The tone played on a PWM buzzer, in RTTTL. Can be imported from a file |
 
 ### Store & Forward Module
 
@@ -118,12 +126,22 @@ Automated range testing tool for evaluating link quality between nodes. When ena
 
 Controls what telemetry data your node shares with the mesh. Telemetry includes device health (battery, uptime) and environmental sensor data (temperature, humidity, pressure).
 
+Each of the four metric groups has its own enable toggle and its own interval, so you can report
+battery health often and sensors rarely.
+
 | Setting | Description |
 |---------|-------------|
-| Device Metrics Interval | How often to report device metrics |
-| Environment Metrics Interval | How often to report environment sensors |
-| Air Quality Enabled | Report particulate sensor data |
-| Power Metrics Enabled | Report power usage |
+| Send Device Telemetry | Master toggle for device metrics. Only shown on firmware 2.7.12 and newer |
+| Device metrics update interval | How often to report battery, uptime and channel utilisation |
+| Environment metrics module enabled | Report the attached environment sensors |
+| Environment metrics update interval | How often to report them |
+| Environment metrics on-screen enabled | Also show these readings on the device's own display |
+| Environment metrics use Fahrenheit | Use °F on the device's display. This is the radio's screen only — the app follows your phone's locale, see [Units & Locale](units-and-locale) |
+| Air quality metrics module enabled | Report particulate and CO₂ sensor data |
+| Air quality metrics update interval | How often to report them |
+| Power metrics module enabled | Report the per-channel voltage and current readings |
+| Power metrics update interval | How often to report them |
+| Power metrics on-screen enabled | Also show power readings on the device's display |
 
 See [Telemetry & Sensors](telemetry-and-sensors) for supported sensors and configuration recommendations.
 
@@ -133,11 +151,14 @@ Pre-configured messages accessible from the device's physical buttons (for radio
 
 | Setting | Description |
 |---------|-------------|
-| ~~Enabled~~ | ⚠️ **Deprecated** — current firmware may ignore this toggle |
+| ~~Canned message enabled~~ | ⚠️ **Deprecated** in the protobuf schema |
 | Messages | Newline-separated list of messages |
-| Send Bell | Play bell sound on send |
-| Rotary Encoder | Enable rotary encoder input |
-| Up/Down/Press Pins | GPIO pin assignments for input |
+| Send bell | Send a bell character alongside the message, so a receiving node's External Notification module can sound |
+| Rotary encoder enabled | Use a rotary encoder as the input device |
+| GPIO pin for rotary encoder A / B / press | The three pins the encoder is wired to |
+| Generate input event on press / CW / CCW | Which key event each encoder action produces |
+| Up/Down/Select input enabled | A separate, simpler input scheme using up/down/select buttons rather than an encoder |
+| ~~Allow input source~~ | ⚠️ **Deprecated** in the protobuf schema |
 
 ### Audio Module
 
@@ -147,9 +168,11 @@ Codec2 audio support for low-bandwidth voice communication over the mesh. This i
 |---------|-------------|
 | Enabled | Activate audio module |
 | Codec2 Rate | Audio quality/bandwidth tradeoff |
+| PTT Pin | GPIO pin for the push-to-talk button |
 | I2S Word Select | GPIO pin for I2S WS |
 | I2S Data In | GPIO pin for I2S DIN |
 | I2S Data Out | GPIO pin for I2S DOUT |
+| I2S Clock (SCK) | GPIO pin for the I2S bit clock |
 
 > ℹ️ **Note:** Audio requires specific hardware (I2S microphone and speaker). Voice quality is very low-bandwidth — think "understandable radio voice," not phone-call quality.
 
@@ -256,7 +279,11 @@ Remotely configure nodes that share your admin key:
 
 ### Clean Node Database
 
-Removes stale nodes from your local database that haven't been heard in a configurable time window.
+Prunes your local node database. Two independent controls:
+
+- An **age slider** — remove nodes not heard from within that window.
+- **Clean unknown nodes only** — restrict the purge to nodes that never sent their user info,
+  leaving named nodes alone regardless of age.
 
 ### Factory Reset
 
