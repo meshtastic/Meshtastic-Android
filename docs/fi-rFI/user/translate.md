@@ -24,7 +24,7 @@ Käännöksiin osallistuminen auttaa tekemään Meshtasticista saavutettavamman 
 | Käyttöoppaan sivut  | `docs/en/user/*.md`                                                 | Sovelluksen sisäinen dokumentaatio Ohjeet ja dokumentaatio -osiossa |
 | Fastlane-metatiedot | fastlane/metadata/android/en-US/                                    | Sovelluskaupan listauksen otsikko, kuvaus ja muutoslokit            |
 
-> ℹ️ **Note:** Developer Guide pages are English-only. Koodiin keskittyvää dokumentaatiota, joka on suunnattu kehitystyöhön osallistuville, ei käännetä.
+> ℹ️ **Huomautus:** Developer Guide -sivut ovat saatavilla vain englanniksi. Koodiin keskittyvää dokumentaatiota, joka on suunnattu kehitystyöhön osallistuville, ei käännetä.
 
 ---
 
@@ -103,8 +103,8 @@ Kiitos, että autat laajentamaan Meshtasticin tavoittavuutta!
 
 ## Aiheeseen liittyvät aiheet
 
-- [Units & Locale](units-and-locale) — how the app picks number, date, and unit formats for your region
-- [Help & Documentation](help-and-docs) — the in-app docs browser these pages are published to
-- [Onboarding](onboarding) — where a new user first meets the translated strings
+- [Yksiköt ja alue](units-and-locale) – miten sovellus valitsee alueellesi sopivat lukujen, päivämäärien ja yksiköiden muodot
+- [Ohje ja dokumentaatio](help-and-docs) – sovelluksen sisäinen dokumentaatio, johon nämä sivut julkaistaan
+- [Käyttöönotto](onboarding) – missä uusi käyttäjä kohtaa ensimmäisenä käännetyt tekstit
 
 ---

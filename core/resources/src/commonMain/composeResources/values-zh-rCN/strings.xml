@@ -1040,7 +1040,6 @@
     <string name="mesh_beacon_on_region">发射地区</string>
     <string name="mesh_beacon_preset_indicator">附近信标广播</string>
     <string name="mesh_beacon_preset_none">无</string>
-    <string name="mesh_beacon_send_as_node">以节点编号进行广播 (0 = 当前节点)</string>
     <string name="mesh_beacon_target">目标节点 %1$d</string>
     <string name="mesh_beacon_target_add">添加目标</string>
     <string name="mesh_beacon_target_channel_index">频道索引</string>
