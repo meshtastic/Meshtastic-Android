@@ -36,6 +36,9 @@ import com.patrykandpatrick.vico.compose.cartesian.data.lineModel
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.common.data.ExtraStore
+import org.meshtastic.core.common.util.MeasureUnitKind
+import org.meshtastic.core.common.util.MetricFormatter
+import org.meshtastic.core.common.util.VOLT_SYMBOL
 import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.model.util.UnitConversions
 import org.meshtastic.core.resources.Res
@@ -178,11 +181,14 @@ internal fun chartValue(metric: Environment, telemetry: Telemetry, isImperial: B
 internal fun unitSuffix(metric: Environment, isFahrenheit: Boolean, isImperial: Boolean): String = when {
     metric == Environment.TEMPERATURE ||
         metric == Environment.SOIL_TEMPERATURE ||
-        metric in Environment.oneWireTemperatures -> if (isFahrenheit) "°F" else "°C"
+        metric in Environment.oneWireTemperatures -> MetricFormatter.degreeSymbol(isFahrenheit)
 
-    metric in Environment.adcVoltages -> " V"
+    metric in Environment.adcVoltages -> " $VOLT_SYMBOL"
 
-    metric == Environment.WIND_SPEED -> if (isImperial) " mph" else " km/h"
+    // Taken from the same source the cards format with, so an axis and its readings cannot drift apart —
+    // which is exactly how the chart kept m/s while the cards moved to km/h.
+    metric == Environment.WIND_SPEED ->
+        " " + (if (isImperial) MeasureUnitKind.MILE_PER_HOUR else MeasureUnitKind.KILOMETER_PER_HOUR).symbol
 
     else -> ""
 }
