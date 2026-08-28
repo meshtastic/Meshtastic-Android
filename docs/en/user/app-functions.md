@@ -2,7 +2,7 @@
 title: App Functions
 parent: User Guide
 nav_order: 19
-last_updated: 2026-08-27
+last_updated: 2026-08-28
 description: Expose mesh capabilities to the Android system and on-device AI assistants (e.g. Gemini) so they can run mesh workflows without opening the app.
 aliases:
   - app-functions
@@ -16,8 +16,8 @@ aliases:
 App Functions expose Meshtastic capabilities to the Android system and to on-device AI assistants (such as Gemini) through the Android App Functions API. With them enabled, an assistant can discover and trigger mesh workflows for you — for example sending a message or checking your mesh status — without you opening the app.
 
 > ℹ️ **Note:** App Functions are available on **Google-flavor Android builds only**.
-
-> ℹ️ **Note:** This is separate from the in-app **Chirpy** assistant. App Functions let the *system* AI assistant act on your mesh; Chirpy is a conversational assistant inside the Meshtastic app itself.
+>
+> This is separate from the in-app **Chirpy** assistant. App Functions let the *system* AI assistant act on your mesh; Chirpy is a conversational assistant inside the Meshtastic app itself.
 
 ## Enabling App Functions
 

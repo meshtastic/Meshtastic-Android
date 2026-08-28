@@ -2,7 +2,7 @@
 title: TAK Integration
 parent: User Guide
 nav_order: 10
-last_updated: 2026-08-27
+last_updated: 2026-08-28
 description: Interoperate with ATAK and WinTAK — CoT position sharing, TAK roles, and plugin setup.
 aliases:
   - tak
@@ -107,15 +107,15 @@ Once configured:
 - Position updates flow bidirectionally between Meshtastic and TAK
 - TAK Tracker nodes broadcast PLI automatically — their positions appear on ATAK maps without any ATAK-side configuration
 
-> ℹ️ **Note:** TAK integration requires specific node roles and module configuration. Standard client nodes don't automatically participate in TAK operations.
+> ℹ️ **Note:** TAK integration requires specific node roles. Standard client nodes don't automatically participate in TAK operations — though with **Mesh to CoT Converter** enabled they still appear on the ATAK map as contacts.
 
 ## Troubleshooting
 
 | Problem | Cause | Solution |
 |---------|-------|----------|
-| Node doesn't appear on ATAK map | TAK module disabled or wrong role | Verify TAK module is enabled and node role is TAK or TAK Tracker |
+| Node doesn't appear on ATAK map | Wrong device role, or Mesh to CoT Converter off | Set the node's Device Role to TAK or TAK Tracker. For ordinary (non-TAK-role) nodes to appear, also enable **Mesh to CoT Converter** under the TAK Server settings |
 | Position updates are stale | GPS fix lost or interval too long | Check GPS status; reduce position broadcast interval in Position Config |
-| ATAK plugin shows "disconnected" | BLE connection lost or plugin crashed | Reconnect Bluetooth in Meshtastic app, then restart ATAK plugin |
+| ATAK shows "disconnected" | The local TAK server is off, or ATAK is pointed elsewhere | Check **Enable Local TAK Server** is on, and that ATAK is connecting to `127.0.0.1:8089` — re-import the exported data package if unsure |
 | Shapes, markers, or routes not bridging | Sending node is on legacy V1 (firmware 2.7.x or older) | Update the sending node's firmware to 2.8.0+ for V2 wire format |
 | CoT data not flowing | Channel mismatch | All TAK nodes must be on the same channel with matching encryption |
 
