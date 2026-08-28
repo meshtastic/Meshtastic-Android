@@ -18,12 +18,12 @@ package org.meshtastic.feature.map.maplibre
 
 import org.maplibre.compose.style.BaseStyle
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.util.precisionRadiusMetersOrNull
 import org.meshtastic.feature.map.BaseMapViewModel
 import org.meshtastic.feature.map.LastHeardFilter
 import org.meshtastic.feature.map.maplibre.geojson.circlePolygon
 import org.meshtastic.feature.map.maplibre.geojson.destination
 import org.meshtastic.feature.map.maplibre.geojson.nodesToFeatureCollection
-import org.meshtastic.feature.map.maplibre.geojson.precisionMeters
 import org.meshtastic.feature.map.maplibre.layers.heardJustNow
 import org.meshtastic.feature.map.maplibre.style.Basemap
 import org.meshtastic.feature.map.maplibre.style.Basemaps
@@ -141,14 +141,14 @@ class BasemapRegistryTest {
 class PrecisionCircleTest {
     @Test
     fun `precision table matches the values the OSMdroid marker used`() {
-        assertEquals(23345.484932, precisionMeters(10))
-        assertEquals(45.58554, precisionMeters(19))
+        assertEquals(23345.484932, precisionRadiusMetersOrNull(10))
+        assertEquals(45.58554, precisionRadiusMetersOrNull(19))
     }
 
     @Test
     fun `an undegraded position has no uncertainty circle`() {
-        assertNull(precisionMeters(0))
-        assertNull(precisionMeters(32))
+        assertNull(precisionRadiusMetersOrNull(0))
+        assertNull(precisionRadiusMetersOrNull(32))
     }
 
     @Test

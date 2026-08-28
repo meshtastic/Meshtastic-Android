@@ -24,27 +24,7 @@ import org.maplibre.spatialk.geojson.FeatureCollection
 import org.maplibre.spatialk.geojson.Point
 import org.maplibre.spatialk.geojson.Position
 import org.meshtastic.core.model.Node
-
-/**
- * Radius, in metres, of the uncertainty circle firmware implies for a given `precision_bits`.
- *
- * Carried over verbatim from the OSMdroid marker so the circle keeps the exact size users already calibrate their trust
- * against. Anything outside 10..19 means "not degraded" and draws no circle.
- */
-@Suppress("MagicNumber")
-fun precisionMeters(precisionBits: Int): Double? = when (precisionBits) {
-    10 -> 23345.484932
-    11 -> 11672.7369
-    12 -> 5836.36288
-    13 -> 2918.175876
-    14 -> 1459.0823719999053
-    15 -> 729.53562
-    16 -> 364.7622
-    17 -> 182.375556
-    18 -> 91.182212
-    19 -> 45.58554
-    else -> null
-}
+import org.meshtastic.core.model.util.precisionRadiusMetersOrNull
 
 /** Formats an `@ColorInt` ARGB value as the `#rrggbb` string MapLibre expressions parse. */
 @Suppress("MagicNumber")
@@ -80,7 +60,7 @@ fun nodesToFeatureCollection(nodes: List<Node>, myNodeNum: Int? = null): Feature
                     // Omitted rather than written as 0.0 when the node reports no precision: 0 is a real radius,
                     // and
                     // a reader cannot tell the difference. GeoCircle drops such nodes instead of drawing a ring.
-                    precisionMeters(node.position.precision_bits ?: 0)?.let {
+                    precisionRadiusMetersOrNull(node.position.precision_bits)?.let {
                         put(NodeFeatureKeys.PRECISION_METERS, it)
                     }
                     put(NodeFeatureKeys.CHIP, node.toNodeChip().featureValue())

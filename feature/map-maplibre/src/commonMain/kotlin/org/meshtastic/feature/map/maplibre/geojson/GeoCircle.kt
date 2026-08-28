@@ -24,6 +24,7 @@ import org.maplibre.spatialk.geojson.FeatureCollection
 import org.maplibre.spatialk.geojson.Polygon
 import org.maplibre.spatialk.geojson.Position
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.util.precisionRadiusMetersOrNull
 import kotlin.math.PI
 import kotlin.math.asin
 import kotlin.math.atan2
@@ -94,7 +95,7 @@ internal fun circlePolygon(
 fun precisionCirclesToFeatureCollection(nodes: List<Node>): FeatureCollection<Polygon, JsonObject?> = FeatureCollection(
     nodes.mapNotNull { node ->
         node.validPosition ?: return@mapNotNull null
-        val radius = precisionMeters(node.position.precision_bits ?: 0) ?: return@mapNotNull null
+        val radius = precisionRadiusMetersOrNull(node.position.precision_bits) ?: return@mapNotNull null
         val (_, background) = node.colors
         Feature(
             geometry = circlePolygon(node.latitude, node.longitude, radius),
