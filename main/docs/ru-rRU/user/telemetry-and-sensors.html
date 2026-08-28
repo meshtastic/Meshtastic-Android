@@ -51,10 +51,10 @@
 
 ### Soil
 
- Metric     | Единица | Notes                                           |
- ---------- | ------- | ----------------------------------------------- |
- Soil Temp  | °C / °F | Reported alongside soil moisture by soil probes |
- Soil Moist | %       | Volumetric water content                        |
+ Метрика     | Единица | Заметки                                         |
+ ----------- | ------- | ----------------------------------------------- |
+ Темп почвы  | °C / °F | Reported alongside soil moisture by soil probes |
+ Влажн почвы | %       | Volumetric water content                        |
 
 Both appear as info cards on the node detail screen, next to the other environment readings.
 
@@ -72,7 +72,7 @@ Both appear as info cards on the node detail screen, next to the other environme
 
  Метрическая | Описание                        |
  ----------- | ------------------------------- |
- Voltage     | Per-channel voltage reading     |
+ Напряжение  | Per-channel voltage reading     |
  Ток         | Per-channel current draw, in mA |
 
 Up to three channels are reported (ch1–ch3), and each can be given its own label — Solar or Battery, say — from the node detail screen. There is no separate wattage reading; the app charts voltage and current, and does not compute power from them.
@@ -102,12 +102,12 @@ Up to three channels are reported (ch1–ch3), and each can be given its own lab
 
 Ноды с датчиками взвешенных частиц или CO₂ передают данные о качестве воздуха:
 
- Metric                | Unit   | Описание                        |
- --------------------- | ------ | ------------------------------- |
- PM1.0 | мкг/м³ | Ультрамелкие взвешенные частицы |
- PM2.5 | мкг/м³ | Мелкие взвешенные частицы       |
- PM10                  | мкг/м³ | Крупные взвешенные частицы      |
- CO₂                   | ppm    | Концентрация углекислого газа   |
+ Метрическая           | Единица | Описание                        |
+ --------------------- | ------- | ------------------------------- |
+ PM1.0 | мкг/м³  | Ультрамелкие взвешенные частицы |
+ PM2.5 | мкг/м³  | Мелкие взвешенные частицы       |
+ PM10                  | мкг/м³  | Крупные взвешенные частицы      |
+ CO₂                   | ppm     | Концентрация углекислого газа   |
 
 Датчики CO₂, такие как SCD4x, также сообщают собственную температуру и влажность, которые отображаются вместе с указанными выше показаниями. На основе истории PM2.5 приложение дополнительно вычисляет значение **AQI EPA по методу NowCast**.
 

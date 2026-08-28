@@ -75,20 +75,20 @@ Controls buzzer, LED, or vibration alerts on your radio hardware. Useful for dev
 There are two independent triggers — an incoming **message**, and a received **bell** character —
 and each can drive the LED, the buzzer and the vibration motor separately, giving six toggles.
 
- Setting                                           | 설명                                                                                                  |
- ------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
- 외부 알림 활성화                                         | Master toggle for the module                                                                        |
- Alert message LED / buzzer / vibra                | Which outputs fire on an incoming message                                                           |
- Alert bell LED / buzzer / vibra                   | Which outputs fire on a received bell character                                                     |
- Output LED (GPIO)              | Pin the LED is wired to                                                                             |
- Output LED active high                            | Whether the LED pin is active high or low                                                           |
- Output buzzer (GPIO)           | Pin the buzzer is wired to                                                                          |
- Output vibra (GPIO)            | Pin the vibration motor is wired to                                                                 |
- Use PWM buzzer                                    | Drive the buzzer with PWM, which allows tones rather than a single pitch                            |
- Use I2S as buzzer                                 | Send the alert through an I2S audio output instead                                                  |
- Output duration (milliseconds) | How long a single alert lasts                                                                       |
- Nag timeout (seconds)          | Keep repeating the alert for this long until it is acknowledged. 0 disables nagging |
- Ringtone                                          | The tone played on a PWM buzzer, in RTTTL. Can be imported from a file              |
+ Setting                            | 설명                                                                                                  |
+ ---------------------------------- | --------------------------------------------------------------------------------------------------- |
+ 외부 알림 활성화                          | Master toggle for the module                                                                        |
+ Alert message LED / buzzer / vibra | Which outputs fire on an incoming message                                                           |
+ Alert bell LED / buzzer / vibra    | Which outputs fire on a received bell character                                                     |
+ LED 출력 (GPIO)   | Pin the LED is wired to                                                                             |
+ LED 출력 active high                 | Whether the LED pin is active high or low                                                           |
+ 부저 출력 (GPIO)    | Pin the buzzer is wired to                                                                          |
+ 진동 출력 (GPIO)    | Pin the vibration motor is wired to                                                                 |
+ PWM 부저 사용                          | Drive the buzzer with PWM, which allows tones rather than a single pitch                            |
+ I2S 부저 사용                          | Send the alert through an I2S audio output instead                                                  |
+ 출력 지속시간 (밀리초)   | How long a single alert lasts                                                                       |
+ 반복 종료 시간 (초)    | Keep repeating the alert for this long until it is acknowledged. 0 disables nagging |
+ 벨소리                                | The tone played on a PWM buzzer, in RTTTL. Can be imported from a file              |
 
 ### Store &amp; Forward Module
 
@@ -126,19 +126,19 @@ Controls what telemetry data your node shares with the mesh. Telemetry includes 
 Each of the four metric groups has its own enable toggle and its own interval, so you can report
 battery health often and sensors rarely.
 
- Setting                               | 설명                                                                                                                                                                                |
- ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
- Send Device Telemetry                 | Master toggle for device metrics. Only shown on firmware 2.7.12 and newer                                                         |
- Device metrics update interval        | How often to report battery, uptime and channel utilisation                                                                                                                       |
- Environment metrics module enabled    | Report the attached environment sensors                                                                                                                                           |
- Environment metrics update interval   | How often to report them                                                                                                                                                          |
- Environment metrics on-screen enabled | Also show these readings on the device's own display                                                                                                                              |
- Environment metrics use Fahrenheit    | Use °F on the device's display. This is the radio's screen only — the app follows your phone's locale, see [Units &amp; Locale](units-and-locale) |
- Air quality metrics module enabled    | Report particulate and CO₂ sensor data                                                                                                                                            |
- Air quality metrics update interval   | How often to report them                                                                                                                                                          |
- Power metrics module enabled          | Report the per-channel voltage and current readings                                                                                                                               |
- Power metrics update interval         | How often to report them                                                                                                                                                          |
- Power metrics on-screen enabled       | Also show power readings on the device's display                                                                                                                                  |
+ Setting                             | 설명                                                                                                                                                                                |
+ ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+ Send Device Telemetry               | Master toggle for device metrics. Only shown on firmware 2.7.12 and newer                                                         |
+ Device metrics update interval      | How often to report battery, uptime and channel utilisation                                                                                                                       |
+ 환경 메트릭 모듈 사용                        | Report the attached environment sensors                                                                                                                                           |
+ Environment metrics update interval | How often to report them                                                                                                                                                          |
+ 환경 메트릭 화면 사용                        | Also show these readings on the device's own display                                                                                                                              |
+ 환경 메트릭에서 화씨 사용                      | Use °F on the device's display. This is the radio's screen only — the app follows your phone's locale, see [Units &amp; Locale](units-and-locale) |
+ 대기질 메트릭 모듈 사용                       | Report particulate and CO₂ sensor data                                                                                                                                            |
+ Air quality metrics update interval | How often to report them                                                                                                                                                          |
+ 전력 메트릭 모듈 사용                        | Report the per-channel voltage and current readings                                                                                                                               |
+ Power metrics update interval       | How often to report them                                                                                                                                                          |
+ 전력 메트릭 화면 사용                        | Also show power readings on the device's display                                                                                                                                  |
 
 See [Telemetry &amp; Sensors](telemetry-and-sensors) for supported sensors and configuration recommendations.
 
@@ -150,11 +150,11 @@ Pre-configured messages accessible from the device's physical buttons (for radio
  ----------------------------------------- | --------------------------------------------------------------------------------------------------------- |
  ~~Canned message enabled~~                | ⚠️ **Deprecated** in the protobuf schema                                                                  |
  메시지기기                                     | Newline-separated list of messages                                                                        |
- Send bell                                 | Send a bell character alongside the message, so a receiving node's External Notification module can sound |
+ 벨 전송                                      | Send a bell character alongside the message, so a receiving node's External Notification module can sound |
  Rotary encoder enabled                    | Use a rotary encoder as the input device                                                                  |
  GPIO pin for rotary encoder A / B / press | The three pins the encoder is wired to                                                                    |
  Generate input event on press / CW / CCW  | Which key event each encoder action produces                                                              |
- Up/Down/Select input enabled              | A separate, simpler input scheme using up/down/select buttons rather than an encoder                      |
+ 업/다운/선택 입력 활성화                            | A separate, simpler input scheme using up/down/select buttons rather than an encoder                      |
  ~~Allow input source~~                    | ⚠️ **Deprecated** in the protobuf schema                                                                  |
 
 ### Audio Module
@@ -195,7 +195,7 @@ Broadcasts information about directly heard neighbors, enabling mesh topology ma
  Update Interval (s) | How often to broadcast neighbor list                                                                                                 |
  Transmit Over LoRa                     | Also broadcast neighbor info over LoRa, not just MQTT/phone. Unavailable on a channel using the default key and name |
 
-See [Discovery](discovery) for how to use neighbor data for mesh topology exploration.
+See [Local Mesh Discovery](discovery) for how to use neighbor data for mesh topology exploration.
 
 ### Ambient Lighting Module
 
@@ -226,7 +226,7 @@ Turns your node into a motion or door sensor alert system. When a GPIO pin detec
 
 People counter using WiFi and BLE probe requests. Counts nearby devices by passively listening for probe requests that phones and laptops emit when scanning for networks. Available only on ESP32 devices.
 
- Setting                                | Description                                                                                                      |
+ Setting                                | 설명                                                                                                               |
  -------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
  활성화                                    | Activate people counting                                                                                         |
  Update Interval (s) | How often to report counts                                                                                       |
@@ -239,7 +239,7 @@ People counter using WiFi and BLE probe requests. Counts nearby devices by passi
 
 Publishes a short free-text status line for your node, which other nodes can display alongside it.
 
- Setting                  | Description                                                                                                                                                                      |
+ Setting                  | 설명                                                                                                                                                                               |
  ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
  The actual status string | Up to 80 characters. The **✕** in the field clears it. (That is the app's own label for the field, verbatim.) |
 
@@ -252,7 +252,7 @@ node to reboot.
 ### Mesh Beacon Module
 
 Broadcasts an invitation to your mesh, and receives invitations from others. See
-[Discovery](discovery) for the full walkthrough.
+[Local Mesh Discovery](discovery) for the full walkthrough.
 
 ### TAK Module
 
@@ -294,7 +294,7 @@ Remotely reboot a connected or administered node.
 
 Opens the **Packets** and **App logs** tabs for viewing, filtering, and exporting diagnostic output. See [Debug Logs](debug-logs) for the full walkthrough.
 
-### About
+### 앱에 대하여
 
 **Settings → About** carries the app's own identity rather than the radio's:
 
