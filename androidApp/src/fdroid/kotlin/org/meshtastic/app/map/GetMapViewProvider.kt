@@ -44,7 +44,3 @@ fun getMapViewProvider(): MapViewProvider = MapLibreMapViewProvider(
     // The same imported-layer manager the Google flavour opens from its layers button.
     layersSheetExtra = { ImportedLayersSlot() },
 )
-
-/** Site Planner (coverage-estimate) — the F-Droid map renders imported coverage as a GeoJSON layer (see #6138). */
-@Suppress("FunctionOnlyReturningConstant") // Flavor-dispatched: the google flavor returns a different value.
-fun sitePlannerAvailable(): Boolean = true

@@ -92,11 +92,11 @@ Since waypoints (and their geofences) are broadcast to the whole mesh, only the 
 
 ## Map Layers
 
-Tap the layers icon on the map to open **Manage Map Layers**, where you can import your own overlays in `.kml`, `.kmz`, or GeoJSON format — either by opening a file with Meshtastic or sharing it into the app from another app. Imported layers are listed with a toggle to show/hide each one and an option to remove it. This is available on both the Google Play and F-Droid builds; on Desktop, `.kml`/`.kmz` rendering is temporarily unavailable (see [Map Sources](#map-sources)).
+Tap the layers icon on the map to open **Manage Map Layers**, where you can import your own overlays in `.kml`, `.kmz`, or GeoJSON format — either by opening a file with Meshtastic or sharing it into the app from another app. Imported layers are listed with a toggle to show/hide each one and an option to remove it. This is available on both the Google Play and F-Droid builds. Desktop cannot import layers yet — it has no file picker for them.
 
 ### Site Planner
 
-**Site Planner** estimates RF coverage for a transmitter and draws it on the map as a color-coded overlay. Open it from a map control, or from a node's detail page via **Estimate coverage** (shown only for nodes with a known position). Configure the transmitter (location, frequency, TX power, antenna gain and height), the receiver (sensitivity, height), and simulation options (max range, high-resolution terrain, color palette), then run the estimate. Like map layers, Site Planner works on both the Google Play and F-Droid builds.
+**Site Planner** estimates RF coverage for a transmitter and draws it on the map as a color-coded overlay. Open it from a map control, or from a node's detail page via **Estimate coverage** (shown only for nodes with a known position). Configure the transmitter (location, frequency, TX power, antenna gain and height), the receiver (sensitivity, height), and simulation options (max range, high-resolution terrain, color palette), then run the estimate. Like map layers, Site Planner works on both the Google Play and F-Droid builds, but not on Desktop.
 
 ## Position Sharing
 
@@ -152,10 +152,6 @@ On **Android**, the same screen also imports a local `.mbtiles` archive for full
 
 Offline area downloads are **F-Droid only**: cache the visible region from the layers sheet.
 **Google Play** builds import pre-made MBTiles files instead, and **Desktop** has neither.
-
-{: .note }
-> On **Desktop**, `.kml`/`.kmz` and GeoJSON layer import is not yet available. On F-Droid, GeoJSON
-> layers, `.kml`/`.kmz` import and Site Planner coverage overlays are unchanged.
 
 ## Related Topics
 

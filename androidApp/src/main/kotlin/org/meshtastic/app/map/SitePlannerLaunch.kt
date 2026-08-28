@@ -73,3 +73,14 @@ private fun sensitivityDbmFor(preset: ModemPreset?): Double = when (preset) {
     ModemPreset.VERY_LONG_SLOW -> -147.5
     else -> SitePlannerParams.DEFAULT_RX_SENSITIVITY_DBM
 }
+
+/**
+ * Whether Site Planner is offered at all.
+ *
+ * Android only, and true on both flavors: the Google map draws the coverage estimate through its data layer and the
+ * MapLibre map as a GeoJSON layer (#6138). It was flavor-dispatched while only one flavor could render the overlay, and
+ * each copy ended up claiming the other returned something different. Desktop takes the `LocalSitePlannerAvailable`
+ * default of false, because the estimate runs in a WebView it has no equivalent for.
+ */
+@Suppress("FunctionOnlyReturningConstant")
+fun sitePlannerAvailable(): Boolean = true

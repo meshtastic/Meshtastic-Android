@@ -64,7 +64,9 @@ Bluetooth Low Energy is supported on Desktop via the [Kable](https://github.com/
 |---------|---------|---------|-------|
 | Messaging | ✓ | ✓ | Full parity |
 | Node List | ✓ | ✓ | Full parity |
-| Map | ✓ | ✓ | Interactive MapLibre map, with base map and overlay pickers and custom tile sources |
+| Map | ✓ | ✓ | Interactive MapLibre map, with base map and overlay pickers and custom tile sources. No offline downloads or layer import |
+| Map layers (`.kml`/`.kmz`/GeoJSON) | ✓ | ✗ | Needs a file picker desktop does not have yet |
+| Site Planner | ✓ | ✗ | Coverage estimates run in a WebView, which desktop has no equivalent for |
 | Settings | ✓ | ✓ | Full parity |
 | Bluetooth (BLE) | ✓ | ✓ | Via Kable on desktop |
 | Firmware Update | ✓ | ✓ | In-app USB, BLE, and Wi-Fi (ESP32) update all work the same as Android |

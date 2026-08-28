@@ -145,8 +145,8 @@ Each module has its own README with details on its responsibilities, API surface
 | [core/prefs](core/prefs/README.md) | Type-safe preferences over multiplatform DataStore |
 | [core/barcode](core/barcode/README.md) | Barcode / QR scanning |
 | [feature/messaging](feature/messaging/README.md) | Messaging UI feature |
-| [feature/map](feature/map/README.md) | Map UI feature — shared state, policy and the waypoint editor |
-| `feature/map-maplibre` | MapLibre map surfaces shared by the `fdroid` flavor and Desktop |
+| [feature/map](feature/map/README.md) | Map UI feature — shared state, policy, tile sources and the waypoint editor |
+| [feature/map-maplibre](feature/map-maplibre/README.md) | MapLibre map surfaces shared by the `fdroid` flavor and Desktop |
 | [feature/node](feature/node/README.md) | Node detail UI feature |
 | [feature/settings](feature/settings/README.md) | Settings UI feature |
 | [feature/firmware](feature/firmware/README.md) | Firmware update UI feature |
