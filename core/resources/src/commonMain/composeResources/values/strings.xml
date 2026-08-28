@@ -1932,6 +1932,8 @@
     <string name="translation_failed">Unable to translate message</string>
     <string name="translation_model_download_failed">Translation model download failed</string>
     <string name="translation_not_required">Message is already in your language</string>
+    <string name="transmit_disabled">Transmit is disabled</string>
+    <string name="transmit_disabled_summary">This device can receive but will not send anything over LoRa.</string>
     <string name="transmit_over_lora">Transmit over LoRa</string>
     <!-- TRANSPORT -->
     <string name="transport">Transport</string>
