@@ -68,6 +68,7 @@ import org.meshtastic.core.resources.you
 import org.meshtastic.core.ui.util.DiscoveryMapNode
 import org.meshtastic.core.ui.util.DiscoveryNeighborType
 import org.meshtastic.feature.map.maplibre.component.MapZoom
+import org.meshtastic.feature.map.maplibre.component.MapZoomCompact
 import org.meshtastic.feature.map.maplibre.component.SecondaryMapControls
 import org.meshtastic.feature.map.maplibre.component.rememberBasemapSelection
 import org.meshtastic.feature.map.maplibre.geojson.MapChipGlyph
@@ -117,24 +118,29 @@ fun MapLibreInlineMap(
         }
     }
 
-    // No controls at all, which is the one place this map deviates from the Google mini-map: that one turns on Google's
-    // own zoom buttons, but Google draws them small and flat, while ours is a floating toolbar nearly 100dp tall — a
-    // third of this thumbnail. The map pinch-zooms, so the buttons cost more than they buy here.
-    MaplibreMap(
-        baseStyle = basemaps.current.toBaseStyle(),
-        cameraState = cameraState,
-        modifier = modifier,
-        options = SecondaryMapOptions,
-        zoomRange = basemaps.current.zoomRange(),
-    ) {
-        (basemaps.current as? Basemap.Raster)?.let { RasterBasemapLayer(it) }
+    // Zoom controls at the compact size. The full-size pair is a floating toolbar nearly 100dp tall, half of this
+    // 200dp thumbnail, which is why this map shipped without one — but the Google mini-map does show zoom buttons, so
+    // going without was a parity gap rather than a considered difference. Google shows only the buttons, having
+    // disabled the zoom and scroll gestures; this keeps the gestures and adds the buttons.
+    Box(modifier = modifier) {
+        MaplibreMap(
+            baseStyle = basemaps.current.toBaseStyle(),
+            cameraState = cameraState,
+            modifier = Modifier.fillMaxSize(),
+            options = SecondaryMapOptions,
+            zoomRange = basemaps.current.zoomRange(),
+        ) {
+            (basemaps.current as? Basemap.Raster)?.let { RasterBasemapLayer(it) }
 
-        val source = rememberFeatureSource(node) { nodesToFeatureCollection(listOf(node)) }
+            val source = rememberFeatureSource(node) { nodesToFeatureCollection(listOf(node)) }
 
-        // The node-detail sheet is where a degraded position matters most — it is the screen a user opens to ask how
-        // precisely this node is placed. The Google mini-map draws the circle; this one left it out.
-        NodePrecisionLayer(id = "inline-precision", nodes = listOf(node))
-        NodeChipLayer(id = "inline-node", source = source, nodes = listOf(node))
+            // The node-detail sheet is where a degraded position matters most — it is the screen a user opens to ask
+            // how precisely this node is placed. The Google mini-map draws the circle; this one left it out.
+            NodePrecisionLayer(id = "inline-precision", nodes = listOf(node))
+            NodeChipLayer(id = "inline-node", source = source, nodes = listOf(node))
+        }
+
+        MapZoomCompact(cameraState = cameraState, basemap = basemaps.current)
     }
 }
 
