@@ -89,7 +89,7 @@ Wind speed, gust and lull are transmitted by the sensor as **m/s** and converted
 | Metric | 18.0 km/h |
 | Imperial (US) | 11.2 mph |
 
-Wind speed, gust and lull all read in the same unit, on the Node Detail environment section and in the Environment Telemetry log alike.
+All three read in the same unit wherever they appear: the Node Detail environment section, the Environment Telemetry log, and the charts.
 
 ## Weight
 
