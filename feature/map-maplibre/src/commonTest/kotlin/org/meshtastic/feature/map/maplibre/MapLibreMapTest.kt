@@ -31,6 +31,7 @@ import org.meshtastic.proto.Position
 import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -95,6 +96,24 @@ class BasemapRegistryTest {
     fun `the NOAA overlay requests projected bounds`() {
         val url = MapOverlays.NoaaRadar.spec.tiles.single()
         assertTrue(url.contains("{bbox-epsg-3857}"), "WMS needs the bbox placeholder, not z/x/y")
+    }
+
+    @Test
+    fun `the NOAA overlay does not point at the retired nowCOAST host`() {
+        // This assertion exists because the placeholder check above passed for a year against a hostname that had
+        // stopped resolving, so the layer drew nothing and nothing failed. A unit test cannot reach the network, but
+        // it can refuse the one host that is known to be gone.
+        val url = MapOverlays.NoaaRadar.spec.tiles.single()
+        assertFalse(url.contains("nowcoast.noaa.gov"), "new.nowcoast.noaa.gov is NXDOMAIN; the layer draws nothing")
+    }
+
+    @Test
+    fun `the NOAA overlay asks for the layer its url names`() {
+        // A WMS GetMap silently returns a blank tile when LAYERS names something the service does not publish, so the
+        // layer in the path and the layer in the query have to agree.
+        val url = MapOverlays.NoaaRadar.spec.tiles.single()
+        val layer = url.substringAfter("LAYERS=").substringBefore("&")
+        assertTrue(url.contains("/$layer/ows"), "LAYERS=$layer is not the layer the path requests")
     }
 
     @Test

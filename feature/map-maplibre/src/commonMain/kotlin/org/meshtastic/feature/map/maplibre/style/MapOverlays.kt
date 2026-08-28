@@ -87,10 +87,17 @@ object MapOverlays {
         )
 
     /**
-     * NOAA nowCOAST NEXRAD reflectivity, carried over from the OSMdroid map.
+     * NEXRAD base reflectivity, quality-controlled, from NCEP's own GeoServer.
+     *
+     * Not nowCOAST, which is where the OSMdroid map pointed and where this pointed until a tester reported the layer
+     * drawing nothing: `new.nowcoast.noaa.gov` no longer resolves — NXDOMAIN, not a 404 — so the overlay had been dead
+     * on the OSMdroid map too and the swap carried the URL over faithfully. Verified against the live service rather
+     * than swapped on faith: a CONUS-wide `GetMap` returns a populated RGBA PNG.
      *
      * WMS is not an XYZ scheme, so this leans on MapLibre's `{bbox-epsg-3857}` placeholder, which expands to the tile's
-     * projected bounds. Kept at 1.1.0 with `SRS` (not `CRS`) to match the request the OSMdroid source was making.
+     * projected bounds. Kept at 1.1.0 with `SRS` (not `CRS`), which is the pairing GeoServer accepts for that version.
+     *
+     * The id is unchanged, so a user who had this overlay switched on keeps it switched on across the fix.
      */
     val NoaaRadar =
         MapOverlay.Raster(
@@ -100,14 +107,13 @@ object MapOverlays {
             RasterTileSpec(
                 tiles =
                 listOf(
-                    "https://new.nowcoast.noaa.gov/arcgis/services/nowcoast/" +
-                        "radar_meteo_imagery_nexrad_time/MapServer/WmsServer" +
-                        "?SERVICE=WMS&VERSION=1.1.0&REQUEST=GetMap&LAYERS=1&STYLES=" +
+                    "https://opengeo.ncep.noaa.gov/geoserver/conus/conus_bref_qcd/ows" +
+                        "?SERVICE=WMS&VERSION=1.1.0&REQUEST=GetMap&LAYERS=conus_bref_qcd&STYLES=" +
                         "&FORMAT=image/png&TRANSPARENT=true&SRS=EPSG:3857" +
                         "&BBOX={bbox-epsg-3857}&WIDTH=256&HEIGHT=256",
                 ),
                 maxZoom = 12,
-                attributionHtml = "NOAA nowCOAST",
+                attributionHtml = "NOAA/NCEP",
             ),
         )
 
