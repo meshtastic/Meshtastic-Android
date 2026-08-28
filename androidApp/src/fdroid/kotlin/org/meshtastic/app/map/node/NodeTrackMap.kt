@@ -18,7 +18,7 @@ package org.meshtastic.app.map.node
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import org.meshtastic.app.map.customRasterBasemaps
+import org.meshtastic.app.map.androidCustomRasterBasemaps
 import org.meshtastic.feature.map.maplibre.MapLibreNodeTrackMap
 import org.meshtastic.proto.Position
 
@@ -41,5 +41,5 @@ fun NodeTrackMap(
     modifier = modifier,
     selectedPositionTime = selectedPositionTime,
     onPositionSelect = onPositionSelect,
-    customBasemaps = { customRasterBasemaps() },
+    customBasemaps = { androidCustomRasterBasemaps() },
 )

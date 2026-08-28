@@ -18,11 +18,11 @@ package org.meshtastic.app.node.component
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import org.meshtastic.app.map.customRasterBasemaps
+import org.meshtastic.app.map.androidCustomRasterBasemaps
 import org.meshtastic.core.model.Node
 import org.meshtastic.feature.map.maplibre.MapLibreInlineMap
 
 /** Flavor-unified entry point for the node-detail mini-map. MapLibre implementation. */
 @Composable
 fun InlineMap(node: Node, modifier: Modifier = Modifier) =
-    MapLibreInlineMap(node = node, modifier = modifier, customBasemaps = { customRasterBasemaps() })
+    MapLibreInlineMap(node = node, modifier = modifier, customBasemaps = { androidCustomRasterBasemaps() })

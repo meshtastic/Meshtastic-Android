@@ -55,11 +55,13 @@ import org.meshtastic.feature.map.component.MapFilterMenu
 import org.meshtastic.feature.map.maplibre.component.BasemapButton
 import org.meshtastic.feature.map.maplibre.component.BasemapSelection
 import org.meshtastic.feature.map.maplibre.component.BoxAuthoringBar
+import org.meshtastic.feature.map.maplibre.component.CustomTileSourcesMenuItem
 import org.meshtastic.feature.map.maplibre.component.MapLayersButton
 import org.meshtastic.feature.map.maplibre.component.MapZoom
 import org.meshtastic.feature.map.maplibre.component.OfflineMapTarget
 import org.meshtastic.feature.map.maplibre.component.WaypointDialogs
 import org.meshtastic.feature.map.maplibre.component.WaypointEditing
+import org.meshtastic.feature.map.maplibre.component.customRasterBasemaps
 import org.meshtastic.feature.map.maplibre.component.rememberBasemapSelection
 import org.meshtastic.feature.map.maplibre.component.rememberWaypointEditing
 import org.meshtastic.feature.map.maplibre.geojson.ClusterMember
@@ -83,12 +85,12 @@ class MapLibreMapViewProvider(
      * Supplies the user's own raster tile sources. Composable for the same reason as [customLayers]; the F-Droid app
      * reads them from its tile-provider store, and desktop has no editor for them yet.
      */
-    private val customBasemaps: @Composable () -> List<Basemap.Raster> = { emptyList() },
+    private val customBasemaps: @Composable () -> List<Basemap.Raster> = { customRasterBasemaps() },
     /**
      * Extra content for the foot of the basemap menu — the F-Droid app puts its tile-source editor there. A slot rather
      * than a callback so the host owns whatever UI it opens; desktop leaves it empty.
      */
-    private val basemapMenuExtra: @Composable () -> Unit = {},
+    private val basemapMenuExtra: @Composable () -> Unit = { CustomTileSourcesMenuItem() },
     /**
      * Presents an editor for the waypoint the map hands over. Defaults to the shared [EditWaypointDialog], so every
      * host gets waypoint creation without wiring anything; a host overrides this only to present its own editor. See

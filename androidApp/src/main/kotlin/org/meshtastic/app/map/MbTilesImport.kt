@@ -62,6 +62,3 @@ internal suspend fun importMbTiles(context: Context, uri: Uri, fileName: String)
         null
     }
 }
-
-/** The URL form MapLibre's MBTiles source accepts: its own scheme over an absolute path, with no tile placeholders. */
-internal fun mbTilesUrl(absolutePath: String): String = "mbtiles://$absolutePath"

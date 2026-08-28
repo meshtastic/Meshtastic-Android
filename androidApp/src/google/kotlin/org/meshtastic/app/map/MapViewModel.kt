@@ -40,13 +40,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.KoinViewModel
-import org.meshtastic.app.map.model.CustomTileProviderConfig
-import org.meshtastic.app.map.model.isValidTileUrlTemplate
 import org.meshtastic.app.map.prefs.map.GoogleCameraPosition
 import org.meshtastic.app.map.prefs.map.GoogleMapSelectionPrefs
 import org.meshtastic.app.map.prefs.map.GoogleMapsPrefs
-import org.meshtastic.app.map.repository.CustomTileProviderRepository
-import org.meshtastic.app.map.repository.CustomTileProviderSaveResult
 import org.meshtastic.app.map.tiles.MapTileHttpClient
 import org.meshtastic.app.map.tiles.RasterBasemap
 import org.meshtastic.app.map.tiles.RasterTileProvider
@@ -65,9 +61,13 @@ import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.map.BaseMapViewModel
+import org.meshtastic.feature.map.tiles.CustomTileProviderConfig
+import org.meshtastic.feature.map.tiles.CustomTileProviderRepository
+import org.meshtastic.feature.map.tiles.CustomTileProviderSaveResult
 import org.meshtastic.feature.map.tiles.MapTileCatalogue
 import org.meshtastic.feature.map.tiles.RasterOverlaySource
 import org.meshtastic.feature.map.tiles.RasterTileSpec
+import org.meshtastic.feature.map.tiles.isValidTileUrlTemplate
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException

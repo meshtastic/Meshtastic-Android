@@ -55,6 +55,7 @@ import org.meshtastic.feature.map.SharedMapViewModel
 import org.meshtastic.feature.map.component.NodeTrackFilterMenu
 import org.meshtastic.feature.map.includes
 import org.meshtastic.feature.map.maplibre.component.TrackPointCard
+import org.meshtastic.feature.map.maplibre.component.customRasterBasemaps
 import org.meshtastic.feature.map.maplibre.component.rememberBasemapSelection
 import org.meshtastic.feature.map.maplibre.geojson.NodeFeatureKeys
 import org.meshtastic.feature.map.maplibre.geojson.featureValue
@@ -92,7 +93,7 @@ fun MapLibreNodeTrackMap(
     modifier: Modifier = Modifier,
     selectedPositionTime: Int? = null,
     onPositionSelect: ((Int) -> Unit)? = null,
-    customBasemaps: @Composable () -> List<Basemap.Raster> = { emptyList() },
+    customBasemaps: @Composable () -> List<Basemap.Raster> = { customRasterBasemaps() },
 ) {
     // Oldest first, as the Google flavor sorts its own track. Everything downstream reads order as age: the gradient
     // runs from the start of the line, the fade runs from index 0, and the chip goes on the last point. The view model

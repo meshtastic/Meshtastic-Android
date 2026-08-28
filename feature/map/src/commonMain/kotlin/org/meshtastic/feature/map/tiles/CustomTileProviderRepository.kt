@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.app.map.repository
+package org.meshtastic.feature.map.tiles
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
@@ -30,7 +30,6 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import org.koin.core.annotation.Single
-import org.meshtastic.app.map.model.CustomTileProviderConfig
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.MapTileProviderPrefs
 

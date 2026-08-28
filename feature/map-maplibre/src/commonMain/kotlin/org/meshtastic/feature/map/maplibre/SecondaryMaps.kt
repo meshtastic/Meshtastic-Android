@@ -66,6 +66,7 @@ import org.meshtastic.core.resources.you
 import org.meshtastic.core.ui.util.DiscoveryMapNode
 import org.meshtastic.core.ui.util.DiscoveryNeighborType
 import org.meshtastic.feature.map.maplibre.component.MapZoom
+import org.meshtastic.feature.map.maplibre.component.customRasterBasemaps
 import org.meshtastic.feature.map.maplibre.component.rememberBasemapSelection
 import org.meshtastic.feature.map.maplibre.geojson.MapChipGlyph
 import org.meshtastic.feature.map.maplibre.geojson.MapChipKey
@@ -96,7 +97,7 @@ private const val INLINE_ZOOM = 15.0
 fun MapLibreInlineMap(
     node: Node,
     modifier: Modifier = Modifier,
-    customBasemaps: @Composable () -> List<Basemap.Raster> = { emptyList() },
+    customBasemaps: @Composable () -> List<Basemap.Raster> = { customRasterBasemaps() },
 ) {
     if (node.validPosition == null) return
     val basemaps = rememberBasemapSelection(customBasemaps())
@@ -145,7 +146,7 @@ fun MapLibreTracerouteMap(
     returnRoute: List<Int>,
     nodeLookup: Map<Int, Node>,
     modifier: Modifier = Modifier,
-    customBasemaps: @Composable () -> List<Basemap.Raster> = { emptyList() },
+    customBasemaps: @Composable () -> List<Basemap.Raster> = { customRasterBasemaps() },
 ) {
     val cameraState = rememberCameraState()
     val basemaps = rememberBasemapSelection(customBasemaps())
@@ -183,7 +184,7 @@ fun MapLibreDiscoveryMap(
     userLongitude: Double,
     nodes: List<DiscoveryMapNode>,
     modifier: Modifier = Modifier,
-    customBasemaps: @Composable () -> List<Basemap.Raster> = { emptyList() },
+    customBasemaps: @Composable () -> List<Basemap.Raster> = { customRasterBasemaps() },
 ) {
     val scanner = GeoPosition(longitude = userLongitude, latitude = userLatitude)
     val cameraState = rememberCameraState(CameraPosition(target = scanner, zoom = DETAIL_ZOOM))

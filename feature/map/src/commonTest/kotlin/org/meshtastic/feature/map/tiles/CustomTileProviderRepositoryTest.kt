@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.app.map.repository
+package org.meshtastic.feature.map.tiles
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -22,7 +22,6 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
-import org.meshtastic.app.map.model.CustomTileProviderConfig
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.testing.FakeMapTileProviderPrefs
 import kotlin.test.Test

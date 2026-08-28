@@ -37,13 +37,9 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kotlinx.serialization.json.Json
 import org.junit.runner.RunWith
-import org.meshtastic.app.map.model.CustomTileProviderConfig
 import org.meshtastic.app.map.prefs.map.GoogleCameraPosition
 import org.meshtastic.app.map.prefs.map.GoogleMapSelectionPrefs
 import org.meshtastic.app.map.prefs.map.GoogleMapsPrefs
-import org.meshtastic.app.map.repository.CustomTileProviderRepository
-import org.meshtastic.app.map.repository.CustomTileProviderRepositoryImpl
-import org.meshtastic.app.map.repository.CustomTileProviderSaveResult
 import org.meshtastic.app.map.tiles.MapTileHttpClient
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.PacketRepository
@@ -55,6 +51,10 @@ import org.meshtastic.core.testing.FakeNotificationPrefs
 import org.meshtastic.core.testing.FakeRadioConfigRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.testing.FakeUiPrefs
+import org.meshtastic.feature.map.tiles.CustomTileProviderConfig
+import org.meshtastic.feature.map.tiles.CustomTileProviderRepository
+import org.meshtastic.feature.map.tiles.CustomTileProviderRepositoryImpl
+import org.meshtastic.feature.map.tiles.CustomTileProviderSaveResult
 import org.meshtastic.feature.map.tiles.MapTileCatalogue
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config

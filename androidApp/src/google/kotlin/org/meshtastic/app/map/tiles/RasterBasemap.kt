@@ -16,9 +16,9 @@
  */
 package org.meshtastic.app.map.tiles
 
-import org.meshtastic.app.map.model.CustomTileProviderConfig
-import org.meshtastic.app.map.model.isValidTileUrlTemplate
+import org.meshtastic.feature.map.tiles.CustomTileProviderConfig
 import org.meshtastic.feature.map.tiles.RasterTileSpec
+import org.meshtastic.feature.map.tiles.isValidTileUrlTemplate
 
 /**
  * A raster basemap the Google map can draw, once a selected id has been resolved to something concrete.
@@ -42,11 +42,14 @@ sealed interface RasterBasemap {
  * A template that fails validation yields null rather than a provider that would request nonsense: the stored value is
  * whatever was typed, and it can also have been valid when saved and edited into nonsense since.
  */
-internal fun CustomTileProviderConfig.toRasterBasemap(): RasterBasemap? = when {
-    localUri != null -> RasterBasemap.Local(id = id, uri = localUri)
+internal fun CustomTileProviderConfig.toRasterBasemap(): RasterBasemap? {
+    val archive = localUri
+    return when {
+        archive != null -> RasterBasemap.Local(id = id, uri = archive)
 
-    urlTemplate.isValidTileUrlTemplate(requireHttps = false) ->
-        RasterBasemap.Remote(id = id, spec = RasterTileSpec(tiles = listOf(urlTemplate)))
+        urlTemplate.isValidTileUrlTemplate(requireHttps = false) ->
+            RasterBasemap.Remote(id = id, spec = RasterTileSpec(tiles = listOf(urlTemplate)))
 
-    else -> null
+        else -> null
+    }
 }

@@ -19,11 +19,11 @@ package org.meshtastic.app.map
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.compose.koinInject
-import org.meshtastic.app.map.component.CustomTileSourcesMenuItem
 import org.meshtastic.app.map.component.ImportedLayersSlot
 import org.meshtastic.app.map.component.SitePlannerSlot
 import org.meshtastic.core.ui.util.MapViewProvider
 import org.meshtastic.feature.map.maplibre.MapLibreMapViewProvider
+import org.meshtastic.feature.map.maplibre.component.CustomTileSourcesMenuItem
 
 fun getMapViewProvider(): MapViewProvider = MapLibreMapViewProvider(
     customLayers = {
@@ -32,8 +32,9 @@ fun getMapViewProvider(): MapViewProvider = MapLibreMapViewProvider(
         // KML and KMZ are converted to GeoJSON on the way through; everything else MapLibre fetches directly.
         rememberRenderableLayers(layers.filter { it.isVisible })
     },
-    customBasemaps = { customRasterBasemaps() },
-    basemapMenuExtra = { CustomTileSourcesMenuItem() },
+    customBasemaps = { androidCustomRasterBasemaps() },
+    // Everything but the picker is common now; Android is just the platform that has one.
+    basemapMenuExtra = { CustomTileSourcesMenuItem(onAddLocalMbTiles = rememberMbTilesImport()) },
     // waypointEditor is not passed: EditWaypointDialog is multiplatform now and the provider defaults to it.
     // sitePlannerAvailable() has returned true on this flavor all along, but nothing consumed it — the MapLibre map
     // never offered the button and dropped the sitePlannerNodeNum deep link. Both are wired now.

@@ -18,7 +18,7 @@ package org.meshtastic.app.map.discovery
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import org.meshtastic.app.map.customRasterBasemaps
+import org.meshtastic.app.map.androidCustomRasterBasemaps
 import org.meshtastic.core.ui.util.DiscoveryMapNode
 import org.meshtastic.feature.map.maplibre.MapLibreDiscoveryMap
 
@@ -34,5 +34,5 @@ fun DiscoveryMap(
     userLongitude = userLongitude,
     nodes = nodes,
     modifier = modifier,
-    customBasemaps = { customRasterBasemaps() },
+    customBasemaps = { androidCustomRasterBasemaps() },
 )

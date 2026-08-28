@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.app.map.component
+package org.meshtastic.feature.map.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -41,8 +41,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.app.map.model.CustomTileProviderConfig
-import org.meshtastic.app.map.model.isValidTileUrlTemplate
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.add_custom_tile_source
 import org.meshtastic.core.resources.add_local_mbtiles_file
@@ -64,15 +62,18 @@ import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.icon.Delete
 import org.meshtastic.core.ui.icon.Edit
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.feature.map.tiles.CustomTileProviderConfig
+import org.meshtastic.feature.map.tiles.isValidTileUrlTemplate
 
 @Suppress("LongMethod", "LongParameterList")
 @Composable
-internal fun CustomTileProviderManager(
+fun CustomTileProviderManager(
     providers: List<CustomTileProviderConfig>,
     onAdd: (CustomTileProviderConfig) -> Unit,
     onUpdate: (CustomTileProviderConfig) -> Unit,
     onDelete: (String) -> Unit,
     onAddLocalMbTiles: (() -> Unit)? = null,
+    modifier: Modifier = Modifier,
 ) {
     var editingConfig by remember { mutableStateOf<CustomTileProviderConfig?>(null) }
     var showEditDialog by remember { mutableStateOf(false) }
@@ -89,7 +90,7 @@ internal fun CustomTileProviderManager(
         )
     }
 
-    LazyColumn(contentPadding = PaddingValues(bottom = 16.dp)) {
+    LazyColumn(modifier = modifier, contentPadding = PaddingValues(bottom = 16.dp)) {
         item {
             Text(
                 text = stringResource(Res.string.manage_custom_tile_sources),

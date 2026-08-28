@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.app.map.model
+package org.meshtastic.feature.map.tiles
 
 import kotlin.test.Test
 import kotlin.test.assertFalse
@@ -25,6 +25,33 @@ class CustomTileProviderConfigTest {
     fun `Google-compatible validation retains HTTP support`() {
         assertTrue("http://tiles.example.org/{z}/{x}/{y}.png".isValidTileUrlTemplate(requireHttps = false))
         assertTrue("https://{s}.example.org/{Z}/{X}/{Y}.jpg".isValidTileUrlTemplate(requireHttps = false))
+    }
+
+    @Test
+    fun `HTTPS can be required`() {
+        assertTrue("https://tiles.example.org/{z}/{x}/{y}.png".isValidTileUrlTemplate(requireHttps = true))
+        assertFalse("http://tiles.example.org/{z}/{x}/{y}.png".isValidTileUrlTemplate(requireHttps = true))
+    }
+
+    @Test
+    fun `a template missing any of the three coordinates is rejected`() {
+        assertFalse("https://tiles.example.org/{z}/{x}.png".isValidTileUrlTemplate(requireHttps = false))
+        assertFalse("https://tiles.example.org/static.png".isValidTileUrlTemplate(requireHttps = false))
+    }
+
+    @Test
+    fun `validation refuses what is not an http url at all`() {
+        // These are the shapes a hand-written parser gets wrong: no scheme, a scheme we do not fetch, and whitespace
+        // that a URL type would have thrown on.
+        assertFalse("tiles.example.org/{z}/{x}/{y}.png".isValidTileUrlTemplate(requireHttps = false))
+        assertFalse("file:///tiles/{z}/{x}/{y}.png".isValidTileUrlTemplate(requireHttps = false))
+        assertFalse("javascript:alert('{z}{x}{y}')".isValidTileUrlTemplate(requireHttps = false))
+        assertFalse("https://tiles example.org/{z}/{x}/{y}.png".isValidTileUrlTemplate(requireHttps = false))
+    }
+
+    @Test
+    fun `a port and a query string are both fine`() {
+        assertTrue("https://tiles.example.org:8443/{z}/{x}/{y}.png?v=2".isValidTileUrlTemplate(requireHttps = false))
     }
 
     @Test
