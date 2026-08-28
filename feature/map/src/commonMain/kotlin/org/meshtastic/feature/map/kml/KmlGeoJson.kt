@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.map.kml
 
+import org.meshtastic.feature.map.geojson.ICON_URL_PROPERTY
 import kotlin.math.roundToLong
 
 /** One GeoJSON feature, with the placemark's text and the style's colours as simplestyle properties. */
@@ -83,15 +84,6 @@ internal fun String.jsonString(): String {
     }
     return escaped.append('"').toString()
 }
-
-/**
- * The property an icon image URL is written to.
- *
- * Deliberately named rather than borrowed: simplestyle-spec 1.1.0 defines `marker-symbol` (a fixed icon vocabulary),
- * `marker-color` and `marker-size`, and nothing for an arbitrary image. This is an extension of ours, so it is declared
- * in one place and documented as such.
- */
-internal const val ICON_URL_PROPERTY = "icon-url"
 
 /** A JSON `\uXXXX` escape is always four hex digits. */
 private const val ESCAPE_DIGITS = 4
