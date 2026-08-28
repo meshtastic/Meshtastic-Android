@@ -17,12 +17,6 @@
 package org.meshtastic.feature.map.maplibre.component
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuGroup
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MenuDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
@@ -38,10 +32,10 @@ import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.MapTileProviderPrefs
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.map_tile_source
-import org.meshtastic.core.resources.selected_map_type
-import org.meshtastic.core.ui.icon.Check
 import org.meshtastic.core.ui.icon.Map
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.feature.map.component.BasemapChoice
+import org.meshtastic.feature.map.component.BasemapMenu
 import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.maplibre.style.Basemap
 import org.meshtastic.feature.map.maplibre.style.Basemaps
@@ -91,8 +85,14 @@ internal fun rememberBasemapSelection(customs: List<Basemap.Raster>): BasemapSel
     )
 }
 
+/**
+ * The basemap button and the menu it opens.
+ *
+ * The menu itself is [org.meshtastic.feature.map.component.BasemapMenu], shared with the Google map; this adds the
+ * toolbar button and maps [BasemapSelection] onto the choices it renders.
+ */
 @Composable
-internal fun BasemapMenu(selection: BasemapSelection, extra: @Composable () -> Unit = {}) {
+internal fun BasemapButton(selection: BasemapSelection, extra: @Composable () -> Unit = {}) {
     var expanded by remember { mutableStateOf(false) }
 
     Box {
@@ -101,41 +101,19 @@ internal fun BasemapMenu(selection: BasemapSelection, extra: @Composable () -> U
             contentDescription = stringResource(Res.string.map_tile_source),
             onClick = { expanded = true },
         )
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            DropdownMenuGroup(shapes = MenuDefaults.groupShapes()) {
-                selection.builtIns.forEach { entry ->
-                    BasemapItem(entry, entry.id == selection.current.id) {
-                        selection.onSelect(entry)
-                        expanded = false
-                    }
-                }
-            }
-            // Second group, as the Google flavor does: the user's own sources read as a separate list.
-            if (selection.customs.isNotEmpty()) {
-                DropdownMenuGroup(shapes = MenuDefaults.groupShapes()) {
-                    selection.customs.forEach { entry ->
-                        BasemapItem(entry, entry.id == selection.current.id) {
-                            selection.onSelect(entry)
-                            expanded = false
-                        }
-                    }
-                }
-            }
-            extra()
-        }
+        BasemapMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            // The user's own sources read as a separate list from the ones we ship.
+            groups = listOf(selection.builtIns.toChoices(), selection.customs.toChoices()),
+            selectedId = selection.current.id,
+            onSelect = { choice -> selection.byId(choice.id)?.let(selection.onSelect) },
+            trailingContent = extra,
+        )
     }
 }
 
-@Composable
-private fun BasemapItem(basemap: Basemap, selected: Boolean, onClick: () -> Unit) {
-    DropdownMenuItem(
-        text = { Text(text = basemap.label) },
-        onClick = onClick,
-        trailingIcon =
-        if (selected) {
-            { Icon(MeshtasticIcons.Check, contentDescription = stringResource(Res.string.selected_map_type)) }
-        } else {
-            null
-        },
-    )
-}
+private fun List<Basemap>.toChoices(): List<BasemapChoice> = map { BasemapChoice(id = it.id, label = it.label) }
+
+private fun BasemapSelection.byId(id: String): Basemap? =
+    builtIns.firstOrNull { it.id == id } ?: customs.firstOrNull { it.id == id }

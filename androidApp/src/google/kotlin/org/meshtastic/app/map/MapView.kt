@@ -41,6 +41,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -179,6 +180,7 @@ import org.meshtastic.feature.map.component.MapControlsOverlay
 import org.meshtastic.feature.map.component.MapFilterActions
 import org.meshtastic.feature.map.component.MapFilterMenu
 import org.meshtastic.feature.map.component.NodeTrackFilterMenu
+import org.meshtastic.feature.map.component.RasterOverlayToggles
 import org.meshtastic.feature.map.component.WaypointInfoDialog
 import org.meshtastic.feature.map.includes
 import org.meshtastic.feature.map.tracerouteNodeSelection
@@ -241,6 +243,9 @@ private const val DEFAULT_GEOJSON_STROKE_WIDTH = 2f
 // (zero-area) so the second tap is ignored.
 private const val BOX_AUTHORING_MIN_CORNER_DELTA = 1e-4
 
+/** Above the raster basemap at -1, below every marker and shape the mesh draws at 0 and up. */
+private const val OVERLAY_Z_INDEX = -0.5f
+
 @Suppress("CyclomaticComplexMethod", "LongMethod")
 @OptIn(MapsComposeExperimentalApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -297,7 +302,8 @@ fun MapView(
     var boxAuthoringSecondCorner by remember { mutableStateOf<LatLng?>(null) }
 
     val selectedGoogleMapType by mapViewModel.selectedGoogleMapType.collectAsStateWithLifecycle()
-    val currentCustomTileProvider by mapViewModel.selectedCustomTileProvider.collectAsStateWithLifecycle()
+    val currentRasterBasemap by mapViewModel.selectedRasterBasemap.collectAsStateWithLifecycle()
+    val enabledOverlayIds by mapViewModel.enabledOverlayIds.collectAsStateWithLifecycle()
 
     var mapTypeMenuExpanded by remember { mutableStateOf(false) }
     var showCustomTileManagerSheet by remember { mutableStateOf(false) }
@@ -577,7 +583,7 @@ fun MapView(
     val onRemoveLayer = { layerId: String -> mapViewModel.removeMapLayer(layerId) }
     val onToggleVisibility = { layerId: String -> mapViewModel.toggleLayerVisibility(layerId) }
 
-    val effectiveGoogleMapType = if (currentCustomTileProvider != null) MapType.NONE else selectedGoogleMapType
+    val effectiveGoogleMapType = if (currentRasterBasemap != null) MapType.NONE else selectedGoogleMapType
 
     var showClusterItemsDialog by remember { mutableStateOf<List<NodeClusterItem>?>(null) }
 
@@ -638,14 +644,24 @@ fun MapView(
                 }
             },
         ) {
-            // Custom tile overlay (all modes)
-            key(currentCustomTileProvider) {
-                currentCustomTileProvider?.let { config ->
-                    mapViewModel.getTileProvider(config)?.let { tileProvider ->
+            // The raster basemap, when one is selected instead of a Google map type (all modes).
+            key(currentRasterBasemap) {
+                currentRasterBasemap?.let { basemap ->
+                    mapViewModel.getTileProvider(basemap)?.let { tileProvider ->
                         TileOverlay(tileProvider = tileProvider, fadeIn = true, transparency = 0f, zIndex = -1f)
                     }
                 }
             }
+
+            // Overlays composite over whichever basemap is in use, and stay below the mesh drawn above them.
+            mapViewModel.availableOverlays
+                .filter { it.id in enabledOverlayIds }
+                .forEach { overlay ->
+                    key(overlay.id) {
+                        val provider = remember(overlay.id) { mapViewModel.createTileProvider(overlay.spec) }
+                        TileOverlay(tileProvider = provider, fadeIn = true, transparency = 0f, zIndex = OVERLAY_Z_INDEX)
+                    }
+                }
 
             // The two-tap flow commits on the second tap, so there is no both-corners-uncommitted state to draw a
             // rectangle preview from; instead mark the first tapped corner so the user sees it registered.
@@ -951,6 +967,13 @@ fun MapView(
     // --- Bottom sheets & dialogs ---
     if (showLayersBottomSheet) {
         ModalBottomSheet(onDismissRequest = { showLayersBottomSheet = false }) {
+            // The raster overlays sit above the imported-layer manager, matching where the MapLibre map puts them.
+            RasterOverlayToggles(
+                available = mapViewModel.availableOverlays,
+                enabledIds = enabledOverlayIds,
+                onToggle = { mapViewModel.toggleOverlay(it) },
+            )
+            HorizontalDivider()
             CustomMapLayersSheet(
                 mapLayers = mapLayers,
                 onToggleVisibility = onToggleVisibility,

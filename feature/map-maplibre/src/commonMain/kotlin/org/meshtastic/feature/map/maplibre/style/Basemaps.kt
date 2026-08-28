@@ -20,25 +20,8 @@ import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
 import kotlinx.serialization.json.putJsonObject
 import org.maplibre.compose.style.BaseStyle
-
-/**
- * Tile-scheme description for one raster source.
- *
- * MapLibre substitutes `{z}`/`{x}`/`{y}` by placeholder name, not position, so an ArcGIS-style `.../tile/{z}/{y}/{x}`
- * template works unchanged — no TMS flag needed for those.
- */
-data class RasterTileSpec(
-    val tiles: List<String>,
-    val tileSize: Int = DEFAULT_TILE_SIZE,
-    val minZoom: Int = 0,
-    val maxZoom: Int = DEFAULT_MAX_ZOOM,
-    val attributionHtml: String? = null,
-) {
-    companion object {
-        const val DEFAULT_TILE_SIZE = 256
-        const val DEFAULT_MAX_ZOOM = 19
-    }
-}
+import org.meshtastic.feature.map.tiles.MapTileCatalogue
+import org.meshtastic.feature.map.tiles.RasterTileSpec
 
 /**
  * A selectable basemap. Vector entries hand MapLibre a style URL; raster entries are rendered as a background plus a
@@ -76,97 +59,12 @@ object Basemaps {
 
     val Dark = Basemap.Vector(id = "dark", label = "Dark", styleUri = "https://tiles.openfreemap.org/styles/dark")
 
-    val OpenStreetMap =
-        Basemap.Raster(
-            id = "osm",
-            label = "OpenStreetMap",
-            spec =
-            RasterTileSpec(
-                tiles = listOf("https://tile.openstreetmap.org/{z}/{x}/{y}.png"),
-                maxZoom = 19,
-                attributionHtml = "&copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a>",
-            ),
-        )
-
-    val OpenTopo =
-        Basemap.Raster(
-            id = "opentopo",
-            label = "OpenTopoMap",
-            spec =
-            RasterTileSpec(
-                tiles = listOf("https://tile.opentopomap.org/{z}/{x}/{y}.png"),
-                maxZoom = 17,
-                attributionHtml = "&copy; OpenTopoMap (CC-BY-SA)",
-            ),
-        )
-
-    val UsgsTopo =
-        Basemap.Raster(
-            id = "usgs-topo",
-            label = "USGS Topo",
-            spec =
-            RasterTileSpec(
-                tiles =
-                listOf(
-                    "https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile/{z}/{y}/{x}",
-                ),
-                maxZoom = 16,
-                attributionHtml = "USGS The National Map",
-            ),
-        )
-
-    val UsgsSatellite =
-        Basemap.Raster(
-            id = "usgs-sat",
-            label = "USGS Imagery",
-            spec =
-            RasterTileSpec(
-                tiles =
-                listOf(
-                    "https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/{z}/{y}/{x}",
-                ),
-                maxZoom = 16,
-                attributionHtml = "USGS The National Map",
-            ),
-        )
-
-    val EsriTopo =
-        Basemap.Raster(
-            id = "esri-topo",
-            label = "Esri Topo",
-            spec =
-            RasterTileSpec(
-                tiles =
-                listOf(
-                    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map" +
-                        "/MapServer/tile/{z}/{y}/{x}.jpg",
-                ),
-                maxZoom = 20,
-                attributionHtml =
-                "Esri, HERE, Garmin, FAO, NOAA, USGS, &copy; OpenStreetMap contributors, " +
-                    "and the GIS User Community",
-            ),
-        )
-
-    val EsriImagery =
-        Basemap.Raster(
-            id = "esri-imagery",
-            label = "Esri Imagery",
-            spec =
-            RasterTileSpec(
-                tiles =
-                listOf(
-                    "https://clarity.maptiles.arcgis.com/arcgis/rest/services/World_Imagery" +
-                        "/MapServer/tile/{z}/{y}/{x}.jpg",
-                ),
-                maxZoom = 20,
-                attributionHtml = "Esri, Maxar, Earthstar Geographics, and the GIS User Community",
-            ),
-        )
+    /** The shared catalogue's rasters, as basemaps this renderer can draw. */
+    private val catalogueRasters: List<Basemap.Raster> =
+        MapTileCatalogue.basemaps.map { Basemap.Raster(id = it.id, label = it.label, spec = it.spec) }
 
     /** Menu order: vector styles first, then the raster carry-overs. */
-    val all: List<Basemap> =
-        listOf(Liberty, Positron, Dark, OpenStreetMap, OpenTopo, UsgsTopo, UsgsSatellite, EsriTopo, EsriImagery)
+    val all: List<Basemap> = listOf(Liberty, Positron, Dark) + catalogueRasters
 
     val default: Basemap = Liberty
 

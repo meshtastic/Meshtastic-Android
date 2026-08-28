@@ -44,6 +44,7 @@ import org.meshtastic.app.map.prefs.map.GoogleMapsPrefs
 import org.meshtastic.app.map.repository.CustomTileProviderRepository
 import org.meshtastic.app.map.repository.CustomTileProviderRepositoryImpl
 import org.meshtastic.app.map.repository.CustomTileProviderSaveResult
+import org.meshtastic.app.map.tiles.MapTileHttpClient
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.testing.FakeLocaleUnitsProvider
@@ -54,6 +55,7 @@ import org.meshtastic.core.testing.FakeNotificationPrefs
 import org.meshtastic.core.testing.FakeRadioConfigRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.testing.FakeUiPrefs
+import org.meshtastic.feature.map.tiles.MapTileCatalogue
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import kotlin.test.Test
@@ -113,6 +115,75 @@ class GoogleCustomTileSelectionTest {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
+    fun `a catalogue basemap survives a cold reload even though it is in nobody's provider list`() = runTest {
+        // A catalogue source is stored in the same preference as a user's own, but is not in the list that preference
+        // is resolved against — so restoring it has to be recognised before the "this provider is gone" path runs and
+        // silently drops the user back to the Google basemap.
+        val dispatcher = StandardTestDispatcher(testScheduler)
+        val prefs = FakeMapTileProviderPrefs()
+        val googleMapsPrefs = FakeGoogleMapsPrefs(customTileUrl = null)
+        val json = Json { ignoreUnknownKeys = true }
+        val catalogueBasemap = MapTileCatalogue.OpenTopo
+
+        Dispatchers.setMain(dispatcher)
+        var httpClient: HttpClient? = null
+        try {
+            val application = ApplicationProvider.getApplicationContext<Application>()
+            val mapPrefs = FakeMapPrefs()
+            val client = HttpClient().also { httpClient = it }
+            val mapLayersManager =
+                MapLayersManager(
+                    application = application,
+                    dispatchers = CoroutineDispatchers(dispatcher, dispatcher, dispatcher),
+                    httpClient = client,
+                    mapPrefs = mapPrefs,
+                )
+
+            val viewModel =
+                mapViewModel(
+                    dispatcher = dispatcher,
+                    application = application,
+                    mapLayersManager = mapLayersManager,
+                    mapPrefs = mapPrefs,
+                    repository = repository(json, dispatcher, prefs),
+                    mapTileProviderPrefs = prefs,
+                    googleMapsPrefs = googleMapsPrefs,
+                )
+            advanceUntilIdle()
+
+            viewModel.selectCatalogueBasemap(catalogueBasemap.id)
+            advanceUntilIdle()
+
+            assertEquals(catalogueBasemap.id, prefs.selectedCustomTileProviderId.value)
+            // Google's own basemap has to go: the raster tiles are opaque, so drawing one under the other is quota
+            // spent on pixels nobody sees.
+            assertEquals(MapType.NONE, viewModel.selectedGoogleMapType.value)
+
+            val coldViewModel =
+                mapViewModel(
+                    dispatcher = dispatcher,
+                    application = application,
+                    mapLayersManager = mapLayersManager,
+                    mapPrefs = mapPrefs,
+                    repository = repository(json, dispatcher, prefs),
+                    mapTileProviderPrefs = prefs,
+                    googleMapsPrefs = googleMapsPrefs,
+                )
+            advanceUntilIdle()
+
+            assertEquals(catalogueBasemap.id, coldViewModel.selectedRasterBasemapId.value)
+            assertEquals(catalogueBasemap.id, prefs.selectedCustomTileProviderId.value)
+        } finally {
+            try {
+                httpClient?.close()
+            } finally {
+                Dispatchers.resetMain()
+            }
+        }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
     fun `legacy generated provider id survives a cold reload after URL migration`() = runTest {
         val dispatcher = StandardTestDispatcher(testScheduler)
         val prefs = FakeMapTileProviderPrefs()
@@ -156,7 +227,7 @@ class GoogleCustomTileSelectionTest {
 
             assertNotEquals(legacyJson, persistedAfterMigration)
             assertEquals(persistedProvider.id, prefs.selectedCustomTileProviderId.value)
-            assertEquals(persistedProvider.id, firstViewModel.selectedCustomTileProviderId.value)
+            assertEquals(persistedProvider.id, firstViewModel.selectedRasterBasemapId.value)
             assertNull(googleMapsPrefs.selectedCustomTileUrl.value)
 
             val coldViewModel =
@@ -171,7 +242,7 @@ class GoogleCustomTileSelectionTest {
                 )
             advanceUntilIdle()
 
-            assertEquals(persistedProvider.id, coldViewModel.selectedCustomTileProviderId.value)
+            assertEquals(persistedProvider.id, coldViewModel.selectedRasterBasemapId.value)
             assertEquals(persistedProvider.id, prefs.selectedCustomTileProviderId.value)
         } finally {
             try {
@@ -206,6 +277,7 @@ class GoogleCustomTileSelectionTest {
             radioController = FakeRadioController(),
             customTileProviderRepository = repository,
             mapTileProviderPrefs = mapTileProviderPrefs,
+            mapTileHttpClient = MapTileHttpClient(application),
             uiPrefs = FakeUiPrefs(),
             notificationPrefs = FakeNotificationPrefs(),
             savedStateHandle = SavedStateHandle(),

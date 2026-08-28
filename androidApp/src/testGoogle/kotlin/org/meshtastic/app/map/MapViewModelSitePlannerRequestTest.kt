@@ -46,6 +46,7 @@ import org.meshtastic.app.map.prefs.map.GoogleMapSelectionPrefs
 import org.meshtastic.app.map.prefs.map.GoogleMapsPrefs
 import org.meshtastic.app.map.repository.CustomTileProviderLoadResult
 import org.meshtastic.app.map.repository.CustomTileProviderRepository
+import org.meshtastic.app.map.tiles.MapTileHttpClient
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.PacketRepository
@@ -116,6 +117,7 @@ class MapViewModelSitePlannerRequestTest {
                 radioController = FakeRadioController(),
                 customTileProviderRepository = customTileProviderRepository,
                 mapTileProviderPrefs = FakeMapTileProviderPrefs(),
+                mapTileHttpClient = MapTileHttpClient(ApplicationProvider.getApplicationContext()),
                 uiPrefs = FakeUiPrefs(),
                 notificationPrefs = FakeNotificationPrefs(),
                 savedStateHandle = SavedStateHandle(),

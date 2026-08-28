@@ -25,7 +25,8 @@ import org.maplibre.compose.sources.rememberRasterDemSource
 import org.maplibre.compose.sources.rememberRasterSource
 import org.meshtastic.feature.map.maplibre.style.Basemap
 import org.meshtastic.feature.map.maplibre.style.MapOverlay
-import org.meshtastic.feature.map.maplibre.style.RasterTileSpec
+import org.meshtastic.feature.map.tiles.DemEncoding
+import org.meshtastic.feature.map.tiles.RasterTileSpec
 
 internal fun RasterTileSpec.toTileSetOptions(): TileSetOptions =
     TileSetOptions(minZoom = minZoom, maxZoom = maxZoom, attributionHtml = attributionHtml)
@@ -67,8 +68,8 @@ private fun HillshadeOverlayLayer(overlay: MapOverlay.Hillshade) {
             // Terrarium, and the mismatch is silent — shading looks plausible but is wrong.
             encoding =
             when (overlay.encoding) {
-                MapOverlay.DemEncoding.TERRARIUM -> RasterDemEncoding.Terrarium
-                MapOverlay.DemEncoding.MAPBOX -> RasterDemEncoding.Mapbox
+                DemEncoding.TERRARIUM -> RasterDemEncoding.Terrarium
+                DemEncoding.MAPBOX -> RasterDemEncoding.Mapbox
             },
         )
     HillshadeLayer(id = "overlay-${overlay.id}", source = source)

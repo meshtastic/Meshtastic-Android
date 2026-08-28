@@ -14,15 +14,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.app.map.model
+package org.meshtastic.feature.map.tiles
 
-class CustomTileSource {
-
+/**
+ * Tile-scheme description for one raster source.
+ *
+ * Renderer-neutral: both map engines can draw XYZ tiles, and each turns this into its own tile source — MapLibre into a
+ * raster source, the Google map into a `UrlTileProvider`. Placeholders are substituted by name rather than position, so
+ * an ArcGIS-style `.../tile/{z}/{y}/{x}` template works unchanged.
+ */
+data class RasterTileSpec(
+    val tiles: List<String>,
+    val tileSize: Int = DEFAULT_TILE_SIZE,
+    val minZoom: Int = 0,
+    val maxZoom: Int = DEFAULT_MAX_ZOOM,
+    val attributionHtml: String? = null,
+) {
     companion object {
-        // Signature mirrors the fdroid flavor's osmdroid-backed implementation.
-        @Suppress("UnusedParameter")
-        fun getTileSource(index: Int) {
-            // No-op stub for the Google flavor (osmdroid tile sources are fdroid-only).
-        }
+        const val DEFAULT_TILE_SIZE = 256
+        const val DEFAULT_MAX_ZOOM = 19
     }
 }

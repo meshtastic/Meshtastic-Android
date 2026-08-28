@@ -19,10 +19,8 @@ package org.meshtastic.feature.map.maplibre.component
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -39,8 +37,10 @@ import org.meshtastic.core.resources.manage_map_layers
 import org.meshtastic.core.ui.icon.Layers
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.feature.map.component.MapButton
+import org.meshtastic.feature.map.component.RasterOverlayToggles
 import org.meshtastic.feature.map.maplibre.style.MapOverlay
 import org.meshtastic.feature.map.maplibre.style.MapOverlays
+import org.meshtastic.feature.map.tiles.MapTileCatalogue
 
 /**
  * The layers control: a button that opens a sheet, matching the Google flavor, which opens a modal sheet rather than a
@@ -94,15 +94,11 @@ private fun MapLayersSheet(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
         )
 
-        MapOverlays.all.forEach { overlay ->
-            val checked = overlays.any { it.id == overlay.id }
-            ListItem(
-                headlineContent = { Text(text = stringResource(overlay.label)) },
-                trailingContent = {
-                    Checkbox(checked = checked, onCheckedChange = { onOverlaysChange(overlays.toggling(overlay)) })
-                },
-            )
-        }
+        RasterOverlayToggles(
+            available = MapTileCatalogue.overlays,
+            enabledIds = overlays.mapTo(mutableSetOf()) { it.id },
+            onToggle = { id -> MapOverlays.byId(id)?.let { onOverlaysChange(overlays.toggling(it)) } },
+        )
 
         HorizontalDivider()
 

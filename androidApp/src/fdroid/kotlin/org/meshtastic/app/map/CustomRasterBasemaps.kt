@@ -27,7 +27,7 @@ import org.meshtastic.app.map.model.CustomTileProviderConfig
 import org.meshtastic.app.map.repository.CustomTileProviderRepository
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.feature.map.maplibre.style.Basemap
-import org.meshtastic.feature.map.maplibre.style.RasterTileSpec
+import org.meshtastic.feature.map.tiles.RasterTileSpec
 
 /**
  * The user's own tile sources, as MapLibre basemaps.

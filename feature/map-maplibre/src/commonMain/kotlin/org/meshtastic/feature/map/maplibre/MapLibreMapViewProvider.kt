@@ -52,7 +52,7 @@ import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.MapControlsOverlay
 import org.meshtastic.feature.map.component.MapFilterActions
 import org.meshtastic.feature.map.component.MapFilterMenu
-import org.meshtastic.feature.map.maplibre.component.BasemapMenu
+import org.meshtastic.feature.map.maplibre.component.BasemapButton
 import org.meshtastic.feature.map.maplibre.component.BasemapSelection
 import org.meshtastic.feature.map.maplibre.component.BoxAuthoringBar
 import org.meshtastic.feature.map.maplibre.component.MapLayersButton
@@ -324,7 +324,7 @@ private fun BoxScope.MapToolbar(
                 ),
             )
         },
-        mapTypeContent = { BasemapMenu(selection = basemaps, extra = basemapMenuExtra) },
+        mapTypeContent = { BasemapButton(selection = basemaps, extra = basemapMenuExtra) },
         layersContent = {
             MapLayersButton(
                 overlays = overlays,

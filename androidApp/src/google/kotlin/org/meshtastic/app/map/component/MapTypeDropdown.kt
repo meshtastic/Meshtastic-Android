@@ -14,16 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
-
 package org.meshtastic.app.map.component
 
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuGroup
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -37,11 +30,18 @@ import org.meshtastic.core.resources.map_type_hybrid
 import org.meshtastic.core.resources.map_type_normal
 import org.meshtastic.core.resources.map_type_satellite
 import org.meshtastic.core.resources.map_type_terrain
-import org.meshtastic.core.resources.selected_map_type
-import org.meshtastic.core.ui.icon.Check
-import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.feature.map.component.BasemapChoice
+import org.meshtastic.feature.map.component.BasemapMenu
+import org.meshtastic.feature.map.tiles.MapTileCatalogue
 
-@Suppress("LongMethod")
+/**
+ * Ids for Google's own map types.
+ *
+ * Prefixed so they cannot collide with a catalogue source or with the random id a user's own source carries, which lets
+ * one selected id stand for the whole menu.
+ */
+private const val GOOGLE_MAP_TYPE_PREFIX = "google:"
+
 @Composable
 internal fun MapTypeDropdown(
     expanded: Boolean,
@@ -50,71 +50,47 @@ internal fun MapTypeDropdown(
     onManageCustomTileProvidersClick: () -> Unit,
 ) {
     val customTileProviders by mapViewModel.customTileProviderConfigs.collectAsStateWithLifecycle()
-    val selectedCustomProviderId by mapViewModel.selectedCustomTileProviderId.collectAsStateWithLifecycle()
+    val selectedRasterBasemapId by mapViewModel.selectedRasterBasemapId.collectAsStateWithLifecycle()
     val selectedGoogleMapType by mapViewModel.selectedGoogleMapType.collectAsStateWithLifecycle()
 
     val googleMapTypes =
         listOf(
-            stringResource(Res.string.map_type_normal) to MapType.NORMAL,
-            stringResource(Res.string.map_type_satellite) to MapType.SATELLITE,
-            stringResource(Res.string.map_type_terrain) to MapType.TERRAIN,
-            stringResource(Res.string.map_type_hybrid) to MapType.HYBRID,
+            BasemapChoice(MapType.NORMAL.toChoiceId(), stringResource(Res.string.map_type_normal)),
+            BasemapChoice(MapType.SATELLITE.toChoiceId(), stringResource(Res.string.map_type_satellite)),
+            BasemapChoice(MapType.TERRAIN.toChoiceId(), stringResource(Res.string.map_type_terrain)),
+            BasemapChoice(MapType.HYBRID.toChoiceId(), stringResource(Res.string.map_type_hybrid)),
         )
+    val catalogueBasemaps = MapTileCatalogue.basemaps.map { BasemapChoice(it.id, it.label) }
+    val customBasemaps = customTileProviders.map { BasemapChoice(it.id, it.name) }
 
-    DropdownMenu(expanded = expanded, onDismissRequest = onDismissRequest) {
-        DropdownMenuGroup(shapes = MenuDefaults.groupShapes()) {
-            googleMapTypes.forEach { (name, type) ->
-                DropdownMenuItem(
-                    text = { Text(name) },
-                    onClick = {
-                        mapViewModel.setSelectedGoogleMapType(type)
-                        onDismissRequest()
-                    },
-                    trailingIcon =
-                    if (selectedCustomProviderId == null && selectedGoogleMapType == type) {
-                        {
-                            Icon(
-                                MeshtasticIcons.Check,
-                                contentDescription = stringResource(Res.string.selected_map_type),
-                            )
-                        }
-                    } else {
-                        null
-                    },
-                )
-            }
-        }
+    BasemapMenu(
+        expanded = expanded,
+        onDismissRequest = onDismissRequest,
+        groups = listOf(googleMapTypes, catalogueBasemaps, customBasemaps),
+        selectedId = selectedRasterBasemapId ?: selectedGoogleMapType.toChoiceId(),
+        onSelect = { choice ->
+            when {
+                choice.id.startsWith(GOOGLE_MAP_TYPE_PREFIX) ->
+                    mapViewModel.setSelectedGoogleMapType(choice.id.toGoogleMapType())
 
-        if (customTileProviders.isNotEmpty()) {
-            DropdownMenuGroup(shapes = MenuDefaults.groupShapes()) {
-                customTileProviders.forEach { config ->
-                    DropdownMenuItem(
-                        text = { Text(config.name) },
-                        onClick = {
-                            mapViewModel.selectCustomTileProvider(config)
-                            onDismissRequest()
-                        },
-                        trailingIcon =
-                        if (selectedCustomProviderId == config.id) {
-                            {
-                                Icon(
-                                    MeshtasticIcons.Check,
-                                    contentDescription = stringResource(Res.string.selected_map_type),
-                                )
-                            }
-                        } else {
-                            null
-                        },
-                    )
-                }
+                catalogueBasemaps.any { it.id == choice.id } -> mapViewModel.selectCatalogueBasemap(choice.id)
+
+                else -> mapViewModel.selectCustomTileProvider(customTileProviders.firstOrNull { it.id == choice.id })
             }
-        }
-        DropdownMenuItem(
-            text = { Text(stringResource(Res.string.manage_custom_tile_sources)) },
-            onClick = {
-                onManageCustomTileProvidersClick()
-                onDismissRequest()
-            },
-        )
-    }
+        },
+        trailingContent = {
+            DropdownMenuItem(
+                text = { Text(stringResource(Res.string.manage_custom_tile_sources)) },
+                onClick = {
+                    onManageCustomTileProvidersClick()
+                    onDismissRequest()
+                },
+            )
+        },
+    )
 }
+
+private fun MapType.toChoiceId(): String = GOOGLE_MAP_TYPE_PREFIX + name
+
+private fun String.toGoogleMapType(): MapType =
+    runCatching { MapType.valueOf(removePrefix(GOOGLE_MAP_TYPE_PREFIX)) }.getOrDefault(MapType.NORMAL)
