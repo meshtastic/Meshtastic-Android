@@ -488,7 +488,6 @@
     <string name="doc_search_placeholder">Rechercher dans la documentation</string>
     <string name="doc_section_developer">Guide du développeur</string>
     <string name="doc_section_user">Guide de l'utilisateur</string>
-    <string name="doc_title_android_auto">Android Auto</string>
     <string name="doc_title_connections">Connexions</string>
     <string name="doc_title_debug_logs">Journaux de débogage</string>
     <string name="doc_title_desktop">Application pour ordinateur</string>

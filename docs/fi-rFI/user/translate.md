@@ -2,7 +2,7 @@
 title: Käännä sovellus
 parent: Käyttöopas
 nav_order: 17
-last_updated: 2026-06-25
+last_updated: 2026-08-27
 description: Miten sovellus ja sen dokumentaatio käännetään Crowdinin avulla sekä ohjeet käännöksiin osallistumiseen.
 aliases:
   - käännä
@@ -24,7 +24,7 @@ Käännöksiin osallistuminen auttaa tekemään Meshtasticista saavutettavamman 
 | Käyttöoppaan sivut  | `docs/en/user/*.md`                                                 | Sovelluksen sisäinen dokumentaatio Ohjeet ja dokumentaatio -osiossa |
 | Fastlane-metatiedot | fastlane/metadata/android/en-US/                                    | Sovelluskaupan listauksen otsikko, kuvaus ja muutoslokit            |
 
-> ⚠️ **Huomautus:** Kehittäjän oppaan sivut ovat saatavilla vain englanniksi. Koodiin keskittyvää dokumentaatiota, joka on suunnattu kehitystyöhön osallistuville, ei käännetä.
+> ℹ️ **Note:** Developer Guide pages are English-only. Koodiin keskittyvää dokumentaatiota, joka on suunnattu kehitystyöhön osallistuville, ei käännetä.
 
 ---
 
@@ -100,3 +100,11 @@ Sovellus valitsee automaattisesti oikean kielialueen laitteen **Kieli & alue** -
 Jos sinulla on kysyttävää tietyn merkkijonon asiayhteydestä tai tarvitset apua alkuun pääsemisessä, avaa keskustelu [Meshtastic GitHub Discussions](https://github.com/orgs/meshtastic/discussions) -sivulla.
 
 Kiitos, että autat laajentamaan Meshtasticin tavoittavuutta!
+
+## Related Topics
+
+- [Units & Locale](units-and-locale) — how the app picks number, date, and unit formats for your region
+- [Help & Documentation](help-and-docs) — the in-app docs browser these pages are published to
+- [Onboarding](onboarding) — where a new user first meets the translated strings
+
+---

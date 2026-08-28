@@ -2,7 +2,7 @@
 title: Tõlgi rakendus
 parent: Kasutusjuhend
 nav_order: 17
-last_updated: 2026-06-25
+last_updated: 2026-08-27
 description: Kuidas rakendust ja selle dokumentatsiooni Crowdini kaudu tõlgitakse ja tõlgete panustamise juhised.
 aliases:
   - tõlgi
@@ -24,7 +24,7 @@ Tõlgete koostamisele kaasaaitamine aitab Meshtasticut laiemale publikule kätte
 | Kasutusjuhendi lehed | `docs/en/user/*.md`                                                 | Rakendusesisene dokumentatsioon kuvatakse jaotises Abi ja dokumentatsioon |
 | Fastlane metadata    | `fastlane/metadata/android/en-US/`                                  | App Store listing title, description, and changelogs                      |
 
-> ⚠️ **Märkus:** Arendaja juhend ainult inglise keeles. Kaastöölistele suunatud koodikeskset dokumentatsiooni ei tõlgita.
+> ℹ️ **Note:** Developer Guide pages are English-only. Kaastöölistele suunatud koodikeskset dokumentatsiooni ei tõlgita.
 
 ---
 
@@ -100,3 +100,11 @@ Rakendus valib automaatselt õige lokaadi seadme **Keele ja piirkonna** sätete 
 Kui on küsimusi konkreetse stringi konteksti kohta või vajad abi alustamiseks, ava arutelu lehel [Meshtastic GitHub Discussions](https://github.com/orgs/meshtastic/discussions).
 
 Tänan teid Meshtasticu haardeala laiendamise eest!
+
+## Related Topics
+
+- [Units & Locale](units-and-locale) — how the app picks number, date, and unit formats for your region
+- [Help & Documentation](help-and-docs) — the in-app docs browser these pages are published to
+- [Onboarding](onboarding) — where a new user first meets the translated strings
+
+---

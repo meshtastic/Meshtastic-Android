@@ -2,7 +2,7 @@
 title: Radion mittarit
 parent: Käyttöopas
 nav_order: 5
-last_updated: 2026-07-08
+last_updated: 2026-08-27
 description: Telemetrianäkymät jokaiselle verkon radiolle — laitteen kunto, ympäristöanturit, ilmanlaatu, signaalin laatu, virta, reitinselvitys ja sijaintihistoria.
 aliases:
   - mittarit
@@ -116,11 +116,13 @@ Yhdistetyn radion paikalliset tilastot näytetään myös Signaalin laatu -näky
 
 Virranhallintatelemetria (edellyttää INA-anturia tai yhteensopivaa laitteistoa):
 
-| Metrijärjestelmä | Kuvaus                        |
-| ---------------- | ----------------------------- |
-| Väyläjännite     | Syöttöjännite                 |
-| Virta            | Virrankulutus milliampeereina |
-| Virta            | Laskennallinen teho           |
+| Metrijärjestelmä | Kuvaus                         |
+| ---------------- | ------------------------------ |
+| Jännite          | Per-channel voltage reading    |
+| Virta            | Per-channel draw, in milliamps |
+
+Up to three channels (ch1–ch3) are charted, each with a label you can edit. The app does not
+derive a wattage figure from them.
 
 ## Reitinselvitys
 
@@ -163,7 +165,7 @@ Sijainti-välilehti näyttää sijaintitiedot radioille, jotka jakavat GPS-sijai
 
 ![Sijaintivälilehden sisältö](../../assets/screenshots/nodes_position.png)
 
-> ⚠️ **Huomautus:** Mittarit ovat käytettävissä vain, jos etäradio on raportoinut ne. Mittarit päivittyvät kunkin radion telemetria-asetuksissa määritetyin väliajoin.
+> ℹ️ **Note:** Metrics are only available when they have been reported by the remote node. Mittarit päivittyvät kunkin radion telemetria-asetuksissa määritetyin väliajoin.
 
 ## Aiheeseen liittyvät aiheet
 

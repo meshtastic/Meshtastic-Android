@@ -2,7 +2,7 @@
 title: コネクション
 parent: User Guide
 nav_order: 2
-last_updated: 2026-08-25
+last_updated: 2026-08-27
 description: スマートフォンやデスクトップを、Bluetooth・USB・TCP/IP で Meshtastic 無線機に接続します。
 aliases:
   - bluetooth
@@ -48,14 +48,16 @@ Tapping **Scan** after you have declined the permission once explains what it is
 
 ### 接続ステータス
 
-| アイコン | 状態  | 説明             |
-| ---- | --- | -------------- |
-| 🟢   | 接続済 | 無線リンクが確立しています  |
-| 🟡   | 接続中 | ハンドシェイク中       |
-| 🔴   | 切断  | 接続がありません       |
-| ⚪    | 未設定 | デバイスが選択されていません |
+| アイコン | 状態            | 説明                                                                                         |
+| ---- | ------------- | ------------------------------------------------------------------------------------------ |
+| 🟢   | 接続済           | 無線リンクが確立しています                                                                              |
+| 🟡   | 接続中           | ハンドシェイク中                                                                                   |
+| 🔴   | 切断            | No active connection; the app keeps trying to reconnect                                    |
+| ⚪    | デバイスはスリープ状態です | The radio is in light sleep — the app is waiting for it to wake and reconnect, not failing |
 
-接続時には、ステータスインジケーターが現在の接続状態を表示します：
+These are the four states the app models. "Device sleeping" is normal on power-saving configurations and needs no action.
+
+When connecting, a status indicator shows the current connection state — tap **Stop Connecting** to abandon the attempt:
 
 ![接続中のステータス](../../assets/screenshots/connections_connecting.png)
 
@@ -79,11 +81,17 @@ USB 接続は有線での代替手段で、デスクトップや Bluetooth が�
 2. アプリが USB の使用許可を求めるので、「**許可**」をタップします。
 3. 接続が自動的に確立されます。
 
-> ⚠️ **注意：** USB 接続には、Android デバイスの OTG 対応が必要です。
+> ℹ️ **Note:** USB connections require OTG support on Android devices.
 
 ## TCP/IP（ネットワーク）
 
 一部の Meshtastic 無線機は WiFi／Ethernet 接続に対応しており、ローカルネットワーク経由の TCP 接続が可能です。 まず、無線機自身の WiFi 設定（ファームウェアのウェブインターフェースや別の接続方法を使用）で無線機をネットワークに接続し、その後アプリから接続します。
+
+> ℹ️ **Note:** **Settings → Wi-Fi Provisioning for mPWRD-OS** is a separate, narrower tool. It provisions WiFi
+> credentials over Bluetooth to **mPWRD-OS** devices only, using their own protocol — it does not
+> configure WiFi on an ordinary Meshtastic radio. It scans over BLE, lists the networks the device
+> can see (including an option for a hidden SSID), takes the password, and reports success or
+> failure. Available on both Android and Desktop.
 
 ### ネットワーク経由で接続する
 

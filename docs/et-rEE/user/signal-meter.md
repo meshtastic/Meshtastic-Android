@@ -2,7 +2,7 @@
 title: Kuidas Meshtastic signaalimõõtur töötab
 parent: Kasutusjuhend
 nav_order: 15
-last_updated: 2026-07-08
+last_updated: 2026-08-27
 description: How the signal meter rates quality from SNR relative to the LoRa modem preset — spread spectrum, presets, and what the bars really mean.
 aliases:
   - signaal
@@ -15,7 +15,7 @@ aliases:
 
 Meshtastici signaalimõõtur – rakenduses tuttavad tulbad või olekuvärv – arvutatakse väga erinevalt traditsioonilise mobiiltelefoni või WiFi-ruuteri „tulpadest”.
 
-Most consumer devices simply measure how "loud" a signal is. Kuna Meshtastic kasutab **LoRa (Long Range)** tehnoloogiat, mõõdab selle signaalimõõtja signaali **selgust** võrreldes sinu võrgu konkreetsete sätetega.
+Most consumer devices measure how "loud" a signal is. Kuna Meshtastic kasutab **LoRa (Long Range)** tehnoloogiat, mõõdab selle signaalimõõtja signaali **selgust** võrreldes sinu võrgu konkreetsete sätetega.
 
 ---
 
@@ -38,7 +38,7 @@ Kui su sõber karjub sulle kõrvulukustava rokkkontserdi ajal, on signaal uskuma
 
 ## 2. The Magic of LoRa: Hearing "Below the Noise Floor"
 
-Standardraadiote (nt FM või WiFi) puhul, kui taustamüra on signaalist valjem (negatiivne signaali-müra suhe), kuuleb vastuvõtja ainult staatilist müra.
+For standard radios (like FM or WiFi), if the background noise is louder than the signal (a negative SNR), the receiver hears only static.
 
 LoRa on eriline. It uses **"Spread Spectrum"** modulation, which allows the radio to mathematically pull a signal out of the air even when it is buried deep _underneath_ the background noise. Seepärast näed Meshtasticus sageli **negatiivseid SNR numbreid** (nt -10 dB, mis tähendab, et signaal on 10 detsibelli nõrgem kui taustamüra).
 

@@ -2,7 +2,7 @@
 title: MQTT
 parent: Kasutusjuhend
 nav_order: 11
-last_updated: 2026-05-13
+last_updated: 2026-08-27
 description: Silda oma võrk internetiga – MQTT maakleri seadistamine, krüpteerimiskihid ja kaardiaruandlus.
 aliases:
   - mqtt
@@ -41,20 +41,31 @@ Internetiühendusega (WiFi või Ethernet) lüüsisõlm jagab võrgusõnumeid MQT
 
 ![MQTT lüliti](/assets/screenshots/settings_switch.png)
 
-| Sätted                     | Kirjeldus                                                                                  | Vaikimisi                                           |
-| -------------------------- | ------------------------------------------------------------------------------------------ | --------------------------------------------------- |
-| Server Address             | MQTT vahendaja hostinimi                                                                   | mqtt.meshtastic.org |
-| Kasutajatunnus             | Broker authentication                                                                      | meshdev                                             |
-| Parool                     | Broker authentication                                                                      | large4cats                                          |
-| Root Topic                 | Base topic for messages                                                                    | msh                                                 |
-| Encryption                 | Krüpteeri MQTT liiklus                                                                     | Lubatud                                             |
-| ~~JSON väljund~~           | ⚠️ **Vananenud** — JSON pakettide tugi on püsivarast eemaldatud; seda välja ignoreeritakse | Keelatud                                            |
-| TLS                        | Secure connection to broker                                                                | Keelatud                                            |
-| Kaardiaruannete koostamine | Teavita asukoht avalikul kaardil                                                           | Keelatud                                            |
+| Sätted                     | Kirjeldus                                                                                                                                                                           | Vaikimisi                                           |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| Server Address             | MQTT vahendaja hostinimi                                                                                                                                                            | mqtt.meshtastic.org |
+| Kasutajatunnus             | Broker authentication                                                                                                                                                               | meshdev                                             |
+| Parool                     | Broker authentication                                                                                                                                                               | large4cats                                          |
+| Root Topic                 | Base topic for messages                                                                                                                                                             | msh                                                 |
+| Encryption                 | Krüpteeri MQTT liiklus                                                                                                                                                              | Lubatud                                             |
+| JSON Output                | Also publish and consume the `/2/json/` topic. Deprecated in the protobuf schema, but still the only toggle for this behaviour — and the app's own proxy honours it | Keelatud                                            |
+| TLS                        | Secure connection to broker                                                                                                                                                         | Keelatud                                            |
+| Kaardiaruannete koostamine | Teavita asukoht avalikul kaardil                                                                                                                                                    | Keelatud                                            |
+
+### Connection Status and Test Connection
+
+The top of the MQTT settings screen shows the live broker connection — **Connected**,
+**Connecting**, **Reconnecting**, **Disconnected**, or **Inactive**.
+
+**Test connection** probes the broker before you commit the settings to the radio, and
+distinguishes the failure modes: the hostname not resolving, the TCP connection being refused,
+TLS failing, the attempt timing out, or the broker rejecting your credentials with a reason.
 
 ### MQTT puhverserver sellel telefonil
 
 Kui sõlmel puudub oma internetiühendus, saab see kasutada ühendatud telefoni MQTT-lüüsina: luba mooduli konfiguratsioonis **MQTT** ja **Proksi kliendiga lubatud** ning rakendus edastab MQTT-liikluse raadio ja maakleri vahel telefoni internetiühenduse kaudu.
+
+> ℹ️ **Note:** The proxy relay is mobile-only. On the Desktop app the MQTT settings are present, but no relay runs behind them.
 
 MQTT sätete ekraani ülaosas olev lüliti **MQTT puhverserver sellel telefonil** näitab, kas see relee töötab praegu, ja võimaldab selle kohe välja lülitada (või taaskäivitada) – ilma seadme MQTT konfiguratsiooni muutmata ja uuesti salvestamata.
 
@@ -95,13 +106,16 @@ Konfi iga kanali kohta, millised suunad on aktiivsed, et kontrollida sõnumivoog
 
 ## Sõnumivormingud
 
-MQTT kasutab protobuf-sõnumivormingut:
+MQTT carries two payload formats:
 
-| Vorming      | Kirjeldus                              | Kasutusjuhtum              |
-| ------------ | -------------------------------------- | -------------------------- |
-| **Protobuf** | Binaarne Meshtastic protobuf kodeering | Node-to-node mesh bridging |
+| Vorming      | Kirjeldus                                   | Kasutusjuhtum                                                               |
+| ------------ | ------------------------------------------- | --------------------------------------------------------------------------- |
+| **Protobuf** | Binaarne Meshtastic protobuf kodeering      | Node-to-node mesh bridging                                                  |
+| **JSON**     | Human-readable JSON on the `/2/json/` topic | Consumers outside the mesh (dashboards, home automation) |
 
-> ⚠️ **Märkus:** JSON väljundi tugi eemaldati püsivarast. Säte `json_enabled` on rakenduses endiselt nähtav, et näha ka pärandühilduvust, kuid see ei mõjuta praegusi püsivara versioone.
+> ℹ️ **Note:** `json_enabled` is marked deprecated in the protobuf schema, but it has not been
+> replaced and it is not ignored. When it is on, the app's own MQTT proxy subscribes to the
+> `/2/json/` topic and decodes those payloads.
 
 ## Encryption & Privacy
 
@@ -111,7 +125,7 @@ Understanding the layered encryption model:
 2. **MQTT krüptimine** (mooduli säte) lisab vahendajale edastamiseks täiendava krüptimiskihi. This protects metadata and routing information.
 3. **TLS** krüpteerib TCP ühenduse vahendaja endaga, takistades võrgutasandil pealtkuulamist.
 
-> 🔒 **Tähtis:** Vaikimisi avalikul kanalil on tuntud võti. MQTT kaudu saadetud vaikekanalil olevad sõnumid on sisuliselt **krüpteerimata** – igaüks saab neid dekodeerida. Always use a custom PSK for private communications.
+> 🔒 **Security:** The default public channel has a well-known key. MQTT kaudu saadetud vaikekanalil olevad sõnumid on sisuliselt **krüpteerimata** – igaüks saab neid dekodeerida. Always use a custom PSK for private communications.
 
 ## Parimad tavad
 

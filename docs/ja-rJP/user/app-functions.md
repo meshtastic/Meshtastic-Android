@@ -2,7 +2,7 @@
 title: アプリ機能
 parent: User Guide
 nav_order: 19
-last_updated: 2026-06-11
+last_updated: 2026-08-28
 description: メッシュの機能を Android システムやオンデバイスの AI アシスタント（例：Gemini）に公開し、アプリを開かずにメッシュのワークフローを実行できるようにします。
 aliases:
   - app-functions
@@ -15,9 +15,9 @@ aliases:
 
 アプリ機能は、Android App Functions API を通じて、Meshtastic の機能を Android システムやオンデバイスの AI アシスタント（Gemini など）に公開します。 有効にすると、アシスタントがあなたに代わってメッシュのワークフロー（例：メッセージの送信やメッシュ状態の確認）を見つけて実行でき、アプリを開く必要がありません。
 
-> ⚠️ **注意：** アプリ機能は、**Google 版の Android ビルドでのみ**利用できます。
-
-> ⚠️ **注意：** これは、アプリ内の **Chirpy** アシスタントとは別のものです。 アプリ機能&#x306F;_&#x30B7;ステ&#x30E0;_&#x306E; AI アシスタントがあなたのメッシュを操作できるようにするもので、Chirpy は Meshtastic アプリ内の対話型アシスタントです。
+> ℹ️ **Note:** App Functions are available on **Google-flavor Android builds only**.
+>
+> This is separate from the in-app **Chirpy** assistant. アプリ機能&#x306F;_&#x30B7;ステ&#x30E0;_&#x306E; AI アシスタントがあなたのメッシュを操作できるようにするもので、Chirpy は Meshtastic アプリ内の対話型アシスタントです。
 
 ## アプリ機能を有効にする
 

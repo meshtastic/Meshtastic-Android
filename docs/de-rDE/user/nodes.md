@@ -2,7 +2,7 @@
 title: Knoten
 parent: User Guide
 nav_order: 4
-last_updated: 2026-07-27
+last_updated: 2026-08-27
 description: Browse, filter, and sort mesh nodes — view details, signal quality, roles, and quick actions.
 aliases:
   - node-list
@@ -103,14 +103,14 @@ Type in the search field to filter nodes by name or short name. The filter updat
 
 ### Filter Toggles
 
-| Filter                     | Beschreibung                                                                         |
-| -------------------------- | ------------------------------------------------------------------------------------ |
-| **Only online**            | Show only nodes heard within the last 2 hours                                        |
-| **Only direct**            | Show only nodes with direct (non-relayed) connections             |
-| **Include unknown**        | Show nodes that haven't sent user info yet                                           |
-| **Exclude infrastructure** | Hide infrastructure-role nodes (Router, Router Late, Client Base) |
-| **Exclude MQTT**           | Hide nodes heard only via MQTT internet bridge                                       |
-| **Show ignored**           | Show nodes you've previously dismissed or muted                                      |
+| Filter                     | Beschreibung                                                                                                                                                                                      |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Only online**            | Show only nodes heard within the last 2 hours                                                                                                                                                     |
+| **Only direct**            | Show only nodes with direct (non-relayed) connections                                                                                                                          |
+| **Include unknown**        | Show nodes that haven't sent user info yet. **On by default**, so a node heard before its info arrives stays visible and messageable; these carry a badge marking them incomplete |
+| **Exclude infrastructure** | Hide infrastructure-role nodes (Router, Router Late, Client Base, and legacy Repeater nodes)                                                                                   |
+| **Exclude MQTT**           | Hide nodes heard only via MQTT internet bridge                                                                                                                                                    |
+| **Show ignored**           | Show nodes you've previously dismissed or muted                                                                                                                                                   |
 
 ### Sort Options
 

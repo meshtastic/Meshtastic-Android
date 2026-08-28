@@ -2,7 +2,7 @@
 title: Виджет на главный экран
 parent: Руководство пользователя
 nav_order: 20
-last_updated: 2026-06-25
+last_updated: 2026-08-27
 description: Добавь виджет главного экрана Meshtastic, чтобы видеть местную статистику своего подключенного радио без открытия приложения.
 aliases:
   - widget
@@ -23,19 +23,23 @@ aliases:
 - **AirUtil** — использование времени передачи (сколько рабочих циклов передаёт вашего радиоустройство)
 - **Трафик** — пакеты, переданные / полученные, и дубликаты
 - **Relays** — пересылаемые пакеты и отмены пересылки (показаны, когда радио действует как ретранслятор)
+- **Noise floor** — the measured background noise level
+- **Dropped** — packets the radio discarded
+- **Heap** — free versus total memory on the radio, drawn as a bar
+- **Nodes** — how many nodes are online, out of the total known
 
 Нажми на виджет, чтобы открыть приложение, или используй его кнопку обновления для запроса свежей статистики.
 
-> 💡 **Совет:** значения отражают радиоустройство, к которому ты подключен в данный момент. Если приложение не подключено к радиоустройству, виджет покажет последнюю известную статистику до переподключения.
+> 💡 **Совет:** значения отражают радиоустройство, к которому ты подключен в данный момент. If the radio disconnects, the widget replaces the stats with a status line — **Disconnected**, **Connecting**, or **Device sleeping**. It does not keep the last-known numbers on screen.
 
 ## Добавление виджета
 
 1. Долгое нажатие на пустой области твоего рабочего стола Android.
 2. Нажми **Виджет**.
-3. Найди **Meshtastic** в списке и перетащи виджет **Local Stats** на домашний экран.
+3. Find **Meshtastic** in the list and drag its widget to your home screen. The app ships one widget, so the picker entry is just the app name.
 4. Изменение размера по мере необходимости — макет адаптируется к доступному пространству.
 
-> ⚠️ **Примечание:** Виджет только для Android. Он недоступен для ПК или сборках для iOS.
+> ℹ️ **Note:** The widget is Android-only. Он недоступен для ПК или сборках для iOS.
 
 ## Связанные темы
 

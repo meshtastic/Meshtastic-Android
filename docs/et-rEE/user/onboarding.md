@@ -2,7 +2,7 @@
 title: Getting Started
 parent: Kasutusjuhend
 nav_order: 1
-last_updated: 2026-08-25
+last_updated: 2026-08-27
 description: Esimese käivitamise seadistus — õigused, sissejuhatav voog ja järgmised sammud pärast raadio ühendamist.
 aliases:
   - first-launch
@@ -16,17 +16,19 @@ Tere tulemast Meshtasticusse! See juhend juhendab sind Meshtastic Androidi raken
 
 ## First Launch
 
-Rakenduse esmakordsel avamisel juhendatakse sind sissejuhatavas voos, mis aitab konfigureerida olulisi õigusi ja sätteid. Each step can be completed in order, or skipped — nothing here is a one-time offer. Every permission can be reviewed and granted later from **Settings → Permissions** inside the app.
+Rakenduse esmakordsel avamisel juhendatakse sind sissejuhatavas voos, mis aitab konfigureerida olulisi õigusi ja sätteid. Complete each step in order or skip it — nothing here is a one-time offer. Every permission can be reviewed and granted later from **Settings → Permissions** inside the app.
 
 ### Tervituskuva
 
-Tervituskuval tutvustatakse Meshtasticut ja selle põhifunktsioone:
+The welcome screen introduces Meshtastic with three feature rows:
 
-- Off-grid mesh communication
-- No cellular or internet required
-- End-to-end encrypted messaging
+|                               |                                                                                                                |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| **Stay Connected Anywhere**   | Communicate off-the-grid with your friends and community without cell service.                 |
+| **Create Your Own Networks**  | Easily set up private mesh networks for secure and reliable communication in remote areas.     |
+| **Track and Share Locations** | Share your location in real-time and keep your group coordinated with integrated GPS features. |
 
-Puuduta **Alusta** seadistusvoo jätkamiseks.
+Tap **Get started** to proceed through the setup flow.
 
 ![Tervituskuva](../../assets/screenshots/onboarding_welcome.png)
 
@@ -53,10 +55,7 @@ Meshtastic kasutab sinu asukohta ka järgmiseks:
 - Calculating distances to other nodes
 - GPS koordinaatide jagamine teiste kärgvõrgu liikmetega (kui lubatud)
 
-Grant **"While using the app"** or **"Always"** depending on your preference:
-
-- **Rakenduse kasutamise ajal** – asukohta uuendatakse kui rakendus on avatud
-- **Alati** – lubab taustal asukoha värskendusi, et kärgvõrgu oleks alati sisse lülitatud
+Grant **"While using the app"**. The app does not request background location — `ACCESS_BACKGROUND_LOCATION` is not in its manifest — so Android will not offer an "Always" option, and position updates happen while the app is in the foreground or running its foreground service.
 
 Declining leaves the rest of the app working: on Android 12 and newer, Bluetooth is unaffected and only the map position and position sharing are disabled. On Android 11 and older, Bluetooth scanning also stops, because that is the permission Android gates it behind.
 
@@ -72,16 +71,13 @@ Märguanded teavitavad teid järgmisest:
 
 ### Critical Alerts Permission
 
-On supported devices, the app may request permission for critical alerts:
+Critical alerts are high-priority notifications that break through Do Not Disturb — for emergency mesh alerts and urgent messages.
 
-- Need on kõrge prioriteediga märguanded, mis võivad režiimist „Ära sega” läbi murda
-- Kasulik hädaolukorra võrguhoiatuste või kiireloomuliste sõnumite jaoks
-- Võid selle sammu **vahele jätta**, kui te kõrge prioriteediga märguandeid ei vaja
-- Seadistada või tühistada hiljem Androidi teavitusseadetes
+This step is not a runtime permission prompt. There is no grant/deny dialog: the button opens the Android system settings page for the app's **Alerts** notification channel, where you turn the breakthrough behaviour on yourself. You can **skip** it, and reach the same page later from Android notification settings.
 
 ### Reviewing permissions later
 
-**Settings → Permissions** summarizes where every runtime permission stands. It reads _All allowed_ when nothing needs you, and names the count when something does — opening itself automatically in that case. Tap the row to see the full list at any time:
+**Settings → Permissions** summarizes where every runtime permission stands. It covers five: **Nearby devices** (Bluetooth), **Location**, **Notifications**, **Camera** (scanning channel and contact QR codes) and **Local network** (finding radios over Wi-Fi by mDNS) — the last two are never asked for during setup, only when a feature first needs them. It reads _All allowed_ when nothing needs you, and names the count when something does — opening itself automatically in that case. Tap the row to see the full list at any time:
 
 | Olek                                        | What tapping the row does                                                                    |
 | ------------------------------------------- | -------------------------------------------------------------------------------------------- |
@@ -101,16 +97,14 @@ Kui load on antud, läheb rakendus üle põhiliidesele. Esimene samm peaks olema
 
 Features also ask in context. Tapping **Scan** on the Connections screen with Bluetooth permission missing explains what it is for and offers to request it; once Android stops prompting, the same control opens the system settings page instead of doing nothing.
 
-## What's Next?
-
-Kui raadioga on ühendus loodud, uuri:
-
-- [Ühendused(connections) — seo oma esimene raadioseade
-- [Sõnumid ja kanalid](messages-and-channels) — saada oma esimene sõnum
-- [Seadmed](nodes) — vaata, kes on sinu võrgus
-- [Kaart ja teekonnapunktid](map-and-waypoints) — vaata sõlmede asukohti
-- [Seaded](settings-radio-user) — raadio ja kasutajaprofiili seadistamine
-
 Kas oled Meshtasticus algaja? Meshtastic.org lehel olev [alustusjuhend](https://meshtastic.org/docs/getting-started) käsitleb riistvara valimist, raadio esialgset seadistamist ja esimest võrgu seadistamist.
+
+## Related Topics
+
+- [Connections](connections) — pair your first radio
+- [Sõnumid ja kanalid](messages-and-channels) — saada oma esimene sõnum
+- [Nodes](nodes) — see who else is on your mesh
+- [Kaart ja teekonnapunktid](map-and-waypoints) — vaata sõlmede asukohti
+- [Settings — Radio & User](settings-radio-user) — configure your radio and user profile
 
 ---

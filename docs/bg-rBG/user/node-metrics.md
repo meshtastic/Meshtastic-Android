@@ -2,7 +2,7 @@
 title: Node Metrics
 parent: Ръководство за потребители
 nav_order: 5
-last_updated: 2026-07-08
+last_updated: 2026-08-27
 description: Telemetry dashboards for each mesh node — device health, environment sensors, air quality, signal quality, power, traceroute, and position history.
 aliases:
   - metrics
@@ -116,11 +116,13 @@ Local Stats from your connected radio are also shown in Signal Quality when avai
 
 Power management telemetry (requires INA sensor or compatible hardware):
 
-| Метрични    | Описание                |
-| ----------- | ----------------------- |
-| Bus Voltage | Supply voltage          |
-| Текущ       | Power draw in milliamps |
-| Захранване  | Calculated wattage      |
+| Метрични   | Описание                       |
+| ---------- | ------------------------------ |
+| Напрежение | Per-channel voltage reading    |
+| Текущ      | Per-channel draw, in milliamps |
+
+Up to three channels (ch1–ch3) are charted, each with a label you can edit. The app does not
+derive a wattage figure from them.
 
 ## Трасиране на маршрут
 
@@ -138,12 +140,12 @@ You → Node A (SNR: 8.5) → Node B (SNR: 5.2) → Target
 
 Each hop represents a relay node that forwarded the message.
 
-## Журнал на позициите
+## Position Log
 
 Historical position data for nodes that share their location:
 
 - GPS coordinates
-- Надморска височина
+- Altitude
 - Speed (if moving)
 - Timestamp for each position report
 
@@ -163,7 +165,7 @@ The position tab shows location data for nodes that share GPS:
 
 ![Position inline content](../../assets/screenshots/nodes_position.png)
 
-> ⚠️ **Note:** Metrics are only available when they have been reported by the remote node. Metrics update at intervals configured on each node's telemetry settings.
+> ℹ️ **Note:** Metrics are only available when they have been reported by the remote node. Metrics update at intervals configured on each node's telemetry settings.
 
 ## Related Topics
 

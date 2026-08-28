@@ -2,7 +2,7 @@
 title: App Functions
 parent: Benutzerhandbuch
 nav_order: 19
-last_updated: 2026-06-11
+last_updated: 2026-08-28
 description: Expose mesh capabilities to the Android system and on-device AI assistants (e.g. Gemini) so they can run mesh workflows without opening the app.
 aliases:
   - app-functions
@@ -15,9 +15,9 @@ aliases:
 
 App Functions expose Meshtastic capabilities to the Android system and to on-device AI assistants (such as Gemini) through the Android App Functions API. Wenn diese aktiviert sind, kann ein Assistent Mesh-Workflows für Sie finden und auslösen – zum Beispiel das Senden einer Nachricht oder das Überprüfen Ihres Mesh-Status –, ohne dass Sie die App öffnen müssen.
 
-> ⚠️ **Note:** App Functions are available on **Google-flavor Android builds only**.
-
-> ⚠️ **Note:** This is separate from the in-app **Chirpy** assistant. App Functions let the _system_ AI assistant act on your mesh; Chirpy is a conversational assistant inside the Meshtastic app itself.
+> ℹ️ **Note:** App Functions are available on **Google-flavor Android builds only**.
+>
+> This is separate from the in-app **Chirpy** assistant. App Functions let the _system_ AI assistant act on your mesh; Chirpy is a conversational assistant inside the Meshtastic app itself.
 
 ## Enabling App Functions
 
@@ -53,7 +53,7 @@ Die Funktionen sind in einen **Schreib**-Bereich (Funktionen, die etwas ändern 
 
 > 🔒 **Privacy:** The **Send Message** function lets an assistant send messages to your mesh on your behalf. Only enable functions you trust the assistant to use. The read functions expose node, message, and metric data to the assistant — enable only what you're comfortable sharing. Each function has its own toggle, and the master toggle turns all of them off at once.
 
-## Related Topics
+## Verwandte Themen
 
 - [Messages & Channels](messages-and-channels) — sending messages directly in the app
 - [Nodes](nodes) — the node list the read functions draw from

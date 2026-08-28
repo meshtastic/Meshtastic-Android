@@ -2,7 +2,7 @@
 title: Laitteet
 parent: Käyttöopas
 nav_order: 4
-last_updated: 2026-07-27
+last_updated: 2026-08-27
 description: Selaa, suodata ja lajittele verkon radioita — tarkastele tietoja, signaalin laatua, rooleja ja pikatoimintoja.
 aliases:
   - radiolista
@@ -103,14 +103,14 @@ Kirjoita hakukenttään suodattaaksesi radioita nimen tai lyhyen nimen perusteel
 
 ### Suodatusvalinnat
 
-| Suodatus                              | Kuvaus                                                                              |
-| ------------------------------------- | ----------------------------------------------------------------------------------- |
-| **Vain verkossa olevat**              | Näytä vain radiot, joista on kuultu viimeisten 2 tunnin aikana                      |
-| **Vain suorat**                       | Näytä vain radiot, joihin on suora yhteys (ei välitetty yhteys)  |
-| **Näytä tuntemattomat**               | Näytä radiot, jotka eivät ole vielä lähettäneet käyttäjätietoja                     |
-| **Ohita infrastruktuurilaitteet**     | Piilota infrastruktuuriroolit (Router, Router Late, Client Base) |
-| **Rajaa MQTT pois**                   | Piilottaa radiot, joista on kuultu vain MQTT-internetsillan kautta                  |
-| **Näytä vain huomioimattomat radiot** | Näytä radiot, jotka olet aiemmin ohittanut tai mykistänyt                           |
+| Suodatus                              | Kuvaus                                                                                                                                                                                            |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Vain verkossa olevat**              | Näytä vain radiot, joista on kuultu viimeisten 2 tunnin aikana                                                                                                                                    |
+| **Vain suorat**                       | Näytä vain radiot, joihin on suora yhteys (ei välitetty yhteys)                                                                                                                |
+| **Näytä tuntemattomat**               | Show nodes that haven't sent user info yet. **On by default**, so a node heard before its info arrives stays visible and messageable; these carry a badge marking them incomplete |
+| **Ohita infrastruktuurilaitteet**     | Hide infrastructure-role nodes (Router, Router Late, Client Base, and legacy Repeater nodes)                                                                                   |
+| **Rajaa MQTT pois**                   | Piilottaa radiot, joista on kuultu vain MQTT-internetsillan kautta                                                                                                                                |
+| **Näytä vain huomioimattomat radiot** | Näytä radiot, jotka olet aiemmin ohittanut tai mykistänyt                                                                                                                                         |
 
 ### Lajitteluvaihtoehdot
 

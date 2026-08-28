@@ -2,7 +2,7 @@
 title: Asetukset — Moduulit ja ylläpito
 parent: Käyttöopas
 nav_order: 8
-last_updated: 2026-07-08
+last_updated: 2026-08-27
 description: Määritä valinnaiset ominaisuusmoduulit (MQTT, telemetria, valmiit viestit, TAK ja muut) sekä suorita laitteen ylläpitotoimia.
 aliases:
   - moduulit
@@ -32,17 +32,28 @@ Moduuliasetukset käyttävät korttipohjaista asettelua, jossa on kytkimiä, pud
 
 Yhdistää verkon viestejä MQTT-välityspalvelimeen ja sieltä takaisin internet-yhteyksiä varten. Näin laajennat verkkoasi radiokantaman ulkopuolelle tai integroit sen kodin automaatiojärjestelmiin.
 
-| Asetus            | Kuvaus                                                                        |
-| ----------------- | ----------------------------------------------------------------------------- |
-| Käytössä          | Ota MQTT-välityspalvelin käyttöön                                             |
-| Palvelin          | MQTT-välityspalvelimen osoite                                                 |
-| Käyttäjänimi      | Todennuksen käyttäjätunnus                                                    |
-| Salasana          | Todennuksen salasana                                                          |
-| Salaus            | Salaa MQTT-viestisisällöt                                                     |
-| ~~JSON Output~~   | ⚠️ **Vanhentunut** — JSON-tuki poistettu laiteohjelmistosta, kenttä ohitetaan |
-| TLS               | Käytä suojattua yhteyttä                                                      |
-| Juuriaihe         | MQTT:n perusaihepolku                                         |
-| Karttaraportointi | Julkaise sijainti julkiselle kartalle                                         |
+| Asetus                                 | Kuvaus                                                                                                                                                                                    |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Käytössä                               | Ota MQTT-välityspalvelin käyttöön                                                                                                                                                         |
+| Palvelin                               | MQTT-välityspalvelimen osoite                                                                                                                                                             |
+| Käyttäjänimi                           | Todennuksen käyttäjätunnus                                                                                                                                                                |
+| Salasana                               | Todennuksen salasana                                                                                                                                                                      |
+| Salaus                                 | Salaa MQTT-viestisisällöt                                                                                                                                                                 |
+| JSON Output                            | Publish and consume MQTT messages as JSON. Marked deprecated in the protobuf schema, but it is still the only toggle for this behaviour and the firmware still honours it |
+| TLS                                    | Käytä suojattua yhteyttä                                                                                                                                                                  |
+| Juuriaihe                              | MQTT:n perusaihepolku                                                                                                                                                     |
+| Välityspalvelin käytössä               | Let a connected phone carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                       |
+| MQTT-välityspalvelin tällä puhelimella | The phone-side half of the above: whether _this_ phone is currently acting as that relay. See [MQTT](mqtt)                                                |
+| Karttaraportointi                      | Publish position to the public map — see below                                                                                                                                            |
+
+**Map Report** expands into its own group:
+
+| Asetus             | Kuvaus                                                                                                                          |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| Käytössä           | Publish to the public map at all                                                                                                |
+| Share location     | Explicit consent to include your position. Map reporting will not save without it                               |
+| Position precision | How coarsely your position is published                                                                                         |
+| Publish interval   | How often to report. Must be **at least 3600 s (1 hour)** — the app blocks saving below that |
 
 Katso [MQTT](mqtt) saadaksesi yksityiskohtaisen käyttöoppaan, joka sisältää salauksen, tietosuojan ja välityspalvelimen määrityksen.
 
@@ -50,29 +61,37 @@ Katso [MQTT](mqtt) saadaksesi yksityiskohtaisen käyttöoppaan, joka sisältää
 
 Mahdollistaa sarjaporttiviestinnän ulkoisten laiteintegraatioiden kanssa (GPS-moduulit, anturit tai mukautettu laitteisto). Kun tämä on käytössä, radion sarjaportti voi lähettää ja vastaanottaa protobuf- tai tekstimuotoista dataa, jolloin ulkoiset mikrokontrollerit tai tietokoneet voivat olla vuorovaikutuksessa verkon kanssa.
 
-| Asetus            | Kuvaus                                        |
-| ----------------- | --------------------------------------------- |
-| Käytössä          | Ota sarjaporttiviestintä käyttöön             |
-| Toista            | Toista vastaanotettu sarjaporttidata takaisin |
-| Tila              | Teksti-, Protobuf- tai NMEA-ulostulo          |
-| RX/TX pinnit      | GPIO-pinnit sarjaporttiyhteyttä varten        |
-| Baud-siirtonopeus | Sarjaporttiyhteyden nopeus                    |
+| Asetus                       | Kuvaus                                                                                                                                                                                              |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Sarjaportti käytössä         | Ota sarjaporttiviestintä käyttöön                                                                                                                                                                   |
+| Echo enabled                 | Toista vastaanotettu sarjaporttidata takaisin                                                                                                                                                       |
+| Serial mode                  | Which protocol the port speaks — Default, Simple, Proto, Text message, NMEA, CalTopo, WS85 weather station, VE.Direct, MeshSolar config, Log, or Log (text only) |
+| RX / TX                      | GPIO pins for the serial connection                                                                                                                                                                 |
+| Serial baud rate             | Port speed                                                                                                                                                                                          |
+| Timeout                      | How long to wait before considering an incoming message complete                                                                                                                                    |
+| Override console serial port | Take over the port the debug console normally uses                                                                                                                                                  |
 
 ### Ulkoisten ilmoitusten moduuli
 
 Ohjaa radion laitteiston summeri-, LED- tai värinähälytyksiä. Hyödyllinen laitteille, joiden täytyy ilmoittaa fyysisesti viestin saapumisesta — erityisen hyödyllinen valvomattomissa tai ulkokäyttöön asennetuissa laitteissa.
 
-| Asetus                                 | Kuvaus                                                           |
-| -------------------------------------- | ---------------------------------------------------------------- |
-| Käytössä                               | Ota ilmoitukset käyttöön                                         |
-| Hälytysviesti                          | Ilmoita saapuvista viesteistä                                    |
-| Hälytysviestin summeri                 | Käytä summeria viesteille                                        |
-| Värinähälytys viesteille               | Käytä värinää viesteille                                         |
-| Hälytysääni                            | Ilmoita soittomerkkimerkistä (bell character) |
-| Ulostulo (GPIO)     | Pinni ilmoitusulostuloa varten                                   |
-| Käytössä                               | Aktiivinen korkealla tai matalalla tasolla                       |
-| Kesto (ms)          | Ilmoituksen kesto                                                |
-| Käytä I2S:ää summerina | Käytä I2S-äänilähtöä                                             |
+There are two independent triggers — an incoming **message**, and a received **bell** character —
+and each can drive the LED, the buzzer and the vibration motor separately, giving six toggles.
+
+| Asetus                                            | Kuvaus                                                                                              |
+| ------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| External notification enabled                     | Master toggle for the module                                                                        |
+| Alert message LED / buzzer / vibra                | Which outputs fire on an incoming message                                                           |
+| Alert bell LED / buzzer / vibra                   | Which outputs fire on a received bell character                                                     |
+| Output LED (GPIO)              | Pin the LED is wired to                                                                             |
+| Output LED active high                            | Whether the LED pin is active high or low                                                           |
+| Output buzzer (GPIO)           | Pin the buzzer is wired to                                                                          |
+| Output vibra (GPIO)            | Pin the vibration motor is wired to                                                                 |
+| Use PWM buzzer                                    | Drive the buzzer with PWM, which allows tones rather than a single pitch                            |
+| Use I2S as buzzer                                 | Send the alert through an I2S audio output instead                                                  |
+| Output duration (milliseconds) | How long a single alert lasts                                                                       |
+| Nag timeout (seconds)          | Keep repeating the alert for this long until it is acknowledged. 0 disables nagging |
+| Ringtone                                          | The tone played on a PWM buzzer, in RTTTL. Can be imported from a file              |
 
 ### Varastoi & välitä -moduuli
 
@@ -91,6 +110,10 @@ Puskuroi viestejä radioille, jotka ovat tilapäisesti poissa verkosta, ja toimi
 
 ### Kuuluvuustesti-moduuli
 
+> ⚠️ **Warning:** Range Test only works on a secured primary channel. While your primary channel
+> still uses the default public key, the Enabled, Interval and Save-CSV controls stay disabled, and
+> saving force-disables the module if the channel has reverted to public.
+
 Automaattinen kuuluvuustestityökalu radioiden välisen yhteyden laadun arviointiin. Kun toiminto on käytössä, radio lähettää säännöllisesti testiviestejä kasvavilla laskuriarvoilla. Vastaanottava radio kirjaa nämä viestit, jolloin voit myöhemmin kävellä tai ajaa pois ja analysoida, millä etäisyydellä viestien saapuminen loppui.
 
 | Asetus                             | Kuvaus                                       |
@@ -103,12 +126,22 @@ Automaattinen kuuluvuustestityökalu radioiden välisen yhteyden laadun arvioint
 
 Määrittää, mitä telemetriatietoja radiosi jakaa verkkoon. Telemetria sisältää laitteen kuntoon liittyviä tietoja (akun varaustaso, käyttöaika) sekä ympäristöanturien tietoja (lämpötila, kosteus, ilmanpaine).
 
-| Asetus                  | Kuvaus                                     |
-| ----------------------- | ------------------------------------------ |
-| Laitemittarien väli     | Kuinka usein laitemittarit raportoidaan    |
-| Ympäristömittarien väli | Kuinka usein ympäristöanturit raportoidaan |
-| Ilmanlaatu käytössä     | Raportoi hiukkasanturin tiedot             |
-| Virtamittarit käytössä  | Raportoi virrankulutus                     |
+Each of the four metric groups has its own enable toggle and its own interval, so you can report
+battery health often and sensors rarely.
+
+| Asetus                                | Kuvaus                                                                                                                                                                            |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Send Device Telemetry                 | Master toggle for device metrics. Only shown on firmware 2.7.12 and newer                                                         |
+| Device metrics update interval        | How often to report battery, uptime and channel utilisation                                                                                                                       |
+| Environment metrics module enabled    | Report the attached environment sensors                                                                                                                                           |
+| Environment metrics update interval   | How often to report them                                                                                                                                                          |
+| Environment metrics on-screen enabled | Also show these readings on the device's own display                                                                                                                              |
+| Environment metrics use Fahrenheit    | Use °F on the device's display. This is the radio's screen only — the app follows your phone's locale, see [Units & Locale](units-and-locale) |
+| Air quality metrics module enabled    | Report particulate and CO₂ sensor data                                                                                                                                            |
+| Air quality metrics update interval   | How often to report them                                                                                                                                                          |
+| Power metrics module enabled          | Report the per-channel voltage and current readings                                                                                                                               |
+| Power metrics update interval         | How often to report them                                                                                                                                                          |
+| Power metrics on-screen enabled       | Also show power readings on the device's display                                                                                                                                  |
 
 Katso [Telemetria ja anturit](telemetry-and-sensors) saadaksesi tietoa tuetuista antureista ja määrityssuosituksista.
 
@@ -116,27 +149,32 @@ Katso [Telemetria ja anturit](telemetry-and-sensors) saadaksesi tietoa tuetuista
 
 Esimääritetyt viestit, joita voidaan käyttää laitteen fyysisillä painikkeilla (radioille, joissa on kiertokooderi, näppäimistö tai vastaava laitteisto). Määritä luettelo pikaviesteistä, jotka voidaan lähettää ilman yhdistettyä puhelinta — ihanteellinen kenttäkäyttöön.
 
-| Asetus                         | Kuvaus                                                                        |
-| ------------------------------ | ----------------------------------------------------------------------------- |
-| ~~Käytössä~~                   | ⚠️ **Vanhentunut** — nykyinen laiteohjelmisto saattaa ohittaa tämän asetuksen |
-| Viestit                        | Rivinvaihdoilla eroteltu viestiluettelo                                       |
-| Lähetä äänimerkki              | Toista merkkiääni lähetyksen yhteydessä                                       |
-| Kiertokooderi                  | Ota kiertokooderin syöte käyttöön                                             |
-| Ylös, alas ja painallus-pinnit | GPIO-pinnien määritykset syötteille                                           |
+| Asetus                                    | Kuvaus                                                                                                    |
+| ----------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| ~~Canned message enabled~~                | ⚠️ **Deprecated** in the protobuf schema                                                                  |
+| Viestit                                   | Rivinvaihdoilla eroteltu viestiluettelo                                                                   |
+| Send bell                                 | Send a bell character alongside the message, so a receiving node's External Notification module can sound |
+| Rotary encoder enabled                    | Use a rotary encoder as the input device                                                                  |
+| GPIO pin for rotary encoder A / B / press | The three pins the encoder is wired to                                                                    |
+| Generate input event on press / CW / CCW  | Which key event each encoder action produces                                                              |
+| Up/Down/Select input enabled              | A separate, simpler input scheme using up/down/select buttons rather than an encoder                      |
+| ~~Allow input source~~                    | ⚠️ **Deprecated** in the protobuf schema                                                                  |
 
 ### Äänimoduuli
 
 Codec2-äänituki matalan kaistanleveyden puheviestintään verkossa. Tämä on **kokeellinen** ominaisuus, joka koodaa puheen erittäin pieniksi datapaketeiksi käyttäen Codec2-koodekkia.
 
-| Asetus             | Kuvaus                                             |
-| ------------------ | -------------------------------------------------- |
-| Käytössä           | Ota äänimoduuli käyttöön                           |
-| Codec2-nopeus      | Äänenlaadun ja kaistanleveyden välinen kompromissi |
-| I2S Word Select    | GPIO-pinni I2S WS:lle              |
-| I2S-datasisääntulo | GPIO-nasta I2S DIN:lle             |
-| I2S-dataulostulo   | GPIO-pinni I2S DOUT:lle            |
+| Asetus                             | Kuvaus                                             |
+| ---------------------------------- | -------------------------------------------------- |
+| Käytössä                           | Ota äänimoduuli käyttöön                           |
+| Codec2-nopeus                      | Äänenlaadun ja kaistanleveyden välinen kompromissi |
+| PTT Pin                            | GPIO pin for the push-to-talk button               |
+| I2S Word Select                    | GPIO-pinni I2S WS:lle              |
+| I2S-datasisääntulo                 | GPIO-nasta I2S DIN:lle             |
+| I2S-dataulostulo                   | GPIO-pinni I2S DOUT:lle            |
+| I2S Clock (SCK) | GPIO pin for the I2S bit clock                     |
 
-> ⚠️ **Huomautus:** Ääniominaisuudet edellyttävät yhteensopivaa laitteistoa (I2S-mikrofoni ja kaiutin). Äänenlaatu on hyvin matalakaistainen — ajattele "ymmärrettävää radiopuhetta", ei puhelinlaatua.
+> ℹ️ **Note:** Audio requires specific hardware (I2S microphone and speaker). Äänenlaatu on hyvin matalakaistainen — ajattele "ymmärrettävää radiopuhetta", ei puhelinlaatua.
 
 ### Etälaitteiston moduuli
 
@@ -191,14 +229,38 @@ Muuttaa radiosi liike- tai ovitunnistimeen perustuvaksi hälytysjärjestelmäksi
 
 Henkilölaskuri, joka hyödyntää Wi-Fi- ja BLE-koepyyntöjä. Laskee lähellä olevia laitteita kuuntelemalla passiivisesti koepyyntöjä, joita puhelimet ja kannettavat tietokoneet lähettävät etsiessään verkkoja. Saatavilla vain ESP32-laitteissa.
 
-| Asetus                              | Kuvaus                                   |
-| ----------------------------------- | ---------------------------------------- |
-| Käytössä                            | Ota henkilölaskenta käyttöön             |
-| Päivitysväli (s) | Kuinka usein laskentatiedot raportoidaan |
+| Setting                             | Description                                                                                                      |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Käytössä                            | Ota henkilölaskenta käyttöön                                                                                     |
+| Päivitysväli (s) | Kuinka usein laskentatiedot raportoidaan                                                                         |
+| WiFi RSSI threshold                 | Ignore WiFi probes weaker than this, so distant devices are not counted (defaults to −80 dBm) |
+| BLE RSSI threshold                  | The same cut-off for BLE advertisements (defaults to −80 dBm)                                 |
 
 > 💡 **Vinkki:** PAX-laskuri on hyödyllinen jalankulkijamäärien arviointiin retkeilyreittien lähtöpisteissä, tapahtumapaikoilla tai muissa kohteissa. Laskentatulokset ovat arvioita — yhdellä henkilöllä voi olla useita laitteita mukana.
 
+### Status Message Module
+
+Publishes a short free-text status line for your node, which other nodes can display alongside it.
+
+| Setting                  | Description                                                                                                                                                                      |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The actual status string | Up to 80 characters. The **✕** in the field clears it. (That is the app's own label for the field, verbatim.) |
+
+Saving takes effect immediately — this is one of the few module settings that never asks the
+node to reboot.
+
+> ℹ️ **Note:** The screen only appears for firmware that reports support for the status-message
+> module. If you do not see it in the module list, your node's firmware does not have it.
+
+### Mesh Beacon Module
+
+Broadcasts an invitation to your mesh, and receives invitations from others. See
+[Discovery](discovery) for the full walkthrough.
+
 ### TAK-moduuli
+
+> ℹ️ **Note:** This module only appears in the list once the node's **Device Role** (Device Config)
+> is set to **TAK** or **TAK Tracker**. Change the role first, or the entry will not be there.
 
 Team Awareness Kit -integraatio yhteensopivuutta varten ATAK- ja WinTAK-järjestelmien kanssa. Katso [TAK-integraatio](tak) saadaksesi tarkemmat määritys- ja käyttöohjeet.
 
@@ -217,7 +279,11 @@ Määritä etänä radiot, jotka jakavat saman ylläpitoavaimen:
 
 ### Tyhjennä NodeDB-tietokanta
 
-Poistaa vanhentuneet radiot paikallisesta tietokannastasi, jos niistä ei ole kuultu määritettävän aikaikkunan aikana.
+Prunes your local node database. Two independent controls:
+
+- An **age slider** — remove nodes not heard from within that window.
+- **Clean unknown nodes only** — restrict the purge to nodes that never sent their user info,
+  leaving named nodes alone regardless of age.
 
 ### Palauta tehdasasetukset
 
@@ -230,6 +296,23 @@ Käynnistä yhdistetty tai ylläpidettävä radio etänä uudelleen.
 ### Vianetsintäpaneeli
 
 Avaa **Paketit**- ja **Sovelluslokit**-välilehdet diagnostiikkatietojen tarkastelua, suodatusta ja vientiä varten. Katso [Virheenjäljityslokit](debug-logs), jossa on täydellinen käyttöohje.
+
+### About
+
+**Settings → About** carries the app's own identity rather than the radio's:
+
+Three sections:
+
+- **What is Meshtastic?** — a short description of the project.
+- **Apps** — opens with **Need Hardware?**, a rotating carousel of popular devices that links out
+  to where to buy one, then the GitHub repository, the running app version, and
+  **Acknowledgements** (below).
+- **Project information** — links to the website and to this documentation.
+
+### Acknowledgements
+
+Reached from **About**, this lists every open-source library the app ships, with its license,
+generated at build time by AboutLibraries. It was previously called the license screen.
 
 ### Etähallinnan vianmääritys
 

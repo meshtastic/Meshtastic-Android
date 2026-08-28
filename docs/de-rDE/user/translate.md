@@ -2,7 +2,7 @@
 title: Translate the App
 parent: User Guide
 nav_order: 17
-last_updated: 2026-06-25
+last_updated: 2026-08-27
 description: How the app and its documentation are translated via Crowdin, and guidelines for contributing translations.
 aliases:
   - translate
@@ -24,7 +24,7 @@ Contributing translations helps make Meshtastic accessible to a wider audience. 
 | User Guide pages  | `docs/en/user/*.md`                                                 | In-app documentation shown in Help & Documentation |
 | Fastlane metadata | `fastlane/metadata/android/en-US/`                                  | App Store listing title, description, and changelogs                   |
 
-> ⚠️ **Note:** Developer Guide pages are English-only. Code-focused documentation targeting contributors is not translated.
+> ℹ️ **Note:** Developer Guide pages are English-only. Code-focused documentation targeting contributors is not translated.
 
 ---
 
@@ -100,3 +100,11 @@ The app automatically selects the correct locale based on your device's **Langua
 If you have questions about a specific string's context or need help getting started, open a discussion on the [Meshtastic GitHub Discussions](https://github.com/orgs/meshtastic/discussions) page.
 
 Vielen Dank, dass Sie dabei geholfen haben, die Reichweite von Meshtastic zu vergrößern!
+
+## Related Topics
+
+- [Units & Locale](units-and-locale) — how the app picks number, date, and unit formats for your region
+- [Help & Documentation](help-and-docs) — the in-app docs browser these pages are published to
+- [Onboarding](onboarding) — where a new user first meets the translated strings
+
+---

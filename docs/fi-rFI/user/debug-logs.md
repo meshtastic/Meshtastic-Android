@@ -2,7 +2,7 @@
 title: Virheenjäljityslokitiedot
 parent: Käyttöopas
 nav_order: 22
-last_updated: 2026-07-08
+last_updated: 2026-08-27
 description: Tarkastele ja vie sovelluksen omat virheenjäljityslokitiedot suoraan sovelluksesta ja liitä lokitiedot GitHub-vikaraporttiin ongelmien selvittämisen helpottamiseksi — adb:tä ei tarvita.
 aliases:
   - debug-lokitiedot
@@ -44,7 +44,7 @@ Napauta **latauskuvaketta** tallentaaksesi nykyiset lokitiedot tiedostoon. Valit
 
 Liitä tämä tiedosto GitHub-vikaraporttiisi.
 
-> 🔒 **Tietosuoja:** Viennit **peittävät automaattisesti** yksityiset avaimet, ylläpitoavaimet ja istuntoavaimet ennen tiedoston kirjoittamista. Kanavien PSK-avaimia **ei** peitetä, ja lokit voivat sisältää myös radioiden nimiä, sijainteja ja muita tunnistetietoja. Tarkista tiedosto ennen sen julkista jakamista, ja jos olet epävarma, jaa se yksityisesti.
+> 🔒 **Privacy:** Exports automatically **redact** private keys, admin keys, session passkeys and channel PSKs before writing the file. Logs can still contain node names, positions, and other identifying details — glance through the file before sharing it publicly, and share privately if you have any doubt.
 
 ## Työpöytä
 

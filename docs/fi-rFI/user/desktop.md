@@ -2,7 +2,7 @@
 title: Työpöytäsovellus
 parent: Käyttöopas
 nav_order: 14
-last_updated: 2026-07-07
+last_updated: 2026-08-27
 description: Asenna ja käytä Meshtastic-työpöytäsovellusta Linuxilla, macOS:llä ja Windowsilla — yhteydet, ominaisuuksien yhtenevyys ja pikanäppäimet.
 aliases:
   - työpöytä
@@ -70,7 +70,6 @@ Bluetooth Low Energy on tuettu työpöydällä [Kable](https://github.com/JuulLa
 | Laiteohjelmiston päivitys                                   | ✓       | ✓        | Sovelluksen USB-, BLE- ja Wi-Fi-päivitykset (ESP32) toimivat samalla tavalla kuin Androidissa               |
 | Ilmoitukset                                                 | ✓       | ✓        | Käyttöjärjestelmän natiivit ilmoitukset                                                                                        |
 | Widgetit                                                    | ✓       | ✗        | Vain Android                                                                                                                   |
-| Vain Android                                                | ✓       | ✗        | Vain Android — ei saatavilla työpöydällä tai iOS:llä                                                           |
 | Tekoälyavustaja (Chirpy)                 | ✓\*     | ✗        | Vain Google-version Android-laitteissa                                                                                         |
 | Sovellustoiminnot (järjestelmän tekoäly) | ✓†      | ✗        | Vain Google-version Android-laitteissa                                                                                         |
 
@@ -131,7 +130,7 @@ cd Meshtastic-Android
 
 Vaatimukset:
 
-- JDK 21
+- JDK 25 (Gradle can provision the toolchain itself via foojay)
 - Android SDK:ta ei tarvita pelkkien työpöytäversioiden rakentamiseen
 
 ## Tunnetut rajoitukset

@@ -2,7 +2,7 @@
 title: Kuinka Meshtastic-signaalimittari toimii
 parent: Käyttöopas
 nav_order: 15
-last_updated: 2026-07-08
+last_updated: 2026-08-27
 description: Miten signaalimittari arvioi signaalin laadun SNR-arvon perusteella suhteessa LoRa-modeemiesiasetukseen — hajaspektri, esiasetukset ja mitä palkit todellisuudessa tarkoittavat.
 aliases:
   - signaali
@@ -15,7 +15,7 @@ aliases:
 
 Meshtasticin signaalimittari — sovelluksessa näkyvät tutut palkit tai tilan väri — lasketaan hyvin eri tavalla kuin perinteisen matkapuhelimen tai WiFi-reitittimen "palkit".
 
-Useimmat kuluttajalaitteet mittaavat yksinkertaisesti signaalin “voimakkuutta”. Koska Meshtastic käyttää **LoRa (Long Range)** -teknologiaa, signaalimittari arvioi sen sijaan kuinka “selkeä” signaali on suhteessa käytössä olevan mesh-verkon asetuksiin.
+Most consumer devices measure how "loud" a signal is. Koska Meshtastic käyttää **LoRa (Long Range)** -teknologiaa, signaalimittari arvioi sen sijaan kuinka “selkeä” signaali on suhteessa käytössä olevan mesh-verkon asetuksiin.
 
 ---
 
@@ -38,7 +38,7 @@ Jos ystäväsi huutaa rock-konsertissa, signaali on erittäin voimakas (korkea R
 
 ## 2. LoRa:n “taika”: kuuleminen kohinan alta
 
-Tavallisessa radiossa (kuten FM- tai WiFi-yhteydessä), jos taustakohina on voimakkaampi kuin signaali (negatiivinen SNR), vastaanotin kuulee vain kohinaa.
+For standard radios (like FM or WiFi), if the background noise is louder than the signal (a negative SNR), the receiver hears only static.
 
 LoRa on erilainen. Se käyttää **hajaspektritekniikkaa (Spread Spectrum)**, joka mahdollistaa signaalin erottamisen myös silloin, kun se on taustakohinan alla. Siksi Meshtasticissa näkyy usein **negatiivisia SNR-arvoja** (esim. -10 dB tarkoittaa, että signaali on 10 dB heikompi kuin kohina).
 

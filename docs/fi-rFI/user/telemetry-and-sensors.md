@@ -2,7 +2,7 @@
 title: Telemetria ja anturit
 parent: Käyttöopas
 nav_order: 9
-last_updated: 2026-05-13
+last_updated: 2026-08-27
 description: Anturitiedot verkossa — tuetut ympäristö-, ilmanlaatu- ja virta-anturit sekä määritys- ja katseluohjeet.
 aliases:
   - sensorit
@@ -47,11 +47,20 @@ Tuetut ympäristöanturit:
 
 ### Ilmanlaatu
 
-| Sensor   | Metrijärjestelmä                                   | Viestit                        |
-| -------- | -------------------------------------------------- | ------------------------------ |
-| BME680   | Kaasuvastus ja IAQ                                 | Haihtuvat orgaaniset yhdisteet |
-| PMSA003I | PM1.0, PM2.5, PM10 | Hiukkaset                      |
-| SEN55    | PM, NOx, VOC, lämpötila, kosteus                   | Monianturi                     |
+| Sensor   | Metrijärjestelmä                                   | Viestit                                                                                                                                   |
+| -------- | -------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| BME680   | Kaasuvastus ja IAQ                                 | Haihtuvat orgaaniset yhdisteet                                                                                                            |
+| PMSA003I | PM1.0, PM2.5, PM10 | Hiukkaset                                                                                                                                 |
+| SEN55    | PM, Temp, Humidity                                 | Multi-sensor. Its NOx and VOC indices are recorded and included in a CSV export, but are not yet shown as cards or charts |
+
+### Soil
+
+| Metric     | Yksikkö | Notes                                           |
+| ---------- | ------- | ----------------------------------------------- |
+| Soil Temp  | °C / °F | Reported alongside soil moisture by soil probes |
+| Soil Moist | %       | Volumetric water content                        |
+
+Both appear as info cards on the node detail screen, next to the other environment readings.
 
 ### Valo ja UV
 
@@ -65,43 +74,44 @@ Tuetut ympäristöanturit:
 
 INA-sarjan virta-antureilla varustetut radiot voivat raportoida:
 
-| Metrijärjestelmä | Kuvaus                                   |
-| ---------------- | ---------------------------------------- |
-| Väyläjännite     | Syöttöjännitteen                         |
-| Virta            | Virrankulutuksen (mA) |
-| Virta            | Lasketun tehon (mW)   |
+| Metrijärjestelmä | Kuvaus                          |
+| ---------------- | ------------------------------- |
+| Voltage          | Per-channel voltage reading     |
+| Virta            | Per-channel current draw, in mA |
+
+Up to three channels are reported (ch1–ch3), and each can be given its own label — Solar or Battery, say — from the node detail screen. There is no separate wattage reading; the app charts voltage and current, and does not compute power from them.
 
 Hyödyllinen aurinkolatauksen tai etäradioiden akun kunnon seurantaan.
 
 ## Telemetrian määrittäminen
 
 1. Siirry kohtaan **Asetukset → Moduuliasetukset → Telemetria**
-2. Määritä raportointivälit:
-   - **Laitemittarien väli** — kuinka usein laitteen mittarit lähetetään verkkoon
-   - **Ympäristömittarien väli** — kuinka usein anturitiedot lähetetään verkkoon
-3. Ota tarvittavat anturityypit käyttöön.
+2. Each metric group has its own enable toggle and its own interval:
 
-### Suositellut raportointivälit
+   - **Device Metrics** — battery, channel and airtime utilisation
+   - **Environment Metrics** — temperature, humidity, pressure and the other sensor readings
+   - **Air Quality Metrics** — particulate and CO₂ readings
+   - **Power Metrics** — the per-channel voltage and current readings
 
-| Käyttötarkoitus                                     | Laite (s) | Ympäristö (s) |
-| --------------------------------------------------- | ---------------------------- | -------------------------------- |
-| Kaupunkiverkko (paljon radioita) | 3600                         | 3600                             |
-| Maaseutuverkko (vähän radioita)  | 900                          | 900                              |
-| Sääasema                                            | 900                          | 300                              |
-| Akun säästäminen                                    | 7200                         | 7200                             |
+   Environment metrics additionally have an on-screen toggle and a Fahrenheit toggle for the
+   device's own display.
 
-> ⚠️ **Huomautus:** Lyhyemmät välit lisäävät käyttöastetta ja akun kulutusta koko verkossa.
+### Choosing an Interval
+
+> 💡 **Tip:** These are nominal values, not hard schedules. On a congested mesh the firmware
+> automatically backs off to longer intervals based on how many nodes are online, so you do not
+> need to hand-tune them for mesh size. Lengthen them deliberately only to save battery.
 
 ## Ilmanlaatumittarit
 
 Hiukkas- tai CO₂-antureilla varustetut radiot raportoivat ilmanlaatutietoja:
 
-| Metrijärjestelmä      | Yksikkö | Kuvaus                    |
-| --------------------- | ------- | ------------------------- |
-| PM1.0 | µg/m³   | Erittäin pienet hiukkaset |
-| PM2.5 | µg/m³   | Pienhiukkaset             |
-| PM10                  | µg/m³   | Karkeat hiukkaset         |
-| CO₂                   | ppm     | Hiilidioksidipitoisuus    |
+| Metric                | Unit  | Kuvaus                    |
+| --------------------- | ----- | ------------------------- |
+| PM1.0 | µg/m³ | Erittäin pienet hiukkaset |
+| PM2.5 | µg/m³ | Pienhiukkaset             |
+| PM10                  | µg/m³ | Karkeat hiukkaset         |
+| CO₂                   | ppm   | Hiilidioksidipitoisuus    |
 
 Myös CO₂ anturit, kuten SCD4x, ilmoittavat oman lämpötilansa ja ilmankosteutensa, jotka näytetään edellä olevien mittausten yhteydessä. PM2.5-historiasta sovellus laskee lisäksi **EPA NowCast AQI** -arvon.
 
