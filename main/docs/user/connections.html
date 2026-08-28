@@ -48,10 +48,12 @@ Tapping **Scan** after you have declined the permission once explains what it is
 ------|-------|-------------|
  🟢 | Connected | Active radio link established |
  🟡 | Connecting | Handshake in progress |
- 🔴 | Disconnected | No active connection |
- ⚪ | Not configured | No device selected |
+ 🔴 | Disconnected | No active connection; the app keeps trying to reconnect |
+ ⚪ | Device sleeping | The radio is in light sleep — the app is waiting for it to wake and reconnect, not failing |
 
-When connecting, a status indicator shows the current connection state:
+These are the four states the app models. "Device sleeping" is normal on power-saving configurations and needs no action.
+
+When connecting, a status indicator shows the current connection state — tap **Stop Connecting** to abandon the attempt:
 
 ![Connecting status](../../assets/screenshots/connections_connecting.png)
 
@@ -75,11 +77,17 @@ USB connections provide a wired alternative, useful for desktop or when Bluetoot
 2. The app will prompt for USB permission — tap **Allow**.
 3. The connection is established automatically.
 
-&gt; ⚠️ **Note:** USB connections require OTG support on Android devices.
+&gt; ℹ️ **Note:** USB connections require OTG support on Android devices.
 
 ## TCP/IP (Network)
 
 Some Meshtastic radios support WiFi/Ethernet connectivity, allowing TCP-based connections over your local network. Get the radio onto your network first — using the radio's own WiFi settings (via the firmware web interface or another connection) — then connect to it from the app.
+
+&gt; ℹ️ **Note:** **Settings → Wi-Fi Provisioning for mPWRD-OS** is a separate, narrower tool. It provisions WiFi
+&gt; credentials over Bluetooth to **mPWRD-OS** devices only, using their own protocol — it does not
+&gt; configure WiFi on an ordinary Meshtastic radio. It scans over BLE, lists the networks the device
+&gt; can see (including an option for a hidden SSID), takes the password, and reports success or
+&gt; failure. Available on both Android and Desktop.
 
 ### Connecting over the Network
 
