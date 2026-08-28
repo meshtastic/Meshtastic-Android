@@ -18,6 +18,7 @@ package org.meshtastic.feature.map.component
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class SitePlannerParamsTest {
@@ -63,6 +64,18 @@ class SitePlannerParamsTest {
         assertTrue(url.contains("&rx_sensitivity=-139.0"), url)
         assertTrue(url.contains("&max_range=60.0"), url)
         assertTrue(url.contains("&high_res=1"), url)
+    }
+
+    @Test
+    fun `the host bridge is asked for only when a host offers one`() {
+        // Opened in an ordinary browser there is no native bridge to hand the estimate to, and pointing the planner at
+        // one that is not there loses the result the user just waited for.
+        val params = SitePlannerParams("N", 1.0, 2.0)
+
+        assertTrue(params.toQueryUrl("https://planner.example").contains("bridge=1"))
+        assertFalse(params.toQueryUrl("https://planner.example", useHostBridge = false).contains("bridge=1"))
+        // The simulation still runs either way.
+        assertTrue(params.toQueryUrl("https://planner.example", useHostBridge = false).contains("run=1"))
     }
 
     @Test

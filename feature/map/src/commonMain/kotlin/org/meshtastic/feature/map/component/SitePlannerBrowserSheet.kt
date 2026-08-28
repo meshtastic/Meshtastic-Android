@@ -53,7 +53,7 @@ fun SitePlannerBrowserSheet(
     SitePlannerSheet(
         initial = params,
         onSubmit = { submitted ->
-            uriHandler.openUri(submitted.toQueryUrl(SITE_PLANNER_URL))
+            uriHandler.openUri(submitted.toQueryUrl(SITE_PLANNER_URL, useHostBridge = false))
             onDismiss()
         },
         onDismiss = onDismiss,
