@@ -18,54 +18,6 @@ package org.meshtastic.feature.map.kml
 
 import kotlin.math.roundToLong
 
-/** Building the GeoJSON a parsed KML becomes: geometry, simplestyle properties, and the escaping both need. */
-internal fun pointGeometry(position: String) = KmlGeometry("Point", position, isPolygonal = false)
-
-internal fun lineGeometry(positions: List<String>) =
-    KmlGeometry("LineString", positions.joinToString(",", prefix = "[", postfix = "]"), isPolygonal = false)
-
-internal fun polygonGeometry(ring: List<String>): KmlGeometry {
-    // GeoJSON requires a closed ring; KML usually closes its own, but not always.
-    val closed = if (ring.first() == ring.last()) ring else ring + ring.first()
-    return KmlGeometry(
-        type = "Polygon",
-        coordinates = closed.joinToString(",", prefix = "[[", postfix = "]]"),
-        isPolygonal = true,
-    )
-}
-
-/**
- * KML coordinates are whitespace-separated `lon,lat[,alt]` tuples; GeoJSON wants `[lon, lat]` pairs.
- *
- * Altitude is dropped rather than carried: nothing on either map reads it, and a third ordinate would make every
- * downstream bounding-box calculation handle a case it never needs to.
- */
-internal fun parseCoordinates(raw: String): List<String>? {
-    val positions =
-        raw.trim().split(WHITESPACE).mapNotNull { tuple ->
-            val parts = tuple.split(',')
-            val longitude = parts.getOrNull(0)?.trim()?.toDoubleOrNull()?.takeIf { it.isValidOrdinate(MAX_LONGITUDE) }
-            val latitude = parts.getOrNull(1)?.trim()?.toDoubleOrNull()?.takeIf { it.isValidOrdinate(MAX_LATITUDE) }
-            if (longitude == null || latitude == null) null else "[$longitude,$latitude]"
-        }
-    return positions.ifEmpty { null }
-}
-
-/** GeoJSON's ordinate bounds, per RFC 7946. */
-private const val MAX_LONGITUDE = 180.0
-private const val MAX_LATITUDE = 90.0
-
-/**
- * Whether an ordinate is one this converter will write, checked before the number reaches the JSON.
- *
- * `toDoubleOrNull` accepts "NaN" and "Infinity", and these coordinates are interpolated into the output as text — so a
- * single such ordinate emits a bare `NaN` token and makes the *whole* converted file unparseable, taking every other
- * placemark in it down too. That is the same shape of failure as writing `0,498` for a decimal under a comma-decimal
- * locale. Out-of-range values go on the same pass: a coordinate outside RFC 7946's bounds is corrupt input rather than
- * a place on Earth.
- */
-private fun Double.isValidOrdinate(limit: Double): Boolean = isFinite() && this in -limit..limit
-
 /** One GeoJSON feature, with the placemark's text and the style's colours as simplestyle properties. */
 internal fun KmlGeometry.toFeature(placemark: Placemark, style: KmlStyle?): String {
     val properties = mutableListOf<String>()
@@ -127,8 +79,6 @@ internal fun String.jsonString(): String {
     return escaped.append('"').toString()
 }
 
-private val WHITESPACE = Regex("\\s+")
-
 /** A JSON `\uXXXX` escape is always four hex digits. */
 private const val ESCAPE_DIGITS = 4
 
@@ -142,10 +92,6 @@ private const val ALPHA = 0
 private const val BLUE = 1
 private const val GREEN = 2
 private const val RED = 3
-
-/** A GeoJSON ring needs three distinct positions before it can be closed into a polygon. */
-internal const val MIN_RING_POSITIONS = 3
-internal const val MIN_LINE_POSITIONS = 2
 
 /** One byte as two lowercase hex digits, the way a CSS colour wants it. */
 private fun Int.hexByte(): String = toString(HEX).padStart(BYTE_CHARS, '0')

@@ -185,7 +185,7 @@ private val GEOMETRY_TAGS = setOf("Point", "LineString", "Polygon")
  * [polygonTaken] guards a polygon's holes: an inner ring arrives as another `<coordinates>` and only the outer one is
  * drawn, so a ring already taken is not overwritten.
  */
-private fun geometryFrom(type: String?, positions: List<String>?, polygonTaken: Boolean): KmlGeometry? = when {
+private fun geometryFrom(type: String?, positions: List<GeoPosition>?, polygonTaken: Boolean): KmlGeometry? = when {
     positions == null -> null
 
     type == "Point" -> positions.firstOrNull()?.let { pointGeometry(it) }

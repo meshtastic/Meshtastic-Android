@@ -98,6 +98,76 @@ class KmlToGeoJsonTest {
     }
 
     @Test
+    fun `a line crossing the antimeridian is cut rather than drawn around the world`() {
+        // RFC 7946 §3.1.9. Uncut, a two-degree hop between 179°E and 179°W draws as a line back across every
+        // meridian on Earth.
+        val result =
+            assertNotNull(
+                convert(
+                    """
+                    <kml><Placemark><LineString>
+                      <coordinates>179,10 -179,10</coordinates>
+                    </LineString></Placemark></kml>
+                    """,
+                ),
+            )
+
+        assertContains(result, """"type":"MultiLineString"""")
+        assertContains(result, """[[[179.0,10.0],[180.0,10.0]],[[-180.0,10.0],[-179.0,10.0]]]""")
+    }
+
+    @Test
+    fun `the cut interpolates the latitude where the line meets the meridian`() {
+        val result =
+            assertNotNull(
+                convert(
+                    """
+                    <kml><Placemark><LineString>
+                      <coordinates>170,0 -170,20</coordinates>
+                    </LineString></Placemark></kml>
+                    """,
+                ),
+            )
+
+        // Halfway along the twenty degrees of longitude it actually travels, so halfway up the latitude too.
+        assertContains(result, """[[[170.0,0.0],[180.0,10.0]],[[-180.0,10.0],[-170.0,20.0]]]""")
+    }
+
+    @Test
+    fun `a line that stays put is left as a plain LineString`() {
+        val result =
+            assertNotNull(
+                convert(
+                    """
+                    <kml><Placemark><LineString>
+                      <coordinates>-107.62,34.07 -107.59,34.14</coordinates>
+                    </LineString></Placemark></kml>
+                    """,
+                ),
+            )
+
+        assertContains(result, """"type":"LineString"""")
+    }
+
+    @Test
+    fun `a clockwise ring is turned to follow the right-hand rule`() {
+        // RFC 7946 §3.1.6 requires an exterior ring to wind counterclockwise. KML says nothing about winding, so
+        // exporters emit both and the ring has to be turned rather than trusted.
+        val result =
+            assertNotNull(
+                convert(
+                    """
+                    <kml><Placemark><Polygon><outerBoundaryIs><LinearRing>
+                      <coordinates>-107.62,34.07 -107.59,34.14 -107.59,34.07</coordinates>
+                    </LinearRing></outerBoundaryIs></Polygon></Placemark></kml>
+                    """,
+                ),
+            )
+
+        assertContains(result, """[[[-107.59,34.07],[-107.59,34.14],[-107.62,34.07],[-107.59,34.07]]]""")
+    }
+
+    @Test
     fun `a polygon hole is ignored rather than drawn as a second shape`() {
         val result =
             assertNotNull(
