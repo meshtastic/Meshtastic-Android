@@ -19,6 +19,7 @@ package org.meshtastic.feature.map.kml
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -302,6 +303,84 @@ class KmlToGeoJsonTest {
             )
 
         assertEquals(3, Regex("\"type\":\"Feature\"").findAll(result).count())
+    }
+
+    @Test
+    fun `a point carries its icon image url`() {
+        val result =
+            assertNotNull(
+                convert(
+                    """
+                    <kml><Document>
+                      <Style id="tower"><IconStyle><Icon>
+                        <href>https://example.org/tower.png</href>
+                      </Icon></IconStyle></Style>
+                      <Placemark><styleUrl>#tower</styleUrl>
+                        <Point><coordinates>-107.62,34.07</coordinates></Point>
+                      </Placemark>
+                    </Document></kml>
+                    """,
+                ),
+            )
+
+        assertContains(result, """"icon-url":"https://example.org/tower.png"""")
+    }
+
+    @Test
+    fun `a line does not carry an icon even when its style names one`() {
+        // An icon says how a point is drawn; on a route it is noise the renderer would have to filter out again.
+        val result =
+            assertNotNull(
+                convert(
+                    """
+                    <kml><Document>
+                      <Style id="route"><IconStyle><Icon><href>https://example.org/x.png</href></Icon></IconStyle>
+                        <LineStyle><color>ff0000ff</color></LineStyle></Style>
+                      <Placemark><styleUrl>#route</styleUrl>
+                        <LineString><coordinates>-107.62,34.07 -107.59,34.14</coordinates></LineString>
+                      </Placemark>
+                    </Document></kml>
+                    """,
+                ),
+            )
+
+        assertFalse("icon-url" in result, result)
+    }
+
+    @Test
+    fun `a NetworkLink href is not mistaken for an icon`() {
+        // <Link><href> lives outside any IconStyle, which is the whole reason the reader keys on the enclosing tag.
+        val result =
+            convert(
+                """
+                <kml><Document>
+                  <NetworkLink><Link><href>https://example.org/more.kml</href></Link></NetworkLink>
+                  <Placemark><Point><coordinates>-107.62,34.07</coordinates></Point></Placemark>
+                </Document></kml>
+                """,
+            )
+
+        assertNotNull(result)
+        assertFalse("icon-url" in result, result)
+    }
+
+    @Test
+    fun `an empty icon href is treated as no icon at all`() {
+        val result =
+            assertNotNull(
+                convert(
+                    """
+                    <kml><Document>
+                      <Style id="blank"><IconStyle><Icon><href></href></Icon></IconStyle></Style>
+                      <Placemark><styleUrl>#blank</styleUrl>
+                        <Point><coordinates>-107.62,34.07</coordinates></Point>
+                      </Placemark>
+                    </Document></kml>
+                    """,
+                ),
+            )
+
+        assertFalse("icon-url" in result, result)
     }
 
     @Test

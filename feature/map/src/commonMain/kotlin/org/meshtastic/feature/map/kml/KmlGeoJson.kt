@@ -29,6 +29,11 @@ internal fun KmlGeometry.toFeature(placemark: Placemark, style: KmlStyle?): Stri
         properties += "\"stroke-opacity\":$opacity"
     }
     style?.lineWidth?.let { properties += "\"stroke-width\":$it" }
+    // Only a point is drawn as an icon, and only this converter emits the key — simplestyle has no property for an
+    // arbitrary image URL, so `icon-url` is ours rather than something a foreign file will carry.
+    if (type == "Point") {
+        style?.iconHref?.let { properties += "\"$ICON_URL_PROPERTY\":${it.jsonString()}" }
+    }
     if (isPolygonal && style?.filled != false) {
         style?.fillColor?.toCssColor()?.let { (hex, opacity) ->
             properties += "\"fill\":\"$hex\""
@@ -78,6 +83,15 @@ internal fun String.jsonString(): String {
     }
     return escaped.append('"').toString()
 }
+
+/**
+ * The property an icon image URL is written to.
+ *
+ * Deliberately named rather than borrowed: simplestyle-spec 1.1.0 defines `marker-symbol` (a fixed icon vocabulary),
+ * `marker-color` and `marker-size`, and nothing for an arbitrary image. This is an extension of ours, so it is declared
+ * in one place and documented as such.
+ */
+internal const val ICON_URL_PROPERTY = "icon-url"
 
 /** A JSON `\uXXXX` escape is always four hex digits. */
 private const val ESCAPE_DIGITS = 4

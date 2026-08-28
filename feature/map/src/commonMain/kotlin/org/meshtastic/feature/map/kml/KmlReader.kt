@@ -70,17 +70,29 @@ private val SUB_STYLES = setOf("LineStyle", "PolyStyle", "IconStyle", "LabelStyl
 /**
  * Folds one element of a `<Style>` sub-style into the style being built.
  *
- * Only LineStyle and PolyStyle contribute: an IconStyle or LabelStyle colour says nothing about how a route or a zone
- * is drawn. `<fill>0</fill>` is how KML says "no fill", so it means outline only rather than a fill of nothing.
+ * Only LineStyle, PolyStyle and an IconStyle's image contribute: an IconStyle or LabelStyle *colour* still says nothing
+ * about how a route or a zone is drawn. `<fill>0</fill>` is how KML says "no fill", so it means outline only rather
+ * than a fill of nothing.
  *
  * [value] is called only for an element that contributes, so an element we ignore is left unconsumed — exactly as it
  * was under the pull parser this replaced.
  */
 private fun KmlStyle.withStyleElement(tag: String, enclosing: String?, value: () -> String): KmlStyle = when {
+    // `<Icon>` is not itself a sub-style, so it falls through without clearing `enclosing` and the `<href>` inside
+    // it
+    // still reads as belonging to the IconStyle. NetworkLink's `<Link><href>` cannot be confused with it for the
+    // same
+    // reason: it is never inside an IconStyle.
+    tag == "href" && enclosing == "IconStyle" -> copy(iconHref = value().takeIf { it.isNotBlank() })
+
     tag == "color" && enclosing == "PolyStyle" -> copy(fillColor = value())
+
     tag == "color" && enclosing == "LineStyle" -> copy(lineColor = value())
+
     tag == "width" && enclosing == "LineStyle" -> copy(lineWidth = value().toFloatOrNull())
+
     tag == "fill" && enclosing == "PolyStyle" -> copy(filled = value() != "0")
+
     else -> this
 }
 

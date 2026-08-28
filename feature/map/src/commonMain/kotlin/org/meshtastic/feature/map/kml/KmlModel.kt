@@ -22,6 +22,8 @@ internal data class KmlStyle(
     val lineWidth: Float? = null,
     val fillColor: String? = null,
     val filled: Boolean = true,
+    /** `<IconStyle><Icon><href>` — the image a point is drawn with, if the KML names one. */
+    val iconHref: String? = null,
 )
 
 internal class Placemark(
