@@ -55,7 +55,7 @@ jobs:
       # stripped (v2.8.0 -> 2.8.0), matching the MSI's ProductVersion.
       - name: Submit MSI manifest to microsoft/winget-pkgs
         if: env.HAS_WINGET_TOKEN == 'true'
-        uses: vedantmgoyal9/winget-releaser@v2
+        uses: vedantmgoyal9/winget-releaser@4ffc7888bffd451b357355dc214d43bb9f23917e # v2
         with:
           identifier: Meshtastic.MeshtasticDesktop
           installers-regex: '\.msi$'

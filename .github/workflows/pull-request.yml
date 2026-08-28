@@ -25,8 +25,8 @@ jobs:
       screenshots: ${{ steps.filter.outputs.screenshots }}
       desktop: ${{ steps.filter.outputs.desktop }}
     steps:
-      - uses: actions/checkout@v7.0.1
-      - uses: dorny/paths-filter@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4
         id: filter
         with:
           token: ''
@@ -219,7 +219,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       # Workflow linting (actionlint + its shellcheck integration over every run: block).
       # Version-pinned; the runner image ships shellcheck. ~1s over the whole tree.
       - name: Lint GitHub workflows (actionlint)
