@@ -1,45 +1,57 @@
 # `:feature:map`
 
 ## Overview
-The `:feature:map` module provides the mapping interface for the application. Map rendering is decomposed into four focused provider contracts, each with per-flavor implementations in `:androidApp`.
+The `:feature:map` module provides the flavor- and platform-neutral mapping interface for the application: shared state, shared policy, and the waypoint editor. The rendering surfaces themselves live behind provider contracts with two implementations — Google Maps for the `google` flavor, and `:feature:map-maplibre` for the `fdroid` flavor and Desktop.
 
 ## Architecture
 
 ### Provider Contracts (in `core:ui/commonMain`)
 
-`MapViewProvider` is a named interface (exposed via `LocalMapViewProvider`); the other three are `CompositionLocal`s in `core/ui/.../util/`.
+`MapViewProvider` is a named interface (exposed via `LocalMapViewProvider`); the rest are `CompositionLocal`s in `core/ui/.../util/`.
 
 | Contract | Purpose | Implementations |
 |---|---|---|
-| `MapViewProvider` | Main map (nodes, waypoints, controls) | `GoogleMapViewProvider`, `FdroidMapViewProvider` |
-| `LocalNodeTrackMapProvider` | Per-node GPS track overlay (embedded in `PositionLogScreens.kt`, `feature:node`) | Google: `NodeTrackMap` → `MapView(GoogleMapMode.NodeTrack)`, F-Droid: `NodeTrackMap` → `NodeTrackOsmMap` |
-| `LocalTracerouteMapProvider` | Traceroute route visualization | Google: `TracerouteMap` → `MapView(GoogleMapMode.Traceroute)`, F-Droid: `TracerouteMap` → `TracerouteOsmMap` |
-| `LocalDiscoveryMapProvider` | Embedded discovery-scan map (node markers + topology polylines, `feature:discovery`) | Google: `DiscoveryMap` → `DiscoveryGoogleMap`, F-Droid: `DiscoveryMap` → `DiscoveryOsmMap` |
+| `MapViewProvider` | Main map (nodes, waypoints, controls) | Google: `GoogleMapViewProvider`, F-Droid + Desktop: `MapLibreMapViewProvider` |
+| `LocalMapMainScreenProvider` | The Map tab itself, so the host decides what the tab renders | Both hosts provide `MapScreen` from this module; the flavor split happens below it, in `MapViewProvider` |
+| `LocalNodeTrackMapProvider` | Per-node GPS track overlay (embedded in `PositionLogScreens.kt`, `feature:node`) | Google: `NodeTrackMap` → `MapView(GoogleMapMode.NodeTrack)`, F-Droid + Desktop: `NodeTrackMap` → `MapLibreNodeTrackMap` |
+| `LocalTracerouteMapProvider` | Traceroute route visualization | Google: `TracerouteMap` → `MapView(GoogleMapMode.Traceroute)`, F-Droid: `TracerouteMap` → `MapLibreTracerouteMap`, Desktop: `DesktopTracerouteMap` |
+| `LocalDiscoveryMapProvider` | Embedded discovery-scan map (node markers + topology polylines, `feature:discovery`) | Google: `DiscoveryMap` → `DiscoveryGoogleMap`, F-Droid + Desktop: `DiscoveryMap` → `MapLibreDiscoveryMap` |
+| `LocalInlineMapProvider` | Node-detail mini-map | Google: `InlineMap` → `GoogleMap`, F-Droid + Desktop: `InlineMap` → `MapLibreInlineMap` |
 
-All providers are injected via `CompositionLocal` in `MainActivity.kt` and consumed by feature modules without direct dependency on Google Maps or osmdroid.
+All providers are injected via `CompositionLocal` — in `MainActivity.kt` on Android and in `desktopApp`'s `Main.kt` on Desktop — and consumed by feature modules without a direct dependency on Google Maps or MapLibre.
 
 ### Shared ViewModels (in `commonMain`)
 
 - **`BaseMapViewModel`** — Core contract for all map state management, node markers, camera positions, and traceroute node selection logic (`TracerouteNodeSelection`, `tracerouteNodeSelection()`).
 - **`NodeMapViewModel`** — Shared logic for per-node map views (track display, position history).
 
+### Shared Logic (in `commonMain`)
+
+Rules both renderers must agree on, so a behaviour difference between the flavors is a test failure rather than a bug report:
+
+- **`MapNodePolicy`** — which nodes appear on the map at all, and their draw order.
+- **`MapBounds`** — the bounding box to open on. Returns `null` rather than a box at (0, 0) when there is no position data.
+- **`MapTimeWindows`** — the `LastHeardFilter` window test and the "just heard" pulse threshold, so both renderers filter tracks and pulse nodes on one definition.
+- **`EditWaypointDialog`** (`commonMain/.../component/`) — the waypoint editor, on Material 3 date/time pickers so Desktop can create waypoints too.
+
 ### Key Data Types
 
 - **`TracerouteOverlay`** (`core:model/commonMain`) — Pure data class representing traceroute route segments. Extracted from `feature:map` for cross-module reuse.
 - **`TracerouteNodeSelection`** (`feature:map/commonMain`) — Data class modeling node selection results during traceroute visualization.
 - **`GeoConstants`** (`core:model/commonMain`) — Centralized geographic constants (`DEG_D`, `HEADING_DEG`, `EARTH_RADIUS_METERS`).
+- **`PositionPrecision`** (`core:model/commonMain/util/`) — `precisionRadiusMetersOrNull()`, the one definition of the position-precision circle radius both renderers draw.
 
 ## Map Providers
 
 - **Google Maps (`google` flavor)**: Uses Google Play Services Maps SDK. Implementations in `androidApp/src/google/kotlin/org/meshtastic/app/map/`.
-- **OpenStreetMap (`fdroid` flavor)**: Uses `osmdroid` for a fully open-source experience. Implementations in `androidApp/src/fdroid/kotlin/org/meshtastic/app/map/`.
+- **MapLibre (`fdroid` flavor and Desktop)**: Uses `maplibre-compose` for a fully open-source experience. The surfaces live in the multiplatform `:feature:map-maplibre` module and are shared verbatim by both hosts; the thin flavor-unified entry points that pick up Android-only extras (file-picker layer import, Site Planner) are in `androidApp/src/fdroid/kotlin/org/meshtastic/app/map/`. `osmdroid` is gone.
 
 ## Features
 - **Live Node Tracking**: Real-time position updates for nodes on the mesh.
 - **Waypoints**: Create and share points of interest.
 - **Per-Node Track Overlay**: Embedded map in `PositionLogScreens.kt` (`feature:node`) showing a node's GPS track history.
 - **Traceroute Visualization**: Dedicated map view showing route segments between mesh nodes.
-- **Offline Maps**: Support for pre-downloaded map tiles (via `osmdroid`).
+- **Offline Maps**: Downloadable MapLibre offline packs, managed from the layers sheet in `:feature:map-maplibre`. The `google` flavor has no download; it imports pre-made MBTiles instead.
 
 
 ## Dependency Graph

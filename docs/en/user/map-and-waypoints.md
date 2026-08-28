@@ -2,7 +2,7 @@
 title: Map & Waypoints
 parent: User Guide
 nav_order: 6
-last_updated: 2026-08-25
+last_updated: 2026-08-28
 description: View node positions on the map, create and share waypoints, manage map layers and Site Planner, and control position sharing and privacy.
 aliases:
   - map
@@ -132,14 +132,19 @@ Overlays can be toggled on top of any base map:
 - **Hillshade** — terrain relief. Useful for understanding why a link fails, since LoRa range is limited by terrain
 - **Weather radar** — NOAA NEXRAD reflectivity (US coverage)
 
+Offline tiles are **F-Droid only**: download map areas for offline use from the layers sheet.
+**Google Play** builds have no offline download — they import pre-made MBTiles files instead.
+
 {: .note }
-> `.kml`/`.kmz` layer import is temporarily unavailable on Desktop while it is rebuilt on MapLibre. GeoJSON layers, Site Planner coverage overlays and offline tile downloads work as before.
+> On **Desktop**, `.kml`/`.kmz` layer import is temporarily unavailable while it is rebuilt on
+> MapLibre. On F-Droid, GeoJSON layers, `.kml`/`.kmz` import and Site Planner coverage overlays are
+> unchanged.
 
 ## Related Topics
 
 - [Nodes](nodes) — view and filter your node list
 - [Node Metrics](node-metrics) — signal quality and position history for individual nodes
-- [Discovery](discovery) — traceroute and neighbor info for understanding mesh topology
+- [Local Mesh Discovery](discovery) — traceroute and neighbor info for understanding mesh topology
 - [Units & Locale](units-and-locale) — distance and coordinate display formats
 
 ---
