@@ -17,12 +17,15 @@
 package org.meshtastic.feature.map.maplibre.layers
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
+import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.layers.HillshadeLayer
 import org.maplibre.compose.layers.RasterLayer
 import org.maplibre.compose.sources.RasterDemEncoding
 import org.maplibre.compose.sources.TileSetOptions
 import org.maplibre.compose.sources.rememberRasterDemSource
 import org.maplibre.compose.sources.rememberRasterSource
+import org.meshtastic.feature.map.layers.opacityOf
 import org.meshtastic.feature.map.maplibre.style.Basemap
 import org.meshtastic.feature.map.maplibre.style.MapOverlay
 import org.meshtastic.feature.map.tiles.DemEncoding
@@ -43,23 +46,36 @@ internal fun RasterBasemapLayer(basemap: Basemap.Raster) {
     RasterLayer(id = "basemap-${basemap.id}", source = source)
 }
 
-/** Renders the toggled overlays, in registry order, above the basemap and below the mesh data. */
+/**
+ * Renders the toggled overlays, in registry order, above the basemap and below the mesh data.
+ *
+ * @param opacity per-overlay opacity, keyed by [MapOverlay.id]. See
+ *   [org.meshtastic.core.repository.MapPrefs.layerOpacity].
+ */
 @Composable
-internal fun MapOverlayLayers(overlays: List<MapOverlay>) {
+internal fun MapOverlayLayers(overlays: List<MapOverlay>, opacity: Map<String, Float>) {
     overlays.forEach { overlay ->
+        val layerOpacity = opacity.opacityOf(overlay.id)
         when (overlay) {
-            is MapOverlay.Hillshade -> HillshadeOverlayLayer(overlay)
+            is MapOverlay.Hillshade -> HillshadeOverlayLayer(overlay, layerOpacity)
 
             is MapOverlay.Raster -> {
                 val source = rememberRasterSource(tiles = overlay.spec.tiles, options = overlay.spec.toTileSetOptions())
-                RasterLayer(id = "overlay-${overlay.id}", source = source)
+                RasterLayer(id = "overlay-${overlay.id}", source = source, opacity = const(layerOpacity))
             }
         }
     }
 }
 
+/**
+ * Terrain shading, faded through its own colours.
+ *
+ * The style spec gives hillshade no opacity property — those colours *are* what gets composited, so scaling their alpha
+ * is the fade. The three values restated here are the spec's own defaults; naming them is the only way to reach their
+ * alpha.
+ */
 @Composable
-private fun HillshadeOverlayLayer(overlay: MapOverlay.Hillshade) {
+private fun HillshadeOverlayLayer(overlay: MapOverlay.Hillshade, opacity: Float) {
     val source =
         rememberRasterDemSource(
             tiles = overlay.spec.tiles,
@@ -72,5 +88,11 @@ private fun HillshadeOverlayLayer(overlay: MapOverlay.Hillshade) {
                 DemEncoding.MAPBOX -> RasterDemEncoding.Mapbox
             },
         )
-    HillshadeLayer(id = "overlay-${overlay.id}", source = source)
+    HillshadeLayer(
+        id = "overlay-${overlay.id}",
+        source = source,
+        shadowColor = const(Color.Black.copy(alpha = opacity)),
+        highlightColor = const(Color.White.copy(alpha = opacity)),
+        accentColor = const(Color.Black.copy(alpha = opacity)),
+    )
 }

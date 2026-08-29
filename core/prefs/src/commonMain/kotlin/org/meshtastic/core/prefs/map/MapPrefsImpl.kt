@@ -99,6 +99,20 @@ class MapPrefsImpl(private val dataStore: MapDataStore, dispatchers: CoroutineDi
     override suspend fun awaitHiddenLayerUrls(): Set<String> =
         dataStore.data.map { it[KEY_HIDDEN_LAYER_URLS_PREF] ?: emptySet() }.first()
 
+    override val layerOpacity: StateFlow<Set<String>> =
+        dataStore.data
+            .map { it[KEY_LAYER_OPACITY_PREF] ?: emptySet() }
+            .stateIn(scope, SharingStarted.Eagerly, emptySet())
+
+    override fun updateLayerOpacity(transform: (Set<String>) -> Set<String>) {
+        scope.launch {
+            dataStore.edit { it[KEY_LAYER_OPACITY_PREF] = transform(it[KEY_LAYER_OPACITY_PREF] ?: emptySet()) }
+        }
+    }
+
+    override suspend fun awaitLayerOpacity(): Set<String> =
+        dataStore.data.map { it[KEY_LAYER_OPACITY_PREF] ?: emptySet() }.first()
+
     override val networkMapLayers: StateFlow<Set<String>> =
         dataStore.data
             .map { it[KEY_NETWORK_MAP_LAYERS_PREF] ?: emptySet() }
@@ -143,6 +157,7 @@ class MapPrefsImpl(private val dataStore: MapDataStore, dispatchers: CoroutineDi
         val KEY_LAST_HEARD_TRACK_FILTER_PREF = longPreferencesKey("last_heard_track_filter")
         val KEY_HIDDEN_LAYER_URLS_PREF = stringSetPreferencesKey("hidden_layer_urls")
         val KEY_NETWORK_MAP_LAYERS_PREF = stringSetPreferencesKey("network_map_layers")
+        val KEY_LAYER_OPACITY_PREF = stringSetPreferencesKey("layer_opacity")
         val KEY_CAMERA_LATITUDE = doublePreferencesKey("camera_latitude")
         val KEY_CAMERA_LONGITUDE = doublePreferencesKey("camera_longitude")
         val KEY_CAMERA_ZOOM = doublePreferencesKey("camera_zoom")

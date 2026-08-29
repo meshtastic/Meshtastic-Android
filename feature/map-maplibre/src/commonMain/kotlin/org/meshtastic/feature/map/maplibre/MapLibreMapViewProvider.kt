@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.maplibre.compose.camera.CameraState
 import org.maplibre.compose.camera.rememberCameraState
@@ -52,6 +54,7 @@ import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.MapControlsOverlay
 import org.meshtastic.feature.map.component.MapFilterActions
 import org.meshtastic.feature.map.component.MapFilterMenu
+import org.meshtastic.feature.map.layers.LayerOpacityStore
 import org.meshtastic.feature.map.maplibre.component.BasemapButton
 import org.meshtastic.feature.map.maplibre.component.BasemapSelection
 import org.meshtastic.feature.map.maplibre.component.BoxAuthoringBar
@@ -140,6 +143,8 @@ class MapLibreMapViewProvider(
         // same reason, and a map that sleeps mid-walk is the one complaint a location-follow feature always draws.
         KeepScreenOn(location.following)
 
+        val layerOpacity by koinInject<LayerOpacityStore>().opacity.collectAsState()
+
         Box(modifier = modifier.fillMaxSize()) {
             MeshMap(
                 viewModel = viewModel,
@@ -147,6 +152,7 @@ class MapLibreMapViewProvider(
                 modifier = Modifier.fillMaxSize(),
                 basemap = basemaps.current,
                 overlays = screen.overlays,
+                layerOpacity = layerOpacity,
                 customLayers = customLayers(),
                 cameraState = cameraState,
                 locationState = location.state,

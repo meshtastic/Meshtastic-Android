@@ -61,6 +61,7 @@ import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.map.BaseMapViewModel
+import org.meshtastic.feature.map.layers.LayerOpacityStore
 import org.meshtastic.feature.map.layers.MapLayerItem
 import org.meshtastic.feature.map.layers.MapLayersManager
 import org.meshtastic.feature.map.layers.PickedMapFile
@@ -94,6 +95,7 @@ class MapViewModel(
     private val application: Application,
     private val dispatchers: CoroutineDispatchers,
     private val mapLayersManager: MapLayersManager,
+    private val layerOpacityStore: LayerOpacityStore,
     mapPrefs: MapPrefs,
     private val googleMapsPrefs: GoogleMapsPrefs,
     nodeRepository: NodeRepository,
@@ -190,6 +192,11 @@ class MapViewModel(
 
     private val _enabledOverlayIds = MutableStateFlow<Set<String>>(emptySet())
     val enabledOverlayIds: StateFlow<Set<String>> = _enabledOverlayIds.asStateFlow()
+
+    /** Per-layer opacity, shared with the MapLibre map through [LayerOpacityStore]. */
+    val layerOpacity: StateFlow<Map<String, Float>> = layerOpacityStore.opacity
+
+    fun setLayerOpacity(key: String, opacity: Float) = layerOpacityStore.setOpacity(key, opacity)
 
     fun toggleOverlay(overlayId: String) {
         _enabledOverlayIds.update { enabled -> if (overlayId in enabled) enabled - overlayId else enabled + overlayId }

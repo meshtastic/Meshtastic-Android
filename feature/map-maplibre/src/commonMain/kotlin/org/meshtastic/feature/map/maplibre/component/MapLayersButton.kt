@@ -25,6 +25,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,12 +33,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.manage_map_layers
 import org.meshtastic.core.ui.icon.Layers
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.component.RasterOverlayToggles
+import org.meshtastic.feature.map.layers.LayerOpacityStore
 import org.meshtastic.feature.map.maplibre.style.MapOverlay
 import org.meshtastic.feature.map.maplibre.style.MapOverlays
 import org.meshtastic.feature.map.tiles.MapTileCatalogue
@@ -64,6 +67,8 @@ internal fun MapLayersButton(
     extra: @Composable () -> Unit,
 ) {
     var sheetVisible by remember { mutableStateOf(false) }
+    val opacityStore: LayerOpacityStore = koinInject()
+    val opacity by opacityStore.opacity.collectAsState()
 
     MapButton(
         icon = MeshtasticIcons.Layers,
@@ -76,6 +81,8 @@ internal fun MapLayersButton(
             MapLayersSheet(
                 overlays = overlays,
                 onOverlaysChange = onOverlaysChange,
+                opacity = opacity,
+                onOpacityChange = opacityStore::setOpacity,
                 offlineTarget = offlineTarget,
                 offlineMapsSupported = offlineMapsSupported,
                 onDismiss = { sheetVisible = false },
@@ -89,6 +96,8 @@ internal fun MapLayersButton(
 private fun MapLayersSheet(
     overlays: List<MapOverlay>,
     onOverlaysChange: (List<MapOverlay>) -> Unit,
+    opacity: Map<String, Float>,
+    onOpacityChange: (String, Float) -> Unit,
     offlineTarget: OfflineMapTarget,
     offlineMapsSupported: Boolean,
     onDismiss: () -> Unit,
@@ -105,6 +114,8 @@ private fun MapLayersSheet(
             available = MapTileCatalogue.overlays,
             enabledIds = overlays.mapTo(mutableSetOf()) { it.id },
             onToggle = { id -> MapOverlays.byId(id)?.let { onOverlaysChange(overlays.toggling(it)) } },
+            opacity = opacity,
+            onOpacityChange = onOpacityChange,
         )
 
         if (offlineMapsSupported) {

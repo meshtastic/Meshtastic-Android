@@ -294,6 +294,20 @@ interface MapPrefs {
     /** Persisted [hiddenLayerUrls]; suspends for the first disk load to avoid a cold-start empty default. */
     suspend fun awaitHiddenLayerUrls(): Set<String>
 
+    /**
+     * Per-layer opacity, each entry encoded as `key|:|opacity`. A layer absent from the set is fully opaque.
+     *
+     * One set spans both kinds of layer: a built-in overlay keyed by its catalogue id, an imported one by its URI — the
+     * same key [hiddenLayerUrls] uses, and for the same reason (a file-backed layer's id is regenerated on load).
+     */
+    val layerOpacity: StateFlow<Set<String>>
+
+    /** Atomically mutate [layerOpacity]; [transform] runs against the persisted value, avoiding lost updates. */
+    fun updateLayerOpacity(transform: (Set<String>) -> Set<String>)
+
+    /** Persisted [layerOpacity]; suspends for the first disk load to avoid a cold-start empty default. */
+    suspend fun awaitLayerOpacity(): Set<String>
+
     /** Persisted network (URL-backed) map layers, each encoded as `id|:|name|:|uri`. */
     val networkMapLayers: StateFlow<Set<String>>
 

@@ -47,5 +47,9 @@ kotlin {
             implementation(libs.okio)
             implementation(libs.ktor.client.core)
         }
+
+        commonTest.dependencies { implementation(libs.compose.multiplatform.ui.test) }
+
+        jvmTest.dependencies { implementation(compose.desktop.currentOs) }
     }
 }

@@ -1067,6 +1067,7 @@
     <string name="lux">Lux</string>
     <string name="manage_custom_tile_sources">Manage Custom Tile Sources</string>
     <string name="manage_map_layers">Manage Map Layers</string>
+    <string name="map_layer_opacity">Opacity: %1$d%%</string>
     <string name="managed_mode">Managed Mode</string>
     <string name="manual_position_request">Manual position request required</string>
     <!-- MAP -->

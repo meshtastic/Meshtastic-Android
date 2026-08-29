@@ -23,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.feature.map.layers.opacityOf
 import org.meshtastic.feature.map.tiles.RasterOverlaySource
 
 /**
@@ -31,22 +32,34 @@ import org.meshtastic.feature.map.tiles.RasterOverlaySource
  * Both flavours show these in their layers sheet. What differs is [available]: the MapLibre map offers every catalogue
  * overlay, while the Google map filters out the DEM-encoded ones, whose pixels are elevation rather than imagery and
  * would draw as noise without a renderer that shades them.
+ *
+ * Terrain shading is the exception to the opacity slider meaning what it says: hillshade has no opacity property in the
+ * style spec, so its renderer fades the shading's own colours instead. See MapOverlayLayers.
  */
 @Composable
 fun RasterOverlayToggles(
     available: List<RasterOverlaySource>,
     enabledIds: Set<String>,
     onToggle: (String) -> Unit,
+    opacity: Map<String, Float>,
+    onOpacityChange: (String, Float) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
         available.forEach { overlay ->
+            val enabled = overlay.id in enabledIds
             ListItem(
                 headlineContent = { Text(text = stringResource(overlay.label)) },
-                trailingContent = {
-                    Checkbox(checked = overlay.id in enabledIds, onCheckedChange = { onToggle(overlay.id) })
-                },
+                trailingContent = { Checkbox(checked = enabled, onCheckedChange = { onToggle(overlay.id) }) },
             )
+            // Only for an overlay that is actually drawing: a slider under an unchecked row controls nothing.
+            if (enabled) {
+                LayerOpacitySlider(
+                    layerKey = overlay.id,
+                    opacity = opacity.opacityOf(overlay.id),
+                    onOpacityChange = onOpacityChange,
+                )
+            }
         }
     }
 }
