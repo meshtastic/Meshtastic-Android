@@ -40,6 +40,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,6 +60,7 @@ import org.meshtastic.core.resources.layer_type_network
 import org.meshtastic.core.resources.manage_map_layers
 import org.meshtastic.core.resources.map_layer_formats
 import org.meshtastic.core.resources.name
+import org.meshtastic.core.resources.name_cannot_be_empty
 import org.meshtastic.core.resources.network_layer_url_hint
 import org.meshtastic.core.resources.no_map_layers_loaded
 import org.meshtastic.core.resources.refresh
@@ -66,6 +68,8 @@ import org.meshtastic.core.resources.remove_layer
 import org.meshtastic.core.resources.save
 import org.meshtastic.core.resources.show_layer
 import org.meshtastic.core.resources.url
+import org.meshtastic.core.resources.url_cannot_be_empty
+import org.meshtastic.core.resources.url_must_be_http
 import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.icon.CellTower
 import org.meshtastic.core.ui.icon.Delete
@@ -76,6 +80,7 @@ import org.meshtastic.core.ui.icon.Visibility
 import org.meshtastic.core.ui.icon.VisibilityOff
 import org.meshtastic.feature.map.layers.LayerType
 import org.meshtastic.feature.map.layers.MapLayerItem
+import org.meshtastic.feature.map.layers.isValidNetworkLayerUrl
 
 @Suppress("LongMethod", "ParameterNaming") // onAddLayerClicked is the established callback name used by both flavors
 @Composable
@@ -240,8 +245,27 @@ private fun MapLayerActions(
 @Suppress("ModifierMissing") // wraps MeshtasticDialog, which owns its own layout; no meaningful modifier slot
 @Composable
 fun AddNetworkLayerDialog(onDismiss: () -> Unit, onConfirm: (String, String) -> Unit) {
-    var name by remember { mutableStateOf("") }
-    var url by remember { mutableStateOf("") }
+    var name by rememberSaveable { mutableStateOf("") }
+    var url by rememberSaveable { mutableStateOf("") }
+    var nameError by remember { mutableStateOf<String?>(null) }
+    var urlError by remember { mutableStateOf<String?>(null) }
+
+    val emptyNameError = stringResource(Res.string.name_cannot_be_empty)
+    val emptyUrlError = stringResource(Res.string.url_cannot_be_empty)
+    val invalidUrlError = stringResource(Res.string.url_must_be_http)
+
+    // Validated here, not just in the store: the store's error return is dropped by two of its three callers,
+    // so this dialog is the one place the user can be told. Same rules as [isValidNetworkLayerUrl].
+    fun validateAndConfirm() {
+        nameError = emptyNameError.takeIf { name.isBlank() }
+        urlError =
+            when {
+                url.isBlank() -> emptyUrlError
+                !isValidNetworkLayerUrl(url.trim()) -> invalidUrlError
+                else -> null
+            }
+        if (nameError == null && urlError == null) onConfirm(name.trim(), url.trim())
+    }
 
     MeshtasticDialog(
         onDismiss = onDismiss,
@@ -250,22 +274,32 @@ fun AddNetworkLayerDialog(onDismiss: () -> Unit, onConfirm: (String, String) -> 
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(
                     value = name,
-                    onValueChange = { name = it },
+                    onValueChange = {
+                        name = it
+                        nameError = null
+                    },
                     label = { Text(stringResource(Res.string.name)) },
+                    isError = nameError != null,
+                    supportingText = { nameError?.let { Text(it) } },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 OutlinedTextField(
                     value = url,
-                    onValueChange = { url = it },
+                    onValueChange = {
+                        url = it
+                        urlError = null
+                    },
                     label = { Text(stringResource(Res.string.url)) },
                     placeholder = { Text(stringResource(Res.string.network_layer_url_hint)) },
+                    isError = urlError != null,
+                    supportingText = { urlError?.let { Text(it) } },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
         },
-        onConfirm = { onConfirm(name, url) },
+        onConfirm = ::validateAndConfirm,
         confirmTextRes = Res.string.save,
         dismissTextRes = Res.string.cancel,
     )

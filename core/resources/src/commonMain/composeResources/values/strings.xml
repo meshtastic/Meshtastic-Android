@@ -1108,6 +1108,7 @@
     <string name="map_type_normal">Normal</string>
     <string name="map_type_satellite">Satellite</string>
     <string name="map_type_terrain">Terrain</string>
+    <string name="map_zoom_levels">(z%1$d–%2$d)</string>
     <string name="mark_as_read">Mark as read</string>
     <string name="mark_unread_selected">Mark unread</string>
     <string name="match_all">Match All | Any</string>
@@ -1996,6 +1997,7 @@
     <!-- URL -->
     <string name="url">URL</string>
     <string name="url_cannot_be_empty">URL cannot be empty.</string>
+    <string name="url_must_be_http">URL must start with http:// or https://.</string>
     <string name="url_must_contain_placeholders">URL must contain placeholders.</string>
     <string name="url_template">URL Template</string>
     <string name="url_template_hint" translatable="false">https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png</string>

@@ -113,7 +113,9 @@ class MapLayersManager(
                     name = parts[1],
                     uri = parts[2],
                     isVisible = !hiddenLayerUrls.contains(parts[2]),
-                    layerType = LayerType.KML,
+                    // Re-derived from the URL — the stored record carries no type, and this must agree with
+                    // what addNetworkMapLayer inferred or a GeoJSON layer reloads as KML and draws nothing.
+                    layerType = networkLayerTypeFor(parts[2]),
                     isNetwork = true,
                 )
             } else {
@@ -130,13 +132,13 @@ class MapLayersManager(
             val extension = picked.extensionOrMime?.lowercase()
             val layerType = resolveLayerType(extension)
             if (layerType == null) {
-                Logger.withTag(TAG).e("Unsupported map layer file type: $extension")
+                Logger.withTag(TAG).w("Unsupported map layer file type: $extension")
                 return@launch
             }
 
             val bytes = picked.read()
             if (bytes == null) {
-                Logger.withTag(TAG).e("Could not read the picked map layer.")
+                Logger.withTag(TAG).w("Could not read the picked map layer.")
                 return@launch
             }
             val storedUri = write(bytes, layerFileName(layerName, layerType.storageExtension()))
@@ -174,18 +176,9 @@ class MapLayersManager(
     @Suppress("ReturnCount") // guard clauses read clearer than nesting for this validation
     fun addNetworkMapLayer(name: String, url: String): String? {
         if (name.isBlank() || url.isBlank()) return "Invalid name or URL for network layer."
-        val parsed =
-            try {
-                Url(url)
-            } catch (@Suppress("SwallowedException", "TooGenericExceptionCaught") e: Exception) {
-                return "Invalid URL."
-            }
-        if (parsed.protocol.name != "http" && parsed.protocol.name != "https") return "URL must be http or https."
+        if (!isValidNetworkLayerUrl(url)) return "URL must be a valid http or https URL."
 
-        val path = parsed.encodedPath.lowercase()
-        val layerType = if (path.endsWith(".geojson") || path.endsWith(".json")) LayerType.GEOJSON else LayerType.KML
-
-        val newItem = MapLayerItem(name = name, uri = url, layerType = layerType, isNetwork = true)
+        val newItem = MapLayerItem(name = name, uri = url, layerType = networkLayerTypeFor(url), isNetwork = true)
         _mapLayers.update { it + newItem }
         val encoded = listOf(newItem.id, newItem.name, url).joinToString(NETWORK_LAYER_DELIMITER)
         mapPrefs.updateNetworkMapLayers { it + encoded }
@@ -293,3 +286,38 @@ class MapLayersManager(
 
 /** The directory name under each platform's own app storage. */
 internal const val LAYERS_DIR = "map_layers"
+
+/**
+ * Whether [url] is one [MapLayersManager.addNetworkMapLayer] will accept: an explicit, parseable http(s) URL.
+ *
+ * The scheme check is on the string, not the parsed protocol — Ktor's [Url] defaults a missing scheme to `http`, so
+ * `example.com/map.kml` would parse as valid and then be stored as a string nothing can fetch. Shared with the
+ * add-layer dialog so the form and the store cannot disagree about what is acceptable.
+ */
+fun isValidNetworkLayerUrl(url: String): Boolean {
+    val hasScheme = url.startsWith("http://", ignoreCase = true) || url.startsWith("https://", ignoreCase = true)
+    if (!hasScheme) return false
+    return try {
+        Url(url)
+        true
+    } catch (@Suppress("SwallowedException", "TooGenericExceptionCaught") e: Exception) {
+        false
+    }
+}
+
+/**
+ * The [LayerType] a network layer's URL implies.
+ *
+ * Called both when a layer is added and when a persisted record is loaded, so the two cannot disagree — the stored
+ * record carries only `id|name|url`. Inference by URL path is all there is to go on without fetching the document; a
+ * URL that will not parse falls back to KML, matching what an unrecognised extension gets.
+ */
+internal fun networkLayerTypeFor(url: String): LayerType {
+    val path =
+        try {
+            Url(url).encodedPath.lowercase()
+        } catch (@Suppress("SwallowedException", "TooGenericExceptionCaught") e: Exception) {
+            return LayerType.KML
+        }
+    return if (path.endsWith(".geojson") || path.endsWith(".json")) LayerType.GEOJSON else LayerType.KML
+}

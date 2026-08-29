@@ -1072,6 +1072,7 @@ map_type_hybrid
 map_type_normal
 map_type_satellite
 map_type_terrain
+map_zoom_levels
 mark_as_read
 mark_unread_selected
 match_all
@@ -1939,6 +1940,7 @@ uptime
 ### URL ###
 url
 url_cannot_be_empty
+url_must_be_http
 url_must_contain_placeholders
 url_template
 url_template_hint
