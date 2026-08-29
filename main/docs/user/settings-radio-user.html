@@ -19,12 +19,16 @@ Configure your radio hardware and user identity parameters.
 ---------|-------------|
  Long Name | Your display name (up to 39 characters) |
  Short Name | 4-character abbreviated name |
+ Status Message | A short free-text status other nodes display alongside your node — up to 80 bytes, cleared with the **✕** in the field. Needs firmware 2.8 or newer, and is absent otherwise |
  Unmessageable | Marks the node as one nobody should try to message — for an unmonitored or infrastructure node. Other clients hide it from the contact list. Needs supporting firmware |
  Licensed Operator | Enable if you hold an amateur radio license (permits higher power). Turning it on relabels **Long Name** as **Call Sign** and adds a separate Long Name field, and is staged behind a confirmation dialog |
 
 ### Applying Changes
 
 After modifying settings, tap **Save** to write the configuration to your radio. The device may reboot to apply changes.
+
+The status message is saved with the same **Save**, but it never reboots the node — and, like the
+rest of this screen, it can be edited on a remote node you administer.
 
 ## Configuration
 
