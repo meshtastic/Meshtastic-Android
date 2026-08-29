@@ -95,7 +95,7 @@ class DefaultFirmwareUpdateManager(
             if (hardware.isEsp32Arc) {
                 esp32OtaUpdateHandler
             } else {
-                error("WiFi OTA only supported for ESP32 devices")
+                error("Wi-Fi OTA only supported for ESP32 devices")
             }
         }
 
