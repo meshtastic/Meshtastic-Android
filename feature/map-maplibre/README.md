@@ -40,6 +40,11 @@ custom tile-source store and editor.
 
 ## Things that will bite
 
+- **A style image must be decoded to a software bitmap.** MapLibre rasterizes an icon painter into a software
+  canvas, and Android's Coil decodes to a hardware bitmap by default — so the first imported icon that finished
+  loading killed the app with `Software rendering doesn't support hardware bitmaps`, taking the map with it and
+  looking exactly like an expression that drew nothing. `decodeForSoftwareCanvas` is why the icon layer works.
+
 - **A raster basemap needs a style that declares `glyphs`.** A style with none can load no font, and the first text
   symbol layer that fails takes down every layer added after it — which on a raster basemap meant the mesh drew
   nothing at all, cluster bubbles included. `RasterBaseStyle` exists for this, and a test asserts it.
