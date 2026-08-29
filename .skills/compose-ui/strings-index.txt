@@ -1319,7 +1319,6 @@ node_sort_last_heard
 node_sort_title
 node_sort_via_favorite
 node_sort_via_mqtt
-node_status_summary
 nodedb_reset
 nodeinfo_broadcast_interval
 ### NODES ###
@@ -1753,7 +1752,7 @@ spread_factor
 ssid
 state_broadcast_seconds
 status_message
-status_message_config
+status_message_summary
 stay_connected_anywhere
 stop_connecting
 store_forward

@@ -265,7 +265,8 @@ object DeepLinkRouter {
             "ambient-lighting" to SettingsRoute.AmbientLighting,
             "detection-sensor" to SettingsRoute.DetectionSensor,
             "paxcounter" to SettingsRoute.Paxcounter,
-            "status-message" to SettingsRoute.StatusMessage,
+            // The status message editor folded into the user screen; keep the published path working.
+            "status-message" to SettingsRoute.User,
             "tak" to SettingsRoute.TAK,
             "clean-node-db" to SettingsRoute.CleanNodeDb,
             "debug-panel" to SettingsRoute.DebugPanel,

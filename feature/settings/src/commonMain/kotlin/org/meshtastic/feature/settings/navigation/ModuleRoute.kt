@@ -47,7 +47,6 @@ import org.meshtastic.core.resources.paxcounter
 import org.meshtastic.core.resources.range_test
 import org.meshtastic.core.resources.remote_hardware
 import org.meshtastic.core.resources.serial
-import org.meshtastic.core.resources.status_message
 import org.meshtastic.core.resources.store_forward
 import org.meshtastic.core.resources.tak
 import org.meshtastic.core.resources.telemetry
@@ -142,13 +141,6 @@ enum class ModuleRoute(
         Res.drawable.ic_perm_scan_wifi,
         AdminMessage.ModuleConfigType.PAXCOUNTER_CONFIG.value,
     ),
-    STATUS_MESSAGE(
-        Res.string.status_message,
-        SettingsRoute.StatusMessage,
-        Res.drawable.ic_message,
-        AdminMessage.ModuleConfigType.STATUSMESSAGE_CONFIG.value,
-        isSupported = { it.supportsStatusMessage },
-    ),
     TAK(
         Res.string.tak,
         SettingsRoute.TAK,
@@ -197,8 +189,6 @@ enum class ModuleRoute(
                 DETECTION_SENSOR -> 0x0800
 
                 PAXCOUNTER -> 0x1000
-
-                STATUS_MESSAGE -> 0x0000
 
                 // Not excludable yet
                 TAK -> 0x0000
