@@ -145,10 +145,14 @@ private suspend fun convertKmlLayer(manager: MapLayersManager, layer: MapLayerIt
             val target = dir / "$key.geojson"
             val sidecar = dir / "$key.overlays"
 
-            // Files already here were converted from this same layer at this same token, so they are still good.
+            // Files already here were converted from this same layer at this same token, so they are still good —
+            // but only if every extracted image also survived: Android may clear individual cache files, and a
+            // sidecar pointing at deleted images would drape nothing until a manual refresh.
             val cachedOverlays = readOverlaySidecar(sidecar)
-            if (cachedOverlays != null && (fs.metadataOrNull(target)?.size ?: 0L) > 0L) {
-                return@safeCatching ConvertedKml("file://$target", cachedOverlays)
+            val imagesIntact =
+                cachedOverlays?.all { (fs.metadataOrNull(it.imagePath.toLocalPath())?.size ?: 0L) > 0L } == true
+            if (imagesIntact && (fs.metadataOrNull(target)?.size ?: 0L) > 0L) {
+                return@safeCatching ConvertedKml("file://$target", cachedOverlays.orEmpty())
             }
 
             val bytes = manager.readLayerBytes(layer) ?: return@safeCatching null
