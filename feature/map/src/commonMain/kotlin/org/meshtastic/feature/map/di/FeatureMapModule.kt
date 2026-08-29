@@ -16,9 +16,26 @@
  */
 package org.meshtastic.feature.map.di
 
+import io.ktor.client.HttpClient
 import org.koin.core.annotation.ComponentScan
 import org.koin.core.annotation.Module
+import org.koin.core.annotation.Single
+import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.repository.MapPrefs
+import org.meshtastic.feature.map.layers.MapLayersManager
 
 @Module
 @ComponentScan("org.meshtastic.feature.map")
-class FeatureMapModule
+class FeatureMapModule {
+
+    /**
+     * Provided here rather than by annotating the class: its storage location and file system are constructor
+     * parameters so tests can redirect them, and Koin would otherwise try to resolve those too.
+     */
+    @Single
+    fun provideMapLayersManager(
+        dispatchers: CoroutineDispatchers,
+        httpClient: HttpClient,
+        mapPrefs: MapPrefs,
+    ): MapLayersManager = MapLayersManager(dispatchers, httpClient, mapPrefs)
+}

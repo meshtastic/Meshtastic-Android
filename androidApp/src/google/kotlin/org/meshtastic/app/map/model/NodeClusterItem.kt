@@ -19,6 +19,8 @@ package org.meshtastic.app.map.model
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.clustering.ClusterItem
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.util.precisionRadiusMetersOrNull
+import org.meshtastic.feature.map.MapNodePolicy
 
 data class NodeClusterItem(
     val node: Node,
@@ -37,33 +39,7 @@ data class NodeClusterItem(
         get() = nodeSnippet
 
     override val zIndex: Float
-        get() =
-            when {
-                node.num == myNodeNum -> 5.0f
+        get() = MapNodePolicy.priorityOf(node, myNodeNum).toFloat()
 
-                // My node is always highest
-                node.isFavorite -> 5.0f
-
-                // Favorites are equally high priority
-                else -> 4.0f
-            }
-
-    fun getPrecisionMeters(): Double? = PRECISION_METERS_BY_BITS[node.position.precision_bits]
-
-    companion object {
-        // Allocated once: this lookup runs for every unclustered item on each cluster pass.
-        private val PRECISION_METERS_BY_BITS =
-            mapOf(
-                10 to 23345.484932,
-                11 to 11672.7369,
-                12 to 5836.36288,
-                13 to 2918.175876,
-                14 to 1459.0823719999053,
-                15 to 729.53562,
-                16 to 364.7622,
-                17 to 182.375556,
-                18 to 91.182212,
-                19 to 45.58554,
-            )
-    }
+    fun getPrecisionMeters(): Double? = precisionRadiusMetersOrNull(node.position.precision_bits)
 }

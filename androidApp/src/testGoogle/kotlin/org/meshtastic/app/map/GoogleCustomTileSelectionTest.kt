@@ -36,16 +36,15 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kotlinx.serialization.json.Json
+import okio.Path.Companion.toOkioPath
 import org.junit.runner.RunWith
-import org.meshtastic.app.map.model.CustomTileProviderConfig
 import org.meshtastic.app.map.prefs.map.GoogleCameraPosition
 import org.meshtastic.app.map.prefs.map.GoogleMapSelectionPrefs
 import org.meshtastic.app.map.prefs.map.GoogleMapsPrefs
-import org.meshtastic.app.map.repository.CustomTileProviderRepository
-import org.meshtastic.app.map.repository.CustomTileProviderRepositoryImpl
-import org.meshtastic.app.map.repository.CustomTileProviderSaveResult
+import org.meshtastic.app.map.tiles.MapTileHttpClient
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.testing.FakeBuildConfigProvider
 import org.meshtastic.core.testing.FakeLocaleUnitsProvider
 import org.meshtastic.core.testing.FakeMapPrefs
 import org.meshtastic.core.testing.FakeMapTileProviderPrefs
@@ -54,14 +53,22 @@ import org.meshtastic.core.testing.FakeNotificationPrefs
 import org.meshtastic.core.testing.FakeRadioConfigRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.testing.FakeUiPrefs
+import org.meshtastic.feature.map.layers.MapLayersManager
+import org.meshtastic.feature.map.tiles.CustomTileProviderConfig
+import org.meshtastic.feature.map.tiles.CustomTileProviderRepository
+import org.meshtastic.feature.map.tiles.CustomTileProviderRepositoryImpl
+import org.meshtastic.feature.map.tiles.CustomTileProviderSaveResult
+import org.meshtastic.feature.map.tiles.MapTileCatalogue
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import kotlin.io.path.createTempDirectory
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import java.nio.file.Path as NioPath
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35], application = Application::class)
@@ -113,6 +120,78 @@ class GoogleCustomTileSelectionTest {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
+    fun `a catalogue basemap survives a cold reload even though it is in nobody's provider list`() = runTest {
+        // A catalogue source is stored in the same preference as a user's own, but is not in the list that preference
+        // is resolved against — so restoring it has to be recognised before the "this provider is gone" path runs and
+        // silently drops the user back to the Google basemap.
+        val dispatcher = StandardTestDispatcher(testScheduler)
+        val prefs = FakeMapTileProviderPrefs()
+        val googleMapsPrefs = FakeGoogleMapsPrefs(customTileUrl = null)
+        val json = Json { ignoreUnknownKeys = true }
+        val catalogueBasemap = MapTileCatalogue.OpenTopo
+
+        Dispatchers.setMain(dispatcher)
+        var httpClient: HttpClient? = null
+        var layersDir: NioPath? = null
+        try {
+            val application = ApplicationProvider.getApplicationContext<Application>()
+            val mapPrefs = FakeMapPrefs()
+            val client = HttpClient().also { httpClient = it }
+            val mapLayersManager =
+                MapLayersManager(
+                    dispatchers = CoroutineDispatchers(dispatcher, dispatcher, dispatcher),
+                    httpClient = client,
+                    mapPrefs = mapPrefs,
+                    // The real location reads a global application context this test never installs.
+                    layersDir = createTempDirectory("map-layers").also { layersDir = it }.toOkioPath(),
+                )
+
+            val viewModel =
+                mapViewModel(
+                    dispatcher = dispatcher,
+                    application = application,
+                    mapLayersManager = mapLayersManager,
+                    mapPrefs = mapPrefs,
+                    repository = repository(json, dispatcher, prefs),
+                    mapTileProviderPrefs = prefs,
+                    googleMapsPrefs = googleMapsPrefs,
+                )
+            advanceUntilIdle()
+
+            viewModel.selectCatalogueBasemap(catalogueBasemap.id)
+            advanceUntilIdle()
+
+            assertEquals(catalogueBasemap.id, prefs.selectedCustomTileProviderId.value)
+            // Google's own basemap has to go: the raster tiles are opaque, so drawing one under the other is quota
+            // spent on pixels nobody sees.
+            assertEquals(MapType.NONE, viewModel.selectedGoogleMapType.value)
+
+            val coldViewModel =
+                mapViewModel(
+                    dispatcher = dispatcher,
+                    application = application,
+                    mapLayersManager = mapLayersManager,
+                    mapPrefs = mapPrefs,
+                    repository = repository(json, dispatcher, prefs),
+                    mapTileProviderPrefs = prefs,
+                    googleMapsPrefs = googleMapsPrefs,
+                )
+            advanceUntilIdle()
+
+            assertEquals(catalogueBasemap.id, coldViewModel.selectedRasterBasemapId.value)
+            assertEquals(catalogueBasemap.id, prefs.selectedCustomTileProviderId.value)
+        } finally {
+            try {
+                httpClient?.close()
+                layersDir?.toFile()?.deleteRecursively()
+            } finally {
+                Dispatchers.resetMain()
+            }
+        }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
     fun `legacy generated provider id survives a cold reload after URL migration`() = runTest {
         val dispatcher = StandardTestDispatcher(testScheduler)
         val prefs = FakeMapTileProviderPrefs()
@@ -123,16 +202,18 @@ class GoogleCustomTileSelectionTest {
 
         Dispatchers.setMain(dispatcher)
         var httpClient: HttpClient? = null
+        var layersDir: NioPath? = null
         try {
             val application = ApplicationProvider.getApplicationContext<Application>()
             val mapPrefs = FakeMapPrefs()
             val client = HttpClient().also { httpClient = it }
             val mapLayersManager =
                 MapLayersManager(
-                    application = application,
                     dispatchers = CoroutineDispatchers(dispatcher, dispatcher, dispatcher),
                     httpClient = client,
                     mapPrefs = mapPrefs,
+                    // The real location reads a global application context this test never installs.
+                    layersDir = createTempDirectory("map-layers").also { layersDir = it }.toOkioPath(),
                 )
 
             assertNull(prefs.selectedCustomTileProviderId.value)
@@ -156,7 +237,7 @@ class GoogleCustomTileSelectionTest {
 
             assertNotEquals(legacyJson, persistedAfterMigration)
             assertEquals(persistedProvider.id, prefs.selectedCustomTileProviderId.value)
-            assertEquals(persistedProvider.id, firstViewModel.selectedCustomTileProviderId.value)
+            assertEquals(persistedProvider.id, firstViewModel.selectedRasterBasemapId.value)
             assertNull(googleMapsPrefs.selectedCustomTileUrl.value)
 
             val coldViewModel =
@@ -171,11 +252,12 @@ class GoogleCustomTileSelectionTest {
                 )
             advanceUntilIdle()
 
-            assertEquals(persistedProvider.id, coldViewModel.selectedCustomTileProviderId.value)
+            assertEquals(persistedProvider.id, coldViewModel.selectedRasterBasemapId.value)
             assertEquals(persistedProvider.id, prefs.selectedCustomTileProviderId.value)
         } finally {
             try {
                 httpClient?.close()
+                layersDir?.toFile()?.deleteRecursively()
             } finally {
                 Dispatchers.resetMain()
             }
@@ -206,6 +288,7 @@ class GoogleCustomTileSelectionTest {
             radioController = FakeRadioController(),
             customTileProviderRepository = repository,
             mapTileProviderPrefs = mapTileProviderPrefs,
+            mapTileHttpClient = MapTileHttpClient(application, FakeBuildConfigProvider()),
             uiPrefs = FakeUiPrefs(),
             notificationPrefs = FakeNotificationPrefs(),
             savedStateHandle = SavedStateHandle(),

@@ -41,11 +41,15 @@ data class SitePlannerParams(
     val overlayTransparency: Int = DEFAULT_OVERLAY_TRANSPARENCY,
 ) {
     /**
-     * Build the planner URL that prefills these params and auto-runs the simulation (`run=1`), asking the planner to
-     * hand the result to a native host bridge (`bridge=1`) rather than the share sheet. Advanced params map onto the
-     * planner's flat query contract (receiver / simulation / display sections).
+     * Build the planner URL that prefills these params and auto-runs the simulation (`run=1`).
+     *
+     * [useHostBridge] asks the planner to hand its result to a native host bridge rather than to its own share sheet.
+     * Only a host that actually provides one should set it: opened in an ordinary browser, `bridge=1` points the
+     * finished estimate at something that is not there, and the user's own way of saving it is what they need instead.
+     *
+     * Advanced params map onto the planner's flat query contract (receiver / simulation / display sections).
      */
-    fun toQueryUrl(baseUrl: String): String {
+    fun toQueryUrl(baseUrl: String, useHostBridge: Boolean = true): String {
         val query = buildString {
             append("lat=").append(latitude)
             append("&lon=").append(longitude)
@@ -62,7 +66,8 @@ data class SitePlannerParams(
             append("&min_dbm=").append(minDbm)
             append("&max_dbm=").append(maxDbm)
             append("&overlay_transparency=").append(overlayTransparency)
-            append("&run=1&bridge=1")
+            append("&run=1")
+            if (useHostBridge) append("&bridge=1")
         }
         val separator = if (baseUrl.endsWith("/")) "" else "/"
         return "$baseUrl$separator?$query"

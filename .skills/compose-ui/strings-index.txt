@@ -565,6 +565,7 @@ double_tap_as_button_press
 downlink_enabled
 downlink_feature_description
 download
+download_this_area
 duplicated_public_key_title
 dynamic
 easily_set_up_private_mesh_networks
@@ -1036,16 +1037,23 @@ manual_position_request
 map
 map_cache_info
 map_cache_manager
+map_cache_megabytes
 map_cache_size
 map_cache_tiles
 map_clear_tiles
 map_download_complete
 map_download_errors
 map_download_region
+map_download_status_complete
+map_download_status_downloading
+map_download_status_paused
 map_filter
 map_layer_formats
 map_node_popup_details
 map_offline_manager
+map_overlay_hillshade
+map_overlay_precipitation
+map_overlay_weather_radar
 map_purge_fail
 map_purge_success
 map_reporting
@@ -1058,11 +1066,13 @@ map_start_download
 map_style_selection
 map_subDescription
 map_tile_download_estimate
+map_tile_limit_reached
 map_tile_source
 map_type_hybrid
 map_type_normal
 map_type_satellite
 map_type_terrain
+map_zoom_levels
 mark_as_read
 mark_unread_selected
 match_all
@@ -1100,7 +1110,6 @@ mesh_beacon_on_preset
 mesh_beacon_on_region
 mesh_beacon_preset_indicator
 mesh_beacon_preset_none
-mesh_beacon_send_as_node
 mesh_beacon_target
 mesh_beacon_target_add
 mesh_beacon_target_channel_index
@@ -1343,6 +1352,8 @@ notifications_on_message_receipt
 now
 ntp_server
 number_of_records
+offline_maps
+offline_maps_empty
 ok_to_mqtt
 okay
 oled_type
@@ -1704,6 +1715,7 @@ signal_quality
 site_planner
 site_planner_antenna_gain_dbi
 site_planner_antenna_height_meters
+site_planner_browser_note
 site_planner_color_scale
 site_planner_estimate
 site_planner_estimating
@@ -1928,6 +1940,7 @@ uptime
 ### URL ###
 url
 url_cannot_be_empty
+url_must_be_http
 url_must_contain_placeholders
 url_template
 url_template_hint
@@ -2024,3 +2037,5 @@ write_nfc_text
 you
 zh_CN
 zh_TW
+zoom_in
+zoom_out

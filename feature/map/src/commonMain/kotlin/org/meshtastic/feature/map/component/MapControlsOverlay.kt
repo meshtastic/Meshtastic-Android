@@ -52,6 +52,8 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusRed
  * filter button, location tracking button, and optional slots for flavor-specific content (map type selector, layers,
  * refresh).
  *
+ * Zoom is deliberately not here — it lives in [MapZoomControls], in the lower corner where Google Maps draws its own.
+ *
  * @param onToggleFilterMenu Callback to open/close the filter dropdown.
  * @param filterDropdownContent Composable rendered inside a [Box] alongside the filter button — typically a
  *   `DropdownMenu` with filter options.
@@ -66,8 +68,9 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 @Suppress("LongParameterList")
 @Composable
 fun MapControlsOverlay(
-    onToggleFilterMenu: () -> Unit,
     modifier: Modifier = Modifier,
+    /** Null hides the button, for maps with nothing worth filtering — a traceroute or a discovery scan. */
+    onToggleFilterMenu: (() -> Unit)? = null,
     bearing: Float = 0f,
     onCompassClick: () -> Unit = {},
     followPhoneBearing: Boolean = false,
@@ -76,7 +79,8 @@ fun MapControlsOverlay(
     layersContent: @Composable () -> Unit = {},
     onSitePlannerClick: (() -> Unit)? = null,
     isLocationTrackingEnabled: Boolean = false,
-    onToggleLocationTracking: () -> Unit = {},
+    /** Null hides the button, for maps with no location plumbing behind it — the node-track map. */
+    onToggleLocationTracking: (() -> Unit)? = null,
     showRefresh: Boolean = false,
     isRefreshing: Boolean = false,
     onRefresh: () -> Unit = {},
@@ -89,14 +93,16 @@ fun MapControlsOverlay(
         // Compass
         CompassButton(onClick = onCompassClick, bearing = bearing, isFollowing = followPhoneBearing)
 
-        // Filter button + dropdown
-        Box {
-            MapButton(
-                icon = MeshtasticIcons.Tune,
-                contentDescription = stringResource(Res.string.map_filter),
-                onClick = onToggleFilterMenu,
-            )
-            filterDropdownContent()
+        // Filter button + dropdown (optional)
+        onToggleFilterMenu?.let { onClick ->
+            Box {
+                MapButton(
+                    icon = MeshtasticIcons.Tune,
+                    contentDescription = stringResource(Res.string.map_filter),
+                    onClick = onClick,
+                )
+                filterDropdownContent()
+            }
         }
 
         // Map type selector (flavor-specific)
@@ -129,12 +135,14 @@ fun MapControlsOverlay(
             }
         }
 
-        // Location tracking button
-        MapButton(
-            icon = if (isLocationTrackingEnabled) MeshtasticIcons.LocationDisabled else MeshtasticIcons.MyLocation,
-            contentDescription = stringResource(Res.string.toggle_my_position),
-            onClick = onToggleLocationTracking,
-        )
+        // Location tracking button (optional)
+        onToggleLocationTracking?.let { onClick ->
+            MapButton(
+                icon = if (isLocationTrackingEnabled) MeshtasticIcons.LocationDisabled else MeshtasticIcons.MyLocation,
+                contentDescription = stringResource(Res.string.toggle_my_position),
+                onClick = onClick,
+            )
+        }
     }
 }
 

@@ -2,7 +2,7 @@
 title: Architecture
 parent: Developer Guide
 nav_order: 1
-last_updated: 2026-08-27
+last_updated: 2026-08-28
 aliases:
   - layers
   - module-architecture
@@ -55,7 +55,8 @@ Each `feature/` module owns a vertical slice of functionality:
 | `feature:intro` | Onboarding/welcome flow |
 | `feature:messaging` | Messages, channels, contacts, quick chat |
 | `feature:connections` | Bluetooth/USB/TCP connection management |
-| `feature:map` | Map display, waypoints |
+| `feature:map` | Map display, waypoints — shared state, policy and the waypoint editor |
+| `feature:map-maplibre` | MapLibre map surfaces — used by the `fdroid` flavor and Desktop; the `google` flavor uses Google Maps instead. Tile-source definitions and the custom-source editor are in `feature:map`, so both renderers share them |
 | `feature:node` | Node list, node detail, metrics |
 | `feature:settings` | All configuration screens |
 | `feature:firmware` | Firmware update flow |

@@ -21,8 +21,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
 import org.meshtastic.core.ui.util.TracerouteMapOverlayInsets
 
+/**
+ * Where the hop count and route legend sit over the MapLibre traceroute map.
+ *
+ * Bottom-centre, the same place the Google flavor puts them, and for the same reason: the lower trailing corner now
+ * holds this map's zoom controls, as Google's own always did there. This flavour used to override the alignment to
+ * BottomEnd because that corner was empty — with zoom in it, the legend was covering the zoom-out button. Left as an
+ * explicit override rather than deleted so the next person sees the corner is taken.
+ */
 fun getTracerouteMapOverlayInsets(): TracerouteMapOverlayInsets = TracerouteMapOverlayInsets(
-    overlayAlignment = Alignment.BottomEnd,
-    overlayPadding = PaddingValues(end = 16.dp, bottom = 16.dp),
-    contentHorizontalAlignment = Alignment.End,
+    overlayAlignment = Alignment.BottomCenter,
+    // Clear of the logo and attribution row along the bottom edge.
+    overlayPadding = PaddingValues(bottom = 48.dp),
+    contentHorizontalAlignment = Alignment.CenterHorizontally,
 )

@@ -34,8 +34,8 @@ import com.google.maps.android.compose.MarkerComposable
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberUpdatedMarkerState
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.util.precisionRadiusMetersOrNull
 import org.meshtastic.core.ui.component.NodeChip
-import org.meshtastic.core.ui.component.precisionBitsToMeters
 
 private const val DEFAULT_ZOOM = 15f
 
@@ -77,9 +77,11 @@ fun InlineMap(node: Node, modifier: Modifier = Modifier) {
             ),
             cameraPositionState = cameraState,
         ) {
-            val precisionMeters = precisionBitsToMeters(node.position.precision_bits)
+            // Null when the position is not degraded. This used to call a formula that answers for every input and
+            // then guard with `> 0`, which an undegraded position passes — drawing a circle ~23,905 km across.
+            val precisionMeters = precisionRadiusMetersOrNull(node.position.precision_bits)
             val latLng = LatLng(node.latitude, node.longitude)
-            if (precisionMeters > 0) {
+            if (precisionMeters != null) {
                 Circle(
                     center = latLng,
                     radius = precisionMeters,

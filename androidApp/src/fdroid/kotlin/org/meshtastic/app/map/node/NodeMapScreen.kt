@@ -23,7 +23,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.meshtastic.app.map.androidCustomRasterBasemaps
 import org.meshtastic.core.ui.component.MainAppBar
+import org.meshtastic.feature.map.maplibre.MapLibreNodeTrackMap
 import org.meshtastic.feature.map.node.NodeMapViewModel
 
 @Composable
@@ -44,10 +46,15 @@ fun NodeMapScreen(nodeMapViewModel: NodeMapViewModel, onNavigateUp: () -> Unit) 
             )
         },
     ) { paddingValues ->
-        NodeTrackOsmMap(
-            positions = positions,
-            mapStyleId = nodeMapViewModel.mapStyleId,
-            modifier = Modifier.fillMaxSize().padding(paddingValues),
-        )
+        // Only once the node has resolved: 0 is not a node, and a placeholder paints the track in the wrong
+        // colour with no head chip.
+        node?.let { resolved ->
+            MapLibreNodeTrackMap(
+                destNum = resolved.num,
+                positions = positions,
+                modifier = Modifier.fillMaxSize().padding(paddingValues),
+                customBasemaps = { androidCustomRasterBasemaps() },
+            )
+        }
     }
 }

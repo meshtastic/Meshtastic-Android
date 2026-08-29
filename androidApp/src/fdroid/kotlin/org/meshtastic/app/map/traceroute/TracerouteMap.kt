@@ -17,14 +17,20 @@
 package org.meshtastic.app.map.traceroute
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.koin.compose.viewmodel.koinViewModel
+import org.meshtastic.app.map.androidCustomRasterBasemaps
 import org.meshtastic.core.model.TracerouteOverlay
+import org.meshtastic.feature.map.SharedMapViewModel
+import org.meshtastic.feature.map.maplibre.MapLibreTracerouteMap
+import org.meshtastic.feature.map.tracerouteNodeSelection
 import org.meshtastic.proto.Position
 
-/**
- * Flavor-unified entry point for the embeddable traceroute map. Delegates to the OSMDroid implementation
- * ([TracerouteOsmMap]).
- */
+/** Flavor-unified entry point for the embeddable traceroute map. MapLibre implementation. */
 @Composable
 fun TracerouteMap(
     tracerouteOverlay: TracerouteOverlay?,
@@ -32,10 +38,33 @@ fun TracerouteMap(
     onMappableCountChange: (shown: Int, total: Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    TracerouteOsmMap(
-        tracerouteOverlay = tracerouteOverlay,
-        tracerouteNodePositions = tracerouteNodePositions,
-        onMappableCountChange = onMappableCountChange,
+    val viewModel: SharedMapViewModel = koinViewModel()
+    // The effect below restarts on hop-count changes; capturing the callback keeps a recomposition
+    // with a fresh lambda from firing a stale one.
+    val reportCount by rememberUpdatedState(onMappableCountChange)
+    val nodes by viewModel.nodes.collectAsStateWithLifecycle()
+
+    val selection =
+        viewModel.tracerouteNodeSelection(
+            tracerouteOverlay = tracerouteOverlay,
+            tracerouteNodePositions = tracerouteNodePositions,
+            nodes = nodes,
+        )
+
+    // The host shows "n of m hops mappable"; m counts every hop the traceroute named, n only those
+    // we can actually place, so a route through nodes we have never heard from still reports honestly.
+    LaunchedEffect(selection.nodeLookup.size, selection.overlayNodeNums.size) {
+        reportCount(
+            selection.overlayNodeNums.count { selection.nodeLookup.containsKey(it) },
+            selection.overlayNodeNums.size,
+        )
+    }
+
+    MapLibreTracerouteMap(
+        forwardRoute = tracerouteOverlay?.forwardRoute.orEmpty(),
+        returnRoute = tracerouteOverlay?.returnRoute.orEmpty(),
+        nodeLookup = selection.nodeLookup,
         modifier = modifier,
+        customBasemaps = { androidCustomRasterBasemaps() },
     )
 }

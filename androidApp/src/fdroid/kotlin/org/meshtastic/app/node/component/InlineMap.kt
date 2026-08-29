@@ -16,52 +16,13 @@
  */
 package org.meshtastic.app.node.component
 
-import android.view.ViewGroup
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.viewinterop.AndroidView
+import org.meshtastic.app.map.androidCustomRasterBasemaps
 import org.meshtastic.core.model.Node
-import org.osmdroid.tileprovider.tilesource.TileSourceFactory
-import org.osmdroid.util.GeoPoint
-import org.osmdroid.views.MapView
-import org.osmdroid.views.overlay.Marker
+import org.meshtastic.feature.map.maplibre.MapLibreInlineMap
 
-private const val INLINE_MAP_ZOOM = 15.0
-
+/** Flavor-unified entry point for the node-detail mini-map. MapLibre implementation. */
 @Composable
-fun InlineMap(node: Node, modifier: Modifier = Modifier) {
-    val context = androidx.compose.ui.platform.LocalContext.current
-
-    val map = remember {
-        MapView(context).apply {
-            layoutParams =
-                ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-
-            // Default osmdroid tile source.
-            setTileSource(TileSourceFactory.MAPNIK)
-            setMultiTouchControls(false)
-            isTilesScaledToDpi = true
-
-            controller.setZoom(INLINE_MAP_ZOOM)
-        }
-    }
-
-    LaunchedEffect(node.latitude, node.longitude) {
-        val point = GeoPoint(node.latitude, node.longitude)
-
-        map.overlays.clear()
-
-        val marker =
-            Marker(map).apply {
-                position = point
-                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-            }
-        map.overlays.add(marker)
-
-        map.controller.animateTo(point)
-    }
-
-    AndroidView(factory = { map }, modifier = modifier)
-}
+fun InlineMap(node: Node, modifier: Modifier = Modifier) =
+    MapLibreInlineMap(node = node, modifier = modifier, customBasemaps = { androidCustomRasterBasemaps() })

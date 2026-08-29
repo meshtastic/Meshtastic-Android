@@ -595,6 +595,7 @@
     <string name="downlink_enabled">MQTT Downlink Enabled</string>
     <string name="downlink_feature_description">Messages from a public internet gateway are forwarded to the local mesh. Due to the zero-hop policy, traffic from the default MQTT server will not propagate further than this device.</string>
     <string name="download">Download</string>
+    <string name="download_this_area">Download this area</string>
     <string name="duplicated_public_key_title">Duplicate Public Key Detected</string>
     <string name="dynamic">Dynamic</string>
     <string name="easily_set_up_private_mesh_networks">Easily set up private mesh networks for secure and reliable communication in remote areas.</string>
@@ -1072,16 +1073,23 @@
     <string name="map">Mesh Map</string>
     <string name="map_cache_info">Cache Capacity: %1$d MB\nCache Usage: %2$d MB</string>
     <string name="map_cache_manager">Cache Manager</string>
+    <string name="map_cache_megabytes">%1$s MB</string>
     <string name="map_cache_size">Current Cache size</string>
     <string name="map_cache_tiles">%1$d tiles</string>
     <string name="map_clear_tiles">Clear Downloaded Tiles</string>
     <string name="map_download_complete">Download complete!</string>
     <string name="map_download_errors">Download complete with %1$d errors</string>
     <string name="map_download_region">Download Region</string>
+    <string name="map_download_status_complete">Complete</string>
+    <string name="map_download_status_downloading">Downloading</string>
+    <string name="map_download_status_paused">Paused</string>
     <string name="map_filter">Map Filter\n</string>
     <string name="map_layer_formats">Map layers support .kml, .kmz, or GeoJSON formats.</string>
     <string name="map_node_popup_details">%1$s&lt;br&gt;Last heard: %2$s&lt;br&gt;Last position: %3$s&lt;br&gt;Battery: %4$s</string>
     <string name="map_offline_manager">Offline Manager</string>
+    <string name="map_overlay_hillshade">Hillshade</string>
+    <string name="map_overlay_precipitation">Precipitation</string>
+    <string name="map_overlay_weather_radar">Weather radar</string>
     <string name="map_purge_fail">SQL Cache purge failed, see logcat for details</string>
     <string name="map_purge_success">SQL Cache purged for %1$s</string>
     <string name="map_reporting">Map reporting</string>
@@ -1094,11 +1102,13 @@
     <string name="map_style_selection">Map style selection</string>
     <string name="map_subDescription">bearing: %1$d° distance: %2$s</string>
     <string name="map_tile_download_estimate">Tile download estimate:</string>
+    <string name="map_tile_limit_reached">Tile limit reached (%1$d)</string>
     <string name="map_tile_source">Tile Source</string>
     <string name="map_type_hybrid">Hybrid</string>
     <string name="map_type_normal">Normal</string>
     <string name="map_type_satellite">Satellite</string>
     <string name="map_type_terrain">Terrain</string>
+    <string name="map_zoom_levels" translatable="false">(z%1$d–%2$d)</string>
     <string name="mark_as_read">Mark as read</string>
     <string name="mark_unread_selected">Mark unread</string>
     <string name="match_all">Match All | Any</string>
@@ -1378,6 +1388,8 @@
     <string name="now">Now</string>
     <string name="ntp_server">NTP server</string>
     <string name="number_of_records">Number of records</string>
+    <string name="offline_maps">Offline maps</string>
+    <string name="offline_maps_empty">No areas downloaded yet</string>
     <string name="ok_to_mqtt">Ok to MQTT</string>
     <string name="okay">OK</string>
     <string name="oled_type">OLED type</string>
@@ -1754,6 +1766,7 @@
     <string name="site_planner">Site Planner</string>
     <string name="site_planner_antenna_gain_dbi">Antenna gain (dBi)</string>
     <string name="site_planner_antenna_height_meters">Antenna height (m)</string>
+    <string name="site_planner_browser_note">The estimate opens in your browser. To bring it onto this map, click the transmitter pin there, choose Export › GeoJSON, then add the downloaded file under Manage Map Layers › Add Layer. Use the GeoJSON export — the KML one is a ground-overlay image this map cannot draw.</string>
     <string name="site_planner_color_scale">Color palette</string>
     <string name="site_planner_estimate">Estimate coverage</string>
     <string name="site_planner_estimating">Estimating coverage…</string>
@@ -1984,6 +1997,7 @@
     <!-- URL -->
     <string name="url">URL</string>
     <string name="url_cannot_be_empty">URL cannot be empty.</string>
+    <string name="url_must_be_http">URL must start with http:// or https://.</string>
     <string name="url_must_contain_placeholders">URL must contain placeholders.</string>
     <string name="url_template">URL Template</string>
     <string name="url_template_hint" translatable="false">https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png</string>
@@ -2080,5 +2094,7 @@
     <string name="you">You</string>
     <string name="zh_CN" translatable="false">简体中文</string>
     <string name="zh_TW" translatable="false">繁體中文</string>
+    <string name="zoom_in">Zoom in</string>
+    <string name="zoom_out">Zoom out</string>
 </resources>
 

@@ -34,8 +34,8 @@ import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.util.precisionRadiusMetersOrNull
 import org.meshtastic.core.model.util.toDistanceString
-import org.meshtastic.core.ui.component.precisionBitsToMeters
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.proto.Position
 import kotlin.math.abs
@@ -234,9 +234,10 @@ class CompassViewModel(
         }
 
         // Fallback: infer radius from precision bits if provided
-        val precisionBits = position.precision_bits
-        if (precisionBits > 0) {
-            return precisionBitsToMeters(precisionBits).toFloat()
+        // Only a degraded position implies a radius; `0` and `32` both mean "not degraded", and the old formula
+        // answered 23,905 km and 5 mm for them respectively.
+        precisionRadiusMetersOrNull(position.precision_bits)?.let {
+            return it.toFloat()
         }
 
         return null

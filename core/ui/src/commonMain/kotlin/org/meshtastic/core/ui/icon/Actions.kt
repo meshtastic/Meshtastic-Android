@@ -48,6 +48,7 @@ import org.meshtastic.core.resources.ic_qr_code
 import org.meshtastic.core.resources.ic_qr_code_2
 import org.meshtastic.core.resources.ic_qr_code_scanner
 import org.meshtastic.core.resources.ic_refresh
+import org.meshtastic.core.resources.ic_remove
 import org.meshtastic.core.resources.ic_reply
 import org.meshtastic.core.resources.ic_restart_alt
 import org.meshtastic.core.resources.ic_restore
@@ -78,6 +79,8 @@ val MeshtasticIcons.More: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_more_vert)
 val MeshtasticIcons.Refresh: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_refresh)
+val MeshtasticIcons.Remove: ImageVector
+    @Composable get() = vectorResource(Res.drawable.ic_remove)
 val MeshtasticIcons.Reply: ImageVector
     @Composable get() = vectorResource(Res.drawable.ic_reply)
 val MeshtasticIcons.Save: ImageVector

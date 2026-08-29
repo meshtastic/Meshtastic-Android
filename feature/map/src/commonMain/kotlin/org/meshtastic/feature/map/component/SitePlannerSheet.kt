@@ -50,6 +50,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SheetValue
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberBottomSheetState
@@ -164,6 +165,9 @@ private class SiteFormState(initial: SitePlannerParams) {
  * Bottom-sheet form for a Site Planner coverage estimate, pre-filled with [initial]. [onSubmit] receives the edited
  * params once they validate. Location shortcut chips ([onUseCurrentLocation]/[onUseNodeLocation]/[onUseMapCenter])
  * re-seed the coordinate fields when provided, preserving edits to the other fields.
+ *
+ * [note] is shown above the submit button. A host whose planner runs somewhere this app cannot read the result back
+ * from uses it to say so, and to say what the user should do instead.
  */
 @Composable
 fun SitePlannerSheet(
@@ -173,6 +177,7 @@ fun SitePlannerSheet(
     onUseCurrentLocation: (() -> Unit)? = null,
     onUseNodeLocation: (() -> Unit)? = null,
     onUseMapCenter: (() -> Unit)? = null,
+    note: String? = null,
 ) {
     val sheetState =
         rememberBottomSheetState(
@@ -186,7 +191,7 @@ fun SitePlannerSheet(
         state.lon = initial.longitude.toString()
     }
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
-        SiteFormContent(state, initial, onSubmit, onUseCurrentLocation, onUseNodeLocation, onUseMapCenter)
+        SiteFormContent(state, initial, onSubmit, onUseCurrentLocation, onUseNodeLocation, onUseMapCenter, note)
     }
 }
 
@@ -198,6 +203,7 @@ private fun SiteFormContent(
     onUseCurrentLocation: (() -> Unit)?,
     onUseNodeLocation: (() -> Unit)?,
     onUseMapCenter: (() -> Unit)?,
+    note: String?,
 ) {
     Column(
         modifier =
@@ -223,6 +229,20 @@ private fun SiteFormContent(
         ReceiverSection(state)
         SimulationSection(state)
         DisplaySection(state)
+        note?.let {
+            Surface(
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                shape = MaterialTheme.shapes.medium,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(12.dp),
+                )
+            }
+        }
         Button(
             onClick = { onSubmit(buildSubmitParams(state, initial)) },
             enabled = state.canSubmit,

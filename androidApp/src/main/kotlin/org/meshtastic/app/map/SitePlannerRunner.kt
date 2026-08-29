@@ -65,12 +65,12 @@ import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.site_planner_estimating
 import org.meshtastic.core.resources.site_planner_failed
 import org.meshtastic.core.resources.site_planner_webview_updating
+import org.meshtastic.feature.map.component.SITE_PLANNER_URL
 import org.meshtastic.feature.map.component.SitePlannerParams
 import org.meshtastic.feature.map.component.SitePlannerSheet
 
 // The official hosted Site Planner (static PWA on GitHub Pages). The estimate flow loads it headless with
 // run=1&bridge=1; the native bridge + full flat query contract it relies on shipped in site-planner #74.
-private const val SITE_PLANNER_BASE_URL = "https://site.meshtastic.org"
 private const val SITE_PLANNER_TIMEOUT_MS = 45_000L
 
 /**
@@ -135,7 +135,7 @@ fun SitePlannerHost(
             // a detached or 0-size WebView can't get a WebGL context, and the planner's autorun waits on map load.
             Box(modifier = Modifier.size(280.dp), contentAlignment = Alignment.Center) {
                 SitePlannerRunner(
-                    url = current.toQueryUrl(SITE_PLANNER_BASE_URL),
+                    url = current.toQueryUrl(SITE_PLANNER_URL),
                     onResult = { geoJson ->
                         onImport(current.name, geoJson, current.latitude, current.longitude)
                         onDismiss()
@@ -304,7 +304,7 @@ private fun configurePlannerWebView(
             // Sub-resource fetches (tiles, XHR) aren't navigations, so this doesn't affect the sim itself.
             override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
                 val target = request?.url ?: return false
-                val trusted = SITE_PLANNER_BASE_URL.toUri()
+                val trusted = SITE_PLANNER_URL.toUri()
                 return target.scheme != trusted.scheme || target.host != trusted.host
             }
 

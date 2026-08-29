@@ -16,9 +16,12 @@
  */
 package org.meshtastic.app
 
-import org.osmdroid.config.Configuration
-
-/** Configures F-Droid-only process globals before any OSMdroid map or tile provider can be created. */
-internal fun configureFlavorApplication(applicationId: String) {
-    Configuration.getInstance().userAgentValue = applicationId
-}
+/**
+ * F-Droid-only process globals.
+ *
+ * Nothing to configure since the map moved to MapLibre: OSMdroid needed a per-app user agent set before its first tile
+ * fetch, whereas maplibre-native manages its own HTTP stack. Kept as a flavor-dispatched no-op so [MeshUtilApplication]
+ * does not need to know which flavor it is in.
+ */
+@Suppress("UnusedParameter")
+internal fun configureFlavorApplication(applicationId: String) = Unit
