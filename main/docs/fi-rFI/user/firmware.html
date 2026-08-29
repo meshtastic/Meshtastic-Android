@@ -31,28 +31,28 @@ Yleisin päivitystapa Android-käyttäjille:
 
 ![Päivitysten tarkistaminen](../../assets/screenshots/firmware_checking.png)
 
-&gt; ⚠️ Varoitus: firmware-päivityksen keskeyttäminen voi rikkoa laitteen. Keep the radio charged and stay in Bluetooth range for the whole update. The app itself only blocks the update below **10%** battery; 50% or more is the safe habit, not an enforced limit.
+&gt; ⚠️ Varoitus: firmware-päivityksen keskeyttäminen voi rikkoa laitteen. Pidä radio ladattuna ja Bluetooth-yhteyden kantaman sisällä koko päivityksen ajan. Sovellus estää päivityksen vain, jos akun varaustaso on alle **10 %**. Suositeltava vähimmäisvaraustaso on 50 %, mutta sitä ei vaadita.
 
 #### Tyhjennä laite päivityksen aikana
 
-Where the app offers it, an **Erase device during update** checkbox appears next to the update button. It is a per-update opt-in and is never remembered.
+Jos sovellus tukee sitä, päivityspainikkeen vieressä näkyy **Tyhjennä laite päivityksen aikana** -valintaruutu. Asetus koskee vain tätä päivitystä eikä sitä muisteta myöhemmin.
 
- Method         | What erasing does                                                                                                                      |
- -------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
- BLE / WiFi OTA | Factory-resets the device once the update is verified. All settings and Bluetooth pairing are removed. |
- USB            | Tyhjentää laitteen flash-muistin kokonaan ja asentaa sen jälkeen valitun laiteohjelmiston alusta alkaen.               |
+ Menetelmä       | Mitä tyhjennys tekee                                                                                                                                     |
+ --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+ BLE / Wi-Fi OTA | Laite palautetaan tehdasasetuksiin, kun päivitys on vahvistettu. Kaikki asetukset ja Bluetooth-pariliitokset poistetaan. |
+ USB             | Tyhjentää laitteen flash-muistin kokonaan ja asentaa sen jälkeen valitun laiteohjelmiston alusta alkaen.                                 |
 
-It is not offered for a local firmware file, during a recovery update, or on USB devices whose board does not support the erase step. Afterwards the device needs setting up — and pairing — again.
+Tätä ei tarjota paikallisen laiteohjelmistotiedoston yhteydessä, palautuspäivityksessä eikä USB-laitteille, joiden piirilevy ei tue tyhjennysvaihetta. Tämän jälkeen laite on määritettävä uudelleen ja pariliitos muodostettava uudelleen.
 
-### OTA via WiFi (network-connected ESP32)
+### OTA Wi-Fi:n kautta (verkkoon yhdistetty ESP32)
 
-When an ESP32 radio is connected over the network rather than Bluetooth, the app offers **WiFi OTA**, which pushes the same update over TCP:
+Kun ESP32-radio on yhdistetty verkkoon Bluetoothin sijaan, sovellus tarjoaa **WiFi OTA** -vaihtoehdon, joka siirtää saman päivityksen TCP-yhteyden kautta.
 
-1. Connect to the radio over the network (see [Connections](connections)).
-2. Open the Firmware Update screen and pick a version.
-3. Tap **Update**. Keep the radio and phone on the same network for the whole transfer.
+1. Muodosta yhteys radioon verkon kautta (katso [Yhteydet](connections)).
+2. Avaa Laiteohjelmiston päivitys -näkymä ja valitse versio.
+3. Napauta **Päivitä**. Pidä radio ja puhelin samassa verkossa koko siirron ajan.
 
-WiFi OTA takes the ESP32 `-update.bin` image rather than the `.uf2` a USB update uses; the app selects the right artifact for you.
+WiFi OTA käyttää ESP32:n `update.bin`-tiedostoa USB-päivityksen `.uf2`-tiedoston sijaan. Sovellus valitsee oikean tiedoston automaattisesti.
 
 ![Laiteohjelmiston vastuuvapauslauseke](../../assets/screenshots/firmware_disclaimer.png)
 
@@ -115,9 +115,9 @@ Kun päivitys onnistuu:
 
 Jos päivitys näyttää jumiutuneen:
 
-- Give it a minute. After writing the image the app waits up to **60 seconds** for the radio to come back and report its new version, so a pause at the verify step is expected.
-- If it is still stuck after that, power-cycle the radio.
-- Attempt the update again.
+- Anna sille hetki aikaa. Kun tiedosto on kirjoitettu, sovellus odottaa enintään **60 sekuntia**, että radio käynnistyy uudelleen ja ilmoittaa uuden versionsa. Lyhyt odotus vahvistusvaiheessa on siis normaalia.
+- Jos radio on tämän jälkeen edelleen jumissa, käynnistä se uudelleen katkaisemalla virta.
+- Yritä päivitystä uudelleen.
 
 ![Laiteohjelmiston päivitysvirhe](../../assets/screenshots/firmware_error.png)
 
@@ -132,9 +132,9 @@ Jos laite ei käynnisty:
 
 ### Yhteensopivuutta koskevat varoitukset
 
-On connecting, the app compares the radio's firmware against two thresholds and reacts differently to each:
+Yhteyden muodostamisen yhteydessä sovellus vertaa radion laiteohjelmistoversiota kahteen rajaan ja toimii niiden perusteella eri tavoin:
 
- Laiteohjelmistoversio                                                                                         | Näet seuraavan                                                | What happens                                                                                                                 |
+ Laiteohjelmistoversio                                                                                         | Näet seuraavan                                                | Mitä tapahtuu                                                                                                                |
  ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
  Alle **2.3.15**                                                               | **Laiteohjelmiston päivitys vaaditaan.**      | Sovellus katkaisee yhteyden radioon. Se ei toimi näin vanhan laiteohjelmiston kanssa.        |
  **2.3.15** tai uudempi, mutta alle **2.5.14** | **Laiteohjelmiston päivitystä suositellaan.** | Vain suositus – voit ohittaa sen ja jatkaa. Valintaikkunassa kerrotaan uusin vakaa julkaisu. |

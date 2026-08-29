@@ -227,33 +227,30 @@ Henkilölaskuri, joka hyödyntää Wi-Fi- ja BLE-koepyyntöjä. Laskee lähellä
  Käytössä                            | Ota henkilölaskenta käyttöön                                                                                                                  |
  Päivitysväli (s) | Kuinka usein laskentatiedot raportoidaan                                                                                                      |
  Wi-Fi-signaalin RSSI-kynnys         | Ohita tätä heikommat Wi-Fi-hakukyselyt, jotta kaukana olevia laitteita ei lasketa mukaan (oletus: -80 dBm) |
- BLE RSSI threshold                  | The same cut-off for BLE advertisements (defaults to −80 dBm)                                                              |
+ BLE-signaalin RSSI-kynnys           | Sama raja-arvo BLE-mainospaketeille (oletus: -80 dBm)                                                      |
 
 &gt; 💡 **Vinkki:** PAX-laskuri on hyödyllinen jalankulkijamäärien arviointiin retkeilyreittien lähtöpisteissä, tapahtumapaikoilla tai muissa kohteissa. Laskentatulokset ovat arvioita — yhdellä henkilöllä voi olla useita laitteita mukana.
 
-### Status Message Module
+### Tilaviestimoduuli
 
-Publishes a short free-text status line for your node, which other nodes can display alongside it.
+Julkaisee radiollesi lyhyen vapaamuotoisen tilaviestin, jonka muut radiot voivat näyttää sen yhteydessä.
 
- Asetus                    | Kuvaus                                                                                                                                                                           |
- ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
- Käytössä oleva tilaviesti | Up to 80 characters. The **✕** in the field clears it. (That is the app's own label for the field, verbatim.) |
+ Asetus                    | Kuvaus                                                                                                                                                                                |
+ ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+ Käytössä oleva tilaviesti | Enintään 80 merkkiä. Kenttään kirjoitettu **✕** tyhjentää sen. (Tämä on sovelluksen oma kentän nimi sellaisenaan.) |
 
-Saving takes effect immediately — this is one of the few module settings that never asks the
-node to reboot.
+Tallennus tulee voimaan heti – tämä on yksi harvoista moduuliasetuksista, joka ei koskaan pyydä radion uudelleenkäynnistystä.
 
-&gt; ℹ️ **Note:** The screen only appears for firmware that reports support for the status-message
-&gt; module. If you do not see it in the module list, your node's firmware does not have it.
+&gt; ℹ️ **Huomautus:** Näyttö näkyy vain laiteohjelmistoissa, jotka tukevat tilaviestimoduulia. Jos et näe sitä moduuliluettelossa, radiosi laiteohjelmisto ei tue sitä.
 
-### Mesh Beacon Module
+### Mesh Beacon -moduuli
 
-Broadcasts an invitation to your mesh, and receives invitations from others. See
-[Local Mesh Discovery](discovery) for the full walkthrough.
+Lähettää kutsun mesh-verkkoosi ja vastaanottaa muiden lähettämiä kutsuja. Katso
+[Paikallinen mesh-haku](discovery), jossa on täydellinen käyttöohje.
 
 ### TAK-moduuli
 
-&gt; ℹ️ **Note:** This module only appears in the list once the node's **Device Role** (Device Config)
-&gt; is set to **TAK** or **TAK Tracker**. Change the role first, or the entry will not be there.
+&gt; ℹ️ **Huomautus:** Tämä moduuli näkyy luettelossa vain, kun radion **Laitteen rooli** (Laiteasetukset) on asetettu arvoon **TAK** tai **TAK-seurantalaite**. Vaihda ensin roolia, muuten tätä kohtaa ei näy.
 
 Team Awareness Kit -integraatio yhteensopivuutta varten ATAK- ja WinTAK-järjestelmien kanssa. Katso [TAK-integraatio](tak) saadaksesi tarkemmat määritys- ja käyttöohjeet.
 
@@ -272,11 +269,10 @@ Määritä etänä radiot, jotka jakavat saman ylläpitoavaimen:
 
 ### Tyhjennä NodeDB-tietokanta
 
-Prunes your local node database. Two independent controls:
+Siivoaa paikallisen radiotietokannan. Kaksi toisistaan riippumatonta asetusta:
 
-- An **age slider** — remove nodes not heard from within that window.
-- **Clean unknown nodes only** — restrict the purge to nodes that never sent their user info,
-  leaving named nodes alone regardless of age.
+- **Ikä-liukusäädin** – poistaa radiot, joista ei ole kuultu määritetyn ajan kuluessa.
+- **Tyhjennä vain tuntemattomat radiot** – rajoittaa siivouksen radioihin, jotka eivät ole koskaan lähettäneet käyttäjätietojaan. Nimetyt radiot säilyvät iästä riippumatta.
 
 ### Palauta tehdasasetukset
 
@@ -292,20 +288,18 @@ Avaa **Paketit**- ja **Sovelluslokit**-välilehdet diagnostiikkatietojen tarkast
 
 ### Tietoja
 
-**Settings → About** carries the app's own identity rather than the radio's:
+**Asetukset → Tietoja** sisältää sovelluksen tiedot, ei radion tietoja:
 
-Three sections:
+Kolme osiota:
 
-- **What is Meshtastic?** — a short description of the project.
-- **Apps** — opens with **Need Hardware?**, a rotating carousel of popular devices that links out
-  to where to buy one, then the GitHub repository, the running app version, and
-  **Acknowledgements** (below).
-- **Project information** — links to the website and to this documentation.
+- **Mikä on Meshtastic?** – lyhyt kuvaus projektista.
+- **Sovellukset** – avautuu kohtaan **Tarvitsetko laitteiston?**, jossa suosittujen laitteiden karuselli sisältää linkit niiden ostopaikkoihin. Lisäksi näytetään GitHub-projekti, käytössä oleva sovellusversio ja
+  **Tekijätiedot** (alla).
+- **Projektitiedot** – linkit verkkosivustolle ja tähän dokumentaatioon.
 
 ### Kiitokset
 
-Reached from **About**, this lists every open-source library the app ships, with its license,
-generated at build time by AboutLibraries. It was previously called the license screen.
+**Tietoja**-kohdasta avattava näkymä, jossa luetellaan kaikki sovelluksen käyttämät avoimen lähdekoodin kirjastot lisensseineen. Luettelo luodaan käännöshetkellä AboutLibraries-kirjastolla. Tätä kutsuttiin aiemmin lisenssinäkymäksi.
 
 ### Etähallinnan vianmääritys
 
