@@ -18,13 +18,12 @@ The entire release process is managed by a single GitHub Action: **`Create or Pr
         already in flight. Internal releases and dry runs are exempt (Play internal testing
         skips full review).
 -   **Automation:** The workflow handles everything automatically:
-    -   **Syncs Assets:** Fetches the latest firmware/hardware lists, protobuf definitions, and translations (Crowdin).
     -   **Generates Changelog:** Categorizes merged PRs by their labels (per `.github/release.yml`) into GitHub's auto-generated release notes; a separate automation workflow opens a PR to fold the same notes into `CHANGELOG.md`.
-    -   **Updates Config:** Automatically bumps the `VERSION_NAME_BASE` in `config.properties`.
-    -   **Verifies & Tags:** Runs lint checks, builds the app, and *only* tags the release if successful.
+    -   **Tags & Builds** *(internal releases)*: Pushes the incremental tag first — there is no lint/test gate in this workflow, that's the separate PR/CI pipeline — then builds the Android bundle/APK and Desktop installers from that tag; if the build fails, an automatic cleanup job deletes the tag so a retry starts clean. Promotions skip this entirely and retag the already-built artifact (see below).
     -   **Deploys Android:** Uploads the build to the correct Google Play track and attaches artifacts (`.aab`/`.apk`) to a GitHub Release.
     -   **Deploys Desktop** *(internal releases)*: Builds native installers (DMG, MSI, EXE, DEB, RPM, AppImage) and Flatpak sources on a matrix of runners and attaches them to the GitHub Release.
 -   **Changelog:** Both the GitHub Release notes and `CHANGELOG.md` are generated from merged PR labels, not raw commit messages — label PRs correctly (`enhancement`, `bugfix`, etc.) to keep them accurate.
+-   **Not part of this workflow:** Firmware/hardware/device-links lists and Crowdin translations are kept current by a separate hourly workflow, `scheduled-updates.yml` ("Scheduled Updates (Firmware, Hardware, Translations)"), which opens its own PR rather than committing directly — it never runs as part of a release. `VERSION_NAME_BASE` in `config.properties` is likewise never written by automation: a maintainer bumps it by hand in an ordinary PR (e.g. "chore: bump VERSION_NAME_BASE to 2.8.2 (#6820)") before starting a release for a new base version, paired with a matching `<release>` entry in `desktopApp/packaging/linux/org.meshtastic.MeshtasticDesktop.metainfo.xml` — a `pull-request.yml` check fails the PR if that entry is missing. `Create or Promote Release` only *reads* `VERSION_NAME_BASE`/`VERSION_CODE_OFFSET` from `config.properties` to compute the build's version name/code.
 
 ## Release Steps
 
@@ -38,11 +37,10 @@ The entire release process is managed by a single GitHub Action: **`Create or Pr
 6.  Click **"Run workflow"**. (Tip: enable `dry_run` first to preview the tag that would be created without pushing anything.)
 
 The workflow will:
-1.  **Create a new commit** on the current branch containing updated assets, translations, and the new changelog.
-2.  **Tag** that commit with an incremental internal tag (e.g., `v2.8.0-internal.1`).
-3.  **Build & Deploy** the verified Android artifact to the Play Store Internal track.
-4.  **Build Desktop** native installers and Flatpak sources on macOS, Windows, and Linux runners.
-5.  Publish a **draft** pre-release on GitHub with all artifacts attached. It stays a draft until
+1.  **Tag** the current commit on the branch with an incremental internal tag (e.g., `v2.8.0-internal.1`) — no new commit is created; it tags whatever is already at `HEAD`.
+2.  **Build & Deploy** the verified Android artifact to the Play Store Internal track.
+3.  **Build Desktop** native installers and Flatpak sources on macOS, Windows, and Linux runners.
+4.  Publish a **draft** pre-release on GitHub with all artifacts attached. It stays a draft until
     the first promotion (closed/open/production), at which point `promote.yml` un-drafts the
     *same* release object (retagging it to the new channel's tag) rather than creating a new one.
 
