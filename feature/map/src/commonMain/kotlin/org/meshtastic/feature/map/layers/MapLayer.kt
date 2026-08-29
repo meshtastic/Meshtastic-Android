@@ -68,6 +68,14 @@ private val KMZ_MAGIC = byteArrayOf('P'.code.toByte(), 'K'.code.toByte())
  */
 fun ByteArray.isKmzArchive(): Boolean = size >= KMZ_MAGIC.size && KMZ_MAGIC.indices.all { this[it] == KMZ_MAGIC[it] }
 
+/**
+ * Ceiling on the bytes one KMZ may inflate to, summed across every entry read from it.
+ *
+ * A zip's inflated size is unrelated to its size on disk, and KMZ files arrive through share-into-app — an unbounded
+ * read hands any other app the ability to OOM this one with a small file. Every KMZ reader shares this cap.
+ */
+const val MAX_KMZ_INFLATED_BYTES: Long = 50L * 1024 * 1024
+
 /** On-disk extension marking a saved coverage estimate, so [LayerType.COVERAGE] survives a restart. */
 const val COVERAGE_EXTENSION = "coverage"
 

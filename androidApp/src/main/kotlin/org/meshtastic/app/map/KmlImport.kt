@@ -18,7 +18,10 @@ package org.meshtastic.app.map
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import co.touchlab.kermit.Logger
 import org.meshtastic.feature.map.kml.KmlToGeoJson
+import org.meshtastic.feature.map.layers.MAX_KMZ_INFLATED_BYTES
+import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.util.zip.ZipInputStream
 
@@ -64,12 +67,17 @@ private const val EMPTY_FEATURE_COLLECTION = """{"type":"FeatureCollection","fea
 private fun InputStream.readArchive(): ImportedKml? {
     var kml: String? = null
     val images = mutableMapOf<String, Bitmap>()
+    // One inflate budget across the whole archive: a zip's inflated size is unrelated to its size on disk, and these
+    // files arrive through share-into-app. Entries past the cap are skipped — for an image that means the overlay or
+    // icon naming it goes undrawn, which beats the OOM.
+    var budget = MAX_KMZ_INFLATED_BYTES
 
     ZipInputStream(this).use { zip ->
         generateSequence { zip.nextEntry }
             .filterNot { it.isDirectory }
             .forEach { entry ->
-                val bytes = zip.readBytes()
+                val bytes = zip.readEntryWithin(budget) ?: return@forEach
+                budget -= bytes.size
                 when {
                     kml == null && entry.name.endsWith(".kml", ignoreCase = true) -> kml = bytes.decodeToString()
 
@@ -81,4 +89,24 @@ private fun InputStream.readArchive(): ImportedKml? {
     }
 
     return kml?.toImportedKml(images)
+}
+
+/**
+ * This entry inflated, or null once it would take the archive past [remaining] bytes.
+ *
+ * Enforced on the bytes actually produced rather than the entry header, which a hostile zip lies in.
+ * `InputStream.readNBytes` would do this but is API 33+; minSdk is 26.
+ */
+private fun ZipInputStream.readEntryWithin(remaining: Long): ByteArray? {
+    val out = ByteArrayOutputStream()
+    val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+    while (true) {
+        val read = read(buffer)
+        if (read == -1) return out.toByteArray()
+        if (out.size() + read > remaining) {
+            Logger.withTag("KmlImport").w { "Refusing a KMZ entry past the ${MAX_KMZ_INFLATED_BYTES}B inflate cap" }
+            return null
+        }
+        out.write(buffer, 0, read)
+    }
 }
