@@ -26,6 +26,7 @@ import org.meshtastic.core.ui.icon.BugReport
 import org.meshtastic.core.ui.icon.Chart
 import org.meshtastic.core.ui.icon.ConfigChannels
 import org.meshtastic.core.ui.icon.Device
+import org.meshtastic.core.ui.icon.Edit
 import org.meshtastic.core.ui.icon.ForkLeft
 import org.meshtastic.core.ui.icon.Group
 import org.meshtastic.core.ui.icon.Language

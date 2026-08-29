@@ -46,18 +46,5 @@ Keep the last 5–8 entries and trim older ones from the bottom.
 
 **August 2026** — Flatpak sources are generated inside each architecture's own offline build (#6919) rather than committed, and the flatpak-sources plugin resolves platform dependencies transitively (0.2.x), so the hand-tracked entries are gone.
 
-**July 2026** — [Test Builds & Obtainium](developer/test-builds) — New page, replacing the root `obtainium-test-builds.md`. Distributable Obtainium configurations now live in `obtainium/` (importable export, one-tap link generator, config-site submission).
-
-**July 2026** — Map layer stack (`MapLayer.kt`, `MapLayersManager`, GeoJSON/KML import, Site Planner) extracted from the Google flavor into shared `androidApp/src/main` source (#6148) — F-Droid now renders imported overlays via a new `osmdroid`-based renderer, so both flavors compile one implementation.
-
-**July 2026** — [Persistence](developer/persistence) — Local Mesh Discovery sessions and cached `msh.to` device links now persist to Room (`DiscoverySessionEntity`, `DiscoveryPresetResultEntity`, `DiscoveredNodeEntity`, `DeviceLinkEntity`).
-
-**June 2026** — [Architecture](developer/architecture) / [Codebase](developer/codebase) — Protos migrated from the `core/proto` git submodule to the `org.meshtastic:protobufs` Maven artifact; there is no longer a local proto module to build or sync.
-
-**June 2026** — AIDL/`IMeshService` removed (#5586). The mesh service is now in-process only, driven entirely through `RadioController` — no cross-process binder, no `aidl` stubs.
-
-**June 2026** — [Testing](developer/testing) — Split the screenshot pipeline: the new generate-only `:docs-screenshots` module holds doc-framed compositions, while `:screenshot-tests` stays the CI visual-regression gate — so reframing a doc image no longer churns a test baseline.
-
-
 <!-- DEV_WHATS_NEW_END -->
 

@@ -33,10 +33,5 @@ Keep the last 5–8 entries and archive older ones by removing them.
 
 **July 2026** — [Settings — Radio & User](user/settings-radio-user) — Security config now offers encrypted on-device key backup/restore and a packet-authenticity Protection Level (Strict / Balanced / Compatible).
 
-**July 2026** — [MQTT](user/mqtt) — Documented the **MQTT proxy on this phone** toggle: see whether your phone is relaying MQTT for the node and cut it off immediately.
-
-**July 2026** — [Map & Waypoints](user/map-and-waypoints) — Waypoints can now define a geofence: get notified when nodes enter or leave an area. Only the waypoint's creator gets notifications by default; others can opt in per geofence.
-
-
 <!-- WHATS_NEW_END -->
 
