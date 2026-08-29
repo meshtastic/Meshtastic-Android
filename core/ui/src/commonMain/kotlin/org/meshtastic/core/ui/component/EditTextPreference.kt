@@ -221,7 +221,11 @@ fun EditTextPreference(
 
     Column(modifier = modifier.fillMaxWidth().padding(8.dp)) {
         OutlinedTextField(
-            modifier = Modifier.fillMaxWidth().onFocusEvent { onFocusChanged(it) },
+            modifier =
+            Modifier.fillMaxWidth().onFocusEvent {
+                isFocused = it.isFocused
+                onFocusChanged(it)
+            },
             value = value,
             singleLine = !multiline,
             maxLines = if (multiline) 5 else 1,
@@ -266,15 +270,21 @@ fun EditTextPreference(
 
         val valueBytes = value.encodeToByteArray().size
         if (showByteCounter(valueBytes, maxSize, counterVisibleWithinBytes, isFocused)) {
-            Box(contentAlignment = Alignment.BottomEnd, modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    text = "$valueBytes/$maxSize",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier.padding(end = 8.dp, bottom = 4.dp),
-                )
-            }
+            ByteCounter(valueBytes = valueBytes, maxSize = maxSize, isError = isError)
         }
+    }
+}
+
+/** The `n/max` byte budget shown under a size-capped field. */
+@Composable
+private fun ByteCounter(valueBytes: Int, maxSize: Int, isError: Boolean) {
+    Box(contentAlignment = Alignment.BottomEnd, modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = "$valueBytes/$maxSize",
+            style = MaterialTheme.typography.bodySmall,
+            color = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onBackground,
+            modifier = Modifier.padding(end = 8.dp, bottom = 4.dp),
+        )
     }
 }
 
