@@ -92,7 +92,7 @@ Since waypoints (and their geofences) are broadcast to the whole mesh, only the 
 
 ## Map Layers
 
-Tap the layers icon on the map to open **Manage Map Layers**, where you can import your own overlays in `.kml`, `.kmz`, or GeoJSON format — by picking a file with **Add Layer**, opening a file with Meshtastic, or sharing it into the app from another app. Imported layers are listed with a toggle to show/hide each one and an option to remove it. This works on the Google Play build, the F-Droid build, and **Desktop**, which shares the same layer store and file picker.
+Tap the layers icon on the map to open **Manage Map Layers**, where you can import your own overlays in `.kml`, `.kmz`, or GeoJSON format — including KMZ ground overlays (georeferenced images, such as exported topo or aerial tiles), which drape at their stated bounds — by picking a file with **Add Layer**, opening a file with Meshtastic, or sharing it into the app from another app. Imported layers are listed with a toggle to show/hide each one and an option to remove it. This works on the Google Play build, the F-Droid build, and **Desktop**, which shares the same layer store and file picker.
 
 ### Site Planner
 

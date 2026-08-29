@@ -209,3 +209,60 @@ private fun geometryFrom(type: String?, positions: List<GeoPosition>?, polygonTa
 
     else -> null
 }
+
+/**
+ * A `<GroundOverlay>`, read through to its end tag. Null when the overlay is missing its image or any box edge — there
+ * is nothing drawable without either.
+ */
+@Suppress("CyclomaticComplexMethod") // one branch per KML tag; splitting them would hide the element shape
+internal fun XmlReader.readGroundOverlay(): KmlGroundOverlay? {
+    var name: String? = null
+    var href: String? = null
+    var north: Double? = null
+    var south: Double? = null
+    var east: Double? = null
+    var west: Double? = null
+    var rotation = 0.0
+    var depth = 1
+
+    while (depth > 0) {
+        when (next()) {
+            EventType.START_ELEMENT ->
+                when (localName) {
+                    "name" -> name = readSimpleElement().trim()
+                    "href" -> href = readSimpleElement().trim()
+                    "north" -> north = readSimpleElement().trim().toDoubleOrNull()
+                    "south" -> south = readSimpleElement().trim().toDoubleOrNull()
+                    "east" -> east = readSimpleElement().trim().toDoubleOrNull()
+                    "west" -> west = readSimpleElement().trim().toDoubleOrNull()
+                    "rotation" -> rotation = readSimpleElement().trim().toDoubleOrNull() ?: 0.0
+                    else -> depth++
+                }
+
+            EventType.END_ELEMENT -> depth--
+
+            EventType.END_DOCUMENT -> depth = 0
+
+            else -> Unit
+        }
+    }
+
+    val image = href?.takeIf { it.isNotBlank() }
+    val edges = listOfNotNull(north, south, east, west)
+    return if (image == null || edges.size < BOX_EDGES) {
+        null
+    } else {
+        KmlGroundOverlay(
+            name = name,
+            href = image,
+            north = edges[0],
+            south = edges[1],
+            east = edges[2],
+            west = edges[3],
+            rotationDegrees = rotation,
+        )
+    }
+}
+
+/** A LatLonBox is only a box with all four of north, south, east and west. */
+private const val BOX_EDGES = 4

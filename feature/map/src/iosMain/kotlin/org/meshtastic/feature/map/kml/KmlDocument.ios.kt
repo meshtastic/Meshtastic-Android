@@ -20,3 +20,6 @@ import org.meshtastic.feature.map.layers.isKmzArchive
 
 /** Bare KML only: unpacking a KMZ needs `java.util.zip`, and no iOS surface renders a map yet. */
 actual fun readKmlDocument(bytes: ByteArray): String? = if (bytes.isKmzArchive()) null else bytes.decodeToString()
+
+/** Nothing: the KMZ case needs `java.util.zip`, and no iOS surface renders a map yet. */
+actual fun readKmlArchiveImages(bytes: ByteArray, hrefs: Set<String>): Map<String, ByteArray> = emptyMap()

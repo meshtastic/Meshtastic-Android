@@ -38,3 +38,23 @@ internal class Placemark(
 
 /** A parsed geometry, held as its GeoJSON type and already-formatted coordinates. */
 internal class KmlGeometry(val type: String, val coordinates: String, val isPolygonal: Boolean)
+
+/**
+ * A KML `<GroundOverlay>`: an image draped over a `<LatLonBox>`.
+ *
+ * [rotationDegrees] is the box's optional `<rotation>` — degrees counter-clockwise about the box centre, per the KML
+ * reference. [href] is untouched: a KMZ-packed relative path, an absolute URL, or (as the Site Planner exports) a
+ * sibling file name that nothing can fetch — what is reachable is the importer's judgement, not the parser's.
+ */
+data class KmlGroundOverlay(
+    val name: String?,
+    val href: String,
+    val north: Double,
+    val south: Double,
+    val east: Double,
+    val west: Double,
+    val rotationDegrees: Double = 0.0,
+)
+
+/** Everything a KML document holds that this app can draw: vector features as GeoJSON, plus the image overlays. */
+data class KmlConversion(val geoJson: String?, val groundOverlays: List<KmlGroundOverlay>)

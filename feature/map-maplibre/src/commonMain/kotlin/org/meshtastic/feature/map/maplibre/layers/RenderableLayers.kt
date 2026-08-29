@@ -22,10 +22,14 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.withContext
+import okio.Path
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.feature.map.geojson.geoJsonIconUrls
+import org.meshtastic.feature.map.kml.KmlGroundOverlay
 import org.meshtastic.feature.map.kml.KmlToGeoJson
+import org.meshtastic.feature.map.kml.corners
+import org.meshtastic.feature.map.kml.readKmlArchiveImages
 import org.meshtastic.feature.map.kml.readKmlDocument
 import org.meshtastic.feature.map.layers.LayerType
 import org.meshtastic.feature.map.layers.MapLayerItem
@@ -52,7 +56,7 @@ import org.meshtastic.feature.map.layers.toLocalPath
  */
 @Composable
 fun rememberRenderableLayers(manager: MapLayersManager, layers: List<MapLayerItem>): List<CustomLayer> {
-    val converted = remember { mutableStateMapOf<String, String>() }
+    val converted = remember { mutableStateMapOf<String, ConvertedKml>() }
     val icons = remember { mutableStateMapOf<String, Set<String>>() }
 
     val kmlLayers = layers.filter { it.layerType == LayerType.KML && it.uri != null }
@@ -76,8 +80,13 @@ fun rememberRenderableLayers(manager: MapLayersManager, layers: List<MapLayerIte
                     layer.uri?.let { CustomLayer(id = layer.id, uri = it, refreshToken = layer.refreshToken) }
 
                 else ->
-                    converted[layer.conversionKey()]?.let {
-                        CustomLayer(id = layer.id, uri = it, refreshToken = layer.refreshToken)
+                    converted[layer.conversionKey()]?.let { conversion ->
+                        CustomLayer(
+                            id = layer.id,
+                            uri = conversion.geoJsonUri,
+                            refreshToken = layer.refreshToken,
+                            groundOverlays = conversion.groundOverlays,
+                        )
                     }
             }
         }
@@ -118,33 +127,125 @@ private fun MapLayerItem.conversionKey(): String = "$id@$refreshToken"
 
 private fun CustomLayer.conversionKey(): String = "$id@$refreshToken"
 
-/** Converts one KML or KMZ import to a GeoJSON file in the cache, returning its URI. Null if nothing was mappable. */
-private suspend fun convertKmlLayer(manager: MapLayersManager, layer: MapLayerItem): String? =
+/** What one KML conversion produced: the GeoJSON file's URI and the draped images. */
+internal data class ConvertedKml(val geoJsonUri: String, val groundOverlays: List<LayerGroundOverlay>)
+
+/**
+ * Converts one KML or KMZ import: GeoJSON to a cache file, ground-overlay images extracted beside it, and the overlay
+ * corner data into a sidecar the cache hit can read back — the GeoJSON cannot carry it, and reconverting on every
+ * launch would defeat the cache. Null when nothing in the file was mappable at all.
+ */
+private suspend fun convertKmlLayer(manager: MapLayersManager, layer: MapLayerItem): ConvertedKml? =
     withContext(ioDispatcher) {
         safeCatching {
             val fs = mapLayerFileSystem()
             val dir = mapLayersCacheDirectory()
             fs.createDirectories(dir)
-            val target = dir / "${layer.conversionKey()}.geojson"
-            // A file already here was converted from this same layer at this same token, so it is still good.
-            if ((fs.metadataOrNull(target)?.size ?: 0L) > 0L) return@safeCatching "file://$target"
+            val key = layer.conversionKey()
+            val target = dir / "$key.geojson"
+            val sidecar = dir / "$key.overlays"
 
-            val bytes = manager.readLayerBytes(layer)
-            val geoJson = bytes?.let { readKmlDocument(it) }?.let { KmlToGeoJson.convert(it) }
-            if (geoJson == null) {
+            // Files already here were converted from this same layer at this same token, so they are still good.
+            val cachedOverlays = readOverlaySidecar(sidecar)
+            if (cachedOverlays != null && (fs.metadataOrNull(target)?.size ?: 0L) > 0L) {
+                return@safeCatching ConvertedKml("file://$target", cachedOverlays)
+            }
+
+            val bytes = manager.readLayerBytes(layer) ?: return@safeCatching null
+            val document = readKmlDocument(bytes) ?: return@safeCatching null
+            val conversion = KmlToGeoJson.convertDocument(document)
+            val overlays = resolveGroundOverlays(layer, bytes, conversion.groundOverlays, dir)
+            if (conversion.geoJson == null && overlays.isEmpty()) {
                 Logger.withTag(TAG).w { "Nothing mappable in an imported KML layer" }
                 return@safeCatching null
             }
-            // Written beside the target and moved into place, so a conversion cut short by leaving the screen
-            // cannot
-            // leave a half-file that the check above would then trust.
+
+            // An overlay-only document still writes a (empty) collection: the layer keeps its uniform shape, and a
+            // real file is something MapLibre certainly fetches, where a data: URI is a gamble. Written beside the
+            // target and moved into place, so a conversion cut short by leaving the screen cannot leave a half-file
+            // that the cache check above would then trust.
             val partial = dir / "${target.name}.part"
-            fs.write(partial) { writeUtf8(geoJson) }
+            fs.write(partial) { writeUtf8(conversion.geoJson ?: EMPTY_FEATURE_COLLECTION) }
             fs.atomicMove(partial, target)
-            "file://$target"
+            writeOverlaySidecar(sidecar, overlays)
+            ConvertedKml("file://$target", overlays)
         }
             .onFailure { Logger.withTag(TAG).w(it) { "Could not convert an imported KML layer" } }
             .getOrNull()
     }
 
+/**
+ * Resolve each overlay's image to a file in the cache. A KMZ-packed image is extracted; anything else — above all the
+ * Site Planner's KML export, whose href names a sibling file that was never in an archive — is logged and skipped
+ * rather than draped as a broken image.
+ */
+private fun resolveGroundOverlays(
+    layer: MapLayerItem,
+    bytes: ByteArray,
+    overlays: List<KmlGroundOverlay>,
+    dir: Path,
+): List<LayerGroundOverlay> {
+    if (overlays.isEmpty()) return emptyList()
+    val fs = mapLayerFileSystem()
+    val packed = readKmlArchiveImages(bytes, overlays.map { it.href }.toSet())
+    return overlays.mapIndexedNotNull { index, overlay ->
+        val image = packed[overlay.href]
+        if (image == null) {
+            // Count, not href: an overlay's image name is user content and does not belong in the log.
+            Logger.withTag(TAG).w { "Skipping a ground overlay whose image is not packed in the archive" }
+            return@mapIndexedNotNull null
+        }
+        val extension = overlay.href.substringAfterLast('.', "png")
+        val path = dir / "${layer.conversionKey()}-overlay-$index.$extension"
+        fs.write(path) { write(image) }
+        val corners = overlay.corners()
+        LayerGroundOverlay(
+            imagePath = path.toString(),
+            corners =
+            listOf(
+                corners.topLeft.longitude to corners.topLeft.latitude,
+                corners.topRight.longitude to corners.topRight.latitude,
+                corners.bottomRight.longitude to corners.bottomRight.latitude,
+                corners.bottomLeft.longitude to corners.bottomLeft.latitude,
+            ),
+        )
+    }
+}
+
+private fun readOverlaySidecar(sidecar: Path): List<LayerGroundOverlay>? {
+    val fs = mapLayerFileSystem()
+    if (fs.metadataOrNull(sidecar) == null) return null
+    return safeCatching {
+        val lines = fs.read(sidecar) { readUtf8() }.lines().filter { it.isNotBlank() }
+        lines.map { line ->
+            val parts = line.split('\t')
+            LayerGroundOverlay(
+                imagePath = parts[0],
+                corners =
+                parts.drop(1).map { pair ->
+                    val (lon, lat) = pair.split(',')
+                    lon.toDouble() to lat.toDouble()
+                },
+            )
+        }
+    }
+        .getOrNull()
+}
+
+/**
+ * One overlay per line: the image path, then four `lon,lat` corners, tab-separated. Hand-rolled rather than
+ * serialization because the shape is four numbers and a path, and a corrupt file just costs a reconversion.
+ */
+private fun writeOverlaySidecar(sidecar: Path, overlays: List<LayerGroundOverlay>) {
+    val fs = mapLayerFileSystem()
+    val text =
+        overlays.joinToString("\n") { overlay ->
+            (listOf(overlay.imagePath) + overlay.corners.map { (lon, lat) -> "$lon,$lat" }).joinToString("\t")
+        }
+    fs.write(sidecar) { writeUtf8(text) }
+}
+
 private const val TAG = "KmlLayers"
+
+/** What an overlay-only conversion writes where its vector features would go. */
+private const val EMPTY_FEATURE_COLLECTION = """{"type":"FeatureCollection","features":[]}"""

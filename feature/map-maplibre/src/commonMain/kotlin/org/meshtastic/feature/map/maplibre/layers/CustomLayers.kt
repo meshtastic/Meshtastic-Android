@@ -25,10 +25,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import co.touchlab.kermit.Logger
 import coil3.compose.AsyncImagePainter
 import coil3.compose.LocalPlatformContext
 import coil3.compose.rememberAsyncImagePainter
 import coil3.request.ImageRequest
+import org.jetbrains.compose.resources.decodeToImageBitmap
 import org.maplibre.compose.expressions.ast.Expression
 import org.maplibre.compose.expressions.dsl.asNumber
 import org.maplibre.compose.expressions.dsl.asString
@@ -47,10 +49,16 @@ import org.maplibre.compose.expressions.value.GeometryType
 import org.maplibre.compose.layers.CircleLayer
 import org.maplibre.compose.layers.FillLayer
 import org.maplibre.compose.layers.LineLayer
+import org.maplibre.compose.layers.RasterLayer
 import org.maplibre.compose.layers.SymbolLayer
 import org.maplibre.compose.sources.GeoJsonData
 import org.maplibre.compose.sources.rememberGeoJsonSource
+import org.maplibre.compose.sources.rememberImageSource
+import org.maplibre.compose.util.PositionQuad
+import org.maplibre.spatialk.geojson.Position
 import org.meshtastic.feature.map.kml.ICON_URL_PROPERTY
+import org.meshtastic.feature.map.layers.mapLayerFileSystem
+import org.meshtastic.feature.map.layers.toLocalPath
 
 /**
  * Fill, outline and point styling for every visible imported overlay.
@@ -74,6 +82,10 @@ internal fun CustomLayers(layers: List<CustomLayer>) {
 @Composable
 private fun ImportedLayer(layer: CustomLayer) {
     val source = rememberGeoJsonSource(data = GeoJsonData.Uri(layer.uri))
+
+    // Draped first so a KML that carries both an image and vector features keeps its lines and points readable on
+    // top — a ground overlay is a basemap-like backdrop, not a marker.
+    layer.groundOverlays.forEachIndexed { index, overlay -> GroundOverlayLayer(layer.id, index, overlay) }
 
     val fill = coalesce(feature["fill"].asString(), feature["color"].asString())
     val stroke = coalesce(feature["stroke"].asString(), feature["color"].asString())
@@ -169,6 +181,40 @@ private fun rememberLayerIcons(urls: Set<String>): Map<String, Painter> {
     return loaded
 }
 
+/**
+ * One KML `<GroundOverlay>`: its image draped between its corners.
+ *
+ * The bitmap is decoded once per path and remembered — a ground overlay from an ESRI export is routinely a
+ * multi-megapixel tile, and decoding it on every recomposition would hitch the map. A file that fails to decode drapes
+ * nothing and logs; the vector half of its layer still renders.
+ */
+@Composable
+private fun GroundOverlayLayer(layerId: String, index: Int, overlay: LayerGroundOverlay) {
+    val image =
+        remember(overlay.imagePath) {
+            runCatching {
+                mapLayerFileSystem().read(overlay.imagePath.toLocalPath()) { readByteArray() }.decodeToImageBitmap()
+            }
+                .onFailure { Logger.withTag("CustomLayers").w(it) { "Could not decode a ground overlay image" } }
+                .getOrNull()
+        } ?: return
+
+    val quad =
+        remember(overlay.corners) {
+            val positions =
+                overlay.corners.map { (longitude, latitude) -> Position(longitude = longitude, latitude = latitude) }
+            PositionQuad(
+                topLeft = positions[0],
+                topRight = positions[1],
+                bottomRight = positions[2],
+                bottomLeft = positions[BOTTOM_LEFT],
+            )
+        }
+
+    val source = rememberImageSource(quad, image)
+    RasterLayer(id = "custom-$layerId-ground-$index", source = source)
+}
+
 /** What an import with no colours of its own is drawn in. */
 private val CustomLayerBlue = Color(0xFF3F51B5)
 
@@ -191,3 +237,6 @@ private const val DEFAULT_STROKE_WIDTH = 2f
 private const val POINT_RADIUS = 5
 
 private val ICON_SIZE = DpSize(28.dp, 28.dp)
+
+/** Corner order is top-left, top-right, bottom-right, bottom-left — see [LayerGroundOverlay.corners]. */
+private const val BOTTOM_LEFT = 3

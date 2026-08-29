@@ -33,3 +33,14 @@ actual fun readKmlDocument(bytes: ByteArray): String? = if (bytes.isKmzArchive()
 } else {
     bytes.decodeToString()
 }
+
+actual fun readKmlArchiveImages(bytes: ByteArray, hrefs: Set<String>): Map<String, ByteArray> {
+    if (hrefs.isEmpty() || !bytes.isKmzArchive()) return emptyMap()
+    val images = mutableMapOf<String, ByteArray>()
+    ZipInputStream(ByteArrayInputStream(bytes)).use { zip ->
+        generateSequence { zip.nextEntry }
+            .filterNot { it.isDirectory }
+            .forEach { entry -> if (entry.name in hrefs) images[entry.name] = zip.readBytes() }
+    }
+    return images
+}

@@ -23,3 +23,12 @@ package org.meshtastic.feature.map.kml
  * returns null (and nothing renders a map there yet anyway). Bare KML is common to all platforms.
  */
 expect fun readKmlDocument(bytes: ByteArray): String?
+
+/**
+ * The image entries a KMZ packs for its ground overlays, keyed by the entry name an overlay's `href` uses.
+ *
+ * Only entries named in [hrefs] are extracted — a KMZ can carry hundreds of images, and pulling all of them for a
+ * document whose overlays name three would be pure waste. Bare KML returns nothing: its hrefs point outside the file,
+ * and fetching those is the caller's decision. Expect/actual for the same reason as [readKmlDocument].
+ */
+expect fun readKmlArchiveImages(bytes: ByteArray, hrefs: Set<String>): Map<String, ByteArray>

@@ -17,11 +17,18 @@
 package org.meshtastic.app.map
 
 import android.graphics.Bitmap
+import org.meshtastic.feature.map.kml.KmlGroundOverlay
 
 /**
- * A converted import: the GeoJSON, plus any images the archive carried.
+ * A converted import: the GeoJSON, any images the archive carried, and any ground overlays the document drapes.
  *
  * [images] is keyed by each file's path inside the archive, which is what a KMZ placemark's `<href>` names and what the
- * Google renderer's image cache is keyed by. Empty for a bare `.kml`, whose icons are ordinary URLs.
+ * Google renderer's image cache is keyed by. Empty for a bare `.kml`, whose icons are ordinary URLs. A ground overlay's
+ * image is looked up in the same map. [geoJson] holds an empty `FeatureCollection` for an overlay-only document — valid
+ * input for every parser downstream, unlike null.
  */
-class ImportedKml(val geoJson: String, val images: Map<String, Bitmap>)
+class ImportedKml(
+    val geoJson: String,
+    val images: Map<String, Bitmap>,
+    val groundOverlays: List<KmlGroundOverlay> = emptyList(),
+)

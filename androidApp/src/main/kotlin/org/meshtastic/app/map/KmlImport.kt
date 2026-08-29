@@ -35,8 +35,24 @@ import java.util.zip.ZipInputStream
 fun convertKmlSource(source: InputStream): ImportedKml? = if (source.isKmzArchive()) {
     source.readArchive()
 } else {
-    KmlToGeoJson.convert(source.readBytes().decodeToString())?.let { ImportedKml(it, emptyMap()) }
+    source.readBytes().decodeToString().toImportedKml(emptyMap())
 }
+
+/**
+ * Null only when the document holds nothing drawable at all. An overlay-only KML gets an empty `FeatureCollection`
+ * rather than being dropped — the overlays are the content, and every parser downstream needs valid JSON.
+ */
+private fun String.toImportedKml(images: Map<String, Bitmap>): ImportedKml? {
+    val conversion = KmlToGeoJson.convertDocument(this)
+    if (conversion.geoJson == null && conversion.groundOverlays.isEmpty()) return null
+    return ImportedKml(
+        geoJson = conversion.geoJson ?: EMPTY_FEATURE_COLLECTION,
+        images = images,
+        groundOverlays = conversion.groundOverlays,
+    )
+}
+
+private const val EMPTY_FEATURE_COLLECTION = """{"type":"FeatureCollection","features":[]}"""
 
 /**
  * The KML in an archive, and every image beside it.
@@ -64,5 +80,5 @@ private fun InputStream.readArchive(): ImportedKml? {
             }
     }
 
-    return kml?.let { document -> KmlToGeoJson.convert(document)?.let { ImportedKml(it, images) } }
+    return kml?.toImportedKml(images)
 }

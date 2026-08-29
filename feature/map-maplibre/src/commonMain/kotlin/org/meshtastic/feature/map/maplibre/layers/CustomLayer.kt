@@ -26,8 +26,28 @@ package org.meshtastic.feature.map.maplibre.layers
  * @param refreshToken bumped by the host when the user asks to refresh this layer. A network layer keeps the same URI
  *   across a refresh, so without something that changes there is nothing to tell the map its contents moved on — see
  *   [CustomLayers][org.meshtastic.feature.map.maplibre.layers.CustomLayers].
+ * @param groundOverlays images the layer drapes over the map (KML `<GroundOverlay>`), already resolved to local files
+ *   with their corners computed.
  * @param icons the distinct icon images the layer's features ask for, found by the host with
  *   [geoJsonIconUrls][org.meshtastic.feature.map.geojson.geoJsonIconUrls]. Supplied rather than discovered because
  *   MapLibre picks an icon per feature from a fixed set of style images, which has to exist before the layer composes.
  */
-data class CustomLayer(val id: String, val uri: String, val refreshToken: Int = 0, val icons: Set<String> = emptySet())
+data class CustomLayer(
+    val id: String,
+    val uri: String,
+    val refreshToken: Int = 0,
+    val icons: Set<String> = emptySet(),
+    val groundOverlays: List<LayerGroundOverlay> = emptyList(),
+)
+
+/**
+ * One image draped over the map for a layer: where its corners land, and the local file its pixels were resolved to.
+ *
+ * Corners arrive computed (rotation applied) because the math lives beside the KML parser where it is tested; the
+ * renderer only drapes.
+ */
+data class LayerGroundOverlay(
+    val imagePath: String,
+    /** Four (longitude, latitude) pairs: top-left, top-right, bottom-right, bottom-left. */
+    val corners: List<Pair<Double, Double>>,
+)

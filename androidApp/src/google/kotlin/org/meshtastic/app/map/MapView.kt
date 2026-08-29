@@ -70,7 +70,10 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.GroundOverlay
+import com.google.android.gms.maps.model.GroundOverlayOptions
 import com.google.android.gms.maps.model.JointType
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
@@ -187,6 +190,7 @@ import org.meshtastic.feature.map.component.WaypointInfoDialog
 import org.meshtastic.feature.map.component.toSitePlannerParams
 import org.meshtastic.feature.map.includes
 import org.meshtastic.feature.map.kml.ICON_URL_PROPERTY
+import org.meshtastic.feature.map.kml.KmlGroundOverlay
 import org.meshtastic.feature.map.layers.LayerType
 import org.meshtastic.feature.map.layers.MapLayerItem
 import org.meshtastic.feature.map.layers.toPickedMapFile
@@ -1516,8 +1520,16 @@ private fun parseMapLayer(layerType: LayerType, stream: InputStream): DataLayer?
                 ?.toLayer()
                 ?.applySimpleStyleSpec()
                 // A KMZ carries its icons inside the archive, and a placemark names them by their path in it. The
-                // renderer resolves those through its image cache, which is seeded from this property.
-                ?.let { layer -> layer.copy(properties = layer.properties + ("images" to imported.images)) }
+                // renderer resolves those through its image cache, which is seeded from this property. Ground
+                // overlays ride the same bag: DataLayer is the one thing that reaches RenderedMapLayer.
+                ?.let { layer ->
+                    layer.copy(
+                        properties =
+                        layer.properties +
+                            ("images" to imported.images) +
+                            ("groundOverlays" to imported.groundOverlays),
+                    )
+                }
         }
 
     LayerType.GEOJSON,
@@ -1541,6 +1553,13 @@ private class RenderedMapLayer(private val map: GmsGoogleMap, private val dataLa
         @Suppress("UNCHECKED_CAST")
         get() = dataLayer.properties["images"] as? Map<String, Bitmap> ?: emptyMap()
 
+    /** KML ground overlays, riding the same property bag as the images they draw with. */
+    private val groundOverlays: List<KmlGroundOverlay>
+        @Suppress("UNCHECKED_CAST")
+        get() = dataLayer.properties["groundOverlays"] as? List<KmlGroundOverlay> ?: emptyList()
+
+    private val renderedGroundOverlays = mutableListOf<GroundOverlay>()
+
     fun show() {
         if (renderer != null) return
         renderer =
@@ -1548,11 +1567,32 @@ private class RenderedMapLayer(private val map: GmsGoogleMap, private val dataLa
                 localImages.forEach { (path, bitmap) -> r.cacheImageData(path, bitmap) }
                 r.addLayer(dataLayer)
             }
+        groundOverlays.forEach { overlay ->
+            val image = localImages[overlay.href]
+            if (image == null) {
+                // The Site Planner's KML export names a sibling file that was never in an archive; there is
+                // nothing to drape. Count, not href — the image name is user content.
+                Logger.withTag("MapView").w { "Skipping a ground overlay whose image is not packed in the archive" }
+                return@forEach
+            }
+            map.addGroundOverlay(
+                GroundOverlayOptions()
+                    .positionFromBounds(
+                        LatLngBounds(LatLng(overlay.south, overlay.west), LatLng(overlay.north, overlay.east)),
+                    )
+                    .image(BitmapDescriptorFactory.fromBitmap(image))
+                    // KML's rotation is degrees counter-clockwise about the box centre; bearing is clockwise.
+                    .bearing((-overlay.rotationDegrees).toFloat()),
+            )
+                ?.let { renderedGroundOverlays += it }
+        }
     }
 
     fun hide() {
         renderer?.clear()
         renderer = null
+        renderedGroundOverlays.forEach { it.remove() }
+        renderedGroundOverlays.clear()
     }
 }
 
