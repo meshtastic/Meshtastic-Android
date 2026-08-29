@@ -43,7 +43,10 @@ internal fun BoundingBox.tileCount(minZoom: Int, maxZoom: Int): Long {
         val top = latitudeToTileY(north, span)
         val bottom = latitudeToTileY(south, span)
 
-        (right - left + 1).toLong() * (bottom - top + 1).toLong()
+        // A box straddling the antimeridian arrives with west > east: its columns wrap around the tile grid,
+        // and the direct difference would go negative.
+        val columns = if (right >= left) right - left + 1 else span - left + right + 1
+        columns.toLong() * (bottom - top + 1).toLong()
     }
 }
 

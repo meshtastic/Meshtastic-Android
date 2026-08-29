@@ -44,6 +44,14 @@ class TileEstimateTest {
     }
 
     @Test
+    fun `a box straddling the antimeridian wraps its columns rather than going negative`() {
+        // Fiji-ish: west of the line to just east of it. At zoom 1 that is both columns and the southern row.
+        assertEquals(2L, box(west = 170.0, south = -30.0, east = -170.0, north = -10.0).tileCount(1, 1))
+        // At zoom zero the whole world is one tile, wrapped or not.
+        assertEquals(1L, box(west = 170.0, south = -30.0, east = -170.0, north = -10.0).tileCount(0, 0))
+    }
+
+    @Test
     fun `an inverted range counts nothing rather than throwing`() {
         assertEquals(0L, box(-93.8, 41.5, -93.5, 41.7).tileCount(minZoom = 17, maxZoom = 16))
     }
