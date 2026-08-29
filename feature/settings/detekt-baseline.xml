@@ -72,7 +72,6 @@
     <ID>ModifierMissing:SecurityConfigScreen.kt:@Composable @Suppress("LongMethod") fun SecurityConfigScreenCommon</ID>
     <ID>ModifierMissing:SerialConfigItemList.kt:@Composable fun SerialConfigScreen</ID>
     <ID>ModifierMissing:SettingsScreen.kt:@Suppress("LongMethod", "CyclomaticComplexMethod") @Composable fun SettingsScreen</ID>
-    <ID>ModifierMissing:StatusMessageConfigItemList.kt:@Composable fun StatusMessageConfigScreen</ID>
     <ID>ModifierMissing:StoreForwardConfigItemList.kt:@Composable fun StoreForwardConfigScreen</ID>
     <ID>ModifierMissing:TelemetryConfigItemList.kt:@Composable fun TelemetryConfigScreen</ID>
     <ID>ModifierMissing:ThemePickerDialog.kt:@Composable fun ThemePickerDialog</ID>

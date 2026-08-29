@@ -22,9 +22,14 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
@@ -39,11 +44,14 @@ import org.meshtastic.core.model.utf8Size
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.call_sign
 import org.meshtastic.core.resources.call_sign_summary
+import org.meshtastic.core.resources.clear
 import org.meshtastic.core.resources.ham_long_name_summary
 import org.meshtastic.core.resources.hardware_model
 import org.meshtastic.core.resources.long_name
 import org.meshtastic.core.resources.node_id
 import org.meshtastic.core.resources.short_name
+import org.meshtastic.core.resources.status_message
+import org.meshtastic.core.resources.status_message_summary
 import org.meshtastic.core.resources.unmessageable
 import org.meshtastic.core.resources.unmonitored_or_infrastructure
 import org.meshtastic.core.resources.user
@@ -52,23 +60,45 @@ import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.RegularPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.core.ui.icon.Close
+import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
+import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.User
 
 private const val LONG_NAME_MAX_LENGTH = 39 // long_name max_size:40
 private const val SHORT_NAME_MAX_LENGTH = 4 // short_name max_size:5
+private const val STATUS_MESSAGE_MAX_BYTES = 80 // status_message max_size:80
+
+// The byte counter appears this close to the limit, matching the message composer.
+private const val STATUS_MESSAGE_COUNTER_WITHIN_BYTES = 20
 
 internal const val USER_LONG_NAME_TEST_TAG = "user_long_name"
 internal const val HAM_LONG_NAME_TEST_TAG = "ham_long_name"
 internal const val USER_SHORT_NAME_TEST_TAG = "user_short_name"
+internal const val USER_STATUS_MESSAGE_TEST_TAG = "user_status_message"
 
 @Composable
 fun UserConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
+    val destNode by viewModel.destNode.collectAsStateWithLifecycle()
     val userConfig = state.userConfig
     val formState = rememberConfigState(initialValue = userConfig)
     val firmwareVersion = state.metadata?.firmware_version
     val capabilities = remember(firmwareVersion) { Capabilities(firmwareVersion) }
+
+    // The status message is a ModuleConfig field, but it is part of the node's identity rather than a module of its
+    // own, so it is edited beside the names instead of in a screen of its own. Editing it here also keeps it reachable
+    // for remote-administered nodes.
+    val statusMessage =
+        remember(state.moduleConfig.statusmessage, destNode?.nodeStatus) {
+            val configured = state.moduleConfig.statusmessage?.node_status.orEmpty()
+            // Fall back to the node's broadcast status so the user edits the live value, not a blank.
+            configured.ifBlank { destNode?.nodeStatus.orEmpty() }
+        }
+    var statusMessageInput by rememberSaveable(statusMessage) { mutableStateOf(statusMessage) }
+    // The field is absent without the capability, so the input can only differ from the saved value when shown.
+    val statusMessageDirty = statusMessageInput != statusMessage
 
     // Ham onboarding repurposes the long-name field as the callsign, for the local node only (iOS parity).
     val hamMode = formState.value.is_licensed && state.isLocal
@@ -85,7 +115,9 @@ fun UserConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         enabled = state.connected && validNames,
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
-        onSave = viewModel::saveUserConfig,
+        additionalDirtyCheck = { statusMessageDirty },
+        onDiscard = { statusMessageInput = statusMessage },
+        onSave = { viewModel.save(it, formState.isDirty, statusMessageInput, statusMessageDirty) },
     ) {
         item {
             TitledCard(title = stringResource(Res.string.user_config)) {
@@ -102,6 +134,14 @@ fun UserConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     isLongNameError = !validLongName,
                     isShortNameError = !validShortName,
                 )
+                if (capabilities.supportsStatusMessage) {
+                    HorizontalDivider()
+                    StatusMessageField(
+                        value = statusMessageInput,
+                        enabled = state.connected,
+                        onValueChange = { statusMessageInput = it },
+                    )
+                }
                 HorizontalDivider()
                 RegularPreference(
                     title = stringResource(Res.string.hardware_model),
@@ -144,6 +184,41 @@ fun UserConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
             }
         }
     }
+}
+
+/** Writes whichever halves of the user screen the operator actually changed: the owner, the status message, or both. */
+private fun RadioConfigViewModel.save(user: User, userDirty: Boolean, statusMessage: String, statusDirty: Boolean) {
+    if (userDirty) saveUserConfig(user)
+    if (statusDirty) {
+        setModuleConfig(ModuleConfig(statusmessage = ModuleConfig.StatusMessageConfig(node_status = statusMessage)))
+    }
+}
+
+/** The node's own status message: a short free-text line other nodes display beside it. */
+@Composable
+private fun StatusMessageField(value: String, enabled: Boolean, onValueChange: (String) -> Unit) {
+    val focusManager = LocalFocusManager.current
+
+    EditTextPreference(
+        title = stringResource(Res.string.status_message),
+        value = value,
+        summary = stringResource(Res.string.status_message_summary),
+        maxSize = STATUS_MESSAGE_MAX_BYTES,
+        counterVisibleWithinBytes = STATUS_MESSAGE_COUNTER_WITHIN_BYTES,
+        enabled = enabled,
+        isError = false,
+        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
+        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+        modifier = Modifier.testTag(USER_STATUS_MESSAGE_TEST_TAG),
+        onValueChanged = onValueChange,
+        trailingIcon = {
+            if (value.isNotEmpty()) {
+                IconButton(onClick = { onValueChange("") }) {
+                    Icon(imageVector = MeshtasticIcons.Close, contentDescription = stringResource(Res.string.clear))
+                }
+            }
+        },
+    )
 }
 
 /**

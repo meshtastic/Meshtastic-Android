@@ -56,6 +56,7 @@ import org.meshtastic.core.domain.usecase.settings.InstallProfileUseCase
 import org.meshtastic.core.domain.usecase.settings.ProcessRadioResponseUseCase
 import org.meshtastic.core.domain.usecase.settings.RadioConfigUseCase
 import org.meshtastic.core.domain.usecase.settings.RadioResponseResult
+import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.HamName
 import org.meshtastic.core.model.MqttConnectionState
@@ -836,10 +837,22 @@ open class RadioConfigViewModel(
         }
 
         when (route) {
-            ConfigRoute.USER ->
+            ConfigRoute.USER -> {
                 safeLaunch(tag = "getOwner") {
                     radioConfigUseCase.getOwner(destNum, onRequestId = ::registerReadRequestId)
                 }
+                // The status message is edited on the user screen, so it is read with the owner. Gated on the
+                // capability: firmware without the module never answers the get, leaving the overlay waiting.
+                if (Capabilities(radioConfigState.value.metadata?.firmware_version).supportsStatusMessage) {
+                    safeLaunch(tag = "getStatusMessageConfig") {
+                        radioConfigUseCase.getModuleConfig(
+                            destNum,
+                            AdminMessage.ModuleConfigType.STATUSMESSAGE_CONFIG.value,
+                            onRequestId = ::registerReadRequestId,
+                        )
+                    }
+                }
+            }
 
             ConfigRoute.CHANNELS -> {
                 safeLaunch(tag = "getChannel0") {

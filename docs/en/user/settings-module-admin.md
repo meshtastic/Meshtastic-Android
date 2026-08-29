@@ -2,7 +2,7 @@
 title: Settings — Modules & Admin
 parent: User Guide
 nav_order: 8
-last_updated: 2026-08-27
+last_updated: 2026-08-29
 description: Configure optional feature modules (MQTT, telemetry, canned messages, TAK, and more) and perform device administration.
 aliases:
   - modules
@@ -240,17 +240,8 @@ People counter using WiFi and BLE probe requests. Counts nearby devices by passi
 
 ### Status Message Module
 
-Publishes a short free-text status line for your node, which other nodes can display alongside it.
-
-| Setting | Description |
-|---------|-------------|
-| The actual status string | Up to 80 characters. The **✕** in the field clears it. (That is the app's own label for the field, verbatim.) |
-
-Saving takes effect immediately — this is one of the few module settings that never asks the
-node to reboot.
-
-> ℹ️ **Note:** The screen only appears for firmware that reports support for the status-message
-> module. If you do not see it in the module list, your node's firmware does not have it.
+The status message has no module screen. It is edited with the rest of the node's identity, on
+[Settings — Radio & User](settings-radio-user#user-profile).
 
 ### Mesh Beacon Module
 

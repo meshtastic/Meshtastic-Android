@@ -77,7 +77,6 @@ import org.meshtastic.feature.settings.radio.component.RangeTestConfigScreen
 import org.meshtastic.feature.settings.radio.component.RemoteHardwareConfigScreen
 import org.meshtastic.feature.settings.radio.component.SecurityConfigScreenCommon
 import org.meshtastic.feature.settings.radio.component.SerialConfigScreen
-import org.meshtastic.feature.settings.radio.component.StatusMessageConfigScreen
 import org.meshtastic.feature.settings.radio.component.StoreForwardConfigScreen
 import org.meshtastic.feature.settings.radio.component.TAKConfigScreen
 import org.meshtastic.feature.settings.radio.component.TakServerScreen
@@ -383,9 +382,6 @@ fun EntryProviderScope<NavKey>.settingsGraph(
 
                 ModuleRoute.PAXCOUNTER ->
                     PaxcounterConfigScreen(viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
-
-                ModuleRoute.STATUS_MESSAGE ->
-                    StatusMessageConfigScreen(viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
 
                 ModuleRoute.TAK ->
                     TAKConfigScreen(viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })

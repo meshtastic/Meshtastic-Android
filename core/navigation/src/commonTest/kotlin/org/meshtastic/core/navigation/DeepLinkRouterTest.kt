@@ -354,7 +354,7 @@ class DeepLinkRouterTest {
                 "ambient-lighting" to SettingsRoute.AmbientLighting,
                 "detection-sensor" to SettingsRoute.DetectionSensor,
                 "paxcounter" to SettingsRoute.Paxcounter,
-                "status-message" to SettingsRoute.StatusMessage,
+                "status-message" to SettingsRoute.User,
                 "tak" to SettingsRoute.TAK,
                 "clean-node-db" to SettingsRoute.CleanNodeDb,
                 "debug-panel" to SettingsRoute.DebugPanel,

@@ -349,7 +349,7 @@ configuration settings screen. Constraints are sourced from two layers:
 
 | Field | Type | Validation | Notes |
 |-------|------|------------|-------|
-| `node_status` | String | maxSize: 80 bytes | Clearable; requires `supportsStatusMessage` capability |
+| `node_status` | String | maxSize: 80 bytes | Clearable; requires `supportsStatusMessage` capability. Edited on the User screen, not a module screen |
 
 ### Traffic Management (`ModuleConfig.TrafficManagementConfig`)
 

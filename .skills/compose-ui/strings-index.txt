@@ -1100,7 +1100,6 @@ mesh_beacon_on_preset
 mesh_beacon_on_region
 mesh_beacon_preset_indicator
 mesh_beacon_preset_none
-mesh_beacon_send_as_node
 mesh_beacon_target
 mesh_beacon_target_add
 mesh_beacon_target_channel_index
@@ -1310,7 +1309,6 @@ node_sort_last_heard
 node_sort_title
 node_sort_via_favorite
 node_sort_via_mqtt
-node_status_summary
 nodedb_reset
 nodeinfo_broadcast_interval
 ### NODES ###
@@ -1741,7 +1739,7 @@ spread_factor
 ssid
 state_broadcast_seconds
 status_message
-status_message_config
+status_message_summary
 stay_connected_anywhere
 stop_connecting
 store_forward
