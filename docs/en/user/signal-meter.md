@@ -58,7 +58,7 @@ Because the rating is relative to the preset limit, the *same* SNR can rate diff
 | Bad | 1 | `5.5 dB` to `7.5 dB` below the `limit` | At the very edge of what the preset can recover. |
 | None | 0 | more than `7.5 dB` below the `limit` | Below the floor — transmission lost to noise. |
 
-> **Note:** The fixed SNR thresholds you may have seen elsewhere (`-7 dB` / `-15 dB`) are now only used for coloring individual hops in traceroute results — not for the per-node signal meter described here.
+> ℹ️ **Note:** The fixed SNR thresholds you may have seen elsewhere (`-7 dB` / `-15 dB`) are now only used for coloring individual hops in traceroute results — not for the per-node signal meter described here.
 
 ---
 
@@ -86,6 +86,3 @@ In the app, signal data is shown in several places:
 - [Nodes](nodes) — where signal bars appear in the node list
 - [Node Metrics](node-metrics) — SNR/RSSI history and the per-node signal quality reference
 - [Settings — Radio & User](settings-radio-user) — modem presets and their SNR limits
-
----
-

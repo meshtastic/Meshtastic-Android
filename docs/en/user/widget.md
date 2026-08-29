@@ -46,5 +46,3 @@ Tap the widget to open the app, or use its refresh control to request fresh stat
 - [Node Metrics](node-metrics) — the full Signal Quality and Local Stats history inside the app
 - [Connections](connections) — connect to a radio so the widget has stats to show
 - [Local Mesh Discovery](discovery) — channel and airtime utilization across the mesh
-
----

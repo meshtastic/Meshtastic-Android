@@ -150,6 +150,3 @@ Requirements:
 
 - [Connections](connections) — connection methods overview
 - [Firmware Updates](firmware) — USB, BLE, and Wi-Fi update all work the same as on Android
-
----
-

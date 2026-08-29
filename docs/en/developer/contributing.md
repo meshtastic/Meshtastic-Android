@@ -106,6 +106,3 @@ Prose in `docs/en/` follows the house style — see [Documentation Style](docume
 - [Meshtastic Discord](https://discord.gg/meshtastic) — `#app-development` channel
 - GitHub Issues — for bug reports and feature requests
 - GitHub Discussions — for questions and ideas
-
----
-

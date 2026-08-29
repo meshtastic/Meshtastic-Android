@@ -109,6 +109,3 @@ Platform-specific implementations:
 2. Register in platform-specific `RadioTransportFactory`
 3. Add connection UI in `feature:connections`
 4. Update DI bindings for the platform
-
----
-

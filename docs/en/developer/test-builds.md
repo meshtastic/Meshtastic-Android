@@ -139,7 +139,7 @@ Two more things about release selection apply to every channel above, not just s
 
 > **Leave "Fallback to older releases" ON.** It is not a channel-strictness setting, and turning it off breaks every channel config here. Obtainium's release loop breaks out after the first candidate when fallback is off, so a title filter never gets to skip past releases that don't match — a config pinned to `-open` or `^Snapshot` then fails with "Could not find a suitable release" because production `v2.7.14` sits at the head of the list. The title filter is what pins the channel; fallback is what lets Obtainium walk down to the newest release that matches it.
 >
-> **If your channel filter still finds nothing:** that channel has no published release yet — common early in a version cycle. Check the [project README](https://github.com/meshtastic/Meshtastic-Android#get-meshtastic) for what is live, or use the *Bleeding edge* form to follow whichever of open/closed is newest.
+> ℹ️ **Note:** If your channel filter still finds nothing, that channel has no published release — common early in a version cycle. Check the [project README](https://github.com/meshtastic/Meshtastic-Android#get-meshtastic) for what is live, or use the *Bleeding edge* form to follow whichever of open/closed is newest.
 
 ---
 

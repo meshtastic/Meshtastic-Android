@@ -159,6 +159,3 @@ A full, browsable directory of every link is also available under **Settings →
 - [Map & Waypoints](map-and-waypoints) — view node positions geographically
 - [Local Mesh Discovery](discovery) — traceroute and neighbor info for topology exploration
 - [Signal Meter](signal-meter) — understand what the signal bars mean
-
----
-

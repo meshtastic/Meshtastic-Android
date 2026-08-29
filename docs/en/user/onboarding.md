@@ -70,7 +70,7 @@ Notifications alert you to:
 
 Critical alerts are high-priority notifications that break through Do Not Disturb — for emergency mesh alerts and urgent messages.
 
-This step is not a runtime permission prompt. There is no grant/deny dialog: the button opens the Android system settings page for the app's **Alerts** notification channel, where you turn the breakthrough behaviour on yourself. You can **skip** it, and reach the same page later from Android notification settings.
+This step is not a runtime permission prompt. There is no grant/deny dialog: the button opens the Android system settings page for the app's **Alerts** notification channel, where you turn the breakthrough behavior on yourself. You can **skip** it, and reach the same page later from Android notification settings.
 
 ### Reviewing permissions later
 
@@ -103,5 +103,3 @@ New to Meshtastic? The [getting started guide](https://meshtastic.org/docs/getti
 - [Nodes](nodes) — see who else is on your mesh
 - [Map & Waypoints](map-and-waypoints) — view node positions
 - [Settings — Radio & User](settings-radio-user) — configure your radio and user profile
-
----

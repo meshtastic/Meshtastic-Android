@@ -142,6 +142,3 @@ Deep link routing is tested in:
 ```
 core/navigation/src/commonTest/kotlin/org/meshtastic/core/navigation/DeepLinkRouterTest.kt
 ```
-
----
-

@@ -142,6 +142,3 @@ Air quality data can be viewed as info cards on the node detail screen, charted 
 - [Node Metrics](node-metrics) — view telemetry data on the node detail screen
 - [Settings — Modules & Admin](settings-module-admin) — telemetry module configuration
 - [Units & Locale](units-and-locale) — temperature and pressure display units
-
----
-

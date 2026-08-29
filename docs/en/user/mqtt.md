@@ -47,7 +47,7 @@ A gateway node with internet access (WiFi or Ethernet) publishes mesh messages t
 | Password | Broker authentication | large4cats |
 | Root Topic | Base topic for messages | msh |
 | Encryption | Encrypt MQTT payload | Enabled |
-| JSON Output | Also publish and consume the `/2/json/` topic. Deprecated in the protobuf schema, but still the only toggle for this behaviour — and the app's own proxy honours it | Disabled |
+| JSON Output | Also publish and consume the `/2/json/` topic. Deprecated in the protobuf schema, but still the only toggle for this behavior — and the app's own proxy honors it | Disabled |
 | TLS | Secure connection to broker | Disabled |
 | Map Reporting | Report position to public map | Disabled |
 
@@ -152,6 +152,3 @@ Understanding the layered encryption model:
 - [Settings — Modules & Admin](settings-module-admin) — MQTT module configuration reference
 - [Messages & Channels](messages-and-channels) — channel encryption and PSK setup
 - [MQTT integration guide](https://meshtastic.org/docs/software/integrations/mqtt) — detailed MQTT documentation on meshtastic.org
-
----
-

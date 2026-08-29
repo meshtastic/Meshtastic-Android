@@ -173,5 +173,3 @@ The position tab shows location data for nodes that share GPS:
 - [Signal Meter](signal-meter) — how signal quality is calculated from SNR and RSSI
 - [Local Mesh Discovery](discovery) — traceroute details and neighbor info
 - [Units & Locale](units-and-locale) — temperature, distance, and speed display formats
-
----

@@ -133,6 +133,3 @@ See [Desktop App](desktop) for platform-specific details and keyboard shortcuts.
 - [Settings — Radio & User](settings-radio-user) — Bluetooth and network configuration
 - [Desktop App](desktop) — desktop-specific connection details
 - [Supported devices](https://meshtastic.org/docs/hardware/devices) — full list of compatible radios on meshtastic.org
-
----
-

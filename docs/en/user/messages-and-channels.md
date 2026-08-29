@@ -86,7 +86,7 @@ A status label appears under **your own** outgoing messages only (incoming messa
 
 | State | Meaning |
 |-------|---------|
-| Sending… | Queued or already handed to the radio, not yet resolved either way. Both stages share this text, but the icon and colour change as it progresses — a yellow upload cloud while queued, a blue arrow once the radio has it |
+| Sending… | Queued or already handed to the radio, not yet resolved either way. Both stages share this text, but the icon and color change as it progresses — a yellow upload cloud while queued, a blue arrow once the radio has it |
 | Delivered to recipient | The strongest confirmation for a direct message — an acknowledgment came back |
 | Delivered to mesh | For a channel broadcast, the message reached the mesh (broadcasts have no per-recipient ack) |
 | Relayed, not confirmed by recipient | For a direct message, shown in a warning color — the message was relayed but no acknowledgment has come back yet |
@@ -246,6 +246,3 @@ reliable or background, but that is not something you control from the message c
 - [Settings — Radio & User](settings-radio-user) — configure channel encryption and presets
 - [MQTT](mqtt) — bridge channel messages to the internet
 - [Channel configuration](https://meshtastic.org/docs/configuration/radio/channels) — detailed channel settings on meshtastic.org
-
----
-

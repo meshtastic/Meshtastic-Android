@@ -246,6 +246,3 @@ Settings use standard preference controls — dropdowns, toggles, and sliders:
 - [Signal Meter](signal-meter) — how modem presets affect signal quality thresholds
 - [LoRa configuration](https://meshtastic.org/docs/configuration/radio/lora) — detailed LoRa settings reference on meshtastic.org
 - [Initial configuration](https://meshtastic.org/docs/getting-started/initial-config) — region setup guide on meshtastic.org
-
----
-

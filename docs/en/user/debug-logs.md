@@ -54,5 +54,3 @@ The desktop app has no system logcat, so the **App logs** tab shows the app's ow
 
 - [Help & In-App Docs](help-and-docs) — reading this documentation offline inside the app
 - [Connections](connections) — if the problem is getting connected to your radio in the first place
-
----

@@ -87,6 +87,3 @@ The `feature:docs` module uses **no** Room or persistent database. Documentation
 - Use bundled resources/assets for static content
 - Never store sensitive data (keys, passwords) in plain Room tables
 - Always provide migrations for schema changes
-
----
-

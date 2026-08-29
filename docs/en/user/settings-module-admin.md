@@ -39,7 +39,7 @@ Bridges mesh messages to and from an MQTT broker for internet connectivity. This
 | Username | Authentication username |
 | Password | Authentication password |
 | Encryption | Encrypt MQTT payloads |
-| JSON Output | Publish and consume MQTT messages as JSON. Marked deprecated in the protobuf schema, but it is still the only toggle for this behaviour and the firmware still honours it |
+| JSON Output | Publish and consume MQTT messages as JSON. Marked deprecated in the protobuf schema, but it is still the only toggle for this behavior and the firmware still honors it |
 | TLS | Use secure connection |
 | Root Topic | Base MQTT topic path |
 | Proxy to client enabled | Let a connected phone carry the node's MQTT traffic, instead of the node reaching the broker itself |
@@ -266,7 +266,7 @@ Remotely configure nodes that share your admin key:
 3. Modify configuration.
 4. Tap **Save** — changes are sent over the mesh.
 
-> ⚠️ **Requires:** Admin key configured on both your node and the target node.
+> ⚠️ **Important:** Requires an admin key configured on both your node and the target node.
 
 ### Clean Node Database
 
@@ -316,6 +316,3 @@ generated at build time by AboutLibraries. It was previously called the license 
 - [Settings — Radio & User](settings-radio-user) — core radio and user profile settings
 - [Module configuration reference](https://meshtastic.org/docs/configuration/module) — detailed module docs on meshtastic.org
 - [FAQ](https://meshtastic.org/docs/faq/) — common questions on meshtastic.org
-
----
-

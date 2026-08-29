@@ -140,6 +140,3 @@ Every feature module should have:
 - [ ] Navigation entries registered
 - [ ] `./gradlew kmpSmokeCompile` passes
 - [ ] `./gradlew :feature:my-feature:allTests` passes
-
----
-

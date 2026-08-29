@@ -58,6 +58,3 @@ The functions are grouped into a **Write** section (functions that change someth
 - [Messages & Channels](messages-and-channels) — sending messages directly in the app
 - [Nodes](nodes) — the node list the read functions draw from
 - [Node Metrics](node-metrics) — the telemetry behind Get Mesh Metrics
-
----
-

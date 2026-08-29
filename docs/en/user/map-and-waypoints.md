@@ -159,6 +159,3 @@ Offline area downloads are **F-Droid only**: cache the visible region from the l
 - [Node Metrics](node-metrics) — signal quality and position history for individual nodes
 - [Local Mesh Discovery](discovery) — traceroute and neighbor info for understanding mesh topology
 - [Units & Locale](units-and-locale) — distance and coordinate display formats
-
----
-

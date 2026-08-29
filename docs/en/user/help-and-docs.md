@@ -45,5 +45,3 @@ A page open in the browser:
 
 - [Translate the App](translate) — how these pages get localized into other languages
 - [App Functions](app-functions) — the separate system-AI integration (distinct from Chirpy)
-
----

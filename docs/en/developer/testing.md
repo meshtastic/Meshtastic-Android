@@ -138,6 +138,3 @@ Tests run automatically on:
 - Pre-release validation
 
 Every job in `reusable-check.yml` runs on `ubuntu-24.04` with JDK 25 and Gradle caching; only the desktop and Flatpak-source jobs use a matrix. The ARM (`ubuntu-24.04-arm`) and container-backed `ubuntu-slim` runners carry the lightweight utility workflows instead — see `.skills/testing-ci/SKILL.md` for the four-tier rule.
-
----
-

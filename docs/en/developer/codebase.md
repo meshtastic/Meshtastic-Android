@@ -160,6 +160,3 @@ Key dependencies in `gradle/libs.versions.toml`:
 | Networking | Ktor |
 | Markdown | multiplatform-markdown-renderer |
 | Testing | kotlin-test, compose-ui-test |
-
----
-

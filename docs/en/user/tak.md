@@ -43,7 +43,7 @@ there is no separate enable switch here, because the device Role above is what t
 
 | Setting | Description |
 |---------|-------------|
-| Team | Your TAK team colour |
+| Team | Your TAK team color |
 | Role | Your member role within that team |
 
 ### Local TAK Server
@@ -131,6 +131,3 @@ Once configured:
 - [Nodes](nodes) — TAK and TAK Tracker roles in the node list
 - [Map & Waypoints](map-and-waypoints) — node positions on the map
 - [ATAK plugin guide](https://meshtastic.org/docs/software/integrations/integrations-atak-plugin/) — detailed ATAK setup on meshtastic.org
-
----
-

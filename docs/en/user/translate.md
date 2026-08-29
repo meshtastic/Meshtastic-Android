@@ -106,5 +106,3 @@ Thank you for helping expand the reach of Meshtastic!
 - [Units & Locale](units-and-locale) — how the app picks number, date, and unit formats for your region
 - [Help & Documentation](help-and-docs) — the in-app docs browser these pages are published to
 - [Onboarding](onboarding) — where a new user first meets the translated strings
-
----

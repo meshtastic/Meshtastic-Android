@@ -211,6 +211,3 @@ See [Nodes](nodes) for full details on filtering and sorting options.
 - [Signal Meter](signal-meter) — interpret the SNR and RSSI a scan reports
 - [Settings — Modules & Admin](settings-module-admin) — configure the Mesh Beacon and Neighbor Info modules
 - [Messages & Channels](messages-and-channels) — join a mesh you found and start talking
-
----
-

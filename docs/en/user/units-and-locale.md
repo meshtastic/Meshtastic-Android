@@ -169,6 +169,3 @@ otherwise. The setting exists on Android and Desktop alike.
 - [Measurement & Formatting](../developer/measurement) — developer reference for the formatting utilities
 - [Settings — Radio & User](settings-radio-user) — region setting that drives unit selection
 - [Display Config](https://meshtastic.org/docs/configuration/radio/display) — units, clock, and compass settings for the radio's own screen, on meshtastic.org
-
----
-
