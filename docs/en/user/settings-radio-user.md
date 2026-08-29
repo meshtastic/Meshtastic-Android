@@ -167,12 +167,12 @@ These control the **radio's own screen**, not the app's.
 
 | Setting | Description |
 |---------|-------------|
-| WiFi enabled | Enable the Wi-Fi radio (ESP32 devices) |
-| SSID | Network name to connect to. **Scan WiFi QR code** fills this and the password from a standard Wi-Fi QR code |
+| Wi-Fi enabled | Enable the Wi-Fi radio (ESP32 radios) |
+| SSID | Network name to connect to. **Scan Wi-Fi QR code** fills this and the password from a standard Wi-Fi QR code |
 | Password | Network password |
 | Ethernet enabled | Use a wired connection on hardware that has one |
 | IPv4 mode | DHCP, or a static address configured with the four fields below |
-| Wifi IP / Subnet / Gateway / DNS | The static address, only used when IPv4 mode is static |
+| Wi-Fi IP / Subnet / Gateway / DNS | The static address, only used when IPv4 mode is static |
 | UDP broadcasting | Share mesh traffic with other nodes over the local network |
 | NTP server | Time synchronization server |
 | rsyslog server | Remote logging server |

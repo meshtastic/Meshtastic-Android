@@ -233,7 +233,7 @@ People counter using Wi-Fi and BLE probe requests. Counts nearby devices by pass
 |---------|-------------|
 | Enabled | Activate people counting |
 | Update Interval (s) | How often to report counts |
-| WiFi RSSI threshold | Ignore Wi-Fi probes weaker than this, so distant devices are not counted (defaults to −80 dBm) |
+| Wi-Fi RSSI threshold | Ignore Wi-Fi probes weaker than this, so distant devices are not counted (defaults to −80 dBm) |
 | BLE RSSI threshold | The same cut-off for BLE advertisements (defaults to −80 dBm) |
 
 > 💡 **Tip:** Paxcounter is useful for estimating foot traffic at trailheads, event venues, or other locations. Counts are approximate — one person may carry multiple devices.

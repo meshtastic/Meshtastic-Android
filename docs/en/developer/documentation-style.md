@@ -61,7 +61,7 @@ Project- and platform-specific decisions, alphabetical. Google's word list cover
 | sign in | Verb; *sign-in* as adjective. Not *log in* or *login*. |
 | tap | The interaction verb for the app's touch UI. *Click* only in desktop-app or web contexts; never *tap on* or *click on*. |
 | touch & hold | Exactly this form (Google's Android convention). Not *long press*, not *tap and hold*. |
-| Wi-Fi | Never *WiFi* or *wifi*. |
+| Wi-Fi | Never *WiFi* or *wifi* — even when quoting an app label that still says WiFi (this word outranks PROC-1's match-the-UI rule; the app strings are converging on Wi-Fi). |
 
 **radio vs. phone vs. node vs. device:** the corpus's biggest ambiguity is *device*, which has meant both the radio and the phone. Use *radio* for the Meshtastic hardware, *phone* for the Android handset, and *node* for a mesh participant. Use *device* only when quoting Android's own UI (the **Nearby devices** permission, *Devices* system pages) or in established compounds (*device metrics*, *device firmware* where the UI uses them).
 
