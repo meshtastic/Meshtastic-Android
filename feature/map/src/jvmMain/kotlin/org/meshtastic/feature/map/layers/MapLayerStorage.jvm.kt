@@ -16,8 +16,13 @@
  */
 package org.meshtastic.feature.map.layers
 
+import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
 
 /** Alongside the desktop database, which already lives in `~/.meshtastic`. */
 actual fun mapLayersDirectory(): Path = "${System.getProperty("user.home")}/.meshtastic/$LAYERS_DIR".toPath()
+
+actual fun mapLayerFileSystem(): FileSystem = FileSystem.SYSTEM
+
+actual fun mapLayersCacheDirectory(): Path = "${System.getProperty("user.home")}/.meshtastic/cache/kml-geojson".toPath()

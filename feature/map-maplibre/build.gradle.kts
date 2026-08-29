@@ -49,6 +49,8 @@ kotlin {
             implementation(projects.feature.map)
 
             implementation(libs.kotlinx.collections.immutable)
+            // The KML conversion cache lives on disk; Okio is how common code reaches it.
+            implementation(libs.okio)
             // Imported layers can name an icon image by URL; Coil fetches and decodes it.
             implementation(libs.coil)
             implementation(libs.coil.network.ktor3)

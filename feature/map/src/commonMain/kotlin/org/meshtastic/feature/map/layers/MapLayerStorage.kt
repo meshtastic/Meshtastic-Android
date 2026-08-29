@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.map.layers
 
+import okio.FileSystem
 import okio.Path
 
 /**
@@ -26,6 +27,20 @@ import okio.Path
  * directory listing *is* the layer list on restart.
  */
 expect fun mapLayersDirectory(): Path
+
+/**
+ * The file system layers are stored on.
+ *
+ * `FileSystem.SYSTEM` is not part of Okio's common API surface — it is declared per platform — so it is reached through
+ * expect/actual, the same way `core:database` reaches it.
+ */
+expect fun mapLayerFileSystem(): FileSystem
+
+/**
+ * Where converted copies of imported layers are cached (KML rendered down to GeoJSON, for the renderer that has no KML
+ * source). Disposable, unlike [mapLayersDirectory] — losing it only costs a reconversion.
+ */
+expect fun mapLayersCacheDirectory(): Path
 
 /**
  * A file the user picked, handed to [MapLayersManager] by whatever picker the platform uses.

@@ -36,6 +36,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kotlinx.serialization.json.Json
+import okio.Path.Companion.toOkioPath
 import org.junit.runner.RunWith
 import org.meshtastic.app.map.prefs.map.GoogleCameraPosition
 import org.meshtastic.app.map.prefs.map.GoogleMapSelectionPrefs
@@ -52,6 +53,7 @@ import org.meshtastic.core.testing.FakeNotificationPrefs
 import org.meshtastic.core.testing.FakeRadioConfigRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.testing.FakeUiPrefs
+import org.meshtastic.feature.map.layers.MapLayersManager
 import org.meshtastic.feature.map.tiles.CustomTileProviderConfig
 import org.meshtastic.feature.map.tiles.CustomTileProviderRepository
 import org.meshtastic.feature.map.tiles.CustomTileProviderRepositoryImpl
@@ -59,6 +61,7 @@ import org.meshtastic.feature.map.tiles.CustomTileProviderSaveResult
 import org.meshtastic.feature.map.tiles.MapTileCatalogue
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import kotlin.io.path.createTempDirectory
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -134,10 +137,11 @@ class GoogleCustomTileSelectionTest {
             val client = HttpClient().also { httpClient = it }
             val mapLayersManager =
                 MapLayersManager(
-                    application = application,
                     dispatchers = CoroutineDispatchers(dispatcher, dispatcher, dispatcher),
                     httpClient = client,
                     mapPrefs = mapPrefs,
+                    // The real location reads a global application context this test never installs.
+                    layersDir = createTempDirectory("map-layers").toOkioPath(),
                 )
 
             val viewModel =
@@ -201,10 +205,11 @@ class GoogleCustomTileSelectionTest {
             val client = HttpClient().also { httpClient = it }
             val mapLayersManager =
                 MapLayersManager(
-                    application = application,
                     dispatchers = CoroutineDispatchers(dispatcher, dispatcher, dispatcher),
                     httpClient = client,
                     mapPrefs = mapPrefs,
+                    // The real location reads a global application context this test never installs.
+                    layersDir = createTempDirectory("map-layers").toOkioPath(),
                 )
 
             assertNull(prefs.selectedCustomTileProviderId.value)

@@ -14,52 +14,57 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.app.map
+package org.meshtastic.feature.map.maplibre.layers
 
-import android.content.Context
-import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.withContext
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.feature.map.geojson.geoJsonIconUrls
-import org.meshtastic.feature.map.maplibre.layers.CustomLayer
-import java.io.BufferedInputStream
-import java.io.File
-
-private const val CONVERTED_DIR = "kml-geojson"
+import org.meshtastic.feature.map.kml.KmlToGeoJson
+import org.meshtastic.feature.map.kml.readKmlDocument
+import org.meshtastic.feature.map.layers.LayerType
+import org.meshtastic.feature.map.layers.MapLayerItem
+import org.meshtastic.feature.map.layers.MapLayersManager
+import org.meshtastic.feature.map.layers.mapLayerFileSystem
+import org.meshtastic.feature.map.layers.mapLayersCacheDirectory
+import org.meshtastic.feature.map.layers.toLocalPath
 
 /**
  * Turns the visible map layers into what MapLibre can actually fetch.
  *
  * GeoJSON and Site Planner coverage estimates pass straight through. KML and KMZ are converted once into a GeoJSON file
- * in the cache and handed over as that file's URI — MapLibre has no KML source, and until now these were filtered out
- * entirely: the import appeared in the layers sheet, could be toggled on, and drew nothing at all.
+ * in the cache and handed over as that file's URI — MapLibre has no KML source, and before this existed those imports
+ * appeared in the layers sheet, could be toggled on, and drew nothing at all.
+ *
+ * Common code because both MapLibre hosts need it: the F-Droid map and the desktop map render the same imported layers.
+ * Reading goes through [MapLayersManager.readLayerBytes], which also covers network layers — the old Android-only
+ * version opened them through a ContentResolver, which cannot open `http`, so a network KML layer silently drew
+ * nothing.
  *
  * Conversion is keyed by layer id *and* refresh token, so a refresh reconverts and a visibility toggle does not. The
  * result is cached in memory for the session, and the file it writes is reused across sessions — an existing file for a
  * given id-and-token cannot be stale, because a refresh changes the token and so changes the filename.
  */
 @Composable
-internal fun rememberRenderableLayers(layers: List<MapLayerItem>): List<CustomLayer> {
-    val context = LocalContext.current
+fun rememberRenderableLayers(manager: MapLayersManager, layers: List<MapLayerItem>): List<CustomLayer> {
     val converted = remember { mutableStateMapOf<String, String>() }
     val icons = remember { mutableStateMapOf<String, Set<String>>() }
 
     val kmlLayers = layers.filter { it.layerType == LayerType.KML && it.uri != null }
 
     // Keyed on the ids-plus-tokens rather than the list: a layer's visibility flicking on and off must not reconvert.
-    val conversionKey = kmlLayers.joinToString(",") { "${it.id}@${it.refreshToken}" }
+    val conversionKey = kmlLayers.joinToString(",") { it.conversionKey() }
     LaunchedEffect(conversionKey) {
         kmlLayers.forEach { layer ->
             val key = layer.conversionKey()
-            if (converted.containsKey(key)) return@forEach
-            convertKmlLayer(context, layer)?.let { converted[key] = it }
+            if (!converted.containsKey(key)) {
+                convertKmlLayer(manager, layer)?.let { converted[key] = it }
+            }
         }
     }
 
@@ -68,9 +73,7 @@ internal fun rememberRenderableLayers(layers: List<MapLayerItem>): List<CustomLa
         layers.mapNotNull { layer ->
             when {
                 layer.layerType != LayerType.KML ->
-                    layer.uri?.let {
-                        CustomLayer(id = layer.id, uri = it.toString(), refreshToken = layer.refreshToken)
-                    }
+                    layer.uri?.let { CustomLayer(id = layer.id, uri = it, refreshToken = layer.refreshToken) }
 
                 else ->
                     converted[layer.conversionKey()]?.let {
@@ -88,7 +91,7 @@ internal fun rememberRenderableLayers(layers: List<MapLayerItem>): List<CustomLa
         renderable.forEach { layer ->
             val key = "${layer.id}@${layer.refreshToken}"
             if (icons.containsKey(key) || localLayers[layer.id] == null) return@forEach
-            icons[key] = scanLayerIcons(context, layer.uri)
+            icons[key] = scanLayerIcons(layer.uri)
         }
     }
 
@@ -101,49 +104,47 @@ internal fun rememberRenderableLayers(layers: List<MapLayerItem>): List<CustomLa
  * Network layers are skipped by the caller: their document lives behind a URL MapLibre fetches itself, and pulling it
  * down a second time here to look for icons is not worth it.
  */
-private suspend fun scanLayerIcons(context: Context, uri: String): Set<String> = withContext(ioDispatcher) {
+private suspend fun scanLayerIcons(uri: String): Set<String> = withContext(ioDispatcher) {
     safeCatching {
-        context.contentResolver.openInputStream(Uri.parse(uri))?.use { stream ->
-            geoJsonIconUrls(stream.readBytes().decodeToString())
-        }
+        val fs = mapLayerFileSystem()
+        fs.read(uri.toLocalPath()) { geoJsonIconUrls(readUtf8()) }
     }
-        .onFailure { Logger.withTag("KmlLayers").w(it) { "Could not read icons from an imported layer" } }
+        .onFailure { Logger.withTag(TAG).w(it) { "Could not read icons from an imported layer" } }
         .getOrNull()
         .orEmpty()
 }
 
 private fun MapLayerItem.conversionKey(): String = "$id@$refreshToken"
 
-/** Converts one KML or KMZ import to a GeoJSON file in the cache, returning its URI. Null if nothing was mappable. */
-private suspend fun convertKmlLayer(context: Context, layer: MapLayerItem): String? = withContext(ioDispatcher) {
-    val source = layer.uri ?: return@withContext null
-    safeCatching {
-        val target =
-            File(File(context.cacheDir, CONVERTED_DIR).apply { mkdirs() }, "${layer.conversionKey()}.geojson")
-        // A file already here was converted from this same layer at this same token, so it is still good.
-        if (target.length() > 0L) return@safeCatching Uri.fromFile(target).toString()
+private fun CustomLayer.conversionKey(): String = "$id@$refreshToken"
 
-        val geoJson =
-            context.contentResolver.openInputStream(source)?.use { stream ->
-                // A KMZ's packed images are dropped here. This map loads an icon from the `icon-url` the
-                // converter
-                // wrote, which for a packed icon is a path inside the archive that nothing can fetch — those
-                // features
-                // fall back to a plain point. The Google flavour keeps the images and resolves them.
-                convertKmlSource(BufferedInputStream(stream))?.geoJson
+/** Converts one KML or KMZ import to a GeoJSON file in the cache, returning its URI. Null if nothing was mappable. */
+private suspend fun convertKmlLayer(manager: MapLayersManager, layer: MapLayerItem): String? =
+    withContext(ioDispatcher) {
+        safeCatching {
+            val fs = mapLayerFileSystem()
+            val dir = mapLayersCacheDirectory()
+            fs.createDirectories(dir)
+            val target = dir / "${layer.conversionKey()}.geojson"
+            // A file already here was converted from this same layer at this same token, so it is still good.
+            if ((fs.metadataOrNull(target)?.size ?: 0L) > 0L) return@safeCatching "file://$target"
+
+            val bytes = manager.readLayerBytes(layer)
+            val geoJson = bytes?.let { readKmlDocument(it) }?.let { KmlToGeoJson.convert(it) }
+            if (geoJson == null) {
+                Logger.withTag(TAG).w { "Nothing mappable in an imported KML layer" }
+                return@safeCatching null
             }
-        if (geoJson == null) {
-            Logger.withTag("KmlLayers").w { "Nothing mappable in an imported KML layer" }
-            return@safeCatching null
+            // Written beside the target and moved into place, so a conversion cut short by leaving the screen
+            // cannot
+            // leave a half-file that the check above would then trust.
+            val partial = dir / "${target.name}.part"
+            fs.write(partial) { writeUtf8(geoJson) }
+            fs.atomicMove(partial, target)
+            "file://$target"
         }
-        // Written beside the target and moved into place, so a conversion cut short by leaving the screen
-        // cannot
-        // leave a half-file that the check above would then trust.
-        val partial = File(target.parentFile, "${target.name}.part")
-        partial.writeText(geoJson)
-        partial.renameTo(target)
-        Uri.fromFile(target).toString()
+            .onFailure { Logger.withTag(TAG).w(it) { "Could not convert an imported KML layer" } }
+            .getOrNull()
     }
-        .onFailure { Logger.withTag("KmlLayers").w(it) { "Could not convert an imported KML layer" } }
-        .getOrNull()
-}
+
+private const val TAG = "KmlLayers"

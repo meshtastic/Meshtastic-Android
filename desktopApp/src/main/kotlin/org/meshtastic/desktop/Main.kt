@@ -107,15 +107,14 @@ import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.desktop.data.DesktopPreferencesDataSource
 import org.meshtastic.desktop.di.desktopModule
 import org.meshtastic.desktop.di.desktopPlatformModule
-import org.meshtastic.desktop.map.DesktopSitePlannerSlot
 import org.meshtastic.desktop.map.DesktopTracerouteMap
+import org.meshtastic.desktop.map.desktopMapViewProvider
 import org.meshtastic.desktop.notification.DesktopOS
 import org.meshtastic.desktop.ui.DesktopMainScreen
 import org.meshtastic.feature.map.MapScreen
 import org.meshtastic.feature.map.SharedMapViewModel
 import org.meshtastic.feature.map.maplibre.MapLibreDiscoveryMap
 import org.meshtastic.feature.map.maplibre.MapLibreInlineMap
-import org.meshtastic.feature.map.maplibre.MapLibreMapViewProvider
 import org.meshtastic.feature.map.maplibre.MapLibreNodeTrackMap
 import java.awt.Desktop
 import java.util.Locale
@@ -415,8 +414,7 @@ private fun ApplicationScope.MeshtasticWindow(
         ProvideMapHost(host = rememberAwtComposeMapHost(window)) {
             CompositionLocalProvider(
                 LocalEventBranding provides eventEdition,
-                LocalMapViewProvider provides
-                    MapLibreMapViewProvider(sitePlanner = { session -> DesktopSitePlannerSlot(session) }),
+                LocalMapViewProvider provides desktopMapViewProvider(),
                 // The planner runs in the browser here rather than in the app; the button is still offered.
                 LocalSitePlannerAvailable provides true,
                 // mapGraph renders the Map tab through this seam, not through LocalMapViewProvider

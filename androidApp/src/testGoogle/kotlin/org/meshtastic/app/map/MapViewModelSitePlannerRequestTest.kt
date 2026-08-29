@@ -36,6 +36,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import okio.Path.Companion.toOkioPath
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -56,11 +57,13 @@ import org.meshtastic.core.testing.FakeNotificationPrefs
 import org.meshtastic.core.testing.FakeRadioConfigRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.testing.FakeUiPrefs
+import org.meshtastic.feature.map.layers.MapLayersManager
 import org.meshtastic.feature.map.tiles.CustomTileProviderConfig
 import org.meshtastic.feature.map.tiles.CustomTileProviderLoadResult
 import org.meshtastic.feature.map.tiles.CustomTileProviderRepository
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import kotlin.io.path.createTempDirectory
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
@@ -88,10 +91,11 @@ class MapViewModelSitePlannerRequestTest {
         httpClient = HttpClient()
         mapLayersManager =
             MapLayersManager(
-                application = ApplicationProvider.getApplicationContext(),
                 dispatchers = CoroutineDispatchers(testDispatcher, testDispatcher, testDispatcher),
                 httpClient = httpClient,
                 mapPrefs = mapPrefs,
+                // The real location reads a global application context this test never installs.
+                layersDir = createTempDirectory("map-layers").toOkioPath(),
             )
         every { googleMapsPrefs.cameraPosition } returns flowOf<GoogleCameraPosition?>(null)
         every { googleMapsPrefs.selectedCustomTileUrl } returns MutableStateFlow(null)

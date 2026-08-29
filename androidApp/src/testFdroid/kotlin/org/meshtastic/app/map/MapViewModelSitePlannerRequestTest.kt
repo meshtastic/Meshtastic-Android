@@ -17,7 +17,6 @@
 package org.meshtastic.app.map
 
 import androidx.lifecycle.SavedStateHandle
-import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
@@ -32,6 +31,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import okio.Path.Companion.toOkioPath
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -45,8 +45,10 @@ import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeNotificationPrefs
 import org.meshtastic.core.testing.FakeRadioConfigRepository
 import org.meshtastic.core.testing.FakeRadioController
+import org.meshtastic.feature.map.layers.MapLayersManager
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import kotlin.io.path.createTempDirectory
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
@@ -72,10 +74,11 @@ class MapViewModelSitePlannerRequestTest {
         httpClient = HttpClient()
         mapLayersManager =
             MapLayersManager(
-                application = ApplicationProvider.getApplicationContext(),
                 dispatchers = CoroutineDispatchers(testDispatcher, testDispatcher, testDispatcher),
                 httpClient = httpClient,
                 mapPrefs = mapPrefs,
+                // The real location reads a global application context this test never installs.
+                layersDir = createTempDirectory("map-layers").toOkioPath(),
             )
 
         nodeRepository.setNodes(listOf(firstNode, secondNode))

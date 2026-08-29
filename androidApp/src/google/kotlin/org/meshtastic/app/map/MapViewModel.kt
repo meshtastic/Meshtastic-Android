@@ -61,6 +61,9 @@ import org.meshtastic.core.repository.RadioController
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.map.BaseMapViewModel
+import org.meshtastic.feature.map.layers.MapLayerItem
+import org.meshtastic.feature.map.layers.MapLayersManager
+import org.meshtastic.feature.map.layers.PickedMapFile
 import org.meshtastic.feature.map.tiles.CustomTileProviderConfig
 import org.meshtastic.feature.map.tiles.CustomTileProviderRepository
 import org.meshtastic.feature.map.tiles.CustomTileProviderSaveResult
@@ -71,7 +74,6 @@ import org.meshtastic.feature.map.tiles.isValidTileUrlTemplate
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import java.io.InputStream
 import kotlin.uuid.Uuid
 
 /** Waypoint coordinates arrive as integer degrees scaled by 1e7. */
@@ -519,7 +521,7 @@ class MapViewModel(
         }
     }
 
-    fun addMapLayer(uri: Uri, fileName: String?) = mapLayersManager.addMapLayer(uri, fileName)
+    fun addMapLayer(picked: PickedMapFile) = mapLayersManager.addMapLayer(picked)
 
     fun addNetworkMapLayer(name: String, url: String) {
         mapLayersManager.addNetworkMapLayer(name, url)?.let { error ->
@@ -568,8 +570,7 @@ class MapViewModel(
         }
     }
 
-    suspend fun getInputStreamFromUri(layerItem: MapLayerItem): InputStream? =
-        mapLayersManager.getInputStreamFromUri(layerItem)
+    suspend fun readLayerBytes(layerItem: MapLayerItem): ByteArray? = mapLayersManager.readLayerBytes(layerItem)
 
     override fun onCleared() {
         super.onCleared()

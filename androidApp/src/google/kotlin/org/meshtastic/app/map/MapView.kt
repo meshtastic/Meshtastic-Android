@@ -116,7 +116,6 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
-import org.meshtastic.app.map.component.CustomMapLayersSheet
 import org.meshtastic.app.map.component.CustomTileProviderManagerSheet
 import org.meshtastic.app.map.component.MapTypeDropdown
 import org.meshtastic.app.map.component.NodeClusterMarkers
@@ -174,6 +173,7 @@ import org.meshtastic.feature.map.MapBounds
 import org.meshtastic.feature.map.MapNodePolicy
 import org.meshtastic.feature.map.component.ClusterMemberEntry
 import org.meshtastic.feature.map.component.ClusterMembersDialog
+import org.meshtastic.feature.map.component.CustomMapLayersSheet
 import org.meshtastic.feature.map.component.DeleteWaypointDialog
 import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.MapButton
@@ -187,12 +187,16 @@ import org.meshtastic.feature.map.component.WaypointInfoDialog
 import org.meshtastic.feature.map.component.toSitePlannerParams
 import org.meshtastic.feature.map.includes
 import org.meshtastic.feature.map.kml.ICON_URL_PROPERTY
+import org.meshtastic.feature.map.layers.LayerType
+import org.meshtastic.feature.map.layers.MapLayerItem
+import org.meshtastic.feature.map.layers.toPickedMapFile
 import org.meshtastic.feature.map.tiles.mapAttributionText
 import org.meshtastic.feature.map.tracerouteNodeSelection
 import org.meshtastic.proto.BoundingBox
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.Waypoint
 import java.io.BufferedInputStream
+import java.io.ByteArrayInputStream
 import java.io.InputStream
 import kotlin.coroutines.resume
 import kotlin.math.abs
@@ -287,10 +291,7 @@ fun MapView(
     val filePickerLauncher =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
-                result.data?.data?.let { uri ->
-                    val fileName = uri.getFileName(context)
-                    mapViewModel.addMapLayer(uri, fileName)
-                }
+                result.data?.data?.let { uri -> mapViewModel.addMapLayer(uri.toPickedMapFile(context)) }
             }
         }
 
@@ -1456,12 +1457,15 @@ private fun MapLayerOverlay(layerItem: MapLayerItem, mapViewModel: MapViewModel)
     MapEffect(layerItem.id, layerItem.refreshToken) { map ->
         currentLayer?.safeHide()
         currentLayer = null
-        val inputStream = mapViewModel.getInputStreamFromUri(layerItem) ?: return@MapEffect
+        val bytes = mapViewModel.readLayerBytes(layerItem) ?: return@MapEffect
         val layer =
             try {
                 val dataLayer =
                     withContext(Dispatchers.IO) {
-                        inputStream.use { stream -> parseMapLayer(layerItem.layerType, stream) }
+                        // Buffered because the KMZ sniff marks and resets the stream before the parser reads it.
+                        BufferedInputStream(ByteArrayInputStream(bytes)).use { stream ->
+                            parseMapLayer(layerItem.layerType, stream)
+                        }
                     }
                 if (dataLayer == null) {
                     Logger.withTag("MapView").e { "Error loading map layer: ${layerItem.name} (unrecognized format)" }

@@ -42,9 +42,9 @@ const val SITE_PLANNER_URL: String = "https://site.meshtastic.org"
  * which measured at roughly three and a half times the size of the whole application.
  *
  * It comes back by hand instead, which the sheet's note spells out: the planner's own export writes a `.geojson`, and
- * that is exactly what the layer importer reads. The note names the format on purpose — the planner's KML export is a
- * bare `<GroundOverlay>` over a sibling PNG, the one construct neither renderer draws, so a user who reached for it
- * would import a file that silently shows nothing.
+ * the layers sheet on this same host imports it. The note names the format on purpose — the planner's KML export is a
+ * bare `<GroundOverlay>` over a sibling PNG that arrives without its image, so a user who reached for it would import a
+ * file that draws nothing.
  */
 @Composable
 fun SitePlannerBrowserSheet(

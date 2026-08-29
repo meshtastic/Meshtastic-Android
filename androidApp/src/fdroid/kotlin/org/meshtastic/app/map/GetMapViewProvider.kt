@@ -19,18 +19,20 @@ package org.meshtastic.app.map
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.compose.koinInject
-import org.meshtastic.app.map.component.ImportedLayersSlot
 import org.meshtastic.app.map.component.SitePlannerSlot
 import org.meshtastic.core.ui.util.MapViewProvider
+import org.meshtastic.feature.map.layers.MapLayersManager
 import org.meshtastic.feature.map.maplibre.MapLibreMapViewProvider
 import org.meshtastic.feature.map.maplibre.component.CustomTileSourcesMenuItem
+import org.meshtastic.feature.map.maplibre.component.ImportedLayersSlot
+import org.meshtastic.feature.map.maplibre.layers.rememberRenderableLayers
 
 fun getMapViewProvider(): MapViewProvider = MapLibreMapViewProvider(
     customLayers = {
         val layersManager: MapLayersManager = koinInject()
         val layers by layersManager.mapLayers.collectAsStateWithLifecycle()
         // KML and KMZ are converted to GeoJSON on the way through; everything else MapLibre fetches directly.
-        rememberRenderableLayers(layers.filter { it.isVisible })
+        rememberRenderableLayers(layersManager, layers.filter { it.isVisible })
     },
     customBasemaps = { androidCustomRasterBasemaps() },
     // Everything but the picker is common now; Android is just the platform that has one.

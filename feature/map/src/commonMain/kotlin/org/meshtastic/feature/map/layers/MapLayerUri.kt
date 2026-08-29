@@ -50,8 +50,11 @@ private const val HEX_RADIX = 16
  */
 internal fun Path.toFileUri(): String = "file://" + toString().encodeURLPath().escapeSubDelimiters()
 
-/** The local path behind a `file://` URI (or a bare path, which is what a hand-made item may carry). */
-internal fun String.toLocalPath(): Path = removePrefix("file://").decodeURLPart().toPath()
+/**
+ * The local path behind a `file://` URI (or a bare path, which is what a hand-made item may carry). Public because the
+ * renderer's conversion cache also stores its files under `file://` URIs and reads them back through this.
+ */
+fun String.toLocalPath(): Path = removePrefix("file://").decodeURLPart().toPath()
 
 /**
  * Escape what Ktor left and Android would not have.

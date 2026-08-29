@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.app.map.component
+package org.meshtastic.feature.map.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -45,8 +45,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.app.map.LayerType
-import org.meshtastic.app.map.MapLayerItem
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.add_layer
@@ -76,6 +74,8 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.core.ui.icon.Visibility
 import org.meshtastic.core.ui.icon.VisibilityOff
+import org.meshtastic.feature.map.layers.LayerType
+import org.meshtastic.feature.map.layers.MapLayerItem
 
 @Suppress("LongMethod", "ParameterNaming") // onAddLayerClicked is the established callback name used by both flavors
 @Composable

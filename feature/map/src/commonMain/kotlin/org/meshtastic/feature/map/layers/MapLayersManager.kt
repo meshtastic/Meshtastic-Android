@@ -34,7 +34,6 @@ import kotlinx.coroutines.withContext
 import okio.FileSystem
 import okio.IOException
 import okio.Path
-import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.MapPrefs
@@ -49,23 +48,16 @@ import org.meshtastic.core.repository.MapPrefs
  * touches a platform URI type — an import arrives as a [PickedMapFile] whose bytes the caller already knows how to
  * read, which is what lets one implementation serve a ContentResolver and a plain file path alike.
  */
-@Single
 @Suppress("TooManyFunctions")
-class MapLayersManager
-// layersDir and fileSystem are parameters so a test can point the store at a temporary directory and an in-memory file
-// system. Koin resolves neither — the three-argument constructor below is the injected one.
-internal constructor(
+class MapLayersManager(
     private val dispatchers: CoroutineDispatchers,
     private val httpClient: HttpClient,
     private val mapPrefs: MapPrefs,
-    private val layersDir: Path,
-    private val fileSystem: FileSystem,
+    // Overridable so a test can point the store at a temporary directory. Resolved by the caller rather than inside
+    // the class because on Android it reads a global application context, which a unit test has no reason to hold.
+    private val layersDir: Path = mapLayersDirectory(),
+    private val fileSystem: FileSystem = mapLayerFileSystem(),
 ) {
-    constructor(
-        dispatchers: CoroutineDispatchers,
-        httpClient: HttpClient,
-        mapPrefs: MapPrefs,
-    ) : this(dispatchers, httpClient, mapPrefs, mapLayersDirectory(), FileSystem.SYSTEM)
 
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
@@ -133,10 +125,11 @@ internal constructor(
     fun addMapLayer(picked: PickedMapFile) {
         scope.launch {
             val layerName = picked.displayName.substringBeforeLast('.').ifBlank { "Layer ${mapLayers.value.size + 1}" }
-            val extension = picked.extensionOrMime?.substringAfterLast('.')?.lowercase()
+            // Not split on '.': a MIME subtype like `vnd.google-earth.kml+xml` is matched whole, and taking
+            // the part after its last dot would leave `kml+xml`, which resolves to nothing.
+            val extension = picked.extensionOrMime?.lowercase()
             val layerType = resolveLayerType(extension)
-            // resolveLayerType only matches non-null input, so a non-null type guarantees a non-null extension.
-            if (layerType == null || extension == null) {
+            if (layerType == null) {
                 Logger.withTag(TAG).e("Unsupported map layer file type: $extension")
                 return@launch
             }
@@ -146,7 +139,7 @@ internal constructor(
                 Logger.withTag(TAG).e("Could not read the picked map layer.")
                 return@launch
             }
-            val storedUri = write(bytes, layerFileName(layerName, extension))
+            val storedUri = write(bytes, layerFileName(layerName, layerType.storageExtension()))
             if (storedUri != null) {
                 _mapLayers.update {
                     it + MapLayerItem(name = layerName, uri = storedUri, layerType = layerType, createdAt = nowMillis)

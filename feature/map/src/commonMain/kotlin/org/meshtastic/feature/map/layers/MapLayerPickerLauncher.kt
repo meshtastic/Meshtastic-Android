@@ -16,16 +16,17 @@
  */
 package org.meshtastic.feature.map.layers
 
-import okio.FileSystem
-import okio.Path
-import okio.Path.Companion.toPath
-import org.meshtastic.core.common.ContextServices
-import java.io.File
+import androidx.compose.runtime.Composable
 
-/** App-internal storage, so imported layers are private to the app and removed with it. */
-actual fun mapLayersDirectory(): Path = File(ContextServices.app.filesDir, LAYERS_DIR).absolutePath.toPath()
+/**
+ * Returns a launcher that asks the user for a map file and hands it back as a [PickedMapFile].
+ *
+ * Android opens the storage-access document picker; desktop opens an AWT file dialog. Both hand back the same thing,
+ * which is what lets the layers sheet be one composable rather than one per platform.
+ */
+@Composable expect fun rememberMapLayerPicker(onPick: (PickedMapFile) -> Unit): MapLayerPickerLauncher
 
-actual fun mapLayerFileSystem(): FileSystem = FileSystem.SYSTEM
-
-/** The app cache, which Android may clear under pressure — exactly right for a reconvertible copy. */
-actual fun mapLayersCacheDirectory(): Path = File(ContextServices.app.cacheDir, "kml-geojson").absolutePath.toPath()
+/** Platform-agnostic handle for opening the picker. */
+fun interface MapLayerPickerLauncher {
+    fun pick()
+}

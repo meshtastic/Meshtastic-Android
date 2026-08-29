@@ -16,8 +16,10 @@
  */
 package org.meshtastic.feature.map.layers
 
+import okio.FileSystem
 import okio.Path
 import okio.Path.Companion.toPath
+import platform.Foundation.NSCachesDirectory
 import platform.Foundation.NSDocumentDirectory
 import platform.Foundation.NSSearchPathForDirectoriesInDomains
 import platform.Foundation.NSUserDomainMask
@@ -29,4 +31,11 @@ import platform.Foundation.NSUserDomainMask
 actual fun mapLayersDirectory(): Path {
     val documents = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, true).first() as String
     return "$documents/$LAYERS_DIR".toPath()
+}
+
+actual fun mapLayerFileSystem(): FileSystem = FileSystem.SYSTEM
+
+actual fun mapLayersCacheDirectory(): Path {
+    val caches = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, true).first() as String
+    return "$caches/kml-geojson".toPath()
 }

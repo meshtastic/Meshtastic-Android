@@ -72,6 +72,20 @@ fun ByteArray.isKmzArchive(): Boolean = size >= KMZ_MAGIC.size && KMZ_MAGIC.indi
 const val COVERAGE_EXTENSION = "coverage"
 
 /**
+ * The extension an imported layer is stored under.
+ *
+ * Derived from the resolved type rather than carried over from the import, because the import's own "extension" may be
+ * a MIME subtype: storing a file as `route.vnd.google-earth.kml+xml` would leave `xml` behind the last dot, which
+ * resolves to no type at all, and the layer would disappear on the next start. A KMZ stored as `.kml` is fine — the
+ * readers sniff the zip magic rather than trusting the name.
+ */
+internal fun LayerType.storageExtension(): String = when (this) {
+    LayerType.KML -> "kml"
+    LayerType.GEOJSON -> "geojson"
+    LayerType.COVERAGE -> COVERAGE_EXTENSION
+}
+
+/**
  * Coverage estimates append a random UUID to their on-disk name so two estimates saved under the same title don't
  * collide. The layers list rebuilds its display name from that file name, so strip the suffix or the raw UUID shows up
  * in the UI.
@@ -88,7 +102,7 @@ fun displayNameFromFileName(fileNameWithoutExtension: String): String =
  * directory, plus control characters. Everything else — spaces, punctuation, non-Latin scripts — is kept, because the
  * list rebuilds a layer's display name from this file name and users should see the name they chose.
  */
-private val FILE_NAME_UNSAFE = Regex("""[/\\p{Cntrl}]""")
+private val FILE_NAME_UNSAFE = Regex("""[/\\\p{Cntrl}]""")
 
 /**
  * Longest sanitized base name kept, in characters. Bounds the total path length: the UUID suffix and extension add ~46

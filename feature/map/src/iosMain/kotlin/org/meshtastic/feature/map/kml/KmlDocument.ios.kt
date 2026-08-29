@@ -14,17 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.app
+package org.meshtastic.feature.map.kml
 
-import android.net.Uri
-import kotlinx.coroutines.flow.MutableStateFlow
+import org.meshtastic.feature.map.layers.isKmzArchive
 
-/**
- * One-slot handoff for a map file (GeoJSON/KML) received via an "Open in / Send to Meshtastic" intent (e.g. the
- * Meshtastic Site Planner's "Send to App" share). The shared [MainActivity] receives the intent; only the Google-flavor
- * map renders overlays, so its `MapViewModel` drains this and imports the layer while the activity still holds the URI
- * read grant.
- */
-object MapFileImportBus {
-    val pending = MutableStateFlow<Uri?>(null)
-}
+/** Bare KML only: unpacking a KMZ needs `java.util.zip`, and no iOS surface renders a map yet. */
+actual fun readKmlDocument(bytes: ByteArray): String? = if (bytes.isKmzArchive()) null else bytes.decodeToString()

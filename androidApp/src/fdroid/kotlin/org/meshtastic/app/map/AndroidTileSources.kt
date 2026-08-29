@@ -29,6 +29,7 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.meshtastic.core.common.util.safeCatching
+import org.meshtastic.feature.map.layers.getFileName
 import org.meshtastic.feature.map.maplibre.component.customRasterBasemaps
 import org.meshtastic.feature.map.maplibre.style.Basemap
 import org.meshtastic.feature.map.tiles.CustomTileProviderConfig

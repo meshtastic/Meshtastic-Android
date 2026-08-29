@@ -14,18 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.map.layers
+package org.meshtastic.feature.map.kml
 
-import okio.FileSystem
-import okio.Path
-import okio.Path.Companion.toPath
-import org.meshtastic.core.common.ContextServices
-import java.io.File
-
-/** App-internal storage, so imported layers are private to the app and removed with it. */
-actual fun mapLayersDirectory(): Path = File(ContextServices.app.filesDir, LAYERS_DIR).absolutePath.toPath()
-
-actual fun mapLayerFileSystem(): FileSystem = FileSystem.SYSTEM
-
-/** The app cache, which Android may clear under pressure — exactly right for a reconvertible copy. */
-actual fun mapLayersCacheDirectory(): Path = File(ContextServices.app.cacheDir, "kml-geojson").absolutePath.toPath()
+/**
+ * The KML text inside [bytes] — the file itself if it is bare KML, or the first `.kml` entry if it is a KMZ archive.
+ *
+ * Expect/actual because unpacking the archive takes `java.util.zip`, which iOS does not have: there the KMZ case
+ * returns null (and nothing renders a map there yet anyway). Bare KML is common to all platforms.
+ */
+expect fun readKmlDocument(bytes: ByteArray): String?

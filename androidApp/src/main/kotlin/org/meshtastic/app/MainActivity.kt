@@ -100,6 +100,8 @@ import org.meshtastic.feature.intro.AppIntroductionScreen
 import org.meshtastic.feature.intro.IntroViewModel
 import org.meshtastic.feature.map.MapScreen
 import org.meshtastic.feature.map.SharedMapViewModel
+import org.meshtastic.feature.map.layers.MapLayersManager
+import org.meshtastic.feature.map.layers.toPickedMapFile
 import org.meshtastic.feature.map.node.NodeMapViewModel
 import org.meshtastic.feature.node.metrics.MetricsViewModel
 import org.meshtastic.feature.node.metrics.TracerouteMapScreen
@@ -108,6 +110,7 @@ class MainActivity : AppCompatActivity() {
     private val model: UIViewModel by viewModel()
 
     private val usbRepository: UsbRepository by inject()
+    private val mapLayersManager: MapLayersManager by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -357,13 +360,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * Hand a map file received via an OS "Open in / Send to Meshtastic" intent to the map, then bring the Map tab
-     * forward so the imported overlay is visible. Only the Google-flavor map consumes this (see [MapFileImportBus]);
-     * the read grant on [uri] lives as long as this activity, which is long enough for the map to copy the file in.
+     * Import a map file received via an OS "Open in / Send to Meshtastic" intent — the Site Planner's "Send to App"
+     * share among them — then bring the Map tab forward so the overlay is visible.
+     *
+     * Handed to the layer store directly rather than through a one-slot bus for the map to drain. The store is common
+     * code now, so both flavours import a shared file; the bus only ever reached the Google map, which meant the same
+     * share silently did nothing on F-Droid. The read grant on [uri] lives as long as this activity, which is long
+     * enough for the store to copy the file in.
      */
     private fun importMapFile(uri: Uri) {
         Logger.d { "Importing shared map file: $uri" }
-        MapFileImportBus.pending.value = uri
+        mapLayersManager.addMapLayer(uri.toPickedMapFile(this))
         handleMeshtasticUri("$DEEP_LINK_BASE_URI/map".toUri())
     }
 
