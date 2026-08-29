@@ -41,6 +41,10 @@ data class MapBounds(val south: Double, val west: Double, val north: Double, val
          *
          * A single point, or several stacked on one spot, yields a zero-area box the camera cannot fit to — a
          * stationary node's whole position track is exactly that — so a degenerate box is padded to something framable.
+         *
+         * Longitudes are min/maxed linearly, so a mesh straddling the antimeridian fits the long way round. Deliberate,
+         * matching the KML converter's polygon stance: wrapped bounds would have to flow through two renderers'
+         * camera-fit APIs to pay off, and no mesh this app has met sits on the date line.
          */
         fun around(points: List<MapPoint>): MapBounds? {
             if (points.isEmpty()) return null

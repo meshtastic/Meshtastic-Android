@@ -188,6 +188,9 @@ private fun ProtoPosition.toTrackPoint(): TrackPoint? {
     return if (latitude == 0.0 && longitude == 0.0) {
         null
     } else {
+        // A missing time becomes 0 deliberately: RTC-less nodes report positions with no usable time, and
+        // dropping those points would erase real tracks. Zero sorts them oldest; the card's guard keeps an
+        // unselected map from matching them.
         GeoPosition(longitude = longitude, latitude = latitude) to (time ?: 0)
     }
 }

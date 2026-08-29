@@ -17,10 +17,12 @@
 package org.meshtastic.feature.map.maplibre
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -115,7 +117,12 @@ fun MeshMap(
     val myNodeInfo by viewModel.myNodeInfo.collectAsStateWithLifecycle()
 
     val scope = rememberCoroutineScope()
-    val visibleNodes = MapNodePolicy.visibleNodes(nodes, filterState, nowSeconds, myNodeInfo?.myNodeNum)
+    // This body recomposes on every camera frame (it reads the viewport below); the mesh-wide filter should not.
+    // `nowSeconds` is deliberately not a key: a packet arriving already changes the node list.
+    val visibleNodes =
+        remember(nodes, filterState, myNodeInfo) {
+            MapNodePolicy.visibleNodes(nodes, filterState, nowSeconds, myNodeInfo?.myNodeNum)
+        }
 
     FrameOnce(enabled = frameOnNodes, nodes = visibleNodes, cameraState = cameraState)
 
@@ -193,12 +200,16 @@ fun MeshMap(
 private fun FrameOnce(enabled: Boolean, nodes: List<Node>, cameraState: CameraState) {
     if (!enabled) return
 
-    val scope = rememberCoroutineScope()
-    val hasFramed = remember { mutableStateOf(false) }
-    if (!hasFramed.value) {
+    var hasFramed by remember { mutableStateOf(false) }
+    val hasViewport = cameraState.viewport != null
+    // An effect, not composition-body work: a launch from composition fires even if the composition is
+    // abandoned, while its state write is rolled back — a camera jump with no framing recorded. The viewport
+    // gate is FitBoundsOnceVisible's: fitting before the map reports a viewport lands on a default.
+    LaunchedEffect(nodes, hasViewport) {
+        if (hasFramed || !hasViewport) return@LaunchedEffect
         nodesBoundingBox(nodes)?.let { box ->
-            hasFramed.value = true
-            scope.launch { cameraState.jumpTo(boundingBox = box) }
+            hasFramed = true
+            cameraState.jumpTo(boundingBox = box)
         }
     }
 }

@@ -60,6 +60,7 @@ import org.maplibre.compose.sources.rememberImageSource
 import org.maplibre.compose.util.PositionQuad
 import org.maplibre.spatialk.geojson.Position
 import org.meshtastic.core.common.util.ioDispatcher
+import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.feature.map.kml.ICON_URL_PROPERTY
 import org.meshtastic.feature.map.layers.mapLayerFileSystem
 import org.meshtastic.feature.map.layers.toLocalPath
@@ -200,7 +201,7 @@ private fun GroundOverlayLayer(layerId: String, index: Int, overlay: LayerGround
         produceState<ImageBitmap?>(initialValue = null, overlay.imagePath) {
             value =
                 withContext(ioDispatcher) {
-                    runCatching {
+                    safeCatching {
                         mapLayerFileSystem()
                             .read(overlay.imagePath.toLocalPath()) { readByteArray() }
                             .decodeToImageBitmap()

@@ -175,7 +175,7 @@ fun EditWaypointDialog(
                 )
             },
             text = {
-                Column(modifier = modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
+                Column(modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
                     OutlinedTextField(
                         value = waypointInput.name,
                         onValueChange = { waypointInput = waypointInput.copy(name = it.take(29)) },

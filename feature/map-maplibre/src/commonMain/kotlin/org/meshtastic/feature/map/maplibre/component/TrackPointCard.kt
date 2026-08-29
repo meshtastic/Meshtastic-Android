@@ -73,10 +73,14 @@ internal fun TrackPointCard(position: Position?, displayUnits: MeasurementSystem
                 value = NumberFormatter.format((position.longitude_i ?: 0) * DEG_D, COORDINATE_DECIMALS),
             )
             DetailRow(label = stringResource(Res.string.sats), value = position.sats_in_view.toString())
-            DetailRow(
-                label = stringResource(Res.string.alt),
-                value = (position.altitude ?: 0).metersIn(displayUnits).toString(displayUnits),
-            )
+            // Omitted rather than substituted: "0 m" is a real altitude, and a point that never reported one
+            // should not claim sea level.
+            position.altitude?.let { altitude ->
+                DetailRow(
+                    label = stringResource(Res.string.alt),
+                    value = altitude.metersIn(displayUnits).toString(displayUnits),
+                )
+            }
             DetailRow(
                 label = stringResource(Res.string.speed),
                 // ground_speed is km/h on the wire (proto canon), not m/s.

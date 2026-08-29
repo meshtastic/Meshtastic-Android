@@ -61,11 +61,13 @@ import org.meshtastic.core.resources.map_select_download_region
 import org.meshtastic.core.resources.map_start_download
 import org.meshtastic.core.resources.map_tile_download_estimate
 import org.meshtastic.core.resources.map_tile_limit_reached
+import org.meshtastic.core.resources.map_zoom_levels
 import org.meshtastic.core.resources.offline_maps_empty
 import org.meshtastic.core.ui.icon.Delete
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.PlayArrow
 import org.meshtastic.feature.map.maplibre.tileCount
+import kotlin.math.roundToInt
 
 /** What the map must tell the offline sheet: which style to pack, and which region is on screen. */
 internal class OfflineMapTarget(
@@ -122,13 +124,9 @@ internal fun OfflineMapsSection(target: OfflineMapTarget, onShowRegion: (Boundin
                 OfflinePackRow(
                     pack = pack,
                     onShow = { bounds -> onShowRegion(bounds) },
-                    // Off the main thread as hygiene, not as an ANR fix — an earlier version of this comment
-                    // claimed the latter and was wrong. `resume` (and `pause`, and `setTileCountLimit`) are plain
-                    // `void` where `create`/`delete` suspend, but the void ones still do no native work inline:
-                    // `resume` reduces to a `post` onto the offline runtime's owner thread, which takes a lock only
-                    // long enough to append to a queue and signal. That lock is released before the owner thread runs
-                    // anything, so all this dispatch buys is keeping the acquisition off the frame path. What starves
-                    // the main thread on this screen is the map's own per-emit rebuild, not this call.
+                    // Hygiene, not an ANR fix: `resume` only posts onto the offline runtime's owner thread,
+                    // taking its lock just long enough to enqueue — this dispatch merely keeps that acquisition
+                    // off the frame path.
                     onToggle = { scope.launch(ioDispatcher) { manager.resume(pack) } },
                     onDelete = { scope.launch { manager.delete(pack) } },
                 )
@@ -173,7 +171,8 @@ private fun DownloadEstimateLines(estimate: Long, range: IntRange) {
             stringResource(Res.string.map_tile_download_estimate) +
                 " " +
                 stringResource(Res.string.map_cache_tiles, estimate.toInt()) +
-                "  (z${range.first}\u2013${range.last})",
+                "  " +
+                stringResource(Res.string.map_zoom_levels, range.first, range.last),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -323,7 +322,8 @@ private fun DownloadProgress.summary(): String = when (this) {
 internal fun Long.megabytes(): String = NumberFormatter.format(this.toDouble() / BYTES_PER_MEGABYTE, 1)
 
 private fun Double.round(): String {
-    val scaled = (this * COORD_SCALE).toInt() / COORD_SCALE
+    // Rounded, not truncated, so a negative coordinate labels the same way as its positive twin.
+    val scaled = (this * COORD_SCALE).roundToInt() / COORD_SCALE
     return scaled.toString()
 }
 

@@ -94,12 +94,14 @@ fun rememberRenderableLayers(manager: MapLayersManager, layers: List<MapLayerIte
     // The renderer has to know a layer's icons before it composes, and the only place they exist is the GeoJSON
     // itself. Reading the finished document rather than threading the set out of the KML converter means an imported
     // GeoJSON that names its own icons gets them too, and a cached conversion does not have to remember them.
-    val localLayers = layers.filterNot { it.isNetwork }.associateBy { it.id }
     val iconKey = renderable.joinToString(",") { "${it.id}@${it.refreshToken}" }
     LaunchedEffect(iconKey) {
         renderable.forEach { layer ->
             val key = "${layer.id}@${layer.refreshToken}"
-            if (icons.containsKey(key) || localLayers[layer.id] == null) return@forEach
+            // Anything whose document ended up as a local file can be scanned — including a network KML, whose
+            // conversion wrote one. Only a network GeoJSON stays unscanned: its document lives behind a URL
+            // MapLibre fetches itself, and pulling it down a second time just for icons is not worth it.
+            if (icons.containsKey(key) || !layer.uri.startsWith(FILE_URI_PREFIX)) return@forEach
             icons[key] = scanLayerIcons(layer.uri)
         }
     }
@@ -110,8 +112,7 @@ fun rememberRenderableLayers(manager: MapLayersManager, layers: List<MapLayerIte
 /**
  * The icons a rendered layer's GeoJSON asks for, or none if it cannot be read.
  *
- * Network layers are skipped by the caller: their document lives behind a URL MapLibre fetches itself, and pulling it
- * down a second time here to look for icons is not worth it.
+ * Only called for documents that live in a local file — see the gate at the call site.
  */
 private suspend fun scanLayerIcons(uri: String): Set<String> = withContext(ioDispatcher) {
     safeCatching {
@@ -152,7 +153,7 @@ private suspend fun convertKmlLayer(manager: MapLayersManager, layer: MapLayerIt
             val imagesIntact =
                 cachedOverlays?.all { (fs.metadataOrNull(it.imagePath.toLocalPath())?.size ?: 0L) > 0L } == true
             if (imagesIntact && (fs.metadataOrNull(target)?.size ?: 0L) > 0L) {
-                return@safeCatching ConvertedKml("file://$target", cachedOverlays.orEmpty())
+                return@safeCatching ConvertedKml("$FILE_URI_PREFIX$target", cachedOverlays.orEmpty())
             }
 
             val bytes = manager.readLayerBytes(layer) ?: return@safeCatching null
@@ -172,7 +173,7 @@ private suspend fun convertKmlLayer(manager: MapLayersManager, layer: MapLayerIt
             fs.write(partial) { writeUtf8(conversion.geoJson ?: EMPTY_FEATURE_COLLECTION) }
             fs.atomicMove(partial, target)
             writeOverlaySidecar(sidecar, overlays)
-            ConvertedKml("file://$target", overlays)
+            ConvertedKml("$FILE_URI_PREFIX$target", overlays)
         }
             .onFailure { Logger.withTag(TAG).w(it) { "Could not convert an imported KML layer" } }
             .getOrNull()
@@ -199,7 +200,12 @@ private fun resolveGroundOverlays(
             Logger.withTag(TAG).w { "Skipping a ground overlay whose image is not packed in the archive" }
             return@mapIndexedNotNull null
         }
-        val extension = overlay.href.substringAfterLast('.', "png")
+        // The href is file content, so its "extension" can hold anything — a '/' in it would put a separator
+        // in the cache filename and fail the write. Cosmetic anyway: decoders sniff bytes, not names.
+        val extension =
+            overlay.href.substringAfterLast('.', "png").takeIf {
+                it.length <= MAX_EXTENSION_LENGTH && it.isNotEmpty() && it.all(Char::isLetterOrDigit)
+            } ?: "png"
         val path = dir / "${layer.conversionKey()}-overlay-$index.$extension"
         fs.write(path) { write(image) }
         val corners = overlay.corners()
@@ -253,3 +259,9 @@ private const val TAG = "KmlLayers"
 
 /** What an overlay-only conversion writes where its vector features would go. */
 private const val EMPTY_FEATURE_COLLECTION = """{"type":"FeatureCollection","features":[]}"""
+
+/** The scheme a layer URI carries when its document is a file this process can read. */
+private const val FILE_URI_PREFIX = "file://"
+
+/** Longest file extension carried over from an overlay's href; longer or stranger falls back to `png`. */
+private const val MAX_EXTENSION_LENGTH = 8

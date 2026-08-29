@@ -51,6 +51,7 @@ import org.robolectric.annotation.Config
 import kotlin.io.path.createTempDirectory
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import java.nio.file.Path as NioPath
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
@@ -64,6 +65,7 @@ class MapViewModelSitePlannerRequestTest {
     private val firstNode = Node(num = 11)
     private val secondNode = Node(num = 22)
     private lateinit var httpClient: HttpClient
+    private lateinit var layersDir: NioPath
     private lateinit var mapLayersManager: MapLayersManager
     private lateinit var viewModel: MapViewModel
 
@@ -72,13 +74,14 @@ class MapViewModelSitePlannerRequestTest {
         Dispatchers.setMain(testDispatcher)
         every { packetRepository.getWaypoints() } returns flowOf(emptyList())
         httpClient = HttpClient()
+        layersDir = createTempDirectory("map-layers")
         mapLayersManager =
             MapLayersManager(
                 dispatchers = CoroutineDispatchers(testDispatcher, testDispatcher, testDispatcher),
                 httpClient = httpClient,
                 mapPrefs = mapPrefs,
                 // The real location reads a global application context this test never installs.
-                layersDir = createTempDirectory("map-layers").toOkioPath(),
+                layersDir = layersDir.toOkioPath(),
             )
 
         nodeRepository.setNodes(listOf(firstNode, secondNode))
@@ -99,6 +102,7 @@ class MapViewModelSitePlannerRequestTest {
     @After
     fun tearDown() {
         httpClient.close()
+        layersDir.toFile().deleteRecursively()
         Dispatchers.resetMain()
     }
 

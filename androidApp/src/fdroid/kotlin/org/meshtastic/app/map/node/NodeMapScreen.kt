@@ -46,11 +46,15 @@ fun NodeMapScreen(nodeMapViewModel: NodeMapViewModel, onNavigateUp: () -> Unit) 
             )
         },
     ) { paddingValues ->
-        MapLibreNodeTrackMap(
-            destNum = node?.num ?: 0,
-            positions = positions,
-            modifier = Modifier.fillMaxSize().padding(paddingValues),
-            customBasemaps = { androidCustomRasterBasemaps() },
-        )
+        // Only once the node has resolved: 0 is not a node, and a placeholder paints the track in the wrong
+        // colour with no head chip.
+        node?.let { resolved ->
+            MapLibreNodeTrackMap(
+                destNum = resolved.num,
+                positions = positions,
+                modifier = Modifier.fillMaxSize().padding(paddingValues),
+                customBasemaps = { androidCustomRasterBasemaps() },
+            )
+        }
     }
 }

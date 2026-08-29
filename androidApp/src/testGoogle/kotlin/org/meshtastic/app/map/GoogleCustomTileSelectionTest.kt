@@ -68,6 +68,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import java.nio.file.Path as NioPath
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35], application = Application::class)
@@ -131,6 +132,7 @@ class GoogleCustomTileSelectionTest {
 
         Dispatchers.setMain(dispatcher)
         var httpClient: HttpClient? = null
+        var layersDir: NioPath? = null
         try {
             val application = ApplicationProvider.getApplicationContext<Application>()
             val mapPrefs = FakeMapPrefs()
@@ -141,7 +143,7 @@ class GoogleCustomTileSelectionTest {
                     httpClient = client,
                     mapPrefs = mapPrefs,
                     // The real location reads a global application context this test never installs.
-                    layersDir = createTempDirectory("map-layers").toOkioPath(),
+                    layersDir = createTempDirectory("map-layers").also { layersDir = it }.toOkioPath(),
                 )
 
             val viewModel =
@@ -181,6 +183,7 @@ class GoogleCustomTileSelectionTest {
         } finally {
             try {
                 httpClient?.close()
+                layersDir?.toFile()?.deleteRecursively()
             } finally {
                 Dispatchers.resetMain()
             }
@@ -199,6 +202,7 @@ class GoogleCustomTileSelectionTest {
 
         Dispatchers.setMain(dispatcher)
         var httpClient: HttpClient? = null
+        var layersDir: NioPath? = null
         try {
             val application = ApplicationProvider.getApplicationContext<Application>()
             val mapPrefs = FakeMapPrefs()
@@ -209,7 +213,7 @@ class GoogleCustomTileSelectionTest {
                     httpClient = client,
                     mapPrefs = mapPrefs,
                     // The real location reads a global application context this test never installs.
-                    layersDir = createTempDirectory("map-layers").toOkioPath(),
+                    layersDir = createTempDirectory("map-layers").also { layersDir = it }.toOkioPath(),
                 )
 
             assertNull(prefs.selectedCustomTileProviderId.value)
@@ -253,6 +257,7 @@ class GoogleCustomTileSelectionTest {
         } finally {
             try {
                 httpClient?.close()
+                layersDir?.toFile()?.deleteRecursively()
             } finally {
                 Dispatchers.resetMain()
             }
