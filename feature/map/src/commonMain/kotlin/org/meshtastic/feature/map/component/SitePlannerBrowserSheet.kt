@@ -22,6 +22,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalUriHandler
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.site_planner_browser_note
 
 /** The hosted Site Planner. One definition, shared by the embedded host and the browser hand-off. */
 const val SITE_PLANNER_URL: String = "https://site.meshtastic.org"
@@ -34,9 +37,14 @@ const val SITE_PLANNER_URL: String = "https://site.meshtastic.org"
  * shortcuts still work; only the last step differs — instead of loading the planner in place, the parameters are
  * encoded into its URL and opened outside the app.
  *
- * The coverage estimate therefore stays in the browser rather than returning as a map layer. Bringing it back needs a
- * JavaScript bridge, which needs an embedded browser: on Desktop that meant bundling Chromium, which measured at
- * roughly three and a half times the size of the whole application.
+ * The coverage estimate therefore stays in the browser rather than returning as a map layer. Bringing it back
+ * automatically needs a JavaScript bridge, which needs an embedded browser: on Desktop that meant bundling Chromium,
+ * which measured at roughly three and a half times the size of the whole application.
+ *
+ * It comes back by hand instead, which the sheet's note spells out: the planner's own export writes a `.geojson`, and
+ * that is exactly what the layer importer reads. The note names the format on purpose — the planner's KML export is a
+ * bare `<GroundOverlay>` over a sibling PNG, the one construct neither renderer draws, so a user who reached for it
+ * would import a file that silently shows nothing.
  */
 @Composable
 fun SitePlannerBrowserSheet(
@@ -57,6 +65,7 @@ fun SitePlannerBrowserSheet(
             onDismiss()
         },
         onDismiss = onDismiss,
+        note = stringResource(Res.string.site_planner_browser_note),
         onUseNodeLocation =
         onUseNodeLocation?.let { node ->
             {

@@ -1765,6 +1765,7 @@
     <string name="site_planner">Site Planner</string>
     <string name="site_planner_antenna_gain_dbi">Antenna gain (dBi)</string>
     <string name="site_planner_antenna_height_meters">Antenna height (m)</string>
+    <string name="site_planner_browser_note">The estimate opens in your browser and stays there. To keep it, click the transmitter pin and choose Export › GeoJSON — that file imports as a map layer in the Meshtastic phone app. Avoid its KML export: that one is a ground-overlay image the app cannot draw.</string>
     <string name="site_planner_color_scale">Color palette</string>
     <string name="site_planner_estimate">Estimate coverage</string>
     <string name="site_planner_estimating">Estimating coverage…</string>

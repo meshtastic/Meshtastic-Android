@@ -1109,7 +1109,6 @@ mesh_beacon_on_preset
 mesh_beacon_on_region
 mesh_beacon_preset_indicator
 mesh_beacon_preset_none
-mesh_beacon_send_as_node
 mesh_beacon_target
 mesh_beacon_target_add
 mesh_beacon_target_channel_index
@@ -1715,6 +1714,7 @@ signal_quality
 site_planner
 site_planner_antenna_gain_dbi
 site_planner_antenna_height_meters
+site_planner_browser_note
 site_planner_color_scale
 site_planner_estimate
 site_planner_estimating

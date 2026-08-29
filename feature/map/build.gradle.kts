@@ -37,11 +37,15 @@ kotlin {
             implementation(projects.core.model)
             implementation(projects.core.navigation)
             implementation(projects.core.prefs)
+            implementation(projects.core.repository)
             implementation(libs.meshtastic.protobufs)
             implementation(projects.core.service)
             implementation(projects.core.resources)
             implementation(projects.core.ui)
             implementation(projects.core.di)
+            // The imported-layer store: Okio for the files it keeps, Ktor for the network layers it fetches.
+            implementation(libs.okio)
+            implementation(libs.ktor.client.core)
         }
     }
 }
