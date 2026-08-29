@@ -26,5 +26,8 @@ package org.meshtastic.feature.map.maplibre.layers
  * @param refreshToken bumped by the host when the user asks to refresh this layer. A network layer keeps the same URI
  *   across a refresh, so without something that changes there is nothing to tell the map its contents moved on — see
  *   [CustomLayers][org.meshtastic.feature.map.maplibre.layers.CustomLayers].
+ * @param icons the distinct icon images the layer's features ask for, found by the host with
+ *   [geoJsonIconUrls][org.meshtastic.feature.map.geojson.geoJsonIconUrls]. Supplied rather than discovered because
+ *   MapLibre picks an icon per feature from a fixed set of style images, which has to exist before the layer composes.
  */
-data class CustomLayer(val id: String, val uri: String, val refreshToken: Int = 0)
+data class CustomLayer(val id: String, val uri: String, val refreshToken: Int = 0, val icons: Set<String> = emptySet())

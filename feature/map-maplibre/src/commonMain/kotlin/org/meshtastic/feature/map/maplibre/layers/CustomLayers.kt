@@ -17,26 +17,40 @@
 package org.meshtastic.feature.map.maplibre.layers
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImagePainter
+import coil3.compose.LocalPlatformContext
+import coil3.compose.rememberAsyncImagePainter
+import coil3.request.ImageRequest
 import org.maplibre.compose.expressions.ast.Expression
 import org.maplibre.compose.expressions.dsl.asNumber
 import org.maplibre.compose.expressions.dsl.asString
+import org.maplibre.compose.expressions.dsl.case
 import org.maplibre.compose.expressions.dsl.coalesce
 import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.expressions.dsl.convertToColor
 import org.maplibre.compose.expressions.dsl.dp
 import org.maplibre.compose.expressions.dsl.eq
 import org.maplibre.compose.expressions.dsl.feature
+import org.maplibre.compose.expressions.dsl.image
 import org.maplibre.compose.expressions.dsl.or
+import org.maplibre.compose.expressions.dsl.switch
 import org.maplibre.compose.expressions.value.BooleanValue
 import org.maplibre.compose.expressions.value.GeometryType
 import org.maplibre.compose.layers.CircleLayer
 import org.maplibre.compose.layers.FillLayer
 import org.maplibre.compose.layers.LineLayer
+import org.maplibre.compose.layers.SymbolLayer
 import org.maplibre.compose.sources.GeoJsonData
 import org.maplibre.compose.sources.rememberGeoJsonSource
+import org.meshtastic.feature.map.kml.ICON_URL_PROPERTY
 
 /**
  * Fill, outline and point styling for every visible imported overlay.
@@ -101,6 +115,58 @@ private fun ImportedLayer(layer: CustomLayer) {
         strokeColor = const(Color.White),
         strokeWidth = const(1.dp),
     )
+
+    // Drawn last so an icon sits over the dot the circle layer already put down. Points keep that dot: an import
+    // usually gives icons to a few features and nothing to the rest, and those still have to be visible.
+    val icons = rememberLayerIcons(layer.icons)
+    if (icons.isNotEmpty()) {
+        SymbolLayer(
+            id = "custom-${layer.id}-icon",
+            source = source,
+            // Only features naming an icon that actually loaded. Without this the `switch` fallback would put some
+            // arbitrary other feature's icon on every plain point in the layer.
+            filter = iconIsOneOf(icons.keys),
+            iconImage =
+            switch(
+                input = coalesce(feature[ICON_URL_PROPERTY].asString(), const("")),
+                *icons.map { (url, painter) -> case(url, image(painter, ICON_SIZE)) }.toTypedArray(),
+                // Unreachable given the filter, and required: `switch` has no way to say "draw nothing".
+                fallback = image(icons.values.first(), ICON_SIZE),
+            ),
+            // An overlay's icons mark specific places, so a crowded import should show all of them rather than let
+            // MapLibre thin them out to keep labels tidy.
+            iconAllowOverlap = const(true),
+        )
+    }
+}
+
+/**
+ * The icon images the layer asks for, once each has been fetched.
+ *
+ * Returning a value makes this non-restartable, so the `state` reads below invalidate the *caller* — which is what
+ * makes the map redraw as icons arrive. Deliberate: a restartable version would recompose alone and the layer above
+ * would never see the painters it produced.
+ */
+@Composable
+private fun rememberLayerIcons(urls: Set<String>): Map<String, Painter> {
+    if (urls.isEmpty()) return emptyMap()
+    // Sorted so the `switch` arms and the fallback stay in the same order across recompositions.
+    val ordered = remember(urls) { urls.sorted() }
+    val loaded = mutableMapOf<String, Painter>()
+    ordered.forEach { url ->
+        key(url) {
+            // See `decodeForSoftwareCanvas` — without it the app dies the moment an icon finishes loading.
+            val painter =
+                rememberAsyncImagePainter(
+                    ImageRequest.Builder(LocalPlatformContext.current).data(url).decodeForSoftwareCanvas().build(),
+                )
+            val state by painter.state.collectAsState()
+            // The loaded painter, not the async wrapper around it: MapLibre rasterizes a painter outside the
+            // composition driving it, where an AsyncImagePainter draws nothing.
+            (state as? AsyncImagePainter.State.Success)?.let { loaded[url] = it.painter }
+        }
+    }
+    return loaded
 }
 
 /** What an import with no colours of its own is drawn in. */
@@ -110,7 +176,18 @@ private val CustomLayerBlue = Color(0xFF3F51B5)
 private fun geometryIsOneOf(vararg types: GeometryType): Expression<BooleanValue> =
     types.map { feature.geometryType() eq const(it) }.reduce { left, right -> left or right }
 
+/**
+ * Matches a feature whose `icon-url` is one of [urls].
+ *
+ * An `or` chain rather than a set-membership test, matching [geometryIsOneOf] — the same shape the rest of this file's
+ * filters already use.
+ */
+private fun iconIsOneOf(urls: Set<String>): Expression<BooleanValue> =
+    urls.map { feature[ICON_URL_PROPERTY].asString() eq const(it) }.reduce { left, right -> left or right }
+
 /** simplestyle-spec fallbacks, matching the Google flavor's own: 0.35 lets stacked contour bands read as a gradient. */
 private const val DEFAULT_FILL_OPACITY = 0.35f
 private const val DEFAULT_STROKE_WIDTH = 2f
 private const val POINT_RADIUS = 5
+
+private val ICON_SIZE = DpSize(28.dp, 28.dp)
