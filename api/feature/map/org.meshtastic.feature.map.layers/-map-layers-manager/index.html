@@ -1,0 +1,284 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>MapLayersManager</title>
+<link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../../styles/style.css" rel="Stylesheet">
+<link href="../../../../styles/main.css" rel="Stylesheet">
+<link href="../../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../../index.html" tabindex="1">
+                    Meshtastic App
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":feature:map/commonMain">common</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":feature:map/commonMain" data-filter=":feature:map/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    Meshtastic App
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="feature-map::org.meshtastic.feature.map.layers/MapLayersManager///PointingToDeclaration//-1707802287">
+  <div class="breadcrumbs"><a href="../../index.html">feature-map</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.feature.map.layers</a><span class="delimiter">/</span><span class="current">MapLayersManager</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Map</span><wbr><span>Layers</span><wbr><span><span>Manager</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">MapLayersManager</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">dispatchers<span class="token operator">: </span><a href="../../../../core/di/org.meshtastic.core.di/-coroutine-dispatchers/index.html">CoroutineDispatchers</a><span class="token punctuation">, </span></span><span class="parameter ">httpClient<span class="token operator">: </span><span data-unresolved-link="io.ktor.client/HttpClient///PointingToDeclaration/">HttpClient</span><span class="token punctuation">, </span></span><span class="parameter ">mapPrefs<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-map-prefs/index.html">MapPrefs</a><span class="token punctuation">, </span></span><span class="parameter ">layersDir<span class="token operator">: </span><span data-unresolved-link="okio/Path///PointingToDeclaration/">Path</span><span class="token operator"> = </span>mapLayersDirectory()<span class="token punctuation">, </span></span><span class="parameter ">fileSystem<span class="token operator">: </span><span data-unresolved-link="okio/FileSystem///PointingToDeclaration/">FileSystem</span><span class="token operator"> = </span>mapLayerFileSystem()</span></span><span class="token punctuation">)</span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/feature/map/src/commonMain/kotlin/org/meshtastic/feature/map/layers/MapLayersManager.kt#L52">source</a>)</span></span></div><p class="paragraph">Owner of the imported map-layer list, its on-disk persistence, and the import plumbing.</p><p class="paragraph">Common code because every host imports layers: both Android flavours and the desktop app observe <a href="map-layers.html">mapLayers</a> and render it their own way. This class is the single home for everything that is not the final overlay draw.</p><p class="paragraph">Layers persist as files under <a href="../map-layers-directory.html">mapLayersDirectory</a>; hidden and network state lives in <a href="../../../../core/repository/org.meshtastic.core.repository/-map-prefs/index.html">MapPrefs</a>. Nothing here touches a platform URI type — an import arrives as a <a href="../-picked-map-file/index.html">PickedMapFile</a> whose bytes the caller already knows how to read, which is what lets one implementation serve a ContentResolver and a plain file path alike.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="tableheader">Constructors</h2>
+        <div class="table"><a data-name="95435443%2FConstructors%2F-1707802287" anchor-label="MapLayersManager" id="95435443%2FConstructors%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-map-layers-manager.html"><span>Map</span><wbr><span>Layers</span><wbr><span><span>Manager</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="95435443%2FConstructors%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">dispatchers<span class="token operator">: </span><a href="../../../../core/di/org.meshtastic.core.di/-coroutine-dispatchers/index.html">CoroutineDispatchers</a><span class="token punctuation">, </span></span><span class="parameter ">httpClient<span class="token operator">: </span><span data-unresolved-link="io.ktor.client/HttpClient///PointingToDeclaration/">HttpClient</span><span class="token punctuation">, </span></span><span class="parameter ">mapPrefs<span class="token operator">: </span><a href="../../../../core/repository/org.meshtastic.core.repository/-map-prefs/index.html">MapPrefs</a><span class="token punctuation">, </span></span><span class="parameter ">layersDir<span class="token operator">: </span><span data-unresolved-link="okio/Path///PointingToDeclaration/">Path</span><span class="token operator"> = </span>mapLayersDirectory()<span class="token punctuation">, </span></span><span class="parameter ">fileSystem<span class="token operator">: </span><span data-unresolved-link="okio/FileSystem///PointingToDeclaration/">FileSystem</span><span class="token operator"> = </span>mapLayerFileSystem()</span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="28017483%2FProperties%2F-1707802287" anchor-label="mapLayers" id="28017483%2FProperties%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="map-layers.html"><span>map</span><wbr><span><span>Layers</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="28017483%2FProperties%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="map-layers.html">mapLayers</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="../-map-layer-item/index.html">MapLayerItem</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="-491923271%2FFunctions%2F-1707802287" anchor-label="addGeoJsonLayer" id="-491923271%2FFunctions%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="add-geo-json-layer.html"><span>add</span><wbr><span>Geo</span><wbr><span>Json</span><wbr><span><span>Layer</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-491923271%2FFunctions%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="add-geo-json-layer.html"><span class="token function">addGeoJsonLayer</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">name<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">geoJson<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Import a GeoJSON string (e.g. handed back by the Site Planner headless bridge) as a visible local overlay, reusing the same storage-backed layer plumbing as file imports.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1174066934%2FFunctions%2F-1707802287" anchor-label="addMapLayer" id="-1174066934%2FFunctions%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="add-map-layer.html"><span>add</span><wbr><span>Map</span><wbr><span><span>Layer</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1174066934%2FFunctions%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="add-map-layer.html"><span class="token function">addMapLayer</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">picked<span class="token operator">: </span><a href="../-picked-map-file/index.html">PickedMapFile</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Import a file the user picked. Unsupported types and unreadable sources are logged and skipped.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1390323802%2FFunctions%2F-1707802287" anchor-label="addNetworkMapLayer" id="1390323802%2FFunctions%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="add-network-map-layer.html"><span>add</span><wbr><span>Network</span><wbr><span>Map</span><wbr><span><span>Layer</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1390323802%2FFunctions%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="add-network-map-layer.html"><span class="token function">addNetworkMapLayer</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">name<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">url<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Returns an error message if <a href="add-network-map-layer.html">name</a>/<a href="add-network-map-layer.html">url</a> are invalid, or null on success. Adds a persisted network layer.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1690985478%2FFunctions%2F-1707802287" anchor-label="readLayerBytes" id="1690985478%2FFunctions%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="read-layer-bytes.html"><span>read</span><wbr><span>Layer</span><wbr><span><span>Bytes</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1690985478%2FFunctions%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="read-layer-bytes.html"><span class="token function">readLayerBytes</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">layerItem<span class="token operator">: </span><a href="../-map-layer-item/index.html">MapLayerItem</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-byte-array/index.html">ByteArray</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">The layer's bytes: fetched for a network layer, read from storage otherwise.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1848481933%2FFunctions%2F-1707802287" anchor-label="refreshAllVisibleNetworkLayers" id="1848481933%2FFunctions%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="refresh-all-visible-network-layers.html"><span>refresh</span><wbr><span>All</span><wbr><span>Visible</span><wbr><span>Network</span><wbr><span><span>Layers</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1848481933%2FFunctions%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="refresh-all-visible-network-layers.html"><span class="token function">refreshAllVisibleNetworkLayers</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-767578453%2FFunctions%2F-1707802287" anchor-label="refreshMapLayer" id="-767578453%2FFunctions%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="refresh-map-layer.html"><span>refresh</span><wbr><span>Map</span><wbr><span><span>Layer</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-767578453%2FFunctions%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="refresh-map-layer.html"><span class="token function">refreshMapLayer</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">layerId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Bump a layer's <a href="../-map-layer-item/refresh-token.html">MapLayerItem.refreshToken</a> so renderers re-read it (used for network-layer refresh).</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-153129940%2FFunctions%2F-1707802287" anchor-label="removeMapLayer" id="-153129940%2FFunctions%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="remove-map-layer.html"><span>remove</span><wbr><span>Map</span><wbr><span><span>Layer</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-153129940%2FFunctions%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="remove-map-layer.html"><span class="token function">removeMapLayer</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">layerId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="387962986%2FFunctions%2F-1707802287" anchor-label="toggleLayerVisibility" id="387962986%2FFunctions%2F-1707802287" data-filterable-set=":feature:map/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map/commonMain" data-filterable-set=":feature:map/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="toggle-layer-visibility.html"><span>toggle</span><wbr><span>Layer</span><wbr><span><span>Visibility</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="387962986%2FFunctions%2F-1707802287"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="toggle-layer-visibility.html"><span class="token function">toggleLayerVisibility</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">layerId<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
