@@ -86,6 +86,18 @@ class UnclusteredNodesTest {
     }
 
     @Test
+    fun `a node already left alone is not absorbed into a later cluster`() {
+        // At zoom 10 a degree is ~1456 tile pixels, so 0.0309 deg ~ 45px — inside the 50px radius, one hop at a time.
+        // The first node's only neighbour is the bridge, so it stands alone and — as supercluster does — leaves the
+        // pool. The bridge then counts 9 without it, short of MIN_POINTS, so nothing here may cluster: every node
+        // stands alone rather than the early loner being counted into a cluster that only reaches 10 through it.
+        val loner = node(1, latitude = 36.13, longitude = -115.2000)
+        val bridge = node(2, latitude = 36.13, longitude = -115.1691)
+        val pileNearBridge = (3..10).map { node(it, latitude = 36.13, longitude = -115.1382) }
+        assertEquals(10, unclustered(listOf(loner, bridge) + pileNearBridge, zoom = 10).size)
+    }
+
+    @Test
     fun `isolation ranking puts the loneliest nodes first so the chip budget reaches them`() {
         // The chip budget is spent down this order, so the nodes certain to be drawn on their own have to come first.
         val nodes = pile(30) + node(9999, latitude = 36.60, longitude = -115.60)

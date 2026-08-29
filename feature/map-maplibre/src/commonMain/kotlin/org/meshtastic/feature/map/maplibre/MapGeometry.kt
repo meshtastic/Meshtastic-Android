@@ -74,6 +74,9 @@ fun unclusteredNodes(nodes: List<Node>, zoom: Int, radiusPx: Int, minPoints: Int
         if (neighbours.size >= minPoints) {
             neighbours.forEach { taken[it] = true }
         } else {
+            // Marked taken too: supercluster excludes every visited point from later neighbourhoods, clustered
+            // or not — a node already standing alone must not pad a later cluster up to the minimum.
+            taken[index] = true
             alone += nodes[index]
         }
     }
