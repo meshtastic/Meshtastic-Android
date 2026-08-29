@@ -1920,6 +1920,8 @@
     <string name="translation_failed">Viestin kääntäminen epäonnistui</string>
     <string name="translation_model_download_failed">Käännösmallin lataus epäonnistui</string>
     <string name="translation_not_required">Viesti on jo omalla kielelläsi</string>
+    <string name="transmit_disabled">Lähetys on poistettu käytöstä</string>
+    <string name="transmit_disabled_summary">Tämä laite voi vastaanottaa, mutta ei lähetä mitään LoRa-verkon kautta.</string>
     <string name="transmit_over_lora">Lähetä LoRa:n kautta</string>
     <!-- TRANSPORT -->
     <string name="transport">Kuljetus</string>
