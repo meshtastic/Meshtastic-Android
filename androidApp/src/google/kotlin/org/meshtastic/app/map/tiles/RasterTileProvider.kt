@@ -59,8 +59,7 @@ class RasterTileProvider(private val spec: RasterTileSpec, private val client: O
         null
     } catch (e: IllegalArgumentException) {
         // OkHttp rejected the URL the template produced. The template is the user's, so this is not ours to crash
-        // on
-        // — but it will not fix itself either, so refuse the tile rather than retrying forever.
+        // on — but it will not fix itself either, so refuse the tile rather than retrying forever.
         logger.w(e) { "Tile url rejected" }
         TileProvider.NO_TILE
     }

@@ -88,7 +88,7 @@ class MapViewModel(
             mapPrefs.setMapStyle(value)
         }
 
-    /** Imported overlay layers; owned by the flavor-neutral [MapLayersManager] and drawn on the OSMdroid map. */
+    /** Imported overlay layers; owned by the flavor-neutral [MapLayersManager] and drawn by the MapLibre map. */
     val mapLayers: StateFlow<List<MapLayerItem>> = mapLayersManager.mapLayers
 
     fun addMapLayer(picked: PickedMapFile) = mapLayersManager.addMapLayer(picked)

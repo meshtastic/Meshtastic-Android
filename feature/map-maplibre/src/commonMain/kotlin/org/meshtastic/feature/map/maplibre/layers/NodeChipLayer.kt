@@ -88,8 +88,9 @@ import org.meshtastic.feature.map.maplibre.geojson.toNodeChip
  *
  * @param chipFilter narrows which features get a chip. The main map passes the unclustered-only test; the smaller maps
  *   have no clusters and pass nothing.
- * @param visibleBounds limits which nodes get an image at all, so the budget is spent on what is on screen rather than
- *   on whatever happens to come first in a mesh of thousands. Null means no limit, for the maps that show a handful.
+ * @param nodes the nodes worth an image, already narrowed and ordered by the caller — [NodeLayers] passes only what the
+ *   padded viewport can see, loneliest first, so the budget is spent on what is on screen rather than on whatever
+ *   happens to come first in a mesh of thousands.
  */
 @Composable
 internal fun NodeChipLayer(
@@ -108,10 +109,8 @@ internal fun NodeChipLayer(
     onClick =
     onNodeClick?.let { click ->
         { features ->
-            // The chip the user sees on top is the one they meant. Query order is not that order, so pick by
-            // the same
-            // rank [chipSortKey] draws by, matching the Google flavor, where the highest zIndex marker takes
-            // the tap.
+            // The chip the user sees on top is the one they meant. Query order is not that order, so pick
+            // by the rank [chipSortKey] draws by — on the Google map the highest zIndex marker takes the tap.
             features
                 .maxByOrNull { it.properties.chipRank() }
                 ?.properties

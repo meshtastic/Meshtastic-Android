@@ -64,8 +64,8 @@ Bluetooth Low Energy is supported on Desktop via the [Kable](https://github.com/
 |---------|---------|---------|-------|
 | Messaging | ✓ | ✓ | Full parity |
 | Node List | ✓ | ✓ | Full parity |
-| Map | ✓ | ✓ | Interactive MapLibre map, with base map and overlay pickers and custom tile sources. No offline downloads or layer import |
-| Map layers (`.kml`/`.kmz`/GeoJSON) | ✓ | ✗ | Needs a file picker desktop does not have yet |
+| Map | ✓ | ✓ | Interactive MapLibre map, with base map and overlay pickers and custom tile sources. No offline downloads or local `.mbtiles` archives |
+| Map layers (`.kml`/`.kmz`/GeoJSON) | ✓ | ✓ | Same layer store and sheet as Android; imported files draw on the desktop map |
 | Site Planner | ✓ | ✓* | *Opens in your browser on desktop; the estimate is not drawn on the desktop map |
 | Settings | ✓ | ✓ | Full parity |
 | Bluetooth (BLE) | ✓ | ✓ | Via Kable on desktop |
@@ -136,9 +136,11 @@ Requirements:
 
 ## Known Limitations
 
-- Offline tile downloads, local `.mbtiles` archives, and `.kml`/`.kmz`/GeoJSON layer import are not
-  yet available on desktop. Site Planner opens in your browser rather than in the app, so its
-  coverage estimate is viewed there rather than drawn on the map. Custom network tile sources are — see
+- Offline tile downloads and local `.mbtiles` archives are not yet available on desktop.
+  `.kml`/`.kmz`/GeoJSON layer import works — see
+  [Map & Waypoints](map-and-waypoints#map-layers). Site Planner opens in your browser
+  rather than in the app; to bring its coverage estimate onto the map, use the planner's
+  **Export › GeoJSON** and add the file as a layer. Custom network tile sources work too — see
   [Map & Waypoints](map-and-waypoints#adding-your-own-tile-source)
 - Some Android-specific features (widgets, specific notification channels) are unavailable
 - Performance may vary on low-spec hardware running Compose Desktop

@@ -78,7 +78,8 @@ import org.meshtastic.feature.map.maplibre.style.MapOverlay
 class MapLibreMapViewProvider(
     /**
      * Supplies the user's imported overlays. A composable supplier rather than a value so the host can collect its own
-     * state; desktop has no importer yet and uses the default.
+     * state; both hosts read the shared layer store through
+     * [rememberRenderableLayers][org.meshtastic.feature.map.maplibre.layers.rememberRenderableLayers].
      */
     private val customLayers: @Composable () -> List<CustomLayer> = { emptyList() },
     /**
@@ -108,13 +109,13 @@ class MapLibreMapViewProvider(
         DefaultWaypointEditor(request)
     },
     /**
-     * Runs a Site Planner session. Null hides the button entirely — the planner lives in the app and has no desktop
-     * host, so desktop leaves it out. See [SitePlannerSession].
+     * Runs a Site Planner session. Null hides the button entirely. The F-Droid app hosts the planner in a WebView;
+     * desktop hands the same form to the system browser. See [SitePlannerSession].
      */
     private val sitePlanner: (@Composable (SitePlannerSession) -> Unit)? = null,
     /**
-     * Extra content for the foot of the layers sheet. The F-Droid app puts its imported-layer manager there, which the
-     * Google flavor reaches through the same button; adding a layer needs a file picker, so it cannot live here.
+     * Extra content for the foot of the layers sheet. Both hosts mount the shared imported-layer manager there — the
+     * picker behind its Add button is the platform-specific part, which is why the slot is the host's to fill.
      */
     private val layersSheetExtra: @Composable () -> Unit = {},
 ) : MapViewProvider {

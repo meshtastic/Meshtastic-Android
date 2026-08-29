@@ -1509,10 +1509,9 @@ private fun MapLayerOverlay(layerItem: MapLayerItem, mapViewModel: MapViewModel)
  * Parse a custom overlay into the maps-utils platform-agnostic [DataLayer] model; null if the format is unrecognized.
  */
 private fun parseMapLayer(layerType: LayerType, stream: InputStream): DataLayer? = when (layerType) {
-    // Converted with the app's own reader rather than maps-utils'. The two parsers disagreed about nothing that
-    // matters here, but keeping both meant keeping the maps-utils/xmlutil pairing that made every KML import die
-    // with
-    // NoSuchMethodError in 2.8.0–2.8.1 — a version floor and a canary test were all that held it.
+    // Converted with the app's own reader rather than maps-utils': keeping both parsers meant keeping the
+    // maps-utils/xmlutil pairing that made every KML import die with NoSuchMethodError in 2.8.0–2.8.1, held off
+    // only by a version floor and a canary test.
     LayerType.KML ->
         convertKmlSource(BufferedInputStream(stream))?.let { imported ->
             GeoJsonParser()

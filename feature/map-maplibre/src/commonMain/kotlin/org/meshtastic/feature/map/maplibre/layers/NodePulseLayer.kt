@@ -94,7 +94,7 @@ internal fun NodePulseLayer(nodes: List<Node>, source: Source) {
  */
 internal fun List<Node>.heardJustNow(now: Long): List<Node> = filter { heardJustNow(it.lastHeard, now) }
 
-/** Pulse only for nodes heard within this many seconds, matching the Google flavor's own window. */
+/** How long one pulse takes to grow and fade, in milliseconds. The membership window is [RECENTLY_HEARD_SECONDS]. */
 private const val PULSE_MILLIS = 1000
 private const val PULSE_FINISHED = 1f
 

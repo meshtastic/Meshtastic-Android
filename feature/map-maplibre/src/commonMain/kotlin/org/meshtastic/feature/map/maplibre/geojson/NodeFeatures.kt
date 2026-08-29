@@ -57,9 +57,8 @@ fun nodesToFeatureCollection(nodes: List<Node>, myNodeNum: Int? = null): Feature
                     put(NodeFeatureKeys.FOREGROUND, foreground.toCssHex())
                     put(NodeFeatureKeys.BACKGROUND, background.toCssHex())
                     put(NodeFeatureKeys.LAST_HEARD, node.lastHeard)
-                    // Omitted rather than written as 0.0 when the node reports no precision: 0 is a real radius,
-                    // and
-                    // a reader cannot tell the difference. GeoCircle drops such nodes instead of drawing a ring.
+                    // Omitted rather than written as 0.0 when the node reports no precision: 0 is a real
+                    // radius, and a reader cannot tell the difference. GeoCircle drops such nodes instead.
                     precisionRadiusMetersOrNull(node.position.precision_bits)?.let {
                         put(NodeFeatureKeys.PRECISION_METERS, it)
                     }

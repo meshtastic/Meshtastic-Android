@@ -42,8 +42,9 @@ object WaypointFeatureKeys {
 /**
  * Waypoint markers.
  *
- * The emoji `icon` is emitted as a string and drawn through a text field rather than an image layer — MapLibre renders
- * it with the glyph stack, so there is no sprite sheet to maintain.
+ * The emoji `icon` is emitted as a string the layers group on — one symbol layer per distinct glyph, each glyph
+ * rasterized into a style image. Not a text field: the basemap's glyph stack has no emoji coverage, so asking for these
+ * as text rendered nothing at all (see [WaypointLayers][org.meshtastic.feature.map.maplibre.layers.WaypointLayers]).
  */
 fun waypointsToFeatureCollection(waypoints: Collection<DataPacket>): FeatureCollection<Point, JsonObject?> =
     FeatureCollection(

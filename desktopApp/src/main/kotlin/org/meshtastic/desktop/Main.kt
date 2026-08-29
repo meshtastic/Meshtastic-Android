@@ -149,9 +149,8 @@ fun main(args: Array<String>) {
     // exitProcessOnExit = false is what makes the shutdown block below reachable at all: with the default (true),
     // application() calls System.exit(0) itself as soon as the Compose loop ends, and control never returns here.
     // Do not "simplify" this back to a bare application {} — that silently disables every teardown that follows.
-    // maplibre-compose 0.15.0 made MapLibre.configure() optional — the first map applies a default
-    // cache configuration process-wide, so there is nothing to set up ahead of composition.
-
+    //
+    // No MapLibre.configure() call: the first map applies a default cache configuration process-wide.
     application(exitProcessOnExit = false) {
         val koinApp = remember {
             // Keep console output and also capture into the in-memory buffer the Debug screen views/exports.
