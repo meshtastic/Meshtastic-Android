@@ -2,7 +2,7 @@
 title: Contributing
 parent: Developer Guide
 nav_order: 8
-last_updated: 2026-07-08
+last_updated: 2026-08-29
 aliases:
   - contributing
   - pull-request
@@ -98,6 +98,8 @@ For docs-specific changes, also run:
 ```bash
 ./gradlew generateDocsBundle validateDocsBundle
 ```
+
+Prose in `docs/en/` follows the house style — see [Documentation Style](documentation-style).
 
 ## Getting Help
 

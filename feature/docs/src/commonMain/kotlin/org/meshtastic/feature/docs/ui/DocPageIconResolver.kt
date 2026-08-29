@@ -110,5 +110,7 @@ internal fun DocPage.resolveIcon(): ImageVector = when (iconId) {
 
     "test-builds" -> MeshtasticIcons.SystemUpdate
 
+    "documentation-style" -> MeshtasticIcons.Edit
+
     else -> MeshtasticIcons.Notes
 }
