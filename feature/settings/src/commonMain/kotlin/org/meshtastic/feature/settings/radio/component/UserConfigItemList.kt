@@ -92,9 +92,7 @@ fun UserConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     // for remote-administered nodes.
     val statusMessage =
         remember(state.moduleConfig.statusmessage, destNode?.nodeStatus) {
-            val configured = state.moduleConfig.statusmessage?.node_status.orEmpty()
-            // Fall back to the node's broadcast status so the user edits the live value, not a blank.
-            configured.ifBlank { destNode?.nodeStatus.orEmpty() }
+            statusMessagePrefill(state.moduleConfig.statusmessage, destNode?.nodeStatus)
         }
     var statusMessageInput by rememberSaveable(statusMessage) { mutableStateOf(statusMessage) }
     // The field is absent without the capability, so the input can only differ from the saved value when shown.
@@ -185,6 +183,14 @@ fun UserConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         }
     }
 }
+
+/**
+ * The status to edit: the configured value, falling back to the node's broadcast status only while no config has been
+ * read, so the operator edits the live value rather than a blank. A config that is present and empty is a status
+ * cleared on purpose, and must not be repopulated from a stale broadcast.
+ */
+private fun statusMessagePrefill(config: ModuleConfig.StatusMessageConfig?, broadcast: String?) =
+    config?.node_status ?: broadcast.orEmpty()
 
 /** Writes whichever halves of the user screen the operator actually changed: the owner, the status message, or both. */
 private fun RadioConfigViewModel.save(user: User, userDirty: Boolean, statusMessage: String, statusDirty: Boolean) {

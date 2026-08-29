@@ -281,6 +281,10 @@ open class RadioConfigViewModel(
 
     private val requestIds = MutableStateFlow(hashSetOf<Int>())
 
+    // USER reads one config on firmware without the status message module and two with it, so whether a
+    // load fanned out is a property of that load, not of the route. Null falls back to the route's flag.
+    private var loadFanOut: Pair<String, Boolean>? = null
+
     // Main-dispatcher confined with the other ViewModel request state below. Keep every access on viewModelScope unless
     // these collections are moved behind explicit synchronization.
     private val requestTimeoutJobs = mutableMapOf<Int, Job>()
@@ -835,6 +839,7 @@ open class RadioConfigViewModel(
         _radioConfigState.update {
             it.copy(route = route.name, responseState = ResponseState.Loading(showOverlay = showOverlay))
         }
+        loadFanOut = null
 
         when (route) {
             ConfigRoute.USER -> {
@@ -843,7 +848,10 @@ open class RadioConfigViewModel(
                 }
                 // The status message is edited on the user screen, so it is read with the owner. Gated on the
                 // capability: firmware without the module never answers the get, leaving the overlay waiting.
-                if (Capabilities(radioConfigState.value.metadata?.firmware_version).supportsStatusMessage) {
+                val readsStatusMessage =
+                    Capabilities(radioConfigState.value.metadata?.firmware_version).supportsStatusMessage
+                loadFanOut = ConfigRoute.USER.name to readsStatusMessage
+                if (readsStatusMessage) {
                     safeLaunch(tag = "getStatusMessageConfig") {
                         radioConfigUseCase.getModuleConfig(
                             destNum,
@@ -1375,7 +1383,8 @@ open class RadioConfigViewModel(
     private fun isSingleResponseRemoteReadRoute(route: String): Boolean {
         if (!isRemoteReadRoute(route)) return false
         val hasReadFanOut =
-            ConfigRoute.entries.firstOrNull { it.name == route }?.hasReadFanOut
+            loadFanOut?.takeIf { it.first == route }?.second
+                ?: ConfigRoute.entries.firstOrNull { it.name == route }?.hasReadFanOut
                 ?: ModuleRoute.entries.firstOrNull { it.name == route }?.hasReadFanOut
         // Unknown routes are never retained.
         return hasReadFanOut == false
