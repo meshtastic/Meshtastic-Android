@@ -2,7 +2,7 @@
 title: Desktop App
 parent: User Guide
 nav_order: 14
-last_updated: 2026-08-28
+last_updated: 2026-08-29
 description: Install and use the Meshtastic Desktop app on Linux, macOS, and Windows — connections, feature parity, and keyboard shortcuts.
 aliases:
   - desktop
@@ -14,34 +14,32 @@ aliases:
 
 # Desktop App
 
-The Meshtastic Desktop application shares its core codebase with Android via Kotlin Multiplatform. Most features work identically on Linux, macOS, and Windows.
+This page covers installing the Meshtastic desktop app, connecting a radio, and how it differs from Android. The desktop app shares its core codebase with Android via Kotlin Multiplatform, so most features work identically across Linux, macOS, and Windows.
 
 ## Installation
 
 ### Linux
 
-- Download the `.deb` or `.AppImage` package from the releases page
+- Download the `.deb` or `.AppImage` package from the [releases page](https://github.com/meshtastic/Meshtastic-Android/releases)
 - Or build from source using `./gradlew :desktopApp:run`
 
 ### macOS
 
-- Download the `.dmg` package from releases
+- Download the `.dmg` package from the [releases page](https://github.com/meshtastic/Meshtastic-Android/releases)
 - Or build from source
 
 ### Windows
 
-- Download the `.msi` installer from releases
+- Download the `.msi` installer from the [releases page](https://github.com/meshtastic/Meshtastic-Android/releases)
 - Or build from source
 
 ## Connecting Your Radio
 
 ### USB Serial (Primary)
 
-The most reliable connection method on Desktop:
+The most reliable connection method on desktop:
 
-1. Connect your Meshtastic radio via USB cable.
-2. The app should detect the serial port automatically.
-3. If not detected, select the correct serial port from the Connect menu.
+Connect your radio via USB. The app detects the serial port automatically; if it doesn't, select the port from the Connect menu.
 
 ### TCP/IP
 
@@ -52,11 +50,10 @@ For network-connected radios:
 
 ### Bluetooth (BLE)
 
-Bluetooth Low Energy is supported on Desktop via the [Kable](https://github.com/JuulLabs/kable) library:
+Bluetooth Low Energy is supported on desktop via the [Kable](https://github.com/JuulLabs/kable) library:
 
-1. Ensure your system has a Bluetooth adapter.
-2. The app scans for nearby Meshtastic radios automatically.
-3. Select your device from the Connect screen.
+1. Ensure your system has a Bluetooth adapter. The app scans for nearby Meshtastic radios automatically.
+2. Select your radio from the Connect screen.
 
 ## Feature Parity
 
@@ -81,7 +78,7 @@ Bluetooth Low Energy is supported on Desktop via the [Kable](https://github.com/
 
 ## UI Differences
 
-The Desktop app uses the same Compose Multiplatform UI with adaptations for larger screens and desktop interaction.
+The desktop app uses the same Compose Multiplatform UI with adaptations for larger screens and desktop interaction.
 
 ### Keyboard Shortcuts
 
@@ -89,7 +86,7 @@ Shortcuts use **⌘** (Command) on macOS and **Ctrl** on Windows and Linux. (The
 
 | Shortcut | Action |
 |----------|--------|
-| **⌘/Ctrl+Q** | Quit the application |
+| **⌘/Ctrl+Q** | Quit the app |
 | **⌘/Ctrl+,** | Open Settings |
 | **⌘/Ctrl+1** | Switch to Messages tab |
 | **⌘/Ctrl+2** | Switch to Nodes tab |
@@ -106,11 +103,11 @@ Shortcuts use **⌘** (Command) on macOS and **Ctrl** on Windows and Linux. (The
 
 ### Notification Preferences
 
-The Desktop app provides in-app toggles for controlling which notifications are shown — messages, new nodes, and low battery alerts. Access these from **Settings → Notifications** within the app.
+The desktop app provides in-app toggles for controlling which notifications are shown — messages, new nodes, and low battery alerts. Access these from **Settings → Notifications** within the app.
 
 ## Built-in Documentation Browser
 
-The Desktop app includes a built-in documentation browser for quick access to help content without leaving the application.
+The desktop app includes a built-in documentation browser for quick access to help content without leaving the app.
 
 ![Docs browser with table of contents](../../assets/screenshots/docs-browser_toc.png)
 
@@ -136,8 +133,8 @@ Requirements:
 
 ## Known Limitations
 
-- Offline tile downloads and local `.mbtiles` archives are not yet available on desktop.
-  `.kml`/`.kmz`/GeoJSON layer import works — see
+- Offline tile downloads and local `.mbtiles` archives are not available on desktop.
+- `.kml`/`.kmz`/GeoJSON layer import works — see
   [Map & Waypoints](map-and-waypoints#map-layers). Site Planner opens in your browser
   rather than in the app; to bring its coverage estimate onto the map, use the planner's
   **Export › GeoJSON** and add the file as a layer. Custom network tile sources work too — see

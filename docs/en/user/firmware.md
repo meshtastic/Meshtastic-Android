@@ -2,7 +2,7 @@
 title: Firmware Updates
 parent: User Guide
 nav_order: 13
-last_updated: 2026-08-27
+last_updated: 2026-08-29
 description: Update your radio firmware over Bluetooth or USB — OTA process, version channels, pre-flight checks, and recovery.
 aliases:
   - firmware
@@ -17,7 +17,7 @@ Keep your Meshtastic radio up to date with the latest firmware for new features,
 
 ## Checking for Updates
 
-1. Open the connected radio's configuration and, under **Advanced**, tap **Firmware Update**. The entry appears only for OTA-capable devices.
+1. Open the connected radio's configuration and, under **Advanced**, tap **Firmware Update**. The entry appears only for OTA-capable radios.
 2. The app checks for available firmware versions.
 3. Available updates show the version number and changelog summary.
 
@@ -27,6 +27,8 @@ Keep your Meshtastic radio up to date with the latest firmware for new features,
 
 The most common update method for Android users:
 
+> ⚠️ **Warning:** Interrupting a firmware update can leave the radio unable to boot. Keep the phone nearby and both devices powered until the update completes.
+
 1. Ensure your radio is connected via Bluetooth.
 2. Navigate to the Firmware Update screen.
 3. Select the desired firmware version.
@@ -34,8 +36,6 @@ The most common update method for Android users:
 5. Wait for the update to complete — **do not disconnect** during the update.
 
 ![Firmware checking for updates](../../assets/screenshots/firmware_checking.png)
-
-> ⚠️ **Warning:** Interrupting a firmware update can brick your device. Keep the radio charged and stay in Bluetooth range for the whole update. The app itself only blocks the update below **10%** battery; 50% or more is the safe habit, not an enforced limit.
 
 #### Erase device during update
 
@@ -48,7 +48,7 @@ Where the app offers it, an **Erase device during update** checkbox appears next
 
 It is not offered for a local firmware file, during a recovery update, or on USB devices whose board does not support the erase step. Afterwards the device needs setting up — and pairing — again.
 
-### OTA via WiFi (network-connected ESP32)
+### OTA via Wi-Fi (network-connected ESP32)
 
 When an ESP32 radio is connected over the network rather than Bluetooth, the app offers **WiFi OTA**, which pushes the same update over TCP:
 
@@ -56,7 +56,7 @@ When an ESP32 radio is connected over the network rather than Bluetooth, the app
 2. Open the Firmware Update screen and pick a version.
 3. Tap **Update**. Keep the radio and phone on the same network for the whole transfer.
 
-WiFi OTA takes the ESP32 `-update.bin` image rather than the `.uf2` a USB update uses; the app selects the right artifact for you.
+Wi-Fi OTA takes the ESP32 `-update.bin` image rather than the `.uf2` a USB update uses; the app selects the right artifact for you.
 
 ![Firmware disclaimer](../../assets/screenshots/firmware_disclaimer.png)
 
@@ -72,7 +72,7 @@ On a **USB/serial** connection, nRF52 and RP2040 devices also offer **Erase and 
 
 Erasing wipes everything on the device — channels, keys and all settings — and there is no backup, so the app asks for confirmation first. Both operations write two files in turn, so you will be asked to select the device's update drive twice: once for the erase or bootloader image, then again for the firmware.
 
-The app reads `INFO_UF2.TXT` from the drive you select to confirm it really is the device's update drive and to identify the board before writing anything. If it can't confirm which Bluetooth stack your device uses it refuses to erase and points you at the [Web Flasher](https://flasher.meshtastic.org) instead — picking wrong there can leave the device needing a hardware programmer to recover.
+The app reads `INFO_UF2.TXT` from the drive you select to confirm it really is the device's update drive and to identify the board before writing anything. If it can't confirm which Bluetooth stack your device uses, it refuses to erase and points you at the [Web Flasher](https://flasher.meshtastic.org) instead. In the Web Flasher, choosing the wrong Bluetooth stack can leave the radio recoverable only with a hardware programmer.
 
 ### Other Flashing Options
 
@@ -95,6 +95,7 @@ Before updating:
 - [ ] Stable Bluetooth connection
 - [ ] Note your current settings (they may reset on major version changes)
 - [ ] Check the release notes for breaking changes
+- [ ] Update the Meshtastic app itself, before or alongside firmware updates, to ensure compatibility
 
 ## Post-Update
 
@@ -103,8 +104,8 @@ After the firmware is written, the app verifies the update and waits for the dev
 ![Verifying update and waiting for the device to reconnect](../../assets/screenshots/firmware_verifying.png)
 
 Once the update succeeds:
-- The radio will reboot automatically
-- Bluetooth connection will re-establish
+- The radio reboots automatically
+- The Bluetooth connection re-establishes
 - Verify your settings are intact
 - Confirm the new version under **Currently Installed** on the Firmware Update screen — it's also shown on the node's detail page and the Connections screen
 
@@ -121,9 +122,9 @@ If the update appears frozen:
 
 ![Firmware update error](../../assets/screenshots/firmware_error.png)
 
-### Device Won't Boot After Update
+### Radio Won't Boot After Update
 
-If your device fails to boot:
+If your radio fails to boot:
 1. Try connecting via USB to a computer
 2. Use the web flasher in recovery/DFU mode
 3. Flash a known-good firmware version
@@ -135,13 +136,11 @@ On connecting, the app compares the radio's firmware against two thresholds and 
 
 | Firmware version | What you see | What happens |
 |---|---|---|
-| Below **2.3.15** | **Firmware update required.** | The app disconnects from the radio. It will not operate against firmware this old. |
+| Below **2.3.15** | **Firmware update required.** | The app disconnects from the radio. It does not operate against firmware this old. |
 | **2.3.15** up to, but not including, **2.5.14** | **Firmware Update Recommended.** | Advisory only — dismiss it and carry on. The dialog names the latest stable release. |
 | **2.5.14** or newer | Nothing | — |
 
 A version string the app cannot parse is ignored rather than treated as too old, so a transient read never disconnects a working radio.
-
-> ⚠️ **Important:** Always update the Meshtastic app before or alongside firmware updates to ensure compatibility.
 
 ## Related Topics
 

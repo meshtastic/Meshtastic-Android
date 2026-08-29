@@ -3,6 +3,7 @@ title: Contributing
 parent: Developer Guide
 nav_order: 8
 last_updated: 2026-08-29
+description: Branch naming, commit style, PR workflow, and the verification gates a change must pass before merge.
 aliases:
   - contributing
   - pull-request

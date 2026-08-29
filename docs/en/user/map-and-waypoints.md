@@ -2,7 +2,7 @@
 title: Map & Waypoints
 parent: User Guide
 nav_order: 6
-last_updated: 2026-08-28
+last_updated: 2026-08-29
 description: View node positions on the map, create and share waypoints, manage map layers and Site Planner, and control position sharing and privacy.
 aliases:
   - map
@@ -34,20 +34,20 @@ Each node that reports a position is shown as a **node chip** marker displaying 
 
 - **Zoom** — pinch or use +/- buttons
 - **Pan** — drag to explore
-- **Center** — select the location button to center on your position
+- **Center** — tap the location button to center on your position
 - **Node tap** — tap a node marker to view details
 
 The floating toolbar provides quick access to compass, layer switching, node filters, refresh, and location tracking. Tap the compass to reorient north-up, or tap the location button to center on your current position.
 
-![Map controls overlay](../../assets/screenshots/map_controls_overlay.png)
+![Map screen with the floating toolbar open, showing compass, layers, and location controls](../../assets/screenshots/map_controls_overlay.png)
 
 ## Waypoints
 
-Waypoints are shared geographic points of interest that all mesh members can see.
+Waypoints are shared points of interest, visible to everyone the waypoint is sent to.
 
 ### Creating a Waypoint
 
-1. Long-press on the map at the desired location.
+1. Touch & hold the map at the desired location.
 2. Enter a name and optional description.
 3. Choose an icon/emoji for the waypoint.
 4. Tap **Send** to share with the mesh.
@@ -63,7 +63,7 @@ Waypoints are addressed like messages: by default they broadcast on the primary 
 | Icon | Visual marker emoji on the map |
 | Locked | If locked, only the creator can edit or delete |
 | Expiration | Optional auto-remove date and time |
-| Geofence | Optional enter/exit alert area — see below |
+| Geofence | Optional enter/exit alert area — see [Waypoint Geofences](#waypoint-geofences) |
 
 ### Waypoint Expiration
 
@@ -87,12 +87,12 @@ Since waypoints (and their geofences) are broadcast to the whole mesh, only the 
 
 - Tap a waypoint on the map to view its details and coordinates
 - Edit or delete waypoints you created
-- **Locked waypoints** cannot be modified or deleted by other nodes — only the original creator can change them
+- **Locked waypoints** cannot be modified or deleted by other mesh members — only the creator can change them
 - Unlocked waypoints can be edited by any mesh member
 
 ## Map Layers
 
-Tap the layers icon on the map to open **Manage Map Layers**, where you can import your own overlays in `.kml`, `.kmz`, or GeoJSON format — including KMZ ground overlays (georeferenced images, such as exported topo or aerial tiles), which drape at their stated bounds — by picking a file with **Add Layer**, opening a file with Meshtastic, or sharing it into the app from another app. Imported layers are listed with a toggle to show/hide each one and an option to remove it. This works on the Google Play build, the F-Droid build, and **Desktop**, which shares the same layer store and file picker.
+Tap the layers icon on the map to open **Manage Map Layers**. It imports your own overlays in `.kml`, `.kmz`, or GeoJSON format — including KMZ ground overlays (georeferenced images, such as exported topo or aerial tiles), which drape at their stated bounds. Add one by picking a file with **Add Layer**, opening a file with Meshtastic, or sharing it into the app from another app. Imported layers are listed with a toggle to show/hide each one and an option to remove it. This works on the Google Play build, the F-Droid build, and **Desktop**, which shares the same layer store and file picker.
 
 ### Site Planner
 
@@ -116,8 +116,8 @@ Configure position behavior in **Settings → Position**.
 ## Map Sources
 
 Every build offers a base map picker from the map toolbar. **Google Play** builds open on Google's own
-map types; **F-Droid** and **Desktop** builds open on MapLibre's vector styles. Below those, all three
-offer the same raster base maps:
+map types; **F-Droid** and **Desktop** builds open on MapLibre's vector styles. Further down the base map
+picker, all three offer the same raster base maps:
 
 | Base map | Notes |
 | --- | --- |
