@@ -288,6 +288,22 @@ class KmlToGeoJsonTest {
     }
 
     @Test
+    fun `a description holding raw html elements does not take the import down`() {
+        // Valid XML, not CDATA: exporters do write nested markup here, and one such description used to abort the
+        // whole document. The markup is dropped; the text and the geometry survive.
+        val result =
+            assertNotNull(
+                convert(
+                    "<kml><Placemark><name>A</name><description>a <b>bold</b> claim</description>" +
+                        "<Point><coordinates>1,2</coordinates></Point></Placemark></kml>",
+                ),
+            )
+
+        assertContains(result, "a bold claim")
+        assertContains(result, "[1.0,2.0]")
+    }
+
+    @Test
     fun `several placemarks all reach the collection`() {
         val result =
             assertNotNull(

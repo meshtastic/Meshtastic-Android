@@ -78,11 +78,9 @@ private val SUB_STYLES = setOf("LineStyle", "PolyStyle", "IconStyle", "LabelStyl
  * was under the pull parser this replaced.
  */
 private fun KmlStyle.withStyleElement(tag: String, enclosing: String?, value: () -> String): KmlStyle = when {
-    // `<Icon>` is not itself a sub-style, so it falls through without clearing `enclosing` and the `<href>` inside
-    // it
-    // still reads as belonging to the IconStyle. NetworkLink's `<Link><href>` cannot be confused with it for the
-    // same
-    // reason: it is never inside an IconStyle.
+    // `<Icon>` is not itself a sub-style, so it falls through without clearing `enclosing`, and the `<href>`
+    // inside it still reads as belonging to the IconStyle. NetworkLink's `<Link><href>` cannot be confused with
+    // it, because that one is never inside an IconStyle.
     tag == "href" && enclosing == "IconStyle" -> copy(iconHref = value().takeIf { it.isNotBlank() })
 
     tag == "color" && enclosing == "PolyStyle" -> copy(fillColor = value())
@@ -156,7 +154,7 @@ private class PlacemarkReader {
         when (tag) {
             "name" -> name = reader.readSimpleElement().trim()
 
-            "description" -> description = reader.readSimpleElement().trim()
+            "description" -> description = reader.readElementTextSkippingMarkup().trim()
 
             "styleUrl" -> styleUrl = reader.readSimpleElement().trim()
 
@@ -190,6 +188,34 @@ private class PlacemarkReader {
 
 /** The geometry elements this reader understands. Everything else in a Placemark is skipped. */
 private val GEOMETRY_TAGS = setOf("Point", "LineString", "Polygon")
+
+/**
+ * The character content of the current element, nested markup skipped rather than fatal.
+ *
+ * For `<description>`, which legitimately holds HTML — usually CDATA-wrapped, but raw nested elements are valid XML
+ * too, and `readSimpleElement` throws on the first one. The markup itself is not wanted (the info card renders plain
+ * text), so only the text between the tags is kept.
+ */
+private fun XmlReader.readElementTextSkippingMarkup(): String {
+    val text = StringBuilder()
+    var depth = 1
+    while (depth > 0) {
+        when (next()) {
+            EventType.START_ELEMENT -> depth++
+
+            EventType.END_ELEMENT -> depth--
+
+            EventType.TEXT,
+            EventType.CDSECT,
+            -> text.append(this.text)
+
+            EventType.END_DOCUMENT -> depth = 0
+
+            else -> Unit
+        }
+    }
+    return text.toString()
+}
 
 /**
  * One geometry from a `<coordinates>` run, or null when there is nothing usable in it.
