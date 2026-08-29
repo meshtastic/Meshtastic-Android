@@ -153,7 +153,9 @@ private const val STRAIGHT_ANGLE = 180.0
  * shows a few dozen, and drawing an image for every one of them spends the whole image budget on nodes nobody is
  * looking at — at DEF CON scale that meant the nodes actually on screen fell back to plain dots.
  *
- * [bounds] should be padded (see [padded]) so panning a little does not change the answer.
+ * [bounds] should be padded (see [padded]) so panning a little does not change the answer. A viewport straddling the
+ * antimeridian matches nothing here, and those nodes degrade to the plain dot — same deliberate linearity as
+ * [MapBounds.around].
  */
 fun nodesInView(nodes: List<Node>, bounds: BoundingBox?): List<Node> {
     if (bounds == null) return nodes
