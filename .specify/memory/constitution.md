@@ -1,6 +1,20 @@
 <!--
 SYNC IMPACT REPORT
 ==================
+Version change: 1.3.5 → 1.3.6
+Modified principles:
+  - VI. Documentation Freshness: the verification-tooling block gains
+    scripts/check-doc-aliases.js, a fourth check and the third blocking one. Every page
+    carries an `aliases:` frontmatter list and DocBundleLoader.kt carries its own alias
+    list per page; only the loader's copy reaches a running app (the in-app renderer
+    strips frontmatter before render, and sync-android-docs.js discards aliases for
+    Docusaurus), so a frontmatter-only alias is a search term no consumer ever sees.
+    Nothing compared the two and six pages had silently drifted. The check requires the
+    loader to be a superset of the frontmatter, not equal to it: loader-only aliases are
+    deliberate extra search vocabulary and are reported as non-fatal notes.
+Modified sections: None.
+Added sections: None.
+
 Version change: 1.3.4 → 1.3.5
 Modified principles:
   - VI. Documentation Freshness: (1) image references — the rule said root-relative
@@ -249,4 +263,4 @@ summary derived from this constitution. The files `.github/copilot-instructions.
 Constitution Check confirming all seven principles were evaluated. Complexity violations
 require explicit justification in the Complexity Tracking table of the plan document.
 
-**Version**: 1.3.5 | **Ratified**: 2026-05-07 | **Last Amended**: 2026-08-29
+**Version**: 1.3.6 | **Ratified**: 2026-05-07 | **Last Amended**: 2026-08-30

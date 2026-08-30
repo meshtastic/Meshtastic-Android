@@ -108,7 +108,7 @@ specs/
 The project constitution at `.specify/memory/constitution.md` defines non-negotiable principles.
 All specs, plans, and tasks are validated against it during `/speckit.analyze`.
 
-Current constitution (v1.3.5) enforces 7 principles:
+Current constitution (v1.3.6) enforces 7 principles:
 
 1. **KMP Core** — Business logic in `commonMain` only
 2. **Zero Lint Tolerance** — `spotlessCheck` + `detekt` must pass
