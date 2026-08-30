@@ -41,10 +41,13 @@ PKG = "com.geeksville.mesh.fdroid.debug"
 ACTIVITY = "org.meshtastic.app.MainActivity"
 
 
-def adb(*args, binary=False):
+def adb(*args):
     cmd = ["adb"] + (["-s", SERIAL] if SERIAL else []) + list(args)
-    r = subprocess.run(cmd, capture_output=not binary, timeout=120)
-    return (r.stdout or b"").decode(errors="replace") if not binary else None
+    r = subprocess.run(cmd, capture_output=True, timeout=120)
+    if r.returncode != 0:
+        err = (r.stderr or b"").decode(errors="replace").strip()
+        raise RuntimeError(f"adb {' '.join(args)} failed ({r.returncode}): {err[:300]}")
+    return (r.stdout or b"").decode(errors="replace")
 
 
 def ui_dump():
@@ -127,14 +130,22 @@ def connect(addr):
     if r.startswith("found"):
         print(tap_text("Connect"))
     else:
-        print("no trust dialog (already trusted)")
-    return f"launched with {addr}"
+        print("no trust dialog seen — verifying the connection directly")
+    # A missing dialog does not prove success (the launch or deeplink may have failed):
+    # require the Connection screen's Disconnect button before claiming victory.
+    v = wait_text("Disconnect", timeout=60)
+    if not v.startswith("found"):
+        return f"FAILED: launched with {addr}, but no connected state appeared ({v})"
+    return f"connected via {addr}"
 
 
 def main():
     global SERIAL, PKG
     argv = sys.argv[1:]
     while argv and argv[0] in ("-s", "-p"):
+        if len(argv) < 2:
+            print(__doc__)
+            return 2
         if argv[0] == "-s":
             SERIAL = argv[1]
         else:
@@ -146,7 +157,10 @@ def main():
     for cmd in argv:
         name, _, val = cmd.partition("=")
         if name == "connect":
-            print(connect(val or "t10.0.2.2:4403"))
+            res = connect(val or "t10.0.2.2:4403")
+            print(res)
+            if res.startswith("FAILED"):
+                return 1
         elif name == "launch":
             adb("shell", "am", "start", "-n", f"{PKG}/{ACTIVITY}", "--ez", "skip_onboarding", "true")
             print("launched")
@@ -159,7 +173,10 @@ def main():
             for n in find(val):
                 print(f"{n.get('text') or n.get('content-desc')!r} clickable={n.get('clickable')} bounds={n.get('bounds')}")
         elif name == "tap_text":
-            print(tap_text(val))
+            res = tap_text(val)
+            print(res)
+            if res.startswith("NOT FOUND"):
+                return 1
         elif name == "tap":
             x, y = val.split(",")
             adb("shell", "input", "tap", x, y)
@@ -177,11 +194,14 @@ def main():
             with open(val, "wb") as f:
                 subprocess.run(
                     ["adb"] + (["-s", SERIAL] if SERIAL else []) + ["exec-out", "screencap", "-p"],
-                    stdout=f, timeout=60,
+                    stdout=f, timeout=60, check=True,
                 )
             print(f"saved {val}")
         elif name == "wait_text":
-            print(wait_text(val))
+            res = wait_text(val)
+            print(res)
+            if res.startswith("TIMEOUT"):
+                return 1
         elif name == "sleep":
             time.sleep(float(val))
         else:

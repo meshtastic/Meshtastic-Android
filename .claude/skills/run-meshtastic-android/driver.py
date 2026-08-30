@@ -38,9 +38,11 @@ Example — poke the Connections screen and screenshot it:
 import base64
 import json
 import os
+import queue
 import re
 import subprocess
 import sys
+import threading
 import time
 
 NIX_POISON = ["DEVELOPER_DIR", "SDKROOT", "CC", "CXX", "LD", "AR", "NM", "RANLIB", "STRIP", "NIX_CC"]
@@ -74,6 +76,16 @@ class HotMcp:
         stdin, stdout = self.proc.stdin, self.proc.stdout
         assert stdin is not None and stdout is not None
         self.stdin, self.stdout = stdin, stdout
+        # readline() would block past any deadline if the server keeps stdout open without
+        # writing; a pump thread + queue makes the RPC timeout real.
+        self._lines: "queue.Queue[str | None]" = queue.Queue()
+
+        def _pump(out, q):
+            for line in out:
+                q.put(line)
+            q.put(None)
+
+        threading.Thread(target=_pump, args=(self.stdout, self._lines), daemon=True).start()
         self.next_id = 1
         self._rpc("initialize", {
             "protocolVersion": "2024-11-05",
@@ -94,9 +106,15 @@ class HotMcp:
         self.next_id += 1
         self._send({"jsonrpc": "2.0", "id": rid, "method": method, "params": params})
         deadline = time.time() + timeout
-        while time.time() < deadline:
-            line = self.stdout.readline()
-            if not line:
+        while True:
+            remaining = deadline - time.time()
+            if remaining <= 0:
+                break
+            try:
+                line = self._lines.get(timeout=remaining)
+            except queue.Empty:
+                break
+            if line is None:
                 raise RuntimeError("hotMcpServer closed its stdout (is another instance running?)")
             line = line.strip()
             if not line.startswith("{"):

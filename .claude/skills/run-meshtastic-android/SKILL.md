@@ -144,9 +144,16 @@ faster even for humans.
 
 ## Stopping
 
-- Desktop: `kill $(pgrep -f "MainKt|devtools.Main")` — the pid file
-  (`desktopApp/build/run/main/main.pid`) is a Java properties file, not a bare
-  pid, and it self-deletes when the app exits cleanly.
+- Desktop: take the pid from the app's own pid file — it is a Java properties
+  file (not a bare pid) and self-deletes on clean exit:
+
+  ```bash
+  kill $(sed -n 's/^pid=//p' desktopApp/build/run/main/main.pid)
+  ```
+
+  If the pid file is gone but a process lingers, `pgrep -af "MainKt|devtools.Main"`,
+  check each match's path for **this** checkout, and kill that specific PID — a bare
+  `pkill` on the pattern can take down another checkout's or session's app.
 - Emulator: `driver_emulator.py -s <serial> stop`.
 - Sim: `replay_stop`. Sessions the sim created are real user data in the app's DB;
   the app's last-selected device is now the sim — switch back on the Connect screen
