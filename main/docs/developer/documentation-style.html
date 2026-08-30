@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Documentation Style</title>
+  <link rel="stylesheet" href="../styles/docs.css">
+</head>
+<body data-page="documentation-style" data-locale="en">
+<pre class="markdown-content"># Documentation Style
+
+House style for everything under `docs/en/`. These pages ship to three places — the in-app docs browser, the GitHub Pages site, and meshtastic.org — so one page has to read well in all of them, and its English source is the translation base for 40+ locales on Crowdin.
+
+This guide synthesizes the [Google developer documentation style guide](https://developers.google.com/style), the [Microsoft Writing Style Guide](https://learn.microsoft.com/en-us/style-guide/welcome/), the Apple Style Guide's gesture vocabulary, the US [plain language guidelines](https://www.plainlanguage.gov/guidelines/) and [18F content guide](https://github.com/18F/content-guide), and Red Hat's admonition rules — adjudicated against this repo's own established conventions. Where an entry here decides something, follow it; for anything not covered, follow Google's guide.
+
+Every rule has an ID so review feedback and audit findings can cite it.
+
+## Voice and Tone
+
+- **VOICE-1** — Address the reader as *you*. *We* means the Meshtastic project team, nothing else. Never *the user* for the reader.
+- **VOICE-2** — Warm, plain, and direct. Contractions are house voice (*you'll*, *doesn't*, *it's*) — but in warnings, write *do not*: negative contractions are too easy to misread when the cost of misreading is data loss.
+- **VOICE-3** — No hype and no filler: no exclamation points, no *simply*, *just*, *easy*, *easily*, or *quickly* in instructions, no *please*, no scare quotes, no pop-culture jokes. If a task is genuinely hard, say what makes it hard instead of calling it easy.
+- **VOICE-4** — Voice stays constant; tone flexes with the reader's situation. A troubleshooting section addresses someone who is stuck and possibly annoyed — that is the calmest, most concrete writing on the page. Clear beats entertaining, always.
+- **VOICE-5** — Active voice by default. Passive is fine when the actor is irrelevant (*the packet is re-encrypted*) or to avoid blaming the reader (*over 50 conflicts were found*).
+- **VOICE-6** — Timeless present tense. The app *sends*, not *will send*. Reserve *will* for events genuinely later than the sentence (*the file will be removed on the next sync*). Never *currently*, *now*, *soon*, *new*, or *as of this writing* — the page outlives all of them — and never pre-announce unreleased features.
+
+## Language
+
+- **LANG-1** — American English spelling: *color*, *behavior*, *honors*, *gray*, *organize*.
+- **LANG-2** — Keep sentences to roughly 25 words and one idea; keep paragraphs to about five sentences and one topic. Front-load: main point first, exceptions after the rule. A one-sentence paragraph is fine.
+- **LANG-3** — Requirement words carry exact weight: *must* (obligation), *must not* (prohibition), *should* (recommendation), *can* (capability), *may* (permission). Never *shall*.
+- **LANG-4** — Prefer *for example* and *such as* over *e.g.*, and *that is* over *i.e.*, in running prose. Inside table cells and parentheses, *e.g.* is acceptable where space is tight.
+- **LANG-5** — One term per concept, everywhere. If the settings page calls it a *modem preset*, no page calls it a *radio profile*. Keep clarifying words that ease translation: *the*, *that*, *who* (*the radios **that** you have paired*, not *the radios you paired*).
+- **LANG-6** — Inclusive, literal language: *allowlist*/*blocklist*, singular *they*, no ableist idioms (*final check*, not *sanity check*), no violent metaphors (*the app stops responding*, not *hangs*), no culture-bound idioms that defeat translators.
+- **LANG-7** — Oxford comma (*Android, iOS, and Windows*). Em dashes are spaced — like this — matching the entire existing corpus.
+- **LANG-8** — Spell out zero through nine in prose; numerals for 10 and up, for all measurements and units (*3 dB*, *915 MHz*), for values the reader enters, and with `%`. Dates spell the month: *June 12, 2026*.
+- **LANG-9** — Don't use *above* and *below* to point at other text — say *earlier*, *the following*, or link to the section. (Literal technical use is fine: *below the noise floor*.)
+
+## Word List
+
+Project- and platform-specific decisions, alphabetical. Google's word list covers the rest.
+
+ Term | Rule |
+---|---|
+ app | The Meshtastic client this repo builds. Not *application*. |
+ channel | Lowercase in prose; bold only when naming a UI element. |
+ direct message | Lowercase; *DM* is fine after the page has spelled it out once. |
+ email | No hyphen. |
+ firmware | Lowercase, even when referring to the Meshtastic firmware project. |
+ internet | Lowercase. |
+ LoRa | Exactly this casing, everywhere. |
+ mesh | Lowercase: *your mesh*, *the mesh network*. |
+ node | A participant in the mesh — yours or anyone's — as it appears in the node list and on the map. |
+ phone | The Android handset the app runs on. Use *phone* even when a tablet also works, unless the distinction matters. |
+ radio | The Meshtastic hardware the app connects to. Prefer this over the ambiguous *device* — see the note after this table. |
+ set up / setup | Verb two words, noun/adjective one word. |
+ sign in | Verb; *sign-in* as adjective. Not *log in* or *login*. |
+ tap | The interaction verb for the app's touch UI. *Click* only in desktop-app or web contexts; never *tap on* or *click on*. |
+ touch &amp; hold | Exactly this form (Google's Android convention). Not *long press*, not *tap and hold*. |
+ Wi-Fi | Never *WiFi* or *wifi* — in docs and in the app's own strings alike (this word outranks PROC-1's match-the-UI rule if a stray label slips back in). |
+
+**radio vs. phone vs. node vs. device:** the corpus's biggest ambiguity is *device*, which has meant both the radio and the phone. Use *radio* for the Meshtastic hardware, *phone* for the Android handset, and *node* for a mesh participant. Use *device* only when quoting Android's own UI (the **Nearby devices** permission, *Devices* system pages) or in established compounds (*device metrics*, *device firmware* where the UI uses them).
+
+## Headings
+
+- **HEAD-1** — Title Case for page titles and all headings: *Where Signal Information Appears*, not *Where signal information appears*. This deliberately deviates from Google, Microsoft, and gov.uk (all sentence case) — the entire corpus is Title Case, and re-casing every heading would invalidate the translation memory for 40+ locales with zero reader benefit. See [Decisions](#decisions-and-why).
+- **HEAD-2** — One `#` H1 per page, and it matches the frontmatter `title` exactly.
+- **HEAD-3** — Never skip a level (H2 → H4). No links, no trailing punctuation, and no numbering in headings — the one exception is a genuine question heading in troubleshooting content (*Which Channels Can Obtainium Reach?*), which research says helps readers find answers.
+- **HEAD-4** — Headings are scannable noun or verb phrases, shorter than the text they cover. No bare code identifiers as an entire heading — add a noun.
+
+## Page Structure
+
+- **STRUCT-1** — Complete frontmatter on every page, user *and* developer: `title`, `parent`, `nav_order`, `last_updated` (bump it whenever content changes — CI checks freshness), `description` (one sentence, ~160 characters, used by search and link previews), and `aliases` (search terms the in-app browser resolves).
+- **STRUCT-2** — Open with a one-to-three-sentence lede that says what the page covers and who needs it. No *Welcome!* preamble.
+- **STRUCT-3** — User pages end with a `## Related Topics` section: bulleted links, each with an em-dash clause saying why you'd go there.
+- **STRUCT-4** — No horizontal rules (`---`) in page bodies, and especially not at the end of the file — the site layout adds its own footer rule, so a trailing `---` renders as a doubled line. Headings already separate sections.
+- **STRUCT-5** — New pages must be registered in `DocBundleLoader.kt` (the in-app index) — CI fails in both directions if the page and the index disagree. Screenshots go in `docs/assets/screenshots/`.
+- **STRUCT-6** — Notable page changes get a *What's New* entry at the top of `user.md` or `developer.md`, in the format the HTML comment there specifies.
+
+## Admonitions
+
+- **ADMON-1** — One form: a blockquote starting with an emoji and a bold label, from this closed set.
+
+ Admonition | Use for |
+---|---|
+ `&gt; 💡 **Tip:**` | An optional shortcut or non-obvious alternative. The reader loses nothing by skipping it. |
+ `&gt; ℹ️ **Note:**` | Supplementary information worth knowing but not required for the task. |
+ `&gt; ⚠️ **Important:**` | Information essential to completing the task correctly, without danger of loss. |
+ `&gt; ⚠️ **Warning:**` | Risk of data loss, lockout, or hardware damage. Must come *before* the action it applies to. |
+ `&gt; 🔒 **Privacy:**` | What data leaves the phone, who on the mesh can see it, and how to limit it. |
+ `&gt; 🔒 **Security:**` | Cryptographic caveats — key handling, unencrypted channels, admin access. |
+
+  Privacy and Security are house-specific labels; they exist because the app's constitution makes privacy a core principle, and they should not be flattened into Note.
+- **ADMON-2** — Admonitions are for information only: never put a required step inside one — if the reader must act, it's a numbered step; if inaction causes loss, it's a Warning. Use them sparingly (rarely more than one per section, never adjacent), or they stop working.
+- **ADMON-3** — A Warning names the concrete consequence first, then how to avoid it: *Formatting a mounted filesystem destroys all data on it*, not *take care when formatting*.
+
+## Procedures and UI
+
+- **PROC-1** — Bold the exact UI label: tap **Get started**. No quotation marks, and no element type (*button*, *menu*) unless it disambiguates. Match the UI's own capitalization exactly.
+- **PROC-2** — Menu paths use a spaced arrow between bold labels: **Settings → Permissions**. Never `&gt;` or `›`.
+- **PROC-3** — Steps are imperative, one action each, ordered goal → location → action: *To pair a second radio, on the Connections screen, tap **Scan**.* Number steps only when order matters; prefer seven or fewer; prefix genuinely optional steps with *Optional:*.
+- **PROC-4** — State the result of a step in the same paragraph as the action, not as its own step.
+- **PROC-5** — Describe the task, not the widget, when you can: *turn on the **MQTT** module*, not *tap the toggle switch next to MQTT*.
+
+## Links
+
+- **LINK-1** — Link text describes the destination — the page title or a noun phrase. Never *click here*, *this page*, or a raw URL as text. The standing formula: *For more information, see [Connections](connections).*
+- **LINK-2** — Sibling pages link by bare slug (`connections`), cross-section by relative path (`../developer/testing`). `scripts/validate-doc-links.js` enforces resolvability.
+- **LINK-3** — Radio-side concepts (LoRa presets, firmware regions, MQTT topics) link out to [meshtastic.org docs](https://meshtastic.org/docs/) rather than re-explaining them here — one source drifts less than two.
+
+## Images
+
+- **IMG-1** — Reference screenshots by relative path: `../../assets/screenshots/&lt;page&gt;_&lt;subject&gt;.png`. Both the Docusaurus sync and the in-app renderer anchor on the `assets/` segment, so this one form works in all three consumers.
+- **IMG-2** — Every image has alt text that names the screen and the state it shows: *Scanning for Bluetooth devices, with a discovered radio in the list*.
+- **IMG-3** — Screenshot only what words can't carry — a complex screen the reader must orient in, not a confirmation dialog. Capture the state right before the action, crop to the relevant surface, and keep version numbers, dates, and real user data out of frame. Place the image directly after the sentence it illustrates.
+- **IMG-4** — Never post an image of text, code, or terminal output — use a code block.
+
+## Code
+
+- **CODE-1** — Code font for file paths, Gradle tasks, module paths (`core:ble`), class and function names, setting keys, values the reader types, and protocol identifiers (`LongFast`, `!a1b2c3d4`).
+- **CODE-2** — Not code font: product names, and URLs the reader is meant to visit (link those instead).
+- **CODE-3** — Fenced blocks with a language tag; shell blocks show the bare command with no `$` prompt, so it copies cleanly.
+- **CODE-4** — Placeholders in angle brackets: `docs/&lt;scope&gt;`, `--tests "&lt;pattern&gt;"`.
+
+## Developer Pages
+
+- **DEV-1** — Same voice, different reader: assume Kotlin, Gradle, and Android fluency, and skip the reassurance — but the rules above still apply. Terse is good; cryptic is not.
+- **DEV-2** — All frontmatter rules apply, including `description` — developer pages are indexed by the same in-app search as user pages.
+- **DEV-3** — Structural or procedural changes get a *What's New for Developers* entry in `developer.md`.
+
+## Decisions and Why
+
+Where this guide deviates from the external guides it synthesizes, the deviation is deliberate:
+
+ Decision | External guides say | Why we differ |
+---|---|---|
+ Title Case headings (HEAD-1) | Google, Microsoft, gov.uk: sentence case | The whole corpus is Title Case; re-casing invalidates ~150 headings' translations across 40+ locales for no reader benefit. |
+ `→` in menu paths (PROC-2) | Google, Microsoft: `&gt;` | `→` is the entrenched house form (29:2 in the corpus), unambiguous in Markdown, and reads naturally in the in-app renderer. |
+ Emoji admonition labels (ADMON-1) | Red Hat, SUSE: plain labeled blocks | The in-app renderer has no admonition component; the emoji-plus-bold-blockquote form is the established house pattern and survives all three renderers. |
+ Privacy/Security labels (ADMON-1) | Not in any external set | They map directly to the constitution's Privacy First principle and deserve more visual weight than Note. |
+ Relative image paths (IMG-1) | (Repo history preferred root-relative) | The in-app image transformer documents the relative form as canonical, the sync script rewrites either form, and every existing page already uses it. |
+ Spaced em dashes (LANG-7) | Microsoft: unspaced | 477:0 in the corpus; also kinder to narrow in-app line widths. |
+ Contractions (VOICE-2) | gov.uk warns on negative contractions | We follow Microsoft/18F (contractions are the house voice) and adopt gov.uk's caution only inside warnings. |
+
+## New Page Checklist
+
+1. Create `docs/en/user/&lt;slug&gt;.md` or `docs/en/developer/&lt;slug&gt;.md` with complete frontmatter (STRUCT-1).
+2. Register the page in `feature/docs/.../data/DocBundleLoader.kt` with keywords and aliases.
+3. Put screenshots in `docs/assets/screenshots/`, referenced per IMG-1.
+4. Add a *What's New* entry (STRUCT-6).
+5. Validate locally: `node scripts/validate-doc-links.js docs/en`, `node scripts/check-doc-coverage.js .`, and the docs bundle Gradle checks in [Contributing](contributing).
+
+## Related Topics
+
+- [Contributing](contributing) — branch naming, PR workflow, and the verification gates docs changes run through
+- [Test Builds &amp; Obtainium](test-builds) — where prerelease docs snapshots are published
+</pre>
+</body>
+</html>
