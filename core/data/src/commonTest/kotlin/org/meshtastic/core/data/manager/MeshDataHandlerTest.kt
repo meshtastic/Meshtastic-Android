@@ -68,6 +68,8 @@ import org.meshtastic.core.repository.TracerouteHandler
 import org.meshtastic.core.testing.FakeNotificationPrefs
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
+import org.meshtastic.proto.Config
+import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.MeshBeacon
 import org.meshtastic.proto.MeshPacket
@@ -487,6 +489,42 @@ class MeshDataHandlerTest {
         handler.handleReceivedData(packet, 123)
 
         assertEquals(0, meshBeaconRepository.offers.value.size)
+    }
+
+    @Test
+    fun `mesh beacon offering an already-configured channel is stored but does not notify`() = testScope.runTest {
+        // design#140 behavior 10: the radio already has "PartyNet" configured, so this offer is redundant.
+        every { radioConfigRepository.channelSetFlow } returns
+            MutableStateFlow(
+                ChannelSet(
+                    settings = listOf(ChannelSettings(name = "PartyNet")),
+                    lora_config = Config.LoRaConfig(use_preset = true, modem_preset = ModemPreset.LONG_FAST),
+                ),
+            )
+        val beacon =
+            MeshBeacon(
+                message = "Join us",
+                offer_channel = ChannelSettings(name = "PartyNet"),
+                offer_preset = ModemPreset.LONG_FAST,
+            )
+        val packet =
+            MeshPacket(
+                from = 456,
+                decoded = Data(portnum = PortNum.MESH_BEACON_APP, payload = beacon.encode().toByteString()),
+            )
+        every { dataMapper.toDataPacket(packet) } returns
+            DataPacket(
+                from = "!remote",
+                bytes = beacon.encode().toByteString(),
+                dataType = PortNum.MESH_BEACON_APP.value,
+            )
+
+        handler.handleReceivedData(packet, 123)
+        advanceUntilIdle()
+
+        // Still stored, so it can reappear in the invitations list if the user later deletes the channel.
+        assertEquals(1, meshBeaconRepository.offers.value.size)
+        verifySuspend(mode = dev.mokkery.verify.VerifyMode.not) { notificationManager.dispatch(any()) }
     }
 
     // --- Store-and-Forward handling ---

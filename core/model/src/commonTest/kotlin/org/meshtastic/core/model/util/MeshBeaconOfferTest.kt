@@ -17,6 +17,8 @@
 package org.meshtastic.core.model.util
 
 import okio.ByteString.Companion.encodeUtf8
+import okio.ByteString.Companion.toByteString
+import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.MeshBeaconOffer
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config.LoRaConfig
@@ -210,5 +212,88 @@ class MeshBeaconOfferTest {
     @Test
     fun `decode returns null for a malformed record`() {
         assertNull(MeshBeaconOffer.decode("not-a-valid-record"))
+    }
+
+    @Test
+    fun `offer matching a configured channel by name and psk is already joined`() {
+        val configured = listOf(ChannelSettings(name = "PartyNet", psk = "secret".encodeUtf8()))
+        val beacon =
+            MeshBeacon(
+                offer_channel = ChannelSettings(name = "PartyNet", psk = "secret".encodeUtf8()),
+                offer_preset = ModemPreset.LONG_FAST,
+            )
+        assertEquals(true, beacon.isAlreadyJoined(radioLora, configured))
+    }
+
+    @Test
+    fun `offer for a channel not configured on the radio is not already joined`() {
+        val configured = listOf(ChannelSettings(name = "HomeMesh"))
+        val beacon =
+            MeshBeacon(offer_channel = ChannelSettings(name = "PartyNet"), offer_preset = ModemPreset.LONG_FAST)
+        assertEquals(false, beacon.isAlreadyJoined(radioLora, configured))
+    }
+
+    @Test
+    fun `same name but different psk is a different mesh and is not already joined`() {
+        // Same name under a different key is deliberately NOT a match.
+        val configured = listOf(ChannelSettings(name = "PartyNet", psk = "secret".encodeUtf8()))
+        val beacon =
+            MeshBeacon(
+                offer_channel = ChannelSettings(name = "PartyNet", psk = "different".encodeUtf8()),
+                offer_preset = ModemPreset.LONG_FAST,
+            )
+        assertEquals(false, beacon.isAlreadyJoined(radioLora, configured))
+    }
+
+    @Test
+    fun `empty-name primary channel matches an offer naming the preset display name`() {
+        // The radio's primary has a blank name, which resolves to the preset display name for identity purposes.
+        val configured = listOf(ChannelSettings(name = ""))
+        val beacon =
+            MeshBeacon(offer_channel = ChannelSettings(name = "LongFast"), offer_preset = ModemPreset.LONG_FAST)
+        assertEquals(true, beacon.isAlreadyJoined(radioLora, configured))
+    }
+
+    @Test
+    fun `default 1-byte psk shorthand matches its expanded full-length equivalent`() {
+        // Both sides resolve to the same expanded default key bytes even though one is the 1-byte shorthand.
+        val expandedDefaultKey =
+            ChannelSettings(name = "HomeMesh", psk = byteArrayOf(1).toByteString()).let {
+                it.copy(psk = Channel(it, radioLora).psk)
+            }
+        val configured = listOf(expandedDefaultKey)
+        val beacon =
+            MeshBeacon(
+                offer_channel = ChannelSettings(name = "HomeMesh", psk = byteArrayOf(1).toByteString()),
+                offer_preset = ModemPreset.LONG_FAST,
+            )
+        assertEquals(true, beacon.isAlreadyJoined(radioLora, configured))
+    }
+
+    @Test
+    fun `isAlreadyJoined returns false when lora config is unknown so a real invitation is never hidden`() {
+        val beacon = MeshBeacon(offer_channel = ChannelSettings(name = "HomeMesh"))
+        assertEquals(false, beacon.isAlreadyJoined(currentLora = null, currentChannels = radioChannels))
+    }
+
+    @Test
+    fun `isAlreadyJoined returns false when no channels are configured`() {
+        val beacon = MeshBeacon(offer_channel = ChannelSettings(name = "HomeMesh"))
+        assertEquals(false, beacon.isAlreadyJoined(currentLora = radioLora, currentChannels = emptyList()))
+    }
+
+    @Test
+    fun `isAlreadyJoined returns false for a beacon with no offer channel`() {
+        val beacon = MeshBeacon(message = "hi")
+        assertEquals(false, beacon.isAlreadyJoined(radioLora, radioChannels))
+    }
+
+    @Test
+    fun `blank-name no-psk secondary placeholder slot is not mistaken for an already-joined channel`() {
+        // SwitchingChannelSetDataSource pads a gap left by a removed channel with a bare ChannelSettings(); a beacon
+        // offering a genuinely blank cleartext channel on the same preset must not match that padding.
+        val configured = listOf(ChannelSettings(name = "HomeMesh"), ChannelSettings())
+        val beacon = MeshBeacon(offer_channel = ChannelSettings(), offer_preset = ModemPreset.LONG_FAST)
+        assertEquals(false, beacon.isAlreadyJoined(radioLora, configured))
     }
 }
