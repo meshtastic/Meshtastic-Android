@@ -84,6 +84,7 @@ import org.meshtastic.core.resources.uptime
 import org.meshtastic.core.resources.user_id
 import org.meshtastic.core.ui.component.SignedNodeDialog
 import org.meshtastic.core.ui.component.determineSignalQuality
+import org.meshtastic.core.ui.component.label
 import org.meshtastic.core.ui.component.transportInfo
 import org.meshtastic.core.ui.icon.ArrowCircleUp
 import org.meshtastic.core.ui.icon.DeviceNumbers
@@ -210,7 +211,7 @@ private fun NameAndRoleRow(node: Node) {
         )
         InfoItem(
             label = stringResource(Res.string.role),
-            value = node.user.role.name,
+            value = stringResource(node.user.role.label),
             icon = MeshtasticIcons.role(node.user.role),
             modifier = Modifier.weight(1f),
         )
