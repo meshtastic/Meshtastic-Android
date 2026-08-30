@@ -57,11 +57,11 @@ class DiscoveryViewModel(
     val currentSession: StateFlow<DiscoverySessionEntity?> = scanEngine.currentSession
     val connectionState: StateFlow<ConnectionState> = serviceRepository.connectionState
 
-    /** The radio's current LoRa config — drives the add-vs-switch decision for a beacon join. */
+    /** The radio's current LoRa config, which drives the add-vs-switch decision for a beacon join. */
     val currentLora: StateFlow<LoRaConfig?> =
         radioConfigRepository.localConfigFlow.map { it.lora }.stateInWhileSubscribed(initialValue = null)
 
-    /** The radio's current channel settings (index 0 = primary) — drives the add-vs-switch decision. */
+    /** The radio's current channel settings (index 0 = primary), which drives the add-vs-switch decision. */
     val currentChannels: StateFlow<List<ChannelSettings>> =
         radioConfigRepository.channelSetFlow.map { it.settings }.stateInWhileSubscribed(initialValue = emptyList())
 
@@ -82,7 +82,7 @@ class DiscoveryViewModel(
             .stateInWhileSubscribed(initialValue = emptySet())
 
     /**
-     * Distinct custom channels advertised by beacons — offered as selectable scan targets (FR-007), minus a channel the
+     * Distinct custom channels advertised by beacons, offered as selectable scan targets (FR-007), minus a channel the
      * radio already has configured (design#140 behavior 10).
      */
     val beaconChannels: StateFlow<List<BeaconChannel>> =

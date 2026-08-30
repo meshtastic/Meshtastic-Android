@@ -82,7 +82,7 @@ class DiscoveryViewModelTest {
 
     @Test
     fun `beacon channels filter still deduplicates by id once already-joined entries are removed`() {
-        val duplicate = partyNetOffer.copy(fromNodeNum = 789) // Same channel from a second node — one row, not two.
+        val duplicate = partyNetOffer.copy(fromNodeNum = 789) // Same channel from a second node: one row, not two.
         val beaconChannels =
             filterAlreadyJoinedBeaconChannels(
                 listOf(partyNetOffer, duplicate),
@@ -108,13 +108,13 @@ class DiscoveryViewModelTest {
 
         assertTrue(results.last().isEmpty(), "already configured, so the invitation starts out hidden")
 
-        // The user deletes the "PartyNet" channel — the still-stored offer must reappear without dismiss()/repository
+        // The user deletes the "PartyNet" channel; the still-stored offer must reappear without dismiss()/repository
         // mutation, since MeshBeaconRepository is never touched by this filter.
         channelsFlow.value = emptyList()
         runCurrent()
         assertEquals(listOf(partyNetOffer), results.last())
 
-        // The user re-adds an unrelated channel — still not a match, offer stays visible.
+        // The user re-adds an unrelated channel; still not a match, offer stays visible.
         channelsFlow.value = listOf(ChannelSettings(name = "HomeMesh"))
         runCurrent()
         assertEquals(listOf(partyNetOffer), results.last())
