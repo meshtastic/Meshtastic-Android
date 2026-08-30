@@ -75,7 +75,6 @@ import org.meshtastic.core.resources.discovery_keep_screen_awake_description
 import org.meshtastic.core.resources.discovery_local_mesh
 import org.meshtastic.core.resources.discovery_not_connected
 import org.meshtastic.core.resources.discovery_not_connected_description
-import org.meshtastic.core.resources.discovery_paused
 import org.meshtastic.core.resources.discovery_preparing
 import org.meshtastic.core.resources.discovery_reconnecting
 import org.meshtastic.core.resources.discovery_restoring_preset
@@ -493,14 +492,6 @@ private fun ScanProgressSection(scanState: DiscoveryScanState, modifier: Modifie
                     Text(
                         text = stringResource(Res.string.discovery_cancelling_scan),
                         style = MaterialTheme.typography.bodyMedium,
-                    )
-                }
-
-                is DiscoveryScanState.Paused -> {
-                    Text(
-                        text = stringResource(Res.string.discovery_paused, scanState.reason),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.error,
                     )
                 }
 
