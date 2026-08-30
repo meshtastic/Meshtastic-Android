@@ -1048,6 +1048,12 @@ map_download_status_complete
 map_download_status_downloading
 map_download_status_paused
 map_filter
+map_filter_all_roles
+map_filter_display_title
+map_filter_nodes_title
+map_filter_roles_title
+map_filter_show_ignored
+map_filter_title
 map_layer_formats
 map_layer_opacity
 map_node_popup_details

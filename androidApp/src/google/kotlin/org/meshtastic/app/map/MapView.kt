@@ -181,12 +181,12 @@ import org.meshtastic.feature.map.component.DeleteWaypointDialog
 import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.component.MapControlsOverlay
-import org.meshtastic.feature.map.component.MapFilterActions
-import org.meshtastic.feature.map.component.MapFilterMenu
+import org.meshtastic.feature.map.component.MapFilterSheet
 import org.meshtastic.feature.map.component.NodeTrackFilterMenu
 import org.meshtastic.feature.map.component.RasterOverlayToggles
 import org.meshtastic.feature.map.component.SitePlannerLaunch
 import org.meshtastic.feature.map.component.WaypointInfoDialog
+import org.meshtastic.feature.map.component.mapFilterActions
 import org.meshtastic.feature.map.component.toSitePlannerParams
 import org.meshtastic.feature.map.includes
 import org.meshtastic.feature.map.kml.ICON_URL_PROPERTY
@@ -909,6 +909,7 @@ fun MapView(
         MapControlsOverlay(
             modifier = Modifier.align(Alignment.TopCenter).padding(top = 8.dp),
             onToggleFilterMenu = { mapFilterMenuExpanded = true },
+            filtersActive = mode !is GoogleMapMode.NodeTrack && mapFilterState.isNarrowing,
             filterDropdownContent = {
                 if (mode is GoogleMapMode.NodeTrack) {
                     NodeTrackFilterMenu(
@@ -917,18 +918,11 @@ fun MapView(
                         selected = mapFilterState.lastHeardTrackFilter,
                         onSelect = mapViewModel::setLastHeardTrackFilter,
                     )
-                } else {
-                    MapFilterMenu(
-                        expanded = mapFilterMenuExpanded,
+                } else if (mapFilterMenuExpanded) {
+                    MapFilterSheet(
                         onDismissRequest = { mapFilterMenuExpanded = false },
                         filterState = mapFilterState,
-                        actions =
-                        MapFilterActions(
-                            onToggleOnlyFavorites = mapViewModel::toggleOnlyFavorites,
-                            onToggleShowWaypoints = mapViewModel::toggleShowWaypointsOnMap,
-                            onToggleShowPrecisionCircle = mapViewModel::toggleShowPrecisionCircleOnMap,
-                            onSelectLastHeard = mapViewModel::setLastHeardFilter,
-                        ),
+                        actions = mapViewModel.mapFilterActions(),
                     )
                 }
             },

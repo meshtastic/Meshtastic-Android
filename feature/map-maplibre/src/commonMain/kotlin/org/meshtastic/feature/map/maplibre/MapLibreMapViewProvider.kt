@@ -52,8 +52,8 @@ import org.meshtastic.feature.map.component.ClusterMemberEntry
 import org.meshtastic.feature.map.component.ClusterMembersDialog
 import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.MapControlsOverlay
-import org.meshtastic.feature.map.component.MapFilterActions
-import org.meshtastic.feature.map.component.MapFilterMenu
+import org.meshtastic.feature.map.component.MapFilterSheet
+import org.meshtastic.feature.map.component.mapFilterActions
 import org.meshtastic.feature.map.layers.LayerOpacityStore
 import org.meshtastic.feature.map.maplibre.component.BasemapButton
 import org.meshtastic.feature.map.maplibre.component.BasemapSelection
@@ -320,28 +320,25 @@ private fun BoxScope.MapToolbar(
 ) {
     var filterMenuExpanded by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+    // Hoisted out of the dropdown slot: the button's badge needs the same state the sheet does.
+    val filterViewModel: SharedMapViewModel = koinViewModel()
+    val filterState by filterViewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
 
     MapControlsOverlay(
         modifier = Modifier.align(Alignment.TopCenter).padding(top = TOOLBAR_INSET.dp),
         onToggleFilterMenu = { filterMenuExpanded = !filterMenuExpanded },
+        filtersActive = filterState.isNarrowing,
         bearing = cameraState.position.bearing.toFloat(),
         followPhoneBearing = location.followingBearing,
         onCompassClick = location.onCompassClick,
         filterDropdownContent = {
-            val filterViewModel: SharedMapViewModel = koinViewModel()
-            val filterState by filterViewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
-            MapFilterMenu(
-                expanded = filterMenuExpanded,
-                onDismissRequest = { filterMenuExpanded = false },
-                filterState = filterState,
-                actions =
-                MapFilterActions(
-                    onToggleOnlyFavorites = filterViewModel::toggleOnlyFavorites,
-                    onToggleShowWaypoints = filterViewModel::toggleShowWaypointsOnMap,
-                    onToggleShowPrecisionCircle = filterViewModel::toggleShowPrecisionCircleOnMap,
-                    onSelectLastHeard = filterViewModel::setLastHeardFilter,
-                ),
-            )
+            if (filterMenuExpanded) {
+                MapFilterSheet(
+                    onDismissRequest = { filterMenuExpanded = false },
+                    filterState = filterState,
+                    actions = filterViewModel.mapFilterActions(),
+                )
+            }
         },
         mapTypeContent = { BasemapButton(selection = basemaps, extra = basemapMenuExtra) },
         layersContent = {

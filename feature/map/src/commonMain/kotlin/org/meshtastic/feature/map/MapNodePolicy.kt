@@ -17,6 +17,8 @@
 package org.meshtastic.feature.map
 
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.util.ONLINE_WINDOW_SECONDS
+import org.meshtastic.proto.Config
 
 /**
  * Which nodes a map shows, and which of them draws on top.
@@ -64,9 +66,36 @@ object MapNodePolicy {
         node.validPosition != null && (node.num == myNodeNum || node.passesFilters(filterState, nowSeconds))
     }
 
+    /**
+     * One node against every filter.
+     *
+     * The node-level rules match the node list's query exactly, because they carry its labels: direct means `hopsAway
+     * == 0` — a node whose distance was never measured (-1) is not direct — and unknown means a node that has not sent
+     * a short name.
+     *
+     * [BaseMapViewModel.MapFilterState.showIgnored] is the one place the map deliberately differs. The node list
+     * segregates (`isIgnored == showIgnored`, so switching it on shows *only* ignored nodes); here it reads literally
+     * and adds them, because a map of nothing but ignored nodes is not a view anyone asked for.
+     */
     private fun Node.passesFilters(filterState: BaseMapViewModel.MapFilterState, nowSeconds: Long): Boolean {
-        if (filterState.onlyFavorites && !isFavorite) return false
-        val window = filterState.lastHeardFilter.seconds
-        return window == LastHeardFilter.Any.seconds || (nowSeconds - lastHeard) <= window
+        val secondsSinceHeard = nowSeconds - lastHeard
+        val cutoff = filterState.lastHeardFilter.seconds
+        return (!filterState.onlyFavorites || isFavorite) &&
+            (!isIgnored || filterState.showIgnored) &&
+            user.role !in filterState.excludedRoles &&
+            (!filterState.onlyOnline || secondsSinceHeard <= ONLINE_WINDOW_SECONDS) &&
+            (!filterState.onlyDirect || hopsAway == 0) &&
+            (!filterState.excludeMqtt || !viaMqtt) &&
+            (filterState.includeUnknown || user.short_name.isNotEmpty()) &&
+            (cutoff == LastHeardFilter.Any.seconds || secondsSinceHeard <= cutoff)
     }
 }
+
+/**
+ * Resolves persisted role names back to roles, dropping any the current protobufs no longer define.
+ *
+ * Names rather than ordinals, and forgiving of names it does not know: a set written by a newer build (or a role
+ * removed from the protos) must not throw on the way back in.
+ */
+fun decodeExcludedRoles(names: Set<String>): Set<Config.DeviceConfig.Role> =
+    names.mapNotNullTo(mutableSetOf()) { name -> Config.DeviceConfig.Role.entries.firstOrNull { it.name == name } }
