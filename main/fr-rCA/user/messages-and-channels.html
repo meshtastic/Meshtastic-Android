@@ -8,7 +8,7 @@
 
 <h3 id="default-channel">Default Channel</h3>
 
-<p>Every Meshtastic device comes with a default <strong>LongFast</strong> channel. This is an unencrypted channel used for general mesh communication.</p>
+<p>Every Meshtastic radio comes with a default <strong>LongFast</strong> channel. It is encrypted with a well-known default key, so anyone running Meshtastic on the same preset can read it.</p>
 
 <h3 id="sécurité-du-canal">Sécurité du canal</h3>
 
@@ -69,14 +69,14 @@
 
 <ol>
   <li>Open the <strong>Messages</strong> tab.</li>
-  <li>Select a node from your contacts list or tap a node in the node list.</li>
+  <li>Select a conversation, or tap a node in the node list.</li>
   <li>Type your message and tap <strong>Send</strong>.</li>
 </ol>
 
 <h3 id="managing-the-conversation-list">Managing the Conversation List</h3>
 
-<p>The <strong>Messages</strong> tab lists your conversations. Each row carries what you need to triage it at a
-glance, and the list itself is directly actionable:</p>
+<p>The <strong>Messages</strong> tab lists your conversations. Each row shows what you need at a glance, and you
+can act on it directly:</p>
 
 <ul>
   <li><strong>Unsent drafts survive.</strong> Type into a conversation and leave without sending, and the text is
@@ -85,7 +85,7 @@ an unsent draft is the thing the row is waiting on <em>you</em> for.</li>
   <li><strong>Unread badge.</strong> A count sits on the row until you open the conversation.</li>
   <li><strong>Swipe right to mute</strong> (swipe again to unmute) and <strong>swipe left to delete</strong>. Deleting asks
 first; muting shows a snackbar with <strong>Undo</strong>.</li>
-  <li><strong>Long-press to select</strong> one or more conversations, then use the action bar to <strong>Pin</strong>,
+  <li><strong>Touch &amp; hold to select</strong> one or more conversations, then use the action bar to <strong>Pin</strong>,
 <strong>Mark unread</strong>, mute or delete them together. Pinned conversations carry a pin marker and rise
 to the top of <strong>their own section</strong>.</li>
   <li><strong>The list is split into Channels and Direct Messages</strong>, each with a collapsible header and each
@@ -114,7 +114,7 @@ control whether they are offered at all.</p>
   <tbody>
     <tr>
       <td>Sending…</td>
-      <td>Queued or already handed to the radio, not yet resolved either way. Both stages share this text, but the icon and colour change as it progresses — a yellow upload cloud while queued, a blue arrow once the radio has it</td>
+      <td>Queued or already handed to the radio, not yet resolved either way. Both stages share this text, but the icon and color change as it progresses — a yellow upload cloud while queued, a blue arrow once the radio has it</td>
     </tr>
     <tr>
       <td>Delivered to recipient</td>
@@ -138,7 +138,7 @@ control whether they are offered at all.</p>
     </tr>
     <tr>
       <td>Erreur</td>
-      <td>Delivery failed — tap the status for the specific reason (see Delivery Errors below)</td>
+      <td>Delivery failed — tap the status for the specific reason (see <a href="#delivery-errors">Delivery Errors</a>)</td>
     </tr>
   </tbody>
 </table>
@@ -257,8 +257,6 @@ control whether they are offered at all.</p>
 
 <p><img src="../../assets/screenshots/messages_edit_quick_chat.png" alt="New quick chat dialog with name, message, and instantly-send toggle" /></p>
 
-<p>The channel list shows each channel with its latest message preview.</p>
-
 <h3 id="searching-messages">Searching Messages</h3>
 
 <p>You can search the full history of any conversation directly from the chat screen:</p>
@@ -321,7 +319,7 @@ control whether they are offered at all.</p>
   </tbody>
 </table>
 
-<p>When composing, focus the message field and type at least three characters to reveal a <strong>formatting toolbar</strong> below the input. Select text and tap a style to wrap it (tap again to remove it); with no selection, a style inserts an empty pair with the cursor between the markers. The link button opens a dialog to enter a URL. As you type, the draft styles live in the field while the underlying text keeps its Markdown characters.</p>
+<p>When composing, focus the message field and type at least three characters to reveal a <strong>formatting toolbar</strong> below the input. Select text and tap a style to wrap it (tap again to remove it); with no selection, a style inserts an empty pair with the cursor between the markers. The link button opens a dialog to enter a URL. As you type, the field shows the styled text, but the message you send still contains the Markdown characters.</p>
 
 <blockquote>
   <p>💡 <strong>Tip:</strong> Formatting is carried as literal characters on the mesh — the same bytes iOS sends. Clients that don’t support Markdown (older apps, plain firmware clients) will show the raw <code class="language-plaintext highlighter-rouge">**</code>/<code class="language-plaintext highlighter-rouge">~~</code> characters. URLs, email addresses, and phone numbers are still auto-linked whether or not you use Markdown.</p>
@@ -336,18 +334,14 @@ control whether they are offered at all.</p>
 <p>React to messages with emoji:</p>
 
 <ul>
-  <li><strong>Double-tap</strong> a message — or long-press it — to raise a quick reaction bar above the bubble</li>
+  <li><strong>Touch &amp; hold</strong> a message — or double-tap it — to raise a quick reaction bar above the bubble. Opening the bar sends nothing.</li>
   <li>Tap an emoji in the bar to send it; tap <strong>more</strong> to open the full picker, or anywhere outside
-the bar to dismiss it without sending</li>
+the bar to dismiss it without sending. A reaction is a real mesh packet, so it only goes out
+when you pick an emoji.</li>
   <li>Reactions appear below the message bubble</li>
   <li>Multiple users can react to the same message</li>
   <li>React to your own messages or others’ messages</li>
 </ul>
-
-<blockquote>
-  <p>ℹ️ <strong>Note:</strong> Opening the bar sends nothing. A reaction is a real mesh packet, so it only goes
-out when you pick an emoji.</p>
-</blockquote>
 
 <p><img src="../../assets/screenshots/messages_reaction.png" alt="Emoji reaction badges displayed beneath a message" /></p>
 
@@ -359,7 +353,7 @@ out when you pick an emoji.</p>
 
 <p><strong>Swipe a message to the right</strong> to reply to it — the composer opens with that message quoted.
 Swiping past the reply threshold arms the action; releasing before it springs back with nothing sent.
-Reply is also in the actions menu, reached by long-pressing and then tapping <strong>More</strong>.</p>
+Reply is also in the actions menu, reached by touching &amp; holding and then tapping <strong>More</strong>.</p>
 
 <h3 id="day-separators">Day Separators</h3>
 
@@ -375,7 +369,7 @@ messages. That count is messages, not people — five unread from one person rea
 
 <h3 id="message-actions">Message Actions</h3>
 
-<p>Long-press or double-tap a message to open the quick reaction bar, then tap <strong>More</strong> (the
+<p>Touch &amp; hold or double-tap a message to open the quick reaction bar, then tap <strong>More</strong> (the
 overflow icon on that bar) to reach:</p>
 
 <ul>
@@ -420,6 +414,3 @@ reliable or background, but that is not something you control from the message c
   <li><a href="mqtt">MQTT</a> — bridge channel messages to the internet</li>
   <li><a href="https://meshtastic.org/docs/configuration/radio/channels">Channel configuration</a> — detailed channel settings on meshtastic.org</li>
 </ul>
-
-<hr />
-

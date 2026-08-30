@@ -13,7 +13,7 @@ Hoia oma Meshtastic raadio ajakohasena uusima püsivaraga, et saada uusi funktsi
 
 ## Kontrollin värskendust
 
-1. Ava ühendatud raadio konfiguratsioon ja puuduta jaotises **Täpsemalt** valikut **Püsivara värskendus**. The entry appears only for OTA-capable devices.
+1. Ava ühendatud raadio konfiguratsioon ja puuduta jaotises **Täpsemalt** valikut **Püsivara värskendus**. The entry appears only for OTA-capable radios.
 2. Rakendus kontrollib saadaolevaid püsivara versioone.
 3. Saadaval olevad värskendused näitavad versiooninumbrit ja muudatuste logi kokkuvõtet.
 
@@ -23,6 +23,8 @@ Hoia oma Meshtastic raadio ajakohasena uusima püsivaraga, et saada uusi funktsi
 
 Kõige levinum värskendamisviis Androidi kasutajate seas:
 
+&gt; ⚠️ **Warning:** Interrupting a firmware update can leave the radio unable to boot. Keep the phone nearby and both devices powered until the update completes.
+
 1. Veendu, et raadio on sinihamba ​​kaudu ühendatud.
 2. Mine püsivara värskenduse lehele.
 3. Vali soovitud püsivara versioon.
@@ -31,28 +33,26 @@ Kõige levinum värskendamisviis Androidi kasutajate seas:
 
 ![Püsivara kontrollib värskendusi](../../assets/screenshots/firmware_checking.png)
 
-&gt; ⚠️ **Hoiatus:** Püsivara värskenduse katkestamine võib sinu seadme rikkuda. Keep the radio charged and stay in Bluetooth range for the whole update. The app itself only blocks the update below **10%** battery; 50% or more is the safe habit, not an enforced limit.
-
 #### Tühjendada seade uuendamise käigus
 
 Where the app offers it, an **Erase device during update** checkbox appears next to the update button. It is a per-update opt-in and is never remembered.
 
- Method         | What erasing does                                                                                                                      |
- -------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
- BLE / WiFi OTA | Factory-resets the device once the update is verified. All settings and Bluetooth pairing are removed. |
- USB            | Puhastab seadme välkmälu täielikult ja paigaldab seejärel valitud püsivara nullist.                                    |
+ Method          | What erasing does                                                                                                                      |
+ --------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+ BLE / Wi-Fi OTA | Factory-resets the device once the update is verified. All settings and Bluetooth pairing are removed. |
+ USB             | Puhastab seadme välkmälu täielikult ja paigaldab seejärel valitud püsivara nullist.                                    |
 
 It is not offered for a local firmware file, during a recovery update, or on USB devices whose board does not support the erase step. Afterwards the device needs setting up — and pairing — again.
 
-### OTA via WiFi (network-connected ESP32)
+### OTA via Wi-Fi (network-connected ESP32)
 
-When an ESP32 radio is connected over the network rather than Bluetooth, the app offers **WiFi OTA**, which pushes the same update over TCP:
+When an ESP32 radio is connected over the network rather than Bluetooth, the app offers **Wi-Fi OTA**, which pushes the same update over TCP:
 
 1. Connect to the radio over the network (see [Connections](connections)).
 2. Open the Firmware Update screen and pick a version.
 3. Tap **Update**. Keep the radio and phone on the same network for the whole transfer.
 
-WiFi OTA takes the ESP32 `-update.bin` image rather than the `.uf2` a USB update uses; the app selects the right artifact for you.
+Wi-Fi OTA takes the ESP32 `-update.bin` image rather than the `.uf2` a USB update uses; the app selects the right artifact for you.
 
 [Püsivara hoiatus](../../assets/screenshots/firmware_disclaimer.png)
 
@@ -60,7 +60,7 @@ WiFi OTA takes the ESP32 `-update.bin` image rather than the `.uf2` a USB update
 
 Kui raadio on ühendatud **USB/jadaühenduse** (mitte sinihamba) kaudu, pakub püsivara värskendamise ekraan **USB failiedastust**. Rakendus taaskäivitab seadme DFU-režiimis ja seejärel palub süsteemifailide valija abil salvestada `.uf2`-fail seadme DFU kettale. See valik kuvatakse ainult USB/jadaühenduse korral – see pole sinihamba ​​kaudu saadaval.
 
-&gt; ℹ️ **nRF alglaaduri märkus:** Tootja alglaadur, mis on tarnitud `.zip`-failina (nt RAK WisBlock RAK4631), tuleb paigaldada jadapordiga DFU-tööriistaga, näiteks `adafruit-nrfutil` – selle `.zip`-faili kettale kopeerimine ei toimi. Failina pakutavat alglaadur `update-....uf2` **saab** installida selle kettale kopeerimise teel; nii töötabki rakenduse enda alglaaduri uuendamine. The app surfaces a hint when the serial-only route applies.
+&gt; ℹ️ **Note:** A vendor nRF bootloader supplied as a `.zip` (e.g. RAK WisBlock RAK4631) has to be flashed with a serial DFU tool such as `adafruit-nrfutil` — copying that `.zip` to the drive won't work. Failina pakutavat alglaadur `update-....uf2` **saab** installida selle kettale kopeerimise teel; nii töötabki rakenduse enda alglaaduri uuendamine. The app surfaces a hint when the serial-only route applies.
 
 ### Factory Erase and Bootloader Upgrade
 
@@ -68,7 +68,7 @@ Kui raadio on ühendatud **USB/jadaühenduse** (mitte sinihamba) kaudu, pakub p�
 
 Kustutamine puhastab seadmest kõik – kanalid, klahvid ja kõik seaded – ning varukoopiat ei tehta, seega küsib rakendus kõigepealt kinnitust. Mõlemad toimingud kirjutavad kordamööda kaks faili, seega palutakse teil seadme uuendusdraiv valida kaks korda: üks kord kustutus- või alglaaduri kujutise jaoks ja seejärel uuesti püsivara jaoks.
 
-Rakendus loeb valitud kettalt faili `INFO_UF2.TXT`, et veenduda, kas see on tõepoolest seadme uuendusketas ja enne millegi kirjutamist plaat tuvastada. Kui see ei suuda kinnitada, millist sinihamba ühendust seade kasutab, keeldub see kustutamast ja suunab hoopis [Web Flasheri] (https://flasher.meshtastic.org) juurde – seal valesti valides võib seade vajada taastamiseks riistvaraprogrammeerijat.
+Rakendus loeb valitud kettalt faili `INFO_UF2.TXT`, et veenduda, kas see on tõepoolest seadme uuendusketas ja enne millegi kirjutamist plaat tuvastada. If it can't confirm which Bluetooth stack your device uses, it refuses to erase and points you at the [Web Flasher](https://flasher.meshtastic.org) instead. In the Web Flasher, choosing the wrong Bluetooth stack can leave the radio recoverable only with a hardware programmer.
 
 ### Muud püsivarauuenduse valikud
 
@@ -93,6 +93,7 @@ Enne uuendamist:
 - [ ] Stabiilne sinihamba ühendus
 - [ ] Pane tähele oma praeguseid seadeid (need võivad oluliste versioonimuudatuste korral lähtestuda)
 - [ ] Check the release notes for breaking changes
+- [ ] Update the Meshtastic app itself, before or alongside firmware updates, to ensure compatibility
 
 ## Eelvärskendus
 
@@ -102,8 +103,8 @@ Pärast püsivara kirjutamist kontrollib rakendus värskendust ja ootab, kuni se
 
 Kui värskendus õnnestub:
 
-- Raadio taaskäivitub automaatselt
-- Sinihamba ühendus taastatakse
+- The radio reboots automatically
+- The Bluetooth connection re-establishes
 - Veendu, et seaded on puutumatud
 - Kontrolli uut versiooni püsivara värskenduse ekraanil jaotises **Praegu paigaldatud** – see kuvatakse ka sõlme üksikasjade lehel ja ühenduste ekraanil
 
@@ -121,9 +122,9 @@ Kui värskendus näib olevat hangunud:
 
 ![Püsivara uuendamise viga](../../assets/screenshots/firmware_error.png)
 
-### Seade ei käivitu pärast värskendamist
+### Radio Won't Boot After Update
 
-If your device fails to boot:
+If your radio fails to boot:
 
 1. Try connecting via USB to a computer
 2. Kasuta veebi püsivarauuendust taaste/DFU režiimis
@@ -136,13 +137,11 @@ On connecting, the app compares the radio's firmware against two thresholds and 
 
  Püsivara versioon                                                                                               | What you see                                     | What happens                                                                                                         |
  --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
- Below **2.3.15**                                                                | **Firmware update required.**    | The app disconnects from the radio. It will not operate against firmware this old.   |
+ Below **2.3.15**                                                                | **Firmware update required.**    | The app disconnects from the radio. It does not operate against firmware this old.   |
  **2.3.15** up to, but not including, **2.5.14** | **Firmware Update Recommended.** | Advisory only — dismiss it and carry on. The dialog names the latest stable release. |
  **2.5.14** or newer                                                             | Nothing                                          | —                                                                                                                    |
 
 A version string the app cannot parse is ignored rather than treated as too old, so a transient read never disconnects a working radio.
-
-&gt; ⚠️ **Tähtis:** Ühilduvuse tagamiseks värskenda Meshtastic rakendust enne püsivara värskendust.
 
 ## Seotud teemad
 
@@ -150,9 +149,6 @@ A version string the app cannot parse is ignored rather than treated as too old,
 - [Püsivara uuendamise juhend](https://meshtastic.org/docs/getting-started/flashing-firmware) — täielik püsivara uuendamise juhend meshtastic.org lehel
 - [Toetatud seadmed](https://meshtastic.org/docs/hardware/devices) — ühilduvate raadiote täielik loetelu on leitav aadressilt meshtastic.org
 - [KKK](https://meshtastic.org/docs/faq/) — meshtastic.org sageli esitatavad küsimused
-
----
-
 </pre>
 </body>
 </html>

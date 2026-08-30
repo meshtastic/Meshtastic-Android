@@ -1,6 +1,6 @@
 <h1 id="settings--radio--user">Settings — Radio &amp; User</h1>
 
-<p>Configure your radio hardware and user identity parameters.</p>
+<p>Configure your radio’s user identity, region and LoRa parameters, position and power behavior, network and Bluetooth connectivity, and security settings.</p>
 
 <h2 id="paramètres-utilisateur">Paramètres utilisateur</h2>
 
@@ -23,6 +23,10 @@
       <td>4-character abbreviated name</td>
     </tr>
     <tr>
+      <td>Statut du message</td>
+      <td>A short free-text status other nodes display alongside your node — up to 80 bytes, cleared with the <strong>✕</strong> in the field. Needs firmware 2.8 or newer, and is absent otherwise</td>
+    </tr>
+    <tr>
       <td>Non joignable par message</td>
       <td>Marks the node as one nobody should try to message — for an unmonitored or infrastructure node. Other clients hide it from the contact list. Needs supporting firmware</td>
     </tr>
@@ -35,7 +39,10 @@
 
 <h3 id="applying-changes">Applying Changes</h3>
 
-<p>After modifying settings, tap <strong>Save</strong> to write the configuration to your radio. The device may reboot to apply changes.</p>
+<p>After modifying settings, tap <strong>Save</strong> to write the configuration to your radio. The radio may reboot to apply changes.</p>
+
+<p>The status message is saved with the same <strong>Save</strong>, but it never reboots the node — and, like the
+rest of this screen, it can be edited on a remote node you administer.</p>
 
 <h2 id="configuration">Configuration</h2>
 
@@ -106,7 +113,7 @@
   <tbody>
     <tr>
       <td>Région</td>
-      <td>Regulatory region for frequency bands</td>
+      <td>Regulatory region for frequency bands. You must set this before transmitting</td>
       <td>Unset (must configure)</td>
     </tr>
     <tr>
@@ -161,7 +168,7 @@
     </tr>
     <tr>
       <td>Autoriser le dépassement du temps d’émission autorisé par heure</td>
-      <td>Ignore the region’s duty-cycle limit. Only legal where you are permitted to</td>
+      <td>Ignores the region’s duty-cycle limit. Illegal in most regions; turn it on only where your license permits</td>
       <td>Éteint</td>
     </tr>
     <tr>
@@ -188,7 +195,7 @@
 </table>
 
 <blockquote>
-  <p>⚠️ <strong>Important:</strong> You <strong>must</strong> set your region before transmitting. Operating without the correct region may violate local radio regulations. See the <a href="https://meshtastic.org/docs/getting-started/initial-config">region configuration guide</a> on meshtastic.org for details.</p>
+  <p>⚠️ <strong>Important:</strong> Operating without the correct region may violate local radio regulations. See the <a href="https://meshtastic.org/docs/getting-started/initial-config">region configuration guide</a> on meshtastic.org for details.</p>
 </blockquote>
 
 <h3 id="modem-presets">Modem Presets</h3>
@@ -332,13 +339,9 @@
   <li><strong>Mixed environments:</strong> Stick with <strong>Long Fast</strong> — it’s the community default and ensures compatibility with others in your area.</li>
 </ul>
 
-<blockquote>
-  <p>⚠️ <strong>Important:</strong> All nodes on the same channel <strong>must</strong> use the same modem preset. Nodes with mismatched presets cannot communicate even if they share the same frequency and encryption key.</p>
-</blockquote>
+<p>All nodes on the same channel must use the same modem preset. Nodes with mismatched presets cannot communicate even if they share the same frequency and encryption key.</p>
 
-<blockquote>
-  <p>💡 <strong>Tip:</strong> The range estimates above assume flat terrain and modest antennas. Elevation advantage (hilltop, rooftop) dramatically increases effective range. A well-placed Router with Long Fast can often outperform a ground-level node with Long Slow.</p>
-</blockquote>
+<p>The range estimates in the <a href="#modem-presets">Modem Presets</a> table assume flat terrain and modest antennas. Elevation advantage (hilltop, rooftop) dramatically increases effective range. A well-placed Router with Long Fast can often outperform a ground-level node with Long Slow.</p>
 
 <h3 id="configuration-de-lécran">Configuration de l’écran</h3>
 
@@ -358,7 +361,7 @@
     </tr>
     <tr>
       <td>Intervalle du carrousel</td>
-      <td>How often the device cycles between screens on its own</td>
+      <td>How often the radio cycles between screens on its own</td>
     </tr>
     <tr>
       <td>Mode d’affichage</td>
@@ -366,11 +369,11 @@
     </tr>
     <tr>
       <td>Unités d’affichage</td>
-      <td>Metric or Imperial on the device’s screen</td>
+      <td>Metric or Imperial on the radio’s screen</td>
     </tr>
     <tr>
       <td>Utiliser le format horaire 12h</td>
-      <td>Show the device clock as 12-hour rather than 24-hour</td>
+      <td>Show the radio’s clock as 12-hour rather than 24-hour</td>
     </tr>
     <tr>
       <td>Bold heading</td>
@@ -386,7 +389,7 @@
     </tr>
     <tr>
       <td>Réveil par appui ou mouvement</td>
-      <td>Light the screen when the device is tapped or moved</td>
+      <td>Light the screen when the radio is tapped or moved</td>
     </tr>
     <tr>
       <td>Orientation de la boussole</td>
@@ -402,7 +405,7 @@
 <h3 id="configuration-de-la-position">Configuration de la position</h3>
 
 <blockquote>
-  <p>⚠️ <strong>Warning:</strong> Saving this screen always reboots the radio.</p>
+  <p>⚠️ <strong>Important:</strong> Saving this screen always reboots the radio.</p>
 </blockquote>
 
 <table>
@@ -500,7 +503,7 @@
 <h3 id="configuration-du-réseau">Configuration du réseau</h3>
 
 <blockquote>
-  <p>⚠️ <strong>Warning:</strong> Saving this screen always reboots the radio.</p>
+  <p>⚠️ <strong>Important:</strong> Saving this screen always reboots the radio.</p>
 </blockquote>
 
 <table>
@@ -512,12 +515,12 @@
   </thead>
   <tbody>
     <tr>
-      <td>WiFi activé</td>
-      <td>Enable the WiFi radio (ESP32 devices)</td>
+      <td>Wi-Fi enabled</td>
+      <td>Enable the Wi-Fi radio (ESP32 radios)</td>
     </tr>
     <tr>
       <td>SSID</td>
-      <td>Network name to connect to. <strong>Scan WiFi QR code</strong> fills this and the password from a standard WiFi QR code</td>
+      <td>Network name to connect to. <strong>Scan Wi-Fi QR code</strong> fills this and the password from a standard Wi-Fi QR code</td>
     </tr>
     <tr>
       <td>Mot de passe</td>
@@ -532,7 +535,7 @@
       <td>DHCP, or a static address configured with the four fields below</td>
     </tr>
     <tr>
-      <td>Wifi IP / Subnet / Gateway / DNS</td>
+      <td>Wi-Fi IP / Subnet / Gateway / DNS</td>
       <td>The static address, only used when IPv4 mode is static</td>
     </tr>
     <tr>
@@ -550,7 +553,7 @@
   </tbody>
 </table>
 
-<p><img src="../../assets/screenshots/settings_ipv4_field.png" alt="IP address field" /></p>
+<p><img src="../../assets/screenshots/settings_ipv4_field.png" alt="Network Config with a static IPv4 address entered" /></p>
 
 <h3 id="configuration-bluetooth">Configuration Bluetooth</h3>
 
@@ -700,15 +703,15 @@ back, which destroys its keys, channels and settings.</p>
   <tbody>
     <tr>
       <td>Dropdown</td>
-      <td><img src="../../assets/screenshots/settings_dropdown.png" alt="Dropdown" /></td>
+      <td><img src="../../assets/screenshots/settings_dropdown.png" alt="A dropdown setting, expanded to show its list of options" /></td>
     </tr>
     <tr>
       <td>Toggle</td>
-      <td><img src="../../assets/screenshots/settings_switch.png" alt="Toggle" /></td>
+      <td><img src="../../assets/screenshots/settings_switch.png" alt="A toggle setting in the on position" /></td>
     </tr>
     <tr>
       <td>Slider</td>
-      <td><img src="../../assets/screenshots/settings_slider.png" alt="Slider" /></td>
+      <td><img src="../../assets/screenshots/settings_slider.png" alt="A slider setting with its current numeric value shown" /></td>
     </tr>
   </tbody>
 </table>
@@ -721,6 +724,3 @@ back, which destroys its keys, channels and settings.</p>
   <li><a href="https://meshtastic.org/docs/configuration/radio/lora">LoRa configuration</a> — detailed LoRa settings reference on meshtastic.org</li>
   <li><a href="https://meshtastic.org/docs/getting-started/initial-config">Initial configuration</a> — region setup guide on meshtastic.org</li>
 </ul>
-
-<hr />
-

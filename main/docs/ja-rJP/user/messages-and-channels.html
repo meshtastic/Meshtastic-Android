@@ -17,7 +17,7 @@ Meshtastic は、**チャンネルブロードキャスト**と**ダイレクト
 
 ### デフォルトチャンネル
 
-すべての Meshtastic デバイスには、デフォルトの **LongFast** チャンネルが用意されています。 これは、一般的なメッシュ通信に使われる暗号化されていないチャンネルです。
+Every Meshtastic radio comes with a default **LongFast** channel. It is encrypted with a well-known default key, so anyone running Meshtastic on the same preset can read it.
 
 ### チャンネルのセキュリティ
 
@@ -48,13 +48,13 @@ Meshtastic は、**チャンネルブロードキャスト**と**ダイレクト
 ### ダイレクトメッセージを送信する
 
 1. 「**メッセージ**」タブを開きます。
-2. 連絡先リストからノードを選択するか、ノードリストでノードをタップします。
+2. Select a conversation, or tap a node in the node list.
 3. メッセージを入力し、「**送信**」をタップします。
 
 ### Managing the Conversation List
 
-The **Messages** tab lists your conversations. Each row carries what you need to triage it at a
-glance, and the list itself is directly actionable:
+The **Messages** tab lists your conversations. Each row shows what you need at a glance, and you
+can act on it directly:
 
 - **Unsent drafts survive.** Type into a conversation and leave without sending, and the text is
   still there when you come back. The row shows it as `Draft: …` in place of the last message —
@@ -62,7 +62,7 @@ glance, and the list itself is directly actionable:
 - **Unread badge.** A count sits on the row until you open the conversation.
 - **Swipe right to mute** (swipe again to unmute) and **swipe left to delete**. Deleting asks
   first; muting shows a snackbar with **Undo**.
-- **Long-press to select** one or more conversations, then use the action bar to **Pin**,
+- **Touch &amp; hold to select** one or more conversations, then use the action bar to **Pin**,
   **Mark unread**, mute or delete them together. Pinned conversations carry a pin marker and rise
   to the top of **their own section**.
 - **The list is split into Channels and Direct Messages**, each with a collapsible header and each
@@ -80,15 +80,15 @@ control whether they are offered at all.
 
 ステータスラベルは、**自分が**送信したメッセージの下にのみ表示されます（他のユーザーからの受信メッセージにはステータスラベルは表示されません）：
 
- 状態                   | 意味                                                                                                                                                                                                                                        |
- -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
- 送信中…                 | Queued or already handed to the radio, not yet resolved either way. Both stages share this text, but the icon and colour change as it progresses — a yellow upload cloud while queued, a blue arrow once the radio has it |
- 受信者に配信済み             | ダイレクトメッセージで最も確実な確認です。受信確認が返ってきています                                                                                                                                                                                                        |
- メッシュに配信済み            | チャンネルブロードキャストでは、メッセージがメッシュに届いたことを示します（ブロードキャストには受信者ごとの確認応答はありません）                                                                                                                                                                         |
- 中継済み、受信者による確認なし      | ダイレクトメッセージでは警告色で表示されます。メッセージは中継されましたが、まだ受信確認が返ってきていません                                                                                                                                                                                    |
- SF++ チェーン経由でルーティング中… | Store &amp; Forward Plus Plus チェーンによってルーティング／バッファリングされています                                                                                                                                                                |
- SF++ チェーンで確認済み       | SF++ チェーン経由で配信が確認されました                                                                                                                                                                                                                    |
- エラー                  | 配信に失敗しました。具体的な理由はステータスをタップして確認してください（下記の「配信エラー」を参照）                                                                                                                                                                                       |
+ 状態                   | 意味                                                                                                                                                                                                                                       |
+ -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+ 送信中…                 | Queued or already handed to the radio, not yet resolved either way. Both stages share this text, but the icon and color change as it progresses — a yellow upload cloud while queued, a blue arrow once the radio has it |
+ 受信者に配信済み             | ダイレクトメッセージで最も確実な確認です。受信確認が返ってきています                                                                                                                                                                                                       |
+ メッシュに配信済み            | チャンネルブロードキャストでは、メッセージがメッシュに届いたことを示します（ブロードキャストには受信者ごとの確認応答はありません）                                                                                                                                                                        |
+ 中継済み、受信者による確認なし      | ダイレクトメッセージでは警告色で表示されます。メッセージは中継されましたが、まだ受信確認が返ってきていません                                                                                                                                                                                   |
+ SF++ チェーン経由でルーティング中… | Store &amp; Forward Plus Plus チェーンによってルーティング／バッファリングされています                                                                                                                                                               |
+ SF++ チェーンで確認済み       | SF++ チェーン経由で配信が確認されました                                                                                                                                                                                                                   |
+ エラー                  | Delivery failed — tap the status for the specific reason (see [Delivery Errors](#delivery-errors))                                                                                                                    |
 
 ### 配信エラー
 
@@ -131,8 +131,6 @@ control whether they are offered at all.
 
 ![名前・メッセージ・即時送信トグルを備えた新規クイックチャットのダイアログ](../../assets/screenshots/messages_edit_quick_chat.png)
 
-チャンネルリストには、各チャンネルが最新メッセージのプレビューとともに表示されます。
-
 ### メッセージを検索する
 
 チャット画面から、どの会話でもその全履歴を直接検索できます：
@@ -162,7 +160,7 @@ control whether they are offered at all.
  インラインコード | `` `code` ``                   | 等幅の `code`    |
  リンク      | `[label](https://example.com)` | タップできる**ラベル** |
 
-メッセージを作成するときは、入力欄にフォーカスして 3 文字以上入力すると、入力欄の下に**書式ツールバー**が表示されます。 テキストを選択してスタイルをタップすると、そのテキストが囲まれます（もう一度タップすると解除されます）。選択していない場合は、空のペアが挿入され、カーソルがマーカーの間に置かれます。 リンクボタンをタップすると、URL を入力するダイアログが開きます。 入力中は下書きに書式が適用されて表示されますが、内部のテキストは Markdown の文字を保持しています。
+メッセージを作成するときは、入力欄にフォーカスして 3 文字以上入力すると、入力欄の下に**書式ツールバー**が表示されます。 テキストを選択してスタイルをタップすると、そのテキストが囲まれます（もう一度タップすると解除されます）。選択していない場合は、空のペアが挿入され、カーソルがマーカーの間に置かれます。 リンクボタンをタップすると、URL を入力するダイアログが開きます。 As you type, the field shows the styled text, but the message you send still contains the Markdown characters.
 
 &gt; 💡 **ヒント：** 書式はメッシュ上ではそのままの文字として送られます。iOS が送信するのと同じバイト列です。 Markdown に対応していないクライアント（古いアプリや、素のファームウェアのクライアント）では、`**` や `~~` の文字がそのまま表示されます。 URL、メールアドレス、電話番号は、Markdown を使うかどうかにかかわらず、引き続き自動的にリンクになります。
 
@@ -174,15 +172,13 @@ control whether they are offered at all.
 
 絵文字でメッセージにリアクションできます：
 
-- **Double-tap** a message — or long-press it — to raise a quick reaction bar above the bubble
+- **Touch &amp; hold** a message — or double-tap it — to raise a quick reaction bar above the bubble. Opening the bar sends nothing.
 - Tap an emoji in the bar to send it; tap **more** to open the full picker, or anywhere outside
-  the bar to dismiss it without sending
+  the bar to dismiss it without sending. A reaction is a real mesh packet, so it only goes out
+  when you pick an emoji.
 - リアクションはメッセージの吹き出しの下に表示されます
 - 複数のユーザーが同じメッセージにリアクションできます
 - 自分のメッセージにも、他の人のメッセージにもリアクションできます
-
-&gt; ℹ️ **Note:** Opening the bar sends nothing. A reaction is a real mesh packet, so it only goes
-&gt; out when you pick an emoji.
 
 ![メッセージの下に表示された絵文字リアクションのバッジ](../../assets/screenshots/messages_reaction.png)
 
@@ -192,7 +188,7 @@ control whether they are offered at all.
 
 **Swipe a message to the right** to reply to it — the composer opens with that message quoted.
 Swiping past the reply threshold arms the action; releasing before it springs back with nothing sent.
-Reply is also in the actions menu, reached by long-pressing and then tapping **More**.
+Reply is also in the actions menu, reached by touching &amp; holding and then tapping **More**.
 
 ### Day Separators
 
@@ -208,7 +204,7 @@ messages. That count is messages, not people — five unread from one person rea
 
 ### メッセージの操作
 
-Long-press or double-tap a message to open the quick reaction bar, then tap **More** (the
+Touch &amp; hold or double-tap a message to open the quick reaction bar, then tap **More** (the
 overflow icon on that bar) to reach:
 
 - **コピー：** メッセージのテキストをクリップボードにコピーします
@@ -245,9 +241,6 @@ reliable or background, but that is not something you control from the message c
 - [設定：無線機とユーザー](settings-radio-user)：チャンネルの暗号化とプリセットを設定します
 - [MQTT](mqtt)：チャンネルのメッセージをインターネットに橋渡しします
 - [チャンネル設定](https://meshtastic.org/docs/configuration/radio/channels)：meshtastic.org にある詳細なチャンネル設定
-
----
-
 </pre>
 </body>
 </html>

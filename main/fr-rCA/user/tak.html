@@ -1,6 +1,6 @@
 <h1 id="tak-integration">TAK Integration</h1>
 
-<p>Meshtastic integrates with the Team Awareness Kit (TAK) ecosystem, enabling interoperability between Meshtastic mesh devices and TAK applications like ATAK and WinTAK.</p>
+<p>Meshtastic integrates with the Team Awareness Kit (TAK) ecosystem, enabling interoperability between Meshtastic radios and TAK applications like ATAK and WinTAK.</p>
 
 <h2 id="overview">Overview</h2>
 
@@ -18,8 +18,8 @@
 
 <ul>
   <li>ATAK (Android Team Awareness Kit), iTAK, or WinTAK installed</li>
-  <li>Your node’s <strong>Device Role</strong> set to <strong>TAK</strong> or <strong>TAK Tracker</strong> — this is what makes the TAK
-module appear in Module Config at all</li>
+  <li>Your node’s <strong>Role</strong> (Device Config) set to <strong>TAK</strong> or <strong>TAK Tracker</strong> — this is what makes the
+TAK module appear in Module Config at all</li>
 </ul>
 
 <blockquote>
@@ -32,37 +32,44 @@ TAK server plus the Mesh to CoT Converter, both described below, with stock ATAK
 <h3 id="configuration">Configuration</h3>
 
 <p>Navigate to <strong>Settings → Module Config → TAK</strong>. The module’s own settings are your TAK identity —
-there is no separate enable switch here, because the device Role above is what turns TAK on:</p>
-
-<p><img src="../../assets/screenshots/settings_switch.png" alt="Module toggle switch" /></p>
+there is no separate enable switch here, because the <strong>Role</strong> setting in Device Config is what
+turns TAK on. Your node broadcasts this identity, which appears on TAK maps.</p>
 
 <table>
   <thead>
     <tr>
-      <th>Setting</th>
+      <th>Paramètre</th>
       <th>Description</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>Team</td>
-      <td>Your TAK team colour</td>
+      <td>Couleur de l’équipe</td>
+      <td>Your team color on the TAK map (e.g., Blue, Red, Cyan, Green)</td>
     </tr>
     <tr>
-      <td>Rôle</td>
-      <td>Your member role within that team</td>
+      <td>Rôle Membre</td>
+      <td>Your operational role within that team (Team Member, Team Lead, HQ, Medic, RTO, etc.)</td>
     </tr>
   </tbody>
 </table>
 
+<p>Your TAK callsign isn’t a separate setting — it’s derived automatically from your Meshtastic node
+name.</p>
+
+<blockquote>
+  <p>💡 <strong>Tip:</strong> Team/role colors are the standard TAK affiliation colors. Coordinate with your TAK
+team to use consistent team assignments.</p>
+</blockquote>
+
 <h3 id="local-tak-server">Local TAK Server</h3>
 
-<p>The app can also run a <strong>local TAK server</strong> so ATAK/iTAK on the <strong>same device</strong> can connect directly, without a remote TAK server. The server binds to localhost only (<code class="language-plaintext highlighter-rouge">127.0.0.1:8089</code>) and uses TLS with mutual certificate authentication (mTLS), so it is not reachable from other devices on the network. Open <strong>Settings → Module Config → TAK → TAK Server</strong>:</p>
+<p>The app can also run a <strong>local TAK server</strong> so ATAK/iTAK on the <strong>same phone</strong> can connect directly, without a remote TAK server. The server binds to localhost only (<code class="language-plaintext highlighter-rouge">127.0.0.1:8089</code>) and uses TLS with mutual certificate authentication (mTLS), so it is not reachable from other devices on the network. Open <strong>Settings → Module Config → TAK → TAK Server</strong>:</p>
 
 <p><img src="../../assets/screenshots/tak_server_enabled.png" alt="Local TAK Server settings with enable toggle and export option" /></p>
 
 <ul>
-  <li><strong>Enable Local TAK Server</strong> — starts the loopback-only mTLS server on port <strong>8089</strong> for ATAK/iTAK connections from the same device.</li>
+  <li><strong>Enable Local TAK Server</strong> — starts the loopback-only mTLS server on port <strong>8089</strong> for ATAK/iTAK connections from the same phone.</li>
   <li><strong>TAK Mesh Channel</strong> — selects which Meshtastic channel outgoing TAK traffic is sent on (default: the primary channel, index 0). Incoming TAK traffic is accepted from any channel. Matches the equivalent setting on iOS and in the legacy ATAK plugin.</li>
   <li><strong>Mesh to CoT Converter</strong> — off by default, and shown under the server toggle. With the server
 running, this synthesizes a CoT contact for every node in your node database, so ordinary
@@ -101,35 +108,6 @@ node visibility</strong> — without it, only TAK-role nodes show up.</li>
 <h3 id="cot-cursor-on-target-format">CoT (Cursor on Target) Format</h3>
 
 <p>TAK messages use the Cursor on Target XML format — a military standard for sharing situational awareness data. Meshtastic converts its internal protobuf messages to CoT format when bridging to TAK systems, so no manual format conversion is needed.</p>
-
-<h2 id="tak-identity">TAK Identity</h2>
-
-<p>When using TAK roles, your node broadcasts identity information that appears on TAK maps:</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Setting</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Couleur de l’équipe</td>
-      <td>Your team color on the TAK map (e.g., Blue, Red, Cyan, Green)</td>
-    </tr>
-    <tr>
-      <td>Rôle Membre</td>
-      <td>Your operational role (Team Member, Team Lead, HQ, Medic, RTO, etc.)</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>These settings appear in <strong>Settings → Module Config → TAK</strong> when the TAK module is enabled. Your TAK callsign isn’t a separate setting — it’s derived automatically from your Meshtastic node name.</p>
-
-<blockquote>
-  <p>💡 <strong>Tip:</strong> Team/role colors are the standard TAK affiliation colors. Coordinate with your TAK team to use consistent team assignments.</p>
-</blockquote>
 
 <h2 id="wire-format-v1--v2">Wire Format (V1 / V2)</h2>
 
@@ -187,8 +165,8 @@ node visibility</strong> — without it, only TAK-role nodes show up.</li>
   <tbody>
     <tr>
       <td>Node doesn’t appear on ATAK map</td>
-      <td>Wrong device role, or Mesh to CoT Converter off</td>
-      <td>Set the node’s Device Role to TAK or TAK Tracker. For ordinary (non-TAK-role) nodes to appear, also enable <strong>Mesh to CoT Converter</strong> under the TAK Server settings</td>
+      <td>Wrong Role setting, or Mesh to CoT Converter off</td>
+      <td>Set the node’s <strong>Role</strong> to TAK or TAK Tracker. For ordinary (non-TAK-role) nodes to appear, also enable <strong>Mesh to CoT Converter</strong> under the TAK Server settings</td>
     </tr>
     <tr>
       <td>Position updates are stale</td>
@@ -215,11 +193,11 @@ node visibility</strong> — without it, only TAK-role nodes show up.</li>
 
 <h2 id="security-considerations">Security Considerations</h2>
 
-<ul>
-  <li>TAK data shares your position and callsign information</li>
-  <li>Ensure your channel encryption is configured when using TAK in sensitive environments</li>
-  <li>The TAK module respects the same channel encryption as other Meshtastic messages</li>
-</ul>
+<blockquote>
+  <p>🔒 <strong>Privacy:</strong> TAK data shares your position and callsign information. The TAK module respects
+the same channel encryption as other Meshtastic messages — in sensitive environments, use a
+channel with a non-default key.</p>
+</blockquote>
 
 <h2 id="related-topics">Related Topics</h2>
 
@@ -227,8 +205,4 @@ node visibility</strong> — without it, only TAK-role nodes show up.</li>
   <li><a href="settings-module-admin">Settings — Modules &amp; Admin</a> — TAK module configuration</li>
   <li><a href="nodes">Nodes</a> — TAK and TAK Tracker roles in the node list</li>
   <li><a href="map-and-waypoints">Map &amp; Waypoints</a> — node positions on the map</li>
-  <li><a href="https://meshtastic.org/docs/software/integrations/integrations-atak-plugin/">ATAK plugin guide</a> — detailed ATAK setup on meshtastic.org</li>
 </ul>
-
-<hr />
-

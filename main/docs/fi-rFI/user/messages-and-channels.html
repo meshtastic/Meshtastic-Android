@@ -17,7 +17,7 @@ Kanavat ovat jaettuja viestintäryhmiä. Kaikki radiot, jotka on määritetty sa
 
 ### Oletuskanava
 
-Jokaisessa Meshtastic-laitteessa on oletuksena **LongFast**-kanava. Tämä on salaamaton kanava yleiseen mesh-viestintään.
+Jokaisessa Meshtastic-radiossa on oletuksena **LongFast**-kanava. Se on salattu tunnetulla oletusavaimella, joten kuka tahansa, joka käyttää Meshtasticia samalla esiasetuksella, voi lukea sen.
 
 ### Kanavan turvallisuus
 
@@ -30,12 +30,12 @@ Kanavat tukevat useita salaustasoja:
  🔓    | Oletus / avoin                            | Käyttää tunnettua oletusavainta. **Kaikki Meshtastic-radiot** samalla esiasetuksella voivat lukea nämä viestit.                   |
  ⚠️    | Turvaton + sijainti                       | Avoin kanava, joka lähettää myös GPS-sijaintisi. Käytä varoen julkisissa verkoissa.                                               |
 
-&gt; 🔒 **Security:** Always configure a unique PSK for private communications. Oletuskanava on tarkoituksella avoin, jotta uudet käyttäjät löytävät mesh-verkon — luo erillinen salattu kanava arkaluontoiselle viestinnälle.
+&gt; 🔒 **Tietoturva:** Määritä yksityistä viestintää varten aina yksilöllinen PSK. Oletuskanava on tarkoituksella avoin, jotta uudet käyttäjät löytävät mesh-verkon — luo erillinen salattu kanava arkaluontoiselle viestinnälle.
 
 ### Kanavan lisääminen
 
 1. Siirry kohtaan **Asetukset → Kanavat**.
-2. Tap the **+** button to add a channel, or import one by scanning a channel QR code.
+2. Lisää kanava napauttamalla **+**-painiketta tai tuo kanava skannaamalla kanavan QR-koodi.
 3. Määritä kanavan nimi ja salausavain.
 4. Jaa kanavan URL tai QR-koodi muille, jotka tarvitsevat pääsyn.
 
@@ -48,69 +48,58 @@ Yksityisviestit (DM) ovat kahden radion välistä päästä päähän salattua v
 ### Yksityisviestin lähettäminen
 
 1. Avaa **Viestit**-välilehti.
-2. Valitse radion yhteystiedoista tai napauta radiota radiolistasta.
+2. Valitse keskustelu tai napauta radiota Radiot-luettelossa.
 3. Kirjoita viesti ja napauta **Lähetä**.
 
-### Managing the Conversation List
+### Keskusteluluettelon hallinta
 
-The **Messages** tab lists your conversations. Each row carries what you need to triage it at a
-glance, and the list itself is directly actionable:
+**Viestit**-välilehdellä näkyvät keskustelusi. Jokainen rivi näyttää tärkeimmät tiedot yhdellä silmäyksellä, ja voit toimia suoraan riviltä:
 
-- **Unsent drafts survive.** Type into a conversation and leave without sending, and the text is
-  still there when you come back. The row shows it as `Draft: …` in place of the last message —
-  an unsent draft is the thing the row is waiting on _you_ for.
-- **Unread badge.** A count sits on the row until you open the conversation.
-- **Swipe right to mute** (swipe again to unmute) and **swipe left to delete**. Deleting asks
-  first; muting shows a snackbar with **Undo**.
-- **Long-press to select** one or more conversations, then use the action bar to **Pin**,
-  **Mark unread**, mute or delete them together. Pinned conversations carry a pin marker and rise
-  to the top of **their own section**.
-- **The list is split into Channels and Direct Messages**, each with a collapsible header and each
-  sorted independently — so a pinned direct message rises within its own section, not above the
-  Channels one.
+- **Lähettämättömät luonnokset säilyvät.** Kirjoita viesti keskusteluun ja poistu lähettämättä sitä, niin teksti on edelleen tallessa, kun palaat. Rivillä näkyy viimeisimmän viestin sijasta `Draft: …` — lähettämätön luonnos pitää rivin ylimpänä.
+- **Lukematon**-merkki: Laskuri näkyy rivillä, kunnes avaat keskustelun.
+- **Pyyhkäise oikealle mykistääksesi** (pyyhkäise uudelleen poistaaksesi mykistyksen) ja **pyyhkäise vasemmalle poistaaksesi**. Poistaminen kysyy ensin vahvistuksen, mykistäminen näyttää **Kumoa**-toiminnon sisältävän ilmoituspalkin.
+- **Kosketa pitkään valitaksesi** yhden tai useamman keskustelun ja käytä sitten toimintopalkkia niiden **kiinnittämiseen**, **merkitsemiseen lukemattomiksi**, mykistämiseen tai poistamiseen yhdessä. Kiinnitetyissä keskusteluissa näkyy nuppineulamerkki, ja ne siirtyvät **oman osionsa alkuun**.
+- **Luettelo on jaettu Kanaviin ja Suoraviesteihin**, joilla kummallakin on oma kutistettava otsikkonsa ja jotka lajitellaan erikseen — siksi kiinnitetty suoraviesti nousee oman osionsa alkuun, ei Kanavat-osion yläpuolelle.
 
-### Conversation Bubbles
+### Keskustelukuplat
 
-On Android 11 and later, a message notification can be opened as a floating **bubble** that
-stays on top of whatever else you are doing. Tap the bubble icon on the notification to promote
-a conversation; Android remembers the choice per conversation, and the system Bubbles settings
-control whether they are offered at all.
+Android 11:ssä ja uudemmissa versioissa viesti-ilmoituksen voi avata kelluvana **kuplana**, joka pysyy muiden sovellusten päällä. Napauta ilmoituksen kuplakuvaketta ottaaksesi keskustelun käyttöön kuplana. Android muistaa valinnan keskustelukohtaisesti, ja järjestelmän Kuplat-asetukset määrittävät, tarjotaanko niitä lainkaan.
 
 ### Viestin tilat
 
 Tilateksti näkyy vain **omissa** lähtevissä viesteissäsi (muiden lähettämissä saapuvissa viesteissä ei näytetä tilaa):
 
- Tila                                                           | Merkitys                                                                                                                                                                                                                                  |
- -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
- Lähetetään…                                                    | Queued or already handed to the radio, not yet resolved either way. Both stages share this text, but the icon and colour change as it progresses — a yellow upload cloud while queued, a blue arrow once the radio has it |
- Toimitettu vastaanottajalle                                    | Vahvin mahdollinen vahvistus suoralle viestille — vastaanottokuittaus on saatu                                                                                                                                                            |
- Toimitettu mesh-verkkoon                                       | Kanavalähetyksessä viesti on saavuttanut mesh-verkon (kanavalähetyksille ei lähetetä vastaanottajakohtaista kuittausta)                                                                                                |
- Välitetty, mutta vastaanottaja ei ole vahvistanut vastaanottoa | Suorassa viestissä tämä näytetään varoitusvärillä — viesti on välitetty eteenpäin, mutta vastaanottokuittausta ei ole vielä saatu                                                                                                         |
- Reititetään SF++ ketjun kautta…                                | Reititetty tai puskuroitu varastoi &amp; välitä Plus Plus -ketjussa                                                                                                                                                       |
- Vahvistettu SF++-ketjussa                                      | Toimitus vahvistettu varastoi &amp; välitä++ -ketjun kautta                                                                                                                                                               |
- Virhe                                                          | Toimitus epäonnistui — napauta tilaa nähdäksesi tarkemman syyn (katso alla kohta toimitusvirheet)                                                                                                                      |
+ Tila                                                           | Merkitys                                                                                                                                                                                                                                                                               |
+ -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+ Lähetetään…                                                    | Jonossa tai jo välitetty radiolle, mutta lopullista tilaa ei ole vielä vahvistettu. Molemmissa vaiheissa näkyy sama teksti, mutta kuvake ja väri vaihtuvat etenemisen mukaan — jonossa näkyy keltainen lähetyspilvi, ja kun radio on vastaanottanut sen, sininen nuoli |
+ Toimitettu vastaanottajalle                                    | Vahvin mahdollinen vahvistus suoralle viestille — vastaanottokuittaus on saatu                                                                                                                                                                                                         |
+ Toimitettu mesh-verkkoon                                       | Kanavalähetyksessä viesti on saavuttanut mesh-verkon (kanavalähetyksille ei lähetetä vastaanottajakohtaista kuittausta)                                                                                                                                             |
+ Välitetty, mutta vastaanottaja ei ole vahvistanut vastaanottoa | Suorassa viestissä tämä näytetään varoitusvärillä — viesti on välitetty eteenpäin, mutta vastaanottokuittausta ei ole vielä saatu                                                                                                                                                      |
+ Reititetään SF++ ketjun kautta…                                | Reititetty tai puskuroitu varastoi &amp; välitä Plus Plus -ketjussa                                                                                                                                                                                                    |
+ Vahvistettu SF++-ketjussa                                      | Toimitus vahvistettu varastoi &amp; välitä++ -ketjun kautta                                                                                                                                                                                                            |
+ Virhe                                                          | Viestin toimitus epäonnistui — napauta tilaa nähdäksesi tarkan syyn (katso [Toimitusvirheet](#delivery-errors))                                                                                                                                                     |
 
 ### Toimitusvirheet
 
 Kun viestin toimitus epäonnistuu, virheilmaisin näyttää, mikä meni pieleen:
 
- Virhe                                     | Merkitys                                                                                                                                                                      | Toimenpiteet                                                                                                                                    |
- ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
- Ei reittiä                                | Kohderadioon ei ole reittiä                                                                                                                                                   | Vastaanottaja voi olla offline-tilassa tai verkon kantaman ulkopuolella. Yritä myöhemmin tai siirry lähemmäksi. |
- Ei radioliitäntää                         | Lähetykseen ei ole käytettävissä radioliitäntää                                                                                                                               | Varmista, että radiosi on yhdistetty ja käytettävissä.                                                                          |
- Toimitus mesh-verkkoon epäonnistui        | Retries exhausted. The same label covers three underlying causes — a relay refusing (NAK), a plain timeout, and running out of retransmits | Move closer, improve signal, or wait for conditions to improve. Tap the error for the specific cause.           |
- Lähetysrajoitus saavutettu                | The mesh is throttling you for sending too fast                                                                                                                               | Wait before sending again.                                                                                                      |
- Ei valtuuksia                             | The destination refused the request                                                                                                                                           | Check you have the right channel and keys for that node.                                                                        |
- Vastaanottaja tarvitsee avaimesi          | Direct-message encryption could not complete because the other node does not have your public key yet                                                                         | Exchange node info — the key travels with it. Common on a first DM to a new contact.                            |
- Vastaanottajan avain ei ole käytettävissä | You do not have the recipient's public key                                                                                                                                    | Wait for their node info to arrive, or ask them to broadcast it.                                                                |
- Salattua viestiä ei voitu lähettää        | Encryption failed for this direct message                                                                                                                                     | Verify both nodes have exchanged keys and are on compatible firmware.                                                           |
- Ylläpitoistunto on vanhentunut            | A remote-admin session timed out                                                                                                                                              | Reopen the remote node's settings to start a new session.                                                                       |
- Ylläpitoavainta ei ole valtuutettu        | The target node does not accept your admin key                                                                                                                                | Varmista, että ylläpitoavain on sama molemmissa radioissa.                                                                      |
- Kanavan tai avaimen ristiriita            | Kohteen kanava tai avain ei täsmää                                                                                                                                            | Varmista, että molemmat radiot käyttävät samaa kanavaa ja PSK:ta.                                               |
- Viesti on liian suuri lähetettäväksi      | Viesti ylittää sallitun enimmäiskoon                                                                                                                                          | Lyhennä viestiä ja yritä uudelleen.                                                                                             |
- Ei sovellusvastausta                      | Sovellus tai liitännäinen ei vastannut pyyntöön                                                                                                                               | Yritä uudelleen tai tarkista kohdesovelluksen tai moduulin tila.                                                                |
- Käyttöasteen rajoitus                     | Alueellinen lähetysajan raja saavutettu                                                                                                                                       | Odota, että käyttöasteikkuna nollautuu.                                                                                         |
- Virheellinen pyyntö                       | Virheellinen tai puutteellinen pyyntö                                                                                                                                         | Jos ongelma jatkuu, päivitä tai käynnistä sovellus uudelleen ja yritä sitten uudelleen.                                         |
+ Virhe                                     | Merkitys                                                                                                                                                                                | Toimenpiteet                                                                                                                                             |
+ ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+ Ei reittiä                                | Kohderadioon ei ole reittiä                                                                                                                                                             | Vastaanottaja voi olla offline-tilassa tai verkon kantaman ulkopuolella. Yritä myöhemmin tai siirry lähemmäksi.          |
+ Ei radioliitäntää                         | Lähetykseen ei ole käytettävissä radioliitäntää                                                                                                                                         | Varmista, että radiosi on yhdistetty ja käytettävissä.                                                                                   |
+ Toimitus mesh-verkkoon epäonnistui        | Uudelleenyritykset käytetty loppuun. Sama ilmoitus kattaa kolme eri syytä — välityksen hylkäys (NAK), aikakatkaisu tai uudelleenyritysten loppuminen | Siirry lähemmäs, paranna signaalia tai odota olosuhteiden paranevan. Napauta virhettä nähdäksesi tarkan syyn.            |
+ Lähetysrajoitus saavutettu                | Mesh-verkko rajoittaa lähetysnopeuttasi                                                                                                                                                 | Odota hetki ennen seuraavan viestin lähettämistä.                                                                                        |
+ Ei valtuuksia                             | Kohde hylkäsi pyynnön                                                                                                                                                                   | Tarkista, että käytössä on oikea kanava ja oikeat avaimet kyseiselle radiolle.                                                           |
+ Vastaanottaja tarvitsee avaimesi          | Suoraviestin salausta ei voitu suorittaa loppuun, koska toisella radiolla ei vielä ole julkista avaintasi                                                                               | Vaihda radiotiedot — julkinen avain välittyy niiden mukana. Yleistä ensimmäisessä suoraviestissä uudelle yhteystiedolle. |
+ Vastaanottajan avain ei ole käytettävissä | Vastaanottajan julkinen avain puuttuu                                                                                                                                                   | Odota, että radion tiedot saapuvat, tai pyydä vastaanottajaa lähettämään ne.                                                             |
+ Salattua viestiä ei voitu lähettää        | Tämän suoraviestin salaus epäonnistui                                                                                                                                                   | Varmista, että molemmat radiot ovat vaihtaneet avaimet ja että niissä on yhteensopiva laiteohjelmisto.                                   |
+ Ylläpitoistunto on vanhentunut            | Etähallintaistunnon aikakatkaisu                                                                                                                                                        | Avaa etäradion asetukset uudelleen aloittaaksesi uuden istunnon.                                                                         |
+ Ylläpitoavainta ei ole valtuutettu        | Kohderadio ei hyväksy järjestelmänvalvojan avaintasi                                                                                                                                    | Varmista, että ylläpitoavain on sama molemmissa radioissa.                                                                               |
+ Kanavan tai avaimen ristiriita            | Kohteen kanava tai avain ei täsmää                                                                                                                                                      | Varmista, että molemmat radiot käyttävät samaa kanavaa ja PSK:ta.                                                        |
+ Viesti on liian suuri lähetettäväksi      | Viesti ylittää sallitun enimmäiskoon                                                                                                                                                    | Lyhennä viestiä ja yritä uudelleen.                                                                                                      |
+ Ei sovellusvastausta                      | Sovellus tai liitännäinen ei vastannut pyyntöön                                                                                                                                         | Yritä uudelleen tai tarkista kohdesovelluksen tai moduulin tila.                                                                         |
+ Käyttöasteen rajoitus                     | Alueellinen lähetysajan raja saavutettu                                                                                                                                                 | Odota, että käyttöasteikkuna nollautuu.                                                                                                  |
+ Virheellinen pyyntö                       | Virheellinen tai puutteellinen pyyntö                                                                                                                                                   | Jos ongelma jatkuu, päivitä tai käynnistä sovellus uudelleen ja yritä sitten uudelleen.                                                  |
 
 &gt; 💡 Vinkki: Useimmat toimitusvirheet korjaantuvat itsestään. Jos radio on ajoittain tavoitettavissa, mesh yrittää uudelleen. Jos “Ei reittiä” -virhe toistuu, tarkista että välissä olevat reitittävät radiot ovat verkossa.
 
@@ -130,8 +119,6 @@ Valmiiksi määritetyt viestit nopeaan viestintään:
 Jokaisella pikaviestillä on lyhyt **Nimi** (painikkeen teksti), lisättävä **Viesti** sekä **Lähetä heti** -kytkin. Kun se on käytössä, painikkeen napauttaminen lähettää viestin välittömästi sen sijaan, että se lisättäisiin muokattavaksi syöttökenttään:
 
 ![Uusi pikakeskusteluviestin valintaikkuna, jossa näkyvät nimi, viesti ja Lähetä heti -kytkin](../../assets/screenshots/messages_edit_quick_chat.png)
-
-Kanavalista näyttää jokaisen kanavan ja sen viimeisimmän viestin esikatselun.
 
 ### Viestien haku
 
@@ -162,7 +149,7 @@ Viestit tukevat kevyttä rivinsisäistä **Markdown**-muotoilua. Vastaanotetut v
  Rivinsisäinen koodi | `` `koodi` ``                 | tasalevyinen `koodi`  |
  Linkki              | `[nimi](https://example.com)` | napautettava **nimi** |
 
-Kun kirjoitat viestiä, napauta viestikenttää ja kirjoita vähintään kolme merkkiä, niin kentän alle avautuu **muotoilutyökalurivi**. Valitse teksti ja napauta muotoilua lisätäksesi sen ympärille merkinnät (napauta uudelleen poistaaksesi ne). Jos tekstiä ei ole valittuna, muotoilu lisää tyhjän merkkiparin ja sijoittaa kohdistimen niiden väliin. Linkkipainike avaa valintaikkunan URL-osoitteen syöttämistä varten. Kirjoittaessasi luonnoksen muotoilu näkyy kentässä, vaikka taustalla oleva teksti säilyttää Markdown-merkit.
+Kun kirjoitat viestiä, napauta viestikenttää ja kirjoita vähintään kolme merkkiä, niin kentän alle avautuu **muotoilutyökalurivi**. Valitse teksti ja napauta muotoilua lisätäksesi sen ympärille merkinnät (napauta uudelleen poistaaksesi ne). Jos tekstiä ei ole valittuna, muotoilu lisää tyhjän merkkiparin ja sijoittaa kohdistimen niiden väliin. Linkkipainike avaa valintaikkunan URL-osoitteen syöttämistä varten. Kirjoittaessasi kentässä näkyy muotoiltu teksti, mutta lähetettävä viesti sisältää edelleen Markdown-merkit.
 
 &gt; 💡 **Vinkki:** Muotoilu välitetään mesh-verkossa kirjaimellisina merkkeinä – samoina tavuina, jotka iOS lähettää. Sovellukset, jotka eivät tue Markdownia (vanhemmat sovellukset ja pelkkää laiteohjelmistoa käyttävät laitteet), näyttävät alkuperäiset `**`- ja `~~`-merkit. URL-osoitteet, sähköpostiosoitteet ja puhelinnumerot muutetaan edelleen automaattisesti linkeiksi riippumatta siitä, käytätkö Markdownia.
 
@@ -174,42 +161,33 @@ Kirjoita viestiä laatiessasi `@` mainitaksesi radion — valitsin ehdottaa kirj
 
 Reagoi viesteihin emojeilla:
 
-- **Double-tap** a message — or long-press it — to raise a quick reaction bar above the bubble
-- Tap an emoji in the bar to send it; tap **more** to open the full picker, or anywhere outside
-  the bar to dismiss it without sending
+- **Kosketa pitkään** viestiä tai kaksoisnapauta sitä, niin viestin yläpuolelle avautuu pikareaktiopalkki. Palkin avaaminen ei lähetä mitään.
+- Lähetä reaktio napauttamalla palkissa olevaa emojia, avaa koko valitsin napauttamalla **Lisää** tai sulje palkki lähettämättä napauttamalla sen ulkopuolelle. Reaktio on oikea mesh-paketti, joten se lähetetään vasta, kun valitset emojin.
 - Reaktiot näkyvät viestin alapuolella
 - Useampi käyttäjä voi reagoida samaan viestiin
 - Voit reagoida omiin ja muiden viesteihin
-
-&gt; ℹ️ **Note:** Opening the bar sends nothing. A reaction is a real mesh packet, so it only goes
-&gt; out when you pick an emoji.
 
 ![Emoji-reaktiot viestin alla](../../assets/screenshots/messages_reaction.png)
 
 &gt; 💡 Vinkki: Reaktiot kuluttavat vain vähän mesh-verkon kaistaa verrattuna täysiin tekstiviesteihin.
 
-### Replying
+### Vastaaminen
 
-**Swipe a message to the right** to reply to it — the composer opens with that message quoted.
-Swiping past the reply threshold arms the action; releasing before it springs back with nothing sent.
-Reply is also in the actions menu, reached by long-pressing and then tapping **More**.
+**Pyyhkäise viestiä oikealle** vastataksesi siihen — viestinkirjoituskenttä avautuu siten, että kyseinen viesti on lainattuna.
+Kun pyyhkäisy ylittää vastauskynnyksen, toiminto aktivoituu. Jos vapautat ennen sitä, viesti palautuu paikalleen eikä mitään tapahdu.
+Vastaustoiminto löytyy myös toimintovalikosta, jonka saat esiin koskettamalla viestiä pitkään ja napauttamalla sitten **Lisää**.
 
-### Day Separators
+### Päiväerottimet
 
-Messages are grouped by day. The separator above the first message of each day reads **Today**
-or **Yesterday** for the two most recent days, and the date itself for older ones.
+Viestit ryhmitellään päivän mukaan. Kahden viimeisimmän päivän ensimmäisen viestin yläpuolella olevassa erottimessa lukee **Tänään** tai **Eilen**, ja sitä vanhemmissa viesteissä näytetään päivämäärä.
 
-### Jump to Latest
+### Siirry viimeisimpiin
 
-Scrolling back through a conversation raises a jump-to-latest control. When messages arrive
-while you are scrolled up, it names the most recent sender and adds a count of the other unread
-messages. That count is messages, not people — five unread from one person reads as their name
-**+4**.
+Keskustelua ylöspäin vierittäessä näkyviin tulee painike, jolla voit siirtyä uusimpaan viestiin. Kun uusia viestejä saapuu sinun ollessasi ylempänä keskustelussa, siinä näytetään uusimman lähettäjän nimi sekä muiden lukemattomien viestien määrä. Lukumäärä tarkoittaa viestejä, ei henkilöitä — jos yhdeltä henkilöltä on viisi lukematonta viestiä, siinä näkyy hänen nimensä ja **+4**.
 
 ### Viestitoiminnot
 
-Long-press or double-tap a message to open the quick reaction bar, then tap **More** (the
-overflow icon on that bar) to reach:
+Avaa pikareaktiopalkki koskettamalla viestiä pitkään tai kaksoisnapauttamalla sitä ja napauta sitten **Lisää** (oikealla oleva ylivuotovalikko):
 
 - **Kopioi** — kopioi viestin teksti leikepöydälle
 - **Vastaa** — lainaa viesti vastaukseesi
@@ -219,16 +197,12 @@ overflow icon on that bar) to reach:
 
 ### Viestien prioriteetti
 
-The app sends every message you compose at the same, default priority — there is no
-emergency or alert tier to choose, and nothing in the app raises a direct message above a
-channel broadcast. Any prioritising between them happens in firmware, not here. (The app
-does mark some of its own internal traffic, such as admin and traceroute packets, as
-reliable or background, but that is not something you control from the message composer.)
+Sovellus lähettää kaikki kirjoittamasi viestit samalla oletusprioriteetilla — valittavana ei ole hätä- tai hälytysprioriteettia, eikä mikään sovelluksessa nosta suoraviestiä kanavalähetyksen edelle. Mahdollinen priorisointi tehdään laiteohjelmistossa, ei tässä. (Sovellus merkitsee osan omasta sisäisestä liikenteestään, kuten järjestelmänvalvojan paketit ja reitiselvityspaketit, luotettaviksi tai taustaliikenteeksi, mutta sitä ei voi hallita viestinkirjoituskentästä.)
 
 ### Viestirajoitukset
 
 - **Enimmäispituus:** 200 tavua (noin 200 merkkiä ASCII-tekstille)
-- The 200-byte cap applies to the in-app composer — the mesh payload limit itself is ~233 bytes, so messages from other senders (e.g., App Functions) may arrive slightly longer
+- 200 tavun rajoitus koskee sovelluksen viestinkirjoituskenttää — itse mesh-viestisisällön raja on noin ~233 tavua, joten muiden lähettäjien (esimerkiksi Sovellustoimintojen) viestit voivat olla hieman pidempiä
 - **Rajoitusnopeus:** mesh-verkko tasaa lähetysajan oikeudenmukaisesti; suuri viestimäärä voi joutua rajoitetuksi
 - **Toimitus:** viestit yritetään lähettää uudelleen automaattisesti, jos kuittausta ei saada
 
@@ -245,9 +219,6 @@ reliable or background, but that is not something you control from the message c
 - [Asetukset — Radio ja käyttäjä](settings-radio-user) — määritä kanavan salaus ja esiasetukset
 - [MQTT](mqtt) — välittää kanavaviestit internetiin
 - [Kanavien määritys](https://meshtastic.org/docs/configuration/radio/channels) — tarkemmat kanava-asetukset meshtastic.org-sivustolla
-
----
-
 </pre>
 </body>
 </html>

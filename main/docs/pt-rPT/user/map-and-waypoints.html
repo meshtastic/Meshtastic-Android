@@ -27,20 +27,20 @@ Each node that reports a position is shown as a **node chip** marker displaying 
 
 - **Zoom** — pinch or use +/- buttons
 - **Pan** — drag to explore
-- **Center** — select the location button to center on your position
+- **Center** — tap the location button to center on your position
 - **Node tap** — tap a node marker to view details
 
 The floating toolbar provides quick access to compass, layer switching, node filters, refresh, and location tracking. Tap the compass to reorient north-up, or tap the location button to center on your current position.
 
-![Map controls overlay](../../assets/screenshots/map_controls_overlay.png)
+![Map screen with the floating toolbar open, showing compass, layers, and location controls](../../assets/screenshots/map_controls_overlay.png)
 
 ## Waypoints
 
-Waypoints are shared geographic points of interest that all mesh members can see.
+Waypoints are shared points of interest, visible to everyone the waypoint is sent to.
 
 ### Creating a Waypoint
 
-1. Long-press on the map at the desired location.
+1. Touch &amp; hold the map at the desired location.
 2. Enter a name and optional description.
 3. Choose an icon/emoji for the waypoint.
 4. Tap **Send** to share with the mesh.
@@ -49,14 +49,14 @@ Waypoints are addressed like messages: by default they broadcast on the primary 
 
 ### Waypoint Properties
 
- Property   | Descrição                                               |
- ---------- | ------------------------------------------------------- |
- Nome       | Short identifier (max 29 characters) |
- Descrição  | Optional longer description                             |
- Icon       | Visual marker emoji on the map                          |
- Bloqueado  | If locked, only the creator can edit or delete          |
- Expiration | Optional auto-remove date and time                      |
- Geofence   | Optional enter/exit alert area — see below              |
+ Property   | Descrição                                                                      |
+ ---------- | ------------------------------------------------------------------------------ |
+ Nome       | Short identifier (max 29 characters)                        |
+ Descrição  | Optional longer description                                                    |
+ Icon       | Visual marker emoji on the map                                                 |
+ Bloqueado  | If locked, only the creator can edit or delete                                 |
+ Expiration | Optional auto-remove date and time                                             |
+ Geofence   | Optional enter/exit alert area — see [Waypoint Geofences](#waypoint-geofences) |
 
 ### Waypoint Expiration
 
@@ -81,16 +81,16 @@ Since waypoints (and their geofences) are broadcast to the whole mesh, only the 
 
 - Tap a waypoint on the map to view its details and coordinates
 - Edit or delete waypoints you created
-- **Locked waypoints** cannot be modified or deleted by other nodes — only the original creator can change them
+- **Locked waypoints** cannot be modified or deleted by other mesh members — only the creator can change them
 - Unlocked waypoints can be edited by any mesh member
 
 ## Map Layers
 
-Tap the layers icon on the map to open **Manage Map Layers**, where you can import your own overlays in `.kml`, `.kmz`, or GeoJSON format — either by opening a file with Meshtastic or sharing it into the app from another app. Imported layers are listed with a toggle to show/hide each one and an option to remove it. This is available on both the Google Play and F-Droid builds.
+Tap the layers icon on the map to open **Manage Map Layers**. It imports your own overlays in `.kml`, `.kmz`, or GeoJSON format — including KMZ ground overlays (georeferenced images, such as exported topo or aerial tiles), which drape at their stated bounds. Add one by picking a file with **Add Layer**, opening a file with Meshtastic, or sharing it into the app from another app. Imported layers are listed with a toggle to show/hide each one and an option to remove it. This works on the Google Play build, the F-Droid build, and **Desktop**, which shares the same layer store and file picker.
 
 ### Site Planner
 
-**Site Planner** estimates RF coverage for a transmitter and draws it on the map as a color-coded overlay. Open it from a map control, or from a node's detail page via **Estimate coverage** (shown only for nodes with a known position). Configure the transmitter (location, frequency, TX power, antenna gain and height), the receiver (sensitivity, height), and simulation options (max range, high-resolution terrain, color palette), then run the estimate. Like map layers, Site Planner works on both the Google Play and F-Droid builds.
+**Site Planner** estimates RF coverage for a transmitter and draws it on the map as a color-coded overlay. Open it from a map control, or from a node's detail page via **Estimate coverage** (shown only for nodes with a known position). Configure the transmitter (location, frequency, TX power, antenna gain and height), the receiver (sensitivity, height), and simulation options (max range, high-resolution terrain, color palette), then run the estimate. Like map layers, Site Planner works on both the Google Play and F-Droid builds, where the finished estimate is drawn on the map as a coverage overlay. On **Desktop** the same form is shown but the planner opens in your browser; to bring the estimate onto the map, use the planner's **Export › GeoJSON** and add the downloaded file under **Manage Map Layers**.
 
 ## Position Sharing
 
@@ -110,11 +110,43 @@ Configure position behavior in **Settings → Position**.
 
 ## Map Sources
 
-The base map depends on your app flavor: **Google Play** builds use Google Maps, while **F-Droid** and Desktop builds use OpenStreetMap. On top of the base map, additional tile sources are available as overlays or alternatives:
+Every build offers a base map picker from the map toolbar. **Google Play** builds open on Google's own
+map types; **F-Droid** and **Desktop** builds open on MapLibre's vector styles. Further down the base map
+picker, all three offer the same raster base maps:
 
-- Satellite imagery — on both Google Play and F-Droid
-- Offline tiles — **F-Droid only**. Download map areas for offline use through OSMdroid's tile
-  cache. Google Play and Desktop builds have no offline download
+ Base map                              | Notes                                                             |
+ ------------------------------------- | ----------------------------------------------------------------- |
+ Normal / Satellite / Terrain / Hybrid | Google Play only — Google's own map types                         |
+ Liberty                               | Default on F-Droid and Desktop. Vector street map |
+ Positron                              | Low-contrast vector map; keeps node markers legible over it       |
+ Escuro                                | Vector map suited to dark themes                                  |
+ OpenStreetMap                         | Classic raster street tiles                                       |
+ OpenTopoMap                           | Raster topographic                                                |
+ USGS Topo / USGS Imagery              | US coverage only                                                  |
+ Esri Topo / Esri Imagery              | Topographic and satellite imagery                                 |
+
+Overlays can be toggled on top of any base map, from the layers sheet:
+
+- **Weather radar** — NOAA NEXRAD reflectivity (US coverage)
+- **Hillshade** — terrain relief, on **F-Droid** and **Desktop** only. Useful for understanding why a
+  link fails, since LoRa range is limited by terrain
+
+### Adding your own tile source
+
+Any XYZ tile endpoint can be added as a base map, on every flavor and on desktop. Open **Manage custom
+tile sources** at the foot of the base map picker and paste a URL template using `{z}`, `{x}` and `{y}`
+— plus `{s}` if the provider uses rotating subdomains. A national mapping service, for example:
+
+```
+https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg
+```
+
+Tiles are cached on disk, so panning does not re-download what you were just looking at.
+
+On **Android**, the same screen also imports a local `.mbtiles` archive for fully offline use.
+
+Offline area downloads are **F-Droid only**: cache the visible region from the layers sheet.
+**Google Play** builds import pre-made MBTiles files instead, and **Desktop** has neither.
 
 ## Related Topics
 
@@ -122,9 +154,6 @@ The base map depends on your app flavor: **Google Play** builds use Google Maps,
 - [Node Metrics](node-metrics) — signal quality and position history for individual nodes
 - [Local Mesh Discovery](discovery) — traceroute and neighbor info for understanding mesh topology
 - [Units &amp; Locale](units-and-locale) — distance and coordinate display formats
-
----
-
 </pre>
 </body>
 </html>

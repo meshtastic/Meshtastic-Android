@@ -1,49 +1,31 @@
 <h1 id="how-the-meshtastic-signal-meter-works">How the Meshtastic Signal Meter Works</h1>
 
-<p>The Meshtastic signal meter — the familiar bars or status color in the app — is calculated very differently than the “bars” on a traditional cell phone or WiFi router.</p>
+<p>The Meshtastic signal meter — the bars or status color next to a node — is calculated differently from the bars on a cell phone or Wi-Fi router. This page explains what it measures and why the same reading can mean something different on another preset.</p>
 
-<p>Most consumer devices measure how “loud” a signal is. However, because Meshtastic uses <strong>LoRa (Long Range)</strong> technology, its signal meter measures how <strong>clear</strong> the signal is, relative to the specific settings your mesh is using.</p>
+<h2 id="rssi-and-snr">RSSI and SNR</h2>
 
-<hr />
-
-<h2 id="1-the-two-metrics-loudness-vs-clarity">1. The Two Metrics: “Loudness” vs. “Clarity”</h2>
-
-<p>Every time the LoRa radio chip receives a message, it reports two measurements:</p>
+<p>Every time the LoRa radio receives a message, it reports two measurements:</p>
 
 <ul>
-  <li><strong>RSSI (Received Signal Strength Indicator):</strong> The <strong>loudness</strong> of the raw power hitting your antenna.</li>
-  <li><strong>SNR (Signal-to-Noise Ratio):</strong> The <strong>clarity</strong> of the signal compared to the background static.</li>
+  <li><strong>RSSI (Received Signal Strength Indicator)</strong> — the raw power hitting the antenna.</li>
+  <li><strong>SNR (Signal-to-Noise Ratio)</strong> — how far the signal stands above the background noise.</li>
 </ul>
 
 <blockquote>
-  <p>💡 <strong>Tip:</strong> Here’s an analogy — imagine you are trying to hear a friend talking to you.</p>
-
-  <ul>
-    <li><strong>RSSI</strong> is how loud their voice is.</li>
-    <li><strong>The Noise Floor</strong> is the background noise in the room (air conditioning, other people talking, traffic).</li>
-    <li><strong>SNR</strong> is how easily you can distinguish your friend’s voice from the background noise.</li>
-  </ul>
+  <p>💡 <strong>Tip:</strong> Think of RSSI as how loud a friend is talking and SNR as how easily you can pick their voice out of the noise in the room. A friend shouting at a rock concert can be loud (high RSSI) yet unintelligible (bad SNR), while a whisper in a quiet library is faint (low RSSI) yet perfectly clear (great SNR).</p>
 </blockquote>
 
-<p>If your friend shouts at you at a deafening rock concert, the signal is incredibly loud (High RSSI), but you still can’t understand them because the background noise is louder (Bad SNR). Conversely, if your friend whispers to you in a dead-silent library, the signal is very weak (Low RSSI), but you can understand them perfectly (Great SNR).</p>
+<h2 id="decoding-below-the-noise-floor">Decoding Below the Noise Floor</h2>
 
-<hr />
+<p>Standard radios such as FM or Wi-Fi lose a signal to static once the background noise is louder than it (a negative SNR). LoRa’s spread spectrum modulation lets the radio pull a signal out of the noise even when the noise is louder, so negative SNR values are common and expected in Meshtastic — for example, −10 dB means the signal is 10 decibels weaker than the background noise.</p>
 
-<h2 id="2-the-magic-of-lora-hearing-below-the-noise-floor">2. The Magic of LoRa: Hearing “Below the Noise Floor”</h2>
+<p>Each modem preset has an SNR limit: the lowest SNR at which that preset can still decode a message. Slower presets tolerate a weaker, noisier signal (a more negative limit, longer range); faster presets need a stronger signal (a less negative limit, shorter range).</p>
 
-<p>For standard radios (like FM or WiFi), if the background noise is louder than the signal (a negative SNR), the receiver hears only static.</p>
+<h2 id="rating-signal-quality">Rating Signal Quality</h2>
 
-<p>LoRa is special. It uses <strong>“Spread Spectrum”</strong> modulation, which allows the radio to mathematically pull a signal out of the air even when it is buried deep <em>underneath</em> the background noise. This is why you will frequently see <strong>negative SNR numbers</strong> in Meshtastic (e.g., -10 dB, which means the signal is 10 decibels weaker than the background static).</p>
+<p>The app rates signal quality (None, Bad, Fair, or Good) from SNR alone, measured against the active preset’s SNR limit. It does not factor in RSSI: without knowing the local noise floor, RSSI alone cannot say whether a signal is decodable. RSSI is still available — on the node detail screen and in the metrics charts.</p>
 
-<p>Depending on which Meshtastic preset you are using (e.g., <code class="language-plaintext highlighter-rouge">LongFast</code> vs. <code class="language-plaintext highlighter-rouge">ShortFast</code>), the radio has a specific <strong>SNR Limit</strong> — the absolute maximum amount of noise it can tolerate before the message is completely lost to the static.</p>
-
-<hr />
-
-<h2 id="3-how-the-signal-meter-calculates-quality">3. How the Signal Meter Calculates Quality</h2>
-
-<p>The app rates your signal quality (None, Bad, Fair, or Good) from <strong>SNR alone, measured relative to the preset’s SNR Limit</strong> — the demodulation floor described above. It deliberately does <strong>not</strong> factor RSSI into the rating: without the local noise floor, RSSI cannot tell you whether a signal is actually decodable, so SNR-versus-the-preset-limit is the meaningful measure. (RSSI is still displayed to you elsewhere.)</p>
-
-<p>Because the rating is relative to the preset limit, the <em>same</em> SNR can rate differently on different presets — <code class="language-plaintext highlighter-rouge">-15 dB</code> is healthy on <code class="language-plaintext highlighter-rouge">LongSlow</code> but unusable on <code class="language-plaintext highlighter-rouge">ShortFast</code>. Letting <code class="language-plaintext highlighter-rouge">limit</code> be the active preset’s SNR Limit, here is how the app picks the bars (or color):</p>
+<p>Because the rating is relative to the preset, the same SNR rates differently on different presets. An SNR of −16 dB rates Good on Long Fast (SNR limit −17.5 dB) but None on Short Fast (SNR limit −7.5 dB). Let <code class="language-plaintext highlighter-rouge">limit</code> be the active preset’s SNR limit:</p>
 
 <table>
   <thead>
@@ -58,60 +40,50 @@
     <tr>
       <td>Bon</td>
       <td>3</td>
-      <td>SNR <strong>above</strong> the preset’s <code class="language-plaintext highlighter-rouge">limit</code></td>
-      <td>Signal is comfortably above the demodulation floor — healthy connection.</td>
+      <td>SNR above <code class="language-plaintext highlighter-rouge">limit</code></td>
+      <td>Comfortably above the demodulation floor — a healthy connection.</td>
     </tr>
     <tr>
       <td>Passable</td>
       <td>2</td>
-      <td>less than <code class="language-plaintext highlighter-rouge">5.5 dB</code> below the <code class="language-plaintext highlighter-rouge">limit</code></td>
-      <td>Decodable, but getting close to the floor.</td>
+      <td>less than 5.5 dB below <code class="language-plaintext highlighter-rouge">limit</code></td>
+      <td>Decodable, but approaching the floor.</td>
     </tr>
     <tr>
       <td>Mauvais</td>
       <td>1</td>
-      <td><code class="language-plaintext highlighter-rouge">5.5 dB</code> to <code class="language-plaintext highlighter-rouge">7.5 dB</code> below the <code class="language-plaintext highlighter-rouge">limit</code></td>
-      <td>At the very edge of what the preset can recover.</td>
+      <td>5.5 dB to 7.5 dB below <code class="language-plaintext highlighter-rouge">limit</code></td>
+      <td>At the edge of what the preset can recover.</td>
     </tr>
     <tr>
       <td>Aucun</td>
       <td>0</td>
-      <td>more than <code class="language-plaintext highlighter-rouge">7.5 dB</code> below the <code class="language-plaintext highlighter-rouge">limit</code></td>
-      <td>Below the floor — transmission lost to noise.</td>
+      <td>more than 7.5 dB below <code class="language-plaintext highlighter-rouge">limit</code></td>
+      <td>Far below the preset’s floor; further packets from this node are likely to be lost.</td>
     </tr>
   </tbody>
 </table>
 
 <blockquote>
-  <p><strong>Note:</strong> The fixed SNR thresholds you may have seen elsewhere (<code class="language-plaintext highlighter-rouge">-7 dB</code> / <code class="language-plaintext highlighter-rouge">-15 dB</code>) are now only used for coloring individual hops in traceroute results — not for the per-node signal meter described here.</p>
+  <p>ℹ️ <strong>Note:</strong> Traceroute hop colors use fixed thresholds (−7 dB / −15 dB); the per-node signal meter uses the preset-relative rating instead.</p>
 </blockquote>
 
-<hr />
+<h2 id="diagnosing-local-interference">Diagnosing Local Interference</h2>
 
-<h2 id="4-what-this-means-for-you">4. What This Means for You</h2>
-
-<p>Because Meshtastic’s meter acts as a <strong>“Clarity Meter”</strong>, it behaves differently than what most people expect:</p>
-
-<blockquote>
-  <p>💡 <strong>Tip:</strong> Don’t panic over low RSSI. You might see a seemingly terrible RSSI value like <code class="language-plaintext highlighter-rouge">-118 dBm</code>. On a cell phone, you would have zero bars. But if you have an SNR of <code class="language-plaintext highlighter-rouge">+2 dB</code>, Meshtastic will still show a strong signal! <em>The library is quiet, so the whisper is heard perfectly.</em></p>
-</blockquote>
-
-<blockquote>
-  <p>⚠️ <strong>Warning:</strong> Watch out for local noise. If you hook up a massive antenna and see a great RSSI (e.g., <code class="language-plaintext highlighter-rouge">-90 dBm</code>) but your signal meter is only showing <strong>1 Bar (Bad)</strong>, you have a problem. It means you have local interference — perhaps a cheap power supply, a noisy computer, or a nearby radio tower — creating so much static that it is drowning out your mesh.</p>
-</blockquote>
+<p>A great RSSI paired with only one bar (Bad) points to local interference, not distance. A cheap power supply, a noisy computer, or a nearby transmitter can create enough static to drown out an otherwise strong signal.</p>
 
 <h2 id="where-signal-information-appears">Where Signal Information Appears</h2>
 
-<p>In the app, signal data is shown in several places:</p>
+<p>In the app, signal data appears in several places:</p>
 
 <ul>
-  <li><strong>Node list</strong> — signal bars icon next to each node</li>
+  <li><strong>Node list</strong> — a signal-bars icon next to each node</li>
   <li><strong>Node detail</strong> — SNR, RSSI, and signal quality in the device metrics section</li>
   <li><strong>Traceroute</strong> — per-hop signal quality for each relay node</li>
   <li><strong>Signal metrics</strong> — historical SNR and RSSI data in the metrics charts</li>
 </ul>
 
-<p><img src="../../assets/screenshots/nodes_signal_info.png" alt="Node entry showing SNR, RSSI values and colored signal bars" /></p>
+<p><img src="../../assets/screenshots/nodes_signal_info.png" alt="Node list entry showing a Good signal rating: 12.5 dB SNR, −42 dBm RSSI, and the green signal-strength icon" /></p>
 
 <h2 id="related-topics">Related Topics</h2>
 
@@ -120,6 +92,3 @@
   <li><a href="node-metrics">Node Metrics</a> — SNR/RSSI history and the per-node signal quality reference</li>
   <li><a href="settings-radio-user">Settings — Radio &amp; User</a> — modem presets and their SNR limits</li>
 </ul>
-
-<hr />
-

@@ -1,34 +1,32 @@
 <h1 id="translate-the-app">Translate the App</h1>
 
-<p>Contributing translations helps make Meshtastic accessible to a wider audience. The app uses <a href="https://crowdin.com/">Crowdin</a> to manage community translations for both the user interface and in-app documentation.</p>
+<p>The app and its in-app docs are translated on Crowdin — this page shows how to contribute. The app uses <a href="https://crowdin.com/">Crowdin</a> to manage community translations for both the user interface and in-app documentation.</p>
 
-<hr />
-
-<h2 id="what-gets-translated">What Gets Translated</h2>
+<h2 id="ce-qui-est-traduit">Ce qui est traduit</h2>
 
 <table>
   <thead>
     <tr>
-      <th>Resource</th>
-      <th>Source Location</th>
+      <th>Ressource</th>
+      <th>Emplacement de la source</th>
       <th>Notes</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>UI strings</td>
+      <td>Chaînes UI</td>
       <td><code class="language-plaintext highlighter-rouge">core/resources/src/commonMain/composeResources/values/strings.xml</code></td>
-      <td>Buttons, labels, messages, and all user-visible text</td>
+      <td>Boutons, étiquettes, messages et tout texte visible par l’utilisateur</td>
     </tr>
     <tr>
-      <td>User Guide pages</td>
+      <td>Pages du Guide de l’utilisateur</td>
       <td><code class="language-plaintext highlighter-rouge">docs/en/user/*.md</code></td>
-      <td>In-app documentation shown in Help &amp; Documentation</td>
+      <td>Documentation dans l’application affichée dans Aide et Documentation</td>
     </tr>
     <tr>
-      <td>Fastlane metadata</td>
-      <td><code class="language-plaintext highlighter-rouge">fastlane/metadata/android/en-US/</code></td>
-      <td>App Store listing title, description, and changelogs</td>
+      <td>Métadonnées Fastlane</td>
+      <td><code class="language-plaintext highlighter-rouge">fastlane/metadata/android/fr-FR/</code></td>
+      <td>Titre de la liste de l’App Store, description et historique des modifications</td>
     </tr>
   </tbody>
 </table>
@@ -37,39 +35,32 @@
   <p>ℹ️ <strong>Note:</strong> Developer Guide pages are English-only. Code-focused documentation targeting contributors is not translated.</p>
 </blockquote>
 
-<hr />
-
-<h2 id="how-to-contribute">How to Contribute</h2>
+<h2 id="comment-contribuer">Comment contribuer</h2>
 
 <ol>
-  <li><strong>Visit the Crowdin project.</strong> Open the <a href="https://crowdin.com/project/meshtastic-android">Meshtastic Android Crowdin project</a> and sign in or create a free account.</li>
-  <li><strong>Choose your language.</strong> Select an existing language or request a new one by opening a <a href="https://github.com/meshtastic/Meshtastic-Android/issues/new">GitHub issue</a>.</li>
-  <li><strong>Translate strings.</strong> Crowdin shows the English source on the left and your translation on the right. Translate each string and save.</li>
-  <li><strong>Review context.</strong> Many strings include screenshots or context comments — check these to understand where the text appears in the app.</li>
-  <li><strong>Submit.</strong> Approved translations are automatically merged into the next release.</li>
+  <li><strong>Visitez le projet Crowdin.</strong> Ouvrez le <a href="https://crowdin.com/project/meshtastic-android">projet Meshtastic Android Crowdin</a> et connectez-vous ou créez un compte gratuit.</li>
+  <li><strong>Choisissez votre langue.</strong> Sélectionnez une langue existante ou demandez-en une nouvelle en ouvrant un <a href="https://github.com/meshtastic/Meshtastic-Android/issues/new">problème GitHub</a>.</li>
+  <li><strong>Traductions</strong> Crowdin montre la source anglaise à gauche et votre traduction à droite. Traduisez chaque portion et sauvegardez.</li>
+  <li><strong>Vérifier le contexte.</strong> De nombreuses portions incluent des captures d’écran ou des commentaires de contexte — cochez celles-ci pour comprendre où le texte apparaît dans l’application. Approved translations are automatically merged into the next release.</li>
 </ol>
 
 <blockquote>
-  <p>💡 <strong>Tip:</strong> Keep translations short. UI strings often appear in buttons, chips, or narrow columns. If a translation is significantly longer than the English original, consider abbreviating where the meaning stays clear.</p>
+  <p>💡 <strong>Tip:</strong> Keep translations short. UI strings often appear in buttons, chips, or narrow columns. Si une traduction est considérablement plus longue que l’original anglais, pensez à abréger en conservant la signification claire.</p>
 </blockquote>
 
-<hr />
+<h2 id="ajouter-une-nouvelle-langue">Ajouter une nouvelle langue</h2>
 
-<h2 id="adding-a-new-language">Adding a New Language</h2>
-
-<p>If your language is not yet listed on Crowdin:</p>
+<p>Si votre langue n’est pas encore listée sur Crowdin :</p>
 
 <ol>
-  <li>Open an issue on <a href="https://github.com/meshtastic/Meshtastic-Android/issues/new">GitHub</a> requesting the new locale.</li>
-  <li>A maintainer will add the language to Crowdin and configure <code class="language-plaintext highlighter-rouge">crowdin.yml</code>.</li>
-  <li>Once added, you can begin translating immediately.</li>
+  <li>Ouvrir un ticket sur <a href="https://github.com/meshtastic/Meshtastic-Android/issues/new">GitHub</a> demandant la nouvelle langue.</li>
+  <li>Un responsable ajoutera la langue à Crowdin et configurera <code class="language-plaintext highlighter-rouge">crowdin.yml</code>.</li>
+  <li>Une fois ajouté, vous pouvez commencer à traduire immédiatement.</li>
 </ol>
 
-<hr />
+<h2 id="comment-sont-organisées-les-traductions">Comment sont organisées les traductions</h2>
 
-<h2 id="how-translations-are-organized">How Translations Are Organized</h2>
-
-<p>The Android app uses <strong>Compose Multiplatform resources</strong> for all user-visible strings:</p>
+<p>L’application Android utilise des <strong>Ressources Multiplateforme</strong> pour tous les textes visibles par l’utilisateur:</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>core/resources/src/commonMain/composeResources/
 ├── values/              ← English (default)
@@ -81,7 +72,7 @@
 └── ...
 </code></pre></div></div>
 
-<p>In-app documentation follows a similar pattern under <code class="language-plaintext highlighter-rouge">docs/</code>:</p>
+<p>La documentation dans l’application suit un modèle similaire dans <code class="language-plaintext highlighter-rouge">docs/</code>:</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docs/
 ├── en/user/             ← English source (default)
@@ -97,26 +88,22 @@
 
 <p>Locale folders use the Android resource convention <code class="language-plaintext highlighter-rouge">{lang}-r{REGION}</code> (e.g. <code class="language-plaintext highlighter-rouge">fr-rFR</code>, <code class="language-plaintext highlighter-rouge">de-rDE</code>, <code class="language-plaintext highlighter-rouge">ja-rJP</code>), matching the <code class="language-plaintext highlighter-rouge">values-*</code> directories used for app strings.</p>
 
-<p>The app automatically selects the correct locale based on your device’s <strong>Language &amp; Region</strong> settings.</p>
+<p>The app automatically selects the correct locale based on your phone’s <strong>Language &amp; Region</strong> settings.</p>
 
-<hr />
-
-<h2 id="translation-guidelines">Translation Guidelines</h2>
+<h2 id="directives-de-traduction">Directives de Traduction</h2>
 
 <ul>
-  <li><strong>Do not translate</strong> technical terms like “LoRa”, “MQTT”, “BLE”, “TAK”, “SNR”, or “RSSI” — these are universal.</li>
-  <li><strong>Keep placeholders intact.</strong> Strings like <code class="language-plaintext highlighter-rouge">%1$s</code> or <code class="language-plaintext highlighter-rouge">%d</code> are filled in at runtime. Do not remove or reorder them unless the grammar of your language requires it.</li>
-  <li><strong>Match tone.</strong> The app uses a friendly, direct voice. Avoid overly formal language.</li>
-  <li><strong>Test if possible.</strong> Switch your device language and open the app to see how translations look in context.</li>
+  <li><strong>Ne traduisez pas</strong> des termes techniques tels que “LoRa”, “MQTT”, “BLE”, “TAK”, “SNR”, ou “RSSI” — ce sont des termes universels.</li>
+  <li><strong>Garder les espaces réservés intact.</strong> Les chaînes comme <code class="language-plaintext highlighter-rouge">%1$s</code> ou <code class="language-plaintext highlighter-rouge">%d</code> sont remplies au moment de l’exécution. Ne les supprimez ni ne les réordonnez pas à moins que la grammaire de votre langue ne l’exige.</li>
+  <li><strong>Respectez le ton</strong> L’application utilise un ton amical Évitez des formulations trop formelles</li>
+  <li><strong>Test if possible.</strong> Switch your phone’s language and open the app to see how translations look in context.</li>
 </ul>
 
-<hr />
-
-<h2 id="questions">Questions?</h2>
+<h2 id="des-questions">Des questions ?</h2>
 
 <p>If you have questions about a specific string’s context or need help getting started, open a discussion on the <a href="https://github.com/orgs/meshtastic/discussions">Meshtastic GitHub Discussions</a> page.</p>
 
-<p>Thank you for helping expand the reach of Meshtastic!</p>
+<p>Thank you for helping expand the reach of Meshtastic.</p>
 
 <h2 id="related-topics">Related Topics</h2>
 
@@ -125,5 +112,3 @@
   <li><a href="help-and-docs">Help &amp; Documentation</a> — the in-app docs browser these pages are published to</li>
   <li><a href="onboarding">Onboarding</a> — where a new user first meets the translated strings</li>
 </ul>
-
-<hr />

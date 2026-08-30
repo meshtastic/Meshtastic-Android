@@ -9,7 +9,7 @@
 <body data-page="settings-radio-user" data-locale="cs-rCZ">
 <pre class="markdown-content"># Settings — Radio &amp; User
 
-Configure your radio hardware and user identity parameters.
+Configure your radio's user identity, region and LoRa parameters, position and power behavior, network and Bluetooth connectivity, and security settings.
 
 ## User Settings
 
@@ -19,12 +19,16 @@ Configure your radio hardware and user identity parameters.
  ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
  Dlouhé jméno      | Your display name (up to 39 characters)                                                                                                                                                                                   |
  Krátké jméno      | 4-character abbreviated name                                                                                                                                                                                                                 |
+ Stavová zpráva    | A short free-text status other nodes display alongside your node — up to 80 bytes, cleared with the **✕** in the field. Needs firmware 2.8 or newer, and is absent otherwise                                 |
  Nepřijímá zprávy  | Marks the node as one nobody should try to message — for an unmonitored or infrastructure node. Other clients hide it from the contact list. Needs supporting firmware                                       |
  Licensed Operator | Enable if you hold an amateur radio license (permits higher power). Turning it on relabels **Long Name** as **Call Sign** and adds a separate Long Name field, and is staged behind a confirmation dialog |
 
 ### Applying Changes
 
-After modifying settings, tap **Save** to write the configuration to your radio. The device may reboot to apply changes.
+After modifying settings, tap **Save** to write the configuration to your radio. The radio may reboot to apply changes.
+
+The status message is saved with the same **Save**, but it never reboots the node — and, like the
+rest of this screen, it can be edited on a remote node you administer.
 
 ## Nastavení
 
@@ -45,7 +49,7 @@ After modifying settings, tap **Save** to write the configuration to your radio.
 
  Nastavení                                          | Popis                                                                                                                                                                                            | Výchozí                                   |
  -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------- |
- Region                                             | Regulatory region for frequency bands                                                                                                                                                            | Unset (must configure) |
+ Region                                             | Regulatory region for frequency bands. You must set this before transmitting                                                                                                     | Unset (must configure) |
  Předvolba modemu                                   | Speed/range tradeoff                                                                                                                                                                             | LongFast                                  |
  Hop Limit                                          | Maximum retransmit hops                                                                                                                                                                          | 3                                         |
  TX Power                                           | Transmission power (dBm); 0 = max allowed for region                                                                                                                          | 0 (region max)         |
@@ -56,13 +60,13 @@ After modifying settings, tap **Save** to write the configuration to your radio.
  Coding Rate                                        | Manual mode only: 5–8. More redundancy costs airtime                                                                                                             | From preset                               |
  Frekvenční slot                                    | Which slot within the region's band to use. 0 derives it from the primary channel name                                                                                           | 0 (automatic)          |
  Vysílání povoleno                                  | Turning this off makes the node receive-only                                                                                                                                                     | On                                        |
- Přepsat pracovní cyklus                            | Ignore the region's duty-cycle limit. Only legal where you are permitted to                                                                                                      | Vypnuto                                   |
+ Přepsat pracovní cyklus                            | Ignores the region's duty-cycle limit. Illegal in most regions; turn it on only where your license permits                                                                       | Vypnuto                                   |
  Ignorovat MQTT                                     | Drop packets that arrived from MQTT rather than over the air                                                                                                                                     | Vypnuto                                   |
  OK do MQTT                                         | Allow your packets to be forwarded to MQTT by gateways                                                                                                                                           | Vypnuto                                   |
  Zvýšené zesílení přijímače (RX) | Extra receive gain on SX126x radios; costs a little current                                                                                                                                      | Vypnuto                                   |
  PA fan disabled                                    | Turn off the power-amplifier fan on hardware that has one                                                                                                                                        | Vypnuto                                   |
 
-&gt; ⚠️ **Important:** You **must** set your region before transmitting. Operating without the correct region may violate local radio regulations. See the [region configuration guide](https://meshtastic.org/docs/getting-started/initial-config) on meshtastic.org for details.
+&gt; ⚠️ **Important:** Operating without the correct region may violate local radio regulations. See the [region configuration guide](https://meshtastic.org/docs/getting-started/initial-config) on meshtastic.org for details.
 
 ### Modem Presets
 
@@ -102,9 +106,9 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 - **Fixed infrastructure links:** Use **Short Turbo** or **Long Turbo** for dedicated point-to-point links with good antennas and line-of-sight.
 - **Mixed environments:** Stick with **Long Fast** — it's the community default and ensures compatibility with others in your area.
 
-&gt; ⚠️ **Important:** All nodes on the same channel **must** use the same modem preset. Nodes with mismatched presets cannot communicate even if they share the same frequency and encryption key.
+All nodes on the same channel must use the same modem preset. Nodes with mismatched presets cannot communicate even if they share the same frequency and encryption key.
 
-&gt; 💡 **Tip:** The range estimates above assume flat terrain and modest antennas. Elevation advantage (hilltop, rooftop) dramatically increases effective range. A well-placed Router with Long Fast can often outperform a ground-level node with Long Slow.
+The range estimates in the [Modem Presets](#modem-presets) table assume flat terrain and modest antennas. Elevation advantage (hilltop, rooftop) dramatically increases effective range. A well-placed Router with Long Fast can often outperform a ground-level node with Long Slow.
 
 ### Nastavení zobrazení
 
@@ -113,20 +117,20 @@ These control the **radio's own screen**, not the app's.
  Nastavení                        | Popis                                                                                                                                                     |
  -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
  Obrazovka zapnutá po dobu        | How long the display stays lit before sleeping                                                                                                            |
- Interval přepínání obrazovek     | How often the device cycles between screens on its own                                                                                                    |
+ Interval přepínání obrazovek     | How often the radio cycles between screens on its own                                                                                                     |
  Režim obrazovky                  | Screen layout/density used by the firmware                                                                                                                |
- Zobrazení jednotek               | Metric or Imperial on the device's screen                                                                                                                 |
- Použít 12h formát hodin          | Show the device clock as 12-hour rather than 24-hour                                                                                                      |
+ Zobrazení jednotek               | Metric or Imperial on the radio's screen                                                                                                                  |
+ Použít 12h formát hodin          | Show the radio's clock as 12-hour rather than 24-hour                                                                                                     |
  Bold heading                     | Draw the screen's heading text in bold                                                                                                                    |
  Překlopit obrazovku              | Rotate the display 180° for an inverted mounting                                                                                                          |
  Typ OLED displeje                | Auto, SSD1306, SH1106, SH1107                                                                                                                             |
- Probuzení klepnutím nebo pohybem | Light the screen when the device is tapped or moved                                                                                                       |
+ Probuzení klepnutím nebo pohybem | Light the screen when the radio is tapped or moved                                                                                                        |
  Orientace kompasu                | Rotation offset for the compass rose (0°, 90°, 180°, 270°)                                                                             |
  Vždy ukazovat na sever           | Locks the compass rose north-up instead of rotating it with your heading. Independent of Compass orientation — neither replaces the other |
 
 ### Nastavení pozice
 
-&gt; ⚠️ **Warning:** Saving this screen always reboots the radio.
+&gt; ⚠️ **Important:** Saving this screen always reboots the radio.
 
  Nastavení                                    | Popis                                                                                                                                                 |
  -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -155,21 +159,21 @@ These control the **radio's own screen**, not the app's.
 
 ### Nastavení sítě
 
-&gt; ⚠️ **Warning:** Saving this screen always reboots the radio.
+&gt; ⚠️ **Important:** Saving this screen always reboots the radio.
 
- Nastavení                        | Popis                                                                                                                      |
- -------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
- WiFi povoleno                    | Enable the WiFi radio (ESP32 devices)                                                                   |
- SSID                             | Network name to connect to. **Scan WiFi QR code** fills this and the password from a standard WiFi QR code |
- Heslo                            | Network password                                                                                                           |
- Ethernet povolen                 | Use a wired connection on hardware that has one                                                                            |
- Režim IPv4                       | DHCP, or a static address configured with the four fields below                                                            |
- Wifi IP / Subnet / Gateway / DNS | The static address, only used when IPv4 mode is static                                                                     |
- UDP vysílání                     | Share mesh traffic with other nodes over the local network                                                                 |
- NTP server                       | Time synchronization server                                                                                                |
- rsyslog server                   | Remote logging server                                                                                                      |
+ Nastavení                         | Popis                                                                                                                        |
+ --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+ Wi-Fi enabled                     | Enable the Wi-Fi radio (ESP32 radios)                                                                     |
+ SSID                              | Network name to connect to. **Scan Wi-Fi QR code** fills this and the password from a standard Wi-Fi QR code |
+ Heslo                             | Network password                                                                                                             |
+ Ethernet povolen                  | Use a wired connection on hardware that has one                                                                              |
+ Režim IPv4                        | DHCP, or a static address configured with the four fields below                                                              |
+ Wi-Fi IP / Subnet / Gateway / DNS | The static address, only used when IPv4 mode is static                                                                       |
+ UDP vysílání                      | Share mesh traffic with other nodes over the local network                                                                   |
+ NTP server                        | Time synchronization server                                                                                                  |
+ rsyslog server                    | Remote logging server                                                                                                        |
 
-![IP address field](../../assets/screenshots/settings_ipv4_field.png)
+![Network Config with a static IPv4 address entered](../../assets/screenshots/settings_ipv4_field.png)
 
 ### Nastavení bluetooth
 
@@ -226,11 +230,11 @@ back-off before you can try again.
 
 Settings use standard preference controls — dropdowns, toggles, and sliders:
 
- Control  | Screenshot                                                  |
- -------- | ----------------------------------------------------------- |
- Dropdown | ![Dropdown](../../assets/screenshots/settings_dropdown.png) |
- Toggle   | ![Toggle](../../assets/screenshots/settings_switch.png)     |
- Slider   | ![Slider](../../assets/screenshots/settings_slider.png)     |
+ Control  | Screenshot                                                                                                  |
+ -------- | ----------------------------------------------------------------------------------------------------------- |
+ Dropdown | ![A dropdown setting, expanded to show its list of options](../../assets/screenshots/settings_dropdown.png) |
+ Toggle   | ![A toggle setting in the on position](../../assets/screenshots/settings_switch.png)                        |
+ Slider   | ![A slider setting with its current numeric value shown](../../assets/screenshots/settings_slider.png)      |
 
 ## Related Topics
 
@@ -238,9 +242,6 @@ Settings use standard preference controls — dropdowns, toggles, and sliders:
 - [Signal Meter](signal-meter) — how modem presets affect signal quality thresholds
 - [LoRa configuration](https://meshtastic.org/docs/configuration/radio/lora) — detailed LoRa settings reference on meshtastic.org
 - [Initial configuration](https://meshtastic.org/docs/getting-started/initial-config) — region setup guide on meshtastic.org
-
----
-
 </pre>
 </body>
 </html>

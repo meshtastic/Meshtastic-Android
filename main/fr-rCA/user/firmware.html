@@ -5,7 +5,7 @@
 <h2 id="checking-for-updates">Checking for Updates</h2>
 
 <ol>
-  <li>Open the connected radio’s configuration and, under <strong>Advanced</strong>, tap <strong>Firmware Update</strong>. The entry appears only for OTA-capable devices.</li>
+  <li>Open the connected radio’s configuration and, under <strong>Advanced</strong>, tap <strong>Firmware Update</strong>. The entry appears only for OTA-capable radios.</li>
   <li>The app checks for available firmware versions.</li>
   <li>Available updates show the version number and changelog summary.</li>
 </ol>
@@ -16,6 +16,10 @@
 
 <p>The most common update method for Android users:</p>
 
+<blockquote>
+  <p>⚠️ <strong>Warning:</strong> Interrupting a firmware update can leave the radio unable to boot. Keep the phone nearby and both devices powered until the update completes.</p>
+</blockquote>
+
 <ol>
   <li>Ensure your radio is connected via Bluetooth.</li>
   <li>Navigate to the Firmware Update screen.</li>
@@ -25,10 +29,6 @@
 </ol>
 
 <p><img src="../../assets/screenshots/firmware_checking.png" alt="Firmware checking for updates" /></p>
-
-<blockquote>
-  <p>⚠️ <strong>Warning:</strong> Interrupting a firmware update can brick your device. Keep the radio charged and stay in Bluetooth range for the whole update. The app itself only blocks the update below <strong>10%</strong> battery; 50% or more is the safe habit, not an enforced limit.</p>
-</blockquote>
 
 <h4 id="erase-device-during-update">Erase device during update</h4>
 
@@ -43,7 +43,7 @@
   </thead>
   <tbody>
     <tr>
-      <td>BLE / WiFi OTA</td>
+      <td>BLE / Wi-Fi OTA</td>
       <td>Factory-resets the device once the update is verified. All settings and Bluetooth pairing are removed.</td>
     </tr>
     <tr>
@@ -55,9 +55,9 @@
 
 <p>It is not offered for a local firmware file, during a recovery update, or on USB devices whose board does not support the erase step. Afterwards the device needs setting up — and pairing — again.</p>
 
-<h3 id="ota-via-wifi-network-connected-esp32">OTA via WiFi (network-connected ESP32)</h3>
+<h3 id="ota-via-wi-fi-network-connected-esp32">OTA via Wi-Fi (network-connected ESP32)</h3>
 
-<p>When an ESP32 radio is connected over the network rather than Bluetooth, the app offers <strong>WiFi OTA</strong>, which pushes the same update over TCP:</p>
+<p>When an ESP32 radio is connected over the network rather than Bluetooth, the app offers <strong>Wi-Fi OTA</strong>, which pushes the same update over TCP:</p>
 
 <ol>
   <li>Connect to the radio over the network (see <a href="connections">Connections</a>).</li>
@@ -65,7 +65,7 @@
   <li>Tap <strong>Update</strong>. Keep the radio and phone on the same network for the whole transfer.</li>
 </ol>
 
-<p>WiFi OTA takes the ESP32 <code class="language-plaintext highlighter-rouge">-update.bin</code> image rather than the <code class="language-plaintext highlighter-rouge">.uf2</code> a USB update uses; the app selects the right artifact for you.</p>
+<p>Wi-Fi OTA takes the ESP32 <code class="language-plaintext highlighter-rouge">-update.bin</code> image rather than the <code class="language-plaintext highlighter-rouge">.uf2</code> a USB update uses; the app selects the right artifact for you.</p>
 
 <p><img src="../../assets/screenshots/firmware_disclaimer.png" alt="Firmware disclaimer" /></p>
 
@@ -74,7 +74,7 @@
 <p>When your radio is connected over <strong>USB/serial</strong> (rather than Bluetooth), the Firmware Update screen offers <strong>USB File Transfer</strong>. The app reboots the device into DFU mode, then prompts you to save the <code class="language-plaintext highlighter-rouge">.uf2</code> file to the device’s DFU drive using the system file picker. This option appears only on a USB/serial connection — it is not available over Bluetooth.</p>
 
 <blockquote>
-  <p>ℹ️ <strong>nRF bootloader note:</strong> A vendor bootloader supplied as a <code class="language-plaintext highlighter-rouge">.zip</code> (e.g. RAK WisBlock RAK4631) has to be flashed with a serial DFU tool such as <code class="language-plaintext highlighter-rouge">adafruit-nrfutil</code> — copying that <code class="language-plaintext highlighter-rouge">.zip</code> to the drive won’t work. A bootloader supplied as an <code class="language-plaintext highlighter-rouge">update-....uf2</code> <strong>can</strong> be installed by copying it to the drive; that is how the app’s own bootloader upgrade works. The app surfaces a hint when the serial-only route applies.</p>
+  <p>ℹ️ <strong>Note:</strong> A vendor nRF bootloader supplied as a <code class="language-plaintext highlighter-rouge">.zip</code> (e.g. RAK WisBlock RAK4631) has to be flashed with a serial DFU tool such as <code class="language-plaintext highlighter-rouge">adafruit-nrfutil</code> — copying that <code class="language-plaintext highlighter-rouge">.zip</code> to the drive won’t work. A bootloader supplied as an <code class="language-plaintext highlighter-rouge">update-....uf2</code> <strong>can</strong> be installed by copying it to the drive; that is how the app’s own bootloader upgrade works. The app surfaces a hint when the serial-only route applies.</p>
 </blockquote>
 
 <h3 id="factory-erase-and-bootloader-upgrade">Factory Erase and Bootloader Upgrade</h3>
@@ -83,7 +83,7 @@
 
 <p>Erasing wipes everything on the device — channels, keys and all settings — and there is no backup, so the app asks for confirmation first. Both operations write two files in turn, so you will be asked to select the device’s update drive twice: once for the erase or bootloader image, then again for the firmware.</p>
 
-<p>The app reads <code class="language-plaintext highlighter-rouge">INFO_UF2.TXT</code> from the drive you select to confirm it really is the device’s update drive and to identify the board before writing anything. If it can’t confirm which Bluetooth stack your device uses it refuses to erase and points you at the <a href="https://flasher.meshtastic.org">Web Flasher</a> instead — picking wrong there can leave the device needing a hardware programmer to recover.</p>
+<p>The app reads <code class="language-plaintext highlighter-rouge">INFO_UF2.TXT</code> from the drive you select to confirm it really is the device’s update drive and to identify the board before writing anything. If it can’t confirm which Bluetooth stack your device uses, it refuses to erase and points you at the <a href="https://flasher.meshtastic.org">Web Flasher</a> instead. In the Web Flasher, choosing the wrong Bluetooth stack can leave the radio recoverable only with a hardware programmer.</p>
 
 <h3 id="other-flashing-options">Other Flashing Options</h3>
 
@@ -128,6 +128,7 @@
   <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Stable Bluetooth connection</li>
   <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Note your current settings (they may reset on major version changes)</li>
   <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Check the release notes for breaking changes</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Update the Meshtastic app itself, before or alongside firmware updates, to ensure compatibility</li>
 </ul>
 
 <h2 id="post-update">Post-Update</h2>
@@ -139,8 +140,8 @@
 <p>Once the update succeeds:</p>
 
 <ul>
-  <li>The radio will reboot automatically</li>
-  <li>Bluetooth connection will re-establish</li>
+  <li>The radio reboots automatically</li>
+  <li>The Bluetooth connection re-establishes</li>
   <li>Verify your settings are intact</li>
   <li>Confirm the new version under <strong>Currently Installed</strong> on the Firmware Update screen — it’s also shown on the node’s detail page and the Connections screen</li>
 </ul>
@@ -161,9 +162,9 @@
 
 <p><img src="../../assets/screenshots/firmware_error.png" alt="Firmware update error" /></p>
 
-<h3 id="device-wont-boot-after-update">Device Won’t Boot After Update</h3>
+<h3 id="radio-wont-boot-after-update">Radio Won’t Boot After Update</h3>
 
-<p>If your device fails to boot:</p>
+<p>If your radio fails to boot:</p>
 
 <ol>
   <li>Try connecting via USB to a computer</li>
@@ -188,7 +189,7 @@
     <tr>
       <td>Below <strong>2.3.15</strong></td>
       <td><strong>Firmware update required.</strong></td>
-      <td>The app disconnects from the radio. It will not operate against firmware this old.</td>
+      <td>The app disconnects from the radio. It does not operate against firmware this old.</td>
     </tr>
     <tr>
       <td><strong>2.3.15</strong> up to, but not including, <strong>2.5.14</strong></td>
@@ -205,10 +206,6 @@
 
 <p>A version string the app cannot parse is ignored rather than treated as too old, so a transient read never disconnects a working radio.</p>
 
-<blockquote>
-  <p>⚠️ <strong>Important:</strong> Always update the Meshtastic app before or alongside firmware updates to ensure compatibility.</p>
-</blockquote>
-
 <h2 id="related-topics">Related Topics</h2>
 
 <ul>
@@ -217,6 +214,3 @@
   <li><a href="https://meshtastic.org/docs/hardware/devices">Supported devices</a> — check firmware compatibility by device</li>
   <li><a href="https://meshtastic.org/docs/faq/">FAQ</a> — common questions on meshtastic.org</li>
 </ul>
-
-<hr />
-

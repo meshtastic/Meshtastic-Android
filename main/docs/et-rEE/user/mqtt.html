@@ -23,10 +23,10 @@ MQTT moodul ühendab sinu sõlme MQTT vahendajaga, võimaldades:
 ## Kuidas see toimib
 
 ```
-[Sinu sõlm] → Raadio → [WiFi-ga lüüsisõlm] → MQTT vahendaja → [Kauglüüs] → Raadio → [Kaugsõlm]
+[Your Node] → Radio → [Gateway Node with Wi-Fi] → MQTT Broker → [Remote Gateway] → Radio → [Remote Node]
 ```
 
-Internetiühendusega (WiFi või Ethernet) lüüsisõlm jagab võrgusõnumeid MQTT. Sama teemaga liitunud kauglüüsid sisestavad need sõnumid oma kohalikku kärgvõrku.
+A gateway node with internet access (Wi-Fi or Ethernet) publishes mesh messages to an MQTT topic. Sama teemaga liitunud kauglüüsid sisestavad need sõnumid oma kohalikku kärgvõrku.
 
 ## Sätted
 
@@ -36,18 +36,18 @@ Internetiühendusega (WiFi või Ethernet) lüüsisõlm jagab võrgusõnumeid MQT
 2. Luba MQTT moodul.
 3. Configure the broker connection:
 
-![MQTT lüliti](/assets/screenshots/settings_switch.png)
+![MQTT module settings with the module enabled](../../assets/screenshots/settings_switch.png)
 
- Sätted                     | Kirjeldus                                                                                                                                                                           | Vaikimisi                                           |
- -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
- Server Address             | MQTT vahendaja hostinimi                                                                                                                                                            | mqtt.meshtastic.org |
- Kasutajatunnus             | Broker authentication                                                                                                                                                               | meshdev                                             |
- Parool                     | Broker authentication                                                                                                                                                               | large4cats                                          |
- Root Topic                 | Base topic for messages                                                                                                                                                             | msh                                                 |
- Encryption                 | Krüpteeri MQTT liiklus                                                                                                                                                              | Lubatud                                             |
- JSON Output                | Also publish and consume the `/2/json/` topic. Deprecated in the protobuf schema, but still the only toggle for this behaviour — and the app's own proxy honours it | Keelatud                                            |
- TLS                        | Secure connection to broker                                                                                                                                                         | Keelatud                                            |
- Kaardiaruannete koostamine | Teavita asukoht avalikul kaardil                                                                                                                                                    | Keelatud                                            |
+ Sätted                     | Kirjeldus                                                                                                                                                                         | Vaikimisi                                           |
+ -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+ Server Address             | MQTT vahendaja hostinimi                                                                                                                                                          | mqtt.meshtastic.org |
+ Kasutajatunnus             | Broker authentication                                                                                                                                                             | meshdev                                             |
+ Parool                     | Broker authentication                                                                                                                                                             | large4cats                                          |
+ Root Topic                 | Base topic for messages                                                                                                                                                           | msh                                                 |
+ Encryption                 | Krüpteeri MQTT liiklus                                                                                                                                                            | Lubatud                                             |
+ JSON Output                | Also publish and consume the `/2/json/` topic. Deprecated in the protobuf schema, but still the only toggle for this behavior — and the app's own proxy honors it | Keelatud                                            |
+ TLS                        | Secure connection to broker                                                                                                                                                       | Keelatud                                            |
+ Kaardiaruannete koostamine | Teavita asukoht avalikul kaardil                                                                                                                                                  | Keelatud                                            |
 
 ### Connection Status and Test Connection
 
@@ -60,17 +60,15 @@ TLS failing, the attempt timing out, or the broker rejecting your credentials wi
 
 ### MQTT puhverserver sellel telefonil
 
-Kui sõlmel puudub oma internetiühendus, saab see kasutada ühendatud telefoni MQTT-lüüsina: luba mooduli konfiguratsioonis **MQTT** ja **Proksi kliendiga lubatud** ning rakendus edastab MQTT-liikluse raadio ja maakleri vahel telefoni internetiühenduse kaudu.
+If your radio has no internet access of its own, it can use the connected phone as its MQTT gateway: enable **MQTT** and **Proxy to client enabled** in the module config, and the app relays MQTT traffic between the radio and the broker over your phone's internet connection.
 
 &gt; ℹ️ **Note:** The proxy relay is mobile-only. On the Desktop app the MQTT settings are present, but no relay runs behind them.
 
-MQTT sätete ekraani ülaosas olev lüliti **MQTT puhverserver sellel telefonil** näitab, kas see relee töötab praegu, ja võimaldab selle kohe välja lülitada (või taaskäivitada) – ilma seadme MQTT konfiguratsiooni muutmata ja uuesti salvestamata.
+The **MQTT proxy on this phone** toggle at the top of the MQTT settings screen shows whether this relay is running and lets you cut it off (or restart it) immediately — without editing and re-saving the radio's MQTT configuration.
 
 ### Meshtastic vaikemaakler
 
-Kogukond haldab avaliku vahendajat aadressil `mqtt.meshtastic.org`. This is intended for general use and testing.
-
-&gt; ℹ️ **Märkus:** Ühendused saidiga `mqtt.meshtastic.org` kasutavad alati TLS-i (port 8883), isegi kui TLS-i lüliti on välja lülitatud. For any other broker, TLS is used only when you enable it (port 8883 with TLS, 1883 without).
+Kogukond haldab avaliku vahendajat aadressil `mqtt.meshtastic.org`. This is intended for general use and testing. Connections to it always use TLS (port 8883), even if the TLS toggle is off; for any other broker, TLS is used only when you enable it (port 8883 with TLS, 1883 without).
 
 &gt; 🔒 **Privaatsus:** Avaliku vahendaja sõnumeid saavad lugeda kõik tellijad. Privaatse suhtluse jaoks kasuta alati kanali krüpteerimist.
 
@@ -127,7 +125,7 @@ Understanding the layered encryption model:
 ## Parimad tavad
 
 - Kasuta kanali krüptimist (PSK), kanalitel mis on sillatud MQTT-ga
-- Ära luba MQTT internetiühenduseta sõlmedel (see puhverdab ja raiskab mälu)
+- Don't enable MQTT on nodes without internet access (the radio buffers unsendable messages and wastes memory)
 - Use a private broker for sensitive deployments
 - MQTT sõnumite allalaadimisel arvesta eetriaja kuluga – iga allalingitud sõnum tarbib sinu kohalikus võrgus raadioeetriaega
 - Kaalu ainult üleslingi lubamist, kui sul on vaja oma kärgvõrku eemalt jälgida ilma sõnumeid tagasi tõmbamata
@@ -136,9 +134,9 @@ Understanding the layered encryption model:
 
 ### MQTT ei ühendu
 
-- **Kontrolli WiFit** – lüüssõlmel peab olema aktiivne internetiühendus (WiFi või Ethernet). MQTT ei tööta LoRa raadiolingi enda kaudu.
-- **Verify credentials** — incorrect username or password will silently fail on most brokers. Double-check for trailing spaces.
-- **Tulemüür** — port 1883 (MQTT) või 8883 (MQTT+TLS) peab olema avatud. Some networks block non-standard ports.
+- **Check Wi-Fi** — the gateway node must have an active internet connection (Wi-Fi or Ethernet). MQTT ei tööta LoRa raadiolingi enda kaudu.
+- **Verify credentials** — with incorrect credentials, most brokers fail silently — double-check for trailing spaces.
+- **Firewall** — port 1883 (MQTT) or 8883 (MQTT over TLS) must be reachable. Some networks allow only web traffic (ports 80 and 443).
 - **DNS-i lahendamine** – kui kasutad kohandatud maakleri hostinime, veenduge, et sõlm suudab seda lahendada. Try the broker's IP address directly.
 
 ### Messages Not Bridging
@@ -152,9 +150,6 @@ Understanding the layered encryption model:
 - [Seaded — Moodulid ja administreerimine](settings-module-admin) — MQTT mooduli konfi viide
 - [Sõnumid ja kanalid](messages-and-channels) — kanali krüptimine ja PSK seadistamine
 - [MQTT integratsioonijuhend](https://meshtastic.org/docs/software/integrations/mqtt) — üksikasjalik MQTT dokumentatsioon aadressil meshtastic.org
-
----
-
 </pre>
 </body>
 </html>

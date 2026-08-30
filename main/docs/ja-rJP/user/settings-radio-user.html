@@ -9,22 +9,26 @@
 <body data-page="settings-radio-user" data-locale="ja-rJP">
 <pre class="markdown-content"># 設定：無線機とユーザー
 
-無線機のハードウェアと、ユーザーの識別情報のパラメーターを設定します。
+Configure your radio's user identity, region and LoRa parameters, position and power behavior, network and Bluetooth connectivity, and security settings.
 
 ## ユーザー設定
 
 ### ユーザープロファイル
 
- 設定項目     | 説明                                                                                                                                                                                                                                           |
- -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
- 正式名称     | 表示名（最大 39 文字）                                                                                                                                                                                                                                |
- 短縮名      | 4 文字の短縮名                                                                                                                                                                                                                                     |
- メッセージ不可  | Marks the node as one nobody should try to message — for an unmonitored or infrastructure node. Other clients hide it from the contact list. Needs supporting firmware                                       |
- 免許を持つ運用者 | Enable if you hold an amateur radio license (permits higher power). Turning it on relabels **Long Name** as **Call Sign** and adds a separate Long Name field, and is staged behind a confirmation dialog |
+ 設定項目       | 説明                                                                                                                                                                                                                                           |
+ ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+ 正式名称       | 表示名（最大 39 文字）                                                                                                                                                                                                                                |
+ 短縮名        | 4 文字の短縮名                                                                                                                                                                                                                                     |
+ ステータスメッセージ | A short free-text status other nodes display alongside your node — up to 80 bytes, cleared with the **✕** in the field. Needs firmware 2.8 or newer, and is absent otherwise                                 |
+ メッセージ不可    | Marks the node as one nobody should try to message — for an unmonitored or infrastructure node. Other clients hide it from the contact list. Needs supporting firmware                                       |
+ 免許を持つ運用者   | Enable if you hold an amateur radio license (permits higher power). Turning it on relabels **Long Name** as **Call Sign** and adds a separate Long Name field, and is staged behind a confirmation dialog |
 
 ### 変更を適用する
 
-設定を変更したら、「**保存**」をタップして構成を無線機に書き込みます。 変更を適用するために、デバイスが再起動することがあります。
+設定を変更したら、「**保存**」をタップして構成を無線機に書き込みます。 The radio may reboot to apply changes.
+
+The status message is saved with the same **Save**, but it never reboots the node — and, like the
+rest of this screen, it can be edited on a remote node you administer.
 
 ## 設定
 
@@ -45,7 +49,7 @@
 
  設定項目          | 説明                                                                                                                                                                                               | デフォルト                                 |
  ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------- |
- リージョン         | 周波数帯の規制リージョン                                                                                                                                                                                     | 未設定（要設定）                              |
+ リージョン         | Regulatory region for frequency bands. You must set this before transmitting                                                                                                     | 未設定（要設定）                              |
  モデムプリセット      | 速度と距離のトレードオフ                                                                                                                                                                                     | LongFast                              |
  ホップ数上限        | 再送信の最大ホップ数                                                                                                                                                                                       | 3                                     |
  送信出力          | 送信出力（dBm）。0 = リージョンで許可された最大値                                                                                                                                                                     | 0（リージョン最大）                            |
@@ -56,13 +60,13 @@
  符号化レート        | Manual mode only: 5–8. More redundancy costs airtime                                                                                                             | From preset                           |
  周波数スロット       | Which slot within the region's band to use. 0 derives it from the primary channel name                                                                                           | 0 (automatic)      |
  送信を有効化        | Turning this off makes the node receive-only                                                                                                                                                     | On                                    |
- デューティサイクルを上書き | Ignore the region's duty-cycle limit. Only legal where you are permitted to                                                                                                      | オフ                                    |
+ デューティサイクルを上書き | Ignores the region's duty-cycle limit. Illegal in most regions; turn it on only where your license permits                                                                       | オフ                                    |
  MQTT を無視      | Drop packets that arrived from MQTT rather than over the air                                                                                                                                     | オフ                                    |
  MQTTを許可       | Allow your packets to be forwarded to MQTT by gateways                                                                                                                                           | オフ                                    |
  RX ブーストゲイン    | Extra receive gain on SX126x radios; costs a little current                                                                                                                                      | オフ                                    |
  PAファン無効       | Turn off the power-amplifier fan on hardware that has one                                                                                                                                        | オフ                                    |
 
-&gt; ⚠️ **重要：** 送信する前に、必ずリージョンを設定する**必要があります**。 正しいリージョンを設定せずに運用すると、現地の無線規制に違反するおそれがあります。 詳しくは、meshtastic.org の [リージョン設定ガイド](https://meshtastic.org/docs/getting-started/initial-config) を参照してください。
+&gt; ⚠️ **Important:** Operating without the correct region may violate local radio regulations. 詳しくは、meshtastic.org の [リージョン設定ガイド](https://meshtastic.org/docs/getting-started/initial-config) を参照してください。
 
 ### モデムプリセット
 
@@ -102,9 +106,9 @@
 - **固定インフラのリンク：** 良好なアンテナと見通しがある専用のポイントツーポイントリンクには、**Short Turbo** または **Long Turbo** を使用します。
 - **混在した環境：** **Long Fast** のままにします。これはコミュニティのデフォルトで、地域内の他のユーザーとの互換性を確保します。
 
-&gt; ⚠️ **重要：** 同じチャンネル上のすべてのノードは、同じモデムプリセットを使用する**必要があります**。 プリセットが一致しないノードは、同じ周波数と暗号化鍵を共有していても通信できません。
+All nodes on the same channel must use the same modem preset. プリセットが一致しないノードは、同じ周波数と暗号化鍵を共有していても通信できません。
 
-&gt; 💡 **ヒント：** 上記の距離の目安は、平坦な地形と一般的なアンテナを前提としています。 高所（丘の上、屋上）にあると、実効的な距離が大幅に伸びます。 適切に設置された Long Fast のルーターは、地上に置かれた Long Slow のノードを上回ることがよくあります。
+The range estimates in the [Modem Presets](#modem-presets) table assume flat terrain and modest antennas. 高所（丘の上、屋上）にあると、実効的な距離が大幅に伸びます。 適切に設置された Long Fast のルーターは、地上に置かれた Long Slow のノードを上回ることがよくあります。
 
 ### 表示設定
 
@@ -113,20 +117,20 @@ These control the **radio's own screen**, not the app's.
  設定項目         | 説明                                                                                                                                                        |
  ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
  画面オンの時間      | How long the display stays lit before sleeping                                                                                                            |
- カルーセルの間隔     | How often the device cycles between screens on its own                                                                                                    |
+ カルーセルの間隔     | How often the radio cycles between screens on its own                                                                                                     |
  表示モード        | Screen layout/density used by the firmware                                                                                                                |
- 表示単位         | Metric or Imperial on the device's screen                                                                                                                 |
- 12時間の時計形式を使用 | Show the device clock as 12-hour rather than 24-hour                                                                                                      |
+ 表示単位         | Metric or Imperial on the radio's screen                                                                                                                  |
+ 12時間の時計形式を使用 | Show the radio's clock as 12-hour rather than 24-hour                                                                                                     |
  Bold heading | Draw the screen's heading text in bold                                                                                                                    |
  画面反転         | Rotate the display 180° for an inverted mounting                                                                                                          |
  OLED タイプ     | 自動、SSD1306、SH1106、SH1107                                                                                                                                  |
- タップまたは動作で起動  | Light the screen when the device is tapped or moved                                                                                                       |
+ タップまたは動作で起動  | Light the screen when the radio is tapped or moved                                                                                                        |
  コンパスの向き      | Rotation offset for the compass rose (0°, 90°, 180°, 270°)                                                                             |
  常に北を上にする     | Locks the compass rose north-up instead of rotating it with your heading. Independent of Compass orientation — neither replaces the other |
 
 ### 位置情報設定
 
-&gt; ⚠️ **Warning:** Saving this screen always reboots the radio.
+&gt; ⚠️ **Important:** Saving this screen always reboots the radio.
 
  設定項目                             | 説明                                                                                                                                                    |
  -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -155,21 +159,21 @@ These control the **radio's own screen**, not the app's.
 
 ### ネットワーク設定
 
-&gt; ⚠️ **Warning:** Saving this screen always reboots the radio.
+&gt; ⚠️ **Important:** Saving this screen always reboots the radio.
 
- 設定項目                             | 説明                                                                                                                         |
- -------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
- Wi-Fiを有効化                        | Enable the WiFi radio (ESP32 devices)                                                                   |
- SSID                             | Network name to connect to. **Scan WiFi QR code** fills this and the password from a standard WiFi QR code |
- パスワード                            | ネットワークのパスワード                                                                                                               |
- イーサネット有効                         | Use a wired connection on hardware that has one                                                                            |
- IPv4 モード                         | DHCP, or a static address configured with the four fields below                                                            |
- Wifi IP / Subnet / Gateway / DNS | The static address, only used when IPv4 mode is static                                                                     |
- UDP ブロードキャスト                     | Share mesh traffic with other nodes over the local network                                                                 |
- NTPサーバー                          | 時刻同期サーバー                                                                                                                   |
- rsyslogサーバー                      | リモートログサーバー                                                                                                                 |
+ 設定項目                              | 説明                                                                                                                           |
+ --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+ Wi-Fi enabled                     | Enable the Wi-Fi radio (ESP32 radios)                                                                     |
+ SSID                              | Network name to connect to. **Scan Wi-Fi QR code** fills this and the password from a standard Wi-Fi QR code |
+ パスワード                             | ネットワークのパスワード                                                                                                                 |
+ イーサネット有効                          | Use a wired connection on hardware that has one                                                                              |
+ IPv4 モード                          | DHCP, or a static address configured with the four fields below                                                              |
+ Wi-Fi IP / Subnet / Gateway / DNS | The static address, only used when IPv4 mode is static                                                                       |
+ UDP ブロードキャスト                      | Share mesh traffic with other nodes over the local network                                                                   |
+ NTPサーバー                           | 時刻同期サーバー                                                                                                                     |
+ rsyslogサーバー                       | リモートログサーバー                                                                                                                   |
 
-![IP アドレスの入力欄](../../assets/screenshots/settings_ipv4_field.png)
+![Network Config with a static IPv4 address entered](../../assets/screenshots/settings_ipv4_field.png)
 
 ### Bluetooth 設定
 
@@ -226,11 +230,11 @@ back-off before you can try again.
 
 設定には、標準的な設定コントロール（ドロップダウン、トグル、スライダー）を使用します：
 
- コントロール  | スクリーンショット                                                  |
- ------- | ---------------------------------------------------------- |
- ドロップダウン | ![ドロップダウン](../../assets/screenshots/settings_dropdown.png) |
- トグル     | ![トグル](../../assets/screenshots/settings_switch.png)       |
- スライダー   | ![スライダー](../../assets/screenshots/settings_slider.png)     |
+ コントロール  | スクリーンショット                                                                                                   |
+ ------- | ----------------------------------------------------------------------------------------------------------- |
+ ドロップダウン | ![A dropdown setting, expanded to show its list of options](../../assets/screenshots/settings_dropdown.png) |
+ トグル     | ![A toggle setting in the on position](../../assets/screenshots/settings_switch.png)                        |
+ スライダー   | ![A slider setting with its current numeric value shown](../../assets/screenshots/settings_slider.png)      |
 
 ## 関連トピック
 
@@ -238,9 +242,6 @@ back-off before you can try again.
 - [信号メーター](signal-meter)：モデムプリセットが信号品質のしきい値に与える影響
 - [LoRa 設定](https://meshtastic.org/docs/configuration/radio/lora)：meshtastic.org にある詳細な LoRa 設定リファレンス
 - [初期設定](https://meshtastic.org/docs/getting-started/initial-config)：meshtastic.org にあるリージョン設定ガイド
-
----
-
 </pre>
 </body>
 </html>

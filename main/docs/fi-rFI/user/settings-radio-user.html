@@ -9,22 +9,25 @@
 <body data-page="settings-radio-user" data-locale="fi-rFI">
 <pre class="markdown-content"># Asetukset — Radio ja käyttäjä
 
-Määritä radion laitteisto ja käyttäjätunnistetiedot.
+Määritä radion käyttäjätiedot, alue ja LoRa-asetukset, sijainti- ja virta-asetukset, verkko- ja Bluetooth-yhteydet sekä suojausasetukset.
 
 ## Käyttäjäasetukset
 
 ### Käyttäjäprofiili
 
- Asetus                   | Kuvaus                                                                                                                                                                                                                                                                                        |
- ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
- Pitkä nimi               | Näyttönimesi (enintään 39 merkkiä)                                                                                                                                                                                                                                         |
- Lyhytnimi                | 4-merkkinen lyhytnimi                                                                                                                                                                                                                                                                         |
- Ei vastaanota viestejä   | Merkitsee radion sellaiseksi, jolle kenenkään ei pitäisi yrittää lähettää viestejä – tarkoitettu valvomattomalle tai infrastruktuuriradiolle. Muut sovellukset piilottavat sen yhteystietoluettelosta. Edellyttää yhteensopivaa laiteohjelmistoa              |
- Lisensoitu radioamatööri | Ota käyttöön, jos sinulla on radioamatöörilupa (sallii suuremman lähetystehon). Käyttöönotto muuttaa **Pitkä nimi** -kentän **Kutsumerkki**-kentäksi ja lisää erillisen **Pitkä nimi** -kentän. Muutos vahvistetaan ensin valintaikkunassa |
+ Asetus                   | Kuvaus                                                                                                                                                                                                                                                                                                                |
+ ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+ Pitkä nimi               | Näyttönimesi (enintään 39 merkkiä)                                                                                                                                                                                                                                                                 |
+ Lyhytnimi                | 4-merkkinen lyhytnimi                                                                                                                                                                                                                                                                                                 |
+ Tilaviesti               | Lyhyt vapaamuotoinen tilaviesti, jonka muut radiot näyttävät radion nimen yhteydessä – enintään 80 merkkiä. Kentän voi tyhjentää kirjoittamalla siihen **✕**. Edellyttää laiteohjelmistoversiota 2.8 tai uudempaa. Muussa tapauksessa tätä ei näytetä |
+ Ei vastaanota viestejä   | Merkitsee radion sellaiseksi, jolle kenenkään ei pitäisi yrittää lähettää viestejä – tarkoitettu valvomattomalle tai infrastruktuuriradiolle. Muut sovellukset piilottavat sen yhteystietoluettelosta. Edellyttää yhteensopivaa laiteohjelmistoa                                      |
+ Lisensoitu radioamatööri | Ota käyttöön, jos sinulla on radioamatöörilupa (sallii suuremman lähetystehon). Käyttöönotto muuttaa **Pitkä nimi** -kentän **Kutsumerkki**-kentäksi ja lisää erillisen **Pitkä nimi** -kentän. Muutos vahvistetaan ensin valintaikkunassa                         |
 
 ### Muutosten käyttöönotto
 
-Asetusten muuttamisen jälkeen napauta **Tallenna** kirjoittaaksesi määritykset radioon. Laite voidaan käynnistää uudelleen muutosten käyttöönottoa varten.
+Asetusten muuttamisen jälkeen napauta **Tallenna** kirjoittaaksesi määritykset radioon. Radio saattaa käynnistyä uudelleen muutosten ottamiseksi käyttöön.
+
+Tilaviesti tallennetaan samalla **Tallenna**-painikkeella, mutta se ei koskaan käynnistä radiota uudelleen. Kuten muitakin tämän näkymän asetuksia, sitä voidaan muokata etähallittavassa radiossa.
 
 ## Asetukset
 
@@ -45,7 +48,7 @@ Asetusten muuttamisen jälkeen napauta **Tallenna** kirjoittaaksesi määritykse
 
  Asetus                                             | Kuvaus                                                                                                                                                                           | Oletus                                           |
  -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
- Alue                                               | Taajuusalueiden sääntelyalue                                                                                                                                                     | Ei asetettu (on määritettävä) |
+ Alue                                               | Taajuusalueen sääntelyalue. Tämä on määritettävä ennen lähettämistä                                                                                              | Ei asetettu (on määritettävä) |
  Modeemin esiasetus                                 | Nopeuden ja kantaman välinen kompromissi                                                                                                                                         | LongFast                                         |
  Hyppyraja                                          | Suurin hyppyjen määrä                                                                                                                                                            | 3                                                |
  Lähetysteho                                        | Lähetysteho (dBm): 0 = alueen sallima enimmäisteho                                                                                            | 0 (alueen enimmäisteho)       |
@@ -56,13 +59,13 @@ Asetusten muuttamisen jälkeen napauta **Tallenna** kirjoittaaksesi määritykse
  Koodausnopeus                                      | Vain manuaalitilassa: 5–8. Suurempi virheenkorjaus lisää lähetysaikaa                                                                            | Esiasetuksesta                                   |
  Taajuuspaikka                                      | Määrittää, mitä alueen taajuusväliä käytetään. 0 muodostetaan ensisijaisen kanavan nimestä                                                                       | 0 (automaattinen)             |
  Lähetys käytössä                                   | Tämän poistaminen käytöstä tekee radiosta vain vastaanottavan                                                                                                                    | Käytössä                                         |
- Ohita käyttöaste (Duty Cycle)   | Ohita alueen lähetysajan käyttörajoitus. Sallittu vain siellä, missä se on laillista                                                                             | Pois                                             |
+ Ohita käyttöaste (Duty Cycle)   | Ohittaa alueen lähetysajan käyttörajoituksen. Laitonta useimmilla alueilla. Ota käyttöön vain, jos radioamatöörilupasi sallii sen                | Pois                                             |
  Ohita MQTT                                         | Hylkää MQTT:n kautta saapuneet paketit sen sijaan, että ne olisi vastaanotettu radion kautta                                                                     | Pois                                             |
  MQTT päällä                                        | Salli yhdyskäytävien välittää pakettisi MQTT:hen                                                                                                                 | Pois                                             |
- RX tehostettu vahvistus                            | Extra receive gain on SX126x radios; costs a little current                                                                                                                      | Pois                                             |
- PA tuuletin pois käytöstä                          | Turn off the power-amplifier fan on hardware that has one                                                                                                                        | Pois                                             |
+ RX tehostettu vahvistus                            | Lisävastaanottovahvistus SX126x-radioille. Kuluttaa hieman enemmän virtaa                                                                                        | Pois                                             |
+ PA tuuletin pois käytöstä                          | Poista päätevahvistimen tuuletin käytöstä laitteissa, joissa sellainen on                                                                                                        | Pois                                             |
 
-&gt; ⚠️ **Tärkeää:** Sinun **täytyy** määrittää alueesi ennen lähettämistä. Lähettäminen väärällä alueasetuksella voi rikkoa paikallisia radiomääräyksiä. Katso [alueasetusten määritysopas](https://meshtastic.org/docs/getting-started/initial-config) meshtastic.org-sivustolta saadaksesi lisätietoja.
+&gt; ⚠️ **Tärkeää:** Käyttö väärällä alueasetuksella voi rikkoa paikallisia radiomääräyksiä. Katso [alueasetusten määritysopas](https://meshtastic.org/docs/getting-started/initial-config) meshtastic.org-sivustolta saadaksesi lisätietoja.
 
 ### Esiasetukset
 
@@ -102,135 +105,128 @@ Modeemiesiasetus määrittää tärkeimmän kompromissin **kantaman** ja **tiedo
 - **Kiinteät infrastruktuurilinkit:** Käytä **Short Turbo**- tai **Long Turbo** -asetusta erillisille pisteestä pisteeseen -linkeille, joissa on hyvät antennit ja suora näköyhteys.
 - **Sekaverkot:** Pysy **Long Fast** -asetuksessa — se on yhteisön oletusasetus ja varmistaa yhteensopivuuden alueesi muiden käyttäjien kanssa.
 
-&gt; ⚠️ **Tärkeää:** Kaikkien samalla kanavalla olevien radioiden **täytyy** käyttää samaa modeemiesiasetusta. Radiot, joiden modeemiesiasetukset eivät täsmää, eivät voi viestiä keskenään, vaikka ne käyttäisivät samaa taajuutta ja salausavainta.
+Kaikkien samalla kanavalla olevien radioiden on käytettävä samaa modeemiesiasetusta. Radiot, joiden modeemiesiasetukset eivät täsmää, eivät voi viestiä keskenään, vaikka ne käyttäisivät samaa taajuutta ja salausavainta.
 
-&gt; 💡 **Vinkki:** Yllä olevat kantama-arviot perustuvat tasaiseen maastoon ja vaatimattomiin antenneihin. Korkeuseroetu (mäki, rakennuksen katto) kasvattaa käytännön kantamaa huomattavasti. Hyvin sijoitettu Long Fast -asetusta käyttävä Router voi usein toimia paremmin kuin maan tasalla oleva Long Slow -asetusta käyttävä radio.
+[Modeemiesiasetukset](#modem-presets)-taulukon kantama-arviot perustuvat tasaiseen maastoon ja vaatimattomiin antenneihin. Korkeuseroetu (mäki, rakennuksen katto) kasvattaa käytännön kantamaa huomattavasti. Hyvin sijoitettu Long Fast -asetusta käyttävä Router voi usein toimia paremmin kuin maan tasalla oleva Long Slow -asetusta käyttävä radio.
 
 ### Näytön asetukset
 
-These control the **radio's own screen**, not the app's.
+Nämä ohjaavat **radion omaa näyttöä**, eivät sovellusta.
 
- Asetus                              | Kuvaus                                                                                                                                                    |
- ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
- Näytön päälläoloaika                | How long the display stays lit before sleeping                                                                                                            |
- Karusellin aikaväli                 | How often the device cycles between screens on its own                                                                                                    |
- Näyttötila                          | Screen layout/density used by the firmware                                                                                                                |
- Näyttöyksiköt                       | Metric or Imperial on the device's screen                                                                                                                 |
- Käytä 12 tunnin kelloa              | Show the device clock as 12-hour rather than 24-hour                                                                                                      |
- Bold heading                        | Draw the screen's heading text in bold                                                                                                                    |
- Käännä näyttö                       | Rotate the display 180° for an inverted mounting                                                                                                          |
- OLED-tyyppi                         | Auto, SSD1306, SH1106, SH1107                                                                                                                             |
- Herätä napautuksesta tai liikkeestä | Light the screen when the device is tapped or moved                                                                                                       |
- Kompassin suuntaus                  | Rotation offset for the compass rose (0°, 90°, 180°, 270°)                                                                             |
- Osoita aina pohjoiseen              | Locks the compass rose north-up instead of rotating it with your heading. Independent of Compass orientation — neither replaces the other |
+ Asetus                              | Kuvaus                                                                                                                                                                        |
+ ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+ Näytön päälläoloaika                | Kuinka kauan näyttö pysyy päällä ennen siirtymistä lepotilaan                                                                                                                 |
+ Karusellin aikaväli                 | Kuinka usein radio vaihtaa näyttönäkymää automaattisesti                                                                                                                      |
+ Näyttötila                          | Laiteohjelmiston käyttämä näytön asettelu/tiheys                                                                                                                              |
+ Näyttöyksiköt                       | Metrinen tai imperiaalinen radion näytössä                                                                                                                                    |
+ Käytä 12 tunnin kelloa              | Näytä radion kello 12 tunnin muodossa 24 tunnin sijaan                                                                                                                        |
+ Lihavoitu otsikko                   | Näytä näytön otsikkoteksti lihavoituna                                                                                                                                        |
+ Käännä näyttö                       | Kierrä näyttö 180° ylösalaisin asennusta varten                                                                                                                               |
+ OLED-tyyppi                         | Auto, SSD1306, SH1106, SH1107                                                                                                                                                 |
+ Herätä napautuksesta tai liikkeestä | Laita näyttö päälle, kun radioon kosketaan tai sitä liikutetaan                                                                                                               |
+ Kompassin suuntaus                  | Kompassinäytön kiertopoikkeama (0°, 90°, 180°, 270°)                                                                                                       |
+ Osoita aina pohjoiseen              | Lukitsee kompassinäytön näyttämään pohjoiseen sen sijaan, että se kääntyisi kulkusuunnan mukaan. Riippumaton kompassin suunnasta — kumpikaan ei korvaa toista |
 
 ### Sijainnin asetukset
 
-&gt; ⚠️ **Warning:** Saving this screen always reboots the radio.
+&gt; ⚠️ **Tärkeää:** Tämän näkymän tallentaminen käynnistää radion aina uudelleen.
 
- Asetus                                            | Kuvaus                                                                                                                                                |
- ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
- GPS-tila (fyysinen laitteisto) | Three-state: GPS enabled, disabled, or not present. Not a simple on/off                                               |
- GPS-kyselyn aikaväli                              | How often the radio asks its GPS for a fix                                                                                                            |
- Lähetyksen aikaväli                               | How often the position is shared with the mesh                                                                                                        |
- Älykäs sijainti                                   | Broadcast based on movement rather than purely on the clock                                                                                           |
- Älykäs aikaväli                                   | With Smart Position on, the shortest gap between broadcasts                                                                                           |
- Älykäs etäisyys                                   | With Smart Position on, how far you must move before broadcasting                                                                                     |
- Kiinteä sijainti                                  | Use a manually entered latitude, longitude and altitude instead of the GPS                                                                            |
- Sijaintimerkinnät                                 | A group of toggles choosing which fields ride along with a position — altitude, its reference and precision, satellites in view, timestamp, and so on |
- GPS EN / Receive / Transmit GPIO                  | Advanced: the pins the GPS module is wired to                                                                                         |
+ Asetus                                            | Kuvaus                                                                                                                                                       |
+ ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+ GPS-tila (fyysinen laitteisto) | Kolmitilainen: GPS käytössä, poistettu käytöstä tai ei käytettävissä. Ei pelkkä käytössä / poistettu käytöstä -asetus        |
+ GPS-kyselyn aikaväli                              | Kuinka usein radio pyytää GPS:ltä sijainnin                                                                                                  |
+ Lähetyksen aikaväli                               | Kuinka usein sijainti jaetaan mesh-verkkoon                                                                                                                  |
+ Älykäs sijainti                                   | Lähettää sijainnin liikkeen perusteella pelkän aikavälin sijaan                                                                                              |
+ Älykäs aikaväli                                   | Älykäs sijainti -toiminnon ollessa käytössä lyhin sallittu aika sijaintilähetysten välillä                                                                   |
+ Älykäs etäisyys                                   | Älykäs sijainti -toiminnon ollessa käytössä, kuinka pitkän matkan on liikuttava ennen sijainnin lähettämistä                                                 |
+ Kiinteä sijainti                                  | Käytä käsin syötettyä leveyspiiriä, pituuspiiriä ja korkeutta GPS:n sijaan                                                                   |
+ Sijaintimerkinnät                                 | Asetusryhmä, jolla valitaan, mitkä tiedot liitetään sijaintiin — kuten korkeus, viitekehys, tarkkuus, näkyvissä olevat satelliitit, aikaleima ja muut tiedot |
+ GPS EN / Vastaanotto / Lähetys GPIO               | Lisäasetukset: nastat, joihin GPS-moduuli on kytketty                                                                                        |
 
 ### Virran asetukset
 
- Asetus                                                      | Kuvaus                                                          |
- ----------------------------------------------------------- | --------------------------------------------------------------- |
- Ota virransäästötila käyttöön                               | Let the radio sleep aggressively between activity               |
- Sammuta virran katketessa                                   | Power the device down after external power disappears           |
- Super-syväunen kesto                                        | How long the deepest sleep state lasts                          |
- Vähimmäisherätyksen kesto                                   | The shortest time the radio stays awake once woken              |
- Bluetoothin odotusaika                                      | How long to wait for a phone to connect before sleeping         |
- ADC-kertoimen ohitus                                        | Turn on a manual correction for battery-voltage readings        |
- Korvaava AD-muuntimen kerroin                               | The correction factor itself, used only when the override is on |
- INA_2XX-akun valvontapiirin I2C-osoite | Address of an external INA-series power sensor, if fitted       |
+ Asetus                                                      | Kuvaus                                                                               |
+ ----------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+ Ota virransäästötila käyttöön                               | Anna radion siirtyä mahdollisimman herkästi lepotilaan toimintojen välillä           |
+ Sammuta virran katketessa                                   | Sammuta laite, kun ulkoinen virta katkeaa                                            |
+ Super-syväunen kesto                                        | Kuinka kauan syvin lepotila kestää                                                   |
+ Vähimmäisherätyksen kesto                                   | Kuinka vähän aikaa radio pysyy hereillä heräämisen jälkeen                           |
+ Bluetoothin odotusaika                                      | Kuinka kauan odotetaan puhelimen yhteyden muodostumista ennen lepotilaan siirtymistä |
+ ADC-kertoimen ohitus                                        | Ota akun jännitemittauksille käyttöön manuaalinen korjaus                            |
+ Korvaava AD-muuntimen kerroin                               | Korjauskerroin, käytössä vain kun manuaalinen korjaus on käytössä                    |
+ INA_2XX-akun valvontapiirin I2C-osoite | Ulkoisen INA-sarjan tehoanturin osoite, jos sellainen on asennettu                   |
 
 ### Verkon asetukset
 
-&gt; ⚠️ **Warning:** Saving this screen always reboots the radio.
+&gt; ⚠️ **Tärkeää:** Tämän näkymän tallentaminen käynnistää radion aina uudelleen.
 
- Asetus                           | Kuvaus                                                                                                                     |
- -------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
- WiFi käytössä                    | Enable the WiFi radio (ESP32 devices)                                                                   |
- SSID                             | Network name to connect to. **Scan WiFi QR code** fills this and the password from a standard WiFi QR code |
- Salasana                         | Verkon salasana                                                                                                            |
- Ethernet käytössä                | Use a wired connection on hardware that has one                                                                            |
- IPv4-tila                        | DHCP, or a static address configured with the four fields below                                                            |
- Wifi IP / Subnet / Gateway / DNS | The static address, only used when IPv4 mode is static                                                                     |
- UDP-lähetys                      | Share mesh traffic with other nodes over the local network                                                                 |
- NTP palvelin                     | Ajan synkronointipalvelin (NTP-palvelin)                                                                |
- rsyslog-palvelin                 | Etätietojen palvelin                                                                                                       |
+ Asetus                                   | Kuvaus                                                                                                                               |
+ ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+ WiFi käytössä                            | Ota WiFi-radio käyttöön (ESP32-radiot)                                                                            |
+ SSID                                     | Verkon nimi, johon yhdistetään. **Skannaa WiFi-QR-koodi** täyttää tämän sekä salasanan tavallisesta WiFi-QR-koodista |
+ Salasana                                 | Verkon salasana                                                                                                                      |
+ Ethernet käytössä                        | Käytä langallista yhteyttä sitä tukevalla laitteistolla                                                                              |
+ IPv4-tila                                | DHCP tai alla olevilla neljällä kentällä määritetty kiinteä osoite                                                                   |
+ WiFi IP / Aliverkko / Yhdyskäytävä / DNS | Kiinteä IP-osoite, käytössä vain kun IPv4-tila on kiinteä                                                                            |
+ UDP-lähetys                              | Jaa mesh-verkon liikenne muiden radioiden kanssa lähiverkon kautta                                                                   |
+ NTP palvelin                             | Ajan synkronointipalvelin (NTP-palvelin)                                                                          |
+ rsyslog-palvelin                         | Etätietojen palvelin                                                                                                                 |
 
-![IP-osoitekenttä](../../assets/screenshots/settings_ipv4_field.png)
+![Verkkoasetukset, joissa on määritetty kiinteä IPv4-osoite](../../assets/screenshots/settings_ipv4_field.png)
 
 ### Bluetooth asetukset
 
- Asetus             | Kuvaus                                                                                                 |
- ------------------ | ------------------------------------------------------------------------------------------------------ |
- Bluetooth käytössä | Ota Bluetooth-radio käyttöön tai poista käytöstä                                                       |
- Pariliitostila     | Kiinteä PIN-koodi, satunnainen PIN-koodi tai ei PIN-koodia                                             |
- Kiinteä PIN-koodi  | PIN code for pairing. Must be **exactly six digits** — the field rejects anything else |
+ Asetus             | Kuvaus                                                                                                                  |
+ ------------------ | ----------------------------------------------------------------------------------------------------------------------- |
+ Bluetooth käytössä | Ota Bluetooth-radio käyttöön tai poista käytöstä                                                                        |
+ Pariliitostila     | Kiinteä PIN-koodi, satunnainen PIN-koodi tai ei PIN-koodia                                                              |
+ Kiinteä PIN-koodi  | Pariliitoksen PIN-koodi. Siinä on oltava **täsmälleen kuusi numeroa** — kenttä hylkää kaikki muut arvot |
 
 ### Turvallisuusasetukset
 
  Asetus                      | Kuvaus                                                                                                                                                                                                                                        |
  --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
  Julkinen avain              | Radiosi julkinen avain (vain luku)                                                                                                                                                                                         |
- Ylläpitäjän avain           | Keys permitted to administer this node remotely — up to three                                                                                                                                                                                 |
- Yksityinen avain            | Your node's private key (handle securely). Shown redacted when you are viewing another node over remote admin — the firmware does not send it                                                              |
- Luo uusi yksityinen avain   | Issues a new keypair for this node, behind a confirmation. Every peer that knew your old key must learn the new one                                                                                                           |
- Suoran viestin avain        | The key used for direct-message encryption                                                                                                                                                                                                    |
+ Ylläpitäjän avain           | Avaimet, joilla tätä radiota voidaan hallita etänä – enintään kolme                                                                                                                                                                           |
+ Yksityinen avain            | Radiosi yksityinen avain (säilytä turvallisesti). Näytetään peitettynä, kun tarkastelet toista radiota etähallinnan kautta — laiteohjelmisto ei lähetä sitä                                                |
+ Luo uusi yksityinen avain   | Luo tälle radiolle uuden avainparin vahvistuksen jälkeen. Kaikkien vanhan avaimesi tunteneiden vertaisradioiden on opittava uusi avain                                                                                        |
+ Suoran viestin avain        | Suoraviestien salaukseen käytettävä avain                                                                                                                                                                                                     |
  ~~Ylläpitokanava käytössä~~ | ⚠️ Poistettu — määritetään nyt automaattisesti, kun ylläpitoavain asetetaan                                                                                                                                                                   |
  Virheenkorjausloki          | Tulosta reaaliaikainen virheenkorjausloki sarjaportin tai bluetoothin kautta                                                                                                                                                                  |
  Sarjaportti käytössä        | Ota sarjakonsoliyhteys käyttöön (siirretty laiteasetuksista)                                                                                                                                                               |
- Hallintatila                | Restrict non-admin channel changes. Only selectable once an Admin Key is set                                                                                                                                                  |
+ Hallintatila                | Rajoita muiden kuin järjestelmänvalvojan tekemiä kanavamuutoksia. Voidaan valita vasta, kun järjestelmänvalvojan avain on määritetty                                                                                          |
  Varmuuskopioi avaimet       | Tallenna radion avaimista salattu varmuuskopio tälle laitteelle (vain Android)                                                                                                                                             |
  Palauta avaimet             | Kirjoita varmuuskopioidut avaimet takaisin radioon (käytettävissä, kun varmuuskopio on olemassa)                                                                                                                           |
  Poista avaimen varmuuskopio | Poista tälle laitteelle tallennettu avainten varmuuskopio                                                                                                                                                                                     |
  Suojaustaso                 | Pakettien aitous – miten allekirjoittamattomia tai välitettyjä paketteja käsitellään: **Tiukka**, **Tasapainoinen** tai **Yhteensopiva** (edellyttää tuettua laiteohjelmistoa; Tiukka pyytää vahvistuksen) |
 
-#### Lockdown Mode
+#### Lukitustila
 
-Lockdown encrypts the device's storage and requires a passphrase for each connection. It needs
-supporting firmware; the row does not appear otherwise.
+Lukitustila salaa laitteen tallennustilan ja edellyttää tunnuslausetta jokaiselle yhteydelle. Edellyttää sitä tukevaa laiteohjelmistoa. Muussa tapauksessa tätä ei näytetä.
 
-Enabling it asks you to set and confirm a passphrase, and to acknowledge that **it locks the debug
-(SWD) port on hardware that supports locking**. You can turn lockdown off again at any time with
-the passphrase, and a full device erase restores the hardware regardless.
+Käyttöönoton yhteydessä sinua pyydetään määrittämään ja vahvistamaan tunnuslause sekä vahvistamaan, että **se lukitsee virheenkorjausportin (SWD)** sitä tukevassa laitteistossa. Voit poistaa lukitustilan käytöstä milloin tahansa tunnuslauseella, ja laitteen täydellinen tyhjennys palauttaa laitteiston joka tapauksessa.
 
-Alongside the passphrase you set the limits that end a session automatically:
+Tunnuslauseen lisäksi määrität rajat, joiden täyttyessä istunto päättyy automaattisesti:
 
- Field                                                 | Mitä se tekee                                     |
- ----------------------------------------------------- | ------------------------------------------------- |
- Jäljellä olevat käynnistykset                         | How many device boots the unlocked state survives |
- Tuntia vanhenemiseen saakka                           | Wall-clock lifetime of the unlocked state         |
- Istunnon enimmäiskesto (minuuttia) | Maximum length of a single unlocked connection    |
+ Kenttä                                                | Mitä se tekee                                      |
+ ----------------------------------------------------- | -------------------------------------------------- |
+ Jäljellä olevat käynnistykset                         | Kuinka monen käynnistyksen ajan avattu tila säilyy |
+ Tuntia vanhenemiseen saakka                           | Avatun tilan enimmäiskesto                         |
+ Istunnon enimmäiskesto (minuuttia) | Yhden avatun yhteyden enimmäiskesto                |
 
-Once active, the row reads _Active — storage encrypted, this connection authenticated_ when
-unlocked, or _Active — enter your passphrase to unlock this connection_ when not. **Lock Now**
-ends the current session immediately. Repeated wrong passphrases are rate-limited with a
-back-off before you can try again.
+Kun lukitustila on käytössä, tässä lukee _Aktiivinen – tallennustila salattu, tämä yhteys todennettu_, kun yhteys on avattu, tai _Aktiivinen – avaa tämä yhteys antamalla tunnuslause_, kun sitä ei ole avattu. **Lukitse nyt** päättää nykyisen istunnon välittömästi. Toistuvat virheelliset tunnuslauseet rajoitetaan odotusajalla, ennen kuin voit yrittää uudelleen.
 
-&gt; ⚠️ **Warning:** There is no passphrase recovery. Losing it means erasing the device to get it
-&gt; back, which destroys its keys, channels and settings.
+&gt; ⚠️ **Varoitus:** Tunnuslausetta ei voi palauttaa. Jos kadotat sen, laite on tyhjennettävä sen palauttamiseksi, jolloin sen avaimet, kanavat ja asetukset poistuvat.
 
 ![Salasanakenttä](../../assets/screenshots/settings_password_field.png)
 
 Asetukset käyttävät tavallisia asetussäätimiä — pudotusvalikoita, kytkimiä ja liukusäätimiä:
 
- Säädin         | Kuvakaappaus                                                      |
- -------------- | ----------------------------------------------------------------- |
- Pudotusvalikko | ![Pudotusvalikko](../../assets/screenshots/settings_dropdown.png) |
- Kytkin         | ![Kytkin](../../assets/screenshots/settings_switch.png)           |
- Liukusäädin    | ![Liukusäädin](../../assets/screenshots/settings_slider.png)      |
+ Säädin         | Kuvakaappaus                                                                                                      |
+ -------------- | ----------------------------------------------------------------------------------------------------------------- |
+ Pudotusvalikko | ![Pudotusvalikkoasetus avattuna näyttämään vaihtoehtoluettelonsa](../../assets/screenshots/settings_dropdown.png) |
+ Kytkin         | ![Kytkinasetus käytössä-asennossa](../../assets/screenshots/settings_switch.png)                                  |
+ Liukusäädin    | ![Liukusäädinasetus nykyinen numeerinen arvo näkyvissä](../../assets/screenshots/settings_slider.png)             |
 
 ## Aiheeseen liittyvät aiheet
 
@@ -238,9 +234,6 @@ Asetukset käyttävät tavallisia asetussäätimiä — pudotusvalikoita, kytkim
 - [Signaalimittari](signal-meter) — miten modeemiesiasetukset vaikuttavat signaalin laadun raja-arvoihin
 - [LoRa-määritykset](https://meshtastic.org/docs/configuration/radio/lora) — yksityiskohtainen LoRa-asetusten viite meshtastic.org-sivustolla
 - [Alkumääritykset](https://meshtastic.org/docs/getting-started/initial-config) — alueasetusten määritysopas meshtastic.org-sivustolla
-
----
-
 </pre>
 </body>
 </html>

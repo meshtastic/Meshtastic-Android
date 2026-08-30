@@ -1,6 +1,6 @@
 <h1 id="nœuds">Nœuds</h1>
 
-<p>The Nodes screen displays all devices visible on your mesh network.</p>
+<p>The Nodes screen lists every node visible on your mesh.</p>
 
 <h2 id="node-list">Node List</h2>
 
@@ -35,12 +35,12 @@
     </tr>
     <tr>
       <td>⭐ Favorite</td>
-      <td>Node marked as favorite by the user</td>
+      <td>Node you marked as a favorite.</td>
     </tr>
   </tbody>
 </table>
 
-<p>A node is considered <strong>online</strong> if it was heard within the last 2 hours, and <strong>offline</strong> otherwise — there is no separate “away” tier.</p>
+<p>There is no separate “away” tier.</p>
 
 <h3 id="node-roles">Node Roles</h3>
 
@@ -56,7 +56,7 @@
   <tbody>
     <tr>
       <td>Client</td>
-      <td>Standard end-user device</td>
+      <td>Standard end-user node</td>
     </tr>
     <tr>
       <td>Base Client</td>
@@ -114,17 +114,17 @@
 <p>Most users should keep the default <strong>Client</strong> role. Consider a different role when:</p>
 
 <ul>
-  <li><strong>Router</strong> — You have a node in a fixed, elevated location with reliable power (rooftop, hilltop). Routers stay awake continuously to relay messages for others and are essential for extending mesh coverage. Don’t use Router on battery-powered handheld devices.</li>
+  <li><strong>Router</strong> — You have a node in a fixed, elevated location with reliable power (rooftop, hilltop). Routers stay awake continuously to relay messages for others and are essential for extending mesh coverage. Don’t use Router on battery-powered handheld radios.</li>
   <li><strong>Router Late</strong> — An infrastructure node that always rebroadcasts packets once but only after all other routing modes have had their turn. Provides supplemental coverage for local clusters without competing with primary routers.</li>
   <li><strong>Client Base</strong> — Treats traffic from/to your favorited nodes with Router Late priority (ensuring those messages get extra relay coverage) while handling everything else as a normal Client.</li>
-  <li><strong>Client Mute</strong> — You want to receive mesh traffic but not contribute to relaying. Useful for monitoring-only devices or to reduce congestion in dense areas.</li>
-  <li><strong>Tracker</strong> — An unattended device whose sole purpose is broadcasting its GPS position (e.g., a vehicle, pet, or asset). Sleeps between broadcasts to conserve battery.</li>
-  <li><strong>Sensor</strong> — An unattended device reporting environmental telemetry (temperature, humidity, air quality). Similar power profile to Tracker.</li>
+  <li><strong>Client Mute</strong> — You want to receive mesh traffic but not contribute to relaying. Useful for monitoring-only radios or to reduce congestion in dense areas.</li>
+  <li><strong>Tracker</strong> — An unattended radio whose sole purpose is broadcasting its GPS position (e.g., a vehicle, pet, or asset). Sleeps between broadcasts to conserve battery.</li>
+  <li><strong>Sensor</strong> — An unattended radio reporting environmental telemetry (temperature, humidity, air quality). Similar power profile to Tracker.</li>
   <li><strong>TAK / TAK Tracker</strong> — Only needed if interoperating with ATAK/WinTAK systems. See <a href="tak">TAK Integration</a> for details.</li>
 </ul>
 
 <blockquote>
-  <p>💡 <strong>Tip:</strong> The mesh works best when most nodes are <strong>Client</strong> or <strong>Router</strong>. Too many Mute nodes reduces mesh resilience; too many Routers in a dense area can cause congestion. A good rule of thumb: one Router per 5–10 Clients in your area.</p>
+  <p>💡 <strong>Tip:</strong> The mesh works best when most nodes are <strong>Client</strong> or <strong>Router</strong>. Too many Client Mute nodes reduce mesh resilience; too many Routers in a dense area can cause congestion. A good rule of thumb: one Router per 5–10 Clients in your area.</p>
 </blockquote>
 
 <h3 id="encryption-indicators">Encryption Indicators</h3>
@@ -164,7 +164,7 @@
 
 <ul>
   <li><strong>Tap</strong> a node to view its detail page</li>
-  <li><strong>Long-press</strong> for quick actions:
+  <li><strong>Touch &amp; hold</strong> for quick actions:
     <ul>
       <li>Mark/remove favorite</li>
       <li>Mute/unmute notifications</li>
@@ -214,7 +214,7 @@
     </tr>
     <tr>
       <td><strong>Show ignored</strong></td>
-      <td>Show nodes you’ve previously dismissed or muted</td>
+      <td>Show nodes you’ve ignored</td>
     </tr>
   </tbody>
 </table>
@@ -268,7 +268,7 @@
 
 <p>Tapping a node opens the detail view with comprehensive information. See <a href="node-metrics">Node Metrics</a> for full details on metrics and telemetry.</p>
 
-<p><img src="../../assets/screenshots/nodes_node_list.png" alt="Node detail view" /></p>
+<p><img src="../../assets/screenshots/nodes_node_list.png" alt="Node list, showing signal quality and last-heard time for each node" /></p>
 
 <p>The detail screen includes device info, position, and action buttons:</p>
 
@@ -322,6 +322,3 @@
   <li><a href="discovery">Local Mesh Discovery</a> — traceroute and neighbor info for topology exploration</li>
   <li><a href="signal-meter">Signal Meter</a> — understand what the signal bars mean</li>
 </ul>
-
-<hr />
-

@@ -1,10 +1,6 @@
 <h1 id="telemetry--sensors">Telemetry &amp; Sensors</h1>
 
-<p>Meshtastic nodes can collect and share sensor data across the mesh network.</p>
-
-<h2 id="overview">Overview</h2>
-
-<p>Telemetry allows nodes equipped with sensors to broadcast environmental, power, and device health information. This data is visible on the node detail screen and can be logged over time.</p>
+<p>Meshtastic nodes can collect and share sensor data across the mesh network. Telemetry allows nodes equipped with sensors to broadcast environmental, power, and device health information, visible on the node detail screen and logged over time.</p>
 
 <h2 id="device-telemetry">Device Telemetry</h2>
 
@@ -121,12 +117,12 @@
     <tr>
       <td>PMSA003I</td>
       <td>PM1.0, PM2.5, PM10</td>
-      <td>Particulate matter</td>
+      <td>See <a href="#air-quality-metrics">Air Quality Metrics</a></td>
     </tr>
     <tr>
       <td>SEN55</td>
       <td>PM, Temp, Humidity</td>
-      <td>Multi-sensor. Its NOx and VOC indices are recorded and included in a CSV export, but are not yet shown as cards or charts</td>
+      <td>Multi-sensor. Its NOx and VOC indices are recorded and included in a CSV export, but are not shown as cards or charts</td>
     </tr>
   </tbody>
 </table>
@@ -205,7 +201,7 @@
   </tbody>
 </table>
 
-<p>Up to three channels are reported (ch1–ch3), and each can be given its own label — Solar or Battery, say — from the node detail screen. There is no separate wattage reading; the app charts voltage and current, and does not compute power from them.</p>
+<p>Up to three sensor channels (ch1–ch3) are reported, and each can be given its own label — Solar or Battery, say — from the node detail screen. There is no separate wattage reading; the app charts voltage and current, and does not compute power from them.</p>
 
 <p>Useful for monitoring solar charging or battery health on remote nodes.</p>
 
@@ -223,18 +219,16 @@
       <li><strong>Power Metrics</strong> — the per-channel voltage and current readings</li>
     </ul>
 
-    <p>Environment metrics additionally have an on-screen toggle and a Fahrenheit toggle for the
-device’s own display.</p>
+    <p>Environment metrics additionally have toggles to show the readings on the radio’s own screen,
+and to show them in Fahrenheit.</p>
   </li>
 </ol>
 
 <h3 id="choosing-an-interval">Choosing an Interval</h3>
 
-<blockquote>
-  <p>💡 <strong>Tip:</strong> These are nominal values, not hard schedules. On a congested mesh the firmware
-automatically backs off to longer intervals based on how many nodes are online, so you do not
-need to hand-tune them for mesh size. Lengthen them deliberately only to save battery.</p>
-</blockquote>
+<p>These are nominal values, not hard schedules. On a congested mesh the firmware automatically
+backs off to longer intervals based on how many nodes are online, so you do not need to
+hand-tune them for mesh size. Lengthen them deliberately only to save battery.</p>
 
 <h2 id="air-quality-metrics">Air Quality Metrics</h2>
 
@@ -293,7 +287,7 @@ need to hand-tune them for mesh size. Lengthen them deliberately only to save ba
   <li>Historical graphs show trends over time.</li>
 </ol>
 
-<p><img src="../../assets/screenshots/node-metrics_telemetric_actions.png" alt="Telemetry actions" /></p>
+<p><img src="../../assets/screenshots/node-metrics_telemetric_actions.png" alt="Node detail screen with the telemetry chart action menu open" /></p>
 
 <h2 id="troubleshooting">Troubleshooting</h2>
 
@@ -310,6 +304,3 @@ need to hand-tune them for mesh size. Lengthen them deliberately only to save ba
   <li><a href="settings-module-admin">Settings — Modules &amp; Admin</a> — telemetry module configuration</li>
   <li><a href="units-and-locale">Units &amp; Locale</a> — temperature and pressure display units</li>
 </ul>
-
-<hr />
-

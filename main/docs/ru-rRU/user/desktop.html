@@ -9,34 +9,32 @@
 <body data-page="desktop" data-locale="ru-rRU">
 <pre class="markdown-content"># Настольное приложение
 
-Настольное приложение Meshtastic использует общий код с Android через Kotlin Multiplatform. Большинство функций работают одинаково на Linux, macOS и Windows.
+This page covers installing the Meshtastic desktop app, connecting a radio, and how it differs from Android. The desktop app shares its core codebase with Android via Kotlin Multiplatform, so most features work identically across Linux, macOS, and Windows.
 
 ## Установка
 
 ### Linux
 
-- Скачайте пакет `.deb` или `.AppImage` со страницы релизов
+- Download the `.deb` or `.AppImage` package from the [releases page](https://github.com/meshtastic/Meshtastic-Android/releases)
 - Или соберите из исходного кода с помощью `./gradlew :desktopApp:run`
 
 ### macOS
 
-- Скачайте пакет `.dmg` из релизов
+- Download the `.dmg` package from the [releases page](https://github.com/meshtastic/Meshtastic-Android/releases)
 - Или соберите из исходных кодов
 
 ### Windows
 
-- Загрузите установщик `.msi` со страницы релизов
+- Download the `.msi` installer from the [releases page](https://github.com/meshtastic/Meshtastic-Android/releases)
 - Или соберите из исходных кодов
 
 ## Подключение твоей радиостанции
 
 ### Последовательная USB (Основной)
 
-Наиболее надежный способ подключения к компьютеру:
+The most reliable connection method on desktop:
 
-1. Подключите свою радиостанцию Meshtastic через USB-кабель.
-2. Приложение должно автоматически определить последовательный порт.
-3. Если порт не определён, выберите правильный последовательный порт в меню "Подключение".
+Connect your radio via USB. The app detects the serial port automatically; if it doesn't, select the port from the Connect menu.
 
 ### TCP/IP
 
@@ -47,26 +45,27 @@
 
 ### Bluetooth (BLE)
 
-Bluetooth Low Energy поддерживается в настольном приложении с помощью библиотеки [Kable](https://github.com/JuulLabs/kable):
+Bluetooth Low Energy is supported on desktop via the [Kable](https://github.com/JuulLabs/kable) library:
 
-1. Убедитесь, что ваша система оснащена Bluetooth-адаптером.
-2. Приложение автоматически сканирует находящиеся поблизости радиостанции Meshtastic.
-3. Выберите своё устройство на экране «Подключение».
+1. Убедитесь, что ваша система оснащена Bluetooth-адаптером. Приложение автоматически сканирует находящиеся поблизости радиостанции Meshtastic.
+2. Select your radio from the Connect screen.
 
 ## Паритет функций
 
- Функция                                              | Android | Desktop | Заметки                                                                                                        |
- ---------------------------------------------------- | ------- | ------- | -------------------------------------------------------------------------------------------------------------- |
- Обмен сообщениями                                    | ✓       | ✓       | Полное равенство                                                                                               |
- Список узлов                                         | ✓       | ✓       | Полное равенство                                                                                               |
- Карта                                                | ✓       | ◐       | Вкладка карты присутствует в настольном приложении, но интерактивный просмотр карты доступен только на Android |
- Настройки                                            | ✓       | ✓       | Полное равенство                                                                                               |
- Bluetooth (BLE)                   | ✓       | ✓       | Через Kable в настольном приложении                                                                            |
- Обновление прошивки                                  | ✓       | ✓       | Внутри приложенное обновление по USB, BLE и Wi-Fi (ESP32) работает так же, как на Android   |
- Уведомления                                          | ✓       | ✓       | Системные уведомления                                                                                          |
- Виджеты                                              | ✓       | ✗       | Только Android                                                                                                 |
- AI-ассистент (Chirpy)             | ✓\*     | ✗       | Только в Google-версии для Android                                                                             |
- Функции приложения (системный ИИ) | ✓†      | ✗       | Только в Google-версии для Android                                                                             |
+ Функция                                               | Android | Desktop | Заметки                                                                                                                                                |
+ ----------------------------------------------------- | ------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+ Обмен сообщениями                                     | ✓       | ✓       | Полное равенство                                                                                                                                       |
+ Список узлов                                          | ✓       | ✓       | Полное равенство                                                                                                                                       |
+ Карта                                                 | ✓       | ✓       | Interactive MapLibre map, with base map and overlay pickers and custom tile sources. No offline downloads or local `.mbtiles` archives |
+ Map layers (`.kml`/`.kmz`/GeoJSON) | ✓       | ✓       | Same layer store and sheet as Android; imported files draw on the desktop map                                                                          |
+ Планировщик участков                                  | ✓       | ✓\*     | \*Opens in your browser on desktop; the estimate is not drawn on the desktop map                                                                       |
+ Настройки                                             | ✓       | ✓       | Полное равенство                                                                                                                                       |
+ Bluetooth (BLE)                    | ✓       | ✓       | Через Kable в настольном приложении                                                                                                                    |
+ Обновление прошивки                                   | ✓       | ✓       | Внутри приложенное обновление по USB, BLE и Wi-Fi (ESP32) работает так же, как на Android                                           |
+ Уведомления                                           | ✓       | ✓       | Системные уведомления                                                                                                                                  |
+ Виджеты                                               | ✓       | ✗       | Только Android                                                                                                                                         |
+ AI-ассистент (Chirpy)              | ✓\*     | ✗       | Только в Google-версии для Android                                                                                                                     |
+ Функции приложения (системный ИИ)  | ✓†      | ✗       | Только в Google-версии для Android                                                                                                                     |
 
 \*Chirpy AI требует Android 14+ в Google-версии на поддерживаемом оборудовании.
 
@@ -74,7 +73,7 @@ Bluetooth Low Energy поддерживается в настольном при
 
 ## Различия интерфейса
 
-Настольное приложение использует тот же интерфейс на Compose Multiplatform с адаптациями для больших экранов и настольного взаимодействия.
+The desktop app uses the same Compose Multiplatform UI with adaptations for larger screens and desktop interaction.
 
 ### Сочетания клавиш
 
@@ -82,7 +81,7 @@ Bluetooth Low Energy поддерживается в настольном при
 
  Сочетание    | Действие                         |
  ------------ | -------------------------------- |
- **⌘/Ctrl+Q** | Выйти из приложения              |
+ **⌘/Ctrl+Q** | Quit the app                     |
  **⌘/Ctrl+,** | Открыть настройки                |
  **⌘/Ctrl+1** | Перейти во вкладку "Сообщения"   |
  **⌘/Ctrl+2** | Перейти во вкладку "Узлы"        |
@@ -99,11 +98,11 @@ Bluetooth Low Energy поддерживается в настольном при
 
 ### Настройки уведомлений
 
-Настольное приложение предоставляет встроенные переключатели для управления отображением уведомлений: сообщения, новые узлы и предупреждения о низком заряде батареи. Доступ к ним осуществляется через **Настройки → Уведомления** в самом приложении.
+The desktop app provides in-app toggles for controlling which notifications are shown — messages, new nodes, and low battery alerts. Доступ к ним осуществляется через **Настройки → Уведомления** в самом приложении.
 
 ## Встроенный браузер документации
 
-Настольное приложение включает встроенный браузер документации для быстрого доступа к справочным материалам без выхода из приложения.
+The desktop app includes a built-in documentation browser for quick access to help content without leaving the app.
 
 ![Браузер документации с оглавлением](../../assets/screenshots/docs-browser_toc.png)
 
@@ -130,7 +129,12 @@ cd Meshtastic-Android
 
 ## Известные ограничения
 
-- Интерактивный просмотр карты доступен только на Android — вкладка «Карта» присутствует в настольном приложении, но не отображает карту
+- Offline tile downloads and local `.mbtiles` archives are not available on desktop.
+- `.kml`/`.kmz`/GeoJSON layer import works — see
+  [Map &amp; Waypoints](map-and-waypoints#map-layers). Site Planner opens in your browser
+  rather than in the app; to bring its coverage estimate onto the map, use the planner's
+  **Export › GeoJSON** and add the file as a layer. Custom network tile sources work too — see
+  [Map &amp; Waypoints](map-and-waypoints#adding-your-own-tile-source)
 - Некоторые специфичные для Android функции (виджеты, отдельные каналы уведомлений) недоступны
 - Производительность может варьироваться на маломощном оборудовании при запуске Compose Desktop
 - BLE-связывание пока не поддерживается в настольном приложении (сопряжение работает без связывания)
@@ -139,9 +143,6 @@ cd Meshtastic-Android
 
 - [Подключения](connections) — обзор методов подключения
 - [Обновление прошивки](firmware) — обновление по USB, BLE и Wi-Fi работает так же, как на Android
-
----
-
 </pre>
 </body>
 </html>

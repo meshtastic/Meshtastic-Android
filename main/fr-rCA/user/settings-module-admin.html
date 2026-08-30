@@ -52,7 +52,7 @@
     </tr>
     <tr>
       <td>JSON Output</td>
-      <td>Publish and consume MQTT messages as JSON. Marked deprecated in the protobuf schema, but it is still the only toggle for this behaviour and the firmware still honours it</td>
+      <td>Publish and consume MQTT messages as JSON. Marked deprecated in the protobuf schema, but it is still the only toggle for this behavior and the firmware still honors it</td>
     </tr>
     <tr>
       <td>TLS</td>
@@ -68,7 +68,7 @@
     </tr>
     <tr>
       <td>MQTT proxy on this phone</td>
-      <td>The phone-side half of the above: whether <em>this</em> phone is currently acting as that relay. See <a href="mqtt">MQTT</a></td>
+      <td>The phone-side half of <strong>Proxy to client enabled</strong>: whether this phone acts as that relay. See <a href="mqtt">MQTT</a></td>
     </tr>
     <tr>
       <td>Map Report</td>
@@ -93,7 +93,7 @@
     </tr>
     <tr>
       <td>Share location</td>
-      <td>Explicit consent to include your position. Map reporting will not save without it</td>
+      <td>Explicit consent to include your position. Map reporting does not save without it</td>
     </tr>
     <tr>
       <td>Position precision</td>
@@ -263,8 +263,8 @@ and each can drive the LED, the buzzer and the vibration motor separately, givin
 <h3 id="range-test-module">Range Test Module</h3>
 
 <blockquote>
-  <p>⚠️ <strong>Warning:</strong> Range Test only works on a secured primary channel. While your primary channel
-still uses the default public key, the Enabled, Interval and Save-CSV controls stay disabled, and
+  <p>⚠️ <strong>Warning:</strong> Range Test only works on a secured primary channel. As long as your primary channel
+still uses the default channel key, the Enabled, Interval and Save-CSV controls stay disabled, and
 saving force-disables the module if the channel has reverted to public.</p>
 </blockquote>
 
@@ -359,7 +359,7 @@ battery health often and sensors rarely.</p>
 
 <h3 id="canned-message-module">Canned Message Module</h3>
 
-<p>Pre-configured messages accessible from the device’s physical buttons (for radios with rotary encoders, keypads, or similar input hardware). Define a list of quick-send messages that can be transmitted without a phone connected — ideal for field use.</p>
+<p>Pre-configured messages accessible from the radio’s physical buttons (for radios with rotary encoders, keypads, or similar input hardware). Define a list of quick-send messages that can be transmitted without a phone connected — ideal for field use.</p>
 
 <table>
   <thead>
@@ -455,6 +455,10 @@ battery health often and sensors rarely.</p>
 
 <p>GPIO control over the mesh network. Allows a remote node to read or write GPIO pins on another node — useful for activating relays, reading switches, or controlling external hardware from a distance.</p>
 
+<blockquote>
+  <p>⚠️ <strong>Warning:</strong> Enabling <strong>Allow Undefined Pins</strong> gives remote nodes access to all GPIO pins, which could interfere with the radio’s own hardware. Only enable on dedicated GPIO nodes.</p>
+</blockquote>
+
 <table>
   <thead>
     <tr>
@@ -477,10 +481,6 @@ battery health often and sensors rarely.</p>
     </tr>
   </tbody>
 </table>
-
-<blockquote>
-  <p>⚠️ <strong>Warning:</strong> Enabling “Allow Undefined Pins” gives remote nodes access to all GPIO pins, which could interfere with the radio’s own hardware. Only enable on dedicated GPIO nodes.</p>
-</blockquote>
 
 <h3 id="neighbor-info-module">Neighbor Info Module</h3>
 
@@ -587,7 +587,7 @@ battery health often and sensors rarely.</p>
 
 <h3 id="paxcounter-module">Paxcounter Module</h3>
 
-<p>People counter using WiFi and BLE probe requests. Counts nearby devices by passively listening for probe requests that phones and laptops emit when scanning for networks. Available only on ESP32 devices.</p>
+<p>People counter using Wi-Fi and BLE probe requests. Counts nearby devices by passively listening for probe requests that phones and laptops emit when scanning for networks. Available only on ESP32 devices.</p>
 
 <table>
   <thead>
@@ -606,8 +606,8 @@ battery health often and sensors rarely.</p>
       <td>How often to report counts</td>
     </tr>
     <tr>
-      <td>WiFi RSSI threshold</td>
-      <td>Ignore WiFi probes weaker than this, so distant devices are not counted (defaults to −80 dBm)</td>
+      <td>Wi-Fi RSSI threshold</td>
+      <td>Ignore Wi-Fi probes weaker than this, so distant devices are not counted (defaults to −80 dBm)</td>
     </tr>
     <tr>
       <td>BLE RSSI threshold</td>
@@ -622,30 +622,8 @@ battery health often and sensors rarely.</p>
 
 <h3 id="status-message-module">Status Message Module</h3>
 
-<p>Publishes a short free-text status line for your node, which other nodes can display alongside it.</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Paramètre</th>
-      <th>Description</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>La chaîne de statut actuelle</td>
-      <td>Up to 80 characters. The <strong>✕</strong> in the field clears it. (That is the app’s own label for the field, verbatim.)</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>Saving takes effect immediately — this is one of the few module settings that never asks the
-node to reboot.</p>
-
-<blockquote>
-  <p>ℹ️ <strong>Note:</strong> The screen only appears for firmware that reports support for the status-message
-module. If you do not see it in the module list, your node’s firmware does not have it.</p>
-</blockquote>
+<p>The status message has no module screen. It is edited with the rest of the node’s identity, on
+<a href="settings-radio-user#user-profile">Settings — Radio &amp; User</a>.</p>
 
 <h3 id="mesh-beacon-module">Mesh Beacon Module</h3>
 
@@ -654,12 +632,10 @@ module. If you do not see it in the module list, your node’s firmware does not
 
 <h3 id="tak-module">TAK Module</h3>
 
-<blockquote>
-  <p>ℹ️ <strong>Note:</strong> This module only appears in the list once the node’s <strong>Device Role</strong> (Device Config)
-is set to <strong>TAK</strong> or <strong>TAK Tracker</strong>. Change the role first, or the entry will not be there.</p>
-</blockquote>
-
-<p>Team Awareness Kit integration for interoperability with ATAK and WinTAK. See <a href="tak">TAK Integration</a> for detailed setup and usage.</p>
+<p>Team Awareness Kit integration for interoperability with ATAK and WinTAK. This module only appears
+in the list once the node’s <strong>Device Role</strong> (Device Config) is set to <strong>TAK</strong> or <strong>TAK Tracker</strong> —
+change the role first, otherwise the entry does not appear. See <a href="tak">TAK Integration</a> for detailed
+setup and usage.</p>
 
 <h2 id="administration">Administration</h2>
 
@@ -675,7 +651,7 @@ is set to <strong>TAK</strong> or <strong>TAK Tracker</strong>. Change the role 
 </ol>
 
 <blockquote>
-  <p>⚠️ <strong>Requires:</strong> Admin key configured on both your node and the target node.</p>
+  <p>⚠️ <strong>Important:</strong> Requires an admin key configured on both your node and the target node.</p>
 </blockquote>
 
 <h3 id="nettoyer-la-base-de-données-des-nœuds">Nettoyer la base de données des nœuds</h3>
@@ -690,7 +666,11 @@ leaving named nodes alone regardless of age.</li>
 
 <h3 id="factory-reset">Factory Reset</h3>
 
-<p>Resets all settings to factory defaults. <strong>This cannot be undone.</strong></p>
+<blockquote>
+  <p>⚠️ <strong>Warning:</strong> Factory reset erases all settings, channels, and keys. This cannot be undone.</p>
+</blockquote>
+
+<p>Resets all settings to factory defaults.</p>
 
 <h3 id="redémarrer">Redémarrer</h3>
 
@@ -709,8 +689,8 @@ leaving named nodes alone regardless of age.</li>
 <ul>
   <li><strong>What is Meshtastic?</strong> — a short description of the project.</li>
   <li><strong>Apps</strong> — opens with <strong>Need Hardware?</strong>, a rotating carousel of popular devices that links out
-to where to buy one, then the GitHub repository, the running app version, and
-<strong>Acknowledgements</strong> (below).</li>
+to where to buy one. It also lists the GitHub repository, the running app version, and
+<strong>Acknowledgements</strong> (see the next section).</li>
   <li><strong>Project information</strong> — links to the website and to this documentation.</li>
 </ul>
 
@@ -734,6 +714,3 @@ generated at build time by AboutLibraries. It was previously called the license 
   <li><a href="https://meshtastic.org/docs/configuration/module">Module configuration reference</a> — detailed module docs on meshtastic.org</li>
   <li><a href="https://meshtastic.org/docs/faq/">FAQ</a> — common questions on meshtastic.org</li>
 </ul>
-
-<hr />
-

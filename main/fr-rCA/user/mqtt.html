@@ -15,10 +15,10 @@
 
 <h2 id="how-it-works">How It Works</h2>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[Your Node] → Radio → [Gateway Node with WiFi] → MQTT Broker → [Remote Gateway] → Radio → [Remote Node]
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[Your Node] → Radio → [Gateway Node with Wi-Fi] → MQTT Broker → [Remote Gateway] → Radio → [Remote Node]
 </code></pre></div></div>
 
-<p>A gateway node with internet access (WiFi or Ethernet) publishes mesh messages to an MQTT topic. Remote gateways subscribed to the same topic inject those messages into their local mesh.</p>
+<p>A gateway node with internet access (Wi-Fi or Ethernet) publishes mesh messages to an MQTT topic. Remote gateways subscribed to the same topic inject those messages into their local mesh.</p>
 
 <h2 id="configuration">Configuration</h2>
 
@@ -30,7 +30,7 @@
   <li>Configure the broker connection:</li>
 </ol>
 
-<p><img src="../../assets/screenshots/settings_switch.png" alt="MQTT toggle switch" /></p>
+<p><img src="../../assets/screenshots/settings_switch.png" alt="MQTT module settings with the module enabled" /></p>
 
 <table>
   <thead>
@@ -68,7 +68,7 @@
     </tr>
     <tr>
       <td>JSON Output</td>
-      <td>Also publish and consume the <code class="language-plaintext highlighter-rouge">/2/json/</code> topic. Deprecated in the protobuf schema, but still the only toggle for this behaviour — and the app’s own proxy honours it</td>
+      <td>Also publish and consume the <code class="language-plaintext highlighter-rouge">/2/json/</code> topic. Deprecated in the protobuf schema, but still the only toggle for this behavior — and the app’s own proxy honors it</td>
       <td>Désactivé</td>
     </tr>
     <tr>
@@ -95,21 +95,17 @@ TLS failing, the attempt timing out, or the broker rejecting your credentials wi
 
 <h3 id="mqtt-proxy-on-this-phone">MQTT Proxy on This Phone</h3>
 
-<p>If your node has no internet access of its own, it can use the connected phone as its MQTT gateway: enable <strong>MQTT</strong> and <strong>Proxy to client enabled</strong> in the module config, and the app relays MQTT traffic between the radio and the broker over your phone’s internet connection.</p>
+<p>If your radio has no internet access of its own, it can use the connected phone as its MQTT gateway: enable <strong>MQTT</strong> and <strong>Proxy to client enabled</strong> in the module config, and the app relays MQTT traffic between the radio and the broker over your phone’s internet connection.</p>
 
 <blockquote>
   <p>ℹ️ <strong>Note:</strong> The proxy relay is mobile-only. On the Desktop app the MQTT settings are present, but no relay runs behind them.</p>
 </blockquote>
 
-<p>The <strong>MQTT proxy on this phone</strong> toggle at the top of the MQTT settings screen shows whether this relay is currently running and lets you cut it off (or restart it) immediately — without editing and re-saving the device’s MQTT configuration.</p>
+<p>The <strong>MQTT proxy on this phone</strong> toggle at the top of the MQTT settings screen shows whether this relay is running and lets you cut it off (or restart it) immediately — without editing and re-saving the radio’s MQTT configuration.</p>
 
 <h3 id="default-meshtastic-broker">Default Meshtastic Broker</h3>
 
-<p>The community maintains a public broker at <code class="language-plaintext highlighter-rouge">mqtt.meshtastic.org</code>. This is intended for general use and testing.</p>
-
-<blockquote>
-  <p>ℹ️ <strong>Note:</strong> Connections to <code class="language-plaintext highlighter-rouge">mqtt.meshtastic.org</code> always use TLS (port 8883), even if the TLS toggle is off. For any other broker, TLS is used only when you enable it (port 8883 with TLS, 1883 without).</p>
-</blockquote>
+<p>The community maintains a public broker at <code class="language-plaintext highlighter-rouge">mqtt.meshtastic.org</code>. This is intended for general use and testing. Connections to it always use TLS (port 8883), even if the TLS toggle is off; for any other broker, TLS is used only when you enable it (port 8883 with TLS, 1883 without).</p>
 
 <blockquote>
   <p>🔒 <strong>Privacy:</strong> Messages on the public broker are readable by anyone subscribed. Always use channel encryption for private communications.</p>
@@ -210,7 +206,7 @@ replaced and it is not ignored. When it is on, the app’s own MQTT proxy subscr
 
 <ul>
   <li>Use channel-level encryption (PSK) on channels that bridge to MQTT</li>
-  <li>Don’t enable MQTT on nodes without internet access (it will buffer and waste memory)</li>
+  <li>Don’t enable MQTT on nodes without internet access (the radio buffers unsendable messages and wastes memory)</li>
   <li>Use a private broker for sensitive deployments</li>
   <li>Be mindful of airtime when downlinking messages from busy MQTT topics — every downlinked message consumes radio airtime on your local mesh</li>
   <li>Consider enabling uplink-only if you only need to monitor your mesh remotely without injecting messages back</li>
@@ -221,9 +217,9 @@ replaced and it is not ignored. When it is on, the app’s own MQTT proxy subscr
 <h3 id="mqtt-not-connecting">MQTT Not Connecting</h3>
 
 <ul>
-  <li><strong>Check WiFi</strong> — the gateway node must have an active internet connection (WiFi or Ethernet). MQTT does not work over the LoRa radio link itself.</li>
-  <li><strong>Verify credentials</strong> — incorrect username or password will silently fail on most brokers. Double-check for trailing spaces.</li>
-  <li><strong>Firewall</strong> — port 1883 (MQTT) or 8883 (MQTT+TLS) must be open. Some networks block non-standard ports.</li>
+  <li><strong>Check Wi-Fi</strong> — the gateway node must have an active internet connection (Wi-Fi or Ethernet). MQTT does not work over the LoRa radio link itself.</li>
+  <li><strong>Verify credentials</strong> — with incorrect credentials, most brokers fail silently — double-check for trailing spaces.</li>
+  <li><strong>Firewall</strong> — port 1883 (MQTT) or 8883 (MQTT over TLS) must be reachable. Some networks allow only web traffic (ports 80 and 443).</li>
   <li><strong>DNS resolution</strong> — if using a custom broker hostname, verify the node can resolve it. Try the broker’s IP address directly.</li>
 </ul>
 
@@ -242,6 +238,3 @@ replaced and it is not ignored. When it is on, the app’s own MQTT proxy subscr
   <li><a href="messages-and-channels">Messages &amp; Channels</a> — channel encryption and PSK setup</li>
   <li><a href="https://meshtastic.org/docs/software/integrations/mqtt">MQTT integration guide</a> — detailed MQTT documentation on meshtastic.org</li>
 </ul>
-
-<hr />
-

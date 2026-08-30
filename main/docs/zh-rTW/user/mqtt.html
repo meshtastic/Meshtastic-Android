@@ -23,10 +23,10 @@ MQTT 模組可將您的節點連接至 MQTT 代理伺服器，實現以下功能
 ## 運作方式
 
 ```
-〔您的節點〕→ 無線電 → 〔具備 Wi-Fi 的閘道節點〕→ MQTT 代理伺服器 → 〔遠端閘道〕→ 無線電 → 〔遠端節點〕
+[Your Node] → Radio → [Gateway Node with Wi-Fi] → MQTT Broker → [Remote Gateway] → Radio → [Remote Node]
 ```
 
-具備網際網路連線（Wi-Fi 或乙太網路）的閘道節點，將 mesh 訊息發布至 MQTT 主題。 訂閱相同主題的遠端閘道，將這些訊息注入其本地 mesh 網路。
+A gateway node with internet access (Wi-Fi or Ethernet) publishes mesh messages to an MQTT topic. 訂閱相同主題的遠端閘道，將這些訊息注入其本地 mesh 網路。
 
 ## 設定
 
@@ -36,18 +36,18 @@ MQTT 模組可將您的節點連接至 MQTT 代理伺服器，實現以下功能
 2. 啟用 MQTT 模組。
 3. 設定代理伺服器連線：
 
-![MQTT toggle switch](../../assets/screenshots/settings_switch.png)
+![MQTT module settings with the module enabled](../../assets/screenshots/settings_switch.png)
 
- 設定          | 描述說明                                                                                                                                                                                | 默認                                                  |
- ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
- 伺服器位址       | MQTT 代理伺服器主機名稱                                                                                                                                                                      | mqtt.meshtastic.org |
- 使用者名稱       | 代理伺服器驗證                                                                                                                                                                             | meshdev                                             |
- 密碼          | 代理伺服器驗證                                                                                                                                                                             | large4cats                                          |
- 根主題         | 訊息的基礎主題                                                                                                                                                                             | msh                                                 |
- 加密          | 加密 MQTT 承載內容                                                                                                                                                                        | 已啟用                                                 |
- JSON Output | Also publish and consume the `/2/json/` topic. Deprecated in the protobuf schema, but still the only toggle for this behaviour — and the app's own proxy honours it | 已停用                                                 |
- TLS         | 與代理伺服器的安全連線                                                                                                                                                                         | 已停用                                                 |
- 地圖回報        | 將位置回報至公開地圖                                                                                                                                                                          | 已停用                                                 |
+ 設定          | 描述說明                                                                                                                                                                              | 默認                                                  |
+ ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+ 伺服器位址       | MQTT 代理伺服器主機名稱                                                                                                                                                                    | mqtt.meshtastic.org |
+ 使用者名稱       | 代理伺服器驗證                                                                                                                                                                           | meshdev                                             |
+ 密碼          | 代理伺服器驗證                                                                                                                                                                           | large4cats                                          |
+ 根主題         | 訊息的基礎主題                                                                                                                                                                           | msh                                                 |
+ 加密          | 加密 MQTT 承載內容                                                                                                                                                                      | 已啟用                                                 |
+ JSON Output | Also publish and consume the `/2/json/` topic. Deprecated in the protobuf schema, but still the only toggle for this behavior — and the app's own proxy honors it | 已停用                                                 |
+ TLS         | 與代理伺服器的安全連線                                                                                                                                                                       | 已停用                                                 |
+ 地圖回報        | 將位置回報至公開地圖                                                                                                                                                                        | 已停用                                                 |
 
 ### Connection Status and Test Connection
 
@@ -60,17 +60,15 @@ TLS failing, the attempt timing out, or the broker rejecting your credentials wi
 
 ### MQTT Proxy on This Phone
 
-If your node has no internet access of its own, it can use the connected phone as its MQTT gateway: enable **MQTT** and **Proxy to client enabled** in the module config, and the app relays MQTT traffic between the radio and the broker over your phone's internet connection.
+If your radio has no internet access of its own, it can use the connected phone as its MQTT gateway: enable **MQTT** and **Proxy to client enabled** in the module config, and the app relays MQTT traffic between the radio and the broker over your phone's internet connection.
 
 &gt; ℹ️ **Note:** The proxy relay is mobile-only. On the Desktop app the MQTT settings are present, but no relay runs behind them.
 
-The **MQTT proxy on this phone** toggle at the top of the MQTT settings screen shows whether this relay is currently running and lets you cut it off (or restart it) immediately — without editing and re-saving the device's MQTT configuration.
+The **MQTT proxy on this phone** toggle at the top of the MQTT settings screen shows whether this relay is running and lets you cut it off (or restart it) immediately — without editing and re-saving the radio's MQTT configuration.
 
 ### 預設 Meshtastic 代理伺服器
 
-社群在 mqtt.meshtastic.org 維護一個公開的代理伺服器。 此伺服器供一般使用與測試之用。
-
-&gt; ℹ️ **Note:** Connections to `mqtt.meshtastic.org` always use TLS (port 8883), even if the TLS toggle is off. For any other broker, TLS is used only when you enable it (port 8883 with TLS, 1883 without).
+社群在 mqtt.meshtastic.org 維護一個公開的代理伺服器。 此伺服器供一般使用與測試之用。 Connections to it always use TLS (port 8883), even if the TLS toggle is off; for any other broker, TLS is used only when you enable it (port 8883 with TLS, 1883 without).
 
 &gt; 🔒 隱私：公開代理伺服器上的訊息，任何訂閱者均可讀取。 私人通訊請務必啟用頻道加密。
 
@@ -127,7 +125,7 @@ MQTT carries two payload formats:
 ## 最佳實踐
 
 - 在橋接至 MQTT 的頻道上使用頻道層級加密（PSK）
-- 請勿在無法連接網際網路的節點上啟用 MQTT（這將導致緩衝堆積並浪費記憶體）
+- Don't enable MQTT on nodes without internet access (the radio buffers unsendable messages and wastes memory)
 - 敏感部署環境請使用私有代理伺服器
 - 從繁忙的 MQTT 主題下行訊息時，請留意無線電佔用時間——每則下行訊息都會消耗本地 mesh 網路的無線電佔用時間
 - 若僅需遠端監控 mesh 網路而不需注入訊息，建議僅啟用上行模式
@@ -136,9 +134,9 @@ MQTT carries two payload formats:
 
 ### MQTT 無法連線
 
-- 檢查 Wi-Fi——閘道節點必須具備有效的網際網路連線（Wi-Fi 或乙太網路）。 MQTT 無法直接透過 LoRa 無線電連結運作。
-- 確認登入憑證 — 帳號或密碼錯誤在大多數代理伺服器上會靜默失敗，不顯示錯誤訊息。 請仔細確認是否有多餘的尾端空白字元。
-- 防火牆 — 連接埠 1883（MQTT）或 8883（MQTT+TLS）必須開放。 部分網路會封鎖非標準連接埠。
+- **Check Wi-Fi** — the gateway node must have an active internet connection (Wi-Fi or Ethernet). MQTT 無法直接透過 LoRa 無線電連結運作。
+- **Verify credentials** — with incorrect credentials, most brokers fail silently — double-check for trailing spaces.
+- **Firewall** — port 1883 (MQTT) or 8883 (MQTT over TLS) must be reachable. Some networks allow only web traffic (ports 80 and 443).
 - DNS 解析 — 若使用自訂代理伺服器主機名稱，請確認節點能夠正確解析該名稱。 請嘗試直接使用代理伺服器的 IP 位址進行連線。
 
 ### 訊息未正常橋接
@@ -152,9 +150,6 @@ MQTT carries two payload formats:
 - 〔設定 — 模組與管理〕(settings-module-admin) — MQTT 模組設定參考
 - 〔訊息與頻道〕(messages-and-channels) — 頻道加密與 PSK 設定
 - 〔MQTT 整合指南〕(https://meshtastic.org/docs/software/integrations/mqtt) — meshtastic.org 上的完整 MQTT 說明文件
-
----
-
 </pre>
 </body>
 </html>

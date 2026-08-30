@@ -2,6 +2,24 @@
 
 <p>The node detail screen provides comprehensive telemetry and metrics for each node on your mesh.</p>
 
+<h2 id="viewing-metrics">Viewing Metrics</h2>
+
+<ol>
+  <li>Navigate to <strong>Nodes</strong>.</li>
+  <li>Tap the node you want to inspect.</li>
+  <li>Select the metric category from the detail tabs.</li>
+</ol>
+
+<p><img src="../../assets/screenshots/nodes_detail_local.png" alt="Node detail — local device" /></p>
+
+<p>The position tab shows location data for nodes that share GPS:</p>
+
+<p><img src="../../assets/screenshots/nodes_position.png" alt="Position inline content" /></p>
+
+<blockquote>
+  <p>ℹ️ <strong>Note:</strong> Metrics are only available when they have been reported by the remote node. Metrics update at intervals configured on each node’s telemetry settings.</p>
+</blockquote>
+
 <h2 id="métriques-de-lappareil">Métriques de l’appareil</h2>
 
 <p>Basic operating information reported by each node:</p>
@@ -78,7 +96,7 @@
   </tbody>
 </table>
 
-<p>Environment metrics are charted over time for easy trend analysis — temperature, humidity, and pressure each get their own line chart with the measurement unit displayed on the Y axis.</p>
+<p>Environment metrics are charted over time — temperature, humidity, and pressure each get their own line chart with the measurement unit displayed on the Y axis.</p>
 
 <p>The BME680 <strong>IAQ (Indoor Air Quality)</strong> index is a single 0–500+ value derived from gas resistance, shown against a color-coded scale from <em>Excellent</em> to <em>Dangerously Polluted</em>:</p>
 
@@ -119,7 +137,7 @@
     <tr>
       <td>AQI</td>
       <td>EPA index</td>
-      <td>EPA <strong>NowCast</strong> AQI computed from your recent PM2.5 history, with a color-coded severity label. Shown next to PM2.5 once enough readings have accumulated.</td>
+      <td>EPA <strong>NowCast</strong> AQI computed from the node’s recent PM2.5 history, with a color-coded severity label. Shown next to PM2.5 once enough readings have accumulated.</td>
     </tr>
     <tr>
       <td>CO₂</td>
@@ -139,7 +157,7 @@
   </tbody>
 </table>
 
-<p>CO₂ readings are color-coded by severity to make air quality easy to read at a glance:</p>
+<p>CO₂ readings are color-coded by severity so you can read air quality at a glance:</p>
 
 <table>
   <thead>
@@ -190,7 +208,7 @@
 </ul>
 
 <blockquote>
-  <p>💡 <strong>Tip:</strong> Air Quality metrics require a compatible air-quality sensor on the remote node. If a node has no particulate or CO₂ sensor, the air-quality button won’t appear. See <a href="telemetry-and-sensors">Telemetry &amp; Sensors</a> for supported hardware.</p>
+  <p>💡 <strong>Tip:</strong> Air Quality metrics require a compatible air-quality sensor on the remote node. See <a href="telemetry-and-sensors">Telemetry &amp; Sensors</a> for supported hardware.</p>
 </blockquote>
 
 <h2 id="métriques-de-signal">Métriques de Signal</h2>
@@ -226,7 +244,7 @@
 
 <h3 id="signal-quality-reference">Signal Quality Reference</h3>
 
-<p>Signal quality is rated from <strong>SNR relative to the active LoRa modem preset’s demodulation floor</strong>, not from fixed thresholds — a given SNR means different things on different presets (e.g. −15 dB is fine on LongSlow but unusable on ShortFast). RSSI is shown but is not part of the rating. Letting <code class="language-plaintext highlighter-rouge">limit</code> be the preset’s SNR limit:</p>
+<p>Signal quality is rated from <strong>SNR relative to the active LoRa modem preset’s demodulation floor</strong>, not from fixed thresholds — a given SNR means different things on different presets (e.g. −15 dB is fine on LongSlow but unusable on ShortFast). RSSI is shown but is not part of the rating. In the table, <em>limit</em> is the preset’s SNR limit.</p>
 
 <table>
   <thead>
@@ -257,7 +275,13 @@
 
 <p>See <a href="signal-meter">Understanding the Signal Meter</a> for the full explanation.</p>
 
-<p>Local Stats from your connected radio are also shown in Signal Quality when available. These logs include noise floor, traffic counters, relay counters, online node counts, and radio uptime. The noise floor chart uses a dashed reference line at -85 dBm to help identify a busy RF environment. Use <strong>Request</strong> to ask the connected radio for a fresh Local Stats telemetry report, <strong>Clear</strong> to remove Local Stats logs for that node, and <strong>Save</strong> to export the visible Local Stats history as CSV.</p>
+<p>Local Stats from your connected radio are also shown in Signal Metrics when available. These logs include noise floor, traffic counters, relay counters, online node counts, and radio uptime. The noise floor chart uses a dashed reference line at -85 dBm to help identify a busy RF environment.</p>
+
+<ul>
+  <li><strong>Request</strong> — ask the connected radio for a fresh Local Stats telemetry report</li>
+  <li><strong>Clear</strong> — remove Local Stats logs for that node</li>
+  <li><strong>Save</strong> — export the visible Local Stats history as CSV</li>
+</ul>
 
 <h2 id="métriques-dalimentation">Métriques d’alimentation</h2>
 
@@ -282,7 +306,7 @@
   </tbody>
 </table>
 
-<p>Up to three channels (ch1–ch3) are charted, each with a label you can edit. The app does not
+<p>Up to three sensor channels (ch1–ch3) are charted, each with a label you can edit. The app does not
 derive a wattage figure from them.</p>
 
 <h2 id="traceroute">Traceroute</h2>
@@ -317,24 +341,6 @@ derive a wattage figure from them.</p>
 
 <p>Shows which nodes a given node can directly hear, useful for understanding mesh topology.</p>
 
-<h2 id="viewing-metrics">Viewing Metrics</h2>
-
-<ol>
-  <li>Navigate to <strong>Nodes</strong>.</li>
-  <li>Tap the node you want to inspect.</li>
-  <li>Select the metric category from the detail tabs.</li>
-</ol>
-
-<p><img src="../../assets/screenshots/nodes_detail_local.png" alt="Node detail — local device" /></p>
-
-<p>The position tab shows location data for nodes that share GPS:</p>
-
-<p><img src="../../assets/screenshots/nodes_position.png" alt="Position inline content" /></p>
-
-<blockquote>
-  <p>ℹ️ <strong>Note:</strong> Metrics are only available when they have been reported by the remote node. Metrics update at intervals configured on each node’s telemetry settings.</p>
-</blockquote>
-
 <h2 id="related-topics">Related Topics</h2>
 
 <ul>
@@ -344,5 +350,3 @@ derive a wattage figure from them.</p>
   <li><a href="discovery">Local Mesh Discovery</a> — traceroute details and neighbor info</li>
   <li><a href="units-and-locale">Units &amp; Locale</a> — temperature, distance, and speed display formats</li>
 </ul>
-
-<hr />

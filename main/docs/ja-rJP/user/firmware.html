@@ -13,7 +13,7 @@
 
 ## 更新を確認する
 
-1. 接続中の無線機の設定を開き、「**詳細設定**」で「**ファームウェア更新**」をタップします。 この項目は、OTA に対応したデバイスでのみ表示されます。
+1. 接続中の無線機の設定を開き、「**詳細設定**」で「**ファームウェア更新**」をタップします。 The entry appears only for OTA-capable radios.
 2. アプリが、利用可能なファームウェアバージョンを確認します。
 3. 利用可能な更新には、バージョン番号と変更履歴の概要が表示されます。
 
@@ -23,6 +23,8 @@
 
 Android ユーザーにとって最も一般的な更新方法です：
 
+&gt; ⚠️ **Warning:** Interrupting a firmware update can leave the radio unable to boot. Keep the phone nearby and both devices powered until the update completes.
+
 1. 無線機が Bluetooth で接続されていることを確認します。
 2. ファームウェア更新画面に移動します。
 3. 希望するファームウェアバージョンを選択します。
@@ -31,28 +33,26 @@ Android ユーザーにとって最も一般的な更新方法です：
 
 ![ファームウェアの更新を確認中](../../assets/screenshots/firmware_checking.png)
 
-&gt; ⚠️ **警告：** ファームウェア更新を中断すると、デバイスが起動不能になることがあります。 Keep the radio charged and stay in Bluetooth range for the whole update. The app itself only blocks the update below **10%** battery; 50% or more is the safe habit, not an enforced limit.
-
 #### Erase device during update
 
 Where the app offers it, an **Erase device during update** checkbox appears next to the update button. It is a per-update opt-in and is never remembered.
 
- Method         | What erasing does                                                                                                                      |
- -------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
- BLE / WiFi OTA | Factory-resets the device once the update is verified. All settings and Bluetooth pairing are removed. |
- USB            | Wipes the device's flash completely, then installs the selected firmware from scratch.                                 |
+ Method          | What erasing does                                                                                                                      |
+ --------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+ BLE / Wi-Fi OTA | Factory-resets the device once the update is verified. All settings and Bluetooth pairing are removed. |
+ USB             | Wipes the device's flash completely, then installs the selected firmware from scratch.                                 |
 
 It is not offered for a local firmware file, during a recovery update, or on USB devices whose board does not support the erase step. Afterwards the device needs setting up — and pairing — again.
 
-### OTA via WiFi (network-connected ESP32)
+### OTA via Wi-Fi (network-connected ESP32)
 
-When an ESP32 radio is connected over the network rather than Bluetooth, the app offers **WiFi OTA**, which pushes the same update over TCP:
+When an ESP32 radio is connected over the network rather than Bluetooth, the app offers **Wi-Fi OTA**, which pushes the same update over TCP:
 
 1. Connect to the radio over the network (see [Connections](connections)).
 2. Open the Firmware Update screen and pick a version.
 3. Tap **Update**. Keep the radio and phone on the same network for the whole transfer.
 
-WiFi OTA takes the ESP32 `-update.bin` image rather than the `.uf2` a USB update uses; the app selects the right artifact for you.
+Wi-Fi OTA takes the ESP32 `-update.bin` image rather than the `.uf2` a USB update uses; the app selects the right artifact for you.
 
 ![ファームウェアの免責事項](../../assets/screenshots/firmware_disclaimer.png)
 
@@ -60,7 +60,7 @@ WiFi OTA takes the ESP32 `-update.bin` image rather than the `.uf2` a USB update
 
 無線機が（Bluetooth ではなく）**USB／シリアル**で接続されている場合、ファームウェア更新画面に「**USB ファイル転送**」が表示されます。 アプリはデバイスを DFU モードで再起動し、システムのファイル選択画面を使って `.uf2` ファイルをデバイスの DFU ドライブに保存するよう促します。 このオプションは USB／シリアル接続でのみ表示され、Bluetooth では利用できません。
 
-&gt; ℹ️ **nRF bootloader note:** A vendor bootloader supplied as a `.zip` (e.g. RAK WisBlock RAK4631) has to be flashed with a serial DFU tool such as `adafruit-nrfutil` — copying that `.zip` to the drive won't work. A bootloader supplied as an `update-....uf2` **can** be installed by copying it to the drive; that is how the app's own bootloader upgrade works. The app surfaces a hint when the serial-only route applies.
+&gt; ℹ️ **Note:** A vendor nRF bootloader supplied as a `.zip` (e.g. RAK WisBlock RAK4631) has to be flashed with a serial DFU tool such as `adafruit-nrfutil` — copying that `.zip` to the drive won't work. A bootloader supplied as an `update-....uf2` **can** be installed by copying it to the drive; that is how the app's own bootloader upgrade works. The app surfaces a hint when the serial-only route applies.
 
 ### Factory Erase and Bootloader Upgrade
 
@@ -68,7 +68,7 @@ On a **USB/serial** connection, nRF52 and RP2040 devices also offer **Erase and 
 
 Erasing wipes everything on the device — channels, keys and all settings — and there is no backup, so the app asks for confirmation first. Both operations write two files in turn, so you will be asked to select the device's update drive twice: once for the erase or bootloader image, then again for the firmware.
 
-The app reads `INFO_UF2.TXT` from the drive you select to confirm it really is the device's update drive and to identify the board before writing anything. If it can't confirm which Bluetooth stack your device uses it refuses to erase and points you at the [Web Flasher](https://flasher.meshtastic.org) instead — picking wrong there can leave the device needing a hardware programmer to recover.
+The app reads `INFO_UF2.TXT` from the drive you select to confirm it really is the device's update drive and to identify the board before writing anything. If it can't confirm which Bluetooth stack your device uses, it refuses to erase and points you at the [Web Flasher](https://flasher.meshtastic.org) instead. In the Web Flasher, choosing the wrong Bluetooth stack can leave the radio recoverable only with a hardware programmer.
 
 ### その他の書き込み方法
 
@@ -93,6 +93,7 @@ The app reads `INFO_UF2.TXT` from the drive you select to confirm it really is t
 - [ ] 安定した Bluetooth 接続
 - [ ] 現在の設定を控えておく（メジャーバージョンの変更時にリセットされることがあります）
 - [ ] 破壊的変更がないか、リリースノートを確認する
+- [ ] Update the Meshtastic app itself, before or alongside firmware updates, to ensure compatibility
 
 ## 更新後
 
@@ -102,8 +103,8 @@ The app reads `INFO_UF2.TXT` from the drive you select to confirm it really is t
 
 更新が成功すると：
 
-- 無線機が自動的に再起動します
-- Bluetooth 接続が再確立されます
+- The radio reboots automatically
+- The Bluetooth connection re-establishes
 - 設定が保持されているか確認します
 - ファームウェア更新画面の「**現在インストール済み**」で新しいバージョンを確認します。バージョンは、ノードの詳細ページや接続画面にも表示されます
 
@@ -121,9 +122,9 @@ The app reads `INFO_UF2.TXT` from the drive you select to confirm it really is t
 
 ![ファームウェア更新のエラー](../../assets/screenshots/firmware_error.png)
 
-### 更新後にデバイスが起動しない
+### Radio Won't Boot After Update
 
-デバイスが起動しない場合：
+If your radio fails to boot:
 
 1. USB でコンピューターに接続してみる
 2. リカバリー／DFU モードで Web Flasher を使用する
@@ -136,13 +137,11 @@ On connecting, the app compares the radio's firmware against two thresholds and 
 
  ファームウェアバージョン                                                                                                    | What you see                                     | What happens                                                                                                         |
  --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
- Below **2.3.15**                                                                | **Firmware update required.**    | The app disconnects from the radio. It will not operate against firmware this old.   |
+ Below **2.3.15**                                                                | **Firmware update required.**    | The app disconnects from the radio. It does not operate against firmware this old.   |
  **2.3.15** up to, but not including, **2.5.14** | **Firmware Update Recommended.** | Advisory only — dismiss it and carry on. The dialog names the latest stable release. |
  **2.5.14** or newer                                                             | Nothing                                          | —                                                                                                                    |
 
 A version string the app cannot parse is ignored rather than treated as too old, so a transient read never disconnects a working radio.
-
-&gt; ⚠️ **重要：** 互換性を確保するため、ファームウェア更新の前、または同時に、必ず Meshtastic アプリを更新してください。
 
 ## 関連トピック
 
@@ -150,9 +149,6 @@ A version string the app cannot parse is ignored rather than treated as too old,
 - [ファームウェア書き込みガイド](https://meshtastic.org/docs/getting-started/flashing-firmware)：meshtastic.org にあるファームウェア書き込みの完全な手順
 - [対応デバイス](https://meshtastic.org/docs/hardware/devices)：デバイスごとのファームウェア互換性を確認
 - [FAQ](https://meshtastic.org/docs/faq/)：meshtastic.org のよくある質問
-
----
-
 </pre>
 </body>
 </html>

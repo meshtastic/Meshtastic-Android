@@ -29,26 +29,26 @@
 
 インターネット接続のために、メッシュのメッセージを MQTT サーバーとの間で橋渡しします。 これにより、無線の到達範囲を超えてメッシュを拡張したり、ホームオートメーションシステムと連携したりできます。
 
- 設定項目                 | 説明                                                                                                                                                                                        |
- -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
- 有効                   | MQTT ブリッジを切り替え                                                                                                                                                                            |
- サーバー                 | MQTT サーバーのアドレス                                                                                                                                                                            |
- ユーザー名                | 認証用のユーザー名                                                                                                                                                                                 |
- パスワード                | 認証用のパスワード                                                                                                                                                                                 |
- 暗号化                  | MQTT ペイロードを暗号化                                                                                                                                                                            |
- JSON Output          | Publish and consume MQTT messages as JSON. Marked deprecated in the protobuf schema, but it is still the only toggle for this behaviour and the firmware still honours it |
- TLS                  | セキュアな接続を使用                                                                                                                                                                                |
- ルートトピック              | MQTT のベーストピックパス                                                                                                                                                                           |
- クライアントへのプロキシの有効化     | Let a connected phone carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                       |
- このスマートフォンの MQTT プロキシ | The phone-side half of the above: whether _this_ phone is currently acting as that relay. See [MQTT](mqtt)                                                |
- マップ報告                | Publish position to the public map — see below                                                                                                                                            |
+ 設定項目                 | 説明                                                                                                                                                                                      |
+ -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+ 有効                   | MQTT ブリッジを切り替え                                                                                                                                                                          |
+ サーバー                 | MQTT サーバーのアドレス                                                                                                                                                                          |
+ ユーザー名                | 認証用のユーザー名                                                                                                                                                                               |
+ パスワード                | 認証用のパスワード                                                                                                                                                                               |
+ 暗号化                  | MQTT ペイロードを暗号化                                                                                                                                                                          |
+ JSON Output          | Publish and consume MQTT messages as JSON. Marked deprecated in the protobuf schema, but it is still the only toggle for this behavior and the firmware still honors it |
+ TLS                  | セキュアな接続を使用                                                                                                                                                                              |
+ ルートトピック              | MQTT のベーストピックパス                                                                                                                                                                         |
+ クライアントへのプロキシの有効化     | Let a connected phone carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                     |
+ このスマートフォンの MQTT プロキシ | The phone-side half of **Proxy to client enabled**: whether this phone acts as that relay. See [MQTT](mqtt)                                             |
+ マップ報告                | Publish position to the public map — see below                                                                                                                                          |
 
 **Map Report** expands into its own group:
 
  設定項目               | 説明                                                                                                                              |
  ------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
  有効                 | Publish to the public map at all                                                                                                |
- Share location     | Explicit consent to include your position. Map reporting will not save without it                               |
+ Share location     | Explicit consent to include your position. Map reporting does not save without it                               |
  Position precision | How coarsely your position is published                                                                                         |
  Publish interval   | How often to report. Must be **at least 3600 s (1 hour)** — the app blocks saving below that |
 
@@ -107,8 +107,8 @@ and each can drive the LED, the buzzer and the vibration motor separately, givin
 
 ### レンジテストモジュール
 
-&gt; ⚠️ **Warning:** Range Test only works on a secured primary channel. While your primary channel
-&gt; still uses the default public key, the Enabled, Interval and Save-CSV controls stay disabled, and
+&gt; ⚠️ **Warning:** Range Test only works on a secured primary channel. As long as your primary channel
+&gt; still uses the default channel key, the Enabled, Interval and Save-CSV controls stay disabled, and
 &gt; saving force-disables the module if the channel has reverted to public.
 
 ノード間のリンク品質を評価するための、自動レンジテストツールです。 有効にすると、ノードはカウンターを増やしながらテストメッセージを定期的に送信します。 受信側のノードがこれらのメッセージを記録するため、歩いたり車で移動したりして、後からどの距離でメッセージが届かなくなったかを分析できます。
@@ -144,7 +144,7 @@ battery health often and sensors rarely.
 
 ### 定型メッセージモジュール
 
-デバイスの物理ボタンからアクセスできる、あらかじめ設定されたメッセージです（ロータリーエンコーダー、キーパッド、または同様の入力ハードウェアを備えた無線機向け）。 スマートフォンを接続していなくても送信できる、クイック送信メッセージのリストを定義します。フィールドでの使用に最適です。
+Pre-configured messages accessible from the radio's physical buttons (for radios with rotary encoders, keypads, or similar input hardware). スマートフォンを接続していなくても送信できる、クイック送信メッセージのリストを定義します。フィールドでの使用に最適です。
 
  設定項目                                      | 説明                                                                                                        |
  ----------------------------------------- | --------------------------------------------------------------------------------------------------------- |
@@ -177,13 +177,13 @@ battery health often and sensors rarely.
 
 メッシュネットワーク経由での GPIO 制御です。 リモートのノードが、別のノードの GPIO ピンを読み書きできるようにします。リレーの作動、スイッチの読み取り、離れた場所からの外部ハードウェア制御に便利です。
 
+&gt; ⚠️ **Warning:** Enabling **Allow Undefined Pins** gives remote nodes access to all GPIO pins, which could interfere with the radio's own hardware. GPIO 専用のノードでのみ有効にしてください。
+
  設定項目     | 説明                                    |
  -------- | ------------------------------------- |
  有効       | リモート GPIO アクセスを有効化                    |
  未定義ピンを許可 | 任意の GPIO ピンへのアクセスを許可（セキュリティリスク）       |
  利用可能なピン  | このノードがリモートの読み書き用に公開する GPIO ピン（最大 4 個） |
-
-&gt; ⚠️ **警告：** 「未定義ピンを許可」を有効にすると、リモートのノードがすべての GPIO ピンにアクセスでき、無線機自体のハードウェアに干渉するおそれがあります。 GPIO 専用のノードでのみ有効にしてください。
 
 ### 隣接ノード情報モジュール
 
@@ -224,30 +224,21 @@ See [Local Mesh Discovery](discovery) for how to use neighbor data for mesh topo
 
 ### Paxcounter モジュール
 
-WiFi と BLE のプローブ要求を使った人数カウンターです。 スマートフォンやノートパソコンがネットワークを探すときに発するプローブ要求を受動的に受信して、近くのデバイスを数えます。 ESP32 デバイスでのみ利用できます。
+People counter using Wi-Fi and BLE probe requests. スマートフォンやノートパソコンがネットワークを探すときに発するプローブ要求を受動的に受信して、近くのデバイスを数えます。 ESP32 デバイスでのみ利用できます。
 
- 設定                  | 説明                                                                                                               |
- ------------------- | ---------------------------------------------------------------------------------------------------------------- |
- 有効                  | 人数カウントを有効化                                                                                                       |
- 更新間隔（秒）             | カウントを報告する頻度                                                                                                      |
- WiFi RSSI threshold | Ignore WiFi probes weaker than this, so distant devices are not counted (defaults to −80 dBm) |
- BLE RSSI threshold  | The same cut-off for BLE advertisements (defaults to −80 dBm)                                 |
+ 設定                   | 説明                                                                                                                |
+ -------------------- | ----------------------------------------------------------------------------------------------------------------- |
+ 有効                   | 人数カウントを有効化                                                                                                        |
+ 更新間隔（秒）              | カウントを報告する頻度                                                                                                       |
+ Wi-Fi RSSI threshold | Ignore Wi-Fi probes weaker than this, so distant devices are not counted (defaults to −80 dBm) |
+ BLE RSSI threshold   | The same cut-off for BLE advertisements (defaults to −80 dBm)                                  |
 
 &gt; 💡 **ヒント：** Paxcounter は、登山口やイベント会場などの人出を推定するのに便利です。 カウントはおおよその値です。1 人が複数のデバイスを持っていることがあります。
 
 ### Status Message Module
 
-Publishes a short free-text status line for your node, which other nodes can display alongside it.
-
- 設定         | 説明                                                                                                                                                                               |
- ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
- ステータスメッセージ | Up to 80 characters. The **✕** in the field clears it. (That is the app's own label for the field, verbatim.) |
-
-Saving takes effect immediately — this is one of the few module settings that never asks the
-node to reboot.
-
-&gt; ℹ️ **Note:** The screen only appears for firmware that reports support for the status-message
-&gt; module. If you do not see it in the module list, your node's firmware does not have it.
+The status message has no module screen. It is edited with the rest of the node's identity, on
+[Settings — Radio &amp; User](settings-radio-user#user-profile).
 
 ### Mesh Beacon Module
 
@@ -256,10 +247,10 @@ Broadcasts an invitation to your mesh, and receives invitations from others. See
 
 ### TAK モジュール
 
-&gt; ℹ️ **Note:** This module only appears in the list once the node's **Device Role** (Device Config)
-&gt; is set to **TAK** or **TAK Tracker**. Change the role first, or the entry will not be there.
-
-ATAK および WinTAK と相互運用するための、Team Awareness Kit 連携です。 詳しい設定と使い方は、[TAK 連携](tak) を参照してください。
+ATAK および WinTAK と相互運用するための、Team Awareness Kit 連携です。 This module only appears
+in the list once the node's **Device Role** (Device Config) is set to **TAK** or **TAK Tracker** —
+change the role first, otherwise the entry does not appear. See [TAK Integration](tak) for detailed
+setup and usage.
 
 ## 管理
 
@@ -272,7 +263,7 @@ ATAK および WinTAK と相互運用するための、Team Awareness Kit 連携
 3. 設定を変更します。
 4. 「**保存**」をタップします。変更がメッシュ経由で送信されます。
 
-&gt; ⚠️ **必要条件：** 自分のノードと対象のノードの両方に管理者鍵が設定されていること。
+&gt; ⚠️ **Important:** Requires an admin key configured on both your node and the target node.
 
 ### ノードデータベースの整理
 
@@ -284,7 +275,9 @@ Prunes your local node database. Two independent controls:
 
 ### 工場出荷時リセット
 
-すべての設定を工場出荷時のデフォルトにリセットします。 **この操作は取り消せません。**
+&gt; ⚠️ **Warning:** Factory reset erases all settings, channels, and keys. This cannot be undone.
+
+すべての設定を工場出荷時のデフォルトにリセットします。
 
 ### 再起動
 
@@ -302,8 +295,8 @@ Three sections:
 
 - **What is Meshtastic?** — a short description of the project.
 - **Apps** — opens with **Need Hardware?**, a rotating carousel of popular devices that links out
-  to where to buy one, then the GitHub repository, the running app version, and
-  **Acknowledgements** (below).
+  to where to buy one. It also lists the GitHub repository, the running app version, and
+  **Acknowledgements** (see the next section).
 - **Project information** — links to the website and to this documentation.
 
 ### 謝辞
@@ -322,9 +315,6 @@ generated at build time by AboutLibraries. It was previously called the license 
 - [設定：無線機とユーザー](settings-radio-user)：基本の無線機とユーザープロファイルの設定
 - [モジュール設定リファレンス](https://meshtastic.org/docs/configuration/module)：meshtastic.org にある詳細なモジュールのドキュメント
 - [FAQ](https://meshtastic.org/docs/faq/)：meshtastic.org のよくある質問
-
----
-
 </pre>
 </body>
 </html>

@@ -13,7 +13,7 @@
 
 ## Проверка обновлений
 
-1. Откройте конфигурацию подключённого радио и в разделе **"Дополнительно"** нажмите **"Обновление прошивки"**. Этот пункт появляется только для устройств, поддерживающих OTA.
+1. Откройте конфигурацию подключённого радио и в разделе **"Дополнительно"** нажмите **"Обновление прошивки"**. The entry appears only for OTA-capable radios.
 2. Приложение проверяет доступные версии прошивки.
 3. Доступные обновления показывают номер версии и сводку изменений.
 
@@ -23,6 +23,8 @@
 
 Наиболее распространённый способ обновления для пользователей Android:
 
+&gt; ⚠️ **Warning:** Interrupting a firmware update can leave the radio unable to boot. Keep the phone nearby and both devices powered until the update completes.
+
 1. Убедитесь, что твоё радио подключено по Bluetooth.
 2. Перейдите на экран "Обновление прошивки".
 3. Выберите нужную версию прошивки.
@@ -31,28 +33,26 @@
 
 ![Проверка обновлений прошивки](../../assets/screenshots/firmware_checking.png)
 
-&gt; ⚠️ **Предупреждение:** Прерывание обновления прошивки может вывести твоё устройство из строя. Keep the radio charged and stay in Bluetooth range for the whole update. The app itself only blocks the update below **10%** battery; 50% or more is the safe habit, not an enforced limit.
-
 #### Очистить устройство при обновлении
 
 Where the app offers it, an **Erase device during update** checkbox appears next to the update button. It is a per-update opt-in and is never remembered.
 
- Method         | What erasing does                                                                                                                      |
- -------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
- BLE / WiFi OTA | Factory-resets the device once the update is verified. All settings and Bluetooth pairing are removed. |
- USB            | Полностью стирает флэш-память устройства, а затем устанавливает выбранную прошивку с нуля.                             |
+ Method          | What erasing does                                                                                                                      |
+ --------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+ BLE / Wi-Fi OTA | Factory-resets the device once the update is verified. All settings and Bluetooth pairing are removed. |
+ USB             | Полностью стирает флэш-память устройства, а затем устанавливает выбранную прошивку с нуля.                             |
 
 It is not offered for a local firmware file, during a recovery update, or on USB devices whose board does not support the erase step. Afterwards the device needs setting up — and pairing — again.
 
-### OTA via WiFi (network-connected ESP32)
+### OTA via Wi-Fi (network-connected ESP32)
 
-When an ESP32 radio is connected over the network rather than Bluetooth, the app offers **WiFi OTA**, which pushes the same update over TCP:
+When an ESP32 radio is connected over the network rather than Bluetooth, the app offers **Wi-Fi OTA**, which pushes the same update over TCP:
 
 1. Connect to the radio over the network (see [Connections](connections)).
 2. Open the Firmware Update screen and pick a version.
 3. Tap **Update**. Keep the radio and phone on the same network for the whole transfer.
 
-WiFi OTA takes the ESP32 `-update.bin` image rather than the `.uf2` a USB update uses; the app selects the right artifact for you.
+Wi-Fi OTA takes the ESP32 `-update.bin` image rather than the `.uf2` a USB update uses; the app selects the right artifact for you.
 
 ![Предупреждение о прошивке](../../assets/screenshots/firmware_disclaimer.png)
 
@@ -60,7 +60,7 @@ WiFi OTA takes the ESP32 `-update.bin` image rather than the `.uf2` a USB update
 
 Когда твоё радио подключено по **USB/seria**l (а не по Bluetooth), на экране обновления прошивки появляется опция **"Передача файла по USB"**. Приложение перезагружает устройство в режим DFU, а затем предлагает сохранить файл `.uf2` на DFU-диск устройства с помощью системного выбора файлов. Эта опция появляется только при подключении по USB/serial — она недоступна по Bluetooth.
 
-&gt; ℹ️ **Примечание о загрузчике nRF**: Загрузчик от производителя, поставляемый в виде `.zip` (например, для RAK WisBlock RAK4631), необходимо прошивать с помощью последовательного инструмента DFU, такого как `adafruit-nrfutil` — копирование этого `.zip` на диск устройства не сработает. Загрузчик, поставляемый в виде `update-....uf2`, **можно** установить, скопировав его на диск; именно так работает обновление загрузчика из самого приложения. Приложение показывает подсказку, когда требуется использование последовательного способа.
+&gt; ℹ️ **Note:** A vendor nRF bootloader supplied as a `.zip` (e.g. RAK WisBlock RAK4631) has to be flashed with a serial DFU tool such as `adafruit-nrfutil` — copying that `.zip` to the drive won't work. Загрузчик, поставляемый в виде `update-....uf2`, **можно** установить, скопировав его на диск; именно так работает обновление загрузчика из самого приложения. Приложение показывает подсказку, когда требуется использование последовательного способа.
 
 ### Полное стирание и обновление загрузчика
 
@@ -68,7 +68,7 @@ WiFi OTA takes the ESP32 `-update.bin` image rather than the `.uf2` a USB update
 
 Стирание удаляет всё на устройстве — каналы, ключи и все настройки — и резервной копии нет, поэтому приложение сначала запрашивает подтверждение. Обе операции записывают два файла по очереди, поэтому тебе будет предложено дважды выбрать диск обновления устройства: один раз для образа стирания или загрузчика, затем снова для прошивки.
 
-Приложение считывает `INFO_UF2.TXT` с выбранного тобою диска, чтобы убедиться, что это действительно диск обновления устройства, и определить плату до записи чего-либо. Если приложение не может подтвердить, какой стек Bluetooth использует твоё устройство, оно отказывается выполнять стирание и направляет тебя к [Web Flasher](https://flasher.meshtastic.org) — неправильный выбор там может привести к необходимости использовать аппаратный программатор для восстановления.
+Приложение считывает `INFO_UF2.TXT` с выбранного тобою диска, чтобы убедиться, что это действительно диск обновления устройства, и определить плату до записи чего-либо. If it can't confirm which Bluetooth stack your device uses, it refuses to erase and points you at the [Web Flasher](https://flasher.meshtastic.org) instead. In the Web Flasher, choosing the wrong Bluetooth stack can leave the radio recoverable only with a hardware programmer.
 
 ### Другие способы прошивки
 
@@ -93,6 +93,7 @@ WiFi OTA takes the ESP32 `-update.bin` image rather than the `.uf2` a USB update
 - [ ] Стабильное соединение Bluetooth
 - [ ] Запишите свои текущие настройки (они могут сброситься при смене мажорной версии)
 - [ ] Проверьте примечания к релизу на наличие критических изменений
+- [ ] Update the Meshtastic app itself, before or alongside firmware updates, to ensure compatibility
 
 ## После обновления
 
@@ -102,8 +103,8 @@ WiFi OTA takes the ESP32 `-update.bin` image rather than the `.uf2` a USB update
 
 После успешного обновления:
 
-- Радио перезагрузится автоматически
-- Соединение Bluetooth восстановится
+- The radio reboots automatically
+- The Bluetooth connection re-establishes
 - Убедись, что твои настройки сохранились
 - Проверьте новую версию в разделе **"Установленная версия"** на экране обновления прошивки — она также отображается на странице сведений о ноде и на экране "Подключения"
 
@@ -121,9 +122,9 @@ WiFi OTA takes the ESP32 `-update.bin` image rather than the `.uf2` a USB update
 
 ![Ошибка обновления прошивки](../../assets/screenshots/firmware_error.png)
 
-### Устройство не загружается после обновления
+### Radio Won't Boot After Update
 
-Если твоё устройство не загружается:
+If your radio fails to boot:
 
 1. Попробуйте подключиться по USB к компьютеру
 2. Используйте Web Flasher в режиме восстановления/DFU
@@ -136,23 +137,18 @@ On connecting, the app compares the radio's firmware against two thresholds and 
 
  Версия прошивки                                                                                                 | What you see                                     | What happens                                                                                                         |
  --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
- Below **2.3.15**                                                                | **Firmware update required.**    | The app disconnects from the radio. It will not operate against firmware this old.   |
+ Below **2.3.15**                                                                | **Firmware update required.**    | The app disconnects from the radio. It does not operate against firmware this old.   |
  **2.3.15** up to, but not including, **2.5.14** | **Firmware Update Recommended.** | Advisory only — dismiss it and carry on. The dialog names the latest stable release. |
  **2.5.14** or newer                                                             | Nothing                                          | —                                                                                                                    |
 
 A version string the app cannot parse is ignored rather than treated as too old, so a transient read never disconnects a working radio.
-
-&gt; ⚠️ **Важно:** Всегда обновляйте приложение Meshtastic до или одновременно с обновлением прошивки, чтобы обеспечить совместимость.
 
 ## Связанные темы
 
 - [Подключения](connections) — восстановление соединения после обновления прошивки
 - [Руководство по прошивке](https://meshtastic.org/docs/getting-started/flashing-firmware)— полное пошаговое руководство по полной прошивке на meshtastic.org
 - [Поддерживаемые устройства](https://meshtastic.org/docs/hardware/devices) — проверьте совместимость прошивки с устройством
-- [Часто задаваемые вопросы](https://meshtastic.org/docs/faq/) — распространённые вопросы на meshtastic.org
-
----
-
+- [FAQ](https://meshtastic.org/docs/faq/) — общие вопросы на meshtastic.org
 </pre>
 </body>
 </html>

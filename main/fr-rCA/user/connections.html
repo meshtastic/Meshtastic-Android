@@ -1,18 +1,18 @@
 <h1 id="connexions">Connexions</h1>
 
-<p>Meshtastic supports multiple transport methods to communicate between your phone/desktop and a radio node.</p>
+<p>Meshtastic supports multiple transport methods to communicate between your phone or desktop and a radio.</p>
 
 <h2 id="bluetooth-ble">Bluetooth (BLE)</h2>
 
 <p>Bluetooth Low Energy is the default and most common connection method on Android.</p>
 
-<h3 id="pairing-a-device">Pairing a Device</h3>
+<h3 id="pairing-a-radio">Pairing a Radio</h3>
 
 <ol>
   <li>Ensure your Meshtastic radio is powered on and in pairing mode.</li>
   <li>Open the app and navigate to the <strong>Connect</strong> tab.</li>
   <li>Tap <strong>Scan for Bluetooth devices</strong> — nearby Meshtastic radios will appear.</li>
-  <li>Select your device from the list.</li>
+  <li>Select your radio from the list.</li>
   <li>Accept the Bluetooth pairing prompt if shown.</li>
 </ol>
 
@@ -20,10 +20,10 @@
 
 <p>Use the transport selector — a segmented button row below the connection card — to switch between the Bluetooth, Network, and USB transports (one is active at a time):</p>
 
-<p><img src="../../assets/screenshots/connections_transport_filters.png" alt="Transport selector" /></p>
+<p><img src="../../assets/screenshots/connections_transport_filters.png" alt="Connections screen with the transport selector showing Bluetooth, Network, and USB" /></p>
 
 <blockquote>
-  <p>💡 <strong>Tip:</strong> If your device doesn’t appear, check that the radio is not already connected to another device or out of range.</p>
+  <p>💡 <strong>Tip:</strong> If your radio doesn’t appear, check that it isn’t already connected to another phone, or out of range.</p>
 </blockquote>
 
 <p>The screen names anything on the app’s side that is blocking a scan, with the fix attached:</p>
@@ -116,8 +116,8 @@
 <h3 id="setup">Setup</h3>
 
 <ol>
-  <li>Connect your radio via USB cable to your device.</li>
-  <li>The app will prompt for USB permission — tap <strong>Allow</strong>.</li>
+  <li>Connect your radio to your phone with a USB cable.</li>
+  <li>The app prompts for USB permission — tap <strong>Allow</strong>.</li>
   <li>The connection is established automatically.</li>
 </ol>
 
@@ -127,12 +127,12 @@
 
 <h2 id="tcpip-network">TCP/IP (Network)</h2>
 
-<p>Some Meshtastic radios support WiFi/Ethernet connectivity, allowing TCP-based connections over your local network. Get the radio onto your network first — using the radio’s own WiFi settings (via the firmware web interface or another connection) — then connect to it from the app.</p>
+<p>Some Meshtastic radios support Wi-Fi/Ethernet connectivity, allowing TCP-based connections over your local network. Get the radio onto your network first — using the radio’s own Wi-Fi settings (via the firmware web interface or another connection) — then connect to it from the app.</p>
 
 <blockquote>
-  <p>ℹ️ <strong>Note:</strong> <strong>Settings → Wi-Fi Provisioning for mPWRD-OS</strong> is a separate, narrower tool. It provisions WiFi
+  <p>ℹ️ <strong>Note:</strong> <strong>Settings → Wi-Fi Provisioning for mPWRD-OS</strong> is a separate, narrower tool. It provisions Wi-Fi
 credentials over Bluetooth to <strong>mPWRD-OS</strong> devices only, using their own protocol — it does not
-configure WiFi on an ordinary Meshtastic radio. It scans over BLE, lists the networks the device
+configure Wi-Fi on an ordinary Meshtastic radio. It scans over BLE, lists the networks the device
 can see (including an option for a hidden SSID), takes the password, and reports success or
 failure. Available on both Android and Desktop.</p>
 </blockquote>
@@ -148,7 +148,7 @@ failure. Available on both Android and Desktop.</p>
       <li><strong>Add device manually…</strong> — enter the radio’s IP address (or hostname) and port (default: <code class="language-plaintext highlighter-rouge">4403</code>).</li>
     </ul>
   </li>
-  <li>Previously-used network addresses are remembered under <strong>Recent Network Devices</strong> for quick reconnection (long-press to remove one).</li>
+  <li>Previously-used network addresses are remembered under <strong>Recent Network Devices</strong> for quick reconnection (touch &amp; hold to remove one).</li>
 </ol>
 
 <blockquote>
@@ -165,7 +165,7 @@ failure. Available on both Android and Desktop.</p>
 
 <h2 id="reconnection-behavior">Reconnection Behavior</h2>
 
-<p>The app reconnects to the <strong>last selected device</strong> on startup. You can switch transports from the Connect screen at any time.</p>
+<p>The app reconnects to the last selected radio on startup. You can switch transports from the Connect screen at any time.</p>
 
 <p>To disconnect, tap the disconnect button on the Connect screen:</p>
 
@@ -191,6 +191,3 @@ failure. Available on both Android and Desktop.</p>
   <li><a href="desktop">Desktop App</a> — desktop-specific connection details</li>
   <li><a href="https://meshtastic.org/docs/hardware/devices">Supported devices</a> — full list of compatible radios on meshtastic.org</li>
 </ul>
-
-<hr />
-

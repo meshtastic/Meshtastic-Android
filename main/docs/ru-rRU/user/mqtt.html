@@ -23,10 +23,10 @@ MQTT соединяет твою mesh-сеть Meshtastic с интернето�
 ## Как это работает
 
 ```
-[Ваша нода] → Радио → [Шлюзовая нода с WiFi] → MQTT-брокер → [Удалённый шлюз] → Радио → [Удалённая нода]
+[Your Node] → Radio → [Gateway Node with Wi-Fi] → MQTT Broker → [Remote Gateway] → Radio → [Remote Node]
 ```
 
-Шлюзовая нода с доступом в интернет (WiFi или Ethernet) публикует сообщения mesh-сети в топик MQTT. Удалённые шлюзы, подписанные на тот же топик, передают эти сообщения в свою локальную mesh-сеть.
+A gateway node with internet access (Wi-Fi or Ethernet) publishes mesh messages to an MQTT topic. Удалённые шлюзы, подписанные на тот же топик, передают эти сообщения в свою локальную mesh-сеть.
 
 ## Настройки
 
@@ -36,18 +36,18 @@ MQTT соединяет твою mesh-сеть Meshtastic с интернето�
 2. Включите модуль MQTT.
 3. Настройте подключение к брокеру:
 
-![Переключатель MQTT](../../assets/screenshots/settings_switch.png)
+![MQTT module settings with the module enabled](../../assets/screenshots/settings_switch.png)
 
- Настройка           | Описание                                                                                                                                                                            | По умолчанию                                        |
- ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
- Адрес сервера       | Имя хоста MQTT-брокера                                                                                                                                                              | mqtt.meshtastic.org |
- Имя пользователя    | Аутентификация брокера                                                                                                                                                              | meshdev                                             |
- Пароль              | Аутентификация брокера                                                                                                                                                              | large4cats                                          |
- Корневая тема       | Базовый топик для сообщений                                                                                                                                                         | msh                                                 |
- Шифрование          | Шифровать полезную нагрузку MQTT                                                                                                                                                    | Включено                                            |
- Вывод JSON          | Also publish and consume the `/2/json/` topic. Deprecated in the protobuf schema, but still the only toggle for this behaviour — and the app's own proxy honours it | Отключено                                           |
- TLS                 | Безопасное подключение к брокеру                                                                                                                                                    | Отключено                                           |
- Публикация на карте | Сообщать о местоположении на публичную карту                                                                                                                                        | Отключено                                           |
+ Настройка           | Описание                                                                                                                                                                          | По умолчанию                                        |
+ ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+ Адрес сервера       | Имя хоста MQTT-брокера                                                                                                                                                            | mqtt.meshtastic.org |
+ Имя пользователя    | Аутентификация брокера                                                                                                                                                            | meshdev                                             |
+ Пароль              | Аутентификация брокера                                                                                                                                                            | large4cats                                          |
+ Корневая тема       | Базовый топик для сообщений                                                                                                                                                       | msh                                                 |
+ Шифрование          | Шифровать полезную нагрузку MQTT                                                                                                                                                  | Включено                                            |
+ Вывод JSON          | Also publish and consume the `/2/json/` topic. Deprecated in the protobuf schema, but still the only toggle for this behavior — and the app's own proxy honors it | Отключено                                           |
+ TLS                 | Безопасное подключение к брокеру                                                                                                                                                  | Отключено                                           |
+ Публикация на карте | Сообщать о местоположении на публичную карту                                                                                                                                      | Отключено                                           |
 
 ### Connection Status and Test Connection
 
@@ -60,17 +60,15 @@ TLS failing, the attempt timing out, or the broker rejecting your credentials wi
 
 ### MQTT-прокси на этом телефоне
 
-Если у твоей ноды нет собственного доступа в интернет, она может использовать подключённый телефон как MQTT-шлюз: включите **MQTT** и **Прокси для клиента** в конфигурации модуля, и приложение будет передавать трафик MQTT между радио и брокером через интернет-соединение твоего телефона.
+If your radio has no internet access of its own, it can use the connected phone as its MQTT gateway: enable **MQTT** and **Proxy to client enabled** in the module config, and the app relays MQTT traffic between the radio and the broker over your phone's internet connection.
 
 &gt; ℹ️ **Note:** The proxy relay is mobile-only. On the Desktop app the MQTT settings are present, but no relay runs behind them.
 
-Переключатель **MQTT-прокси на этом телефоне** в верхней части экрана настроек MQTT показывает, запущена ли сейчас эта ретрансляция, и позволяет тебе немедленно отключить (или перезапустить) её — без редактирования и повторного сохранения конфигурации MQTT устройства.
+The **MQTT proxy on this phone** toggle at the top of the MQTT settings screen shows whether this relay is running and lets you cut it off (or restart it) immediately — without editing and re-saving the radio's MQTT configuration.
 
 ### Стандартный брокер Meshtastic
 
-Сообщество поддерживает публичный брокер по адресу `mqtt.meshtastic.org`. Он предназначен для общего использования и тестирования.
-
-&gt; ℹ️ **Примечание:** Подключения к `mqtt.meshtastic.org` всегда используют TLS (порт 8883), даже если переключатель TLS выключен. Для любого другого брокера TLS используется только при включении (порт 8883 с TLS, 1883 без).
+Сообщество поддерживает публичный брокер по адресу `mqtt.meshtastic.org`. Он предназначен для общего использования и тестирования. Connections to it always use TLS (port 8883), even if the TLS toggle is off; for any other broker, TLS is used only when you enable it (port 8883 with TLS, 1883 without).
 
 &gt; 🔒 **Приватность:** Сообщения на публичном брокере доступны для чтения всем, кто подписан. Всегда используйте шифрование каналов для конфиденциальной связи.
 
@@ -127,7 +125,7 @@ MQTT carries two payload formats:
 ## Рекомендации
 
 - Используйте шифрование на уровне канала (PSK) на каналах, подключённых к MQTT
-- Не включайте MQTT на нодах без доступа в интернет (это приведёт к буферизации и напрасной трате памяти)
+- Don't enable MQTT on nodes without internet access (the radio buffers unsendable messages and wastes memory)
 - Используйте частный брокер для задач, требующих повышенной безопасности
 - Учитывайте эфирное время при передаче сообщений из загруженных MQTT-топиков — каждое такое сообщение расходует радиоэфирное время в вашей локальной mesh-сети
 - Рассмотрите включение режима "только uplink", если нужно лишь удалённо наблюдать за mesh-сетью, не отправляя сообщения обратно
@@ -136,9 +134,9 @@ MQTT carries two payload formats:
 
 ### MQTT не подключается
 
-- **Проверьте WiFi** — шлюзовая нода должна иметь активное подключение к интернету (WiFi или Ethernet). MQTT не работает через сам радиоканал LoRa.
-- **Проверьте учётные данные** — неверное имя пользователя или пароль на большинстве брокеров приводят к тихому сбою. Проверьте, нет ли лишних пробелов в конце.
-- **Брандмауэр** — порт 1883 (MQTT) или 8883 (MQTT+TLS) должен быть открыт. Некоторые сети блокируют нестандартные порты.
+- **Check Wi-Fi** — the gateway node must have an active internet connection (Wi-Fi or Ethernet). MQTT не работает через сам радиоканал LoRa.
+- **Verify credentials** — with incorrect credentials, most brokers fail silently — double-check for trailing spaces.
+- **Firewall** — port 1883 (MQTT) or 8883 (MQTT over TLS) must be reachable. Some networks allow only web traffic (ports 80 and 443).
 - **Разрешение DNS** — если используется имя хоста собственного брокера, убедитесь, что нода может его разрешить. Попробуйте подключиться напрямую по IP-адресу брокера.
 
 ### Сообщения не проходят через мост
@@ -152,9 +150,6 @@ MQTT carries two payload formats:
 - [Настройки — Модули и администрирование](settings-module-admin) — справочник по конфигурации модуля MQTT
 - [Сообщения и каналы](messages-and-channels) — шифрование каналов и настройка PSK
 - [Руководство по интеграции MQTT](https://meshtastic.org/docs/software/integrations/mqtt) — подробная документация по MQTT на meshtastic.org
-
----
-
 </pre>
 </body>
 </html>

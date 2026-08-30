@@ -9,7 +9,7 @@
 <body data-page="settings-radio-user" data-locale="et-rEE">
 <pre class="markdown-content"># Seaded — raadio ja kasutaja
 
-Configure your radio hardware and user identity parameters.
+Configure your radio's user identity, region and LoRa parameters, position and power behavior, network and Bluetooth connectivity, and security settings.
 
 ## Kasutaja seaded
 
@@ -19,12 +19,16 @@ Configure your radio hardware and user identity parameters.
  ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
  Täis nimi                 | Your display name (up to 39 characters)                                                                                                                                                                                   |
  Lühi nimi                 | 4-character abbreviated name                                                                                                                                                                                                                 |
+ Oleku teavitus            | A short free-text status other nodes display alongside your node — up to 80 bytes, cleared with the **✕** in the field. Needs firmware 2.8 or newer, and is absent otherwise                                 |
  Ei võta sõnumeid vastu    | Marks the node as one nobody should try to message — for an unmonitored or infrastructure node. Other clients hide it from the contact list. Needs supporting firmware                                       |
  Litsentseeritud operaator | Enable if you hold an amateur radio license (permits higher power). Turning it on relabels **Long Name** as **Call Sign** and adds a separate Long Name field, and is staged behind a confirmation dialog |
 
 ### Applying Changes
 
-Pärast sätete muutmist puuduta nuppu **Salvesta**, et konfiguratsioon raadiosse salvestada. Muudatuste rakendamiseks võib seade taaskäivituda.
+Pärast sätete muutmist puuduta nuppu **Salvesta**, et konfiguratsioon raadiosse salvestada. The radio may reboot to apply changes.
+
+The status message is saved with the same **Save**, but it never reboots the node — and, like the
+rest of this screen, it can be edited on a remote node you administer.
 
 ## Sätted
 
@@ -45,7 +49,7 @@ Pärast sätete muutmist puuduta nuppu **Salvesta**, et konfiguratsioon raadioss
 
  Sätted                   | Kirjeldus                                                                                                                                                                                        | Vaikimisi                                       |
  ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------- |
- Regioon                  | Sagedusribade reguleerimispiirkond                                                                                                                                                               | Määramata (tuleb seadistada) |
+ Regioon                  | Regulatory region for frequency bands. You must set this before transmitting                                                                                                     | Määramata (tuleb seadistada) |
  Modemi vaikesäte         | Speed/range tradeoff                                                                                                                                                                             | LongFast                                        |
  Hüppete limiit           | Maks uuesti saadetud hüpet                                                                                                                                                                       | 3                                               |
  TX võimsus               | Transmission power (dBm); 0 = max allowed for region                                                                                                                          | 0 (regiooni maks)            |
@@ -56,13 +60,13 @@ Pärast sätete muutmist puuduta nuppu **Salvesta**, et konfiguratsioon raadioss
  Kodeerimiskiirus         | Manual mode only: 5–8. More redundancy costs airtime                                                                                                             | From preset                                     |
  Sageduspesa              | Which slot within the region's band to use. 0 derives it from the primary channel name                                                                                           | 0 (automatic)                |
  Edastus lubatud          | Turning this off makes the node receive-only                                                                                                                                                     | On                                              |
- Töötsükli tühistamine    | Ignore the region's duty-cycle limit. Only legal where you are permitted to                                                                                                      | Väljas                                          |
+ Töötsükli tühistamine    | Ignores the region's duty-cycle limit. Illegal in most regions; turn it on only where your license permits                                                                       | Väljas                                          |
  Keela MQTT               | Drop packets that arrived from MQTT rather than over the air                                                                                                                                     | Väljas                                          |
  MQTT kasutuses           | Allow your packets to be forwarded to MQTT by gateways                                                                                                                                           | Väljas                                          |
  RX võimendatud võimendus | Extra receive gain on SX126x radios; costs a little current                                                                                                                                      | Väljas                                          |
  PA ventilaator keelatud  | Turn off the power-amplifier fan on hardware that has one                                                                                                                                        | Väljas                                          |
 
-&gt; ⚠️ **Tähtis:** Enne edastamist **peate** oma piirkonna määrama. Operating without the correct region may violate local radio regulations. Lisateabe saamiseks vaadake [regiooni seadistamise juhendit](https://meshtastic.org/docs/getting-started/initial-config) aadressil meshtastic.org.
+&gt; ⚠️ **Important:** Operating without the correct region may violate local radio regulations. Lisateabe saamiseks vaadake [regiooni seadistamise juhendit](https://meshtastic.org/docs/getting-started/initial-config) aadressil meshtastic.org.
 
 ### Modem Presets
 
@@ -102,9 +106,9 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 - **Fikseeritud taristuühendused:** Kasutage **Short Turbo** või **Long Turbo** spetsiaalsete punkt-punkti ühenduste jaoks, millel on head antennid ja otsenähtavus.
 - **Mixed environments:** Stick with **Long Fast** — it's the community default and ensures compatibility with others in your area.
 
-&gt; ⚠️ **Tähtis:** Kõik samal kanalil olevad sõlmed **peavad** kasutama sama modemi eelseadistust. Erinevate eelseadetega sõlmed ei saa suhelda isegi siis, kui neil on sama sagedus ja krüpteerimisvõti.
+All nodes on the same channel must use the same modem preset. Erinevate eelseadetega sõlmed ei saa suhelda isegi siis, kui neil on sama sagedus ja krüpteerimisvõti.
 
-&gt; 💡 **Vihje:** ulatuse hinnangud eeldavad tasast maastikku ja mõõdukaid antenne. Elevation advantage (hilltop, rooftop) dramatically increases effective range. A well-placed Router with Long Fast can often outperform a ground-level node with Long Slow.
+The range estimates in the [Modem Presets](#modem-presets) table assume flat terrain and modest antennas. Kõrguse eelis (mäetipp, katus) suurendab märgatavalt efektiivset ulatust. A well-placed Router with Long Fast can often outperform a ground-level node with Long Slow.
 
 ### Ekraani sätted
 
@@ -113,20 +117,20 @@ These control the **radio's own screen**, not the app's.
  Sätted                            | Kirjeldus                                                                                                                                                 |
  --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
  Ekraan sisse lülitatud            | How long the display stays lit before sleeping                                                                                                            |
- Karusselli intervall              | How often the device cycles between screens on its own                                                                                                    |
+ Karusselli intervall              | How often the radio cycles between screens on its own                                                                                                     |
  Ekraani režiim                    | Screen layout/density used by the firmware                                                                                                                |
- Ekraani ühikud                    | Metric or Imperial on the device's screen                                                                                                                 |
- Kasuta 12 tunni formaati          | Show the device clock as 12-hour rather than 24-hour                                                                                                      |
+ Ekraani ühikud                    | Metric or Imperial on the radio's screen                                                                                                                  |
+ Kasuta 12 tunni formaati          | Show the radio's clock as 12-hour rather than 24-hour                                                                                                     |
  Bold heading                      | Draw the screen's heading text in bold                                                                                                                    |
  Keera ekraani                     | Rotate the display 180° for an inverted mounting                                                                                                          |
  OLED tüüp                         | Auto, SSD1306, SH1106, SH1107                                                                                                                             |
- Ärata puudutusega või liigutusega | Light the screen when the device is tapped or moved                                                                                                       |
+ Ärata puudutusega või liigutusega | Light the screen when the radio is tapped or moved                                                                                                        |
  Kompassi suund                    | Rotation offset for the compass rose (0°, 90°, 180°, 270°)                                                                             |
  Suund alati põhi                  | Locks the compass rose north-up instead of rotating it with your heading. Independent of Compass orientation — neither replaces the other |
 
 ### Asukoha sätted
 
-&gt; ⚠️ **Warning:** Saving this screen always reboots the radio.
+&gt; ⚠️ **Important:** Saving this screen always reboots the radio.
 
  Sätted                                    | Kirjeldus                                                                                                                                             |
  ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -155,21 +159,21 @@ These control the **radio's own screen**, not the app's.
 
 ### Võrgu sätted
 
-&gt; ⚠️ **Warning:** Saving this screen always reboots the radio.
+&gt; ⚠️ **Important:** Saving this screen always reboots the radio.
 
- Sätted                           | Kirjeldus                                                                                                                  |
- -------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
- Wifi lubatud                     | Enable the WiFi radio (ESP32 devices)                                                                   |
- SSID                             | Network name to connect to. **Scan WiFi QR code** fills this and the password from a standard WiFi QR code |
- Parool                           | Network password                                                                                                           |
- Ethernet lubatud                 | Use a wired connection on hardware that has one                                                                            |
- IPv4 režiim                      | DHCP, or a static address configured with the four fields below                                                            |
- Wifi IP / Subnet / Gateway / DNS | The static address, only used when IPv4 mode is static                                                                     |
- UDP levitamine                   | Share mesh traffic with other nodes over the local network                                                                 |
- NTP server                       | Time synchronization server                                                                                                |
- rsyslog server                   | Kauglogimise server                                                                                                        |
+ Sätted                            | Kirjeldus                                                                                                                    |
+ --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+ Wi-Fi enabled                     | Enable the Wi-Fi radio (ESP32 radios)                                                                     |
+ SSID                              | Network name to connect to. **Scan Wi-Fi QR code** fills this and the password from a standard Wi-Fi QR code |
+ Parool                            | Network password                                                                                                             |
+ Ethernet lubatud                  | Use a wired connection on hardware that has one                                                                              |
+ IPv4 režiim                       | DHCP, or a static address configured with the four fields below                                                              |
+ Wi-Fi IP / Subnet / Gateway / DNS | The static address, only used when IPv4 mode is static                                                                       |
+ UDP levitamine                    | Share mesh traffic with other nodes over the local network                                                                   |
+ NTP server                        | Time synchronization server                                                                                                  |
+ rsyslog server                    | Kauglogimise server                                                                                                          |
 
-![IP aadressi väli](../../assets/screenshots/settings_ipv4_field.png)
+![Network Config with a static IPv4 address entered](../../assets/screenshots/settings_ipv4_field.png)
 
 ### Sinihamba sätted
 
@@ -226,11 +230,11 @@ back-off before you can try again.
 
 Seaded kasutavad standardseid eelistuste juhtelemente – rippmenüüsid, lülitid ja liugurid:
 
- Control  | Screenshot                                                   |
- -------- | ------------------------------------------------------------ |
- Dropdown | ![Rippmenüü](../../assets/screenshots/settings_dropdown.png) |
- Toggle   | ![Lülitus](../../assets/screenshots/settings_switch.png)     |
- Slider   | ![Liugur](../../assets/screenshots/settings_slider.png)      |
+ Control  | Screenshot                                                                                                  |
+ -------- | ----------------------------------------------------------------------------------------------------------- |
+ Dropdown | ![A dropdown setting, expanded to show its list of options](../../assets/screenshots/settings_dropdown.png) |
+ Toggle   | ![A toggle setting in the on position](../../assets/screenshots/settings_switch.png)                        |
+ Slider   | ![A slider setting with its current numeric value shown](../../assets/screenshots/settings_slider.png)      |
 
 ## Seotud teemad
 
@@ -238,9 +242,6 @@ Seaded kasutavad standardseid eelistuste juhtelemente – rippmenüüsid, lülit
 - [Signal Meter](signal-meter) — how modem presets affect signal quality thresholds
 - [LoRa konfiguratsioon](https://meshtastic.org/docs/configuration/radio/lora) — üksikasjalik LoRa sätete juhend aadressil meshtastic.org
 - [Esialgne konfiguratsioon](https://meshtastic.org/docs/getting-started/initial-config) — piirkonna seadistamise juhend meshtastic.org lehel
-
----
-
 </pre>
 </body>
 </html>

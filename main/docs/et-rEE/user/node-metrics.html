@@ -11,6 +11,20 @@
 
 Sõlme detailvaates on iga kärgvõrgu sõlme kohta põhjalikud telemeetria ja mõõdikud.
 
+## Viewing Metrics
+
+1. Mine **Seadmed**.
+2. Puuduta sõlme, mida soovite kontrollida.
+3. Vali detailvaadete vahekaartidelt mõõdiku kategooria.
+
+![Sõlme detailid — kohalik seade](../../assets/screenshots/nodes_detail_local.png)
+
+Asukoha vahekaart kuvab GPS-i jagavate sõlmede asukohaandmeid:
+
+![Asukoha tekstisisene sisu](../../assets/screenshots/nodes_position.png)
+
+&gt; ℹ️ **Note:** Metrics are only available when they have been reported by the remote node. Mõõdikud värskendatakse iga sõlme telemeetria sätetes seadistatud intervallidega.
+
 ## Seadme mõõdikud
 
 Basic operating information reported by each node:
@@ -39,7 +53,7 @@ Environmental sensor data (requires compatible hardware):
  Gaasi surve                          | BME680                |
  IAQ (Air Quality) | BME680                |
 
-Keskkonnanäitajaid joonistatakse aja jooksul lihtsaks trendianalüüsiks – temperatuur, niiskus ja rõhk saavad igaüks oma joondiagrammi, mille mõõtühik kuvatakse Y-teljel.
+Environment metrics are charted over time — temperature, humidity, and pressure each get their own line chart with the measurement unit displayed on the Y axis.
 
 BME680 **IAQ (siseõhu kvaliteet)** indeks on üksik väärtus vahemikus 0–500+, mis on tuletatud gaasitakistusest ja näidatud värvikoodiga skaalal _Suurepärane_ kuni _Ohtlikult saastunud_:
 
@@ -51,17 +65,17 @@ BME680 **IAQ (siseõhu kvaliteet)** indeks on üksik väärtus vahemikus 0–500
 
 Air Quality is a dedicated metrics view for nodes equipped with a particulate-matter and/or CO₂ sensor. See on **eraldi BME680 siseõhu kvaliteedi näidust**, mis on loetletud keskkonnamõõdikute all – siseõhu kvaliteet on ühtne gaasitakistusest tuletatud indeks, samas kui õhukvaliteedi vaade diagrammib aluseks olevaid tahkete osakeste ja CO₂ mõõtmisi.
 
- Meetriline            | Unit       | Kirjeldus                                                                                                                                                                                                                                             |
- --------------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
- PM1.0 | µg/m³      | Particulate matter up to 1.0 micron                                                                                                                                                                                                   |
- PM2,5                 | µg/m³      | Particulate matter up to 2.5 microns                                                                                                                                                                                                  |
- PM10                  | µg/m³      | Particulate matter up to 10 microns                                                                                                                                                                                                                   |
- AQI                   | EPA indeks | EPA **NowCast** õhukvaliteedi indeks on arvutatud hiljutise PM2.5 ajaloo põhjal ja sellel on värvikoodiga raskusastme silt. Kuvatakse PM2.5 kõrval, kui on kogunenud piisavalt näite. |
- CO₂                   | ppm        | Süsinikdioksiidi kontsentratsioon                                                                                                                                                                                                                     |
- CO₂ temperatuur       | °C / °F    | Temperature reported by the CO₂ sensor itself (e.g. SCD4x)                                                                                                                                         |
- CO₂ niiskus           | %          | Relative humidity reported by the CO₂ sensor                                                                                                                                                                                                          |
+ Meetriline            | Unit       | Kirjeldus                                                                                                                                                                                                                       |
+ --------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+ PM1.0 | µg/m³      | Particulate matter up to 1.0 micron                                                                                                                                                                             |
+ PM2,5                 | µg/m³      | Particulate matter up to 2.5 microns                                                                                                                                                                            |
+ PM10                  | µg/m³      | Particulate matter up to 10 microns                                                                                                                                                                                             |
+ AQI                   | EPA indeks | EPA **NowCast** AQI computed from the node's recent PM2.5 history, with a color-coded severity label. Kuvatakse PM2.5 kõrval, kui on kogunenud piisavalt näite. |
+ CO₂                   | ppm        | Süsinikdioksiidi kontsentratsioon                                                                                                                                                                                               |
+ CO₂ temperatuur       | °C / °F    | Temperature reported by the CO₂ sensor itself (e.g. SCD4x)                                                                                                                   |
+ CO₂ niiskus           | %          | Relative humidity reported by the CO₂ sensor                                                                                                                                                                                    |
 
-CO₂ näidud on vastavalt raskusastmele värvikoodiga kodeeritud, et õhukvaliteeti oleks kiirelt loetav:
+CO₂ readings are color-coded by severity so you can read air quality at a glance:
 
  Band         | CO₂ ulatus (ppm) | Värv        |
  ------------ | ----------------------------------- | ----------- |
@@ -80,7 +94,7 @@ An air-quality log/metrics button appears on the node detail screen **only when 
 - **Refresh / request** the latest air-quality telemetry.
 - **Ekspordi CSV** analüüsimiseks arvutustabeli vaates.
 
-&gt; 💡 **Vihje:** Õhukvaliteedi mõõdikute jaoks on vaja kaugsõlmega ühendatud andurit. If a node has no particulate or CO₂ sensor, the air-quality button won't appear. Vaata [Telemeetria &amp; Sensorid](telemetry-and-sensors) toetatud raudvara kohta.
+&gt; 💡 **Vihje:** Õhukvaliteedi mõõdikute jaoks on vaja kaugsõlmega ühendatud andurit. Vaata [Telemeetria &amp; Sensorid](telemetry-and-sensors) toetatud raudvara kohta.
 
 ## Signaali mõõdikud
 
@@ -95,7 +109,7 @@ Radio signal quality information:
 
 ### Signal Quality Reference
 
-Signaali kvaliteeti hinnatakse **SNR-i põhjal, mis on seotud aktiivse LoRa modemi eelseadistuse demodulatsiooni alumise piiriga**, mitte fikseeritud läviväärtuste põhjal – antud SNR tähendab erinevatel eelseadistustel erinevat väärtust (nt −15 dB on LongSlow režiimil hea, kuid ShortFast režiimil mittekasutatav). RSSI on kuvatud, aga see ei ole osa hinnangust. Letting `limit` be the preset's SNR limit:
+Signaali kvaliteeti hinnatakse **SNR-i põhjal, mis on seotud aktiivse LoRa modemi eelseadistuse demodulatsiooni alumise piiriga**, mitte fikseeritud läviväärtuste põhjal – antud SNR tähendab erinevatel eelseadistustel erinevat väärtust (nt −15 dB on LongSlow režiimil hea, kuid ShortFast režiimil mittekasutatav). RSSI on kuvatud, aga see ei ole osa hinnangust. In the table, _limit_ is the preset's SNR limit.
 
  Kvaliteet | Kriteerium                                |
  --------- | ----------------------------------------- |
@@ -106,7 +120,11 @@ Signaali kvaliteeti hinnatakse **SNR-i põhjal, mis on seotud aktiivse LoRa mode
 
 See [Understanding the Signal Meter](signal-meter) for the full explanation.
 
-Kohalik statistika ühendatud raadiost kuvatakse ka signaali kvaliteedi all, kui see on saadaval. Need logid sisaldavad mürataset, liiklusloendureid, edastusloendureid, võrgus olevate sõlmede arvu ja raadio tööaega. The noise floor chart uses a dashed reference line at -85 dBm to help identify a busy RF environment. Kasuta **Taotle**, et küsida ühendatud raadiost uut kohaliku statistika telemeetriaaruannet, **Tühjenda**, et eemaldada selle sõlme kohaliku statistika logi ja **Salvesta**, et salvestada nähtavat kohaliku statistika ajalugu CSV-failina.
+Local Stats from your connected radio are also shown in Signal Metrics when available. Need logid sisaldavad mürataset, liiklusloendureid, edastusloendureid, võrgus olevate sõlmede arvu ja raadio tööaega. The noise floor chart uses a dashed reference line at -85 dBm to help identify a busy RF environment.
+
+- **Request** — ask the connected radio for a fresh Local Stats telemetry report
+- **Clear** — remove Local Stats logs for that node
+- **Save** — export the visible Local Stats history as CSV
 
 ## Võimsusnäitajad
 
@@ -117,7 +135,7 @@ Power management telemetry (requires INA sensor or compatible hardware):
  Vool       | Per-channel voltage reading    |
  Pinge      | Per-channel draw, in milliamps |
 
-Up to three channels (ch1–ch3) are charted, each with a label you can edit. The app does not
+Up to three sensor channels (ch1–ch3) are charted, each with a label you can edit. The app does not
 derive a wattage figure from them.
 
 ## Marsruudi
@@ -149,20 +167,6 @@ Asukohta jagavate sõlmede ajaloolised asukohaandmed:
 
 Näitab, milliseid sõlmi antud sõlm otse kuuleb, kasulik kärgvõrgu topoloogia mõistmiseks.
 
-## Viewing Metrics
-
-1. Mine **Seadmed**.
-2. Puuduta sõlme, mida soovite kontrollida.
-3. Vali detailvaadete vahekaartidelt mõõdiku kategooria.
-
-![Sõlme detailid — kohalik seade](../../assets/screenshots/nodes_detail_local.png)
-
-Asukoha vahekaart kuvab GPS-i jagavate sõlmede asukohaandmeid:
-
-![Asukoha tekstisisene sisu](../../assets/screenshots/nodes_position.png)
-
-&gt; ℹ️ **Note:** Metrics are only available when they have been reported by the remote node. Mõõdikud värskendatakse iga sõlme telemeetria sätetes seadistatud intervallidega.
-
 ## Seotud teemad
 
 - [Nodes](nodes) — node list, filtering, and sorting
@@ -170,8 +174,6 @@ Asukoha vahekaart kuvab GPS-i jagavate sõlmede asukohaandmeid:
 - [Signal Meter](signal-meter) — how signal quality is calculated from SNR and RSSI
 - [Local Mesh Discovery](discovery) — traceroute details and neighbor info
 - [Ühikud ja lokaat](units-and-locale) — temperatuuri, kauguse ja kiiruse kuvamise ühikud
-
----
 </pre>
 </body>
 </html>

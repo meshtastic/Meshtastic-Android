@@ -9,16 +9,14 @@
   <li><strong>Manual exploration</strong> — traceroute, Neighbor Info, and the node list, which you can use at any time to investigate specific paths and topology.</li>
 </ul>
 
-<hr />
-
 <h2 id="local-mesh-discovery-scanner">Local Mesh Discovery (Scanner)</h2>
 
-<p>Local Mesh Discovery is a dedicated scanning mode that helps you find the best LoRa modem preset for your location and see which nodes are active on each preset. It cycles your connected radio through one or more presets you choose, listens (or “dwells”) on each one for a set time to collect packets, then analyzes and ranks the results.</p>
+<p>Local Mesh Discovery is a dedicated scanning mode that helps you find the best LoRa modem preset for your location and see which nodes are active on each preset. It cycles your connected radio through one or more presets you choose, dwells on each one — listens for a set time — to collect packets, then analyzes and ranks the results.</p>
 
 <p>Open it from <strong>Settings → Advanced → Local Mesh Discovery</strong>. On desktop, it has its own <strong>Settings → Local Mesh Discovery</strong> entry.</p>
 
 <blockquote>
-  <p>ℹ️ <strong>Note:</strong> Discovery temporarily changes your radio’s LoRa settings while it scans, then restores your original configuration when it finishes. Your device must be connected to run a scan.</p>
+  <p>ℹ️ <strong>Note:</strong> Discovery temporarily changes your radio’s LoRa settings while it scans, then restores your original configuration when it finishes. Your radio must be connected to run a scan.</p>
 </blockquote>
 
 <h3 id="setting-up-a-scan">Setting Up a Scan</h3>
@@ -51,7 +49,7 @@
 <p>The <strong>Start</strong> button stays disabled — with an explanation of why — until the scan can run. Common reasons it’s disabled:</p>
 
 <ul>
-  <li>The device is <strong>not connected</strong>.</li>
+  <li>The radio is <strong>not connected</strong>.</li>
   <li><strong>No presets</strong> have been selected to scan.</li>
   <li>The selected preset uses <strong>2.4 GHz</strong>, which your hardware doesn’t support.</li>
 </ul>
@@ -108,7 +106,7 @@
 <table>
   <thead>
     <tr>
-      <th>Metric</th>
+      <th>Métrique</th>
       <th>What it tells you</th>
     </tr>
   </thead>
@@ -148,11 +146,9 @@
   <p>💡 <strong>Tip:</strong> On <strong>Google Play</strong> builds, Discovery can generate an on-device AI summary (Gemini Nano) of your results. F-Droid builds always use the algorithmic summary — the proprietary ML Kit dependency is deliberately excluded from that flavor — so you get a readable interpretation of the scan either way.</p>
 </blockquote>
 
-<hr />
-
 <h2 id="mesh-beacon">Mesh Beacon</h2>
 
-<p>Mesh Beacon lets nodes invite others to join their mesh. A beaconing node periodically broadcasts an invitation — optionally advertising a channel, region, and modem preset — that nearby devices can hear even before they share a configuration.</p>
+<p>Mesh Beacon lets nodes invite others to join their mesh. A beaconing node periodically broadcasts an invitation — optionally advertising a channel, region, and modem preset — that nearby nodes can hear even before they share a configuration.</p>
 
 <p>Configure it under <strong>Settings → Module Config → Mesh Beacon</strong>:</p>
 
@@ -171,26 +167,22 @@
 
 <p>Channels advertised by beacons also show up in the scan setup as <strong>Beacon channels</strong> — select one to include it as a scan target.</p>
 
-<hr />
-
 <h2 id="manual-exploration">Manual Exploration</h2>
 
-<p>The tools below are available at any time from the node list and node detail screens. Use them to investigate specific paths and build a topology picture, alongside or instead of a full scan.</p>
+<p>The following tools are available at any time from the node list and node detail screens. Use them to investigate specific paths and build a topology picture, alongside or instead of a full scan.</p>
 
-<h2 id="traceroute">Traceroute</h2>
+<h3 id="traceroute">Traceroute</h3>
 
 <p>Traceroute reveals the exact path a message takes from your node to any other node on the mesh. It’s the single most useful tool for debugging connectivity problems.</p>
 
-<h3 id="running-a-traceroute">Running a Traceroute</h3>
+<h4 id="running-a-traceroute">Running a Traceroute</h4>
 
 <ol>
   <li>Navigate to <strong>Nodes</strong> and tap the node you want to trace.</li>
-  <li>On the node detail screen, tap <strong>Traceroute</strong>.</li>
-  <li>The app sends a traceroute request and waits for the response.</li>
-  <li>Results display each hop in order, with signal quality at every step.</li>
+  <li>On the node detail screen, tap <strong>Traceroute</strong>. The app sends the request; results show each hop with signal quality.</li>
 </ol>
 
-<h3 id="reading-the-results-1">Reading the Results</h3>
+<h4 id="reading-the-results-1">Reading the Results</h4>
 
 <p>A traceroute result looks like this:</p>
 
@@ -230,7 +222,7 @@
   <p>💡 <strong>Tip:</strong> Run traceroute several times over a few minutes. If the path changes, your mesh has redundant routes — a sign of a well-connected network.</p>
 </blockquote>
 
-<h3 id="troubleshooting-with-traceroute">Troubleshooting with Traceroute</h3>
+<h4 id="troubleshooting-with-traceroute">Troubleshooting with Traceroute</h4>
 
 <ul>
   <li><strong>“No route found”</strong> — The target node may be offline, out of range, or on a different channel. Check that both nodes share at least one channel with the same encryption key.</li>
@@ -238,13 +230,11 @@
   <li><strong>Asymmetric paths</strong> — A traceroute from A→B may take a different path than B→A. This is normal — radio propagation is not always symmetric.</li>
 </ul>
 
-<hr />
-
-<h2 id="informations-sur-les-voisins">Informations sur les voisins</h2>
+<h3 id="informations-sur-les-voisins">Informations sur les voisins</h3>
 
 <p>The Neighbor Info module lets each node broadcast a list of the nodes it can <strong>directly hear</strong> (single-hop). When multiple nodes share their neighbor lists, you can piece together a topology map of the entire mesh.</p>
 
-<h3 id="enabling-neighbor-info">Enabling Neighbor Info</h3>
+<h4 id="enabling-neighbor-info">Enabling Neighbor Info</h4>
 
 <ol>
   <li>Navigate to <strong>Settings → Module Config → Neighbor Info</strong>.</li>
@@ -252,9 +242,9 @@
   <li>Set the broadcast interval (default: 900 seconds / 15 minutes).</li>
 </ol>
 
-<p>Once enabled, your node periodically broadcasts its neighbor table. Other nodes with Neighbor Info enabled do the same.</p>
+<p>Once enabled, your node periodically broadcasts its neighbor list. Other nodes with Neighbor Info enabled do the same.</p>
 
-<h3 id="viewing-neighbor-data">Viewing Neighbor Data</h3>
+<h4 id="viewing-neighbor-data">Viewing Neighbor Data</h4>
 
 <ul>
   <li>Open any node’s detail screen and look for the <strong>Neighbors</strong> section.</li>
@@ -266,20 +256,18 @@
   <p>ℹ️ <strong>Note:</strong> Neighbor Info increases airtime usage because every enabled node periodically broadcasts its neighbor list. On busy meshes with many nodes, consider longer broadcast intervals (3600 seconds or more) to avoid congestion.</p>
 </blockquote>
 
-<hr />
-
-<h2 id="node-list-as-a-discovery-tool">Node List as a Discovery Tool</h2>
+<h3 id="node-list-as-a-discovery-tool">Node List as a Discovery Tool</h3>
 
 <p>The node list itself is a powerful discovery tool when you use its filtering and sorting features effectively.</p>
 
-<h3 id="finding-new-nodes">Finding New Nodes</h3>
+<h4 id="finding-new-nodes">Finding New Nodes</h4>
 
 <ul>
   <li>Sort by <strong>Last heard</strong> to see the most recently active nodes at the top.</li>
-  <li>Enable <strong>Include unknown</strong> to see nodes that have appeared on the mesh but haven’t sent user info yet — these are often newly powered-on devices.</li>
+  <li>Enable <strong>Include unknown</strong> to see nodes that have appeared on the mesh but haven’t sent user info yet — these are often newly powered-on radios.</li>
 </ul>
 
-<h3 id="assessing-connectivity">Assessing Connectivity</h3>
+<h4 id="assessing-connectivity">Assessing Connectivity</h4>
 
 <ul>
   <li>Sort by <strong>Hops away</strong> to see which nodes are directly reachable (0 hops) versus relayed.</li>
@@ -287,7 +275,7 @@
   <li>Use <strong>Exclude MQTT</strong> to focus on nodes reachable over radio (not via internet bridge).</li>
 </ul>
 
-<h3 id="infrastructure-audit">Infrastructure Audit</h3>
+<h4 id="infrastructure-audit">Infrastructure Audit</h4>
 
 <ul>
   <li>Disable <strong>Exclude infrastructure</strong> to see Router, Router Late, and Client Base nodes.</li>
@@ -295,8 +283,6 @@
 </ul>
 
 <p>See <a href="nodes">Nodes</a> for full details on filtering and sorting options.</p>
-
-<hr />
 
 <h2 id="tips-for-mesh-exploration">Tips for Mesh Exploration</h2>
 
@@ -316,6 +302,3 @@
   <li><a href="settings-module-admin">Settings — Modules &amp; Admin</a> — configure the Mesh Beacon and Neighbor Info modules</li>
   <li><a href="messages-and-channels">Messages &amp; Channels</a> — join a mesh you found and start talking</li>
 </ul>
-
-<hr />
-

@@ -27,20 +27,20 @@
 
 - **ズーム：** ピンチ操作、または +/− ボタンを使います
 - **移動：** ドラッグして見て回ります
-- **中央に配置：** 位置ボタンを選ぶと、自分の位置を中央に表示します
+- **Center** — tap the location button to center on your position
 - **ノードのタップ：** ノードのマーカーをタップすると詳細を表示します
 
 フローティングツールバーから、コンパス、レイヤーの切り替え、ノードの絞り込み、更新、位置追跡にすばやくアクセスできます。 コンパスをタップすると北を上に向け直し、位置ボタンをタップすると現在の位置を中央に表示します。
 
-![マップ操作のオーバーレイ](../../assets/screenshots/map_controls_overlay.png)
+![Map screen with the floating toolbar open, showing compass, layers, and location controls](../../assets/screenshots/map_controls_overlay.png)
 
 ## ウェイポイント
 
-ウェイポイントは、メッシュの全メンバーが見られる、共有された地理的な注目地点です。
+Waypoints are shared points of interest, visible to everyone the waypoint is sent to.
 
 ### ウェイポイントを作成する
 
-1. マップ上の目的の場所を長押しします。
+1. Touch &amp; hold the map at the desired location.
 2. 名前と、任意で説明を入力します。
 3. ウェイポイントのアイコン／絵文字を選びます。
 4. 「**送信**」をタップしてメッシュに共有します。
@@ -49,14 +49,14 @@
 
 ### ウェイポイントのプロパティ
 
- プロパティ  | 説明                          |
- ------ | --------------------------- |
- 名前     | 短い識別子（最大 29 文字）             |
- 説明     | 任意の、より詳しい説明                 |
- アイコン   | マップ上の視覚的なマーカー絵文字            |
- ロック済み  | ロックすると、作成者だけが編集・削除できます      |
- 有効期限   | 任意の、自動削除する日時                |
- ジオフェンス | 任意の、進入／退出を通知するエリア。詳しくは後述します |
+ プロパティ  | 説明                                                                             |
+ ------ | ------------------------------------------------------------------------------ |
+ 名前     | 短い識別子（最大 29 文字）                                                                |
+ 説明     | 任意の、より詳しい説明                                                                    |
+ アイコン   | マップ上の視覚的なマーカー絵文字                                                               |
+ ロック済み  | ロックすると、作成者だけが編集・削除できます                                                         |
+ 有効期限   | 任意の、自動削除する日時                                                                   |
+ ジオフェンス | Optional enter/exit alert area — see [Waypoint Geofences](#waypoint-geofences) |
 
 ### ウェイポイントの有効期限
 
@@ -81,16 +81,16 @@
 
 - マップ上のウェイポイントをタップすると、その詳細と座標を表示します
 - 自分が作成したウェイポイントを編集または削除できます
-- **ロックされたウェイポイント**は、他のノードから変更・削除できません。元の作成者だけが変更できます
+- **Locked waypoints** cannot be modified or deleted by other mesh members — only the creator can change them
 - ロックされていないウェイポイントは、どのメッシュメンバーでも編集できます
 
 ## マップレイヤー
 
-マップのレイヤーアイコンをタップすると「**マップレイヤーの管理**」が開き、`.kml`、`.kmz`、または GeoJSON 形式の独自のオーバーレイをインポートできます。Meshtastic でファイルを開くか、別のアプリからアプリに共有することでインポートします。 インポートしたレイヤーは、それぞれ表示／非表示を切り替えるトグルと、削除するオプションとともに一覧表示されます。 これは Google Play 版と F-Droid 版の両方で利用できます。
+Tap the layers icon on the map to open **Manage Map Layers**. It imports your own overlays in `.kml`, `.kmz`, or GeoJSON format — including KMZ ground overlays (georeferenced images, such as exported topo or aerial tiles), which drape at their stated bounds. Add one by picking a file with **Add Layer**, opening a file with Meshtastic, or sharing it into the app from another app. インポートしたレイヤーは、それぞれ表示／非表示を切り替えるトグルと、削除するオプションとともに一覧表示されます。 This works on the Google Play build, the F-Droid build, and **Desktop**, which shares the same layer store and file picker.
 
 ### サイトプランナー
 
-**サイトプランナー**は、送信機の RF カバレッジを推定し、色分けされたオーバーレイとしてマップに描画します。 マップの操作から開くか、ノードの詳細ページから「**カバレッジを推定**」で開きます（位置が判明しているノードでのみ表示されます）。 送信機（位置、周波数、送信出力、アンテナ利得と高さ）、受信機（感度、高さ）、シミュレーションのオプション（最大範囲、高解像度の地形、カラーパレット）を設定してから、推定を実行します。 マップレイヤーと同様に、サイトプランナーも Google Play 版と F-Droid 版の両方で動作します。
+**サイトプランナー**は、送信機の RF カバレッジを推定し、色分けされたオーバーレイとしてマップに描画します。 マップの操作から開くか、ノードの詳細ページから「**カバレッジを推定**」で開きます（位置が判明しているノードでのみ表示されます）。 送信機（位置、周波数、送信出力、アンテナ利得と高さ）、受信機（感度、高さ）、シミュレーションのオプション（最大範囲、高解像度の地形、カラーパレット）を設定してから、推定を実行します。 Like map layers, Site Planner works on both the Google Play and F-Droid builds, where the finished estimate is drawn on the map as a coverage overlay. On **Desktop** the same form is shown but the planner opens in your browser; to bring the estimate onto the map, use the planner's **Export › GeoJSON** and add the downloaded file under **Manage Map Layers**.
 
 ## 位置の共有
 
@@ -110,11 +110,43 @@
 
 ## マップソース
 
-ベースマップはアプリの版によって異なります。**Google Play** 版は Google マップを、**F-Droid** 版とデスクトップ版は OpenStreetMap を使用します。 ベースマップの上に、オーバーレイまたは代替として、追加のタイルソースを利用できます：
+Every build offers a base map picker from the map toolbar. **Google Play** builds open on Google's own
+map types; **F-Droid** and **Desktop** builds open on MapLibre's vector styles. Further down the base map
+picker, all three offer the same raster base maps:
 
-- Satellite imagery — on both Google Play and F-Droid
-- Offline tiles — **F-Droid only**. Download map areas for offline use through OSMdroid's tile
-  cache. Google Play and Desktop builds have no offline download
+ Base map                              | 備考                                                                |
+ ------------------------------------- | ----------------------------------------------------------------- |
+ Normal / Satellite / Terrain / Hybrid | Google Play only — Google's own map types                         |
+ Liberty                               | Default on F-Droid and Desktop. Vector street map |
+ Positron                              | Low-contrast vector map; keeps node markers legible over it       |
+ ダーク                                   | Vector map suited to dark themes                                  |
+ OpenStreetMap                         | Classic raster street tiles                                       |
+ OpenTopoMap                           | Raster topographic                                                |
+ USGS Topo / USGS Imagery              | US coverage only                                                  |
+ Esri Topo / Esri Imagery              | Topographic and satellite imagery                                 |
+
+Overlays can be toggled on top of any base map, from the layers sheet:
+
+- **Weather radar** — NOAA NEXRAD reflectivity (US coverage)
+- **Hillshade** — terrain relief, on **F-Droid** and **Desktop** only. Useful for understanding why a
+  link fails, since LoRa range is limited by terrain
+
+### Adding your own tile source
+
+Any XYZ tile endpoint can be added as a base map, on every flavor and on desktop. Open **Manage custom
+tile sources** at the foot of the base map picker and paste a URL template using `{z}`, `{x}` and `{y}`
+— plus `{s}` if the provider uses rotating subdomains. A national mapping service, for example:
+
+```
+https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg
+```
+
+Tiles are cached on disk, so panning does not re-download what you were just looking at.
+
+On **Android**, the same screen also imports a local `.mbtiles` archive for fully offline use.
+
+Offline area downloads are **F-Droid only**: cache the visible region from the layers sheet.
+**Google Play** builds import pre-made MBTiles files instead, and **Desktop** has neither.
 
 ## 関連トピック
 
@@ -122,9 +154,6 @@
 - [ノードメトリクス](node-metrics)：各ノードの信号品質と位置履歴
 - [Local Mesh Discovery](discovery) — traceroute and neighbor info for understanding mesh topology
 - [単位とロケール](units-and-locale)：距離と座標の表示形式
-
----
-
 </pre>
 </body>
 </html>
