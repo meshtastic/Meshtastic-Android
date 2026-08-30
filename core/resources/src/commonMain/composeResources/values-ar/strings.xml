@@ -138,6 +138,8 @@
     <string name="max">الأعلى</string>
     <!-- MESH -->
     <string name="mesh_beacon_preset_none">لا يوجد</string>
+    <string name="mesh_beacon_region_label">الجهة</string>
+    <string name="mesh_beacon_target_channel_index">عربي</string>
     <!-- MESHTASTIC -->
     <string name="meshtastic_low_battery_notifications">إشعارات انخفاض شدة البطارية</string>
     <string name="meshtastic_new_nodes_notifications">إشعارات العقدة الجديدة</string>

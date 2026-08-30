@@ -132,6 +132,8 @@
     <string name="map_tile_download_estimate">Descarga de 'tile' estimada:</string>
     <string name="map_tile_source">Fonte de 'tile'</string>
     <!-- MESH -->
+    <string name="mesh_beacon_region_label">Rexión</string>
+    <string name="mesh_beacon_target_channel_index">Canle</string>
     <!-- MESHTASTIC -->
     <string name="meshtastic_service_notifications">Notificacións de servizo</string>
     <!-- MESSAGE -->

@@ -722,6 +722,8 @@
     <string name="mesh_beacon_offer_preset">Пресет: %1$s</string>
     <string name="mesh_beacon_offer_region">Регіон: %1$s</string>
     <string name="mesh_beacon_preset_none">Жоден</string>
+    <string name="mesh_beacon_region_label">Регіон</string>
+    <string name="mesh_beacon_target_channel_index">Канал</string>
     <!-- MESHTASTIC -->
     <string name="meshtastic">Meshtastic</string>
     <string name="meshtastic_alerts_notifications">Сповіщення про тривоги</string>

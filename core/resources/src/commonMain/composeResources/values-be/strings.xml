@@ -159,6 +159,8 @@
     <string name="map_type_terrain">Рэльеф</string>
     <!-- MESH -->
     <string name="mesh_beacon_preset_none">Нічога</string>
+    <string name="mesh_beacon_region_label">Рэгіён</string>
+    <string name="mesh_beacon_target_channel_index">Канал</string>
     <!-- MESHTASTIC -->
     <string name="meshtastic">Meshtastic</string>
     <string name="meshtastic_app_name">Meshtastic</string>

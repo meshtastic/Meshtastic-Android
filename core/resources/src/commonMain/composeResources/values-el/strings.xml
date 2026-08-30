@@ -155,6 +155,8 @@
     <string name="map_select_download_region">Επιλογή περιοχής λήψης</string>
     <string name="map_start_download">Εκκίνηση Λήψης</string>
     <!-- MESH -->
+    <string name="mesh_beacon_region_label">Περιφέρεια</string>
+    <string name="mesh_beacon_target_channel_index">Κανάλι</string>
     <!-- MESHTASTIC -->
     <string name="meshtastic_service_notifications">Ειδοποιήσεις Υπηρεσίας</string>
     <!-- MESSAGE -->

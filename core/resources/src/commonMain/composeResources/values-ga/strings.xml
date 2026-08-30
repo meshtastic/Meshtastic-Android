@@ -150,6 +150,8 @@
     <string name="map_tile_source">Foinse Tíle</string>
     <!-- MESH -->
     <string name="mesh_beacon_preset_none">Ní dhéanfaidh sé</string>
+    <string name="mesh_beacon_region_label">Réigiún</string>
+    <string name="mesh_beacon_target_channel_index">Cainéal</string>
     <!-- MESHTASTIC -->
     <string name="meshtastic_new_nodes_notifications">Fógartha faoi na nodes nua</string>
     <string name="meshtastic_service_notifications">Fógraí seirbhíse</string>
