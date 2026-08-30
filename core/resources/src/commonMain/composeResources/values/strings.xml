@@ -1124,7 +1124,9 @@
     <!-- MESH -->
     <string name="mesh_beacon">Mesh Beacon</string>
     <string name="mesh_beacon_broadcast">Broadcast a beacon</string>
+    <string name="mesh_beacon_broadcast_requires_preset">Beacon broadcasting advertises a modem preset for others to join. This radio uses custom LoRa settings instead of a standard preset, so a beacon could invite people onto settings they cannot hear. Broadcasting can be turned off here, but not on, until the radio uses a standard modem preset.</string>
     <string name="mesh_beacon_broadcast_summary">Periodically advertise this mesh to nearby nodes</string>
+    <string name="mesh_beacon_channel_number">Channel %1$d</string>
     <string name="mesh_beacon_channels_title">Beacon channels</string>
     <string name="mesh_beacon_interval">Broadcast interval</string>
     <string name="mesh_beacon_interval_error">Choose an interval of at least one hour</string>
@@ -1133,6 +1135,7 @@
     <string name="mesh_beacon_listen_summary">Capture invitations advertised by nearby meshes</string>
     <string name="mesh_beacon_message">Beacon message</string>
     <string name="mesh_beacon_message_error">Maximum %1$d bytes</string>
+    <string name="mesh_beacon_no_channels">No channels available</string>
     <string name="mesh_beacon_notification_body">A nearby mesh invited you to join</string>
     <string name="mesh_beacon_notification_title">Mesh invitation</string>
     <string name="mesh_beacon_offer_add">Add channel</string>

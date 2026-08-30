@@ -105,7 +105,7 @@ class MeshBeaconConfigPolicyTest {
     fun beaconOfferChannelIndex_nullChannel_returnsNull() {
         val channelList = listOf(ChannelSettings(name = "Primary"))
 
-        assertNull(beaconOfferChannelIndex(null, channelList))
+        assertNull(beaconOfferChannelIndex(null, selectableBeaconChannels(channelList)))
     }
 
     @Test
@@ -117,7 +117,7 @@ class MeshBeaconConfigPolicyTest {
             )
         val offer = ChannelSettings(name = "Secondary", psk = "b".encodeUtf8())
 
-        assertEquals(1, beaconOfferChannelIndex(offer, channelList))
+        assertEquals(1, beaconOfferChannelIndex(offer, selectableBeaconChannels(channelList)))
     }
 
     @Test
@@ -125,12 +125,76 @@ class MeshBeaconConfigPolicyTest {
         val channelList = listOf(ChannelSettings(name = "Primary", psk = "a".encodeUtf8()))
         val offer = ChannelSettings(name = "Stale", psk = "z".encodeUtf8())
 
-        assertNull(beaconOfferChannelIndex(offer, channelList))
+        assertNull(beaconOfferChannelIndex(offer, selectableBeaconChannels(channelList)))
+    }
+
+    @Test
+    fun beaconOfferChannelIndex_offerMatchesOnlyAPlaceholderSlot_returnsNull() {
+        // A blank/empty offer's identity coincidentally matches the placeholder secondary in the RAW list; once
+        // filtered through selectableBeaconChannels that slot is gone, so the match must not go through (design#140
+        // Q2) -- otherwise the offer picker would silently select an excluded, never-rendered item.
+        val channelList = listOf(ChannelSettings(name = "Primary", psk = "a".encodeUtf8()), ChannelSettings())
+        val offer = ChannelSettings()
+
+        assertNull(beaconOfferChannelIndex(offer, selectableBeaconChannels(channelList)))
+    }
+
+    @Test
+    fun selectableBeaconChannels_placeholderSecondaryExcluded_followingRealSlotKeepsTrueIndex() {
+        val channelList =
+            listOf(
+                ChannelSettings(name = "Primary", psk = "a".encodeUtf8()),
+                ChannelSettings(), // placeholder secondary: blank name, empty psk
+                ChannelSettings(name = "Real", psk = "b".encodeUtf8()),
+            )
+
+        val selectable = selectableBeaconChannels(channelList)
+
+        assertEquals(listOf(0, 2), selectable.map { it.first })
+    }
+
+    @Test
+    fun selectableBeaconChannels_blankPrimaryKept() {
+        val channelList = listOf(ChannelSettings())
+
+        val selectable = selectableBeaconChannels(channelList)
+
+        assertEquals(listOf(0), selectable.map { it.first })
+    }
+
+    @Test
+    fun selectableBeaconChannels_nameOnlySecondaryKept() {
+        val channelList = listOf(ChannelSettings(name = "Primary"), ChannelSettings(name = "Named"))
+
+        val selectable = selectableBeaconChannels(channelList)
+
+        assertEquals(listOf(0, 1), selectable.map { it.first })
+    }
+
+    @Test
+    fun selectableBeaconChannels_pskOnlySecondaryKept() {
+        val channelList = listOf(ChannelSettings(name = "Primary"), ChannelSettings(psk = "b".encodeUtf8()))
+
+        val selectable = selectableBeaconChannels(channelList)
+
+        assertEquals(listOf(0, 1), selectable.map { it.first })
+    }
+
+    @Test
+    fun selectableBeaconChannels_oneBytePskCleartextSentinelSecondaryKept() {
+        // A raw ChannelSettings.psk of size 1 (firmware's cleartext sentinel is a single 0x00 byte) is not padding:
+        // isChannelPlaceholder only treats size == 0 as placeholder.
+        val channelList = listOf(ChannelSettings(name = "Primary"), ChannelSettings(psk = "\u0000".encodeUtf8()))
+
+        val selectable = selectableBeaconChannels(channelList)
+
+        assertEquals(listOf(0, 1), selectable.map { it.first })
     }
 
     @Test
     fun stampBeaconConfigForSave_stampsRegionAndPresetOnConfigAndTargets() {
-        val radioLora = Config.LoRaConfig(region = RegionCode.EU_868, modem_preset = ModemPreset.MEDIUM_FAST)
+        val radioLora =
+            Config.LoRaConfig(region = RegionCode.EU_868, modem_preset = ModemPreset.MEDIUM_FAST, use_preset = true)
         val config =
             MeshBeaconConfig(
                 broadcast_offer_region = RegionCode.US,
@@ -142,7 +206,7 @@ class MeshBeaconConfigPolicyTest {
                 ),
             )
 
-        val stamped = stampBeaconConfigForSave(config, radioLora, channelList = emptyList())
+        val stamped = stampBeaconConfigForSave(config, config, radioLora, channelList = emptyList())
 
         assertEquals(RegionCode.EU_868, stamped.broadcast_offer_region)
         assertEquals(ModemPreset.MEDIUM_FAST, stamped.broadcast_offer_preset)
@@ -153,11 +217,12 @@ class MeshBeaconConfigPolicyTest {
 
     @Test
     fun stampBeaconConfigForSave_untouchedOfferChannel_defaultsToPrimary() {
-        val radioLora = Config.LoRaConfig(region = RegionCode.US, modem_preset = ModemPreset.LONG_FAST)
+        val radioLora =
+            Config.LoRaConfig(region = RegionCode.US, modem_preset = ModemPreset.LONG_FAST, use_preset = true)
         val primary = ChannelSettings(name = "Primary", psk = "a".encodeUtf8())
         val config = MeshBeaconConfig(broadcast_offer_channel = null)
 
-        val stamped = stampBeaconConfigForSave(config, radioLora, channelList = listOf(primary))
+        val stamped = stampBeaconConfigForSave(config, config, radioLora, channelList = listOf(primary))
 
         assertEquals("Primary", stamped.broadcast_offer_channel?.name)
         assertEquals("a".encodeUtf8(), stamped.broadcast_offer_channel?.psk)
@@ -165,12 +230,13 @@ class MeshBeaconConfigPolicyTest {
 
     @Test
     fun stampBeaconConfigForSave_alreadySetOfferChannel_isKeptEvenIfStale() {
-        val radioLora = Config.LoRaConfig(region = RegionCode.US, modem_preset = ModemPreset.LONG_FAST)
+        val radioLora =
+            Config.LoRaConfig(region = RegionCode.US, modem_preset = ModemPreset.LONG_FAST, use_preset = true)
         val stale = ChannelSettings(name = "Stale", psk = "z".encodeUtf8())
         val config = MeshBeaconConfig(broadcast_offer_channel = stale)
 
         val stamped =
-            stampBeaconConfigForSave(config, radioLora, channelList = listOf(ChannelSettings(name = "Primary")))
+            stampBeaconConfigForSave(config, config, radioLora, channelList = listOf(ChannelSettings(name = "Primary")))
 
         assertEquals("Stale", stamped.broadcast_offer_channel?.name)
         assertEquals("z".encodeUtf8(), stamped.broadcast_offer_channel?.psk)
@@ -180,7 +246,8 @@ class MeshBeaconConfigPolicyTest {
     fun stampBeaconConfigForSave_onlyNameAndPskCarryOverToOfferChannel() {
         // A beacon invites a stranger's radio to join this channel: the radio's own index/id/uplink/downlink/module
         // flags have no meaning there and must never leak onto someone else's node.
-        val radioLora = Config.LoRaConfig(region = RegionCode.US, modem_preset = ModemPreset.LONG_FAST)
+        val radioLora =
+            Config.LoRaConfig(region = RegionCode.US, modem_preset = ModemPreset.LONG_FAST, use_preset = true)
         val fullChannel =
             ChannelSettings(
                 name = "Primary",
@@ -192,9 +259,52 @@ class MeshBeaconConfigPolicyTest {
             )
         val config = MeshBeaconConfig(broadcast_offer_channel = null)
 
-        val stamped = stampBeaconConfigForSave(config, radioLora, channelList = listOf(fullChannel))
+        val stamped = stampBeaconConfigForSave(config, config, radioLora, channelList = listOf(fullChannel))
 
         assertEquals(ChannelSettings(name = "Primary", psk = "a".encodeUtf8()), stamped.broadcast_offer_channel)
+    }
+
+    @Test
+    fun stampBeaconConfigForSave_customParams_preservesStoredBroadcastFieldsVerbatim() {
+        val radioLora =
+            Config.LoRaConfig(region = RegionCode.US, modem_preset = ModemPreset.LONG_FAST, use_preset = false)
+        val listenFlag = MeshBeaconConfig.Flags.FLAG_LISTEN_ENABLED.value
+        val broadcastFlag = MeshBeaconConfig.Flags.FLAG_BROADCAST_ENABLED.value
+        val stored =
+            MeshBeaconConfig(
+                flags = listenFlag or broadcastFlag,
+                broadcast_message = "Stored message",
+                broadcast_interval_secs = 3600,
+                broadcast_offer_region = RegionCode.EU_868,
+                broadcast_offer_preset = ModemPreset.MEDIUM_FAST,
+                broadcast_offer_channel = ChannelSettings(name = "Stored", psk = "s".encodeUtf8()),
+                broadcast_targets =
+                listOf(MeshBeaconConfig.BroadcastTarget(region = RegionCode.EU_868, channel_index = 1)),
+            )
+        // The form differs on every broadcast field, plus clears the BROADCAST flag (the only edit the gated UI
+        // actually allows) -- none of the broadcast field edits should survive the save.
+        val form =
+            stored.copy(
+                flags = listenFlag,
+                broadcast_message = "Edited but discarded",
+                broadcast_interval_secs = 7200,
+                broadcast_offer_region = RegionCode.JP,
+                broadcast_offer_preset = ModemPreset.SHORT_FAST,
+                broadcast_offer_channel = ChannelSettings(name = "Different"),
+                broadcast_targets = emptyList(),
+            )
+
+        val stamped =
+            stampBeaconConfigForSave(form, stored, radioLora, channelList = listOf(ChannelSettings(name = "Primary")))
+
+        assertEquals(stored.broadcast_message, stamped.broadcast_message)
+        assertEquals(stored.broadcast_interval_secs, stamped.broadcast_interval_secs)
+        assertEquals(stored.broadcast_offer_region, stamped.broadcast_offer_region)
+        assertEquals(stored.broadcast_offer_preset, stamped.broadcast_offer_preset)
+        assertEquals(stored.broadcast_offer_channel, stamped.broadcast_offer_channel)
+        assertEquals(stored.broadcast_targets, stamped.broadcast_targets)
+        // Flags come from the form, not the stored config: the listen/broadcast toggle edits are honored.
+        assertEquals(form.flags, stamped.flags)
     }
 
     @Test
