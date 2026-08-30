@@ -1686,7 +1686,8 @@ internal fun Feature.applySimpleStyleSpec(): Feature {
  * there is nothing layer-wide to fade. Scaling rather than replacing the alpha keeps an import's own relative
  * transparency: a coverage export whose contour bands are already translucent stays a gradient as the layer fades.
  *
- * Point features are left alone; their icons are bitmaps whose alpha maps-utils' [PointStyle] does not expose.
+ * Points included: [PointStyle] carries an ARGB colour the renderer turns into marker alpha, so a point-only layer
+ * would otherwise stay fully visible at 0%.
  */
 internal fun DataLayer.scaledByOpacity(opacity: Float): DataLayer =
     if (opacity >= 1f) this else copy(features = features.map { it.scaledByOpacity(opacity) })
@@ -1702,6 +1703,8 @@ private fun Feature.scaledByOpacity(opacity: Float): Feature = when (val feature
         )
 
     is LineStyle -> copy(style = featureStyle.copy(color = featureStyle.color.scaleAlpha(opacity)))
+
+    is PointStyle -> copy(style = featureStyle.copy(color = featureStyle.color.scaleAlpha(opacity)))
 
     else -> this
 }

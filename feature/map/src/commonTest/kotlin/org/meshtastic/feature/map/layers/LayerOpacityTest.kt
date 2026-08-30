@@ -52,6 +52,12 @@ class LayerOpacityTest {
     }
 
     @Test
+    fun `a non-finite value is dropped rather than clamped`() {
+        // coerceIn cannot clamp NaN — every comparison against it is false, so it passes through unchanged.
+        assertEquals(emptyMap<String, Float>(), decodeLayerOpacity(setOf("a|:|NaN", "b|:|Infinity")))
+    }
+
+    @Test
     fun `an out of range value is clamped`() {
         assertEquals(mapOf("a" to 0f, "b" to 1f), decodeLayerOpacity(setOf("a|:|-3.0", "b|:|7.5")))
     }

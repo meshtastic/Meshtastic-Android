@@ -56,7 +56,11 @@ fun decodeLayerOpacity(entries: Set<String>): Map<String, Float> = entries
     .mapNotNull { entry ->
         if (!entry.contains(OPACITY_DELIMITER)) return@mapNotNull null
         val key = entry.substringBeforeLast(OPACITY_DELIMITER).takeIf { it.isNotEmpty() } ?: return@mapNotNull null
-        val opacity = entry.substringAfterLast(OPACITY_DELIMITER).toFloatOrNull() ?: return@mapNotNull null
+        // isFinite, not merely parseable: "NaN" parses, and coerceIn cannot clamp it because every comparison
+        // against NaN is false — so a corrupted entry would reach the renderers as a non-finite opacity.
+        val opacity =
+            entry.substringAfterLast(OPACITY_DELIMITER).toFloatOrNull()?.takeIf { it.isFinite() }
+                ?: return@mapNotNull null
         key to opacity.coerceIn(0f, LAYER_OPACITY_OPAQUE)
     }
     .toMap()

@@ -19,6 +19,7 @@ package org.meshtastic.app.map
 import com.google.maps.android.data.parser.geojson.GeoJsonParser
 import com.google.maps.android.data.renderer.mapper.toLayer
 import com.google.maps.android.data.renderer.model.LineStyle
+import com.google.maps.android.data.renderer.model.PointStyle
 import com.google.maps.android.data.renderer.model.PolygonStyle
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -76,6 +77,24 @@ class MapLayerOpacityTest {
 
         val style = assertNotNull(faded.features.single().style as? LineStyle)
         assertEquals(64, AndroidColor.alpha(style.color))
+    }
+
+    @Test
+    fun `a point's alpha is scaled too`() {
+        // A point-only KML stayed fully visible at 0% while this was skipped: PointStyle does carry an ARGB colour,
+        // which the renderer turns into the marker's alpha.
+        val point =
+            """
+            {"type":"FeatureCollection","features":[{"type":"Feature",
+              "properties":{"icon-url":"https://example.org/tower.png"},
+              "geometry":{"type":"Point","coordinates":[0,0]}}]}
+            """
+                .trimIndent()
+
+        val faded = layerFrom(point).scaledByOpacity(0.5f)
+
+        val style = assertNotNull(faded.features.single().style as? PointStyle)
+        assertEquals(128, AndroidColor.alpha(style.color))
     }
 
     @Test
