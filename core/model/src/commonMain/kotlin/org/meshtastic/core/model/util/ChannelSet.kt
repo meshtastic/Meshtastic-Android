@@ -93,6 +93,34 @@ val ChannelSet.primaryChannel: Channel?
 
 fun ChannelSet.hasLoraConfig(): Boolean = lora_config != null
 
+/**
+ * True when [this] is a channel the radio already has configured (design#140 behavior 10). Null [currentLora] or an
+ * empty [currentChannels] means "can't tell" and returns false, never hiding a still-relevant invitation on missing
+ * data. Comparison uses resolved [ChannelIdentity] (effective name plus expanded PSK) so a blank-name primary or a
+ * short-code PSK still matches; differing PSK under an identical name is deliberately not a match, since same name with
+ * a different key is a different mesh.
+ */
+@Suppress("ReturnCount")
+fun ChannelSettings.isAlreadyJoined(
+    offerPreset: LoRaConfig.ModemPreset?,
+    currentLora: LoRaConfig?,
+    currentChannels: List<ChannelSettings>,
+): Boolean {
+    val lora = currentLora ?: return false
+    if (currentChannels.isEmpty()) return false
+    val offerLora = lora.copy(use_preset = true, modem_preset = offerPreset ?: lora.modem_preset)
+    val offerIdentity = channelIdentity(offerLora)
+    return currentChannels.any { it.channelIdentity(lora) == offerIdentity }
+}
+
+/**
+ * True when [this] beacon's offered channel is already configured on the radio; see [ChannelSettings.isAlreadyJoined].
+ */
+fun MeshBeacon.isAlreadyJoined(currentLora: LoRaConfig?, currentChannels: List<ChannelSettings>): Boolean {
+    val offer = offer_channel ?: return false
+    return offer.isAlreadyJoined(offer_preset, currentLora, currentChannels)
+}
+
 /** How a received Mesh Beacon invitation can be joined, given the connected radio's current settings. */
 enum class BeaconJoinOption {
     /** Add the offered channel to a free secondary slot with no retune/reboot (mesh shares the radio's frequency). */
