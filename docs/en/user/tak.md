@@ -26,7 +26,7 @@ The TAK module allows Meshtastic nodes to:
 ### Prerequisites
 
 - ATAK (Android Team Awareness Kit), iTAK, or WinTAK installed
-- Your node's **Role** (Device configuration) set to **TAK** or **TAK Tracker** — this is what makes the
+- Your node's **Device Role** (Device configuration) set to **TAK** or **TAK Tracker** — this is what makes the
   TAK module appear in Module configuration at all
 - Firmware 2.8.0 or newer on the radio. Earlier firmware accepts a TAK config write and never
   stores it, so the app hides the TAK module entry below that version even when the role is set
@@ -40,7 +40,7 @@ The TAK module allows Meshtastic nodes to:
 ### Configuration
 
 Navigate to **Settings → Module configuration → TAK**. The module's own settings are your TAK identity —
-there is no separate enable switch here, because the **Role** setting in Device configuration is what
+there is no separate enable switch here, because the **Device Role** setting in Device configuration is what
 turns TAK on. Your node broadcasts this identity, which appears on TAK maps.
 
 | Setting | Description |
@@ -110,7 +110,7 @@ Once configured:
 
 | Problem | Cause | Solution |
 |---------|-------|----------|
-| Node doesn't appear on ATAK map | Wrong Role setting, or Mesh to CoT Converter off | Set the node's **Role** to TAK or TAK Tracker. For ordinary (non-TAK-role) nodes to appear, also enable **Mesh to CoT Converter** under **Settings → Advanced → TAK Server** |
+| Node doesn't appear on ATAK map | Wrong Device Role setting, or Mesh to CoT Converter off | Set the node's **Device Role** to TAK or TAK Tracker. For ordinary (non-TAK-role) nodes to appear, also enable **Mesh to CoT Converter** under **Settings → Advanced → TAK Server** |
 | Position updates are stale | GPS fix lost or interval too long | Check GPS status; reduce position broadcast interval in Position Config |
 | ATAK shows "disconnected" | The local TAK server is off, or ATAK is pointed elsewhere | Check **Enable Local TAK Server** is on, and that ATAK is connecting to `127.0.0.1:8089` — re-import the exported data package if unsure |
 | Shapes, markers, or routes not bridging | Sending node is on legacy V1 (firmware 2.7.x or older) | Update the sending node's firmware to 2.8.0+ for V2 wire format |

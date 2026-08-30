@@ -150,5 +150,5 @@ Requirements:
 ## Related Topics
 
 - [Connections](connections) — connection methods overview
-- [Firmware Updates](firmware) — USB, BLE, and Wi-Fi update all work the same as on Android
+- [Firmware Updates](firmware) — in-app USB, BLE, and Wi-Fi update all work the same as on Android
 - [Map & Waypoints](map-and-waypoints) — base maps, layers, custom tile sources, and what the desktop map does not do

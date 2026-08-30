@@ -132,7 +132,7 @@ Traceroute reveals the exact path a message takes from your node to any other no
 
 A traceroute result looks like this:
 
-```
+```text
 Route traced toward destination:
 
 ■ Your Node (YOUR)

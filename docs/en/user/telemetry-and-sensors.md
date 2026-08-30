@@ -97,7 +97,7 @@ Useful for monitoring solar charging or battery health on remote nodes.
 
 1. Navigate to **Settings → Module configuration → Telemetry**.
 2. Each metric group has its own enable toggle and its own interval:
-   - **Device Metrics** — battery, ChUtil, and AirUtil. Its enable toggle, **Send Device Telemetry**, appears only on firmware 2.7.12 and later; on older firmware you can change the interval but not turn the group off
+   - **Device Metrics** — battery, voltage, uptime, ChUtil, and AirUtil. Its enable toggle, **Send Device Telemetry**, appears only on firmware 2.7.12 and later; on older firmware you can change the interval but not turn the group off
    - **Environment Metrics** — temperature, humidity, pressure and the other sensor readings
    - **Air Quality Metrics** — particulate and CO₂ readings
    - **Power Metrics** — the per-channel voltage and current readings

@@ -52,7 +52,6 @@ Meshtastic also uses your location for:
 - Showing your position on the mesh map
 - Calculating distances to other nodes
 - Sharing your GPS coordinates with other mesh members (if enabled)
-- Filtering the node list and the map by how close a node is to you
 
 Grant **"While using the app"**. The app does not request background location — `ACCESS_BACKGROUND_LOCATION` is not in its manifest — so Android will not offer an "Always" option, and position updates happen while the app is in the foreground or running its foreground service.
 
