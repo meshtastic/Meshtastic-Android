@@ -51,23 +51,29 @@ kotlin {
     // otherwise silently collide with. Kept outside the `webEnabled` guard above — with no wasmJs
     // target present this groups every compilation and is an inert no-op layer.
     //
-    // withJvm()/withAndroidTarget()/withApple() (NOT a withCompilations predicate excluding wasmJs):
-    // the predicate form grafts `nonWeb` onto leaf compilations only, bypassing the default
-    // template's own `iosMain` intermediate — iOS's actuals (NoopStubs.kt) then have no dependsOn
-    // path to nonWebMain's expects (KablePlatformSetup.kt) even though both are ancestors of the
-    // same leaf targets, because Kotlin's expect/actual visibility check walks each source set's own
-    // dependsOn closure, not the leaf's merged one. Nesting the default template's own named groups
-    // under this one keeps `iosMain` (and its existing dependsOn edges) intact underneath it.
+    // Deliberately a withCompilations predicate, NOT withAndroidTarget()/withApple(): this repo
+    // applies `com.android.kotlin.multiplatform.library` (see KmpLibraryConventionPlugin.kt), and
+    // withAndroidTarget() silently fails to attach androidMain to a custom group under that specific
+    // plugin — a confirmed, open JetBrains bug (KT-80409); androidMain stays wired directly to
+    // commonMain instead, which broke this module's Android compile the one time this code tried
+    // withAndroidTarget(). A KGP engineer's own documented workaround for that bug is to drop to the
+    // lower-level withCompilations predicate instead of the named helper, which is what this does.
     @OptIn(ExperimentalKotlinGradlePluginApi::class)
     applyHierarchyTemplate(KotlinHierarchyTemplate.default) {
-        common {
-            group("nonWeb") {
-                withJvm()
-                withAndroidTarget()
-                withApple()
-            }
-        }
+        common { group("nonWeb") { withCompilations { it.target.targetName != "wasmJs" } } }
     }
+
+    // The predicate above only reaches the two *leaf* iOS compilations (iosArm64Main,
+    // iosSimulatorArm64Main) — each gains nonWebMain as an extra, direct dependsOn edge alongside
+    // their existing one on `iosMain`, but the pre-existing shared `iosMain` intermediate itself
+    // (created by the default hierarchy template once iosArm64()/iosSimulatorArm64() are
+    // registered, and where NoopStubs.kt's `actual`s live) never gains an edge to nonWebMain. Kotlin
+    // checks each source set's *own* expect/actual visibility against its own dependsOn closure, not
+    // the leaf's merged one, so iosMain's actuals can't see nonWebMain's expects even though both are
+    // (separately) ancestors of the same two leaves — confirmed via a printSourceSetHierarchy dump.
+    // Wire it explicitly, the same "drop to a lower-level, explicit construct" pattern KT-80409's own
+    // workaround uses for the analogous Android problem.
+    sourceSets.getByName("iosMain") { dependsOn(sourceSets.getByName("nonWebMain")) }
 
     sourceSets {
         commonMain.dependencies {
