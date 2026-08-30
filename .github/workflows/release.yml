@@ -314,10 +314,15 @@ jobs:
         # Quote the -P flag: PowerShell on Windows interprets the dot in
         # `-PaboutLibraries.release=true` as member access on `-PaboutLibraries`,
         # splitting the token and feeding `.release=true` to Gradle as a task name.
+        # --no-isolated-projects --no-configuration-cache: CMP's Windows MSI/WiX packaging
+        # reads Project.layout on the root project, which IP and the CC each reject; both
+        # must be flags, not -D properties (inert on windows-latest), and --no-isolated-projects
+        # needs Gradle 9.7+ — full rationale on the desktop packaging step in reusable-check.yml.
         run: >
           ./gradlew :desktopApp:packageReleaseDistributionForCurrentOS
           ${{ contains(runner.os, 'macOS') && ':desktopApp:packageReleaseUberJarForCurrentOS' || '' }}
           '-PaboutLibraries.release=true' '-Pdesktop.release=true' --no-daemon
+          --no-isolated-projects --no-configuration-cache
 
       # Authenticode-signs the MSI/EXE installers via Azure Trusted Signing
       # (rebranded "Artifact Signing"). Skips cleanly when the secrets are
