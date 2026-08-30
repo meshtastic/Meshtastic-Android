@@ -26,6 +26,50 @@ function parseFrontmatter(content) {
     return { fields, body, raw };
 }
 
+/**
+ * Read a YAML list field out of a raw frontmatter block (the `raw` from parseFrontmatter).
+ * `fields` cannot carry these: a block list leaves the key's own line empty.
+ * Handles both the block form used by every page —
+ *     aliases:
+ *       - bluetooth
+ *       - usb
+ * — and the inline form `aliases: [bluetooth, usb]`. Returns [] when the key is absent.
+ */
+function parseListField(rawFrontmatter, key) {
+    const lines = rawFrontmatter.split("\n");
+    const values = [];
+    let inList = false;
+
+    for (const line of lines) {
+        if (!inList) {
+            const head = line.match(new RegExp(`^${key}:\\s*(.*)$`));
+            if (!head) continue;
+
+            const inline = head[1].trim();
+            if (inline.startsWith("[")) {
+                return inline
+                    .replace(/^\[|\]$/g, "")
+                    .split(",")
+                    .map(v => v.trim().replace(/^["']|["']$/g, ""))
+                    .filter(v => v.length > 0);
+            }
+            if (inline.length > 0) return [inline.replace(/^["']|["']$/g, "")];
+            inList = true;
+            continue;
+        }
+
+        const item = line.match(/^\s+-\s+(.*)$/);
+        if (item) {
+            values.push(item[1].trim().replace(/^["']|["']$/g, ""));
+            continue;
+        }
+        // Any non-item line at this point ends the list.
+        if (line.trim().length > 0) break;
+    }
+
+    return values;
+}
+
 /** Discover all .md page slugs under docs/{section}/ */
 function discoverSlugs(docsDir, section) {
     const dir = path.join(docsDir, section);
@@ -48,4 +92,4 @@ function forEachDocPage(docsDir, fn) {
     }
 }
 
-module.exports = { parseFrontmatter, discoverSlugs, forEachDocPage };
+module.exports = { parseFrontmatter, parseListField, discoverSlugs, forEachDocPage };

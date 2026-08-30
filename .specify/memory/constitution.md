@@ -158,13 +158,14 @@ Governance rules:
   means deleting its locale copies in the same commit.
 
 Verification tooling — also enforced in CI: `.github/workflows/docs-quality.yml` runs the
-link check, the coverage check, and a two-way `DocBundleLoader.kt` registry check as a
-**blocking** gate on PRs touching `docs/en/**` (freshness stays advisory). Run locally
-before pushing docs changes:
+link check, the coverage check, a two-way `DocBundleLoader.kt` registry check, and the alias
+registration check as a **blocking** gate on PRs touching `docs/en/**` (freshness stays
+advisory). Run locally before pushing docs changes:
 
 ```bash
 node scripts/check-doc-coverage.js    # every user-facing feature module has a page
 node scripts/validate-doc-links.js    # internal cross-references and image paths resolve
+node scripts/check-doc-aliases.js     # frontmatter aliases are registered in DocBundleLoader.kt
 node scripts/check-doc-freshness.js   # advisory: pages >180 days old, or missing last_updated
 ```
 <!-- Rationale: Documentation drift misleads users and increases support burden. Three distinct consumers means changes must be verified across all delivery channels. -->
