@@ -1803,7 +1803,7 @@
     <string name="ssid">SSID</string>
     <string name="state_broadcast_seconds">State broadcast (seconds)</string>
     <string name="status_message">Status Message</string>
-    <string name="status_message_summary">A status message that is broadcast to the mesh. Other nodes will see this status in the node list. Transmitted after changes + every 12 hours.</string>
+    <string name="status_message_summary">A public status message that is broadcast to the mesh on change and every 12 hours.</string>
     <string name="stay_connected_anywhere">Stay Connected Anywhere</string>
     <string name="stop_connecting">Stop Connecting</string>
     <string name="store_forward">Store &amp; Forward</string>
