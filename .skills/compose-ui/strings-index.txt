@@ -1049,6 +1049,7 @@ map_download_status_downloading
 map_download_status_paused
 map_filter
 map_layer_formats
+map_layer_opacity
 map_node_popup_details
 map_offline_manager
 map_overlay_hillshade
