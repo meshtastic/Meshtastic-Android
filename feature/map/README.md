@@ -69,6 +69,7 @@ graph TB
   :feature:map -.-> :core:model
   :feature:map -.-> :core:navigation
   :feature:map -.-> :core:prefs
+  :feature:map -.-> :core:repository
   :feature:map -.-> :core:service
   :feature:map -.-> :core:resources
   :feature:map -.-> :core:ui
