@@ -108,14 +108,14 @@ specs/
 The project constitution at `.specify/memory/constitution.md` defines non-negotiable principles.
 All specs, plans, and tasks are validated against it during `/speckit.analyze`.
 
-Current constitution (v1.3.4) enforces 7 principles:
+Current constitution (v1.3.5) enforces 7 principles:
 
 1. **KMP Core** — Business logic in `commonMain` only
 2. **Zero Lint Tolerance** — `spotlessCheck` + `detekt` must pass
 3. **Compose Multiplatform UI** — CMP, not Android-only Compose
 4. **Privacy First** — No PII/location/key exposure
 5. **Design Standards Compliance** — Review against Meshtastic design standards; cross-platform features must reference an upstream spec from `meshtastic/design/features/`
-6. **Documentation Freshness** — User-facing changes update `docs/en/` (in-app browser, Jekyll, Docusaurus) with `last_updated` frontmatter; author-enforced, the check scripts are not wired into CI
+6. **Documentation Freshness** — User-facing changes update `docs/en/` (in-app browser, Jekyll, Docusaurus) with `last_updated` frontmatter; links, coverage, and the DocBundleLoader registry are a blocking CI gate (`docs-quality.yml`) on PRs touching `docs/en/**`, freshness advisory
 7. **Verify Before Push** — Local verification before any `git push`
 
 ## Extension Hooks

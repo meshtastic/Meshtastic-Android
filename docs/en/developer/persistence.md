@@ -2,7 +2,8 @@
 title: Persistence
 parent: Developer Guide
 nav_order: 6
-last_updated: 2026-08-27
+last_updated: 2026-08-29
+description: The app's three persistence layers — Room, DataStore, and core:prefs — and when a contributor should use each.
 aliases:
   - room
   - database
@@ -12,7 +13,7 @@ aliases:
 
 # Persistence
 
-How the Meshtastic app stores data across different mechanisms.
+The app's three persistence layers — Room, DataStore, and `core:prefs` — and when a contributor should use each.
 
 ## Room KMP Database
 
@@ -23,7 +24,7 @@ The primary structured data store:
 - Message history
 - Waypoints
 - Telemetry data
-- Channel configurations
+- Channel set configuration (channel names and LoRa config)
 
 ### Key Points
 
@@ -45,6 +46,7 @@ The primary structured data store:
 | `ReactionEntity` | Emoji reactions on messages |
 | `MeshLog` | Raw mesh protocol logs |
 | `MetadataEntity` | Device metadata (firmware version, hardware model) |
+| `ChannelSetEntity` | The connected radio's channel set — channel names and LoRa config — one row per device |
 | `QuickChatAction` | User-configured quick-chat messages |
 | `DeviceHardwareEntity` | Cached device hardware catalog |
 | `FirmwareReleaseEntity` | Cached firmware release info |
@@ -54,18 +56,17 @@ The primary structured data store:
 | `DiscoveredNodeEntity` | Nodes found during a discovery preset scan |
 | `DeviceLinkEntity` | Cached `msh.to` device links from the Meshtastic API |
 
-> ℹ️ **Note:** Waypoints, telemetry, and channel data are stored within the `Packet` entity (using the `port_num` field to distinguish packet types) rather than in separate tables.
+> ℹ️ **Note:** Waypoints and telemetry are stored within the `Packet` entity (the `port_num` field distinguishes packet types), alongside a `channel` index recording which channel each packet used. Channel *configuration* — names and LoRa settings — lives separately, in `ChannelSetEntity`.
 
 ## DataStore Preferences
 
 **Module:** `core:datastore`
 
 For lightweight key-value preferences:
-- Local radio configuration (LocalConfig proto)
-- Module configuration (ModuleConfig proto)
-- Channel set data
+- Local radio configuration (`LocalConfig`)
+- Module configuration (`ModuleConfig`)
 - Local statistics
-- Recently connected device addresses
+- Recently connected radio addresses
 
 ## Core Prefs
 
@@ -87,6 +88,3 @@ The `feature:docs` module uses **no** Room or persistent database. Documentation
 - Use bundled resources/assets for static content
 - Never store sensitive data (keys, passwords) in plain Room tables
 - Always provide migrations for schema changes
-
----
-

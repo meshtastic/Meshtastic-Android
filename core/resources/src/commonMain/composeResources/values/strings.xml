@@ -303,7 +303,7 @@
     <string name="config_lora_region_summary">The region where you will be using your radios.</string>
     <string name="config_network_eth_enabled_summary">Enabling Ethernet will disable the bluetooth connection to the app. TCP node connections are not available on Apple devices.</string>
     <string name="config_network_udp_enabled_summary">Enable broadcasting packets via UDP over the local network.</string>
-    <string name="config_network_wifi_enabled_summary">Enabling WiFi will disable the bluetooth connection to the app.</string>
+    <string name="config_network_wifi_enabled_summary">Enabling Wi-Fi will disable the bluetooth connection to the app.</string>
     <string name="config_position_broadcast_secs_summary">The maximum interval that can elapse without a node broadcasting a position.</string>
     <string name="config_position_broadcast_smart_minimum_distance_summary">The minimum distance change in meters to be considered for a smart position broadcast.</string>
     <string name="config_position_broadcast_smart_minimum_interval_secs_summary">The fastest that position updates will be sent if the minimum distance has been satisfied.</string>
@@ -749,7 +749,7 @@
     <string name="firmware_update_method_ble">BLE OTA</string>
     <string name="firmware_update_method_detail">Update via %1$s</string>
     <string name="firmware_update_method_usb">USB File Transfer</string>
-    <string name="firmware_update_method_wifi">WiFi OTA</string>
+    <string name="firmware_update_method_wifi">Wi-Fi OTA</string>
     <string name="firmware_update_missing_target">Firmware target information is unavailable for this device.</string>
     <string name="firmware_update_nightly">Nightly</string>
     <string name="firmware_update_no_device">No device connected</string>
@@ -1444,7 +1444,7 @@
     <string name="pax_total_format">PAX: %1$d</string>
     <string name="pax_total_marker">PAX: %1$s</string>
     <string name="pax_wifi_format">W:%1$d</string>
-    <string name="pax_wifi_marker">WiFi: %1$s</string>
+    <string name="pax_wifi_marker">Wi-Fi: %1$s</string>
     <string name="paxcounter">Paxcounter</string>
     <string name="paxcounter_config">Paxcounter Config</string>
     <string name="paxcounter_enabled">Paxcounter enabled</string>
@@ -2036,28 +2036,28 @@
     <string name="what_is_meshtastic">What is Meshtastic?</string>
     <string name="what_is_meshtastic_description">An open source, off-grid, decentralized, mesh network that runs on affordable, low-power radios.</string>
     <!-- WIFI -->
-    <string name="wifi_config">WiFi Options</string>
+    <string name="wifi_config">Wi-Fi Options</string>
     <string name="wifi_devices">Wi-Fi Provisioning for mPWRD-OS</string>
-    <string name="wifi_enabled">WiFi enabled</string>
-    <string name="wifi_ip">Wifi IP:</string>
+    <string name="wifi_enabled">Wi-Fi enabled</string>
+    <string name="wifi_ip">Wi-Fi IP:</string>
     <string name="wifi_provision_available_networks">Available Networks</string>
     <string name="wifi_provision_connect_failed">Could not connect: %1$s</string>
     <string name="wifi_provision_description">Provision Wi-Fi credentials to your mPWRD-OS device via Bluetooth.</string>
     <string name="wifi_provision_device_found">Device found</string>
-    <string name="wifi_provision_device_found_detail">Ready to scan for WiFi networks.</string>
+    <string name="wifi_provision_device_found_detail">Ready to scan for Wi-Fi networks.</string>
     <string name="wifi_provision_hidden_network">Hidden network</string>
     <string name="wifi_provision_mpwrd_disclaimer">Learn more about the mPWRD-OS project\nhttps://github.com/mPWRD-OS</string>
     <string name="wifi_provision_no_networks">No networks found</string>
-    <string name="wifi_provision_scan_failed">Failed to scan for WiFi networks: %1$s</string>
+    <string name="wifi_provision_scan_failed">Failed to scan for Wi-Fi networks: %1$s</string>
     <string name="wifi_provision_scan_networks">Scan for Networks</string>
     <string name="wifi_provision_scanning_ble">Searching for device…</string>
     <string name="wifi_provision_scanning_wifi">Scanning…</string>
-    <string name="wifi_provision_sending_credentials">Applying WiFi configuration…</string>
+    <string name="wifi_provision_sending_credentials">Applying Wi-Fi configuration…</string>
     <string name="wifi_provision_signal_strength">%1$d%</string>
     <string name="wifi_provision_ssid_label">Network Name (SSID)</string>
     <string name="wifi_provision_ssid_placeholder">Enter or select a network</string>
-    <string name="wifi_provision_status_applied">WiFi configured successfully!</string>
-    <string name="wifi_provision_status_failed">Failed to apply WiFi configuration</string>
+    <string name="wifi_provision_status_applied">Wi-Fi configured successfully!</string>
+    <string name="wifi_provision_status_failed">Failed to apply Wi-Fi configuration</string>
     <string name="wifi_provision_success_description">Your mPWRD-OS device has joined the Wi-Fi network.</string>
     <string name="wifi_provision_success_device_connected">Device Connected</string>
     <string name="wifi_provision_success_done">Done</string>
@@ -2074,9 +2074,9 @@
     <string name="wifi_provision_success_username">Username</string>
     <string name="wifi_provision_success_username_value" translatable="false">root</string>
     <string name="wifi_provisioning">Wi-Fi Provisioning for mPWRD-OS</string>
-    <string name="wifi_qr_code_error">Invalid WiFi Credential QR code format</string>
-    <string name="wifi_qr_code_scan">Scan WiFi QR code</string>
-    <string name="wifi_rssi_threshold_defaults_to_80">WiFi RSSI threshold (defaults to -80)</string>
+    <string name="wifi_qr_code_error">Invalid Wi-Fi Credential QR code format</string>
+    <string name="wifi_qr_code_scan">Scan Wi-Fi QR code</string>
+    <string name="wifi_rssi_threshold_defaults_to_80">Wi-Fi RSSI threshold (defaults to -80)</string>
     <string name="wifi_unavailable">Not connected to Wi-Fi. Network scan may not find nearby devices.</string>
     <!-- WIND -->
     <string name="wind">Wind</string>

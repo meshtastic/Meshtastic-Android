@@ -12,7 +12,7 @@
 [![Vercel](https://img.shields.io/static/v1?label=Powered%20by&message=Vercel&style=flat&logo=vercel&color=000000)](https://vercel.com?utm_source=meshtastic&utm_campaign=oss)
 [![Revved up by Develocity](https://img.shields.io/badge/Revved%20up%20by-Develocity-06A0CE?logo=Gradle&labelColor=02303A)](https://community.develocity.cloud/scans?search.rootProjectNames=MeshtasticAndroid)
 
-This is a tool for using Android (and Compose Desktop) with open-source mesh radios. For more information see our webpage: [meshtastic.org](https://www.meshtastic.org). If you are looking for the device side code, see [here](https://github.com/meshtastic/firmware).
+The Meshtastic client for Android and Compose Desktop — an app for communicating over open-source mesh radios. For more information see our webpage: [meshtastic.org](https://www.meshtastic.org). The device-side code lives in the [firmware repository](https://github.com/meshtastic/firmware).
 
 If you have questions or feedback please [Join our discussion forum](https://github.com/orgs/meshtastic/discussions) or the [Discord Group](https://discord.gg/meshtastic). We would love to hear from you!
 
@@ -30,7 +30,7 @@ Highlights of the 2.8 line:
 
 ## Get Meshtastic
 
-The easiest and fastest way to get the latest releases is to use our [GitHub releases](https://github.com/meshtastic/Meshtastic-Android/releases). It is recommended to use these with [Obtainium](https://github.com/ImranR98/Obtainium) to get the latest updates automatically.
+The fastest way to get releases is [GitHub releases](https://github.com/meshtastic/Meshtastic-Android/releases); pair them with [Obtainium](https://github.com/ImranR98/Obtainium) for automatic updates.
 
 With Obtainium installed, tap a link below on your phone to set it up with everything pre-configured. The `google` flavor adds Google Crashlytics and Google Maps; `fdroid` has no Google dependencies.
 
@@ -56,7 +56,7 @@ What those two channels point at right now:
 
 Closed-beta and per-commit snapshot channels, importable config files, and the setup details are in [Test Builds & Obtainium](docs/en/developer/test-builds.md). These links, files and the table above are generated — see [`obtainium/`](obtainium/).
 
-Alternatively, these other providers are also available, but may be slower to update. 
+These providers are also available but may update more slowly.
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
 alt="Get it on F-Droid"
@@ -68,10 +68,10 @@ width="24%">](https://apt.izzysoft.de/fdroid/index/apk/com.geeksville.mesh)
 alt="Get it on GitHub"
 width="24%">](https://github.com/meshtastic/Meshtastic-Android/releases)
 [<img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
-alt="Download at https://play.google.com/store/apps/details?id=com.geeksville.mesh]"
+alt="Get it on Google Play"
 width="24%">](https://play.google.com/store/apps/details?id=com.geeksville.mesh&referrer=utm_source%3Dgithub-android-readme)
 
-The play store is the last to update of these options, but if you want to join the Play Store testing program go to [this URL](https://play.google.com/apps/testing/com.geeksville.mesh) and opt-in to become a tester.
+The play store is the last to update of these options. To [join the Play Store testing program](https://play.google.com/apps/testing/com.geeksville.mesh), opt in to become a tester.
 If you encounter any problems or have questions, [ask us on the discord](https://discord.gg/meshtastic), [create an issue](https://github.com/meshtastic/Meshtastic-Android/issues), or [post in the forum](https://github.com/orgs/meshtastic/discussions) and we'll help as we can.
 
 ### Desktop
@@ -80,7 +80,7 @@ If you encounter any problems or have questions, [ask us on the discord](https:/
 
 ## Documentation
 
-Both sites are deployed to GitHub Pages automatically on every push to `main`.
+The two documentation sites below are deployed to GitHub Pages automatically on every push to `main`.
 
 | Site | URL | Contents |
 |---|---|---|
@@ -168,11 +168,11 @@ The app includes a built-in **Local TAK Server** feature that can be enabled in 
 
 ## Building the Android App
 > [!WARNING]
-> Debug and release builds can be installed concurrently. This is solely to enable smoother development, and you should avoid running both apps simultaneously. To ensure proper function, force quit the app not in use.
+> Debug and release builds install side by side to ease development, but don't run both at once — force-quit the one you are not using.
 
-https://meshtastic.org/docs/development/android/
+Follow the [Android development guide](https://meshtastic.org/docs/development/android/) to set up your environment.
 
-Note: when building the `google` flavor locally you will need to supply your own [Google Maps Android SDK api key](https://developers.google.com/maps/documentation/android-sdk/get-api-key) as `MAPS_API_KEY` in `secrets.properties` (repo root — create the file if it doesn't exist) in order to use Google Maps. Without it, `secrets.defaults.properties` supplies a placeholder so the build still succeeds, but map tiles will not load.
+Note: when building the `google` flavor locally you will need a [Google Maps Android SDK api key](https://developers.google.com/maps/documentation/android-sdk/get-api-key) to use Google Maps. Create `secrets.properties` at the repo root and set `MAPS_API_KEY=…`. Without it the build still succeeds with a placeholder key, but map tiles will not load.
 e.g.
 ```properties
 # secrets.properties

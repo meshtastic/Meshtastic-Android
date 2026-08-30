@@ -2,7 +2,8 @@
 title: Codebase
 parent: Developer Guide
 nav_order: 2
-last_updated: 2026-08-28
+last_updated: 2026-08-29
+description: Repository layout, package namespacing, and the Gradle build system — convention plugins, build variants, and key tasks.
 aliases:
   - repository-layout
   - project-structure
@@ -19,7 +20,7 @@ Repository layout, namespacing conventions, and build system overview.
 Meshtastic-Android/
 ├── androidApp/                 # Android application module
 │   ├── src/main/           # Shared Android code
-│   ├── src/google/         # Google Play flavor (Gemini, proprietary)
+│   ├── src/google/         # Google Play flavor (proprietary Google integrations — Gemini, Maps, Play services)
 │   └── src/fdroid/         # F-Droid flavor (FOSS-only)
 ├── desktopApp/                # Desktop JVM application
 ├── feature/                # Feature modules (KMP)
@@ -95,9 +96,8 @@ All build files use Kotlin DSL (`.gradle.kts`). Configuration:
 
 ### Convention Plugins
 
-Located in `build-logic/convention/src/main/kotlin/`, registered in
-`build-logic/convention/build.gradle.kts`. There are 24 plugin ids; these are the ones a module
-build applies most often:
+Located in `build-logic/convention/src/main/kotlin/`. The full set is registered in
+`build-logic/convention/build.gradle.kts`; these are the ones a module build applies most often:
 
 | Plugin | Purpose |
 |--------|---------|
@@ -160,6 +160,3 @@ Key dependencies in `gradle/libs.versions.toml`:
 | Networking | Ktor |
 | Markdown | multiplatform-markdown-renderer |
 | Testing | kotlin-test, compose-ui-test |
-
----
-

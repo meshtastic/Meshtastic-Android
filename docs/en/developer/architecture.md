@@ -2,7 +2,8 @@
 title: Architecture
 parent: Developer Guide
 nav_order: 1
-last_updated: 2026-08-28
+last_updated: 2026-08-29
+description: How the Android and Desktop apps split into androidApp/desktopApp, feature modules, and core modules, and how radio control and navigation are layered across them.
 aliases:
   - layers
   - module-architecture
@@ -12,7 +13,7 @@ aliases:
 
 # Architecture
 
-The Meshtastic Android and Desktop apps follow a modular Kotlin Multiplatform (KMP) architecture with clear layer boundaries (iOS is currently a compile-only validation target — there is no shipping iOS app yet).
+The Meshtastic Android and Desktop apps follow a modular Kotlin Multiplatform (KMP) architecture with clear layer boundaries. iOS is a compile-only validation target; no iOS app ships.
 
 ## Layer Overview
 
@@ -44,7 +45,7 @@ The Desktop (Linux/macOS/Windows) entry point:
 - Compose Desktop window management
 - Desktop-specific DI (`DesktopKoinModule`)
 - Platform stubs for Android-only capabilities
-- BLE (Kable), Serial, and TCP transport implementations
+- `DesktopRadioTransportFactory` and a jSerialComm-based serial transport; the BLE and TCP transport implementations it wires up are shared code — they live in `core:network`, built on `core:ble`'s BLE primitives — not desktopApp-owned
 
 ### `feature/*` — Feature Modules
 
@@ -61,7 +62,7 @@ Each `feature/` module owns a vertical slice of functionality:
 | `feature:settings` | All configuration screens |
 | `feature:firmware` | Firmware update flow |
 | `feature:docs` | In-app documentation browser |
-| `feature:wifi-provision` | WiFi provisioning |
+| `feature:wifi-provision` | Wi-Fi provisioning |
 | `feature:widget` | Android home screen widgets |
 | `feature:discovery` | Mesh network discovery |
 
@@ -98,7 +99,7 @@ Shared infrastructure used by all features:
 | `core:testing` | Test utilities |
 | `core:konsist` | Konsist architecture/convention tests |
 
-Protobuf models are no longer a local module — they come from the external `org.meshtastic:protobufs` Maven artifact (pinned in `gradle/libs.versions.toml`).
+Protobuf models come from the external `org.meshtastic:protobufs` Maven artifact (pinned in `gradle/libs.versions.toml`).
 
 ## KMP Source Sets
 
@@ -175,6 +176,3 @@ Navigation uses **Navigation 3** with typed routes:
 - Each feature registers its own navigation entries
 
 See [Navigation & Deep Links](navigation-and-deep-links) for details.
-
----
-

@@ -1,29 +1,29 @@
 # Meshtastic Release Process
 
-This guide summarizes the steps for releasing new versions of Meshtastic Android and Desktop. The process is fully automated via GitHub Actions and Fastlane.
+This guide summarizes the steps for releasing new versions of Meshtastic Android and Desktop. The core flow is automated once a developer triggers the **Create or Promote Release** workflow; Microsoft Store and winget publishing run as separate workflows (see Desktop Store Publishing).
 
 ## Overview
 
-The entire release process is managed by a single, manually-triggered GitHub Action: **`Create or Promote Release`**.
+The entire release process is managed by a single GitHub Action: **`Create or Promote Release`**.
 
--   **Trigger:** To start a new release or promote an existing one, a developer manually runs the workflow from the GitHub Actions tab.
+-   **Trigger:** To start a new release or promote an existing one, a developer runs the workflow from the GitHub Actions tab.
 -   **Inputs:** The workflow requires the following inputs:
     1.  `base_version`: The base version number you are releasing (e.g., `2.8.0`).
     2.  `channel`: The release channel you are targeting (`internal`, `closed`, `open`, or `production`).
     3.  `dry_run`: If `true`, calculates the tag but does not push it or start the release (default: `false`).
-    4.  `no_review_in_flight`: **Promotions only, and a hard gate.** Every promotion creates a
-        new Play submission, which *cancels and restarts* any review already in flight. The
-        workflow fails immediately unless this is checked, so open Play Console → Publishing
-        overview → Submission activity first: if anything reads "In review", wait. Internal
-        releases and dry runs are exempt (Play internal testing skips full review).
+    4.  `no_review_in_flight`: **Promotions only, and a hard gate.** Before promoting, check
+        Play Console → Publishing overview → Submission activity; if anything reads "In
+        review", wait. Tick this box to confirm — the workflow fails without it, because
+        each promotion creates a new Play submission that *cancels and restarts* any review
+        already in flight. Internal releases and dry runs are exempt (Play internal testing
+        skips full review).
 -   **Automation:** The workflow handles everything automatically:
-    -   **Syncs Assets:** Fetches the latest firmware/hardware lists, protobuf definitions, and translations (Crowdin).
-    -   **Generates Changelog:** Creates a clean changelog from commits since the last production release and commits it to the repo.
-    -   **Updates Config:** Automatically bumps the `VERSION_NAME_BASE` in `config.properties`.
-    -   **Verifies & Tags:** Runs lint checks, builds the app, and *only* tags the release if successful.
+    -   **Generates Changelog:** Categorizes merged PRs by their labels (per `.github/release.yml`) into GitHub's auto-generated release notes; a separate automation workflow opens a PR to fold the same notes into `CHANGELOG.md`.
+    -   **Tags & Builds** *(internal releases)*: Pushes the incremental tag first — there is no lint/test gate in this workflow, that's the separate PR/CI pipeline — then builds the Android bundle/APK and Desktop installers from that tag; if the build fails, an automatic cleanup job deletes the tag so a retry starts clean. Promotions skip this entirely and retag the already-built artifact (see below).
     -   **Deploys Android:** Uploads the build to the correct Google Play track and attaches artifacts (`.aab`/`.apk`) to a GitHub Release.
     -   **Deploys Desktop** *(internal releases)*: Builds native installers (DMG, MSI, EXE, DEB, RPM, AppImage) and Flatpak sources on a matrix of runners and attaches them to the GitHub Release.
--   **Changelog:** Release notes are auto-generated from PR labels. Ensure PRs are labeled correctly to maintain an accurate changelog.
+-   **Changelog:** Both the GitHub Release notes and `CHANGELOG.md` are generated from merged PR labels, not raw commit messages — label PRs correctly (`enhancement`, `bugfix`, etc.) to keep them accurate.
+-   **Not part of this workflow:** Firmware/hardware/device-links lists and Crowdin translations are kept current by a separate hourly workflow, `scheduled-updates.yml` ("Scheduled Updates (Firmware, Hardware, Translations)"), which opens its own PR rather than committing directly — it never runs as part of a release. `VERSION_NAME_BASE` in `config.properties` is likewise never written by automation: a maintainer bumps it by hand in an ordinary PR (e.g. "chore: bump VERSION_NAME_BASE to 2.8.2 (#6820)") before starting a release for a new base version, paired with a matching `<release>` entry in `desktopApp/packaging/linux/org.meshtastic.MeshtasticDesktop.metainfo.xml` — a `pull-request.yml` check fails the PR if that entry is missing. `Create or Promote Release` only *reads* `VERSION_NAME_BASE`/`VERSION_CODE_OFFSET` from `config.properties` to compute the build's version name/code.
 
 ## Release Steps
 
@@ -37,11 +37,12 @@ The entire release process is managed by a single, manually-triggered GitHub Act
 6.  Click **"Run workflow"**. (Tip: enable `dry_run` first to preview the tag that would be created without pushing anything.)
 
 The workflow will:
-1.  **Create a new commit** on the current branch containing updated assets, translations, and the new changelog.
-2.  **Tag** that commit with an incremental internal tag (e.g., `v2.8.0-internal.1`).
-3.  **Build & Deploy** the verified Android artifact to the Play Store Internal track.
-4.  **Build Desktop** native installers and Flatpak sources on macOS, Windows, and Linux runners.
-5.  Publish a **draft** pre-release on GitHub with all artifacts attached.
+1.  **Tag** the current commit on the branch with an incremental internal tag (e.g., `v2.8.0-internal.1`) — no new commit is created; it tags whatever is already at `HEAD`.
+2.  **Build & Deploy** the built Android artifact to the Play Store Internal track.
+3.  **Build Desktop** native installers and Flatpak sources on macOS, Windows, and Linux runners.
+4.  Publish a **draft** pre-release on GitHub with all artifacts attached. It stays a draft until
+    the first promotion (closed/open/production), at which point `promote.yml` un-drafts the
+    *same* release object (retagging it to the new channel's tag) rather than creating a new one.
 
 ### 2. Promote to the Next Channel
 
@@ -66,7 +67,9 @@ After testing is complete on all pre-release channels, you can create the final 
 2.  **Verify Desktop:** Download and smoke-test at least one installer (DMG, MSI, or AppImage) from the GitHub Release.
 3.  **Verify the desktop store submissions** *(production only — see below)*: the Microsoft Store
     submission in Partner Center, and the pull request opened against `microsoft/winget-pkgs`.
-4.  **Merge:** Merge the release branch (if one was used for stabilization) back into `main`.
+4.  **Merge:** If a `release/*` branch was used for stabilization (CI runs the same PR checks
+    against PRs targeting `release/**` as it does for `main`), merge it back into `main` now
+    that production has shipped.
 
 ### Desktop Store Publishing (production only)
 

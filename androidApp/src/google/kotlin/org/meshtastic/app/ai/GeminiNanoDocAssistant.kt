@@ -660,7 +660,7 @@ Guidelines:
 
         private const val FALLBACK_CONTEXT =
             "Meshtastic is an open-source mesh networking platform for LoRa radios. " +
-                "The app connects to Meshtastic devices via Bluetooth or WiFi to send messages, " +
+                "The app connects to Meshtastic devices via Bluetooth or Wi-Fi to send messages, " +
                 "share location, and manage mesh network settings like channels, nodes, and modules."
     }
 }

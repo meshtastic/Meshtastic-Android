@@ -2,7 +2,8 @@
 title: Contributing
 parent: Developer Guide
 nav_order: 8
-last_updated: 2026-07-08
+last_updated: 2026-08-29
+description: Branch naming, commit style, PR workflow, and the verification gates a change must pass before merge.
 aliases:
   - contributing
   - pull-request
@@ -99,11 +100,10 @@ For docs-specific changes, also run:
 ./gradlew generateDocsBundle validateDocsBundle
 ```
 
+Prose in `docs/en/` follows the house style — see [Documentation Style](documentation-style).
+
 ## Getting Help
 
 - [Meshtastic Discord](https://discord.gg/meshtastic) — `#app-development` channel
 - GitHub Issues — for bug reports and feature requests
 - GitHub Discussions — for questions and ideas
-
----
-

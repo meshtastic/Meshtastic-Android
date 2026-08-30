@@ -1,14 +1,15 @@
 # Contributing to Meshtastic-Android
 
-Thank you for your interest in contributing to Meshtastic-Android! We welcome contributions from everyone. Please take a moment to review these guidelines to help us maintain a high-quality, collaborative project.
+Thank you for your interest in contributing to Meshtastic-Android! We welcome contributions from everyone.
 
 ## How to Contribute
 
-- **Fork the repository** and create your branch from `main` or the appropriate feature branch.
-- **Make your changes** in a logical, atomic manner.
+- **Fork the repository** and create your branch from `main`.
+- **Keep each change focused** — one concern per commit.
 - **Test your changes** thoroughly before submitting a pull request.
 - **Submit a pull request** (PR) with a clear description of your changes and the problem they solve.
 - If you are addressing an existing issue, please reference it in your PR (e.g., `Fixes #123`).
+- First-time contributors are asked to sign the CLA — the CLA-assistant bot will prompt you on your first PR.
 
 ## Code Style
 
@@ -37,10 +38,8 @@ Meshtastic-Android uses [Detekt](https://detekt.dev/) for static code analysis a
 
 - Run `./gradlew detekt` before submitting your pull request to ensure your code passes all lint checks.
 - Fix any Detekt warnings or errors reported in your code.
-- It is possible to suppress warnings individually, but this should be used very sparingly.
+- Suppress individual warnings only as a last resort.
 - You can find Detekt configuration in the `config/detekt` directory. If you believe a rule should be changed or suppressed, discuss it in your PR.
-
-Consistent linting helps keep the codebase clean and maintainable.
 
 ### Testing
 
@@ -55,23 +54,25 @@ Meshtastic-Android uses unit tests, Robolectric JVM tests, and instrumented UI t
 - Add or update tests for any new features or bug fixes.
 - Ensure all tests pass by running:
   - `./gradlew test` for unit and Robolectric tests (pure-Android modules)
-  - `./gradlew allTests` for KMP module tests (`core:*`, `feature:*`)
+  - `./gradlew allTests` for KMP module tests (`core:*`, `feature:*`) — neither `test` nor `allTests` alone is sufficient; both must pass.
+  - `./gradlew kmpSmokeCompile` when touching any KMP module — compiles the non-Android targets the unit tests don't cover
   - `./gradlew connectedAndroidTest` for instrumented tests
-  > Both `test` **and** `allTests` must pass. `allTests` covers KMP modules; `test` covers pure-Android modules. Neither alone is sufficient.
 - For UI components, write Robolectric Compose tests where possible for faster execution.
 - If your change is difficult to test, explain why in your pull request.
 
-Comprehensive testing helps prevent regressions and ensures a stable experience for all users.
-
-
 ## Pull Requests
 
-- branches should start with:
-    - bugfix
-    - enhancement
-    - dependencies
-    - repo
-    - reserved (release, automation)
+- Branches use conventional-commit style prefixes, e.g. `feat/<topic>`:
+    - `feat/` — new user-visible behavior
+    - `fix/` — bug fixes
+    - `chore/` — tooling, deps, CI, cleanup
+    - `docs/` — documentation only
+    - `build/` — build system changes
+    - `ci/` — CI workflow changes
+    - `refactor/` — code structure changes
+    - `test/` — test additions or fixes
+    - `deps/` — dependency updates
+- `release/*` and `automation/*` are reserved for maintainers and automated workflows.
 - Ensure your branch is up to date with the latest `main` branch before submitting a PR.
 - Provide a meaningful title and description for your PR.
 - Include information on how to test and/or replicate if it is not obvious.
@@ -89,7 +90,7 @@ Comprehensive testing helps prevent regressions and ensures a stable experience 
 ## Community Standards
 
 - Be respectful and considerate in all interactions.
-- The Meshtastic Android project is subject to the code of conduct for the parent project, which can be [found here:](https://meshtastic.org/docs/legal/conduct/)
+- The Meshtastic Android project is subject to the [Meshtastic code of conduct](https://meshtastic.org/docs/legal/conduct/).
 - Help others by reviewing pull requests and answering questions when possible.
 
 Thank you for helping make Meshtastic-Android better! 

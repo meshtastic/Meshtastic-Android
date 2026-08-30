@@ -683,6 +683,8 @@ class Esp32OtaUpdateHandler(
         }
     }
 
+    // Matched against the firmware's ClientNotification text ("Rebooting to WiFi OTA"), so the
+    // spelling must stay the firmware's — never "Wi-Fi".
     private fun otaModeName(rebootMode: Int): String = when (rebootMode) {
         REBOOT_MODE_BLE -> "BLE"
         REBOOT_MODE_WIFI -> "WiFi"

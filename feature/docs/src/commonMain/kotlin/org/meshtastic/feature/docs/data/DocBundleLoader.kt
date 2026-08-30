@@ -587,6 +587,17 @@ class DefaultDocBundleLoader : DocBundleLoader {
             18000,
             "test-builds",
         ),
+        KeywordIndexEntry(
+            "documentation-style",
+            "Documentation Style",
+            "developer",
+            "en/developer/documentation-style.html",
+            11,
+            listOf("style", "writing", "docs", "prose", "voice", "admonition", "wording"),
+            listOf("style", "style-guide", "docs-style", "writing"),
+            15400,
+            "documentation-style",
+        ),
     )
 
     private fun KeywordIndexEntry.toDocPage(): DocPage = DocPage(
