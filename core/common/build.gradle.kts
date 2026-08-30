@@ -15,14 +15,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.meshtastic.kmp.jvm.android)
     alias(libs.plugins.meshtastic.koin)
 }
 
+// Gated the same way as core/ble (see its build.gradle.kts for the full Isolated Projects /
+// browser() rationale): absent from the configuration graph by default, pass
+// -Pmeshtastic.web=true to build it locally. core:common has no native-only dependency (no Kable
+// equivalent here), so unlike core:ble it needs no source-set hierarchy split — just the target
+// plus a wasmJsMain actual for each of its existing expect declarations.
+val webEnabled = providers.gradleProperty("meshtastic.web").isPresent
+
 kotlin {
     android { withHostTest { isIncludeAndroidResources = true } }
+
+    if (webEnabled) {
+        @OptIn(ExperimentalWasmDsl::class) wasmJs()
+    }
 
     sourceSets {
         commonMain.dependencies {
