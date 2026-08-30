@@ -83,8 +83,10 @@ private val CODING_RATE_RANGE = 5..8
  * Builds the modem-preset dropdown items: hide presets the target firmware's preset table doesn't have yet
  * ([Capabilities.supportsPreset]), restrict to the region's legal presets (R7), then always keep the current selection
  * present (disabled) so the field is never blank when the device's preset is illegal for the region.
+ *
+ * Internal (not private): reused by the Mesh Beacon config editor's target-row preset pickers (design#140).
  */
-private fun buildPresetItems(
+internal fun buildPresetItems(
     presetConstraint: RegionPresetConstraint?,
     presetsGated: Boolean,
     selectedPreset: ModemPreset,
