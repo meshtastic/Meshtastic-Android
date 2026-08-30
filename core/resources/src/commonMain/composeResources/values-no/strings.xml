@@ -153,6 +153,8 @@
     <string name="max">Maks</string>
     <!-- MESH -->
     <string name="mesh_beacon_preset_none">Ingen</string>
+    <string name="mesh_beacon_region_label">Region</string>
+    <string name="mesh_beacon_target_channel_index">Kanal</string>
     <!-- MESHTASTIC -->
     <string name="meshtastic_new_nodes_notifications">Varsel om nye noder</string>
     <string name="meshtastic_service_notifications">Tjeneste meldinger</string>

@@ -290,6 +290,8 @@
     <!-- MESH -->
     <string name="mesh_beacon_offer_dismiss">Отпусти</string>
     <string name="mesh_beacon_preset_none">Ништа</string>
+    <string name="mesh_beacon_region_label">Регион</string>
+    <string name="mesh_beacon_target_channel_index">Канал</string>
     <!-- MESHTASTIC -->
     <string name="meshtastic_alerts_notifications">Обавештења о упозорењима</string>
     <string name="meshtastic_low_battery_notifications">Нотификације о ниском нивоу батерије</string>

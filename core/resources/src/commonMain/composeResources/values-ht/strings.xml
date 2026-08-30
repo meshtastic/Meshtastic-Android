@@ -146,6 +146,8 @@
     <string name="map_tile_source">Sous Tèk</string>
     <!-- MESH -->
     <string name="mesh_beacon_preset_none">Pa gen</string>
+    <string name="mesh_beacon_region_label">Rejyon</string>
+    <string name="mesh_beacon_target_channel_index">kanal</string>
     <!-- MESHTASTIC -->
     <string name="meshtastic_new_nodes_notifications">Notifikasyon nouvo nœud</string>
     <string name="meshtastic_service_notifications">Notifikasyon sèvis</string>

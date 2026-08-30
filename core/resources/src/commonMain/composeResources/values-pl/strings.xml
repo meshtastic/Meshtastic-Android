@@ -475,6 +475,8 @@
     <!-- MESH -->
     <string name="mesh_beacon_offer_dismiss">Zamknij</string>
     <string name="mesh_beacon_preset_none">Brak</string>
+    <string name="mesh_beacon_region_label">Region</string>
+    <string name="mesh_beacon_target_channel_index">Kanał</string>
     <!-- MESHTASTIC -->
     <string name="meshtastic">Meshtastic</string>
     <string name="meshtastic_alerts_notifications">Powiadomienia alertowe</string>

@@ -129,6 +129,8 @@
     <string name="map_tile_download_estimate">הערכת זמן להורדה:</string>
     <string name="map_tile_source">מקור מפות</string>
     <!-- MESH -->
+    <string name="mesh_beacon_region_label">אזור</string>
+    <string name="mesh_beacon_target_channel_index">ערוץ</string>
     <!-- MESHTASTIC -->
     <string name="meshtastic_alerts_notifications">התראות</string>
     <string name="meshtastic_service_notifications">התראות שירות</string>

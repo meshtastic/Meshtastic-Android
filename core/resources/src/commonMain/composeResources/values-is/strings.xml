@@ -120,6 +120,7 @@
     <string name="map_tile_download_estimate">Áætlaður niðurhalstími reits:</string>
     <string name="map_tile_source">Uppruni reits</string>
     <!-- MESH -->
+    <string name="mesh_beacon_region_label">Svæði</string>
     <!-- MESHTASTIC -->
     <string name="meshtastic_service_notifications">Tilkynningar um þjónustu</string>
     <!-- MESSAGE -->

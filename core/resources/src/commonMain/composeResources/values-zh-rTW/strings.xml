@@ -758,6 +758,8 @@
     <!-- MESH -->
     <string name="mesh_beacon_offer_dismiss">略過</string>
     <string name="mesh_beacon_preset_none">無</string>
+    <string name="mesh_beacon_region_label">地區</string>
+    <string name="mesh_beacon_target_channel_index">頻道</string>
     <string name="mesh_map_location">Mesh Map 地圖位置</string>
     <string name="mesh_map_location_description">在 Mesh 地圖上，為您的手機啟用藍色的定位點。</string>
     <!-- MESHTASTIC -->

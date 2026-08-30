@@ -130,6 +130,8 @@
     <string name="map_tile_download_estimate">Estimació de descàrrega de tessel·les:</string>
     <string name="map_tile_source">Font de tessel·la</string>
     <!-- MESH -->
+    <string name="mesh_beacon_region_label">Regió</string>
+    <string name="mesh_beacon_target_channel_index">Canal</string>
     <!-- MESHTASTIC -->
     <string name="meshtastic">Meshtastic</string>
     <string name="meshtastic_app_name">Meshtastic</string>

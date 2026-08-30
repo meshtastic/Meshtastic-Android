@@ -155,6 +155,8 @@
     <string name="max">Maks.</string>
     <!-- MESH -->
     <string name="mesh_beacon_preset_none">Brez</string>
+    <string name="mesh_beacon_region_label">Regija</string>
+    <string name="mesh_beacon_target_channel_index">Kanal</string>
     <!-- MESHTASTIC -->
     <string name="meshtastic_new_nodes_notifications">Obvestila novih vozlišč</string>
     <string name="meshtastic_service_notifications">Obvestila storitve</string>

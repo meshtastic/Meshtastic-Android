@@ -150,6 +150,8 @@
     <string name="max">Max</string>
     <!-- MESH -->
     <string name="mesh_beacon_preset_none">Nėra</string>
+    <string name="mesh_beacon_region_label">Regionas</string>
+    <string name="mesh_beacon_target_channel_index">Kanalas</string>
     <!-- MESHTASTIC -->
     <string name="meshtastic_new_nodes_notifications">Naujo įtaiso pranešimas</string>
     <string name="meshtastic_service_notifications">Paslaugos pranešimai</string>
