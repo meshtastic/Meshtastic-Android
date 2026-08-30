@@ -22,6 +22,12 @@ import org.koin.core.annotation.Single
 
 @Single
 class DesktopFirmwareUsbManager : FirmwareUsbManager {
+    /**
+     * Desktop offers no maintenance affordance at all: with no way to vet a bootloader volume and no CDC unblock, every
+     * path below refuses, so the section is hidden rather than shown and then dead-ended.
+     */
+    override val supportsUf2Maintenance: Boolean = false
+
     override fun deviceDetachFlow(): Flow<Unit> = emptyFlow()
 
     /**

@@ -19,6 +19,17 @@ package org.meshtastic.feature.firmware
 import kotlinx.coroutines.flow.Flow
 
 interface FirmwareUsbManager {
+    /**
+     * Whether this platform can run the multi-pass UF2 maintenance sequence (factory erase, OTAFIX bootloader upgrade)
+     * at all.
+     *
+     * Android only today: the sequence needs a mounted bootloader volume the platform can classify as removable
+     * (`FirmwareFileHandler.isRemovableDestination`) and a CDC port it can unblock ([unblockCdcPort]) to start the
+     * erase, and desktop has neither. Carried here rather than as an `expect val` so the capability stays injectable —
+     * the JVM target is both the desktop platform and the host these ViewModel tests run on.
+     */
+    val supportsUf2Maintenance: Boolean
+
     fun deviceDetachFlow(): Flow<Unit>
 
     /**

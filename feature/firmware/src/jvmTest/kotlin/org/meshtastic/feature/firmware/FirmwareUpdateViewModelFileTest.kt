@@ -146,6 +146,10 @@ class FirmwareUpdateViewModelFileTest {
             )
         nodeRepository.setOurNode(node)
 
+        // These run on the JVM host but describe the Android platform, the only one with a UF2 maintenance flow;
+        // the desktop answer is pinned by its own test below rather than inherited from the host.
+        every { usbManager.supportsUf2Maintenance } returns true
+
         every { fileHandler.cleanupAllTemporaryFiles() } returns Unit
         everySuspend { fileHandler.deleteFile(any()) } returns Unit
         everySuspend { fileHandler.getDisplayName(any()) } calls { (it.args[0] as CommonUri).pathSegments.lastOrNull() }
@@ -820,6 +824,23 @@ class FirmwareUpdateViewModelFileTest {
         val ready = assertIs<FirmwareUpdateState.Ready>(viewModel.state.value)
         assertTrue(ready.maintenance.show, "the action stays visible so the refusal can be explained")
         assertEquals(UsbMaintenanceRefusal.UnknownSoftDevice, ready.maintenance.eraseRefusal)
+    }
+
+    @Test
+    fun `maintenance is hidden on a platform with no maintenance flow`() = runTest {
+        // Desktop: serial connects and reports USB, but nothing downstream can vet a bootloader volume, so the
+        // section must never compose there.
+        every { usbManager.supportsUf2Maintenance } returns false
+        every { radioPrefs.devAddr } returns MutableStateFlow("s/dev/ttyUSB0")
+        everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any(), any(), any()) } returns
+            Result.success(nrfHardware(SoftDeviceVariant.S140_6_1_1))
+
+        viewModel = createViewModel()
+        advanceUntilIdle()
+
+        val ready = assertIs<FirmwareUpdateState.Ready>(viewModel.state.value)
+        assertFalse(ready.maintenance.show, "the ViewModel must consult the platform, not just the manifest")
+        assertFalse(ready.maintenance.showBootloaderUpgrade)
     }
 
     @Test
