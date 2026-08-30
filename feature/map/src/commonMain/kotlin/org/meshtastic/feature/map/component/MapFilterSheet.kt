@@ -55,6 +55,7 @@ import org.meshtastic.core.resources.node_filter_only_online
 import org.meshtastic.core.resources.only_favorites
 import org.meshtastic.core.resources.show_precision_circle
 import org.meshtastic.core.resources.show_waypoints
+import org.meshtastic.core.ui.component.label
 import org.meshtastic.core.ui.icon.Favorite
 import org.meshtastic.core.ui.icon.Lens
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -195,7 +196,7 @@ private fun RoleFilterChips(
             FilterChip(
                 selected = role !in excluded,
                 onClick = { onToggle(role) },
-                label = { Text(role.name) },
+                label = { Text(stringResource(role.label)) },
                 leadingIcon = { Icon(imageVector = MeshtasticIcons.role(role), contentDescription = null) },
                 modifier = Modifier.testTag(roleFilterChipTestTag(role)),
             )

@@ -19,7 +19,7 @@
     <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Message from %1$s: %2$s</string>
-    <string name="a11y_node_battery">battery %1$d%%</string>
+    <string name="a11y_node_battery">battery %1$d%</string>
     <string name="a11y_node_distance_away">%1$s away</string>
     <string name="a11y_node_favorite">favorite</string>
     <string name="a11y_node_hops_away">%1$d hops away</string>
@@ -225,7 +225,7 @@
     <string name="chirpy_assistant_title">Chirpy Assistant</string>
     <string name="chirpy_checking">Checking Chirpy availability…</string>
     <string name="chirpy_downloading">Chirpy is downloading…</string>
-    <string name="chirpy_downloading_progress">Downloading Chirpy model: %1$d%%</string>
+    <string name="chirpy_downloading_progress">Downloading Chirpy model: %1$d%</string>
     <string name="chirpy_downloading_subtitle">This only happens once. Chirpy will be ready soon!</string>
     <string name="chirpy_error_busy">Whoa! The channel is totally congested right now with heavy traffic! 📶 Let's wait for a clear slot and retry our transmission.</string>
     <string name="chirpy_error_model_unavailable">My battery is charging or my firmware is still downloading! 🔋 Give me a few moments to sync up and boot!</string>
@@ -1628,18 +1628,31 @@
     <string name="ringtone_imported">Imported ringtone</string>
     <!-- ROLE -->
     <string name="role">Device Role</string>
+    <string name="role_client">Client</string>
+    <string name="role_client_base">Client Base</string>
     <string name="role_client_base_desc">Treats packets from or to favorited nodes as ROUTER_LATE, and all other packets as CLIENT.</string>
     <string name="role_client_desc">App connected or standalone messaging device.</string>
+    <string name="role_client_hidden">Client Hidden</string>
     <string name="role_client_hidden_desc">Device that only broadcasts as needed for stealth or power savings.</string>
+    <string name="role_client_mute">Client Mute</string>
     <string name="role_client_mute_desc">Device that does not forward packets from other devices.</string>
-    <string name="role_lost_and_found_desc">Broadcasts location as message to default channel regularly for to assist with device recovery.</string>
+    <string name="role_lost_and_found">Lost and Found</string>
+    <string name="role_lost_and_found_desc">Broadcasts location as message to default channel regularly to assist with device recovery.</string>
+    <string name="role_repeater">Repeater</string>
     <string name="role_repeater_desc">Infrastructure node for extending network coverage by relaying messages with minimal overhead. Not visible in nodes list.</string>
+    <string name="role_router">Router</string>
+    <string name="role_router_client">Router Client</string>
     <string name="role_router_client_desc">Combination of both ROUTER and CLIENT. Not for mobile devices.</string>
     <string name="role_router_desc">Infrastructure node for extending network coverage by relaying messages. Visible in nodes list.</string>
+    <string name="role_router_late">Router Late</string>
     <string name="role_router_late_desc">Infrastructure node that always rebroadcasts packets once but only after all other modes, ensuring additional coverage for local clusters. Visible in nodes list.</string>
+    <string name="role_sensor">Sensor</string>
     <string name="role_sensor_desc">Broadcasts telemetry packets as priority.</string>
+    <string name="role_tak">TAK</string>
     <string name="role_tak_desc">Optimized for ATAK system communication, reduces routine broadcasts.</string>
+    <string name="role_tak_tracker">TAK Tracker</string>
     <string name="role_tak_tracker_desc">Enables automatic TAK PLI broadcasts and reduces routine broadcasts.</string>
+    <string name="role_tracker">Tracker</string>
     <string name="role_tracker_desc">Broadcasts GPS position packets as priority.</string>
     <string name="root_topic">Root topic</string>
     <string name="rotary_encoder_1_enabled">Rotary encoder #1 enabled</string>

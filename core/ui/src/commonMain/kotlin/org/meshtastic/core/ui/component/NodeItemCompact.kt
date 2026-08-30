@@ -141,6 +141,9 @@ fun NodeItemCompact(
 
     val style = if (thatNode.isUnknownUser) FontStyle.Italic else FontStyle.Normal
 
+    // Resolved out here, not inside the remember: stringResource is composable, and the description is built in a
+    // plain lambda.
+    val roleLabel = stringResource(thatNode.user.role.label)
     val a11yStrings = rememberNodeDescriptionStrings()
     val modemPreset = LocalModemPreset.current
     val nodeDescription =
@@ -150,7 +153,7 @@ fun NodeItemCompact(
                 isOnline = thatNode.isOnline,
                 isFavorite = isFavorite,
                 lastHeard = thatNode.lastHeard,
-                role = thatNode.user.role.name,
+                role = roleLabel,
                 hopsAway = thatNode.hopsAway,
                 batteryLevel = thatNode.batteryLevel,
                 distance = distance,
@@ -409,7 +412,7 @@ private fun CompactFooterRow(
                 add {
                     Icon(
                         imageVector = MeshtasticIcons.role(thatNode.user.role),
-                        contentDescription = thatNode.user.role.name,
+                        contentDescription = stringResource(thatNode.user.role.label),
                         modifier = Modifier.size(COMPACT_ICON_SIZE_DP.dp),
                         tint = tertiaryColor,
                     )

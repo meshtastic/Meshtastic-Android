@@ -268,7 +268,7 @@ fun RoleInfo(
         modifier = modifier,
         icon = MeshtasticIcons.role(role),
         contentDescription = stringResource(Res.string.role),
-        text = role.name,
+        text = stringResource(role.label),
         style = MaterialTheme.typography.labelSmall,
         contentColor = contentColor,
     )
