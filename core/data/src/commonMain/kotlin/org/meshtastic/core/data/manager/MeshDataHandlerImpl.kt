@@ -42,6 +42,7 @@ import org.meshtastic.core.model.source
 import org.meshtastic.core.model.textMentionsNode
 import org.meshtastic.core.model.util.MeshDataMapper
 import org.meshtastic.core.model.util.decodeOrNull
+import org.meshtastic.core.model.util.isAlreadyJoined
 import org.meshtastic.core.model.util.isValidCodePoint
 import org.meshtastic.core.model.util.snrOrNull
 import org.meshtastic.core.model.util.toOneLiner
@@ -252,8 +253,13 @@ class MeshDataHandlerImpl(
                 snr = packet.snrOrNull() ?: 0f,
                 rssi = packet.rx_rssi,
             )
-        if (meshBeaconRepository.add(offer)) {
+        val isNew = meshBeaconRepository.add(offer)
+        if (isNew) {
             radioInterfaceService.launchSessionWork(scope, session) {
+                // design#140 behavior 10: still stored for the invitations list, but a mesh the radio is already on
+                // does not warrant a notification.
+                val channelSet = radioConfigRepository.channelSetFlow.first()
+                if (beacon.isAlreadyJoined(channelSet.lora_config, channelSet.settings)) return@launchSessionWork
                 notificationManager.dispatch(
                     Notification(
                         title = getStringSuspend(Res.string.mesh_beacon_notification_title),
