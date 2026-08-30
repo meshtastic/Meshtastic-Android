@@ -14,6 +14,11 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 * feat(appfunctions): reconcile system state instead of blind-writing it by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6908
 * feat(units): resolve units from the device region, add a Units setting, render through ICU by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6916
 * feat(connections): notice when transmit is disabled by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6945
+* feat(agents): add the run-meshtastic-android skill with desktop and emulator drivers by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6955
+* feat(map): give every map layer its own opacity slider by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6958
+* feat(map): filter the map by node role and by how a node was heard by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6959
+* feat(settings): align the Mesh Beacon config editor with design#140 by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6963
+* feat(discovery): suppress beacon invitations for channels the radio already has by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6964
 #### 🖥️ Desktop
 * fix(desktop): disable macOS notifications when the process has no app bundle by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6876
 * fix(desktop): test the bundle path, not the identifier, before notifying by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6885
@@ -25,6 +30,9 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 * fix(node): convert temperature before labelling it °F, and show wind in km/h by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6925
 * fix(settings): drop the beacon single-target scalars protobufs reserved by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6942
 * fix(node): scroll traceroute/log history detail popups by @beecho01 in https://github.com/meshtastic/Meshtastic-Android/pull/6708
+* fix(ui): show device roles by name, and stop doubling two percent signs by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6962
+#### 📝 Other Changes
+* refactor(settings): edit the status message on the user screen by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6951
 
 ### Internal (v2.8.2-internal.3)
 Changes since [`v2.8.1`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.1):
