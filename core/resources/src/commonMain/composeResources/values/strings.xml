@@ -967,7 +967,7 @@
     <string name="local_network_permission">Local network permission</string>
     <string name="local_network_permission_blocked_rationale">Local network access is off and Android will not ask again. A radio on your Wi-Fi cannot be found or reached until you turn it on in app settings. A radio on a public address or over a VPN is unaffected.</string>
     <string name="local_network_permission_denied_hint">Local network access is turned off for Meshtastic. If this radio is on your local network, the connection will fail until you allow local network access in system settings.</string>
-    <string name="local_network_permission_rationale">Meshtastic needs local network access to find radios on your Wi-Fi. It only looks on the network you are already connected to. Without it, you can still reach a radio by typing its address.</string>
+    <string name="local_network_permission_rationale">Meshtastic needs local network access to find and reach radios on your Wi-Fi. It only looks on the network you are already connected to. Without it, a radio on your Wi-Fi cannot be reached even by typing its address; a radio on a public address or over a VPN is unaffected.</string>
     <string name="local_stats_bad">Bad %1$d</string>
     <string name="local_stats_battery">Battery: %1$d%</string>
     <string name="local_stats_diagnostics_prefix">Diagnostics: %1$s</string>
@@ -1309,11 +1309,11 @@
     <string name="node_layout_complete_description">The Complete layout displays all available node data. Fields with no data are automatically hidden.</string>
     <string name="node_layout_device_role">Device &amp; Role</string>
     <string name="node_layout_distance_and_bearing">Distance and Bearing</string>
-    <string name="node_layout_help_signal_bad">Signal is poor. SNR is above −18 dB and RSSI is above −125 dBm.</string>
-    <string name="node_layout_help_signal_fair">Signal is moderate. SNR is above −12 dB and RSSI is above −120 dBm.</string>
-    <string name="node_layout_help_signal_good">Signal is strong. SNR is above −7 dB and RSSI is above −115 dBm.</string>
-    <string name="node_layout_help_signal_indicator">Combines SNR and RSSI into a quality level shown as a colored icon with description. Displayed in the Complete layout only.</string>
-    <string name="node_layout_help_signal_none">No usable signal detected. Below all quality thresholds.</string>
+    <string name="node_layout_help_signal_bad">Signal is poor. SNR is 5.5 to 7.5 dB below the preset's SNR limit.</string>
+    <string name="node_layout_help_signal_fair">Signal is moderate. SNR is less than 5.5 dB below the preset's SNR limit.</string>
+    <string name="node_layout_help_signal_good">Signal is strong. SNR is above your modem preset's SNR limit.</string>
+    <string name="node_layout_help_signal_indicator">Rates SNR against your modem preset's SNR limit and shows the result as a colored icon with a label. RSSI is displayed but does not affect the rating.</string>
+    <string name="node_layout_help_signal_none">No usable signal. SNR is more than 7.5 dB below the preset's SNR limit.</string>
     <string name="node_layout_hops_away">Hops Away</string>
     <string name="node_layout_last_heard_time">Last Heard Time</string>
     <string name="node_layout_log_icons">Environment Metrics</string>

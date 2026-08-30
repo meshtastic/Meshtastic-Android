@@ -602,10 +602,11 @@ fun ConnectionsScreen(
                                 onAction = openLocationSettings,
                             )
                         }
-                        // The BLE pane's missing-permission card, for the transport whose discovery Android 17 gates.
-                        // Without it the network pane repeats the BLE bug it was just fixed for: an empty list and a
-                        // hint about the network, when the app was never allowed to look. Manual entry still works,
-                        // which is why the copy points at it rather than presenting this as a dead end.
+                        // The BLE pane's missing-permission card, for the transport Android 17 gates. Without it
+                        // the network pane repeats the BLE bug it was just fixed for: an empty list and a hint about
+                        // the network, when the app was never allowed to look. The gate is on the socket, not just
+                        // discovery, so manual entry is no workaround for a radio on this Wi-Fi — only one reached
+                        // over a public address or a VPN is unaffected, which is what the copy now says.
                         if (activeTransport == DeviceType.TCP && !localNetworkPermission.isGranted) {
                             PermissionRecoveryCard(
                                 state = localNetworkPermission,
