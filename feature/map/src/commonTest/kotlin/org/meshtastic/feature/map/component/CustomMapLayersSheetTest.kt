@@ -51,7 +51,7 @@ class CustomMapLayersSheetTest {
     }
 
     @Test
-    fun `an imported layer's opacity is keyed by its uri, not its id`() = runComposeUiTest {
+    fun `an imported layer's opacity is keyed by its uri rather than its id`() = runComposeUiTest {
         // A file-backed layer is handed a fresh random id on every load, so an id key would silently lose the
         // user's setting at the next start. hiddenLayerUrls keys visibility by URI for the same reason.
         val layer = layer()

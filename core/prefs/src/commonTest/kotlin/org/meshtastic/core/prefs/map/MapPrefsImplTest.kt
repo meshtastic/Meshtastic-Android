@@ -90,7 +90,7 @@ class MapPrefsImplTest {
     }
 
     @Test
-    fun `a layer opacity update sees the persisted value, not the eager default`() = testScope.runTest {
+    fun `a layer opacity update sees the persisted value rather than the eager default`() = testScope.runTest {
         prefs.updateLayerOpacity { it + "hillshade|:|0.4" }
 
         prefs.updateLayerOpacity { it + "weather|:|0.8" }

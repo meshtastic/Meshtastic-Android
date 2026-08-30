@@ -63,7 +63,7 @@ class RasterOverlayTogglesTest {
     }
 
     @Test
-    fun `the slider reports once, when the drag ends`() = runComposeUiTest {
+    fun `the slider reports once when the drag ends`() = runComposeUiTest {
         // Every report is a DataStore write; reporting per frame would write dozens of times across one drag.
         val reported = mutableListOf<Pair<String, Float>>()
         setContent {
