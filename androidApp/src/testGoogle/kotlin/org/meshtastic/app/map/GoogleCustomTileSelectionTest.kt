@@ -53,6 +53,7 @@ import org.meshtastic.core.testing.FakeNotificationPrefs
 import org.meshtastic.core.testing.FakeRadioConfigRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.testing.FakeUiPrefs
+import org.meshtastic.feature.map.layers.LayerOpacityStore
 import org.meshtastic.feature.map.layers.MapLayersManager
 import org.meshtastic.feature.map.tiles.CustomTileProviderConfig
 import org.meshtastic.feature.map.tiles.CustomTileProviderRepository
@@ -280,6 +281,7 @@ class GoogleCustomTileSelectionTest {
             application = application,
             dispatchers = CoroutineDispatchers(dispatcher, dispatcher, dispatcher),
             mapLayersManager = mapLayersManager,
+            layerOpacityStore = LayerOpacityStore(mapPrefs, CoroutineDispatchers(dispatcher, dispatcher, dispatcher)),
             mapPrefs = mapPrefs,
             googleMapsPrefs = googleMapsPrefs,
             nodeRepository = FakeNodeRepository(),

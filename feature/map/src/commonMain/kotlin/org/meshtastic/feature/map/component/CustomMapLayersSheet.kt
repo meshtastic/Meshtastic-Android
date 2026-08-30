@@ -81,6 +81,7 @@ import org.meshtastic.core.ui.icon.VisibilityOff
 import org.meshtastic.feature.map.layers.LayerType
 import org.meshtastic.feature.map.layers.MapLayerItem
 import org.meshtastic.feature.map.layers.isValidNetworkLayerUrl
+import org.meshtastic.feature.map.layers.opacityOf
 
 @Suppress("LongMethod", "ParameterNaming") // onAddLayerClicked is the established callback name used by both flavors
 @Composable
@@ -92,6 +93,8 @@ fun CustomMapLayersSheet(
     onAddLayerClicked: () -> Unit,
     onRefreshLayer: (String) -> Unit,
     onAddNetworkLayer: (String, String) -> Unit,
+    opacity: Map<String, Float>,
+    onOpacityChange: (String, Float) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var showAddNetworkLayerDialog by remember { mutableStateOf(false) }
@@ -127,6 +130,8 @@ fun CustomMapLayersSheet(
                     onToggleVisibility = onToggleVisibility,
                     onRemoveLayer = onRemoveLayer,
                     onRefreshLayer = onRefreshLayer,
+                    opacity = opacity,
+                    onOpacityChange = onOpacityChange,
                 )
                 HorizontalDivider()
             }
@@ -165,6 +170,8 @@ private fun MapLayerRow(
     onToggleVisibility: (String) -> Unit,
     onRemoveLayer: (String) -> Unit,
     onRefreshLayer: (String) -> Unit,
+    opacity: Map<String, Float>,
+    onOpacityChange: (String, Float) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val typeLabel =
@@ -176,38 +183,49 @@ private fun MapLayerRow(
                 else -> Res.string.layer_type_geojson
             },
         )
-    ListItem(
-        modifier = modifier,
-        headlineContent = { Text(layer.name) },
-        supportingContent = {
-            Text(
-                text =
-                layer.createdAt?.let {
-                    stringResource(Res.string.layer_subtitle, typeLabel, DateFormatter.formatDateTimeShort(it))
-                } ?: typeLabel,
-                style = MaterialTheme.typography.bodySmall,
+    Column(modifier = modifier) {
+        ListItem(
+            headlineContent = { Text(layer.name) },
+            supportingContent = {
+                Text(
+                    text =
+                    layer.createdAt?.let {
+                        stringResource(Res.string.layer_subtitle, typeLabel, DateFormatter.formatDateTimeShort(it))
+                    } ?: typeLabel,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            },
+            leadingContent = {
+                Icon(
+                    imageVector =
+                    if (layer.layerType == LayerType.COVERAGE) {
+                        MeshtasticIcons.CellTower
+                    } else {
+                        MeshtasticIcons.Layers
+                    },
+                    contentDescription = typeLabel,
+                )
+            },
+            trailingContent = {
+                MapLayerActions(
+                    layer = layer,
+                    onToggleVisibility = onToggleVisibility,
+                    onRemoveLayer = onRemoveLayer,
+                    onRefreshLayer = onRefreshLayer,
+                )
+            },
+        )
+        // Keyed by URI, not id: a file-backed layer is handed a fresh random id on every load, so an id key would
+        // lose the setting at the next start. hiddenLayerUrls keys visibility the same way.
+        val opacityKey = layer.uri
+        if (layer.isVisible && opacityKey != null) {
+            LayerOpacitySlider(
+                layerKey = opacityKey,
+                opacity = opacity.opacityOf(opacityKey),
+                onOpacityChange = onOpacityChange,
             )
-        },
-        leadingContent = {
-            Icon(
-                imageVector =
-                if (layer.layerType == LayerType.COVERAGE) {
-                    MeshtasticIcons.CellTower
-                } else {
-                    MeshtasticIcons.Layers
-                },
-                contentDescription = typeLabel,
-            )
-        },
-        trailingContent = {
-            MapLayerActions(
-                layer = layer,
-                onToggleVisibility = onToggleVisibility,
-                onRemoveLayer = onRemoveLayer,
-                onRefreshLayer = onRefreshLayer,
-            )
-        },
-    )
+        }
+    }
 }
 
 /** Per-row refresh (network layers only), visibility toggle, and delete controls. */

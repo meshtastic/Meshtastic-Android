@@ -81,6 +81,7 @@ fun MeshMap(
     modifier: Modifier = Modifier,
     basemap: Basemap = Basemaps.default,
     overlays: List<MapOverlay> = emptyList(),
+    layerOpacity: Map<String, Float> = emptyMap(),
     customLayers: List<CustomLayer> = emptyList(),
     onWaypointClick: (Int) -> Unit = {},
     /** Called with the nodes of a tapped cluster that cannot be zoomed apart any further. */
@@ -155,8 +156,8 @@ fun MeshMap(
         if (basemap is Basemap.Raster) {
             RasterBasemapLayer(basemap)
         }
-        MapOverlayLayers(overlays)
-        CustomLayers(customLayers)
+        MapOverlayLayers(overlays, layerOpacity)
+        CustomLayers(customLayers, layerOpacity)
 
         if (filterState.showWaypoints) {
             WaypointLayers(waypoints = waypoints.values, onWaypointClick = onWaypointClick)

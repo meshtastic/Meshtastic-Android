@@ -21,6 +21,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import org.koin.compose.koinInject
 import org.meshtastic.feature.map.component.CustomMapLayersSheet
+import org.meshtastic.feature.map.layers.LayerOpacityStore
 import org.meshtastic.feature.map.layers.MapLayersManager
 import org.meshtastic.feature.map.layers.rememberMapLayerPicker
 
@@ -33,7 +34,9 @@ import org.meshtastic.feature.map.layers.rememberMapLayerPicker
 @Composable
 fun ImportedLayersSlot() {
     val manager: MapLayersManager = koinInject()
+    val opacityStore: LayerOpacityStore = koinInject()
     val layers by manager.mapLayers.collectAsState()
+    val opacity by opacityStore.opacity.collectAsState()
     val picker = rememberMapLayerPicker(onPick = manager::addMapLayer)
 
     CustomMapLayersSheet(
@@ -43,5 +46,7 @@ fun ImportedLayersSlot() {
         onAddLayerClicked = picker::pick,
         onRefreshLayer = manager::refreshMapLayer,
         onAddNetworkLayer = manager::addNetworkMapLayer,
+        opacity = opacity,
+        onOpacityChange = opacityStore::setOpacity,
     )
 }

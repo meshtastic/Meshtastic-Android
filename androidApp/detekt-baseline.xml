@@ -52,8 +52,8 @@
     <ID>TooManyFunctions:MapViewModel.kt:MapViewModel : BaseMapViewModel</ID>
     <ID>UtilityClassWithPublicConstructor:CustomTileSource.kt:CustomTileSource</ID>
     <ID>ViewModelForwarding:MapView.kt:CustomTileProviderManagerSheet(mapViewModel = mapViewModel)</ID>
-    <ID>ViewModelForwarding:MapView.kt:MainMapContent( nodeClusterItems = nodeClusterItems, mapFilterState = mapFilterState, navigateToNodeDetails = navigateToNodeDetails, displayableWaypoints = displayableWaypoints, myNodeNum = myNodeNum, onEditWaypointRequest = { editingWaypoint = it }, onDeleteWaypointRequest = { deletingWaypoint = it }, onShowGeofenceInfo = { geofenceInfoWaypoint = it }, selectedWaypointId = selectedWaypointId, mapLayers = mapLayers, mapViewModel = mapViewModel, cameraPositionState = cameraPositionState, coroutineScope = coroutineScope, onShowClusterItemsDialog = { showClusterItemsDialog = it }, )</ID>
-    <ID>ViewModelForwarding:MapView.kt:MapLayerOverlay(layerItem, mapViewModel)</ID>
+    <ID>ViewModelForwarding:MapView.kt:MainMapContent( nodeClusterItems = nodeClusterItems, mapFilterState = mapFilterState, navigateToNodeDetails = navigateToNodeDetails, displayableWaypoints = displayableWaypoints, myNodeNum = myNodeNum, onEditWaypointRequest = { editingWaypoint = it }, onDeleteWaypointRequest = { deletingWaypoint = it }, onShowGeofenceInfo = { geofenceInfoWaypoint = it }, selectedWaypointId = selectedWaypointId, mapLayers = mapLayers, layerOpacity = layerOpacity, mapViewModel = mapViewModel, cameraPositionState = cameraPositionState, coroutineScope = coroutineScope, onShowClusterItemsDialog = { showClusterItemsDialog = it }, )</ID>
+    <ID>ViewModelForwarding:MapView.kt:MapLayerOverlay(layerItem, opacity, mapViewModel)</ID>
     <ID>ViewModelForwarding:MapView.kt:MapTypeDropdown( expanded = mapTypeMenuExpanded, onDismissRequest = { mapTypeMenuExpanded = false }, mapViewModel = mapViewModel, onManageCustomTileProvidersClick = { mapTypeMenuExpanded = false showCustomTileManagerSheet = true }, )</ID>
   </CurrentIssues>
 </SmellBaseline>

@@ -47,6 +47,7 @@ import org.maplibre.compose.expressions.dsl.feature
 import org.maplibre.compose.expressions.dsl.image
 import org.maplibre.compose.expressions.dsl.or
 import org.maplibre.compose.expressions.dsl.switch
+import org.maplibre.compose.expressions.dsl.times
 import org.maplibre.compose.expressions.value.BooleanValue
 import org.maplibre.compose.expressions.value.GeometryType
 import org.maplibre.compose.layers.CircleLayer
@@ -63,6 +64,7 @@ import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.feature.map.kml.ICON_URL_PROPERTY
 import org.meshtastic.feature.map.layers.mapLayerFileSystem
+import org.meshtastic.feature.map.layers.opacityOf
 import org.meshtastic.feature.map.layers.toLocalPath
 
 /**
@@ -74,23 +76,23 @@ import org.meshtastic.feature.map.layers.toLocalPath
  * imported as stacked bands, or a KML whose whole point was its colours, arrived unreadable.
  */
 @Composable
-internal fun CustomLayers(layers: List<CustomLayer>) {
+internal fun CustomLayers(layers: List<CustomLayer>, opacity: Map<String, Float>) {
     layers.forEach { layer ->
         // Keyed on the refresh token as well as the id: a refreshed network layer keeps its URI, so the source's data
         // is unchanged and nothing would re-fetch. Changing the key rebuilds the source, which does. The Google
         // flavour keys its own MapEffect the same way.
-        key(layer.id, layer.refreshToken) { ImportedLayer(layer) }
+        key(layer.id, layer.refreshToken) { ImportedLayer(layer, opacity.opacityOf(layer.uri)) }
     }
 }
 
 /** One imported overlay: a source, and the three layers that between them can draw anything in it. */
 @Composable
-private fun ImportedLayer(layer: CustomLayer) {
+private fun ImportedLayer(layer: CustomLayer, opacity: Float) {
     val source = rememberGeoJsonSource(data = GeoJsonData.Uri(layer.uri))
 
     // Draped first so a KML that carries both an image and vector features keeps its lines and points readable on
     // top — a ground overlay is a basemap-like backdrop, not a marker.
-    layer.groundOverlays.forEachIndexed { index, overlay -> GroundOverlayLayer(layer.id, index, overlay) }
+    layer.groundOverlays.forEachIndexed { index, overlay -> GroundOverlayLayer(layer.id, index, overlay, opacity) }
 
     val fill = coalesce(feature["fill"].asString(), feature["color"].asString())
     val stroke = coalesce(feature["stroke"].asString(), feature["color"].asString())
@@ -105,7 +107,9 @@ private fun ImportedLayer(layer: CustomLayer) {
         source = source,
         filter = geometryIsOneOf(GeometryType.Polygon, GeometryType.MultiPolygon),
         color = fill.convertToColor(const(CustomLayerBlue)),
-        opacity = coalesce(feature["fill-opacity"].asNumber(), const(DEFAULT_FILL_OPACITY)),
+        // The layer's own opacity scales whatever the feature asked for, rather than replacing it: an import that
+        // styles some features translucent stays relatively translucent as the whole layer fades.
+        opacity = coalesce(feature["fill-opacity"].asNumber(), const(DEFAULT_FILL_OPACITY)) * const(opacity),
     )
     LineLayer(
         id = "custom-${layer.id}-line",
@@ -120,7 +124,7 @@ private fun ImportedLayer(layer: CustomLayer) {
             GeometryType.MultiPolygon,
         ),
         color = strokeColor,
-        opacity = coalesce(feature["stroke-opacity"].asNumber(), const(1f)),
+        opacity = coalesce(feature["stroke-opacity"].asNumber(), const(1f)) * const(opacity),
         width = strokeWidth,
     )
     CircleLayer(
@@ -128,6 +132,7 @@ private fun ImportedLayer(layer: CustomLayer) {
         source = source,
         filter = geometryIsOneOf(GeometryType.Point, GeometryType.MultiPoint),
         color = strokeColor,
+        opacity = const(opacity),
         radius = const(POINT_RADIUS.dp),
         strokeColor = const(Color.White),
         strokeWidth = const(1.dp),
@@ -153,6 +158,7 @@ private fun ImportedLayer(layer: CustomLayer) {
             // An overlay's icons mark specific places, so a crowded import should show all of them rather than let
             // MapLibre thin them out to keep labels tidy.
             iconAllowOverlap = const(true),
+            iconOpacity = const(opacity),
         )
     }
 }
@@ -194,7 +200,7 @@ private fun rememberLayerIcons(urls: Set<String>): Map<String, Painter> {
  * nothing and logs; the vector half of its layer still renders.
  */
 @Composable
-private fun GroundOverlayLayer(layerId: String, index: Int, overlay: LayerGroundOverlay) {
+private fun GroundOverlayLayer(layerId: String, index: Int, overlay: LayerGroundOverlay, opacity: Float) {
     // Decoded off the composition thread: an ESRI export's tile is routinely multi-megapixel, and a synchronous
     // decode in `remember` would hitch the map for every overlay on every first composition.
     val image by
@@ -227,7 +233,7 @@ private fun GroundOverlayLayer(layerId: String, index: Int, overlay: LayerGround
         }
 
     val source = rememberImageSource(quad, decoded)
-    RasterLayer(id = "custom-$layerId-ground-$index", source = source)
+    RasterLayer(id = "custom-$layerId-ground-$index", source = source, opacity = const(opacity))
 }
 
 /** What an import with no colours of its own is drawn in. */

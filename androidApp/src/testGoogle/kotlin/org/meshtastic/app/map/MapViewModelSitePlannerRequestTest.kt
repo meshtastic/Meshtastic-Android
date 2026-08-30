@@ -57,6 +57,7 @@ import org.meshtastic.core.testing.FakeNotificationPrefs
 import org.meshtastic.core.testing.FakeRadioConfigRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.testing.FakeUiPrefs
+import org.meshtastic.feature.map.layers.LayerOpacityStore
 import org.meshtastic.feature.map.layers.MapLayersManager
 import org.meshtastic.feature.map.tiles.CustomTileProviderConfig
 import org.meshtastic.feature.map.tiles.CustomTileProviderLoadResult
@@ -117,6 +118,8 @@ class MapViewModelSitePlannerRequestTest {
                 application = ApplicationProvider.getApplicationContext(),
                 dispatchers = CoroutineDispatchers(testDispatcher, testDispatcher, testDispatcher),
                 mapLayersManager = mapLayersManager,
+                layerOpacityStore =
+                LayerOpacityStore(mapPrefs, CoroutineDispatchers(testDispatcher, testDispatcher, testDispatcher)),
                 mapPrefs = mapPrefs,
                 googleMapsPrefs = googleMapsPrefs,
                 nodeRepository = nodeRepository,
