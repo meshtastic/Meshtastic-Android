@@ -316,6 +316,9 @@
     <string name="map_download_errors">İndirme %1$d hata ile tamamlandı</string>
     <string name="map_download_region">Bölgeyi İndir</string>
     <string name="map_filter">Harita Filtresi\n</string>
+    <string name="map_filter_all_roles">Hepsi</string>
+    <string name="map_filter_display_title">Ekran</string>
+    <string name="map_filter_nodes_title">Nodelar</string>
     <string name="map_offline_manager">Çevrim dışı işlemleri</string>
     <string name="map_purge_fail">SQL Önbellek temizleme başarısız, ayrıntılar için logcat' e bakın</string>
     <string name="map_purge_success">%1$s için SQL önbelleği temizlendi</string>
@@ -636,12 +639,8 @@
     <string name="waypoint_received">Alınan yer işareti: %1$s</string>
     <string name="weight">Ağırlık</string>
     <!-- WIFI -->
-    <string name="wifi_enabled">WiFi etkin</string>
     <string name="wifi_provision_success_ip_address">IP Adresi</string>
     <string name="wifi_provision_success_username">Kullanıcı adı</string>
-    <string name="wifi_qr_code_error">Geçersiz Wi-Fi Kimlik Bilgisi QR kodu formatı</string>
-    <string name="wifi_qr_code_scan">Wi-Fi QR Kodu Tara</string>
-    <string name="wifi_rssi_threshold_defaults_to_80">WiFi RSSI eşiği (varsayılan -80)</string>
     <!-- WIND -->
     <string name="wind">Rüzgar</string>
     <!-- WRITE -->

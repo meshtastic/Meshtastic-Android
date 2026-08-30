@@ -2,7 +2,7 @@
 title: ノード
 parent: User Guide
 nav_order: 4
-last_updated: 2026-08-27
+last_updated: 2026-08-29
 description: メッシュノードの閲覧・絞り込み・並べ替え。詳細、信号品質、役割、クイック操作を確認できます。
 aliases:
   - node-list
@@ -13,7 +13,7 @@ aliases:
 
 # ノード
 
-ノード画面には、メッシュネットワーク上で見えているすべてのデバイスが表示されます。
+The Nodes screen lists every node visible on your mesh.
 
 ## ノードリスト
 
@@ -28,13 +28,13 @@ aliases:
 
 ### ノードのステータス表示
 
-| バッジ      | 意味                 |
-| -------- | ------------------ |
-| 🟢 オンライン | 過去 2 時間以内に受信したノード  |
-| ⚪ オフライン  | 2 時間を超えて受信していないノード |
-| ⭐ お気に入り  | ユーザーがお気に入りに設定したノード |
+| バッジ      | 意味                                             |
+| -------- | ---------------------------------------------- |
+| 🟢 オンライン | 過去 2 時間以内に受信したノード                              |
+| ⚪ オフライン  | 2 時間を超えて受信していないノード                             |
+| ⭐ お気に入り  | Node you marked as a favorite. |
 
-ノードは、過去 2 時間以内に受信していれば**オンライン**、そうでなければ**オフライン**とみなされます。「離席中」のような中間の段階はありません。
+There is no separate "away" tier.
 
 ### ノードの役割
 
@@ -42,7 +42,7 @@ aliases:
 
 | 役割              | 説明                                                                                                    |
 | --------------- | ----------------------------------------------------------------------------------------------------- |
-| クライアント          | 標準的なエンドユーザーのデバイス                                                                                      |
+| クライアント          | Standard end-user node                                                                                |
 | クライアント・ベース      | お気に入りノードの通信をルーター・レイトの優先度で扱い、それ以外の通信はクライアントとして扱います                                                     |
 | クライアント・ミュート     | 受信しますが、再送信はしません                                                                                       |
 | クライアント・非表示      | クライアント・ミュートと同様で、さらにノードリストから隠れます                                                                       |
@@ -60,15 +60,15 @@ aliases:
 
 ほとんどのユーザーは、デフォルトの**クライアント**役割のままにしてください。 次のような場合は、別の役割を検討してください：
 
-- **ルーター：** 電源が安定した、固定された高所（屋上、丘の上など）にノードを設置している場合。 ルーターは他のノードのメッセージを中継するために常に起動し続け、メッシュのカバレッジ拡大に不可欠です。 バッテリー駆動のハンドヘルドデバイスではルーターを使用しないでください。
+- **ルーター：** 電源が安定した、固定された高所（屋上、丘の上など）にノードを設置している場合。 ルーターは他のノードのメッセージを中継するために常に起動し続け、メッシュのカバレッジ拡大に不可欠です。 Don't use Router on battery-powered handheld radios.
 - **ルーター・レイト：** パケットを常に 1 回だけ再送信するインフラノードですが、他のすべてのルーティングモードの番が終わった後にのみ行います。 主要なルーターと競合することなく、ローカルのクラスターに補助的なカバレッジを提供します。
 - **クライアント・ベース：** お気に入りノードとの間の通信をルーター・レイトの優先度で扱い（それらのメッセージが追加の中継カバレッジを得られるようにします）、それ以外はすべて通常のクライアントとして処理します。
-- **クライアント・ミュート：** メッシュの通信を受信したいが、中継には貢献したくない場合。 監視専用のデバイスや、混雑した地域での輻輳軽減に便利です。
-- **トラッカー：** GPS 位置の発信だけを目的とする無人デバイス（車両、ペット、資産など）。 発信の合間はスリープしてバッテリーを節約します。
-- **センサー：** 環境テレメトリ（気温、湿度、大気質）を報告する無人デバイス。 電力プロファイルはトラッカーと同様です。
+- **クライアント・ミュート：** メッシュの通信を受信したいが、中継には貢献したくない場合。 Useful for monitoring-only radios or to reduce congestion in dense areas.
+- **Tracker** — An unattended radio whose sole purpose is broadcasting its GPS position (e.g., a vehicle, pet, or asset). 発信の合間はスリープしてバッテリーを節約します。
+- **Sensor** — An unattended radio reporting environmental telemetry (temperature, humidity, air quality). 電力プロファイルはトラッカーと同様です。
 - **TAK／TAK Tracker：** ATAK／WinTAK システムと相互運用する場合にのみ必要です。 詳しくは [TAK 連携](tak) を参照してください。
 
-> 💡 **ヒント：** メッシュは、ほとんどのノードが**クライアント**または**ルーター**のときに最も良く機能します。 ミュートノードが多すぎるとメッシュの耐障害性が低下し、混雑した地域にルーターが多すぎると輻輳を招くことがあります。 目安としては、地域内のクライアント 5〜10 台につきルーター 1 台です。
+> 💡 **ヒント：** メッシュは、ほとんどのノードが**クライアント**または**ルーター**のときに最も良く機能します。 Too many Client Mute nodes reduce mesh resilience; too many Routers in a dense area can cause congestion. 目安としては、地域内のクライアント 5〜10 台につきルーター 1 台です。
 
 ### 暗号化の表示
 
@@ -87,7 +87,7 @@ aliases:
 ノードリストから、次のことができます：
 
 - ノードを**タップ**すると詳細ページを表示します
-- **長押し**でクイック操作を表示します：
+- **Touch & hold** for quick actions:
   - お気に入りに追加／解除
   - 通知のミュート／解除
   - ダイレクトメッセージを送信
@@ -110,7 +110,7 @@ aliases:
 | **不明なノードを含む**  | Show nodes that haven't sent user info yet. **On by default**, so a node heard before its info arrives stays visible and messageable; these carry a badge marking them incomplete |
 | **インフラを除外**    | Hide infrastructure-role nodes (Router, Router Late, Client Base, and legacy Repeater nodes)                                                                                   |
 | **MQTT を除外**   | MQTT のインターネットブリッジ経由でのみ受信したノードを非表示にします                                                                                                                                                             |
-| **無視したノードを表示** | 以前に非表示またはミュートにしたノードを表示します                                                                                                                                                                         |
+| **無視したノードを表示** | Show nodes you've ignored                                                                                                                                                                         |
 
 ### 並べ替えオプション
 
@@ -132,7 +132,7 @@ aliases:
 
 ノードをタップすると、詳しい情報を含む詳細ビューが開きます。 メトリクスとテレメトリの詳細については、[ノードメトリクス](node-metrics) を参照してください。
 
-![ノードの詳細ビュー](../../assets/screenshots/nodes_node_list.png)
+![Node list, showing signal quality and last-heard time for each node](../../assets/screenshots/nodes_node_list.png)
 
 詳細画面には、デバイス情報、位置、操作ボタンが含まれます：
 
@@ -161,6 +161,3 @@ aliases:
 - [マップとウェイポイント](map-and-waypoints)：ノードの位置を地図上で確認
 - [Local Mesh Discovery](discovery) — traceroute and neighbor info for topology exploration
 - [信号メーター](signal-meter)：信号バーの意味を理解する
-
----
-

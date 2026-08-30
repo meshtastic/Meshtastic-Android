@@ -2,7 +2,7 @@
 title: Telemeetria & Sensorid
 parent: Kasutusjuhend
 nav_order: 9
-last_updated: 2026-08-27
+last_updated: 2026-08-29
 description: Kärgvõrgu andurite andmed — toetatud keskkonna-, õhukvaliteedi- ja võimsusandurid ning konfiguratsiooni- ja vaatamisjuhendid.
 aliases:
   - sensorid
@@ -13,11 +13,7 @@ aliases:
 
 # Telemetria & sensorid
 
-Meshtastic sõlmed saavad koguda ja jagada andurite andmeid kärgvõrgu kaudu.
-
-## Ülevaade
-
-Telemeetria võimaldab anduritega varustatud sõlmedel levitada keskkonna-, energiatarbimise ja seadme terviseteavet. This data is visible on the node detail screen and can be logged over time.
+Meshtastic sõlmed saavad koguda ja jagada andurite andmeid kärgvõrgu kaudu. Telemetry allows nodes equipped with sensors to broadcast environmental, power, and device health information, visible on the node detail screen and logged over time.
 
 ## Device Telemetry
 
@@ -47,11 +43,11 @@ Supported environmental sensors:
 
 ### Air Quality
 
-| Andur    | Meetriline           | Sõnumid                                                                                                                                   |
-| -------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| BME680   | Gas Resistance / IAQ | Volatile organic compounds                                                                                                                |
-| PMSA003I | PM1,0, PM2,5, PM10   | Particulate matter                                                                                                                        |
-| SEN55    | PM, Temp, Humidity   | Multi-sensor. Its NOx and VOC indices are recorded and included in a CSV export, but are not yet shown as cards or charts |
+| Andur    | Meetriline           | Sõnumid                                                                                                                               |
+| -------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| BME680   | Gas Resistance / IAQ | Volatile organic compounds                                                                                                            |
+| PMSA003I | PM1,0, PM2,5, PM10   | See [Air Quality Metrics](#air-quality-metrics)                                                                                       |
+| SEN55    | PM, Temp, Humidity   | Multi-sensor. Its NOx and VOC indices are recorded and included in a CSV export, but are not shown as cards or charts |
 
 ### Soil
 
@@ -64,11 +60,11 @@ Both appear as info cards on the node detail screen, next to the other environme
 
 ### Valgus & UV
 
-| Andur    | Meetriline                              |
-| -------- | --------------------------------------- |
-| OPT3001  | Ambient valgus (lux) |
-| VEML7700 | Ambient valgus (lux) |
-| LTR390   | UV indeks                               |
+| Andur    | Meetriline                                    |
+| -------- | --------------------------------------------- |
+| OPT3001  | Ambient valgus (lux)       |
+| VEML7700 | Ümbritseva valguse (luksi) |
+| LTR390   | UV indeks                                     |
 
 ## Võimsusnäitajad
 
@@ -79,7 +75,7 @@ Nodes with INA-series power sensors can report:
 | Vool       | Per-channel voltage reading     |
 | Pinge      | Per-channel current draw, in mA |
 
-Up to three channels are reported (ch1–ch3), and each can be given its own label — Solar or Battery, say — from the node detail screen. There is no separate wattage reading; the app charts voltage and current, and does not compute power from them.
+Up to three sensor channels (ch1–ch3) are reported, and each can be given its own label — Solar or Battery, say — from the node detail screen. There is no separate wattage reading; the app charts voltage and current, and does not compute power from them.
 
 Kasulik päikesepaneelide laadimise või aku seisundi jälgimiseks kaugsõlmedes.
 
@@ -93,14 +89,14 @@ Kasulik päikesepaneelide laadimise või aku seisundi jälgimiseks kaugsõlmedes
    - **Air Quality Metrics** — particulate and CO₂ readings
    - **Power Metrics** — the per-channel voltage and current readings
 
-   Environment metrics additionally have an on-screen toggle and a Fahrenheit toggle for the
-   device's own display.
+   Environment metrics additionally have toggles to show the readings on the radio's own screen,
+   and to show them in Fahrenheit.
 
 ### Choosing an Interval
 
-> 💡 **Tip:** These are nominal values, not hard schedules. On a congested mesh the firmware
-> automatically backs off to longer intervals based on how many nodes are online, so you do not
-> need to hand-tune them for mesh size. Lengthen them deliberately only to save battery.
+These are nominal values, not hard schedules. On a congested mesh the firmware automatically
+backs off to longer intervals based on how many nodes are online, so you do not need to
+hand-tune them for mesh size. Lengthen them deliberately only to save battery.
 
 ## Air Quality Metrics
 
@@ -129,7 +125,7 @@ CO₂ näit on värvikoodiga märgitud vastavalt raskusastmele (Hea → Umbne �
    - Air Quality Metrics (if PM/CO₂ sensor present)
 3. Ajaloolised graafikud näitavad aja jooksul trende.
 
-![Telemeetria toimingud](../../assets/screenshots/node-metrics_telemetric_actions.png)
+![Node detail screen with the telemetry chart action menu open](../../assets/screenshots/node-metrics_telemetric_actions.png)
 
 ## Veaotsing
 
@@ -142,6 +138,3 @@ CO₂ näit on värvikoodiga märgitud vastavalt raskusastmele (Hea → Umbne �
 - [Node Metrics](node-metrics) — view telemetry data on the node detail screen
 - [Seaded — Moodulid ja administreerimine](settings-module-admin) — telemeetriamooduli konfiguratsioon
 - [Ühikud ja lokaat](units-and-locale) — temperatuuri ja rõhu kuvamise ühikud
-
----
-

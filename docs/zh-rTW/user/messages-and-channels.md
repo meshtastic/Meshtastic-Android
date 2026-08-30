@@ -2,7 +2,7 @@
 title: 訊息與頻道
 parent: 使用者指南
 nav_order: 3
-last_updated: 2026-08-27
+last_updated: 2026-08-29
 description: Send and receive messages, manage channels, configure encryption, search conversations, and use quick chat, reactions, and message actions.
 aliases:
   - 頻道
@@ -21,7 +21,7 @@ Meshtastic 支援兩種通訊模式：頻道廣播與私訊。
 
 ### 預設頻道
 
-每台 Meshtastic 裝置均內建預設的 LongFast 頻道。 此為未加密頻道，供一般 mesh 網路通訊使用。
+Every Meshtastic radio comes with a default **LongFast** channel. It is encrypted with a well-known default key, so anyone running Meshtastic on the same preset can read it.
 
 ### 頻道安全性
 
@@ -52,13 +52,13 @@ Meshtastic 支援兩種通訊模式：頻道廣播與私訊。
 ### 傳送私訊
 
 1. 開啟「訊息」頁籤。
-2. 從聯絡人清單中選取節點，或在節點清單中點選節點。
+2. Select a conversation, or tap a node in the node list.
 3. 輸入訊息後點選「傳送」。
 
 ### Managing the Conversation List
 
-The **Messages** tab lists your conversations. Each row carries what you need to triage it at a
-glance, and the list itself is directly actionable:
+The **Messages** tab lists your conversations. Each row shows what you need at a glance, and you
+can act on it directly:
 
 - **Unsent drafts survive.** Type into a conversation and leave without sending, and the text is
   still there when you come back. The row shows it as `Draft: …` in place of the last message —
@@ -66,7 +66,7 @@ glance, and the list itself is directly actionable:
 - **Unread badge.** A count sits on the row until you open the conversation.
 - **Swipe right to mute** (swipe again to unmute) and **swipe left to delete**. Deleting asks
   first; muting shows a snackbar with **Undo**.
-- **Long-press to select** one or more conversations, then use the action bar to **Pin**,
+- **Touch & hold to select** one or more conversations, then use the action bar to **Pin**,
   **Mark unread**, mute or delete them together. Pinned conversations carry a pin marker and rise
   to the top of **their own section**.
 - **The list is split into Channels and Direct Messages**, each with a collapsible header and each
@@ -84,15 +84,15 @@ control whether they are offered at all.
 
 A status label appears under **your own** outgoing messages only (incoming messages from others show no status label):
 
-| 狀態                                  | 含義                                                                                                                                                                                                                                        |
-| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Sending…                            | Queued or already handed to the radio, not yet resolved either way. Both stages share this text, but the icon and colour change as it progresses — a yellow upload cloud while queued, a blue arrow once the radio has it |
-| Delivered to recipient              | The strongest confirmation for a direct message — an acknowledgment came back                                                                                                                                                             |
-| 已傳送至 Mesh                           | For a channel broadcast, the message reached the mesh (broadcasts have no per-recipient ack)                                                                                                                           |
-| Relayed, not confirmed by recipient | For a direct message, shown in a warning color — the message was relayed but no acknowledgment has come back yet                                                                                                                          |
-| 透過 SF++ 鏈路由…                        | Being routed/buffered by the Store & Forward Plus Plus chain                                                                                                                                                          |
-| 已在 SF++ 鏈上確認                        | Confirmed delivered via the SF++ chain                                                                                                                                                                                                    |
-| 錯誤                                  | Delivery failed — tap the status for the specific reason (see Delivery Errors below)                                                                                                                                   |
+| 狀態                                  | 含義                                                                                                                                                                                                                                       |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Sending…                            | Queued or already handed to the radio, not yet resolved either way. Both stages share this text, but the icon and color change as it progresses — a yellow upload cloud while queued, a blue arrow once the radio has it |
+| Delivered to recipient              | The strongest confirmation for a direct message — an acknowledgment came back                                                                                                                                                            |
+| 已傳送至 Mesh                           | For a channel broadcast, the message reached the mesh (broadcasts have no per-recipient ack)                                                                                                                          |
+| Relayed, not confirmed by recipient | For a direct message, shown in a warning color — the message was relayed but no acknowledgment has come back yet                                                                                                                         |
+| 透過 SF++ 鏈路由…                        | Being routed/buffered by the Store & Forward Plus Plus chain                                                                                                                                                         |
+| 已在 SF++ 鏈上確認                        | Confirmed delivered via the SF++ chain                                                                                                                                                                                                   |
+| 錯誤                                  | Delivery failed — tap the status for the specific reason (see [Delivery Errors](#delivery-errors))                                                                                                                    |
 
 ### 傳遞錯誤
 
@@ -135,8 +135,6 @@ Each quick chat entry has a short **Name** (the button label), the **Message** i
 
 ![New quick chat dialog with name, message, and instantly-send toggle](../../assets/screenshots/messages_edit_quick_chat.png)
 
-頻道清單會顯示每個頻道及其最新訊息預覽。
-
 ### Searching Messages
 
 You can search the full history of any conversation directly from the chat screen:
@@ -166,7 +164,7 @@ Messages support lightweight inline **Markdown**. Received messages render the s
 | Inline code   | `` `code` ``                   | monospace `code`     |
 | Link          | `[label](https://example.com)` | a tappable **label** |
 
-When composing, focus the message field and type at least three characters to reveal a **formatting toolbar** below the input. Select text and tap a style to wrap it (tap again to remove it); with no selection, a style inserts an empty pair with the cursor between the markers. The link button opens a dialog to enter a URL. As you type, the draft styles live in the field while the underlying text keeps its Markdown characters.
+When composing, focus the message field and type at least three characters to reveal a **formatting toolbar** below the input. Select text and tap a style to wrap it (tap again to remove it); with no selection, a style inserts an empty pair with the cursor between the markers. The link button opens a dialog to enter a URL. As you type, the field shows the styled text, but the message you send still contains the Markdown characters.
 
 > 💡 **Tip:** Formatting is carried as literal characters on the mesh — the same bytes iOS sends. Clients that don't support Markdown (older apps, plain firmware clients) will show the raw `**`/`~~` characters. URLs, email addresses, and phone numbers are still auto-linked whether or not you use Markdown.
 
@@ -178,15 +176,13 @@ Type `@` while composing to mention a node — a picker suggests matching contac
 
 以表情符號對訊息作出回應：
 
-- **Double-tap** a message — or long-press it — to raise a quick reaction bar above the bubble
+- **Touch & hold** a message — or double-tap it — to raise a quick reaction bar above the bubble. Opening the bar sends nothing.
 - Tap an emoji in the bar to send it; tap **more** to open the full picker, or anywhere outside
-  the bar to dismiss it without sending
+  the bar to dismiss it without sending. A reaction is a real mesh packet, so it only goes out
+  when you pick an emoji.
 - 訊息回應顯示於訊息泡泡下方
 - 多位使用者可對同一則訊息作出回應
 - 可對自己或他人的訊息作出回應
-
-> ℹ️ **Note:** Opening the bar sends nothing. A reaction is a real mesh packet, so it only goes
-> out when you pick an emoji.
 
 ![Emoji reaction badges displayed beneath a message](../../assets/screenshots/messages_reaction.png)
 
@@ -196,7 +192,7 @@ Type `@` while composing to mention a node — a picker suggests matching contac
 
 **Swipe a message to the right** to reply to it — the composer opens with that message quoted.
 Swiping past the reply threshold arms the action; releasing before it springs back with nothing sent.
-Reply is also in the actions menu, reached by long-pressing and then tapping **More**.
+Reply is also in the actions menu, reached by touching & holding and then tapping **More**.
 
 ### Day Separators
 
@@ -212,7 +208,7 @@ messages. That count is messages, not people — five unread from one person rea
 
 ### 訊息動作
 
-Long-press or double-tap a message to open the quick reaction bar, then tap **More** (the
+Touch & hold or double-tap a message to open the quick reaction bar, then tap **More** (the
 overflow icon on that bar) to reach:
 
 - 複製 — 將訊息文字複製至剪貼簿
@@ -249,6 +245,3 @@ reliable or background, but that is not something you control from the message c
 - 〔設定——無線電與使用者〕(settings-radio-user) — 設定頻道加密與預設值
 - 〔MQTT〕(mqtt) — 將頻道訊息橋接至網際網路
 - [Channel configuration](https://meshtastic.org/docs/configuration/radio/channels) — detailed channel settings on meshtastic.org
-
----
-

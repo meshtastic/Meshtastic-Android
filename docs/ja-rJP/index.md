@@ -6,11 +6,9 @@ nav_order: 0
 
 # Meshtastic Android アプリのドキュメント
 
-KMP（Kotlin Multiplatform）で構築された Meshtastic の Android、デスクトップ、iOS アプリ向けの、ユーザーおよび開発者向けドキュメントです。
+User and developer documentation for the Meshtastic Android and Desktop app, built with Kotlin Multiplatform.
 
 サイドバーのナビゲーションから、アプリの機能については**ユーザーガイド**を、プロジェクトへの貢献については**開発者ガイド**をご覧ください。
-
----
 
 ## クイックリンク
 
@@ -24,7 +22,5 @@ KMP（Kotlin Multiplatform）で構築された Meshtastic の Android、デス�
 | [デスクトップアプリ](user/desktop)                 | Linux、macOS、Windows でのデスクトップ利用       |
 | [アーキテクチャ](developer/architecture)         | コントリビューター向けのアプリアーキテクチャ概要             |
 | [コントリビューション](developer/contributing)      | ブランチ命名、PR ワークフロー、検証コマンド              |
-
----
 
 > このドキュメントは、アプリ内の**ヘルプとドキュメント**ブラウザと同じ Markdown ソースから提供されています。

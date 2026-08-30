@@ -2,7 +2,7 @@
 title: Sõnumid ja kanalid
 parent: Kasutusjuhend
 nav_order: 3
-last_updated: 2026-08-27
+last_updated: 2026-08-29
 description: Saada ja võta vastu sõnumeid, halda kanaleid, konfigureeri krüpteerimist ning kasuta kiirvestlust, reaktsioone ja sõnumitoiminguid.
 aliases:
   - kanalid
@@ -21,7 +21,7 @@ Kanalid on jagatud suhtlusgrupid. Kõik sama kanalivõtmega seadistatud sõlmed 
 
 ### Vaikekanal
 
-Igal Meshtastic seadmel on vaikimisi **PikkKauge** kanal. See on krüpteerimata kanal, mida kasutatakse üldiseks võrgusuhtluseks.
+Every Meshtastic radio comes with a default **LongFast** channel. It is encrypted with a well-known default key, so anyone running Meshtastic on the same preset can read it.
 
 ### Kanali turvalisus
 
@@ -52,13 +52,13 @@ Otsesõnumid (DM-id) on punkt-punkti krüptitud suhtlus kahe konkreetse sõlme v
 ### Sending a Direct Message
 
 1. Ava vahekaart **Sõnumid**.
-2. Vali kontaktide loendist sõlm või puuduta sõlme loendis.
+2. Select a conversation, or tap a node in the node list.
 3. Tippi oma sõnum ja puuduta nuppu **Saada**.
 
 ### Managing the Conversation List
 
-The **Messages** tab lists your conversations. Each row carries what you need to triage it at a
-glance, and the list itself is directly actionable:
+The **Messages** tab lists your conversations. Each row shows what you need at a glance, and you
+can act on it directly:
 
 - **Unsent drafts survive.** Type into a conversation and leave without sending, and the text is
   still there when you come back. The row shows it as `Draft: …` in place of the last message —
@@ -66,7 +66,7 @@ glance, and the list itself is directly actionable:
 - **Unread badge.** A count sits on the row until you open the conversation.
 - **Swipe right to mute** (swipe again to unmute) and **swipe left to delete**. Deleting asks
   first; muting shows a snackbar with **Undo**.
-- **Long-press to select** one or more conversations, then use the action bar to **Pin**,
+- **Touch & hold to select** one or more conversations, then use the action bar to **Pin**,
   **Mark unread**, mute or delete them together. Pinned conversations carry a pin marker and rise
   to the top of **their own section**.
 - **The list is split into Channels and Direct Messages**, each with a collapsible header and each
@@ -84,15 +84,15 @@ control whether they are offered at all.
 
 Olekumärgis kuvatakse ainult **sinu enda** väljaminevate sõnumite all (teiste sissetulevate sõnumite puhul olekumärgist ei kuvata):
 
-| Olek                              | Tähendus                                                                                                                                                                                                                                  |
-| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Saadan…                           | Queued or already handed to the radio, not yet resolved either way. Both stages share this text, but the icon and colour change as it progresses — a yellow upload cloud while queued, a blue arrow once the radio has it |
-| Saajale kätte toimetatud          | Kõige tugevam kinnitus otsesõnumile – vastus tuli                                                                                                                                                                                         |
-| Kärgvõrku kohale jõudnud          | Kanali leviedastuse puhul jõuab sõnum kärgvõrku (leviedastustel puudub saajapõhine kinnitus)                                                                                                                           |
-| Vahendatud, saaja pole kinnitanud | Otsesõnumi puhul kuvatakse hoiatusvärviga – sõnum edastati, kuid kinnitust pole veel tulnud                                                                                                                                               |
-| Marsruutimine SF++ ahela kaudu…   | Being routed/buffered by the Store & Forward Plus Plus chain                                                                                                                                                          |
-| Kinnitatud SF++ ahel              | Kinnitatud kohaletoimetamine SF++ keti kaudu                                                                                                                                                                                              |
-| Tõrge                             | Kohaletoimetamine ebaõnnestus – puuduta konkreetse põhjuse olekut (vt allpool jaotist „Kohaletoimetamise vead”)                                                                                                        |
+| Olek                              | Tähendus                                                                                                                                                                                                                                 |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Saadan…                           | Queued or already handed to the radio, not yet resolved either way. Both stages share this text, but the icon and color change as it progresses — a yellow upload cloud while queued, a blue arrow once the radio has it |
+| Saajale kätte toimetatud          | Kõige tugevam kinnitus otsesõnumile – vastus tuli                                                                                                                                                                                        |
+| Kärgvõrku kohale jõudnud          | Kanali leviedastuse puhul jõuab sõnum kärgvõrku (leviedastustel puudub saajapõhine kinnitus)                                                                                                                          |
+| Vahendatud, saaja pole kinnitanud | Otsesõnumi puhul kuvatakse hoiatusvärviga – sõnum edastati, kuid kinnitust pole veel tulnud                                                                                                                                              |
+| Marsruutimine SF++ ahela kaudu…   | Being routed/buffered by the Store & Forward Plus Plus chain                                                                                                                                                         |
+| Kinnitatud SF++ ahel              | Kinnitatud kohaletoimetamine SF++ keti kaudu                                                                                                                                                                                             |
+| Tõrge                             | Delivery failed — tap the status for the specific reason (see [Delivery Errors](#delivery-errors))                                                                                                                    |
 
 ### Delivery Errors
 
@@ -135,8 +135,6 @@ Igal kiirvestluse kirjel on lühike **Nimi** (nupu silt), **Sõnum**, mille see 
 
 [Uus kiirvestluse dialoog nime, sõnumi ja kohese saatmise lülitiga](../../assets/screenshots/messages_edit_quick_chat.png)
 
-Kanalite loendis kuvatakse iga kanal koos selle viimase sõnumi eelvaatega.
-
 ### Otsin sõnumeid
 
 Saad otsida mis tahes vestluse kogu ajaloost otse vestlusekraanilt:
@@ -166,7 +164,7 @@ Messages support lightweight inline **Markdown**. Received messages render the s
 | Inline code      | `` `kood` ``                  | monospace `code`     |
 | Ühendus          | `[silt](https://example.com)` | a tappable **label** |
 
-When composing, focus the message field and type at least three characters to reveal a **formatting toolbar** below the input. Vali tekst ja puuduta stiili, et see murda (puuduta uuesti, et see eemaldada); kui valikut pole, lisab stiil tühja paari, kusjuures kursor on markerite vahel. Linginupp avab URL-i sisestamiseks dialoogiboksi. As you type, the draft styles live in the field while the underlying text keeps its Markdown characters.
+When composing, focus the message field and type at least three characters to reveal a **formatting toolbar** below the input. Vali tekst ja puuduta stiili, et see murda (puuduta uuesti, et see eemaldada); kui valikut pole, lisab stiil tühja paari, kusjuures kursor on markerite vahel. Linginupp avab URL-i sisestamiseks dialoogiboksi. As you type, the field shows the styled text, but the message you send still contains the Markdown characters.
 
 > 💡 **Vihje:** Vormindus kantakse kärgvõrgu literaalmärkidena – samad baidid, mida iOS saadab. Kliendid, mis ei toeta Markdowni (vanemad rakendused, tavalised püsivara kliendid), kuvavad toored `**`/`~~` märgid. URL-id, e-posti aadressid ja telefoninumbrid lingitakse endiselt automaatselt olenemata sellest, kas kasutate Markdowni või mitte.
 
@@ -178,15 +176,13 @@ Type `@` while composing to mention a node — a picker suggests matching contac
 
 React to messages with emoji:
 
-- **Double-tap** a message — or long-press it — to raise a quick reaction bar above the bubble
+- **Touch & hold** a message — or double-tap it — to raise a quick reaction bar above the bubble. Opening the bar sends nothing.
 - Tap an emoji in the bar to send it; tap **more** to open the full picker, or anywhere outside
-  the bar to dismiss it without sending
+  the bar to dismiss it without sending. A reaction is a real mesh packet, so it only goes out
+  when you pick an emoji.
 - Reaktsioonid kuvatakse sõnumimulli all
 - Mitu kasutajat saavad samale sõnumile reageerida
 - Reageeri oma või teiste sõnumitele
-
-> ℹ️ **Note:** Opening the bar sends nothing. A reaction is a real mesh packet, so it only goes
-> out when you pick an emoji.
 
 ![Emotikonide reaktsioonimärgid kuvatakse sõnumi all](../../assets/screenshots/messages_reaction.png)
 
@@ -196,7 +192,7 @@ React to messages with emoji:
 
 **Swipe a message to the right** to reply to it — the composer opens with that message quoted.
 Swiping past the reply threshold arms the action; releasing before it springs back with nothing sent.
-Reply is also in the actions menu, reached by long-pressing and then tapping **More**.
+Reply is also in the actions menu, reached by touching & holding and then tapping **More**.
 
 ### Day Separators
 
@@ -212,7 +208,7 @@ messages. That count is messages, not people — five unread from one person rea
 
 ### Message Actions
 
-Long-press or double-tap a message to open the quick reaction bar, then tap **More** (the
+Touch & hold or double-tap a message to open the quick reaction bar, then tap **More** (the
 overflow icon on that bar) to reach:
 
 - **Kopeeri** – kopeeri sõnumi tekst lõikelauale
@@ -249,6 +245,3 @@ reliable or background, but that is not something you control from the message c
 - [Seaded — Raadio ja kasutaja](settings-radio-user) — kanalite krüpteerimise ja eelseadete konfimine
 - [MQTT](mqtt) — silda kanali sõnumid internetti
 - [Kanali konf](https://meshtastic.org/docs/configuration/radio/channels) — üksikasjalikud kanali seaded leiate aadressilt meshtastic.org
-
----
-

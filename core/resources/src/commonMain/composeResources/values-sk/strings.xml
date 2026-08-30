@@ -260,6 +260,8 @@
     <string name="map_download_complete">Sťahovanie dokončené!</string>
     <string name="map_download_errors">Sťahovanie ukončené s %1$d chybami</string>
     <string name="map_download_region">Stiahnuť oblasť</string>
+    <string name="map_filter_all_roles">Všetky</string>
+    <string name="map_filter_display_title">Obrazovka</string>
     <string name="map_offline_manager">Offline manager</string>
     <string name="map_purge_fail">Vyčistenie SQL Cache zlyhalo, podrobnosti nájdete v logcat</string>
     <string name="map_purge_success">SQL Cache vyčistená pre %1$s</string>
@@ -509,12 +511,8 @@
     <string name="waypoint_received">Prijatý cieľový bod: %1$s</string>
     <string name="weight">Hmotnosť</string>
     <!-- WIFI -->
-    <string name="wifi_enabled">WiFi zapnutá</string>
-    <string name="wifi_ip">Wifi IP:</string>
     <string name="wifi_provision_success_ip_address">IP adresa</string>
     <string name="wifi_provision_success_username">Používateľské meno</string>
-    <string name="wifi_qr_code_error">Neplatný formát QR kódu poverenia WiFi</string>
-    <string name="wifi_qr_code_scan">Skenuj WiFi QR kód</string>
     <!-- WIND -->
     <string name="wind">Vietor</string>
     <!-- WRITE -->

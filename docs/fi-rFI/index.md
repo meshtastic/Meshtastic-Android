@@ -6,11 +6,9 @@ nav_order: 0
 
 # Meshtastic Android -sovelluksen dokumentaatio
 
-Käyttäjä- ja kehittäjädokumentaatio Meshtasticin Android-, Desktop- ja iOS-sovelluksille, jotka on toteutettu Kotlin Multiplatform (KMP) -teknologialla.
+User and developer documentation for the Meshtastic Android and Desktop app, built with Kotlin Multiplatform.
 
 Käytä sivupalkkia selataksesi **käyttöopasta** ja **Kehittäjäopasta**. Käyttöoppaasta löydät sovelluksen ominaisuudet ja kehittäjäoppaasta ohjeet projektin kehittämiseen osallistumiseen.
-
----
 
 ## Pikalinkit
 
@@ -24,7 +22,5 @@ Käytä sivupalkkia selataksesi **käyttöopasta** ja **Kehittäjäopasta**. Kä
 | [Työpöytäsovellus](user/desktop)                                    | Työpöytäsovelluksen käyttö Linuxissa, macOS ja Windows käyttöjärjestelmissä |
 | [Arkkitehtuuri](developer/architecture)                             | Yleiskatsaus sovelluksen arkkitehtuuriin kehittäjille                       |
 | [Osallistuminen kehitystyöhön](developer/contributing)              | Haarojen nimeäminen, PR-työnkulku ja tarkistuskomennot                      |
-
----
 
 > Tämä dokumentaatio perustuu samoihin Markdown-lähdetiedostoihin kuin sovelluksen sisäinen **Ohje ja dokumentaatio** -osio.

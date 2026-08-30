@@ -2,7 +2,7 @@
 title: MQTT
 parent: User Guide
 nav_order: 11
-last_updated: 2026-08-27
+last_updated: 2026-08-29
 description: メッシュをインターネットに橋渡しします。MQTT サーバーの設定、暗号化の各レイヤー、マップ報告について説明します。
 aliases:
   - mqtt
@@ -26,10 +26,10 @@ MQTT モジュールは、ノードを MQTT サーバーに接続し、次のこ
 ## 仕組み
 
 ```
-[自分のノード] → 無線 → [WiFi 付きゲートウェイノード] → MQTT サーバー → [リモートゲートウェイ] → 無線 → [リモートノード]
+[Your Node] → Radio → [Gateway Node with Wi-Fi] → MQTT Broker → [Remote Gateway] → Radio → [Remote Node]
 ```
 
-インターネットに接続されたゲートウェイノード（WiFi または Ethernet）が、メッシュのメッセージを MQTT トピックに公開します。 同じトピックを購読しているリモートのゲートウェイが、それらのメッセージを自分のローカルメッシュに取り込みます。
+A gateway node with internet access (Wi-Fi or Ethernet) publishes mesh messages to an MQTT topic. 同じトピックを購読しているリモートのゲートウェイが、それらのメッセージを自分のローカルメッシュに取り込みます。
 
 ## 設定
 
@@ -39,18 +39,18 @@ MQTT モジュールは、ノードを MQTT サーバーに接続し、次のこ
 2. MQTT モジュールを有効にします。
 3. サーバーへの接続を設定します：
 
-![MQTT のトグルスイッチ](../../assets/screenshots/settings_switch.png)
+![MQTT module settings with the module enabled](../../assets/screenshots/settings_switch.png)
 
-| 設定項目        | 説明                                                                                                                                                                                  | デフォルト                                               |
-| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
-| サーバーアドレス    | MQTT サーバーのホスト名                                                                                                                                                                      | mqtt.meshtastic.org |
-| ユーザー名       | サーバーの認証                                                                                                                                                                             | meshdev                                             |
-| パスワード       | サーバーの認証                                                                                                                                                                             | large4cats                                          |
-| ルートトピック     | メッセージのベーストピック                                                                                                                                                                       | msh                                                 |
-| 暗号化         | MQTT ペイロードを暗号化                                                                                                                                                                      | 有効                                                  |
-| JSON Output | Also publish and consume the `/2/json/` topic. Deprecated in the protobuf schema, but still the only toggle for this behaviour — and the app's own proxy honours it | 無効                                                  |
-| TLS         | サーバーへのセキュアな接続                                                                                                                                                                       | 無効                                                  |
-| マップ報告       | 公開マップに位置を報告                                                                                                                                                                         | 無効                                                  |
+| 設定項目        | 説明                                                                                                                                                                                | デフォルト                                               |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| サーバーアドレス    | MQTT サーバーのホスト名                                                                                                                                                                    | mqtt.meshtastic.org |
+| ユーザー名       | サーバーの認証                                                                                                                                                                           | meshdev                                             |
+| パスワード       | サーバーの認証                                                                                                                                                                           | large4cats                                          |
+| ルートトピック     | メッセージのベーストピック                                                                                                                                                                     | msh                                                 |
+| 暗号化         | MQTT ペイロードを暗号化                                                                                                                                                                    | 有効                                                  |
+| JSON Output | Also publish and consume the `/2/json/` topic. Deprecated in the protobuf schema, but still the only toggle for this behavior — and the app's own proxy honors it | 無効                                                  |
+| TLS         | サーバーへのセキュアな接続                                                                                                                                                                     | 無効                                                  |
+| マップ報告       | 公開マップに位置を報告                                                                                                                                                                       | 無効                                                  |
 
 ### Connection Status and Test Connection
 
@@ -63,17 +63,15 @@ TLS failing, the attempt timing out, or the broker rejecting your credentials wi
 
 ### このスマートフォンでの MQTT プロキシ
 
-ノード自体がインターネットに接続できない場合、接続中のスマートフォンを MQTT ゲートウェイとして使えます。モジュール設定で「**MQTT**」と「**クライアントへのプロキシを有効化**」を有効にすると、アプリがスマートフォンのインターネット接続を通じて、無線機とサーバーの間で MQTT の通信を中継します。
+If your radio has no internet access of its own, it can use the connected phone as its MQTT gateway: enable **MQTT** and **Proxy to client enabled** in the module config, and the app relays MQTT traffic between the radio and the broker over your phone's internet connection.
 
 > ℹ️ **Note:** The proxy relay is mobile-only. On the Desktop app the MQTT settings are present, but no relay runs behind them.
 
-MQTT 設定画面の上部にある「**このスマートフォンでの MQTT プロキシ**」トグルは、この中継が現在動作しているかどうかを示し、デバイスの MQTT 設定を編集して保存し直すことなく、すぐに停止（または再開）できます。
+The **MQTT proxy on this phone** toggle at the top of the MQTT settings screen shows whether this relay is running and lets you cut it off (or restart it) immediately — without editing and re-saving the radio's MQTT configuration.
 
 ### デフォルトの Meshtastic サーバー
 
-コミュニティが `mqtt.meshtastic.org` で公開サーバーを運用しています。 これは一般的な利用やテストを目的としています。
-
-> ℹ️ **注意：** `mqtt.meshtastic.org` への接続は、TLS のトグルがオフでも常に TLS（ポート 8883）を使用します。 それ以外のサーバーでは、TLS は有効にした場合にのみ使用されます（TLS ありはポート 8883、なしは 1883）。
+コミュニティが `mqtt.meshtastic.org` で公開サーバーを運用しています。 これは一般的な利用やテストを目的としています。 Connections to it always use TLS (port 8883), even if the TLS toggle is off; for any other broker, TLS is used only when you enable it (port 8883 with TLS, 1883 without).
 
 > 🔒 **プライバシー：** 公開サーバー上のメッセージは、購読している誰もが読めます。 プライベートな通信には、必ずチャンネルの暗号化を使用してください。
 
@@ -130,7 +128,7 @@ MQTT carries two payload formats:
 ## ベストプラクティス
 
 - MQTT に橋渡しするチャンネルでは、チャンネルレベルの暗号化（PSK）を使用します
-- インターネットに接続できないノードでは MQTT を有効にしないでください（バッファリングしてメモリを浪費します）
+- Don't enable MQTT on nodes without internet access (the radio buffers unsendable messages and wastes memory)
 - 機密性の高い運用にはプライベートサーバーを使用します
 - 混雑した MQTT トピックからメッセージをダウンリンクする際は、電波利用時間に注意してください。ダウンリンクされたメッセージはすべて、ローカルメッシュの無線の電波利用時間を消費します
 - メッセージを送り返さず、リモートでメッシュを監視するだけでよい場合は、アップリンクのみを有効にすることを検討してください
@@ -139,9 +137,9 @@ MQTT carries two payload formats:
 
 ### MQTT が接続できない
 
-- **WiFi を確認：** ゲートウェイノードには、有効なインターネット接続（WiFi または Ethernet）が必要です。 MQTT は LoRa の無線リンク自体では動作しません。
-- **認証情報を確認：** ユーザー名やパスワードが正しくないと、ほとんどのサーバーでは何も表示されずに失敗します。 末尾のスペースがないか、よく確認してください。
-- **ファイアウォール：** ポート 1883（MQTT）または 8883（MQTT+TLS）が開いている必要があります。 一部のネットワークは、標準外のポートをブロックします。
+- **Check Wi-Fi** — the gateway node must have an active internet connection (Wi-Fi or Ethernet). MQTT は LoRa の無線リンク自体では動作しません。
+- **Verify credentials** — with incorrect credentials, most brokers fail silently — double-check for trailing spaces.
+- **Firewall** — port 1883 (MQTT) or 8883 (MQTT over TLS) must be reachable. Some networks allow only web traffic (ports 80 and 443).
 - **DNS 解決：** カスタムのサーバーホスト名を使う場合は、ノードがそれを解決できるか確認してください。 サーバーの IP アドレスを直接試してみてください。
 
 ### メッセージが橋渡しされない
@@ -155,6 +153,3 @@ MQTT carries two payload formats:
 - [設定：モジュールと管理](settings-module-admin)：MQTT モジュールの設定リファレンス
 - [メッセージとチャンネル](messages-and-channels)：チャンネルの暗号化と PSK の設定
 - [MQTT 連携ガイド](https://meshtastic.org/docs/software/integrations/mqtt)：meshtastic.org にある詳細な MQTT ドキュメント
-
----
-

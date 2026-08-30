@@ -2,7 +2,7 @@
 title: Meshtastic の信号メーターの仕組み
 parent: User Guide
 nav_order: 15
-last_updated: 2026-08-27
+last_updated: 2026-08-29
 description: 信号メーターが、LoRa モデムプリセットに対する SNR から品質をどう評価するかを説明します。スペクトラム拡散、プリセット、バーが実際に意味するもの。
 aliases:
   - signal
@@ -13,80 +13,55 @@ aliases:
 
 # Meshtastic の信号メーターの仕組み
 
-Meshtastic の信号メーター（アプリでおなじみのバーやステータスの色）は、従来の携帯電話や WiFi ルーターの「バー」とはまったく異なる方法で計算されます。
+The Meshtastic signal meter — the bars or status color next to a node — is calculated differently from the bars on a cell phone or Wi-Fi router. This page explains what it measures and why the same reading can mean something different on another preset.
 
-Most consumer devices measure how "loud" a signal is. しかし Meshtastic は **LoRa（Long Range）**技術を使用しているため、その信号メーターは、メッシュが使用している具体的な設定を基準に、信号がどれだけ**明瞭か**を測定します。
+## RSSI and SNR
 
----
+Every time the LoRa radio receives a message, it reports two measurements:
 
-## 1. 2 つの指標：「大きさ」と「明瞭さ」
+- **RSSI (Received Signal Strength Indicator)** — the raw power hitting the antenna.
+- **SNR (Signal-to-Noise Ratio)** — how far the signal stands above the background noise.
 
-LoRa の無線チップは、メッセージを受信するたびに 2 つの測定値を報告します：
+> 💡 **Tip:** Think of RSSI as how loud a friend is talking and SNR as how easily you can pick their voice out of the noise in the room. A friend shouting at a rock concert can be loud (high RSSI) yet unintelligible (bad SNR), while a whisper in a quiet library is faint (low RSSI) yet perfectly clear (great SNR).
 
-- **RSSI（受信信号強度インジケーター）：** アンテナに届く生の電力の**大きさ**。
-- **SNR（信号対ノイズ比）：** 背景のノイズと比較した信号の**明瞭さ**。
+## Decoding Below the Noise Floor
 
-> 💡 **ヒント：** たとえて言うと、友人があなたに話しかけているのを聞き取ろうとしている場面を想像してください。
->
-> - **RSSI** は、その声がどれだけ大きいかです。
-> - **ノイズフロア**は、部屋の中の背景ノイズ（エアコン、他の人の話し声、交通音）です。
-> - **SNR** は、背景ノイズの中から友人の声をどれだけ簡単に聞き分けられるかです。
+Standard radios such as FM or Wi-Fi lose a signal to static once the background noise is louder than it (a negative SNR). LoRa's spread spectrum modulation lets the radio pull a signal out of the noise even when the noise is louder, so negative SNR values are common and expected in Meshtastic — for example, −10 dB means the signal is 10 decibels weaker than the background noise.
 
-耳をつんざくようなロックコンサートで友人が叫んでも、信号は非常に大きい（高い RSSI）一方で、背景ノイズのほうが大きいため（悪い SNR）、聞き取れません。 逆に、静まり返った図書館で友人がささやけば、信号は非常に弱い（低い RSSI）ものの、完璧に聞き取れます（非常に良い SNR）。
+Each modem preset has an SNR limit: the lowest SNR at which that preset can still decode a message. Slower presets tolerate a weaker, noisier signal (a more negative limit, longer range); faster presets need a stronger signal (a less negative limit, shorter range).
 
----
+## Rating Signal Quality
 
-## 2. LoRa の魔法：「ノイズフロアの下」を聞き取る
+The app rates signal quality (None, Bad, Fair, or Good) from SNR alone, measured against the active preset's SNR limit. It does not factor in RSSI: without knowing the local noise floor, RSSI alone cannot say whether a signal is decodable. RSSI is still available — on the node detail screen and in the metrics charts.
 
-For standard radios (like FM or WiFi), if the background noise is louder than the signal (a negative SNR), the receiver hears only static.
+Because the rating is relative to the preset, the same SNR rates differently on different presets. An SNR of −16 dB rates Good on Long Fast (SNR limit −17.5 dB) but None on Short Fast (SNR limit −7.5 dB). Let `limit` be the active preset's SNR limit:
 
-LoRa は特別です。 \*\*「スペクトラム拡散」\*\*変調を使用しており、信号が背景ノイズ&#x306E;_&#x4E0B;_&#x6DF1;くに埋もれていても、無線機が数学的に信号を取り出せます。 そのため Meshtastic では、**負の SNR 値**が頻繁に見られます（例：-10 dB。これは信号が背景ノイズより 10 デシベル弱いことを意味します）。
+| レベル | バー | 基準                                                             | 意味                                                                                                  |
+| --- | -- | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| 良   | 3  | SNR above `limit`                                              | Comfortably above the demodulation floor — a healthy connection.                    |
+| 普通  | 2  | less than 5.5 dB below `limit`                 | Decodable, but approaching the floor.                                               |
+| 不良  | 1  | 5.5 dB to 7.5 dB below `limit` | At the edge of what the preset can recover.                                         |
+| なし  | 0  | more than 7.5 dB below `limit`                 | Far below the preset's floor; further packets from this node are likely to be lost. |
 
-使用している Meshtastic のプリセット（例：`LongFast` と `ShortFast`）に応じて、無線機には固有の **SNR 限界**があります。これは、メッセージがノイズに完全に埋もれてしまう前に許容できるノイズの絶対的な最大量です。
+> ℹ️ **Note:** Traceroute hop colors use fixed thresholds (−7 dB / −15 dB); the per-node signal meter uses the preset-relative rating instead.
 
----
+## Diagnosing Local Interference
 
-## 3. 信号メーターが品質を計算する仕組み
-
-アプリは、信号品質（なし・不良・普通・良）を **SNR のみから、プリセットの SNR 限界を基準として**評価します。これは前述の復調限界です。 この評価には、意図的に RSSI を**含めていません**。ローカルのノイズフロアが分からなければ、RSSI だけでは信号が実際に復調できるかどうかは分からないため、プリセット限界に対する SNR が意味のある指標になります。 （RSSI は、別の場所には引き続き表示されます。）
-
-評価はプリセット限界を基準とするため、_同じ_ SNR でもプリセットによって評価が異なります。`-15 dB` は `LongSlow` では良好ですが、`ShortFast` では使い物になりません。 `limit` を現在のプリセットの SNR 限界とすると、アプリがバー（または色）を選ぶ方法は次のとおりです：
-
-| レベル | バー | 基準                              | 意味                           |
-| --- | -- | ------------------------------- | ---------------------------- |
-| 良   | 3  | SNR がプリセットの `limit` を**上回る**    | 信号が復調限界を十分に上回っています。良好な接続です。  |
-| 普通  | 2  | `limit` より `5.5 dB` 未満低い        | 復調できますが、限界に近づいています。          |
-| 不良  | 1  | `limit` より `5.5 dB`〜`7.5 dB` 低い | プリセットが復元できるぎりぎりの境界です。        |
-| なし  | 0  | `limit` より `7.5 dB` を超えて低い      | 限界を下回っています。送信がノイズに埋もれて失われます。 |
-
-> **注意：** 他の場所で見かけたことのある固定の SNR しきい値（`-7 dB`／`-15 dB`）は、現在ではルート追跡の結果で個々のホップに色を付けるためだけに使われ、ここで説明しているノードごとの信号メーターには使われません。
-
----
-
-## 4. これがあなたにとって意味すること
-
-Meshtastic のメーターは\*\*「明瞭さのメーター」\*\*として機能するため、多くの人が予想するのとは異なる動作をします：
-
-> 💡 **ヒント：** RSSI が低くても慌てないでください。 `-118 dBm` のような、一見ひどい RSSI 値が表示されることがあります。 携帯電話なら、バーはゼロでしょう。 しかし SNR が `+2 dB` あれば、Meshtastic は依然として強い信号を表示します！ _図書館は静かなので、ささやき声も完璧に聞こえます。_
-
-> ⚠️ **警告：** ローカルのノイズに注意してください。 大型のアンテナを接続して優れた RSSI（例：`-90 dBm`）が表示されているのに、信号メーターが \*\*1 本（不良）\*\*しか表示していない場合、問題があります。 これは、ローカルの干渉（安価な電源、ノイズの多いコンピューター、近くの電波塔など）が大量のノイズを発生させ、メッシュをかき消していることを意味します。
+A great RSSI paired with only one bar (Bad) points to local interference, not distance. A cheap power supply, a noisy computer, or a nearby transmitter can create enough static to drown out an otherwise strong signal.
 
 ## 信号情報が表示される場所
 
-アプリでは、信号データはいくつかの場所に表示されます：
+In the app, signal data appears in several places:
 
-- **ノードリスト**：各ノードの横にある信号バーのアイコン
+- **Node list** — a signal-bars icon next to each node
 - **ノードの詳細**：デバイスメトリクスのセクションにある SNR、RSSI、信号品質
 - **ルート追跡**：各中継ノードの、ホップごとの信号品質
 - **信号メトリクス**：メトリクスのグラフにある SNR と RSSI の履歴データ
 
-![SNR、RSSI の値と色付きの信号バーを表示したノードの項目](../../assets/screenshots/nodes_signal_info.png)
+![Node list entry showing a Good signal rating: 12.5 dB SNR, −42 dBm RSSI, and the green signal-strength icon](../../assets/screenshots/nodes_signal_info.png)
 
 ## 関連トピック
 
 - [ノード](nodes)：ノードリストで信号バーが表示される場所
 - [ノードメトリクス](node-metrics)：SNR／RSSI の履歴と、ノードごとの信号品質の目安
 - [設定：無線機とユーザー](settings-radio-user)：モデムプリセットとその SNR 限界
-
----
-

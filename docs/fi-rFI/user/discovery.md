@@ -2,11 +2,11 @@
 title: Paikallisen mesh-verkon skannaus
 parent: Käyttöopas
 nav_order: 12
-last_updated: 2026-08-28
+last_updated: 2026-08-29
 description: Tutki mesh-verkkoasi — paikallinen verkon haku, reitinselvitykset, naapurikartat ja radion hakuun liittyvät työkalut.
 aliases:
-  - discovery
-  - local-mesh-discovery
+  - haku
+  - paikallisen mesh-verkon haku
   - mesh-verkon haku
   - paikallinen haku
   - verkkohaku
@@ -23,21 +23,19 @@ Sovellus tarjoaa kaksi toisiaan täydentävää lähestymistapaa:
 - Paikallinen verkon haku (Scanner) — automaattinen tila, joka kierrättää yhdistettyä radiota eri LoRa-esiasetusten läpi, kuuntelee jokaisella ja arvioi, mikä esiasetus toimii parhaiten sijainnissasi.
 - Manuaalinen etsiminen — reitinselvityksen reitit, naapuritiedot ja radiolista, joita voit käyttää milloin tahansa yksittäisten reittien ja topologian tarkasteluun.
 
----
-
 ## Paikallinen verkon haku (Scanner)
 
-Paikallinen verkon haku on erillinen skannaustila, joka auttaa löytämään parhaan LoRa-modeemiesiasetuksen sijaintiisi ja näkemään, mitkä radiot ovat aktiivisia kullakin esiasetuksella. Se kierrättää yhdistettyä radiota valitsemiesi esiasetusten läpi, kuuntelee jokaisella asetuksella määrätyn ajan kerätäkseen paketteja ja analysoi sekä pisteyttää tulokset.
+Paikallinen verkon haku on erillinen skannaustila, joka auttaa löytämään parhaan LoRa-modeemiesiasetuksen sijaintiisi ja näkemään, mitkä radiot ovat aktiivisia kullakin esiasetuksella. Käy yhdistetyn radiosi läpi yhdellä tai useammalla valitsemallasi esiasetuksella, viipyy jokaisella määritetyn ajan paketteja keräten ja analysoi lopuksi tulokset sekä asettaa ne paremmuusjärjestykseen.
 
 Avaa se kohdasta **Asetukset → Lisäasetukset → Paikallinen mesh-haku**. Työpöytäversiossa sille on oma kohta kohdassa **Asetukset → Paikallinen mesh-haku**.
 
-> ℹ️ **Note:** Discovery temporarily changes your radio's LoRa settings while it scans, then restores your original configuration when it finishes. Laitteen täytyy olla yhdistettynä, jotta skannaus voidaan suorittaa.
+> ℹ️ **Huomautus:** Discovery muuttaa väliaikaisesti radiosi LoRa-asetuksia skannauksen ajaksi ja palauttaa alkuperäiset asetukset, kun skannaus on valmis. Radion on oltava yhdistettynä skannauksen suorittamiseksi.
 
 ### Skannauksen asetukset
 
 Ennen aloittamista määritä nämä asetukset:
 
-| Hallinta                       | Kuvaus                                                                                                                                                                                                                                    |
+| Säädin                         | Kuvaus                                                                                                                                                                                                                                    |
 | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **LoRa-esiasetuksen valitsin** | Valitse yksi tai useampi esiasetus skannattavaksi. Haku pysähtyy jokaisessa valitussa esiasetuksessa vuorollaan kuuntelemaan liikennettä.                                                                 |
 | **Kuunteluaika**               | Kunkin esiasetuksen kuunteluaika. Valitse 1, 5, 15, 30, 45, 60, 90, 120 tai 180 minuuttia. Pidempi kuunteluaika kerää enemmän paketteja ja antaa tarkemman kuvan, mutta kestää pidempään. |
@@ -45,7 +43,7 @@ Ennen aloittamista määritä nämä asetukset:
 
 **Käynnistä**-painike ei ole käytettävissä ja näyttää syyn, kunnes skannaus voidaan suorittaa. Yleisiä syitä, miksi se on pois käytöstä:
 
-- Laite **ei ole yhdistetty**
+- Radio **ei ole yhdistetty**.
 - **Esiasetuksia ei ole valittu** skannattavaksi.
 - Valittu esiasetus käyttää **2,4 GHz -taajuutta**, jota laitteistosi ei tue.
 
@@ -86,13 +84,11 @@ Tuloksista saatavilla olevat lisätoiminnot:
 - **Haun kartta** — kartta skannauksessa löydetyistä radioista.
 - **Raportin vienti** — vie raportti PDF-tiedostona Androidilla tai tekstinä muilla alustoilla.
 
-> 💡 **Tip:** On **Google Play** builds, Discovery can generate an on-device AI summary (Gemini Nano) of your results. F-Droid builds always use the algorithmic summary — the proprietary ML Kit dependency is deliberately excluded from that flavor — so you get a readable interpretation of the scan either way.
-
----
+> 💡 **Vinkki:** **Google Play** -versiossa Discovery voi luoda tuloksista laitteella toimivan tekoälyyhteenvedon (Gemini Nano). F-Droid-versio käyttää aina algoritmista yhteenvetoa — suljettu ML Kit -riippuvuus on jätetty tarkoituksella pois tästä versiosta, joten saat luettavan yhteenvedon skannauksesta joka tapauksessa.
 
 ## Verkkokutsu
 
-Mesh Beacon antaa radioille mahdollisuuden kutsua muita liittymään mesh-verkkoon. Majakkatilassa oleva radio lähettää määräajoin kutsun, jossa voidaan ilmoittaa kanava, alue ja modeemiasetus. Näin lähistöllä olevat laitteet voivat havaita verkon jo ennen kuin niillä on yhteinen määritys.
+Mesh Beacon antaa radioille mahdollisuuden kutsua muita liittymään mesh-verkkoon. Majakkatilassa oleva radio lähettää säännöllisesti kutsun, jossa voidaan haluttaessa ilmoittaa kanava, alue ja modeemiesiasetus — lähellä olevat radiot voivat havaita sen jo ennen asetusten jakamista.
 
 Määritä se kohdassa **Asetukset → Moduuliasetukset → Mesh Beacon**:
 
@@ -107,24 +103,20 @@ Vastaanotetut kutsut näkyvät **Mesh-kutsut** -korteissa haku-näytössä. Joka
 
 Majakoiden ilmoittamat kanavat näkyvät myös Haku-toiminnon asetuksissa kohdassa **Majakkakanavat**. Valitse kanava lisätäksesi sen hakukohteeksi.
 
----
-
 ## Manuaalinen haku
 
-Alla olevat työkalut ovat käytettävissä milloin tahansa radiolistasta ja radion tietonäkymistä. Käytä niitä yksittäisten reittien tutkimiseen ja topologian muodostamiseen, joko osana skannausta tai sen sijaan.
+Seuraavat työkalut ovat aina käytettävissä Radiot- ja Radion tiedot -näkymissä. Käytä niitä yksittäisten reittien tutkimiseen ja topologian muodostamiseen, joko osana skannausta tai sen sijaan.
 
-## Reitinselvitys
+### Reitinselvitys
 
 Reitinselvitys näyttää tarkan polun, jota kautta viesti kulkee omalta radioltasi mihin tahansa toiseen verkon radioon. Se on yksittäisistä työkaluista hyödyllisin yhteysongelmien vianmääritykseen.
 
-### Reitinselvityksen suorittaminen
+#### Reitinselvityksen suorittaminen
 
 1. Siirry kohtaan **Radiot** ja napauta radiota, jota haluat jäljittää.
-2. Radion tietonäkymässä napauta **Reitinselvitys**.
-3. Sovellus lähettää reitinselvityspyynnön ja odottaa vastausta.
-4. Tulokset näyttävät jokaisen hypyn järjestyksessä sekä signaalin laadun jokaisessa vaiheessa.
+2. Radion tietonäkymässä napauta **Reitinselvitys**. Sovellus lähettää pyynnön, ja tulokset näyttävät jokaisen hypyn signaalin laadun.
 
-### Tulosten lukeminen
+#### Tulosten lukeminen
 
 Reitinselvityksen tulos näyttää tältä:
 
@@ -143,59 +135,53 @@ Jokainen hyppy on välittäjä-radio, joka lähetti viestin eteenpäin. Jokaisen
 
 > Vinkki: Aja reitinselvitys useita kertoja muutaman minuutin aikana. Jos reitti muuttuu, verkossasi on varareittejä — merkki hyvin kytketystä verkosta.
 
-### Reitinselvityksen vianmääritys
+#### Reitinselvityksen vianmääritys
 
 - **Reittiä ei löytynyt** — kohderadio voi olla kiinni, kantaman ulkopuolella tai eri kanavalla. Varmista, että molemmat radiot jakavat vähintään yhden kanavan samalla salausavaimella.
 - **Reitinselvitys aikakatkaistu** — reitti voi olla liian pitkä (ylittää hyppymäärärajan) tai välittäjä-radio on ruuhkautunut. Kokeile nostaa hyppymäärärajaa kohdassa **Asetukset → LoRa-asetukset**.
 - **Epäsymmetriset reitit** — reitinselvitys A→B voi kulkea eri reittiä kuin B→A. Tämä on normaalia — radiosignaalin eteneminen ei aina ole symmetristä.
 
----
-
-## Naapuritieto
+### Naapuritieto
 
 Naapuritieto-moduuli antaa jokaisen radion lähettää listan radioista, jotka se voi **kuulla suoraan** (yhden hypyn päässä). Kun useat radiot jakavat naapurilistansa, voit muodostaa koko verkon topologian kartan.
 
-### Naapuritiedon käyttöönotto
+#### Naapuritiedon käyttöönotto
 
 1. Siirry kohtaan **Asetukset → Moduuliasetukset → Naapuritieto**.
 2. Ota moduuli käyttöön.
 3. Aseta lähetysväli (oletus: 900 sekuntia / 15 minuuttia).
 
-Kun toiminto on käytössä, radio lähettää säännöllisesti naapuritiedot. Myös muut radiot, joissa naapuritieto on käytössä, toimivat samalla tavalla.
+Kun toiminto on käytössä, radiosi lähettää säännöllisesti naapuriluettelonsa. Myös muut radiot, joissa naapuritieto on käytössä, toimivat samalla tavalla.
 
-### Naapuritiedon katselu
+#### Naapuritiedon katselu
 
 - Avaa minkä tahansa radion tietonäkymä ja etsi **Naapurit**-osio.
 - Jokainen naapurimerkintä näyttää radion, joka on kuultu suoraan, sekä sen signaalilaadun.
 - Yhdistä naapuritiedot useista radioista ymmärtääksesi koko mesh-verkon topologian.
 
-> ℹ️ **Note:** Neighbor Info increases airtime usage because every enabled node periodically broadcasts its neighbor list. Vilkkaissa verkoissa, joissa on paljon radioita, harkitse pidempiä lähetysvälejä (3600 sekuntia tai enemmän) ruuhkautumisen välttämiseksi.
+> ℹ️ **Huomautus:** Naapuritieto lisää lähetysaikaa, koska jokainen toiminnon ottanut radio lähettää säännöllisesti naapuriluettelonsa. Vilkkaissa verkoissa, joissa on paljon radioita, harkitse pidempiä lähetysvälejä (3600 sekuntia tai enemmän) ruuhkautumisen välttämiseksi.
 
----
-
-## Radiolista hakutyökaluna
+### Radiolista hakutyökaluna
 
 Radiolista on itsessään tehokas hakutyökalu, kun käytät sen suodatus- ja lajitteluominaisuuksia oikein.
 
-### Uusien radioiden löytäminen
+#### Uusien radioiden löytäminen
 
 - Lajittele **Viimeksi kuultu** nähdäksesi viimeksi aktiiviset radiot ylimpänä.
-- Ota käyttöön **Näytä tuntemattomat** nähdäksesi radiot, jotka ovat ilmestyneet verkkoon, mutta eivät ole vielä lähettäneet käyttäjätietoja — usein juuri käyttöönotettuja laitteita.
+- Ota käyttöön **Sisällytä tuntemattomat**, jos haluat nähdä radiot, jotka ovat ilmestyneet mesh-verkkoon mutta eivät ole vielä lähettäneet käyttäjätietojaan — nämä ovat usein juuri käynnistettyjä radioita.
 
-### Yhteyksien arviointi
+#### Yhteyksien arviointi
 
 - Lajittele **Hyppyjen määrä** nähdäksesi mitkä radiot ovat suoraan tavoitettavissa (0 hyppyä) ja mitkä välitettyinä.
 - Lajittele **Etäisyys** löytääksesi lähellä olevat radiot ja varmistaaksesi niiden tavoitettavuuden.
 - Käytä **Rajaa MQTT pois** keskittyäksesi radioyhteyksillä tavoitettaviin radioihin (ei internet-sillan kautta).
 
-### Infrastruktuurin tarkistus
+#### Infrastruktuurin tarkistus
 
 - Poista **Jätä infrastruktuuri pois** käytöstä, jos haluat nähdä Router-, Router Late- ja Client Base -radiot.
 - Tarkista niiden signaalin laatu ja viimeksi kuultu -ajat varmistaaksesi, että infrastruktuuriradiot ovat kunnossa.
 
 Katso [Radiot](nodes) saadaksesi lisätietoa suodatus- ja lajitteluasetuksista.
-
----
 
 ## Vinkkejä mesh-verkon tutkimiseen
 
@@ -206,11 +192,8 @@ Katso [Radiot](nodes) saadaksesi lisätietoa suodatus- ja lajitteluasetuksista.
 
 ## Aiheeseen liittyvät aiheet
 
-- [Nodes](nodes) — the node list these scans populate
-- [Map & Waypoints](map-and-waypoints) — see discovered nodes geographically
-- [Signal Meter](signal-meter) — interpret the SNR and RSSI a scan reports
-- [Settings — Modules & Admin](settings-module-admin) — configure the Mesh Beacon and Neighbor Info modules
-- [Messages & Channels](messages-and-channels) — join a mesh you found and start talking
-
----
-
+- [Radiot](nodes) — luettelo radioista, jotka nämä skannaukset löytävät
+- [Kartta ja reittipisteet](map-and-waypoints) — tarkastele löydettyjä radioita kartalla
+- [Signaalimittari](signal-meter) — tulkitse skannauksen raportoimat SNR- ja RSSI-arvot
+- [Asetukset — Moduulit ja ylläpito](settings-module-admin) — määritä Mesh Beacon- ja Naapuritieto-moduulit
+- [Viestit ja kanavat](messages-and-channels) — liity löytämääsi mesh-verkkoon ja aloita viestintä

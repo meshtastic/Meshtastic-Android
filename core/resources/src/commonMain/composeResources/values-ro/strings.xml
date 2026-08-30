@@ -187,7 +187,6 @@
     <string name="config_lora_region_summary">Regiunea în care veți folosi radioul.</string>
     <string name="config_network_eth_enabled_summary">Activarea Ethernet va dezactiva conexiunea Bluetooth la aplicație. Conexiunile TCP ale nodului nu sunt disponibile pe dispozitivele Apple.</string>
     <string name="config_network_udp_enabled_summary">Activați transmisiunea pachetelor prin UDP în rețeaua locală.</string>
-    <string name="config_network_wifi_enabled_summary">Activarea WiFi va dezactiva conexiunea Bluetooth la aplicație.</string>
     <string name="config_position_broadcast_secs_summary">Intervalul maxim care poate trece fără ca un nod să transmită o poziție.</string>
     <string name="config_position_broadcast_smart_minimum_distance_summary">Modificarea minimă a distanței în metri care trebuie luată în considerare pentru o transmisie inteligentă a poziției.</string>
     <string name="config_position_broadcast_smart_minimum_interval_secs_summary">Cea mai rapidă actualizare a poziției care va fi trimisă dacă distanța minimă a fost respectată.</string>
@@ -419,7 +418,6 @@
     <string name="firmware_update_method_ble">BLE OTA</string>
     <string name="firmware_update_method_detail">Updateaza către %1$s</string>
     <string name="firmware_update_method_usb">Transfer fişier USB</string>
-    <string name="firmware_update_method_wifi">WiFi OTA</string>
     <string name="firmware_update_no_device">Niciun dispozitiv conectat</string>
     <string name="firmware_update_node_info_missing">Informațiile utilizatorului nodului lipsesc.</string>
     <string name="firmware_update_not_found_in_release">Nu am putut găsi firmware-ul pentru %1$s în versiune</string>
@@ -625,6 +623,9 @@
     <string name="map_download_errors">Descărcare finalizată cu %1$d erori</string>
     <string name="map_download_region">Descarca regiunea</string>
     <string name="map_filter">Filtru Hartă\n</string>
+    <string name="map_filter_all_roles">Toate</string>
+    <string name="map_filter_display_title">Ecran</string>
+    <string name="map_filter_nodes_title">Noduri</string>
     <string name="map_offline_manager">Manager offline</string>
     <string name="map_purge_fail">Ștergerea cache-ului SQL a eșuat, vedeți logcat pentru detalii</string>
     <string name="map_purge_success">Cache SQL șters pentru %1$s</string>
@@ -752,7 +753,6 @@
     <string name="node_sort_title">Sortare după</string>
     <string name="node_sort_via_favorite">după favorite</string>
     <string name="node_sort_via_mqtt">via MQTT</string>
-    <string name="node_status_summary">Șirul de stare real</string>
     <string name="nodedb_reset">Resetare NodeDB</string>
     <string name="nodeinfo_broadcast_interval">Intervalul de difuzare a informațiilor nodului</string>
     <!-- NODES -->
@@ -812,7 +812,6 @@
     <string name="pax_total_format">PAX: %1$d</string>
     <string name="pax_total_marker">PAX: %1$s</string>
     <string name="pax_wifi_format">W:%1$d</string>
-    <string name="pax_wifi_marker">WiFi: %1$s</string>
     <string name="paxcounter">Paxcounter</string>
     <string name="paxcounter_config">Configurație Paxcounter</string>
     <string name="paxcounter_enabled">Paxcounter activat</string>
@@ -1055,7 +1054,6 @@
     <string name="ssid">Numele rețelei</string>
     <string name="state_broadcast_seconds">Difuzare stare (secunde)</string>
     <string name="status_message">Mesaj de stare:</string>
-    <string name="status_message_config">Configurare mesaj prestabilit</string>
     <string name="stay_connected_anywhere">Rămâneţi conectat oriunde</string>
     <string name="super_deep_sleep_duration_seconds">Durată maximă de somn</string>
     <string name="supported">Suportate</string>
@@ -1216,34 +1214,23 @@
     <string name="waypoint_received">Reper recepționat: $1%1$s</string>
     <string name="weight">Greutate</string>
     <!-- WIFI -->
-    <string name="wifi_config">Optiuni Wi-Fi</string>
     <string name="wifi_devices">Wi-Fi Provisioning for mPWRD-OS</string>
-    <string name="wifi_enabled">WiFi activat</string>
-    <string name="wifi_ip">IP Wi-Fi:</string>
     <string name="wifi_provision_available_networks">Rețele disponibile</string>
     <string name="wifi_provision_connect_failed">Nu se poate conecta: %1$s</string>
     <string name="wifi_provision_description">Furnizați acreditări Wi-Fi pentru dispozitivul mPWRD-OS prin Bluetooth.</string>
     <string name="wifi_provision_device_found">Dispozitiv gasit</string>
-    <string name="wifi_provision_device_found_detail">Gata de scanare pentru rețele WiFi.</string>
     <string name="wifi_provision_mpwrd_disclaimer">Aflați mai multe despre proiectul mPWRD-OS\nhttps://github.com/mPWRD-OS</string>
     <string name="wifi_provision_no_networks">Nu au fost găsite rețele</string>
-    <string name="wifi_provision_scan_failed">Nu s-a reușit scanarea pentru rețelele WiFi: %1$s</string>
     <string name="wifi_provision_scan_networks">Scanare pentru reţele</string>
     <string name="wifi_provision_scanning_ble">Căutare dispozitive</string>
     <string name="wifi_provision_scanning_wifi">Scanare…</string>
-    <string name="wifi_provision_sending_credentials">Se aplică configurarea WiFi…</string>
     <string name="wifi_provision_signal_strength">%1$d%</string>
     <string name="wifi_provision_ssid_label">Nume rețea (SSID)</string>
     <string name="wifi_provision_ssid_placeholder">Introdu sau selecteaza o retea</string>
-    <string name="wifi_provision_status_applied">WiFi configurat cu succes!</string>
-    <string name="wifi_provision_status_failed">Nu s-a reușit aplicarea configurației Wi-Fi</string>
     <string name="wifi_provision_success_done">Gata</string>
     <string name="wifi_provision_success_ip_address">Adresa IP</string>
     <string name="wifi_provision_success_username">Nume de utilizator</string>
     <string name="wifi_provisioning">Wi-Fi Provisioning for mPWRD-OS</string>
-    <string name="wifi_qr_code_error">Format cod QR pentru credențiale WiFi nevalid</string>
-    <string name="wifi_qr_code_scan">Scanare cod QR WiFi</string>
-    <string name="wifi_rssi_threshold_defaults_to_80">Pragul WiFi RSSI (implicit la -80)</string>
     <!-- WIND -->
     <string name="wind">Vânt</string>
     <string name="wind_direction">Directie vânt</string>

@@ -2,7 +2,7 @@
 title: アプリを翻訳する
 parent: User Guide
 nav_order: 17
-last_updated: 2026-08-27
+last_updated: 2026-08-29
 description: アプリとそのドキュメントが Crowdin を通じてどう翻訳されるか、および翻訳に貢献するためのガイドラインを説明します。
 aliases:
   - translate
@@ -12,9 +12,7 @@ aliases:
 
 # アプリを翻訳する
 
-翻訳への貢献は、Meshtastic をより多くの人が使えるようにするのに役立ちます。 アプリは、ユーザーインターフェースとアプリ内ドキュメントの両方のコミュニティ翻訳を管理するために [Crowdin](https://crowdin.com/) を使用しています。
-
----
+The app and its in-app docs are translated on Crowdin — this page shows how to contribute. アプリは、ユーザーインターフェースとアプリ内ドキュメントの両方のコミュニティ翻訳を管理するために [Crowdin](https://crowdin.com/) を使用しています。
 
 ## 翻訳される対象
 
@@ -26,19 +24,14 @@ aliases:
 
 > ℹ️ **Note:** Developer Guide pages are English-only. コントリビューター向けの、コード中心のドキュメントは翻訳されません。
 
----
-
 ## 貢献する方法
 
 1. **Crowdin プロジェクトにアクセスします。** [Meshtastic Android の Crowdin プロジェクト](https://crowdin.com/project/meshtastic-android) を開き、サインインするか、無料アカウントを作成します。
 2. **言語を選びます。** 既存の言語を選択するか、[GitHub の issue](https://github.com/meshtastic/Meshtastic-Android/issues/new) を作成して新しい言語をリクエストします。
 3. **文字列を翻訳します。** Crowdin では、左側に英語の原文、右側に自分の翻訳が表示されます。 各文字列を翻訳して保存します。
-4. **コンテキストを確認します。** 多くの文字列には、スクリーンショットやコンテキストのコメントが含まれています。これらを確認して、テキストがアプリのどこに表示されるかを把握してください。
-5. **送信します。** 承認された翻訳は、次のリリースに自動的にマージされます。
+4. **コンテキストを確認します。** 多くの文字列には、スクリーンショットやコンテキストのコメントが含まれています。これらを確認して、テキストがアプリのどこに表示されるかを把握してください。 Approved translations are automatically merged into the next release.
 
 > 💡 **ヒント：** 翻訳は短くしてください。 UI 文字列は、ボタン、チップ、狭い列に表示されることがよくあります。 翻訳が英語の原文よりも大幅に長くなる場合は、意味が明確なままになる範囲で短縮することを検討してください。
-
----
 
 ## 新しい言語を追加する
 
@@ -47,8 +40,6 @@ aliases:
 1. [GitHub](https://github.com/meshtastic/Meshtastic-Android/issues/new) で issue を作成し、新しいロケールをリクエストします。
 2. メンテナーが Crowdin にその言語を追加し、`crowdin.yml` を設定します。
 3. 追加されたら、すぐに翻訳を始められます。
-
----
 
 ## 翻訳の構成
 
@@ -82,29 +73,23 @@ docs/
 
 ロケールフォルダーは、Android のリソース規則 `{lang}-r{REGION}`（例：`fr-rFR`、`de-rDE`、`ja-rJP`）を使用し、アプリ文字列に使われる `values-*` ディレクトリと対応しています。
 
-アプリは、デバイスの**言語と地域**の設定に基づいて、正しいロケールを自動的に選択します。
-
----
+The app automatically selects the correct locale based on your phone's **Language & Region** settings.
 
 ## 翻訳ガイドライン
 
 - 「LoRa」「MQTT」「BLE」「TAK」「SNR」「RSSI」などの技術用語は**翻訳しないでください**。これらは共通です。
 - **プレースホルダーはそのまま保ちます。** `%1$s` や `%d` のような文字列は、実行時に値が埋め込まれます。 自分の言語の文法上必要な場合を除き、削除したり並び替えたりしないでください。
 - **トーンを合わせます。** アプリは、親しみやすく率直な語り口を使っています。 過度に堅い言葉は避けてください。
-- **可能ならテストします。** デバイスの言語を切り替えてアプリを開き、翻訳が実際の文脈でどう見えるか確認してください。
-
----
+- **Test if possible.** Switch your phone's language and open the app to see how translations look in context.
 
 ## 質問がありますか？
 
 特定の文字列のコンテキストについて質問がある場合や、始め方について助けが必要な場合は、[Meshtastic GitHub Discussions](https://github.com/orgs/meshtastic/discussions) のページでディスカッションを作成してください。
 
-Meshtastic の普及にご協力いただき、ありがとうございます！
+Thank you for helping expand the reach of Meshtastic.
 
 ## 関連トピック
 
 - [Units & Locale](units-and-locale) — how the app picks number, date, and unit formats for your region
 - [Help & Documentation](help-and-docs) — the in-app docs browser these pages are published to
 - [Onboarding](onboarding) — where a new user first meets the translated strings
-
----

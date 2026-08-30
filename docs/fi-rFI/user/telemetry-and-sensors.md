@@ -2,7 +2,7 @@
 title: Telemetria ja anturit
 parent: Käyttöopas
 nav_order: 9
-last_updated: 2026-08-27
+last_updated: 2026-08-29
 description: Anturitiedot verkossa — tuetut ympäristö-, ilmanlaatu- ja virta-anturit sekä määritys- ja katseluohjeet.
 aliases:
   - sensorit
@@ -13,11 +13,7 @@ aliases:
 
 # Telemetria ja anturit
 
-Meshtastic-radiot voivat kerätä ja jakaa anturitietoja koko verkon laajuisesti.
-
-## Yleiskatsaus
-
-Telemetria mahdollistaa antureilla varustettujen radioiden ympäristö-, virta- ja laitteen kuntotietojen lähettämisen verkkoon. Nämä tiedot näkyvät radion tietonäytössä ja niitä voidaan tallentaa sekä seurata ajan kuluessa.
+Meshtastic-radiot voivat kerätä ja jakaa anturitietoja koko verkon laajuisesti. Telemetria mahdollistaa antureilla varustettujen radioiden lähettää ympäristö-, virta- ja laitteen kuntotietoja, jotka näkyvät radion tietonäytössä ja kirjataan lokiin ajan mittaan.
 
 ## Laitteen telemetriatiedot
 
@@ -47,11 +43,11 @@ Tuetut ympäristöanturit:
 
 ### Ilmanlaatu
 
-| Sensor   | Metrijärjestelmä                                   | Viestit                                                                                                                                               |
-| -------- | -------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| BME680   | Kaasuvastus ja IAQ                                 | Haihtuvat orgaaniset yhdisteet                                                                                                                        |
-| PMSA003I | PM1.0, PM2.5, PM10 | Hiukkaset                                                                                                                                             |
-| SEN55    | PM, lämpötila, kosteus                             | Monianturi. Sen NOx- ja VOC-indeksit tallennetaan ja sisällytetään CSV-vientiin, mutta niitä ei vielä näytetä kortteina tai kaavioina |
+| Sensor   | Metrijärjestelmä                                   | Viestit                                                                                                                                           |
+| -------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| BME680   | Kaasuvastus ja IAQ                                 | Haihtuvat orgaaniset yhdisteet                                                                                                                    |
+| PMSA003I | PM1.0, PM2.5, PM10 | Katso [Ilmanlaatumittaukset](#air-quality-metrics)                                                                                                |
+| SEN55    | PM, lämpötila, kosteus                             | Monianturi. NOx- ja VOC-indeksit tallennetaan ja sisällytetään CSV-vientiin, mutta niitä ei vielä näytetä kortteina tai kaavioina |
 
 ### Maaperä
 
@@ -79,7 +75,7 @@ INA-sarjan virta-antureilla varustetut radiot voivat raportoida:
 | Jännite          | Kanavakohtainen jännitemittaus                |
 | Virta            | Kanavakohtainen virta (mA) |
 
-Enintään kolme kanavaa (ch1–ch3) voidaan näyttää, ja jokaiselle voidaan antaa oma nimi, kuten Aurinko tai Akku, radion tietonäytössä. Erillistä tehomittausta ei ole. Sovellus näyttää kaavioissa jännitteen ja virran, mutta ei laske niistä tehoa.
+Enintään kolme anturikanavaa (ch1–ch3) voidaan raportoida, ja jokaiselle voidaan antaa oma nimi, kuten Aurinko tai Akku, radion tietonäytössä. Erillistä tehomittausta ei ole. Sovellus näyttää kaavioissa jännitteen ja virran, mutta ei laske niistä tehoa.
 
 Hyödyllinen aurinkolatauksen tai etäradioiden akun kunnon seurantaan.
 
@@ -93,11 +89,11 @@ Hyödyllinen aurinkolatauksen tai etäradioiden akun kunnon seurantaan.
    - **Ilmanlaatumittaukset** — hiukkas- ja CO₂-mittaukset
    - **Virtamittaukset** — kanavakohtaiset jännite- ja virtamittaukset
 
-   Ympäristömittauksille on lisäksi    radion omalle näytölle oma näyttökytkin ja Fahrenheit-kytkin.
+   Ympäristömittauksille on lisäksi kytkimet, joilla mittaukset voidaan näyttää radion omalla näytöllä sekä Fahrenheit-asteina.
 
 ### Mittausvälin valitseminen
 
-> 💡 **Vinkki:** Nämä ovat nimellisiä arvoja, eivät tarkkoja aikatauluja. Ruuhkaisessa mesh-verkossa laiteohjelmisto pidentää mittausvälejä automaattisesti verkossa olevien radioiden määrän mukaan, joten niitä ei tarvitse säätää käsin verkon koon perusteella. Pidennä niitä tarkoituksella vain akun säästämiseksi.
+Nämä ovat nimellisiä arvoja, eivät tarkkoja aikatauluja. Ruuhkaisessa mesh-verkossa laiteohjelmisto pidentää mittausvälejä automaattisesti verkossa olevien radioiden määrän mukaan, joten niitä ei tarvitse säätää käsin verkon koon perusteella. Pidennä niitä tarkoituksella vain akun säästämiseksi.
 
 ## Ilmanlaatumittarit
 
@@ -126,7 +122,7 @@ Ilmanlaatutiedot voidaan näyttää tietokortteina radion tietonäytössä, esit
    - Ilmanlaatumittarit (jos PM-/CO₂-anturi on käytettävissä)
 3. Historiakaaviot näyttävät mittaustietojen kehittymisen ajan kuluessa.
 
-![Telemetriatoiminnot](../../assets/screenshots/node-metrics_telemetric_actions.png)
+![Radion tietonäyttö, jossa telemetriakaavion toimintovalikko on avattuna](../../assets/screenshots/node-metrics-telemetric_actions.png)
 
 ## Vianetsintä
 
@@ -139,6 +135,3 @@ Ilmanlaatutiedot voidaan näyttää tietokortteina radion tietonäytössä, esit
 - [Radion mittarit](node-metrics) — tarkastele telemetriatietoja radion tietonäytössä
 - [Asetukset — Moduulit ja ylläpito](settings-module-admin) — telemetriamoduulin määritys
 - [Yksiköt ja aluekohtaiset asetukset](units-and-locale) — lämpötilan ja ilmanpaineen näyttöyksiköt
-
----
-

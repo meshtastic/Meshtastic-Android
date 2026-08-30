@@ -2,7 +2,7 @@
 title: ホーム画面ウィジェット
 parent: User Guide
 nav_order: 20
-last_updated: 2026-08-27
+last_updated: 2026-08-29
 description: Meshtastic のホーム画面ウィジェットを追加すると、アプリを開かずに、接続中の無線機のローカル統計をひと目で確認できます。
 aliases:
   - widget
@@ -30,13 +30,13 @@ Android では、Meshtastic はホーム画面の**ウィジェット**を提供
 
 ウィジェットをタップするとアプリが開きます。更新コントロールを使うと、最新の統計を要求できます。
 
-> 💡 **ヒント：** 値は、現在接続している無線機を反映します。 If the radio disconnects, the widget replaces the stats with a status line — **Disconnected**, **Connecting**, or **Device sleeping**. It does not keep the last-known numbers on screen.
+> ℹ️ **Note:** The values reflect the connected radio. If the radio disconnects, the widget replaces the stats with a status line — **Disconnected**, **Connecting**, or **Device sleeping**. It does not keep the last-known numbers on screen.
 
 ## ウィジェットを追加する
 
-1. Android のホーム画面の空いている場所を長押しします。
+1. Touch & hold an empty area of your Android home screen.
 2. 「**ウィジェット**」をタップします。
-3. Find **Meshtastic** in the list and drag its widget to your home screen. The app ships one widget, so the picker entry is just the app name.
+3. Drag the **Meshtastic** widget to your home screen. The app ships one widget, so the picker entry is just the app name.
 4. 必要に応じてサイズを変更します。レイアウトは利用可能なスペースに合わせて調整されます。
 
 > ℹ️ **Note:** The widget is Android-only. デスクトップ版や iOS 版では利用できません。
@@ -46,5 +46,3 @@ Android では、Meshtastic はホーム画面の**ウィジェット**を提供
 - [ノードメトリクス](node-metrics)：アプリ内の完全な信号品質とローカル統計の履歴
 - [コネクション](connections)：ウィジェットに表示する統計が得られるよう、無線機に接続する
 - [Local Mesh Discovery](discovery) — channel and airtime utilization across the mesh
-
----

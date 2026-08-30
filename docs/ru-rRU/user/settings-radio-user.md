@@ -2,7 +2,7 @@
 title: Настройки - Радио и пользователь
 parent: Руководство пользователя
 nav_order: 7
-last_updated: 2026-08-27
+last_updated: 2026-08-29
 description: Настройте ваше радиоустройство, пресеты LoRa, пользовательский профиль, обмен местоположением, управление питанием и безопасность.
 aliases:
   - настройки
@@ -13,7 +13,7 @@ aliases:
 
 # Настройки - Радио и пользователь
 
-Настройте радиоустройство и параметры идентификации пользователя.
+Configure your radio's user identity, region and LoRa parameters, position and power behavior, network and Bluetooth connectivity, and security settings.
 
 ## Настройки пользователя
 
@@ -23,12 +23,16 @@ aliases:
 | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Полное имя               | Ваше отображаемое имя (до 39 символов)                                                                                                                                                                                    |
 | Короткое имя             | 4-символьное сокращённое имя                                                                                                                                                                                                                 |
+| Состояние сообщения      | A short free-text status other nodes display alongside your node — up to 80 bytes, cleared with the **✕** in the field. Needs firmware 2.8 or newer, and is absent otherwise                                 |
 | Без сообщений            | Marks the node as one nobody should try to message — for an unmonitored or infrastructure node. Other clients hide it from the contact list. Needs supporting firmware                                       |
 | Лицензированный оператор | Enable if you hold an amateur radio license (permits higher power). Turning it on relabels **Long Name** as **Call Sign** and adds a separate Long Name field, and is staged behind a confirmation dialog |
 
 ### Применение изменений
 
-После изменения настроек нажмите **Сохранить** чтобы записать конфигурацию в ваше радиоустройство. Устройство может перезагрузиться для применения изменений.
+После изменения настроек нажмите **Сохранить** чтобы записать конфигурацию в ваше радиоустройство. The radio may reboot to apply changes.
+
+The status message is saved with the same **Save**, but it never reboots the node — and, like the
+rest of this screen, it can be edited on a remote node you administer.
 
 ## Настройки
 
@@ -49,7 +53,7 @@ aliases:
 
 | Настройка                   | Описание                                                                                                                                                                                         | По умолчанию                                             |
 | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------- |
-| Регион / Страна             | Область регулирования для диапазонов частот                                                                                                                                                      | Не установлено (необходимо настроить) |
+| Регион / Страна             | Regulatory region for frequency bands. You must set this before transmitting                                                                                                     | Не установлено (необходимо настроить) |
 | Режим работы модема         | Компромисс между скоростью и дальностью                                                                                                                                                          | LongFast                                                 |
 | Лимит хопов                 | Максимальное количество ретрансляций                                                                                                                                                             | 3                                                        |
 | Мощность передачи           | Мощность передачи (дБм); 0 = максимально разрешённая для региона                                                                                                              | 0 (максимум региона)                  |
@@ -60,13 +64,13 @@ aliases:
 | Частота кодирования         | Manual mode only: 5–8. More redundancy costs airtime                                                                                                             | From preset                                              |
 | Частота слота               | Which slot within the region's band to use. 0 derives it from the primary channel name                                                                                           | 0 (automatic)                         |
 | Передача включена           | Turning this off makes the node receive-only                                                                                                                                                     | On                                                       |
-| Переопределить рабочий цикл | Ignore the region's duty-cycle limit. Only legal where you are permitted to                                                                                                      | Выкл                                                     |
+| Переопределить рабочий цикл | Ignores the region's duty-cycle limit. Illegal in most regions; turn it on only where your license permits                                                                       | Выкл                                                     |
 | Игнорировать MQTT           | Drop packets that arrived from MQTT rather than over the air                                                                                                                                     | Выкл                                                     |
 | ОК в MQTT                   | Allow your packets to be forwarded to MQTT by gateways                                                                                                                                           | Выкл                                                     |
 | Усиление RX                 | Extra receive gain on SX126x radios; costs a little current                                                                                                                                      | Выкл                                                     |
 | PA вентилятор выключен      | Turn off the power-amplifier fan on hardware that has one                                                                                                                                        | Выкл                                                     |
 
-> ⚠️ **Важно:** Вы **обязаны** установить свой регион перед отправкой. Работа без правильного региона может нарушать местные правила радиопользования. Смотрите [руководство по настройке региона](https://meshtastic.org/docs/getting-started/initial-config) на сайте meshtastic.org для получения подробной информации.
+> ⚠️ **Important:** Operating without the correct region may violate local radio regulations. Смотрите [руководство по настройке региона](https://meshtastic.org/docs/getting-started/initial-config) на сайте meshtastic.org для получения подробной информации.
 
 ### Предустановки модема
 
@@ -106,9 +110,9 @@ aliases:
 - **Фиксированные инфраструктурные связи:** Используй **Short Turbo** или **Long Turbo** для выделенных соединений точка-точка с хорошими антеннами и прямой видимостью.
 - **Смешанные среды:** Используй **Long Fast** — это настройка по умолчанию в сообществе и она обеспечит совместимость с другими в вашем регионе.
 
-> ⚠️ **Важно:** Все ноды в одном канале **должны** использовать один и тот же пресет модема. Ноды с несовпадающими предустановками не смогут обмениваться данными, даже если они используют одну частоту и ключ шифрования.
+All nodes on the same channel must use the same modem preset. Ноды с несовпадающими предустановками не смогут обмениваться данными, даже если они используют одну частоту и ключ шифрования.
 
-> 💡 **Совет:** Указанные выше оценки дальности предполагают ровную местность и небольшие антенны. Преимущество высоты (вершина холма, крыша) значительно увеличивает эффективную дальность. Хорошо размещённый маршрутизатор с Long Fast часто может превзойти наземную ноду с Long Slow.
+The range estimates in the [Modem Presets](#modem-presets) table assume flat terrain and modest antennas. Преимущество высоты (вершина холма, крыша) значительно увеличивает эффективную дальность. Хорошо размещённый маршрутизатор с Long Fast часто может превзойти наземную ноду с Long Slow.
 
 ### Параметры дисплея
 
@@ -117,20 +121,20 @@ These control the **radio's own screen**, not the app's.
 | Настройка                               | Описание                                                                                                                                                  |
 | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Включать экран на                       | How long the display stays lit before sleeping                                                                                                            |
-| Интервал карусели                       | How often the device cycles between screens on its own                                                                                                    |
+| Интервал карусели                       | How often the radio cycles between screens on its own                                                                                                     |
 | Режим экрана                            | Screen layout/density used by the firmware                                                                                                                |
-| Система измерения                       | Metric or Imperial on the device's screen                                                                                                                 |
-| Использовать 12-часовой формат времени  | Show the device clock as 12-hour rather than 24-hour                                                                                                      |
+| Система измерения                       | Metric or Imperial on the radio's screen                                                                                                                  |
+| Использовать 12-часовой формат времени  | Show the radio's clock as 12-hour rather than 24-hour                                                                                                     |
 | Bold heading                            | Draw the screen's heading text in bold                                                                                                                    |
 | Повернуть экран                         | Rotate the display 180° for an inverted mounting                                                                                                          |
 | Тип OLED                                | Авто, SSD1306, SH1106, SH1107                                                                                                                             |
-| Включать экран при касании или движении | Light the screen when the device is tapped or moved                                                                                                       |
+| Включать экран при касании или движении | Light the screen when the radio is tapped or moved                                                                                                        |
 | Направление компаса                     | Rotation offset for the compass rose (0°, 90°, 180°, 270°)                                                                             |
 | Всегда указывать на север               | Locks the compass rose north-up instead of rotating it with your heading. Independent of Compass orientation — neither replaces the other |
 
 ### Настройки местоположения
 
-> ⚠️ **Warning:** Saving this screen always reboots the radio.
+> ⚠️ **Important:** Saving this screen always reboots the radio.
 
 | Настройка                                              | Описание                                                                                                                                              |
 | ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -159,21 +163,21 @@ These control the **radio's own screen**, not the app's.
 
 ### Настройка сети
 
-> ⚠️ **Warning:** Saving this screen always reboots the radio.
+> ⚠️ **Important:** Saving this screen always reboots the radio.
 
-| Настройка                        | Описание                                                                                                                   |
-| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| WiFi включен                     | Enable the WiFi radio (ESP32 devices)                                                                   |
-| Название сети                    | Network name to connect to. **Scan WiFi QR code** fills this and the password from a standard WiFi QR code |
-| Пароль                           | Пароль сети                                                                                                                |
-| Ethernet включен                 | Use a wired connection on hardware that has one                                                                            |
-| Режим IPv4                       | DHCP, or a static address configured with the four fields below                                                            |
-| Wifi IP / Subnet / Gateway / DNS | The static address, only used when IPv4 mode is static                                                                     |
-| UDP трансляция                   | Share mesh traffic with other nodes over the local network                                                                 |
-| NTP-сервер                       | Сервер синхронизации времени                                                                                               |
-| Сервер rsyslog                   | Удалённый сервер логирования                                                                                               |
+| Настройка                         | Описание                                                                                                                     |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Wi-Fi enabled                     | Enable the Wi-Fi radio (ESP32 radios)                                                                     |
+| Название сети                     | Network name to connect to. **Scan Wi-Fi QR code** fills this and the password from a standard Wi-Fi QR code |
+| Пароль                            | Пароль сети                                                                                                                  |
+| Ethernet включен                  | Use a wired connection on hardware that has one                                                                              |
+| Режим IPv4                        | DHCP, or a static address configured with the four fields below                                                              |
+| Wi-Fi IP / Subnet / Gateway / DNS | The static address, only used when IPv4 mode is static                                                                       |
+| UDP трансляция                    | Share mesh traffic with other nodes over the local network                                                                   |
+| NTP-сервер                        | Сервер синхронизации времени                                                                                                 |
+| Сервер rsyslog                    | Удалённый сервер логирования                                                                                                 |
 
-![Поле IP-адреса](../../assets/screenshots/settings_ipv4_field.png)
+![Network Config with a static IPv4 address entered](../../assets/screenshots/settings_ipv4_field.png)
 
 ### Настройка Bluetooth
 
@@ -230,11 +234,11 @@ back-off before you can try again.
 
 Настройки используют стандартные элементы управления предпочтениями — выпадающие списки, переключатели и ползунки:
 
-| Управление        | Снимок экрана                                                        |
-| ----------------- | -------------------------------------------------------------------- |
-| Выпадающий список | ![Выпадающий список](../../assets/screenshots/settings_dropdown.png) |
-| Переключатель     | ![Переключатель](../../assets/screenshots/settings_switch.png)       |
-| Ползунок          | ![Ползунок](../../assets/screenshots/settings_slider.png)            |
+| Управление        | Снимок экрана                                                                                               |
+| ----------------- | ----------------------------------------------------------------------------------------------------------- |
+| Выпадающий список | ![A dropdown setting, expanded to show its list of options](../../assets/screenshots/settings_dropdown.png) |
+| Переключатель     | ![A toggle setting in the on position](../../assets/screenshots/settings_switch.png)                        |
+| Ползунок          | ![A slider setting with its current numeric value shown](../../assets/screenshots/settings_slider.png)      |
 
 ## Связанные темы
 
@@ -242,6 +246,3 @@ back-off before you can try again.
 - [Измеритель сигнала](signal-meter) — как предустановки модема влияют на пороги качества сигнала
 - [Конфигурация LoRa](https://meshtastic.org/docs/configuration/radio/lora) — подробная справка по настройкам LoRa на meshtastic.org
 - [Начальная конфигурация](https://meshtastic.org/docs/getting-started/initial-config) — руководство по настройке региона на meshtastic.org
-
----
-

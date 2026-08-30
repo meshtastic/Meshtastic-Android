@@ -315,8 +315,6 @@
     <string name="waypoint_received">Mottatt veipunkt: %1$s</string>
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">IP-adresse</string>
-    <string name="wifi_qr_code_error">Ugyldig WiFi legitimasjon QR-kode format</string>
-    <string name="wifi_qr_code_scan">Skann WiFi QR-kode</string>
     <!-- WIND -->
     <!-- WRITE -->
     <string name="you">Deg</string>

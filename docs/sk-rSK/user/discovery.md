@@ -2,7 +2,7 @@
 title: Local Mesh Discovery
 parent: User Guide
 nav_order: 12
-last_updated: 2026-08-28
+last_updated: 2026-08-29
 description: Explore your mesh network — the Local Mesh Discovery scanner, traceroute paths, neighbor maps, and node discovery tools.
 aliases:
   - discovery
@@ -23,15 +23,13 @@ The app offers two complementary approaches:
 - **Local Mesh Discovery (Scanner)** — an automated mode that cycles your connected radio through different LoRa presets, listens on each, and ranks which preset performs best at your location.
 - **Manual exploration** — traceroute, Neighbor Info, and the node list, which you can use at any time to investigate specific paths and topology.
 
----
-
 ## Local Mesh Discovery (Scanner)
 
-Local Mesh Discovery is a dedicated scanning mode that helps you find the best LoRa modem preset for your location and see which nodes are active on each preset. It cycles your connected radio through one or more presets you choose, listens (or "dwells") on each one for a set time to collect packets, then analyzes and ranks the results.
+Local Mesh Discovery is a dedicated scanning mode that helps you find the best LoRa modem preset for your location and see which nodes are active on each preset. It cycles your connected radio through one or more presets you choose, dwells on each one — listens for a set time — to collect packets, then analyzes and ranks the results.
 
 Open it from **Settings → Advanced → Local Mesh Discovery**. On desktop, it has its own **Settings → Local Mesh Discovery** entry.
 
-> ℹ️ **Note:** Discovery temporarily changes your radio's LoRa settings while it scans, then restores your original configuration when it finishes. Your device must be connected to run a scan.
+> ℹ️ **Note:** Discovery temporarily changes your radio's LoRa settings while it scans, then restores your original configuration when it finishes. Your radio must be connected to run a scan.
 
 ### Setting Up a Scan
 
@@ -45,7 +43,7 @@ Before starting, configure these controls:
 
 The **Start** button stays disabled — with an explanation of why — until the scan can run. Common reasons it's disabled:
 
-- The device is **not connected**.
+- The radio is **not connected**.
 - **No presets** have been selected to scan.
 - The selected preset uses **2.4 GHz**, which your hardware doesn't support.
 
@@ -88,11 +86,9 @@ Additional features available from the results:
 
 > 💡 **Tip:** On **Google Play** builds, Discovery can generate an on-device AI summary (Gemini Nano) of your results. F-Droid builds always use the algorithmic summary — the proprietary ML Kit dependency is deliberately excluded from that flavor — so you get a readable interpretation of the scan either way.
 
----
-
 ## Mesh Beacon
 
-Mesh Beacon lets nodes invite others to join their mesh. A beaconing node periodically broadcasts an invitation — optionally advertising a channel, region, and modem preset — that nearby devices can hear even before they share a configuration.
+Mesh Beacon lets nodes invite others to join their mesh. A beaconing node periodically broadcasts an invitation — optionally advertising a channel, region, and modem preset — that nearby nodes can hear even before they share a configuration.
 
 Configure it under **Settings → Module Config → Mesh Beacon**:
 
@@ -107,24 +103,20 @@ Received invitations appear as **Mesh invitations** cards on the Discovery scree
 
 Channels advertised by beacons also show up in the scan setup as **Beacon channels** — select one to include it as a scan target.
 
----
-
 ## Manual Exploration
 
-The tools below are available at any time from the node list and node detail screens. Use them to investigate specific paths and build a topology picture, alongside or instead of a full scan.
+The following tools are available at any time from the node list and node detail screens. Use them to investigate specific paths and build a topology picture, alongside or instead of a full scan.
 
-## Trasovanie
+### Trasovanie
 
 Traceroute reveals the exact path a message takes from your node to any other node on the mesh. It's the single most useful tool for debugging connectivity problems.
 
-### Running a Traceroute
+#### Running a Traceroute
 
 1. Navigate to **Nodes** and tap the node you want to trace.
-2. On the node detail screen, tap **Traceroute**.
-3. The app sends a traceroute request and waits for the response.
-4. Results display each hop in order, with signal quality at every step.
+2. On the node detail screen, tap **Traceroute**. The app sends the request; results show each hop with signal quality.
 
-### Reading the Results
+#### Reading the Results
 
 A traceroute result looks like this:
 
@@ -143,27 +135,25 @@ Each hop represents a relay node that forwarded the message. The SNR and RSSI va
 
 > 💡 **Tip:** Run traceroute several times over a few minutes. If the path changes, your mesh has redundant routes — a sign of a well-connected network.
 
-### Troubleshooting with Traceroute
+#### Troubleshooting with Traceroute
 
 - **"No route found"** — The target node may be offline, out of range, or on a different channel. Check that both nodes share at least one channel with the same encryption key.
 - **Traceroute times out** — The path may be too long (exceeds hop limit) or a relay node is congested. Try increasing the hop limit in **Settings → LoRa Config**.
 - **Asymmetric paths** — A traceroute from A→B may take a different path than B→A. This is normal — radio propagation is not always symmetric.
 
----
-
-## Informácia o susedoch
+### Informácia o susedoch
 
 The Neighbor Info module lets each node broadcast a list of the nodes it can **directly hear** (single-hop). When multiple nodes share their neighbor lists, you can piece together a topology map of the entire mesh.
 
-### Enabling Neighbor Info
+#### Enabling Neighbor Info
 
 1. Navigate to **Settings → Module Config → Neighbor Info**.
 2. Enable the module.
 3. Set the broadcast interval (default: 900 seconds / 15 minutes).
 
-Once enabled, your node periodically broadcasts its neighbor table. Other nodes with Neighbor Info enabled do the same.
+Once enabled, your node periodically broadcasts its neighbor list. Other nodes with Neighbor Info enabled do the same.
 
-### Viewing Neighbor Data
+#### Viewing Neighbor Data
 
 - Open any node's detail screen and look for the **Neighbors** section.
 - Each neighbor entry shows the node that was directly heard and its signal quality.
@@ -171,31 +161,27 @@ Once enabled, your node periodically broadcasts its neighbor table. Other nodes 
 
 > ℹ️ **Note:** Neighbor Info increases airtime usage because every enabled node periodically broadcasts its neighbor list. On busy meshes with many nodes, consider longer broadcast intervals (3600 seconds or more) to avoid congestion.
 
----
-
-## Node List as a Discovery Tool
+### Node List as a Discovery Tool
 
 The node list itself is a powerful discovery tool when you use its filtering and sorting features effectively.
 
-### Finding New Nodes
+#### Finding New Nodes
 
 - Sort by **Last heard** to see the most recently active nodes at the top.
-- Enable **Include unknown** to see nodes that have appeared on the mesh but haven't sent user info yet — these are often newly powered-on devices.
+- Enable **Include unknown** to see nodes that have appeared on the mesh but haven't sent user info yet — these are often newly powered-on radios.
 
-### Assessing Connectivity
+#### Assessing Connectivity
 
 - Sort by **Hops away** to see which nodes are directly reachable (0 hops) versus relayed.
 - Sort by **Distance** to find nearby nodes and verify they're reachable.
 - Use **Exclude MQTT** to focus on nodes reachable over radio (not via internet bridge).
 
-### Infrastructure Audit
+#### Infrastructure Audit
 
 - Disable **Exclude infrastructure** to see Router, Router Late, and Client Base nodes.
 - Check their signal quality and last-heard times to verify your infrastructure nodes are healthy.
 
 See [Nodes](nodes) for full details on filtering and sorting options.
-
----
 
 ## Tips for Mesh Exploration
 
@@ -211,6 +197,3 @@ See [Nodes](nodes) for full details on filtering and sorting options.
 - [Signal Meter](signal-meter) — interpret the SNR and RSSI a scan reports
 - [Settings — Modules & Admin](settings-module-admin) — configure the Mesh Beacon and Neighbor Info modules
 - [Messages & Channels](messages-and-channels) — join a mesh you found and start talking
-
----
-

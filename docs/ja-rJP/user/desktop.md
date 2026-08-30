@@ -2,7 +2,7 @@
 title: デスクトップアプリ
 parent: User Guide
 nav_order: 14
-last_updated: 2026-08-27
+last_updated: 2026-08-29
 description: Linux、macOS、Windows で Meshtastic デスクトップアプリをインストールして使う方法。接続、機能の対応状況、キーボードショートカットを説明します。
 aliases:
   - desktop
@@ -14,34 +14,32 @@ aliases:
 
 # デスクトップアプリ
 
-Meshtastic デスクトップアプリケーションは、Kotlin Multiplatform を通じて、コアのコードベースを Android と共有しています。 ほとんどの機能は、Linux、macOS、Windows で同じように動作します。
+This page covers installing the Meshtastic desktop app, connecting a radio, and how it differs from Android. The desktop app shares its core codebase with Android via Kotlin Multiplatform, so most features work identically across Linux, macOS, and Windows.
 
 ## インストール
 
 ### Linux
 
-- リリースページから `.deb` または `.AppImage` パッケージをダウンロードします
+- Download the `.deb` or `.AppImage` package from the [releases page](https://github.com/meshtastic/Meshtastic-Android/releases)
 - または、`./gradlew :desktopApp:run` を使ってソースからビルドします
 
 ### macOS
 
-- リリースから `.dmg` パッケージをダウンロードします
+- Download the `.dmg` package from the [releases page](https://github.com/meshtastic/Meshtastic-Android/releases)
 - または、ソースからビルドします
 
 ### Windows
 
-- リリースから `.msi` インストーラーをダウンロードします
+- Download the `.msi` installer from the [releases page](https://github.com/meshtastic/Meshtastic-Android/releases)
 - または、ソースからビルドします
 
 ## 無線機を接続する
 
 ### USB シリアル（主要）
 
-デスクトップで最も信頼できる接続方法です：
+The most reliable connection method on desktop:
 
-1. USB ケーブルで Meshtastic 無線機を接続します。
-2. アプリがシリアルポートを自動的に検出します。
-3. 検出されない場合は、接続メニューから正しいシリアルポートを選択します。
+Connect your radio via USB. The app detects the serial port automatically; if it doesn't, select the port from the Connect menu.
 
 ### TCP/IP
 
@@ -52,26 +50,27 @@ Meshtastic デスクトップアプリケーションは、Kotlin Multiplatform 
 
 ### Bluetooth（BLE）
 
-Bluetooth Low Energy は、[Kable](https://github.com/JuulLabs/kable) ライブラリを通じてデスクトップでサポートされています：
+Bluetooth Low Energy is supported on desktop via the [Kable](https://github.com/JuulLabs/kable) library:
 
-1. システムに Bluetooth アダプターがあることを確認します。
-2. アプリが近くの Meshtastic 無線機を自動的にスキャンします。
-3. 接続画面からデバイスを選択します。
+1. システムに Bluetooth アダプターがあることを確認します。 アプリが近くの Meshtastic 無線機を自動的にスキャンします。
+2. Select your radio from the Connect screen.
 
 ## 機能の対応状況
 
-| 機能                | Android | デスクトップ | 備考                                                   |
-| ----------------- | ------- | ------ | ---------------------------------------------------- |
-| メッセージング           | ✓       | ✓      | 完全対応                                                 |
-| ノードリスト            | ✓       | ✓      | 完全対応                                                 |
-| マップ               | ✓       | ◐      | マップタブはデスクトップにも存在しますが、インタラクティブなマップビューは Android のみです   |
-| 設定                | ✓       | ✓      | 完全対応                                                 |
-| Bluetooth（BLE）    | ✓       | ✓      | デスクトップでは Kable 経由                                    |
-| ファームウェアの更新        | ✓       | ✓      | アプリ内の USB、BLE、Wi-Fi（ESP32）更新はすべて、Android と同じように動作します |
-| 通知                | ✓       | ✓      | OS ネイティブの通知                                          |
-| ウィジェット            | ✓       | ✗      | Android のみ                                           |
-| AI アシスタント（Chirpy） | ✓\*     | ✗      | Google 版の Android のみ                                 |
-| アプリ機能（システム AI）    | ✓†      | ✗      | Google 版の Android のみ                                 |
+| 機能                                                    | Android | デスクトップ | 備考                                                                                                                                                     |
+| ----------------------------------------------------- | ------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| メッセージング                                               | ✓       | ✓      | 完全対応                                                                                                                                                   |
+| ノードリスト                                                | ✓       | ✓      | 完全対応                                                                                                                                                   |
+| マップ                                                   | ✓       | ✓      | Interactive MapLibre map, with base map and overlay pickers and custom tile sources. No offline downloads or local `.mbtiles` archives |
+| Map layers (`.kml`/`.kmz`/GeoJSON) | ✓       | ✓      | Same layer store and sheet as Android; imported files draw on the desktop map                                                                          |
+| サイトプランナー                                              | ✓       | ✓\*    | \*Opens in your browser on desktop; the estimate is not drawn on the desktop map                                                                       |
+| 設定                                                    | ✓       | ✓      | 完全対応                                                                                                                                                   |
+| Bluetooth（BLE）                                        | ✓       | ✓      | デスクトップでは Kable 経由                                                                                                                                      |
+| ファームウェアの更新                                            | ✓       | ✓      | アプリ内の USB、BLE、Wi-Fi（ESP32）更新はすべて、Android と同じように動作します                                                                                                   |
+| 通知                                                    | ✓       | ✓      | OS ネイティブの通知                                                                                                                                            |
+| ウィジェット                                                | ✓       | ✗      | Android のみ                                                                                                                                             |
+| AI アシスタント（Chirpy）                                     | ✓\*     | ✗      | Google 版の Android のみ                                                                                                                                   |
+| アプリ機能（システム AI）                                        | ✓†      | ✗      | Google 版の Android のみ                                                                                                                                   |
 
 \*Chirpy AI には、対応ハードウェアを備えた Google 版ビルドで Android 14 以降が必要です。
 
@@ -79,7 +78,7 @@ Bluetooth Low Energy は、[Kable](https://github.com/JuulLabs/kable) ライブ�
 
 ## UI の違い
 
-デスクトップアプリは、同じ Compose Multiplatform の UI を使用し、大きな画面とデスクトップ操作に合わせて調整されています。
+The desktop app uses the same Compose Multiplatform UI with adaptations for larger screens and desktop interaction.
 
 ### キーボードショートカット
 
@@ -87,7 +86,7 @@ Bluetooth Low Energy は、[Kable](https://github.com/JuulLabs/kable) ライブ�
 
 | ショートカット      | 操作           |
 | ------------ | ------------ |
-| **⌘/Ctrl+Q** | アプリケーションを終了  |
+| **⌘/Ctrl+Q** | Quit the app |
 | **⌘/Ctrl+,** | 設定を開く        |
 | **⌘/Ctrl+1** | メッセージタブに切り替え |
 | **⌘/Ctrl+2** | ノードタブに切り替え   |
@@ -104,11 +103,11 @@ Bluetooth Low Energy は、[Kable](https://github.com/JuulLabs/kable) ライブ�
 
 ### 通知の設定
 
-デスクトップアプリには、どの通知を表示するか（メッセージ、新しいノード、バッテリー低下の警告）を制御するアプリ内トグルがあります。 これらには、アプリ内の「**設定 → 通知**」からアクセスします。
+The desktop app provides in-app toggles for controlling which notifications are shown — messages, new nodes, and low battery alerts. これらには、アプリ内の「**設定 → 通知**」からアクセスします。
 
 ## 組み込みのドキュメントブラウザー
 
-デスクトップアプリには、アプリケーションを離れることなくヘルプコンテンツにすばやくアクセスできる、組み込みのドキュメントブラウザーが含まれています。
+The desktop app includes a built-in documentation browser for quick access to help content without leaving the app.
 
 ![目次付きのドキュメントブラウザー](../../assets/screenshots/docs-browser_toc.png)
 
@@ -135,7 +134,12 @@ cd Meshtastic-Android
 
 ## 既知の制限
 
-- インタラクティブなマップビューは Android のみです。マップタブは存在しますが、デスクトップではマップが表示されません。
+- Offline tile downloads and local `.mbtiles` archives are not available on desktop.
+- `.kml`/`.kmz`/GeoJSON layer import works — see
+  [Map & Waypoints](map-and-waypoints#map-layers). Site Planner opens in your browser
+  rather than in the app; to bring its coverage estimate onto the map, use the planner's
+  **Export › GeoJSON** and add the file as a layer. Custom network tile sources work too — see
+  [Map & Waypoints](map-and-waypoints#adding-your-own-tile-source)
 - 一部の Android 固有の機能（ウィジェット、特定の通知チャンネル）は利用できません
 - Compose Desktop を実行する低スペックのハードウェアでは、パフォーマンスが変わることがあります
 - デスクトップでは BLE のボンディングはまだサポートされていません（ペアリングはボンディングなしで機能します）
@@ -144,6 +148,3 @@ cd Meshtastic-Android
 
 - [コネクション](connections)：接続方法の概要
 - [ファームウェア更新](firmware)：USB、BLE、Wi-Fi 更新はすべて、Android と同じように動作します
-
----
-

@@ -2,7 +2,7 @@
 title: Sovellustoiminnot
 parent: Käyttöopas
 nav_order: 19
-last_updated: 2026-08-28
+last_updated: 2026-08-29
 description: Tuo mesh-ominaisuudet Android-järjestelmälle ja laitteessa toimiville tekoälyavustajille (esim. Gemini), jotta ne voivat suorittaa mesh-toimintoja ilman sovelluksen avaamista.
 aliases:
   - sovellustoiminnot
@@ -13,15 +13,13 @@ aliases:
 
 # Sovellustoiminnot
 
-Sovellustoiminnot tuovat Meshtastic-ominaisuudet Android-järjestelmälle ja laitteessa toimiville tekoälyavustajille (kuten Gemini) Android App Functions -rajapinnan kautta. Kun ne ovat käytössä, avustaja voi löytää ja käynnistää mesh-toimintoja puolestasi — esimerkiksi lähettää viestin tai tarkistaa mesh-tilan — ilman että avaat sovellusta.
+Sovellustoiminnot tuovat Meshtastic-ominaisuudet Android-järjestelmälle ja laitteessa toimiville tekoälyavustajille (kuten Gemini) Android App Functions -rajapinnan kautta. Kun ne ovat käytössä, avustaja voi löytää ja käynnistää mesh-toimintoja puolestasi — esimerkiksi lähettää viestin tai tarkistaa mesh-tilan — ilman että avaat sovellusta. Sovellustoiminnot ovat käytettävissä vain **Google-version Android-julkaisuissa**.
 
-> ℹ️ **Note:** App Functions are available on **Google-flavor Android builds only**.
->
-> This is separate from the in-app **Chirpy** assistant. Sovellustoiminnot mahdollistavat sen, että _järjestelmän_ tekoälyavustaja voi toimia mesh-verkon kautta; Chirpy on Meshtastic-sovelluksen sisäinen keskusteluavustaja.
+> ℹ️ **Huomautus:** Tämä on eri asia kuin sovelluksen sisäinen **Chirpy**-avustaja. Sovellustoiminnot mahdollistavat sen, että _järjestelmän_ tekoälyavustaja voi toimia mesh-verkon kautta; Chirpy on Meshtastic-sovelluksen sisäinen keskusteluavustaja.
 
 ## Sovellustoimintojen käyttöönotto
 
-Sovellustoimintoja hallitaan kohdasta **Asetukset → Järjestelmän tekoäly** (sovelluksen näkymän nimi on "Järjestelmän tekoäly"). Näyttö sisältää:
+Hallitse sovellustoimintoja kohdasta **Asetukset → Järjestelmätekoäly**. Näyttö sisältää:
 
 - **Pääkytkin**, nimeltään **"Salli tekoälyn käyttö"**, ja alaotsikko _"Salli järjestelmän tekoälyavustajien (esim. Gemini) löytää ja käyttää mesh-toimintoja"_. Kun pois käytöstä, toimintoja ei jaeta järjestelmälle.
 - Yksittäinen kytkin jokaiselle toiminnolle, jotta voit paljastaa vain haluamasi ominaisuudet.
@@ -38,16 +36,16 @@ Toiminnot on jaettu **Kirjoita**-osioon (toiminnot, jotka muuttavat jotakin tai 
 
 ### Lukutoiminnot
 
-| Toiminto                         | Mitä se palauttaa                                           |
-| -------------------------------- | ----------------------------------------------------------- |
-| **Hae mesh-verkko-tila**         | Koko mesh-verkon tila.                      |
-| **Hae radiolista**               | Mesh-verkon radiolista.                     |
-| **Hae kanavatiedot**             | Tietoa kanavistasi.                         |
-| **Hae laitteen tila**            | Yhdistetyn radion tila.                     |
-| **Hae radion tiedot**            | Yksityiskohtaiset tiedot tietystä radiosta. |
-| **Hae viimeisimmät viestit**     | Viimeisimmät viestisi keskusteluista.       |
-| **Hae lukemattomien yhteenveto** | Yhteenveto lukemattomista viesteistä.       |
-| **Hae mesh-metriikat**           | Mesh-verkon telemetria ja metriikat.        |
+| Toiminto                         | Mitä se palauttaa                                                                    |
+| -------------------------------- | ------------------------------------------------------------------------------------ |
+| **Hae mesh-verkko-tila**         | Onko yhteys radioon muodostettu ja kuinka monta radiota on verkossa. |
+| **Hae radiolista**               | Mesh-verkon radiolista.                                              |
+| **Hae kanavatiedot**             | Tietoa kanavistasi.                                                  |
+| **Hae laitteen tila**            | Yhdistetyn radion tila.                                              |
+| **Hae radion tiedot**            | Yksityiskohtaiset tiedot tietystä radiosta.                          |
+| **Hae viimeisimmät viestit**     | Viimeisimmät viestisi keskusteluista.                                |
+| **Hae lukemattomien yhteenveto** | Yhteenveto lukemattomista viesteistä.                                |
+| **Hae mesh-metriikat**           | Mesh-verkon telemetria ja metriikat.                                 |
 
 ## Yksityisyys
 
@@ -58,6 +56,3 @@ Toiminnot on jaettu **Kirjoita**-osioon (toiminnot, jotka muuttavat jotakin tai 
 - [Viestit ja kanavat](messages-and-channels) — viestien lähettäminen suoraan sovelluksessa
 - [Radiot](nodes) — radiolista, josta lukutoiminnot hakevat tiedot
 - [Radiometriikat](node-metrics) — telemetria, jonka pohjalta **Hae mesh-metriikat** muodostuu
-
----
-

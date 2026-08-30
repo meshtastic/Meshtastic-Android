@@ -2,7 +2,7 @@
 title: Виджет на главный экран
 parent: Руководство пользователя
 nav_order: 20
-last_updated: 2026-08-27
+last_updated: 2026-08-29
 description: Добавь виджет главного экрана Meshtastic, чтобы видеть местную статистику своего подключенного радио без открытия приложения.
 aliases:
   - widget
@@ -30,13 +30,13 @@ aliases:
 
 Нажми на виджет, чтобы открыть приложение, или используй его кнопку обновления для запроса свежей статистики.
 
-> 💡 **Совет:** значения отражают радиоустройство, к которому ты подключен в данный момент. If the radio disconnects, the widget replaces the stats with a status line — **Disconnected**, **Connecting**, or **Device sleeping**. It does not keep the last-known numbers on screen.
+> ℹ️ **Note:** The values reflect the connected radio. If the radio disconnects, the widget replaces the stats with a status line — **Disconnected**, **Connecting**, or **Device sleeping**. It does not keep the last-known numbers on screen.
 
 ## Добавление виджета
 
-1. Долгое нажатие на пустой области твоего рабочего стола Android.
+1. Touch & hold an empty area of your Android home screen.
 2. Нажми **Виджет**.
-3. Find **Meshtastic** in the list and drag its widget to your home screen. The app ships one widget, so the picker entry is just the app name.
+3. Drag the **Meshtastic** widget to your home screen. The app ships one widget, so the picker entry is just the app name.
 4. Изменение размера по мере необходимости — макет адаптируется к доступному пространству.
 
 > ℹ️ **Note:** The widget is Android-only. Он недоступен для ПК или сборках для iOS.
@@ -46,5 +46,3 @@ aliases:
 - [Метрики нод](node-metrics) — полная статистика сигнала и локальная статистика внутри приложения
 - [Подключения](connections) — подключиться к радиоустройству, чтобы виджет показывал статистику
 - [Local Mesh Discovery](discovery) — channel and airtime utilization across the mesh
-
----

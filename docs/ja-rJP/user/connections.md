@@ -2,7 +2,7 @@
 title: コネクション
 parent: User Guide
 nav_order: 2
-last_updated: 2026-08-27
+last_updated: 2026-08-29
 description: スマートフォンやデスクトップを、Bluetooth・USB・TCP/IP で Meshtastic 無線機に接続します。
 aliases:
   - bluetooth
@@ -13,27 +13,27 @@ aliases:
 
 # コネクション
 
-Meshtastic は、スマートフォン／デスクトップと無線機ノード間の通信に複数の接続方式をサポートしています。
+Meshtastic supports multiple transport methods to communicate between your phone or desktop and a radio.
 
 ## Bluetooth（BLE）
 
 Bluetooth Low Energy は、Android で標準的かつ最も一般的な接続方法です。
 
-### デバイスをペアリングする
+### Pairing a Radio
 
 1. Meshtastic 無線機の電源が入っていて、ペアリングモードになっていることを確認します。
 2. アプリを開き、「**接続**」タブに移動します。
 3. 「**Bluetooth デバイスをスキャン**」をタップすると、近くの Meshtastic 無線機が表示されます。
-4. リストからデバイスを選択します。
+4. Select your radio from the list.
 5. Bluetooth のペアリング確認が表示されたら承認します。
 
 ![Bluetooth デバイスをスキャンし、見つかった無線機がリストに表示されている様子](../../assets/screenshots/connections_bluetooth_scan.png)
 
 接続カードの下にあるセグメント化されたボタン列（接続方式のセレクター）を使って、Bluetooth・ネットワーク・USB の接続方式を切り替えます（一度に 1 つが有効になります）：
 
-![接続方式のセレクター](../../assets/screenshots/connections_transport_filters.png)
+![Connections screen with the transport selector showing Bluetooth, Network, and USB](../../assets/screenshots/connections_transport_filters.png)
 
-> 💡 **Tip:** If your device doesn't appear, check that the radio is not already connected to another device or out of range.
+> 💡 **Tip:** If your radio doesn't appear, check that it isn't already connected to another phone, or out of range.
 
 The screen names anything on the app's side that is blocking a scan, with the fix attached:
 
@@ -77,19 +77,19 @@ USB 接続は有線での代替手段で、デスクトップや Bluetooth が�
 
 ### セットアップ
 
-1. USB ケーブルで無線機をデバイスに接続します。
-2. アプリが USB の使用許可を求めるので、「**許可**」をタップします。
+1. Connect your radio to your phone with a USB cable.
+2. The app prompts for USB permission — tap **Allow**.
 3. 接続が自動的に確立されます。
 
 > ℹ️ **Note:** USB connections require OTG support on Android devices.
 
 ## TCP/IP（ネットワーク）
 
-一部の Meshtastic 無線機は WiFi／Ethernet 接続に対応しており、ローカルネットワーク経由の TCP 接続が可能です。 まず、無線機自身の WiFi 設定（ファームウェアのウェブインターフェースや別の接続方法を使用）で無線機をネットワークに接続し、その後アプリから接続します。
+Some Meshtastic radios support Wi-Fi/Ethernet connectivity, allowing TCP-based connections over your local network. Get the radio onto your network first — using the radio's own Wi-Fi settings (via the firmware web interface or another connection) — then connect to it from the app.
 
-> ℹ️ **Note:** **Settings → Wi-Fi Provisioning for mPWRD-OS** is a separate, narrower tool. It provisions WiFi
+> ℹ️ **Note:** **Settings → Wi-Fi Provisioning for mPWRD-OS** is a separate, narrower tool. It provisions Wi-Fi
 > credentials over Bluetooth to **mPWRD-OS** devices only, using their own protocol — it does not
-> configure WiFi on an ordinary Meshtastic radio. It scans over BLE, lists the networks the device
+> configure Wi-Fi on an ordinary Meshtastic radio. It scans over BLE, lists the networks the device
 > can see (including an option for a hidden SSID), takes the password, and reports success or
 > failure. Available on both Android and Desktop.
 
@@ -100,7 +100,7 @@ USB 接続は有線での代替手段で、デスクトップや Bluetooth が�
 3. 無線機は次の 2 通りの方法で選べます：
    - **ネットワークデバイスをスキャン**：これをオンにすると、ローカルネットワーク上で自身を告知している無線機（mDNS ／ `_meshtastic._tcp`）を自動的に探索します。 見つかったデバイスがリストに表示されるので、タップして接続します。
    - **デバイスを手動で追加…**：無線機の IP アドレス（またはホスト名）とポート（既定：`4403`）を入力します。
-4. 以前使用したネットワークアドレスは「**最近のネットワークデバイス**」に記憶され、すばやく再接続できます（長押しで削除できます）。
+4. Previously-used network addresses are remembered under **Recent Network Devices** for quick reconnection (touch & hold to remove one).
 
 > 💡 **ヒント：** ネットワーク探索は mDNS を使用するため、両方のデバイスが同じサブネット上にある場合にのみ機能します。 Android 17 以降では、スキャンにローカルネットワークの権限が必要です。探索で何も見つからない場合は、IP アドレスでデバイスを手動追加してください。
 
@@ -112,7 +112,7 @@ USB 接続は有線での代替手段で、デスクトップや Bluetooth が�
 
 ## 再接続の動作
 
-アプリは起動時に「**最後に選択したデバイス**」へ再接続します。 接続方式は、接続画面からいつでも切り替えられます。
+The app reconnects to the last selected radio on startup. 接続方式は、接続画面からいつでも切り替えられます。
 
 切断するには、接続画面の切断ボタンをタップします：
 
@@ -134,6 +134,3 @@ USB 接続は有線での代替手段で、デスクトップや Bluetooth が�
 - [設定：無線機とユーザー](settings-radio-user)：Bluetooth とネットワークの設定
 - [デスクトップアプリ](desktop)：デスクトップ固有の接続に関する詳細
 - [対応デバイス](https://meshtastic.org/docs/hardware/devices)：meshtastic.org にある互換無線機の一覧
-
----
-

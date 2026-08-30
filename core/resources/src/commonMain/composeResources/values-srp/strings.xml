@@ -110,7 +110,6 @@
     <string name="config_lora_hop_limit_summary">Подешава максималан број скокова. Подразумевано је 3, а повећање броја одобрених скокова такође повећава загушење и треба га користити опрезно. Поруке емитоване са 0 скокова неће добити потврде пријема (ACK).</string>
     <string name="config_lora_modem_preset_summary">Доступна унапред подешена подешавања модема, подразумевана је Long Fast.</string>
     <string name="config_lora_region_summary">Регион у коме ћете користити ваше радио уређаје.</string>
-    <string name="config_network_wifi_enabled_summary">Омогућавање ВајФаја ће онемогућити блутут везу са апликацијом.</string>
     <string name="config_position_broadcast_smart_minimum_distance_summary">Минимална промена растојања у метрима која ће се узети у обзир за паметно емитовање позиције.</string>
     <string name="config_position_flags_summary">Опциони поља за укључивање при склапању порука о позицији. Што више поља је укључено, порука ће бити већа, што доводи до дужег времена емитовања и већег ризика од губитка пакета.</string>
     <string name="config_power_is_power_saving_summary">Спаваће све што је више могуће, за улогу трагача и сензора ово ће укључивати и лора радио. Не користите ово подешавање ако желите да користите свој уређај са мобилним апликацијама или користите уређај без корисничког дугмета.</string>
@@ -274,6 +273,9 @@
     <string name="map_download_complete">Преузимање готово!</string>
     <string name="map_download_errors">Преузимање довршено са %1$d грешака</string>
     <string name="map_download_region">Регион за преузимање</string>
+    <string name="map_filter_all_roles">Сви</string>
+    <string name="map_filter_display_title">Приказ</string>
+    <string name="map_filter_nodes_title">Чворови</string>
     <string name="map_offline_manager">Менаџер офлајн мапа</string>
     <string name="map_purge_fail">Пражњење SQL кеша није успело, погледајте logcat за детаље</string>
     <string name="map_purge_success">Кеш SQL очишћен за %1$s</string>
@@ -535,11 +537,8 @@
     <string name="what_is_meshtastic">Шта је Мештастик?</string>
     <string name="what_is_meshtastic_description">Отворена, off-grid, децентрализована, меш мрежа која ради на приступачним радио уређајима мале снаге.</string>
     <!-- WIFI -->
-    <string name="wifi_config">Опције вајфаја</string>
     <string name="wifi_provision_success_ip_address">IP адреса</string>
     <string name="wifi_provision_success_username">Корисничко име</string>
-    <string name="wifi_qr_code_error">Неважећи формат QR кода за ВајФАј податке</string>
-    <string name="wifi_qr_code_scan">Скенирај ВајФај QR код</string>
     <!-- WIND -->
     <string name="wind_speed">Брзина ветра</string>
     <!-- WRITE -->

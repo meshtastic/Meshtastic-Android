@@ -2,7 +2,7 @@
 title: Телеметрия и датчики
 parent: Руководство пользователя
 nav_order: 9
-last_updated: 2026-08-27
+last_updated: 2026-08-29
 description: Данные датчиков в mesh-сети — поддерживаемые датчики окружающей среды, качества воздуха и питания, а также руководства по настройке и просмотру.
 aliases:
   - sensors
@@ -13,11 +13,7 @@ aliases:
 
 # Телеметрия и датчики
 
-Ноды Meshtastic могут собирать и передавать данные датчиков по всей mesh-сети.
-
-## Обзор
-
-Телеметрия позволяет нодам, оснащённым датчиками, передавать информацию об окружающей среде, питании и состоянии устройства. Эти данные отображаются на экране сведений о ноде и могут регистрироваться с течением времени.
+Ноды Meshtastic могут собирать и передавать данные датчиков по всей mesh-сети. Telemetry allows nodes equipped with sensors to broadcast environmental, power, and device health information, visible on the node detail screen and logged over time.
 
 ## Телеметрия устройства
 
@@ -47,11 +43,11 @@ aliases:
 
 ### Качество воздуха
 
-| Sensor   | Метрика                                            | Заметки                                                                                                                                   |
-| -------- | -------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| BME680   | Сопротивление газа / IAQ                           | Летучие органические соединения                                                                                                           |
-| PMSA003I | PM1.0, PM2.5, PM10 | Взвешенные частицы                                                                                                                        |
-| SEN55    | PM, Temp, Humidity                                 | Multi-sensor. Its NOx and VOC indices are recorded and included in a CSV export, but are not yet shown as cards or charts |
+| Sensor   | Метрика                                            | Заметки                                                                                                                               |
+| -------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| BME680   | Сопротивление газа / IAQ                           | Летучие органические соединения                                                                                                       |
+| PMSA003I | PM1.0, PM2.5, PM10 | See [Air Quality Metrics](#air-quality-metrics)                                                                                       |
+| SEN55    | PM, Temp, Humidity                                 | Multi-sensor. Its NOx and VOC indices are recorded and included in a CSV export, but are not shown as cards or charts |
 
 ### Soil
 
@@ -79,7 +75,7 @@ Both appear as info cards on the node detail screen, next to the other environme
 | Напряжение  | Per-channel voltage reading     |
 | Ток         | Per-channel current draw, in mA |
 
-Up to three channels are reported (ch1–ch3), and each can be given its own label — Solar or Battery, say — from the node detail screen. There is no separate wattage reading; the app charts voltage and current, and does not compute power from them.
+Up to three sensor channels (ch1–ch3) are reported, and each can be given its own label — Solar or Battery, say — from the node detail screen. There is no separate wattage reading; the app charts voltage and current, and does not compute power from them.
 
 Полезно для мониторинга солнечной зарядки или состояния батареи на удалённых нодах.
 
@@ -93,14 +89,14 @@ Up to three channels are reported (ch1–ch3), and each can be given its own lab
    - **Air Quality Metrics** — particulate and CO₂ readings
    - **Power Metrics** — the per-channel voltage and current readings
 
-   Environment metrics additionally have an on-screen toggle and a Fahrenheit toggle for the
-   device's own display.
+   Environment metrics additionally have toggles to show the readings on the radio's own screen,
+   and to show them in Fahrenheit.
 
 ### Choosing an Interval
 
-> 💡 **Tip:** These are nominal values, not hard schedules. On a congested mesh the firmware
-> automatically backs off to longer intervals based on how many nodes are online, so you do not
-> need to hand-tune them for mesh size. Lengthen them deliberately only to save battery.
+These are nominal values, not hard schedules. On a congested mesh the firmware automatically
+backs off to longer intervals based on how many nodes are online, so you do not need to
+hand-tune them for mesh size. Lengthen them deliberately only to save battery.
 
 ## Метрики качества воздуха
 
@@ -129,7 +125,7 @@ Up to three channels are reported (ch1–ch3), and each can be given its own lab
    - Метрики качества воздуха (при наличии датчика PM/CO₂)
 3. Исторические графики показывают тенденции с течением времени.
 
-![Действия с телеметрией](../../assets/screenshots/node-metrics_telemetric_actions.png)
+![Node detail screen with the telemetry chart action menu open](../../assets/screenshots/node-metrics_telemetric_actions.png)
 
 ## Устранение неполадок
 
@@ -142,6 +138,3 @@ Up to three channels are reported (ch1–ch3), and each can be given its own lab
 - [Метрики нод](node-metrics) — просмотр данных телеметрии на экране сведений о ноде
 - [Настройки — Модули и администрирование](settings-module-admin) — конфигурация модуля телеметрии
 - [Единицы измерения и регион](units-and-locale) — единицы отображения температуры и давления
-
----
-

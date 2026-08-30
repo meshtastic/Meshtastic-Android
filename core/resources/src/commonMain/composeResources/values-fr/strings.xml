@@ -272,7 +272,6 @@
     <string name="config_lora_region_summary">La région où vous allez utiliser vos radios.</string>
     <string name="config_network_eth_enabled_summary">Activer Ethernet désactivera la connexion Bluetooth à l'application. Les connexions de nœuds via TCP ne sont pas disponibles sur les appareils Apple.</string>
     <string name="config_network_udp_enabled_summary">Activer les paquets de diffusion via UDP sur le réseau local.</string>
-    <string name="config_network_wifi_enabled_summary">L'activation du Wifi désactivera la connexion Bluetooth à l'application.</string>
     <string name="config_position_broadcast_secs_summary">L'intervalle maximum qui peut s'écouler sans qu'un nœud diffuse une position.</string>
     <string name="config_position_broadcast_smart_minimum_distance_summary">Distance minimale en mètres pour considérer une diffusion de position intelligente.</string>
     <string name="config_position_broadcast_smart_minimum_interval_secs_summary">Intervalle minimum auquel les mises à jour de position seront envoyées si la distance minimale est respectée.</string>
@@ -630,7 +629,6 @@
     <string name="firmware_update_method_ble">Mise à jour via Bluetooth</string>
     <string name="firmware_update_method_detail">Mettre à jour via %1$s</string>
     <string name="firmware_update_method_usb">Transfert de fichier USB</string>
-    <string name="firmware_update_method_wifi">Mise à jour via WiFi</string>
     <string name="firmware_update_missing_target">Les informations de destination du micrologiciel ne sont pas disponibles pour cet appareil.</string>
     <string name="firmware_update_nightly">Nightly</string>
     <string name="firmware_update_no_device">Aucun appareil connecté</string>
@@ -892,7 +890,11 @@
     <string name="map_download_complete">Téléchargement terminé !</string>
     <string name="map_download_errors">Téléchargement terminé avec %1$d erreurs</string>
     <string name="map_download_region">Télécharger la région</string>
+    <string name="map_download_status_complete">Complété</string>
     <string name="map_filter">Filtre de carte\n</string>
+    <string name="map_filter_all_roles">Tout</string>
+    <string name="map_filter_display_title">Écran</string>
+    <string name="map_filter_nodes_title">Nœuds</string>
     <string name="map_layer_formats">Les calques personnalisés prennent en charge les fichiers .kml, .kmz ou GeoJSON.</string>
     <string name="map_node_popup_details">%1$s&lt;br&gt;Dernière écoute : %2$s&lt;br&gt;Dernière position : %3$s&lt;br&gt;Batterie : %4$s</string>
     <string name="map_offline_manager">Gestionnaire hors-ligne</string>
@@ -1046,7 +1048,6 @@
     <string name="node_sort_title">Trier</string>
     <string name="node_sort_via_favorite">par Favoris</string>
     <string name="node_sort_via_mqtt">via MQTT</string>
-    <string name="node_status_summary">La chaîne de statut actuelle</string>
     <string name="nodedb_reset">Reconfiguration de NodeDB</string>
     <string name="nodeinfo_broadcast_interval">Intervalle de diffusion des infos nœud</string>
     <!-- NODES -->
@@ -1112,7 +1113,6 @@
     <string name="pax_total_format">PAX : %1$d</string>
     <string name="pax_total_marker">PAX : %1$s</string>
     <string name="pax_wifi_format">W :%1$d</string>
-    <string name="pax_wifi_marker">Wi-Fi : %1$s</string>
     <string name="paxcounter">Compteur de passages</string>
     <string name="paxcounter_config">Configuration du Paxcounter</string>
     <string name="paxcounter_enabled">Paxcounter activé</string>
@@ -1382,7 +1382,6 @@
     <string name="ssid">SSID</string>
     <string name="state_broadcast_seconds">Diffusion de l'État (secondes)</string>
     <string name="status_message">Statut du message</string>
-    <string name="status_message_config">Configuration du statut du message</string>
     <string name="stay_connected_anywhere">Restez connecté n'importe où</string>
     <string name="store_forward">Stocker &amp; Transférer</string>
     <string name="store_forward_config">Stocker &amp; Transférer la configuration</string>
@@ -1556,27 +1555,19 @@
     <string name="waypoint_received">Point de passage reçu : %1$s</string>
     <string name="weight">Poids</string>
     <!-- WIFI -->
-    <string name="wifi_config">Options WiFi</string>
     <string name="wifi_devices">Approvisionnement Wi-Fi pour mPWRD-OS</string>
-    <string name="wifi_enabled">WiFi activé</string>
-    <string name="wifi_ip">IP du Wifi :</string>
     <string name="wifi_provision_available_networks">Réseaux disponibles</string>
     <string name="wifi_provision_connect_failed">Impossible de se connecter : %1$s</string>
     <string name="wifi_provision_description">Fournissez les identifiants Wi-Fi à votre appareil mPWRD-OS via Bluetooth.</string>
     <string name="wifi_provision_device_found">Appareil détecté</string>
-    <string name="wifi_provision_device_found_detail">Prêt à rechercher des réseaux WiFi.</string>
     <string name="wifi_provision_mpwrd_disclaimer">En savoir plus sur le projet mPWRD-OS\nhttps://github.com/mPWRD-OS</string>
     <string name="wifi_provision_no_networks">Aucun réseau trouvé</string>
-    <string name="wifi_provision_scan_failed">Échec de la recherche des réseaux WiFi : %1$s</string>
     <string name="wifi_provision_scan_networks">Rechercher des réseaux</string>
     <string name="wifi_provision_scanning_ble">Recherche de l'appareil</string>
     <string name="wifi_provision_scanning_wifi">Recherche…</string>
-    <string name="wifi_provision_sending_credentials">Application de la configuration WiFi…</string>
     <string name="wifi_provision_signal_strength">%1$d%</string>
     <string name="wifi_provision_ssid_label">Nom du réseau (SSID)</string>
     <string name="wifi_provision_ssid_placeholder">Saisir ou sélectionnez un réseau</string>
-    <string name="wifi_provision_status_applied">WiFi configuré avec succès !</string>
-    <string name="wifi_provision_status_failed">Impossible d'appliquer la configuration WiFi</string>
     <string name="wifi_provision_success_description">Votre appareil mPWRD-OS a rejoint le réseau Wi-Fi.</string>
     <string name="wifi_provision_success_device_connected">Appareil connecté</string>
     <string name="wifi_provision_success_done">Terminé</string>
@@ -1591,9 +1582,6 @@
     <string name="wifi_provision_success_ssh_unavailable">Commande SSH disponible après l'attribution de l'IP.</string>
     <string name="wifi_provision_success_username">Nom d'utilisateur</string>
     <string name="wifi_provisioning">Approvisionnement Wi-Fi pour mPWRD-OS</string>
-    <string name="wifi_qr_code_error">Format du code QR d'identification WiFi invalide</string>
-    <string name="wifi_qr_code_scan">Scanner le code QR WiFi</string>
-    <string name="wifi_rssi_threshold_defaults_to_80">Seuil RSSI WiFi (par défaut -80)</string>
     <!-- WIND -->
     <string name="wind">Vent</string>
     <string name="wind_direction">Direction du vent</string>
@@ -1602,4 +1590,6 @@
     <string name="wind_speed">Vitesse du vent</string>
     <!-- WRITE -->
     <string name="you">Vous</string>
+    <string name="zoom_in">Zoom +</string>
+    <string name="zoom_out">Zoom -</string>
 </resources>

@@ -2,7 +2,7 @@
 title: Соединения
 parent: Руководство пользователя
 nav_order: 2
-last_updated: 2026-08-27
+last_updated: 2026-08-29
 description: Подключи свой телефон или компьютер к устройству Meshtastic через Bluetooth, USB или TCP/IP.
 aliases:
   - bluetooth
@@ -13,27 +13,27 @@ aliases:
 
 # Соединения
 
-Meshtastic поддерживает несколько способов передачи данных между вашим телефоном/компьютером и радионодой.
+Meshtastic supports multiple transport methods to communicate between your phone or desktop and a radio.
 
 ## Bluetooth (BLE)
 
 Bluetooth Low Energy является наиболее распространенным методом подключения на Android.
 
-### Привязка устройства
+### Pairing a Radio
 
 1. Убедитесь, что устройство Meshtastic включено и находится в режиме сопряжения.
 2. Откройте приложение и перейдите на вкладку **Подключение**.
 3. Нажми **Сканировать Bluetooth-устройства** — рядом появятся радиостанции Meshtastic.
-4. Выберите ваше устройство из списка.
+4. Select your radio from the list.
 5. Примите запрос на соединение Bluetooth, если показано.
 
 ![Сканирование устройств Bluetooth с обнаружением радиоустройств в списке](../../assets/screenshots/connections_bluetooth_scan.png)
 
 Используйте селектор транспорта — ряд сегментированных кнопок под карточкой подключения — для переключения между транспортами Bluetooth, Network и USB (одновременно активен только один):
 
-![Селектор транспорта](../../assets/screenshots/connections_transport_filters.png)
+![Connections screen with the transport selector showing Bluetooth, Network, and USB](../../assets/screenshots/connections_transport_filters.png)
 
-> 💡 **Tip:** If your device doesn't appear, check that the radio is not already connected to another device or out of range.
+> 💡 **Tip:** If your radio doesn't appear, check that it isn't already connected to another phone, or out of range.
 
 The screen names anything on the app's side that is blocking a scan, with the fix attached:
 
@@ -77,19 +77,19 @@ When connecting, a status indicator shows the current connection state — tap *
 
 ### Настройка
 
-1. Подключи свою ноду к устройству с помощью USB-кабеля.
-2. Приложение запросит разрешение на доступ к USB — нажми **Разрешить**.
+1. Connect your radio to your phone with a USB cable.
+2. The app prompts for USB permission — tap **Allow**.
 3. Соединение устанавливается автоматически.
 
 > ℹ️ **Note:** USB connections require OTG support on Android devices.
 
 ## TCP/IP (Сеть)
 
-Некоторые радиостанции Meshtastic поддерживают подключение по WiFi/Ethernet, что позволяет устанавливать TCP-соединения через локальную сеть. Сначала подключи радиоустройство к своей сети — используя его собственные настройки Wi-Fi (через веб-интерфейс прошивки или другое подключение) — затем подключайся к нему через приложение.
+Some Meshtastic radios support Wi-Fi/Ethernet connectivity, allowing TCP-based connections over your local network. Get the radio onto your network first — using the radio's own Wi-Fi settings (via the firmware web interface or another connection) — then connect to it from the app.
 
-> ℹ️ **Note:** **Settings → Wi-Fi Provisioning for mPWRD-OS** is a separate, narrower tool. It provisions WiFi
+> ℹ️ **Note:** **Settings → Wi-Fi Provisioning for mPWRD-OS** is a separate, narrower tool. It provisions Wi-Fi
 > credentials over Bluetooth to **mPWRD-OS** devices only, using their own protocol — it does not
-> configure WiFi on an ordinary Meshtastic radio. It scans over BLE, lists the networks the device
+> configure Wi-Fi on an ordinary Meshtastic radio. It scans over BLE, lists the networks the device
 > can see (including an option for a hidden SSID), takes the password, and reports success or
 > failure. Available on both Android and Desktop.
 
@@ -100,7 +100,7 @@ When connecting, a status indicator shows the current connection state — tap *
 3. Выбери радиоустройство одним из двух способов:
    - **Сканировать сетевые устройства** — включи эту опцию чтобы автоматически обнаруживать радиоустройства, которые объявляют о себе в локальной сети (mDNS / `_meshtastic._tcp`). Обнаруженные устройства появляются в списке; нажми на одно, чтобы подключиться.
    - **Добавить устройство вручную…** — введи IP-адрес радиостанции (или имя хоста) и порт (по умолчанию: `4403`).
-4. Ранее использованные сетевые адреса запоминаются в разделе **Недавние сетевые устройства** для быстрого повторного подключения (удерживай пальцем, чтобы удалить).
+4. Previously-used network addresses are remembered under **Recent Network Devices** for quick reconnection (touch & hold to remove one).
 
 > 💡 **Совет:** Обнаружение сети использует mDNS, который работает только когда оба устройства находятся в одной подсети. На Android 17+ приложению нужно разрешение на локальную сеть для сканирования; если поиск ничего не находит, добавь устройство вручную по IP.
 
@@ -112,7 +112,7 @@ When connecting, a status indicator shows the current connection state — tap *
 
 ## Поведение при повторном подключении
 
-Приложение подключается к **последнему выбранному устройству** при запуске. Вы можете переключать транспорт с экрана подключения в любое время.
+The app reconnects to the last selected radio on startup. Вы можете переключать транспорт с экрана подключения в любое время.
 
 Чтобы отключиться, нажми кнопку отключения на экране подключения:
 
@@ -134,6 +134,3 @@ When connecting, a status indicator shows the current connection state — tap *
 - [Настройки — Радио и пользователь](settings-radio-user) — настройка Bluetooth и сети
 - [Десктопное приложение](desktop) — детали подключения, специфичные для настольных компьютеров
 - [Поддерживаемые устройства](https://meshtastic.org/docs/hardware/devices) — полный список совместимых радиоустройств на meshtastic.org
-
----
-

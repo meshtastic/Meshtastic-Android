@@ -2,7 +2,7 @@
 title: Messages & Channels
 parent: User Guide
 nav_order: 3
-last_updated: 2026-08-27
+last_updated: 2026-08-29
 description: Send and receive messages, manage channels, configure encryption, search conversations, and use quick chat, reactions, and message actions.
 aliases:
   - channels
@@ -21,7 +21,7 @@ Channels are shared communication groups. All nodes configured with the same cha
 
 ### Default Channel
 
-Every Meshtastic device comes with a default **LongFast** channel. This is an unencrypted channel used for general mesh communication.
+Every Meshtastic radio comes with a default **LongFast** channel. It is encrypted with a well-known default key, so anyone running Meshtastic on the same preset can read it.
 
 ### Channel Security
 
@@ -52,13 +52,13 @@ Direct messages (DMs) are point-to-point encrypted communications between two sp
 ### Sending a Direct Message
 
 1. Open the **Messages** tab.
-2. Select a node from your contacts list or tap a node in the node list.
+2. Select a conversation, or tap a node in the node list.
 3. Type your message and tap **Send**.
 
 ### Managing the Conversation List
 
-The **Messages** tab lists your conversations. Each row carries what you need to triage it at a
-glance, and the list itself is directly actionable:
+The **Messages** tab lists your conversations. Each row shows what you need at a glance, and you
+can act on it directly:
 
 - **Unsent drafts survive.** Type into a conversation and leave without sending, and the text is
   still there when you come back. The row shows it as `Draft: …` in place of the last message —
@@ -66,7 +66,7 @@ glance, and the list itself is directly actionable:
 - **Unread badge.** A count sits on the row until you open the conversation.
 - **Swipe right to mute** (swipe again to unmute) and **swipe left to delete**. Deleting asks
   first; muting shows a snackbar with **Undo**.
-- **Long-press to select** one or more conversations, then use the action bar to **Pin**,
+- **Touch & hold to select** one or more conversations, then use the action bar to **Pin**,
   **Mark unread**, mute or delete them together. Pinned conversations carry a pin marker and rise
   to the top of **their own section**.
 - **The list is split into Channels and Direct Messages**, each with a collapsible header and each
@@ -84,15 +84,15 @@ control whether they are offered at all.
 
 A status label appears under **your own** outgoing messages only (incoming messages from others show no status label):
 
-| State                               | Meaning                                                                                                                                                                                                                                   |
-| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Sending…                            | Queued or already handed to the radio, not yet resolved either way. Both stages share this text, but the icon and colour change as it progresses — a yellow upload cloud while queued, a blue arrow once the radio has it |
-| Delivered to recipient              | The strongest confirmation for a direct message — an acknowledgment came back                                                                                                                                                             |
-| Delivered to mesh                   | For a channel broadcast, the message reached the mesh (broadcasts have no per-recipient ack)                                                                                                                           |
-| Relayed, not confirmed by recipient | For a direct message, shown in a warning color — the message was relayed but no acknowledgment has come back yet                                                                                                                          |
-| Routing via SF++ chain…             | Being routed/buffered by the Store & Forward Plus Plus chain                                                                                                                                                          |
-| Confirmed on SF++ chain             | Confirmed delivered via the SF++ chain                                                                                                                                                                                                    |
-| Feil                                | Delivery failed — tap the status for the specific reason (see Delivery Errors below)                                                                                                                                   |
+| State                               | Meaning                                                                                                                                                                                                                                  |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Sending…                            | Queued or already handed to the radio, not yet resolved either way. Both stages share this text, but the icon and color change as it progresses — a yellow upload cloud while queued, a blue arrow once the radio has it |
+| Delivered to recipient              | The strongest confirmation for a direct message — an acknowledgment came back                                                                                                                                                            |
+| Delivered to mesh                   | For a channel broadcast, the message reached the mesh (broadcasts have no per-recipient ack)                                                                                                                          |
+| Relayed, not confirmed by recipient | For a direct message, shown in a warning color — the message was relayed but no acknowledgment has come back yet                                                                                                                         |
+| Routing via SF++ chain…             | Being routed/buffered by the Store & Forward Plus Plus chain                                                                                                                                                         |
+| Confirmed on SF++ chain             | Confirmed delivered via the SF++ chain                                                                                                                                                                                                   |
+| Feil                                | Delivery failed — tap the status for the specific reason (see [Delivery Errors](#delivery-errors))                                                                                                                    |
 
 ### Delivery Errors
 
@@ -135,8 +135,6 @@ Each quick chat entry has a short **Name** (the button label), the **Message** i
 
 ![New quick chat dialog with name, message, and instantly-send toggle](../../assets/screenshots/messages_edit_quick_chat.png)
 
-The channel list shows each channel with its latest message preview.
-
 ### Searching Messages
 
 You can search the full history of any conversation directly from the chat screen:
@@ -166,7 +164,7 @@ Messages support lightweight inline **Markdown**. Received messages render the s
 | Inline code   | `` `code` ``                   | monospace `code`     |
 | Link          | `[label](https://example.com)` | a tappable **label** |
 
-When composing, focus the message field and type at least three characters to reveal a **formatting toolbar** below the input. Select text and tap a style to wrap it (tap again to remove it); with no selection, a style inserts an empty pair with the cursor between the markers. The link button opens a dialog to enter a URL. As you type, the draft styles live in the field while the underlying text keeps its Markdown characters.
+When composing, focus the message field and type at least three characters to reveal a **formatting toolbar** below the input. Select text and tap a style to wrap it (tap again to remove it); with no selection, a style inserts an empty pair with the cursor between the markers. The link button opens a dialog to enter a URL. As you type, the field shows the styled text, but the message you send still contains the Markdown characters.
 
 > 💡 **Tip:** Formatting is carried as literal characters on the mesh — the same bytes iOS sends. Clients that don't support Markdown (older apps, plain firmware clients) will show the raw `**`/`~~` characters. URLs, email addresses, and phone numbers are still auto-linked whether or not you use Markdown.
 
@@ -178,15 +176,13 @@ Type `@` while composing to mention a node — a picker suggests matching contac
 
 React to messages with emoji:
 
-- **Double-tap** a message — or long-press it — to raise a quick reaction bar above the bubble
+- **Touch & hold** a message — or double-tap it — to raise a quick reaction bar above the bubble. Opening the bar sends nothing.
 - Tap an emoji in the bar to send it; tap **more** to open the full picker, or anywhere outside
-  the bar to dismiss it without sending
+  the bar to dismiss it without sending. A reaction is a real mesh packet, so it only goes out
+  when you pick an emoji.
 - Reactions appear below the message bubble
 - Multiple users can react to the same message
 - React to your own messages or others' messages
-
-> ℹ️ **Note:** Opening the bar sends nothing. A reaction is a real mesh packet, so it only goes
-> out when you pick an emoji.
 
 ![Emoji reaction badges displayed beneath a message](../../assets/screenshots/messages_reaction.png)
 
@@ -196,7 +192,7 @@ React to messages with emoji:
 
 **Swipe a message to the right** to reply to it — the composer opens with that message quoted.
 Swiping past the reply threshold arms the action; releasing before it springs back with nothing sent.
-Reply is also in the actions menu, reached by long-pressing and then tapping **More**.
+Reply is also in the actions menu, reached by touching & holding and then tapping **More**.
 
 ### Day Separators
 
@@ -212,7 +208,7 @@ messages. That count is messages, not people — five unread from one person rea
 
 ### Message Actions
 
-Long-press or double-tap a message to open the quick reaction bar, then tap **More** (the
+Touch & hold or double-tap a message to open the quick reaction bar, then tap **More** (the
 overflow icon on that bar) to reach:
 
 - **Copy** — copy message text to clipboard
@@ -249,6 +245,3 @@ reliable or background, but that is not something you control from the message c
 - [Settings — Radio & User](settings-radio-user) — configure channel encryption and presets
 - [MQTT](mqtt) — bridge channel messages to the internet
 - [Channel configuration](https://meshtastic.org/docs/configuration/radio/channels) — detailed channel settings on meshtastic.org
-
----
-

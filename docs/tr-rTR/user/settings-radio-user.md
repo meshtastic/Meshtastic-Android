@@ -2,7 +2,7 @@
 title: Settings — Radio & User
 parent: User Guide
 nav_order: 7
-last_updated: 2026-08-27
+last_updated: 2026-08-29
 description: Configure your radio hardware, LoRa presets, user profile, position sharing, power management, and security.
 aliases:
   - ayarlar
@@ -13,7 +13,7 @@ aliases:
 
 # Settings — Radio & User
 
-Configure your radio hardware and user identity parameters.
+Configure your radio's user identity, region and LoRa parameters, position and power behavior, network and Bluetooth connectivity, and security settings.
 
 ## User Settings
 
@@ -23,12 +23,16 @@ Configure your radio hardware and user identity parameters.
 | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Uzun Ad            | Your display name (up to 39 characters)                                                                                                                                                                                   |
 | Kısa Ad            | 4-character abbreviated name                                                                                                                                                                                                                 |
+| Status Message     | A short free-text status other nodes display alongside your node — up to 80 bytes, cleared with the **✕** in the field. Needs firmware 2.8 or newer, and is absent otherwise                                 |
 | Mesaj gönderilemez | Marks the node as one nobody should try to message — for an unmonitored or infrastructure node. Other clients hide it from the contact list. Needs supporting firmware                                       |
 | Licensed Operator  | Enable if you hold an amateur radio license (permits higher power). Turning it on relabels **Long Name** as **Call Sign** and adds a separate Long Name field, and is staged behind a confirmation dialog |
 
 ### Applying Changes
 
-After modifying settings, tap **Save** to write the configuration to your radio. The device may reboot to apply changes.
+After modifying settings, tap **Save** to write the configuration to your radio. The radio may reboot to apply changes.
+
+The status message is saved with the same **Save**, but it never reboots the node — and, like the
+rest of this screen, it can be edited on a remote node you administer.
 
 ## Yapılandırma
 
@@ -49,7 +53,7 @@ After modifying settings, tap **Save** to write the configuration to your radio.
 
 | Setting                      | Açıklaması                                                                                                                                                                                       | Varsayılan                                |
 | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------- |
-| Bölge                        | Regulatory region for frequency bands                                                                                                                                                            | Unset (must configure) |
+| Bölge                        | Regulatory region for frequency bands. You must set this before transmitting                                                                                                     | Unset (must configure) |
 | Modem Ön Ayarı               | Speed/range tradeoff                                                                                                                                                                             | LongFast                                  |
 | Hop Limiti                   | Maximum retransmit hops                                                                                                                                                                          | 3                                         |
 | TX Power                     | Transmission power (dBm); 0 = max allowed for region                                                                                                                          | 0 (region max)         |
@@ -60,13 +64,13 @@ After modifying settings, tap **Save** to write the configuration to your radio.
 | Coding Rate                  | Manual mode only: 5–8. More redundancy costs airtime                                                                                                             | From preset                               |
 | Frequency Slot               | Which slot within the region's band to use. 0 derives it from the primary channel name                                                                                           | 0 (automatic)          |
 | Transmit Enabled             | Turning this off makes the node receive-only                                                                                                                                                     | On                                        |
-| Görev Döngüsünü Geçersiz Kıl | Ignore the region's duty-cycle limit. Only legal where you are permitted to                                                                                                      | Off                                       |
+| Görev Döngüsünü Geçersiz Kıl | Ignores the region's duty-cycle limit. Illegal in most regions; turn it on only where your license permits                                                                       | Off                                       |
 | MQTT'yi Yoksay               | Drop packets that arrived from MQTT rather than over the air                                                                                                                                     | Off                                       |
 | MQTT'ye Tamam                | Allow your packets to be forwarded to MQTT by gateways                                                                                                                                           | Off                                       |
 | RX Boosted Gain              | Extra receive gain on SX126x radios; costs a little current                                                                                                                                      | Off                                       |
 | PA fanı devre dışı           | Turn off the power-amplifier fan on hardware that has one                                                                                                                                        | Off                                       |
 
-> ⚠️ **Important:** You **must** set your region before transmitting. Operating without the correct region may violate local radio regulations. See the [region configuration guide](https://meshtastic.org/docs/getting-started/initial-config) on meshtastic.org for details.
+> ⚠️ **Important:** Operating without the correct region may violate local radio regulations. See the [region configuration guide](https://meshtastic.org/docs/getting-started/initial-config) on meshtastic.org for details.
 
 ### Modem Presets
 
@@ -106,9 +110,9 @@ The modem preset controls the fundamental tradeoff between **range** and **data 
 - **Fixed infrastructure links:** Use **Short Turbo** or **Long Turbo** for dedicated point-to-point links with good antennas and line-of-sight.
 - **Mixed environments:** Stick with **Long Fast** — it's the community default and ensures compatibility with others in your area.
 
-> ⚠️ **Important:** All nodes on the same channel **must** use the same modem preset. Nodes with mismatched presets cannot communicate even if they share the same frequency and encryption key.
+All nodes on the same channel must use the same modem preset. Nodes with mismatched presets cannot communicate even if they share the same frequency and encryption key.
 
-> 💡 **Tip:** The range estimates above assume flat terrain and modest antennas. Elevation advantage (hilltop, rooftop) dramatically increases effective range. A well-placed Router with Long Fast can often outperform a ground-level node with Long Slow.
+The range estimates in the [Modem Presets](#modem-presets) table assume flat terrain and modest antennas. Elevation advantage (hilltop, rooftop) dramatically increases effective range. A well-placed Router with Long Fast can often outperform a ground-level node with Long Slow.
 
 ### Akran Ayarı
 
@@ -117,20 +121,20 @@ These control the **radio's own screen**, not the app's.
 | Setting                   | Açıklaması                                                                                                                                                |
 | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Screen on for             | How long the display stays lit before sleeping                                                                                                            |
-| Carousel interval         | How often the device cycles between screens on its own                                                                                                    |
+| Carousel interval         | How often the radio cycles between screens on its own                                                                                                     |
 | Görüntü Modu              | Screen layout/density used by the firmware                                                                                                                |
-| Görüntü Birimleri         | Metric or Imperial on the device's screen                                                                                                                 |
-| 12h saat formatını kullan | Show the device clock as 12-hour rather than 24-hour                                                                                                      |
+| Görüntü Birimleri         | Metric or Imperial on the radio's screen                                                                                                                  |
+| 12h saat formatını kullan | Show the radio's clock as 12-hour rather than 24-hour                                                                                                     |
 | Bold heading              | Draw the screen's heading text in bold                                                                                                                    |
 | Ekranı Çevir              | Rotate the display 180° for an inverted mounting                                                                                                          |
 | OLED type                 | Auto, SSD1306, SH1106, SH1107                                                                                                                             |
-| Wake on tap or motion     | Light the screen when the device is tapped or moved                                                                                                       |
+| Wake on tap or motion     | Light the screen when the radio is tapped or moved                                                                                                        |
 | Pusula yönü               | Rotation offset for the compass rose (0°, 90°, 180°, 270°)                                                                             |
 | Always point north        | Locks the compass rose north-up instead of rotating it with your heading. Independent of Compass orientation — neither replaces the other |
 
 ### Konum Ayarı
 
-> ⚠️ **Warning:** Saving this screen always reboots the radio.
+> ⚠️ **Important:** Saving this screen always reboots the radio.
 
 | Setting                                         | Açıklaması                                                                                                                                            |
 | ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -159,21 +163,21 @@ These control the **radio's own screen**, not the app's.
 
 ### Ağ Ayarı
 
-> ⚠️ **Warning:** Saving this screen always reboots the radio.
+> ⚠️ **Important:** Saving this screen always reboots the radio.
 
-| Setting                          | Açıklaması                                                                                                                 |
-| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| WiFi etkin                       | Enable the WiFi radio (ESP32 devices)                                                                   |
-| SSID                             | Network name to connect to. **Scan WiFi QR code** fills this and the password from a standard WiFi QR code |
-| Şifre                            | Ağ şifresi                                                                                                                 |
-| Ethernet etkin                   | Use a wired connection on hardware that has one                                                                            |
-| IPv4 modu                        | DHCP, or a static address configured with the four fields below                                                            |
-| Wifi IP / Subnet / Gateway / DNS | The static address, only used when IPv4 mode is static                                                                     |
-| UDP broadcasting                 | Share mesh traffic with other nodes over the local network                                                                 |
-| NTP sunucusu                     | Time synchronization server                                                                                                |
-| rsyslog sunucusu                 | Remote logging server                                                                                                      |
+| Setting                           | Açıklaması                                                                                                                   |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Wi-Fi enabled                     | Enable the Wi-Fi radio (ESP32 radios)                                                                     |
+| SSID                              | Network name to connect to. **Scan Wi-Fi QR code** fills this and the password from a standard Wi-Fi QR code |
+| Şifre                             | Ağ şifresi                                                                                                                   |
+| Ethernet etkin                    | Use a wired connection on hardware that has one                                                                              |
+| IPv4 modu                         | DHCP, or a static address configured with the four fields below                                                              |
+| Wi-Fi IP / Subnet / Gateway / DNS | The static address, only used when IPv4 mode is static                                                                       |
+| UDP broadcasting                  | Share mesh traffic with other nodes over the local network                                                                   |
+| NTP sunucusu                      | Time synchronization server                                                                                                  |
+| rsyslog sunucusu                  | Remote logging server                                                                                                        |
 
-![IP address field](../../assets/screenshots/settings_ipv4_field.png)
+![Network Config with a static IPv4 address entered](../../assets/screenshots/settings_ipv4_field.png)
 
 ### Bluetooth Ayarı
 
@@ -230,11 +234,11 @@ back-off before you can try again.
 
 Settings use standard preference controls — dropdowns, toggles, and sliders:
 
-| Control  | Screenshot                                                  |
-| -------- | ----------------------------------------------------------- |
-| Dropdown | ![Dropdown](../../assets/screenshots/settings_dropdown.png) |
-| Toggle   | ![Toggle](../../assets/screenshots/settings_switch.png)     |
-| Slider   | ![Slider](../../assets/screenshots/settings_slider.png)     |
+| Control  | Screenshot                                                                                                  |
+| -------- | ----------------------------------------------------------------------------------------------------------- |
+| Dropdown | ![A dropdown setting, expanded to show its list of options](../../assets/screenshots/settings_dropdown.png) |
+| Toggle   | ![A toggle setting in the on position](../../assets/screenshots/settings_switch.png)                        |
+| Slider   | ![A slider setting with its current numeric value shown](../../assets/screenshots/settings_slider.png)      |
 
 ## Related Topics
 
@@ -242,6 +246,3 @@ Settings use standard preference controls — dropdowns, toggles, and sliders:
 - [Signal Meter](signal-meter) — how modem presets affect signal quality thresholds
 - [LoRa configuration](https://meshtastic.org/docs/configuration/radio/lora) — detailed LoRa settings reference on meshtastic.org
 - [Initial configuration](https://meshtastic.org/docs/getting-started/initial-config) — region setup guide on meshtastic.org
-
----
-
