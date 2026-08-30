@@ -21,6 +21,8 @@ package org.meshtastic.feature.map.component
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingToolbarDefaults
@@ -55,8 +57,10 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusRed
  * Zoom is deliberately not here — it lives in [MapZoomControls], in the lower corner where Google Maps draws its own.
  *
  * @param onToggleFilterMenu Callback to open/close the filter dropdown.
- * @param filterDropdownContent Composable rendered inside a [Box] alongside the filter button — typically a
- *   `DropdownMenu` with filter options.
+ * @param filterDropdownContent Composable rendered inside a [Box] alongside the filter button — [MapFilterSheet] on the
+ *   main map, a dropdown on the node-track map.
+ * @param filtersActive Whether any filter is narrowing what the map shows. Badges the button, because a filter that
+ *   hides nodes is otherwise indistinguishable from a quiet mesh.
  * @param mapTypeContent Optional composable for a map type selector button + dropdown. Google flavor provides map type
  *   and custom tile options; F-Droid provides a tile source selector.
  * @param layersContent Optional composable for a layers management button.
@@ -75,6 +79,7 @@ fun MapControlsOverlay(
     onCompassClick: () -> Unit = {},
     followPhoneBearing: Boolean = false,
     filterDropdownContent: @Composable () -> Unit = {},
+    filtersActive: Boolean = false,
     mapTypeContent: @Composable () -> Unit = {},
     layersContent: @Composable () -> Unit = {},
     onSitePlannerClick: (() -> Unit)? = null,
@@ -96,11 +101,13 @@ fun MapControlsOverlay(
         // Filter button + dropdown (optional)
         onToggleFilterMenu?.let { onClick ->
             Box {
-                MapButton(
-                    icon = MeshtasticIcons.Tune,
-                    contentDescription = stringResource(Res.string.map_filter),
-                    onClick = onClick,
-                )
+                BadgedBox(badge = { if (filtersActive) Badge() }) {
+                    MapButton(
+                        icon = MeshtasticIcons.Tune,
+                        contentDescription = stringResource(Res.string.map_filter),
+                        onClick = onClick,
+                    )
+                }
                 filterDropdownContent()
             }
         }

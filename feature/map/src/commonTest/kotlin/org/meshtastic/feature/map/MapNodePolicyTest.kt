@@ -17,7 +17,9 @@
 package org.meshtastic.feature.map
 
 import org.meshtastic.core.model.Node
+import org.meshtastic.proto.Config
 import org.meshtastic.proto.Position
+import org.meshtastic.proto.User
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -25,22 +27,52 @@ import kotlin.test.assertTrue
 /** The rules both map engines answer: who appears, and who draws on top. */
 class MapNodePolicyTest {
 
-    private fun node(num: Int, latitude: Double, longitude: Double, lastHeard: Int = 0, isFavorite: Boolean = false) =
-        Node(
-            num = num,
-            position = Position(latitude_i = (latitude * 1e7).toInt(), longitude_i = (longitude * 1e7).toInt()),
-            lastHeard = lastHeard,
-            isFavorite = isFavorite,
-        )
+    @Suppress("LongParameterList")
+    private fun node(
+        num: Int,
+        latitude: Double,
+        longitude: Double,
+        lastHeard: Int = 0,
+        isFavorite: Boolean = false,
+        role: Config.DeviceConfig.Role = Config.DeviceConfig.Role.CLIENT,
+        hopsAway: Int = 0,
+        viaMqtt: Boolean = false,
+        isIgnored: Boolean = false,
+        shortName: String = "ABCD",
+    ) = Node(
+        num = num,
+        position = Position(latitude_i = (latitude * 1e7).toInt(), longitude_i = (longitude * 1e7).toInt()),
+        lastHeard = lastHeard,
+        isFavorite = isFavorite,
+        user = User(short_name = shortName, role = role),
+        hopsAway = hopsAway,
+        viaMqtt = viaMqtt,
+        isIgnored = isIgnored,
+    )
 
-    private fun filters(onlyFavorites: Boolean = false, lastHeard: LastHeardFilter = LastHeardFilter.Any) =
-        BaseMapViewModel.MapFilterState(
-            onlyFavorites = onlyFavorites,
-            showWaypoints = true,
-            showPrecisionCircle = true,
-            lastHeardFilter = lastHeard,
-            lastHeardTrackFilter = LastHeardFilter.Any,
-        )
+    @Suppress("LongParameterList")
+    private fun filters(
+        onlyFavorites: Boolean = false,
+        lastHeard: LastHeardFilter = LastHeardFilter.Any,
+        excludedRoles: Set<Config.DeviceConfig.Role> = emptySet(),
+        onlyOnline: Boolean = false,
+        onlyDirect: Boolean = false,
+        excludeMqtt: Boolean = false,
+        showIgnored: Boolean = false,
+        includeUnknown: Boolean = true,
+    ) = BaseMapViewModel.MapFilterState(
+        onlyFavorites = onlyFavorites,
+        showWaypoints = true,
+        showPrecisionCircle = true,
+        lastHeardFilter = lastHeard,
+        lastHeardTrackFilter = LastHeardFilter.Any,
+        excludedRoles = excludedRoles,
+        onlyOnline = onlyOnline,
+        onlyDirect = onlyDirect,
+        excludeMqtt = excludeMqtt,
+        showIgnored = showIgnored,
+        includeUnknown = includeUnknown,
+    )
 
     private fun visible(nodes: List<Node>, state: BaseMapViewModel.MapFilterState, now: Long = 0, mine: Int? = null) =
         MapNodePolicy.visibleNodes(nodes, state, now, mine).map { it.num }
@@ -91,5 +123,90 @@ class MapNodePolicyTest {
         assertEquals(MapNodePolicy.PRIORITY_PROMINENT, MapNodePolicy.priorityOf(favourite, myNodeNum = 1))
         assertEquals(MapNodePolicy.PRIORITY_ORDINARY, MapNodePolicy.priorityOf(ordinary, myNodeNum = 1))
         assertTrue(MapNodePolicy.PRIORITY_PROMINENT > MapNodePolicy.PRIORITY_ORDINARY)
+    }
+
+    @Test
+    fun `a node whose role is excluded is hidden`() {
+        val nodes =
+            listOf(
+                node(1, 45.0, -122.0, role = Config.DeviceConfig.Role.ROUTER),
+                node(2, 45.1, -122.1, role = Config.DeviceConfig.Role.CLIENT),
+            )
+        assertEquals(listOf(2), visible(nodes, filters(excludedRoles = setOf(Config.DeviceConfig.Role.ROUTER))))
+    }
+
+    @Test
+    fun `excluding CLIENT also hides every node that never reported a role`() {
+        // CLIENT is 0, the proto default, so "never said" and "said CLIENT" are the same value on the wire. Worth
+        // pinning: it is the one surprising consequence of a per-role filter.
+        val nodes = listOf(node(1, 45.0, -122.0), node(2, 45.1, -122.1, role = Config.DeviceConfig.Role.ROUTER))
+        assertEquals(listOf(2), visible(nodes, filters(excludedRoles = setOf(Config.DeviceConfig.Role.CLIENT))))
+    }
+
+    @Test
+    fun `the online filter drops nodes unheard for over two hours`() {
+        // 97_000 is 3_000s back, inside the two-hour window; 90_000 is 10_000s back, outside it.
+        val nodes = listOf(node(1, 45.0, -122.0, lastHeard = 90_000), node(2, 45.1, -122.1, lastHeard = 97_000))
+        assertEquals(listOf(2), visible(nodes, filters(onlyOnline = true), now = 100_000))
+    }
+
+    @Test
+    fun `the direct filter drops both relayed nodes and nodes of unknown distance`() {
+        // The node list's query is `hops_away <= 0 AND hops_away >= 0`, so -1 — never measured — is not direct.
+        val nodes =
+            listOf(node(1, 45.0, -122.0, hopsAway = 2), node(2, 45.1, -122.1), node(3, 45.2, -122.2, hopsAway = -1))
+        assertEquals(listOf(2), visible(nodes, filters(onlyDirect = true)))
+    }
+
+    @Test
+    fun `the mqtt filter drops nodes heard over mqtt`() {
+        val nodes = listOf(node(1, 45.0, -122.0, viaMqtt = true), node(2, 45.1, -122.1))
+        assertEquals(listOf(2), visible(nodes, filters(excludeMqtt = true)))
+    }
+
+    @Test
+    fun `ignored nodes are hidden by default`() {
+        val nodes = listOf(node(1, 45.0, -122.0, isIgnored = true), node(2, 45.1, -122.1))
+        assertEquals(listOf(2), visible(nodes, filters()))
+    }
+
+    @Test
+    fun `showing ignored nodes adds them rather than showing only them`() {
+        // The node list segregates — its filter is `isIgnored == showIgnored` — but a map of nothing but ignored
+        // nodes is not a view anyone wants. Here the toggle reads literally: include them too.
+        val nodes = listOf(node(1, 45.0, -122.0, isIgnored = true), node(2, 45.1, -122.1))
+        assertEquals(listOf(1, 2), visible(nodes, filters(showIgnored = true)))
+    }
+
+    @Test
+    fun `excluding unknown nodes drops the ones with no name yet`() {
+        // "Unknown" is a node that has not sent a short name, matching the node list's `short_name IS NOT NULL`.
+        val nodes = listOf(node(1, 45.0, -122.0, shortName = ""), node(2, 45.1, -122.1))
+        assertEquals(listOf(2), visible(nodes, filters(includeUnknown = false)))
+    }
+
+    @Test
+    fun `my own node survives every new filter`() {
+        val mine =
+            node(
+                1,
+                45.0,
+                -122.0,
+                lastHeard = 0,
+                role = Config.DeviceConfig.Role.ROUTER,
+                hopsAway = 3,
+                viaMqtt = true,
+                isIgnored = true,
+                shortName = "",
+            )
+        val state =
+            filters(
+                excludedRoles = setOf(Config.DeviceConfig.Role.ROUTER),
+                onlyOnline = true,
+                onlyDirect = true,
+                excludeMqtt = true,
+                includeUnknown = false,
+            )
+        assertEquals(listOf(1), visible(listOf(mine), state, now = 100_000, mine = 1))
     }
 }

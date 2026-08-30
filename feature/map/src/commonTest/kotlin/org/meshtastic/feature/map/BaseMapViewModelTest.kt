@@ -73,6 +73,12 @@ class BaseMapViewModelTest {
         every { mapPrefs.showPrecisionCircleOnMap } returns MutableStateFlow(false)
         every { mapPrefs.lastHeardFilter } returns MutableStateFlow(0L)
         every { mapPrefs.lastHeardTrackFilter } returns MutableStateFlow(0L)
+        every { mapPrefs.onlyOnlineOnMap } returns MutableStateFlow(false)
+        every { mapPrefs.onlyDirectOnMap } returns MutableStateFlow(false)
+        every { mapPrefs.excludeMqttOnMap } returns MutableStateFlow(false)
+        every { mapPrefs.showIgnoredOnMap } returns MutableStateFlow(false)
+        every { mapPrefs.includeUnknownOnMap } returns MutableStateFlow(true)
+        every { mapPrefs.excludedMapRoles } returns MutableStateFlow(emptySet())
 
         waypointPacketsFlow = MutableStateFlow(emptyList())
         every { packetRepository.getWaypoints() } returns waypointPacketsFlow

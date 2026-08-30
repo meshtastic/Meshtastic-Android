@@ -17,6 +17,7 @@
 package org.meshtastic.feature.map
 
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -50,6 +51,7 @@ import org.meshtastic.core.resources.two_days
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.ChannelSet
+import org.meshtastic.proto.Config
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.Waypoint
 
@@ -151,6 +153,65 @@ open class BaseMapViewModel(
         mapPrefs.setShowPrecisionCircleOnMap(newValue)
     }
 
+    private val onlyOnline = MutableStateFlow(mapPrefs.onlyOnlineOnMap.value)
+    val onlyOnlineOnMap: StateFlow<Boolean> = onlyOnline.asStateFlow()
+
+    fun toggleOnlyOnline() {
+        val newValue = !onlyOnline.value
+        onlyOnline.value = newValue
+        mapPrefs.setOnlyOnlineOnMap(newValue)
+    }
+
+    private val onlyDirect = MutableStateFlow(mapPrefs.onlyDirectOnMap.value)
+    val onlyDirectOnMap: StateFlow<Boolean> = onlyDirect.asStateFlow()
+
+    fun toggleOnlyDirect() {
+        val newValue = !onlyDirect.value
+        onlyDirect.value = newValue
+        mapPrefs.setOnlyDirectOnMap(newValue)
+    }
+
+    private val excludeMqtt = MutableStateFlow(mapPrefs.excludeMqttOnMap.value)
+    val excludeMqttOnMap: StateFlow<Boolean> = excludeMqtt.asStateFlow()
+
+    fun toggleExcludeMqtt() {
+        val newValue = !excludeMqtt.value
+        excludeMqtt.value = newValue
+        mapPrefs.setExcludeMqttOnMap(newValue)
+    }
+
+    private val showIgnored = MutableStateFlow(mapPrefs.showIgnoredOnMap.value)
+    val showIgnoredOnMap: StateFlow<Boolean> = showIgnored.asStateFlow()
+
+    fun toggleShowIgnored() {
+        val newValue = !showIgnored.value
+        showIgnored.value = newValue
+        mapPrefs.setShowIgnoredOnMap(newValue)
+    }
+
+    private val includeUnknown = MutableStateFlow(mapPrefs.includeUnknownOnMap.value)
+    val includeUnknownOnMap: StateFlow<Boolean> = includeUnknown.asStateFlow()
+
+    fun toggleIncludeUnknown() {
+        val newValue = !includeUnknown.value
+        includeUnknown.value = newValue
+        mapPrefs.setIncludeUnknownOnMap(newValue)
+    }
+
+    private val excludedRoles = MutableStateFlow(decodeExcludedRoles(mapPrefs.excludedMapRoles.value))
+    val excludedMapRoles: StateFlow<Set<Config.DeviceConfig.Role>> = excludedRoles.asStateFlow()
+
+    fun toggleRoleExcluded(role: Config.DeviceConfig.Role) {
+        val newValue = excludedRoles.value.let { if (role in it) it - role else it + role }
+        excludedRoles.value = newValue
+        mapPrefs.setExcludedMapRoles(newValue.mapTo(mutableSetOf()) { it.name })
+    }
+
+    fun clearExcludedRoles() {
+        excludedRoles.value = emptySet()
+        mapPrefs.setExcludedMapRoles(emptySet())
+    }
+
     private val lastHeardFilterValue = MutableStateFlow(LastHeardFilter.fromSeconds(mapPrefs.lastHeardFilter.value))
     val lastHeardFilter: StateFlow<LastHeardFilter> = lastHeardFilterValue.asStateFlow()
 
@@ -189,15 +250,40 @@ open class BaseMapViewModel(
 
     fun generatePacketId(): Int = radioController.generatePacketId()
 
+    /**
+     * Everything the map's filter sheet controls.
+     *
+     * The node-level filters mirror the node list's, down to reusing its string resources, so the same words mean the
+     * same thing on both screens. [showIgnored] is the one deliberate divergence — see [MapNodePolicy].
+     */
     data class MapFilterState(
         val onlyFavorites: Boolean,
         val showWaypoints: Boolean,
         val showPrecisionCircle: Boolean,
         val lastHeardFilter: LastHeardFilter,
         val lastHeardTrackFilter: LastHeardFilter,
-    )
+        /** Roles the user has switched off. Excluded rather than included so a role added by future firmware shows. */
+        val excludedRoles: Set<Config.DeviceConfig.Role> = emptySet(),
+        val onlyOnline: Boolean = false,
+        val onlyDirect: Boolean = false,
+        val excludeMqtt: Boolean = false,
+        val showIgnored: Boolean = false,
+        val includeUnknown: Boolean = true,
+    ) {
+        /** True when anything here is narrowing the node set, so the filter button can show it. */
+        val isNarrowing: Boolean
+            get() =
+                onlyFavorites ||
+                    excludedRoles.isNotEmpty() ||
+                    onlyOnline ||
+                    onlyDirect ||
+                    excludeMqtt ||
+                    !includeUnknown ||
+                    lastHeardFilter != LastHeardFilter.Any
+    }
 
-    val mapFilterStateFlow: StateFlow<MapFilterState> =
+    // Two intermediate combines rather than one: `combine` tops out at five flows, and there are eleven.
+    private val displayFilters: Flow<MapFilterState> =
         combine(
             showOnlyFavorites,
             showWaypointsOnMap,
@@ -207,6 +293,14 @@ open class BaseMapViewModel(
         ) { favoritesOnly, showWaypoints, showPrecisionCircle, lastHeardFilter, lastHeardTrackFilter ->
             MapFilterState(favoritesOnly, showWaypoints, showPrecisionCircle, lastHeardFilter, lastHeardTrackFilter)
         }
+
+    private val nodeFilters: Flow<NodeFilters> =
+        combine(excludedMapRoles, onlyOnlineOnMap, onlyDirectOnMap, excludeMqttOnMap, showIgnoredOnMap, ::NodeFilters)
+
+    val mapFilterStateFlow: StateFlow<MapFilterState> =
+        combine(displayFilters, nodeFilters, includeUnknownOnMap) { display, nodes, includeUnknown ->
+            display.with(nodes, includeUnknown)
+        }
             .stateInWhileSubscribed(
                 initialValue =
                 MapFilterState(
@@ -215,8 +309,36 @@ open class BaseMapViewModel(
                     showPrecisionCircleOnMap.value,
                     lastHeardFilter.value,
                     lastHeardTrackFilter.value,
-                ),
+                )
+                    .with(
+                        NodeFilters(
+                            excludedMapRoles.value,
+                            onlyOnlineOnMap.value,
+                            onlyDirectOnMap.value,
+                            excludeMqttOnMap.value,
+                            showIgnoredOnMap.value,
+                        ),
+                        includeUnknownOnMap.value,
+                    ),
             )
+
+    /** The five node-level toggles, boxed so they fit one `combine`. */
+    private data class NodeFilters(
+        val excludedRoles: Set<Config.DeviceConfig.Role>,
+        val onlyOnline: Boolean,
+        val onlyDirect: Boolean,
+        val excludeMqtt: Boolean,
+        val showIgnored: Boolean,
+    )
+
+    private fun MapFilterState.with(nodes: NodeFilters, includeUnknown: Boolean) = copy(
+        excludedRoles = nodes.excludedRoles,
+        onlyOnline = nodes.onlyOnline,
+        onlyDirect = nodes.onlyDirect,
+        excludeMqtt = nodes.excludeMqtt,
+        showIgnored = nodes.showIgnored,
+        includeUnknown = includeUnknown,
+    )
 }
 
 /**

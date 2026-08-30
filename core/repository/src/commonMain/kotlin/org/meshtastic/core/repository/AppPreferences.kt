@@ -285,6 +285,41 @@ interface MapPrefs {
 
     fun setLastHeardTrackFilter(seconds: Long)
 
+    /**
+     * Node filters shared with the node list's vocabulary, persisted separately: a user filtering the map to routers
+     * has not asked for the same of their contact list.
+     */
+    val onlyOnlineOnMap: StateFlow<Boolean>
+
+    fun setOnlyOnlineOnMap(only: Boolean)
+
+    val onlyDirectOnMap: StateFlow<Boolean>
+
+    fun setOnlyDirectOnMap(only: Boolean)
+
+    val excludeMqttOnMap: StateFlow<Boolean>
+
+    fun setExcludeMqttOnMap(exclude: Boolean)
+
+    val showIgnoredOnMap: StateFlow<Boolean>
+
+    fun setShowIgnoredOnMap(show: Boolean)
+
+    val includeUnknownOnMap: StateFlow<Boolean>
+
+    fun setIncludeUnknownOnMap(include: Boolean)
+
+    /**
+     * Names of the device roles the user has switched off on the map.
+     *
+     * Excluded rather than included, and by name rather than ordinal: an included set would make nodes reporting a role
+     * added by future firmware invisible with no way to discover why, and `ROUTER_CLIENT = 3` is already a deprecated
+     * slot.
+     */
+    val excludedMapRoles: StateFlow<Set<String>>
+
+    fun setExcludedMapRoles(roles: Set<String>)
+
     /** URIs of imported map layers the user has toggled off; a layer is visible unless its URI is in this set. */
     val hiddenLayerUrls: StateFlow<Set<String>>
 
