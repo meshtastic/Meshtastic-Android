@@ -48,8 +48,11 @@ kotlin {
             implementation(libs.ktor.client.core)
         }
 
-        commonTest.dependencies { implementation(libs.compose.multiplatform.ui.test) }
-
-        jvmTest.dependencies { implementation(compose.desktop.currentOs) }
+        // Compose UI tests live in jvmTest, not commonTest: this module enables Android host tests, and
+        // `runComposeUiTest` has no Robolectric host there — the same tests NPE the moment they run under it.
+        jvmTest.dependencies {
+            implementation(libs.compose.multiplatform.ui.test)
+            implementation(compose.desktop.currentOs)
+        }
     }
 }
