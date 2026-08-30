@@ -305,9 +305,6 @@ interface MapPrefs {
     /** Atomically mutate [layerOpacity]; [transform] runs against the persisted value, avoiding lost updates. */
     fun updateLayerOpacity(transform: (Set<String>) -> Set<String>)
 
-    /** Persisted [layerOpacity]; suspends for the first disk load to avoid a cold-start empty default. */
-    suspend fun awaitLayerOpacity(): Set<String>
-
     /** Persisted network (URL-backed) map layers, each encoded as `id|:|name|:|uri`. */
     val networkMapLayers: StateFlow<Set<String>>
 

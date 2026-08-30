@@ -80,13 +80,13 @@ class MapPrefsImplTest {
 
     @Test
     fun `layer opacity is absent until a slider is moved`() =
-        testScope.runTest { assertEquals(emptySet<String>(), prefs.awaitLayerOpacity()) }
+        testScope.runTest { assertEquals(emptySet<String>(), prefs.layerOpacity.value) }
 
     @Test
     fun `layer opacity is persisted`() = testScope.runTest {
         prefs.updateLayerOpacity { it + "hillshade|:|0.4" }
 
-        assertEquals(setOf("hillshade|:|0.4"), prefs.awaitLayerOpacity())
+        assertEquals(setOf("hillshade|:|0.4"), prefs.layerOpacity.value)
     }
 
     @Test
@@ -95,6 +95,6 @@ class MapPrefsImplTest {
 
         prefs.updateLayerOpacity { it + "weather|:|0.8" }
 
-        assertEquals(setOf("hillshade|:|0.4", "weather|:|0.8"), prefs.awaitLayerOpacity())
+        assertEquals(setOf("hillshade|:|0.4", "weather|:|0.8"), prefs.layerOpacity.value)
     }
 }

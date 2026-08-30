@@ -20,6 +20,7 @@ import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.meshtastic.feature.map.tiles.MapTileCatalogue
@@ -78,5 +79,22 @@ class RasterOverlayTogglesTest {
         onNodeWithTag(layerOpacityTestTag(overlay.id)).performSemanticsAction(SemanticsActions.SetProgress) { it(0.8f) }
 
         runOnIdle { assertEquals(listOf(overlay.id to 0.8f), reported) }
+    }
+
+    @Test
+    fun `the opacity is labelled as a percentage`() = runComposeUiTest {
+        // The label's "%%" escape is an aapt convention, and core/resources is compiled by Compose Multiplatform's
+        // own resource pipeline instead — strings.xml here uses both spellings, so only rendering settles it.
+        setContent {
+            RasterOverlayToggles(
+                available = listOf(overlay),
+                enabledIds = setOf(overlay.id),
+                onToggle = {},
+                opacity = mapOf(overlay.id to 0.2f),
+                onOpacityChange = { _, _ -> },
+            )
+        }
+
+        onNodeWithText("Opacity: 20%").assertIsDisplayed()
     }
 }

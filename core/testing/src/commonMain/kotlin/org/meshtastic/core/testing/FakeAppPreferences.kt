@@ -318,8 +318,6 @@ class FakeMapPrefs : MapPrefs {
         layerOpacity.value = transform(layerOpacity.value)
     }
 
-    override suspend fun awaitLayerOpacity(): Set<String> = layerOpacity.value
-
     override val networkMapLayers = MutableStateFlow<Set<String>>(emptySet())
 
     override fun updateNetworkMapLayers(transform: (Set<String>) -> Set<String>) {

@@ -110,9 +110,6 @@ class MapPrefsImpl(private val dataStore: MapDataStore, dispatchers: CoroutineDi
         }
     }
 
-    override suspend fun awaitLayerOpacity(): Set<String> =
-        dataStore.data.map { it[KEY_LAYER_OPACITY_PREF] ?: emptySet() }.first()
-
     override val networkMapLayers: StateFlow<Set<String>> =
         dataStore.data
             .map { it[KEY_NETWORK_MAP_LAYERS_PREF] ?: emptySet() }
