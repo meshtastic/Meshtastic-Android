@@ -24,24 +24,17 @@ plugins {
     alias(libs.plugins.meshtastic.koin)
 }
 
-// `wasmJs { browser() }`'s auto-applied WasmNpmResolverPlugin reaches into the root project's
-// Project.plugins, which org.gradle.isolated-projects=true (gradle.properties, repo-wide) forbids
-// from a subproject — that broke configuration for every task in the whole repo, not just wasmJs
-// ones, since Gradle configures this module's build script whenever anything depends on it. Two
-// fixes: (1) core:ble is a library, not an executable — it needs the wasmJs *compile* target only,
-// not browser()'s npm/webpack tooling, which is IP-incompatible today (JetBrains: JS/Wasm + Isolated
-// Projects is not yet supported). (2) gate the target registration behind a property so it is absent
-// from the configuration graph by default — pass -Pmeshtastic.web=true to build it locally; it must
-// stay off for the standard baseline/CI until upstream JS/Wasm + IP support lands.
-val webEnabled = providers.gradleProperty("meshtastic.web").isPresent
-
 kotlin {
     android { withHostTest { isIncludeAndroidResources = true } }
 
-    if (webEnabled) {
-        @OptIn(ExperimentalWasmDsl::class)
-        wasmJs()
-    }
+    // wasmJs is a first-class target, alongside android/jvm/iOS above (org.gradle.isolated-projects
+    // is off repo-wide as of this branch -- see gradle.properties -- specifically so more than one
+    // project can carry this target; see that file's comment for the confirmed KGP incompatibility
+    // this sidesteps). Bare wasmJs(), no browser(): this is a library module producing a klib, not a
+    // browser-runnable executable -- browser()'s npm/webpack tooling belongs on the eventual webApp
+    // module only.
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs()
 
     // Kable (this module's BLE library on android/jvm/ios) has no wasmJs target. Everything that
     // depends on it lives in the `nonWebMain` intermediate source set this creates instead of

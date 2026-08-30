@@ -23,19 +23,16 @@ plugins {
     alias(libs.plugins.meshtastic.koin)
 }
 
-// Gated the same way as core/ble (see its build.gradle.kts for the full Isolated Projects /
-// browser() rationale): absent from the configuration graph by default, pass
-// -Pmeshtastic.web=true to build it locally. core:common has no native-only dependency (no Kable
-// equivalent here), so unlike core:ble it needs no source-set hierarchy split — just the target
-// plus a wasmJsMain actual for each of its existing expect declarations.
-val webEnabled = providers.gradleProperty("meshtastic.web").isPresent
-
 kotlin {
     android { withHostTest { isIncludeAndroidResources = true } }
 
-    if (webEnabled) {
-        @OptIn(ExperimentalWasmDsl::class) wasmJs()
-    }
+    // wasmJs is a first-class target, alongside android/jvm above (see core/ble/build.gradle.kts
+    // and gradle.properties for why org.gradle.isolated-projects is off repo-wide as of this
+    // branch). core:common has no native-only dependency (no Kable equivalent here), so unlike
+    // core:ble it needs no source-set hierarchy split -- just the target plus a wasmJsMain actual
+    // for each existing expect declaration.
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs()
 
     sourceSets {
         commonMain.dependencies {
