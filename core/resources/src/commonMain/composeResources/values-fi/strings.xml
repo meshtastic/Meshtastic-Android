@@ -19,7 +19,7 @@
     <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Viesti käyttäjältä %1$s: %2$s</string>
-    <string name="a11y_node_battery">akku %1$d%%</string>
+    <string name="a11y_node_battery">akku %1$d %</string>
     <string name="a11y_node_distance_away">%1$s pois</string>
     <string name="a11y_node_favorite">suosikki</string>
     <string name="a11y_node_hops_away">%1$d hypyn päässä</string>
@@ -225,7 +225,7 @@
     <string name="chirpy_assistant_title">Chirpy Apulainen</string>
     <string name="chirpy_checking">Tarkistetaan Chirpyn saatavuutta…</string>
     <string name="chirpy_downloading">Chirpy lataa…</string>
-    <string name="chirpy_downloading_progress">Ladataan Chirpy mallia: %1$d%%</string>
+    <string name="chirpy_downloading_progress">Chirpy-mallia ladataan: %1$d %</string>
     <string name="chirpy_downloading_subtitle">Tämä tapahtuu vain kerran. Chirpy on valmis pian!</string>
     <string name="chirpy_error_busy">Kanava on tällä hetkellä erittäin ruuhkainen. 📶 Odotetaan vapaata lähetysvuoroa ja yritetään uudelleen.</string>
     <string name="chirpy_error_model_unavailable">Akkua ladataan tai laiteohjelmistoa päivitetään parhaillaan! 🔋 Odota hetki, niin saan synkronoinnin ja käynnistyksen valmiiksi.</string>
@@ -1616,18 +1616,31 @@
     <string name="ringtone_imported">Tuotu soittoääni</string>
     <!-- ROLE -->
     <string name="role">Laitteen rooli</string>
+    <string name="role_client">Client</string>
+    <string name="role_client_base">Client Base</string>
     <string name="role_client_base_desc">Suosikkiradioihin liittyvät paketit käsitellään ROUTER_LATE-tilassa, muut paketit CLIENT-tilassa.</string>
     <string name="role_client_desc">Yhdistetty sovellukseen tai itsenäinen viestintälaite.</string>
+    <string name="role_client_hidden">Client Hidden</string>
     <string name="role_client_hidden_desc">Laite, joka lähettää vain tarvittaessa tai virransäästotilassa.</string>
+    <string name="role_client_mute">Client Mute</string>
     <string name="role_client_mute_desc">Laite, joka ei välitä paketteja muilta laitteilta.</string>
-    <string name="role_lost_and_found_desc">Lähettää laitteen sijainnin viestillä oletuskanavalle sen löytämisen helpottamiseksi.</string>
+    <string name="role_lost_and_found">Lost and Found</string>
+    <string name="role_lost_and_found_desc">Lähettää sijainnin säännöllisesti oletuskanavalle helpottaakseen laitteen löytämistä.</string>
+    <string name="role_repeater">Repeater</string>
     <string name="role_repeater_desc">Laite, joka laajentaa verkon kattavuutta välittämällä viestejä verkkoa kuormittamatta. Ei näy laitelistauksessa.</string>
+    <string name="role_router">Router</string>
+    <string name="role_router_client">Router Client</string>
     <string name="role_router_client_desc">Yhdistelmä ROUTER sekä CLIENT roolista. Ei mobiililaitteille.</string>
     <string name="role_router_desc">Laite, joka laajentaa verkon infrastruktuuria viestejä välittämällä. Näkyy laitelistauksessa.</string>
+    <string name="role_router_late">Router Late</string>
     <string name="role_router_late_desc">Muuten samanlainen kuin ROUTER rooli, mutta se uudelleen lähettää paketteja vasta kaikkien muiden tilojen jälkeen, varmistaen paremman peittoalueen muille laitteille. Laite näkyy mesh-verkon laiteluettelossa muille käyttäjille.</string>
+    <string name="role_sensor">Sensor</string>
     <string name="role_sensor_desc">Lähettää telemetriatiedot ensisijaisesti.</string>
+    <string name="role_tak">TAK</string>
     <string name="role_tak_desc">Optimoitu ATAK-järjestelmän viestintään, joka vähentää tavanomaisia lähetyksiä.</string>
+    <string name="role_tak_tracker">TAK Tracker</string>
     <string name="role_tak_tracker_desc">Ottaa käyttöön automaattisen TAK PLI -lähetyksen vähentäen tavanomaisia lähetyksiä.</string>
+    <string name="role_tracker">Tracker</string>
     <string name="role_tracker_desc">Lähettää GPS-sijaintitiedot ensisijaisesti.</string>
     <string name="root_topic">Palvelimen osoite (root topic)</string>
     <string name="rotary_encoder_1_enabled">Kiertovalitsin #1 käytössä</string>
@@ -1797,7 +1810,7 @@
     <string name="ssid">SSID</string>
     <string name="state_broadcast_seconds">Tilatiedon lähetys (sekuntia)</string>
     <string name="status_message">Tilaviesti</string>
-    <string name="status_message_summary">Mesh-verkkoon lähetettävä tilaviesti. Muut radiot näkevät tämän tilaviestin radioluettelossa.</string>
+    <string name="status_message_summary">Julkinen tilaviesti, joka lähetetään mesh-verkkoon aina muuttuessaan ja lisäksi 12 tunnin välein.</string>
     <string name="stay_connected_anywhere">Pysy yhteydessä kaikkialla</string>
     <string name="stop_connecting">Lopeta yhdistäminen</string>
     <string name="store_forward">Varastoi &amp; välitä</string>

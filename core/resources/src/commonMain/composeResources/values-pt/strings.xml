@@ -464,17 +464,26 @@
     <string name="reset_to_defaults">Redefinir para configurações originais</string>
     <string name="ringtone">Toque</string>
     <!-- ROLE -->
+    <string name="role_client">Cliente</string>
     <string name="role_client_desc">Ligado por app, ou dispositivo autónomo de mensagens.</string>
+    <string name="role_client_hidden">Cliente oculto</string>
     <string name="role_client_hidden_desc">Dispositivo que só transmite quando necessário para economizar energia ou anonimidade.</string>
+    <string name="role_client_mute">Cliente silenciado</string>
     <string name="role_client_mute_desc">Dispositivo que não encaminha mensagens de outros dispositivos.</string>
-    <string name="role_lost_and_found_desc">Transmite regularmente a localização como uma mensagem para o canal default, para auxiliar na recuperação do dispositivo.</string>
+    <string name="role_lost_and_found">Perdidos e Achados</string>
+    <string name="role_repeater">Repetidor</string>
     <string name="role_repeater_desc">Node de infraestrutura para estender a cobertura da rede retransmitindo mensagens com overhead mínimo. Não visível na lista de nodes.</string>
+    <string name="role_router">Roteador</string>
+    <string name="role_router_client">Cliente Roteador</string>
     <string name="role_router_client_desc">Combinação de ROUTER e CLIENT. Não indicado para dispositivos móveis.</string>
     <string name="role_router_desc">Node de infraestrutura que retransmite mensagens para estender a cobertura da rede (Router). Visível na lista de nodes.</string>
     <string name="role_router_late_desc">Node de infraestrutura que vai sempre retransmitir dados uma vez, mas apenas após todos os outros modos, garantindo cobertura adicional para grupos locais. Visível na lista de nós.</string>
+    <string name="role_sensor">Sensor</string>
     <string name="role_sensor_desc">Transmite dados de telemetria como prioridade.</string>
+    <string name="role_tak">TAK — ‘Kit’ de Consciencialização da Equipa</string>
     <string name="role_tak_desc">Otimizado para comunicação do sistema ATAK, reduz as transmissões de rotina.</string>
     <string name="role_tak_tracker_desc">Permite transmissões automáticas do TAK PLI e reduz as transmissões de rotina.</string>
+    <string name="role_tracker">Monitor</string>
     <string name="role_tracker_desc">Transmite dados de posições GPS como prioridade.</string>
     <string name="root_topic">Tópico principal</string>
     <string name="rotary_encoder_1_enabled">Ativar Codificador rotativo #1</string>

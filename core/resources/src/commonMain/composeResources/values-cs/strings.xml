@@ -19,7 +19,6 @@
     <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Zpráva od %1$s: %2$s</string>
-    <string name="a11y_node_battery">baterie: %1$d%%</string>
     <string name="a11y_node_favorite">oblíbené</string>
     <string name="a11y_node_offline">offline</string>
     <string name="a11y_node_online">online</string>
@@ -108,6 +107,7 @@
     <!-- AQI -->
     <string name="aqi">AQI</string>
     <string name="aqi_good">Silný</string>
+    <string name="aqi_value_with_severity">%1$d (%2$s)</string>
     <string name="are_you_sure">Jste si jistý?</string>
     <string name="are_you_sure_change_default">Opravdu chcete změnit na výchozí kanál?</string>
     <string name="audio">Zvuk</string>
@@ -211,7 +211,6 @@
     <string name="chirpy_assistant_title">Asistent Chirpy</string>
     <string name="chirpy_checking">Ověřování dostupnosti Chirpyho…</string>
     <string name="chirpy_downloading">Chirpy se stahuje…</string>
-    <string name="chirpy_downloading_progress">Stahování modelu Chirpy: %1$d%%</string>
     <string name="chirpy_downloading_subtitle">Toto proběhne pouze jednou. Chirpy bude brzy připraven!</string>
     <string name="chirpy_error_busy">Páni! Kanál je právě úplně zahlcený silným provozem! 📶 Počkejme na volný slot a zkusme přenos znovu.</string>
     <string name="chirpy_error_model_unavailable">Moje baterie se nabíjí nebo se stále stahuje firmware! 🔋Dejte mi pár okamžiků na synchronizaci a spuštění!</string>
@@ -281,6 +280,7 @@
     <string name="config_lora_region_summary">Oblast, ve které budete svá rádia používat.</string>
     <string name="config_network_eth_enabled_summary">Zapnutí Ethernetu deaktivuje Bluetooth připojení k aplikaci. TCP připojení k uzlu není na zařízeních Apple k dispozici.</string>
     <string name="config_network_udp_enabled_summary">Povolit vysílání paketů přes UDP v místní síti.</string>
+    <string name="config_network_wifi_enabled_summary">Povolením Wi-Fi se deaktivuje připojení aplikace přes Bluetooth.</string>
     <string name="config_position_broadcast_secs_summary">Maximální interval, který může uplynout, aniž by uzel odeslal polohový paket.</string>
     <string name="config_position_broadcast_smart_minimum_distance_summary">Minimální změna vzdálenosti v metrech, která se bere v úvahu pro chytré vysílání polohy.</string>
     <string name="config_position_broadcast_smart_minimum_interval_secs_summary">Nejkratší interval, ve kterém budou odesílány aktualizace polohy, pokud byla splněna minimální vzdálenost.</string>
@@ -813,12 +813,30 @@
     <string name="key_verification_request_title">Požadavek na ověření klíče</string>
     <string name="key_verification_title">Ověření klíče</string>
     <!-- LABEL -->
+    <string name="label_lite_fast">Lite - Fast</string>
+    <string name="label_lite_slow">Lite - Pomalá</string>
+    <string name="label_long_fast">Long Range - Fast</string>
+    <string name="label_long_moderate">Long Range - Moderate</string>
+    <string name="label_long_slow">Long Range - Slow</string>
+    <string name="label_long_turbo">Long Range - Turbo</string>
+    <string name="label_medium_fast">Medium Range - Fast</string>
+    <string name="label_medium_slow">Medium Range - Slow</string>
+    <string name="label_medium_turbo">Medium Range - Turbo</string>
+    <string name="label_narrow_fast">Narrow - Fast</string>
+    <string name="label_narrow_slow">Narrow - Slow</string>
+    <string name="label_short_fast">Short Range - Fast</string>
+    <string name="label_short_slow">Short Range - Slow</string>
+    <string name="label_short_turbo">Short Range - Turbo</string>
+    <string name="label_tiny_fast">Tiny - Fast</string>
+    <string name="label_tiny_slow">Tiny - Slow</string>
+    <string name="label_very_long_slow">Very Long Range - Slow</string>
     <string name="last_heard_filter_label">Filtrovat podle času posledního slyšení: %1$s</string>
     <string name="last_position_update">Poslední aktualizace pozice</string>
     <string name="latest_alpha_firmware">Poslední alfa</string>
     <string name="latest_stable_firmware">Poslední stabilní</string>
     <string name="latitude">Zeměpisná šířka</string>
     <!-- LAYER -->
+    <string name="layer_subtitle">%1$s • %2$s</string>
     <string name="learn_more">Zjistit více</string>
     <string name="led_heartbeat">Blikání LED při provozu</string>
     <string name="led_state">Stav LED</string>
@@ -973,8 +991,10 @@
     <string name="mesh_beacon_offer_channel_key">Klíč nabízeného kanálu (base64)</string>
     <string name="mesh_beacon_offer_channel_name">Název nabízeného kanálu</string>
     <string name="mesh_beacon_offer_dismiss">Zavřít</string>
+    <string name="mesh_beacon_offer_preset">Předvolba: %1$s</string>
     <string name="mesh_beacon_offer_preset_setting">Nabízený přednastavený profil</string>
     <string name="mesh_beacon_offer_region_setting">Nabízený region</string>
+    <string name="mesh_beacon_offer_signal">Signál: %1$s / %2$s</string>
     <string name="mesh_beacon_on_preset">Vysílací profil</string>
     <string name="mesh_beacon_on_region">Vysílací region</string>
     <string name="mesh_beacon_preset_none">Žádný</string>
@@ -1178,6 +1198,7 @@
     <string name="now">Nyní</string>
     <string name="ntp_server">NTP server</string>
     <string name="number_of_records">Počet záznamů</string>
+    <string name="offline_maps">Offline mapy</string>
     <string name="ok_to_mqtt">OK do MQTT</string>
     <string name="okay">OK</string>
     <string name="oled_type">Typ OLED displeje</string>
@@ -1223,9 +1244,11 @@
     <string name="password">Heslo</string>
     <!-- PAX -->
     <string name="pax">PAX</string>
+    <string name="pax_ble_marker">BLE: %1$s</string>
     <string name="pax_metrics_log">Metriky PAX</string>
     <string name="pax_total_format">PAX: %1$d</string>
     <string name="pax_total_marker">PAX: %1$s</string>
+    <string name="pax_wifi_marker">Wi-Fi: %1$s</string>
     <string name="paxcounter">Paxcounter</string>
     <string name="paxcounter_config">Nastavení Paxcounteru</string>
     <string name="paxcounter_enabled">Paxcounter povolen</string>
@@ -1389,12 +1412,14 @@
     <string name="role_client_desc">Připojená aplikace nebo nezávislé zařízení.</string>
     <string name="role_client_hidden_desc">Zařízení, které vysílá pouze podle potřeby pro utajení nebo úsporu energie.</string>
     <string name="role_client_mute_desc">Zařízení, které nepřeposílá pakety ostatních zařízení.</string>
-    <string name="role_lost_and_found_desc">Pravidelně vysílá polohu jako zprávu do výchozího kanálu a pomáhá tak při hledání ztraceného zařízení.</string>
+    <string name="role_lost_and_found_desc">Pravidelně vysílá polohu jako zprávu na výchozí kanál, aby usnadnila nalezení zařízení.</string>
     <string name="role_repeater_desc">Uzel infrastruktury pro rozšíření pokrytí sítě přenosem zpráv s minimální režií. Není viditelné v seznamu uzlů.</string>
     <string name="role_router_client_desc">Kombinace ROUTER a CLIENT. Ne u mobilních zařízení.</string>
     <string name="role_router_desc">Uzel infrastruktury pro rozšíření pokrytí sítě přeposíláním zpráv. Viditelné v seznamu uzlů.</string>
     <string name="role_router_late_desc">Uzel infrastruktury, který vždy jednou zopakuje pakety, ale až po všech ostatních režimech, čímž zajišťuje lepší pokrytí místních clusterů. Je viditelný v seznamu uzlů.</string>
+    <string name="role_sensor">Senzor</string>
     <string name="role_sensor_desc">Prioritně vysílá pakety s telemetrií.</string>
+    <string name="role_tak">TAK</string>
     <string name="role_tak_desc">Optimalizované pro systémy komunikace ATAK, snižuje rutinní vysílání.</string>
     <string name="role_tak_tracker_desc">Povolí automatické vysílání TAK PLI a snižuje běžné vysílání.</string>
     <string name="role_tracker_desc">Prioritně vysílá pakety s pozicí GPS.</string>
@@ -1536,7 +1561,7 @@
     <string name="ssid">SSID</string>
     <string name="state_broadcast_seconds">Vysílání stavu (v sekundách)</string>
     <string name="status_message">Stavová zpráva</string>
-    <string name="status_message_summary">Stavová zpráva vysílaná do mesh sítě. Ostatní uzly tento stav uvidí v seznamu uzlů.</string>
+    <string name="status_message_summary">Veřejná stavová zpráva vysílaná do mesh sítě při změně a každých 12 hodin.</string>
     <string name="stay_connected_anywhere">Zůstaňte připojeni kdekoliv</string>
     <string name="stop_connecting">Zastavit připojování</string>
     <string name="store_forward">Ukládání a předávání</string>
@@ -1557,6 +1582,7 @@
     <string name="tak_server">TAK server</string>
     <string name="tak_server_channel">TAK mesh kanál</string>
     <string name="tak_server_channel_desc">Kanál Meshtastic používaný pro odchozí provoz TAK</string>
+    <string name="tak_server_channel_option">%1$d: %2$s</string>
     <string name="tak_server_enabled">Povolit místní TAK server</string>
     <string name="tak_server_enabled_desc">Spustí místní TLS server na portu 8089 pro připojení k ATAK</string>
     <string name="tak_server_export_data_package_desc">Vygenerovat soubor .zip pro připojení ATAK k tomuto serveru</string>
@@ -1569,9 +1595,14 @@
     <string name="tak_server_status_failed">Server TAK se nepodařilo spustit. Vypněte a znovu zapněte tuto funkci a zkuste to znovu.</string>
     <string name="tak_server_status_not_running">TAK server není spuštěn</string>
     <string name="tak_server_status_off">Vypnuto</string>
+    <string name="tak_server_status_starting">Spouštění serveru TAK</string>
     <string name="tak_server_status_unavailable">Místní TAK server je k dispozici v aplikaci Meshtastic pro Android</string>
     <string name="tak_server_status_waiting">Server naslouchá na 127.0.0.1:8089 — čeká na ATAK</string>
+    <string name="tak_server_test_card_title">Test TAK mesh sítě (ladění)</string>
+    <string name="tak_server_test_protocol_v1_label">V1 (starší firmware &lt; 2.8.0 – PLI + pouze chat)</string>
+    <string name="tak_server_test_protocol_v2_label">V2 (firmware ≥ 2.8.0)</string>
     <string name="tak_server_test_result_bytes">%1$dB ✓</string>
+    <string name="tak_server_test_result_expected_drop">Není v schématu v1 (očekáváno)</string>
     <string name="tak_server_test_result_unknown_error">✗</string>
     <string name="tak_server_v1_fallback_notice">Firmware připojeného uzlu nepodporuje plnou integraci TAK – do ATAK se budou přenášet pouze polohy a chatové zprávy. Značky a další typy událostí vyžadují firmware verze 2.8.0 nebo novější.</string>
     <string name="tak_team">Barva týmu</string>
@@ -1686,6 +1717,8 @@
     <!-- URL -->
     <string name="url">Adresa URL</string>
     <string name="url_cannot_be_empty">Adresa URL nesmí být prázdná.</string>
+    <string name="url_must_be_http">URL adresa musí začínat http:// nebo https://.</string>
+    <string name="url_must_contain_placeholders">URL musí obsahovat zástupné symboly.</string>
     <string name="url_template">URL šablona</string>
     <string name="usb">USB</string>
     <string name="usb_permission_denied">Přístup k USB byl zamítnut. Odpojte a znovu připojte zařízení a zkuste to znovu.</string>
@@ -1701,6 +1734,7 @@
     <string name="user_config">Nastavení uživatele</string>
     <string name="user_id">Identifikátor uživatele</string>
     <string name="user_info">Informace o uživateli</string>
+    <string name="user_string">Uživatelský řetězec</string>
     <string name="userinfo">Informace o uživateli</string>
     <string name="username">Uživatelské jméno</string>
     <string name="uv_lux">UV lux</string>
@@ -1722,7 +1756,9 @@
     <string name="what_is_meshtastic">Co je Meshtastic?</string>
     <string name="what_is_meshtastic_description">Open source, decentralizovaná mesh síť fungující bez běžné infrastruktury, která využívá cenově dostupná rádiová zařízení s nízkou spotřebou.</string>
     <!-- WIFI -->
+    <string name="wifi_config">Možnosti Wi-Fi</string>
     <string name="wifi_devices">Nastavení Wi-Fi pro mPWRD-OS</string>
+    <string name="wifi_enabled">Wi-Fi povoleno</string>
     <string name="wifi_provision_available_networks">Dostupné sítě</string>
     <string name="wifi_provision_connect_failed">Nelze se připojit: %1$s</string>
     <string name="wifi_provision_description">Nastavit přihlašovací údaje k Wi-Fi v zařízení mPWRD-OS přes Bluetooth.</string>
@@ -1764,4 +1800,6 @@
     <string name="write_nfc_success">Zapsáno do tagu</string>
     <string name="write_nfc_text">Přidržte zapisovatelný NFC tag proti zadní straně telefonu.</string>
     <string name="you">Vy</string>
+    <string name="zoom_in">Přiblížit</string>
+    <string name="zoom_out">Oddálit</string>
 </resources>

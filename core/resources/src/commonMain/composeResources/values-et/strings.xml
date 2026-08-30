@@ -19,7 +19,6 @@
     <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Sõnum saatjalt %1$s: %2$s</string>
-    <string name="a11y_node_battery">aku %1$d%%</string>
     <string name="a11y_node_distance_away">%1$s kaugusel</string>
     <string name="a11y_node_favorite">lemmik</string>
     <string name="a11y_node_hops_away">%1$d hüppe kaugusel</string>
@@ -214,7 +213,6 @@
     <string name="chirpy_assistant_title">Chirpy assistent</string>
     <string name="chirpy_checking">Chirpy saadavuse kontroll…</string>
     <string name="chirpy_downloading">Chirpy laetakse alla…</string>
-    <string name="chirpy_downloading_progress">Laen Chirpy mudelit: %1$d%%</string>
     <string name="chirpy_downloading_subtitle">See juhtub ainult korra. Chirpy on varsti valmis!</string>
     <string name="chirpy_error_busy">Vau! Kanal on hetkel täiesti ülekoormatud ja liiklus on tihe! 📶 Ootame vaba aega ja proovime edastust uuesti.</string>
     <string name="chirpy_error_model_unavailable">Mu aku laeb või püsivara allalaadimine on pooleli! 🔋 Anna mulle paar hetke sünkroonimiseks ja käivitamiseks!</string>
@@ -1574,18 +1572,30 @@
     <string name="ringtone_imported">Imporditud helin</string>
     <!-- ROLE -->
     <string name="role">Seadme roll</string>
+    <string name="role_client">Klient</string>
+    <string name="role_client_base">Klient-baas</string>
     <string name="role_client_base_desc">Käsitleb lemmiksõlmedest tulevaid või neile saadetud pakette kui RUUTER_HILINE ja kõiki teisi pakette kui KLIENT.</string>
     <string name="role_client_desc">Rakendusega ühendatud või iseseisev sõnumsideseade.</string>
+    <string name="role_client_hidden">Peidetud klient</string>
     <string name="role_client_hidden_desc">Seade, mis edastab ülekandeid ainult siis, kui see on vajalik varjamiseks või energia säästmiseks.</string>
+    <string name="role_client_mute">Vaikne klient</string>
     <string name="role_client_mute_desc">Seade, mis ei edasta pakette teistelt seadmetelt.</string>
-    <string name="role_lost_and_found_desc">Edastab asukohta regulaarselt vaikekanalile sõnumina, et aidata seadme leidmisel.</string>
+    <string name="role_lost_and_found">Kaotud ja leitud</string>
+    <string name="role_repeater">Repiiter</string>
     <string name="role_repeater_desc">Infrastruktuuri sõlm võrgu leviala laiendamiseks, edastades sõnumeid minimaalse üldkuluga. Pole sõlmede loendis nähtav.</string>
+    <string name="role_router">Ruuter</string>
+    <string name="role_router_client">Ruuteri klient</string>
     <string name="role_router_client_desc">Ruuteri ja Kliendi kombinatsioon. Ei ole mõeldud mobiilseadmetele.</string>
     <string name="role_router_desc">Infrastruktuuri sõlm võrgu leviala laiendamiseks sõnumite edastamise kaudu. Nähtav sõlmede loendis.</string>
+    <string name="role_router_late">Hiline ruuter</string>
     <string name="role_router_late_desc">Infrastruktuurisõlm, mis saadab pakette ainult ühe korra, ning alles peale kõiki teisi sõlmi, tagades kohalikele klastritele täiendava katvuse. Nähtav sõlmede loendis.</string>
+    <string name="role_sensor">Andur</string>
     <string name="role_sensor_desc">Esmalt edastatakse telemeetria pakette.</string>
+    <string name="role_tak">TAK</string>
     <string name="role_tak_desc">Optimeeritud ATAK süsteemi side jaoks, vähendab rutiinseid saateid.</string>
+    <string name="role_tak_tracker">Jälgitav TAK</string>
     <string name="role_tak_tracker_desc">Võimaldab automaatseid TAK PLI saateid ja vähendab rutiinseid saateid.</string>
+    <string name="role_tracker">Jälgitav</string>
     <string name="role_tracker_desc">Esmajärjekorras edastatakse GPS asukoha pakette.</string>
     <string name="root_topic">Juurteema</string>
     <string name="rotary_encoder_1_enabled">Pöördvalik #1 lubatud</string>

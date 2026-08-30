@@ -19,7 +19,6 @@
     <!-- A11Y -->
     <string name="a11y_label_value">%1$s：%2$s</string>
     <string name="a11y_message_from">%1$s からのメッセージ：%2$s</string>
-    <string name="a11y_node_battery">バッテリー %1$d%%</string>
     <string name="a11y_node_distance_away">%1$s 先</string>
     <string name="a11y_node_favorite">お気に入り</string>
     <string name="a11y_node_hops_away">%1$d ホップ先</string>
@@ -201,7 +200,6 @@
     <string name="chirpy_assistant_title">Chirpy アシスタント</string>
     <string name="chirpy_checking">Chirpy の利用可否を確認しています…</string>
     <string name="chirpy_downloading">Chirpy をダウンロードしています…</string>
-    <string name="chirpy_downloading_progress">Chirpy モデルをダウンロード中：%1$d%%</string>
     <string name="chirpy_downloading_subtitle">これは最初の一度だけです。Chirpy はまもなく準備完了します！</string>
     <string name="chirpy_error_busy">おっと！今チャンネルがトラフィックでかなり混雑しています！📶 空きスロットを待ってから、送信をやり直しましょう。</string>
     <string name="chirpy_error_model_unavailable">バッテリーを充電中か、ファームウェアをまだダウンロード中です！🔋 同期して起動するまで少し待ってください！</string>
@@ -1430,18 +1428,30 @@
     <string name="ringtone_imported">着信音をインポートしました</string>
     <!-- ROLE -->
     <string name="role">デバイスの役割</string>
+    <string name="role_client">クライアント</string>
+    <string name="role_client_base">クライアント・ベース</string>
     <string name="role_client_base_desc">お気に入りのノードとの間のパケットを ROUTER_LATE として扱い、その他のすべてのパケットを CLIENT として扱います。</string>
     <string name="role_client_desc">アプリに接続されているか、スタンドアロンのメッセージングデバイスです。</string>
+    <string name="role_client_hidden">クライアント・非表示</string>
     <string name="role_client_hidden_desc">ステルスまたは電力節約のため、必要に応じてのみブロードキャストするデバイス。</string>
+    <string name="role_client_mute">クライアント・ミュート</string>
     <string name="role_client_mute_desc">このデバイスは他のデバイスからのパケットを転送しません。</string>
-    <string name="role_lost_and_found_desc">デバイスを見つけやすくするために、デバイス自身の位置情報をメッセージ形式で定期的にデフォルトのチャンネルにブロードキャストします。</string>
+    <string name="role_lost_and_found">紛失モード</string>
+    <string name="role_repeater">リピーター</string>
     <string name="role_repeater_desc">最小限のオーバーヘッドでメッセージを中継することでネットワークの通信範囲を拡大するためのインフラストラクチャノード。ノードリストには表示されません。</string>
+    <string name="role_router">ルーター</string>
+    <string name="role_router_client">ルータークライアント</string>
     <string name="role_router_client_desc">ROUTERとCLIENTの組み合わせ。モバイルデバイス向けではありません。</string>
     <string name="role_router_desc">メッセージを中継することでネットワークの通信範囲を拡大するためのインフラストラクチャノード。ノードリストに表示されます。</string>
+    <string name="role_router_late">ルーター・レイト</string>
     <string name="role_router_late_desc">周辺クラスターの通信範囲を拡大させるインフラストラクチャノード。他のすべてのノードが通信し終わった後で、必ずパケットを1回だけ再ブロードキャストする。ノードリストに表示される。</string>
+    <string name="role_sensor">センサー</string>
     <string name="role_sensor_desc">テレメトリパケットを優先してブロードキャストします。</string>
+    <string name="role_tak">TAK</string>
     <string name="role_tak_desc">ATAKシステムとの通信に最適化し、定期的なブロードキャストを削減します。</string>
+    <string name="role_tak_tracker">TAK Tracker</string>
     <string name="role_tak_tracker_desc">TAK PLIの自動ブロードキャストを有効にし、ルーチンブロードキャストを削減します。</string>
+    <string name="role_tracker">トラッカー</string>
     <string name="role_tracker_desc">GPSの位置情報パケットを優先してブロードキャストします。</string>
     <string name="root_topic">ルート トピック</string>
     <string name="rotary_encoder_1_enabled">ロータリーエンコーダ #1 を有効化</string>

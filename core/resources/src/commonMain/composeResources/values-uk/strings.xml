@@ -19,7 +19,6 @@
     <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Повідомлення від %1$s: %2$s</string>
-    <string name="a11y_node_battery">батарея: %1$d %</string>
     <string name="a11y_node_distance_away">%1$s від вас</string>
     <string name="a11y_node_hops_away">%1$d стрибків</string>
     <string name="a11y_node_offline">офлайн</string>
@@ -1068,18 +1067,30 @@
     <string name="ringtone_imported">Завантажена мелодія</string>
     <!-- ROLE -->
     <string name="role">Роль пристрою</string>
+    <string name="role_client">Клієнт</string>
+    <string name="role_client_base">Client Base</string>
     <string name="role_client_base_desc">Розглядає пакети від або до улюблених вузлів так само як ROUTER_LATE, а всі інші пакети як CLIENT.</string>
     <string name="role_client_desc">Застосунок з'єднано або автономний режим обміну повідомленнями.</string>
+    <string name="role_client_hidden">Client Hidden</string>
     <string name="role_client_hidden_desc">Пристрій, який передає лише у разі потреби для економії енергії або скритності.</string>
+    <string name="role_client_mute">Client Mute</string>
     <string name="role_client_mute_desc">Пристрій, який не пересилає пакети з інших пристроїв.</string>
-    <string name="role_lost_and_found_desc">Регулярно транслює координати в основний канал для полегшення пошуку пристрою.</string>
+    <string name="role_lost_and_found">Loast and Found</string>
+    <string name="role_repeater">Repeater</string>
     <string name="role_repeater_desc">Інфраструктурний вузол для покриття мережі. Пересилає повідомлення з мінімальним навантаженням. Не показується в списку вузлів.</string>
+    <string name="role_router">Router</string>
+    <string name="role_router_client">Router Client</string>
     <string name="role_router_client_desc">Комбінація ROUTER і CLIENT. Не для мобільних пристроїв.</string>
     <string name="role_router_desc">Вузол інфраструктури для розширення покриття мережею повторними повідомленнями. Видимий у списку вузлів.</string>
+    <string name="role_router_late">Router Late</string>
     <string name="role_router_late_desc">Інфраструктурний вузол, що завжди ретранслює пакети один раз після всіх інших режимів, забезпечуючи додаткове покриття для локальних груп. Показується у списку вузлів.</string>
+    <string name="role_sensor">Датчик</string>
     <string name="role_sensor_desc">Пріоритетна передача пакетів телеметрії.</string>
+    <string name="role_tak">ТАК</string>
     <string name="role_tak_desc">Оптимізовано для з'єднання з системою ATAK, зменшує рутинні радіо трансляції.</string>
+    <string name="role_tak_tracker">TAK Tracker</string>
     <string name="role_tak_tracker_desc">Увімкнути автоматичну передачу TAK PLI та зменшити кількість звичайних трансляцій.</string>
+    <string name="role_tracker">Трекер</string>
     <string name="role_tracker_desc">Пріоритетна трансляція GPS-координат.</string>
     <string name="root_topic">Кореневий чат</string>
     <string name="rotary_encoder_1_enabled">Енкодер #1 активований</string>

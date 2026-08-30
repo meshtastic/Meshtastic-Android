@@ -238,7 +238,6 @@
     <string name="role_client_desc">Pajisje e lidhur ose pajisje mesazhi autonome.</string>
     <string name="role_client_hidden_desc">Pajisje që transmeton vetëm kur është e nevojshme për fshehtësi ose kursim energjie.</string>
     <string name="role_client_mute_desc">Pajisje që nuk kalon paketa nga pajisje të tjera.</string>
-    <string name="role_lost_and_found_desc">Transmeton vendndodhjen si mesazh në kanalin e parazgjedhur rregullisht për të ndihmuar në rikuperimin e pajisjeve.</string>
     <string name="role_repeater_desc">Nyjë infrastrukture për zgjerimin e mbulimit të rrjetit duke transmetuar mesazhe me ngarkesë minimale. Nuk është e dukshme në listën e nyjeve.</string>
     <string name="role_router_client_desc">Kombinim i të dyjave ROUTER dhe CLIENT. Nuk është për pajisje mobile.</string>
     <string name="role_router_desc">Nyjë infrastrukture për zgjerimin e mbulimit të rrjetit duke transmetuar mesazhe. E dukshme në listën e nyjeve.</string>

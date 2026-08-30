@@ -52,10 +52,7 @@ Sovellus voi myös käyttää **paikallista TAK-palvelinta**, jolloin samalla pu
 
 - **Ota paikallinen TAK-palvelin käyttöön** — käynnistää vain loopback-yhteyttä käyttävän mTLS-palvelimen portissa **8089** samalla puhelimella olevien ATAK- ja iTAK-yhteyksien käyttöön.
 - **TAK-mesh-kanava** – valitsee, mitä Meshtastic-kanavaa käytetään lähtevään TAK-liikenteeseen (oletuksena ensisijainen kanava, indeksi 0) Saapuva TAK-liikenne hyväksytään miltä tahansa kanavalta. Vastaa iOS:n ja vanhan ATAK-liitännäisen vastaavaa asetusta.
-- **Mesh to CoT Converter** — oletusarvoisesti pois käytöstä, ja näkyy palvelinkytkimen alla. With the server
-  running, this synthesizes a CoT contact for every node in your node database, so ordinary
-  Meshtastic nodes appear on the ATAK map as contacts. **This is what replaced the old plugin's
-  node visibility** — without it, only TAK-role nodes show up.
+- **Mesh to CoT Converter** — oletusarvoisesti pois käytöstä, ja näkyy palvelinkytkimen alla. Kun palvelin on käynnissä, se luo CoT-yhteystiedon jokaisesta radiosolmujen tietokannan radiosta, jolloin tavalliset Meshtastic-radiot näkyvät ATAK-kartalla yhteystietoina. **Tämä korvaa vanhan lisäosan näkyvyyden** — ilman tätä näkyvät vain TAK-roolin radiot.
 - **Vie TAK-tietopaketti** — luo `.zip`-tietopaketin, jonka ATAK/iTAK voi tuoda muodostaakseen yhteyden tähän palvelimeen.
 
 ## TAK-roolit
@@ -93,23 +90,21 @@ Kun asetukset on määritetty:
 - Sijaintipäivitykset kulkevat kaksisuuntaisesti Meshtasticin ja TAK-järjestelmän välillä
 - TAK Tracker -radiot lähettävät PLI-sijaintia automaattisesti — niiden sijainti näkyy ATAK-kartoilla ilman erillistä ATAK-asetusta
 
-> ℹ️ **Note:** TAK integration requires specific node roles. Standard client nodes don't automatically participate in TAK operations — though with **Mesh to CoT Converter** enabled they still appear on the ATAK map as contacts.
+> ℹ️ **Huomautus:** TAK-integraatio edellyttää tiettyjä radiorooleja. Tavalliset Client-roolin radiot eivät osallistu automaattisesti TAK-toimintoihin — mutta kun **Mesh to CoT Converter** on käytössä, ne näkyvät silti ATAK-kartalla yhteystietoina.
 
 ## Vianetsintä
 
-| Ongelma                                      | Syy                                                                                                                                   | Ratkaisu                                                                                                                                                                                           |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Radio ei näy ATAK-kartalla                   | Wrong Role setting, or Mesh to CoT Converter off                                                                                      | Set the node's **Role** to TAK or TAK Tracker. For ordinary (non-TAK-role) nodes to appear, also enable **Mesh to CoT Converter** under the TAK Server settings |
-| Sijaintipäivitykset ovat vanhentuneita       | GPS-signaali katkennut tai lähetysväli liian pitkä                                                                                    | Tarkista GPS-tila; lyhennä sijaintilähetyksen väliä kohdassa Sijainnin asetukset                                                                                                                   |
-| ATAK shows "disconnected"                    | The local TAK server is off, or ATAK is pointed elsewhere                                                                             | Check **Enable Local TAK Server** is on, and that ATAK is connecting to `127.0.0.1:8089` — re-import the exported data package if unsure                                                           |
-| Muotoja, merkintöjä tai reittejä ei välitetä | Lähettävä radio käyttää vanhaa V1-protokollaa (laiteohjelmisto 2.7.x tai vanhempi) | Päivitä lähettävän radion laiteohjelmisto versioon 2.8.0 tai uudempaan, jotta V2-siirtomuoto on käytettävissä                                                      |
-| CoT-data ei kulje                            | Kanava ei täsmää                                                                                                                      | Kaikkien TAK-laitteiden täytyy olla samalla kanavalla ja yhteensopivalla salauksella                                                                                                               |
+| Ongelma                                      | Syy                                                                                                                                   | Ratkaisu                                                                                                                                                                                                           |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Radio ei näy ATAK-kartalla                   | Väärä rooliasetus tai Mesh to CoT Converter ei ole käytössä                                                                           | Aseta radion **rooliksi** TAK tai TAK Tracker. Jos haluat myös tavallisten (ei-TAK-roolin) radioiden näkyvän, ota **Mesh to CoT Converter** käyttöön TAK-palvelimen asetuksista |
+| Sijaintipäivitykset ovat vanhentuneita       | GPS-signaali katkennut tai lähetysväli liian pitkä                                                                                    | Tarkista GPS-tila; lyhennä sijaintilähetyksen väliä kohdassa Sijainnin asetukset                                                                                                                                   |
+| ATAK näyttää tilan "Ei yhteyttä"             | Paikallinen TAK-palvelin ei ole käytössä tai ATAK on yhdistetty muualle                                                               | Varmista, että **Ota paikallinen TAK-palvelin käyttöön** on käytössä ja että ATAK muodostaa yhteyden osoitteeseen `127.0.0.1:8089` — tuo viety datapaketti uudelleen, jos et ole varma                             |
+| Muotoja, merkintöjä tai reittejä ei välitetä | Lähettävä radio käyttää vanhaa V1-protokollaa (laiteohjelmisto 2.7.x tai vanhempi) | Päivitä lähettävän radion laiteohjelmisto versioon 2.8.0 tai uudempaan, jotta V2-siirtomuoto on käytettävissä                                                                      |
+| CoT-data ei kulje                            | Kanava ei täsmää                                                                                                                      | Kaikkien TAK-laitteiden täytyy olla samalla kanavalla ja yhteensopivalla salauksella                                                                                                                               |
 
 ## Tietoturvahuomiot
 
-> 🔒 **Privacy:** TAK data shares your position and callsign information. The TAK module respects
-> the same channel encryption as other Meshtastic messages — in sensitive environments, use a
-> channel with a non-default key.
+> 🔒 **Tietosuoja:** TAK-tiedot sisältävät sijaintisi ja kutsutunnuksesi. TAK-moduuli käyttää samaa kanavasalausta kuin muutkin Meshtastic-viestit — arkaluonteisissa ympäristöissä käytä kanavaa, jonka avain ei ole oletusarvoinen.
 
 ## Aiheeseen liittyvät aiheet
 

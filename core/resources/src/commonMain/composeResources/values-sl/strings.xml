@@ -244,7 +244,6 @@
     <string name="role_client_desc">Aplikacija povezana ali samostojna naprava za sporočanje.</string>
     <string name="role_client_hidden_desc">Naprava, ki oddaja samo po potrebi zaradi prikritosti ali varčevanja z energijo.</string>
     <string name="role_client_mute_desc">Naprava ki ne posreduje paketkov drugih naprav.</string>
-    <string name="role_lost_and_found_desc">Redno oddaja lokacijo kot sporočilo privzetemu kanalu za pomoč pri vrnitvi naprave.</string>
     <string name="role_repeater_desc">Infrastrukturno vozlišče za razširitev pokritosti omrežja s posredovanjem sporočil z minimalnimi stroški. Ni vidno na seznamu vozlišč.</string>
     <string name="role_router_client_desc">Kombinacija ROUTER in CLIENT. Ni za mobilne naprave.</string>
     <string name="role_router_desc">Infrastrukturno vozlišče za razširitev pokritosti omrežja s posredovanjem sporočil. Vidno na seznamu vozlišč.</string>

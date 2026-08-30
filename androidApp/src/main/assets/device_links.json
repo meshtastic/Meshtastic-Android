@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-08-20T14:28:46.266Z",
+  "generatedAt": "2026-08-30T17:22:39.329Z",
   "source": "https://msh.to/api/urls",
   "links": [
     {
@@ -3777,6 +3777,74 @@
       ],
       "marketplace": null,
       "regions": null
+    },
+    {
+      "shortCode": "rokland-t-deck-cypher",
+      "url": "https://msh.to/rokland-t-deck-cypher",
+      "description": "LILYGO T-Deck CYPHER-M8K (Rokland)",
+      "type": "marketplace",
+      "targets": [
+        "t-deck"
+      ],
+      "hwModels": [
+        50
+      ],
+      "marketplace": "rokland",
+      "regions": [
+        "AU",
+        "AT",
+        "BE",
+        "CA",
+        "DK",
+        "EC",
+        "FR",
+        "DE",
+        "IE",
+        "JP",
+        "NL",
+        "NZ",
+        "NO",
+        "PK",
+        "ES",
+        "SE",
+        "CH",
+        "GB",
+        "US"
+      ]
+    },
+    {
+      "shortCode": "rokland-rak6421",
+      "url": "https://msh.to/rokland-rak6421",
+      "description": "Rokland RAK6421 Hat+",
+      "type": "marketplace",
+      "targets": [
+        "native"
+      ],
+      "hwModels": [
+        121
+      ],
+      "marketplace": "rokland",
+      "regions": [
+        "AU",
+        "AT",
+        "BE",
+        "CA",
+        "DK",
+        "EC",
+        "FR",
+        "DE",
+        "IE",
+        "JP",
+        "NL",
+        "NZ",
+        "NO",
+        "PK",
+        "ES",
+        "SE",
+        "CH",
+        "GB",
+        "US"
+      ]
     }
   ]
 }

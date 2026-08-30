@@ -242,7 +242,6 @@
     <string name="role_client_desc">App-tilkoblet eller frittstående meldingsenhet.</string>
     <string name="role_client_hidden_desc">Enhet som bare kringkaster når nødvendig, for stealth eller strømsparing.</string>
     <string name="role_client_mute_desc">Enhet som ikke videresender pakker fra andre enheter.</string>
-    <string name="role_lost_and_found_desc">Sender sted som melding til standardkanalen regelmessig for å hjelpe med å finne enheten.</string>
     <string name="role_repeater_desc">Infrastruktur-node for utvidelse av nettverksdekning ved å videresende meldinger med minimal overhead. Ikke synlig i nodelisten.</string>
     <string name="role_router_client_desc">Kombinasjon av ROUTER og CLIENT. Ikke for mobile enheter.</string>
     <string name="role_router_desc">Infrastruktur-node for utvidelse av nettverksdekning ved å videresende meldinger. Synlig i nodelisten.</string>

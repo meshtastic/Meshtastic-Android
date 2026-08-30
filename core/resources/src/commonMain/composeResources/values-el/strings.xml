@@ -233,6 +233,7 @@
     <string name="reset">Επαναφορά</string>
     <string name="reset_to_defaults">Επαναφορά προεπιλογών</string>
     <!-- ROLE -->
+    <string name="role_client_base">Πελάτης Βάση</string>
     <!-- ROUTING -->
     <string name="routing_error_timeout">Λήξη χρονικού ορίου</string>
     <!-- SAVE -->

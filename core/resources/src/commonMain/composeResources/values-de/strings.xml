@@ -19,7 +19,6 @@
     <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Nachricht von %1$s: %2$s</string>
-    <string name="a11y_node_battery">Akku %1$d%%</string>
     <string name="a11y_node_distance_away">%1$s Abwesend</string>
     <string name="a11y_node_favorite">Favorit</string>
     <string name="a11y_node_hops_away">%1$d Sprünge entfernt</string>
@@ -200,7 +199,6 @@
     <string name="chirpy_assistant_title">Chirpy Assistent</string>
     <string name="chirpy_checking">Chirpy Verfügbarkeit…</string>
     <string name="chirpy_downloading">Chirpy wird heruntergeladen…</string>
-    <string name="chirpy_downloading_progress">Chirpy Modell herunterladen: %1$d%%</string>
     <string name="chirpy_downloading_subtitle">Dies geschieht nur einmal. Chirpy wird bald bereit sein!</string>
     <string name="chirpy_error_busy">Whoa! Der Kanal ist gerade völlig überlastet – hier herrscht reger Datenverkehr! 📶 Lassen Sie uns auf ein freies Zeitfenster warten und die Übertragung dann erneut versuchen.</string>
     <string name="chirpy_error_model_unavailable">Meine Batterie lädt gerade, oder meine Firmware wird noch heruntergeladen! 🔋 Geben Sie mir ein paar Augenblicke, um mich zu synchronisieren und hochzufahren!</string>
@@ -1333,18 +1331,31 @@
     <string name="ringtone_imported">Importierter Klingelton</string>
     <!-- ROLE -->
     <string name="role">Geräterolle</string>
+    <string name="role_client">Client</string>
+    <string name="role_client_base">Client Base</string>
     <string name="role_client_base_desc">Pakete von oder zu favorisierten Knoten werden als ROUTER_LATE weitergeleitet und alle anderen Pakete als CLIENT.</string>
     <string name="role_client_desc">Mit der App verbundenes oder eigenständiges Messaging-Gerät.</string>
+    <string name="role_client_hidden">Client - Versteckt</string>
     <string name="role_client_hidden_desc">Gerät, das nur bei Bedarf sendet, um nicht entdeckt zu werden oder Strom zu sparen.</string>
+    <string name="role_client_mute">Client Mute</string>
     <string name="role_client_mute_desc">Gerät, das keine Pakete von anderen Geräten weiterleitet.</string>
-    <string name="role_lost_and_found_desc">Sendet den Standort regelmäßig als Nachricht an den Standardkanal, um das Gerät wiederzufinden.</string>
+    <string name="role_lost_and_found">Tracker</string>
+    <string name="role_lost_and_found_desc">Sendet den Standort regelmäßig als Nachricht an den Standardkanal, um die Gerätewiederherstellung zu erleichtern.</string>
+    <string name="role_repeater">Repeater</string>
     <string name="role_repeater_desc">Infrastrukturknoten zur Erweiterung der Netzabdeckung durch Weiterleitung von Nachrichten mit minimalem Overhead. In der Knotenliste nicht sichtbar.</string>
+    <string name="role_router">Router</string>
+    <string name="role_router_client">Router Client</string>
     <string name="role_router_client_desc">Kombination von ROUTER und CLIENT. Nicht für mobile Endgeräte.</string>
     <string name="role_router_desc">Knoten zur Erweiterung der Netzabdeckung durch Weiterleiten von Nachrichten. In Knotenliste sichtbar.</string>
+    <string name="role_router_late">Router mit Verzögerung</string>
     <string name="role_router_late_desc">Infrastruktur-Node, der Pakete immer einmal erneut sendet, jedoch erst, nachdem alle anderen Modi durchlaufen wurden, um zusätzliche Abdeckung für lokale Cluster sicherzustellen. Sichtbar in der Node-Liste.</string>
+    <string name="role_sensor">Sensor</string>
     <string name="role_sensor_desc">Telemetrienachricht mit Priorität gesendet.</string>
+    <string name="role_tak">TAK</string>
     <string name="role_tak_desc">Optimiert für ATAK-Systemkommunikation, verringert die Anzahl der Routineübertragungen.</string>
+    <string name="role_tak_tracker">TAK Tracker</string>
     <string name="role_tak_tracker_desc">Aktiviert automatische TAK-PLI-Übertragungen und verringert die Anzahl der Routineübertragungen.</string>
+    <string name="role_tracker">Tracker</string>
     <string name="role_tracker_desc">GPS Standortnachricht mit Priorität gesendet.</string>
     <string name="root_topic">Hauptthema</string>
     <string name="rotary_encoder_1_enabled">Drehencoder #1 aktiviert</string>

@@ -418,17 +418,26 @@
     <string name="ringtone">Мелодија звона</string>
     <!-- ROLE -->
     <string name="role">Улога уређаја</string>
+    <string name="role_client">Клијент</string>
     <string name="role_client_desc">Povezana aplikacija ili samostalni uređaj za slanje poruka.</string>
+    <string name="role_client_hidden">Скривени клијент</string>
     <string name="role_client_hidden_desc">Uređaj koji prenosi samo kada je potrebno radi skrivenosti ili uštede energije.</string>
+    <string name="role_client_mute">Клијент мутиран</string>
     <string name="role_client_mute_desc">Uređaj koji ne prosleđuje pakete od drugih uređaja.</string>
-    <string name="role_lost_and_found_desc">Prenosi lokaciju kao poruku na podrazumevani kanal redovno kako bi pomogao u pronalasku uređaja.</string>
+    <string name="role_lost_and_found">Изгубљено и нађено</string>
+    <string name="role_repeater">Поновљач</string>
     <string name="role_repeater_desc">Infrastrukturni čvor za proširenje pokrivenosti mreže prosleđivanjem poruka sa minimalnim troškovima energije. Nije vidljiv na listi čvorova.</string>
+    <string name="role_router">Рутер</string>
     <string name="role_router_client_desc">Kombinacija i RUTERA i KLIJENTA. Nije namenjeno za mobilne uređaje.</string>
     <string name="role_router_desc">Infrastrukturni čvor za proširenje pokrivenosti mreže prosleđivanjem poruka. Vidljiv na listi čvorova.</string>
+    <string name="role_router_late">Рутер са кашњењем</string>
     <string name="role_router_late_desc">Infrastrukturni čvor koji uvek ponovo prenosi pakete jednom, ali tek nakon svih drugih načina, osiguravajući dodatno pokrivanje za lokalne klastere. Vidljiv u listi čvorova.</string>
+    <string name="role_sensor">Сензор</string>
     <string name="role_sensor_desc">Emituje telemetrijske pakete kao prioritet.</string>
     <string name="role_tak_desc">Optimizovano za komunikaciju u ATAK sistemu, smanjuje rutinske emisije.</string>
+    <string name="role_tak_tracker">ТАК Трекер</string>
     <string name="role_tak_tracker_desc">Omogućava autmatske TAK PLI emisije i smanjuje rutinske emisije.</string>
+    <string name="role_tracker">Трекер</string>
     <string name="role_tracker_desc">Emituje GPS pakete položaja kao prioritet.</string>
     <!-- ROUTING -->
     <string name="routing_error_got_nak">Primljena negativna potvrda</string>

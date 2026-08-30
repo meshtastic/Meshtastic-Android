@@ -19,7 +19,6 @@
     <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">От %1$s: %2$s</string>
-    <string name="a11y_node_battery">заряд батареи %1$d%%</string>
     <string name="a11y_node_distance_away">%1$s отсюда</string>
     <string name="a11y_node_favorite">избранный</string>
     <string name="a11y_node_hops_away">%1$d hops away</string>
@@ -222,7 +221,6 @@
     <string name="chirpy_assistant_title">Весёлый помощник</string>
     <string name="chirpy_checking">Проверка доступности Chirpy…</string>
     <string name="chirpy_downloading">Chirpy загружается…</string>
-    <string name="chirpy_downloading_progress">Загрузка модели Chirpy: %1$d%%</string>
     <string name="chirpy_downloading_subtitle">Это произошло только один раз. Chirpy скоро будет готов!</string>
     <string name="chirpy_error_busy">Ух ё! Канал сейчас совершенно перегружен из-за сильного трафика! 📶 Давай подождём свободного промежутка и попробуем передать снова.</string>
     <string name="chirpy_error_model_unavailable">Моя батарея заряжается или моя прошивка всё ещё загружается! 🔋 Дай мне немного времени, чтобы синхронизироваться и загрузиться!</string>
@@ -1586,18 +1584,30 @@
     <string name="ringtone_imported">Импортировать рингтон</string>
     <!-- ROLE -->
     <string name="role">Роль устройства</string>
+    <string name="role_client">Client</string>
+    <string name="role_client_base">Client Base</string>
     <string name="role_client_base_desc">Обрабатывает пакеты от избранных нод как ROUTER_LATE, а все остальные пакеты - как от CLIENT.</string>
     <string name="role_client_desc">Приложение подключено или автономное устройство обмена сообщениями.</string>
+    <string name="role_client_hidden">Client Hidden</string>
     <string name="role_client_hidden_desc">Устройство, которое передает сигнал только при необходимости для скрытности или экономии энергии.</string>
+    <string name="role_client_mute">Client Mute</string>
     <string name="role_client_mute_desc">Устройство, которое не пересылает пакеты с других устройств.</string>
-    <string name="role_lost_and_found_desc">Регулярно передает местоположение в виде сообщения на канал по умолчанию для помощи в восстановлении устройства.</string>
+    <string name="role_lost_and_found">Lost and Found</string>
+    <string name="role_repeater">Repeater</string>
     <string name="role_repeater_desc">Инфраструктурная нода для расширения покрытия сети путем передачи сообщений с минимальными накладными расходами. Не видна в списке нод.</string>
+    <string name="role_router">Router</string>
+    <string name="role_router_client">Router Client</string>
     <string name="role_router_client_desc">Сочетание ROUTER и CLIENT. Не для носимых устройств.</string>
     <string name="role_router_desc">Инфраструктурная нода для расширения охвата сети путем передачи сообщений. Видима в списке нод.</string>
+    <string name="role_router_late">Router Late</string>
     <string name="role_router_late_desc">Инфраструктурная нода, которая всегда ретранслирует пакеты один раз, но только после всех остальных режимов, обеспечивая дополнительное покрытие для локальных кластеров. Видима в списке.</string>
+    <string name="role_sensor">Sensor</string>
     <string name="role_sensor_desc">Транслирует пакеты телеметрии в приоритетном порядке.</string>
+    <string name="role_tak">Тактический</string>
     <string name="role_tak_desc">Оптимизировано для связи с системой ATAK, сокращает текущие передачи.</string>
+    <string name="role_tak_tracker">TAK Tracker</string>
     <string name="role_tak_tracker_desc">Включает автоматические трансляции TAK PLI и сокращает рутинные трансляции.</string>
+    <string name="role_tracker">Tracker</string>
     <string name="role_tracker_desc">Транслирует пакеты местоположения GPS в приоритетном порядке.</string>
     <string name="root_topic">Корневая тема</string>
     <string name="rotary_encoder_1_enabled">Поворотный энкодер #1 включен</string>

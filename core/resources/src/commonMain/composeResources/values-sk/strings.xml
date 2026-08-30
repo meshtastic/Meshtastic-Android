@@ -404,17 +404,28 @@
     <string name="reset_to_defaults">Obnoviť na predvolené nastavenia</string>
     <string name="ringtone">Zvonenie</string>
     <!-- ROLE -->
+    <string name="role_client">Klient</string>
     <string name="role_client_desc">Pripojená aplikácia, alebo samostatné zariadenie na odosielanie správ.</string>
+    <string name="role_client_hidden">Skrytý Klient</string>
     <string name="role_client_hidden_desc">Zariadenie, ktoré vysiela len podľa potreby pre utajenie, alebo úsporu energie.</string>
+    <string name="role_client_mute">Stlmený Klient</string>
     <string name="role_client_mute_desc">Zariadenie, ktoré nepreposiela pakety z ďalších zariadení.</string>
-    <string name="role_lost_and_found_desc">Pravidelne vysiela polohu ako správu na predvolený kanál, aby pomohol pri obnove zariadenia.</string>
+    <string name="role_lost_and_found">Straty a nálezy</string>
+    <string name="role_repeater">Opakovač</string>
     <string name="role_repeater_desc">Uzol infraštruktúry na rozšírenie pokrytia siete prenosom správ s minimálnou réžiou. Nezobrazuje sa v zozname uzlov.</string>
+    <string name="role_router">Smerovač</string>
+    <string name="role_router_client">Smerovač Klient</string>
     <string name="role_router_client_desc">Kombinácia ROUTER a CLIENT. Nie pre mobilné zariadenia.</string>
     <string name="role_router_desc">Uzol infraštruktúry na rozšírenie pokrytia siete prenosom správ. Viditeľný v zozname uzlov.</string>
+    <string name="role_router_late">Smerovač s Oneskorením</string>
     <string name="role_router_late_desc">Uzol infraštruktúry, ktorý vždy preposiela pakety raz, ale až po všetkých ostatných režimoch, čím zabezpečuje dodatočné pokrytie pre miestne zväzky. Viditeľný v zozname uzlov.</string>
+    <string name="role_sensor">Senzor</string>
     <string name="role_sensor_desc">Prioritne vysiela telemetrické pakety.</string>
+    <string name="role_tak">TAK</string>
     <string name="role_tak_desc">Optimalizované pre systémovú komunikáciu ATAK, znižuje rutinné vysielanie.</string>
+    <string name="role_tak_tracker">TAK Sledovač</string>
     <string name="role_tak_tracker_desc">Umožňuje automatické vysielanie TAK PLI a znižuje rutinné vysielanie.</string>
+    <string name="role_tracker">Sledovač</string>
     <string name="role_tracker_desc">Prioritne vysiela pakety polohy GPS.</string>
     <string name="rotary_encoder_1_enabled">Enkóder #1 aktivovaný</string>
     <!-- ROUTING -->

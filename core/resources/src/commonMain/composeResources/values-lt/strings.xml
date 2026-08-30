@@ -239,7 +239,6 @@
     <string name="role_client_desc">Programėlė prijungta prie atskiro susirašinėjimo įtaiso.</string>
     <string name="role_client_hidden_desc">Įtaisas transliuojantis tik prireikus. Naudojama slaptumo ar energijos taupymui.</string>
     <string name="role_client_mute_desc">Įtaisas kuris nepersiunčia kitų įtaisų paketų.</string>
-    <string name="role_lost_and_found_desc">Reguliariai siunčia GPS pozicijos informaciją į pagrindinį kanalą, lengvesniam įtaiso radimui.</string>
     <string name="role_repeater_desc">Stacionarus įtaisas tinklo išplėtimui, persiunčiantis žinutes. Nerodomas įtaisų sąraše.</string>
     <string name="role_router_client_desc">ROUTER ir CLIENT kombinacija. Neskirta mobiliems įtaisams.</string>
     <string name="role_router_desc">Stacionarus aukštuminis įtaisas geresniam tinklo padengimui. Matomas node`ų sąraše.</string>
