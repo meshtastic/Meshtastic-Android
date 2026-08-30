@@ -60,6 +60,13 @@ kotlin {
             api(libs.maplibre.compose.material3)
         }
 
+        // Compose UI tests live in jvmTest, not commonTest: this module enables Android host tests, and
+        // `runComposeUiTest` has no Robolectric host there — the same tests NPE the moment they run under it.
+        jvmTest.dependencies {
+            implementation(libs.compose.multiplatform.ui.test)
+            implementation(compose.desktop.currentOs)
+        }
+
         // maplibre-compose 0.15.0 no longer brings the MapLibre Android SDK along transitively —
         // Android renders through maplibre-native FFI now, so the backend ships as its own
         // artifact. runtimeOnly because nothing compiles against it; it only has to reach the APK.

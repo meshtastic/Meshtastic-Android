@@ -26,7 +26,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.compose.viewmodel.koinViewModel
 import org.maplibre.spatialk.geojson.BoundingBox
 import org.maplibre.spatialk.geojson.Position
-import org.meshtastic.core.model.isLocked
+import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.model.isModifiableBy
 import org.meshtastic.core.model.util.waypointIconOrDefault
 import org.meshtastic.feature.map.SharedMapViewModel
@@ -59,30 +59,21 @@ internal fun WaypointDialogs(
 
     selectedId?.let { id ->
         waypoints[id]?.waypoint?.let { waypoint ->
-            WaypointInfoDialog(
+            WaypointInfoSlot(
                 waypoint = waypoint,
+                myNodeNum = viewModel.myNodeNum,
+                isConnected = isConnected,
                 displayUnits = displayUnits,
                 alertsEnabled = waypoint.id in alertOptIns,
                 onToggleAlerts = { viewModel.setGeofenceAlertOptIn(waypoint.id, it) },
-                onDismissRequest = { onSelectedIdChange(null) },
-                // Editing re-broadcasts, so it needs a connection — and a locked foreign geofence stays read-only.
-                onEdit =
-                if (!waypoint.isLocked && isConnected) {
-                    {
-                        onSelectedIdChange(null)
-                        editing.onEdit(waypoint)
-                    }
-                } else {
-                    null
+                onDismiss = { onSelectedIdChange(null) },
+                onEdit = {
+                    onSelectedIdChange(null)
+                    editing.onEdit(waypoint)
                 },
-                onDeleteForMe =
-                if (!waypoint.isLocked) {
-                    {
-                        onSelectedIdChange(null)
-                        deletingId = waypoint.id
-                    }
-                } else {
-                    null
+                onDeleteForMe = {
+                    onSelectedIdChange(null)
+                    deletingId = waypoint.id
                 },
             )
         }
@@ -114,6 +105,37 @@ internal fun WaypointDialogs(
             )
         }
     }
+}
+
+/**
+ * The tapped waypoint's details, offering only the actions the current state allows.
+ *
+ * Stateless so both gates can be exercised without a view model.
+ */
+@Composable
+internal fun WaypointInfoSlot(
+    waypoint: Waypoint,
+    myNodeNum: Int?,
+    isConnected: Boolean,
+    displayUnits: MeasurementSystem,
+    alertsEnabled: Boolean,
+    onToggleAlerts: (Boolean) -> Unit,
+    onDismiss: () -> Unit,
+    onEdit: () -> Unit,
+    onDeleteForMe: () -> Unit,
+) {
+    WaypointInfoDialog(
+        waypoint = waypoint,
+        displayUnits = displayUnits,
+        alertsEnabled = alertsEnabled,
+        onToggleAlerts = onToggleAlerts,
+        onDismissRequest = onDismiss,
+        // Editing re-broadcasts, so it needs a connection and mesh-wide permission: unlocked, or locked to us.
+        // `isLocked` alone made our own locked waypoint read-only, with no other route to the editor.
+        onEdit = if (waypoint.isModifiableBy(myNodeNum) && isConnected) onEdit else null,
+        // Dropping our local copy is not a mesh operation, so a foreign lock does not withhold it.
+        onDeleteForMe = onDeleteForMe,
+    )
 }
 
 /** Delete confirmation, wrapped so dismissing and acting both clear the pending waypoint. */
