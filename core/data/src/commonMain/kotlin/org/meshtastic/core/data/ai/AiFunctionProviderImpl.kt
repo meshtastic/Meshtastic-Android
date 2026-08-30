@@ -530,8 +530,8 @@ class AiFunctionProviderImpl(
          *
          * `Constants.DATA_PAYLOAD_LEN` is 233, and `CommandSenderImpl.sendData` applies it to the **whole encoded
          * `Data` proto** via `Data.ADAPTER.isWithinSizeLimit`, not to the `payload` field alone — so the text budget is
-         * 233 less [TEXT_DATA_ENVELOPE_BYTES]. Anything longer is persisted to history here and then rejected later by
-         * the send queue, which is why this must be checked up front.
+         * 233 less [TEXT_DATA_ENVELOPE_BYTES]. Checking it here returns `InvalidArgument` before the send path runs, so
+         * an over-long message is never written to history.
          */
         val MAX_MESSAGE_LENGTH = Constants.DATA_PAYLOAD_LEN.value - TEXT_DATA_ENVELOPE_BYTES
     }
