@@ -486,7 +486,6 @@
     <string name="role_client_desc">앱과 연결해서 사용하거나 독립형 메시징 장치.</string>
     <string name="role_client_hidden_desc">스텔스 또는 절전을 위해 필요한 경우에만 전송.</string>
     <string name="role_client_mute_desc">다른 장치에서 온 패킷을 전달하지 않는 장치.</string>
-    <string name="role_lost_and_found_desc">분실 장치의 회수를 돕기 위해 기본 채널에 정기적으로 위치 정보를 전송.</string>
     <string name="role_repeater_desc">최소한의 오버헤드로 메시지를 전달하여 네트워크 범위를 확장하기 위한 인프라 노드. 노드 목록에 표시되지 않음.</string>
     <string name="role_router_client_desc">CLIENT와 ROUTER의 조합. 이동형 장치에는 적합하지 않음.</string>
     <string name="role_router_desc">메시지를 중계하여 네트워크 범위를 확장하는 인프라 노드. 노드 목록에 표시.</string>

@@ -19,7 +19,6 @@
     <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Message de %1$s: %2$s</string>
-    <string name="a11y_node_battery">batterie : %1$d%%</string>
     <string name="a11y_node_distance_away">À %1$s</string>
     <string name="a11y_node_favorite">favori</string>
     <string name="a11y_node_hops_away">À %1$d sauts</string>
@@ -197,7 +196,6 @@
     <string name="chirpy">Chirpy</string>
     <string name="chirpy_assistant_title">Assistant Chirpy</string>
     <string name="chirpy_downloading">Chirpy est en train de télécharger…</string>
-    <string name="chirpy_downloading_progress">Téléchargement du modèle Chirpy : %1$d%%</string>
     <string name="chirpy_downloading_subtitle">Cela ne se produit qu'une seule fois. Chirpy sera bientôt prêt !</string>
     <string name="chirpy_error_busy">Woah! Le canal est totalement bondé avec un lourd trafic actuellement ! 📶 Attende pour un moment plus calme et réessayer la transmission.</string>
     <string name="chirpy_error_model_unavailable">Ma batterie se charge ou mon firmware est toujours en téléchargement ! 🔋Donne-moi un peu de temps pour me synchroniser et m'allumer !</string>
@@ -1258,18 +1256,30 @@
     <string name="ringtone_imported">Sonnerie importée</string>
     <!-- ROLE -->
     <string name="role">Rôle de l'appareil</string>
+    <string name="role_client">Client</string>
+    <string name="role_client_base">Base Client</string>
     <string name="role_client_base_desc">Traite les paquets depuis ou vers les nœuds favoris comme Routeur avec retard (ROUTER_LATE), et tous les autres paquets comme CLIENT.</string>
     <string name="role_client_desc">Dispositif de messagerie autonome ou connecté à l'application.</string>
+    <string name="role_client_hidden">Client masqué</string>
     <string name="role_client_hidden_desc">Appareil ne diffusant que si nécessaire pour la discrétion et l'économie d'énergie.</string>
+    <string name="role_client_mute">Client muet</string>
     <string name="role_client_mute_desc">Appareil ne transmettant pas les paquets provenant d'autres appareils.</string>
-    <string name="role_lost_and_found_desc">Transmet régulièrement la position par message dans le canal par défaut pour vous aider à retrouver l'appareil.</string>
+    <string name="role_lost_and_found">Objets trouvés</string>
+    <string name="role_repeater">Répéteur</string>
     <string name="role_repeater_desc">Nœud d'infrastructure pour étendre la couverture réseau en relayant les messages avec une surcharge minimale. Non visible dans la liste des nœuds.</string>
+    <string name="role_router">Routeur</string>
+    <string name="role_router_client">Routeur Client</string>
     <string name="role_router_client_desc">Combinaison à la fois du ROUTER et du CLIENT. Pas pour les appareils mobiles.</string>
     <string name="role_router_desc">Nœud d'infrastructure pour étendre la couverture réseau en relayant les messages. Visible dans la liste des nœuds.</string>
+    <string name="role_router_late">Routeur avec retard</string>
     <string name="role_router_late_desc">Nœud d'infrastructure qui retransmet toujours les paquets une fois mais seulement après tous les autres modes, assurant une couverture supplémentaire pour les clusters locaux. Visible dans la liste des nœuds.</string>
+    <string name="role_sensor">Capteur</string>
     <string name="role_sensor_desc">Transmet les paquets de télémétrie en priorité.</string>
+    <string name="role_tak">TAK</string>
     <string name="role_tak_desc">Optimisé pour le système de communication ATAK, diminue les émissions de routine.</string>
+    <string name="role_tak_tracker">Traqueur TAK</string>
     <string name="role_tak_tracker_desc">Active les diffusions automatiques de TAK PLI et réduit les diffusions de routine.</string>
+    <string name="role_tracker">Traqueur</string>
     <string name="role_tracker_desc">Transmet les paquets de positions GPS en priorité.</string>
     <string name="root_topic">Sujet principal</string>
     <string name="rotary_encoder_1_enabled">Encodeur rotatif #1 activé</string>

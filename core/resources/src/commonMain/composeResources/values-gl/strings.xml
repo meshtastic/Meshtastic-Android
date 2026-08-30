@@ -202,6 +202,7 @@
     <string name="reset">Restablecer</string>
     <string name="reset_to_defaults">Restablecer a por defecto</string>
     <!-- ROLE -->
+    <string name="role_client">Cliente</string>
     <string name="role_client_desc">Aplicación conectada ou dispositivo de mensaxería autónomo.</string>
     <!-- ROUTING -->
     <!-- SAVE -->

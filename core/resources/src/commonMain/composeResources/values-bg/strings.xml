@@ -19,7 +19,6 @@
     <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Съобщение от %1$s: %2$s</string>
-    <string name="a11y_node_battery">батерия %1$d%%</string>
     <string name="a11y_node_favorite">любим</string>
     <string name="a11y_node_last_heard">последно чут %1$s</string>
     <string name="a11y_node_offline">офлайн</string>
@@ -1036,17 +1035,25 @@
     <string name="ringtone_imported">Импортирана мелодия</string>
     <!-- ROLE -->
     <string name="role">Роля на устройството</string>
+    <string name="role_client">Клиент</string>
     <string name="role_client_base_desc">Третира пакетите от или до предпочитани възли като ROUTER_LATE, а всички останали пакети като CLIENT.</string>
     <string name="role_client_desc">Свързано с приложение или самостоятелно устройство за съобщения.</string>
+    <string name="role_client_hidden">Скрит клиент</string>
     <string name="role_client_hidden_desc">Устройство, което излъчва само при необходимост за скритост или пестене на енергия.</string>
     <string name="role_client_mute_desc">Устройство, което не препредава пакети от други устройства.фигурир</string>
-    <string name="role_lost_and_found_desc">Редовно излъчва местоположението като съобщение до канала по подразбиране, за да подпомогне възстановяването на устройството.</string>
+    <string name="role_lost_and_found">Загубено и намерено</string>
+    <string name="role_repeater">Ретранслатор</string>
     <string name="role_repeater_desc">Инфраструктурен възел за разширяване на мрежовото покритие чрез препредаване на съобщения с минимални разходи. Не се вижда в списъка с възли.</string>
+    <string name="role_router">Рутер</string>
+    <string name="role_router_client">Рутер клиент</string>
     <string name="role_router_client_desc">Комбинация от РУТЕР и КЛИЕНТ. Не е за мобилни устройства.</string>
     <string name="role_router_desc">Инфраструктурен възел за разширяване на мрежовото покритие чрез препредаване на съобщения. Вижда се в списъка с възли.</string>
     <string name="role_router_late_desc">Инфраструктурен възел, който винаги препредава пакети веднъж, но само след всички останали режими, осигурявайки допълнително покритие за локалните клъстери. Вижда се в списъка с възли.</string>
+    <string name="role_sensor">Сензор</string>
     <string name="role_sensor_desc">Излъчва приоритетно телеметрични пакети.</string>
+    <string name="role_tak">TAK</string>
     <string name="role_tak_desc">Оптимизирано за комуникация със системата ATAK, намалява рутинните излъчвания.</string>
+    <string name="role_tracker">Тракер</string>
     <string name="role_tracker_desc">Излъчва приоритетно пакети за GPS позиция</string>
     <string name="rotary_encoder_1_enabled">Ротационен енкодер #1 е активиран</string>
     <!-- ROUTING -->

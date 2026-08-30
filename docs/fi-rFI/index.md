@@ -6,7 +6,7 @@ nav_order: 0
 
 # Meshtastic Android -sovelluksen dokumentaatio
 
-User and developer documentation for the Meshtastic Android and Desktop app, built with Kotlin Multiplatform.
+Meshtastic Android- ja Työpöytä-sovelluksen käyttäjä- ja kehittäjädokumentaatio, toteutettu Kotlin Multiplatformilla.
 
 Käytä sivupalkkia selataksesi **käyttöopasta** ja **Kehittäjäopasta**. Käyttöoppaasta löydät sovelluksen ominaisuudet ja kehittäjäoppaasta ohjeet projektin kehittämiseen osallistumiseen.
 

@@ -19,7 +19,6 @@
     <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">来自 %1$s: %2$s 的消息</string>
-    <string name="a11y_node_battery">电量: %1$d%%</string>
     <string name="a11y_node_distance_away">%1$s 离开</string>
     <string name="a11y_node_favorite">收藏</string>
     <string name="a11y_node_hops_away">%1$d 跳数</string>
@@ -201,7 +200,6 @@
     <string name="chirpy_assistant_title">Chirpy 助手</string>
     <string name="chirpy_checking">正在检查 Chirpy 助手的可用性…</string>
     <string name="chirpy_downloading">Chirpy 助手正在下载中…</string>
-    <string name="chirpy_downloading_progress">正在下载 Chirpy 语音模型: %1$d%%</string>
     <string name="chirpy_downloading_subtitle">Chirpy 语音助手马上就好啦！</string>
     <string name="chirpy_error_busy">当前信道因为流量太大，已经完全拥堵了！📶 让我们等待一个空闲的时段，然后再重试发送。</string>
     <string name="chirpy_error_model_unavailable">请充电，固件还在下载中！🔋 给我一点时间来同步数据并启动吧！</string>
@@ -1446,18 +1444,30 @@
     <string name="ringtone_imported">已导入铃声</string>
     <!-- ROLE -->
     <string name="role">设备角色</string>
+    <string name="role_client">客户端</string>
+    <string name="role_client_base">客户群</string>
     <string name="role_client_base_desc">将来自或收藏节点的数据包视为ROUTER_LATE，所有其他数据包均为CLIENT。</string>
     <string name="role_client_desc">应用配对或独立使用的消息传递设备</string>
+    <string name="role_client_hidden">客户端隐藏</string>
     <string name="role_client_hidden_desc">只在需要时才广播的设备，以达到隐蔽或省电的目的。</string>
+    <string name="role_client_mute">客户端静默</string>
     <string name="role_client_mute_desc">不转发其他设备数据包的设备。</string>
-    <string name="role_lost_and_found_desc">定期向默认信道发送位置信息，以协助设备恢复。</string>
+    <string name="role_lost_and_found">失物招领</string>
+    <string name="role_repeater">中继</string>
     <string name="role_repeater_desc">通过最低开销转发消息扩展网络覆盖的基础设施节点。不可见于节点列表。</string>
+    <string name="role_router">路由</string>
+    <string name="role_router_client">路由客户端</string>
     <string name="role_router_client_desc">同时兼具路由器和客户端功能的设备。不适用于移动设备。</string>
     <string name="role_router_desc">用于通过转发消息扩展网络覆盖范围的基础设施节点。可在节点列表中看到。</string>
+    <string name="role_router_late">延迟时间</string>
     <string name="role_router_late_desc">基础设施节点，总是在所有其他模式之后重新广播数据包一次，以确保本地集群的额外覆盖范围。会在节点列表中显示。</string>
+    <string name="role_sensor">传感器</string>
     <string name="role_sensor_desc">将遥测数据包优先广播。</string>
+    <string name="role_tak">TAK</string>
     <string name="role_tak_desc">针对 ATAK 系统通信进行优化，减少常规广播。</string>
+    <string name="role_tak_tracker">TAK 追踪器</string>
     <string name="role_tak_tracker_desc">启用自动 TAK PLI（Position Location Information）广播，并减少常规广播。</string>
+    <string name="role_tracker">追踪器</string>
     <string name="role_tracker_desc">定位模式 - 用于作为 GPS 跟踪器。从该设备发送的定位数据包优先级较高，每两分钟广播一次。智能位置广播默认为关闭。</string>
     <string name="root_topic">根主题</string>
     <string name="rotary_encoder_1_enabled">启用旋转编码器 #1 </string>

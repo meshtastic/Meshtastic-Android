@@ -496,7 +496,6 @@
     <string name="role_client_desc">Uygulamaya bağlı veya bağımsız mesajlaşma cihazı.</string>
     <string name="role_client_hidden_desc">Gizlilik veya güç tasarrufu için sadece gerektiğinde yayın yapan cihaz.</string>
     <string name="role_client_mute_desc">Diğer cihazlardan gelen paketleri tekrarlamayan cihaz.</string>
-    <string name="role_lost_and_found_desc">Cihazın kurtarılmasına yardımcı olmak için konumunu düzenli olarak varsayılan kanala mesaj olarak gönderir.</string>
     <string name="role_repeater_desc">Mesajları minimum ek yük ile tekrarlayarak ağ kapsamını genişletmek için altyapı düğümü. Düğümler listesinde görünmez.</string>
     <string name="role_router_client_desc">Hem ROUTER hem de CLIENT'ın bir kombinasyonu. Mobil cihazlar için değildir.</string>
     <string name="role_router_desc">Mesajları tekrarlayarak ağ kapsamını genişletmek için altyapı düğümü. Düğümler listesinde görünür.</string>

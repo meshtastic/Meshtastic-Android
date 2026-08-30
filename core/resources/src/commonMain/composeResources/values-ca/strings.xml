@@ -217,7 +217,6 @@
     <string name="role_client_desc">Dispositiu de missatgeria, connectat o autònom.</string>
     <string name="role_client_hidden_desc">Dispositiu que només difon quan cal, per discreció o estalvi d’energia.</string>
     <string name="role_client_mute_desc">Dispositiu sense reenviament de paquets.</string>
-    <string name="role_lost_and_found_desc">Difon regularment la ubicació com a missatge al canal per defecte per ajudar a recuperar el dispositiu.</string>
     <string name="role_repeater_desc">Node d’infraestructura per ampliar cobertura amb mínima càrrega. Ocult a la llista de nodes.</string>
     <string name="role_router_client_desc">Combinació ROUTER + CLIENT. No mòbils.</string>
     <string name="role_router_desc">Node d’infraestructura per ampliar cobertura. Apareix a la llista de nodes.</string>

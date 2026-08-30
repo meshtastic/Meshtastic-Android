@@ -19,7 +19,6 @@
     <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Meddelande från %1$s: %2$s</string>
-    <string name="a11y_node_battery">batteri %1$d%%</string>
     <string name="a11y_node_distance_away">%1$s bort</string>
     <string name="a11y_node_favorite">favorit</string>
     <string name="a11y_node_hops_away">%1$d hopp bort</string>
@@ -1080,18 +1079,30 @@
     <string name="ringtone_imported">Importerad ringsignal</string>
     <!-- ROLE -->
     <string name="role">Enhetens roll</string>
+    <string name="role_client">Client</string>
+    <string name="role_client_base">Client Base</string>
     <string name="role_client_base_desc">Hantera paket till och från favoritnoder som ROUTER_LATE och alla andra paket som CLIENT.</string>
     <string name="role_client_desc">App uppkopplad eller fristående nod.</string>
+    <string name="role_client_hidden">Client Hidden</string>
     <string name="role_client_hidden_desc">Nod som endast kommunicerar vid behov för att gömma sig och samtidigt hålla nere strömförbrukningen.</string>
+    <string name="role_client_mute">Client Mute</string>
     <string name="role_client_mute_desc">Nod som inte vidarebefordrar meddelanden.</string>
-    <string name="role_lost_and_found_desc">Skickar regelbundet ut GPS position på standardkanalen för att assistera vid uppsökande.</string>
+    <string name="role_lost_and_found">Hittegods</string>
+    <string name="role_repeater">Repeater</string>
     <string name="role_repeater_desc">Nod som utökar nätverket igenom att vidarebefordra meddelanden utan egen information. Syns ej i nod listan.</string>
+    <string name="role_router">Router</string>
+    <string name="role_router_client">Router Client</string>
     <string name="role_router_client_desc">Kombinerad ROUTER och CLIENT. Ej för mobila noder.</string>
     <string name="role_router_desc">Nod som utökar nätverket igenom att vidarebefordra meddelanden. Syns i nod listan.</string>
+    <string name="role_router_late">Router Late</string>
     <string name="role_router_late_desc">Nod som utökar nätverket igenom att vidarebefordra meddelanden men endast efter alla noder. Syns i nod listan.</string>
+    <string name="role_sensor">Sensor</string>
     <string name="role_sensor_desc">Nod som prioriterar telemetri meddelanden.</string>
+    <string name="role_tak">TAK</string>
     <string name="role_tak_desc">Roll optimerad för användning tillsammans med ATAK.</string>
+    <string name="role_tak_tracker">TAK Tracker</string>
     <string name="role_tak_tracker_desc">Skickar automatiskt ut GPS position för användning med ATAK.</string>
+    <string name="role_tracker">Tracker</string>
     <string name="role_tracker_desc">Nod som prioriterar GPS meddelanden.</string>
     <string name="root_topic">Rotämne (root topic)</string>
     <!-- ROUTING -->

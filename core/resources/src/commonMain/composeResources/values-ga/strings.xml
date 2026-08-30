@@ -234,7 +234,6 @@
     <string name="role_client_desc">Feiste nascaithe nó feiste teachtaireachtaí standálaí.</string>
     <string name="role_client_hidden_desc">Feiste a seolann ach nuair is gá, chun éalú nó do chumas cothromóige.</string>
     <string name="role_client_mute_desc">Feiste nach dtarchuir pacáistí ó ghléasanna eile.</string>
-    <string name="role_lost_and_found_desc">Pacáiste leis an suíomh agus é seolta chuig an cainéal réamhshocraithe gach lá.</string>
     <string name="role_repeater_desc">Ceannaire infreastruchtúrtha chun clúdach líonra a leathnú trí theachtaireachtaí a athsheoladh le níos lú romha.</string>
     <string name="role_router_client_desc">Comhcheangail de dhá ról ROUTER agus CLIENT. Ní do ghléasanna soghluaiste.</string>
     <string name="role_router_desc">Ceannaire infreastruchtúrtha chun clúdach líonra a leathnú trí theachtaireachtaí a athsheoladh. Infheicthe i liosta na nóid.</string>

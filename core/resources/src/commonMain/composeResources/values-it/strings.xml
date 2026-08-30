@@ -19,7 +19,6 @@
     <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Messaggio da %1$s: %2$s</string>
-    <string name="a11y_node_battery">batteria %1$d%%</string>
     <string name="a11y_node_distance_away">distante %1$s</string>
     <string name="a11y_node_favorite">preferito</string>
     <string name="a11y_node_hops_away">%1$d hop di distanza</string>
@@ -201,7 +200,6 @@
     <string name="chirpy_assistant_title">Assistente Chirpy</string>
     <string name="chirpy_checking">Verifica disponibilità Chirpy…</string>
     <string name="chirpy_downloading">Scaricamento in corso di Chirpy…</string>
-    <string name="chirpy_downloading_progress">Scaricamento in corso del modello Chirpy: %1$d%%</string>
     <string name="chirpy_downloading_subtitle">Questo è necessario solo una volta. Chirpy sarà pronto a breve!</string>
     <string name="chirpy_error_busy">Ahia! In questo momento il canale è completamente congestionato a causa di traffico intenso! 📶 Aspettiamo uno slot libero e riproviamo la trasmissione.</string>
     <string name="chirpy_error_model_unavailable">La mia batteria è in carica o il mio firmware sta ancora scaricando! 🔋 Dammi qualche istante per sincronizzare e avviare!</string>
@@ -1438,18 +1436,30 @@
     <string name="ringtone_imported">Suoneria importata</string>
     <!-- ROLE -->
     <string name="role">Ruolo Del Dispositivo</string>
+    <string name="role_client">Client</string>
+    <string name="role_client_base">Base Client</string>
     <string name="role_client_base_desc">Tratta i pacchetti da o verso i nodi preferiti come ROUTER_LATE, e tutti gli altri pacchetti come CLIENT.</string>
     <string name="role_client_desc">App collegata o dispositivo di messaggistica standalone.</string>
+    <string name="role_client_hidden">Client Nascosto</string>
     <string name="role_client_hidden_desc">Dispositivo che trasmette solo quando necessario, per risparmiare energia o restare invisibile.</string>
+    <string name="role_client_mute">Client Mute</string>
     <string name="role_client_mute_desc">Dispositivo che non inoltra pacchetti da altri dispositivi.</string>
-    <string name="role_lost_and_found_desc">Trasmette a intervalli regolari la posizione come messaggio nel canale predefinito per aiutare il recupero del dispositivo.</string>
+    <string name="role_lost_and_found">Oggetti Smarriti</string>
+    <string name="role_repeater">Repeater</string>
     <string name="role_repeater_desc">Nodo d'infrastruttura per estendere la copertura della rete tramite inoltro dei messaggi con overhead minimo. Non visibile nell'elenco dei nodi.</string>
+    <string name="role_router">Router</string>
+    <string name="role_router_client">Router Client</string>
     <string name="role_router_client_desc">Combinazione di ROUTER e CLIENT. Non per dispositivi mobili.</string>
     <string name="role_router_desc">Nodo d'infrastruttura per estendere la copertura di rete tramite inoltro dei messaggi. Visibile nell'elenco dei nodi.</string>
+    <string name="role_router_late">Router Late</string>
     <string name="role_router_late_desc">Nodo dell'infrastruttura che ritrasmette sempre i pacchetti una volta ma solo dopo tutte le altre modalità, garantendo una copertura aggiuntiva per i cluster locali. Visibile nella lista dei nodi.</string>
+    <string name="role_sensor">Sensore</string>
     <string name="role_sensor_desc">Dà priorità alla trasmissione di pacchetti di telemetria.</string>
+    <string name="role_tak">TAK</string>
     <string name="role_tak_desc">Ottimizzato per la comunicazione del sistema ATAK, riduce le trasmissioni di routine.</string>
+    <string name="role_tak_tracker">TAK Tracker</string>
     <string name="role_tak_tracker_desc">Abilita le trasmissioni automatiche TAK PLI e riduce le trasmissioni di routine.</string>
+    <string name="role_tracker">Tracker</string>
     <string name="role_tracker_desc">Dà priorità alla trasmissione di pacchetti di posizione GPS.</string>
     <string name="root_topic">Root topic</string>
     <string name="rotary_encoder_1_enabled">Encoder rotativo #1 abilitato</string>

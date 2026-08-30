@@ -19,7 +19,6 @@
     <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">來自 %1$s 的訊息：%2$s</string>
-    <string name="a11y_node_battery">電池 %1$d%%</string>
     <string name="a11y_node_distance_away">距離 %1$s</string>
     <string name="a11y_node_favorite">最愛</string>
     <string name="a11y_node_hops_away">距離 %1$d 跳</string>
@@ -160,7 +159,6 @@
     <string name="chirpy_assistant_title">Chirpy 助理</string>
     <string name="chirpy_checking">正在檢查 Chirpy 是否可用…</string>
     <string name="chirpy_downloading">Chirpy 下載中…</string>
-    <string name="chirpy_downloading_progress">正在下載 Chirpy 模型：%1$d%%</string>
     <string name="chirpy_downloading_subtitle">這只會發生一次，Chirpy 即將準備就緒！</string>
     <string name="chirpy_error_busy">哇！頻道目前嚴重壅塞！📶 讓我們等待空閒時段後重試傳輸。</string>
     <string name="chirpy_error_model_unavailable">電池正在充電或韌體仍在下載中！🔋 請給我一點時間同步並啟動！</string>
@@ -1112,18 +1110,30 @@
     <string name="ringtone_imported">已匯入鈴聲</string>
     <!-- ROLE -->
     <string name="role">裝置角色</string>
+    <string name="role_client">Client</string>
+    <string name="role_client_base">客戶端基礎模式</string>
     <string name="role_client_base_desc">將來自或發往我的最愛節點的封包視為 ROUTER_LATE，其他所有封包視為 CLIENT。</string>
     <string name="role_client_desc">應用程式連接或獨立收發裝置。</string>
+    <string name="role_client_hidden">Client Hidden</string>
     <string name="role_client_hidden_desc">基於省電或隱私需求，僅提供最低限度廣播通訊的節點。</string>
+    <string name="role_client_mute">Client Mute</string>
     <string name="role_client_mute_desc">對其他裝置封包不予轉播的節點。</string>
-    <string name="role_lost_and_found_desc">定期向預設頻道播送定位的裝置，以便於裝置復原。</string>
+    <string name="role_lost_and_found">Lost and Found</string>
+    <string name="role_repeater">Repeater</string>
     <string name="role_repeater_desc">加強網路覆蓋的中繼基地台節點，但轉播時僅添加最低限度的額外負擔（Overhead）。不會顯示在節點列表上。</string>
+    <string name="role_router">Router</string>
+    <string name="role_router_client">Router Client</string>
     <string name="role_router_client_desc">兼具路由器和用戶端功能的節點。行動裝置不宜使用。</string>
     <string name="role_router_desc">加強網路覆蓋的中繼基地台節點。顯示在節點列表上。</string>
+    <string name="role_router_late">Router Late</string>
     <string name="role_router_late_desc">基礎建設節點，總是在所有其他模式之後才重新廣播一次封包，以確保本地群集有額外的覆蓋範圍。在節點清單中可見。</string>
+    <string name="role_sensor">Sensor</string>
     <string name="role_sensor_desc">優先廣播遙測資料封包。</string>
+    <string name="role_tak">TAK</string>
     <string name="role_tak_desc">最佳化以供 ATAK 系統通訊使用，減少日常廣播量。</string>
+    <string name="role_tak_tracker">TAK Tracker</string>
     <string name="role_tak_tracker_desc">啓用自動 TAK PLI 廣播，將減少定期廣播。</string>
+    <string name="role_tracker">Repeater</string>
     <string name="role_tracker_desc">優先廣播 GPS 位置封包。</string>
     <string name="root_topic">根話題</string>
     <string name="rotary_encoder_1_enabled">啟用旋轉編碼器#1</string>

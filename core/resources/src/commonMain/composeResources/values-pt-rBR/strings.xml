@@ -19,7 +19,6 @@
     <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Mensagem de %1$s %2$s</string>
-    <string name="a11y_node_battery">%1$d%% de bateria</string>
     <string name="a11y_node_distance_away">%1$s de distância</string>
     <string name="a11y_node_favorite">favorito</string>
     <string name="a11y_node_hops_away">A %1$d salto de distância</string>
@@ -615,7 +614,6 @@
     <string name="role_client_desc">Aplicativo conectado ou é um dispositivo autônomo de mensagem.</string>
     <string name="role_client_hidden_desc">Dispositivo que só transmite conforme necessário para economizar energia ou se manter em segredo.</string>
     <string name="role_client_mute_desc">Dispositivo que não retransmite pacotes de outros dispositivos.</string>
-    <string name="role_lost_and_found_desc">Transmite o local como mensagem para o canal padrão regularmente para ajudar na recuperação do dispositivo.</string>
     <string name="role_repeater_desc">Nó de infraestrutura para estender a cobertura da rede repassando mensagens com sobrecarga mínima. Não visível na lista de nós.</string>
     <string name="role_router_client_desc">Combinação de ROUTER e CLIENT. Incompatível com dispositivos móveis.</string>
     <string name="role_router_desc">Nó de infraestrutura para estender a cobertura da rede repassando mensagens. Visível na lista de nós.</string>

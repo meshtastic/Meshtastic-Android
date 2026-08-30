@@ -384,7 +384,6 @@
     <string name="role_client_desc">Toestel geeft geen pakketten door van andere toestellen.</string>
     <string name="role_client_hidden_desc">Apparaat dat alleen uitzendt als dat nodig is voor stealth of energiebesparing.</string>
     <string name="role_client_mute_desc">Apparaat stuurt geen pakketten van andere apparaten.</string>
-    <string name="role_lost_and_found_desc">Zend locatie regelmatig als bericht via het standaard kanaal voor zoektocht apparaat.</string>
     <string name="role_repeater_desc">Infrastructuur node om netwerk bereik te vergroten door berichten door te geven zonder overtolligheid. Niet zichtbaar in noden lijst.</string>
     <string name="role_router_client_desc">Combinatie van ROUTER en CLIENT. Niet voor mobiele toestellen.</string>
     <string name="role_router_desc">Infrastructuur node om netwerk bereik te vergroten door berichten door te geven. Zichtbare in noden lijst.</string>

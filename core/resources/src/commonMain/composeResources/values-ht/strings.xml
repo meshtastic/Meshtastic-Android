@@ -231,7 +231,6 @@
     <string name="role_client_desc">Aplikasyon konekte oswa aparèy mesaj endepandan.</string>
     <string name="role_client_hidden_desc">Aparèy ki sèlman voye kòm sa nesesè pou kachèt oswa ekonomi pouvwa.</string>
     <string name="role_client_mute_desc">Aparèy ki pa voye pake soti nan lòt aparèy.</string>
-    <string name="role_lost_and_found_desc">Voye pozisyon kòm mesaj nan kanal default regilyèman pou ede ak rekiperasyon aparèy.</string>
     <string name="role_repeater_desc">Nœud enfrastrikti pou elaji kouvèti rezo pa relaye mesaj avèk ti overhead. Pa vizib nan lis nœud.</string>
     <string name="role_router_client_desc">Kombinasyon de toude ROUTER ak CLIENT. Pa pou aparèy mobil.</string>
     <string name="role_router_desc">Nœud enfrastrikti pou elaji kouvèti rezo pa relaye mesaj. Vizyèl nan lis nœud.</string>
