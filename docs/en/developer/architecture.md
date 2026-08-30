@@ -45,7 +45,7 @@ The Desktop (Linux/macOS/Windows) entry point:
 - Compose Desktop window management
 - Desktop-specific DI (`DesktopKoinModule`)
 - Platform stubs for Android-only capabilities
-- `DesktopRadioTransportFactory` and a jSerialComm-based serial transport; the BLE and TCP transport implementations it wires up are shared code in `core:network`/`core:ble`, not desktopApp-owned
+- `DesktopRadioTransportFactory` and a jSerialComm-based serial transport; the BLE and TCP transport implementations it wires up are shared code — they live in `core:network`, built on `core:ble`'s BLE primitives — not desktopApp-owned
 
 ### `feature/*` — Feature Modules
 

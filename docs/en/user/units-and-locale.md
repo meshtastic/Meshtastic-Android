@@ -152,8 +152,8 @@ metres. For those cases the app has its own switch:
 2. Choose **System default**, **Metric**, or **Imperial**
 3. Every screen updates immediately — no restart needed
 
-**System default** follows your phone's region and measurement settings. Forcing **Metric** or **Imperial** applies to
-everything, temperature included (metric → °C, imperial → °F), even where the device's own regional preferences say
+**System default** follows your phone's or computer's region and measurement settings. Forcing **Metric** or **Imperial** applies to
+everything, temperature included (metric → °C, imperial → °F), even where the system's own regional preferences say
 otherwise. The setting exists on Android and Desktop alike.
 
 ## Related Topics

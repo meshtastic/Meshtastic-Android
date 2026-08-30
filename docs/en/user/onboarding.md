@@ -84,7 +84,7 @@ This step is not a runtime permission prompt. There is no grant/deny dialog: the
 | **Blocked — tap to open system settings** | Android will no longer show its dialog, so this opens the page where you can turn it back on |
 | **Not required on this version of Android** | Nothing — the permission does not exist on your device |
 
-This matters most for notifications. If you decline them during setup, this row is the way back: Android stops showing the dialog once you have declined firmly (a second denial on Android 11 and newer), at which point this row switches to **Blocked** and sends you to the system settings page instead.
+This matters most for notifications. If you decline them during setup, this row is the way back: Android stops showing the dialog once you have declined firmly (a second denial), at which point this row switches to **Blocked** and sends you to the system settings page instead. The notification prompt exists only on Android 13 and newer — on older versions notifications are on by default and managed from Android's own settings.
 
 ## After Setup
 

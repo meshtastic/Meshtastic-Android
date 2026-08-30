@@ -1,6 +1,6 @@
 # Meshtastic Release Process
 
-This guide summarizes the steps for releasing new versions of Meshtastic Android and Desktop — automated end-to-end once a developer triggers one GitHub Action.
+This guide summarizes the steps for releasing new versions of Meshtastic Android and Desktop. The core flow is automated once a developer triggers the **Create or Promote Release** workflow; Microsoft Store and winget publishing run as separate workflows (see Desktop Store Publishing).
 
 ## Overview
 
@@ -38,7 +38,7 @@ The entire release process is managed by a single GitHub Action: **`Create or Pr
 
 The workflow will:
 1.  **Tag** the current commit on the branch with an incremental internal tag (e.g., `v2.8.0-internal.1`) — no new commit is created; it tags whatever is already at `HEAD`.
-2.  **Build & Deploy** the verified Android artifact to the Play Store Internal track.
+2.  **Build & Deploy** the built Android artifact to the Play Store Internal track.
 3.  **Build Desktop** native installers and Flatpak sources on macOS, Windows, and Linux runners.
 4.  Publish a **draft** pre-release on GitHub with all artifacts attached. It stays a draft until
     the first promotion (closed/open/production), at which point `promote.yml` un-drafts the

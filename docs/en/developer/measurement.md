@@ -103,7 +103,7 @@ The two source functions (in `core/common/.../util/MeasurementSystem.kt`) are de
 
 The user's in-app **Units** choice (`UnitsOverride`, stored in `UiPrefs`) is folded in by `LocaleUnitsProvider`, which is the only place display code takes units from. A Konsist rule (`MeasurementSystemSourceTest`) keeps direct reads of the OS resolution out of the rest of the codebase, because a direct read follows the locale but ignores the setting. A forced system carries its temperature with it (metric → °C, imperial → °F), overriding even an explicit OS regional temperature preference.
 
-Both functions resolve the locale the same way, in order:
+`getSystemMeasurementSystem()` resolves the locale in this order (temperature is separate: as described above, `getSystemTemperatureUnit()` reads the regional temperature preference via `LocalePreferences`, shares only the region backfill, and falls back to Celsius):
 
 1. The `ms` Unicode extension (the Android 16+ Measurement system preference) wins outright.
 2. A locale with no region — the in-app language picker offers bare tags like `en` — takes its region from the system configuration rather than letting ICU guess one from the language.

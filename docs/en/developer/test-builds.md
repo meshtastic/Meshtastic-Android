@@ -15,9 +15,7 @@ aliases:
 
 [Obtainium](https://github.com/ImranR98/Obtainium) installs and auto-updates Android apps straight from their GitHub releases — no Play Store account, no testing-track invite. This page sets it up for Meshtastic and shows how to follow the **open beta**, **closed beta**, or **snapshot** channels.
 
-> **Heads up — signatures.** Builds from GitHub are signed with the project's release key (`CN=Kevin Hester, O=Geeksville Industries`), **not** Google Play's. If you already have Meshtastic installed from the Play Store, Android refuses to update over it.
->
-> **Switching between the `fdroid` and `google` flavors is fine.** Both flavors in a given release carry the *same* release key, so Obtainium can move you from one to the other in place — verified by installing the `google` APK over an installed `fdroid` build. Only the *origin* of a build (Play vs GitHub) determines whether the signatures clash.
+Builds from GitHub are signed with the project's release key (`CN=Kevin Hester, O=Geeksville Industries`), **not** Google Play's — if you already have Meshtastic installed from the Play Store, Android refuses to update over it. Switching between the `fdroid` and `google` flavors is fine: both flavors in a given release carry the *same* release key, so Obtainium can move you from one to the other in place (verified by installing the `google` APK over an installed `fdroid` build). Only the *origin* of a build (Play vs GitHub) determines whether the signatures clash.
 
 > ⚠️ **Warning:** Uninstalling the Play Store version of Meshtastic clears the app's data — message history and settings on this phone are lost. Uninstall it before installing via Obtainium, then stay on Obtainium for updates.
 
@@ -135,7 +133,10 @@ The APKs are named `…-debug-<versionCode>.apk` (not `-release.apk`), so use de
 
 Snapshot releases attach only the debug APKs — no `.aab` or desktop installers.
 
-> **If you build debug locally, uninstall your local build first.** CI signs snapshots with *its own* debug keystore, not yours (`07c16b98…` from CI versus `88914c61…` from a local machine, for example). Since both produce the same `com.geeksville.mesh.<flavor>.debug` package name, Android refuses the swap with `INSTALL_FAILED_UPDATE_INCOMPATIBLE`. The "installs as a separate app" note earlier on this page holds against *release* builds, not against your own debug builds.
+> ℹ️ **Note:** Local debug builds and CI snapshots are update-compatible: the repo checks in a shared debug
+> keystore (`config/debug.keystore`) that both sign with, so Obtainium can update over your own debug
+> install. `INSTALL_FAILED_UPDATE_INCOMPATIBLE` means the installed build predates the shared keystore
+> (or was signed with another machine's default key) — uninstall that one build and reinstall.
 
 Two more things about release selection apply to every channel described earlier, not just snapshot:
 

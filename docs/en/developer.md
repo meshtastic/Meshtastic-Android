@@ -38,7 +38,7 @@ Keep the last 5–8 entries and trim older ones from the bottom.
 
 **August 2026** — Offline map-pack downloads are gated on `offlineMapsSupported`, since the MapLibre offline API compiles on Desktop but silently downloads nothing there.
 
-**August 2026** — New module `feature/map-maplibre`: the F-Droid flavor and Desktop now render every map surface (main map, node track, traceroute, discovery, inline mini-map) through `maplibre-compose` from one multiplatform module, and `osmdroid` is gone. The July 2026 entry describes the renderer it replaced. The shared rules both renderers must agree on live in `feature/map` policy classes.
+**August 2026** — New module `feature/map-maplibre`: the F-Droid flavor and Desktop now render every map surface (main map, node track, traceroute, discovery, inline mini-map) through `maplibre-compose` from one multiplatform module, and `osmdroid` is gone. The shared rules both renderers must agree on live in `feature/map` policy classes.
 
 **August 2026** — Android Auto removed from all build variants (#6779). `feature/car` is gone — the module, its Car App Library dependencies, the `automotive_app_desc.xml` manifest entry and the `google` flavor's `FlavorModule` registration.
 

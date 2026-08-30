@@ -25,7 +25,7 @@ the lower-level BLE connection primitives (scanning, GATT, Kable wiring) that `B
 on — it does not implement `RadioTransport` itself. This lets the app work identically regardless of the
 underlying connection type.
 
-```
+```text
 App ← RadioController → Transport (BLE | Serial | TCP)
 ```
 

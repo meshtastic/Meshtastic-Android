@@ -24,7 +24,7 @@ The primary structured data store:
 - Message history
 - Waypoints
 - Telemetry data
-- Channel set configuration (channel names, PSKs, and LoRa config)
+- Channel set configuration (channel names and LoRa config)
 
 ### Key Points
 
@@ -46,7 +46,7 @@ The primary structured data store:
 | `ReactionEntity` | Emoji reactions on messages |
 | `MeshLog` | Raw mesh protocol logs |
 | `MetadataEntity` | Device metadata (firmware version, hardware model) |
-| `ChannelSetEntity` | The connected radio's channel set — channel names, PSKs, and LoRa config — one row per device |
+| `ChannelSetEntity` | The connected radio's channel set — channel names and LoRa config — one row per device |
 | `QuickChatAction` | User-configured quick-chat messages |
 | `DeviceHardwareEntity` | Cached device hardware catalog |
 | `FirmwareReleaseEntity` | Cached firmware release info |
@@ -56,7 +56,7 @@ The primary structured data store:
 | `DiscoveredNodeEntity` | Nodes found during a discovery preset scan |
 | `DeviceLinkEntity` | Cached `msh.to` device links from the Meshtastic API |
 
-> ℹ️ **Note:** Waypoints and telemetry are stored within the `Packet` entity (the `port_num` field distinguishes packet types), alongside a `channel` index recording which channel each packet used. Channel *configuration* — names, PSKs, and LoRa settings — lives separately, in `ChannelSetEntity`.
+> ℹ️ **Note:** Waypoints and telemetry are stored within the `Packet` entity (the `port_num` field distinguishes packet types), alongside a `channel` index recording which channel each packet used. Channel *configuration* — names and LoRa settings — lives separately, in `ChannelSetEntity`.
 
 ## DataStore Preferences
 
