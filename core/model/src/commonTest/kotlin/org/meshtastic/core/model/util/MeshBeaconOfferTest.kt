@@ -287,4 +287,13 @@ class MeshBeaconOfferTest {
         val beacon = MeshBeacon(message = "hi")
         assertEquals(false, beacon.isAlreadyJoined(radioLora, radioChannels))
     }
+
+    @Test
+    fun `blank-name no-psk secondary placeholder slot is not mistaken for an already-joined channel`() {
+        // SwitchingChannelSetDataSource pads a gap left by a removed channel with a bare ChannelSettings(); a beacon
+        // offering a genuinely blank cleartext channel on the same preset must not match that padding.
+        val configured = listOf(ChannelSettings(name = "HomeMesh"), ChannelSettings())
+        val beacon = MeshBeacon(offer_channel = ChannelSettings(), offer_preset = ModemPreset.LONG_FAST)
+        assertEquals(false, beacon.isAlreadyJoined(radioLora, configured))
+    }
 }
