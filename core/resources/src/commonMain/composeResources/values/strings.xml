@@ -689,10 +689,6 @@
     <string name="firmware_maintenance_cdc_unblock_failed">The erase file was copied but the device didn't start erasing. Nothing has been changed yet. Unplug the device, double-press its reset button, and try again.</string>
     <string name="firmware_maintenance_copy_failed">Couldn't copy the file to the device's drive. Make sure the drive is still connected and try again.</string>
     <string name="firmware_maintenance_data_unavailable">The erase image list isn't available right now. Check your connection and try again, or use the web flasher at flasher.meshtastic.org.</string>
-    <string name="firmware_maintenance_erase_action">Erase and reinstall</string>
-    <string name="firmware_maintenance_erase_confirm_button">Erase device</string>
-    <string name="firmware_maintenance_erase_confirm_text">This erases everything on %1$s, including its channels, keys and all settings, then reinstalls the firmware. It cannot be undone and there is no backup.\n\nYou will be asked to select the device's drive twice: once for the erase file, then again for the firmware.</string>
-    <string name="firmware_maintenance_erase_confirm_title">Erase this device?</string>
     <string name="firmware_maintenance_no_release">Select a firmware version first, so the device can be reinstalled after erasing.</string>
     <string name="firmware_maintenance_not_a_bootloader_volume">That drive isn't the device's update drive. Select the drive that appears when the device is in update mode (it contains a file named INFO_UF2.TXT).</string>
     <string name="firmware_maintenance_select_drive">Select the device's update drive</string>
@@ -933,24 +929,6 @@
     <string name="key_verification_final_title">Key Verification Complete</string>
     <string name="key_verification_request_title">Key Verification Request</string>
     <string name="key_verification_title">Key Verification</string>
-    <!-- LABEL -->
-    <string name="label_lite_fast">Lite - Fast</string>
-    <string name="label_lite_slow">Lite - Slow</string>
-    <string name="label_long_fast">Long Range - Fast</string>
-    <string name="label_long_moderate">Long Range - Moderate</string>
-    <string name="label_long_slow">Long Range - Slow</string>
-    <string name="label_long_turbo">Long Range - Turbo</string>
-    <string name="label_medium_fast">Medium Range - Fast</string>
-    <string name="label_medium_slow">Medium Range - Slow</string>
-    <string name="label_medium_turbo">Medium Range - Turbo</string>
-    <string name="label_narrow_fast">Narrow - Fast</string>
-    <string name="label_narrow_slow">Narrow - Slow</string>
-    <string name="label_short_fast">Short Range - Fast</string>
-    <string name="label_short_slow">Short Range - Slow</string>
-    <string name="label_short_turbo">Short Range - Turbo</string>
-    <string name="label_tiny_fast">Tiny - Fast</string>
-    <string name="label_tiny_slow">Tiny - Slow</string>
-    <string name="label_very_long_slow">Very Long Range - Slow</string>
     <string name="last_heard_filter_label">Filter by Last Heard time: %1$s</string>
     <string name="last_position_update">Last position update</string>
     <string name="latest_alpha_firmware">Latest alpha</string>
@@ -1950,7 +1928,6 @@
     <string name="traffic_management_nodeinfo_direct_response_max_hops">Max Hops for Direct Response</string>
     <string name="traffic_management_position_dedup">Position Deduplication</string>
     <string name="traffic_management_position_min_interval">Min Position Interval (secs)</string>
-    <string name="traffic_management_position_precision">Position Precision (bits)</string>
     <string name="traffic_management_rate_limit_enabled">Rate Limiting</string>
     <string name="traffic_management_rate_limit_max_packets">Max Packets in Window</string>
     <string name="traffic_management_rate_limit_window">Rate Limit Window (secs)</string>
