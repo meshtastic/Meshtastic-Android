@@ -18,9 +18,7 @@ package org.meshtastic.feature.map
 
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
@@ -104,11 +102,6 @@ open class BaseMapViewModel(
             .map { nodes -> nodes.filterNot { node -> node.isIgnored } }
             .stateInWhileSubscribed(initialValue = emptyList())
 
-    val nodesWithPosition: StateFlow<List<Node>> =
-        nodes
-            .map { nodes -> nodes.filter { node -> node.validPosition != null } }
-            .stateInWhileSubscribed(initialValue = emptyList())
-
     val waypoints: StateFlow<Map<Int, DataPacket>> =
         packetRepository
             .getWaypoints()
@@ -126,108 +119,82 @@ open class BaseMapViewModel(
     /** True if the waypoint with [id] was created by this device (vs. received from another node over the mesh). */
     fun isMyWaypoint(id: Int): Boolean = waypoints.value[id]?.isFromLocal(myNodeNum) == true
 
-    private val showOnlyFavorites = MutableStateFlow(mapPrefs.showOnlyFavorites.value)
-    val showOnlyFavoritesOnMap: StateFlow<Boolean> = showOnlyFavorites.asStateFlow()
+    // Every filter reads its persisted flow directly rather than snapshotting `.value` into a mirror at
+    // construction. MapPrefsImpl's flows start eagerly but load from DataStore asynchronously, so a view model built
+    // before that first read kept the defaults forever — nothing wrote the persisted values back into a mirror.
+    val showOnlyFavoritesOnMap: StateFlow<Boolean> = mapPrefs.showOnlyFavorites
 
-    fun toggleOnlyFavorites() {
-        val newValue = !showOnlyFavorites.value
-        showOnlyFavorites.value = newValue
-        mapPrefs.setShowOnlyFavorites(newValue)
-    }
+    fun toggleOnlyFavorites() = mapPrefs.setShowOnlyFavorites(!showOnlyFavoritesOnMap.value)
 
-    private val showWaypoints = MutableStateFlow(mapPrefs.showWaypointsOnMap.value)
-    val showWaypointsOnMap: StateFlow<Boolean> = showWaypoints.asStateFlow()
+    val showWaypointsOnMap: StateFlow<Boolean> = mapPrefs.showWaypointsOnMap
 
-    fun toggleShowWaypointsOnMap() {
-        val newValue = !showWaypoints.value
-        showWaypoints.value = newValue
-        mapPrefs.setShowWaypointsOnMap(newValue)
-    }
+    fun toggleShowWaypointsOnMap() = mapPrefs.setShowWaypointsOnMap(!showWaypointsOnMap.value)
 
-    private val showPrecisionCircle = MutableStateFlow(mapPrefs.showPrecisionCircleOnMap.value)
-    val showPrecisionCircleOnMap: StateFlow<Boolean> = showPrecisionCircle.asStateFlow()
+    val showPrecisionCircleOnMap: StateFlow<Boolean> = mapPrefs.showPrecisionCircleOnMap
 
-    fun toggleShowPrecisionCircleOnMap() {
-        val newValue = !showPrecisionCircle.value
-        showPrecisionCircle.value = newValue
-        mapPrefs.setShowPrecisionCircleOnMap(newValue)
-    }
+    fun toggleShowPrecisionCircleOnMap() = mapPrefs.setShowPrecisionCircleOnMap(!showPrecisionCircleOnMap.value)
 
-    private val onlyOnline = MutableStateFlow(mapPrefs.onlyOnlineOnMap.value)
-    val onlyOnlineOnMap: StateFlow<Boolean> = onlyOnline.asStateFlow()
+    val onlyOnlineOnMap: StateFlow<Boolean> = mapPrefs.onlyOnlineOnMap
 
-    fun toggleOnlyOnline() {
-        val newValue = !onlyOnline.value
-        onlyOnline.value = newValue
-        mapPrefs.setOnlyOnlineOnMap(newValue)
-    }
+    fun toggleOnlyOnline() = mapPrefs.setOnlyOnlineOnMap(!onlyOnlineOnMap.value)
 
-    private val onlyDirect = MutableStateFlow(mapPrefs.onlyDirectOnMap.value)
-    val onlyDirectOnMap: StateFlow<Boolean> = onlyDirect.asStateFlow()
+    val onlyDirectOnMap: StateFlow<Boolean> = mapPrefs.onlyDirectOnMap
 
-    fun toggleOnlyDirect() {
-        val newValue = !onlyDirect.value
-        onlyDirect.value = newValue
-        mapPrefs.setOnlyDirectOnMap(newValue)
-    }
+    fun toggleOnlyDirect() = mapPrefs.setOnlyDirectOnMap(!onlyDirectOnMap.value)
 
-    private val excludeMqtt = MutableStateFlow(mapPrefs.excludeMqttOnMap.value)
-    val excludeMqttOnMap: StateFlow<Boolean> = excludeMqtt.asStateFlow()
+    val excludeMqttOnMap: StateFlow<Boolean> = mapPrefs.excludeMqttOnMap
 
-    fun toggleExcludeMqtt() {
-        val newValue = !excludeMqtt.value
-        excludeMqtt.value = newValue
-        mapPrefs.setExcludeMqttOnMap(newValue)
-    }
+    fun toggleExcludeMqtt() = mapPrefs.setExcludeMqttOnMap(!excludeMqttOnMap.value)
 
-    private val showIgnored = MutableStateFlow(mapPrefs.showIgnoredOnMap.value)
-    val showIgnoredOnMap: StateFlow<Boolean> = showIgnored.asStateFlow()
+    val showIgnoredOnMap: StateFlow<Boolean> = mapPrefs.showIgnoredOnMap
 
-    fun toggleShowIgnored() {
-        val newValue = !showIgnored.value
-        showIgnored.value = newValue
-        mapPrefs.setShowIgnoredOnMap(newValue)
-    }
+    fun toggleShowIgnored() = mapPrefs.setShowIgnoredOnMap(!showIgnoredOnMap.value)
 
-    private val includeUnknown = MutableStateFlow(mapPrefs.includeUnknownOnMap.value)
-    val includeUnknownOnMap: StateFlow<Boolean> = includeUnknown.asStateFlow()
+    val includeUnknownOnMap: StateFlow<Boolean> = mapPrefs.includeUnknownOnMap
 
-    fun toggleIncludeUnknown() {
-        val newValue = !includeUnknown.value
-        includeUnknown.value = newValue
-        mapPrefs.setIncludeUnknownOnMap(newValue)
-    }
+    fun toggleIncludeUnknown() = mapPrefs.setIncludeUnknownOnMap(!includeUnknownOnMap.value)
 
-    private val excludedRoles = MutableStateFlow(decodeExcludedRoles(mapPrefs.excludedMapRoles.value))
-    val excludedMapRoles: StateFlow<Set<Config.DeviceConfig.Role>> = excludedRoles.asStateFlow()
+    /**
+     * The nodes the map draws from.
+     *
+     * Built from the repository rather than from [nodes], which drops every ignored node unconditionally — that is the
+     * right default for the pickers that read it, but it left the map's own show-ignored filter with nothing to add
+     * back. [MapNodePolicy] still decides; this only stops the discard happening before it is asked.
+     *
+     * Declared here rather than beside [nodes] because it reads [showIgnoredOnMap], and a property initialiser cannot
+     * see one declared below it.
+     */
+    val nodesWithPosition: StateFlow<List<Node>> =
+        combine(nodeRepository.getNodes(), showIgnoredOnMap) { all, showIgnored ->
+            all.filter { node -> node.validPosition != null && (showIgnored || !node.isIgnored) }
+        }
+            .stateInWhileSubscribed(initialValue = emptyList())
+
+    val excludedMapRoles: StateFlow<Set<Config.DeviceConfig.Role>> =
+        mapPrefs.excludedMapRoles
+            .map(::decodeExcludedRoles)
+            .stateInWhileSubscribed(decodeExcludedRoles(mapPrefs.excludedMapRoles.value))
 
     fun toggleRoleExcluded(role: Config.DeviceConfig.Role) {
-        val newValue = excludedRoles.value.let { if (role in it) it - role else it + role }
-        excludedRoles.value = newValue
+        val newValue = excludedMapRoles.value.let { if (role in it) it - role else it + role }
         mapPrefs.setExcludedMapRoles(newValue.mapTo(mutableSetOf()) { it.name })
     }
 
-    fun clearExcludedRoles() {
-        excludedRoles.value = emptySet()
-        mapPrefs.setExcludedMapRoles(emptySet())
-    }
+    fun clearExcludedRoles() = mapPrefs.setExcludedMapRoles(emptySet())
 
-    private val lastHeardFilterValue = MutableStateFlow(LastHeardFilter.fromSeconds(mapPrefs.lastHeardFilter.value))
-    val lastHeardFilter: StateFlow<LastHeardFilter> = lastHeardFilterValue.asStateFlow()
+    val lastHeardFilter: StateFlow<LastHeardFilter> =
+        mapPrefs.lastHeardFilter
+            .map(LastHeardFilter::fromSeconds)
+            .stateInWhileSubscribed(LastHeardFilter.fromSeconds(mapPrefs.lastHeardFilter.value))
 
-    fun setLastHeardFilter(filter: LastHeardFilter) {
-        lastHeardFilterValue.value = filter
-        mapPrefs.setLastHeardFilter(filter.seconds)
-    }
+    fun setLastHeardFilter(filter: LastHeardFilter) = mapPrefs.setLastHeardFilter(filter.seconds)
 
-    private val lastHeardTrackFilterValue =
-        MutableStateFlow(LastHeardFilter.fromSeconds(mapPrefs.lastHeardTrackFilter.value))
-    val lastHeardTrackFilter: StateFlow<LastHeardFilter> = lastHeardTrackFilterValue.asStateFlow()
+    val lastHeardTrackFilter: StateFlow<LastHeardFilter> =
+        mapPrefs.lastHeardTrackFilter
+            .map(LastHeardFilter::fromSeconds)
+            .stateInWhileSubscribed(LastHeardFilter.fromSeconds(mapPrefs.lastHeardTrackFilter.value))
 
-    fun setLastHeardTrackFilter(filter: LastHeardFilter) {
-        lastHeardTrackFilterValue.value = filter
-        mapPrefs.setLastHeardTrackFilter(filter.seconds)
-    }
+    fun setLastHeardTrackFilter(filter: LastHeardFilter) = mapPrefs.setLastHeardTrackFilter(filter.seconds)
 
     open fun getUser(userId: String?) =
         nodeRepository.getUser(userId ?: org.meshtastic.core.model.NodeAddress.ID_BROADCAST)
@@ -285,7 +252,7 @@ open class BaseMapViewModel(
     // Two intermediate combines rather than one: `combine` tops out at five flows, and there are eleven.
     private val displayFilters: Flow<MapFilterState> =
         combine(
-            showOnlyFavorites,
+            showOnlyFavoritesOnMap,
             showWaypointsOnMap,
             showPrecisionCircleOnMap,
             lastHeardFilter,
@@ -304,7 +271,7 @@ open class BaseMapViewModel(
             .stateInWhileSubscribed(
                 initialValue =
                 MapFilterState(
-                    showOnlyFavorites.value,
+                    showOnlyFavoritesOnMap.value,
                     showWaypointsOnMap.value,
                     showPrecisionCircleOnMap.value,
                     lastHeardFilter.value,
