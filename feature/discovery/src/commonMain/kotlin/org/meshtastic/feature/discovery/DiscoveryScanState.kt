@@ -20,10 +20,10 @@ package org.meshtastic.feature.discovery
  * State machine for a discovery scan lifecycle.
  *
  * ```
- * Idle → Preparing → Shifting → [Reconnecting] → Dwell → Shifting (loop) → Analysis → Complete(Success)
- * Any scanning → Cancelling → Restoring → Complete(Cancelled)
- * Any scanning → Failed(reason) → Restoring → Complete(Failed)
- * Reconnecting timeout → Paused
+ * Idle → Preparing → Shifting → Reconnecting → Dwell → Shifting (loop) → Analysis → Complete(Success)
+ * Refused at start → Failed(reason)
+ * Shift error, reconnect timeout, or aborted dwell → Analysis → Complete(Failed)
+ * Any scanning → Cancelling → Complete(Cancelled)
  * ```
  */
 sealed interface DiscoveryScanState {
@@ -47,9 +47,6 @@ sealed interface DiscoveryScanState {
 
     /** Scan finished and results are persisted. */
     data class Complete(val outcome: CompletionOutcome = CompletionOutcome.Success) : DiscoveryScanState
-
-    /** Scan paused due to an unrecoverable transient condition (e.g. reconnect timeout). */
-    data class Paused(val reason: String) : DiscoveryScanState
 
     /** User-initiated cancellation in progress; persisting partial results before restoring home preset. */
     data object Cancelling : DiscoveryScanState

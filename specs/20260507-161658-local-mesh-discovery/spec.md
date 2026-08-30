@@ -423,7 +423,6 @@ These features were added during implementation for safety, reliability, and cro
 | Feature | Description | File(s) |
 |---|---|---|
 | Interrupted session recovery | `markInterruptedSessions()` DAO query on ViewModel init marks any lingering `in_progress` sessions as `interrupted`. Handles app process death mid-scan. | `DiscoveryDao.kt`, `DiscoveryViewModel.kt` |
-| Paused scan state | `DiscoveryScanState.Paused` provides a recoverable grace period during BLE reconnect before transitioning to `Failed`. Original spec only had direct `WaitingForReconnect → Failed`. | `DiscoveryScanState.kt` |
 | Infrastructure node classification | Nodes with `ROUTER`, `ROUTER_LATE`, or `CLIENT_BASE` roles flagged via `isInfrastructure` on entity. `infrastructureNodeCount` aggregated per preset result. Aligns with Apple's relay/infrastructure tracking. | `DiscoveryScanEngine.kt`, `DiscoveredNodeEntity.kt`, `DiscoveryPresetResultEntity.kt` |
 | Active NeighborInfo request | Engine actively requests `NeighborInfo` at dwell start and mid-dwell via `radioController.requestNeighborInfo()`. Original spec mentioned only passive collection. | `DiscoveryScanEngine.kt` |
 | Deprecated preset filtering | `VERY_LONG_SLOW` and `LONG_SLOW` presets hidden from picker per meshtastic/design standards deprecation. | `PresetPickerCard.kt` |

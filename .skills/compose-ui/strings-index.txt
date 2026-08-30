@@ -442,7 +442,6 @@ discovery_lora_presets_description
 discovery_map
 discovery_not_connected
 discovery_not_connected_description
-discovery_paused
 discovery_preparing
 discovery_preset_home_label
 discovery_reconnecting
