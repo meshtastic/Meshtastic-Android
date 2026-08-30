@@ -20,6 +20,14 @@ plugins {
     alias(libs.plugins.meshtastic.koin)
 }
 
+meshtasticKmpTargets {
+    web.set(true)
+    // Kable (core/ble's BLE library on android/jvm/ios) has no wasmJs target. Everything that
+    // depends on it lives in the `nativeMain` intermediate source set this creates instead of
+    // `commonMain`, so wasmJs can join the hierarchy without an actual for Kable-typed expects.
+    hoistNativeOnlyDependencies.set(true)
+}
+
 kotlin {
     android { withHostTest { isIncludeAndroidResources = true } }
 
@@ -32,8 +40,10 @@ kotlin {
 
             implementation(libs.kermit)
             implementation(libs.kotlinx.coroutines.core)
-            implementation(libs.kable.core)
         }
+
+        // android/jvm/ios only (see meshtasticKmpTargets above) — Kable has no wasmJs target.
+        getByName("nativeMain").dependencies { implementation(libs.kable.core) }
 
         androidMain.dependencies {
             implementation(libs.androidx.lifecycle.process)

@@ -26,6 +26,7 @@ import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.findByType
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinBaseExtension
@@ -145,6 +146,36 @@ internal fun Project.configureKotlinMultiplatform() {
 
     configureMokkery()
     configureKotlin<KotlinMultiplatformExtension>()
+}
+
+/**
+ * Registers the `wasmJs` target for modules that opt in via `meshtasticKmpTargets { web.set(true) }`
+ * — deferred to `afterEvaluate` because that extension is configured in the module's own
+ * `build.gradle.kts` body, which runs *after* this convention plugin's `apply()`; reading the
+ * property eagerly here would always observe its default (`false`).
+ *
+ * When [MeshtasticKmpTargetsExtension.hoistNativeOnlyDependencies] is also set, groups every
+ * non-`wasmJs` compilation (android/jvm/iOS) under a shared `nativeMain` intermediate source set,
+ * for modules with a dependency (Kable, `androidx.sqlite.bundled`, ...) that has no `wasmJs`
+ * artifact and must be moved out of `commonMain`. Applied in the same `afterEvaluate` block so the
+ * `wasmJs` target already exists before the hierarchy template groups around it.
+ */
+@OptIn(ExperimentalWasmDsl::class, ExperimentalKotlinGradlePluginApi::class)
+internal fun Project.configureWasmJsTarget(targets: MeshtasticKmpTargetsExtension) {
+    afterEvaluate {
+        if (!targets.web.getOrElse(false)) return@afterEvaluate
+        extensions.configure<KotlinMultiplatformExtension> {
+            wasmJs { browser() }
+
+            if (targets.hoistNativeOnlyDependencies.getOrElse(false)) {
+                applyHierarchyTemplate(KotlinHierarchyTemplate.default) {
+                    common {
+                        group("nativeMain") { withCompilations { it.target.targetName != "wasmJs" } }
+                    }
+                }
+            }
+        }
+    }
 }
 
 /** Configure Mokkery for the project */

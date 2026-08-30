@@ -17,11 +17,13 @@
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
+import org.meshtastic.buildlogic.MeshtasticKmpTargetsExtension
 import org.meshtastic.buildlogic.configureAndroidMarketplaceFallback
 import org.meshtastic.buildlogic.configureGraphTasks
 import org.meshtastic.buildlogic.configureKmpTestDependencies
 import org.meshtastic.buildlogic.configureKotlinMultiplatform
 import org.meshtastic.buildlogic.configureTestOptions
+import org.meshtastic.buildlogic.configureWasmJsTarget
 import org.meshtastic.buildlogic.libs
 import org.meshtastic.buildlogic.plugin
 
@@ -37,7 +39,11 @@ class KmpLibraryConventionPlugin : Plugin<Project> {
             apply(plugin = "meshtastic.kover")
             apply(plugin = libs.plugin("mokkery").get().pluginId)
 
+            val meshtasticKmpTargets =
+                extensions.create("meshtasticKmpTargets", MeshtasticKmpTargetsExtension::class.java)
+
             configureKotlinMultiplatform()
+            configureWasmJsTarget(meshtasticKmpTargets)
             configureKmpTestDependencies()
             configureTestOptions()
             configureGraphTasks()
