@@ -19,22 +19,32 @@ package org.meshtastic.core.data.ai
 import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
 import dev.mokkery.every
+import dev.mokkery.everySuspend
+import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.util.isWithinSizeLimit
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.usecase.SendMessageUseCase
+import org.meshtastic.proto.ChannelSet
+import org.meshtastic.proto.Constants
+import org.meshtastic.proto.Data
+import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.User
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlin.time.Clock
 import kotlin.time.Instant
 
@@ -251,6 +261,76 @@ class AiFunctionProviderImplTest {
 
         val result = provider.sendMessage("hello", null, null)
         assertIs<SendMessageResult.RateLimited>(result)
+    }
+
+    // --- sendMessage length boundary tests ---
+    //
+    // The ceiling is UTF-8 *bytes*, not characters: CommandSenderImpl.sendData applies
+    // Constants.DATA_PAYLOAD_LEN (233) to the whole encoded Data proto, leaving
+    // AiFunctionProviderImpl.MAX_MESSAGE_LENGTH bytes for the text itself.
+
+    @Test
+    fun sendMessage_accepts_text_exactly_at_the_byte_limit() = runTest {
+        every { radioConfigRepository.channelSetFlow } returns flowOf(ChannelSet())
+        everySuspend { sendMessageUseCase.invoke(any(), any(), any()) } returns 42
+
+        val text = "a".repeat(AiFunctionProviderImpl.MAX_MESSAGE_LENGTH)
+        assertEquals(AiFunctionProviderImpl.MAX_MESSAGE_LENGTH, text.encodeToByteArray().size)
+
+        val result = createProvider().sendMessage(text, null, null)
+
+        assertIs<SendMessageResult.Success>(result)
+        assertEquals(42, result.messageId)
+    }
+
+    @Test
+    fun sendMessage_rejects_text_one_byte_over_the_limit() = runTest {
+        val overBy = AiFunctionProviderImpl.MAX_MESSAGE_LENGTH + 1
+        val text = "a".repeat(overBy)
+
+        val result = createProvider().sendMessage(text, null, null)
+
+        val invalid = assertIs<SendMessageResult.InvalidArgument>(result)
+        assertTrue(invalid.reason.contains("$overBy bytes"), "actual size should be reported: ${invalid.reason}")
+        assertTrue(
+            invalid.reason.contains("${AiFunctionProviderImpl.MAX_MESSAGE_LENGTH} bytes"),
+            "the real limit should be reported: ${invalid.reason}",
+        )
+    }
+
+    @Test
+    fun sendMessage_counts_multi_byte_text_in_bytes_not_characters() = runTest {
+        every { radioConfigRepository.channelSetFlow } returns flowOf(ChannelSet())
+        everySuspend { sendMessageUseCase.invoke(any(), any(), any()) } returns 7
+
+        // "\u00fc" is two UTF-8 bytes, so half as many characters fit.
+        val fits = "\u00fc".repeat(AiFunctionProviderImpl.MAX_MESSAGE_LENGTH / 2)
+        assertEquals(AiFunctionProviderImpl.MAX_MESSAGE_LENGTH, fits.encodeToByteArray().size)
+        assertIs<SendMessageResult.Success>(createProvider().sendMessage(fits, null, null))
+
+        // One more character is only one more *character* but two more bytes.
+        val overflows = fits + "\u00fc"
+        assertTrue(overflows.length < AiFunctionProviderImpl.MAX_MESSAGE_LENGTH, "must be under the limit in chars")
+        assertIs<SendMessageResult.InvalidArgument>(createProvider().sendMessage(overflows, null, null))
+    }
+
+    @Test
+    fun maxMessageLength_is_the_largest_text_the_send_path_will_encode() {
+        // Pins the constant to the predicate CommandSenderImpl.sendData actually applies, so a change to the
+        // Data proto's framing fails here instead of in the send queue.
+        fun encodesWithinLimit(byteCount: Int): Boolean {
+            val data =
+                Data(
+                    portnum = PortNum.TEXT_MESSAGE_APP,
+                    payload = ByteArray(byteCount) { 'a'.code.toByte() }.toByteString(),
+                    reply_id = 0,
+                    emoji = 0,
+                )
+            return Data.ADAPTER.isWithinSizeLimit(data, Constants.DATA_PAYLOAD_LEN.value)
+        }
+
+        assertTrue(encodesWithinLimit(AiFunctionProviderImpl.MAX_MESSAGE_LENGTH), "the limit itself must fit")
+        assertFalse(encodesWithinLimit(AiFunctionProviderImpl.MAX_MESSAGE_LENGTH + 1), "one byte over must not fit")
     }
 
     // --- getRecentMessages tests ---

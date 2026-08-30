@@ -42,7 +42,7 @@ class MeshtasticAppFunctions(private val provider: AiFunctionProvider) {
      * communications where cellular service is unavailable.
      *
      * @param context The app function invocation context provided by the system.
-     * @param text The message text to send (max 237 bytes).
+     * @param text The message text to send (max 228 UTF-8 bytes — the mesh payload left after protobuf framing).
      * @param recipientName Optional name of a specific node to send a direct message to. If omitted, the message is
      *   broadcast to all nodes on the specified channel.
      * @param channelName Optional channel name to broadcast on. If omitted, uses the primary channel. Ignored when

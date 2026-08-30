@@ -26,6 +26,7 @@ import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.usecase.SendMessageUseCase
+import org.meshtastic.proto.Constants
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.seconds
@@ -514,8 +515,25 @@ class AiFunctionProviderImpl(
         private const val MESSAGES_PER_CONTACT = 5
         private const val MESSAGE_PREVIEW_MAX_LENGTH = 100
 
-        /** Standard Meshtastic message payload limit (bytes). */
-        const val MAX_MESSAGE_LENGTH = 237
+        /**
+         * Protobuf framing a text message costs inside the `Data` envelope that
+         * [org.meshtastic.core.data.manager.CommandSenderImpl.sendData] size-checks:
+         * * `portnum` tag + varint value: 2 bytes
+         * * `payload` tag: 1 byte
+         * * `payload` length varint: 2 bytes (any payload of 128 bytes or more)
+         * * `reply_id` / `emoji`: 0 bytes, both are proto3 identity values here
+         */
+        private const val TEXT_DATA_ENVELOPE_BYTES = 5
+
+        /**
+         * Largest text message (UTF-8 bytes, not characters) that survives the send path.
+         *
+         * `Constants.DATA_PAYLOAD_LEN` is 233, and `CommandSenderImpl.sendData` applies it to the **whole encoded
+         * `Data` proto** via `Data.ADAPTER.isWithinSizeLimit`, not to the `payload` field alone — so the text budget is
+         * 233 less [TEXT_DATA_ENVELOPE_BYTES]. Anything longer is persisted to history here and then rejected later by
+         * the send queue, which is why this must be checked up front.
+         */
+        val MAX_MESSAGE_LENGTH = Constants.DATA_PAYLOAD_LEN.value - TEXT_DATA_ENVELOPE_BYTES
     }
 }
 
