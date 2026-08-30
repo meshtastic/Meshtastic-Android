@@ -272,7 +272,6 @@
     <string name="config_lora_region_summary">Die Region, in der Sie das Funkgerät benutzen.</string>
     <string name="config_network_eth_enabled_summary">Durch Aktivieren von Ethernet wird die Bluetooth Verbindung zur App deaktiviert. TCP Knotenverbindungen sind auf Apple Geräten nicht verfügbar.</string>
     <string name="config_network_udp_enabled_summary">Aktivieren Sie die Übertragung von Paketen per UDP über das lokale Netzwerk.</string>
-    <string name="config_network_wifi_enabled_summary">Durch die Aktivierung von WLAN wird die Bluetooth Verbindung zur App deaktiviert.</string>
     <string name="config_position_broadcast_secs_summary">Die maximale Verzögerung, ehe ein Knoten einen Standort erneut sendet.</string>
     <string name="config_position_broadcast_smart_minimum_distance_summary">Die minimale Entfernungsänderung in Metern, die für eine intelligente Standortübermittlung berücksichtigt werden muss.</string>
     <string name="config_position_broadcast_smart_minimum_interval_secs_summary">Am schnellsten werden Standortaktualisierungen gesendet, wenn die Mindestentfernung eingehalten wurde.</string>
@@ -636,7 +635,6 @@
     <string name="firmware_update_method_ble">BLE OTA</string>
     <string name="firmware_update_method_detail">Update über %1$s</string>
     <string name="firmware_update_method_usb">USB Dateiübertragung</string>
-    <string name="firmware_update_method_wifi">WiFi OTA</string>
     <string name="firmware_update_missing_target">Firmware Ziel Information ist nicht verfügbar für dieses Gerät.</string>
     <string name="firmware_update_nightly">Nächtlich</string>
     <string name="firmware_update_no_device">Kein Gerät verbunden</string>
@@ -887,7 +885,11 @@
     <string name="map_download_complete">Herunterladen abgeschlossen!</string>
     <string name="map_download_errors">Herunterladen abgeschlossen mit %1$d Fehlern</string>
     <string name="map_download_region">Region herunterladen</string>
+    <string name="map_download_status_complete">Fertig</string>
     <string name="map_filter">Kartenfilter\n</string>
+    <string name="map_filter_all_roles">Alle</string>
+    <string name="map_filter_display_title">Anzeige</string>
+    <string name="map_filter_nodes_title">Knoten</string>
     <string name="map_layer_formats">Kartenebenen unterstützen kml, kmz oder GeoJSON Format.</string>
     <string name="map_node_popup_details">%1$s&lt;br&gt;Zuletzt gehört: %2$s&lt;br&gt;Letzte Position: %3$s&lt;br&gt;Akku: %4$s</string>
     <string name="map_offline_manager">Offline-Verwaltung</string>
@@ -1104,7 +1106,6 @@
     <string name="node_sort_title">Sortieren nach</string>
     <string name="node_sort_via_favorite">über Favorit</string>
     <string name="node_sort_via_mqtt">über MQTT</string>
-    <string name="node_status_summary">Die aktuelle Statuszeichenkette</string>
     <string name="nodedb_reset">Node-Datenbank zurücksetzen</string>
     <string name="nodeinfo_broadcast_interval">Knoteninfo Übertragungsintervall</string>
     <!-- NODES -->
@@ -1133,6 +1134,7 @@
     <string name="now">Jetzt</string>
     <string name="ntp_server">NTP Server</string>
     <string name="number_of_records">Anzahl Einträge</string>
+    <string name="offline_maps">Offline Karten</string>
     <string name="ok_to_mqtt">OK für MQTT</string>
     <string name="okay">OK</string>
     <string name="oled_type">OLED Typ</string>
@@ -1181,7 +1183,6 @@
     <string name="pax_total_format">Besucher: %1$d</string>
     <string name="pax_total_marker">Besucher: %1$s</string>
     <string name="pax_wifi_format">W:%1$d</string>
-    <string name="pax_wifi_marker">Wlan: %1$s</string>
     <string name="paxcounter">Besucherzähler</string>
     <string name="paxcounter_config">Einstellung Besucherzähler</string>
     <string name="paxcounter_enabled">Besucherzähler aktiviert</string>
@@ -1484,7 +1485,6 @@
     <string name="ssid">SSID</string>
     <string name="state_broadcast_seconds">Statusübertragung (Sekunden)</string>
     <string name="status_message">Statusmeldung</string>
-    <string name="status_message_config">Konfiguration der Statusmeldung</string>
     <string name="stay_connected_anywhere">Bleibe überall in Verbindung</string>
     <string name="stop_connecting">Verbindung trennen</string>
     <string name="store_forward">Speichern &amp; Weiterleiten</string>
@@ -1682,28 +1682,20 @@
     <string name="what_is_meshtastic">Was ist Meshtastic?</string>
     <string name="what_is_meshtastic_description">Ein quelloffenes, netzunabhängiges, dezentrales Mesh-Netzwerk, das auf kostengünstigen, stromsparenden Funkgeräten läuft.</string>
     <!-- WIFI -->
-    <string name="wifi_config">WiFi Optionen</string>
     <string name="wifi_devices">WLAN Unterstützung für mPWRD-OS</string>
-    <string name="wifi_enabled">WiFi aktiviert</string>
-    <string name="wifi_ip">WLAN IP:</string>
     <string name="wifi_provision_available_networks">Verfügbare Netzwerke</string>
     <string name="wifi_provision_connect_failed">Verbindung fehlgeschlagen: %1$s</string>
     <string name="wifi_provision_description">Stellen Sie Ihrem mPWRD-OS Gerät WLAN Zugangsdaten über Bluetooth zur Verfügung.</string>
     <string name="wifi_provision_device_found">Gerät gefunden</string>
-    <string name="wifi_provision_device_found_detail">Bereit zur Suche nach WLAN Netzwerken.</string>
     <string name="wifi_provision_hidden_network">Verstecktes Netzwerk</string>
     <string name="wifi_provision_mpwrd_disclaimer">Erfahren Sie mehr über das mPWRD-OS Projekt\nhttps://github.com/mPWRD-OS</string>
     <string name="wifi_provision_no_networks">Keine Netzwerke gefunden</string>
-    <string name="wifi_provision_scan_failed">Suche nach WLAN Netzwerken fehlgeschlagen: %1$s</string>
     <string name="wifi_provision_scan_networks">Suche nach Netzwerken</string>
     <string name="wifi_provision_scanning_ble">Gerät wird gesucht...</string>
     <string name="wifi_provision_scanning_wifi">Scanne…</string>
-    <string name="wifi_provision_sending_credentials">WLAN Konfiguration wird angewendet...</string>
     <string name="wifi_provision_signal_strength">%1$d%</string>
     <string name="wifi_provision_ssid_label">Netzwerkname (SSID)</string>
     <string name="wifi_provision_ssid_placeholder">Netzwerk eingeben oder auswählen</string>
-    <string name="wifi_provision_status_applied">WLAN erfolgreich konfiguriert!</string>
-    <string name="wifi_provision_status_failed">WLAN Konfiguration konnte nicht angewendet werden</string>
     <string name="wifi_provision_success_description">Ihr mPWRD-OS Gerät ist dem Wi-Fi-Netzwerk beigetreten.</string>
     <string name="wifi_provision_success_device_connected">Gerät verbunden</string>
     <string name="wifi_provision_success_done">Fertig</string>
@@ -1718,9 +1710,6 @@
     <string name="wifi_provision_success_ssh_unavailable">SSH Kommando verfügbar, nachdem eine IP zugewiesen wurde.</string>
     <string name="wifi_provision_success_username">Benutzername</string>
     <string name="wifi_provisioning">WLAN Unterstützung für mPWRD-OS</string>
-    <string name="wifi_qr_code_error">Ungültiges QR-Code-Format für WiFi-Berechtigung</string>
-    <string name="wifi_qr_code_scan">WiFi QR-Code scannen</string>
-    <string name="wifi_rssi_threshold_defaults_to_80">WiFi RSSI Schwellenwert (Standard -80)</string>
     <string name="wifi_unavailable">Nicht mit Wlan verbunden. Netzwerkscans finden vielleicht keine Geräte in der Nähe.</string>
     <!-- WIND -->
     <string name="wind">Wind</string>
@@ -1734,4 +1723,6 @@
     <string name="write_nfc_success">Auf Tag geschrieben</string>
     <string name="write_nfc_text">Halte einen schreibbaren NFC-Tag gegen die Hinterseite deines Handys.</string>
     <string name="you">Du</string>
+    <string name="zoom_in">Vergrößern</string>
+    <string name="zoom_out">Verkleinern</string>
 </resources>

@@ -2,7 +2,7 @@
 title: Ühikud, mõõtühikud ja lokaat
 parent: Kasutusjuhend
 nav_order: 16
-last_updated: 2026-08-27
+last_updated: 2026-08-29
 description: Kuidas rakendus vormindab temperatuuri, vahemaad, kiirust ja muid mõõtmisi vastavalt seadme lokaadile.
 aliases:
   - measurement
@@ -16,25 +16,21 @@ aliases:
 
 The Meshtastic app automatically displays temperatures, distances, speeds, and times in the units your device is configured to use. If your device's settings can't express the units you want, an in-app **Units** setting overrides them.
 
----
-
 ## Kuidas see toimib
 
 Meshtastic raadiod edastavad andmeid alati **meetrilistes ühikutes** (meetrites, °C, m/s, hPa jne). Kui rakendus need andmed vastu võtab, teisendab ja kuvab see väärtused seadme lokaadi määratud ühikutes.
 
 Androidis määravad mõõteseaded süsteemi **Keel ja piirkond** seaded. Töölaual (JVM) kasutab rakendus JVM-i vaikesätet „lokaat”.
 
-Units follow your device's **region**, not the display language. Choosing a plain language — like **English** in the app's own Language setting or Android's per-app language — keeps the region your device is set to; only a choice that names a region of its own (like **English (Canada)**) brings that region's units with it. On Android 16+, the system-wide **Measurement system** preference overrides the region entirely.
+Units follow your device's **region**, not the display language. Plain languages — like **English** in the app's own Language setting or Android's per-app language — keep the region your device is set to. A choice that names a region of its own, like **English (Canada)**, overrides it and brings that region's units with it. On Android 16+, the system-wide **Measurement system** preference overrides the region entirely.
 
 > 💡 **Tip:** By default there is nothing to configure — change your system measurement preferences and every screen in Meshtastic updates automatically. If your device offers no working region or measurement setting (some manufacturer builds don't), set **Settings → Units** in the app instead.
 
----
-
 ## The Radio's Own Screen Is Separate
 
-**Device → Display → Units** configures the screen on the radio, not the app. So do **Use 12-Hour Clock** and **Always Point North** — all three apply to the node's display only. Temperature on that screen has its own setting, [**Telemetry → Display Fahrenheit**](https://meshtastic.org/docs/configuration/module/telemetry#display-fahrenheit).
+**Device → Display → Units** configures the screen on the radio, not the app. So do **Use 12-Hour Clock** and **Always Point North** — all three apply to the radio's display only. Temperature on that screen has its own setting, [**Telemetry → Display Fahrenheit**](https://meshtastic.org/docs/configuration/module/telemetry#display-fahrenheit).
 
-If your node list shows miles while the radio's screen shows kilometres, this is why: the two are set in different places. Changing the device setting will never alter what the app displays. See the [Display Config](https://meshtastic.org/docs/configuration/radio/display) guide on meshtastic.org for the device-side options.
+If your node list shows miles while the radio's screen shows kilometres, this is why: the two are set in different places. Changing the radio's setting never alters what the app displays. See the [Display Config](https://meshtastic.org/docs/configuration/radio/display) guide on meshtastic.org for the device-side options.
 
 ## Temperatuur
 
@@ -138,13 +134,13 @@ By default the app follows your device, and your measurement system (metric vs i
 
 1. Ava **Androidi seaded → Süsteem → Keel ja piirkond**
 2. Change your **Region**
-3. On Android 16+, **Measurement system** overrides the region for every measurement
-4. On Android 14+, temperature can be overridden on its own under **Regional preferences → Temperature**
-5. Tagasi Meshtastic juurde — väärtused värskendatakse kohe
+3. Tagasi Meshtastic juurde — väärtused värskendatakse kohe
 
-Not every English region is fully metric. **English (United Kingdom)** uses miles and feet for distance, so the node list shows miles and altitude in feet. For metric distances, set the app's **Units** setting to Metric (below), or choose a fully metric region such as English (Canada), English (Ireland), or English (New Zealand).
+On Android 16+, the system-wide **Measurement system** preference overrides the region for every measurement. On Android 14+, temperature can be overridden on its own under **Regional preferences → Temperature**.
 
-Some phones do not offer the **Regional preferences** menu at all and list only English (United States). On those devices, use the app's **Units** setting below.
+Not every English region is fully metric. **English (United Kingdom)** uses miles and feet for distance, so the node list shows miles and altitude in feet. For metric distances, set the app's **Units** setting to Metric (see [Overriding the Units in the App](#overriding-the-units-in-the-app)), or choose a fully metric region such as English (Canada), English (Ireland), or English (New Zealand).
+
+Some phones do not offer the **Regional preferences** menu at all and list only English (United States). On those devices, use the app's **Units** setting (see [Overriding the Units in the App](#overriding-the-units-in-the-app)).
 
 ### Overriding the units in the app
 
@@ -156,11 +152,9 @@ metres. For those cases the app has its own switch:
 2. Choose **System default**, **Metric**, or **Imperial**
 3. Every screen updates immediately — no restart needed
 
-**System default** follows your device as described above. Forcing **Metric** or **Imperial** applies to
-everything, temperature included (metric → °C, imperial → °F), even where the device's own regional preferences say
+**System default** follows your phone's or computer's region and measurement settings. Forcing **Metric** or **Imperial** applies to
+everything, temperature included (metric → °C, imperial → °F), even where the system's own regional preferences say
 otherwise. The setting exists on Android and Desktop alike.
-
-> 💡 **Vihje:** Kogu mõõtühikute vormindamine toimub tsentraalselt ja arvestab platvormi lokaaduga, seega püsivad ühikud kogu rakenduses ühtsed.
 
 ## Seotud teemad
 
@@ -169,6 +163,3 @@ otherwise. The setting exists on Android and Desktop alike.
 - [Measurement & Formatting](../developer/measurement) — developer reference for the formatting utilities
 - [Seaded — Raadio ja kasutaja](settings-radio-user) — piirkonna säte, mis määrab üksuse valiku
 - [Display Config](https://meshtastic.org/docs/configuration/radio/display) — units, clock, and compass settings for the radio's own screen, on meshtastic.org
-
----
-

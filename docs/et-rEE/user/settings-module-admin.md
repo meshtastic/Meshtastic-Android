@@ -2,7 +2,7 @@
 title: Sätted - moodulid & admin
 parent: Kasutusjuhend
 nav_order: 8
-last_updated: 2026-08-27
+last_updated: 2026-08-29
 description: Muuda valikulisi funktsioonimooduleid (MQTT, telemeetria, salvestatud sõnumid, TAK ja palju muud) ja teosta seadme haldamist.
 aliases:
   - moodul
@@ -32,26 +32,26 @@ Mooduli seaded kasutavad kaardipõhist paigutust koos lülitite, rippmenüüde, 
 
 Sildab võrgusõnumeid MQTT vahendajasse ja sealt internetiühenduse loomiseks. This is how you extend your mesh beyond radio range or integrate with home automation systems.
 
-| Sätted                           | Kirjeldus                                                                                                                                                                                 |
-| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Lubatud                          | Lükka MQTT sild sisse                                                                                                                                                                     |
-| Server                           | MQTT vahendaja aadress                                                                                                                                                                    |
-| Kasutajatunnus                   | Authentication username                                                                                                                                                                   |
-| Parool                           | Authentication password                                                                                                                                                                   |
-| Encryption                       | Krüpteeri MQTT kasutus                                                                                                                                                                    |
-| JSON Output                      | Publish and consume MQTT messages as JSON. Marked deprecated in the protobuf schema, but it is still the only toggle for this behaviour and the firmware still honours it |
-| TLS                              | Use secure connection                                                                                                                                                                     |
-| Root Topic                       | Baas MQTT teema teekond                                                                                                                                                                   |
-| Kliendi proksi lubatud           | Let a connected phone carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                       |
-| Selle telefoni MQTT puhverserver | The phone-side half of the above: whether _this_ phone is currently acting as that relay. See [MQTT](mqtt)                                                |
-| Kaardiaruanne                    | Publish position to the public map — see below                                                                                                                                            |
+| Sätted                           | Kirjeldus                                                                                                                                                                               |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Lubatud                          | Lükka MQTT sild sisse                                                                                                                                                                   |
+| Server                           | MQTT vahendaja aadress                                                                                                                                                                  |
+| Kasutajatunnus                   | Authentication username                                                                                                                                                                 |
+| Parool                           | Authentication password                                                                                                                                                                 |
+| Encryption                       | Krüpteeri MQTT kasutus                                                                                                                                                                  |
+| JSON Output                      | Publish and consume MQTT messages as JSON. Marked deprecated in the protobuf schema, but it is still the only toggle for this behavior and the firmware still honors it |
+| TLS                              | Use secure connection                                                                                                                                                                   |
+| Root Topic                       | Baas MQTT teema teekond                                                                                                                                                                 |
+| Kliendi proksi lubatud           | Let a connected phone carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                     |
+| Selle telefoni MQTT puhverserver | The phone-side half of **Proxy to client enabled**: whether this phone acts as that relay. See [MQTT](mqtt)                                             |
+| Kaardiaruanne                    | Publish position to the public map — see below                                                                                                                                          |
 
 **Map Report** expands into its own group:
 
 | Sätted             | Kirjeldus                                                                                                                       |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
 | Lubatud            | Publish to the public map at all                                                                                                |
-| Share location     | Explicit consent to include your position. Map reporting will not save without it                               |
+| Share location     | Explicit consent to include your position. Map reporting does not save without it                               |
 | Position precision | How coarsely your position is published                                                                                         |
 | Publish interval   | How often to report. Must be **at least 3600 s (1 hour)** — the app blocks saving below that |
 
@@ -110,8 +110,8 @@ Puhverdab ajutiselt võrguühenduseta olnud sõlmede sõnumeid ja esitab need uu
 
 ### Kaugustesti moodul
 
-> ⚠️ **Warning:** Range Test only works on a secured primary channel. While your primary channel
-> still uses the default public key, the Enabled, Interval and Save-CSV controls stay disabled, and
+> ⚠️ **Warning:** Range Test only works on a secured primary channel. As long as your primary channel
+> still uses the default channel key, the Enabled, Interval and Save-CSV controls stay disabled, and
 > saving force-disables the module if the channel has reverted to public.
 
 Automatiseeritud vahemiku testimise tööriist sõlmede vahelise ühenduse kvaliteedi hindamiseks. Kui lubatud, edastab sõlm perioodiliselt testsõnumeid kasvavate loenduritega. Vastuvõtusõlm logib need sõnumid, võimaldades kõndida või minema sõita ning hiljem analüüsida, millisel kaugusel sõnumite saabumine lakkas.
@@ -147,7 +147,7 @@ Vaata [Telemeetria & Sensorid](telemetry-and-sensors) toetatud andurite ja säte
 
 ### Eelsalvestatud sõnumi moodul
 
-Seadme füüsiliste nuppude kaudu ligipääsetavad eelseadistatud sõnumid (pöördnuppude, klaviatuuride või sarnase sisendriistvaraga raadiote puhul). Määra nimekiri kiirsõnumitest, mida saab edastada ilma telefoni ühendamata – ideaalne välitöödeks.
+Pre-configured messages accessible from the radio's physical buttons (for radios with rotary encoders, keypads, or similar input hardware). Määra nimekiri kiirsõnumitest, mida saab edastada ilma telefoni ühendamata – ideaalne välitöödeks.
 
 | Sätted                                    | Kirjeldus                                                                                                 |
 | ----------------------------------------- | --------------------------------------------------------------------------------------------------------- |
@@ -180,13 +180,13 @@ Codec2 audio support for low-bandwidth voice communication over the mesh. See on
 
 GPIO juhtimine kärgvõrgu kaudu. Võimaldab kaugsõlmel lugeda või kirjutada GPIO sisendkontakte teisel sõlmel – kasulik releede aktiveerimiseks, lülitite lugemiseks või välise riistvara kaugjuhtimiseks.
 
+> ⚠️ **Warning:** Enabling **Allow Undefined Pins** gives remote nodes access to all GPIO pins, which could interfere with the radio's own hardware. Luba ainult spetsiaalsetel GPIO sõlmedel.
+
 | Sätted                     | Kirjeldus                                                               |
 | -------------------------- | ----------------------------------------------------------------------- |
 | Lubatud                    | Aktiveeri kaugjuurdepääs GPIO-le                                        |
 | Luba määratlemata sisendid | Luba juurdepääs mis tahes GPIO sisendile (turvarisk) |
 | Available Pins             | Kuni 4 GPIO sisendit, mida see sõlm kauglugemiseks/-kirjutamiseks avab  |
-
-> ⚠️ **Hoiatus:** Funktsiooni „Luba määratlemata sisendkontaktid” lubamine annab kaugsõlmedele juurdepääsu kõigile GPIO sisendile, mis võib häirida raadio enda riistvara. Luba ainult spetsiaalsetel GPIO sõlmedel.
 
 ### Naabriinfo moodul
 
@@ -227,30 +227,21 @@ Muudab sõlme liikumis- või ukseanduri hoiatussüsteemiks. Kui GPIO sisend tuva
 
 ### Paxloenduri moodul
 
-Inimeste loendur WiFi ja BLE päringute abil. Loendab lähedalasuvaid seadmeid, kuulates passiivselt sondimistaotlusi, mida telefonid ja sülearvutid võrkude skannimisel edastavad. Available only on ESP32 devices.
+People counter using Wi-Fi and BLE probe requests. Loendab lähedalasuvaid seadmeid, kuulates passiivselt sondimistaotlusi, mida telefonid ja sülearvutid võrkude skannimisel edastavad. Available only on ESP32 devices.
 
-| Sätted                                     | Kirjeldus                                                                                                        |
-| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
-| Lubatud                                    | Aktiveeri inimeste loendamine                                                                                    |
-| Värskendusintervall(id) | Kui tihti loendeid esitada                                                                                       |
-| WiFi RSSI threshold                        | Ignore WiFi probes weaker than this, so distant devices are not counted (defaults to −80 dBm) |
-| BLE RSSI threshold                         | The same cut-off for BLE advertisements (defaults to −80 dBm)                                 |
+| Sätted                                     | Kirjeldus                                                                                                         |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| Lubatud                                    | Aktiveeri inimeste loendamine                                                                                     |
+| Värskendusintervall(id) | Kui tihti loendeid esitada                                                                                        |
+| Wi-Fi RSSI threshold                       | Ignore Wi-Fi probes weaker than this, so distant devices are not counted (defaults to −80 dBm) |
+| BLE RSSI threshold                         | The same cut-off for BLE advertisements (defaults to −80 dBm)                                  |
 
 > 💡 **Vihje:** Paxloendur on kasulik jalakäijate liikluse hindamiseks matkaradade alguses, ürituste toimumiskohtades või muudes kohtades. Arvud on ligikaudsed – üks inimene võib kaasas kanda mitut seadet.
 
 ### Status Message Module
 
-Publishes a short free-text status line for your node, which other nodes can display alongside it.
-
-| Sätted                | Kirjeldus                                                                                                                                                                        |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Tegeliku oleku string | Up to 80 characters. The **✕** in the field clears it. (That is the app's own label for the field, verbatim.) |
-
-Saving takes effect immediately — this is one of the few module settings that never asks the
-node to reboot.
-
-> ℹ️ **Note:** The screen only appears for firmware that reports support for the status-message
-> module. If you do not see it in the module list, your node's firmware does not have it.
+The status message has no module screen. It is edited with the rest of the node's identity, on
+[Settings — Radio & User](settings-radio-user#user-profile).
 
 ### Mesh Beacon Module
 
@@ -259,10 +250,10 @@ Broadcasts an invitation to your mesh, and receives invitations from others. See
 
 ### TAK moodul
 
-> ℹ️ **Note:** This module only appears in the list once the node's **Device Role** (Device Config)
-> is set to **TAK** or **TAK Tracker**. Change the role first, or the entry will not be there.
-
-Meeskonna teadlikkuse komplekti integratsioon ATAKi ja WinTAKi koostalitlusvõime tagamiseks. Vaata [TAK Integration](tak) täpsema seadistamise ja kasutamise kohta.
+Meeskonna teadlikkuse komplekti integratsioon ATAKi ja WinTAKi koostalitlusvõime tagamiseks. This module only appears
+in the list once the node's **Device Role** (Device Config) is set to **TAK** or **TAK Tracker** —
+change the role first, otherwise the entry does not appear. See [TAK Integration](tak) for detailed
+setup and usage.
 
 ## Haldus
 
@@ -275,7 +266,7 @@ Administraatori võtit jagavate sõlmede kaugkonfigureerimine:
 3. Muuda seadistust.
 4. Puuduta **Salvesta** – muudatused saadetakse kärgvõrgu kaudu.
 
-> ⚠️ **Nõutud:** Administraatori võtit, mis on seadistatud nii sinu kui ka sihtsõlmes.
+> ⚠️ **Important:** Requires an admin key configured on both your node and the target node.
 
 ### Tühjenda sõlmede andmebaas
 
@@ -287,7 +278,9 @@ Prunes your local node database. Two independent controls:
 
 ### Factory Reset
 
-Taastab kõik seaded tehase vaikeväärtustele. **Seda ei saa tagasi võtta.**
+> ⚠️ **Warning:** Factory reset erases all settings, channels, and keys. This cannot be undone.
+
+Taastab kõik seaded tehase vaikeväärtustele.
 
 ### Taaskäivita
 
@@ -305,8 +298,8 @@ Three sections:
 
 - **What is Meshtastic?** — a short description of the project.
 - **Apps** — opens with **Need Hardware?**, a rotating carousel of popular devices that links out
-  to where to buy one, then the GitHub repository, the running app version, and
-  **Acknowledgements** (below).
+  to where to buy one. It also lists the GitHub repository, the running app version, and
+  **Acknowledgements** (see the next section).
 - **Project information** — links to the website and to this documentation.
 
 ### Tänusõnad
@@ -325,6 +318,3 @@ generated at build time by AboutLibraries. It was previously called the license 
 - [Seaded — Raadio ja kasutaja](settings-radio-user) — raadio ja kasutajaprofiili põhiseaded
 - [Mooduli konfiguratsiooni viide](https://meshtastic.org/docs/configuration/module) — üksikasjalik mooduli dokumentatsioon aadressil meshtastic.org
 - [KKK](https://meshtastic.org/docs/faq/) — meshtastic.org sageli esitatavad küsimused
-
----
-

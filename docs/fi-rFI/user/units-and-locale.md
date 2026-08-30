@@ -2,39 +2,35 @@
 title: Yksiköt, mittaus ja kieli- ja alueasetukset
 parent: Käyttöopas
 nav_order: 16
-last_updated: 2026-08-27
+last_updated: 2026-08-29
 description: Miten sovellus muotoilee lämpötilan, etäisyyden, nopeuden ja muut mittayksiköt laitteesi alueasetusten perusteella.
 aliases:
-  - measurement
-  - units
-  - locale
-  - metric
-  - imperial
+  - mittaaminen
+  - yksiköt
+  - paikallinen
+  - metrinen
+  - imperiaalinen
 ---
 
 # Yksiköt, mittaus ja kieli- ja alueasetukset
 
 Meshtastic-sovellus näyttää lämpötilat, etäisyydet, nopeudet ja ajat automaattisesti niissä yksiköissä, jotka laitteesi on määritetty käyttämään. Jos laitteesi asetukset eivät tarjoa haluamiasi yksiköitä, sovelluksen **Yksiköt**-asetus ohittaa ne.
 
----
-
-## Miten se toimii
+## Kuinka se toimii
 
 Meshtastic-radiot lähettävät tiedot aina **metrisissä yksiköissä** (metri, °C, m/s, hPa jne.). Kun sovellus vastaanottaa nämä tiedot, se muuntaa ja näyttää arvot laitteesi alueasetusten mukaisessa yksikköjärjestelmässä.
 
 Androidissa mittausasetukset määräytyvät järjestelmän **Kieli ja alue** -asetusten mukaan. Työpöytäversiossa (JVM) sovellus käyttää JVM:n oletus-`Locale`-asetusta.
 
-Yksiköt seuraavat laitteesi **aluetta**, ei näytön kieltä. Pelkän kielen valitseminen – esimerkiksi **English** sovelluksen omasta kieliasetuksesta tai Androidin sovelluskohtaisesta kielestä – säilyttää laitteen alueasetuksen. Vasta aluekohtaisen vaihtoehdon, kuten **English (Canada)**, valitseminen tuo mukanaan kyseisen alueen yksiköt. Android 16:ssa järjestelmän **Mittausjärjestelmä**-asetus ohittaa alueasetuksen kokonaan.
+Yksiköt seuraavat laitteesi **aluetta**, ei näytön kieltä. Pelkkä kieli, kuten **English**, sovelluksen omasta Kieli-asetuksesta tai Androidin sovelluskohtaisesta kieliasetuksesta säilyttää laitteesi alueasetuksen. Kieli, jossa on oma alue, kuten **English (Canada)**, ohittaa sen ja ottaa käyttöön kyseisen alueen yksiköt. Android 16:ssa järjestelmän **Mittausjärjestelmä**-asetus ohittaa alueasetuksen kokonaan.
 
 > 💡 **Vinkki:** Oletusarvoisesti mitään ei tarvitse määrittää – muuta järjestelmän mittausjärjestelmäasetusta, niin kaikki Meshtasticin näkymät päivittyvät automaattisesti. Jos laitteesi ei tarjoa toimivaa alue- tai mittausjärjestelmäasetusta (joissakin valmistajien Android-versioissa näin on), määritä se sovelluksessa kohdassa **Asetukset → Yksiköt**.
 
----
-
 ## Radion oma näyttö käyttää omia asetuksiaan
 
-**Laite → Näyttö → Yksiköt** määrittää radion näytössä käytettävät yksiköt, ei sovelluksessa. Myös **Käytä 12 tunnin kelloa** ja **Osoita aina pohjoiseen** vaikuttavat vain radion näyttöön. Kyseisen näytön lämpötilalla on oma asetuksensa, [**Telemetria → Näytä Fahrenheit-asteet**](https://meshtastic.org/docs/configuration/module/telemetry#display-fahrenheit).
+**Laite → Näyttö → Yksiköt** määrittää radion näytössä käytettävät yksiköt, ei sovelluksessa. Siksi **Käytä 12 tunnin kelloa** ja **Osoita aina pohjoiseen** vaikuttavat kaikki vain radion näyttöön. Kyseisen näytön lämpötilalla on oma asetuksensa, [**Telemetria → Näytä Fahrenheit-asteet**](https://meshtastic.org/docs/configuration/module/telemetry#display-fahrenheit).
 
-Jos radioluettelossa näkyvät mailit, mutta radion näytössä kilometrit, syy on siinä, että ne määritetään eri paikoissa. Laitteen asetusten muuttaminen ei koskaan vaikuta sovelluksen näyttämiin tietoihin. Katso laitteen asetuksia koskevat ohjeet Meshtasticin [Näytön asetukset] (https://meshtastic.org/docs/configuration/radio/display) -oppaasta.
+Jos radioluettelossa näkyvät mailit, mutta radion näytössä kilometrit, syy on siinä, että ne määritetään eri paikoissa. Radion asetusten muuttaminen ei koskaan vaikuta siihen, mitä sovellus näyttää. Katso laitteen asetuksia koskevat ohjeet Meshtasticin [Näytön asetukset] (https://meshtastic.org/docs/configuration/radio/display) -oppaasta.
 
 ## Lämpötila
 
@@ -82,22 +78,22 @@ GPS-maanopeus näytetään laitteesi kieli- ja alueasetusten mukaisessa nopeusyk
 
 ## Tuuli
 
-Wind speed, gust and lull are transmitted by the sensor as **m/s** and converted for display — the app shows the unit weather forecasts use in your region, not the raw sensor unit.
+Anturi lähettää tuulen nopeuden, puuskat ja tyynten jaksojen nopeuden yksikössä **m/s**, ja ne muunnetaan näyttöä varten — sovellus näyttää alueellasi käytettävän sääyksikön, ei anturin raakaa yksikköä.
 
-| Asetuksesi                            | Näet                      |
-| ------------------------------------- | ------------------------- |
-| Metrijärjestelmä                      | 18.0 km/h |
-| Imperiaalinen (US) | 11.2 mph  |
+| Asetuksesi                            | Näet                     |
+| ------------------------------------- | ------------------------ |
+| Metrijärjestelmä                      | 18,0 km/h                |
+| Imperiaalinen (US) | 11.2 mph |
 
-All three read in the same unit wherever they appear: the Node Detail environment section, the Environment Telemetry log, and the charts.
+Kaikki kolme näytetään samassa yksikössä kaikkialla, missä ne esiintyvät: Radion tiedot -näkymän ympäristöosiossa, ympäristötelemetrian lokissa ja kaavioissa.
 
 ## Paino
 
-Readings from a connected scale are transmitted in **kg** and converted for display.
+Yhdistetyn vaa'an mittaustulokset lähetetään yksikössä **kg** ja muunnetaan näyttöä varten.
 
 | Asetuksesi                            | Näet                    |
 | ------------------------------------- | ----------------------- |
-| Metrijärjestelmä                      | 1.50 kg |
+| Metrijärjestelmä                      | 1,50 kg                 |
 | Imperiaalinen (US) | 3.31 lb |
 
 ## Sademäärä
@@ -106,7 +102,7 @@ Sademittaukset (1 tunnin ja 24 tunnin yhteismäärät) lähetetään muodossa **
 
 | Asetuksesi                            | Näet                    |
 | ------------------------------------- | ----------------------- |
-| Metrijärjestelmä                      | 12.0 mm |
+| Metrijärjestelmä                      | 12,0 mm                 |
 | Imperiaalinen (US) | 0.47 in |
 
 ## Yksiköt, jotka eivät muutu
@@ -138,13 +134,13 @@ Oletusarvoisesti sovellus käyttää laitteesi asetuksia, ja mittausjärjestelm�
 
 1. Avaa **Asetukset → Järjestelmä → Kieli ja alue**
 2. Vaihda **alueasetusta**
-3. Android 16:ssa **Mittausjärjestelmä** ohittaa alueasetuksen kaikissa mittauksissa
-4. Android 14:ssä lämpötila-asetus voidaan määrittää erikseen kohdassa **Alueasetukset → Lämpötila**
-5. Palaa Meshtasticiin — arvot päivittyvät välittömästi
+3. Palaa Meshtasticiin — arvot päivittyvät välittömästi
 
-Kaikki englanninkieliset alueet eivät käytä täysin metristä järjestelmää. **English (United Kingdom)** käyttää etäisyyksissä maileja ja korkeuksissa jalkoja, joten radioluettelossa näkyvät mailit ja korkeus jaloissa. Jos haluat käyttää metrisiä etäisyyksiä, valitse sovelluksen **Yksiköt** -asetukseksi _Metrinen_ (alla) tai valitse täysin metrinen alue, kuten English (Canada), English (Ireland) tai English (New Zealand).
+Android 16:ssa järjestelmänlaajuinen **Mittayksikköjärjestelmä**-asetus ohittaa alueasetuksen kaikissa mittauksissa. Android 14:ssä lämpötilan voi ohittaa kohdassa **Alueasetukset → Lämpötila**.
 
-Joissakin puhelimissa **Alueasetukset** -valikkoa ei ole lainkaan, vaan tarjolla on vain English (United States). Käytä tällöin alla olevaa sovelluksen **Yksiköt** -asetusta.
+Kaikki englanninkieliset alueet eivät käytä täysin metristä järjestelmää. **English (United Kingdom)** käyttää etäisyyksissä maileja ja korkeuksissa jalkoja, joten radioluettelossa näkyvät mailit ja korkeus jaloissa. Jos haluat käyttää metrijärjestelmää, valitse sovelluksen **Yksiköt**-asetukseksi **Metrinen** (katso [Yksiköiden ohittaminen sovelluksessa](#overriding-the-units-in-the-app)) tai valitse täysin metrijärjestelmää käyttävä alue, kuten English (Canada), English (Ireland) tai English (New Zealand).
+
+Joissakin puhelimissa **Alueasetukset** -valikkoa ei ole lainkaan, vaan tarjolla on vain English (United States). Näillä laitteilla käytä sovelluksen **Yksiköt**-asetusta (katso [Yksiköiden ohittaminen sovelluksessa](#overriding-the-units-in-the-app)).
 
 ### Sovelluksen yksiköiden ohittaminen
 
@@ -154,9 +150,7 @@ Kaikki laitteet eivät tue kaikkia asetuksia – joissakin valmistajien Android-
 2. Valitse **Järjestelmän oletus**, **Metrinen** tai **Imperiaalinen**
 3. Kaikki näkymät päivittyvät heti – uudelleenkäynnistystä ei tarvita
 
-**Järjestelmän oletus** käyttää laitteesi asetuksia edellä kuvatulla tavalla. Pakottamalla asetukseksi **Metrinen** tai **Imperiaalinen** kaikki mittaukset käyttävät kyseistä järjestelmää, myös lämpötila (metrinen → °C, imperiallinen → °F), vaikka laitteen omat alueasetukset määrittäisivät toisin. Asetus on käytettävissä sekä Android- että työpöytäversiossa.
-
-> 💡 **Vinkki:** Kaikki mittausten muotoilut tehdään keskitetysti ja ne noudattavat käyttöympäristösi alueasetuksia, joten yksiköt pysyvät yhtenäisinä kaikkialla sovelluksessa.
+**Järjestelmän oletus** käyttää puhelimesi tai tietokoneesi alue- ja mittayksikköasetuksia. **Metrinen**- tai **Imperiallinen**-asetuksen pakottaminen koskee kaikkia yksiköitä, myös lämpötilaa (metrinen → °C, imperiaalinen → °F), vaikka järjestelmän omat alueasetukset määrittäisivät toisin. Asetus on käytettävissä sekä Android- että työpöytäversiossa.
 
 ## Aiheeseen liittyvät aiheet
 
@@ -165,6 +159,3 @@ Kaikki laitteet eivät tue kaikkia asetuksia – joissakin valmistajien Android-
 - [Mittaus ja muotoilu](../developer/measurement) — kehittäjien viite muotoiluapuohjelmista
 - [Asetukset — Radio ja käyttäjä](settings-radio-user) — alueasetus, joka määrittää käytettävät mittayksiköt
 - [Näytön asetukset](https://meshtastic.org/docs/configuration/radio/display) – radion oman näytön yksikkö-, kello- ja kompassiasetukset meshtastic.orgissa
-
----
-

@@ -213,7 +213,6 @@
     <string name="config_lora_region_summary">Regionen där du kommer att använda din radio.</string>
     <string name="config_network_eth_enabled_summary">Aktivering av Ethernet kommer att inaktivera Bluetooth-anslutningen till appen. TCP-nodanslutningar är inte tillgängliga på Apple-enheter.</string>
     <string name="config_network_udp_enabled_summary">Aktivera UDP-sändning över det lokala nätverket.</string>
-    <string name="config_network_wifi_enabled_summary">Aktivering av WiFi kommer att inaktivera Bluetooth-anslutningen till appen.</string>
     <string name="config_position_broadcast_secs_summary">Längsta tid som kan förflyta utan att en nod sänder en position.</string>
     <string name="config_position_broadcast_smart_minimum_distance_summary">Minsta förändring av position för att smart position ska sända (meter).</string>
     <string name="config_position_broadcast_smart_minimum_interval_secs_summary">Hur ofta position ska skickas om minsta angivna förflyttning skett.</string>
@@ -507,7 +506,6 @@
     <string name="firmware_update_method_ble">BLE OTA</string>
     <string name="firmware_update_method_detail">Uppdatera via %1$s</string>
     <string name="firmware_update_method_usb">USB filöverföring</string>
-    <string name="firmware_update_method_wifi">Trådlös uppdatering</string>
     <string name="firmware_update_nightly">Nattlig</string>
     <string name="firmware_update_no_device">Ingen ansluten enhet</string>
     <string name="firmware_update_not_found_in_release">Kunde inte hitta fast programvara för %1$s i utgåvan.</string>
@@ -714,7 +712,11 @@
     <string name="map_download_complete">Nedladdningen slutförd!</string>
     <string name="map_download_errors">Nedladdning slutförd med %1$d fel</string>
     <string name="map_download_region">Ladda ner region</string>
+    <string name="map_download_status_complete">Komplett</string>
     <string name="map_filter">Kartfilter\n</string>
+    <string name="map_filter_all_roles">Alla</string>
+    <string name="map_filter_display_title">Display</string>
+    <string name="map_filter_nodes_title">Noder</string>
     <string name="map_layer_formats">Kartlager stödjer .kml, .kmz och GeoJSON format.</string>
     <string name="map_node_popup_details">%1$s&lt;br&gt;Hördes senast: %2$s&lt;br&gt;Senaste position: %3$s&lt;br&gt;Batteri: %4$s</string>
     <string name="map_offline_manager">Offline-hanterare</string>
@@ -865,7 +867,6 @@
     <string name="node_sort_title">Sortera efter</string>
     <string name="node_sort_via_favorite">via Favoriter</string>
     <string name="node_sort_via_mqtt">via MQTT</string>
-    <string name="node_status_summary">Själva statustexten</string>
     <string name="nodedb_reset">Nollställ NodeDB</string>
     <string name="nodeinfo_broadcast_interval">Sändningsintervall för nod-info</string>
     <!-- NODES -->
@@ -936,7 +937,6 @@
     <string name="pax_total_format">PAX: %1$d</string>
     <string name="pax_total_marker">PAX: %1$s</string>
     <string name="pax_wifi_format">W:%1$d</string>
-    <string name="pax_wifi_marker">WiFi: %1$s</string>
     <string name="paxcounter">Paxcounter</string>
     <string name="paxcounter_config">Konfiguration av PAX-räknare</string>
     <string name="paxcounter_enabled">PAX-räknare aktiverad</string>
@@ -1228,7 +1228,6 @@
     <string name="ssid">SSID</string>
     <string name="state_broadcast_seconds">Statussändningsintervall (sekunder)</string>
     <string name="status_message">Statusmeddelande</string>
-    <string name="status_message_config">Inställningar för statusmeddelande</string>
     <string name="stay_connected_anywhere">Håll dig uppkopplad var som helst</string>
     <string name="store_forward">Lagra &amp; Vidarebefordra</string>
     <string name="store_forward_config">Lagra &amp; Vidarebefordra konfiguration</string>
@@ -1394,23 +1393,17 @@
     <string name="waypoint_received">Mottagen vägpunkt: %1$s</string>
     <string name="weight">Vikt</string>
     <!-- WIFI -->
-    <string name="wifi_config">WiFi-alternativ</string>
-    <string name="wifi_enabled">WiFi är aktiverat</string>
-    <string name="wifi_ip">Wifi IP:</string>
     <string name="wifi_provision_available_networks">Tillgängliga nätverk</string>
     <string name="wifi_provision_connect_failed">Kunde inte ansluta: %1$s</string>
     <string name="wifi_provision_device_found">Enhet hittad</string>
     <string name="wifi_provision_hidden_network">Dolt nätverk</string>
     <string name="wifi_provision_no_networks">Hittade inga nätverk</string>
-    <string name="wifi_provision_scan_failed">Misslyckades med att söka efter WiFi-nätverk: %1$s</string>
     <string name="wifi_provision_scan_networks">Sök efter nätverk</string>
     <string name="wifi_provision_scanning_ble">Söker efter enhet…</string>
     <string name="wifi_provision_scanning_wifi">Söker…</string>
-    <string name="wifi_provision_sending_credentials">Applicerar WiFi konfiguration…</string>
     <string name="wifi_provision_signal_strength">%1$d%</string>
     <string name="wifi_provision_ssid_label">Nätverksnamn (SSID)</string>
     <string name="wifi_provision_ssid_placeholder">Mata in eller väl ett nätverk</string>
-    <string name="wifi_provision_status_failed">Misslyckades att applicera WiFi konfiguration</string>
     <string name="wifi_provision_success_device_connected">Enhet ansluten</string>
     <string name="wifi_provision_success_done">Klart</string>
     <string name="wifi_provision_success_ip_address">IP-adress</string>
@@ -1419,11 +1412,11 @@
     <string name="wifi_provision_success_ssh_command">ssh %1$s@%2$s</string>
     <string name="wifi_provision_success_ssh_label">SSH-kommando</string>
     <string name="wifi_provision_success_username">Användarnamn</string>
-    <string name="wifi_qr_code_error">Felaktigt QR-kodformat eller inloggningsinformation</string>
-    <string name="wifi_qr_code_scan">Skanna WiFi QR-kod</string>
     <!-- WIND -->
     <string name="wind">Vind</string>
     <string name="wind_speed">Vindhastighet</string>
     <!-- WRITE -->
     <string name="you">Du</string>
+    <string name="zoom_in">Zooma in</string>
+    <string name="zoom_out">Zooma ut</string>
 </resources>

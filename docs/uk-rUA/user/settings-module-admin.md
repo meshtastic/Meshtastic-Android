@@ -2,7 +2,7 @@
 title: Settings — Modules & Admin
 parent: User Guide
 nav_order: 8
-last_updated: 2026-08-27
+last_updated: 2026-08-29
 description: Configure optional feature modules (MQTT, telemetry, canned messages, TAK, and more) and perform device administration.
 aliases:
   - modules
@@ -32,26 +32,26 @@ Module settings use a card-based layout with toggle switches, dropdowns, text fi
 
 Bridges mesh messages to and from an MQTT broker for internet connectivity. This is how you extend your mesh beyond radio range or integrate with home automation systems.
 
-| Setting                       | Опис                                                                                                                                                                                      |
-| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Увімкнено                     | Toggle MQTT bridge                                                                                                                                                                        |
-| Сервер                        | MQTT broker address                                                                                                                                                                       |
-| Ім'я користувача              | Authentication username                                                                                                                                                                   |
-| Пароль                        | Authentication password                                                                                                                                                                   |
-| Шифрування                    | Encrypt MQTT payloads                                                                                                                                                                     |
-| JSON Output                   | Publish and consume MQTT messages as JSON. Marked deprecated in the protobuf schema, but it is still the only toggle for this behaviour and the firmware still honours it |
-| TLS                           | Use secure connection                                                                                                                                                                     |
-| Root Topic                    | Base MQTT topic path                                                                                                                                                                      |
-| Проксі для клієнта увімкнуто  | Let a connected phone carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                       |
-| MQTT проксі на цьому телефоні | The phone-side half of the above: whether _this_ phone is currently acting as that relay. See [MQTT](mqtt)                                                |
-| Map Report                    | Publish position to the public map — see below                                                                                                                                            |
+| Setting                       | Опис                                                                                                                                                                                    |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Увімкнено                     | Toggle MQTT bridge                                                                                                                                                                      |
+| Сервер                        | MQTT broker address                                                                                                                                                                     |
+| Ім'я користувача              | Authentication username                                                                                                                                                                 |
+| Пароль                        | Authentication password                                                                                                                                                                 |
+| Шифрування                    | Encrypt MQTT payloads                                                                                                                                                                   |
+| JSON Output                   | Publish and consume MQTT messages as JSON. Marked deprecated in the protobuf schema, but it is still the only toggle for this behavior and the firmware still honors it |
+| TLS                           | Use secure connection                                                                                                                                                                   |
+| Root Topic                    | Base MQTT topic path                                                                                                                                                                    |
+| Проксі для клієнта увімкнуто  | Let a connected phone carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                     |
+| MQTT проксі на цьому телефоні | The phone-side half of **Proxy to client enabled**: whether this phone acts as that relay. See [MQTT](mqtt)                                             |
+| Map Report                    | Publish position to the public map — see below                                                                                                                                          |
 
 **Map Report** expands into its own group:
 
 | Setting            | Опис                                                                                                                            |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
 | Увімкнено          | Publish to the public map at all                                                                                                |
-| Share location     | Explicit consent to include your position. Map reporting will not save without it                               |
+| Share location     | Explicit consent to include your position. Map reporting does not save without it                               |
 | Position precision | How coarsely your position is published                                                                                         |
 | Publish interval   | How often to report. Must be **at least 3600 s (1 hour)** — the app blocks saving below that |
 
@@ -110,8 +110,8 @@ Buffers messages for nodes that were temporarily offline, then replays them when
 
 ### Range Test Module
 
-> ⚠️ **Warning:** Range Test only works on a secured primary channel. While your primary channel
-> still uses the default public key, the Enabled, Interval and Save-CSV controls stay disabled, and
+> ⚠️ **Warning:** Range Test only works on a secured primary channel. As long as your primary channel
+> still uses the default channel key, the Enabled, Interval and Save-CSV controls stay disabled, and
 > saving force-disables the module if the channel has reverted to public.
 
 Automated range testing tool for evaluating link quality between nodes. When enabled, the node periodically transmits test messages with incrementing counters. A receiver node logs these messages, allowing you to walk or drive away and later analyze at what distance messages stopped arriving.
@@ -147,7 +147,7 @@ See [Telemetry & Sensors](telemetry-and-sensors) for supported sensors and confi
 
 ### Canned Message Module
 
-Pre-configured messages accessible from the device's physical buttons (for radios with rotary encoders, keypads, or similar input hardware). Define a list of quick-send messages that can be transmitted without a phone connected — ideal for field use.
+Pre-configured messages accessible from the radio's physical buttons (for radios with rotary encoders, keypads, or similar input hardware). Define a list of quick-send messages that can be transmitted without a phone connected — ideal for field use.
 
 | Setting                                   | Опис                                                                                                      |
 | ----------------------------------------- | --------------------------------------------------------------------------------------------------------- |
@@ -180,13 +180,13 @@ Codec2 audio support for low-bandwidth voice communication over the mesh. This i
 
 GPIO control over the mesh network. Allows a remote node to read or write GPIO pins on another node — useful for activating relays, reading switches, or controlling external hardware from a distance.
 
+> ⚠️ **Warning:** Enabling **Allow Undefined Pins** gives remote nodes access to all GPIO pins, which could interfere with the radio's own hardware. Only enable on dedicated GPIO nodes.
+
 | Setting              | Опис                                                            |
 | -------------------- | --------------------------------------------------------------- |
 | Увімкнено            | Activate remote GPIO access                                     |
 | Allow Undefined Pins | Allow access to any GPIO pin (security risk) |
 | Available Pins       | Up to 4 GPIO pins this node exposes for remote read/write       |
-
-> ⚠️ **Warning:** Enabling "Allow Undefined Pins" gives remote nodes access to all GPIO pins, which could interfere with the radio's own hardware. Only enable on dedicated GPIO nodes.
 
 ### Neighbor Info Module
 
@@ -227,30 +227,21 @@ Turns your node into a motion or door sensor alert system. When a GPIO pin detec
 
 ### Paxcounter Module
 
-People counter using WiFi and BLE probe requests. Counts nearby devices by passively listening for probe requests that phones and laptops emit when scanning for networks. Available only on ESP32 devices.
+People counter using Wi-Fi and BLE probe requests. Counts nearby devices by passively listening for probe requests that phones and laptops emit when scanning for networks. Available only on ESP32 devices.
 
-| Setting                                | Опис                                                                                                             |
-| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| Увімкнено                              | Activate people counting                                                                                         |
-| Update Interval (s) | How often to report counts                                                                                       |
-| WiFi RSSI threshold                    | Ignore WiFi probes weaker than this, so distant devices are not counted (defaults to −80 dBm) |
-| BLE RSSI threshold                     | The same cut-off for BLE advertisements (defaults to −80 dBm)                                 |
+| Setting                                | Опис                                                                                                              |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Увімкнено                              | Activate people counting                                                                                          |
+| Update Interval (s) | How often to report counts                                                                                        |
+| Wi-Fi RSSI threshold                   | Ignore Wi-Fi probes weaker than this, so distant devices are not counted (defaults to −80 dBm) |
+| BLE RSSI threshold                     | The same cut-off for BLE advertisements (defaults to −80 dBm)                                  |
 
 > 💡 **Tip:** Paxcounter is useful for estimating foot traffic at trailheads, event venues, or other locations. Counts are approximate — one person may carry multiple devices.
 
 ### Status Message Module
 
-Publishes a short free-text status line for your node, which other nodes can display alongside it.
-
-| Setting                   | Опис                                                                                                                                                                             |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Рядок актуального статусу | Up to 80 characters. The **✕** in the field clears it. (That is the app's own label for the field, verbatim.) |
-
-Saving takes effect immediately — this is one of the few module settings that never asks the
-node to reboot.
-
-> ℹ️ **Note:** The screen only appears for firmware that reports support for the status-message
-> module. If you do not see it in the module list, your node's firmware does not have it.
+The status message has no module screen. It is edited with the rest of the node's identity, on
+[Settings — Radio & User](settings-radio-user#user-profile).
 
 ### Mesh Beacon Module
 
@@ -259,10 +250,10 @@ Broadcasts an invitation to your mesh, and receives invitations from others. See
 
 ### TAK Module
 
-> ℹ️ **Note:** This module only appears in the list once the node's **Device Role** (Device Config)
-> is set to **TAK** or **TAK Tracker**. Change the role first, or the entry will not be there.
-
-Team Awareness Kit integration for interoperability with ATAK and WinTAK. See [TAK Integration](tak) for detailed setup and usage.
+Team Awareness Kit integration for interoperability with ATAK and WinTAK. This module only appears
+in the list once the node's **Device Role** (Device Config) is set to **TAK** or **TAK Tracker** —
+change the role first, otherwise the entry does not appear. See [TAK Integration](tak) for detailed
+setup and usage.
 
 ## Адміністрування
 
@@ -275,7 +266,7 @@ Remotely configure nodes that share your admin key:
 3. Modify configuration.
 4. Tap **Save** — changes are sent over the mesh.
 
-> ⚠️ **Requires:** Admin key configured on both your node and the target node.
+> ⚠️ **Important:** Requires an admin key configured on both your node and the target node.
 
 ### Очистити базу даних вузлів
 
@@ -287,7 +278,9 @@ Prunes your local node database. Two independent controls:
 
 ### Factory Reset
 
-Resets all settings to factory defaults. **This cannot be undone.**
+> ⚠️ **Warning:** Factory reset erases all settings, channels, and keys. This cannot be undone.
+
+Resets all settings to factory defaults.
 
 ### Перевантажити
 
@@ -305,8 +298,8 @@ Three sections:
 
 - **What is Meshtastic?** — a short description of the project.
 - **Apps** — opens with **Need Hardware?**, a rotating carousel of popular devices that links out
-  to where to buy one, then the GitHub repository, the running app version, and
-  **Acknowledgements** (below).
+  to where to buy one. It also lists the GitHub repository, the running app version, and
+  **Acknowledgements** (see the next section).
 - **Project information** — links to the website and to this documentation.
 
 ### Подяки
@@ -325,6 +318,3 @@ generated at build time by AboutLibraries. It was previously called the license 
 - [Settings — Radio & User](settings-radio-user) — core radio and user profile settings
 - [Module configuration reference](https://meshtastic.org/docs/configuration/module) — detailed module docs on meshtastic.org
 - [FAQ](https://meshtastic.org/docs/faq/) — common questions on meshtastic.org
-
----
-

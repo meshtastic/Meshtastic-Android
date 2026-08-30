@@ -2,7 +2,7 @@
 title: Sõlmed
 parent: Kasutusjuhend
 nav_order: 4
-last_updated: 2026-08-27
+last_updated: 2026-08-29
 description: Browse, filter, and sort mesh nodes — view details, signal quality, roles, and quick actions.
 aliases:
   - sõlmede loend
@@ -13,7 +13,7 @@ aliases:
 
 # Sõlmed
 
-Sõlmede ekraanil kuvatakse kõik teie võrgus nähtavad seadmed.
+The Nodes screen lists every node visible on your mesh.
 
 ## Sõlmede loend
 
@@ -28,47 +28,47 @@ Sõlmede loend näitab kõiki sõlmi, mida raadio on kuulnud, sealhulgas:
 
 ### Sõlme oleku indikaatorid
 
-| Märk             | Tähendus                             |
-| ---------------- | ------------------------------------ |
-| 🟢 Võrgus        | Viimase 2 tunni jooksul kuuldud sõlm |
-| ⚪ Võrgust väljas | Viimase 2 tunni jooksul kuuldud sõlm |
-| ⭐ Lemmik         | Node marked as favorite by the user  |
+| Märk             | Tähendus                                       |
+| ---------------- | ---------------------------------------------- |
+| 🟢 Võrgus        | Viimase 2 tunni jooksul kuuldud sõlm           |
+| ⚪ Võrgust väljas | Viimase 2 tunni jooksul kuuldud sõlm           |
+| ⭐ Lemmik         | Node you marked as a favorite. |
 
-Sõlm loetakse **võrgus** olevaks, kui seda on viimase 2 tunni jooksul kuulda olnud, ja **võrguväliseks** muul juhul — eraldi "eemal" taset ei ole.
+There is no separate "away" tier.
 
 ### Node Roles
 
 Sõlmedele saab määrata erinevaid rolle, mis mõjutavad nende kärgvõrgus käitumist:
 
-| Roll                             | Kirjeldus                                                                                                                                                               |
-| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Klient                           | Standard end-user device                                                                                                                                                |
-| Klient-baas                      | Treats favorited-node traffic as Router Late priority; all other traffic as Client                                                                                      |
-| Vaikne klient                    | Receives but doesn't retransmit                                                                                                                                         |
-| Peidetud klient                  | Like Client Mute, plus hides from node list                                                                                                                             |
-| Ruuter                           | Prioriseerib sõnumi edastamist; jääb edastamiseks ärkvele                                                                                                               |
-| Hiline ruuter                    | Infrastruktuurisõlm, mis levitab signaali ühe korra, kuid alles pärast kõiki teisi režiime (pakub täiendavat leviala)                                |
-| ~~Ruuteri klient~~               | ⚠️ **Vananenud** (eemaldatud püsivara versioonis 2.3.15) — enam mitte valitav; kasuta hoopis ruuterint või kliendina |
-| ~~Repiiter~~                     | ⚠️ **Vananenud** (eemaldatud püsivara versioonis 2.7.11) — enam mitte valitav; kasuta hoopis ruuterina               |
-| Jälgitav                         | Optimized for position reporting at regular intervals                                                                                                                   |
-| Andur                            | Optimized for telemetry reporting                                                                                                                                       |
-| TAK                              | Ühildub TAK süsteemidega (saadab/võtab vastu CoT)                                                                                                    |
-| Jälgitav TAK                     | Ainult TAK asukoha aruandlus                                                                                                                                            |
-| Lost & Found | Pidev asukoha majakas taastamiseks                                                                                                                                      |
+| Roll               | Kirjeldus                                                                                                                                                               |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Klient             | Standard end-user node                                                                                                                                                  |
+| Klient-baas        | Treats favorited-node traffic as Router Late priority; all other traffic as Client                                                                                      |
+| Vaikne klient      | Receives but doesn't retransmit                                                                                                                                         |
+| Peidetud klient    | Like Client Mute, plus hides from node list                                                                                                                             |
+| Ruuter             | Prioriseerib sõnumi edastamist; jääb edastamiseks ärkvele                                                                                                               |
+| Hiline ruuter      | Infrastruktuurisõlm, mis levitab signaali ühe korra, kuid alles pärast kõiki teisi režiime (pakub täiendavat leviala)                                |
+| ~~Ruuteri klient~~ | ⚠️ **Vananenud** (eemaldatud püsivara versioonis 2.3.15) — enam mitte valitav; kasuta hoopis ruuterint või kliendina |
+| ~~Repiiter~~       | ⚠️ **Vananenud** (eemaldatud püsivara versioonis 2.7.11) — enam mitte valitav; kasuta hoopis ruuterina               |
+| Jälgitav           | Optimized for position reporting at regular intervals                                                                                                                   |
+| Andur              | Optimized for telemetry reporting                                                                                                                                       |
+| TAK                | Ühildub TAK süsteemidega (saadab/võtab vastu CoT)                                                                                                    |
+| Jälgitav TAK       | Ainult TAK asukoha aruandlus                                                                                                                                            |
+| Kadunud ja leitud  | Pidev asukoha majakas taastamiseks                                                                                                                                      |
 
 ### Choosing a Role
 
 Most users should keep the default **Client** role. Consider a different role when:
 
-- **Ruuter** — Teil on sõlm fikseeritud, kõrgemal asuvas asukohas, millel on usaldusväärne toide (katusel, mäetipul). Ruuterid püsivad pidevalt ärkvel, et vahendada teistele sõnumeid ja on võrguühenduse laiendamiseks hädavajalikud. Ära kasuta ruuter akutoitel töötavatel käsiseadetel.
+- **Ruuter** — Teil on sõlm fikseeritud, kõrgemal asuvas asukohas, millel on usaldusväärne toide (katusel, mäetipul). Ruuterid püsivad pidevalt ärkvel, et vahendada teistele sõnumeid ja on võrguühenduse laiendamiseks hädavajalikud. Don't use Router on battery-powered handheld radios.
 - **Ruuter hiline** – infrastruktuurisõlm, mis levitab pakette alati üks kord uuesti, aga alles pärast seda, kui kõik teised marsruutimisrežiimid on oma käigu teinud. Provides supplemental coverage for local clusters without competing with primary routers.
 - **Baas klient** – käsitleb lemmiksõlmedesse suunduvat ja sealt tulevaid liiklusi ruuteri hilinemise prioriteediga (tagades, et need sõnumid saavad täiendava edastuskatte), samal ajal kui kõike muud käsitletakse tavalise kliendina.
-- **Kliendi vaigistatud** — Soovid vastu võtta võrguliiklust, aga mitte edastamisse panustada. Useful for monitoring-only devices or to reduce congestion in dense areas.
-- **Jälgimisseade** – järelevalveta seade, mille ainus eesmärk on oma GPS asukoha levitamine (nt sõiduk, lemmikloom või vara). Aku säästmiseks magab saadete vahel.
-- **Sensor** — An unattended device reporting environmental telemetry (temperature, humidity, air quality). Sarnane võimsusprofiil jälgimisseadmele.
+- **Kliendi vaigistatud** — Soovid vastu võtta võrguliiklust, aga mitte edastamisse panustada. Useful for monitoring-only radios or to reduce congestion in dense areas.
+- **Tracker** — An unattended radio whose sole purpose is broadcasting its GPS position (e.g., a vehicle, pet, or asset). Aku säästmiseks magab saadete vahel.
+- **Sensor** — An unattended radio reporting environmental telemetry (temperature, humidity, air quality). Sarnane võimsusprofiil jälgimisseadmele.
 - **TAK / TAK jälgimisseade** — Vajalik ainult ATAK/WinTAK süsteemidega koostööl. Üksikasjade saamiseks vaata [TAK integratsioon](tak).
 
-> 💡 **Vihje:** Kärgvõrk töötab kõige paremini, kui enamik sõlmi on **klient** või **ruuter**. Too many Mute nodes reduces mesh resilience; too many Routers in a dense area can cause congestion. A good rule of thumb: one Router per 5–10 Clients in your area.
+> 💡 **Vihje:** Kärgvõrk töötab kõige paremini, kui enamik sõlmi on **klient** või **ruuter**. Too many Client Mute nodes reduce mesh resilience; too many Routers in a dense area can cause congestion. A good rule of thumb: one Router per 5–10 Clients in your area.
 
 ### Encryption Indicators
 
@@ -87,7 +87,7 @@ Sõlmed kuvavad oma nime kõrval krüpteerimisoleku ikoone:
 From the node list, you can:
 
 - **Puuduta** sõlmel, et vaadata üksikasjade lehte
-- **Long-press** for quick actions:
+- **Touch & hold** for quick actions:
   - Mark/remove favorite
   - Teavituste vaigistamine/vaigistuse tühistamine
   - Saada otsesõnum
@@ -110,7 +110,7 @@ Sõlmede filtreerimiseks nime või lühinime järgi tipi otsinguväljal. Filter 
 | **Include unknown**        | Show nodes that haven't sent user info yet. **On by default**, so a node heard before its info arrives stays visible and messageable; these carry a badge marking them incomplete |
 | **Exclude infrastructure** | Hide infrastructure-role nodes (Router, Router Late, Client Base, and legacy Repeater nodes)                                                                                   |
 | **Välista MQTT**           | Peida ainult MQTT internetisilla kaudu kuuldavad sõlmed                                                                                                                                           |
-| **Kuva ignoreeritud**      | Kuva sõlmed, mille olete varem sulgenud või vaigistanud                                                                                                                                           |
+| **Kuva ignoreeritud**      | Show nodes you've ignored                                                                                                                                                                         |
 
 ### Sorteerimisvalikud
 
@@ -132,7 +132,7 @@ Puuduta sõlmede loendi rakenduse ribal hüppehistogrammi ikooni, et avada tulpd
 
 Sõlmel klõpsamine avab detailvaate koos põhjaliku teabega. See [Node Metrics](node-metrics) for full details on metrics and telemetry.
 
-![Sõlme detailvaade](../../assets/screenshots/nodes_node_list.png)
+![Node list, showing signal quality and last-heard time for each node](../../assets/screenshots/nodes_node_list.png)
 
 The detail screen includes device info, position, and action buttons:
 
@@ -161,6 +161,3 @@ Täielik ja sirvitav kataloog kõikidest linkidest on saadaval ka menüüs **Sea
 - [Kaart ja teekonnapunktid](map-and-waypoints) — vaata sõlmede geograafilisi asukohti
 - [Local Mesh Discovery](discovery) — traceroute and neighbor info for topology exploration
 - [Signal Meter](signal-meter) — understand what the signal bars mean
-
----
-

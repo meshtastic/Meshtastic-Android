@@ -2,7 +2,7 @@
 title: Настройки — Модули и администрирование
 parent: Руководство пользователя
 nav_order: 8
-last_updated: 2026-08-27
+last_updated: 2026-08-29
 description: Настрой дополнительные функциональные модули (MQTT, телеметрия, готовые сообщения, TAK и другие) и выполняй администрирование устройств.
 aliases:
   - modules
@@ -32,26 +32,26 @@ aliases:
 
 Мосты передают сообщения туда и обратно от брокера MQTT для подключения к интернету. Ты так расширишь сеть за пределы радиуса действия или интегрируешь её с системами домашней автоматизации.
 
-| Настройка                    | Описание                                                                                                                                                                                  |
-| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Включено                     | Переключить MQTT мост                                                                                                                                                                     |
-| Сервер                       | Адрес MQTT брокера                                                                                                                                                                        |
-| Имя пользователя             | Имя пользователя для аутентификации                                                                                                                                                       |
-| Пароль                       | Пароль аутентификации                                                                                                                                                                     |
-| Шифрование                   | Зашифровать MQTT-пейлоады                                                                                                                                                                 |
-| Вывод JSON                   | Publish and consume MQTT messages as JSON. Marked deprecated in the protobuf schema, but it is still the only toggle for this behaviour and the firmware still honours it |
-| TLS                          | Использовать защищённое соединение                                                                                                                                                        |
-| Корневая тема                | Базовый путь темы MQTT                                                                                                                                                                    |
-| Прокси клиенту включен       | Let a connected phone carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                       |
-| MQTT-прокси на этом телефоне | The phone-side half of the above: whether _this_ phone is currently acting as that relay. See [MQTT](mqtt)                                                |
-| Отчет карты                  | Publish position to the public map — see below                                                                                                                                            |
+| Настройка                    | Описание                                                                                                                                                                                |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Включено                     | Переключить MQTT мост                                                                                                                                                                   |
+| Сервер                       | Адрес MQTT брокера                                                                                                                                                                      |
+| Имя пользователя             | Имя пользователя для аутентификации                                                                                                                                                     |
+| Пароль                       | Пароль аутентификации                                                                                                                                                                   |
+| Шифрование                   | Зашифровать MQTT-пейлоады                                                                                                                                                               |
+| Вывод JSON                   | Publish and consume MQTT messages as JSON. Marked deprecated in the protobuf schema, but it is still the only toggle for this behavior and the firmware still honors it |
+| TLS                          | Использовать защищённое соединение                                                                                                                                                      |
+| Корневая тема                | Базовый путь темы MQTT                                                                                                                                                                  |
+| Прокси клиенту включен       | Let a connected phone carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                     |
+| MQTT-прокси на этом телефоне | The phone-side half of **Proxy to client enabled**: whether this phone acts as that relay. See [MQTT](mqtt)                                             |
+| Отчет карты                  | Publish position to the public map — see below                                                                                                                                          |
 
 **Map Report** expands into its own group:
 
 | Настройка          | Описание                                                                                                                        |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
 | Включено           | Publish to the public map at all                                                                                                |
-| Share location     | Explicit consent to include your position. Map reporting will not save without it                               |
+| Share location     | Explicit consent to include your position. Map reporting does not save without it                               |
 | Position precision | How coarsely your position is published                                                                                         |
 | Publish interval   | How often to report. Must be **at least 3600 s (1 hour)** — the app blocks saving below that |
 
@@ -110,8 +110,8 @@ and each can drive the LED, the buzzer and the vibration motor separately, givin
 
 ### Модуль проверки дальности
 
-> ⚠️ **Warning:** Range Test only works on a secured primary channel. While your primary channel
-> still uses the default public key, the Enabled, Interval and Save-CSV controls stay disabled, and
+> ⚠️ **Warning:** Range Test only works on a secured primary channel. As long as your primary channel
+> still uses the default channel key, the Enabled, Interval and Save-CSV controls stay disabled, and
 > saving force-disables the module if the channel has reverted to public.
 
 Автоматизированный инструмент для проверки дальности и оценки качества связи между нодами. Когда включено, нода периодически отправляет сообщения с увеличивающимся счетчиком. Приёмная нода записывает эти сообщения, что позволяет тебе уйти пешком или уехать на машине, а потом проанализировать, на каком расстоянии сообщения перестали приходить.
@@ -147,7 +147,7 @@ battery health often and sensors rarely.
 
 ### Модуль шаблонных сообщений
 
-Предварительно настроенные сообщения, доступные через физические кнопки устройства (для радиостанций с поворотными энкодерами, кнопочными панелями или аналогичным оборудованием ввода). Определите список быстрых сообщений, которые могут быть переданы без подключённого телефона — идеально подходит для использования в поле.
+Pre-configured messages accessible from the radio's physical buttons (for radios with rotary encoders, keypads, or similar input hardware). Определите список быстрых сообщений, которые могут быть переданы без подключённого телефона — идеально подходит для использования в поле.
 
 | Настройка                                 | Описание                                                                                                  |
 | ----------------------------------------- | --------------------------------------------------------------------------------------------------------- |
@@ -180,13 +180,13 @@ battery health often and sensors rarely.
 
 Управление GPIO через mesh-сеть. Позволяет удалённому узлу читать и записывать состояния выводов GPIO на другом узле — полезно для активации реле, опроса переключателей или удалённого управления внешним оборудованием.
 
+> ⚠️ **Warning:** Enabling **Allow Undefined Pins** gives remote nodes access to all GPIO pins, which could interfere with the radio's own hardware. Включать только на выделенных GPIO-нодах.
+
 | Настройка                     | Описание                                                                        |
 | ----------------------------- | ------------------------------------------------------------------------------- |
 | Включено                      | Активировать удаленный GPIO доступ                                              |
 | Разрешить неопределенные пины | Разрешить доступ к любому GPIO-пину (риск для безопасности)  |
 | Доступные пины                | До 4 пинов GPIO, которые этот узел предоставляет для удалённого чтения и записи |
-
-> ⚠️ Предупреждение: Включение опции «Разрешить неопределённые пины» даёт удалённым узлам доступ ко всем выводам GPIO, что может нарушить работу собственного аппаратного обеспечения радио. Включать только на выделенных GPIO-нодах.
 
 ### Модуль информации о соседях
 
@@ -227,30 +227,21 @@ See [Local Mesh Discovery](discovery) for how to use neighbor data for mesh topo
 
 ### Paxcounter Модуль
 
-Подсчёт количества людей по Wi-Fi и BLE-запросам от устройств. Засчитывает ближайшие устройства, пассивно прослушивая зондирующие запросы, чтобы телефоны и ноутбуки излучали при сканировании сетей. Доступно только на устройствах ESP32.
+People counter using Wi-Fi and BLE probe requests. Засчитывает ближайшие устройства, пассивно прослушивая зондирующие запросы, чтобы телефоны и ноутбуки излучали при сканировании сетей. Доступно только на устройствах ESP32.
 
-| Настройка                                  | Описание                                                                                                         |
-| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
-| Включено                                   | Активировать подсчет людей                                                                                       |
-| Интервал обновления (с) | Как часто сообщать подсчитывания                                                                                 |
-| WiFi RSSI threshold                        | Ignore WiFi probes weaker than this, so distant devices are not counted (defaults to −80 dBm) |
-| BLE RSSI threshold                         | The same cut-off for BLE advertisements (defaults to −80 dBm)                                 |
+| Настройка                                  | Описание                                                                                                          |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| Включено                                   | Активировать подсчет людей                                                                                        |
+| Интервал обновления (с) | Как часто сообщать подсчитывания                                                                                  |
+| Wi-Fi RSSI threshold                       | Ignore Wi-Fi probes weaker than this, so distant devices are not counted (defaults to −80 dBm) |
+| BLE RSSI threshold                         | The same cut-off for BLE advertisements (defaults to −80 dBm)                                  |
 
 > 💡 **Совет:** Paxcounter полезен для приблизительной оценки пешеходного потока в местах начала маршрутов, на мероприятийных площадках или в других локациях. Счетчики приблизительны — один человек может иметь несколько устройств.
 
 ### Status Message Module
 
-Publishes a short free-text status line for your node, which other nodes can display alongside it.
-
-| Настройка                     | Описание                                                                                                                                                                         |
-| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Строка фактического состояния | Up to 80 characters. The **✕** in the field clears it. (That is the app's own label for the field, verbatim.) |
-
-Saving takes effect immediately — this is one of the few module settings that never asks the
-node to reboot.
-
-> ℹ️ **Note:** The screen only appears for firmware that reports support for the status-message
-> module. If you do not see it in the module list, your node's firmware does not have it.
+The status message has no module screen. It is edited with the rest of the node's identity, on
+[Settings — Radio & User](settings-radio-user#user-profile).
 
 ### Mesh Beacon Module
 
@@ -259,10 +250,10 @@ Broadcasts an invitation to your mesh, and receives invitations from others. See
 
 ### Модуль TAK
 
-> ℹ️ **Note:** This module only appears in the list once the node's **Device Role** (Device Config)
-> is set to **TAK** or **TAK Tracker**. Change the role first, or the entry will not be there.
-
-Интеграция Team Awareness Kit для совместимости с ATAK и WinTAK. См. [TAK Integration](tak) для детальной настройки и использования.
+Интеграция Team Awareness Kit для совместимости с ATAK и WinTAK. This module only appears
+in the list once the node's **Device Role** (Device Config) is set to **TAK** or **TAK Tracker** —
+change the role first, otherwise the entry does not appear. See [TAK Integration](tak) for detailed
+setup and usage.
 
 ## Администрирование
 
@@ -275,7 +266,7 @@ Broadcasts an invitation to your mesh, and receives invitations from others. See
 3. Измени конфигурацию.
 4. Нажми **Сохранить** — изменения отправляются через сеть.
 
-> ⚠️ **Требуется:** Ключ администратора настроенный как на вашем узле, так и на целевом узле.
+> ⚠️ **Important:** Requires an admin key configured on both your node and the target node.
 
 ### Очистить базу данных нод
 
@@ -287,7 +278,9 @@ Prunes your local node database. Two independent controls:
 
 ### Сброс к заводским настройкам
 
-Сбрасывает все настройки к заводским. **Это действие нельзя отменить.**
+> ⚠️ **Warning:** Factory reset erases all settings, channels, and keys. This cannot be undone.
+
+Сбрасывает все настройки к заводским.
 
 ### Перезагрузка
 
@@ -305,8 +298,8 @@ Three sections:
 
 - **What is Meshtastic?** — a short description of the project.
 - **Apps** — opens with **Need Hardware?**, a rotating carousel of popular devices that links out
-  to where to buy one, then the GitHub repository, the running app version, and
-  **Acknowledgements** (below).
+  to where to buy one. It also lists the GitHub repository, the running app version, and
+  **Acknowledgements** (see the next section).
 - **Project information** — links to the website and to this documentation.
 
 ### Благодарности
@@ -325,6 +318,3 @@ generated at build time by AboutLibraries. It was previously called the license 
 - [Настройки — Радио и Пользователь](settings-radio-user) — основные настройки радио и профиля пользователя
 - [Ссылка на конфигурацию модуля](https://meshtastic.org/docs/configuration/module) — подробная документация по модулям на meshtastic.org
 - [FAQ](https://meshtastic.org/docs/faq/) — общие вопросы на meshtastic.org
-
----
-

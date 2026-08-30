@@ -2,7 +2,7 @@
 title: Yhteydet
 parent: Käyttöopas
 nav_order: 2
-last_updated: 2026-08-27
+last_updated: 2026-08-29
 description: Yhdistä puhelin tai työpöytä Meshtastic-radioon Bluetoothin, USB:n tai TCP/IP:n kautta.
 aliases:
   - bluetooth
@@ -13,27 +13,27 @@ aliases:
 
 # Yhteydet
 
-Meshtastic tukee useita siirtotapoja puhelimen/työpöydän ja radion välillä viestimiseen.
+Meshtastic tukee useita yhteystapoja puhelimen tai työpöydän ja radion väliseen tiedonsiirtoon.
 
 ## Bluetooth (BLE)
 
 Bluetooth Low Energy on oletus ja yleisin yhteystapa Androidilla.
 
-### Laitteen pariliitos
+### Radion pariliittäminen
 
 1. Varmista, että Meshtastic-radio on päällä ja paritustilassa.
 2. Avaa sovellus ja siirry **Yhdistä**-välilehdelle.
 3. Napauta **Hae bluetooth-laitteita** — lähellä olevat Meshtastic-radiot ilmestyvät näkyville.
-4. Valitse laitteesi listasta.
+4. Valitse radiosi luettelosta.
 5. Hyväksy Bluetooth-pariliitospyyntö, jos se tulee näkyviin.
 
 ![Bluetooth-laitteiden haku, jossa löytynyt radio näkyy luettelossa](../../assets/screenshots/connections_bluetooth_scan.png)
 
 Vaihda bluetooth-, verkko- ja USB-yhteyksien välillä käyttämällä yhteyskortin alapuolella olevaa yhteysvalitsinta (vain yksi yhteystapa voi olla aktiivinen kerrallaan):
 
-![Yhteysvalitsin](../../assets/screenshots/connections_transport_filters.png)
+![Yhteydet-näkymä, jossa yhteystavan valitsin näyttää Bluetooth-, Verkko- ja USB-vaihtoehdot](../../assets/screenshots/connections_transport_filters.png)
 
-> 💡 **Vinkki:** Jos laitettasi ei näy, tarkista, ettei radio ole jo yhdistetty toiseen laitteeseen tai kantaman ulkopuolella.
+> 💡 **Vinkki:** Jos radioasi ei näy, varmista, ettei se ole jo yhdistetty toiseen puhelimeen tai ettei se ole kantaman ulkopuolella.
 
 Näytössä kerrotaan kaikki sovelluksen puolella olevat syyt, jotka estävät haun, sekä niiden ratkaisut:
 
@@ -48,16 +48,16 @@ Kun napautat **Hae** sen jälkeen, kun olet kerran hylännyt käyttöoikeuspyynn
 
 ### Yhteyden tila
 
-| Ikoni | Tila                 | Kuvaus                                                                                     |
-| ----- | -------------------- | ------------------------------------------------------------------------------------------ |
-| 🟢    | Yhdistetty           | Aktiivinen radiolinkki muodostettu                                                         |
-| 🟡    | Yhdistetään          | Yhteyden muodostus käynnissä                                                               |
-| 🔴    | Ei yhdistetty        | No active connection; the app keeps trying to reconnect                                    |
-| ⚪     | Laite on lepotilassa | The radio is in light sleep — the app is waiting for it to wake and reconnect, not failing |
+| Ikoni | Tila                 | Kuvaus                                                                                                                 |
+| ----- | -------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| 🟢    | Yhdistetty           | Aktiivinen radiolinkki muodostettu                                                                                     |
+| 🟡    | Yhdistetään          | Yhteyden muodostus käynnissä                                                                                           |
+| 🔴    | Ei yhdistetty        | Ei aktiivista yhteyttä; sovellus yrittää jatkuvasti muodostaa yhteyden uudelleen                                       |
+| ⚪     | Laite on lepotilassa | Radio on kevyessä lepotilassa — sovellus odottaa sen heräävän ja muodostavan yhteyden uudelleen, kyse ei ole virheestä |
 
-These are the four states the app models. "Device sleeping" is normal on power-saving configurations and needs no action.
+Nämä ovat neljä yhteystilaa, joita sovellus käyttää. "Laite lepotilassa" on normaali virransäästöasetuksissa eikä vaadi mitään toimenpiteitä.
 
-When connecting, a status indicator shows the current connection state — tap **Stop Connecting** to abandon the attempt:
+Yhteyttä muodostettaessa tilailmaisin näyttää nykyisen yhteyden tilan — napauta **Lopeta yhteyden muodostaminen** keskeyttääksesi yrityksen:
 
 ![Yhdistämisen tila](../../assets/screenshots/connections_connecting.png)
 
@@ -77,21 +77,17 @@ USB-yhteydet tarjoavat langallisen vaihtoehdon, hyödyllinen työpöytäkäytös
 
 ### Asetukset
 
-1. Yhdistä radio USB-kaapelilla laitteeseesi.
-2. Sovellus pyytää USB-oikeuksia — paina **Salli**.
+1. Yhdistä radio puhelimeen USB-kaapelilla.
+2. Sovellus pyytää USB-käyttöoikeutta — napauta **Salli**.
 3. Yhteys muodostetaan automaattisesti.
 
-> ℹ️ **Note:** USB connections require OTG support on Android devices.
+> ℹ️ **Huomautus:** USB-yhteydet edellyttävät Android-laitteissa OTG-tukea.
 
 ## TCP/IP (Verkko)
 
-Jotkin Meshtastic-radiot tukevat WiFi tai Ethernet-yhteyttä, mikä mahdollistaa TCP-pohjaiset yhteydet lähiverkkosi kautta. Liitä radio ensin verkkoon käyttämällä radion omia WiFi-asetuksia (laiteohjelmiston verkkokäyttöliittymän tai muun yhteystavan kautta) — yhdistä siihen sitten sovelluksesta.
+Jotkin Meshtastic-radiot tukevat WiFi-/Ethernet-yhteyttä, jolloin TCP-pohjaiset yhteydet toimivat lähiverkon kautta. Yhdistä radio ensin verkkoosi radion omilla WiFi-asetuksilla (laiteohjelmiston verkkokäyttöliittymän tai muun yhteyden kautta) ja muodosta sen jälkeen yhteys siihen sovelluksesta.
 
-> ℹ️ **Note:** **Settings → Wi-Fi Provisioning for mPWRD-OS** is a separate, narrower tool. It provisions WiFi
-> credentials over Bluetooth to **mPWRD-OS** devices only, using their own protocol — it does not
-> configure WiFi on an ordinary Meshtastic radio. It scans over BLE, lists the networks the device
-> can see (including an option for a hidden SSID), takes the password, and reports success or
-> failure. Available on both Android and Desktop.
+> ℹ️ **Huomautus:** **Asetukset → WiFi-määritys mPWRD-OS:lle** on erillinen ja rajatumpi toiminto. Se määrittää WiFi-kirjautumistiedot Bluetoothin kautta vain **mPWRD-OS**-laitteille niiden omalla protokollalla — sillä ei määritetä tavallisen Meshtastic-radion WiFi-asetuksia. Se etsii Bluetooth LE:n kautta verkot, jotka laite näkee (mukaan lukien piilotettu SSID), pyytää salasanan ja ilmoittaa onnistuiko määritys vai ei. Saatavilla sekä Androidille että Työpöydälle.
 
 ### Yhdistäminen verkon kautta
 
@@ -100,7 +96,7 @@ Jotkin Meshtastic-radiot tukevat WiFi tai Ethernet-yhteyttä, mikä mahdollistaa
 3. Valitse radio jommallakummalla seuraavista tavoista:
    - **Hae verkkolaitteita** — ota tämä käyttöön, jotta lähiverkossa itsensä ilmoittavat radiot löytyvät automaattisesti (mDNS / `_meshtastic._tcp`). Löydetyt laitteet näkyvät luettelossa; yhdistä napauttamalla haluamaasi laitetta.
    - **Lisää laite manuaalisesti** — anna radion IP-osoite (tai isäntänimi) ja portti (oletus: `4403`).
-4. Aiemmin käytetyt verkko-osoitteet tallennetaan **Viimeisimmät verkkolaitteet** -osioon nopeaa uudelleenyhdistämistä varten (poista pitämällä painettuna).
+4. Aiemmin käytetyt verkko-osoitteet muistetaan kohdassa **Viimeisimmät verkkolaitteet**, jotta yhteyden muodostaminen uudelleen käy nopeasti (poista osoite koskettamalla sitä pitkään).
 
 > 💡 **Vinkki:** Verkkolaitteiden haku käyttää mDNS:ää, joka toimii vain, kun molemmat laitteet ovat samassa aliverkossa. Android 17:ssä ja uudemmissa versioissa sovellus tarvitsee lähiverkon käyttöoikeuden laitteiden hakuun. Jos haku ei löydä mitään, lisää laite manuaalisesti IP-osoitteella.
 
@@ -112,7 +108,7 @@ Jotkin Meshtastic-radiot tukevat WiFi tai Ethernet-yhteyttä, mikä mahdollistaa
 
 ## Uudelleenyhdistämisen toiminta
 
-Sovellus yhdistyy käynnistyksen yhteydessä **viimeksi valittuun laitteeseen**. Voit vaihtaa yhteystapaa Yhdistä-näkymästä milloin tahansa.
+Sovellus muodostaa käynnistyessään automaattisesti yhteyden viimeksi valittuun radioon. Voit vaihtaa yhteystapaa Yhdistä-näkymästä milloin tahansa.
 
 Yhteyden katkaisemiseksi paina Yhdistä-näkymän katkaisupainiketta:
 
@@ -134,6 +130,3 @@ Katso [Työpöytäsovellus](desktop) alustakohtaiset tiedot ja pikanäppäimet.
 - [Asetukset — Radio & käyttäjä](settings-radio-user) — Bluetooth- ja verkkoasetukset
 - [Työpöytäsovellus](desktop) — työpöytäkohtaiset yhteystiedot
 - [Tuetut laitteet](https://meshtastic.org/docs/hardware/devices) — täydellinen lista yhteensopivista radioista meshtastic.org -sivustolla
-
----
-

@@ -2,7 +2,7 @@
 title: Kartta ja reittipisteet
 parent: Käyttöopas
 nav_order: 6
-last_updated: 2026-08-27
+last_updated: 2026-08-29
 description: Näytä radioiden sijainnit kartalla, luo ja jaa reittipisteitä, hallitse karttatasoja ja Site Planneria sekä säädä sijainnin jakamista ja tietosuoja-asetuksia.
 aliases:
   - kartta
@@ -35,20 +35,20 @@ Jokainen sijaintinsa raportoiva radio näytetään **radiotunnisteena**, jossa n
 
 - **Zoomaus** — nipistä tai käytä +/- -painikkeita
 - **Panorointi** — vedä karttaa
-- **Keskitä** — valitse sijaintipainike keskittääksesi oman sijaintisi
+- **Keskitä** — napauta sijaintipainiketta keskittääksesi kartan omaan sijaintiisi
 - **Radion napautus** — avaa radion tiedot napauttamalla merkkiä
 
 Kelluva työkalupalkki tarjoaa nopean pääsyn kompassiin, tasojen vaihtoon, suodattimiin, päivitykseen ja sijainnin seurantaan. Napauta kompassia suunnan palauttamiseksi pohjoiseen tai sijaintipainiketta keskittääksesi oman sijaintisi.
 
-![Kartan hallintapainikkeet](../../assets/screenshots/map_controls_overlay.png)
+![Karttanäkymä, jossa kelluva työkalurivi on avattuna ja kompassi-, taso- sekä sijaintitoiminnot näkyvät](../../assets/screenshots/map_controls_overlay.png)
 
 ## Reittipisteet
 
-Reittipisteet ovat jaettuja maantieteellisiä kiinnostavia kohteita, jotka kaikki mesh-verkon jäsenet voivat nähdä.
+Reittipisteet ovat jaettuja kiinnostavia kohteita, jotka näkyvät kaikille, joille reittipiste lähetetään.
 
 ### Reittipisteen luominen
 
-1. Paina karttaa pitkään haluamassasi sijainnissa.
+1. Kosketa karttaa halutusta kohdasta ja pidä sormi paikallaan.
 2. Anna nimi ja valinnainen kuvaus.
 3. Valitse reittipisteelle kuvake tai emoji.
 4. Napauta **Lähetä** jakaaksesi sen verkkoon.
@@ -57,14 +57,14 @@ Reittipisteet osoitetaan kuten viestit: oletuksena ne lähetetään yleislähety
 
 ### Reittipisteen ominaisuudet
 
-| Ominaisuus      | Kuvaus                                                                  |
-| --------------- | ----------------------------------------------------------------------- |
-| Nimi            | Lyhyt tunniste (enintään 29 merkkiä)                 |
-| Kuvaus          | Valinnainen pidempi kuvaus                                              |
-| Kuvake          | Visuaalinen merkkiemoji kartalla                                        |
-| Lukittu         | Jos lukittu, vain merkin luonut voi muokata tai poistaa sen             |
-| Voimassaoloaika | Valinnainen automaattinen poistopäivä ja -aika                          |
-| Aluerajaus      | Valinnainen aluerajaus saapumis- ja poistumisilmoituksille — katso alla |
+| Ominaisuus      | Kuvaus                                                                                             |
+| --------------- | -------------------------------------------------------------------------------------------------- |
+| Nimi            | Lyhyt tunniste (enintään 29 merkkiä)                                            |
+| Kuvaus          | Valinnainen pidempi kuvaus                                                                         |
+| Kuvake          | Visuaalinen merkkiemoji kartalla                                                                   |
+| Lukittu         | Jos lukittu, vain merkin luonut voi muokata tai poistaa sen                                        |
+| Voimassaoloaika | Valinnainen automaattinen poistopäivä ja -aika                                                     |
+| Aluerajaus      | Valinnainen saapumis-/poistumishälytysalue — katso [Reittipisteiden geoaidat](#waypoint-geofences) |
 
 ### Reittipisteen vanheneminen
 
@@ -89,16 +89,16 @@ Koska reittipisteet (ja niiden aluerajaukset) lähetetään koko mesh-verkkoon, 
 
 - Napauta reittipistettä kartalla nähdäksesi sen tiedot ja koordinaatit
 - Muokkaa tai poista luomiasi reittipisteitä
-- **Lukitut reittipisteet** eivät ole muiden radioiden muokattavissa tai poistettavissa — vain alkuperäisen merkin luonut voi muuttaa niitä
+- **Lukittuja reittipisteitä** eivät muut mesh-verkon jäsenet voi muokata tai poistaa — vain niiden luoja voi muuttaa niitä
 - Lukitsemattomia reittipisteitä voi muokata kuka tahansa mesh-verkon jäsen
 
 ## Karttatasot
 
-Napauta kartan karttatasokuvaketta avataksesi **Hallitse karttatasoja** -näkymän, jossa voit tuoda omia karttatasojasi `.kml`-, `.kmz`- tai GeoJSON-muodossa joko avaamalla tiedoston Meshtasticissa tai jakamalla sen sovellukseen toisesta sovelluksesta. Tuodut karttatasot näkyvät luettelossa, jossa voit näyttää tai piilottaa ne sekä poistaa ne. Tämä on käytettävissä sekä Google Play- että F-Droid-versioissa.
+Napauta kartan tasokuvaketta avataksesi **Hallitse karttatasoja**. Tuo omia peitekuvia `.kml`-, `.kmz`- tai GeoJSON-muodossa, mukaan lukien KMZ-maanpeitekuvat (georeferoidut kuvat, kuten viedyt topografiset tai ilmakuvat), jotka sijoitetaan kartalle niiden määritettyjen rajojen mukaisesti. Lisää sellainen valitsemalla tiedosto **Lisää taso** -toiminnolla, avaamalla tiedosto Meshtasticissa tai jakamalla se sovellukseen toisesta sovelluksesta. Tuodut karttatasot näkyvät luettelossa, jossa voit näyttää tai piilottaa ne sekä poistaa ne. Tämä toimii Google Play -versiossa, F-Droid-versiossa ja **Desktopissa**, joissa käytetään samaa karttatasojen tallennusta ja tiedostonvalitsinta.
 
 ### Site Planner
 
-**Site Planner** arvioi lähettimen kuuluvuusalueen ja piirtää sen kartalle värikoodattuna peittoalueena. Avaa se kartan ohjaimista tai radion tiedoista **Arvioi peittoalue** -toiminnolla (näkyy vain radioille, joilla on tunnettu sijainti). Määritä lähettimen asetukset (sijainti, taajuus, lähetysteho, antennin vahvistus ja korkeus), vastaanottimen asetukset (herkkyys ja korkeus) sekä simuloinnin asetukset (enimmäisetäisyys, korkean tarkkuuden maastomalli ja väripaletti), ja käynnistä sitten arviointi. Karttatasojen tavoin myös Site Planner on käytettävissä sekä Google Play- että F-Droid-versioissa.
+**Site Planner** arvioi lähettimen kuuluvuusalueen ja piirtää sen kartalle värikoodattuna peittoalueena. Avaa se kartan ohjaimista tai radion tiedoista **Arvioi peittoalue** -toiminnolla (näkyy vain radioille, joilla on tunnettu sijainti). Määritä lähettimen asetukset (sijainti, taajuus, lähetysteho, antennin vahvistus ja korkeus), vastaanottimen asetukset (herkkyys ja korkeus) sekä simuloinnin asetukset (enimmäisetäisyys, korkean tarkkuuden maastomalli ja väripaletti), ja käynnistä sitten arviointi. Kuten karttatasotkin, Site Planner toimii sekä Google Play- että F-Droid-versioissa, joissa valmis arvio piirretään kartalle peitekuvana. **Työpöydällä** näytetään sama käyttöliittymä, mutta suunnittelutyökalu avautuu selaimeen. Saat arvion kartalle käyttämällä suunnittelutyökalun **Vie → GeoJSON** -toimintoa ja lisäämällä ladatun tiedoston kohdassa **Hallitse karttatasoja**.
 
 ## Sijainnin jakaminen
 
@@ -118,18 +118,42 @@ Määritä sijaintikäyttäytyminen kohdassa **Asetukset → Sijainti**.
 
 ## Karttalähteet
 
-Kartan pohja riippuu sovellusversiosta: **Google Play** -versio käyttää Google Mapsia, kun taas **F-Droid**- ja työpöytäversiot käyttävät OpenStreetMapia. Pohjakartan lisäksi käytettävissä on muita karttatasoja peitekerroksina tai vaihtoehtoisina karttoina:
+Jokaisessa versiossa kartan työkalurivillä on karttapohjan valitsin. **Google Play** -versioissa käytetään Googlen omia karttatyyppejä. **F-Droid**- ja **Työpöytä**-versioissa käytetään MapLibren vektorityylejä. Alempana karttapohjan valitsimessa kaikki tarjoavat samat rasterikarttapohjat:
 
-- Satellite imagery — on both Google Play and F-Droid
-- Offline tiles — **F-Droid only**. Download map areas for offline use through OSMdroid's tile
-  cache. Google Play and Desktop builds have no offline download
+| Karttapohja                               | Viestit                                                                     |
+| ----------------------------------------- | --------------------------------------------------------------------------- |
+| Normaali / Satelliitti / Maasto / Hybridi | Vain Google Play – Googlen omat karttatyypit                                |
+| Liberty                                   | Oletus F-Droid- ja Desktop-versioissa. Vektorinen tiekartta |
+| Positron                                  | Vähäkontrastinen vektorikartta, jonka päällä radiomerkit erottuvat hyvin    |
+| Tumma                                     | Tummiin teemoihin sopiva vektorikartta                                      |
+| OpenStreetMap                             | Perinteiset rasterimuotoiset tiekarttaruudut                                |
+| OpenTopoMap                               | Rasterimuotoinen topografinen kartta                                        |
+| USGS Topo / USGS Imagery                  | Vain Yhdysvaltojen kattavuus                                                |
+| Esri Topo / Esri Imagery                  | Topografinen kartta ja satelliittikuvat                                     |
+
+Peitekuvat voidaan ottaa käyttöön minkä tahansa karttapohjan päällä karttatasovalikosta:
+
+- **Säätutka** — NOAA NEXRAD -heijastavuus (Yhdysvaltojen kattavuus)
+- **Varjostus** — maaston korkeuserot, vain **F-Droid**- ja **työpöytä**-versioissa. Hyödyllinen, kun halutaan ymmärtää, miksi LoRa-yhteys katkeaa maaston vuoksi
+
+### Oman karttatiilipalvelun lisääminen
+
+Mikä tahansa XYZ-karttatiilipalvelu voidaan lisätä karttapohjaksi kaikkiin versioihin, myös työpöytiin. Avaa **Hallitse mukautettuja karttalähteitä** karttapohjan valitsimen alareunasta ja liitä URL-malli käyttäen merkintöjä `{z}`, `{x}` ja `{y}` sekä tarvittaessa `{s}`, jos palveluntarjoaja käyttää kiertäviä aliverkkotunnuksia. Esimerkiksi kansallinen karttapalvelu:
+
+```
+https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg
+```
+
+Karttatiilet tallennetaan välimuistiin levylle, joten kartan siirtäminen ei lataa juuri katsottua aluetta uudelleen.
+
+**Androidissa** tällä samalla näkymällä voidaan tuoda myös paikallinen `.mbtiles`-arkisto täysin offline-käyttöä varten.
+
+Offline-alueiden lataaminen on käytettävissä vain **F-Droid**-versiossa: tallenna näkyvissä oleva alue karttatasovalikosta.
+**Google Play** -versiot tuovat sen sijaan valmiita MBTiles-tiedostoja, eikä **työpöytä** tue kumpaakaan toimintoa.
 
 ## Aiheeseen liittyvät aiheet
 
 - [Radiot](nodes) — tarkastele ja suodata radiolistaa
 - [Radion mittarit](node-metrics) — signaalin laatu ja sijaintihistoria yksittäisille radioille
-- [Local Mesh Discovery](discovery) — traceroute and neighbor info for understanding mesh topology
+- [Paikallinen mesh-verkon etsintä](discovery) — reitiselvitys ja naapuritiedot mesh-verkon rakenteen hahmottamiseen
 - [Yksiköt ja kieliasetukset](units-and-locale) — etäisyys- ja koordinaattien näyttömuodot
-
----
-

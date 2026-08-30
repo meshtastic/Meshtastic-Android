@@ -2,7 +2,7 @@
 title: Сообщения и каналы
 parent: Руководство пользователя
 nav_order: 3
-last_updated: 2026-08-27
+last_updated: 2026-08-29
 description: Отправляйте и получайте сообщения, управляйте каналами, настраивайте шифрование, ищите по перепискам, а также используйте быстрый чат, реакции и действия с сообщениями.
 aliases:
   - channels
@@ -21,7 +21,7 @@ Meshtastic поддерживает два режима связи: **вещан
 
 ### Канал по умолчанию
 
-Каждое устройство Meshtastic имеет канал **LongFast** по умолчанию. Это незашифрованный канал, используемый для общей связи в ячеистой сети.
+Every Meshtastic radio comes with a default **LongFast** channel. It is encrypted with a well-known default key, so anyone running Meshtastic on the same preset can read it.
 
 ### Безопасность канала
 
@@ -52,13 +52,13 @@ Meshtastic поддерживает два режима связи: **вещан
 ### Отправка личного сообщения
 
 1. Откройте вкладку **Сообщения**.
-2. Выберите ноду из списка контактов или нажмите на ноду в списке нод.
+2. Select a conversation, or tap a node in the node list.
 3. Введите сообщение и нажмите **"Отправить"**.
 
 ### Managing the Conversation List
 
-The **Messages** tab lists your conversations. Each row carries what you need to triage it at a
-glance, and the list itself is directly actionable:
+The **Messages** tab lists your conversations. Each row shows what you need at a glance, and you
+can act on it directly:
 
 - **Unsent drafts survive.** Type into a conversation and leave without sending, and the text is
   still there when you come back. The row shows it as `Draft: …` in place of the last message —
@@ -66,7 +66,7 @@ glance, and the list itself is directly actionable:
 - **Unread badge.** A count sits on the row until you open the conversation.
 - **Swipe right to mute** (swipe again to unmute) and **swipe left to delete**. Deleting asks
   first; muting shows a snackbar with **Undo**.
-- **Long-press to select** one or more conversations, then use the action bar to **Pin**,
+- **Touch & hold to select** one or more conversations, then use the action bar to **Pin**,
   **Mark unread**, mute or delete them together. Pinned conversations carry a pin marker and rise
   to the top of **their own section**.
 - **The list is split into Channels and Direct Messages**, each with a collapsible header and each
@@ -84,15 +84,15 @@ control whether they are offered at all.
 
 Метка статуса отображается только **под твоими** исходящими сообщениями (входящие сообщения от других не имеют метки статуса):
 
-| Состояние                             | Значение                                                                                                                                                                                                                                  |
-| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Отправка…                             | Queued or already handed to the radio, not yet resolved either way. Both stages share this text, but the icon and colour change as it progresses — a yellow upload cloud while queued, a blue arrow once the radio has it |
-| Доставлено получателю                 | Самое надёжное подтверждение для личного сообщения — получено подтверждение о доставке                                                                                                                                                    |
-| Отправлено в сеть                     | Для широковещательного сообщения в канале — сообщение достигло mesh-сети (у широковещательных сообщений нет подтверждений для каждого получателя)                                                                      |
-| Передано, не подтверждено получателем | Для личного сообщения, отображается предупреждающим цветом — сообщение было ретранслировано, но подтверждение ещё не получено                                                                                                             |
-| Маршрутизация по SF++ цепочке…        | Находится в процессе маршрутизации/буферизации в цепочке Store & Forward Plus Plus                                                                                                                                    |
-| Подтверждено в цепочке SF++           | Подтверждена доставка через цепочку SF++                                                                                                                                                                                                  |
-| Ошибки                                | Ошибка доставки — нажмите на статус, чтобы узнать конкретную причину (см. раздел «Ошибки доставки» ниже)                                                                                               |
+| Состояние                             | Значение                                                                                                                                                                                                                                 |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Отправка…                             | Queued or already handed to the radio, not yet resolved either way. Both stages share this text, but the icon and color change as it progresses — a yellow upload cloud while queued, a blue arrow once the radio has it |
+| Доставлено получателю                 | Самое надёжное подтверждение для личного сообщения — получено подтверждение о доставке                                                                                                                                                   |
+| Отправлено в сеть                     | Для широковещательного сообщения в канале — сообщение достигло mesh-сети (у широковещательных сообщений нет подтверждений для каждого получателя)                                                                     |
+| Передано, не подтверждено получателем | Для личного сообщения, отображается предупреждающим цветом — сообщение было ретранслировано, но подтверждение ещё не получено                                                                                                            |
+| Маршрутизация по SF++ цепочке…        | Находится в процессе маршрутизации/буферизации в цепочке Store & Forward Plus Plus                                                                                                                                   |
+| Подтверждено в цепочке SF++           | Подтверждена доставка через цепочку SF++                                                                                                                                                                                                 |
+| Ошибки                                | Delivery failed — tap the status for the specific reason (see [Delivery Errors](#delivery-errors))                                                                                                                    |
 
 ### Ошибки доставки
 
@@ -135,8 +135,6 @@ control whether they are offered at all.
 
 ![Диалог создания быстрого чата с именем, сообщением и переключателем мгновенной отправки](../../assets/screenshots/messages_edit_quick_chat.png)
 
-Список каналов показывает каждый канал с предпросмотром последнего сообщения.
-
 ### Поиск сообщений
 
 Ты можешь искать по всей истории любой переписки прямо на экране чата:
@@ -166,7 +164,7 @@ control whether they are offered at all.
 | Встроенный код | `` `код` ``                    | моноширинный `код`    |
 | Ссылка         | `[текст](https://example.com)` | нажимаемая **ссылка** |
 
-При создании сообщения установите фокус на поле ввода и введите не менее трёх символов — под полем появится **панель форматирования**. Выделите текст и нажмите на стиль, чтобы применить его (повторное нажатие убирает форматирование); если текст не выделен, будет вставлена пустая пара символов разметки, а курсор окажется между ними. Кнопка вставки ссылки открывает диалог для ввода URL-адреса. В процессе твоего набора черновые стили отображаются в поле, но в самом тексте сохраняются символы Markdown.
+При создании сообщения установите фокус на поле ввода и введите не менее трёх символов — под полем появится **панель форматирования**. Выделите текст и нажмите на стиль, чтобы применить его (повторное нажатие убирает форматирование); если текст не выделен, будет вставлена пустая пара символов разметки, а курсор окажется между ними. Кнопка вставки ссылки открывает диалог для ввода URL-адреса. As you type, the field shows the styled text, but the message you send still contains the Markdown characters.
 
 > 💡 **Совет:** Форматирование передаётся по mesh-сети как есть — теми же байтами, что и iOS. Клиенты, не поддерживающие Markdown (старые приложения, простые клиенты на прошивке), отобразят сырые символы `**`/`~~`. URL-адреса, адреса электронной почты и номера телефонов всё равно автоматически становятся ссылками независимо от того, используете ли вы Markdown.
 
@@ -178,15 +176,13 @@ control whether they are offered at all.
 
 Реагируйте на сообщения с помощью эмодзи:
 
-- **Double-tap** a message — or long-press it — to raise a quick reaction bar above the bubble
+- **Touch & hold** a message — or double-tap it — to raise a quick reaction bar above the bubble. Opening the bar sends nothing.
 - Tap an emoji in the bar to send it; tap **more** to open the full picker, or anywhere outside
-  the bar to dismiss it without sending
+  the bar to dismiss it without sending. A reaction is a real mesh packet, so it only goes out
+  when you pick an emoji.
 - Реакции появляются под пузырьком сообщения
 - Несколько пользователей могут отреагировать на одно и то же сообщение
 - Реагируйте на свои сообщения или сообщения других
-
-> ℹ️ **Note:** Opening the bar sends nothing. A reaction is a real mesh packet, so it only goes
-> out when you pick an emoji.
 
 ![Значки реакций-эмодзи, отображаемые под сообщением](../../assets/screenshots/messages_reaction.png)
 
@@ -196,7 +192,7 @@ control whether they are offered at all.
 
 **Swipe a message to the right** to reply to it — the composer opens with that message quoted.
 Swiping past the reply threshold arms the action; releasing before it springs back with nothing sent.
-Reply is also in the actions menu, reached by long-pressing and then tapping **More**.
+Reply is also in the actions menu, reached by touching & holding and then tapping **More**.
 
 ### Day Separators
 
@@ -212,7 +208,7 @@ messages. That count is messages, not people — five unread from one person rea
 
 ### Действия с сообщениями
 
-Long-press or double-tap a message to open the quick reaction bar, then tap **More** (the
+Touch & hold or double-tap a message to open the quick reaction bar, then tap **More** (the
 overflow icon on that bar) to reach:
 
 - **Копировать** — скопировать текст сообщения в буфер обмена
@@ -249,6 +245,3 @@ reliable or background, but that is not something you control from the message c
 - [Настройки — Радио и пользователь](settings-radio-user) — настройка шифрования каналов и пресетов
 - [MQTT](mqtt) — мост для передачи сообщений канала в интернет
 - [Конфигурация каналов](https://meshtastic.org/docs/configuration/radio/channels) — подробные параметры каналов на meshtastic.org
-
----
-

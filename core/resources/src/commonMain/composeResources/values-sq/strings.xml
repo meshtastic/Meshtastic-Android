@@ -299,8 +299,6 @@
     <string name="waypoint_received">Pikë rreshti e marrë: %1$s</string>
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">Adresa IP</string>
-    <string name="wifi_qr_code_error">Formati i gabuar i kodit QR të kredencialeve WiFi</string>
-    <string name="wifi_qr_code_scan">Skano QR kodi WiFi</string>
     <!-- WIND -->
     <!-- WRITE -->
     <string name="you">Ju</string>

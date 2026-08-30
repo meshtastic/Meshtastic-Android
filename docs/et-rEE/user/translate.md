@@ -2,7 +2,7 @@
 title: Tõlgi rakendus
 parent: Kasutusjuhend
 nav_order: 17
-last_updated: 2026-08-27
+last_updated: 2026-08-29
 description: Kuidas rakendust ja selle dokumentatsiooni Crowdini kaudu tõlgitakse ja tõlgete panustamise juhised.
 aliases:
   - tõlgi
@@ -12,9 +12,7 @@ aliases:
 
 # Tõlgi rakendus
 
-Tõlgete koostamisele kaasaaitamine aitab Meshtasticut laiemale publikule kättesaadavaks teha. Rakendus kasutab nii kasutajaliidese kui ka rakendusesisese dokumentatsiooni kogukonna tõlgete haldamiseks [Crowdinit](https://crowdin.com/).
-
----
+The app and its in-app docs are translated on Crowdin — this page shows how to contribute. Rakendus kasutab nii kasutajaliidese kui ka rakendusesisese dokumentatsiooni kogukonna tõlgete haldamiseks [Crowdinit](https://crowdin.com/).
 
 ## Mida tõlgitakse
 
@@ -26,19 +24,14 @@ Tõlgete koostamisele kaasaaitamine aitab Meshtasticut laiemale publikule kätte
 
 > ℹ️ **Note:** Developer Guide pages are English-only. Kaastöölistele suunatud koodikeskset dokumentatsiooni ei tõlgita.
 
----
-
 ## How to Contribute
 
 1. **Külasta Crowdini projekti.** Ava [Meshtastic Android Crowdini projekt](https://crowdin.com/project/meshtastic-android) ja logi sisse või loo tasuta konto.
 2. **Vali keel.** Vali olemasolev keel või taotle uut, avades [GitHubi probleemi](https://github.com/meshtastic/Meshtastic-Android/issues/new).
 3. **Tõlgi stringe.** Crowdin kuvab ingliskeelse allika vasakul ja sinu tõlke paremal. Tõlki iga string ja salvesta.
-4. **Review context.** Many strings include screenshots or context comments — check these to understand where the text appears in the app.
-5. **Submit.** Approved translations are automatically merged into the next release.
+4. **Review context.** Many strings include screenshots or context comments — check these to understand where the text appears in the app. Approved translations are automatically merged into the next release.
 
 > 💡 \*\*Vihje." Hoia tõlked lühikesed. UI strings often appear in buttons, chips, or narrow columns. Kui tõlge on oluliselt pikem kui ingliskeelne originaal, kaaluge lühendamist kohtades, kus tähendus jääb selgeks.
-
----
 
 ## Lisa uus keel
 
@@ -47,8 +40,6 @@ Kui teie keelt Crowdinis veel pole:
 1. Ava probleem [GitHubis](https://github.com/meshtastic/Meshtastic-Android/issues/new) ja taotle uut lokaati.
 2. Hooldaja lisab keele Crowdinile ja seadistab faili `crowdin.yml`.
 3. Pärast lisamist saad kohe tõlkima hakata.
-
----
 
 ## How Translations Are Organized
 
@@ -82,29 +73,23 @@ docs/
 
 Lokaadikaustad kasutavad Androidi ressursikonventsiooni `{lang}-r{REGION}` (nt `fr-rFR`, `de-rDE`, `ja-rJP`), mis vastab rakenduste stringide jaoks kasutatavatele `values-*` kataloogidele.
 
-Rakendus valib automaatselt õige lokaadi seadme **Keele ja piirkonna** sätete põhjal.
-
----
+The app automatically selects the correct locale based on your phone's **Language & Region** settings.
 
 ## Translation Guidelines
 
 - **Ära tõlgi** tehnilisi termineid nagu "LoRa", "MQTT", "BLE", "TAK", "SNR", or "RSSI" — need on universaalsed.
 - **Jäta kohatäited puutumata.** Stringid nagu `%1$s` või `%d` täidetakse käitusajal. Do not remove or reorder them unless the grammar of your language requires it.
 - **Match tone.** The app uses a friendly, direct voice. Avoid overly formal language.
-- **Testi võimalusel.** Vaheta seadme keelt ja ava rakendus, et näha, kuidas tõlked kontekstis välja näevad.
+- **Test if possible.** Switch your phone's language and open the app to see how translations look in context.
 
----
-
-## Questions?
+## Küsimusi?
 
 Kui on küsimusi konkreetse stringi konteksti kohta või vajad abi alustamiseks, ava arutelu lehel [Meshtastic GitHub Discussions](https://github.com/orgs/meshtastic/discussions).
 
-Tänan teid Meshtasticu haardeala laiendamise eest!
+Thank you for helping expand the reach of Meshtastic.
 
 ## Seotud teemad
 
 - [Units & Locale](units-and-locale) — how the app picks number, date, and unit formats for your region
 - [Help & Documentation](help-and-docs) — the in-app docs browser these pages are published to
 - [Onboarding](onboarding) — where a new user first meets the translated strings
-
----

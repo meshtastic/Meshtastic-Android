@@ -163,7 +163,6 @@
     <string name="config_lora_region_summary">A régió, ahol a rádiókat használni fogja.</string>
     <string name="config_network_eth_enabled_summary">Az Ethernet engedélyezése letiltja az alkalmazáshoz tartozó Bluetooth-kapcsolatot. A TCP csomópont-kapcsolatok Apple eszközökön nem érhetők el.</string>
     <string name="config_network_udp_enabled_summary">Csomagok sugárzásának engedélyezése UDP-n a helyi hálózaton.</string>
-    <string name="config_network_wifi_enabled_summary">A Wi-Fi engedélyezése letiltja az alkalmazáshoz tartozó Bluetooth-kapcsolatot.</string>
     <string name="config_position_broadcast_secs_summary">A maximális időköz, amely pozícióközvetítés nélkül eltelhet egy csomópontnál.</string>
     <string name="config_position_broadcast_smart_minimum_distance_summary">Az intelligens pozícióközvetítéshez figyelembe vett minimális távolságváltozás (méterben).</string>
     <string name="config_position_broadcast_smart_minimum_interval_secs_summary">A pozíciófrissítések legnagyobb gyakorisága, ha a minimális távolságváltozás teljesült.</string>
@@ -470,6 +469,9 @@
     <string name="map_download_errors">A letöltés %1$d hibával fejeződött be</string>
     <string name="map_download_region">Letöltési régió</string>
     <string name="map_filter">Térkép szűrő\n</string>
+    <string name="map_filter_all_roles">Összes</string>
+    <string name="map_filter_display_title">Kijelző</string>
+    <string name="map_filter_nodes_title">Csomópontok</string>
     <string name="map_offline_manager">Offline kezelő</string>
     <string name="map_purge_fail">SQL gyorsítótár kiürítése sikertelen, a részleteket lásd a logcat-ben</string>
     <string name="map_purge_success">SQL gyorsítótár kiürítve %1$s számára</string>
@@ -937,14 +939,8 @@
     <string name="waypoint_received">Útvonalpont érkezett: %1$s</string>
     <string name="weight">Súly</string>
     <!-- WIFI -->
-    <string name="wifi_config">Wi-Fi beállítások</string>
-    <string name="wifi_enabled">WiFi engedélyezve</string>
-    <string name="wifi_ip">Wifi IP:</string>
     <string name="wifi_provision_success_ip_address">IP cím</string>
     <string name="wifi_provision_success_username">Felhasználónév</string>
-    <string name="wifi_qr_code_error">Érvénytelen WiFi-hitelesítő QR-kód formátum</string>
-    <string name="wifi_qr_code_scan">WiFi QR kód szkennelése</string>
-    <string name="wifi_rssi_threshold_defaults_to_80">WiFi RSSI küszöbérték (alapértelmezés: -80)</string>
     <!-- WIND -->
     <string name="wind">Szél</string>
     <!-- WRITE -->

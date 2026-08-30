@@ -132,6 +132,7 @@
     <string name="lora_config">إعدادات لورا</string>
     <string name="low_battery_title">البطارية منخفضه: %1$s</string>
     <!-- MAP -->
+    <string name="map_filter_display_title">إعدادات الشاشة</string>
     <string name="map_select_download_region">حدد جهة التحميل</string>
     <string name="map_start_download">ابدأ التحميل</string>
     <string name="max">الأعلى</string>

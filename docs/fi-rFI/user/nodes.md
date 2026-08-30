@@ -2,7 +2,7 @@
 title: Laitteet
 parent: Käyttöopas
 nav_order: 4
-last_updated: 2026-08-27
+last_updated: 2026-08-29
 description: Selaa, suodata ja lajittele verkon radioita — tarkastele tietoja, signaalin laatua, rooleja ja pikatoimintoja.
 aliases:
   - radiolista
@@ -13,7 +13,7 @@ aliases:
 
 # Laitteet
 
-Radiot-näyttö näyttää kaikki verkossasi näkyvät laitteet.
+Radionäkymässä luetellaan kaikki mesh-verkossasi näkyvät radiot.
 
 ## Radiolista
 
@@ -28,13 +28,13 @@ Radioluettelo näyttää kaikki radiot, joista radiosi on vastaanottanut tietoja
 
 ### Radion tilailmaisimet
 
-| Tunniste     | Tarkoitus                              |
-| ------------ | -------------------------------------- |
-| 🟢 Verkossa  | Radio kuultu viimeisen 2 tunnin aikana |
-| Ei verkkossa | Radiosta ei ole kuultu yli 2 tuntiin   |
-| ⭐ Suosikki   | Käyttäjän suosikiksi merkitsemä radio  |
+| Tunniste     | Tarkoitus                                               |
+| ------------ | ------------------------------------------------------- |
+| 🟢 Verkossa  | Radio kuultu viimeisen 2 tunnin aikana                  |
+| Ei verkkossa | Radiosta ei ole kuultu yli 2 tuntiin                    |
+| ⭐ Suosikki   | Radio, jonka olet merkinnyt suosikiksi. |
 
-Radio katsotaan **verkossa olevaksi**, jos siitä on kuultu viimeisten 2 tunnin aikana. Muussa tapauksessa se katsotaan **poissa verkosta** olevaksi — erillistä "poissa"-tilaa ei ole.
+Erillistä "poissa"-tilaa ei ole.
 
 ### Radion roolit
 
@@ -42,7 +42,7 @@ Radioille voidaan määrittää erilaisia rooleja, jotka vaikuttavat niiden toim
 
 | Rooli                | Kuvaus                                                                                                                                                                         |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Client               | Tavallinen loppukäyttäjän laite                                                                                                                                                |
+| Client               | Tavallinen käyttäjäradio                                                                                                                                                       |
 | Client Base          | Käsittelee suosikkiradioiden liikenteen Router Late -prioriteetilla, kaiken muun liikenteen Client -prioriteetilla                                                             |
 | Client Mute          | Vastaanottaa viestejä, mutta ei lähetä niitä edelleen                                                                                                                          |
 | Client Hidden        | Kuten Client Mute, mutta piilotetaan myös radioluettelosta                                                                                                                     |
@@ -60,15 +60,15 @@ Radioille voidaan määrittää erilaisia rooleja, jotka vaikuttavat niiden toim
 
 Useimpien käyttäjien kannattaa käyttää oletusarvoista **Client**-roolia. Harkitse muuta roolia seuraavissa tilanteissa:
 
-- **Router** — Sinulla on radio kiinteässä, korkealla sijaitsevassa paikassa, jossa on luotettava virransyöttö (katto, mäki). Routerit pysyvät jatkuvasti hereillä välittääkseen muiden viestejä ja ovat tärkeitä verkon peittoalueen laajentamisessa. Älä käytä **Router**-roolia akkukäyttöisissä käsilaitteissa.
+- **Router** — Sinulla on radio kiinteässä, korkealla sijaitsevassa paikassa, jossa on luotettava virransyöttö (katto, mäki). Routerit pysyvät jatkuvasti hereillä välittääkseen muiden viestejä ja ovat tärkeitä verkon peittoalueen laajentamisessa. Älä käytä Reititin-roolia akkukäyttöisissä käsiradioissa.
 - **Router Late** — Infrastruktuuriradio, joka lähettää paketit uudelleen kerran, mutta vasta kaikkien muiden reititystilojen jälkeen. Tarjoaa lisäpeittoa paikallisille ryhmille kilpailematta ensisijaisten Routerien kanssa.
 - **Client Base** — Käsittelee suosikkiradioihisi menevän tai niistä tulevan liikenteen Router Late -prioriteetilla (varmistaen näille viesteille ylimääräisen välityspeiton), samalla kun kaikki muu käsitellään tavallisen Client-roolin tavoin.
-- **Client Mute** — Voit vastaanottaa verkkoliikennettä, mutta et osallistu viestien välittämiseen. Hyödyllinen vain valvontaan käytettäville laitteille tai ruuhkien vähentämiseen tiheästi rakennetuilla alueilla.
-- **Tracker** — Valvomaton laite, jonka ainoa tarkoitus on lähettää GPS-sijaintiaan (esim. ajoneuvo, lemmikki tai omaisuus). Nukkuu lähetysten välillä akun säästämiseksi.
-- **Sensor** — Valvomaton laite, joka raportoi ympäristötelemetriaa (lämpötila, kosteus, ilmanlaatu). Samanlainen virrankulutusprofiili kuin Tracker-roolissa.
+- **Client Mute** — Voit vastaanottaa verkkoliikennettä, mutta et osallistu viestien välittämiseen. Hyödyllinen vain kuunteluun tarkoitetuissa radioissa tai ruuhkan vähentämiseen tiheillä alueilla.
+- **Tracker** "seurantalaite" — miehittämätön radio, jonka ainoa tehtävä on lähettää GPS-sijaintiaan (esimerkiksi ajoneuvo, henkilö tai muu kohde). Nukkuu lähetysten välillä akun säästämiseksi.
+- **Anturi** — miehittämätön radio, joka lähettää ympäristötelemetriaa (lämpötila, ilmankosteus, ilmanlaatu). Samanlainen virrankulutusprofiili kuin Tracker-roolissa.
 - **TAK / TAK Tracker** — Tarvitaan vain yhteensopivuuteen ATAK-/WinTAK-järjestelmien kanssa. Katso [TAK-integraatio](tak) lisätietoja varten.
 
-> 💡 **Vinkki:** Verkko toimii parhaiten, kun suurin osa radioista käyttää **Client**- tai **Router**-roolia. Liian suuri määrä Client Mute -rooleja heikentää verkon toimintavarmuutta, kun taas liian suuri määrä Router-rooleja tiheässä verkossa voi aiheuttaa ruuhkaa. Hyvä nyrkkisääntö on yksi Router jokaista 5–10 Client-roolia kohden alueellasi.
+> 💡 **Vinkki:** Verkko toimii parhaiten, kun suurin osa radioista käyttää **Client**- tai **Router**-roolia. Liian suuri määrä Client Mute (mykistetty) -radioita heikentää mesh-verkon vikasietoisuutta. Liian useat Router -roolin radiot tiheällä alueella voivat aiheuttaa ruuhkaa. Hyvä nyrkkisääntö on yksi Router jokaista 5–10 Client-roolia kohden alueellasi.
 
 ### Salausilmaisimet
 
@@ -87,7 +87,7 @@ Radiot näyttävät nimensä vieressä salauksen tilaa kuvaavat kuvakkeet:
 Radioluettelosta voit:
 
 - **Napauttaa** radiota avataksesi sen tietosivun
-- **Pitkä painallus** pikatoimintoja varten:
+- **Kosketa ja pidä painettuna** nähdäksesi pikatoiminnot:
   - Merkitse tai poista suosikki
   - Mykistä tai poista mykistys ilmoituksista
   - Lähetä yksityisviesti
@@ -103,14 +103,14 @@ Kirjoita hakukenttään suodattaaksesi radioita nimen tai lyhyen nimen perusteel
 
 ### Suodatusvalinnat
 
-| Suodatus                              | Kuvaus                                                                                                                                                                                            |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Vain verkossa olevat**              | Näytä vain radiot, joista on kuultu viimeisten 2 tunnin aikana                                                                                                                                    |
-| **Vain suorat**                       | Näytä vain radiot, joihin on suora yhteys (ei välitetty yhteys)                                                                                                                |
-| **Näytä tuntemattomat**               | Show nodes that haven't sent user info yet. **On by default**, so a node heard before its info arrives stays visible and messageable; these carry a badge marking them incomplete |
-| **Ohita infrastruktuurilaitteet**     | Hide infrastructure-role nodes (Router, Router Late, Client Base, and legacy Repeater nodes)                                                                                   |
-| **Rajaa MQTT pois**                   | Piilottaa radiot, joista on kuultu vain MQTT-internetsillan kautta                                                                                                                                |
-| **Näytä vain huomioimattomat radiot** | Näytä radiot, jotka olet aiemmin ohittanut tai mykistänyt                                                                                                                                         |
+| Suodatus                              | Kuvaus                                                                                                                                                                                                                                                                                |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Vain verkossa olevat**              | Näytä vain radiot, joista on kuultu viimeisten 2 tunnin aikana                                                                                                                                                                                                                        |
+| **Vain suorat**                       | Näytä vain radiot, joihin on suora yhteys (ei välitetty yhteys)                                                                                                                                                                                                    |
+| **Näytä tuntemattomat**               | Näytä radiot, jotka eivät ole vielä lähettäneet käyttäjätietoja. **Oletuksena käytössä**, joten radio, joka on kuultu ennen käyttäjätietojensa saapumista, pysyy näkyvissä ja sille voi lähettää viestejä. Tällaiset radiot merkitään keskeneräisiksi |
+| **Ohita infrastruktuurilaitteet**     | Piilota infrastruktuurirooleissa olevat radiot (Router, Router Late, Client Base ja vanhat Repeater radiot)                                                                                                                                                        |
+| **Rajaa MQTT pois**                   | Piilottaa radiot, joista on kuultu vain MQTT-internetsillan kautta                                                                                                                                                                                                                    |
+| **Näytä vain huomioimattomat radiot** | Näytä ohittamasi radiot                                                                                                                                                                                                                                                               |
 
 ### Lajitteluvaihtoehdot
 
@@ -132,7 +132,7 @@ Avaa pylväskaavio, joka näyttää radioiden määrän kullakin hyppyetäisyyde
 
 Radion napauttaminen avaa tietonäkymän, jossa on kattavat tiedot. Katso [Radion mittarit](node-metrics) saadaksesi täydelliset tiedot mittareista ja telemetriasta.
 
-![Radion tietonäkymä](../../assets/screenshots/nodes_node_list.png)
+![Radioluettelo, jossa näkyvät kunkin radion signaalin laatu ja viimeisin kuulemisaika](../../assets/screenshots/nodes_node_list.png)
 
 Tietonäyttö sisältää laitetiedot, sijainnin ja toimintopainikkeet:
 
@@ -159,8 +159,5 @@ Kaikkien linkkien selattava hakemisto löytyy myös kohdasta **Asetukset → Ohj
 - [Radion mittarit](node-metrics) — yksityiskohtaiset telemetriakoontinäytöt jokaiselle radiolle
 - [Viestit ja kanavat](messages-and-channels) — lähetä yksityisviesti radiolle
 - [Kartta ja reittipisteet](map-and-waypoints) — tarkastele radioiden sijainteja kartalla
-- [Local Mesh Discovery](discovery) — traceroute and neighbor info for topology exploration
+- [Paikallinen mesh-verkon etsintä](discovery) — reitiselvitys ja naapuritiedot verkon rakenteen hahmottamiseen
 - [Signaalimittari](signal-meter) — ymmärrä, mitä signaalipalkit tarkoittavat
-
----
-

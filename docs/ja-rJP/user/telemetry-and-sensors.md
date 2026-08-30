@@ -2,7 +2,7 @@
 title: テレメトリとセンサー
 parent: User Guide
 nav_order: 9
-last_updated: 2026-08-27
+last_updated: 2026-08-29
 description: メッシュ上のセンサーデータ。対応する環境・大気質・電力センサーと、設定・表示のガイドを説明します。
 aliases:
   - sensors
@@ -13,11 +13,7 @@ aliases:
 
 # テレメトリとセンサー
 
-Meshtastic のノードは、メッシュネットワーク全体でセンサーデータを収集・共有できます。
-
-## 概要
-
-テレメトリを使うと、センサーを搭載したノードが、環境・電力・デバイスの状態の情報をブロードキャストできます。 このデータはノードの詳細画面で確認でき、時系列で記録することもできます。
+Meshtastic のノードは、メッシュネットワーク全体でセンサーデータを収集・共有できます。 Telemetry allows nodes equipped with sensors to broadcast environmental, power, and device health information, visible on the node detail screen and logged over time.
 
 ## デバイステレメトリ
 
@@ -47,11 +43,11 @@ Meshtastic のノードは、メッシュネットワーク全体でセンサー
 
 ### 大気質
 
-| センサー     | メトリクス                                              | 備考                                                                                                                                        |
-| -------- | -------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| BME680   | ガス抵抗／IAQ                                           | 揮発性有機化合物                                                                                                                                  |
-| PMSA003I | PM1.0, PM2.5, PM10 | 粒子状物質                                                                                                                                     |
-| SEN55    | PM, Temp, Humidity                                 | Multi-sensor. Its NOx and VOC indices are recorded and included in a CSV export, but are not yet shown as cards or charts |
+| センサー     | メトリクス                                              | 備考                                                                                                                                    |
+| -------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| BME680   | ガス抵抗／IAQ                                           | 揮発性有機化合物                                                                                                                              |
+| PMSA003I | PM1.0, PM2.5, PM10 | See [Air Quality Metrics](#air-quality-metrics)                                                                                       |
+| SEN55    | PM, Temp, Humidity                                 | Multi-sensor. Its NOx and VOC indices are recorded and included in a CSV export, but are not shown as cards or charts |
 
 ### Soil
 
@@ -79,7 +75,7 @@ INA シリーズの電力センサーを搭載したノードは、次を報告�
 | 電圧    | Per-channel voltage reading     |
 | 電流    | Per-channel current draw, in mA |
 
-Up to three channels are reported (ch1–ch3), and each can be given its own label — Solar or Battery, say — from the node detail screen. There is no separate wattage reading; the app charts voltage and current, and does not compute power from them.
+Up to three sensor channels (ch1–ch3) are reported, and each can be given its own label — Solar or Battery, say — from the node detail screen. There is no separate wattage reading; the app charts voltage and current, and does not compute power from them.
 
 リモートノードの太陽光充電やバッテリーの状態を監視するのに便利です。
 
@@ -93,14 +89,14 @@ Up to three channels are reported (ch1–ch3), and each can be given its own lab
    - **Air Quality Metrics** — particulate and CO₂ readings
    - **Power Metrics** — the per-channel voltage and current readings
 
-   Environment metrics additionally have an on-screen toggle and a Fahrenheit toggle for the
-   device's own display.
+   Environment metrics additionally have toggles to show the readings on the radio's own screen,
+   and to show them in Fahrenheit.
 
 ### Choosing an Interval
 
-> 💡 **Tip:** These are nominal values, not hard schedules. On a congested mesh the firmware
-> automatically backs off to longer intervals based on how many nodes are online, so you do not
-> need to hand-tune them for mesh size. Lengthen them deliberately only to save battery.
+These are nominal values, not hard schedules. On a congested mesh the firmware automatically
+backs off to longer intervals based on how many nodes are online, so you do not need to
+hand-tune them for mesh size. Lengthen them deliberately only to save battery.
 
 ## 大気質メトリクス
 
@@ -129,7 +125,7 @@ CO₂ の測定値は、深刻度に応じて色分けされます（良好 → 
    - 大気質メトリクス（PM／CO₂ センサーがある場合）
 3. 履歴グラフで、時系列の傾向を確認できます。
 
-![テレメトリの操作](../../assets/screenshots/node-metrics_telemetric_actions.png)
+![Node detail screen with the telemetry chart action menu open](../../assets/screenshots/node-metrics_telemetric_actions.png)
 
 ## トラブルシューティング
 
@@ -142,6 +138,3 @@ CO₂ の測定値は、深刻度に応じて色分けされます（良好 → 
 - [ノードメトリクス](node-metrics)：ノードの詳細画面でテレメトリデータを表示
 - [設定：モジュールと管理](settings-module-admin)：テレメトリモジュールの設定
 - [単位とロケール](units-and-locale)：温度と気圧の表示単位
-
----
-

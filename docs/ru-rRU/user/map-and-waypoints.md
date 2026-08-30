@@ -2,7 +2,7 @@
 title: Карта и путевые точки
 parent: Руководство пользователя
 nav_order: 6
-last_updated: 2026-08-27
+last_updated: 2026-08-29
 description: Просматривайте расположение нод на карте, создавайте и делитесь путевыми точками, управляйте слоями карты и планировщиком участков, а также контролируйте передачу геоданных и приватность.
 aliases:
   - map
@@ -35,20 +35,20 @@ aliases:
 
 - **Масштаб** — используйте щипок или кнопки +/-
 - **Перемещение** — перетаскивайте карту для исследования
-- **Центрирование** — нажмите кнопку местоположения, чтобы отцентрировать карту на твоё местоположение
+- **Center** — tap the location button to center on your position
 - **Нажатие на ноду** — коснитесь маркера ноды для просмотра подробностей
 
 Плавающая панель инструментов предоставляет быстрый доступ к компасу, переключению слоёв, фильтрам нод, обновлению и отслеживанию местоположения. Нажмите на компас, чтобы сориентировать карту на север, или нажмите кнопку местоположения, чтобы отцентрироваться на твоей текущей позиции.
 
-![Элементы управления картой](../../assets/screenshots/map_controls_overlay.png)
+![Map screen with the floating toolbar open, showing compass, layers, and location controls](../../assets/screenshots/map_controls_overlay.png)
 
 ## Путевые точки
 
-Путевые точки — это общие географические точки интереса, которые видят все участники mesh-сети.
+Waypoints are shared points of interest, visible to everyone the waypoint is sent to.
 
 ### Создание путевой точки
 
-1. Нажмите и удерживайте карту в нужном месте.
+1. Touch & hold the map at the desired location.
 2. Введите имя и, при желании, описанье.
 3. Выберите значок/эмодзи для путевой точки.
 4. Нажмите **"Отправить"**, чтобы поделиться с mesh-сетью.
@@ -57,14 +57,14 @@ aliases:
 
 ### Свойства путевой точки
 
-| Свойство        | Описание                                                                 |
-| --------------- | ------------------------------------------------------------------------ |
-| Имя             | Короткий идентификатор (не более 29 символов)         |
-| Описание        | Необязательное более длинное описание                                    |
-| Значок          | Визуальный эмодзи маркер на карте                                        |
-| Заблокировано   | Если заблокировано, только создатель может изменить или удалить          |
-| Истечение срока | Необязательная дата и время автоматического удаления                     |
-| Геозона         | Необязательная зона оповещения о входе/выходе — см. ниже |
+| Свойство        | Описание                                                                       |
+| --------------- | ------------------------------------------------------------------------------ |
+| Имя             | Короткий идентификатор (не более 29 символов)               |
+| Описание        | Необязательное более длинное описание                                          |
+| Значок          | Визуальный эмодзи маркер на карте                                              |
+| Заблокировано   | Если заблокировано, только создатель может изменить или удалить                |
+| Истечение срока | Необязательная дата и время автоматического удаления                           |
+| Геозона         | Optional enter/exit alert area — see [Waypoint Geofences](#waypoint-geofences) |
 
 ### Истечение срока путевой точки
 
@@ -89,16 +89,16 @@ aliases:
 
 - Нажмите на путевую точку на карте, чтобы просмотреть её сведения и координаты
 - Редактируйте или удаляйте созданные тобою путевые точки
-- **Заблокированные путевые точки** не могут быть изменены или удалены другими нодами — только создатель может их редактировать
+- **Locked waypoints** cannot be modified or deleted by other mesh members — only the creator can change them
 - Незаблокированные путевые точки может редактировать любой участник mesh-сети
 
 ## Слои карты
 
-Нажмите на значок слоёв на карте, чтобы открыть **"Управление слоями карты"**, где можно импортировать собственные слои в формате `.kml`, `.kmz` или GeoJSON — либо открыв файл с помощью Meshtastic, либо передав его в приложение из другой программы. Импортированные слои отображаются в списке с переключателем для показа/скрытия каждого и возможностью удалить слой. Доступно как в Google Play, так и в F-Droid сборках.
+Tap the layers icon on the map to open **Manage Map Layers**. It imports your own overlays in `.kml`, `.kmz`, or GeoJSON format — including KMZ ground overlays (georeferenced images, such as exported topo or aerial tiles), which drape at their stated bounds. Add one by picking a file with **Add Layer**, opening a file with Meshtastic, or sharing it into the app from another app. Импортированные слои отображаются в списке с переключателем для показа/скрытия каждого и возможностью удалить слой. This works on the Google Play build, the F-Droid build, and **Desktop**, which shares the same layer store and file picker.
 
 ### Планировщик участков
 
-**Планировщик участков** оценивает радиочастотное покрытие для передатчика и отображает его на карте в виде цветового наложения. Откройте его с панели управления картой или со страницы сведений о ноде через **"Оценку покрытия"** (отображается только для нод с известным местоположением). Настройте передатчик (местоположение, частота, мощность передачи, усиление и высота антенны), приёмник (чувствительность, высота) и параметры симуляции (максимальная дальность, рельеф высокого разрешения, цветовая палитра), затем запустите расчёт. Как и слои карты, планировщик участков работает как в Google Play, так и в F-Droid сборках.
+**Планировщик участков** оценивает радиочастотное покрытие для передатчика и отображает его на карте в виде цветового наложения. Откройте его с панели управления картой или со страницы сведений о ноде через **"Оценку покрытия"** (отображается только для нод с известным местоположением). Настройте передатчик (местоположение, частота, мощность передачи, усиление и высота антенны), приёмник (чувствительность, высота) и параметры симуляции (максимальная дальность, рельеф высокого разрешения, цветовая палитра), затем запустите расчёт. Like map layers, Site Planner works on both the Google Play and F-Droid builds, where the finished estimate is drawn on the map as a coverage overlay. On **Desktop** the same form is shown but the planner opens in your browser; to bring the estimate onto the map, use the planner's **Export › GeoJSON** and add the downloaded file under **Manage Map Layers**.
 
 ## Передача геоданных
 
@@ -118,11 +118,43 @@ aliases:
 
 ## Источники карт
 
-Основная карта зависит от варианта сборки: сборки для **Google Play** используют Google Maps, а сборки **F-Droid** и настольные — OpenStreetMap. Поверх основной карты доступны дополнительные источники плиток в качестве наложений или альтернатив:
+Every build offers a base map picker from the map toolbar. **Google Play** builds open on Google's own
+map types; **F-Droid** and **Desktop** builds open on MapLibre's vector styles. Further down the base map
+picker, all three offer the same raster base maps:
 
-- Satellite imagery — on both Google Play and F-Droid
-- Offline tiles — **F-Droid only**. Download map areas for offline use through OSMdroid's tile
-  cache. Google Play and Desktop builds have no offline download
+| Base map                              | Заметки                                                           |
+| ------------------------------------- | ----------------------------------------------------------------- |
+| Normal / Satellite / Terrain / Hybrid | Google Play only — Google's own map types                         |
+| Liberty                               | Default on F-Droid and Desktop. Vector street map |
+| Positron                              | Low-contrast vector map; keeps node markers legible over it       |
+| Темная                                | Vector map suited to dark themes                                  |
+| OpenStreetMap                         | Classic raster street tiles                                       |
+| OpenTopoMap                           | Raster topographic                                                |
+| USGS Topo / USGS Imagery              | US coverage only                                                  |
+| Esri Topo / Esri Imagery              | Topographic and satellite imagery                                 |
+
+Overlays can be toggled on top of any base map, from the layers sheet:
+
+- **Weather radar** — NOAA NEXRAD reflectivity (US coverage)
+- **Hillshade** — terrain relief, on **F-Droid** and **Desktop** only. Useful for understanding why a
+  link fails, since LoRa range is limited by terrain
+
+### Adding your own tile source
+
+Any XYZ tile endpoint can be added as a base map, on every flavor and on desktop. Open **Manage custom
+tile sources** at the foot of the base map picker and paste a URL template using `{z}`, `{x}` and `{y}`
+— plus `{s}` if the provider uses rotating subdomains. A national mapping service, for example:
+
+```
+https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg
+```
+
+Tiles are cached on disk, so panning does not re-download what you were just looking at.
+
+On **Android**, the same screen also imports a local `.mbtiles` archive for fully offline use.
+
+Offline area downloads are **F-Droid only**: cache the visible region from the layers sheet.
+**Google Play** builds import pre-made MBTiles files instead, and **Desktop** has neither.
 
 ## Связанные темы
 
@@ -130,6 +162,3 @@ aliases:
 - [Метрики нод](node-metrics) — качество сигнала и история местоположения для отдельных нод
 - [Local Mesh Discovery](discovery) — traceroute and neighbor info for understanding mesh topology
 - [Единицы измерения и регион](units-and-locale) — форматы отображения расстояний и координат
-
----
-

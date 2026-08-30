@@ -151,6 +151,8 @@
     <string name="lora_config">LoRa</string>
     <string name="lux">Люкс</string>
     <!-- MAP -->
+    <string name="map_filter_all_roles">Усе</string>
+    <string name="map_filter_display_title">Экран</string>
     <string name="map_type_hybrid">Гібрыд</string>
     <string name="map_type_normal">Звычайная</string>
     <string name="map_type_satellite">Спадарожнік</string>
@@ -307,7 +309,6 @@
     <string name="username">Імя карыстальніка</string>
     <string name="via_mqtt">праз MQTT</string>
     <!-- WIFI -->
-    <string name="wifi_ip">Wifi IP:</string>
     <string name="wifi_provision_success_ip_address">IP-адрас</string>
     <string name="wifi_provision_success_username">Імя карыстальніка</string>
     <!-- WIND -->

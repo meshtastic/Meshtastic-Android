@@ -239,6 +239,8 @@
     <string name="map_download_complete">Download voltooid!</string>
     <string name="map_download_errors">Download voltooid met %1$d fouten</string>
     <string name="map_download_region">Download regio</string>
+    <string name="map_filter_all_roles">Alles</string>
+    <string name="map_filter_display_title">Weergave</string>
     <string name="map_offline_manager">Offline Manager</string>
     <string name="map_purge_fail">SQL cache verwijderen mislukt, zie logcat voor details</string>
     <string name="map_purge_success">SQL cache gewist voor %1$s</string>
@@ -499,12 +501,8 @@
     <string name="waypoint_received">Ontvangen waypoint: %1$s</string>
     <string name="weight">Gewicht</string>
     <!-- WIFI -->
-    <string name="wifi_enabled">Wifi ingeschakeld</string>
     <string name="wifi_provision_success_ip_address">IP-adres</string>
     <string name="wifi_provision_success_username">Gebruikersnaam</string>
-    <string name="wifi_qr_code_error">Ongeldige WiFi Credential QR-code formaat</string>
-    <string name="wifi_qr_code_scan">Scan WiFi QR-code</string>
-    <string name="wifi_rssi_threshold_defaults_to_80">WiFi RSSI drempelwaarde (standaard -80)</string>
     <!-- WIND -->
     <string name="wind">Wind</string>
     <!-- WRITE -->

@@ -2,7 +2,7 @@
 title: Kohalik kärgvõrgu avastaja
 parent: Kasutusjuhend
 nav_order: 12
-last_updated: 2026-08-28
+last_updated: 2026-08-29
 description: Avasta oma kärgvõrku – kohalik kärgvõrgu avastaja skanner, traceroute'i teed, naabri-kaardid ja sõlmede avastamise tööriistad.
 aliases:
   - discovery
@@ -23,15 +23,13 @@ The app offers two complementary approaches:
 - **Kohalik kärgvõrgu avastaja (skanner)** – automaatne režiim, mis perioodiliselt skaneerib ühendatud raadiol läbi erinevate LoRa eelhäälestuste, kuulab igaüht neist ja järjestab, milline eelhäälestus sinu asukohas kõige paremini toimib.
 - **Manuaalne uurimine** – traceroute, naabri info ja sõlmede loend, mida saate igal ajal kasutada konkreetsete teede ja topoloogia uurimiseks.
 
----
-
 ## Kohalik kärgvõrgu avastaja (skanner)
 
-Kohalik kärgvõrdu avastaja on spetsiaalne skaneerimisrežiim, mis aitab leida oma asukoha jaoks parima LoRa modemi eelseadistuse ja näha, millised sõlmed on igal eelseadistusel aktiivsed. See kerib ühendatud raadio läbi ühe või mitu valitud eelseadet, kuulab (või "ootab") igaüht neist määratud aja jooksul pakettide kogumiseks ning seejärel analüüsib ja järjestab tulemused.
+Kohalik kärgvõrdu avastaja on spetsiaalne skaneerimisrežiim, mis aitab leida oma asukoha jaoks parima LoRa modemi eelseadistuse ja näha, millised sõlmed on igal eelseadistusel aktiivsed. It cycles your connected radio through one or more presets you choose, dwells on each one — listens for a set time — to collect packets, then analyzes and ranks the results.
 
 Ava see menüüst **Seaded → Lisateave → Kohaliku võrgu tuvastamine**. Töölaual on sellel omaette kirje **Seaded → Kohaliku võrgu avastamine**.
 
-> ℹ️ **Note:** Discovery temporarily changes your radio's LoRa settings while it scans, then restores your original configuration when it finishes. Skannimise käivitamiseks peab seade olema ühendatud.
+> ℹ️ **Note:** Discovery temporarily changes your radio's LoRa settings while it scans, then restores your original configuration when it finishes. Your radio must be connected to run a scan.
 
 ### Skannimise seadistamine
 
@@ -45,7 +43,7 @@ Before starting, configure these controls:
 
 The **Start** button stays disabled — with an explanation of why — until the scan can run. Common reasons it's disabled:
 
-- The device is **not connected**.
+- The radio is **not connected**.
 - Skannimiseks pole **ühtegi eelseadet** valitud.
 - Valitud eelseadistus kasutab **2,4 GHz** sagedust, mida sinu riistvara ei toeta.
 
@@ -88,11 +86,9 @@ Tulemustest saadaolevad lisafunktsioonid:
 
 > 💡 **Tip:** On **Google Play** builds, Discovery can generate an on-device AI summary (Gemini Nano) of your results. F-Droid builds always use the algorithmic summary — the proprietary ML Kit dependency is deliberately excluded from that flavor — so you get a readable interpretation of the scan either way.
 
----
-
 ## Kärgvõrgu majakas
 
-Kärgvõrgu majakas võimaldab sõlmedel kutsuda teisi oma võrguga liituma. Majakasõlm saadab perioodiliselt kutset – valikuliselt reklaamides kanalit, piirkonda ja modemi eelseadistust –, mida lähedalasuvad seadmed kuulevad juba enne konfiguratsiooni jagamist.
+Kärgvõrgu majakas võimaldab sõlmedel kutsuda teisi oma võrguga liituma. A beaconing node periodically broadcasts an invitation — optionally advertising a channel, region, and modem preset — that nearby nodes can hear even before they share a configuration.
 
 Konfigureeri see menüüs **Seaded → Mooduli konfiguratsioon → Kärgvõrgu majakas**:
 
@@ -107,24 +103,20 @@ Received invitations appear as **Mesh invitations** cards on the Discovery scree
 
 Majakate poolt reklaamitud kanalid kuvatakse skannimise seadistuses ka **Majakakanalitena** – valige üks, et see skannimise sihtmärgina lisada.
 
----
-
 ## Manual Exploration
 
-The tools below are available at any time from the node list and node detail screens. Use them to investigate specific paths and build a topology picture, alongside or instead of a full scan.
+The following tools are available at any time from the node list and node detail screens. Use them to investigate specific paths and build a topology picture, alongside or instead of a full scan.
 
-## Marsruudi
+### Marsruudi
 
 Traceroute näitab täpset teed, mida sõnum sõlmest mis tahes teise kärgvõrgu sõlme kulgeb. See on kõige kasulikum tööriist ühenduvusprobleemide tõrkeotsinguks.
 
-### Traceroute'i käivitamine
+#### Traceroute'i käivitamine
 
 1. Mine valikuni **Sõlmed** ja puuduta sõlme, mida soovid jälgida.
-2. Sõlme üksikasjade ekraanil puuduta **Traceroute**.
-3. Rakendus saadab traceroute'i päringu ja ootab vastust.
-4. Tulemused kuvatakse iga hüppe kohta, koos signaali kvaliteediga igal sammul.
+2. Sõlme üksikasjade ekraanil puuduta **Traceroute**. The app sends the request; results show each hop with signal quality.
 
-### Reading the Results
+#### Reading the Results
 
 Traceroute'i tulemus näeb välja selline:
 
@@ -143,27 +135,25 @@ Iga hüpe näitab vahendussõlme, mis sõnumi edastas. The SNR and RSSI values a
 
 > 💡 **Vihje:** Käivita traceroute'i mitu korda mõne minuti tagant. If the path changes, your mesh has redundant routes — a sign of a well-connected network.
 
-### Veaotsing koos Traceroute
+#### Veaotsing koos Traceroute
 
 - **"Marsruuti ei leitud"** — Sihtsõlm võib olla võrguühenduseta, leviulatusest väljas või teisel kanalil. Kontrolli, et mõlemad sõlmed jagaksid vähemalt ühte kanalit sama krüpteerimisvõtmega.
 - **Traceroute aegus** — Tee võib olla liiga pikk (ületab hüppete limiidi) või on vahendussõlm ülekoormatud. Proovi hüppe limiiti suurendada menüüs **Seaded → LoRa konfiguratsioon**.
 - **Asümmeetrilised teed** – Jälgimismarsruut teelt A→B võib minna teist teed kui teelt B→A. This is normal — radio propagation is not always symmetric.
 
----
-
-## Naabruse teave
+### Naabruse teave
 
 Naabriinfo moodul võimaldab igal sõlmel levitada nimekirja sõlmedest, mida see **otse kuuleb** (üksik-hüpe). Kui mitu sõlme jagavad oma naaberloendeid, saate kokku panna kogu võrgu topoloogiakaardi.
 
-### Naabriinfo lubamine
+#### Naabriinfo lubamine
 
 1. Mine menüüsse **Seaded → Mooduli konfiguratsioon → Naabriinfo**.
 2. Luba moodul.
 3. Määra levintervall (vaikimisi: 900 sekundit / 15 minutit).
 
-Kui see on lubatud, levitab sõlm perioodiliselt oma naabri-tabelit. Teised sõlmed, millel on naabriinfo lubatud, teevad sama.
+Once enabled, your node periodically broadcasts its neighbor list. Teised sõlmed, millel on naabriinfo lubatud, teevad sama.
 
-### Naabri andmete vaatamine
+#### Naabri andmete vaatamine
 
 - Ava suvalise sõlme detailvaade ja otsi üles jaotis **Naabrid**.
 - Iga naabri-kirje näitab otse kuuldud sõlme ja selle signaali kvaliteeti.
@@ -171,31 +161,27 @@ Kui see on lubatud, levitab sõlm perioodiliselt oma naabri-tabelit. Teised sõl
 
 > ℹ️ **Note:** Neighbor Info increases airtime usage because every enabled node periodically broadcasts its neighbor list. Paljude sõlmedega tiheda liiklusega kärgvõrgu puhul kaaluge ummikute vältimiseks pikemaid levitamise intervalle (3600 sekundit või rohkem).
 
----
-
-## Sõlmede loend avastusvahendina
+### Sõlmede loend avastusvahendina
 
 Sõlmede loend ise on võimas avastusvahend, kui kasutada selle filtreerimis- ja sortimisfunktsioone tõhusalt.
 
-### Otsin uusi sõlmi
+#### Otsin uusi sõlmi
 
 - Sorteeri **Viimati kuuldud** järgi, et näha kõige hiljutisemaid aktiivseid sõlmi ülaosas.
-- Enable **Include unknown** to see nodes that have appeared on the mesh but haven't sent user info yet — these are often newly powered-on devices.
+- Enable **Include unknown** to see nodes that have appeared on the mesh but haven't sent user info yet — these are often newly powered-on radios.
 
-### Assessing Connectivity
+#### Assessing Connectivity
 
 - Sorteeri **Hüpete arvu järgi**, et näha, millised sõlmed on otse kättesaadavad (0 hüpet) ja millised vahendatavate sõlmedega.
 - Sort by **Distance** to find nearby nodes and verify they're reachable.
 - Kasuta **Välista MQTT** raadio teel (mitte internetisilla kaudu) ligipääsetavatele sõlmedele keskendumiseks.
 
-### Infrastructure Audit
+#### Infrastructure Audit
 
 - Disable **Exclude infrastructure** to see Router, Router Late, and Client Base nodes.
 - Kontrolli nende signaali kvaliteeti ja viimase kuulmise aegu, et veenduda oma infrastruktuuri sõlmede töökorras olekus.
 
 Filtreerimis- ja sortimisvalikute kohta leiate lisateavet jaotisest [Nodes](nodes).
-
----
 
 ## Tips for Mesh Exploration
 
@@ -211,6 +197,3 @@ Filtreerimis- ja sortimisvalikute kohta leiate lisateavet jaotisest [Nodes](node
 - [Signal Meter](signal-meter) — interpret the SNR and RSSI a scan reports
 - [Settings — Modules & Admin](settings-module-admin) — configure the Mesh Beacon and Neighbor Info modules
 - [Messages & Channels](messages-and-channels) — join a mesh you found and start talking
-
----
-

@@ -276,7 +276,6 @@
     <string name="config_lora_region_summary">使用电台的地区。</string>
     <string name="config_network_eth_enabled_summary">启用以太网将禁用蓝牙连接。TCP节点连接在 Apple 设备上不可用。</string>
     <string name="config_network_udp_enabled_summary">在本地网络上启用通过 UDP广播数据包。</string>
-    <string name="config_network_wifi_enabled_summary">启用 WiFi 将禁用应用程序的蓝牙连接。</string>
     <string name="config_position_broadcast_secs_summary">无节点广播位置的最大间隔。</string>
     <string name="config_position_broadcast_smart_minimum_distance_summary">智能位置广播考虑的最小距离变化以米为单位。</string>
     <string name="config_position_broadcast_smart_minimum_interval_secs_summary">如果达到最小距离，位置更新将会发送最快的。</string>
@@ -685,7 +684,6 @@
     <string name="firmware_update_method_ble">BLE OTA</string>
     <string name="firmware_update_method_detail">更新到%1$s</string>
     <string name="firmware_update_method_usb">USB文件传输</string>
-    <string name="firmware_update_method_wifi">WiFi OTA</string>
     <string name="firmware_update_missing_target">该设备无法获取固件目标信息。</string>
     <string name="firmware_update_nightly">每日构建</string>
     <string name="firmware_update_no_device">设备未连接</string>
@@ -983,7 +981,11 @@
     <string name="map_download_complete">下载已完成！</string>
     <string name="map_download_errors">下载完成，但有 %1$d 个错误</string>
     <string name="map_download_region">下载区域</string>
+    <string name="map_download_status_complete">完成</string>
     <string name="map_filter">地图过滤器\n</string>
+    <string name="map_filter_all_roles">全部</string>
+    <string name="map_filter_display_title">显示</string>
+    <string name="map_filter_nodes_title">节点</string>
     <string name="map_layer_formats">地图图层支持 .kml, .kmz, 或 GeoJSON 格式。</string>
     <string name="map_node_popup_details">%1$s&lt;br&gt;最后通信时间: %2$s&lt;br&gt;最后位置: %3$s&lt;br&gt;电池电量: %4$s</string>
     <string name="map_offline_manager">离线管理</string>
@@ -1214,7 +1216,6 @@
     <string name="node_sort_title">排序规则</string>
     <string name="node_sort_via_favorite">通过收藏夹</string>
     <string name="node_sort_via_mqtt">通过 MQTT</string>
-    <string name="node_status_summary">当前状态字符串</string>
     <string name="nodedb_reset">重置节点数据库</string>
     <string name="nodeinfo_broadcast_interval">节点信息广播间隔</string>
     <!-- NODES -->
@@ -1297,7 +1298,6 @@
     <string name="pax_total_format">人员: %1$d</string>
     <string name="pax_total_marker">人员: %1$s</string>
     <string name="pax_wifi_format">W:%1$d</string>
-    <string name="pax_wifi_marker">无线网络: %1$s</string>
     <string name="paxcounter">客流计数</string>
     <string name="paxcounter_config">Paxcount 配置</string>
     <string name="paxcounter_enabled">启用 Paxcount</string>
@@ -1614,7 +1614,6 @@
     <string name="ssid">SSID</string>
     <string name="state_broadcast_seconds">状态广播(秒)</string>
     <string name="status_message">状态消息</string>
-    <string name="status_message_config">状态消息配置</string>
     <string name="stay_connected_anywhere">随时随地保持联系</string>
     <string name="stop_connecting">停止连接</string>
     <string name="store_forward">存储 &amp; 转发</string>
@@ -1816,28 +1815,20 @@
     <string name="what_is_meshtastic">什么是 Meshtastic?</string>
     <string name="what_is_meshtastic_description">这是一个开源、离网、分布式 Mesh 网络，可在价格低廉的低功率无线电设备上运行。</string>
     <!-- WIFI -->
-    <string name="wifi_config">WiFi设置</string>
     <string name="wifi_devices">MPWRD-OS 系统 Wi-Fi 配置</string>
-    <string name="wifi_enabled">启用 WiFi</string>
-    <string name="wifi_ip">Wifi IP地址：</string>
     <string name="wifi_provision_available_networks">可用网络</string>
     <string name="wifi_provision_connect_failed">无法连接: %1$s</string>
     <string name="wifi_provision_description">通过蓝牙将 Wi-Fi 凭证预置/配置到你的 mPWRD-OS 设备中。</string>
     <string name="wifi_provision_device_found">已发现设备</string>
-    <string name="wifi_provision_device_found_detail">准备开始搜索 Wi-Fi 网络。</string>
     <string name="wifi_provision_hidden_network">隐藏网络</string>
     <string name="wifi_provision_mpwrd_disclaimer">了解更多关于 mPWRD-OS 项目\nhttps://github.com/mPWRD-OS</string>
     <string name="wifi_provision_no_networks">未发现网络</string>
-    <string name="wifi_provision_scan_failed">扫描WiFi网络失败: %1$s</string>
     <string name="wifi_provision_scan_networks">扫描网络</string>
     <string name="wifi_provision_scanning_ble">正在搜索设备…</string>
     <string name="wifi_provision_scanning_wifi">正在扫描…</string>
-    <string name="wifi_provision_sending_credentials">正在应用 WiFi 配置…</string>
     <string name="wifi_provision_signal_strength">%1$d%</string>
     <string name="wifi_provision_ssid_label">网络名称(SSID)</string>
     <string name="wifi_provision_ssid_placeholder">输入或选择一个网络</string>
-    <string name="wifi_provision_status_applied">WiFi配置成功！</string>
-    <string name="wifi_provision_status_failed">应用 Wi-Fi 配置失败</string>
     <string name="wifi_provision_success_description">您的 mPWRD-OS 设备已经加入 Wi-Fi 网络。</string>
     <string name="wifi_provision_success_device_connected">设备已连接</string>
     <string name="wifi_provision_success_done">完成</string>
@@ -1852,9 +1843,6 @@
     <string name="wifi_provision_success_ssh_unavailable">分配 IP 地址后，SSH 命令即可使用。</string>
     <string name="wifi_provision_success_username">用户名称</string>
     <string name="wifi_provisioning">为 mPWRD-OS 系统配置 Wi-Fi 网络</string>
-    <string name="wifi_qr_code_error">WiFi凭据二维码格式无效</string>
-    <string name="wifi_qr_code_scan">扫描 WiFi 二维码</string>
-    <string name="wifi_rssi_threshold_defaults_to_80">WiFi RSSI 阈值(默认为-80)</string>
     <string name="wifi_unavailable">未连接到 Wi-Fi,网络扫描可能找不到附近的设备。</string>
     <!-- WIND -->
     <string name="wind">风</string>
@@ -1869,4 +1857,6 @@
     <string name="write_nfc_success">数据已成功写入标签</string>
     <string name="write_nfc_text">请将一张可写入的 NFC 标签贴在手机背面。</string>
     <string name="you">你</string>
+    <string name="zoom_in">放大</string>
+    <string name="zoom_out">缩小</string>
 </resources>

@@ -2,7 +2,7 @@
 title: ローカルメッシュ探索
 parent: User Guide
 nav_order: 12
-last_updated: 2026-08-28
+last_updated: 2026-08-29
 description: メッシュネットワークを探索します。ローカルメッシュ探索スキャナー、ルート追跡の経路、隣接ノードのマップ、ノード探索ツールを説明します。
 aliases:
   - discovery
@@ -23,15 +23,13 @@ aliases:
 - **ローカルメッシュ探索（スキャナー）**：接続中の無線機をさまざまな LoRa プリセットで順に切り替え、それぞれで受信し、あなたの場所でどのプリセットが最も性能が良いかをランク付けする自動モードです。
 - **手動での探索**：ルート追跡、隣接ノード情報、ノードリスト。特定の経路やトポロジーを調べるために、いつでも使えます。
 
----
-
 ## ローカルメッシュ探索（スキャナー）
 
-ローカルメッシュ探索は、あなたの場所に最適な LoRa モデムプリセットを見つけ、各プリセットでどのノードがアクティブかを確認できる、専用のスキャンモードです。 接続中の無線機を、選択した 1 つ以上のプリセットで順に切り替え、パケットを収集するために各プリセットで一定時間受信（「滞在」）し、その後、結果を分析してランク付けします。
+ローカルメッシュ探索は、あなたの場所に最適な LoRa モデムプリセットを見つけ、各プリセットでどのノードがアクティブかを確認できる、専用のスキャンモードです。 It cycles your connected radio through one or more presets you choose, dwells on each one — listens for a set time — to collect packets, then analyzes and ranks the results.
 
 「**設定 → 詳細設定 → ローカルメッシュ探索**」から開きます。 デスクトップでは、独自の「**設定 → ローカルメッシュ探索**」の項目があります。
 
-> ℹ️ **Note:** Discovery temporarily changes your radio's LoRa settings while it scans, then restores your original configuration when it finishes. スキャンを実行するには、デバイスが接続されている必要があります。
+> ℹ️ **Note:** Discovery temporarily changes your radio's LoRa settings while it scans, then restores your original configuration when it finishes. Your radio must be connected to run a scan.
 
 ### スキャンを設定する
 
@@ -45,7 +43,7 @@ aliases:
 
 「**開始**」ボタンは、スキャンを実行できるようになるまで（理由の説明とともに）無効のままです。 無効になる主な理由：
 
-- デバイスが**接続されていない**。
+- The radio is **not connected**.
 - スキャンする**プリセットが選択されていない**。
 - 選択したプリセットが、ハードウェアが対応していない **2.4 GHz** を使用している。
 
@@ -72,7 +70,7 @@ aliases:
 
 メトリクスには次が含まれます：
 
-| メトリクス      | 分かること                              |
+| メートル法      | 分かること                              |
 | ---------- | ---------------------------------- |
 | RF の健全性    | そのプリセットにおける無線環境の総合的な品質。            |
 | チャンネル利用率   | 滞在中に電波がどれだけ混雑していたか。                |
@@ -88,11 +86,9 @@ aliases:
 
 > 💡 **Tip:** On **Google Play** builds, Discovery can generate an on-device AI summary (Gemini Nano) of your results. F-Droid builds always use the algorithmic summary — the proprietary ML Kit dependency is deliberately excluded from that flavor — so you get a readable interpretation of the scan either way.
 
----
-
 ## メッシュビーコン
 
-メッシュビーコンを使うと、ノードが他のノードを自分のメッシュに招待できます。 ビーコンを発信するノードは、招待を定期的にブロードキャストします（任意でチャンネル、リージョン、モデムプリセットを告知）。近くのデバイスは、設定を共有する前でもこれを受信できます。
+メッシュビーコンを使うと、ノードが他のノードを自分のメッシュに招待できます。 A beaconing node periodically broadcasts an invitation — optionally advertising a channel, region, and modem preset — that nearby nodes can hear even before they share a configuration.
 
 「**設定 → モジュール設定 → メッシュビーコン**」で設定します：
 
@@ -107,24 +103,20 @@ aliases:
 
 ビーコンが告知したチャンネルは、スキャン設定にも「**ビーコンのチャンネル**」として表示されます。選択すると、スキャン対象に含められます。
 
----
-
 ## 手動での探索
 
-以下のツールは、ノードリストとノードの詳細画面からいつでも利用できます。 完全なスキャンと併用して、またはその代わりに、特定の経路を調べてトポロジーの全体像を組み立てるのに使えます。
+The following tools are available at any time from the node list and node detail screens. 完全なスキャンと併用して、またはその代わりに、特定の経路を調べてトポロジーの全体像を組み立てるのに使えます。
 
-## ルート追跡
+### ルート追跡
 
 ルート追跡は、メッセージが自分のノードから、メッシュ上の他の任意のノードへ通る正確な経路を明らかにします。 接続の問題をデバッグするのに、最も役立つツールです。
 
-### ルート追跡を実行する
+#### ルート追跡を実行する
 
 1. 「**ノード**」に移動し、追跡したいノードをタップします。
-2. ノードの詳細画面で、「**ルート追跡**」をタップします。
-3. アプリがルート追跡の要求を送信し、応答を待ちます。
-4. 結果には、各ホップが順番に、各段階の信号品質とともに表示されます。
+2. ノードの詳細画面で、「**ルート追跡**」をタップします。 The app sends the request; results show each hop with signal quality.
 
-### 結果の見方
+#### 結果の見方
 
 ルート追跡の結果は次のように表示されます：
 
@@ -143,27 +135,25 @@ aliases:
 
 > 💡 **ヒント：** ルート追跡を数分間かけて何度か実行してください。 経路が変わる場合、メッシュには冗長な経路があり、よくつながったネットワークの兆候です。
 
-### ルート追跡によるトラブルシューティング
+#### ルート追跡によるトラブルシューティング
 
 - **「経路が見つかりません」**：対象のノードがオフラインか、圏外か、別のチャンネルにいる可能性があります。 両方のノードが、同じ暗号化鍵を持つチャンネルを少なくとも 1 つ共有しているか確認してください。
 - **ルート追跡がタイムアウトする**：経路が長すぎる（ホップ数上限を超える）か、中継ノードが混雑している可能性があります。 「**設定 → LoRa 設定**」でホップ数上限を増やしてみてください。
 - **非対称な経路**：A→B のルート追跡は、B→A とは異なる経路を通ることがあります。 これは正常です。電波の伝搬は常に対称とは限りません。
 
----
-
-## 隣接ノード情報
+### 隣接ノード情報
 
 隣接ノード情報モジュールを使うと、各ノードが**直接受信できる**（シングルホップの）ノードのリストをブロードキャストできます。 複数のノードが隣接ノードのリストを共有すると、メッシュ全体のトポロジーマップを組み立てられます。
 
-### 隣接ノード情報を有効にする
+#### 隣接ノード情報を有効にする
 
 1. 「**設定 → モジュール設定 → 隣接ノード情報**」に移動します。
 2. モジュールを有効にします。
 3. ブロードキャスト間隔を設定します（デフォルト：900 秒／15 分）。
 
-有効にすると、ノードは隣接ノードのテーブルを定期的にブロードキャストします。 隣接ノード情報を有効にしている他のノードも、同じことを行います。
+Once enabled, your node periodically broadcasts its neighbor list. 隣接ノード情報を有効にしている他のノードも、同じことを行います。
 
-### 隣接ノードのデータを表示する
+#### 隣接ノードのデータを表示する
 
 - 任意のノードの詳細画面を開き、「**隣接ノード**」セクションを探します。
 - 各隣接ノードの項目には、直接受信したノードとその信号品質が表示されます。
@@ -171,31 +161,27 @@ aliases:
 
 > ℹ️ **Note:** Neighbor Info increases airtime usage because every enabled node periodically broadcasts its neighbor list. ノードの多い混雑したメッシュでは、輻輳を避けるために、より長いブロードキャスト間隔（3600 秒以上）を検討してください。
 
----
-
-## 探索ツールとしてのノードリスト
+### 探索ツールとしてのノードリスト
 
 ノードリスト自体も、絞り込みと並べ替えの機能を効果的に使えば、強力な探索ツールになります。
 
-### 新しいノードを見つける
+#### 新しいノードを見つける
 
 - 「**最後の通信**」で並べ替えると、最近アクティブだったノードが先頭に表示されます。
-- 「**不明なノードを含む**」を有効にすると、メッシュに現れたもののまだユーザー情報を送信していないノードが表示されます。これらは、電源を入れたばかりのデバイスであることがよくあります。
+- Enable **Include unknown** to see nodes that have appeared on the mesh but haven't sent user info yet — these are often newly powered-on radios.
 
-### 接続性を評価する
+#### 接続性を評価する
 
 - 「**ホップ数**」で並べ替えると、直接到達できるノード（0 ホップ）と中継されるノードが分かります。
 - 「**距離**」で並べ替えると、近くのノードを見つけて、到達できるか確認できます。
 - 「**MQTT を除外**」を使うと、（インターネットブリッジ経由ではなく）無線で到達できるノードに絞り込めます。
 
-### インフラの監査
+#### インフラの監査
 
 - 「**インフラを除外**」を無効にすると、ルーター、ルーター・レイト、クライアント・ベースのノードが表示されます。
 - 信号品質と最後の通信時刻を確認して、インフラのノードが健全であることを確かめます。
 
 絞り込みと並べ替えのオプションの詳細については、[ノード](nodes) を参照してください。
-
----
 
 ## メッシュ探索のヒント
 
@@ -211,6 +197,3 @@ aliases:
 - [Signal Meter](signal-meter) — interpret the SNR and RSSI a scan reports
 - [Settings — Modules & Admin](settings-module-admin) — configure the Mesh Beacon and Neighbor Info modules
 - [Messages & Channels](messages-and-channels) — join a mesh you found and start talking
-
----
-

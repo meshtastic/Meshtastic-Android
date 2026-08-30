@@ -2,7 +2,7 @@
 title: Debug Logs
 parent: Посібник користувача
 nav_order: 22
-last_updated: 2026-08-27
+last_updated: 2026-08-29
 description: View and export the app's own debug logs from inside the app, and attach a capture to a GitHub issue to help diagnose bugs — no adb required.
 aliases:
   - debug-logs
@@ -13,11 +13,11 @@ aliases:
 
 # Debug Logs
 
-When something misbehaves, the app's debug logs are the single most useful thing you can attach to a bug report. Meshtastic can capture them **for you, from inside the app** — you no longer need `adb` or any desktop tooling to collect them.
+When something misbehaves, the app's debug logs are the single most useful thing you can attach to a bug report. Meshtastic can capture them **for you, from inside the app** — you don't need `adb` or any desktop tooling to collect them.
 
 Open the **Debug Panel** from **Settings → Advanced → Debug Panel**.
 
-> 📎 **Filing an issue?** Export your logs (see below) and attach the `.txt` file to your report at [github.com/meshtastic/Meshtastic-Android/issues](https://github.com/meshtastic/Meshtastic-Android/issues). A log capture that covers the moment the problem happened turns "it doesn't work" into something a developer can actually track down.
+If you're filing an issue, export your logs (see [Exporting](#exporting)) and attach the `.txt` file to your report on the [Meshtastic-Android issue tracker](https://github.com/meshtastic/Meshtastic-Android/issues). A log capture that covers the moment the problem happened turns "it doesn't work" into something a developer can actually track down.
 
 ## The two tabs
 
@@ -30,7 +30,7 @@ Each tab has its own **export** button and produces its own file, so you can gra
 
 ## Viewing app logs
 
-The **App logs** tab shows the most recent log lines from **this app only** — never other apps on your device.
+The **App logs** tab shows the most recent log lines from **this app only** — never other apps on your phone.
 
 - **Search** — type in the search box to filter to matching lines.
 - **Level filter** — the **V / D / I / W / E** chips toggle Verbose, Debug, Info, Warn, and Error lines. Tap a level to hide it; tap again to bring it back. Fatal lines are always shown.
@@ -54,5 +54,3 @@ The desktop app has no system logcat, so the **App logs** tab shows the app's ow
 
 - [Help & In-App Docs](help-and-docs) — reading this documentation offline inside the app
 - [Connections](connections) — if the problem is getting connected to your radio in the first place
-
----

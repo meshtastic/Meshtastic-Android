@@ -2,7 +2,7 @@
 title: Primeros Pasos
 parent: User Guide
 nav_order: 1
-last_updated: 2026-08-27
+last_updated: 2026-08-29
 description: First-launch setup — permissions, onboarding flow, and next steps after connecting your radio.
 aliases:
   - first-launch
@@ -12,11 +12,11 @@ aliases:
 
 # Primeros Pasos
 
-Welcome to Meshtastic! This guide walks you through the initial setup of the Meshtastic Android app.
+This page covers the first-launch flow of the Meshtastic Android app, what each permission is for, and how to revisit them later.
 
 ## First Launch
 
-When you open the app for the first time, you'll be guided through an introductory flow that helps configure essential permissions and settings. Complete each step in order or skip it — nothing here is a one-time offer. Every permission can be reviewed and granted later from **Settings → Permissions** inside the app.
+When you open the app for the first time, the app guides you through an introductory flow that configures essential permissions and settings. Complete each step in order or skip it — nothing here is a one-time offer. Every permission can be reviewed and granted later from **Settings → Permissions** inside the app.
 
 ### Welcome Screen
 
@@ -47,7 +47,7 @@ Grant both permissions when prompted. Without Bluetooth, you'll need to use USB 
 
 ### Location Permission
 
-> ⚠️ **Is location required for Bluetooth?** On **Android 11 and older**, yes — those releases treat a Bluetooth scan as a location capability, so the app asks for Location instead of "Nearby devices", and system **Location Services** must also be switched on for a scan to return anything. There you will see **one** location step rather than two, on the Bluetooth screen, because it is a single system permission — and asking twice for it would push you toward the point where Android stops offering the dialog at all (a second denial on Android 11; the "Don't ask again" checkbox on Android 10 and older). On **Android 12 and newer** the two are separate: "Nearby devices" is declared `neverForLocation`, and declining Location does not stop you finding or connecting to a radio.
+> ⚠️ **Is location required for Bluetooth?** **Android 11 and older** show one location step, on the Bluetooth screen, rather than two — those releases treat a Bluetooth scan as a location capability, so the app asks for Location instead of "Nearby devices". Asking twice would push you toward the point where Android stops offering the dialog at all (a second denial on Android 11; the "Don't ask again" checkbox on Android 10 and older). On **Android 12 and newer** the two are separate: "Nearby devices" is declared `neverForLocation`, and declining Location does not stop you finding or connecting to a radio.
 
 Meshtastic also uses your location for:
 
@@ -57,7 +57,7 @@ Meshtastic also uses your location for:
 
 Grant **"While using the app"**. The app does not request background location — `ACCESS_BACKGROUND_LOCATION` is not in its manifest — so Android will not offer an "Always" option, and position updates happen while the app is in the foreground or running its foreground service.
 
-Declining leaves the rest of the app working: on Android 12 and newer, Bluetooth is unaffected and only the map position and position sharing are disabled. On Android 11 and older, Bluetooth scanning also stops, because that is the permission Android gates it behind.
+Declining leaves the rest of the app working: on Android 12 and newer, Bluetooth is unaffected and only the map position and position sharing are disabled. On Android 11 and older, Bluetooth scanning also stops, because that is the permission Android gates it behind — and system **Location Services** must also be switched on for a scan to return anything.
 
 ### Notifications Permission
 
@@ -73,11 +73,11 @@ Notifications alert you to:
 
 Critical alerts are high-priority notifications that break through Do Not Disturb — for emergency mesh alerts and urgent messages.
 
-This step is not a runtime permission prompt. There is no grant/deny dialog: the button opens the Android system settings page for the app's **Alerts** notification channel, where you turn the breakthrough behaviour on yourself. You can **skip** it, and reach the same page later from Android notification settings.
+This step is not a runtime permission prompt. There is no grant/deny dialog: the button opens the Android system settings page for the app's **Alerts** notification channel, where you turn the breakthrough behavior on yourself. You can **skip** it, and reach the same page later from Android notification settings.
 
 ### Reviewing permissions later
 
-**Settings → Permissions** summarizes where every runtime permission stands. It covers five: **Nearby devices** (Bluetooth), **Location**, **Notifications**, **Camera** (scanning channel and contact QR codes) and **Local network** (finding radios over Wi-Fi by mDNS) — the last two are never asked for during setup, only when a feature first needs them. It reads _All allowed_ when nothing needs you, and names the count when something does — opening itself automatically in that case. Tap the row to see the full list at any time:
+**Settings → Permissions** summarizes where every runtime permission stands. It covers five: **Nearby devices** (Bluetooth), **Location**, **Notifications**, **Camera** (scanning channel and contact QR codes) and **Local network** (finding radios over Wi-Fi by mDNS) — the last two are never asked for during setup, only when a feature first needs them. It reads _All allowed_ when no permission needs attention; the row names the count and the Permissions screen opens automatically when something does. Tap the row to see the full list at any time:
 
 | State                                       | What tapping the row does                                                                    |
 | ------------------------------------------- | -------------------------------------------------------------------------------------------- |
@@ -87,11 +87,11 @@ This step is not a runtime permission prompt. There is no grant/deny dialog: the
 | **Blocked — tap to open system settings**   | Android will no longer show its dialog, so this opens the page where you can turn it back on |
 | **Not required on this version of Android** | Nothing — the permission does not exist on your device                                       |
 
-This matters most for notifications. The app used to ask for them in exactly one place — the setup flow — so declining there meant no message, new-node, or low-battery alerts, with nothing in the app that could ask again. Android itself stops showing the dialog once you have declined firmly (a second denial on Android 11 and newer), at which point this row switches to **Blocked** and sends you to the system settings page instead.
+This matters most for notifications. If you decline them during setup, this row is the way back: Android stops showing the dialog once you have declined firmly (a second denial), at which point this row switches to **Blocked** and sends you to the system settings page instead. The notification prompt exists only on Android 13 and newer — on older versions notifications are on by default and managed from Android's own settings.
 
 ## After Setup
 
-Once permissions are granted, the app transitions to the main interface. Your first action should be connecting to a Meshtastic radio — see [Connections](connections) for detailed instructions.
+After you grant permissions, the app opens the main interface. Your first action should be connecting to a Meshtastic radio — see [Connections](connections) for detailed instructions.
 
 > 💡 **Tip:** If you skipped any permissions during setup, open **Settings → Permissions** in the app. Every runtime permission is listed there with its current state and a way back to it — including notifications, which the system will not prompt for a second time on its own.
 
@@ -106,5 +106,3 @@ New to Meshtastic? The [getting started guide](https://meshtastic.org/docs/getti
 - [Nodes](nodes) — see who else is on your mesh
 - [Map & Waypoints](map-and-waypoints) — view node positions
 - [Settings — Radio & User](settings-radio-user) — configure your radio and user profile
-
----

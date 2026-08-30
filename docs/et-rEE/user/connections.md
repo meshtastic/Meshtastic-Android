@@ -2,7 +2,7 @@
 title: Ühendus
 parent: Kasutusjuhend
 nav_order: 2
-last_updated: 2026-08-27
+last_updated: 2026-08-29
 description: Ühenda oma telefon või arvuti Meshtastic raadioga Bluetoothi, USB või TCP/IP kaudu.
 aliases:
   - sinihammas
@@ -13,27 +13,27 @@ aliases:
 
 # Ühendus
 
-Meshtastic toetab mitut transpordimeetodit telefoni/arvuti ja raadiosõlme vaheliseks suhtluseks.
+Meshtastic supports multiple transport methods to communicate between your phone or desktop and a radio.
 
 ## Sinihammas (BLE)
 
 Sinihamba madal voolutarve on Androidi vaike- ja levinuim ühendusviis.
 
-### Seadme sidumine
+### Pairing a Radio
 
 1. Veendu, et Meshtastic seade on sisse lülitatud ja sidumisrežiimis.
 2. Ava rakendus ja navigeeri vahekaardile **Ühendused**.
 3. Puuduta valikut **Otsi sinihamba seadmeid** – kuvatakse lähedalasuvad Meshtasticu raadiod.
-4. Vali loendist oma seade.
+4. Select your radio from the list.
 5. Nõustu Bluetoothi ​​sidumise taotlusega, kui see kuvatakse.
 
 ![Sinihamba seadmete otsimine, leitud raadio on loendis](../../assets/screenshots/connections_bluetooth_scan.png)
 
 Sinihamba, võrgu ja USB-transpordi vahel vahetamiseks (üks on korraga aktiivne) kasutage transpordivalijat – ühenduskaardi all asuvat segmenteeritud nuppude rida:
 
-![Transpordi valik](../../assets/screenshots/connections_transport_filters.png)
+![Connections screen with the transport selector showing Bluetooth, Network, and USB](../../assets/screenshots/connections_transport_filters.png)
 
-> 💡 **Tip:** If your device doesn't appear, check that the radio is not already connected to another device or out of range.
+> 💡 **Tip:** If your radio doesn't appear, check that it isn't already connected to another phone, or out of range.
 
 The screen names anything on the app's side that is blocking a scan, with the fix attached:
 
@@ -77,19 +77,19 @@ USB ühendused pakuvad juhtmega alternatiivi, mis on kasulik lauaarvutite puhul 
 
 ### Seadistamine
 
-1. Connect your radio via USB cable to your device.
-2. Rakendus küsib USB luba – puuduta **Luba**.
+1. Connect your radio to your phone with a USB cable.
+2. The app prompts for USB permission — tap **Allow**.
 3. The connection is established automatically.
 
 > ℹ️ **Note:** USB connections require OTG support on Android devices.
 
 ## TCP/IP (võrk)
 
-Mõned Meshtastic raadiod toetavad WiFi/Etherneti ühendust, võimaldades TCP-põhiseid ühendusi kohaliku võrgu kaudu. Ühenda raadio esmalt oma võrku – kasutades raadio enda WiFi-seadeid (püsivara veebiliidese või muu ühenduse kaudu) – ja seejärel loo ühendus rakenduse kaudu.
+Some Meshtastic radios support Wi-Fi/Ethernet connectivity, allowing TCP-based connections over your local network. Get the radio onto your network first — using the radio's own Wi-Fi settings (via the firmware web interface or another connection) — then connect to it from the app.
 
-> ℹ️ **Note:** **Settings → Wi-Fi Provisioning for mPWRD-OS** is a separate, narrower tool. It provisions WiFi
+> ℹ️ **Note:** **Settings → Wi-Fi Provisioning for mPWRD-OS** is a separate, narrower tool. It provisions Wi-Fi
 > credentials over Bluetooth to **mPWRD-OS** devices only, using their own protocol — it does not
-> configure WiFi on an ordinary Meshtastic radio. It scans over BLE, lists the networks the device
+> configure Wi-Fi on an ordinary Meshtastic radio. It scans over BLE, lists the networks the device
 > can see (including an option for a hidden SSID), takes the password, and reports success or
 > failure. Available on both Android and Desktop.
 
@@ -100,7 +100,7 @@ Mõned Meshtastic raadiod toetavad WiFi/Etherneti ühendust, võimaldades TCP-p�
 3. Choose the radio one of two ways:
    - **Võrguseadmete otsimine** – lülita see sisse, et automaatselt avastada raadioid, mis reklaamivad end kohalikus võrgus (mDNS / `_meshtastic._tcp`). Leitud seadmed kuvatakse loendis; ühenduse loomiseks puuduta neist ühte.
    - **Lisa seade käsitsi…** — Sisesta raadio IP-aadress (või hostinimi) ja port (vaikimisi: 4403).
-4. Previously-used network addresses are remembered under **Recent Network Devices** for quick reconnection (long-press to remove one).
+4. Previously-used network addresses are remembered under **Recent Network Devices** for quick reconnection (touch & hold to remove one).
 
 > 💡 **Vihje:** Võrgu tuvastamine kasutab mDNS-i, mis töötab ainult siis, kui mõlemad seadmed on samas alamvõrgus. Android 17+ puhul vajab rakendus skanniks kohaliku võrgu luba; kui otsing ei leia midagi, lisa seade käsitsi IP-aadressi järgi.
 
@@ -112,7 +112,7 @@ Mõned Meshtastic raadiod toetavad WiFi/Etherneti ühendust, võimaldades TCP-p�
 
 ## Reconnection Behavior
 
-Rakendus loob käivitamisel uuesti ühenduse **viimati valitud seadmega**. Transporti saab ühenduskuvalt igal ajal vahetada.
+The app reconnects to the last selected radio on startup. Transporti saab ühenduskuvalt igal ajal vahetada.
 
 Ühenduse katkestamiseks puuduta ühenduse loomise ekraanil katkestamise nuppu:
 
@@ -134,6 +134,3 @@ Platvormipõhiste üksikasjade ja kiirklahvide kohta vaata [Töölauarakendus] (
 - [Seaded — Raadio ja kasutaja](settings-radio-user) — sinihamba ​​ja võrgu seadistus
 - [Desktop App](desktop) — desktop-specific connection details
 - [Supported devices](https://meshtastic.org/docs/hardware/devices) — full list of compatible radios on meshtastic.org
-
----
-

@@ -149,6 +149,7 @@
     <string name="map_download_complete">Η λήψη ολοκληρώθηκε!</string>
     <string name="map_download_errors">Λήψη ολοκληρώθηκε με %1$d σφάλματα</string>
     <string name="map_download_region">Λήψη Περιοχής</string>
+    <string name="map_filter_display_title">Οθόνη</string>
     <string name="map_offline_manager">Διαχειριστής Εκτός Δικτύου</string>
     <string name="map_purge_success">Η προσωρινή μνήμη SQL καθαρίστηκε για %1$s</string>
     <string name="map_select_download_region">Επιλογή περιοχής λήψης</string>
@@ -292,8 +293,6 @@
     <!-- WIFI -->
     <string name="wifi_provision_success_ip_address">IP διεύθυνση</string>
     <string name="wifi_provision_success_username">Όνομα χρήστη</string>
-    <string name="wifi_qr_code_error">Μη έγκυρη μορφή QR διαπιστευτηρίων WiFi</string>
-    <string name="wifi_qr_code_scan">Σάρωση QR κωδικού WiFi</string>
     <!-- WIND -->
     <!-- WRITE -->
     <string name="you">Εσύ</string>

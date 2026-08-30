@@ -299,7 +299,6 @@
     <string name="config_lora_region_summary">Регион, в котором вы будете использовать ваше радио.</string>
     <string name="config_network_eth_enabled_summary">Включение Ethernet отключит Bluetooth-соединение с приложением. TCP-соединения не доступны на устройствах Apple.</string>
     <string name="config_network_udp_enabled_summary">Включить вещание пакетов через UDP в локальной сети.</string>
-    <string name="config_network_wifi_enabled_summary">Включение WiFi отключит Bluetooth-подключение к приложению.</string>
     <string name="config_position_broadcast_secs_summary">Максимальное время между передачами позиции нодой.</string>
     <string name="config_position_broadcast_smart_minimum_distance_summary">Минимальное расстояние для умной рассылки координаты.</string>
     <string name="config_position_broadcast_smart_minimum_interval_secs_summary">Чем меньше расстояние, тем быстрее будет отправляться обновление позицию.</string>
@@ -742,7 +741,6 @@
     <string name="firmware_update_method_ble">BLE OTA (по воздуху)</string>
     <string name="firmware_update_method_detail">Обновить по %1$s</string>
     <string name="firmware_update_method_usb">Передача файлов через USB</string>
-    <string name="firmware_update_method_wifi">WiFi OTA</string>
     <string name="firmware_update_missing_target">Информация о целевой прошивке недоступна для этого устройства.</string>
     <string name="firmware_update_nightly">Ночные сборки</string>
     <string name="firmware_update_no_device">Нет подключенных устройств</string>
@@ -1064,7 +1062,11 @@
     <string name="map_download_complete">Скачивание завершено!</string>
     <string name="map_download_errors">Скачивание завершено с %1$d ошибок</string>
     <string name="map_download_region">Скачать Регион</string>
+    <string name="map_download_status_complete">Полнота</string>
     <string name="map_filter">Фильтр карты\n</string>
+    <string name="map_filter_all_roles">Всё</string>
+    <string name="map_filter_display_title">Дисплей</string>
+    <string name="map_filter_nodes_title">Ноды</string>
     <string name="map_layer_formats">Слои карты поддерживают форматы .kml, .kmz или GeoJSON.</string>
     <string name="map_node_popup_details">%1$s&lt;br&gt;Последняя активность: %2$s&lt;br&gt;Последняя позиция: %3$s&lt;br&gt;Заряд: %4$s</string>
     <string name="map_offline_manager">Оффлайн менеджер</string>
@@ -1328,7 +1330,6 @@
     <string name="node_sort_title">Сортировать по</string>
     <string name="node_sort_via_favorite">по избранным</string>
     <string name="node_sort_via_mqtt">через MQTT</string>
-    <string name="node_status_summary">Строка фактического состояния</string>
     <string name="nodedb_reset">Очистка списка нод сети</string>
     <string name="nodeinfo_broadcast_interval">Интервал вещания передачи информации об узле</string>
     <!-- NODES -->
@@ -1413,7 +1414,6 @@
     <string name="pax_total_format">PAX: %1$d</string>
     <string name="pax_total_marker">PAX: %1$s</string>
     <string name="pax_wifi_format">W:%1$d</string>
-    <string name="pax_wifi_marker">WiFi: %1$s</string>
     <string name="paxcounter">Счётчик прохожих</string>
     <string name="paxcounter_config">Настройки Paxcounter</string>
     <string name="paxcounter_enabled">Paxcounter включен</string>
@@ -1766,7 +1766,6 @@
     <string name="ssid">Название сети</string>
     <string name="state_broadcast_seconds">Трансляция состояния (в секундах)</string>
     <string name="status_message">Состояние сообщения</string>
-    <string name="status_message_config">Настройка состояния сообщений</string>
     <string name="stay_connected_anywhere">Оставайтесь на связи везде</string>
     <string name="stop_connecting">Остановить подключение</string>
     <string name="store_forward">Store &amp; Forward</string>
@@ -1996,28 +1995,20 @@
     <string name="what_is_meshtastic">Что такое Meshtastic?</string>
     <string name="what_is_meshtastic_description">Открытая, автономная, децентрализованная mesh-сеть, работающая на доступных маломощных радиоустройствах.</string>
     <!-- WIFI -->
-    <string name="wifi_config">Настройки WiFi</string>
     <string name="wifi_devices">Настройка Wi-Fi для mPWRD-OS</string>
-    <string name="wifi_enabled">WiFi включен</string>
-    <string name="wifi_ip">Wi-Fi IP:</string>
     <string name="wifi_provision_available_networks">Доступные сети</string>
     <string name="wifi_provision_connect_failed">Не удалось подключиться: %1$s</string>
     <string name="wifi_provision_description">Предоставьте учетные данные для доступа к Wi-Fi на вашем устройстве с mPWRD-OS через Bluetooth.</string>
     <string name="wifi_provision_device_found">Найденное устройство</string>
-    <string name="wifi_provision_device_found_detail">Готов к сканированию Wi-Fi сетей.</string>
     <string name="wifi_provision_hidden_network">Скрытая сеть</string>
     <string name="wifi_provision_mpwrd_disclaimer">Узнайте больше о проекте mPWRD-OS\nhttps://github.com/mPWRD-OS</string>
     <string name="wifi_provision_no_networks">Сети не найдены</string>
-    <string name="wifi_provision_scan_failed">Не удалось просканировать сети Wi-Fi: %1$s</string>
     <string name="wifi_provision_scan_networks">Поиск сетей</string>
     <string name="wifi_provision_scanning_ble">Поиск устройства…</string>
     <string name="wifi_provision_scanning_wifi">Поиск…</string>
-    <string name="wifi_provision_sending_credentials">Применение настроек Wi-Fi…</string>
     <string name="wifi_provision_signal_strength">%1$d%</string>
     <string name="wifi_provision_ssid_label">Имя сети (SSID)</string>
     <string name="wifi_provision_ssid_placeholder">Введите или выберите сеть</string>
-    <string name="wifi_provision_status_applied">Wi-Fi успешно настроен!</string>
-    <string name="wifi_provision_status_failed">Не удалось применить настройку Wi-Fi</string>
     <string name="wifi_provision_success_description">Ваше устройство mPWRD-OS подключилось к сети Wi-Fi.</string>
     <string name="wifi_provision_success_device_connected">Устройство подключено</string>
     <string name="wifi_provision_success_done">Готово</string>
@@ -2032,9 +2023,6 @@
     <string name="wifi_provision_success_ssh_unavailable">Команды SSH доступны после назначения IP-адреса.</string>
     <string name="wifi_provision_success_username">Имя пользователя</string>
     <string name="wifi_provisioning">Настройка Wi-Fi для mPWRD-OS</string>
-    <string name="wifi_qr_code_error">Неверный формат QR-кода WiFi</string>
-    <string name="wifi_qr_code_scan">Сканировать QR-код WiFi</string>
-    <string name="wifi_rssi_threshold_defaults_to_80">Порог WiFi RSSI (по умолчанию -80)</string>
     <string name="wifi_unavailable">Нет подключения к Wi-Fi. Сканирование сети может не обнаружить ближайшие устройства.</string>
     <!-- WIND -->
     <string name="wind">Ветер</string>
@@ -2049,4 +2037,6 @@
     <string name="write_nfc_success">Написано для метки</string>
     <string name="write_nfc_text">Поднеси записываемую NFC-метку к задней части своего телефона.</string>
     <string name="you">Вы</string>
+    <string name="zoom_in">Увеличить</string>
+    <string name="zoom_out">Уменьшить</string>
 </resources>

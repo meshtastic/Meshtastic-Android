@@ -2,7 +2,7 @@
 title: 連線
 parent: 使用者指南
 nav_order: 2
-last_updated: 2026-08-27
+last_updated: 2026-08-29
 description: 透過藍牙、USB 或 TCP/IP 將您的手機或電腦連接至 Meshtastic 無線電裝置。
 aliases:
   - 藍牙
@@ -13,27 +13,27 @@ aliases:
 
 # 連線
 
-Meshtastic 支援多種傳輸方式，以便您的手機或電腦與無線電節點進行通訊。
+Meshtastic supports multiple transport methods to communicate between your phone or desktop and a radio.
 
 ## 藍牙（BLE）
 
 藍牙低功耗是 Android 上預設且最常見的連線方式。
 
-### 配對裝置
+### Pairing a Radio
 
 1. 請確認您的 Meshtastic 無線電裝置已開機，並進入配對模式。
 2. 開啟應用程式，並前往「連線」頁籤。
 3. Tap **Scan for Bluetooth devices** — nearby Meshtastic radios will appear.
-4. 從清單中選取您的裝置。
+4. Select your radio from the list.
 5. 若出現藍牙配對提示，請點選接受。
 
 ![Scanning for Bluetooth devices, with a discovered radio in the list](../../assets/screenshots/connections_bluetooth_scan.png)
 
 Use the transport selector — a segmented button row below the connection card — to switch between the Bluetooth, Network, and USB transports (one is active at a time):
 
-![Transport selector](../../assets/screenshots/connections_transport_filters.png)
+![Connections screen with the transport selector showing Bluetooth, Network, and USB](../../assets/screenshots/connections_transport_filters.png)
 
-> 💡 **Tip:** If your device doesn't appear, check that the radio is not already connected to another device or out of range.
+> 💡 **Tip:** If your radio doesn't appear, check that it isn't already connected to another phone, or out of range.
 
 The screen names anything on the app's side that is blocking a scan, with the fix attached:
 
@@ -77,19 +77,19 @@ USB 連線提供有線替代方案，適用於桌上型電腦或藍牙無法使�
 
 ### 設定
 
-1. 請使用 USB 傳輸線將無線電裝置連接至您的裝置。
-2. 應用程式將提示要求 USB 權限——請點選「允許」。
+1. Connect your radio to your phone with a USB cable.
+2. The app prompts for USB permission — tap **Allow**.
 3. 連線將自動建立。
 
 > ℹ️ **Note:** USB connections require OTG support on Android devices.
 
 ## TCP/IP (Network)
 
-Some Meshtastic radios support WiFi/Ethernet connectivity, allowing TCP-based connections over your local network. Get the radio onto your network first — using the radio's own WiFi settings (via the firmware web interface or another connection) — then connect to it from the app.
+Some Meshtastic radios support Wi-Fi/Ethernet connectivity, allowing TCP-based connections over your local network. Get the radio onto your network first — using the radio's own Wi-Fi settings (via the firmware web interface or another connection) — then connect to it from the app.
 
-> ℹ️ **Note:** **Settings → Wi-Fi Provisioning for mPWRD-OS** is a separate, narrower tool. It provisions WiFi
+> ℹ️ **Note:** **Settings → Wi-Fi Provisioning for mPWRD-OS** is a separate, narrower tool. It provisions Wi-Fi
 > credentials over Bluetooth to **mPWRD-OS** devices only, using their own protocol — it does not
-> configure WiFi on an ordinary Meshtastic radio. It scans over BLE, lists the networks the device
+> configure Wi-Fi on an ordinary Meshtastic radio. It scans over BLE, lists the networks the device
 > can see (including an option for a hidden SSID), takes the password, and reports success or
 > failure. Available on both Android and Desktop.
 
@@ -100,7 +100,7 @@ Some Meshtastic radios support WiFi/Ethernet connectivity, allowing TCP-based co
 3. Choose the radio one of two ways:
    - **Scan for network devices** — toggle this on to auto-discover radios that advertise themselves on the local network (mDNS / `_meshtastic._tcp`). Discovered devices appear in the list; tap one to connect.
    - **Add device manually…** — enter the radio's IP address (or hostname) and port (default: `4403`).
-4. Previously-used network addresses are remembered under **Recent Network Devices** for quick reconnection (long-press to remove one).
+4. Previously-used network addresses are remembered under **Recent Network Devices** for quick reconnection (touch & hold to remove one).
 
 > 💡 **Tip:** Network discovery uses mDNS, which only works when both devices are on the same subnet. On Android 17+ the app needs the local-network permission for scanning; if discovery finds nothing, add the device manually by IP.
 
@@ -112,7 +112,7 @@ Some Meshtastic radios support WiFi/Ethernet connectivity, allowing TCP-based co
 
 ## 重新連線行為
 
-應用程式啟動時將自動重新連接至上次選取的裝置。 您可隨時在連線畫面切換傳輸方式。
+The app reconnects to the last selected radio on startup. 您可隨時在連線畫面切換傳輸方式。
 
 若要中斷連線，請點選連線畫面上的中斷連線按鈕：
 
@@ -134,6 +134,3 @@ Some Meshtastic radios support WiFi/Ethernet connectivity, allowing TCP-based co
 - 〔設定 — 無線電與使用者〕(settings-radio-user) — 藍牙與網路設定
 - 〔桌面版應用程式〕(desktop) — 桌面版連線詳細說明
 - 〔支援的裝置〕(https://meshtastic.org/docs/hardware/devices)— meshtastic.org 上的完整相容無線電裝置清單
-
----
-

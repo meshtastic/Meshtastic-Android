@@ -2,7 +2,7 @@
 title: Интеграция TAK
 parent: Руководство пользователя
 nav_order: 10
-last_updated: 2026-08-28
+last_updated: 2026-08-29
 description: Взаимодействие с ATAK и WinTAK — передача данных CoT о местоположении, роли TAK и настройка плагина.
 aliases:
   - tak
@@ -12,7 +12,7 @@ aliases:
 
 # Интеграция TAK
 
-Meshtastic интегрируется с экосистемой Team Awareness Kit (TAK), обеспечивая взаимодействие между устройствами mesh-сети Meshtastic и приложениями TAK, такими как ATAK и WinTAK.
+Meshtastic integrates with the Team Awareness Kit (TAK) ecosystem, enabling interoperability between Meshtastic radios and TAK applications like ATAK and WinTAK.
 
 ## Обзор
 
@@ -27,8 +27,8 @@ Meshtastic интегрируется с экосистемой Team Awareness K
 ### Необходимые условия
 
 - ATAK (Android Team Awareness Kit), iTAK, or WinTAK installed
-- Your node's **Device Role** set to **TAK** or **TAK Tracker** — this is what makes the TAK
-  module appear in Module Config at all
+- Your node's **Role** (Device Config) set to **TAK** or **TAK Tracker** — this is what makes the
+  TAK module appear in Module Config at all
 
 > ⚠️ **Warning:** The old **Meshtastic ATAK Plugin** is no longer part of this path and cannot
 > work. It bridged through the cross-process AIDL API, which was removed in app 2.8.0; the mesh
@@ -38,22 +38,27 @@ Meshtastic интегрируется с экосистемой Team Awareness K
 ### Настройки
 
 Перейдите в **Настройки → Конфигурация модулей → TAK**. The module's own settings are your TAK identity —
-there is no separate enable switch here, because the device Role above is what turns TAK on:
+there is no separate enable switch here, because the **Role** setting in Device Config is what
+turns TAK on. Your node broadcasts this identity, which appears on TAK maps.
 
-![Переключатель модуля](../../assets/screenshots/settings_switch.png)
+| Настройка      | Описание                                                                                                                 |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Цвет команды   | Цвет твоей команды на карте TAK (например, Синий, Красный, Голубой, Зелёный)                          |
+| Роль участника | Your operational role within that team (Team Member, Team Lead, HQ, Medic, RTO, etc.) |
 
-| Настройка | Описание                          |
-| --------- | --------------------------------- |
-| Командой  | Your TAK team colour              |
-| Роль      | Your member role within that team |
+Your TAK callsign isn't a separate setting — it's derived automatically from your Meshtastic node
+name.
+
+> 💡 **Совет:** Цвета команд/ролей являются стандартными цветами принадлежности в TAK. Coordinate with your TAK
+> team to use consistent team assignments.
 
 ### Локальный TAK-сервер
 
-Приложение также может запускать **локальный TAK-сервер**, чтобы ATAK/iTAK на **том же устройстве** могли подключаться напрямую, без удалённого TAK-сервера. Сервер привязывается только к локальному хосту (`127.0.0.1:8089`) и использует TLS с взаимной аутентификацией по сертификатам (mTLS), поэтому он недоступен с других устройств в сети. Откройте **Настройки → Конфигурация модулей → TAK → TAK-сервер**:
+The app can also run a **local TAK server** so ATAK/iTAK on the **same phone** can connect directly, without a remote TAK server. Сервер привязывается только к локальному хосту (`127.0.0.1:8089`) и использует TLS с взаимной аутентификацией по сертификатам (mTLS), поэтому он недоступен с других устройств в сети. Откройте **Настройки → Конфигурация модулей → TAK → TAK-сервер**:
 
 ![Настройки локального TAK-сервера с переключателем включения и опцией экспорта](../../assets/screenshots/tak_server_enabled.png)
 
-- **Включить локальный TAK-сервер** — запускает mTLS-сервер только на локальную петлю на порту **8089** для подключений ATAK/iTAK с того же устройства.
+- **Enable Local TAK Server** — starts the loopback-only mTLS server on port **8089** for ATAK/iTAK connections from the same phone.
 - **TAK Mesh Channel** — выбирает, в какой канал Meshtastic отправляется исходящий трафик TAK (по умолчанию: основной канал, индекс 0). Входящий трафик TAK принимается с любого канала. Соответствует аналогичной настройке на iOS и в устаревшем плагине ATAK.
 - **Mesh to CoT Converter** — off by default, and shown under the server toggle. With the server
   running, this synthesizes a CoT contact for every node in your node database, so ordinary
@@ -75,19 +80,6 @@ there is no separate enable switch here, because the device Role above is what t
 ### Формат CoT (Cursor on Target)
 
 Сообщения TAK используют формат XML Cursor on Target — военный стандарт для обмена данными о ситуационной осведомлённости. Meshtastic преобразует свои внутренние сообщения protobuf в формат CoT при соединении с системами TAK, поэтому ручное преобразование формата не требуется.
-
-## Идентификация в TAK
-
-При использовании ролей TAK твоя нода передаёт идентификационную информацию, которая отображается на картах TAK:
-
-| Настройка      | Описание                                                                                                                  |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| Цвет команды   | Цвет твоей команды на карте TAK (например, Синий, Красный, Голубой, Зелёный)                           |
-| Роль участника | Твоя оперативная роль (Team Member, Team Lead, HQ, Medic, RTO и т. д.) |
-
-Эти настройки появляются в **Настройки → Конфигурация модулей → TAK**, когда модуль TAK включён. Твой позывной в TAK не задаётся отдельно — он автоматически берётся из имени твоей ноды Meshtastic.
-
-> 💡 **Совет:** Цвета команд/ролей являются стандартными цветами принадлежности в TAK. Согласуй с твоей командой TAK использование единообразных назначений команд.
 
 ## Формат передачи (V1 / V2)
 
@@ -113,26 +105,22 @@ Meshtastic поддерживает два формата передачи да�
 
 ## Устранение неполадок
 
-| Проблема                                   | Причина                                                                                                                   | Решение                                                                                                                                                                                               |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Нода не отображается на карте ATAK         | Wrong device role, or Mesh to CoT Converter off                                                                           | Set the node's Device Role to TAK or TAK Tracker. For ordinary (non-TAK-role) nodes to appear, also enable **Mesh to CoT Converter** under the TAK Server settings |
-| Данные о местоположении устарели           | Потерян сигнал GPS или слишком большой интервал                                                                           | Проверьте состояние GPS; уменьшите интервал передачи координат в настройках Position Config                                                                                                           |
-| ATAK shows "disconnected"                  | The local TAK server is off, or ATAK is pointed elsewhere                                                                 | Check **Enable Local TAK Server** is on, and that ATAK is connecting to `127.0.0.1:8089` — re-import the exported data package if unsure                                                              |
-| Фигуры, маркеры или маршруты не передаются | Отправляющая нода использует устаревший V1 (прошивка 2.7.x или старше) | Обновите прошивку отправляющей ноды до 2.8.0+ для использования формата передачи V2                                                                                   |
-| Данные CoT не передаются                   | Несовпадение каналов                                                                                                      | Все ноды TAK должны находиться на одном канале с одинаковым шифрованием                                                                                                                               |
+| Проблема                                   | Причина                                                                                                                   | Решение                                                                                                                                                                                            |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Нода не отображается на карте ATAK         | Wrong Role setting, or Mesh to CoT Converter off                                                                          | Set the node's **Role** to TAK or TAK Tracker. For ordinary (non-TAK-role) nodes to appear, also enable **Mesh to CoT Converter** under the TAK Server settings |
+| Данные о местоположении устарели           | Потерян сигнал GPS или слишком большой интервал                                                                           | Проверьте состояние GPS; уменьшите интервал передачи координат в настройках Position Config                                                                                                        |
+| ATAK shows "disconnected"                  | The local TAK server is off, or ATAK is pointed elsewhere                                                                 | Check **Enable Local TAK Server** is on, and that ATAK is connecting to `127.0.0.1:8089` — re-import the exported data package if unsure                                                           |
+| Фигуры, маркеры или маршруты не передаются | Отправляющая нода использует устаревший V1 (прошивка 2.7.x или старше) | Обновите прошивку отправляющей ноды до 2.8.0+ для использования формата передачи V2                                                                                |
+| Данные CoT не передаются                   | Несовпадение каналов                                                                                                      | Все ноды TAK должны находиться на одном канале с одинаковым шифрованием                                                                                                                            |
 
 ## Соображения безопасности
 
-- Данные TAK передают ваше местоположение и позывной
-- Убедись, что шифрование канала настроено при использовании TAK в чувствительных средах
-- Модуль TAK соблюдает то же шифрование канала, что и другие сообщения Meshtastic
+> 🔒 **Privacy:** TAK data shares your position and callsign information. The TAK module respects
+> the same channel encryption as other Meshtastic messages — in sensitive environments, use a
+> channel with a non-default key.
 
 ## Связанные темы
 
 - [Настройки — Модули и администрирование](settings-module-admin) — конфигурация модуля TAK
 - [Ноды](nodes) — роли TAK и TAK Tracker в списке нод
 - [Карта и путевые точки](map-and-waypoints) — расположение нод на карте
-- [Руководство по плагину ATAK](https://meshtastic.org/docs/software/integrations/integrations-atak-plugin/) — подробная настройка ATAK на meshtastic.org
-
----
-

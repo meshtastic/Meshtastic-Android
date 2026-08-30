@@ -2,7 +2,7 @@
 title: ヘルプとアプリ内ドキュメント
 parent: User Guide
 nav_order: 21
-last_updated: 2026-08-27
+last_updated: 2026-08-29
 description: このドキュメントをアプリ内で閲覧・検索し、オンデバイスの AI アシスタント Chirpy に Meshtastic について質問できます。
 aliases:
   - help
@@ -37,13 +37,11 @@ aliases:
 
 ![ページリンク付きで質問に答える Chirpy AI アシスタント](../../assets/screenshots/docs-browser_chirpy.png)
 
-> 🔒 **プライバシー：** 対応する Google 版のデバイスでは、Chirpy は Gemini Nano を使って**オンデバイス**で動作します。質問がスマートフォンの外に出ることはありません。 初回使用時に、小さなモデルがダウンロードされます。
+Chirpy is Google-flavor Android only. On F-Droid, desktop and iOS builds the assistant button does not appear at all — the same is true on a phone whose hardware cannot run the on-device model. Browsing and the docs browser's own search work normally on every platform.
 
-> ℹ️ **Note:** Chirpy is Google-flavor Android only. On F-Droid, Desktop and iOS builds the assistant button does not appear at all — the same is true on a Google-flavor device whose hardware cannot run the on-device model. Browsing and the docs browser's own search work normally on every platform.
+> 🔒 **Privacy:** On supported phones running the Google-flavor build, Chirpy runs **on-device** using Gemini Nano — your questions never leave your phone. 初回使用時に、小さなモデルがダウンロードされます。
 
 ## 関連トピック
 
 - [アプリを翻訳する](translate)：これらのページが他の言語にどう翻訳されるか
 - [アプリ機能](app-functions)：Chirpy とは別の、システム AI 連携
-
----

@@ -2,7 +2,7 @@
 title: Ohjeet jasovelluksen sisäinen dokumentaatio
 parent: Käyttöopas
 nav_order: 21
-last_updated: 2026-08-27
+last_updated: 2026-08-29
 description: Selaa tätä dokumentaatiota sovelluksessa, hae siitä tietoa ja kysy Meshtasticiin liittyviä kysymyksiä Chirpyltä — laitteella toimivalta tekoälyavustajalta.
 aliases:
   - apua
@@ -37,13 +37,11 @@ Dokumentaatiosivu avattuna selaimessa:
 
 ![Chirpy-tekoälyavustaja vastaa kysymykseen ja näyttää linkkejä sivuille](../../assets/screenshots/docs-browser_chirpy.png)
 
-> ⚠️ **Tietosuoja:** Google-versiota käyttävillä laitteilla Chirpy toimii **laitteella** Gemini Nanon avulla — kysymyksesi eivät poistu puhelimestasi. Pieni kielimalli ladataan ensimmäisellä käyttökerralla.
+Chirpy on käytettävissä vain Androidin Google-versiossa. F-Droid-, Työpöytä- ja iOS-versioissa avustajapainiketta ei näytetä lainkaan — sama koskee puhelimia, joiden laitteisto ei pysty suorittamaan laitteella ajettavaa mallia. Selaaminen ja ohjeselaimen oma haku toimivat normaalisti kaikilla alustoilla.
 
-> ℹ️ **Note:** Chirpy is Google-flavor Android only. On F-Droid, Desktop and iOS builds the assistant button does not appear at all — the same is true on a Google-flavor device whose hardware cannot run the on-device model. Browsing and the docs browser's own search work normally on every platform.
+> 🔒 **Tietosuoja:** Tuetuissa puhelimissa, joissa käytetään Google-versiota, Chirpy toimii **laitteella** Gemini Nanon avulla — kysymyksesi eivät koskaan poistu puhelimestasi. Pieni kielimalli ladataan ensimmäisellä käyttökerralla.
 
 ## Aiheeseen liittyvät aiheet
 
 - [Käännä sovellus](translate) — miten nämä sivut lokalisoidaan muille kielille
 - [Sovelluksen toiminnot](app-functions) — erillinen järjestelmätekoälyintegraatio (ei sama kuin Chirpy)
-
----

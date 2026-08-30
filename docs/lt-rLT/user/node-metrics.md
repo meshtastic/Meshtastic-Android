@@ -2,7 +2,7 @@
 title: Node Metrics
 parent: User Guide
 nav_order: 5
-last_updated: 2026-08-27
+last_updated: 2026-08-29
 description: Telemetry dashboards for each mesh node — device health, environment sensors, air quality, signal quality, power, traceroute, and position history.
 aliases:
   - metrics
@@ -14,6 +14,20 @@ aliases:
 # Node Metrics
 
 The node detail screen provides comprehensive telemetry and metrics for each node on your mesh.
+
+## Viewing Metrics
+
+1. Navigate to **Nodes**.
+2. Tap the node you want to inspect.
+3. Select the metric category from the detail tabs.
+
+![Node detail — local device](../../assets/screenshots/nodes_detail_local.png)
+
+The position tab shows location data for nodes that share GPS:
+
+![Position inline content](../../assets/screenshots/nodes_position.png)
+
+> ℹ️ **Note:** Metrics are only available when they have been reported by the remote node. Metrics update at intervals configured on each node's telemetry settings.
 
 ## Device Metrics
 
@@ -43,7 +57,7 @@ Environmental sensor data (requires compatible hardware):
 | Gas Resistance                       | BME680                |
 | IAQ (Air Quality) | BME680                |
 
-Environment metrics are charted over time for easy trend analysis — temperature, humidity, and pressure each get their own line chart with the measurement unit displayed on the Y axis.
+Environment metrics are charted over time — temperature, humidity, and pressure each get their own line chart with the measurement unit displayed on the Y axis.
 
 The BME680 **IAQ (Indoor Air Quality)** index is a single 0–500+ value derived from gas resistance, shown against a color-coded scale from _Excellent_ to _Dangerously Polluted_:
 
@@ -55,17 +69,17 @@ The BME680 **IAQ (Indoor Air Quality)** index is a single 0–500+ value derived
 
 Air Quality is a dedicated metrics view for nodes equipped with a particulate-matter and/or CO₂ sensor. It is **separate from the BME680 IAQ reading** listed under Environment Metrics — IAQ is a single gas-resistance-derived index, while the Air Quality view charts the underlying particulate and CO₂ measurements.
 
-| Metric                | Unit      | Aprašymas                                                                                                                                                                                                                  |
-| --------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| PM1.0 | µg/m³     | Particulate matter up to 1.0 micron                                                                                                                                                                        |
-| PM2.5 | µg/m³     | Particulate matter up to 2.5 microns                                                                                                                                                                       |
-| PM10                  | µg/m³     | Particulate matter up to 10 microns                                                                                                                                                                                        |
-| AQI                   | EPA index | EPA **NowCast** AQI computed from your recent PM2.5 history, with a color-coded severity label. Shown next to PM2.5 once enough readings have accumulated. |
-| CO₂                   | ppm       | Carbon dioxide concentration                                                                                                                                                                                               |
-| CO₂ temperature       | °C / °F   | Temperature reported by the CO₂ sensor itself (e.g. SCD4x)                                                                                                              |
-| CO₂ humidity          | %         | Relative humidity reported by the CO₂ sensor                                                                                                                                                                               |
+| Metric                | Unit      | Aprašymas                                                                                                                                                                                                                        |
+| --------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| PM1.0 | µg/m³     | Particulate matter up to 1.0 micron                                                                                                                                                                              |
+| PM2.5 | µg/m³     | Particulate matter up to 2.5 microns                                                                                                                                                                             |
+| PM10                  | µg/m³     | Particulate matter up to 10 microns                                                                                                                                                                                              |
+| AQI                   | EPA index | EPA **NowCast** AQI computed from the node's recent PM2.5 history, with a color-coded severity label. Shown next to PM2.5 once enough readings have accumulated. |
+| CO₂                   | ppm       | Carbon dioxide concentration                                                                                                                                                                                                     |
+| CO₂ temperature       | °C / °F   | Temperature reported by the CO₂ sensor itself (e.g. SCD4x)                                                                                                                    |
+| CO₂ humidity          | %         | Relative humidity reported by the CO₂ sensor                                                                                                                                                                                     |
 
-CO₂ readings are color-coded by severity to make air quality easy to read at a glance:
+CO₂ readings are color-coded by severity so you can read air quality at a glance:
 
 | Band     | CO₂ Range (ppm) | Color    |
 | -------- | ---------------------------------- | -------- |
@@ -84,7 +98,7 @@ An air-quality log/metrics button appears on the node detail screen **only when 
 - **Refresh / request** the latest air-quality telemetry.
 - **Export to CSV** for analysis in a spreadsheet.
 
-> 💡 **Tip:** Air Quality metrics require a compatible air-quality sensor on the remote node. If a node has no particulate or CO₂ sensor, the air-quality button won't appear. See [Telemetry & Sensors](telemetry-and-sensors) for supported hardware.
+> 💡 **Tip:** Air Quality metrics require a compatible air-quality sensor on the remote node. See [Telemetry & Sensors](telemetry-and-sensors) for supported hardware.
 
 ## Signal Metrics
 
@@ -99,7 +113,7 @@ Radio signal quality information:
 
 ### Signal Quality Reference
 
-Signal quality is rated from **SNR relative to the active LoRa modem preset's demodulation floor**, not from fixed thresholds — a given SNR means different things on different presets (e.g. −15 dB is fine on LongSlow but unusable on ShortFast). RSSI is shown but is not part of the rating. Letting `limit` be the preset's SNR limit:
+Signal quality is rated from **SNR relative to the active LoRa modem preset's demodulation floor**, not from fixed thresholds — a given SNR means different things on different presets (e.g. −15 dB is fine on LongSlow but unusable on ShortFast). RSSI is shown but is not part of the rating. In the table, _limit_ is the preset's SNR limit.
 
 | Quality    | Criteria                                                         |
 | ---------- | ---------------------------------------------------------------- |
@@ -110,7 +124,11 @@ Signal quality is rated from **SNR relative to the active LoRa modem preset's de
 
 See [Understanding the Signal Meter](signal-meter) for the full explanation.
 
-Local Stats from your connected radio are also shown in Signal Quality when available. These logs include noise floor, traffic counters, relay counters, online node counts, and radio uptime. The noise floor chart uses a dashed reference line at -85 dBm to help identify a busy RF environment. Use **Request** to ask the connected radio for a fresh Local Stats telemetry report, **Clear** to remove Local Stats logs for that node, and **Save** to export the visible Local Stats history as CSV.
+Local Stats from your connected radio are also shown in Signal Metrics when available. These logs include noise floor, traffic counters, relay counters, online node counts, and radio uptime. The noise floor chart uses a dashed reference line at -85 dBm to help identify a busy RF environment.
+
+- **Request** — ask the connected radio for a fresh Local Stats telemetry report
+- **Clear** — remove Local Stats logs for that node
+- **Save** — export the visible Local Stats history as CSV
 
 ## Power Metrics
 
@@ -121,7 +139,7 @@ Power management telemetry (requires INA sensor or compatible hardware):
 | Voltage | Per-channel voltage reading    |
 | Current | Per-channel draw, in milliamps |
 
-Up to three channels (ch1–ch3) are charted, each with a label you can edit. The app does not
+Up to three sensor channels (ch1–ch3) are charted, each with a label you can edit. The app does not
 derive a wattage figure from them.
 
 ## Žinutės kelias
@@ -153,20 +171,6 @@ Historical position data for nodes that share their location:
 
 Shows which nodes a given node can directly hear, useful for understanding mesh topology.
 
-## Viewing Metrics
-
-1. Navigate to **Nodes**.
-2. Tap the node you want to inspect.
-3. Select the metric category from the detail tabs.
-
-![Node detail — local device](../../assets/screenshots/nodes_detail_local.png)
-
-The position tab shows location data for nodes that share GPS:
-
-![Position inline content](../../assets/screenshots/nodes_position.png)
-
-> ℹ️ **Note:** Metrics are only available when they have been reported by the remote node. Metrics update at intervals configured on each node's telemetry settings.
-
 ## Related Topics
 
 - [Nodes](nodes) — node list, filtering, and sorting
@@ -174,5 +178,3 @@ The position tab shows location data for nodes that share GPS:
 - [Signal Meter](signal-meter) — how signal quality is calculated from SNR and RSSI
 - [Local Mesh Discovery](discovery) — traceroute details and neighbor info
 - [Units & Locale](units-and-locale) — temperature, distance, and speed display formats
-
----

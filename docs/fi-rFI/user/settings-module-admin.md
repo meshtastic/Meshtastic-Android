@@ -2,7 +2,7 @@
 title: Asetukset — Moduulit ja ylläpito
 parent: Käyttöopas
 nav_order: 8
-last_updated: 2026-08-27
+last_updated: 2026-08-29
 description: Määritä valinnaiset ominaisuusmoduulit (MQTT, telemetria, valmiit viestit, TAK ja muut) sekä suorita laitteen ylläpitotoimia.
 aliases:
   - moduulit
@@ -43,7 +43,7 @@ Yhdistää verkon viestejä MQTT-välityspalvelimeen ja sieltä takaisin interne
 | TLS                                    | Käytä suojattua yhteyttä                                                                                                                                                                                    |
 | Juuriaihe                              | MQTT:n perusaihepolku                                                                                                                                                                       |
 | Välityspalvelin käytössä               | Anna yhdistetyn puhelimen välittää radion MQTT-liikenne sen sijaan, että radio muodostaisi itse yhteyden välityspalvelimeen                                                                                 |
-| MQTT-välityspalvelin tällä puhelimella | Yllä olevan toiminnon puhelinpään asetus: käyttääkö **tämä** puhelin tällä hetkellä kyseistä välitystä. Katso [MQTT](mqtt)                                                  |
+| MQTT-välityspalvelin tällä puhelimella | Yllä olevan **Välitys asiakkaalle käytössä** -asetuksen puhelinpään osuus: käyttääkö tämä puhelin kyseistä välitystä. Katso [MQTT](mqtt)                                    |
 | Karttaraportointi                      | Julkaise sijainti julkiselle kartalle – katso alla                                                                                                                                                          |
 
 **Karttajulkaisu** laajenee omaksi ryhmäkseen:
@@ -109,7 +109,7 @@ Puskuroi viestejä radioille, jotka ovat tilapäisesti poissa verkosta, ja toimi
 
 ### Kuuluvuustesti-moduuli
 
-> ⚠️ **Varoitus:** Kuuluvuustesti toimii vain suojatulla ensisijaisella kanavalla. Niin kauan kuin ensisijainen kanavasi käyttää oletusarvoista julkista avainta, Käytössä-, Väli- ja Tallenna CSV -asetukset pysyvät poissa käytöstä. Tallentaminen poistaa moduulin automaattisesti käytöstä, jos kanava on palautunut julkiseksi.
+> ⚠️ **Varoitus:** Kuuluvuustesti toimii vain suojatulla ensisijaisella kanavalla. Niin kauan kuin ensisijainen kanavasi käyttää oletusarvoista kanava-avainta, Käytössä-, Väli- ja Tallenna CSV -asetukset pysyvät poissa käytöstä. Tallentaminen poistaa moduulin automaattisesti käytöstä, jos kanava on palautunut julkiseksi.
 
 Automaattinen kuuluvuustestityökalu radioiden välisen yhteyden laadun arviointiin. Kun toiminto on käytössä, radio lähettää säännöllisesti testiviestejä kasvavilla laskuriarvoilla. Vastaanottava radio kirjaa nämä viestit, jolloin voit myöhemmin kävellä tai ajaa pois ja analysoida, millä etäisyydellä viestien saapuminen loppui.
 
@@ -143,7 +143,7 @@ Katso [Telemetria ja anturit](telemetry-and-sensors) saadaksesi tietoa tuetuista
 
 ### Valmiiden viestien moduuli
 
-Esimääritetyt viestit, joita voidaan käyttää laitteen fyysisillä painikkeilla (radioille, joissa on kiertokooderi, näppäimistö tai vastaava laitteisto). Määritä luettelo pikaviesteistä, jotka voidaan lähettää ilman yhdistettyä puhelinta — ihanteellinen kenttäkäyttöön.
+Valmiiksi määritetyt viestit, joita voidaan lähettää radion fyysisillä painikkeilla (radioille, joissa on kiertokoodain, näppäimistö tai vastaava syöttölaite). Määritä luettelo pikaviesteistä, jotka voidaan lähettää ilman yhdistettyä puhelinta — ihanteellinen kenttäkäyttöön.
 
 | Asetus                                                          | Kuvaus                                                                                                                 |
 | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
@@ -176,13 +176,13 @@ Codec2-äänituki matalan kaistanleveyden puheviestintään verkossa. Tämä on 
 
 GPIO-ohjaus mesh-verkon kautta. Mahdollistaa etäradion lukea tai kirjoittaa GPIO-nastoja toisessa radiossa — hyödyllinen releiden aktivointiin, kytkimien lukemiseen tai ulkoisen laitteiston ohjaamiseen etäältä.
 
+> ⚠️ **Varoitus:** **Salli määrittämättömät nastat** -asetuksen käyttöönotto antaa etäradioille pääsyn kaikkiin GPIO-nastoihin, mikä voi häiritä radion omaa laitteistoa. Ota käyttöön vain erillisissä GPIO-radioissa.
+
 | Asetus                          | Kuvaus                                                                      |
 | ------------------------------- | --------------------------------------------------------------------------- |
 | Käytössä                        | Ota etä-GPIO-käyttö käyttöön                                                |
 | Salli määrittelemättömät pinnit | Salli pääsy mihin tahansa GPIO-nastaan (tietoturvariski) |
 | Käytettävissä olevat pinnit     | Enintään 4 tämän radion etälukuun tai kirjoitukseen tarjoamaa GPIO-pinniä   |
-
-> ⚠️ **Varoitus:** Määrittelemättömien pinnien salliminen antaa etäradioille pääsyn kaikkiin GPIO-pinneihin, mikä voi häiritä radion omaa laitteistoa. Ota käyttöön vain erillisissä GPIO-radioissa.
 
 ### Naapuritieto-moduuli
 
@@ -223,28 +223,20 @@ Muuttaa radiosi liike- tai ovitunnistimeen perustuvaksi hälytysjärjestelmäksi
 
 ### PAX-laskurimoduuli
 
-Henkilölaskuri, joka hyödyntää Wi-Fi- ja BLE-koepyyntöjä. Laskee lähellä olevia laitteita kuuntelemalla passiivisesti koepyyntöjä, joita puhelimet ja kannettavat tietokoneet lähettävät etsiessään verkkoja. Saatavilla vain ESP32-laitteissa.
+Henkilöt, jotka lasketaan WiFi- ja BLE-hakukyselyiden perusteella. Laskee lähellä olevia laitteita kuuntelemalla passiivisesti koepyyntöjä, joita puhelimet ja kannettavat tietokoneet lähettävät etsiessään verkkoja. Saatavilla vain ESP32-laitteissa.
 
-| Asetus                              | Kuvaus                                                                                                                                        |
-| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| Käytössä                            | Ota henkilölaskenta käyttöön                                                                                                                  |
-| Päivitysväli (s) | Kuinka usein laskentatiedot raportoidaan                                                                                                      |
-| Wi-Fi-signaalin RSSI-kynnys         | Ohita tätä heikommat Wi-Fi-hakukyselyt, jotta kaukana olevia laitteita ei lasketa mukaan (oletus: -80 dBm) |
-| BLE-signaalin RSSI-kynnys           | Sama raja-arvo BLE-mainospaketeille (oletus: -80 dBm)                                                      |
+| Asetus                              | Kuvaus                                                                                                                                         |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Käytössä                            | Ota henkilölaskenta käyttöön                                                                                                                   |
+| Päivitysväli (s) | Kuinka usein laskentatiedot raportoidaan                                                                                                       |
+| WiFi-signaalin RSSI-kynnys          | Ohita tätä heikommat WiFi-hakukyselyt, jotta kauempana olevia laitteita ei lasketa mukaan (oletus: –80 dBm) |
+| BLE-signaalin RSSI-kynnys           | Sama raja-arvo BLE-mainospaketeille (oletus: -80 dBm)                                                       |
 
 > 💡 **Vinkki:** PAX-laskuri on hyödyllinen jalankulkijamäärien arviointiin retkeilyreittien lähtöpisteissä, tapahtumapaikoilla tai muissa kohteissa. Laskentatulokset ovat arvioita — yhdellä henkilöllä voi olla useita laitteita mukana.
 
 ### Tilaviestimoduuli
 
-Julkaisee radiollesi lyhyen vapaamuotoisen tilaviestin, jonka muut radiot voivat näyttää sen yhteydessä.
-
-| Asetus                    | Kuvaus                                                                                                                                                                                |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Käytössä oleva tilaviesti | Enintään 80 merkkiä. Kenttään kirjoitettu **✕** tyhjentää sen. (Tämä on sovelluksen oma kentän nimi sellaisenaan.) |
-
-Tallennus tulee voimaan heti – tämä on yksi harvoista moduuliasetuksista, joka ei koskaan pyydä radion uudelleenkäynnistystä.
-
-> ℹ️ **Huomautus:** Näyttö näkyy vain laiteohjelmistoissa, jotka tukevat tilaviestimoduulia. Jos et näe sitä moduuliluettelossa, radiosi laiteohjelmisto ei tue sitä.
+Tilaviestillä ei ole omaa moduulinäkymää. Sitä muokataan yhdessä muiden radion tunnistetietojen kanssa kohdassa [Asetukset → Radio ja käyttäjä](settings-radio-user#user-profile).
 
 ### Mesh Beacon -moduuli
 
@@ -253,9 +245,7 @@ Lähettää kutsun mesh-verkkoosi ja vastaanottaa muiden lähettämiä kutsuja. 
 
 ### TAK-moduuli
 
-> ℹ️ **Huomautus:** Tämä moduuli näkyy luettelossa vain, kun radion **Laitteen rooli** (Laiteasetukset) on asetettu arvoon **TAK** tai **TAK-seurantalaite**. Vaihda ensin roolia, muuten tätä kohtaa ei näy.
-
-Team Awareness Kit -integraatio yhteensopivuutta varten ATAK- ja WinTAK-järjestelmien kanssa. Katso [TAK-integraatio](tak) saadaksesi tarkemmat määritys- ja käyttöohjeet.
+Team Awareness Kit -integraatio yhteensopivuutta varten ATAK- ja WinTAK-järjestelmien kanssa. Tämä moduuli näkyy luettelossa vasta, kun radion **Laitteen rooli** (Laiteasetukset) on asetettu arvoon **TAK** tai **TAK-seurantalaite** — vaihda ensin roolia, muuten kohtaa ei näy. Katso [TAK-integraatio](tak), jossa on tarkemmat käyttöönotto- ja käyttöohjeet.
 
 ## Ylläpito
 
@@ -268,7 +258,7 @@ Määritä etänä radiot, jotka jakavat saman ylläpitoavaimen:
 3. Muokkaa määrityksiä.
 4. Napauta **Tallenna** — muutokset lähetetään verkon kautta.
 
-> ⚠️ **Edellyttää:** Ylläpitoavain on määritetty sekä omassa radiossasi että kohderadiossa.
+> ⚠️ **Tärkeää:** Edellyttää, että järjestelmänvalvojan avain on määritetty sekä omassa radiossasi että kohderadiossa.
 
 ### Tyhjennä NodeDB-tietokanta
 
@@ -279,7 +269,9 @@ Siivoaa paikallisen radiotietokannan. Kaksi toisistaan riippumatonta asetusta:
 
 ### Palauta tehdasasetukset
 
-Palauttaa kaikki asetukset tehdasasetuksiin. **Tätä toimintoa ei voi perua.**
+> ⚠️ **Varoitus:** Tehdasasetusten palautus poistaa kaikki asetukset, kanavat ja avaimet. Tätä ei voi kumota.
+
+Palauttaa kaikki asetukset tehdasasetuksiin.
 
 ### Käynnistä uudelleen
 
@@ -296,8 +288,7 @@ Avaa **Paketit**- ja **Sovelluslokit**-välilehdet diagnostiikkatietojen tarkast
 Kolme osiota:
 
 - **Mikä on Meshtastic?** – lyhyt kuvaus projektista.
-- **Sovellukset** – avautuu kohtaan **Tarvitsetko laitteiston?**, jossa suosittujen laitteiden karuselli sisältää linkit niiden ostopaikkoihin. Lisäksi näytetään GitHub-projekti, käytössä oleva sovellusversio ja
-  **Tekijätiedot** (alla).
+- **Sovellukset** — avaa **Tarvitsetko laitteiston?** -näkymän, jossa on suosittujen laitteiden karuselli ja linkit niiden ostopaikkoihin. Siellä näytetään myös GitHub-tietovarasto, käytössä oleva sovellusversio ja **Tekijätiedot** (katso seuraava osio).
 - **Projektitiedot** – linkit verkkosivustolle ja tähän dokumentaatioon.
 
 ### Kiitokset
@@ -315,6 +306,3 @@ Kolme osiota:
 - [Asetukset — Radio ja käyttäjä](settings-radio-user) — radion ja käyttäjäprofiilin keskeiset asetukset
 - [Moduulien määritysviite](https://meshtastic.org/docs/configuration/module) — yksityiskohtainen moduulidokumentaatio meshtastic.org-sivustolla
 - [UKK](https://meshtastic.org/docs/faq/) – usein kysytyt kysymykset meshtastic.org -sivustolla
-
----
-

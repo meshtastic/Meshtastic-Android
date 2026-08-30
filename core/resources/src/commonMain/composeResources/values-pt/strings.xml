@@ -113,7 +113,6 @@
     <string name="config_lora_hop_limit_summary">Define o número máximo de saltos; o valor predefinido é 3. Aumentar o número de saltos também aumenta a congestão e deve ser usado com precaução. Mensagens de broadcast com 0 saltos não receberão ACKs.</string>
     <string name="config_network_eth_enabled_summary">Ativar a Ethernet irá desativar a ligação Bluetooth à aplicação. As ligações TCP do nó não estão disponíveis em dispositivos Apple.</string>
     <string name="config_network_udp_enabled_summary">Ativar a transmissão de pacotes via UDP através da rede local.</string>
-    <string name="config_network_wifi_enabled_summary">Ativar o WiFi irá desativar a ligação Bluetooth à aplicação.</string>
     <string name="config_position_broadcast_secs_summary">O intervalo máximo que pode decorrer sem que um nó transmita a sua posição.</string>
     <string name="configuration">Configuração</string>
     <string name="connect">Ligar</string>
@@ -292,6 +291,9 @@
     <string name="map_download_complete">Download concluído!</string>
     <string name="map_download_errors">Download concluído com %1$d erros</string>
     <string name="map_download_region">Baixar região</string>
+    <string name="map_filter_all_roles">Tudo</string>
+    <string name="map_filter_display_title">Ecrã</string>
+    <string name="map_filter_nodes_title">Nodes</string>
     <string name="map_offline_manager">Gerenciador offline</string>
     <string name="map_purge_fail">Falha na remoção do cache SQL, consulte logcat para obter detalhes</string>
     <string name="map_purge_success">Cache SQL removido para %1$s</string>
@@ -598,12 +600,8 @@
     <string name="waypoint_received">Ponto de passagem recebido %1$s</string>
     <string name="weight">Peso</string>
     <!-- WIFI -->
-    <string name="wifi_enabled">WiFi ligado</string>
     <string name="wifi_provision_success_ip_address">Endereço IP</string>
     <string name="wifi_provision_success_username">Utilizador</string>
-    <string name="wifi_qr_code_error">Código QR do Wi-Fi com formato inválido</string>
-    <string name="wifi_qr_code_scan">Ler o código QR do Wi-Fi</string>
-    <string name="wifi_rssi_threshold_defaults_to_80">Limite de RSSI do Wi-Fi (o padrão é -80)</string>
     <!-- WIND -->
     <string name="wind">Vento</string>
     <!-- WRITE -->
