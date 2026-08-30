@@ -20,6 +20,7 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import org.koin.core.annotation.KoinViewModel
@@ -28,6 +29,7 @@ import org.meshtastic.core.database.entity.DiscoverySessionEntity
 import org.meshtastic.core.model.ChannelOption
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.MeshBeaconOffer
+import org.meshtastic.core.model.util.isAlreadyJoined
 import org.meshtastic.core.repository.DiscoveryPrefs
 import org.meshtastic.core.repository.MeshBeaconRepository
 import org.meshtastic.core.repository.RadioConfigRepository
@@ -55,40 +57,6 @@ class DiscoveryViewModel(
     val currentSession: StateFlow<DiscoverySessionEntity?> = scanEngine.currentSession
     val connectionState: StateFlow<ConnectionState> = serviceRepository.connectionState
 
-    /** Mesh Beacon invitations received from other meshes, newest first. */
-    val beaconOffers: StateFlow<List<MeshBeaconOffer>> = meshBeaconRepository.offers
-
-    /** Modem presets advertised by any received beacon — flagged in the scan-setup picker (FR-004). */
-    val beaconPresets: StateFlow<Set<ChannelOption>> =
-        meshBeaconRepository.offers
-            .map { offers -> offers.mapNotNull { ChannelOption.from(it.beacon.offer_preset) }.toSet() }
-            .stateInWhileSubscribed(initialValue = emptySet())
-
-    /** Distinct custom channels advertised by beacons — offered as selectable scan targets (FR-007). */
-    val beaconChannels: StateFlow<List<BeaconChannel>> =
-        meshBeaconRepository.offers
-            .map { offers ->
-                offers
-                    .mapNotNull { offer ->
-                        val ch = offer.beacon.offer_channel ?: return@mapNotNull null
-                        val name =
-                            ch.name.ifBlank {
-                                return@mapNotNull null
-                            }
-                        BeaconChannel(
-                            name = name,
-                            psk = ch.psk,
-                            preset = ChannelOption.from(offer.beacon.offer_preset),
-                            region = offer.beacon.offer_region,
-                        )
-                    }
-                    .distinctBy { it.id }
-            }
-            .stateInWhileSubscribed(initialValue = emptyList())
-
-    private val _selectedBeaconChannels = MutableStateFlow<Set<String>>(emptySet())
-    val selectedBeaconChannels: StateFlow<Set<String>> = _selectedBeaconChannels.asStateFlow()
-
     /** The radio's current LoRa config — drives the add-vs-switch decision for a beacon join. */
     val currentLora: StateFlow<LoRaConfig?> =
         radioConfigRepository.localConfigFlow.map { it.lora }.stateInWhileSubscribed(initialValue = null)
@@ -96,6 +64,33 @@ class DiscoveryViewModel(
     /** The radio's current channel settings (index 0 = primary) — drives the add-vs-switch decision. */
     val currentChannels: StateFlow<List<ChannelSettings>> =
         radioConfigRepository.channelSetFlow.map { it.settings }.stateInWhileSubscribed(initialValue = emptyList())
+
+    /**
+     * Mesh Beacon invitations received from other meshes, newest first, minus offers for a channel the radio already
+     * has configured (design#140 behavior 10). Filtered reactively at presentation time, not at ingest, so a later
+     * channel deletion brings a still-stored invitation back and joining removes it, without ever mutating
+     * [MeshBeaconRepository].
+     */
+    val beaconOffers: StateFlow<List<MeshBeaconOffer>> =
+        combine(meshBeaconRepository.offers, currentLora, currentChannels, ::filterAlreadyJoinedOffers)
+            .stateInWhileSubscribed(initialValue = emptyList())
+
+    /** Modem presets advertised by any received beacon — flagged in the scan-setup picker (FR-004). */
+    val beaconPresets: StateFlow<Set<ChannelOption>> =
+        meshBeaconRepository.offers
+            .map { offers -> offers.mapNotNull { ChannelOption.from(it.beacon.offer_preset) }.toSet() }
+            .stateInWhileSubscribed(initialValue = emptySet())
+
+    /**
+     * Distinct custom channels advertised by beacons — offered as selectable scan targets (FR-007), minus a channel the
+     * radio already has configured (design#140 behavior 10).
+     */
+    val beaconChannels: StateFlow<List<BeaconChannel>> =
+        combine(meshBeaconRepository.offers, currentLora, currentChannels, ::filterAlreadyJoinedBeaconChannels)
+            .stateInWhileSubscribed(initialValue = emptyList())
+
+    private val _selectedBeaconChannels = MutableStateFlow<Set<String>>(emptySet())
+    val selectedBeaconChannels: StateFlow<Set<String>> = _selectedBeaconChannels.asStateFlow()
 
     val homePreset: StateFlow<ChannelOption> =
         radioConfigRepository.localConfigFlow
@@ -242,3 +237,39 @@ class DiscoveryViewModel(
         private const val SECONDS_PER_MINUTE = 60L
     }
 }
+
+/**
+ * Drops beacon offers whose channel the radio already has configured (design#140 behavior 10). Extracted as a plain
+ * function so the filtering logic is unit-testable without constructing [DiscoveryViewModel] or its Flow wiring.
+ */
+internal fun filterAlreadyJoinedOffers(
+    offers: List<MeshBeaconOffer>,
+    lora: LoRaConfig?,
+    channels: List<ChannelSettings>,
+): List<MeshBeaconOffer> = offers.filterNot { it.beacon.isAlreadyJoined(lora, channels) }
+
+/**
+ * Builds the distinct, selectable beacon-channel scan targets, dropping any channel the radio already has configured
+ * (design#140 behavior 10). Extracted as a plain function for the same testability reason as
+ * [filterAlreadyJoinedOffers].
+ */
+internal fun filterAlreadyJoinedBeaconChannels(
+    offers: List<MeshBeaconOffer>,
+    lora: LoRaConfig?,
+    channels: List<ChannelSettings>,
+): List<BeaconChannel> = offers
+    .mapNotNull { offer ->
+        val ch = offer.beacon.offer_channel ?: return@mapNotNull null
+        val name =
+            ch.name.ifBlank {
+                return@mapNotNull null
+            }
+        if (ch.isAlreadyJoined(offer.beacon.offer_preset, lora, channels)) return@mapNotNull null
+        BeaconChannel(
+            name = name,
+            psk = ch.psk,
+            preset = ChannelOption.from(offer.beacon.offer_preset),
+            region = offer.beacon.offer_region,
+        )
+    }
+    .distinctBy { it.id }
