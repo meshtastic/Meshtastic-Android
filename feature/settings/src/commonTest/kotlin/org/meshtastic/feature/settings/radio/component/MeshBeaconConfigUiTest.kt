@@ -25,11 +25,9 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.getString
-import org.meshtastic.core.resources.mesh_beacon_offer_channel_name
 import org.meshtastic.core.resources.mesh_beacon_region_required
 import org.meshtastic.core.resources.save_changes
 import org.meshtastic.core.ui.component.DropDownItem
-import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.feature.settings.radio.ResponseState
@@ -96,16 +94,14 @@ class MeshBeaconConfigUiTest {
                     onSave = { savedConfig = stampBeaconConfigForSave(it, radioLora, channelList) },
                 ) {
                     item {
-                        val offerChannel = configState.value.broadcast_offer_channel
-                        val matchedIndex = beaconOfferChannelIndex(offerChannel, channelList)
-                        val items = channelList.mapIndexed { index, s -> DropDownItem(index, s.name) }
-                        DropDownPreference(
-                            title = getString(Res.string.mesh_beacon_offer_channel_name),
-                            items = items,
-                            selectedItem = matchedIndex ?: 0,
+                        OfferChannelPreference(
+                            offerChannel = configState.value.broadcast_offer_channel,
+                            channelList = channelList,
+                            radioLora = radioLora,
+                            channelItems = channelList.mapIndexed { index, s -> DropDownItem(index, s.name) },
                             enabled = true,
-                            onItemSelected = { index ->
-                                configState.value = configState.value.copy(broadcast_offer_channel = channelList[index])
+                            onChannelSelect = {
+                                configState.value = configState.value.copy(broadcast_offer_channel = it)
                             },
                         )
                     }

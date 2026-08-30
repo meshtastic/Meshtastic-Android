@@ -37,6 +37,7 @@ import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.RegionInfo
 import org.meshtastic.core.model.RegionPresetConstraint
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.config_lora_modem_preset_licensed_summary
 import org.meshtastic.core.resources.mesh_beacon
 import org.meshtastic.core.resources.mesh_beacon_broadcast
 import org.meshtastic.core.resources.mesh_beacon_broadcast_summary
@@ -65,6 +66,8 @@ import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.util.FixedUpdateIntervals
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.toDisplayString
+import org.meshtastic.proto.ChannelSettings
+import org.meshtastic.proto.Config
 import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
 import org.meshtastic.proto.Config.LoRaConfig.RegionCode
 import org.meshtastic.proto.ModuleConfig
@@ -240,28 +243,14 @@ fun MeshBeaconConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, 
         }
         item {
             TitledCard(title = stringResource(Res.string.mesh_beacon_offer_channel_name)) {
-                val offerChannel = formState.value.broadcast_offer_channel
-                val matchedIndex =
-                    remember(offerChannel, state.channelList) {
-                        beaconOfferChannelIndex(offerChannel, state.channelList)
-                    }
-                val offerItems =
-                    if (offerChannel != null && matchedIndex == null) {
-                        val staleLabel = offerChannel.name.ifBlank { Channel(offerChannel, radioLora).name }
-                        channelItems + DropDownItem(value = -1, label = staleLabel, enabled = false)
-                    } else {
-                        channelItems
-                    }
-                val selectedChannelIndex = matchedIndex ?: if (offerChannel == null) 0 else -1
-                DropDownPreference(
-                    title = stringResource(Res.string.mesh_beacon_offer_channel_name),
-                    items = offerItems,
-                    selectedItem = selectedChannelIndex,
+                OfferChannelPreference(
+                    offerChannel = formState.value.broadcast_offer_channel,
+                    channelList = state.channelList,
+                    radioLora = radioLora,
+                    channelItems = channelItems,
                     enabled = state.connected,
-                    onItemSelected = { index ->
-                        state.channelList.getOrNull(index)?.let { chosen ->
-                            formState.value = formState.value.copy(broadcast_offer_channel = chosen)
-                        }
+                    onChannelSelect = { chosen ->
+                        formState.value = formState.value.copy(broadcast_offer_channel = chosen)
                     },
                 )
             }
@@ -279,6 +268,38 @@ fun MeshBeaconConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, 
             )
         }
     }
+}
+
+/**
+ * Picker for the required offered channel (design#140 behavior 3): one of the radio's own channels, defaulting to the
+ * primary when unset. A stored channel the radio no longer has is kept selected as a disabled fallback item so the
+ * picker never renders blank.
+ */
+@Composable
+internal fun OfferChannelPreference(
+    offerChannel: ChannelSettings?,
+    channelList: List<ChannelSettings>,
+    radioLora: Config.LoRaConfig,
+    channelItems: List<DropDownItem<Int>>,
+    enabled: Boolean,
+    onChannelSelect: (ChannelSettings) -> Unit,
+) {
+    val matchedIndex = remember(offerChannel, channelList) { beaconOfferChannelIndex(offerChannel, channelList) }
+    val offerItems =
+        if (offerChannel != null && matchedIndex == null) {
+            val staleLabel = offerChannel.name.ifBlank { Channel(offerChannel, radioLora).name }
+            channelItems + DropDownItem(value = -1, label = staleLabel, enabled = false)
+        } else {
+            channelItems
+        }
+    val selectedChannelIndex = matchedIndex ?: if (offerChannel == null) 0 else -1
+    DropDownPreference(
+        title = stringResource(Res.string.mesh_beacon_offer_channel_name),
+        items = offerItems,
+        selectedItem = selectedChannelIndex,
+        enabled = enabled,
+        onItemSelected = { index -> channelList.getOrNull(index)?.let(onChannelSelect) },
+    )
 }
 
 /**
@@ -332,8 +353,11 @@ private fun BroadcastTargetsCard(
                 remember(presetConstraint, presetsGated, selectedPreset, capabilities) {
                     buildPresetItems(presetConstraint, presetsGated, selectedPreset, capabilities)
                 }
+            val presetSummary =
+                if (presetsGated) stringResource(Res.string.config_lora_modem_preset_licensed_summary) else null
             DropDownPreference(
                 title = stringResource(Res.string.mesh_beacon_on_preset),
+                summary = presetSummary,
                 items = presetItems,
                 selectedItem = selectedPreset,
                 enabled = enabled,
