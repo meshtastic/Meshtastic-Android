@@ -14,6 +14,7 @@ on:
     paths:
       - "docs/en/**"
       - "feature/docs/src/commonMain/kotlin/org/meshtastic/feature/docs/data/DocBundleLoader.kt"
+      - "scripts/check-doc-aliases.js"
       - "scripts/check-doc-coverage.js"
       - "scripts/check-doc-freshness.js"
       - "scripts/validate-doc-links.js"
@@ -94,6 +95,13 @@ jobs:
             exit 1
           fi
           echo "DocBundleLoader and docs/en/ agree in both directions."
+
+      - name: Check alias registration
+        # The registry check above proves a page is reachable; this proves it is findable.
+        # Only DocBundleLoader's alias list reaches the app — the frontmatter one is stripped
+        # before render and stripped again by sync-android-docs.js — so an alias authored in
+        # frontmatter and never registered is a search term no consumer ever sees.
+        run: node scripts/check-doc-aliases.js .
 
       - name: Check doc freshness
         # Advisory, as it always was: a page being old is a prompt to look, not a defect.

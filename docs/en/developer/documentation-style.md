@@ -2,7 +2,7 @@
 title: Documentation Style
 parent: Developer Guide
 nav_order: 11
-last_updated: 2026-08-29
+last_updated: 2026-08-30
 description: House style for the user and developer docs — voice, wording, formatting, page structure, and the decisions behind them.
 aliases:
   - style
@@ -152,7 +152,7 @@ Where this guide deviates from the external guides it synthesizes, the deviation
 2. Register the page in `feature/docs/.../data/DocBundleLoader.kt` with keywords and aliases.
 3. Put screenshots in `docs/assets/screenshots/`, referenced per IMG-1.
 4. Add a *What's New* entry (STRUCT-6).
-5. Validate locally: `node scripts/validate-doc-links.js docs/en`, `node scripts/check-doc-coverage.js .`, and the docs bundle Gradle checks in [Contributing](contributing).
+5. Validate locally: `node scripts/validate-doc-links.js docs/en`, `node scripts/check-doc-coverage.js .`, `node scripts/check-doc-aliases.js .` (every alias in step 1's frontmatter must also be in step 2's loader entry — only the loader's list reaches in-app search), and the docs bundle Gradle checks in [Contributing](contributing).
 
 ## Related Topics
 
