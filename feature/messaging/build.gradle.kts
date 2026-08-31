@@ -18,6 +18,15 @@
 plugins { alias(libs.plugins.meshtastic.kmp.feature) }
 
 kotlin {
+    // Feature module: bare wasmJs(), no browser() (that's for the eventual webApp executable). No custom
+    // hierarchy group is needed for MAIN — zero expect/actual declarations and zero java.*/android.* imports
+    // in commonMain (confirmed via grep), and a fresh sweep of every wasmJs-relevant dependency's own
+    // nonWebMain (core:database/core:prefs/core:network/core:datastore/core:ble) found zero references to
+    // any of their nonWebMain-only types from this module's commonMain — same shape as core:domain, unlike
+    // feature:connections (which needed an interface-extraction seam for two core:datastore types).
+    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
+    wasmJs()
+
     sourceSets {
         commonMain.dependencies {
             implementation(projects.core.common)
@@ -46,6 +55,27 @@ kotlin {
         androidMain.dependencies { implementation(libs.androidx.work.runtime.ktx) }
 
         commonTest.dependencies { implementation(libs.compose.multiplatform.ui.test) }
+
+        // TEST only: core:testing has no wasmJs target (same gap every other module this session hit).
+        // 3 of 14 commonTest files import it (confirmed via grep, not assumed): MessageViewModelTest.kt,
+        // MessageViewModelTranslationTest.kt, ContactsViewModelTest.kt — moved to a manually-created
+        // nonWebTest source set (this module uses no hierarchy template for MAIN, so nothing auto-creates
+        // one, same as core:domain); the other 11 stay in commonTest and compile for wasmJs. core:testing
+        // itself is wired into nonWebTest by KmpFeatureConventionPlugin (afterEvaluate, routes to
+        // nonWebTest when present) — not added here.
+        val nonWebTest by creating { dependsOn(commonTest.get()) }
+
+        // No `android { withHostTest {} }` call in this module, so androidHostTest never materializes —
+        // matching{}.configureEach{} degrades to a harmless no-op for whichever of these leaf test source
+        // sets isn't registered, instead of throwing the way a bare getByName("androidHostTest") would at
+        // configuration time (same fix core:ui's pass required for the same reason).
+        matching {
+            it.name == "jvmTest" ||
+                it.name == "androidHostTest" ||
+                it.name == "iosArm64Test" ||
+                it.name == "iosSimulatorArm64Test"
+        }
+            .configureEach { dependsOn(nonWebTest) }
 
         jvmTest.dependencies { implementation(compose.desktop.currentOs) }
     }
