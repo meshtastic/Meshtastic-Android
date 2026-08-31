@@ -612,18 +612,24 @@ jobs:
         # packageDistributionForCurrentOS (debug build type, no ProGuard) produces real
         # installers (dmg/msi+exe/deb+rpm+AppImage-dir) so the snapshot release below can
         # ship something testers can actually install, not just an unpacked app dir.
-        # On Gradle 9.7.1 CMP's Windows MSI/WiX packaging reads Project.layout on the root project
-        # from ':desktopApp'. Isolated Projects and the configuration cache reject that
-        # independently, so both have to go — disabling only IP still fails as "1 problem was found
-        # storing the configuration cache", and Gradle refuses --no-configuration-cache while IP is
-        # still on. This job never persists a CC entry (cache_configuration_cache defaults to
-        # false), so dropping the cache costs nothing.
-        # Flags, not -D properties: -Dorg.gradle.isolated-projects=false took effect on macOS and
-        # both Linux runners but NOT on windows-latest, which still died on "Configuration Cache
-        # cannot be disabled when Isolated Projects is enabled". --no-isolated-projects is
-        # unambiguous; it needs 9.7+, which is exactly what this PR moves us to, so a pin-back below
-        # 9.7 has to revert this line with it.
-        run: ./gradlew :desktopApp:packageDistributionForCurrentOS :desktopApp:proguardReleaseJars -Pci=true --no-isolated-projects --no-configuration-cache
+        # Windows only: CMP's WiX packaging reads Project.layout on the root project from
+        # ':desktopApp', which Isolated Projects rejects. Stack, from a --dry-run on
+        # windows-latest against compose-multiplatform 1.12.0:
+        #     WixToolsetKt.configureWix(wixToolset.kt:43)
+        #     ConfigureJvmApplicationKt.configureJvmApplication(configureJvmApplication.kt:46)
+        #     ComposePlugin.apply$lambda$2(ComposePlugin.kt:58)
+        # configureWix only runs where MSI/EXE are target formats, which is why macOS,
+        # ubuntu-24.04 and ubuntu-24.04-arm all package fine with IP on — verified by
+        # running this exact task list unflagged on all four runners. Keep the escape
+        # pinned to the one OS that needs it, and drop it when CMP stops reaching for
+        # the root project.
+        # Both flags go together: IP implies the configuration cache, and Gradle refuses
+        # --no-configuration-cache while IP is still on. Flags, not -D properties —
+        # -Dorg.gradle.isolated-projects=false is inert on windows-latest. --no-isolated-projects
+        # needs Gradle 9.7+, so a pin-back below 9.7 has to revert this line with it.
+        run: >
+          ./gradlew :desktopApp:packageDistributionForCurrentOS :desktopApp:proguardReleaseJars -Pci=true
+          ${{ runner.os == 'Windows' && '--no-isolated-projects --no-configuration-cache' || '' }}
 
       # CMP's TargetFormat.AppImage is jpackage's "app-image" — an unpacked directory, not
       # a Linux .AppImage. Wrap it into a real AppImage, same as the release workflow.
