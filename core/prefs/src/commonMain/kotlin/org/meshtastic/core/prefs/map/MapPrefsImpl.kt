@@ -48,6 +48,8 @@ class MapPrefsImpl(private val dataStore: MapDataStore, dispatchers: CoroutineDi
         scope.launch { dataStore.edit { it[KEY_MAP_STYLE_PREF] = style } }
     }
 
+    override suspend fun awaitMapStyle(): Int = dataStore.data.map { it[KEY_MAP_STYLE_PREF] ?: 0 }.first()
+
     override val showOnlyFavorites: StateFlow<Boolean> =
         dataStore.data.map { it[KEY_SHOW_ONLY_FAVORITES_PREF] ?: false }.stateIn(scope, SharingStarted.Eagerly, false)
 

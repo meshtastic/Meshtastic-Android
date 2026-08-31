@@ -18,6 +18,7 @@ package org.meshtastic.feature.map.maplibre.component
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -55,15 +56,37 @@ internal class BasemapSelection(
  * Two preferences back this, matching how the Google flavor stores it: an index into the built-in list, and a separate
  * id for a user-defined source. Keeping them apart means a custom source being added or removed cannot silently repoint
  * the built-in selection, which an index over a mixed list would.
+ *
+ * Returns null until both preferences have been read from disk once. [MapPrefs.mapStyle] and
+ * [MapTileProviderPrefs.selectedCustomTileProviderId] are eager StateFlows that start at a hardcoded default (`0`,
+ * `null`) and only take on the persisted value after their first disk read — so a map composed before that read
+ * resolves opens on the default basemap and swaps to the persisted one moments later. That swap is not cosmetic: every
+ * caller hands `current` to `MaplibreMap`'s `baseStyle`, and a changed `baseStyle` unloads the live style synchronously
+ * (maplibre-compose 0.15.0, `MlnFfiMapSession.setBaseStyle`), so map content still attaching its sources to that style
+ * throws "Source ... was not added: its style is no longer loaded" — an error dialog over a dead map. Fast hardware
+ * masks the race, which is why development never saw it: the preference read settles in milliseconds, long before the
+ * style's network fetch completes, so the swap lands while nothing is attached yet. On slow storage the read can land
+ * exactly in the attach window, on every open. Waiting for the persisted values means the map only ever opens with one
+ * style. (The live StateFlows can lag the awaited read by a dispatch, but that catch-up emission carries an equal value
+ * and lands before any style could finish loading and begin attaching, so the gate itself cannot reintroduce the swap.)
  */
 @Composable
-internal fun rememberBasemapSelection(customs: List<Basemap.Raster>): BasemapSelection {
+internal fun rememberBasemapSelection(customs: List<Basemap.Raster>): BasemapSelection? {
     val mapPrefs: MapPrefs = koinInject()
     val tilePrefs: MapTileProviderPrefs = koinInject()
     val scope = rememberCoroutineScope()
 
+    var hasLoaded by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        mapPrefs.awaitMapStyle()
+        tilePrefs.awaitSelectedCustomTileProviderId()
+        hasLoaded = true
+    }
+
     val styleIndex by mapPrefs.mapStyle.collectAsStateWithLifecycle()
     val selectedCustomId by tilePrefs.selectedCustomTileProviderId.collectAsStateWithLifecycle()
+
+    if (!hasLoaded) return null
 
     val current =
         customs.firstOrNull { it.id == selectedCustomId } ?: Basemaps.all.getOrElse(styleIndex) { Basemaps.default }

@@ -265,6 +265,16 @@ interface MapPrefs {
 
     fun setMapStyle(style: Int)
 
+    /**
+     * Persisted [mapStyle]; suspends for the first disk load to avoid a cold-start default.
+     *
+     * [mapStyle] is shared eagerly and starts at `0` before the first disk read completes, same as [hiddenLayerUrls]'s
+     * empty-set default. A caller that renders a basemap from the eager value before this resolves can render the wrong
+     * one and then swap moments later — which, for a MapLibre style, means tearing down and rebuilding the whole style
+     * subcomposition out from under sources still attaching to it.
+     */
+    suspend fun awaitMapStyle(): Int
+
     val showOnlyFavorites: StateFlow<Boolean>
 
     fun setShowOnlyFavorites(show: Boolean)

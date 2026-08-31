@@ -79,6 +79,13 @@ class MapPrefsImplTest {
     }
 
     @Test
+    fun `map style await sees the persisted value rather than the eager default`() = testScope.runTest {
+        prefs.setMapStyle(3)
+
+        assertEquals(3, prefs.awaitMapStyle())
+    }
+
+    @Test
     fun `layer opacity is absent until a slider is moved`() =
         testScope.runTest { assertEquals(emptySet<String>(), prefs.layerOpacity.value) }
 
