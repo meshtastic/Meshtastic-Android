@@ -72,6 +72,7 @@ import org.meshtastic.core.ui.icon.SystemUpdate
 import org.meshtastic.core.ui.icon.Upload
 import org.meshtastic.feature.settings.component.ExpressiveSection
 import org.meshtastic.feature.settings.navigation.ConfigRoute
+import org.meshtastic.feature.settings.tak.isTakSupportedOnPlatform
 
 @Composable
 fun RadioConfigItemList(
@@ -200,12 +201,16 @@ private fun AdvancedSection(isManaged: Boolean, isOtaCapable: Boolean, enabled: 
             onClick = { onNavigate(SettingsRoute.CleanNodeDb) },
         )
 
-        ListItem(
-            text = stringResource(Res.string.tak_server),
-            leadingIcon = MeshtasticIcons.Settings,
-            enabled = enabled,
-            onClick = { onNavigate(SettingsRoute.TakServer) },
-        )
+        // Hidden on wasmJs: the local TAK server binds an inbound TLS listener, which a browser sandbox can never
+        // accept -- see TakAvailability.kt. Menu item, not the nav destination itself, is the visible-facing gate.
+        if (isTakSupportedOnPlatform) {
+            ListItem(
+                text = stringResource(Res.string.tak_server),
+                leadingIcon = MeshtasticIcons.Settings,
+                enabled = enabled,
+                onClick = { onNavigate(SettingsRoute.TakServer) },
+            )
+        }
 
         ListItem(
             text = stringResource(Res.string.discovery_local_mesh),

@@ -14,6 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:Suppress("TooManyFunctions") // Two new TAK-seam expect declarations pushed this file over the file limit.
+
 package org.meshtastic.feature.settings.navigation
 
 import androidx.compose.runtime.Composable
@@ -78,8 +80,6 @@ import org.meshtastic.feature.settings.radio.component.RemoteHardwareConfigScree
 import org.meshtastic.feature.settings.radio.component.SecurityConfigScreenCommon
 import org.meshtastic.feature.settings.radio.component.SerialConfigScreen
 import org.meshtastic.feature.settings.radio.component.StoreForwardConfigScreen
-import org.meshtastic.feature.settings.radio.component.TAKConfigScreen
-import org.meshtastic.feature.settings.radio.component.TakServerScreen
 import org.meshtastic.feature.settings.radio.component.TelemetryConfigScreen
 import org.meshtastic.feature.settings.radio.component.UserConfigScreen
 import kotlin.reflect.KClass
@@ -384,7 +384,7 @@ fun EntryProviderScope<NavKey>.settingsGraph(
                     PaxcounterConfigScreen(viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
 
                 ModuleRoute.TAK ->
-                    TAKConfigScreen(viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
+                    TakModuleConfigContent(viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
 
                 ModuleRoute.MESH_BEACON ->
                     MeshBeaconConfigScreen(viewModel, onBack = dropUnlessResumed { backStack.removeLastOrNull() })
@@ -392,7 +392,7 @@ fun EntryProviderScope<NavKey>.settingsGraph(
         }
     }
 
-    entry<SettingsRoute.TakServer> { TakServerScreen(onBack = dropUnlessResumed { backStack.removeLastOrNull() }) }
+    registerTakServerDestination(backStack)
 
     entry<SettingsRoute.DebugPanel> {
         val viewModel: DebugViewModel = koinViewModel()
@@ -449,6 +449,26 @@ expect fun SettingsMainScreen(
     onNavigate: (Route) -> Unit,
     onBack: (() -> Unit)? = null,
 )
+
+/**
+ * Content for the [ModuleRoute.TAK] destination. Real on android/jvm/iOS (wires the shared `TAKConfigScreen`); an
+ * honest empty composable on wasmJs, where `isTakSupportedOnPlatform` already hides the menu entry that would navigate
+ * here -- this is a defensive fallback for a direct deep link (`DeepLinkRouter`'s "tak" -> SettingsRoute.TAK mapping),
+ * not the primary gate. See TakAvailability.kt.
+ */
+@Composable expect fun TakModuleConfigContent(viewModel: RadioConfigViewModel, onBack: () -> Unit)
+
+/**
+ * Registers the standalone TAK server settings destination ([SettingsRoute.TakServer]). Real on android/jvm/iOS (wires
+ * the shared `TakServerScreen`); registers nothing on wasmJs -- TAK/ATAK requires an inbound TLS listener a browser
+ * sandbox can never accept. The "TAK Server" menu item that navigates here is already hidden on wasmJs via
+ * `isTakSupportedOnPlatform`, so this destination is unreachable through normal navigation on web.
+ *
+ * Takes [backStack] rather than a pre-built `onBack` lambda: `dropUnlessResumed { ... }` is itself `@Composable` and
+ * must be called from inside the `entry<SettingsRoute.TakServer> { ... }` content lambda (a composable context) -- not
+ * from `settingsGraph`'s own non-composable body, which is where the call site of this function lives.
+ */
+expect fun EntryProviderScope<NavKey>.registerTakServerDestination(backStack: NavBackStack<NavKey>)
 
 /** Expect declarations for platform-specific config screens. */
 fun <R : Route> EntryProviderScope<NavKey>.configComposable(
