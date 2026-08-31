@@ -39,6 +39,12 @@ interface DisplayMirrorManager {
 
     /** Routes an incoming palette chunk from the device to the reassembly state machine. */
     fun handleIncomingPalette(chunk: DisplayPalette)
+
+    /**
+     * Clears all held state — latest frame, latest palette, and partial reassembly buffers. Call when a session ends or
+     * a fresh mirror UI opens, so a previous device's final screen is never shown as if live.
+     */
+    fun reset()
 }
 
 /**
