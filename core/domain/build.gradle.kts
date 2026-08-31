@@ -24,7 +24,8 @@ plugins {
 kotlin {
     android { withHostTest { isIncludeAndroidResources = true } }
 
-    // Library module: bare wasmJs(), no browser(). No custom hierarchy group is needed for MAIN — zero
+    // Library module: bare wasmJs(), no browser() — see core:prefs/build.gradle.kts's comment.
+    // No custom hierarchy group is needed for MAIN — zero
     // expect/actual declarations and zero java.*/android.* imports in commonMain (confirmed via grep),
     // and every commonMain dependency (core:repository/model/common/database/datastore/resources,
     // protobufs, kermit/okio/kotlinx-datetime/kotlinx-serialization-json(-okio)) already publishes a

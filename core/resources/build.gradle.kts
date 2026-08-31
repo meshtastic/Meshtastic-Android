@@ -25,6 +25,7 @@ plugins {
 }
 
 kotlin {
+    // Library module: bare wasmJs(), no browser() — see core:prefs/build.gradle.kts's comment.
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs()
 

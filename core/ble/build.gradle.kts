@@ -27,7 +27,8 @@ plugins {
 kotlin {
     android { withHostTest { isIncludeAndroidResources = true } }
 
-    // Library module: bare wasmJs(), no browser() (that's for the eventual webApp executable).
+    // Library module: bare wasmJs(), no browser() — see core:prefs/build.gradle.kts's comment for why the
+    // repo-wide browser() experiment was reverted.
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs()
 
@@ -64,6 +65,24 @@ kotlin {
             implementation(libs.jetbrains.lifecycle.runtime)
         }
 
-        commonTest.dependencies { implementation(projects.core.testing) }
+        // kotlin("test")/kotlinx-coroutines-test only — previously came transitively through core:testing's own
+        // api() exposure, which commonTest can no longer depend on directly (see nonWebTest below).
+        // BleRetryTest/DisconnectReasonTest still need kotlin("test"); BleRetryTest also needs coroutines-test.
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+            implementation(libs.kotlinx.coroutines.test)
+        }
+
+        // android/jvm/ios only (see hierarchy template above): core:testing has no wasmJs target, and every
+        // commonTest file that references Kable directly (BleExceptionClassifierTest, KableBleConnectionTest,
+        // KableStateMappingTest, KableMeshtasticRadioProfile{,Exception}Test, MeshtasticBleDeviceRssiTest,
+        // BleScanStartExceptionTest — 7 of 9, confirmed via grep for `com.juul.kable`/`core.testing` imports, not
+        // assumed) moved here too, since commonTest can't see nonWebMain's Kable dependency either. Only
+        // BleRetryTest/DisconnectReasonTest stay in commonTest. This was a latent gap: core:ble's own
+        // compileTestKotlinWasmJs was never actually exercised until the webApp milestone pass tried building
+        // it (a standing `[DEFERRED]` since the core:ble milestone, never revisited until now). Kept regardless
+        // of that pass's own `browser()` experiment being reverted (see core:prefs/build.gradle.kts's comment) —
+        // it's a real, independent fix: compileTestKotlinWasmJs for this module now passes on its own merits.
+        getByName("nonWebTest").dependencies { implementation(projects.core.testing) }
     }
 }

@@ -75,19 +75,21 @@ private fun storageKey(namespace: String, key: PrefsKey<*>): String = "$namespac
 // element containing '|' itself would corrupt round-tripping; no current preference stores one.
 private const val SET_DELIMITER = "|"
 
+// Two returns only (ReturnCount limit 2): a failed numeric parse now flows through as a null `value` rather
+// than an early `return null` per branch — same behavior (T? already permits null), fewer exit points.
 @Suppress("UNCHECKED_CAST")
 private fun <T> decode(raw: String?, type: PrefsKeyType): T? {
     if (raw == null) return null
-    val value: Any =
+    val value: Any? =
         when (type) {
-            PrefsKeyType.BOOLEAN -> raw.toBooleanStrictOrNull() ?: return null
-            PrefsKeyType.INT -> raw.toIntOrNull() ?: return null
-            PrefsKeyType.LONG -> raw.toLongOrNull() ?: return null
-            PrefsKeyType.DOUBLE -> raw.toDoubleOrNull() ?: return null
+            PrefsKeyType.BOOLEAN -> raw.toBooleanStrictOrNull()
+            PrefsKeyType.INT -> raw.toIntOrNull()
+            PrefsKeyType.LONG -> raw.toLongOrNull()
+            PrefsKeyType.DOUBLE -> raw.toDoubleOrNull()
             PrefsKeyType.STRING -> raw
             PrefsKeyType.STRING_SET -> raw.split(SET_DELIMITER).filter(String::isNotEmpty).toSet()
         }
-    return value as T
+    return value as T?
 }
 
 @Suppress("UNCHECKED_CAST")

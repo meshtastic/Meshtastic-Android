@@ -69,7 +69,8 @@ class WasmJsRadioTransportFactory(
 
             InterfaceId.TCP ->
                 error(
-                    "TCP transport is not supported on web: browsers cannot open raw sockets (permanent sandbox limitation)",
+                    "TCP transport is not supported on web: browsers cannot open raw sockets " +
+                        "(permanent sandbox limitation)",
                 )
 
             InterfaceId.SERIAL ->

@@ -14,6 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:Suppress(
+    // Each js("...") snippet below references its Kotlin parameter (size/array/index) INSIDE the embedded JS
+    // source string, which detekt's static analysis can't see — a false positive, not a real unused parameter.
+    "UnusedParameter",
+)
+
 package org.meshtastic.core.model.util
 
 // Backs channel PSK/private-key generation -- must be cryptographically secure. crypto.getRandomValues()

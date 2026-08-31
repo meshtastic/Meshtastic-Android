@@ -24,7 +24,8 @@ plugins { alias(libs.plugins.meshtastic.kmp.feature) }
 kotlin {
     android { withHostTest { isIncludeAndroidResources = true } }
 
-    // Feature module: bare wasmJs(), no browser() (that's for the eventual webApp executable).
+    // Library module: bare wasmJs(), no browser() — see core:prefs/build.gradle.kts's comment for why the
+    // repo-wide browser() experiment was reverted.
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs()
 

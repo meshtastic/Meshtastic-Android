@@ -43,7 +43,10 @@ internal fun Project.configureDetekt(extension: DetektExtension) = extension.app
     // Default sources. Every production source set that ships code must be listed explicitly — detekt silently
     // skips anything not named here, which is how src/fdroid, src/google, src/iosMain, and src/jvmAndroidMain
     // went unanalyzed for as long as only the main/common sets were listed. (Test source sets are deliberately
-    // not scanned, matching the original list.)
+    // not scanned, matching the original list.) src/wasmJsMain and src/nonWebMain were missing too — every prior
+    // "detekt clean on wasmJsMain" claim in this repo's wasmJs-target effort was never actually checking those
+    // files; found while adding :webApp, whose entire source lives in src/wasmJsMain and would otherwise report
+    // NO-SOURCE forever.
     source.setFrom(
         files(
             "src/main/java",
@@ -53,6 +56,8 @@ internal fun Project.configureDetekt(extension: DetektExtension) = extension.app
             "src/jvmMain/kotlin",
             "src/jvmAndroidMain/kotlin",
             "src/iosMain/kotlin",
+            "src/wasmJsMain/kotlin",
+            "src/nonWebMain/kotlin",
             "src/fdroid/java",
             "src/fdroid/kotlin",
             "src/google/java",

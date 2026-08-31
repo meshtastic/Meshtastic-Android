@@ -14,6 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:Suppress(
+    // The entire Web Bluetooth surface this file wraps (see its own KDoc) genuinely needs this many
+    // declarations in one place — splitting it would scatter `external`/`js()` interop across files instead
+    // of isolating it here, the opposite of this file's own stated purpose.
+    "TooManyFunctions",
+    // Every js("...") snippet below references its Kotlin parameter (view/array/index/value/serviceUuid) INSIDE
+    // the JS source string, which detekt's static analysis can't see — it only sees the js() call, not what the
+    // embedded JS actually references, and flags each parameter as unused. A real false positive, not a real gap.
+    "UnusedParameter",
+)
+
 package org.meshtastic.core.ble
 
 import kotlinx.coroutines.await

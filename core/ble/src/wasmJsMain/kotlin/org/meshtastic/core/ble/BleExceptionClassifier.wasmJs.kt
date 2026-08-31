@@ -14,7 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-@file:Suppress("MatchingDeclarationName") // File groups the classifier function and its result type.
+@file:Suppress(
+    "MatchingDeclarationName", // File groups the classifier function and its result type.
+    "FunctionOnlyReturningConstant", // Always-null is the honest answer here — see classifyBleException's own KDoc.
+)
 
 package org.meshtastic.core.ble
 

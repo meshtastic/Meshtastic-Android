@@ -27,7 +27,13 @@ plugins {
 kotlin {
     android { withHostTest {} }
 
-    // Library module: bare wasmJs(), no browser() (that's for the eventual webApp executable).
+    // Library module: bare wasmJs(), no browser() (that's for the eventual webApp executable). Tried adding
+    // browser() repo-wide to satisfy KGP's npm root resolver for :webApp's packaging task — it also arms each
+    // module's wasmJsBrowserTest task, which allTests then picks up and fails (no karma/headless-Chrome runner
+    // configured anywhere in this repo). That CI-gate regression outweighs unblocking webApp packaging, so this
+    // reverted back to bare wasmJs() pending a real decision (relax FAIL_ON_PROJECT_REPOS, stand up a browser
+    // test runner, or scope browser() to just webApp's transitive consumption graph with test tasks disabled).
+    // See .agent_plans/web-target-workpad.md's webApp milestone entry.
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs()
 

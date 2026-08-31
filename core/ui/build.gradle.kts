@@ -28,7 +28,7 @@ kotlin {
     // Without this, Res.readBytes() throws MissingResourceException at runtime.
     android { androidResources.enable = true }
 
-    // Library module: bare wasmJs(), no browser() (that's for the eventual webApp executable). No custom
+    // Library module: bare wasmJs(), no browser() — see core:prefs/build.gradle.kts's comment. No custom
     // hierarchy group is needed for MAIN, same shape as core:common/core:model/core:repository/core:service:
     // every one of this module's own dependencies (core/*, coil, jetbrains-markdown, qrcode-kotlin, every
     // compose-multiplatform-*/jetbrains-* artifact) is confirmed to publish a wasmJs variant, and the only

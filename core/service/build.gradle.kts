@@ -23,7 +23,7 @@ plugins {
 kotlin {
     android { withHostTest { isIncludeAndroidResources = true } }
 
-    // Library module: bare wasmJs(), no browser() (that's for the eventual webApp executable). No custom
+    // Library module: bare wasmJs(), no browser() — see core:prefs/build.gradle.kts's comment. No custom
     // hierarchy group is needed for MAIN: core:takserver (the one dependency with no wasmJs variant) is
     // removed entirely below, not relocated, and nothing else in commonMain/androidMain/jvmMain is
     // web-hostile — same shape as core:repository, unlike core:ble/core:database/core:prefs/core:network.

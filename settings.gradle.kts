@@ -67,6 +67,17 @@ dependencyResolutionManagement {
             }
         }
         maven { url = uri("./offline-repository") }
+
+        // NOTE: a webApp-milestone pass tried adding exclusiveContent{ivy(...)} blocks here for
+        // nodejs.org/dist, yarnpkg and WebAssembly/binaryen releases, to satisfy Kotlin/Wasm's NodeJs/Yarn/
+        // Binaryen setup plugins under FAIL_ON_PROJECT_REPOS above. It did NOT work: those plugins'
+        // AbstractSetupTask registers its own project-level Ivy repository at project-evaluation/task-
+        // configuration time (a different code path than what a settings-level declaration intercepts), so
+        // :webApp:wasmJsBrowserDistribution still failed with "was added by unknown code" even with this
+        // block in place. Reverted rather than leaving dead config in place. See
+        // .agent_plans/web-target-workpad.md's webApp milestone entry for the full diagnosis and the options
+        // a future pass needs to choose between (relax FAIL_ON_PROJECT_REPOS, or find a way to make the
+        // plugin consume a pre-registered repository).
     }
 }
 
@@ -120,6 +131,25 @@ include(
     ":feature:wifi-provision",
     ":desktopApp",
     ":androidApp",
+    // ":webApp", — NOT included yet. webApp/ has a complete, compiling module (verified via
+    // :webApp:compileKotlinWasmJs run directly against its own build.gradle.kts with an ad-hoc
+    // includeBuild-style check), but merely adding it to this include list breaks the ROOT-LEVEL baseline
+    // gate (`./gradlew spotlessCheck detekt test allTests`, unscoped) for every other module in the repo,
+    // confirmed by an actual run: it fails at configuration time, before any task executes, with
+    // "IllegalStateException: :core:common is not configured for JS usage" thrown from
+    // KotlinRootNpmResolver. Isolated experimentally (2026-08-31): the trigger is specifically
+    // `binaries.executable()`, not `browser()` — with `:webApp` included but `binaries.executable()` removed,
+    // `./gradlew :core:common:help --dry-run` and `./gradlew projects` both configure cleanly. So the conflict
+    // is inherent to declaring an executable Kotlin/Wasm binary anywhere in a multi-project build that also
+    // contains other wasmJs-target subprojects — every other wasmJs-enabled module deliberately stays at bare
+    // wasmJs() (see core:prefs/build.gradle.kts's comment), and that registers a root-level kotlinWasmNpmInstall
+    // task that walks the WHOLE build's wasmJs dependency graph regardless of which task you actually invoke.
+    // The likely escape hatch is a Gradle composite build (webApp as its own build via includeBuild(), consuming
+    // the libraries through dependency substitution rather than as a subproject) — NOT attempted here: it would
+    // require sharing build-logic's convention plugins and the version catalog across build boundaries and
+    // substituting ~15 transitive project() dependencies, which is a real restructuring, not a quick fix, and
+    // risks being wrong if done blind at the tail of this effort. Re-add this line only after that is resolved
+    // (see .agent_plans/web-target-workpad.md's webApp milestone entry for the full diagnosis and options).
     ":core:barcode",
     ":feature:widget",
     ":screenshot-tests",

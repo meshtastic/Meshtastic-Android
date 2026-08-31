@@ -25,6 +25,7 @@ plugins {
 
 kotlin {
     // takpacket-sdk and components-resources confirmed to publish a wasmJs variant before enabling this.
+    // Library module: bare wasmJs(), no browser() — see core:prefs/build.gradle.kts's comment.
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs()
 
@@ -75,6 +76,9 @@ kotlin {
             }
         }
 
-        commonTest.dependencies { implementation(projects.core.testing) }
+        // core:testing has no wasmJs target — nothing here actually used it beyond kotlin("test") (confirmed via
+        // grep, zero org.meshtastic.core.testing references in this module's commonTest), so depend on that
+        // directly instead of moving files, matching core:database's identical fix for the same situation.
+        commonTest.dependencies { implementation(kotlin("test")) }
     }
 }

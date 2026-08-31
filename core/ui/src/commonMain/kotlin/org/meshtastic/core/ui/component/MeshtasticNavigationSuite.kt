@@ -79,6 +79,9 @@ fun MeshtasticNavigationSuite(
     multiBackstack: MultiBackstack,
     uiViewModel: UIViewModel,
     modifier: Modifier = Modifier,
+    // Lets a host hide a tab it has no entry provider for (e.g. webApp omits Map, v0 scope) without a
+    // per-platform expect/actual — every existing caller keeps today's full tab set by default.
+    visibleDestinations: List<TopLevelDestination> = TopLevelDestination.entries,
     content: @Composable () -> Unit,
 ) {
     val connectionState by uiViewModel.connectionState.collectAsStateWithLifecycle()
@@ -99,7 +102,7 @@ fun MeshtasticNavigationSuite(
         modifier = modifier,
         layoutType = layoutType,
         navigationSuiteItems = {
-            TopLevelDestination.entries.forEach { destination ->
+            visibleDestinations.forEach { destination ->
                 val isSelected = destination == topLevelDestination
                 item(
                     selected = isSelected,

@@ -20,12 +20,11 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import okio.ByteString.Companion.encodeUtf8
 
-/**
- * Preferences-shaped helpers for [DatabaseManager.associateDevice]. Split out of `DeviceIdentity.kt` (which keeps
- * [validDeviceIdOrNull] in commonMain) because `androidx.datastore:datastore-preferences` — the `Preferences` type
- * itself — has no wasmJs variant, and [DatabaseManager] (this file's only consumer) lives in `nonWebMain` for the same
- * reason.
- */
+// Preferences-shaped helpers for DatabaseManager.associateDevice. Split out of `DeviceIdentity.kt` (which keeps
+// validDeviceIdOrNull in commonMain) because `androidx.datastore:datastore-preferences` — the `Preferences` type
+// itself — has no wasmJs variant, and DatabaseManager (this file's only consumer) lives in `nonWebMain` for the same
+// reason. Plain comment, not KDoc: this describes the whole file, not a single declaration, and detekt's Kdoc rules
+// flag a `/**` block with nothing directly beneath it as a dangling/orphaned doc.
 
 /** Datastore key mapping a node number to its canonical DB. Legacy: node numbers renumber under firmware 2.8. */
 internal fun nodeDbPrefKey(nodeNum: Int): Preferences.Key<String> =
