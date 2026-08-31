@@ -24,6 +24,14 @@ plugins {
 kotlin {
     android { withHostTest { isIncludeAndroidResources = true } }
 
+    // Library module: bare wasmJs(), no browser(). No custom hierarchy group is needed for MAIN — zero
+    // expect/actual declarations and zero java.*/android.* imports in commonMain (confirmed via grep),
+    // and every commonMain dependency (core:repository/model/common/database/datastore/resources,
+    // protobufs, kermit/okio/kotlinx-datetime/kotlinx-serialization-json(-okio)) already publishes a
+    // wasmJs variant — same shape as core:repository/core:service, unlike core:ble/core:database.
+    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
+    wasmJs()
+
     sourceSets {
         commonMain.dependencies {
             implementation(projects.core.repository)
@@ -40,6 +48,17 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kotlinx.serialization.json.okio)
         }
-        commonTest.dependencies { implementation(projects.core.testing) }
+
+        // TEST only: core:testing has no wasmJs target (same gap every other module this session hit).
+        // 7 of 13 commonTest files depend on it (confirmed via grep for the import, not assumed) — moved
+        // to a nonWebTest source set; the other 6 stay in commonTest and compile for wasmJs.
+        val nonWebTest by creating {
+            dependsOn(commonTest.get())
+            dependencies { implementation(projects.core.testing) }
+        }
+        getByName("jvmTest") { dependsOn(nonWebTest) }
+        getByName("androidHostTest") { dependsOn(nonWebTest) }
+        matching { it.name == "iosArm64Test" || it.name == "iosSimulatorArm64Test" }
+            .configureEach { dependsOn(nonWebTest) }
     }
 }

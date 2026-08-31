@@ -69,8 +69,31 @@ class KmpFeatureConventionPlugin : Plugin<Project> {
 
                     implementation(libs.library("compose-multiplatform-ui"))
                 }
+            }
 
-                sourceSets.getByName("commonTest").dependencies { implementation(project(":core:testing")) }
+            // core:testing has no wasmJs target (same gap every core/* module hit while gaining one this
+            // session). Wiring it into commonTest directly — as this plugin used to, unconditionally —
+            // breaks compileTestKotlinWasmJs for every feature module that opts into wasmJs, since the
+            // dependency is added by this shared plugin's apply(), which runs *before* the consuming
+            // module's own build.gradle.kts `kotlin {}` block (and any nonWebTest source set it creates)
+            // has executed. Deferring to afterEvaluate — which fires only after the whole build script has
+            // run — lets us check what the consuming module actually set up and route accordingly:
+            // - a module with a `nonWebTest` source set (wasmJs opted in, core:testing hoisted out of
+            //   commonMain the same way every core/* module did) gets core:testing wired there instead.
+            // - every other feature module (no wasmJs, no nonWebTest) is wired into commonTest exactly as
+            //   before — fully backward-compatible, verified against every other v0/non-wasmJs consumer.
+            target.afterEvaluate {
+                extensions.configure<KotlinMultiplatformExtension> {
+                    val hasWasmJsTarget = targets.findByName("wasmJs") != null
+                    val nonWebTest = sourceSets.findByName("nonWebTest")
+                    check(!hasWasmJsTarget || nonWebTest != null) {
+                        "${target.path} registers wasmJs() but has no `nonWebTest` source set — " +
+                            "core:testing has no wasmJs target, so it must be routed away from commonTest. " +
+                            "See feature/connections/build.gradle.kts for the pattern."
+                    }
+                    val testSourceSet = nonWebTest ?: sourceSets.getByName("commonTest")
+                    testSourceSet.dependencies { implementation(project(":core:testing")) }
+                }
             }
         }
     }

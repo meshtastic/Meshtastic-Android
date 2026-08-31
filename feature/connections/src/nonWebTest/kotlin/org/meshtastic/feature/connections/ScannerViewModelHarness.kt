@@ -35,8 +35,6 @@ import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.meshtastic.core.ble.BleDevice
 import org.meshtastic.core.ble.BleScanner
-import org.meshtastic.core.datastore.FirmwareRecoveryDataSource
-import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.network.repository.DiscoveredService
 import org.meshtastic.core.network.repository.NetworkRepository
@@ -47,6 +45,8 @@ import org.meshtastic.core.testing.FakeBluetoothRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.testing.FakeServiceRepository
 import org.meshtastic.core.testing.FakeUiPrefs
+import org.meshtastic.feature.connections.data.PendingFirmwareRecoverySource
+import org.meshtastic.feature.connections.data.RecentAddressesSource
 import org.meshtastic.feature.connections.model.DeviceListEntry
 import org.meshtastic.feature.connections.model.DiscoveredDevices
 import org.meshtastic.feature.connections.model.GetDiscoveredDevicesUseCase
@@ -73,8 +73,8 @@ class ScannerViewModelHarness(val testDispatcher: TestDispatcher = UnconfinedTes
 
     val radioInterfaceService: RadioInterfaceService = mock(MockMode.autofill)
     val radioPrefs: RadioPrefs = mock(MockMode.autofill)
-    val recentAddressesDataSource: RecentAddressesDataSource = mock(MockMode.autofill)
-    val firmwareRecoveryDataSource: FirmwareRecoveryDataSource = mock(MockMode.autofill)
+    val recentAddressesDataSource: RecentAddressesSource = mock(MockMode.autofill)
+    val firmwareRecoveryDataSource: PendingFirmwareRecoverySource = mock(MockMode.autofill)
     val networkRepository: NetworkRepository = mock(MockMode.autofill)
     val bleScanner: BleScanner = mock(MockMode.autofill)
 

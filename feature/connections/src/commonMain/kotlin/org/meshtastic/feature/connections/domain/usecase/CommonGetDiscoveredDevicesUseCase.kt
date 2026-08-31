@@ -21,12 +21,12 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
 import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.common.util.safeCatchingAll
-import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.core.network.repository.DiscoveredService
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.resources.meshtastic
+import org.meshtastic.feature.connections.data.RecentAddressesSource
 import org.meshtastic.feature.connections.model.DiscoveredDevices
 import org.meshtastic.feature.connections.model.GetDiscoveredDevicesUseCase
 
@@ -39,7 +39,7 @@ import org.meshtastic.feature.connections.model.GetDiscoveredDevicesUseCase
  * target registers its own `@Single` wrapper (see `JvmGetDiscoveredDevicesUseCase`).
  */
 open class CommonGetDiscoveredDevicesUseCase(
-    private val recentAddressesDataSource: RecentAddressesDataSource,
+    private val recentAddressesDataSource: RecentAddressesSource,
     private val nodeRepository: NodeRepository,
     private val databaseManager: DatabaseManager,
     private val usbScanner: UsbScanner? = null,

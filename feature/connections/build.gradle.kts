@@ -15,10 +15,32 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.plugin.KotlinHierarchyTemplate
+
 plugins { alias(libs.plugins.meshtastic.kmp.feature) }
 
 kotlin {
     android { withHostTest { isIncludeAndroidResources = true } }
+
+    // Feature module: bare wasmJs(), no browser() (that's for the eventual webApp executable).
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs()
+
+    // nonWebMain: ScannerViewModel/CommonGetDiscoveredDevicesUseCase depend on RecentAddressesSource/
+    // PendingFirmwareRecoverySource (feature-local interfaces, commonMain) — but the real, Preferences-backed
+    // adapters (DataSourceAdapters.kt) delegate to core:datastore's RecentAddressesDataSource/
+    // FirmwareRecoveryDataSource, which have no wasmJs target (androidx.datastore.preferences publishes none
+    // — see core:datastore's own wasmJs milestone). Predicate, not withAndroidTarget()/withApple() — those
+    // silently drop androidMain under com.android.kotlin.multiplatform.library (KT-80409), same as core:ble.
+    @OptIn(ExperimentalKotlinGradlePluginApi::class)
+    applyHierarchyTemplate(KotlinHierarchyTemplate.default) {
+        common { group("nonWeb") { withCompilations { it.target.targetName != "wasmJs" } } }
+    }
+
+    // The predicate above misses iosMain itself (only reaches the two leaf iOS compilations), same gap core:ble hit.
+    sourceSets.getByName("iosMain") { dependsOn(sourceSets.getByName("nonWebMain")) }
 
     sourceSets {
         commonMain.dependencies {
@@ -47,5 +69,14 @@ kotlin {
             implementation(libs.compose.multiplatform.ui.test)
             implementation(compose.desktop.currentOs)
         }
+
+        // TEST only: 4 of 6 commonTest files depend on core:testing (no wasmJs target — same gap every
+        // other module this session hit), confirmed via grep for the import, not assumed:
+        // ScannerViewModelHarness.kt/ScannerViewModelTest.kt/TcpDiscoveryHelpersTest.kt/
+        // CommonGetDiscoveredDevicesUseCaseTest.kt moved to the nonWebTest source set the hierarchy
+        // template above already creates (android/jvm/iOS only); the other 2 stay in commonTest and
+        // compile for wasmJs. core:testing itself is wired into nonWebTest by KmpFeatureConventionPlugin
+        // (afterEvaluate, routes to nonWebTest when present) — not added here.
+        getByName("nonWebTest") { dependsOn(commonTest.get()) }
     }
 }

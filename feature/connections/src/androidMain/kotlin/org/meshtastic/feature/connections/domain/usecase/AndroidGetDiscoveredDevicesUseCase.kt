@@ -24,7 +24,6 @@ import org.jetbrains.compose.resources.getString
 import org.koin.core.annotation.Single
 import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.common.database.DatabaseManager
-import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.core.datastore.model.RecentAddress
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.network.repository.DiscoveredService
@@ -33,6 +32,7 @@ import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.meshtastic
+import org.meshtastic.feature.connections.data.RecentAddressesSource
 import org.meshtastic.feature.connections.model.AndroidUsbDeviceData
 import org.meshtastic.feature.connections.model.DeviceListEntry
 import org.meshtastic.feature.connections.model.DiscoveredDevices
@@ -44,7 +44,7 @@ import java.util.Locale
 @Single(binds = [GetDiscoveredDevicesUseCase::class])
 class AndroidGetDiscoveredDevicesUseCase(
     private val bluetoothRepository: BluetoothRepository,
-    private val recentAddressesDataSource: RecentAddressesDataSource,
+    private val recentAddressesDataSource: RecentAddressesSource,
     private val nodeRepository: NodeRepository,
     private val databaseManager: DatabaseManager,
     private val usbRepository: UsbRepository,

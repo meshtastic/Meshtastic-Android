@@ -44,8 +44,6 @@ import org.meshtastic.core.ble.BleScanStartFailureReason
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.MeshtasticBleConstants
 import org.meshtastic.core.common.util.safeCatchingAll
-import org.meshtastic.core.datastore.FirmwareRecoveryDataSource
-import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.core.datastore.model.PendingFirmwareRecovery
 import org.meshtastic.core.datastore.model.RecentAddress
 import org.meshtastic.core.di.CoroutineDispatchers
@@ -65,6 +63,8 @@ import org.meshtastic.core.resources.getPluralStringSuspend
 import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
+import org.meshtastic.feature.connections.data.PendingFirmwareRecoverySource
+import org.meshtastic.feature.connections.data.RecentAddressesSource
 import org.meshtastic.feature.connections.model.DeviceListEntry
 import org.meshtastic.feature.connections.model.DiscoveredDevices
 import org.meshtastic.feature.connections.model.GetDiscoveredDevicesUseCase
@@ -143,12 +143,12 @@ open class ScannerViewModel(
     private val radioController: RadioController,
     private val radioInterfaceService: RadioInterfaceService,
     private val radioPrefs: RadioPrefs,
-    private val recentAddressesDataSource: RecentAddressesDataSource,
+    private val recentAddressesDataSource: RecentAddressesSource,
     private val getDiscoveredDevicesUseCase: GetDiscoveredDevicesUseCase,
     private val networkRepository: NetworkRepository,
     private val dispatchers: CoroutineDispatchers,
     private val uiPrefs: UiPrefs,
-    private val firmwareRecoveryDataSource: FirmwareRecoveryDataSource,
+    private val firmwareRecoveryDataSource: PendingFirmwareRecoverySource,
     private val bleScanner: BleScanner? = null,
 ) : ViewModel() {
 
