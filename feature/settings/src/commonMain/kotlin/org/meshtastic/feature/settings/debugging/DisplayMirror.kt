@@ -16,7 +16,6 @@
  */
 package org.meshtastic.feature.settings.debugging
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
@@ -32,11 +31,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Icon
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
@@ -56,7 +54,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
@@ -64,43 +62,34 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
-import org.koin.core.annotation.KoinViewModel
-import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.repository.AdminController
-import org.meshtastic.core.repository.ConnectionStateProvider
-import org.meshtastic.core.repository.DisplayMirrorManager
 import org.meshtastic.core.repository.MirrorFrame
 import org.meshtastic.core.repository.MirrorPalette
-import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.core.ui.icon.KeyboardArrowDown
-import org.meshtastic.core.ui.icon.KeyboardArrowLeft
-import org.meshtastic.core.ui.icon.KeyboardArrowRight
-import org.meshtastic.core.ui.icon.KeyboardArrowUp
-import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.mirror_active
+import org.meshtastic.core.resources.mirror_back
+import org.meshtastic.core.resources.mirror_eink_hint
+import org.meshtastic.core.resources.mirror_frame_info
+import org.meshtastic.core.resources.mirror_hint_keyboard_active
+import org.meshtastic.core.resources.mirror_hint_tap_keyboard
+import org.meshtastic.core.resources.mirror_hint_tap_touch
+import org.meshtastic.core.resources.mirror_keyboard
+import org.meshtastic.core.resources.mirror_no_frame
+import org.meshtastic.core.resources.mirror_not_connected
+import org.meshtastic.core.resources.mirror_off
+import org.meshtastic.core.resources.refresh
 import org.meshtastic.proto.DisplayInfo
 
 // M3 comfortable target for remote-control keys (48dp minimum + breathing room).
 private val DPAD_KEY_SIZE = 56.dp
-private val DPAD_GAP = 8.dp
 
 // OS-typematic-style auto-repeat, slowed to what a LoRa radio UI can render.
-private const val REPEAT_INITIAL_DELAY_MS = 500L
-private const val REPEAT_INTERVAL_MS = 100L
+internal const val REPEAT_INITIAL_DELAY_MS = 500L
+internal const val REPEAT_INTERVAL_MS = 100L
 
 // Swipes on the mirror shorter than this are ignored as accidental.
 private val SWIPE_THRESHOLD = 48.dp
@@ -108,63 +97,18 @@ private val SWIPE_THRESHOLD = 48.dp
 // Mirror + D-pad fit comfortably side by side above this content width.
 private val SIDE_BY_SIDE_MIN_WIDTH = 760.dp
 
-// Firmware input_broker_event codes (src/input/InputBroker.h).
-private const val INPUT_SELECT = 10
-private const val INPUT_SELECT_LONG = 11
-private const val INPUT_UP = 17
-private const val INPUT_DOWN = 18
-private const val INPUT_LEFT = 19
-private const val INPUT_RIGHT = 20
-private const val INPUT_BACK = 27
+// Firmware input_broker_event codes (src/input/InputBroker.h). USER_PRESS is
+// what physical touch drivers emit for a tap, with touch coordinates attached.
+internal const val INPUT_SELECT = 10
+internal const val INPUT_SELECT_LONG = 11
+internal const val INPUT_UP = 17
+internal const val INPUT_DOWN = 18
+internal const val INPUT_LEFT = 19
+internal const val INPUT_RIGHT = 20
+internal const val INPUT_BACK = 27
+internal const val INPUT_USER_PRESS = 28
 
-@KoinViewModel
-class DisplayMirrorViewModel(
-    displayMirrorManager: DisplayMirrorManager,
-    connectionStateProvider: ConnectionStateProvider,
-    nodeRepository: NodeRepository,
-    private val adminController: AdminController,
-) : ViewModel() {
-
-    val frame: StateFlow<MirrorFrame?> = displayMirrorManager.frame
-
-    val palette: StateFlow<MirrorPalette?> = displayMirrorManager.palette
-
-    val connected: StateFlow<Boolean> =
-        connectionStateProvider.connectionState
-            .map { it is ConnectionState.Connected }
-            .stateIn(viewModelScope, SharingStarted.Eagerly, false)
-
-    /** Panel description from the connect handshake; null on display-less nodes and pre-DisplayInfo firmware. */
-    val displayInfo: StateFlow<DisplayInfo?> =
-        nodeRepository.ourNodeInfo.map { it?.metadata?.display }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
-
-    private val _mirroring = MutableStateFlow(false)
-    val mirroring: StateFlow<Boolean> = _mirroring.asStateFlow()
-
-    init {
-        // The device forgets the (non-persisted) mirror setting on disconnect/reboot;
-        // mirror the reset locally so the toggle never claims a dead stream is live.
-        viewModelScope.launch { connected.collect { if (!it) _mirroring.value = false } }
-    }
-
-    fun setMirror(enabled: Boolean) {
-        adminController.setDisplayMirror(enabled)
-        _mirroring.value = enabled
-    }
-
-    fun requestFrame() = adminController.requestDisplayFrame()
-
-    fun sendKey(eventCode: Int) = adminController.sendInputEvent(eventCode)
-
-    /** Stops a live stream when the mirror UI goes away; safe to call redundantly. */
-    fun stopMirroring() {
-        if (_mirroring.value) setMirror(false)
-    }
-
-    override fun onCleared() = stopMirroring()
-}
-
-/** PoC live view of the connected device's screen, with remote D-pad control. Strings are deliberately unlocalized. */
+/** Live view of the connected device's screen, with remote D-pad, keyboard, and touch control. */
 @Composable
 fun DisplayMirrorContent(modifier: Modifier = Modifier, viewModel: DisplayMirrorViewModel = koinViewModel()) {
     val frame by viewModel.frame.collectAsStateWithLifecycle()
@@ -184,42 +128,66 @@ fun DisplayMirrorContent(modifier: Modifier = Modifier, viewModel: DisplayMirror
         val currentFrame = frame
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Switch(checked = mirroring, onCheckedChange = viewModel::setMirror, enabled = connected)
-            Text(text = if (mirroring) "Mirroring" else "Mirror off", style = MaterialTheme.typography.titleMedium)
-            OutlinedButton(onClick = viewModel::requestFrame, enabled = connected) { Text("Refresh") }
+            Text(
+                text = stringResource(if (mirroring) Res.string.mirror_active else Res.string.mirror_off),
+                style = MaterialTheme.typography.titleMedium,
+            )
+            OutlinedButton(onClick = viewModel::requestFrame, enabled = connected) {
+                Text(stringResource(Res.string.refresh))
+            }
             if (currentFrame != null) {
                 Text(
-                    text = "${currentFrame.width}x${currentFrame.height}  frame #${currentFrame.frameId}",
+                    text =
+                    stringResource(
+                        Res.string.mirror_frame_info,
+                        currentFrame.width,
+                        currentFrame.height,
+                        currentFrame.frameId,
+                    ),
                     style = MaterialTheme.typography.labelSmall,
                 )
             }
         }
 
         if (displayInfo?.panel_class == DisplayInfo.PanelClass.EINK) {
-            Text(
-                text = "E-ink display: refresh is slow — prefer one-shot Refresh over continuous mirroring.",
-                style = MaterialTheme.typography.labelSmall,
-            )
+            Text(text = stringResource(Res.string.mirror_eink_hint), style = MaterialTheme.typography.labelSmall)
         }
 
         when {
             !connected -> {
-                Text(text = "Not connected to a device.")
+                Text(text = stringResource(Res.string.mirror_not_connected))
                 DpadCluster(enabled = false, onEvent = viewModel::sendKey)
             }
 
             currentFrame == null -> {
-                Text(text = "No frame received yet — enable mirroring or tap Refresh.")
+                Text(text = stringResource(Res.string.mirror_no_frame))
                 DpadCluster(enabled = connected, onEvent = viewModel::sendKey)
             }
 
-            else -> MirrorWithControls(currentFrame, palette, enabled = connected, onEvent = viewModel::sendKey)
+            else ->
+                MirrorWithControls(
+                    currentFrame,
+                    palette,
+                    enabled = connected,
+                    hasTouch = displayInfo?.has_touch == true,
+                    onEvent = viewModel::sendKey,
+                    onTouch = viewModel::sendTouch,
+                )
         }
     }
 }
 
 /** Controls sit beside the mirror when the window is wide enough, below it otherwise. */
+@Suppress("LongParameterList")
 @Composable
-private fun MirrorWithControls(frame: MirrorFrame, palette: MirrorPalette?, enabled: Boolean, onEvent: (Int) -> Unit) {
+private fun MirrorWithControls(
+    frame: MirrorFrame,
+    palette: MirrorPalette?,
+    enabled: Boolean,
+    hasTouch: Boolean,
+    onEvent: (Int) -> Unit,
+    onTouch: (Int, Int, Int) -> Unit,
+) {
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         if (maxWidth >= SIDE_BY_SIDE_MIN_WIDTH) {
             Row(
@@ -227,7 +195,7 @@ private fun MirrorWithControls(frame: MirrorFrame, palette: MirrorPalette?, enab
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                MirrorSurface(frame, palette, onEvent = onEvent, modifier = Modifier.weight(1f, fill = false))
+                MirrorSurface(frame, palette, hasTouch, onEvent, onTouch, modifier = Modifier.weight(1f, fill = false))
                 DpadCluster(enabled = enabled, onEvent = onEvent)
             }
         } else {
@@ -236,7 +204,7 @@ private fun MirrorWithControls(frame: MirrorFrame, palette: MirrorPalette?, enab
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                MirrorSurface(frame, palette, onEvent = onEvent)
+                MirrorSurface(frame, palette, hasTouch, onEvent, onTouch)
                 DpadCluster(enabled = enabled, onEvent = onEvent)
             }
         }
@@ -244,21 +212,27 @@ private fun MirrorWithControls(frame: MirrorFrame, palette: MirrorPalette?, enab
 }
 
 /**
- * The live mirror plus its direct input affordances: click to focus (keyboard capture — arrows, Enter/Space = OK,
- * Esc/Backspace = Back), swipe in a cardinal direction for a single direction event.
+ * The live mirror plus its direct input affordances: a Keyboard chip toggles key capture (arrows, Enter/Space = OK,
+ * Esc/Backspace = Back), swiping in a cardinal direction sends one direction event, and on touch-capable devices
+ * tapping or long-pressing the image forwards real touch coordinates; elsewhere a tap toggles capture.
  */
 @Composable
+@Suppress("LongParameterList")
 private fun MirrorSurface(
     frame: MirrorFrame,
     palette: MirrorPalette?,
+    hasTouch: Boolean,
     onEvent: (Int) -> Unit,
+    onTouch: (Int, Int, Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
     var focused by remember { mutableStateOf(false) }
-    val isFocused by rememberUpdatedState(focused)
+    val currentFrame by rememberUpdatedState(frame)
     val focusColor = MaterialTheme.colorScheme.primary
+
+    fun toggleKeyboard() = if (focused) focusManager.clearFocus() else focusRequester.requestFocus()
 
     Column(
         modifier = modifier,
@@ -271,17 +245,34 @@ private fun MirrorSurface(
                 .onFocusChanged { focused = it.isFocused }
                 .focusable()
                 .onPreviewKeyEvent { event ->
-                    if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
-                    keyToInputEvent(event.key)?.let {
-                        onEvent(it)
-                        true
-                    } ?: false
+                    val mapped = keyToInputEvent(event.key) ?: return@onPreviewKeyEvent false
+                    // Consume KeyUp of mapped keys too, or Space/arrows leak to the scroll container.
+                    if (event.type == KeyEventType.KeyDown) onEvent(mapped)
+                    true
                 }
-                .pointerInput(Unit) {
+                .pointerInput(hasTouch) {
                     detectTapGestures(
-                        onTap = {
-                            // Tap toggles keyboard control so there is always a way out of capture.
-                            if (isFocused) focusManager.clearFocus() else focusRequester.requestFocus()
+                        onTap = { offset ->
+                            if (hasTouch) {
+                                onTouch(
+                                    INPUT_USER_PRESS,
+                                    offset.toDeviceX(size.width, currentFrame),
+                                    offset.toDeviceY(size.height, currentFrame),
+                                )
+                            } else {
+                                // Tap toggles keyboard control so there is always a way out of capture.
+                                toggleKeyboard()
+                            }
+                        },
+                        onLongPress = { offset ->
+                            // Physical touch drivers map a long-press to SELECT with coordinates.
+                            if (hasTouch) {
+                                onTouch(
+                                    INPUT_SELECT,
+                                    offset.toDeviceX(size.width, currentFrame),
+                                    offset.toDeviceY(size.height, currentFrame),
+                                )
+                            }
                         },
                     )
                 }
@@ -290,17 +281,38 @@ private fun MirrorSurface(
         ) {
             MirrorFrameImage(frame, palette)
         }
+        MirrorControlHints(focused = focused, hasTouch = hasTouch, onToggleKeyboard = { toggleKeyboard() })
+    }
+}
+
+@Composable
+private fun MirrorControlHints(focused: Boolean, hasTouch: Boolean, onToggleKeyboard: () -> Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        FilterChip(
+            selected = focused,
+            onClick = onToggleKeyboard,
+            label = { Text(stringResource(Res.string.mirror_keyboard)) },
+        )
         Text(
             text =
-            if (focused) {
-                "Keyboard active: arrows · Enter = OK · Esc = back — click the screen again to exit"
-            } else {
-                "Click the screen for keyboard control, or swipe it to navigate"
-            },
+            stringResource(
+                when {
+                    focused -> Res.string.mirror_hint_keyboard_active
+                    hasTouch -> Res.string.mirror_hint_tap_touch
+                    else -> Res.string.mirror_hint_tap_keyboard
+                },
+            ),
             style = MaterialTheme.typography.labelSmall,
         )
     }
 }
+
+/** Scales a tap position on the scaled-up mirror image back to panel pixel coordinates. */
+private fun Offset.toDeviceX(boxWidthPx: Int, frame: MirrorFrame): Int =
+    (x / boxWidthPx * frame.width).toInt().coerceIn(0, frame.width - 1)
+
+private fun Offset.toDeviceY(boxHeightPx: Int, frame: MirrorFrame): Int =
+    (y / boxHeightPx * frame.height).toInt().coerceIn(0, frame.height - 1)
 
 private fun keyToInputEvent(key: Key): Int? = when (key) {
     Key.DirectionUp -> INPUT_UP
@@ -348,97 +360,27 @@ private fun Modifier.swipeToDirection(onEvent: (Int) -> Unit): Modifier = pointe
     )
 }
 
-/**
- * Cross-shaped 5-way cluster with Back below-left, following the TV-remote convention: directions auto-repeat on hold
- * (500ms delay, then 10Hz — slow enough for the radio to render), OK long-press sends the firmware's SELECT_LONG.
- */
+/** The remote cluster: circular 5-way ring (see [DpadRing]) with Back below-left, per TV-remote convention. */
 @Composable
 private fun DpadCluster(enabled: Boolean, onEvent: (Int) -> Unit, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(DPAD_GAP),
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        RepeatingKey(MeshtasticIcons.KeyboardArrowUp, "Up", enabled) { onEvent(INPUT_UP) }
-        Row(horizontalArrangement = Arrangement.spacedBy(DPAD_GAP)) {
-            RepeatingKey(MeshtasticIcons.KeyboardArrowLeft, "Left", enabled) { onEvent(INPUT_LEFT) }
-            OkKey(
-                enabled = enabled,
-                onSelect = { onEvent(INPUT_SELECT) },
-                onSelectLong = { onEvent(INPUT_SELECT_LONG) },
-            )
-            RepeatingKey(MeshtasticIcons.KeyboardArrowRight, "Right", enabled) { onEvent(INPUT_RIGHT) }
-        }
-        RepeatingKey(MeshtasticIcons.KeyboardArrowDown, "Down", enabled) { onEvent(INPUT_DOWN) }
-        Row(modifier = Modifier.widthIn(min = DPAD_KEY_SIZE * 3 + DPAD_GAP * 2)) {
-            BackKey(enabled = enabled) { onEvent(INPUT_BACK) }
-        }
-    }
-}
-
-/** A direction key: fires on press, then auto-repeats while held. */
-@Composable
-private fun RepeatingKey(icon: ImageVector, label: String, enabled: Boolean, onEvent: () -> Unit) {
-    var pressed by remember { mutableStateOf(false) }
-    val background =
-        when {
-            !enabled -> MaterialTheme.colorScheme.surfaceVariant
-            pressed -> MaterialTheme.colorScheme.primaryContainer
-            else -> MaterialTheme.colorScheme.secondaryContainer
-        }
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier =
-        Modifier.size(DPAD_KEY_SIZE).clip(CircleShape).background(background).pointerInput(enabled) {
-            if (!enabled) return@pointerInput
-            coroutineScope {
-                detectTapGestures(
-                    onPress = {
-                        pressed = true
-                        onEvent()
-                        val repeater = launch {
-                            delay(REPEAT_INITIAL_DELAY_MS)
-                            while (isActive) {
-                                onEvent()
-                                delay(REPEAT_INTERVAL_MS)
-                            }
-                        }
-                        tryAwaitRelease()
-                        repeater.cancel()
-                        pressed = false
-                    },
-                )
-            }
-        },
-    ) {
-        Icon(imageVector = icon, contentDescription = label, tint = contentColorFor(enabled))
-    }
-}
-
-/** Center OK: tap selects, long-press sends SELECT_LONG. */
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-private fun OkKey(enabled: Boolean, onSelect: () -> Unit, onSelectLong: () -> Unit) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier =
-        Modifier.size(DPAD_KEY_SIZE)
-            .clip(CircleShape)
-            .background(
-                if (enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
-            )
-            .combinedClickable(enabled = enabled, onLongClick = onSelectLong, onClick = onSelect),
-    ) {
-        Text(
-            text = "OK",
-            style = MaterialTheme.typography.titleSmall,
-            color = if (enabled) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+        DpadRing(
+            enabled = enabled,
+            onEvent = onEvent,
+            onSelect = { onEvent(INPUT_SELECT) },
+            onSelectLong = { onEvent(INPUT_SELECT_LONG) },
         )
+        BackKey(enabled = enabled) { onEvent(INPUT_BACK) }
     }
 }
 
 @Composable
 private fun BackKey(enabled: Boolean, onBack: () -> Unit) {
+    val haptics = LocalHapticFeedback.current
     Box(
         contentAlignment = Alignment.Center,
         modifier =
@@ -451,9 +393,16 @@ private fun BackKey(enabled: Boolean, onBack: () -> Unit) {
                     MaterialTheme.colorScheme.surfaceVariant
                 },
             )
-            .combinedClickable(enabled = enabled, onClick = onBack),
+            .combinedClickable(enabled = enabled) {
+                haptics.performHapticFeedback(HapticFeedbackType.VirtualKey)
+                onBack()
+            },
     ) {
-        Text(text = "Back", style = MaterialTheme.typography.labelMedium, color = contentColorFor(enabled))
+        Text(
+            text = stringResource(Res.string.mirror_back),
+            style = MaterialTheme.typography.labelMedium,
+            color = contentColorFor(enabled),
+        )
     }
 }
 
