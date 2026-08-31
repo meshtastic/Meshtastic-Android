@@ -103,18 +103,13 @@ fi
 echo "✅ No DEPENDENCY_INFO_BLOCK in signing block"
 
 echo "── Step 6: Check native libraries have debug symbols (not stripped) ──"
-STRIPPED_LIBS=""
-while IFS= read -r -d '' so; do
-  # no .symtab = stripped
-  if ! readelf -S "$so" 2>/dev/null | grep -q "\.symtab"; then
-    STRIPPED_LIBS="${STRIPPED_LIBS} $(basename "$so")"
-  fi
-done < <(find "$APK_DIR" -name "*.so" -print0 2>/dev/null)
-# some third-party .so arrive pre-stripped — warn only
-if [ -n "$STRIPPED_LIBS" ]; then
-  echo "::warning::Some native libraries appear stripped (may cause NDK-version-dependent RB failures):${STRIPPED_LIBS}"
+# Run from repo root (see header), so this is a static path shellcheck -x can follow.
+. scripts/lib/stripped-libs.sh
+scan_stripped_libs "$APK_DIR"
+if [ -n "$STRIPPED_UNEXPECTED" ]; then
+  echo "::warning::Unexpected stripped native libraries (may cause NDK-version-dependent RB failures):${STRIPPED_UNEXPECTED}"
 else
-  echo "✅ Native libraries retain debug symbols"
+  echo "✅ Native libraries retain debug symbols (${STRIPPED_KNOWN_COUNT} known pre-stripped third-party lib(s) ignored)"
 fi
 
 echo "── Step 7: Check aboutlibraries 'generated' timestamp not in APK ──"

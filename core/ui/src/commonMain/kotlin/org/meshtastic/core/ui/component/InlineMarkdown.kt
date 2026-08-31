@@ -22,6 +22,7 @@ import org.intellij.markdown.ast.ASTNode
 import org.intellij.markdown.flavours.gfm.GFMElementTypes
 import org.intellij.markdown.flavours.gfm.GFMFlavourDescriptor
 import org.intellij.markdown.flavours.gfm.GFMTokenTypes
+import org.intellij.markdown.parser.CancellationToken
 import org.intellij.markdown.parser.MarkdownParser
 
 /**
@@ -39,13 +40,20 @@ import org.intellij.markdown.parser.MarkdownParser
  */
 fun parseInlineMarkdown(source: String): InlineMarkdownResult {
     // Empty input or a parser failure (assertions are disabled, but stay total regardless) → literal text, no spans.
-    val tree = if (source.isEmpty()) null else runCatching { parser.buildMarkdownTreeFromString(source) }.getOrNull()
+    val tree = if (source.isEmpty()) null else parseOrNull(source)
     return tree?.let { InlineMarkdownVisitor(source).build(it) }
         ?: InlineMarkdownResult(source, emptyList(), emptyList())
 }
 
 // assertionsEnabled = false → the parser recovers to a flat tree instead of throwing on malformed input.
-private val parser = MarkdownParser(GFMFlavourDescriptor(), false)
+// cancellationToken is passed explicitly to select the current constructor: omitting it resolves to the
+// deprecated two-argument overload.
+private val parser = MarkdownParser(GFMFlavourDescriptor(), false, CancellationToken.NonCancellable)
+
+// The String overload of buildMarkdownTreeFromString is deprecated in favour of the CharSequence one, and
+// Kotlin picks the more specific String overload unless the argument is widened here.
+private fun parseOrNull(source: String): ASTNode? =
+    runCatching { parser.buildMarkdownTreeFromString(source as CharSequence) }.getOrNull()
 
 /**
  * Style spans over the RAW [source] (delimiters kept in place) for live in-field styling. Unlike [parseInlineMarkdown]
@@ -54,9 +62,7 @@ private val parser = MarkdownParser(GFMFlavourDescriptor(), false)
  */
 fun inlineMarkdownStyleRanges(source: String): List<StyleSpan> {
     val hasDelimiter = source.any { it == '*' || it == '~' || it == '`' }
-    val tree =
-        (if (hasDelimiter) runCatching { parser.buildMarkdownTreeFromString(source) }.getOrNull() else null)
-            ?: return emptyList()
+    val tree = (if (hasDelimiter) parseOrNull(source) else null) ?: return emptyList()
     val spans = mutableListOf<StyleSpan>()
     collectStyleRanges(tree, spans)
     return spans

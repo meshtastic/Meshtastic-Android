@@ -1010,7 +1010,7 @@ class NodeManagerImplTest {
         assertNull(nodeManager.nodeDBbyNodeNum[oldNum])
         val canonical = nodeManager.nodeDBbyNodeNum[newNum]
         assertNotNull(canonical)
-        assertEquals("Migrated", canonical!!.user.long_name)
+        assertEquals("Migrated", canonical.user.long_name)
         assertEquals(validPk, canonical.publicKey)
         verifyNoRepositoryDeletion()
         verifySuspend(mode = VerifyMode.not) { nodeRepository.upsert(any()) }
@@ -1063,7 +1063,7 @@ class NodeManagerImplTest {
         assertEquals(7, placeholder.channel)
         val canonical = nodeManager.nodeDBbyNodeNum[newNum]
         assertNotNull(canonical)
-        assertEquals("Migrated", canonical!!.user.long_name)
+        assertEquals("Migrated", canonical.user.long_name)
         verifyNoRepositoryDeletion()
         verifySuspend(mode = VerifyMode.not) { nodeRepository.upsert(any()) }
         verifySuspend(mode = VerifyMode.not) { notificationManager.dispatch(any()) }
@@ -1093,11 +1093,11 @@ class NodeManagerImplTest {
 
         val fromNode = nodeManager.nodeDBbyNodeNum[fromNum]
         assertNotNull(fromNode)
-        assertEquals("Established", fromNode!!.user.long_name)
+        assertEquals("Established", fromNode.user.long_name)
         assertEquals(differentPk, fromNode.publicKey)
         val otherNode = nodeManager.nodeDBbyNodeNum[otherNum]
         assertNotNull(otherNode)
-        assertEquals("Other", otherNode!!.user.long_name)
+        assertEquals("Other", otherNode.user.long_name)
         verifyNoRepositoryDeletion()
         verifySuspend(mode = VerifyMode.not) { nodeRepository.upsert(any()) }
         verifySuspend(mode = VerifyMode.not) { notificationManager.dispatch(any()) }
@@ -1233,7 +1233,7 @@ class NodeManagerImplTest {
         assertNull(nodeManager.nodeDBbyNodeNum[otherNum])
         val localNode = nodeManager.nodeDBbyNodeNum[localNum]
         assertNotNull(localNode)
-        assertEquals("Local Node", localNode!!.user.long_name)
+        assertEquals("Local Node", localNode.user.long_name)
         assertEquals(validPk, localNode.publicKey)
         verifyNoRepositoryDeletion()
         verifySuspend(mode = VerifyMode.exactly(1)) { nodeRepository.upsert(any()) }
@@ -1317,7 +1317,7 @@ class NodeManagerImplTest {
 
         val result = nodeManager.nodeDBbyNodeNum[newNodeNum]
         assertNotNull(result)
-        assertEquals("New Node", result!!.user.long_name)
+        assertEquals("New Node", result.user.long_name)
         assertEquals(newPk, result.publicKey)
         verifyNoRepositoryDeletion()
         verifySuspend(mode = VerifyMode.exactly(1)) { nodeRepository.upsert(any()) }
@@ -1401,7 +1401,7 @@ class NodeManagerImplTest {
 
         val result = nodeManager.nodeDBbyNodeNum[nodeNum]
         assertNotNull(result)
-        assertEquals("Updated", result!!.user.long_name)
+        assertEquals("Updated", result.user.long_name)
         assertEquals(validPk, result.publicKey)
         verifyNoRepositoryDeletion()
         verifySuspend(mode = VerifyMode.exactly(1)) { nodeRepository.upsert(any()) }
@@ -1526,7 +1526,7 @@ class NodeManagerImplTest {
         assertNull(nodeManager.nodeDBbyNodeNum[oldNum])
         val survivor = nodeManager.getNodeById(sharedUserId)
         assertNotNull(survivor)
-        assertEquals(newNum, survivor!!.num)
+        assertEquals(newNum, survivor.num)
     }
 
     // ── Additional identity reconciliation tests ────────────────────────────────
@@ -1716,7 +1716,7 @@ class NodeManagerImplTest {
         // byId should point to node2 (non-placeholder, lowest among non-placeholders)
         val representative = nodeManager.getNodeById(userId)
         assertNotNull(representative)
-        assertEquals(node2, representative!!.num)
+        assertEquals(node2, representative.num)
     }
 
     // 17. Old-ID survivor restoration after put
@@ -1751,12 +1751,12 @@ class NodeManagerImplTest {
         // byId for oldUserId should now point to survivorNum
         val survivor = nodeManager.getNodeById(oldUserId)
         assertNotNull(survivor)
-        assertEquals(survivorNum, survivor!!.num)
+        assertEquals(survivorNum, survivor.num)
 
         // byId for newUserId should point to nodeNum
         val newNode = nodeManager.getNodeById(newUserId)
         assertNotNull(newNode)
-        assertEquals(nodeNum, newNode!!.num)
+        assertEquals(nodeNum, newNode.num)
     }
 
     // 18. fromByNum insertion-order independence
@@ -1882,7 +1882,7 @@ class NodeManagerImplTest {
         assertNotNull(nodeManager.nodeDBbyNodeNum[preferredNum])
         val representative = nodeManager.getNodeById(userId)
         assertNotNull(representative)
-        assertEquals(preferredNum, representative!!.num)
+        assertEquals(preferredNum, representative.num)
     }
 
     // 20. Accepted local node remains the byId representative
@@ -1916,7 +1916,7 @@ class NodeManagerImplTest {
         assertNotNull(nodeManager.nodeDBbyNodeNum[remoteNum])
         val representative = nodeManager.getNodeById(userId)
         assertNotNull(representative)
-        assertEquals(localNum, representative!!.num)
+        assertEquals(localNum, representative.num)
     }
 
     // 21. Exact notification title, message, ID, category, and deep link
@@ -1986,7 +1986,7 @@ class NodeManagerImplTest {
         assertNull(nodeManager.nodeDBbyNodeNum[staleNum])
         val canonical = nodeManager.nodeDBbyNodeNum[canonicalNum]
         assertNotNull(canonical)
-        assertEquals("Canonical", canonical!!.user.long_name)
+        assertEquals("Canonical", canonical.user.long_name)
         assertEquals(canonicalKey, canonical.publicKey)
         assertEquals(111, canonical.position.latitude_i)
         assertEquals(222, canonical.position.longitude_i)
@@ -2021,7 +2021,7 @@ class NodeManagerImplTest {
         assertNull(nodeManager.nodeDBbyNodeNum[staleNum])
         val canonical = nodeManager.nodeDBbyNodeNum[canonicalNum]
         assertNotNull(canonical)
-        assertEquals("Fresh Canonical", canonical!!.user.long_name)
+        assertEquals("Fresh Canonical", canonical.user.long_name)
         assertEquals(canonicalKey, canonical.publicKey)
         verifyNoRepositoryDeletion()
         verifySuspend(mode = VerifyMode.not) { nodeRepository.upsert(any()) }
@@ -2059,8 +2059,8 @@ class NodeManagerImplTest {
         val bravo = nodeManager.nodeDBbyNodeNum[b]
         assertNotNull(alpha)
         assertNotNull(bravo)
-        assertEquals("Alpha Packet", alpha!!.user.long_name)
-        assertEquals("Bravo", bravo!!.user.long_name)
+        assertEquals("Alpha Packet", alpha.user.long_name)
+        assertEquals("Bravo", bravo.user.long_name)
         verifyNoRepositoryDeletion()
         verifySuspend(mode = VerifyMode.not) { nodeRepository.upsert(any()) }
         verifySuspend(mode = VerifyMode.not) { notificationManager.dispatch(any()) }
@@ -2096,9 +2096,9 @@ class NodeManagerImplTest {
         val atNoncanonical = nodeManager.nodeDBbyNodeNum[noncanonicalNum]
         assertNotNull(atCanonical)
         assertNotNull(atNoncanonical)
-        assertEquals(establishedKey, atCanonical!!.publicKey)
+        assertEquals(establishedKey, atCanonical.publicKey)
         assertEquals("Established", atCanonical.user.long_name)
-        assertEquals(canonicalKey, atNoncanonical!!.publicKey)
+        assertEquals(canonicalKey, atNoncanonical.publicKey)
         verifyNoRepositoryDeletion()
         verifySuspend(mode = VerifyMode.not) { nodeRepository.upsert(any()) }
         verifySuspend(mode = VerifyMode.not) { notificationManager.dispatch(any()) }
@@ -2482,7 +2482,7 @@ class NodeManagerImplTest {
         assertNull(nodeManager.nodeDBbyNodeNum[staleNum], "stale-DB row must not leak into the live index")
         val loaded = nodeManager.nodeDBbyNodeNum[freshNum]
         assertNotNull(loaded)
-        assertEquals("New DB", loaded!!.user.long_name)
+        assertEquals("New DB", loaded.user.long_name)
     }
 
     @Test
@@ -2518,7 +2518,7 @@ class NodeManagerImplTest {
         )
         val live = nodeManager.nodeDBbyNodeNum[liveNum]
         assertNotNull(live)
-        assertEquals("Live After Clear", live!!.user.long_name)
+        assertEquals("Live After Clear", live.user.long_name)
     }
 
     @Test
@@ -2547,7 +2547,7 @@ class NodeManagerImplTest {
 
         val result = nodeManager.nodeDBbyNodeNum[num]
         assertNotNull(result)
-        assertEquals("Live Updated", result!!.user.long_name)
+        assertEquals("Live Updated", result.user.long_name)
         assertEquals(200, result.lastHeard, "live mutation field must not be overwritten by the snapshot")
     }
 
@@ -2722,7 +2722,7 @@ class NodeManagerImplTest {
 
             val reused = nodeManager.nodeDBbyNodeNum[num]
             assertNotNull(reused)
-            assertEquals("Replacement", reused!!.user.long_name)
+            assertEquals("Replacement", reused.user.long_name)
             assertEquals(reuseKey, reused.publicKey)
             assertEquals(1, reuseDispatches.count { it.id == num && it.message == "Replacement" })
         }
