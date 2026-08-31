@@ -39,7 +39,7 @@ fun annotateTraceroute(
     return buildAnnotatedString {
         inString.lines().forEachIndexed { i, line ->
             if (i > 0) append("\n")
-            // Example line: "⇊ -8.75 dB" (formatTraceroutePath in RouteDiscovery.kt emits no unit suffix)
+            // Example line: "⇊ -8.75 dB" (formatTraceroutePath in RouteDiscovery.kt emits "dB", with no trailing "SNR")
             if (line.trimStart().startsWith("⇊")) {
                 val snrRegex = Regex("""⇊ ([\d.?-]+) dB""")
                 val snrMatch = snrRegex.find(line)
