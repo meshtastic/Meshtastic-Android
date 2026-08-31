@@ -66,7 +66,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
-import org.meshtastic.core.repository.MirrorFormat
 import org.meshtastic.core.repository.MirrorFrame
 import org.meshtastic.core.repository.MirrorPalette
 import org.meshtastic.core.resources.Res
@@ -81,7 +80,6 @@ import org.meshtastic.core.resources.mirror_keyboard
 import org.meshtastic.core.resources.mirror_no_frame
 import org.meshtastic.core.resources.mirror_not_connected
 import org.meshtastic.core.resources.mirror_off
-import org.meshtastic.core.resources.mirror_view_only
 import org.meshtastic.core.resources.refresh
 import org.meshtastic.proto.DisplayInfo
 
@@ -159,9 +157,6 @@ fun DisplayMirrorContent(modifier: Modifier = Modifier, viewModel: DisplayMirror
                     currentFrame,
                     palette,
                     enabled = connected,
-                    // MUI (RGB565) devices read their own input drivers, not the
-                    // InputBroker remote events inject into — mirror-only for now.
-                    inputSupported = currentFrame.format != MirrorFormat.RGB565,
                     hasTouch = displayInfo?.has_touch == true,
                     onEvent = viewModel::sendKey,
                     onTouch = viewModel::sendTouch,
@@ -177,13 +172,12 @@ private fun MirrorWithControls(
     frame: MirrorFrame,
     palette: MirrorPalette?,
     enabled: Boolean,
-    inputSupported: Boolean,
     hasTouch: Boolean,
     onEvent: (Int) -> Unit,
     onTouch: (Int, Int, Int) -> Unit,
 ) {
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-        if (maxWidth >= SIDE_BY_SIDE_MIN_WIDTH && inputSupported) {
+        if (maxWidth >= SIDE_BY_SIDE_MIN_WIDTH) {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterHorizontally),
                 verticalAlignment = Alignment.CenterVertically,
@@ -198,27 +192,10 @@ private fun MirrorWithControls(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                if (inputSupported) {
-                    MirrorSurface(frame, palette, hasTouch, onEvent, onTouch)
-                    DpadCluster(enabled = enabled, onEvent = onEvent)
-                } else {
-                    ViewOnlyMirror(frame, palette)
-                }
+                MirrorSurface(frame, palette, hasTouch, onEvent, onTouch)
+                DpadCluster(enabled = enabled, onEvent = onEvent)
             }
         }
-    }
-}
-
-/** Mirror without any input affordances, for device UIs that do not accept remote input yet. */
-@Composable
-private fun ViewOnlyMirror(frame: MirrorFrame, palette: MirrorPalette?, modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        MirrorFrameImage(frame, palette)
-        Text(text = stringResource(Res.string.mirror_view_only), style = MaterialTheme.typography.labelSmall)
     }
 }
 
