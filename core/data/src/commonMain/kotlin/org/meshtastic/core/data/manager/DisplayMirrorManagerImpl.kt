@@ -22,7 +22,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import org.koin.core.annotation.Single
 import org.meshtastic.core.repository.DisplayMirrorManager
 import org.meshtastic.core.repository.MirrorFrame
+import org.meshtastic.core.repository.MirrorPalette
 import org.meshtastic.proto.DisplayFrame
+import org.meshtastic.proto.DisplayPalette
 
 /**
  * Display frame reassembly state machine.
@@ -37,9 +39,18 @@ class DisplayMirrorManagerImpl : DisplayMirrorManager {
     private val _frame = MutableStateFlow<MirrorFrame?>(null)
     override val frame = _frame.asStateFlow()
 
+    private val _palette = MutableStateFlow<MirrorPalette?>(null)
+    override val palette = _palette.asStateFlow()
+
     private var buffer: ByteArray? = null
     private var frameId = 0
     private var received = 0
+
+    private var paletteRegions = mutableListOf<DisplayPalette.ColorRegion>()
+    private var paletteSignature = 0
+    private var paletteReceived = 0
+    private var paletteDefaultOn = 0
+    private var paletteDefaultOff = 0
 
     override fun handleIncomingFrame(chunk: DisplayFrame) {
         val data = chunk.data_.toByteArray()
@@ -64,8 +75,44 @@ class DisplayMirrorManagerImpl : DisplayMirrorManager {
         received += data.size
 
         if (received == total) {
-            _frame.value = MirrorFrame(width = chunk.width, height = chunk.height, frameId = frameId, pixels = buf)
+            _frame.value =
+                MirrorFrame(
+                    width = chunk.width,
+                    height = chunk.height,
+                    frameId = frameId,
+                    paletteSignature = chunk.palette_signature,
+                    pixels = buf,
+                )
             buffer = null
+        }
+    }
+
+    override fun handleIncomingPalette(chunk: DisplayPalette) {
+        if (chunk.region_offset == 0) {
+            paletteRegions = mutableListOf()
+            paletteSignature = chunk.signature
+            paletteReceived = 0
+            // Defaults are authoritative on the first chunk; later chunks may omit them.
+            paletteDefaultOn = chunk.default_on_color
+            paletteDefaultOff = chunk.default_off_color
+        }
+        if (chunk.signature != paletteSignature || chunk.region_offset != paletteReceived) {
+            Logger.w { "DisplayMirror: bad palette chunk ${chunk.signature}@${chunk.region_offset}" }
+            paletteRegions.clear()
+            paletteReceived = -1 // poison until the next offset-0 chunk restarts
+            return
+        }
+        paletteRegions.addAll(chunk.regions)
+        paletteReceived += chunk.regions.size
+
+        if (paletteReceived >= chunk.region_total) {
+            _palette.value =
+                MirrorPalette(
+                    signature = chunk.signature,
+                    defaultOnColor = paletteDefaultOn,
+                    defaultOffColor = paletteDefaultOff,
+                    regions = paletteRegions.toList(),
+                )
         }
     }
 

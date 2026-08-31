@@ -18,6 +18,7 @@ package org.meshtastic.core.data.manager
 
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.proto.DisplayFrame
+import org.meshtastic.proto.DisplayPalette
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
@@ -124,6 +125,50 @@ class DisplayMirrorManagerImplTest {
         )
 
         assertNull(manager.frame.value)
+    }
+
+    @Test
+    fun `reassembles a two-chunk palette and tags frames with its signature`() {
+        val region =
+            DisplayPalette.ColorRegion(x = 0, y = 0, width = 128, height = 16, on_color = 0xF800, off_color = 0)
+        manager.handleIncomingPalette(
+            DisplayPalette(
+                signature = 42,
+                default_on_color = 0xFFFF,
+                default_off_color = 0,
+                region_offset = 0,
+                region_total = 3,
+                regions = listOf(region, region),
+            ),
+        )
+        assertNull(manager.palette.value)
+
+        manager.handleIncomingPalette(
+            DisplayPalette(signature = 42, region_offset = 2, region_total = 3, regions = listOf(region)),
+        )
+
+        val palette = manager.palette.value!!
+        assertEquals(42, palette.signature)
+        assertEquals(0xFFFF, palette.defaultOnColor)
+        assertEquals(3, palette.regions.size)
+    }
+
+    @Test
+    fun `out-of-sequence palette chunk is dropped until a restart`() {
+        val region = DisplayPalette.ColorRegion(x = 0, y = 0, width = 8, height = 8)
+        manager.handleIncomingPalette(
+            DisplayPalette(signature = 7, region_offset = 0, region_total = 2, regions = listOf(region)),
+        )
+        manager.handleIncomingPalette(
+            DisplayPalette(signature = 7, region_offset = 5, region_total = 2, regions = listOf(region)),
+        )
+        assertNull(manager.palette.value)
+
+        // A fresh offset-0 chunk recovers
+        manager.handleIncomingPalette(
+            DisplayPalette(signature = 8, region_offset = 0, region_total = 1, regions = listOf(region)),
+        )
+        assertEquals(8, manager.palette.value?.signature)
     }
 
     private companion object {

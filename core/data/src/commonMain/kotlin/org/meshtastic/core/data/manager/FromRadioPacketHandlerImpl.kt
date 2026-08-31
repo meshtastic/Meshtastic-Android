@@ -46,6 +46,7 @@ import org.meshtastic.core.resources.key_verification_title
 import org.meshtastic.core.resources.low_entropy_key_title
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.DisplayFrame
+import org.meshtastic.proto.DisplayPalette
 import org.meshtastic.proto.FromRadio
 
 /** Implementation of [FromRadioPacketHandler] that dispatches [FromRadio] variants to specialized handlers. */
@@ -87,6 +88,7 @@ class FromRadioPacketHandlerImpl(
         val xmodemPacket = proto.xmodemPacket
         val lockdownStatus = proto.lockdown_status
         val displayFrame = proto.display_frame
+        val displayPalette = proto.display_palette
 
         when {
             myInfo != null -> configFlowManager.value.handleMyInfo(myInfo, session)
@@ -136,6 +138,8 @@ class FromRadioPacketHandlerImpl(
 
             displayFrame != null -> handleDisplayFrame(displayFrame, session)
 
+            displayPalette != null -> handleDisplayPalette(displayPalette, session)
+
             lockdownStatus != null ->
                 runIfSessionActive(session, "lockdown status") {
                     lockdownCoordinator.handleLockdownStatus(lockdownStatus)
@@ -154,6 +158,9 @@ class FromRadioPacketHandlerImpl(
 
     private fun handleDisplayFrame(frame: DisplayFrame, session: RadioSessionContext) =
         runIfSessionActive(session, "display frame") { displayMirrorManager.value.handleIncomingFrame(frame) }
+
+    private fun handleDisplayPalette(palette: DisplayPalette, session: RadioSessionContext) =
+        runIfSessionActive(session, "display palette") { displayMirrorManager.value.handleIncomingPalette(palette) }
 
     private fun runIfSessionActive(session: RadioSessionContext, operation: String, block: () -> Unit) {
         if (!radioInterfaceService.runIfSessionActive(session, block)) {

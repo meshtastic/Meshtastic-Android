@@ -18,6 +18,7 @@ package org.meshtastic.core.repository
 
 import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.proto.DisplayFrame
+import org.meshtastic.proto.DisplayPalette
 
 /**
  * Reassembles the chunked [DisplayFrame] stream from the connected device into complete framebuffer snapshots.
@@ -30,9 +31,26 @@ interface DisplayMirrorManager {
     /** Latest completely reassembled frame, or null before the first one arrives. */
     val frame: StateFlow<MirrorFrame?>
 
+    /** Latest completely reassembled color palette, or null when the device renders monochrome. */
+    val palette: StateFlow<MirrorPalette?>
+
     /** Routes an incoming display frame chunk from the device to the reassembly state machine. */
     fun handleIncomingFrame(chunk: DisplayFrame)
+
+    /** Routes an incoming palette chunk from the device to the reassembly state machine. */
+    fun handleIncomingPalette(chunk: DisplayPalette)
 }
+
+/**
+ * A complete color palette for [MirrorFrame]s whose `paletteSignature` matches [signature]: per-region RGB565 on/off
+ * colors (later regions override earlier ones where they overlap) plus defaults for pixels outside all regions.
+ */
+data class MirrorPalette(
+    val signature: Int,
+    val defaultOnColor: Int,
+    val defaultOffColor: Int,
+    val regions: List<DisplayPalette.ColorRegion>,
+)
 
 /**
  * One complete device framebuffer snapshot.
@@ -40,17 +58,25 @@ interface DisplayMirrorManager {
  * [pixels] is MONO_VLSB: 1 bit per pixel in vertical LSB-first pages — byte index = `x + (y / 8) * width`, bit index =
  * `y % 8`.
  */
-data class MirrorFrame(val width: Int, val height: Int, val frameId: Int, val pixels: ByteArray) {
+data class MirrorFrame(
+    val width: Int,
+    val height: Int,
+    val frameId: Int,
+    val paletteSignature: Int,
+    val pixels: ByteArray,
+) {
     override fun equals(other: Any?): Boolean = other is MirrorFrame &&
         other.width == width &&
         other.height == height &&
         other.frameId == frameId &&
+        other.paletteSignature == paletteSignature &&
         other.pixels.contentEquals(pixels)
 
     override fun hashCode(): Int {
         var result = width
         result = 31 * result + height
         result = 31 * result + frameId
+        result = 31 * result + paletteSignature
         result = 31 * result + pixels.contentHashCode()
         return result
     }
