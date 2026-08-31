@@ -210,17 +210,6 @@
     <string name="ip_port">Port:</string>
     <string name="ipv4_mode">IPv4 režim</string>
     <!-- KEY -->
-    <!-- LABEL -->
-    <string name="label_long_fast">Ďaleký Dosah - Rýchlo</string>
-    <string name="label_long_moderate">Ďaleký Dosah - Mierne</string>
-    <string name="label_long_slow">Ďaleký Dosah - Pomali</string>
-    <string name="label_long_turbo">Ďaleký Dosah - Turbo</string>
-    <string name="label_medium_fast">Stredný Dosah - Rýchlo</string>
-    <string name="label_medium_slow">Stredný Dosah - Pomali</string>
-    <string name="label_short_fast">Krátky Dosah -  Rýchlo</string>
-    <string name="label_short_slow">Krátky Dosah - Pomali</string>
-    <string name="label_short_turbo">Krátky Dosah - Turbo</string>
-    <string name="label_very_long_slow">Veľmi Ďaleký Dosah - Pomali</string>
     <!-- LAYER -->
     <string name="led_state">Stav LED</string>
     <!-- LICENSED -->

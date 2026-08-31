@@ -631,21 +631,6 @@
     <string name="key_verification_final_title">金鑰驗證已完成</string>
     <string name="key_verification_request_title">金鑰驗證請求</string>
     <string name="key_verification_title">金鑰驗證</string>
-    <!-- LABEL -->
-    <string name="label_lite_fast">Lite - Fast</string>
-    <string name="label_lite_slow">Lite - Slow</string>
-    <string name="label_long_fast">Long - Fast</string>
-    <string name="label_long_moderate">Long - Moderate</string>
-    <string name="label_long_slow">Long - Slow</string>
-    <string name="label_long_turbo">Long - Turbo</string>
-    <string name="label_medium_fast">Medium - Fast</string>
-    <string name="label_medium_slow">Medium - Slow</string>
-    <string name="label_narrow_fast">Narrow - Fast</string>
-    <string name="label_narrow_slow">Narrow - Slow</string>
-    <string name="label_short_fast">Short - Fast</string>
-    <string name="label_short_slow">Short - Slow</string>
-    <string name="label_short_turbo">Short - Turbo</string>
-    <string name="label_very_long_slow">Very Long - Slow</string>
     <string name="last_heard_filter_label">依最後收到時間篩選：%1$s</string>
     <string name="last_position_update">最後位置更新</string>
     <string name="latest_alpha_firmware">最新測試版韌體</string>
@@ -877,11 +862,6 @@
     <string name="node_layout_complete_description">完整版面會顯示所有可用的節點資料，無資料的欄位將自動隱藏。</string>
     <string name="node_layout_device_role">裝置 &amp; 角色</string>
     <string name="node_layout_distance_and_bearing">距離與方位</string>
-    <string name="node_layout_help_signal_bad">訊號微弱。SNR 高於 −18 dB 且 RSSI 高於 −125 dBm。</string>
-    <string name="node_layout_help_signal_fair">訊號普通。SNR 高於 −12 dB 且 RSSI 高於 −120 dBm。</string>
-    <string name="node_layout_help_signal_good">訊號良好。SNR 高於 −7 dB 且 RSSI 高於 −115 dBm。</string>
-    <string name="node_layout_help_signal_indicator">將 SNR 與 RSSI 合併為一個品質等級，以彩色圖示與說明呈現。僅在完整版面中顯示。</string>
-    <string name="node_layout_help_signal_none">未偵測到可用訊號，低於所有品質門檻值。</string>
     <string name="node_layout_hops_away">節點距</string>
     <string name="node_layout_last_heard_time">最後收到時間</string>
     <string name="node_layout_log_icons">環境計量資料</string>
@@ -1348,7 +1328,6 @@
     <string name="traffic_management_nodeinfo_direct_response_max_hops">直接應答最大跳數</string>
     <string name="traffic_management_position_dedup">定位去重複化處理</string>
     <string name="traffic_management_position_min_interval">定位最小間隔時間（秒）</string>
-    <string name="traffic_management_position_precision">定位精度（位元）</string>
     <string name="traffic_management_rate_limit_enabled">速率限制</string>
     <string name="traffic_management_rate_limit_max_packets">開放窗口期封包上限</string>
     <string name="traffic_management_rate_limit_window">速率限制開放窗口期（秒）</string>

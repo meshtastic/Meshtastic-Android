@@ -838,24 +838,6 @@
     <string name="key_verification_final_title">鍵の検証が完了しました</string>
     <string name="key_verification_request_title">鍵の検証リクエスト</string>
     <string name="key_verification_title">鍵の検証</string>
-    <!-- LABEL -->
-    <string name="label_lite_fast">Lite・高速</string>
-    <string name="label_lite_slow">Lite・低速</string>
-    <string name="label_long_fast">長距離・高速</string>
-    <string name="label_long_moderate">長距離・中速</string>
-    <string name="label_long_slow">長距離・低速</string>
-    <string name="label_long_turbo">長距離・ターボ</string>
-    <string name="label_medium_fast">中距離・高速</string>
-    <string name="label_medium_slow">中距離・低速</string>
-    <string name="label_medium_turbo">中距離・ターボ</string>
-    <string name="label_narrow_fast">狭帯域・高速</string>
-    <string name="label_narrow_slow">狭帯域・低速</string>
-    <string name="label_short_fast">短距離・高速</string>
-    <string name="label_short_slow">短距離・低速</string>
-    <string name="label_short_turbo">短距離・ターボ</string>
-    <string name="label_tiny_fast">極短距離・高速</string>
-    <string name="label_tiny_slow">極短距離・低速</string>
-    <string name="label_very_long_slow">超長距離・低速</string>
     <string name="last_heard_filter_label">最後に受信した時間でフィルター: %1$s</string>
     <string name="last_position_update">最終位置更新</string>
     <string name="latest_alpha_firmware">最新のアルファ版</string>
@@ -1162,11 +1144,6 @@
     <string name="node_layout_complete_description">「詳細」レイアウトは、利用可能なすべてのノードデータを表示します。データのない項目は自動的に非表示になります。</string>
     <string name="node_layout_device_role">デバイスと役割</string>
     <string name="node_layout_distance_and_bearing">距離と方位</string>
-    <string name="node_layout_help_signal_bad">信号は弱いです。SNR が −18 dB 以上、RSSI が −125 dBm 以上です。</string>
-    <string name="node_layout_help_signal_fair">信号は中程度です。SNR が −12 dB 以上、RSSI が −120 dBm 以上です。</string>
-    <string name="node_layout_help_signal_good">信号は強いです。SNR が −7 dB 以上、RSSI が −115 dBm 以上です。</string>
-    <string name="node_layout_help_signal_indicator">SNR と RSSI を組み合わせて品質レベルを算出し、色付きアイコンと説明で表示します。「詳細」レイアウトでのみ表示されます。</string>
-    <string name="node_layout_help_signal_none">利用可能な信号がありません。すべての品質しきい値を下回っています。</string>
     <string name="node_layout_hops_away">ホップ数</string>
     <string name="node_layout_last_heard_time">最終受信時刻</string>
     <string name="node_layout_log_icons">環境メトリクス</string>
@@ -1704,7 +1681,6 @@
     <string name="traffic_management_nodeinfo_direct_response_max_hops">直接応答の最大ホップ数</string>
     <string name="traffic_management_position_dedup">位置情報の重複排除</string>
     <string name="traffic_management_position_min_interval">位置情報の最小間隔（秒）</string>
-    <string name="traffic_management_position_precision">位置情報の精度（ビット）</string>
     <string name="traffic_management_rate_limit_enabled">レート制限</string>
     <string name="traffic_management_rate_limit_max_packets">ウィンドウ内の最大パケット数</string>
     <string name="traffic_management_rate_limit_window">レート制限のウィンドウ（秒）</string>

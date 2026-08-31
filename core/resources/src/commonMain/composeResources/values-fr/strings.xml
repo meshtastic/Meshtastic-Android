@@ -581,8 +581,6 @@
     <string name="firmware_edition">Version du micrologiciel</string>
     <string name="firmware_event_ended_banner">%1$s est déprécié. Utilisez un micrologiciel Meshtastic standard pour restaurer les fonctionnalités normales.</string>
     <string name="firmware_event_ended_button">Mettre à jour le micrologiciel</string>
-    <string name="firmware_maintenance_erase_action">Effacer et réinstaller</string>
-    <string name="firmware_maintenance_erase_confirm_title">Effacer ce périphérique ?</string>
     <string name="firmware_maintenance_upgrade_bootloader_action">Mise à jour du bootloader</string>
     <string name="firmware_maintenance_upgrade_confirm_title">Mettre à jour le chargeur de démarrage ?</string>
     <string name="firmware_old">Le micrologiciel de la radio est trop ancien pour communiquer avec cette application. Pour des informations, voir <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Guide d'installation du micrologiciel</a>.</string>
@@ -770,17 +768,6 @@
     <string name="key_verification_final_title">Vérification de la clé terminée</string>
     <string name="key_verification_request_title">Requête de vérification de clé</string>
     <string name="key_verification_title">Vérification de la clé</string>
-    <!-- LABEL -->
-    <string name="label_long_fast">Longue portée-Rapide</string>
-    <string name="label_long_moderate">Longue portée - Modérée</string>
-    <string name="label_long_slow">Longue portée - Lent</string>
-    <string name="label_long_turbo">Longue portée - Turbo</string>
-    <string name="label_medium_fast">Portée moyenne - Rapide</string>
-    <string name="label_medium_slow">Portée moyenne - Lent</string>
-    <string name="label_short_fast">Portée courte - Rapide</string>
-    <string name="label_short_slow">Portée courte - Lent</string>
-    <string name="label_short_turbo">Portée courte - Turbo</string>
-    <string name="label_very_long_slow">Très longue portée - Lent</string>
     <string name="last_heard_filter_label">Filtrer par la dernière écoute : %1$s</string>
     <string name="last_position_update">Dernière mise à jour de position</string>
     <string name="latest_alpha_firmware">Dernière version alpha</string>
@@ -1486,7 +1473,6 @@
     <string name="traffic_management_nodeinfo_direct_response_max_hops">Max de saut pour une réponse directe</string>
     <string name="traffic_management_position_dedup">Déduplication de Position</string>
     <string name="traffic_management_position_min_interval">Intervalle de position min (secs)</string>
-    <string name="traffic_management_position_precision">Précision de position (octets)</string>
     <string name="traffic_management_rate_limit_enabled">Limitation de débit</string>
     <string name="traffic_management_rate_limit_max_packets">Paquets maximum dans la fenêtre</string>
     <string name="traffic_management_rate_limit_window">Fenêtre de limitation de taux (secs)</string>

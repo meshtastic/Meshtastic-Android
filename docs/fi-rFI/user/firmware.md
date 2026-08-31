@@ -46,7 +46,7 @@ Jos sovellus tukee sitä, päivityspainikkeen vieressä näkyy **Tyhjennä laite
 | BLE / WiFi OTA | Laite palautetaan tehdasasetuksiin, kun päivitys on vahvistettu. Kaikki asetukset ja Bluetooth-pariliitokset poistetaan. |
 | USB            | Tyhjentää laitteen flash-muistin kokonaan ja asentaa sen jälkeen valitun laiteohjelmiston alusta alkaen.                                 |
 
-Tätä ei tarjota paikallisen laiteohjelmistotiedoston yhteydessä, palautuspäivityksessä eikä USB-laitteille, joiden piirilevy ei tue tyhjennysvaihetta. Tämän jälkeen laite on määritettävä uudelleen ja pariliitos muodostettava uudelleen.
+It is not offered for a local firmware file, during a recovery update, on USB devices whose board does not support the erase step, or over USB in the desktop app — the USB erase runs the Android-only maintenance sequence below. Tämän jälkeen laite on määritettävä uudelleen ja pariliitos muodostettava uudelleen.
 
 ### OTA WiFi:n kautta (verkkoon yhdistetty ESP32)
 
@@ -67,6 +67,8 @@ Kun radio on yhdistetty **USB:n tai sarjayhteyden** kautta (bluetoothin sijaan),
 ### Tyhjennys tehdasasetuksiin ja käynnistyslataimen päivitys
 
 On a **USB/serial** connection, nRF52 and RP2040 devices can be wiped as part of an update — that is the **Erase device during update** opt-in described earlier on this page. nRF52 devices additionally offer **Upgrade bootloader** where an upgraded bootloader is published for the board; RP2040 devices run no Adafruit bootloader, so they never see it.
+
+Both are Android-only. They depend on Android's update-drive checks, so the desktop app does not show them — use the [Web Flasher](https://flasher.meshtastic.org) there instead.
 
 Select a firmware version before either one: the app hides both until a release is chosen, because the firmware is reinstalled after the device is wiped or the new bootloader is written.
 

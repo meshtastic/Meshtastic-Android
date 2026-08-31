@@ -768,21 +768,6 @@
     <string name="key_verification_final_title">Schlüsselprüfung abgeschlossen</string>
     <string name="key_verification_request_title">Anfrage zur Schlüsselprüfung</string>
     <string name="key_verification_title">Schlüsselprüfung</string>
-    <!-- LABEL -->
-    <string name="label_lite_fast">Leicht - Schnell</string>
-    <string name="label_lite_slow">Leicht - Langsam</string>
-    <string name="label_long_fast">Hohe Reichweite - Schnell</string>
-    <string name="label_long_moderate">Hohe Reichweite - Mäßig</string>
-    <string name="label_long_slow">Hohe Reichweite - Langsam</string>
-    <string name="label_long_turbo">Hohe Reichweite - Turbo</string>
-    <string name="label_medium_fast">Mittlere Reichweite - Schnell</string>
-    <string name="label_medium_slow">Mittlere Reichweite - Langsam</string>
-    <string name="label_narrow_fast">Schmal - Schnell</string>
-    <string name="label_narrow_slow">Schmal - Langsam</string>
-    <string name="label_short_fast">Kurze Reichweite - Schnell</string>
-    <string name="label_short_slow">Kurze Reichweite - Langsam</string>
-    <string name="label_short_turbo">Kurze Reichweite - Turbo</string>
-    <string name="label_very_long_slow">Sehr hohe Reichweite - Langsam</string>
     <string name="last_heard_filter_label">Filtern nach letztem Empfang: %1$s</string>
     <string name="last_position_update">Letzte Standortaktualisierung</string>
     <string name="latest_alpha_firmware">Neueste Alpha Version</string>
@@ -1069,11 +1054,6 @@
     <string name="node_layout_complete_description">Das vollständige Layout zeigt alle verfügbaren Knotendaten an. Felder ohne Daten werden automatisch ausgeblendet.</string>
     <string name="node_layout_device_role">Gerät &amp; Rolle</string>
     <string name="node_layout_distance_and_bearing">Entfernung und Peilung</string>
-    <string name="node_layout_help_signal_bad">Das Signal ist schlecht, das Signal-Rauschverhältnis ist über −18 dB und die Signalstärke ist über −125 dBm.</string>
-    <string name="node_layout_help_signal_fair">Das Signal ist mäßig, das Signal-Rauschverhältnis ist über −12 dB und die Signalstärke ist über −120 dBm.</string>
-    <string name="node_layout_help_signal_good">Das Signal ist stark, das Signal-Rauschverhältnis ist über −7 dB und die Signalstärke ist über −115 dBm.</string>
-    <string name="node_layout_help_signal_indicator">Kombiniert SNR und RSSI zu einem Qualitätsniveau, das als farbiges Symbol mit einer Beschreibung angezeigt wird.</string>
-    <string name="node_layout_help_signal_none">Kein nutzbares Signal erkannt. Unterhalb aller Qualitätsgrenzen.</string>
     <string name="node_layout_hops_away">Sprünge entfernt</string>
     <string name="node_layout_last_heard_time">Zuletzt gesehen</string>
     <string name="node_layout_log_icons">Umweltdaten</string>
@@ -1594,7 +1574,6 @@
     <string name="traffic_management_nodeinfo_direct_response_max_hops">Max. Sprungweite für direkte Antwort</string>
     <string name="traffic_management_position_dedup">Standortvereinfachung</string>
     <string name="traffic_management_position_min_interval">Min. Standortintervall (Sekunden)</string>
-    <string name="traffic_management_position_precision">Standortgenauigkeit</string>
     <string name="traffic_management_rate_limit_enabled">Anfragen begrenzen</string>
     <string name="traffic_management_rate_limit_max_packets">Maximale Pakete im Zeitfenster</string>
     <string name="traffic_management_rate_limit_window">Zeitfenster für Begrenzung (Sek.)</string>

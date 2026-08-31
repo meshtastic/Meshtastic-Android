@@ -618,18 +618,6 @@
     <string name="json_output_enabled">JSON-utdata aktiverad</string>
     <string name="jump_to_latest_from">%1$s</string>
     <!-- KEY -->
-    <!-- LABEL -->
-    <string name="label_lite_fast">Lite - Fast</string>
-    <string name="label_long_fast">Lång räckvidd - snabbt</string>
-    <string name="label_long_moderate">Lång räckvidd - måttligt</string>
-    <string name="label_long_slow">Lång räckvidd - långsamt</string>
-    <string name="label_long_turbo">Lång räckvidd - supersnabbt</string>
-    <string name="label_medium_fast">Medellång räckvidd - snabbt</string>
-    <string name="label_medium_slow">Medellång räckvidd - långsamt</string>
-    <string name="label_short_fast">Kort räckvidd - snabbt</string>
-    <string name="label_short_slow">Kort räckvidd - långsamt</string>
-    <string name="label_short_turbo">Kort räckvidd - supersnabbt</string>
-    <string name="label_very_long_slow">Mycket lång räckvidd - långsamt</string>
     <string name="last_heard_filter_label">Filtrera på senaste kontakt: %1$s</string>
     <string name="last_position_update">Senaste positionsuppdatering</string>
     <string name="latest_alpha_firmware">Senaste alfa</string>
@@ -847,9 +835,6 @@
     <string name="node_layout_complete">Komplett</string>
     <string name="node_layout_device_role">Enhet &amp; roll</string>
     <string name="node_layout_distance_and_bearing">Avstånd och bäring</string>
-    <string name="node_layout_help_signal_bad">Dålig mottagning. SNR över −18 dB och RSSI över −125 dBm.</string>
-    <string name="node_layout_help_signal_fair">Medelbra mottagning. SNR över −12 dB och RSSI över −120 dBm.</string>
-    <string name="node_layout_help_signal_good">Bra mottagning. SNR över −7 dB och RSSI över −115 dBm.</string>
     <string name="node_layout_hops_away">Hopp bort</string>
     <string name="node_layout_last_heard_time">Hördes senast klockan</string>
     <string name="node_layout_log_icons">Miljövärden</string>

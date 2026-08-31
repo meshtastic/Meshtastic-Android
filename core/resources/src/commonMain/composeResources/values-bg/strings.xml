@@ -605,7 +605,6 @@
     <string name="key_verification_final_title">Проверката на ключа е завършена</string>
     <string name="key_verification_request_title">Заявка за проверка на ключ</string>
     <string name="key_verification_title">Проверка на ключ</string>
-    <!-- LABEL -->
     <string name="last_heard_filter_label">Филтриране по време на последното чуване: %1$s</string>
     <string name="last_position_update">Последна актуализация на позицията</string>
     <string name="latest_alpha_firmware">Най-новия алфа</string>
@@ -835,11 +834,6 @@
     <string name="node_layout_complete">Пълно</string>
     <string name="node_layout_complete_description">Пълното оформление показва всички налични данни за възлите. Полетата без данни се скриват автоматично.</string>
     <string name="node_layout_device_role">Устройство &amp; Роля</string>
-    <string name="node_layout_help_signal_bad">Сигналът е слаб. SNR е над −18 dB и RSSI е над −125 dBm.</string>
-    <string name="node_layout_help_signal_fair">Сигналът е умерен. SNR е над −12 dB и RSSI е над −120 dBm.</string>
-    <string name="node_layout_help_signal_good">Сигналът е силен. SNR е над −7 dB и RSSI е над −115 dBm.</string>
-    <string name="node_layout_help_signal_indicator">Комбинира SNR и RSSI в ниво на качество, показано като цветна икона с описание. Показва се само в пълния дизайн.</string>
-    <string name="node_layout_help_signal_none">Не е открит използваем сигнал. Под всички прагове за качество.</string>
     <string name="node_layout_hops_away">Брой отскоци</string>
     <string name="node_layout_log_icons">Показатели на околната среда</string>
     <string name="node_layout_no_preview_available">Няма налични възли за преглед.</string>

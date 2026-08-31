@@ -142,8 +142,8 @@ cd Meshtastic-Android
   in the browser and use the planner's GeoJSON export, then add the file as a layer — not the KML
   export, which is a ground-overlay image this map cannot draw. Custom network tile sources work
   too — see [Map & Waypoints](map-and-waypoints#adding-your-own-tile-source)
-- The USB maintenance flow — nRF52/RP2040 factory erase and bootloader upgrade — is Android-only. The
-  desktop app still shows the option, but it cannot complete there
+- The USB maintenance flow — nRF52/RP2040 factory erase and bootloader upgrade — is Android-only, and the
+  desktop app does not offer it. Use the [Web Flasher](https://flasher.meshtastic.org) instead
 - 部分 Android 專屬功能（小工具、特定通知頻道）無法使用
 - 在低規格硬體上執行 Compose Desktop 時，效能可能有所不同
 - 桌面版尚不支援 BLE 綁定（配對功能可在不綁定的情況下正常使用）

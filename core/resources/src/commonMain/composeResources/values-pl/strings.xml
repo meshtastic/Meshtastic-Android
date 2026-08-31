@@ -385,17 +385,6 @@
     <string name="ipv4_mode">Tryb IPv4</string>
     <string name="json_output_enabled">Włącz wyjście JSON</string>
     <!-- KEY -->
-    <!-- LABEL -->
-    <string name="label_long_fast">Daleki zasięg — Szybko</string>
-    <string name="label_long_moderate">Daleki zasięg — Średnio</string>
-    <string name="label_long_slow">Daleki zasięg — Wolno</string>
-    <string name="label_long_turbo">Daleki zasięg — Turbo</string>
-    <string name="label_medium_fast">Średni zasięg — Szybko</string>
-    <string name="label_medium_slow">Średni zasięg — wolno</string>
-    <string name="label_short_fast">Krótki zasięg — Szybko</string>
-    <string name="label_short_slow">Bliski zasięg — Wolno</string>
-    <string name="label_short_turbo">Krótki zasięg — Turbo</string>
-    <string name="label_very_long_slow">Bardzo daleki zasięg — Wolno</string>
     <string name="last_position_update">Ostatnia aktualizacja lokalizacji</string>
     <string name="latest_alpha_firmware">Ostatnia wersja alpha</string>
     <string name="latest_stable_firmware">Ostatnia stabilna wersja</string>

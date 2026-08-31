@@ -851,24 +851,6 @@
     <string name="key_verification_final_title">密钥验证完成</string>
     <string name="key_verification_request_title">密钥验证请求</string>
     <string name="key_verification_title">密钥验证</string>
-    <!-- LABEL -->
-    <string name="label_lite_fast">Lite - Fast</string>
-    <string name="label_lite_slow">Lite - Slow</string>
-    <string name="label_long_fast">长距离 / 快速模式</string>
-    <string name="label_long_moderate">长距离 / 中速模式</string>
-    <string name="label_long_slow">长距离 / 低速模式</string>
-    <string name="label_long_turbo">长距离 / 高速模式</string>
-    <string name="label_medium_fast">中距离 / 快速模式</string>
-    <string name="label_medium_slow">中距离 / 低速模式</string>
-    <string name="label_medium_turbo">中距离 - 快速模式</string>
-    <string name="label_narrow_fast">Narrow - Fast</string>
-    <string name="label_narrow_slow">Narrow - Slow</string>
-    <string name="label_short_fast">短距离 / 快速模式</string>
-    <string name="label_short_slow">短距离 / 低速模式</string>
-    <string name="label_short_turbo">短距离 / 高速模式</string>
-    <string name="label_tiny_fast">Tiny - Fast</string>
-    <string name="label_tiny_slow">Tiny - Slow</string>
-    <string name="label_very_long_slow">超长距离 / 低速模式</string>
     <string name="last_heard_filter_label">按最后听到时间筛选：%1$s</string>
     <string name="last_position_update">最后位置更新</string>
     <string name="latest_alpha_firmware">最新测试版</string>
@@ -1177,11 +1159,6 @@
     <string name="node_layout_complete_description">完整布局会显示所有可用的节点数据.没有数据将被自动隐藏。</string>
     <string name="node_layout_device_role">设备 &amp; 角色</string>
     <string name="node_layout_distance_and_bearing">距离与方位</string>
-    <string name="node_layout_help_signal_bad">信号质量差.当前信噪比高于 -18 dB且 接收信号强度高于 -125。</string>
-    <string name="node_layout_help_signal_fair">信号质量中等.当前信噪比高于 -12 dB且 接收信号强度高于 -120 dBm。</string>
-    <string name="node_layout_help_signal_good">信号质量极佳.当前信噪比高于 -7 dB且接收信号强度高于 -115 dBm。</string>
-    <string name="node_layout_help_signal_indicator">将 SNR 和 RSSI 综合为一个质量等级，并以带有描述文字的彩色图标形式显示.此功能仅在完整布局下可见。</string>
-    <string name="node_layout_help_signal_none">未检测到可用信号.当前指标低于所有质量阈值。</string>
     <string name="node_layout_hops_away">跃点数</string>
     <string name="node_layout_last_heard_time">最后活跃时间</string>
     <string name="node_layout_log_icons">传感器指标</string>
@@ -1721,7 +1698,6 @@
     <string name="traffic_management_nodeinfo_direct_response_max_hops">直接响应的最大节点数</string>
     <string name="traffic_management_position_dedup">调度位置</string>
     <string name="traffic_management_position_min_interval">最小位置间隔(秒)</string>
-    <string name="traffic_management_position_precision">位置精度 (bits)</string>
     <string name="traffic_management_rate_limit_enabled">调用次数限制</string>
     <string name="traffic_management_rate_limit_max_packets">窗口最大数据包</string>
     <string name="traffic_management_rate_limit_window">速度限制窗口 (秒)</string>

@@ -401,17 +401,6 @@
     <string name="ipv4_mode">IPv4 mód</string>
     <string name="json_output_enabled">JSON kimenet engedélyezve</string>
     <!-- KEY -->
-    <!-- LABEL -->
-    <string name="label_long_fast">Nagy hatótáv – Gyors</string>
-    <string name="label_long_moderate">Nagy hatótáv – Közepes</string>
-    <string name="label_long_slow">Nagy hatótáv – Lassú</string>
-    <string name="label_long_turbo">Long Range - Turbo</string>
-    <string name="label_medium_fast">Közepes hatótáv – Gyors</string>
-    <string name="label_medium_slow">Közepes hatótáv – Lassú</string>
-    <string name="label_short_fast">Kis hatótáv – Gyors</string>
-    <string name="label_short_slow">Kis hatótáv – Lassú</string>
-    <string name="label_short_turbo">Kis hatótáv – Turbó</string>
-    <string name="label_very_long_slow">Nagyon nagy hatótáv – Lassú</string>
     <string name="last_heard_filter_label">Szűrés az utolsó észlelés ideje szerint: %1$s</string>
     <string name="last_position_update">Utolsó pozíciófrissítés</string>
     <string name="latest_alpha_firmware">Legújabb alpha</string>
