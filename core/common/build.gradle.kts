@@ -26,11 +26,7 @@ plugins {
 kotlin {
     android { withHostTest { isIncludeAndroidResources = true } }
 
-    // wasmJs is a first-class target, alongside android/jvm above (see core/ble/build.gradle.kts
-    // and gradle.properties for why org.gradle.isolated-projects is off repo-wide as of this
-    // branch). core:common has no native-only dependency (no Kable equivalent here), so unlike
-    // core:ble it needs no source-set hierarchy split -- just the target plus a wasmJsMain actual
-    // for each existing expect declaration.
+    // No native-only dependency here, so unlike core:ble no hierarchy split is needed.
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs()
 

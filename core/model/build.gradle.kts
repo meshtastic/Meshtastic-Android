@@ -15,6 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
@@ -22,6 +24,10 @@ plugins {
 }
 
 kotlin {
+    // takpacket-sdk and components-resources confirmed to publish a wasmJs variant before enabling this.
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs()
+
     android {
         withHostTest { isIncludeAndroidResources = true }
         withDeviceTest { instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner" }

@@ -14,23 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+package org.meshtastic.core.resources
 
-import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.compose.resources.StringResource
 
-plugins {
-    alias(libs.plugins.meshtastic.kmp.library)
-    alias(libs.plugins.meshtastic.koin)
-}
+// A browser can't synchronously block its one event-loop thread, so there is no wasmJs runBlocking.
+// Fail loudly rather than return a wrong value; callers on web must use getStringSuspend() instead.
+actual fun getString(stringResource: StringResource): String =
+    error("getString() is not supported on web -- use getStringSuspend() instead")
 
-kotlin {
-    // No expect declarations here, so just the target.
-    @OptIn(ExperimentalWasmDsl::class)
-    wasmJs()
-
-    sourceSets {
-        commonMain.dependencies {
-            implementation(projects.core.common)
-            implementation(libs.kotlinx.coroutines.core)
-        }
-    }
-}
+actual fun getString(stringResource: StringResource, vararg formatArgs: Any): String =
+    error("getString() is not supported on web -- use getStringSuspend() instead")

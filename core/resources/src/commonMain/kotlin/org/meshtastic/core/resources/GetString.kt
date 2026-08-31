@@ -16,35 +16,20 @@
  */
 package org.meshtastic.core.resources
 
-import kotlinx.coroutines.runBlocking
 import org.jetbrains.compose.resources.PluralStringResource
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getPluralString as composeGetPluralString
 import org.jetbrains.compose.resources.getString as composeGetString
 
+// runBlocking doesn't exist on wasmJs (no way to synchronously block a browser's single event-loop
+// thread), so the blocking overloads below are expect/actual: real on android/jvm/iOS, an error on
+// wasmJs (see wasmJsMain's GetString.wasmJs.kt) rather than a silently wrong return value.
+
 /** Retrieves a string from the [StringResource] in a blocking manner. Use primarily in non-composable code. */
-fun getString(stringResource: StringResource): String = runBlocking { composeGetString(stringResource) }
+expect fun getString(stringResource: StringResource): String
 
 /** Retrieves a formatted string from the [StringResource] in a blocking manner. */
-fun getString(stringResource: StringResource, vararg formatArgs: Any): String = runBlocking {
-    val resolvedArgs =
-        formatArgs
-            .map { arg ->
-                if (arg is StringResource) {
-                    composeGetString(arg)
-                } else {
-                    arg
-                }
-            }
-            .toTypedArray()
-
-    if (resolvedArgs.isNotEmpty()) {
-        @Suppress("SpreadOperator")
-        composeGetString(stringResource, *resolvedArgs)
-    } else {
-        composeGetString(stringResource)
-    }
-}
+expect fun getString(stringResource: StringResource, vararg formatArgs: Any): String
 
 /** Retrieves a string from the [StringResource] in a suspending manner. */
 suspend fun getStringSuspend(stringResource: StringResource): String = composeGetString(stringResource)
