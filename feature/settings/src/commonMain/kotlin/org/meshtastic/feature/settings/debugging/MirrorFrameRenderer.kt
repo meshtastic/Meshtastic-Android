@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.repository.MirrorFormat
 import org.meshtastic.core.repository.MirrorFrame
 import org.meshtastic.core.repository.MirrorPalette
 import org.meshtastic.core.resources.Res
@@ -76,6 +77,11 @@ internal class ResolvedRegion(
     val off: Color,
 )
 
+/** Reads one little-endian RGB565 value from a packed pixel row. */
+@Suppress("MagicNumber")
+private fun leRgb565At(pixels: ByteArray, index: Int): Int =
+    (pixels[index].toInt() and 0xFF) or ((pixels[index + 1].toInt() and 0xFF) shl 8)
+
 /** Expands RGB565 to 8-bit channels by bit replication (the canonical expansion; plain scaling floors). */
 @Suppress("MagicNumber")
 internal fun rgb565ToColor(v: Int): Color {
@@ -114,7 +120,46 @@ internal fun MirrorPalette.resolveRegions(): List<ResolvedRegion> = regions.map 
     )
 }
 
-private fun renderFrame(frame: MirrorFrame, palette: MirrorPalette?): ImageBitmap {
+private fun renderFrame(frame: MirrorFrame, palette: MirrorPalette?): ImageBitmap = when (frame.format) {
+    MirrorFormat.RGB565 -> renderRgb565Frame(frame)
+    MirrorFormat.MONO_VLSB -> renderMonoFrame(frame, palette)
+}
+
+/** True-color frames (LVGL/MUI devices): little-endian RGB565, drawn as horizontal same-color runs. */
+private fun renderRgb565Frame(frame: MirrorFrame): ImageBitmap {
+    val bitmap = ImageBitmap(frame.width, frame.height)
+    val size = Size(frame.width.toFloat(), frame.height.toFloat())
+    CanvasDrawScope().draw(Density(1f), LayoutDirection.Ltr, Canvas(bitmap), size) {
+        drawRect(color = Color.Black)
+        for (y in 0 until frame.height) {
+            val rowBase = y * frame.width * 2
+            var runStart = 0
+            var runColor: Color? = null
+            fun flush(endExclusive: Int) {
+                val color = runColor
+                if (color != null && color != Color.Black) {
+                    drawRect(
+                        color = color,
+                        topLeft = Offset(runStart.toFloat(), y.toFloat()),
+                        size = Size((endExclusive - runStart).toFloat(), 1f),
+                    )
+                }
+            }
+            for (x in 0 until frame.width) {
+                val color = rgb565ToColor(leRgb565At(frame.pixels, rowBase + x * 2))
+                if (color != runColor) {
+                    flush(x)
+                    runStart = x
+                    runColor = color
+                }
+            }
+            flush(frame.width)
+        }
+    }
+    return bitmap
+}
+
+private fun renderMonoFrame(frame: MirrorFrame, palette: MirrorPalette?): ImageBitmap {
     val defaultOn = palette?.let { rgb565ToColor(it.defaultOnColor) } ?: Color.White
     val defaultOff = palette?.let { rgb565ToColor(it.defaultOffColor) } ?: Color.Black
     val regions = palette?.resolveRegions().orEmpty()
