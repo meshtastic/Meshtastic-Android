@@ -356,6 +356,7 @@ debug_search_prev
 debug_store_logs_summary
 debug_store_logs_title
 debug_tab_app_logs
+debug_tab_mirror
 debug_tab_packets
 deep_link_connect_message
 deep_link_connect_title
@@ -1167,6 +1168,24 @@ minimum_broadcast_seconds
 minimum_distance
 minimum_interval
 minimum_wake_time_seconds
+### MIRROR ###
+mirror_active
+mirror_back
+mirror_device_screen
+mirror_eink_hint
+mirror_frame_info
+mirror_hint_keyboard_active
+mirror_hint_tap_keyboard
+mirror_hint_tap_touch
+mirror_key_down
+mirror_key_left
+mirror_key_ok
+mirror_key_right
+mirror_key_up
+mirror_keyboard
+mirror_no_frame
+mirror_not_connected
+mirror_off
 modem_preset
 module_settings
 modules_already_unlocked

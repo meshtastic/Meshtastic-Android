@@ -45,6 +45,7 @@ import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.DisplayFrame
+import org.meshtastic.proto.DisplayPalette
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.LoRaRegionPresetMap
 import org.meshtastic.proto.LockdownStatus
@@ -225,11 +226,13 @@ class FromRadioPacketHandlerImplTest {
         handle(FromRadio(xmodemPacket = xmodemPacket))
         handle(FromRadio(lockdown_status = lockdownStatus))
         handle(FromRadio(display_frame = DisplayFrame(width = 128, height = 64)))
+        handle(FromRadio(display_palette = DisplayPalette(signature = 1)))
 
         verify(mode = VerifyMode.exactly(0)) { mqttManager.handleMqttProxyMessage(any()) }
         verify(mode = VerifyMode.exactly(0)) { packetHandler.handleQueueStatus(any()) }
         verify(mode = VerifyMode.exactly(0)) { xmodemManager.handleIncomingXModem(any()) }
         verify(mode = VerifyMode.exactly(0)) { displayMirrorManager.handleIncomingFrame(any()) }
+        verify(mode = VerifyMode.exactly(0)) { displayMirrorManager.handleIncomingPalette(any()) }
         assertEquals(null, lockdownCoordinator.lastStatus)
     }
 
@@ -240,6 +243,15 @@ class FromRadioPacketHandlerImplTest {
         handle(FromRadio(display_frame = frame))
 
         verify { displayMirrorManager.handleIncomingFrame(frame) }
+    }
+
+    @Test
+    fun `handleFromRadio routes DISPLAY_PALETTE to displayMirrorManager`() {
+        val palette = DisplayPalette(signature = 7, region_total = 0)
+
+        handle(FromRadio(display_palette = palette))
+
+        verify { displayMirrorManager.handleIncomingPalette(palette) }
     }
 
     @Test

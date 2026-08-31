@@ -77,6 +77,7 @@ import org.meshtastic.core.resources.debug_panel
 import org.meshtastic.core.resources.debug_store_logs_summary
 import org.meshtastic.core.resources.debug_store_logs_title
 import org.meshtastic.core.resources.debug_tab_app_logs
+import org.meshtastic.core.resources.debug_tab_mirror
 import org.meshtastic.core.resources.debug_tab_packets
 import org.meshtastic.core.resources.log_retention_days
 import org.meshtastic.core.resources.log_retention_days_quantity
@@ -187,8 +188,7 @@ fun DebugScreen(onNavigateUp: () -> Unit, viewModel: DebugViewModel) {
                 Tab(
                     selected = selectedTab == 2,
                     onClick = { selectedTab = 2 },
-                    // PoC tab; deliberately unlocalized.
-                    text = { Text("Mirror") },
+                    text = { Text(stringResource(Res.string.debug_tab_mirror)) },
                 )
             }
             if (selectedTab == 1) {

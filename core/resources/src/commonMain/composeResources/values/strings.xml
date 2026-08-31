@@ -383,6 +383,7 @@
     <string name="debug_store_logs_summary">Disable to skip writing mesh logs to disk</string>
     <string name="debug_store_logs_title">Store mesh logs</string>
     <string name="debug_tab_app_logs">App logs</string>
+    <string name="debug_tab_mirror">Mirror</string>
     <string name="debug_tab_packets">Packets</string>
     <string name="deep_link_connect_message">A link is asking this app to connect to the device at %1$s. Only continue if you trust where the link came from.</string>
     <string name="deep_link_connect_title">Connect to this device?</string>
@@ -1203,6 +1204,24 @@
     <string name="minimum_distance">Smart Distance</string>
     <string name="minimum_interval">Smart Interval</string>
     <string name="minimum_wake_time_seconds">Minimum wake time</string>
+    <!-- MIRROR -->
+    <string name="mirror_active">Mirroring</string>
+    <string name="mirror_back">Back</string>
+    <string name="mirror_device_screen">Device screen</string>
+    <string name="mirror_eink_hint">E-ink display: refresh is slow — prefer one-shot Refresh over continuous mirroring.</string>
+    <string name="mirror_frame_info">%1$d×%2$d · frame #%3$d</string>
+    <string name="mirror_hint_keyboard_active">Arrows · Enter = OK · Esc = back</string>
+    <string name="mirror_hint_tap_keyboard">Click the screen for keyboard control, or swipe it to navigate</string>
+    <string name="mirror_hint_tap_touch">Tap the screen to touch the device, or swipe to navigate</string>
+    <string name="mirror_key_down">Down</string>
+    <string name="mirror_key_left">Left</string>
+    <string name="mirror_key_ok">OK</string>
+    <string name="mirror_key_right">Right</string>
+    <string name="mirror_key_up">Up</string>
+    <string name="mirror_keyboard">Keyboard</string>
+    <string name="mirror_no_frame">No frame received yet — enable mirroring or tap Refresh.</string>
+    <string name="mirror_not_connected">Not connected to a device.</string>
+    <string name="mirror_off">Mirror off</string>
     <string name="modem_preset">Presets</string>
     <string name="module_settings">Module configuration</string>
     <string name="modules_already_unlocked">Modules already unlocked</string>

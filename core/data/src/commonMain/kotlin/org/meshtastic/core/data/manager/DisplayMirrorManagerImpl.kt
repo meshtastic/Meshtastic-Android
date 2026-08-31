@@ -31,7 +31,8 @@ import org.meshtastic.proto.DisplayPalette
  *
  * Chunks of one frame arrive contiguously and in offset order (FromRadio is a reliable ordered stream), so a chunk with
  * a new `frame_id` or `offset == 0` starts a new frame and an out-of-sequence chunk drops the partial frame. Calls are
- * serialized by the single receive-loop collector in MeshServiceOrchestrator (recreated per session).
+ * serialized by the single receive-loop collector in MeshServiceOrchestrator; this singleton's state outlives a
+ * session, so [reset] must be called when one ends.
  */
 @Single
 class DisplayMirrorManagerImpl : DisplayMirrorManager {
@@ -45,6 +46,8 @@ class DisplayMirrorManagerImpl : DisplayMirrorManager {
     private var buffer: ByteArray? = null
     private var frameId = 0
     private var received = 0
+    private var frameWidth = 0
+    private var frameHeight = 0
 
     private var paletteRegions = mutableListOf<DisplayPalette.ColorRegion>()
     private var paletteSignature = 0
@@ -62,10 +65,13 @@ class DisplayMirrorManagerImpl : DisplayMirrorManager {
             buffer = ByteArray(total)
             frameId = chunk.frame_id
             received = 0
+            // Geometry is authoritative on the first chunk; a later chunk may not transpose it.
+            frameWidth = chunk.width
+            frameHeight = chunk.height
         }
 
         val buf = buffer
-        if (buf == null || chunk.frame_id != frameId || chunk.offset != received || buf.size != total) {
+        if (buf == null || !matchesCurrentFrame(chunk, buf.size)) {
             Logger.w { "DisplayMirror: bad chunk ${chunk.frame_id}@${chunk.offset}, expected $frameId@$received" }
             buffer = null
             return
@@ -77,8 +83,8 @@ class DisplayMirrorManagerImpl : DisplayMirrorManager {
         if (received == total) {
             _frame.value =
                 MirrorFrame(
-                    width = chunk.width,
-                    height = chunk.height,
+                    width = frameWidth,
+                    height = frameHeight,
                     frameId = frameId,
                     paletteSignature = chunk.palette_signature,
                     pixels = buf,
@@ -96,8 +102,7 @@ class DisplayMirrorManagerImpl : DisplayMirrorManager {
             paletteDefaultOn = chunk.default_on_color
             paletteDefaultOff = chunk.default_off_color
         }
-        if (chunk.signature != paletteSignature || chunk.region_offset != paletteReceived) {
-            Logger.w { "DisplayMirror: bad palette chunk ${chunk.signature}@${chunk.region_offset}" }
+        if (!isAcceptablePaletteChunk(chunk)) {
             paletteRegions.clear()
             paletteReceived = -1 // poison until the next offset-0 chunk restarts
             return
@@ -114,6 +119,26 @@ class DisplayMirrorManagerImpl : DisplayMirrorManager {
                     regions = paletteRegions.toList(),
                 )
         }
+    }
+
+    private fun matchesCurrentFrame(chunk: DisplayFrame, bufSize: Int): Boolean {
+        val inSequence = chunk.frame_id == frameId && chunk.offset == received && bufSize == chunk.total_size
+        val geometryStable = chunk.width == frameWidth && chunk.height == frameHeight
+        return inSequence && geometryStable
+    }
+
+    /** Sequenced continuation of the current palette, within the region cap; logs and rejects anything else. */
+    private fun isAcceptablePaletteChunk(chunk: DisplayPalette): Boolean {
+        val withinCap =
+            chunk.region_total <= MAX_PALETTE_REGIONS &&
+                paletteReceived >= 0 &&
+                paletteReceived + chunk.regions.size <= MAX_PALETTE_REGIONS
+        val inSequence = chunk.signature == paletteSignature && chunk.region_offset == paletteReceived
+        val acceptable = withinCap && inSequence
+        if (!acceptable) {
+            Logger.w { "DisplayMirror: bad palette chunk ${chunk.signature}@${chunk.region_offset}" }
+        }
+        return acceptable
     }
 
     /**
@@ -139,9 +164,22 @@ class DisplayMirrorManagerImpl : DisplayMirrorManager {
         return acceptable
     }
 
+    override fun reset() {
+        buffer = null
+        received = 0
+        paletteRegions = mutableListOf()
+        paletteReceived = 0
+        paletteSignature = 0
+        _frame.value = null
+        _palette.value = null
+    }
+
     private companion object {
         // Generous sanity cap: 320x240 at 1bpp is 9600 bytes.
         const val MAX_FRAME_BYTES = 16384
+
+        // The firmware's region table caps at 48; anything past this is a bug or an attack.
+        const val MAX_PALETTE_REGIONS = 512
 
         // MONO_VLSB packs 8 vertically adjacent pixels per byte (one "page" row).
         const val PIXELS_PER_PAGE = 8
