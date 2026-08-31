@@ -2,7 +2,7 @@
 title: Help & In-App Docs
 parent: Kasutaja juhis
 nav_order: 21
-last_updated: 2026-08-29
+last_updated: 2026-08-30
 description: Sirvi seda dokumentatsiooni rakenduses, otsi seda ja küsi Chirpylt – seadmesisesele TI assistendile – küsimusi Meshtasticu kohta.
 aliases:
   - abi
@@ -23,7 +23,7 @@ Dokumendibrauser loetleb kõik kasutusjuhendi lehed. Selle lugemiseks klõpsa le
 
 ### Otsi
 
-Lehtede pealkirja ja märksõnade järgi filtreerimiseks puuduta otsinguikooni ja tippi – tulemused värskendatakse tippimise ajal.
+The search box sits at the top of the docs browser. Type in it to filter pages by title and keywords — results update as you type, and the **Clear search** button (✕) empties the box.
 
 ![Rakendusesisese dokumentatsiooni otsimine](../../assets/screenshots/docs-browser_search.png)
 

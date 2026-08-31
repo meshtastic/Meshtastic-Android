@@ -2,7 +2,7 @@
 title: Settings — Modules & Admin
 parent: User Guide
 nav_order: 8
-last_updated: 2026-08-29
+last_updated: 2026-08-30
 description: Configure optional feature modules (MQTT, telemetry, canned messages, TAK, and more) and perform device administration.
 aliases:
   - modules
@@ -14,19 +14,23 @@ aliases:
 
 Configure optional feature modules and perform device administration. Modules extend Meshtastic with specialized capabilities — each can be independently enabled or disabled.
 
-> 💡 **Tip:** You only need to enable the modules you actually use. Disabling unused modules reduces airtime, saves battery, and simplifies your configuration.
+> 💡 **Tip:** You only need to enable the modules you actually use. Disabling unused modules reduces airtime, saves battery, and simplifies your configuration. A module you expect can be missing for three reasons: your node's role does not enable it, your firmware is older than the release that added it, or the firmware build excludes it for this hardware.
 
 Module settings use a card-based layout with toggle switches, dropdowns, text fields, and sliders:
 
-![Toggle switch](../../assets/screenshots/settings_switch.png)
+![A toggle setting in the on position](../../assets/screenshots/settings_switch.png)
 
-![Dropdown selector](../../assets/screenshots/settings_dropdown.png)
+![A dropdown setting, expanded to show its list of options](../../assets/screenshots/settings_dropdown.png)
 
-![Text field](../../assets/screenshots/settings_text_field.png)
+![A text field setting with a value entered](../../assets/screenshots/settings_text_field.png)
 
-![Settings card layout](../../assets/screenshots/settings_titled_card.png)
+![A module settings card with its title and grouped controls](../../assets/screenshots/settings_titled_card.png)
 
 ## Module Configuration
+
+Every module lives under **Settings → Module configuration**.
+
+> ⚠️ **Important:** Saving a module screen restarts the radio — the button reads **Save & restart**, and the radio is unreachable for a few seconds afterwards. External Notification and Mesh Beacon are the exceptions: their button reads **Save**, and the radio may still restart for some changes.
 
 ### MQTT Module
 
@@ -34,26 +38,27 @@ Bridges mesh messages to and from an MQTT broker for internet connectivity. This
 
 | Setting                        | Descriere                                                                                                                                                                               |
 | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Activat                        | Toggle MQTT bridge                                                                                                                                                                      |
-| Server                         | MQTT broker address                                                                                                                                                                     |
+| MQTT activat                   | Toggle MQTT bridge                                                                                                                                                                      |
+| Adresă                         | MQTT broker address                                                                                                                                                                     |
 | Nume de utilizator             | Authentication username                                                                                                                                                                 |
 | Parolă                         | Authentication password                                                                                                                                                                 |
-| Encryption                     | Encrypt MQTT payloads                                                                                                                                                                   |
-| JSON Output                    | Publish and consume MQTT messages as JSON. Marked deprecated in the protobuf schema, but it is still the only toggle for this behavior and the firmware still honors it |
-| TLS                            | Use secure connection                                                                                                                                                                   |
-| Root Topic                     | Base MQTT topic path                                                                                                                                                                    |
+| Criptare activată              | Encrypt MQTT payloads                                                                                                                                                                   |
+| Ieșire JSON activată           | Publish and consume MQTT messages as JSON. Marked deprecated in the protobuf schema, but it is still the only toggle for this behavior and the firmware still honors it |
+| TLS activat                    | Use secure connection                                                                                                                                                                   |
+| Temă rădăcină                  | Base MQTT topic path                                                                                                                                                                    |
 | Proxy-ul pentru client activat | Let a connected phone carry the node's MQTT traffic, instead of the node reaching the broker itself                                                                                     |
 | MQTT proxy on this phone       | The phone-side half of **Proxy to client enabled**: whether this phone acts as that relay. See [MQTT](mqtt)                                             |
-| Map Report                     | Publish position to the public map — see below                                                                                                                                          |
+| Raportarea hărții              | Publish position to the public map — see the Map reporting group that follows                                                                                                           |
 
-**Map Report** expands into its own group:
+Turning **Map reporting** on reveals a consent card headed _Consent to Share Unencrypted Node Data
+via MQTT_, with an **I agree.** switch under it. The rest of the card does not exist on screen
+until you agree:
 
-| Setting            | Descriere                                                                                                                       |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
-| Activat            | Publish to the public map at all                                                                                                |
-| Share location     | Explicit consent to include your position. Map reporting does not save without it                               |
-| Position precision | How coarsely your position is published                                                                                         |
-| Publish interval   | How often to report. Must be **at least 3600 s (1 hour)** — the app blocks saving below that |
+| Setting                                                    | Descriere                                                                                                                                                                                |
+| ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Sunt de acord                                              | Explicit consent to transmit your node data, including an approximate position, unencrypted. Map reporting does not start without it                                     |
+| Precision slider                                           | The slider has no label of its own. It sets how coarsely your position is published, from 12 to 15; the line beneath reads _±_ the resulting distance, in your own units |
+| Intervalul de raportare hartă (secunde) | How often to report. A dropdown of fixed intervals from 1 hour to 72 hours — nothing shorter is offered                                                                  |
 
 See [MQTT](mqtt) for a detailed usage guide including encryption, privacy, and broker setup.
 
@@ -97,30 +102,31 @@ and each can drive the LED, the buzzer and the vibration motor separately, givin
 
 Buffers messages for nodes that were temporarily offline, then replays them when those nodes reconnect. Essential for meshes where nodes go in and out of range regularly — ensures messages aren't lost during brief disconnections.
 
-| Setting                                    | Descriere                                                                                                                                        |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Activat                                    | Activate store and forward                                                                                                                       |
-| Puls                                       | Periodically announce this node's store-and-forward capability                                                                                   |
-| Records                                    | Maximum stored messages                                                                                                                          |
-| History Return (max)    | Max messages to replay                                                                                                                           |
-| History Return (window) | Time window for replay                                                                                                                           |
-| Server                                     | Act as a store-and-forward server for the mesh (requires ample memory, e.g. ESP32 with PSRAM) |
+| Setting                              | Descriere                                                                                                                                        |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Reținere și redirecționare activată  | Activate store and forward                                                                                                                       |
+| Puls                                 | Periodically announce this node's store-and-forward capability                                                                                   |
+| Numarul de inregistrari              | Maximum stored messages                                                                                                                          |
+| istoric număr maxim de retur         | Max messages to replay                                                                                                                           |
+| Fereastra de returnare a istoricului | Time window for replay                                                                                                                           |
+| Server                               | Act as a store-and-forward server for the mesh (requires ample memory, e.g. ESP32 with PSRAM) |
 
 > 💡 **Tip:** Store and Forward works best on nodes with ample memory (ESP32 with PSRAM). Router nodes are ideal candidates since they're typically always-on.
 
 ### Range Test Module
 
 > ⚠️ **Warning:** Range Test only works on a secured primary channel. As long as your primary channel
-> still uses the default channel key, the Enabled, Interval and Save-CSV controls stay disabled, and
-> saving force-disables the module if the channel has reverted to public.
+> still uses the default channel key, the interval and CSV controls stay disabled — you can still
+> switch an already-enabled module off — and saving force-disables the module if the channel has
+> reverted to public.
 
 Automated range testing tool for evaluating link quality between nodes. When enabled, the node periodically transmits test messages with incrementing counters. A receiver node logs these messages, allowing you to walk or drive away and later analyze at what distance messages stopped arriving.
 
-| Setting                                | Descriere                         |
-| -------------------------------------- | --------------------------------- |
-| Activat                                | Activate range testing            |
-| Sender Interval (s) | Time between test transmissions   |
-| Save CSV                               | Log received test data to SD card |
+| Setting                                                                 | Descriere                                                                                 |
+| ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Testul de gamă activat                                                  | Activate range testing                                                                    |
+| Interval mesaj expeditor (secunde)                   | Time between test transmissions, chosen from a dropdown of fixed intervals                |
+| Salvați .CSV doar în memorie (ESP32) | Log received test data to the radio's own filesystem. ESP32 hardware only |
 
 ### Telemetry Module
 
@@ -132,7 +138,7 @@ battery health often and sensors rarely.
 | Setting                                                 | Descriere                                                                                                                                                                         |
 | ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Trimite telemetrie dispozitiv                           | Master toggle for device metrics. Only shown on firmware 2.7.12 and newer                                                         |
-| Intervalul de actualizare a parametrilor dispozitivului | How often to report battery, uptime and channel utilisation                                                                                                                       |
+| Intervalul de actualizare a parametrilor dispozitivului | How often to report battery, uptime and channel utilization                                                                                                                       |
 | Modul de măsurare mediu activat                         | Report the attached environment sensors                                                                                                                                           |
 | Interval actualizare valori mediu                       | How often to report them                                                                                                                                                          |
 | Valorile de mediu pe ecran sunt activate                | Also show these readings on the device's own display                                                                                                                              |
@@ -149,30 +155,30 @@ See [Telemetry & Sensors](telemetry-and-sensors) for supported sensors and confi
 
 Pre-configured messages accessible from the radio's physical buttons (for radios with rotary encoders, keypads, or similar input hardware). Define a list of quick-send messages that can be transmitted without a phone connected — ideal for field use.
 
-| Setting                                   | Descriere                                                                                                 |
-| ----------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| ~~Canned message enabled~~                | ⚠️ **Deprecated** in the protobuf schema                                                                  |
-| Mesaje                                    | Newline-separated list of messages                                                                        |
-| Trimite clopoțel                          | Send a bell character alongside the message, so a receiving node's External Notification module can sound |
-| Rotary encoder enabled                    | Use a rotary encoder as the input device                                                                  |
-| GPIO pin for rotary encoder A / B / press | The three pins the encoder is wired to                                                                    |
-| Generate input event on press / CW / CCW  | Which key event each encoder action produces                                                              |
-| Intrare sus/jos/selectare activată        | A separate, simpler input scheme using up/down/select buttons rather than an encoder                      |
-| ~~Allow input source~~                    | ⚠️ **Deprecated** in the protobuf schema                                                                  |
+| Setting                                        | Descriere                                                                                                 |
+| ---------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| ~~Canned message enabled~~                     | ⚠️ **Deprecated** in the protobuf schema                                                                  |
+| Mesaje                                         | Newline-separated list of messages                                                                        |
+| Trimite clopoțel                               | Send a bell character alongside the message, so a receiving node's External Notification module can sound |
+| Encoder rotativ #1 activat                     | Use a rotary encoder as the input device                                                                  |
+| GPIO pin for rotary encoder A / B / Press port | The three pins the encoder is wired to                                                                    |
+| Generate input event on Press / CW / CCW       | Which key event each encoder action produces                                                              |
+| Intrare sus/jos/selectare activată             | A separate, simpler input scheme using up/down/select buttons rather than an encoder                      |
+| ~~Allow input source~~                         | ⚠️ **Deprecated** in the protobuf schema                                                                  |
 
 ### Audio Module
 
 Codec2 audio support for low-bandwidth voice communication over the mesh. This is an **experimental** feature that encodes voice into very small data packets using the Codec2 codec.
 
-| Setting                            | Descriere                            |
-| ---------------------------------- | ------------------------------------ |
-| Activat                            | Activate audio module                |
-| Codec2 Rate                        | Audio quality/bandwidth tradeoff     |
-| PTT Pin                            | GPIO pin for the push-to-talk button |
-| I2S Word Select                    | GPIO pin for I2S WS                  |
-| I2S Data In                        | GPIO pin for I2S DIN                 |
-| I2S Data Out                       | GPIO pin for I2S DOUT                |
-| I2S Clock (SCK) | GPIO pin for the I2S bit clock       |
+| Setting                    | Descriere                            |
+| -------------------------- | ------------------------------------ |
+| CODEC 2 activat            | Activate audio module                |
+| Rată de eșantionare CODEC2 | Audio quality/bandwidth tradeoff     |
+| Pin PTT                    | GPIO pin for the push-to-talk button |
+| Selectare cuvânt I2S       | GPIO pin for I2S WS                  |
+| Intrare date I2S           | GPIO pin for I2S DIN                 |
+| Ieșire date I2S            | GPIO pin for I2S DOUT                |
+| Ceas I2S                   | GPIO pin for the I2S bit clock       |
 
 > ℹ️ **Note:** Audio requires specific hardware (I2S microphone and speaker). Voice quality is very low-bandwidth — think "understandable radio voice," not phone-call quality.
 
@@ -180,23 +186,23 @@ Codec2 audio support for low-bandwidth voice communication over the mesh. This i
 
 GPIO control over the mesh network. Allows a remote node to read or write GPIO pins on another node — useful for activating relays, reading switches, or controlling external hardware from a distance.
 
-> ⚠️ **Warning:** Enabling **Allow Undefined Pins** gives remote nodes access to all GPIO pins, which could interfere with the radio's own hardware. Only enable on dedicated GPIO nodes.
+> ⚠️ **Warning:** Turning on **Allow undefined pin access** gives remote nodes access to all GPIO pins, which could interfere with the radio's own hardware. Turn it on only on dedicated GPIO nodes.
 
-| Setting              | Descriere                                                       |
-| -------------------- | --------------------------------------------------------------- |
-| Activat              | Activate remote GPIO access                                     |
-| Allow Undefined Pins | Allow access to any GPIO pin (security risk) |
-| Available Pins       | Up to 4 GPIO pins this node exposes for remote read/write       |
+| Setting                     | Descriere                                                       |
+| --------------------------- | --------------------------------------------------------------- |
+| Hardware extern activat     | Activate remote GPIO access                                     |
+| Permite acces Pin nedefinit | Allow access to any GPIO pin (security risk) |
+| Pin-uri disponibile         | Up to 4 GPIO pins this node exposes for remote read/write       |
 
 ### Neighbor Info Module
 
 Broadcasts information about directly heard neighbors, enabling mesh topology mapping. Each enabled node periodically shares a list of the other nodes it can hear and their signal quality.
 
-| Setting                                | Descriere                                                                                                                            |
-| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| Activat                                | Activate neighbor broadcasting                                                                                                       |
-| Update Interval (s) | How often to broadcast neighbor list                                                                                                 |
-| Transmit Over LoRa                     | Also broadcast neighbor info over LoRa, not just MQTT/phone. Unavailable on a channel using the default key and name |
+| Setting                                              | Descriere                                                                                                                            |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Info vecin activat                                   | Activate neighbor broadcasting                                                                                                       |
+| Interval de actualizare (secunde) | How often to broadcast neighbor list                                                                                                 |
+| Transmite peste LoRA                                 | Also broadcast neighbor info over LoRa, not just MQTT/phone. Unavailable on a channel using the default key and name |
 
 See [Local Mesh Discovery](discovery) for how to use neighbor data for mesh topology exploration.
 
@@ -206,7 +212,7 @@ Controls onboard NeoPixel or other addressable RGB LEDs on supported hardware. C
 
 | Setting            | Descriere                                                  |
 | ------------------ | ---------------------------------------------------------- |
-| LED State          | Turn the LED on or off                                     |
+| Stare LED          | Turn the LED on or off                                     |
 | Actual             | LED current limit (0–31)                |
 | Red / Green / Blue | Individual color channel values (0–255) |
 
@@ -214,27 +220,27 @@ Controls onboard NeoPixel or other addressable RGB LEDs on supported hardware. C
 
 Turns your node into a motion or door sensor alert system. When a GPIO pin detects a state change (motion detected, door opened), the node broadcasts an alert message over the mesh.
 
-| Setting                                  | Descriere                                                                                                                               |
-| ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| Activat                                  | Activate detection sensor                                                                                                               |
-| Monitor Pin                              | GPIO pin connected to sensor                                                                                                            |
-| Detection Trigger Type                   | How the pin's state maps to a detection event (e.g. active high/low, edge-triggered) |
-| Use Input Pullup Mode                    | Enable the pin's internal pull-up resistor                                                                                              |
-| Minimum Broadcast (s) | Minimum time between alert broadcasts                                                                                                   |
-| State Broadcast (s)   | Periodic state broadcast interval                                                                                                       |
-| Send Bell                                | Include bell character in alerts                                                                                                        |
-| Friendly Name                            | Custom name for this sensor                                                                                                             |
+| Setting                                           | Descriere                                                                                                                               |
+| ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Senzor detectare activat                          | Activate detection sensor                                                                                                               |
+| Pin GPIO de monitorizat                           | GPIO pin connected to sensor                                                                                                            |
+| Tip declanșator detectare                         | How the pin's state maps to a detection event (e.g. active high/low, edge-triggered) |
+| Folosește modul INPUT_PULLUP | Enable the pin's internal pull-up resistor                                                                                              |
+| Difuzare minimă (secunde)      | Minimum time between alert broadcasts                                                                                                   |
+| Difuzare stare (secunde)       | Periodic state broadcast interval                                                                                                       |
+| Trimite clopoțelul cu mesaj de alertă             | Include bell character in alerts                                                                                                        |
+| Nume comun                                        | Custom name for this sensor                                                                                                             |
 
 ### Paxcounter Module
 
 People counter using Wi-Fi and BLE probe requests. Counts nearby devices by passively listening for probe requests that phones and laptops emit when scanning for networks. Available only on ESP32 devices.
 
-| Setting                                | Descriere                                                                                                         |
-| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| Activat                                | Activate people counting                                                                                          |
-| Update Interval (s) | How often to report counts                                                                                        |
-| Wi-Fi RSSI threshold                   | Ignore Wi-Fi probes weaker than this, so distant devices are not counted (defaults to −80 dBm) |
-| BLE RSSI threshold                     | The same cut-off for BLE advertisements (defaults to −80 dBm)                                  |
+| Setting                                              | Descriere                                                                                                         |
+| ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Paxcounter activat                                   | Activate people counting                                                                                          |
+| Interval de actualizare (secunde) | How often to report counts                                                                                        |
+| Wi-Fi RSSI threshold                                 | Ignore Wi-Fi probes weaker than this, so distant devices are not counted (defaults to −80 dBm) |
+| BLE RSSI threshold                                   | The same cut-off for BLE advertisements (defaults to −80 dBm)                                  |
 
 > 💡 **Tip:** Paxcounter is useful for estimating foot traffic at trailheads, event venues, or other locations. Counts are approximate — one person may carry multiple devices.
 
@@ -245,15 +251,16 @@ The status message has no module screen. It is edited with the rest of the node'
 
 ### Mesh Beacon Module
 
-Broadcasts an invitation to your mesh, and receives invitations from others. See
-[Local Mesh Discovery](discovery) for the full walkthrough.
+Broadcasts an invitation to your mesh, and receives invitations from others. The entry appears only
+on radios running firmware 2.8.0 or newer. See [Local Mesh Discovery](discovery) for the full
+walkthrough.
 
 ### TAK Module
 
-Team Awareness Kit integration for interoperability with ATAK and WinTAK. This module only appears
-in the list once the node's **Device Role** (Device Config) is set to **TAK** or **TAK Tracker** —
-change the role first, otherwise the entry does not appear. See [TAK Integration](tak) for detailed
-setup and usage.
+Team Awareness Kit integration for interoperability with ATAK and WinTAK. Two things have to be
+true before the entry appears in the module list: the radio runs firmware 2.8.0 or newer, and its
+**Device Role** on **Settings → Device configuration → Device** is set to `TAK` or `TAK_TRACKER`.
+See [TAK Integration](tak) for detailed setup and usage.
 
 ## Administrare
 
@@ -268,27 +275,61 @@ Remotely configure nodes that share your admin key:
 
 > ⚠️ **Important:** Requires an admin key configured on both your node and the target node.
 
-### Curăță baza de date a nodurilor
+### Device Actions
 
-Prunes your local node database. Two independent controls:
+**Settings → Administration** holds five one-shot actions, each behind a confirmation dialog:
 
-- An **age slider** — remove nodes not heard from within that window.
-- **Clean unknown nodes only** — restrict the purge to nodes that never sent their user info,
-  leaving named nodes alone regardless of age.
+| Action                           | What it does                                                                                           |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Set time                         | Sends your phone's clock to the radio                                                                  |
+| Restartează                      | Restarts the radio                                                                                     |
+| Oprire                           | Powers the radio down                                                                                  |
+| Resetare la setările din fabrică | Returns every setting to its factory default                                                           |
+| Resetare NodeDB                  | Clears the radio's node database. This dialog carries a **Preserve Favorites?** switch |
 
-### Factory Reset
+> ⚠️ **Warning:** Factory reset erases all settings, channels, and keys, and cannot be undone. Before you reset, use **Export configuration** to save the radio's settings and **Backup Keys** on the Security screen to save its keys, so you can put both back afterwards.
 
-> ⚠️ **Warning:** Factory reset erases all settings, channels, and keys. This cannot be undone.
+### Copie de rezervă și restaurare
 
-Resets all settings to factory defaults.
+**Settings → Backup & Restore** writes the connected radio's whole configuration to a file with
+**Export configuration**, and reads a saved file back in with **Import configuration**. Export
+before a factory reset, or to copy one radio's setup onto another. The section is shown for your
+own radio only, not over remote admin.
 
-### Restartează
+### Avansate
 
-Remotely reboot a connected or administered node.
+**Settings → Advanced** collects the tools that read or rewrite local state, and is likewise shown
+for your own radio only: **Firmware Update** on OTA-capable hardware, **Clean Node Database**,
+**TAK Server**, **Local Mesh Discovery**, and the **Debug Panel**.
 
-### Panou de depanare
+#### Curăță baza de date a nodurilor
+
+Prunes nodes from your node database — from the app's copy _and_ from the radio's own, so this is
+not a display-only cleanup. The two filters combine rather than acting separately; the screen puts
+it as _Selections are additive_.
+
+- **Clean up nodes last seen older than N days** — always applied. The slider runs from 7 days to
+  365 and starts at 30; with **Clean up only unknown nodes** turned on, its floor drops to 0.
+- **Clean up only unknown nodes** — narrows the same purge to nodes that never sent their user
+  info. The age limit still applies on top of it.
+
+The screen lists the nodes queued for deletion as you move the filters. **Clean Now** carries the
+purge out, after one more confirmation, and it cannot be undone. Favorited nodes, ignored nodes,
+and nodes with a public key heard in the last seven days are never removed, whatever the filters
+say — that is why the queued list can be shorter than you expect.
+
+#### Panou de depanare
 
 Opens the **Packets** and **App logs** tabs for viewing, filtering, and exporting diagnostic output. See [Debug Logs](debug-logs) for the full walkthrough.
+
+### App Settings
+
+Two easy-to-miss entries on the **Settings** screen configure the app rather than the radio, and
+appear only when your own node is selected:
+
+- **Node Layout** — how much detail each row of the node list shows.
+- **Message Filter** — hides incoming messages that contain words you list. With no words
+  configured it does nothing.
 
 ### Despre
 

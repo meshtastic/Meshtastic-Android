@@ -2,7 +2,7 @@
 title: アプリを翻訳する
 parent: User Guide
 nav_order: 17
-last_updated: 2026-08-29
+last_updated: 2026-08-30
 description: アプリとそのドキュメントが Crowdin を通じてどう翻訳されるか、および翻訳に貢献するためのガイドラインを説明します。
 aliases:
   - translate
@@ -16,11 +16,11 @@ The app and its in-app docs are translated on Crowdin — this page shows how to
 
 ## 翻訳される対象
 
-| リソース           | ソースの場所                                                              | 備考                                  |
-| -------------- | ------------------------------------------------------------------- | ----------------------------------- |
-| UI 文字列         | `core/resources/src/commonMain/composeResources/values/strings.xml` | ボタン、ラベル、メッセージ、およびユーザーに表示されるすべてのテキスト |
-| ユーザーガイドのページ    | `docs/en/user/*.md`                                                 | 「ヘルプとドキュメント」に表示されるアプリ内ドキュメント        |
-| Fastlane メタデータ | `fastlane/metadata/android/en-US/`                                  | アプリストアの掲載タイトル、説明、変更履歴               |
+| リソース           | ソースの場所                                                              | 備考                                                     |
+| -------------- | ------------------------------------------------------------------- | ------------------------------------------------------ |
+| UI 文字列         | `core/resources/src/commonMain/composeResources/values/strings.xml` | ボタン、ラベル、メッセージ、およびユーザーに表示されるすべてのテキスト                    |
+| ユーザーガイドのページ    | `docs/en/user/*.md`                                                 | 「ヘルプとドキュメント」に表示されるアプリ内ドキュメント                           |
+| Fastlane メタデータ | `fastlane/metadata/android/en-US/`                                  | Google Play listing title, description, and changelogs |
 
 > ℹ️ **Note:** Developer Guide pages are English-only. コントリビューター向けの、コード中心のドキュメントは翻訳されません。
 
@@ -29,7 +29,7 @@ The app and its in-app docs are translated on Crowdin — this page shows how to
 1. **Crowdin プロジェクトにアクセスします。** [Meshtastic Android の Crowdin プロジェクト](https://crowdin.com/project/meshtastic-android) を開き、サインインするか、無料アカウントを作成します。
 2. **言語を選びます。** 既存の言語を選択するか、[GitHub の issue](https://github.com/meshtastic/Meshtastic-Android/issues/new) を作成して新しい言語をリクエストします。
 3. **文字列を翻訳します。** Crowdin では、左側に英語の原文、右側に自分の翻訳が表示されます。 各文字列を翻訳して保存します。
-4. **コンテキストを確認します。** 多くの文字列には、スクリーンショットやコンテキストのコメントが含まれています。これらを確認して、テキストがアプリのどこに表示されるかを把握してください。 Approved translations are automatically merged into the next release.
+4. **コンテキストを確認します。** 多くの文字列には、スクリーンショットやコンテキストのコメントが含まれています。これらを確認して、テキストがアプリのどこに表示されるかを把握してください。 A scheduled job pulls approved translations from Crowdin and opens a pull request; they ship once a maintainer merges it and a new build goes out.
 
 > 💡 **ヒント：** 翻訳は短くしてください。 UI 文字列は、ボタン、チップ、狭い列に表示されることがよくあります。 翻訳が英語の原文よりも大幅に長くなる場合は、意味が明確なままになる範囲で短縮することを検討してください。
 
@@ -71,9 +71,11 @@ docs/
 └── ...
 ```
 
-ロケールフォルダーは、Android のリソース規則 `{lang}-r{REGION}`（例：`fr-rFR`、`de-rDE`、`ja-rJP`）を使用し、アプリ文字列に使われる `values-*` ディレクトリと対応しています。
+Doc locale folders use Android locale qualifiers, either `{lang}` or `{lang}-r{REGION}` (for example `fr`, `fr-rFR`, `de-rDE`, `ja-rJP`). The `values-*` folders for app strings use bare language codes instead (`values-fr`, `values-de`, `values-ja`), because `crowdin.yml` writes strings with `%two_letters_code%` and doc pages with `%android_code%`. The two sets do not line up one-to-one.
 
 The app automatically selects the correct locale based on your phone's **Language & Region** settings.
+
+A page that came from Crowdin is labeled **Community translated** under its title in the app. If a page has no Crowdin translation for your language yet, the Google-flavor Android build machine-translates the English source on the fly and labels it **Auto-translated** instead; F-Droid and desktop builds show the English page. Your Crowdin translation replaces the machine one as soon as it lands.
 
 ## 翻訳ガイドライン
 

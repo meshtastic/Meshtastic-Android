@@ -2,7 +2,7 @@
 title: Ноды
 parent: Руководство пользователя
 nav_order: 4
-last_updated: 2026-08-29
+last_updated: 2026-08-30
 description: Просматривайте, фильтруйте и сортируйте ноды сети — просматривайте подробности, качество сигнала, роли и быстрые действия.
 aliases:
   - node-list
@@ -21,18 +21,22 @@ The Nodes screen lists every node visible on your mesh.
 
 - **Имя ноды** — длинное имя, настроенное пользователем
 - **Короткое имя** — 4-символьный идентификатор
-- **Качество сигнала** — последний уровень принимаемого сигнала
+- **Signal quality** — SNR, RSSI, and a quality word, shown only for nodes your radio heard directly. In the Complete layout a node reached through a relay shows its hop count here instead; a node heard only over MQTT shows neither
 - **Последнее услышанное** — время с последнего общения
 - **Расстояние** — предполагаемое расстояние (если позиции общие)
 - **Батарея** — уровень заряда батареи удалённой ноды (если включена телеметрия)
 
+### Choosing What the List Shows
+
+The list has two densities, set at **Settings → Node Layout**. **Complete** shows every field a node has reported and hides the ones it hasn't. **Compact** fits more nodes on screen and lets you pick the fields yourself — **Power**, **Last Heard Time**, **Relative Last Heard Time**, **Distance and Bearing**, **Hops Away**, **Signal (Direct Only)**, **Channel**, and **Device & Role**. The **Environment Metrics** toggle applies to both densities. A preview above the toggles shows the effect before you leave the screen.
+
 ### Индикаторы состояния ноды
 
-| Значок      | Значение                                       |
-| ----------- | ---------------------------------------------- |
-| 🟢 Онлайн   | Нода слышна за последние 2 часа                |
-| ⚪ Оффлайн   | Нода не отвечала больше 2 часов                |
-| ⭐ Избранный | Node you marked as a favorite. |
+| Индикатор             | Значение                                       |
+| --------------------- | ---------------------------------------------- |
+| Green last-heard time | Нода слышна за последние 2 часа                |
+| Plain last-heard time | Нода не отвечала больше 2 часов                |
+| ⭐ Избранный           | Node you marked as a favorite. |
 
 There is no separate "away" tier.
 
@@ -40,21 +44,21 @@ There is no separate "away" tier.
 
 У нод можно настраивать разные роли, которые влияют на их поведение в сети:
 
-| Роль                             | Описание                                                                                                                                                        |
-| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Client                           | Standard end-user node                                                                                                                                          |
-| Client Base                      | Обрабатывает трафик избранных нод как приоритет Router Late; весь остальной трафик как Client                                                                   |
-| Client Mute                      | Принимает, но не ретранслирует                                                                                                                                  |
-| Client Hidden                    | Как Client Mute, плюс скрыт из списка нод                                                                                                                       |
-| Router                           | Ставит в приоритет пересылку сообщений; не засыпает чтобы передавать их                                                                                         |
-| Router Late                      | Инфраструктурная нода, которая ретранслирует один раз, но только после всех остальных режимов (обеспечивает дополнительное покрытие)         |
-| ~~Router Client~~                | ⚠️ **Устарело** (удалено в прошивке 2.3.15) — больше не выбирается; используй вместо этого Router или Client |
-| ~~Repeater~~                     | ⚠️ **Устарело** (удалено в прошивке 2.7.11) — больше не выбирается; используй вместо этого Router            |
-| Tracker                          | Оптимизировано для передачи данных о местоположении через регулярные промежутки времени                                                                         |
-| Sensor                           | Оптимизировано для данных телеметрии                                                                                                                            |
-| Тактический                      | Взаимодействует с системами TAK (отправляет/принимает CoT)                                                                                   |
-| TAK Tracker                      | Только отчет о позиции TAK                                                                                                                                      |
-| Lost & Found | Непрерывный маяк для поиска                                                                                                                                     |
+| Роль              | Описание                                                                                                                                                        |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Client            | Standard end-user node                                                                                                                                          |
+| Client Base       | Обрабатывает трафик избранных нод как приоритет Router Late; весь остальной трафик как Client                                                                   |
+| Client Mute       | Принимает, но не ретранслирует                                                                                                                                  |
+| Client Hidden     | Как Client Mute, плюс скрыт из списка нод                                                                                                                       |
+| Router            | Ставит в приоритет пересылку сообщений; не засыпает чтобы передавать их                                                                                         |
+| Router Late       | Инфраструктурная нода, которая ретранслирует один раз, но только после всех остальных режимов (обеспечивает дополнительное покрытие)         |
+| ~~Router Client~~ | ⚠️ **Устарело** (удалено в прошивке 2.3.15) — больше не выбирается; используй вместо этого Router или Client |
+| ~~Repeater~~      | ⚠️ **Устарело** (удалено в прошивке 2.7.11) — больше не выбирается; используй вместо этого Router            |
+| Tracker           | Оптимизировано для передачи данных о местоположении через регулярные промежутки времени                                                                         |
+| Sensor            | Оптимизировано для данных телеметрии                                                                                                                            |
+| Тактический       | Взаимодействует с системами TAK (отправляет/принимает CoT)                                                                                   |
+| TAK Tracker       | Только отчет о позиции TAK                                                                                                                                      |
+| Lost and Found    | Sends its position to the default channel as a text message at regular intervals, to help recover a lost radio                                                  |
 
 ### Выбор роли
 
@@ -82,6 +86,8 @@ There is no separate "away" tier.
 
 > 💡 **Совет:** Шифрование PKI (прошивка 2.5+) обеспечивает более надёжную защиту, чем общий PSK для канала, потому что у каждой ноды есть уникальная пара ключей. Если видишь предупреждение о несоответствии ключа, нода могла быть сброшена или скомпрометирована.
 
+To clear a mismatch, first confirm through another trusted channel that the key change was intentional — a factory reset causes one. Then touch & hold the node, choose **Remove**, and let the two radios exchange keys again the next time yours hears it.
+
 ## Быстрые действия
 
 Из списка нод ты можешь:
@@ -93,7 +99,13 @@ There is no separate "away" tier.
   - Отправить личное сообщение
   - Трассировка
   - Игнорировать/разблокировать
-  - Удалить ноду
+  - Удалить
+
+## Sharing a Contact
+
+On a node's detail screen, tap **Share Contact** to produce a link and a QR code for that node. From the same dialog, **Write to NFC tag** saves the link to a writable NFC tag that anyone can tap to open.
+
+To add someone else's contact, use the import button on the node list and choose **Scan Shared Contact QR Code**, **Scan Shared Contact NFC**, or **Input Shared Contact URL**. The app asks you to confirm with **Import Shared Contact?**, and warns you when the contact is one you already have.
 
 ## Фильтрация и сортировка
 
@@ -105,24 +117,24 @@ There is no separate "away" tier.
 
 | Фильтр                       | Описание                                                                                                                                                                                          |
 | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Только онлайн**            | Показывать только ноды, услышанные за последние 2 часа                                                                                                                                            |
-| **Только прямые**            | Показывать только ноды с прямыми (без посредников) соединениями                                                                                                                |
+| **Hide offline nodes**       | Показывать только ноды, услышанные за последние 2 часа                                                                                                                                            |
+| **Only show direct nodes**   | Show only nodes your radio heard directly, with no relay in between                                                                                                                               |
 | **Включить неизвестные**     | Show nodes that haven't sent user info yet. **On by default**, so a node heard before its info arrives stays visible and messageable; these carry a badge marking them incomplete |
-| **Исключить инфраструктуру** | Hide infrastructure-role nodes (Router, Router Late, Client Base, and legacy Repeater nodes)                                                                                   |
+| **Исключить инфраструктуру** | Hide infrastructure-role nodes (Router, Router Late, Client Base, and legacy Repeater nodes) and any node that cannot be messaged, whatever its role                           |
 | **Исключить MQTT**           | Скрыть ноды, слышимые только через интернет-мост MQTT                                                                                                                                             |
-| **Показать игнорируемые**    | Show nodes you've ignored                                                                                                                                                                         |
+| **Only show ignored Nodes**  | Replace the list with the nodes you have ignored. Every other node is hidden while this is on, and a banner appears at the top of the list to take you back                       |
 
 ### Параметры сортировки
 
-| Сортировка                                                | Описание                                                              |
-| --------------------------------------------------------- | --------------------------------------------------------------------- |
-| **Последнее слышанное** (по умолчанию) | Сначала недавно слышимые ноды                                         |
-| **По алфавиту**                                           | Сортировать по полному имени ноды                                     |
-| **Расстояние**                                            | Сначала ближайшие ноды (требуется обмен позициями) |
-| **Меньше хопов**                                          | Сначала с наименьшим количеством ретрансляций                         |
-| **Канал**                                                 | Группировать по индексу канала                                        |
-| **Через MQTT**                                            | Сгруппировать по MQTT и радиоприему                                   |
-| **Избранное**                                             | Сначала избранные ноды                                                |
+| Сортировка                                    | Описание                                                              |
+| --------------------------------------------- | --------------------------------------------------------------------- |
+| **Last heard**                                | Сначала недавно слышимые ноды                                         |
+| **A-Z**                                       | Сортировать по полному имени ноды                                     |
+| **Расстояние**                                | Сначала ближайшие ноды (требуется обмен позициями) |
+| **Меньше хопов**                              | Сначала с наименьшим количеством ретрансляций                         |
+| **Канал**                                     | Группировать по индексу канала                                        |
+| **via MQTT**                                  | Сгруппировать по MQTT и радиоприему                                   |
+| **via Favorite** (default) | Favorited nodes first, then the rest                                  |
 
 ## Нод на хоп
 
@@ -132,9 +144,7 @@ There is no separate "away" tier.
 
 Нажатие на ноду открывает подробный вид с полной информацией. Смотри [Метрики ноды](node-metrics) для полной информации о метриках и телеметрии.
 
-![Node list, showing signal quality and last-heard time for each node](../../assets/screenshots/nodes_node_list.png)
-
-Экран с деталями включает информацию об устройстве, его местоположение и кнопки действий:
+The Details card carries the node's short name, role, IDs, last heard time, hops away, uptime, and its SNR and RSSI:
 
 ![Раздел деталей ноды](../../assets/screenshots/nodes_detail_section.png)
 
@@ -152,7 +162,15 @@ There is no separate "away" tier.
 
 Когда оборудование ноды распознано, в детальном просмотре появляется сворачиваемый раздел **"Хочу такой"**, содержащий ссылки на места, где можно купить или узнать больше об этом устройстве: страницу продукта у производителя, варианты продукта и объявления на региональных торговых площадках (например, AliExpress, Amazon и у поддерживаемых продавцов), отфильтрованные по твоей стране. Каждая ссылка открывается через сервис перенаправления `msh.to`. Устройства без подходящих ссылок не показывают этот раздел.
 
-Полный, просматриваемый каталог всех ссылок также доступен в **Настройки → Справка и документация → Ссылки на устройства**.
+A full, browsable directory of every link is also available at **Settings → Device Links**. The item is hidden while you have Settings open for a remote node.
+
+## When No Nodes Appear
+
+The list stays empty until your radio hears another node.
+
+- **No device connected** — the app is not connected to a radio. See [Connections](connections).
+- **Searching for nodes** — the radio is connected and listening, but nothing has arrived yet. Check that its region and modem preset match the mesh around you, and leave **Include unknown** on so a node that has not yet sent its name still appears. See [Settings — Radio & User](settings-radio-user).
+- A node you expect is missing — check the filter toggles. **Only show direct nodes**, **Exclude MQTT**, and **Exclude infrastructure** each hide a whole category of node.
 
 ## Связанные темы
 

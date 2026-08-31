@@ -435,7 +435,6 @@
     <string name="discovery_map">网络拓扑地图</string>
     <string name="discovery_not_connected">未连接</string>
     <string name="discovery_not_connected_description">请连接到一台 Meshtastic 设备以开始扫描。</string>
-    <string name="discovery_paused">已暂停: %1$s</string>
     <string name="discovery_preparing">正在扫描</string>
     <string name="discovery_preset_home_label">%1$s (主页)</string>
     <string name="discovery_reconnecting">正在重新连接 %1$s</string>

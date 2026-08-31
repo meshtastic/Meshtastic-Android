@@ -456,7 +456,6 @@
     <string name="discovery_map">Avastuskaart</string>
     <string name="discovery_not_connected">Pole ühendatud</string>
     <string name="discovery_not_connected_description">Skaneerimise alustamiseks loo ühendus Meshtastic seadmega.</string>
-    <string name="discovery_paused">Peatatud: %1$s</string>
     <string name="discovery_preparing">Skaneerimise ettevalmistamine</string>
     <string name="discovery_preset_home_label">%1$s (Kodu)</string>
     <string name="discovery_reconnecting">Ühenduse taasloomine %1$s</string>

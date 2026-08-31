@@ -2,7 +2,7 @@
 title: Node Metrics
 parent: User Guide
 nav_order: 5
-last_updated: 2026-08-29
+last_updated: 2026-08-30
 description: Telemetry dashboards for each mesh node — device health, environment sensors, air quality, signal quality, power, traceroute, and position history.
 aliases:
   - metrics
@@ -19,11 +19,12 @@ The node detail screen provides comprehensive telemetry and metrics for each nod
 
 1. Navigate to **Nodes**.
 2. Tap the node you want to inspect.
-3. Select the metric category from the detail tabs.
+3. Scroll to the **Telemetry** section and find the category you want — **Signal Quality**, **Device Metrics**, **Environment Metrics**, **Air-Quality Metrics**, **Power Metrics**, **Position**, and the rest.
+4. Tap the refresh button on a row to ask the node for a fresh reading. The chart button beside it opens that category's history, and appears once the node has reported that kind of telemetry.
 
 ![Node detail — local device](../../assets/screenshots/nodes_detail_local.png)
 
-The position tab shows location data for nodes that share GPS:
+The **Position** row expands to show location data for nodes that share GPS:
 
 ![Position inline content](../../assets/screenshots/nodes_position.png)
 
@@ -33,17 +34,17 @@ The position tab shows location data for nodes that share GPS:
 
 Basic operating information reported by each node:
 
-| Metric         | الوصف                               |
-| -------------- | ----------------------------------- |
-| Battery Level  | Current battery percentage          |
-| شدة التيار     | Battery voltage reading             |
-| استخدام القناة | Percentage of airtime consumed      |
-| Airtime        | Transmission time used by this node |
-| Uptime         | Time since last reboot              |
+| Metric        | الوصف                                                    |
+| ------------- | -------------------------------------------------------- |
+| Battery Level | Current battery percentage                               |
+| شدة التيار    | Battery voltage reading                                  |
+| ChUtil        | Percentage of local airtime in use                       |
+| AirUtil       | Percentage of the last hour this node spent transmitting |
+| Uptime        | Time since last reboot                                   |
 
-Device metrics are displayed as individual cards with trend sparklines showing battery level, voltage, channel utilization, airtime, and uptime over time.
+Device Metrics has no cards on the node detail screen. Use the chart button on its row to open the Device Metrics screen, where battery level, voltage, ChUtil, and AirUtil are plotted over time and every reading — uptime included — is listed with its timestamp underneath. Pick a time frame at the top of the screen, and use the save icon in the app bar to export the visible history as CSV.
 
-> 💡 **Tip:** Tap any metric card to expand it into a full chart with historical data points. Pinch to zoom the time axis.
+> 💡 **Tip:** Where a category does show cards — Environment, Air Quality, and Power — touch & hold a card to copy its value to the clipboard. On a chart screen, pinch to zoom the time axis.
 
 ## Environment Metrics
 
@@ -100,7 +101,7 @@ An air-quality log/metrics button appears on the node detail screen **only when 
 
 > 💡 **Tip:** Air Quality metrics require a compatible air-quality sensor on the remote node. See [Telemetry & Sensors](telemetry-and-sensors) for supported hardware.
 
-## Signal Metrics
+## جودة الإشارة
 
 Radio signal quality information:
 
@@ -124,7 +125,7 @@ Signal quality is rated from **SNR relative to the active LoRa modem preset's de
 
 See [Understanding the Signal Meter](signal-meter) for the full explanation.
 
-Local Stats from your connected radio are also shown in Signal Metrics when available. These logs include noise floor, traffic counters, relay counters, online node counts, and radio uptime. The noise floor chart uses a dashed reference line at -85 dBm to help identify a busy RF environment.
+Local Stats from your connected radio are also shown in Signal Quality when available. These logs include noise floor, traffic counters, relay counters, online node counts, and radio uptime. The noise floor chart uses a dashed reference line at -85 dBm to help identify a busy RF environment.
 
 - **Request** — ask the connected radio for a fresh Local Stats telemetry report
 - **Clear** — remove Local Stats logs for that node
@@ -139,24 +140,21 @@ Power management telemetry (requires INA sensor or compatible hardware):
 | شدة التيار | Per-channel voltage reading    |
 | الحالي     | Per-channel draw, in milliamps |
 
-Up to three sensor channels (ch1–ch3) are charted, each with a label you can edit. The app does not
-derive a wattage figure from them.
+The node detail screen shows cards for channels 1 to 3. Use the chart button on the **Power Metrics** row to open the chart screen, which lists a chip for every channel that reported data — up to eight — and charts the one you select. Use the label field under the chips to give a channel a name of your own, such as Solar or Battery. The app does not derive a wattage figure from voltage and current.
 
 ## Traceroute
 
 Traceroute shows the path a message takes through the mesh:
 
-1. From the node detail screen, tap **Traceroute**.
+1. From the node detail screen's **Telemetry** section, tap the refresh button on the **Traceroute** row. You cannot traceroute your own node, and the button accepts one request every 30 seconds.
 2. The app sends a traceroute request to the target node.
-3. Results show each hop with SNR/RSSI values.
+3. Results show each hop with its SNR.
 
 ### Reading Traceroute Results
 
-```
-You → Node A (SNR: 8.5) → Node B (SNR: 5.2) → Target
-```
+A traceroute is a round trip, so each saved result carries a hop count in each direction — **Forward Hops** and **Return Hops** — and the **Round Trip** time in seconds. A result marked **Direct** reached the target with no relay in between. Tap a result to read the route traced toward the destination and the route traced back to you, with the SNR of every hop. On Android that view offers **View on map**, which draws the same path, as long as the start and destination nodes have both shared a position.
 
-Each hop represents a relay node that forwarded the message.
+A result marked **No Response** means the target never answered. It may be out of range, asleep, or configured not to reply. Wait for the 30-second cooldown to clear and try again; if it keeps failing, send a direct message first to confirm the node is reachable at all.
 
 ## سجل الموقع
 
@@ -170,6 +168,14 @@ Historical position data for nodes that share their location:
 ## Neighbor Info
 
 Shows which nodes a given node can directly hear, useful for understanding mesh topology.
+
+## Host Metrics
+
+Nodes that run Meshtastic on a Linux host, such as a Raspberry Pi, report the host's own health — free memory, free disk space, one-, five-, and fifteen-minute load averages, and how long the host has been up. The **Host Metrics** row is always listed; its chart button appears once a node has reported them.
+
+## PAX Metrics
+
+A node running the PAX counter module reports how many Wi-Fi and Bluetooth devices it saw nearby, as a crowd-size estimate, and charts the two counts alongside their total. The **PAX Metrics** row is always listed; its chart button appears once a node has reported them. The counts are of devices, not people.
 
 ## Related Topics
 

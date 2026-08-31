@@ -2,7 +2,7 @@
 title: Translate the App
 parent: User Guide
 nav_order: 17
-last_updated: 2026-08-29
+last_updated: 2026-08-30
 description: How the app and its documentation are translated via Crowdin, and guidelines for contributing translations.
 aliases:
   - translate
@@ -16,11 +16,11 @@ The app and its in-app docs are translated on Crowdin — this page shows how to
 
 ## Ce qui est traduit
 
-| Ressource                       | Emplacement de la source                                            | Notes                                                                         |
-| ------------------------------- | ------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| Chaînes UI                      | `core/resources/src/commonMain/composeResources/values/strings.xml` | Boutons, étiquettes, messages et tout texte visible par l'utilisateur         |
-| Pages du Guide de l'utilisateur | `docs/en/user/*.md`                                                 | Documentation dans l'application affichée dans Aide et Documentation          |
-| Métadonnées Fastlane            | `fastlane/metadata/android/fr-FR/`                                  | Titre de la liste de l'App Store, description et historique des modifications |
+| Ressource                       | Emplacement de la source                                            | Notes                                                                 |
+| ------------------------------- | ------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| Chaînes UI                      | `core/resources/src/commonMain/composeResources/values/strings.xml` | Boutons, étiquettes, messages et tout texte visible par l'utilisateur |
+| Pages du Guide de l'utilisateur | `docs/en/user/*.md`                                                 | Documentation dans l'application affichée dans Aide et Documentation  |
+| Métadonnées Fastlane            | `fastlane/metadata/android/fr-FR/`                                  | Google Play listing title, description, and changelogs                |
 
 > ℹ️ **Note:** Developer Guide pages are English-only. Code-focused documentation targeting contributors is not translated.
 
@@ -29,7 +29,7 @@ The app and its in-app docs are translated on Crowdin — this page shows how to
 1. **Visitez le projet Crowdin.** Ouvrez le [projet Meshtastic Android Crowdin](https://crowdin.com/project/meshtastic-android) et connectez-vous ou créez un compte gratuit.
 2. **Choisissez votre langue.** Sélectionnez une langue existante ou demandez-en une nouvelle en ouvrant un [problème GitHub](https://github.com/meshtastic/Meshtastic-Android/issues/new).
 3. **Traductions** Crowdin montre la source anglaise à gauche et votre traduction à droite. Traduisez chaque portion et sauvegardez.
-4. **Vérifier le contexte.** De nombreuses portions incluent des captures d'écran ou des commentaires de contexte — cochez celles-ci pour comprendre où le texte apparaît dans l'application. Approved translations are automatically merged into the next release.
+4. **Vérifier le contexte.** De nombreuses portions incluent des captures d'écran ou des commentaires de contexte — cochez celles-ci pour comprendre où le texte apparaît dans l'application. A scheduled job pulls approved translations from Crowdin and opens a pull request; they ship once a maintainer merges it and a new build goes out.
 
 > 💡 **Tip:** Keep translations short. UI strings often appear in buttons, chips, or narrow columns. Si une traduction est considérablement plus longue que l'original anglais, pensez à abréger en conservant la signification claire.
 
@@ -71,9 +71,11 @@ docs/
 └── ...
 ```
 
-Locale folders use the Android resource convention `{lang}-r{REGION}` (e.g. `fr-rFR`, `de-rDE`, `ja-rJP`), matching the `values-*` directories used for app strings.
+Doc locale folders use Android locale qualifiers, either `{lang}` or `{lang}-r{REGION}` (for example `fr`, `fr-rFR`, `de-rDE`, `ja-rJP`). The `values-*` folders for app strings use bare language codes instead (`values-fr`, `values-de`, `values-ja`), because `crowdin.yml` writes strings with `%two_letters_code%` and doc pages with `%android_code%`. The two sets do not line up one-to-one.
 
 The app automatically selects the correct locale based on your phone's **Language & Region** settings.
+
+A page that came from Crowdin is labeled **Community translated** under its title in the app. If a page has no Crowdin translation for your language yet, the Google-flavor Android build machine-translates the English source on the fly and labels it **Auto-translated** instead; F-Droid and desktop builds show the English page. Your Crowdin translation replaces the machine one as soon as it lands.
 
 ## Directives de Traduction
 

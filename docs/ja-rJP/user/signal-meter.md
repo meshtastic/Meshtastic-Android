@@ -2,7 +2,7 @@
 title: Meshtastic の信号メーターの仕組み
 parent: User Guide
 nav_order: 15
-last_updated: 2026-08-29
+last_updated: 2026-08-30
 description: 信号メーターが、LoRa モデムプリセットに対する SNR から品質をどう評価するかを説明します。スペクトラム拡散、プリセット、バーが実際に意味するもの。
 aliases:
   - signal
@@ -36,27 +36,29 @@ The app rates signal quality (None, Bad, Fair, or Good) from SNR alone, measured
 
 Because the rating is relative to the preset, the same SNR rates differently on different presets. An SNR of −16 dB rates Good on Long Fast (SNR limit −17.5 dB) but None on Short Fast (SNR limit −7.5 dB). Let `limit` be the active preset's SNR limit:
 
-| レベル | バー | 基準                                                             | 意味                                                                                                  |
-| --- | -- | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| 良   | 3  | SNR above `limit`                                              | Comfortably above the demodulation floor — a healthy connection.                    |
-| 普通  | 2  | less than 5.5 dB below `limit`                 | Decodable, but approaching the floor.                                               |
-| 不良  | 1  | 5.5 dB to 7.5 dB below `limit` | At the edge of what the preset can recover.                                         |
-| なし  | 0  | more than 7.5 dB below `limit`                 | Far below the preset's floor; further packets from this node are likely to be lost. |
+| レベル | バー   | 基準                                                             | 意味                                                                                                  |
+| --- | ---- | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| 良   | Full | SNR above `limit`                                              | Comfortably above the demodulation floor — a healthy connection.                    |
+| 普通  | 3    | less than 5.5 dB below `limit`                 | Decodable, but approaching the floor.                                               |
+| 不良  | 2    | 5.5 dB to 7.5 dB below `limit` | At the edge of what the preset can recover.                                         |
+| なし  | 1    | more than 7.5 dB below `limit`                 | Far below the preset's floor; further packets from this node are likely to be lost. |
+
+The icon never goes blank, so count the bars carefully: a single bar means None, not a weak but usable link, and Good is a solid wedge rather than a set of bars. A gray three-bar icon labeled Unknown is a different state again — the packet carried no SNR measurement at all, which is not the same as measuring one and finding it too weak.
 
 > ℹ️ **Note:** Traceroute hop colors use fixed thresholds (−7 dB / −15 dB); the per-node signal meter uses the preset-relative rating instead.
 
 ## Diagnosing Local Interference
 
-A great RSSI paired with only one bar (Bad) points to local interference, not distance. A cheap power supply, a noisy computer, or a nearby transmitter can create enough static to drown out an otherwise strong signal.
+A great RSSI paired with a one- or two-bar rating (None or Bad) points to local interference, not distance. A cheap power supply, a noisy computer, or a nearby transmitter can create enough static to drown out an otherwise strong signal.
 
 ## 信号情報が表示される場所
 
 In the app, signal data appears in several places:
 
-- **Node list** — a signal-bars icon next to each node
-- **ノードの詳細**：デバイスメトリクスのセクションにある SNR、RSSI、信号品質
+- **Node list** — a signal-bars icon, shown only for nodes your radio heard directly. A node reached through a relay shows its hop count instead, because the SNR your radio measured describes the last hop, not the whole path
+- **Node detail** — SNR, RSSI, and the quality word in the **Details** card at the top of the screen
 - **ルート追跡**：各中継ノードの、ホップごとの信号品質
-- **信号メトリクス**：メトリクスのグラフにある SNR と RSSI の履歴データ
+- **Signal Quality** — historical SNR and RSSI data in the metrics charts
 
 ![Node list entry showing a Good signal rating: 12.5 dB SNR, −42 dBm RSSI, and the green signal-strength icon](../../assets/screenshots/nodes_signal_info.png)
 

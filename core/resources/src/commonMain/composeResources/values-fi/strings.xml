@@ -470,7 +470,6 @@
     <string name="discovery_map">Löydettyjen radioiden kartta</string>
     <string name="discovery_not_connected">Ei yhdistetty</string>
     <string name="discovery_not_connected_description">Yhdistä Meshtastic-radioon aloittaaksesi skannauksen.</string>
-    <string name="discovery_paused">Pysäytetty: %1$s</string>
     <string name="discovery_preparing">Valmistellaan skannausta</string>
     <string name="discovery_preset_home_label">%1$s (koti)</string>
     <string name="discovery_reconnecting">Yhdistetään uudelleen laitteeseen %1$s</string>

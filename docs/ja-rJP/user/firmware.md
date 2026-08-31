@@ -2,7 +2,7 @@
 title: ファームウェア更新
 parent: User Guide
 nav_order: 13
-last_updated: 2026-08-29
+last_updated: 2026-08-30
 description: 無線機のファームウェアを Bluetooth または USB で更新します。OTA の手順、バージョンチャンネル、事前チェック、復旧について説明します。
 aliases:
   - firmware
@@ -32,7 +32,7 @@ Android ユーザーにとって最も一般的な更新方法です：
 1. 無線機が Bluetooth で接続されていることを確認します。
 2. ファームウェア更新画面に移動します。
 3. 希望するファームウェアバージョンを選択します。
-4. 「**更新**」をタップして OTA 処理を開始します。
+4. Tap **Update**. An **Update Warning** dialog lists the pre-flight checks — read it, then tap **I know what I'm doing.** to start. This dialog appears for every update method, including Wi-Fi OTA, USB, and a local firmware file.
 5. 更新が完了するまで待ちます。更新中は**接続を切断しないでください**。
 
 ![ファームウェアの更新を確認中](../../assets/screenshots/firmware_checking.png)
@@ -58,8 +58,6 @@ When an ESP32 radio is connected over the network rather than Bluetooth, the app
 
 Wi-Fi OTA takes the ESP32 `-update.bin` image rather than the `.uf2` a USB update uses; the app selects the right artifact for you.
 
-![ファームウェアの免責事項](../../assets/screenshots/firmware_disclaimer.png)
-
 ### アプリ内での USB 更新
 
 無線機が（Bluetooth ではなく）**USB／シリアル**で接続されている場合、ファームウェア更新画面に「**USB ファイル転送**」が表示されます。 アプリはデバイスを DFU モードで再起動し、システムのファイル選択画面を使って `.uf2` ファイルをデバイスの DFU ドライブに保存するよう促します。 このオプションは USB／シリアル接続でのみ表示され、Bluetooth では利用できません。
@@ -68,9 +66,11 @@ Wi-Fi OTA takes the ESP32 `-update.bin` image rather than the `.uf2` a USB updat
 
 ### Factory Erase and Bootloader Upgrade
 
-On a **USB/serial** connection, nRF52 and RP2040 devices also offer **Erase and reinstall** and, where an upgraded bootloader is published for the board, **Upgrade bootloader**.
+On a **USB/serial** connection, nRF52 and RP2040 devices can be wiped as part of an update — that is the **Erase device during update** opt-in described earlier on this page. nRF52 devices additionally offer **Upgrade bootloader** where an upgraded bootloader is published for the board; RP2040 devices run no Adafruit bootloader, so they never see it.
 
-Erasing wipes everything on the device — channels, keys and all settings — and there is no backup, so the app asks for confirmation first. Both operations write two files in turn, so you will be asked to select the device's update drive twice: once for the erase or bootloader image, then again for the firmware.
+Select a firmware version before either one: the app hides both until a release is chosen, because the firmware is reinstalled after the device is wiped or the new bootloader is written.
+
+Both a USB erase and a bootloader upgrade write two files in turn, so you are asked to select the device's update drive twice: once for the erase or bootloader image, then again for the firmware.
 
 The app reads `INFO_UF2.TXT` from the drive you select to confirm it really is the device's update drive and to identify the board before writing anything. If it can't confirm which Bluetooth stack your device uses, it refuses to erase and points you at the [Web Flasher](https://flasher.meshtastic.org) instead. In the Web Flasher, choosing the wrong Bluetooth stack can leave the radio recoverable only with a hardware programmer.
 
@@ -124,11 +124,15 @@ The app reads `INFO_UF2.TXT` from the drive you select to confirm it really is t
 - If it is still stuck after that, power-cycle the radio.
 - Attempt the update again.
 
+The message **Verification timed out. Device did not reconnect in time.** means the image was written but the radio did not come back within that window — power-cycle it and check the version under **Currently Installed** before re-running the update.
+
 ![ファームウェア更新のエラー](../../assets/screenshots/firmware_error.png)
 
 ### Radio Won't Boot After Update
 
-If your radio fails to boot:
+If the app told you the Bluetooth update could not be finished, follow the instruction it gave: connect the radio to a computer over USB and re-flash it with the vendor's serial DFU tool, such as `adafruit-nrfutil`. A stock nRF bootloader cannot reliably complete an interrupted over-the-air update.
+
+Otherwise, if your radio fails to boot:
 
 1. USB でコンピューターに接続してみる
 2. リカバリー／DFU モードで Web Flasher を使用する

@@ -2,7 +2,7 @@
 title: ヘルプとアプリ内ドキュメント
 parent: User Guide
 nav_order: 21
-last_updated: 2026-08-29
+last_updated: 2026-08-30
 description: このドキュメントをアプリ内で閲覧・検索し、オンデバイスの AI アシスタント Chirpy に Meshtastic について質問できます。
 aliases:
   - help
@@ -23,7 +23,7 @@ aliases:
 
 ### 検索
 
-検索アイコンをタップして入力すると、タイトルとキーワードでページを絞り込めます。結果は入力に応じて更新されます。
+The search box sits at the top of the docs browser. Type in it to filter pages by title and keywords — results update as you type, and the **Clear search** button (✕) empties the box.
 
 ![アプリ内ドキュメントの検索](../../assets/screenshots/docs-browser_search.png)
 

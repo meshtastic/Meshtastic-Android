@@ -2,7 +2,7 @@
 title: コネクション
 parent: User Guide
 nav_order: 2
-last_updated: 2026-08-29
+last_updated: 2026-08-30
 description: スマートフォンやデスクトップを、Bluetooth・USB・TCP/IP で Meshtastic 無線機に接続します。
 aliases:
   - bluetooth
@@ -21,13 +21,15 @@ Bluetooth Low Energy は、Android で標準的かつ最も一般的な接続方
 
 ### Pairing a Radio
 
-1. Meshtastic 無線機の電源が入っていて、ペアリングモードになっていることを確認します。
+1. Power on your radio. Most radios advertise over Bluetooth as soon as they boot — there is no pairing mode to enter. Radios with a color touchscreen ship with Bluetooth switched off, so turn it on from the radio's own on-screen menu first.
 2. アプリを開き、「**接続**」タブに移動します。
 3. 「**Bluetooth デバイスをスキャン**」をタップすると、近くの Meshtastic 無線機が表示されます。
 4. Select your radio from the list.
-5. Bluetooth のペアリング確認が表示されたら承認します。
+5. Android asks you to pair. If your radio has a screen, it shows a six-digit PIN — type that into the Android dialog. If your radio has no screen, the PIN is `123456`.
 
 ![Bluetooth デバイスをスキャンし、見つかった無線機がリストに表示されている様子](../../assets/screenshots/connections_bluetooth_scan.png)
+
+You can change the pairing method, or turn Bluetooth on for a radio that ships with it off, under **Settings → Device configuration → Bluetooth** — see [Settings — Radio & User](settings-radio-user). For more information, see [Bluetooth configuration](https://meshtastic.org/docs/configuration/radio/bluetooth) on meshtastic.org.
 
 接続カードの下にあるセグメント化されたボタン列（接続方式のセレクター）を使って、Bluetooth・ネットワーク・USB の接続方式を切り替えます（一度に 1 つが有効になります）：
 
@@ -44,16 +46,16 @@ The screen names anything on the app's side that is blocking a scan, with the fi
 | **Bluetooth scanning also needs location services** | Android 11 and older only: the permission is held but the system location toggle is off.                                                   |
 | No card, empty list                                 | Nothing on this side is blocking the scan — the radio is out of range, off, or already connected elsewhere.                                                |
 
-Tapping **Scan** after you have declined the permission once explains what it is for before asking again, and lets you decline again without being cornered.
+The explanation lives in that card, not in the scan control: tapping **Scan for Bluetooth devices** after you have declined once asks Android again directly.
 
 ### 接続ステータス
 
-| アイコン | 状態            | 説明                                                                                         |
-| ---- | ------------- | ------------------------------------------------------------------------------------------ |
-| 🟢   | 接続済           | 無線リンクが確立しています                                                                              |
-| 🟡   | 接続中           | ハンドシェイク中                                                                                   |
-| 🔴   | 切断            | No active connection; the app keeps trying to reconnect                                    |
-| ⚪    | デバイスはスリープ状態です | The radio is in light sleep — the app is waiting for it to wake and reconnect, not failing |
+| アイコン | 状態            | 説明                                                                                                         |
+| ---- | ------------- | ---------------------------------------------------------------------------------------------------------- |
+| 🟢   | 接続済           | 無線リンクが確立しています                                                                                              |
+| 🟡   | 接続中           | ハンドシェイク中                                                                                                   |
+| 🔴   | 切断            | No active connection. The app retries automatically, with a growing delay between attempts |
+| ⚪    | デバイスはスリープ状態です | The radio is in light sleep — the app is waiting for it to wake and reconnect, not failing                 |
 
 These are the four states the app models. "Device sleeping" is normal on power-saving configurations and needs no action.
 
@@ -67,9 +69,12 @@ When connecting, a status indicator shows the current connection state — tap *
 
 ### Bluetooth のトラブルシューティング
 
-- **デバイスが見つからない：** Bluetooth をオフ／オンし、位置情報が有効になっていることを確認します。
+- **Radio not found:** Turn Bluetooth off and back on. On Android 11 and older, also check that system location services are switched on — those releases do not return scan results without them.
+- **Bluetooth scan couldn't start:** Try again, and toggle Bluetooth off and on if it repeats.
 - **接続が切れる：** 無線機に近づき、電波干渉がないか確認します。
+- **Pairing failed, or pairing did not complete:** Check that the **Nearby devices** permission is granted, then pair again.
 - **ペアリングが拒否される：** Android の Bluetooth 設定でデバイスの登録を解除し、やり直します。
+- **Could not establish a stable connection after repeated attempts:** The app stopped retrying after three failed handshakes — a radio that keeps failing here is usually crashing on reconnect. Power-cycle the radio, then tap it again on the **Connect** tab to start a fresh attempt.
 
 ## USB シリアル
 
@@ -77,32 +82,31 @@ USB 接続は有線での代替手段で、デスクトップや Bluetooth が�
 
 ### セットアップ
 
-1. Connect your radio to your phone with a USB cable.
+1. Connect your radio to your phone with a USB data cable. Charge-only cables carry no data lines, and a radio on one never appears in the list.
 2. The app prompts for USB permission — tap **Allow**.
 3. 接続が自動的に確立されます。
 
 > ℹ️ **Note:** USB connections require OTG support on Android devices.
 
+### Troubleshooting USB
+
+- **USB permission denied:** Unplug the radio and plug it back in — Android asks again on reconnect.
+- **No radio in the list:** Check that the cable carries data rather than only power, and that the phone supports OTG.
+
 ## TCP/IP（ネットワーク）
 
-Some Meshtastic radios support Wi-Fi/Ethernet connectivity, allowing TCP-based connections over your local network. Get the radio onto your network first — using the radio's own Wi-Fi settings (via the firmware web interface or another connection) — then connect to it from the app.
-
-> ℹ️ **Note:** **Settings → Wi-Fi Provisioning for mPWRD-OS** is a separate, narrower tool. It provisions Wi-Fi
-> credentials over Bluetooth to **mPWRD-OS** devices only, using their own protocol — it does not
-> configure Wi-Fi on an ordinary Meshtastic radio. It scans over BLE, lists the networks the device
-> can see (including an option for a hidden SSID), takes the password, and reports success or
-> failure. Available on both Android and Desktop.
+Some Meshtastic radios support Wi-Fi/Ethernet connectivity, allowing TCP-based connections over your local network. Get the radio onto your network first. Connect to it over Bluetooth or USB, open **Settings → Device configuration → Network**, and under **Wi-Fi Options** turn on **Wi-Fi enabled** and enter the **SSID** and **Password**. The Network screen appears only for radios whose hardware supports Wi-Fi or Ethernet. Once the radio has an address, come back and connect to it over the network.
 
 ### ネットワーク経由で接続する
 
 1. 無線機がスマートフォン／デスクトップと同じローカルネットワーク上にあることを確認します。
-2. 接続画面で、接続方式のセレクターから「**ネットワーク**」を選択します。
+2. On the **Connect** tab, select **Network** in the transport selector.
 3. 無線機は次の 2 通りの方法で選べます：
    - **ネットワークデバイスをスキャン**：これをオンにすると、ローカルネットワーク上で自身を告知している無線機（mDNS ／ `_meshtastic._tcp`）を自動的に探索します。 見つかったデバイスがリストに表示されるので、タップして接続します。
    - **デバイスを手動で追加…**：無線機の IP アドレス（またはホスト名）とポート（既定：`4403`）を入力します。
 4. Previously-used network addresses are remembered under **Recent Network Devices** for quick reconnection (touch & hold to remove one).
 
-> 💡 **ヒント：** ネットワーク探索は mDNS を使用するため、両方のデバイスが同じサブネット上にある場合にのみ機能します。 Android 17 以降では、スキャンにローカルネットワークの権限が必要です。探索で何も見つからない場合は、IP アドレスでデバイスを手動追加してください。
+Network discovery uses mDNS, which only works when both your phone and the radio are on the same subnet. If the phone is not on Wi-Fi at all, the app warns that a network scan may find nothing. On Android 17 and newer, the app needs the **Local network permission** to reach a radio on your own Wi-Fi at all — not only to discover it — so typing the address by hand does not work around a denied permission. Grant it from the card on the Network pane, or from the **Permissions** section of **Settings**. A radio on a public address, or one reached over a VPN, needs no permission.
 
 ### TCP を使う場面
 
@@ -110,11 +114,31 @@ Some Meshtastic radios support Wi-Fi/Ethernet connectivity, allowing TCP-based c
 - シミュレートされた無線機でテストする
 - Bluetooth の電波干渉が問題になる環境
 
+### mPWRD-OS の Wi-Fi プロビジョニング
+
+**Settings → Wi-Fi Provisioning for mPWRD-OS** is a separate, narrower tool. It sends Wi-Fi credentials over Bluetooth to **mPWRD-OS** devices only, using their own protocol — it does not configure Wi-Fi on an ordinary Meshtastic radio. It is available on both Android and desktop.
+
+1. Open the screen and wait while the app finds the device over Bluetooth.
+2. Tap **Scan for Networks**, then pick a network from **Available Networks** — or turn on **Hidden network** and type the name into **Network Name (SSID)**.
+3. Enter the **Password** and tap **Apply**.
+
+If the scan reports **No networks found** or fails outright, move the phone closer to the device and scan again. If **Failed to apply Wi-Fi configuration** comes back, check the password and try again.
+
+## After Your First Connection
+
+Being connected is not the same as being able to transmit.
+
+A radio leaves the factory with no LoRa region set, and it does not transmit until you set one. When you connect such a radio, the **Connect** tab shows a **Set your region** card; tap it to open the LoRa screen and choose the region you are in.
+
+Once the region is set, the tab warns you if the radio is receive-only: a **Transmit is disabled** card, reading "This device can receive but will not send anything over LoRa." Tap it to open the same screen and turn **Transmit Enabled** back on. Only one of the two cards appears at a time — an unset region already stops the radio transmitting, so the app names that first and holds the transmit card back until you have set a region.
+
+For more information, see [Settings — Radio & User](settings-radio-user#lora-config).
+
 ## 再接続の動作
 
-The app reconnects to the last selected radio on startup. 接続方式は、接続画面からいつでも切り替えられます。
+The app reconnects to the last selected radio on startup. You can switch transports from the **Connect** tab at any time.
 
-切断するには、接続画面の切断ボタンをタップします：
+To disconnect, tap the disconnect button on the **Connect** tab:
 
 ![無線機から切断](../../assets/screenshots/connections_disconnect.png)
 
@@ -131,6 +155,8 @@ The app reconnects to the last selected radio on startup. 接続方式は、接�
 ## 関連トピック
 
 - [はじめに](onboarding)：初回起動時のセットアップと権限
-- [設定：無線機とユーザー](settings-radio-user)：Bluetooth とネットワークの設定
+- [Settings — Radio & User](settings-radio-user) — Bluetooth, region, and network configuration
+- [Messages & Channels](messages-and-channels) — send your first message once the radio is connected
+- [Nodes](nodes) — see who else is on your mesh
 - [デスクトップアプリ](desktop)：デスクトップ固有の接続に関する詳細
 - [対応デバイス](https://meshtastic.org/docs/hardware/devices)：meshtastic.org にある互換無線機の一覧

@@ -2,7 +2,7 @@
 title: Püsivara värskendus
 parent: Kasutusjuhend
 nav_order: 13
-last_updated: 2026-08-29
+last_updated: 2026-08-30
 description: Raadio püsivara uuendamine sinihamba ​​või USB kaudu – OTA protsess, versioonikanalid, lennueelsed kontrollid ja taastamine.
 aliases:
   - püsivara
@@ -32,7 +32,7 @@ Kõige levinum värskendamisviis Androidi kasutajate seas:
 1. Veendu, et raadio on sinihamba ​​kaudu ühendatud.
 2. Mine püsivara värskenduse lehele.
 3. Vali soovitud püsivara versioon.
-4. OTA alustamiseks puuduta nuppu **Uuenda**.
+4. Tap **Update**. An **Update Warning** dialog lists the pre-flight checks — read it, then tap **I know what I'm doing.** to start. This dialog appears for every update method, including Wi-Fi OTA, USB, and a local firmware file.
 5. Oota, kuni värskendus on lõppenud – **ära katkesta ühendust** värskenduse ajal.
 
 ![Püsivara kontrollib värskendusi](../../assets/screenshots/firmware_checking.png)
@@ -58,8 +58,6 @@ When an ESP32 radio is connected over the network rather than Bluetooth, the app
 
 Wi-Fi OTA takes the ESP32 `-update.bin` image rather than the `.uf2` a USB update uses; the app selects the right artifact for you.
 
-[Püsivara hoiatus](../../assets/screenshots/firmware_disclaimer.png)
-
 ### Rakendusesisene USB värskendus
 
 Kui raadio on ühendatud **USB/jadaühenduse** (mitte sinihamba) kaudu, pakub püsivara värskendamise ekraan **USB failiedastust**. Rakendus taaskäivitab seadme DFU-režiimis ja seejärel palub süsteemifailide valija abil salvestada `.uf2`-fail seadme DFU kettale. See valik kuvatakse ainult USB/jadaühenduse korral – see pole sinihamba ​​kaudu saadaval.
@@ -68,9 +66,11 @@ Kui raadio on ühendatud **USB/jadaühenduse** (mitte sinihamba) kaudu, pakub p�
 
 ### Factory Erase and Bootloader Upgrade
 
-**USB/jadapordi** ühenduse korral pakuvad nRF52 ja RP2040 seadmed ka **Kustuta ja installi uuesti** ning kui plaadile on avaldatud uuendatud alglaadur, siis **Alguslaaduri uuendamine**.
+On a **USB/serial** connection, nRF52 and RP2040 devices can be wiped as part of an update — that is the **Erase device during update** opt-in described earlier on this page. nRF52 devices additionally offer **Upgrade bootloader** where an upgraded bootloader is published for the board; RP2040 devices run no Adafruit bootloader, so they never see it.
 
-Kustutamine puhastab seadmest kõik – kanalid, klahvid ja kõik seaded – ning varukoopiat ei tehta, seega küsib rakendus kõigepealt kinnitust. Mõlemad toimingud kirjutavad kordamööda kaks faili, seega palutakse teil seadme uuendusdraiv valida kaks korda: üks kord kustutus- või alglaaduri kujutise jaoks ja seejärel uuesti püsivara jaoks.
+Select a firmware version before either one: the app hides both until a release is chosen, because the firmware is reinstalled after the device is wiped or the new bootloader is written.
+
+Both a USB erase and a bootloader upgrade write two files in turn, so you are asked to select the device's update drive twice: once for the erase or bootloader image, then again for the firmware.
 
 Rakendus loeb valitud kettalt faili `INFO_UF2.TXT`, et veenduda, kas see on tõepoolest seadme uuendusketas ja enne millegi kirjutamist plaat tuvastada. If it can't confirm which Bluetooth stack your device uses, it refuses to erase and points you at the [Web Flasher](https://flasher.meshtastic.org) instead. In the Web Flasher, choosing the wrong Bluetooth stack can leave the radio recoverable only with a hardware programmer.
 
@@ -124,11 +124,15 @@ Kui värskendus näib olevat hangunud:
 - If it is still stuck after that, power-cycle the radio.
 - Attempt the update again.
 
+The message **Verification timed out. Device did not reconnect in time.** means the image was written but the radio did not come back within that window — power-cycle it and check the version under **Currently Installed** before re-running the update.
+
 ![Püsivara uuendamise viga](../../assets/screenshots/firmware_error.png)
 
 ### Radio Won't Boot After Update
 
-If your radio fails to boot:
+If the app told you the Bluetooth update could not be finished, follow the instruction it gave: connect the radio to a computer over USB and re-flash it with the vendor's serial DFU tool, such as `adafruit-nrfutil`. A stock nRF bootloader cannot reliably complete an interrupted over-the-air update.
+
+Otherwise, if your radio fails to boot:
 
 1. Try connecting via USB to a computer
 2. Kasuta veebi püsivarauuendust taaste/DFU režiimis

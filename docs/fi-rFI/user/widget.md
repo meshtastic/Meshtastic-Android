@@ -2,7 +2,7 @@
 title: Aloitusnäytön widget
 parent: Käyttöopas
 nav_order: 20
-last_updated: 2026-08-29
+last_updated: 2026-08-30
 description: Lisää Meshtasticin aloitusnäytön widget, jotta näet yhdellä silmäyksellä yhdistetyn radiosi paikalliset tilastot ilman, että avaat sovelluksen.
 aliases:
   - widget
@@ -18,15 +18,17 @@ Androidissa Meshtastic tarjoaa aloitusnäytölle **widgetin**, joka näyttää y
 
 Widget näyttää **yhdistetyn radion** tämänhetkiset paikalliset tilastot:
 
+- A **node chip** across the top, carrying the radio's short name in its own colors
 - **Akun varaustaso** — radion akun varaustaso tai **Verkkovirta**, jos radio käyttää ulkoista virtalähdettä
 - **ChUtil** — kanavan käyttöaste (kuinka kuormitettu LoRa-kanava on prosentteina)
 - **AirUtil** — lähetysajan käyttöaste (kuinka suuren osan lähetysajasta radiosi käyttää)
 - **Liikenne** — lähetetyt ja vastaanotetut paketit sekä havaitut kaksoiskappaleet
 - **Välitykset** — välitetyt paketit ja välityksen peruutukset (näytetään, kun radio toimii välittäjänä)
-- **Kohinataso** — mitattu taustakohinan taso
-- **Hylätyt** — radion hylkäämät paketit
+- **Diagnostics** — a combined line carrying **Noise** (the background noise level in dBm), **Bad** (corrupt packets received), and **Dropped** (packets the radio discarded). Bad and Dropped appear only once they are above zero, so a quiet radio may show the noise reading alone
 - **Muistin käyttö** — radion vapaa ja kokonaismuisti palkkina esitettynä
 - **Radiot** — kuinka monta radiota on verkossa tunnetusta kokonaismäärästä
+- **Uptime** — how long the radio has been running since its last reboot, shown beside Nodes
+- **Updated** — the time the stats last refreshed, along the foot of the widget
 
 Avaa sovellus napauttamalla widgetiä tai pyydä uudet tilastot sen päivityspainikkeella.
 

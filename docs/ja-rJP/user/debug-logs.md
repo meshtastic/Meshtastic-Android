@@ -2,7 +2,7 @@
 title: デバッグログ
 parent: ユーザーガイド
 nav_order: 22
-last_updated: 2026-08-29
+last_updated: 2026-08-30
 description: アプリのデバッグログをアプリ内で表示・エクスポートし、バグの診断に役立つよう GitHub の issue にキャプチャを添付できます。adb は不要です。
 aliases:
   - debug-logs
@@ -40,11 +40,11 @@ The **App logs** tab shows the most recent log lines from **this app only** — 
 
 ## エクスポート
 
-**ダウンロード**アイコンをタップすると、現在のログをファイルに保存できます。 保存先はシステムのファイル選択画面で選び、ファイルにはタイムスタンプ付きの名前（例：`meshtastic_logcat_20260701_143312.txt`）が付くため、繰り返しエクスポートしても互いに上書きされることはありません。
+**ダウンロード**アイコンをタップすると、現在のログをファイルに保存できます。 The app first shows a warning about what the file contains — confirm it, then choose where the file goes through the system file picker. The file is named with a timestamp (for example `meshtastic_logcat_20260701_143312.txt`) so repeated exports never overwrite each other. The same warning guards the **Packets** tab export.
 
 そのファイルを GitHub の issue に添付してください。
 
-> 🔒 **Privacy:** Exports automatically **redact** private keys, admin keys, session passkeys and channel PSKs before writing the file. Logs can still contain node names, positions, and other identifying details — glance through the file before sharing it publicly, and share privately if you have any doubt.
+> 🔒 **Privacy:** Exports automatically **redact** private keys, admin keys, session passkeys, and channel PSKs, and suppress raw packet bytes. Everything else stays — the file can contain your message text, precise locations, and node details. Read it before sharing it publicly, and share privately if you have any doubt.
 
 ## デスクトップ
 

@@ -2,7 +2,7 @@
 title: Fehlersuchprotokolle
 parent: Benutzerhandbuch
 nav_order: 22
-last_updated: 2026-08-29
+last_updated: 2026-08-30
 description: View and export the app's own debug logs from inside the app, and attach a capture to a GitHub issue to help diagnose bugs — no adb required.
 aliases:
   - debug-logs
@@ -40,11 +40,11 @@ Error and warning lines are tinted so problems stand out.
 
 ## Exporting
 
-Tap the **download** icon to save the current logs to a file. Sie wählen den Speicherort über die Dateiauswahl des Systems aus, und die Datei wird mit einem Zeitstempel versehen (zum Beispiel `meshtastic_logcat_20260701_143312.txt`), sodass sich wiederholte Exporte nicht gegenseitig überschreiben.
+Tap the **download** icon to save the current logs to a file. The app first shows a warning about what the file contains — confirm it, then choose where the file goes through the system file picker. The file is named with a timestamp (for example `meshtastic_logcat_20260701_143312.txt`) so repeated exports never overwrite each other. The same warning guards the **Packets** tab export.
 
 Attach that file to your GitHub issue.
 
-> 🔒 **Privacy:** Exports automatically **redact** private keys, admin keys, session passkeys and channel PSKs before writing the file. Logs can still contain node names, positions, and other identifying details — glance through the file before sharing it publicly, and share privately if you have any doubt.
+> 🔒 **Privacy:** Exports automatically **redact** private keys, admin keys, session passkeys, and channel PSKs, and suppress raw packet bytes. Everything else stays — the file can contain your message text, precise locations, and node details. Read it before sharing it publicly, and share privately if you have any doubt.
 
 ## Desktop
 

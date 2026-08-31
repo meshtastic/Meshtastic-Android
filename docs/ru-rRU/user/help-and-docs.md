@@ -2,7 +2,7 @@
 title: Справка и встроенная документация
 parent: Руководство пользователя
 nav_order: 21
-last_updated: 2026-08-29
+last_updated: 2026-08-30
 description: Просматривайте эту документацию внутри приложения, выполняйте по ней поиск и задавайте вопросы о Meshtastic ассистенту Chirpy — встроенному ИИ-помощнику на устройстве.
 aliases:
   - help
@@ -23,7 +23,7 @@ aliases:
 
 ### Поиск
 
-Нажмите на значок поиска и введите текст, чтобы отфильтровать страницы по названию и ключевым словам — результаты обновляются по мере твоего ввода.
+The search box sits at the top of the docs browser. Type in it to filter pages by title and keywords — results update as you type, and the **Clear search** button (✕) empties the box.
 
 ![Поиск во встроенной документации](../../assets/screenshots/docs-browser_search.png)
 

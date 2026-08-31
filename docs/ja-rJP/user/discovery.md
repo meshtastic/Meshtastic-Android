@@ -2,7 +2,7 @@
 title: ローカルメッシュ探索
 parent: User Guide
 nav_order: 12
-last_updated: 2026-08-29
+last_updated: 2026-08-30
 description: メッシュネットワークを探索します。ローカルメッシュ探索スキャナー、ルート追跡の経路、隣接ノードのマップ、ノード探索ツールを説明します。
 aliases:
   - discovery
@@ -27,21 +27,21 @@ aliases:
 
 ローカルメッシュ探索は、あなたの場所に最適な LoRa モデムプリセットを見つけ、各プリセットでどのノードがアクティブかを確認できる、専用のスキャンモードです。 It cycles your connected radio through one or more presets you choose, dwells on each one — listens for a set time — to collect packets, then analyzes and ranks the results.
 
-「**設定 → 詳細設定 → ローカルメッシュ探索**」から開きます。 デスクトップでは、独自の「**設定 → ローカルメッシュ探索**」の項目があります。
+Connect your radio, then open **Settings → Advanced → Local Mesh Discovery**. On Android the **Advanced** section stays grayed out until a radio is connected and the app has finished reading its configuration, and every entry in it is disabled on a managed device. On desktop, Local Mesh Discovery has its own entry on the Settings screen, with no such gate.
 
-> ℹ️ **Note:** Discovery temporarily changes your radio's LoRa settings while it scans, then restores your original configuration when it finishes. Your radio must be connected to run a scan.
+> ℹ️ **Note:** Discovery temporarily changes your radio's LoRa settings while it scans, then restores your original configuration when it finishes.
 
 ### スキャンを設定する
 
 開始する前に、次のコントロールを設定します：
 
-| コントロール            | 説明                                                                                                    |
-| ----------------- | ----------------------------------------------------------------------------------------------------- |
-| **LoRa プリセットの選択** | スキャンするプリセットを 1 つ以上選択します。 探索は、選択した各プリセットに順番に滞在します。                                                     |
-| **滞在時間**          | 各プリセットで受信する時間。 1、5、15、30、45、60、90、120、180 分から選択します。 滞在時間を長くすると、より多くのパケットを収集してより明確な状況が分かりますが、時間もかかります。 |
-| **画面をスリープさせない**   | 長いスキャン中に画面がスリープするのを防ぐ、任意のトグルです。                                                                       |
+| コントロール            | 説明                                                                                                                                                                                                                |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **LoRa プリセットの選択** | スキャンするプリセットを 1 つ以上選択します。 探索は、選択した各プリセットに順番に滞在します。                                                                                                                                                                 |
+| **滞在時間**          | 各プリセットで受信する時間。 1、5、15、30、45、60、90、120、180 分から選択します。 滞在時間を長くすると、より多くのパケットを収集してより明確な状況が分かりますが、時間もかかります。                                                                                                             |
+| **画面をスリープさせない**   | Keeps the phone out of Android Doze mode, which would otherwise drop radio packets during a long scan. Recommended — a scan run with it off can under-count what the radio heard. |
 
-「**開始**」ボタンは、スキャンを実行できるようになるまで（理由の説明とともに）無効のままです。 無効になる主な理由：
+The **Start Scan** button stays disabled — with an explanation of why — until the scan can run. 無効になる主な理由：
 
 - The radio is **not connected**.
 - スキャンする**プリセットが選択されていない**。
@@ -51,16 +51,20 @@ aliases:
 
 スキャンの実行中、探索は現在の段階を表示します：
 
-| 段階                                               | 実行中の内容                                            |
-| ------------------------------------------------ | ------------------------------------------------- |
-| **準備中**                                          | 現在の構成を保存し、スキャンの準備をしています。                          |
-| **\<preset\> に切り替え中** | テストする次のプリセットに無線機を切り替えています。                        |
-| **再接続中**                                         | プリセット変更後に接続を再確立しています。                             |
-| **滞在**                                           | 現在のプリセットで受信してパケットを収集しており、次のステップまでのカウントダウンが表示されます。 |
-| **分析**                                           | 収集したパケットを処理し、プリセットをランク付けしています。                    |
-| **復元中**                                          | 元の LoRa 構成に戻しています。                                |
+| 段階                                                                     | 実行中の内容                                                                                                                                                                                                                              |
+| ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Preparing scan**                                                     | 現在の構成を保存し、スキャンの準備をしています。                                                                                                                                                                                                            |
+| **\<preset\> に切り替え中**                       | テストする次のプリセットに無線機を切り替えています。                                                                                                                                                                                                          |
+| **Reconnecting on \<preset\>**              | プリセット変更後に接続を再確立しています。                                                                                                                                                                                                               |
+| **Dwelling on \<preset\>**                  | 現在のプリセットで受信してパケットを収集しており、次のステップまでのカウントダウンが表示されます。                                                                                                                                                                                   |
+| **Analyzing results**                                                  | 収集したパケットを処理し、プリセットをランク付けしています。                                                                                                                                                                                                      |
+| **Restoring home preset**                                              | 元の LoRa 構成に戻しています。                                                                                                                                                                                                                  |
+| **Cancelling scan**                                                    | You tapped **Stop Scan**; partial results are saved before the original preset is restored.                                                                                                                         |
+| **Scan failed: \<reason\>** | The scan could not continue — most often the radio did not come back within a minute of a preset change. The results collected so far are saved, and the original preset is restored automatically. |
 
 ![現在のプリセットの残り時間を示す滞在のカウントダウン](../../assets/screenshots/discovery_dwell_progress.png)
+
+If a scan is interrupted — the app is closed, or the radio goes away — the app restores your original preset the next time it reconnects to that radio, and tells you it has done so. Reconnect the same radio to let that happen; until you do, the radio stays on whichever preset the scan left it on.
 
 ### 結果の見方
 
@@ -90,10 +94,16 @@ aliases:
 
 メッシュビーコンを使うと、ノードが他のノードを自分のメッシュに招待できます。 A beaconing node periodically broadcasts an invitation — optionally advertising a channel, region, and modem preset — that nearby nodes can hear even before they share a configuration.
 
-「**設定 → モジュール設定 → メッシュビーコン**」で設定します：
+Configure it under **Settings → Module configuration → Mesh Beacon**. The entry appears only on radios running firmware 2.8.0 or newer. A read-only **Region** row at the top of the screen shows the region the beacon advertises: that region, and the preset, are always the ones the radio itself uses, so a beacon cannot invite anyone onto settings your radio is not running.
 
 - **ビーコンを受信**：他のノードがブロードキャストする招待を受け取ります。
-- **ビーコンを発信**：一定間隔で自分の招待を送信します。任意でメッセージと提示するチャンネルを設定できます。
+- **Broadcast a beacon** — periodically advertise this mesh to nearby nodes, with an optional **Beacon message** of up to 100 bytes, a **Broadcast interval** picked from fixed intervals between 1 hour and 72 hours, and an **Offered channel** chosen from your radio's own channels. The offered channel is required, and defaults to your primary channel.
+- **Broadcast targets** — optional extra destinations beyond the offered channel. **Add target** appends a row; each row picks a **Channel** and a **Transmit preset**, and **Remove target** deletes it. With no targets, the beacon goes out on the offered channel alone.
+
+Two conditions block beacon setup:
+
+- **The radio has no region set.** The screen shows nothing but _Set your radio's region before setting up a beacon._ Set the region on **Settings → LoRa** first.
+- **The radio uses custom LoRa settings.** A beacon advertises a modem preset for others to join, so a radio with **Use Preset** turned off has no standard preset to offer. In that state **Broadcast a beacon** can be turned off but not on, and the broadcast settings are read-only. Listening for beacons is unaffected.
 
 受信した招待は、探索画面に「**メッシュへの招待**」カードとして表示されます。 各カードには、送信者のメッセージと、提示されたチャンネル・リージョン・プリセット・信号品質が表示され、次の操作ができます：
 
@@ -102,6 +112,8 @@ aliases:
 - **閉じる**：招待を無視します。
 
 ビーコンが告知したチャンネルは、スキャン設定にも「**ビーコンのチャンネル**」として表示されます。選択すると、スキャン対象に含められます。
+
+An invitation to a mesh your radio is already on is suppressed: no card, no notification, and no **Beacon channels** entry. A channel counts as one you already have only when both its name and its key match a channel on your radio — the same name with a different key is a different mesh, so that invitation still reaches you.
 
 ## 手動での探索
 
@@ -114,31 +126,38 @@ The following tools are available at any time from the node list and node detail
 #### ルート追跡を実行する
 
 1. 「**ノード**」に移動し、追跡したいノードをタップします。
-2. ノードの詳細画面で、「**ルート追跡**」をタップします。 The app sends the request; results show each hop with signal quality.
+2. On the node detail screen, find **Traceroute** in the **Telemetry** section and tap its request button. Once a result arrives, a second button on the same row opens the traceroute log, where each hop is listed with its signal quality.
 
 #### 結果の見方
 
 ルート追跡の結果は次のように表示されます：
 
-```
-自分 → ノード A (SNR: 8.5, RSSI: -95) → ノード B (SNR: 5.2, RSSI: -108) → ターゲット
+```text
+Route traced toward destination:
+
+■ Your Node (YOUR)
+⇊ 8.5 dB
+■ Relay Node (RLAY)
+⇊ -8.75 dB
+■ Target Node (TGT1)
 ```
 
-各ホップは、メッセージを転送した中継ノードを表します。 各ホップの SNR と RSSI の値から、その特定の区間のリンク品質が分かります。
+Each `⇊` line between two nodes is one relay hop, and the SNR on that line is the quality of that segment alone. The app colors it green at or above −7 dB, yellow at or above −15 dB, and orange below that. A request that also gets a reply adds a second block under **Route traced back to us:**.
 
-| 確認すべき点                         | 意味                                   |
-| ------------------------------ | ------------------------------------ |
-| すべてのホップが良い SNR（−7 dB 以上、緑）を示す  | 健全な経路。メッセージが確実に流れます                  |
-| 1 つのホップが悪い SNR（−15 dB 未満、赤）を示す | 弱いリンク。この中継区間は脆弱です                    |
-| ホップ数が多い（4 以上）                  | 長い経路。短くするためにノードの再配置を検討してください         |
-| 再試行で経路が変わる                     | メッシュが適応しています。複数の経路が存在します（これは良いことです！） |
+| 確認すべき点                                                             | 意味                                   |
+| ------------------------------------------------------------------ | ------------------------------------ |
+| すべてのホップが良い SNR（−7 dB 以上、緑）を示す                                      | 健全な経路。メッセージが確実に流れます                  |
+| One hop shows a poor SNR (below −15 dB, orange) | 弱いリンク。この中継区間は脆弱です                    |
+| ホップ数が多い（4 以上）                                                      | 長い経路。短くするためにノードの再配置を検討してください         |
+| 再試行で経路が変わる                                                         | メッシュが適応しています。複数の経路が存在します（これは良いことです！） |
 
 > 💡 **ヒント：** ルート追跡を数分間かけて何度か実行してください。 経路が変わる場合、メッシュには冗長な経路があり、よくつながったネットワークの兆候です。
 
 #### ルート追跡によるトラブルシューティング
 
-- **「経路が見つかりません」**：対象のノードがオフラインか、圏外か、別のチャンネルにいる可能性があります。 両方のノードが、同じ暗号化鍵を持つチャンネルを少なくとも 1 つ共有しているか確認してください。
-- **ルート追跡がタイムアウトする**：経路が長すぎる（ホップ数上限を超える）か、中継ノードが混雑している可能性があります。 「**設定 → LoRa 設定**」でホップ数上限を増やしてみてください。
+- **No Response** — The traceroute got nothing back. The target node may be offline, out of range, or on a different channel. 両方のノードが、同じ暗号化鍵を持つチャンネルを少なくとも 1 つ共有しているか確認してください。
+- **ルート追跡がタイムアウトする**：経路が長すぎる（ホップ数上限を超える）か、中継ノードが混雑している可能性があります。 Try increasing the hop limit in **Settings → LoRa**.
+- **Cannot show traceroute map because the start or destination node has no position information** — The path was traced, but one end has never shared a position.
 - **非対称な経路**：A→B のルート追跡は、B→A とは異なる経路を通ることがあります。 これは正常です。電波の伝搬は常に対称とは限りません。
 
 ### 隣接ノード情報
@@ -147,19 +166,20 @@ The following tools are available at any time from the node list and node detail
 
 #### 隣接ノード情報を有効にする
 
-1. 「**設定 → モジュール設定 → 隣接ノード情報**」に移動します。
+1. Navigate to **Settings → Module configuration → Neighbor Info**.
 2. モジュールを有効にします。
-3. ブロードキャスト間隔を設定します（デフォルト：900 秒／15 分）。
+3. Set **Update interval (seconds)**. The default is 21600 seconds (6 hours), and the firmware minimum is 14400 seconds (4 hours) — a smaller value is rejected and reset to the default.
+4. Turn on **Transmit over LoRa**. Without it, your neighbor list goes only to MQTT and to this app, never over the air. It is unavailable on a channel that still uses the default name and key, so set up your own channel first — see [Messages & Channels](messages-and-channels).
 
-Once enabled, your node periodically broadcasts its neighbor list. 隣接ノード情報を有効にしている他のノードも、同じことを行います。
+Once enabled and transmitting over LoRa, your node periodically broadcasts its neighbor list. 隣接ノード情報を有効にしている他のノードも、同じことを行います。
 
 #### 隣接ノードのデータを表示する
 
-- 任意のノードの詳細画面を開き、「**隣接ノード**」セクションを探します。
+- Open a node's detail screen and find **Neighbor Info** in the **Telemetry** section. The request button asks the node for its current neighbor list; once the app has received one, a second button on the same row opens the log of everything that node has reported. The row appears only on nodes that can answer a neighbor request, or that have already reported neighbors.
 - 各隣接ノードの項目には、直接受信したノードとその信号品質が表示されます。
 - 複数のノードの隣接ノードデータを組み合わせて、メッシュ全体のトポロジーを把握します。
 
-> ℹ️ **Note:** Neighbor Info increases airtime usage because every enabled node periodically broadcasts its neighbor list. ノードの多い混雑したメッシュでは、輻輳を避けるために、より長いブロードキャスト間隔（3600 秒以上）を検討してください。
+> ℹ️ **Note:** Neighbor Info increases airtime usage because every enabled node periodically broadcasts its neighbor list. The firmware does not accept an interval shorter than 14400 seconds (4 hours) for this reason; on busy meshes, leave it at the 21600-second default or raise it further.
 
 ### 探索ツールとしてのノードリスト
 
