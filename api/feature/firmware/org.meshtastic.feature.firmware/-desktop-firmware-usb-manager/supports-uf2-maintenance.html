@@ -2,7 +2,7 @@
 <html class="no-js" lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
-    <title>deviceDetachFlow</title>
+    <title>supportsUf2Maintenance</title>
 <link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>
     <script>document.documentElement.classList.replace("no-js", "js");</script>
     <script>const storage = localStorage.getItem("dokka-dark-mode")
@@ -42,7 +42,7 @@
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
-                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":feature:firmware/commonMain">common</button>
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":feature:firmware/jvmMain">jvm</button>
             <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
                 <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
                 <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
@@ -51,11 +51,11 @@
                             <i class="ui-kit-icon ui-kit-icon_cross"></i>
                         </button>
                     </div>
-                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                        <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
                             <label class="checkbox">
-                                <input type="checkbox" class="checkbox--input" id=":feature:firmware/commonMain" data-filter=":feature:firmware/commonMain">
+                                <input type="checkbox" class="checkbox--input" id=":feature:firmware/jvmMain" data-filter=":feature:firmware/jvmMain">
                                 <span class="checkbox--icon"></span>
-                                common
+                                jvm
                             </label>
                         </li>
                 </ul>
@@ -89,12 +89,14 @@
         </nav>
         <div id="resizer" class="resizer" data-item-type="BAR"></div>
         <div id="main" data-item-type="SECTION" role="main">
-<div class="main-content" data-page-type="member" id="content" pageids="feature-firmware::org.meshtastic.feature.firmware/FirmwareUsbManager/deviceDetachFlow/#/PointingToDeclaration//-803617142">
-  <div class="breadcrumbs"><a href="../../index.html">feature-firmware</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.feature.firmware</a><span class="delimiter">/</span><a href="index.html">FirmwareUsbManager</a><span class="delimiter">/</span><span class="current">deviceDetachFlow</span></div>
+<div class="main-content" data-page-type="member" id="content" pageids="feature-firmware::org.meshtastic.feature.firmware/DesktopFirmwareUsbManager/supportsUf2Maintenance/#/PointingToDeclaration//809578796">
+  <div class="breadcrumbs"><a href="../../index.html">feature-firmware</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.feature.firmware</a><span class="delimiter">/</span><a href="index.html">DesktopFirmwareUsbManager</a><span class="delimiter">/</span><span class="current">supportsUf2Maintenance</span></div>
   <div class="cover ">
-    <h1 class="cover"><span>device</span><wbr><span>Detach</span><wbr><span><span>Flow</span></span></h1>
+    <h1 class="cover"><span>supports</span><wbr><span><span>Uf2Maintenance</span></span></h1>
   </div>
-  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/commonMain"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="device-detach-flow.html"><span class="token function">deviceDetachFlow</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a><span class="token operator">&gt;</span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/feature/firmware/src/commonMain/kotlin/org/meshtastic/feature/firmware/FirmwareUsbManager.kt#L33">source</a>)</span></span></div></div></div>
+  <div class="platform-hinted  with-platform-tabs" data-platform-hinted="data-platform-hinted">
+    <div class="platform-bookmarks-row" data-toggle-list="data-toggle-list"><button class="platform-bookmark" data-filterable-current=":feature:firmware/jvmMain" data-filterable-set=":feature:firmware/jvmMain" data-active="" data-toggle=":feature:firmware/jvmMain">jvm</button></div>
+<div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:firmware/jvmMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="supports-uf2-maintenance.html">supportsUf2Maintenance</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/feature/firmware/src/jvmMain/kotlin/org/meshtastic/feature/firmware/DesktopFirmwareUsbManager.kt#L31">source</a>)</span></span></div><p class="paragraph">Desktop offers no maintenance affordance at all: with no way to vet a bootloader volume and no CDC unblock, every maintenance operation below is a no-op, so the section is hidden rather than shown and then dead-ended. <a href="ensure-serial-permission.html">ensureSerialPermission</a> is the exception — desktop serial access has no permission model, so preflighting it succeeds trivially.</p></div>  </div>
 </div>
     <div class="footer">
         <div class="footer--container">
