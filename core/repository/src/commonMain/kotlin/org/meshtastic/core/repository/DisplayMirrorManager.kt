@@ -22,9 +22,9 @@ import org.meshtastic.proto.DisplayFrame
 /**
  * Reassembles the chunked [DisplayFrame] stream from the connected device into complete framebuffer snapshots.
  *
- * The device streams its 1bpp framebuffer as `FromRadio.display_frame` chunks while display mirroring is enabled
- * (see `AdminMessage.set_display_mirror`). Chunks of one frame share a `frame_id`; a frame is complete when
- * `offset + data.size == total_size`.
+ * The device streams its 1bpp framebuffer as `FromRadio.display_frame` chunks while display mirroring is enabled (see
+ * `AdminMessage.set_display_mirror`). Chunks of one frame share a `frame_id`; a frame is complete when `offset +
+ * data.size == total_size`.
  */
 interface DisplayMirrorManager {
     /** Latest completely reassembled frame, or null before the first one arrives. */
@@ -37,16 +37,15 @@ interface DisplayMirrorManager {
 /**
  * One complete device framebuffer snapshot.
  *
- * [pixels] is MONO_VLSB: 1 bit per pixel in vertical LSB-first pages — byte index = `x + (y / 8) * width`,
- * bit index = `y % 8`.
+ * [pixels] is MONO_VLSB: 1 bit per pixel in vertical LSB-first pages — byte index = `x + (y / 8) * width`, bit index =
+ * `y % 8`.
  */
 data class MirrorFrame(val width: Int, val height: Int, val frameId: Int, val pixels: ByteArray) {
-    override fun equals(other: Any?): Boolean =
-        other is MirrorFrame &&
-            other.width == width &&
-            other.height == height &&
-            other.frameId == frameId &&
-            other.pixels.contentEquals(pixels)
+    override fun equals(other: Any?): Boolean = other is MirrorFrame &&
+        other.width == width &&
+        other.height == height &&
+        other.frameId == frameId &&
+        other.pixels.contentEquals(pixels)
 
     override fun hashCode(): Int {
         var result = width

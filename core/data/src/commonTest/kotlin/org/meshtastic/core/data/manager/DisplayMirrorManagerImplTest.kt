@@ -1,0 +1,134 @@
+/*
+ * Copyright (c) 2026 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+package org.meshtastic.core.data.manager
+
+import okio.ByteString.Companion.toByteString
+import org.meshtastic.proto.DisplayFrame
+import kotlin.test.Test
+import kotlin.test.assertContentEquals
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
+
+class DisplayMirrorManagerImplTest {
+
+    private val manager = DisplayMirrorManagerImpl()
+
+    // 128x64 MONO_VLSB frame = 1024 bytes; the firmware chunks at 384.
+    private fun chunk(
+        frameId: Int = 1,
+        offset: Int = 0,
+        data: ByteArray,
+        total: Int = FRAME_BYTES,
+        width: Int = WIDTH,
+        height: Int = HEIGHT,
+        format: DisplayFrame.Format = DisplayFrame.Format.MONO_VLSB,
+    ) = DisplayFrame(
+        width = width,
+        height = height,
+        format = format,
+        frame_id = frameId,
+        offset = offset,
+        total_size = total,
+        data_ = data.toByteString(),
+    )
+
+    private fun bytes(size: Int, fill: Int) = ByteArray(size) { fill.toByte() }
+
+    @Test
+    fun `reassembles a three-chunk frame in order`() {
+        manager.handleIncomingFrame(chunk(offset = 0, data = bytes(384, 1)))
+        manager.handleIncomingFrame(chunk(offset = 384, data = bytes(384, 2)))
+        assertNull(manager.frame.value)
+
+        manager.handleIncomingFrame(chunk(offset = 768, data = bytes(256, 3)))
+
+        val frame = manager.frame.value!!
+        assertEquals(WIDTH, frame.width)
+        assertEquals(HEIGHT, frame.height)
+        assertEquals(1, frame.frameId)
+        assertContentEquals(bytes(384, 1) + bytes(384, 2) + bytes(256, 3), frame.pixels)
+    }
+
+    @Test
+    fun `single-chunk frame completes immediately`() {
+        // 64x32 = 256 bytes fits one chunk
+        manager.handleIncomingFrame(chunk(width = 64, height = 32, total = 256, data = bytes(256, 7)))
+
+        assertEquals(256, manager.frame.value?.pixels?.size)
+    }
+
+    @Test
+    fun `out-of-sequence chunk drops the partial frame`() {
+        manager.handleIncomingFrame(chunk(offset = 0, data = bytes(384, 1)))
+        manager.handleIncomingFrame(chunk(offset = 768, data = bytes(256, 3))) // gap: 384 missing
+
+        manager.handleIncomingFrame(chunk(offset = 384, data = bytes(384, 2))) // too late
+        assertNull(manager.frame.value)
+    }
+
+    @Test
+    fun `offset zero restarts mid-frame on device reboot or torn capture`() {
+        manager.handleIncomingFrame(chunk(frameId = 5, offset = 0, data = bytes(384, 1)))
+
+        // New frame id starting over at offset 0 wins
+        manager.handleIncomingFrame(chunk(frameId = 6, offset = 0, data = bytes(384, 4)))
+        manager.handleIncomingFrame(chunk(frameId = 6, offset = 384, data = bytes(384, 5)))
+        manager.handleIncomingFrame(chunk(frameId = 6, offset = 768, data = bytes(256, 6)))
+
+        assertEquals(6, manager.frame.value?.frameId)
+    }
+
+    @Test
+    fun `frame id change mid-frame without offset zero is dropped`() {
+        manager.handleIncomingFrame(chunk(frameId = 1, offset = 0, data = bytes(384, 1)))
+        manager.handleIncomingFrame(chunk(frameId = 2, offset = 384, data = bytes(384, 2)))
+
+        assertNull(manager.frame.value)
+    }
+
+    @Test
+    fun `rejects geometry that does not match total size`() {
+        manager.handleIncomingFrame(
+            chunk(width = 64, height = 64, total = 256, data = bytes(256, 1)),
+        ) // 64x64 needs 512
+        manager.handleIncomingFrame(chunk(width = 0, height = 64, total = 0, data = ByteArray(0)))
+        manager.handleIncomingFrame(chunk(width = 128, height = 0, total = 0, data = ByteArray(0)))
+
+        assertNull(manager.frame.value)
+    }
+
+    @Test
+    fun `rejects unsupported format`() {
+        manager.handleIncomingFrame(
+            chunk(
+                width = 64,
+                height = 32,
+                total = 256,
+                data = bytes(256, 1),
+                format = DisplayFrame.Format.FORMAT_UNSPECIFIED,
+            ),
+        )
+
+        assertNull(manager.frame.value)
+    }
+
+    private companion object {
+        const val WIDTH = 128
+        const val HEIGHT = 64
+        const val FRAME_BYTES = 1024
+    }
+}
