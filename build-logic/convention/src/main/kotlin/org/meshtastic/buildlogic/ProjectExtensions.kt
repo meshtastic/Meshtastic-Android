@@ -66,9 +66,16 @@ internal fun Project.configureTestOptions() {
     // Gradle 9 requires junit-platform-launcher on every test runtime classpath when
     // useJUnitPlatform() is active.  Add it lazily to all *UnitTestRuntimeClasspath and
     // *TestRuntimeClasspath configurations so all Android and JVM test tasks get it
-    // without requiring per-module declarations.
+    // without requiring per-module declarations. Excludes wasmJs*: useJUnitPlatform() below is never applied to
+    // that platform's Kotlin/JS test task (it isn't a `Test` task at all), and junit-platform-launcher only
+    // publishes a JVM variant — adding it here made wasmJsBrowserTest's own configuration unresolvable the
+    // moment browser() gave every wasmJs-enabled module a real test runtime classpath (previously bare wasmJs()
+    // never created one, so this never fired).
     configurations
-        .matching { it.name.endsWith("UnitTestRuntimeClasspath") || it.name.endsWith("TestRuntimeClasspath") }
+        .matching {
+            !it.name.startsWith("wasmJs") &&
+                (it.name.endsWith("UnitTestRuntimeClasspath") || it.name.endsWith("TestRuntimeClasspath"))
+        }
         .configureEach {
             val launcher = libs.library("junit-platform-launcher")
             project.dependencies.add(name, launcher)

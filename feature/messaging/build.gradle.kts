@@ -18,14 +18,15 @@
 plugins { alias(libs.plugins.meshtastic.kmp.feature) }
 
 kotlin {
-    // Library module: bare wasmJs(), no browser() — see core:prefs/build.gradle.kts's comment. No custom
+    // wasmJs { browser() } required repo-wide by KGP's root npm resolver — see core:prefs/build.gradle.kts's comment.
+    // No custom
     // hierarchy group is needed for MAIN — zero expect/actual declarations and zero java.*/android.* imports
     // in commonMain (confirmed via grep), and a fresh sweep of every wasmJs-relevant dependency's own
     // nonWebMain (core:database/core:prefs/core:network/core:datastore/core:ble) found zero references to
     // any of their nonWebMain-only types from this module's commonMain — same shape as core:domain, unlike
     // feature:connections (which needed an interface-extraction seam for two core:datastore types).
     @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
-    wasmJs()
+    wasmJs { browser() }
 
     sourceSets {
         commonMain.dependencies {

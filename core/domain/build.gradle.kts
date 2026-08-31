@@ -24,14 +24,14 @@ plugins {
 kotlin {
     android { withHostTest { isIncludeAndroidResources = true } }
 
-    // Library module: bare wasmJs(), no browser() — see core:prefs/build.gradle.kts's comment.
+    // wasmJs { browser() } required repo-wide by KGP's root npm resolver — see core:prefs/build.gradle.kts's comment.
     // No custom hierarchy group is needed for MAIN — zero
     // expect/actual declarations and zero java.*/android.* imports in commonMain (confirmed via grep),
     // and every commonMain dependency (core:repository/model/common/database/datastore/resources,
     // protobufs, kermit/okio/kotlinx-datetime/kotlinx-serialization-json(-okio)) already publishes a
     // wasmJs variant — same shape as core:repository/core:service, unlike core:ble/core:database.
     @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
-    wasmJs()
+    wasmJs { browser() }
 
     sourceSets {
         commonMain.dependencies {

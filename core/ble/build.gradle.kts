@@ -27,10 +27,11 @@ plugins {
 kotlin {
     android { withHostTest { isIncludeAndroidResources = true } }
 
-    // Library module: bare wasmJs(), no browser() — see core:prefs/build.gradle.kts's comment for why the
-    // repo-wide browser() experiment was reverted.
+    // wasmJs { browser() } required repo-wide by KGP's root npm resolver — see core:prefs/build.gradle.kts's
+    // comment for the full story (webApp's binaries.executable(), the wasmJsBrowserTest/karma gap it
+    // exposed, and how that's now handled centrally).
     @OptIn(ExperimentalWasmDsl::class)
-    wasmJs()
+    wasmJs { browser() }
 
     // nonWebMain: Kable has no wasmJs target, so its dependents live here instead of commonMain.
     // Predicate, not withAndroidTarget()/withApple() — those silently drop androidMain under

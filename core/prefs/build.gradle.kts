@@ -27,15 +27,18 @@ plugins {
 kotlin {
     android { withHostTest {} }
 
-    // Library module: bare wasmJs(), no browser() (that's for the eventual webApp executable). Tried adding
-    // browser() repo-wide to satisfy KGP's npm root resolver for :webApp's packaging task — it also arms each
-    // module's wasmJsBrowserTest task, which allTests then picks up and fails (no karma/headless-Chrome runner
-    // configured anywhere in this repo). That CI-gate regression outweighs unblocking webApp packaging, so this
-    // reverted back to bare wasmJs() pending a real decision (relax FAIL_ON_PROJECT_REPOS, stand up a browser
-    // test runner, or scope browser() to just webApp's transitive consumption graph with test tasks disabled).
-    // See .agent_plans/web-target-workpad.md's webApp milestone entry.
+    // wasmJs { browser() } is required repo-wide, not just on webApp itself: KGP's root npm resolver
+    // (KotlinRootNpmResolver) requires every module reachable from webApp's wasmJs { browser() {
+    // binaries.executable() } } dependency graph to also declare browser()/nodejs(), not just bare wasmJs() —
+    // confirmed by isolating the exact trigger (binaries.executable(), not browser() alone; see
+    // settings.gradle.kts's webApp-include comment for that experiment). browser() alone also arms this
+    // module's wasmJsBrowserTest task, which needs a karma/headless-Chrome runner this repo doesn't configure
+    // anywhere — disabled centrally in KotlinAndroid.kt's configureKotlinMultiplatform() instead of per module,
+    // so it can't be missed on a future wasmJs-enabled module. See .agent_plans/web-target-workpad.md's webApp
+    // milestone entry for the full history (an earlier pass tried this exact retrofit, then reverted it after
+    // finding the wasmJsBrowserTest gap but before finding the central-disable fix).
     @OptIn(ExperimentalWasmDsl::class)
-    wasmJs()
+    wasmJs { browser() }
 
     // nonWebMain: androidx.datastore.preferences has no wasmJs variant (the `Preferences` type itself doesn't
     // resolve there), so DataStorePrefsStore — the adapter wrapping a real DataStore<Preferences> — and the

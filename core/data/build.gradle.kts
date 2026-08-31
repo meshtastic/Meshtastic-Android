@@ -28,10 +28,11 @@ plugins {
 kotlin {
     android { withHostTest { isIncludeAndroidResources = true } }
 
-    // Library module: bare wasmJs(), no browser() — see core:prefs/build.gradle.kts's comment for why the
-    // repo-wide browser() experiment was reverted.
+    // wasmJs { browser() } required repo-wide by KGP's root npm resolver — see core:prefs/build.gradle.kts's
+    // comment for the full story (webApp's binaries.executable(), the wasmJsBrowserTest/karma gap it
+    // exposed, and how that's now handled centrally).
     @OptIn(ExperimentalWasmDsl::class)
-    wasmJs()
+    wasmJs { browser() }
 
     // nonWebMain: core:takserver (ATAK, out of this effort's v0 scope) and the Room/sqlite-bundled runtime
     // (jvmAndroidMain) have no wasmJs story. jvmAndroidMain nests inside it, replacing the

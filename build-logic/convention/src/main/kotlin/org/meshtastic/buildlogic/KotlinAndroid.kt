@@ -145,6 +145,22 @@ internal fun Project.configureKotlinMultiplatform() {
 
     configureMokkery()
     configureKotlin<KotlinMultiplatformExtension>()
+
+    // wasmJsBrowserTest needs a karma/headless-Chrome runner this repo doesn't configure anywhere; every
+    // wasmJs-enabled module needs browser() on its wasmJs target (KGP's root npm resolver requires every module
+    // reachable from webApp's wasmJs { browser() { binaries.executable() } } graph to also declare browser()/
+    // nodejs(), not just bare wasmJs() — see webApp/build.gradle.kts), which arms this task by default. Disabled
+    // centrally here instead of per-module so it can never be missed on a future wasmJs-enabled module.
+    tasks.matching { it.name == "wasmJsBrowserTest" }.configureEach { enabled = false }
+
+    // Compose Multiplatform's own plugin registers this unconditionally on every Compose-enabled module with a
+    // wasmJs { browser() } target, regardless of whether the module has any real Compose UI tests (none of ours
+    // do — no androidx.compose.ui:ui-test dependency anywhere in this repo). It asserts binaries.executable() is
+    // present, since Skiko can't load without one (JetBrains CMP-4906) — a real constraint for an app, but a
+    // false alarm for a library module that never runs Compose UI tests on wasmJs. Safe to disable outright: this
+    // is a plain validation task, not one with its own eagerly-resolved dependencies (unlike wasmJsBrowserTest
+    // above, this one only fails when its action actually runs, so enabled = false fully suppresses it).
+    tasks.matching { it.name == "checkComposeUiTestConfigurationForWasmJs" }.configureEach { enabled = false }
 }
 
 /** Configure Mokkery for the project */

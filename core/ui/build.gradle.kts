@@ -28,7 +28,8 @@ kotlin {
     // Without this, Res.readBytes() throws MissingResourceException at runtime.
     android { androidResources.enable = true }
 
-    // Library module: bare wasmJs(), no browser() — see core:prefs/build.gradle.kts's comment. No custom
+    // wasmJs { browser() } required repo-wide by KGP's root npm resolver — see core:prefs/build.gradle.kts's comment.
+    // No custom
     // hierarchy group is needed for MAIN, same shape as core:common/core:model/core:repository/core:service:
     // every one of this module's own dependencies (core/*, coil, jetbrains-markdown, qrcode-kotlin, every
     // compose-multiplatform-*/jetbrains-* artifact) is confirmed to publish a wasmJs variant, and the only
@@ -39,7 +40,7 @@ kotlin {
     // needed here (calling it a second time, after `meshtastic.kmp.jvm.android`'s own, would fail — Gradle
     // only allows one per project — which is why core:common/core:model keep the plugin and skip the call too).
     @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
-    wasmJs()
+    wasmJs { browser() }
 
     sourceSets {
         commonMain.dependencies {

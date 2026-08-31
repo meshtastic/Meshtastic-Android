@@ -25,9 +25,9 @@ plugins {
 
 kotlin {
     // takpacket-sdk and components-resources confirmed to publish a wasmJs variant before enabling this.
-    // Library module: bare wasmJs(), no browser() — see core:prefs/build.gradle.kts's comment.
+    // wasmJs { browser() } required repo-wide by KGP's root npm resolver — see core:prefs/build.gradle.kts's comment.
     @OptIn(ExperimentalWasmDsl::class)
-    wasmJs()
+    wasmJs { browser() }
 
     android {
         withHostTest { isIncludeAndroidResources = true }

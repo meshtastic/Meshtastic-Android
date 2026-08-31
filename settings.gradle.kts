@@ -44,7 +44,7 @@ plugins {
 
 @Suppress("UnstableApiUsage")
 dependencyResolutionManagement {
-    repositoriesMode = RepositoriesMode.FAIL_ON_PROJECT_REPOS
+    repositoriesMode = RepositoriesMode.PREFER_SETTINGS // TEMP-EXPERIMENT: will be reverted after one diagnostic run.
     repositories {
         // Only enable mavenLocal for local JitPack testing; never in CI.
         if (providers.gradleProperty("useMavenLocal").isPresent) mavenLocal()
@@ -68,16 +68,32 @@ dependencyResolutionManagement {
         }
         maven { url = uri("./offline-repository") }
 
-        // NOTE: a webApp-milestone pass tried adding exclusiveContent{ivy(...)} blocks here for
-        // nodejs.org/dist, yarnpkg and WebAssembly/binaryen releases, to satisfy Kotlin/Wasm's NodeJs/Yarn/
-        // Binaryen setup plugins under FAIL_ON_PROJECT_REPOS above. It did NOT work: those plugins'
-        // AbstractSetupTask registers its own project-level Ivy repository at project-evaluation/task-
-        // configuration time (a different code path than what a settings-level declaration intercepts), so
-        // :webApp:wasmJsBrowserDistribution still failed with "was added by unknown code" even with this
-        // block in place. Reverted rather than leaving dead config in place. See
-        // .agent_plans/web-target-workpad.md's webApp milestone entry for the full diagnosis and the options
-        // a future pass needs to choose between (relax FAIL_ON_PROJECT_REPOS, or find a way to make the
-        // plugin consume a pre-registered repository).
+        // TEMP-EXPERIMENT: node.js dist repo for Kotlin/Wasm's NodeJs setup task, under PREFER_SETTINGS
+        // (see repositoriesMode above). An earlier pass tried this exact ivy block under
+        // FAIL_ON_PROJECT_REPOS, where ANY project-declared repo is an unconditional hard error regardless of
+        // a matching settings-level repo -- that combination could never have worked. PREFER_SETTINGS instead
+        // ignores the project-declared repo and resolves from settings, so this should actually take effect.
+        ivy {
+            url = uri("https://nodejs.org/dist")
+            patternLayout { artifact("v[revision]/[artifact](-v[revision]-[classifier]).[ext]") }
+            metadataSources { artifact() }
+            content { includeModule("org.nodejs", "node") }
+        }
+        // Yarn's own setup task, same PREFER_SETTINGS reasoning as the node.js repo above.
+        ivy {
+            url = uri("https://github.com/yarnpkg/yarn/releases/download")
+            patternLayout { artifact("v[revision]/yarn-v[revision].[ext]") }
+            metadataSources { artifact() }
+            content { includeModule("com.yarnpkg", "yarn") }
+        }
+        // Binaryen (wasm-opt), same PREFER_SETTINGS reasoning as the two repos above. GitHub release tags are
+        // "version_<n>"; KGP's own dependency coordinate uses just the bare number as [revision].
+        ivy {
+            url = uri("https://github.com/WebAssembly/binaryen/releases/download")
+            patternLayout { artifact("version_[revision]/binaryen-version_[revision]-[classifier].[ext]") }
+            metadataSources { artifact() }
+            content { includeModule("com.github.webassembly", "binaryen") }
+        }
     }
 }
 
@@ -131,7 +147,8 @@ include(
     ":feature:wifi-provision",
     ":desktopApp",
     ":androidApp",
-    // ":webApp", — NOT included yet. webApp/ has a complete, compiling module (verified via
+    ":webApp", // TEMP-EXPERIMENT: will be reverted immediately after one diagnostic gradle run.
+    // webApp/ has a complete, compiling module (verified via
     // :webApp:compileKotlinWasmJs run directly against its own build.gradle.kts with an ad-hoc
     // includeBuild-style check), but merely adding it to this include list breaks the ROOT-LEVEL baseline
     // gate (`./gradlew spotlessCheck detekt test allTests`, unscoped) for every other module in the repo,

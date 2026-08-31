@@ -23,12 +23,13 @@ plugins {
 kotlin {
     android { withHostTest {} }
 
-    // Library module: bare wasmJs(), no browser() — see core:prefs/build.gradle.kts's comment. No custom
+    // wasmJs { browser() } required repo-wide by KGP's root npm resolver — see core:prefs/build.gradle.kts's comment.
+    // No custom
     // hierarchy GROUP is needed for MAIN: Location's android/jvm/ios actuals already each live in their own
     // independent source set (no shared nonWeb code to hide from wasmJs), so a 4th, wasmJsMain/Location.kt, is
     // all this module needs.
     @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
-    wasmJs()
+    wasmJs { browser() }
 
     // The plain default template call IS still required, though, once any source set below declares a manual
     // `dependsOn` edge (nonWebTest, see sourceSets block): KGP only auto-applies the default hierarchy template

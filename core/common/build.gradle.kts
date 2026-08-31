@@ -26,10 +26,10 @@ plugins {
 kotlin {
     android { withHostTest { isIncludeAndroidResources = true } }
 
-    // No native-only dependency here, so unlike core:ble no hierarchy split is needed. Library module: bare
-    // wasmJs(), no browser() — see core:prefs/build.gradle.kts's comment.
+    // No native-only dependency here, so unlike core:ble no hierarchy split is needed. wasmJs { browser() }
+    // required repo-wide by KGP's root npm resolver — see core:prefs/build.gradle.kts's comment.
     @OptIn(ExperimentalWasmDsl::class)
-    wasmJs()
+    wasmJs { browser() }
 
     sourceSets {
         commonMain.dependencies {
