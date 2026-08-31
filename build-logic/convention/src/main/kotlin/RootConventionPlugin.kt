@@ -77,7 +77,15 @@ private fun Project.registerKmpSmokeCompileTask() {
 /** KMP modules that declare `withDeviceTest {}` and therefore have `compileAndroidDeviceTest` tasks. */
 private val DEVICE_TEST_MODULES = listOf(":core:database", ":core:model")
 
-/** All modules included in `settings.gradle.kts`. Update this list when adding or removing modules. */
+/**
+ * Modules that participate in root aggregation (Dokka, Kover) and `kmpSmokeCompile`.
+ *
+ * Hand-maintained rather than derived, because `subprojects {}` iteration is incompatible with Isolated Projects.
+ * The `verify-module-list` guard in `pull-request.yml` fails the build when this drifts from
+ * `settings.gradle.kts`, so a new module cannot silently fall out of the gate — which is how
+ * `:feature:discovery`, `:feature:docs` and `:feature:map-maplibre` went unaggregated and uncompiled by
+ * `kmpSmokeCompile` for several releases.
+ */
 private val ALL_MODULES_FULL =
     listOf(
         ":androidApp",
@@ -103,7 +111,10 @@ private val ALL_MODULES_FULL =
         ":feature:intro",
         ":feature:messaging",
         ":feature:connections",
+        ":feature:discovery",
+        ":feature:docs",
         ":feature:map",
+        ":feature:map-maplibre",
         ":feature:node",
         ":feature:settings",
         ":feature:firmware",

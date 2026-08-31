@@ -140,6 +140,60 @@ jobs:
 
           print('check-changes filter is aligned with settings.gradle module roots.')
           PY
+      # Drift guard: ALL_MODULES_FULL in RootConventionPlugin.kt is a hand-maintained
+      # copy of settings.gradle.kts (subprojects {} iteration is incompatible with
+      # Isolated Projects). It has drifted before: :feature:discovery, :feature:docs
+      # and :feature:map-maplibre were never added, so they were silently absent from
+      # Dokka aggregation, Kover aggregation and kmpSmokeCompile.
+      - name: Verify the root module list matches settings.gradle.kts
+        run: |
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+
+          settings = Path('settings.gradle.kts').read_text()
+          plugin = Path(
+              'build-logic/convention/src/main/kotlin/RootConventionPlugin.kt'
+          ).read_text()
+
+          include = settings[settings.index('include('):]
+          modules = set(re.findall(r'"(:[^"]+)"', include[: include.index('\n)')]))
+
+          # ALL_MODULES_FULL appears twice (declaration and use), so bound the slice to
+          # the declaration's own closing paren rather than searching for the name.
+          decl = plugin[plugin.index('ALL_MODULES_FULL ='):]
+          listed = set(re.findall(r'"(:[^"]+)"', decl[: decl.index('\n    )')]))
+
+          # Test harnesses and generators, deliberately kept out of root aggregation
+          # (PR #6412). Excluded here so the guard does not force them back in.
+          exempt = {
+              ':baselineprofile',
+              ':core:konsist',
+              ':docs-screenshots',
+              ':screenshot-tests',
+          }
+
+          missing = sorted(modules - listed - exempt)
+          extra = sorted(listed - modules)
+
+          problems = []
+          for m in missing:
+              problems.append(
+                  f'{m} is in settings.gradle.kts but not ALL_MODULES_FULL -- it is absent '
+                  'from Dokka/Kover aggregation and kmpSmokeCompile'
+              )
+          for m in extra:
+              problems.append(f'{m} is in ALL_MODULES_FULL but no longer in settings.gradle.kts')
+
+          if problems:
+              print('Root module list drift detected:')
+              for p in problems:
+                  print('  -', p)
+              raise SystemExit(1)
+
+          print(f'{len(listed)} modules verified against settings.gradle.kts '
+                f'({len(exempt)} exempt).')
+          PY
       # Drift guard: the shard task lists in reusable-check.yml are
       # hand-maintained and have silently dropped modules before (discovery,
       # docs, wifi-provision, car, datastore, konsist had tests that never ran
