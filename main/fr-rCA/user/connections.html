@@ -9,14 +9,16 @@
 <h3 id="pairing-a-radio">Pairing a Radio</h3>
 
 <ol>
-  <li>Ensure your Meshtastic radio is powered on and in pairing mode.</li>
+  <li>Power on your radio. Most radios advertise over Bluetooth as soon as they boot — there is no pairing mode to enter. Radios with a color touchscreen ship with Bluetooth switched off, so turn it on from the radio’s own on-screen menu first.</li>
   <li>Open the app and navigate to the <strong>Connect</strong> tab.</li>
   <li>Tap <strong>Scan for Bluetooth devices</strong> — nearby Meshtastic radios will appear.</li>
   <li>Select your radio from the list.</li>
-  <li>Accept the Bluetooth pairing prompt if shown.</li>
+  <li>Android asks you to pair. If your radio has a screen, it shows a six-digit PIN — type that into the Android dialog. If your radio has no screen, the PIN is <code class="language-plaintext highlighter-rouge">123456</code>.</li>
 </ol>
 
 <p><img src="../../assets/screenshots/connections_bluetooth_scan.png" alt="Scanning for Bluetooth devices, with a discovered radio in the list" /></p>
+
+<p>You can change the pairing method, or turn Bluetooth on for a radio that ships with it off, under <strong>Settings → Device configuration → Bluetooth</strong> — see <a href="settings-radio-user">Settings — Radio &amp; User</a>. For more information, see <a href="https://meshtastic.org/docs/configuration/radio/bluetooth">Bluetooth configuration</a> on meshtastic.org.</p>
 
 <p>Use the transport selector — a segmented button row below the connection card — to switch between the Bluetooth, Network, and USB transports (one is active at a time):</p>
 
@@ -55,7 +57,7 @@
   </tbody>
 </table>
 
-<p>Tapping <strong>Scan</strong> after you have declined the permission once explains what it is for before asking again, and lets you decline again without being cornered.</p>
+<p>The explanation lives in that card, not in the scan control: tapping <strong>Scan for Bluetooth devices</strong> after you have declined once asks Android again directly.</p>
 
 <h3 id="connection-status">Connection Status</h3>
 
@@ -81,7 +83,7 @@
     <tr>
       <td>🔴</td>
       <td>Déconnecté</td>
-      <td>No active connection; the app keeps trying to reconnect</td>
+      <td>No active connection. The app retries automatically, with a growing delay between attempts</td>
     </tr>
     <tr>
       <td>⚪</td>
@@ -104,9 +106,12 @@
 <h3 id="troubleshooting-bluetooth">Troubleshooting Bluetooth</h3>
 
 <ul>
-  <li><strong>Device not found:</strong> Toggle Bluetooth off/on, ensure location is enabled.</li>
+  <li><strong>Radio not found:</strong> Turn Bluetooth off and back on. On Android 11 and older, also check that system location services are switched on — those releases do not return scan results without them.</li>
+  <li><strong>Bluetooth scan couldn’t start:</strong> Try again, and toggle Bluetooth off and on if it repeats.</li>
   <li><strong>Connection drops:</strong> Move closer to the radio; check for interference.</li>
+  <li><strong>Pairing failed, or pairing did not complete:</strong> Check that the <strong>Nearby devices</strong> permission is granted, then pair again.</li>
   <li><strong>Pairing rejected:</strong> Forget the device in Android Bluetooth settings and retry.</li>
+  <li><strong>Could not establish a stable connection after repeated attempts:</strong> The app stopped retrying after three failed handshakes — a radio that keeps failing here is usually crashing on reconnect. Power-cycle the radio, then tap it again on the <strong>Connect</strong> tab to start a fresh attempt.</li>
 </ul>
 
 <h2 id="usb-serial">USB Serial</h2>
@@ -116,7 +121,7 @@
 <h3 id="setup">Setup</h3>
 
 <ol>
-  <li>Connect your radio to your phone with a USB cable.</li>
+  <li>Connect your radio to your phone with a USB data cable. Charge-only cables carry no data lines, and a radio on one never appears in the list.</li>
   <li>The app prompts for USB permission — tap <strong>Allow</strong>.</li>
   <li>The connection is established automatically.</li>
 </ol>
@@ -125,23 +130,22 @@
   <p>ℹ️ <strong>Note:</strong> USB connections require OTG support on Android devices.</p>
 </blockquote>
 
+<h3 id="troubleshooting-usb">Troubleshooting USB</h3>
+
+<ul>
+  <li><strong>USB permission denied:</strong> Unplug the radio and plug it back in — Android asks again on reconnect.</li>
+  <li><strong>No radio in the list:</strong> Check that the cable carries data rather than only power, and that the phone supports OTG.</li>
+</ul>
+
 <h2 id="tcpip-network">TCP/IP (Network)</h2>
 
-<p>Some Meshtastic radios support Wi-Fi/Ethernet connectivity, allowing TCP-based connections over your local network. Get the radio onto your network first — using the radio’s own Wi-Fi settings (via the firmware web interface or another connection) — then connect to it from the app.</p>
-
-<blockquote>
-  <p>ℹ️ <strong>Note:</strong> <strong>Settings → Wi-Fi Provisioning for mPWRD-OS</strong> is a separate, narrower tool. It provisions Wi-Fi
-credentials over Bluetooth to <strong>mPWRD-OS</strong> devices only, using their own protocol — it does not
-configure Wi-Fi on an ordinary Meshtastic radio. It scans over BLE, lists the networks the device
-can see (including an option for a hidden SSID), takes the password, and reports success or
-failure. Available on both Android and Desktop.</p>
-</blockquote>
+<p>Some Meshtastic radios support Wi-Fi/Ethernet connectivity, allowing TCP-based connections over your local network. Get the radio onto your network first. Connect to it over Bluetooth or USB, open <strong>Settings → Device configuration → Network</strong>, and under <strong>Wi-Fi Options</strong> turn on <strong>Wi-Fi enabled</strong> and enter the <strong>SSID</strong> and <strong>Password</strong>. The Network screen appears only for radios whose hardware supports Wi-Fi or Ethernet. Once the radio has an address, come back and connect to it over the network.</p>
 
 <h3 id="connecting-over-the-network">Connecting over the Network</h3>
 
 <ol>
   <li>Make sure the radio is on the same local network as your phone/desktop.</li>
-  <li>On the Connect screen, select <strong>Network</strong> in the transport selector.</li>
+  <li>On the <strong>Connect</strong> tab, select <strong>Network</strong> in the transport selector.</li>
   <li>Choose the radio one of two ways:
     <ul>
       <li><strong>Scan for network devices</strong> — toggle this on to auto-discover radios that advertise themselves on the local network (mDNS / <code class="language-plaintext highlighter-rouge">_meshtastic._tcp</code>). Discovered devices appear in the list; tap one to connect.</li>
@@ -151,9 +155,7 @@ failure. Available on both Android and Desktop.</p>
   <li>Previously-used network addresses are remembered under <strong>Recent Network Devices</strong> for quick reconnection (touch &amp; hold to remove one).</li>
 </ol>
 
-<blockquote>
-  <p>💡 <strong>Tip:</strong> Network discovery uses mDNS, which only works when both devices are on the same subnet. On Android 17+ the app needs the local-network permission for scanning; if discovery finds nothing, add the device manually by IP.</p>
-</blockquote>
+<p>Network discovery uses mDNS, which only works when both your phone and the radio are on the same subnet. If the phone is not on Wi-Fi at all, the app warns that a network scan may find nothing. On Android 17 and newer, the app needs the <strong>Local network permission</strong> to reach a radio on your own Wi-Fi at all — not only to discover it — so typing the address by hand does not work around a denied permission. Grant it from the card on the Network pane, or from the <strong>Permissions</strong> section of <strong>Settings</strong>. A radio on a public address, or one reached over a VPN, needs no permission.</p>
 
 <h3 id="when-to-use-tcp">When to Use TCP</h3>
 
@@ -163,11 +165,33 @@ failure. Available on both Android and Desktop.</p>
   <li>Environments where Bluetooth has interference issues</li>
 </ul>
 
+<h3 id="approvisionnement-wi-fi-pour-mpwrd-os">Approvisionnement Wi-Fi pour mPWRD-OS</h3>
+
+<p><strong>Settings → Wi-Fi Provisioning for mPWRD-OS</strong> is a separate, narrower tool. It sends Wi-Fi credentials over Bluetooth to <strong>mPWRD-OS</strong> devices only, using their own protocol — it does not configure Wi-Fi on an ordinary Meshtastic radio. It is available on both Android and desktop.</p>
+
+<ol>
+  <li>Open the screen and wait while the app finds the device over Bluetooth.</li>
+  <li>Tap <strong>Scan for Networks</strong>, then pick a network from <strong>Available Networks</strong> — or turn on <strong>Hidden network</strong> and type the name into <strong>Network Name (SSID)</strong>.</li>
+  <li>Enter the <strong>Password</strong> and tap <strong>Apply</strong>.</li>
+</ol>
+
+<p>If the scan reports <strong>No networks found</strong> or fails outright, move the phone closer to the device and scan again. If <strong>Failed to apply Wi-Fi configuration</strong> comes back, check the password and try again.</p>
+
+<h2 id="after-your-first-connection">After Your First Connection</h2>
+
+<p>Being connected is not the same as being able to transmit.</p>
+
+<p>A radio leaves the factory with no LoRa region set, and it does not transmit until you set one. When you connect such a radio, the <strong>Connect</strong> tab shows a <strong>Set your region</strong> card; tap it to open the LoRa screen and choose the region you are in.</p>
+
+<p>Once the region is set, the tab warns you if the radio is receive-only: a <strong>Transmit is disabled</strong> card, reading “This device can receive but will not send anything over LoRa.” Tap it to open the same screen and turn <strong>Transmit Enabled</strong> back on. Only one of the two cards appears at a time — an unset region already stops the radio transmitting, so the app names that first and holds the transmit card back until you have set a region.</p>
+
+<p>For more information, see <a href="settings-radio-user#lora-config">Settings — Radio &amp; User</a>.</p>
+
 <h2 id="reconnection-behavior">Reconnection Behavior</h2>
 
-<p>The app reconnects to the last selected radio on startup. You can switch transports from the Connect screen at any time.</p>
+<p>The app reconnects to the last selected radio on startup. You can switch transports from the <strong>Connect</strong> tab at any time.</p>
 
-<p>To disconnect, tap the disconnect button on the Connect screen:</p>
+<p>To disconnect, tap the disconnect button on the <strong>Connect</strong> tab:</p>
 
 <p><img src="../../assets/screenshots/connections_disconnect.png" alt="Disconnect from radio" /></p>
 
@@ -187,7 +211,9 @@ failure. Available on both Android and Desktop.</p>
 
 <ul>
   <li><a href="onboarding">Getting Started</a> — first-launch setup and permissions</li>
-  <li><a href="settings-radio-user">Settings — Radio &amp; User</a> — Bluetooth and network configuration</li>
+  <li><a href="settings-radio-user">Settings — Radio &amp; User</a> — Bluetooth, region, and network configuration</li>
+  <li><a href="messages-and-channels">Messages &amp; Channels</a> — send your first message once the radio is connected</li>
+  <li><a href="nodes">Nodes</a> — see who else is on your mesh</li>
   <li><a href="desktop">Desktop App</a> — desktop-specific connection details</li>
   <li><a href="https://meshtastic.org/docs/hardware/devices">Supported devices</a> — full list of compatible radios on meshtastic.org</li>
 </ul>

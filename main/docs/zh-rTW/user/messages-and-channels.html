@@ -21,29 +21,38 @@ Every Meshtastic radio comes with a default **LongFast** channel. It is encrypte
 
 ### 頻道安全性
 
-頻道支援多種加密等級：
+Each channel carries a lock icon that shows how well it is protected. Tap the icon to see the same explanation inside the app.
 
- 圖示 | 安全等級            | 描述說明                                           |
- -- | --------------- | ---------------------------------------------- |
- 🔒 | PSK（256 位元 AES） | 使用強力預共享金鑰進行完整加密。 僅持有相符金鑰的節點可讀取訊息。              |
- 🔐 | PSK（128 位元 AES） | 使用較短的金鑰進行加密。 適用於大多數情境，但敏感資料建議使用 256 位元加密。      |
- 🔓 | 預設／開放           | 使用眾所周知的預設金鑰。 使用相同預設值的任何 Meshtastic 裝置均可讀取這些訊息。 |
- ⚠️ | 不安全 + 位置        | 開放頻道，同時廣播您的 GPS 位置。 在公開 mesh 網路中使用時請謹慎。        |
+ 圖示                                 | 代表意義                                                                                                                                                  |
+ ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+ Green closed lock                  | The channel is securely encrypted, with either a 128-bit or a 256-bit AES key.                                                        |
+ Yellow open lock                   | The channel is not securely encrypted — it uses no key at all, or a well-known one-byte key — and it does not carry precise location. |
+ Red open lock                      | Not securely encrypted, and the channel carries precise location data.                                                                |
+ Red open lock with a warning badge | Not securely encrypted, carrying precise location data, and uplinking that data to the internet over MQTT.                            |
+
+Key length alone does not change the icon: a 128-bit key and a 256-bit key both show the green lock.
 
 &gt; 🔒 **Security:** Always configure a unique PSK for private communications. 預設頻道刻意設計為開放，以便新使用者能探索 mesh 網路 — 但對於任何敏感內容，請另行建立獨立的加密頻道。
 
 ### 新增頻道
 
-1. 前往「設定 → 頻道」。
-2. Tap the **+** button to add a channel, or import one by scanning a channel QR code.
-3. 設定頻道名稱與加密金鑰。設定頻道名稱與加密金鑰。
-4. 將頻道網址或 QR Code 分享給需要加入的人。
+1. Connect to your radio. The **Channels** row stays grayed out until the app has a connection — see [Connections](connections).
+2. Go to **Settings**, then tap **Channels** under **Configuration**.
+3. Tap the **+** button to add a channel. The editor opens on the new entry.
+4. Set the channel name and the **PSK**, and choose whether the channel uses MQTT uplink and downlink. Naming a new channel generates a fresh 256-bit key for you; the refresh icon beside **PSK** generates another one.
+5. Tap **Save** to close the editor. The change is still only on your phone.
+6. Tap **Send** at the bottom of the channel list to write the changes to the radio. **Cancel**, or leaving the screen without tapping **Send**, throws them away.
+7. Optional: share the channel URL or QR code with the people who need access.
 
-點選頻道可查看其詳細資訊與分享選項。
+Tapping an existing channel opens the same editor, where you can change the name, the PSK, MQTT uplink and downlink, and position precision. Every edit on this screen — adding, editing, deleting, or dragging a channel into a new order — waits on **Send** the same way.
 
 ## 私訊
 
-私訊（DM）是兩個特定節點之間的點對點加密通訊。
+Direct messages (DMs) go to one specific node. When both radios hold each other's public keys, your radio encrypts the message to that node's public key, so no one else on the mesh can read it — not even nodes that share your channel.
+
+Your radio must already hold the other node's public key before it can send a DM. Keys travel inside node info, which nodes broadcast periodically, so the key usually arrives on its own once you have heard from that node. Until it does, a radio that has its own key pair — the default — refuses the send rather than falling back to channel encryption, and the message shows **Recipient key unavailable**.
+
+A public-key conversation carries a key icon in its top bar. A green closed lock means the direct message is protected by public-key encryption; a red key-off icon means the node's public key changed and no longer matches the one your radio stored. Tap the icon for the details.
 
 ### 傳送私訊
 
@@ -96,7 +105,7 @@ A status label appears under **your own** outgoing messages only (incoming messa
 
  錯誤                               | 含義                                                                                                                                                                            | 處理方式                                                                                                                                  |
  -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
- 無路由                              | 無法找到通往目標節點的路徑                                                                                                                                                                 | 收件者可能已離線或超出 mesh 網路範圍。 請稍後再試，或靠近對方後重新傳送。                                                                                              |
+ 無路徑                              | 無法找到通往目標節點的路徑                                                                                                                                                                 | 收件者可能已離線或超出 mesh 網路範圍。 請稍後再試，或靠近對方後重新傳送。                                                                                              |
  No radio interface               | 無可用的無線電介面進行傳送                                                                                                                                                                 | Check that your radio is connected and available.                                                                     |
  Failed to deliver to mesh        | Retries exhausted. The same label covers three underlying causes — a relay refusing (NAK), a plain timeout, and running out of retransmits | Move closer, improve signal, or wait for conditions to improve. Tap the error for the specific cause. |
  Rate limited                     | The mesh is throttling you for sending too fast                                                                                                                               | Wait before sending again.                                                                                            |
@@ -112,22 +121,21 @@ A status label appears under **your own** outgoing messages only (incoming messa
  Duty cycle limit                 | 已達地區無線電佔用時間上限                                                                                                                                                                 | Wait for the duty cycle window to reset.                                                                              |
  Invalid request                  | Malformed or invalid request                                                                                                                                                  | Retry after updating or restarting the app if this persists.                                                          |
 
-&gt; 💡 提示：大多數傳遞錯誤會自動解決。 若節點間歇性可到達，mesh 網路將自動重試。 若持續出現「無路由」錯誤，請確認中間的路由器節點是否在線。
+&gt; 💡 提示：大多數傳遞錯誤會自動解決。 若節點間歇性可到達，mesh 網路將自動重試。 For persistent **No route** errors, check that intermediate Router nodes are online.
 
 ## 訊息功能
 
 ### 快速聊天
 
-預先設定的訊息，可快速進行通訊：
+Pre-configured messages for rapid communication, useful when typing is impractical (gloves, small screen, urgent):
 
-- 透過訊息輸入區的快速聊天按鈕開啟
-- 從內建短語或自訂訊息中選取
-- 在「設定 → 快速聊天」中自訂快速聊天訊息
-- 適用於不便打字的情況（戴手套、螢幕過小、緊急狀況）
+- The quick chat row is hidden until you turn it on. Open a conversation, tap the overflow menu in the top bar, then tap **Show quick chat menu**. **Hide quick chat menu** puts the row away again.
+- The row carries one built-in entry, the 🔔 alert bell. It appends an alert message that includes a bell character, which clients that support it flag as an alert. Every other button on the row is one you created.
+- Add, edit, reorder, and delete your own entries from the same overflow menu — tap **Quick chat options**.
 
 ![Quick chat option](../../assets/screenshots/messages_quick_chat.png)
 
-Each quick chat entry has a short **Name** (the button label), the **Message** it inserts, and an **Instantly send** toggle — when enabled, tapping the button sends the message immediately instead of placing it in the input field for editing:
+Each quick chat entry has a **Name** — the button label, capped at five characters, forced to uppercase, and filled in for you from the message text — and the **Message** it carries. A switch decides what tapping the button does. A new entry starts on **Instantly send**, so a tap sends the message straight away; turn the switch off and the label changes to **Append to message**, which puts the text in the input field for you to edit first.
 
 ![New quick chat dialog with name, message, and instantly-send toggle](../../assets/screenshots/messages_edit_quick_chat.png)
 
@@ -173,7 +181,7 @@ Type `@` while composing to mention a node — a picker suggests matching contac
 以表情符號對訊息作出回應：
 
 - **Touch &amp; hold** a message — or double-tap it — to raise a quick reaction bar above the bubble. Opening the bar sends nothing.
-- Tap an emoji in the bar to send it; tap **more** to open the full picker, or anywhere outside
+- Tap an emoji in the bar to send it; tap **More reactions** to open the full picker, or anywhere outside
   the bar to dismiss it without sending. A reaction is a real mesh packet, so it only goes out
   when you pick an emoji.
 - 訊息回應顯示於訊息泡泡下方
@@ -188,7 +196,7 @@ Type `@` while composing to mention a node — a picker suggests matching contac
 
 **Swipe a message to the right** to reply to it — the composer opens with that message quoted.
 Swiping past the reply threshold arms the action; releasing before it springs back with nothing sent.
-Reply is also in the actions menu, reached by touching &amp; holding and then tapping **More**.
+Reply is also in the actions sheet, reached by touching &amp; holding and then tapping **More message actions**.
 
 ### Day Separators
 
@@ -204,14 +212,16 @@ messages. That count is messages, not people — five unread from one person rea
 
 ### 訊息動作
 
-Touch &amp; hold or double-tap a message to open the quick reaction bar, then tap **More** (the
-overflow icon on that bar) to reach:
+Touch &amp; hold or double-tap a message to open the quick reaction bar, then tap **More message actions**
+(the overflow icon on that bar) to open the actions sheet. The emoji row runs across the top of the
+sheet — that is where reactions live — and beneath it, along with the message's timestamp and
+delivery status, are:
 
-- 複製 — 將訊息文字複製至剪貼簿
 - 回覆 — 在回覆中引用該訊息
-- 回應 — 新增表情符號回應
-- **Translate** — translate a received message into your device language and toggle between the original and translated text (Google Play build only; uses on-device translation)
-- 刪除 — 移除您傳送的訊息（僅限本機刪除）
+- **Copy** — copy the message text to the clipboard
+- **Translate** — translate a received message into your device language, and toggle between the original and translated text (Google Play build only; uses on-device translation). The first translation into a language asks to download a one-time language model and tells you its size, then translates once the download finishes. If the download fails, or the message is already in your language, the app says so instead of translating
+- **Select** — start multi-select, so you can act on several messages at once
+- **Delete** — remove the message from this phone. It works on any message in the conversation, yours or not, and does not remove it from anyone else's radio or phone
 
 ### 訊息優先順序
 
@@ -224,7 +234,7 @@ reliable or background, but that is not something you control from the message c
 ### 訊息限制
 
 - **Maximum length:** 200 bytes (approximately 200 characters for ASCII text)
-- The 200-byte cap applies to the in-app composer — the mesh payload limit itself is ~233 bytes, so messages from other senders (e.g., App Functions) may arrive slightly longer
+- The 200-byte cap applies to the in-app composer — the mesh payload limit itself is 233 bytes, so messages from other senders (e.g., App Functions) may arrive slightly longer
 - 速率限制：mesh 網路會執行無線電佔用時間公平性管制；大量訊息可能會被節流
 - 傳遞：若未收到確認回應，訊息將自動重試
 

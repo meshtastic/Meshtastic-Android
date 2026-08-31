@@ -34,25 +34,27 @@ Because the rating is relative to the preset, the same SNR rates differently on 
 
  Уровень     | Деления | Критерии                                                       | Значение                                                                                            |
  ----------- | ------- | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
- Хороший     | 3       | SNR above `limit`                                              | Comfortably above the demodulation floor — a healthy connection.                    |
- Средний     | 2       | less than 5.5 dB below `limit`                 | Decodable, but approaching the floor.                                               |
- Плохой      | 1       | 5.5 dB to 7.5 dB below `limit` | At the edge of what the preset can recover.                                         |
- Отсутствует | 0       | more than 7.5 dB below `limit`                 | Far below the preset's floor; further packets from this node are likely to be lost. |
+ Хороший     | Full    | SNR above `limit`                                              | Comfortably above the demodulation floor — a healthy connection.                    |
+ Средний     | 3       | less than 5.5 dB below `limit`                 | Decodable, but approaching the floor.                                               |
+ Плохой      | 2       | 5.5 dB to 7.5 dB below `limit` | At the edge of what the preset can recover.                                         |
+ Отсутствует | 1       | more than 7.5 dB below `limit`                 | Far below the preset's floor; further packets from this node are likely to be lost. |
+
+The icon never goes blank, so count the bars carefully: a single bar means None, not a weak but usable link, and Good is a solid wedge rather than a set of bars. A gray three-bar icon labeled Unknown is a different state again — the packet carried no SNR measurement at all, which is not the same as measuring one and finding it too weak.
 
 &gt; ℹ️ **Note:** Traceroute hop colors use fixed thresholds (−7 dB / −15 dB); the per-node signal meter uses the preset-relative rating instead.
 
 ## Diagnosing Local Interference
 
-A great RSSI paired with only one bar (Bad) points to local interference, not distance. A cheap power supply, a noisy computer, or a nearby transmitter can create enough static to drown out an otherwise strong signal.
+A great RSSI paired with a one- or two-bar rating (None or Bad) points to local interference, not distance. A cheap power supply, a noisy computer, or a nearby transmitter can create enough static to drown out an otherwise strong signal.
 
 ## Где появляется информация о сигнале
 
 In the app, signal data appears in several places:
 
-- **Node list** — a signal-bars icon next to each node
-- **Детали ноды** — SNR, RSSI и качество сигнала в разделе метрик устройства
+- **Node list** — a signal-bars icon, shown only for nodes your radio heard directly. A node reached through a relay shows its hop count instead, because the SNR your radio measured describes the last hop, not the whole path
+- **Node detail** — SNR, RSSI, and the quality word in the **Details** card at the top of the screen
 - **Трассировка** — качество сигнала на каждой промежуточной ноде
-- **Метрики сигнала** — история данных SNR и RSSI на графиках метрик
+- **Signal Quality** — historical SNR and RSSI data in the metrics charts
 
 ![Node list entry showing a Good signal rating: 12.5 dB SNR, −42 dBm RSSI, and the green signal-strength icon](../../assets/screenshots/nodes_signal_info.png)
 

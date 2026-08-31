@@ -17,15 +17,15 @@ Meshtastic-radiot lähettävät tiedot aina **metrisissä yksiköissä** (metri,
 
 Androidissa mittausasetukset määräytyvät järjestelmän **Kieli ja alue** -asetusten mukaan. Työpöytäversiossa (JVM) sovellus käyttää JVM:n oletus-`Locale`-asetusta.
 
-Yksiköt seuraavat laitteesi **aluetta**, ei näytön kieltä. Pelkkä kieli, kuten **English**, sovelluksen omasta Kieli-asetuksesta tai Androidin sovelluskohtaisesta kieliasetuksesta säilyttää laitteesi alueasetuksen. Kieli, jossa on oma alue, kuten **English (Canada)**, ohittaa sen ja ottaa käyttöön kyseisen alueen yksiköt. Android 16:ssa järjestelmän **Mittausjärjestelmä**-asetus ohittaa alueasetuksen kokonaan.
+Yksiköt seuraavat laitteesi **aluetta**, ei näytön kieltä. Pelkkä kieli, kuten **English**, sovelluksen omasta Kieli-asetuksesta tai Androidin sovelluskohtaisesta kieliasetuksesta säilyttää laitteesi alueasetuksen. Kieli, jossa on oma alue, kuten **English (Canada)**, ohittaa sen ja ottaa käyttöön kyseisen alueen yksiköt. On Android 16+, the system-wide **Measurement system** preference overrides the region for distance, speed, and the other measurements — but not for temperature, which keeps following the region.
 
 &gt; 💡 **Vinkki:** Oletusarvoisesti mitään ei tarvitse määrittää – muuta järjestelmän mittausjärjestelmäasetusta, niin kaikki Meshtasticin näkymät päivittyvät automaattisesti. Jos laitteesi ei tarjoa toimivaa alue- tai mittausjärjestelmäasetusta (joissakin valmistajien Android-versioissa näin on), määritä se sovelluksessa kohdassa **Asetukset → Yksiköt**.
 
 ## Radion oma näyttö käyttää omia asetuksiaan
 
-**Laite → Näyttö → Yksiköt** määrittää radion näytössä käytettävät yksiköt, ei sovelluksessa. Siksi **Käytä 12 tunnin kelloa** ja **Osoita aina pohjoiseen** vaikuttavat kaikki vain radion näyttöön. Kyseisen näytön lämpötilalla on oma asetuksensa, [**Telemetria → Näytä Fahrenheit-asteet**](https://meshtastic.org/docs/configuration/module/telemetry#display-fahrenheit).
+**Settings → Device configuration → Display → Display units** configures the screen on the radio, not the app. The **Use 12h clock format** and **Always point north** settings do too — all three apply to the radio's display only. Temperature on that screen has its own setting, **Environment metrics use Fahrenheit**, on the radio's Telemetry module — see the [Telemetry module reference](https://meshtastic.org/docs/configuration/module/telemetry#display-fahrenheit) on meshtastic.org.
 
-Jos radioluettelossa näkyvät mailit, mutta radion näytössä kilometrit, syy on siinä, että ne määritetään eri paikoissa. Radion asetusten muuttaminen ei koskaan vaikuta siihen, mitä sovellus näyttää. Katso laitteen asetuksia koskevat ohjeet Meshtasticin [Näytön asetukset] (https://meshtastic.org/docs/configuration/radio/display) -oppaasta.
+If your node list shows miles while the radio's screen shows kilometers, this is why: the two are set in different places. Radion asetusten muuttaminen ei koskaan vaikuta siihen, mitä sovellus näyttää. Katso laitteen asetuksia koskevat ohjeet Meshtasticin [Näytön asetukset] (https://meshtastic.org/docs/configuration/radio/display) -oppaasta.
 
 ## Lämpötila
 
@@ -53,7 +53,7 @@ Radioiden väliset etäisyydet ja GPS-korkeudet lähetetään **metreinä** ja m
  Metrijärjestelmä                      | 350 m          | 2,5 km                 | 1 200 m  |
  Imperiaalinen (US) | 1,148 ft       | 1.6 mi | 3,937 ft |
 
-Sovellus käyttää luonnollista skaalausta — lyhyet etäisyydet pysyvät metreissä tai jaloissa, kun taas pidemmät etäisyydet vaihtuvat automaattisesti kilometreihin tai maileihin.
+The app uses natural scaling — short distances stay in meters or feet, while longer distances switch to kilometers or miles automatically.
 
 ### Missä nämä näkyvät
 
@@ -121,7 +121,7 @@ Kaikki aikaleimat koko sovelluksessa — viimeksi kuultu, viestien ajat, telemet
  **24 tunnin aika**  | Aikamuoto             | 14:30 vs 2:30 PM |
  **Päivämäärämuoto** | Päivämäärän järjestys | 09/05/2026 vs 05/09/2026                         |
 
-Sovellus käyttää myös **suhteellista aikaa** silloin kun se on järkevää — esimerkiksi “5 min sitten” tai “2 tuntia sitten” radiolistassa — ja tämä mukautuu automaattisesti laitteesi kieleen.
+The app also uses **relative time** where it makes sense — for example, "5 min ago" or "2 hours ago" in the node list — which is automatically localized into your device language.
 
 ## Mittausjärjestelmän muuttaminen
 
@@ -131,7 +131,7 @@ Oletusarvoisesti sovellus käyttää laitteesi asetuksia, ja mittausjärjestelm�
 2. Vaihda **alueasetusta**
 3. Palaa Meshtasticiin — arvot päivittyvät välittömästi
 
-Android 16:ssa järjestelmänlaajuinen **Mittayksikköjärjestelmä**-asetus ohittaa alueasetuksen kaikissa mittauksissa. Android 14:ssä lämpötilan voi ohittaa kohdassa **Alueasetukset → Lämpötila**.
+On Android 16+, the system-wide **Measurement system** preference overrides the region for distance, speed, and the other measurements — but not for temperature. Temperature is resolved separately, and on Android 14+ you override it on its own under **Regional preferences → Temperature**.
 
 Kaikki englanninkieliset alueet eivät käytä täysin metristä järjestelmää. **English (United Kingdom)** käyttää etäisyyksissä maileja ja korkeuksissa jalkoja, joten radioluettelossa näkyvät mailit ja korkeus jaloissa. Jos haluat käyttää metrijärjestelmää, valitse sovelluksen **Yksiköt**-asetukseksi **Metrinen** (katso [Yksiköiden ohittaminen sovelluksessa](#overriding-the-units-in-the-app)) tai valitse täysin metrijärjestelmää käyttävä alue, kuten English (Canada), English (Ireland) tai English (New Zealand).
 
@@ -139,7 +139,9 @@ Joissakin puhelimissa **Alueasetukset** -valikkoa ei ole lainkaan, vaan tarjolla
 
 ### Sovelluksen yksiköiden ohittaminen
 
-Kaikki laitteet eivät tue kaikkia asetuksia – joissakin valmistajien Android-versioissa ei ole lainkaan alueasetuksia, joissakin on tarjolla vain yksi englanninkielinen alue, ja Ison-Britannian alueasetukset käyttävät etäisyyksissä brittiläisiä yksiköitä, vaikka haluaisit lukea korkeuden metreinä. Tällöin voit käyttää sovelluksen omaa asetusta:
+Not every device can express every preference — some manufacturer builds ship no regional preferences at all, some
+offer only one English variant, and UK regions are imperial for distance even if you'd rather read altitude in
+meters. Tällöin voit käyttää sovelluksen omaa asetusta:
 
 1. Avaa **Meshtasticin asetukset → Yksiköt**
 2. Valitse **Järjestelmän oletus**, **Metrinen** tai **Imperiaalinen**

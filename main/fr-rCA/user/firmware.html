@@ -24,7 +24,7 @@
   <li>Ensure your radio is connected via Bluetooth.</li>
   <li>Navigate to the Firmware Update screen.</li>
   <li>Select the desired firmware version.</li>
-  <li>Tap <strong>Update</strong> to begin the OTA process.</li>
+  <li>Tap <strong>Update</strong>. An <strong>Update Warning</strong> dialog lists the pre-flight checks — read it, then tap <strong>I know what I’m doing.</strong> to start. This dialog appears for every update method, including Wi-Fi OTA, USB, and a local firmware file.</li>
   <li>Wait for the update to complete — <strong>do not disconnect</strong> during the update.</li>
 </ol>
 
@@ -53,7 +53,7 @@
   </tbody>
 </table>
 
-<p>It is not offered for a local firmware file, during a recovery update, or on USB devices whose board does not support the erase step. Afterwards the device needs setting up — and pairing — again.</p>
+<p>It is not offered for a local firmware file, during a recovery update, on USB devices whose board does not support the erase step, or over USB in the desktop app — the USB erase runs the Android-only maintenance sequence below. Afterwards the device needs setting up — and pairing — again.</p>
 
 <h3 id="ota-via-wi-fi-network-connected-esp32">OTA via Wi-Fi (network-connected ESP32)</h3>
 
@@ -67,8 +67,6 @@
 
 <p>Wi-Fi OTA takes the ESP32 <code class="language-plaintext highlighter-rouge">-update.bin</code> image rather than the <code class="language-plaintext highlighter-rouge">.uf2</code> a USB update uses; the app selects the right artifact for you.</p>
 
-<p><img src="../../assets/screenshots/firmware_disclaimer.png" alt="Firmware disclaimer" /></p>
-
 <h3 id="in-app-usb-update">In-App USB Update</h3>
 
 <p>When your radio is connected over <strong>USB/serial</strong> (rather than Bluetooth), the Firmware Update screen offers <strong>USB File Transfer</strong>. The app reboots the device into DFU mode, then prompts you to save the <code class="language-plaintext highlighter-rouge">.uf2</code> file to the device’s DFU drive using the system file picker. This option appears only on a USB/serial connection — it is not available over Bluetooth.</p>
@@ -79,9 +77,13 @@
 
 <h3 id="factory-erase-and-bootloader-upgrade">Factory Erase and Bootloader Upgrade</h3>
 
-<p>On a <strong>USB/serial</strong> connection, nRF52 and RP2040 devices also offer <strong>Erase and reinstall</strong> and, where an upgraded bootloader is published for the board, <strong>Upgrade bootloader</strong>.</p>
+<p>On a <strong>USB/serial</strong> connection, nRF52 and RP2040 devices can be wiped as part of an update — that is the <strong>Erase device during update</strong> opt-in described earlier on this page. nRF52 devices additionally offer <strong>Upgrade bootloader</strong> where an upgraded bootloader is published for the board; RP2040 devices run no Adafruit bootloader, so they never see it.</p>
 
-<p>Erasing wipes everything on the device — channels, keys and all settings — and there is no backup, so the app asks for confirmation first. Both operations write two files in turn, so you will be asked to select the device’s update drive twice: once for the erase or bootloader image, then again for the firmware.</p>
+<p>Both are Android-only. They depend on Android’s update-drive checks, so the desktop app does not show them — use the <a href="https://flasher.meshtastic.org">Web Flasher</a> there instead.</p>
+
+<p>Select a firmware version before either one: the app hides both until a release is chosen, because the firmware is reinstalled after the device is wiped or the new bootloader is written.</p>
+
+<p>Both a USB erase and a bootloader upgrade write two files in turn, so you are asked to select the device’s update drive twice: once for the erase or bootloader image, then again for the firmware.</p>
 
 <p>The app reads <code class="language-plaintext highlighter-rouge">INFO_UF2.TXT</code> from the drive you select to confirm it really is the device’s update drive and to identify the board before writing anything. If it can’t confirm which Bluetooth stack your device uses, it refuses to erase and points you at the <a href="https://flasher.meshtastic.org">Web Flasher</a> instead. In the Web Flasher, choosing the wrong Bluetooth stack can leave the radio recoverable only with a hardware programmer.</p>
 
@@ -160,11 +162,15 @@
   <li>Attempt the update again.</li>
 </ul>
 
+<p>The message <strong>Verification timed out. Device did not reconnect in time.</strong> means the image was written but the radio did not come back within that window — power-cycle it and check the version under <strong>Currently Installed</strong> before re-running the update.</p>
+
 <p><img src="../../assets/screenshots/firmware_error.png" alt="Firmware update error" /></p>
 
 <h3 id="radio-wont-boot-after-update">Radio Won’t Boot After Update</h3>
 
-<p>If your radio fails to boot:</p>
+<p>If the app told you the Bluetooth update could not be finished, follow the instruction it gave: connect the radio to a computer over USB and re-flash it with the vendor’s serial DFU tool, such as <code class="language-plaintext highlighter-rouge">adafruit-nrfutil</code>. A stock nRF bootloader cannot reliably complete an interrupted over-the-air update.</p>
+
+<p>Otherwise, if your radio fails to boot:</p>
 
 <ol>
   <li>Try connecting via USB to a computer</li>

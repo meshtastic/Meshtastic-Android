@@ -9,28 +9,32 @@
 <ul>
   <li><strong>Node name</strong> — user-configured long name</li>
   <li><strong>Short name</strong> — 4-character identifier</li>
-  <li><strong>Signal quality</strong> — last heard signal strength</li>
+  <li><strong>Signal quality</strong> — SNR, RSSI, and a quality word, shown only for nodes your radio heard directly. In the Complete layout a node reached through a relay shows its hop count here instead; a node heard only over MQTT shows neither</li>
   <li><strong>Last heard</strong> — time since last communication</li>
   <li><strong>Distance</strong> — estimated distance (if positions are shared)</li>
   <li><strong>Battery</strong> — remote node battery level (if telemetry is enabled)</li>
 </ul>
+
+<h3 id="choosing-what-the-list-shows">Choosing What the List Shows</h3>
+
+<p>The list has two densities, set at <strong>Settings → Node Layout</strong>. <strong>Complete</strong> shows every field a node has reported and hides the ones it hasn’t. <strong>Compact</strong> fits more nodes on screen and lets you pick the fields yourself — <strong>Power</strong>, <strong>Last Heard Time</strong>, <strong>Relative Last Heard Time</strong>, <strong>Distance and Bearing</strong>, <strong>Hops Away</strong>, <strong>Signal (Direct Only)</strong>, <strong>Channel</strong>, and <strong>Device &amp; Role</strong>. The <strong>Environment Metrics</strong> toggle applies to both densities. A preview above the toggles shows the effect before you leave the screen.</p>
 
 <h3 id="node-status-indicators">Node Status Indicators</h3>
 
 <table>
   <thead>
     <tr>
-      <th>Badge</th>
+      <th>Indicator</th>
       <th>Meaning</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>🟢 Online</td>
+      <td>Green last-heard time</td>
       <td>Node heard within the last 2 hours</td>
     </tr>
     <tr>
-      <td>⚪ Offline</td>
+      <td>Plain last-heard time</td>
       <td>Node not heard for over 2 hours</td>
     </tr>
     <tr>
@@ -103,8 +107,8 @@
       <td>TAK position reporting only</td>
     </tr>
     <tr>
-      <td>Lost &amp; Found</td>
-      <td>Continuous position beacon for recovery</td>
+      <td>Objets trouvés</td>
+      <td>Sends its position to the default channel as a text message at regular intervals, to help recover a lost radio</td>
     </tr>
   </tbody>
 </table>
@@ -158,6 +162,8 @@
   <p>💡 <strong>Tip:</strong> PKI encryption (firmware 2.5+) provides stronger security than channel PSK because each node has a unique key pair. If you see a key mismatch warning, the node may have been reset or compromised.</p>
 </blockquote>
 
+<p>To clear a mismatch, first confirm through another trusted channel that the key change was intentional — a factory reset causes one. Then touch &amp; hold the node, choose <strong>Remove</strong>, and let the two radios exchange keys again the next time yours hears it.</p>
+
 <h2 id="quick-actions">Quick Actions</h2>
 
 <p>From the node list, you can:</p>
@@ -171,10 +177,16 @@
       <li>Send a direct message</li>
       <li>Trace route</li>
       <li>Ignore/unignore</li>
-      <li>Supprimer le nœud</li>
+      <li>Supprimer</li>
     </ul>
   </li>
 </ul>
+
+<h2 id="sharing-a-contact">Sharing a Contact</h2>
+
+<p>On a node’s detail screen, tap <strong>Share Contact</strong> to produce a link and a QR code for that node. From the same dialog, <strong>Write to NFC tag</strong> saves the link to a writable NFC tag that anyone can tap to open.</p>
+
+<p>To add someone else’s contact, use the import button on the node list and choose <strong>Scan Shared Contact QR Code</strong>, <strong>Scan Shared Contact NFC</strong>, or <strong>Input Shared Contact URL</strong>. The app asks you to confirm with <strong>Import Shared Contact?</strong>, and warns you when the contact is one you already have.</p>
 
 <h2 id="filtering--sorting">Filtering &amp; Sorting</h2>
 
@@ -193,12 +205,12 @@
   </thead>
   <tbody>
     <tr>
-      <td><strong>Only online</strong></td>
+      <td><strong>Hide offline nodes</strong></td>
       <td>Show only nodes heard within the last 2 hours</td>
     </tr>
     <tr>
-      <td><strong>Only direct</strong></td>
-      <td>Show only nodes with direct (non-relayed) connections</td>
+      <td><strong>Only show direct nodes</strong></td>
+      <td>Show only nodes your radio heard directly, with no relay in between</td>
     </tr>
     <tr>
       <td><strong>Include unknown</strong></td>
@@ -206,15 +218,15 @@
     </tr>
     <tr>
       <td><strong>Exclude infrastructure</strong></td>
-      <td>Hide infrastructure-role nodes (Router, Router Late, Client Base, and legacy Repeater nodes)</td>
+      <td>Hide infrastructure-role nodes (Router, Router Late, Client Base, and legacy Repeater nodes) and any node that cannot be messaged, whatever its role</td>
     </tr>
     <tr>
       <td><strong>Exclude MQTT</strong></td>
       <td>Hide nodes heard only via MQTT internet bridge</td>
     </tr>
     <tr>
-      <td><strong>Show ignored</strong></td>
-      <td>Show nodes you’ve ignored</td>
+      <td><strong>Only show ignored Nodes</strong></td>
+      <td>Replace the list with the nodes you have ignored. Every other node is hidden while this is on, and a banner appears at the top of the list to take you back</td>
     </tr>
   </tbody>
 </table>
@@ -230,11 +242,11 @@
   </thead>
   <tbody>
     <tr>
-      <td><strong>Last heard</strong> (default)</td>
+      <td><strong>Last heard</strong></td>
       <td>Most recently heard nodes first</td>
     </tr>
     <tr>
-      <td><strong>Alphabetical</strong></td>
+      <td><strong>A-Z</strong></td>
       <td>Sorted by node long name</td>
     </tr>
     <tr>
@@ -250,12 +262,12 @@
       <td>Grouped by channel index</td>
     </tr>
     <tr>
-      <td><strong>Via MQTT</strong></td>
+      <td><strong>via MQTT</strong></td>
       <td>Grouped by MQTT vs. radio-heard</td>
     </tr>
     <tr>
-      <td><strong>Favorites</strong></td>
-      <td>Favorited nodes first</td>
+      <td><strong>via Favorite</strong> (default)</td>
+      <td>Favorited nodes first, then the rest</td>
     </tr>
   </tbody>
 </table>
@@ -268,9 +280,7 @@
 
 <p>Tapping a node opens the detail view with comprehensive information. See <a href="node-metrics">Node Metrics</a> for full details on metrics and telemetry.</p>
 
-<p><img src="../../assets/screenshots/nodes_node_list.png" alt="Node list, showing signal quality and last-heard time for each node" /></p>
-
-<p>The detail screen includes device info, position, and action buttons:</p>
+<p>The Details card carries the node’s short name, role, IDs, last heard time, hops away, uptime, and its SNR and RSSI:</p>
 
 <p><img src="../../assets/screenshots/nodes_detail_section.png" alt="Node detail section" /></p>
 
@@ -311,7 +321,17 @@
 
 <p>When a node’s hardware is recognized, the detail view shows a collapsible <strong>“I want one”</strong> section linking to places to buy or learn more about that device: the vendor’s product page, product variants, and regional marketplace listings (such as AliExpress, Amazon, and supported retailers), filtered to your country. Each link opens through the <code class="language-plaintext highlighter-rouge">msh.to</code> redirect service. Devices with no matching links don’t show the section.</p>
 
-<p>A full, browsable directory of every link is also available under <strong>Settings → Help &amp; Documentation → Device Links</strong>.</p>
+<p>A full, browsable directory of every link is also available at <strong>Settings → Device Links</strong>. The item is hidden while you have Settings open for a remote node.</p>
+
+<h2 id="when-no-nodes-appear">When No Nodes Appear</h2>
+
+<p>The list stays empty until your radio hears another node.</p>
+
+<ul>
+  <li><strong>No device connected</strong> — the app is not connected to a radio. See <a href="connections">Connections</a>.</li>
+  <li><strong>Searching for nodes</strong> — the radio is connected and listening, but nothing has arrived yet. Check that its region and modem preset match the mesh around you, and leave <strong>Include unknown</strong> on so a node that has not yet sent its name still appears. See <a href="settings-radio-user">Settings — Radio &amp; User</a>.</li>
+  <li>A node you expect is missing — check the filter toggles. <strong>Only show direct nodes</strong>, <strong>Exclude MQTT</strong>, and <strong>Exclude infrastructure</strong> each hide a whole category of node.</li>
+</ul>
 
 <h2 id="related-topics">Related Topics</h2>
 

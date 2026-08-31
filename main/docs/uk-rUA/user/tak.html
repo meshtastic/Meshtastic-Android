@@ -24,8 +24,11 @@ The TAK module allows Meshtastic nodes to:
 ### Prerequisites
 
 - ATAK (Android Team Awareness Kit), iTAK, or WinTAK installed
-- Your node's **Role** (Device Config) set to **TAK** or **TAK Tracker** — this is what makes the
-  TAK module appear in Module Config at all
+- Your node's **Device Role** (Device configuration) set to **TAK** or **TAK Tracker** — this is what makes the
+  TAK module appear in Module configuration at all
+- Firmware 2.8.0 or newer on the radio. Earlier firmware accepts a TAK config write and never
+  stores it, so the app hides the TAK module entry below that version even when the role is set
+  correctly. See [Firmware Updates](firmware)
 
 &gt; ⚠️ **Warning:** The old **Meshtastic ATAK Plugin** is no longer part of this path and cannot
 &gt; work. It bridged through the cross-process AIDL API, which was removed in app 2.8.0; the mesh
@@ -34,8 +37,8 @@ The TAK module allows Meshtastic nodes to:
 
 ### Налаштування
 
-Navigate to **Settings → Module Config → TAK**. The module's own settings are your TAK identity —
-there is no separate enable switch here, because the **Role** setting in Device Config is what
+Navigate to **Settings → Module configuration → TAK**. The module's own settings are your TAK identity —
+there is no separate enable switch here, because the **Device Role** setting in Device configuration is what
 turns TAK on. Your node broadcasts this identity, which appears on TAK maps.
 
  Setting     | Опис                                                                                                                     |
@@ -51,7 +54,9 @@ name.
 
 ### Local TAK Server
 
-The app can also run a **local TAK server** so ATAK/iTAK on the **same phone** can connect directly, without a remote TAK server. The server binds to localhost only (`127.0.0.1:8089`) and uses TLS with mutual certificate authentication (mTLS), so it is not reachable from other devices on the network. Open **Settings → Module Config → TAK → TAK Server**:
+The app can also run a **local TAK server** so ATAK/iTAK on the **same phone** can connect directly, without a remote TAK server. The server binds to localhost only (`127.0.0.1:8089`) and uses TLS with mutual certificate authentication (mTLS), so it is not reachable from other devices on the network.
+
+Open **Settings → Advanced → TAK Server**. These are app settings stored on this phone, which is why they sit next to **Firmware Update** and **Debug Panel** rather than under the TAK module config — and why they need neither a TAK role nor firmware 2.8.0:
 
 ![Local TAK Server settings with enable toggle and export option](../../assets/screenshots/tak_server_enabled.png)
 
@@ -102,13 +107,13 @@ Once configured:
 
 ## Troubleshooting
 
- Problem                                 | Cause                                                                                                     | Solution                                                                                                                                                                                           |
- --------------------------------------- | --------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
- Node doesn't appear on ATAK map         | Wrong Role setting, or Mesh to CoT Converter off                                                          | Set the node's **Role** to TAK or TAK Tracker. For ordinary (non-TAK-role) nodes to appear, also enable **Mesh to CoT Converter** under the TAK Server settings |
- Position updates are stale              | GPS fix lost or interval too long                                                                         | Check GPS status; reduce position broadcast interval in Position Config                                                                                                                            |
- ATAK shows "disconnected"               | The local TAK server is off, or ATAK is pointed elsewhere                                                 | Check **Enable Local TAK Server** is on, and that ATAK is connecting to `127.0.0.1:8089` — re-import the exported data package if unsure                                                           |
- Shapes, markers, or routes not bridging | Sending node is on legacy V1 (firmware 2.7.x or older) | Update the sending node's firmware to 2.8.0+ for V2 wire format                                                                                                    |
- CoT data not flowing                    | Channel mismatch                                                                                          | All TAK nodes must be on the same channel with matching encryption                                                                                                                                 |
+ Problem                                 | Cause                                                                                                     | Solution                                                                                                                                                                                                               |
+ --------------------------------------- | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+ Node doesn't appear on ATAK map         | Wrong Device Role setting, or Mesh to CoT Converter off                                                   | Set the node's **Device Role** to TAK or TAK Tracker. For ordinary (non-TAK-role) nodes to appear, also enable **Mesh to CoT Converter** under **Settings → Advanced → TAK Server** |
+ Position updates are stale              | GPS fix lost or interval too long                                                                         | Check GPS status; reduce position broadcast interval in Position Config                                                                                                                                                |
+ ATAK shows "disconnected"               | The local TAK server is off, or ATAK is pointed elsewhere                                                 | Check **Enable Local TAK Server** is on, and that ATAK is connecting to `127.0.0.1:8089` — re-import the exported data package if unsure                                                                               |
+ Shapes, markers, or routes not bridging | Sending node is on legacy V1 (firmware 2.7.x or older) | Update the sending node's firmware to 2.8.0+ for V2 wire format                                                                                                                        |
+ CoT data not flowing                    | Channel mismatch                                                                                          | All TAK nodes must be on the same channel with matching encryption                                                                                                                                                     |
 
 ## Security Considerations
 

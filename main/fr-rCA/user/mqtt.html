@@ -25,12 +25,10 @@
 <h3 id="enabling-mqtt">Enabling MQTT</h3>
 
 <ol>
-  <li>Navigate to <strong>Settings → Module Config → MQTT</strong>.</li>
+  <li>Navigate to <strong>Settings → Module configuration → MQTT</strong>.</li>
   <li>Enable the MQTT module.</li>
   <li>Configure the broker connection:</li>
 </ol>
-
-<p><img src="../../assets/screenshots/settings_switch.png" alt="MQTT module settings with the module enabled" /></p>
 
 <table>
   <thead>
@@ -42,43 +40,48 @@
   </thead>
   <tbody>
     <tr>
-      <td>Server Address</td>
+      <td><strong>Address</strong></td>
       <td>MQTT broker hostname</td>
       <td>mqtt.meshtastic.org</td>
     </tr>
     <tr>
-      <td>Nom d’utilisateur</td>
+      <td><strong>Username</strong></td>
       <td>Broker authentication</td>
       <td>meshdev</td>
     </tr>
     <tr>
-      <td>Mot de passe</td>
+      <td><strong>Password</strong></td>
       <td>Broker authentication</td>
       <td>large4cats</td>
     </tr>
     <tr>
-      <td>Root Topic</td>
+      <td><strong>Root topic</strong></td>
       <td>Base topic for messages</td>
-      <td>msh</td>
+      <td><code class="language-plaintext highlighter-rouge">msh</code>, which the radio rewrites to <code class="language-plaintext highlighter-rouge">msh/&lt;REGION&gt;</code> once you set a region</td>
     </tr>
     <tr>
-      <td>Chiffrement</td>
+      <td><strong>Encryption enabled</strong></td>
       <td>Encrypt MQTT payload</td>
       <td>Activé</td>
     </tr>
     <tr>
-      <td>JSON Output</td>
+      <td><strong>JSON output enabled</strong></td>
       <td>Also publish and consume the <code class="language-plaintext highlighter-rouge">/2/json/</code> topic. Deprecated in the protobuf schema, but still the only toggle for this behavior — and the app’s own proxy honors it</td>
       <td>Désactivé</td>
     </tr>
     <tr>
-      <td>TLS</td>
+      <td><strong>TLS enabled</strong></td>
       <td>Secure connection to broker</td>
       <td>Désactivé</td>
     </tr>
     <tr>
-      <td>Map Reporting</td>
+      <td><strong>Map reporting</strong></td>
       <td>Report position to public map</td>
+      <td>Désactivé</td>
+    </tr>
+    <tr>
+      <td><strong>Proxy to client enabled</strong></td>
+      <td>Relay MQTT through the connected phone</td>
       <td>Désactivé</td>
     </tr>
   </tbody>
@@ -86,8 +89,11 @@
 
 <h3 id="connection-status-and-test-connection">Connection Status and Test Connection</h3>
 
-<p>The top of the MQTT settings screen shows the live broker connection — <strong>Connected</strong>,
-<strong>Connecting</strong>, <strong>Reconnecting</strong>, <strong>Disconnected</strong>, or <strong>Inactive</strong>.</p>
+<p>The top of the MQTT settings screen shows the status of the relay this phone runs —
+<strong>Connected</strong>, <strong>Connecting</strong>, <strong>Reconnecting</strong>, <strong>Disconnected</strong>, or <strong>Inactive</strong>. It reads
+<strong>Inactive</strong> whenever the phone is not relaying, which includes the normal case of a radio
+reaching the broker over its own Wi-Fi or Ethernet. The radio’s own connection to the broker is
+not reported here.</p>
 
 <p><strong>Test connection</strong> probes the broker before you commit the settings to the radio, and
 distinguishes the failure modes: the hostname not resolving, the TCP connection being refused,
@@ -105,7 +111,9 @@ TLS failing, the attempt timing out, or the broker rejecting your credentials wi
 
 <h3 id="default-meshtastic-broker">Default Meshtastic Broker</h3>
 
-<p>The community maintains a public broker at <code class="language-plaintext highlighter-rouge">mqtt.meshtastic.org</code>. This is intended for general use and testing. Connections to it always use TLS (port 8883), even if the TLS toggle is off; for any other broker, TLS is used only when you enable it (port 8883 with TLS, 1883 without).</p>
+<p>The community maintains a public broker at <code class="language-plaintext highlighter-rouge">mqtt.meshtastic.org</code>. This is intended for general use and testing.</p>
+
+<p>When this phone relays MQTT for the radio, connections to that broker always use TLS on port 8883 even if <strong>TLS enabled</strong> is off — the app forces the switch on and grays it out. A radio that reaches the broker over its own Wi-Fi or Ethernet forces nothing: turn <strong>TLS enabled</strong> on yourself, or it connects in the clear on port 1883. For any other broker the toggle decides in both cases (port 8883 with TLS, 1883 without).</p>
 
 <blockquote>
   <p>🔒 <strong>Privacy:</strong> Messages on the public broker are readable by anyone subscribed. Always use channel encryption for private communications.</p>
@@ -125,13 +133,15 @@ TLS failing, the attempt timing out, or the broker rejecting your credentials wi
 
 <h2 id="map-reporting">Map Reporting</h2>
 
-<p>When Map Reporting is enabled, your node publishes its position to the Meshtastic community map:</p>
+<p>When <strong>Map reporting</strong> is on, your node periodically publishes a map report to the broker. The report goes out unencrypted, whatever keys your channels use, and carries your node id, long and short name, approximate location, hardware model, role, firmware version, LoRa region, modem preset, and primary channel name.</p>
 
-<ul>
-  <li>Visible at <a href="https://meshmap.net">meshmap.net</a> and similar community map services</li>
-  <li>Only position and node info are shared</li>
-  <li>Disable this if you don’t want your location publicly visible</li>
-</ul>
+<p>Turning it on opens a consent card. Turn on <strong>I agree.</strong> and choose a <strong>Map reporting interval (seconds)</strong> of one hour or more — the screen will not save until you do. A slider sets the position precision, and the app shows the resulting accuracy as a ± distance, so you can publish an approximate location rather than an exact one.</p>
+
+<p>Reports appear at <a href="https://meshmap.net">meshmap.net</a> and similar community map services.</p>
+
+<blockquote>
+  <p>🔒 <strong>Privacy:</strong> A map report is readable by anyone subscribed to the broker. Leave <strong>Map reporting</strong> off if you do not want your approximate location published.</p>
+</blockquote>
 
 <h2 id="uplink-vs-downlink">Uplink vs Downlink</h2>
 
@@ -154,7 +164,7 @@ TLS failing, the attempt timing out, or the broker rejecting your credentials wi
   </tbody>
 </table>
 
-<p>Configure per-channel which directions are active to control message flow and airtime usage.</p>
+<p>Uplink and downlink are per-channel settings, not MQTT module settings. Open <strong>Settings → Channels</strong>, tap the channel, and use <strong>MQTT Uplink Enabled</strong> and <strong>MQTT Downlink Enabled</strong>. Every channel you want bridged out needs uplink on, and every channel you want MQTT traffic injected into needs downlink on.</p>
 
 <h2 id="message-formats">Message Formats</h2>
 
@@ -194,7 +204,7 @@ replaced and it is not ignored. When it is on, the app’s own MQTT proxy subscr
 
 <ol>
   <li><strong>Channel encryption</strong> happens on the mesh <em>before</em> MQTT. If your channel has a PSK, the MQTT payload is already encrypted — the broker and any subscribers see only the ciphertext.</li>
-  <li><strong>MQTT encryption</strong> (the module setting) adds an additional encryption layer for transit to the broker. This protects metadata and routing information.</li>
+  <li><strong>Encryption enabled</strong> (the module setting) decides which copy of the packet the gateway publishes — it is not an extra layer. Leave it on and the broker receives the packet still encrypted with your channel key. Turn it off and the gateway publishes the decrypted packet, so anyone subscribed to the topic reads your messages in the clear. Turn it off only when you own the broker and want plain payloads for a dashboard.</li>
   <li><strong>TLS</strong> encrypts the TCP connection to the broker itself, preventing network-level eavesdropping.</li>
 </ol>
 
@@ -228,7 +238,9 @@ replaced and it is not ignored. When it is on, the app’s own MQTT proxy subscr
 <ul>
   <li><strong>Check uplink/downlink settings</strong> — if only uplink is enabled, messages flow from mesh to MQTT but not back. Enable downlink on the receiving gateway.</li>
   <li><strong>Channel mismatch</strong> — both gateways must share the same channel with the same PSK. A mismatch means messages are encrypted with different keys and appear as garbage.</li>
-  <li><strong>Topic mismatch</strong> — ensure both gateways use the same root topic. The default <code class="language-plaintext highlighter-rouge">msh</code> works for the public broker.</li>
+  <li><strong>Topic mismatch</strong> — both gateways must use exactly the same root topic. Setting a region rewrites a default root to <code class="language-plaintext highlighter-rouge">msh/&lt;REGION&gt;</code> (for example <code class="language-plaintext highlighter-rouge">msh/US</code>), so gateways in different regions do not meet until you give both the same explicit root.</li>
+  <li><strong>Ignore MQTT is on</strong> — in a region with a duty-cycle limit, the radio turns on <strong>Ignore MQTT</strong> (LoRa config, <strong>Advanced</strong>) when you set the region, and then drops every packet that reached it via MQTT. Turn it off on the receiving nodes, not only on the gateway.</li>
+  <li><strong>Ok to MQTT is off</strong> — on a public broker a gateway uplinks other nodes’ packets only when the sending node has <strong>Ok to MQTT</strong> (LoRa config, <strong>Advanced</strong>) on. Your own traffic bridges either way; your neighbors’ does not until they opt in.</li>
 </ul>
 
 <h2 id="related-topics">Related Topics</h2>

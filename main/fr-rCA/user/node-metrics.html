@@ -7,12 +7,13 @@
 <ol>
   <li>Navigate to <strong>Nodes</strong>.</li>
   <li>Tap the node you want to inspect.</li>
-  <li>Select the metric category from the detail tabs.</li>
+  <li>Scroll to the <strong>Telemetry</strong> section and find the category you want — <strong>Signal Quality</strong>, <strong>Device Metrics</strong>, <strong>Environment Metrics</strong>, <strong>Air-Quality Metrics</strong>, <strong>Power Metrics</strong>, <strong>Position</strong>, and the rest.</li>
+  <li>Tap the refresh button on a row to ask the node for a fresh reading. The chart button beside it opens that category’s history, and appears once the node has reported that kind of telemetry.</li>
 </ol>
 
 <p><img src="../../assets/screenshots/nodes_detail_local.png" alt="Node detail — local device" /></p>
 
-<p>The position tab shows location data for nodes that share GPS:</p>
+<p>The <strong>Position</strong> row expands to show location data for nodes that share GPS:</p>
 
 <p><img src="../../assets/screenshots/nodes_position.png" alt="Position inline content" /></p>
 
@@ -41,12 +42,12 @@
       <td>Battery voltage reading</td>
     </tr>
     <tr>
-      <td>Utilisation du canal</td>
-      <td>Percentage of airtime consumed</td>
+      <td>UtilCanal</td>
+      <td>Percentage of local airtime in use</td>
     </tr>
     <tr>
-      <td>Temps d’émission</td>
-      <td>Transmission time used by this node</td>
+      <td>UtilAir</td>
+      <td>Percentage of the last hour this node spent transmitting</td>
     </tr>
     <tr>
       <td>Durée de fonctionnement</td>
@@ -55,10 +56,10 @@
   </tbody>
 </table>
 
-<p>Device metrics are displayed as individual cards with trend sparklines showing battery level, voltage, channel utilization, airtime, and uptime over time.</p>
+<p>Device Metrics has no cards on the node detail screen. Use the chart button on its row to open the Device Metrics screen, where battery level, voltage, ChUtil, and AirUtil are plotted over time and every reading — uptime included — is listed with its timestamp underneath. Pick a time frame at the top of the screen, and use the save icon in the app bar to export the visible history as CSV.</p>
 
 <blockquote>
-  <p>💡 <strong>Tip:</strong> Tap any metric card to expand it into a full chart with historical data points. Pinch to zoom the time axis.</p>
+  <p>💡 <strong>Tip:</strong> Where a category does show cards — Environment, Air Quality, and Power — touch &amp; hold a card to copy its value to the clipboard. On a chart screen, pinch to zoom the time axis.</p>
 </blockquote>
 
 <h2 id="métriques-denvironnement">Métriques d’environnement</h2>
@@ -211,7 +212,7 @@
   <p>💡 <strong>Tip:</strong> Air Quality metrics require a compatible air-quality sensor on the remote node. See <a href="telemetry-and-sensors">Telemetry &amp; Sensors</a> for supported hardware.</p>
 </blockquote>
 
-<h2 id="métriques-de-signal">Métriques de Signal</h2>
+<h2 id="qualité-du-signal">Qualité du signal</h2>
 
 <p>Radio signal quality information:</p>
 
@@ -275,7 +276,7 @@
 
 <p>See <a href="signal-meter">Understanding the Signal Meter</a> for the full explanation.</p>
 
-<p>Local Stats from your connected radio are also shown in Signal Metrics when available. These logs include noise floor, traffic counters, relay counters, online node counts, and radio uptime. The noise floor chart uses a dashed reference line at -85 dBm to help identify a busy RF environment.</p>
+<p>Local Stats from your connected radio are also shown in Signal Quality when available. These logs include noise floor, traffic counters, relay counters, online node counts, and radio uptime. The noise floor chart uses a dashed reference line at -85 dBm to help identify a busy RF environment.</p>
 
 <ul>
   <li><strong>Request</strong> — ask the connected radio for a fresh Local Stats telemetry report</li>
@@ -306,25 +307,23 @@
   </tbody>
 </table>
 
-<p>Up to three sensor channels (ch1–ch3) are charted, each with a label you can edit. The app does not
-derive a wattage figure from them.</p>
+<p>The node detail screen shows cards for channels 1 to 3. Use the chart button on the <strong>Power Metrics</strong> row to open the chart screen, which lists a chip for every channel that reported data — up to eight — and charts the one you select. Use the label field under the chips to give a channel a name of your own, such as Solar or Battery. The app does not derive a wattage figure from voltage and current.</p>
 
 <h2 id="traceroute">Traceroute</h2>
 
 <p>Traceroute shows the path a message takes through the mesh:</p>
 
 <ol>
-  <li>From the node detail screen, tap <strong>Traceroute</strong>.</li>
+  <li>From the node detail screen’s <strong>Telemetry</strong> section, tap the refresh button on the <strong>Traceroute</strong> row. You cannot traceroute your own node, and the button accepts one request every 30 seconds.</li>
   <li>The app sends a traceroute request to the target node.</li>
-  <li>Results show each hop with SNR/RSSI values.</li>
+  <li>Results show each hop with its SNR.</li>
 </ol>
 
 <h3 id="reading-traceroute-results">Reading Traceroute Results</h3>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>You → Node A (SNR: 8.5) → Node B (SNR: 5.2) → Target
-</code></pre></div></div>
+<p>A traceroute is a round trip, so each saved result carries a hop count in each direction — <strong>Forward Hops</strong> and <strong>Return Hops</strong> — and the <strong>Round Trip</strong> time in seconds. A result marked <strong>Direct</strong> reached the target with no relay in between. Tap a result to read the route traced toward the destination and the route traced back to you, with the SNR of every hop. On Android that view offers <strong>View on map</strong>, which draws the same path, as long as the start and destination nodes have both shared a position.</p>
 
-<p>Each hop represents a relay node that forwarded the message.</p>
+<p>A result marked <strong>No Response</strong> means the target never answered. It may be out of range, asleep, or configured not to reply. Wait for the 30-second cooldown to clear and try again; if it keeps failing, send a direct message first to confirm the node is reachable at all.</p>
 
 <h2 id="journal-des-positions">Journal des positions</h2>
 
@@ -340,6 +339,14 @@ derive a wattage figure from them.</p>
 <h2 id="informations-sur-les-voisins">Informations sur les voisins</h2>
 
 <p>Shows which nodes a given node can directly hear, useful for understanding mesh topology.</p>
+
+<h2 id="métriques-de-lhôte">Métriques de l’hôte</h2>
+
+<p>Nodes that run Meshtastic on a Linux host, such as a Raspberry Pi, report the host’s own health — free memory, free disk space, one-, five-, and fifteen-minute load averages, and how long the host has been up. The <strong>Host Metrics</strong> row is always listed; its chart button appears once a node has reported them.</p>
+
+<h2 id="métriques-de-pax">Métriques de PAX</h2>
+
+<p>A node running the PAX counter module reports how many Wi-Fi and Bluetooth devices it saw nearby, as a crowd-size estimate, and charts the two counts alongside their total. The <strong>PAX Metrics</strong> row is always listed; its chart button appears once a node has reported them. The counts are of devices, not people.</p>
 
 <h2 id="related-topics">Related Topics</h2>
 

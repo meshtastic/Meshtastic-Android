@@ -26,7 +26,7 @@
     <tr>
       <td>Métadonnées Fastlane</td>
       <td><code class="language-plaintext highlighter-rouge">fastlane/metadata/android/fr-FR/</code></td>
-      <td>Titre de la liste de l’App Store, description et historique des modifications</td>
+      <td>Google Play listing title, description, and changelogs</td>
     </tr>
   </tbody>
 </table>
@@ -41,7 +41,7 @@
   <li><strong>Visitez le projet Crowdin.</strong> Ouvrez le <a href="https://crowdin.com/project/meshtastic-android">projet Meshtastic Android Crowdin</a> et connectez-vous ou créez un compte gratuit.</li>
   <li><strong>Choisissez votre langue.</strong> Sélectionnez une langue existante ou demandez-en une nouvelle en ouvrant un <a href="https://github.com/meshtastic/Meshtastic-Android/issues/new">problème GitHub</a>.</li>
   <li><strong>Traductions</strong> Crowdin montre la source anglaise à gauche et votre traduction à droite. Traduisez chaque portion et sauvegardez.</li>
-  <li><strong>Vérifier le contexte.</strong> De nombreuses portions incluent des captures d’écran ou des commentaires de contexte — cochez celles-ci pour comprendre où le texte apparaît dans l’application. Approved translations are automatically merged into the next release.</li>
+  <li><strong>Vérifier le contexte.</strong> De nombreuses portions incluent des captures d’écran ou des commentaires de contexte — cochez celles-ci pour comprendre où le texte apparaît dans l’application. A scheduled job pulls approved translations from Crowdin and opens a pull request; they ship once a maintainer merges it and a new build goes out.</li>
 </ol>
 
 <blockquote>
@@ -86,9 +86,11 @@
 └── ...
 </code></pre></div></div>
 
-<p>Locale folders use the Android resource convention <code class="language-plaintext highlighter-rouge">{lang}-r{REGION}</code> (e.g. <code class="language-plaintext highlighter-rouge">fr-rFR</code>, <code class="language-plaintext highlighter-rouge">de-rDE</code>, <code class="language-plaintext highlighter-rouge">ja-rJP</code>), matching the <code class="language-plaintext highlighter-rouge">values-*</code> directories used for app strings.</p>
+<p>Doc locale folders use Android locale qualifiers, either <code class="language-plaintext highlighter-rouge">{lang}</code> or <code class="language-plaintext highlighter-rouge">{lang}-r{REGION}</code> (for example <code class="language-plaintext highlighter-rouge">fr</code>, <code class="language-plaintext highlighter-rouge">fr-rFR</code>, <code class="language-plaintext highlighter-rouge">de-rDE</code>, <code class="language-plaintext highlighter-rouge">ja-rJP</code>). The <code class="language-plaintext highlighter-rouge">values-*</code> folders for app strings use bare language codes instead (<code class="language-plaintext highlighter-rouge">values-fr</code>, <code class="language-plaintext highlighter-rouge">values-de</code>, <code class="language-plaintext highlighter-rouge">values-ja</code>), because <code class="language-plaintext highlighter-rouge">crowdin.yml</code> writes strings with <code class="language-plaintext highlighter-rouge">%two_letters_code%</code> and doc pages with <code class="language-plaintext highlighter-rouge">%android_code%</code>. The two sets do not line up one-to-one.</p>
 
 <p>The app automatically selects the correct locale based on your phone’s <strong>Language &amp; Region</strong> settings.</p>
+
+<p>A page that came from Crowdin is labeled <strong>Community translated</strong> under its title in the app. If a page has no Crowdin translation for your language yet, the Google-flavor Android build machine-translates the English source on the fly and labels it <strong>Auto-translated</strong> instead; F-Droid and desktop builds show the English page. Your Crowdin translation replaces the machine one as soon as it lands.</p>
 
 <h2 id="directives-de-traduction">Directives de Traduction</h2>
 

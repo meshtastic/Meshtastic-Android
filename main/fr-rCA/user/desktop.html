@@ -7,7 +7,8 @@
 <h3 id="linux">Linux</h3>
 
 <ul>
-  <li>Download the <code class="language-plaintext highlighter-rouge">.deb</code> or <code class="language-plaintext highlighter-rouge">.AppImage</code> package from the <a href="https://github.com/meshtastic/Meshtastic-Android/releases">releases page</a></li>
+  <li>Download the <code class="language-plaintext highlighter-rouge">.deb</code>, <code class="language-plaintext highlighter-rouge">.rpm</code>, or <code class="language-plaintext highlighter-rouge">.AppImage</code> package from the <a href="https://github.com/meshtastic/Meshtastic-Android/releases">releases page</a></li>
+  <li>Or install from Flathub: <code class="language-plaintext highlighter-rouge">flatpak install flathub org.meshtastic.MeshtasticDesktop</code></li>
   <li>Or build from source using <code class="language-plaintext highlighter-rouge">./gradlew :desktopApp:run</code></li>
 </ul>
 
@@ -21,7 +22,7 @@
 <h3 id="windows">Windows</h3>
 
 <ul>
-  <li>Download the <code class="language-plaintext highlighter-rouge">.msi</code> installer from the <a href="https://github.com/meshtastic/Meshtastic-Android/releases">releases page</a></li>
+  <li>Download the <code class="language-plaintext highlighter-rouge">.msi</code> or <code class="language-plaintext highlighter-rouge">.exe</code> installer from the <a href="https://github.com/meshtastic/Meshtastic-Android/releases">releases page</a></li>
   <li>Or build from source</li>
 </ul>
 
@@ -109,7 +110,7 @@
       <td>Mise à jour du firmware</td>
       <td>✓</td>
       <td>✓</td>
-      <td>In-app USB, BLE, and Wi-Fi (ESP32) update all work the same as Android</td>
+      <td>In-app USB, BLE, and Wi-Fi (ESP32) update work the same as Android. The USB maintenance flow — nRF52/RP2040 factory erase and bootloader upgrade — is Android-only</td>
     </tr>
     <tr>
       <td>Notifications</td>
@@ -193,14 +194,14 @@
 
 <ul>
   <li><strong>Window resizing</strong> — responsive layout adapts to window dimensions</li>
-  <li><strong>System tray</strong> — minimize to system tray for background mesh operation</li>
+  <li><strong>System tray</strong> — closing the window minimizes to the system tray for background mesh operation. On a desktop environment with no tray, there is nowhere to minimize to, so closing quits the app instead</li>
   <li><strong>Tray menu</strong> — right-click the tray icon to show window or quit</li>
   <li><strong>Mouse interaction</strong> — hover states and standard desktop navigation</li>
 </ul>
 
 <h3 id="notification-preferences">Notification Preferences</h3>
 
-<p>The desktop app provides in-app toggles for controlling which notifications are shown — messages, new nodes, and low battery alerts. Access these from <strong>Settings → Notifications</strong> within the app.</p>
+<p>The desktop app provides in-app toggles for controlling which notifications are shown. Find them in the <strong>App Notifications</strong> section of the Settings screen: <strong>Direct message notifications</strong>, <strong>New node notifications</strong>, and <strong>Low battery notifications</strong>.</p>
 
 <h2 id="built-in-documentation-browser">Built-in Documentation Browser</h2>
 
@@ -236,9 +237,12 @@
   <li>Offline tile downloads and local <code class="language-plaintext highlighter-rouge">.mbtiles</code> archives are not available on desktop.</li>
   <li><code class="language-plaintext highlighter-rouge">.kml</code>/<code class="language-plaintext highlighter-rouge">.kmz</code>/GeoJSON layer import works — see
 <a href="map-and-waypoints#map-layers">Map &amp; Waypoints</a>. Site Planner opens in your browser
-rather than in the app; to bring its coverage estimate onto the map, use the planner’s
-<strong>Export › GeoJSON</strong> and add the file as a layer. Custom network tile sources work too — see
-<a href="map-and-waypoints#adding-your-own-tile-source">Map &amp; Waypoints</a></li>
+rather than in the app; to bring its coverage estimate onto the map, click the transmitter pin
+in the browser and use the planner’s GeoJSON export, then add the file as a layer — not the KML
+export, which is a ground-overlay image this map cannot draw. Custom network tile sources work
+too — see <a href="map-and-waypoints#adding-your-own-tile-source">Map &amp; Waypoints</a></li>
+  <li>The USB maintenance flow — nRF52/RP2040 factory erase and bootloader upgrade — is Android-only, and the
+desktop app does not offer it. Use the <a href="https://flasher.meshtastic.org">Web Flasher</a> instead</li>
   <li>Some Android-specific features (widgets, specific notification channels) are unavailable</li>
   <li>Performance may vary on low-spec hardware running Compose Desktop</li>
   <li>BLE bonding is not yet supported on desktop (pairing works without bonding)</li>
@@ -248,5 +252,6 @@ rather than in the app; to bring its coverage estimate onto the map, use the pla
 
 <ul>
   <li><a href="connections">Connections</a> — connection methods overview</li>
-  <li><a href="firmware">Firmware Updates</a> — USB, BLE, and Wi-Fi update all work the same as on Android</li>
+  <li><a href="firmware">Firmware Updates</a> — in-app USB, BLE, and Wi-Fi update all work the same as on Android</li>
+  <li><a href="map-and-waypoints">Map &amp; Waypoints</a> — base maps, layers, custom tile sources, and what the desktop map does not do</li>
 </ul>

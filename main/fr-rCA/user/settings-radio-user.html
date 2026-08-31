@@ -2,9 +2,43 @@
 
 <p>Configure your radio’s user identity, region and LoRa parameters, position and power behavior, network and Bluetooth connectivity, and security settings.</p>
 
+<h2 id="how-these-screens-work">How These Screens Work</h2>
+
+<p>Everything here is on the <strong>Settings</strong> screen. <strong>User</strong>, <strong>LoRa</strong>, <strong>Channels</strong> and <strong>Security</strong> are
+listed there directly. <strong>Device</strong>, <strong>Position</strong>, <strong>Power</strong>, <strong>Network</strong>, <strong>Display</strong> and
+<strong>Bluetooth</strong> are one level down, under <strong>Settings → Device configuration</strong>. <strong>Network</strong> appears
+only on radios with Wi-Fi or Ethernet, and <strong>Bluetooth</strong> only on radios with Bluetooth.</p>
+
+<p>Settings use standard preference controls — dropdowns, toggles, and sliders:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Control</th>
+      <th>Screenshot</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Dropdown</td>
+      <td><img src="../../assets/screenshots/settings_dropdown.png" alt="A dropdown setting, expanded to show its list of options" /></td>
+    </tr>
+    <tr>
+      <td>Toggle</td>
+      <td><img src="../../assets/screenshots/settings_switch.png" alt="A toggle setting in the on position" /></td>
+    </tr>
+    <tr>
+      <td>Slider</td>
+      <td><img src="../../assets/screenshots/settings_slider.png" alt="A slider setting with its current numeric value shown" /></td>
+    </tr>
+  </tbody>
+</table>
+
 <h2 id="paramètres-utilisateur">Paramètres utilisateur</h2>
 
 <h3 id="user-profile">User Profile</h3>
+
+<p>On <strong>Settings → User</strong>.</p>
 
 <table>
   <thead>
@@ -24,22 +58,22 @@
     </tr>
     <tr>
       <td>Statut du message</td>
-      <td>A short free-text status other nodes display alongside your node — up to 80 bytes, cleared with the <strong>✕</strong> in the field. Needs firmware 2.8 or newer, and is absent otherwise</td>
+      <td>A short, public free-text status other nodes display alongside your node — up to 80 bytes, cleared with the <strong>✕</strong> in the field. The radio broadcasts it to the mesh when you change it and again every 12 hours. Needs firmware 2.8 or newer, and is absent otherwise</td>
     </tr>
     <tr>
       <td>Non joignable par message</td>
       <td>Marks the node as one nobody should try to message — for an unmonitored or infrastructure node. Other clients hide it from the contact list. Needs supporting firmware</td>
     </tr>
     <tr>
-      <td>Licensed Operator</td>
-      <td>Enable if you hold an amateur radio license (permits higher power). Turning it on relabels <strong>Long Name</strong> as <strong>Call Sign</strong> and adds a separate Long Name field, and is staged behind a confirmation dialog</td>
+      <td>Radioamateur licencié (RA)</td>
+      <td>Enable if you hold an amateur radio license (permits higher power). Turning it on is staged behind a confirmation dialog. On your own radio it then relabels <strong>Long Name</strong> as <strong>Call sign</strong> and adds a separate Long Name field; over remote admin the field stays <strong>Long Name</strong></td>
     </tr>
   </tbody>
 </table>
 
 <h3 id="applying-changes">Applying Changes</h3>
 
-<p>After modifying settings, tap <strong>Save</strong> to write the configuration to your radio. The radio may reboot to apply changes.</p>
+<p>The footer appears as soon as you change something. <strong>Discard</strong> throws the change away, and the other button writes it to the radio: it reads <strong>Save &amp; restart</strong> on the screens the firmware applies with a reboot — Position, Network, Bluetooth, Security, and most module screens — and <strong>Save</strong> everywhere else.</p>
 
 <p>The status message is saved with the same <strong>Save</strong>, but it never reboots the node — and, like the
 rest of this screen, it can be edited on a remote node you administer.</p>
@@ -47,6 +81,8 @@ rest of this screen, it can be edited on a remote node you administer.</p>
 <h2 id="configuration">Configuration</h2>
 
 <h3 id="configuration-de-lappareil">Configuration de l’appareil</h3>
+
+<p>On <strong>Settings → Device configuration → Device</strong>.</p>
 
 <table>
   <thead>
@@ -58,22 +94,22 @@ rest of this screen, it can be edited on a remote node you administer.</p>
   </thead>
   <tbody>
     <tr>
-      <td>Rôle</td>
-      <td>Node behavior (Client, Router, etc.) — each option carries its own description in the picker. Choosing Router asks for confirmation</td>
-      <td>Client</td>
+      <td>Rôle de l’appareil</td>
+      <td>Node behavior. The picker lists the firmware names (<code class="language-plaintext highlighter-rouge">CLIENT</code>, <code class="language-plaintext highlighter-rouge">ROUTER</code>, <code class="language-plaintext highlighter-rouge">ROUTER_LATE</code>, <code class="language-plaintext highlighter-rouge">TAK</code>, and so on), and the description of whichever role is selected appears under the field. Choosing <code class="language-plaintext highlighter-rouge">ROUTER</code> or <code class="language-plaintext highlighter-rouge">ROUTER_LATE</code> asks you to confirm you have read the device-role guidance first</td>
+      <td><code class="language-plaintext highlighter-rouge">CLIENT</code></td>
     </tr>
     <tr>
       <td>Mode de réémission</td>
-      <td>How the node retransmits messages; each mode is described in the picker</td>
-      <td>Tout</td>
+      <td>How the node retransmits messages. As with the role, the picker lists the firmware names and describes only the selected one</td>
+      <td><code class="language-plaintext highlighter-rouge">ALL</code></td>
     </tr>
     <tr>
-      <td>Node Info Broadcast (s)</td>
-      <td>Interval for broadcasting node info</td>
-      <td>10800</td>
+      <td>Intervalle de diffusion des infos nœud</td>
+      <td>How often the node re-announces itself. A dropdown of fixed intervals — Unset, then 3 to 72 hours — not a value you type in seconds</td>
+      <td>3 hours</td>
     </tr>
     <tr>
-      <td>Double-tap Button</td>
+      <td>Double clic comme appui sur le bouton</td>
       <td>Treat a double tap as a button press</td>
       <td>Désactivé</td>
     </tr>
@@ -102,6 +138,8 @@ rest of this screen, it can be edited on a remote node you administer.</p>
 
 <h3 id="configuration-lora">Configuration LoRa</h3>
 
+<p>On <strong>Settings → LoRa</strong>.</p>
+
 <table>
   <thead>
     <tr>
@@ -117,17 +155,17 @@ rest of this screen, it can be edited on a remote node you administer.</p>
       <td>Unset (must configure)</td>
     </tr>
     <tr>
-      <td>Préréglage du modem</td>
+      <td>Préréglages</td>
       <td>Speed/range tradeoff</td>
       <td>LongFast</td>
     </tr>
     <tr>
-      <td>Limite de sauts</td>
+      <td>Nombre de sauts</td>
       <td>Maximum retransmit hops</td>
       <td>3</td>
     </tr>
     <tr>
-      <td>TX Power</td>
+      <td>Puissance d’émission</td>
       <td>Transmission power (dBm); 0 = max allowed for region</td>
       <td>0 (region max)</td>
     </tr>
@@ -135,11 +173,6 @@ rest of this screen, it can be edited on a remote node you administer.</p>
       <td>Remplacer la fréquence</td>
       <td>Overrides the computed operating frequency outright (MHz). It does not offset the calculated value — leave at 0 unless you know you need a specific frequency</td>
       <td>0 (use calculated)</td>
-    </tr>
-    <tr>
-      <td>Channel Bandwidth</td>
-      <td>Bandwidth setting</td>
-      <td>Default for preset</td>
     </tr>
     <tr>
       <td>Utiliser un préréglage</td>
@@ -154,6 +187,11 @@ rest of this screen, it can be edited on a remote node you administer.</p>
     <tr>
       <td>Taux de codage</td>
       <td>Manual mode only: 5–8. More redundancy costs airtime</td>
+      <td>From preset</td>
+    </tr>
+    <tr>
+      <td>Bande Passante</td>
+      <td>Manual mode only: the channel bandwidth in kHz, typed in directly. On the 2.4 GHz region the app offers a list of the bandwidths your radio supports instead, and a stored value that is not on that list shows as <em>Unsupported</em> and blocks saving until you pick a supported one</td>
       <td>From preset</td>
     </tr>
     <tr>
@@ -173,11 +211,11 @@ rest of this screen, it can be edited on a remote node you administer.</p>
     </tr>
     <tr>
       <td>Ignorer MQTT</td>
-      <td>Drop packets that arrived from MQTT rather than over the air</td>
-      <td>Éteint</td>
+      <td>Drop packets that arrived from MQTT rather than over the air. The firmware turns this on for you whenever you set a region that has a duty-cycle limit — the EU bands, Thailand, and Ukraine 433</td>
+      <td>Off, until you set a duty-cycle-limited region</td>
     </tr>
     <tr>
-      <td>OK vers MQTT</td>
+      <td>Transmission des paquets vers MQTT</td>
       <td>Allow your packets to be forwarded to MQTT by gateways</td>
       <td>Éteint</td>
     </tr>
@@ -194,11 +232,15 @@ rest of this screen, it can be edited on a remote node you administer.</p>
   </tbody>
 </table>
 
+<p>Some regions are amateur-radio allocations whose presets only licensed operators may use. On firmware 2.8 or newer the app knows which regions those are and grays the whole <strong>Presets</strong> list out until <strong>Licensed amateur radio (Ham)</strong> is turned on for the node you are configuring; the text under the field says so while it is grayed out.</p>
+
 <blockquote>
   <p>⚠️ <strong>Important:</strong> Operating without the correct region may violate local radio regulations. See the <a href="https://meshtastic.org/docs/getting-started/initial-config">region configuration guide</a> on meshtastic.org for details.</p>
 </blockquote>
 
 <h3 id="modem-presets">Modem Presets</h3>
+
+<p>The Lite, Narrow, Medium Turbo, and Tiny presets need firmware 2.8 or newer — the app hides them on older radios.</p>
 
 <blockquote>
   <p>💡 <strong>Tip:</strong> The <strong>SNR Limit</strong> values are negative on purpose. LoRa can decode signals <em>below</em> the noise floor, so a more-negative limit means the preset tolerates a weaker, noisier signal (more range). See <a href="signal-meter">How the Signal Meter Works</a> for the full explanation.</p>
@@ -232,28 +274,28 @@ rest of this screen, it can be edited on a remote node you administer.</p>
     <tr>
       <td>Short Slow</td>
       <td>~5 km</td>
-      <td>5.5 kbps</td>
+      <td>6.25 kbps</td>
       <td>−10 dB</td>
       <td>Suburban short-range; moderate building density</td>
     </tr>
     <tr>
       <td>Medium Fast</td>
       <td>~5 km</td>
-      <td>5.5 kbps</td>
+      <td>3.52 kbps</td>
       <td>−12.5 dB</td>
       <td>Suburban areas; moderate building density</td>
     </tr>
     <tr>
       <td>Medium Slow</td>
       <td>~8 km</td>
-      <td>1.1 kbps</td>
+      <td>1.95 kbps</td>
       <td>−15 dB</td>
       <td>Suburban/rural; moderate range with slower speed</td>
     </tr>
     <tr>
       <td>Long Turbo</td>
       <td>~10 km</td>
-      <td>4.4 kbps</td>
+      <td>1.34 kbps</td>
       <td>−12.5 dB</td>
       <td>Similar range to Long Fast but with 500 kHz bandwidth; faster throughput</td>
     </tr>
@@ -274,30 +316,51 @@ rest of this screen, it can be edited on a remote node you administer.</p>
     <tr>
       <td>Lite Fast</td>
       <td>~5 km</td>
-      <td>5.5 kbps</td>
+      <td>1.76 kbps</td>
       <td>−12.5 dB</td>
       <td>EU 866 MHz SRD band (125 kHz BW); comparable to Medium Fast</td>
     </tr>
     <tr>
       <td>Lite Slow</td>
       <td>~10 km</td>
-      <td>1.1 kbps</td>
+      <td>0.98 kbps</td>
       <td>−15 dB</td>
       <td>EU 866 MHz SRD band (125 kHz BW); comparable to Long Fast</td>
     </tr>
     <tr>
       <td>Narrow Fast</td>
       <td>~5 km</td>
-      <td>2.7 kbps</td>
+      <td>2.28 kbps</td>
       <td>−10 dB</td>
       <td>EU 868 MHz band (62.5 kHz BW); avoids interference with other devices</td>
     </tr>
     <tr>
       <td>Narrow Slow</td>
       <td>~10 km</td>
-      <td>1.1 kbps</td>
+      <td>1.30 kbps</td>
       <td>−12.5 dB</td>
       <td>EU 868 MHz band (62.5 kHz BW); comparable to Long Fast</td>
+    </tr>
+    <tr>
+      <td>Medium Turbo</td>
+      <td>~5 km</td>
+      <td>7.0 kbps</td>
+      <td>−12.5 dB</td>
+      <td>Like Medium Fast but with 500 kHz bandwidth; not legal in every region. Needs firmware 2.8 or newer</td>
+    </tr>
+    <tr>
+      <td>Tiny Fast</td>
+      <td>~10 km</td>
+      <td>0.68 kbps</td>
+      <td>−7.5 dB</td>
+      <td>Amateur bands that cap occupied bandwidth; these presets use 15.6 kHz. Needs firmware 2.8 or newer, an SX126x or SX127x radio, and a TCXO of ±5 ppm or better</td>
+    </tr>
+    <tr>
+      <td>Tiny Slow</td>
+      <td>~20 km</td>
+      <td>0.33 kbps</td>
+      <td>−10 dB</td>
+      <td>Same band restrictions as Tiny Fast, longer range. Same firmware, radio, and TCXO requirements</td>
     </tr>
     <tr>
       <td><del>Long Slow</del></td>
@@ -317,7 +380,7 @@ rest of this screen, it can be edited on a remote node you administer.</p>
 </table>
 
 <blockquote>
-  <p>ℹ️ <strong>Note:</strong> This table uses the common short names. In the app’s preset dropdown they read as <strong>Short Range - Fast</strong>, <strong>Long Range - Fast</strong>, <strong>Lite - Fast</strong>, <strong>Narrow - Fast</strong>, and so on.</p>
+  <p>ℹ️ <strong>Note:</strong> This table uses the common short names. The app’s <strong>Presets</strong> dropdown lists the raw firmware names instead — <code class="language-plaintext highlighter-rouge">SHORT_FAST</code>, <code class="language-plaintext highlighter-rouge">LONG_FAST</code>, <code class="language-plaintext highlighter-rouge">LITE_FAST</code>, <code class="language-plaintext highlighter-rouge">NARROW_FAST</code>, and so on. Local Mesh Discovery shows the same presets as <em>Long Fast</em> and <em>Short Turbo</em>.</p>
 </blockquote>
 
 <h4 id="choosing-a-modem-preset">Choosing a Modem Preset</h4>
@@ -345,7 +408,7 @@ rest of this screen, it can be edited on a remote node you administer.</p>
 
 <h3 id="configuration-de-lécran">Configuration de l’écran</h3>
 
-<p>These control the <strong>radio’s own screen</strong>, not the app’s.</p>
+<p>On <strong>Settings → Device configuration → Display</strong>. These control the <strong>radio’s own screen</strong>, not the app’s.</p>
 
 <table>
   <thead>
@@ -376,7 +439,7 @@ rest of this screen, it can be edited on a remote node you administer.</p>
       <td>Show the radio’s clock as 12-hour rather than 24-hour</td>
     </tr>
     <tr>
-      <td>Bold heading</td>
+      <td>Titre en gras</td>
       <td>Draw the screen’s heading text in bold</td>
     </tr>
     <tr>
@@ -403,6 +466,8 @@ rest of this screen, it can be edited on a remote node you administer.</p>
 </table>
 
 <h3 id="configuration-de-la-position">Configuration de la position</h3>
+
+<p>On <strong>Settings → Device configuration → Position</strong>.</p>
 
 <blockquote>
   <p>⚠️ <strong>Important:</strong> Saving this screen always reboots the radio.</p>
@@ -457,6 +522,8 @@ rest of this screen, it can be edited on a remote node you administer.</p>
 
 <h3 id="configuration-de-lalimentation">Configuration de l’alimentation</h3>
 
+<p>On <strong>Settings → Device configuration → Power</strong>.</p>
+
 <table>
   <thead>
     <tr>
@@ -502,8 +569,10 @@ rest of this screen, it can be edited on a remote node you administer.</p>
 
 <h3 id="configuration-du-réseau">Configuration du réseau</h3>
 
+<p>On <strong>Settings → Device configuration → Network</strong>, on radios with Wi-Fi or Ethernet.</p>
+
 <blockquote>
-  <p>⚠️ <strong>Important:</strong> Saving this screen always reboots the radio.</p>
+  <p>⚠️ <strong>Warning:</strong> Turning on <strong>Wi-Fi enabled</strong> or <strong>Ethernet enabled</strong> ends the Bluetooth connection between your phone and the radio. Reconnect over the network afterwards from the <a href="connections">Connections</a> screen, or turn Wi-Fi off again from the radio’s own screen or over USB. Saving this screen also always reboots the radio.</p>
 </blockquote>
 
 <table>
@@ -520,7 +589,7 @@ rest of this screen, it can be edited on a remote node you administer.</p>
     </tr>
     <tr>
       <td>SSID</td>
-      <td>Network name to connect to. <strong>Scan Wi-Fi QR code</strong> fills this and the password from a standard Wi-Fi QR code</td>
+      <td>Network name to connect to. Appears only once <strong>Wi-Fi enabled</strong> is on, along with <strong>Password</strong>. <strong>Scan Wi-Fi QR code</strong> fills both from a standard Wi-Fi QR code; on Android, holding the phone against a Wi-Fi NFC tag while this screen is open fills them the same way, and the app offers to open system settings if NFC is turned off</td>
     </tr>
     <tr>
       <td>Mot de passe</td>
@@ -532,7 +601,7 @@ rest of this screen, it can be edited on a remote node you administer.</p>
     </tr>
     <tr>
       <td>Mode IPv4</td>
-      <td>DHCP, or a static address configured with the four fields below</td>
+      <td>DHCP, or a static address configured with the four fields that follow</td>
     </tr>
     <tr>
       <td>Wi-Fi IP / Subnet / Gateway / DNS</td>
@@ -557,6 +626,12 @@ rest of this screen, it can be edited on a remote node you administer.</p>
 
 <h3 id="configuration-bluetooth">Configuration Bluetooth</h3>
 
+<p>On <strong>Settings → Device configuration → Bluetooth</strong>, on radios with Bluetooth.</p>
+
+<blockquote>
+  <p>⚠️ <strong>Important:</strong> Saving this screen always reboots the radio.</p>
+</blockquote>
+
 <table>
   <thead>
     <tr>
@@ -566,11 +641,11 @@ rest of this screen, it can be edited on a remote node you administer.</p>
   </thead>
   <tbody>
     <tr>
-      <td>Bluetooth Enabled</td>
+      <td>Bluetooth activé</td>
       <td>Enable/disable BLE radio</td>
     </tr>
     <tr>
-      <td>Mode d’appairage</td>
+      <td>Mode d’appariement</td>
       <td>Fixed PIN, Random PIN, or No PIN</td>
     </tr>
     <tr>
@@ -581,6 +656,12 @@ rest of this screen, it can be edited on a remote node you administer.</p>
 </table>
 
 <h3 id="configuration-de-sécurité">Configuration de sécurité</h3>
+
+<p>On <strong>Settings → Security</strong>. The screen is grouped into cards: <strong>Packet authenticity</strong>, <strong>Direct Message Key</strong> (your node’s key pair), <strong>Admin Keys</strong>, <strong>Logs</strong>, and <strong>Administration</strong>.</p>
+
+<blockquote>
+  <p>⚠️ <strong>Important:</strong> Saving this screen always reboots the radio.</p>
+</blockquote>
 
 <table>
   <thead>
@@ -607,20 +688,16 @@ rest of this screen, it can be edited on a remote node you administer.</p>
       <td>Issues a new keypair for this node, behind a confirmation. Every peer that knew your old key must learn the new one</td>
     </tr>
     <tr>
-      <td>Clé de message direct</td>
-      <td>The key used for direct-message encryption</td>
-    </tr>
-    <tr>
       <td><del>Admin Channel Enabled</del></td>
       <td>⚠️ Removed — now configured automatically when an admin key is set</td>
     </tr>
     <tr>
-      <td>Debug Log</td>
-      <td>Output live debug logging over serial/bluetooth</td>
+      <td>Console série</td>
+      <td>Serial console over the Stream API</td>
     </tr>
     <tr>
-      <td>Serial Enabled</td>
-      <td>Enable serial console access (moved from Device Config)</td>
+      <td>API de journalisation de débogage activée</td>
+      <td>Output live debug logging over serial, and view and export position-redacted radio logs over Bluetooth</td>
     </tr>
     <tr>
       <td>Mode géré</td>
@@ -628,7 +705,7 @@ rest of this screen, it can be edited on a remote node you administer.</p>
     </tr>
     <tr>
       <td>Sauvegarder les clés</td>
-      <td>Save an encrypted backup of the node’s keys on this device (Android only)</td>
+      <td>Save an encrypted backup of the node’s keys on this phone (Android only, and only for your own node)</td>
     </tr>
     <tr>
       <td>Restore Keys</td>
@@ -636,11 +713,11 @@ rest of this screen, it can be edited on a remote node you administer.</p>
     </tr>
     <tr>
       <td>Delete Key Backup</td>
-      <td>Remove the stored key backup from this device</td>
+      <td>Remove the stored key backup from this phone</td>
     </tr>
     <tr>
-      <td>Protection Level</td>
-      <td>Packet authenticity — how unsigned or relayed packets are treated: <strong>Strict</strong>, <strong>Balanced</strong>, or <strong>Compatible</strong> (requires supporting firmware; Strict asks for confirmation)</td>
+      <td>Protection level</td>
+      <td>How unsigned or relayed packets are treated: <strong>Strict — Require authentication</strong>, <strong>Balanced — Prefer authenticated</strong>, or <strong>Compatible — Accept unsigned</strong> (requires supporting firmware; Strict asks for confirmation)</td>
     </tr>
   </tbody>
 </table>
@@ -674,7 +751,7 @@ the passphrase, and a full device erase restores the hardware regardless.</p>
     </tr>
     <tr>
       <td>Limite de sessions (minutes)</td>
-      <td>Maximum length of a single unlocked connection</td>
+      <td>A per-boot uptime cap on the unlocked state. 0, the default, means no cap</td>
     </tr>
   </tbody>
 </table>
@@ -688,33 +765,6 @@ back-off before you can try again.</p>
   <p>⚠️ <strong>Warning:</strong> There is no passphrase recovery. Losing it means erasing the device to get it
 back, which destroys its keys, channels and settings.</p>
 </blockquote>
-
-<p><img src="../../assets/screenshots/settings_password_field.png" alt="Password field" /></p>
-
-<p>Settings use standard preference controls — dropdowns, toggles, and sliders:</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>Control</th>
-      <th>Screenshot</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Dropdown</td>
-      <td><img src="../../assets/screenshots/settings_dropdown.png" alt="A dropdown setting, expanded to show its list of options" /></td>
-    </tr>
-    <tr>
-      <td>Toggle</td>
-      <td><img src="../../assets/screenshots/settings_switch.png" alt="A toggle setting in the on position" /></td>
-    </tr>
-    <tr>
-      <td>Slider</td>
-      <td><img src="../../assets/screenshots/settings_slider.png" alt="A slider setting with its current numeric value shown" /></td>
-    </tr>
-  </tbody>
-</table>
 
 <h2 id="related-topics">Related Topics</h2>
 

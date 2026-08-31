@@ -36,11 +36,11 @@ The **App logs** tab shows the most recent log lines from **this app only** — 
 
 ## Экспорт
 
-Нажмите на значок **загрузки**, чтобы сохранить текущие журналы в файл. Вы выбираете расположение через системное окно выбора файлов, а файл получает имя с меткой времени (например, `meshtastic_logcat_20260701_143312.txt`), поэтому повторные экспорты никогда не перезаписывают друг друга.
+Нажмите на значок **загрузки**, чтобы сохранить текущие журналы в файл. The app first shows a warning about what the file contains — confirm it, then choose where the file goes through the system file picker. The file is named with a timestamp (for example `meshtastic_logcat_20260701_143312.txt`) so repeated exports never overwrite each other. The same warning guards the **Packets** tab export.
 
 Прикрепите этот файл к своей задаче на GitHub.
 
-&gt; 🔒 **Privacy:** Exports automatically **redact** private keys, admin keys, session passkeys and channel PSKs before writing the file. Logs can still contain node names, positions, and other identifying details — glance through the file before sharing it publicly, and share privately if you have any doubt.
+&gt; 🔒 **Privacy:** Exports automatically **redact** private keys, admin keys, session passkeys, and channel PSKs, and suppress raw packet bytes. Everything else stays — the file can contain your message text, precise locations, and node details. Read it before sharing it publicly, and share privately if you have any doubt.
 
 ## Desktop
 

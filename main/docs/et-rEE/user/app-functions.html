@@ -20,38 +20,42 @@ Control App Functions from **Settings → System AI**. The screen has:
 - **Pealüliti** sildiga **"Luba tehisintellektile juurdepääs"** alapealkirjaga _"Luba süsteemi TI assistentidel (nt Gemini) kärgvõrgu funktsioone avastada ja kasutada"_. Väljalülitatud olekus pole süsteemile ühtegi funktsiooni avatud.
 - **Iga funktsiooni jaoks on eraldi lüliti**, nii et saad kuvada ainult soovitud võimalusi.
 
+&gt; ⚠️ **Important:** App Functions ship switched on. On a Google-flavor build the master toggle and every individual function, **Send message** included, start enabled — so an assistant can read your mesh data and send messages to your mesh until you turn **Allow AI access** off.
+
 Funktsioonid on rühmitatud kirjutamis- (Write) sektsiooni (funktsioonid, mis midagi muudavad või andmeid kärgvõrgule saadavad) ja lugemis- (Read) sektsiooni (funktsioonid, mis ainult teavet tagastavad).
 
 ![Rakenduse funktsioonide ekraan põhi- ja funktsioonipõhiste lülititega](../../assets/screenshots/app-functions_settings.png)
 
+The screenshot has **Send message** and **Get recent messages** switched off to illustrate per-function control; a fresh install shows every switch on.
+
 ### Kirjutamis funktsioonid
 
- Funktsioon       | What it does                                                                                                |
- ---------------- | ----------------------------------------------------------------------------------------------------------- |
- **Send Message** | Saadab kontaktile (otsesõnum) või kanalile tekstisõnumi, kuni 237 baiti. |
+ Funktsioon       | What it does                                                                                                                                                                                                  |
+ ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+ **Send message** | Sends a text message to a contact (direct message) or to a channel. The mesh carries at most 233 bytes of text, so keep assistant-composed messages short. |
 
 ### Lugemis funktsioonid
 
  Funktsioon              | What it returns                                                                     |
  ----------------------- | ----------------------------------------------------------------------------------- |
- **Küsi kärgvõrgu olek** | Whether you're connected to a radio, and how many nodes are online. |
- **Get Node List**       | Teie kärgvõrgu sõlmede loend.                                       |
- **Saa kanali info**     | Teave kanalite kohta.                                               |
- **Küsi kärgvõrgu olek** | Ühendatud raadio olek.                                              |
- **Get Node Details**    | Detailed information about a specific node.                         |
- **Get Recent Messages** | Recent messages from your conversations.                            |
- **Get Unread Summary**  | A summary of unread messages.                                       |
- **Get Mesh Metrics**    | Telemetry and metrics from your mesh.                               |
+ **Get mesh status**     | Whether you're connected to a radio, and how many nodes are online. |
+ **Get node list**       | Teie kärgvõrgu sõlmede loend.                                       |
+ **Get channel info**    | Teave kanalite kohta.                                               |
+ **Get device status**   | Ühendatud raadio olek.                                              |
+ **Get node details**    | Detailed information about a specific node.                         |
+ **Get mesh metrics**    | Telemetry and metrics from your mesh.                               |
+ **Get recent messages** | Recent messages from your conversations.                            |
+ **Get unread summary**  | A summary of unread messages.                                       |
 
 ## Privacy
 
-&gt; 🔒 **Privaatsus:** Funktsioon **Saada sõnum** võimaldab assistendil sinu nimel sinu kärgvõrku sõnumeid saata. Luba ainult need funktsioonid, mille kasutamist sa assistendile usaldad. Lugemisfunktsioonid avaldavad abilisele sõlme-, sõnumi- ja mõõdikuandmeid – lubage jagada ainult seda, mida soovite. Igal funktsioonil on oma lüliti ja peamine lüliti lülitab need kõik korraga välja.
+&gt; 🔒 **Privacy:** The **Send message** function lets an assistant send messages to your mesh on your behalf, and the read functions expose node, message, and metric data to it. Because all of them start enabled, the choice you make here is what to turn off rather than what to turn on. Each function has its own toggle, and **Allow AI access** turns all of them off at once.
 
 ## Seotud teemad
 
 - [Sõnumid ja kanalid](user/messages-and-channels)— sõnumite saatmine otse rakenduses
 - [Sõlmed](nodes) — sõlmede loend, millest lugemisfunktsioonid ammutavad
-- [Node Metrics](node-metrics) — the telemetry behind Get Mesh Metrics
+- [Node Metrics](node-metrics) — the telemetry behind Get mesh metrics
 </pre>
 </body>
 </html>

@@ -32,27 +32,29 @@ A gateway node with internet access (Wi-Fi or Ethernet) publishes mesh messages 
 
 ### 啟用 MQTT
 
-1. 前往「設定 → 模組設定 → MQTT」。
+1. Navigate to **Settings → Module configuration → MQTT**.
 2. 啟用 MQTT 模組。
 3. 設定代理伺服器連線：
 
-![MQTT module settings with the module enabled](../../assets/screenshots/settings_switch.png)
-
- 設定          | 描述說明                                                                                                                                                                              | 默認                                                  |
- ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
- 伺服器位址       | MQTT 代理伺服器主機名稱                                                                                                                                                                    | mqtt.meshtastic.org |
- 使用者名稱       | 代理伺服器驗證                                                                                                                                                                           | meshdev                                             |
- 密碼          | 代理伺服器驗證                                                                                                                                                                           | large4cats                                          |
- 根主題         | 訊息的基礎主題                                                                                                                                                                           | msh                                                 |
- 加密          | 加密 MQTT 承載內容                                                                                                                                                                      | 已啟用                                                 |
- JSON Output | Also publish and consume the `/2/json/` topic. Deprecated in the protobuf schema, but still the only toggle for this behavior — and the app's own proxy honors it | 已停用                                                 |
- TLS         | 與代理伺服器的安全連線                                                                                                                                                                       | 已停用                                                 |
- 地圖回報        | 將位置回報至公開地圖                                                                                                                                                                        | 已停用                                                 |
+ 設定                          | 描述說明                                                                                                                                                                              | 默認                                                                      |
+ --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+ **Address**                 | MQTT 代理伺服器主機名稱                                                                                                                                                                    | mqtt.meshtastic.org                     |
+ **Username**                | 代理伺服器驗證                                                                                                                                                                           | meshdev                                                                 |
+ **Password**                | 代理伺服器驗證                                                                                                                                                                           | large4cats                                                              |
+ **Root topic**              | 訊息的基礎主題                                                                                                                                                                           | `msh`, which the radio rewrites to `msh/&lt;REGION&gt;` once you set a region |
+ **Encryption enabled**      | 加密 MQTT 承載內容                                                                                                                                                                      | 已啟用                                                                     |
+ **JSON output enabled**     | Also publish and consume the `/2/json/` topic. Deprecated in the protobuf schema, but still the only toggle for this behavior — and the app's own proxy honors it | 已停用                                                                     |
+ **TLS enabled**             | 與代理伺服器的安全連線                                                                                                                                                                       | 已停用                                                                     |
+ **Map reporting**           | 將位置回報至公開地圖                                                                                                                                                                        | 已停用                                                                     |
+ **Proxy to client enabled** | Relay MQTT through the connected phone                                                                                                                                            | 已停用                                                                     |
 
 ### Connection Status and Test Connection
 
-The top of the MQTT settings screen shows the live broker connection — **Connected**,
-**Connecting**, **Reconnecting**, **Disconnected**, or **Inactive**.
+The top of the MQTT settings screen shows the status of the relay this phone runs —
+**Connected**, **Connecting**, **Reconnecting**, **Disconnected**, or **Inactive**. It reads
+**Inactive** whenever the phone is not relaying, which includes the normal case of a radio
+reaching the broker over its own Wi-Fi or Ethernet. The radio's own connection to the broker is
+not reported here.
 
 **Test connection** probes the broker before you commit the settings to the radio, and
 distinguishes the failure modes: the hostname not resolving, the TCP connection being refused,
@@ -68,7 +70,9 @@ The **MQTT proxy on this phone** toggle at the top of the MQTT settings screen s
 
 ### 預設 Meshtastic 代理伺服器
 
-社群在 mqtt.meshtastic.org 維護一個公開的代理伺服器。 此伺服器供一般使用與測試之用。 Connections to it always use TLS (port 8883), even if the TLS toggle is off; for any other broker, TLS is used only when you enable it (port 8883 with TLS, 1883 without).
+社群在 mqtt.meshtastic.org 維護一個公開的代理伺服器。 此伺服器供一般使用與測試之用。
+
+When this phone relays MQTT for the radio, connections to that broker always use TLS on port 8883 even if **TLS enabled** is off — the app forces the switch on and grays it out. A radio that reaches the broker over its own Wi-Fi or Ethernet forces nothing: turn **TLS enabled** on yourself, or it connects in the clear on port 1883. For any other broker the toggle decides in both cases (port 8883 with TLS, 1883 without).
 
 &gt; 🔒 隱私：公開代理伺服器上的訊息，任何訂閱者均可讀取。 私人通訊請務必啟用頻道加密。
 
@@ -84,11 +88,13 @@ The **MQTT proxy on this phone** toggle at the top of the MQTT settings screen s
 
 ## 地圖回報
 
-啟用地圖回報後，您的節點將把位置發布至 Meshtastic 社群地圖：
+When **Map reporting** is on, your node periodically publishes a map report to the broker. The report goes out unencrypted, whatever keys your channels use, and carries your node id, long and short name, approximate location, hardware model, role, firmware version, LoRa region, modem preset, and primary channel name.
 
-- 可在〔meshmap.net〕(https://meshmap.net) 及類似的社群地圖服務上查看
-- 僅分享位置與節點資訊
-- 若不希望位置公開顯示，請停用此功能
+Turning it on opens a consent card. Turn on **I agree.** and choose a **Map reporting interval (seconds)** of one hour or more — the screen will not save until you do. A slider sets the position precision, and the app shows the resulting accuracy as a ± distance, so you can publish an approximate location rather than an exact one.
+
+Reports appear at [meshmap.net](https://meshmap.net) and similar community map services.
+
+&gt; 🔒 **Privacy:** A map report is readable by anyone subscribed to the broker. Leave **Map reporting** off if you do not want your approximate location published.
 
 ## 上行 vs 下行
 
@@ -97,7 +103,7 @@ The **MQTT proxy on this phone** toggle at the top of the MQTT settings screen s
  上行 | 訊息從 mesh 網路 → MQTT 代理伺服器 |
  下行 | 訊息從 MQTT 代理伺服器 → mesh 網路 |
 
-可依頻道設定哪些方向為啟用狀態，以控制訊息流向與無線電佔用時間。
+Uplink and downlink are per-channel settings, not MQTT module settings. Open **Settings → Channels**, tap the channel, and use **MQTT Uplink Enabled** and **MQTT Downlink Enabled**. Every channel you want bridged out needs uplink on, and every channel you want MQTT traffic injected into needs downlink on.
 
 ## 訊息格式
 
@@ -117,7 +123,7 @@ MQTT carries two payload formats:
 了解分層加密模型：
 
 1. 頻道加密在 mesh 網路上進行，發生於 MQTT 傳輸之前。 若您的頻道已設定 PSK，MQTT 承載內容將已加密——代理伺服器及任何訂閱者只能看到密文。
-2. MQTT 加密（模組設定）在傳輸至代理伺服器的過程中新增額外的加密層。 此設定可保護中繼資料與路由資訊。
+2. **Encryption enabled** (the module setting) decides which copy of the packet the gateway publishes — it is not an extra layer. Leave it on and the broker receives the packet still encrypted with your channel key. Turn it off and the gateway publishes the decrypted packet, so anyone subscribed to the topic reads your messages in the clear. Turn it off only when you own the broker and want plain payloads for a dashboard.
 3. TLS 對連接至代理伺服器的 TCP 連線進行加密，防止網路層級的竊聽。
 
 &gt; 🔒 **Security:** The default public channel has a well-known key. 透過 MQTT 傳送的預設頻道訊息實際上等同於未加密 — 任何人均可解碼。 私人通訊請務必使用自訂 PSK。
@@ -143,7 +149,9 @@ MQTT carries two payload formats:
 
 - 檢查上行／下行設定 — 若僅啟用上行，訊息只會從 mesh 網路流向 MQTT，不會反向傳送。 請在接收端閘道上啟用下行功能。
 - 頻道不符 — 兩個閘道必須使用相同頻道且具備相同的 PSK。 不符時，訊息將以不同金鑰加密，導致對方收到的內容為亂碼。
-- 主題不符 — 請確認兩個閘道使用相同的根主題。 預設的 msh 適用於公開代理伺服器。
+- **Topic mismatch** — both gateways must use exactly the same root topic. Setting a region rewrites a default root to `msh/&lt;REGION&gt;` (for example `msh/US`), so gateways in different regions do not meet until you give both the same explicit root.
+- **Ignore MQTT is on** — in a region with a duty-cycle limit, the radio turns on **Ignore MQTT** (LoRa config, **Advanced**) when you set the region, and then drops every packet that reached it via MQTT. Turn it off on the receiving nodes, not only on the gateway.
+- **Ok to MQTT is off** — on a public broker a gateway uplinks other nodes' packets only when the sending node has **Ok to MQTT** (LoRa config, **Advanced**) on. Your own traffic bridges either way; your neighbors' does not until they opt in.
 
 ## 相關主題
 

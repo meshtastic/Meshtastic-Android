@@ -34,25 +34,27 @@ Koska arviointi suhteutetaan esiasetukseen, sama SNR saa eri arvioinnin eri esia
 
  Taso        | Palkit | Kriteerit                                                      | Merkitys                                                                                                              |
  ----------- | ------ | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
- Hyvä        | 3      | SNR yli `rajan`                                                | Selvästi demodulointirajan yläpuolella — yhteys on hyvä.                                              |
- Kohtalainen | 2      | alle 5.5 dB `rajan` alapuolella                | Voidaan vielä purkaa, mutta lähellä rajaa.                                                            |
- Huono       | 1      | 5.5–7.5 dB `rajan` alapuolella | Esiasetuksen vastaanottokyvyn rajalla.                                                                |
- ei mitään   | 0      | yli 7.5 dB `rajan` alapuolella                 | Selvästi esiasetuksen rajan alapuolella; tältä radiolta tulevia lisäpaketteja todennäköisesti katoaa. |
+ Hyvä        | Full   | SNR yli `rajan`                                                | Selvästi demodulointirajan yläpuolella — yhteys on hyvä.                                              |
+ Kohtalainen | 3      | alle 5.5 dB `rajan` alapuolella                | Voidaan vielä purkaa, mutta lähellä rajaa.                                                            |
+ Huono       | 2      | 5.5–7.5 dB `rajan` alapuolella | Esiasetuksen vastaanottokyvyn rajalla.                                                                |
+ ei mitään   | 1      | yli 7.5 dB `rajan` alapuolella                 | Selvästi esiasetuksen rajan alapuolella; tältä radiolta tulevia lisäpaketteja todennäköisesti katoaa. |
+
+The icon never goes blank, so count the bars carefully: a single bar means None, not a weak but usable link, and Good is a solid wedge rather than a set of bars. A gray three-bar icon labeled Unknown is a different state again — the packet carried no SNR measurement at all, which is not the same as measuring one and finding it too weak.
 
 &gt; ℹ️ **Huomautus:** Reitiselvityksen hyppyjen värit käyttävät kiinteitä raja-arvoja (−7 dB / −15 dB); radion signaalimittari käyttää sen sijaan esiasetukseen suhteutettua arviointia.
 
 ## Paikallisten häiriöiden tunnistaminen
 
-Hyvä RSSI mutta vain yksi palkki (Huono) viittaa paikallisiin häiriöihin, ei etäisyyteen. Halpa virtalähde, häiriöinen tietokone tai lähellä oleva lähetin voi aiheuttaa niin paljon kohinaa, että muuten vahva signaali peittyy.
+A great RSSI paired with a one- or two-bar rating (None or Bad) points to local interference, not distance. Halpa virtalähde, häiriöinen tietokone tai lähellä oleva lähetin voi aiheuttaa niin paljon kohinaa, että muuten vahva signaali peittyy.
 
 ## Missä signaalitieto näkyy
 
 Sovelluksessa signaalitiedot näkyvät useassa paikassa:
 
-- **Radioluettelo** — signaalipalkkikuvake jokaisen radion vieressä
-- **Radion tiedot** — SNR, RSSI ja signaalin laatu laitteen mittareissa
+- **Node list** — a signal-bars icon, shown only for nodes your radio heard directly. A node reached through a relay shows its hop count instead, because the SNR your radio measured describes the last hop, not the whole path
+- **Node detail** — SNR, RSSI, and the quality word in the **Details** card at the top of the screen
 - **Reitinselvitys** — signaalin laatu jokaisessa välivaiheessa jokaiselle välittävälle radiolle
-- Signaalimittarit — historiallinen SNR- ja RSSI-data mittauskaavioissa
+- **Signal Quality** — historical SNR and RSSI data in the metrics charts
 
 ![Radioluettelon merkintä, jossa näkyy hyvä signaali: 12.5 dB SNR, −42 dBm RSSI ja vihreä signaalipalkkikuvake](../../assets/screenshots/nodes_signal_info.png)
 

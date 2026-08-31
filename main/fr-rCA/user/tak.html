@@ -18,8 +18,11 @@
 
 <ul>
   <li>ATAK (Android Team Awareness Kit), iTAK, or WinTAK installed</li>
-  <li>Your node’s <strong>Role</strong> (Device Config) set to <strong>TAK</strong> or <strong>TAK Tracker</strong> — this is what makes the
-TAK module appear in Module Config at all</li>
+  <li>Your node’s <strong>Device Role</strong> (Device configuration) set to <strong>TAK</strong> or <strong>TAK Tracker</strong> — this is what makes the
+TAK module appear in Module configuration at all</li>
+  <li>Firmware 2.8.0 or newer on the radio. Earlier firmware accepts a TAK config write and never
+stores it, so the app hides the TAK module entry below that version even when the role is set
+correctly. See <a href="firmware">Firmware Updates</a></li>
 </ul>
 
 <blockquote>
@@ -31,8 +34,8 @@ TAK server plus the Mesh to CoT Converter, both described below, with stock ATAK
 
 <h3 id="configuration">Configuration</h3>
 
-<p>Navigate to <strong>Settings → Module Config → TAK</strong>. The module’s own settings are your TAK identity —
-there is no separate enable switch here, because the <strong>Role</strong> setting in Device Config is what
+<p>Navigate to <strong>Settings → Module configuration → TAK</strong>. The module’s own settings are your TAK identity —
+there is no separate enable switch here, because the <strong>Device Role</strong> setting in Device configuration is what
 turns TAK on. Your node broadcasts this identity, which appears on TAK maps.</p>
 
 <table>
@@ -64,7 +67,9 @@ team to use consistent team assignments.</p>
 
 <h3 id="local-tak-server">Local TAK Server</h3>
 
-<p>The app can also run a <strong>local TAK server</strong> so ATAK/iTAK on the <strong>same phone</strong> can connect directly, without a remote TAK server. The server binds to localhost only (<code class="language-plaintext highlighter-rouge">127.0.0.1:8089</code>) and uses TLS with mutual certificate authentication (mTLS), so it is not reachable from other devices on the network. Open <strong>Settings → Module Config → TAK → TAK Server</strong>:</p>
+<p>The app can also run a <strong>local TAK server</strong> so ATAK/iTAK on the <strong>same phone</strong> can connect directly, without a remote TAK server. The server binds to localhost only (<code class="language-plaintext highlighter-rouge">127.0.0.1:8089</code>) and uses TLS with mutual certificate authentication (mTLS), so it is not reachable from other devices on the network.</p>
+
+<p>Open <strong>Settings → Advanced → TAK Server</strong>. These are app settings stored on this phone, which is why they sit next to <strong>Firmware Update</strong> and <strong>Debug Panel</strong> rather than under the TAK module config — and why they need neither a TAK role nor firmware 2.8.0:</p>
 
 <p><img src="../../assets/screenshots/tak_server_enabled.png" alt="Local TAK Server settings with enable toggle and export option" /></p>
 
@@ -165,8 +170,8 @@ node visibility</strong> — without it, only TAK-role nodes show up.</li>
   <tbody>
     <tr>
       <td>Node doesn’t appear on ATAK map</td>
-      <td>Wrong Role setting, or Mesh to CoT Converter off</td>
-      <td>Set the node’s <strong>Role</strong> to TAK or TAK Tracker. For ordinary (non-TAK-role) nodes to appear, also enable <strong>Mesh to CoT Converter</strong> under the TAK Server settings</td>
+      <td>Wrong Device Role setting, or Mesh to CoT Converter off</td>
+      <td>Set the node’s <strong>Device Role</strong> to TAK or TAK Tracker. For ordinary (non-TAK-role) nodes to appear, also enable <strong>Mesh to CoT Converter</strong> under <strong>Settings → Advanced → TAK Server</strong></td>
     </tr>
     <tr>
       <td>Position updates are stale</td>

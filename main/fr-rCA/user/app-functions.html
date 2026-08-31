@@ -15,9 +15,15 @@
   <li>An <strong>individual toggle for each function</strong>, so you can expose only the capabilities you want.</li>
 </ul>
 
+<blockquote>
+  <p>⚠️ <strong>Important:</strong> App Functions ship switched on. On a Google-flavor build the master toggle and every individual function, <strong>Send message</strong> included, start enabled — so an assistant can read your mesh data and send messages to your mesh until you turn <strong>Allow AI access</strong> off.</p>
+</blockquote>
+
 <p>The functions are grouped into a <strong>Write</strong> section (functions that change something or send data to your mesh) and a <strong>Read</strong> section (functions that only return information).</p>
 
 <p><img src="../../assets/screenshots/app-functions_settings.png" alt="App Functions screen with master and per-function toggles" /></p>
+
+<p>The screenshot has <strong>Send message</strong> and <strong>Get recent messages</strong> switched off to illustrate per-function control; a fresh install shows every switch on.</p>
 
 <h3 id="write-functions">Write Functions</h3>
 
@@ -30,8 +36,8 @@
   </thead>
   <tbody>
     <tr>
-      <td><strong>Send Message</strong></td>
-      <td>Sends a text message to a contact (direct message) or to a channel, up to 237 bytes.</td>
+      <td><strong>Send message</strong></td>
+      <td>Sends a text message to a contact (direct message) or to a channel. The mesh carries at most 233 bytes of text, so keep assistant-composed messages short.</td>
     </tr>
   </tbody>
 </table>
@@ -47,36 +53,36 @@
   </thead>
   <tbody>
     <tr>
-      <td><strong>Get Mesh Status</strong></td>
+      <td><strong>Get mesh status</strong></td>
       <td>Whether you’re connected to a radio, and how many nodes are online.</td>
     </tr>
     <tr>
-      <td><strong>Get Node List</strong></td>
+      <td><strong>Get node list</strong></td>
       <td>The list of nodes on your mesh.</td>
     </tr>
     <tr>
-      <td><strong>Get Channel Info</strong></td>
+      <td><strong>Get channel info</strong></td>
       <td>Information about your channels.</td>
     </tr>
     <tr>
-      <td><strong>Get Device Status</strong></td>
+      <td><strong>Get device status</strong></td>
       <td>Status of your connected radio.</td>
     </tr>
     <tr>
-      <td><strong>Get Node Details</strong></td>
+      <td><strong>Get node details</strong></td>
       <td>Detailed information about a specific node.</td>
     </tr>
     <tr>
-      <td><strong>Get Recent Messages</strong></td>
+      <td><strong>Get mesh metrics</strong></td>
+      <td>Telemetry and metrics from your mesh.</td>
+    </tr>
+    <tr>
+      <td><strong>Get recent messages</strong></td>
       <td>Recent messages from your conversations.</td>
     </tr>
     <tr>
-      <td><strong>Get Unread Summary</strong></td>
+      <td><strong>Get unread summary</strong></td>
       <td>A summary of unread messages.</td>
-    </tr>
-    <tr>
-      <td><strong>Get Mesh Metrics</strong></td>
-      <td>Telemetry and metrics from your mesh.</td>
     </tr>
   </tbody>
 </table>
@@ -84,7 +90,7 @@
 <h2 id="privacy">Privacy</h2>
 
 <blockquote>
-  <p>🔒 <strong>Privacy:</strong> The <strong>Send Message</strong> function lets an assistant send messages to your mesh on your behalf. Only enable functions you trust the assistant to use. The read functions expose node, message, and metric data to the assistant — enable only what you’re comfortable sharing. Each function has its own toggle, and the master toggle turns all of them off at once.</p>
+  <p>🔒 <strong>Privacy:</strong> The <strong>Send message</strong> function lets an assistant send messages to your mesh on your behalf, and the read functions expose node, message, and metric data to it. Because all of them start enabled, the choice you make here is what to turn off rather than what to turn on. Each function has its own toggle, and <strong>Allow AI access</strong> turns all of them off at once.</p>
 </blockquote>
 
 <h2 id="related-topics">Related Topics</h2>
@@ -92,5 +98,5 @@
 <ul>
   <li><a href="messages-and-channels">Messages &amp; Channels</a> — sending messages directly in the app</li>
   <li><a href="nodes">Nodes</a> — the node list the read functions draw from</li>
-  <li><a href="node-metrics">Node Metrics</a> — the telemetry behind Get Mesh Metrics</li>
+  <li><a href="node-metrics">Node Metrics</a> — the telemetry behind Get mesh metrics</li>
 </ul>

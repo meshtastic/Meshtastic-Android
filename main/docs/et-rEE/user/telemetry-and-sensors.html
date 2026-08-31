@@ -15,13 +15,13 @@ Meshtastic sõlmed saavad koguda ja jagada andurite andmeid kärgvõrgu kaudu. T
 
 Kõik Meshtastic sõlmed edastavad seadme põhitelemeetriat:
 
- Meetriline       | Kirjeldus                              | Tüüpiline ulatus                   |
- ---------------- | -------------------------------------- | ---------------------------------- |
- Aku tase         | Charge percentage                      | 0–100%                             |
- Vool             | Aku pinge                              | 3,0–4,2V (LiPo) |
- Kanali kasutus   | Kohalikult kasutatud eetriaja %        | 0–100%                             |
- Eetri kasutus TX | Selle sõlme poolt kasutatud eetriaja % | 0–100%                             |
- Töötamise aeg    | Seconds since last boot                | Varies                             |
+ Meetriline     | Kirjeldus                                       | Tüüpiline ulatus                   |
+ -------------- | ----------------------------------------------- | ---------------------------------- |
+ Aku tase       | Charge percentage                               | 0–100%                             |
+ Vool           | Aku pinge                                       | 3,0–4,2V (LiPo) |
+ Kanali kasutus | % of local airtime in use                       | 0–100%                             |
+ Saate kasutus  | % of the last hour this node spent transmitting | 0–100%                             |
+ Töötamise aeg  | Seconds since last boot                         | Varies                             |
 
 ## Environment Sensors
 
@@ -62,6 +62,20 @@ Both appear as info cards on the node detail screen, next to the other environme
  VEML7700 | Ümbritseva valguse (luksi) |
  LTR390   | UV indeks                                     |
 
+### Weather and Other Readings
+
+ Meetriline                            | Ühik                 | Where it appears                                                                                                                                            |
+ ------------------------------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+ Wind speed                            | km/h or mph          | Card and chart. Sensors report meters per second; the app converts to match your unit setting, and the chart uses the same unit as the card |
+ Wind direction, gust, and lull        | degrees, km/h or mph | Listed with each reading on the Environment Metrics screen; not charted                                                                                     |
+ Rainfall, last hour and last 24 hours | mm or in             | Listed with each reading on the Environment Metrics screen; not charted                                                                                     |
+ Radiatsioon                           | µR/h                 | Card and chart                                                                                                                                              |
+ Kaal                                  | kg or lb             | Card only — load cells, such as a beehive scale                                                                                                             |
+ Kaugus                                | mm or in             | Card only — water level, from a distance sensor                                                                                                             |
+ Dew point                             | °C or °F             | Card only — computed from temperature and humidity                                                                                                          |
+ 1-Wire temperature                    | °C or °F             | Card and chart, up to eight DS18B20-style probes                                                                                                            |
+ ADC voltage                           | V                    | Card and chart, up to eight raw analog channels                                                                                                             |
+
 ## Võimsusnäitajad
 
 Nodes with INA-series power sensors can report:
@@ -71,22 +85,22 @@ Nodes with INA-series power sensors can report:
  Vool       | Per-channel voltage reading     |
  Pinge      | Per-channel current draw, in mA |
 
-Up to three sensor channels (ch1–ch3) are reported, and each can be given its own label — Solar or Battery, say — from the node detail screen. There is no separate wattage reading; the app charts voltage and current, and does not compute power from them.
+The node detail screen shows read-only cards for channels 1 to 3. Use the chart button on the **Power Metrics** row to open the chart screen, which lists a chip for every channel that reported data — up to eight — and charts the one you select. Rename a channel there, in the label field under the chips, to something like Solar or Battery. There is no separate wattage reading; the app charts voltage and current, and does not compute power from them.
 
 Kasulik päikesepaneelide laadimise või aku seisundi jälgimiseks kaugsõlmedes.
 
 ## Configuring Telemetry
 
-1. Mine menüüsse **Seaded → Mooduli konfiguratsioon → Telemeetria**.
+1. Navigate to **Settings → Module configuration → Telemetry**.
 2. Each metric group has its own enable toggle and its own interval:
 
-   - **Device Metrics** — battery, channel and airtime utilisation
+   - **Device Metrics** — battery, voltage, uptime, ChUtil, and AirUtil. Its enable toggle, **Send Device Telemetry**, appears only on firmware 2.7.12 and later; on older firmware you can change the interval but not turn the group off
    - **Environment Metrics** — temperature, humidity, pressure and the other sensor readings
    - **Air Quality Metrics** — particulate and CO₂ readings
    - **Power Metrics** — the per-channel voltage and current readings
 
-   Environment metrics additionally have toggles to show the readings on the radio's own screen,
-   and to show them in Fahrenheit.
+   Environment and Power each have an extra toggle to show their readings on the radio's own
+   screen, and Environment has one more to show its temperatures there in Fahrenheit.
 
 ### Choosing an Interval
 
@@ -114,12 +128,8 @@ CO₂ näit on värvikoodiga märgitud vastavalt raskusastmele (Hea → Umbne �
 ## Viewing Telemetry
 
 1. Mine **Seadmed** ja vali seade.
-2. Telemeetria jaotised kuvatakse detailvaates:
-   - Device Metrics (always available)
-   - Environment Metrics (if sensors present)
-   - Power Metrics (if INA sensor present)
-   - Air Quality Metrics (if PM/CO₂ sensor present)
-3. Ajaloolised graafikud näitavad aja jooksul trende.
+2. The **Telemetry** section lists a row for every metric type — Device, Environment, Air Quality, Power, and the rest — whether or not this node has reported it. A row fills in with readings, and grows a chart button, once that node has actually sent that kind of telemetry. An empty row means nothing has arrived yet, not that the sensor is missing.
+3. Use the chart button on a row to open that metric's history, where you can pick a time frame and export the readings as CSV.
 
 ![Node detail screen with the telemetry chart action menu open](../../assets/screenshots/node-metrics_telemetric_actions.png)
 

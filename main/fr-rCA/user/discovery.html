@@ -13,10 +13,10 @@
 
 <p>Local Mesh Discovery is a dedicated scanning mode that helps you find the best LoRa modem preset for your location and see which nodes are active on each preset. It cycles your connected radio through one or more presets you choose, dwells on each one — listens for a set time — to collect packets, then analyzes and ranks the results.</p>
 
-<p>Open it from <strong>Settings → Advanced → Local Mesh Discovery</strong>. On desktop, it has its own <strong>Settings → Local Mesh Discovery</strong> entry.</p>
+<p>Connect your radio, then open <strong>Settings → Advanced → Local Mesh Discovery</strong>. On Android the <strong>Advanced</strong> section stays grayed out until a radio is connected and the app has finished reading its configuration, and every entry in it is disabled on a managed device. On desktop, Local Mesh Discovery has its own entry on the Settings screen, with no such gate.</p>
 
 <blockquote>
-  <p>ℹ️ <strong>Note:</strong> Discovery temporarily changes your radio’s LoRa settings while it scans, then restores your original configuration when it finishes. Your radio must be connected to run a scan.</p>
+  <p>ℹ️ <strong>Note:</strong> Discovery temporarily changes your radio’s LoRa settings while it scans, then restores your original configuration when it finishes.</p>
 </blockquote>
 
 <h3 id="setting-up-a-scan">Setting Up a Scan</h3>
@@ -41,12 +41,12 @@
     </tr>
     <tr>
       <td><strong>Keep screen awake</strong></td>
-      <td>Optional toggle that prevents the screen from sleeping during a long scan.</td>
+      <td>Keeps the phone out of Android Doze mode, which would otherwise drop radio packets during a long scan. Recommended — a scan run with it off can under-count what the radio heard.</td>
     </tr>
   </tbody>
 </table>
 
-<p>The <strong>Start</strong> button stays disabled — with an explanation of why — until the scan can run. Common reasons it’s disabled:</p>
+<p>The <strong>Start Scan</strong> button stays disabled — with an explanation of why — until the scan can run. Common reasons it’s disabled:</p>
 
 <ul>
   <li>The radio is <strong>not connected</strong>.</li>
@@ -67,7 +67,7 @@
   </thead>
   <tbody>
     <tr>
-      <td><strong>Preparing</strong></td>
+      <td><strong>Preparing scan</strong></td>
       <td>Saving your current configuration and getting ready to scan.</td>
     </tr>
     <tr>
@@ -75,25 +75,35 @@
       <td>Switching the radio to the next preset to test.</td>
     </tr>
     <tr>
-      <td><strong>Reconnecting</strong></td>
+      <td><strong>Reconnecting on &lt;preset&gt;</strong></td>
       <td>Re-establishing the connection after the preset change.</td>
     </tr>
     <tr>
-      <td><strong>Dwell</strong></td>
+      <td><strong>Dwelling on &lt;preset&gt;</strong></td>
       <td>Listening on the current preset to collect packets, with a countdown to the next step.</td>
     </tr>
     <tr>
-      <td><strong>Analysis</strong></td>
+      <td><strong>Analyzing results</strong></td>
       <td>Processing the collected packets and ranking the presets.</td>
     </tr>
     <tr>
-      <td><strong>Restoring</strong></td>
+      <td><strong>Restoring home preset</strong></td>
       <td>Putting your original LoRa configuration back.</td>
+    </tr>
+    <tr>
+      <td><strong>Cancelling scan</strong></td>
+      <td>You tapped <strong>Stop Scan</strong>; partial results are saved before the original preset is restored.</td>
+    </tr>
+    <tr>
+      <td><strong>Scan failed: &lt;reason&gt;</strong></td>
+      <td>The scan could not continue — most often the radio did not come back within a minute of a preset change. The results collected so far are saved, and the original preset is restored automatically.</td>
     </tr>
   </tbody>
 </table>
 
 <p><img src="../../assets/screenshots/discovery_dwell_progress.png" alt="Dwell countdown showing time remaining on the current preset" /></p>
+
+<p>If a scan is interrupted — the app is closed, or the radio goes away — the app restores your original preset the next time it reconnects to that radio, and tells you it has done so. Reconnect the same radio to let that happen; until you do, the radio stays on whichever preset the scan left it on.</p>
 
 <h3 id="reading-the-results">Reading the Results</h3>
 
@@ -150,11 +160,19 @@
 
 <p>Mesh Beacon lets nodes invite others to join their mesh. A beaconing node periodically broadcasts an invitation — optionally advertising a channel, region, and modem preset — that nearby nodes can hear even before they share a configuration.</p>
 
-<p>Configure it under <strong>Settings → Module Config → Mesh Beacon</strong>:</p>
+<p>Configure it under <strong>Settings → Module configuration → Mesh Beacon</strong>. The entry appears only on radios running firmware 2.8.0 or newer. A read-only <strong>Region</strong> row at the top of the screen shows the region the beacon advertises: that region, and the preset, are always the ones the radio itself uses, so a beacon cannot invite anyone onto settings your radio is not running.</p>
 
 <ul>
   <li><strong>Listen for beacons</strong> — receive invitations broadcast by other nodes.</li>
-  <li><strong>Broadcast beacon</strong> — send your own invitation at a set interval, with an optional message and an offered channel.</li>
+  <li><strong>Broadcast a beacon</strong> — periodically advertise this mesh to nearby nodes, with an optional <strong>Beacon message</strong> of up to 100 bytes, a <strong>Broadcast interval</strong> picked from fixed intervals between 1 hour and 72 hours, and an <strong>Offered channel</strong> chosen from your radio’s own channels. The offered channel is required, and defaults to your primary channel.</li>
+  <li><strong>Broadcast targets</strong> — optional extra destinations beyond the offered channel. <strong>Add target</strong> appends a row; each row picks a <strong>Channel</strong> and a <strong>Transmit preset</strong>, and <strong>Remove target</strong> deletes it. With no targets, the beacon goes out on the offered channel alone.</li>
+</ul>
+
+<p>Two conditions block beacon setup:</p>
+
+<ul>
+  <li><strong>The radio has no region set.</strong> The screen shows nothing but <em>Set your radio’s region before setting up a beacon.</em> Set the region on <strong>Settings → LoRa</strong> first.</li>
+  <li><strong>The radio uses custom LoRa settings.</strong> A beacon advertises a modem preset for others to join, so a radio with <strong>Use Preset</strong> turned off has no standard preset to offer. In that state <strong>Broadcast a beacon</strong> can be turned off but not on, and the broadcast settings are read-only. Listening for beacons is unaffected.</li>
 </ul>
 
 <p>Received invitations appear as <strong>Mesh invitations</strong> cards on the Discovery screen. Each card shows the sender’s message plus the offered channel, region, preset, and signal quality, with these actions:</p>
@@ -166,6 +184,8 @@
 </ul>
 
 <p>Channels advertised by beacons also show up in the scan setup as <strong>Beacon channels</strong> — select one to include it as a scan target.</p>
+
+<p>An invitation to a mesh your radio is already on is suppressed: no card, no notification, and no <strong>Beacon channels</strong> entry. A channel counts as one you already have only when both its name and its key match a channel on your radio — the same name with a different key is a different mesh, so that invitation still reaches you.</p>
 
 <h2 id="manual-exploration">Manual Exploration</h2>
 
@@ -179,17 +199,23 @@
 
 <ol>
   <li>Navigate to <strong>Nodes</strong> and tap the node you want to trace.</li>
-  <li>On the node detail screen, tap <strong>Traceroute</strong>. The app sends the request; results show each hop with signal quality.</li>
+  <li>On the node detail screen, find <strong>Traceroute</strong> in the <strong>Telemetry</strong> section and tap its request button. Once a result arrives, a second button on the same row opens the traceroute log, where each hop is listed with its signal quality.</li>
 </ol>
 
 <h4 id="reading-the-results-1">Reading the Results</h4>
 
 <p>A traceroute result looks like this:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>You → Node A (SNR: 8.5, RSSI: -95) → Node B (SNR: 5.2, RSSI: -108) → Target
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Route traced toward destination:
+
+■ Your Node (YOUR)
+⇊ 8.5 dB
+■ Relay Node (RLAY)
+⇊ -8.75 dB
+■ Target Node (TGT1)
 </code></pre></div></div>
 
-<p>Each hop represents a relay node that forwarded the message. The SNR and RSSI values at each hop tell you about the link quality on that specific segment.</p>
+<p>Each <code class="language-plaintext highlighter-rouge">⇊</code> line between two nodes is one relay hop, and the SNR on that line is the quality of that segment alone. The app colors it green at or above −7 dB, yellow at or above −15 dB, and orange below that. A request that also gets a reply adds a second block under <strong>Route traced back to us:</strong>.</p>
 
 <table>
   <thead>
@@ -204,7 +230,7 @@
       <td>Healthy path — messages flow reliably</td>
     </tr>
     <tr>
-      <td>One hop shows Bad SNR (&lt; −15 dB, red)</td>
+      <td>One hop shows a poor SNR (below −15 dB, orange)</td>
       <td>Weak link — this relay segment is fragile</td>
     </tr>
     <tr>
@@ -225,8 +251,9 @@
 <h4 id="troubleshooting-with-traceroute">Troubleshooting with Traceroute</h4>
 
 <ul>
-  <li><strong>“No route found”</strong> — The target node may be offline, out of range, or on a different channel. Check that both nodes share at least one channel with the same encryption key.</li>
-  <li><strong>Traceroute times out</strong> — The path may be too long (exceeds hop limit) or a relay node is congested. Try increasing the hop limit in <strong>Settings → LoRa Config</strong>.</li>
+  <li><strong>No Response</strong> — The traceroute got nothing back. The target node may be offline, out of range, or on a different channel. Check that both nodes share at least one channel with the same encryption key.</li>
+  <li><strong>Traceroute times out</strong> — The path may be too long (exceeds hop limit) or a relay node is congested. Try increasing the hop limit in <strong>Settings → LoRa</strong>.</li>
+  <li><strong>Cannot show traceroute map because the start or destination node has no position information</strong> — The path was traced, but one end has never shared a position.</li>
   <li><strong>Asymmetric paths</strong> — A traceroute from A→B may take a different path than B→A. This is normal — radio propagation is not always symmetric.</li>
 </ul>
 
@@ -237,23 +264,24 @@
 <h4 id="enabling-neighbor-info">Enabling Neighbor Info</h4>
 
 <ol>
-  <li>Navigate to <strong>Settings → Module Config → Neighbor Info</strong>.</li>
+  <li>Navigate to <strong>Settings → Module configuration → Neighbor Info</strong>.</li>
   <li>Enable the module.</li>
-  <li>Set the broadcast interval (default: 900 seconds / 15 minutes).</li>
+  <li>Set <strong>Update interval (seconds)</strong>. The default is 21600 seconds (6 hours), and the firmware minimum is 14400 seconds (4 hours) — a smaller value is rejected and reset to the default.</li>
+  <li>Turn on <strong>Transmit over LoRa</strong>. Without it, your neighbor list goes only to MQTT and to this app, never over the air. It is unavailable on a channel that still uses the default name and key, so set up your own channel first — see <a href="messages-and-channels">Messages &amp; Channels</a>.</li>
 </ol>
 
-<p>Once enabled, your node periodically broadcasts its neighbor list. Other nodes with Neighbor Info enabled do the same.</p>
+<p>Once enabled and transmitting over LoRa, your node periodically broadcasts its neighbor list. Other nodes with Neighbor Info enabled do the same.</p>
 
 <h4 id="viewing-neighbor-data">Viewing Neighbor Data</h4>
 
 <ul>
-  <li>Open any node’s detail screen and look for the <strong>Neighbors</strong> section.</li>
+  <li>Open a node’s detail screen and find <strong>Neighbor Info</strong> in the <strong>Telemetry</strong> section. The request button asks the node for its current neighbor list; once the app has received one, a second button on the same row opens the log of everything that node has reported. The row appears only on nodes that can answer a neighbor request, or that have already reported neighbors.</li>
   <li>Each neighbor entry shows the node that was directly heard and its signal quality.</li>
   <li>Combine neighbor data from multiple nodes to understand the full mesh topology.</li>
 </ul>
 
 <blockquote>
-  <p>ℹ️ <strong>Note:</strong> Neighbor Info increases airtime usage because every enabled node periodically broadcasts its neighbor list. On busy meshes with many nodes, consider longer broadcast intervals (3600 seconds or more) to avoid congestion.</p>
+  <p>ℹ️ <strong>Note:</strong> Neighbor Info increases airtime usage because every enabled node periodically broadcasts its neighbor list. The firmware does not accept an interval shorter than 14400 seconds (4 hours) for this reason; on busy meshes, leave it at the 21600-second default or raise it further.</p>
 </blockquote>
 
 <h3 id="node-list-as-a-discovery-tool">Node List as a Discovery Tool</h3>

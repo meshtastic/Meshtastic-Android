@@ -26,13 +26,13 @@
       <td>3.0–4.2V (LiPo)</td>
     </tr>
     <tr>
-      <td>Utilisation du canal</td>
-      <td>% of airtime used locally</td>
+      <td>UtilCanal</td>
+      <td>% of local airtime in use</td>
       <td>0–100%</td>
     </tr>
     <tr>
-      <td>Air Utilization TX</td>
-      <td>% of airtime used by this node</td>
+      <td>UtilAir</td>
+      <td>% of the last hour this node spent transmitting</td>
       <td>0–100%</td>
     </tr>
     <tr>
@@ -178,6 +178,65 @@
   </tbody>
 </table>
 
+<h3 id="weather-and-other-readings">Weather and Other Readings</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Metric</th>
+      <th>Unité</th>
+      <th>Where it appears</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Wind speed</td>
+      <td>km/h or mph</td>
+      <td>Card and chart. Sensors report meters per second; the app converts to match your unit setting, and the chart uses the same unit as the card</td>
+    </tr>
+    <tr>
+      <td>Wind direction, gust, and lull</td>
+      <td>degrees, km/h or mph</td>
+      <td>Listed with each reading on the Environment Metrics screen; not charted</td>
+    </tr>
+    <tr>
+      <td>Rainfall, last hour and last 24 hours</td>
+      <td>mm or in</td>
+      <td>Listed with each reading on the Environment Metrics screen; not charted</td>
+    </tr>
+    <tr>
+      <td>Radiation</td>
+      <td>µR/h</td>
+      <td>Card and chart</td>
+    </tr>
+    <tr>
+      <td>Poids</td>
+      <td>kg or lb</td>
+      <td>Card only — load cells, such as a beehive scale</td>
+    </tr>
+    <tr>
+      <td>Distance</td>
+      <td>mm or in</td>
+      <td>Card only — water level, from a distance sensor</td>
+    </tr>
+    <tr>
+      <td>Dew point</td>
+      <td>°C or °F</td>
+      <td>Card only — computed from temperature and humidity</td>
+    </tr>
+    <tr>
+      <td>1-Wire temperature</td>
+      <td>°C or °F</td>
+      <td>Card and chart, up to eight DS18B20-style probes</td>
+    </tr>
+    <tr>
+      <td>ADC voltage</td>
+      <td>V</td>
+      <td>Card and chart, up to eight raw analog channels</td>
+    </tr>
+  </tbody>
+</table>
+
 <h2 id="métriques-dalimentation">Métriques d’alimentation</h2>
 
 <p>Nodes with INA-series power sensors can report:</p>
@@ -185,7 +244,7 @@
 <table>
   <thead>
     <tr>
-      <th>Metric</th>
+      <th>Métrique</th>
       <th>Description</th>
     </tr>
   </thead>
@@ -201,26 +260,26 @@
   </tbody>
 </table>
 
-<p>Up to three sensor channels (ch1–ch3) are reported, and each can be given its own label — Solar or Battery, say — from the node detail screen. There is no separate wattage reading; the app charts voltage and current, and does not compute power from them.</p>
+<p>The node detail screen shows read-only cards for channels 1 to 3. Use the chart button on the <strong>Power Metrics</strong> row to open the chart screen, which lists a chip for every channel that reported data — up to eight — and charts the one you select. Rename a channel there, in the label field under the chips, to something like Solar or Battery. There is no separate wattage reading; the app charts voltage and current, and does not compute power from them.</p>
 
 <p>Useful for monitoring solar charging or battery health on remote nodes.</p>
 
 <h2 id="configuring-telemetry">Configuring Telemetry</h2>
 
 <ol>
-  <li>Navigate to <strong>Settings → Module Config → Telemetry</strong>.</li>
+  <li>Navigate to <strong>Settings → Module configuration → Telemetry</strong>.</li>
   <li>
     <p>Each metric group has its own enable toggle and its own interval:</p>
 
     <ul>
-      <li><strong>Device Metrics</strong> — battery, channel and airtime utilisation</li>
+      <li><strong>Device Metrics</strong> — battery, voltage, uptime, ChUtil, and AirUtil. Its enable toggle, <strong>Send Device Telemetry</strong>, appears only on firmware 2.7.12 and later; on older firmware you can change the interval but not turn the group off</li>
       <li><strong>Environment Metrics</strong> — temperature, humidity, pressure and the other sensor readings</li>
       <li><strong>Air Quality Metrics</strong> — particulate and CO₂ readings</li>
       <li><strong>Power Metrics</strong> — the per-channel voltage and current readings</li>
     </ul>
 
-    <p>Environment metrics additionally have toggles to show the readings on the radio’s own screen,
-and to show them in Fahrenheit.</p>
+    <p>Environment and Power each have an extra toggle to show their readings on the radio’s own
+screen, and Environment has one more to show its temperatures there in Fahrenheit.</p>
   </li>
 </ol>
 
@@ -276,15 +335,8 @@ hand-tune them for mesh size. Lengthen them deliberately only to save battery.</
 
 <ol>
   <li>Navigate to <strong>Nodes</strong> and select a node.</li>
-  <li>Telemetry sections show on the detail screen:
-    <ul>
-      <li>Device Metrics (always available)</li>
-      <li>Environment Metrics (if sensors present)</li>
-      <li>Power Metrics (if INA sensor present)</li>
-      <li>Air Quality Metrics (if PM/CO₂ sensor present)</li>
-    </ul>
-  </li>
-  <li>Historical graphs show trends over time.</li>
+  <li>The <strong>Telemetry</strong> section lists a row for every metric type — Device, Environment, Air Quality, Power, and the rest — whether or not this node has reported it. A row fills in with readings, and grows a chart button, once that node has actually sent that kind of telemetry. An empty row means nothing has arrived yet, not that the sensor is missing.</li>
+  <li>Use the chart button on a row to open that metric’s history, where you can pick a time frame and export the readings as CSV.</li>
 </ol>
 
 <p><img src="../../assets/screenshots/node-metrics_telemetric_actions.png" alt="Node detail screen with the telemetry chart action menu open" /></p>

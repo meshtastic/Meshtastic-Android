@@ -15,7 +15,8 @@ This page covers installing the Meshtastic desktop app, connecting a radio, and 
 
 ### Linux
 
-- Download the `.deb` or `.AppImage` package from the [releases page](https://github.com/meshtastic/Meshtastic-Android/releases)
+- Download the `.deb`, `.rpm`, or `.AppImage` package from the [releases page](https://github.com/meshtastic/Meshtastic-Android/releases)
+- Or install from Flathub: `flatpak install flathub org.meshtastic.MeshtasticDesktop`
 - Или соберите из исходного кода с помощью `./gradlew :desktopApp:run`
 
 ### macOS
@@ -25,7 +26,7 @@ This page covers installing the Meshtastic desktop app, connecting a radio, and 
 
 ### Windows
 
-- Download the `.msi` installer from the [releases page](https://github.com/meshtastic/Meshtastic-Android/releases)
+- Download the `.msi` or `.exe` installer from the [releases page](https://github.com/meshtastic/Meshtastic-Android/releases)
 - Или соберите из исходных кодов
 
 ## Подключение твоей радиостанции
@@ -52,20 +53,20 @@ Bluetooth Low Energy is supported on desktop via the [Kable](https://github.com/
 
 ## Паритет функций
 
- Функция                                               | Android | Desktop | Заметки                                                                                                                                                |
- ----------------------------------------------------- | ------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
- Обмен сообщениями                                     | ✓       | ✓       | Полное равенство                                                                                                                                       |
- Список узлов                                          | ✓       | ✓       | Полное равенство                                                                                                                                       |
- Карта                                                 | ✓       | ✓       | Interactive MapLibre map, with base map and overlay pickers and custom tile sources. No offline downloads or local `.mbtiles` archives |
- Map layers (`.kml`/`.kmz`/GeoJSON) | ✓       | ✓       | Same layer store and sheet as Android; imported files draw on the desktop map                                                                          |
- Планировщик участков                                  | ✓       | ✓\*     | \*Opens in your browser on desktop; the estimate is not drawn on the desktop map                                                                       |
- Настройки                                             | ✓       | ✓       | Полное равенство                                                                                                                                       |
- Bluetooth (BLE)                    | ✓       | ✓       | Через Kable в настольном приложении                                                                                                                    |
- Обновление прошивки                                   | ✓       | ✓       | Внутри приложенное обновление по USB, BLE и Wi-Fi (ESP32) работает так же, как на Android                                           |
- Уведомления                                           | ✓       | ✓       | Системные уведомления                                                                                                                                  |
- Виджеты                                               | ✓       | ✗       | Только Android                                                                                                                                         |
- AI-ассистент (Chirpy)              | ✓\*     | ✗       | Только в Google-версии для Android                                                                                                                     |
- Функции приложения (системный ИИ)  | ✓†      | ✗       | Только в Google-версии для Android                                                                                                                     |
+ Функция                                               | Android | Desktop | Заметки                                                                                                                                                                                               |
+ ----------------------------------------------------- | ------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+ Обмен сообщениями                                     | ✓       | ✓       | Полное равенство                                                                                                                                                                                      |
+ Список узлов                                          | ✓       | ✓       | Полное равенство                                                                                                                                                                                      |
+ Карта                                                 | ✓       | ✓       | Interactive MapLibre map, with base map and overlay pickers and custom tile sources. No offline downloads or local `.mbtiles` archives                                                |
+ Map layers (`.kml`/`.kmz`/GeoJSON) | ✓       | ✓       | Same layer store and sheet as Android; imported files draw on the desktop map                                                                                                                         |
+ Планировщик участков                                  | ✓       | ✓\*     | \*Opens in your browser on desktop; the estimate is not drawn on the desktop map                                                                                                                      |
+ Настройки                                             | ✓       | ✓       | Полное равенство                                                                                                                                                                                      |
+ Bluetooth (BLE)                    | ✓       | ✓       | Через Kable в настольном приложении                                                                                                                                                                   |
+ Обновление прошивки                                   | ✓       | ✓       | In-app USB, BLE, and Wi-Fi (ESP32) update work the same as Android. The USB maintenance flow — nRF52/RP2040 factory erase and bootloader upgrade — is Android-only |
+ Уведомления                                           | ✓       | ✓       | Системные уведомления                                                                                                                                                                                 |
+ Виджеты                                               | ✓       | ✗       | Только Android                                                                                                                                                                                        |
+ AI-ассистент (Chirpy)              | ✓\*     | ✗       | Только в Google-версии для Android                                                                                                                                                                    |
+ Функции приложения (системный ИИ)  | ✓†      | ✗       | Только в Google-версии для Android                                                                                                                                                                    |
 
 \*Chirpy AI требует Android 14+ в Google-версии на поддерживаемом оборудовании.
 
@@ -92,13 +93,13 @@ The desktop app uses the same Compose Multiplatform UI with adaptations for larg
 ### Окно и системный трей
 
 - **Изменение размера окна** — адаптивный макет подстраивается под размеры окна
-- **Системный трей** — сверните в системный трей для фоновой работы mesh-сети
+- **System tray** — closing the window minimizes to the system tray for background mesh operation. On a desktop environment with no tray, there is nowhere to minimize to, so closing quits the app instead
 - **Меню трея** — щёлкните правой кнопкой мыши по значку в трее, чтобы показать окно или выйти
 - **Взаимодействие с мышью** — состояния при наведении и стандартная настольная навигация
 
 ### Настройки уведомлений
 
-The desktop app provides in-app toggles for controlling which notifications are shown — messages, new nodes, and low battery alerts. Доступ к ним осуществляется через **Настройки → Уведомления** в самом приложении.
+The desktop app provides in-app toggles for controlling which notifications are shown. Find them in the **App Notifications** section of the Settings screen: **Direct message notifications**, **New node notifications**, and **Low battery notifications**.
 
 ## Встроенный браузер документации
 
@@ -132,9 +133,12 @@ cd Meshtastic-Android
 - Offline tile downloads and local `.mbtiles` archives are not available on desktop.
 - `.kml`/`.kmz`/GeoJSON layer import works — see
   [Map &amp; Waypoints](map-and-waypoints#map-layers). Site Planner opens in your browser
-  rather than in the app; to bring its coverage estimate onto the map, use the planner's
-  **Export › GeoJSON** and add the file as a layer. Custom network tile sources work too — see
-  [Map &amp; Waypoints](map-and-waypoints#adding-your-own-tile-source)
+  rather than in the app; to bring its coverage estimate onto the map, click the transmitter pin
+  in the browser and use the planner's GeoJSON export, then add the file as a layer — not the KML
+  export, which is a ground-overlay image this map cannot draw. Custom network tile sources work
+  too — see [Map &amp; Waypoints](map-and-waypoints#adding-your-own-tile-source)
+- The USB maintenance flow — nRF52/RP2040 factory erase and bootloader upgrade — is Android-only, and the
+  desktop app does not offer it. Use the [Web Flasher](https://flasher.meshtastic.org) instead
 - Некоторые специфичные для Android функции (виджеты, отдельные каналы уведомлений) недоступны
 - Производительность может варьироваться на маломощном оборудовании при запуске Compose Desktop
 - BLE-связывание пока не поддерживается в настольном приложении (сопряжение работает без связывания)
@@ -142,7 +146,8 @@ cd Meshtastic-Android
 ## Связанные темы
 
 - [Подключения](connections) — обзор методов подключения
-- [Обновление прошивки](firmware) — обновление по USB, BLE и Wi-Fi работает так же, как на Android
+- [Firmware Updates](firmware) — in-app USB, BLE, and Wi-Fi update all work the same as on Android
+- [Map &amp; Waypoints](map-and-waypoints) — base maps, layers, custom tile sources, and what the desktop map does not do
 </pre>
 </body>
 </html>

@@ -15,7 +15,8 @@ This page covers installing the Meshtastic desktop app, connecting a radio, and 
 
 ### Linux
 
-- Download the `.deb` or `.AppImage` package from the [releases page](https://github.com/meshtastic/Meshtastic-Android/releases)
+- Download the `.deb`, `.rpm`, or `.AppImage` package from the [releases page](https://github.com/meshtastic/Meshtastic-Android/releases)
+- Or install from Flathub: `flatpak install flathub org.meshtastic.MeshtasticDesktop`
 - Or build from source using `./gradlew :desktopApp:run`
 
 ### macOS
@@ -25,7 +26,7 @@ This page covers installing the Meshtastic desktop app, connecting a radio, and 
 
 ### Windows
 
-- Download the `.msi` installer from the [releases page](https://github.com/meshtastic/Meshtastic-Android/releases)
+- Download the `.msi` or `.exe` installer from the [releases page](https://github.com/meshtastic/Meshtastic-Android/releases)
 - Or build from source
 
 ## Connecting Your Radio
@@ -52,20 +53,20 @@ Bluetooth Low Energy is supported on desktop via the [Kable](https://github.com/
 
 ## Feature Parity
 
- Feature                                               | Android | Desktop | Notas                                                                                                                                                  |
- ----------------------------------------------------- | ------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
- Messaging                                             | ✓       | ✓       | Full parity                                                                                                                                            |
- Node List                                             | ✓       | ✓       | Full parity                                                                                                                                            |
- Mapa                                                  | ✓       | ✓       | Interactive MapLibre map, with base map and overlay pickers and custom tile sources. No offline downloads or local `.mbtiles` archives |
- Map layers (`.kml`/`.kmz`/GeoJSON) | ✓       | ✓       | Same layer store and sheet as Android; imported files draw on the desktop map                                                                          |
- Site Planner                                          | ✓       | ✓\*     | \*Opens in your browser on desktop; the estimate is not drawn on the desktop map                                                                       |
- Ajustes                                               | ✓       | ✓       | Full parity                                                                                                                                            |
- Bluetooth (BLE)                    | ✓       | ✓       | Via Kable on desktop                                                                                                                                   |
- Actualización de firmware                             | ✓       | ✓       | In-app USB, BLE, and Wi-Fi (ESP32) update all work the same as Android                                                              |
- Notifications                                         | ✓       | ✓       | Native OS notifications                                                                                                                                |
- Widgets                                               | ✓       | ✗       | Android-only                                                                                                                                           |
- AI Assistant (Chirpy)              | ✓\*     | ✗       | Google flavor Android only                                                                                                                             |
- App Functions (system AI)          | ✓†      | ✗       | Google flavor Android only                                                                                                                             |
+ Feature                                               | Android | Desktop | Notas                                                                                                                                                                                                 |
+ ----------------------------------------------------- | ------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+ Messaging                                             | ✓       | ✓       | Full parity                                                                                                                                                                                           |
+ Node List                                             | ✓       | ✓       | Full parity                                                                                                                                                                                           |
+ Mapa                                                  | ✓       | ✓       | Interactive MapLibre map, with base map and overlay pickers and custom tile sources. No offline downloads or local `.mbtiles` archives                                                |
+ Map layers (`.kml`/`.kmz`/GeoJSON) | ✓       | ✓       | Same layer store and sheet as Android; imported files draw on the desktop map                                                                                                                         |
+ Site Planner                                          | ✓       | ✓\*     | \*Opens in your browser on desktop; the estimate is not drawn on the desktop map                                                                                                                      |
+ Ajustes                                               | ✓       | ✓       | Full parity                                                                                                                                                                                           |
+ Bluetooth (BLE)                    | ✓       | ✓       | Via Kable on desktop                                                                                                                                                                                  |
+ Actualización de firmware                             | ✓       | ✓       | In-app USB, BLE, and Wi-Fi (ESP32) update work the same as Android. The USB maintenance flow — nRF52/RP2040 factory erase and bootloader upgrade — is Android-only |
+ Notifications                                         | ✓       | ✓       | Native OS notifications                                                                                                                                                                               |
+ Widgets                                               | ✓       | ✗       | Android-only                                                                                                                                                                                          |
+ AI Assistant (Chirpy)              | ✓\*     | ✗       | Google flavor Android only                                                                                                                                                                            |
+ App Functions (system AI)          | ✓†      | ✗       | Google flavor Android only                                                                                                                                                                            |
 
 \*Chirpy AI requires Android 14+ on Google flavor builds with supported hardware.
 
@@ -92,13 +93,13 @@ Shortcuts use **⌘** (Command) on macOS and **Ctrl** on Windows and Linux. (The
 ### Window &amp; System Tray
 
 - **Window resizing** — responsive layout adapts to window dimensions
-- **System tray** — minimize to system tray for background mesh operation
+- **System tray** — closing the window minimizes to the system tray for background mesh operation. On a desktop environment with no tray, there is nowhere to minimize to, so closing quits the app instead
 - **Tray menu** — right-click the tray icon to show window or quit
 - **Mouse interaction** — hover states and standard desktop navigation
 
 ### Notification Preferences
 
-The desktop app provides in-app toggles for controlling which notifications are shown — messages, new nodes, and low battery alerts. Access these from **Settings → Notifications** within the app.
+The desktop app provides in-app toggles for controlling which notifications are shown. Find them in the **App Notifications** section of the Settings screen: **Direct message notifications**, **New node notifications**, and **Low battery notifications**.
 
 ## Built-in Documentation Browser
 
@@ -132,9 +133,12 @@ Requirements:
 - Offline tile downloads and local `.mbtiles` archives are not available on desktop.
 - `.kml`/`.kmz`/GeoJSON layer import works — see
   [Map &amp; Waypoints](map-and-waypoints#map-layers). Site Planner opens in your browser
-  rather than in the app; to bring its coverage estimate onto the map, use the planner's
-  **Export › GeoJSON** and add the file as a layer. Custom network tile sources work too — see
-  [Map &amp; Waypoints](map-and-waypoints#adding-your-own-tile-source)
+  rather than in the app; to bring its coverage estimate onto the map, click the transmitter pin
+  in the browser and use the planner's GeoJSON export, then add the file as a layer — not the KML
+  export, which is a ground-overlay image this map cannot draw. Custom network tile sources work
+  too — see [Map &amp; Waypoints](map-and-waypoints#adding-your-own-tile-source)
+- The USB maintenance flow — nRF52/RP2040 factory erase and bootloader upgrade — is Android-only, and the
+  desktop app does not offer it. Use the [Web Flasher](https://flasher.meshtastic.org) instead
 - Some Android-specific features (widgets, specific notification channels) are unavailable
 - Performance may vary on low-spec hardware running Compose Desktop
 - BLE bonding is not yet supported on desktop (pairing works without bonding)
@@ -142,7 +146,8 @@ Requirements:
 ## Related Topics
 
 - [Connections](connections) — connection methods overview
-- [Firmware Updates](firmware) — USB, BLE, and Wi-Fi update all work the same as on Android
+- [Firmware Updates](firmware) — in-app USB, BLE, and Wi-Fi update all work the same as on Android
+- [Map &amp; Waypoints](map-and-waypoints) — base maps, layers, custom tile sources, and what the desktop map does not do
 </pre>
 </body>
 </html>

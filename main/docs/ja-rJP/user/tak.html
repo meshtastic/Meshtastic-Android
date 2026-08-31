@@ -24,8 +24,11 @@ TAK モジュールを使うと、Meshtastic のノードは次のことがで�
 ### 前提条件
 
 - ATAK (Android Team Awareness Kit), iTAK, or WinTAK installed
-- Your node's **Role** (Device Config) set to **TAK** or **TAK Tracker** — this is what makes the
-  TAK module appear in Module Config at all
+- Your node's **Device Role** (Device configuration) set to **TAK** or **TAK Tracker** — this is what makes the
+  TAK module appear in Module configuration at all
+- Firmware 2.8.0 or newer on the radio. Earlier firmware accepts a TAK config write and never
+  stores it, so the app hides the TAK module entry below that version even when the role is set
+  correctly. See [Firmware Updates](firmware)
 
 &gt; ⚠️ **Warning:** The old **Meshtastic ATAK Plugin** is no longer part of this path and cannot
 &gt; work. It bridged through the cross-process AIDL API, which was removed in app 2.8.0; the mesh
@@ -34,8 +37,8 @@ TAK モジュールを使うと、Meshtastic のノードは次のことがで�
 
 ### 設定
 
-「**設定 → モジュール設定 → TAK**」に移動します。 The module's own settings are your TAK identity —
-there is no separate enable switch here, because the **Role** setting in Device Config is what
+Navigate to **Settings → Module configuration → TAK**. The module's own settings are your TAK identity —
+there is no separate enable switch here, because the **Device Role** setting in Device configuration is what
 turns TAK on. Your node broadcasts this identity, which appears on TAK maps.
 
  設定項目    | 説明                                                                                                                       |
@@ -51,7 +54,9 @@ name.
 
 ### ローカル TAK サーバー
 
-The app can also run a **local TAK server** so ATAK/iTAK on the **same phone** can connect directly, without a remote TAK server. サーバーは localhost のみ（`127.0.0.1:8089`）にバインドし、相互証明書認証（mTLS）による TLS を使用するため、ネットワーク上の他のデバイスからは到達できません。 「**設定 → モジュール設定 → TAK → TAK サーバー**」を開きます：
+The app can also run a **local TAK server** so ATAK/iTAK on the **same phone** can connect directly, without a remote TAK server. サーバーは localhost のみ（`127.0.0.1:8089`）にバインドし、相互証明書認証（mTLS）による TLS を使用するため、ネットワーク上の他のデバイスからは到達できません。
+
+Open **Settings → Advanced → TAK Server**. These are app settings stored on this phone, which is why they sit next to **Firmware Update** and **Debug Panel** rather than under the TAK module config — and why they need neither a TAK role nor firmware 2.8.0:
 
 ![有効化トグルとエクスポートオプションを備えたローカル TAK サーバーの設定](../../assets/screenshots/tak_server_enabled.png)
 
@@ -102,13 +107,13 @@ Meshtastic は 2 つの TAK ワイヤ形式に対応しており、接続中の�
 
 ## トラブルシューティング
 
- 問題                        | 原因                                                                    | 解決策                                                                                                                                                                                                |
- ------------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
- ノードが ATAK のマップに表示されない     | Wrong Role setting, or Mesh to CoT Converter off                      | Set the node's **Role** to TAK or TAK Tracker. For ordinary (non-TAK-role) nodes to appear, also enable **Mesh to CoT Converter** under the TAK Server settings |
- 位置の更新が古い                  | GPS 測位が失われた、または間隔が長すぎる                                                | GPS の状態を確認し、位置情報設定で位置のブロードキャスト間隔を短くする                                                                                                                                                              |
- ATAK shows "disconnected" | The local TAK server is off, or ATAK is pointed elsewhere             | Check **Enable Local TAK Server** is on, and that ATAK is connecting to `127.0.0.1:8089` — re-import the exported data package if unsure                                                           |
- 図形、マーカー、ルートが橋渡しされない       | 送信側のノードがレガシーな V1（ファームウェア 2.7.x 以前）である | V2 ワイヤ形式にするため、送信側のノードのファームウェアを 2.8.0 以降に更新する                                                                                                                       |
- CoT データが流れない              | チャンネルの不一致                                                             | すべての TAK ノードが、暗号化が一致した同じチャンネル上にある必要がある                                                                                                                                                             |
+ 問題                        | 原因                                                                    | 解決策                                                                                                                                                                                                                    |
+ ------------------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+ ノードが ATAK のマップに表示されない     | Wrong Device Role setting, or Mesh to CoT Converter off               | Set the node's **Device Role** to TAK or TAK Tracker. For ordinary (non-TAK-role) nodes to appear, also enable **Mesh to CoT Converter** under **Settings → Advanced → TAK Server** |
+ 位置の更新が古い                  | GPS 測位が失われた、または間隔が長すぎる                                                | GPS の状態を確認し、位置情報設定で位置のブロードキャスト間隔を短くする                                                                                                                                                                                  |
+ ATAK shows "disconnected" | The local TAK server is off, or ATAK is pointed elsewhere             | Check **Enable Local TAK Server** is on, and that ATAK is connecting to `127.0.0.1:8089` — re-import the exported data package if unsure                                                                               |
+ 図形、マーカー、ルートが橋渡しされない       | 送信側のノードがレガシーな V1（ファームウェア 2.7.x 以前）である | V2 ワイヤ形式にするため、送信側のノードのファームウェアを 2.8.0 以降に更新する                                                                                                                                           |
+ CoT データが流れない              | チャンネルの不一致                                                             | すべての TAK ノードが、暗号化が一致した同じチャンネル上にある必要がある                                                                                                                                                                                 |
 
 ## セキュリティに関する注意
 

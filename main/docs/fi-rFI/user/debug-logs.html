@@ -36,11 +36,11 @@ Virhe- ja varoitusrivit on korostettu, jotta ongelmat erottuvat paremmin.
 
 ## Lokien vienti
 
-Napauta **latauskuvaketta** tallentaaksesi nykyiset lokitiedot tiedostoon. Valitset tallennuspaikan järjestelmän tiedostonvalitsimessa, ja tiedosto nimetään aikaleimalla (esimerkiksi `meshtastic_logcat_20260701_143312.txt`), jotta aiemmat viennit eivät ylikirjoitu.
+Napauta **latauskuvaketta** tallentaaksesi nykyiset lokitiedot tiedostoon. The app first shows a warning about what the file contains — confirm it, then choose where the file goes through the system file picker. The file is named with a timestamp (for example `meshtastic_logcat_20260701_143312.txt`) so repeated exports never overwrite each other. The same warning guards the **Packets** tab export.
 
 Liitä tämä tiedosto GitHub-vikaraporttiisi.
 
-&gt; 🔒 **Tietosuoja:** Vienti **peittää automaattisesti** yksityiset avaimet, järjestelmänvalvojan avaimet, istuntoavaimet ja kanavien PSK-avaimet ennen tiedoston kirjoittamista. Lokeissa voi silti olla radion nimiä, sijainteja ja muita tunnistetietoja — tarkista tiedosto ennen sen jakamista julkisesti ja jaa se epävarmoissa tapauksissa mieluummin yksityisesti.
+&gt; 🔒 **Privacy:** Exports automatically **redact** private keys, admin keys, session passkeys, and channel PSKs, and suppress raw packet bytes. Everything else stays — the file can contain your message text, precise locations, and node details. Read it before sharing it publicly, and share privately if you have any doubt.
 
 ## Työpöytä
 

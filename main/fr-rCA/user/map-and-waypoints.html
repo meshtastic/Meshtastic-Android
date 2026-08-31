@@ -25,15 +25,23 @@
   <li><strong>Node tap</strong> — tap a node marker to view details</li>
 </ul>
 
-<p>The floating toolbar provides quick access to compass, layer switching, node filters, refresh, and location tracking. Tap the compass to reorient north-up, or tap the location button to center on your current position.</p>
+<p>The floating toolbar provides quick access to the compass, the map type and layers pickers, node filters, Site Planner, and location tracking. Tap the compass to reorient north-up, or tap the location button to center on your current position. On <strong>Google Play</strong> builds a refresh button joins them while a network layer is showing; on <strong>F-Droid</strong> and <strong>Desktop</strong>, refresh a network layer from its own row in the layers sheet instead.</p>
 
-<p><img src="../../assets/screenshots/map_controls_overlay.png" alt="Map screen with the floating toolbar open, showing compass, layers, and location controls" /></p>
+<p><img src="../../assets/screenshots/map_controls_overlay.png" alt="Map floating toolbar with compass, filter, refresh, and location controls" /></p>
+
+<h3 id="filtering-the-map">Filtering the Map</h3>
+
+<p>Tap the filter button in the floating toolbar to open <strong>Filter map</strong>. <strong>Display</strong> controls what is drawn: <strong>Only Favorites</strong>, <strong>Show Waypoints</strong>, <strong>Show Precision Circles</strong>, and a slider that hides nodes not heard from recently. <strong>Node roles</strong> is a chip per device role, plus <strong>All</strong> to show every role; a selected chip means that role is shown. <strong>Nodes</strong> narrows the set further with <strong>Hide offline nodes</strong>, <strong>Only show direct nodes</strong>, <strong>Exclude MQTT</strong>, <strong>Show ignored nodes</strong>, and <strong>Include unknown</strong>.</p>
+
+<p>A dot on the filter button means at least one filter is hiding something — check it before concluding the mesh is quiet. Turning <strong>Show Waypoints</strong> off hides every waypoint, including your own. <strong>Show ignored nodes</strong> adds them to the map rather than showing only them — unlike the node list’s <strong>Only show ignored Nodes</strong>.</p>
 
 <h2 id="waypoints">Waypoints</h2>
 
-<p>Waypoints are shared points of interest, visible to everyone the waypoint is sent to.</p>
+<p>Waypoints are shared points of interest, visible to everyone on your mesh.</p>
 
 <h3 id="creating-a-waypoint">Creating a Waypoint</h3>
+
+<p>Your radio must be connected — the map ignores a touch &amp; hold while it is not, because saving a waypoint means broadcasting it.</p>
 
 <ol>
   <li>Touch &amp; hold the map at the desired location.</li>
@@ -42,7 +50,7 @@
   <li>Tap <strong>Send</strong> to share with the mesh.</li>
 </ol>
 
-<p>Waypoints are addressed like messages: by default they broadcast on the primary channel, but a waypoint can also be sent on a specific channel or as a direct message to a single node.</p>
+<p>Waypoints always broadcast to the whole mesh on the primary channel. Unlike a message, a waypoint cannot be addressed to one channel or sent as a direct message.</p>
 
 <h3 id="waypoint-properties">Waypoint Properties</h3>
 
@@ -102,24 +110,26 @@
   <li>Optionally enable <strong>Favorites only</strong> to limit alerts to your favorited nodes.</li>
 </ol>
 
-<p>Since waypoints (and their geofences) are broadcast to the whole mesh, only the <strong>creator</strong> is alerted by default. If someone else shares a geofenced waypoint with you, its detail view offers a <strong>“Notify me of crossings”</strong> opt-in so you can also receive enter/exit alerts for it.</p>
+<p>Since waypoints (and their geofences) are broadcast to the whole mesh, only the <strong>creator</strong> is alerted by default. If someone else shares a geofenced waypoint with you, its detail view offers a <strong>Notify me of crossings</strong> opt-in so you can also receive enter/exit alerts for it.</p>
 
 <h3 id="managing-waypoints">Managing Waypoints</h3>
 
 <ul>
-  <li>Tap a waypoint on the map to view its details and coordinates</li>
-  <li>Edit or delete waypoints you created</li>
-  <li><strong>Locked waypoints</strong> cannot be modified or deleted by other mesh members — only the creator can change them</li>
-  <li>Unlocked waypoints can be edited by any mesh member</li>
+  <li>Tap a waypoint to see its name, description, and geofence radius. On <strong>Google Play</strong> builds the first tap opens the marker’s info bubble — tap the bubble to open the waypoint itself</li>
+  <li><strong>Locked waypoints</strong> can only be changed on the mesh by the node that locked them</li>
+  <li>Unlocked waypoints can be edited by any mesh member while connected to a radio — saving re-broadcasts the waypoint</li>
+  <li>Confirming a delete removes your own copy. To remove it from everyone else’s map too, select <strong>Delete for everyone</strong> in the delete dialog; that box appears only for a waypoint you may change (unlocked, or locked by you) and only while you are connected</li>
 </ul>
 
 <h2 id="couches-cartographiques">Couches cartographiques</h2>
 
-<p>Tap the layers icon on the map to open <strong>Manage Map Layers</strong>. It imports your own overlays in <code class="language-plaintext highlighter-rouge">.kml</code>, <code class="language-plaintext highlighter-rouge">.kmz</code>, or GeoJSON format — including KMZ ground overlays (georeferenced images, such as exported topo or aerial tiles), which drape at their stated bounds. Add one by picking a file with <strong>Add Layer</strong>, opening a file with Meshtastic, or sharing it into the app from another app. Imported layers are listed with a toggle to show/hide each one and an option to remove it. This works on the Google Play build, the F-Droid build, and <strong>Desktop</strong>, which shares the same layer store and file picker.</p>
+<p>Tap the layers icon on the map to open <strong>Manage Map Layers</strong>. It imports your own overlays in <code class="language-plaintext highlighter-rouge">.kml</code>, <code class="language-plaintext highlighter-rouge">.kmz</code>, or GeoJSON format — including KMZ ground overlays (georeferenced images, such as exported topo or aerial tiles), which drape at their stated bounds. Add one by picking a file with <strong>Add Layer</strong>, opening a file with Meshtastic, or sharing it into the app from another app. <strong>Add Network Layer</strong> instead takes a name and an <code class="language-plaintext highlighter-rouge">http://</code> or <code class="language-plaintext highlighter-rouge">https://</code> URL pointing at a KML or GeoJSON file; that layer then carries its own refresh button in the sheet. On <strong>Google Play</strong> builds the toolbar’s refresh button re-fetches every visible network layer at once.</p>
+
+<p>Imported layers are listed with a toggle to show/hide each one and an option to remove it. Each layer — imported or built-in overlay — carries its own opacity slider while it is switched on, so an overlay can be faded back rather than only switched off. This works on the Google Play build, the F-Droid build, and <strong>Desktop</strong>, which shares the same layer store and file picker.</p>
 
 <h3 id="site-planner">Site Planner</h3>
 
-<p><strong>Site Planner</strong> estimates RF coverage for a transmitter and draws it on the map as a color-coded overlay. Open it from a map control, or from a node’s detail page via <strong>Estimate coverage</strong> (shown only for nodes with a known position). Configure the transmitter (location, frequency, TX power, antenna gain and height), the receiver (sensitivity, height), and simulation options (max range, high-resolution terrain, color palette), then run the estimate. Like map layers, Site Planner works on both the Google Play and F-Droid builds, where the finished estimate is drawn on the map as a coverage overlay. On <strong>Desktop</strong> the same form is shown but the planner opens in your browser; to bring the estimate onto the map, use the planner’s <strong>Export › GeoJSON</strong> and add the downloaded file under <strong>Manage Map Layers</strong>.</p>
+<p><strong>Site Planner</strong> estimates RF coverage for a transmitter and draws it on the map as a color-coded overlay. Open it from a map control, or from a node’s detail page via <strong>Estimate coverage</strong> (shown only for nodes with a known position). Configure the transmitter (location, frequency, TX power, antenna gain and height), the receiver (sensitivity, height), and simulation options (max range, high-resolution terrain, color palette), then run the estimate. Like map layers, Site Planner works on both the Google Play and F-Droid builds, where the finished estimate is drawn on the map as a coverage overlay. On <strong>Desktop</strong> the same form is shown but the planner opens in your browser; to bring the estimate onto the map, click the transmitter pin in the browser, choose the planner’s GeoJSON export, then add the downloaded file under <strong>Manage Map Layers</strong> with <strong>Add Layer</strong>. Use the GeoJSON export, not the KML one — the KML is a ground-overlay image this map cannot draw.</p>
 
 <h2 id="position-sharing">Position Sharing</h2>
 
@@ -128,17 +138,18 @@
 <p>Your node shares its GPS position based on:</p>
 
 <ul>
-  <li><strong>Fixed interval</strong> — broadcast position at regular intervals</li>
-  <li><strong>Smart position</strong> — broadcast when movement exceeds a threshold</li>
-  <li><strong>Manual</strong> — only share when explicitly requested</li>
+  <li><strong>Broadcast Interval</strong> — share the position on a fixed timer</li>
+  <li><strong>Smart Position</strong> — share only once you have moved far enough; <strong>Smart Interval</strong> sets the shortest gap between broadcasts and <strong>Smart Distance</strong> how far you must move</li>
+  <li><strong>Fixed Position</strong> — publish a latitude, longitude, and altitude you enter by hand instead of the GPS reading</li>
+  <li><strong>GPS Mode (Physical Hardware)</strong> — GPS enabled, disabled, or not present on this hardware; offered only while <strong>Fixed Position</strong> is off</li>
 </ul>
 
-<p>Configure position behavior in <strong>Settings → Position</strong>.</p>
+<p>Configure position behavior in <strong>Settings → Device configuration → Position</strong>. The screen is only reachable while your radio is connected, and saving it reboots the radio. For the full field list, see <a href="settings-radio-user">Settings — Radio &amp; User</a>.</p>
 
 <h3 id="privacy-considerations">Privacy Considerations</h3>
 
 <blockquote>
-  <p>🔒 <strong>Privacy:</strong> Position data is broadcast to all nodes on your channel. If you don’t want your location shared, disable GPS position in settings or use a fixed/fake position.</p>
+  <p>🔒 <strong>Privacy:</strong> Position data is broadcast to all nodes on your channel. If you don’t want your location shared, disable GPS position in settings or use a fixed/fake position. To keep sharing a position without pinpointing yourself, edit the channel in <strong>Settings → Channels</strong>, turn <strong>Precise location</strong> off, and set the slider beneath it — the channel then publishes an approximate area, shown as ± a distance, instead of an exact point.</p>
 </blockquote>
 
 <h2 id="map-sources">Map Sources</h2>
@@ -165,11 +176,11 @@ picker, all three offer the same raster base maps:</p>
     </tr>
     <tr>
       <td>Positron</td>
-      <td>Low-contrast vector map; keeps node markers legible over it</td>
+      <td>F-Droid and Desktop only. Low-contrast vector map; keeps node markers legible over it</td>
     </tr>
     <tr>
       <td>Sombre</td>
-      <td>Vector map suited to dark themes</td>
+      <td>F-Droid and Desktop only. Vector map suited to dark themes</td>
     </tr>
     <tr>
       <td>OpenStreetMap</td>
@@ -200,8 +211,8 @@ link fails, since LoRa range is limited by terrain</li>
 
 <h3 id="adding-your-own-tile-source">Adding your own tile source</h3>
 
-<p>Any XYZ tile endpoint can be added as a base map, on every flavor and on desktop. Open <strong>Manage custom
-tile sources</strong> at the foot of the base map picker and paste a URL template using <code class="language-plaintext highlighter-rouge">{z}</code>, <code class="language-plaintext highlighter-rouge">{x}</code> and <code class="language-plaintext highlighter-rouge">{y}</code>
+<p>Any XYZ tile endpoint can be added as a base map, on every flavor and on desktop. Open <strong>Manage Custom
+Tile Sources</strong> at the foot of the base map picker and paste a URL template using <code class="language-plaintext highlighter-rouge">{z}</code>, <code class="language-plaintext highlighter-rouge">{x}</code> and <code class="language-plaintext highlighter-rouge">{y}</code>
 — plus <code class="language-plaintext highlighter-rouge">{s}</code> if the provider uses rotating subdomains. A national mapping service, for example:</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg
@@ -211,7 +222,10 @@ tile sources</strong> at the foot of the base map picker and paste a URL templat
 
 <p>On <strong>Android</strong>, the same screen also imports a local <code class="language-plaintext highlighter-rouge">.mbtiles</code> archive for fully offline use.</p>
 
-<p>Offline area downloads are <strong>F-Droid only</strong>: cache the visible region from the layers sheet.
+<p>Offline area downloads are <strong>F-Droid only</strong>. Select a vector base map first — Liberty, Positron, or Dark —
+since a download is defined against a vector style and <strong>Start Download</strong> stays disabled over a raster one.
+Frame the area you want on screen, then tap <strong>Start Download</strong> in the layers sheet: that creates a paused
+pack covering the current zoom plus two levels deeper. Press play on the pack’s row to actually download it.
 <strong>Google Play</strong> builds import pre-made MBTiles files instead, and <strong>Desktop</strong> has neither.</p>
 
 <h2 id="related-topics">Related Topics</h2>

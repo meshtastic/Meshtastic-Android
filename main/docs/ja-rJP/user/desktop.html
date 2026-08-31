@@ -15,7 +15,8 @@ This page covers installing the Meshtastic desktop app, connecting a radio, and 
 
 ### Linux
 
-- Download the `.deb` or `.AppImage` package from the [releases page](https://github.com/meshtastic/Meshtastic-Android/releases)
+- Download the `.deb`, `.rpm`, or `.AppImage` package from the [releases page](https://github.com/meshtastic/Meshtastic-Android/releases)
+- Or install from Flathub: `flatpak install flathub org.meshtastic.MeshtasticDesktop`
 - または、`./gradlew :desktopApp:run` を使ってソースからビルドします
 
 ### macOS
@@ -25,7 +26,7 @@ This page covers installing the Meshtastic desktop app, connecting a radio, and 
 
 ### Windows
 
-- Download the `.msi` installer from the [releases page](https://github.com/meshtastic/Meshtastic-Android/releases)
+- Download the `.msi` or `.exe` installer from the [releases page](https://github.com/meshtastic/Meshtastic-Android/releases)
 - または、ソースからビルドします
 
 ## 無線機を接続する
@@ -52,20 +53,20 @@ Bluetooth Low Energy is supported on desktop via the [Kable](https://github.com/
 
 ## 機能の対応状況
 
- 機能                                                    | Android | デスクトップ | 備考                                                                                                                                                     |
- ----------------------------------------------------- | ------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
- メッセージング                                               | ✓       | ✓      | 完全対応                                                                                                                                                   |
- ノードリスト                                                | ✓       | ✓      | 完全対応                                                                                                                                                   |
- マップ                                                   | ✓       | ✓      | Interactive MapLibre map, with base map and overlay pickers and custom tile sources. No offline downloads or local `.mbtiles` archives |
- Map layers (`.kml`/`.kmz`/GeoJSON) | ✓       | ✓      | Same layer store and sheet as Android; imported files draw on the desktop map                                                                          |
- サイトプランナー                                              | ✓       | ✓\*    | \*Opens in your browser on desktop; the estimate is not drawn on the desktop map                                                                       |
- 設定                                                    | ✓       | ✓      | 完全対応                                                                                                                                                   |
- Bluetooth（BLE）                                        | ✓       | ✓      | デスクトップでは Kable 経由                                                                                                                                      |
- ファームウェアの更新                                            | ✓       | ✓      | アプリ内の USB、BLE、Wi-Fi（ESP32）更新はすべて、Android と同じように動作します                                                                                                   |
- 通知                                                    | ✓       | ✓      | OS ネイティブの通知                                                                                                                                            |
- ウィジェット                                                | ✓       | ✗      | Android のみ                                                                                                                                             |
- AI アシスタント（Chirpy）                                     | ✓\*     | ✗      | Google 版の Android のみ                                                                                                                                   |
- アプリ機能（システム AI）                                        | ✓†      | ✗      | Google 版の Android のみ                                                                                                                                   |
+ 機能                                                    | Android | デスクトップ | 備考                                                                                                                                                                                                    |
+ ----------------------------------------------------- | ------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+ メッセージング                                               | ✓       | ✓      | 完全対応                                                                                                                                                                                                  |
+ ノードリスト                                                | ✓       | ✓      | 完全対応                                                                                                                                                                                                  |
+ マップ                                                   | ✓       | ✓      | Interactive MapLibre map, with base map and overlay pickers and custom tile sources. No offline downloads or local `.mbtiles` archives                                                |
+ Map layers (`.kml`/`.kmz`/GeoJSON) | ✓       | ✓      | Same layer store and sheet as Android; imported files draw on the desktop map                                                                                                                         |
+ サイトプランナー                                              | ✓       | ✓\*    | \*Opens in your browser on desktop; the estimate is not drawn on the desktop map                                                                                                                      |
+ 設定                                                    | ✓       | ✓      | 完全対応                                                                                                                                                                                                  |
+ Bluetooth（BLE）                                        | ✓       | ✓      | デスクトップでは Kable 経由                                                                                                                                                                                     |
+ ファームウェアの更新                                            | ✓       | ✓      | In-app USB, BLE, and Wi-Fi (ESP32) update work the same as Android. The USB maintenance flow — nRF52/RP2040 factory erase and bootloader upgrade — is Android-only |
+ 通知                                                    | ✓       | ✓      | OS ネイティブの通知                                                                                                                                                                                           |
+ ウィジェット                                                | ✓       | ✗      | Android のみ                                                                                                                                                                                            |
+ AI アシスタント（Chirpy）                                     | ✓\*     | ✗      | Google 版の Android のみ                                                                                                                                                                                  |
+ アプリ機能（システム AI）                                        | ✓†      | ✗      | Google 版の Android のみ                                                                                                                                                                                  |
 
 \*Chirpy AI には、対応ハードウェアを備えた Google 版ビルドで Android 14 以降が必要です。
 
@@ -92,13 +93,13 @@ The desktop app uses the same Compose Multiplatform UI with adaptations for larg
 ### ウィンドウとシステムトレイ
 
 - **ウィンドウのサイズ変更**：レスポンシブなレイアウトがウィンドウの寸法に合わせて調整されます
-- **システムトレイ**：システムトレイに最小化して、バックグラウンドでメッシュを動作させます
+- **System tray** — closing the window minimizes to the system tray for background mesh operation. On a desktop environment with no tray, there is nowhere to minimize to, so closing quits the app instead
 - **トレイメニュー**：トレイアイコンを右クリックして、ウィンドウ表示または終了します
 - **マウス操作**：ホバー状態と標準的なデスクトップのナビゲーション
 
 ### 通知の設定
 
-The desktop app provides in-app toggles for controlling which notifications are shown — messages, new nodes, and low battery alerts. これらには、アプリ内の「**設定 → 通知**」からアクセスします。
+The desktop app provides in-app toggles for controlling which notifications are shown. Find them in the **App Notifications** section of the Settings screen: **Direct message notifications**, **New node notifications**, and **Low battery notifications**.
 
 ## 組み込みのドキュメントブラウザー
 
@@ -132,9 +133,12 @@ cd Meshtastic-Android
 - Offline tile downloads and local `.mbtiles` archives are not available on desktop.
 - `.kml`/`.kmz`/GeoJSON layer import works — see
   [Map &amp; Waypoints](map-and-waypoints#map-layers). Site Planner opens in your browser
-  rather than in the app; to bring its coverage estimate onto the map, use the planner's
-  **Export › GeoJSON** and add the file as a layer. Custom network tile sources work too — see
-  [Map &amp; Waypoints](map-and-waypoints#adding-your-own-tile-source)
+  rather than in the app; to bring its coverage estimate onto the map, click the transmitter pin
+  in the browser and use the planner's GeoJSON export, then add the file as a layer — not the KML
+  export, which is a ground-overlay image this map cannot draw. Custom network tile sources work
+  too — see [Map &amp; Waypoints](map-and-waypoints#adding-your-own-tile-source)
+- The USB maintenance flow — nRF52/RP2040 factory erase and bootloader upgrade — is Android-only, and the
+  desktop app does not offer it. Use the [Web Flasher](https://flasher.meshtastic.org) instead
 - 一部の Android 固有の機能（ウィジェット、特定の通知チャンネル）は利用できません
 - Compose Desktop を実行する低スペックのハードウェアでは、パフォーマンスが変わることがあります
 - デスクトップでは BLE のボンディングはまだサポートされていません（ペアリングはボンディングなしで機能します）
@@ -142,7 +146,8 @@ cd Meshtastic-Android
 ## 関連トピック
 
 - [コネクション](connections)：接続方法の概要
-- [ファームウェア更新](firmware)：USB、BLE、Wi-Fi 更新はすべて、Android と同じように動作します
+- [Firmware Updates](firmware) — in-app USB, BLE, and Wi-Fi update all work the same as on Android
+- [Map &amp; Waypoints](map-and-waypoints) — base maps, layers, custom tile sources, and what the desktop map does not do
 </pre>
 </body>
 </html>

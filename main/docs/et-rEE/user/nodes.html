@@ -17,18 +17,22 @@ Sõlmede loend näitab kõiki sõlmi, mida raadio on kuulnud, sealhulgas:
 
 - **Sõlme nimi** — kasutaja pandud pikk nimi
 - **Lühinimi** — 4-tähemärgiline identifikaator
-- **Signal quality** — last heard signal strength
+- **Signal quality** — SNR, RSSI, and a quality word, shown only for nodes your radio heard directly. In the Complete layout a node reached through a relay shows its hop count here instead; a node heard only over MQTT shows neither
 - **Last heard** — time since last communication
 - **Vahemaa** — hinnanguline vahemaa (kui asukohta jagatakse)
 - **Aku** — kaugsõlme aku tase (kui telemeetria on lubatud)
 
+### Choosing What the List Shows
+
+The list has two densities, set at **Settings → Node Layout**. **Complete** shows every field a node has reported and hides the ones it hasn't. **Compact** fits more nodes on screen and lets you pick the fields yourself — **Power**, **Last Heard Time**, **Relative Last Heard Time**, **Distance and Bearing**, **Hops Away**, **Signal (Direct Only)**, **Channel**, and **Device &amp; Role**. The **Environment Metrics** toggle applies to both densities. A preview above the toggles shows the effect before you leave the screen.
+
 ### Sõlme oleku indikaatorid
 
- Märk             | Tähendus                                       |
- ---------------- | ---------------------------------------------- |
- 🟢 Võrgus        | Viimase 2 tunni jooksul kuuldud sõlm           |
- ⚪ Võrgust väljas | Viimase 2 tunni jooksul kuuldud sõlm           |
- ⭐ Lemmik         | Node you marked as a favorite. |
+ Indicator             | Tähendus                                       |
+ --------------------- | ---------------------------------------------- |
+ Green last-heard time | Viimase 2 tunni jooksul kuuldud sõlm           |
+ Plain last-heard time | Viimase 2 tunni jooksul kuuldud sõlm           |
+ ⭐ Lemmik              | Node you marked as a favorite. |
 
 There is no separate "away" tier.
 
@@ -50,7 +54,7 @@ Sõlmedele saab määrata erinevaid rolle, mis mõjutavad nende kärgvõrgus kä
  Andur              | Optimized for telemetry reporting                                                                                                                                       |
  TAK                | Ühildub TAK süsteemidega (saadab/võtab vastu CoT)                                                                                                    |
  Jälgitav TAK       | Ainult TAK asukoha aruandlus                                                                                                                                            |
- Kadunud ja leitud  | Pidev asukoha majakas taastamiseks                                                                                                                                      |
+ Kaotud ja leitud   | Sends its position to the default channel as a text message at regular intervals, to help recover a lost radio                                                          |
 
 ### Choosing a Role
 
@@ -78,6 +82,8 @@ Sõlmed kuvavad oma nime kõrval krüpteerimisoleku ikoone:
 
 &gt; 💡 **Vihje:** PKI krüpteering (püsivara 2,5+) pakub tugevamat turvalisust kui kanali PSK, kuna igal sõlmel on unikaalne võtmepaar. Kui näed võtme mittevastavuse hoiatust, võib sõlm olla lähtestatud või ohustatud.
 
+To clear a mismatch, first confirm through another trusted channel that the key change was intentional — a factory reset causes one. Then touch &amp; hold the node, choose **Remove**, and let the two radios exchange keys again the next time yours hears it.
+
 ## Quick Actions
 
 From the node list, you can:
@@ -89,7 +95,13 @@ From the node list, you can:
   - Saada otsesõnum
   - Trace route
   - Ignore/unignore
-  - Remove node
+  - Eemalda
+
+## Sharing a Contact
+
+On a node's detail screen, tap **Share Contact** to produce a link and a QR code for that node. From the same dialog, **Write to NFC tag** saves the link to a writable NFC tag that anyone can tap to open.
+
+To add someone else's contact, use the import button on the node list and choose **Scan Shared Contact QR Code**, **Scan Shared Contact NFC**, or **Input Shared Contact URL**. The app asks you to confirm with **Import Shared Contact?**, and warns you when the contact is one you already have.
 
 ## Filtering &amp; Sorting
 
@@ -99,26 +111,26 @@ Sõlmede filtreerimiseks nime või lühinime järgi tipi otsinguväljal. Filter 
 
 ### Filter Toggles
 
- Filtreeri                  | Kirjeldus                                                                                                                                                                                         |
- -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
- **Ainult ühenduses**       | Näita ainult viimase 2 tunni jooksul kuuldud sõlmi                                                                                                                                                |
- **Only direct**            | Kuva ainult otseühendustega (mitte releeühendusega) sõlmi                                                                                                                      |
- **Include unknown**        | Show nodes that haven't sent user info yet. **On by default**, so a node heard before its info arrives stays visible and messageable; these carry a badge marking them incomplete |
- **Exclude infrastructure** | Hide infrastructure-role nodes (Router, Router Late, Client Base, and legacy Repeater nodes)                                                                                   |
- **Välista MQTT**           | Peida ainult MQTT internetisilla kaudu kuuldavad sõlmed                                                                                                                                           |
- **Kuva ignoreeritud**      | Show nodes you've ignored                                                                                                                                                                         |
+ Filtreeri                   | Kirjeldus                                                                                                                                                                                         |
+ --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+ **Hide offline nodes**      | Näita ainult viimase 2 tunni jooksul kuuldud sõlmi                                                                                                                                                |
+ **Only show direct nodes**  | Show only nodes your radio heard directly, with no relay in between                                                                                                                               |
+ **Include unknown**         | Show nodes that haven't sent user info yet. **On by default**, so a node heard before its info arrives stays visible and messageable; these carry a badge marking them incomplete |
+ **Exclude infrastructure**  | Hide infrastructure-role nodes (Router, Router Late, Client Base, and legacy Repeater nodes) and any node that cannot be messaged, whatever its role                           |
+ **Välista MQTT**            | Peida ainult MQTT internetisilla kaudu kuuldavad sõlmed                                                                                                                                           |
+ **Only show ignored Nodes** | Replace the list with the nodes you have ignored. Every other node is hidden while this is on, and a banner appears at the top of the list to take you back                       |
 
 ### Sorteerimisvalikud
 
- Sorteeri                                    | Kirjeldus                                                          |
- ------------------------------------------- | ------------------------------------------------------------------ |
- **Last heard** (default) | Viimati kuuldud sõlmed esimesena                                   |
- **Alphabetical**                            | Sorted by node long name                                           |
- **Distance**                                | Nearest nodes first (requires position sharing) |
- **Hüppe kaugusel**                          | Vähim vahendatud hüppeid esimesena                                 |
- **Kanal**                                   | Rühmitatud kanali loendi alusel                                    |
- **Läbi MQTT**                               | Rühmitatud MQTT ver raadiost kuuldud järgi                         |
- **Favorites**                               | Favorited nodes first                                              |
+ Sorteeri                                      | Kirjeldus                                                          |
+ --------------------------------------------- | ------------------------------------------------------------------ |
+ **Last heard**                                | Viimati kuuldud sõlmed esimesena                                   |
+ **A-Z**                                       | Sorted by node long name                                           |
+ **Distance**                                  | Nearest nodes first (requires position sharing) |
+ **Hüppe kaugusel**                            | Vähim vahendatud hüppeid esimesena                                 |
+ **Kanal**                                     | Rühmitatud kanali loendi alusel                                    |
+ **via MQTT**                                  | Rühmitatud MQTT ver raadiost kuuldud järgi                         |
+ **via Favorite** (default) | Favorited nodes first, then the rest                               |
 
 ## Sõlme hüppe kohta
 
@@ -128,15 +140,13 @@ Puuduta sõlmede loendi rakenduse ribal hüppehistogrammi ikooni, et avada tulpd
 
 Sõlmel klõpsamine avab detailvaate koos põhjaliku teabega. See [Node Metrics](node-metrics) for full details on metrics and telemetry.
 
-![Node list, showing signal quality and last-heard time for each node](../../assets/screenshots/nodes_node_list.png)
-
-The detail screen includes device info, position, and action buttons:
+The Details card carries the node's short name, role, IDs, last heard time, hops away, uptime, and its SNR and RSSI:
 
 ![Sõlme üksikasjade jaotis](../../assets/screenshots/nodes_detail_section.png)
 
 Tekstisisesed olekuindikaatorid näitavad peamisi mõõdikuid lühidalt:
 
- Indicator       | Screenshot                                                        |
+ Indikaator      | Screenshot                                                        |
  --------------- | ----------------------------------------------------------------- |
  Signal quality  | ![Signaal](../../assets/screenshots/nodes_signal_info.png)        |
  Aku tase        | ![Aku](../../assets/screenshots/nodes_battery_info.png)           |
@@ -148,7 +158,15 @@ Tekstisisesed olekuindikaatorid näitavad peamisi mõõdikuid lühidalt:
 
 Kui sõlme riistvara tuvastatakse, kuvatakse detailvaates kokkupandav jaotis **„Soovin ühte”**, mis lingib kohtadele, kust seadet osta või selle kohta lisateavet saada: müüja tooteleht, tootevariandid ja piirkondlike marketplace loendid (nt AliExpress, Amazon ja toetatud jaemüüjad), mis on filtreeritud sinu riigi järgi. Iga link avaneb ümbersuunamisteenuse `msh.to` kaudu. Seadmed, millel pole vastavaid linke, seda jaotist ei kuva.
 
-Täielik ja sirvitav kataloog kõikidest linkidest on saadaval ka menüüs **Seaded → Abi ja dokumentatsioon → Seadme lingid**.
+A full, browsable directory of every link is also available at **Settings → Device Links**. The item is hidden while you have Settings open for a remote node.
+
+## When No Nodes Appear
+
+The list stays empty until your radio hears another node.
+
+- **No device connected** — the app is not connected to a radio. See [Connections](connections).
+- **Searching for nodes** — the radio is connected and listening, but nothing has arrived yet. Check that its region and modem preset match the mesh around you, and leave **Include unknown** on so a node that has not yet sent its name still appears. See [Settings — Radio &amp; User](settings-radio-user).
+- A node you expect is missing — check the filter toggles. **Only show direct nodes**, **Exclude MQTT**, and **Exclude infrastructure** each hide a whole category of node.
 
 ## Seotud teemad
 

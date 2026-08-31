@@ -32,27 +32,29 @@ A gateway node with internet access (Wi-Fi or Ethernet) publishes mesh messages 
 
 ### Enabling MQTT
 
-1. Navigate to **Settings → Module Config → MQTT**.
+1. Navigate to **Settings → Module configuration → MQTT**.
 2. Enable the MQTT module.
 3. Configure the broker connection:
 
-![MQTT module settings with the module enabled](../../assets/screenshots/settings_switch.png)
-
- Setting        | Descrição                                                                                                                                                                         | Predefinição                                        |
- -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
- Server Address | MQTT broker hostname                                                                                                                                                              | mqtt.meshtastic.org |
- Utilizador     | Broker authentication                                                                                                                                                             | meshdev                                             |
- Palavra-passe  | Broker authentication                                                                                                                                                             | large4cats                                          |
- Root Topic     | Base topic for messages                                                                                                                                                           | msh                                                 |
- Encryption     | Encrypt MQTT payload                                                                                                                                                              | Enabled                                             |
- JSON Output    | Also publish and consume the `/2/json/` topic. Deprecated in the protobuf schema, but still the only toggle for this behavior — and the app's own proxy honors it | Disabled                                            |
- TLS            | Secure connection to broker                                                                                                                                                       | Disabled                                            |
- Map Reporting  | Report position to public map                                                                                                                                                     | Disabled                                            |
+ Setting                     | Descrição                                                                                                                                                                         | Predefinição                                                            |
+ --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+ **Address**                 | MQTT broker hostname                                                                                                                                                              | mqtt.meshtastic.org                     |
+ **Username**                | Broker authentication                                                                                                                                                             | meshdev                                                                 |
+ **Password**                | Broker authentication                                                                                                                                                             | large4cats                                                              |
+ **Root topic**              | Base topic for messages                                                                                                                                                           | `msh`, which the radio rewrites to `msh/&lt;REGION&gt;` once you set a region |
+ **Encryption enabled**      | Encrypt MQTT payload                                                                                                                                                              | Enabled                                                                 |
+ **JSON output enabled**     | Also publish and consume the `/2/json/` topic. Deprecated in the protobuf schema, but still the only toggle for this behavior — and the app's own proxy honors it | Disabled                                                                |
+ **TLS enabled**             | Secure connection to broker                                                                                                                                                       | Disabled                                                                |
+ **Map reporting**           | Report position to public map                                                                                                                                                     | Disabled                                                                |
+ **Proxy to client enabled** | Relay MQTT through the connected phone                                                                                                                                            | Disabled                                                                |
 
 ### Connection Status and Test Connection
 
-The top of the MQTT settings screen shows the live broker connection — **Connected**,
-**Connecting**, **Reconnecting**, **Disconnected**, or **Inactive**.
+The top of the MQTT settings screen shows the status of the relay this phone runs —
+**Connected**, **Connecting**, **Reconnecting**, **Disconnected**, or **Inactive**. It reads
+**Inactive** whenever the phone is not relaying, which includes the normal case of a radio
+reaching the broker over its own Wi-Fi or Ethernet. The radio's own connection to the broker is
+not reported here.
 
 **Test connection** probes the broker before you commit the settings to the radio, and
 distinguishes the failure modes: the hostname not resolving, the TCP connection being refused,
@@ -68,7 +70,9 @@ The **MQTT proxy on this phone** toggle at the top of the MQTT settings screen s
 
 ### Default Meshtastic Broker
 
-The community maintains a public broker at `mqtt.meshtastic.org`. This is intended for general use and testing. Connections to it always use TLS (port 8883), even if the TLS toggle is off; for any other broker, TLS is used only when you enable it (port 8883 with TLS, 1883 without).
+The community maintains a public broker at `mqtt.meshtastic.org`. This is intended for general use and testing.
+
+When this phone relays MQTT for the radio, connections to that broker always use TLS on port 8883 even if **TLS enabled** is off — the app forces the switch on and grays it out. A radio that reaches the broker over its own Wi-Fi or Ethernet forces nothing: turn **TLS enabled** on yourself, or it connects in the clear on port 1883. For any other broker the toggle decides in both cases (port 8883 with TLS, 1883 without).
 
 &gt; 🔒 **Privacy:** Messages on the public broker are readable by anyone subscribed. Always use channel encryption for private communications.
 
@@ -84,11 +88,13 @@ Configure your node to point to your private broker with appropriate credentials
 
 ## Map Reporting
 
-When Map Reporting is enabled, your node publishes its position to the Meshtastic community map:
+When **Map reporting** is on, your node periodically publishes a map report to the broker. The report goes out unencrypted, whatever keys your channels use, and carries your node id, long and short name, approximate location, hardware model, role, firmware version, LoRa region, modem preset, and primary channel name.
 
-- Visible at [meshmap.net](https://meshmap.net) and similar community map services
-- Only position and node info are shared
-- Disable this if you don't want your location publicly visible
+Turning it on opens a consent card. Turn on **I agree.** and choose a **Map reporting interval (seconds)** of one hour or more — the screen will not save until you do. A slider sets the position precision, and the app shows the resulting accuracy as a ± distance, so you can publish an approximate location rather than an exact one.
+
+Reports appear at [meshmap.net](https://meshmap.net) and similar community map services.
+
+&gt; 🔒 **Privacy:** A map report is readable by anyone subscribed to the broker. Leave **Map reporting** off if you do not want your approximate location published.
 
 ## Uplink vs Downlink
 
@@ -97,7 +103,7 @@ When Map Reporting is enabled, your node publishes its position to the Meshtasti
  **Uplink**   | Messages from mesh → MQTT broker |
  **Downlink** | Messages from MQTT broker → mesh |
 
-Configure per-channel which directions are active to control message flow and airtime usage.
+Uplink and downlink are per-channel settings, not MQTT module settings. Open **Settings → Channels**, tap the channel, and use **MQTT Uplink Enabled** and **MQTT Downlink Enabled**. Every channel you want bridged out needs uplink on, and every channel you want MQTT traffic injected into needs downlink on.
 
 ## Message Formats
 
@@ -117,7 +123,7 @@ MQTT carries two payload formats:
 Understanding the layered encryption model:
 
 1. **Channel encryption** happens on the mesh _before_ MQTT. If your channel has a PSK, the MQTT payload is already encrypted — the broker and any subscribers see only the ciphertext.
-2. **MQTT encryption** (the module setting) adds an additional encryption layer for transit to the broker. This protects metadata and routing information.
+2. **Encryption enabled** (the module setting) decides which copy of the packet the gateway publishes — it is not an extra layer. Leave it on and the broker receives the packet still encrypted with your channel key. Turn it off and the gateway publishes the decrypted packet, so anyone subscribed to the topic reads your messages in the clear. Turn it off only when you own the broker and want plain payloads for a dashboard.
 3. **TLS** encrypts the TCP connection to the broker itself, preventing network-level eavesdropping.
 
 &gt; 🔒 **Security:** The default public channel has a well-known key. Messages on the default channel sent via MQTT are effectively **unencrypted** — anyone can decode them. Always use a custom PSK for private communications.
@@ -143,7 +149,9 @@ Understanding the layered encryption model:
 
 - **Check uplink/downlink settings** — if only uplink is enabled, messages flow from mesh to MQTT but not back. Enable downlink on the receiving gateway.
 - **Channel mismatch** — both gateways must share the same channel with the same PSK. A mismatch means messages are encrypted with different keys and appear as garbage.
-- **Topic mismatch** — ensure both gateways use the same root topic. The default `msh` works for the public broker.
+- **Topic mismatch** — both gateways must use exactly the same root topic. Setting a region rewrites a default root to `msh/&lt;REGION&gt;` (for example `msh/US`), so gateways in different regions do not meet until you give both the same explicit root.
+- **Ignore MQTT is on** — in a region with a duty-cycle limit, the radio turns on **Ignore MQTT** (LoRa config, **Advanced**) when you set the region, and then drops every packet that reached it via MQTT. Turn it off on the receiving nodes, not only on the gateway.
+- **Ok to MQTT is off** — on a public broker a gateway uplinks other nodes' packets only when the sending node has **Ok to MQTT** (LoRa config, **Advanced**) on. Your own traffic bridges either way; your neighbors' does not until they opt in.
 
 ## Related Topics
 

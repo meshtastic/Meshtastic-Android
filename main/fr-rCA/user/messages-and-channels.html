@@ -12,39 +12,36 @@
 
 <h3 id="sécurité-du-canal">Sécurité du canal</h3>
 
-<p>Channels support multiple encryption levels:</p>
+<p>Each channel carries a lock icon that shows how well it is protected. Tap the icon to see the same explanation inside the app.</p>
 
 <table>
   <thead>
     <tr>
       <th>Icon</th>
-      <th>Security Level</th>
-      <th>Description</th>
+      <th>What it means</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>🔒</td>
-      <td>PSK (256-bit AES)</td>
-      <td>Fully encrypted with a strong pre-shared key. Only nodes with the matching key can read messages.</td>
+      <td>Green closed lock</td>
+      <td>The channel is securely encrypted, with either a 128-bit or a 256-bit AES key.</td>
     </tr>
     <tr>
-      <td>🔐</td>
-      <td>PSK (128-bit AES)</td>
-      <td>Encrypted with a shorter key. Secure for most uses but 256-bit is preferred for sensitive data.</td>
+      <td>Yellow open lock</td>
+      <td>The channel is not securely encrypted — it uses no key at all, or a well-known one-byte key — and it does not carry precise location.</td>
     </tr>
     <tr>
-      <td>🔓</td>
-      <td>Default / Open</td>
-      <td>Uses the well-known default key. <strong>Any Meshtastic device</strong> on the same preset can read these messages.</td>
+      <td>Red open lock</td>
+      <td>Not securely encrypted, and the channel carries precise location data.</td>
     </tr>
     <tr>
-      <td>⚠️</td>
-      <td>Insecure + Position</td>
-      <td>Open channel that also broadcasts your GPS position. Use with caution in public meshes.</td>
+      <td>Red open lock with a warning badge</td>
+      <td>Not securely encrypted, carrying precise location data, and uplinking that data to the internet over MQTT.</td>
     </tr>
   </tbody>
 </table>
+
+<p>Key length alone does not change the icon: a 128-bit key and a 256-bit key both show the green lock.</p>
 
 <blockquote>
   <p>🔒 <strong>Security:</strong> Always configure a unique PSK for private communications. The default channel is intentionally open so new users can discover the mesh — but you should create a separate encrypted channel for anything sensitive.</p>
@@ -53,17 +50,24 @@
 <h3 id="adding-a-channel">Adding a Channel</h3>
 
 <ol>
-  <li>Navigate to <strong>Settings → Channels</strong>.</li>
-  <li>Tap the <strong>+</strong> button to add a channel, or import one by scanning a channel QR code.</li>
-  <li>Configure the channel name and encryption key.</li>
-  <li>Share the channel URL/QR code with others who need access.</li>
+  <li>Connect to your radio. The <strong>Channels</strong> row stays grayed out until the app has a connection — see <a href="connections">Connections</a>.</li>
+  <li>Go to <strong>Settings</strong>, then tap <strong>Channels</strong> under <strong>Configuration</strong>.</li>
+  <li>Tap the <strong>+</strong> button to add a channel. The editor opens on the new entry.</li>
+  <li>Set the channel name and the <strong>PSK</strong>, and choose whether the channel uses MQTT uplink and downlink. Naming a new channel generates a fresh 256-bit key for you; the refresh icon beside <strong>PSK</strong> generates another one.</li>
+  <li>Tap <strong>Save</strong> to close the editor. The change is still only on your phone.</li>
+  <li>Tap <strong>Send</strong> at the bottom of the channel list to write the changes to the radio. <strong>Cancel</strong>, or leaving the screen without tapping <strong>Send</strong>, throws them away.</li>
+  <li>Optional: share the channel URL or QR code with the people who need access.</li>
 </ol>
 
-<p>Tapping a channel shows its details and sharing options.</p>
+<p>Tapping an existing channel opens the same editor, where you can change the name, the PSK, MQTT uplink and downlink, and position precision. Every edit on this screen — adding, editing, deleting, or dragging a channel into a new order — waits on <strong>Send</strong> the same way.</p>
 
 <h2 id="messages-directs">Messages directs</h2>
 
-<p>Direct messages (DMs) are point-to-point encrypted communications between two specific nodes.</p>
+<p>Direct messages (DMs) go to one specific node. When both radios hold each other’s public keys, your radio encrypts the message to that node’s public key, so no one else on the mesh can read it — not even nodes that share your channel.</p>
+
+<p>Your radio must already hold the other node’s public key before it can send a DM. Keys travel inside node info, which nodes broadcast periodically, so the key usually arrives on its own once you have heard from that node. Until it does, a radio that has its own key pair — the default — refuses the send rather than falling back to channel encryption, and the message shows <strong>Recipient key unavailable</strong>.</p>
+
+<p>A public-key conversation carries a key icon in its top bar. A green closed lock means the direct message is protected by public-key encryption; a red key-off icon means the node’s public key changed and no longer matches the one your radio stored. Tap the icon for the details.</p>
 
 <h3 id="sending-a-direct-message">Sending a Direct Message</h3>
 
@@ -157,7 +161,7 @@ control whether they are offered at all.</p>
   </thead>
   <tbody>
     <tr>
-      <td>Pas de route</td>
+      <td>Pas de routage</td>
       <td>No path exists to the destination node</td>
       <td>The recipient may be offline or out of mesh range. Try later or move closer.</td>
     </tr>
@@ -235,25 +239,24 @@ control whether they are offered at all.</p>
 </table>
 
 <blockquote>
-  <p>💡 <strong>Tip:</strong> Most delivery errors resolve themselves. If a node is intermittently reachable, the mesh will retry. For persistent “No Route” errors, check that intermediate Router nodes are online.</p>
+  <p>💡 <strong>Tip:</strong> Most delivery errors resolve themselves. If a node is intermittently reachable, the mesh will retry. For persistent <strong>No route</strong> errors, check that intermediate Router nodes are online.</p>
 </blockquote>
 
 <h2 id="message-features">Message Features</h2>
 
 <h3 id="quick-chat">Quick Chat</h3>
 
-<p>Pre-configured messages for rapid communication:</p>
+<p>Pre-configured messages for rapid communication, useful when typing is impractical (gloves, small screen, urgent):</p>
 
 <ul>
-  <li>Access via the Quick Chat button in the message input area</li>
-  <li>Choose from built-in phrases or custom messages</li>
-  <li>Customize quick chat messages in <strong>Settings → Quick Chat</strong></li>
-  <li>Useful when typing is impractical (gloves, small screen, urgent)</li>
+  <li>The quick chat row is hidden until you turn it on. Open a conversation, tap the overflow menu in the top bar, then tap <strong>Show quick chat menu</strong>. <strong>Hide quick chat menu</strong> puts the row away again.</li>
+  <li>The row carries one built-in entry, the 🔔 alert bell. It appends an alert message that includes a bell character, which clients that support it flag as an alert. Every other button on the row is one you created.</li>
+  <li>Add, edit, reorder, and delete your own entries from the same overflow menu — tap <strong>Quick chat options</strong>.</li>
 </ul>
 
 <p><img src="../../assets/screenshots/messages_quick_chat.png" alt="Quick chat option" /></p>
 
-<p>Each quick chat entry has a short <strong>Name</strong> (the button label), the <strong>Message</strong> it inserts, and an <strong>Instantly send</strong> toggle — when enabled, tapping the button sends the message immediately instead of placing it in the input field for editing:</p>
+<p>Each quick chat entry has a <strong>Name</strong> — the button label, capped at five characters, forced to uppercase, and filled in for you from the message text — and the <strong>Message</strong> it carries. A switch decides what tapping the button does. A new entry starts on <strong>Instantly send</strong>, so a tap sends the message straight away; turn the switch off and the label changes to <strong>Append to message</strong>, which puts the text in the input field for you to edit first.</p>
 
 <p><img src="../../assets/screenshots/messages_edit_quick_chat.png" alt="New quick chat dialog with name, message, and instantly-send toggle" /></p>
 
@@ -335,7 +338,7 @@ control whether they are offered at all.</p>
 
 <ul>
   <li><strong>Touch &amp; hold</strong> a message — or double-tap it — to raise a quick reaction bar above the bubble. Opening the bar sends nothing.</li>
-  <li>Tap an emoji in the bar to send it; tap <strong>more</strong> to open the full picker, or anywhere outside
+  <li>Tap an emoji in the bar to send it; tap <strong>More reactions</strong> to open the full picker, or anywhere outside
 the bar to dismiss it without sending. A reaction is a real mesh packet, so it only goes out
 when you pick an emoji.</li>
   <li>Reactions appear below the message bubble</li>
@@ -353,7 +356,7 @@ when you pick an emoji.</li>
 
 <p><strong>Swipe a message to the right</strong> to reply to it — the composer opens with that message quoted.
 Swiping past the reply threshold arms the action; releasing before it springs back with nothing sent.
-Reply is also in the actions menu, reached by touching &amp; holding and then tapping <strong>More</strong>.</p>
+Reply is also in the actions sheet, reached by touching &amp; holding and then tapping <strong>More message actions</strong>.</p>
 
 <h3 id="day-separators">Day Separators</h3>
 
@@ -369,15 +372,17 @@ messages. That count is messages, not people — five unread from one person rea
 
 <h3 id="message-actions">Message Actions</h3>
 
-<p>Touch &amp; hold or double-tap a message to open the quick reaction bar, then tap <strong>More</strong> (the
-overflow icon on that bar) to reach:</p>
+<p>Touch &amp; hold or double-tap a message to open the quick reaction bar, then tap <strong>More message actions</strong>
+(the overflow icon on that bar) to open the actions sheet. The emoji row runs across the top of the
+sheet — that is where reactions live — and beneath it, along with the message’s timestamp and
+delivery status, are:</p>
 
 <ul>
-  <li><strong>Copy</strong> — copy message text to clipboard</li>
   <li><strong>Reply</strong> — quote the message in your response</li>
-  <li><strong>React</strong> — add an emoji reaction</li>
-  <li><strong>Translate</strong> — translate a received message into your device language and toggle between the original and translated text (Google Play build only; uses on-device translation)</li>
-  <li><strong>Delete</strong> — remove a message you sent (local deletion)</li>
+  <li><strong>Copy</strong> — copy the message text to the clipboard</li>
+  <li><strong>Translate</strong> — translate a received message into your device language, and toggle between the original and translated text (Google Play build only; uses on-device translation). The first translation into a language asks to download a one-time language model and tells you its size, then translates once the download finishes. If the download fails, or the message is already in your language, the app says so instead of translating</li>
+  <li><strong>Select</strong> — start multi-select, so you can act on several messages at once</li>
+  <li><strong>Delete</strong> — remove the message from this phone. It works on any message in the conversation, yours or not, and does not remove it from anyone else’s radio or phone</li>
 </ul>
 
 <h3 id="message-priority">Message Priority</h3>
@@ -392,7 +397,7 @@ reliable or background, but that is not something you control from the message c
 
 <ul>
   <li><strong>Maximum length:</strong> 200 bytes (approximately 200 characters for ASCII text)</li>
-  <li>The 200-byte cap applies to the in-app composer — the mesh payload limit itself is ~233 bytes, so messages from other senders (e.g., App Functions) may arrive slightly longer</li>
+  <li>The 200-byte cap applies to the in-app composer — the mesh payload limit itself is 233 bytes, so messages from other senders (e.g., App Functions) may arrive slightly longer</li>
   <li><strong>Rate limiting:</strong> The mesh enforces airtime fairness; heavy message volume may be throttled</li>
   <li><strong>Delivery:</strong> Messages are retried automatically if no acknowledgment is received</li>
 </ul>

@@ -15,11 +15,12 @@ Sõlme detailvaates on iga kärgvõrgu sõlme kohta põhjalikud telemeetria ja m
 
 1. Mine **Seadmed**.
 2. Puuduta sõlme, mida soovite kontrollida.
-3. Vali detailvaadete vahekaartidelt mõõdiku kategooria.
+3. Scroll to the **Telemetry** section and find the category you want — **Signal Quality**, **Device Metrics**, **Environment Metrics**, **Air-Quality Metrics**, **Power Metrics**, **Position**, and the rest.
+4. Tap the refresh button on a row to ask the node for a fresh reading. The chart button beside it opens that category's history, and appears once the node has reported that kind of telemetry.
 
 ![Sõlme detailid — kohalik seade](../../assets/screenshots/nodes_detail_local.png)
 
-Asukoha vahekaart kuvab GPS-i jagavate sõlmede asukohaandmeid:
+The **Position** row expands to show location data for nodes that share GPS:
 
 ![Asukoha tekstisisene sisu](../../assets/screenshots/nodes_position.png)
 
@@ -29,17 +30,17 @@ Asukoha vahekaart kuvab GPS-i jagavate sõlmede asukohaandmeid:
 
 Basic operating information reported by each node:
 
- Meetriline     | Kirjeldus                                |
- -------------- | ---------------------------------------- |
- Aku tase       | Praegune aku protsent                    |
- Vool           | Aku pinge näit                           |
- Kanali kasutus | Percentage of airtime consumed           |
- Airtime        | Transmission time used by this node      |
- Töötamise aeg  | Viimasest taaskäivitamisest möödunud aeg |
+ Meetriline     | Kirjeldus                                                |
+ -------------- | -------------------------------------------------------- |
+ Aku tase       | Praegune aku protsent                                    |
+ Vool           | Aku pinge näit                                           |
+ Kanali kasutus | Percentage of local airtime in use                       |
+ Saate kasutus  | Percentage of the last hour this node spent transmitting |
+ Töötamise aeg  | Viimasest taaskäivitamisest möödunud aeg                 |
 
-Seadme mõõdikud kuvatakse individuaalsete kaartidena, millel on trendigraafikud, mis näitavad aku taset, pinget, kanali kasutamist, eetriaega ja tööaega aja jooksul.
+Device Metrics has no cards on the node detail screen. Use the chart button on its row to open the Device Metrics screen, where battery level, voltage, ChUtil, and AirUtil are plotted over time and every reading — uptime included — is listed with its timestamp underneath. Pick a time frame at the top of the screen, and use the save icon in the app bar to export the visible history as CSV.
 
-&gt; 💡 **Vihje:** Puuduta mis tahes mõõdikukaarti, et laiendada see ajalooliste andmepunktidega täisdiagrammiks. Ajatelje suumimiseks näpista sõrmed kokku.
+&gt; 💡 **Tip:** Where a category does show cards — Environment, Air Quality, and Power — touch &amp; hold a card to copy its value to the clipboard. On a chart screen, pinch to zoom the time axis.
 
 ## Keskkonnamõõdikud
 
@@ -96,7 +97,7 @@ An air-quality log/metrics button appears on the node detail screen **only when 
 
 &gt; 💡 **Vihje:** Õhukvaliteedi mõõdikute jaoks on vaja kaugsõlmega ühendatud andurit. Vaata [Telemeetria &amp; Sensorid](telemetry-and-sensors) toetatud raudvara kohta.
 
-## Signaali mõõdikud
+## Levi Kvaliteet
 
 Radio signal quality information:
 
@@ -120,7 +121,7 @@ Signaali kvaliteeti hinnatakse **SNR-i põhjal, mis on seotud aktiivse LoRa mode
 
 See [Understanding the Signal Meter](signal-meter) for the full explanation.
 
-Local Stats from your connected radio are also shown in Signal Metrics when available. Need logid sisaldavad mürataset, liiklusloendureid, edastusloendureid, võrgus olevate sõlmede arvu ja raadio tööaega. The noise floor chart uses a dashed reference line at -85 dBm to help identify a busy RF environment.
+Kohalik statistika ühendatud raadiost kuvatakse ka signaali kvaliteedi all, kui see on saadaval. Need logid sisaldavad mürataset, liiklusloendureid, edastusloendureid, võrgus olevate sõlmede arvu ja raadio tööaega. The noise floor chart uses a dashed reference line at -85 dBm to help identify a busy RF environment.
 
 - **Request** — ask the connected radio for a fresh Local Stats telemetry report
 - **Clear** — remove Local Stats logs for that node
@@ -135,24 +136,21 @@ Power management telemetry (requires INA sensor or compatible hardware):
  Vool       | Per-channel voltage reading    |
  Pinge      | Per-channel draw, in milliamps |
 
-Up to three sensor channels (ch1–ch3) are charted, each with a label you can edit. The app does not
-derive a wattage figure from them.
+The node detail screen shows cards for channels 1 to 3. Use the chart button on the **Power Metrics** row to open the chart screen, which lists a chip for every channel that reported data — up to eight — and charts the one you select. Use the label field under the chips to give a channel a name of your own, such as Solar or Battery. The app does not derive a wattage figure from voltage and current.
 
 ## Marsruudi
 
 Traceroute näitab sõnumi teed läbi kärgvõrgu:
 
-1. Sõlme üksikasjade ekraanil puuduta **Traceroute**.
+1. From the node detail screen's **Telemetry** section, tap the refresh button on the **Traceroute** row. You cannot traceroute your own node, and the button accepts one request every 30 seconds.
 2. Rakendus saadab sihtsõlmele traceroute-päringu.
-3. Tulemused näitavad iga hüpet koos SNR/RSSI väärtustega.
+3. Results show each hop with its SNR.
 
 ### Traceroute'i tulemuste lugemine
 
-```
-Sina → seade A (SNR: 8,5) → seade B (SNR: 5,2) → sihtkoht
-```
+A traceroute is a round trip, so each saved result carries a hop count in each direction — **Forward Hops** and **Return Hops** — and the **Round Trip** time in seconds. A result marked **Direct** reached the target with no relay in between. Tap a result to read the route traced toward the destination and the route traced back to you, with the SNR of every hop. On Android that view offers **View on map**, which draws the same path, as long as the start and destination nodes have both shared a position.
 
-Iga hüpe esindab vahendussõlme, mis sõnumi edastas.
+A result marked **No Response** means the target never answered. It may be out of range, asleep, or configured not to reply. Wait for the 30-second cooldown to clear and try again; if it keeps failing, send a direct message first to confirm the node is reachable at all.
 
 ## Asukoha logi
 
@@ -166,6 +164,14 @@ Asukohta jagavate sõlmede ajaloolised asukohaandmed:
 ## Naabruse teave
 
 Näitab, milliseid sõlmi antud sõlm otse kuuleb, kasulik kärgvõrgu topoloogia mõistmiseks.
+
+## Hosti mõõdik
+
+Nodes that run Meshtastic on a Linux host, such as a Raspberry Pi, report the host's own health — free memory, free disk space, one-, five-, and fifteen-minute load averages, and how long the host has been up. The **Host Metrics** row is always listed; its chart button appears once a node has reported them.
+
+## Pax mõõdiku logi
+
+A node running the PAX counter module reports how many Wi-Fi and Bluetooth devices it saw nearby, as a crowd-size estimate, and charts the two counts alongside their total. The **PAX Metrics** row is always listed; its chart button appears once a node has reported them. The counts are of devices, not people.
 
 ## Seotud teemad
 
