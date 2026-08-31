@@ -15,15 +15,44 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.plugin.KotlinHierarchyTemplate
+
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
-    alias(libs.plugins.meshtastic.kmp.jvm.android)
     alias(libs.plugins.meshtastic.koin)
 }
 
 kotlin {
     android { withHostTest { isIncludeAndroidResources = true } }
+
+    // Library module: bare wasmJs(), no browser() (that's for the eventual webApp executable).
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs()
+
+    // nonWebMain: core:takserver (ATAK, out of this effort's v0 scope) and the Room/sqlite-bundled runtime
+    // (jvmAndroidMain) have no wasmJs story. jvmAndroidMain nests inside it, replacing the
+    // meshtastic.kmp.jvm.android convention plugin -- which would need a second, conflicting
+    // applyHierarchyTemplate call (Gradle only allows one per project) -- so its dependency block keeps
+    // resolving unchanged. Predicate, not withAndroidTarget()/withApple(): those silently drop androidMain
+    // under com.android.kotlin.multiplatform.library (KT-80409), same as core:ble/core:network.
+    @OptIn(ExperimentalKotlinGradlePluginApi::class)
+    applyHierarchyTemplate(KotlinHierarchyTemplate.default) {
+        common {
+            group("nonWeb") {
+                withCompilations { it.target.targetName != "wasmJs" }
+                group("jvmAndroid") {
+                    withCompilations { it.target.targetName == "android" || it.target.targetName == "jvm" }
+                }
+            }
+        }
+    }
+
+    // The predicate above misses iosMain itself (only reaches the two leaf iOS compilations), same gap
+    // core:ble/core:network hit.
+    sourceSets.getByName("iosMain") { dependsOn(sourceSets.getByName("nonWebMain")) }
 
     sourceSets {
         commonMain.dependencies {
@@ -36,7 +65,6 @@ kotlin {
             implementation(projects.core.network)
             implementation(projects.core.prefs)
             implementation(libs.meshtastic.protobufs)
-            implementation(projects.core.takserver)
 
             implementation(libs.jetbrains.lifecycle.runtime)
             implementation(libs.androidx.paging.common)
@@ -47,6 +75,12 @@ kotlin {
             implementation(libs.kotlinx.atomicfu)
             implementation(libs.kotlinx.collections.immutable)
         }
+
+        // android/jvm/ios only: ATAK/TAK-server support is a niche feature out of this effort's v0 scope
+        // (see the workpad's [SCOPING] entry) -- core:takserver itself has no wasmJs target and needs none;
+        // nothing in this module's own commonMain source actually uses its API (confirmed via grep), so this
+        // dependency line moves wholesale rather than being duplicated.
+        getByName("nonWebMain").dependencies { implementation(projects.core.takserver) }
 
         // Room / SQLite runtime shared between Android and Desktop JVM targets
         getByName("jvmAndroidMain") {
@@ -62,7 +96,24 @@ kotlin {
             implementation(libs.androidx.core.location.altitude)
         }
 
-        commonTest.dependencies { implementation(projects.core.testing) }
+        // core:database exposes Room only as `implementation` (its own commonMain
+        // `androidx.room.paging` dependency), so `RoomDatabase` -- the supertype of the
+        // `MeshtasticDatabase` this module's repositories reference via `DatabaseProvider` -- isn't
+        // visible to external consumers by default; jvmAndroidMain above already redeclares it
+        // directly for the same reason. wasmJs needs the identical redeclaration (sqlite-bundled
+        // excluded: native-only, unrelated to RoomDatabase itself).
+        wasmJsMain.dependencies {
+            implementation(libs.androidx.room.runtime)
+            implementation(libs.androidx.room.paging)
+        }
+
+        // android/jvm/ios only: core:testing has no wasmJs target of its own (same gap
+        // core:ble/core:database/core:network hit) -- confirmed via a real
+        // :core:data:compileTestKotlinWasmJs run that this dependency does block that task (it fails at
+        // configuration, "no matching variant of project :core:testing"), so the 14 commonTest files that
+        // actually import org.meshtastic.core.testing moved to nonWebTest with it; the other 19 (confirmed
+        // via grep) don't reference it and stayed in commonTest.
+        getByName("nonWebTest").dependencies { implementation(projects.core.testing) }
 
         getByName("androidHostTest") { dependencies { runtimeOnly(libs.androidx.sqlite.bundled.jvm) } }
     }

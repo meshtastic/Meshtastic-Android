@@ -24,5 +24,8 @@ import org.meshtastic.mqtt.MqttTransportFactory
  * default, `tcp://`/`ssl://`) plus WebSocket (`ws://`/`wss://`); `wasmJs` gets WebSocket only — a browser cannot open a
  * raw TCP socket at all (permanent sandbox limitation, not a library gap; `mqtt-client-transport-tcp` publishes no
  * wasmJs variant at all, confirmed via its Gradle Module Metadata).
+ *
+ * Public (not `internal`): `core:data`'s `MqttManagerImpl.probe()` composes the identical transport for its one-off
+ * probe client and must not duplicate this platform-selection logic itself.
  */
-internal expect fun mqttTransportFactory(tls: (TLSConfigBuilder.() -> Unit)?): MqttTransportFactory
+expect fun mqttTransportFactory(tls: (TLSConfigBuilder.() -> Unit)?): MqttTransportFactory

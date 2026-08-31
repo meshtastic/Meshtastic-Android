@@ -21,5 +21,5 @@ import org.meshtastic.mqtt.MqttTransportFactory
 import org.meshtastic.mqtt.transport.ws.WebSocketTransportFactory
 
 // Browsers cannot open raw TCP sockets (permanent sandbox limitation) — WebSocket is the only transport available.
-internal actual fun mqttTransportFactory(tls: (TLSConfigBuilder.() -> Unit)?): MqttTransportFactory =
+actual fun mqttTransportFactory(tls: (TLSConfigBuilder.() -> Unit)?): MqttTransportFactory =
     WebSocketTransportFactory(tls)

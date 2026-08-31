@@ -22,5 +22,5 @@ import org.meshtastic.mqtt.plus
 import org.meshtastic.mqtt.transport.tcp.TcpTransportFactory
 import org.meshtastic.mqtt.transport.ws.WebSocketTransportFactory
 
-internal actual fun mqttTransportFactory(tls: (TLSConfigBuilder.() -> Unit)?): MqttTransportFactory =
+actual fun mqttTransportFactory(tls: (TLSConfigBuilder.() -> Unit)?): MqttTransportFactory =
     TcpTransportFactory(tls) + WebSocketTransportFactory(tls)
