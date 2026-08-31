@@ -352,7 +352,6 @@
     <string name="ipv4_mode">Modo IPv4</string>
     <string name="json_output_enabled">Saída JSON ativada</string>
     <!-- KEY -->
-    <!-- LABEL -->
     <string name="last_position_update">Atualização da última posição</string>
     <string name="latest_alpha_firmware">Último alfa</string>
     <string name="latest_stable_firmware">Último estável</string>

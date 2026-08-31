@@ -670,10 +670,6 @@
     <string name="firmware_maintenance_cdc_unblock_failed">Kustutusfail kopeeriti, kuid seade ei alustanud kustutamist. Midagi pole veel muutunud. Eemaldage seade vooluvõrgust, vajutage kaks korda lähtestamisnuppu ja proovige uuesti.</string>
     <string name="firmware_maintenance_copy_failed">Faili ei õnnestunud seadme kettale kopeerida. Veendu, et ketas on endiselt ühendatud ja proovi uuesti.</string>
     <string name="firmware_maintenance_data_unavailable">Kustutatavate piltide loend pole praegu saadaval. Kontrolli oma ühendust ja proovi uuesti või kasuta veebipõhist paigaldust aadressil flasher.meshtastic.org.</string>
-    <string name="firmware_maintenance_erase_action">Kustuta ja paigalda</string>
-    <string name="firmware_maintenance_erase_confirm_button">Seadme tühjendamine</string>
-    <string name="firmware_maintenance_erase_confirm_text">See kustutab %1$s seadmest kõik, sh kanalid, võtmed ja kõik seaded, seejärel paigaldab püsivara uuesti. Seda ei saa tagasi võtta ja varukoopiat ei tehta.\n\nTeil palutakse seadme ketta valida kaks korda: üks kord kustutusfaili ja seejärel uuesti püsivara jaoks.</string>
-    <string name="firmware_maintenance_erase_confirm_title">Kas tühjendada see seade?</string>
     <string name="firmware_maintenance_no_release">Vali esmalt püsivara versioon, et seadet saaks pärast kustutamist uuesti taastada.</string>
     <string name="firmware_maintenance_not_a_bootloader_volume">See ketas ei ole seadme uuendusketas. Vali ketas, mis kuvatakse, kui seade on uuendusrežiimis (see sisaldab faili nimega INFO_UF2.TXT).</string>
     <string name="firmware_maintenance_select_drive">Vali seadme värskendusketas</string>
@@ -911,24 +907,6 @@
     <string name="key_verification_final_title">Võtme kontrollimine on lõpule viidud</string>
     <string name="key_verification_request_title">Võtme kinnitamise taotlus</string>
     <string name="key_verification_title">Võtme kontrollimine</string>
-    <!-- LABEL -->
-    <string name="label_lite_fast">Kerge - Kiire</string>
-    <string name="label_lite_slow">Kerge - Aeglane</string>
-    <string name="label_long_fast">Pikk ulatus - kiire</string>
-    <string name="label_long_moderate">Pikk ulatus - mõõdukas</string>
-    <string name="label_long_slow">Pikk ulatus - aeglane</string>
-    <string name="label_long_turbo">Pikk ulatus - Turbo</string>
-    <string name="label_medium_fast">Keskmine ulatus - kiire</string>
-    <string name="label_medium_slow">Keskmine ulatus - aeglane</string>
-    <string name="label_medium_turbo">Medium Range - Turbo</string>
-    <string name="label_narrow_fast">Kitsas - Kiire</string>
-    <string name="label_narrow_slow">Kitsas - Aeglane</string>
-    <string name="label_short_fast">Lühike ulatus - kiire</string>
-    <string name="label_short_slow">Lühike ulatus - aeglane</string>
-    <string name="label_short_turbo">Lühike ulatus - turbo</string>
-    <string name="label_tiny_fast">Pisike - kiire</string>
-    <string name="label_tiny_slow">Pisike - aeglane</string>
-    <string name="label_very_long_slow">Väga pikk ulatus- aeglane</string>
     <string name="last_heard_filter_label">Filtreeri viimase kuulmise aja järgi: %1$s</string>
     <string name="last_position_update">Viimase asukoha värskendus</string>
     <string name="latest_alpha_firmware">Viimane alfa</string>
@@ -1284,11 +1262,6 @@
     <string name="node_layout_complete_description">Täielik paigutus kuvab kõik saadaolevad sõlmeandmed. Andmeteta väljad peidetakse automaatselt.</string>
     <string name="node_layout_device_role">Seadme &amp; roll</string>
     <string name="node_layout_distance_and_bearing">Kaugus ja suund</string>
-    <string name="node_layout_help_signal_bad">Signaal on nõrk. SNR on üle −18 dB ja RSSI üle −125 dBm.</string>
-    <string name="node_layout_help_signal_fair">Signaal on mõõdukas. SNR on üle −12 dB ja RSSI üle −120 dBm.</string>
-    <string name="node_layout_help_signal_good">Signaal on tugev. SNR on üle −7 dB ja RSSI üle −115 dBm.</string>
-    <string name="node_layout_help_signal_indicator">Kombineerib SNR ja RSSI kvaliteeditasemeks, mida kuvatakse värvilise ikoonina koos kirjeldusega. Kuvatakse ainult täielikus paigutuses.</string>
-    <string name="node_layout_help_signal_none">Kasutatavat signaali ei tuvastatud. Alla kõigi kvaliteedilävede.</string>
     <string name="node_layout_hops_away">Hüppe kaugusel</string>
     <string name="node_layout_last_heard_time">Viimati kuuldud aeg</string>
     <string name="node_layout_log_icons">Keskkonnamõõdikud</string>
@@ -1883,7 +1856,6 @@
     <string name="traffic_management_nodeinfo_direct_response_max_hops">Otsevastuse hüpete maksimaalne arv</string>
     <string name="traffic_management_position_dedup">Asukoha dubleerimine</string>
     <string name="traffic_management_position_min_interval">Minimaalne asukoha intervall (sekundites)</string>
-    <string name="traffic_management_position_precision">Asukoha täpsus (bittides)</string>
     <string name="traffic_management_rate_limit_enabled">Saatekiiruse piiramine</string>
     <string name="traffic_management_rate_limit_max_packets">Max pakettide arv aknas</string>
     <string name="traffic_management_rate_limit_window">Kiiruse piirangu aken (sekundites)</string>

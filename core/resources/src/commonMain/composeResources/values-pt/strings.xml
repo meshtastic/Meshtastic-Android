@@ -259,7 +259,6 @@
     <string name="ipv4_mode">Modo IPv4</string>
     <string name="json_output_enabled">Saída JSON ativada</string>
     <!-- KEY -->
-    <!-- LABEL -->
     <string name="latitude">Latitude</string>
     <!-- LAYER -->
     <string name="led_state">Estado do LED</string>

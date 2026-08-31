@@ -685,10 +685,6 @@
     <string name="firmware_maintenance_cdc_unblock_failed">Poistotiedosto kopioitiin, mutta laite ei aloittanut poistamista. Mitään ei ole vielä muutettu. Irrota laite, paina sen nollauspainiketta kahdesti ja yritä uudelleen.</string>
     <string name="firmware_maintenance_copy_failed">Tiedostoa ei voitu kopioida laitteen asemalle. Varmista, että asema on edelleen yhdistetty ja yritä uudelleen.</string>
     <string name="firmware_maintenance_data_unavailable">Laitteen tyhjennystiedostoja ei ole tällä hetkellä saatavilla. Tarkista yhteytesi ja yritä uudelleen tai käytä Web Flasheria osoitteessa flasher.meshtastic.org</string>
-    <string name="firmware_maintenance_erase_action">Tyhjennä ja asenna uudelleen</string>
-    <string name="firmware_maintenance_erase_confirm_button">Tyhjennä laite</string>
-    <string name="firmware_maintenance_erase_confirm_text">Tämä tyhjentää kaiken laitteesta %1$s, mukaan lukien kanavat, avaimet ja kaikki asetukset, ja asentaa sitten laiteohjelmiston uudelleen.\n\nToimintoa ei voi peruuttaa, eikä varmuuskopiota ole. Sinua pyydetään valitsemaan laitteen asema kahdesti: ensin poistotiedostoa ja sitten laiteohjelmistoa varten.</string>
-    <string name="firmware_maintenance_erase_confirm_title">Tyhjennetäänkö tämä laite?</string>
     <string name="firmware_maintenance_no_release">Valitse ensin laiteohjelmiston versio, jotta laite voidaan asentaa uudelleen tyhjentämisen jälkeen.</string>
     <string name="firmware_maintenance_not_a_bootloader_volume">Tämä asema ei ole laitteen päivitysasema. Valitse asema, joka näkyy, kun laite on päivitystilassa (se sisältää tiedoston nimeltä INFO_UF2.TXT).</string>
     <string name="firmware_maintenance_select_drive">Valitse laitteen päivitysasema</string>
@@ -929,24 +925,6 @@
     <string name="key_verification_final_title">Avaimen varmennus valmis</string>
     <string name="key_verification_request_title">Avaimen varmennuspyyntö</string>
     <string name="key_verification_title">Avaimen varmennus</string>
-    <!-- LABEL -->
-    <string name="label_lite_fast">Lite - Fast</string>
-    <string name="label_lite_slow">Lite - Slow</string>
-    <string name="label_long_fast">Long Range - Fast</string>
-    <string name="label_long_moderate">Long Range - Moderate</string>
-    <string name="label_long_slow">Long Range - Slow</string>
-    <string name="label_long_turbo">Long Range - Turbo</string>
-    <string name="label_medium_fast">Medium Range - Fast</string>
-    <string name="label_medium_slow">Medium Range - Slow</string>
-    <string name="label_medium_turbo">Medium Range - Turbo</string>
-    <string name="label_narrow_fast">Narrow - Fast</string>
-    <string name="label_narrow_slow">Narrow - Slow</string>
-    <string name="label_short_fast">Short Range - Fast</string>
-    <string name="label_short_slow">Short Range - Slow</string>
-    <string name="label_short_turbo">Short Range - Turbo</string>
-    <string name="label_tiny_fast">Tiny - Fast</string>
-    <string name="label_tiny_slow">Tiny - Slow</string>
-    <string name="label_very_long_slow">Very Long Range - Slow</string>
     <string name="last_heard_filter_label">Suodata viimeksi kuullun ajan mukaan: %1$s</string>
     <string name="last_position_update">Viimeisin sijainnin päivitys</string>
     <string name="latest_alpha_firmware">Viimeisin epävakaa (alpha)</string>
@@ -983,7 +961,6 @@
     <string name="local_network_permission">Paikallisverkon käyttöoikeus</string>
     <string name="local_network_permission_blocked_rationale">Paikallisverkon käyttöoikeus on poistettu käytöstä, eikä Android enää pyydä sitä. Wi-Fi-verkossasi olevaa radiota ei voida löytää eikä siihen voida muodostaa yhteyttä, ennen kuin otat käyttöoikeuden käyttöön sovelluksen asetuksissa. Julkisessa verkossa tai VPN:n kautta oleva radio toimii normaalisti.</string>
     <string name="local_network_permission_denied_hint">Meshtasticin paikallisverkon käyttöoikeus on poistettu käytöstä. Jos tämä radio on paikallisverkossasi, yhteys epäonnistuu, kunnes sallit paikallisverkon käytön järjestelmän asetuksissa.</string>
-    <string name="local_network_permission_rationale">Meshtastic tarvitsee paikallisverkon käyttöoikeuden löytääkseen Wi-Fi-verkossasi olevat radiot. Sovellus etsii vain verkosta, johon olet jo yhdistetty. Ilman käyttöoikeutta voit silti muodostaa yhteyden radioon kirjoittamalla sen osoitteen.</string>
     <string name="local_stats_bad">Huonot %1$d</string>
     <string name="local_stats_battery">Akku: %1$d%</string>
     <string name="local_stats_diagnostics_prefix">Vianmääritys: %1$s</string>
@@ -1322,11 +1299,6 @@
     <string name="node_layout_complete_description">Täydellinen-näkymä näyttää kaikki saatavilla olevat tiedot. Kentät, joista ei ole tietoja saatavilla, piilotetaan automaattisesti.</string>
     <string name="node_layout_device_role">Laite &amp; rooli</string>
     <string name="node_layout_distance_and_bearing">Etäisyys ja suuntima</string>
-    <string name="node_layout_help_signal_bad">Signaalin laatu on heikko. SNR-arvo on yli −18 dB ja RSSI-arvo yli −125 dBm.</string>
-    <string name="node_layout_help_signal_fair">Signaali on kohtalainen. SNR-arvo on yli −12 dB ja RSSI-arvo yli −120 dBm.</string>
-    <string name="node_layout_help_signal_good">Signaalin laatu on hyvä. SNR-arvo on yli −7 dB ja RSSI-arvo yli −115 dBm.</string>
-    <string name="node_layout_help_signal_indicator">Yhdistää SNR- ja RSSI-arvot signaalin laatuluokitukseksi, joka näytetään värillisenä kuvakkeena ja kuvauksena. Näytetään vain täydellinen-näkymässä. 📶</string>
-    <string name="node_layout_help_signal_none">Käyttökelpoista signaalia ei havaittu. Signaali alittaa kaikki laatukriteerit.</string>
     <string name="node_layout_hops_away">Hyppyjä</string>
     <string name="node_layout_last_heard_time">Viimeksi kuultu</string>
     <string name="node_layout_log_icons">Ympäristöarvot</string>
@@ -1937,7 +1909,6 @@
     <string name="traffic_management_nodeinfo_direct_response_max_hops">Suoran vastauksen enimmäishyppyjen määrä</string>
     <string name="traffic_management_position_dedup">Sijaintiduplikaattien poisto (liikenteenhallinta)</string>
     <string name="traffic_management_position_min_interval">Sijainnin vähimmäislähetysväli (sekunteina)</string>
-    <string name="traffic_management_position_precision">Sijainnin tarkkuus (bitteinä)</string>
     <string name="traffic_management_rate_limit_enabled">Lähetysnopeuden rajoitus</string>
     <string name="traffic_management_rate_limit_max_packets">Pakettien enimmäismäärä aikajaksossa</string>
     <string name="traffic_management_rate_limit_window">Lähetysrajoituksen aikajakso (sekunteina)</string>

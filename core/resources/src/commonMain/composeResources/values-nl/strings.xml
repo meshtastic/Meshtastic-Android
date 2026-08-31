@@ -209,7 +209,6 @@
     <string name="ipv4_mode">IPv4 modus</string>
     <string name="json_output_enabled">JSON uitvoer ingeschakeld</string>
     <!-- KEY -->
-    <!-- LABEL -->
     <string name="latitude">Breedtegraad</string>
     <!-- LAYER -->
     <string name="led_state">LED status</string>

@@ -531,17 +531,6 @@
     <string name="key_verification_final_title">Verificare cheie finalizată</string>
     <string name="key_verification_request_title">Solicitare de verificare cheie</string>
     <string name="key_verification_title">Verificare cheie</string>
-    <!-- LABEL -->
-    <string name="label_long_fast">Rază lungă - rapid</string>
-    <string name="label_long_moderate">Rază lungă - moderat</string>
-    <string name="label_long_slow">Rază lungă - lent</string>
-    <string name="label_long_turbo">Rază lungă - turbo</string>
-    <string name="label_medium_fast">Rază medie - rapid</string>
-    <string name="label_medium_slow">Rază medie - lent</string>
-    <string name="label_short_fast">Rază scurtă - rapid</string>
-    <string name="label_short_slow">Rază scurtă - lent</string>
-    <string name="label_short_turbo">Rază scurtă - turbo</string>
-    <string name="label_very_long_slow">Rază foarte lungă - lent</string>
     <string name="last_heard_filter_label">Filtrați după ultima oră: %1$s</string>
     <string name="last_position_update">Ultima actualizare a poziției</string>
     <string name="latest_alpha_firmware">Ultimul alfa</string>
@@ -1154,7 +1143,6 @@
     <string name="traffic_management_nodeinfo_direct_response_max_hops">Hops maxim pentru răspuns direct</string>
     <string name="traffic_management_position_dedup">Deduplicare poziție</string>
     <string name="traffic_management_position_min_interval">Interval poziţie minimă (sec)</string>
-    <string name="traffic_management_position_precision">Precizie poziție (bits)</string>
     <string name="traffic_management_rate_limit_enabled">Evaluare limitare</string>
     <string name="traffic_management_rate_limit_max_packets">Pachete Max în fereastră</string>
     <string name="traffic_management_rate_limit_window">Evaluează fereastra limită (secunde)</string>

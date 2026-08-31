@@ -46,7 +46,7 @@ Where the app offers it, an **Erase device during update** checkbox appears next
 | BLE / Wi-Fi OTA | Factory-resets the device once the update is verified. All settings and Bluetooth pairing are removed. |
 | USB             | Wipes the device's flash completely, then installs the selected firmware from scratch.                                 |
 
-It is not offered for a local firmware file, during a recovery update, or on USB devices whose board does not support the erase step. Afterwards the device needs setting up — and pairing — again.
+It is not offered for a local firmware file, during a recovery update, on USB devices whose board does not support the erase step, or over USB in the desktop app — the USB erase runs the Android-only maintenance sequence below. Afterwards the device needs setting up — and pairing — again.
 
 ### OTA via Wi-Fi (network-connected ESP32)
 
@@ -67,6 +67,8 @@ When your radio is connected over **USB/serial** (rather than Bluetooth), the Fi
 ### Factory Erase and Bootloader Upgrade
 
 On a **USB/serial** connection, nRF52 and RP2040 devices can be wiped as part of an update — that is the **Erase device during update** opt-in described earlier on this page. nRF52 devices additionally offer **Upgrade bootloader** where an upgraded bootloader is published for the board; RP2040 devices run no Adafruit bootloader, so they never see it.
+
+Both are Android-only. They depend on Android's update-drive checks, so the desktop app does not show them — use the [Web Flasher](https://flasher.meshtastic.org) there instead.
 
 Select a firmware version before either one: the app hides both until a release is chosen, because the firmware is reinstalled after the device is wiped or the new bootloader is written.
 

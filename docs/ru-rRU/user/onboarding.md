@@ -12,23 +12,23 @@ aliases:
 
 # Начало работы
 
-This page covers the first-launch flow of the Meshtastic Android app, what each permission is for, and how to revisit them later.
+На этой странице рассказывается о процессе первого запуска приложения Meshtastic для Android, для чего нужно каждое разрешение и как вернуться к нему позже.
 
 ## Первый запуск
 
-When you open the app for the first time, the app guides you through an introductory flow that configures essential permissions and settings. Complete each step in order or skip it — nothing here is a one-time offer. Every permission can be reviewed and granted later from the **Permissions** section of **Settings** inside the app.
+Когда ты открываешь приложение впервые, оно проводит тебя через вводный процесс, который настраивает необходимые разрешения и параметры. Выполни каждый шаг по порядку или пропусти — здесь ничто не является одноразовым предложением. Every permission can be reviewed and granted later from the **Permissions** section of **Settings** inside the app.
 
 ### Экран приветствия
 
 The welcome screen introduces Meshtastic with three feature rows:
 
-|                               |                                                                                                                          |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| **Stay Connected Anywhere**   | Общайтесь вне сети со своими друзьями и сообществом без использования сотовой связи.                     |
-| **Create Your Own Networks**  | Легко создать частные сети для защищённой и надежной связи в удаленных районах.                          |
-| **Track and Share Locations** | Делитесь своим местоположением в режиме реального времени и поддерживайте работу группы с функциями GPS. |
+|                                         |                                                                                                                          |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| **Будь на связи везде**                 | Общайтесь вне сети со своими друзьями и сообществом без использования сотовой связи.                     |
+| **Создавай свои собственные сети**      | Легко создать частные сети для защищённой и надежной связи в удаленных районах.                          |
+| **Отслеживай и делись местоположением** | Делитесь своим местоположением в режиме реального времени и поддерживайте работу группы с функциями GPS. |
 
-Tap **Get started** to proceed through the setup flow.
+Нажми **Начать**, чтобы пройти процесс настройки.
 
 ![Экран приветствия](../../assets/screenshots/onboarding_welcome.png)
 

@@ -263,7 +263,6 @@
     <string name="ipv4_mode">IPv4 모드</string>
     <string name="json_output_enabled">JSON 사용</string>
     <!-- KEY -->
-    <!-- LABEL -->
     <string name="last_position_update">최근 위치 업데이트</string>
     <string name="latitude">위도</string>
     <!-- LAYER -->

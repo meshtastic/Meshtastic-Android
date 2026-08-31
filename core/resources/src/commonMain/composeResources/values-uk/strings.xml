@@ -591,23 +591,6 @@
     <string name="key_verification_final_title">Перевірку ключа завершено</string>
     <string name="key_verification_request_title">Запит ключа верифікації</string>
     <string name="key_verification_title">Ключ верифікації</string>
-    <!-- LABEL -->
-    <string name="label_lite_fast">Легкий - Швидкий</string>
-    <string name="label_lite_slow">Легкий - Повільний</string>
-    <string name="label_long_fast">Велика дальність - Швидко</string>
-    <string name="label_long_moderate">Велика дальність - Помірно</string>
-    <string name="label_long_slow">Мала дальність - Повільно</string>
-    <string name="label_long_turbo">Long Range - Turbo</string>
-    <string name="label_medium_fast">Середня дальність - Швидко</string>
-    <string name="label_medium_slow">Середня дальність - Повільно</string>
-    <string name="label_narrow_fast">Вузький - Швидкий</string>
-    <string name="label_narrow_slow">Вузький - Повільний</string>
-    <string name="label_short_fast">Мала дальність - Повільно</string>
-    <string name="label_short_slow">Мала дальність - Повільно</string>
-    <string name="label_short_turbo">Мала дальність - Турбо</string>
-    <string name="label_tiny_fast"></string>
-    <string name="label_tiny_slow"></string>
-    <string name="label_very_long_slow">Дуже велика дальність - Повільно</string>
     <string name="last_heard_filter_label">Фільтрувати за часом останньої активності:%1$s</string>
     <string name="last_position_update">Останнє оновлення позиції</string>
     <string name="latest_alpha_firmware">Остання альфа</string>
@@ -835,10 +818,6 @@
     <string name="node_layout_compact">Компактний</string>
     <string name="node_layout_complete">Повний</string>
     <string name="node_layout_device_role">Пристрій &amp; Роль</string>
-    <string name="node_layout_help_signal_bad">Сигнал поганий. SNR вище −18 dB і RSSI вище −125 dBm.</string>
-    <string name="node_layout_help_signal_fair">Сигнал задовільний. SNR вище −12 dB і RSSI вище −120 dBm.</string>
-    <string name="node_layout_help_signal_good">Сигнал сильний. SNR вище −7 dB і RSSI вище −115 dBm.</string>
-    <string name="node_layout_help_signal_indicator">Поєднує SNR та RSSI в рівень якості, який відображається як кольоровий значок з описом. Відображається лише в повному макеті.</string>
     <string name="node_layout_hops_away">Кількість стрибків повідомлення</string>
     <string name="node_layout_log_icons">Показники довкілля</string>
     <string name="node_layout_power">Живлення</string>

@@ -593,7 +593,6 @@
     <string name="firmware">Firmware</string>
     <string name="firmware_edition">Firmware edice</string>
     <string name="firmware_event_ended_button">Aktualizovat firmware</string>
-    <string name="firmware_maintenance_erase_confirm_text">Tímto se ze zařízení %1$s vymaže vše včetně kanálů, klíčů a všech nastavení a poté se znovu nainstaluje firmware. Tuto akci nelze vrátit zpět a neexistuje žádná záloha.\n\nBudete dvakrát vyzváni k výběru disku zařízení: nejprve pro soubor pro vymazání a poté znovu pro firmware.</string>
     <string name="firmware_maintenance_no_release">Nejprve vyberte verzi firmwaru, aby bylo možné po vymazání zařízení firmware znovu nainstalovat.</string>
     <string name="firmware_maintenance_not_a_bootloader_volume">Vybraný disk není aktualizační disk zařízení. Vyberte disk, který se zobrazí v režimu aktualizace zařízení (obsahuje soubor INFO_UF2.TXT).</string>
     <string name="firmware_maintenance_select_drive">Vyberte disk zařízení určený pro aktualizaci</string>
@@ -811,24 +810,6 @@
     <string name="key_verification_final_title">Ověření klíče dokončeno</string>
     <string name="key_verification_request_title">Požadavek na ověření klíče</string>
     <string name="key_verification_title">Ověření klíče</string>
-    <!-- LABEL -->
-    <string name="label_lite_fast">Lite - Fast</string>
-    <string name="label_lite_slow">Lite - Pomalá</string>
-    <string name="label_long_fast">Long Range - Fast</string>
-    <string name="label_long_moderate">Long Range - Moderate</string>
-    <string name="label_long_slow">Long Range - Slow</string>
-    <string name="label_long_turbo">Long Range - Turbo</string>
-    <string name="label_medium_fast">Medium Range - Fast</string>
-    <string name="label_medium_slow">Medium Range - Slow</string>
-    <string name="label_medium_turbo">Medium Range - Turbo</string>
-    <string name="label_narrow_fast">Narrow - Fast</string>
-    <string name="label_narrow_slow">Narrow - Slow</string>
-    <string name="label_short_fast">Short Range - Fast</string>
-    <string name="label_short_slow">Short Range - Slow</string>
-    <string name="label_short_turbo">Short Range - Turbo</string>
-    <string name="label_tiny_fast">Tiny - Fast</string>
-    <string name="label_tiny_slow">Tiny - Slow</string>
-    <string name="label_very_long_slow">Very Long Range - Slow</string>
     <string name="last_heard_filter_label">Filtrovat podle času posledního slyšení: %1$s</string>
     <string name="last_position_update">Poslední aktualizace pozice</string>
     <string name="latest_alpha_firmware">Poslední alfa</string>
@@ -855,7 +836,6 @@
     <string name="local_network_permission">Oprávnění k místní síti</string>
     <string name="local_network_permission_blocked_rationale">Přístup k místní síti je vypnutý a Android se už nezeptá. Rádio v síti Wi-Fi nelze najít ani k němu přistupovat, dokud tento přístup nezapnete v nastavení aplikace. Rádio na veřejné adrese nebo přes VPN to neovlivní.</string>
     <string name="local_network_permission_denied_hint">Přístup k místní síti je pro Meshtastic vypnutý. Pokud je toto rádio v místní síti, připojení se nezdaří, dokud v nastavení systému nepovolíte přístup k místní síti.</string>
-    <string name="local_network_permission_rationale">Meshtastic potřebuje přístup k místní síti, aby mohl vyhledat rádia v síti Wi-Fi. Vyhledává pouze v síti, ke které jste právě připojeni. Bez tohoto přístupu se stále můžete připojit k rádiu zadáním jeho adresy.</string>
     <string name="local_stats_bad">Poškozené %1$d</string>
     <string name="local_stats_battery">Baterie: %1$d%</string>
     <string name="local_stats_diagnostics_prefix">Diagnostika: %1$s</string>
@@ -1133,11 +1113,6 @@
     <string name="node_layout_complete_description">Kompletní rozložení zobrazuje všechna dostupná data uzlu. Pole bez dat jsou automaticky skryta.</string>
     <string name="node_layout_device_role">Zařízení a Role</string>
     <string name="node_layout_distance_and_bearing">Vzdálenost a směr</string>
-    <string name="node_layout_help_signal_bad">Kvalita signálu je nízká. Poměr signálu k šumu (SNR) je vyšší než −18 dB a síla přijímaného signálu (RSSI) je vyšší než −125 dBm.</string>
-    <string name="node_layout_help_signal_fair">Signál je uspokojivý. SNR je vyšší než −12 dB a RSSI je vyšší než −120 dBm.</string>
-    <string name="node_layout_help_signal_good">Signál je silný. SNR je vyšší než −7 dB a RSSI je vyšší než −115 dBm.</string>
-    <string name="node_layout_help_signal_indicator">Kombinuje SNR a RSSI do úrovně kvality zobrazené jako barevná ikona s popisem. Zobrazeno pouze v úplném rozložení.</string>
-    <string name="node_layout_help_signal_none">Nebyl detekován žádný použitelný signál. Hodnoty jsou pod všemi prahovými úrovněmi kvality.</string>
     <string name="node_layout_hops_away">Počet skoků</string>
     <string name="node_layout_last_heard_time">Čas posledního zachycení</string>
     <string name="node_layout_log_icons">Metriky prostředí</string>

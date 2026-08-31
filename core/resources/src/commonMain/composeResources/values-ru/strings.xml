@@ -19,6 +19,7 @@
     <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">От %1$s: %2$s</string>
+    <string name="a11y_node_battery">заряд батареи %1$d</string>
     <string name="a11y_node_distance_away">%1$s отсюда</string>
     <string name="a11y_node_favorite">избранный</string>
     <string name="a11y_node_hops_away">%1$d hops away</string>
@@ -174,6 +175,7 @@
     <string name="bold_heading">Выделять заголовок жирным</string>
     <string name="bonding_failed_permissions">Сопряжение не удалось. Дай соседнему устройству разрешения и попробуй снова.</string>
     <string name="bonding_failed_retry">Сопряжение не завершилось. Попробуй снова.</string>
+    <string name="boot_reconnect_blocked_title">Meshtastic не может переподключиться</string>
     <string name="bottom_nav_settings">Настройки</string>
     <string name="broadcast_interval">Период рассылки</string>
     <string name="busy_noise_floor">Busy floor</string>
@@ -679,10 +681,6 @@
     <string name="firmware_maintenance_cdc_unblock_failed">Файл стирания был скопирован, но устройство не начало стирание. Пока ничего не изменилось. Отключи устройство, дважды нажми кнопку сброса и повтори попытку.</string>
     <string name="firmware_maintenance_copy_failed">Не удалось скопировать файл на диск устройства. Убедите, что диск всё ещё подключён, и повтори попытку.</string>
     <string name="firmware_maintenance_data_unavailable">Список образов для стирания сейчас недоступен. Проверь подключение и повтори попытку или используй веб-флешер на flasher.meshtastic.org.</string>
-    <string name="firmware_maintenance_erase_action">Очистить и переустановить</string>
-    <string name="firmware_maintenance_erase_confirm_button">Очистить устройство</string>
-    <string name="firmware_maintenance_erase_confirm_text">Это полностью сотрёт данные на %1$s, включая каналы, ключи и все настройки, затем переустановит прошивку. Это действие необратимо, и резервной копии нет.\n\nТебе будет предложено дважды выбрать диск устройства: сначала для файла стирания, затем для прошивки.</string>
-    <string name="firmware_maintenance_erase_confirm_title">Очистить это устройство?</string>
     <string name="firmware_maintenance_no_release">Сначала выбери версию прошивки, чтобы устройство можно было переустановить после стирания.</string>
     <string name="firmware_maintenance_not_a_bootloader_volume">Этот диск не является диском обновления устройства. Выберите диск, который появляется, когда устройство находится в режиме обновления (он содержит файл с именем INFO_UF2.TXT).</string>
     <string name="firmware_maintenance_select_drive">Выберите диск обновления устройства</string>
@@ -920,24 +918,6 @@
     <string name="key_verification_final_title">Проверка ключа завершена</string>
     <string name="key_verification_request_title">Запрос проверки ключа</string>
     <string name="key_verification_title">Проверка ключа</string>
-    <!-- LABEL -->
-    <string name="label_lite_fast">Легкий - Быстро</string>
-    <string name="label_lite_slow">Легкий - Медленно</string>
-    <string name="label_long_fast">Большая дальность - Быстрый</string>
-    <string name="label_long_moderate">Большая дальность - Умеренно</string>
-    <string name="label_long_slow">Long Range - Slow</string>
-    <string name="label_long_turbo">Большая дальность - Турбо</string>
-    <string name="label_medium_fast">Medium Range - Fast</string>
-    <string name="label_medium_slow">Medium Range - Slow</string>
-    <string name="label_medium_turbo">Medium Range - Turbo</string>
-    <string name="label_narrow_fast">Узкий - Быстро</string>
-    <string name="label_narrow_slow">Узкий - Медленно</string>
-    <string name="label_short_fast">Short Range - Fast</string>
-    <string name="label_short_slow">Short Range - Slow</string>
-    <string name="label_short_turbo">Short Range - Turbo</string>
-    <string name="label_tiny_fast">Tiny - Fast</string>
-    <string name="label_tiny_slow">Tiny - Slow</string>
-    <string name="label_very_long_slow">Очень большая дальность - Медленный</string>
     <string name="last_heard_filter_label">Фильтр по времени последнего сообщения: %1$s</string>
     <string name="last_position_update">Обновление последнего местоположения</string>
     <string name="latest_alpha_firmware">Последняя альфа</string>
@@ -1291,11 +1271,6 @@
     <string name="node_layout_complete_description">Полная схема отображает все доступные данные нод. Поля без данных автоматически скрываются.</string>
     <string name="node_layout_device_role">Роль устройства</string>
     <string name="node_layout_distance_and_bearing">Расстояние и азимут</string>
-    <string name="node_layout_help_signal_bad">Сигнал плохой. SNR выше −18 дБ, а RSSI выше −125 дБм.</string>
-    <string name="node_layout_help_signal_fair">Сигнал умеренный. SNR выше −12 дБ, а RSSI — выше −120 дБм.</string>
-    <string name="node_layout_help_signal_good">Сигнал сильный. SNR выше −7 дБ, а RSSI выше −115 дБм.</string>
-    <string name="node_layout_help_signal_indicator">Объединяет SNR и RSSI в уровень качества, отображаемый в виде цветного значка с описанием. Отображается только в полной компоновке.</string>
-    <string name="node_layout_help_signal_none">Не обнаружен пригодный сигнал. Ниже всех порогов качества.</string>
     <string name="node_layout_hops_away">Прыжков</string>
     <string name="node_layout_last_heard_time">Время последнего вещания</string>
     <string name="node_layout_log_icons">Метрики окружения</string>
@@ -1900,7 +1875,6 @@
     <string name="traffic_management_nodeinfo_direct_response_max_hops">Макс кол-во хопов для прямых сообщений</string>
     <string name="traffic_management_position_dedup">Удаление дубликатов позиций</string>
     <string name="traffic_management_position_min_interval">Мин. интервал позиционирования (сек)</string>
-    <string name="traffic_management_position_precision">Точность позиции (бит)</string>
     <string name="traffic_management_rate_limit_enabled">Ограничение скорости</string>
     <string name="traffic_management_rate_limit_max_packets">Макс пакетов в окне</string>
     <string name="traffic_management_rate_limit_window">Окно ограничения скорости (сек.)</string>

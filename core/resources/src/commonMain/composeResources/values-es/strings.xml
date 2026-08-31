@@ -414,7 +414,6 @@ Rango de Valores 0 - 500.</string>
     <string name="ipv4_mode">Modo IPv4</string>
     <string name="json_output_enabled">Salida JSON activada</string>
     <!-- KEY -->
-    <!-- LABEL -->
     <string name="last_heard_filter_label">Filtrar por tiempo de la última escucha: %1$s</string>
     <string name="last_position_update">Última actualización</string>
     <string name="latest_alpha_firmware">Última alfa</string>

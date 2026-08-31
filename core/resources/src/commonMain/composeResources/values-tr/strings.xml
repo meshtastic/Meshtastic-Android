@@ -280,7 +280,6 @@
     <string name="ipv4_mode">IPv4 modu</string>
     <string name="json_output_enabled">JSON çıktısı etkin</string>
     <!-- KEY -->
-    <!-- LABEL -->
     <string name="latitude">Enlem</string>
     <!-- LAYER -->
     <string name="led_state">LED durumu</string>

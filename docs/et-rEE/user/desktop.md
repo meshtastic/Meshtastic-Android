@@ -142,8 +142,8 @@ Nõuded:
   in the browser and use the planner's GeoJSON export, then add the file as a layer — not the KML
   export, which is a ground-overlay image this map cannot draw. Custom network tile sources work
   too — see [Map & Waypoints](map-and-waypoints#adding-your-own-tile-source)
-- The USB maintenance flow — nRF52/RP2040 factory erase and bootloader upgrade — is Android-only. The
-  desktop app still shows the option, but it cannot complete there
+- The USB maintenance flow — nRF52/RP2040 factory erase and bootloader upgrade — is Android-only, and the
+  desktop app does not offer it. Use the [Web Flasher](https://flasher.meshtastic.org) instead
 - Mõned Androidile omased funktsioonid (vidinad, kindlad teavituskanalid) pole saadaval
 - Performance may vary on low-spec hardware running Compose Desktop
 - Lauaarvutid ei toeta veel BLE liitmist (sidumine toimib ilma ühendamiseta)
