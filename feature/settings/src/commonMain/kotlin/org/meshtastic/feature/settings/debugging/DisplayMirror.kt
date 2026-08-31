@@ -25,9 +25,11 @@ import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
@@ -44,6 +46,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,6 +63,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -100,6 +104,9 @@ private const val REPEAT_INTERVAL_MS = 100L
 
 // Swipes on the mirror shorter than this are ignored as accidental.
 private val SWIPE_THRESHOLD = 48.dp
+
+// Mirror + D-pad fit comfortably side by side above this content width.
+private val SIDE_BY_SIDE_MIN_WIDTH = 760.dp
 
 // Firmware input_broker_event codes (src/input/InputBroker.h).
 private const val INPUT_SELECT = 10
@@ -195,12 +202,44 @@ fun DisplayMirrorContent(modifier: Modifier = Modifier, viewModel: DisplayMirror
         }
 
         when {
-            !connected -> Text(text = "Not connected to a device.")
-            currentFrame != null -> MirrorSurface(currentFrame, palette, onEvent = viewModel::sendKey)
-            else -> Text(text = "No frame received yet — enable mirroring or tap Refresh.")
-        }
+            !connected -> {
+                Text(text = "Not connected to a device.")
+                DpadCluster(enabled = false, onEvent = viewModel::sendKey)
+            }
 
-        DpadCluster(enabled = connected, onEvent = viewModel::sendKey)
+            currentFrame == null -> {
+                Text(text = "No frame received yet — enable mirroring or tap Refresh.")
+                DpadCluster(enabled = connected, onEvent = viewModel::sendKey)
+            }
+
+            else -> MirrorWithControls(currentFrame, palette, enabled = connected, onEvent = viewModel::sendKey)
+        }
+    }
+}
+
+/** Controls sit beside the mirror when the window is wide enough, below it otherwise. */
+@Composable
+private fun MirrorWithControls(frame: MirrorFrame, palette: MirrorPalette?, enabled: Boolean, onEvent: (Int) -> Unit) {
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        if (maxWidth >= SIDE_BY_SIDE_MIN_WIDTH) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                MirrorSurface(frame, palette, onEvent = onEvent, modifier = Modifier.weight(1f, fill = false))
+                DpadCluster(enabled = enabled, onEvent = onEvent)
+            }
+        } else {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                MirrorSurface(frame, palette, onEvent = onEvent)
+                DpadCluster(enabled = enabled, onEvent = onEvent)
+            }
+        }
     }
 }
 
@@ -216,7 +255,9 @@ private fun MirrorSurface(
     modifier: Modifier = Modifier,
 ) {
     val focusRequester = remember { FocusRequester() }
+    val focusManager = LocalFocusManager.current
     var focused by remember { mutableStateOf(false) }
+    val isFocused by rememberUpdatedState(focused)
     val focusColor = MaterialTheme.colorScheme.primary
 
     Column(
@@ -236,7 +277,14 @@ private fun MirrorSurface(
                         true
                     } ?: false
                 }
-                .pointerInput(Unit) { detectTapGestures(onTap = { focusRequester.requestFocus() }) }
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onTap = {
+                            // Tap toggles keyboard control so there is always a way out of capture.
+                            if (isFocused) focusManager.clearFocus() else focusRequester.requestFocus()
+                        },
+                    )
+                }
                 .swipeToDirection(onEvent)
                 .border(width = 2.dp, color = if (focused) focusColor else Color.Transparent),
         ) {
@@ -245,7 +293,7 @@ private fun MirrorSurface(
         Text(
             text =
             if (focused) {
-                "Keyboard active: arrows navigate · Enter selects · Esc goes back"
+                "Keyboard active: arrows · Enter = OK · Esc = back — click the screen again to exit"
             } else {
                 "Click the screen for keyboard control, or swipe it to navigate"
             },
