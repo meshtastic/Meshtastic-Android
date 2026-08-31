@@ -59,6 +59,7 @@
     <string name="add_network_device">Add</string>
     <string name="add_network_device_manually">Add device manually…</string>
     <string name="add_network_layer">Add Network Layer</string>
+    <string name="add_usb_device">Add serial device…</string>
     <string name="address">Address</string>
     <string name="admin_key">Admin Key</string>
     <string name="admin_keys">Admin Keys</string>

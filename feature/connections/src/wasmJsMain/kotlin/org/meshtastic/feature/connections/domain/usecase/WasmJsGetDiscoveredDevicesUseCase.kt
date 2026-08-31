@@ -23,9 +23,8 @@ import org.meshtastic.feature.connections.data.RecentAddressesSource
 import org.meshtastic.feature.connections.model.GetDiscoveredDevicesUseCase
 
 /**
- * wasmJs binding for [GetDiscoveredDevicesUseCase] — same shape as [JvmGetDiscoveredDevicesUseCase], minus USB (no
- * [UsbScanner] arg: WebUSB hot-plug scanning is a future pass, not this v0 slice; `usbDevices` in the resulting
- * [org.meshtastic.feature.connections.model.DiscoveredDevices] is always empty). Found via an actual browser load
+ * wasmJs binding for [GetDiscoveredDevicesUseCase] — same shape as [JvmGetDiscoveredDevicesUseCase], with
+ * [WasmJsUsbScanner] providing real Web Serial-backed USB discovery. Found via an actual browser load
  * (`NoDefinitionFoundException` for [GetDiscoveredDevicesUseCase], since [CommonGetDiscoveredDevicesUseCase] is
  * deliberately un-annotated in commonMain — see its own KDoc), not a compile-time check.
  */
@@ -34,4 +33,5 @@ class WasmJsGetDiscoveredDevicesUseCase(
     recentAddressesDataSource: RecentAddressesSource,
     nodeRepository: NodeRepository,
     databaseManager: DatabaseManager,
-) : CommonGetDiscoveredDevicesUseCase(recentAddressesDataSource, nodeRepository, databaseManager)
+    usbScanner: WasmJsUsbScanner,
+) : CommonGetDiscoveredDevicesUseCase(recentAddressesDataSource, nodeRepository, databaseManager, usbScanner)

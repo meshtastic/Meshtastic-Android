@@ -65,6 +65,7 @@ import org.meshtastic.core.ui.viewmodel.safeLaunch
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.connections.data.PendingFirmwareRecoverySource
 import org.meshtastic.feature.connections.data.RecentAddressesSource
+import org.meshtastic.feature.connections.domain.usecase.UsbScanner
 import org.meshtastic.feature.connections.model.DeviceListEntry
 import org.meshtastic.feature.connections.model.DiscoveredDevices
 import org.meshtastic.feature.connections.model.GetDiscoveredDevicesUseCase
@@ -150,6 +151,7 @@ open class ScannerViewModel(
     private val uiPrefs: UiPrefs,
     private val firmwareRecoveryDataSource: PendingFirmwareRecoverySource,
     private val bleScanner: BleScanner? = null,
+    private val usbScanner: UsbScanner? = null,
 ) : ViewModel() {
 
     // ── Mock / demo transport ─────────────────────────────────────────────────────────────────
@@ -437,6 +439,23 @@ open class ScannerViewModel(
                     }
                 }
             }
+    }
+
+    /**
+     * Whether discovering a new USB/serial device needs an explicit request action (e.g. a button) rather than passive
+     * scanning alone — true only on web (Web Serial's `requestPort()` picker), false everywhere else.
+     */
+    val usbNeedsExplicitDeviceRequest: Boolean
+        get() = usbScanner?.needsExplicitDeviceRequest() == true
+
+    /**
+     * Triggers the platform's explicit USB/serial device-request flow. No-op where [usbNeedsExplicitDeviceRequest] is
+     * false. Must be called from the same event-handler chain as a user gesture (e.g. a button's onClick) — see
+     * [UsbScanner.requestNewDevice]'s KDoc.
+     */
+    fun requestUsbDevice() {
+        if (usbScanner?.needsExplicitDeviceRequest() != true) return
+        safeLaunch(tag = "requestUsbDevice") { usbScanner.requestNewDevice() }
     }
 
     /**

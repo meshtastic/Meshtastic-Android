@@ -41,6 +41,7 @@ add_local_mbtiles_file
 add_network_device
 add_network_device_manually
 add_network_layer
+add_usb_device
 address
 admin_key
 admin_keys

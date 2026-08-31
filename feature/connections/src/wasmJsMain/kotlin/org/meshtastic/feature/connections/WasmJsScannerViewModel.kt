@@ -26,14 +26,15 @@ import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.feature.connections.data.PendingFirmwareRecoverySource
 import org.meshtastic.feature.connections.data.RecentAddressesSource
+import org.meshtastic.feature.connections.domain.usecase.WasmJsUsbScanner
 import org.meshtastic.feature.connections.model.GetDiscoveredDevicesUseCase
 
 /**
- * wasmJs [ScannerViewModel] registration — same shape as [JvmScannerViewModel]. Unlike Jvm/Android, `bleScanner` is NOT
- * optional here: `CoreBleWasmJsModule` (webApp/di/WebKoinModule.kt) always provides a real Web Bluetooth-backed
- * [BleScanner] (this repo's core:ble wasmJs pass), so this platform has real BLE scanning, just no USB (see
- * [WasmJsGetDiscoveredDevicesUseCase]). Found via an actual browser load, not a compile-time check — same as that
- * use-case wrapper's own KDoc explains.
+ * wasmJs [ScannerViewModel] registration — same shape as [JvmScannerViewModel]. Unlike Jvm/Android, `bleScanner` and
+ * `usbScanner` are NOT optional here: `CoreBleWasmJsModule` (webApp/di/WebKoinModule.kt) always provides a real Web
+ * Bluetooth-backed [BleScanner] (this repo's core:ble wasmJs pass), and [WasmJsUsbScanner] always provides a real Web
+ * Serial-backed one, so this platform has real BLE and USB scanning, just no TCP discovery. Found via an actual browser
+ * load, not a compile-time check — same as [WasmJsGetDiscoveredDevicesUseCase]'s own KDoc explains.
  */
 @KoinViewModel(binds = [ScannerViewModel::class])
 @Suppress("LongParameterList")
@@ -49,6 +50,7 @@ class WasmJsScannerViewModel(
     uiPrefs: UiPrefs,
     firmwareRecoveryDataSource: PendingFirmwareRecoverySource,
     bleScanner: BleScanner,
+    usbScanner: WasmJsUsbScanner,
 ) : ScannerViewModel(
     serviceRepository,
     radioController,
@@ -61,4 +63,5 @@ class WasmJsScannerViewModel(
     uiPrefs,
     firmwareRecoveryDataSource,
     bleScanner,
+    usbScanner,
 )
