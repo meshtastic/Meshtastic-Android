@@ -103,37 +103,13 @@ fi
 echo "✅ No DEPENDENCY_INFO_BLOCK in signing block"
 
 echo "── Step 6: Check native libraries have debug symbols (not stripped) ──"
-# These arrive pre-stripped from their upstream AARs and always will. Listing them
-# every run made the warning 100% noise, so it never read as a signal; only a .so
-# outside this set is worth a warning. Add an entry here when a new dependency's
-# prebuilt lib shows up — never to silence one we build ourselves.
-KNOWN_PRESTRIPPED="
-libandroidx.graphics.path.so
-libimage_processing_util_jni.so
-libjniMaplibreNativeC.so
-libmaplibre-native-c.so
-libsurface_util_jni.so
-"
-STRIPPED_LIBS=""
-KNOWN_COUNT=0
-while IFS= read -r lib; do
-  if printf '%s\n' "$KNOWN_PRESTRIPPED" | grep -qxF "$lib"; then
-    KNOWN_COUNT=$((KNOWN_COUNT + 1))
-  else
-    STRIPPED_LIBS="${STRIPPED_LIBS} ${lib}"
-  fi
-done < <(
-  while IFS= read -r -d '' so; do
-    # no .symtab = stripped
-    if ! readelf -S "$so" 2>/dev/null | grep -q "\.symtab"; then
-      basename "$so"
-    fi
-  done < <(find "$APK_DIR" -name "*.so" -print0 2>/dev/null) | sort -u
-)
-if [ -n "$STRIPPED_LIBS" ]; then
-  echo "::warning::Unexpected stripped native libraries (may cause NDK-version-dependent RB failures):${STRIPPED_LIBS}"
+# shellcheck source=lib/stripped-libs.sh
+. "$(dirname "$0")/lib/stripped-libs.sh"
+scan_stripped_libs "$APK_DIR"
+if [ -n "$STRIPPED_UNEXPECTED" ]; then
+  echo "::warning::Unexpected stripped native libraries (may cause NDK-version-dependent RB failures):${STRIPPED_UNEXPECTED}"
 else
-  echo "✅ Native libraries retain debug symbols (${KNOWN_COUNT} known pre-stripped third-party lib(s) ignored)"
+  echo "✅ Native libraries retain debug symbols (${STRIPPED_KNOWN_COUNT} known pre-stripped third-party lib(s) ignored)"
 fi
 
 echo "── Step 7: Check aboutlibraries 'generated' timestamp not in APK ──"

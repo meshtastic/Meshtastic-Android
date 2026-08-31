@@ -89,6 +89,11 @@ jobs:
           filter: 'blob:none'
           submodules: true
 
+      # rb-check runs only in the merge queue and needs two release builds, so its Step 6
+      # classification would otherwise ship unexercised. Needs no toolchain — runs here.
+      - name: Self-test verify-rb Step 6
+        run: ./scripts/verify-rb-selftest.sh
+
       - name: Gradle Setup
         uses: ./.github/actions/gradle-setup
         with:
