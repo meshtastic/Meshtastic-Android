@@ -9535,7 +9535,7 @@
   },"1362": {
     "doc": "Documentation Style",
     "title": "New Page Checklist",
-    "content": ". | Create docs/en/user/&lt;slug&gt;.md or docs/en/developer/&lt;slug&gt;.md with complete frontmatter (STRUCT-1). | Register the page in feature/docs/.../data/DocBundleLoader.kt with keywords and aliases. | Put screenshots in docs/assets/screenshots/, referenced per IMG-1. | Add a What’s New entry (STRUCT-6). | Validate locally: node scripts/validate-doc-links.js docs/en, node scripts/check-doc-coverage.js ., and the docs bundle Gradle checks in Contributing. | . ",
+    "content": ". | Create docs/en/user/&lt;slug&gt;.md or docs/en/developer/&lt;slug&gt;.md with complete frontmatter (STRUCT-1). | Register the page in feature/docs/.../data/DocBundleLoader.kt with keywords and aliases. | Put screenshots in docs/assets/screenshots/, referenced per IMG-1. | Add a What’s New entry (STRUCT-6). | Validate locally: node scripts/validate-doc-links.js docs/en, node scripts/check-doc-coverage.js ., node scripts/check-doc-aliases.js . (every alias in step 1’s frontmatter must also be in step 2’s loader entry — only the loader’s list reaches in-app search), and the docs bundle Gradle checks in Contributing. | . ",
     "url": "/Meshtastic-Android/main/en/developer/documentation-style.html#new-page-checklist",
     
     "relUrl": "/en/developer/documentation-style.html#new-page-checklist"
