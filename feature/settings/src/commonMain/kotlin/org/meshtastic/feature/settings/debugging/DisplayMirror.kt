@@ -142,9 +142,7 @@ class DisplayMirrorViewModel(
 
     /** Panel description from the connect handshake; null on display-less nodes and pre-DisplayInfo firmware. */
     val displayInfo: StateFlow<DisplayInfo?> =
-        nodeRepository.ourNodeInfo
-            .map { it?.metadata?.display }
-            .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+        nodeRepository.ourNodeInfo.map { it?.metadata?.display }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     private val _mirroring = MutableStateFlow(false)
     val mirroring: StateFlow<Boolean> = _mirroring.asStateFlow()
@@ -228,11 +226,14 @@ private fun MirrorSurface(frame: MirrorFrame, onEvent: (Int) -> Unit, modifier: 
     var focused by remember { mutableStateOf(false) }
     val focusColor = MaterialTheme.colorScheme.primary
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
         Box(
             modifier =
-            modifier
-                .focusRequester(focusRequester)
+            Modifier.focusRequester(focusRequester)
                 .onFocusChanged { focused = it.isFocused }
                 .focusable()
                 .onPreviewKeyEvent { event ->
@@ -262,11 +263,22 @@ private fun MirrorSurface(frame: MirrorFrame, onEvent: (Int) -> Unit, modifier: 
 
 private fun keyToInputEvent(key: Key): Int? = when (key) {
     Key.DirectionUp -> INPUT_UP
+
     Key.DirectionDown -> INPUT_DOWN
+
     Key.DirectionLeft -> INPUT_LEFT
+
     Key.DirectionRight -> INPUT_RIGHT
-    Key.Enter, Key.NumPadEnter, Key.Spacebar -> INPUT_SELECT
-    Key.Escape, Key.Backspace -> INPUT_BACK
+
+    Key.Enter,
+    Key.NumPadEnter,
+    Key.Spacebar,
+    -> INPUT_SELECT
+
+    Key.Escape,
+    Key.Backspace,
+    -> INPUT_BACK
+
     else -> null
 }
 
@@ -285,8 +297,10 @@ private fun Modifier.swipeToDirection(onEvent: (Int) -> Unit): Modifier = pointe
             val vertical = drag.y
             when {
                 kotlin.math.abs(horizontal) < threshold && kotlin.math.abs(vertical) < threshold -> Unit
+
                 kotlin.math.abs(horizontal) >= kotlin.math.abs(vertical) ->
                     onEvent(if (horizontal > 0) INPUT_RIGHT else INPUT_LEFT)
+
                 else -> onEvent(if (vertical > 0) INPUT_DOWN else INPUT_UP)
             }
         },
@@ -294,17 +308,24 @@ private fun Modifier.swipeToDirection(onEvent: (Int) -> Unit): Modifier = pointe
 }
 
 /**
- * Cross-shaped 5-way cluster with Back below-left, following the TV-remote convention: directions auto-repeat on
- * hold (500ms delay, then 10Hz — slow enough for the radio to render), OK long-press sends the firmware's
- * SELECT_LONG.
+ * Cross-shaped 5-way cluster with Back below-left, following the TV-remote convention: directions auto-repeat on hold
+ * (500ms delay, then 10Hz — slow enough for the radio to render), OK long-press sends the firmware's SELECT_LONG.
  */
 @Composable
 private fun DpadCluster(enabled: Boolean, onEvent: (Int) -> Unit, modifier: Modifier = Modifier) {
-    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(DPAD_GAP)) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(DPAD_GAP),
+    ) {
         RepeatingKey(MeshtasticIcons.KeyboardArrowUp, "Up", enabled) { onEvent(INPUT_UP) }
         Row(horizontalArrangement = Arrangement.spacedBy(DPAD_GAP)) {
             RepeatingKey(MeshtasticIcons.KeyboardArrowLeft, "Left", enabled) { onEvent(INPUT_LEFT) }
-            OkKey(enabled = enabled, onSelect = { onEvent(INPUT_SELECT) }, onSelectLong = { onEvent(INPUT_SELECT_LONG) })
+            OkKey(
+                enabled = enabled,
+                onSelect = { onEvent(INPUT_SELECT) },
+                onSelectLong = { onEvent(INPUT_SELECT_LONG) },
+            )
             RepeatingKey(MeshtasticIcons.KeyboardArrowRight, "Right", enabled) { onEvent(INPUT_RIGHT) }
         }
         RepeatingKey(MeshtasticIcons.KeyboardArrowDown, "Down", enabled) { onEvent(INPUT_DOWN) }
@@ -327,31 +348,27 @@ private fun RepeatingKey(icon: ImageVector, label: String, enabled: Boolean, onE
     Box(
         contentAlignment = Alignment.Center,
         modifier =
-        Modifier
-            .size(DPAD_KEY_SIZE)
-            .clip(CircleShape)
-            .background(background)
-            .pointerInput(enabled) {
-                if (!enabled) return@pointerInput
-                coroutineScope {
-                    detectTapGestures(
-                        onPress = {
-                            pressed = true
-                            onEvent()
-                            val repeater = launch {
-                                delay(REPEAT_INITIAL_DELAY_MS)
-                                while (isActive) {
-                                    onEvent()
-                                    delay(REPEAT_INTERVAL_MS)
-                                }
+        Modifier.size(DPAD_KEY_SIZE).clip(CircleShape).background(background).pointerInput(enabled) {
+            if (!enabled) return@pointerInput
+            coroutineScope {
+                detectTapGestures(
+                    onPress = {
+                        pressed = true
+                        onEvent()
+                        val repeater = launch {
+                            delay(REPEAT_INITIAL_DELAY_MS)
+                            while (isActive) {
+                                onEvent()
+                                delay(REPEAT_INTERVAL_MS)
                             }
-                            tryAwaitRelease()
-                            repeater.cancel()
-                            pressed = false
-                        },
-                    )
-                }
-            },
+                        }
+                        tryAwaitRelease()
+                        repeater.cancel()
+                        pressed = false
+                    },
+                )
+            }
+        },
     ) {
         Icon(imageVector = icon, contentDescription = label, tint = contentColorFor(enabled))
     }
@@ -364,8 +381,7 @@ private fun OkKey(enabled: Boolean, onSelect: () -> Unit, onSelectLong: () -> Un
     Box(
         contentAlignment = Alignment.Center,
         modifier =
-        Modifier
-            .size(DPAD_KEY_SIZE)
+        Modifier.size(DPAD_KEY_SIZE)
             .clip(CircleShape)
             .background(
                 if (enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
@@ -385,11 +401,14 @@ private fun BackKey(enabled: Boolean, onBack: () -> Unit) {
     Box(
         contentAlignment = Alignment.Center,
         modifier =
-        Modifier
-            .size(DPAD_KEY_SIZE)
+        Modifier.size(DPAD_KEY_SIZE)
             .clip(CircleShape)
             .background(
-                if (enabled) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+                if (enabled) {
+                    MaterialTheme.colorScheme.secondaryContainer
+                } else {
+                    MaterialTheme.colorScheme.surfaceVariant
+                },
             )
             .combinedClickable(enabled = enabled, onClick = onBack),
     ) {
@@ -402,9 +421,8 @@ private fun contentColorFor(enabled: Boolean): Color =
     if (enabled) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
 
 /**
- * Renders a MONO_VLSB 1bpp framebuffer once per frame into a 1:1 [ImageBitmap] and scales it up with
- * nearest-neighbor filtering — crisp device pixels, no fractional-scale seams, one pixel walk per frame
- * instead of per recomposition.
+ * Renders a MONO_VLSB 1bpp framebuffer once per frame into a 1:1 [ImageBitmap] and scales it up with nearest-neighbor
+ * filtering — crisp device pixels, no fractional-scale seams, one pixel walk per frame instead of per recomposition.
  */
 @Composable
 private fun MirrorFrameImage(frame: MirrorFrame, modifier: Modifier = Modifier) {
