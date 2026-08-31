@@ -231,6 +231,13 @@ jobs:
         # find rather than a glob: scripts/*.sh missed scripts/lib/, scripts/docs/ and
         # scripts/verify-flatpak/ entirely.
         run: find scripts -name '*.sh' -print0 | xargs -0 shellcheck -x
+      # rb-check runs only in the merge queue and needs two release builds, so Step 6's
+      # classification would otherwise ship unexercised. It lives here rather than in
+      # lint-check because it needs no toolchain, and because lint-check sits behind the
+      # `android` path filter — which does not list scripts/, so a PR touching only the
+      # scanner would have skipped its own test.
+      - name: Self-test verify-rb Step 6
+        run: ./scripts/verify-rb-selftest.sh
       - name: Validate store listing metadata lengths
         run: python3 scripts/check-metadata-length.py
       # Compose Multiplatform does not strip Android-style \" / \' escapes, so a
