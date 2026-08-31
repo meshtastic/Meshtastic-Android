@@ -17,50 +17,10 @@
 package org.meshtastic.core.ui.util
 
 import org.jetbrains.compose.resources.StringResource
-import org.meshtastic.core.model.ChannelOption
 import org.meshtastic.core.model.TracerouteMapAvailability
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.label_lite_fast
-import org.meshtastic.core.resources.label_lite_slow
-import org.meshtastic.core.resources.label_long_fast
-import org.meshtastic.core.resources.label_long_moderate
-import org.meshtastic.core.resources.label_long_slow
-import org.meshtastic.core.resources.label_long_turbo
-import org.meshtastic.core.resources.label_medium_fast
-import org.meshtastic.core.resources.label_medium_slow
-import org.meshtastic.core.resources.label_medium_turbo
-import org.meshtastic.core.resources.label_narrow_fast
-import org.meshtastic.core.resources.label_narrow_slow
-import org.meshtastic.core.resources.label_short_fast
-import org.meshtastic.core.resources.label_short_slow
-import org.meshtastic.core.resources.label_short_turbo
-import org.meshtastic.core.resources.label_tiny_fast
-import org.meshtastic.core.resources.label_tiny_slow
-import org.meshtastic.core.resources.label_very_long_slow
 import org.meshtastic.core.resources.traceroute_endpoint_missing
 import org.meshtastic.core.resources.traceroute_map_no_data
-
-val ChannelOption.labelRes: StringResource
-    get() =
-        when (this) {
-            ChannelOption.VERY_LONG_SLOW -> Res.string.label_very_long_slow
-            ChannelOption.LONG_TURBO -> Res.string.label_long_turbo
-            ChannelOption.LONG_FAST -> Res.string.label_long_fast
-            ChannelOption.LONG_MODERATE -> Res.string.label_long_moderate
-            ChannelOption.LONG_SLOW -> Res.string.label_long_slow
-            ChannelOption.MEDIUM_FAST -> Res.string.label_medium_fast
-            ChannelOption.MEDIUM_SLOW -> Res.string.label_medium_slow
-            ChannelOption.MEDIUM_TURBO -> Res.string.label_medium_turbo
-            ChannelOption.SHORT_FAST -> Res.string.label_short_fast
-            ChannelOption.SHORT_SLOW -> Res.string.label_short_slow
-            ChannelOption.SHORT_TURBO -> Res.string.label_short_turbo
-            ChannelOption.LITE_FAST -> Res.string.label_lite_fast
-            ChannelOption.LITE_SLOW -> Res.string.label_lite_slow
-            ChannelOption.NARROW_FAST -> Res.string.label_narrow_fast
-            ChannelOption.NARROW_SLOW -> Res.string.label_narrow_slow
-            ChannelOption.TINY_FAST -> Res.string.label_tiny_fast
-            ChannelOption.TINY_SLOW -> Res.string.label_tiny_slow
-        }
 
 fun TracerouteMapAvailability.toMessageRes(): StringResource? = when (this) {
     TracerouteMapAvailability.Ok -> null

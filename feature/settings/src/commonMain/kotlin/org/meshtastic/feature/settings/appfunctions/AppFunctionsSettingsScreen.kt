@@ -237,7 +237,7 @@ fun PreviewAppFunctionsSettings() {
             Column {
                 MasterToggleSection(masterEnabled = true, onToggle = {})
                 HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                WriteFunctionsSection(masterEnabled = true, sendMessage = false, onToggleSendMessage = {})
+                WriteFunctionsSection(masterEnabled = true, sendMessage = true, onToggleSendMessage = {})
                 HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                 ReadFunctionsSection(
                     masterEnabled = true,
@@ -253,7 +253,7 @@ fun PreviewAppFunctionsSettings() {
                     onToggleNodeDetails = {},
                     getMeshMetrics = true,
                     onToggleMeshMetrics = {},
-                    getRecentMessages = false,
+                    getRecentMessages = true,
                     onToggleRecentMessages = {},
                     getUnreadSummary = true,
                     onToggleUnreadSummary = {},
