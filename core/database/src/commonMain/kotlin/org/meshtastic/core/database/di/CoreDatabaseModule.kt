@@ -19,19 +19,22 @@ package org.meshtastic.core.database.di
 import org.koin.core.annotation.ComponentScan
 import org.koin.core.annotation.Factory
 import org.koin.core.annotation.Module
-import org.koin.core.annotation.Single
 import org.meshtastic.core.database.DatabaseProvider
-import org.meshtastic.core.database.createDatabaseDataStore
 import org.meshtastic.core.database.dao.DiscoveryDao
 import org.meshtastic.core.database.dao.SwitchingDiscoveryDao
 
+/**
+ * Common (all-platform) Koin module. `@ComponentScan("org.meshtastic.core.database")` reaches whatever compilation this
+ * module lives in — for android/jvm/iOS that includes `nonWebMain` (e.g. `DatabaseManager`), for wasmJs it includes
+ * `wasmJsMain` (e.g. `SingleDatabaseProvider`) — so no per-target duplicate of this module is needed. This module used
+ * to also provide `DatabaseDataStore`; that provider moved to `nonWebMain`'s `CoreDatabaseNonWebModule` because
+ * `DatabaseDataStore` is `Preferences`-coupled, which has no wasmJs variant. That new module deliberately does *not*
+ * re-declare `@ComponentScan` of the same package, to avoid double-registering everything this one already scans for
+ * android/jvm/iOS.
+ */
 @Module
 @ComponentScan("org.meshtastic.core.database")
 class CoreDatabaseModule {
-    @Single
-    fun provideDatabaseDataStore(): DatabaseDataStore =
-        createDatabaseDataStore("db-manager-prefs").asDatabaseDataStore()
-
     /**
      * Long-lived consumers (discovery ViewModels, the scan engine) hold this DAO across device/DB switches, so hand
      * them the switch-aware delegate — never a DAO pinned to the injection-time `currentDb.value`, which would keep

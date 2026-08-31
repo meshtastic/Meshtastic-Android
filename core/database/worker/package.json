@@ -1,0 +1,8 @@
+{
+  "name": "sqlite-wasm-worker",
+  "version": "0.0.0",
+  "license": "GPL-3.0-or-later",
+  "dependencies": {
+    "@sqlite.org/sqlite-wasm": "^3.50.1-build1"
+  }
+}

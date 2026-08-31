@@ -1592,23 +1592,8 @@ open class DatabaseManager(private val datastore: DatabaseDataStore, private val
         private const val WRITER_GATE_TIMEOUT_MS = 30_000L
         val DB_TERMS = listOf("pool", "database", "connection", "sqlite")
 
-        private const val ROOM_POOL_ACQUIRE_TIMEOUT_PHRASE = "timed out attempting to acquire"
-        private const val ROOM_READER_CONNECTION_PHRASE = "reader connection"
-        private const val ROOM_WRITER_CONNECTION_PHRASE = "writer connection"
-
-        /**
-         * Room KMP currently exposes pool-acquire timeouts as exception message text instead of a stable common typed
-         * signal. Keep this fallback narrow so BLE/GATT/transport connection errors do not trigger DB reopen recovery.
-         */
-        private fun isRoomPoolAcquireTimeoutMessage(message: String): Boolean =
-            ROOM_POOL_ACQUIRE_TIMEOUT_PHRASE in message &&
-                (ROOM_READER_CONNECTION_PHRASE in message || ROOM_WRITER_CONNECTION_PHRASE in message)
-
-        fun isDbPoolAcquireTimeoutException(e: Exception): Boolean = generateSequence<Throwable>(e) { it.cause }
-            .any { throwable ->
-                val msg = throwable.message?.lowercase() ?: return@any false
-                isRoomPoolAcquireTimeoutMessage(msg)
-            }
+        fun isDbPoolAcquireTimeoutException(e: Exception): Boolean =
+            org.meshtastic.core.database.isDbPoolAcquireTimeoutException(e)
 
         fun isDbClosedException(e: Exception): Boolean = isDbPoolAcquireTimeoutException(e) ||
             generateSequence<Throwable>(e) { it.cause }

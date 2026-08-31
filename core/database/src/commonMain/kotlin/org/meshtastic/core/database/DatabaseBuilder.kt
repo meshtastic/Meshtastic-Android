@@ -16,8 +16,6 @@
  */
 package org.meshtastic.core.database
 
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import androidx.room3.RoomDatabase
 import okio.FileSystem
 import okio.Path
@@ -37,5 +35,8 @@ expect fun deleteDatabase(dbName: String)
 /** Returns the [FileSystem] to use for database file operations. */
 expect fun getFileSystem(): FileSystem
 
-/** Creates a platform-specific [DataStore] for database-related preferences. */
-expect fun createDatabaseDataStore(name: String): DataStore<Preferences>
+// createDatabaseDataStore's expect lives in nonWebMain's DatabaseDataStoreBuilder.kt, not here: DataStore<Preferences>
+// has no wasmJs variant (androidx.datastore:datastore-preferences publishes no wasmJs/js target at all), and Kotlin
+// only requires an expect to sit in an ancestor of every source set providing an actual — nonWebMain already is one
+// for android/jvm/iOS, so this is a source-location move only. wasmJs, not being a descendant of nonWebMain, never
+// sees this expect and calls nothing that would need it.

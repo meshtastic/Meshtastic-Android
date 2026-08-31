@@ -21,16 +21,17 @@ import androidx.sqlite.SQLiteDriver
 import androidx.sqlite.execSQL
 
 /**
- * Wraps a [SQLiteDriver] so every connection it opens waits up to [busyTimeoutMs] for a competing connection's lock
- * instead of failing immediately with SQLITE_BUSY ("Error code: 5, message: database is locked").
+ * wasmJs counterpart of `nonWebMain`'s `BusyTimeoutSQLiteDriver.kt` — same name, same wrapping behavior, differing only
+ * in that `override fun open` must be `suspend` here: `androidx.sqlite.SQLiteDriver.open()` is declared `suspend` on
+ * androidx.sqlite's own `webMain` branch (`webMain/androidx/sqlite/SQLiteDriver.web.kt` in
+ * `androidx.sqlite:sqlite:2.7.0`'s sources), to support async drivers like `WebWorkerSQLiteDriver`. Not an
+ * `expect`/`actual` pair — the suspend modifier difference means a single implementation can't satisfy both branches —
+ * so this is an independent declaration visible only to the wasmJs compilation, exactly like `core:ble`'s
+ * `BleServiceExtensions.kt` documents for the same shape.
  *
- * Each database normally holds a single connection (see `configureCommon`), but [DatabaseManager]'s wedge recovery
- * deliberately abandons a stalled connection and opens a replacement pool against the same file (see
- * `abandonWedgedDbBlock`). Until the abandoned callback finishes, both connections are live — and the bundled driver's
- * default busy timeout is zero, so any write on the replacement fails the moment the abandoned connection holds the
- * write lock. In the field (2.8.1, build 29321949) that surfaced as a fatal uncaught SQLITE_BUSY from Room's own
- * invalidation-tracker housekeeping (`TriggerBasedInvalidationTracker.syncTriggers`), which the app cannot catch. A
- * busy timeout makes the replacement connection wait out the overlap instead.
+ * Wraps a [SQLiteDriver] so every connection it opens waits up to [busyTimeoutMs] for a competing connection's lock
+ * instead of failing immediately with SQLITE_BUSY. `PRAGMA busy_timeout` is standard SQL, so it works the same way over
+ * `WebWorkerSQLiteDriver`'s worker-message protocol as it does over a real native connection.
  */
 class BusyTimeoutSQLiteDriver(
     private val delegate: SQLiteDriver,
@@ -42,14 +43,12 @@ class BusyTimeoutSQLiteDriver(
         require(busyTimeoutMs > 0) { "busyTimeoutMs must be positive, was $busyTimeoutMs" }
     }
 
-    override fun open(fileName: String): SQLiteConnection {
+    override suspend fun open(fileName: String): SQLiteConnection {
         val connection = delegate.open(fileName)
         try {
             connection.execSQL("PRAGMA busy_timeout = $busyTimeoutMs")
         } catch (@Suppress("TooGenericExceptionCaught") setupFailure: Throwable) {
-            // The platforms throw different exception types here (android.database.SQLException on
-            // Android, androidx.sqlite.SQLiteException elsewhere); close the live native connection
-            // before rethrowing so a failed setup never leaks it.
+            // Close the live connection before rethrowing so a failed setup never leaks it.
             connection.close()
             throw setupFailure
         }
@@ -58,9 +57,8 @@ class BusyTimeoutSQLiteDriver(
 
     companion object {
         /**
-         * Long enough to ride out the typical abandoned-writer overlap (slow MeshLog cleanups and node-heavy packet
-         * transactions observed in the field run 1-30s), short enough that a truly stuck holder still surfaces as an
-         * error rather than an ANR-adjacent stall. Waiting happens on Room's I/O dispatcher, never the main thread.
+         * Long enough to ride out the typical abandoned-writer overlap, short enough that a truly stuck holder still
+         * surfaces as an error. Same value as `nonWebMain`'s copy — see its KDoc for the field-measured rationale.
          */
         const val DEFAULT_BUSY_TIMEOUT_MS = 10_000L
     }

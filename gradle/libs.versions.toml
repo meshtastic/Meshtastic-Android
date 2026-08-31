@@ -160,6 +160,9 @@ androidx-room-testing = { module = "androidx.room3:room3-testing", version.ref =
 androidx-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "androidx-sqlite-bundled" }
 # JVM variant provides the host-platform native library for BundledSQLiteDriver in host/Robolectric tests
 androidx-sqlite-bundled-jvm = { module = "androidx.sqlite:sqlite-bundled-jvm", version.ref = "androidx-sqlite-bundled" }
+# wasmJs/js-only WebWorkerSQLiteDriver backed by @sqlite.org/sqlite-wasm over OPFS; same androidx.sqlite
+# release train as sqlite-bundled, confirmed present at this version on Google's Maven.
+androidx-sqlite-web = { module = "androidx.sqlite:sqlite-web", version.ref = "androidx-sqlite-bundled" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "androidx-work" }
 androidx-work-testing = { module = "androidx.work:work-testing", version.ref = "androidx-work" }
 

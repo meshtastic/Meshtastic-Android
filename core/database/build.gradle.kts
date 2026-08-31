@@ -15,6 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import org.jetbrains.kotlin.gradle.plugin.KotlinHierarchyTemplate
+
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.meshtastic.android.room)
@@ -28,10 +32,26 @@ kotlin {
         withDeviceTest { instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner" }
     }
 
+    // Library module: bare wasmJs(), no browser() (that's for the eventual webApp executable).
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs()
+
+    // nonWebMain: androidx.sqlite:sqlite-bundled and androidx.datastore:datastore-preferences have no wasmJs
+    // variant (the `Preferences` type itself doesn't resolve there), so DatabaseManager/DatabaseDataStore and
+    // everything Preferences-shaped live here instead of commonMain. Predicate, not
+    // withAndroidTarget()/withApple() — those silently drop androidMain under
+    // com.android.kotlin.multiplatform.library (KT-80409). See core/ble/build.gradle.kts for the same pattern.
+    @OptIn(ExperimentalKotlinGradlePluginApi::class)
+    applyHierarchyTemplate(KotlinHierarchyTemplate.default) {
+        common { group("nonWeb") { withCompilations { it.target.targetName != "wasmJs" } } }
+    }
+
+    // The predicate above misses iosMain itself (only reaches the two leaf iOS compilations), so any
+    // nonWebMain-only actual can't see nonWebMain's expects/types without this explicit edge.
+    sourceSets.getByName("iosMain") { dependsOn(sourceSets.getByName("nonWebMain")) }
+
     sourceSets {
         commonMain.dependencies {
-            implementation(libs.androidx.sqlite.bundled)
-            implementation(libs.androidx.datastore.preferences)
             implementation(libs.kotlinx.atomicfu)
             implementation(libs.okio)
 
@@ -44,7 +64,35 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kermit)
         }
-        commonTest.dependencies {
+
+        // android/jvm/ios only (see hierarchy template above) — sqlite-bundled and datastore-preferences have
+        // no wasmJs variant, and DatabaseManager (the sole consumer of both) lives here.
+        getByName("nonWebMain").dependencies {
+            implementation(libs.androidx.sqlite.bundled)
+            implementation(libs.androidx.datastore.preferences)
+        }
+
+        wasmJsMain.dependencies {
+            implementation(libs.androidx.sqlite.web)
+            implementation(libs.kotlinx.browser)
+            // Generic WebWorkerSQLiteDriver worker script (open/prepare/step/close over @sqlite.org/sqlite-wasm
+            // + OPFS) — same shape as the proven danysantiago/room-web-demo reference, vendored locally since
+            // this module doesn't need a second Gradle module just for the worker.
+            implementation(npm("sqlite-wasm-worker", file("worker")))
+        }
+
+        // kotlin("test") only — previously came transitively through core:testing's `api(kotlin("test"))`, which
+        // commonTest can no longer depend on directly (see nonWebTest below). The few commonTest files left after
+        // that split (BuildDbNameTest, ConvertersTest, DbFlowRecoveryTest, DeviceIdentityTest, ReactionKeyTest)
+        // still need it, and wasmJs needs its own resolvable copy too.
+        commonTest.dependencies { implementation(kotlin("test")) }
+
+        // Everything that needs a real driver (getInMemoryDatabaseBuilder(), core:testing's setupTestContext()) or
+        // core:testing itself lives in nonWebTest, not commonTest: core:testing has no wasmJs target of its own
+        // (it in turn depends on core:repository/core:datastore, neither of which does either — the same dependency
+        // -chain problem core:ble hit, not something worth solving just to satisfy this module's tests), and
+        // getInMemoryDatabaseBuilder() has no real in-memory equivalent over OPFS on wasmJs (see its wasmJs actual).
+        getByName("nonWebTest").dependencies {
             implementation(projects.core.testing)
             implementation(libs.androidx.room.testing)
         }
@@ -75,4 +123,8 @@ dependencies {
     "kspJvm"(libs.ksp.symbol.processing.aa.embeddable)
     "kspAndroidHostTest"(libs.androidx.room.compiler)
     "kspAndroidDeviceTest"(libs.androidx.room.compiler)
+    // Module-local wasmJs wiring: AndroidRoomConventionPlugin only adds kspAndroid/kspJvm (it's applied by this
+    // module alone in the whole repo), so wire kspWasmJs here rather than teaching the shared plugin about a
+    // target no other Room consumer has.
+    "kspWasmJs"(libs.androidx.room.compiler)
 }

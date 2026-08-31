@@ -32,14 +32,15 @@ private const val MAX_DB_RETRY_BACKOFF_SHIFT = 5
  * Restarts a database-backed Flow after the Room pool wedge behind #6608 — an acquire timeout or a stall — with capped
  * exponential backoff. The backoff resets after a successful emission; every other failure propagates.
  *
- * [DatabaseManager.observeCurrentDb] recovers a wedged pool in place, but its per-collector and per-window budgets can
+ * DatabaseManager.observeCurrentDb recovers a wedged pool in place, but its per-collector and per-window budgets can
  * exhaust while a leaked-permit storm is still active; a `stateIn(..., SharingStarted.Eagerly, ...)` upstream that then
  * throws is dead for the process lifetime. Retrying re-enters recovery with a fresh collector once the manager's rate
  * window reopens.
  *
- * Deliberately narrower than [DatabaseManager.isDbClosedException]: a closed pool is not retried here.
- * `observeCurrentDb` re-latches on the replacement pool by itself, so retrying adds nothing — and it would keep a flow
- * alive that used to terminate, turning a dead collector into a backoff loop that outlives its collecting scope.
+ * Deliberately narrower than a closed-pool exception classifier: a closed pool is not retried here.
+ * DatabaseManager.observeCurrentDb re-latches on the replacement pool by itself, so retrying adds nothing — and it
+ * would keep a flow alive that used to terminate, turning a dead collector into a backoff loop that outlives its
+ * collecting scope.
  */
 fun <T> Flow<T>.retryOnDbPoolFailure(label: String): Flow<T> = flow {
     // Per-collection state: each collector backs off independently, and a plain var is safe because a Flow is
@@ -49,8 +50,7 @@ fun <T> Flow<T>.retryOnDbPoolFailure(label: String): Flow<T> = flow {
         onEach { consecutiveFailures = 0 }
             .retryWhen { cause, _ ->
                 val recoverable =
-                    cause is DbFlowStalledException ||
-                        (cause is Exception && DatabaseManager.isDbPoolAcquireTimeoutException(cause))
+                    cause is DbFlowStalledException || (cause is Exception && isDbPoolAcquireTimeoutException(cause))
                 if (!recoverable) return@retryWhen false
                 consecutiveFailures += 1
                 val delayMs =

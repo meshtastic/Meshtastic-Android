@@ -137,6 +137,10 @@ fun desktopModule() = module {
         org.meshtastic.core.datastore.di.CoreDatastoreModule().coreDatastoreModule(),
         org.meshtastic.core.prefs.di.CorePrefsModule().corePrefsModule(),
         org.meshtastic.core.database.di.CoreDatabaseModule().coreDatabaseModule(),
+        // Koin's generated `module` extension is per-class but identically named within a package, so the single
+        // `import ... di.module as coreDatabaseModule` above already covers this second `@Module` class in the same
+        // `org.meshtastic.core.database.di` package too — Kotlin picks the right overload by receiver type.
+        org.meshtastic.core.database.di.CoreDatabaseNonWebModule().coreDatabaseModule(),
         org.meshtastic.core.data.di.CoreDataModule().coreDataModule(),
         org.meshtastic.core.domain.di.CoreDomainModule().coreDomainModule(),
         org.meshtastic.core.repository.di.CoreRepositoryModule().coreRepositoryModule(),
