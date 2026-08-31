@@ -34,6 +34,16 @@ internal const val INPUT_RIGHT = 20
 internal const val INPUT_BACK = 27
 internal const val INPUT_USER_PRESS = 28
 
+// ANYKEY carries a character in kb_char rather than a navigation code.
+internal const val INPUT_ANYKEY = 0xFF
+
+// LVGL's backspace key value; typed as a character so text fields delete
+// rather than navigating back (which is what Esc is for).
+internal const val CHAR_BACKSPACE = 8
+
+// Below this, key events are control codes rather than typable text.
+internal const val FIRST_PRINTABLE_CHAR = 32
+
 /** Scales a tap position on the scaled-up mirror image back to panel pixel coordinates. */
 internal fun Offset.toDeviceX(boxWidthPx: Int, frame: MirrorFrame): Int =
     (x / boxWidthPx * frame.width).toInt().coerceIn(0, frame.width - 1)
@@ -55,9 +65,7 @@ internal fun keyToInputEvent(key: Key): Int? = when (key) {
     Key.Spacebar,
     -> INPUT_SELECT
 
-    Key.Escape,
-    Key.Backspace,
-    -> INPUT_BACK
+    Key.Escape -> INPUT_BACK
 
     else -> null
 }
