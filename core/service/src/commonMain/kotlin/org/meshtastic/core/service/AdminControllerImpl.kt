@@ -125,6 +125,24 @@ internal class AdminControllerImpl(
         scope.handledLaunch { radioConfigRepository.setLocalConfig(config) }
     }
 
+    override suspend fun setDisplayMirror(enabled: Boolean) {
+        commandSender.sendAdmin(myNodeNum) { AdminMessage(set_display_mirror = enabled) }
+    }
+
+    override suspend fun sendInputEvent(eventCode: Int, kbChar: Int, touchX: Int, touchY: Int) {
+        commandSender.sendAdmin(myNodeNum) {
+            AdminMessage(
+                send_input_event =
+                    AdminMessage.InputEvent(
+                        event_code = eventCode,
+                        kb_char = kbChar,
+                        touch_x = touchX,
+                        touch_y = touchY,
+                    ),
+            )
+        }
+    }
+
     override suspend fun setConfig(destNum: Int, config: Config, packetId: Int) {
         commandSender.sendAdmin(destNum, packetId) { AdminMessage(set_config = config) }
         if (destNum == nodeManager.myNodeNum.value) {

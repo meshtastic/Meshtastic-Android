@@ -184,9 +184,19 @@ fun DebugScreen(onNavigateUp: () -> Unit, viewModel: DebugViewModel) {
                     onClick = { selectedTab = 1 },
                     text = { Text(stringResource(Res.string.debug_tab_app_logs)) },
                 )
+                Tab(
+                    selected = selectedTab == 2,
+                    onClick = { selectedTab = 2 },
+                    // PoC tab; deliberately unlocalized.
+                    text = { Text("Mirror") },
+                )
             }
             if (selectedTab == 1) {
                 LogcatContent(modifier = Modifier.fillMaxSize())
+                return@Column
+            }
+            if (selectedTab == 2) {
+                DisplayMirrorContent(modifier = Modifier.fillMaxSize())
                 return@Column
             }
             LazyColumn(modifier = Modifier.fillMaxSize(), state = listState) {
