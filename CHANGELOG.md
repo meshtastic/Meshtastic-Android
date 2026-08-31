@@ -9,32 +9,13 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
-#### 🏗️ Features
-* feat(settings): send the optional ham long_name alongside the call sign by @vidplace7 in https://github.com/meshtastic/Meshtastic-Android/pull/6875
-* feat(appfunctions): reconcile system state instead of blind-writing it by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6908
-* feat(units): resolve units from the device region, add a Units setting, render through ICU by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6916
-* feat(connections): notice when transmit is disabled by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6945
-* feat(agents): add the run-meshtastic-android skill with desktop and emulator drivers by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6955
-* feat(map): give every map layer its own opacity slider by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6958
-* feat(map): filter the map by node role and by how a node was heard by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6959
-* feat(settings): align the Mesh Beacon config editor with design#140 by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6963
-* feat(discovery): suppress beacon invitations for channels the radio already has by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6964
-#### 🖥️ Desktop
-* fix(desktop): disable macOS notifications when the process has no app bundle by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6876
-* fix(desktop): test the bundle path, not the identifier, before notifying by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6885
 #### 🛠️ Fixes
-* Stabilize Mid-Session Locale Unit State Test by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6870
-* Demote Repeated Offline Heartbeat Rejection Logs to Debug by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6872
-* Use Scan-Only Probes After Prolonged Bonded BLE Reconnect Failures by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6871
-* fix(permissions): recover from a skipped, denied, or revoked permission instead of dead-ending by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6880
-* fix(node): convert temperature before labelling it °F, and show wind in km/h by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6925
-* fix(settings): drop the beacon single-target scalars protobufs reserved by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6942
-* fix(node): scroll traceroute/log history detail popups by @beecho01 in https://github.com/meshtastic/Meshtastic-Android/pull/6708
-* fix(ui): show device roles by name, and stop doubling two percent signs by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6962
-#### 📝 Other Changes
-* refactor(settings): edit the status message on the user screen by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6951
+* fix(map): gate the MapLibre waypoint editor on isModifiableBy by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6969
+* fix(ai): bound assistant messages at what the send path will actually encode by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6970
+* fix(firmware): hide USB maintenance where the platform cannot run it by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6974
+* fix(map): resolve the persisted basemap before the map first renders by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6978
 
-### Internal (v2.8.2-internal.3)
+### Internal (v2.8.2-internal.4)
 Changes since [`v2.8.1`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.1):
 
 #### 🏗️ Features
@@ -49,6 +30,18 @@ Changes since [`v2.8.1`](https://github.com/meshtastic/Meshtastic-Android/releas
 * feat(notifications): offer conversations as bubbles by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6858
 * feat(messaging): mark unread, swipe row actions, and pinned conversations by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6857
 * feat(messaging): close the quick reaction bar on a tap outside it by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6865
+* feat(settings): send the optional ham long_name alongside the call sign by @vidplace7 in https://github.com/meshtastic/Meshtastic-Android/pull/6875
+* feat(appfunctions): reconcile system state instead of blind-writing it by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6908
+* feat(units): resolve units from the device region, add a Units setting, render through ICU by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6916
+* feat(connections): notice when transmit is disabled by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6945
+* feat(agents): add the run-meshtastic-android skill with desktop and emulator drivers by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6955
+* feat(map): give every map layer its own opacity slider by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6958
+* feat(map): filter the map by node role and by how a node was heard by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6959
+* feat(settings): align the Mesh Beacon config editor with design#140 by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6963
+* feat(discovery): suppress beacon invitations for channels the radio already has by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6964
+#### 🖥️ Desktop
+* fix(desktop): disable macOS notifications when the process has no app bundle by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6876
+* fix(desktop): test the bundle path, not the identifier, before notifying by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6885
 #### 🛠️ Fixes
 * fix(navigation): clear deep-link replay cache once applied to the backstack by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6796
 * fix(ui): give feedback when a contact or channel import arrives while disconnected by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6798
@@ -66,6 +59,16 @@ Changes since [`v2.8.1`](https://github.com/meshtastic/Meshtastic-Android/releas
 * fix(mqtt): tolerate object-typed payload in MQTT JSON messages by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6839
 * fix(messaging): clear and suppress notifications for the conversation on screen by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6849
 * fix(messaging): fire swipe row actions once per swipe, and let the snackbar go by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6863
+* Stabilize Mid-Session Locale Unit State Test by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6870
+* Demote Repeated Offline Heartbeat Rejection Logs to Debug by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6872
+* Use Scan-Only Probes After Prolonged Bonded BLE Reconnect Failures by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/6871
+* fix(permissions): recover from a skipped, denied, or revoked permission instead of dead-ending by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6880
+* fix(node): convert temperature before labelling it °F, and show wind in km/h by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6925
+* fix(settings): drop the beacon single-target scalars protobufs reserved by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6942
+* fix(node): scroll traceroute/log history detail popups by @beecho01 in https://github.com/meshtastic/Meshtastic-Android/pull/6708
+* fix(ui): show device roles by name, and stop doubling two percent signs by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6962
+#### 📝 Other Changes
+* refactor(settings): edit the status message on the user screen by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6951
 
 ## New Contributors
 * @azchohfi made their first contribution in https://github.com/meshtastic/Meshtastic-Android/pull/6864
