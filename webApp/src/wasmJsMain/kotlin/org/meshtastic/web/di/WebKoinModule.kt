@@ -24,12 +24,18 @@ import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.common.di.PROCESS_LIFECYCLE
 import org.meshtastic.core.common.di.ServiceScope
+import org.meshtastic.core.common.util.LocaleChangeNotifier
 import org.meshtastic.core.data.datasource.BundledAssetReader
 import org.meshtastic.core.network.repository.MQTTRepository
+import org.meshtastic.core.network.repository.SerialDevicePresence
+import org.meshtastic.core.network.repository.ServiceDiscovery
 import org.meshtastic.core.repository.AdminController
 import org.meshtastic.core.repository.AppWidgetUpdater
 import org.meshtastic.core.repository.ConnectionStateProvider
+import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.LocationRepository
+import org.meshtastic.core.repository.LocationService
+import org.meshtastic.core.repository.LockdownPassphraseStore
 import org.meshtastic.core.repository.MeshLocationManager
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.MeshWorkerManager
@@ -41,9 +47,11 @@ import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.QueryController
 import org.meshtastic.core.repository.RadioController
+import org.meshtastic.core.repository.SecurityKeyBackupStore
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.core.repository.TracerouteResponseProvider
+import org.meshtastic.core.service.LocalNetworkAccess
 import org.meshtastic.core.service.RadioControllerImpl
 import org.meshtastic.core.service.ServiceRepositoryImpl
 import org.meshtastic.feature.messaging.translation.MessageTranslationService
@@ -57,7 +65,12 @@ import org.meshtastic.web.lifecycle.webProcessLifecycle
 import org.meshtastic.web.radio.WebMessageQueue
 import org.meshtastic.web.stub.NoopAppWidgetUpdater
 import org.meshtastic.web.stub.NoopCompassHeadingProvider
+import org.meshtastic.web.stub.NoopFileService
+import org.meshtastic.web.stub.NoopLocalNetworkAccess
+import org.meshtastic.web.stub.NoopLocaleChangeNotifier
 import org.meshtastic.web.stub.NoopLocationRepository
+import org.meshtastic.web.stub.NoopLocationService
+import org.meshtastic.web.stub.NoopLockdownPassphraseStore
 import org.meshtastic.web.stub.NoopMQTTRepository
 import org.meshtastic.web.stub.NoopMagneticFieldProvider
 import org.meshtastic.web.stub.NoopMeshLocationManager
@@ -66,6 +79,9 @@ import org.meshtastic.web.stub.NoopMeshWorkerManager
 import org.meshtastic.web.stub.NoopNotificationManager
 import org.meshtastic.web.stub.NoopPhoneLocationProvider
 import org.meshtastic.web.stub.NoopPlatformAnalytics
+import org.meshtastic.web.stub.NoopSecurityKeyBackupStore
+import org.meshtastic.web.stub.NoopSerialDevicePresence
+import org.meshtastic.web.stub.NoopServiceDiscovery
 import org.meshtastic.core.ble.di.module as coreBleWasmJsModule
 import org.meshtastic.core.common.di.module as coreCommonModule
 import org.meshtastic.core.data.di.module as coreDataModule
@@ -179,6 +195,18 @@ private fun webPlatformStubsModule() = module {
     single<LocationRepository> { NoopLocationRepository() }
     // Deliberate override of the real, auto-discovered MQTTRepositoryImpl — same choice desktopApp makes.
     single<MQTTRepository> { NoopMQTTRepository() }
+    // mDNS-based; no browser equivalent — see NoopServiceDiscovery's own KDoc.
+    single<ServiceDiscovery> { NoopServiceDiscovery() }
+    // No OS serial-port hot-plug API on web — see NoopSerialDevicePresence's own KDoc.
+    single<SerialDevicePresence> { NoopSerialDevicePresence() }
+    // The remaining five: all found the same way (an actual browser load, not a compile-time check) — each
+    // interface's own KDoc in NoopStubs.kt explains why the fix is a no-op rather than a real implementation.
+    single<SecurityKeyBackupStore> { NoopSecurityKeyBackupStore() }
+    single<LockdownPassphraseStore> { NoopLockdownPassphraseStore() }
+    single<FileService> { NoopFileService() }
+    single<LocalNetworkAccess> { NoopLocalNetworkAccess() }
+    single<LocationService> { NoopLocationService() }
+    single<LocaleChangeNotifier> { NoopLocaleChangeNotifier() }
     single<CompassHeadingProvider> { NoopCompassHeadingProvider() }
     single<PhoneLocationProvider> { NoopPhoneLocationProvider() }
     single<MagneticFieldProvider> { NoopMagneticFieldProvider() }

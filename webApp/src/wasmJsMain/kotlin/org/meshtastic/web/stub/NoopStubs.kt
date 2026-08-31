@@ -20,15 +20,26 @@ package org.meshtastic.web.stub
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
+import okio.BufferedSink
+import okio.BufferedSource
+import org.meshtastic.core.common.util.CommonUri
+import org.meshtastic.core.common.util.LocaleChangeNotifier
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.network.repository.DiscoveredService
 import org.meshtastic.core.network.repository.MQTTRepository
+import org.meshtastic.core.network.repository.SerialDevicePresence
+import org.meshtastic.core.network.repository.ServiceDiscovery
 import org.meshtastic.core.repository.AppWidgetUpdater
 import org.meshtastic.core.repository.DataPair
+import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.Location
 import org.meshtastic.core.repository.LocationRepository
+import org.meshtastic.core.repository.LocationService
+import org.meshtastic.core.repository.LockdownPassphraseStore
 import org.meshtastic.core.repository.MeshLocationManager
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.MeshWorkerManager
@@ -36,6 +47,10 @@ import org.meshtastic.core.repository.Notification
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PersistedPacketId
 import org.meshtastic.core.repository.PlatformAnalytics
+import org.meshtastic.core.repository.SecurityKeyBackupStore
+import org.meshtastic.core.repository.StoredPassphrase
+import org.meshtastic.core.repository.StoredSecurityKeys
+import org.meshtastic.core.service.LocalNetworkAccess
 import org.meshtastic.feature.node.compass.CompassHeadingProvider
 import org.meshtastic.feature.node.compass.HeadingState
 import org.meshtastic.feature.node.compass.MagneticFieldProvider
@@ -152,6 +167,104 @@ class NoopLocationRepository : LocationRepository {
     override val receivingLocationUpdates = MutableStateFlow(false)
 
     override fun getLocations(): Flow<Location> = emptyFlow()
+}
+
+// endregion
+
+// region Service discovery stub — JvmServiceDiscovery/AndroidServiceDiscovery are both mDNS (JmDNS/NsdManager), a
+// raw-socket OS capability with no browser equivalent (no stable web mDNS-scanning API exists); permanent
+// impossibility, not a deferred feature, same reasoning as core:service's NoopTakServerIntegration. Found via an
+// actual browser load of webApp (NoDefinitionFoundException for ServiceDiscovery, since JvmServiceDiscovery's
+// @Single lives in core:network's jvmMain and is never compiled for wasmJs) -- not caught by any compile-time
+// check, since NetworkRepositoryImpl's constructor dependency is satisfied by Koin reflection, not an import.
+
+class NoopServiceDiscovery : ServiceDiscovery {
+    override val resolvedServices: Flow<List<DiscoveredService>> = flowOf(emptyList())
+}
+
+// endregion
+
+// region Serial device presence stub — same JVM/Desktop precedent (JvmSerialDevicePresence's own KDoc: "platforms
+// without hot-plug observation... return a perpetually-empty set"), just with no OS serial-port API to poll at all.
+// Web Serial exists but hot-plug detection via it is a future pass, not this v0 slice. Found the same way as
+// NoopServiceDiscovery above: an actual browser load, not a compile-time check (SharedRadioInterfaceService's
+// constructor dependency is satisfied by Koin reflection).
+
+class NoopSerialDevicePresence : SerialDevicePresence {
+    override val deviceKeys: StateFlow<Set<String>> = MutableStateFlow(emptySet())
+}
+
+// endregion
+
+// region Secure-storage stubs — EncryptedSharedPreferences (Android) / Keychain (iOS) have no browser analogue in
+// this v0 pass; a real implementation would need to weigh Web Crypto + IndexedDB against the same "not actually
+// encrypted at rest in an extension-readable origin" caveat every browser secrets story carries. Deferred, not
+// permanently impossible (unlike TAK/serial/mDNS) — found the same way as the two stubs above.
+
+class NoopSecurityKeyBackupStore : SecurityKeyBackupStore {
+    override fun get(nodeNum: Int): StoredSecurityKeys? = null
+
+    override fun save(nodeNum: Int, publicKeyBase64: String, privateKeyBase64: String, timestamp: Long) {}
+
+    override fun delete(nodeNum: Int) {}
+}
+
+class NoopLockdownPassphraseStore : LockdownPassphraseStore {
+    override fun getPassphrase(deviceAddress: String): StoredPassphrase? = null
+
+    override fun savePassphrase(
+        deviceAddress: String,
+        passphrase: String,
+        boots: Int,
+        hours: Int,
+        maxSessionSeconds: Int,
+    ) {}
+
+    override fun clearPassphrase(deviceAddress: String) {}
+}
+
+// endregion
+
+// region File I/O stub — a real implementation would use the File System Access API (limited browser support) or
+// download/upload via <input type=file>/blob URLs; deferred, not permanently impossible, same posture as the
+// secure-storage stubs above.
+
+class NoopFileService : FileService {
+    override suspend fun write(uri: CommonUri, block: suspend (BufferedSink) -> Unit): Boolean = false
+
+    override suspend fun read(uri: CommonUri, block: suspend (BufferedSource) -> Unit): Boolean = false
+}
+
+// endregion
+
+// region Local-network-access stub — the Android-17-specific ACCESS_LOCAL_NETWORK gate this interface exists for
+// has no web equivalent; per the interface's own doc ("granted-by-construction everywhere the concept does not
+// apply"), the correct answer is true, not false — TCP is rejected earlier anyway, by WasmJsRadioTransportFactory
+// itself (browsers cannot open raw sockets at all, a permanent impossibility, not this gate's concern).
+
+class NoopLocalNetworkAccess : LocalNetworkAccess {
+    override fun isGranted(): Boolean = true
+}
+
+// endregion
+
+// region Location-service stub — one-off "get current location" request; a real implementation would wrap
+// navigator.geolocation.getCurrentPosition, same deferred posture as NoopLocationRepository above (no consumer
+// needs it wired up yet).
+
+class NoopLocationService : LocationService {
+    override suspend fun getCurrentLocation(): Location? = null
+}
+
+// endregion
+
+// region Locale-change stub — a real implementation would listen for the `languagechange` window event; deferred,
+// not permanently impossible. Never emitting is honest, not a lie: LocaleUnitsProvider's contract only promises a
+// value derived from *this* flow changes when the OS locale changes, and a full page reload already re-reads
+// navigator.language fresh regardless.
+
+class NoopLocaleChangeNotifier : LocaleChangeNotifier {
+    override val localeChanges: Flow<Unit> = emptyFlow()
 }
 
 // endregion
