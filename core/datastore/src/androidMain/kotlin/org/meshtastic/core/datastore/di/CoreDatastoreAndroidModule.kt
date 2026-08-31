@@ -36,6 +36,7 @@ import org.meshtastic.core.datastore.serializer.ChannelSetSerializer
 import org.meshtastic.core.datastore.serializer.LocalConfigSerializer
 import org.meshtastic.core.datastore.serializer.LocalStatsSerializer
 import org.meshtastic.core.datastore.serializer.ModuleConfigSerializer
+import org.meshtastic.core.datastore.store.asStore
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
@@ -68,6 +69,7 @@ class LocalConfigDataStoreModule {
         produceNewData = { LocalConfig() },
         scope = scope,
     )
+        .asStore()
         .asCoreLocalConfigDataStore()
 }
 
@@ -80,6 +82,7 @@ class ModuleConfigDataStoreModule {
         produceNewData = { LocalModuleConfig() },
         scope = scope,
     )
+        .asStore()
         .asCoreModuleConfigDataStore()
 }
 
@@ -92,6 +95,7 @@ class ChannelSetDataStoreModule {
         produceNewData = { ChannelSet() },
         scope = scope,
     )
+        .asStore()
         .asCoreChannelSetDataStore()
 }
 
@@ -104,6 +108,7 @@ class LocalStatsDataStoreModule {
         produceNewData = { LocalStats() },
         scope = scope,
     )
+        .asStore()
         .asCoreLocalStatsDataStore()
 }
 

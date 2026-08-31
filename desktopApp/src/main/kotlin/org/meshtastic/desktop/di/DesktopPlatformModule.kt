@@ -52,6 +52,7 @@ import org.meshtastic.core.datastore.serializer.ChannelSetSerializer
 import org.meshtastic.core.datastore.serializer.LocalConfigSerializer
 import org.meshtastic.core.datastore.serializer.LocalStatsSerializer
 import org.meshtastic.core.datastore.serializer.ModuleConfigSerializer
+import org.meshtastic.core.datastore.store.asStore
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.prefs.di.AnalyticsDataStore
 import org.meshtastic.core.prefs.di.AppDataStore
@@ -192,21 +193,25 @@ private fun desktopProtoDataStoreModule() = module {
 
     single<CoreLocalConfigDataStore> {
         protoStore(LocalConfigSerializer, "$protoDir/local_config.pb", { LocalConfig() }, get())
+            .asStore()
             .asCoreLocalConfigDataStore()
     }
 
     single<CoreModuleConfigDataStore> {
         protoStore(ModuleConfigSerializer, "$protoDir/module_config.pb", { LocalModuleConfig() }, get())
+            .asStore()
             .asCoreModuleConfigDataStore()
     }
 
     single<CoreChannelSetDataStore> {
         protoStore(ChannelSetSerializer, "$protoDir/channel_set.pb", { ChannelSet() }, get())
+            .asStore()
             .asCoreChannelSetDataStore()
     }
 
     single<CoreLocalStatsDataStore> {
         protoStore(LocalStatsSerializer, "$protoDir/local_stats.pb", { LocalStats() }, get())
+            .asStore()
             .asCoreLocalStatsDataStore()
     }
 }
