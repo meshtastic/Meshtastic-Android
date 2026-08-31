@@ -175,6 +175,10 @@ jobs:
 
           missing = sorted(modules - listed - exempt)
           extra = sorted(listed - modules)
+          # The exemption is bidirectional: an exempt module must also stay OUT of the
+          # list. Without this, adding one back would pass silently and quietly undo
+          # #6412 by pulling a test harness into Dokka, Kover and kmpSmokeCompile.
+          readded = sorted(listed & exempt)
 
           problems = []
           for m in missing:
@@ -184,6 +188,11 @@ jobs:
               )
           for m in extra:
               problems.append(f'{m} is in ALL_MODULES_FULL but no longer in settings.gradle.kts')
+          for m in readded:
+              problems.append(
+                  f'{m} is exempt from root aggregation (#6412) but present in '
+                  'ALL_MODULES_FULL -- remove it, or drop it from the exempt set here'
+              )
 
           if problems:
               print('Root module list drift detected:')
