@@ -20,12 +20,7 @@ package org.meshtastic.core.common.util
 
 import kotlin.math.abs
 
-/**
- * `Intl.DateTimeFormat`'s `dateStyle`/`timeStyle` map directly onto the JVM desktop actual's `FormatStyle.SHORT` /
- * `FormatStyle.MEDIUM` (`"short"`/`"medium"` respectively), so the per-function style mapping here mirrors
- * `JvmPlatformUtils.kt`'s `DateFormatter` object function-for-function rather than Android's more elaborate
- * `DateUtils`-based one.
- */
+// Mirrors JvmPlatformUtils.kt's DateFormatter (short/medium styles), not Android's DateUtils-based one.
 actual object DateFormatter {
 
     actual fun formatRelativeTime(timestampMillis: Long): String {

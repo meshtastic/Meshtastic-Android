@@ -16,16 +16,11 @@
  */
 package org.meshtastic.core.common.util
 
-// There is no browser API for a measurement-system *override* the way Android 14+'s regional preferences expose
-// one, so honoring MEASUREMENT_SYSTEM_EXTENSION (see MeasurementSystem.kt) is not possible here -- this is an
-// accepted, honest platform gap, not an oversight. Region-based inference via the module's own
-// measurementSystemForRegion is the best signal available, the same fallback the JVM desktop actual uses below
-// Android P.
+// No browser API for a measurement-system override (unlike Android 14+); region-based inference is the
+// best available signal, same fallback the JVM actual uses below Android P.
 actual fun getSystemMeasurementSystem(): MeasurementSystem = measurementSystemForRegion(currentRegionCode())
 
-// Likewise, there is no browser API for the OS regional-preferences temperature unit. CLDR's unitPreferenceData
-// region list is small and static, so it is reused verbatim from the JVM actual rather than treated as
-// JVM-specific logic.
+// No browser API for this either; CLDR's region list is reused verbatim from the JVM actual.
 actual fun getSystemTemperatureUnit(): TemperatureUnit = when (currentRegionCode()) {
     "US",
     "BS",
@@ -49,12 +44,7 @@ actual fun currentLocaleQualifier(): String {
 
 private data class ParsedLocale(val language: String, val region: String)
 
-/**
- * Parses `navigator.language` (a BCP-47 tag like `"en-US"`, or `"zh-Hans-CN"`) into a language and region, by hand
- * rather than via the `Intl.Locale` API's `.maximize()` -- that would infer a region for a language-only tag (an
- * ICU-quality nicety), but a plain split is enough to answer these three functions honestly, and keeps this file free
- * of another `js()` surface.
- */
+/** Parses `navigator.language` (e.g. `"en-US"`) into language + region by hand, no `Intl.Locale`. */
 private fun parsedBrowserLocale(): ParsedLocale {
     val tag = browserLanguage()
     if (tag.isBlank()) return ParsedLocale(DEFAULT_LANGUAGE, "")

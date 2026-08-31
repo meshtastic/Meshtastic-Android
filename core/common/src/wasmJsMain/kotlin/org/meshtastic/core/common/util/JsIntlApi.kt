@@ -19,16 +19,7 @@
 
 package org.meshtastic.core.common.util
 
-/**
- * Raw `Intl`/browser JS interop, isolated to this one file so nothing else in `wasmJsMain` needs to touch `external`
- * declarations or `js()` snippets directly. Everything above this layer (`DateFormatter`, `DecimalFormatting`,
- * `LocalizedUnitFormatting`, `MeasurementSystem` actuals) talks only to the small Kotlin-shaped API declared here --
- * the same "isolate raw JS interop to one file" discipline `core:ble`'s `WebBluetoothApi.kt` applies to Web Bluetooth.
- *
- * There is no ICU on this platform; every formatter here is backed by the browser's own `Intl` implementation
- * (https://tc39.es/ecma402/), which is CLDR-driven the same way Android's `android.icu` is, just with a coarser options
- * surface.
- */
+// Raw Intl/browser JS interop, isolated to this one file (mirrors core:ble's WebBluetoothApi.kt).
 internal external interface JsNumberFormat : JsAny {
     fun format(value: Double): String
 }
@@ -44,9 +35,7 @@ internal external interface JsRelativeTimeFormat : JsAny {
 /** `navigator.language`, a BCP-47 tag like `"en-US"`, or `""` when unavailable. */
 internal fun browserLanguage(): String = js("(navigator.language || '')")
 
-// `locale || undefined` lets an empty string (see [browserLanguage]) fall through to Intl's own default-locale
-// resolution instead of throwing on an invalid empty BCP-47 tag.
-
+// `locale || undefined` falls through to Intl's default-locale resolution for an empty tag.
 private fun newNumberFormat(locale: String, options: JsAny): JsNumberFormat =
     js("new Intl.NumberFormat(locale || undefined, options)")
 
@@ -56,8 +45,7 @@ private fun newDateTimeFormat(locale: String, options: JsAny): JsDateTimeFormat 
 private fun newRelativeTimeFormat(locale: String, options: JsAny): JsRelativeTimeFormat =
     js("new Intl.RelativeTimeFormat(locale || undefined, options)")
 
-// `roundingMode` (ES2023) is simply ignored by engines that predate it -- an unrecognized key in an Intl options
-// object is never an error -- so it is always safe to request half-up rounding here.
+// roundingMode (ES2023) is ignored, not an error, on engines that predate it.
 private fun decimalOptions(fractionDigits: Int): JsAny =
     js("({ minimumFractionDigits: fractionDigits, maximumFractionDigits: fractionDigits, roundingMode: 'halfExpand' })")
 
@@ -99,9 +87,6 @@ internal fun timeOnlyFormatter(locale: String, style: String): JsDateTimeFormat 
 internal fun dateTimeFormatter(locale: String, dateStyle: String, timeStyle: String): JsDateTimeFormat =
     newDateTimeFormat(locale, dateTimeStyleOptions(dateStyle, timeStyle))
 
-/**
- * An `Intl.RelativeTimeFormat` with `numeric: 'auto'`, so small deltas render as "now"/"yesterday" where the CLDR data
- * for [locale] has an idiomatic word for them, rather than always spelling out a count.
- */
+/** `numeric: 'auto'` so small deltas render as "now"/"yesterday" where CLDR has a word for them. */
 internal fun relativeTimeFormatter(locale: String): JsRelativeTimeFormat =
     newRelativeTimeFormat(locale, relativeTimeOptions())
