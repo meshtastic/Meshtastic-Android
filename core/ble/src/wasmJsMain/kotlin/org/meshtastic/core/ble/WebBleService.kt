@@ -32,7 +32,7 @@ import kotlin.uuid.Uuid
  * before the service is handed to a caller's `setup` block. [WebBleConnection.profile] does exactly that, mirroring how
  * Kable's [KableBleConnection] (`nonWebMain`) waits for `peripheral.services` before handing out its own [BleService].
  */
-class WebBleService(
+internal class WebBleService(
     private val jsService: JsBluetoothRemoteGATTService,
     private val resolvedCharacteristics: Map<Uuid, JsBluetoothRemoteGATTCharacteristic>,
 ) : BleService {

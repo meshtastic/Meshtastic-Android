@@ -28,11 +28,9 @@ import kotlinx.coroutines.flow.asStateFlow
  * the Kable-based `MeshtasticBleDevice` (in `nonWebMain`) carries a Kable `Advertisement`. [WebBleConnection.connect]
  * casts to this type, matching that same pattern.
  *
- * @param jsDevice The live device handle from `requestDevice()`. Internal so only this file's siblings
- *   ([WebBleConnection], [WebBleScanner]) can reach into it — everything else in `core:ble` only ever sees the
- *   [BleDevice] contract.
+ * @param jsDevice The live device handle from `requestDevice()`.
  */
-class WebBleDevice(internal val jsDevice: JsBluetoothDevice) : BleDevice {
+internal class WebBleDevice(val jsDevice: JsBluetoothDevice) : BleDevice {
     override val address: String = jsDevice.id
     override val name: String? = jsDevice.name
 

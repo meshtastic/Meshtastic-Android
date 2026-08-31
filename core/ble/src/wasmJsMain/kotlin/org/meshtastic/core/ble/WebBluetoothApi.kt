@@ -17,6 +17,9 @@
 package org.meshtastic.core.ble
 
 import kotlinx.coroutines.await
+import org.khronos.webgl.Int8Array
+import org.khronos.webgl.toByteArray
+import org.khronos.webgl.toInt8Array
 import kotlin.js.Promise
 
 /**
@@ -151,33 +154,19 @@ internal suspend fun JsBluetoothRemoteGATTCharacteristic.stopNotificationsSuspen
 internal fun JsBluetoothRemoteGATTCharacteristic.currentValueAsByteArray(): ByteArray =
     value?.let { dataViewToByteArray(it) } ?: ByteArray(0)
 
-// --- Byte-level conversion helpers (DataView <-> ByteArray, ByteArray -> Uint8Array) ---
+// --- Byte-level conversion helpers (DataView <-> ByteArray) ---
 //
-// Kept as small js() snippets rather than a fully typed external DataView/Uint8Array surface: the exact
-// typed-array external API for this Kotlin/Wasm version is not load-bearing here, only correct byte
-// transfer is. This mirrors the same pragmatic js()-snippet technique already proven for constructing a
-// Worker elsewhere in the Kotlin/Wasm ecosystem.
+// kotlinx-browser (JetBrains, the documented Kotlin/Wasm typed-array interop library) provides
+// Int8Array.toByteArray()/ByteArray.toInt8Array() directly. DataView itself has no kotlinx-browser
+// conversion, so it's viewed as an Int8Array over the same underlying buffer first (one small js()
+// snippet), then handed to the real library function.
 
-private fun dataViewByteLength(view: JsAny): Int = js("view.byteLength")
+private fun dataViewAsInt8Array(view: JsAny): Int8Array =
+    js("new Int8Array(view.buffer, view.byteOffset, view.byteLength)")
 
-private fun dataViewGetUint8(view: JsAny, index: Int): Int = js("view.getUint8(index)")
+private fun dataViewToByteArray(view: JsAny): ByteArray = dataViewAsInt8Array(view).toByteArray()
 
-private fun dataViewToByteArray(view: JsAny): ByteArray {
-    val length = dataViewByteLength(view)
-    return ByteArray(length) { i -> dataViewGetUint8(view, i).toByte() }
-}
-
-private fun newUint8Array(length: Int): JsAny = js("new Uint8Array(length)")
-
-private fun uint8ArraySet(array: JsAny, index: Int, value: Int): Unit = js("array[index] = value")
-
-private fun byteArrayToUint8Array(bytes: ByteArray): JsAny {
-    val array = newUint8Array(bytes.size)
-    for (i in bytes.indices) {
-        uint8ArraySet(array, i, bytes[i].toInt() and 0xFF)
-    }
-    return array
-}
+private fun byteArrayToUint8Array(bytes: ByteArray): JsAny = bytes.toInt8Array()
 
 private fun jsBooleanToBoolean(value: JsAny): Boolean = js("value")
 
