@@ -25,7 +25,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -40,6 +40,9 @@ import org.meshtastic.feature.map.component.BasemapMenu
 import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.maplibre.style.Basemap
 import org.meshtastic.feature.map.maplibre.style.Basemaps
+
+/** A preference value that has been read from disk; distinguishes "not read yet" from a persisted null. */
+private data class Loaded<T>(val value: T)
 
 /** The basemap in use, everything selectable, and how to change it. */
 @Stable
@@ -67,8 +70,9 @@ internal class BasemapSelection(
  * masks the race, which is why development never saw it: the preference read settles in milliseconds, long before the
  * style's network fetch completes, so the swap lands while nothing is attached yet. On slow storage the read can land
  * exactly in the attach window, on every open. Waiting for the persisted values means the map only ever opens with one
- * style. (The live StateFlows can lag the awaited read by a dispatch, but that catch-up emission carries an equal value
- * and lands before any style could finish loading and begin attaching, so the gate itself cannot reintroduce the swap.)
+ * style. (The initial values come from the awaited reads themselves — each live flow's replayed current value is
+ * dropped, since it can still be the default — so the gate cannot open on a value the renderer would immediately swap
+ * away from.)
  */
 @Composable
 internal fun rememberBasemapSelection(customs: List<Basemap.Raster>): BasemapSelection? {
@@ -76,20 +80,30 @@ internal fun rememberBasemapSelection(customs: List<Basemap.Raster>): BasemapSel
     val tilePrefs: MapTileProviderPrefs = koinInject()
     val scope = rememberCoroutineScope()
 
-    var hasLoaded by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) {
-        mapPrefs.awaitMapStyle()
-        tilePrefs.awaitSelectedCustomTileProviderId()
-        hasLoaded = true
+    var styleIndex by remember { mutableStateOf<Loaded<Int>?>(null) }
+    var selectedCustomId by remember { mutableStateOf<Loaded<String?>?>(null) }
+
+    // Subscribe before reading, and drop each flow's replayed current value: it can predate the first disk read and
+    // so may still be the eager default. The awaited reads supply the initial values — re-delivering anything a
+    // dropped replay carried — and every later emission is a genuine update that overwrites them. The reads fill only
+    // a still-null slot, so they never clobber a newer collected value. Plain collect rather than a lifecycle-aware
+    // collector: drop(1) must drop only the subscription replay, and a lifecycle restart would re-drop a real value.
+    LaunchedEffect(mapPrefs, tilePrefs) {
+        launch { mapPrefs.mapStyle.drop(1).collect { styleIndex = Loaded(it) } }
+        launch { tilePrefs.selectedCustomTileProviderId.drop(1).collect { selectedCustomId = Loaded(it) } }
+        val style = Loaded(mapPrefs.awaitMapStyle())
+        val custom = Loaded(tilePrefs.awaitSelectedCustomTileProviderId())
+        if (styleIndex == null) styleIndex = style
+        if (selectedCustomId == null) selectedCustomId = custom
     }
 
-    val styleIndex by mapPrefs.mapStyle.collectAsStateWithLifecycle()
-    val selectedCustomId by tilePrefs.selectedCustomTileProviderId.collectAsStateWithLifecycle()
-
-    if (!hasLoaded) return null
+    val loadedStyle = styleIndex
+    val loadedCustom = selectedCustomId
+    if (loadedStyle == null || loadedCustom == null) return null
 
     val current =
-        customs.firstOrNull { it.id == selectedCustomId } ?: Basemaps.all.getOrElse(styleIndex) { Basemaps.default }
+        customs.firstOrNull { it.id == loadedCustom.value }
+            ?: Basemaps.all.getOrElse(loadedStyle.value) { Basemaps.default }
 
     return BasemapSelection(
         current = current,
