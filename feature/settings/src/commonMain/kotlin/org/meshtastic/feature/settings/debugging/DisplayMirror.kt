@@ -55,10 +55,12 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.key.utf16CodePoint
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -160,6 +162,7 @@ fun DisplayMirrorContent(modifier: Modifier = Modifier, viewModel: DisplayMirror
                     hasTouch = displayInfo?.has_touch == true,
                     onEvent = viewModel::sendKey,
                     onTouch = viewModel::sendTouch,
+                    onChar = viewModel::sendChar,
                 )
         }
     }
@@ -175,6 +178,7 @@ private fun MirrorWithControls(
     hasTouch: Boolean,
     onEvent: (Int) -> Unit,
     onTouch: (Int, Int, Int) -> Unit,
+    onChar: (Int) -> Unit,
 ) {
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
         if (maxWidth >= SIDE_BY_SIDE_MIN_WIDTH) {
@@ -183,7 +187,15 @@ private fun MirrorWithControls(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                MirrorSurface(frame, palette, hasTouch, onEvent, onTouch, modifier = Modifier.weight(1f, fill = false))
+                MirrorSurface(
+                    frame,
+                    palette,
+                    hasTouch,
+                    onEvent,
+                    onTouch,
+                    onChar,
+                    modifier = Modifier.weight(1f, fill = false),
+                )
                 DpadCluster(enabled = enabled, onEvent = onEvent)
             }
         } else {
@@ -192,7 +204,7 @@ private fun MirrorWithControls(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                MirrorSurface(frame, palette, hasTouch, onEvent, onTouch)
+                MirrorSurface(frame, palette, hasTouch, onEvent, onTouch, onChar)
                 DpadCluster(enabled = enabled, onEvent = onEvent)
             }
         }
@@ -212,6 +224,7 @@ private fun MirrorSurface(
     hasTouch: Boolean,
     onEvent: (Int) -> Unit,
     onTouch: (Int, Int, Int) -> Unit,
+    onChar: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val focusRequester = remember { FocusRequester() }
@@ -232,12 +245,7 @@ private fun MirrorSurface(
             Modifier.focusRequester(focusRequester)
                 .onFocusChanged { focused = it.isFocused }
                 .focusable()
-                .onPreviewKeyEvent { event ->
-                    val mapped = keyToInputEvent(event.key) ?: return@onPreviewKeyEvent false
-                    // Consume KeyUp of mapped keys too, or Space/arrows leak to the scroll container.
-                    if (event.type == KeyEventType.KeyDown) onEvent(mapped)
-                    true
-                }
+                .remoteKeyInput(onEvent, onChar)
                 .pointerInput(hasTouch) {
                     detectTapGestures(
                         onTap = { offset ->
@@ -294,6 +302,35 @@ private fun MirrorControlHints(focused: Boolean, hasTouch: Boolean, onToggleKeyb
         )
     }
 }
+
+/**
+ * Sends captured key presses to the device: mapped navigation keys as input events, Backspace and printable characters
+ * as typed characters. Handled keys are consumed on both down and up so nothing leaks into the surrounding scroll
+ * container.
+ */
+private fun Modifier.remoteKeyInput(onEvent: (Int) -> Unit, onChar: (Int) -> Unit): Modifier =
+    onPreviewKeyEvent { event ->
+        val down = event.type == KeyEventType.KeyDown
+        val mapped = keyToInputEvent(event.key)
+        when {
+            mapped != null -> {
+                if (down) onEvent(mapped)
+                true
+            }
+
+            event.key == Key.Backspace -> {
+                if (down) onChar(CHAR_BACKSPACE)
+                true
+            }
+
+            event.utf16CodePoint >= FIRST_PRINTABLE_CHAR -> {
+                if (down) onChar(event.utf16CodePoint)
+                true
+            }
+
+            else -> false
+        }
+    }
 
 /** Converts a completed drag into one direction event along its dominant axis, ignoring short accidental swipes. */
 private fun Modifier.swipeToDirection(onEvent: (Int) -> Unit): Modifier = pointerInput(Unit) {
