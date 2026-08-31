@@ -17,7 +17,6 @@
 package org.meshtastic.feature.settings.debugging
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
@@ -28,9 +27,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
@@ -55,12 +52,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.FilterQuality
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
@@ -68,8 +60,6 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -91,6 +81,7 @@ import org.meshtastic.core.repository.AdminController
 import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.DisplayMirrorManager
 import org.meshtastic.core.repository.MirrorFrame
+import org.meshtastic.core.repository.MirrorPalette
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.ui.icon.KeyboardArrowDown
 import org.meshtastic.core.ui.icon.KeyboardArrowLeft
@@ -98,9 +89,6 @@ import org.meshtastic.core.ui.icon.KeyboardArrowRight
 import org.meshtastic.core.ui.icon.KeyboardArrowUp
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.proto.DisplayInfo
-
-// 4x scale for the common 128px-wide OLED; caps the image so the D-pad stays above the fold on desktop.
-private val MAX_CANVAS_WIDTH = 512.dp
 
 // M3 comfortable target for remote-control keys (48dp minimum + breathing room).
 private val DPAD_KEY_SIZE = 56.dp
@@ -112,9 +100,6 @@ private const val REPEAT_INTERVAL_MS = 100L
 
 // Swipes on the mirror shorter than this are ignored as accidental.
 private val SWIPE_THRESHOLD = 48.dp
-
-// MONO_VLSB packs 8 vertically adjacent pixels per byte (one "page" row).
-private const val PIXELS_PER_PAGE = 8
 
 // Firmware input_broker_event codes (src/input/InputBroker.h).
 private const val INPUT_SELECT = 10
@@ -134,6 +119,8 @@ class DisplayMirrorViewModel(
 ) : ViewModel() {
 
     val frame: StateFlow<MirrorFrame?> = displayMirrorManager.frame
+
+    val palette: StateFlow<MirrorPalette?> = displayMirrorManager.palette
 
     val connected: StateFlow<Boolean> =
         connectionStateProvider.connectionState
@@ -174,6 +161,7 @@ class DisplayMirrorViewModel(
 @Composable
 fun DisplayMirrorContent(modifier: Modifier = Modifier, viewModel: DisplayMirrorViewModel = koinViewModel()) {
     val frame by viewModel.frame.collectAsStateWithLifecycle()
+    val palette by viewModel.palette.collectAsStateWithLifecycle()
     val mirroring by viewModel.mirroring.collectAsStateWithLifecycle()
     val connected by viewModel.connected.collectAsStateWithLifecycle()
     val displayInfo by viewModel.displayInfo.collectAsStateWithLifecycle()
@@ -208,7 +196,7 @@ fun DisplayMirrorContent(modifier: Modifier = Modifier, viewModel: DisplayMirror
 
         when {
             !connected -> Text(text = "Not connected to a device.")
-            currentFrame != null -> MirrorSurface(currentFrame, onEvent = viewModel::sendKey)
+            currentFrame != null -> MirrorSurface(currentFrame, palette, onEvent = viewModel::sendKey)
             else -> Text(text = "No frame received yet — enable mirroring or tap Refresh.")
         }
 
@@ -221,7 +209,12 @@ fun DisplayMirrorContent(modifier: Modifier = Modifier, viewModel: DisplayMirror
  * Esc/Backspace = Back), swipe in a cardinal direction for a single direction event.
  */
 @Composable
-private fun MirrorSurface(frame: MirrorFrame, onEvent: (Int) -> Unit, modifier: Modifier = Modifier) {
+private fun MirrorSurface(
+    frame: MirrorFrame,
+    palette: MirrorPalette?,
+    onEvent: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val focusRequester = remember { FocusRequester() }
     var focused by remember { mutableStateOf(false) }
     val focusColor = MaterialTheme.colorScheme.primary
@@ -247,7 +240,7 @@ private fun MirrorSurface(frame: MirrorFrame, onEvent: (Int) -> Unit, modifier: 
                 .swipeToDirection(onEvent)
                 .border(width = 2.dp, color = if (focused) focusColor else Color.Transparent),
         ) {
-            MirrorFrameImage(frame)
+            MirrorFrameImage(frame, palette)
         }
         Text(
             text =
@@ -419,41 +412,3 @@ private fun BackKey(enabled: Boolean, onBack: () -> Unit) {
 @Composable
 private fun contentColorFor(enabled: Boolean): Color =
     if (enabled) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
-
-/**
- * Renders a MONO_VLSB 1bpp framebuffer once per frame into a 1:1 [ImageBitmap] and scales it up with nearest-neighbor
- * filtering — crisp device pixels, no fractional-scale seams, one pixel walk per frame instead of per recomposition.
- */
-@Composable
-private fun MirrorFrameImage(frame: MirrorFrame, modifier: Modifier = Modifier) {
-    val bitmap = remember(frame) { renderFrame(frame) }
-    Image(
-        bitmap = bitmap,
-        contentDescription = "Device screen",
-        modifier =
-        modifier
-            .widthIn(max = MAX_CANVAS_WIDTH)
-            .fillMaxWidth()
-            .aspectRatio(frame.width.toFloat() / frame.height.toFloat()),
-        filterQuality = FilterQuality.None,
-    )
-}
-
-private fun renderFrame(frame: MirrorFrame): ImageBitmap {
-    val bitmap = ImageBitmap(frame.width, frame.height)
-    val size = Size(frame.width.toFloat(), frame.height.toFloat())
-    CanvasDrawScope().draw(Density(1f), LayoutDirection.Ltr, Canvas(bitmap), size) {
-        drawRect(color = Color.Black)
-        val pixel = Size(1f, 1f)
-        for (y in 0 until frame.height) {
-            val page = (y / PIXELS_PER_PAGE) * frame.width
-            val bit = 1 shl (y % PIXELS_PER_PAGE)
-            for (x in 0 until frame.width) {
-                if (frame.pixels[page + x].toInt() and bit != 0) {
-                    drawRect(color = Color.White, topLeft = Offset(x.toFloat(), y.toFloat()), size = pixel)
-                }
-            }
-        }
-    }
-    return bitmap
-}
