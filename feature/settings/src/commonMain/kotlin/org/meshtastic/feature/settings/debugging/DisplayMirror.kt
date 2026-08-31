@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.FilledTonalButton
@@ -51,6 +52,9 @@ import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.repository.DisplayMirrorManager
 import org.meshtastic.core.repository.MirrorFrame
 import org.meshtastic.core.repository.RadioController
+
+// 4x scale for the common 128px-wide OLED; caps the canvas so the D-pad stays above the fold on desktop.
+private val MAX_CANVAS_WIDTH = 512.dp
 
 // Firmware input_broker_event codes (src/input/InputBroker.h).
 private const val INPUT_SELECT = 10
@@ -94,18 +98,20 @@ fun DisplayMirrorContent(modifier: Modifier = Modifier, viewModel: DisplayMirror
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
+        val currentFrame = frame
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Switch(checked = mirroring, onCheckedChange = viewModel::setMirror)
             Text(text = if (mirroring) "Mirroring" else "Mirror off", style = MaterialTheme.typography.titleMedium)
+            if (currentFrame != null) {
+                Text(
+                    text = "${currentFrame.width}x${currentFrame.height}  frame #${currentFrame.frameId}",
+                    style = MaterialTheme.typography.labelSmall,
+                )
+            }
         }
 
-        val currentFrame = frame
         if (currentFrame != null) {
             MirrorFrameCanvas(currentFrame)
-            Text(
-                text = "${currentFrame.width}x${currentFrame.height}  frame #${currentFrame.frameId}",
-                style = MaterialTheme.typography.labelSmall,
-            )
         } else {
             Text(text = "No frame received yet — enable mirroring above.")
         }
@@ -121,18 +127,18 @@ fun DisplayMirrorContent(modifier: Modifier = Modifier, viewModel: DisplayMirror
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             FilledTonalButton(onClick = { viewModel.sendKey(INPUT_DOWN) }) { Text("Down") }
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             FilledTonalButton(onClick = { viewModel.sendKey(INPUT_BACK) }) { Text("Back") }
         }
     }
 }
 
-/** Draws a MONO_VLSB 1bpp framebuffer scaled to the available width, one filled rect per lit pixel. */
+/** Draws a MONO_VLSB 1bpp framebuffer scaled up, one filled rect per lit pixel. Width-capped so the controls stay in view on desktop. */
 @Composable
 private fun MirrorFrameCanvas(frame: MirrorFrame) {
     val aspect = frame.width.toFloat() / frame.height.toFloat()
-    Canvas(modifier = Modifier.fillMaxWidth().aspectRatio(aspect).background(Color.Black)) {
+    Canvas(
+        modifier = Modifier.widthIn(max = MAX_CANVAS_WIDTH).fillMaxWidth().aspectRatio(aspect).background(Color.Black),
+    ) {
         val scale = size.width / frame.width
         val pixel = Size(scale, scale)
         for (y in 0 until frame.height) {
