@@ -165,11 +165,24 @@ class UsbMaintenanceGateTest {
     private fun esp32() =
         DeviceHardware(hwModelSlug = "HELTEC_V3", platformioTarget = "heltec-v3", architecture = "esp32-s3")
 
+    /**
+     * Calls the gate on a platform that can run the sequence, which is what every scenario below is about.
+     * [supportsMaintenance] is spelled out only where the platform itself is the subject — the real function takes it
+     * undefaulted so no production call site can forget it.
+     */
+    private fun maintenanceGate(
+        manifest: MaintenanceUf2Manifest,
+        hardware: DeviceHardware,
+        updateMethod: FirmwareUpdateMethod,
+        hasRelease: Boolean,
+        supportsMaintenance: Boolean = true,
+    ) = usbMaintenanceGate(manifest, hardware, updateMethod, hasRelease, supportsMaintenance)
+
     // ── Architecture and transport gating (R11) ──────────────────────────────
 
     @Test
     fun `gate is shown for nrf52840 over usb with a release`() {
-        val gate = usbMaintenanceGate(testManifest, nrf(), FirmwareUpdateMethod.Usb, hasRelease = true)
+        val gate = maintenanceGate(testManifest, nrf(), FirmwareUpdateMethod.Usb, hasRelease = true)
 
         assertTrue(gate.show, "nRF52840 over USB should offer maintenance")
         assertNull(gate.eraseRefusal, "A resolved SoftDevice must not refuse")
@@ -177,7 +190,7 @@ class UsbMaintenanceGateTest {
 
     @Test
     fun `gate is shown for rp2040 over usb and never refuses on softdevice`() {
-        val gate = usbMaintenanceGate(testManifest, rp2040(), FirmwareUpdateMethod.Usb, hasRelease = true)
+        val gate = maintenanceGate(testManifest, rp2040(), FirmwareUpdateMethod.Usb, hasRelease = true)
 
         assertTrue(gate.show, "RP2040 over USB should offer maintenance")
         assertNull(gate.eraseRefusal, "RP2040 has no SoftDevice to resolve")
@@ -211,7 +224,7 @@ class UsbMaintenanceGateTest {
         assertNull(eraseUf2For(hostile, nrf()), "A traversal fileName must resolve to null, not throw")
         assertNull(eraseUf2For(hostile, rp2040()), "A separator in fileName must resolve to null, not throw")
 
-        val gate = usbMaintenanceGate(hostile, rp2040(), FirmwareUpdateMethod.Usb, hasRelease = true)
+        val gate = maintenanceGate(hostile, rp2040(), FirmwareUpdateMethod.Usb, hasRelease = true)
         assertEquals(UsbMaintenanceRefusal.MaintenanceDataUnavailable, gate.eraseRefusal)
     }
 
@@ -244,21 +257,21 @@ class UsbMaintenanceGateTest {
     fun `rp2040 with no erase data reports missing data rather than unsupported architecture`() {
         val empty = MaintenanceUf2Manifest()
 
-        val gate = usbMaintenanceGate(empty, rp2040(), FirmwareUpdateMethod.Usb, hasRelease = true)
+        val gate = maintenanceGate(empty, rp2040(), FirmwareUpdateMethod.Usb, hasRelease = true)
 
         assertEquals(UsbMaintenanceRefusal.MaintenanceDataUnavailable, gate.eraseRefusal)
     }
 
     @Test
     fun `gate is hidden for esp32 even over usb`() {
-        assertFalse(usbMaintenanceGate(testManifest, esp32(), FirmwareUpdateMethod.Usb, hasRelease = true).show)
+        assertFalse(maintenanceGate(testManifest, esp32(), FirmwareUpdateMethod.Usb, hasRelease = true).show)
     }
 
     @Test
     fun `gate is hidden for every non-usb transport`() {
         listOf(FirmwareUpdateMethod.Ble, FirmwareUpdateMethod.Wifi, FirmwareUpdateMethod.Unknown).forEach { method ->
             assertFalse(
-                usbMaintenanceGate(testManifest, nrf(), method, hasRelease = true).show,
+                maintenanceGate(testManifest, nrf(), method, hasRelease = true).show,
                 "Maintenance must not be offered over $method — the flow needs the UF2 mass-storage drive",
             )
         }
@@ -266,14 +279,35 @@ class UsbMaintenanceGateTest {
 
     @Test
     fun `gate is hidden without a release because there would be nothing to reflash`() {
-        assertFalse(usbMaintenanceGate(testManifest, nrf(), FirmwareUpdateMethod.Usb, hasRelease = false).show)
+        assertFalse(maintenanceGate(testManifest, nrf(), FirmwareUpdateMethod.Usb, hasRelease = false).show)
+    }
+
+    /**
+     * Desktop has no UF2 maintenance flow: it cannot classify a bootloader volume and cannot unblock the CDC port the
+     * erase image waits on. Offering the section there ends in a refusal the user can do nothing about, so an otherwise
+     * fully eligible device must still hide it.
+     */
+    @Test
+    fun `gate is hidden on a platform that cannot run the sequence`() {
+        val gate =
+            maintenanceGate(
+                testManifest,
+                nrf(),
+                FirmwareUpdateMethod.Usb,
+                hasRelease = true,
+                supportsMaintenance = false,
+            )
+
+        assertFalse(gate.show, "A platform with no maintenance flow must hide the section rather than refuse it")
+        assertNull(gate.eraseRefusal, "Platform incapability is not a refusal the user can act on")
+        assertFalse(gate.showBootloaderUpgrade, "OTAFIX needs the same sequence")
     }
 
     // ── Fail-closed SoftDevice refusal (R4) ──────────────────────────────────
 
     @Test
     fun `unresolved softdevice shows the action but refuses it`() {
-        val gate = usbMaintenanceGate(testManifest, nrf(variant = null), FirmwareUpdateMethod.Usb, hasRelease = true)
+        val gate = maintenanceGate(testManifest, nrf(variant = null), FirmwareUpdateMethod.Usb, hasRelease = true)
 
         assertTrue(gate.show, "The action stays visible so the refusal can be explained")
         assertEquals(UsbMaintenanceRefusal.UnknownSoftDevice, gate.eraseRefusal)
@@ -320,11 +354,11 @@ class UsbMaintenanceGateTest {
     @Test
     fun `otafix is offered only for supported targets`() {
         assertTrue(
-            usbMaintenanceGate(testManifest, nrf(target = "rak4631"), FirmwareUpdateMethod.Usb, hasRelease = true)
+            maintenanceGate(testManifest, nrf(target = "rak4631"), FirmwareUpdateMethod.Usb, hasRelease = true)
                 .showBootloaderUpgrade,
         )
         assertTrue(
-            usbMaintenanceGate(
+            maintenanceGate(
                 testManifest,
                 nrf(target = "heltec-mesh-node-t114"),
                 FirmwareUpdateMethod.Usb,
@@ -349,7 +383,7 @@ class UsbMaintenanceGateTest {
         )
             .forEach { target ->
                 assertFalse(
-                    usbMaintenanceGate(testManifest, nrf(target = target), FirmwareUpdateMethod.Usb, hasRelease = true)
+                    maintenanceGate(testManifest, nrf(target = target), FirmwareUpdateMethod.Usb, hasRelease = true)
                         .showBootloaderUpgrade,
                     "$target is not an OTAFIX-supported product",
                 )

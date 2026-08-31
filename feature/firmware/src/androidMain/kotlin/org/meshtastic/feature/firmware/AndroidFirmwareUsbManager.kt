@@ -39,6 +39,8 @@ import org.meshtastic.core.network.repository.UsbRepository
 class AndroidFirmwareUsbManager(private val context: Context, private val usbRepository: UsbRepository) :
     FirmwareUsbManager {
 
+    override val supportsUf2Maintenance: Boolean = true
+
     override suspend fun serialPortKeys(): Set<String> = usbRepository.serialDevices.value.keys
 
     @Suppress("ReturnCount") // each failed precondition must abort without poking an arbitrary port

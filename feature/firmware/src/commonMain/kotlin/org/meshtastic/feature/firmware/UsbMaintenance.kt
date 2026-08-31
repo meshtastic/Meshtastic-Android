@@ -159,15 +159,19 @@ data class UsbMaintenanceGate(
  *
  * @param hasRelease Whether a firmware release is selected. Erasing without one would strand the device with no
  *   application, so the whole section is hidden.
+ * @param platformSupportsMaintenance Whether this platform can run the sequence at all
+ *   ([FirmwareUsbManager.supportsUf2Maintenance]). Hidden rather than refused: a platform with no UF2 maintenance flow
+ *   is shaped like the wrong transport, not like data the user could go and fix.
  */
 internal fun usbMaintenanceGate(
     manifest: MaintenanceUf2Manifest,
     hardware: DeviceHardware,
     updateMethod: FirmwareUpdateMethod,
     hasRelease: Boolean,
+    platformSupportsMaintenance: Boolean,
 ): UsbMaintenanceGate {
     val uf2Architecture = hardware.isNrf52Arc || hardware.isRp2040Arc
-    if (updateMethod !is FirmwareUpdateMethod.Usb || !uf2Architecture || !hasRelease) {
+    if (!platformSupportsMaintenance || updateMethod !is FirmwareUpdateMethod.Usb || !uf2Architecture || !hasRelease) {
         return UsbMaintenanceGate(show = false)
     }
 

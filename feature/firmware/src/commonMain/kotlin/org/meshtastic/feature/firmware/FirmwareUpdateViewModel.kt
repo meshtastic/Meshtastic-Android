@@ -306,6 +306,7 @@ class FirmwareUpdateViewModel(
                                     hardware = deviceHardware,
                                     updateMethod = firmwareUpdateMethod,
                                     hasRelease = release != null,
+                                    platformSupportsMaintenance = usbManager.supportsUf2Maintenance,
                                 ),
                             )
                     }
