@@ -2,7 +2,7 @@
 title: Tõlgi rakendus
 parent: Kasutusjuhend
 nav_order: 17
-last_updated: 2026-08-29
+last_updated: 2026-08-30
 description: Kuidas rakendust ja selle dokumentatsiooni Crowdini kaudu tõlgitakse ja tõlgete panustamise juhised.
 aliases:
   - tõlgi
@@ -20,7 +20,7 @@ The app and its in-app docs are translated on Crowdin — this page shows how to
 | -------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------- |
 | UI strings           | `core/resources/src/commonMain/composeResources/values/strings.xml` | Nupud, sildid, sõnumid ja kogu kasutajale nähtav tekst                    |
 | Kasutusjuhendi lehed | `docs/en/user/*.md`                                                 | Rakendusesisene dokumentatsioon kuvatakse jaotises Abi ja dokumentatsioon |
-| Fastlane metadata    | `fastlane/metadata/android/en-US/`                                  | App Store listing title, description, and changelogs                      |
+| Fastlane metadata    | `fastlane/metadata/android/en-US/`                                  | Google Play listing title, description, and changelogs                    |
 
 > ℹ️ **Note:** Developer Guide pages are English-only. Kaastöölistele suunatud koodikeskset dokumentatsiooni ei tõlgita.
 
@@ -29,7 +29,7 @@ The app and its in-app docs are translated on Crowdin — this page shows how to
 1. **Külasta Crowdini projekti.** Ava [Meshtastic Android Crowdini projekt](https://crowdin.com/project/meshtastic-android) ja logi sisse või loo tasuta konto.
 2. **Vali keel.** Vali olemasolev keel või taotle uut, avades [GitHubi probleemi](https://github.com/meshtastic/Meshtastic-Android/issues/new).
 3. **Tõlgi stringe.** Crowdin kuvab ingliskeelse allika vasakul ja sinu tõlke paremal. Tõlki iga string ja salvesta.
-4. **Review context.** Many strings include screenshots or context comments — check these to understand where the text appears in the app. Approved translations are automatically merged into the next release.
+4. **Review context.** Many strings include screenshots or context comments — check these to understand where the text appears in the app. A scheduled job pulls approved translations from Crowdin and opens a pull request; they ship once a maintainer merges it and a new build goes out.
 
 > 💡 \*\*Vihje." Hoia tõlked lühikesed. UI strings often appear in buttons, chips, or narrow columns. Kui tõlge on oluliselt pikem kui ingliskeelne originaal, kaaluge lühendamist kohtades, kus tähendus jääb selgeks.
 
@@ -71,9 +71,11 @@ docs/
 └── ...
 ```
 
-Lokaadikaustad kasutavad Androidi ressursikonventsiooni `{lang}-r{REGION}` (nt `fr-rFR`, `de-rDE`, `ja-rJP`), mis vastab rakenduste stringide jaoks kasutatavatele `values-*` kataloogidele.
+Doc locale folders use Android locale qualifiers, either `{lang}` or `{lang}-r{REGION}` (for example `fr`, `fr-rFR`, `de-rDE`, `ja-rJP`). The `values-*` folders for app strings use bare language codes instead (`values-fr`, `values-de`, `values-ja`), because `crowdin.yml` writes strings with `%two_letters_code%` and doc pages with `%android_code%`. The two sets do not line up one-to-one.
 
 The app automatically selects the correct locale based on your phone's **Language & Region** settings.
+
+A page that came from Crowdin is labeled **Community translated** under its title in the app. If a page has no Crowdin translation for your language yet, the Google-flavor Android build machine-translates the English source on the fly and labels it **Auto-translated** instead; F-Droid and desktop builds show the English page. Your Crowdin translation replaces the machine one as soon as it lands.
 
 ## Translation Guidelines
 

@@ -2,7 +2,7 @@
 title: Laiteohjelmiston päivitykset
 parent: Käyttöopas
 nav_order: 13
-last_updated: 2026-08-29
+last_updated: 2026-08-30
 description: Päivitä radiosi laiteohjelmisto bluetoothin tai USB:n kautta — OTA-päivitys, versiokanavat, tarkistukset ennen päivitystä ja palautus.
 aliases:
   - firmware
@@ -32,7 +32,7 @@ Yleisin päivitystapa Android-käyttäjille:
 1. Varmista, että radiosi on yhdistetty Bluetoothilla.
 2. Siirry Firmware-päivitys -näkymään.
 3. Valitse haluamasi firmware-versio.
-4. Napauta **Päivitä** aloittaaksesi OTA-päivityksen.
+4. Napauta **Päivitä**. An **Update Warning** dialog lists the pre-flight checks — read it, then tap **I know what I'm doing.** to start. This dialog appears for every update method, including Wi-Fi OTA, USB, and a local firmware file.
 5. Odota, että päivitys valmistuu — älä katkaise yhteyttä päivityksen aikana.
 
 ![Päivitysten tarkistaminen](../../assets/screenshots/firmware_checking.png)
@@ -58,8 +58,6 @@ Kun ESP32-radio on yhdistetty verkkoon Bluetoothin sijaan, sovellus tarjoaa **Wi
 
 WiFi OTA käyttää ESP32:n `update.bin`-tiedostoa USB-päivityksen `.uf2`-tiedoston sijaan. Sovellus valitsee oikean tiedoston automaattisesti.
 
-![Laiteohjelmiston vastuuvapauslauseke](../../assets/screenshots/firmware_disclaimer.png)
-
 ### USB-päivitys sovelluksesta
 
 Kun radio on yhdistetty **USB:n tai sarjayhteyden** kautta (bluetoothin sijaan), **laiteohjelmiston päivitys** -näkymässä on käytettävissä **USB-tiedostonsiirto**. Sovellus käynnistää laitteen uudelleen DFU-tilaan ja pyytää sitten tallentamaan `.uf2`-tiedoston laitteen DFU-asemaan järjestelmän tiedostonvalitsimen avulla. Tämä vaihtoehto näkyy vain USB tai sarjayhteydellä — sitä ei voi käyttää bluetoothin kautta.
@@ -68,9 +66,11 @@ Kun radio on yhdistetty **USB:n tai sarjayhteyden** kautta (bluetoothin sijaan),
 
 ### Tyhjennys tehdasasetuksiin ja käynnistyslataimen päivitys
 
-**USB-/sarjaliitäntäyhteydellä** NRF52- ja RP2040-laitteet tarjoavat myös vaihtoehdot **Tyhjennys tehdasasetuksiin ja uudelleenasennus** sekä, jos laitteelle on julkaistu päivitetty käynnistyslatain, **Päivitä käynnistyslatain**.
+On a **USB/serial** connection, nRF52 and RP2040 devices can be wiped as part of an update — that is the **Erase device during update** opt-in described earlier on this page. nRF52 devices additionally offer **Upgrade bootloader** where an upgraded bootloader is published for the board; RP2040 devices run no Adafruit bootloader, so they never see it.
 
-Tyhjennys tehdasasetuksiin poistaa laitteesta kaiken – kanavat, avaimet ja kaikki asetukset – eikä varmuuskopiota ole, joten sovellus pyytää ensin vahvistuksen. Molemmat toiminnot kirjoittavat vuorollaan kaksi tiedostoa, joten sinua pyydetään valitsemaan laitteen päivitysasema kahdesti: ensin tyhjennystiedostoa tai käynnistyslatainkuvaa varten ja sen jälkeen laiteohjelmistoa varten.
+Select a firmware version before either one: the app hides both until a release is chosen, because the firmware is reinstalled after the device is wiped or the new bootloader is written.
+
+Both a USB erase and a bootloader upgrade write two files in turn, so you are asked to select the device's update drive twice: once for the erase or bootloader image, then again for the firmware.
 
 Sovellus lukee valitsemaltasi asemalta tiedoston `INFO_UF2.TXT` varmistaakseen, että kyseessä on todella laitteen päivitysasema, sekä tunnistaakseen laitteen ennen kuin mitään kirjoitetaan. Jos sovellus ei pysty tunnistamaan laitteesi Bluetooth-pinoa, se kieltäytyy tyhjentämästä laitetta ja ohjaa sinut sen sijaan [Web Flasheriin](https://flasher.meshtastic.org). Web Flasherissa väärän Bluetooth-pinon valitseminen voi johtaa siihen, että radion palauttaminen onnistuu vain laitteisto-ohjelmoijan avulla.
 
@@ -124,11 +124,15 @@ Jos päivitys näyttää jumiutuneen:
 - Jos radio on tämän jälkeen edelleen jumissa, käynnistä se uudelleen katkaisemalla virta.
 - Yritä päivitystä uudelleen.
 
+The message **Verification timed out. Device did not reconnect in time.** means the image was written but the radio did not come back within that window — power-cycle it and check the version under **Currently Installed** before re-running the update.
+
 ![Laiteohjelmiston päivitysvirhe](../../assets/screenshots/firmware_error.png)
 
 ### Radio ei käynnisty päivityksen jälkeen
 
-Jos radiosi ei käynnisty:
+If the app told you the Bluetooth update could not be finished, follow the instruction it gave: connect the radio to a computer over USB and re-flash it with the vendor's serial DFU tool, such as `adafruit-nrfutil`. A stock nRF bootloader cannot reliably complete an interrupted over-the-air update.
+
+Otherwise, if your radio fails to boot:
 
 1. Kokeile yhdistää USB:llä tietokoneeseen
 2. Käytä web-flasheria palautus tai DFU-tilassa

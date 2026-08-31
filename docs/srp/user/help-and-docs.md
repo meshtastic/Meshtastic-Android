@@ -2,7 +2,7 @@
 title: Help & In-App Docs
 parent: User Guide
 nav_order: 21
-last_updated: 2026-08-29
+last_updated: 2026-08-30
 description: Browse this documentation inside the app, search it, and ask Chirpy — the on-device AI assistant — questions about Meshtastic.
 aliases:
   - help
@@ -23,7 +23,7 @@ The docs browser lists every user-guide page. Tap a page to read it; images and 
 
 ### Претражи
 
-Tap the search icon and type to filter pages by title and keywords — results update as you type.
+The search box sits at the top of the docs browser. Type in it to filter pages by title and keywords — results update as you type, and the **Clear search** button (✕) empties the box.
 
 ![Searching the in-app documentation](../../assets/screenshots/docs-browser_search.png)
 

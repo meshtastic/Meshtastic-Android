@@ -2,7 +2,7 @@
 title: Kartta ja reittipisteet
 parent: Käyttöopas
 nav_order: 6
-last_updated: 2026-08-29
+last_updated: 2026-08-30
 description: Näytä radioiden sijainnit kartalla, luo ja jaa reittipisteitä, hallitse karttatasoja ja Site Planneria sekä säädä sijainnin jakamista ja tietosuoja-asetuksia.
 aliases:
   - kartta
@@ -38,22 +38,30 @@ Jokainen sijaintinsa raportoiva radio näytetään **radiotunnisteena**, jossa n
 - **Keskitä** — napauta sijaintipainiketta keskittääksesi kartan omaan sijaintiisi
 - **Radion napautus** — avaa radion tiedot napauttamalla merkkiä
 
-Kelluva työkalupalkki tarjoaa nopean pääsyn kompassiin, tasojen vaihtoon, suodattimiin, päivitykseen ja sijainnin seurantaan. Napauta kompassia suunnan palauttamiseksi pohjoiseen tai sijaintipainiketta keskittääksesi oman sijaintisi.
+The floating toolbar provides quick access to the compass, the map type and layers pickers, node filters, Site Planner, and location tracking. Napauta kompassia suunnan palauttamiseksi pohjoiseen tai sijaintipainiketta keskittääksesi oman sijaintisi. On **Google Play** builds a refresh button joins them while a network layer is showing; on **F-Droid** and **Desktop**, refresh a network layer from its own row in the layers sheet instead.
 
-![Karttanäkymä, jossa kelluva työkalurivi on avattuna ja kompassi-, taso- sekä sijaintitoiminnot näkyvät](../../assets/screenshots/map_controls_overlay.png)
+![Map floating toolbar with compass, filter, refresh, and location controls](../../assets/screenshots/map_controls_overlay.png)
+
+### Filtering the Map
+
+Tap the filter button in the floating toolbar to open **Filter map**. **Display** controls what is drawn: **Only Favorites**, **Show Waypoints**, **Show Precision Circles**, and a slider that hides nodes not heard from recently. **Node roles** is a chip per device role, plus **All** to show every role; a selected chip means that role is shown. **Nodes** narrows the set further with **Hide offline nodes**, **Only show direct nodes**, **Exclude MQTT**, **Show ignored nodes**, and **Include unknown**.
+
+A dot on the filter button means at least one filter is hiding something — check it before concluding the mesh is quiet. Turning **Show Waypoints** off hides every waypoint, including your own. **Show ignored nodes** adds them to the map rather than showing only them — unlike the node list's **Only show ignored Nodes**.
 
 ## Reittipisteet
 
-Reittipisteet ovat jaettuja kiinnostavia kohteita, jotka näkyvät kaikille, joille reittipiste lähetetään.
+Waypoints are shared points of interest, visible to everyone on your mesh.
 
 ### Reittipisteen luominen
+
+Your radio must be connected — the map ignores a touch & hold while it is not, because saving a waypoint means broadcasting it.
 
 1. Kosketa karttaa halutusta kohdasta ja pidä sormi paikallaan.
 2. Anna nimi ja valinnainen kuvaus.
 3. Valitse reittipisteelle kuvake tai emoji.
 4. Napauta **Lähetä** jakaaksesi sen verkkoon.
 
-Reittipisteet osoitetaan kuten viestit: oletuksena ne lähetetään yleislähetyksenä ensisijaisella kanavalla, mutta reittipiste voidaan lähettää myös tietyllä kanavalla tai suoraviestinä yhdelle radiolle.
+Waypoints always broadcast to the whole mesh on the primary channel. Unlike a message, a waypoint cannot be addressed to one channel or sent as a direct message.
 
 ### Reittipisteen ominaisuudet
 
@@ -83,22 +91,24 @@ Mikä tahansa reittipiste voidaan määrittää myös **aluerajaukseksi** eli il
 2. Kun alue on määritetty, ota käyttöön **Ilmoita saapuessa** ja/tai **Ilmoita poistuttaessa**.
 3. Voit halutessasi ottaa käyttöön **Vain suosikit** -asetuksen, jolloin ilmoituksia näytetään vain suosikkiradioistasi.
 
-Koska reittipisteet (ja niiden aluerajaukset) lähetetään koko mesh-verkkoon, oletusarvoisesti ilmoitukset saa vain niiden **luoja**. Jos joku jakaa kanssasi aluerajauksen sisältävän reittipisteen, sen tiedoissa voit ottaa käyttöön **Ilmoita aluerajan ylityksistä** -asetuksen, jolloin saat myös ilmoitukset alueelle saapumisesta ja sieltä poistumisesta.
+Koska reittipisteet (ja niiden aluerajaukset) lähetetään koko mesh-verkkoon, oletusarvoisesti ilmoitukset saa vain niiden **luoja**. If someone else shares a geofenced waypoint with you, its detail view offers a **Notify me of crossings** opt-in so you can also receive enter/exit alerts for it.
 
 ### Reittipisteiden hallinta
 
-- Napauta reittipistettä kartalla nähdäksesi sen tiedot ja koordinaatit
-- Muokkaa tai poista luomiasi reittipisteitä
-- **Lukittuja reittipisteitä** eivät muut mesh-verkon jäsenet voi muokata tai poistaa — vain niiden luoja voi muuttaa niitä
-- Lukitsemattomia reittipisteitä voi muokata kuka tahansa mesh-verkon jäsen
+- Tap a waypoint to see its name, description, and geofence radius. On **Google Play** builds the first tap opens the marker's info bubble — tap the bubble to open the waypoint itself
+- **Locked waypoints** can only be changed on the mesh by the node that locked them
+- Unlocked waypoints can be edited by any mesh member while connected to a radio — saving re-broadcasts the waypoint
+- Confirming a delete removes your own copy. To remove it from everyone else's map too, select **Delete for everyone** in the delete dialog; that box appears only for a waypoint you may change (unlocked, or locked by you) and only while you are connected
 
 ## Karttatasot
 
-Napauta kartan tasokuvaketta avataksesi **Hallitse karttatasoja**. Tuo omia peitekuvia `.kml`-, `.kmz`- tai GeoJSON-muodossa, mukaan lukien KMZ-maanpeitekuvat (georeferoidut kuvat, kuten viedyt topografiset tai ilmakuvat), jotka sijoitetaan kartalle niiden määritettyjen rajojen mukaisesti. Lisää sellainen valitsemalla tiedosto **Lisää taso** -toiminnolla, avaamalla tiedosto Meshtasticissa tai jakamalla se sovellukseen toisesta sovelluksesta. Tuodut karttatasot näkyvät luettelossa, jossa voit näyttää tai piilottaa ne sekä poistaa ne. Tämä toimii Google Play -versiossa, F-Droid-versiossa ja **Desktopissa**, joissa käytetään samaa karttatasojen tallennusta ja tiedostonvalitsinta.
+Napauta kartan tasokuvaketta avataksesi **Hallitse karttatasoja**. Tuo omia peitekuvia `.kml`-, `.kmz`- tai GeoJSON-muodossa, mukaan lukien KMZ-maanpeitekuvat (georeferoidut kuvat, kuten viedyt topografiset tai ilmakuvat), jotka sijoitetaan kartalle niiden määritettyjen rajojen mukaisesti. Lisää sellainen valitsemalla tiedosto **Lisää taso** -toiminnolla, avaamalla tiedosto Meshtasticissa tai jakamalla se sovellukseen toisesta sovelluksesta. **Add Network Layer** instead takes a name and an `http://` or `https://` URL pointing at a KML or GeoJSON file; that layer then carries its own refresh button in the sheet. On **Google Play** builds the toolbar's refresh button re-fetches every visible network layer at once.
+
+Tuodut karttatasot näkyvät luettelossa, jossa voit näyttää tai piilottaa ne sekä poistaa ne. Each layer — imported or built-in overlay — carries its own opacity slider while it is switched on, so an overlay can be faded back rather than only switched off. Tämä toimii Google Play -versiossa, F-Droid-versiossa ja **Desktopissa**, joissa käytetään samaa karttatasojen tallennusta ja tiedostonvalitsinta.
 
 ### Site Planner
 
-**Site Planner** arvioi lähettimen kuuluvuusalueen ja piirtää sen kartalle värikoodattuna peittoalueena. Avaa se kartan ohjaimista tai radion tiedoista **Arvioi peittoalue** -toiminnolla (näkyy vain radioille, joilla on tunnettu sijainti). Määritä lähettimen asetukset (sijainti, taajuus, lähetysteho, antennin vahvistus ja korkeus), vastaanottimen asetukset (herkkyys ja korkeus) sekä simuloinnin asetukset (enimmäisetäisyys, korkean tarkkuuden maastomalli ja väripaletti), ja käynnistä sitten arviointi. Kuten karttatasotkin, Site Planner toimii sekä Google Play- että F-Droid-versioissa, joissa valmis arvio piirretään kartalle peitekuvana. **Työpöydällä** näytetään sama käyttöliittymä, mutta suunnittelutyökalu avautuu selaimeen. Saat arvion kartalle käyttämällä suunnittelutyökalun **Vie → GeoJSON** -toimintoa ja lisäämällä ladatun tiedoston kohdassa **Hallitse karttatasoja**.
+**Site Planner** arvioi lähettimen kuuluvuusalueen ja piirtää sen kartalle värikoodattuna peittoalueena. Avaa se kartan ohjaimista tai radion tiedoista **Arvioi peittoalue** -toiminnolla (näkyy vain radioille, joilla on tunnettu sijainti). Määritä lähettimen asetukset (sijainti, taajuus, lähetysteho, antennin vahvistus ja korkeus), vastaanottimen asetukset (herkkyys ja korkeus) sekä simuloinnin asetukset (enimmäisetäisyys, korkean tarkkuuden maastomalli ja väripaletti), ja käynnistä sitten arviointi. Kuten karttatasotkin, Site Planner toimii sekä Google Play- että F-Droid-versioissa, joissa valmis arvio piirretään kartalle peitekuvana. On **Desktop** the same form is shown but the planner opens in your browser; to bring the estimate onto the map, click the transmitter pin in the browser, choose the planner's GeoJSON export, then add the downloaded file under **Manage Map Layers** with **Add Layer**. Use the GeoJSON export, not the KML one — the KML is a ground-overlay image this map cannot draw.
 
 ## Sijainnin jakaminen
 
@@ -106,30 +116,31 @@ Napauta kartan tasokuvaketta avataksesi **Hallitse karttatasoja**. Tuo omia peit
 
 Radiosi jakaa GPS-sijaintinsa seuraavilla tavoilla:
 
-- **Kiinteä väli** — sijainti lähetetään säännöllisin väliajoin
-- **Älykäs sijainti** — sijainti lähetetään, kun liike ylittää kynnyksen
-- **Manuaalinen** — sijainti jaetaan vain erikseen pyydettäessä
+- **Broadcast Interval** — share the position on a fixed timer
+- **Smart Position** — share only once you have moved far enough; **Smart Interval** sets the shortest gap between broadcasts and **Smart Distance** how far you must move
+- **Fixed Position** — publish a latitude, longitude, and altitude you enter by hand instead of the GPS reading
+- **GPS Mode (Physical Hardware)** — GPS enabled, disabled, or not present on this hardware; offered only while **Fixed Position** is off
 
-Määritä sijaintikäyttäytyminen kohdassa **Asetukset → Sijainti**.
+Configure position behavior in **Settings → Device configuration → Position**. The screen is only reachable while your radio is connected, and saving it reboots the radio. For the full field list, see [Settings — Radio & User](settings-radio-user).
 
 ### Tietosuoja
 
-> 🔒 **Yksityisyys:** sijaintitiedot lähetetään kaikille saman kanavan radioille. Jos et halua sijaintiasi jaettavan, poista GPS käytöstä asetuksista tai käytä kiinteää tai valesijaintia.
+> 🔒 **Yksityisyys:** sijaintitiedot lähetetään kaikille saman kanavan radioille. Jos et halua sijaintiasi jaettavan, poista GPS käytöstä asetuksista tai käytä kiinteää tai valesijaintia. To keep sharing a position without pinpointing yourself, edit the channel in **Settings → Channels**, turn **Precise location** off, and set the slider beneath it — the channel then publishes an approximate area, shown as ± a distance, instead of an exact point.
 
 ## Karttalähteet
 
 Jokaisessa versiossa kartan työkalurivillä on karttapohjan valitsin. **Google Play** -versioissa käytetään Googlen omia karttatyyppejä. **F-Droid**- ja **Työpöytä**-versioissa käytetään MapLibren vektorityylejä. Alempana karttapohjan valitsimessa kaikki tarjoavat samat rasterikarttapohjat:
 
-| Karttapohja                               | Viestit                                                                     |
-| ----------------------------------------- | --------------------------------------------------------------------------- |
-| Normaali / Satelliitti / Maasto / Hybridi | Vain Google Play – Googlen omat karttatyypit                                |
-| Liberty                                   | Oletus F-Droid- ja Desktop-versioissa. Vektorinen tiekartta |
-| Positron                                  | Vähäkontrastinen vektorikartta, jonka päällä radiomerkit erottuvat hyvin    |
-| Tumma                                     | Tummiin teemoihin sopiva vektorikartta                                      |
-| OpenStreetMap                             | Perinteiset rasterimuotoiset tiekarttaruudut                                |
-| OpenTopoMap                               | Rasterimuotoinen topografinen kartta                                        |
-| USGS Topo / USGS Imagery                  | Vain Yhdysvaltojen kattavuus                                                |
-| Esri Topo / Esri Imagery                  | Topografinen kartta ja satelliittikuvat                                     |
+| Karttapohja                               | Viestit                                                                                                            |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Normaali / Satelliitti / Maasto / Hybridi | Vain Google Play – Googlen omat karttatyypit                                                                       |
+| Liberty                                   | Oletus F-Droid- ja Desktop-versioissa. Vektorinen tiekartta                                        |
+| Positron                                  | F-Droid and Desktop only. Vähäkontrastinen vektorikartta, jonka päällä radiomerkit erottuvat hyvin |
+| Tumma                                     | F-Droid and Desktop only. Tummiin teemoihin sopiva vektorikartta                                   |
+| OpenStreetMap                             | Perinteiset rasterimuotoiset tiekarttaruudut                                                                       |
+| OpenTopoMap                               | Rasterimuotoinen topografinen kartta                                                                               |
+| USGS Topo / USGS Imagery                  | Vain Yhdysvaltojen kattavuus                                                                                       |
+| Esri Topo / Esri Imagery                  | Topografinen kartta ja satelliittikuvat                                                                            |
 
 Peitekuvat voidaan ottaa käyttöön minkä tahansa karttapohjan päällä karttatasovalikosta:
 
@@ -138,7 +149,9 @@ Peitekuvat voidaan ottaa käyttöön minkä tahansa karttapohjan päällä kartt
 
 ### Oman karttatiilipalvelun lisääminen
 
-Mikä tahansa XYZ-karttatiilipalvelu voidaan lisätä karttapohjaksi kaikkiin versioihin, myös työpöytiin. Avaa **Hallitse mukautettuja karttalähteitä** karttapohjan valitsimen alareunasta ja liitä URL-malli käyttäen merkintöjä `{z}`, `{x}` ja `{y}` sekä tarvittaessa `{s}`, jos palveluntarjoaja käyttää kiertäviä aliverkkotunnuksia. Esimerkiksi kansallinen karttapalvelu:
+Mikä tahansa XYZ-karttatiilipalvelu voidaan lisätä karttapohjaksi kaikkiin versioihin, myös työpöytiin. Open **Manage Custom
+Tile Sources** at the foot of the base map picker and paste a URL template using `{z}`, `{x}` and `{y}`
+— plus `{s}` if the provider uses rotating subdomains. Esimerkiksi kansallinen karttapalvelu:
 
 ```
 https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg
@@ -148,7 +161,10 @@ Karttatiilet tallennetaan välimuistiin levylle, joten kartan siirtäminen ei la
 
 **Androidissa** tällä samalla näkymällä voidaan tuoda myös paikallinen `.mbtiles`-arkisto täysin offline-käyttöä varten.
 
-Offline-alueiden lataaminen on käytettävissä vain **F-Droid**-versiossa: tallenna näkyvissä oleva alue karttatasovalikosta.
+Offline area downloads are **F-Droid only**. Select a vector base map first — Liberty, Positron, or Dark —
+since a download is defined against a vector style and **Start Download** stays disabled over a raster one.
+Frame the area you want on screen, then tap **Start Download** in the layers sheet: that creates a paused
+pack covering the current zoom plus two levels deeper. Press play on the pack's row to actually download it.
 **Google Play** -versiot tuovat sen sijaan valmiita MBTiles-tiedostoja, eikä **työpöytä** tue kumpaakaan toimintoa.
 
 ## Aiheeseen liittyvät aiheet

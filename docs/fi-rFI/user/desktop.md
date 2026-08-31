@@ -2,7 +2,7 @@
 title: Työpöytäsovellus
 parent: Käyttöopas
 nav_order: 14
-last_updated: 2026-08-29
+last_updated: 2026-08-30
 description: Asenna ja käytä Meshtastic-työpöytäsovellusta Linuxilla, macOS:llä ja Windowsilla — yhteydet, ominaisuuksien yhtenevyys ja pikanäppäimet.
 aliases:
   - työpöytä
@@ -20,7 +20,8 @@ Tällä sivulla kerrotaan Meshtastic Työpöytä -sovelluksen asentamisesta, rad
 
 ### Linux
 
-- Lataa `.deb`- tai `.AppImage`-paketti [julkaisusivulta](https://github.com/meshtastic/Meshtastic-Android/releases)
+- Download the `.deb`, `.rpm`, or `.AppImage` package from the [releases page](https://github.com/meshtastic/Meshtastic-Android/releases)
+- Or install from Flathub: `flatpak install flathub org.meshtastic.MeshtasticDesktop`
 - Tai rakenna lähdekoodista komennolla `./gradlew :desktopApp:run`
 
 ### macOS
@@ -30,7 +31,7 @@ Tällä sivulla kerrotaan Meshtastic Työpöytä -sovelluksen asentamisesta, rad
 
 ### Windows
 
-- Lataa `.msi`-asennusohjelma [julkaisusivulta](https://github.com/meshtastic/Meshtastic-Android/releases)
+- Download the `.msi` or `.exe` installer from the [releases page](https://github.com/meshtastic/Meshtastic-Android/releases)
 - Tai rakenna lähdekoodista
 
 ## Radioon yhdistäminen
@@ -57,20 +58,20 @@ Bluetooth Low Energy on tuettu Työpöydällä [Kable](https://github.com/JuulLa
 
 ## Ominaisuuksien yhtenevyys
 
-| Ominaisuus                                                  | Android | Työpöytä | Viestit                                                                                                                                                                                        |
-| ----------------------------------------------------------- | ------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Viestit                                                     | ✓       | ✓        | Täysi yhtenevyys                                                                                                                                                                               |
-| Radiolista                                                  | ✓       | ✓        | Täysi yhtenevyys                                                                                                                                                                               |
-| Kartta                                                      | ✓       | ✓        | Vuorovaikutteinen MapLibre-kartta, jossa on taustakartan ja karttatasojen valitsimet sekä mukautetut karttalähteet. Ei offline-latauksia eikä paikallisia `.mbtiles`-arkistoja |
-| Karttatasot (`.kml` / `.kmz` / GeoJSON)  | ✓       | ✓        | Sama karttatasojen hallinta kuin Androidissa. Tuodut tiedostot piirretään Työpöytä-kartalle                                                                                    |
-| Site Planner                                                | ✓       | ✓\*      | \*Avautuu selaimessa Työpöydällä, eikä arviota piirretä Työpöytä-kartalle                                                                                                                      |
-| Asetukset                                                   | ✓       | ✓        | Täysi yhtenevyys                                                                                                                                                                               |
-| Bluetooth (BLE)                          | ✓       | ✓        | Työpöydällä Kable-kirjaston kautta                                                                                                                                                             |
-| Laiteohjelmiston päivitys                                   | ✓       | ✓        | Sovelluksen USB-, BLE- ja Wi-Fi-päivitykset (ESP32) toimivat samalla tavalla kuin Androidissa                                                                               |
-| Ilmoitukset                                                 | ✓       | ✓        | Käyttöjärjestelmän natiivit ilmoitukset                                                                                                                                                        |
-| Widgetit                                                    | ✓       | ✗        | Vain Android                                                                                                                                                                                   |
-| Tekoälyavustaja (Chirpy)                 | ✓\*     | ✗        | Vain Google-version Android-laitteissa                                                                                                                                                         |
-| Sovellustoiminnot (järjestelmän tekoäly) | ✓†      | ✗        | Vain Google-version Android-laitteissa                                                                                                                                                         |
+| Ominaisuus                                                  | Android | Työpöytä | Viestit                                                                                                                                                                                               |
+| ----------------------------------------------------------- | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Viestit                                                     | ✓       | ✓        | Täysi yhtenevyys                                                                                                                                                                                      |
+| Radiolista                                                  | ✓       | ✓        | Täysi yhtenevyys                                                                                                                                                                                      |
+| Kartta                                                      | ✓       | ✓        | Vuorovaikutteinen MapLibre-kartta, jossa on taustakartan ja karttatasojen valitsimet sekä mukautetut karttalähteet. Ei offline-latauksia eikä paikallisia `.mbtiles`-arkistoja        |
+| Karttatasot (`.kml` / `.kmz` / GeoJSON)  | ✓       | ✓        | Sama karttatasojen hallinta kuin Androidissa. Tuodut tiedostot piirretään Työpöytä-kartalle                                                                                           |
+| Site Planner                                                | ✓       | ✓\*      | \*Avautuu selaimessa Työpöydällä, eikä arviota piirretä Työpöytä-kartalle                                                                                                                             |
+| Asetukset                                                   | ✓       | ✓        | Täysi yhtenevyys                                                                                                                                                                                      |
+| Bluetooth (BLE)                          | ✓       | ✓        | Työpöydällä Kable-kirjaston kautta                                                                                                                                                                    |
+| Laiteohjelmiston päivitys                                   | ✓       | ✓        | In-app USB, BLE, and Wi-Fi (ESP32) update work the same as Android. The USB maintenance flow — nRF52/RP2040 factory erase and bootloader upgrade — is Android-only |
+| Ilmoitukset                                                 | ✓       | ✓        | Käyttöjärjestelmän natiivit ilmoitukset                                                                                                                                                               |
+| Widgetit                                                    | ✓       | ✗        | Vain Android                                                                                                                                                                                          |
+| Tekoälyavustaja (Chirpy)                 | ✓\*     | ✗        | Vain Google-version Android-laitteissa                                                                                                                                                                |
+| Sovellustoiminnot (järjestelmän tekoäly) | ✓†      | ✗        | Vain Google-version Android-laitteissa                                                                                                                                                                |
 
 \*Chirpy AI vaatii Android 14+ -version Google-version Android-laitteissa, joissa on tuettu laitteisto.
 
@@ -97,13 +98,13 @@ Pikanäppäimissä käytetään macOS:ssä **⌘**-näppäintä (Command) ja Win
 ### Ikkuna ja järjestelmätarjotin
 
 - **Ikkunan koon muuttaminen** — responsiivinen asettelu mukautuu ikkunan kokoon
-- **Järjestelmätarjotin** — pienennä järjestelmätarjottimeen taustalla tapahtuvaa mesh-toimintaa varten
+- **System tray** — closing the window minimizes to the system tray for background mesh operation. On a desktop environment with no tray, there is nowhere to minimize to, so closing quits the app instead
 - **Valikko** — napsauta järjestelmätarjottimen kuvaketta hiiren oikealla näyttääksesi ikkunan tai sulkeaksesi sovelluksen
 - **Hiiritoiminnot** — hover-tilat ja tavallinen työpöydän navigointi
 
 ### Ilmoitusasetukset
 
-Työpöytä-sovelluksessa on omat asetukset näytettäville ilmoituksille — viestit, uudet radiot ja vähäisen akun varoitukset. Avaa nämä kohdasta **Asetukset → Ilmoitukset** sovelluksessa.
+The desktop app provides in-app toggles for controlling which notifications are shown. Find them in the **App Notifications** section of the Settings screen: **Direct message notifications**, **New node notifications**, and **Low battery notifications**.
 
 ## Sisäänrakennettu dokumentaatioselain
 
@@ -135,7 +136,13 @@ Vaatimukset:
 ## Tunnetut rajoitukset
 
 - Offline-kartta-alueiden lataukset ja paikalliset `.mbtiles`-arkistot eivät ole käytettävissä Työpöydällä.
-- `.kml`-, `.kmz`- ja GeoJSON-karttatasojen tuonti toimii — katso [Kartta ja reittipisteet](map-and-waypoints#map-layers). Site Planner avautuu selaimessa eikä sovelluksessa. Jos haluat tuoda peittoaluearvion kartalle, käytä Site Plannerin **Vie › GeoJSON** -toimintoa ja lisää tiedosto karttatasoksi. Myös mukautetut verkkokarttalähteet toimivat — katso [Kartta ja reittipisteet](map-and-waypoints#adding-your-own-tile-source)
+- `.kml`-, `.kmz`- ja GeoJSON-karttatasojen tuonti toimii — katso [Kartta ja reittipisteet](map-and-waypoints#map-layers). Site Planner opens in your browser
+  rather than in the app; to bring its coverage estimate onto the map, click the transmitter pin
+  in the browser and use the planner's GeoJSON export, then add the file as a layer — not the KML
+  export, which is a ground-overlay image this map cannot draw. Custom network tile sources work
+  too — see [Map & Waypoints](map-and-waypoints#adding-your-own-tile-source)
+- The USB maintenance flow — nRF52/RP2040 factory erase and bootloader upgrade — is Android-only. The
+  desktop app still shows the option, but it cannot complete there
 - Jotkin Android-kohtaiset ominaisuudet (widgetit, tietyt ilmoituskanavat) eivät ole käytettävissä
 - Suorituskyky voi vaihdella heikkotehoisella laitteistolla ajettaessa Compose Desktopia
 - BLE-paritus ei vielä tallenna laiteparia työpöydällä (paritus toimii ilman tallennusta)
@@ -143,4 +150,5 @@ Vaatimukset:
 ## Aiheeseen liittyvät aiheet
 
 - [Yhteydet](connections) — yhteystapojen yleiskatsaus
-- [Laiteohjelmistopäivitykset](firmware) — USB-, BLE- ja Wi-Fi-päivitykset toimivat samalla tavalla kuin Androidissa
+- [Firmware Updates](firmware) — in-app USB, BLE, and Wi-Fi update all work the same as on Android
+- [Map & Waypoints](map-and-waypoints) — base maps, layers, custom tile sources, and what the desktop map does not do

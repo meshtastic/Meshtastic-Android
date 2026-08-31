@@ -2,7 +2,7 @@
 title: Kohalik kärgvõrgu avastaja
 parent: Kasutusjuhend
 nav_order: 12
-last_updated: 2026-08-29
+last_updated: 2026-08-30
 description: Avasta oma kärgvõrku – kohalik kärgvõrgu avastaja skanner, traceroute'i teed, naabri-kaardid ja sõlmede avastamise tööriistad.
 aliases:
   - discovery
@@ -27,9 +27,9 @@ The app offers two complementary approaches:
 
 Kohalik kärgvõrdu avastaja on spetsiaalne skaneerimisrežiim, mis aitab leida oma asukoha jaoks parima LoRa modemi eelseadistuse ja näha, millised sõlmed on igal eelseadistusel aktiivsed. It cycles your connected radio through one or more presets you choose, dwells on each one — listens for a set time — to collect packets, then analyzes and ranks the results.
 
-Ava see menüüst **Seaded → Lisateave → Kohaliku võrgu tuvastamine**. Töölaual on sellel omaette kirje **Seaded → Kohaliku võrgu avastamine**.
+Connect your radio, then open **Settings → Advanced → Local Mesh Discovery**. On Android the **Advanced** section stays grayed out until a radio is connected and the app has finished reading its configuration, and every entry in it is disabled on a managed device. On desktop, Local Mesh Discovery has its own entry on the Settings screen, with no such gate.
 
-> ℹ️ **Note:** Discovery temporarily changes your radio's LoRa settings while it scans, then restores your original configuration when it finishes. Your radio must be connected to run a scan.
+> ℹ️ **Note:** Discovery temporarily changes your radio's LoRa settings while it scans, then restores your original configuration when it finishes.
 
 ### Skannimise seadistamine
 
@@ -39,9 +39,9 @@ Before starting, configure these controls:
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **LoRa preset picker** | Vali skannimiseks üks või mitu eelseadistust. Otsing peatub kordamööda iga valitud eelseadistuse juures, et kuulata liiklust.                                                                     |
 | **Kuulamisaeg**        | Time to listen on each preset. Vali 1, 5, 15, 30, 45, 60, 90, 120 või 180 minutit. Pikemad kuulamisajad koguvad rohkem pakette ja annavad selgema pildi, kuid võtavad kauem aega. |
-| **Keep screen awake**  | Valikuline lüliti, mis takistab ekraani pika skannimise ajal magamaminekut.                                                                                                                                       |
+| **Keep screen awake**  | Keeps the phone out of Android Doze mode, which would otherwise drop radio packets during a long scan. Recommended — a scan run with it off can under-count what the radio heard.                 |
 
-The **Start** button stays disabled — with an explanation of why — until the scan can run. Common reasons it's disabled:
+The **Start Scan** button stays disabled — with an explanation of why — until the scan can run. Common reasons it's disabled:
 
 - The radio is **not connected**.
 - Skannimiseks pole **ühtegi eelseadet** valitud.
@@ -51,16 +51,20 @@ The **Start** button stays disabled — with an explanation of why — until the
 
 Skanni ajal näitab Discovery selle praegust etappi:
 
-| Stage                                                 | What's happening                                                                                                |
-| ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| **Preparing**                                         | Praeguste sätete salvestamine ja skannimiseks valmistumine.                                     |
-| **Shifting to \<preset\>** | Switching the radio to the next preset to test.                                                 |
-| **Reconnecting**                                      | Re-establishing the connection after the preset change.                                         |
-| **Kuulamine**                                         | Kuulatakse praegust eelseadistust pakettide kogumiseks ja järgmise sammuni on oodata loendurit. |
-| **Analysis**                                          | Kogutud pakettide töötlemine ja eelseadete järjestamine.                                        |
-| **Restoring**                                         | Algsete LoRa seadete taastamine.                                                                |
+| Stage                                                                  | What's happening                                                                                                                                                                                                                    |
+| ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Preparing scan**                                                     | Praeguste sätete salvestamine ja skannimiseks valmistumine.                                                                                                                                                         |
+| **Shifting to \<preset\>**                  | Switching the radio to the next preset to test.                                                                                                                                                                     |
+| **Reconnecting on \<preset\>**              | Re-establishing the connection after the preset change.                                                                                                                                                             |
+| **Dwelling on \<preset\>**                  | Kuulatakse praegust eelseadistust pakettide kogumiseks ja järgmise sammuni on oodata loendurit.                                                                                                                     |
+| **Analyzing results**                                                  | Kogutud pakettide töötlemine ja eelseadete järjestamine.                                                                                                                                                            |
+| **Restoring home preset**                                              | Algsete LoRa seadete taastamine.                                                                                                                                                                                    |
+| **Cancelling scan**                                                    | You tapped **Stop Scan**; partial results are saved before the original preset is restored.                                                                                                                         |
+| **Scan failed: \<reason\>** | The scan could not continue — most often the radio did not come back within a minute of a preset change. The results collected so far are saved, and the original preset is restored automatically. |
 
 ![Kuulamis loendur näitab praeguse eelseadistuse järelejäänud aega](../../assets/screenshots/discovery_dwell_progress.png)
+
+If a scan is interrupted — the app is closed, or the radio goes away — the app restores your original preset the next time it reconnects to that radio, and tells you it has done so. Reconnect the same radio to let that happen; until you do, the radio stays on whichever preset the scan left it on.
 
 ### Reading the Results
 
@@ -90,10 +94,16 @@ Tulemustest saadaolevad lisafunktsioonid:
 
 Kärgvõrgu majakas võimaldab sõlmedel kutsuda teisi oma võrguga liituma. A beaconing node periodically broadcasts an invitation — optionally advertising a channel, region, and modem preset — that nearby nodes can hear even before they share a configuration.
 
-Konfigureeri see menüüs **Seaded → Mooduli konfiguratsioon → Kärgvõrgu majakas**:
+Configure it under **Settings → Module configuration → Mesh Beacon**. The entry appears only on radios running firmware 2.8.0 or newer. A read-only **Region** row at the top of the screen shows the region the beacon advertises: that region, and the preset, are always the ones the radio itself uses, so a beacon cannot invite anyone onto settings your radio is not running.
 
 - **Kuula majakaid** — võta vastu teiste sõlmede edastatud kutseid.
-- **Saatemajakas** – saada oma kutse kindla intervalliga koos valikulise sõnumi ja pakutava kanaliga.
+- **Broadcast a beacon** — periodically advertise this mesh to nearby nodes, with an optional **Beacon message** of up to 100 bytes, a **Broadcast interval** picked from fixed intervals between 1 hour and 72 hours, and an **Offered channel** chosen from your radio's own channels. The offered channel is required, and defaults to your primary channel.
+- **Broadcast targets** — optional extra destinations beyond the offered channel. **Add target** appends a row; each row picks a **Channel** and a **Transmit preset**, and **Remove target** deletes it. With no targets, the beacon goes out on the offered channel alone.
+
+Two conditions block beacon setup:
+
+- **The radio has no region set.** The screen shows nothing but _Set your radio's region before setting up a beacon._ Set the region on **Settings → LoRa** first.
+- **The radio uses custom LoRa settings.** A beacon advertises a modem preset for others to join, so a radio with **Use Preset** turned off has no standard preset to offer. In that state **Broadcast a beacon** can be turned off but not on, and the broadcast settings are read-only. Listening for beacons is unaffected.
 
 Received invitations appear as **Mesh invitations** cards on the Discovery screen. Igal kaardil kuvatakse saatja sõnum koos pakutava kanali, piirkonna, eelseadistuse ja signaali kvaliteedi ning järgmiste toimingutega:
 
@@ -102,6 +112,8 @@ Received invitations appear as **Mesh invitations** cards on the Discovery scree
 - **Dismiss** — ignore the invitation.
 
 Majakate poolt reklaamitud kanalid kuvatakse skannimise seadistuses ka **Majakakanalitena** – valige üks, et see skannimise sihtmärgina lisada.
+
+An invitation to a mesh your radio is already on is suppressed: no card, no notification, and no **Beacon channels** entry. A channel counts as one you already have only when both its name and its key match a channel on your radio — the same name with a different key is a different mesh, so that invitation still reaches you.
 
 ## Manual Exploration
 
@@ -114,31 +126,38 @@ Traceroute näitab täpset teed, mida sõnum sõlmest mis tahes teise kärgvõrg
 #### Traceroute'i käivitamine
 
 1. Mine valikuni **Sõlmed** ja puuduta sõlme, mida soovid jälgida.
-2. Sõlme üksikasjade ekraanil puuduta **Traceroute**. The app sends the request; results show each hop with signal quality.
+2. On the node detail screen, find **Traceroute** in the **Telemetry** section and tap its request button. Once a result arrives, a second button on the same row opens the traceroute log, where each hop is listed with its signal quality.
 
 #### Reading the Results
 
 Traceroute'i tulemus näeb välja selline:
 
-```
-You → Node A (SNR: 8.5, RSSI: -95) → Node B (SNR: 5.2, RSSI: -108) → Target
+```text
+Route traced toward destination:
+
+■ Your Node (YOUR)
+⇊ 8.5 dB
+■ Relay Node (RLAY)
+⇊ -8.75 dB
+■ Target Node (TGT1)
 ```
 
-Iga hüpe näitab vahendussõlme, mis sõnumi edastas. The SNR and RSSI values at each hop tell you about the link quality on that specific segment.
+Each `⇊` line between two nodes is one relay hop, and the SNR on that line is the quality of that segment alone. The app colors it green at or above −7 dB, yellow at or above −15 dB, and orange below that. A request that also gets a reply adds a second block under **Route traced back to us:**.
 
-| What to look for                                                                                         | What it means                                                               |
-| -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| Kõik hüpped näitavad head signaali-müra suhet (≥ −7 dB, roheline)                     | Healthy path — messages flow reliably                                       |
-| Üks hüpe näitab halba signaali-müra suhet (< −15 dB, punane) | Kehv ühendus – see releesegment on habras                                   |
-| Mitu hüppet (4+)                                                                      | Pikk tee – kaalu sõlme ümberpaigutamist selle lühendamiseks                 |
-| Different path on retry                                                                                  | Mesh is adapting — multiple routes exist (this is good!) |
+| What to look for                                                                     | What it means                                                               |
+| ------------------------------------------------------------------------------------ | --------------------------------------------------------------------------- |
+| Kõik hüpped näitavad head signaali-müra suhet (≥ −7 dB, roheline) | Healthy path — messages flow reliably                                       |
+| One hop shows a poor SNR (below −15 dB, orange)                   | Kehv ühendus – see releesegment on habras                                   |
+| Mitu hüppet (4+)                                                  | Pikk tee – kaalu sõlme ümberpaigutamist selle lühendamiseks                 |
+| Different path on retry                                                              | Mesh is adapting — multiple routes exist (this is good!) |
 
 > 💡 **Vihje:** Käivita traceroute'i mitu korda mõne minuti tagant. If the path changes, your mesh has redundant routes — a sign of a well-connected network.
 
 #### Veaotsing koos Traceroute
 
-- **"Marsruuti ei leitud"** — Sihtsõlm võib olla võrguühenduseta, leviulatusest väljas või teisel kanalil. Kontrolli, et mõlemad sõlmed jagaksid vähemalt ühte kanalit sama krüpteerimisvõtmega.
-- **Traceroute aegus** — Tee võib olla liiga pikk (ületab hüppete limiidi) või on vahendussõlm ülekoormatud. Proovi hüppe limiiti suurendada menüüs **Seaded → LoRa konfiguratsioon**.
+- **No Response** — The traceroute got nothing back. The target node may be offline, out of range, or on a different channel. Kontrolli, et mõlemad sõlmed jagaksid vähemalt ühte kanalit sama krüpteerimisvõtmega.
+- **Traceroute aegus** — Tee võib olla liiga pikk (ületab hüppete limiidi) või on vahendussõlm ülekoormatud. Try increasing the hop limit in **Settings → LoRa**.
+- **Cannot show traceroute map because the start or destination node has no position information** — The path was traced, but one end has never shared a position.
 - **Asümmeetrilised teed** – Jälgimismarsruut teelt A→B võib minna teist teed kui teelt B→A. This is normal — radio propagation is not always symmetric.
 
 ### Naabruse teave
@@ -147,19 +166,20 @@ Naabriinfo moodul võimaldab igal sõlmel levitada nimekirja sõlmedest, mida se
 
 #### Naabriinfo lubamine
 
-1. Mine menüüsse **Seaded → Mooduli konfiguratsioon → Naabriinfo**.
+1. Navigate to **Settings → Module configuration → Neighbor Info**.
 2. Luba moodul.
-3. Määra levintervall (vaikimisi: 900 sekundit / 15 minutit).
+3. Set **Update interval (seconds)**. The default is 21600 seconds (6 hours), and the firmware minimum is 14400 seconds (4 hours) — a smaller value is rejected and reset to the default.
+4. Turn on **Transmit over LoRa**. Without it, your neighbor list goes only to MQTT and to this app, never over the air. It is unavailable on a channel that still uses the default name and key, so set up your own channel first — see [Messages & Channels](messages-and-channels).
 
-Once enabled, your node periodically broadcasts its neighbor list. Teised sõlmed, millel on naabriinfo lubatud, teevad sama.
+Once enabled and transmitting over LoRa, your node periodically broadcasts its neighbor list. Teised sõlmed, millel on naabriinfo lubatud, teevad sama.
 
 #### Naabri andmete vaatamine
 
-- Ava suvalise sõlme detailvaade ja otsi üles jaotis **Naabrid**.
+- Open a node's detail screen and find **Neighbor Info** in the **Telemetry** section. The request button asks the node for its current neighbor list; once the app has received one, a second button on the same row opens the log of everything that node has reported. The row appears only on nodes that can answer a neighbor request, or that have already reported neighbors.
 - Iga naabri-kirje näitab otse kuuldud sõlme ja selle signaali kvaliteeti.
 - Kogu kärgvõrgu topoloogia mõistmiseks kombineerige mitme sõlme naaberandmeid.
 
-> ℹ️ **Note:** Neighbor Info increases airtime usage because every enabled node periodically broadcasts its neighbor list. Paljude sõlmedega tiheda liiklusega kärgvõrgu puhul kaaluge ummikute vältimiseks pikemaid levitamise intervalle (3600 sekundit või rohkem).
+> ℹ️ **Note:** Neighbor Info increases airtime usage because every enabled node periodically broadcasts its neighbor list. The firmware does not accept an interval shorter than 14400 seconds (4 hours) for this reason; on busy meshes, leave it at the 21600-second default or raise it further.
 
 ### Sõlmede loend avastusvahendina
 

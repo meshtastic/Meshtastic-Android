@@ -2,7 +2,7 @@
 title: 地圖與航點
 parent: 使用者指南
 nav_order: 6
-last_updated: 2026-08-29
+last_updated: 2026-08-30
 description: View node positions on the map, create and share waypoints, manage map layers and Site Planner, and control position sharing and privacy.
 aliases:
   - map
@@ -38,22 +38,30 @@ Each node that reports a position is shown as a **node chip** marker displaying 
 - **Center** — tap the location button to center on your position
 - 點選節點 — 點選節點標記以檢視詳細資訊
 
-浮動工具列提供快速存取羅盤、圖層切換、節點篩選、重新整理及位置追蹤等功能。 點選羅盤可重新對齊正北方向，或點選位置按鈕使地圖以您目前位置為中心。
+The floating toolbar provides quick access to the compass, the map type and layers pickers, node filters, Site Planner, and location tracking. 點選羅盤可重新對齊正北方向，或點選位置按鈕使地圖以您目前位置為中心。 On **Google Play** builds a refresh button joins them while a network layer is showing; on **F-Droid** and **Desktop**, refresh a network layer from its own row in the layers sheet instead.
 
-![Map screen with the floating toolbar open, showing compass, layers, and location controls](../../assets/screenshots/map_controls_overlay.png)
+![Map floating toolbar with compass, filter, refresh, and location controls](../../assets/screenshots/map_controls_overlay.png)
+
+### Filtering the Map
+
+Tap the filter button in the floating toolbar to open **Filter map**. **Display** controls what is drawn: **Only Favorites**, **Show Waypoints**, **Show Precision Circles**, and a slider that hides nodes not heard from recently. **Node roles** is a chip per device role, plus **All** to show every role; a selected chip means that role is shown. **Nodes** narrows the set further with **Hide offline nodes**, **Only show direct nodes**, **Exclude MQTT**, **Show ignored nodes**, and **Include unknown**.
+
+A dot on the filter button means at least one filter is hiding something — check it before concluding the mesh is quiet. Turning **Show Waypoints** off hides every waypoint, including your own. **Show ignored nodes** adds them to the map rather than showing only them — unlike the node list's **Only show ignored Nodes**.
 
 ## 航點
 
-Waypoints are shared points of interest, visible to everyone the waypoint is sent to.
+Waypoints are shared points of interest, visible to everyone on your mesh.
 
 ### 建立航點
+
+Your radio must be connected — the map ignores a touch & hold while it is not, because saving a waypoint means broadcasting it.
 
 1. Touch & hold the map at the desired location.
 2. 輸入名稱及選填的說明。
 3. 為航點選擇圖示或表情符號。
 4. 點選「傳送」以分享至 mesh 網路。
 
-Waypoints are addressed like messages: by default they broadcast on the primary channel, but a waypoint can also be sent on a specific channel or as a direct message to a single node.
+Waypoints always broadcast to the whole mesh on the primary channel. Unlike a message, a waypoint cannot be addressed to one channel or sent as a direct message.
 
 ### 航點屬性
 
@@ -83,22 +91,24 @@ Any waypoint can also define a **geofence** — an alert area — so you or othe
 2. Once a region is set, toggle **Notify on enter** and/or **Notify on exit**.
 3. Optionally enable **Favorites only** to limit alerts to your favorited nodes.
 
-Since waypoints (and their geofences) are broadcast to the whole mesh, only the **creator** is alerted by default. If someone else shares a geofenced waypoint with you, its detail view offers a **"Notify me of crossings"** opt-in so you can also receive enter/exit alerts for it.
+Since waypoints (and their geofences) are broadcast to the whole mesh, only the **creator** is alerted by default. If someone else shares a geofenced waypoint with you, its detail view offers a **Notify me of crossings** opt-in so you can also receive enter/exit alerts for it.
 
 ### 管理航點
 
-- 點選地圖上的航點，可檢視其詳細資訊與座標
-- 編輯或刪除您建立的航點
-- **Locked waypoints** cannot be modified or deleted by other mesh members — only the creator can change them
-- 未鎖定的航點可由任何 mesh 成員編輯
+- Tap a waypoint to see its name, description, and geofence radius. On **Google Play** builds the first tap opens the marker's info bubble — tap the bubble to open the waypoint itself
+- **Locked waypoints** can only be changed on the mesh by the node that locked them
+- Unlocked waypoints can be edited by any mesh member while connected to a radio — saving re-broadcasts the waypoint
+- Confirming a delete removes your own copy. To remove it from everyone else's map too, select **Delete for everyone** in the delete dialog; that box appears only for a waypoint you may change (unlocked, or locked by you) and only while you are connected
 
 ## 地圖圖層
 
-Tap the layers icon on the map to open **Manage Map Layers**. It imports your own overlays in `.kml`, `.kmz`, or GeoJSON format — including KMZ ground overlays (georeferenced images, such as exported topo or aerial tiles), which drape at their stated bounds. Add one by picking a file with **Add Layer**, opening a file with Meshtastic, or sharing it into the app from another app. Imported layers are listed with a toggle to show/hide each one and an option to remove it. This works on the Google Play build, the F-Droid build, and **Desktop**, which shares the same layer store and file picker.
+Tap the layers icon on the map to open **Manage Map Layers**. It imports your own overlays in `.kml`, `.kmz`, or GeoJSON format — including KMZ ground overlays (georeferenced images, such as exported topo or aerial tiles), which drape at their stated bounds. Add one by picking a file with **Add Layer**, opening a file with Meshtastic, or sharing it into the app from another app. **Add Network Layer** instead takes a name and an `http://` or `https://` URL pointing at a KML or GeoJSON file; that layer then carries its own refresh button in the sheet. On **Google Play** builds the toolbar's refresh button re-fetches every visible network layer at once.
+
+Imported layers are listed with a toggle to show/hide each one and an option to remove it. Each layer — imported or built-in overlay — carries its own opacity slider while it is switched on, so an overlay can be faded back rather than only switched off. This works on the Google Play build, the F-Droid build, and **Desktop**, which shares the same layer store and file picker.
 
 ### Site Planner
 
-**Site Planner** estimates RF coverage for a transmitter and draws it on the map as a color-coded overlay. Open it from a map control, or from a node's detail page via **Estimate coverage** (shown only for nodes with a known position). Configure the transmitter (location, frequency, TX power, antenna gain and height), the receiver (sensitivity, height), and simulation options (max range, high-resolution terrain, color palette), then run the estimate. Like map layers, Site Planner works on both the Google Play and F-Droid builds, where the finished estimate is drawn on the map as a coverage overlay. On **Desktop** the same form is shown but the planner opens in your browser; to bring the estimate onto the map, use the planner's **Export › GeoJSON** and add the downloaded file under **Manage Map Layers**.
+**Site Planner** estimates RF coverage for a transmitter and draws it on the map as a color-coded overlay. Open it from a map control, or from a node's detail page via **Estimate coverage** (shown only for nodes with a known position). Configure the transmitter (location, frequency, TX power, antenna gain and height), the receiver (sensitivity, height), and simulation options (max range, high-resolution terrain, color palette), then run the estimate. Like map layers, Site Planner works on both the Google Play and F-Droid builds, where the finished estimate is drawn on the map as a coverage overlay. On **Desktop** the same form is shown but the planner opens in your browser; to bring the estimate onto the map, click the transmitter pin in the browser, choose the planner's GeoJSON export, then add the downloaded file under **Manage Map Layers** with **Add Layer**. Use the GeoJSON export, not the KML one — the KML is a ground-overlay image this map cannot draw.
 
 ## 位置分享
 
@@ -106,15 +116,16 @@ Tap the layers icon on the map to open **Manage Map Layers**. It imports your ow
 
 您的節點依據以下方式分享 GPS 位置：
 
-- 固定間隔 — 依固定時間間隔廣播位置
-- 智慧位置 — 移動距離超過閾值時才廣播位置
-- 手動 — 僅在明確要求時才分享位置
+- **Broadcast Interval** — share the position on a fixed timer
+- **Smart Position** — share only once you have moved far enough; **Smart Interval** sets the shortest gap between broadcasts and **Smart Distance** how far you must move
+- **Fixed Position** — publish a latitude, longitude, and altitude you enter by hand instead of the GPS reading
+- **GPS Mode (Physical Hardware)** — GPS enabled, disabled, or not present on this hardware; offered only while **Fixed Position** is off
 
-請在「設定 → 位置」中設定位置行為。
+Configure position behavior in **Settings → Device configuration → Position**. The screen is only reachable while your radio is connected, and saving it reboots the radio. For the full field list, see [Settings — Radio & User](settings-radio-user).
 
 ### 隱私注意事項
 
-> 🔒 隱私：位置資料將廣播至您頻道上的所有節點。 若不想分享您的位置，請在設定中停用 GPS 定位，或使用固定／假位置。
+> 🔒 隱私：位置資料將廣播至您頻道上的所有節點。 若不想分享您的位置，請在設定中停用 GPS 定位，或使用固定／假位置。 To keep sharing a position without pinpointing yourself, edit the channel in **Settings → Channels**, turn **Precise location** off, and set the slider beneath it — the channel then publishes an approximate area, shown as ± a distance, instead of an exact point.
 
 ## 地圖來源
 
@@ -122,16 +133,16 @@ Every build offers a base map picker from the map toolbar. **Google Play** build
 map types; **F-Droid** and **Desktop** builds open on MapLibre's vector styles. Further down the base map
 picker, all three offer the same raster base maps:
 
-| Base map                              | 備註                                                                |
-| ------------------------------------- | ----------------------------------------------------------------- |
-| Normal / Satellite / Terrain / Hybrid | Google Play only — Google's own map types                         |
-| Liberty                               | Default on F-Droid and Desktop. Vector street map |
-| Positron                              | Low-contrast vector map; keeps node markers legible over it       |
-| 深色                                    | Vector map suited to dark themes                                  |
-| OpenStreetMap                         | Classic raster street tiles                                       |
-| OpenTopoMap                           | Raster topographic                                                |
-| USGS Topo / USGS Imagery              | US coverage only                                                  |
-| Esri Topo / Esri Imagery              | Topographic and satellite imagery                                 |
+| Base map                              | 備註                                                                                                    |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Normal / Satellite / Terrain / Hybrid | Google Play only — Google's own map types                                                             |
+| Liberty                               | Default on F-Droid and Desktop. Vector street map                                     |
+| Positron                              | F-Droid and Desktop only. Low-contrast vector map; keeps node markers legible over it |
+| 深色                                    | F-Droid and Desktop only. Vector map suited to dark themes                            |
+| OpenStreetMap                         | Classic raster street tiles                                                                           |
+| OpenTopoMap                           | Raster topographic                                                                                    |
+| USGS Topo / USGS Imagery              | US coverage only                                                                                      |
+| Esri Topo / Esri Imagery              | Topographic and satellite imagery                                                                     |
 
 Overlays can be toggled on top of any base map, from the layers sheet:
 
@@ -141,8 +152,8 @@ Overlays can be toggled on top of any base map, from the layers sheet:
 
 ### Adding your own tile source
 
-Any XYZ tile endpoint can be added as a base map, on every flavor and on desktop. Open **Manage custom
-tile sources** at the foot of the base map picker and paste a URL template using `{z}`, `{x}` and `{y}`
+Any XYZ tile endpoint can be added as a base map, on every flavor and on desktop. Open **Manage Custom
+Tile Sources** at the foot of the base map picker and paste a URL template using `{z}`, `{x}` and `{y}`
 — plus `{s}` if the provider uses rotating subdomains. A national mapping service, for example:
 
 ```
@@ -153,7 +164,10 @@ Tiles are cached on disk, so panning does not re-download what you were just loo
 
 On **Android**, the same screen also imports a local `.mbtiles` archive for fully offline use.
 
-Offline area downloads are **F-Droid only**: cache the visible region from the layers sheet.
+Offline area downloads are **F-Droid only**. Select a vector base map first — Liberty, Positron, or Dark —
+since a download is defined against a vector style and **Start Download** stays disabled over a raster one.
+Frame the area you want on screen, then tap **Start Download** in the layers sheet: that creates a paused
+pack covering the current zoom plus two levels deeper. Press play on the pack's row to actually download it.
 **Google Play** builds import pre-made MBTiles files instead, and **Desktop** has neither.
 
 ## 相關主題

@@ -2,7 +2,7 @@
 title: Виджет на главный экран
 parent: Руководство пользователя
 nav_order: 20
-last_updated: 2026-08-29
+last_updated: 2026-08-30
 description: Добавь виджет главного экрана Meshtastic, чтобы видеть местную статистику своего подключенного радио без открытия приложения.
 aliases:
   - widget
@@ -18,15 +18,17 @@ aliases:
 
 Виджет показывает текущую локальную статистику **подключённого радиоустройства**:
 
+- A **node chip** across the top, carrying the radio's short name in its own colors
 - **Батарея** — уровень заряда батареи радиоустройства или _Питание от сети_, когда работает от внешнего источника
 - **ChUtil** — использование канала (насколько занят канал LoRa, в процентах)
 - **AirUtil** — использование времени передачи (сколько рабочих циклов передаёт вашего радиоустройство)
 - **Трафик** — пакеты, переданные / полученные, и дубликаты
 - **Relays** — пересылаемые пакеты и отмены пересылки (показаны, когда радио действует как ретранслятор)
-- **Noise floor** — the measured background noise level
-- **Dropped** — packets the radio discarded
+- **Diagnostics** — a combined line carrying **Noise** (the background noise level in dBm), **Bad** (corrupt packets received), and **Dropped** (packets the radio discarded). Bad and Dropped appear only once they are above zero, so a quiet radio may show the noise reading alone
 - **Heap** — free versus total memory on the radio, drawn as a bar
 - **Nodes** — how many nodes are online, out of the total known
+- **Uptime** — how long the radio has been running since its last reboot, shown beside Nodes
+- **Updated** — the time the stats last refreshed, along the foot of the widget
 
 Нажми на виджет, чтобы открыть приложение, или используй его кнопку обновления для запроса свежей статистики.
 

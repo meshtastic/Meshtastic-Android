@@ -2,7 +2,7 @@
 title: Telemetria ja anturit
 parent: Käyttöopas
 nav_order: 9
-last_updated: 2026-08-29
+last_updated: 2026-08-30
 description: Anturitiedot verkossa — tuetut ympäristö-, ilmanlaatu- ja virta-anturit sekä määritys- ja katseluohjeet.
 aliases:
   - sensorit
@@ -19,13 +19,13 @@ Meshtastic-radiot voivat kerätä ja jakaa anturitietoja koko verkon laajuisesti
 
 Kaikki Meshtastic-radiot raportoivat peruslaitetelemetrian:
 
-| Metrijärjestelmä                               | Kuvaus                                             | Tyypillinen vaihteluväli                                           |
-| ---------------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------ |
-| Akun varaustaso                                | Varausprosentti                                    | 0–100%                                                             |
-| Jännite                                        | Akun jännite                                       | 3.0–4.2V (LiPo) |
-| Kanavan Käyttö                                 | Paikallisesti käytetyn käyttöasteen prosenttiosuus | 0–100%                                                             |
-| Lähetysajan käyttöaste (TX) | Tämän radion käyttämän lähetysajan prosenttiosuus  | 0–100%                                                             |
-| Käyttöaika                                     | Sekuntia viimeisestä käynnistyksestä               | Vaihtelee                                                          |
+| Metrijärjestelmä       | Kuvaus                                          | Tyypillinen vaihteluväli                                           |
+| ---------------------- | ----------------------------------------------- | ------------------------------------------------------------------ |
+| Akun varaustaso        | Varausprosentti                                 | 0–100%                                                             |
+| Jännite                | Akun jännite                                    | 3.0–4.2V (LiPo) |
+| Kanavan käyttöaste     | % of local airtime in use                       | 0–100%                                                             |
+| Lähetysajan käyttöaste | % of the last hour this node spent transmitting | 0–100%                                                             |
+| Käyttöaika             | Sekuntia viimeisestä käynnistyksestä            | Vaihtelee                                                          |
 
 ## Ympäristöanturit
 
@@ -66,6 +66,20 @@ Molemmat näkyvät tietokorteissa radion tietonäytössä muiden ympäristömitt
 | VEML7700 | Ympäristön valoisuus (lux) |
 | LTR390   | UV-indeksi                                    |
 
+### Weather and Other Readings
+
+| Metrijärjestelmä                      | Yksikkö              | Where it appears                                                                                                                                            |
+| ------------------------------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Wind speed                            | km/h or mph          | Card and chart. Sensors report meters per second; the app converts to match your unit setting, and the chart uses the same unit as the card |
+| Wind direction, gust, and lull        | degrees, km/h or mph | Listed with each reading on the Environment Metrics screen; not charted                                                                                     |
+| Rainfall, last hour and last 24 hours | mm or in             | Listed with each reading on the Environment Metrics screen; not charted                                                                                     |
+| Säteily                               | µR/h                 | Card and chart                                                                                                                                              |
+| Paino                                 | kg or lb             | Card only — load cells, such as a beehive scale                                                                                                             |
+| Etäisyys                              | mm or in             | Card only — water level, from a distance sensor                                                                                                             |
+| Dew point                             | °C or °F             | Card only — computed from temperature and humidity                                                                                                          |
+| 1-Wire temperature                    | °C or °F             | Card and chart, up to eight DS18B20-style probes                                                                                                            |
+| ADC voltage                           | V                    | Card and chart, up to eight raw analog channels                                                                                                             |
+
 ## Virranhallinnan arvot
 
 INA-sarjan virta-antureilla varustetut radiot voivat raportoida:
@@ -75,21 +89,22 @@ INA-sarjan virta-antureilla varustetut radiot voivat raportoida:
 | Jännite          | Kanavakohtainen jännitemittaus                |
 | Virta            | Kanavakohtainen virta (mA) |
 
-Enintään kolme anturikanavaa (ch1–ch3) voidaan raportoida, ja jokaiselle voidaan antaa oma nimi, kuten Aurinko tai Akku, radion tietonäytössä. Erillistä tehomittausta ei ole. Sovellus näyttää kaavioissa jännitteen ja virran, mutta ei laske niistä tehoa.
+The node detail screen shows read-only cards for channels 1 to 3. Use the chart button on the **Power Metrics** row to open the chart screen, which lists a chip for every channel that reported data — up to eight — and charts the one you select. Rename a channel there, in the label field under the chips, to something like Solar or Battery. Erillistä tehomittausta ei ole. Sovellus näyttää kaavioissa jännitteen ja virran, mutta ei laske niistä tehoa.
 
 Hyödyllinen aurinkolatauksen tai etäradioiden akun kunnon seurantaan.
 
 ## Telemetrian määrittäminen
 
-1. Siirry kohtaan **Asetukset → Moduuliasetukset → Telemetria**
+1. Navigate to **Settings → Module configuration → Telemetry**.
 2. Jokaisella mittausryhmällä on oma käyttöönottokytkin ja oma mittausväli:
 
-   - **Laitemittaukset** — akku, kanava ja lähetysajan käyttö
+   - **Device Metrics** — battery, voltage, uptime, ChUtil, and AirUtil. Its enable toggle, **Send Device Telemetry**, appears only on firmware 2.7.12 and later; on older firmware you can change the interval but not turn the group off
    - **Ympäristömittaukset** — lämpötila, kosteus, paine ja muut anturimittaukset
    - **Ilmanlaatumittaukset** — hiukkas- ja CO₂-mittaukset
    - **Virtamittaukset** — kanavakohtaiset jännite- ja virtamittaukset
 
-   Ympäristömittauksille on lisäksi kytkimet, joilla mittaukset voidaan näyttää radion omalla näytöllä sekä Fahrenheit-asteina.
+   Environment and Power each have an extra toggle to show their readings on the radio's own
+   screen, and Environment has one more to show its temperatures there in Fahrenheit.
 
 ### Mittausvälin valitseminen
 
@@ -115,12 +130,8 @@ Ilmanlaatutiedot voidaan näyttää tietokortteina radion tietonäytössä, esit
 ## Telemetrian tarkastelu
 
 1. Siirry kohtaan **Radiot** ja valitse radio.
-2. Telemetriaosiot näkyvät radion tietonäytössä:
-   - Laitemittarit (aina käytettävissä)
-   - Ympäristömittarit (jos antureita on saatavilla)
-   - Virtamittarit (jos INA-anturi on käytettävissä)
-   - Ilmanlaatumittarit (jos PM-/CO₂-anturi on käytettävissä)
-3. Historiakaaviot näyttävät mittaustietojen kehittymisen ajan kuluessa.
+2. The **Telemetry** section lists a row for every metric type — Device, Environment, Air Quality, Power, and the rest — whether or not this node has reported it. A row fills in with readings, and grows a chart button, once that node has actually sent that kind of telemetry. An empty row means nothing has arrived yet, not that the sensor is missing.
+3. Use the chart button on a row to open that metric's history, where you can pick a time frame and export the readings as CSV.
 
 ![Radion tietonäyttö, jossa telemetriakaavion toimintovalikko on avattuna](../../assets/screenshots/node-metrics-telemetric_actions.png)
 

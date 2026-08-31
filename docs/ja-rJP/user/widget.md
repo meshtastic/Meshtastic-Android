@@ -2,7 +2,7 @@
 title: ホーム画面ウィジェット
 parent: User Guide
 nav_order: 20
-last_updated: 2026-08-29
+last_updated: 2026-08-30
 description: Meshtastic のホーム画面ウィジェットを追加すると、アプリを開かずに、接続中の無線機のローカル統計をひと目で確認できます。
 aliases:
   - widget
@@ -18,15 +18,17 @@ Android では、Meshtastic はホーム画面の**ウィジェット**を提供
 
 ウィジェットは、**接続中の無線機**の現在のローカル統計を表示します：
 
+- A **node chip** across the top, carrying the radio's short name in its own colors
 - **Battery**：無線機のバッテリー残量。外部電源で動作している場合は _Powered_（給電中）
 - **ChUtil**：チャンネル利用率（LoRa チャンネルがどれだけ混雑しているかを割合で表示）
 - **AirUtil**：電波利用率（無線機がデューティサイクルのうちどれだけ送信しているか）
 - **Traffic**：送受信したパケットと、検出した重複
 - **Relays**：中継したパケットと、中継のキャンセル（無線機が中継しているときに表示）
-- **Noise floor** — the measured background noise level
-- **Dropped** — packets the radio discarded
+- **Diagnostics** — a combined line carrying **Noise** (the background noise level in dBm), **Bad** (corrupt packets received), and **Dropped** (packets the radio discarded). Bad and Dropped appear only once they are above zero, so a quiet radio may show the noise reading alone
 - **Heap** — free versus total memory on the radio, drawn as a bar
 - **Nodes** — how many nodes are online, out of the total known
+- **Uptime** — how long the radio has been running since its last reboot, shown beside Nodes
+- **Updated** — the time the stats last refreshed, along the foot of the widget
 
 ウィジェットをタップするとアプリが開きます。更新コントロールを使うと、最新の統計を要求できます。
 

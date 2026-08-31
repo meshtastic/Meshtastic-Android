@@ -2,7 +2,7 @@
 title: Соединения
 parent: Руководство пользователя
 nav_order: 2
-last_updated: 2026-08-29
+last_updated: 2026-08-30
 description: Подключи свой телефон или компьютер к устройству Meshtastic через Bluetooth, USB или TCP/IP.
 aliases:
   - bluetooth
@@ -21,13 +21,15 @@ Bluetooth Low Energy является наиболее распростране�
 
 ### Pairing a Radio
 
-1. Убедитесь, что устройство Meshtastic включено и находится в режиме сопряжения.
+1. Power on your radio. Most radios advertise over Bluetooth as soon as they boot — there is no pairing mode to enter. Radios with a color touchscreen ship with Bluetooth switched off, so turn it on from the radio's own on-screen menu first.
 2. Откройте приложение и перейдите на вкладку **Подключение**.
 3. Нажми **Сканировать Bluetooth-устройства** — рядом появятся радиостанции Meshtastic.
 4. Select your radio from the list.
-5. Примите запрос на соединение Bluetooth, если показано.
+5. Android asks you to pair. If your radio has a screen, it shows a six-digit PIN — type that into the Android dialog. If your radio has no screen, the PIN is `123456`.
 
 ![Сканирование устройств Bluetooth с обнаружением радиоустройств в списке](../../assets/screenshots/connections_bluetooth_scan.png)
+
+You can change the pairing method, or turn Bluetooth on for a radio that ships with it off, under **Settings → Device configuration → Bluetooth** — see [Settings — Radio & User](settings-radio-user). For more information, see [Bluetooth configuration](https://meshtastic.org/docs/configuration/radio/bluetooth) on meshtastic.org.
 
 Используйте селектор транспорта — ряд сегментированных кнопок под карточкой подключения — для переключения между транспортами Bluetooth, Network и USB (одновременно активен только один):
 
@@ -44,16 +46,16 @@ The screen names anything on the app's side that is blocking a scan, with the fi
 | **Bluetooth scanning also needs location services** | Android 11 and older only: the permission is held but the system location toggle is off.                                                   |
 | No card, empty list                                 | Nothing on this side is blocking the scan — the radio is out of range, off, or already connected elsewhere.                                                |
 
-Tapping **Scan** after you have declined the permission once explains what it is for before asking again, and lets you decline again without being cornered.
+The explanation lives in that card, not in the scan control: tapping **Scan for Bluetooth devices** after you have declined once asks Android again directly.
 
 ### Статус подключения
 
-| Иконка | Состояние       | Описание                                                                                   |
-| ------ | --------------- | ------------------------------------------------------------------------------------------ |
-| 🟢     | Подключено      | Подключение активно                                                                        |
-| 🟡     | Подключение     | Выполняется рукопожатие                                                                    |
-| 🔴     | Отключено       | No active connection; the app keeps trying to reconnect                                    |
-| ⚪      | Устройство спит | The radio is in light sleep — the app is waiting for it to wake and reconnect, not failing |
+| Иконка | Состояние       | Описание                                                                                                   |
+| ------ | --------------- | ---------------------------------------------------------------------------------------------------------- |
+| 🟢     | Подключено      | Подключение активно                                                                                        |
+| 🟡     | Подключение     | Выполняется рукопожатие                                                                                    |
+| 🔴     | Отключено       | No active connection. The app retries automatically, with a growing delay between attempts |
+| ⚪      | Устройство спит | The radio is in light sleep — the app is waiting for it to wake and reconnect, not failing                 |
 
 These are the four states the app models. "Device sleeping" is normal on power-saving configurations and needs no action.
 
@@ -67,9 +69,12 @@ When connecting, a status indicator shows the current connection state — tap *
 
 ### Устранение неполадок Bluetooth
 
-- **Устройство не найдено:** Выключи и снова включи Bluetooth, убедись, что включена служба определения местоположения.
+- **Radio not found:** Turn Bluetooth off and back on. On Android 11 and older, also check that system location services are switched on — those releases do not return scan results without them.
+- **Bluetooth scan couldn't start:** Try again, and toggle Bluetooth off and on if it repeats.
 - **Потеря связи:** Подойди ближе к ноде; проверь наличие помех.
+- **Pairing failed, or pairing did not complete:** Check that the **Nearby devices** permission is granted, then pair again.
 - **Сопряжение отклонено:** Забыть устройство в настройках Bluetooth на Android и повторить попытку.
+- **Could not establish a stable connection after repeated attempts:** The app stopped retrying after three failed handshakes — a radio that keeps failing here is usually crashing on reconnect. Power-cycle the radio, then tap it again on the **Connect** tab to start a fresh attempt.
 
 ## Последовательный USB
 
@@ -77,32 +82,31 @@ When connecting, a status indicator shows the current connection state — tap *
 
 ### Настройка
 
-1. Connect your radio to your phone with a USB cable.
+1. Connect your radio to your phone with a USB data cable. Charge-only cables carry no data lines, and a radio on one never appears in the list.
 2. The app prompts for USB permission — tap **Allow**.
 3. Соединение устанавливается автоматически.
 
 > ℹ️ **Note:** USB connections require OTG support on Android devices.
 
+### Troubleshooting USB
+
+- **USB permission denied:** Unplug the radio and plug it back in — Android asks again on reconnect.
+- **No radio in the list:** Check that the cable carries data rather than only power, and that the phone supports OTG.
+
 ## TCP/IP (Сеть)
 
-Some Meshtastic radios support Wi-Fi/Ethernet connectivity, allowing TCP-based connections over your local network. Get the radio onto your network first — using the radio's own Wi-Fi settings (via the firmware web interface or another connection) — then connect to it from the app.
-
-> ℹ️ **Note:** **Settings → Wi-Fi Provisioning for mPWRD-OS** is a separate, narrower tool. It provisions Wi-Fi
-> credentials over Bluetooth to **mPWRD-OS** devices only, using their own protocol — it does not
-> configure Wi-Fi on an ordinary Meshtastic radio. It scans over BLE, lists the networks the device
-> can see (including an option for a hidden SSID), takes the password, and reports success or
-> failure. Available on both Android and Desktop.
+Some Meshtastic radios support Wi-Fi/Ethernet connectivity, allowing TCP-based connections over your local network. Get the radio onto your network first. Connect to it over Bluetooth or USB, open **Settings → Device configuration → Network**, and under **Wi-Fi Options** turn on **Wi-Fi enabled** and enter the **SSID** and **Password**. The Network screen appears only for radios whose hardware supports Wi-Fi or Ethernet. Once the radio has an address, come back and connect to it over the network.
 
 ### Подключение к сети
 
 1. Убедись, что радио подключено к той же локальной сети, что и твой телефон/компьютер.
-2. На экране "Подключение" выберите **Network** в селекторе транспорта.
+2. On the **Connect** tab, select **Network** in the transport selector.
 3. Выбери радиоустройство одним из двух способов:
    - **Сканировать сетевые устройства** — включи эту опцию чтобы автоматически обнаруживать радиоустройства, которые объявляют о себе в локальной сети (mDNS / `_meshtastic._tcp`). Обнаруженные устройства появляются в списке; нажми на одно, чтобы подключиться.
    - **Добавить устройство вручную…** — введи IP-адрес радиостанции (или имя хоста) и порт (по умолчанию: `4403`).
 4. Previously-used network addresses are remembered under **Recent Network Devices** for quick reconnection (touch & hold to remove one).
 
-> 💡 **Совет:** Обнаружение сети использует mDNS, который работает только когда оба устройства находятся в одной подсети. На Android 17+ приложению нужно разрешение на локальную сеть для сканирования; если поиск ничего не находит, добавь устройство вручную по IP.
+Network discovery uses mDNS, which only works when both your phone and the radio are on the same subnet. If the phone is not on Wi-Fi at all, the app warns that a network scan may find nothing. On Android 17 and newer, the app needs the **Local network permission** to reach a radio on your own Wi-Fi at all — not only to discover it — so typing the address by hand does not work around a denied permission. Grant it from the card on the Network pane, or from the **Permissions** section of **Settings**. A radio on a public address, or one reached over a VPN, needs no permission.
 
 ### Когда использовать TCP
 
@@ -110,11 +114,31 @@ Some Meshtastic radios support Wi-Fi/Ethernet connectivity, allowing TCP-based c
 - Тестирование с использованием имитирования радиоприемника
 - Окружающая среда, где возникают помехи Bluetooth
 
+### Настройка Wi-Fi для mPWRD-OS
+
+**Settings → Wi-Fi Provisioning for mPWRD-OS** is a separate, narrower tool. It sends Wi-Fi credentials over Bluetooth to **mPWRD-OS** devices only, using their own protocol — it does not configure Wi-Fi on an ordinary Meshtastic radio. It is available on both Android and desktop.
+
+1. Open the screen and wait while the app finds the device over Bluetooth.
+2. Tap **Scan for Networks**, then pick a network from **Available Networks** — or turn on **Hidden network** and type the name into **Network Name (SSID)**.
+3. Enter the **Password** and tap **Apply**.
+
+If the scan reports **No networks found** or fails outright, move the phone closer to the device and scan again. If **Failed to apply Wi-Fi configuration** comes back, check the password and try again.
+
+## After Your First Connection
+
+Being connected is not the same as being able to transmit.
+
+A radio leaves the factory with no LoRa region set, and it does not transmit until you set one. When you connect such a radio, the **Connect** tab shows a **Set your region** card; tap it to open the LoRa screen and choose the region you are in.
+
+Once the region is set, the tab warns you if the radio is receive-only: a **Transmit is disabled** card, reading "This device can receive but will not send anything over LoRa." Tap it to open the same screen and turn **Transmit Enabled** back on. Only one of the two cards appears at a time — an unset region already stops the radio transmitting, so the app names that first and holds the transmit card back until you have set a region.
+
+For more information, see [Settings — Radio & User](settings-radio-user#lora-config).
+
 ## Поведение при повторном подключении
 
-The app reconnects to the last selected radio on startup. Вы можете переключать транспорт с экрана подключения в любое время.
+The app reconnects to the last selected radio on startup. You can switch transports from the **Connect** tab at any time.
 
-Чтобы отключиться, нажми кнопку отключения на экране подключения:
+To disconnect, tap the disconnect button on the **Connect** tab:
 
 ![Отключение от радиоприёмника](../../assets/screenshots/connections_disconnect.png)
 
@@ -131,6 +155,8 @@ The app reconnects to the last selected radio on startup. Вы можете пе
 ## Связанные темы
 
 - [Начало работы](onboarding) — настройка при первом запуске и разрешения
-- [Настройки — Радио и пользователь](settings-radio-user) — настройка Bluetooth и сети
+- [Settings — Radio & User](settings-radio-user) — Bluetooth, region, and network configuration
+- [Messages & Channels](messages-and-channels) — send your first message once the radio is connected
+- [Nodes](nodes) — see who else is on your mesh
 - [Десктопное приложение](desktop) — детали подключения, специфичные для настольных компьютеров
 - [Поддерживаемые устройства](https://meshtastic.org/docs/hardware/devices) — полный список совместимых радиоустройств на meshtastic.org

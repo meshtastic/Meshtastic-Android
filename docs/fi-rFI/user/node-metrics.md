@@ -2,7 +2,7 @@
 title: Radion mittarit
 parent: Käyttöopas
 nav_order: 5
-last_updated: 2026-08-29
+last_updated: 2026-08-30
 description: Telemetrianäkymät jokaiselle verkon radiolle — laitteen kunto, ympäristöanturit, ilmanlaatu, signaalin laatu, virta, reitinselvitys ja sijaintihistoria.
 aliases:
   - mittarit
@@ -19,11 +19,12 @@ Radion tietonäyttö tarjoaa kattavat telemetria- ja mittaritiedot jokaiselle ve
 
 1. Siirry kohtaan **Radiot**.
 2. Napauta radiota, jota haluat tarkastella.
-3. Valitse mittariluokka tietonäytön välilehdistä.
+3. Scroll to the **Telemetry** section and find the category you want — **Signal Quality**, **Device Metrics**, **Environment Metrics**, **Air-Quality Metrics**, **Power Metrics**, **Position**, and the rest.
+4. Tap the refresh button on a row to ask the node for a fresh reading. The chart button beside it opens that category's history, and appears once the node has reported that kind of telemetry.
 
 ![Radion tietonäyttö – paikallinen laite](../../assets/screenshots/nodes_detail_local.png)
 
-Sijainti-välilehti näyttää sijaintitiedot radioille, jotka jakavat GPS-sijaintinsa:
+The **Position** row expands to show location data for nodes that share GPS:
 
 ![Sijaintivälilehden sisältö](../../assets/screenshots/nodes_position.png)
 
@@ -33,17 +34,17 @@ Sijainti-välilehti näyttää sijaintitiedot radioille, jotka jakavat GPS-sijai
 
 Perustoimintatiedot, jotka jokainen radio raportoi:
 
-| Metrijärjestelmä | Kuvaus                                           |
-| ---------------- | ------------------------------------------------ |
-| Akun varaustaso  | Nykyinen akun varaustaso                         |
-| Jännite          | Akun jännitelukema                               |
-| Kanavan Käyttö   | Käytetyn lähetysajan käyttöasteen prosenttiosuus |
-| Lähetysaika      | Tämän radion käyttämä lähetysaika                |
-| Käyttöaika       | Aika viimeisestä uudelleenkäynnistyksestä        |
+| Metrijärjestelmä       | Kuvaus                                                   |
+| ---------------------- | -------------------------------------------------------- |
+| Akun varaustaso        | Nykyinen akun varaustaso                                 |
+| Jännite                | Akun jännitelukema                                       |
+| Kanavan käyttöaste     | Percentage of local airtime in use                       |
+| Lähetysajan käyttöaste | Percentage of the last hour this node spent transmitting |
+| Käyttöaika             | Aika viimeisestä uudelleenkäynnistyksestä                |
 
-Laitemittarit näytetään erillisinä kortteina, joissa trendikäyrät esittävät akun varaustason, jännitteen, kanavan käyttöasteen, käyttöasteen ja käyttöajan kehitystä ajan kuluessa.
+Device Metrics has no cards on the node detail screen. Use the chart button on its row to open the Device Metrics screen, where battery level, voltage, ChUtil, and AirUtil are plotted over time and every reading — uptime included — is listed with its timestamp underneath. Pick a time frame at the top of the screen, and use the save icon in the app bar to export the visible history as CSV.
 
-> 💡 **Vinkki:** Napauta mitä tahansa mittarikorttia laajentaaksesi sen täydelliseksi kaavioksi, jossa näkyvät historiatiedot. Nipistä lähentääksesi tai loitontaaksesi aika-akselia.
+> 💡 **Tip:** Where a category does show cards — Environment, Air Quality, and Power — touch & hold a card to copy its value to the clipboard. On a chart screen, pinch to zoom the time axis.
 
 ## Ympäristöarvot
 
@@ -100,7 +101,7 @@ Ilmanlaatu tai mittaripainike näkyy radion tietonäytössä **vain silloin, kun
 
 > 💡 **Vinkki:** Ilmanlaatumittarit edellyttävät yhteensopivaa ilmanlaatuanturia etäradiossa. Katso [Telemetria ja anturit](telemetry-and-sensors) saadaksesi lisätietoja tuetusta laitteistosta.
 
-## Signaalin voimakkuudet
+## Signaalin laatu
 
 Radiosignaalin laatutiedot:
 
@@ -124,7 +125,7 @@ Signaalin laatu arvioidaan **SNR**-arvon perusteella suhteessa käytössä oleva
 
 Katso [Signaalimittarin toiminta](signal-meter), jos haluat täydellisen selityksen.
 
-Yhdistetyn radiosi Local Stats -tiedot näytetään myös Signaalimittarit-näkymässä, jos ne ovat saatavilla. Nämä kerätyt tiedot sisältävät kohinatason, liikennelaskurit, välityslaskurit, verkossa olevien radioiden määrän sekä radion käyttöajan. Kohinatason kaaviossa käytetään katkoviivalla merkittyä viiteviivaa arvossa -85 dBm, jotta kuormittunut RF-ympäristö on helpompi tunnistaa.
+Yhdistetyn radion paikalliset tilastot näytetään myös Signaalin laatu -näkymässä silloin, kun ne ovat saatavilla. Nämä kerätyt tiedot sisältävät kohinatason, liikennelaskurit, välityslaskurit, verkossa olevien radioiden määrän sekä radion käyttöajan. Kohinatason kaaviossa käytetään katkoviivalla merkittyä viiteviivaa arvossa -85 dBm, jotta kuormittunut RF-ympäristö on helpompi tunnistaa.
 
 - **Pyydä** — pyydä yhdistettyä radiota lähettämään uusi Local Stats -telemetriaraportti
 - **Tyhjennä** — poista tämän radion Local Stats -lokit
@@ -139,23 +140,21 @@ Virranhallintatelemetria (edellyttää INA-anturia tai yhteensopivaa laitteistoa
 | Jännite          | Kanavakohtainen jännitelukema                 |
 | Virta            | Kanavakohtainen virrankulutus milliampeereina |
 
-Enintään kolme anturikanavaa (ch1–ch3) piirretään kaavioon, ja jokaiselle voi määrittää oman nimen. Sovellus ei laske niistä tehoa.
+The node detail screen shows cards for channels 1 to 3. Use the chart button on the **Power Metrics** row to open the chart screen, which lists a chip for every channel that reported data — up to eight — and charts the one you select. Use the label field under the chips to give a channel a name of your own, such as Solar or Battery. The app does not derive a wattage figure from voltage and current.
 
 ## Reitinselvitys
 
 Reitinselvitys näyttää viestin kulkeman reitin verkossa:
 
-1. Napauta radion tietonäytössä **Reitinselvitys**.
+1. From the node detail screen's **Telemetry** section, tap the refresh button on the **Traceroute** row. You cannot traceroute your own node, and the button accepts one request every 30 seconds.
 2. Sovellus lähettää reitinselvityspyynnön kohderadiolle.
-3. Tulokset näyttävät jokaisen hypyn SNR- ja RSSI-arvoineen.
+3. Results show each hop with its SNR.
 
 ### Reitinselvityksen tulosten lukeminen
 
-```
-Sinä → Radio A (SNR: 8.5) → Radio B (SNR: 5.2) → Kohde
-```
+A traceroute is a round trip, so each saved result carries a hop count in each direction — **Forward Hops** and **Return Hops** — and the **Round Trip** time in seconds. A result marked **Direct** reached the target with no relay in between. Tap a result to read the route traced toward the destination and the route traced back to you, with the SNR of every hop. On Android that view offers **View on map**, which draws the same path, as long as the start and destination nodes have both shared a position.
 
-Jokainen hyppy edustaa välitysradiota, joka välitti viestin eteenpäin.
+A result marked **No Response** means the target never answered. It may be out of range, asleep, or configured not to reply. Wait for the 30-second cooldown to clear and try again; if it keeps failing, send a direct message first to confirm the node is reachable at all.
 
 ## Sijainnin Loki
 
@@ -169,6 +168,14 @@ Historialliset sijaintitiedot radioille, jotka jakavat sijaintinsa:
 ## Naapuritieto
 
 Näyttää, mitkä radiot tietty radio voi kuulla suoraan, mikä auttaa ymmärtämään verkon topologiaa.
+
+## Isäntälaitteen mittausarvot
+
+Nodes that run Meshtastic on a Linux host, such as a Raspberry Pi, report the host's own health — free memory, free disk space, one-, five-, and fifteen-minute load averages, and how long the host has been up. The **Host Metrics** row is always listed; its chart button appears once a node has reported them.
+
+## Pax mittarit
+
+A node running the PAX counter module reports how many Wi-Fi and Bluetooth devices it saw nearby, as a crowd-size estimate, and charts the two counts alongside their total. The **PAX Metrics** row is always listed; its chart button appears once a node has reported them. The counts are of devices, not people.
 
 ## Aiheeseen liittyvät aiheet
 

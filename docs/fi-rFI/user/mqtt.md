@@ -2,7 +2,7 @@
 title: MQTT
 parent: Käyttöopas
 nav_order: 11
-last_updated: 2026-08-29
+last_updated: 2026-08-30
 description: Siltaa mesh-verkko internetiin — MQTT-välityspalvelimen käyttöönotto, salauskerrokset ja karttadatan välitys.
 aliases:
   - mqtt
@@ -35,26 +35,29 @@ Internet-yhteydellä varustettu yhdyskäytäväradio (WiFi tai Ethernet) julkais
 
 ### MQTT:n käyttöönotto
 
-1. Siirry kohtaan **Asetukset → Moduulin asetukset → MQTT**.
+1. Navigate to **Settings → Module configuration → MQTT**.
 2. Ota MQTT-moduuli käyttöön.
 3. Määritä välityspalvelimen yhteys:
 
-![MQTT-moduulin asetukset moduuli käytössä](../../assets/screenshots/settings_switch.png)
-
-| Asetus            | Kuvaus                                                                                                                                                                                                               | Oletus                                              |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
-| Palvelimen osoite | MQTT-välityspalvelimen osoite                                                                                                                                                                                        | mqtt.meshtastic.org |
-| Käyttäjänimi      | Välityspalvelimen tunnistautuminen                                                                                                                                                                                   | meshdev                                             |
-| Salasana          | Välityspalvelimen tunnistautuminen                                                                                                                                                                                   | large4cats                                          |
-| Juuriaihe         | Viestien perusaihe                                                                                                                                                                                                   | msh                                                 |
-| Salaus            | MQTT-viestisisällön salaus                                                                                                                                                                                           | Käytössä                                            |
-| JSON-tuloste      | Julkaise ja vastaanota myös `/2/json/`-aihetta. Merkitty protobuf-rakenteessa vanhentuneeksi, mutta tämä on edelleen ainoa asetus tähän toimintaan — ja sovelluksen oma välityspalvelin käyttää sitä | Ei käytössä                                         |
-| TLS               | Yhteyden suojaaminen välityspalvelimeen                                                                                                                                                                              | Ei käytössä                                         |
-| Karttaraportointi | Sijainnin julkaisu julkiselle kartalle                                                                                                                                                                               | Ei käytössä                                         |
+| Asetus                      | Kuvaus                                                                                                                                                                                                               | Oletus                                                                  |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| **Address**                 | MQTT-välityspalvelimen osoite                                                                                                                                                                                        | mqtt.meshtastic.org                     |
+| **Username**                | Välityspalvelimen tunnistautuminen                                                                                                                                                                                   | meshdev                                                                 |
+| **Password**                | Välityspalvelimen tunnistautuminen                                                                                                                                                                                   | large4cats                                                              |
+| **Root topic**              | Viestien perusaihe                                                                                                                                                                                                   | `msh`, which the radio rewrites to `msh/<REGION>` once you set a region |
+| **Encryption enabled**      | MQTT-viestisisällön salaus                                                                                                                                                                                           | Käytössä                                                                |
+| **JSON output enabled**     | Julkaise ja vastaanota myös `/2/json/`-aihetta. Merkitty protobuf-rakenteessa vanhentuneeksi, mutta tämä on edelleen ainoa asetus tähän toimintaan — ja sovelluksen oma välityspalvelin käyttää sitä | Ei käytössä                                                             |
+| **TLS enabled**             | Yhteyden suojaaminen välityspalvelimeen                                                                                                                                                                              | Ei käytössä                                                             |
+| **Map reporting**           | Sijainnin julkaisu julkiselle kartalle                                                                                                                                                                               | Ei käytössä                                                             |
+| **Proxy to client enabled** | Relay MQTT through the connected phone                                                                                                                                                                               | Ei käytössä                                                             |
 
 ### Yhteyden tila ja testaa yhteys
 
-MQTT-asetusten yläreunassa näkyy välityspalvelinyhteyden tila: **Yhdistetty**, **Yhdistetään**, **Yhdistetään uudelleen**, **Yhteys katkaistu** tai **Ei käytössä**.
+The top of the MQTT settings screen shows the status of the relay this phone runs —
+**Connected**, **Connecting**, **Reconnecting**, **Disconnected**, or **Inactive**. It reads
+**Inactive** whenever the phone is not relaying, which includes the normal case of a radio
+reaching the broker over its own Wi-Fi or Ethernet. The radio's own connection to the broker is
+not reported here.
 
 **Testaa yhteys** tarkistaa välityspalvelimen ennen asetusten tallentamista radioon ja erottaa eri virhetilanteet: palvelinnimen selvitys epäonnistui, TCP-yhteys hylättiin, TLS epäonnistui, yritys aikakatkaistiin tai välityspalvelin hylkäsi tunnistetietosi syyn kera.
 
@@ -68,7 +71,9 @@ MQTT-asetusten yläreunassa oleva **MQTT-välityspalvelin tällä puhelimella** 
 
 ### Oletus Meshtastic-välityspalvelin
 
-Yhteisö ylläpitää julkista välityspalvelinta osoitteessa `mqtt.meshtastic.org`. Tämä on tarkoitettu yleiseen käyttöön ja testaukseen. Yhteydet tähän käyttävät aina TLS:ää (portti 8883), vaikka TLS-kytkin olisi pois käytöstä. Muiden välityspalvelimien kohdalla TLS:ää käytetään vain, jos otat sen käyttöön (portti 8883 TLS:llä, 1883 ilman).
+Yhteisö ylläpitää julkista välityspalvelinta osoitteessa `mqtt.meshtastic.org`. Tämä on tarkoitettu yleiseen käyttöön ja testaukseen.
+
+When this phone relays MQTT for the radio, connections to that broker always use TLS on port 8883 even if **TLS enabled** is off — the app forces the switch on and grays it out. A radio that reaches the broker over its own Wi-Fi or Ethernet forces nothing: turn **TLS enabled** on yourself, or it connects in the clear on port 1883. For any other broker the toggle decides in both cases (port 8883 with TLS, 1883 without).
 
 > 🔒 **Tietosuoja:** Julkisen välityspalvelimen viestit ovat kaikkien tilaajien luettavissa. Käytä aina kanavasalausta yksityiseen viestintään.
 
@@ -84,11 +89,13 @@ Määritä radiosi osoittamaan omaan välityspalvelimeesi oikeilla tunnistetiedo
 
 ## Karttaraportointi
 
-Kun karttajako (Map Reporting) on käytössä, radiosi julkaisee sijaintinsa Meshtastic-yhteisökartalle:
+When **Map reporting** is on, your node periodically publishes a map report to the broker. The report goes out unencrypted, whatever keys your channels use, and carries your node id, long and short name, approximate location, hardware model, role, firmware version, LoRa region, modem preset, and primary channel name.
 
-- Näkyvissä osoitteessa [meshmap.net](https://meshmap.net) ja vastaavissa yhteisökarttapalveluissa
-- Jaetaan vain sijainti- ja laitetiedot
-- Poista käytöstä, jos et halua sijaintisi näkyvän julkisesti
+Turning it on opens a consent card. Turn on **I agree.** and choose a **Map reporting interval (seconds)** of one hour or more — the screen will not save until you do. A slider sets the position precision, and the app shows the resulting accuracy as a ± distance, so you can publish an approximate location rather than an exact one.
+
+Reports appear at [meshmap.net](https://meshmap.net) and similar community map services.
+
+> 🔒 **Privacy:** A map report is readable by anyone subscribed to the broker. Leave **Map reporting** off if you do not want your approximate location published.
 
 ## Lähetys vs vastaanotto
 
@@ -97,7 +104,7 @@ Kun karttajako (Map Reporting) on käytössä, radiosi julkaisee sijaintinsa Mes
 | **Lähetys**     | Viestit mesh-verkosta → MQTT-välityspalvelimeen  |
 | **Vastaanotto** | Viestit MQTT-välityspalvelimesta → mesh-verkkoon |
 
-Määritä kanavakohtaisesti, mitkä suunnat ovat käytössä viestiliikenteen ja lähetysajan käytön hallintaan.
+Uplink and downlink are per-channel settings, not MQTT module settings. Open **Settings → Channels**, tap the channel, and use **MQTT Uplink Enabled** and **MQTT Downlink Enabled**. Every channel you want bridged out needs uplink on, and every channel you want MQTT traffic injected into needs downlink on.
 
 ## Viestiformaatit
 
@@ -115,7 +122,7 @@ MQTT käyttää kahta viestisisällön muotoa:
 Kerrostetun salausmallin ymmärtäminen:
 
 1. **Kanavasalaus** tapahtuu meshissä _ennen_ MQTT:tä. Jos kanavallasi on PSK, MQTT-viestisisältö on jo salattu — välityspalvelin ja tilaajat näkevät vain salatun datan.
-2. **MQTT-salaus** (moduuliasetus) lisää ylimääräisen salauskerroksen matkalla välityspalvelimelle. Tämä suojaa metatietoja ja reititystietoja.
+2. **Encryption enabled** (the module setting) decides which copy of the packet the gateway publishes — it is not an extra layer. Leave it on and the broker receives the packet still encrypted with your channel key. Turn it off and the gateway publishes the decrypted packet, so anyone subscribed to the topic reads your messages in the clear. Turn it off only when you own the broker and want plain payloads for a dashboard.
 3. **TLS** salaa TCP-yhteyden itse välityspalvelimeen estäen verkkotason salakuuntelun.
 
 > 🔒 **Tietoturva:** Oletusjulkisella kanavalla on tunnettu avain. Oletuskanavan MQTT:n kautta lähetetyt viestit ovat käytännössä **salaamattomia** — kuka tahansa tilaaja voi purkaa ne. Käytä aina omaa PSK-avainta yksityiseen viestintään.
@@ -141,7 +148,9 @@ Kerrostetun salausmallin ymmärtäminen:
 
 - **Tarkista lähetys ja vastaanotto-asetukset** – jos vain lähetys on käytössä, viestit kulkevat meshistä MQTT:hen mutta eivät takaisin. Ota vastaanotto käyttöön vastaanottavassa yhdyskäytävän laitteessa.
 - **Kanava ei täsmää** – molempien gateway-laitteiden täytyy käyttää samaa kanavaa ja samaa PSK-avainta. Eroavaisuus tarkoittaa, että viestit on salattu eri avaimilla ja näyttävät roskalta.
-- **Aihe ei täsmää** – varmista, että molemmat yhdyskäytävät käyttävät samaa juuriaihetta (Root Topic). Oletus `msh` toimii julkisessa välityspalvelimessa.
+- **Topic mismatch** — both gateways must use exactly the same root topic. Setting a region rewrites a default root to `msh/<REGION>` (for example `msh/US`), so gateways in different regions do not meet until you give both the same explicit root.
+- **Ignore MQTT is on** — in a region with a duty-cycle limit, the radio turns on **Ignore MQTT** (LoRa config, **Advanced**) when you set the region, and then drops every packet that reached it via MQTT. Turn it off on the receiving nodes, not only on the gateway.
+- **Ok to MQTT is off** — on a public broker a gateway uplinks other nodes' packets only when the sending node has **Ok to MQTT** (LoRa config, **Advanced**) on. Your own traffic bridges either way; your neighbors' does not until they opt in.
 
 ## Aiheeseen liittyvät aiheet
 

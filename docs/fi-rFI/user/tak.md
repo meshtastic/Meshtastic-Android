@@ -2,7 +2,7 @@
 title: TAK-integraatio
 parent: Käyttöopas
 nav_order: 10
-last_updated: 2026-08-29
+last_updated: 2026-08-30
 description: ATAK:n ja WinTAK:n yhteentoimivuus — CoT-sijaintijako, TAK-roolit ja lisäosien käyttöönotto.
 aliases:
   - tak
@@ -27,13 +27,19 @@ TAK-moduuli mahdollistaa Meshtastic-radioille:
 ### Edellytykset
 
 - Asennettuna ATAK (Android Team Awareness Kit), iTAK tai WinTAK
-- Radiosi **rooliksi** (Laiteasetukset) on asetettu **TAK** tai **TAK Tracker** — tämä tuo TAK-moduulin näkyviin Moduuliasetuksiin
+- Your node's **Device Role** (Device configuration) set to **TAK** or **TAK Tracker** — this is what makes the
+  TAK module appear in Module configuration at all
+- Firmware 2.8.0 or newer on the radio. Earlier firmware accepts a TAK config write and never
+  stores it, so the app hides the TAK module entry below that version even when the role is set
+  correctly. See [Firmware Updates](firmware)
 
 > ⚠️ **Varoitus:** Vanha **Meshtastic ATAK Plugin** ei enää kuulu tähän kokonaisuuteen eikä toimi. Yhteentoimivuus toteutetaan sovelluksen sisäisen paikallisen AIDL-rajapinnan kautta, joka poistettiin sovelluksesta 2.8.0. Mesh-palvelu toimii nyt vain sovelluksen sisäisenä. Älä asenna sitä. Yhteentoimivuus toimii nykyisin sovelluksen oman paikallisen TAK-palvelimen sekä Mesh to CoT Converterin kautta, jotka kuvataan jäljempänä, yhdessä vakio-ATAKin, iTAKin ja WinTAKin kanssa.
 
 ### Asetukset
 
-Siirry kohtaan **Asetukset → Moduulin asetukset → TAK**. Moduulin omat asetukset ovat TAK-tunnuksesi — erillistä käyttöönottokytkintä ei ole, sillä Laiteasetusten **Rooli**-asetus ottaa TAKin käyttöön. Radiosi lähettää tämän tunnuksen, joka näkyy TAK-kartoilla.
+Navigate to **Settings → Module configuration → TAK**. The module's own settings are your TAK identity —
+there is no separate enable switch here, because the **Device Role** setting in Device configuration is what
+turns TAK on. Radiosi lähettää tämän tunnuksen, joka näkyy TAK-kartoilla.
 
 | Asetus        | Kuvaus                                                                                                                      |
 | ------------- | --------------------------------------------------------------------------------------------------------------------------- |
@@ -46,7 +52,9 @@ TAK-kutsutunnuksesi ei ole erillinen asetus — se muodostetaan automaattisesti 
 
 ### Paikallinen TAK-palvelin
 
-Sovellus voi myös käyttää **paikallista TAK-palvelinta**, jolloin samalla puhelimella oleva ATAK tai iTAK voi muodostaa siihen yhteyden suoraan ilman etä-TAK-palvelinta. Palvelin kuuntelee vain paikallisia yhteyksiä (127.0.0.1:8089) ja käyttää TLS:ää molemminpuolisella varmenteiden todentamisella. Avaa **Asetukset → Moduuliasetukset → TAK → TAK-palvelin**:
+Sovellus voi myös käyttää **paikallista TAK-palvelinta**, jolloin samalla puhelimella oleva ATAK tai iTAK voi muodostaa siihen yhteyden suoraan ilman etä-TAK-palvelinta. Palvelin kuuntelee vain paikallisia yhteyksiä (127.0.0.1:8089) ja käyttää TLS:ää molemminpuolisella varmenteiden todentamisella.
+
+Open **Settings → Advanced → TAK Server**. These are app settings stored on this phone, which is why they sit next to **Firmware Update** and **Debug Panel** rather than under the TAK module config — and why they need neither a TAK role nor firmware 2.8.0:
 
 ![Paikallisen TAK-palvelimen asetukset, joissa näkyvät käyttöönotto ja vientitoiminto](../../assets/screenshots/tak_server_enabled.png)
 
@@ -94,13 +102,13 @@ Kun asetukset on määritetty:
 
 ## Vianetsintä
 
-| Ongelma                                      | Syy                                                                                                                                   | Ratkaisu                                                                                                                                                                                                           |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Radio ei näy ATAK-kartalla                   | Väärä rooliasetus tai Mesh to CoT Converter ei ole käytössä                                                                           | Aseta radion **rooliksi** TAK tai TAK Tracker. Jos haluat myös tavallisten (ei-TAK-roolin) radioiden näkyvän, ota **Mesh to CoT Converter** käyttöön TAK-palvelimen asetuksista |
-| Sijaintipäivitykset ovat vanhentuneita       | GPS-signaali katkennut tai lähetysväli liian pitkä                                                                                    | Tarkista GPS-tila; lyhennä sijaintilähetyksen väliä kohdassa Sijainnin asetukset                                                                                                                                   |
-| ATAK näyttää tilan "Ei yhteyttä"             | Paikallinen TAK-palvelin ei ole käytössä tai ATAK on yhdistetty muualle                                                               | Varmista, että **Ota paikallinen TAK-palvelin käyttöön** on käytössä ja että ATAK muodostaa yhteyden osoitteeseen `127.0.0.1:8089` — tuo viety datapaketti uudelleen, jos et ole varma                             |
-| Muotoja, merkintöjä tai reittejä ei välitetä | Lähettävä radio käyttää vanhaa V1-protokollaa (laiteohjelmisto 2.7.x tai vanhempi) | Päivitä lähettävän radion laiteohjelmisto versioon 2.8.0 tai uudempaan, jotta V2-siirtomuoto on käytettävissä                                                                      |
-| CoT-data ei kulje                            | Kanava ei täsmää                                                                                                                      | Kaikkien TAK-laitteiden täytyy olla samalla kanavalla ja yhteensopivalla salauksella                                                                                                                               |
+| Ongelma                                      | Syy                                                                                                                                   | Ratkaisu                                                                                                                                                                                                               |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Radio ei näy ATAK-kartalla                   | Wrong Device Role setting, or Mesh to CoT Converter off                                                                               | Set the node's **Device Role** to TAK or TAK Tracker. For ordinary (non-TAK-role) nodes to appear, also enable **Mesh to CoT Converter** under **Settings → Advanced → TAK Server** |
+| Sijaintipäivitykset ovat vanhentuneita       | GPS-signaali katkennut tai lähetysväli liian pitkä                                                                                    | Tarkista GPS-tila; lyhennä sijaintilähetyksen väliä kohdassa Sijainnin asetukset                                                                                                                                       |
+| ATAK näyttää tilan "Ei yhteyttä"             | Paikallinen TAK-palvelin ei ole käytössä tai ATAK on yhdistetty muualle                                                               | Varmista, että **Ota paikallinen TAK-palvelin käyttöön** on käytössä ja että ATAK muodostaa yhteyden osoitteeseen `127.0.0.1:8089` — tuo viety datapaketti uudelleen, jos et ole varma                                 |
+| Muotoja, merkintöjä tai reittejä ei välitetä | Lähettävä radio käyttää vanhaa V1-protokollaa (laiteohjelmisto 2.7.x tai vanhempi) | Päivitä lähettävän radion laiteohjelmisto versioon 2.8.0 tai uudempaan, jotta V2-siirtomuoto on käytettävissä                                                                          |
+| CoT-data ei kulje                            | Kanava ei täsmää                                                                                                                      | Kaikkien TAK-laitteiden täytyy olla samalla kanavalla ja yhteensopivalla salauksella                                                                                                                                   |
 
 ## Tietoturvahuomiot
 

@@ -2,7 +2,7 @@
 title: Paikallisen mesh-verkon skannaus
 parent: Käyttöopas
 nav_order: 12
-last_updated: 2026-08-29
+last_updated: 2026-08-30
 description: Tutki mesh-verkkoasi — paikallinen verkon haku, reitinselvitykset, naapurikartat ja radion hakuun liittyvät työkalut.
 aliases:
   - haku
@@ -27,9 +27,9 @@ Sovellus tarjoaa kaksi toisiaan täydentävää lähestymistapaa:
 
 Paikallinen verkon haku on erillinen skannaustila, joka auttaa löytämään parhaan LoRa-modeemiesiasetuksen sijaintiisi ja näkemään, mitkä radiot ovat aktiivisia kullakin esiasetuksella. Käy yhdistetyn radiosi läpi yhdellä tai useammalla valitsemallasi esiasetuksella, viipyy jokaisella määritetyn ajan paketteja keräten ja analysoi lopuksi tulokset sekä asettaa ne paremmuusjärjestykseen.
 
-Avaa se kohdasta **Asetukset → Lisäasetukset → Paikallinen mesh-haku**. Työpöytäversiossa sille on oma kohta kohdassa **Asetukset → Paikallinen mesh-haku**.
+Connect your radio, then open **Settings → Advanced → Local Mesh Discovery**. On Android the **Advanced** section stays grayed out until a radio is connected and the app has finished reading its configuration, and every entry in it is disabled on a managed device. On desktop, Local Mesh Discovery has its own entry on the Settings screen, with no such gate.
 
-> ℹ️ **Huomautus:** Discovery muuttaa väliaikaisesti radiosi LoRa-asetuksia skannauksen ajaksi ja palauttaa alkuperäiset asetukset, kun skannaus on valmis. Radion on oltava yhdistettynä skannauksen suorittamiseksi.
+> ℹ️ **Huomautus:** Discovery muuttaa väliaikaisesti radiosi LoRa-asetuksia skannauksen ajaksi ja palauttaa alkuperäiset asetukset, kun skannaus on valmis.
 
 ### Skannauksen asetukset
 
@@ -39,9 +39,9 @@ Ennen aloittamista määritä nämä asetukset:
 | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **LoRa-esiasetuksen valitsin** | Valitse yksi tai useampi esiasetus skannattavaksi. Haku pysähtyy jokaisessa valitussa esiasetuksessa vuorollaan kuuntelemaan liikennettä.                                                                 |
 | **Kuunteluaika**               | Kunkin esiasetuksen kuunteluaika. Valitse 1, 5, 15, 30, 45, 60, 90, 120 tai 180 minuuttia. Pidempi kuunteluaika kerää enemmän paketteja ja antaa tarkemman kuvan, mutta kestää pidempään. |
-| **Pidä näyttö päällä**         | Valinnainen kytkin, joka estää näytön siirtymisen lepotilaan pitkän skannauksen aikana.                                                                                                                                   |
+| **Pidä näyttö päällä**         | Keeps the phone out of Android Doze mode, which would otherwise drop radio packets during a long scan. Recommended — a scan run with it off can under-count what the radio heard.                         |
 
-**Käynnistä**-painike ei ole käytettävissä ja näyttää syyn, kunnes skannaus voidaan suorittaa. Yleisiä syitä, miksi se on pois käytöstä:
+The **Start Scan** button stays disabled — with an explanation of why — until the scan can run. Yleisiä syitä, miksi se on pois käytöstä:
 
 - Radio **ei ole yhdistetty**.
 - **Esiasetuksia ei ole valittu** skannattavaksi.
@@ -51,16 +51,20 @@ Ennen aloittamista määritä nämä asetukset:
 
 Skannauksen aikana haku näyttää sen nykyisen vaiheen:
 
-| Tila                                                          | Mitä tapahtuu                                                                                                               |
-| ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| **Valmistelee**                                               | Tallennetaan nykyinen kokoonpano ja valmistaudutaan skannaukseen.                                           |
-| **Vaihdetaan kohteeseen <preset\>** | Vaihdetaan radio seuraavaan esiasetukseen testausta varten.                                                 |
-| **Yhdistetään uudelleen**                                     | Yhteys muodostetaan uudelleen esiasetuksen vaihdon jälkeen.                                                 |
-| **Kuuntelu**                                                  | Nykyisen esiasetuksen kuuntelu pakettien keräämiseksi, seuraavaan vaiheeseen siirtymisen laskuri käynnissä. |
-| **Analyysi**                                                  | Kerättyjen pakettien käsittely ja esiasetusten vertailu ja pisteytys.                                       |
-| **Palautetaan asetuksia**                                     | Palautetaan alkuperäinen LoRa-konfiguraatio takaisin.                                                       |
+| Tila                                                                   | Mitä tapahtuu                                                                                                                                                                                                                       |
+| ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Preparing scan**                                                     | Tallennetaan nykyinen kokoonpano ja valmistaudutaan skannaukseen.                                                                                                                                                   |
+| **Vaihdetaan kohteeseen <preset\>**          | Vaihdetaan radio seuraavaan esiasetukseen testausta varten.                                                                                                                                                         |
+| **Reconnecting on \<preset\>**              | Yhteys muodostetaan uudelleen esiasetuksen vaihdon jälkeen.                                                                                                                                                         |
+| **Dwelling on \<preset\>**                  | Nykyisen esiasetuksen kuuntelu pakettien keräämiseksi, seuraavaan vaiheeseen siirtymisen laskuri käynnissä.                                                                                                         |
+| **Analyzing results**                                                  | Kerättyjen pakettien käsittely ja esiasetusten vertailu ja pisteytys.                                                                                                                                               |
+| **Restoring home preset**                                              | Palautetaan alkuperäinen LoRa-konfiguraatio takaisin.                                                                                                                                                               |
+| **Cancelling scan**                                                    | You tapped **Stop Scan**; partial results are saved before the original preset is restored.                                                                                                                         |
+| **Scan failed: \<reason\>** | The scan could not continue — most often the radio did not come back within a minute of a preset change. The results collected so far are saved, and the original preset is restored automatically. |
 
 ![Kuuntelun laskuri näyttää jäljellä olevan ajan nykyisessä esiasetuksessa](../../assets/screenshots/discovery_dwell_progress.png)
+
+If a scan is interrupted — the app is closed, or the radio goes away — the app restores your original preset the next time it reconnects to that radio, and tells you it has done so. Reconnect the same radio to let that happen; until you do, the radio stays on whichever preset the scan left it on.
 
 ### Tulosten lukeminen
 
@@ -90,10 +94,16 @@ Tuloksista saatavilla olevat lisätoiminnot:
 
 Mesh Beacon antaa radioille mahdollisuuden kutsua muita liittymään mesh-verkkoon. Majakkatilassa oleva radio lähettää säännöllisesti kutsun, jossa voidaan haluttaessa ilmoittaa kanava, alue ja modeemiesiasetus — lähellä olevat radiot voivat havaita sen jo ennen asetusten jakamista.
 
-Määritä se kohdassa **Asetukset → Moduuliasetukset → Mesh Beacon**:
+Configure it under **Settings → Module configuration → Mesh Beacon**. The entry appears only on radios running firmware 2.8.0 or newer. A read-only **Region** row at the top of the screen shows the region the beacon advertises: that region, and the preset, are always the ones the radio itself uses, so a beacon cannot invite anyone onto settings your radio is not running.
 
 - **Kuuntele majakoita** – vastaanota muiden radioiden lähettämiä liittymiskutsuja.
-- **Lähetä majakka** – lähetä oma liittymiskutsusi määritetyin väliajoin. Voit liittää mukaan viestin ja tarjotun kanavan.
+- **Broadcast a beacon** — periodically advertise this mesh to nearby nodes, with an optional **Beacon message** of up to 100 bytes, a **Broadcast interval** picked from fixed intervals between 1 hour and 72 hours, and an **Offered channel** chosen from your radio's own channels. The offered channel is required, and defaults to your primary channel.
+- **Broadcast targets** — optional extra destinations beyond the offered channel. **Add target** appends a row; each row picks a **Channel** and a **Transmit preset**, and **Remove target** deletes it. With no targets, the beacon goes out on the offered channel alone.
+
+Two conditions block beacon setup:
+
+- **The radio has no region set.** The screen shows nothing but _Set your radio's region before setting up a beacon._ Set the region on **Settings → LoRa** first.
+- **The radio uses custom LoRa settings.** A beacon advertises a modem preset for others to join, so a radio with **Use Preset** turned off has no standard preset to offer. In that state **Broadcast a beacon** can be turned off but not on, and the broadcast settings are read-only. Listening for beacons is unaffected.
 
 Vastaanotetut kutsut näkyvät **Mesh-kutsut** -korteissa haku-näytössä. Jokainen kortti näyttää lähettäjän viestin sekä tarjotun kanavan, alueen, esiasetuksen ja signaalin laadun. Käytettävissä ovat seuraavat toiminnot:
 
@@ -102,6 +112,8 @@ Vastaanotetut kutsut näkyvät **Mesh-kutsut** -korteissa haku-näytössä. Joka
 - **Hylkää** – ohita kutsu.
 
 Majakoiden ilmoittamat kanavat näkyvät myös Haku-toiminnon asetuksissa kohdassa **Majakkakanavat**. Valitse kanava lisätäksesi sen hakukohteeksi.
+
+An invitation to a mesh your radio is already on is suppressed: no card, no notification, and no **Beacon channels** entry. A channel counts as one you already have only when both its name and its key match a channel on your radio — the same name with a different key is a different mesh, so that invitation still reaches you.
 
 ## Manuaalinen haku
 
@@ -114,31 +126,38 @@ Reitinselvitys näyttää tarkan polun, jota kautta viesti kulkee omalta radiolt
 #### Reitinselvityksen suorittaminen
 
 1. Siirry kohtaan **Radiot** ja napauta radiota, jota haluat jäljittää.
-2. Radion tietonäkymässä napauta **Reitinselvitys**. Sovellus lähettää pyynnön, ja tulokset näyttävät jokaisen hypyn signaalin laadun.
+2. On the node detail screen, find **Traceroute** in the **Telemetry** section and tap its request button. Once a result arrives, a second button on the same row opens the traceroute log, where each hop is listed with its signal quality.
 
 #### Tulosten lukeminen
 
 Reitinselvityksen tulos näyttää tältä:
 
-```
-Sinä → Radio A (SNR: 8.5, RSSI: -95) → Radio B (SNR: 5.2, RSSI: -108) → Kohde
+```text
+Route traced toward destination:
+
+■ Your Node (YOUR)
+⇊ 8.5 dB
+■ Relay Node (RLAY)
+⇊ -8.75 dB
+■ Target Node (TGT1)
 ```
 
-Jokainen hyppy on välittäjä-radio, joka lähetti viestin eteenpäin. Jokaisen hypyn SNR- ja RSSI-arvot kertovat kyseisen yhteysvälin laadusta.
+Each `⇊` line between two nodes is one relay hop, and the SNR on that line is the quality of that segment alone. The app colors it green at or above −7 dB, yellow at or above −15 dB, and orange below that. A request that also gets a reply adds a second block under **Route traced back to us:**.
 
-| Mitä kannattaa tarkkailla                                                                                        | Mitä se tarkoittaa                                                               |
-| ---------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| Kaikki hypyt näyttävät hyvän SNR:n (≥ −7 dB, vihreä)                          | Hyvä reitti — viestit kulkevat luotettavasti                                     |
-| Yksi hyppy näyttää huonon SNR:n (< −15 dB, punainen) | Heikko yhteys — tämä välityssegmentti on haavoittuva                             |
-| Useita hyppyjä (4+)                                                                           | Pitkä reitti — harkitse radion siirtämistä sen lyhentämiseksi                    |
-| Eri reitti uudelleenyrityksellä                                                                                  | Verkko mukautuu — useita reittejä on olemassa (tämä on hyvä!) |
+| Mitä kannattaa tarkkailla                                                               | Mitä se tarkoittaa                                                               |
+| --------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Kaikki hypyt näyttävät hyvän SNR:n (≥ −7 dB, vihreä) | Hyvä reitti — viestit kulkevat luotettavasti                                     |
+| One hop shows a poor SNR (below −15 dB, orange)                      | Heikko yhteys — tämä välityssegmentti on haavoittuva                             |
+| Useita hyppyjä (4+)                                                  | Pitkä reitti — harkitse radion siirtämistä sen lyhentämiseksi                    |
+| Eri reitti uudelleenyrityksellä                                                         | Verkko mukautuu — useita reittejä on olemassa (tämä on hyvä!) |
 
 > Vinkki: Aja reitinselvitys useita kertoja muutaman minuutin aikana. Jos reitti muuttuu, verkossasi on varareittejä — merkki hyvin kytketystä verkosta.
 
 #### Reitinselvityksen vianmääritys
 
-- **Reittiä ei löytynyt** — kohderadio voi olla kiinni, kantaman ulkopuolella tai eri kanavalla. Varmista, että molemmat radiot jakavat vähintään yhden kanavan samalla salausavaimella.
-- **Reitinselvitys aikakatkaistu** — reitti voi olla liian pitkä (ylittää hyppymäärärajan) tai välittäjä-radio on ruuhkautunut. Kokeile nostaa hyppymäärärajaa kohdassa **Asetukset → LoRa-asetukset**.
+- **No Response** — The traceroute got nothing back. The target node may be offline, out of range, or on a different channel. Varmista, että molemmat radiot jakavat vähintään yhden kanavan samalla salausavaimella.
+- **Reitinselvitys aikakatkaistu** — reitti voi olla liian pitkä (ylittää hyppymäärärajan) tai välittäjä-radio on ruuhkautunut. Try increasing the hop limit in **Settings → LoRa**.
+- **Cannot show traceroute map because the start or destination node has no position information** — The path was traced, but one end has never shared a position.
 - **Epäsymmetriset reitit** — reitinselvitys A→B voi kulkea eri reittiä kuin B→A. Tämä on normaalia — radiosignaalin eteneminen ei aina ole symmetristä.
 
 ### Naapuritieto
@@ -147,19 +166,20 @@ Naapuritieto-moduuli antaa jokaisen radion lähettää listan radioista, jotka s
 
 #### Naapuritiedon käyttöönotto
 
-1. Siirry kohtaan **Asetukset → Moduuliasetukset → Naapuritieto**.
+1. Navigate to **Settings → Module configuration → Neighbor Info**.
 2. Ota moduuli käyttöön.
-3. Aseta lähetysväli (oletus: 900 sekuntia / 15 minuuttia).
+3. Set **Update interval (seconds)**. The default is 21600 seconds (6 hours), and the firmware minimum is 14400 seconds (4 hours) — a smaller value is rejected and reset to the default.
+4. Turn on **Transmit over LoRa**. Without it, your neighbor list goes only to MQTT and to this app, never over the air. It is unavailable on a channel that still uses the default name and key, so set up your own channel first — see [Messages & Channels](messages-and-channels).
 
-Kun toiminto on käytössä, radiosi lähettää säännöllisesti naapuriluettelonsa. Myös muut radiot, joissa naapuritieto on käytössä, toimivat samalla tavalla.
+Once enabled and transmitting over LoRa, your node periodically broadcasts its neighbor list. Myös muut radiot, joissa naapuritieto on käytössä, toimivat samalla tavalla.
 
 #### Naapuritiedon katselu
 
-- Avaa minkä tahansa radion tietonäkymä ja etsi **Naapurit**-osio.
+- Open a node's detail screen and find **Neighbor Info** in the **Telemetry** section. The request button asks the node for its current neighbor list; once the app has received one, a second button on the same row opens the log of everything that node has reported. The row appears only on nodes that can answer a neighbor request, or that have already reported neighbors.
 - Jokainen naapurimerkintä näyttää radion, joka on kuultu suoraan, sekä sen signaalilaadun.
 - Yhdistä naapuritiedot useista radioista ymmärtääksesi koko mesh-verkon topologian.
 
-> ℹ️ **Huomautus:** Naapuritieto lisää lähetysaikaa, koska jokainen toiminnon ottanut radio lähettää säännöllisesti naapuriluettelonsa. Vilkkaissa verkoissa, joissa on paljon radioita, harkitse pidempiä lähetysvälejä (3600 sekuntia tai enemmän) ruuhkautumisen välttämiseksi.
+> ℹ️ **Huomautus:** Naapuritieto lisää lähetysaikaa, koska jokainen toiminnon ottanut radio lähettää säännöllisesti naapuriluettelonsa. The firmware does not accept an interval shorter than 14400 seconds (4 hours) for this reason; on busy meshes, leave it at the 21600-second default or raise it further.
 
 ### Radiolista hakutyökaluna
 

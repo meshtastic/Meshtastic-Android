@@ -2,7 +2,7 @@
 title: Viestit ja kanavat
 parent: Käyttöopas
 nav_order: 3
-last_updated: 2026-08-29
+last_updated: 2026-08-30
 description: Lähetä ja vastaanota viestejä, hallitse kanavia, määritä salaus, hae keskusteluja sekä käytä pikachatia, reaktioita ja viestitoimintoja.
 aliases:
   - kanavat
@@ -25,29 +25,38 @@ Jokaisessa Meshtastic-radiossa on oletuksena **LongFast**-kanava. Se on salattu 
 
 ### Kanavan turvallisuus
 
-Kanavat tukevat useita salaustasoja:
+Each channel carries a lock icon that shows how well it is protected. Tap the icon to see the same explanation inside the app.
 
-| Ikoni | Suojaustaso                               | Kuvaus                                                                                                                                                            |
-| ----- | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 🔒    | PSK (256-bittinen AES) | Täysin salattu vahvalla esijaetulla avaimella. Vain samaa avainta käyttävät radiot voivat lukea viestejä.                         |
-| 🔐    | PSK (128-bittinen AES) | Salattu lyhyemmällä avaimella. Useimmille käyttötapauksille turvallinen, mutta 256-bittinen on suositeltu arkaluontoiseen dataan. |
-| 🔓    | Oletus / avoin                            | Käyttää tunnettua oletusavainta. **Kaikki Meshtastic-radiot** samalla esiasetuksella voivat lukea nämä viestit.                   |
-| ⚠️    | Turvaton + sijainti                       | Avoin kanava, joka lähettää myös GPS-sijaintisi. Käytä varoen julkisissa verkoissa.                                               |
+| Ikoni                              | Mitä se tarkoittaa                                                                                                                                    |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Green closed lock                  | The channel is securely encrypted, with either a 128-bit or a 256-bit AES key.                                                        |
+| Yellow open lock                   | The channel is not securely encrypted — it uses no key at all, or a well-known one-byte key — and it does not carry precise location. |
+| Red open lock                      | Not securely encrypted, and the channel carries precise location data.                                                                |
+| Red open lock with a warning badge | Not securely encrypted, carrying precise location data, and uplinking that data to the internet over MQTT.                            |
+
+Key length alone does not change the icon: a 128-bit key and a 256-bit key both show the green lock.
 
 > 🔒 **Tietoturva:** Määritä yksityistä viestintää varten aina yksilöllinen PSK. Oletuskanava on tarkoituksella avoin, jotta uudet käyttäjät löytävät mesh-verkon — luo erillinen salattu kanava arkaluontoiselle viestinnälle.
 
 ### Kanavan lisääminen
 
-1. Siirry kohtaan **Asetukset → Kanavat**.
-2. Lisää kanava napauttamalla **+**-painiketta tai tuo kanava skannaamalla kanavan QR-koodi.
-3. Määritä kanavan nimi ja salausavain.
-4. Jaa kanavan URL tai QR-koodi muille, jotka tarvitsevat pääsyn.
+1. Connect to your radio. The **Channels** row stays grayed out until the app has a connection — see [Connections](connections).
+2. Go to **Settings**, then tap **Channels** under **Configuration**.
+3. Tap the **+** button to add a channel. The editor opens on the new entry.
+4. Set the channel name and the **PSK**, and choose whether the channel uses MQTT uplink and downlink. Naming a new channel generates a fresh 256-bit key for you; the refresh icon beside **PSK** generates another one.
+5. Tap **Save** to close the editor. The change is still only on your phone.
+6. Tap **Send** at the bottom of the channel list to write the changes to the radio. **Cancel**, or leaving the screen without tapping **Send**, throws them away.
+7. Optional: share the channel URL or QR code with the people who need access.
 
-Napauttamalla kanavaa näet sen tiedot ja jakovaihtoehdot.
+Tapping an existing channel opens the same editor, where you can change the name, the PSK, MQTT uplink and downlink, and position precision. Every edit on this screen — adding, editing, deleting, or dragging a channel into a new order — waits on **Send** the same way.
 
 ## Yksityisviestit
 
-Yksityisviestit (DM) ovat kahden radion välistä päästä päähän salattua viestintää.
+Direct messages (DMs) go to one specific node. When both radios hold each other's public keys, your radio encrypts the message to that node's public key, so no one else on the mesh can read it — not even nodes that share your channel.
+
+Your radio must already hold the other node's public key before it can send a DM. Keys travel inside node info, which nodes broadcast periodically, so the key usually arrives on its own once you have heard from that node. Until it does, a radio that has its own key pair — the default — refuses the send rather than falling back to channel encryption, and the message shows **Recipient key unavailable**.
+
+A public-key conversation carries a key icon in its top bar. A green closed lock means the direct message is protected by public-key encryption; a red key-off icon means the node's public key changed and no longer matches the one your radio stored. Tap the icon for the details.
 
 ### Yksityisviestin lähettäminen
 
@@ -105,22 +114,21 @@ Kun viestin toimitus epäonnistuu, virheilmaisin näyttää, mikä meni pieleen:
 | Käyttöasteen rajoitus                     | Alueellinen lähetysajan raja saavutettu                                                                                                                                                 | Odota, että käyttöasteikkuna nollautuu.                                                                                                  |
 | Virheellinen pyyntö                       | Virheellinen tai puutteellinen pyyntö                                                                                                                                                   | Jos ongelma jatkuu, päivitä tai käynnistä sovellus uudelleen ja yritä sitten uudelleen.                                                  |
 
-> 💡 Vinkki: Useimmat toimitusvirheet korjaantuvat itsestään. Jos radio on ajoittain tavoitettavissa, mesh yrittää uudelleen. Jos “Ei reittiä” -virhe toistuu, tarkista että välissä olevat reitittävät radiot ovat verkossa.
+> 💡 Vinkki: Useimmat toimitusvirheet korjaantuvat itsestään. Jos radio on ajoittain tavoitettavissa, mesh yrittää uudelleen. For persistent **No route** errors, check that intermediate Router nodes are online.
 
 ## Viestiominaisuudet
 
 ### Pikachatti
 
-Valmiiksi määritetyt viestit nopeaan viestintään:
+Pre-configured messages for rapid communication, useful when typing is impractical (gloves, small screen, urgent):
 
-- Käytettävissä viestikentän Pikachatti-painikkeen kautta
-- Valitse valmiista sisäänrakennetuista viesteistä tai omista viesteistä
-- Muokkaa pikachatti-viestejä kohdassa **Asetukset → Pikachatti**
-- Hyödyllinen, kun kirjoittaminen on hankalaa (hanskat, pieni näyttö, kiire)
+- The quick chat row is hidden until you turn it on. Open a conversation, tap the overflow menu in the top bar, then tap **Show quick chat menu**. **Hide quick chat menu** puts the row away again.
+- The row carries one built-in entry, the 🔔 alert bell. It appends an alert message that includes a bell character, which clients that support it flag as an alert. Every other button on the row is one you created.
+- Add, edit, reorder, and delete your own entries from the same overflow menu — tap **Quick chat options**.
 
 ![Pikachatti-vaihtoehto](../../assets/screenshots/messages_quick_chat.png)
 
-Jokaisella pikaviestillä on lyhyt **Nimi** (painikkeen teksti), lisättävä **Viesti** sekä **Lähetä heti** -kytkin. Kun se on käytössä, painikkeen napauttaminen lähettää viestin välittömästi sen sijaan, että se lisättäisiin muokattavaksi syöttökenttään:
+Each quick chat entry has a **Name** — the button label, capped at five characters, forced to uppercase, and filled in for you from the message text — and the **Message** it carries. A switch decides what tapping the button does. A new entry starts on **Instantly send**, so a tap sends the message straight away; turn the switch off and the label changes to **Append to message**, which puts the text in the input field for you to edit first.
 
 ![Uusi pikakeskusteluviestin valintaikkuna, jossa näkyvät nimi, viesti ja Lähetä heti -kytkin](../../assets/screenshots/messages_edit_quick_chat.png)
 
@@ -166,7 +174,8 @@ Kirjoita viestiä laatiessasi `@` mainitaksesi radion — valitsin ehdottaa kirj
 Reagoi viesteihin emojeilla:
 
 - **Kosketa pitkään** viestiä tai kaksoisnapauta sitä, niin viestin yläpuolelle avautuu pikareaktiopalkki. Palkin avaaminen ei lähetä mitään.
-- Lähetä reaktio napauttamalla palkissa olevaa emojia, avaa koko valitsin napauttamalla **Lisää** tai sulje palkki lähettämättä napauttamalla sen ulkopuolelle. Reaktio on oikea mesh-paketti, joten se lähetetään vasta, kun valitset emojin.
+- Tap an emoji in the bar to send it; tap **More reactions** to open the full picker, or anywhere outside
+  the bar to dismiss it without sending. Reaktio on oikea mesh-paketti, joten se lähetetään vasta, kun valitset emojin.
 - Reaktiot näkyvät viestin alapuolella
 - Useampi käyttäjä voi reagoida samaan viestiin
 - Voit reagoida omiin ja muiden viesteihin
@@ -179,7 +188,7 @@ Reagoi viesteihin emojeilla:
 
 **Pyyhkäise viestiä oikealle** vastataksesi siihen — viestinkirjoituskenttä avautuu siten, että kyseinen viesti on lainattuna.
 Kun pyyhkäisy ylittää vastauskynnyksen, toiminto aktivoituu. Jos vapautat ennen sitä, viesti palautuu paikalleen eikä mitään tapahdu.
-Vastaustoiminto löytyy myös toimintovalikosta, jonka saat esiin koskettamalla viestiä pitkään ja napauttamalla sitten **Lisää**.
+Reply is also in the actions sheet, reached by touching & holding and then tapping **More message actions**.
 
 ### Päiväerottimet
 
@@ -191,13 +200,16 @@ Keskustelua ylöspäin vierittäessä näkyviin tulee painike, jolla voit siirty
 
 ### Viestitoiminnot
 
-Avaa pikareaktiopalkki koskettamalla viestiä pitkään tai kaksoisnapauttamalla sitä ja napauta sitten **Lisää** (oikealla oleva ylivuotovalikko):
+Touch & hold or double-tap a message to open the quick reaction bar, then tap **More message actions**
+(the overflow icon on that bar) to open the actions sheet. The emoji row runs across the top of the
+sheet — that is where reactions live — and beneath it, along with the message's timestamp and
+delivery status, are:
 
-- **Kopioi** — kopioi viestin teksti leikepöydälle
 - **Vastaa** — lainaa viesti vastaukseesi
-- **Reagoi** — lisää emoji-reaktio
-- **Käännä** — kääntää vastaanotetun viestin laitteesi kielelle ja mahdollistaa vaihtamisen alkuperäisen ja käännetyn tekstin välillä (vain Google Play -versiossa; käyttää laitteella toimivaa käännöstä)
-- **Poista** — poista lähettämäsi viesti (paikallinen poisto)
+- **Copy** — copy the message text to the clipboard
+- **Translate** — translate a received message into your device language, and toggle between the original and translated text (Google Play build only; uses on-device translation). The first translation into a language asks to download a one-time language model and tells you its size, then translates once the download finishes. If the download fails, or the message is already in your language, the app says so instead of translating
+- **Select** — start multi-select, so you can act on several messages at once
+- **Delete** — remove the message from this phone. It works on any message in the conversation, yours or not, and does not remove it from anyone else's radio or phone
 
 ### Viestien prioriteetti
 
@@ -206,7 +218,7 @@ Sovellus lähettää kaikki kirjoittamasi viestit samalla oletusprioriteetilla �
 ### Viestirajoitukset
 
 - **Enimmäispituus:** 200 tavua (noin 200 merkkiä ASCII-tekstille)
-- 200 tavun rajoitus koskee sovelluksen viestinkirjoituskenttää — itse mesh-viestisisällön raja on noin ~233 tavua, joten muiden lähettäjien (esimerkiksi Sovellustoimintojen) viestit voivat olla hieman pidempiä
+- The 200-byte cap applies to the in-app composer — the mesh payload limit itself is 233 bytes, so messages from other senders (e.g., App Functions) may arrive slightly longer
 - **Rajoitusnopeus:** mesh-verkko tasaa lähetysajan oikeudenmukaisesti; suuri viestimäärä voi joutua rajoitetuksi
 - **Toimitus:** viestit yritetään lähettää uudelleen automaattisesti, jos kuittausta ei saada
 

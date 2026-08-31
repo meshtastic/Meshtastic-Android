@@ -2,7 +2,7 @@
 title: Метрики ноды
 parent: Руководство пользователя
 nav_order: 5
-last_updated: 2026-08-29
+last_updated: 2026-08-30
 description: Панели телеметрии для каждой ноды mesh-сети — состояние устройства, датчики окружающей среды, качество воздуха, качество сигнала, питание, трассировка и история местоположения.
 aliases:
   - metrics
@@ -19,11 +19,12 @@ aliases:
 
 1. Перейдите в раздел **Ноды**.
 2. Нажмите на ноду, которую хотите просмотреть.
-3. Выберите категорию метрик на вкладках с подробностями.
+3. Scroll to the **Telemetry** section and find the category you want — **Signal Quality**, **Device Metrics**, **Environment Metrics**, **Air-Quality Metrics**, **Power Metrics**, **Position**, and the rest.
+4. Tap the refresh button on a row to ask the node for a fresh reading. The chart button beside it opens that category's history, and appears once the node has reported that kind of telemetry.
 
 ![Сведения о ноде — локальное устройство](../../assets/screenshots/nodes_detail_local.png)
 
-Вкладка "Местоположение" показывает координаты нод, которые передают GPS-данные:
+The **Position** row expands to show location data for nodes that share GPS:
 
 ![Встроенное содержимое о местоположении](../../assets/screenshots/nodes_position.png)
 
@@ -33,17 +34,17 @@ aliases:
 
 Основная информация о работе, сообщаемая каждой нодой:
 
-| Метрическая          | Описание                                  |
-| -------------------- | ----------------------------------------- |
-| Уровень заряда       | Текущий процент заряда батареи            |
-| Напряжение           | Показания напряжения батареи              |
-| Использование канала | Процент израсходованного эфирного времени |
-| Эфирное время        | Время передачи, использованное этой нодой |
-| Аптайм               | Время с момента последней перезагрузки    |
+| Метрическая    | Описание                                                 |
+| -------------- | -------------------------------------------------------- |
+| Уровень заряда | Текущий процент заряда батареи                           |
+| Напряжение     | Показания напряжения батареи                             |
+| ChUtil         | Percentage of local airtime in use                       |
+| AirUtil        | Percentage of the last hour this node spent transmitting |
+| Аптайм         | Время с момента последней перезагрузки                   |
 
-Метрики устройства отображаются в виде отдельных карточек с трендовыми спарклайнами, показывающими уровень заряда, напряжение, использование канала, эфирное время и время безотказной работы(аптайма) с течением времени.
+Device Metrics has no cards on the node detail screen. Use the chart button on its row to open the Device Metrics screen, where battery level, voltage, ChUtil, and AirUtil are plotted over time and every reading — uptime included — is listed with its timestamp underneath. Pick a time frame at the top of the screen, and use the save icon in the app bar to export the visible history as CSV.
 
-> 💡 **Совет:** Нажмите на любую карточку метрики, чтобы развернуть её в полноценный график с историческими точками данных. Масштабируйте временную ось щипком.
+> 💡 **Tip:** Where a category does show cards — Environment, Air Quality, and Power — touch & hold a card to copy its value to the clipboard. On a chart screen, pinch to zoom the time axis.
 
 ## Метрики окружения
 
@@ -100,7 +101,7 @@ CO₂ readings are color-coded by severity so you can read air quality at a glan
 
 > 💡 **Совет:** Для получения метрик качества воздуха на удалённой ноде должен быть установлен совместимый датчик. См. [Телеметрия и датчики](telemetry-and-sensors) для получения информации о поддерживаемом оборудовании.
 
-## Показатели сигнала
+## Качество сигнала
 
 Информация о качестве радиосигнала:
 
@@ -124,7 +125,7 @@ CO₂ readings are color-coded by severity so you can read air quality at a glan
 
 См. [Понимание измерителя сигнала](signal-meter) для полного объяснения.
 
-Local Stats from your connected radio are also shown in Signal Metrics when available. Эти журналы включают уровень шума, счётчики трафика, счётчики ретрансляций, количество нод в сети и время работы радио. График уровня шума использует пунктирную опорную линию на уровне -85 дБм, чтобы помочь определить загруженность радиоэфира.
+Локальная статистика твоего подключённого радио также отображается в разделе "Качество сигнала", когда она доступна. Эти журналы включают уровень шума, счётчики трафика, счётчики ретрансляций, количество нод в сети и время работы радио. График уровня шума использует пунктирную опорную линию на уровне -85 дБм, чтобы помочь определить загруженность радиоэфира.
 
 - **Request** — ask the connected radio for a fresh Local Stats telemetry report
 - **Clear** — remove Local Stats logs for that node
@@ -139,24 +140,21 @@ Local Stats from your connected radio are also shown in Signal Metrics when avai
 | Напряжение  | Per-channel voltage reading    |
 | Ток         | Per-channel draw, in milliamps |
 
-Up to three sensor channels (ch1–ch3) are charted, each with a label you can edit. The app does not
-derive a wattage figure from them.
+The node detail screen shows cards for channels 1 to 3. Use the chart button on the **Power Metrics** row to open the chart screen, which lists a chip for every channel that reported data — up to eight — and charts the one you select. Use the label field under the chips to give a channel a name of your own, such as Solar or Battery. The app does not derive a wattage figure from voltage and current.
 
 ## Трассировка маршрута
 
 Трассировка показывает путь сообщения через mesh-сеть:
 
-1. На экране сведений о ноде нажмите **"Трассировка"**.
+1. From the node detail screen's **Telemetry** section, tap the refresh button on the **Traceroute** row. You cannot traceroute your own node, and the button accepts one request every 30 seconds.
 2. Приложение отправляет запрос трассировки целевой ноде.
-3. Результаты показывают каждый хоп со значениями SNR/RSSI.
+3. Results show each hop with its SNR.
 
 ### Чтение результатов трассировки
 
-```
-Ты → Нода A (SNR: 8.5) → Нода B (SNR: 5.2) → Цель
-```
+A traceroute is a round trip, so each saved result carries a hop count in each direction — **Forward Hops** and **Return Hops** — and the **Round Trip** time in seconds. A result marked **Direct** reached the target with no relay in between. Tap a result to read the route traced toward the destination and the route traced back to you, with the SNR of every hop. On Android that view offers **View on map**, which draws the same path, as long as the start and destination nodes have both shared a position.
 
-Каждый хоп обозначает ретранслирующую ноду, которая переслала сообщение.
+A result marked **No Response** means the target never answered. It may be out of range, asleep, or configured not to reply. Wait for the 30-second cooldown to clear and try again; if it keeps failing, send a direct message first to confirm the node is reachable at all.
 
 ## Журнал местоположения
 
@@ -170,6 +168,14 @@ derive a wattage figure from them.
 ## Информация об окружении
 
 Показывает, какие ноды данная нода может слышать напрямую — полезно для понимания топологии mesh-сети.
+
+## Метрики хоста
+
+Nodes that run Meshtastic on a Linux host, such as a Raspberry Pi, report the host's own health — free memory, free disk space, one-, five-, and fifteen-minute load averages, and how long the host has been up. The **Host Metrics** row is always listed; its chart button appears once a node has reported them.
+
+## Метрика прохожих
+
+A node running the PAX counter module reports how many Wi-Fi and Bluetooth devices it saw nearby, as a crowd-size estimate, and charts the two counts alongside their total. The **PAX Metrics** row is always listed; its chart button appears once a node has reported them. The counts are of devices, not people.
 
 ## Связанные темы
 

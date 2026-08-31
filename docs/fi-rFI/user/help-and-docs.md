@@ -2,7 +2,7 @@
 title: Ohjeet jasovelluksen sisäinen dokumentaatio
 parent: Käyttöopas
 nav_order: 21
-last_updated: 2026-08-29
+last_updated: 2026-08-30
 description: Selaa tätä dokumentaatiota sovelluksessa, hae siitä tietoa ja kysy Meshtasticiin liittyviä kysymyksiä Chirpyltä — laitteella toimivalta tekoälyavustajalta.
 aliases:
   - apua
@@ -23,7 +23,7 @@ Dokumentaation selain näyttää kaikki käyttöohjeen sivut. Avaa sivu napautta
 
 ### Haku
 
-Napauta hakukuvaketta ja kirjoita hakusanoja suodattaaksesi sivuja otsikon ja avainsanojen perusteella — tulokset päivittyvät kirjoittaessasi.
+The search box sits at the top of the docs browser. Type in it to filter pages by title and keywords — results update as you type, and the **Clear search** button (✕) empties the box.
 
 ![Haku sovelluksen sisäisessä dokumentaatiossa](../../assets/screenshots/docs-browser_search.png)
 

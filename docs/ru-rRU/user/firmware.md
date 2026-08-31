@@ -2,7 +2,7 @@
 title: Обновления прошивки
 parent: Руководство пользователя
 nav_order: 13
-last_updated: 2026-08-29
+last_updated: 2026-08-30
 description: Обновляйте прошивку своего радио по Bluetooth или USB — процесс OTA, каналы версий, предполётные проверки и восстановление.
 aliases:
   - firmware
@@ -32,7 +32,7 @@ aliases:
 1. Убедитесь, что твоё радио подключено по Bluetooth.
 2. Перейдите на экран "Обновление прошивки".
 3. Выберите нужную версию прошивки.
-4. Нажмите **"Обновить"**, чтобы начать процесс OTA.
+4. Tap **Update**. An **Update Warning** dialog lists the pre-flight checks — read it, then tap **I know what I'm doing.** to start. This dialog appears for every update method, including Wi-Fi OTA, USB, and a local firmware file.
 5. Дождитесь завершения обновления — **не отключайте устройство** во время обновления.
 
 ![Проверка обновлений прошивки](../../assets/screenshots/firmware_checking.png)
@@ -58,8 +58,6 @@ When an ESP32 radio is connected over the network rather than Bluetooth, the app
 
 Wi-Fi OTA takes the ESP32 `-update.bin` image rather than the `.uf2` a USB update uses; the app selects the right artifact for you.
 
-![Предупреждение о прошивке](../../assets/screenshots/firmware_disclaimer.png)
-
 ### Обновление внутри приложения по USB
 
 Когда твоё радио подключено по **USB/seria**l (а не по Bluetooth), на экране обновления прошивки появляется опция **"Передача файла по USB"**. Приложение перезагружает устройство в режим DFU, а затем предлагает сохранить файл `.uf2` на DFU-диск устройства с помощью системного выбора файлов. Эта опция появляется только при подключении по USB/serial — она недоступна по Bluetooth.
@@ -68,9 +66,11 @@ Wi-Fi OTA takes the ESP32 `-update.bin` image rather than the `.uf2` a USB updat
 
 ### Полное стирание и обновление загрузчика
 
-При подключении по **USB/serial** устройства на базе nRF52 и RP2040 также предлагают **"Стереть и переустановить"** и, если для платы опубликован обновлённый загрузчик, **"Обновить загрузчик"**.
+On a **USB/serial** connection, nRF52 and RP2040 devices can be wiped as part of an update — that is the **Erase device during update** opt-in described earlier on this page. nRF52 devices additionally offer **Upgrade bootloader** where an upgraded bootloader is published for the board; RP2040 devices run no Adafruit bootloader, so they never see it.
 
-Стирание удаляет всё на устройстве — каналы, ключи и все настройки — и резервной копии нет, поэтому приложение сначала запрашивает подтверждение. Обе операции записывают два файла по очереди, поэтому тебе будет предложено дважды выбрать диск обновления устройства: один раз для образа стирания или загрузчика, затем снова для прошивки.
+Select a firmware version before either one: the app hides both until a release is chosen, because the firmware is reinstalled after the device is wiped or the new bootloader is written.
+
+Both a USB erase and a bootloader upgrade write two files in turn, so you are asked to select the device's update drive twice: once for the erase or bootloader image, then again for the firmware.
 
 Приложение считывает `INFO_UF2.TXT` с выбранного тобою диска, чтобы убедиться, что это действительно диск обновления устройства, и определить плату до записи чего-либо. If it can't confirm which Bluetooth stack your device uses, it refuses to erase and points you at the [Web Flasher](https://flasher.meshtastic.org) instead. In the Web Flasher, choosing the wrong Bluetooth stack can leave the radio recoverable only with a hardware programmer.
 
@@ -124,11 +124,15 @@ Wi-Fi OTA takes the ESP32 `-update.bin` image rather than the `.uf2` a USB updat
 - If it is still stuck after that, power-cycle the radio.
 - Attempt the update again.
 
+The message **Verification timed out. Device did not reconnect in time.** means the image was written but the radio did not come back within that window — power-cycle it and check the version under **Currently Installed** before re-running the update.
+
 ![Ошибка обновления прошивки](../../assets/screenshots/firmware_error.png)
 
 ### Radio Won't Boot After Update
 
-If your radio fails to boot:
+If the app told you the Bluetooth update could not be finished, follow the instruction it gave: connect the radio to a computer over USB and re-flash it with the vendor's serial DFU tool, such as `adafruit-nrfutil`. A stock nRF bootloader cannot reliably complete an interrupted over-the-air update.
+
+Otherwise, if your radio fails to boot:
 
 1. Попробуйте подключиться по USB к компьютеру
 2. Используйте Web Flasher в режиме восстановления/DFU

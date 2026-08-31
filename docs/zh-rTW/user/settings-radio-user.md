@@ -2,7 +2,7 @@
 title: Settings — Radio & User
 parent: User Guide
 nav_order: 7
-last_updated: 2026-08-29
+last_updated: 2026-08-30
 description: Configure your radio hardware, LoRa presets, user profile, position sharing, power management, and security.
 aliases:
   - 設定
@@ -15,21 +15,38 @@ aliases:
 
 Configure your radio's user identity, region and LoRa parameters, position and power behavior, network and Bluetooth connectivity, and security settings.
 
+## How These Screens Work
+
+Everything here is on the **Settings** screen. **User**, **LoRa**, **Channels** and **Security** are
+listed there directly. **Device**, **Position**, **Power**, **Network**, **Display** and
+**Bluetooth** are one level down, under **Settings → Device configuration**. **Network** appears
+only on radios with Wi-Fi or Ethernet, and **Bluetooth** only on radios with Bluetooth.
+
+Settings use standard preference controls — dropdowns, toggles, and sliders:
+
+| Control  | 螢幕截圖                                                                                                        |
+| -------- | ----------------------------------------------------------------------------------------------------------- |
+| Dropdown | ![A dropdown setting, expanded to show its list of options](../../assets/screenshots/settings_dropdown.png) |
+| Toggle   | ![A toggle setting in the on position](../../assets/screenshots/settings_switch.png)                        |
+| Slider   | ![A slider setting with its current numeric value shown](../../assets/screenshots/settings_slider.png)      |
+
 ## 使用者設定
 
 ### User Profile
 
-| 設定                | 描述說明                                                                                                                                                                                                                                         |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 長名稱               | Your display name (up to 39 characters)                                                                                                                                                                                   |
-| 簡短名稱              | 4-character abbreviated name                                                                                                                                                                                                                 |
-| 狀態訊息              | A short free-text status other nodes display alongside your node — up to 80 bytes, cleared with the **✕** in the field. Needs firmware 2.8 or newer, and is absent otherwise                                 |
-| 不接收訊息             | Marks the node as one nobody should try to message — for an unmonitored or infrastructure node. Other clients hide it from the contact list. Needs supporting firmware                                       |
-| Licensed Operator | Enable if you hold an amateur radio license (permits higher power). Turning it on relabels **Long Name** as **Call Sign** and adds a separate Long Name field, and is staged behind a confirmation dialog |
+On **Settings → User**.
+
+| 設定                                   | 描述說明                                                                                                                                                                                                                                                                                                                                |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 長名稱                                  | Your display name (up to 39 characters)                                                                                                                                                                                                                                                                          |
+| 簡短名稱                                 | 4-character abbreviated name                                                                                                                                                                                                                                                                                                        |
+| 狀態訊息                                 | A short, public free-text status other nodes display alongside your node — up to 80 bytes, cleared with the **✕** in the field. The radio broadcasts it to the mesh when you change it and again every 12 hours. Needs firmware 2.8 or newer, and is absent otherwise               |
+| 不接收訊息                                | Marks the node as one nobody should try to message — for an unmonitored or infrastructure node. Other clients hide it from the contact list. Needs supporting firmware                                                                                                                              |
+| 領有執照的業餘無線電台 (HAM) | Enable if you hold an amateur radio license (permits higher power). Turning it on is staged behind a confirmation dialog. On your own radio it then relabels **Long Name** as **Call sign** and adds a separate Long Name field; over remote admin the field stays **Long Name** |
 
 ### Applying Changes
 
-After modifying settings, tap **Save** to write the configuration to your radio. The radio may reboot to apply changes.
+The footer appears as soon as you change something. **Discard** throws the change away, and the other button writes it to the radio: it reads **Save & restart** on the screens the firmware applies with a reboot — Position, Network, Bluetooth, Security, and most module screens — and **Save** everywhere else.
 
 The status message is saved with the same **Save**, but it never reboots the node — and, like the
 rest of this screen, it can be edited on a remote node you administer.
@@ -38,62 +55,73 @@ rest of this screen, it can be edited on a remote node you administer.
 
 ### 設備設置
 
-| 設定                                         | 描述說明                                                                                                                                                                                   | 默認       |
-| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
-| 角色                                         | Node behavior (Client, Router, etc.) — each option carries its own description in the picker. Choosing Router asks for confirmation | 用戶端      |
-| ## Rebroadcast Mode轉發廣播模式                  | How the node retransmits messages; each mode is described in the picker                                                                                                                | 全部       |
-| Node Info Broadcast (s) | Interval for broadcasting node info                                                                                                                                                    | 10800    |
-| Double-tap Button                          | Treat a double tap as a button press                                                                                                                                                   | Disabled |
-| 三擊執行 Ad Hoc Ping                           | Send an ad-hoc position ping on a triple click                                                                                                                                         | 已停用      |
-| LED 心跳指示                                   | Blink the status LED periodically                                                                                                                                                      | 已啟用      |
-| 時區                                         | POSIX time-zone string for the device clock, with buttons to copy your phone's zone or clear it                                                                                        | —        |
-| Button / Buzzer GPIO                       | Advanced: which pins the button and buzzer are wired to                                                                                                                | —        |
+On **Settings → Device configuration → Device**.
+
+| 設定                        | 描述說明                                                                                                                                                                                                                                                                                                                                        | 默認       |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| 裝置角色                      | Node behavior. The picker lists the firmware names (`CLIENT`, `ROUTER`, `ROUTER_LATE`, `TAK`, and so on), and the description of whichever role is selected appears under the field. Choosing `ROUTER` or `ROUTER_LATE` asks you to confirm you have read the device-role guidance first | `CLIENT` |
+| ## Rebroadcast Mode轉發廣播模式 | How the node retransmits messages. As with the role, the picker lists the firmware names and describes only the selected one                                                                                                                                                                                                | `ALL`    |
+| 節點資訊廣播間隔                  | How often the node re-announces itself. A dropdown of fixed intervals — Unset, then 3 to 72 hours — not a value you type in seconds                                                                                                                                                                                         | 3 hours  |
+| 雙擊觸發按鈕功能                  | Treat a double tap as a button press                                                                                                                                                                                                                                                                                                        | Disabled |
+| 三擊執行 Ad Hoc Ping          | Send an ad-hoc position ping on a triple click                                                                                                                                                                                                                                                                                              | 已停用      |
+| LED 心跳指示                  | Blink the status LED periodically                                                                                                                                                                                                                                                                                                           | 已啟用      |
+| 時區                        | POSIX time-zone string for the device clock, with buttons to copy your phone's zone or clear it                                                                                                                                                                                                                                             | —        |
+| Button / Buzzer GPIO      | Advanced: which pins the button and buzzer are wired to                                                                                                                                                                                                                                                                     | —        |
 
 ### LoRa規劃
 
-| 設定                                       | 描述說明                                                                                                                                                                                             | 默認                                        |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------- |
-| 地區                                       | Regulatory region for frequency bands. You must set this before transmitting                                                                                                     | Unset (must configure) |
-| 數據機預設值 (Modem Preset) | Speed/range tradeoff                                                                                                                                                                             | LongFast                                  |
-| 躍點限制                                     | Maximum retransmit hops                                                                                                                                                                          | 3                                         |
-| TX Power                                 | Transmission power (dBm); 0 = max allowed for region                                                                                                                          | 0 (region max)         |
-| 手動設定頻率                                   | Overrides the computed operating frequency outright (MHz). It does not offset the calculated value — leave at 0 unless you know you need a specific frequency | 0 (use calculated)     |
-| Channel Bandwidth                        | Bandwidth setting                                                                                                                                                                                | Default for preset                        |
-| 使用預設值                                    | On by default. Turn it off to set Spread Factor, Coding Rate and Bandwidth by hand instead of taking them from the modem preset                                                  | On                                        |
-| 擴頻因子                                     | Manual mode only: 7–12. Higher spreads further but slower                                                                                                        | From preset                               |
-| 編碼率                                      | Manual mode only: 5–8. More redundancy costs airtime                                                                                                             | From preset                               |
-| 頻率槽                                      | Which slot within the region's band to use. 0 derives it from the primary channel name                                                                                           | 0 (automatic)          |
-| 已啟用發射                                    | Turning this off makes the node receive-only                                                                                                                                                     | On                                        |
-| 覆蓋工作週期/佔空比                               | Ignores the region's duty-cycle limit. Illegal in most regions; turn it on only where your license permits                                                                       | Off                                       |
-| 忽略 MQTT                                  | Drop packets that arrived from MQTT rather than over the air                                                                                                                                     | Off                                       |
-| 將消息轉發至MQTT                               | Allow your packets to be forwarded to MQTT by gateways                                                                                                                                           | Off                                       |
-| 接收增益提升                                   | Extra receive gain on SX126x radios; costs a little current                                                                                                                                      | Off                                       |
-| 停用PA風扇                                   | Turn off the power-amplifier fan on hardware that has one                                                                                                                                        | Off                                       |
+On **Settings → LoRa**.
+
+| 設定         | 描述說明                                                                                                                                                                                                                                                                                                                              | 默認                                             |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| 地區         | Regulatory region for frequency bands. You must set this before transmitting                                                                                                                                                                                                                                      | Unset (must configure)      |
+| 預設配置       | Speed/range tradeoff                                                                                                                                                                                                                                                                                                              | LongFast                                       |
+| 中繼次數       | Maximum retransmit hops                                                                                                                                                                                                                                                                                                           | 3                                              |
+| 傳輸功率       | Transmission power (dBm); 0 = max allowed for region                                                                                                                                                                                                                                                           | 0 (region max)              |
+| 手動設定頻率     | Overrides the computed operating frequency outright (MHz). It does not offset the calculated value — leave at 0 unless you know you need a specific frequency                                                                                                                                  | 0 (use calculated)          |
+| 使用預設值      | On by default. Turn it off to set Spread Factor, Coding Rate and Bandwidth by hand instead of taking them from the modem preset                                                                                                                                                                                   | On                                             |
+| 擴頻因子       | Manual mode only: 7–12. Higher spreads further but slower                                                                                                                                                                                                                                         | From preset                                    |
+| 編碼率        | Manual mode only: 5–8. More redundancy costs airtime                                                                                                                                                                                                                                              | From preset                                    |
+| 頻寬         | Manual mode only: the channel bandwidth in kHz, typed in directly. On the 2.4 GHz region the app offers a list of the bandwidths your radio supports instead, and a stored value that is not on that list shows as _Unsupported_ and blocks saving until you pick a supported one | From preset                                    |
+| 頻率槽        | Which slot within the region's band to use. 0 derives it from the primary channel name                                                                                                                                                                                                                            | 0 (automatic)               |
+| 已啟用發射      | Turning this off makes the node receive-only                                                                                                                                                                                                                                                                                      | On                                             |
+| 覆蓋工作週期/佔空比 | Ignores the region's duty-cycle limit. Illegal in most regions; turn it on only where your license permits                                                                                                                                                                                                        | Off                                            |
+| 忽略 MQTT    | Drop packets that arrived from MQTT rather than over the air. The firmware turns this on for you whenever you set a region that has a duty-cycle limit — the EU bands, Thailand, and Ukraine 433                                                                                                                  | Off, until you set a duty-cycle-limited region |
+| 允許轉發至 MQTT | Allow your packets to be forwarded to MQTT by gateways                                                                                                                                                                                                                                                                            | Off                                            |
+| 接收增益提升     | Extra receive gain on SX126x radios; costs a little current                                                                                                                                                                                                                                                                       | Off                                            |
+| 停用PA風扇     | Turn off the power-amplifier fan on hardware that has one                                                                                                                                                                                                                                                                         | Off                                            |
+
+Some regions are amateur-radio allocations whose presets only licensed operators may use. On firmware 2.8 or newer the app knows which regions those are and grays the whole **Presets** list out until **Licensed amateur radio (Ham)** is turned on for the node you are configuring; the text under the field says so while it is grayed out.
 
 > ⚠️ **Important:** Operating without the correct region may violate local radio regulations. See the [region configuration guide](https://meshtastic.org/docs/getting-started/initial-config) on meshtastic.org for details.
 
 ### Modem Presets
 
+The Lite, Narrow, Medium Turbo, and Tiny presets need firmware 2.8 or newer — the app hides them on older radios.
+
 > 💡 **Tip:** The **SNR Limit** values are negative on purpose. LoRa can decode signals _below_ the noise floor, so a more-negative limit means the preset tolerates a weaker, noisier signal (more range). See [How the Signal Meter Works](signal-meter) for the full explanation.
 
-| Preset             | 範圍                      | 速度                        | SNR Limit                | Best For                                                                                                 |
-| ------------------ | ----------------------- | ------------------------- | ------------------------ | -------------------------------------------------------------------------------------------------------- |
-| 短 Turbo            | ~1 km   | 21.9 kbps | −7.5 dB  | Dense urban with line-of-sight; data-heavy applications                                                  |
-| 短 快                | ~3 km   | 10.9 kbps | −7.5 dB  | Urban neighborhoods; buildings within a few blocks                                                       |
-| 短 慢                | ~5 km   | 5.5 kbps  | −10 dB                   | Suburban short-range; moderate building density                                                          |
-| 中等快                | ~5 km   | 5.5 kbps  | −12.5 dB | Suburban areas; moderate building density                                                                |
-| 中等慢                | ~8 km   | 1.1 kbps  | −15 dB                   | Suburban/rural; moderate range with slower speed                                                         |
-| Long Turbo         | ~10 km  | 4.4 kbps  | −12.5 dB | Similar range to Long Fast but with 500 kHz bandwidth; faster throughput                                 |
-| Long Fast          | ~10 km  | 1.1 kbps  | −17.5 dB | **General use (default)** — balanced range and speed                                  |
-| 長度中等的              | ~20 km  | 0.34 kbps | −17.5 dB | Rural with some terrain; occasional use                                                                  |
-| Lite Fast          | ~5 km   | 5.5 kbps  | −12.5 dB | EU 866 MHz SRD band (125 kHz BW); comparable to Medium Fast                           |
-| Lite Slow          | ~10 km  | 1.1 kbps  | −15 dB                   | EU 866 MHz SRD band (125 kHz BW); comparable to Long Fast                             |
-| Narrow Fast        | ~5 km   | 2.7 kbps  | −10 dB                   | EU 868 MHz band (62.5 kHz BW); avoids interference with other devices |
-| Narrow Slow        | ~10 km  | 1.1 kbps  | −12.5 dB | EU 868 MHz band (62.5 kHz BW); comparable to Long Fast                |
-| ~~Long Slow~~      | ~30 km  | 0.18 kbps | −20 dB                   | ⚠️ **Deprecated** — still selectable but may be removed in a future firmware release                     |
-| ~~Very Long Slow~~ | ~40+ km | 0.09 kbps | −20 dB                   | ⚠️ **Deprecated** — still selectable but may be removed in a future firmware release                     |
+| Preset             | 範圍                      | 速度                        | SNR Limit                | Best For                                                                                                                                                                                                      |
+| ------------------ | ----------------------- | ------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 短 Turbo            | ~1 km   | 21.9 kbps | −7.5 dB  | Dense urban with line-of-sight; data-heavy applications                                                                                                                                                       |
+| 短 快                | ~3 km   | 10.9 kbps | −7.5 dB  | Urban neighborhoods; buildings within a few blocks                                                                                                                                                            |
+| 短 慢                | ~5 km   | 6.25 kbps | −10 dB                   | Suburban short-range; moderate building density                                                                                                                                                               |
+| 中等快                | ~5 km   | 3.52 kbps | −12.5 dB | Suburban areas; moderate building density                                                                                                                                                                     |
+| 中等慢                | ~8 km   | 1.95 kbps | −15 dB                   | Suburban/rural; moderate range with slower speed                                                                                                                                                              |
+| Long Turbo         | ~10 km  | 1.34 kbps | −12.5 dB | Similar range to Long Fast but with 500 kHz bandwidth; faster throughput                                                                                                                                      |
+| Long Fast          | ~10 km  | 1.1 kbps  | −17.5 dB | **General use (default)** — balanced range and speed                                                                                                                                       |
+| 長度中等的              | ~20 km  | 0.34 kbps | −17.5 dB | Rural with some terrain; occasional use                                                                                                                                                                       |
+| Lite Fast          | ~5 km   | 1.76 kbps | −12.5 dB | EU 866 MHz SRD band (125 kHz BW); comparable to Medium Fast                                                                                                                                |
+| Lite Slow          | ~10 km  | 0.98 kbps | −15 dB                   | EU 866 MHz SRD band (125 kHz BW); comparable to Long Fast                                                                                                                                  |
+| Narrow Fast        | ~5 km   | 2.28 kbps | −10 dB                   | EU 868 MHz band (62.5 kHz BW); avoids interference with other devices                                                                                                      |
+| Narrow Slow        | ~10 km  | 1.30 kbps | −12.5 dB | EU 868 MHz band (62.5 kHz BW); comparable to Long Fast                                                                                                                     |
+| Medium Turbo       | ~5 km   | 7.0 kbps  | −12.5 dB | Like Medium Fast but with 500 kHz bandwidth; not legal in every region. Needs firmware 2.8 or newer                                                                           |
+| Tiny Fast          | ~10 km  | 0.68 kbps | −7.5 dB  | Amateur bands that cap occupied bandwidth; these presets use 15.6 kHz. Needs firmware 2.8 or newer, an SX126x or SX127x radio, and a TCXO of ±5 ppm or better |
+| Tiny Slow          | ~20 km  | 0.33 kbps | −10 dB                   | Same band restrictions as Tiny Fast, longer range. Same firmware, radio, and TCXO requirements                                                                                                |
+| ~~Long Slow~~      | ~30 km  | 0.18 kbps | −20 dB                   | ⚠️ **Deprecated** — still selectable but may be removed in a future firmware release                                                                                                                          |
+| ~~Very Long Slow~~ | ~40+ km | 0.09 kbps | −20 dB                   | ⚠️ **Deprecated** — still selectable but may be removed in a future firmware release                                                                                                                          |
 
-> ℹ️ **Note:** This table uses the common short names. In the app's preset dropdown they read as **Short Range - Fast**, **Long Range - Fast**, **Lite - Fast**, **Narrow - Fast**, and so on.
+> ℹ️ **Note:** This table uses the common short names. The app's **Presets** dropdown lists the raw firmware names instead — `SHORT_FAST`, `LONG_FAST`, `LITE_FAST`, `NARROW_FAST`, and so on. Local Mesh Discovery shows the same presets as _Long Fast_ and _Short Turbo_.
 
 #### Choosing a Modem Preset
 
@@ -116,23 +144,25 @@ The range estimates in the [Modem Presets](#modem-presets) table assume flat ter
 
 ### 顯示設置
 
-These control the **radio's own screen**, not the app's.
+On **Settings → Device configuration → Display**. These control the **radio's own screen**, not the app's.
 
-| 設定           | 描述說明                                                                                                                                                      |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 螢幕開啟持續時間     | How long the display stays lit before sleeping                                                                                                            |
-| 輪播間隔         | How often the radio cycles between screens on its own                                                                                                     |
-| 顯示模式         | Screen layout/density used by the firmware                                                                                                                |
-| 顯示單位         | Metric or Imperial on the radio's screen                                                                                                                  |
-| 使用12小時制      | Show the radio's clock as 12-hour rather than 24-hour                                                                                                     |
-| Bold heading | Draw the screen's heading text in bold                                                                                                                    |
-| 翻轉畫面         | Rotate the display 180° for an inverted mounting                                                                                                          |
-| OLED 類型      | Auto, SSD1306, SH1106, SH1107                                                                                                                             |
-| 輕觸或移動喚醒      | Light the screen when the radio is tapped or moved                                                                                                        |
-| 羅盤朝向         | Rotation offset for the compass rose (0°, 90°, 180°, 270°)                                                                             |
-| 始終指向北方       | Locks the compass rose north-up instead of rotating it with your heading. Independent of Compass orientation — neither replaces the other |
+| 設定       | 描述說明                                                                                                                                                      |
+| -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 螢幕開啟持續時間 | How long the display stays lit before sleeping                                                                                                            |
+| 輪播間隔     | How often the radio cycles between screens on its own                                                                                                     |
+| 顯示模式     | Screen layout/density used by the firmware                                                                                                                |
+| 顯示單位     | Metric or Imperial on the radio's screen                                                                                                                  |
+| 使用12小時制  | Show the radio's clock as 12-hour rather than 24-hour                                                                                                     |
+| 粗體字      | Draw the screen's heading text in bold                                                                                                                    |
+| 翻轉畫面     | Rotate the display 180° for an inverted mounting                                                                                                          |
+| OLED 類型  | Auto, SSD1306, SH1106, SH1107                                                                                                                             |
+| 輕觸或移動喚醒  | Light the screen when the radio is tapped or moved                                                                                                        |
+| 羅盤朝向     | Rotation offset for the compass rose (0°, 90°, 180°, 270°)                                                                             |
+| 始終指向北方   | Locks the compass rose north-up instead of rotating it with your heading. Independent of Compass orientation — neither replaces the other |
 
 ### 位置設定
+
+On **Settings → Device configuration → Position**.
 
 > ⚠️ **Important:** Saving this screen always reboots the radio.
 
@@ -150,6 +180,8 @@ These control the **radio's own screen**, not the app's.
 
 ### 電源設定
 
+On **Settings → Device configuration → Power**.
+
 | 設定                                     | 描述說明                                                            |
 | -------------------------------------- | --------------------------------------------------------------- |
 | 啟用省電模式                                 | Let the radio sleep aggressively between activity               |
@@ -163,47 +195,56 @@ These control the **radio's own screen**, not the app's.
 
 ### 網路配置
 
-> ⚠️ **Important:** Saving this screen always reboots the radio.
+On **Settings → Device configuration → Network**, on radios with Wi-Fi or Ethernet.
 
-| 設定                                | 描述說明                                                                                                                         |
-| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Wi-Fi enabled                     | Enable the Wi-Fi radio (ESP32 radios)                                                                     |
-| SSID                              | Network name to connect to. **Scan Wi-Fi QR code** fills this and the password from a standard Wi-Fi QR code |
-| 密碼                                | 網路密碼                                                                                                                         |
-| 啟用以太網                             | Use a wired connection on hardware that has one                                                                              |
-| 第四代IP模式                           | DHCP, or a static address configured with the four fields below                                                              |
-| Wi-Fi IP / Subnet / Gateway / DNS | The static address, only used when IPv4 mode is static                                                                       |
-| UDP 廣播                            | Share mesh traffic with other nodes over the local network                                                                   |
-| 時間伺服器                             | Time synchronization server                                                                                                  |
-| rsyslog伺服器                        | Remote logging server                                                                                                        |
+> ⚠️ **Warning:** Turning on **Wi-Fi enabled** or **Ethernet enabled** ends the Bluetooth connection between your phone and the radio. Reconnect over the network afterwards from the [Connections](connections) screen, or turn Wi-Fi off again from the radio's own screen or over USB. Saving this screen also always reboots the radio.
+
+| 設定                                | 描述說明                                                                                                                                                                                                                                                                                                                                                                      |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Wi-Fi enabled                     | Enable the Wi-Fi radio (ESP32 radios)                                                                                                                                                                                                                                                                                                                  |
+| SSID                              | Network name to connect to. Appears only once **Wi-Fi enabled** is on, along with **Password**. **Scan Wi-Fi QR code** fills both from a standard Wi-Fi QR code; on Android, holding the phone against a Wi-Fi NFC tag while this screen is open fills them the same way, and the app offers to open system settings if NFC is turned off |
+| 密碼                                | 網路密碼                                                                                                                                                                                                                                                                                                                                                                      |
+| 啟用以太網                             | Use a wired connection on hardware that has one                                                                                                                                                                                                                                                                                                                           |
+| 第四代IP模式                           | DHCP, or a static address configured with the four fields that follow                                                                                                                                                                                                                                                                                                     |
+| Wi-Fi IP / Subnet / Gateway / DNS | The static address, only used when IPv4 mode is static                                                                                                                                                                                                                                                                                                                    |
+| UDP 廣播                            | Share mesh traffic with other nodes over the local network                                                                                                                                                                                                                                                                                                                |
+| 時間伺服器                             | Time synchronization server                                                                                                                                                                                                                                                                                                                                               |
+| rsyslog伺服器                        | Remote logging server                                                                                                                                                                                                                                                                                                                                                     |
 
 ![Network Config with a static IPv4 address entered](../../assets/screenshots/settings_ipv4_field.png)
 
 ### 藍牙配置
 
-| 設定                | 描述說明                                                                                                   |
-| ----------------- | ------------------------------------------------------------------------------------------------------ |
-| Bluetooth Enabled | Enable/disable BLE radio                                                                               |
-| 配對模式              | Fixed PIN, Random PIN, or No PIN                                                                       |
-| 固定 PIN            | PIN code for pairing. Must be **exactly six digits** — the field rejects anything else |
+On **Settings → Device configuration → Bluetooth**, on radios with Bluetooth.
+
+> ⚠️ **Important:** Saving this screen always reboots the radio.
+
+| 設定     | 描述說明                                                                                                   |
+| ------ | ------------------------------------------------------------------------------------------------------ |
+| 藍牙已啟用  | Enable/disable BLE radio                                                                               |
+| 配對模式   | Fixed PIN, Random PIN, or No PIN                                                                       |
+| 固定 PIN | PIN code for pairing. Must be **exactly six digits** — the field rejects anything else |
 
 ### 安全性設定
 
-| 設定                        | 描述說明                                                                                                                                                                                                           |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 公鑰                        | Your node's public key (read-only)                                                                                                                                                          |
-| 管理金鑰                      | Keys permitted to administer this node remotely — up to three                                                                                                                                                  |
-| 私鑰                        | Your node's private key (handle securely). Shown redacted when you are viewing another node over remote admin — the firmware does not send it                               |
-| 重新產生私鑰                    | Issues a new keypair for this node, behind a confirmation. Every peer that knew your old key must learn the new one                                                                            |
-| 私訊金鑰                      | The key used for direct-message encryption                                                                                                                                                                     |
-| ~~Admin Channel Enabled~~ | ⚠️ Removed — now configured automatically when an admin key is set                                                                                                                                             |
-| 除錯日誌                      | Output live debug logging over serial/bluetooth                                                                                                                                                                |
-| Serial Enabled            | Enable serial console access (moved from Device Config)                                                                                                                                     |
-| 管理模式                      | Restrict non-admin channel changes. Only selectable once an Admin Key is set                                                                                                                   |
-| 備份金鑰                      | Save an encrypted backup of the node's keys on this device (Android only)                                                                                                                   |
-| Restore Keys              | Write the backed-up keys back to the node (available once a backup exists)                                                                                                                  |
-| Delete Key Backup         | Remove the stored key backup from this device                                                                                                                                                                  |
-| Protection Level          | Packet authenticity — how unsigned or relayed packets are treated: **Strict**, **Balanced**, or **Compatible** (requires supporting firmware; Strict asks for confirmation) |
+On **Settings → Security**. The screen is grouped into cards: **Packet authenticity**, **Direct Message Key** (your node's key pair), **Admin Keys**, **Logs**, and **Administration**.
+
+> ⚠️ **Important:** Saving this screen always reboots the radio.
+
+| 設定                        | 描述說明                                                                                                                                                                                                                                                       |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 公鑰                        | Your node's public key (read-only)                                                                                                                                                                                                      |
+| 管理金鑰                      | Keys permitted to administer this node remotely — up to three                                                                                                                                                                                              |
+| 私鑰                        | Your node's private key (handle securely). Shown redacted when you are viewing another node over remote admin — the firmware does not send it                                                                           |
+| 重新產生私鑰                    | Issues a new keypair for this node, behind a confirmation. Every peer that knew your old key must learn the new one                                                                                                                        |
+| ~~Admin Channel Enabled~~ | ⚠️ Removed — now configured automatically when an admin key is set                                                                                                                                                                                         |
+| 序列控制台                     | Serial console over the Stream API                                                                                                                                                                                                                         |
+| 啟用除錯日誌 API                | Output live debug logging over serial, and view and export position-redacted radio logs over Bluetooth                                                                                                                                                     |
+| 管理模式                      | Restrict non-admin channel changes. Only selectable once an Admin Key is set                                                                                                                                                               |
+| 備份金鑰                      | Save an encrypted backup of the node's keys on this phone (Android only, and only for your own node)                                                                                                                                    |
+| Restore Keys              | Write the backed-up keys back to the node (available once a backup exists)                                                                                                                                                              |
+| Delete Key Backup         | Remove the stored key backup from this phone                                                                                                                                                                                                               |
+| Protection level          | How unsigned or relayed packets are treated: **Strict — Require authentication**, **Balanced — Prefer authenticated**, or **Compatible — Accept unsigned** (requires supporting firmware; Strict asks for confirmation) |
 
 #### Lockdown Mode
 
@@ -216,11 +257,11 @@ the passphrase, and a full device erase restores the hardware regardless.
 
 Alongside the passphrase you set the limits that end a session automatically:
 
-| Field                                    | What it does                                      |
-| ---------------------------------------- | ------------------------------------------------- |
-| Boots remaining                          | How many device boots the unlocked state survives |
-| Hours until expiry                       | Wall-clock lifetime of the unlocked state         |
-| Session cap (minutes) | Maximum length of a single unlocked connection    |
+| Field                                    | What it does                                                                              |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Boots remaining                          | How many device boots the unlocked state survives                                         |
+| Hours until expiry                       | Wall-clock lifetime of the unlocked state                                                 |
+| Session cap (minutes) | A per-boot uptime cap on the unlocked state. 0, the default, means no cap |
 
 Once active, the row reads _Active — storage encrypted, this connection authenticated_ when
 unlocked, or _Active — enter your passphrase to unlock this connection_ when not. **Lock Now**
@@ -229,16 +270,6 @@ back-off before you can try again.
 
 > ⚠️ **Warning:** There is no passphrase recovery. Losing it means erasing the device to get it
 > back, which destroys its keys, channels and settings.
-
-![Password field](../../assets/screenshots/settings_password_field.png)
-
-Settings use standard preference controls — dropdowns, toggles, and sliders:
-
-| Control  | 螢幕截圖                                                                                                        |
-| -------- | ----------------------------------------------------------------------------------------------------------- |
-| Dropdown | ![A dropdown setting, expanded to show its list of options](../../assets/screenshots/settings_dropdown.png) |
-| Toggle   | ![A toggle setting in the on position](../../assets/screenshots/settings_switch.png)                        |
-| Slider   | ![A slider setting with its current numeric value shown](../../assets/screenshots/settings_slider.png)      |
 
 ## Related Topics
 
