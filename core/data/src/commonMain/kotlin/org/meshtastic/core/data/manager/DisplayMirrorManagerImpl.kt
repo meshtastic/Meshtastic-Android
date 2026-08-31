@@ -27,9 +27,9 @@ import org.meshtastic.proto.DisplayFrame
 /**
  * Display frame reassembly state machine.
  *
- * Chunks arrive in offset order within a frame (the firmware drains one snapshot before capturing the next), so a
- * chunk with a new `frame_id` or `offset == 0` starts a new frame and an out-of-sequence chunk drops the partial
- * frame. Called sequentially from [FromRadioPacketHandlerImpl] on a single IO coroutine.
+ * Chunks of one frame arrive contiguously and in offset order (FromRadio is a reliable ordered stream), so a chunk with
+ * a new `frame_id` or `offset == 0` starts a new frame and an out-of-sequence chunk drops the partial frame. Calls are
+ * serialized by the single receive-loop collector in MeshServiceOrchestrator (recreated per session).
  */
 @Single
 class DisplayMirrorManagerImpl : DisplayMirrorManager {
@@ -45,10 +45,7 @@ class DisplayMirrorManagerImpl : DisplayMirrorManager {
         val data = chunk.data_.toByteArray()
         val total = chunk.total_size
 
-        if (total <= 0 || total > MAX_FRAME_BYTES || chunk.offset + data.size > total) {
-            Logger.w { "DisplayMirror: dropping malformed chunk (offset=${chunk.offset} size=${data.size} total=$total)" }
-            return
-        }
+        if (!isAcceptableChunk(chunk, data.size)) return
 
         if (chunk.offset == 0) {
             buffer = ByteArray(total)
@@ -58,7 +55,7 @@ class DisplayMirrorManagerImpl : DisplayMirrorManager {
 
         val buf = buffer
         if (buf == null || chunk.frame_id != frameId || chunk.offset != received || buf.size != total) {
-            Logger.w { "DisplayMirror: out-of-sequence chunk (frame=${chunk.frame_id}/$frameId offset=${chunk.offset}/$received)" }
+            Logger.w { "DisplayMirror: bad chunk ${chunk.frame_id}@${chunk.offset}, expected $frameId@$received" }
             buffer = null
             return
         }
@@ -72,8 +69,34 @@ class DisplayMirrorManagerImpl : DisplayMirrorManager {
         }
     }
 
+    /**
+     * Format must be MONO_VLSB and width/height must describe exactly total_size bytes; a zero or lying dimension would
+     * otherwise reach the renderer (aspectRatio requires > 0).
+     */
+    private fun isAcceptableChunk(chunk: DisplayFrame, dataSize: Int): Boolean {
+        val total = chunk.total_size
+        val expectedSize = chunk.width * ((chunk.height + PIXELS_PER_PAGE - 1) / PIXELS_PER_PAGE)
+        val acceptable =
+            chunk.format == DisplayFrame.Format.MONO_VLSB &&
+                chunk.width > 0 &&
+                chunk.height > 0 &&
+                expectedSize == total &&
+                total <= MAX_FRAME_BYTES &&
+                chunk.offset + dataSize <= total
+        if (!acceptable) {
+            Logger.w {
+                "DisplayMirror: dropping bad chunk (format=${chunk.format} ${chunk.width}x${chunk.height} " +
+                    "offset=${chunk.offset} size=$dataSize total=$total)"
+            }
+        }
+        return acceptable
+    }
+
     private companion object {
         // Generous sanity cap: 320x240 at 1bpp is 9600 bytes.
         const val MAX_FRAME_BYTES = 16384
+
+        // MONO_VLSB packs 8 vertically adjacent pixels per byte (one "page" row).
+        const val PIXELS_PER_PAGE = 8
     }
 }

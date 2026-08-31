@@ -45,6 +45,7 @@ import org.meshtastic.core.resources.key_verification_request_title
 import org.meshtastic.core.resources.key_verification_title
 import org.meshtastic.core.resources.low_entropy_key_title
 import org.meshtastic.proto.ClientNotification
+import org.meshtastic.proto.DisplayFrame
 import org.meshtastic.proto.FromRadio
 
 /** Implementation of [FromRadioPacketHandler] that dispatches [FromRadio] variants to specialized handlers. */
@@ -133,10 +134,7 @@ class FromRadioPacketHandlerImpl(
             xmodemPacket != null ->
                 runIfSessionActive(session, "XModem packet") { xmodemManager.value.handleIncomingXModem(xmodemPacket) }
 
-            displayFrame != null ->
-                runIfSessionActive(session, "display frame") {
-                    displayMirrorManager.value.handleIncomingFrame(displayFrame)
-                }
+            displayFrame != null -> handleDisplayFrame(displayFrame, session)
 
             lockdownStatus != null ->
                 runIfSessionActive(session, "lockdown status") {
@@ -153,6 +151,9 @@ class FromRadioPacketHandlerImpl(
             }
         }
     }
+
+    private fun handleDisplayFrame(frame: DisplayFrame, session: RadioSessionContext) =
+        runIfSessionActive(session, "display frame") { displayMirrorManager.value.handleIncomingFrame(frame) }
 
     private fun runIfSessionActive(session: RadioSessionContext, operation: String, block: () -> Unit) {
         if (!radioInterfaceService.runIfSessionActive(session, block)) {
