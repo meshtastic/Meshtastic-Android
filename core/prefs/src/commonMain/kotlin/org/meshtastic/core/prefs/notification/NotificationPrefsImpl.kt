@@ -16,9 +16,6 @@
  */
 package org.meshtastic.core.prefs.notification
 
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
@@ -29,6 +26,8 @@ import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.prefs.di.UiDataStore
+import org.meshtastic.core.prefs.store.booleanPrefsKey
+import org.meshtastic.core.prefs.store.stringPrefsKey
 import org.meshtastic.core.repository.NotificationPrefs
 
 @Single
@@ -116,10 +115,10 @@ class NotificationPrefsImpl(private val dataStore: UiDataStore, dispatchers: Cor
         private fun parseOptInIds(csv: String?): List<Int> =
             csv?.split(',')?.mapNotNull { it.toIntOrNull() }?.distinct() ?: emptyList()
 
-        private val KEY_MESSAGES_ENABLED = booleanPreferencesKey("notif_messages_enabled")
-        private val KEY_NODE_EVENTS_ENABLED = booleanPreferencesKey("notif_node_events_enabled")
-        private val KEY_NODE_EVENTS_AUTO_DISABLED = booleanPreferencesKey("notif_node_events_auto_disabled_event")
-        private val KEY_LOW_BATTERY_ENABLED = booleanPreferencesKey("notif_low_battery_enabled")
-        private val KEY_GEOFENCE_ALERT_OPT_INS = stringPreferencesKey("notif_geofence_alert_opt_ins")
+        private val KEY_MESSAGES_ENABLED = booleanPrefsKey("notif_messages_enabled")
+        private val KEY_NODE_EVENTS_ENABLED = booleanPrefsKey("notif_node_events_enabled")
+        private val KEY_NODE_EVENTS_AUTO_DISABLED = booleanPrefsKey("notif_node_events_auto_disabled_event")
+        private val KEY_LOW_BATTERY_ENABLED = booleanPrefsKey("notif_low_battery_enabled")
+        private val KEY_GEOFENCE_ALERT_OPT_INS = stringPrefsKey("notif_geofence_alert_opt_ins")
     }
 }

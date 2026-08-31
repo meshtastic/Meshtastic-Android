@@ -16,9 +16,6 @@
  */
 package org.meshtastic.core.prefs.appfunctions
 
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.edit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
@@ -29,6 +26,8 @@ import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.prefs.di.AppDataStore
+import org.meshtastic.core.prefs.store.PrefsKey
+import org.meshtastic.core.prefs.store.booleanPrefsKey
 import org.meshtastic.core.repository.AppFunctionsPrefs
 
 @Single
@@ -68,23 +67,23 @@ class AppFunctionsPrefsImpl(private val dataStore: AppDataStore, dispatchers: Co
 
     override fun setGetUnreadSummaryEnabled(enabled: Boolean) = set(KEY_GET_UNREAD_SUMMARY, enabled)
 
-    private fun booleanPref(key: Preferences.Key<Boolean>, default: Boolean): StateFlow<Boolean> =
+    private fun booleanPref(key: PrefsKey<Boolean>, default: Boolean): StateFlow<Boolean> =
         dataStore.data.map { it[key] ?: default }.stateIn(scope, SharingStarted.Eagerly, default)
 
-    private fun set(key: Preferences.Key<Boolean>, value: Boolean) {
+    private fun set(key: PrefsKey<Boolean>, value: Boolean) {
         scope.launch { dataStore.edit { prefs -> prefs[key] = value } }
     }
 
     companion object {
-        private val KEY_MASTER = booleanPreferencesKey("appfn_master_enabled")
-        private val KEY_SEND_MESSAGE = booleanPreferencesKey("appfn_send_message")
-        private val KEY_GET_MESH_STATUS = booleanPreferencesKey("appfn_get_mesh_status")
-        private val KEY_GET_NODE_LIST = booleanPreferencesKey("appfn_get_node_list")
-        private val KEY_GET_CHANNEL_INFO = booleanPreferencesKey("appfn_get_channel_info")
-        private val KEY_GET_DEVICE_STATUS = booleanPreferencesKey("appfn_get_device_status")
-        private val KEY_GET_NODE_DETAILS = booleanPreferencesKey("appfn_get_node_details")
-        private val KEY_GET_MESH_METRICS = booleanPreferencesKey("appfn_get_mesh_metrics")
-        private val KEY_GET_RECENT_MESSAGES = booleanPreferencesKey("appfn_get_recent_messages")
-        private val KEY_GET_UNREAD_SUMMARY = booleanPreferencesKey("appfn_get_unread_summary")
+        private val KEY_MASTER = booleanPrefsKey("appfn_master_enabled")
+        private val KEY_SEND_MESSAGE = booleanPrefsKey("appfn_send_message")
+        private val KEY_GET_MESH_STATUS = booleanPrefsKey("appfn_get_mesh_status")
+        private val KEY_GET_NODE_LIST = booleanPrefsKey("appfn_get_node_list")
+        private val KEY_GET_CHANNEL_INFO = booleanPrefsKey("appfn_get_channel_info")
+        private val KEY_GET_DEVICE_STATUS = booleanPrefsKey("appfn_get_device_status")
+        private val KEY_GET_NODE_DETAILS = booleanPrefsKey("appfn_get_node_details")
+        private val KEY_GET_MESH_METRICS = booleanPrefsKey("appfn_get_mesh_metrics")
+        private val KEY_GET_RECENT_MESSAGES = booleanPrefsKey("appfn_get_recent_messages")
+        private val KEY_GET_UNREAD_SUMMARY = booleanPrefsKey("appfn_get_unread_summary")
     }
 }

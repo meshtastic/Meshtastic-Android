@@ -16,9 +16,6 @@
  */
 package org.meshtastic.core.prefs.meshlog
 
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.intPreferencesKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
@@ -30,6 +27,8 @@ import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.prefs.di.MeshLogDataStore
+import org.meshtastic.core.prefs.store.booleanPrefsKey
+import org.meshtastic.core.prefs.store.intPrefsKey
 import org.meshtastic.core.repository.MeshLogCleanupPolicy
 import org.meshtastic.core.repository.MeshLogPrefs
 
@@ -68,7 +67,7 @@ class MeshLogPrefsImpl(private val dataStore: MeshLogDataStore, dispatchers: Cor
         const val DEFAULT_RETENTION_DAYS = 30
         const val DEFAULT_LOGGING_ENABLED = true
 
-        val KEY_RETENTION_DAYS_PREF = intPreferencesKey(RETENTION_DAYS_KEY)
-        val KEY_LOGGING_ENABLED_PREF = booleanPreferencesKey(LOGGING_ENABLED_KEY)
+        val KEY_RETENTION_DAYS_PREF = intPrefsKey(RETENTION_DAYS_KEY)
+        val KEY_LOGGING_ENABLED_PREF = booleanPrefsKey(LOGGING_ENABLED_KEY)
     }
 }

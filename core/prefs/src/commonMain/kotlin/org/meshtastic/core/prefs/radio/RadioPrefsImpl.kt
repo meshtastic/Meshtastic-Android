@@ -16,8 +16,6 @@
  */
 package org.meshtastic.core.prefs.radio
 
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
@@ -28,6 +26,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.prefs.di.RadioDataStore
+import org.meshtastic.core.prefs.store.stringPrefsKey
 import org.meshtastic.core.repository.RadioPrefs
 
 @Single
@@ -65,7 +64,7 @@ class RadioPrefsImpl(private val dataStore: RadioDataStore, dispatchers: Corouti
     }
 
     companion object {
-        val KEY_DEV_ADDR_PREF = stringPreferencesKey("devAddr2")
-        val KEY_DEV_NAME_PREF = stringPreferencesKey("devName")
+        val KEY_DEV_ADDR_PREF = stringPrefsKey("devAddr2")
+        val KEY_DEV_NAME_PREF = stringPrefsKey("devName")
     }
 }

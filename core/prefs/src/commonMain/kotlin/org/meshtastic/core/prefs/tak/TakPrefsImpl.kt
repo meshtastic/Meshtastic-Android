@@ -16,9 +16,6 @@
  */
 package org.meshtastic.core.prefs.tak
 
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.intPreferencesKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
@@ -29,6 +26,8 @@ import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.prefs.di.UiDataStore
+import org.meshtastic.core.prefs.store.booleanPrefsKey
+import org.meshtastic.core.prefs.store.intPrefsKey
 import org.meshtastic.core.repository.TakPrefs
 
 @Single(binds = [TakPrefs::class])
@@ -57,8 +56,8 @@ class TakPrefsImpl(private val dataStore: UiDataStore, dispatchers: CoroutineDis
     }
 
     companion object {
-        val KEY_TAK_SERVER_ENABLED = booleanPreferencesKey("tak_server_enabled")
-        val KEY_TAK_MESH_TO_COT = booleanPreferencesKey("tak_mesh_to_cot")
-        val KEY_TAK_SERVER_CHANNEL = intPreferencesKey("tak_server_channel")
+        val KEY_TAK_SERVER_ENABLED = booleanPrefsKey("tak_server_enabled")
+        val KEY_TAK_MESH_TO_COT = booleanPrefsKey("tak_mesh_to_cot")
+        val KEY_TAK_SERVER_CHANNEL = intPrefsKey("tak_server_channel")
     }
 }

@@ -16,9 +16,6 @@
  */
 package org.meshtastic.core.prefs.emoji
 
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.intPreferencesKey
-import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
@@ -29,6 +26,8 @@ import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.prefs.di.CustomEmojiDataStore
+import org.meshtastic.core.prefs.store.intPrefsKey
+import org.meshtastic.core.prefs.store.stringPrefsKey
 import org.meshtastic.core.repository.CustomEmojiPrefs
 
 @Single
@@ -60,7 +59,7 @@ class CustomEmojiPrefsImpl(private val dataStore: CustomEmojiDataStore, dispatch
 
     companion object {
         const val KEY_EMOJI_FREQ = "pref_key_custom_emoji_freq"
-        val KEY_EMOJI_FREQ_PREF = stringPreferencesKey(KEY_EMOJI_FREQ)
-        val KEY_SKIN_TONE_PREF = intPreferencesKey("pref_key_skin_tone")
+        val KEY_EMOJI_FREQ_PREF = stringPrefsKey(KEY_EMOJI_FREQ)
+        val KEY_SKIN_TONE_PREF = intPrefsKey("pref_key_skin_tone")
     }
 }

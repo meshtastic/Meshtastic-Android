@@ -23,6 +23,13 @@ plugins {
 kotlin {
     android { withHostTest {} }
 
+    // Library module: bare wasmJs(), no browser() (that's for the eventual webApp executable). Unlike
+    // core:ble/core:database/core:prefs, no custom hierarchy group is needed: Location's android/jvm/ios
+    // actuals already each live in their own independent source set (no shared nonWeb code to hide from
+    // wasmJs), so a 4th, wasmJsMain/Location.kt, is all this module needs.
+    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
+    wasmJs()
+
     sourceSets {
         commonMain.dependencies {
             api(projects.core.model)

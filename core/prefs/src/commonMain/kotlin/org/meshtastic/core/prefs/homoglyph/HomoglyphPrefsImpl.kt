@@ -16,8 +16,6 @@
  */
 package org.meshtastic.core.prefs.homoglyph
 
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.edit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
@@ -28,6 +26,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.prefs.di.HomoglyphEncodingDataStore
+import org.meshtastic.core.prefs.store.booleanPrefsKey
 import org.meshtastic.core.repository.HomoglyphPrefs
 
 @Single
@@ -44,6 +43,6 @@ class HomoglyphPrefsImpl(private val dataStore: HomoglyphEncodingDataStore, disp
 
     companion object {
         const val KEY_ENABLED = "enabled"
-        val KEY_ENABLED_PREF = booleanPreferencesKey(KEY_ENABLED)
+        val KEY_ENABLED_PREF = booleanPrefsKey(KEY_ENABLED)
     }
 }

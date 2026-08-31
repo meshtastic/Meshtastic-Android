@@ -16,9 +16,6 @@
  */
 package org.meshtastic.core.prefs.analytics
 
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
@@ -30,6 +27,8 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.prefs.di.AnalyticsDataStore
 import org.meshtastic.core.prefs.di.AppDataStore
+import org.meshtastic.core.prefs.store.booleanPrefsKey
+import org.meshtastic.core.prefs.store.stringPrefsKey
 import org.meshtastic.core.repository.AnalyticsPrefs
 import kotlin.uuid.Uuid
 
@@ -67,7 +66,7 @@ class AnalyticsPrefsImpl(
         const val KEY_ANALYTICS_ALLOWED = "allowed"
         const val KEY_INSTALL_ID = "appPrefs_install_id"
 
-        val KEY_ANALYTICS_ALLOWED_PREF = booleanPreferencesKey(KEY_ANALYTICS_ALLOWED)
-        val KEY_INSTALL_ID_PREF = stringPreferencesKey(KEY_INSTALL_ID)
+        val KEY_ANALYTICS_ALLOWED_PREF = booleanPrefsKey(KEY_ANALYTICS_ALLOWED)
+        val KEY_INSTALL_ID_PREF = stringPrefsKey(KEY_INSTALL_ID)
     }
 }

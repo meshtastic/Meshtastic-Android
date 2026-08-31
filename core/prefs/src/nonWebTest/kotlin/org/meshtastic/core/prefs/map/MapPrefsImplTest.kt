@@ -14,48 +14,49 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.prefs.mesh
+package org.meshtastic.core.prefs.map
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.edit
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import okio.FileSystem
 import okio.Path
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.prefs.di.MeshDataStore
-import org.meshtastic.core.prefs.di.asMeshDataStore
+import org.meshtastic.core.prefs.di.asMapDataStore
+import org.meshtastic.core.prefs.store.asPrefsStore
+import org.meshtastic.core.repository.MapCameraPosition
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.uuid.Uuid
 
-class MeshPrefsImplTest {
+class MapPrefsImplTest {
     private lateinit var tmpDir: Path
     private lateinit var dataStore: DataStore<Preferences>
+    private lateinit var prefs: MapPrefsImpl
     private lateinit var testScope: TestScope
-    private lateinit var dispatchers: CoroutineDispatchers
 
     @BeforeTest
     fun setup() {
         val testDispatcher = UnconfinedTestDispatcher()
         testScope = TestScope(testDispatcher)
-        dispatchers = CoroutineDispatchers(testDispatcher, testDispatcher, testDispatcher)
-        tmpDir = FileSystem.SYSTEM_TEMPORARY_DIRECTORY / "meshPrefsTest-${Uuid.random()}"
+        tmpDir = FileSystem.SYSTEM_TEMPORARY_DIRECTORY / "mapPrefsTest-${Uuid.random()}"
         FileSystem.SYSTEM.createDirectories(tmpDir)
         dataStore =
             PreferenceDataStoreFactory.createWithPath(
                 scope = testScope,
                 produceFile = { tmpDir / "test.preferences_pb" },
+            )
+        prefs =
+            MapPrefsImpl(
+                dataStore.asPrefsStore().asMapDataStore(),
+                CoroutineDispatchers(testDispatcher, testDispatcher, testDispatcher),
             )
     }
 
@@ -66,23 +67,35 @@ class MeshPrefsImplTest {
     }
 
     @Test
-    fun `await device address waits for persisted data instead of returning the flow default`() = testScope.runTest {
-        val persistedAddress = "xAA:BB:CC:DD:EE:FF"
-        dataStore.edit { preferences -> preferences[MeshPrefsImpl.KEY_DEVICE_ADDRESS_PREF] = persistedAddress }
-        val loadGate = CompletableDeferred<Unit>()
-        val delegate = dataStore.asMeshDataStore()
-        val delayedDataStore =
-            object : MeshDataStore by delegate {
-                override val data = delegate.data.onStart { loadGate.await() }
-            }
-        val prefs = MeshPrefsImpl(delayedDataStore, dispatchers)
+    fun `camera is absent before the map has been positioned`() =
+        testScope.runTest { assertNull(prefs.awaitCameraPosition()) }
 
-        assertEquals("n", prefs.deviceAddress.value)
-        val snapshot = async { prefs.awaitDeviceAddress() }
-        assertFalse(snapshot.isCompleted)
+    @Test
+    fun `camera position is persisted as a complete record`() = testScope.runTest {
+        val expected = MapCameraPosition(latitude = 38.627, longitude = -90.1994, zoom = 13.5)
 
-        loadGate.complete(Unit)
+        prefs.setCameraPosition(expected)
 
-        assertEquals(persistedAddress, snapshot.await())
+        assertEquals(expected, prefs.awaitCameraPosition())
+    }
+
+    @Test
+    fun `layer opacity is absent until a slider is moved`() =
+        testScope.runTest { assertEquals(emptySet<String>(), prefs.layerOpacity.value) }
+
+    @Test
+    fun `layer opacity is persisted`() = testScope.runTest {
+        prefs.updateLayerOpacity { it + "hillshade|:|0.4" }
+
+        assertEquals(setOf("hillshade|:|0.4"), prefs.layerOpacity.value)
+    }
+
+    @Test
+    fun `a layer opacity update sees the persisted value rather than the eager default`() = testScope.runTest {
+        prefs.updateLayerOpacity { it + "hillshade|:|0.4" }
+
+        prefs.updateLayerOpacity { it + "weather|:|0.8" }
+
+        assertEquals(setOf("hillshade|:|0.4", "weather|:|0.8"), prefs.layerOpacity.value)
     }
 }

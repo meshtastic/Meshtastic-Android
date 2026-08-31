@@ -18,76 +18,72 @@
 
 package org.meshtastic.core.prefs.di
 
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
+import org.meshtastic.core.prefs.store.PrefsStore
 
 // One type per preference domain, so the compiler distinguishes them instead of a Koin string qualifier. Each is a
-// transparent `DataStore<Preferences>` — inject and use it exactly like one.
+// transparent PrefsStore — inject and use it exactly like one. PrefsStore itself (not `DataStore<Preferences>`
+// directly — androidx.datastore.preferences has no wasmJs variant) is what makes these usable from every target:
+// nonWebMain's DataStorePrefsStore adapts a real DataStore<Preferences>, wasmJsMain's LocalStoragePrefsStore is
+// backed by localStorage. See core/prefs/store/PrefsStore.kt.
 
-interface AnalyticsDataStore : DataStore<Preferences>
+interface AnalyticsDataStore : PrefsStore
 
 /** Presents an existing store as [AnalyticsDataStore]; the wrapper adds nothing but identity. */
-fun DataStore<Preferences>.asAnalyticsDataStore(): AnalyticsDataStore =
-    object : AnalyticsDataStore, DataStore<Preferences> by this {}
+fun PrefsStore.asAnalyticsDataStore(): AnalyticsDataStore = object : AnalyticsDataStore, PrefsStore by this {}
 
-interface AppDataStore : DataStore<Preferences>
+interface AppDataStore : PrefsStore
 
 /** Presents an existing store as [AppDataStore]; the wrapper adds nothing but identity. */
-fun DataStore<Preferences>.asAppDataStore(): AppDataStore = object : AppDataStore, DataStore<Preferences> by this {}
+fun PrefsStore.asAppDataStore(): AppDataStore = object : AppDataStore, PrefsStore by this {}
 
-interface CustomEmojiDataStore : DataStore<Preferences>
+interface CustomEmojiDataStore : PrefsStore
 
 /** Presents an existing store as [CustomEmojiDataStore]; the wrapper adds nothing but identity. */
-fun DataStore<Preferences>.asCustomEmojiDataStore(): CustomEmojiDataStore =
-    object : CustomEmojiDataStore, DataStore<Preferences> by this {}
+fun PrefsStore.asCustomEmojiDataStore(): CustomEmojiDataStore = object : CustomEmojiDataStore, PrefsStore by this {}
 
-interface FilterDataStore : DataStore<Preferences>
+interface FilterDataStore : PrefsStore
 
 /** Presents an existing store as [FilterDataStore]; the wrapper adds nothing but identity. */
-fun DataStore<Preferences>.asFilterDataStore(): FilterDataStore =
-    object : FilterDataStore, DataStore<Preferences> by this {}
+fun PrefsStore.asFilterDataStore(): FilterDataStore = object : FilterDataStore, PrefsStore by this {}
 
-interface HomoglyphEncodingDataStore : DataStore<Preferences>
+interface HomoglyphEncodingDataStore : PrefsStore
 
 /** Presents an existing store as [HomoglyphEncodingDataStore]; the wrapper adds nothing but identity. */
-fun DataStore<Preferences>.asHomoglyphEncodingDataStore(): HomoglyphEncodingDataStore =
-    object : HomoglyphEncodingDataStore, DataStore<Preferences> by this {}
+fun PrefsStore.asHomoglyphEncodingDataStore(): HomoglyphEncodingDataStore =
+    object : HomoglyphEncodingDataStore, PrefsStore by this {}
 
-interface MapConsentDataStore : DataStore<Preferences>
+interface MapConsentDataStore : PrefsStore
 
 /** Presents an existing store as [MapConsentDataStore]; the wrapper adds nothing but identity. */
-fun DataStore<Preferences>.asMapConsentDataStore(): MapConsentDataStore =
-    object : MapConsentDataStore, DataStore<Preferences> by this {}
+fun PrefsStore.asMapConsentDataStore(): MapConsentDataStore = object : MapConsentDataStore, PrefsStore by this {}
 
-interface MapDataStore : DataStore<Preferences>
+interface MapDataStore : PrefsStore
 
 /** Presents an existing store as [MapDataStore]; the wrapper adds nothing but identity. */
-fun DataStore<Preferences>.asMapDataStore(): MapDataStore = object : MapDataStore, DataStore<Preferences> by this {}
+fun PrefsStore.asMapDataStore(): MapDataStore = object : MapDataStore, PrefsStore by this {}
 
-interface MapTileProviderDataStore : DataStore<Preferences>
+interface MapTileProviderDataStore : PrefsStore
 
 /** Presents an existing store as [MapTileProviderDataStore]; the wrapper adds nothing but identity. */
-fun DataStore<Preferences>.asMapTileProviderDataStore(): MapTileProviderDataStore =
-    object : MapTileProviderDataStore, DataStore<Preferences> by this {}
+fun PrefsStore.asMapTileProviderDataStore(): MapTileProviderDataStore =
+    object : MapTileProviderDataStore, PrefsStore by this {}
 
-interface MeshDataStore : DataStore<Preferences>
+interface MeshDataStore : PrefsStore
 
 /** Presents an existing store as [MeshDataStore]; the wrapper adds nothing but identity. */
-fun DataStore<Preferences>.asMeshDataStore(): MeshDataStore = object : MeshDataStore, DataStore<Preferences> by this {}
+fun PrefsStore.asMeshDataStore(): MeshDataStore = object : MeshDataStore, PrefsStore by this {}
 
-interface MeshLogDataStore : DataStore<Preferences>
+interface MeshLogDataStore : PrefsStore
 
 /** Presents an existing store as [MeshLogDataStore]; the wrapper adds nothing but identity. */
-fun DataStore<Preferences>.asMeshLogDataStore(): MeshLogDataStore =
-    object : MeshLogDataStore, DataStore<Preferences> by this {}
+fun PrefsStore.asMeshLogDataStore(): MeshLogDataStore = object : MeshLogDataStore, PrefsStore by this {}
 
-interface RadioDataStore : DataStore<Preferences>
+interface RadioDataStore : PrefsStore
 
 /** Presents an existing store as [RadioDataStore]; the wrapper adds nothing but identity. */
-fun DataStore<Preferences>.asRadioDataStore(): RadioDataStore =
-    object : RadioDataStore, DataStore<Preferences> by this {}
+fun PrefsStore.asRadioDataStore(): RadioDataStore = object : RadioDataStore, PrefsStore by this {}
 
-interface UiDataStore : DataStore<Preferences>
+interface UiDataStore : PrefsStore
 
 /** Presents an existing store as [UiDataStore]; the wrapper adds nothing but identity. */
-fun DataStore<Preferences>.asUiDataStore(): UiDataStore = object : UiDataStore, DataStore<Preferences> by this {}
+fun PrefsStore.asUiDataStore(): UiDataStore = object : UiDataStore, PrefsStore by this {}

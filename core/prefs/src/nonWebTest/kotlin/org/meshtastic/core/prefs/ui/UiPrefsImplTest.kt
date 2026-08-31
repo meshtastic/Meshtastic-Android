@@ -19,7 +19,6 @@ package org.meshtastic.core.prefs.ui
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.edit
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.TestDispatcher
@@ -31,6 +30,7 @@ import okio.Path
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.prefs.di.asUiDataStore
+import org.meshtastic.core.prefs.store.asPrefsStore
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -59,7 +59,7 @@ class UiPrefsImplTest {
                 produceFile = { tmpDir / "test.preferences_pb" },
             )
         val dispatchers = CoroutineDispatchers(testDispatcher, testDispatcher, testDispatcher)
-        prefs = UiPrefsImpl(dataStore.asUiDataStore(), dispatchers)
+        prefs = UiPrefsImpl(dataStore.asPrefsStore().asUiDataStore(), dispatchers)
     }
 
     @AfterTest
@@ -70,7 +70,7 @@ class UiPrefsImplTest {
 
     @Test
     fun `explicit selected connection transport wins over legacy booleans`() = testScope.runTest {
-        dataStore.edit {
+        dataStore.asPrefsStore().edit {
             it[UiPrefsImpl.KEY_SELECTED_CONNECTION_TRANSPORT] = DeviceType.USB.name
             it[UiPrefsImpl.KEY_SHOW_BLE_TRANSPORT] = true
             it[UiPrefsImpl.KEY_SHOW_NETWORK_TRANSPORT] = true
@@ -82,7 +82,7 @@ class UiPrefsImplTest {
 
     @Test
     fun `invalid selected connection transport falls back to legacy booleans`() = testScope.runTest {
-        dataStore.edit {
+        dataStore.asPrefsStore().edit {
             it[UiPrefsImpl.KEY_SELECTED_CONNECTION_TRANSPORT] = "WIFI"
             it[UiPrefsImpl.KEY_SHOW_BLE_TRANSPORT] = false
             it[UiPrefsImpl.KEY_SHOW_NETWORK_TRANSPORT] = true
@@ -98,7 +98,7 @@ class UiPrefsImplTest {
 
     @Test
     fun `legacy selected connection transport defaults to BLE when all transports are visible`() = testScope.runTest {
-        dataStore.edit {
+        dataStore.asPrefsStore().edit {
             it[UiPrefsImpl.KEY_SHOW_BLE_TRANSPORT] = true
             it[UiPrefsImpl.KEY_SHOW_NETWORK_TRANSPORT] = true
             it[UiPrefsImpl.KEY_SHOW_USB_TRANSPORT] = true
@@ -109,7 +109,7 @@ class UiPrefsImplTest {
 
     @Test
     fun `legacy selected connection transport chooses TCP when BLE is hidden`() = testScope.runTest {
-        dataStore.edit {
+        dataStore.asPrefsStore().edit {
             it[UiPrefsImpl.KEY_SHOW_BLE_TRANSPORT] = false
             it[UiPrefsImpl.KEY_SHOW_NETWORK_TRANSPORT] = true
             it[UiPrefsImpl.KEY_SHOW_USB_TRANSPORT] = true
@@ -120,7 +120,7 @@ class UiPrefsImplTest {
 
     @Test
     fun `legacy selected connection transport chooses USB when only USB is visible`() = testScope.runTest {
-        dataStore.edit {
+        dataStore.asPrefsStore().edit {
             it[UiPrefsImpl.KEY_SHOW_BLE_TRANSPORT] = false
             it[UiPrefsImpl.KEY_SHOW_NETWORK_TRANSPORT] = false
             it[UiPrefsImpl.KEY_SHOW_USB_TRANSPORT] = true
@@ -137,7 +137,8 @@ class UiPrefsImplTest {
     fun `full message timestamps persist when enabled`() = testScope.runTest {
         prefs.setShowFullMessageTimestamps(true)
 
-        val stored = dataStore.data.first { it[UiPrefsImpl.KEY_SHOW_FULL_MESSAGE_TIMESTAMPS] == true }
+        val stored =
+            dataStore.asPrefsStore().data.first { it[UiPrefsImpl.KEY_SHOW_FULL_MESSAGE_TIMESTAMPS] == true }
         assertTrue(prefs.showFullMessageTimestamps.value)
         assertEquals(true, stored[UiPrefsImpl.KEY_SHOW_FULL_MESSAGE_TIMESTAMPS])
     }

@@ -77,6 +77,7 @@ import org.meshtastic.core.prefs.di.asMeshDataStore
 import org.meshtastic.core.prefs.di.asMeshLogDataStore
 import org.meshtastic.core.prefs.di.asRadioDataStore
 import org.meshtastic.core.prefs.di.asUiDataStore
+import org.meshtastic.core.prefs.store.asPrefsStore
 import org.meshtastic.desktop.DesktopBuildConfig
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.LocalConfig
@@ -144,20 +145,31 @@ fun desktopPlatformModule() = module {
     single(named(PROCESS_LIFECYCLE)) { DesktopProcessLifecycleOwner().lifecycle }
 }
 
-/** Typed preference-datastore singletons for each preference domain. */
+/**
+ * Typed preference-datastore singletons for each preference domain.
+ *
+ * Every core:prefs store (all but the last line) inserts [asPrefsStore] before its `asXDataStore()` call: those marker
+ * types are now `PrefsStore`-backed (androidx.datastore.preferences has no wasmJs variant, so core:prefs abstracts over
+ * it — see core/prefs/store/PrefsStore.kt), not `DataStore<Preferences>` directly. `CorePreferencesDataStore` belongs
+ * to core:datastore, a separate, unrelated module still typed directly against `DataStore<Preferences>` — left as-is.
+ */
 private fun desktopPreferencesDataStoreModule() = module {
-    single<AnalyticsDataStore> { prefsStore("analytics", get()).asAnalyticsDataStore() }
-    single<HomoglyphEncodingDataStore> { prefsStore("homoglyph_encoding", get()).asHomoglyphEncodingDataStore() }
-    single<AppDataStore> { prefsStore("app", get()).asAppDataStore() }
-    single<CustomEmojiDataStore> { prefsStore("custom_emoji", get()).asCustomEmojiDataStore() }
-    single<MapDataStore> { prefsStore("map", get()).asMapDataStore() }
-    single<MapConsentDataStore> { prefsStore("map_consent", get()).asMapConsentDataStore() }
-    single<MapTileProviderDataStore> { prefsStore("map_tile_provider", get()).asMapTileProviderDataStore() }
-    single<MeshDataStore> { prefsStore("mesh", get()).asMeshDataStore() }
-    single<RadioDataStore> { prefsStore("radio", get()).asRadioDataStore() }
-    single<UiDataStore> { prefsStore("ui", get()).asUiDataStore() }
-    single<MeshLogDataStore> { prefsStore("meshlog", get()).asMeshLogDataStore() }
-    single<FilterDataStore> { prefsStore("filter", get()).asFilterDataStore() }
+    single<AnalyticsDataStore> { prefsStore("analytics", get()).asPrefsStore().asAnalyticsDataStore() }
+    single<HomoglyphEncodingDataStore> {
+        prefsStore("homoglyph_encoding", get()).asPrefsStore().asHomoglyphEncodingDataStore()
+    }
+    single<AppDataStore> { prefsStore("app", get()).asPrefsStore().asAppDataStore() }
+    single<CustomEmojiDataStore> { prefsStore("custom_emoji", get()).asPrefsStore().asCustomEmojiDataStore() }
+    single<MapDataStore> { prefsStore("map", get()).asPrefsStore().asMapDataStore() }
+    single<MapConsentDataStore> { prefsStore("map_consent", get()).asPrefsStore().asMapConsentDataStore() }
+    single<MapTileProviderDataStore> {
+        prefsStore("map_tile_provider", get()).asPrefsStore().asMapTileProviderDataStore()
+    }
+    single<MeshDataStore> { prefsStore("mesh", get()).asPrefsStore().asMeshDataStore() }
+    single<RadioDataStore> { prefsStore("radio", get()).asPrefsStore().asRadioDataStore() }
+    single<UiDataStore> { prefsStore("ui", get()).asPrefsStore().asUiDataStore() }
+    single<MeshLogDataStore> { prefsStore("meshlog", get()).asPrefsStore().asMeshLogDataStore() }
+    single<FilterDataStore> { prefsStore("filter", get()).asPrefsStore().asFilterDataStore() }
     single<CorePreferencesDataStore> { prefsStore("core_preferences", get()).asCorePreferencesDataStore() }
 }
 
