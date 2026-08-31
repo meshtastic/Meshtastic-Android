@@ -24,7 +24,9 @@ import org.koin.core.annotation.Single
 class DesktopFirmwareUsbManager : FirmwareUsbManager {
     /**
      * Desktop offers no maintenance affordance at all: with no way to vet a bootloader volume and no CDC unblock, every
-     * path below refuses, so the section is hidden rather than shown and then dead-ended.
+     * maintenance operation below is a no-op, so the section is hidden rather than shown and then dead-ended.
+     * [ensureSerialPermission] is the exception — desktop serial access has no permission model, so preflighting it
+     * succeeds trivially.
      */
     override val supportsUf2Maintenance: Boolean = false
 
