@@ -274,6 +274,8 @@ class FakeMapPrefs : MapPrefs {
         mapStyle.value = style
     }
 
+    override suspend fun awaitMapStyle(): Int = mapStyle.value
+
     override val showOnlyFavorites = MutableStateFlow(false)
 
     override fun setShowOnlyFavorites(show: Boolean) {

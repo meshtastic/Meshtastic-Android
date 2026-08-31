@@ -131,7 +131,8 @@ class MapLibreMapViewProvider(
         sitePlannerNodeNum: Int?,
     ) {
         val viewModel: SharedMapViewModel = koinViewModel()
-        val basemaps = rememberBasemapSelection(customBasemaps())
+        // Null for the one frame before the basemap preference has loaded from disk; see rememberBasemapSelection.
+        val basemaps = rememberBasemapSelection(customBasemaps()) ?: return
 
         val cameraState = rememberCameraState()
         val location = rememberLocationControls(cameraState)

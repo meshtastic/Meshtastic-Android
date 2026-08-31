@@ -100,7 +100,8 @@ fun MapLibreInlineMap(
     customBasemaps: @Composable () -> List<Basemap.Raster> = { customRasterBasemaps() },
 ) {
     if (node.validPosition == null) return
-    val basemaps = rememberBasemapSelection(customBasemaps())
+    // Null for the one frame before the basemap preference has loaded from disk; see rememberBasemapSelection.
+    val basemaps = rememberBasemapSelection(customBasemaps()) ?: return
     val target = GeoPosition(longitude = node.longitude, latitude = node.latitude)
     val cameraState = rememberCameraState(CameraPosition(target = target, zoom = INLINE_ZOOM))
 
@@ -149,7 +150,8 @@ fun MapLibreTracerouteMap(
     customBasemaps: @Composable () -> List<Basemap.Raster> = { customRasterBasemaps() },
 ) {
     val cameraState = rememberCameraState()
-    val basemaps = rememberBasemapSelection(customBasemaps())
+    // Null for the one frame before the basemap preference has loaded from disk; see rememberBasemapSelection.
+    val basemaps = rememberBasemapSelection(customBasemaps()) ?: return
     val hops = (forwardRoute + returnRoute).distinct().mapNotNull { nodeLookup[it] }
 
     // Keyed on the hops: the route is what this map exists to frame, so a different route should re-frame it. The
@@ -188,7 +190,8 @@ fun MapLibreDiscoveryMap(
 ) {
     val scanner = GeoPosition(longitude = userLongitude, latitude = userLatitude)
     val cameraState = rememberCameraState(CameraPosition(target = scanner, zoom = DETAIL_ZOOM))
-    val basemaps = rememberBasemapSelection(customBasemaps())
+    // Null for the one frame before the basemap preference has loaded from disk; see rememberBasemapSelection.
+    val basemaps = rememberBasemapSelection(customBasemaps()) ?: return
     // The node itself, not its index. The feature carries an index into `located`, which is only meaningful for
     // the composition that built it — a scan that reports another node afterwards renumbers the list, and a held
     // index would then describe somebody else. Resolving at tap time closes that window.

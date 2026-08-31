@@ -103,7 +103,8 @@ fun MapLibreNodeTrackMap(
 
     // The basemap is a shared preference, so a track opens on whatever the main map is set to. The OSMdroid track map
     // resolved the same preference; hardcoding the default meant picking Dark on the main map and getting Liberty here.
-    val basemaps = rememberBasemapSelection(customBasemaps())
+    // Null for the one frame before the preference has loaded from disk; see rememberBasemapSelection.
+    val basemaps = rememberBasemapSelection(customBasemaps()) ?: return
 
     val viewModel: SharedMapViewModel = koinViewModel()
     val filterState by viewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
