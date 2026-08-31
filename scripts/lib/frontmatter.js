@@ -47,11 +47,10 @@ function parseListField(rawFrontmatter, key) {
 
             const inline = head[1].trim();
             if (inline.startsWith("[")) {
-                return inline
-                    .replace(/^\[|\]$/g, "")
-                    .split(",")
-                    .map(v => v.trim().replace(/^["']|["']$/g, ""))
-                    .filter(v => v.length > 0);
+                // Split on commas that sit outside quotes: a quoted scalar may legally contain one
+                // (aliases: ["serial, USB"]), and a naive split would report it as two aliases and
+                // then flag phantom drift against DocBundleLoader.
+                return splitInlineList(inline.replace(/^\[|\]$/g, ""));
             }
             if (inline.length > 0) return [inline.replace(/^["']|["']$/g, "")];
             inList = true;
@@ -93,3 +92,28 @@ function forEachDocPage(docsDir, fn) {
 }
 
 module.exports = { parseFrontmatter, parseListField, discoverSlugs, forEachDocPage };
+
+/**
+ * Split the body of an inline YAML flow sequence on top-level commas only, honouring single and
+ * double quotes. Returns trimmed, unquoted, non-empty values.
+ */
+function splitInlineList(body) {
+    const out = [];
+    let cur = "";
+    let quote = null;
+    for (const ch of body) {
+        if (quote) {
+            if (ch === quote) quote = null;
+            else cur += ch;
+        } else if (ch === '"' || ch === "'") {
+            quote = ch;
+        } else if (ch === ",") {
+            out.push(cur);
+            cur = "";
+        } else {
+            cur += ch;
+        }
+    }
+    out.push(cur);
+    return out.map(v => v.trim()).filter(v => v.length > 0);
+}
