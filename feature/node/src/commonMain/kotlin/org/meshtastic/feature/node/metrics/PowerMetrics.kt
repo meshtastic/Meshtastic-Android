@@ -403,8 +403,13 @@ private fun PowerChannelsRow1(pm: org.meshtastic.proto.PowerMetrics, channelLabe
     }
 }
 
+// PowerMetrics.ch4-ch8 are deprecated in the proto: protobufs#877 moved multi-channel ADC readings to
+// EnvironmentMetrics.adc_voltage_ch0-7, which this app already reads and graphs. These reads stay because
+// firmware predating that move still reports on ch4-ch8, and dropping them would blank the channels those
+// devices show today. Delete them, and PowerChannel.FOUR..EIGHT, once the proto removes the fields.
+// Note the migration covers voltage only - ch4-ch8 *current* has no successor field at all.
 @Composable
-@Suppress("CyclomaticComplexMethod")
+@Suppress("CyclomaticComplexMethod", "DEPRECATION")
 private fun PowerChannelsExtraRows(pm: org.meshtastic.proto.PowerMetrics, channelLabels: List<String>) {
     val hasCh456 =
         hasChannelData(pm.ch4_voltage, pm.ch4_current) ||
@@ -480,27 +485,29 @@ private fun PowerChannelColumn(titleRes: StringResource, customLabel: String?, v
 }
 
 /** Retrieves the appropriate voltage depending on `channelSelected`. */
-@Suppress("CyclomaticComplexMethod")
-private fun retrieveVoltage(channelSelected: PowerChannel, telemetry: Telemetry): Float = when (channelSelected) {
-    PowerChannel.ONE -> telemetry.power_metrics?.ch1_voltage ?: Float.NaN
-    PowerChannel.TWO -> telemetry.power_metrics?.ch2_voltage ?: Float.NaN
-    PowerChannel.THREE -> telemetry.power_metrics?.ch3_voltage ?: Float.NaN
-    PowerChannel.FOUR -> telemetry.power_metrics?.ch4_voltage ?: Float.NaN
-    PowerChannel.FIVE -> telemetry.power_metrics?.ch5_voltage ?: Float.NaN
-    PowerChannel.SIX -> telemetry.power_metrics?.ch6_voltage ?: Float.NaN
-    PowerChannel.SEVEN -> telemetry.power_metrics?.ch7_voltage ?: Float.NaN
-    PowerChannel.EIGHT -> telemetry.power_metrics?.ch8_voltage ?: Float.NaN
-}
+@Suppress("CyclomaticComplexMethod", "DEPRECATION") // ch4-ch8: see PowerChannelsExtraRows
+private fun retrieveVoltage(channelSelected: PowerChannel, telemetry: Telemetry): Float =
+    when (channelSelected) {
+        PowerChannel.ONE -> telemetry.power_metrics?.ch1_voltage ?: Float.NaN
+        PowerChannel.TWO -> telemetry.power_metrics?.ch2_voltage ?: Float.NaN
+        PowerChannel.THREE -> telemetry.power_metrics?.ch3_voltage ?: Float.NaN
+        PowerChannel.FOUR -> telemetry.power_metrics?.ch4_voltage ?: Float.NaN
+        PowerChannel.FIVE -> telemetry.power_metrics?.ch5_voltage ?: Float.NaN
+        PowerChannel.SIX -> telemetry.power_metrics?.ch6_voltage ?: Float.NaN
+        PowerChannel.SEVEN -> telemetry.power_metrics?.ch7_voltage ?: Float.NaN
+        PowerChannel.EIGHT -> telemetry.power_metrics?.ch8_voltage ?: Float.NaN
+    }
 
 /** Retrieves the appropriate current depending on `channelSelected`. */
-@Suppress("CyclomaticComplexMethod")
-private fun retrieveCurrent(channelSelected: PowerChannel, telemetry: Telemetry): Float = when (channelSelected) {
-    PowerChannel.ONE -> telemetry.power_metrics?.ch1_current ?: Float.NaN
-    PowerChannel.TWO -> telemetry.power_metrics?.ch2_current ?: Float.NaN
-    PowerChannel.THREE -> telemetry.power_metrics?.ch3_current ?: Float.NaN
-    PowerChannel.FOUR -> telemetry.power_metrics?.ch4_current ?: Float.NaN
-    PowerChannel.FIVE -> telemetry.power_metrics?.ch5_current ?: Float.NaN
-    PowerChannel.SIX -> telemetry.power_metrics?.ch6_current ?: Float.NaN
-    PowerChannel.SEVEN -> telemetry.power_metrics?.ch7_current ?: Float.NaN
-    PowerChannel.EIGHT -> telemetry.power_metrics?.ch8_current ?: Float.NaN
-}
+@Suppress("CyclomaticComplexMethod", "DEPRECATION") // ch4-ch8: see PowerChannelsExtraRows
+private fun retrieveCurrent(channelSelected: PowerChannel, telemetry: Telemetry): Float =
+    when (channelSelected) {
+        PowerChannel.ONE -> telemetry.power_metrics?.ch1_current ?: Float.NaN
+        PowerChannel.TWO -> telemetry.power_metrics?.ch2_current ?: Float.NaN
+        PowerChannel.THREE -> telemetry.power_metrics?.ch3_current ?: Float.NaN
+        PowerChannel.FOUR -> telemetry.power_metrics?.ch4_current ?: Float.NaN
+        PowerChannel.FIVE -> telemetry.power_metrics?.ch5_current ?: Float.NaN
+        PowerChannel.SIX -> telemetry.power_metrics?.ch6_current ?: Float.NaN
+        PowerChannel.SEVEN -> telemetry.power_metrics?.ch7_current ?: Float.NaN
+        PowerChannel.EIGHT -> telemetry.power_metrics?.ch8_current ?: Float.NaN
+    }

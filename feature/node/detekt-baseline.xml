@@ -51,7 +51,7 @@
     <ID>MultipleEmitters:AdministrationSection.kt:@Composable private fun FirmwareVersionItems</ID>
     <ID>MultipleEmitters:HostMetricsLog.kt:@Composable private fun LoadRow</ID>
     <ID>MultipleEmitters:PositionSection.kt:@Composable internal fun PositionInlineContent</ID>
-    <ID>MultipleEmitters:PowerMetrics.kt:@Composable @Suppress("CyclomaticComplexMethod") private fun PowerChannelsExtraRows</ID>
+    <ID>MultipleEmitters:PowerMetrics.kt:@Composable @Suppress("CyclomaticComplexMethod", "DEPRECATION") private fun PowerChannelsExtraRows</ID>
     <ID>MultipleEmitters:TracerouteLog.kt:@Composable private fun TracerouteCardMetrics</ID>
     <ID>MutableStateAutoboxing:CooldownOutlinedIconButton.kt:mutableStateOf(0f)</ID>
     <ID>MutableStateAutoboxing:TracerouteMapScreen.kt:mutableStateOf(0)</ID>

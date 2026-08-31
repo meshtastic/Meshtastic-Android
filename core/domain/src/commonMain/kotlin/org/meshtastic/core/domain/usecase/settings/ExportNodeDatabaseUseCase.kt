@@ -175,6 +175,10 @@ private fun EnvironmentMetrics.toExport(): EnvironmentMetricsExport? = Environme
 )
     .takeUnless { it == EnvironmentMetricsExport() }
 
+// ch4-ch8 are deprecated in the proto (protobufs#877 moved ADC readings to
+// EnvironmentMetrics.adc_voltage_ch0-7). Exports must still carry them: they are the only record of what
+// firmware predating that move reported, and an export that silently dropped them would lose stored history.
+@Suppress("DEPRECATION")
 private fun PowerMetrics.toExport(): PowerMetricsExport? = PowerMetricsExport(
     ch1Voltage = ch1_voltage,
     ch1Current = ch1_current,
