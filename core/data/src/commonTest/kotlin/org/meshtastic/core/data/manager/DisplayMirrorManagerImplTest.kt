@@ -171,6 +171,39 @@ class DisplayMirrorManagerImplTest {
         assertEquals(8, manager.palette.value?.signature)
     }
 
+    @Test
+    fun `reset clears frames palettes and partial state`() {
+        manager.handleIncomingFrame(chunk(width = 64, height = 32, total = 256, data = bytes(256, 7)))
+        manager.handleIncomingPalette(
+            DisplayPalette(signature = 9, region_offset = 0, region_total = 0, regions = emptyList()),
+        )
+
+        manager.reset()
+
+        assertNull(manager.frame.value)
+        assertNull(manager.palette.value)
+    }
+
+    @Test
+    fun `rejects palettes past the region cap`() {
+        val region = DisplayPalette.ColorRegion(x = 0, y = 0, width = 8, height = 8)
+        manager.handleIncomingPalette(
+            DisplayPalette(signature = 3, region_offset = 0, region_total = 100_000, regions = listOf(region)),
+        )
+
+        assertNull(manager.palette.value)
+    }
+
+    @Test
+    fun `chunk that changes geometry mid-frame is dropped`() {
+        manager.handleIncomingFrame(chunk(offset = 0, data = bytes(384, 1)))
+        // Transposed geometry with the same total size must not complete the frame
+        manager.handleIncomingFrame(chunk(width = 64, height = 128, offset = 384, data = bytes(384, 2)))
+        manager.handleIncomingFrame(chunk(offset = 768, data = bytes(256, 3)))
+
+        assertNull(manager.frame.value)
+    }
+
     private companion object {
         const val WIDTH = 128
         const val HEIGHT = 64
