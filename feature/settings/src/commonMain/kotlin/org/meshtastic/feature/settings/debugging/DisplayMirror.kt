@@ -55,7 +55,6 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
@@ -67,6 +66,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
+import org.meshtastic.core.repository.MirrorFormat
 import org.meshtastic.core.repository.MirrorFrame
 import org.meshtastic.core.repository.MirrorPalette
 import org.meshtastic.core.resources.Res
@@ -81,6 +81,7 @@ import org.meshtastic.core.resources.mirror_keyboard
 import org.meshtastic.core.resources.mirror_no_frame
 import org.meshtastic.core.resources.mirror_not_connected
 import org.meshtastic.core.resources.mirror_off
+import org.meshtastic.core.resources.mirror_view_only
 import org.meshtastic.core.resources.refresh
 import org.meshtastic.proto.DisplayInfo
 
@@ -96,17 +97,6 @@ private val SWIPE_THRESHOLD = 48.dp
 
 // Mirror + D-pad fit comfortably side by side above this content width.
 private val SIDE_BY_SIDE_MIN_WIDTH = 760.dp
-
-// Firmware input_broker_event codes (src/input/InputBroker.h). USER_PRESS is
-// what physical touch drivers emit for a tap, with touch coordinates attached.
-internal const val INPUT_SELECT = 10
-internal const val INPUT_SELECT_LONG = 11
-internal const val INPUT_UP = 17
-internal const val INPUT_DOWN = 18
-internal const val INPUT_LEFT = 19
-internal const val INPUT_RIGHT = 20
-internal const val INPUT_BACK = 27
-internal const val INPUT_USER_PRESS = 28
 
 /** Live view of the connected device's screen, with remote D-pad, keyboard, and touch control. */
 @Composable
@@ -169,6 +159,9 @@ fun DisplayMirrorContent(modifier: Modifier = Modifier, viewModel: DisplayMirror
                     currentFrame,
                     palette,
                     enabled = connected,
+                    // MUI (RGB565) devices read their own input drivers, not the
+                    // InputBroker remote events inject into — mirror-only for now.
+                    inputSupported = currentFrame.format != MirrorFormat.RGB565,
                     hasTouch = displayInfo?.has_touch == true,
                     onEvent = viewModel::sendKey,
                     onTouch = viewModel::sendTouch,
@@ -184,12 +177,13 @@ private fun MirrorWithControls(
     frame: MirrorFrame,
     palette: MirrorPalette?,
     enabled: Boolean,
+    inputSupported: Boolean,
     hasTouch: Boolean,
     onEvent: (Int) -> Unit,
     onTouch: (Int, Int, Int) -> Unit,
 ) {
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-        if (maxWidth >= SIDE_BY_SIDE_MIN_WIDTH) {
+        if (maxWidth >= SIDE_BY_SIDE_MIN_WIDTH && inputSupported) {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterHorizontally),
                 verticalAlignment = Alignment.CenterVertically,
@@ -204,10 +198,27 @@ private fun MirrorWithControls(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                MirrorSurface(frame, palette, hasTouch, onEvent, onTouch)
-                DpadCluster(enabled = enabled, onEvent = onEvent)
+                if (inputSupported) {
+                    MirrorSurface(frame, palette, hasTouch, onEvent, onTouch)
+                    DpadCluster(enabled = enabled, onEvent = onEvent)
+                } else {
+                    ViewOnlyMirror(frame, palette)
+                }
             }
         }
+    }
+}
+
+/** Mirror without any input affordances, for device UIs that do not accept remote input yet. */
+@Composable
+private fun ViewOnlyMirror(frame: MirrorFrame, palette: MirrorPalette?, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        MirrorFrameImage(frame, palette)
+        Text(text = stringResource(Res.string.mirror_view_only), style = MaterialTheme.typography.labelSmall)
     }
 }
 
@@ -307,34 +318,6 @@ private fun MirrorControlHints(focused: Boolean, hasTouch: Boolean, onToggleKeyb
     }
 }
 
-/** Scales a tap position on the scaled-up mirror image back to panel pixel coordinates. */
-private fun Offset.toDeviceX(boxWidthPx: Int, frame: MirrorFrame): Int =
-    (x / boxWidthPx * frame.width).toInt().coerceIn(0, frame.width - 1)
-
-private fun Offset.toDeviceY(boxHeightPx: Int, frame: MirrorFrame): Int =
-    (y / boxHeightPx * frame.height).toInt().coerceIn(0, frame.height - 1)
-
-private fun keyToInputEvent(key: Key): Int? = when (key) {
-    Key.DirectionUp -> INPUT_UP
-
-    Key.DirectionDown -> INPUT_DOWN
-
-    Key.DirectionLeft -> INPUT_LEFT
-
-    Key.DirectionRight -> INPUT_RIGHT
-
-    Key.Enter,
-    Key.NumPadEnter,
-    Key.Spacebar,
-    -> INPUT_SELECT
-
-    Key.Escape,
-    Key.Backspace,
-    -> INPUT_BACK
-
-    else -> null
-}
-
 /** Converts a completed drag into one direction event along its dominant axis, ignoring short accidental swipes. */
 private fun Modifier.swipeToDirection(onEvent: (Int) -> Unit): Modifier = pointerInput(Unit) {
     val threshold = SWIPE_THRESHOLD.toPx()
@@ -405,7 +388,3 @@ private fun BackKey(enabled: Boolean, onBack: () -> Unit) {
         )
     }
 }
-
-@Composable
-private fun contentColorFor(enabled: Boolean): Color =
-    if (enabled) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
