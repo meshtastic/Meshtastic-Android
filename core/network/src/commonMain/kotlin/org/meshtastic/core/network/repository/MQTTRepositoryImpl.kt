@@ -61,9 +61,6 @@ import org.meshtastic.mqtt.MqttMessage
 import org.meshtastic.mqtt.QoS
 import org.meshtastic.mqtt.ReasonCode
 import org.meshtastic.mqtt.packet.Subscription
-import org.meshtastic.mqtt.plus
-import org.meshtastic.mqtt.transport.tcp.TcpTransportFactory
-import org.meshtastic.mqtt.transport.ws.WebSocketTransportFactory
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.MqttClientProxyMessage
 import org.meshtastic.proto.ServiceEnvelope
@@ -448,10 +445,11 @@ private class DefaultMqttClientSession(private val delegate: MqttClient) : MqttC
 private fun defaultMqttClientFactory(setup: MqttClientSetup): MqttClientSession = DefaultMqttClientSession(
     MqttClient(setup.ownerId) {
         // mqtt-client 0.4.0 makes transport a required SPI: the client throws at connect if unset.
-        // Register TCP/TLS (the default) + WebSocket (for user-entered ws://-/wss:// brokers).
-        // Both get the same private-CA trust hook so the grant stays scoped to this socket — see [mqttTlsConfig].
+        // mqttTransportFactory() composes the platform's transport(s) (TCP+WS off web, WS-only on web — see
+        // MqttTransportSelection.kt); both get the same private-CA trust hook, scoped to this socket — see
+        // [mqttTlsConfig].
         val tls = mqttTlsConfig()
-        transportFactory = TcpTransportFactory(tls) + WebSocketTransportFactory(tls)
+        transportFactory = mqttTransportFactory(tls)
         keepAliveSeconds = MQTT_KEEPALIVE_SECONDS
         autoReconnect = true
         val (user, pass) = effectiveCredentials(setup.mqttConfig)
