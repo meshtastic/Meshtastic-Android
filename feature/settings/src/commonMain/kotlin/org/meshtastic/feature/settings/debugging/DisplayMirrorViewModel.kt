@@ -83,6 +83,9 @@ class DisplayMirrorViewModel(
 
     fun sendKey(eventCode: Int) = adminController.sendInputEvent(eventCode)
 
+    /** Forwards a typed character; the device UI receives it as a key press rather than a navigation event. */
+    fun sendChar(codePoint: Int) = adminController.sendInputEvent(INPUT_ANYKEY, kbChar = codePoint)
+
     /** Forwards a tap/long-press on the mirrored image as a device touch event with panel coordinates. */
     fun sendTouch(eventCode: Int, x: Int, y: Int) = adminController.sendInputEvent(eventCode, touchX = x, touchY = y)
 
