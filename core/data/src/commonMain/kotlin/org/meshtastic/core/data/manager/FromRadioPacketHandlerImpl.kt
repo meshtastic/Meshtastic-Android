@@ -22,6 +22,7 @@ import kotlinx.coroutines.SupervisorJob
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.model.util.isOtaStatusNotification
+import org.meshtastic.core.repository.DisplayMirrorManager
 import org.meshtastic.core.repository.FirmwareUpdateStatusRepository
 import org.meshtastic.core.repository.FromRadioPacketHandler
 import org.meshtastic.core.repository.LockdownCoordinator
@@ -54,6 +55,7 @@ class FromRadioPacketHandlerImpl(
     private val configFlowManager: Lazy<MeshConfigFlowManager>,
     private val configHandler: Lazy<MeshConfigHandler>,
     private val xmodemManager: Lazy<XModemManager>,
+    private val displayMirrorManager: Lazy<DisplayMirrorManager>,
     private val mqttManager: MqttManager,
     private val packetHandler: PacketHandler,
     private val serviceNotifications: MeshNotificationManager,
@@ -83,6 +85,7 @@ class FromRadioPacketHandlerImpl(
         val regionPresets = proto.region_presets
         val xmodemPacket = proto.xmodemPacket
         val lockdownStatus = proto.lockdown_status
+        val displayFrame = proto.display_frame
 
         when {
             myInfo != null -> configFlowManager.value.handleMyInfo(myInfo, session)
@@ -129,6 +132,11 @@ class FromRadioPacketHandlerImpl(
 
             xmodemPacket != null ->
                 runIfSessionActive(session, "XModem packet") { xmodemManager.value.handleIncomingXModem(xmodemPacket) }
+
+            displayFrame != null ->
+                runIfSessionActive(session, "display frame") {
+                    displayMirrorManager.value.handleIncomingFrame(displayFrame)
+                }
 
             lockdownStatus != null ->
                 runIfSessionActive(session, "lockdown status") {

@@ -51,6 +51,18 @@ interface AdminController {
     /** Updates a local radio channel. Same fire-and-forget contract as [setLocalConfig]. */
     suspend fun setLocalChannel(channel: Channel)
 
+    /**
+     * Enables or disables live display mirroring on the locally connected node. While enabled, the device streams its
+     * framebuffer as `FromRadio.display_frame` chunks — collect them via [DisplayMirrorManager].
+     */
+    suspend fun setDisplayMirror(enabled: Boolean)
+
+    /**
+     * Injects a physical input event (button/key/touch) into the locally connected node's UI via the firmware
+     * InputBroker. Event codes are the firmware's `input_broker_event` values.
+     */
+    suspend fun sendInputEvent(eventCode: Int, kbChar: Int = 0, touchX: Int = 0, touchY: Int = 0)
+
     // ── Remote configuration ────────────────────────────────────────────────
 
     /** Updates the owner (user info) on a remote node. */
