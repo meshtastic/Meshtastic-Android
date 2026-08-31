@@ -103,8 +103,8 @@ fi
 echo "✅ No DEPENDENCY_INFO_BLOCK in signing block"
 
 echo "── Step 6: Check native libraries have debug symbols (not stripped) ──"
-# shellcheck source=lib/stripped-libs.sh
-. "$(dirname "$0")/lib/stripped-libs.sh"
+# Run from repo root (see header), so this is a static path shellcheck -x can follow.
+. scripts/lib/stripped-libs.sh
 scan_stripped_libs "$APK_DIR"
 if [ -n "$STRIPPED_UNEXPECTED" ]; then
   echo "::warning::Unexpected stripped native libraries (may cause NDK-version-dependent RB failures):${STRIPPED_UNEXPECTED}"

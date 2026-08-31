@@ -227,7 +227,10 @@ jobs:
           bash <(curl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/v1.7.12/scripts/download-actionlint.bash) 1.7.12 /tmp
           /tmp/actionlint -color
       - name: Lint repo shell scripts (shellcheck)
-        run: shellcheck scripts/*.sh
+        # -x so sourced libraries are followed into rather than reported as SC1091, and
+        # find rather than a glob: scripts/*.sh missed scripts/lib/, scripts/docs/ and
+        # scripts/verify-flatpak/ entirely.
+        run: find scripts -name '*.sh' -print0 | xargs -0 shellcheck -x
       - name: Validate store listing metadata lengths
         run: python3 scripts/check-metadata-length.py
       # Compose Multiplatform does not strip Android-style \" / \' escapes, so a
