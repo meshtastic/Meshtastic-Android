@@ -58,24 +58,30 @@ data class MirrorPalette(
     val regions: List<DisplayPalette.ColorRegion>,
 )
 
-/**
- * One complete device framebuffer snapshot.
- *
- * [pixels] is MONO_VLSB: 1 bit per pixel in vertical LSB-first pages — byte index = `x + (y / 8) * width`, bit index =
- * `y % 8`.
- */
+/** Pixel encodings a [MirrorFrame] can carry. */
+enum class MirrorFormat {
+    /** 1 bit per pixel, vertical LSB-first pages — byte index `x + (y / 8) * width`, bit index `y % 8`. */
+    MONO_VLSB,
+
+    /** 16 bits per pixel, little-endian RGB565, rows tightly packed. */
+    RGB565,
+}
+
+/** One complete device framebuffer snapshot in [format]. */
 data class MirrorFrame(
     val width: Int,
     val height: Int,
     val frameId: Int,
     val paletteSignature: Int,
     val pixels: ByteArray,
+    val format: MirrorFormat = MirrorFormat.MONO_VLSB,
 ) {
     override fun equals(other: Any?): Boolean = other is MirrorFrame &&
         other.width == width &&
         other.height == height &&
         other.frameId == frameId &&
         other.paletteSignature == paletteSignature &&
+        other.format == format &&
         other.pixels.contentEquals(pixels)
 
     override fun hashCode(): Int {
