@@ -27,6 +27,7 @@ import dev.mokkery.verify
 import dev.mokkery.verify.VerifyMode
 import dev.mokkery.verifySuspend
 import org.meshtastic.core.model.util.isOtaStatusNotification
+import org.meshtastic.core.repository.DisplayMirrorManager
 import org.meshtastic.core.repository.FirmwareUpdateStatusRepository
 import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.MeshConfigHandler
@@ -43,6 +44,7 @@ import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceMetadata
+import org.meshtastic.proto.DisplayFrame
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.LoRaRegionPresetMap
 import org.meshtastic.proto.LockdownStatus
@@ -68,6 +70,7 @@ class FromRadioPacketHandlerImplTest {
     private val configFlowManager: MeshConfigFlowManager = mock(MockMode.autofill)
     private val configHandler: MeshConfigHandler = mock(MockMode.autofill)
     private val xmodemManager: XModemManager = mock(MockMode.autofill)
+    private val displayMirrorManager: DisplayMirrorManager = mock(MockMode.autofill)
     private val lockdownCoordinator = FakeLockdownCoordinator()
     private val firmwareUpdateStatusRepository = FirmwareUpdateStatusRepository()
     private val radioInterfaceService: RadioInterfaceService = mock(MockMode.autofill)
@@ -105,6 +108,7 @@ class FromRadioPacketHandlerImplTest {
                 lazy { configFlowManager },
                 lazy { configHandler },
                 lazy { xmodemManager },
+                lazy { displayMirrorManager },
                 mqttManager,
                 packetHandler,
                 notificationManager,
@@ -220,11 +224,22 @@ class FromRadioPacketHandlerImplTest {
         handle(FromRadio(queueStatus = queueStatus))
         handle(FromRadio(xmodemPacket = xmodemPacket))
         handle(FromRadio(lockdown_status = lockdownStatus))
+        handle(FromRadio(display_frame = DisplayFrame(width = 128, height = 64)))
 
         verify(mode = VerifyMode.exactly(0)) { mqttManager.handleMqttProxyMessage(any()) }
         verify(mode = VerifyMode.exactly(0)) { packetHandler.handleQueueStatus(any()) }
         verify(mode = VerifyMode.exactly(0)) { xmodemManager.handleIncomingXModem(any()) }
+        verify(mode = VerifyMode.exactly(0)) { displayMirrorManager.handleIncomingFrame(any()) }
         assertEquals(null, lockdownCoordinator.lastStatus)
+    }
+
+    @Test
+    fun `handleFromRadio routes DISPLAY_FRAME to displayMirrorManager`() {
+        val frame = DisplayFrame(width = 128, height = 64, frame_id = 1, total_size = 1024)
+
+        handle(FromRadio(display_frame = frame))
+
+        verify { displayMirrorManager.handleIncomingFrame(frame) }
     }
 
     @Test
