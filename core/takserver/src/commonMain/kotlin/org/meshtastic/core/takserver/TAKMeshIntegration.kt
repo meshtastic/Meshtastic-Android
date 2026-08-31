@@ -21,6 +21,7 @@ package org.meshtastic.core.takserver
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
@@ -34,6 +35,7 @@ import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.TakPrefs
+import org.meshtastic.core.repository.TakServerIntegration
 import org.meshtastic.core.takserver.TAKPacketConversion.toCoTMessage
 import org.meshtastic.core.takserver.TAKPacketConversion.toTAKPacket
 import org.meshtastic.core.takserver.TAKPacketV2Conversion.toTAKPacketV2
@@ -98,8 +100,13 @@ class TAKMeshIntegration(
     private val nodeRepository: NodeRepository,
     private val meshToCotBroadcaster: MeshToCotBroadcaster,
     private val takPrefs: TakPrefs,
-) {
-    private val isRunning = AtomicBoolean(false)
+) : TakServerIntegration {
+    // This class's own start()/stop() re-entrancy latch (below) — distinct from isRunning, which reports
+    // the underlying TAK server's actual running state via TAKServerManager.
+    private val isRunningState = AtomicBoolean(false)
+
+    override val isRunning: StateFlow<Boolean>
+        get() = takServerManager.isRunning
 
     // Immutable list reference replaced atomically in start()/stop(); never mutated in-place.
     // @Volatile only guarantees visibility of the reference itself — any in-place mutation
@@ -115,8 +122,8 @@ class TAKMeshIntegration(
     // from the single meshPacketFlow collector coroutine (handleMeshPacket), so no locking.
     private val deliveryDedup = CotDeliveryDedup()
 
-    fun start(scope: CoroutineScope) {
-        if (!isRunning.compareAndSet(expectedValue = false, newValue = true)) return
+    override fun start(scope: CoroutineScope) {
+        if (!isRunningState.compareAndSet(expectedValue = false, newValue = true)) return
 
         takServerManager.start(scope)
 
@@ -178,8 +185,8 @@ class TAKMeshIntegration(
         Logger.i { "TAK Mesh Integration started — firmware=$fw, outbound=$proto" }
     }
 
-    fun stop() {
-        if (!isRunning.compareAndSet(expectedValue = true, newValue = false)) return
+    override fun stop() {
+        if (!isRunningState.compareAndSet(expectedValue = true, newValue = false)) return
         val toCancel = jobs
         jobs = emptyList()
         toCancel.forEach(Job::cancel)

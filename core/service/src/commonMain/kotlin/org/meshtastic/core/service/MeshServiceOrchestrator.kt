@@ -42,11 +42,10 @@ import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceStateWriter
 import org.meshtastic.core.repository.TakPrefs
+import org.meshtastic.core.repository.TakServerIntegration
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.resources.local_network_permission_denied_hint
-import org.meshtastic.core.takserver.TAKMeshIntegration
-import org.meshtastic.core.takserver.TAKServerManager
 
 // English fallback for local_network_permission_denied_hint when resource lookup is unavailable. Kept above the
 // class KDoc so that KDoc still binds to the class. Internal so tests can assert the exact surfaced text.
@@ -70,8 +69,7 @@ class MeshServiceOrchestrator(
     private val nodeManager: NodeManager,
     private val messageProcessor: MeshMessageProcessor,
     private val serviceNotifications: MeshNotificationManager,
-    private val takServerManager: TAKServerManager,
-    private val takMeshIntegration: TAKMeshIntegration,
+    private val takServerIntegration: TakServerIntegration,
     private val takPrefs: TakPrefs,
     private val databaseManager: DatabaseManager,
     private val connectionManager: MeshConnectionManager,
@@ -167,12 +165,12 @@ class MeshServiceOrchestrator(
         // Observe TAK server pref to start/stop
         takPrefs.isTakServerEnabled
             .onEach { isEnabled ->
-                if (isEnabled && !takServerManager.isRunning.value) {
+                if (isEnabled && !takServerIntegration.isRunning.value) {
                     Logger.i { "TAK Server enabled by preference, starting integration" }
-                    takMeshIntegration.start(newScope)
+                    takServerIntegration.start(newScope)
                 } else if (!isEnabled) {
                     Logger.i { "TAK Server disabled by preference, stopping integration" }
-                    takMeshIntegration.stop()
+                    takServerIntegration.stop()
                 }
             }
             .launchIn(newScope)
@@ -223,7 +221,7 @@ class MeshServiceOrchestrator(
      */
     fun stop() {
         Logger.i { "Stopping mesh service orchestrator" }
-        takMeshIntegration.stop()
+        takServerIntegration.stop()
         // Best-effort polite goodbye on service teardown (onDestroy / process shutdown). We launch
         // on a fresh detached scope — not the orchestrator's per-start scope — so the subsequent
         // scope.cancel() below doesn't interrupt the short drain delay inside disconnect(). The

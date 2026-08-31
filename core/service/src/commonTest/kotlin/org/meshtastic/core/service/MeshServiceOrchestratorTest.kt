@@ -38,26 +38,20 @@ import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.common.util.safeCatchingAll
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.repository.CommandSender
-import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshMessageProcessor
 import org.meshtastic.core.repository.MeshNotificationManager
 import org.meshtastic.core.repository.NodeManager
-import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.ReceivedRadioFrame
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.TakPrefs
+import org.meshtastic.core.repository.TakServerIntegration
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.resources.local_network_permission_denied_hint
-import org.meshtastic.core.takserver.MeshToCotBroadcaster
-import org.meshtastic.core.takserver.TAKMeshIntegration
-import org.meshtastic.core.takserver.TAKServerManager
 import org.meshtastic.proto.FromRadio
-import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.MyNodeInfo
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -75,12 +69,9 @@ class MeshServiceOrchestratorTest {
     private val nodeManager: NodeManager = mock(MockMode.autofill)
 
     private val messageProcessor: MeshMessageProcessor = mock(MockMode.autofill)
-    private val commandSender: CommandSender = mock(MockMode.autofill)
-    private val meshConfigHandler: MeshConfigHandler = mock(MockMode.autofill)
     private val serviceNotifications: MeshNotificationManager = mock(MockMode.autofill)
-    private val takServerManager: TAKServerManager = mock(MockMode.autofill)
+    private val takServerIntegration: TakServerIntegration = mock(MockMode.autofill)
     private val takPrefs: TakPrefs = mock(MockMode.autofill)
-    private val nodeRepository: NodeRepository = mock(MockMode.autofill)
     private val databaseManager: DatabaseManager = mock(MockMode.autofill)
     private val connectionManager: MeshConnectionManager = mock(MockMode.autofill)
 
@@ -120,40 +111,8 @@ class MeshServiceOrchestratorTest {
             {
                 isSessionActive(it.args[0] as RadioSessionContext)
             }
-        every { serviceRepository.meshPacketFlow } returns MutableSharedFlow()
-        every { meshConfigHandler.moduleConfig } returns MutableStateFlow(LocalModuleConfig())
         every { takPrefs.isTakServerEnabled } returns takEnabledFlow
-        every { takPrefs.isMeshToCotEnabled } returns MutableStateFlow(false)
-        every { takPrefs.takServerChannel } returns MutableStateFlow(0)
-        every { takServerManager.isRunning } returns takRunningFlow
-        every { takServerManager.inboundMessages } returns MutableSharedFlow()
-        every { nodeRepository.myNodeInfo } returns MutableStateFlow(null)
-
-        // Deliberately its own dispatcher, not the class-level testDispatcher: the broadcaster's
-        // scheduler doesn't need to be the same one driving this test, and a distinct name keeps
-        // that from reading as though the two are linked.
-        val broadcasterTestDispatcher = UnconfinedTestDispatcher()
-        val takMeshIntegration =
-            TAKMeshIntegration(
-                takServerManager = takServerManager,
-                commandSender = commandSender,
-                serviceRepository = serviceRepository,
-                meshConfigHandler = meshConfigHandler,
-                nodeRepository = nodeRepository,
-                takPrefs = takPrefs,
-                meshToCotBroadcaster =
-                MeshToCotBroadcaster(
-                    takServerManager = takServerManager,
-                    nodeRepository = nodeRepository,
-                    takPrefs = takPrefs,
-                    dispatchers =
-                    CoroutineDispatchers(
-                        io = broadcasterTestDispatcher,
-                        main = broadcasterTestDispatcher,
-                        default = broadcasterTestDispatcher,
-                    ),
-                ),
-            )
+        every { takServerIntegration.isRunning } returns takRunningFlow
 
         return MeshServiceOrchestrator(
             radioInterfaceService = radioInterfaceService,
@@ -161,8 +120,7 @@ class MeshServiceOrchestratorTest {
             nodeManager = nodeManager,
             messageProcessor = messageProcessor,
             serviceNotifications = serviceNotifications,
-            takServerManager = takServerManager,
-            takMeshIntegration = takMeshIntegration,
+            takServerIntegration = takServerIntegration,
             takPrefs = takPrefs,
             databaseManager = databaseManager,
             connectionManager = connectionManager,
@@ -202,14 +160,23 @@ class MeshServiceOrchestratorTest {
 
         // Toggle on
         takEnabledFlow.value = true
-        verify { takServerManager.start(any()) }
+        // Exactly 1, not just "at least 1": nothing before this point could have called start() — the
+        // orchestrator's collector's only prior emission (isTakServerEnabled's initial `false`) takes the
+        // stop() branch instead — so this genuinely proves the toggle drove it.
+        verify(exactly(1)) { takServerIntegration.start(any()) }
 
         // Update mock state to reflect it's running
         takRunningFlow.value = true
 
         // Toggle off
         takEnabledFlow.value = false
-        verify { takServerManager.stop() }
+        // Exactly 2, not 1: the real TAKMeshIntegration this mock replaces has its own start()/stop()
+        // re-entrancy latch, so its initial no-op stop() (from isTakServerEnabled's starting `false`
+        // value, before "Toggle on" above) never reached the wrapped TAKServerManager it forwards to. A
+        // bare interface mock has no such latch — the orchestrator really does call stop() twice here
+        // (once at that initial emission, once for this toggle) — so asserting exactly(1) would fail,
+        // and a bare `verify { stop() }` would pass without proving *this* toggle caused a call.
+        verify(exactly(2)) { takServerIntegration.stop() }
 
         orchestrator.stop()
     }
@@ -219,14 +186,26 @@ class MeshServiceOrchestratorTest {
         val takEnabledFlow = MutableStateFlow(false)
         val takRunningFlow = MutableStateFlow(false)
         val lifecycleEvents = mutableListOf<String>()
-        every { takServerManager.start(any()) } calls
+        // The real TAKMeshIntegration this mock replaces has its own start()/stop() re-entrancy latch
+        // (a CAS'd AtomicBoolean) so a redundant stop() while already stopped — or a redundant start()
+        // while already started — is a silent no-op instead of forwarding to TAKServerManager. A bare
+        // autofill mock has no such state, so replicate the latch here to keep asserting the real
+        // lifecycle sequence rather than every call the orchestrator happens to make.
+        var started = false
+        every { takServerIntegration.start(any()) } calls
             {
-                lifecycleEvents += "start"
+                if (!started) {
+                    started = true
+                    lifecycleEvents += "start"
+                }
                 Unit
             }
-        every { takServerManager.stop() } calls
+        every { takServerIntegration.stop() } calls
             {
-                lifecycleEvents += "stop"
+                if (started) {
+                    started = false
+                    lifecycleEvents += "stop"
+                }
                 Unit
             }
         val orchestrator = createOrchestrator(takEnabledFlow = takEnabledFlow, takRunningFlow = takRunningFlow)
@@ -248,14 +227,23 @@ class MeshServiceOrchestratorTest {
         val takEnabledFlow = MutableStateFlow(true)
         val takRunningFlow = MutableStateFlow(false)
         val lifecycleEvents = mutableListOf<String>()
-        every { takServerManager.start(any()) } calls
+        // See testTakServerCanRetryAfterFailedStart for why this latch replicates the real
+        // TAKMeshIntegration's own start()/stop() re-entrancy guard.
+        var started = false
+        every { takServerIntegration.start(any()) } calls
             {
-                lifecycleEvents += "start"
+                if (!started) {
+                    started = true
+                    lifecycleEvents += "start"
+                }
                 Unit
             }
-        every { takServerManager.stop() } calls
+        every { takServerIntegration.stop() } calls
             {
-                lifecycleEvents += "stop"
+                if (started) {
+                    started = false
+                    lifecycleEvents += "stop"
+                }
                 Unit
             }
         val orchestrator = createOrchestrator(takEnabledFlow = takEnabledFlow, takRunningFlow = takRunningFlow)
