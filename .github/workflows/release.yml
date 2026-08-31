@@ -168,7 +168,7 @@ jobs:
           echo "$GOOGLE_PLAY_JSON_KEY" > ./fastlane/play-store-credentials.json
 
       - name: Setup Fastlane
-        uses: ruby/setup-ruby@e5517072e87f198d9533967ae13d97c11b604005 # v1.99.0
+        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
         with:
           ruby-version: '4.0.6'
           bundler-cache: true
@@ -239,7 +239,7 @@ jobs:
           echo "$KEYSTORE_PROPERTIES" > ./keystore.properties
 
       - name: Setup Fastlane
-        uses: ruby/setup-ruby@e5517072e87f198d9533967ae13d97c11b604005 # v1.99.0
+        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
         with:
           ruby-version: '4.0.6'
           bundler-cache: true
