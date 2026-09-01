@@ -47,8 +47,9 @@ private val MAX_CANVAS_WIDTH = 512.dp
 private const val PIXELS_PER_PAGE = 8
 
 /**
- * Renders a MONO_VLSB 1bpp framebuffer once per frame into a 1:1 [ImageBitmap] and scales it up with nearest-neighbor
- * filtering — crisp device pixels, no fractional-scale seams, one pixel walk per frame instead of per recomposition.
+ * Renders a device frame — 1bpp MONO_VLSB or RGB565 — once per frame into a 1:1 [ImageBitmap] and scales it up with
+ * nearest-neighbor filtering — crisp device pixels, no fractional-scale seams, one pixel walk per frame instead of per
+ * recomposition.
  */
 @Composable
 internal fun MirrorFrameImage(frame: MirrorFrame, palette: MirrorPalette?, modifier: Modifier = Modifier) {
@@ -76,6 +77,9 @@ internal class ResolvedRegion(
     val on: Color,
     val off: Color,
 )
+
+// Sentinel for "no run started"; 0 is black, which is the skipped background.
+private const val NO_RUN = -1
 
 /** Reads one little-endian RGB565 value from a packed pixel row. */
 @Suppress("MagicNumber")
@@ -134,23 +138,24 @@ private fun renderRgb565Frame(frame: MirrorFrame): ImageBitmap {
         for (y in 0 until frame.height) {
             val rowBase = y * frame.width * 2
             var runStart = 0
-            var runColor: Color? = null
+            // Track the raw RGB565 value: Color is a value class, so a nullable
+            // one would box on every pixel comparison.
+            var runValue = NO_RUN
             fun flush(endExclusive: Int) {
-                val color = runColor
-                if (color != null && color != Color.Black) {
+                if (runValue > 0) {
                     drawRect(
-                        color = color,
+                        color = rgb565ToColor(runValue),
                         topLeft = Offset(runStart.toFloat(), y.toFloat()),
                         size = Size((endExclusive - runStart).toFloat(), 1f),
                     )
                 }
             }
             for (x in 0 until frame.width) {
-                val color = rgb565ToColor(leRgb565At(frame.pixels, rowBase + x * 2))
-                if (color != runColor) {
+                val value = leRgb565At(frame.pixels, rowBase + x * 2)
+                if (value != runValue) {
                     flush(x)
                     runStart = x
-                    runColor = color
+                    runValue = value
                 }
             }
             flush(frame.width)

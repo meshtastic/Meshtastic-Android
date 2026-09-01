@@ -89,6 +89,7 @@ data class MirrorFrame(
         result = 31 * result + height
         result = 31 * result + frameId
         result = 31 * result + paletteSignature
+        result = 31 * result + format.ordinal
         result = 31 * result + pixels.contentHashCode()
         return result
     }
