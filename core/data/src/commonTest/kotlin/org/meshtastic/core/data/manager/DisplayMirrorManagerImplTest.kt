@@ -17,6 +17,7 @@
 package org.meshtastic.core.data.manager
 
 import okio.ByteString.Companion.toByteString
+import org.meshtastic.core.repository.MirrorFormat
 import org.meshtastic.proto.DisplayFrame
 import org.meshtastic.proto.DisplayPalette
 import kotlin.test.Test
@@ -200,6 +201,82 @@ class DisplayMirrorManagerImplTest {
         // Transposed geometry with the same total size must not complete the frame
         manager.handleIncomingFrame(chunk(width = 64, height = 128, offset = 384, data = bytes(384, 2)))
         manager.handleIncomingFrame(chunk(offset = 768, data = bytes(256, 3)))
+
+        assertNull(manager.frame.value)
+    }
+
+    // ── RGB565 dirty-rect path ──────────────────────────────────────────────
+
+    private fun rectChunk(
+        frameId: Int = 1,
+        offset: Int = 0,
+        data: ByteArray,
+        total: Int = 200,
+        width: Int = WIDTH,
+        height: Int = HEIGHT,
+        rectX: Int = 0,
+        rectY: Int = 0,
+        rectW: Int = 10,
+        rectH: Int = 10,
+    ) = DisplayFrame(
+        width = width,
+        height = height,
+        format = DisplayFrame.Format.RGB565,
+        frame_id = frameId,
+        offset = offset,
+        total_size = total,
+        rect_x = rectX,
+        rect_y = rectY,
+        rect_width = rectW,
+        rect_height = rectH,
+        data_ = data.toByteString(),
+    )
+
+    @Test
+    fun `composites a completed rect into an RGB565 frame`() {
+        manager.handleIncomingFrame(rectChunk(data = bytes(200, 0x11)))
+
+        val frame = manager.frame.value!!
+        assertEquals(MirrorFormat.RGB565, frame.format)
+        assertEquals(WIDTH * HEIGHT * 2, frame.pixels.size)
+    }
+
+    @Test
+    fun `rejects a rect whose total size does not match its geometry`() {
+        manager.handleIncomingFrame(rectChunk(total = 999, data = bytes(200, 1)))
+
+        assertNull(manager.frame.value)
+    }
+
+    @Test
+    fun `rejects a rect that would overflow the panel`() {
+        manager.handleIncomingFrame(rectChunk(rectX = WIDTH - 2, data = bytes(200, 1)))
+        manager.handleIncomingFrame(rectChunk(rectY = Int.MAX_VALUE, data = bytes(200, 1)))
+
+        assertNull(manager.frame.value)
+    }
+
+    @Test
+    fun `rejects an oversized rect without allocating`() {
+        manager.handleIncomingFrame(
+            rectChunk(
+                width = 4000,
+                height = 4000,
+                rectW = 4000,
+                rectH = 4000,
+                total = Int.MAX_VALUE,
+                data = bytes(8, 1),
+            ),
+        )
+
+        assertNull(manager.frame.value)
+    }
+
+    @Test
+    fun `continuation chunk cannot grow the rect buffer`() {
+        manager.handleIncomingFrame(rectChunk(offset = 0, total = 200, data = bytes(100, 1)))
+        // Same geometry claim, larger total: must not write past the allocation.
+        manager.handleIncomingFrame(rectChunk(offset = 100, total = 800, rectW = 20, rectH = 20, data = bytes(100, 2)))
 
         assertNull(manager.frame.value)
     }
