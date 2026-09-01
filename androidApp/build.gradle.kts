@@ -343,3 +343,19 @@ dependencies {
     // plugin merges the generated rules into src/<variant>/generated/baselineProfiles at build time.
     baselineProfile(projects.baselineprofile)
 }
+
+// DO NOT MERGE AS-IS — pinned to an unreleased snapshot.
+//
+// #6901 moved F-Droid from OSMdroid to maplibre-compose, whose 0.15.0 native stack
+// (maplibre-native-ffi 0.202608.3) publishes arm64-v8a and x86_64 only. Our abiFilters above
+// still list armeabi-v7a, so the 32-bit split installs with no map engine and the map tab dies
+// with UnsatisfiedLinkError on libjniMaplibreNativeC.so — meshtastic/Meshtastic-Android#7001.
+//
+// Upstream merged ARM32 on 2026-08-24 (maplibre-native-ffi#658, #659, #660) but has not cut a
+// release carrying it. The 0.1.0-SNAPSHOT publication does carry it, which is what this pin is
+// for. Replace with a maplibre-compose version whose ffi pin is >= the first release containing
+// those PRs, then delete this block.
+configurations.configureEach {
+    resolutionStrategy.eachDependency { if (requested.group == "org.maplibre.nativeffi") useVersion("0.1.0-SNAPSHOT") }
+    resolutionStrategy.cacheChangingModulesFor(0, "seconds")
+}
