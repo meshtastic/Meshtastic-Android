@@ -71,5 +71,5 @@ internal fun keyToInputEvent(key: Key): Int? = when (key) {
 }
 
 @Composable
-internal fun contentColorFor(enabled: Boolean): Color =
+internal fun dpadContentColor(enabled: Boolean): Color =
     if (enabled) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
