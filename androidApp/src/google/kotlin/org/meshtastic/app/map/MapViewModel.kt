@@ -24,6 +24,7 @@ import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.TileProvider
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.MapType
@@ -40,6 +41,11 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.KoinViewModel
+import org.meshtastic.app.map.offline.pmtiles.OfflineDownloadState
+import org.meshtastic.app.map.offline.pmtiles.OfflineRegion
+import org.meshtastic.app.map.offline.pmtiles.OfflineRegionExtractor
+import org.meshtastic.app.map.offline.pmtiles.OfflineRegionStore
+import org.meshtastic.app.map.offline.pmtiles.OfflineRegionTileSet
 import org.meshtastic.app.map.prefs.map.GoogleCameraPosition
 import org.meshtastic.app.map.prefs.map.GoogleMapSelectionPrefs
 import org.meshtastic.app.map.prefs.map.GoogleMapsPrefs
@@ -431,6 +437,60 @@ class MapViewModel(
 
     /** Imported overlay layers; owned by the flavor-neutral [MapLayersManager] and rendered by [MapLayerOverlay]. */
     val mapLayers: StateFlow<List<MapLayerItem>> = mapLayersManager.mapLayers
+
+    // --- Offline vector regions (PMTiles-extracted) ---
+
+    // Offline properties exposed as internal StateFlow for composable consumption
+    internal val offlineRegionStore = OfflineRegionStore(File(application.filesDir, "offline_regions"))
+
+    private val _offlineRegions = MutableStateFlow(offlineRegionStore.list())
+    val offlineRegions: StateFlow<List<OfflineRegion>> = _offlineRegions.asStateFlow()
+
+    private val _offlineDownloadState = MutableStateFlow<OfflineDownloadState?>(null)
+    val offlineDownloadState: StateFlow<OfflineDownloadState?> = _offlineDownloadState.asStateFlow()
+
+    /**
+     * Shown on the map whenever a downloaded region covers the current viewport — manual, not tied to connectivity.
+     * Wiring this to `mapNetworkAvailable` (from the sibling offline-fallback change) so it activates itself the
+     * instant the network drops is the natural next step once both land; kept manual here so this change doesn't depend
+     * on that one merging first.
+     */
+    private val _offlineOverlayEnabled = MutableStateFlow(false)
+    val offlineOverlayEnabled: StateFlow<Boolean> = _offlineOverlayEnabled.asStateFlow()
+
+    fun setOfflineOverlayEnabled(enabled: Boolean) {
+        _offlineOverlayEnabled.value = enabled
+    }
+
+    fun estimateOfflineTileCount(bounds: LatLngBounds, zoomRange: IntRange): Long =
+        OfflineRegionTileSet.estimateTileCount(bounds, zoomRange)
+
+    fun downloadOfflineRegion(bounds: LatLngBounds, zoomRange: IntRange) {
+        viewModelScope.launch {
+            OfflineRegionExtractor(offlineRegionStore).download(bounds, zoomRange).collect { state ->
+                _offlineDownloadState.value = state
+                if (state is OfflineDownloadState.Complete) _offlineRegions.value = offlineRegionStore.list()
+            }
+        }
+    }
+
+    fun clearOfflineDownloadState() {
+        _offlineDownloadState.value = null
+    }
+
+    fun deleteOfflineRegion(id: String) {
+        viewModelScope.launch {
+            offlineRegionStore.delete(id)
+            _offlineRegions.value = offlineRegionStore.list()
+        }
+    }
+
+    fun offlineRegionArchiveFile(id: String): File = offlineRegionStore.archiveFile(id)
+
+    /** The downloaded region, if any, whose bounds fully cover [bounds] — the current camera viewport. */
+    fun offlineRegionCovering(bounds: LatLngBounds): OfflineRegion? = _offlineRegions.value.firstOrNull {
+        it.bounds.contains(bounds.northeast) && it.bounds.contains(bounds.southwest)
+    }
 
     init {
         viewModelScope.launch {

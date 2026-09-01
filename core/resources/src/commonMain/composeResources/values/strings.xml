@@ -1070,7 +1070,14 @@
     <string name="map_layer_formats">Map layers support .kml, .kmz, or GeoJSON formats.</string>
     <string name="map_layer_opacity">Opacity: %1$d%</string>
     <string name="map_node_popup_details">%1$s&lt;br&gt;Last heard: %2$s&lt;br&gt;Last position: %3$s&lt;br&gt;Battery: %4$s</string>
+    <string name="map_offline_download_failed_build">No offline map data available right now — try again later</string>
+    <string name="map_offline_download_failed_io">Download failed — check your connection and try again</string>
+    <string name="map_offline_download_failed_region_limit">Too many offline regions downloaded already — delete one first</string>
+    <string name="map_offline_download_failed_storage">Downloaded regions are using too much storage — delete one first</string>
+    <string name="map_offline_download_failed_tile_limit">Selected area is too large — zoom in or pick a smaller region</string>
+    <string name="map_offline_downloading_progress">Downloading… %1$d / %2$d tiles</string>
     <string name="map_offline_manager">Offline Manager</string>
+    <string name="map_offline_show_on_map">Show on map</string>
     <string name="map_overlay_hillshade">Hillshade</string>
     <string name="map_overlay_precipitation">Precipitation</string>
     <string name="map_overlay_weather_radar">Weather radar</string>

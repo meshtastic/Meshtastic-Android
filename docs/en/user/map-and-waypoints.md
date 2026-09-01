@@ -2,7 +2,7 @@
 title: Map & Waypoints
 parent: User Guide
 nav_order: 6
-last_updated: 2026-08-30
+last_updated: 2026-09-01
 description: View node positions on the map, create and share waypoints, manage map layers and Site Planner, and control position sharing and privacy.
 aliases:
   - map
@@ -161,11 +161,16 @@ Tiles are cached on disk, so panning does not re-download what you were just loo
 
 On **Android**, the same screen also imports a local `.mbtiles` archive for fully offline use.
 
-Offline area downloads are **F-Droid only**. Select a vector base map first — Liberty, Positron, or Dark —
-since a download is defined against a vector style and **Start Download** stays disabled over a raster one.
-Frame the area you want on screen, then tap **Start Download** in the layers sheet: that creates a paused
-pack covering the current zoom plus two levels deeper. Press play on the pack's row to actually download it.
-**Google Play** builds import pre-made MBTiles files instead, and **Desktop** has neither.
+On **F-Droid**, select a vector base map first — Liberty, Positron, or Dark — since a download is defined
+against a vector style and **Start Download** stays disabled over a raster one. Frame the area you want on
+screen, then tap **Start Download** in the layers sheet: that creates a paused pack covering the current zoom
+plus two levels deeper. Press play on the pack's row to actually download it.
+
+On **Google Play**, the layers sheet's **Offline Manager** section downloads its own offline regions instead
+— water, roads and administrative boundaries extracted from the public Protomaps basemap dataset, drawn
+directly as map shapes rather than raster tiles. Frame the area you want, tap **Start Download**, and once
+it finishes flip **Show on map** to draw it (it's off by default so it never surprises you by covering up the
+live map). You can still import a pre-made `.mbtiles` archive here too, as before. **Desktop** has neither.
 
 ## Related Topics
 

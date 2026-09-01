@@ -303,6 +303,10 @@ dependencies {
     // — 5.0.0's is compiled against 0.91.x's removed policyBuilder(), so every KML/KMZ map import
     // crashed with NoSuchMethodError. Drop when maps-compose's chain requires >= 5.1.1 on its own.
     googleImplementation(libs.android.maps.utils)
+    // Offline vector basemap: extracts PMTiles-format tiles into a local MBTiles archive, then decodes their MVT
+    // protobuf geometry to draw as native GoogleMap Polygon/Polyline overlays. See offline/pmtiles/README.md.
+    googleImplementation(libs.pmtiles.reader)
+    googleImplementation(libs.kotlinx.serialization.protobuf)
     // maps-compose-widgets requests androidx.compose.material:material version-less (expects a BOM
     // we exclude). Name it with a version so the version is published in the app's graph metadata.
     googleImplementation(libs.androidx.compose.material)

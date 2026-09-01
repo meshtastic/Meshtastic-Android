@@ -124,6 +124,8 @@ import org.meshtastic.app.map.component.MapTypeDropdown
 import org.meshtastic.app.map.component.NodeClusterMarkers
 import org.meshtastic.app.map.component.WaypointMarkers
 import org.meshtastic.app.map.model.NodeClusterItem
+import org.meshtastic.app.map.offline.pmtiles.OfflineVectorOverlay
+import org.meshtastic.app.map.offline.pmtiles.component.OfflineRegionManagerSection
 import org.meshtastic.app.map.tiles.RasterBasemap
 import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.common.util.nowSeconds
@@ -318,6 +320,7 @@ fun MapView(
 
     val selectedGoogleMapType by mapViewModel.selectedGoogleMapType.collectAsStateWithLifecycle()
     val currentRasterBasemap by mapViewModel.selectedRasterBasemap.collectAsStateWithLifecycle()
+    val offlineOverlayEnabled by mapViewModel.offlineOverlayEnabled.collectAsStateWithLifecycle()
     val enabledOverlayIds by mapViewModel.enabledOverlayIds.collectAsStateWithLifecycle()
     val layerOpacity by mapViewModel.layerOpacity.collectAsStateWithLifecycle()
 
@@ -669,6 +672,20 @@ fun MapView(
                 }
             }
 
+            // The offline vector overlay, drawn only while the user has switched it on and a downloaded region
+            // actually covers what's on screen — see MapViewModel.offlineOverlayEnabled/offlineRegionCovering.
+            if (offlineOverlayEnabled) {
+                val visibleBounds = cameraPositionState.projection?.visibleRegion?.latLngBounds
+                val coveringRegion = visibleBounds?.let { mapViewModel.offlineRegionCovering(it) }
+                coveringRegion?.let { region ->
+                    OfflineVectorOverlay(
+                        region = region,
+                        archiveFile = mapViewModel.offlineRegionArchiveFile(region.id),
+                        cameraPositionState = cameraPositionState,
+                    )
+                }
+            }
+
             // Overlays composite over whichever basemap is in use, and stay below the mesh drawn above them.
             mapViewModel.availableOverlays
                 .filter { it.id in enabledOverlayIds }
@@ -1001,7 +1018,27 @@ fun MapView(
 
     // --- Bottom sheets & dialogs ---
     if (showLayersBottomSheet) {
-        ModalBottomSheet(onDismissRequest = { showLayersBottomSheet = false }) {
+        ModalBottomSheet(
+            onDismissRequest = {
+                showLayersBottomSheet = false
+                mapViewModel.clearOfflineDownloadState()
+            },
+        ) {
+            val offlineRegions by mapViewModel.offlineRegions.collectAsStateWithLifecycle()
+            val offlineDownloadState by mapViewModel.offlineDownloadState.collectAsStateWithLifecycle()
+            OfflineRegionManagerSection(
+                visibleBounds = cameraPositionState.projection?.visibleRegion?.latLngBounds,
+                currentZoom = cameraPositionState.position.zoom.toInt(),
+                regions = offlineRegions,
+                downloadState = offlineDownloadState,
+                offlineOverlayEnabled = offlineOverlayEnabled,
+                estimateTileCount = mapViewModel::estimateOfflineTileCount,
+                onDownload = mapViewModel::downloadOfflineRegion,
+                onDeleteRegion = mapViewModel::deleteOfflineRegion,
+                onToggleOfflineOverlay = mapViewModel::setOfflineOverlayEnabled,
+            )
+            HorizontalDivider()
+
             // The raster overlays sit above the imported-layer manager, matching where the MapLibre map puts them.
             RasterOverlayToggles(
                 available = mapViewModel.availableOverlays,
