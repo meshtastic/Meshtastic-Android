@@ -470,8 +470,17 @@ class MapViewModel(
     private fun restoreFromOfflineAutoSwitch() {
         val saved = offlineAutoSwitch ?: return
         offlineAutoSwitch = null
-        if (saved.rasterBasemapId != null) {
-            applyRasterBasemapSelection(saved.rasterBasemapId)
+        // The saved id might no longer resolve — e.g. the user deleted that custom tile provider while offline —
+        // in which case applying it anyway would leave selectedRasterBasemap null with Google's own basemap also
+        // off (MapType.NONE), so the map would show nothing at all. Fall back to the native basemap instead.
+        val savedIdStillResolves =
+            saved.rasterBasemapId != null &&
+                (
+                    MapTileCatalogue.basemaps.any { it.id == saved.rasterBasemapId } ||
+                        customTileProviderConfigs.value.findSelectedCustomTileProvider(saved.rasterBasemapId) != null
+                    )
+        if (savedIdStillResolves) {
+            applyRasterBasemapSelection(checkNotNull(saved.rasterBasemapId))
         } else {
             clearCurrentTileProvider()
             _selectedGoogleMapType.value = saved.googleMapType
@@ -510,9 +519,11 @@ class MapViewModel(
                 selection = googleMapsPrefs.awaitMapSelection(),
                 selectedProviderId = mapTileProviderPrefs.awaitSelectedCustomTileProviderId(),
             )
-        }
 
-        viewModelScope.launch {
+            // Sequenced after the persisted-selection load, in the same coroutine, deliberately: this collector can
+            // otherwise start reacting to an offline-at-startup provider/network combination before the persisted
+            // selection above has been applied, auto-switching against a still-default _selectedRasterBasemapId —
+            // and loadPersistedMapType's own writes moments later would silently clobber that switch.
             combine(mapNetworkAvailable, customTileProviderConfigs, ::Pair).collect { (available, providers) ->
                 handleConnectivityChange(available, providers)
             }
