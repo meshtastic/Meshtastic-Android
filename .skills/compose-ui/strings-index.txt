@@ -1034,6 +1034,7 @@ map_filter_title
 map_layer_formats
 map_layer_opacity
 map_node_popup_details
+map_offline_banner
 map_offline_manager
 map_overlay_hillshade
 map_overlay_precipitation

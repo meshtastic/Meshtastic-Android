@@ -53,6 +53,7 @@ import org.meshtastic.feature.map.component.ClusterMembersDialog
 import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.MapControlsOverlay
 import org.meshtastic.feature.map.component.MapFilterSheet
+import org.meshtastic.feature.map.component.OfflineStatusBanner
 import org.meshtastic.feature.map.component.mapFilterActions
 import org.meshtastic.feature.map.layers.LayerOpacityStore
 import org.meshtastic.feature.map.maplibre.component.BasemapButton
@@ -169,6 +170,8 @@ class MapLibreMapViewProvider(
 
             MapZoom(cameraState = cameraState, basemap = basemaps.current)
 
+            OfflineIndicator(viewModel)
+
             MapToolbar(
                 basemaps = basemaps,
                 location = location,
@@ -202,6 +205,16 @@ class MapLibreMapViewProvider(
             )
         }
     }
+}
+
+/** The "you're offline" pill, top-start so it never collides with the toolbar's top-center controls. */
+@Composable
+private fun BoxScope.OfflineIndicator(viewModel: SharedMapViewModel) {
+    val networkAvailable by viewModel.mapNetworkAvailable.collectAsStateWithLifecycle()
+    OfflineStatusBanner(
+        visible = !networkAvailable,
+        modifier = Modifier.align(Alignment.TopStart).padding(top = 8.dp, start = 8.dp),
+    )
 }
 
 /** Everything the main map screen holds open over the map: dialogs, sheets and the chosen overlays. */

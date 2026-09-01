@@ -183,6 +183,7 @@ import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.component.MapControlsOverlay
 import org.meshtastic.feature.map.component.MapFilterSheet
 import org.meshtastic.feature.map.component.NodeTrackFilterMenu
+import org.meshtastic.feature.map.component.OfflineStatusBanner
 import org.meshtastic.feature.map.component.RasterOverlayToggles
 import org.meshtastic.feature.map.component.SitePlannerLaunch
 import org.meshtastic.feature.map.component.WaypointInfoDialog
@@ -318,6 +319,7 @@ fun MapView(
 
     val selectedGoogleMapType by mapViewModel.selectedGoogleMapType.collectAsStateWithLifecycle()
     val currentRasterBasemap by mapViewModel.selectedRasterBasemap.collectAsStateWithLifecycle()
+    val mapNetworkAvailable by mapViewModel.mapNetworkAvailable.collectAsStateWithLifecycle()
     val enabledOverlayIds by mapViewModel.enabledOverlayIds.collectAsStateWithLifecycle()
     val layerOpacity by mapViewModel.layerOpacity.collectAsStateWithLifecycle()
 
@@ -741,6 +743,11 @@ fun MapView(
                     )
             }
         }
+
+        OfflineStatusBanner(
+            visible = !mapNetworkAvailable,
+            modifier = Modifier.align(Alignment.TopStart).padding(top = 8.dp, start = 8.dp),
+        )
 
         // Scale bar
         ScaleBar(
