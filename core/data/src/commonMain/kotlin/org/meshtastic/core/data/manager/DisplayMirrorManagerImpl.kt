@@ -50,6 +50,8 @@ class DisplayMirrorManagerImpl : DisplayMirrorManager {
     private var frameWidth = 0
     private var frameHeight = 0
 
+    private val rects = MirrorRectCompositor()
+
     private var paletteRegions = mutableListOf<DisplayPalette.ColorRegion>()
     private var paletteSignature = 0
     private var paletteReceived = 0
@@ -57,8 +59,8 @@ class DisplayMirrorManagerImpl : DisplayMirrorManager {
     private var paletteDefaultOff = 0
 
     override fun handleIncomingFrame(chunk: DisplayFrame) {
-        if (chunk.format == DisplayFrame.Format.RGB565 && chunk.rect_width > 0) {
-            handleRectChunk(chunk)
+        if (chunk.format == DisplayFrame.Format.RGB565) {
+            if (rects.handle(chunk)) emitRectFrame(chunk)
         } else {
             handleMonoChunk(chunk)
         }
@@ -173,82 +175,15 @@ class DisplayMirrorManagerImpl : DisplayMirrorManager {
         return acceptable
     }
 
-    // ── RGB565 dirty-rect stream (LVGL/MUI devices) ─────────────────────────
-    // Rects composite into a persistent little-endian RGB565 canvas; frames
-    // are emitted coalesced so a burst of rects costs one canvas copy.
-
-    private var canvas: ByteArray? = null
-    private var canvasWidth = 0
-    private var canvasHeight = 0
-    private var rectBuffer: ByteArray? = null
-    private var rectReceived = 0
-    private var rectFrameId = 0
-
-    private fun handleRectChunk(chunk: DisplayFrame) {
-        val data = chunk.data_.toByteArray()
-        if (chunk.offset == 0) {
-            rectBuffer = ByteArray(chunk.total_size)
-            rectFrameId = chunk.frame_id
-            rectReceived = 0
-        }
-        if (!isAcceptableRectChunk(chunk, data.size)) {
-            rectBuffer = null
-            return
-        }
-        val buf = rectBuffer ?: return
-        data.copyInto(buf, chunk.offset)
-        rectReceived += data.size
-        if (rectReceived == chunk.total_size) {
-            compositeRect(chunk, buf)
-            rectBuffer = null
-        }
-    }
-
-    private fun isAcceptableRectChunk(chunk: DisplayFrame, dataSize: Int): Boolean {
-        val bytes = chunk.rect_width * chunk.rect_height * 2
-        val withinPanel =
-            chunk.width in 1..MAX_PANEL_EDGE &&
-                chunk.height in 1..MAX_PANEL_EDGE &&
-                chunk.rect_x + chunk.rect_width <= chunk.width &&
-                chunk.rect_y + chunk.rect_height <= chunk.height
-        val inSequence = rectBuffer != null && chunk.frame_id == rectFrameId && chunk.offset == rectReceived
-        val acceptable =
-            withinPanel && inSequence && bytes == chunk.total_size && chunk.offset + dataSize <= chunk.total_size
-        if (!acceptable) {
-            Logger.w {
-                "DisplayMirror: dropping bad rect ${chunk.rect_width}x${chunk.rect_height} total=${chunk.total_size}"
-            }
-        }
-        return acceptable
-    }
-
-    private fun compositeRect(chunk: DisplayFrame, rect: ByteArray) {
-        if (canvas == null || canvasWidth != chunk.width || canvasHeight != chunk.height) {
-            canvas = ByteArray(chunk.width * chunk.height * 2)
-            canvasWidth = chunk.width
-            canvasHeight = chunk.height
-        }
-        val target = canvas ?: return
-        val rowBytes = chunk.rect_width * 2
-        for (row in 0 until chunk.rect_height) {
-            val src = row * rowBytes
-            val dst = ((chunk.rect_y + row) * canvasWidth + chunk.rect_x) * 2
-            rect.copyInto(target, dst, src, src + rowBytes)
-        }
-        // One emission per completed rect: rects are already flush-coalesced
-        // device-side, and StateFlow conflates under a slow collector.
-        emitCanvas(chunk.frame_id)
-    }
-
-    private fun emitCanvas(frameId: Int) {
-        val target = canvas ?: return
+    private fun emitRectFrame(chunk: DisplayFrame) {
+        val pixels = rects.snapshot() ?: return
         _frame.value =
             MirrorFrame(
-                width = canvasWidth,
-                height = canvasHeight,
-                frameId = frameId,
+                width = rects.width,
+                height = rects.height,
+                frameId = chunk.frame_id,
                 paletteSignature = 0,
-                pixels = target.copyOf(),
+                pixels = pixels,
                 format = MirrorFormat.RGB565,
             )
     }
@@ -256,9 +191,7 @@ class DisplayMirrorManagerImpl : DisplayMirrorManager {
     override fun reset() {
         buffer = null
         received = 0
-        canvas = null
-        rectBuffer = null
-        rectReceived = 0
+        rects.reset()
         paletteRegions = mutableListOf()
         paletteReceived = 0
         paletteSignature = 0
@@ -272,9 +205,6 @@ class DisplayMirrorManagerImpl : DisplayMirrorManager {
 
         // The firmware's region table caps at 48; anything past this is a bug or an attack.
         const val MAX_PALETTE_REGIONS = 512
-
-        // Sanity bound for RGB565 panels (largest realistic is 800x480).
-        const val MAX_PANEL_EDGE = 1024
 
         // MONO_VLSB packs 8 vertically adjacent pixels per byte (one "page" row).
         const val PIXELS_PER_PAGE = 8
