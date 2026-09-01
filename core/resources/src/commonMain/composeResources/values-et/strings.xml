@@ -19,6 +19,7 @@
     <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Sõnum saatjalt %1$s: %2$s</string>
+    <string name="a11y_node_battery">aku %1$d%</string>
     <string name="a11y_node_distance_away">%1$s kaugusel</string>
     <string name="a11y_node_favorite">lemmik</string>
     <string name="a11y_node_hops_away">%1$d hüppe kaugusel</string>
@@ -213,6 +214,7 @@
     <string name="chirpy_assistant_title">Chirpy assistent</string>
     <string name="chirpy_checking">Chirpy saadavuse kontroll…</string>
     <string name="chirpy_downloading">Chirpy laetakse alla…</string>
+    <string name="chirpy_downloading_progress">Laen Chirpy mudeli: %1$d%</string>
     <string name="chirpy_downloading_subtitle">See juhtub ainult korra. Chirpy on varsti valmis!</string>
     <string name="chirpy_error_busy">Vau! Kanal on hetkel täiesti ülekoormatud ja liiklus on tihe! 📶 Ootame vaba aega ja proovime edastust uuesti.</string>
     <string name="chirpy_error_model_unavailable">Mu aku laeb või püsivara allalaadimine on pooleli! 🔋 Anna mulle paar hetke sünkroonimiseks ja käivitamiseks!</string>
@@ -725,6 +727,7 @@
     <string name="firmware_update_method_ble">BLE OTA</string>
     <string name="firmware_update_method_detail">Uuenda %1$s' abil</string>
     <string name="firmware_update_method_usb">USB failiedastus</string>
+    <string name="firmware_update_method_wifi">Wi-Fi OTA</string>
     <string name="firmware_update_missing_target">Selle seadme püsivara teave pole saadaval.</string>
     <string name="firmware_update_nightly">Öösiti</string>
     <string name="firmware_update_no_device">Ühtegi seadet pole ühendatud</string>
@@ -1038,6 +1041,7 @@
     <string name="map_node_popup_details">%1$s&lt;br&gt;Viimati kuuldud: %2$s&lt;br&gt;Viimatine asukoht: %3$s&lt;br&gt;Aku: %4$s</string>
     <string name="map_offline_manager">Võrguühenduseta haldur</string>
     <string name="map_overlay_hillshade">Mäevarju</string>
+    <string name="map_overlay_weather_radar">Ilmaradar</string>
     <string name="map_purge_fail">SQL-i vahemälu tühjendamine ebaõnnestus, vaata üksikasju logcat'ist</string>
     <string name="map_purge_success">SQL-i vahemälu puhastatud %1$s' jaoks</string>
     <string name="map_reporting">Kaardi raport</string>
@@ -1064,6 +1068,7 @@
     <string name="mesh_beacon">Kärgvõrgu majakas</string>
     <string name="mesh_beacon_broadcast">Levita majakat</string>
     <string name="mesh_beacon_broadcast_summary">Reklaami seda kärgvõrku perioodiliselt lähedalasuvatele sõlmedele</string>
+    <string name="mesh_beacon_channel_number">Kanal %1$d</string>
     <string name="mesh_beacon_channels_title">Majaka kanal</string>
     <string name="mesh_beacon_invitations_title">Kärgvõrgu kutsed</string>
     <string name="mesh_beacon_listen">Kuula majakaid</string>
@@ -1372,6 +1377,7 @@
     <string name="pax_total_format">PAX: %1$d</string>
     <string name="pax_total_marker">PAX: %1$s</string>
     <string name="pax_wifi_format">W:%1$d</string>
+    <string name="pax_wifi_marker">Wi-Fi: %1$s</string>
     <string name="paxcounter">Pax loendur</string>
     <string name="paxcounter_config">Paxcounter sätted</string>
     <string name="paxcounter_enabled">Paxcounter lubatud</string>
@@ -1957,7 +1963,10 @@
     <string name="what_is_meshtastic">Mis on Meshtastic?</string>
     <string name="what_is_meshtastic_description">Avatud lähtekoodiga, võrgust sõltumatu, detsentraliseeritud kärgvõrk, mis töötab taskukohaste ja väikese energiatarbega raadioside abil.</string>
     <!-- WIFI -->
+    <string name="wifi_config">Wi-Fi valikud</string>
     <string name="wifi_devices">WiFi ühenduse loomine mPWRD-OS-i jaoks</string>
+    <string name="wifi_enabled">Wi-Fi lubatud</string>
+    <string name="wifi_ip">Wi-Fi IP:</string>
     <string name="wifi_provision_available_networks">Saada olevad võrgud</string>
     <string name="wifi_provision_connect_failed">Ühenduse loomine ebaõnnestus: %1$s</string>
     <string name="wifi_provision_description">Anna mPWRD-OS-seadmele Sinihamba kaudu WiFi mandaadid.</string>
@@ -1985,6 +1994,7 @@
     <string name="wifi_provision_success_ssh_unavailable">SSH käsk on saadaval peale IP aadressi määramist.</string>
     <string name="wifi_provision_success_username">Kasutajatunnus</string>
     <string name="wifi_provisioning">WiFi ühenduse loomine mPWRD-OS-i jaoks</string>
+    <string name="wifi_qr_code_scan">Skanneeri Wi-Fi QR kood</string>
     <string name="wifi_unavailable">Pole WiFi ühendust. Võrgu skann ei pruugi lähedalasuvaid seadmeid leida.</string>
     <!-- WIND -->
     <string name="wind">Tuul</string>
