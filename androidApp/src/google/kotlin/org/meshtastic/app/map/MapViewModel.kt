@@ -446,28 +446,39 @@ class MapViewModel(
      * [setSelectedGoogleMapType].
      */
     private fun handleConnectivityChange(networkAvailable: Boolean, providers: List<CustomTileProviderConfig>) {
-        if (!networkAvailable) {
-            if (offlineAutoSwitch != null) return // Already switched.
-            val alreadyLocal = providers.findSelectedCustomTileProvider(_selectedRasterBasemapId.value)?.isLocal == true
-            if (alreadyLocal) return
-            val fallback = providers.firstOrNull { it.isLocal }
-            if (!shouldAutoUseOfflineBasemap(networkAvailable = false, hasOfflineBasemap = fallback != null)) return
-            checkNotNull(fallback) // fallback != null, guaranteed by the check above.
+        if (networkAvailable) {
+            restoreFromOfflineAutoSwitch()
+        } else {
+            autoSwitchToOfflineBasemap(providers)
+        }
+    }
+
+    private fun autoSwitchToOfflineBasemap(providers: List<CustomTileProviderConfig>) {
+        val alreadyLocal = providers.findSelectedCustomTileProvider(_selectedRasterBasemapId.value)?.isLocal == true
+        val fallback = providers.firstOrNull { it.isLocal }
+        val shouldSwitch =
+            offlineAutoSwitch == null &&
+                !alreadyLocal &&
+                shouldAutoUseOfflineBasemap(networkAvailable = false, hasOfflineBasemap = fallback != null)
+
+        if (shouldSwitch && fallback != null) {
             offlineAutoSwitch = OfflineAutoSwitchState(_selectedRasterBasemapId.value, _selectedGoogleMapType.value)
             applyRasterBasemapSelection(fallback.id)
+        }
+    }
+
+    private fun restoreFromOfflineAutoSwitch() {
+        val saved = offlineAutoSwitch ?: return
+        offlineAutoSwitch = null
+        if (saved.rasterBasemapId != null) {
+            applyRasterBasemapSelection(saved.rasterBasemapId)
         } else {
-            val saved = offlineAutoSwitch ?: return
-            offlineAutoSwitch = null
-            if (saved.rasterBasemapId != null) {
-                applyRasterBasemapSelection(saved.rasterBasemapId)
-            } else {
-                clearCurrentTileProvider()
-                _selectedGoogleMapType.value = saved.googleMapType
-                _selectedRasterBasemapId.value = null
-                viewModelScope.launch { mapTileProviderPrefs.setSelectedCustomTileProviderId(null) }
-                googleMapsPrefs.setSelectedGoogleMapType(saved.googleMapType.name)
-                googleMapsPrefs.setSelectedCustomTileUrl(null)
-            }
+            clearCurrentTileProvider()
+            _selectedGoogleMapType.value = saved.googleMapType
+            _selectedRasterBasemapId.value = null
+            viewModelScope.launch { mapTileProviderPrefs.setSelectedCustomTileProviderId(null) }
+            googleMapsPrefs.setSelectedGoogleMapType(saved.googleMapType.name)
+            googleMapsPrefs.setSelectedCustomTileUrl(null)
         }
     }
 

@@ -33,7 +33,7 @@ class OfflineFallbackTest {
     }
 
     @Test
-    fun `stays put while the network is up, fallback or not`() {
+    fun `stays put while the network is up regardless of a fallback`() {
         assertFalse(shouldAutoUseOfflineBasemap(networkAvailable = true, hasOfflineBasemap = true))
         assertFalse(shouldAutoUseOfflineBasemap(networkAvailable = true, hasOfflineBasemap = false))
     }

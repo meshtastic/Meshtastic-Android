@@ -43,6 +43,7 @@ import org.meshtastic.app.map.prefs.map.GoogleMapSelectionPrefs
 import org.meshtastic.app.map.prefs.map.GoogleMapsPrefs
 import org.meshtastic.app.map.tiles.MapTileHttpClient
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.network.repository.NetworkRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.testing.FakeBuildConfigProvider
 import org.meshtastic.core.testing.FakeLocaleUnitsProvider
@@ -276,6 +277,10 @@ class GoogleCustomTileSelectionTest {
     ): MapViewModel {
         val packetRepository = mock<PacketRepository>(MockMode.autofill)
         every { packetRepository.getWaypoints() } returns flowOf(emptyList())
+        val networkRepository = mock<NetworkRepository>(MockMode.autofill)
+        // Explicit rather than relying on autofill's default: these tests assert persisted-selection behavior and
+        // have no business exercising the offline auto-fallback path this ViewModel also has.
+        every { networkRepository.networkAvailable } returns flowOf(true)
 
         return MapViewModel(
             application = application,
@@ -295,6 +300,7 @@ class GoogleCustomTileSelectionTest {
             notificationPrefs = FakeNotificationPrefs(),
             savedStateHandle = SavedStateHandle(),
             localeUnitsProvider = FakeLocaleUnitsProvider(),
+            networkRepository = networkRepository,
         )
     }
 
