@@ -1222,7 +1222,6 @@
     <string name="mirror_no_frame">No frame received yet — enable mirroring or tap Refresh.</string>
     <string name="mirror_not_connected">Not connected to a device.</string>
     <string name="mirror_off">Mirror off</string>
-    <string name="mirror_view_only">Mirror only: remote input is not supported for this device UI yet.</string>
     <string name="modem_preset">Presets</string>
     <string name="module_settings">Module configuration</string>
     <string name="modules_already_unlocked">Modules already unlocked</string>

@@ -57,6 +57,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isAltPressed
+import androidx.compose.ui.input.key.isCtrlPressed
+import androidx.compose.ui.input.key.isMetaPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
@@ -310,6 +313,9 @@ private fun MirrorControlHints(focused: Boolean, hasTouch: Boolean, onToggleKeyb
  */
 private fun Modifier.remoteKeyInput(onEvent: (Int) -> Unit, onChar: (Int) -> Unit): Modifier =
     onPreviewKeyEvent { event ->
+        // Never swallow host shortcuts (Cmd+Q, Ctrl+C, Alt+Tab): those belong to
+        // the desktop, not the mirrored device.
+        if (event.isCtrlPressed || event.isMetaPressed || event.isAltPressed) return@onPreviewKeyEvent false
         val down = event.type == KeyEventType.KeyDown
         val mapped = keyToInputEvent(event.key)
         when {
@@ -398,7 +404,7 @@ private fun BackKey(enabled: Boolean, onBack: () -> Unit) {
         Text(
             text = stringResource(Res.string.mirror_back),
             style = MaterialTheme.typography.labelMedium,
-            color = contentColorFor(enabled),
+            color = dpadContentColor(enabled),
         )
     }
 }
