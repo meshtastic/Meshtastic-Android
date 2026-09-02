@@ -102,6 +102,7 @@ import org.meshtastic.core.ui.icon.Verified
 import org.meshtastic.core.ui.icon.role
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.util.LocalModemPreset
+import org.meshtastic.core.ui.util.LocalNoiseFloor
 import org.meshtastic.core.ui.util.createClipEntry
 import org.meshtastic.core.ui.util.formatAgo
 import org.meshtastic.proto.MeshPacket.TransportMechanism
@@ -295,8 +296,9 @@ private fun UserAndUptimeRow(node: Node) {
 private fun SignalRow(node: Node) {
     Row(modifier = Modifier.fillMaxWidth()) {
         val snr = node.snrOrNull
+        val rssi = node.rssiOrNull
         if (snr != null) {
-            val quality = determineSignalQuality(snr, LocalModemPreset.current)
+            val quality = determineSignalQuality(snr, LocalModemPreset.current, rssi, LocalNoiseFloor.current)
             // Value-before-quality with " · " matches the node-list signal pill in SignalInfo.kt.
             InfoItem(
                 label = stringResource(Res.string.snr),
@@ -308,7 +310,6 @@ private fun SignalRow(node: Node) {
         } else {
             Spacer(Modifier.weight(1f))
         }
-        val rssi = node.rssiOrNull
         if (rssi != null) {
             // No quality word here: RSSI alone can't be rated without the noise floor - see determineSignalQuality.
             InfoItem(

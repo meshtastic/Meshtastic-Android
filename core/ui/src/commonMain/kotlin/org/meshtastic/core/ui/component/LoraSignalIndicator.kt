@@ -159,17 +159,29 @@ fun Rssi(rssi: Int?, modifier: Modifier = Modifier, label: String = stringResour
  * given SNR means different things per preset — e.g. -15 dB is excellent on LongSlow (SF12) but unusable on ShortFast
  * (SF7) — so a fixed threshold mis-rates most presets.
  *
- * RSSI is intentionally not considered: without the noise floor it cannot indicate whether a signal is demodulable, so
- * SNR-versus-preset-limit is the meaningful measure (it is still shown to the user via [Rssi]). See #5446.
+ * RSSI alone cannot indicate whether a signal is demodulable without knowing the noise floor, so it is ignored unless
+ * both [rssi] and [noiseFloor] are known (design#15, android#6826): when both are present, `(rssi - noiseFloor)` is
+ * rated against the same preset-relative bands as SNR and the *worse* of the two tiers wins — a strong SNR reading over
+ * a noisy channel is still a bad link. With either missing, the rating is SNR-only, unchanged from #5446.
  *
  * A null/unknown [modemPreset] falls back to the LongFast default limit.
  */
-fun determineSignalQuality(snr: Float, modemPreset: ModemPreset?): Quality {
+fun determineSignalQuality(snr: Float, modemPreset: ModemPreset?, rssi: Int? = null, noiseFloor: Int? = null): Quality {
     val limit = modemPreset.snrLimit
-    return when {
-        snr > limit -> Quality.GOOD
-        snr > limit - SNR_FAIR_OFFSET -> Quality.FAIR
-        snr >= limit - SNR_BAD_OFFSET -> Quality.BAD
-        else -> Quality.NONE
-    }
+    val snrMargin = snr - limit
+    val margin =
+        if (rssi != null && noiseFloor != null) {
+            minOf(snrMargin, (rssi - noiseFloor) - limit)
+        } else {
+            snrMargin
+        }
+    return qualityForMargin(margin)
+}
+
+/** Classifies a demodulation-floor margin (dB above [ModemPreset.snrLimit]) into a [Quality] band. */
+private fun qualityForMargin(margin: Float): Quality = when {
+    margin > 0f -> Quality.GOOD
+    margin > -SNR_FAIR_OFFSET -> Quality.FAIR
+    margin >= -SNR_BAD_OFFSET -> Quality.BAD
+    else -> Quality.NONE
 }

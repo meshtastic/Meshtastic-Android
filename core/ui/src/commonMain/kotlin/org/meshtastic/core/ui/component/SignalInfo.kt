@@ -41,6 +41,7 @@ import org.meshtastic.core.resources.signal_quality
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.LocalModemPreset
+import org.meshtastic.core.ui.util.LocalNoiseFloor
 
 /**
  * Renders the node's signal quality, or nothing when it has no SNR reading to rate.
@@ -56,7 +57,8 @@ fun SignalInfo(
 ) {
     val snr = node.snrOrNull
     if (snr != null) {
-        val quality = determineSignalQuality(snr, LocalModemPreset.current)
+        val rssi = node.rssiOrNull
+        val quality = determineSignalQuality(snr, LocalModemPreset.current, rssi, LocalNoiseFloor.current)
         val signalColor = quality.color.invoke()
         Row(
             modifier = modifier,
@@ -71,8 +73,7 @@ fun SignalInfo(
             )
             Text(
                 text =
-                "${MetricFormatter.snr(snr)} · ${MetricFormatter.rssi(node.rssiOrNull)} · " +
-                    stringResource(quality.nameRes),
+                "${MetricFormatter.snr(snr)} · ${MetricFormatter.rssi(rssi)} · " + stringResource(quality.nameRes),
                 style =
                 MaterialTheme.typography.labelSmall.copy(
                     fontWeight = FontWeight.Bold,
