@@ -29,17 +29,23 @@ object HttpClientDefaults {
     const val TIMEOUT_MS = 30_000L
 
     /**
-     * Timeout in milliseconds for a whole request. Deliberately generous: api.meshtastic.org has been measured taking
-     * 20-60s to serve `github/firmware/list` and `resource/deviceHardware`, and callers use stale-while-revalidate
-     * caching so nothing user-facing waits on this deadline.
+     * Timeout in milliseconds for a whole request. Deliberately generous: the API has been measured taking 20-60s to
+     * serve `github/firmware/list` and `resource/deviceHardware`, and callers use stale-while-revalidate caching so
+     * nothing user-facing waits on this deadline.
      */
     const val REQUEST_TIMEOUT_MS = 90_000L
 
     /** Maximum number of automatic retries on server errors (5xx) and transient connection/IO failures. */
     const val MAX_RETRIES = 3
 
-    /** Base URL for the Meshtastic public API. Installed via the `DefaultRequest` plugin. */
-    const val API_BASE_URL = "https://api.meshtastic.org/"
+    /**
+     * Base URL for the Meshtastic public API, installed via the `DefaultRequest` plugin.
+     *
+     * The Cloudflare R2-backed v2 host, not `api.meshtastic.org`. v2 is CDN-cached with `stale-if-error`, and it
+     * answers cross-origin requests: v1 replies HTTP 500 to any `Origin` outside a hardcoded allowlist, so it cannot be
+     * reached from a browser at all (meshtastic/api#134).
+     */
+    const val API_BASE_URL = "https://apiv2.meshtastic.org/"
 }
 
 /**
