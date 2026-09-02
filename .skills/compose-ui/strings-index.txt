@@ -1024,6 +1024,8 @@ map_download_region
 map_download_status_complete
 map_download_status_downloading
 map_download_status_paused
+map_engine_unavailable
+map_engine_unavailable_detail
 map_filter
 map_filter_all_roles
 map_filter_display_title
