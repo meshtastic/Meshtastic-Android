@@ -34,13 +34,14 @@ import org.meshtastic.core.resources.none_quality
 import org.meshtastic.core.resources.snr
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.LocalModemPreset
+import org.meshtastic.core.ui.util.LocalNoiseFloor
 import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
 import kotlin.test.Test
 
 /**
  * Node Details' SignalRow reuses the already-tested [determineSignalQuality] to label SNR (see
- * [LoraSignalIndicatorTest] for the underlying threshold coverage). RSSI intentionally keeps showing the raw value
- * only - RSSI alone cannot indicate quality without the noise floor.
+ * [LoraSignalIndicatorTest] for the underlying threshold coverage), including the design#15 noise-floor blend when
+ * [LocalNoiseFloor] is provided. RSSI's own value cell never shows a quality word either way - only SNR's does.
  */
 @OptIn(ExperimentalTestApi::class)
 class SignalRowQualityLabelTest {
@@ -79,6 +80,23 @@ class SignalRowQualityLabelTest {
         onNodeWithText(getString(Res.string.snr)).assertDoesNotExist()
     }
 
+    @Test
+    fun signalRow_noiseFloorBlendDowngradesTheLabel() = runComposeUiTest {
+        // SNR -10 alone rates GOOD on LongFast (limit -17.5). rssi(-90) - noiseFloor(-70) = -20; margin -2.5 -> FAIR,
+        // the worse tier - matches LoraSignalIndicatorTest's "picks the worse tier" case.
+        setNodeDetails(Node(num = 1, snr = -10f, rssi = -90, hopsAway = 0), noiseFloor = -70)
+        val expected = "${MetricFormatter.snr(-10f)} · ${getString(Res.string.fair)}"
+        onNodeWithText(expected).assertExists()
+    }
+
+    @Test
+    fun signalRow_withoutNoiseFloorStaysSnrOnly() = runComposeUiTest {
+        // Same SNR/RSSI as the downgrade case above, but no LocalNoiseFloor provided -> unchanged GOOD rating.
+        setNodeDetails(Node(num = 1, snr = -10f, rssi = -90, hopsAway = 0))
+        val expected = "${MetricFormatter.snr(-10f)} · ${getString(Res.string.good)}"
+        onNodeWithText(expected).assertExists()
+    }
+
     private fun ComposeUiTest.assertSnrLabel(snr: Float, expectedQualityRes: StringResource) {
         // hopsAway = 0 - matches MainNodeDetails' guard for rendering SignalRow at all.
         setNodeDetails(Node(num = 1, snr = snr, rssi = -100, hopsAway = 0))
@@ -87,8 +105,8 @@ class SignalRowQualityLabelTest {
         onNodeWithText(expected).assertExists()
     }
 
-    private fun ComposeUiTest.setNodeDetails(node: Node) = setContent {
-        CompositionLocalProvider(LocalModemPreset provides preset) {
+    private fun ComposeUiTest.setNodeDetails(node: Node, noiseFloor: Int? = null) = setContent {
+        CompositionLocalProvider(LocalModemPreset provides preset, LocalNoiseFloor provides noiseFloor) {
             AppTheme { Surface { NodeDetailsSection(node = node) } }
         }
     }
