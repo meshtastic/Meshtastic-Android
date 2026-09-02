@@ -115,6 +115,7 @@ private val ALL_MODULES_FULL =
         ":feature:docs",
         ":feature:map",
         ":feature:map-maplibre",
+        ":feature:map-terrain",
         ":feature:node",
         ":feature:settings",
         ":feature:firmware",
