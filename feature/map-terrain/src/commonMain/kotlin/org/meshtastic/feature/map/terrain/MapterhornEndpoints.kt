@@ -51,4 +51,18 @@ object MapterhornEndpoints {
         val tile = TerrainTileMath.tileAt(REGIONAL_ARCHIVE_ZOOM, centerLat, centerLon)
         return "https://download.mapterhorn.com/${tile.x}-${tile.y}.pmtiles"
     }
+
+    /**
+     * What to show on screen whenever terrain (hillshade or contours) is actively rendering.
+     *
+     * Deliberately generic rather than an enumerated per-source credit: Mapterhorn's data is a mosaic of 100+ regional
+     * datasets under a mix of licenses (CC-BY-4.0, CC0, national open-data licenses, US public domain — see
+     * mapterhorn.com/attribution/, fetched and confirmed during this feature's research, not assumed), with no single
+     * blanket license covering all of it. Computing which specific sources a given downloaded region actually draws
+     * from would be the fully-correct answer, but is real additional engineering; this generic credit plus a link to
+     * Mapterhorn's own attribution page is the honest, low-risk baseline both flavors should ship with now, upgradeable
+     * to a per-region source list later without changing the UI shape that reads it.
+     */
+    const val ATTRIBUTION = "Terrain data © Mapterhorn"
+    const val ATTRIBUTION_URL = "https://mapterhorn.com/attribution/"
 }

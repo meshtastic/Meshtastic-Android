@@ -92,6 +92,17 @@ internal fun TerrainLayers(viewportBounds: BoundingBox?, zoom: Double, displayUn
 }
 
 /**
+ * Attribution for both hillshade tiers' [TileSetOptions], picked up by
+ * [org.maplibre.compose.material3.AttributionButton]'s own per-source aggregation (deduplicated, so setting this on
+ * both tiers rather than only the always-present global one is harmless). The contour
+ * [org.maplibre.compose.sources.GeoJsonSource] below has no attribution field of its own to carry this on —
+ * [org.maplibre.compose.sources.GeoJsonOptions] doesn't have one — but contours only ever render alongside hillshade
+ * (see [TerrainLayers]'s shared gate), so this covers both.
+ */
+private const val MAPTERHORN_ATTRIBUTION_HTML =
+    "&copy; <a href=\"${MapterhornEndpoints.ATTRIBUTION_URL}\">Mapterhorn</a>"
+
+/**
  * The two hillshade tiers, as two [HillshadeLayer]s over two `file://` raster-dem sources (see
  * [org.maplibre.compose.sources.rememberRasterDemSource]) — see this feature's PR description for why MapLibre's own
  * internal Horn's-method shading means no decoded elevation grid or [org.meshtastic.feature.map.terrain.Hillshade] call
@@ -109,7 +120,8 @@ private fun HillshadeTiers(repository: OfflineTerrainRepository, region: Offline
     val globalSource =
         rememberRasterDemSource(
             tiles = listOf(repository.tileUrlTemplate(TerrainSource.GLOBAL)),
-            options = TileSetOptions(minZoom = 0, maxZoom = globalMaxZoom),
+            options =
+            TileSetOptions(minZoom = 0, maxZoom = globalMaxZoom, attributionHtml = MAPTERHORN_ATTRIBUTION_HTML),
             encoding = RasterDemEncoding.Terrarium,
         )
 
@@ -127,7 +139,12 @@ private fun HillshadeTiers(repository: OfflineTerrainRepository, region: Offline
         val regionalSource =
             rememberRasterDemSource(
                 tiles = listOf(repository.tileUrlTemplate(TerrainSource.REGIONAL)),
-                options = TileSetOptions(minZoom = MapterhornEndpoints.REGIONAL_MIN_ZOOM, maxZoom = regionalMaxZoom),
+                options =
+                TileSetOptions(
+                    minZoom = MapterhornEndpoints.REGIONAL_MIN_ZOOM,
+                    maxZoom = regionalMaxZoom,
+                    attributionHtml = MAPTERHORN_ATTRIBUTION_HTML,
+                ),
                 encoding = RasterDemEncoding.Terrarium,
             )
         HillshadeLayer(
