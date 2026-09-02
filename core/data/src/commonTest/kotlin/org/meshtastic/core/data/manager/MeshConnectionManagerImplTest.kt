@@ -69,6 +69,7 @@ import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
+import org.meshtastic.proto.LocalStats
 import org.meshtastic.proto.ModuleConfig
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -278,6 +279,23 @@ class MeshConnectionManagerImplTest {
         verify { locationManager.stop() }
         verify { mqttManager.stop() }
         assertEquals(true, lockdownCoordinator.disconnectCalled)
+    }
+
+    @Test
+    fun `Disconnected state clears the stale noise floor`() = runTest(testDispatcher) {
+        // localStats only overwrites on a fresh local_stats telemetry packet, so a stale reading from the previous
+        // radio would otherwise silently blend into the next radio's signal-quality rating until it reports its
+        // own.
+        every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
+        manager = createManager(backgroundScope)
+        radioConnectionState.value = ConnectionState.Connected
+        advanceUntilIdle()
+        nodeRepository.updateLocalStats(LocalStats(noise_floor = -70))
+
+        radioConnectionState.value = ConnectionState.Disconnected
+        advanceUntilIdle()
+
+        assertEquals(LocalStats(), nodeRepository.localStats.value, "Disconnect should reset to \"no reading yet\"")
     }
 
     @Test

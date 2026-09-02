@@ -26,6 +26,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import org.koin.compose.koinInject
+import org.meshtastic.core.model.noiseFloorOrNull
 import org.meshtastic.core.navigation.MultiBackstack
 import org.meshtastic.core.navigation.NodeDetailRoute
 import org.meshtastic.core.navigation.NodesRoute
@@ -78,13 +79,11 @@ fun MeshtasticAppShell(
             .collectAsStateWithLifecycle(initialValue = null)
 
     // Connected device's own noise floor (dBm, from its LocalStats telemetry), provided once here so signal-quality
-    // rating can blend it in (design#15) without per-screen plumbing. 0 is firmware's "no reading yet" sentinel,
-    // normalized to null here so downstream callers never need to know about it.
+    // rating can blend it in (design#15) without per-screen plumbing. See [noiseFloorOrNull] for the "no reading yet"
+    // sentinel normalization.
     val nodeRepository = koinInject<NodeRepository>()
     val noiseFloor by
-        remember(nodeRepository) {
-            nodeRepository.localStats.map { it.noise_floor.takeIf { nf -> nf != 0 } }.distinctUntilChanged()
-        }
+        remember(nodeRepository) { nodeRepository.localStats.map { it.noiseFloorOrNull }.distinctUntilChanged() }
             .collectAsStateWithLifecycle(initialValue = null)
 
     MeshtasticSnackbarProvider(snackbarManager = uiViewModel.snackbarManager, hostModifier = hostModifier) {
