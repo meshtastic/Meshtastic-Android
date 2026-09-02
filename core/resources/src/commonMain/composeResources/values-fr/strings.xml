@@ -19,6 +19,7 @@
     <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Message de %1$s: %2$s</string>
+    <string name="a11y_node_battery">batterie : %1$d%</string>
     <string name="a11y_node_distance_away">À %1$s</string>
     <string name="a11y_node_favorite">favori</string>
     <string name="a11y_node_hops_away">À %1$d sauts</string>
@@ -135,6 +136,7 @@
     <string name="battery_ina_2xx_i2c_address">Adresse I2C de la batterie INA_2XX</string>
     <string name="ble_devices">Appareils Bluetooth</string>
     <string name="ble_rssi_threshold_defaults_to_80">Seuil BLE RSSI (par défaut -80)</string>
+    <string name="ble_scan_needs_location_services">La recherche Bluetooth nécessite également des services de localisation activés pour cette version d'Android. Votre position n'est pas utilisée.</string>
     <string name="blue">Bleu</string>
     <!-- BLUETOOTH -->
     <string name="bluetooth">Bluetooth</string>
@@ -147,6 +149,14 @@
     <string name="bluetooth_feature_discovery">Découverte</string>
     <string name="bluetooth_feature_discovery_description">Trouvez et identifiez les dispositifs Meshtastic autour de  vous.</string>
     <string name="bluetooth_permission">Bluetooth</string>
+    <string name="bluetooth_permission_blocked_notice">L'accès aux appareils à proximité est désactivé et Android ne le demandera plus. Activez-le dans les paramètres de l'application pour vous connecter via le Bluetooth, ou bien connectez-vous via Wi-Fi ou USB.</string>
+    <string name="bluetooth_permission_blocked_notice_pre31">L'autorisation de localisation est désactivée et Android ne la demandera plus. Activez-la dans les paramètres de l'application vous rechercher des appareils Bluetooth ou bien connectez-vous via Wi-Fi ou USB.</string>
+    <string name="bluetooth_permission_blocked_rationale">L'accès aux appareils à proximité est désactivé et Android ne le demandera plus. Activez-le dans les paramètres de l'application pour rechercher et vous connecter via Bluetooth.</string>
+    <string name="bluetooth_permission_blocked_rationale_pre31">L'autorisation de localisation est désactivée et Android ne la demandera plus. Activez-la dans les paramètres de l'application pour rechercher et vous connecter via Bluetooth.</string>
+    <string name="bluetooth_permission_denied_notice">Sans accès aux appareils à proximité, Meshtastic ne peut pas trouver ou se connecter à votre radio via Bluetooth. Vous pouvez toujours vous connecter via Wi-Fi ou USB.</string>
+    <string name="bluetooth_permission_denied_notice_pre31">Sans autorisation de localisation, Android bloque la recherche Bluetooth, Meshtastic ne peut donc pas trouver votre radio. Vous pouvez toujours vous connecter via Wi-Fi ou USB.</string>
+    <string name="bluetooth_permission_rationale">Meshtastic a besoin de l'accès aux périphériques à proximité pour trouver votre radio et se connecter à celle-ci. Il est utilisé seulement pour parler à vos propres appareils, jamais pour vous localiser. Sans cela, le Bluetooth est indisponible — le Wi-Fi et l'USB fonctionnent toujours.</string>
+    <string name="bluetooth_permission_rationale_pre31">Meshtastic a besoin d'une autorisation de localisation car cette version d'Android traite la recherche Bluetooth comme une capacité de localisation. Votre position n'est jamais lue ou partagée pour cela. Sans elle, le Bluetooth n'est pas disponible — le Wi-Fi et l'USB fonctionnent toujours.</string>
     <string name="bluetooth_scan_location_services_disabled">Les services de localisation sont désactivés. Activez-les pour rechercher les appareils à proximité.</string>
     <string name="bluetooth_scan_missing_permission">L'analyse Bluetooth nécessite une autorisation. Autorisez les périphériques à proximité (ou la localisation) pour trouver des périphériques.</string>
     <string name="bluetooth_scan_start_failed">L'analyse Bluetooth n'a pas pu démarrer. Essayez à nouveau, ou activez/désactivez Bluetooth si le problème continue.</string>
@@ -157,12 +167,19 @@
     <string name="bold_heading">Titre en gras</string>
     <string name="bonding_failed_permissions">L'appairage a échoué. Accorder les autorisations de l'appareil à proximité et essayer à nouveau.</string>
     <string name="bonding_failed_retry">L'appairage n'a pas abouti. Veuillez réessayer.</string>
+    <string name="boot_reconnect_blocked_message">L'autorisation d'accès aux appareils à proximité est désactivée, votre radio ne peut donc pas être atteinte en Bluetooth. Appuyez pour l'allumer.</string>
+    <string name="boot_reconnect_blocked_title">Meshtastic ne peut pas se reconnecter</string>
     <string name="bottom_nav_settings">Réglages</string>
     <string name="broadcast_interval">Intervalle de diffusion</string>
     <string name="button_gpio">GPIO du bouton</string>
     <string name="buzzer_gpio">GPIO du buzzer</string>
+    <plurals name="cache_limit_eviction_warning">
+        <item quantity="one">Réduire ceci supprimera définitivement l'historique pour %1$d appareil.</item>
+        <item quantity="other">Réduire ceci supprimera définitivement l'historique pour %1$d appareils.</item>
+    </plurals>
     <string name="calculating">Calcul en cours…</string>
     <string name="call_sign">Indicatif d'appel</string>
+    <string name="call_sign_summary">Votre indicatif de radio amateur, jusqu'à 7 caractères</string>
     <string name="camera_permission">Autorisation de la caméra</string>
     <string name="camera_permission_rationale">Autoriser l'accès à l'appareil photo pour scanner les codes QR.</string>
     <string name="camera_unavailable">La caméra n'a pas pu démarrer. Essayez à nouveau, ou fermez le scanner et rouvrez-le.</string>
@@ -219,6 +236,7 @@
     <string name="clean_unknown_nodes">Nettoyer uniquement les nœuds inconnus</string>
     <!-- CLEAR -->
     <string name="clear">Effacer</string>
+    <string name="clear_position_track_message">Ceci supprimera définitivement les données GPS de ce nœud. Cette action est irréversible.</string>
     <string name="clear_selection">Effacer la sélection</string>
     <string name="clear_time_zone">Effacer le fuseau horaire</string>
     <string name="client_notification">Notification client</string>
@@ -270,6 +288,7 @@
     <string name="config_lora_region_summary">La région où vous allez utiliser vos radios.</string>
     <string name="config_network_eth_enabled_summary">Activer Ethernet désactivera la connexion Bluetooth à l'application. Les connexions de nœuds via TCP ne sont pas disponibles sur les appareils Apple.</string>
     <string name="config_network_udp_enabled_summary">Activer les paquets de diffusion via UDP sur le réseau local.</string>
+    <string name="config_network_wifi_enabled_summary">Activer le Wi-Fi désactivera la connexion Bluetooth à l'application.</string>
     <string name="config_position_broadcast_secs_summary">L'intervalle maximum qui peut s'écouler sans qu'un nœud diffuse une position.</string>
     <string name="config_position_broadcast_smart_minimum_distance_summary">Distance minimale en mètres pour considérer une diffusion de position intelligente.</string>
     <string name="config_position_broadcast_smart_minimum_interval_secs_summary">Intervalle minimum auquel les mises à jour de position seront envoyées si la distance minimale est respectée.</string>
@@ -344,6 +363,7 @@
     <string name="debug_store_logs_summary">Désactiver pour passer l'écriture des journaux de maillage sur le disque</string>
     <string name="debug_store_logs_title">Stocker les journaux de maillage</string>
     <string name="debug_tab_app_logs">Journal de l'application</string>
+    <string name="debug_tab_packets">Paquets</string>
     <string name="deep_link_connect_message">Un lien demande à cette application de se connecter à l'appareil %1$s. Ne continuez que si vous avez confiance en l'origine du lien.</string>
     <string name="deep_link_connect_title">Se connecter à cet appareil ?</string>
     <string name="deep_link_disconnect_message">Un lien demande à cette application de se déconnecter de votre appareil. Continuez uniquement si vous faites confiance à l'origine du lien.</string>
@@ -449,16 +469,23 @@
     <string name="discovery_start_scan_reason_no_presets">Aucun préréglage sélectionné</string>
     <string name="discovery_start_scan_reason_not_connected">Appareil non connecté</string>
     <string name="discovery_stat_analysis">Analyse</string>
+    <string name="discovery_stat_bad_packets">Paquets invalides</string>
     <string name="discovery_stat_channel_utilization">Utilisation du canal</string>
     <string name="discovery_stat_date">Date</string>
     <string name="discovery_stat_direct">Direct</string>
+    <string name="discovery_stat_duplicate_packets">Paquets en double</string>
     <string name="discovery_stat_failure_rate">Taux d'erreur</string>
+    <string name="discovery_stat_mesh">Maillage</string>
     <string name="discovery_stat_messages">Messages</string>
     <string name="discovery_stat_online_total_nodes">Nœuds en ligne / Total</string>
+    <string name="discovery_stat_packets_rx">Paquets RX</string>
+    <string name="discovery_stat_packets_tx">Paquets TX</string>
     <string name="discovery_stat_selected">Sélectionné</string>
     <string name="discovery_stat_session_overview">Aperçu de la session</string>
     <string name="discovery_stat_status">Statut</string>
     <string name="discovery_stat_success_rate">Taux de réussite</string>
+    <string name="discovery_stat_total_messages">Messages totaux</string>
+    <string name="discovery_stat_total_unique_nodes">Total de nœuds uniques</string>
     <string name="discovery_stat_unique_nodes">Nœuds uniques</string>
     <string name="discovery_stat_unselected">Non sélectionné</string>
     <string name="discovery_stop_scan">Arrêter le scan</string>
@@ -909,6 +936,7 @@
     <string name="mesh_beacon_preset_none">Aucun</string>
     <string name="mesh_beacon_region_label">Région</string>
     <string name="mesh_beacon_target_channel_index">Canal</string>
+    <string name="mesh_beacon_target_default">Par défaut</string>
     <string name="mesh_map_location">Emplacement de la carte de maillage</string>
     <string name="mesh_map_location_description">Active le point de localisation bleu de votre téléphone sur la carte de maillage.</string>
     <!-- MESHTASTIC -->

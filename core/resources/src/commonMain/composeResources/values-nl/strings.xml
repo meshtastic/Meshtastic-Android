@@ -254,6 +254,7 @@
     <string name="mesh_beacon_preset_none">Geen</string>
     <string name="mesh_beacon_region_label">Regio</string>
     <string name="mesh_beacon_target_channel_index">Kanaal</string>
+    <string name="mesh_beacon_target_default">Standaard</string>
     <!-- MESHTASTIC -->
     <string name="meshtastic_alerts_notifications">Waarschuwingsmeldingen</string>
     <string name="meshtastic_low_battery_notifications">Batterij bijna leeg</string>

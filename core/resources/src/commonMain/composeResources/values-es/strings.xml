@@ -498,6 +498,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="mesh_beacon_preset_none">Ninguna</string>
     <string name="mesh_beacon_region_label">Región</string>
     <string name="mesh_beacon_target_channel_index">Canal</string>
+    <string name="mesh_beacon_target_default">Por defecto</string>
     <string name="mesh_map_location_description">Habilita el punto de posición azul para tu teléfono en el mapa de la malla.</string>
     <!-- MESHTASTIC -->
     <string name="meshtastic">Meshtastic</string>
