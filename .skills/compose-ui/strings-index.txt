@@ -1336,8 +1336,12 @@ notifications_on_message_receipt
 now
 ntp_server
 number_of_records
+### OFFLINE ###
 offline_maps
 offline_maps_empty
+offline_terrain_empty
+offline_terrain_manager
+offline_terrain_regional_detail
 ok_to_mqtt
 okay
 oled_type

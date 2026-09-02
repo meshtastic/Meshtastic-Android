@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.map.terrain
 
+import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -50,5 +51,33 @@ class TerrainTileMathTest {
 
         val global = GeoBounds(south = -60.0, west = -170.0, north = 60.0, east = 170.0)
         assertFalse(TerrainTileMath.fitsInSingleTile(zoom = 6, global))
+    }
+
+    @Test
+    fun `lonLatAt at a tile's own corner round-trips through tileAt`() {
+        val zoom = 12
+        val tile = TerrainTileMath.tileAt(zoom, latitude = 47.6, longitude = -122.3)
+
+        // The tile's own top-left corner (localX=0, localY=0) must land back inside that same tile.
+        val corner = TerrainTileMath.lonLatAt(tile, localX = 0f, localY = 0f)
+        assertEquals(tile, TerrainTileMath.tileAt(zoom, corner.latitude, corner.longitude))
+    }
+
+    @Test
+    fun `lonLatAt at the tile center is roughly the tile's own midpoint`() {
+        val zoom = 8
+        val tile = TileIndex(zoom, x = 41, y = 91)
+
+        val center = TerrainTileMath.lonLatAt(tile, localX = 0.5f, localY = 0.5f)
+        assertEquals(tile, TerrainTileMath.tileAt(zoom, center.latitude, center.longitude))
+    }
+
+    @Test
+    fun `lonLatAt zoom 0 spans the whole world`() {
+        val topLeft = TerrainTileMath.lonLatAt(TileIndex(0, 0, 0), localX = 0f, localY = 0f)
+        assertTrue(abs(topLeft.longitude - -180.0) < 1e-6)
+
+        val bottomRight = TerrainTileMath.lonLatAt(TileIndex(0, 0, 0), localX = 1f, localY = 1f)
+        assertTrue(abs(bottomRight.longitude - 180.0) < 1e-6)
     }
 }

@@ -132,6 +132,18 @@ private fun MapLayersSheet(
 
         HorizontalDivider()
 
+        // Not offlineMapsSupported-gated — see OfflineTerrainSection's own doc comment for why terrain downloads
+        // work on both Android and Desktop even though the base map's own offline packs don't.
+        OfflineTerrainSection(
+            target = offlineTarget,
+            onShowRegion = { bounds ->
+                onDismiss()
+                offlineTarget.showRegion(bounds)
+            },
+        )
+
+        HorizontalDivider()
+
         extra()
     }
 }

@@ -1372,8 +1372,12 @@
     <string name="now">Now</string>
     <string name="ntp_server">NTP server</string>
     <string name="number_of_records">Number of records</string>
+    <!-- OFFLINE -->
     <string name="offline_maps">Offline maps</string>
     <string name="offline_maps_empty">No areas downloaded yet</string>
+    <string name="offline_terrain_empty">No terrain downloaded yet</string>
+    <string name="offline_terrain_manager">Offline Terrain</string>
+    <string name="offline_terrain_regional_detail">Includes high-detail regional terrain</string>
     <string name="ok_to_mqtt">Ok to MQTT</string>
     <string name="okay">OK</string>
     <string name="oled_type">OLED type</string>
