@@ -194,9 +194,7 @@ open class RadioConfigViewModel(
     val sessionAuthorized = serviceRepository.sessionAuthorized
     val lockdownState = serviceRepository.lockdownState
 
-    fun sendLockNow() {
-        safeLaunch(tag = "sendLockNow") { lockdownCoordinator.lockNow() }
-    }
+    fun sendLockNow(): Boolean = lockdownCoordinator.lockNow()
 
     /**
      * Submits a lockdown passphrase: enables lockdown (from DISABLED), authenticates ([disable]=false from LOCKED), or
@@ -208,11 +206,7 @@ open class RadioConfigViewModel(
         hours: Int = 0,
         maxSessionSeconds: Int = 0,
         disable: Boolean = false,
-    ) {
-        safeLaunch(tag = "submitLockdownPassphrase") {
-            lockdownCoordinator.submitPassphrase(passphrase, boots, hours, maxSessionSeconds, disable)
-        }
-    }
+    ): Boolean = lockdownCoordinator.submitPassphrase(passphrase, boots, hours, maxSessionSeconds, disable)
 
     val analyticsAllowedFlow = analyticsPrefs.analyticsAllowed
 

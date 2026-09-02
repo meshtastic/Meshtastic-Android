@@ -115,7 +115,6 @@ class ConnectionsViewModel(
 
     val connectionState = serviceRepository.connectionState
     val lockdownState = serviceRepository.lockdownState
-    val sessionAuthorized = serviceRepository.sessionAuthorized
 
     val myNodeInfo: StateFlow<MyNodeInfo?> = nodeRepository.myNodeInfo
 
@@ -174,11 +173,11 @@ class ConnectionsViewModel(
      * [ServiceRepository.RECONNECTING_PROGRESS_TEXT] for the cross-track contract.
      */
     val connectionStatus: StateFlow<ConnectionStatus> =
-        combine(
-            connectionState,
-            serviceRepository.connectionProgress,
-            nodeRestartTracker.restartExpected,
-        ) { state, progress, restartExpected ->
+        combine(connectionState, serviceRepository.connectionProgress, nodeRestartTracker.restartExpected) {
+                state,
+                progress,
+                restartExpected,
+            ->
             when (state) {
                 is ConnectionState.Connected -> ConnectionStatus.CONNECTED
 

@@ -191,9 +191,11 @@ class LockdownCoordinatorImplTest {
     // region LOCKED — auto-replay
 
     @Test
-    fun `LOCKED with stored passphrase triggers auto-unlock`() {
+    fun `LOCKED with stored passphrase enters AwaitingResponse only after dispatch admission`() {
         radioService.setDeviceAddress(testDeviceAddress)
         passphraseStore.saved[testDeviceAddress] = StoredPassphrase("secret", 10, 24)
+        var stateDuringDispatch: LockdownState? = null
+        commandSender.onLockdownPassphraseDispatchAttempt = { stateDuringDispatch = serviceRepo.lockdownState.value }
 
         coordinator.handleLockdownStatus(
             LockdownStatus(state = LockdownStatus.State.LOCKED, lock_reason = "needs_auth"),
@@ -202,6 +204,32 @@ class LockdownCoordinatorImplTest {
         assertEquals("secret", commandSender.lastPassphrase)
         assertEquals(10, commandSender.lastBoots)
         assertEquals(24, commandSender.lastHours)
+        assertFalse(stateDuringDispatch is LockdownState.AwaitingResponse)
+        assertIs<LockdownState.AwaitingResponse>(serviceRepo.lockdownState.value)
+    }
+
+    @Test
+    fun `LOCKED with stored passphrase stays retryable when dispatch is rejected`() {
+        radioService.setDeviceAddress(testDeviceAddress)
+        passphraseStore.saved[testDeviceAddress] = StoredPassphrase("secret", 10, 24)
+
+        // Establish a previous successful auto-unlock so a stale auto-attempt marker would be observable below.
+        coordinator.handleLockdownStatus(LockdownStatus(state = LockdownStatus.State.LOCKED))
+        coordinator.handleLockdownStatus(LockdownStatus(state = LockdownStatus.State.UNLOCKED))
+        commandSender.lockdownPassphraseDispatchAccepted = false
+
+        coordinator.handleLockdownStatus(
+            LockdownStatus(state = LockdownStatus.State.LOCKED, lock_reason = "needs_auth"),
+        )
+
+        val state = serviceRepo.lockdownState.value
+        assertIs<LockdownState.Locked>(state)
+        assertEquals("needs_auth", state.lockReason)
+        assertEquals("secret", passphraseStore.saved[testDeviceAddress]?.passphrase)
+
+        // A later failure must not be treated as an auto-attempt that never left the app.
+        coordinator.handleLockdownStatus(LockdownStatus(state = LockdownStatus.State.UNLOCK_FAILED))
+        assertEquals("secret", passphraseStore.saved[testDeviceAddress]?.passphrase)
     }
 
     @Test
@@ -415,6 +443,19 @@ class LockdownCoordinatorImplTest {
     }
 
     @Test
+    fun `rejected lockNow does not arm the acknowledgement transition`() {
+        commandSender.lockNowDispatchAccepted = false
+
+        assertFalse(coordinator.lockNow())
+        coordinator.handleLockdownStatus(
+            LockdownStatus(state = LockdownStatus.State.LOCKED, lock_reason = "needs_auth"),
+        )
+
+        assertIs<LockdownState.Locked>(serviceRepo.lockdownState.value)
+        assertFalse(connectionManager.clearRadioConfigCalled)
+    }
+
+    @Test
     fun `lockNow flag resets after onConnect`() {
         coordinator.lockNow()
         coordinator.onConnect()
@@ -433,29 +474,66 @@ class LockdownCoordinatorImplTest {
     // region submitPassphrase
 
     @Test
-    fun `submitPassphrase sends command and clears lockNow flag`() {
+    fun `submitPassphrase enters AwaitingResponse only after dispatch admission and clears lockNow flag`() {
         coordinator.lockNow()
-        coordinator.submitPassphrase("test", boots = 5, hours = 12)
+        serviceRepo.setLockdownState(LockdownState.Locked("needs_auth"))
+        var stateDuringDispatch: LockdownState? = null
+        commandSender.onLockdownPassphraseDispatchAttempt = { stateDuringDispatch = serviceRepo.lockdownState.value }
+
+        assertTrue(coordinator.submitPassphrase("test", boots = 5, hours = 12))
 
         assertEquals("test", commandSender.lastPassphrase)
         assertEquals(5, commandSender.lastBoots)
         assertEquals(12, commandSender.lastHours)
+        assertIs<LockdownState.Locked>(stateDuringDispatch)
+        assertIs<LockdownState.AwaitingResponse>(serviceRepo.lockdownState.value)
 
-        // Subsequent LOCKED should not trigger LockNowAcknowledged
+        // Subsequent LOCKED should not trigger LockNowAcknowledged.
         radioService.setDeviceAddress(testDeviceAddress)
         coordinator.handleLockdownStatus(LockdownStatus(state = LockdownStatus.State.LOCKED))
         assertIs<LockdownState.Locked>(serviceRepo.lockdownState.value)
     }
 
     @Test
-    fun `submitPassphrase with disable forwards disable flag and clears stored passphrase`() {
+    fun `rejected submitPassphrase preserves retryable state and does not stage credentials`() {
+        radioService.setDeviceAddress(testDeviceAddress)
+        serviceRepo.setLockdownState(LockdownState.Locked("needs_auth"))
+        commandSender.lockdownPassphraseDispatchAccepted = false
+
+        assertFalse(coordinator.submitPassphrase("not-sent", boots = 5, hours = 12))
+
+        val state = serviceRepo.lockdownState.value
+        assertIs<LockdownState.Locked>(state)
+        assertEquals("needs_auth", state.lockReason)
+
+        // A later status must not persist credentials from a command that never left the app.
+        coordinator.handleLockdownStatus(LockdownStatus(state = LockdownStatus.State.UNLOCKED))
+        assertNull(passphraseStore.saved[testDeviceAddress])
+    }
+
+    @Test
+    fun `submitPassphrase with disable clears stored passphrase only after dispatch admission`() {
         radioService.setDeviceAddress(testDeviceAddress)
         passphraseStore.saved[testDeviceAddress] = StoredPassphrase("original", 50, 0)
 
-        coordinator.submitPassphrase("original", boots = 0, hours = 0, disable = true)
+        assertTrue(coordinator.submitPassphrase("original", boots = 0, hours = 0, disable = true))
 
         assertTrue(commandSender.lastDisable)
         assertTrue(passphraseStore.saved.isEmpty())
+        assertIs<LockdownState.AwaitingResponse>(serviceRepo.lockdownState.value)
+    }
+
+    @Test
+    fun `rejected disable preserves stored passphrase and unlocked state`() {
+        radioService.setDeviceAddress(testDeviceAddress)
+        passphraseStore.saved[testDeviceAddress] = StoredPassphrase("original", 50, 0)
+        serviceRepo.setLockdownState(LockdownState.Unlocked)
+        commandSender.lockdownPassphraseDispatchAccepted = false
+
+        assertFalse(coordinator.submitPassphrase("original", boots = 0, hours = 0, disable = true))
+
+        assertEquals("original", passphraseStore.saved[testDeviceAddress]?.passphrase)
+        assertIs<LockdownState.Unlocked>(serviceRepo.lockdownState.value)
     }
 
     @Test
