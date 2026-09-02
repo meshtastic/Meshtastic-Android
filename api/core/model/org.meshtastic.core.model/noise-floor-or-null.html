@@ -2,7 +2,7 @@
 <html class="no-js" lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
-    <title>MeshtasticAppShell</title>
+    <title>noiseFloorOrNull</title>
 <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>
     <script>document.documentElement.classList.replace("no-js", "js");</script>
     <script>const storage = localStorage.getItem("dokka-dark-mode")
@@ -42,7 +42,7 @@
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
-                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:ui/commonMain">common</button>
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":core:model/commonMain">common</button>
             <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
                 <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
                 <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
@@ -53,7 +53,7 @@
                     </div>
                         <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
                             <label class="checkbox">
-                                <input type="checkbox" class="checkbox--input" id=":core:ui/commonMain" data-filter=":core:ui/commonMain">
+                                <input type="checkbox" class="checkbox--input" id=":core:model/commonMain" data-filter=":core:model/commonMain">
                                 <span class="checkbox--icon"></span>
                                 common
                             </label>
@@ -89,12 +89,12 @@
         </nav>
         <div id="resizer" class="resizer" data-item-type="BAR"></div>
         <div id="main" data-item-type="SECTION" role="main">
-<div class="main-content" data-page-type="member" id="content" pageids="core-ui::org.meshtastic.core.ui.component//MeshtasticAppShell/#org.meshtastic.core.navigation.MultiBackstack#org.meshtastic.core.ui.viewmodel.UIViewModel#androidx.compose.ui.Modifier#kotlin.Function0[kotlin.Unit]/PointingToDeclaration//-920980536">
-  <div class="breadcrumbs"><a href="../index.html">core-ui</a><span class="delimiter">/</span><a href="index.html">org.meshtastic.core.ui.component</a><span class="delimiter">/</span><span class="current">MeshtasticAppShell</span></div>
+<div class="main-content" data-page-type="member" id="content" pageids="core-model::org.meshtastic.core.model//noiseFloorOrNull/org.meshtastic.proto.LocalStats#/PointingToDeclaration//394437785">
+  <div class="breadcrumbs"><a href="../index.html">core-model</a><span class="delimiter">/</span><a href="index.html">org.meshtastic.core.model</a><span class="delimiter">/</span><span class="current">noiseFloorOrNull</span></div>
   <div class="cover ">
-    <h1 class="cover"><span>Meshtastic</span><wbr><span>App</span><wbr><span><span>Shell</span></span></h1>
+    <h1 class="cover"><span>noise</span><wbr><span>Floor</span><wbr><span>Or</span><wbr><span><span>Null</span></span></h1>
   </div>
-  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-meshtastic-app-shell.html"><span class="token function">MeshtasticAppShell</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">multiBackstack<span class="token operator">: </span><a href="../../../core/navigation/org.meshtastic.core.navigation/-multi-backstack/index.html">MultiBackstack</a><span class="token punctuation">, </span></span><span class="parameter ">uiViewModel<span class="token operator">: </span><a href="../org.meshtastic.core.ui.viewmodel/-u-i-view-model/index.html">UIViewModel</a><span class="token punctuation">, </span></span><span class="parameter ">hostModifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier<span class="token punctuation">, </span></span><span class="parameter ">content<span class="token operator">: </span><span><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a>&nbsp;</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-unit/index.html">Unit</a></span></span><span class="token punctuation">)</span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/component/MeshtasticAppShell.kt#L47">source</a>)</span></span></div><p class="paragraph">Shared shell for setting up global UI logic across platforms (Android, Desktop).</p><p class="paragraph">This component handles deep linking, shared dialogs (via <a href="-meshtastic-common-app-setup.html">MeshtasticCommonAppSetup</a>), and provides the global <a href="-meshtastic-snackbar-provider.html">MeshtasticSnackbarProvider</a>. Platform entry points should wrap their navigation layout inside this shell.</p></div></div>
+  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><span data-unresolved-link="org.meshtastic.proto/LocalStats///PointingToDeclaration/">LocalStats</span><span class="token punctuation">.</span><a href="noise-floor-or-null.html">noiseFloorOrNull</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">?</span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/model/src/commonMain/kotlin/org/meshtastic/core/model/LocalStats.kt#L26">source</a>)</span></span></div><p class="paragraph">Last measured noise floor in dBm, or null when this reading has never been reported (<span data-unresolved-link="org.meshtastic.proto/LocalStats/noise_floor/#/PointingToDeclaration/">LocalStats.noise_floor</span> still holds firmware's <code class="lang-kotlin">0</code> "no reading yet" sentinel). Every read of <code class="lang-kotlin">noise_floor</code> should go through this so every consumer treats absence the same way, rather than each site repeating its own <code class="lang-kotlin">!= 0</code> / <code class="lang-kotlin">?: 0</code> guard.</p></div></div>
 </div>
     <div class="footer">
         <div class="footer--container">
