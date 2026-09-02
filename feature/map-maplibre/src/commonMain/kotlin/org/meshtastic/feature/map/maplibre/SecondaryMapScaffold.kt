@@ -64,7 +64,7 @@ internal fun SecondaryMapSurface(
     content: @Composable () -> Unit,
 ) {
     // Same guard as MeshMap: the secondary maps compose MaplibreMap directly, so they crash the same way.
-    if (!isMapLibreRuntimeAvailable()) return MapEngineUnavailable(modifier)
+    if (!LocalMapLibreRuntimeProbe.current()) return MapEngineUnavailable(modifier)
 
     MaplibreMap(
         baseStyle = basemaps.current.toBaseStyle(),

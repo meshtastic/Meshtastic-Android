@@ -16,6 +16,8 @@
  */
 package org.meshtastic.feature.map.maplibre
 
+import androidx.compose.runtime.staticCompositionLocalOf
+
 /**
  * Whether MapLibre's native rendering engine can actually load on this device.
  *
@@ -27,3 +29,17 @@ package org.meshtastic.feature.map.maplibre
  * Off Android there is no such gap, and the actuals there answer `true` unconditionally.
  */
 internal expect fun isMapLibreRuntimeAvailable(): Boolean
+
+/**
+ * Whether [load] brought the engine in. Wraps the call rather than catching a type: a missing library raises
+ * `UnsatisfiedLinkError`, which is an `Error`, not an `Exception` — a `catch (e: Exception)` would let the crash
+ * straight through, which is the bug this guards against.
+ */
+internal fun probeNativeRuntime(load: () -> Unit): Boolean = runCatching(load).isSuccess
+
+/**
+ * The probe the map screens consult, as a composition local so a test can drive the unavailable path without a device
+ * that lacks the engine. Defaults to the real [isMapLibreRuntimeAvailable].
+ */
+@Suppress("CompositionLocalAllowlist")
+internal val LocalMapLibreRuntimeProbe = staticCompositionLocalOf<() -> Boolean> { ::isMapLibreRuntimeAvailable }

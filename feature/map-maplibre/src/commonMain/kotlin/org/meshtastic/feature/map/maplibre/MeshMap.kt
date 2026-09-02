@@ -114,7 +114,7 @@ fun MeshMap(
     frameOnNodes: Boolean = true,
 ) {
     // No engine on this device means composing a map is the UnsatisfiedLinkError crash in #7001.
-    if (!isMapLibreRuntimeAvailable()) return MapEngineUnavailable(modifier)
+    if (!LocalMapLibreRuntimeProbe.current()) return MapEngineUnavailable(modifier)
 
     val nodes by viewModel.nodesWithPosition.collectAsStateWithLifecycle()
     val waypoints by viewModel.waypoints.collectAsStateWithLifecycle()

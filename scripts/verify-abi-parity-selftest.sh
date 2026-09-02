@@ -96,6 +96,57 @@ while IFS= read -r line; do
   esac
 done <<< "$CHECKED_IN_KNOWN_GAPS"
 
+# 7. The wrapper itself: directory scanning, split-name parsing, the universal APK, the
+#    single-split and no-APK cases, and the exit status across flavors. It sources the
+#    checked-in allowlist, so the recorded fdroid gap is exercised for real here.
+# tree <name> <flavor> <buildType> <abi>=<lib,lib,...>... — writes split APKs into a
+# fixture outputs directory shaped like androidApp/build/outputs/apk.
+tree() {
+  local name=$1 flavor=$2 type=$3 spec dir="$WORKDIR/tree-$1/$2/$3" src
+  shift 3
+  mkdir -p "$dir"
+  for spec in "$@"; do
+    src="$WORKDIR/tree-$name-$flavor-${spec%%=*}-src"
+    mkdir -p "$src/lib/${spec%%=*}"
+    for lib in $(printf '%s' "${spec#*=}" | tr ',' ' '); do printf 'x' > "$src/lib/${spec%%=*}/$lib"; done
+    (cd "$src" && zip -q -r "$dir/androidApp-$flavor-${spec%%=*}-$type.apk" lib)
+  done
+}
+# wrapper <label> <tree> <want-exit> <want-substring>
+wrapper() {
+  local label=$1 tree=$2 want=$3 needle=$4 out rc=0
+  out=$(scripts/verify-abi-parity.sh "$WORKDIR/tree-$tree" 2>&1) || rc=$?
+  if [ "$rc" = "$want" ] && printf '%s' "$out" | grep -qF -- "$needle"; then
+    echo "✅ $label"
+  else
+    echo "❌ $label: exit $rc (wanted $want), output:"; printf '%s\n' "$out" | sed 's/^/     /'
+    FAILURES=$((FAILURES + 1))
+  fi
+}
+
+tree even google debug armeabi-v7a=liba.so,libb.so arm64-v8a=liba.so,libb.so universal=liba.so,libb.so
+wrapper "matching splits pass, universal ignored" even 0 "google: all splits ship the same native libraries"
+
+tree gap google debug armeabi-v7a=liba.so arm64-v8a=liba.so,libengine.so
+wrapper "unrecorded gap fails with the lib named" gap 1 "armeabi-v7a/libengine.so"
+
+MAPLIBRE="libjniMaplibreNativeC.so,libmaplibre-native-c.so"
+tree known fdroid release armeabi-v7a=liba.so "arm64-v8a=liba.so,$MAPLIBRE"
+wrapper "the recorded fdroid gap passes and is counted" known 0 "fdroid: splits match apart from 2 recorded known gap(s)"
+
+tree stale fdroid release "armeabi-v7a=liba.so,$MAPLIBRE" "arm64-v8a=liba.so,$MAPLIBRE"
+wrapper "the recorded gap closing fails until the lines go" stale 1 "known-gap entries whose library is now present"
+
+tree single google debug arm64-v8a=liba.so
+wrapper "a lone split is nothing to compare, so no APKs were checked" single 1 "no split APKs found"
+
+mkdir -p "$WORKDIR/tree-empty"
+wrapper "an empty outputs directory fails loudly" empty 1 "no split APKs found"
+
+tree both google debug armeabi-v7a=liba.so arm64-v8a=liba.so,libx.so
+tree both fdroid debug armeabi-v7a=liba.so arm64-v8a=liba.so,liby.so
+wrapper "one failure per flavor adds up in the exit status" both 2 "armeabi-v7a/liby.so"
+
 echo
 if [ "$FAILURES" -gt 0 ]; then
   echo "❌ $FAILURES check(s) failed"

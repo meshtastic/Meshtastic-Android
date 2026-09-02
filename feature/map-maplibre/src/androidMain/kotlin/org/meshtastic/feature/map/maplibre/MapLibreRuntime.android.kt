@@ -27,9 +27,8 @@ package org.meshtastic.feature.map.maplibre
 private const val MAPLIBRE_JNI_LIBRARY = "jniMaplibreNativeC"
 
 private val runtimeAvailable: Boolean by lazy {
-    // runCatching, not catch (Exception): a missing library raises UnsatisfiedLinkError, which is an Error.
     // System.loadLibrary is process-wide and idempotent, so MapLibre's own load later finds this one already done.
-    runCatching { System.loadLibrary(MAPLIBRE_JNI_LIBRARY) }.isSuccess
+    probeNativeRuntime { System.loadLibrary(MAPLIBRE_JNI_LIBRARY) }
 }
 
 internal actual fun isMapLibreRuntimeAvailable(): Boolean = runtimeAvailable

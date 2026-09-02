@@ -132,7 +132,7 @@ class MapLibreMapViewProvider(
         sitePlannerNodeNum: Int?,
     ) {
         // Guarded here too, or the toolbar and zoom controls float over an empty screen driving a missing map.
-        if (!isMapLibreRuntimeAvailable()) return MapEngineUnavailable(modifier)
+        if (!LocalMapLibreRuntimeProbe.current()) return MapEngineUnavailable(modifier)
 
         val viewModel: SharedMapViewModel = koinViewModel()
         // Null for the one frame before the basemap preference has loaded from disk; see rememberBasemapSelection.
