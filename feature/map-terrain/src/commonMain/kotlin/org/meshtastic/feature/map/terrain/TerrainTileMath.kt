@@ -46,17 +46,50 @@ object TerrainTileMath {
         return TileIndex(zoom, x, y)
     }
 
-    /** Every tile in [bounds] at [zoom], inclusive of both corners' own tiles. */
+    /** The largest valid tile-column/row index at [zoom] — `2^zoom - 1`, the same bound [tileAt] clamps into. */
+    private fun maxTileIndex(zoom: Int): Int = (2.0.pow(zoom).toInt() - 1)
+
+    /**
+     * The x-index ranges [tilesAt] must enumerate for [bounds] at [zoom] — normally a single `[west.x, east.x]` range,
+     * but split into two (`[west.x, maxX]` and `[0, east.x]`) when [bounds] crosses the antimeridian (e.g. west=170,
+     * east=-170 — real for Fiji, or Chukotka/Alaska): a plain `IntRange` with `start > end` is empty in Kotlin, which
+     * would otherwise silently enumerate zero tiles for a real, valid region.
+     */
+    private fun xRangesAt(zoom: Int, northwest: TileIndex, southeast: TileIndex): List<IntRange> =
+        if (northwest.x <= southeast.x) {
+            listOf(northwest.x..southeast.x)
+        } else {
+            listOf(northwest.x..maxTileIndex(zoom), 0..southeast.x)
+        }
+
+    /** Every tile in [bounds] at [zoom], inclusive of both corners' own tiles. Antimeridian-aware — see [xRangesAt]. */
     fun tilesAt(zoom: Int, bounds: GeoBounds): List<TileIndex> {
         val northwest = tileAt(zoom, bounds.north, bounds.west)
         val southeast = tileAt(zoom, bounds.south, bounds.east)
         val tiles = mutableListOf<TileIndex>()
-        for (x in northwest.x..southeast.x) {
-            for (y in northwest.y..southeast.y) {
-                tiles += TileIndex(zoom, x, y)
+        for (xRange in xRangesAt(zoom, northwest, southeast)) {
+            for (x in xRange) {
+                for (y in northwest.y..southeast.y) {
+                    tiles += TileIndex(zoom, x, y)
+                }
             }
         }
         return tiles
+    }
+
+    /**
+     * How many tiles [tilesAt] would return for [zoom]/[bounds], computed from the two corner indices rather than by
+     * materializing the list — stays O(1) per zoom regardless of how large the actual count is. Shared by
+     * [TerrainRegionExtractor] (to bound memory before enumerating) and `:feature:map-maplibre`'s own pre-download
+     * estimate shown in the layers sheet.
+     */
+    fun tileCountAt(zoom: Int, bounds: GeoBounds): Long {
+        val northwest = tileAt(zoom, bounds.north, bounds.west)
+        val southeast = tileAt(zoom, bounds.south, bounds.east)
+        val rows = (southeast.y - northwest.y + 1).coerceAtLeast(0)
+        val columns =
+            xRangesAt(zoom, northwest, southeast).sumOf { range -> (range.last - range.first + 1).coerceAtLeast(0) }
+        return columns.toLong() * rows.toLong()
     }
 
     /** Whether [bounds] fits entirely inside a single tile at [zoom] — used for Mapterhorn's regional-archive gate. */

@@ -47,20 +47,25 @@ internal object TerrainDownloadPlanner {
         return MapterhornEndpoints.GLOBAL_MAX_ZOOM
     }
 
-    /** Mirrors [org.meshtastic.feature.map.terrain.TerrainRegionExtractor.download]'s own tile enumeration. */
-    private fun tileCount(bounds: GeoBounds, maxZoom: Int): Int {
+    /**
+     * Mirrors [org.meshtastic.feature.map.terrain.TerrainRegionExtractor.download]'s own tile enumeration, but via
+     * [TerrainTileMath.tileCountAt] rather than materializing each zoom level's tile list — this function walks zoom 18
+     * down to 12 on every call, and materializing to count at the deep end would be the same
+     * count-before-you-can-afford-to-materialize problem the extractor itself was fixed for.
+     */
+    private fun tileCount(bounds: GeoBounds, maxZoom: Int): Long {
         val globalZoomRange = 0..minOf(maxZoom, MapterhornEndpoints.GLOBAL_MAX_ZOOM)
-        val globalCount = globalZoomRange.sumOf { zoom -> TerrainTileMath.tilesAt(zoom, bounds).size }
+        val globalCount = globalZoomRange.sumOf { zoom -> TerrainTileMath.tileCountAt(zoom, bounds) }
 
         val regionalUrl =
             if (maxZoom > MapterhornEndpoints.GLOBAL_MAX_ZOOM) MapterhornEndpoints.regionalUrlFor(bounds) else null
         val regionalCount =
             if (regionalUrl == null) {
-                0
+                0L
             } else {
                 val regionalZoomRange =
                     MapterhornEndpoints.REGIONAL_MIN_ZOOM..minOf(maxZoom, MapterhornEndpoints.REGIONAL_MAX_ZOOM)
-                regionalZoomRange.sumOf { zoom -> TerrainTileMath.tilesAt(zoom, bounds).size }
+                regionalZoomRange.sumOf { zoom -> TerrainTileMath.tileCountAt(zoom, bounds) }
             }
 
         return globalCount + regionalCount

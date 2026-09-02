@@ -88,4 +88,19 @@ class HillshadeTest {
             Hillshade.shade(wrongSize, width = 1, height = 1, maxShadowAlpha = 1f)
         }
     }
+
+    @Test
+    fun `despike leaves the margin ring's original values untouched`() {
+        // 5x5 padded tile (3x3 output + a 1px margin ring): flat at 100 everywhere except the tile's own top-left
+        // margin corner, spiked far above its clamped-at-the-edge neighborhood's median. If despike touched the
+        // margin ring it would flatten that corner back to 100 — it must not, since the margin exists to carry real
+        // neighbor-tile elevation data into edge-pixel shading, not to be cleaned up itself.
+        val values = FloatArray(25) { 100f }
+        values[0] = 1000f
+        val padded = ElevationTile(5, 5, values)
+
+        val despiked = Hillshade.despike(padded)
+
+        assertEquals(1000f, despiked.elevationAt(0, 0))
+    }
 }

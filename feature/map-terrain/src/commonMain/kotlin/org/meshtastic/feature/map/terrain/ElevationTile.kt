@@ -35,6 +35,7 @@ fun terrariumElevationMeters(red: Int, green: Int, blue: Int): Float =
  */
 class ElevationTile(val width: Int, val height: Int, val elevations: FloatArray) {
     init {
+        require(width > 0 && height > 0) { "width ($width) and height ($height) must both be positive" }
         require(elevations.size == width * height) {
             "elevations.size (${elevations.size}) must equal width×height ($width×$height)"
         }
