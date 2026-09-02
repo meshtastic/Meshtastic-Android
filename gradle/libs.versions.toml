@@ -250,6 +250,12 @@ kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.
 kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinx-serialization" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 kotlinx-serialization-json-okio = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json-okio", version.ref = "kotlinx-serialization" }
+kotlinx-serialization-protobuf = { module = "org.jetbrains.kotlinx:kotlinx-serialization-protobuf", version.ref = "kotlinx-serialization" }
+# Reads the PMTiles v3 container format (header + directory tree). MIT-licensed; see
+# https://github.com/simonpoole/pmtiles-reader. Also added independently on feat/map-google-pmtiles-offline
+# (PR #7000, not yet merged) for the base offline layer — identical entry, so whichever branch merges first,
+# the other's rebase sees no real conflict here.
+pmtiles-reader = { module = "ch.poole.geo.pmtiles-reader:Reader", version = "0.3.6" }
 
 # Networking
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
@@ -305,6 +311,7 @@ meshtastic-mqtt-client-transport-ws = { module = "org.meshtastic:mqtt-client-tra
 
 jserialcomm = { module = "com.fazecast:jSerialComm", version.ref = "jserialcomm" }
 okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
+okio-fakefilesystem = { module = "com.squareup.okio:okio-fakefilesystem", version.ref = "okio" }
 uri-kmp = { module = "com.eygraber:uri-kmp", version.ref = "uri-kmp" }
 kermit = { module = "co.touchlab:kermit", version = "2.1.0" }
 # Debug-only leak/GC-thrash detector -- see feature/settings/.../debugging/DebugViewModel.kt and

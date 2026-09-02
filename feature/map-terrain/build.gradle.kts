@@ -35,11 +35,28 @@ kotlin {
     }
 
     sourceSets {
-        commonMain.dependencies { implementation(projects.core.common) }
+        commonMain.dependencies {
+            implementation(projects.core.common)
+            implementation(libs.kotlinx.coroutines.core)
+            // Local terrain-tile storage is a plain file hierarchy, not SQLite: unlike the base offline layer's
+            // Google-only archive (which can assume Android's SQLite), this module's storage must also work on
+            // Desktop, and Okio's FileSystem is genuinely multiplatform where Android's SQLite APIs are not.
+            implementation(libs.okio)
+        }
 
-        // Skia's Image decoder reaches WebP directly; brought in transitively by Compose
-        // Multiplatform's desktop UI artifact, which the `meshtastic.kmp.feature` convention plugin
-        // already applies — see feature/map-maplibre's identical jvmTest dependency for precedent.
-        jvmMain.dependencies { implementation(compose.desktop.currentOs) }
+        commonTest.dependencies { implementation(libs.okio.fakefilesystem) }
+
+        // ch.poole.geo.pmtiles:Reader is a plain Java library, usable identically from both the android and
+        // jvm targets — but KMP has no built-in "android+jvm, not native" source set to put it in once, so the
+        // small amount of code wrapping it is duplicated between androidMain and jvmMain, same as
+        // ElevationTile's platform-specific decode actuals.
+        androidMain.dependencies { implementation(libs.pmtiles.reader) }
+        jvmMain.dependencies {
+            implementation(libs.pmtiles.reader)
+            // Skia's Image decoder reaches WebP directly; brought in transitively by Compose
+            // Multiplatform's desktop UI artifact, which the `meshtastic.kmp.feature` convention plugin
+            // already applies — see feature/map-maplibre's identical jvmTest dependency for precedent.
+            implementation(compose.desktop.currentOs)
+        }
     }
 }
