@@ -98,11 +98,17 @@ object Hillshade {
      * Reconstructed from iOS's documented behavior rather than a byte-exact port of `HillshadeTileOverlay.swift` (the
      * source wasn't available to copy verbatim); [DESPIKE_THRESHOLD_METERS] is a starting estimate and may need
      * retuning against real Mapterhorn data once this renders somewhere visible.
+     *
+     * Only iterates the interior — the [MARGIN]-px ring is real neighbor-tile elevation data (see this file's own doc
+     * comment on why the padding exists), not despike's to clean up. Despiking it would corrupt exactly the pixels the
+     * padding exists to get right, before [shadeOnePixel] ever reads them as edge-pixel neighbor context. Internal, not
+     * private, so [HillshadeTest][org.meshtastic.feature.map.terrain.HillshadeTest] can assert the margin ring survives
+     * unchanged.
      */
-    private fun despike(tile: ElevationTile): ElevationTile {
+    internal fun despike(tile: ElevationTile): ElevationTile {
         val out = tile.elevations.copyOf()
-        for (y in 0 until tile.height) {
-            for (x in 0 until tile.width) {
+        for (y in MARGIN until tile.height - MARGIN) {
+            for (x in MARGIN until tile.width - MARGIN) {
                 val neighborhood =
                     floatArrayOf(
                         tile.elevationAt(x - 1, y - 1),

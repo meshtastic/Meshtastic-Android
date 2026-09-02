@@ -30,15 +30,16 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.SerializationException
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okio.FileSystem
+import okio.IOException
 import okio.Path
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.feature.map.layers.mapLayerFileSystem
 import org.meshtastic.feature.map.terrain.GeoBounds
+import org.meshtastic.feature.map.terrain.TerrainDownloadFailure
 import org.meshtastic.feature.map.terrain.TerrainDownloadState
 import org.meshtastic.feature.map.terrain.TerrainRegionExtractor
 import org.meshtastic.feature.map.terrain.TerrainSource
@@ -120,32 +121,20 @@ class OfflineTerrainRepository(private val fileSystem: FileSystem, private val b
             _region.value = null
 
             TerrainRegionExtractor(store).download(bounds, maxZoom).collect { state ->
-                when (state) {
-                    is TerrainDownloadState.Complete -> {
-                        val downloaded =
-                            OfflineTerrainRegion(
-                                south = bounds.south,
-                                west = bounds.west,
-                                north = bounds.north,
-                                east = bounds.east,
-                                maxZoom = maxZoom,
-                                hasRegionalDetail = state.hasRegionalDetail,
-                                tileCount = state.tileCount,
-                                byteSize = state.byteSize,
-                            )
-                        writeManifest(downloaded)
-                        _region.value = downloaded
-                    }
+                val outcome =
+                    when (state) {
+                        is TerrainDownloadState.Complete -> persistCompletedDownload(bounds, maxZoom, state)
 
-                    is TerrainDownloadState.Failed -> {
-                        // Nothing partial is kept: TerrainRegionExtractor already ran store.deleteAll() itself
-                        // on both failure reasons (TILE_LIMIT_EXCEEDED never wrote a tile to begin with).
-                        Logger.withTag(LOG_TAG).w { "Offline terrain download failed: ${state.reason}" }
-                    }
+                        is TerrainDownloadState.Failed -> {
+                            // Nothing partial is kept: TerrainRegionExtractor already ran store.deleteAll() itself on
+                            // both failure reasons (TILE_LIMIT_EXCEEDED never wrote a tile to begin with).
+                            Logger.withTag(LOG_TAG).w { "Offline terrain download failed: ${state.reason}" }
+                            state
+                        }
 
-                    is TerrainDownloadState.InProgress -> Unit
-                }
-                emit(state)
+                        is TerrainDownloadState.InProgress -> state
+                    }
+                emit(outcome)
             }
         }
     }
@@ -184,9 +173,16 @@ class OfflineTerrainRepository(private val fileSystem: FileSystem, private val b
      * `baseDir` is always an absolute path (see [terrainStorageDirectory]'s platform actuals), so this yields a
      * three-slash `file:///...` URL — see `OfflineTerrainRepositoryTest`'s template test for why that is asserted
      * explicitly rather than left to be "fixed" to four slashes later.
+     *
+     * The directory portion is percent-encoded before interpolation — a Desktop/JVM user-data path can legitimately
+     * contain characters reserved in a URL (a space in a Windows/macOS username is the common case, `#`/`%` less so but
+     * just as real) — while the trailing `{z}/{x}/{y}` placeholders are appended afterwards, literally, so
+     * [rememberRasterDemSource]'s own substitution still sees them unescaped.
      */
-    fun tileUrlTemplate(source: TerrainSource): String =
-        "file://${baseDir / TILES_DIR_NAME / source.dirName}/{z}/{x}/{y}.webp"
+    fun tileUrlTemplate(source: TerrainSource): String {
+        val encodedDir = (baseDir / TILES_DIR_NAME / source.dirName).toString().percentEncodeUrlReserved()
+        return "file://$encodedDir/{z}/{x}/{y}.webp"
+    }
 
     private fun loadIfNeeded(force: Boolean = false) {
         if (loaded && !force) return
@@ -205,17 +201,62 @@ class OfflineTerrainRepository(private val fileSystem: FileSystem, private val b
         if (store.sizeBytes() > 0L) store.deleteAll()
     }
 
+    /**
+     * A manifest that fails to parse is unusable, but leaving it (and its tile directory) on disk would permanently
+     * retain that disk usage with no region shown and no delete action available to reclaim it — the next call would
+     * just hit the same corrupt file and return `null` again. Both are deleted here so the next [download] starts clean
+     * instead of layering a fresh manifest over stale, orphaned tiles.
+     *
+     * A single [IllegalArgumentException] catch, not a separate one for `SerializationException`: kotlinx.serialization
+     * throws that as a subtype of it, so one catch already covers both a malformed-JSON and a schema-mismatch manifest.
+     */
     private fun readManifest(): OfflineTerrainRegion? {
         if (!fileSystem.exists(manifestPath)) return null
         return try {
             val text = fileSystem.read(manifestPath) { readUtf8() }
             json.decodeFromString<OfflineTerrainRegion>(text)
-        } catch (error: SerializationException) {
-            Logger.withTag(LOG_TAG).w(error) { "Ignoring an unreadable offline-terrain manifest" }
-            null
         } catch (error: IllegalArgumentException) {
-            Logger.withTag(LOG_TAG).w(error) { "Ignoring an unreadable offline-terrain manifest" }
+            Logger.withTag(LOG_TAG).w(error) { "Discarding an unreadable offline-terrain manifest and its tiles" }
+            deleteManifest()
+            store.deleteAll()
             null
+        }
+    }
+
+    /**
+     * Builds the [OfflineTerrainRegion] for a [TerrainDownloadState.Complete] and persists it via [writeManifest] — the
+     * one write in [download] with no error handling of its own, so a full disk or a permission failure here would
+     * otherwise propagate as an uncaught exception instead of surfacing through [downloadState] like every other
+     * failure mode. On write failure, the tiles [TerrainRegionExtractor] just fetched are discarded too: a manifest-
+     * less tile directory is exactly what [cleanUpOrphanedTiles] treats as orphaned, so leaving them would just be
+     * deferring the same cleanup to the next [loadIfNeeded] instead of reporting the failure now.
+     */
+    private fun persistCompletedDownload(
+        bounds: GeoBounds,
+        maxZoom: Int,
+        state: TerrainDownloadState.Complete,
+    ): TerrainDownloadState {
+        val downloaded =
+            OfflineTerrainRegion(
+                south = bounds.south,
+                west = bounds.west,
+                north = bounds.north,
+                east = bounds.east,
+                maxZoom = maxZoom,
+                hasRegionalDetail = state.hasRegionalDetail,
+                tileCount = state.tileCount,
+                byteSize = state.byteSize,
+            )
+        return try {
+            writeManifest(downloaded)
+            _region.value = downloaded
+            state
+        } catch (error: IOException) {
+            Logger.withTag(LOG_TAG).w(error) { "Failed to persist the offline-terrain manifest" }
+            store.deleteAll()
+            deleteManifest()
+            _region.value = null
+            TerrainDownloadState.Failed(TerrainDownloadFailure.IO_ERROR)
         }
     }
 

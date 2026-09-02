@@ -48,8 +48,10 @@ import org.meshtastic.core.resources.map_cache_tiles
 import org.meshtastic.core.resources.map_select_download_region
 import org.meshtastic.core.resources.map_start_download
 import org.meshtastic.core.resources.map_tile_download_estimate
+import org.meshtastic.core.resources.map_tile_download_estimate_detail
 import org.meshtastic.core.resources.map_tile_limit_reached
 import org.meshtastic.core.resources.map_zoom_levels
+import org.meshtastic.core.resources.offline_terrain_cache_detail
 import org.meshtastic.core.resources.offline_terrain_empty
 import org.meshtastic.core.resources.offline_terrain_manager
 import org.meshtastic.core.resources.offline_terrain_regional_detail
@@ -145,11 +147,12 @@ private fun TerrainDownloadControls(
             )
             Text(
                 text =
-                stringResource(Res.string.map_tile_download_estimate) +
-                    " " +
-                    stringResource(Res.string.map_cache_tiles, estimate.toInt()) +
-                    "  " +
+                stringResource(
+                    Res.string.map_tile_download_estimate_detail,
+                    stringResource(Res.string.map_tile_download_estimate),
+                    stringResource(Res.string.map_cache_tiles, estimate.toInt()),
                     stringResource(Res.string.map_zoom_levels, 0, maxZoom),
+                ),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -195,11 +198,12 @@ private fun DownloadedTerrainRow(region: OfflineTerrainRegion, onShow: () -> Uni
         Column(modifier = Modifier.fillMaxWidth(TERRAIN_ROW_TEXT_FRACTION)) {
             Text(
                 text =
-                stringResource(Res.string.map_cache_size) +
-                    ": " +
-                    stringResource(Res.string.map_cache_megabytes, region.byteSize.megabytes()) +
-                    " · " +
+                stringResource(
+                    Res.string.offline_terrain_cache_detail,
+                    stringResource(Res.string.map_cache_size),
+                    stringResource(Res.string.map_cache_megabytes, region.byteSize.megabytes()),
                     stringResource(Res.string.map_cache_tiles, region.tileCount.toInt()),
+                ),
                 style = MaterialTheme.typography.bodyMedium,
             )
             if (region.hasRegionalDetail) {

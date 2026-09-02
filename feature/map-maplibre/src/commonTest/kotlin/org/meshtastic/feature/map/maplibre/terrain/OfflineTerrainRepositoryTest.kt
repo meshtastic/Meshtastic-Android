@@ -64,6 +64,24 @@ class OfflineTerrainRepositoryTest {
     }
 
     @Test
+    fun `a corrupt manifest is deleted along with its tile directory not just ignored`() = runTest {
+        // A manifest that fails to parse must not be left on disk to permanently retain its tiles' disk usage with
+        // no region shown and no delete action available to reclaim it.
+        fileSystem.createDirectories(baseDir)
+        fileSystem.write(baseDir / "manifest.json") { writeUtf8("not valid json") }
+        val store = TerrainTileStore(fileSystem, baseDir / "tiles")
+        store.writeTile(TerrainSource.GLOBAL, TileIndex(5, 1, 1), byteArrayOf(1, 2, 3))
+        assertTrue(store.sizeBytes() > 0L)
+
+        val repository = repository()
+        repository.refresh()
+
+        assertNull(repository.region.value)
+        assertTrue(!fileSystem.exists(baseDir / "manifest.json"))
+        assertEquals(0L, store.sizeBytes())
+    }
+
+    @Test
     fun `a manifest with no tile directory still loads as a region`() = runTest {
         // The manifest and the tile directory are independent on disk; this only exercises manifest read/write, not
         // the orphan-tile cleanup above.
@@ -137,6 +155,18 @@ class OfflineTerrainRepositoryTest {
         assertEquals(
             "file:///data/terrain/tiles/regional/{z}/{x}/{y}.webp",
             repository.tileUrlTemplate(TerrainSource.REGIONAL),
+        )
+    }
+
+    @Test
+    fun `tileUrlTemplate percent-encodes reserved characters but leaves the z x y placeholders literal`() {
+        // A Windows/macOS username with a space is the common real-world case; # and % are less common but just as
+        // real (a fragment delimiter and the escape prefix itself, respectively).
+        val repository = OfflineTerrainRepository(fileSystem, "/data/My Terrain #1 100%/dir".toPath())
+
+        assertEquals(
+            "file:///data/My%20Terrain%20%231%20100%25/dir/tiles/global/{z}/{x}/{y}.webp",
+            repository.tileUrlTemplate(TerrainSource.GLOBAL),
         )
     }
 

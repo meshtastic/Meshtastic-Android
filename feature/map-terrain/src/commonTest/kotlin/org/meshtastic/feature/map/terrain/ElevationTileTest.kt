@@ -62,4 +62,12 @@ class ElevationTileTest {
             ElevationTile(width = 2, height = 2, elevations = floatArrayOf(1f))
         }
     }
+
+    @Test
+    fun `a zero-dimension grid is rejected at construction rather than crashing elevationAt later`() {
+        // width=0 (or height=0) passes the size == width*height check trivially (0 == 0), but would later throw
+        // from elevationAt's coerceIn(0, width - 1) -> coerceIn(0, -1) on first use. Reject it up front instead.
+        assertFailsWith<IllegalArgumentException> { ElevationTile(width = 0, height = 2, elevations = floatArrayOf()) }
+        assertFailsWith<IllegalArgumentException> { ElevationTile(width = 2, height = 0, elevations = floatArrayOf()) }
+    }
 }

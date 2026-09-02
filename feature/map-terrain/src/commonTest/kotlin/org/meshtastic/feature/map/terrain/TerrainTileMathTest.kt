@@ -45,6 +45,30 @@ class TerrainTileMathTest {
     }
 
     @Test
+    fun `tilesAt wraps the antimeridian instead of returning zero tiles`() {
+        // Fiji-shaped bounds: west=170, east=-170. northwest.x > southeast.x at any real zoom, which a plain
+        // IntRange(start > end) would silently enumerate as empty.
+        val bounds = GeoBounds(south = -20.0, west = 170.0, north = -16.0, east = -170.0)
+        val tiles = TerrainTileMath.tilesAt(zoom = 6, bounds)
+
+        assertTrue(tiles.isNotEmpty())
+        assertTrue(tiles.contains(TerrainTileMath.tileAt(6, bounds.north, bounds.west)))
+        assertTrue(tiles.contains(TerrainTileMath.tileAt(6, bounds.south, bounds.east)))
+        // The wrap point itself (x=0, the antimeridian) must be covered, not skipped.
+        val y = TerrainTileMath.tileAt(6, bounds.north, bounds.west).y
+        assertTrue(tiles.contains(TileIndex(6, 0, y)))
+    }
+
+    @Test
+    fun `tileCountAt agrees with tilesAt's own size including across the antimeridian`() {
+        val normal = GeoBounds(south = -1.0, west = -1.0, north = 1.0, east = 1.0)
+        assertEquals(TerrainTileMath.tilesAt(4, normal).size.toLong(), TerrainTileMath.tileCountAt(4, normal))
+
+        val wrapping = GeoBounds(south = -20.0, west = 170.0, north = -16.0, east = -170.0)
+        assertEquals(TerrainTileMath.tilesAt(6, wrapping).size.toLong(), TerrainTileMath.tileCountAt(6, wrapping))
+    }
+
+    @Test
     fun `fitsInSingleTile is true for a tiny box and false for a global one`() {
         val tiny = GeoBounds(south = 47.6, west = -122.4, north = 47.61, east = -122.39)
         assertTrue(TerrainTileMath.fitsInSingleTile(zoom = 6, tiny))

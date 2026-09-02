@@ -57,7 +57,14 @@ class TerrainDownloadEstimateTest {
     }
 
     @Test
-    fun `zero or negative maxZoom counts nothing`() {
+    fun `negative maxZoom counts nothing`() {
         assertEquals(0L, estimateTerrainTiles(tinyBounds, -1))
+    }
+
+    @Test
+    fun `maxZoom 0 counts the single world-covering z0 tile`() {
+        // Unlike a negative maxZoom, 0 is a real, valid zoom range (0..0) -- it legitimately counts the one z0 tile
+        // that covers the whole world, not nothing.
+        assertEquals(1L, estimateTerrainTiles(tinyBounds, 0))
     }
 }

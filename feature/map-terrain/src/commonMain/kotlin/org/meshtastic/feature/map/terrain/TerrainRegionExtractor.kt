@@ -49,44 +49,50 @@ class TerrainRegionExtractor(private val store: TerrainTileStore) {
 
     fun download(bounds: GeoBounds, maxZoom: Int): Flow<TerrainDownloadState> = flow {
         val globalZoomRange = 0..minOf(maxZoom, MapterhornEndpoints.GLOBAL_MAX_ZOOM)
-        val globalTiles = globalZoomRange.flatMap { zoom -> TerrainTileMath.tilesAt(zoom, bounds) }
-
         val regionalUrl =
             if (maxZoom > MapterhornEndpoints.GLOBAL_MAX_ZOOM) MapterhornEndpoints.regionalUrlFor(bounds) else null
         val regionalZoomRange =
             MapterhornEndpoints.REGIONAL_MIN_ZOOM..minOf(maxZoom, MapterhornEndpoints.REGIONAL_MAX_ZOOM)
+
+        // Counted cheaply — via TerrainTileMath.tileCountAt's corner arithmetic, O(1) per zoom — before anything is
+        // materialized. A single regional z6 tile at maxZoom 18 is ~16.7M tiles at z18 alone; flatMap-ing a TileIndex
+        // per tile before this check runs would allocate that whole list first and risk OOM on exactly the oversized
+        // requests this limit exists to reject.
+        val globalCount = globalZoomRange.sumOf { zoom -> TerrainTileMath.tileCountAt(zoom, bounds) }
+        val regionalCount =
+            if (regionalUrl != null) {
+                regionalZoomRange.sumOf { zoom -> TerrainTileMath.tileCountAt(zoom, bounds) }
+            } else {
+                0L
+            }
+        val totalTiles = globalCount + regionalCount
+        if (totalTiles > MAX_TILES) {
+            emit(TerrainDownloadState.Failed(TerrainDownloadFailure.TILE_LIMIT_EXCEEDED))
+            return@flow
+        }
+        if (totalTiles == 0L) {
+            emit(TerrainDownloadState.Complete(tileCount = 0, byteSize = 0, hasRegionalDetail = false))
+            return@flow
+        }
+
+        // Only materialized now that the cheap count above has confirmed it's under MAX_TILES.
+        val globalTiles = globalZoomRange.flatMap { zoom -> TerrainTileMath.tilesAt(zoom, bounds) }
         val regionalTiles =
             if (regionalUrl != null) {
                 regionalZoomRange.flatMap { zoom -> TerrainTileMath.tilesAt(zoom, bounds) }
             } else {
                 emptyList()
             }
+        val total = totalTiles.toInt()
 
-        val totalTiles = globalTiles.size + regionalTiles.size
-        if (totalTiles > MAX_TILES) {
-            emit(TerrainDownloadState.Failed(TerrainDownloadFailure.TILE_LIMIT_EXCEEDED))
-            return@flow
-        }
-        if (totalTiles == 0) {
-            emit(TerrainDownloadState.Complete(tileCount = 0, byteSize = 0, hasRegionalDetail = false))
-            return@flow
-        }
-
-        var completed = 0
+        var result = FetchResult(processed = 0, stored = 0)
         try {
-            completed =
-                fetchInto(
-                    MapterhornEndpoints.GLOBAL_PMTILES_URL,
-                    TerrainSource.GLOBAL,
-                    globalTiles,
-                    completed,
-                    totalTiles,
-                ) {
+            result =
+                fetchInto(MapterhornEndpoints.GLOBAL_PMTILES_URL, TerrainSource.GLOBAL, globalTiles, result, total) {
                     emit(it)
                 }
             if (regionalUrl != null) {
-                completed =
-                    fetchInto(regionalUrl, TerrainSource.REGIONAL, regionalTiles, completed, totalTiles) { emit(it) }
+                result = fetchInto(regionalUrl, TerrainSource.REGIONAL, regionalTiles, result, total) { emit(it) }
             }
         } catch (_: Exception) {
             store.deleteAll()
@@ -96,32 +102,45 @@ class TerrainRegionExtractor(private val store: TerrainTileStore) {
 
         emit(
             TerrainDownloadState.Complete(
-                tileCount = completed.toLong(),
+                tileCount = result.stored,
                 byteSize = store.sizeBytes(),
                 hasRegionalDetail = regionalUrl != null,
             ),
         )
     }
 
+    /**
+     * [processed] drives [TerrainDownloadState.InProgress] (every tile the fetch loop reaches, whether or not the
+     * archive actually had it); [stored] drives [TerrainDownloadState.Complete.tileCount] (only tiles [store]'s
+     * writeTile actually persisted). Sparse archive coverage — [TerrainTileFetcher.fetchTile] legitimately returning
+     * `null` for a tile the source archive doesn't have — is documented as normal, not an error, so it must not inflate
+     * the count the UI reports as "downloaded".
+     */
+    private data class FetchResult(val processed: Int, val stored: Long)
+
     private suspend fun fetchInto(
         pmtilesUrl: String,
         source: TerrainSource,
         tiles: List<TileIndex>,
-        startingCompleted: Int,
+        starting: FetchResult,
         totalTiles: Int,
         onProgress: suspend (TerrainDownloadState.InProgress) -> Unit,
-    ): Int {
-        var completed = startingCompleted
+    ): FetchResult {
+        var processed = starting.processed
+        var stored = starting.stored
         TerrainTileFetcher(pmtilesUrl).use { fetcher ->
             for (tile in tiles) {
-                fetcher.fetchTile(tile.zoom, tile.x, tile.y)?.let { bytes -> store.writeTile(source, tile, bytes) }
-                completed++
-                if (completed % PROGRESS_STRIDE == 0 || completed == totalTiles) {
-                    onProgress(TerrainDownloadState.InProgress(completed, totalTiles))
+                fetcher.fetchTile(tile.zoom, tile.x, tile.y)?.let { bytes ->
+                    store.writeTile(source, tile, bytes)
+                    stored++
+                }
+                processed++
+                if (processed % PROGRESS_STRIDE == 0 || processed == totalTiles) {
+                    onProgress(TerrainDownloadState.InProgress(processed, totalTiles))
                 }
             }
         }
-        return completed
+        return FetchResult(processed, stored)
     }
 
     companion object {
