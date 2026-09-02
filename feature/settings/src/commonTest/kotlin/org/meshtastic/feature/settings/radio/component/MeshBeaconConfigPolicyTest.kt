@@ -216,6 +216,24 @@ class MeshBeaconConfigPolicyTest {
     }
 
     @Test
+    fun stampBeaconConfigForSave_defaultTargetRow_nullFieldsSurviveButRegionIsStamped() {
+        // A seeded/"Default" row (null channel_index, null preset) must reach the outgoing ModuleConfig with those
+        // fields still null -- that's the whole point of the sentinel, matching firmware's own "unset falls back to
+        // running config" semantics (module_config.proto). Region is the one field every target always gets, per
+        // save-time stamping (behavior 1), regardless of the row's own null fields.
+        val radioLora =
+            Config.LoRaConfig(region = RegionCode.EU_868, modem_preset = ModemPreset.MEDIUM_FAST, use_preset = true)
+        val config = MeshBeaconConfig(broadcast_targets = listOf(MeshBeaconConfig.BroadcastTarget()))
+
+        val stamped = stampBeaconConfigForSave(config, config, radioLora, channelList = emptyList())
+
+        val target = stamped.broadcast_targets.single()
+        assertNull(target.channel_index)
+        assertNull(target.preset)
+        assertEquals(RegionCode.EU_868, target.region)
+    }
+
+    @Test
     fun stampBeaconConfigForSave_untouchedOfferChannel_defaultsToPrimary() {
         val radioLora =
             Config.LoRaConfig(region = RegionCode.US, modem_preset = ModemPreset.LONG_FAST, use_preset = true)
@@ -339,6 +357,18 @@ class MeshBeaconConfigPolicyTest {
     }
 
     @Test
+    fun selectBeaconTargetChannel_defaultSentinelWithConcretePreset_presetUnchanged() {
+        // Same as the null-preset case above, but with a preset the user has already deliberately chosen -- the
+        // regression this guards is "Default" silently resetting a concrete preset, not just leaving null alone.
+        val target = MeshBeaconConfig.BroadcastTarget(channel_index = 2, preset = ModemPreset.SHORT_FAST)
+
+        val updated = selectBeaconTargetChannel(target, channelIndex = null, currentPreset = ModemPreset.LONG_FAST)
+
+        assertNull(updated.channel_index)
+        assertEquals(ModemPreset.SHORT_FAST, updated.preset)
+    }
+
+    @Test
     fun seedBeaconTargets_emptyStoredList_seedsOneDefaultRow() {
         val seeded = seedBeaconTargets(emptyList())
 
@@ -352,6 +382,28 @@ class MeshBeaconConfigPolicyTest {
         val seeded = seedBeaconTargets(stored)
 
         assertEquals(stored, seeded)
+    }
+
+    @Test
+    fun initialBeaconFormState_emptyStoredConfig_seedsFormTargetsThroughTheProductionPath() {
+        // Calls the exact function MeshBeaconConfigScreen calls to build formState's initial value -- not
+        // seedBeaconTargets directly -- so this breaks if the screen's wiring to it ever comes apart.
+        val loaded = MeshBeaconConfig(broadcast_message = "hi", broadcast_targets = emptyList())
+
+        val initial = initialBeaconFormState(loaded)
+
+        assertEquals(listOf(MeshBeaconConfig.BroadcastTarget()), initial.broadcast_targets)
+        assertEquals("hi", initial.broadcast_message)
+    }
+
+    @Test
+    fun initialBeaconFormState_nonEmptyStoredConfig_isUnchanged() {
+        val stored = listOf(MeshBeaconConfig.BroadcastTarget(channel_index = 3))
+        val loaded = MeshBeaconConfig(broadcast_targets = stored)
+
+        val initial = initialBeaconFormState(loaded)
+
+        assertEquals(stored, initial.broadcast_targets)
     }
 
     @Test

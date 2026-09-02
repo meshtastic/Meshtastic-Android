@@ -135,11 +135,7 @@ fun MeshBeaconConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, 
         return
     }
 
-    val formState =
-        rememberConfigState(
-            initialValue =
-            meshBeaconConfig.copy(broadcast_targets = seedBeaconTargets(meshBeaconConfig.broadcast_targets)),
-        )
+    val formState = rememberConfigState(initialValue = initialBeaconFormState(meshBeaconConfig))
 
     val listenFlag = MeshBeaconConfig.Flags.FLAG_LISTEN_ENABLED.value
     val broadcastFlag = MeshBeaconConfig.Flags.FLAG_BROADCAST_ENABLED.value

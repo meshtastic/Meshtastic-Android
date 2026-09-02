@@ -146,6 +146,15 @@ internal fun seedBeaconTargets(stored: List<MeshBeaconConfig.BroadcastTarget>): 
     stored.ifEmpty { listOf(MeshBeaconConfig.BroadcastTarget()) }
 
 /**
+ * [MeshBeaconConfigScreen]'s actual `formState` initial value: [seedBeaconTargets] applied to the loaded config's
+ * `broadcast_targets`, everything else untouched. Pulled out as its own function (rather than inlined at the
+ * `rememberConfigState` call site) so a test can call the exact production entry point instead of separately calling
+ * [seedBeaconTargets] and only asserting against it in isolation.
+ */
+internal fun initialBeaconFormState(loaded: MeshBeaconConfig): MeshBeaconConfig =
+    loaded.copy(broadcast_targets = seedBeaconTargets(loaded.broadcast_targets))
+
+/**
  * Removes the target row at [index], keeping the list at a floor of one row (design#140 behavior 6: "no UI that changes
  * shape once targets exist" -- the list must never render with zero rows, since zero rows would hide firmware's
  * implicit single-target fallback rather than represent "no beacon"). Removing the only remaining row replaces it with

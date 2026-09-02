@@ -19,10 +19,9 @@ package org.meshtastic.feature.settings.radio.component
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
@@ -40,6 +39,7 @@ import org.meshtastic.core.resources.mesh_beacon_broadcast_requires_preset
 import org.meshtastic.core.resources.mesh_beacon_no_channels
 import org.meshtastic.core.resources.mesh_beacon_region_required
 import org.meshtastic.core.resources.mesh_beacon_target
+import org.meshtastic.core.resources.mesh_beacon_target_default
 import org.meshtastic.core.resources.mesh_beacon_target_remove
 import org.meshtastic.core.resources.save_changes
 import org.meshtastic.core.ui.component.DropDownItem
@@ -55,6 +55,7 @@ import org.meshtastic.proto.Config.LoRaConfig.RegionCode
 import org.meshtastic.proto.ModuleConfig.MeshBeaconConfig
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 /**
  * Mirrors [LoRaBandwidthUiTest]'s shape: composes [RadioConfigScreenList] directly with a hand-built [ConfigState],
@@ -341,14 +342,18 @@ class MeshBeaconConfigUiTest {
     }
 
     @Test
-    fun emptyStoredTargets_seededListRendersExactlyOneRow() = runComposeUiTest {
+    fun emptyStoredConfig_productionSeedPathRendersExactlyOneRow() = runComposeUiTest {
+        // Goes through initialBeaconFormState -- the exact function MeshBeaconConfigScreen calls to build formState's
+        // initial value -- rather than calling seedBeaconTargets itself, so this proves the screen's own wiring
+        // rather than just the policy function in isolation.
         val presetConstraint =
             RegionPresetConstraint(presets = listOf(ModemPreset.LONG_FAST), ModemPreset.LONG_FAST, false)
+        val seededTargets = initialBeaconFormState(MeshBeaconConfig()).broadcast_targets
 
         setContent {
             AppTheme {
                 BroadcastTargetsCard(
-                    targets = seedBeaconTargets(emptyList()),
+                    targets = seededTargets,
                     enabled = true,
                     channelItems = listOf(DropDownItem(0, "Primary")),
                     currentPreset = ModemPreset.LONG_FAST,
@@ -365,31 +370,107 @@ class MeshBeaconConfigUiTest {
     }
 
     @Test
-    fun removingTheLastTargetRow_reseedsOneRowInsteadOfZero() = runComposeUiTest {
+    fun removingTheLastTargetRow_replacesItWithAGenuineDefaultRow() = runComposeUiTest {
         val presetConstraint =
             RegionPresetConstraint(presets = listOf(ModemPreset.LONG_FAST), ModemPreset.LONG_FAST, false)
+        lateinit var targetsState: MutableState<List<MeshBeaconConfig.BroadcastTarget>>
 
         setContent {
             AppTheme {
-                var targets by remember { mutableStateOf(seedBeaconTargets(emptyList())) }
+                targetsState = remember { mutableStateOf(seedBeaconTargets(emptyList())) }
                 BroadcastTargetsCard(
-                    targets = targets,
+                    targets = targetsState.value,
                     enabled = true,
                     channelItems = listOf(DropDownItem(0, "Primary")),
                     currentPreset = ModemPreset.LONG_FAST,
                     presetConstraint = presetConstraint,
                     presetsGated = false,
                     capabilities = Capabilities(firmwareVersion = null),
-                    onChange = { targets = it },
+                    onChange = { targetsState.value = it },
                 )
             }
         }
 
         onNodeWithText(getString(Res.string.mesh_beacon_target_remove)).performClick()
 
-        // The row survives the click: it never renders empty, it comes back as a fresh default row (design#140
-        // behavior 6) -- not zero rows, which would hide firmware's implicit single-target fallback.
+        // Not just "one row, one remove button" -- that would also pass for a wrong non-empty result. The replaced
+        // row must be a genuine fresh default: both fields null, not carried over from the removed row.
+        runOnIdle { assertEquals(listOf(MeshBeaconConfig.BroadcastTarget()), targetsState.value) }
         onNodeWithText(getString(Res.string.mesh_beacon_target, 1)).assertIsDisplayed()
         onAllNodesWithText(getString(Res.string.mesh_beacon_target_remove)).assertCountEquals(1)
+    }
+
+    @Test
+    fun broadcastTargetRow_selectingDefaultChannel_clearsChannelIndexAndLeavesPresetUntouched() = runComposeUiTest {
+        val presetConstraint =
+            RegionPresetConstraint(presets = listOf(ModemPreset.LONG_FAST), ModemPreset.LONG_FAST, false)
+        lateinit var targetsState: MutableState<List<MeshBeaconConfig.BroadcastTarget>>
+
+        setContent {
+            AppTheme {
+                targetsState = remember {
+                    mutableStateOf(
+                        listOf(MeshBeaconConfig.BroadcastTarget(channel_index = 0, preset = ModemPreset.LONG_FAST)),
+                    )
+                }
+                BroadcastTargetsCard(
+                    targets = targetsState.value,
+                    enabled = true,
+                    channelItems = listOf(DropDownItem(0, "Primary")),
+                    currentPreset = ModemPreset.LONG_FAST,
+                    presetConstraint = presetConstraint,
+                    presetsGated = false,
+                    capabilities = Capabilities(firmwareVersion = null),
+                    onChange = { targetsState.value = it },
+                )
+            }
+        }
+
+        // Opens the channel picker (currently showing the concrete channel "Primary") and picks "Default".
+        onNodeWithText("Primary").performClick()
+        onNodeWithText(getString(Res.string.mesh_beacon_target_default)).performClick()
+
+        runOnIdle {
+            assertNull(targetsState.value.single().channel_index)
+            assertEquals(ModemPreset.LONG_FAST, targetsState.value.single().preset)
+        }
+        onNodeWithText(getString(Res.string.mesh_beacon_target_default)).assertIsDisplayed()
+    }
+
+    @Test
+    fun broadcastTargetRow_selectingDefaultPreset_clearsPresetAndLeavesChannelUntouched() = runComposeUiTest {
+        val presetConstraint =
+            RegionPresetConstraint(presets = listOf(ModemPreset.LONG_FAST), ModemPreset.LONG_FAST, false)
+        lateinit var targetsState: MutableState<List<MeshBeaconConfig.BroadcastTarget>>
+
+        setContent {
+            AppTheme {
+                targetsState = remember {
+                    mutableStateOf(
+                        listOf(MeshBeaconConfig.BroadcastTarget(channel_index = 0, preset = ModemPreset.LONG_FAST)),
+                    )
+                }
+                BroadcastTargetsCard(
+                    targets = targetsState.value,
+                    enabled = true,
+                    channelItems = listOf(DropDownItem(0, "Primary")),
+                    currentPreset = ModemPreset.LONG_FAST,
+                    presetConstraint = presetConstraint,
+                    presetsGated = false,
+                    capabilities = Capabilities(firmwareVersion = null),
+                    onChange = { targetsState.value = it },
+                )
+            }
+        }
+
+        // Opens the preset picker (currently showing the concrete preset "LONG_FAST") and picks "Default".
+        onNodeWithText(ModemPreset.LONG_FAST.name).performClick()
+        onNodeWithText(getString(Res.string.mesh_beacon_target_default)).performClick()
+
+        runOnIdle {
+            assertNull(targetsState.value.single().preset)
+            assertEquals(0, targetsState.value.single().channel_index)
+        }
+        onNodeWithText(getString(Res.string.mesh_beacon_target_default)).assertIsDisplayed()
     }
 }
