@@ -57,6 +57,7 @@ import org.meshtastic.core.resources.mesh_beacon_region_required
 import org.meshtastic.core.resources.mesh_beacon_target
 import org.meshtastic.core.resources.mesh_beacon_target_add
 import org.meshtastic.core.resources.mesh_beacon_target_channel_index
+import org.meshtastic.core.resources.mesh_beacon_target_default
 import org.meshtastic.core.resources.mesh_beacon_target_remove
 import org.meshtastic.core.resources.mesh_beacon_targets
 import org.meshtastic.core.resources.plurals_seconds
@@ -95,9 +96,13 @@ private fun Int.hasFlag(flag: Int): Boolean = (this and flag) != 0
  *
  * The region and offered/transmit preset are never user-chosen here: the radio's own LoRa region and configured preset
  * are always stamped in on save (`stampBeaconConfigForSave`), so the beacon can never transmit region or preset
- * information the radio itself does not use. The repeated `broadcast_targets` list ([BroadcastTargetsCard]) is the only
- * way to name extra beacon destinations beyond the offered channel; an empty list sends one beacon on that channel
- * alone.
+ * information the radio itself does not use. `broadcast_offer_*` is the invitation payload content shown to listeners
+ * (what channel/preset they could join); the repeated `broadcast_targets` list ([BroadcastTargetsCard]) is the
+ * separate, only, TX destination list -- which radio settings the beacon packet itself is actually transmitted on.
+ * Firmware sends one beacon on the node's running preset and primary channel when this list is empty
+ * (`MeshBeaconModule.cpp::sendBeacon`), so the editor seeds and floors the list at one row ([seedBeaconTargets],
+ * [removeBeaconTarget]) rather than ever showing zero rows -- design#140 behavior 6 keeps that implicit default visible
+ * and editable instead of hidden.
  */
 @Suppress("LongMethod")
 @Composable
@@ -130,7 +135,7 @@ fun MeshBeaconConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, 
         return
     }
 
-    val formState = rememberConfigState(initialValue = meshBeaconConfig)
+    val formState = rememberConfigState(initialValue = initialBeaconFormState(meshBeaconConfig))
 
     val listenFlag = MeshBeaconConfig.Flags.FLAG_LISTEN_ENABLED.value
     val broadcastFlag = MeshBeaconConfig.Flags.FLAG_BROADCAST_ENABLED.value
@@ -362,12 +367,14 @@ internal fun OfferChannelPreference(
 }
 
 /**
- * Editor for the repeated `broadcast_targets` list: extra beacon destinations beyond the offered channel. Each row
- * picks one of the radio's own channels ([channelItems]) and a preset filtered by [presetConstraint] (design#140
- * behaviors 2 and 7); region is no longer a row concept (behavior 1), the radio's own region applies to every target.
+ * Editor for the repeated `broadcast_targets` list: the beacon's actual TX destinations (design#140 behavior 6). Each
+ * row picks one of the radio's own channels ([channelItems]) or the "Default" sentinel, and a preset filtered by
+ * [presetConstraint] (design#140 behaviors 2 and 7) or "Default"; region is no longer a row concept (behavior 1), the
+ * radio's own region applies to every target. Internal (not private): unit-testable directly, mirroring
+ * [OfferChannelPreference].
  */
 @Composable
-private fun BroadcastTargetsCard(
+internal fun BroadcastTargetsCard(
     targets: List<MeshBeaconConfig.BroadcastTarget>,
     enabled: Boolean,
     channelItems: List<DropDownItem<Int>>,
@@ -390,7 +397,7 @@ private fun BroadcastTargetsCard(
                 presetsGated = presetsGated,
                 capabilities = capabilities,
                 onChange = { updated -> onChange(targets.mapIndexed { i, t -> if (i == index) updated(t) else t }) },
-                onRemove = { onChange(targets.filterIndexed { i, _ -> i != index }) },
+                onRemove = { onChange(removeBeaconTarget(targets, index)) },
             )
         }
         HorizontalDivider()
@@ -421,18 +428,24 @@ private fun BroadcastTargetRow(
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
         style = MaterialTheme.typography.titleSmall,
     )
-    val rowChannelIndex = target.channel_index ?: 0
+    // Nullable value type throughout (design#140 behavior 6): `null` is the "Default" sentinel, matching the wire
+    // format where an unset channel_index/preset falls back to the running config (module_config.proto's
+    // BroadcastTarget). A row is never forced to a resolved value the way it was before this row supported "Default".
+    val defaultLabel = stringResource(Res.string.mesh_beacon_target_default)
+    val rowChannelIndex = target.channel_index
+    val nullableChannelItems: List<DropDownItem<Int?>> =
+        listOf(DropDownItem<Int?>(value = null, label = defaultLabel)) +
+            channelItems.map { DropDownItem<Int?>(it.value, it.label, it.icon, it.color, it.enabled, it.testTag) }
     val rowChannelItems =
-        if (channelItems.none { it.value == rowChannelIndex }) {
-            val fallback =
-                DropDownItem(
+        if (rowChannelIndex != null && nullableChannelItems.none { it.value == rowChannelIndex }) {
+            nullableChannelItems +
+                DropDownItem<Int?>(
                     value = rowChannelIndex,
                     label = stringResource(Res.string.mesh_beacon_channel_number, rowChannelIndex),
                     enabled = false,
                 )
-            channelItems + fallback
         } else {
-            channelItems
+            nullableChannelItems
         }
     DropDownPreference(
         title = stringResource(Res.string.mesh_beacon_target_channel_index),
@@ -441,17 +454,22 @@ private fun BroadcastTargetRow(
         enabled = enabled,
         onItemSelected = { channelIndex -> onChange { selectBeaconTargetChannel(it, channelIndex, currentPreset) } },
     )
-    val selectedPreset = target.preset ?: presetConstraint.defaultPreset
+    val rowPreset = target.preset
     val presetItems =
-        remember(presetConstraint, presetsGated, selectedPreset, capabilities) {
-            buildPresetItems(presetConstraint, presetsGated, selectedPreset, capabilities)
+        remember(presetConstraint, presetsGated, rowPreset, capabilities) {
+            buildPresetItems(presetConstraint, presetsGated, rowPreset ?: presetConstraint.defaultPreset, capabilities)
         }
+    val nullablePresetItems: List<DropDownItem<ModemPreset?>> =
+        listOf(DropDownItem<ModemPreset?>(value = null, label = defaultLabel)) +
+            presetItems.map {
+                DropDownItem<ModemPreset?>(it.value, it.label, it.icon, it.color, it.enabled, it.testTag)
+            }
     val presetSummary = if (presetsGated) stringResource(Res.string.config_lora_modem_preset_licensed_summary) else null
     DropDownPreference(
         title = stringResource(Res.string.mesh_beacon_on_preset),
         summary = presetSummary,
-        items = presetItems,
-        selectedItem = selectedPreset,
+        items = nullablePresetItems,
+        selectedItem = rowPreset,
         enabled = enabled,
         onItemSelected = { sel -> onChange { it.copy(preset = sel) } },
     )
