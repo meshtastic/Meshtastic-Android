@@ -1011,6 +1011,7 @@
     <string name="mesh_beacon_target">Destinazione %1$d</string>
     <string name="mesh_beacon_target_add">Aggiungi destinazione</string>
     <string name="mesh_beacon_target_channel_index">Canale</string>
+    <string name="mesh_beacon_target_default">Predefinito</string>
     <string name="mesh_beacon_target_remove">Rimuovi destinazione</string>
     <string name="mesh_beacon_targets">Destinazioni della trasmissione</string>
     <string name="mesh_map_location">Posizione sulla mappa della Mesh</string>

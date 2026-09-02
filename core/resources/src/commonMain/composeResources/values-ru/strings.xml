@@ -1099,6 +1099,7 @@
     <string name="mesh_beacon_target">Цель %1$d</string>
     <string name="mesh_beacon_target_add">Добавить цель</string>
     <string name="mesh_beacon_target_channel_index">Канал</string>
+    <string name="mesh_beacon_target_default">По умолчанию</string>
     <string name="mesh_beacon_target_remove">Удалить цель</string>
     <string name="mesh_beacon_targets">Цели передачи</string>
     <string name="mesh_map_location">Карта расположения нод</string>

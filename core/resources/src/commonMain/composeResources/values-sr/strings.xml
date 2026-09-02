@@ -283,6 +283,7 @@
     <string name="mesh_beacon_preset_none">Bez</string>
     <string name="mesh_beacon_region_label">Регион</string>
     <string name="mesh_beacon_target_channel_index">Kanal</string>
+    <string name="mesh_beacon_target_default">Подразумевано</string>
     <!-- MESHTASTIC -->
     <string name="meshtastic_alerts_notifications">Обавештења о упозорењима</string>
     <string name="meshtastic_low_battery_notifications">Нотификације о ниском нивоу батерије</string>
