@@ -44,6 +44,7 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.FirmwareReleaseRepository
+import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NodeRestartTracker
 import org.meshtastic.core.repository.Notification
@@ -61,9 +62,10 @@ import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalConfig
 
 /**
- * Derived, UI-friendly summary of the device connection state. Combines [ServiceRepository.connectionState] with
- * "region unset" and the [ServiceRepository.RECONNECTING_PROGRESS_TEXT] handshake-recovery signal to surface cases
- * (MUST_SET_REGION, RECONNECTING) that otherwise need separate boolean flags in the UI layer.
+ * Derived, UI-friendly summary of the device connection lifecycle. Combines [ServiceRepository.connectionState] with
+ * the [ServiceRepository.RECONNECTING_PROGRESS_TEXT] handshake-recovery signal and expected-restart state.
+ * Configuration health is modeled separately so region, lockdown, and managed-mode policy cannot leak into the
+ * connection label.
  */
 enum class ConnectionStatus {
     /** No device has been selected or we are otherwise disconnected. */
@@ -85,14 +87,11 @@ enum class ConnectionStatus {
      */
     RESTARTING,
 
-    /** Connected with node info available. */
+    /** Transport connected. */
     CONNECTED,
 
     /** Connected but the device is in deep sleep. */
     CONNECTED_SLEEPING,
-
-    /** Connected and active, but LoRa region is UNSET — user action required. */
-    MUST_SET_REGION,
 }
 
 @KoinViewModel
@@ -100,6 +99,7 @@ class ConnectionsViewModel(
     radioConfigRepository: RadioConfigRepository,
     serviceRepository: ServiceRepository,
     nodeRepository: NodeRepository,
+    nodeManager: NodeManager,
     nodeRestartTracker: NodeRestartTracker,
     private val uiPrefs: UiPrefs,
     private val deviceHardwareRepository: DeviceHardwareRepository,
@@ -154,9 +154,19 @@ class ConnectionsViewModel(
             .stateInWhileSubscribed(initialValue = false)
 
     /**
-     * Single source of truth for the UI's "connection status" pill/banner. Derived from [connectionState],
-     * [ServiceRepository.connectionProgress], and [regionUnset]; kept here rather than in the composable so the mapping
-     * is observable and testable.
+     * Whether [ourNodeInfo] belongs to the active transport session rather than cached state from an earlier session.
+     * Warning presentation uses this boundary so a non-null repository node alone cannot make configuration actionable.
+     */
+    val activeNodeInfoReady: StateFlow<Boolean> =
+        combine(nodeManager.connectionIdentity, nodeRepository.ourNodeInfo) { connectionIdentity, ourNode ->
+            connectionIdentity != null && ourNode?.num == connectionIdentity.nodeNum
+        }
+            .distinctUntilChanged()
+            .stateInWhileSubscribed(initialValue = false)
+
+    /**
+     * Single source of truth for the UI's connection lifecycle label. Kept independent from configuration state so
+     * region, lockdown, and managed-mode changes cannot rewrite a transient connection label.
      *
      * The [ConnectionStatus.RECONNECTING] case is signalled by the WiFi/TCP handshake watchdog writing
      * [ServiceRepository.RECONNECTING_PROGRESS_TEXT] to [ServiceRepository.connectionProgress] immediately before its
@@ -166,13 +176,11 @@ class ConnectionsViewModel(
     val connectionStatus: StateFlow<ConnectionStatus> =
         combine(
             connectionState,
-            regionUnset,
             serviceRepository.connectionProgress,
             nodeRestartTracker.restartExpected,
-        ) { state, unset, progress, restartExpected ->
+        ) { state, progress, restartExpected ->
             when (state) {
-                is ConnectionState.Connected ->
-                    if (unset) ConnectionStatus.MUST_SET_REGION else ConnectionStatus.CONNECTED
+                is ConnectionState.Connected -> ConnectionStatus.CONNECTED
 
                 // While an expected node restart is in flight, the drop and the reconnect attempts are the restart
                 // —
