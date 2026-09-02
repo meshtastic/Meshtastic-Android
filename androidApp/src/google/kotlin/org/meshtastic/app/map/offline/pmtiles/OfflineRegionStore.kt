@@ -38,6 +38,9 @@ internal class OfflineRegionStore(private val baseDir: File) {
 
     fun archiveFile(id: String): File = File(baseDir, "$id.mbtiles")
 
+    /** Where a region's terrain tiles live — an [org.meshtastic.feature.map.terrain.TerrainTileStore] rooted here. */
+    fun terrainDir(id: String): File = File(baseDir, "$id/terrain")
+
     fun list(): List<OfflineRegion> = readManifest()
 
     suspend fun add(region: OfflineRegion) {
@@ -47,11 +50,13 @@ internal class OfflineRegionStore(private val baseDir: File) {
     suspend fun delete(id: String) {
         mutex.withLock {
             archiveFile(id).delete()
+            terrainDir(id).deleteRecursively()
             writeManifest(readManifest().filterNot { it.id == id })
         }
     }
 
-    fun totalBytes(): Long = readManifest().sumOf { it.byteSize }
+    /** Every byte a downloaded region occupies — its base vector archive plus any terrain attached to it. */
+    fun totalBytes(): Long = readManifest().sumOf { it.byteSize + it.terrainByteSize }
 
     private fun readManifest(): List<OfflineRegion> {
         if (!manifestFile.exists()) return emptyList()

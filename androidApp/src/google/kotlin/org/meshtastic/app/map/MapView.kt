@@ -127,6 +127,8 @@ import org.meshtastic.app.map.model.NodeClusterItem
 import org.meshtastic.app.map.offline.pmtiles.OfflineRegionExtractor
 import org.meshtastic.app.map.offline.pmtiles.OfflineVectorOverlay
 import org.meshtastic.app.map.offline.pmtiles.component.OfflineRegionManagerSection
+import org.meshtastic.app.map.offline.terrain.ContourOverlay
+import org.meshtastic.app.map.offline.terrain.HillshadeTileProvider
 import org.meshtastic.app.map.tiles.RasterBasemap
 import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.common.util.nowSeconds
@@ -198,6 +200,7 @@ import org.meshtastic.feature.map.layers.LayerType
 import org.meshtastic.feature.map.layers.MapLayerItem
 import org.meshtastic.feature.map.layers.opacityOf
 import org.meshtastic.feature.map.layers.toPickedMapFile
+import org.meshtastic.feature.map.terrain.MapterhornEndpoints
 import org.meshtastic.feature.map.tiles.mapAttributionText
 import org.meshtastic.feature.map.tracerouteNodeSelection
 import org.meshtastic.proto.BoundingBox
@@ -263,6 +266,9 @@ private const val BOX_AUTHORING_MIN_CORNER_DELTA = 1e-4
 /** Above the raster basemap at -1, below every marker and shape the mesh draws at 0 and up. */
 private const val OVERLAY_Z_INDEX = -0.5f
 
+/** Below the offline vector layer's own water/roads/boundaries (-0.75f) so those still draw on top of the shading. */
+private const val TERRAIN_HILLSHADE_Z_INDEX = -0.9f
+
 /** Clears Google's own logo and the zoom controls, both of which sit along the bottom edge. */
 private val ATTRIBUTION_BOTTOM_PADDING = 4.dp
 private const val ATTRIBUTION_SCRIM_ALPHA = 0.7f
@@ -322,6 +328,8 @@ fun MapView(
     val selectedGoogleMapType by mapViewModel.selectedGoogleMapType.collectAsStateWithLifecycle()
     val currentRasterBasemap by mapViewModel.selectedRasterBasemap.collectAsStateWithLifecycle()
     val offlineOverlayEnabled by mapViewModel.offlineOverlayEnabled.collectAsStateWithLifecycle()
+    val terrainHillshadeEnabled by mapViewModel.terrainHillshadeEnabled.collectAsStateWithLifecycle()
+    val terrainContoursEnabled by mapViewModel.terrainContoursEnabled.collectAsStateWithLifecycle()
     val enabledOverlayIds by mapViewModel.enabledOverlayIds.collectAsStateWithLifecycle()
     val layerOpacity by mapViewModel.layerOpacity.collectAsStateWithLifecycle()
 
@@ -673,16 +681,47 @@ fun MapView(
                 }
             }
 
+            // The downloaded region (if any) covering what's on screen — shared by the offline vector overlay and
+            // offline terrain below, each gated by its own toggle rather than each other's.
+            val visibleBounds = cameraPositionState.projection?.visibleRegion?.latLngBounds
+            val coveringRegion = visibleBounds?.let { mapViewModel.offlineRegionCovering(it) }
+
             // The offline vector overlay, drawn only while the user has switched it on and a downloaded region
             // actually covers what's on screen — see MapViewModel.offlineOverlayEnabled/offlineRegionCovering.
             if (offlineOverlayEnabled) {
-                val visibleBounds = cameraPositionState.projection?.visibleRegion?.latLngBounds
-                val coveringRegion = visibleBounds?.let { mapViewModel.offlineRegionCovering(it) }
                 coveringRegion?.let { region ->
                     OfflineVectorOverlay(
                         region = region,
                         archiveFile = mapViewModel.offlineRegionArchiveFile(region.id),
                         cameraPositionState = cameraPositionState,
+                    )
+                }
+            }
+
+            // Offline terrain (hillshade + contours) — independent of the vector overlay's own toggle, gated only
+            // by its own two switches and whether the covering region actually has terrain downloaded. See
+            // MapViewModel.terrainHillshadeEnabled/terrainContoursEnabled and OfflineRegionManagerSection.
+            if (coveringRegion?.hasTerrain == true) {
+                if (terrainHillshadeEnabled) {
+                    key(coveringRegion.id) {
+                        val hillshadeProvider =
+                            remember(coveringRegion.id) {
+                                HillshadeTileProvider(mapViewModel.terrainStoreForRegion(coveringRegion.id))
+                            }
+                        TileOverlay(
+                            tileProvider = hillshadeProvider,
+                            fadeIn = true,
+                            transparency = 0f,
+                            zIndex = TERRAIN_HILLSHADE_Z_INDEX,
+                        )
+                    }
+                }
+                if (terrainContoursEnabled) {
+                    ContourOverlay(
+                        region = coveringRegion,
+                        store = mapViewModel.terrainStoreForRegion(coveringRegion.id),
+                        cameraPositionState = cameraPositionState,
+                        metric = displayUnits == MeasurementSystem.METRIC,
                     )
                 }
             }
@@ -904,26 +943,27 @@ fun MapView(
         //
         // The offline vector layer's own credit is folded in here too, not left to the archive's metadata table
         // alone: an on-disk-only attribution is invisible to anyone who never opens the offline-region manager
-        // sheet, which is exactly the gap this mirrors from the sibling iOS app's own terrain layer.
-        val offlineRegionActive =
-            offlineOverlayEnabled &&
-                cameraPositionState.projection?.visibleRegion?.latLngBounds?.let {
-                    mapViewModel.offlineRegionCovering(it)
-                } != null
+        // sheet, which is exactly the gap this mirrors from the sibling iOS app's own terrain layer. The offline
+        // terrain layer's own credit (Mapterhorn) is folded in the same way, whenever hillshade or contours are
+        // actually rendering.
+        val attributionCoveringRegion =
+            cameraPositionState.projection?.visibleRegion?.latLngBounds?.let { mapViewModel.offlineRegionCovering(it) }
+        val offlineRegionActive = offlineOverlayEnabled && attributionCoveringRegion != null
+        val terrainActive =
+            attributionCoveringRegion?.hasTerrain == true && (terrainHillshadeEnabled || terrainContoursEnabled)
         val attributionText =
-            remember(currentRasterBasemap, enabledOverlayIds, offlineRegionActive) {
+            remember(currentRasterBasemap, enabledOverlayIds, offlineRegionActive, terrainActive) {
                 val baseAttribution =
                     mapAttributionText(
                         basemap = (currentRasterBasemap as? RasterBasemap.Remote)?.spec,
                         overlays = mapViewModel.availableOverlays.filter { it.id in enabledOverlayIds }.map { it.spec },
                     )
-                if (offlineRegionActive) {
-                    listOf(baseAttribution, OfflineRegionExtractor.ATTRIBUTION)
-                        .filter { it.isNotEmpty() }
-                        .joinToString(" · ")
-                } else {
-                    baseAttribution
+                buildList {
+                    if (baseAttribution.isNotEmpty()) add(baseAttribution)
+                    if (offlineRegionActive) add(OfflineRegionExtractor.ATTRIBUTION)
+                    if (terrainActive) add(MapterhornEndpoints.ATTRIBUTION)
                 }
+                    .joinToString(" · ")
             }
         if (attributionText.isNotEmpty()) {
             Text(
@@ -1040,10 +1080,13 @@ fun MapView(
             onDismissRequest = {
                 showLayersBottomSheet = false
                 mapViewModel.clearOfflineDownloadState()
+                mapViewModel.clearTerrainDownloadState()
             },
         ) {
             val offlineRegions by mapViewModel.offlineRegions.collectAsStateWithLifecycle()
             val offlineDownloadState by mapViewModel.offlineDownloadState.collectAsStateWithLifecycle()
+            val terrainDownloadState by mapViewModel.terrainDownloadState.collectAsStateWithLifecycle()
+            val terrainDownloadRegionId by mapViewModel.terrainDownloadRegionId.collectAsStateWithLifecycle()
             OfflineRegionManagerSection(
                 visibleBounds = cameraPositionState.projection?.visibleRegion?.latLngBounds,
                 currentZoom = cameraPositionState.position.zoom.toInt(),
@@ -1054,6 +1097,13 @@ fun MapView(
                 onDownload = mapViewModel::downloadOfflineRegion,
                 onDeleteRegion = mapViewModel::deleteOfflineRegion,
                 onToggleOfflineOverlay = mapViewModel::setOfflineOverlayEnabled,
+                terrainDownloadState = terrainDownloadState,
+                terrainDownloadRegionId = terrainDownloadRegionId,
+                terrainHillshadeEnabled = terrainHillshadeEnabled,
+                terrainContoursEnabled = terrainContoursEnabled,
+                onDownloadTerrain = mapViewModel::downloadTerrainForRegion,
+                onToggleHillshade = mapViewModel::setTerrainHillshadeEnabled,
+                onToggleContours = mapViewModel::setTerrainContoursEnabled,
             )
             HorizontalDivider()
 

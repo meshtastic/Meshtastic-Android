@@ -65,6 +65,27 @@ class WebMercatorTileMathTest {
         assertEquals(135.0, point.longitude, ABSOLUTE_TOLERANCE)
     }
 
+    @Test
+    fun `tileFractionalToLatLng agrees with tileLocalToLatLng for the same fractional position`() {
+        // ContourPoint's own [0,1]x[0,1] convention is exactly local divided by extent, so the two must agree.
+        val viaLocal = WebMercatorTileMath.tileLocalToLatLng(TileIndex(2, 3, 1), extent = 4, TileCoord(1, 3))
+        val viaFractional =
+            WebMercatorTileMath.tileFractionalToLatLng(zoom = 2, tileX = 3, tileY = 1, fracX = 0.25, fracY = 0.75)
+
+        assertEquals(viaLocal.longitude, viaFractional.longitude, ABSOLUTE_TOLERANCE)
+        assertEquals(viaLocal.latitude, viaFractional.latitude, ABSOLUTE_TOLERANCE)
+    }
+
+    @Test
+    fun `a fractional point at the tile's own center lands on its own midpoint`() {
+        // Tile (0, 0, 0) is the whole world; its center (0.5, 0.5) is the equator and prime meridian.
+        val center =
+            WebMercatorTileMath.tileFractionalToLatLng(zoom = 0, tileX = 0, tileY = 0, fracX = 0.5, fracY = 0.5)
+
+        assertEquals(0.0, center.longitude, ABSOLUTE_TOLERANCE)
+        assertEquals(0.0, center.latitude, ABSOLUTE_TOLERANCE)
+    }
+
     private companion object {
         const val ABSOLUTE_TOLERANCE = 1e-6
         const val WEB_MERCATOR_MAX_LATITUDE = 85.05112878

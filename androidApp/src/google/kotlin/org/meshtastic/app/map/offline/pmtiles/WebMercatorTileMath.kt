@@ -37,10 +37,19 @@ internal object WebMercatorTileMath {
     }
 
     /** Places a feature's tile-local point (`0 until extent` on each axis) at its real-world [LatLng]. */
-    fun tileLocalToLatLng(tile: TileIndex, extent: Int, local: TileCoord): LatLng {
-        val n = 2.0.pow(tile.zoom)
-        val fx = tile.x + local.x.toDouble() / extent
-        val fy = tile.y + local.y.toDouble() / extent
+    fun tileLocalToLatLng(tile: TileIndex, extent: Int, local: TileCoord): LatLng =
+        tileFractionalToLatLng(tile.zoom, tile.x, tile.y, local.x.toDouble() / extent, local.y.toDouble() / extent)
+
+    /**
+     * Places a fractional `[0,1]×[0,1]` tile-local point — [org.meshtastic.feature.map.terrain.ContourPoint]'s own
+     * convention — at its real-world [LatLng]. A standalone zoom/x/y overload rather than one keyed by this file's own
+     * [TileIndex], so callers outside this package (the offline terrain contour renderer, which has its own same-shaped
+     * but distinct `TileIndex`) can reuse this math without a type-conversion shim.
+     */
+    fun tileFractionalToLatLng(zoom: Int, tileX: Int, tileY: Int, fracX: Double, fracY: Double): LatLng {
+        val n = 2.0.pow(zoom)
+        val fx = tileX + fracX
+        val fy = tileY + fracY
         val lon = fx / n * FULL_LON_RANGE_DEG - LON_RANGE_DEG
         val latRad = atan(sinh(PI * (1 - 2 * fy / n)))
         return LatLng(Math.toDegrees(latRad), lon)

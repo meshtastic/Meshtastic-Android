@@ -40,6 +40,21 @@ data class OfflineRegion(
     val tileCount: Long,
     val byteSize: Long,
     val createdAtEpochSeconds: Long,
+    /**
+     * Whether an offline terrain layer (hillshade + contours) has been downloaded for this region — a separate
+     * downloadable unit attached to an already-downloaded base region, sharing its storage budget
+     * ([OfflineRegionStore.totalBytes]) and independently deletable without touching the base vector layer, matching
+     * the sibling iOS app's own terrain-as-attachment model. Defaults to `false` so [OfflineRegionStore]'s
+     * `Json.decodeFromString` keeps reading manifests written before this field existed instead of failing to parse.
+     */
+    val hasTerrain: Boolean = false,
+    /** Bytes [org.meshtastic.feature.map.terrain.TerrainTileStore] has written for this region's terrain tiles. */
+    val terrainByteSize: Long = 0L,
+    /**
+     * Whether the terrain download included Mapterhorn's higher-resolution regional tier (zoom 13-18), not just the
+     * always-present global one (zoom 0-12) — see [org.meshtastic.feature.map.terrain.TerrainRegionExtractor].
+     */
+    val terrainHasRegionalDetail: Boolean = false,
 ) {
     val bounds: LatLngBounds
         get() = LatLngBounds(LatLng(southLat, westLon), LatLng(northLat, eastLon))

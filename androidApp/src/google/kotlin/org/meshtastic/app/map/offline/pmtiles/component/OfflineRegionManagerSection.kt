@@ -28,6 +28,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,6 +38,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.app.map.offline.pmtiles.OfflineDownloadFailure
 import org.meshtastic.app.map.offline.pmtiles.OfflineDownloadState
 import org.meshtastic.app.map.offline.pmtiles.OfflineRegion
+import org.meshtastic.app.map.offline.pmtiles.OfflineRegionExtractor
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.delete
 import org.meshtastic.core.resources.map_cache_tiles
@@ -46,9 +48,16 @@ import org.meshtastic.core.resources.map_offline_download_failed_io
 import org.meshtastic.core.resources.map_offline_download_failed_region_limit
 import org.meshtastic.core.resources.map_offline_download_failed_storage
 import org.meshtastic.core.resources.map_offline_download_failed_tile_limit
+import org.meshtastic.core.resources.map_offline_download_terrain
 import org.meshtastic.core.resources.map_offline_downloading_progress
 import org.meshtastic.core.resources.map_offline_manager
 import org.meshtastic.core.resources.map_offline_show_on_map
+import org.meshtastic.core.resources.map_offline_terrain_contours
+import org.meshtastic.core.resources.map_offline_terrain_download_complete
+import org.meshtastic.core.resources.map_offline_terrain_download_failed_io
+import org.meshtastic.core.resources.map_offline_terrain_download_failed_tile_limit
+import org.meshtastic.core.resources.map_offline_terrain_downloading_progress
+import org.meshtastic.core.resources.map_overlay_hillshade
 import org.meshtastic.core.resources.map_select_download_region
 import org.meshtastic.core.resources.map_start_download
 import org.meshtastic.core.resources.map_tile_download_estimate
@@ -56,6 +65,8 @@ import org.meshtastic.core.resources.map_zoom_levels
 import org.meshtastic.core.resources.offline_maps_empty
 import org.meshtastic.core.ui.icon.Delete
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.feature.map.terrain.TerrainDownloadFailure
+import org.meshtastic.feature.map.terrain.TerrainDownloadState
 
 /** How many zoom levels deeper than the current view a download covers — matches the MapLibre flavor's own choice. */
 private const val EXTRA_ZOOM_LEVELS = 2
@@ -71,6 +82,7 @@ private const val MAX_ZOOM = 20
  * purpose, for cross-flavor consistency, which is the design-standards justification for this section not going through
  * a full design review as new UI.
  */
+@Suppress("LongParameterList")
 @Composable
 internal fun OfflineRegionManagerSection(
     visibleBounds: LatLngBounds?,
@@ -82,6 +94,13 @@ internal fun OfflineRegionManagerSection(
     onDownload: (LatLngBounds, IntRange) -> Unit,
     onDeleteRegion: (String) -> Unit,
     onToggleOfflineOverlay: (Boolean) -> Unit,
+    terrainDownloadState: TerrainDownloadState?,
+    terrainDownloadRegionId: String?,
+    terrainHillshadeEnabled: Boolean,
+    terrainContoursEnabled: Boolean,
+    onDownloadTerrain: (String) -> Unit,
+    onToggleHillshade: (Boolean) -> Unit,
+    onToggleContours: (Boolean) -> Unit,
 ) {
     val zoomRange = currentZoom.coerceIn(MIN_ZOOM, MAX_ZOOM).let { it..(it + EXTRA_ZOOM_LEVELS).coerceAtMost(MAX_ZOOM) }
     val estimate = visibleBounds?.let { estimateTileCount(it, zoomRange) } ?: 0L
@@ -122,15 +141,59 @@ internal fun OfflineRegionManagerSection(
             Text(text = stringResource(Res.string.map_start_download))
         }
 
-        if (regions.isEmpty()) {
-            Text(
-                text = stringResource(Res.string.offline_maps_empty),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        } else {
-            regions.forEach { region -> OfflineRegionRow(region, onDelete = { onDeleteRegion(region.id) }) }
-        }
+        DownloadedRegionsList(
+            regions = regions,
+            terrainDownloadState = terrainDownloadState,
+            terrainDownloadRegionId = terrainDownloadRegionId,
+            terrainHillshadeEnabled = terrainHillshadeEnabled,
+            terrainContoursEnabled = terrainContoursEnabled,
+            onDeleteRegion = onDeleteRegion,
+            onDownloadTerrain = onDownloadTerrain,
+            onToggleHillshade = onToggleHillshade,
+            onToggleContours = onToggleContours,
+        )
+    }
+}
+
+@Suppress("LongParameterList")
+@Composable
+private fun DownloadedRegionsList(
+    regions: List<OfflineRegion>,
+    terrainDownloadState: TerrainDownloadState?,
+    terrainDownloadRegionId: String?,
+    terrainHillshadeEnabled: Boolean,
+    terrainContoursEnabled: Boolean,
+    onDeleteRegion: (String) -> Unit,
+    onDownloadTerrain: (String) -> Unit,
+    onToggleHillshade: (Boolean) -> Unit,
+    onToggleContours: (Boolean) -> Unit,
+) {
+    if (regions.isEmpty()) {
+        Text(
+            text = stringResource(Res.string.offline_maps_empty),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        return
+    }
+
+    // The shared budget covers every region's base archive plus any terrain already attached to it — see
+    // OfflineRegionStore.totalBytes, which this mirrors without a store call from composition.
+    val terrainStorageAvailable =
+        regions.sumOf { it.byteSize + it.terrainByteSize } < OfflineRegionExtractor.MAX_TOTAL_BYTES
+    regions.forEach { region ->
+        OfflineRegionRow(
+            region = region,
+            onDelete = { onDeleteRegion(region.id) },
+            terrainStorageAvailable = terrainStorageAvailable,
+            terrainDownloadState = terrainDownloadState.takeIf { terrainDownloadRegionId == region.id },
+            isDownloadingTerrain = terrainDownloadRegionId == region.id,
+            terrainHillshadeEnabled = terrainHillshadeEnabled,
+            terrainContoursEnabled = terrainContoursEnabled,
+            onDownloadTerrain = { onDownloadTerrain(region.id) },
+            onToggleHillshade = onToggleHillshade,
+            onToggleContours = onToggleContours,
+        )
     }
 }
 
@@ -175,25 +238,116 @@ private fun OfflineDownloadFailure.messageRes() = when (this) {
     OfflineDownloadFailure.IO_ERROR -> Res.string.map_offline_download_failed_io
 }
 
+@Suppress("LongParameterList")
 @Composable
-private fun OfflineRegionRow(region: OfflineRegion, onDelete: () -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        Column(modifier = Modifier.fillMaxWidth(REGION_ROW_TEXT_FRACTION)) {
-            Text(text = region.label(), style = MaterialTheme.typography.bodyLarge)
-            Text(
-                text = stringResource(Res.string.map_cache_tiles, region.tileCount.toInt()),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+private fun OfflineRegionRow(
+    region: OfflineRegion,
+    onDelete: () -> Unit,
+    terrainStorageAvailable: Boolean,
+    terrainDownloadState: TerrainDownloadState?,
+    isDownloadingTerrain: Boolean,
+    terrainHillshadeEnabled: Boolean,
+    terrainContoursEnabled: Boolean,
+    onDownloadTerrain: () -> Unit,
+    onToggleHillshade: (Boolean) -> Unit,
+    onToggleContours: (Boolean) -> Unit,
+) {
+    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Column(modifier = Modifier.fillMaxWidth(REGION_ROW_TEXT_FRACTION)) {
+                Text(text = region.label(), style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    text = stringResource(Res.string.map_cache_tiles, region.tileCount.toInt()),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            IconButton(onClick = onDelete) {
+                Icon(imageVector = MeshtasticIcons.Delete, contentDescription = stringResource(Res.string.delete))
+            }
         }
-        IconButton(onClick = onDelete) {
-            Icon(imageVector = MeshtasticIcons.Delete, contentDescription = stringResource(Res.string.delete))
+
+        // Rendering only ever shows terrain for whichever single region currently covers the viewport (see
+        // MapViewModel.offlineRegionCovering), so these two switches are global toggles, not per-region state —
+        // every terrain-having row reflects/controls the same MapViewModel.terrainHillshadeEnabled/ContoursEnabled.
+        if (region.hasTerrain) {
+            TerrainToggleRow(
+                label = stringResource(Res.string.map_overlay_hillshade),
+                checked = terrainHillshadeEnabled,
+                onCheckedChange = onToggleHillshade,
+            )
+            TerrainToggleRow(
+                label = stringResource(Res.string.map_offline_terrain_contours),
+                checked = terrainContoursEnabled,
+                onCheckedChange = onToggleContours,
+            )
+        } else if (isDownloadingTerrain) {
+            TerrainDownloadStatusLine(terrainDownloadState)
+        } else {
+            TextButton(onClick = onDownloadTerrain, enabled = terrainStorageAvailable) {
+                Text(stringResource(Res.string.map_offline_download_terrain))
+            }
         }
     }
+}
+
+@Composable
+private fun TerrainToggleRow(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.fillMaxWidth(REGION_ROW_TEXT_FRACTION),
+        )
+        Switch(checked = checked, onCheckedChange = onCheckedChange)
+    }
+}
+
+@Composable
+private fun TerrainDownloadStatusLine(state: TerrainDownloadState?) {
+    when (state) {
+        null -> Unit
+
+        is TerrainDownloadState.InProgress -> {
+            Column(modifier = Modifier.padding(top = 4.dp)) {
+                Text(
+                    text =
+                    stringResource(
+                        Res.string.map_offline_terrain_downloading_progress,
+                        state.completed,
+                        state.total,
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                )
+                LinearProgressIndicator(
+                    progress = { if (state.total > 0) state.completed.toFloat() / state.total else 0f },
+                    modifier = Modifier.fillMaxWidth().padding(top = 2.dp),
+                )
+            }
+        }
+
+        is TerrainDownloadState.Complete ->
+            Text(
+                text = stringResource(Res.string.map_offline_terrain_download_complete),
+                style = MaterialTheme.typography.bodySmall,
+            )
+
+        is TerrainDownloadState.Failed ->
+            Text(
+                text = stringResource(state.reason.messageRes()),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+            )
+    }
+}
+
+private fun TerrainDownloadFailure.messageRes() = when (this) {
+    TerrainDownloadFailure.TILE_LIMIT_EXCEEDED -> Res.string.map_offline_terrain_download_failed_tile_limit
+    TerrainDownloadFailure.IO_ERROR -> Res.string.map_offline_terrain_download_failed_io
 }
 
 private fun OfflineRegion.label(): String {

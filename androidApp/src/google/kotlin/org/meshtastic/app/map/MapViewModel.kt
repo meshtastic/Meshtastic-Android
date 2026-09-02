@@ -40,12 +40,15 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okio.FileSystem
+import okio.Path.Companion.toPath
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.app.map.offline.pmtiles.OfflineDownloadState
 import org.meshtastic.app.map.offline.pmtiles.OfflineRegion
 import org.meshtastic.app.map.offline.pmtiles.OfflineRegionExtractor
 import org.meshtastic.app.map.offline.pmtiles.OfflineRegionStore
 import org.meshtastic.app.map.offline.pmtiles.OfflineRegionTileSet
+import org.meshtastic.app.map.offline.terrain.TerrainDownloadPlanner
 import org.meshtastic.app.map.prefs.map.GoogleCameraPosition
 import org.meshtastic.app.map.prefs.map.GoogleMapSelectionPrefs
 import org.meshtastic.app.map.prefs.map.GoogleMapsPrefs
@@ -71,6 +74,10 @@ import org.meshtastic.feature.map.layers.LayerOpacityStore
 import org.meshtastic.feature.map.layers.MapLayerItem
 import org.meshtastic.feature.map.layers.MapLayersManager
 import org.meshtastic.feature.map.layers.PickedMapFile
+import org.meshtastic.feature.map.terrain.GeoBounds
+import org.meshtastic.feature.map.terrain.TerrainDownloadState
+import org.meshtastic.feature.map.terrain.TerrainRegionExtractor
+import org.meshtastic.feature.map.terrain.TerrainTileStore
 import org.meshtastic.feature.map.tiles.CustomTileProviderConfig
 import org.meshtastic.feature.map.tiles.CustomTileProviderRepository
 import org.meshtastic.feature.map.tiles.CustomTileProviderSaveResult
@@ -490,6 +497,88 @@ class MapViewModel(
     /** The downloaded region, if any, whose bounds fully cover [bounds] — the current camera viewport. */
     fun offlineRegionCovering(bounds: LatLngBounds): OfflineRegion? = _offlineRegions.value.firstOrNull {
         it.bounds.contains(bounds.northeast) && it.bounds.contains(bounds.southwest)
+    }
+
+    // --- Offline terrain (hillshade + contours), attached to an already-downloaded base region ---
+
+    private val _terrainDownloadState = MutableStateFlow<TerrainDownloadState?>(null)
+    val terrainDownloadState: StateFlow<TerrainDownloadState?> = _terrainDownloadState.asStateFlow()
+
+    /** Which region [terrainDownloadState] belongs to — terrain, unlike the base layer, downloads per-row. */
+    private val _terrainDownloadRegionId = MutableStateFlow<String?>(null)
+    val terrainDownloadRegionId: StateFlow<String?> = _terrainDownloadRegionId.asStateFlow()
+
+    /**
+     * Manual toggles, same shape as [offlineOverlayEnabled] — independent of it, gated by [OfflineRegion.hasTerrain].
+     */
+    private val _terrainHillshadeEnabled = MutableStateFlow(false)
+    val terrainHillshadeEnabled: StateFlow<Boolean> = _terrainHillshadeEnabled.asStateFlow()
+
+    private val _terrainContoursEnabled = MutableStateFlow(false)
+    val terrainContoursEnabled: StateFlow<Boolean> = _terrainContoursEnabled.asStateFlow()
+
+    fun setTerrainHillshadeEnabled(enabled: Boolean) {
+        _terrainHillshadeEnabled.value = enabled
+    }
+
+    fun setTerrainContoursEnabled(enabled: Boolean) {
+        _terrainContoursEnabled.value = enabled
+    }
+
+    fun clearTerrainDownloadState() {
+        _terrainDownloadState.value = null
+        _terrainDownloadRegionId.value = null
+    }
+
+    /** A [TerrainTileStore] rooted at this region's own terrain subdirectory of [offlineRegionStore]'s base dir. */
+    fun terrainStoreForRegion(id: String): TerrainTileStore =
+        TerrainTileStore(FileSystem.SYSTEM, offlineRegionStore.terrainDir(id).absolutePath.toPath())
+
+    /**
+     * Downloads terrain for an already-downloaded base region. No-ops (rather than starting a download that would only
+     * fail) unless [canDownloadTerrainForRegion] — the UI already keeps its "Download Terrain" affordance disabled in
+     * that case; this is the defensive re-check, same relationship [downloadOfflineRegion] has to its own button's
+     * `enabled` condition.
+     */
+    fun downloadTerrainForRegion(regionId: String) {
+        val region = _offlineRegions.value.firstOrNull { it.id == regionId } ?: return
+        if (!canDownloadTerrainForRegion(regionId)) return
+
+        viewModelScope.launch {
+            _terrainDownloadRegionId.value = regionId
+            val store = terrainStoreForRegion(regionId)
+            val bounds =
+                GeoBounds(
+                    south = region.southLat,
+                    west = region.westLon,
+                    north = region.northLat,
+                    east = region.eastLon,
+                )
+            val maxZoom = TerrainDownloadPlanner.maxZoomFitting(bounds, TerrainRegionExtractor.MAX_TILES)
+            TerrainRegionExtractor(store).download(bounds, maxZoom).collect { state ->
+                _terrainDownloadState.value = state
+                if (state is TerrainDownloadState.Complete) {
+                    val updated =
+                        region.copy(
+                            hasTerrain = true,
+                            terrainByteSize = state.byteSize,
+                            terrainHasRegionalDetail = state.hasRegionalDetail,
+                        )
+                    offlineRegionStore.add(updated)
+                    _offlineRegions.value = offlineRegionStore.list()
+                }
+            }
+        }
+    }
+
+    /**
+     * Whether [regionId] is eligible for a terrain download: doesn't have one yet, and the shared storage budget
+     * ([OfflineRegionExtractor.MAX_TOTAL_BYTES], covering every region's base archive plus any terrain attached to it —
+     * [OfflineRegionStore.totalBytes]) isn't already exhausted.
+     */
+    private fun canDownloadTerrainForRegion(regionId: String): Boolean {
+        val region = _offlineRegions.value.firstOrNull { it.id == regionId } ?: return false
+        return !region.hasTerrain && offlineRegionStore.totalBytes() < OfflineRegionExtractor.MAX_TOTAL_BYTES
     }
 
     init {

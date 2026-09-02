@@ -307,6 +307,14 @@ dependencies {
     // protobuf geometry to draw as native GoogleMap Polygon/Polyline overlays. See offline/pmtiles/README.md.
     googleImplementation(libs.pmtiles.reader)
     googleImplementation(libs.kotlinx.serialization.protobuf)
+    // Offline terrain (hillshade + contours) for a downloaded region: Terrarium decode, hillshade shading and
+    // marching-squares contours are shared math from :feature:map-terrain; see offline/terrain/ for the
+    // Google-flavor-specific rendering built on top of it.
+    googleImplementation(projects.feature.mapTerrain)
+    // TerrainTileStore's file hierarchy is Okio-based (it also backs Desktop's MapLibre terrain rendering), but
+    // okio is only an `implementation` dependency of :feature:map-terrain, not `api` — this flavor needs its own
+    // dependency to construct a TerrainTileStore itself.
+    googleImplementation(libs.okio)
     // maps-compose-widgets requests androidx.compose.material:material version-less (expects a BOM
     // we exclude). Name it with a version so the version is published in the app's graph metadata.
     googleImplementation(libs.androidx.compose.material)
