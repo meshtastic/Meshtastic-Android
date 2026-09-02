@@ -126,7 +126,8 @@ class OfflineTerrainRepository(private val fileSystem: FileSystem, private val b
                         is TerrainDownloadState.Complete -> persistCompletedDownload(bounds, maxZoom, state)
 
                         is TerrainDownloadState.Failed -> {
-                            // Nothing partial is kept: TerrainRegionExtractor already ran store.deleteAll() itself on
+                            // Nothing partial is kept: TerrainRegionExtractor already ran store.deleteAll()
+                            // itself on
                             // both failure reasons (TILE_LIMIT_EXCEEDED never wrote a tile to begin with).
                             Logger.withTag(LOG_TAG).w { "Offline terrain download failed: ${state.reason}" }
                             state
