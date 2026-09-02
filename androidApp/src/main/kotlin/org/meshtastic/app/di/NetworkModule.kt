@@ -39,9 +39,13 @@ import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
-import io.ktor.client.request.url
+import io.ktor.client.request.header
+import io.ktor.http.HttpHeaders
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
+import okhttp3.Cache
+import okhttp3.ConnectionPool
+import okhttp3.Dispatcher
 import okio.Path.Companion.toOkioPath
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
@@ -51,10 +55,15 @@ import org.meshtastic.core.network.KermitHttpLogger
 import org.meshtastic.core.network.configureDefaultRetry
 import org.meshtastic.core.network.service.ApiService
 import org.meshtastic.core.network.service.ApiServiceImpl
+import java.util.concurrent.TimeUnit
 
 private const val DISK_CACHE_PERCENT = 0.02
 private const val MEMORY_CACHE_PERCENT = 0.25
 private const val MEMORY_CACHE_BACKGROUND_PERCENT = 0.1
+private const val HTTP_CACHE_SIZE_BYTES = 10L * 1024L * 1024L // 10 MiB
+private const val MAX_IDLE_CONNECTIONS = 8
+private const val KEEP_ALIVE_DURATION_MINUTES = 2L
+private const val MAX_REQUESTS_PER_HOST = 10
 
 @Module
 class NetworkModule {
@@ -107,18 +116,39 @@ class NetworkModule {
      */
     @Single
     fun provideHttpClient(
+        application: Context,
         json: Json,
         buildConfigProvider: BuildConfigProvider,
         networkInstrumentation: OkHttpNetworkInstrumentation,
     ): HttpClient = HttpClient(engineFactory = OkHttp) {
         engine {
+            config {
+                cache(
+                    Cache(directory = application.cacheDir.resolve("http_cache"), maxSize = HTTP_CACHE_SIZE_BYTES),
+                )
+                fastFallback(true)
+                connectionPool(
+                    ConnectionPool(
+                        maxIdleConnections = MAX_IDLE_CONNECTIONS,
+                        keepAliveDuration = KEEP_ALIVE_DURATION_MINUTES,
+                        timeUnit = TimeUnit.MINUTES,
+                    ),
+                )
+                dispatcher(Dispatcher().apply { maxRequestsPerHost = MAX_REQUESTS_PER_HOST })
+            }
             // Flavor-provided analytics hooks: google supplies Datadog's interceptor + event listener so RUM
             // captures per-request network timing; fdroid supplies OkHttpNetworkInstrumentation.NONE (no-op).
             networkInstrumentation.interceptors.forEach { addInterceptor(it) }
             networkInstrumentation.eventListenerFactory?.let { factory -> config { eventListenerFactory(factory) } }
         }
         install(plugin = ContentNegotiation) { json(json) }
-        install(DefaultRequest) { url(HttpClientDefaults.API_BASE_URL) }
+        install(DefaultRequest) {
+            url(HttpClientDefaults.API_BASE_URL)
+            header(
+                HttpHeaders.UserAgent,
+                "Meshtastic-Android/${buildConfigProvider.versionName} (${buildConfigProvider.applicationId})",
+            )
+        }
         install(plugin = HttpTimeout) {
             requestTimeoutMillis = HttpClientDefaults.REQUEST_TIMEOUT_MS
             connectTimeoutMillis = HttpClientDefaults.TIMEOUT_MS
