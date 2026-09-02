@@ -121,15 +121,41 @@ internal fun stampBeaconConfigForSave(
 }
 
 /**
- * Applies a channel pick to one broadcast target row (design#140 behavior 7): the channel index is always set, and the
- * radio's currently-configured preset is preselected only the first time the row gets a channel, never overwriting a
- * preset the user already chose.
+ * Applies a channel pick to one broadcast target row (design#140 behavior 7): the radio's currently-configured preset
+ * is preselected only the first time the row gets a concrete channel, never overwriting a preset the user already
+ * chose. Picking the "Default" sentinel (`channelIndex = null`, design#140 behavior 6) leaves any existing preset
+ * untouched rather than preselecting -- there is no channel to have "just been picked".
  */
 internal fun selectBeaconTargetChannel(
     target: MeshBeaconConfig.BroadcastTarget,
-    channelIndex: Int,
+    channelIndex: Int?,
     currentPreset: ModemPreset,
-): MeshBeaconConfig.BroadcastTarget = target.copy(channel_index = channelIndex, preset = target.preset ?: currentPreset)
+): MeshBeaconConfig.BroadcastTarget = target.copy(
+    channel_index = channelIndex,
+    preset = if (channelIndex != null) target.preset ?: currentPreset else target.preset,
+)
+
+/**
+ * Seeds an empty stored `broadcast_targets` list with one default row (design#140 behavior 6: "one row saves as the
+ * single broadcast config, added rows save as broadcast targets"). Firmware's own fallback for an empty list is a
+ * single beacon on the node's running preset and region over the primary channel (`MeshBeaconModule.cpp::sendBeacon`);
+ * seeding a row here makes that default visible and editable in the editor instead of leaving it implicit. A non-empty
+ * stored list is returned unchanged.
+ */
+internal fun seedBeaconTargets(stored: List<MeshBeaconConfig.BroadcastTarget>): List<MeshBeaconConfig.BroadcastTarget> =
+    stored.ifEmpty { listOf(MeshBeaconConfig.BroadcastTarget()) }
+
+/**
+ * Removes the target row at [index], keeping the list at a floor of one row (design#140 behavior 6: "no UI that changes
+ * shape once targets exist" -- the list must never render with zero rows, since zero rows would hide firmware's
+ * implicit single-target fallback rather than represent "no beacon"). Removing the only remaining row replaces it with
+ * a fresh default row instead of emptying the list, mirroring the reference iOS editor.
+ */
+internal fun removeBeaconTarget(
+    targets: List<MeshBeaconConfig.BroadcastTarget>,
+    index: Int,
+): List<MeshBeaconConfig.BroadcastTarget> =
+    targets.filterIndexed { i, _ -> i != index }.ifEmpty { listOf(MeshBeaconConfig.BroadcastTarget()) }
 
 /** The three broadcast-half gating decisions design#140 Q1 hangs off `radioLora.use_preset` and the STORED flag. */
 internal data class BeaconBroadcastGate(

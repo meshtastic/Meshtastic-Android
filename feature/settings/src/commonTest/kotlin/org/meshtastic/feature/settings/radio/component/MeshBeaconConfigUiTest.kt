@@ -19,18 +19,28 @@ package org.meshtastic.feature.settings.radio.component
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
+import org.meshtastic.core.model.Capabilities
+import org.meshtastic.core.model.RegionPresetConstraint
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.mesh_beacon_broadcast_requires_preset
 import org.meshtastic.core.resources.mesh_beacon_no_channels
 import org.meshtastic.core.resources.mesh_beacon_region_required
+import org.meshtastic.core.resources.mesh_beacon_target
+import org.meshtastic.core.resources.mesh_beacon_target_remove
 import org.meshtastic.core.resources.save_changes
 import org.meshtastic.core.ui.component.DropDownItem
 import org.meshtastic.core.ui.component.EditTextPreference
@@ -328,5 +338,58 @@ class MeshBeaconConfigUiTest {
         onNodeWithText(getString(Res.string.save_changes)).assertIsEnabled().performClick()
 
         runOnIdle { assertEquals(listenFlag, savedConfig?.flags) }
+    }
+
+    @Test
+    fun emptyStoredTargets_seededListRendersExactlyOneRow() = runComposeUiTest {
+        val presetConstraint =
+            RegionPresetConstraint(presets = listOf(ModemPreset.LONG_FAST), ModemPreset.LONG_FAST, false)
+
+        setContent {
+            AppTheme {
+                BroadcastTargetsCard(
+                    targets = seedBeaconTargets(emptyList()),
+                    enabled = true,
+                    channelItems = listOf(DropDownItem(0, "Primary")),
+                    currentPreset = ModemPreset.LONG_FAST,
+                    presetConstraint = presetConstraint,
+                    presetsGated = false,
+                    capabilities = Capabilities(firmwareVersion = null),
+                    onChange = {},
+                )
+            }
+        }
+
+        onNodeWithText(getString(Res.string.mesh_beacon_target, 1)).assertIsDisplayed()
+        onAllNodesWithText(getString(Res.string.mesh_beacon_target_remove)).assertCountEquals(1)
+    }
+
+    @Test
+    fun removingTheLastTargetRow_reseedsOneRowInsteadOfZero() = runComposeUiTest {
+        val presetConstraint =
+            RegionPresetConstraint(presets = listOf(ModemPreset.LONG_FAST), ModemPreset.LONG_FAST, false)
+
+        setContent {
+            AppTheme {
+                var targets by remember { mutableStateOf(seedBeaconTargets(emptyList())) }
+                BroadcastTargetsCard(
+                    targets = targets,
+                    enabled = true,
+                    channelItems = listOf(DropDownItem(0, "Primary")),
+                    currentPreset = ModemPreset.LONG_FAST,
+                    presetConstraint = presetConstraint,
+                    presetsGated = false,
+                    capabilities = Capabilities(firmwareVersion = null),
+                    onChange = { targets = it },
+                )
+            }
+        }
+
+        onNodeWithText(getString(Res.string.mesh_beacon_target_remove)).performClick()
+
+        // The row survives the click: it never renders empty, it comes back as a fresh default row (design#140
+        // behavior 6) -- not zero rows, which would hide firmware's implicit single-target fallback.
+        onNodeWithText(getString(Res.string.mesh_beacon_target, 1)).assertIsDisplayed()
+        onAllNodesWithText(getString(Res.string.mesh_beacon_target_remove)).assertCountEquals(1)
     }
 }

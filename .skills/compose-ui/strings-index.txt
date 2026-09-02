@@ -1098,6 +1098,7 @@ mesh_beacon_region_required
 mesh_beacon_target
 mesh_beacon_target_add
 mesh_beacon_target_channel_index
+mesh_beacon_target_default
 mesh_beacon_target_remove
 mesh_beacon_targets
 mesh_map_location

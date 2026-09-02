@@ -1134,6 +1134,7 @@
     <string name="mesh_beacon_target">Target %1$d</string>
     <string name="mesh_beacon_target_add">Add target</string>
     <string name="mesh_beacon_target_channel_index">Channel</string>
+    <string name="mesh_beacon_target_default">Default</string>
     <string name="mesh_beacon_target_remove">Remove target</string>
     <string name="mesh_beacon_targets">Broadcast targets</string>
     <string name="mesh_map_location">Mesh Map Location</string>

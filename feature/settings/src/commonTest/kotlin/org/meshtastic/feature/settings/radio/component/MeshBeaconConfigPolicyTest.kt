@@ -326,4 +326,53 @@ class MeshBeaconConfigPolicyTest {
         assertEquals(3, updated.channel_index)
         assertEquals(ModemPreset.LONG_MODERATE, updated.preset)
     }
+
+    @Test
+    fun selectBeaconTargetChannel_defaultSentinel_clearsChannelAndLeavesPresetUntouched() {
+        val target = MeshBeaconConfig.BroadcastTarget(channel_index = 2, preset = null)
+
+        val updated = selectBeaconTargetChannel(target, channelIndex = null, currentPreset = ModemPreset.SHORT_FAST)
+
+        assertNull(updated.channel_index)
+        // Picking "Default" is not "picking a channel" (design#140 behavior 7 only fires on a concrete channel).
+        assertNull(updated.preset)
+    }
+
+    @Test
+    fun seedBeaconTargets_emptyStoredList_seedsOneDefaultRow() {
+        val seeded = seedBeaconTargets(emptyList())
+
+        assertEquals(listOf(MeshBeaconConfig.BroadcastTarget()), seeded)
+    }
+
+    @Test
+    fun seedBeaconTargets_nonEmptyStoredList_isUnchanged() {
+        val stored = listOf(MeshBeaconConfig.BroadcastTarget(channel_index = 1, preset = ModemPreset.LONG_FAST))
+
+        val seeded = seedBeaconTargets(stored)
+
+        assertEquals(stored, seeded)
+    }
+
+    @Test
+    fun removeBeaconTarget_removingOneOfSeveral_dropsOnlyThatRow() {
+        val targets =
+            listOf(
+                MeshBeaconConfig.BroadcastTarget(channel_index = 0),
+                MeshBeaconConfig.BroadcastTarget(channel_index = 1),
+            )
+
+        val updated = removeBeaconTarget(targets, index = 0)
+
+        assertEquals(listOf(MeshBeaconConfig.BroadcastTarget(channel_index = 1)), updated)
+    }
+
+    @Test
+    fun removeBeaconTarget_removingTheOnlyRow_reseedsADefaultRowInstead() {
+        val targets = listOf(MeshBeaconConfig.BroadcastTarget(channel_index = 4, preset = ModemPreset.SHORT_FAST))
+
+        val updated = removeBeaconTarget(targets, index = 0)
+
+        assertEquals(listOf(MeshBeaconConfig.BroadcastTarget()), updated)
+    }
 }
