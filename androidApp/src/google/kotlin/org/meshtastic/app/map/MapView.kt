@@ -124,6 +124,7 @@ import org.meshtastic.app.map.component.MapTypeDropdown
 import org.meshtastic.app.map.component.NodeClusterMarkers
 import org.meshtastic.app.map.component.WaypointMarkers
 import org.meshtastic.app.map.model.NodeClusterItem
+import org.meshtastic.app.map.offline.pmtiles.OfflineRegionExtractor
 import org.meshtastic.app.map.offline.pmtiles.OfflineVectorOverlay
 import org.meshtastic.app.map.offline.pmtiles.component.OfflineRegionManagerSection
 import org.meshtastic.app.map.tiles.RasterBasemap
@@ -900,12 +901,29 @@ fun MapView(
 
         // Tile credit. OpenStreetMap's and Esri's tile policies both require it, and unlike MapLibre — which has an
         // attribution ornament of its own — the Google map has nowhere to put it but here.
+        //
+        // The offline vector layer's own credit is folded in here too, not left to the archive's metadata table
+        // alone: an on-disk-only attribution is invisible to anyone who never opens the offline-region manager
+        // sheet, which is exactly the gap this mirrors from the sibling iOS app's own terrain layer.
+        val offlineRegionActive =
+            offlineOverlayEnabled &&
+                cameraPositionState.projection?.visibleRegion?.latLngBounds?.let {
+                    mapViewModel.offlineRegionCovering(it)
+                } != null
         val attributionText =
-            remember(currentRasterBasemap, enabledOverlayIds) {
-                mapAttributionText(
-                    basemap = (currentRasterBasemap as? RasterBasemap.Remote)?.spec,
-                    overlays = mapViewModel.availableOverlays.filter { it.id in enabledOverlayIds }.map { it.spec },
-                )
+            remember(currentRasterBasemap, enabledOverlayIds, offlineRegionActive) {
+                val baseAttribution =
+                    mapAttributionText(
+                        basemap = (currentRasterBasemap as? RasterBasemap.Remote)?.spec,
+                        overlays = mapViewModel.availableOverlays.filter { it.id in enabledOverlayIds }.map { it.spec },
+                    )
+                if (offlineRegionActive) {
+                    listOf(baseAttribution, OfflineRegionExtractor.ATTRIBUTION)
+                        .filter { it.isNotEmpty() }
+                        .joinToString(" · ")
+                } else {
+                    baseAttribution
+                }
             }
         if (attributionText.isNotEmpty()) {
             Text(
