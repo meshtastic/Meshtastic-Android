@@ -47,6 +47,7 @@ import org.meshtastic.app.map.prefs.map.GoogleMapsPrefs
 import org.meshtastic.app.map.tiles.MapTileHttpClient
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.network.repository.NetworkRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.testing.FakeBuildConfigProvider
 import org.meshtastic.core.testing.FakeLocaleUnitsProvider
@@ -80,6 +81,7 @@ class MapViewModelSitePlannerRequestTest {
     private val mapPrefs = FakeMapPrefs()
     private val googleMapsPrefs = mock<GoogleMapsPrefs>(MockMode.autofill)
     private val customTileProviderRepository = mock<CustomTileProviderRepository>(MockMode.autofill)
+    private val networkRepository = mock<NetworkRepository>(MockMode.autofill)
     private val firstNode = Node(num = 11)
     private val secondNode = Node(num = 22)
     private lateinit var httpClient: HttpClient
@@ -91,6 +93,7 @@ class MapViewModelSitePlannerRequestTest {
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         every { packetRepository.getWaypoints() } returns flowOf(emptyList())
+        every { networkRepository.networkAvailable } returns flowOf(true)
         httpClient = HttpClient()
         layersDir = createTempDirectory("map-layers")
         mapLayersManager =
@@ -134,6 +137,7 @@ class MapViewModelSitePlannerRequestTest {
                 notificationPrefs = FakeNotificationPrefs(),
                 savedStateHandle = SavedStateHandle(),
                 localeUnitsProvider = FakeLocaleUnitsProvider(),
+                networkRepository = networkRepository,
             )
     }
 

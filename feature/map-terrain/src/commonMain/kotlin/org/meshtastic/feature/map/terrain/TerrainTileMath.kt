@@ -18,7 +18,9 @@ package org.meshtastic.feature.map.terrain
 
 import kotlin.math.PI
 import kotlin.math.asinh
+import kotlin.math.atan
 import kotlin.math.pow
+import kotlin.math.sinh
 import kotlin.math.tan
 
 /** A geographic bounding box, degrees. */
@@ -26,6 +28,9 @@ data class GeoBounds(val south: Double, val west: Double, val north: Double, val
 
 /** A single XYZ (google/osm-convention, not TMS) slippy-map tile index. */
 data class TileIndex(val zoom: Int, val x: Int, val y: Int)
+
+/** A point in geographic space, degrees — what [TerrainTileMath.lonLatAt] converts a tile-local position into. */
+data class LonLat(val longitude: Double, val latitude: Double)
 
 /**
  * Standard XYZ/slippy-map Web Mercator tile math, self-contained here (rather than reused from either flavor's own copy
@@ -97,6 +102,23 @@ object TerrainTileMath {
         val northwest = tileAt(zoom, bounds.north, bounds.west)
         val southeast = tileAt(zoom, bounds.south, bounds.east)
         return northwest == southeast
+    }
+
+    /**
+     * Inverse of [tileAt]: the geographic point at a fractional position within [tile] — [localX]/[localY] in the
+     * tile's own `[0,1]×[0,1]` unit square, the same convention [ContourPoint] uses. Needed to place contour geometry
+     * (which [ContourGenerator] emits tile-local) on a real map; nothing here needed the inverse before.
+     *
+     * Standard inverse spherical Web Mercator — the mirror of [tileAt]'s own `asinh(tan(...))` forward transform.
+     */
+    fun lonLatAt(tile: TileIndex, localX: Float, localY: Float): LonLat {
+        val n = 2.0.pow(tile.zoom)
+        val x = (tile.x + localX) / n
+        val y = (tile.y + localY) / n
+        val longitude = x * FULL_TURN_DEGREES - FULL_TURN_DEGREES / 2
+        val latitudeRadians = atan(sinh(PI * (1.0 - 2.0 * y)))
+        val latitude = latitudeRadians * HALF_TURN_DEGREES / PI
+        return LonLat(longitude = longitude, latitude = latitude)
     }
 
     private const val HALF_TURN_DEGREES = 180.0

@@ -14,13 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.node.metrics
+package org.meshtastic.feature.map.maplibre
 
-import androidx.compose.ui.graphics.Canvas
-import androidx.compose.ui.graphics.skiaCanvas
-
-internal actual fun Canvas.platformSaveCount(): Int = skiaCanvas.saveCount
-
-internal actual fun Canvas.platformRestoreToCount(count: Int) {
-    skiaCanvas.restoreToCount(count)
-}
+/** Every published desktop and iOS artifact carries its own engine, so there is nothing to probe for. */
+internal actual fun isMapLibreRuntimeAvailable(): Boolean = true

@@ -188,11 +188,13 @@ import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.component.MapControlsOverlay
 import org.meshtastic.feature.map.component.MapFilterSheet
 import org.meshtastic.feature.map.component.NodeTrackFilterMenu
+import org.meshtastic.feature.map.component.OfflineStatusBanner
 import org.meshtastic.feature.map.component.RasterOverlayToggles
 import org.meshtastic.feature.map.component.SitePlannerLaunch
 import org.meshtastic.feature.map.component.WaypointInfoDialog
 import org.meshtastic.feature.map.component.mapFilterActions
 import org.meshtastic.feature.map.component.toSitePlannerParams
+import org.meshtastic.feature.map.geojson.sanitizeImportedIconUrl
 import org.meshtastic.feature.map.includes
 import org.meshtastic.feature.map.kml.ICON_URL_PROPERTY
 import org.meshtastic.feature.map.kml.KmlGroundOverlay
@@ -330,6 +332,7 @@ fun MapView(
     val offlineOverlayEnabled by mapViewModel.offlineOverlayEnabled.collectAsStateWithLifecycle()
     val terrainHillshadeEnabled by mapViewModel.terrainHillshadeEnabled.collectAsStateWithLifecycle()
     val terrainContoursEnabled by mapViewModel.terrainContoursEnabled.collectAsStateWithLifecycle()
+    val mapNetworkAvailable by mapViewModel.mapNetworkAvailable.collectAsStateWithLifecycle()
     val enabledOverlayIds by mapViewModel.enabledOverlayIds.collectAsStateWithLifecycle()
     val layerOpacity by mapViewModel.layerOpacity.collectAsStateWithLifecycle()
 
@@ -798,6 +801,11 @@ fun MapView(
                     )
             }
         }
+
+        OfflineStatusBanner(
+            visible = !mapNetworkAvailable,
+            modifier = Modifier.align(Alignment.TopStart).padding(top = 8.dp, start = 8.dp),
+        )
 
         // Scale bar
         ScaleBar(
@@ -1770,9 +1778,9 @@ internal fun Feature.applySimpleStyleSpec(): Feature {
         // A KML icon reaches us as the `icon-url` the converter writes; maps-utils' GeoJSON mapper reads no icon
         // property at all, so without this the Google map would silently lose the icons it has always drawn.
         geometry.isPointLike() ->
-            stringProperty(ICON_URL_PROPERTY)
-                ?.takeIf { it.isNotBlank() }
-                ?.let { copy(style = PointStyle(iconUrl = it)) } ?: this
+            stringProperty(ICON_URL_PROPERTY)?.let(::sanitizeImportedIconUrl)?.let {
+                copy(style = PointStyle(iconUrl = it))
+            } ?: this
 
         else -> this // Mixed geometry collections keep the mapper's style.
     }

@@ -142,6 +142,16 @@ class PacketHandlerImplTest {
     }
 
     @Test
+    fun `trySendToRadio reports direct transport admission`() {
+        val toRadio = ToRadio(packet = MeshPacket(id = 124))
+
+        assertTrue(handler.trySendToRadio(toRadio))
+
+        every { radioInterfaceService.trySendToRadio(any()) } returns false
+        assertFalse(handler.trySendToRadio(toRadio))
+    }
+
+    @Test
     fun `sendToRadio updates status using the full outgoing packet identity`() = runTest(testDispatcher) {
         val packet =
             MeshPacket(

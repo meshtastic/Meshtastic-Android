@@ -56,6 +56,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.model.TelemetryType
+import org.meshtastic.core.model.noiseFloorOrNull
 import org.meshtastic.core.model.util.TimeConstants.MS_PER_SEC
 import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.model.util.rxTimeOrNull
@@ -163,7 +164,7 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit, m
         }
     val localStatsData = state.localStats.filter { it.time.toLong() >= threshold && it.local_stats != null }
     val data = remember(signalData, localStatsData) { buildSignalLog(signalData, localStatsData) }
-    val hasNoiseFloor = remember(localStatsData) { localStatsData.any { it.local_stats?.noise_floor != 0 } }
+    val hasNoiseFloor = remember(localStatsData) { localStatsData.any { it.local_stats?.noiseFloorOrNull != null } }
     val hasRssi = remember(signalData) { signalData.any { it.rx_rssi != null } }
     val hasSnr = remember(signalData) { signalData.any { it.snrOrNull() != null } }
     val hasAnyLocalStats = state.localStats.isNotEmpty()
@@ -314,7 +315,7 @@ private fun SignalMetricsChart(
     selectedX: Double?,
     onPointSelected: (Double) -> Unit,
 ) {
-    val noiseFloorData = remember(localStats) { localStats.filter { it.local_stats?.noise_floor != 0 } }
+    val noiseFloorData = remember(localStats) { localStats.filter { it.local_stats?.noiseFloorOrNull != null } }
     val busyFloorData =
         remember(noiseFloorData) {
             if (noiseFloorData.size > 1) listOf(noiseFloorData.first(), noiseFloorData.last()) else emptyList()
@@ -459,8 +460,8 @@ private fun SignalMetricsChart(
 }
 
 @Composable
-private fun noiseFloorTextColor(value: Int): Color = when {
-    value == 0 -> MaterialTheme.colorScheme.onSurfaceVariant
+private fun noiseFloorTextColor(value: Int?): Color = when {
+    value == null -> MaterialTheme.colorScheme.onSurfaceVariant
     value < QUIET_NOISE_FLOOR_DBM -> SignalMetric.SNR.color
     value < BUSY_FLOOR_DBM -> Orange
     else -> MaterialTheme.colorScheme.error
@@ -471,7 +472,7 @@ private fun noiseFloorTextColor(value: Int): Color = when {
 private fun LocalStatsCard(telemetry: Telemetry, isSelected: Boolean, onClick: () -> Unit) {
     val localStats = telemetry.local_stats
     val time = telemetry.time.toLong() * MS_PER_SEC
-    val noiseFloor = localStats?.noise_floor ?: 0
+    val noiseFloor = localStats?.noiseFloorOrNull
 
     SelectableMetricCard(isSelected = isSelected, onClick = onClick) {
         Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
@@ -484,7 +485,7 @@ private fun LocalStatsCard(telemetry: Telemetry, isSelected: Boolean, onClick: (
 
                 Text(
                     text =
-                    if (noiseFloor != 0) {
+                    if (noiseFloor != null) {
                         stringResource(Res.string.local_stats_noise, noiseFloor)
                     } else {
                         stringResource(Res.string.noise_floor_no_reading)

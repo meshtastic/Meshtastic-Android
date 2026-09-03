@@ -172,6 +172,15 @@ directly as map shapes rather than raster tiles. Frame the area you want, tap **
 it finishes flip **Show on map** to draw it (it's off by default so it never surprises you by covering up the
 live map). You can still import a pre-made `.mbtiles` archive here too, as before. **Desktop** has neither.
 
+### Going offline
+
+An **Offline** pill appears over the map whenever the device has no network connection. On **Google Play**
+builds, if you've imported a local `.mbtiles` archive, the map switches to it automatically the moment the
+network drops — no toggle to remember — and switches back once you're reconnected, as long as you haven't
+picked a different base map yourself in between. On **F-Droid**, a downloaded offline area keeps rendering on
+its own; the pill is purely informational there. **Desktop** has no offline downloads at all yet, so the pill
+is informational there too.
+
 ## Related Topics
 
 - [Nodes](nodes) — view and filter your node list

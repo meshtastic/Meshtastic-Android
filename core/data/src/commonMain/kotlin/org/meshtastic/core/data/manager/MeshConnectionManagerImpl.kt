@@ -69,6 +69,7 @@ import org.meshtastic.core.resources.error_recovery_exhausted
 import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Config
+import org.meshtastic.proto.LocalStats
 import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.ToRadio
 import kotlin.time.Duration
@@ -545,6 +546,11 @@ class MeshConnectionManagerImpl(
         serviceRepository.setConnectionState(ConnectionState.Disconnected)
         lockdownCoordinator.onDisconnect()
         tearDownConnection()
+        // A different radio may connect next, and localStats only overwrites on a fresh local_stats telemetry
+        // packet - without this, signal-quality rating would silently blend the *previous* radio's noise floor into
+        // the new one's readings until it gets around to reporting its own. Clearing back to "no reading yet" makes
+        // that gap an explicit SNR-only fallback (design#15) instead of a stale, wrong number.
+        nodeRepository.updateLocalStats(LocalStats())
 
         analytics.track(
             EVENT_MESH_DISCONNECT,

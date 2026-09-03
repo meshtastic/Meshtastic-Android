@@ -201,10 +201,12 @@ class PacketHandlerImpl(
     private val sendAckTimeoutJobs = mutableMapOf<PersistedStatusTarget, Job>()
 
     override fun sendToRadio(p: ToRadio) {
-        if (!dispatchToRadio(p)) {
+        if (!trySendToRadio(p)) {
             Logger.w { "sendToRadio dropped: no active transport accepted outbound command" }
         }
     }
+
+    override fun trySendToRadio(p: ToRadio): Boolean = dispatchToRadio(p)
 
     private fun dispatchToRadio(p: ToRadio): Boolean {
         Logger.d { "Sending to radio ${p.toPIIString()}" }

@@ -320,6 +320,7 @@
     <string name="mesh_beacon_preset_none">없음</string>
     <string name="mesh_beacon_region_label">지역</string>
     <string name="mesh_beacon_target_channel_index">채널</string>
+    <string name="mesh_beacon_target_default">기본값</string>
     <!-- MESHTASTIC -->
     <string name="meshtastic">Meshtastic</string>
     <string name="meshtastic_alerts_notifications">경고 알림</string>

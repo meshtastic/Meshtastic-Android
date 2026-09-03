@@ -1126,6 +1126,7 @@
     <string name="mesh_beacon_target">Kohde %1$d</string>
     <string name="mesh_beacon_target_add">Lisää kohde</string>
     <string name="mesh_beacon_target_channel_index">Kanava</string>
+    <string name="mesh_beacon_target_default">Oletus</string>
     <string name="mesh_beacon_target_remove">Poista kohde</string>
     <string name="mesh_beacon_targets">Lähetyksen kohteet</string>
     <string name="mesh_map_location">Meshtastic kartan sijainti</string>

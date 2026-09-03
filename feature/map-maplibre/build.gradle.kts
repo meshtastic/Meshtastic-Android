@@ -47,6 +47,10 @@ kotlin {
             implementation(projects.core.service)
             implementation(projects.core.ui)
             implementation(projects.feature.map)
+            // Offline terrain math (elevation decode, contour generation, zoom-banded intervals) and storage
+            // (TerrainTileStore, TerrainRegionExtractor) — see feature/map-terrain's own build.gradle.kts for why the
+            // MapLibre-specific rendering wiring lives here instead.
+            implementation(projects.feature.mapTerrain)
 
             implementation(libs.kotlinx.collections.immutable)
             // The KML conversion cache lives on disk; Okio is how common code reaches it.
@@ -59,6 +63,10 @@ kotlin {
             api(libs.maplibre.compose)
             api(libs.maplibre.compose.material3)
         }
+
+        // Backs OfflineTerrainRepositoryTest's manifest/store round-trips without touching a real disk — same
+        // precedent as :feature:map-terrain's own TerrainTileStoreTest.
+        commonTest.dependencies { implementation(libs.okio.fakefilesystem) }
 
         // Compose UI tests live in jvmTest, not commonTest: this module enables Android host tests, and
         // `runComposeUiTest` has no Robolectric host there — the same tests NPE the moment they run under it.

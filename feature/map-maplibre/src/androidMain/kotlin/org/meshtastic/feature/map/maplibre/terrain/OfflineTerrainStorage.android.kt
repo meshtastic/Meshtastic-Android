@@ -14,13 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.node.metrics
+package org.meshtastic.feature.map.maplibre.terrain
 
-import androidx.compose.ui.graphics.Canvas
-import androidx.compose.ui.graphics.nativeCanvas
+import okio.Path
+import okio.Path.Companion.toPath
+import org.meshtastic.core.common.ContextServices
+import java.io.File
 
-internal actual fun Canvas.platformSaveCount(): Int = nativeCanvas.saveCount
+/** App-internal storage, so downloaded terrain is private to the app and removed with it. */
+actual fun terrainStorageDirectory(): Path = File(ContextServices.app.filesDir, TERRAIN_DIR).absolutePath.toPath()
 
-internal actual fun Canvas.platformRestoreToCount(count: Int) {
-    nativeCanvas.restoreToCount(count)
-}
+private const val TERRAIN_DIR = "terrain"

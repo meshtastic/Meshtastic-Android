@@ -26,12 +26,15 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import org.koin.compose.koinInject
+import org.meshtastic.core.model.noiseFloorOrNull
 import org.meshtastic.core.navigation.MultiBackstack
 import org.meshtastic.core.navigation.NodeDetailRoute
 import org.meshtastic.core.navigation.NodesRoute
+import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.ui.util.LocalMeshActivity
 import org.meshtastic.core.ui.util.LocalModemPreset
+import org.meshtastic.core.ui.util.LocalNoiseFloor
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 
 /**
@@ -75,11 +78,20 @@ fun MeshtasticAppShell(
         }
             .collectAsStateWithLifecycle(initialValue = null)
 
+    // Connected device's own noise floor (dBm, from its LocalStats telemetry), provided once here so signal-quality
+    // rating can blend it in (design#15) without per-screen plumbing. See [noiseFloorOrNull] for the "no reading yet"
+    // sentinel normalization.
+    val nodeRepository = koinInject<NodeRepository>()
+    val noiseFloor by
+        remember(nodeRepository) { nodeRepository.localStats.map { it.noiseFloorOrNull }.distinctUntilChanged() }
+            .collectAsStateWithLifecycle(initialValue = null)
+
     MeshtasticSnackbarProvider(snackbarManager = uiViewModel.snackbarManager, hostModifier = hostModifier) {
         // Provide the activity FLOW (stable ref) — not a collected value — so it costs no recomposition; only the
         // local-node connection badge collects it, animating in the draw phase. See LocalMeshActivity.
         CompositionLocalProvider(
             LocalModemPreset provides modemPreset,
+            LocalNoiseFloor provides noiseFloor,
             LocalMeshActivity provides uiViewModel.meshActivity,
         ) {
             content()

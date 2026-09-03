@@ -264,6 +264,7 @@
     <string name="mesh_beacon_preset_none">Žiadny</string>
     <string name="mesh_beacon_region_label">Región</string>
     <string name="mesh_beacon_target_channel_index">Kanál</string>
+    <string name="mesh_beacon_target_default">Predvolené</string>
     <!-- MESHTASTIC -->
     <string name="meshtastic">Meshtastic</string>
     <string name="meshtastic_alerts_notifications">Notifikácie upozornení</string>

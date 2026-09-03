@@ -448,7 +448,7 @@ class CommandSenderImpl(
         hours: Int,
         maxSessionSeconds: Int,
         disable: Boolean,
-    ) {
+    ): Boolean {
         val validUntilEpoch =
             if (hours > 0) {
                 (nowMillis / MILLIS_PER_SECOND + hours.toLong() * SECONDS_PER_HOUR).toInt()
@@ -463,15 +463,13 @@ class CommandSenderImpl(
                 max_session_seconds = maxSessionSeconds.coerceAtLeast(0),
                 disable = disable,
             )
-        sendLockdownAdmin(AdminMessage(lockdown_auth = lockdownAuth))
+        return sendLockdownAdmin(AdminMessage(lockdown_auth = lockdownAuth))
     }
 
-    override fun sendLockNow() {
-        sendLockdownAdmin(AdminMessage(lockdown_auth = LockdownAuth(lock_now = true)))
-    }
+    override fun sendLockNow(): Boolean = sendLockdownAdmin(AdminMessage(lockdown_auth = LockdownAuth(lock_now = true)))
 
-    private fun sendLockdownAdmin(adminMessage: AdminMessage) {
-        val myNum = nodeManager.myNodeNum.value ?: return
+    private fun sendLockdownAdmin(adminMessage: AdminMessage): Boolean {
+        val myNum = nodeManager.myNodeNum.value ?: return false
         val packet =
             MeshPacket(
                 to = myNum,
@@ -483,7 +481,7 @@ class CommandSenderImpl(
                 priority = MeshPacket.Priority.RELIABLE,
                 decoded = Data(portnum = PortNum.ADMIN_APP, payload = adminMessage.encode().toByteString()),
             )
-        packetHandler.sendToRadio(ToRadio(packet = packet))
+        return packetHandler.trySendToRadio(ToRadio(packet = packet))
     }
 
     fun resolveNodeNum(address: NodeAddress): Int = when (address) {

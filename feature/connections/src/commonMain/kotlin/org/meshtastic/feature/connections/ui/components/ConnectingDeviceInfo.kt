@@ -38,7 +38,6 @@ import org.meshtastic.core.resources.connected
 import org.meshtastic.core.resources.connected_sleeping
 import org.meshtastic.core.resources.connecting
 import org.meshtastic.core.resources.disconnect
-import org.meshtastic.core.resources.must_set_region
 import org.meshtastic.core.resources.node_restarting
 import org.meshtastic.core.resources.not_connected
 import org.meshtastic.core.resources.reconnecting
@@ -61,7 +60,6 @@ fun ConnectingDeviceInfo(
     val statusLabel =
         when (connectionStatus) {
             ConnectionStatus.CONNECTED -> stringResource(Res.string.connected)
-            ConnectionStatus.MUST_SET_REGION -> stringResource(Res.string.must_set_region)
             ConnectionStatus.CONNECTING -> connectionProgress ?: stringResource(Res.string.connecting)
             ConnectionStatus.RECONNECTING -> stringResource(Res.string.reconnecting)
             ConnectionStatus.RESTARTING -> stringResource(Res.string.node_restarting)
@@ -69,13 +67,12 @@ fun ConnectingDeviceInfo(
             ConnectionStatus.NOT_CONNECTED -> stringResource(Res.string.not_connected)
         }
 
-    // This card also renders when the transport is already CONNECTED but node info hasn't arrived yet
-    // (or the region needs setting), so only the not-yet-established states get "Stop Connecting".
+    // This card can also render while the transport is already CONNECTED but node info has not arrived yet, so only
+    // the not-yet-established lifecycle states get "Stop Connecting".
     val disconnectLabel =
         when (connectionStatus) {
             ConnectionStatus.CONNECTED,
             ConnectionStatus.CONNECTED_SLEEPING,
-            ConnectionStatus.MUST_SET_REGION,
             -> stringResource(Res.string.disconnect)
 
             ConnectionStatus.CONNECTING,
