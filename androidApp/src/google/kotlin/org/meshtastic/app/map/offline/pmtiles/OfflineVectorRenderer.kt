@@ -80,7 +80,8 @@ internal class OfflineVectorRenderer {
             try {
                 ProtoBuf.decodeFromByteArray(VectorTile.serializer(), bytes)
             } catch (e: SerializationException) {
-                LOG.w(e) { "Malformed MVT tile at $tile" }
+                // No tile coordinates in the message: zoom/x/y is location-adjacent data (AGENTS.md Privacy First).
+                LOG.w(e) { "Malformed MVT tile" }
                 return emptyList()
             }
 

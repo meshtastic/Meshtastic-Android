@@ -46,8 +46,8 @@ private const val WATER_STROKE_WIDTH_PX = 1.5f
  * Draws a downloaded offline region's water, roads and boundaries as native `Polygon`/`Polyline` overlays — the same
  * technique the sibling iOS app uses (`PMTilesMapView.swift`'s `OfflineVectorTileProvider`), decoding straight to
  * shapes rather than rasterizing, so the offline basemap draws in the same coordinate space as node markers with no
- * compositing seam. Only mounted while [region] covers the visible map and the network is down — see the caller in
- * `MapView.kt`.
+ * compositing seam. Only mounted while [region] covers the visible map and the user has manually enabled the offline
+ * overlay — a toggle, not a network-down gate; see `MapView.kt`'s `offlineOverlayEnabled` caller.
  */
 @Composable
 internal fun OfflineVectorOverlay(region: OfflineRegion, archiveFile: File, cameraPositionState: CameraPositionState) {

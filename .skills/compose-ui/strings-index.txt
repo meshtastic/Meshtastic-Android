@@ -1042,6 +1042,7 @@ map_offline_download_failed_tile_limit
 map_offline_download_terrain
 map_offline_downloading_progress
 map_offline_manager
+map_offline_region_label
 map_offline_show_on_map
 map_offline_terrain_contours
 map_offline_terrain_download_complete

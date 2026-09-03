@@ -21,6 +21,8 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 
 /**
  * Where downloaded offline regions live: one `.mbtiles` archive per region plus a JSON manifest of their metadata, all
@@ -68,8 +70,17 @@ internal class OfflineRegionStore(private val baseDir: File) {
         }
     }
 
+    // Write-then-rename: a process death mid-write leaves the untouched original (or a stray .tmp file), never a
+    // half-written manifest.json that readManifest's corruption handling would silently mistake for "no regions".
     private fun writeManifest(regions: List<OfflineRegion>) {
-        manifestFile.writeText(Json.encodeToString(regions))
+        val tmpFile = File(baseDir, "manifest.json.tmp")
+        tmpFile.writeText(Json.encodeToString(regions))
+        Files.move(
+            tmpFile.toPath(),
+            manifestFile.toPath(),
+            StandardCopyOption.REPLACE_EXISTING,
+            StandardCopyOption.ATOMIC_MOVE,
+        )
     }
 
     companion object {

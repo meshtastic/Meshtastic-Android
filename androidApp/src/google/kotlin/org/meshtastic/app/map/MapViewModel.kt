@@ -450,6 +450,10 @@ class MapViewModel(
     // Offline properties exposed as internal StateFlow for composable consumption
     internal val offlineRegionStore = OfflineRegionStore(File(application.filesDir, "offline_regions"))
 
+    // A single shared instance, not one per download call: OfflineRegionExtractor's mutex only serializes concurrent
+    // downloads against each other if they all go through the same instance.
+    private val offlineRegionExtractor = OfflineRegionExtractor(offlineRegionStore)
+
     private val _offlineRegions = MutableStateFlow(offlineRegionStore.list())
     val offlineRegions: StateFlow<List<OfflineRegion>> = _offlineRegions.asStateFlow()
 
@@ -474,7 +478,7 @@ class MapViewModel(
 
     fun downloadOfflineRegion(bounds: LatLngBounds, zoomRange: IntRange) {
         viewModelScope.launch {
-            OfflineRegionExtractor(offlineRegionStore).download(bounds, zoomRange).collect { state ->
+            offlineRegionExtractor.download(bounds, zoomRange).collect { state ->
                 _offlineDownloadState.value = state
                 if (state is OfflineDownloadState.Complete) _offlineRegions.value = offlineRegionStore.list()
             }

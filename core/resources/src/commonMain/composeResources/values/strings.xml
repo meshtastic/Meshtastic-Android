@@ -1078,6 +1078,7 @@
     <string name="map_offline_download_terrain">Download Terrain</string>
     <string name="map_offline_downloading_progress">Downloading… %1$d / %2$d tiles</string>
     <string name="map_offline_manager">Offline Manager</string>
+    <string name="map_offline_region_label">%1$s, %2$s  %3$s</string>
     <string name="map_offline_show_on_map">Show on map</string>
     <string name="map_offline_terrain_contours">Contours</string>
     <string name="map_offline_terrain_download_complete">Terrain download complete</string>

@@ -102,6 +102,29 @@ class OfflineRegionStoreTest {
         assertEquals(42L, regions.single().terrainByteSize)
     }
 
+    @Test
+    fun `writing the manifest leaves no temp file behind and the real manifest is immediately readable`() = runTest {
+        store.add(baseRegion(id = "abc"))
+
+        // Write-then-rename: the intermediate file must never survive a completed write.
+        assertFalse(File(baseDir, "manifest.json.tmp").exists())
+        assertTrue(File(baseDir, "manifest.json").exists())
+        assertEquals(1, store.list().size)
+    }
+
+    @Test
+    fun `a manifest write never leaves manifest json half-written`() = runTest {
+        // Simulates a process death mid-write: a stray temp file with a torn/partial write must never be mistaken
+        // for the real manifest, and must not stop a subsequent, complete write from succeeding.
+        File(baseDir, "manifest.json.tmp").writeText("""[{"id":"partial","southLat":""")
+        store.add(baseRegion(id = "abc"))
+
+        assertFalse(File(baseDir, "manifest.json.tmp").exists())
+        val regions = store.list()
+        assertEquals(1, regions.size)
+        assertEquals("abc", regions.single().id)
+    }
+
     private fun baseRegion(id: String, byteSize: Long = 0L, hasTerrain: Boolean = false, terrainByteSize: Long = 0L) =
         OfflineRegion(
             id = id,

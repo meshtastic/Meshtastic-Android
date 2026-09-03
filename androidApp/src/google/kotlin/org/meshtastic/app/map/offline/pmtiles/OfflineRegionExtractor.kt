@@ -21,9 +21,12 @@ import ch.poole.geo.pmtiles.HttpUrlConnectionChannel
 import ch.poole.geo.pmtiles.Reader
 import co.touchlab.kermit.Logger
 import com.google.android.gms.maps.model.LatLngBounds
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.meshtastic.core.common.util.ioDispatcher
 import java.io.IOException
 import java.util.zip.GZIPInputStream
@@ -68,60 +71,71 @@ enum class OfflineDownloadFailure {
  */
 internal class OfflineRegionExtractor(private val store: OfflineRegionStore) {
 
+    // Serializes downloads so two concurrent starts can't both pass the same totalBytes()/list() precheck and
+    // together blow past MAX_TOTAL_BYTES/MAX_REGIONS — every download must go through this one instance.
+    private val downloadMutex = Mutex()
+
     fun download(bounds: LatLngBounds, zoomRange: IntRange): Flow<OfflineDownloadState> = flow {
-        val tiles = OfflineRegionTileSet.tiles(bounds, zoomRange)
-        when {
-            tiles.size > MAX_TILES_PER_REGION -> {
-                emit(OfflineDownloadState.Failed(OfflineDownloadFailure.TILE_LIMIT_EXCEEDED))
-                return@flow
+        downloadMutex.withLock {
+            val tiles = OfflineRegionTileSet.tiles(bounds, zoomRange)
+            when {
+                tiles.size > MAX_TILES_PER_REGION -> {
+                    emit(OfflineDownloadState.Failed(OfflineDownloadFailure.TILE_LIMIT_EXCEEDED))
+                    return@withLock
+                }
+
+                store.list().size >= MAX_REGIONS -> {
+                    emit(OfflineDownloadState.Failed(OfflineDownloadFailure.REGION_LIMIT_EXCEEDED))
+                    return@withLock
+                }
+
+                store.totalBytes() >= MAX_TOTAL_BYTES -> {
+                    emit(OfflineDownloadState.Failed(OfflineDownloadFailure.STORAGE_LIMIT_EXCEEDED))
+                    return@withLock
+                }
             }
 
-            store.list().size >= MAX_REGIONS -> {
-                emit(OfflineDownloadState.Failed(OfflineDownloadFailure.REGION_LIMIT_EXCEEDED))
-                return@flow
+            val url = PmTilesDailyBuild.resolveLatestUrl()
+            if (url == null) {
+                emit(OfflineDownloadState.Failed(OfflineDownloadFailure.NO_BUILD_AVAILABLE))
+                return@withLock
             }
 
-            store.totalBytes() >= MAX_TOTAL_BYTES -> {
-                emit(OfflineDownloadState.Failed(OfflineDownloadFailure.STORAGE_LIMIT_EXCEEDED))
-                return@flow
+            val id = Uuid.random().toString()
+            val archiveFile = store.archiveFile(id)
+
+            try {
+                extractInto(archiveFile, url, tiles) { completed ->
+                    emit(OfflineDownloadState.InProgress(completed, tiles.size))
+                }
+            } catch (e: IOException) {
+                LOG.w(e) { "Offline region extraction failed" }
+                archiveFile.delete()
+                emit(OfflineDownloadState.Failed(OfflineDownloadFailure.IO_ERROR))
+                return@withLock
+            } catch (e: CancellationException) {
+                // Not an IOException, so it needs its own cleanup — a cancelled download must not leave its
+                // partial archive file behind, and cancellation must still propagate, never be swallowed.
+                archiveFile.delete()
+                throw e
             }
+
+            val region =
+                OfflineRegion(
+                    id = id,
+                    southLat = bounds.southwest.latitude,
+                    westLon = bounds.southwest.longitude,
+                    northLat = bounds.northeast.latitude,
+                    eastLon = bounds.northeast.longitude,
+                    minZoom = zoomRange.first,
+                    maxZoom = zoomRange.last,
+                    tileCount = tiles.size.toLong(),
+                    byteSize = archiveFile.length(),
+                    createdAtEpochSeconds = System.currentTimeMillis() / MILLIS_PER_SECOND,
+                )
+            store.add(region)
+            emit(OfflineDownloadState.Complete(region))
         }
-
-        val url = PmTilesDailyBuild.resolveLatestUrl()
-        if (url == null) {
-            emit(OfflineDownloadState.Failed(OfflineDownloadFailure.NO_BUILD_AVAILABLE))
-            return@flow
-        }
-
-        val id = Uuid.random().toString()
-        val archiveFile = store.archiveFile(id)
-
-        try {
-            extractInto(archiveFile, url, tiles) { completed ->
-                emit(OfflineDownloadState.InProgress(completed, tiles.size))
-            }
-        } catch (e: IOException) {
-            LOG.w(e) { "Offline region extraction failed" }
-            archiveFile.delete()
-            emit(OfflineDownloadState.Failed(OfflineDownloadFailure.IO_ERROR))
-            return@flow
-        }
-
-        val region =
-            OfflineRegion(
-                id = id,
-                southLat = bounds.southwest.latitude,
-                westLon = bounds.southwest.longitude,
-                northLat = bounds.northeast.latitude,
-                eastLon = bounds.northeast.longitude,
-                minZoom = zoomRange.first,
-                maxZoom = zoomRange.last,
-                tileCount = tiles.size.toLong(),
-                byteSize = archiveFile.length(),
-                createdAtEpochSeconds = System.currentTimeMillis() / MILLIS_PER_SECOND,
-            )
-        store.add(region)
-        emit(OfflineDownloadState.Complete(region))
     }
         .flowOn(ioDispatcher)
 

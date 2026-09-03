@@ -22,9 +22,10 @@ import java.io.File
 
 /**
  * A downloaded offline region, stored on disk as a standard `.mbtiles` archive (`tiles`/`metadata` tables, TMS row
- * numbering) holding gzip-compressed MVT tiles — the same container format [org.meshtastic.app.map.MBTilesProvider]
- * already reads for raster imports, just with `format=pbf` instead of a raster format. Any generic MBTiles tool can
- * open a region this writes; nothing here is a bespoke format.
+ * numbering) holding MVT tiles — the same container format [org.meshtastic.app.map.MBTilesProvider] already reads for
+ * raster imports, just with `format=pbf` instead of a raster format. Tiles are stored decompressed:
+ * [OfflineRegionExtractor] gunzips each one before [writeTile], trading more disk per tile for a simpler read path with
+ * no per-read inflate. Any generic MBTiles tool can still open a region this writes; nothing here is a bespoke format.
  */
 internal class OfflineVectorArchive private constructor(private val database: SQLiteDatabase) : AutoCloseable {
 

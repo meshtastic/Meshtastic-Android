@@ -114,4 +114,33 @@ class MvtDecoderTest {
 
         assertEquals(listOf(TileCoord(0, 0), TileCoord(4, 0), TileCoord(4, 4)), lines.single())
     }
+
+    @Test
+    fun `a truncated parameter stream drops the rest of the tile instead of spinning through count`() {
+        // LineTo(count=1) with no dx,dy pair following it — truncated immediately. A malformed/malicious tile can
+        // set count up to ~536M; the fix must detect this in O(1), not by exhausting `count` iterations.
+        val commands = listOf((2) or (1 shl 3))
+
+        val lines = MvtDecoder.decodeGeometry(VectorTile.GEOM_LINESTRING, commands)
+
+        assertEquals(emptyList(), lines)
+    }
+
+    @Test
+    fun `a truncated command near the end of the stream is not misread as a trailing command`() {
+        // MoveTo(0,0), LineTo(5,5) [both valid], then a truncated LineTo(count=1) header with no dx,dy pair behind
+        // it, followed by one leftover int that would decode as a valid ClosePath(count=1) header if the parser
+        // kept going after the truncation. The old repeat+return@repeat implementation only skipped the failing
+        // iteration, not the whole command stream, so the outer loop moved on and spuriously closed the ring — this
+        // pins that the ring comes back open (2 points, not 3) once truncation correctly abandons the whole stream.
+        val moveTo = listOf(9, 0, 0) // MoveTo(count=1) -> (0,0)
+        val lineTo = listOf(10, 10, 10) // LineTo(count=1) -> +(5,5) = (5,5)
+        val truncatedLineTo = 10 // LineTo(count=1) header with no dx,dy pair following
+        val leftoverClosePathHeader = (1 shl 3) or 7 // would decode as ClosePath(count=1) if read as a new header
+        val commands = moveTo + lineTo + truncatedLineTo + leftoverClosePathHeader
+
+        val rings = MvtDecoder.decodeGeometry(VectorTile.GEOM_POLYGON, commands)
+
+        assertEquals(listOf(TileCoord(0, 0), TileCoord(5, 5)), rings.single())
+    }
 }

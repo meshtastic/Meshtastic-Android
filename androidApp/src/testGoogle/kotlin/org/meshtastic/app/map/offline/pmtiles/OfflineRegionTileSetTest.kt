@@ -57,4 +57,34 @@ class OfflineRegionTileSetTest {
             OfflineRegionTileSet.tiles(box, 5..9).size,
         )
     }
+
+    @Test
+    fun `tiles wraps the antimeridian instead of returning zero tiles`() {
+        // Fiji-shaped bounds: west=170, east=-170. The northwest corner's tile-x ends up greater than the southeast
+        // corner's, which a plain IntRange(start > end) would silently enumerate as empty.
+        val bounds = LatLngBounds(LatLng(-20.0, 170.0), LatLng(-16.0, -170.0))
+
+        val tiles = OfflineRegionTileSet.tiles(bounds, 6..6)
+
+        assertTrue(tiles.isNotEmpty())
+        // The wrap point itself (x=0, the antimeridian) must be covered, not skipped.
+        assertTrue(tiles.any { it.x == 0 })
+        // Both the western and eastern edges of the wrapping box must be represented.
+        assertTrue(tiles.any { it.x == MAX_TILE_INDEX_AT_ZOOM_6 })
+    }
+
+    @Test
+    fun `estimateTileCount agrees with tiles' own size including across the antimeridian`() {
+        val wrapping = LatLngBounds(LatLng(-20.0, 170.0), LatLng(-16.0, -170.0))
+
+        assertEquals(
+            OfflineRegionTileSet.tiles(wrapping, 6..6).size.toLong(),
+            OfflineRegionTileSet.estimateTileCount(wrapping, 6..6),
+        )
+    }
+
+    private companion object {
+        /** `2^6 - 1`: the largest valid tile-column index at zoom 6. */
+        const val MAX_TILE_INDEX_AT_ZOOM_6 = 63
+    }
 }

@@ -39,6 +39,7 @@ import org.meshtastic.app.map.offline.pmtiles.OfflineDownloadFailure
 import org.meshtastic.app.map.offline.pmtiles.OfflineDownloadState
 import org.meshtastic.app.map.offline.pmtiles.OfflineRegion
 import org.meshtastic.app.map.offline.pmtiles.OfflineRegionExtractor
+import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.delete
 import org.meshtastic.core.resources.map_cache_tiles
@@ -51,6 +52,7 @@ import org.meshtastic.core.resources.map_offline_download_failed_tile_limit
 import org.meshtastic.core.resources.map_offline_download_terrain
 import org.meshtastic.core.resources.map_offline_downloading_progress
 import org.meshtastic.core.resources.map_offline_manager
+import org.meshtastic.core.resources.map_offline_region_label
 import org.meshtastic.core.resources.map_offline_show_on_map
 import org.meshtastic.core.resources.map_offline_terrain_contours
 import org.meshtastic.core.resources.map_offline_terrain_download_complete
@@ -350,11 +352,18 @@ private fun TerrainDownloadFailure.messageRes() = when (this) {
     TerrainDownloadFailure.IO_ERROR -> Res.string.map_offline_terrain_download_failed_io
 }
 
+@Composable
 private fun OfflineRegion.label(): String {
-    val lat = (southLat * COORD_SCALE).toInt() / COORD_SCALE
-    val lon = (westLon * COORD_SCALE).toInt() / COORD_SCALE
-    return "$lat, $lon  z$minZoom–$maxZoom"
+    val lat = NumberFormatter.format((southLat * COORD_SCALE).toInt() / COORD_SCALE, COORD_DECIMALS)
+    val lon = NumberFormatter.format((westLon * COORD_SCALE).toInt() / COORD_SCALE, COORD_DECIMALS)
+    return stringResource(
+        Res.string.map_offline_region_label,
+        lat,
+        lon,
+        stringResource(Res.string.map_zoom_levels, minZoom, maxZoom),
+    )
 }
 
 private const val REGION_ROW_TEXT_FRACTION = 0.8f
 private const val COORD_SCALE = 100.0
+private const val COORD_DECIMALS = 2

@@ -25,8 +25,8 @@ internal data class TileCoord(val x: Int, val y: Int)
  * For [org.meshtastic.app.map.offline.pmtiles.VectorTile.GEOM_POINT] the single returned ring is every point of a
  * Point/MultiPoint feature. For `GEOM_LINESTRING` each ring is one polyline. For `GEOM_POLYGON` each ring is one closed
  * ring (exterior or a hole; MVT gives no explicit hole flag — winding order is what distinguishes them, and this
- * decoder doesn't need to tell them apart since [com.google.maps.android.compose.Polygon] draws every ring it's given
- * as either the outer boundary or a hole in exactly that order).
+ * decoder doesn't need to tell them apart since [OfflineVectorOverlay] draws every ring it's given as its own
+ * independent [com.google.maps.android.compose.Polygon] — no hole grouping, see that file's doc comment).
  */
 internal object MvtDecoder {
 
@@ -81,7 +81,9 @@ internal object MvtDecoder {
     private fun collectDeltaSteps(commands: List<Int>): List<DeltaStep> {
         val steps = mutableListOf<DeltaStep>()
         var i = 0
-        while (i < commands.size) {
+        // Labeled so a truncated stream can abandon parsing entirely: `count` comes straight off the wire (up to
+        // ~536M), and `repeat(count) { return@repeat }` would only skip one iteration per truncated element.
+        outer@ while (i < commands.size) {
             val commandInteger = commands[i]
             i++
             val id = commandInteger and COMMAND_ID_MASK
@@ -93,12 +95,14 @@ internal object MvtDecoder {
                 continue
             }
 
-            repeat(count) {
-                if (i + 1 >= commands.size) return@repeat // Truncated stream from a malformed tile; drop the rest.
+            var remaining = count
+            while (remaining > 0) {
+                if (i + 1 >= commands.size) break@outer // Truncated stream from a malformed tile; drop the rest.
                 val dx = zigZagDecode(commands[i])
                 val dy = zigZagDecode(commands[i + 1])
                 i += 2
                 steps += DeltaStep(id, dx, dy)
+                remaining--
             }
         }
         return steps
