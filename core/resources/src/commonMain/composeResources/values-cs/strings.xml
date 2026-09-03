@@ -974,6 +974,7 @@
     <string name="mesh_beacon_target">Cíl: %1$d</string>
     <string name="mesh_beacon_target_add">Přidat cíl</string>
     <string name="mesh_beacon_target_channel_index">Kanál</string>
+    <string name="mesh_beacon_target_default">Výchozí</string>
     <string name="mesh_beacon_targets">Cíle vysílání</string>
     <string name="mesh_map_location">Poloha v mesh mapě</string>
     <string name="mesh_map_location_description">Zobrazí modrou tečku polohy vašeho telefonu v mesh mapě.</string>

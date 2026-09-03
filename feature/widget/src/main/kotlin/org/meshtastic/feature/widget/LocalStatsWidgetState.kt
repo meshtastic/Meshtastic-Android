@@ -31,6 +31,7 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.noiseFloorOrNull
 import org.meshtastic.core.model.util.onlineTimeThreshold
 import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.NodeRepository
@@ -143,7 +144,7 @@ class LocalStatsWidgetStateProvider(nodeRepository: NodeRepository, connectionSt
             numRxDupe = stats.num_rx_dupe,
             numTxRelay = stats.num_tx_relay,
             numTxRelayCanceled = stats.num_tx_relay_canceled,
-            noiseFloor = stats.noise_floor,
+            noiseFloor = stats.noiseFloorOrNull ?: 0,
             numPacketsRxBad = stats.num_packets_rx_bad,
             numTxDropped = stats.num_tx_dropped,
             heapFreeBytes = stats.heap_free_bytes,

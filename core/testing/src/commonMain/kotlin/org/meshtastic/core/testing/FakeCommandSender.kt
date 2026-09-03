@@ -78,6 +78,10 @@ class FakeCommandSender :
     var lastDisable: Boolean = false
         private set
 
+    var lockdownPassphraseDispatchAccepted: Boolean = true
+    var lockNowDispatchAccepted: Boolean = true
+    var onLockdownPassphraseDispatchAttempt: (() -> Unit)? = null
+
     var lockNowCalled: Boolean = false
         private set
 
@@ -97,6 +101,9 @@ class FakeCommandSender :
             lastHours = 0
             lastMaxSessionSeconds = 0
             lastDisable = false
+            lockdownPassphraseDispatchAccepted = true
+            lockNowDispatchAccepted = true
+            onLockdownPassphraseDispatchAttempt = null
             lockNowCalled = false
             awaitedAdminResult = AwaitedSendResult(AwaitedSendStatus.ACCEPTED, departureEpochAtDispatch = 0)
             sendDataFailure = null
@@ -208,17 +215,20 @@ class FakeCommandSender :
         hours: Int,
         maxSessionSeconds: Int,
         disable: Boolean,
-    ) {
+    ): Boolean {
         failCommandIfConfigured()
         lastPassphrase = passphrase
         lastBoots = boots
         lastHours = hours
         lastMaxSessionSeconds = maxSessionSeconds
         lastDisable = disable
+        onLockdownPassphraseDispatchAttempt?.invoke()
+        return lockdownPassphraseDispatchAccepted
     }
 
-    override fun sendLockNow() {
+    override fun sendLockNow(): Boolean {
         failCommandIfConfigured()
         lockNowCalled = true
+        return lockNowDispatchAccepted
     }
 }

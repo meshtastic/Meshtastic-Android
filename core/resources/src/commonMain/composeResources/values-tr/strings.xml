@@ -334,6 +334,7 @@
     <string name="mesh_beacon_preset_none">Yok</string>
     <string name="mesh_beacon_region_label">Bölge</string>
     <string name="mesh_beacon_target_channel_index">Kanal</string>
+    <string name="mesh_beacon_target_default">Varsayılan</string>
     <string name="mesh_map_location">Mesh Harita Konumu</string>
     <string name="mesh_map_location_description">Telefonunuz için mesh haritasında mavi konum noktasını etkinleştirir.</string>
     <!-- MESHTASTIC -->

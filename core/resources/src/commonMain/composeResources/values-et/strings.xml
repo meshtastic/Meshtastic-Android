@@ -1094,6 +1094,7 @@
     <string name="mesh_beacon_target">Sihtmärk %1$d</string>
     <string name="mesh_beacon_target_add">Lisa sihtmärk</string>
     <string name="mesh_beacon_target_channel_index">Kanal</string>
+    <string name="mesh_beacon_target_default">Vaikimisi</string>
     <string name="mesh_beacon_target_remove">Eemalda sihtmärk</string>
     <string name="mesh_beacon_targets">Levita sihtmärke</string>
     <string name="mesh_map_location">Meshtastic kaardi asukoht</string>

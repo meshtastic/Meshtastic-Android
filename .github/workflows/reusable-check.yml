@@ -552,6 +552,12 @@ jobs:
         # survives a pin-back below 9.7 without editing this line.
         run: ./gradlew androidApp:assembleFdroidDebug androidApp:assembleGoogleDebug -Pci=true --parallel --configuration-cache -Dorg.gradle.isolated-projects=false --continue
 
+      # A dependency published for only some of our ABIs builds and installs cleanly and then
+      # crashes with UnsatisfiedLinkError on the others (#7001). Compare the splits here, where
+      # they are already built for every PR.
+      - name: Verify native library ABI parity
+        run: ./scripts/verify-abi-parity.sh
+
       - name: Upload debug artifact
         if: ${{ inputs.upload_artifacts }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7

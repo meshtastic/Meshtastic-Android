@@ -61,6 +61,7 @@ import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.FirmwareUpdateDestination
 import org.meshtastic.core.model.FirmwareUpdateNotice
 import org.meshtastic.core.model.InterfaceId
+import org.meshtastic.core.model.service.LockdownState
 import org.meshtastic.core.navigation.FirmwareRoute
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
@@ -148,6 +149,67 @@ import org.meshtastic.feature.connections.ui.components.TransportSelector
  */
 private val CardMinHeight = 100.dp
 
+/** Whether the connected card's config warning cards (region, transmit) may render for this connection. */
+internal fun canShowConfigWarnings(
+    connectedWithNode: Boolean,
+    activeNodeInfoReady: Boolean,
+    lockdownState: LockdownState,
+    isManaged: Boolean,
+    isPhysicalDevice: Boolean,
+): Boolean =
+    connectedWithNode && activeNodeInfoReady && lockdownState.allowsConfigWrites && !isManaged && isPhysicalDevice
+
+/** Applies connection policy and renders the actionable configuration-health cards it admits. */
+@Composable
+internal fun ConfigurationWarningCards(
+    connectedWithNode: Boolean,
+    activeNodeInfoReady: Boolean,
+    lockdownState: LockdownState,
+    isManaged: Boolean,
+    isPhysicalDevice: Boolean,
+    regionUnset: Boolean,
+    txDisabled: Boolean,
+    onConfigNavigate: (Route) -> Unit,
+) {
+    val showWarnings =
+        canShowConfigWarnings(
+            connectedWithNode = connectedWithNode,
+            activeNodeInfoReady = activeNodeInfoReady,
+            lockdownState = lockdownState,
+            isManaged = isManaged,
+            isPhysicalDevice = isPhysicalDevice,
+        )
+
+    Column {
+        if (showWarnings && regionUnset) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Card(modifier = Modifier.fillMaxWidth()) {
+                ListItem(
+                    leadingIcon = MeshtasticIcons.Language,
+                    text = stringResource(Res.string.set_your_region),
+                    // Navigate straight to the LoRa screen: it re-reads the route on entry and renders from the
+                    // connect-time snapshot meanwhile, so pre-fetching behind a progress dialog here bought nothing and
+                    // could strand the user on an empty dialog when the read completed before the dialog observed it.
+                    onClick = { onConfigNavigate(SettingsRoute.LoRa) },
+                )
+            }
+        }
+
+        // An unset region already disables transmit and has its own card, so do not blame one root cause twice.
+        if (showWarnings && txDisabled && !regionUnset) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Card(modifier = Modifier.fillMaxWidth()) {
+                ListItem(
+                    leadingIcon = MeshtasticIcons.CellTower,
+                    text = stringResource(Res.string.transmit_disabled),
+                    supportingText = stringResource(Res.string.transmit_disabled_summary),
+                    onClick = { onConfigNavigate(SettingsRoute.LoRa) },
+                )
+            }
+        }
+    }
+}
+
 /** Composable screen for managing device connections (BLE, TCP, USB). It displays connection status. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Suppress("CyclomaticComplexMethod", "LongMethod", "MagicNumber", "ModifierMissing", "ComposableParamOrder")
@@ -166,7 +228,9 @@ fun ConnectionsScreen(
     val firmwareUpdateNotice by connectionsViewModel.firmwareUpdateNotice.collectAsStateWithLifecycle()
     val regionUnset by connectionsViewModel.regionUnset.collectAsStateWithLifecycle()
     val txDisabled by connectionsViewModel.txDisabled.collectAsStateWithLifecycle()
-    val sessionAuthorized by connectionsViewModel.sessionAuthorized.collectAsStateWithLifecycle()
+    val activeNodeInfoReady by connectionsViewModel.activeNodeInfoReady.collectAsStateWithLifecycle()
+    val lockdownState by connectionsViewModel.lockdownState.collectAsStateWithLifecycle()
+    val localConfig by connectionsViewModel.localConfig.collectAsStateWithLifecycle()
 
     val selectedDevice by scanModel.selectedNotNullFlow.collectAsStateWithLifecycle()
     val persistedDeviceName by scanModel.persistedDeviceName.collectAsStateWithLifecycle()
@@ -504,36 +568,27 @@ fun ConnectionsScreen(
                         val isPhysicalDevice =
                             selectedDevice != InterfaceId.MOCK.id.toString() &&
                                 selectedDevice != InterfaceId.REPLAY.id.toString()
-                        val canShowConfigWarnings =
-                            uiState == ConnectionUiState.CONNECTED_WITH_NODE && sessionAuthorized && isPhysicalDevice
-                        if (canShowConfigWarnings && regionUnset) {
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Card(modifier = Modifier.fillMaxWidth()) {
-                                ListItem(
-                                    leadingIcon = MeshtasticIcons.Language,
-                                    text = stringResource(Res.string.set_your_region),
-                                    // Navigate straight to the LoRa screen: it re-reads the route on entry and
-                                    // renders from the connect-time snapshot meanwhile, so pre-fetching behind a
-                                    // progress dialog here bought nothing and could strand the user on an empty
-                                    // dialog when the read completed before the dialog observed it.
-                                    onClick = { onConfigNavigate(SettingsRoute.LoRa) },
-                                )
-                            }
-                        }
-
-                        // Transmit-disabled notice. Suppressed while the region is unset: that already disables
-                        // transmit and has its own card above, so showing both would blame one root cause twice.
-                        if (canShowConfigWarnings && txDisabled && !regionUnset) {
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Card(modifier = Modifier.fillMaxWidth()) {
-                                ListItem(
-                                    leadingIcon = MeshtasticIcons.CellTower,
-                                    text = stringResource(Res.string.transmit_disabled),
-                                    supportingText = stringResource(Res.string.transmit_disabled_summary),
-                                    onClick = { onConfigNavigate(SettingsRoute.LoRa) },
-                                )
-                            }
-                        }
+                        val isManaged = localConfig.security?.is_managed == true
+                        // Gate on LockdownState rather than sessionAuthorized. Pre-2.8 firmware and newer builds that
+                        // do not include runtime lockdown support never enter that authentication flow, while an
+                        // explicit DISABLED state also leaves sessionAuthorized false. None, Disabled, and Unlocked do
+                        // not withhold config writes on lockdown grounds; AwaitingResponse stays non-actionable until
+                        // firmware reports the result. Managed mode is a separate client policy: match the existing
+                        // settings behavior and suppress warnings only when SecurityConfig explicitly marks the device
+                        // managed, so an incomplete first-run config stream does not hide the region warning.
+                        // Node readiness binds the warnings to the active transport session. Stage 1 clears cached
+                        // config before accepting the fresh stream, while a cached node can survive a database switch;
+                        // do not attribute post-handshake config state to a node the new session has not identified.
+                        ConfigurationWarningCards(
+                            connectedWithNode = uiState == ConnectionUiState.CONNECTED_WITH_NODE,
+                            activeNodeInfoReady = activeNodeInfoReady,
+                            lockdownState = lockdownState,
+                            isManaged = isManaged,
+                            isPhysicalDevice = isPhysicalDevice,
+                            regionUnset = regionUnset,
+                            txDisabled = txDisabled,
+                            onConfigNavigate = onConfigNavigate,
+                        )
 
                         // Transport selector sits between the connection card and device list; it controls only the
                         // visible discovery pane, not the globally selected/connected device shown above.

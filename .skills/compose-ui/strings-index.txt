@@ -1024,6 +1024,8 @@ map_download_region
 map_download_status_complete
 map_download_status_downloading
 map_download_status_paused
+map_engine_unavailable
+map_engine_unavailable_detail
 map_filter
 map_filter_all_roles
 map_filter_display_title
@@ -1099,6 +1101,7 @@ mesh_beacon_region_required
 mesh_beacon_target
 mesh_beacon_target_add
 mesh_beacon_target_channel_index
+mesh_beacon_target_default
 mesh_beacon_target_remove
 mesh_beacon_targets
 mesh_map_location

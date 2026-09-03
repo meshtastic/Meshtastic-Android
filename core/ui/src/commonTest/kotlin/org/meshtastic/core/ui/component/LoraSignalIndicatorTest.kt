@@ -23,7 +23,8 @@ import kotlin.test.assertEquals
 
 /**
  * Tests for preset-relative signal-quality rating (issue #5446). Quality is judged from SNR relative to the modem
- * preset's demodulation floor; RSSI is intentionally not part of the rating.
+ * preset's demodulation floor. RSSI only joins the rating when a noise floor is also known (design#15, #6826) — see the
+ * "noise-floor blend" tests below; with either missing, RSSI stays display-only.
  */
 class LoraSignalIndicatorTest {
 
@@ -94,9 +95,48 @@ class LoraSignalIndicatorTest {
     }
 
     @Test
-    fun `RSSI does not influence the rating`() {
-        // Identical SNR + preset always yields the same verdict regardless of any RSSI (RSSI is display-only now).
-        val good = determineSignalQuality(snr = -5f, modemPreset = ModemPreset.LONG_FAST)
-        assertEquals(Quality.GOOD, good)
+    fun `RSSI alone does not influence the rating`() {
+        // Without a noise floor, identical SNR + preset always yields the same verdict regardless of any RSSI.
+        val withoutNoiseFloor = determineSignalQuality(snr = -5f, modemPreset = ModemPreset.LONG_FAST, rssi = -140)
+        assertEquals(Quality.GOOD, withoutNoiseFloor)
+    }
+
+    @Test
+    fun `noise floor alone does not influence the rating`() {
+        // Without an RSSI reading, a noise floor alone can't form a margin either.
+        val withoutRssi = determineSignalQuality(snr = -5f, modemPreset = ModemPreset.LONG_FAST, noiseFloor = -70)
+        assertEquals(Quality.GOOD, withoutRssi)
+    }
+
+    @Test
+    fun `noise-floor blend picks the worse tier when RSSI margin is worse than SNR margin`() {
+        val preset = ModemPreset.LONG_FAST // limit -17.5
+        // SNR -10 -> margin +7.5 -> GOOD alone. rssi(-90) - noiseFloor(-70) = -20; margin -2.5 -> FAIR, the worse tier.
+        val quality = determineSignalQuality(snr = -10f, modemPreset = preset, rssi = -90, noiseFloor = -70)
+        assertEquals(Quality.FAIR, quality)
+    }
+
+    @Test
+    fun `same SNR rates differently depending on the RSSI margin alone`() {
+        // Differential proof the blend is actually wired in, not just accepting-and-ignoring rssi/noiseFloor: hold
+        // SNR fixed at a FAIR-alone reading (-22, margin -4.5 on LongFast's -17.5 limit) and vary only rssi/noiseFloor.
+        val preset = ModemPreset.LONG_FAST
+        val snr = -22f
+
+        // rssi(-94) - noiseFloor(-70) = -24; margin -6.5 -> BAD, worse than SNR's own FAIR -> downgrades the result.
+        val withBadRssiMargin = determineSignalQuality(snr = snr, modemPreset = preset, rssi = -94, noiseFloor = -70)
+        assertEquals(Quality.BAD, withBadRssiMargin)
+
+        // rssi(-60) - noiseFloor(-70) = 10; margin +27.5 -> GOOD, better than SNR's FAIR -> SNR stays the worse tier.
+        val withGoodRssiMargin = determineSignalQuality(snr = snr, modemPreset = preset, rssi = -60, noiseFloor = -70)
+        assertEquals(Quality.FAIR, withGoodRssiMargin)
+    }
+
+    @Test
+    fun `noise-floor blend can downgrade a good SNR reading all the way to NONE`() {
+        val preset = ModemPreset.LONG_FAST
+        // SNR -10 -> margin +7.5 -> GOOD alone. rssi(-115) - noiseFloor(-70) = -45; margin -27.5 -> NONE.
+        val quality = determineSignalQuality(snr = -10f, modemPreset = preset, rssi = -115, noiseFloor = -70)
+        assertEquals(Quality.NONE, quality)
     }
 }

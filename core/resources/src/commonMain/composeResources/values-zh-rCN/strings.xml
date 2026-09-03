@@ -1018,6 +1018,7 @@
     <string name="mesh_beacon_target">目标节点 %1$d</string>
     <string name="mesh_beacon_target_add">添加目标</string>
     <string name="mesh_beacon_target_channel_index">频道</string>
+    <string name="mesh_beacon_target_default">默认</string>
     <string name="mesh_beacon_target_remove">取消目标</string>
     <string name="mesh_beacon_targets">广播目标</string>
     <string name="mesh_map_location">网格地图位置</string>

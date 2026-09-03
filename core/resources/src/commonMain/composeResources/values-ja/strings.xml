@@ -1003,6 +1003,7 @@
     <string name="mesh_beacon_target">ターゲット %1$d</string>
     <string name="mesh_beacon_target_add">ターゲットを追加</string>
     <string name="mesh_beacon_target_channel_index">チャンネル</string>
+    <string name="mesh_beacon_target_default">デフォルト</string>
     <string name="mesh_beacon_target_remove">ターゲットを削除</string>
     <string name="mesh_beacon_targets">発信ターゲット</string>
     <string name="mesh_map_location">メッシュマップの位置情報</string>

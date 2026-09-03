@@ -14,13 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.node.metrics
+package org.meshtastic.core.model
 
-import androidx.compose.ui.graphics.Canvas
-import androidx.compose.ui.graphics.skiaCanvas
+import org.meshtastic.proto.LocalStats
 
-internal actual fun Canvas.platformSaveCount(): Int = skiaCanvas.saveCount
-
-internal actual fun Canvas.platformRestoreToCount(count: Int) {
-    skiaCanvas.restoreToCount(count)
-}
+/**
+ * Last measured noise floor in dBm, or null when this reading has never been reported ([LocalStats.noise_floor] still
+ * holds firmware's `0` "no reading yet" sentinel). Every read of `noise_floor` should go through this so every consumer
+ * treats absence the same way, rather than each site repeating its own `!= 0` / `?: 0` guard.
+ */
+val LocalStats.noiseFloorOrNull: Int?
+    get() = noise_floor.takeIf { it != 0 }

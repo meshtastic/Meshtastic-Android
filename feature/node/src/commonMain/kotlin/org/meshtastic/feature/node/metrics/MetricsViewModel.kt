@@ -49,6 +49,7 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.core.model.evaluateTracerouteMapAvailability
+import org.meshtastic.core.model.noiseFloorOrNull
 import org.meshtastic.core.model.util.GeoConstants
 import org.meshtastic.core.model.util.TELEMETRY_CHANNEL_COUNT
 import org.meshtastic.core.model.util.UnitConversions
@@ -424,7 +425,7 @@ open class MetricsViewModel(
             epochSeconds = { it.time.toLong() },
         ) { telemetry ->
             val stats = telemetry.local_stats
-            "\"${stats?.noise_floor ?: ""}\",\"${stats?.uptime_seconds ?: ""}\"," +
+            "\"${stats?.noiseFloorOrNull ?: ""}\",\"${stats?.uptime_seconds ?: ""}\"," +
                 "\"${stats?.channel_utilization ?: ""}\",\"${stats?.air_util_tx ?: ""}\"," +
                 "\"${stats?.num_packets_tx ?: ""}\",\"${stats?.num_packets_rx ?: ""}\"," +
                 "\"${stats?.num_packets_rx_bad ?: ""}\",\"${stats?.num_rx_dupe ?: ""}\"," +

@@ -916,6 +916,7 @@
     <string name="mesh_beacon_target">Ziel %1$d</string>
     <string name="mesh_beacon_target_add">Ziel hinzufügen</string>
     <string name="mesh_beacon_target_channel_index">Kanal</string>
+    <string name="mesh_beacon_target_default">Standardwert</string>
     <string name="mesh_beacon_target_remove">Ziel entfernen</string>
     <string name="mesh_map_location">Netzwerk Kartenstandort</string>
     <string name="mesh_map_location_description">Aktiviert den blauen Punkt für Ihr Telefon in der Netzwerkkarte.</string>

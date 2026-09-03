@@ -301,6 +301,8 @@ jobs:
       # scanner would have skipped its own test.
       - name: Self-test verify-rb Step 6
         run: ./scripts/verify-rb-selftest.sh
+      - name: Self-test verify-abi-parity
+        run: ./scripts/verify-abi-parity-selftest.sh
       - name: Validate store listing metadata lengths
         run: python3 scripts/check-metadata-length.py
       # Compose Multiplatform does not strip Android-style \" / \' escapes, so a

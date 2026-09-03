@@ -29,7 +29,8 @@ import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
-import io.ktor.client.request.url
+import io.ktor.client.request.header
+import io.ktor.http.HttpHeaders
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import org.koin.dsl.module
@@ -241,8 +242,15 @@ private fun desktopPlatformStubsModule() = module {
     // Ktor HttpClient for JVM/Desktop (equivalent of CoreNetworkAndroidModule on Android)
     single<HttpClient> {
         HttpClient(Java) {
+            engine {
+                protocolVersion = java.net.http.HttpClient.Version.HTTP_2
+                config { followRedirects(java.net.http.HttpClient.Redirect.NORMAL) }
+            }
             install(ContentNegotiation) { json(get<Json>()) }
-            install(DefaultRequest) { url(HttpClientDefaults.API_BASE_URL) }
+            install(DefaultRequest) {
+                url(HttpClientDefaults.API_BASE_URL)
+                header(HttpHeaders.UserAgent, "Meshtastic-Desktop/${DesktopBuildConfig.VERSION_NAME}")
+            }
             install(HttpTimeout) {
                 requestTimeoutMillis = HttpClientDefaults.REQUEST_TIMEOUT_MS
                 connectTimeoutMillis = HttpClientDefaults.TIMEOUT_MS

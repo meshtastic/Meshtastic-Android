@@ -16,9 +16,25 @@
  */
 package org.meshtastic.core.model.service
 
-/** Represents the lockdown authentication state for a firmware-locked device. */
+/**
+ * Lockdown session state for the connected device.
+ *
+ * [None] means the current connection has no concrete runtime lockdown state. This is expected for pre-2.8 firmware,
+ * which does not implement the runtime lockdown handshake, and for newer builds that do not include runtime lockdown
+ * support. [allowsConfigWrites] summarizes only whether lockdown state withholds normal admin configuration writes;
+ * managed-device and other client policy remain separate.
+ */
 sealed class LockdownState {
     data object None : LockdownState()
+
+    /**
+     * A manual or automatic passphrase command was admitted to the active transport and is waiting for the firmware's
+     * next lockdown status.
+     *
+     * Write eligibility remains unresolved until that response arrives. A rejected dispatch leaves the previous
+     * retryable state in place instead of entering this state.
+     */
+    data object AwaitingResponse : LockdownState()
 
     /**
      * Device is locked or this client is not yet authorized.
@@ -32,7 +48,7 @@ sealed class LockdownState {
 
     data object Unlocked : LockdownState()
 
-    /** Device is lockdown-capable but lockdown is currently OFF. The toggle shows OFF. */
+    /** Lockdown-capable firmware explicitly reported that lockdown is disabled. */
     data object Disabled : LockdownState()
 
     /** Lock Now ACK received — client should disconnect immediately, no dialog. */
@@ -47,6 +63,31 @@ sealed class LockdownState {
             require(backoffSeconds > 0) { "backoffSeconds must be positive" }
         }
     }
+
+    /**
+     * True when the current lockdown state does not withhold normal configuration writes.
+     *
+     * No received lockdown status ([None]), explicitly disabled lockdown ([Disabled]), and an authenticated lockdown
+     * session ([Unlocked]) do not withhold writes on lockdown grounds. [AwaitingResponse] keeps write eligibility
+     * unresolved until firmware reports the next state; locked, provisioning, and authentication-failure states
+     * withhold admin access. Managed-device policy is intentionally evaluated separately by the presentation.
+     */
+    val allowsConfigWrites: Boolean
+        get() =
+            when (this) {
+                is None,
+                is Disabled,
+                is Unlocked,
+                -> true
+
+                is AwaitingResponse,
+                is Locked,
+                is NeedsProvision,
+                is LockNowAcknowledged,
+                is UnlockFailed,
+                is UnlockBackoff,
+                -> false
+            }
 }
 
 /**

@@ -1060,6 +1060,8 @@
     <string name="map_download_status_complete">Complete</string>
     <string name="map_download_status_downloading">Downloading</string>
     <string name="map_download_status_paused">Paused</string>
+    <string name="map_engine_unavailable">Map unavailable on this device</string>
+    <string name="map_engine_unavailable_detail">This build of the app does not include the map renderer for your phone's processor. Everything else works normally.</string>
     <string name="map_filter">Map Filter\n</string>
     <string name="map_filter_all_roles">All</string>
     <string name="map_filter_display_title">Display</string>
@@ -1135,6 +1137,7 @@
     <string name="mesh_beacon_target">Target %1$d</string>
     <string name="mesh_beacon_target_add">Add target</string>
     <string name="mesh_beacon_target_channel_index">Channel</string>
+    <string name="mesh_beacon_target_default">Default</string>
     <string name="mesh_beacon_target_remove">Remove target</string>
     <string name="mesh_beacon_targets">Broadcast targets</string>
     <string name="mesh_map_location">Mesh Map Location</string>

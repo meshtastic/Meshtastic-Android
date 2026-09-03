@@ -50,6 +50,7 @@ import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
+import org.meshtastic.core.model.noiseFloorOrNull
 import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.repository.MeshNotificationManager
@@ -1164,7 +1165,8 @@ class MeshNotificationManagerImpl(
 
         // Diagnostic Fields
         val diagnosticParts = mutableListOf<String>()
-        if (noise_floor != 0) diagnosticParts.add(getStringSuspend(Res.string.local_stats_noise, noise_floor))
+        val noiseFloor = noiseFloorOrNull
+        if (noiseFloor != null) diagnosticParts.add(getStringSuspend(Res.string.local_stats_noise, noiseFloor))
         if (num_packets_rx_bad > 0) {
             diagnosticParts.add(getStringSuspend(Res.string.local_stats_bad, num_packets_rx_bad))
         }
