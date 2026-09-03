@@ -155,23 +155,6 @@ fun MeshtasticNavDisplay(
                     if (backStack.size > 1) {
                         backStack.removeLastOrNull()
                     }
-
-                    internal class ScreenViewTracker(private val analytics: PlatformAnalytics) {
-                        private var activeName: String? = null
-
-                        fun onCurrentKeyChanged(currentKey: NavKey?) {
-                            val name = currentKey?.rumViewName()
-                            if (name == activeName) return
-                            activeName?.let { analytics.stopScreenView(key = it) }
-                            activeName = name
-                            if (name != null) analytics.startScreenView(key = name, name = name)
-                        }
-
-                        fun dispose() {
-                            activeName?.let { analytics.stopScreenView(key = it) }
-                            activeName = null
-                        }
-                    }
                 },
             // NavDisplay falls back to SinglePaneSceneStrategy automatically when none of these compute a Scene.
             sceneStrategies = listOf(DialogSceneStrategy(), listDetailSceneStrategy, supportingPaneSceneStrategy),
@@ -181,6 +164,23 @@ fun MeshtasticNavDisplay(
             predictivePopTransitionSpec = meshtasticPredictivePopTransitionSpec(),
             modifier = modifier,
         )
+    }
+}
+
+private class ScreenViewTracker(private val analytics: PlatformAnalytics) {
+    private var activeName: String? = null
+
+    fun onCurrentKeyChanged(currentKey: NavKey?) {
+        val name = currentKey?.rumViewName()
+        if (name == activeName) return
+        activeName?.let { analytics.stopScreenView(key = it) }
+        activeName = name
+        if (name != null) analytics.startScreenView(key = name, name = name)
+    }
+
+    fun dispose() {
+        activeName?.let { analytics.stopScreenView(key = it) }
+        activeName = null
     }
 }
 
