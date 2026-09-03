@@ -51,6 +51,7 @@ import org.meshtastic.core.common.util.LocaleUnitsProvider
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
+import org.meshtastic.core.network.repository.NetworkRepository
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.MapTileProviderPrefs
 import org.meshtastic.core.repository.NodeRepository
@@ -65,6 +66,7 @@ import org.meshtastic.feature.map.layers.LayerOpacityStore
 import org.meshtastic.feature.map.layers.MapLayerItem
 import org.meshtastic.feature.map.layers.MapLayersManager
 import org.meshtastic.feature.map.layers.PickedMapFile
+import org.meshtastic.feature.map.shouldAutoUseOfflineBasemap
 import org.meshtastic.feature.map.tiles.CustomTileProviderConfig
 import org.meshtastic.feature.map.tiles.CustomTileProviderRepository
 import org.meshtastic.feature.map.tiles.CustomTileProviderSaveResult
@@ -109,6 +111,7 @@ class MapViewModel(
     notificationPrefs: NotificationPrefs,
     savedStateHandle: SavedStateHandle,
     localeUnitsProvider: LocaleUnitsProvider,
+    networkRepository: NetworkRepository,
 ) : BaseMapViewModel(
     mapPrefs,
     nodeRepository,
@@ -117,6 +120,7 @@ class MapViewModel(
     radioConfigRepository,
     notificationPrefs,
     localeUnitsProvider,
+    networkRepository,
 ) {
 
     private val _selectedWaypointId = MutableStateFlow(savedStateHandle.get<Int>("waypointId"))
@@ -321,6 +325,7 @@ class MapViewModel(
     }
 
     fun selectCustomTileProvider(config: CustomTileProviderConfig?) {
+        offlineAutoSwitch = null // The user is choosing a basemap directly; stop tracking an auto-switch to restore.
         if (config != null) {
             if (!config.isLocal && !isValidTileUrlTemplate(config.urlTemplate)) {
                 Logger.withTag("MapViewModel").w("Attempted to select an invalid custom tile URL template")
@@ -345,6 +350,7 @@ class MapViewModel(
 
     /** Selects one of the raster basemaps we ship. They draw exactly as a user's own source does. */
     fun selectCatalogueBasemap(basemapId: String) {
+        offlineAutoSwitch = null // The user is choosing a basemap directly; stop tracking an auto-switch to restore.
         applyRasterBasemapSelection(basemapId)
     }
 
@@ -363,6 +369,7 @@ class MapViewModel(
     }
 
     fun setSelectedGoogleMapType(mapType: MapType) {
+        offlineAutoSwitch = null // The user is choosing a basemap directly; stop tracking an auto-switch to restore.
         clearCurrentTileProvider()
         _selectedGoogleMapType.value = mapType
         _selectedRasterBasemapId.value = null
@@ -423,6 +430,67 @@ class MapViewModel(
     private fun isValidTileUrlTemplate(urlTemplate: String): Boolean =
         urlTemplate.isValidTileUrlTemplate(requireHttps = false)
 
+    /** What to restore once the network returns from an auto-switch; null when nothing has been auto-switched. */
+    private data class OfflineAutoSwitchState(val rasterBasemapId: String?, val googleMapType: MapType)
+
+    private var offlineAutoSwitch: OfflineAutoSwitchState? = null
+
+    /**
+     * Google's own tiles have no offline continuity of their own — no downloaded packs, no ambient cache the app
+     * controls — so unlike the MapLibre flavor (whose engine keeps serving downloaded/cached tiles for the current
+     * style without any app-level help) this flavor has to switch basemaps itself to keep the map usable offline.
+     *
+     * Switches to the user's first local MBTiles source the instant the network drops, and switches back to whatever
+     * was selected before once it returns — but only if nothing else changed the selection in between; see the
+     * `offlineAutoSwitch = null` lines in [selectCustomTileProvider], [selectCatalogueBasemap] and
+     * [setSelectedGoogleMapType].
+     */
+    private fun handleConnectivityChange(networkAvailable: Boolean, providers: List<CustomTileProviderConfig>) {
+        if (networkAvailable) {
+            restoreFromOfflineAutoSwitch()
+        } else {
+            autoSwitchToOfflineBasemap(providers)
+        }
+    }
+
+    private fun autoSwitchToOfflineBasemap(providers: List<CustomTileProviderConfig>) {
+        val alreadyLocal = providers.findSelectedCustomTileProvider(_selectedRasterBasemapId.value)?.isLocal == true
+        val fallback = providers.firstOrNull { it.isLocal }
+        val shouldSwitch =
+            offlineAutoSwitch == null &&
+                !alreadyLocal &&
+                shouldAutoUseOfflineBasemap(networkAvailable = false, hasOfflineBasemap = fallback != null)
+
+        if (shouldSwitch && fallback != null) {
+            offlineAutoSwitch = OfflineAutoSwitchState(_selectedRasterBasemapId.value, _selectedGoogleMapType.value)
+            applyRasterBasemapSelection(fallback.id)
+        }
+    }
+
+    private fun restoreFromOfflineAutoSwitch() {
+        val saved = offlineAutoSwitch ?: return
+        offlineAutoSwitch = null
+        // The saved id might no longer resolve — e.g. the user deleted that custom tile provider while offline —
+        // in which case applying it anyway would leave selectedRasterBasemap null with Google's own basemap also
+        // off (MapType.NONE), so the map would show nothing at all. Fall back to the native basemap instead.
+        val savedIdStillResolves =
+            saved.rasterBasemapId != null &&
+                (
+                    MapTileCatalogue.basemaps.any { it.id == saved.rasterBasemapId } ||
+                        customTileProviderConfigs.value.findSelectedCustomTileProvider(saved.rasterBasemapId) != null
+                    )
+        if (savedIdStillResolves) {
+            applyRasterBasemapSelection(checkNotNull(saved.rasterBasemapId))
+        } else {
+            clearCurrentTileProvider()
+            _selectedGoogleMapType.value = saved.googleMapType
+            _selectedRasterBasemapId.value = null
+            viewModelScope.launch { mapTileProviderPrefs.setSelectedCustomTileProviderId(null) }
+            googleMapsPrefs.setSelectedGoogleMapType(saved.googleMapType.name)
+            googleMapsPrefs.setSelectedCustomTileUrl(null)
+        }
+    }
+
     private fun clearCurrentTileProvider() {
         (currentTileProvider as? MBTilesProvider)?.close()
         currentTileProvider = null
@@ -451,6 +519,14 @@ class MapViewModel(
                 selection = googleMapsPrefs.awaitMapSelection(),
                 selectedProviderId = mapTileProviderPrefs.awaitSelectedCustomTileProviderId(),
             )
+
+            // Sequenced after the persisted-selection load, in the same coroutine, deliberately: this collector can
+            // otherwise start reacting to an offline-at-startup provider/network combination before the persisted
+            // selection above has been applied, auto-switching against a still-default _selectedRasterBasemapId —
+            // and loadPersistedMapType's own writes moments later would silently clobber that switch.
+            combine(mapNetworkAvailable, customTileProviderConfigs, ::Pair).collect { (available, providers) ->
+                handleConnectivityChange(available, providers)
+            }
         }
 
         selectedWaypointId.value?.let { wpId ->

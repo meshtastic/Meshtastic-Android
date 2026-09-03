@@ -38,6 +38,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.network.repository.NetworkRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.testing.FakeLocaleUnitsProvider
 import org.meshtastic.core.testing.FakeMapPrefs
@@ -61,6 +62,7 @@ class MapViewModelSitePlannerRequestTest {
     private val testDispatcher = StandardTestDispatcher()
     private val nodeRepository = FakeNodeRepository()
     private val packetRepository = mock<PacketRepository>(MockMode.autofill)
+    private val networkRepository = mock<NetworkRepository>(MockMode.autofill)
     private val mapPrefs = FakeMapPrefs()
     private val firstNode = Node(num = 11)
     private val secondNode = Node(num = 22)
@@ -73,6 +75,7 @@ class MapViewModelSitePlannerRequestTest {
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         every { packetRepository.getWaypoints() } returns flowOf(emptyList())
+        every { networkRepository.networkAvailable } returns flowOf(true)
         httpClient = HttpClient()
         layersDir = createTempDirectory("map-layers")
         mapLayersManager =
@@ -96,6 +99,7 @@ class MapViewModelSitePlannerRequestTest {
                 mapLayersManager = mapLayersManager,
                 savedStateHandle = SavedStateHandle(),
                 localeUnitsProvider = FakeLocaleUnitsProvider(),
+                networkRepository = networkRepository,
             )
     }
 
