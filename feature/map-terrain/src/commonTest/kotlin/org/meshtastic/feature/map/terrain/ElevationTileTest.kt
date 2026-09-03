@@ -70,4 +70,12 @@ class ElevationTileTest {
         assertFailsWith<IllegalArgumentException> { ElevationTile(width = 0, height = 2, elevations = floatArrayOf()) }
         assertFailsWith<IllegalArgumentException> { ElevationTile(width = 2, height = 0, elevations = floatArrayOf()) }
     }
+
+    @Test
+    fun `dimensions whose product overflows Int are rejected rather than matching an empty array`() {
+        // 65536 * 65536 wraps to 0 in Int, which would satisfy `size == width * height` for an empty array.
+        assertFailsWith<IllegalArgumentException> {
+            ElevationTile(width = 65536, height = 65536, elevations = floatArrayOf())
+        }
+    }
 }
