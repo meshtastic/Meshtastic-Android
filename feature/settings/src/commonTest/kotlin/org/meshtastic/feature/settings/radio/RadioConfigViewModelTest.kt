@@ -44,6 +44,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.setMain
+import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
 import org.meshtastic.core.domain.usecase.settings.AdminActionsUseCase
 import org.meshtastic.core.domain.usecase.settings.ExportProfileUseCase
@@ -64,6 +65,7 @@ import org.meshtastic.core.repository.HomoglyphPrefs
 import org.meshtastic.core.repository.LocationRepository
 import org.meshtastic.core.repository.LocationService
 import org.meshtastic.core.repository.MapConsentPrefs
+import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NodeRestartTracker
 import org.meshtastic.core.repository.PacketRepository
@@ -92,6 +94,7 @@ import org.meshtastic.proto.LoRaRegionPresetMap
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Routing
 import org.meshtastic.proto.User
 import kotlin.test.AfterTest
@@ -170,6 +173,7 @@ class RadioConfigViewModelTest {
     private val uiPrefs: UiPrefs = mock(MockMode.autofill)
     private val securityKeyBackupStore: SecurityKeyBackupStore = mock(MockMode.autofill)
     private val snackbarManager: SnackbarManager = mock(MockMode.autofill)
+    private val connectionManager: MeshConnectionManager = mock(MockMode.autofill)
     private val trackerScope = CoroutineScope(SupervisorJob())
     private val nodeRestartTracker = NodeRestartTracker(trackerScope)
 
@@ -222,34 +226,131 @@ class RadioConfigViewModelTest {
     private fun runTest(block: suspend TestScope.() -> Unit) =
         kotlinx.coroutines.test.runTest(testDispatcher, testBody = block)
 
-    private fun createViewModel(destNum: Int? = null, snackbarManager: SnackbarManager = this.snackbarManager) =
-        RadioConfigViewModel(
-            destNum = destNum,
-            radioConfigRepository = radioConfigRepository,
-            packetRepository = packetRepository,
-            serviceRepository = serviceRepository,
-            nodeRepository = nodeRepository,
-            locationRepository = locationRepository,
-            mapConsentPrefs = mapConsentPrefs,
-            analyticsPrefs = analyticsPrefs,
-            homoglyphEncodingPrefs = homoglyphEncodingPrefs,
-            importProfileUseCase = importProfileUseCase,
-            exportProfileUseCase = exportProfileUseCase,
-            importSecurityConfigUseCase = importSecurityConfigUseCase,
-            securityKeyBackupStore = securityKeyBackupStore,
-            snackbarManager = snackbarManager,
-            nodeRestartTracker = nodeRestartTracker,
-            installProfileUseCase = installProfileUseCase,
-            radioConfigUseCase = radioConfigUseCase,
-            adminActionsUseCase = adminActionsUseCase,
-            processRadioResponseUseCase = processRadioResponseUseCase,
-            locationService = locationService,
-            fileService = fileService,
-            mqttManager = mqttManager,
-            lockdownCoordinator = FakeLockdownCoordinator(),
-            analytics = mock(MockMode.autofill),
+    private fun createViewModel(
+        destNum: Int? = null,
+        snackbarManager: SnackbarManager = this.snackbarManager,
+        processRadioResponseUseCase: ProcessRadioResponseUseCase = this.processRadioResponseUseCase,
+    ) = RadioConfigViewModel(
+        initialDestNum = destNum,
+        radioConfigRepository = radioConfigRepository,
+        packetRepository = packetRepository,
+        serviceRepository = serviceRepository,
+        nodeRepository = nodeRepository,
+        locationRepository = locationRepository,
+        mapConsentPrefs = mapConsentPrefs,
+        analyticsPrefs = analyticsPrefs,
+        homoglyphEncodingPrefs = homoglyphEncodingPrefs,
+        importProfileUseCase = importProfileUseCase,
+        exportProfileUseCase = exportProfileUseCase,
+        importSecurityConfigUseCase = importSecurityConfigUseCase,
+        securityKeyBackupStore = securityKeyBackupStore,
+        snackbarManager = snackbarManager,
+        nodeRestartTracker = nodeRestartTracker,
+        connectionManager = connectionManager,
+        installProfileUseCase = installProfileUseCase,
+        radioConfigUseCase = radioConfigUseCase,
+        adminActionsUseCase = adminActionsUseCase,
+        processRadioResponseUseCase = processRadioResponseUseCase,
+        locationService = locationService,
+        fileService = fileService,
+        mqttManager = mqttManager,
+        lockdownCoordinator = FakeLockdownCoordinator(),
+        analytics = mock(MockMode.autofill),
+    )
+        .also { createdViewModels += it }
+
+    @Test
+    fun `local save acked by a renumbered radio re-runs the handshake and completes the save`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        nodeRepository.setNodes(listOf(node))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
+        val packetFlow = MutableSharedFlow<MeshPacket>()
+        every { serviceRepository.meshPacketFlow } returns packetFlow
+        everySuspend { radioConfigUseCase.setConfig(any(), any(), any()) } calls
+            {
+                it.args.onRequestIdArg()(77)
+                77
+            }
+        viewModel = createViewModel(processRadioResponseUseCase = ProcessRadioResponseUseCase())
+
+        viewModel.setConfig(Config(lora = Config.LoRaConfig(region = Config.LoRaConfig.RegionCode.US)))
+        runCurrent()
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Loading)
+
+        // Firmware 2.8 renumbered itself on the first region set: the ACK comes from the new number.
+        packetFlow.emit(routingAck(requestId = 77, from = 456))
+        runCurrent()
+
+        verify { connectionManager.startConfigOnly() }
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Success)
+    }
+
+    @Test
+    fun `a session opened on the connected node by number follows it after the renumber`() = runTest {
+        nodeRepository.setNodes(listOf(Node(num = 123, user = User(id = "!123"))))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
+        val packetFlow = MutableSharedFlow<MeshPacket>()
+        every { serviceRepository.meshPacketFlow } returns packetFlow
+        val writeTargets = mutableListOf<Int>()
+        var nextPacketId = 90
+        everySuspend { radioConfigUseCase.setConfig(any(), any(), any()) } calls
+            {
+                writeTargets += it.args[0] as Int
+                val id = ++nextPacketId
+                it.args.onRequestIdArg()(id)
+                id
+            }
+        // Node detail → Administration opens the connected node's settings by its number, not as a null local session.
+        viewModel = createViewModel(destNum = 123, processRadioResponseUseCase = ProcessRadioResponseUseCase())
+        assertTrue(viewModel.radioConfigState.value.isLocal)
+
+        viewModel.setConfig(Config(lora = Config.LoRaConfig(region = Config.LoRaConfig.RegionCode.US)))
+        runCurrent()
+        packetFlow.emit(routingAck(requestId = 91, from = 456))
+        runCurrent()
+        verify { connectionManager.startConfigOnly() }
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Success)
+
+        // The re-handshake lands: the radio reports its new number and is installed under it.
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 456))
+        nodeRepository.setNodes(listOf(Node(num = 456, user = User(id = "!456"))))
+        runCurrent()
+        assertTrue(viewModel.radioConfigState.value.isLocal)
+
+        viewModel.setConfig(Config(lora = Config.LoRaConfig(region = Config.LoRaConfig.RegionCode.US)))
+        runCurrent()
+        assertEquals(listOf(123, 456), writeTargets)
+    }
+
+    @Test
+    fun `remote save acked by an unexpected node neither re-handshakes nor completes`() = runTest {
+        nodeRepository.setNodes(
+            listOf(Node(num = 123, user = User(id = "!123")), Node(num = 200, user = User(id = "!200"))),
         )
-            .also { createdViewModels += it }
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
+        val packetFlow = MutableSharedFlow<MeshPacket>()
+        every { serviceRepository.meshPacketFlow } returns packetFlow
+        everySuspend { radioConfigUseCase.setConfig(any(), any(), any()) } calls
+            {
+                it.args.onRequestIdArg()(78)
+                78
+            }
+        viewModel = createViewModel(destNum = 200, processRadioResponseUseCase = ProcessRadioResponseUseCase())
+
+        viewModel.setConfig(Config(lora = Config.LoRaConfig(region = Config.LoRaConfig.RegionCode.US)))
+        runCurrent()
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Loading)
+
+        packetFlow.emit(routingAck(requestId = 78, from = 456))
+        runCurrent()
+
+        verify(exactly(0)) { connectionManager.startConfigOnly() }
+        val state = viewModel.radioConfigState.value
+        assertTrue(
+            state.responseState is ResponseState.Loading,
+            "expected Loading, got ${state.responseState} (isLocal=${state.isLocal}, route='${state.route}')",
+        )
+    }
 
     @Test
     fun `setConfig calls useCase`() = runTest {
@@ -2092,3 +2193,14 @@ class RadioConfigViewModelTest {
 /** Extracts the trailing `onRequestId` callback from a mocked request method's args. */
 @Suppress("UNCHECKED_CAST")
 private fun List<Any?>.onRequestIdArg(): (Int) -> Unit = last() as (Int) -> Unit
+
+/** A real ROUTING_APP ack for [requestId] as the radio would deliver it, sent by node [from]. */
+private fun routingAck(requestId: Int, from: Int) = MeshPacket(
+    from = from,
+    decoded =
+    Data(
+        portnum = PortNum.ROUTING_APP,
+        request_id = requestId,
+        payload = ByteString.of(*Routing(error_reason = Routing.Error.NONE).encode()),
+    ),
+)
