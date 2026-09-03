@@ -1358,6 +1358,7 @@
     <string name="now">Nyt</string>
     <string name="ntp_server">NTP palvelin</string>
     <string name="number_of_records">Kirjausten määrä</string>
+    <!-- OFFLINE -->
     <string name="offline_maps">Offline-kartat</string>
     <string name="offline_maps_empty">Alueita ei ole vielä ladattu</string>
     <string name="ok_to_mqtt">MQTT päällä</string>

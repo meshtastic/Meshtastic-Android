@@ -912,6 +912,7 @@
     <string name="now">現在</string>
     <string name="ntp_server">時間伺服器</string>
     <string name="number_of_records">紀錄數目</string>
+    <!-- OFFLINE -->
     <string name="ok_to_mqtt">允許轉發至 MQTT</string>
     <string name="okay">好的</string>
     <string name="oled_type">OLED 類型</string>

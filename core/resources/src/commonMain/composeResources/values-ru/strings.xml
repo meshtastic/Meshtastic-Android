@@ -1327,6 +1327,7 @@
     <string name="now">Только что</string>
     <string name="ntp_server">NTP-сервер</string>
     <string name="number_of_records">Количество записей</string>
+    <!-- OFFLINE -->
     <string name="ok_to_mqtt">ОК в MQTT</string>
     <string name="okay">Лады</string>
     <string name="oled_type">Тип OLED</string>

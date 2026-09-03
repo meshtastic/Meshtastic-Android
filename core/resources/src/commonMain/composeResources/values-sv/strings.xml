@@ -876,6 +876,7 @@
     <string name="now">Nu</string>
     <string name="ntp_server">NTP-server</string>
     <string name="number_of_records">Antal poster</string>
+    <!-- OFFLINE -->
     <string name="ok_to_mqtt">Ok till MQTT</string>
     <string name="okay">Okej</string>
     <string name="oled_type">OLED-typ</string>

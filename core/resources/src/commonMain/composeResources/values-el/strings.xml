@@ -189,6 +189,7 @@
     <string name="none">Κανένα (απενεργοποιημένο)</string>
     <string name="not_connected">Αποσυνδεδεμένο</string>
     <!-- NOTIFICATIONS -->
+    <!-- OFFLINE -->
     <string name="okay">Εντάξει</string>
     <!-- ONE -->
     <string name="one_day">24 Ώρες</string>

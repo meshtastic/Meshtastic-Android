@@ -767,6 +767,7 @@
     <string name="now">Acum</string>
     <string name="ntp_server">Server NTP</string>
     <string name="number_of_records">Numarul de inregistrari</string>
+    <!-- OFFLINE -->
     <string name="ok_to_mqtt">Acceptă MQTT</string>
     <string name="okay">Ok</string>
     <string name="oled_type">Tip OLED</string>

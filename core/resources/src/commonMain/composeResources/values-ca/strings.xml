@@ -173,6 +173,7 @@
     <string name="none">Cap (desactivat)</string>
     <string name="not_connected">No connectat</string>
     <!-- NOTIFICATIONS -->
+    <!-- OFFLINE -->
     <string name="okay">Acceptar</string>
     <!-- ONE -->
     <string name="one_day">24 Hores</string>

@@ -407,6 +407,7 @@
     <string name="now">Şimdi</string>
     <string name="ntp_server">NTP sunucusu</string>
     <string name="number_of_records">Kayıt sayısı</string>
+    <!-- OFFLINE -->
     <string name="okay">Tamam</string>
     <!-- ONE -->
     <string name="one_day">24 Saat</string>

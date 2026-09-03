@@ -860,6 +860,7 @@
     <string name="now">Зараз</string>
     <string name="ntp_server">NTP-сервер</string>
     <string name="number_of_records">Кількість записів</string>
+    <!-- OFFLINE -->
     <string name="ok_to_mqtt">MQTT: Готово</string>
     <string name="okay">Гаразд</string>
     <string name="oled_type">Тип OLED</string>

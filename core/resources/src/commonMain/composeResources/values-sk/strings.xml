@@ -327,6 +327,7 @@
     <string name="not_connected">Nepripojené</string>
     <!-- NOTIFICATIONS -->
     <string name="ntp_server">NTP server</string>
+    <!-- OFFLINE -->
     <!-- ONE -->
     <string name="one_day">24 Hodín</string>
     <string name="one_week">1 týždeň</string>
