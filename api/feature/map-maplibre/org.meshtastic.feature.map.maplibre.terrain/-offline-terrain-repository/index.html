@@ -1,0 +1,288 @@
+<!doctype html>
+<html class="no-js" lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>OfflineTerrainRepository</title>
+<link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>
+    <script>document.documentElement.classList.replace("no-js", "js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+      if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      } else {
+        const savedDarkMode = JSON.parse(storage)
+        if (savedDarkMode === true) {
+          document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+      }
+    </script>
+<script type="text/javascript" src="../../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../../styles/style.css" rel="Stylesheet">
+<link href="../../../../styles/main.css" rel="Stylesheet">
+<link href="../../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../../ui-kit/ui-kit.min.js" defer></script></head>
+<body>
+<div class="root">
+    <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
+<a class="library-name--link" href="../../../../index.html" tabindex="1">
+                    Meshtastic App
+            </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
+        </button>
+        <div class="navigation-controls--break ui-kit_mobile-only"></div>
+        <div class="library-version" id="library-version">
+        </div>
+        <div class="navigation-controls">
+        <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
+                <button class="platform-tag platform-selector common-like" data-active="" aria-pressed="true" data-filter=":feature:map-maplibre/commonMain">common</button>
+            <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
+                <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
+                <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
+                    <div class="dropdown--header"><span>Target filter</span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close target filter">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                        <li role="option" class="dropdown--option platform-selector-option common-like" tabindex="0">
+                            <label class="checkbox">
+                                <input type="checkbox" class="checkbox--input" id=":feature:map-maplibre/commonMain" data-filter=":feature:map-maplibre/commonMain">
+                                <span class="checkbox--icon"></span>
+                                common
+                            </label>
+                        </li>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </ul>
+            <button class="navigation-controls--btn navigation-controls--btn_theme" id="theme-toggle-button" type="button">Switch theme
+            </button>
+            <div class="navigation-controls--btn navigation-controls--btn_search" id="searchBar" role="button">Search in
+                API
+            </div>
+        </div>
+    </header>
+    <div id="container">
+        <nav id="leftColumn" class="sidebar" data-item-type="SECTION" data-item-config="{&quot;defaultSize&quot;: 280, &quot;minSize&quot;: 200, &quot;maxSize&quot;: 400}">
+            <a class="toc--skip-link" href="#main">Skip to content</a>
+            <div class="dropdown theme-dark_mobile" data-role="dropdown" id="toc-dropdown">
+                <ul role="listbox" id="toc-listbox" class="dropdown--list dropdown--list_toc-list" data-role="dropdown-listbox" aria-label="Table of contents">
+                    <div class="dropdown--header">
+                            <span>
+                                    Meshtastic App
+                            </span>
+                        <button class="button" data-role="dropdown-toggle" aria-label="Close table of contents">
+                            <i class="ui-kit-icon ui-kit-icon_cross"></i>
+                        </button>
+                    </div>
+                    <div class="sidebar--inner" id="sideMenu"></div>
+                </ul>
+                <div class="dropdown--overlay"></div>
+            </div>
+        </nav>
+        <div id="resizer" class="resizer" data-item-type="BAR"></div>
+        <div id="main" data-item-type="SECTION" role="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="feature-map-maplibre::org.meshtastic.feature.map.maplibre.terrain/OfflineTerrainRepository///PointingToDeclaration//-831320004">
+  <div class="breadcrumbs"><a href="../../index.html">feature-map-maplibre</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.feature.map.maplibre.terrain</a><span class="delimiter">/</span><span class="current">OfflineTerrainRepository</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Offline</span><wbr><span>Terrain</span><wbr><span><span>Repository</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-maplibre/commonMain"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">OfflineTerrainRepository</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">fileSystem<span class="token operator">: </span><span data-unresolved-link="okio/FileSystem///PointingToDeclaration/">FileSystem</span><span class="token punctuation">, </span></span><span class="parameter ">baseDir<span class="token operator">: </span><span data-unresolved-link="okio/Path///PointingToDeclaration/">Path</span></span></span><span class="token punctuation">)</span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/feature/map-maplibre/src/commonMain/kotlin/org/meshtastic/feature/map/maplibre/terrain/OfflineTerrainRepository.kt#L66">source</a>)</span></span></div><p class="paragraph">Owns the one downloaded offline-terrain region: its manifest, and the <a href="../../../../feature/map-terrain/org.meshtastic.feature.map.terrain/-terrain-tile-store/index.html">TerrainTileStore</a> holding its tiles.</p><p class="paragraph">Not a Koin <code class="lang-kotlin">@Single</code>. <a href="../../org.meshtastic.feature.map.maplibre/-map-libre-map-view-provider/index.html">MapLibreMapViewProvider</a>'s own doc comment already states this module's rule — "free of any assumption about how the host app wires its graph" — and it turns out to bind harder than usual here: a <code class="lang-kotlin">@Module @ComponentScan</code> in this package would only take effect once some host's Koin startup imports it, and every host that does that (<code class="lang-kotlin">androidApp/src/main</code>'s <code class="lang-kotlin">MainKoinModule</code>) compiles into <i>both</i> Android flavors, so registering it there would pull a MapLibre-only type into the Google flavor's dependency graph, exactly what this module's own build.gradle.kts forbids. <a href="-companion/default.html">default</a> is how every caller reaches the same instance instead — a plain lazily-initialized singleton, not a DI one.</p><p class="paragraph">Single region, not a list: see <a href="../-offline-terrain-region/index.html">OfflineTerrainRegion</a>'s own doc comment for why. A new <a href="download.html">download</a> therefore replaces whatever was there before — deleting the old tiles and manifest <i>before</i> fetching the first new one, not after. This is a known, deliberate tradeoff, not an oversight: there is nowhere to stage the new region side-by-side with the old one without doubling disk usage for the download's duration, so a <a href="download.html">download</a> that later fails or is cancelled leaves nothing downloaded rather than restoring what was there — <a href="region.html">region</a> reports <code class="lang-kotlin">null</code>, the same as if nothing had ever been fetched.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="tableheader">Constructors</h2>
+        <div class="table"><a data-name="-1283244228%2FConstructors%2F-831320004" anchor-label="OfflineTerrainRepository" id="-1283244228%2FConstructors%2F-831320004" data-filterable-set=":feature:map-maplibre/commonMain"></a>
+          <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":feature:map-maplibre/commonMain" data-filterable-set=":feature:map-maplibre/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-offline-terrain-repository.html"><span>Offline</span><wbr><span>Terrain</span><wbr><span><span>Repository</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1283244228%2FConstructors%2F-831320004"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-maplibre/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">fileSystem<span class="token operator">: </span><span data-unresolved-link="okio/FileSystem///PointingToDeclaration/">FileSystem</span><span class="token punctuation">, </span></span><span class="parameter ">baseDir<span class="token operator">: </span><span data-unresolved-link="okio/Path///PointingToDeclaration/">Path</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="TYPE">
+        <h2 class="tableheader">Types</h2>
+        <div class="table"><a data-name="-2084701276%2FClasslikes%2F-831320004" anchor-label="Companion" id="-2084701276%2FClasslikes%2F-831320004" data-filterable-set=":feature:map-maplibre/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map-maplibre/commonMain" data-filterable-set=":feature:map-maplibre/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-companion/index.html"><span><span>Companion</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2084701276%2FClasslikes%2F-831320004"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-maplibre/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="-companion/index.html">Companion</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="1315987860%2FProperties%2F-831320004" anchor-label="downloadState" id="1315987860%2FProperties%2F-831320004" data-filterable-set=":feature:map-maplibre/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map-maplibre/commonMain" data-filterable-set=":feature:map-maplibre/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="download-state.html"><span>download</span><wbr><span><span>State</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1315987860%2FProperties%2F-831320004"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-maplibre/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="download-state.html">downloadState</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="../../../../feature/map-terrain/org.meshtastic.feature.map.terrain/-terrain-download-state/index.html">TerrainDownloadState</a><span class="token operator">?</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">The most recent state <a href="start-download.html">startDownload</a> has reported, surviving a UI that goes away and comes back.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-481397591%2FProperties%2F-831320004" anchor-label="region" id="-481397591%2FProperties%2F-831320004" data-filterable-set=":feature:map-maplibre/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map-maplibre/commonMain" data-filterable-set=":feature:map-maplibre/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="region.html"><span><span>region</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-481397591%2FProperties%2F-831320004"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-maplibre/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="region.html">region</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="../-offline-terrain-region/index.html">OfflineTerrainRegion</a><span class="token operator">?</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">The current region, or <code class="lang-kotlin">null</code> if nothing has been downloaded. Populated by <a href="refresh.html">refresh</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1694713110%2FProperties%2F-831320004" anchor-label="tileStore" id="-1694713110%2FProperties%2F-831320004" data-filterable-set=":feature:map-maplibre/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map-maplibre/commonMain" data-filterable-set=":feature:map-maplibre/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="tile-store.html"><span>tile</span><wbr><span><span>Store</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1694713110%2FProperties%2F-831320004"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-maplibre/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="tile-store.html">tileStore</a><span class="token operator">: </span><a href="../../../../feature/map-terrain/org.meshtastic.feature.map.terrain/-terrain-tile-store/index.html">TerrainTileStore</a></div><div class="brief "><p class="paragraph">For reading tile bytes directly — <a href="../../../../feature/map-maplibre/org.meshtastic.feature.map.maplibre.layers/index.html">org.meshtastic.feature.map.maplibre.layers.ContourLayer</a>'s own use.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="tableheader">Functions</h2>
+        <div class="table"><a data-name="-674217518%2FFunctions%2F-831320004" anchor-label="delete" id="-674217518%2FFunctions%2F-831320004" data-filterable-set=":feature:map-maplibre/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map-maplibre/commonMain" data-filterable-set=":feature:map-maplibre/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="delete.html"><span><span>delete</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-674217518%2FFunctions%2F-831320004"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-maplibre/commonMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="delete.html"><span class="token function">delete</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Deletes the current region's tiles and manifest, leaving nothing downloaded. A no-op if there is none.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1590836572%2FFunctions%2F-831320004" anchor-label="download" id="1590836572%2FFunctions%2F-831320004" data-filterable-set=":feature:map-maplibre/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map-maplibre/commonMain" data-filterable-set=":feature:map-maplibre/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="download.html"><span><span>download</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1590836572%2FFunctions%2F-831320004"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-maplibre/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="download.html"><span class="token function">download</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">bounds<span class="token operator">: </span><a href="../../../../feature/map-terrain/org.meshtastic.feature.map.terrain/-geo-bounds/index.html">GeoBounds</a><span class="token punctuation">, </span></span><span class="parameter ">maxZoom<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/Flow///PointingToDeclaration/">Flow</span><span class="token operator">&lt;</span><a href="../../../../feature/map-terrain/org.meshtastic.feature.map.terrain/-terrain-download-state/index.html">TerrainDownloadState</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Replaces whatever region was downloaded before with a fresh one covering <a href="download.html">bounds</a> up to <a href="download.html">maxZoom</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-116253726%2FFunctions%2F-831320004" anchor-label="refresh" id="-116253726%2FFunctions%2F-831320004" data-filterable-set=":feature:map-maplibre/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map-maplibre/commonMain" data-filterable-set=":feature:map-maplibre/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="refresh.html"><span><span>refresh</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-116253726%2FFunctions%2F-831320004"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-maplibre/commonMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="refresh.html"><span class="token function">refresh</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Loads the manifest from disk if this is the first call. Idempotent, and cheap after the first: everything past that point reads <a href="region.html">region</a>'s already-loaded value. Callers that only ever read <a href="region.html">region</a> from a composable should call this once from a <code class="lang-kotlin">LaunchedEffect</code>; see <a href="../../../../feature/map-maplibre/org.meshtastic.feature.map.maplibre.layers/index.html">TerrainLayers</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1718413666%2FFunctions%2F-831320004" anchor-label="startDownload" id="-1718413666%2FFunctions%2F-831320004" data-filterable-set=":feature:map-maplibre/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map-maplibre/commonMain" data-filterable-set=":feature:map-maplibre/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="start-download.html"><span>start</span><wbr><span><span>Download</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1718413666%2FFunctions%2F-831320004"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-maplibre/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="start-download.html"><span class="token function">startDownload</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">bounds<span class="token operator">: </span><a href="../../../../feature/map-terrain/org.meshtastic.feature.map.terrain/-geo-bounds/index.html">GeoBounds</a><span class="token punctuation">, </span></span><span class="parameter ">maxZoom<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div><div class="brief "><p class="paragraph">Starts a <a href="download.html">download</a> on this repository's own <a href="../../../../feature/map-maplibre/org.meshtastic.feature.map.maplibre.terrain/-offline-terrain-repository/scope.html">scope</a> and mirrors its emissions into <a href="download-state.html">downloadState</a>, so a caller observes progress instead of collecting a <code class="lang-kotlin">Flow</code> tied to its own lifecycle — see <a href="../../../../feature/map-maplibre/org.meshtastic.feature.map.maplibre.terrain/-offline-terrain-repository/scope.html">scope</a>'s own comment for why that distinction matters here. A no-op while a download is already running, closing the double-tap window a UI-side "is it downloading" check can't close on its own (the first <a href="../../../../feature/map-terrain/org.meshtastic.feature.map.terrain/-terrain-download-state/-in-progress/index.html">TerrainDownloadState.InProgress</a> only arrives after several tiles have already been fetched).</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2069276804%2FFunctions%2F-831320004" anchor-label="tileUrlTemplate" id="2069276804%2FFunctions%2F-831320004" data-filterable-set=":feature:map-maplibre/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":feature:map-maplibre/commonMain" data-filterable-set=":feature:map-maplibre/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="tile-url-template.html"><span>tile</span><wbr><span>Url</span><wbr><span><span>Template</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2069276804%2FFunctions%2F-831320004"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map-maplibre/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="tile-url-template.html"><span class="token function">tileUrlTemplate</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">source<span class="token operator">: </span><a href="../../../../feature/map-terrain/org.meshtastic.feature.map.terrain/-terrain-source/index.html">TerrainSource</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div><div class="brief "><p class="paragraph">The <code class="lang-kotlin">file://</code> URL template <span data-unresolved-link="org.maplibre.compose.sources//rememberRasterDemSource/#kotlin.String#kotlin.Int/PointingToDeclaration/">rememberRasterDemSource</span> (hillshade) can use to reach <a href="tile-url-template.html">source</a>'s downloaded tiles directly, matching <a href="../../../../feature/map-terrain/org.meshtastic.feature.map.terrain/-terrain-tile-store/index.html">TerrainTileStore</a>'s own <code class="lang-kotlin">&lt;baseDir&gt;/&lt;source&gt;/&lt;zoom&gt;/&lt;x&gt;/&lt;y&gt;.webp</code> layout.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="footer">
+        <div class="footer--container">
+            <a href="#content" id="go-to-top-link" class="footer--button footer--button_go-to-top"></a>
+            <div class="footer--content">
+                <div>
+                    <span>Generated by </span>
+                    <a class="footer--link footer--link_external" href="https://github.com/Kotlin/dokka">
+                        Dokka
+                    </a>
+                    <div>© 2026 Copyright</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

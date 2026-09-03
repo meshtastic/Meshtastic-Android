@@ -152,6 +152,9 @@ org.meshtastic.feature.map.maplibre.component
 org.meshtastic.feature.map.maplibre.geojson
 org.meshtastic.feature.map.maplibre.layers
 org.meshtastic.feature.map.maplibre.style
+org.meshtastic.feature.map.maplibre.terrain
+module:feature-map-terrain
+org.meshtastic.feature.map.terrain
 module:feature-messaging
 org.meshtastic.feature.messaging
 org.meshtastic.feature.messaging.component
