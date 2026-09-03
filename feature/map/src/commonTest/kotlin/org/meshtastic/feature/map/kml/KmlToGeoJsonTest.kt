@@ -322,7 +322,28 @@ class KmlToGeoJsonTest {
     }
 
     @Test
-    fun `a point carries its icon image url`() {
+    fun `a point carries its packed icon path`() {
+        val result =
+            assertNotNull(
+                convert(
+                    """
+                    <kml><Document>
+                      <Style id="tower"><IconStyle><Icon>
+                        <href>files/tower.png</href>
+                      </Icon></IconStyle></Style>
+                      <Placemark><styleUrl>#tower</styleUrl>
+                        <Point><coordinates>-107.62,34.07</coordinates></Point>
+                      </Placemark>
+                    </Document></kml>
+                    """,
+                ),
+            )
+
+        assertContains(result, """"icon-url":"files/tower.png"""")
+    }
+
+    @Test
+    fun `a point strips a remote icon url`() {
         val result =
             assertNotNull(
                 convert(
@@ -339,7 +360,7 @@ class KmlToGeoJsonTest {
                 ),
             )
 
-        assertContains(result, """"icon-url":"https://example.org/tower.png"""")
+        assertFalse("icon-url" in result, result)
     }
 
     @Test
