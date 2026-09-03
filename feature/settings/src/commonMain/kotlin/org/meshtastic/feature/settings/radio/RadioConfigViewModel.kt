@@ -73,6 +73,7 @@ import org.meshtastic.core.repository.LocationService
 import org.meshtastic.core.repository.LockdownCoordinator
 import org.meshtastic.core.repository.LockdownPassphraseStore
 import org.meshtastic.core.repository.MapConsentPrefs
+import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NodeRestartTracker
@@ -175,6 +176,7 @@ open class RadioConfigViewModel(
     private val securityKeyBackupStore: SecurityKeyBackupStore,
     private val snackbarManager: SnackbarManager,
     private val nodeRestartTracker: NodeRestartTracker,
+    private val connectionManager: MeshConnectionManager,
     private val analytics: PlatformAnalytics,
 ) : ViewModel() {
 
@@ -1233,6 +1235,24 @@ open class RadioConfigViewModel(
                         incrementCompleted()
                     }
                 }
+            }
+
+            is RadioResponseResult.UnexpectedAckSender -> {
+                // The connected radio ACKed our local write from a node number other than the one we addressed:
+                // firmware 2.8 renumbers itself (num = crc32(public_key)) when it mints the PKI key on the first
+                // region set, live and without a reboot, so our cached number is now stale and every further admin
+                // write would NAK PKI_SEND_FAIL_PUBLIC_KEY until we re-learn it. Re-run the config handshake to pick
+                // up the new my_node_num, and treat this ACK as the save's confirmation. Scoped to a local save
+                // (route empty, isLocal): a remote admin target legitimately answers from a different node.
+                if (requestId != null && !isLateRemoteRead && route.isEmpty() && radioConfigState.value.isLocal) {
+                    clearRequestIds()
+                    connectionManager.startConfigOnly()
+                    setResponseStateSuccess()
+                }
+                // Otherwise an unaddressed node's ack says nothing about our request: leave it pending, exactly as
+                // when the use case returned null for it. Falling through would let the generic completion below
+                // retire the request and resolve a remote save on a foreign ack.
+                return
             }
 
             is RadioResponseResult.Metadata -> {
