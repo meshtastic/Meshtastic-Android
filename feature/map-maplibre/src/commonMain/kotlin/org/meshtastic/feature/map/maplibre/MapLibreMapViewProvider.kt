@@ -149,8 +149,6 @@ class MapLibreMapViewProvider(
         // same reason, and a map that sleeps mid-walk is the one complaint a location-follow feature always draws.
         KeepScreenOn(location.following)
 
-        val layerOpacity by koinInject<LayerOpacityStore>().opacity.collectAsState()
-
         Box(modifier = modifier.fillMaxSize()) {
             MeshMap(
                 viewModel = viewModel,
@@ -158,7 +156,7 @@ class MapLibreMapViewProvider(
                 modifier = Modifier.fillMaxSize(),
                 basemap = basemaps.current,
                 overlays = screen.overlays,
-                layerOpacity = layerOpacity,
+                layerOpacity = koinInject<LayerOpacityStore>().opacity.collectAsState().value,
                 customLayers = customLayers(),
                 cameraState = cameraState,
                 locationState = location.state,
