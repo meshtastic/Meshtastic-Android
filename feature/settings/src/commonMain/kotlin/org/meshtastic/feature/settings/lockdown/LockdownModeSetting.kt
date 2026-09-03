@@ -88,6 +88,8 @@ import org.meshtastic.feature.settings.radio.component.NodeActionButton
  *   the one-time irreversible warning.
  * - [LockdownState.Locked] → ON (locked); authentication is handled by the global lockdown dialog, so the switch is
  *   read-only here.
+ * - [LockdownState.AwaitingResponse] → temporarily non-actionable after transport admission while firmware processes a
+ *   lockdown command.
  * - [LockdownState.Unlocked] → ON; turning OFF opens the disable dialog, plus a "Lock now" affordance and session info.
  *
  * Visibility is gated on [supported] — the firmware-version capability from `Capabilities.supportsLockdown` (lockdown

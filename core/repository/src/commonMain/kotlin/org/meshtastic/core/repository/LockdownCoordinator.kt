@@ -47,6 +47,8 @@ interface LockdownCoordinator {
      *
      * @param disable when `true`, turns lockdown OFF (decrypt storage back to plaintext); the device reboots and
      *   reconnects reporting `DISABLED`.
+     * @return `true` when the command was admitted to the active transport. A `false` result leaves the current
+     *   retryable lockdown state in place so the caller can surface the failure and retry.
      */
     fun submitPassphrase(
         passphrase: String,
@@ -54,8 +56,8 @@ interface LockdownCoordinator {
         hours: Int,
         maxSessionSeconds: Int = 0,
         disable: Boolean = false,
-    )
+    ): Boolean
 
-    /** Sends a Lock Now command to the connected device. */
-    fun lockNow()
+    /** @return `true` when the Lock Now command was admitted to the active transport. */
+    fun lockNow(): Boolean
 }

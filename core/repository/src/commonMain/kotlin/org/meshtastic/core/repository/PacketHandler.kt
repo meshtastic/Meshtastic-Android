@@ -22,8 +22,16 @@ import org.meshtastic.proto.ToRadio
 
 /** Interface for handling the transmission of packets to the radio and managing the packet queue. */
 interface PacketHandler {
-    /** Sends a command/packet directly to the radio. */
+    /** Sends a command/packet directly to the radio, logging when no active transport accepts it. */
     fun sendToRadio(p: ToRadio)
+
+    /**
+     * Attempts a direct command/packet dispatch to the active transport.
+     *
+     * @return `true` when the transport accepted the bytes for asynchronous handoff, or `false` when no active
+     *   transport accepted them. This is admission only; it does not confirm firmware processing.
+     */
+    fun trySendToRadio(p: ToRadio): Boolean
 
     /**
      * Adds a mesh packet to the queue for sending.

@@ -69,9 +69,11 @@ import org.meshtastic.core.ui.icon.VisibilityOff
 /**
  * Non-dismissable lockdown authentication dialog.
  *
- * Shown when the connected device requires passphrase authentication. The dialog blocks all interaction with the app
- * until the user either authenticates successfully or disconnects. Back gestures are suppressed to prevent dismissing
- * the dialog and bypassing authentication.
+ * Shown while the connected device requires passphrase input or retry. The dialog blocks app interaction while shown.
+ * After a passphrase command is admitted to the active transport, [LockdownState.AwaitingResponse] hides it until
+ * firmware reports the next status. A rejected dispatch leaves the retryable state and dialog in place; a locked,
+ * provisioning, or failed response shows it again, while successful authentication leaves it dismissed. Back gestures
+ * are suppressed whenever the dialog is visible.
  */
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable

@@ -36,6 +36,8 @@ import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.FirmwareUpdateDestination
+import org.meshtastic.core.repository.ConnectionIdentity
+import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRestartTracker
 import org.meshtastic.core.repository.Notification
 import org.meshtastic.core.repository.NotificationManager
@@ -72,6 +74,8 @@ class ConnectionsViewModelTest {
     private val serviceRepository = FakeServiceRepository()
     private val nodeRestartTracker = NodeRestartTracker(CoroutineScope(SupervisorJob()))
     private val nodeRepository = FakeNodeRepository()
+    private val connectionIdentity = MutableStateFlow<ConnectionIdentity?>(null)
+    private val nodeManager: NodeManager = mock(MockMode.autofill)
     private val uiPrefs = FakeUiPrefs()
     private val deviceHardwareRepository = FakeDeviceHardwareRepository()
     private val firmwareReleaseRepository = FakeFirmwareReleaseRepository()
@@ -98,6 +102,8 @@ class ConnectionsViewModelTest {
         notificationsCanBeScheduled = true
 
         every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(LocalConfig())
+        every { nodeManager.connectionIdentity } returns connectionIdentity
+        connectionIdentity.value = null
         uiPrefs.hasShownNotPairedWarning.value = false
         uiPrefs.firmwareUpdateNotificationKeys.value = emptySet()
 
@@ -109,6 +115,7 @@ class ConnectionsViewModelTest {
         radioConfigRepository = radioConfigRepository,
         serviceRepository = serviceRepository,
         nodeRepository = nodeRepository,
+        nodeManager = nodeManager,
         nodeRestartTracker = nodeRestartTracker,
         uiPrefs = uiPrefs,
         deviceHardwareRepository = deviceHardwareRepository,
@@ -153,6 +160,102 @@ class ConnectionsViewModelTest {
 
         assertEquals(true, viewModel.hasShownNotPairedWarning.value)
         assertEquals(true, uiPrefs.hasShownNotPairedWarning.value)
+    }
+
+    @Test
+    fun `connection status stays lifecycle-only when region is unset`() = runTest {
+        val configFlow =
+            MutableStateFlow(LocalConfig(lora = Config.LoRaConfig(region = Config.LoRaConfig.RegionCode.UNSET)))
+        every { radioConfigRepository.localConfigFlow } returns configFlow
+        val vm = newViewModel()
+
+        vm.connectionStatus.test {
+            assertEquals(ConnectionStatus.NOT_CONNECTED, awaitItem())
+
+            serviceRepository.setConnectionState(ConnectionState.Connected)
+            assertEquals(ConnectionStatus.CONNECTED, awaitItem())
+
+            vm.activeNodeInfoReady.test {
+                assertEquals(false, awaitItem())
+
+                nodeRepository.setOurNode(
+                    org.meshtastic.core.model.Node(num = 2, user = User(hw_model = HardwareModel.TBEAM)),
+                )
+                connectionIdentity.value =
+                    ConnectionIdentity(sessionGeneration = 2, address = "test", nodeNum = 2, deviceId = null)
+                assertEquals(true, awaitItem())
+
+                // Region and node readiness are configuration-warning inputs, not connection-lifecycle states.
+                assertEquals(ConnectionStatus.CONNECTED, vm.connectionStatus.value)
+                cancelAndIgnoreRemainingEvents()
+            }
+
+            expectNoEvents()
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `same-node reconnect readiness does not rewrite the connecting lifecycle`() = runTest {
+        val vm = newViewModel()
+
+        vm.activeNodeInfoReady.test {
+            assertEquals(false, awaitItem())
+
+            // A cached node whose num matches the fresh session identity can become warning-ready before Connected.
+            nodeRepository.setOurNode(
+                org.meshtastic.core.model.Node(num = 7, user = User(hw_model = HardwareModel.TBEAM)),
+            )
+            connectionIdentity.value =
+                ConnectionIdentity(sessionGeneration = 3, address = "test", nodeNum = 7, deviceId = null)
+            advanceUntilIdle()
+            assertEquals(true, awaitItem())
+
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        vm.connectionStatus.test {
+            assertEquals(ConnectionStatus.NOT_CONNECTED, awaitItem())
+
+            serviceRepository.setConnectionState(ConnectionState.Connecting)
+            assertEquals(ConnectionStatus.CONNECTING, awaitItem())
+
+            serviceRepository.setConnectionState(ConnectionState.Connected)
+            assertEquals(ConnectionStatus.CONNECTED, awaitItem())
+
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `active node readiness is withdrawn when the identity is cleared or replaced`() = runTest {
+        val vm = newViewModel()
+
+        vm.activeNodeInfoReady.test {
+            assertEquals(false, awaitItem())
+
+            nodeRepository.setOurNode(
+                org.meshtastic.core.model.Node(num = 7, user = User(hw_model = HardwareModel.TBEAM)),
+            )
+            connectionIdentity.value =
+                ConnectionIdentity(sessionGeneration = 3, address = "first", nodeNum = 7, deviceId = null)
+            assertEquals(true, awaitItem())
+
+            connectionIdentity.value = null
+            assertEquals(false, awaitItem())
+
+            connectionIdentity.value =
+                ConnectionIdentity(sessionGeneration = 4, address = "second", nodeNum = 8, deviceId = null)
+            advanceUntilIdle()
+            assertEquals(false, vm.activeNodeInfoReady.value)
+
+            nodeRepository.setOurNode(
+                org.meshtastic.core.model.Node(num = 8, user = User(hw_model = HardwareModel.TBEAM)),
+            )
+            assertEquals(true, awaitItem())
+
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test
