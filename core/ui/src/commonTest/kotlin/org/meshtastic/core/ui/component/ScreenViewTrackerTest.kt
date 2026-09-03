@@ -35,9 +35,9 @@ class ScreenViewTrackerTest {
 
         assertEquals(
             listOf(
-                "start:org.meshtastic.core.navigation.NodesRoute.Nodes",
+                "start:org.meshtastic.core.navigation.NodesRoute.Nodes:name=org.meshtastic.core.navigation.NodesRoute.Nodes",
                 "stop:org.meshtastic.core.navigation.NodesRoute.Nodes",
-                "start:org.meshtastic.core.navigation.NodeDetailRoute.DeviceMetrics",
+                "start:org.meshtastic.core.navigation.NodeDetailRoute.DeviceMetrics:name=org.meshtastic.core.navigation.NodeDetailRoute.DeviceMetrics",
             ),
             analytics.events,
         )
@@ -54,7 +54,7 @@ class ScreenViewTrackerTest {
 
         assertEquals(
             listOf(
-                "start:org.meshtastic.core.navigation.NodesRoute.Nodes",
+                "start:org.meshtastic.core.navigation.NodesRoute.Nodes:name=org.meshtastic.core.navigation.NodesRoute.Nodes",
                 "stop:org.meshtastic.core.navigation.NodesRoute.Nodes",
             ),
             analytics.events,
@@ -70,7 +70,26 @@ class ScreenViewTrackerTest {
         tracker.onCurrentKeyChanged(NodeDetailRoute.DeviceMetrics(destNum = 2))
 
         assertEquals(
-            listOf("start:org.meshtastic.core.navigation.NodeDetailRoute.DeviceMetrics"),
+            listOf(
+                "start:org.meshtastic.core.navigation.NodeDetailRoute.DeviceMetrics:name=org.meshtastic.core.navigation.NodeDetailRoute.DeviceMetrics",
+            ),
+            analytics.events,
+        )
+    }
+
+    @Test
+    fun `clearing the current route stops the active view without starting a null replacement`() {
+        val analytics = RecordingPlatformAnalytics()
+        val tracker = ScreenViewTracker(analytics)
+
+        tracker.onCurrentKeyChanged(NodesRoute.Nodes)
+        tracker.onCurrentKeyChanged(null)
+
+        assertEquals(
+            listOf(
+                "start:org.meshtastic.core.navigation.NodesRoute.Nodes:name=org.meshtastic.core.navigation.NodesRoute.Nodes",
+                "stop:org.meshtastic.core.navigation.NodesRoute.Nodes",
+            ),
             analytics.events,
         )
     }
@@ -84,7 +103,7 @@ private class RecordingPlatformAnalytics : PlatformAnalytics {
     override fun setDeviceAttributes(firmwareVersion: String, model: String) = Unit
 
     override fun startScreenView(key: String, name: String) {
-        events += "start:$key"
+        events += "start:$key:name=$name"
     }
 
     override fun stopScreenView(key: String) {
