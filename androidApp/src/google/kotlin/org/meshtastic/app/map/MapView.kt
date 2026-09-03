@@ -1666,9 +1666,9 @@ internal fun Feature.applySimpleStyleSpec(): Feature {
         // A KML icon reaches us as the `icon-url` the converter writes; maps-utils' GeoJSON mapper reads no icon
         // property at all, so without this the Google map would silently lose the icons it has always drawn.
         geometry.isPointLike() ->
-            stringProperty(ICON_URL_PROPERTY)
-                ?.let(::sanitizeImportedIconUrl)
-                ?.let { copy(style = PointStyle(iconUrl = it)) } ?: this
+            stringProperty(ICON_URL_PROPERTY)?.let(::sanitizeImportedIconUrl)?.let {
+                copy(style = PointStyle(iconUrl = it))
+            } ?: this
 
         else -> this // Mixed geometry collections keep the mapper's style.
     }

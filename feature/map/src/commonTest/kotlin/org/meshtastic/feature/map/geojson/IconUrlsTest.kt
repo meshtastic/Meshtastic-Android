@@ -60,10 +60,7 @@ class IconUrlsTest {
     @Test
     fun `an icon that is not a string does not take the whole document down`() {
         val geoJson =
-            collection(
-                feature("""{"icon-url":{"nested":"object"}}"""),
-                feature("""{"icon-url":"files/good.png"}"""),
-            )
+            collection(feature("""{"icon-url":{"nested":"object"}}"""), feature("""{"icon-url":"files/good.png"}"""))
 
         assertEquals(setOf("files/good.png"), geoJsonIconUrls(geoJson))
     }

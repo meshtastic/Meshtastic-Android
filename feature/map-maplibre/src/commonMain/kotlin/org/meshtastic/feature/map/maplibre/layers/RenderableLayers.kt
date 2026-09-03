@@ -110,7 +110,9 @@ fun rememberRenderableLayers(manager: MapLayersManager, layers: List<MapLayerIte
     }
 
     return renderable.map { layer ->
-        layer.copy(icons = if (layer.icons.isNotEmpty()) layer.icons else icons["${layer.id}@${layer.refreshToken}"].orEmpty())
+        layer.copy(
+            icons = if (layer.icons.isNotEmpty()) layer.icons else icons["${layer.id}@${layer.refreshToken}"].orEmpty(),
+        )
     }
 }
 
@@ -206,22 +208,26 @@ private suspend fun convertKmlLayer(manager: MapLayersManager, layer: MapLayerIt
 
 private fun rewritePackedIconUrls(layer: MapLayerItem, bytes: ByteArray, geoJson: String, dir: Path): String {
     val iconPaths = geoJsonIconUrls(geoJson)
-    if (iconPaths.isEmpty()) return geoJson
     val packed = readKmlArchiveImages(bytes, iconPaths)
-    if (packed.isEmpty()) return geoJson
-    val fs = mapLayerFileSystem()
-    val replacements =
-        iconPaths.mapIndexedNotNull { index, iconPath ->
-            val image = packed[iconPath] ?: return@mapIndexedNotNull null
-            val extension =
-                iconPath.substringAfterLast('.', "png").takeIf {
-                    it.length <= MAX_EXTENSION_LENGTH && it.isNotEmpty() && it.all(Char::isLetterOrDigit)
-                } ?: "png"
-            val path = dir / "${layer.conversionKey()}-icon-$index.$extension"
-            fs.write(path) { write(image) }
-            iconPath to "$FILE_URI_PREFIX$path"
-        }.toMap()
-    return rewriteGeoJsonIconUrls(geoJson, replacements)
+    return if (iconPaths.isEmpty() || packed.isEmpty()) {
+        geoJson
+    } else {
+        val fs = mapLayerFileSystem()
+        val replacements =
+            iconPaths
+                .mapIndexedNotNull { index, iconPath ->
+                    val image = packed[iconPath] ?: return@mapIndexedNotNull null
+                    val extension =
+                        iconPath.substringAfterLast('.', "png").takeIf {
+                            it.length <= MAX_EXTENSION_LENGTH && it.isNotEmpty() && it.all(Char::isLetterOrDigit)
+                        } ?: "png"
+                    val path = dir / "${layer.conversionKey()}-icon-$index.$extension"
+                    fs.write(path) { write(image) }
+                    iconPath to "$FILE_URI_PREFIX$path"
+                }
+                .toMap()
+        rewriteGeoJsonIconUrls(geoJson, replacements)
+    }
 }
 
 /**

@@ -46,8 +46,11 @@ private const val MAX_ICONS = 64
  */
 fun geoJsonIconUrls(geoJson: String): Set<String> = readIconUrls(geoJson, ::sanitizeImportedIconUrl)
 
-/** Relative icon references from the caller's own rewritten GeoJSON (e.g. cache `file://` URIs) rather than user input. */
-fun trustedGeoJsonIconUrls(geoJson: String): Set<String> = readIconUrls(geoJson) { it.trim().takeIf(String::isNotEmpty) }
+/**
+ * Relative icon references from the caller's own rewritten GeoJSON (e.g. cache `file://` URIs) rather than user input.
+ */
+fun trustedGeoJsonIconUrls(geoJson: String): Set<String> =
+    readIconUrls(geoJson) { it.trim().takeIf(String::isNotEmpty) }
 
 /**
  * Imported layers may name icons only by an archive-relative path. Absolute URIs would make the app fetch arbitrary
@@ -61,16 +64,18 @@ fun sanitizeImportedIconUrl(url: String): String? {
 }
 
 /** Rewrites `icon-url` properties without disturbing unrelated properties or feature order. */
-fun rewriteGeoJsonIconUrls(geoJson: String, replacements: Map<String, String>): String {
-    if (replacements.isEmpty()) return geoJson
-    return try {
+fun rewriteGeoJsonIconUrls(geoJson: String, replacements: Map<String, String>): String = if (replacements.isEmpty()) {
+    geoJson
+} else {
+    try {
         val root = Json.parseToJsonElement(geoJson).jsonObject
-        val features = root["features"]?.jsonArray ?: return geoJson
-        Json.encodeToString(
-            JsonObject(
-                root + ("features" to JsonArray(features.map { feature -> rewriteIconUrl(feature, replacements) })),
-            ),
-        )
+        val features = root["features"]?.jsonArray
+        if (features == null) {
+            geoJson
+        } else {
+            val rewrittenFeatures = JsonArray(features.map { feature -> rewriteIconUrl(feature, replacements) })
+            Json.encodeToString(JsonObject(root + ("features" to rewrittenFeatures)))
+        }
     } catch (e: IllegalArgumentException) {
         Logger.withTag(TAG).w(e) { "Could not rewrite icons in an imported layer" }
         geoJson
@@ -94,15 +99,17 @@ private fun readIconUrls(geoJson: String, transform: (String) -> String?): Set<S
     emptySet()
 }
 
-private fun rewriteIconUrl(feature: JsonElement, replacements: Map<String, String>): JsonElement {
-    val objectValue = feature as? JsonObject ?: return feature
-    val properties = propertiesOf(objectValue) ?: return feature
-    val current = iconUrlOf(properties) ?: return feature
-    val rewritten = replacements[current] ?: return feature
-    return JsonObject(
-        objectValue + ("properties" to JsonObject(properties + (ICON_URL_PROPERTY to JsonPrimitive(rewritten)))),
-    )
-}
+private fun rewriteIconUrl(feature: JsonElement, replacements: Map<String, String>): JsonElement =
+    (feature as? JsonObject)?.let { objectValue ->
+        propertiesOf(objectValue)?.let { properties ->
+            iconUrlOf(properties)?.let { current ->
+                replacements[current]?.let { rewritten ->
+                    val rewrittenProperties = JsonObject(properties + (ICON_URL_PROPERTY to JsonPrimitive(rewritten)))
+                    JsonObject(objectValue + ("properties" to rewrittenProperties))
+                }
+            }
+        }
+    } ?: feature
 
 private fun propertiesOf(feature: JsonElement): JsonObject? = (feature as? JsonObject)?.get("properties") as? JsonObject
 

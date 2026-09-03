@@ -100,9 +100,7 @@ fun MeshtasticNavDisplay(
         val currentKey = backStack.lastOrNull()
         val tracker = remember(analytics) { ScreenViewTracker(analytics) }
         LaunchedEffect(currentKey, tracker) { tracker.onCurrentKeyChanged(currentKey) }
-        DisposableEffect(tracker) {
-            onDispose { tracker.dispose() }
-        }
+        DisposableEffect(tracker) { onDispose { tracker.dispose() } }
     }
 
     val listDetailSceneStrategy =
