@@ -2,8 +2,8 @@
 <html class="no-js" lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
-    <title>ProcessRadioResponseUseCase</title>
-<link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>
+    <title>UnexpectedAckSender</title>
+<link href="../../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../../";</script>
     <script>document.documentElement.classList.replace("no-js", "js");</script>
     <script>const storage = localStorage.getItem("dokka-dark-mode")
       if (storage == null) {
@@ -18,22 +18,22 @@
         }
       }
     </script>
-<script type="text/javascript" src="../../../../scripts/sourceset_dependencies.js" async></script>
-<link href="../../../../styles/style.css" rel="Stylesheet">
-<link href="../../../../styles/main.css" rel="Stylesheet">
-<link href="../../../../styles/prism.css" rel="Stylesheet">
-<link href="../../../../styles/logo-styles.css" rel="Stylesheet">
-<link href="../../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
-<script type="text/javascript" src="../../../../scripts/safe-local-storage_blocking.js"></script>
-<script type="text/javascript" src="../../../../scripts/navigation-loader.js" async></script>
-<script type="text/javascript" src="../../../../scripts/platform-content-handler.js" async></script>
-<script type="text/javascript" src="../../../../scripts/main.js" defer></script>
-<script type="text/javascript" src="../../../../scripts/prism.js" async></script>
-<script type="text/javascript" src="../../../../ui-kit/ui-kit.min.js" defer></script></head>
+<script type="text/javascript" src="../../../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../../../styles/style.css" rel="Stylesheet">
+<link href="../../../../../styles/main.css" rel="Stylesheet">
+<link href="../../../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../../../ui-kit/ui-kit.min.js" defer></script></head>
 <body>
 <div class="root">
     <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
-<a class="library-name--link" href="../../../../index.html" tabindex="1">
+<a class="library-name--link" href="../../../../../index.html" tabindex="1">
                     Meshtastic App
             </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
         </button>
@@ -89,47 +89,47 @@
         </nav>
         <div id="resizer" class="resizer" data-item-type="BAR"></div>
         <div id="main" data-item-type="SECTION" role="main">
-<div class="main-content" data-page-type="classlike" id="content" pageids="core-domain::org.meshtastic.core.domain.usecase.settings/ProcessRadioResponseUseCase///PointingToDeclaration//-1616371464">
-  <div class="breadcrumbs"><a href="../../index.html">core-domain</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.core.domain.usecase.settings</a><span class="delimiter">/</span><span class="current">ProcessRadioResponseUseCase</span></div>
+<div class="main-content" data-page-type="classlike" id="content" pageids="core-domain::org.meshtastic.core.domain.usecase.settings/RadioResponseResult.UnexpectedAckSender///PointingToDeclaration//-1616371464">
+  <div class="breadcrumbs"><a href="../../../index.html">core-domain</a><span class="delimiter">/</span><a href="../../index.html">org.meshtastic.core.domain.usecase.settings</a><span class="delimiter">/</span><a href="../index.html">RadioResponseResult</a><span class="delimiter">/</span><span class="current">UnexpectedAckSender</span></div>
   <div class="cover ">
-    <h1 class="cover"><span>Process</span><wbr><span>Radio</span><wbr><span>Response</span><wbr><span>Use</span><wbr><span><span>Case</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:domain/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">class </span><a href="index.html">ProcessRadioResponseUseCase</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/domain/src/commonMain/kotlin/org/meshtastic/core/domain/usecase/settings/ProcessRadioResponseUseCase.kt#L65">source</a>)</span></span></div><p class="paragraph">Use case for processing incoming <span data-unresolved-link="org.meshtastic.proto/MeshPacket///PointingToDeclaration/">MeshPacket</span>s that are responses to admin requests.</p></div></div>
+    <h1 class="cover"><span>Unexpected</span><wbr><span>Ack</span><wbr><span><span>Sender</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:domain/commonMain"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="index.html">UnexpectedAckSender</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>from<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span> : <a href="../index.html">RadioResponseResult</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/domain/src/commonMain/kotlin/org/meshtastic/core/domain/usecase/settings/ProcessRadioResponseUseCase.kt#L60">source</a>)</span></span></div><p class="paragraph">A routing ACK for one of our requests arrived from <a href="../../../../../core/domain/org.meshtastic.core.domain.usecase.settings/-radio-response-result/-unexpected-ack-sender/--root--.html">from</a>, not the node the request was addressed to. For a request addressed to the connected node this means the radio renumbered itself between the request and its ACK — firmware 2.8 moves <code class="lang-kotlin">my_node_num</code> to <code class="lang-kotlin">crc32(public_key)</code> when it mints the key on the first region set.</p></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
     <div class="tabs-section-body">
       <div data-togglable="CONSTRUCTOR">
         <h2 class="tableheader">Constructors</h2>
-        <div class="table"><a data-name="1295771523%2FConstructors%2F-1616371464" anchor-label="ProcessRadioResponseUseCase" id="1295771523%2FConstructors%2F-1616371464" data-filterable-set=":core:domain/commonMain"></a>
+        <div class="table"><a data-name="-375261072%2FConstructors%2F-1616371464" anchor-label="UnexpectedAckSender" id="-375261072%2FConstructors%2F-1616371464" data-filterable-set=":core:domain/commonMain"></a>
           <div class="table-row table-row_content" data-togglable="CONSTRUCTOR" data-filterable-current=":core:domain/commonMain" data-filterable-set=":core:domain/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="-process-radio-response-use-case.html"><span>Process</span><wbr><span>Radio</span><wbr><span>Response</span><wbr><span>Use</span><wbr><span><span>Case</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1295771523%2FConstructors%2F-1616371464"></span>
+                  <div><a href="-unexpected-ack-sender.html"><span>Unexpected</span><wbr><span>Ack</span><wbr><span><span>Sender</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-375261072%2FConstructors%2F-1616371464"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:domain/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="token punctuation">)</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:domain/commonMain"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">from<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div></div></div>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <div data-togglable="FUNCTION">
-        <h2 class="tableheader">Functions</h2>
-        <div class="table"><a data-name="880624649%2FFunctions%2F-1616371464" anchor-label="invoke" id="880624649%2FFunctions%2F-1616371464" data-filterable-set=":core:domain/commonMain"></a>
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="2107041777%2FProperties%2F-1616371464" anchor-label="from" id="2107041777%2FProperties%2F-1616371464" data-filterable-set=":core:domain/commonMain"></a>
           <div class="table-row table-row_content" data-filterable-current=":core:domain/commonMain" data-filterable-set=":core:domain/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="invoke.html"><span><span>invoke</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="880624649%2FFunctions%2F-1616371464"></span>
+                  <div><a href="from.html"><span><span>from</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2107041777%2FProperties%2F-1616371464"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:domain/commonMain"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">operator </span><span class="token keyword">fun </span><a href="invoke.html"><span class="token function">invoke</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">packet<span class="token operator">: </span><span data-unresolved-link="org.meshtastic.proto/MeshPacket///PointingToDeclaration/">MeshPacket</span><span class="token punctuation">, </span></span><span class="parameter ">destNum<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">requestIds<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.collections/-set/index.html">Set</a><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-radio-response-result/index.html">RadioResponseResult</a><span class="token operator">?</span></div><div class="brief "><p class="paragraph">Decodes and processes the provided <a href="invoke.html">packet</a>.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:domain/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="from.html">from</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
                 </div>
               </div>
             </div>
