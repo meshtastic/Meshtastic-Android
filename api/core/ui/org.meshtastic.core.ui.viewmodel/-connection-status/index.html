@@ -93,7 +93,7 @@
   <div class="breadcrumbs"><a href="../../index.html">core-ui</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.core.ui.viewmodel</a><span class="delimiter">/</span><span class="current">ConnectionStatus</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Connection</span><wbr><span><span>Status</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">enum </span><a href="index.html">ConnectionStatus</a> : <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-enum/index.html">Enum</a><span class="token operator">&lt;</span><a href="index.html">ConnectionStatus</a><span class="token operator">&gt; </span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/viewmodel/ConnectionsViewModel.kt#L68">source</a>)</span></span></div><p class="paragraph">Derived, UI-friendly summary of the device connection state. Combines <a href="../../../../core/repository/org.meshtastic.core.repository/-service-repository/connection-state.html">ServiceRepository.connectionState</a> with "region unset" and the <a href="../../../../core/repository/org.meshtastic.core.repository/-service-repository/-companion/-r-e-c-o-n-n-e-c-t-i-n-g_-p-r-o-g-r-e-s-s_-t-e-x-t.html">ServiceRepository.RECONNECTING_PROGRESS_TEXT</a> handshake-recovery signal to surface cases (MUST_SET_REGION, RECONNECTING) that otherwise need separate boolean flags in the UI layer.</p></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">enum </span><a href="index.html">ConnectionStatus</a> : <a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-enum/index.html">Enum</a><span class="token operator">&lt;</span><a href="index.html">ConnectionStatus</a><span class="token operator">&gt; </span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/viewmodel/ConnectionsViewModel.kt#L70">source</a>)</span></span></div><p class="paragraph">Derived, UI-friendly summary of the device connection lifecycle. Combines <a href="../../../../core/repository/org.meshtastic.core.repository/-service-repository/connection-state.html">ServiceRepository.connectionState</a> with the <a href="../../../../core/repository/org.meshtastic.core.repository/-service-repository/-companion/-r-e-c-o-n-n-e-c-t-i-n-g_-p-r-o-g-r-e-s-s_-t-e-x-t.html">ServiceRepository.RECONNECTING_PROGRESS_TEXT</a> handshake-recovery signal and expected-restart state. Configuration health is modeled separately so region, lockdown, and managed-mode policy cannot leak into the connection label.</p></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button><button class="section-tab" data-togglable="ENTRY">Entries</button></div>
@@ -170,7 +170,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><div class="block"><a href="-c-o-n-n-e-c-t-e-d/index.html">CONNECTED</a></div></div><div class="brief "><p class="paragraph">Connected with node info available.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><div class="block"><a href="-c-o-n-n-e-c-t-e-d/index.html">CONNECTED</a></div></div><div class="brief "><p class="paragraph">Transport connected.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -186,21 +186,6 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><div class="block"><a href="-c-o-n-n-e-c-t-e-d_-s-l-e-e-p-i-n-g/index.html">CONNECTED_SLEEPING</a></div></div><div class="brief "><p class="paragraph">Connected but the device is in deep sleep.</p></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-<a data-name="-323726974%2FClasslikes%2F-920980536" anchor-label="MUST_SET_REGION" id="-323726974%2FClasslikes%2F-920980536" data-filterable-set=":core:ui/commonMain"></a>
-          <div class="table-row table-row_content" data-togglable="ENTRY" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="-m-u-s-t_-s-e-t_-r-e-g-i-o-n/index.html">MUST_SET_REGION</a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-323726974%2FClasslikes%2F-920980536"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><div class="block"><a href="-m-u-s-t_-s-e-t_-r-e-g-i-o-n/index.html">MUST_SET_REGION</a></div></div><div class="brief "><p class="paragraph">Connected and active, but LoRa region is UNSET — user action required.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -228,13 +213,13 @@
           <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="-m-u-s-t_-s-e-t_-r-e-g-i-o-n/index.html#-372974862%2FProperties%2F-920980536"><span><span>name</span></span></a></div>
+                  <div><a href="-c-o-n-n-e-c-t-e-d_-s-l-e-e-p-i-n-g/index.html#-372974862%2FProperties%2F-920980536"><span><span>name</span></span></a></div>
 <span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-372974862%2FProperties%2F-920980536"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">val </span><a href="-m-u-s-t_-s-e-t_-r-e-g-i-o-n/index.html#-372974862%2FProperties%2F-920980536">name</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">val </span><a href="-c-o-n-n-e-c-t-e-d_-s-l-e-e-p-i-n-g/index.html#-372974862%2FProperties%2F-920980536">name</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
                 </div>
               </div>
             </div>
@@ -243,13 +228,13 @@
           <div class="table-row table-row_content" data-filterable-current=":core:ui/commonMain" data-filterable-set=":core:ui/commonMain">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
-                  <div><a href="-m-u-s-t_-s-e-t_-r-e-g-i-o-n/index.html#-739389684%2FProperties%2F-920980536"><span><span>ordinal</span></span></a></div>
+                  <div><a href="-c-o-n-n-e-c-t-e-d_-s-l-e-e-p-i-n-g/index.html#-739389684%2FProperties%2F-920980536"><span><span>ordinal</span></span></a></div>
 <span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-739389684%2FProperties%2F-920980536"></span>
                     <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">val </span><a href="-m-u-s-t_-s-e-t_-r-e-g-i-o-n/index.html#-739389684%2FProperties%2F-920980536">ordinal</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:ui/commonMain"><div class="symbol monospace"><span class="token keyword">expect </span><span class="token keyword">val </span><a href="-c-o-n-n-e-c-t-e-d_-s-l-e-e-p-i-n-g/index.html#-739389684%2FProperties%2F-920980536">ordinal</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
                 </div>
               </div>
             </div>
