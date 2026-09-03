@@ -52,6 +52,7 @@ import org.meshtastic.feature.map.component.ClusterMemberEntry
 import org.meshtastic.feature.map.component.ClusterMembersDialog
 import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.MapControlsOverlay
+import org.meshtastic.feature.map.component.MapEngineUnavailable
 import org.meshtastic.feature.map.component.MapFilterSheet
 import org.meshtastic.feature.map.component.mapFilterActions
 import org.meshtastic.feature.map.layers.LayerOpacityStore
@@ -130,6 +131,9 @@ class MapLibreMapViewProvider(
         waypointId: Int?,
         sitePlannerNodeNum: Int?,
     ) {
+        // Guarded here too, or the toolbar and zoom controls float over an empty screen driving a missing map.
+        if (!LocalMapLibreRuntimeProbe.current()) return MapEngineUnavailable(modifier)
+
         val viewModel: SharedMapViewModel = koinViewModel()
         // Null for the one frame before the basemap preference has loaded from disk; see rememberBasemapSelection.
         val basemaps = rememberBasemapSelection(customBasemaps()) ?: return

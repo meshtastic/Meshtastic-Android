@@ -31,6 +31,7 @@ import org.maplibre.compose.camera.CameraState
 import org.maplibre.compose.map.MapOptions
 import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.spatialk.geojson.BoundingBox
+import org.meshtastic.feature.map.component.MapEngineUnavailable
 import org.meshtastic.feature.map.maplibre.component.BasemapSelection
 import org.meshtastic.feature.map.maplibre.component.MapZoom
 import org.meshtastic.feature.map.maplibre.component.SecondaryMapControls
@@ -62,6 +63,9 @@ internal fun SecondaryMapSurface(
     options: MapOptions = SecondaryMapOptions,
     content: @Composable () -> Unit,
 ) {
+    // Same guard as MeshMap: the secondary maps compose MaplibreMap directly, so they crash the same way.
+    if (!LocalMapLibreRuntimeProbe.current()) return MapEngineUnavailable(modifier)
+
     MaplibreMap(
         baseStyle = basemaps.current.toBaseStyle(),
         cameraState = cameraState,
