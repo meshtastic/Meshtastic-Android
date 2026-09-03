@@ -31,6 +31,7 @@ import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneSt
 import androidx.compose.material3.adaptive.navigation3.rememberSupportingPaneSceneStrategy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -97,10 +98,10 @@ fun MeshtasticNavDisplay(
     // No-op when [analytics] is null (fdroid/desktop hosts and the intro flow pass nothing).
     if (analytics != null) {
         val currentKey = backStack.lastOrNull()
-        DisposableEffect(currentKey, analytics) {
-            val name = currentKey?.rumViewName()
-            if (name != null) analytics.startScreenView(key = name, name = name)
-            onDispose { if (name != null) analytics.stopScreenView(key = name) }
+        val tracker = remember(analytics) { ScreenViewTracker(analytics) }
+        LaunchedEffect(currentKey, tracker) { tracker.onCurrentKeyChanged(currentKey) }
+        DisposableEffect(tracker) {
+            onDispose { tracker.dispose() }
         }
     }
 
@@ -153,6 +154,23 @@ fun MeshtasticNavDisplay(
                 ?: {
                     if (backStack.size > 1) {
                         backStack.removeLastOrNull()
+                    }
+
+                    internal class ScreenViewTracker(private val analytics: PlatformAnalytics) {
+                        private var activeName: String? = null
+
+                        fun onCurrentKeyChanged(currentKey: NavKey?) {
+                            val name = currentKey?.rumViewName()
+                            if (name == activeName) return
+                            activeName?.let { analytics.stopScreenView(key = it) }
+                            activeName = name
+                            if (name != null) analytics.startScreenView(key = name, name = name)
+                        }
+
+                        fun dispose() {
+                            activeName?.let { analytics.stopScreenView(key = it) }
+                            activeName = null
+                        }
                     }
                 },
             // NavDisplay falls back to SinglePaneSceneStrategy automatically when none of these compute a Scene.

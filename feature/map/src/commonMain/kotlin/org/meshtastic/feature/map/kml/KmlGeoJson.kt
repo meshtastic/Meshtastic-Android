@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.map.kml
 
+import org.meshtastic.feature.map.geojson.sanitizeImportedIconUrl
 import kotlin.math.roundToLong
 
 /** One GeoJSON feature, with the placemark's text and the style's colours as simplestyle properties. */
@@ -32,7 +33,7 @@ internal fun KmlGeometry.toFeature(placemark: Placemark, style: KmlStyle?): Stri
     // Only a point is drawn as an icon, and only this converter emits the key — simplestyle has no property for an
     // arbitrary image URL, so `icon-url` is ours rather than something a foreign file will carry.
     if (type == "Point") {
-        style?.iconHref?.let { properties += "\"$ICON_URL_PROPERTY\":${it.jsonString()}" }
+        style?.iconHref?.let(::sanitizeImportedIconUrl)?.let { properties += "\"$ICON_URL_PROPERTY\":${it.jsonString()}" }
     }
     if (isPolygonal && style?.filled != false) {
         style?.fillColor?.toCssColor()?.let { (hex, opacity) ->

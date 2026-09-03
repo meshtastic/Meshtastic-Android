@@ -188,6 +188,7 @@ import org.meshtastic.feature.map.component.SitePlannerLaunch
 import org.meshtastic.feature.map.component.WaypointInfoDialog
 import org.meshtastic.feature.map.component.mapFilterActions
 import org.meshtastic.feature.map.component.toSitePlannerParams
+import org.meshtastic.feature.map.geojson.sanitizeImportedIconUrl
 import org.meshtastic.feature.map.includes
 import org.meshtastic.feature.map.kml.ICON_URL_PROPERTY
 import org.meshtastic.feature.map.kml.KmlGroundOverlay
@@ -1666,7 +1667,7 @@ internal fun Feature.applySimpleStyleSpec(): Feature {
         // property at all, so without this the Google map would silently lose the icons it has always drawn.
         geometry.isPointLike() ->
             stringProperty(ICON_URL_PROPERTY)
-                ?.takeIf { it.isNotBlank() }
+                ?.let(::sanitizeImportedIconUrl)
                 ?.let { copy(style = PointStyle(iconUrl = it)) } ?: this
 
         else -> this // Mixed geometry collections keep the mapper's style.

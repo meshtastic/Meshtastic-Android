@@ -17,6 +17,7 @@
 package org.meshtastic.feature.map.geojson
 
 import kotlin.test.Test
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
@@ -31,12 +32,12 @@ class IconUrlsTest {
     fun `every distinct icon in the document is found once`() {
         val geoJson =
             collection(
-                feature("""{"icon-url":"https://example.org/a.png"}"""),
-                feature("""{"icon-url":"https://example.org/b.png"}"""),
-                feature("""{"icon-url":"https://example.org/a.png"}"""),
+                feature("""{"icon-url":"files/a.png"}"""),
+                feature("""{"icon-url":"files/b.png"}"""),
+                feature("""{"icon-url":"files/a.png"}"""),
             )
 
-        assertEquals(setOf("https://example.org/a.png", "https://example.org/b.png"), geoJsonIconUrls(geoJson))
+        assertEquals(setOf("files/a.png", "files/b.png"), geoJsonIconUrls(geoJson))
     }
 
     @Test
@@ -61,10 +62,39 @@ class IconUrlsTest {
         val geoJson =
             collection(
                 feature("""{"icon-url":{"nested":"object"}}"""),
-                feature("""{"icon-url":"https://example.org/good.png"}"""),
+                feature("""{"icon-url":"files/good.png"}"""),
             )
 
-        assertEquals(setOf("https://example.org/good.png"), geoJsonIconUrls(geoJson))
+        assertEquals(setOf("files/good.png"), geoJsonIconUrls(geoJson))
+    }
+
+    @Test
+    fun `absolute icon urls are rejected`() {
+        val geoJson =
+            collection(
+                feature("""{"icon-url":"https://example.org/a.png"}"""),
+                feature("""{"icon-url":"http://example.org/b.png"}"""),
+                feature("""{"icon-url":"file:///tmp/c.png"}"""),
+                feature("""{"icon-url":"data:image/png;base64,AA=="}"""),
+                feature("""{"icon-url":"//example.org/d.png"}"""),
+            )
+
+        assertEquals(emptySet(), geoJsonIconUrls(geoJson))
+    }
+
+    @Test
+    fun `rewriting icon urls only touches configured icons`() {
+        val geoJson =
+            collection(
+                feature("""{"icon-url":"files/packed.png","title":"packed"}"""),
+                feature("""{"icon-url":"files/plain.png","title":"plain"}"""),
+            )
+
+        val rewritten = rewriteGeoJsonIconUrls(geoJson, mapOf("files/packed.png" to "file:///cache/packed.png"))
+
+        assertContains(rewritten, """"icon-url":"file:///cache/packed.png"""")
+        assertContains(rewritten, """"icon-url":"files/plain.png"""")
+        assertEquals(setOf("file:///cache/packed.png", "files/plain.png"), trustedGeoJsonIconUrls(rewritten))
     }
 
     @Test
@@ -75,7 +105,7 @@ class IconUrlsTest {
 
     @Test
     fun `the icon count is capped so one import cannot fill the style with images`() {
-        val many = (1..200).map { feature("""{"icon-url":"https://example.org/$it.png"}""") }
+        val many = (1..200).map { feature("""{"icon-url":"icons/$it.png"}""") }
 
         assertTrue(geoJsonIconUrls(collection(*many.toTypedArray())).size <= 64)
     }

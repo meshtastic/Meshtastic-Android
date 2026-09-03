@@ -45,16 +45,18 @@ internal fun Canvas.withRestoreUnderflowGuard(block: () -> Unit) {
     } catch (e: IllegalStateException) {
         // JVM CancellationException subclasses IllegalStateException; the message filter is what rethrows it.
         if (e.message?.contains(RESTORE_UNDERFLOW_MESSAGE) != true) throw e
-        // Error severity so analytics records a Crashlytics non-fatal; downgrade once the upstream fix is verified.
-        Logger.e(e) { "Dropped a chart frame: Vico unbalanced the canvas save stack" }
+        // Vico 3.3.1 carries the upstream fix for this crash. Keep the frame-drop breadcrumb while field verification
+        // burns in, but stop promoting a swallowed draw bug to an analytics defect.
+        Logger.w(e) { "Dropped a chart frame: Vico unbalanced the canvas save stack" }
     } finally {
         platformRestoreToCount(saveCount)
     }
 }
 
 /**
- * Guards the chart subtree against Vico 3.3.0's canvas restore underflow inside BaseCartesianLayer.draw (Crashlytics
- * issue 7744c73d302c0af1676f31f80802d59f, fatal since 2.8.0). Remove once fixed upstream.
+ * Guards the chart subtree against Vico's historical canvas restore underflow inside BaseCartesianLayer.draw
+ * (Crashlytics issue 7744c73d302c0af1676f31f80802d59f, fatal since 2.8.0). Keep only until field verification shows the
+ * 3.3.1 upstream fix has fully burned in.
  *
  * After a swallow, Vico's cached offscreen layer canvas may stay corrupted indefinitely (a frozen, blank, or partially
  * clipped chart until the canvas size changes or the screen is recreated); the node-canvas rebalance here cannot reach
