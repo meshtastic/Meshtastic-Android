@@ -255,7 +255,7 @@ kotlinx-serialization-protobuf = { module = "org.jetbrains.kotlinx:kotlinx-seria
 # https://github.com/simonpoole/pmtiles-reader. Also added independently on feat/map-google-pmtiles-offline
 # (PR #7000, not yet merged) for the base offline layer — identical entry, so whichever branch merges first,
 # the other's rebase sees no real conflict here.
-pmtiles-reader = { module = "ch.poole.geo.pmtiles-reader:Reader", version = "0.3.6" }
+pmtiles-reader = { module = "ch.poole.geo.pmtiles-reader:Reader", version = "0.3.7" }
 
 # Networking
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
