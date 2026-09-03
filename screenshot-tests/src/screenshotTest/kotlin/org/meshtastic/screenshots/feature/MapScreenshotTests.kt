@@ -22,6 +22,7 @@ import com.android.tools.screenshot.PreviewTest
 import org.meshtastic.feature.map.component.DeleteWaypointDialogLocalOnlyPreview
 import org.meshtastic.feature.map.component.DeleteWaypointDialogWithBroadcastPreview
 import org.meshtastic.feature.map.component.MapControlsOverlayPreview
+import org.meshtastic.feature.map.component.MapEngineUnavailablePreview
 import org.meshtastic.feature.map.component.MapZoomControlsPreview
 import org.meshtastic.feature.map.component.WaypointInfoDialogOptedInPreview
 import org.meshtastic.feature.map.component.WaypointInfoDialogReadOnlyPreview
@@ -66,4 +67,11 @@ fun ScreenshotWaypointInfoDialogReadOnly() {
 @Composable
 fun ScreenshotWaypointInfoDialogOptedIn() {
     WaypointInfoDialogOptedInPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotMapEngineUnavailable() {
+    MapEngineUnavailablePreview()
 }

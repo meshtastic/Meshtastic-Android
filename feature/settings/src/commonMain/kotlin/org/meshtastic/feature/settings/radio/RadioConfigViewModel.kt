@@ -73,6 +73,7 @@ import org.meshtastic.core.repository.LocationService
 import org.meshtastic.core.repository.LockdownCoordinator
 import org.meshtastic.core.repository.LockdownPassphraseStore
 import org.meshtastic.core.repository.MapConsentPrefs
+import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NodeRestartTracker
@@ -152,7 +153,7 @@ data class RadioConfigState(
 @KoinViewModel
 @Suppress("LongParameterList", "LargeClass")
 open class RadioConfigViewModel(
-    @InjectedParam private val destNum: Int?,
+    @InjectedParam initialDestNum: Int?,
     private val radioConfigRepository: RadioConfigRepository,
     private val packetRepository: PacketRepository,
     private val serviceRepository: ServiceRepository,
@@ -175,8 +176,19 @@ open class RadioConfigViewModel(
     private val securityKeyBackupStore: SecurityKeyBackupStore,
     private val snackbarManager: SnackbarManager,
     private val nodeRestartTracker: NodeRestartTracker,
+    private val connectionManager: MeshConnectionManager,
     private val analytics: PlatformAnalytics,
 ) : ViewModel() {
+
+    /**
+     * The node this session addresses. Starts as the injected destination (null = the connected node, whatever its
+     * number). A session opened on the connected node *by number* — Node detail → Administration — drops to null when
+     * that number moves under it (firmware 2.8 renumbers on the first region set), so later writes follow the connected
+     * node through [destNode] instead of a number the radio no longer answers to.
+     */
+    private val activeDestNum = MutableStateFlow(initialDestNum)
+    private val destNum: Int?
+        get() = activeDestNum.value
 
     val lockdownTokenInfo = serviceRepository.lockdownTokenInfo
     val sessionAuthorized = serviceRepository.sessionAuthorized
@@ -309,8 +321,9 @@ open class RadioConfigViewModel(
         locationService.getCurrentLocation()
 
     init {
-        nodeRepository.nodeDBbyNum
-            .map { nodes -> if (destNum != null) nodes[destNum] else nodes.values.firstOrNull() }
+        combine(nodeRepository.nodeDBbyNum, activeDestNum) { nodes, dest ->
+            if (dest != null) nodes[dest] else nodes.values.firstOrNull()
+        }
             .distinctUntilChanged()
             .onEach {
                 _destNode.value = it
@@ -325,11 +338,10 @@ open class RadioConfigViewModel(
         // Derive isLocal from the immutable destNum and the (possibly changing) myNodeInfo.
         // flatMapLatest cancels the previous inner flow on every change, so there is
         // no window where stale local config can leak through.
-        nodeRepository.myNodeInfo
-            .map { ni ->
-                val isLocal = (destNum == null) || (destNum == ni?.myNodeNum)
-                isLocal to if (isLocal) ni?.pioEnv else null
-            }
+        combine(nodeRepository.myNodeInfo, activeDestNum) { ni, dest ->
+            val isLocal = (dest == null) || (dest == ni?.myNodeNum)
+            isLocal to if (isLocal) ni?.pioEnv else null
+        }
             .distinctUntilChanged()
             .flatMapLatest { (isLocal, pioEnv) ->
                 if (isLocal) {
@@ -1233,6 +1245,27 @@ open class RadioConfigViewModel(
                         incrementCompleted()
                     }
                 }
+            }
+
+            is RadioResponseResult.UnexpectedAckSender -> {
+                // The connected radio ACKed our local write from a node number other than the one we addressed:
+                // firmware 2.8 renumbers itself (num = crc32(public_key)) when it mints the PKI key on the first
+                // region set, live and without a reboot, so our cached number is now stale and every further admin
+                // write would NAK PKI_SEND_FAIL_PUBLIC_KEY until we re-learn it. Re-run the config handshake to pick
+                // up the new my_node_num, and treat this ACK as the save's confirmation. Scoped to a local save
+                // (route empty, isLocal): a remote admin target legitimately answers from a different node.
+                if (requestId != null && !isLateRemoteRead && route.isEmpty() && radioConfigState.value.isLocal) {
+                    clearRequestIds()
+                    // A session opened on the connected node by number would otherwise keep addressing the old
+                    // number (and stop counting as local) once the handshake reports the new one.
+                    activeDestNum.value = null
+                    connectionManager.startConfigOnly()
+                    setResponseStateSuccess()
+                }
+                // Otherwise an unaddressed node's ack says nothing about our request: leave it pending, exactly as
+                // when the use case returned null for it. Falling through would let the generic completion below
+                // retire the request and resolve a remote save on a foreign ack.
+                return
             }
 
             is RadioResponseResult.Metadata -> {
