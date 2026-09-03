@@ -75,7 +75,7 @@ internal fun ContourOverlay(
 ) {
     var contours by remember(region.id) { mutableStateOf<List<StyledContour>>(emptyList()) }
 
-    LaunchedEffect(region.id, cameraPositionState.position, cameraPositionState.isMoving) {
+    LaunchedEffect(region.id, cameraPositionState.position, cameraPositionState.isMoving, metric) {
         if (cameraPositionState.isMoving) return@LaunchedEffect
         val bounds = cameraPositionState.projection?.visibleRegion?.latLngBounds ?: return@LaunchedEffect
         val zoom = cameraPositionState.position.zoom.toInt()

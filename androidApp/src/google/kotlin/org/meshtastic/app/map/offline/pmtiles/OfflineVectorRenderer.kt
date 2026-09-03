@@ -63,13 +63,16 @@ internal class OfflineVectorRenderer {
 
     private fun tileFeatures(regionId: String, archive: OfflineVectorArchive, tile: TileIndex): List<OfflineFeature> {
         val key = "$regionId/${tile.zoom}/${tile.x}/${tile.y}"
-        tileCache[key]?.let {
-            return it
-        }
+        // Access-ordered, so even get() is a structural modification — and a superseded LaunchedEffect's featuresFor
+        // keeps running on the IO dispatcher while the next one starts. Same lock as HillshadeTileProvider's caches.
+        synchronized(tileCache) { tileCache[key] }
+            ?.let {
+                return it
+            }
 
         val bytes = archive.readTile(tile.zoom, tile.x, tile.y)
         val decoded = if (bytes == null) emptyList() else decodeTile(tile, bytes)
-        tileCache[key] = decoded
+        synchronized(tileCache) { tileCache[key] = decoded }
         return decoded
     }
 

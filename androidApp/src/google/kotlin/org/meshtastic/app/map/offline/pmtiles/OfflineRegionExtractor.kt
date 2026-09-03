@@ -104,36 +104,37 @@ internal class OfflineRegionExtractor(private val store: OfflineRegionStore) {
             val id = Uuid.random().toString()
             val archiveFile = store.archiveFile(id)
 
-            try {
-                extractInto(archiveFile, url, tiles) { completed ->
-                    emit(OfflineDownloadState.InProgress(completed, tiles.size))
-                }
-            } catch (e: IOException) {
-                LOG.w(e) { "Offline region extraction failed" }
-                archiveFile.delete()
-                emit(OfflineDownloadState.Failed(OfflineDownloadFailure.IO_ERROR))
-                return@withLock
-            } catch (e: CancellationException) {
-                // Not an IOException, so it needs its own cleanup — a cancelled download must not leave its
-                // partial archive file behind, and cancellation must still propagate, never be swallowed.
-                archiveFile.delete()
-                throw e
-            }
-
+            // store.add stays inside the guard: the manifest write can throw too, and an archive with no
+            // manifest entry is an orphan nothing would ever delete.
             val region =
-                OfflineRegion(
-                    id = id,
-                    southLat = bounds.southwest.latitude,
-                    westLon = bounds.southwest.longitude,
-                    northLat = bounds.northeast.latitude,
-                    eastLon = bounds.northeast.longitude,
-                    minZoom = zoomRange.first,
-                    maxZoom = zoomRange.last,
-                    tileCount = tiles.size.toLong(),
-                    byteSize = archiveFile.length(),
-                    createdAtEpochSeconds = System.currentTimeMillis() / MILLIS_PER_SECOND,
-                )
-            store.add(region)
+                try {
+                    extractInto(archiveFile, url, tiles) { completed ->
+                        emit(OfflineDownloadState.InProgress(completed, tiles.size))
+                    }
+                    OfflineRegion(
+                        id = id,
+                        southLat = bounds.southwest.latitude,
+                        westLon = bounds.southwest.longitude,
+                        northLat = bounds.northeast.latitude,
+                        eastLon = bounds.northeast.longitude,
+                        minZoom = zoomRange.first,
+                        maxZoom = zoomRange.last,
+                        tileCount = tiles.size.toLong(),
+                        byteSize = archiveFile.length(),
+                        createdAtEpochSeconds = System.currentTimeMillis() / MILLIS_PER_SECOND,
+                    )
+                        .also { store.add(it) }
+                } catch (e: IOException) {
+                    LOG.w(e) { "Offline region extraction failed" }
+                    archiveFile.delete()
+                    emit(OfflineDownloadState.Failed(OfflineDownloadFailure.IO_ERROR))
+                    return@withLock
+                } catch (e: CancellationException) {
+                    // Not an IOException, so it needs its own cleanup — a cancelled download must not leave its
+                    // partial archive file behind, and cancellation must still propagate, never be swallowed.
+                    archiveFile.delete()
+                    throw e
+                }
             emit(OfflineDownloadState.Complete(region))
         }
     }

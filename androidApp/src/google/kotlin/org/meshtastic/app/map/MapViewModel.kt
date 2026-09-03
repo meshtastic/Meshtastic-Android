@@ -29,6 +29,8 @@ import com.google.android.gms.maps.model.TileProvider
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.MapType
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,6 +39,7 @@ import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -491,6 +494,12 @@ class MapViewModel(
 
     fun deleteOfflineRegion(id: String) {
         viewModelScope.launch {
+            if (_terrainDownloadRegionId.value == id) {
+                // Joined, not just cancelled: the terrain job's Complete handler would otherwise re-add this region
+                // to the manifest with no archive behind it, and its tile writes would race the directory delete.
+                terrainDownloadJob?.cancelAndJoin()
+                clearTerrainDownloadState()
+            }
             offlineRegionStore.delete(id)
             _offlineRegions.value = offlineRegionStore.list()
         }
@@ -538,41 +547,58 @@ class MapViewModel(
     fun terrainStoreForRegion(id: String): TerrainTileStore =
         TerrainTileStore(FileSystem.SYSTEM, offlineRegionStore.terrainDir(id).absolutePath.toPath())
 
+    private var terrainDownloadJob: Job? = null
+
     /**
      * Downloads terrain for an already-downloaded base region. No-ops (rather than starting a download that would only
      * fail) unless [canDownloadTerrainForRegion] — the UI already keeps its "Download Terrain" affordance disabled in
      * that case; this is the defensive re-check, same relationship [downloadOfflineRegion] has to its own button's
-     * `enabled` condition.
+     * `enabled` condition. One terrain job at a time: a second would race the single [terrainDownloadState] and both
+     * would pass the same one-shot storage check.
      */
     fun downloadTerrainForRegion(regionId: String) {
-        val region = _offlineRegions.value.firstOrNull { it.id == regionId } ?: return
-        if (!canDownloadTerrainForRegion(regionId)) return
+        val region = _offlineRegions.value.firstOrNull { it.id == regionId }
+        if (region == null || terrainDownloadJob?.isActive == true || !canDownloadTerrainForRegion(regionId)) return
 
-        viewModelScope.launch {
-            _terrainDownloadRegionId.value = regionId
-            val store = terrainStoreForRegion(regionId)
-            val bounds =
-                GeoBounds(
-                    south = region.southLat,
-                    west = region.westLon,
-                    north = region.northLat,
-                    east = region.eastLon,
-                )
-            val maxZoom = TerrainDownloadPlanner.maxZoomFitting(bounds, TerrainRegionExtractor.MAX_TILES)
-            TerrainRegionExtractor(store).download(bounds, maxZoom).collect { state ->
-                _terrainDownloadState.value = state
-                if (state is TerrainDownloadState.Complete) {
-                    val updated =
-                        region.copy(
-                            hasTerrain = true,
-                            terrainByteSize = state.byteSize,
-                            terrainHasRegionalDetail = state.hasRegionalDetail,
-                        )
-                    offlineRegionStore.add(updated)
-                    _offlineRegions.value = offlineRegionStore.list()
+        _terrainDownloadRegionId.value = regionId
+        _terrainDownloadState.value = null
+        terrainDownloadJob =
+            viewModelScope.launch {
+                val store = terrainStoreForRegion(regionId)
+                val bounds =
+                    GeoBounds(
+                        south = region.southLat,
+                        west = region.westLon,
+                        north = region.northLat,
+                        east = region.eastLon,
+                    )
+                val maxZoom = TerrainDownloadPlanner.maxZoomFitting(bounds, TerrainRegionExtractor.MAX_TILES)
+                // flowOn: the extractor does blocking per-tile HTTP on its collector's dispatcher.
+                TerrainRegionExtractor(store).download(bounds, maxZoom).flowOn(dispatchers.io).collect { state ->
+                    _terrainDownloadState.value = state
+                    if (state is TerrainDownloadState.Complete) attachTerrain(region, state, store)
                 }
             }
+    }
+
+    private suspend fun attachTerrain(
+        region: OfflineRegion,
+        state: TerrainDownloadState.Complete,
+        store: TerrainTileStore,
+    ) {
+        // deleteOfflineRegion joins this job first, but the manifest is the authority on whether the region survived.
+        if (offlineRegionStore.list().none { it.id == region.id }) {
+            store.deleteAll()
+            return
         }
+        offlineRegionStore.add(
+            region.copy(
+                hasTerrain = true,
+                terrainByteSize = state.byteSize,
+                terrainHasRegionalDetail = state.hasRegionalDetail,
+            ),
+        )
+        _offlineRegions.value = offlineRegionStore.list()
     }
 
     /**

@@ -44,8 +44,7 @@ private val LOG = Logger.withTag("HillshadeTileProvider")
  * this tile's own edge wherever a neighbor wasn't downloaded — see its own doc comment).
  *
  * [getTile] is called concurrently by the Maps SDK from multiple threads, so both caches below are guarded by
- * `synchronized` — unlike [org.meshtastic.app.map.offline.pmtiles.OfflineVectorRenderer]'s identically-shaped tile
- * cache, which is only ever touched from one sequential `LaunchedEffect` and needs no lock.
+ * `synchronized`, as is [org.meshtastic.app.map.offline.pmtiles.OfflineVectorRenderer]'s identically-shaped tile cache.
  */
 internal class HillshadeTileProvider(private val store: TerrainTileStore) : TileProvider {
 
@@ -90,15 +89,16 @@ internal class HillshadeTileProvider(private val store: TerrainTileStore) : Tile
         val cached = synchronized(elevationCache) { elevationCache[key] }
         if (cached != null) return cached
 
-        val decoded = store.readTile(source, tile)?.let { bytes -> decodeSafely(tile, bytes) }
+        val decoded = store.readTile(source, tile)?.let { bytes -> decodeSafely(bytes) }
         if (decoded != null) synchronized(elevationCache) { elevationCache[key] = decoded }
         return decoded
     }
 
-    private fun decodeSafely(tile: TileIndex, bytes: ByteArray): ElevationTile? = try {
+    private fun decodeSafely(bytes: ByteArray): ElevationTile? = try {
         decodeTerrariumTile(bytes)
     } catch (e: IllegalStateException) {
-        LOG.w(e) { "Could not decode a downloaded Terrarium tile at $tile" }
+        // No tile coordinates in the message: zoom/x/y is location-adjacent data (AGENTS.md Privacy First).
+        LOG.w(e) { "Could not decode a downloaded Terrarium tile" }
         null
     }
 

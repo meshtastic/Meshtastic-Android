@@ -183,11 +183,17 @@ private fun DownloadedRegionsList(
     // OfflineRegionStore.totalBytes, which this mirrors without a store call from composition.
     val terrainStorageAvailable =
         regions.sumOf { it.byteSize + it.terrainByteSize } < OfflineRegionExtractor.MAX_TOTAL_BYTES
+    // terrainDownloadRegionId outlives its job (it keeps the result line on that row until the sheet closes), so
+    // "running" is that plus a non-terminal state. One terrain job at a time — every other row's button waits.
+    val terrainDownloadRunning =
+        terrainDownloadRegionId != null &&
+            terrainDownloadState !is TerrainDownloadState.Complete &&
+            terrainDownloadState !is TerrainDownloadState.Failed
     regions.forEach { region ->
         OfflineRegionRow(
             region = region,
             onDelete = { onDeleteRegion(region.id) },
-            terrainStorageAvailable = terrainStorageAvailable,
+            terrainDownloadEnabled = terrainStorageAvailable && !terrainDownloadRunning,
             terrainDownloadState = terrainDownloadState.takeIf { terrainDownloadRegionId == region.id },
             isDownloadingTerrain = terrainDownloadRegionId == region.id,
             terrainHillshadeEnabled = terrainHillshadeEnabled,
@@ -245,7 +251,7 @@ private fun OfflineDownloadFailure.messageRes() = when (this) {
 private fun OfflineRegionRow(
     region: OfflineRegion,
     onDelete: () -> Unit,
-    terrainStorageAvailable: Boolean,
+    terrainDownloadEnabled: Boolean,
     terrainDownloadState: TerrainDownloadState?,
     isDownloadingTerrain: Boolean,
     terrainHillshadeEnabled: Boolean,
@@ -290,7 +296,7 @@ private fun OfflineRegionRow(
         } else if (isDownloadingTerrain) {
             TerrainDownloadStatusLine(terrainDownloadState)
         } else {
-            TextButton(onClick = onDownloadTerrain, enabled = terrainStorageAvailable) {
+            TextButton(onClick = onDownloadTerrain, enabled = terrainDownloadEnabled) {
                 Text(stringResource(Res.string.map_offline_download_terrain))
             }
         }
