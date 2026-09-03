@@ -34,9 +34,12 @@ import kotlin.time.Duration.Companion.minutes
 /**
  * Legacy v1 CoT <-> TAKPacket conversion for firmware <= 2.7.x.
  *
- * Wire format: bare protobuf-encoded [TAKPacket] on `ATAK_PLUGIN` port 72, no zstd compression (the proto has an
- * `is_compressed` flag but the firmware doesn't act on it). Supports only PLI and GeoChat payloads — shape, marker,
- * route, casevac, emergency, and task CoT events return null and are dropped.
+ * Wire format: bare protobuf-encoded [TAKPacket] on `ATAK_PLUGIN` port 72, no zstd compression. Supports only PLI and
+ * GeoChat payloads — shape, marker, route, casevac, emergency, and task CoT events return null and are dropped.
+ *
+ * Note that the firmware *does* act on the proto's `is_compressed` flag: `AtakPluginModule` unishox2-compresses the
+ * callsign and GeoChat string fields for LoRa transport. Conversion here assumes plain strings, so callers must not
+ * feed it a compressed packet — see `TAKMeshIntegration.handleV1Packet`.
  *
  * For the SDK-backed path that handles all payload types with zstd dictionary compression on `ATAK_PLUGIN_V2` port 78,
  * see [TAKPacketV2Conversion].

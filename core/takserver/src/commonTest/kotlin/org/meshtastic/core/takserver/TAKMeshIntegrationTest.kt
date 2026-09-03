@@ -272,6 +272,18 @@ class TAKMeshIntegrationTest {
     }
 
     @Test
+    fun `inbound compressed V1 packet is not broadcast to TAK clients`() = runTest(UnconfinedTestDispatcher()) {
+        val h = TestHarness()
+        h.integration.start(backgroundScope)
+
+        // Firmware <= 2.7.x delivers the compressed original alongside its decompressed copy. Rendering it would
+        // surface a duplicate contact whose callsign is unishox2 bytes decoded as text.
+        h.serviceRepository.emitMeshPacket(createV1PliMeshPacket(isCompressed = true))
+
+        assertTrue(h.serverManager.broadcasts.isEmpty(), "Compressed V1 packet must not reach TAK clients")
+    }
+
+    @Test
     fun `inbound packet on unrelated port is ignored`() = runTest(UnconfinedTestDispatcher()) {
         val h = TestHarness()
         h.integration.start(backgroundScope)
@@ -438,9 +450,10 @@ class TAKMeshIntegrationTest {
     private fun createPli(uid: String) =
         CoTMessage.pli(uid = uid, callsign = "TEST", latitude = 33.0, longitude = -84.0)
 
-    private fun createV1PliMeshPacket(): MeshPacket {
+    private fun createV1PliMeshPacket(isCompressed: Boolean = false): MeshPacket {
         val takPacket =
             TAKPacket(
+                is_compressed = isCompressed,
                 contact = org.meshtastic.proto.Contact(callsign = "BRAVO", device_callsign = "bravo-uid"),
                 pli =
                 org.meshtastic.proto.PLI(
