@@ -45,7 +45,15 @@ enum class TerrainDownloadFailure {
  * lifecycle, "delete the terrain without touching the basemap") — that's the caller's integration concern, same
  * separation as [TerrainTileStore] only knowing about the directory it's handed.
  */
-class TerrainRegionExtractor(private val store: TerrainTileStore) {
+class TerrainRegionExtractor(
+    private val store: TerrainTileStore,
+    private val openArchive: (pmtilesUrl: String) -> TileArchive = ::remoteArchive,
+) {
+
+    /** One open PMTiles archive — [TerrainTileFetcher] in production; a seam so tests can script sparse coverage. */
+    interface TileArchive : AutoCloseable {
+        fun fetchTile(zoom: Int, x: Int, y: Int): ByteArray?
+    }
 
     fun download(bounds: GeoBounds, maxZoom: Int): Flow<TerrainDownloadState> = flow {
         val globalZoomRange = 0..minOf(maxZoom, MapterhornEndpoints.GLOBAL_MAX_ZOOM)
@@ -85,14 +93,16 @@ class TerrainRegionExtractor(private val store: TerrainTileStore) {
             }
         val total = totalTiles.toInt()
 
-        var result = FetchResult(processed = 0, stored = 0)
+        var global = FetchResult(processed = 0, stored = 0)
+        var regional = FetchResult(processed = 0, stored = 0)
         try {
-            result =
-                fetchInto(MapterhornEndpoints.GLOBAL_PMTILES_URL, TerrainSource.GLOBAL, globalTiles, result, total) {
+            global =
+                fetchInto(MapterhornEndpoints.GLOBAL_PMTILES_URL, TerrainSource.GLOBAL, globalTiles, 0, total) {
                     emit(it)
                 }
             if (regionalUrl != null) {
-                result = fetchInto(regionalUrl, TerrainSource.REGIONAL, regionalTiles, result, total) { emit(it) }
+                regional =
+                    fetchInto(regionalUrl, TerrainSource.REGIONAL, regionalTiles, global.processed, total) { emit(it) }
             }
         } catch (_: Exception) {
             store.deleteAll()
@@ -100,11 +110,13 @@ class TerrainRegionExtractor(private val store: TerrainTileStore) {
             return@flow
         }
 
+        // Per tier, not "a regional URL existed": a regional archive with no coverage here stores nothing, and a
+        // renderer trusting the flag would then read an empty REGIONAL dir at z13+ instead of the global tiles.
         emit(
             TerrainDownloadState.Complete(
-                tileCount = result.stored,
+                tileCount = global.stored + regional.stored,
                 byteSize = store.sizeBytes(),
-                hasRegionalDetail = regionalUrl != null,
+                hasRegionalDetail = regional.stored > 0,
             ),
         )
     }
@@ -122,15 +134,15 @@ class TerrainRegionExtractor(private val store: TerrainTileStore) {
         pmtilesUrl: String,
         source: TerrainSource,
         tiles: List<TileIndex>,
-        starting: FetchResult,
+        alreadyProcessed: Int,
         totalTiles: Int,
         onProgress: suspend (TerrainDownloadState.InProgress) -> Unit,
     ): FetchResult {
-        var processed = starting.processed
-        var stored = starting.stored
-        TerrainTileFetcher(pmtilesUrl).use { fetcher ->
+        var processed = alreadyProcessed
+        var stored = 0L
+        openArchive(pmtilesUrl).use { archive ->
             for (tile in tiles) {
-                fetcher.fetchTile(tile.zoom, tile.x, tile.y)?.let { bytes ->
+                archive.fetchTile(tile.zoom, tile.x, tile.y)?.let { bytes ->
                     store.writeTile(source, tile, bytes)
                     stored++
                 }
@@ -147,5 +159,14 @@ class TerrainRegionExtractor(private val store: TerrainTileStore) {
         /** See the base offline layer's own extractor for why this is far below iOS's 600k-tile-scale caps. */
         const val MAX_TILES = 3_000
         private const val PROGRESS_STRIDE = 10
+
+        private fun remoteArchive(pmtilesUrl: String): TileArchive {
+            val fetcher = TerrainTileFetcher(pmtilesUrl)
+            return object : TileArchive {
+                override fun fetchTile(zoom: Int, x: Int, y: Int): ByteArray? = fetcher.fetchTile(zoom, x, y)
+
+                override fun close() = fetcher.close()
+            }
+        }
     }
 }

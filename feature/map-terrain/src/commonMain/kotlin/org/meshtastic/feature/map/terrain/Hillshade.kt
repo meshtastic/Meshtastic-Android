@@ -107,20 +107,17 @@ object Hillshade {
      */
     internal fun despike(tile: ElevationTile): ElevationTile {
         val out = tile.elevations.copyOf()
+        // One scratch window per call, refilled per pixel: a fresh array per pixel is ~64k allocations per tile,
+        // on getTile's cache-miss path. Local, not a field — Hillshade is an object and shade() runs concurrently.
+        val neighborhood = FloatArray(NEIGHBORHOOD_SIZE)
         for (y in MARGIN until tile.height - MARGIN) {
             for (x in MARGIN until tile.width - MARGIN) {
-                val neighborhood =
-                    floatArrayOf(
-                        tile.elevationAt(x - 1, y - 1),
-                        tile.elevationAt(x, y - 1),
-                        tile.elevationAt(x + 1, y - 1),
-                        tile.elevationAt(x - 1, y),
-                        tile.elevationAt(x, y),
-                        tile.elevationAt(x + 1, y),
-                        tile.elevationAt(x - 1, y + 1),
-                        tile.elevationAt(x, y + 1),
-                        tile.elevationAt(x + 1, y + 1),
-                    )
+                var n = 0
+                for (dy in -MARGIN..MARGIN) {
+                    for (dx in -MARGIN..MARGIN) {
+                        neighborhood[n++] = tile.elevationAt(x + dx, y + dy)
+                    }
+                }
                 neighborhood.sort()
                 val median = neighborhood[MEDIAN_INDEX]
                 val center = tile.elevationAt(x, y)
@@ -161,5 +158,6 @@ object Hillshade {
     private const val LOCAL_RELIEF_FADE_RANGE = 1.2f
 
     private const val DESPIKE_THRESHOLD_METERS = 2f
+    private const val NEIGHBORHOOD_SIZE = 9
     private const val MEDIAN_INDEX = 4
 }
