@@ -167,7 +167,7 @@ fun MeshtasticNavDisplay(
     }
 }
 
-private class ScreenViewTracker(private val analytics: PlatformAnalytics) {
+internal class ScreenViewTracker(private val analytics: PlatformAnalytics) {
     private var activeName: String? = null
 
     fun onCurrentKeyChanged(currentKey: NavKey?) {
