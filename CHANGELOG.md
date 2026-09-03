@@ -15,6 +15,7 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 #### 🛠️ Fixes
 * fix(network): point the API base URL at the R2-backed apiv2 host by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7004
 * fix(settings): floor the beacon broadcast-target list at one row by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7010
+* fix(settings): re-learn the node number when the first region set renumbers the radio by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7021
 
 ### Closed Beta (v2.8.2-closed.1)
 Changes since [`v2.8.1`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.1):
