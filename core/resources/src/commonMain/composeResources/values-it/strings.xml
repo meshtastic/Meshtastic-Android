@@ -1202,6 +1202,7 @@
     <string name="now">Adesso</string>
     <string name="ntp_server">Server NTP</string>
     <string name="number_of_records">Numero di record</string>
+    <!-- OFFLINE -->
     <string name="ok_to_mqtt">OK per MQTT</string>
     <string name="okay">Ok</string>
     <string name="oled_type">Tipo OLED</string>

@@ -1213,6 +1213,7 @@
     <string name="now">当前</string>
     <string name="ntp_server">NTP 服务器</string>
     <string name="number_of_records">记录数</string>
+    <!-- OFFLINE -->
     <string name="ok_to_mqtt">使用MQTT</string>
     <string name="okay">确定</string>
     <string name="oled_type">OLED 类型</string>

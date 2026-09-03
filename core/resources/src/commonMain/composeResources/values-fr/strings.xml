@@ -1087,6 +1087,7 @@
     <string name="now">Maintenant</string>
     <string name="ntp_server">Serveur NTP</string>
     <string name="number_of_records">Nombre d'enregistrements</string>
+    <!-- OFFLINE -->
     <string name="ok_to_mqtt">Transmission des paquets vers MQTT</string>
     <string name="okay">D'accord</string>
     <string name="oled_type">Type d'OLED</string>

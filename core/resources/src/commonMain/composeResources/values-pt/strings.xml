@@ -382,6 +382,7 @@
     <string name="notifications_on_message_receipt">Notificações no recibo de mensagem</string>
     <string name="ntp_server">Servidor NTP</string>
     <string name="number_of_records">Número de registos</string>
+    <!-- OFFLINE -->
     <string name="okay">Okay</string>
     <!-- ONE -->
     <string name="one_day">24 Horas</string>

@@ -600,6 +600,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="now">Ahora</string>
     <string name="ntp_server">Servidor NTP</string>
     <string name="number_of_records">Número de registros</string>
+    <!-- OFFLINE -->
     <string name="ok_to_mqtt">Permitir MQTT</string>
     <string name="okay">Vale</string>
     <string name="oled_type">Tipo de OLED</string>

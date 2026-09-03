@@ -310,6 +310,7 @@
     <!-- NOTIFICATIONS -->
     <string name="ntp_server">NTP server</string>
     <string name="number_of_records">Aantal records</string>
+    <!-- OFFLINE -->
     <string name="okay">OK</string>
     <!-- ONE -->
     <string name="one_day">24 Uur</string>

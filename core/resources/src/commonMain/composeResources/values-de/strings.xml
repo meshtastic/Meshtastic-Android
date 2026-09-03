@@ -1107,6 +1107,7 @@
     <string name="now">Jetzt</string>
     <string name="ntp_server">NTP Server</string>
     <string name="number_of_records">Anzahl Einträge</string>
+    <!-- OFFLINE -->
     <string name="offline_maps">Offline Karten</string>
     <string name="ok_to_mqtt">OK für MQTT</string>
     <string name="okay">OK</string>

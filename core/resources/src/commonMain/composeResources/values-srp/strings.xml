@@ -340,6 +340,7 @@
     <string name="notes">Белешке</string>
     <!-- NOTIFICATIONS -->
     <string name="number_of_records">Број записа</string>
+    <!-- OFFLINE -->
     <string name="ok_to_mqtt">Позитиван за MQTT</string>
     <string name="okay">Океј</string>
     <!-- ONE -->

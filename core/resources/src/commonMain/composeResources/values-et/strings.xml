@@ -1323,6 +1323,7 @@
     <string name="now">Praegu</string>
     <string name="ntp_server">NTP server</string>
     <string name="number_of_records">Kirjete arv</string>
+    <!-- OFFLINE -->
     <string name="offline_maps">Võrguühenduseta kaardid</string>
     <string name="ok_to_mqtt">Ok MQTTi</string>
     <string name="okay">Olgu</string>

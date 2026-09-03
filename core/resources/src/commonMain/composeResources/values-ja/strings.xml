@@ -1198,6 +1198,7 @@
     <string name="now">今</string>
     <string name="ntp_server">NTPサーバー</string>
     <string name="number_of_records">サーバーの最大保管レコード数  (デフォルト 約11,000レコード)</string>
+    <!-- OFFLINE -->
     <string name="ok_to_mqtt">MQTT への送信を許可</string>
     <string name="okay">OK</string>
     <string name="oled_type">OLED タイプ</string>
