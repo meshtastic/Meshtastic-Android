@@ -1052,6 +1052,7 @@ map_start_download
 map_style_selection
 map_subDescription
 map_tile_download_estimate
+map_tile_download_estimate_detail
 map_tile_limit_reached
 map_tile_source
 map_type_hybrid
@@ -1339,8 +1340,13 @@ notifications_on_message_receipt
 now
 ntp_server
 number_of_records
+### OFFLINE ###
 offline_maps
 offline_maps_empty
+offline_terrain_cache_detail
+offline_terrain_empty
+offline_terrain_manager
+offline_terrain_regional_detail
 ok_to_mqtt
 okay
 oled_type

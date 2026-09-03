@@ -254,6 +254,7 @@ jobs:
               :feature:intro:allTests
               :feature:map:allTests
               :feature:map-maplibre:allTests
+              :feature:map-terrain:allTests
               :feature:messaging:allTests
               :feature:node:allTests
               :feature:settings:allTests
@@ -267,6 +268,7 @@ jobs:
               :feature:intro:koverXmlReport
               :feature:map:koverXmlReport
               :feature:map-maplibre:koverXmlReport
+              :feature:map-terrain:koverXmlReport
               :feature:messaging:koverXmlReport
               :feature:node:koverXmlReport
               :feature:settings:koverXmlReport

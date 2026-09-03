@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonObject
 import org.maplibre.compose.camera.CameraState
@@ -60,6 +61,7 @@ import org.meshtastic.feature.map.maplibre.layers.CustomLayers
 import org.meshtastic.feature.map.maplibre.layers.MapOverlayLayers
 import org.meshtastic.feature.map.maplibre.layers.NodeLayers
 import org.meshtastic.feature.map.maplibre.layers.RasterBasemapLayer
+import org.meshtastic.feature.map.maplibre.layers.TerrainLayers
 import org.meshtastic.feature.map.maplibre.layers.WaypointLayers
 import org.meshtastic.feature.map.maplibre.style.Basemap
 import org.meshtastic.feature.map.maplibre.style.Basemaps
@@ -120,6 +122,7 @@ fun MeshMap(
     val waypoints by viewModel.waypoints.collectAsStateWithLifecycle()
     val filterState by viewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
     val myNodeInfo by viewModel.myNodeInfo.collectAsStateWithLifecycle()
+    val displayUnits by viewModel.displayUnits.collectAsStateWithLifecycle()
 
     val scope = rememberCoroutineScope()
     // This body recomposes on every camera frame (it reads the viewport below); the mesh-wide filter should not.
@@ -161,38 +164,66 @@ fun MeshMap(
             RasterBasemapLayer(basemap)
         }
         MapOverlayLayers(overlays, layerOpacity)
+        TerrainLayers(
+            viewportBounds = cameraState.viewport?.visibleBoundingBox,
+            zoom = cameraState.position.zoom,
+            displayUnits = displayUnits,
+        )
         CustomLayers(customLayers, layerOpacity)
 
         if (filterState.showWaypoints) {
             WaypointLayers(waypoints = waypoints.values, onWaypointClick = onWaypointClick)
         }
 
-        NodeLayers(
-            nodes = visibleNodes,
-            // Padded so a modest pan keeps the same nodes in view, and the chips are not redrawn for every frame of a
-            // drag. Without a viewport at all — the first composition — every node is a candidate, as before.
-            visibleBounds = cameraState.viewport?.visibleBoundingBox?.padded(CHIP_VIEW_PADDING),
-            // Floored: clustering indexes per whole zoom level, so the set only changes when the level does — and a
-            // pinch does not recompute it for every fractional step in between.
-            zoom = floor(cameraState.position.zoom).toInt(),
+        MeshMapNodeLayers(
+            visibleNodes = visibleNodes,
+            cameraState = cameraState,
+            filterState = filterState,
             myNodeNum = myNodeInfo?.myNodeNum,
-            showPrecisionCircles = filterState.showPrecisionCircle,
-            onNodeClick = navigateToNodeDetails,
+            navigateToNodeDetails = navigateToNodeDetails,
             onClusterMembers = onClusterMembers,
-            onClusterZoom = { centre, expansionZoom ->
-                scope.launch {
-                    val current = cameraState.position
-                    // A cluster that cannot report an expansion zoom answers with a sentinel (0 on
-                    // Android and desktop, -1 on iOS), so clamp — never zoom out on a tap.
-                    cameraState.animateTo(current.copy(target = centre, zoom = maxOf(expansionZoom, current.zoom)))
-                }
-            },
+            scope = scope,
         )
 
         // Declared last so the user's own position and an in-progress box corner draw above the mesh.
         UserLocationPuck(locationState = locationState, cameraState = cameraState, visible = followLocation)
         BoxCornerMarker(boxCorner)
     }
+}
+
+/** The node chips, clusters and precision circles — split out of [MeshMap] itself only to keep that function short. */
+@Composable
+@MaplibreComposable
+private fun MeshMapNodeLayers(
+    visibleNodes: List<Node>,
+    cameraState: CameraState,
+    filterState: BaseMapViewModel.MapFilterState,
+    myNodeNum: Int?,
+    navigateToNodeDetails: (Int) -> Unit,
+    onClusterMembers: (List<ClusterMember>) -> Unit,
+    scope: CoroutineScope,
+) {
+    NodeLayers(
+        nodes = visibleNodes,
+        // Padded so a modest pan keeps the same nodes in view, and the chips are not redrawn for every frame of a
+        // drag. Without a viewport at all — the first composition — every node is a candidate, as before.
+        visibleBounds = cameraState.viewport?.visibleBoundingBox?.padded(CHIP_VIEW_PADDING),
+        // Floored: clustering indexes per whole zoom level, so the set only changes when the level does — and a
+        // pinch does not recompute it for every fractional step in between.
+        zoom = floor(cameraState.position.zoom).toInt(),
+        myNodeNum = myNodeNum,
+        showPrecisionCircles = filterState.showPrecisionCircle,
+        onNodeClick = navigateToNodeDetails,
+        onClusterMembers = onClusterMembers,
+        onClusterZoom = { centre, expansionZoom ->
+            scope.launch {
+                val current = cameraState.position
+                // A cluster that cannot report an expansion zoom answers with a sentinel (0 on
+                // Android and desktop, -1 on iOS), so clamp — never zoom out on a tap.
+                cameraState.animateTo(current.copy(target = centre, zoom = maxOf(expansionZoom, current.zoom)))
+            }
+        },
+    )
 }
 
 /**
