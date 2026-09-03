@@ -2,8 +2,8 @@
 <html class="no-js" lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
-    <title>isMyWaypoint</title>
-<link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>
+    <title>OfflineStatusBanner</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>
     <script>document.documentElement.classList.replace("no-js", "js");</script>
     <script>const storage = localStorage.getItem("dokka-dark-mode")
       if (storage == null) {
@@ -18,22 +18,22 @@
         }
       }
     </script>
-<script type="text/javascript" src="../../../../scripts/sourceset_dependencies.js" async></script>
-<link href="../../../../styles/style.css" rel="Stylesheet">
-<link href="../../../../styles/main.css" rel="Stylesheet">
-<link href="../../../../styles/prism.css" rel="Stylesheet">
-<link href="../../../../styles/logo-styles.css" rel="Stylesheet">
-<link href="../../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
-<script type="text/javascript" src="../../../../scripts/safe-local-storage_blocking.js"></script>
-<script type="text/javascript" src="../../../../scripts/navigation-loader.js" async></script>
-<script type="text/javascript" src="../../../../scripts/platform-content-handler.js" async></script>
-<script type="text/javascript" src="../../../../scripts/main.js" defer></script>
-<script type="text/javascript" src="../../../../scripts/prism.js" async></script>
-<script type="text/javascript" src="../../../../ui-kit/ui-kit.min.js" defer></script></head>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../ui-kit/ui-kit.min.js" defer></script></head>
 <body>
 <div class="root">
     <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
-<a class="library-name--link" href="../../../../index.html" tabindex="1">
+<a class="library-name--link" href="../../../index.html" tabindex="1">
                     Meshtastic App
             </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
         </button>
@@ -89,12 +89,12 @@
         </nav>
         <div id="resizer" class="resizer" data-item-type="BAR"></div>
         <div id="main" data-item-type="SECTION" role="main">
-<div class="main-content" data-page-type="member" id="content" pageids="feature-map::org.meshtastic.feature.map/BaseMapViewModel/isMyWaypoint/#kotlin.Int/PointingToDeclaration//-1707802287">
-  <div class="breadcrumbs"><a href="../../index.html">feature-map</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.feature.map</a><span class="delimiter">/</span><a href="index.html">BaseMapViewModel</a><span class="delimiter">/</span><span class="current">isMyWaypoint</span></div>
+<div class="main-content" data-page-type="member" id="content" pageids="feature-map::org.meshtastic.feature.map.component//OfflineStatusBanner/#kotlin.Boolean#androidx.compose.ui.Modifier/PointingToDeclaration//-1707802287">
+  <div class="breadcrumbs"><a href="../index.html">feature-map</a><span class="delimiter">/</span><a href="index.html">org.meshtastic.feature.map.component</a><span class="delimiter">/</span><span class="current">OfflineStatusBanner</span></div>
   <div class="cover ">
-    <h1 class="cover"><span>is</span><wbr><span>My</span><wbr><span><span>Waypoint</span></span></h1>
+    <h1 class="cover"><span>Offline</span><wbr><span>Status</span><wbr><span><span>Banner</span></span></h1>
   </div>
-  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="is-my-waypoint.html"><span class="token function">isMyWaypoint</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">id<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/feature/map/src/commonMain/kotlin/org/meshtastic/feature/map/BaseMapViewModel.kt#L130">source</a>)</span></span></div><p class="paragraph">True if the waypoint with <a href="is-my-waypoint.html">id</a> was created by this device (vs. received from another node over the mesh).</p></div></div>
+  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><a href="https://developer.android.com/reference/kotlin/androidx/compose/runtime/Composable.html"><span class="token annotation builtin">Composable</span></a></div></div><span class="token keyword">fun </span><a href="-offline-status-banner.html"><span class="token function">OfflineStatusBanner</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">visible<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">modifier<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/androidx/compose/ui/Modifier.html">Modifier</a><span class="token operator"> = </span>Modifier</span></span><span class="token punctuation">)</span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/feature/map/src/commonMain/kotlin/org/meshtastic/feature/map/component/OfflineStatusBanner.kt#L48">source</a>)</span></span></div><p class="paragraph">A small pill reporting that the device has no network connection right now.</p><p class="paragraph">Purely informational — neither map backend needs this composable to keep rendering offline. MapLibre already serves any tile it holds (an offline pack or its own ambient cache) straight from disk the instant a network fetch fails, and the Google flavor's auto-switch to a local basemap (see <code class="lang-kotlin">MapViewModel.handleConnectivityChange</code>) happens independently of whether this is on screen. It exists only so a blank or stale-looking map reads as "you're offline" rather than as a bug.</p></div></div>
 </div>
     <div class="footer">
         <div class="footer--container">

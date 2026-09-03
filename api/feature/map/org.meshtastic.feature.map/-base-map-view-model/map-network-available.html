@@ -2,7 +2,7 @@
 <html class="no-js" lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
-    <title>isMyWaypoint</title>
+    <title>mapNetworkAvailable</title>
 <link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>
     <script>document.documentElement.classList.replace("no-js", "js");</script>
     <script>const storage = localStorage.getItem("dokka-dark-mode")
@@ -89,12 +89,12 @@
         </nav>
         <div id="resizer" class="resizer" data-item-type="BAR"></div>
         <div id="main" data-item-type="SECTION" role="main">
-<div class="main-content" data-page-type="member" id="content" pageids="feature-map::org.meshtastic.feature.map/BaseMapViewModel/isMyWaypoint/#kotlin.Int/PointingToDeclaration//-1707802287">
-  <div class="breadcrumbs"><a href="../../index.html">feature-map</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.feature.map</a><span class="delimiter">/</span><a href="index.html">BaseMapViewModel</a><span class="delimiter">/</span><span class="current">isMyWaypoint</span></div>
+<div class="main-content" data-page-type="member" id="content" pageids="feature-map::org.meshtastic.feature.map/BaseMapViewModel/mapNetworkAvailable/#/PointingToDeclaration//-1707802287">
+  <div class="breadcrumbs"><a href="../../index.html">feature-map</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.feature.map</a><span class="delimiter">/</span><a href="index.html">BaseMapViewModel</a><span class="delimiter">/</span><span class="current">mapNetworkAvailable</span></div>
   <div class="cover ">
-    <h1 class="cover"><span>is</span><wbr><span>My</span><wbr><span><span>Waypoint</span></span></h1>
+    <h1 class="cover"><span>map</span><wbr><span>Network</span><wbr><span><span>Available</span></span></h1>
   </div>
-  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">fun </span><a href="is-my-waypoint.html"><span class="token function">isMyWaypoint</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">id<span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/feature/map/src/commonMain/kotlin/org/meshtastic/feature/map/BaseMapViewModel.kt#L130">source</a>)</span></span></div><p class="paragraph">True if the waypoint with <a href="is-my-waypoint.html">id</a> was created by this device (vs. received from another node over the mesh).</p></div></div>
+  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":feature:map/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="map-network-available.html">mapNetworkAvailable</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.coroutines.flow/StateFlow///PointingToDeclaration/">StateFlow</span><span class="token operator">&lt;</span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator">&gt;</span><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/feature/map/src/commonMain/kotlin/org/meshtastic/feature/map/BaseMapViewModel.kt#L82">source</a>)</span></span></div><p class="paragraph">Whether the device currently has network connectivity, for the offline-basemap banner and (on the Google flavor) the auto-fallback in org.meshtastic.app.map.MapViewModel. Optimistically <code class="lang-kotlin">true</code> until the first emission arrives, so the map never flashes an "offline" banner on cold start.</p></div></div>
 </div>
     <div class="footer">
         <div class="footer--container">
