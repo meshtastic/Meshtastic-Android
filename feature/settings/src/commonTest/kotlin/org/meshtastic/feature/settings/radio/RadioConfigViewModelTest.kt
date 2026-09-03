@@ -231,7 +231,7 @@ class RadioConfigViewModelTest {
         snackbarManager: SnackbarManager = this.snackbarManager,
         processRadioResponseUseCase: ProcessRadioResponseUseCase = this.processRadioResponseUseCase,
     ) = RadioConfigViewModel(
-        destNum = destNum,
+        initialDestNum = destNum,
         radioConfigRepository = radioConfigRepository,
         packetRepository = packetRepository,
         serviceRepository = serviceRepository,
@@ -283,6 +283,43 @@ class RadioConfigViewModelTest {
 
         verify { connectionManager.startConfigOnly() }
         assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Success)
+    }
+
+    @Test
+    fun `a session opened on the connected node by number follows it after the renumber`() = runTest {
+        nodeRepository.setNodes(listOf(Node(num = 123, user = User(id = "!123"))))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
+        val packetFlow = MutableSharedFlow<MeshPacket>()
+        every { serviceRepository.meshPacketFlow } returns packetFlow
+        val writeTargets = mutableListOf<Int>()
+        var nextPacketId = 90
+        everySuspend { radioConfigUseCase.setConfig(any(), any(), any()) } calls
+            {
+                writeTargets += it.args[0] as Int
+                val id = ++nextPacketId
+                it.args.onRequestIdArg()(id)
+                id
+            }
+        // Node detail → Administration opens the connected node's settings by its number, not as a null local session.
+        viewModel = createViewModel(destNum = 123, processRadioResponseUseCase = ProcessRadioResponseUseCase())
+        assertTrue(viewModel.radioConfigState.value.isLocal)
+
+        viewModel.setConfig(Config(lora = Config.LoRaConfig(region = Config.LoRaConfig.RegionCode.US)))
+        runCurrent()
+        packetFlow.emit(routingAck(requestId = 91, from = 456))
+        runCurrent()
+        verify { connectionManager.startConfigOnly() }
+        assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Success)
+
+        // The re-handshake lands: the radio reports its new number and is installed under it.
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 456))
+        nodeRepository.setNodes(listOf(Node(num = 456, user = User(id = "!456"))))
+        runCurrent()
+        assertTrue(viewModel.radioConfigState.value.isLocal)
+
+        viewModel.setConfig(Config(lora = Config.LoRaConfig(region = Config.LoRaConfig.RegionCode.US)))
+        runCurrent()
+        assertEquals(listOf(123, 456), writeTargets)
     }
 
     @Test

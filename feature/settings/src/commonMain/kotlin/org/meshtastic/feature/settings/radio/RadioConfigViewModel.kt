@@ -153,7 +153,7 @@ data class RadioConfigState(
 @KoinViewModel
 @Suppress("LongParameterList", "LargeClass")
 open class RadioConfigViewModel(
-    @InjectedParam private val destNum: Int?,
+    @InjectedParam initialDestNum: Int?,
     private val radioConfigRepository: RadioConfigRepository,
     private val packetRepository: PacketRepository,
     private val serviceRepository: ServiceRepository,
@@ -179,6 +179,16 @@ open class RadioConfigViewModel(
     private val connectionManager: MeshConnectionManager,
     private val analytics: PlatformAnalytics,
 ) : ViewModel() {
+
+    /**
+     * The node this session addresses. Starts as the injected destination (null = the connected node, whatever its
+     * number). A session opened on the connected node *by number* — Node detail → Administration — drops to null when
+     * that number moves under it (firmware 2.8 renumbers on the first region set), so later writes follow the connected
+     * node through [destNode] instead of a number the radio no longer answers to.
+     */
+    private val activeDestNum = MutableStateFlow(initialDestNum)
+    private val destNum: Int?
+        get() = activeDestNum.value
 
     val lockdownTokenInfo = serviceRepository.lockdownTokenInfo
     val sessionAuthorized = serviceRepository.sessionAuthorized
@@ -311,8 +321,9 @@ open class RadioConfigViewModel(
         locationService.getCurrentLocation()
 
     init {
-        nodeRepository.nodeDBbyNum
-            .map { nodes -> if (destNum != null) nodes[destNum] else nodes.values.firstOrNull() }
+        combine(nodeRepository.nodeDBbyNum, activeDestNum) { nodes, dest ->
+            if (dest != null) nodes[dest] else nodes.values.firstOrNull()
+        }
             .distinctUntilChanged()
             .onEach {
                 _destNode.value = it
@@ -327,11 +338,10 @@ open class RadioConfigViewModel(
         // Derive isLocal from the immutable destNum and the (possibly changing) myNodeInfo.
         // flatMapLatest cancels the previous inner flow on every change, so there is
         // no window where stale local config can leak through.
-        nodeRepository.myNodeInfo
-            .map { ni ->
-                val isLocal = (destNum == null) || (destNum == ni?.myNodeNum)
-                isLocal to if (isLocal) ni?.pioEnv else null
-            }
+        combine(nodeRepository.myNodeInfo, activeDestNum) { ni, dest ->
+            val isLocal = (dest == null) || (dest == ni?.myNodeNum)
+            isLocal to if (isLocal) ni?.pioEnv else null
+        }
             .distinctUntilChanged()
             .flatMapLatest { (isLocal, pioEnv) ->
                 if (isLocal) {
@@ -1246,6 +1256,9 @@ open class RadioConfigViewModel(
                 // (route empty, isLocal): a remote admin target legitimately answers from a different node.
                 if (requestId != null && !isLateRemoteRead && route.isEmpty() && radioConfigState.value.isLocal) {
                     clearRequestIds()
+                    // A session opened on the connected node by number would otherwise keep addressing the old
+                    // number (and stop counting as local) once the handshake reports the new one.
+                    activeDestNum.value = null
                     connectionManager.startConfigOnly()
                     setResponseStateSuccess()
                 }
