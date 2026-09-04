@@ -222,11 +222,16 @@ Tile Sources</strong> at the foot of the base map picker and paste a URL templat
 
 <p>On <strong>Android</strong>, the same screen also imports a local <code class="language-plaintext highlighter-rouge">.mbtiles</code> archive for fully offline use.</p>
 
-<p>Offline area downloads are <strong>F-Droid only</strong>. Select a vector base map first — Liberty, Positron, or Dark —
-since a download is defined against a vector style and <strong>Start Download</strong> stays disabled over a raster one.
-Frame the area you want on screen, then tap <strong>Start Download</strong> in the layers sheet: that creates a paused
-pack covering the current zoom plus two levels deeper. Press play on the pack’s row to actually download it.
-<strong>Google Play</strong> builds import pre-made MBTiles files instead, and <strong>Desktop</strong> has neither.</p>
+<p>On <strong>F-Droid</strong>, select a vector base map first — Liberty, Positron, or Dark — since a download is defined
+against a vector style and <strong>Start Download</strong> stays disabled over a raster one. Frame the area you want on
+screen, then tap <strong>Start Download</strong> in the layers sheet: that creates a paused pack covering the current zoom
+plus two levels deeper. Press play on the pack’s row to actually download it.</p>
+
+<p>On <strong>Google Play</strong>, the layers sheet’s <strong>Offline Manager</strong> section downloads its own offline regions instead
+— water, roads and administrative boundaries extracted from the public Protomaps basemap dataset, drawn
+directly as map shapes rather than raster tiles. Frame the area you want, tap <strong>Start Download</strong>, and once
+it finishes flip <strong>Show on map</strong> to draw it (it’s off by default so it never surprises you by covering up the
+live map). You can still import a pre-made <code class="language-plaintext highlighter-rouge">.mbtiles</code> archive here too, as before. <strong>Desktop</strong> has neither.</p>
 
 <h3 id="going-offline">Going offline</h3>
 
