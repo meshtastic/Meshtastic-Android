@@ -38,7 +38,9 @@ import org.meshtastic.core.resources.traceroute
 import org.meshtastic.core.resources.view_on_map
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
+import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
+import org.meshtastic.core.ui.util.LocalModemPreset
 import org.meshtastic.core.ui.util.annotateTraceroute
 import org.meshtastic.core.ui.util.toMessageRes
 import org.meshtastic.core.ui.viewmodel.UIViewModel
@@ -71,6 +73,8 @@ fun TracerouteAlertHandler(
                                 statusGreen = colorScheme.StatusGreen,
                                 statusYellow = colorScheme.StatusYellow,
                                 statusOrange = colorScheme.StatusOrange,
+                                statusRed = colorScheme.StatusRed,
+                                modemPreset = LocalModemPreset.current,
                             ),
                         )
                     }
