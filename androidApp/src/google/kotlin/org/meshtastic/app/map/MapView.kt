@@ -102,7 +102,6 @@ import com.google.maps.android.data.renderer.mapview.MapViewRenderer
 import com.google.maps.android.data.renderer.model.DataLayer
 import com.google.maps.android.data.renderer.model.Feature
 import com.google.maps.android.data.renderer.model.Geometry
-import com.google.maps.android.data.renderer.model.LineString
 import com.google.maps.android.data.renderer.model.LineStyle
 import com.google.maps.android.data.renderer.model.MultiGeometry
 import com.google.maps.android.data.renderer.model.PointGeometry
@@ -1553,9 +1552,9 @@ private fun parseMapLayer(layerType: LayerType, stream: InputStream): DataLayer?
  * A parsed custom overlay (KML/KMZ/GeoJSON) plus the machinery to draw it on the map.
  *
  * Each [show] creates a fresh single-use [MapViewRenderer] and [hide] tears it down with [MapViewRenderer.clear].
- * Renderers are deliberately not reused: clear() cancels their icon-loading scope for good, and per-feature removal
- * ([MapViewRenderer.removeFeature]) silently no-ops for MultiGeometry features (the renderer keys rendered map objects
- * by internal per-geometry copies), so clear() is the only teardown that reliably takes everything off the map.
+ * Renderers are deliberately not reused: clear() cancels their icon-loading scope for good, so a hidden layer holds
+ * nothing live and every re-show starts with a working one. Reuse would buy nothing — an opacity change or a refresh
+ * rebuilds this object outright, leaving the visibility toggle as the only re-show path.
  */
 private class RenderedMapLayer(
     private val map: GmsGoogleMap,
@@ -1633,11 +1632,13 @@ private fun RenderedMapLayer.safeHide() {
 /**
  * Apply simplestyle-spec (https://github.com/mapbox/simplestyle-spec) properties to a parsed GeoJSON layer.
  *
- * The maps-utils GeoJSON mapper reads `fill`/`stroke`/`stroke-width`/`fill-opacity`/`stroke-opacity` itself, but misses
- * several things this app relies on for Meshtastic Site Planner coverage exports: the legacy `color` fallback,
- * `rgb()`/`rgba()` colors, a default fill opacity so stacked contour bands read as a gradient, and polygon styling for
- * MultiPolygon features (the mapper styles any multi-geometry as a line). Rebuild each feature's style from its
- * properties so the coverage draws in its dBm colors instead of the default black outline.
+ * The maps-utils GeoJSON mapper reads `fill`/`stroke`/`stroke-width`/`fill-opacity`/`stroke-opacity` itself, but
+ * attaches no style at all to a feature carrying none of those keys — which is every Meshtastic Site Planner coverage
+ * export that predates them, and leaves the opacity slider nothing to fade. So each feature's style is resolved here,
+ * adding what the mapper does not cover: the legacy `color` fallback, `rgb()`/`rgba()` colors, `stroke-opacity` on
+ * lines, a default fill opacity so stacked contour bands read as a gradient, and the imported `icon-url` it has no
+ * marker styling for. Geometry is classified the way the mapper classifies it, except that a point without an
+ * `icon-url` is left alone — the mapper styles no point at all, and there is nothing of ours to add.
  */
 internal fun DataLayer.applySimpleStyleSpec(): DataLayer = copy(features = features.map { it.applySimpleStyleSpec() })
 
@@ -1651,6 +1652,13 @@ internal fun Feature.applySimpleStyleSpec(): Feature {
         }
     val strokeWidth = stringProperty("stroke-width")?.toFloatOrNull() ?: DEFAULT_GEOJSON_STROKE_WIDTH
     return when {
+        // A KML icon reaches us as the `icon-url` the converter writes; the mapper reads no icon property at all, and
+        // sorts a MultiPoint into the line branch below, so without this the map loses the icons it has always drawn.
+        geometry.isPointLike() ->
+            stringProperty(ICON_URL_PROPERTY)?.let(::sanitizeImportedIconUrl)?.let {
+                copy(style = PointStyle(iconUrl = it))
+            } ?: this
+
         geometry.isPolygonal() ->
             copy(
                 style =
@@ -1661,16 +1669,7 @@ internal fun Feature.applySimpleStyleSpec(): Feature {
                 ),
             )
 
-        geometry.isLinear() -> copy(style = LineStyle(color = stroke ?: AndroidColor.BLACK, width = strokeWidth))
-
-        // A KML icon reaches us as the `icon-url` the converter writes; maps-utils' GeoJSON mapper reads no icon
-        // property at all, so without this the Google map would silently lose the icons it has always drawn.
-        geometry.isPointLike() ->
-            stringProperty(ICON_URL_PROPERTY)?.let(::sanitizeImportedIconUrl)?.let {
-                copy(style = PointStyle(iconUrl = it))
-            } ?: this
-
-        else -> this // Mixed geometry collections keep the mapper's style.
+        else -> copy(style = LineStyle(color = stroke ?: AndroidColor.BLACK, width = strokeWidth))
     }
 }
 
@@ -1715,13 +1714,9 @@ private fun Int.scaleAlpha(opacity: Float): Int = AndroidColor.argb(
 private fun Geometry.isPointLike(): Boolean = this is PointGeometry ||
     (this is MultiGeometry && geometries.isNotEmpty() && geometries.all { it is PointGeometry })
 
-/** Polygon or MultiPolygon (a multi-geometry whose members are all polygons). */
+/** Polygon or MultiPolygon — recursive, so a nested collection is classified the way the mapper classifies it. */
 private fun Geometry.isPolygonal(): Boolean =
-    this is ModelPolygon || (this is MultiGeometry && geometries.isNotEmpty() && geometries.all { it is ModelPolygon })
-
-/** LineString or MultiLineString (a multi-geometry whose members are all line strings). */
-private fun Geometry.isLinear(): Boolean =
-    this is LineString || (this is MultiGeometry && geometries.isNotEmpty() && geometries.all { it is LineString })
+    this is ModelPolygon || (this is MultiGeometry && geometries.isNotEmpty() && geometries.all { it.isPolygonal() })
 
 private fun Feature.stringProperty(key: String): String? = properties[key] as? String
 
