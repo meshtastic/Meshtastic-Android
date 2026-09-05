@@ -434,14 +434,30 @@ class TAKMeshIntegration(
     }
 
     /**
-     * v1 receive path (firmware <= 2.7.x): decode bare protobuf [TAKPacket] (no compression) from port 72 (ATAK_PLUGIN)
-     * and convert to CoT for forwarding to attached TAK clients. Kept indefinitely so users on stable 2.7.x firmware
-     * retain PLI + GeoChat interop; new typed payloads (shapes, markers, routes, etc.) still require a v2-capable radio
-     * (firmware >= 2.8.0).
+     * v1 receive path (firmware <= 2.7.x): decode bare protobuf [TAKPacket] from port 72 (ATAK_PLUGIN) and convert to
+     * CoT for forwarding to attached TAK clients. Kept indefinitely so users on stable 2.7.x firmware retain PLI +
+     * GeoChat interop; new typed payloads (shapes, markers, routes, etc.) still require a v2-capable radio (firmware >=
+     * 2.8.0).
+     *
+     * Packets flagged `is_compressed` are skipped — see the comment inline for why the radio delivers them alongside a
+     * decompressed copy.
      */
     private suspend fun handleV1Packet(payload: okio.ByteString) {
         try {
             val takPacket = TAKPacket.ADAPTER.decode(payload)
+            // Firmware <= 2.7.x unishox2-compresses contact.callsign / device_callsign for LoRa transport and sets
+            // is_compressed. On receive it decompresses into a *copy* and sends that to the phone, but the original
+            // compressed packet is delivered as well (AtakPluginModule::alterReceivedProtobuf allocates a copy rather
+            // than rewriting mp in place, as the transmit branch does). We therefore see every PLI twice.
+            //
+            // The compressed twin cannot be rendered here: this module has no unishox2 implementation, so its string
+            // fields decode as replacement characters and ATAK surfaces them as a second contact with an unreadable
+            // callsign, re-broadcast on every PLI and impossible to dismiss. Skip it and keep the decompressed copy,
+            // which carries identical position, team and telemetry.
+            if (takPacket.is_compressed) {
+                Logger.d { "Skip compressed V1 packet; the radio also delivers a decompressed copy" }
+                return
+            }
             val cotMessage = takPacket.toCoTMessage() ?: return
             takServerManager.broadcast(cotMessage)
             Logger.d { "V1 → TAK clients: ${cotMessage.type}" }
