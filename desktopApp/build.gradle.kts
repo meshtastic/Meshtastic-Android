@@ -251,7 +251,7 @@ compose.desktop {
                 menuGroup = "Network"
                 debMaintainer = "developers@meshtastic.org"
                 appCategory = "Network"
-                rpmLicenseType = "GPLv3+"
+                rpmLicenseType = "GPL-3.0-or-later"
             }
 
             // Define target formats based on the current host OS to avoid configuration errors
