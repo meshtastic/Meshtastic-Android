@@ -21,6 +21,7 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.ioDispatcher
@@ -77,16 +78,27 @@ class ContactsViewModel(
         combine(nodeRepository.myNodeInfo, nodeRepository.myId) { info, id -> Pair(info, id) }
 
     /**
+     * Node numbers we hold a public key for. Narrowed to a set and de-duplicated on purpose: the contact list has to
+     * recompute when a key arrives, but observing the whole node DB would rebuild it on every position and telemetry
+     * packet.
+     */
+    private val keyedNodeNums: Flow<Set<Int>> =
+        nodeRepository.nodeDBbyNum
+            .map { db -> db.values.filter { it.hasPKC }.mapTo(mutableSetOf()) { node -> node.num } }
+            .distinctUntilChanged()
+
+    /**
      * Flat contact list (channels + DMs) with empty-channel placeholders merged in, consumed by both ContactsScreen and
      * ShareScreen. ContactsScreen groups it into collapsible Channels/DirectMessages sections at render time.
      */
     val contactList =
-        combine(identityFlow, packetRepository.getContacts(), channels, packetRepository.getContactSettings()) {
-                identity,
-                contacts,
-                channelSet,
-                settings,
-            ->
+        combine(
+            identityFlow,
+            packetRepository.getContacts(),
+            channels,
+            packetRepository.getContactSettings(),
+            keyedNodeNums,
+        ) { identity, contacts, channelSet, settings, keyedNodes ->
             val (myNodeInfo, myId) = identity
             val myNodeNum = myNodeInfo?.myNodeNum ?: return@combine emptyList<Contact>()
             // Add empty channel placeholders (always show Broadcast contacts, even when empty)
@@ -130,7 +142,7 @@ class ContactsViewModel(
                     isPinned = settings[contactKey]?.pinned == true,
                     // Keyless DM threads stay in the list (never hide a conversation) but are flagged: without a
                     // public key the radio refuses to send, the same as an unmessagable node.
-                    isUnmessageable = (user.is_unmessagable ?: false) || (!toBroadcast && !node.hasPKC),
+                    isUnmessageable = (user.is_unmessagable ?: false) || (!toBroadcast && node.num !in keyedNodes),
                     nodeColors =
                     if (!toBroadcast) {
                         node.colors

@@ -30,6 +30,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.domain.usecase.session.EnsureRemoteAdminSessionUseCase
 import org.meshtastic.core.domain.usecase.session.ObserveRemoteAdminSessionStatusUseCase
 import org.meshtastic.core.model.Node
@@ -44,7 +45,10 @@ import org.meshtastic.proto.User
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+
+private val TEST_KEY = ByteArray(32) { 0x2B.toByte() }.toByteString()
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class HandleNodeActionTest {
@@ -90,6 +94,45 @@ class HandleNodeActionTest {
 
         verify { nodeManagementActions.requestRemoveNode(any(), node, any()) }
         assertFalse(navigateUpCalled)
+    }
+
+    @Test
+    fun `direct message to a keyless node with a thread opens that thread`() = runTest(testDispatcher) {
+        // The message action is only visible for a keyless node because a thread exists. getDirectMessageRoute
+        // would fall back to node.channel and open a different, empty conversation.
+        val node = Node(num = 1234, user = User(id = "!000004d2"))
+        val viewModel = createViewModel()
+        var route: String? = null
+
+        handleNodeAction(
+            action = NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.DirectMessage(node)),
+            uiState = NodeDetailUiState(existingContactKey = "8!000004d2"),
+            navigateToMessages = { route = it },
+            onNavigateUp = {},
+            onNavigate = {},
+            viewModel = viewModel,
+        )
+
+        assertEquals("8!000004d2", route)
+    }
+
+    @Test
+    fun `direct message to a keyed node uses the computed route rather than an old thread`() = runTest(testDispatcher) {
+        val node = Node(num = 1234, user = User(id = "!000004d2", public_key = TEST_KEY))
+        val ourNode = Node(num = 9999, user = User(id = "!0000270f", public_key = TEST_KEY))
+        val viewModel = createViewModel()
+        var route: String? = null
+
+        handleNodeAction(
+            action = NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.DirectMessage(node)),
+            uiState = NodeDetailUiState(ourNode = ourNode, existingContactKey = "0!000004d2"),
+            navigateToMessages = { route = it },
+            onNavigateUp = {},
+            onNavigate = {},
+            viewModel = viewModel,
+        )
+
+        assertEquals("8!000004d2", route)
     }
 
     private fun createViewModel() = NodeDetailViewModel(

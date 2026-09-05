@@ -74,9 +74,17 @@ data class NodeDetailUiState(
     val lastRequestNeighborsTime: Long? = null,
     val sessionStatus: SessionStatus = SessionStatus.NoSession,
     val isEnsuringSession: Boolean = false,
+    /**
+     * Contact key of an existing direct-message thread with this node, or null. Held as the key rather than a flag: the
+     * computed route uses [Node.channel] when the node has no public key, which would open a different, empty
+     * conversation instead of the thread the message action was kept visible for.
+     */
+    val existingContactKey: String? = null,
+) {
     /** True when a direct-message thread with this node already exists, keyed either legacy or PKI. */
-    val hasConversation: Boolean = false,
-)
+    val hasConversation: Boolean
+        get() = existingContactKey != null
+}
 
 /**
  * ViewModel for the Node Details screen, coordinating data from the node database, mesh logs, and radio configuration.
@@ -116,13 +124,17 @@ class NodeDetailViewModel(
     val navigationEvents: Flow<Route> = _navigationEvents.receiveAsFlow()
 
     /**
-     * True when a DM thread with [nodeId] already exists. A conversation can be keyed the legacy way (bare node id) or
-     * with the PKI channel prefix, so match on the address rather than a single key spelling.
+     * Contact key of an existing DM thread with [nodeId], or null. A conversation can be keyed the legacy way (bare
+     * node id) or with the PKI channel prefix, so match on the address rather than a single key spelling, and take the
+     * most recently used key when a node has both.
      */
-    private fun hasConversationFlow(nodeId: Int): Flow<Boolean> {
+    private fun existingContactKeyFlow(nodeId: Int): Flow<String?> {
         val nodeIdString = NodeAddress.numToDefaultId(nodeId)
         return packetRepository.getContacts().map { contacts ->
-            contacts.keys.any { ContactKey(it).addressString == nodeIdString }
+            contacts.entries
+                .filter { ContactKey(it.key).addressString == nodeIdString }
+                .maxByOrNull { it.value.time }
+                ?.key
         }
     }
 
@@ -137,12 +149,12 @@ class NodeDetailViewModel(
                         getNodeDetailsUseCase(nodeId),
                         sessionStatusFlow,
                         isEnsuringSession,
-                        hasConversationFlow(nodeId),
-                    ) { base, sessionStatus, ensuring, hasConversation ->
+                        existingContactKeyFlow(nodeId),
+                    ) { base, sessionStatus, ensuring, existingContactKey ->
                         base.copy(
                             sessionStatus = sessionStatus,
                             isEnsuringSession = ensuring,
-                            hasConversation = hasConversation,
+                            existingContactKey = existingContactKey,
                         )
                     }
                 }
