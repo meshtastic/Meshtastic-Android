@@ -77,6 +77,7 @@ import org.meshtastic.core.resources.debug_panel
 import org.meshtastic.core.resources.debug_store_logs_summary
 import org.meshtastic.core.resources.debug_store_logs_title
 import org.meshtastic.core.resources.debug_tab_app_logs
+import org.meshtastic.core.resources.debug_tab_mirror
 import org.meshtastic.core.resources.debug_tab_packets
 import org.meshtastic.core.resources.log_retention_days
 import org.meshtastic.core.resources.log_retention_days_quantity
@@ -184,9 +185,18 @@ fun DebugScreen(onNavigateUp: () -> Unit, viewModel: DebugViewModel) {
                     onClick = { selectedTab = 1 },
                     text = { Text(stringResource(Res.string.debug_tab_app_logs)) },
                 )
+                Tab(
+                    selected = selectedTab == 2,
+                    onClick = { selectedTab = 2 },
+                    text = { Text(stringResource(Res.string.debug_tab_mirror)) },
+                )
             }
             if (selectedTab == 1) {
                 LogcatContent(modifier = Modifier.fillMaxSize())
+                return@Column
+            }
+            if (selectedTab == 2) {
+                DisplayMirrorContent(modifier = Modifier.fillMaxSize())
                 return@Column
             }
             LazyColumn(modifier = Modifier.fillMaxSize(), state = listState) {

@@ -22,6 +22,7 @@ import kotlinx.coroutines.SupervisorJob
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.model.util.isOtaStatusNotification
+import org.meshtastic.core.repository.DisplayMirrorManager
 import org.meshtastic.core.repository.FirmwareUpdateStatusRepository
 import org.meshtastic.core.repository.FromRadioPacketHandler
 import org.meshtastic.core.repository.LockdownCoordinator
@@ -45,6 +46,8 @@ import org.meshtastic.core.resources.key_verification_request_title
 import org.meshtastic.core.resources.key_verification_title
 import org.meshtastic.core.resources.low_entropy_key_title
 import org.meshtastic.proto.ClientNotification
+import org.meshtastic.proto.DisplayFrame
+import org.meshtastic.proto.DisplayPalette
 import org.meshtastic.proto.FromRadio
 
 /** Implementation of [FromRadioPacketHandler] that dispatches [FromRadio] variants to specialized handlers. */
@@ -55,6 +58,7 @@ class FromRadioPacketHandlerImpl(
     private val configFlowManager: Lazy<MeshConfigFlowManager>,
     private val configHandler: Lazy<MeshConfigHandler>,
     private val xmodemManager: Lazy<XModemManager>,
+    private val displayMirrorManager: Lazy<DisplayMirrorManager>,
     private val mqttManager: MqttManager,
     private val packetHandler: PacketHandler,
     private val notificationManager: NotificationManager,
@@ -84,6 +88,8 @@ class FromRadioPacketHandlerImpl(
         val regionPresets = proto.region_presets
         val xmodemPacket = proto.xmodemPacket
         val lockdownStatus = proto.lockdown_status
+        val displayFrame = proto.display_frame
+        val displayPalette = proto.display_palette
 
         when {
             myInfo != null -> configFlowManager.value.handleMyInfo(myInfo, session)
@@ -131,6 +137,10 @@ class FromRadioPacketHandlerImpl(
             xmodemPacket != null ->
                 runIfSessionActive(session, "XModem packet") { xmodemManager.value.handleIncomingXModem(xmodemPacket) }
 
+            displayFrame != null -> handleDisplayFrame(displayFrame, session)
+
+            displayPalette != null -> handleDisplayPalette(displayPalette, session)
+
             lockdownStatus != null ->
                 runIfSessionActive(session, "lockdown status") {
                     lockdownCoordinator.handleLockdownStatus(lockdownStatus)
@@ -146,6 +156,12 @@ class FromRadioPacketHandlerImpl(
             }
         }
     }
+
+    private fun handleDisplayFrame(frame: DisplayFrame, session: RadioSessionContext) =
+        runIfSessionActive(session, "display frame") { displayMirrorManager.value.handleIncomingFrame(frame) }
+
+    private fun handleDisplayPalette(palette: DisplayPalette, session: RadioSessionContext) =
+        runIfSessionActive(session, "display palette") { displayMirrorManager.value.handleIncomingPalette(palette) }
 
     private fun runIfSessionActive(session: RadioSessionContext, operation: String, block: () -> Unit) {
         if (!radioInterfaceService.runIfSessionActive(session, block)) {

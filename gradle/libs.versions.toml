@@ -104,7 +104,9 @@ mqttastic = "0.8.1"
 jmdns = "3.6.3"
 qrcode-kotlin = "4.5.0"
 takpacket-sdk = "0.9.1"
-meshtastic-protobufs = "2.8.0"
+# PoC: DisplayFrame screen mirroring — locally published from protobufs@screen-mirror-poc
+# (requires -PuseMavenLocal or the gradle.properties flag on this branch)
+meshtastic-protobufs = "2.99.0-screen-mirror-poc-SNAPSHOT"
 
 # Gradle Plugins
 ccud = "2.8.0"
