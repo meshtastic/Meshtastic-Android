@@ -28,11 +28,13 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.domain.usecase.session.EnsureRemoteAdminSessionUseCase
 import org.meshtastic.core.domain.usecase.session.EnsureSessionResult
 import org.meshtastic.core.domain.usecase.session.ObserveRemoteAdminSessionStatusUseCase
+import org.meshtastic.core.model.ContactKey
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.SessionStatus
@@ -40,6 +42,7 @@ import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.repository.LocalNodeUnavailableException
 import org.meshtastic.core.repository.PacketQueueRejectedException
+import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.QueryController
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
@@ -71,6 +74,8 @@ data class NodeDetailUiState(
     val lastRequestNeighborsTime: Long? = null,
     val sessionStatus: SessionStatus = SessionStatus.NoSession,
     val isEnsuringSession: Boolean = false,
+    /** True when a direct-message thread with this node already exists, keyed either legacy or PKI. */
+    val hasConversation: Boolean = false,
 )
 
 /**
@@ -85,6 +90,7 @@ class NodeDetailViewModel(
     private val nodeRequestActions: NodeRequestActions,
     private val queryController: QueryController,
     private val getNodeDetailsUseCase: GetNodeDetailsUseCase,
+    private val packetRepository: PacketRepository,
     private val ensureRemoteAdminSession: EnsureRemoteAdminSessionUseCase,
     private val observeRemoteAdminSessionStatus: ObserveRemoteAdminSessionStatusUseCase,
     private val snackbarManager: SnackbarManager,
@@ -109,6 +115,17 @@ class NodeDetailViewModel(
     private val _navigationEvents = Channel<Route>(capacity = Channel.BUFFERED)
     val navigationEvents: Flow<Route> = _navigationEvents.receiveAsFlow()
 
+    /**
+     * True when a DM thread with [nodeId] already exists. A conversation can be keyed the legacy way (bare node id) or
+     * with the PKI channel prefix, so match on the address rather than a single key spelling.
+     */
+    private fun hasConversationFlow(nodeId: Int): Flow<Boolean> {
+        val nodeIdString = NodeAddress.numToDefaultId(nodeId)
+        return packetRepository.getContacts().map { contacts ->
+            contacts.keys.any { ContactKey(it).addressString == nodeIdString }
+        }
+    }
+
     /** Primary UI state stream, combining identity, metrics, and global device metadata. */
     val uiState: StateFlow<NodeDetailUiState> =
         activeNodeId
@@ -116,12 +133,17 @@ class NodeDetailViewModel(
                 if (nodeId == null) {
                     flowOf(NodeDetailUiState())
                 } else {
-                    combine(getNodeDetailsUseCase(nodeId), sessionStatusFlow, isEnsuringSession) {
-                            base,
-                            sessionStatus,
-                            ensuring,
-                        ->
-                        base.copy(sessionStatus = sessionStatus, isEnsuringSession = ensuring)
+                    combine(
+                        getNodeDetailsUseCase(nodeId),
+                        sessionStatusFlow,
+                        isEnsuringSession,
+                        hasConversationFlow(nodeId),
+                    ) { base, sessionStatus, ensuring, hasConversation ->
+                        base.copy(
+                            sessionStatus = sessionStatus,
+                            isEnsuringSession = ensuring,
+                            hasConversation = hasConversation,
+                        )
                     }
                 }
             }

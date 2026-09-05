@@ -128,7 +128,9 @@ class ContactsViewModel(
                     isMuted = settings[contactKey]?.isMuted == true,
                     draft = settings[contactKey]?.draft.orEmpty(),
                     isPinned = settings[contactKey]?.pinned == true,
-                    isUnmessageable = user.is_unmessagable ?: false,
+                    // Keyless DM threads stay in the list (never hide a conversation) but are flagged: without a
+                    // public key the radio refuses to send, the same as an unmessagable node.
+                    isUnmessageable = (user.is_unmessagable ?: false) || (!toBroadcast && !node.hasPKC),
                     nodeColors =
                     if (!toBroadcast) {
                         node.colors

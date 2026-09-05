@@ -594,8 +594,6 @@ encryption_error
 encryption_error_text
 encryption_pkc
 encryption_pkc_text
-encryption_psk
-encryption_psk_text
 env_metrics_log
 ### ENVIRONMENT ###
 environment
@@ -1265,6 +1263,8 @@ no_network_devices_found
 no_network_devices_hint
 no_network_devices_seen
 no_pax_metrics_logs
+no_public_key
+no_public_key_text
 no_usb_devices_found
 no_usb_devices_hint
 no_usb_devices_seen
@@ -1566,6 +1566,7 @@ request_metadata
 request_pax_metrics
 request_power_metrics
 request_telemetry
+request_user_info
 requesting_from
 resend
 reset
@@ -1712,6 +1713,7 @@ share_location
 share_location_description
 share_to
 share_your_location_in_real_time
+shared_contact_no_public_key
 short_name
 should_update
 should_update_firmware

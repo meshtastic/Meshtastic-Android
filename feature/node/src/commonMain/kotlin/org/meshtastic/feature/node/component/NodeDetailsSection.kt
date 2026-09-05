@@ -22,6 +22,7 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
@@ -34,6 +35,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -67,10 +69,13 @@ import org.meshtastic.core.resources.encryption_error
 import org.meshtastic.core.resources.encryption_error_text
 import org.meshtastic.core.resources.error
 import org.meshtastic.core.resources.hops_away
+import org.meshtastic.core.resources.no_public_key
+import org.meshtastic.core.resources.no_public_key_text
 import org.meshtastic.core.resources.node_id
 import org.meshtastic.core.resources.node_number
 import org.meshtastic.core.resources.node_sort_last_heard
 import org.meshtastic.core.resources.public_key
+import org.meshtastic.core.resources.request_user_info
 import org.meshtastic.core.resources.role
 import org.meshtastic.core.resources.rssi
 import org.meshtastic.core.resources.security_signed_node
@@ -92,6 +97,7 @@ import org.meshtastic.core.ui.icon.History
 import org.meshtastic.core.ui.icon.HopCount
 import org.meshtastic.core.ui.icon.KeyOff
 import org.meshtastic.core.ui.icon.Lock
+import org.meshtastic.core.ui.icon.LockOpen
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Notes
 import org.meshtastic.core.ui.icon.Person
@@ -101,6 +107,7 @@ import org.meshtastic.core.ui.icon.Snr
 import org.meshtastic.core.ui.icon.Verified
 import org.meshtastic.core.ui.icon.role
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
+import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 import org.meshtastic.core.ui.util.LocalModemPreset
 import org.meshtastic.core.ui.util.LocalNoiseFloor
 import org.meshtastic.core.ui.util.createClipEntry
@@ -115,6 +122,8 @@ fun NodeDetailsSection(
     modifier: Modifier = Modifier,
     deviceHardware: DeviceHardware? = null,
     reportedTarget: String? = null,
+    isLocal: Boolean = false,
+    onRequestUserInfo: (() -> Unit)? = null,
 ) {
     SectionCard(title = Res.string.details, modifier = modifier) {
         Column(modifier = Modifier.animateContentSize()) {
@@ -130,7 +139,7 @@ fun NodeDetailsSection(
                 )
                 SectionDivider()
             }
-            MainNodeDetails(node)
+            MainNodeDetails(node, isLocal, onRequestUserInfo)
         }
     }
 }
@@ -168,7 +177,7 @@ private fun MismatchKeyWarning(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun MainNodeDetails(node: Node) {
+private fun MainNodeDetails(node: Node, isLocal: Boolean, onRequestUserInfo: (() -> Unit)?) {
     Column {
         NameAndRoleRow(node)
         node.nodeStatus?.let { status ->
@@ -197,6 +206,10 @@ private fun MainNodeDetails(node: Node) {
         if (publicKey.size > 0) {
             SectionDivider()
             PublicKeyItem(publicKey.toByteArray())
+        } else if (!isLocal) {
+            // Our own missing key is not something Request User Info can fix, so the notice is for remote nodes only.
+            SectionDivider()
+            NoPublicKeyItem(onRequestUserInfo)
         }
     }
 }
@@ -440,5 +453,47 @@ private fun PublicKeyItem(publicKeyBytes: ByteArray) {
             style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
             color = if (isMismatch) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
         )
+    }
+}
+
+/**
+ * Shown in place of [PublicKeyItem] for a node whose NodeInfo has not arrived. Without a key the radio refuses a direct
+ * message outright, so the row states that and offers the request that resolves it.
+ */
+@Composable
+private fun NoPublicKeyItem(onRequestUserInfo: (() -> Unit)?) {
+    val label = stringResource(Res.string.no_public_key)
+    val body = stringResource(Res.string.no_public_key_text)
+    val description = stringResource(Res.string.a11y_label_value, label, body)
+
+    Column(
+        modifier =
+        Modifier.fillMaxWidth()
+            .defaultMinSize(minHeight = 48.dp)
+            .padding(horizontal = 20.dp, vertical = 8.dp)
+            .semantics(mergeDescendants = true) { contentDescription = description },
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = MeshtasticIcons.LockOpen,
+                contentDescription = null,
+                modifier = Modifier.size(14.dp),
+                tint = MaterialTheme.colorScheme.StatusYellow,
+            )
+            Spacer(Modifier.width(6.dp))
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontWeight = FontWeight.Bold,
+            )
+        }
+        Spacer(Modifier.height(4.dp))
+        Text(text = body, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface)
+        if (onRequestUserInfo != null) {
+            TextButton(onClick = onRequestUserInfo, contentPadding = PaddingValues(0.dp)) {
+                Text(stringResource(Res.string.request_user_info))
+            }
+        }
     }
 }

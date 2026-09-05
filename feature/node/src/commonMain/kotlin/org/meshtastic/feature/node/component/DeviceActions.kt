@@ -60,7 +60,7 @@ import org.meshtastic.core.ui.icon.VolumeOff
 import org.meshtastic.core.ui.icon.VolumeUp
 import org.meshtastic.feature.node.model.LogsType
 import org.meshtastic.feature.node.model.NodeDetailAction
-import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
+import org.meshtastic.feature.node.model.showsDirectMessageAction
 import org.meshtastic.proto.Telemetry
 
 @Composable
@@ -75,11 +75,12 @@ fun DeviceActions(
     isFahrenheit: Boolean,
     modifier: Modifier = Modifier,
     isLocal: Boolean = false,
+    hasConversation: Boolean = false,
     airQualityHistory: List<Telemetry> = emptyList(),
 ) {
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         SectionCard(title = Res.string.actions) {
-            PrimaryActionsRow(node = node, isLocal = isLocal, onAction = onAction)
+            PrimaryActionsRow(node = node, isLocal = isLocal, hasConversation = hasConversation, onAction = onAction)
 
             if (!isLocal) {
                 SectionDivider(Modifier.padding(vertical = 8.dp))
@@ -103,13 +104,21 @@ fun DeviceActions(
 }
 
 @Composable
-private fun PrimaryActionsRow(node: Node, isLocal: Boolean, onAction: (NodeDetailAction) -> Unit) {
+private fun PrimaryActionsRow(
+    node: Node,
+    isLocal: Boolean,
+    hasConversation: Boolean,
+    onAction: (NodeDetailAction) -> Unit,
+) {
+    // Hidden for a node the radio would refuse to send to: unmessagable, or no public key on file. An existing
+    // thread keeps it visible so a conversation is never stranded.
+    val showMessageAction = !isLocal && node.showsDirectMessageAction(hasConversation)
     Row(
         modifier = Modifier.padding(horizontal = 20.dp).fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        if (!node.isEffectivelyUnmessageable && !isLocal) {
+        if (showMessageAction) {
             Button(
                 onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.DirectMessage(node))) },
                 modifier = Modifier.weight(1f),
@@ -128,11 +137,11 @@ private fun PrimaryActionsRow(node: Node, isLocal: Boolean, onAction: (NodeDetai
 
         OutlinedButton(
             onClick = { onAction(NodeDetailAction.ShareContact) },
-            modifier = if (node.isEffectivelyUnmessageable || isLocal) Modifier.weight(1f) else Modifier,
+            modifier = if (showMessageAction) Modifier else Modifier.weight(1f),
             shape = MaterialTheme.shapes.large,
         ) {
             Icon(MeshtasticIcons.QrCode2, contentDescription = null)
-            if (node.isEffectivelyUnmessageable || isLocal) {
+            if (!showMessageAction) {
                 Spacer(Modifier.width(8.dp))
                 Text(stringResource(Res.string.share_contact))
             }

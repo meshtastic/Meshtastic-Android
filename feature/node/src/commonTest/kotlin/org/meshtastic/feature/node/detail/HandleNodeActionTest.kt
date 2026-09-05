@@ -34,6 +34,7 @@ import org.meshtastic.core.domain.usecase.session.EnsureRemoteAdminSessionUseCas
 import org.meshtastic.core.domain.usecase.session.ObserveRemoteAdminSessionStatusUseCase
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.SessionStatus
+import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.QueryController
 import org.meshtastic.core.ui.util.SnackbarManager
 import org.meshtastic.feature.node.component.NodeMenuAction
@@ -53,6 +54,7 @@ class HandleNodeActionTest {
     private val nodeRequestActions: NodeRequestActions = mock()
     private val queryController: QueryController = mock()
     private val getNodeDetailsUseCase: GetNodeDetailsUseCase = mock()
+    private val packetRepository: PacketRepository = mock()
     private val ensureRemoteAdminSession: EnsureRemoteAdminSessionUseCase = mock()
     private val observeRemoteAdminSessionStatus: ObserveRemoteAdminSessionStatusUseCase = mock()
     private val snackbarManager: SnackbarManager = mock()
@@ -61,6 +63,7 @@ class HandleNodeActionTest {
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         every { getNodeDetailsUseCase(any()) } returns emptyFlow()
+        every { packetRepository.getContacts() } returns flowOf(emptyMap())
         every { observeRemoteAdminSessionStatus(any()) } returns flowOf(SessionStatus.NoSession)
     }
 
@@ -95,6 +98,7 @@ class HandleNodeActionTest {
         nodeRequestActions = nodeRequestActions,
         queryController = queryController,
         getNodeDetailsUseCase = getNodeDetailsUseCase,
+        packetRepository = packetRepository,
         ensureRemoteAdminSession = ensureRemoteAdminSession,
         observeRemoteAdminSessionStatus = observeRemoteAdminSessionStatus,
         snackbarManager = snackbarManager,
