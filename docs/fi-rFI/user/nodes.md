@@ -2,7 +2,7 @@
 title: Laitteet
 parent: Käyttöopas
 nav_order: 4
-last_updated: 2026-08-30
+last_updated: 2026-09-04
 description: Selaa, suodata ja lajittele verkon radioita — tarkastele tietoja, signaalin laatua, rooleja ja pikatoimintoja.
 aliases:
   - radiolista
@@ -100,6 +100,11 @@ Radioluettelosta voit:
   - Reitinselvitys
   - Ohita tai poista ohitus
   - Poista
+
+Touch & hold **your own node** instead and you get one action, **Update status**, which opens the
+User settings screen with the cursor already in the Status Message field. It only appears while the
+radio is connected and running firmware 2.8 or newer — see
+[Settings — Radio & User](settings-radio-user.md) for the field itself.
 
 ## Sharing a Contact
 
