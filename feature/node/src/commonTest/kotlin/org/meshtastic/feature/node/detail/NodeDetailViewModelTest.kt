@@ -45,6 +45,7 @@ import org.meshtastic.core.model.SessionStatus
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.repository.LocalNodeUnavailableException
 import org.meshtastic.core.repository.PacketQueueRejectedException
+import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.QueryController
 import org.meshtastic.feature.node.component.NodeMenuAction
 import org.meshtastic.feature.node.domain.usecase.GetNodeDetailsUseCase
@@ -64,6 +65,7 @@ class NodeDetailViewModelTest {
     private val nodeRequestActions: NodeRequestActions = mock()
     private val queryController: QueryController = mock()
     private val getNodeDetailsUseCase: GetNodeDetailsUseCase = mock()
+    private val packetRepository: PacketRepository = mock()
     private val ensureRemoteAdminSession: EnsureRemoteAdminSessionUseCase = mock()
     private val observeRemoteAdminSessionStatus: ObserveRemoteAdminSessionStatusUseCase = mock()
     private val snackbarManager = RecordingSnackbarManager()
@@ -73,6 +75,7 @@ class NodeDetailViewModelTest {
         Dispatchers.setMain(testDispatcher)
 
         every { getNodeDetailsUseCase(any()) } returns emptyFlow()
+        every { packetRepository.getContacts() } returns flowOf(emptyMap())
         every { observeRemoteAdminSessionStatus(any()) } returns flowOf(SessionStatus.NoSession)
         snackbarManager.messages.clear()
         viewModel = createViewModel(1234)
@@ -84,6 +87,7 @@ class NodeDetailViewModelTest {
         nodeRequestActions = nodeRequestActions,
         queryController = queryController,
         getNodeDetailsUseCase = getNodeDetailsUseCase,
+        packetRepository = packetRepository,
         ensureRemoteAdminSession = ensureRemoteAdminSession,
         observeRemoteAdminSessionStatus = observeRemoteAdminSessionStatus,
         snackbarManager = snackbarManager,

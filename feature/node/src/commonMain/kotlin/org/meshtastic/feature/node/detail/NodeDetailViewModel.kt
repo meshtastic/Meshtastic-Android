@@ -28,11 +28,13 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.domain.usecase.session.EnsureRemoteAdminSessionUseCase
 import org.meshtastic.core.domain.usecase.session.EnsureSessionResult
 import org.meshtastic.core.domain.usecase.session.ObserveRemoteAdminSessionStatusUseCase
+import org.meshtastic.core.model.ContactKey
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.SessionStatus
@@ -40,6 +42,7 @@ import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoute
 import org.meshtastic.core.repository.LocalNodeUnavailableException
 import org.meshtastic.core.repository.PacketQueueRejectedException
+import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.QueryController
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
@@ -71,7 +74,17 @@ data class NodeDetailUiState(
     val lastRequestNeighborsTime: Long? = null,
     val sessionStatus: SessionStatus = SessionStatus.NoSession,
     val isEnsuringSession: Boolean = false,
-)
+    /**
+     * Contact key of an existing direct-message thread with this node, or null. Held as the key rather than a flag: the
+     * computed route uses [Node.channel] when the node has no public key, which would open a different, empty
+     * conversation instead of the thread the message action was kept visible for.
+     */
+    val existingContactKey: String? = null,
+) {
+    /** True when a direct-message thread with this node already exists, keyed either legacy or PKI. */
+    val hasConversation: Boolean
+        get() = existingContactKey != null
+}
 
 /**
  * ViewModel for the Node Details screen, coordinating data from the node database, mesh logs, and radio configuration.
@@ -85,6 +98,7 @@ class NodeDetailViewModel(
     private val nodeRequestActions: NodeRequestActions,
     private val queryController: QueryController,
     private val getNodeDetailsUseCase: GetNodeDetailsUseCase,
+    private val packetRepository: PacketRepository,
     private val ensureRemoteAdminSession: EnsureRemoteAdminSessionUseCase,
     private val observeRemoteAdminSessionStatus: ObserveRemoteAdminSessionStatusUseCase,
     private val snackbarManager: SnackbarManager,
@@ -109,6 +123,21 @@ class NodeDetailViewModel(
     private val _navigationEvents = Channel<Route>(capacity = Channel.BUFFERED)
     val navigationEvents: Flow<Route> = _navigationEvents.receiveAsFlow()
 
+    /**
+     * Contact key of an existing DM thread with [nodeId], or null. A conversation can be keyed the legacy way (bare
+     * node id) or with the PKI channel prefix, so match on the address rather than a single key spelling, and take the
+     * most recently used key when a node has both.
+     */
+    private fun existingContactKeyFlow(nodeId: Int): Flow<String?> {
+        val nodeIdString = NodeAddress.numToDefaultId(nodeId)
+        return packetRepository.getContacts().map { contacts ->
+            contacts.entries
+                .filter { ContactKey(it.key).addressString == nodeIdString }
+                .maxByOrNull { it.value.time }
+                ?.key
+        }
+    }
+
     /** Primary UI state stream, combining identity, metrics, and global device metadata. */
     val uiState: StateFlow<NodeDetailUiState> =
         activeNodeId
@@ -116,12 +145,17 @@ class NodeDetailViewModel(
                 if (nodeId == null) {
                     flowOf(NodeDetailUiState())
                 } else {
-                    combine(getNodeDetailsUseCase(nodeId), sessionStatusFlow, isEnsuringSession) {
-                            base,
-                            sessionStatus,
-                            ensuring,
-                        ->
-                        base.copy(sessionStatus = sessionStatus, isEnsuringSession = ensuring)
+                    combine(
+                        getNodeDetailsUseCase(nodeId),
+                        sessionStatusFlow,
+                        isEnsuringSession,
+                        existingContactKeyFlow(nodeId),
+                    ) { base, sessionStatus, ensuring, existingContactKey ->
+                        base.copy(
+                            sessionStatus = sessionStatus,
+                            isEnsuringSession = ensuring,
+                            existingContactKey = existingContactKey,
+                        )
                     }
                 }
             }

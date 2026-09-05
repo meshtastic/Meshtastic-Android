@@ -40,6 +40,7 @@ import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
@@ -87,6 +88,8 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
+
+private val TEST_PUBLIC_KEY = ByteArray(32) { 0x2B.toByte() }.toByteString()
 
 class RadioControllerImplTest {
 
@@ -441,7 +444,13 @@ class RadioControllerImplTest {
     fun sendSharedContactCallsCommandSenderAdminAwait() = runTest {
         val controller = createController(scope = backgroundScope)
         val nodeNum = 321
-        val user = User(id = NodeAddress.numToDefaultId(nodeNum), long_name = "Remote Node", short_name = "RN")
+        val user =
+            User(
+                id = NodeAddress.numToDefaultId(nodeNum),
+                long_name = "Remote Node",
+                short_name = "RN",
+                public_key = TEST_PUBLIC_KEY,
+            )
         val node = Node(num = nodeNum, user = user, manuallyVerified = true)
         every { nodeRepository.getNode(NodeAddress.numToDefaultId(nodeNum)) } returns node
         everySuspend { commandSender.sendAdminAwait(any(), any(), any(), any()) } returns true
@@ -1505,7 +1514,11 @@ class RadioControllerImplTest {
     fun importContactSendsAdminAndUpdatesNodeManager() = runTest {
         val controller = createController(scope = backgroundScope)
         // A QR-scanned contact arrives with manually_verified = false (proto default).
-        val contact = SharedContact(node_num = 42, user = User(id = "!0000002a", long_name = "Test"))
+        val contact =
+            SharedContact(
+                node_num = 42,
+                user = User(id = "!0000002a", long_name = "Test", public_key = TEST_PUBLIC_KEY),
+            )
 
         var sentMessage: AdminMessage? = null
         everySuspend { commandSender.sendAdmin(any(), any(), any(), any()) } calls
@@ -1527,7 +1540,11 @@ class RadioControllerImplTest {
         val controller = createController(scope = backgroundScope)
         // A contact shared as already verified stays verified on import.
         val contact =
-            SharedContact(node_num = 42, user = User(id = "!0000002a", long_name = "Test"), manually_verified = true)
+            SharedContact(
+                node_num = 42,
+                user = User(id = "!0000002a", long_name = "Test", public_key = TEST_PUBLIC_KEY),
+                manually_verified = true,
+            )
 
         var sentMessage: AdminMessage? = null
         everySuspend { commandSender.sendAdmin(any(), any(), any(), any()) } calls
@@ -1651,5 +1668,29 @@ class RadioControllerImplTest {
         controller.importContact(contact)
 
         verifySuspend(exactly(0)) { commandSender.sendAdmin(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun sendSharedContactRejectsNodeWithNoPublicKey() = runTest {
+        val controller = createController(scope = backgroundScope)
+        val nodeNum = 321
+        val user = User(id = NodeAddress.numToDefaultId(nodeNum), long_name = "Heard Only", short_name = "HO")
+        every { nodeRepository.getNode(NodeAddress.numToDefaultId(nodeNum)) } returns Node(num = nodeNum, user = user)
+
+        val result = controller.sendSharedContact(nodeNum)
+
+        assertFalse(result)
+        verifySuspend(exactly(0)) { commandSender.sendAdminAwait(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun importContactRejectsEmptyPublicKey() = runTest {
+        val controller = createController(scope = backgroundScope)
+        val contact = SharedContact(node_num = 42, user = User(id = "!0000002a", long_name = "Test"))
+
+        controller.importContact(contact)
+
+        verifySuspend(exactly(0)) { commandSender.sendAdmin(any(), any(), any(), any()) }
+        verify(exactly(0)) { nodeManager.handleReceivedUser(any(), any(), any(), any()) }
     }
 }
