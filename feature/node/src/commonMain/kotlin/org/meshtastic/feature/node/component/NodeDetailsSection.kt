@@ -457,8 +457,9 @@ private fun PublicKeyItem(publicKeyBytes: ByteArray) {
 }
 
 /**
- * Shown in place of [PublicKeyItem] for a node whose NodeInfo has not arrived. Without a key the radio refuses a direct
- * message outright, so the row states that and offers the request that resolves it.
+ * Shown in place of [PublicKeyItem] when no public key is on file: either the node's NodeInfo has not arrived, or it
+ * arrived carrying an empty key. Without a key the radio refuses a direct message outright, so the row states that and
+ * offers the request that resolves it.
  */
 @Composable
 private fun NoPublicKeyItem(onRequestUserInfo: (() -> Unit)?) {

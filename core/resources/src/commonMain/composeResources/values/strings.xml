@@ -1764,7 +1764,7 @@
     <string name="share_location_description">Use your phone GPS to send locations to your node instead of using a hardware GPS on your node.</string>
     <string name="share_to">Share to…</string>
     <string name="share_your_location_in_real_time">Share your location in real-time and keep your group coordinated with integrated GPS features.</string>
-    <string name="shared_contact_no_public_key">This contact has no public key. Importing it would clear the key your radio already holds, so it cannot be imported. Ask the sender to share it again once their node has exchanged keys.</string>
+    <string name="shared_contact_no_public_key">This contact has no public key, so it cannot be imported. A contact without one clears any key your radio already holds for that node. Ask the sender to share it again once their node has exchanged keys.</string>
     <string name="short_name">Short Name</string>
     <string name="should_update">To benefit from the latest fixes and features, please update your node firmware.\n\nLatest stable firmware version: %1$s</string>
     <string name="should_update_firmware">Firmware Update Recommended.</string>
