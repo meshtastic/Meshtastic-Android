@@ -49,6 +49,12 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
     /** Support for sharing contact information via QR codes. Supported since firmware v2.6.8. */
     val supportsQrCodeSharing = atLeast(V2_6_8)
 
+    /**
+     * Support for the RemoteShell module (PTY-over-mesh, REMOTE_SHELL_APP portnum). The proto is upstream but no
+     * firmware release ships the module, so it stays gated to [UNRELEASED].
+     */
+    val supportsRemoteShell = atLeast(UNRELEASED)
+
     /** Support for Status Message module. Supported since firmware v2.8.0. */
     val supportsStatusMessage = atLeast(V2_8_0)
 

@@ -1542,6 +1542,9 @@ remote_admin_unreachable
 remote_hardware
 remote_hardware_config
 remote_hardware_enabled
+remote_shell
+remote_shell_open
+remote_shell_requires_session
 remotely_administrating
 ### REMOVE ###
 remove

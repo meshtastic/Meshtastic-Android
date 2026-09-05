@@ -29,6 +29,8 @@ sealed interface NodeDetailAction {
     /** Open the remote-administration screen, ensuring a fresh session passkey first. */
     data class OpenRemoteAdmin(val nodeNum: Int) : NodeDetailAction
 
+    data class OpenRemoteShell(val nodeNum: Int) : NodeDetailAction
+
     /** Force-refresh device metadata (firmware version, edition, role) for the given node. */
     data class RefreshMetadata(val nodeNum: Int) : NodeDetailAction
 
