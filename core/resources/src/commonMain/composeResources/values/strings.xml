@@ -1995,6 +1995,7 @@
     <string name="up_down_select_input_enabled">Up/Down/Select input enabled</string>
     <string name="update_interval">GPS Polling Interval</string>
     <string name="update_interval_seconds">Update interval (seconds)</string>
+    <string name="update_status">Update status</string>
     <string name="updated">Updated</string>
     <string name="uplink_enabled">MQTT Uplink Enabled</string>
     <string name="uplink_feature_description">Messages from the mesh will be sent to the public internet through any node's configured gateway.</string>

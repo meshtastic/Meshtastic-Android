@@ -74,6 +74,7 @@ class NavigationConfigTest {
             SettingsRoute.ModuleConfiguration,
             SettingsRoute.Administration,
             SettingsRoute.User,
+            SettingsRoute.UserStatusMessage,
             SettingsRoute.ChannelConfig,
             SettingsRoute.Device,
             SettingsRoute.Position,

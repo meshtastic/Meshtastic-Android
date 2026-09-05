@@ -1938,6 +1938,7 @@ unset
 up_down_select_input_enabled
 update_interval
 update_interval_seconds
+update_status
 updated
 uplink_enabled
 uplink_feature_description
