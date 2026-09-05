@@ -33,7 +33,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.FocusState
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -213,6 +215,8 @@ fun EditTextPreference(
     // does, instead of only while the field has focus.
     counterVisibleWithinBytes: Int? = null,
     onFocusChanged: (FocusState) -> Unit = {},
+    // [modifier] lands on the wrapping column, so a caller that needs the text field itself focused passes one here.
+    focusRequester: FocusRequester? = null,
     trailingIcon: (@Composable () -> Unit)? = null,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     multiline: Boolean = false,
@@ -222,10 +226,12 @@ fun EditTextPreference(
     Column(modifier = modifier.fillMaxWidth().padding(8.dp)) {
         OutlinedTextField(
             modifier =
-            Modifier.fillMaxWidth().onFocusEvent {
-                isFocused = it.isFocused
-                onFocusChanged(it)
-            },
+            Modifier.fillMaxWidth()
+                .then(focusRequester?.let { Modifier.focusRequester(it) } ?: Modifier)
+                .onFocusEvent {
+                    isFocused = it.isFocused
+                    onFocusChanged(it)
+                },
             value = value,
             singleLine = !multiline,
             maxLines = if (multiline) 5 else 1,

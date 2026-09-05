@@ -59,6 +59,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeListDensity
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.channel_invalid
@@ -83,11 +84,19 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.NoDevice
 import org.meshtastic.core.ui.icon.Nodes
 import org.meshtastic.core.ui.util.parseDeepLinkOrInvalid
+import org.meshtastic.feature.node.component.LocalNodeContextMenu
 import org.meshtastic.feature.node.component.NodeContextMenu
 import org.meshtastic.feature.node.component.NodeCountSummary
 import org.meshtastic.feature.node.component.NodeFilterTextField
 import org.meshtastic.feature.node.component.NodeHopHistogramSheet
 import org.meshtastic.feature.node.component.NodeListHelp
+
+/**
+ * design#115: status message editing is offered on the connected local node only, and only where the firmware has the
+ * module — absent, never disabled, everywhere else.
+ */
+internal fun canEditStatusMessage(node: Node, ourNode: Node?, connectionState: ConnectionState): Boolean =
+    node.num == ourNode?.num && connectionState == ConnectionState.Connected && node.capabilities.supportsStatusMessage
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -101,6 +110,7 @@ fun NodeListScreen(
     activeNodeId: Int? = null,
     onHandleDeepLink: (org.meshtastic.core.common.util.CommonUri, onInvalid: () -> Unit) -> Unit = { _, _ -> },
     onNavigateToConnections: () -> Unit = {},
+    onEditStatusMessage: () -> Unit = {},
 ) {
     val showToast = org.meshtastic.core.ui.util.rememberShowToastResource()
     val scope = rememberCoroutineScope()
@@ -257,8 +267,12 @@ fun NodeListScreen(
                     var expanded by remember { mutableStateOf(false) }
 
                     Box(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
+                        val isThisNode = node.num == ourNode?.num
+                        val canEditStatus = canEditStatusMessage(node, ourNode, connectionState)
+                        // Our own node only earns a long press while it has something to offer, or it opens an
+                        // empty menu.
                         val longClick =
-                            if (node.num != ourNode?.num) {
+                            if (!isThisNode || canEditStatus) {
                                 { expanded = true }
                             } else {
                                 null
@@ -305,8 +319,13 @@ fun NodeListScreen(
                                     deviceImageUrl = deviceImageUrls[node.user.hw_model.value],
                                 )
                         }
-                        val isThisNode = remember(node) { ourNode?.num == node.num }
-                        if (!isThisNode) {
+                        if (canEditStatus) {
+                            LocalNodeContextMenu(
+                                expanded = expanded,
+                                onUpdateStatus = onEditStatusMessage,
+                                onDismiss = { expanded = false },
+                            )
+                        } else if (!isThisNode) {
                             NodeContextMenu(
                                 expanded = expanded,
                                 node = node,

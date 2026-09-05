@@ -25,12 +25,15 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.ImeAction
@@ -73,13 +76,16 @@ private const val STATUS_MESSAGE_MAX_BYTES = 80 // status_message max_size:80
 // The byte counter appears this close to the limit, matching the message composer.
 private const val STATUS_MESSAGE_COUNTER_WITHIN_BYTES = 20
 
+// The field is subcomposed by a LazyColumn, so its node can attach a frame after the request.
+private const val FOCUS_REQUEST_ATTEMPTS = 3
+
 internal const val USER_LONG_NAME_TEST_TAG = "user_long_name"
 internal const val HAM_LONG_NAME_TEST_TAG = "ham_long_name"
 internal const val USER_SHORT_NAME_TEST_TAG = "user_short_name"
 internal const val USER_STATUS_MESSAGE_TEST_TAG = "user_status_message"
 
 @Composable
-fun UserConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
+fun UserConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, focusStatusMessage: Boolean = false) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val destNode by viewModel.destNode.collectAsStateWithLifecycle()
     val userConfig = state.userConfig
@@ -95,6 +101,13 @@ fun UserConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
             statusMessagePrefill(state.moduleConfig.statusmessage, destNode?.nodeStatus)
         }
     var statusMessageInput by rememberSaveable(statusMessage) { mutableStateOf(statusMessage) }
+
+    val statusFocus =
+        rememberStatusMessageFocus(
+            requested = focusStatusMessage,
+            supported = capabilities.supportsStatusMessage,
+            connected = state.connected,
+        )
     // The field is absent without the capability, so the input can only differ from the saved value when shown.
     val statusMessageDirty = statusMessageInput != statusMessage
 
@@ -137,6 +150,7 @@ fun UserConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     StatusMessageField(
                         value = statusMessageInput,
                         enabled = state.connected,
+                        focus = statusFocus,
                         onValueChange = { statusMessageInput = it },
                     )
                 }
@@ -185,6 +199,28 @@ fun UserConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
 }
 
 /**
+ * The field only exists once metadata reports the capability, so [pending] waits for that rather than for the first
+ * frame. It stays true until focus actually lands, and false forever after, so a failed request is retried while a
+ * later config read cannot steal focus back.
+ */
+internal class StatusMessageFocus(val requester: FocusRequester, val pending: Boolean, val onLanded: () -> Unit)
+
+@Composable
+internal fun rememberStatusMessageFocus(
+    requested: Boolean,
+    supported: Boolean,
+    connected: Boolean,
+): StatusMessageFocus {
+    val requester = remember { FocusRequester() }
+    var landed by rememberSaveable { mutableStateOf(false) }
+    return StatusMessageFocus(
+        requester = requester,
+        pending = requested && supported && connected && !landed,
+        onLanded = { landed = true },
+    )
+}
+
+/**
  * The status to edit: the configured value, falling back to the node's broadcast status only while no config has been
  * read, so the operator edits the live value rather than a blank. A config that is present and empty is a status
  * cleared on purpose, and must not be repopulated from a stale broadcast.
@@ -202,8 +238,25 @@ private fun RadioConfigViewModel.save(user: User, userDirty: Boolean, statusMess
 
 /** The node's own status message: a short free-text line other nodes display beside it. */
 @Composable
-private fun StatusMessageField(value: String, enabled: Boolean, onValueChange: (String) -> Unit) {
+internal fun StatusMessageField(
+    value: String,
+    enabled: Boolean,
+    focus: StatusMessageFocus,
+    onValueChange: (String) -> Unit,
+) {
     val focusManager = LocalFocusManager.current
+    var focused by remember { mutableStateOf(false) }
+
+    // Requested from inside the field so its node exists; a request that still lands early fails silently, hence the
+    // frame retry.
+    LaunchedEffect(focus.pending) {
+        if (!focus.pending) return@LaunchedEffect
+        repeat(FOCUS_REQUEST_ATTEMPTS) {
+            focus.requester.requestFocus()
+            if (focused) return@LaunchedEffect
+            withFrameNanos {}
+        }
+    }
 
     EditTextPreference(
         title = stringResource(Res.string.status_message),
@@ -216,6 +269,11 @@ private fun StatusMessageField(value: String, enabled: Boolean, onValueChange: (
         keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
         modifier = Modifier.testTag(USER_STATUS_MESSAGE_TEST_TAG),
+        focusRequester = focus.requester,
+        onFocusChanged = {
+            focused = it.isFocused
+            if (it.isFocused) focus.onLanded()
+        },
         onValueChanged = onValueChange,
         trailingIcon = {
             if (value.isNotEmpty()) {
