@@ -87,7 +87,6 @@
     <!-- ENCRYPTION -->
     <string name="encryption_error">Pa matche kle piblik</string>
     <string name="encryption_pkc">Chifreman Kle Piblik</string>
-    <string name="encryption_psk">Kle Pataje</string>
     <!-- ENVIRONMENT -->
     <string name="error">Erè</string>
     <string name="error_duty_cycle">Limit sik devwa rive. Pa ka voye mesaj kounye a, tanpri eseye ankò pita.</string>

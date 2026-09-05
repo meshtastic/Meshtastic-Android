@@ -179,7 +179,6 @@
     <string name="encryption_enabled">암호화 사용</string>
     <string name="encryption_error">공개 키가 일치하지 않습니다</string>
     <string name="encryption_pkc">공개 키 암호화</string>
-    <string name="encryption_psk">공유 키</string>
     <!-- ENVIRONMENT -->
     <string name="environment">환경</string>
     <string name="environment_metrics_module_enabled">환경 메트릭 모듈 사용</string>

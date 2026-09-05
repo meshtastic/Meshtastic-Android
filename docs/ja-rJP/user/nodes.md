@@ -78,13 +78,13 @@ There is no separate "away" tier.
 
 ノードは、名前の横に暗号化ステータスのアイコンを表示します：
 
-| アイコン     | 意味                                                  |
-| -------- | --------------------------------------------------- |
-| 🔒 ロック   | 通信は PKI（公開鍵基盤）を使用します。本人性が検証された、エンドツーエンドの暗号化です       |
-| 🔓 ロック解除 | 通信は共有チャンネルの PSK を使用します。暗号化されていますが、本人性は個別には検証されていません |
-| ⚠️ 不一致   | 公開鍵の不一致。前回確認時からノードの鍵が変わっています（信頼する前に調べてください）         |
+| アイコン     | 意味                                                                                                                                                |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🔒 ロック   | 通信は PKI（公開鍵基盤）を使用します。本人性が検証された、エンドツーエンドの暗号化です                                                                                                     |
+| 🔓 ロック解除 | No public key has been received for this node, so it cannot be direct messaged — use **Request User Info** on the node detail page to ask for one |
+| ⚠️ 不一致   | 公開鍵の不一致。前回確認時からノードの鍵が変わっています（信頼する前に調べてください）                                                                                                       |
 
-> 💡 **ヒント：** PKI 暗号化（ファームウェア 2.5 以降）は、各ノードが固有の鍵ペアを持つため、チャンネル PSK より強力なセキュリティを提供します。 鍵の不一致の警告が表示された場合、そのノードはリセットされたか、侵害された可能性があります。
+> 💡 **Tip:** Direct messages always use PKI, so the radio needs the other node's public key before it can send one. It refuses the send rather than falling back to channel encryption. Keys arrive inside node info, which is why an open lock usually clears itself once that node is heard from properly. 鍵の不一致の警告が表示された場合、そのノードはリセットされたか、侵害された可能性があります。
 
 To clear a mismatch, first confirm through another trusted channel that the key change was intentional — a factory reset causes one. Then touch & hold the node, choose **Remove**, and let the two radios exchange keys again the next time yours hears it.
 

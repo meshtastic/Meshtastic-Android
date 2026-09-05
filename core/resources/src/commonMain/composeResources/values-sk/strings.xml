@@ -152,7 +152,6 @@
     <!-- ENCRYPTION -->
     <string name="encryption_error">Nezhoda verejného kľúča</string>
     <string name="encryption_pkc">Šifrovanie verejného kľúča</string>
-    <string name="encryption_psk">Zdieľaný kľúč</string>
     <!-- ENVIRONMENT -->
     <string name="environment">Prostredie</string>
     <string name="error">Chyba</string>

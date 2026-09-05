@@ -81,10 +81,10 @@ Radiot näyttävät nimensä vieressä salauksen tilaa kuvaavat kuvakkeet:
 | Kuvake          | Merkitys                                                                                                                                                                       |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | 🔒 Lukittu      | Yhteys käyttää PKI:tä (julkisen avaimen infrastruktuuria) — päästä päähän salattu ja varmennetulla identiteetillä suojattu. |
-| 🔓 Lukitsematon | Yhteys käyttää PKI:tä (julkisen avaimen infrastruktuuria) — päästä päähän salattu ja varmennetulla identiteetillä suojattu. |
+| 🔓 Lukitsematon | No public key has been received for this node, so it cannot be direct messaged — use **Request User Info** on the node detail page to ask for one                              |
 | ⚠️ Ei täsmää    | Julkinen avain ei täsmää — radion avain on muuttunut viime näkemän jälkeen (tutki ennen luottamista).                                       |
 
-> 💡 **Vinkki:** PKI-salaus (laiteohjelmisto 2.5+) tarjoaa vahvemman suojauksen kuin kanavan PSK-avain, koska jokaisella radiolla on oma yksilöllinen avainparinsa. Jos näet avaimen täsmäämättömyysvaroituksen, radio on voitu nollata tai sen tietoturva on voinut vaarantua.
+> 💡 **Tip:** Direct messages always use PKI, so the radio needs the other node's public key before it can send one. It refuses the send rather than falling back to channel encryption. Keys arrive inside node info, which is why an open lock usually clears itself once that node is heard from properly. Jos näet avaimen täsmäämättömyysvaroituksen, radio on voitu nollata tai sen tietoturva on voinut vaarantua.
 
 To clear a mismatch, first confirm through another trusted channel that the key change was intentional — a factory reset causes one. Then touch & hold the node, choose **Remove**, and let the two radios exchange keys again the next time yours hears it.
 

@@ -100,7 +100,6 @@
     <!-- ENCRYPTION -->
     <string name="encryption_error">Ασυμφωνία δημόσιου κλειδιού</string>
     <string name="encryption_pkc">Κρυπτογράφηση Δημόσιου Κλειδιού</string>
-    <string name="encryption_psk">Κοινόχρηστο Κλειδί</string>
     <!-- ENVIRONMENT -->
     <string name="error">Σφάλμα</string>
     <!-- EXPORT -->

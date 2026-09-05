@@ -177,7 +177,6 @@
     <string name="encryption_enabled">Encriptação ativada</string>
     <string name="encryption_error">Incompatibilidade de chave pública</string>
     <string name="encryption_pkc">Criptografia de chave pública</string>
-    <string name="encryption_psk">Chave partilhada</string>
     <!-- ENVIRONMENT -->
     <string name="environment">Ambiente</string>
     <string name="environment_metrics_module_enabled">Módulo de métricas de ambiente ativado</string>
