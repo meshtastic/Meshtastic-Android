@@ -76,10 +76,10 @@ Nodes display encryption status icons next to their name:
  Icon | Meaning |
 ------|---------|
  🔒 Locked | Communication uses PKI (public key infrastructure) — end-to-end encrypted with verified identity |
- 🔓 Unlocked | Communication uses shared channel PSK — encrypted but identity not individually verified |
+ 🔓 Unlocked | No public key has been received for this node, so it cannot be direct messaged — use **Request User Info** on the node detail page to ask for one |
  ⚠️ Mismatch | Public key mismatch — the node's key has changed since last seen (investigate before trusting) |
 
-&gt; 💡 **Tip:** PKI encryption (firmware 2.5+) provides stronger security than channel PSK because each node has a unique key pair. If you see a key mismatch warning, the node may have been reset or compromised.
+&gt; 💡 **Tip:** Direct messages always use PKI, so the radio needs the other node's public key before it can send one. It refuses the send rather than falling back to channel encryption. Keys arrive inside node info, which is why an open lock usually clears itself once that node is heard from properly. If you see a key mismatch warning, the node may have been reset or compromised.
 
 To clear a mismatch, first confirm through another trusted channel that the key change was intentional — a factory reset causes one. Then touch &amp; hold the node, choose **Remove**, and let the two radios exchange keys again the next time yours hears it.
 
