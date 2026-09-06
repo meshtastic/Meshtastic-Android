@@ -83,6 +83,52 @@ fun NodeItemCompleteActivePreview() {
 
 @PreviewLightDark
 @Composable
+fun NodeItemUnheardPreview() {
+    // Heard recently enough to count as online, but not since the radio's LoRa config changed. The unheard marker
+    // has to win over the online tint here: green would claim it is reachable.
+    val unheardNode =
+        previewNodes.minnieMouse.copy(
+            lastHeard = (org.meshtastic.core.common.util.nowSeconds - 300).toInt(),
+            heardOnCurrentLora = false,
+        )
+    AppTheme {
+        Surface {
+            Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+                NodeItem(
+                    thisNode = previewNodes.mickeyMouse,
+                    thatNode = unheardNode,
+                    distanceUnits = MeasurementSystem.METRIC,
+                    tempInFahrenheit = false,
+                    connectionState = ConnectionState.Connected,
+                )
+            }
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+fun NodeItemCompactUnheardPreview() {
+    val unheardNode =
+        previewNodes.minnieMouse.copy(
+            lastHeard = (org.meshtastic.core.common.util.nowSeconds - 300).toInt(),
+            heardOnCurrentLora = false,
+        )
+    AppTheme {
+        Surface {
+            Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+                NodeItemCompact(
+                    thisNode = previewNodes.mickeyMouse,
+                    thatNode = unheardNode,
+                    distanceUnits = MeasurementSystem.METRIC,
+                )
+            }
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
 fun NodeItemSignedPreview() {
     // A node that signs its broadcasts (XEdDSA) AND has a PKC key — green lock + green shield in the security chip.
     val signedNode = previewNodes.minnieMouse.copy(signsPackets = true, publicKey = ByteArray(32) { 1 }.toByteString())

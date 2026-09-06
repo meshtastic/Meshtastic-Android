@@ -74,8 +74,8 @@ import org.meshtastic.core.ui.icon.AirUtilization
 import org.meshtastic.core.ui.icon.ChannelUtilization
 import org.meshtastic.core.ui.icon.MapCompass
 import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.core.ui.icon.SignalOff
 import org.meshtastic.core.ui.icon.Notes
+import org.meshtastic.core.ui.icon.SignalOff
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
 import org.meshtastic.core.ui.util.LocalModemPreset
@@ -461,8 +461,8 @@ private fun MetricsGrid(items: List<@Composable () -> Unit>) {
  * [LastHeardInfo] tinted StatusGreen when [online] — the "online" affordance — rendered plain otherwise. Shared by the
  * complete and compact node rows.
  *
- * When [heardOnCurrentLora] is false the radio has not heard this node since its LoRa settings changed, so it cannot
- * be reached from here. That is a different claim from "offline" and takes precedence: an online node can still be
+ * When [heardOnCurrentLora] is false the radio has not heard this node since its LoRa settings changed, so it cannot be
+ * reached from here. That is a different claim from "offline" and takes precedence: an online node can still be
  * unreachable, and the online tint would say the opposite.
  */
 @Composable

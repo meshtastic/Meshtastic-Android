@@ -444,8 +444,8 @@ private fun NodeListEmptyState(
  * Shown as an offer, never an automatic removal: the app's node DB is deliberately a superset of the radio's, and a
  * node may simply be out of range rather than on another channel — it comes back on its own when next heard.
  *
- * Dismissal is per-composition rather than saved, and re-arms whenever the count rises, so a later config change
- * offers again instead of staying silent.
+ * Dismissal is per-composition rather than saved, and re-arms whenever the count rises, so a later config change offers
+ * again instead of staying silent.
  */
 @Composable
 private fun UnheardNodesBanner(unheardNodes: List<Node>, onRemoveAll: () -> Unit, modifier: Modifier = Modifier) {
@@ -483,9 +483,7 @@ private fun UnheardNodesBanner(unheardNodes: List<Node>, onRemoveAll: () -> Unit
                 )
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.align(Alignment.End)) {
-                TextButton(onClick = { dismissed = true }) {
-                    Text(stringResource(Res.string.nodes_unheard_keep))
-                }
+                TextButton(onClick = { dismissed = true }) { Text(stringResource(Res.string.nodes_unheard_keep)) }
                 TextButton(
                     onClick = {
                         onRemoveAll()
