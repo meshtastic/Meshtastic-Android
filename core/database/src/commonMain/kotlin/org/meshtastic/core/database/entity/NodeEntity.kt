@@ -69,6 +69,7 @@ data class NodeWithRelations(
         metadata = metadata?.proto,
         manuallyVerified = node.manuallyVerified,
         signsPackets = node.signsPackets,
+        heardOnCurrentLora = node.heardOnCurrentLora,
     )
 
     fun toEntity() = with(node) {
@@ -97,6 +98,7 @@ data class NodeWithRelations(
             nodeStatus = nodeStatus,
             lastTransport = lastTransport,
             signsPackets = signsPackets,
+            heardOnCurrentLora = heardOnCurrentLora,
         )
     }
 }
@@ -156,6 +158,12 @@ data class NodeEntity(
     @ColumnInfo(name = "last_transport", defaultValue = "0") var lastTransport: Int = 0,
     /** True when this node signs its broadcasts via XEdDSA (NodeInfo.has_xeddsa_signed). */
     @ColumnInfo(name = "has_xeddsa_signed", defaultValue = "0") var signsPackets: Boolean = false,
+    /**
+     * True when the radio has heard this node over RF since its current LoRa config took effect
+     * (NodeInfo.heard_on_current_lora). Defaults true so nodes stored before this column existed, and nodes from
+     * firmware that does not report it, are never shown as unheard.
+     */
+    @ColumnInfo(name = "heard_on_current_lora", defaultValue = "1") var heardOnCurrentLora: Boolean = true,
 ) {
     val deviceMetrics: org.meshtastic.proto.DeviceMetrics?
         get() = deviceTelemetry.device_metrics
@@ -222,5 +230,6 @@ data class NodeEntity(
         nodeStatus = nodeStatus,
         lastTransport = lastTransport,
         signsPackets = signsPackets,
+        heardOnCurrentLora = heardOnCurrentLora,
     )
 }

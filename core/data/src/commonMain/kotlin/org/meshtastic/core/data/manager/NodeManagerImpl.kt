@@ -33,6 +33,7 @@ import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.common.util.clampTimestampToNow
 import org.meshtastic.core.common.util.crc32
 import org.meshtastic.core.common.util.handledLaunch
+import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
@@ -770,6 +771,11 @@ class NodeManagerImpl(
             // precision-limited channel; do not let it clobber a more precise coordinate we already hold (#6360).
             val timed = position.copy(time = clampTimestampToNow(position.time))
             next = next.copy(position = preservingKnownPrecision(timed, next.position))
+        }
+        // Firmware that predates the field never sends it, and a proto3 bool decodes as false - which would mark
+        // every node unheard. Leave the stored value (which defaults to true) alone unless the node reports it.
+        if (Capabilities(nodeRepository.myNodeInfo.value?.firmwareVersion).supportsHeardOnCurrentLora) {
+            next = next.copy(heardOnCurrentLora = info.heard_on_current_lora)
         }
         return next.copy(
             lastHeard = clampTimestampToNow(info.last_heard),

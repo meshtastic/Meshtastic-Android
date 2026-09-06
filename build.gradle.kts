@@ -86,3 +86,22 @@ plugins.withId("org.meshtastic.flatpak.sources") {
 dependencies {
     dokkaPlugin(libs.dokka.android.documentation.plugin)
 }
+
+// ─── TEMPORARY: protobufs preview for meshtastic/protobufs#1061 ───────────────────────────────────
+// We track an unreleased protobufs build carrying NodeInfo.heard_on_current_lora. takpacket-sdk-jvm
+// transitively pins a tagged protobufs, and Gradle ranks the tag above a -SNAPSHOT qualifier. That
+// downgrades the test *runtime* classpath to the tag while the common-metadata *compile* uses the
+// snapshot, yielding NoSuchFieldError on the proto-generated classes at test runtime
+// (assembleDebug/detekt don't catch it; test/allTests do). Force every protobufs* variant to the
+// preview so compile and runtime agree.
+// REMOVE once protobufs is tagged: set the tag and delete this block.
+allprojects {
+    configurations.all {
+        resolutionStrategy.eachDependency {
+            if (requested.group == "org.meshtastic" && requested.name.startsWith("protobufs")) {
+                useVersion("2.8.0.1-gfc6de8f-SNAPSHOT")
+                because("preview #1061: override takpacket transitive protobufs pin")
+            }
+        }
+    }
+}

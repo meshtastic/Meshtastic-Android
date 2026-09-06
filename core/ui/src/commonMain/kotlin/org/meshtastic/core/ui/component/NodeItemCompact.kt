@@ -327,6 +327,7 @@ private fun CompactHealthRow(
                         online = thatNode.isOnline,
                         contentColor = contentColor,
                         relative = lastHeardIsRelative,
+                        heardOnCurrentLora = thatNode.heardOnCurrentLora,
                     )
                 },
             )

@@ -69,6 +69,8 @@ data class Node(
     val manuallyVerified: Boolean = false,
     /** True when this node signs its broadcasts via XEdDSA (NodeInfo.has_xeddsa_signed). Automatic trust. */
     val signsPackets: Boolean = false,
+    /** False when the radio has not heard this node since its current LoRa config took effect. */
+    val heardOnCurrentLora: Boolean = true,
     val nodeStatus: String? = null,
     /** The transport mechanism this node was last heard over (see [MeshPacket.TransportMechanism]). */
     val lastTransport: Int = 0,

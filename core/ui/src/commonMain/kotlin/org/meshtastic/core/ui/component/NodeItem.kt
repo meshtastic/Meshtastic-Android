@@ -73,8 +73,10 @@ import org.meshtastic.core.ui.icon.AirUtilization
 import org.meshtastic.core.ui.icon.ChannelUtilization
 import org.meshtastic.core.ui.icon.MapCompass
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.SignalOff
 import org.meshtastic.core.ui.icon.Notes
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
+import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
 import org.meshtastic.core.ui.util.LocalModemPreset
 
 private const val GRID_COLUMNS = 3
@@ -457,9 +459,36 @@ private fun MetricsGrid(items: List<@Composable () -> Unit>) {
 /**
  * [LastHeardInfo] tinted StatusGreen when [online] — the "online" affordance — rendered plain otherwise. Shared by the
  * complete and compact node rows.
+ *
+ * When [heardOnCurrentLora] is false the radio has not heard this node since its LoRa settings changed, so it cannot
+ * be reached from here. That is a different claim from "offline" and takes precedence: an online node can still be
+ * unreachable, and the online tint would say the opposite.
  */
 @Composable
-internal fun StatusAwareLastHeard(lastHeard: Int, online: Boolean, contentColor: Color, relative: Boolean = true) {
+internal fun StatusAwareLastHeard(
+    lastHeard: Int,
+    online: Boolean,
+    contentColor: Color,
+    relative: Boolean = true,
+    heardOnCurrentLora: Boolean = true,
+) {
+    if (!heardOnCurrentLora) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            Icon(
+                imageVector = MeshtasticIcons.SignalOff,
+                contentDescription = stringResource(Res.string.node_not_heard_on_current_lora),
+                tint = MaterialTheme.colorScheme.StatusOrange,
+                modifier = Modifier.size(14.dp),
+            )
+            LastHeardInfo(
+                lastHeard = lastHeard,
+                showLabel = false,
+                relative = relative,
+                contentColor = MaterialTheme.colorScheme.StatusOrange,
+            )
+        }
+        return
+    }
     LastHeardInfo(
         lastHeard = lastHeard,
         showLabel = false,
@@ -535,6 +564,7 @@ private fun NodeItemHeader(
                     lastHeard = thatNode.lastHeard,
                     online = !isThisNode && thatNode.isOnline,
                     contentColor = contentColor,
+                    heardOnCurrentLora = isThisNode || thatNode.heardOnCurrentLora,
                 )
             }
         }

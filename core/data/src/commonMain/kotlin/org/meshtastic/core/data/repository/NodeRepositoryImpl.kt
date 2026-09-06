@@ -300,5 +300,6 @@ class NodeRepositoryImpl(
         nodeStatus = nodeStatus,
         lastTransport = lastTransport,
         signsPackets = signsPackets,
+        heardOnCurrentLora = heardOnCurrentLora,
     )
 }
