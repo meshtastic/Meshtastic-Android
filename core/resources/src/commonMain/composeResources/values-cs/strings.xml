@@ -545,8 +545,6 @@
     <string name="encryption_error_text">Veřejný klíč neodpovídá uloženému klíči. Můžete uzel odebrat a nechat jej znovu vyměnit klíče, ale může to znamenat bezpečnostní problém. Kontaktujte uživatele jiným důvěryhodným kanálem a ověřte, zda ke změně klíče došlo v důsledku továrního resetu nebo jiné úmyslné akce.</string>
     <string name="encryption_pkc">Šifrování veřejného klíče</string>
     <string name="encryption_pkc_text">Přímé zprávy používají novou infrastrukturu veřejných klíčů pro šifrování.</string>
-    <string name="encryption_psk">Sdílený klíč</string>
-    <string name="encryption_psk_text">Lze odesílat a přijímat pouze kanálové zprávy. Přímé zprávy vyžadují funkci infrastruktury veřejných klíčů (PKI) ve firmwaru verze 2.5 a vyšší.</string>
     <string name="env_metrics_log">Metriky prostředí</string>
     <!-- ENVIRONMENT -->
     <string name="environment">Životní prostředí</string>

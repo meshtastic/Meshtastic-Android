@@ -571,8 +571,6 @@
     <string name="encryption_error_text">La chiave pubblica non corrisponde alla chiave salvata. È possibile rimuovere il nodo e lasciarlo scambiare le chiavi nuovamente, ma questo può indicare un problema di sicurezza più serio. Contattare l'utente attraverso un altro canale attendibile, per determinare se il cambiamento di chiave è dovuto a un ripristino di fabbrica o ad altre azioni intenzionali.</string>
     <string name="encryption_pkc">Crittografia a Chiave Pubblica</string>
     <string name="encryption_pkc_text">I messaggi diretti stanno usando la crittografia basata sulla nuova infrastruttura a chiave pubblica.</string>
-    <string name="encryption_psk">Chiave Condivisa</string>
-    <string name="encryption_psk_text">Solo i messaggi del canale possono essere inviati/ricevuti. I messaggi diretti necessitano dell'Infrastruttura a Chiave Pubblica, presente nel firmware 2.5+.</string>
     <string name="env_metrics_log">Metriche Ambientali</string>
     <!-- ENVIRONMENT -->
     <string name="environment">Ambiente</string>

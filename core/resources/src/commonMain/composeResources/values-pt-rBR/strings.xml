@@ -255,7 +255,6 @@
     <string name="encryption_enabled">Criptografia ativada</string>
     <string name="encryption_error">Chave pública não confere</string>
     <string name="encryption_pkc">Criptografia de Chave Pública</string>
-    <string name="encryption_psk">Chave Compartilhada</string>
     <!-- ENVIRONMENT -->
     <string name="environment">Ambiente</string>
     <string name="environment_metrics_module_enabled">Módulo de métricas do ambiente ativado</string>

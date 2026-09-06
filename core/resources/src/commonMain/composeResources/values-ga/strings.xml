@@ -90,7 +90,6 @@
     <!-- ENCRYPTION -->
     <string name="encryption_error">Mícomhoiriúnacht na heochrach phoiblí</string>
     <string name="encryption_pkc">Cóid Poiblí Eochair</string>
-    <string name="encryption_psk">Eochair roinnte</string>
     <!-- ENVIRONMENT -->
     <string name="error">Earráid</string>
     <string name="error_duty_cycle">Teorainn na Ciorcad Oibre bainte. Ní féidir teachtaireachtaí a sheoladh faoi láthair, déan iarracht arís níos déanaí.</string>

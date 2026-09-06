@@ -145,7 +145,6 @@
     <string name="encryption_enabled">Encryptie ingeschakeld</string>
     <string name="encryption_error">Publieke sleutel komt niet overeen</string>
     <string name="encryption_pkc">Publieke sleutel encryptie</string>
-    <string name="encryption_psk">Gedeelde Key</string>
     <!-- ENVIRONMENT -->
     <string name="environment">Omgeving</string>
     <string name="error">Fout</string>

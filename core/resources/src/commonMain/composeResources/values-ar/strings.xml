@@ -90,7 +90,6 @@
     <!-- ENCRYPTION -->
     <string name="encryption_error">المفتاح العام غير متطابق</string>
     <string name="encryption_pkc">تشفير المفتاح العام</string>
-    <string name="encryption_psk">مفتاح مشترك</string>
     <!-- ENVIRONMENT -->
     <string name="error">غلط</string>
     <!-- EXPORT -->

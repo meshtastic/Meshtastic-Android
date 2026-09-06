@@ -608,8 +608,6 @@
     <string name="encryption_error_text">Avalikvõti ei ühti salvestatud võtmele. Võid sõlme eemaldada ja lasta uuesti võtmeid vahetada, kuid see võib viidata tõsisemale turvaprobleemile. Võtke kasutajaga ühendust mõne muu usaldusväärse kanali kaudu, et teha kindlaks, kas võtmevahetus oli tingitud tehaseseadete taastamisest või muust tahtlikust toimingust.</string>
     <string name="encryption_pkc">Avaliku võtme krüpteerimine</string>
     <string name="encryption_pkc_text">Otsesõnumid kasutavad krüpteerimiseks uut avaliku võtme infrastruktuuri.</string>
-    <string name="encryption_psk">Jagatud võti</string>
-    <string name="encryption_psk_text">Saata/vastuvõtta saab ainult kanali-sõnumeid. Otsesõnumid nõuavad avaliku võtme infrastruktuuri funktsiooni püsivara versioonist 2.5 alates.</string>
     <string name="env_metrics_log">Keskkonnamõõdikud</string>
     <!-- ENVIRONMENT -->
     <string name="environment">Keskkond</string>
