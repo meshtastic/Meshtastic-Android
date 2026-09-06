@@ -337,6 +337,43 @@ class MeshtasticDatabaseMigrationTest {
     }
 
     /** Reads one column of every row as a string, with SQL NULL surfaced as Kotlin null. */
+    /**
+     * 57→58 adds `nodes.heard_on_current_lora`, which gates whether a node is shown as unreachable and offered for
+     * removal. It defaults to 1 precisely so rows written before the column existed are never flagged: a default of 0
+     * would present every pre-upgrade node as unheard on first launch. This proves both the default and that existing
+     * node data survives the addition.
+     */
+    @Test
+    fun heardOnCurrentLoraColumnDefaultsToHeardAndPreservesNodes() = runTest {
+        helper.createDatabase(HEARD_ON_LORA_FROM_VERSION).use { connection ->
+            connection.execSQL(
+                "INSERT INTO nodes (num, long_name, short_name, last_heard, channel, via_mqtt, hops_away, " +
+                    "is_favorite, is_ignored, is_muted, notes) " +
+                    "VALUES (42, 'Minnie Mouse', 'MiMo', 1000, 0, 0, 1, 1, 0, 0, 'keep me')",
+            )
+            connection.execSQL(
+                "INSERT INTO nodes (num, long_name, short_name, last_heard) VALUES (43, 'Mickey', 'MiMo2', 2000)",
+            )
+        }
+
+        helper.runMigrationsAndValidate(
+            HEARD_ON_LORA_TO_VERSION,
+            listOf(MeshtasticDatabase.MIGRATION_52_53),
+        ).use { connection ->
+            // Both rows survive, and neither reads as unheard.
+            assertEquals(listOf("42", "43"), queryColumn(connection, "SELECT num FROM nodes ORDER BY num"))
+            assertEquals(
+                listOf("1", "1"),
+                queryColumn(connection, "SELECT heard_on_current_lora FROM nodes ORDER BY num"),
+            )
+            // Pre-existing values are untouched by the column addition.
+            assertEquals(listOf("Minnie Mouse"), queryColumn(connection, "SELECT long_name FROM nodes WHERE num = 42"))
+            assertEquals(listOf("keep me"), queryColumn(connection, "SELECT notes FROM nodes WHERE num = 42"))
+            assertEquals(listOf("1"), queryColumn(connection, "SELECT is_favorite FROM nodes WHERE num = 42"))
+            assertEquals(listOf("1000"), queryColumn(connection, "SELECT last_heard FROM nodes WHERE num = 42"))
+        }
+    }
+
     private fun queryColumn(connection: SQLiteConnection, sql: String): List<String?> =
         connection.prepare(sql).use { statement ->
             buildList {
@@ -363,6 +400,8 @@ class MeshtasticDatabaseMigrationTest {
         const val DRAFT_COLUMN_TO_VERSION = 56
         const val PINNED_COLUMN_FROM_VERSION = 56
         const val PINNED_COLUMN_TO_VERSION = 57
+        const val HEARD_ON_LORA_FROM_VERSION = 57
+        const val HEARD_ON_LORA_TO_VERSION = 58
 
         /** Room's runtime FTS content-sync triggers, verbatim from the generated MeshtasticDatabase_Impl. */
         val FTS_SYNC_TRIGGERS =

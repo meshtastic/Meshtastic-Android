@@ -58,5 +58,6 @@ open class GetFilteredNodesUseCase constructor(private val nodeRepository: NodeR
                     }
                 }
                 .filter { node -> if (filter.excludeMqtt) !node.viaMqtt else true }
+                .filter { node -> if (filter.excludeUnheard) node.heardOnCurrentLora else true }
         }
 }

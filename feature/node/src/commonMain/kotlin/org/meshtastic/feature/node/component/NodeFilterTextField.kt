@@ -64,6 +64,7 @@ import org.meshtastic.core.resources.clear
 import org.meshtastic.core.resources.desc_node_filter_clear
 import org.meshtastic.core.resources.node_filter_exclude_infrastructure
 import org.meshtastic.core.resources.node_filter_exclude_mqtt
+import org.meshtastic.core.resources.node_filter_exclude_unheard
 import org.meshtastic.core.resources.node_filter_ignored
 import org.meshtastic.core.resources.node_filter_include_unknown
 import org.meshtastic.core.resources.node_filter_only_direct
@@ -99,6 +100,8 @@ fun NodeFilterTextField(
     ignoredNodeCount: Int,
     excludeMqtt: Boolean,
     onToggleExcludeMqtt: () -> Unit,
+    excludeUnheard: Boolean,
+    onToggleExcludeUnheard: () -> Unit,
 ) {
     Column(modifier = modifier.background(MaterialTheme.colorScheme.background)) {
         Row {
@@ -123,6 +126,8 @@ fun NodeFilterTextField(
                     ignoredNodeCount = ignoredNodeCount,
                     excludeMqtt = excludeMqtt,
                     onToggleExcludeMqtt = onToggleExcludeMqtt,
+                    excludeUnheard = excludeUnheard,
+                    onToggleExcludeUnheard = onToggleExcludeUnheard,
                 ),
             )
         }
@@ -160,6 +165,8 @@ data class NodeFilterToggles(
     val ignoredNodeCount: Int,
     val excludeMqtt: Boolean,
     val onToggleExcludeMqtt: () -> Unit,
+    val excludeUnheard: Boolean,
+    val onToggleExcludeUnheard: () -> Unit,
 )
 
 @Composable
@@ -291,6 +298,12 @@ private fun NodeSortButton(
                 text = stringResource(Res.string.node_filter_exclude_mqtt),
                 checked = toggles.excludeMqtt,
                 onClick = toggles.onToggleExcludeMqtt,
+            )
+
+            DropdownMenuCheck(
+                text = stringResource(Res.string.node_filter_exclude_unheard),
+                checked = toggles.excludeUnheard,
+                onClick = toggles.onToggleExcludeUnheard,
             )
         }
     }

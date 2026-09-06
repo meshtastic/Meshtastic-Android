@@ -1275,6 +1275,7 @@ node_count_template
 node_count_total
 node_filter_exclude_infrastructure
 node_filter_exclude_mqtt
+node_filter_exclude_unheard
 node_filter_ignored
 node_filter_include_unknown
 node_filter_only_direct

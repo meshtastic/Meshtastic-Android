@@ -281,6 +281,8 @@ fun NodeListScreen(
                             ignoredNodeCount = ignoredNodeCount,
                             excludeMqtt = state.filter.excludeMqtt,
                             onToggleExcludeMqtt = { viewModel.nodeFilterPreferences.toggleExcludeMqtt() },
+                            excludeUnheard = state.filter.excludeUnheard,
+                            onToggleExcludeUnheard = { viewModel.nodeFilterPreferences.toggleExcludeUnheard() },
                         )
                     }
                 }

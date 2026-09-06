@@ -127,7 +127,12 @@ interface UiPrefs {
 
     val excludeMqtt: StateFlow<Boolean>
 
+    /** Hide nodes not heard since the radio's current LoRa config took effect. */
+    val excludeUnheard: StateFlow<Boolean>
+
     fun setExcludeMqtt(value: Boolean)
+
+    fun setExcludeUnheard(value: Boolean)
 
     val hasShownNotPairedWarning: StateFlow<Boolean>
 

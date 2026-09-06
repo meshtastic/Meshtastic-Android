@@ -117,11 +117,12 @@ class NodeListViewModel(
         }
 
     private val nodeFilter: Flow<NodeFilterState> =
-        combine(_nodeFilterText, filterToggles, nodeFilterPreferences.excludeMqtt) {
-                filterText,
+        combine(
+                _nodeFilterText,
                 filterToggles,
-                excludeMqtt,
-            ->
+                nodeFilterPreferences.excludeMqtt,
+                nodeFilterPreferences.excludeUnheard,
+            ) { filterText, filterToggles, excludeMqtt, excludeUnheard ->
             NodeFilterState(
                 filterText = filterText,
                 includeUnknown = filterToggles.includeUnknown,
@@ -130,6 +131,7 @@ class NodeListViewModel(
                 onlyDirect = filterToggles.onlyDirect,
                 showIgnored = filterToggles.showIgnored,
                 excludeMqtt = excludeMqtt,
+                excludeUnheard = excludeUnheard,
             )
         }
 
@@ -246,6 +248,7 @@ data class NodeFilterState(
     val onlyDirect: Boolean = false,
     val showIgnored: Boolean = false,
     val excludeMqtt: Boolean = false,
+    val excludeUnheard: Boolean = false,
 ) {
     /** True if any user-applied filter is narrowing the visible node set. Unknown nodes are shown unless opted out. */
     val isActive: Boolean
@@ -255,7 +258,8 @@ data class NodeFilterState(
                 excludeInfrastructure ||
                 onlyOnline ||
                 onlyDirect ||
-                excludeMqtt
+                excludeMqtt ||
+                excludeUnheard
 }
 
 data class NodeFilterToggles(

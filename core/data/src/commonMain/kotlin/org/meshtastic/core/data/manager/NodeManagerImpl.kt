@@ -428,7 +428,12 @@ class NodeManagerImpl(
             // process-wide nodeDBbyNum StateFlow. The StateFlow is a stateIn cache over SharingStarted.Eagerly and
             // can briefly retain the PREVIOUS database's map after a currentDb switch, which would resurrect retired
             // or stale rows on the new session.
-            val snapshot = nodeRepository.getNodeDbSnapshot()
+            // Cached rows may carry a flag written by a different radio. The connected device's NodeInfo dump
+            // repopulates real values when it reports them, so "heard" is the only safe resting state here.
+            val snapshot =
+                nodeRepository.getNodeDbSnapshot().mapValues { (_, node) ->
+                    if (reportsHeardOnCurrentLora) node else node.copy(heardOnCurrentLora = true)
+                }
             val persistedLocalNum = nodeRepository.myNodeInfo.value?.myNodeNum
             nodeState.update { state ->
                 if (generation != sessionGeneration.value) {
@@ -782,10 +787,9 @@ class NodeManagerImpl(
             next = next.copy(position = preservingKnownPrecision(timed, next.position))
         }
         // Firmware that predates the field never sends it, and a proto3 bool decodes as false - which would mark
-        // every node unheard. Leave the stored value (which defaults to true) alone unless the node reports it.
-        if (reportsHeardOnCurrentLora) {
-            next = next.copy(heardOnCurrentLora = info.heard_on_current_lora)
-        }
+        // every node unheard. Normalize rather than skip: a value persisted by a previous radio must not survive
+        // into a session whose firmware cannot report it.
+        next = next.copy(heardOnCurrentLora = !reportsHeardOnCurrentLora || info.heard_on_current_lora)
         return next.copy(
             lastHeard = clampTimestampToNow(info.last_heard),
             deviceMetrics = info.device_metrics ?: next.deviceMetrics,

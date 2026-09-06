@@ -30,6 +30,7 @@ open class NodeFilterPreferences constructor(private val uiPrefs: UiPrefs) {
     open val onlyDirect = uiPrefs.onlyDirect
     open val showIgnored = uiPrefs.showIgnored
     open val excludeMqtt = uiPrefs.excludeMqtt
+    open val excludeUnheard = uiPrefs.excludeUnheard
 
     // Node list layout preferences
     open val nodeListDensity = uiPrefs.nodeListDensity
@@ -112,5 +113,9 @@ open class NodeFilterPreferences constructor(private val uiPrefs: UiPrefs) {
 
     open fun toggleExcludeMqtt() {
         uiPrefs.setExcludeMqtt(!excludeMqtt.value)
+    }
+
+    open fun toggleExcludeUnheard() {
+        uiPrefs.setExcludeUnheard(!excludeUnheard.value)
     }
 }
