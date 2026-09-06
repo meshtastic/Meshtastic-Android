@@ -55,6 +55,7 @@ class NodeListViewModelTest {
     private val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
     private val connectionStateProvider: ConnectionStateProvider = mock(MockMode.autofill)
     private val nodeFilterPreferences: NodeFilterPreferences = mock(MockMode.autofill)
+    private val nodeManager: NodeManager = mock(MockMode.autofill)
     private val localeUnitsProvider = FakeLocaleUnitsProvider()
     private val nodeManagementActions: NodeManagementActions = mock(MockMode.autofill)
     private val nodeRequestActions: NodeRequestActions = mock(MockMode.autofill)
@@ -78,6 +79,7 @@ class NodeListViewModelTest {
         every { nodeFilterPreferences.showIgnored } returns MutableStateFlow(false)
         every { nodeFilterPreferences.excludeMqtt } returns MutableStateFlow(false)
         every { nodeFilterPreferences.excludeUnheard } returns MutableStateFlow(false)
+        every { nodeManager.reportsHeardOnCurrentLora } returns MutableStateFlow(true)
 
         every { getFilteredNodesUseCase(any(), any()) } returns MutableStateFlow(emptyList())
 
@@ -96,6 +98,7 @@ class NodeListViewModelTest {
         nodeRequestActions = nodeRequestActions,
         getFilteredNodesUseCase = getFilteredNodesUseCase,
         nodeFilterPreferences = nodeFilterPreferences,
+        nodeManager = nodeManager,
         localeUnitsProvider = localeUnitsProvider,
     )
 

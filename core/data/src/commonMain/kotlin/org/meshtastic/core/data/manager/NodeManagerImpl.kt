@@ -336,17 +336,19 @@ class NodeManagerImpl(
         firmwareEdition.value = edition
     }
 
-    // Session state rather than a lookup per node: applyNodeInfo runs once for every node in the DB dump, and it
-    // stays a pure mapper this way.
-    private var reportsHeardOnCurrentLora = false
+    // A StateFlow rather than a plain field: setFirmwareVersion, clear, loadCachedNodeDB and the install paths run
+    // on different coroutines, so reads need atomic visibility, and the UI needs to observe it to suppress the
+    // unheard consumers until the database normalization has landed.
+    override val reportsHeardOnCurrentLora = MutableStateFlow(false)
 
     override fun setFirmwareVersion(version: String?, session: RadioSessionContext?) {
-        reportsHeardOnCurrentLora = Capabilities(version).supportsHeardOnCurrentLora
+        val supported = Capabilities(version).supportsHeardOnCurrentLora
+        reportsHeardOnCurrentLora.value = supported
         // Normalize in the database, not just in nodeState: the node list renders from the repository flows, which
         // read rows directly and would otherwise still see a false written by a radio whose firmware could report it.
         // Bound to the originating session lease: a delayed write from a superseded session would otherwise resolve
         // the next session's database and clear flags that session had legitimately set.
-        if (!reportsHeardOnCurrentLora) {
+        if (!supported) {
             radioInterfaceService.launchSessionWork(scope, session) { nodeRepository.markAllHeardOnCurrentLora() }
         }
     }
@@ -439,7 +441,7 @@ class NodeManagerImpl(
             // repopulates real values when it reports them, so "heard" is the only safe resting state here.
             val snapshot =
                 nodeRepository.getNodeDbSnapshot().mapValues { (_, node) ->
-                    if (reportsHeardOnCurrentLora) node else node.copy(heardOnCurrentLora = true)
+                    if (reportsHeardOnCurrentLora.value) node else node.copy(heardOnCurrentLora = true)
                 }
             val persistedLocalNum = nodeRepository.myNodeInfo.value?.myNodeNum
             nodeState.update { state ->
@@ -495,7 +497,7 @@ class NodeManagerImpl(
         myNodeNum.value = null
         myDeviceId.value = null
         firmwareEdition.value = null
-        reportsHeardOnCurrentLora = false
+        reportsHeardOnCurrentLora.value = false
         _connectionIdentity.value = null
     }
 
@@ -769,13 +771,13 @@ class NodeManagerImpl(
         node.copy(nodeStatus = status?.takeIf { it.isNotEmpty() })
 
     override fun installNodeInfo(info: ProtoNodeInfo) {
-        val reportsHeard = reportsHeardOnCurrentLora
+        val reportsHeard = reportsHeardOnCurrentLora.value
         // Stage-2 configuration installation persists the complete node snapshot through installConfig.
         updateNodeState(info.num, channel = 0) { node -> applyNodeInfo(node, info, reportsHeard) }
     }
 
     override suspend fun installNodeInfoAndPersist(info: ProtoNodeInfo) {
-        val reportsHeard = reportsHeardOnCurrentLora
+        val reportsHeard = reportsHeardOnCurrentLora.value
         updateNodeAndPersist(info.num) { node -> applyNodeInfo(node, info, reportsHeard) }
     }
 

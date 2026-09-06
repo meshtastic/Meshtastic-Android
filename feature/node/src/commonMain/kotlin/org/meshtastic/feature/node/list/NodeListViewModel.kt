@@ -39,6 +39,7 @@ import org.meshtastic.core.model.NodeSortOption
 import org.meshtastic.core.repository.AdminController
 import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.DeviceHardwareRepository
+import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
@@ -64,6 +65,7 @@ class NodeListViewModel(
     private val nodeRequestActions: NodeRequestActions,
     private val getFilteredNodesUseCase: GetFilteredNodesUseCase,
     val nodeFilterPreferences: NodeFilterPreferences,
+    private val nodeManager: NodeManager,
     localeUnitsProvider: LocaleUnitsProvider,
 ) : ViewModel() {
 
@@ -122,7 +124,8 @@ class NodeListViewModel(
             filterToggles,
             nodeFilterPreferences.excludeMqtt,
             nodeFilterPreferences.excludeUnheard,
-        ) { filterText, filterToggles, excludeMqtt, excludeUnheard ->
+            nodeManager.reportsHeardOnCurrentLora,
+        ) { filterText, filterToggles, excludeMqtt, excludeUnheard, reportsHeard ->
             NodeFilterState(
                 filterText = filterText,
                 includeUnknown = filterToggles.includeUnknown,
@@ -131,7 +134,9 @@ class NodeListViewModel(
                 onlyDirect = filterToggles.onlyDirect,
                 showIgnored = filterToggles.showIgnored,
                 excludeMqtt = excludeMqtt,
-                excludeUnheard = excludeUnheard,
+                // Suppressed until the firmware proves it reports the field, so a stale false cannot hide nodes
+                // while the database normalization is still in flight.
+                excludeUnheard = excludeUnheard && reportsHeard,
             )
         }
 
@@ -156,10 +161,21 @@ class NodeListViewModel(
     val nodeList: StateFlow<List<Node>> =
         combine(nodeFilter, nodeSortOption, ::Pair)
             .flatMapLatest { (filter, sort) -> getFilteredNodesUseCase.invoke(filter, sort) }
+            .heardWhileUnsupported()
             .stateInWhileSubscribed(initialValue = emptyList())
 
     val unfilteredNodeList: StateFlow<List<Node>> =
-        nodeRepository.getNodes().stateInWhileSubscribed(initialValue = emptyList())
+        nodeRepository.getNodes().heardWhileUnsupported().stateInWhileSubscribed(initialValue = emptyList())
+
+    /**
+     * Presents every node as heard while the firmware cannot report the field. The database is normalized
+     * asynchronously when unsupported firmware connects; until that write lands, rows can still carry a false written
+     * by a previous radio, and the marker, banner and removal offer would otherwise act on it.
+     */
+    private fun Flow<List<Node>>.heardWhileUnsupported(): Flow<List<Node>> =
+        combine(this, nodeManager.reportsHeardOnCurrentLora) { nodes, reportsHeard ->
+            if (reportsHeard) nodes else nodes.map { if (it.heardOnCurrentLora) it else it.copy(heardOnCurrentLora = true) }
+        }
 
     private val _deviceImageUrls = MutableStateFlow<Map<Int, String>>(emptyMap())
 

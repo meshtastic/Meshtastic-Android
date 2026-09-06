@@ -92,6 +92,13 @@ interface NodeManager : NodeIdLookup {
     fun setFirmwareEdition(edition: FirmwareEdition?)
 
     /**
+     * Whether the connected firmware reports NodeInfo.heard_on_current_lora. False until local metadata proves it, and
+     * false again on disconnect. Consumers of the unheard state (marker, banner, filter) gate on this rather than on
+     * the stored flag alone, so a stale false cannot surface while the database normalization is still in flight.
+     */
+    val reportsHeardOnCurrentLora: StateFlow<Boolean>
+
+    /**
      * Records the connected device's firmware version so node ingestion can gate on its capabilities. Passing null (a
      * disconnect, or metadata not yet received) resets to the least-capable assumption.
      */
