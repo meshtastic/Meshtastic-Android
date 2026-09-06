@@ -174,7 +174,11 @@ class NodeListViewModel(
      */
     private fun Flow<List<Node>>.heardWhileUnsupported(): Flow<List<Node>> =
         combine(this, nodeManager.reportsHeardOnCurrentLora) { nodes, reportsHeard ->
-            if (reportsHeard) nodes else nodes.map { if (it.heardOnCurrentLora) it else it.copy(heardOnCurrentLora = true) }
+            if (reportsHeard) {
+                nodes
+            } else {
+                nodes.map { if (it.heardOnCurrentLora) it else it.copy(heardOnCurrentLora = true) }
+            }
         }
 
     private val _deviceImageUrls = MutableStateFlow<Map<Int, String>>(emptyMap())
