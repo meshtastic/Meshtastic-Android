@@ -347,13 +347,18 @@ class MeshtasticDatabaseMigrationTest {
     @Test
     fun heardOnCurrentLoraColumnDefaultsToHeardAndPreservesNodes() = runTest {
         helper.createDatabase(HEARD_ON_LORA_FROM_VERSION).use { connection ->
+            // Every NOT NULL column without a default in schema 57; the BLOBs are empty protos.
+            val columns =
+                "num, user, position, latitude, longitude, snr, rssi, last_heard, device_metrics, channel, " +
+                    "via_mqtt, hops_away, is_favorite, environment_metrics, power_metrics, paxcounter"
             connection.execSQL(
-                "INSERT INTO nodes (num, long_name, short_name, last_heard, channel, via_mqtt, hops_away, " +
-                    "is_favorite, is_ignored, is_muted, notes) " +
-                    "VALUES (42, 'Minnie Mouse', 'MiMo', 1000, 0, 0, 1, 1, 0, 0, 'keep me')",
+                "INSERT INTO nodes ($columns, long_name, short_name, notes) VALUES " +
+                    "(42, x'', x'', 0.0, 0.0, 0.0, 0, 1000, x'', 0, 0, 1, 1, x'', x'', x'', " +
+                    "'Minnie Mouse', 'MiMo', 'keep me')",
             )
             connection.execSQL(
-                "INSERT INTO nodes (num, long_name, short_name, last_heard) VALUES (43, 'Mickey', 'MiMo2', 2000)",
+                "INSERT INTO nodes ($columns, long_name, short_name) VALUES " +
+                    "(43, x'', x'', 0.0, 0.0, 0.0, 0, 2000, x'', 0, 0, 2, 0, x'', x'', x'', 'Mickey', 'MiMo2')",
             )
         }
 
