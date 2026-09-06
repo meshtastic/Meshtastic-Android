@@ -337,6 +337,7 @@ class MeshtasticDatabaseMigrationTest {
     }
 
     /** Reads one column of every row as a string, with SQL NULL surfaced as Kotlin null. */
+
     /**
      * 57→58 adds `nodes.heard_on_current_lora`, which gates whether a node is shown as unreachable and offered for
      * removal. It defaults to 1 precisely so rows written before the column existed are never flagged: a default of 0

@@ -118,11 +118,11 @@ class NodeListViewModel(
 
     private val nodeFilter: Flow<NodeFilterState> =
         combine(
-                _nodeFilterText,
-                filterToggles,
-                nodeFilterPreferences.excludeMqtt,
-                nodeFilterPreferences.excludeUnheard,
-            ) { filterText, filterToggles, excludeMqtt, excludeUnheard ->
+            _nodeFilterText,
+            filterToggles,
+            nodeFilterPreferences.excludeMqtt,
+            nodeFilterPreferences.excludeUnheard,
+        ) { filterText, filterToggles, excludeMqtt, excludeUnheard ->
             NodeFilterState(
                 filterText = filterText,
                 includeUnknown = filterToggles.includeUnknown,

@@ -98,10 +98,10 @@ fun NodeFilterTextField(
     showIgnored: Boolean,
     onToggleShowIgnored: () -> Unit,
     ignoredNodeCount: Int,
-    excludeMqtt: Boolean,
-    onToggleExcludeMqtt: () -> Unit,
     excludeUnheard: Boolean,
     onToggleExcludeUnheard: () -> Unit,
+    excludeMqtt: Boolean,
+    onToggleExcludeMqtt: () -> Unit,
 ) {
     Column(modifier = modifier.background(MaterialTheme.colorScheme.background)) {
         Row {
@@ -163,10 +163,10 @@ data class NodeFilterToggles(
     val showIgnored: Boolean,
     val onToggleShowIgnored: () -> Unit,
     val ignoredNodeCount: Int,
-    val excludeMqtt: Boolean,
-    val onToggleExcludeMqtt: () -> Unit,
     val excludeUnheard: Boolean,
     val onToggleExcludeUnheard: () -> Unit,
+    val excludeMqtt: Boolean,
+    val onToggleExcludeMqtt: () -> Unit,
 )
 
 @Composable
