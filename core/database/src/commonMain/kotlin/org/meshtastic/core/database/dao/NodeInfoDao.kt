@@ -414,8 +414,8 @@ interface NodeInfoDao {
     /**
      * Clears the unheard flag on every node. Called when the connected firmware cannot report
      * NodeInfo.heard_on_current_lora, so a value written by a radio that could does not outlive it and leave nodes
-     * shown as unreachable. Normalizing in the database rather than in memory keeps every reader correct, including
-     * the repository-backed flows the node list renders from.
+     * shown as unreachable. Normalizing in the database rather than in memory keeps every reader correct, including the
+     * repository-backed flows the node list renders from.
      */
     @Query("UPDATE nodes SET heard_on_current_lora = 1 WHERE heard_on_current_lora = 0")
     suspend fun markAllHeardOnCurrentLora()

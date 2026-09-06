@@ -154,7 +154,7 @@ class FakeNodeRepository :
     }
 
     override suspend fun markAllHeardOnCurrentLora() {
-        nodes.value = nodes.value.mapValues { (_, n) -> n.copy(heardOnCurrentLora = true) }
+        _nodeDBbyNum.value = _nodeDBbyNum.value.mapValues { (_, n) -> n.copy(heardOnCurrentLora = true) }
     }
 
     override suspend fun setNodeNotes(num: Int, notes: String) {

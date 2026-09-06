@@ -60,6 +60,8 @@ open class GetFilteredNodesUseCase constructor(private val nodeRepository: NodeR
                 }
                 .filter { node -> if (filter.excludeMqtt) !node.viaMqtt else true }
                 // The connected node is never unreachable from itself, and both row renderers already exempt it.
-                .filter { node -> if (filter.excludeUnheard) node.heardOnCurrentLora || node.num == ourNum else true }
+                .filter { node ->
+                    if (filter.excludeUnheard) node.heardOnCurrentLora || node.num == ourNum else true
+                }
         }
 }
