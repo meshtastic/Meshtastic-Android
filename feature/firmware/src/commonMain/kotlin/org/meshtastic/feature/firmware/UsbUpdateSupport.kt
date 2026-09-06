@@ -49,16 +49,15 @@ private const val PERCENT_MAX = 100
 internal sealed interface UsbFileSavePass {
     val step: UsbFileSaveStep
 
-    /** Image identity is decided from the mounted volume; nothing has been downloaded yet. */
-    data class FromVolume(
-        override val step: UsbFileSaveStep,
-        val request: UsbMaintenanceRequest,
-        /**
-         * True for the nRF factory-erase image, which blocks on `while (!Serial)` before formatting and needs a host to
-         * assert DTR before it will run.
-         */
-        val requiresCdcUnblock: Boolean,
-    ) : UsbFileSavePass
+    /**
+     * Image identity is decided from the mounted volume; nothing has been downloaded yet.
+     *
+     * Whether the written image then needs a CDC unblock is decided with the image
+     * ([MaintenanceUf2.requiresCdcUnblock]) rather than here: the same erase request resolves to the SoftDevice sketch
+     * (which blocks on `while (!Serial)`) or to the bootloader-driven erase image (which must *not* have its port
+     * opened) depending on what the drive reports.
+     */
+    data class FromVolume(override val step: UsbFileSaveStep, val request: UsbMaintenanceRequest) : UsbFileSavePass
 
     /** Already downloaded and verified. */
     data class Prepared(override val step: UsbFileSaveStep, val artifact: FirmwareArtifact, val fileName: String) :
@@ -134,13 +133,7 @@ internal suspend fun performUsbMaintenance(
 
     val passes =
         listOf(
-            UsbFileSavePass.FromVolume(
-                step = maintenanceStep,
-                request = request,
-                // Only the nRF erase image blocks waiting for a CDC host; pico_erase runs on its own, and a bootloader
-                // self-update is consumed by the bootloader itself.
-                requiresCdcUnblock = request == UsbMaintenanceRequest.FactoryErase && hardware.isNrf52Arc,
-            ),
+            UsbFileSavePass.FromVolume(step = maintenanceStep, request = request),
             UsbFileSavePass.Prepared(
                 step = UsbFileSaveStep.Firmware,
                 artifact = firmware,
@@ -212,11 +205,12 @@ internal class UsbPassWriter(
                 is VolumeInspection.Accepted -> inspection.volume
             }
 
-        val artifact =
-            when (val resolved = resolveImage(pass, hardware, volume, updateState)) {
-                is ImageResolution.Failed -> return resolved.result
-                is ImageResolution.Ready -> resolved.artifact
+        val resolved =
+            when (val resolution = resolveImage(pass, hardware, volume, updateState)) {
+                is ImageResolution.Failed -> return resolution.result
+                is ImageResolution.Ready -> resolution
             }
+        val artifact = resolved.artifact
 
         val fileName = artifact.fileName ?: return UsbPassResult.CopyFailed
         updateState(FirmwareUpdateState.Processing(ProgressState(UiText.Resource(Res.string.firmware_update_copying))))
@@ -248,9 +242,12 @@ internal class UsbPassWriter(
             }
         }
 
-        if (pass is UsbFileSavePass.FromVolume && pass.requiresCdcUnblock) {
+        // Only the SoftDevice erase sketch waits for a host. The bootloader-driven erase image, pico_erase and OTAFIX
+        // self-updates are consumed by the bootloader itself, and the only CDC port after those is the bootloader's
+        // own — opening it would latch onto the wrong port and stall for nothing.
+        if (resolved.requiresCdcUnblock) {
             if (!unblockCdc(CDC_UNBLOCK_WAIT_MS, CDC_DTR_HOLD_MS)) {
-                // The erase image blocks before InternalFS.format(), so a failed unblock has destroyed nothing.
+                // The erase sketch blocks before InternalFS.format(), so a failed unblock has destroyed nothing.
                 return UsbPassResult.CdcUnblockFailed
             }
         }
@@ -260,7 +257,8 @@ internal class UsbPassWriter(
 
     /** Either the image to write, or the result to return instead. */
     private sealed interface ImageResolution {
-        data class Ready(val artifact: FirmwareArtifact) : ImageResolution
+        /** @property requiresCdcUnblock Carried from [MaintenanceUf2.requiresCdcUnblock]; always false for firmware. */
+        data class Ready(val artifact: FirmwareArtifact, val requiresCdcUnblock: Boolean = false) : ImageResolution
 
         data class Failed(val result: UsbPassResult) : ImageResolution
     }
@@ -298,8 +296,9 @@ internal class UsbPassWriter(
                                 ),
                             )
                         }
-                    artifact?.let { ImageResolution.Ready(it) }
-                        ?: ImageResolution.Failed(UsbPassResult.ImageDownloadFailed)
+                    artifact?.let {
+                        ImageResolution.Ready(it, requiresCdcUnblock = choice.asset.requiresCdcUnblock)
+                    } ?: ImageResolution.Failed(UsbPassResult.ImageDownloadFailed)
                 }
             }
     }

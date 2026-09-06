@@ -83,11 +83,12 @@ open class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
      * Download a pinned maintenance image (factory erase, bootloader upgrade) and verify it before returning.
      *
      * The module's only absolute-URL entry point. Unlike release artifacts, these images have no versioned upstream —
-     * `nrf52_factory_erase` has cut no releases — so the URL is commit/tag-pinned and the content is the real contract.
+     * the erase images are commit-pinned, not released — so the URL is commit/tag-pinned and the content is the real
+     * contract.
      *
-     * A digest or address mismatch is **terminal**: the file is deleted and `null` is returned with no fallback. The
-     * release-zip fallback the other retrievers use would be actively wrong here, because the payload is destructive
-     * and "some other file with the right name" is precisely the failure being guarded against.
+     * A digest, address or family-ID mismatch is **terminal**: the file is deleted and `null` is returned with no
+     * fallback. The release-zip fallback the other retrievers use would be actively wrong here, because the payload is
+     * destructive and "some other file with the right name" is precisely the failure being guarded against.
      *
      * @return The verified [FirmwareArtifact], or `null` when the download failed or verification did not pass.
      */
@@ -124,6 +125,21 @@ open class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
                 Logger.e {
                     "Maintenance image ${asset.fileName} targets ${actualAddress?.toString(HEX_RADIX)}, " +
                         "expected ${expectedAddress.toString(HEX_RADIX)} — refusing to write"
+                }
+                fileHandler.deleteFile(artifact)
+                return null
+            }
+        }
+
+        val expectedFamily = asset.expectedFamilyId
+        if (expectedFamily != null) {
+            val actualFamily = uf2FamilyId(bytes)
+            if (actualFamily != expectedFamily) {
+                // The bootloader-driven erase image is a single block the bootloader recognises by family ID; its
+                // targetAddr is 0, so this is the row-authoring check that replaces the address check above.
+                Logger.e {
+                    "Maintenance image ${asset.fileName} declares family ${actualFamily?.toString(HEX_RADIX)}, " +
+                        "expected ${expectedFamily.toString(HEX_RADIX)} — refusing to write"
                 }
                 fileHandler.deleteFile(artifact)
                 return null

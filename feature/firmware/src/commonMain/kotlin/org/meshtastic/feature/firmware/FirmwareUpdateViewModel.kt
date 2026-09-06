@@ -695,9 +695,9 @@ class FirmwareUpdateViewModel(
     /**
      * Re-offers the same pass with an explanation, or fails outright when nothing destructive has happened yet.
      *
-     * Once an erase or bootloader image has been written the device has no application, so dropping the user on an
-     * error screen is the worst available outcome — the flow keeps offering the pass until it succeeds or they leave
-     * deliberately.
+     * Once an erase or bootloader image has been written the device may have no application (a bootloader-driven erase
+     * keeps it, the SoftDevice sketch and OTAFIX do not), so dropping the user on an error screen is the worst
+     * available outcome — the flow keeps offering the pass until it succeeds or they leave deliberately.
      */
     private fun reofferOrFail(pass: UsbFileSavePass, message: UiText) {
         if (destructiveWriteDone) {

@@ -44,14 +44,29 @@ data class MaintenanceUf2Manifest(
 data class MaintenanceUf2EraseSet(
     /** Keyed by [SoftDeviceVariant.fromWire]'s own input strings, e.g. "6.1.1" / "7.3.0". */
     @SerialName("nrf52") val nrf52: Map<String, EraseImageEntry> = emptyMap(),
+    /**
+     * The board-agnostic bootloader-driven erase image (OTAFIX `tools/meshtastic_factory_erase.uf2`): a single UF2
+     * block the bootloader itself consumes when its `INFO_UF2.TXT` advertises `Factory-Erase: UF2 family <id>`. Absent
+     * from manifests that predate it, and ignored by bootloaders that do not advertise it — so it is only ever
+     * preferred over [nrf52], never a replacement for it.
+     */
+    @SerialName("nrf52Bootloader") val nrf52Bootloader: EraseImageEntry? = null,
     @SerialName("rp2040") val rp2040: EraseImageEntry,
 )
 
+/**
+ * @property expectedFirstTargetAddress The flash address the image's first block writes to, for images whose address
+ *   carries a safety invariant (the SoftDevice-specific nRF erase sketches). Null otherwise.
+ * @property expectedFamilyId The UF2 family ID the image's block must declare (flag `0x2000` set, u32 at offset 28) —
+ *   the bootloader-driven erase image's contract, checked against the bytes instead of an address, because that image's
+ *   `targetAddr` is 0 by design. Null for every other image.
+ */
 @Serializable
 data class EraseImageEntry(
     @SerialName("fileName") val fileName: String,
     @SerialName("sha256") val sha256: String,
     @SerialName("expectedFirstTargetAddress") val expectedFirstTargetAddress: Long? = null,
+    @SerialName("expectedFamilyId") val expectedFamilyId: Long? = null,
 )
 
 /**

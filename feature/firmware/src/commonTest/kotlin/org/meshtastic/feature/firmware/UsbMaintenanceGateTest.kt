@@ -65,6 +65,11 @@ class UsbMaintenanceGateTest {
                         "expectedFirstTargetAddress": 159744
                       }
                     },
+                    "nrf52Bootloader": {
+                      "fileName": "meshtastic_factory_erase.uf2",
+                      "sha256": "6ef3146505c40079ee9e7e692448e40a793dad636f55d1545063299d28908f0d",
+                      "expectedFamilyId": 1296388936
+                    },
                     "rp2040": {
                       "fileName": "pico_erase.uf2",
                       "sha256": "08aa7d561e8b8bf2f9b061b3506fb4d8f135e832efe0f3ae978241db2da0c853"
@@ -720,5 +725,147 @@ class UsbMaintenanceGateTest {
     fun `non-uf2 payloads yield no target address`() {
         assertNull(uf2FirstTargetAddress(ByteArray(UF2_BLOCK_BYTES)), "Zeroed bytes carry no UF2 magic")
         assertNull(uf2FirstTargetAddress(ByteArray(16)), "A short payload cannot hold a UF2 block")
+    }
+
+    // ── Bootloader-driven factory erase (OTAFIX PR #41) ──────────────────────
+
+    /** The family OTAFIX advertises and consumes: 0x4D455348, "MESH" little-endian. */
+    private val meshFamily = 0x4D455348L
+
+    private val rakOtafixEraseInfo =
+        "UF2 Bootloader 0.9.2-OTAFIX2.3-BP1.6\r\nModel: WisBlock RAK4631 Board\r\n" +
+            "Board-ID: WisBlock-RAK4631-Board\r\nDate: Sep  6 2026\r\nSoftDevice: S140 7.3.0\r\n" +
+            "Factory-Erase: UF2 family 0x4D455348\r\n"
+
+    @Test
+    fun `the manifest decodes the bootloader erase entry with its family id`() {
+        val entry = assertNotNull(testManifest.erase?.nrf52Bootloader, "the shipped manifest carries the entry")
+
+        assertEquals("meshtastic_factory_erase.uf2", entry.fileName)
+        assertEquals(meshFamily, entry.expectedFamilyId, "1296388936 decimal in the manifest is 0x4D455348")
+        assertNull(entry.expectedFirstTargetAddress, "targetAddr is 0 by design; no address invariant is authored")
+    }
+
+    @Test
+    fun `factory erase family is parsed from the bootloader's own line`() {
+        assertEquals(meshFamily, parseUf2FactoryEraseFamily(rakOtafixEraseInfo))
+        assertEquals(meshFamily, parseUf2FactoryEraseFamily("Factory-Erase: UF2 family 0x4D455348"), "no CRLF")
+    }
+
+    @Test
+    fun `factory erase family parsing tolerates case and leading whitespace like its siblings`() {
+        assertEquals(meshFamily, parseUf2FactoryEraseFamily("  factory-erase: uf2 family 0X4d455348\r\n"))
+    }
+
+    @Test
+    fun `factory erase family takes the last hex token on the line`() {
+        assertEquals(0xDEADBEEFL, parseUf2FactoryEraseFamily("Factory-Erase: UF2 family 0x1234 0xDEADBEEF\r\n"))
+    }
+
+    @Test
+    fun `a different factory erase family still parses so the resolver can refuse it`() {
+        assertEquals(0xDEADBEEFL, parseUf2FactoryEraseFamily("Factory-Erase: UF2 family 0xDEADBEEF\r\n"))
+    }
+
+    @Test
+    fun `an absent or malformed factory erase line yields no family`() {
+        assertNull(parseUf2FactoryEraseFamily(rak4631OtafixInfo), "Every bootloader before PR #41 omits the line")
+        assertNull(parseUf2FactoryEraseFamily("Factory-Erase: UF2 family\r\n"), "No token at all")
+        assertNull(parseUf2FactoryEraseFamily("Factory-Erase: UF2 family 4D455348\r\n"), "Not 0x-prefixed")
+        assertNull(parseUf2FactoryEraseFamily("Factory-Erase: UF2 family 0xZZZZ\r\n"), "Not hex")
+        assertNull(parseUf2FactoryEraseFamily("Factory-Erase: 0x\r\n"), "Prefix with nothing after it")
+        assertNull(parseUf2FactoryEraseFamily(""), "Empty payload")
+    }
+
+    @Test
+    fun `bootloader erase image resolves when the volume advertises the manifest family`() {
+        val asset = assertNotNull(bootloaderEraseUf2For(testManifest, meshFamily))
+
+        assertEquals("meshtastic_factory_erase.uf2", asset.fileName)
+        assertEquals(meshFamily, asset.expectedFamilyId)
+        assertNull(asset.expectedFirstTargetAddress, "The address check would reject a targetAddr of 0")
+        assertFalse(asset.requiresCdcUnblock, "The bootloader consumes the block itself; there is no sketch to unblock")
+        assertTrue(asset.url.endsWith("resource/maintenanceUf2/asset/meshtastic_factory_erase.uf2"))
+    }
+
+    @Test
+    fun `bootloader erase image refuses a volume advertising another family or none`() {
+        assertNull(bootloaderEraseUf2For(testManifest, 0xDEADBEEFL), "Wrong family must fall through to the sketch")
+        assertNull(bootloaderEraseUf2For(testManifest, null), "No line means the bootloader ignores the file")
+    }
+
+    @Test
+    fun `bootloader erase image refuses when the manifest cannot vouch for a family`() {
+        val withoutEntry = testManifest.copy(erase = testManifest.erase?.copy(nrf52Bootloader = null))
+        assertNull(bootloaderEraseUf2For(withoutEntry, meshFamily), "Older manifests carry no entry")
+
+        val unverifiable =
+            testManifest.copy(
+                erase =
+                testManifest.erase?.copy(
+                    nrf52Bootloader = testManifest.erase?.nrf52Bootloader?.copy(expectedFamilyId = null),
+                ),
+            )
+        assertNull(bootloaderEraseUf2For(unverifiable, meshFamily), "No expected family means no byte-level check")
+        assertNull(bootloaderEraseUf2For(MaintenanceUf2Manifest(), meshFamily), "No erase set at all")
+    }
+
+    @Test
+    fun `an unsafe bootloader erase filename refuses the image instead of throwing`() {
+        val unsafe =
+            testManifest.copy(
+                erase =
+                testManifest.erase?.copy(
+                    nrf52Bootloader = testManifest.erase?.nrf52Bootloader?.copy(fileName = "../erase.uf2"),
+                ),
+            )
+
+        assertNull(bootloaderEraseUf2For(unsafe, meshFamily))
+    }
+
+    @Test
+    fun `only the softdevice erase sketches need a cdc unblock`() {
+        assertTrue(assertNotNull(eraseUf2For(testManifest, nrf())).requiresCdcUnblock)
+        assertTrue(assertNotNull(eraseUf2ForVariant(testManifest, SoftDeviceVariant.S140_7_3_0)).requiresCdcUnblock)
+        assertFalse(assertNotNull(eraseUf2For(testManifest, rp2040())).requiresCdcUnblock, "pico_erase runs on its own")
+        assertFalse(
+            assertNotNull(otafixUf2ForBoardId(testManifest, "WisBlock-RAK4631-Board")).requiresCdcUnblock,
+            "A bootloader self-update is consumed by the bootloader",
+        )
+    }
+
+    // ── UF2 family ID header parsing ─────────────────────────────────────────
+
+    private fun uf2Block(flags: Long, familyId: Long): ByteArray {
+        val block = ByteArray(UF2_BLOCK_BYTES)
+        fun putLe32(offset: Int, value: Long) {
+            for (i in 0 until 4) block[offset + i] = ((value shr (8 * i)) and 0xFF).toByte()
+        }
+        putLe32(0, 0x0A324655L)
+        putLe32(UF2_FLAGS_OFFSET, flags)
+        putLe32(UF2_FAMILY_ID_OFFSET, familyId)
+        return block
+    }
+
+    @Test
+    fun `uf2 family id is read from the first block when the family flag is set`() {
+        assertEquals(meshFamily, uf2FamilyId(uf2Block(flags = UF2_FLAG_FAMILY_ID, familyId = meshFamily)))
+        assertEquals(
+            meshFamily,
+            uf2FamilyId(uf2Block(flags = UF2_FLAG_FAMILY_ID or 0x1L, familyId = meshFamily)),
+            "Other flag bits do not matter",
+        )
+    }
+
+    @Test
+    fun `uf2 family id is absent when the family flag is clear`() {
+        // Without 0x2000 the word at offset 28 is a file size, and reading it as an identity would be a false match.
+        assertNull(uf2FamilyId(uf2Block(flags = 0L, familyId = meshFamily)))
+    }
+
+    @Test
+    fun `non-uf2 payloads yield no family id`() {
+        assertNull(uf2FamilyId(ByteArray(UF2_BLOCK_BYTES)), "Zeroed bytes carry no UF2 magic")
+        assertNull(uf2FamilyId(ByteArray(32)), "A short payload cannot hold a UF2 block")
     }
 }
