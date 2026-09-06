@@ -146,6 +146,12 @@ class FakeUiPrefs : UiPrefs {
         excludeMqtt.value = value
     }
 
+    override val excludeUnheard = MutableStateFlow(false)
+
+    override fun setExcludeUnheard(value: Boolean) {
+        excludeUnheard.value = value
+    }
+
     override val hasShownNotPairedWarning = MutableStateFlow(false)
 
     override fun setHasShownNotPairedWarning(shown: Boolean) {
