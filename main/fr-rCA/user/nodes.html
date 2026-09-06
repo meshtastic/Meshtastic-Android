@@ -149,7 +149,7 @@
     </tr>
     <tr>
       <td>🔓 Unlocked</td>
-      <td>Communication uses shared channel PSK — encrypted but identity not individually verified</td>
+      <td>No public key has been received for this node, so it cannot be direct messaged — use <strong>Request User Info</strong> on the node detail page to ask for one</td>
     </tr>
     <tr>
       <td>⚠️ Mismatch</td>
@@ -159,7 +159,7 @@
 </table>
 
 <blockquote>
-  <p>💡 <strong>Tip:</strong> PKI encryption (firmware 2.5+) provides stronger security than channel PSK because each node has a unique key pair. If you see a key mismatch warning, the node may have been reset or compromised.</p>
+  <p>💡 <strong>Tip:</strong> Direct messages always use PKI, so the radio needs the other node’s public key before it can send one. It refuses the send rather than falling back to channel encryption. Keys arrive inside node info, which is why an open lock usually clears itself once that node is heard from properly. If you see a key mismatch warning, the node may have been reset or compromised.</p>
 </blockquote>
 
 <p>To clear a mismatch, first confirm through another trusted channel that the key change was intentional — a factory reset causes one. Then touch &amp; hold the node, choose <strong>Remove</strong>, and let the two radios exchange keys again the next time yours hears it.</p>
