@@ -376,10 +376,12 @@ class MeshConfigFlowManagerImpl(
         val admitted =
             runForSession(session) {
                 Logger.i { "Local Metadata received: ${metadata.firmware_version}" }
-                nodeManager.setFirmwareVersion(metadata.firmware_version)
                 val state = handshakeState.value
                 if (state is HandshakeState.ReceivingConfig && state.belongsTo(session)) {
                     handled = true
+                    // Only the session that owns the handshake may move the capability: a late frame from a
+                    // superseded session would otherwise reclassify the NodeInfo batch still being installed.
+                    nodeManager.setFirmwareVersion(metadata.firmware_version)
                     handshakeState.value = state.copy(metadata = metadata)
                     // Persist the metadata immediately, but never let a queued old-session write target the next
                     // session's selected database.

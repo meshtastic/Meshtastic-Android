@@ -138,10 +138,17 @@ fun NodeListScreen(
     val totalNodeCount by viewModel.totalNodeCount.collectAsStateWithLifecycle(0)
     val unfilteredNodes by viewModel.unfilteredNodeList.collectAsStateWithLifecycle()
     // Favorites and our own node are never offered for removal: a favorite is an explicit keep, and the connected
-    // radio is not something the node list may delete.
+    // radio is not something the node list may delete. ourNode and unfilteredNodes come from independent flows, so
+    // the list can already contain the local node while ourNode is still null. Offer nothing until it is known,
+    // rather than risk removing the user's own node from the radio.
     val unheardNodes =
         remember(unfilteredNodes, ourNode) {
-            unfilteredNodes.filter { !it.heardOnCurrentLora && !it.isFavorite && it.num != ourNode?.num }
+            val ourNum = ourNode?.num
+            if (ourNum == null) {
+                emptyList()
+            } else {
+                unfilteredNodes.filter { !it.heardOnCurrentLora && !it.isFavorite && it.num != ourNum }
+            }
         }
     val deviceImageUrls by viewModel.deviceImageUrls.collectAsStateWithLifecycle()
     val ignoredNodeCount = unfilteredNodes.count { it.isIgnored }

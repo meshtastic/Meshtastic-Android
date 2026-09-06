@@ -342,6 +342,11 @@ class NodeManagerImpl(
 
     override fun setFirmwareVersion(version: String?) {
         reportsHeardOnCurrentLora = Capabilities(version).supportsHeardOnCurrentLora
+        // Normalize in the database, not just in nodeState: the node list renders from the repository flows, which
+        // read rows directly and would otherwise still see a false written by a radio whose firmware could report it.
+        if (!reportsHeardOnCurrentLora) {
+            scope.handledLaunch { nodeRepository.markAllHeardOnCurrentLora() }
+        }
     }
 
     companion object {
@@ -762,15 +767,17 @@ class NodeManagerImpl(
         node.copy(nodeStatus = status?.takeIf { it.isNotEmpty() })
 
     override fun installNodeInfo(info: ProtoNodeInfo) {
+        val reportsHeard = reportsHeardOnCurrentLora
         // Stage-2 configuration installation persists the complete node snapshot through installConfig.
-        updateNodeState(info.num, channel = 0) { node -> applyNodeInfo(node, info) }
+        updateNodeState(info.num, channel = 0) { node -> applyNodeInfo(node, info, reportsHeard) }
     }
 
     override suspend fun installNodeInfoAndPersist(info: ProtoNodeInfo) {
-        updateNodeAndPersist(info.num) { node -> applyNodeInfo(node, info) }
+        val reportsHeard = reportsHeardOnCurrentLora
+        updateNodeAndPersist(info.num) { node -> applyNodeInfo(node, info, reportsHeard) }
     }
 
-    private fun applyNodeInfo(node: Node, info: ProtoNodeInfo): Node {
+    private fun applyNodeInfo(node: Node, info: ProtoNodeInfo, reportsHeard: Boolean): Node {
         var next = node
         val user = info.user
         if (user != null && !shouldPreserveExistingUser(node.user, user)) {
@@ -789,7 +796,7 @@ class NodeManagerImpl(
         // Firmware that predates the field never sends it, and a proto3 bool decodes as false - which would mark
         // every node unheard. Normalize rather than skip: a value persisted by a previous radio must not survive
         // into a session whose firmware cannot report it.
-        next = next.copy(heardOnCurrentLora = !reportsHeardOnCurrentLora || info.heard_on_current_lora)
+        next = next.copy(heardOnCurrentLora = !reportsHeard || info.heard_on_current_lora)
         return next.copy(
             lastHeard = clampTimestampToNow(info.last_heard),
             deviceMetrics = info.device_metrics ?: next.deviceMetrics,

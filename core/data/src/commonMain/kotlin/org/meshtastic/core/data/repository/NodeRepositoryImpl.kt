@@ -256,6 +256,9 @@ class NodeRepositoryImpl(
     override suspend fun setNodeNotes(num: Int, notes: String) =
         withContext(dispatchers.io) { nodeInfoWriteDataSource.setNodeNotes(num, notes) }
 
+    override suspend fun markAllHeardOnCurrentLora() =
+        withContext(dispatchers.io) { nodeInfoWriteDataSource.markAllHeardOnCurrentLora() }
+
     override suspend fun updatePowerChannelLabel(num: Int, channelIndex: Int, label: String) =
         withContext(dispatchers.io) { nodeInfoWriteDataSource.updatePowerChannelLabel(num, channelIndex, label) }
 

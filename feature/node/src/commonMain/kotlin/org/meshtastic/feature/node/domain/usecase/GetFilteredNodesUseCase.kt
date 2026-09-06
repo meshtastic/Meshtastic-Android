@@ -38,6 +38,7 @@ open class GetFilteredNodesUseCase constructor(private val nodeRepository: NodeR
             onlyDirect = filter.onlyDirect,
         )
         .map { list ->
+            val ourNum = nodeRepository.myNodeInfo.value?.myNodeNum
             list
                 .filter { node -> node.isIgnored == filter.showIgnored }
                 .filter { node ->
@@ -58,6 +59,7 @@ open class GetFilteredNodesUseCase constructor(private val nodeRepository: NodeR
                     }
                 }
                 .filter { node -> if (filter.excludeMqtt) !node.viaMqtt else true }
-                .filter { node -> if (filter.excludeUnheard) node.heardOnCurrentLora else true }
+                // The connected node is never unreachable from itself, and both row renderers already exempt it.
+                .filter { node -> if (filter.excludeUnheard) node.heardOnCurrentLora || node.num == ourNum else true }
         }
 }

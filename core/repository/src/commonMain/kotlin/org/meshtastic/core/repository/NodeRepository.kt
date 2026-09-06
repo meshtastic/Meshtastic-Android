@@ -160,6 +160,9 @@ interface NodeRepository {
      */
     suspend fun setNodeNotes(num: Int, notes: String)
 
+    /** Clears the unheard flag on every node. See NodeInfoDao.markAllHeardOnCurrentLora. */
+    suspend fun markAllHeardOnCurrentLora()
+
     /**
      * Sets one user-editable power-channel label (e.g. "Solar", "Battery"). The read-modify-write is atomic, so
      * concurrent edits to different channels don't clobber each other.
