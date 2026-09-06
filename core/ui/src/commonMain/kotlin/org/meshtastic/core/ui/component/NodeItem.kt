@@ -103,7 +103,7 @@ fun NodeItem(
     val isIgnored = thatNode.isIgnored
     val isFavorite = thatNode.isFavorite
 
-    val isThisNode = remember(thatNode) { thisNode?.num == thatNode.num }
+    val isThisNode = remember(thisNode, thatNode) { thisNode?.num == thatNode.num }
     val system = distanceUnits
     val distance =
         remember(thisNode, thatNode, system) {

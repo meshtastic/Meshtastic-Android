@@ -81,6 +81,7 @@ class NodeListViewModelTest {
         every { nodeFilterPreferences.excludeMqtt } returns MutableStateFlow(false)
         every { nodeFilterPreferences.excludeUnheard } returns MutableStateFlow(false)
         every { nodeManager.reportsHeardOnCurrentLora } returns MutableStateFlow(true)
+        every { nodeManager.isNodeDbReady } returns MutableStateFlow(true)
 
         every { getFilteredNodesUseCase(any(), any()) } returns MutableStateFlow(emptyList())
 

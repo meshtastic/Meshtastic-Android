@@ -118,14 +118,25 @@ class NodeListViewModel(
             )
         }
 
+    /**
+     * The unheard filter may only narrow the list once the firmware has proven it reports the field AND the
+     * handshake's NodeInfo install has completed. Between setFirmwareVersion flipping the capability and that install
+     * landing, cached rows can still carry a false from a previous session, and the filter would hide valid nodes
+     * until each was rewritten.
+     */
+    private val unheardFilterAllowed: Flow<Boolean> =
+        combine(nodeManager.reportsHeardOnCurrentLora, nodeManager.isNodeDbReady) { reportsHeard, dbReady ->
+            reportsHeard && dbReady
+        }
+
     private val nodeFilter: Flow<NodeFilterState> =
         combine(
             _nodeFilterText,
             filterToggles,
             nodeFilterPreferences.excludeMqtt,
             nodeFilterPreferences.excludeUnheard,
-            nodeManager.reportsHeardOnCurrentLora,
-        ) { filterText, filterToggles, excludeMqtt, excludeUnheard, reportsHeard ->
+            unheardFilterAllowed,
+        ) { filterText, filterToggles, excludeMqtt, excludeUnheard, unheardAllowed ->
             NodeFilterState(
                 filterText = filterText,
                 includeUnknown = filterToggles.includeUnknown,
@@ -134,9 +145,7 @@ class NodeListViewModel(
                 onlyDirect = filterToggles.onlyDirect,
                 showIgnored = filterToggles.showIgnored,
                 excludeMqtt = excludeMqtt,
-                // Suppressed until the firmware proves it reports the field, so a stale false cannot hide nodes
-                // while the database normalization is still in flight.
-                excludeUnheard = excludeUnheard && reportsHeard,
+                excludeUnheard = excludeUnheard && unheardAllowed,
             )
         }
 

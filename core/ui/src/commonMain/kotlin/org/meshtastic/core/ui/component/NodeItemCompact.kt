@@ -118,7 +118,7 @@ fun NodeItemCompact(
     val longName = thatNode.user.long_name.ifEmpty { stringResource(Res.string.unknown_username) }
     val isFavorite = thatNode.isFavorite
     val isIgnored = thatNode.isIgnored
-    val isThisNode = remember(thatNode) { thisNode?.num == thatNode.num }
+    val isThisNode = remember(thisNode, thatNode) { thisNode?.num == thatNode.num }
     val system = distanceUnits
     val distance =
         remember(thisNode, thatNode, system) {
