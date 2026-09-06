@@ -336,6 +336,14 @@ class NodeManagerImpl(
         firmwareEdition.value = edition
     }
 
+    // Session state rather than a lookup per node: applyNodeInfo runs once for every node in the DB dump, and it
+    // stays a pure mapper this way.
+    private var reportsHeardOnCurrentLora = false
+
+    override fun setFirmwareVersion(version: String?) {
+        reportsHeardOnCurrentLora = Capabilities(version).supportsHeardOnCurrentLora
+    }
+
     companion object {
         private const val NODE_PERSISTENCE_LANE_COUNT = 64
         private const val TIME_MS_TO_S = 1000L
@@ -475,6 +483,7 @@ class NodeManagerImpl(
         myNodeNum.value = null
         myDeviceId.value = null
         firmwareEdition.value = null
+        reportsHeardOnCurrentLora = false
         _connectionIdentity.value = null
     }
 
@@ -774,7 +783,7 @@ class NodeManagerImpl(
         }
         // Firmware that predates the field never sends it, and a proto3 bool decodes as false - which would mark
         // every node unheard. Leave the stored value (which defaults to true) alone unless the node reports it.
-        if (Capabilities(nodeRepository.myNodeInfo.value?.firmwareVersion).supportsHeardOnCurrentLora) {
+        if (reportsHeardOnCurrentLora) {
             next = next.copy(heardOnCurrentLora = info.heard_on_current_lora)
         }
         return next.copy(

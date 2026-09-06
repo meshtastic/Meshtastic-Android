@@ -376,6 +376,7 @@ class MeshConfigFlowManagerImpl(
         val admitted =
             runForSession(session) {
                 Logger.i { "Local Metadata received: ${metadata.firmware_version}" }
+                nodeManager.setFirmwareVersion(metadata.firmware_version)
                 val state = handshakeState.value
                 if (state is HandshakeState.ReceivingConfig && state.belongsTo(session)) {
                     handled = true

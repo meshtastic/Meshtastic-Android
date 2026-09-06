@@ -92,6 +92,12 @@ interface NodeManager : NodeIdLookup {
     fun setFirmwareEdition(edition: FirmwareEdition?)
 
     /**
+     * Records the connected device's firmware version so node ingestion can gate on its capabilities. Passing null (a
+     * disconnect, or metadata not yet received) resets to the least-capable assumption.
+     */
+    fun setFirmwareVersion(version: String?)
+
+    /**
      * Fresh-handshake identity for the current connection session. Null when no handshake identity has been confirmed
      * for the active transport. Cleared synchronously before a new address is published, and populated atomically when
      * [handleMyInfo] captures the selected address and decodes nodeNum and deviceId from the same MyNodeInfo packet.
