@@ -340,12 +340,14 @@ class NodeManagerImpl(
     // stays a pure mapper this way.
     private var reportsHeardOnCurrentLora = false
 
-    override fun setFirmwareVersion(version: String?) {
+    override fun setFirmwareVersion(version: String?, session: RadioSessionContext?) {
         reportsHeardOnCurrentLora = Capabilities(version).supportsHeardOnCurrentLora
         // Normalize in the database, not just in nodeState: the node list renders from the repository flows, which
         // read rows directly and would otherwise still see a false written by a radio whose firmware could report it.
+        // Bound to the originating session lease: a delayed write from a superseded session would otherwise resolve
+        // the next session's database and clear flags that session had legitimately set.
         if (!reportsHeardOnCurrentLora) {
-            scope.handledLaunch { nodeRepository.markAllHeardOnCurrentLora() }
+            radioInterfaceService.launchSessionWork(scope, session) { nodeRepository.markAllHeardOnCurrentLora() }
         }
     }
 

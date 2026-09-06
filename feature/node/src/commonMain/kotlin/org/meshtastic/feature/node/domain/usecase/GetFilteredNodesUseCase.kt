@@ -17,6 +17,7 @@
 package org.meshtastic.feature.node.domain.usecase
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import org.koin.core.annotation.Single
 import org.meshtastic.core.model.Node
@@ -37,8 +38,8 @@ open class GetFilteredNodesUseCase constructor(private val nodeRepository: NodeR
             onlyOnline = filter.onlyOnline,
             onlyDirect = filter.onlyDirect,
         )
-        .map { list ->
-            val ourNum = nodeRepository.myNodeInfo.value?.myNodeNum
+        .combine(nodeRepository.myNodeInfo) { list, myNodeInfo -> list to myNodeInfo?.myNodeNum }
+        .map { (list, ourNum) ->
             list
                 .filter { node -> node.isIgnored == filter.showIgnored }
                 .filter { node ->

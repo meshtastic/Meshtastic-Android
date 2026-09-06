@@ -95,7 +95,7 @@ interface NodeManager : NodeIdLookup {
      * Records the connected device's firmware version so node ingestion can gate on its capabilities. Passing null (a
      * disconnect, or metadata not yet received) resets to the least-capable assumption.
      */
-    fun setFirmwareVersion(version: String?)
+    fun setFirmwareVersion(version: String?, session: RadioSessionContext? = null)
 
     /**
      * Fresh-handshake identity for the current connection session. Null when no handshake identity has been confirmed
