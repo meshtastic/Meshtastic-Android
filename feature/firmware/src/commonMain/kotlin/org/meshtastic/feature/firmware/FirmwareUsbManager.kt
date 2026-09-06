@@ -45,9 +45,10 @@ interface FirmwareUsbManager {
      * Opens the port that appeared since [excluding] was captured and holds DTR asserted, so firmware waiting on a host
      * will run.
      *
-     * The nRF52 factory-erase image blocks in `while (!Serial)` before `InternalFS.format()`, and `Serial` only becomes
-     * truthy once DTR is asserted — without this the erase never starts. A failure here is therefore safe: the image is
-     * written but has destroyed nothing.
+     * The SoftDevice-specific nRF52 erase sketch blocks in `while (!Serial)` before `InternalFS.format()`, and `Serial`
+     * only becomes truthy once DTR is asserted — without this the erase never starts. A failure here is therefore safe:
+     * the image is written but has destroyed nothing. Never called after the bootloader-driven erase image: the only
+     * port present then is the bootloader's own (see `MaintenanceUf2.requiresCdcUnblock`).
      *
      * @return true when a port was claimed and DTR held.
      */

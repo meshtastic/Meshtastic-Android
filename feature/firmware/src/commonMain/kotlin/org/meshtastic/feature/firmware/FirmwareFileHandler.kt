@@ -75,8 +75,8 @@ interface FirmwareFileHandler {
      * bootloader drive rather than internal storage.
      *
      * Used to reject the Downloads mistake *before* writing, which matters only once a write is destructive: in a
-     * multi-pass maintenance sequence a mis-saved pass leaves the device with no application, and nothing else in the
-     * flow can tell a landed write from a lost one. The plain single-pass update path deliberately does not consult
+     * multi-pass maintenance sequence a mis-saved pass can leave the device with no application, and nothing else in
+     * the flow can tell a landed write from a lost one. The plain single-pass update path deliberately does not consult
      * this — its worst case is "nothing happened, replug".
      */
     suspend fun isRemovableDestination(destinationUri: CommonUri): Boolean

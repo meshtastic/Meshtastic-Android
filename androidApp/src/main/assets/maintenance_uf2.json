@@ -15,6 +15,11 @@
         "expectedFirstTargetAddress": 159744
       }
     },
+    "nrf52Bootloader": {
+      "fileName": "meshtastic_factory_erase.uf2",
+      "sha256": "6ef3146505c40079ee9e7e692448e40a793dad636f55d1545063299d28908f0d",
+      "expectedFamilyId": 1296388936
+    },
     "rp2040": {
       "fileName": "pico_erase.uf2",
       "sha256": "08aa7d561e8b8bf2f9b061b3506fb4d8f135e832efe0f3ae978241db2da0c853"

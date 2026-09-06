@@ -57,6 +57,11 @@ abstract class CommonMaintenanceVolumeTest {
                         "expectedFirstTargetAddress": 159744
                       }
                     },
+                    "nrf52Bootloader": {
+                      "fileName": "meshtastic_factory_erase.uf2",
+                      "sha256": "6ef3146505c40079ee9e7e692448e40a793dad636f55d1545063299d28908f0d",
+                      "expectedFamilyId": 1296388936
+                    },
                     "rp2040": {
                       "fileName": "pico_erase.uf2",
                       "sha256": "08aa7d561e8b8bf2f9b061b3506fb4d8f135e832efe0f3ae978241db2da0c853"
@@ -157,6 +162,12 @@ abstract class CommonMaintenanceVolumeTest {
 
     /** RP2040 BOOTSEL volumes expose an INFO_UF2.TXT too, with no SoftDevice line. */
     private val picoInfo = "UF2 Bootloader v3.0\r\nModel: Raspberry Pi RP2\r\nBoard-ID: RPI-RP2\r\n"
+
+    /** The family OTAFIX (PR #41 onwards) advertises and consumes as a factory-erase command. */
+    private val meshFamily = 0x4D455348L
+
+    /** [rakInfo] as an OTAFIX bootloader with bootloader-driven erase emits it — the SoftDevice line is still there. */
+    private val rakOtafixEraseInfo = rakInfo + "Factory-Erase: UF2 family 0x4D455348\r\n"
 
     private class FakeVolume(private val removable: Boolean = true, private val info: String? = null) :
         NoopFirmwareFileHandler() {
@@ -316,5 +327,122 @@ abstract class CommonMaintenanceVolumeTest {
             )
 
         assertEquals(UsbMaintenanceRefusal.UnknownBoardId, assertIs<MaintenanceImageChoice.Refused>(choice).reason)
+    }
+
+    // ── Bootloader-driven factory erase ──────────────────────────────────────
+
+    @Test
+    fun `a volume advertising a factory erase family reports it alongside its softdevice`() = runTest {
+        val accepted =
+            assertIs<VolumeInspection.Accepted>(
+                inspectMaintenanceVolume(treeUri, FakeVolume(info = rakOtafixEraseInfo)),
+            )
+
+        assertEquals(meshFamily, accepted.volume.factoryEraseFamily)
+        assertEquals(SoftDeviceVariant.S140_6_1_1, accepted.volume.softDevice, "The SoftDevice line is still read")
+    }
+
+    @Test
+    fun `a volume without the factory erase line reports no family`() = runTest {
+        val accepted =
+            assertIs<VolumeInspection.Accepted>(inspectMaintenanceVolume(treeUri, FakeVolume(info = rakInfo)))
+
+        assertEquals(null, accepted.volume.factoryEraseFamily)
+    }
+
+    @Test
+    fun `erase prefers the bootloader image when the volume advertises the manifest family`() {
+        val choice =
+            chooseMaintenanceImage(
+                testManifest,
+                UsbMaintenanceRequest.FactoryErase,
+                nrf(SoftDeviceVariant.S140_6_1_1),
+                MaintenanceVolume("WisBlock-RAK4631-Board", SoftDeviceVariant.S140_6_1_1, meshFamily),
+            )
+
+        val asset = assertIs<MaintenanceImageChoice.Resolved>(choice).asset
+        assertEquals("meshtastic_factory_erase.uf2", asset.fileName)
+        assertEquals(false, asset.requiresCdcUnblock, "The bootloader consumes the block; do not open its CDC port")
+    }
+
+    @Test
+    fun `erase uses the bootloader image even when no softdevice can be resolved`() {
+        // The bootloader knows its own flash layout, so there is no SoftDevice choice to get wrong.
+        val choice =
+            chooseMaintenanceImage(
+                testManifest,
+                UsbMaintenanceRequest.FactoryErase,
+                nrf(variant = null),
+                MaintenanceVolume("SomeBoard", softDevice = null, factoryEraseFamily = meshFamily),
+            )
+
+        assertEquals("meshtastic_factory_erase.uf2", assertIs<MaintenanceImageChoice.Resolved>(choice).asset.fileName)
+    }
+
+    @Test
+    fun `erase uses the bootloader image over a softdevice conflict`() {
+        // The conflict refusal exists to protect the SoftDevice from the wrong sketch; the bootloader image touches
+        // neither SoftDevice nor application, so the disagreement is moot on this path.
+        val choice =
+            chooseMaintenanceImage(
+                testManifest,
+                UsbMaintenanceRequest.FactoryErase,
+                nrf(SoftDeviceVariant.S140_6_1_1),
+                MaintenanceVolume("WisBlock-RAK4631-Board", SoftDeviceVariant.S140_7_3_0, meshFamily),
+            )
+
+        assertEquals("meshtastic_factory_erase.uf2", assertIs<MaintenanceImageChoice.Resolved>(choice).asset.fileName)
+    }
+
+    @Test
+    fun `erase falls back to the softdevice sketch when the volume advertises a different family`() {
+        val choice =
+            chooseMaintenanceImage(
+                testManifest,
+                UsbMaintenanceRequest.FactoryErase,
+                nrf(SoftDeviceVariant.S140_6_1_1),
+                MaintenanceVolume("WisBlock-RAK4631-Board", SoftDeviceVariant.S140_6_1_1, 0xDEADBEEFL),
+            )
+
+        val asset = assertIs<MaintenanceImageChoice.Resolved>(choice).asset
+        assertEquals("nrf_erase2.uf2", asset.fileName)
+        assertTrue(asset.requiresCdcUnblock, "The sketch still waits for a host")
+    }
+
+    @Test
+    fun `erase falls back to every existing refusal when the volume advertises no family`() {
+        val conflict =
+            chooseMaintenanceImage(
+                testManifest,
+                UsbMaintenanceRequest.FactoryErase,
+                nrf(SoftDeviceVariant.S140_6_1_1),
+                MaintenanceVolume("WisBlock-RAK4631-Board", SoftDeviceVariant.S140_7_3_0, factoryEraseFamily = null),
+            )
+        assertEquals(
+            UsbMaintenanceRefusal.SoftDeviceConflict,
+            assertIs<MaintenanceImageChoice.Refused>(conflict).reason,
+        )
+
+        val unknown =
+            chooseMaintenanceImage(
+                testManifest,
+                UsbMaintenanceRequest.FactoryErase,
+                nrf(variant = null),
+                MaintenanceVolume("SomeBoard", softDevice = null, factoryEraseFamily = null),
+            )
+        assertEquals(UsbMaintenanceRefusal.UnknownSoftDevice, assertIs<MaintenanceImageChoice.Refused>(unknown).reason)
+    }
+
+    @Test
+    fun `erase on rp2040 ignores a factory erase family`() {
+        val choice =
+            chooseMaintenanceImage(
+                testManifest,
+                UsbMaintenanceRequest.FactoryErase,
+                rp2040(),
+                MaintenanceVolume("RPI-RP2", softDevice = null, factoryEraseFamily = meshFamily),
+            )
+
+        assertEquals("pico_erase.uf2", assertIs<MaintenanceImageChoice.Resolved>(choice).asset.fileName)
     }
 }

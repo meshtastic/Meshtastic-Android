@@ -31,16 +31,26 @@ import org.meshtastic.core.network.HttpClientDefaults
  * this class is the download-time gate against a corrupted transfer, independent of how the manifest naming this image
  * was itself fetched.
  *
- * @property expectedFirstTargetAddress For nRF erase images, the flash address the UF2's first block writes to. Checked
- *   against the resolved [SoftDeviceVariant] before the image is offered, because a swapped URL/digest row is the one
- *   authoring mistake a digest alone cannot catch — and the mistake that corrupts a SoftDevice. Null when the image's
- *   address carries no such invariant (RP2040, bootloader self-updates).
+ * @property expectedFirstTargetAddress For the SoftDevice-specific nRF erase sketches, the flash address the UF2's
+ *   first block writes to. Checked against the resolved [SoftDeviceVariant] before the image is offered, because a
+ *   swapped URL/digest row is the one authoring mistake a digest alone cannot catch — and the mistake that corrupts a
+ *   SoftDevice. Null when the image's address carries no such invariant (RP2040, bootloader self-updates, and the
+ *   bootloader-driven erase image, whose `targetAddr` is 0 by design).
+ * @property expectedFamilyId For the bootloader-driven erase image, the UF2 family ID its block must declare. That
+ *   image is a single block the bootloader consumes itself, so its integrity contract is the family ID rather than an
+ *   address. Null for every other image.
+ * @property requiresCdcUnblock True only for the SoftDevice-specific nRF erase sketches, which block in `while
+ *   (!Serial)` before formatting and need a host to assert DTR. False for images the bootloader consumes itself (RP2040
+ *   `pico_erase`, OTAFIX self-updates, and the bootloader-driven erase image): opening a CDC port after one of those
+ *   latches onto the bootloader's own port and stalls the flow for nothing.
  */
 internal data class MaintenanceUf2(
     val url: String,
     val fileName: String,
     val sha256: String,
     val expectedFirstTargetAddress: Long? = null,
+    val expectedFamilyId: Long? = null,
+    val requiresCdcUnblock: Boolean = false,
 ) {
     init {
         // downloadFile interpolates fileName straight into a temp path. The mapping boundary already refuses unsafe
@@ -68,15 +78,34 @@ private val SAFE_UF2_FILE_NAME = Regex("""[A-Za-z0-9._-]+\.uf2""")
  * `null` when the row names an unsafe file: a refusal of that image, never a crash. One malformed row must not take
  * down the whole firmware screen.
  */
-private fun EraseImageEntry.toMaintenanceUf2OrNull(): MaintenanceUf2? {
+private fun EraseImageEntry.toMaintenanceUf2OrNull(requiresCdcUnblock: Boolean = false): MaintenanceUf2? {
     if (!SAFE_UF2_FILE_NAME.matches(fileName)) return null
     return MaintenanceUf2(
         url = "${HttpClientDefaults.API_BASE_URL}resource/maintenanceUf2/asset/$fileName",
         fileName = fileName,
         sha256 = sha256,
         expectedFirstTargetAddress = expectedFirstTargetAddress,
+        expectedFamilyId = expectedFamilyId,
+        requiresCdcUnblock = requiresCdcUnblock,
     )
 }
+
+/**
+ * The bootloader-driven erase image from [MaintenanceUf2EraseSet.nrf52Bootloader], when the volume's advertised
+ * `Factory-Erase:` family ([volumeFamily]) equals the entry's `expectedFamilyId`; `null` otherwise.
+ *
+ * Both sides must be present and equal: a bootloader that advertises no family silently ignores the file (every
+ * bootloader shipped before OTAFIX PR #41), and an entry with no expected family cannot be verified against the bytes,
+ * so neither may resolve here — the caller falls through to the SoftDevice-specific sketch path unchanged.
+ */
+internal fun bootloaderEraseUf2For(manifest: MaintenanceUf2Manifest, volumeFamily: Long?): MaintenanceUf2? =
+    manifest.erase
+        ?.nrf52Bootloader
+        ?.takeIf { it.expectedFamilyId != null && it.expectedFamilyId == volumeFamily }
+        // targetAddr is 0 in this image by design, so the first-target-address invariant does not apply — the family
+        // ID is the contract the retriever checks instead. Force it null so an authored address can never reject it.
+        ?.copy(expectedFirstTargetAddress = null)
+        ?.toMaintenanceUf2OrNull()
 
 /**
  * OTAFIX bootloader self-update images stay hosted on `Adafruit_nRF52_Bootloader_OTAFIX`'s own GitHub releases — only
@@ -113,7 +142,12 @@ internal fun eraseUf2For(manifest: MaintenanceUf2Manifest, hardware: DeviceHardw
     val erase = manifest.erase ?: return null
     return when {
         hardware.isRp2040Arc -> erase.rp2040.toMaintenanceUf2OrNull()
-        hardware.isNrf52Arc -> hardware.softDeviceVariant?.let { erase.nrf52[it.wireValue]?.toMaintenanceUf2OrNull() }
+
+        hardware.isNrf52Arc ->
+            hardware.softDeviceVariant?.let {
+                erase.nrf52[it.wireValue]?.toMaintenanceUf2OrNull(requiresCdcUnblock = true)
+            }
+
         else -> null
     }
 }
@@ -177,13 +211,34 @@ internal fun parseUf2SoftDevice(infoUf2Text: String): SoftDeviceVariant? {
 }
 
 /**
+ * Extracts the UF2 family ID a bootloader advertises for its own factory erase, from its `INFO_UF2.TXT`.
+ *
+ * OTAFIX (PR #41 onwards) appends `Factory-Erase: UF2 family 0x4D455348` when it will consume a single-block UF2 of
+ * that family as an erase command. Parsed like its siblings — by line prefix, case-insensitively, tolerating leading
+ * whitespace — taking the last `0x`-prefixed token. Returns `null` when the line is absent (every earlier bootloader)
+ * or carries no parseable hex token; a *different* family parses fine and is refused by [bootloaderEraseUf2For].
+ */
+@Suppress("ReturnCount") // guard clauses; an unparseable line must yield null rather than a guess
+internal fun parseUf2FactoryEraseFamily(infoUf2Text: String): Long? {
+    val value =
+        infoUf2Text
+            .lineSequence()
+            .firstOrNull { it.trimStart().startsWith(UF2_FACTORY_ERASE_PREFIX, ignoreCase = true) }
+            ?.substringAfter(':') ?: return null
+    val token =
+        value.split(' ').lastOrNull { it.startsWith(HEX_PREFIX, ignoreCase = true) }?.drop(HEX_PREFIX.length)
+            ?: return null
+    return token.toLongOrNull(HEX_RADIX)
+}
+
+/**
  * Which erase image [variant] needs, from [manifest]. `null` when [manifest] carries no `erase` set at all (never
  * fetched/seeded — fail closed), when this specific variant's row is missing from `erase.nrf52` (a malformed or partial
  * manifest), or when that row names an unsafe file — never a guess at a substitute image.
  */
 internal fun eraseUf2ForVariant(manifest: MaintenanceUf2Manifest, variant: SoftDeviceVariant): MaintenanceUf2? {
     val erase = manifest.erase ?: return null
-    return erase.nrf52[variant.wireValue]?.toMaintenanceUf2OrNull()
+    return erase.nrf52[variant.wireValue]?.toMaintenanceUf2OrNull(requiresCdcUnblock = true)
 }
 
 /** Outcome of reconciling the SoftDevice the drive reports against the manifest's pre-flight hint. */
@@ -237,40 +292,11 @@ private const val UF2_BOARD_ID_PREFIX = "Board-ID:"
 
 private const val UF2_SOFTDEVICE_PREFIX = "SoftDevice:"
 
+private const val UF2_FACTORY_ERASE_PREFIX = "Factory-Erase:"
+
+private const val HEX_PREFIX = "0x"
+
+private const val HEX_RADIX = 16
+
 /** All Meshtastic nRF52840 boards run the S140 SoftDevice; anything else is out of scope and refuses. */
 private const val SUPPORTED_SOFTDEVICE_ID = "S140"
-
-/** UF2 block size, per the UF2 specification. */
-internal const val UF2_BLOCK_BYTES = 512
-
-/** Byte offset of `targetAddr` within a UF2 block header. */
-internal const val UF2_TARGET_ADDR_OFFSET = 12
-
-private const val UF2_MAGIC_START0 = 0x0A324655
-
-/** Bytes in a little-endian 32-bit field, and the mask/shift used to reassemble one. */
-private const val UINT32_BYTES = 4
-
-private const val BITS_PER_BYTE = 8
-
-private const val BYTE_MASK = 0xFFL
-
-/**
- * Reads the target flash address of the first UF2 block in [bytes], or `null` when the payload is not a UF2 image.
- *
- * Used to cross-check a pinned erase image against the resolved SoftDevice variant before it is written.
- */
-@Suppress("ReturnCount") // guard clauses over a binary header
-internal fun uf2FirstTargetAddress(bytes: ByteArray): Long? {
-    if (bytes.size < UF2_BLOCK_BYTES) return null
-    if (readLittleEndianUInt32(bytes, 0) != UF2_MAGIC_START0.toLong()) return null
-    return readLittleEndianUInt32(bytes, UF2_TARGET_ADDR_OFFSET)
-}
-
-private fun readLittleEndianUInt32(bytes: ByteArray, offset: Int): Long {
-    var value = 0L
-    for (i in UINT32_BYTES - 1 downTo 0) {
-        value = (value shl BITS_PER_BYTE) or (bytes[offset + i].toLong() and BYTE_MASK)
-    }
-    return value
-}

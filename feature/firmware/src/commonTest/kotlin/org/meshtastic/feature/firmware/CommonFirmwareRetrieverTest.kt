@@ -532,6 +532,112 @@ abstract class CommonFirmwareRetrieverTest {
         assertNotNull(retriever.retrieveMaintenanceUf2(asset) {}, "No expected address means no address check")
     }
 
+    // ── Bootloader-driven erase image (family-ID contract) ───────────────────
+
+    /** The family OTAFIX consumes as a factory-erase command: 0x4D455348, "MESH". */
+    private val meshFamily = 0x4D455348L
+
+    /**
+     * Rebuilds `tools/meshtastic_factory_erase.uf2` byte for byte from its published header: one 512-byte block,
+     * family-ID flag set, targetAddr 0, 256 zero payload bytes. Parameterised only where a test needs a wrong value.
+     */
+    private fun factoryEraseBlock(flags: Long = UF2_FLAG_FAMILY_ID, familyId: Long = meshFamily): ByteArray {
+        val block = ByteArray(UF2_BLOCK_BYTES)
+        fun putLe32(offset: Int, value: Long) {
+            for (i in 0 until 4) {
+                block[offset + i] = ((value shr (8 * i)) and 0xFF).toByte()
+            }
+        }
+        putLe32(0, 0x0A324655L) // magicStart0
+        putLe32(4, 0x9E5D5157L) // magicStart1
+        putLe32(UF2_FLAGS_OFFSET, flags)
+        putLe32(UF2_TARGET_ADDR_OFFSET, 0L)
+        putLe32(16, 256L) // payloadSize
+        putLe32(20, 0L) // blockNo
+        putLe32(24, 1L) // numBlocks
+        putLe32(UF2_FAMILY_ID_OFFSET, familyId)
+        putLe32(508, 0x0AB16F30L) // magicEnd
+        return block
+    }
+
+    private fun bootloaderEraseAsset(payload: ByteArray, expectedFamily: Long?) = MaintenanceUf2(
+        url = "https://example.com/uf2/meshtastic_factory_erase.uf2",
+        fileName = "meshtastic_factory_erase.uf2",
+        sha256 = FirmwareHashUtil.bytesToHex(FirmwareHashUtil.calculateSha256Bytes(payload)),
+        expectedFamilyId = expectedFamily,
+    )
+
+    @Test
+    fun `the bootloader erase image rebuilt from its contract matches the shipped digest and family`() {
+        // Pins the reader to the bytes that actually ship (OTAFIX c8ccd1d7 tools/meshtastic_factory_erase.uf2), not
+        // just to a synthetic block: the digest is the manifest's, so a header drift here would show up as a mismatch.
+        val block = factoryEraseBlock()
+
+        assertEquals(
+            "6ef3146505c40079ee9e7e692448e40a793dad636f55d1545063299d28908f0d",
+            FirmwareHashUtil.bytesToHex(FirmwareHashUtil.calculateSha256Bytes(block)),
+        )
+        assertEquals(meshFamily, uf2FamilyId(block))
+        assertEquals(0L, uf2FirstTargetAddress(block), "targetAddr is 0 — the address check would reject this file")
+    }
+
+    @Test
+    fun `bootloader erase image with matching digest and family id is returned`() = runTest {
+        val handler = FakeFirmwareFileHandler()
+        val retriever = FirmwareRetriever(handler)
+        val payload = factoryEraseBlock()
+        val asset = bootloaderEraseAsset(payload, expectedFamily = meshFamily)
+        handler.existingUrls.add(asset.url)
+        handler.fileBytes[asset.fileName] = payload
+
+        val result = retriever.retrieveMaintenanceUf2(asset) {}
+
+        assertNotNull(result, "A verified bootloader erase image should be returned")
+        assertTrue(handler.deletedFiles.isEmpty(), "A verified image must not be deleted")
+    }
+
+    @Test
+    fun `bootloader erase image with the wrong family id is rejected even when the digest matches`() = runTest {
+        // A row pointing at some other single-block UF2: intact, digest-correct, and not the command the bootloader
+        // recognises. It would be written and then silently ignored by the device.
+        val handler = FakeFirmwareFileHandler()
+        val retriever = FirmwareRetriever(handler)
+        val payload = factoryEraseBlock(familyId = 0xADA52840L)
+        val asset = bootloaderEraseAsset(payload, expectedFamily = meshFamily)
+        handler.existingUrls.add(asset.url)
+        handler.fileBytes[asset.fileName] = payload
+
+        val result = retriever.retrieveMaintenanceUf2(asset) {}
+
+        assertNull(result, "A family-ID mismatch must not yield an artifact")
+        assertEquals(1, handler.deletedFiles.size, "The rejected download must be deleted")
+    }
+
+    @Test
+    fun `bootloader erase image without the family flag is rejected when a family is expected`() = runTest {
+        val handler = FakeFirmwareFileHandler()
+        val retriever = FirmwareRetriever(handler)
+        val payload = factoryEraseBlock(flags = 0L)
+        val asset = bootloaderEraseAsset(payload, expectedFamily = meshFamily)
+        handler.existingUrls.add(asset.url)
+        handler.fileBytes[asset.fileName] = payload
+
+        assertNull(retriever.retrieveMaintenanceUf2(asset) {}, "Offset 28 is a file size without the flag")
+        assertEquals(1, handler.deletedFiles.size)
+    }
+
+    @Test
+    fun `bootloader erase image skips the family check when the asset declares no expected family`() = runTest {
+        val handler = FakeFirmwareFileHandler()
+        val retriever = FirmwareRetriever(handler)
+        val payload = factoryEraseBlock(familyId = 0xADA52840L)
+        val asset = bootloaderEraseAsset(payload, expectedFamily = null)
+        handler.existingUrls.add(asset.url)
+        handler.fileBytes[asset.fileName] = payload
+
+        assertNotNull(retriever.retrieveMaintenanceUf2(asset) {}, "No expected family means no family check")
+    }
+
     // -----------------------------------------------------------------------
     // Test infrastructure
     // -----------------------------------------------------------------------
