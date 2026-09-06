@@ -119,10 +119,10 @@ class NodeListViewModel(
         }
 
     /**
-     * The unheard filter may only narrow the list once the firmware has proven it reports the field AND the
-     * handshake's NodeInfo install has completed. Between setFirmwareVersion flipping the capability and that install
-     * landing, cached rows can still carry a false from a previous session, and the filter would hide valid nodes
-     * until each was rewritten.
+     * The unheard filter may only narrow the list once the firmware has proven it reports the field AND the handshake's
+     * NodeInfo install has completed. Between setFirmwareVersion flipping the capability and that install landing,
+     * cached rows can still carry a false from a previous session, and the filter would hide valid nodes until each was
+     * rewritten.
      */
     private val unheardFilterAllowed: Flow<Boolean> =
         combine(nodeManager.reportsHeardOnCurrentLora, nodeManager.isNodeDbReady) { reportsHeard, dbReady ->
