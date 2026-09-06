@@ -66,6 +66,7 @@ import org.meshtastic.core.resources.current
 import org.meshtastic.core.resources.elevation_suffix
 import org.meshtastic.core.resources.node_list_click_label
 import org.meshtastic.core.resources.node_list_long_click_label
+import org.meshtastic.core.resources.node_not_heard_on_current_lora
 import org.meshtastic.core.resources.signal_quality
 import org.meshtastic.core.resources.unknown_username
 import org.meshtastic.core.resources.voltage
