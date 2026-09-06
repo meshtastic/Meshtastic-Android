@@ -459,12 +459,14 @@ private fun NodeListEmptyState(
 @Composable
 private fun UnheardNodesBanner(unheardNodes: List<Node>, onRemoveAll: () -> Unit, modifier: Modifier = Modifier) {
     var dismissed by remember { mutableStateOf(false) }
-    var seenMax by remember { mutableIntStateOf(0) }
+    var previousCount by remember { mutableIntStateOf(0) }
     val count = unheardNodes.size
 
+    // Re-arm on any rise, not only above a historical maximum: dismissing at 3, dropping to 1 and rising to 2 is
+    // still a new config change worth offering for.
     LaunchedEffect(count) {
-        if (count > seenMax) dismissed = false
-        seenMax = count
+        if (count > previousCount) dismissed = false
+        previousCount = count
     }
 
     if (count == 0 || dismissed) return
