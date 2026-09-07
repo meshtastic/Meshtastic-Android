@@ -1178,6 +1178,7 @@
     <string name="nodes_empty_searching_hint">近くのノードは、検出され次第ここに表示されます。</string>
     <string name="nodes_empty_searching_title">ノードを検索中</string>
     <string name="nodes_queued_for_deletion">%1$d 件のノードが削除待ちです：</string>
+    <string name="nodes_unheard_remove">削除</string>
     <string name="noise_floor">ノイズフロア</string>
     <string name="noise_floor_definition">無線受信機が測定した背景の RF ノイズです。値が低いほど、通常は受信環境が静かであることを示します。-85 dBm は混雑の目安であり、明確な失敗のしきい値ではありません。</string>
     <string name="noise_floor_no_reading">ノイズフロア：測定値なし</string>

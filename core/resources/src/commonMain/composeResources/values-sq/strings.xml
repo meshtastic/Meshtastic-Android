@@ -187,6 +187,7 @@
     <string name="node_sort_via_mqtt">përmes MQTT</string>
     <string name="nodedb_reset">Përditësimi i NodeDB</string>
     <!-- NODES -->
+    <string name="nodes_unheard_remove">Hiq</string>
     <string name="none">Asnjë (çaktivizo)</string>
     <string name="none_quality">Asnjë</string>
     <string name="not_connected">Nuk është lidhur</string>

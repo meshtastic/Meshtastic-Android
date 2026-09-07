@@ -1193,6 +1193,7 @@
     <string name="nodes_empty_searching_hint">附近节点在被发现后将显示在这里。</string>
     <string name="nodes_empty_searching_title">正在搜索节点</string>
     <string name="nodes_queued_for_deletion">%1$d 节点待删除：</string>
+    <string name="nodes_unheard_remove">移除</string>
     <string name="noise_floor">底噪</string>
     <string name="noise_floor_definition">无线电接收器测量到的背景射频噪声。较低的数值通常表示接收环境较为安静; -85 dBm 是一个表示环境繁忙的参考基准，而非硬性故障阈值。</string>
     <string name="noise_floor_no_reading">底噪:未获取到数据</string>

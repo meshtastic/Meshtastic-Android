@@ -549,6 +549,7 @@
     <string name="nodes">Węzły</string>
     <string name="nodes_at_this_location">Węzły w tej lokalizacji</string>
     <string name="nodes_empty_disconnected_title">Brak podłączonych urządzeń</string>
+    <string name="nodes_unheard_remove">Usuń</string>
     <string name="none">Brak (wyłącz)</string>
     <string name="none_quality">brak</string>
     <string name="not_connected">Nie połączono</string>

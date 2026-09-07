@@ -587,6 +587,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="nodes_at_this_location">Nodos en esta ubicación</string>
     <string name="nodes_empty_disconnected_title">No hay dispositivos conectados</string>
     <string name="nodes_queued_for_deletion">%1$d nodos en cola para borrar:</string>
+    <string name="nodes_unheard_remove">Quitar</string>
     <string name="none">Ninguno (desactivado)</string>
     <string name="none_quality">Ninguna</string>
     <string name="not_connected">No está conectado</string>

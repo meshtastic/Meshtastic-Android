@@ -200,6 +200,7 @@
     <string name="node_sort_via_favorite">Абраныя</string>
     <string name="node_sort_via_mqtt">праз MQTT</string>
     <!-- NODES -->
+    <string name="nodes_unheard_remove">Прыбраць</string>
     <string name="none">Няма (адключана)</string>
     <string name="none_quality">Нічога</string>
     <string name="not_connected">Не злучана</string>

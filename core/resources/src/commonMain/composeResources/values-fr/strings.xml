@@ -1070,6 +1070,7 @@
     <string name="nodes_empty_searching_hint">Les nœuds à proximité apparaîtront ici quand ils seront découverts.</string>
     <string name="nodes_empty_searching_title">Recherche de nœuds en cours</string>
     <string name="nodes_queued_for_deletion">%1$d nœuds en attente de suppression :</string>
+    <string name="nodes_unheard_remove">Supprimer</string>
     <string name="none">Aucun (désactivé)</string>
     <string name="none_quality">Aucun</string>
     <string name="not_connected">Non connecté</string>

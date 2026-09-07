@@ -185,6 +185,7 @@
     <string name="node_sort_distance">Απόσταση</string>
     <string name="node_sort_via_mqtt">μέσω MQTT</string>
     <!-- NODES -->
+    <string name="nodes_unheard_remove">Διαγραφή</string>
     <string name="none">Κανένα (απενεργοποιημένο)</string>
     <string name="not_connected">Αποσυνδεδεμένο</string>
     <!-- NOTIFICATIONS -->

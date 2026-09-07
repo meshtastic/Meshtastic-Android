@@ -495,6 +495,7 @@
     <string name="nodes">Nós</string>
     <string name="nodes_at_this_location">Nós neste local</string>
     <string name="nodes_queued_for_deletion">%1$d nós na fila para exclusão:</string>
+    <string name="nodes_unheard_remove">Excluir</string>
     <string name="none">Nenhum (desabilitado)</string>
     <string name="none_quality">Nenhum</string>
     <string name="not_connected">Não conectado</string>

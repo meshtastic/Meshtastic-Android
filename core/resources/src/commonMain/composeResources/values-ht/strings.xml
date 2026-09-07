@@ -180,6 +180,7 @@
     <string name="node_sort_via_mqtt">atravè MQTT</string>
     <string name="nodedb_reset">Reyajiste NodeDB</string>
     <!-- NODES -->
+    <string name="nodes_unheard_remove">Retire</string>
     <string name="none">Okenn (enfim)</string>
     <string name="none_quality">Pa gen</string>
     <string name="not_connected">Pa konekte</string>

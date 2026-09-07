@@ -184,6 +184,7 @@
     <string name="node_sort_via_mqtt">trí MQTT</string>
     <string name="nodedb_reset">Athshocraigh NodeDB</string>
     <!-- NODES -->
+    <string name="nodes_unheard_remove">Bain</string>
     <string name="none">Ní aon (diúscairt)</string>
     <string name="none_quality">Ní dhéanfaidh sé</string>
     <string name="not_connected">Ní ceangailte</string>

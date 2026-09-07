@@ -864,6 +864,7 @@
     <string name="nodes_empty_searching_hint">Възлите наблизо ще се показват тук, когато бъдат открити.</string>
     <string name="nodes_empty_searching_title">Търсене на възли</string>
     <string name="nodes_queued_for_deletion">%1$d възела са на опашка за изтриване:</string>
+    <string name="nodes_unheard_remove">Изтрий</string>
     <string name="none">Няма (деактивирано)</string>
     <string name="none_quality">Няма</string>
     <string name="not_connected">Няма връзка</string>

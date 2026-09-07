@@ -396,6 +396,7 @@
     <string name="nodeinfo_broadcast_interval">Node Bilgisi Yayın Aralığı</string>
     <!-- NODES -->
     <string name="nodes">Düğümler</string>
+    <string name="nodes_unheard_remove">Kaldır</string>
     <string name="none">Hiçbiri (kapat)</string>
     <string name="none_quality">Yok</string>
     <string name="not_connected">Bağlı değil</string>
