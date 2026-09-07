@@ -98,6 +98,16 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
     val supportsMeshBeacon = atLeast(V2_8_0)
 
     /**
+     * Whether the node reports [NodeInfo.heard_on_current_lora] - whether it has heard each node since its current LoRa
+     * config took effect. Gated to [UNRELEASED] until the firmware side ships. Older firmware never sends the field,
+     * and a proto3 bool defaults to false, so an ungated read marks every node as unheard.
+     *
+     * Deliberately outside [forceEnableAll]: every other capability being wrong in a debug build shows a UI the
+     * firmware ignores, but this one being wrong persists false into the node DB and offers real nodes for removal.
+     */
+    val supportsHeardOnCurrentLora = version != null && version >= UNRELEASED
+
+    /**
      * Whether this firmware's region table contains [region]. Regions declare the release that introduced them via
      * [RegionInfo.minFirmware]; older firmware would treat an unknown region code as UNSET, so the picker hides it.
      */

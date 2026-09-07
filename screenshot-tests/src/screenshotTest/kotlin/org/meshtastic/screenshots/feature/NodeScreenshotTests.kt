@@ -31,11 +31,13 @@ import org.meshtastic.feature.node.component.NodeItemCompactActivePreview
 import org.meshtastic.feature.node.component.NodeItemCompactAllFieldsPreview
 import org.meshtastic.feature.node.component.NodeItemCompactMinimalPreview
 import org.meshtastic.feature.node.component.NodeItemCompactOnlineRemotePreview
+import org.meshtastic.feature.node.component.NodeItemCompactUnheardPreview
 import org.meshtastic.feature.node.component.NodeItemCompactUnknownPreview
 import org.meshtastic.feature.node.component.NodeItemCompleteActivePreview
 import org.meshtastic.feature.node.component.NodeItemCompleteOnlineRemotePreview
 import org.meshtastic.feature.node.component.NodeItemCompletePreview
 import org.meshtastic.feature.node.component.NodeItemSignedPreview
+import org.meshtastic.feature.node.component.NodeItemUnheardPreview
 import org.meshtastic.feature.node.component.NodeItemUnknownPreview
 import org.meshtastic.feature.node.component.PositionInlineContentPreview
 import org.meshtastic.feature.node.component.PowerMetricsNoCurrentPreview
@@ -290,4 +292,18 @@ fun ScreenshotHopHistogramContent() {
 @Composable
 fun ScreenshotHopHistogramEmpty() {
     HopHistogramEmptyPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotNodeItemUnheard() {
+    NodeItemUnheardPreview()
+}
+
+@PreviewTest
+@PreviewLightDark
+@Composable
+fun ScreenshotNodeItemCompactUnheard() {
+    NodeItemCompactUnheardPreview()
 }

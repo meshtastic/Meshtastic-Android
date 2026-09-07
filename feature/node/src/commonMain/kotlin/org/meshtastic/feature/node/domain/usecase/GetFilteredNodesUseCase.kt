@@ -17,6 +17,7 @@
 package org.meshtastic.feature.node.domain.usecase
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import org.koin.core.annotation.Single
 import org.meshtastic.core.model.Node
@@ -37,7 +38,8 @@ open class GetFilteredNodesUseCase constructor(private val nodeRepository: NodeR
             onlyOnline = filter.onlyOnline,
             onlyDirect = filter.onlyDirect,
         )
-        .map { list ->
+        .combine(nodeRepository.myNodeInfo) { list, myNodeInfo -> list to myNodeInfo?.myNodeNum }
+        .map { (list, ourNum) ->
             list
                 .filter { node -> node.isIgnored == filter.showIgnored }
                 .filter { node ->
@@ -58,5 +60,9 @@ open class GetFilteredNodesUseCase constructor(private val nodeRepository: NodeR
                     }
                 }
                 .filter { node -> if (filter.excludeMqtt) !node.viaMqtt else true }
+                // The connected node is never unreachable from itself, and both row renderers already exempt it.
+                .filter { node ->
+                    if (filter.excludeUnheard) node.heardOnCurrentLora || node.num == ourNum else true
+                }
         }
 }

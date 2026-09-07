@@ -67,6 +67,10 @@ class SwitchingNodeInfoWriteDataSource(
         withContext(dispatchers.io) { dbManager.withDb { it.nodeInfoDao().setNodeNotes(num, notes) } }
     }
 
+    override suspend fun markAllHeardOnCurrentLora() {
+        withContext(dispatchers.io) { dbManager.withDb { it.nodeInfoDao().markAllHeardOnCurrentLora() } }
+    }
+
     override suspend fun updatePowerChannelLabel(num: Int, channelIndex: Int, label: String) {
         withContext(dispatchers.io) {
             dbManager.withDb { it.nodeInfoDao().updatePowerChannelLabel(num, channelIndex, label) }

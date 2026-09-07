@@ -1275,6 +1275,7 @@ node_count_template
 node_count_total
 node_filter_exclude_infrastructure
 node_filter_exclude_mqtt
+node_filter_exclude_unheard
 node_filter_ignored
 node_filter_include_unknown
 node_filter_only_direct
@@ -1311,6 +1312,7 @@ node_list_click_label
 node_list_help_node_details
 node_list_help_title
 node_list_long_click_label
+node_not_heard_on_current_lora
 node_number
 node_request_send_failed
 node_restarting
@@ -1333,6 +1335,10 @@ nodes_empty_disconnected_title
 nodes_empty_searching_hint
 nodes_empty_searching_title
 nodes_queued_for_deletion
+nodes_unheard_banner
+nodes_unheard_banner_one
+nodes_unheard_keep
+nodes_unheard_remove
 noise_floor
 noise_floor_definition
 noise_floor_no_reading
