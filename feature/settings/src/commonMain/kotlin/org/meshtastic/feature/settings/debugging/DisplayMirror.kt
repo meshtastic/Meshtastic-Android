@@ -101,6 +101,31 @@ private val SWIPE_THRESHOLD = 48.dp
 // Mirror + D-pad fit comfortably side by side above this content width.
 private val SIDE_BY_SIDE_MIN_WIDTH = 760.dp
 
+/** Toggle, one-shot refresh, and the live frame's geometry. Split out to keep [DisplayMirrorContent] readable. */
+@Composable
+private fun MirrorHeaderRow(
+    mirroring: Boolean,
+    active: Boolean,
+    frame: MirrorFrame?,
+    onToggle: (Boolean) -> Unit,
+    onRefresh: () -> Unit,
+) {
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Switch(checked = mirroring, onCheckedChange = onToggle, enabled = active)
+        Text(
+            text = stringResource(if (mirroring) Res.string.mirror_active else Res.string.mirror_off),
+            style = MaterialTheme.typography.titleMedium,
+        )
+        OutlinedButton(onClick = onRefresh, enabled = active) { Text(stringResource(Res.string.refresh)) }
+        if (frame != null) {
+            Text(
+                text = stringResource(Res.string.mirror_frame_info, frame.width, frame.height, frame.frameId),
+                style = MaterialTheme.typography.labelSmall,
+            )
+        }
+    }
+}
+
 /** Live view of the connected device's screen, with remote D-pad, keyboard, and touch control. */
 @Composable
 fun DisplayMirrorContent(modifier: Modifier = Modifier, viewModel: DisplayMirrorViewModel = koinViewModel()) {
@@ -109,6 +134,7 @@ fun DisplayMirrorContent(modifier: Modifier = Modifier, viewModel: DisplayMirror
     val mirroring by viewModel.mirroring.collectAsStateWithLifecycle()
     val connected by viewModel.connected.collectAsStateWithLifecycle()
     val displayInfo by viewModel.displayInfo.collectAsStateWithLifecycle()
+    val active = connected && !viewModel.managed.collectAsStateWithLifecycle().value
 
     // Don't leave the device streaming to a hidden tab or abandoned screen.
     DisposableEffect(Unit) { onDispose { viewModel.stopMirroring() } }
@@ -119,28 +145,13 @@ fun DisplayMirrorContent(modifier: Modifier = Modifier, viewModel: DisplayMirror
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         val currentFrame = frame
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Switch(checked = mirroring, onCheckedChange = viewModel::setMirror, enabled = connected)
-            Text(
-                text = stringResource(if (mirroring) Res.string.mirror_active else Res.string.mirror_off),
-                style = MaterialTheme.typography.titleMedium,
-            )
-            OutlinedButton(onClick = viewModel::requestFrame, enabled = connected) {
-                Text(stringResource(Res.string.refresh))
-            }
-            if (currentFrame != null) {
-                Text(
-                    text =
-                    stringResource(
-                        Res.string.mirror_frame_info,
-                        currentFrame.width,
-                        currentFrame.height,
-                        currentFrame.frameId,
-                    ),
-                    style = MaterialTheme.typography.labelSmall,
-                )
-            }
-        }
+        MirrorHeaderRow(
+            mirroring = mirroring,
+            active = active,
+            frame = currentFrame,
+            onToggle = viewModel::setMirror,
+            onRefresh = viewModel::requestFrame,
+        )
 
         if (displayInfo?.panel_class == DisplayInfo.PanelClass.EINK) {
             Text(text = stringResource(Res.string.mirror_eink_hint), style = MaterialTheme.typography.labelSmall)
@@ -154,14 +165,14 @@ fun DisplayMirrorContent(modifier: Modifier = Modifier, viewModel: DisplayMirror
 
             currentFrame == null -> {
                 Text(text = stringResource(Res.string.mirror_no_frame))
-                DpadCluster(enabled = connected, onEvent = viewModel::sendKey)
+                DpadCluster(enabled = active, onEvent = viewModel::sendKey)
             }
 
             else ->
                 MirrorWithControls(
                     currentFrame,
                     palette,
-                    enabled = connected,
+                    enabled = active,
                     hasTouch = displayInfo?.has_touch == true,
                     onEvent = viewModel::sendKey,
                     onTouch = viewModel::sendTouch,
