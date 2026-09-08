@@ -29,14 +29,11 @@ import kotlin.test.Test
 import kotlin.test.assertSame
 
 @RunWith(RobolectricTestRunner::class)
-@Config(application = MeshUtilApplication::class, sdk = [34])
+@Config(application = ImageLoaderOnlyApplication::class, sdk = [34])
 class CoilImageLoaderLifecycleTest {
     @After
     @OptIn(DelicateCoilApi::class)
     fun tearDown() {
-        // Booting the real Application starts background init on Dispatchers.Default; leaving it running
-        // leaks failures into later tests in this JVM (Robolectric never calls onTerminate).
-        ApplicationProvider.getApplicationContext<MeshUtilApplication>().cancelBackgroundInit()
         SingletonImageLoader.reset()
     }
 
@@ -47,4 +44,12 @@ class CoilImageLoaderLifecycleTest {
 
         assertSame(configuredImageLoader, SingletonImageLoader.get(application))
     }
+}
+
+/**
+ * Boots the production Application with its background init suppressed: what this asserts is the Koin/Coil wiring, and
+ * the real [MeshUtilApplication.startBackgroundInit] opens a database whose connection can outlive the test.
+ */
+private class ImageLoaderOnlyApplication : MeshUtilApplication() {
+    override fun startBackgroundInit() = Unit
 }

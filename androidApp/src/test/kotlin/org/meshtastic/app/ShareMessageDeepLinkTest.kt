@@ -18,8 +18,6 @@ package org.meshtastic.app
 
 import android.app.PendingIntent
 import android.content.Intent
-import androidx.test.core.app.ApplicationProvider
-import org.junit.After
 import org.junit.runner.RunWith
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.navigation.ContactsRoute
@@ -36,13 +34,6 @@ import kotlin.test.assertNull
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])
 class ShareMessageDeepLinkTest {
-
-    @After
-    fun tearDown() {
-        // No `application =` override, so Robolectric boots the manifest's real MeshUtilApplication and its
-        // background init; stop it here or its failures land on whichever test runs next in this JVM.
-        ApplicationProvider.getApplicationContext<MeshUtilApplication>().cancelBackgroundInit()
-    }
 
     @Test
     fun `shared text round trips through the deep link query`() {
