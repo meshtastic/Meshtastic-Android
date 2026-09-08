@@ -13,11 +13,11 @@
 
 ## Первый запуск
 
-Когда ты открываешь приложение впервые, оно проводит тебя через вводный процесс, который настраивает необходимые разрешения и параметры. Выполни каждый шаг по порядку или пропусти — здесь ничто не является одноразовым предложением. Every permission can be reviewed and granted later from the **Permissions** section of **Settings** inside the app.
+Когда ты открываешь приложение впервые, оно проводит тебя через вводный процесс, который настраивает необходимые разрешения и параметры. Выполни каждый шаг по порядку или пропусти — здесь ничто не является одноразовым предложением. Каждое разрешение можно просмотреть и выдать позже в разделе **Разрешения** в **Настройках** внутри приложения.
 
 ### Экран приветствия
 
-The welcome screen introduces Meshtastic with three feature rows:
+Экран приветствия знакомит с Meshtastic с тремя рядами функций:
 
                                          |                                                                                                                          |
  --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
@@ -35,16 +35,16 @@ The welcome screen introduces Meshtastic with three feature rows:
 
 ### Разрешения Bluetooth
 
-Bluetooth is the primary connection method between your phone and Meshtastic radio. The **Bluetooth** screen shows what the permission buys you:
+Bluetooth — это основной способ подключения твоего телефона к радиостанции Meshtastic. Экран **Bluetooth** показывает, что даёт тебе это разрешение:
 
-- **Discovery** — find and identify Meshtastic devices near you.
-- **Configuration** — wirelessly manage your device settings and channels.
+- **Обнаружение** — найди и определи устройства Meshtastic рядом с тобой.
+- **Настройки** — управляйте параметрами устройства и каналами по беспроводной сети.
 
-On Android 12 and newer, Android asks once, for **Nearby devices**, and that one grant covers both scanning and connecting. Without it, you'll need to use USB or TCP connections instead.
+На Android 12 и новее система спрашивает один раз про **ближайшие устройства**, и это разрешение покрывает и сканирование, и подключение. Без него придётся использовать USB или TCP-соединения.
 
 ### Разрешение на доступ к местоположению
 
-&gt; ℹ️ **Note:** Location is not required for Bluetooth on Android 12 and newer. **Android 11 and older** show one location step, on the Bluetooth screen, rather than two — those releases treat a Bluetooth scan as a location capability, so the app asks for Location instead of "Nearby devices". Asking twice would push you toward the point where Android stops offering the dialog at all (a second denial on Android 11; the "Don't ask again" checkbox on Android 10 and older). On **Android 12 and newer** the two are separate: "Nearby devices" is declared `neverForLocation`, and declining Location does not stop you finding or connecting to a radio.
+&gt; ℹ️ **Примечание:** Для Bluetooth на Android 12 и выше местоположение не требуется. **Android 11 and older** show one location step, on the Bluetooth screen, rather than two — those releases treat a Bluetooth scan as a location capability, so the app asks for Location instead of "Nearby devices". Asking twice would push you toward the point where Android stops offering the dialog at all (a second denial on Android 11; the "Don't ask again" checkbox on Android 10 and older). On **Android 12 and newer** the two are separate: "Nearby devices" is declared `neverForLocation`, and declining Location does not stop you finding or connecting to a radio.
 
 Meshtastic также использует местоположение для:
 
@@ -90,19 +90,19 @@ This matters most for notifications. If you decline them during setup, this row 
 
 ## После настройки
 
-After you grant permissions, the app opens the main interface. Ваше первое действие должно заключаться в подключении к радиостанции Meshtastic — см. [Подключения](connections) для подробных инструкций.
+После предоставления разрешений, приложение открывает основной интерфейс. Ваше первое действие должно заключаться в подключении к радиостанции Meshtastic — см. [Подключения](connections) для подробных инструкций.
 
-&gt; 💡 **Tip:** If you skipped any permissions during setup, open the **Permissions** section of **Settings** in the app. Every runtime permission is listed there with its current state and a way back to it — including notifications, which the system will not prompt for a second time on its own.
+&gt; 💡 **Совет:** Если ты пропустил какие-либо разрешения при настройке, открой раздел **Разрешения** в **Настройках** приложения. Там перечислены все разрешения во время работы с их текущим состоянием и возможностью вернуться к ним — включая уведомления, на которые система сама больше не будет выдавать запрос второй раз.
 
-Features also ask in context. On the **Connect** tab, a card above the device list explains what the Bluetooth permission is for and offers **Grant permission**; once Android stops prompting, that button becomes **Open settings**.
+Возможности также спрашивают в контексте. На вкладке **Подключение** карточка над списком устройств объясняет, для чего нужен доступ к Bluetooth, и предлагает **Предоставить доступ**; как только Android перестанет показывать подсказки, эта кнопка станет **Открыть настройки**.
 
 Новичок в Meshtastic? Руководство [по началу работы](https://meshtastic.org/docs/getting-started) на meshtastic.org охватывает выбор оборудования, начальную настройку радиостанции и первую установку сети.
 
 ## Связанные темы
 
-- [Connections](connections) — pair your first radio
+- [Подключения](connections) — подключи своё первое радиоустройство
 - [Сообщения и каналы](messages-and-channels) — отправь  своё первое сообщение
-- [Nodes](nodes) — see who else is on your mesh
+- [Ноды](nodes) — посмотри, кто ещё в твоей сети
 - [Карта и контрольные точки](map-and-waypoints) — просмотр позиций нод
 - [Settings — Radio &amp; User](settings-radio-user) — configure your radio and user profile
 </pre>
