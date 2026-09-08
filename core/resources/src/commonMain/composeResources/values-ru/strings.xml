@@ -165,6 +165,8 @@
     <string name="bluetooth_permission_blocked_rationale_pre31">Разрешение на определение местоположения выключено, и Android больше не будет спрашивать. Включи его в настройках приложения, чтобы сканировать и подключаться через Bluetooth.</string>
     <string name="bluetooth_permission_denied_notice">Без доступа к устройствам поблизости Meshtastic не сможет найти или подключиться к твоей радиостанции по Bluetooth. Ты всё ещё можешь подключиться через Wi-Fi или USB.</string>
     <string name="bluetooth_permission_denied_notice_pre31">Без разрешения на доступ к местоположению Android блокирует сканирование Bluetooth, поэтому Meshtastic не может найти твою радиостанцию. Ты всё ещё можешь подключиться через Wi-Fi или USB.</string>
+    <string name="bluetooth_permission_rationale">Meshtastic требует доступ к устройствам поблизости, чтобы найти ваше радио и подключиться к нему. Он используется только для общения с вашими устройствами и никогда — чтобы определить ваше местоположение. Без этого Bluetooth недоступен — Wi-Fi и USB всё равно работают.</string>
+    <string name="bluetooth_permission_rationale_pre31">Meshtastic нуждается в разрешении на доступ к местоположению, потому что эта версия Android рассматривает сканирование Bluetooth как функцию определения местоположения. Ваше положение никогда не считывается и не передается для этого. Без этого Bluetooth недоступен — Wi-Fi и USB всё ещё работают.</string>
     <string name="bluetooth_scan_location_services_disabled">Службы определения местоположения отключены. Включите их, чтобы искать ближайшие устройства.</string>
     <string name="bluetooth_scan_missing_permission">Сканирование Bluetooth требует разрешения. Дайте разрешение на поиск устройств поблизости (или местоположения).</string>
     <string name="bluetooth_scan_start_failed">Невозможно запустить сканирование Bluetooth. Попробуй снова или включи/выключи Bluetooth, если проблема не исчезнет.</string>
@@ -960,7 +962,9 @@
     <!-- LOCAL -->
     <string name="local_mbtiles_file">Локальный файл MBTiles</string>
     <string name="local_network_permission">Доступ к локальной сети</string>
+    <string name="local_network_permission_blocked_rationale">Доступ к локальной сети выключен, и Android больше не будет спрашивать. Радио в вашей Wi-Fi сети не может быть найдено или доступно, пока вы не включите его в настройках приложения. Радио через публичный адрес или VPN не затронуто.</string>
     <string name="local_network_permission_denied_hint">Доступ к локальной сети для Meshtastic выключен. Если это радиоустройство в твоей локальной сети, подключение не удастся, пока не разрешишь доступ к локальной сети в системных настройках.</string>
+    <string name="local_network_permission_rationale">Meshtastic нужен доступ к локальной сети, чтобы находить и подключаться к радиостанциям в твоей Wi-Fi. Он ищет только в сети, к которой ты уже подключен. Без этого радиостанцию в твоей Wi-Fi нельзя будет найти даже по её адресу; радиостанции с публичным адресом или через VPN это не касается.</string>
     <string name="local_stats_bad">Плохие: %1$d</string>
     <string name="local_stats_battery">Батарея: %1$d</string>
     <string name="local_stats_diagnostics_prefix">Диагностика: %1$s</string>
@@ -977,6 +981,9 @@
     <!-- LOCATION -->
     <string name="location_disabled">Доступ к местоположению выключен, невозможно отправлять координаты в сеть.</string>
     <string name="location_permission">Доступ к местоположению</string>
+    <string name="location_permission_blocked_notice">Доступ к местоположению отключен, и Android больше не будет спрашивать. Включи его в настройках приложения, когда захочешь снова пользоваться картой и делиться местоположением.</string>
+    <string name="location_permission_blocked_toast">Разрешение на определение местоположения выключено. Включи его в настройках приложения, чтобы поделиться своей позицией.</string>
+    <string name="location_permission_denied_notice">Без доступа к местоположению карта не покажет где ты находишься, и Meshtastic не сможет делиться твоей позицией в сети. Всё остальное будет работать, и ты сможешь включить это позже.</string>
     <string name="location_sharing">Поделиться местоположением</string>
     <!-- LOCKDOWN -->
     <string name="lockdown_backoff">Попробуй снова через %1$d секунд.</string>

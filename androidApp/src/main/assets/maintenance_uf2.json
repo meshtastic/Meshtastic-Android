@@ -1,7 +1,7 @@
 {
   "manifestVersion": 1,
-  "otafixReleaseTag": "0.9.2-OTAFIX2.4",
-  "otafixBase": "https://github.com/meshtastic/Adafruit_nRF52_Bootloader_OTAFIX/releases/download/0.9.2-OTAFIX2.4",
+  "otafixReleaseTag": "0.9.2-OTAFIX2.5",
+  "otafixBase": "https://github.com/meshtastic/Adafruit_nRF52_Bootloader_OTAFIX/releases/download/0.9.2-OTAFIX2.5",
   "erase": {
     "nrf52": {
       "6.1.1": {
@@ -28,59 +28,79 @@
   "otafixByBoardId": {
     "HT-n5262": {
       "otafixBoardSlug": "heltec_t114",
-      "sha256": "e774fa8653e702a133571e9166d973a3efe192e63894cb8dd4117064732e6e42"
+      "sha256": "96a461dcf5eb3df81de26ed278632a949f777304878ddb445958dbbf0684702a"
+    },
+    "Heltec-T096-v1": {
+      "otafixBoardSlug": "heltec_t096",
+      "sha256": "e81ca347718ce0f3511fb909db793e090020e684f903ba35a4efe5aa2872356e"
+    },
+    "Heltec-T1": {
+      "otafixBoardSlug": "heltec_t1",
+      "sha256": "112fa1f748a6b6c33bbb1893378b432180c9afeb7ca608a23b7544bf364a6fb4"
     },
     "MinewSemi-MX25LE01": {
       "otafixBoardSlug": "minewsemi_mx25le01",
-      "sha256": "4b40b1bcb5a8ecc48db898b9702abdc71373cb81eaaa5ff11d89c0ff830066a9"
+      "sha256": "301937aaade9c548d40c4c25db7a7cd2356d694c27764ad295789e04128f4170"
     },
     "TRACKER L1": {
       "otafixBoardSlug": "wio_tracker_l1",
-      "sha256": "19e7e9617ab9180c725b5e23ae61cdcf2406a8776ccfe44722341f8f136607f8"
+      "sha256": "4eb3c0aa307f6f69395817b49e2041ba063e7004333c3a702296f6724cdeae58"
+    },
+    "WisBlock-RAK3401-Board": {
+      "otafixBoardSlug": "wiscore_rak3401",
+      "sha256": "33d1d5f46ceda68e96d95ad358f9625eedc02fd9ebe67517e603a018ee1eac38"
     },
     "WisBlock-RAK4631-Board": {
       "otafixBoardSlug": "wiscore_rak4631_board",
-      "sha256": "aa3f9bac4783caa0c1fd8de1ea675776e1eec93c6cb1d66279eb634f540037a7"
+      "sha256": "20044aefae6f02e6b769d2018cdab827af359ca12aea5a93591e300574e8a7f4"
     },
     "WisMesh-Tag": {
       "otafixBoardSlug": "wismesh_tag",
-      "sha256": "6ec60cc380fe001a5d81ef6accc29fc2bea3cc0c4def6bb6548de2955d2a216d"
+      "sha256": "228545896fb2e16f4eaf0f70c672b7cd0ceab8448b51d24cd4f5a4b4515d6f52"
+    },
+    "muzi-Base-Board": {
+      "otafixBoardSlug": "muzi_base",
+      "sha256": "bee189b0c8aabacdd0033caac11cd1fb01445fe0d92912fb5e4bf5ba21ca7374"
+    },
+    "nRF52840-MeshTracker-X1": {
+      "otafixBoardSlug": "mesh_tracker_x1",
+      "sha256": "52764ebe629dae6d9085f6e6d85a8d5d2df7aeea8e47dca55c692fdb0fbcc4e8"
     },
     "nRF52840-SeeedSenseCAPSolarP1-v1": {
       "otafixBoardSlug": "sensecap_solar_p1",
-      "sha256": "72d48f3fe71fd746d09f31fdb5c09fbea21e136ddbbc62a248971c1ef218b38b"
+      "sha256": "99bf90359cceadb6d93bafae4f8ed93865ed0f40c9f422399f78944d0a1a00c0"
     },
     "nRF52840-SeeedXiao-v1": {
       "otafixBoardSlug": "xiao_nrf52840_ble",
-      "sha256": "52887c2c5b2f459f9ee36a97d8675031005ab16a14a9e1a995ca443c68dcc055"
+      "sha256": "678a68ef215461ab7f8fa840036e79fc0aa33433e8e5bb66bc20efa757c7c5c6"
     },
     "nRF52840-SeeedXiaoSense-v1": {
       "otafixBoardSlug": "xiao_nrf52840_ble_sense",
-      "sha256": "9a8ee563289be117d885c76388ce19ef2d33aa08f002c1f5d0f65cbb8cbf12a8"
+      "sha256": "4a44832efe05ccc458bd9218934bed192aa4bd8a6f6aac5a2b45ec310c8e496d"
     },
     "nRF52840-T1000-E-v1": {
       "otafixBoardSlug": "t1000_e",
-      "sha256": "69c3d5cdeea491f420a91ec59d5bdf1b29f2fa48738b7aa5ccd1da5e8022f652"
+      "sha256": "58e304325b0ad443ab91cd4d25f37197abde03f9b22fce449c903376222c6dfc"
     },
     "nRF52840-TEcho-v1": {
       "otafixBoardSlug": "lilygo_techo",
-      "sha256": "1456be2106969c66f3a931c5168d338418e389c9d0491fdd07a543aa42c07224"
+      "sha256": "aea201b970862a53640d1aab367e2955224923ffbf9081a834bc73fedfc66853"
     },
     "nRF52840-ThinkNode-M3-v1": {
       "otafixBoardSlug": "thinknode_m3",
-      "sha256": "8fdb1854939a3f8955df75643c08c31f6091ddd0cff2d6a8ac8914c85f4270a5"
+      "sha256": "fe8104928ee53014a015345c814fc9fb77bda51c4f99414b823ea4631a78555c"
     },
     "nRF52840-ThinkNodeM1-v1": {
       "otafixBoardSlug": "thinknode_m1",
-      "sha256": "69a9f48ccbb70518d1224ecad62e4c5de6eb1fe689fab58955434c84f1aeb063"
+      "sha256": "0173e78956cd4f3513d68e69fe51ae7182db2392e40121ddda7c9a44cc8af333"
     },
     "nRF52840-ThinkNodeM6-v1": {
       "otafixBoardSlug": "thinknode_m6",
-      "sha256": "2fc615270caccdb9e935a936c446f23fd62d69114dba386248de9f0559f71db3"
+      "sha256": "17525b78ac0f565f8f7942d8ccd4c4d614bd19ee0d82108d762e9bb811a533b5"
     },
     "nRF52840-promicro": {
       "otafixBoardSlug": "promicro_nrf52840",
-      "sha256": "c791ff487df98a97bae25c721ea2004dfaa00a296ffc04482d8753ae87eba8a9"
+      "sha256": "c5b3af91554687ae3d2e62129f61a3656bcc6cfb2ab7d35f4ae7e18d979c0ae7"
     }
   },
   "otafixSupportedTargets": [
@@ -96,6 +116,10 @@
     "seeed_wio_tracker_L1",
     "seeed_wio_tracker_L1_eink",
     "seeed_solar_node",
-    "seeed_xiao_nrf52840_kit"
+    "seeed_xiao_nrf52840_kit",
+    "seeed_mesh_tracker_X1",
+    "muzi-base",
+    "heltec-mesh-node-t096",
+    "heltec-mesh-node-t1"
   ]
 }
