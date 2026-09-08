@@ -94,6 +94,8 @@ import org.meshtastic.proto.LoRaRegionPresetMap
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.ModuleConfig
+import org.meshtastic.proto.ModuleConfig.MeshBeaconConfig
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Routing
 import org.meshtastic.proto.User
@@ -118,7 +120,7 @@ class RadioConfigViewModelTest {
             ConfigRoute.entries.filter(ConfigRoute::hasReadFanOut).toSet(),
         )
         assertEquals(
-            setOf(ModuleRoute.CANNED_MESSAGE, ModuleRoute.EXT_NOTIFICATION),
+            setOf(ModuleRoute.CANNED_MESSAGE, ModuleRoute.EXT_NOTIFICATION, ModuleRoute.MESH_BEACON),
             ModuleRoute.entries.filter(ModuleRoute::hasReadFanOut).toSet(),
         )
     }
@@ -147,6 +149,153 @@ class RadioConfigViewModelTest {
         advanceUntilIdle()
 
         verifySuspend(exactly(0)) { radioConfigUseCase.getModuleConfig(any(), any(), any()) }
+    }
+
+    @Test
+    fun `MESH_BEACON route on a remote node reads the beacon module config plus LoRa config and channel 0`() = runTest {
+        val localNode = Node(num = 100, user = User(id = "!100"))
+        val remoteNode =
+            Node(num = 456, user = User(id = "!456"), metadata = DeviceMetadata(firmware_version = "2.8.0"))
+        nodeRepository.setNodes(listOf(localNode, remoteNode))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100))
+        viewModel = createViewModel(destNum = 456)
+
+        viewModel.setResponseStateLoading(ModuleRoute.MESH_BEACON)
+        advanceUntilIdle()
+
+        // Pins ModuleRoute.MESH_BEACON.type: the default (0) would fetch MQTT_CONFIG instead.
+        verifySuspend {
+            radioConfigUseCase.getModuleConfig(456, AdminMessage.ModuleConfigType.MESHBEACON_CONFIG.value, any())
+        }
+        verifySuspend(exactly(0)) {
+            radioConfigUseCase.getModuleConfig(456, AdminMessage.ModuleConfigType.MQTT_CONFIG.value, any())
+        }
+        // Pins the loadModuleRoute fan-out that fills the editor's region gate and channel picker.
+        verifySuspend { radioConfigUseCase.getChannel(456, 0, any()) }
+        verifySuspend { radioConfigUseCase.getConfig(456, AdminMessage.ConfigType.LORA_CONFIG.value, any()) }
+    }
+
+    @Test
+    fun `MESH_BEACON route skips the module get on firmware without the module but still reads LoRa and channel 0`() =
+        runTest {
+            val localNode = Node(num = 100, user = User(id = "!100"))
+            val remoteNode =
+                Node(num = 456, user = User(id = "!456"), metadata = DeviceMetadata(firmware_version = "2.7.21"))
+            nodeRepository.setNodes(listOf(localNode, remoteNode))
+            nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100))
+            viewModel = createViewModel(destNum = 456)
+
+            viewModel.setResponseStateLoading(ModuleRoute.MESH_BEACON)
+            advanceUntilIdle()
+
+            // Pins the supportsMeshBeacon gate: firmware without the module never answers, so no get is issued. The
+            // module list already hides the route on such firmware; this keeps the view model safe if reached directly.
+            verifySuspend(exactly(0)) { radioConfigUseCase.getModuleConfig(any(), any(), any()) }
+            verifySuspend { radioConfigUseCase.getChannel(456, 0, any()) }
+            verifySuspend { radioConfigUseCase.getConfig(456, AdminMessage.ConfigType.LORA_CONFIG.value, any()) }
+        }
+
+    @Test
+    fun `MESH_BEACON remote read completes only after all three responses land`() = runTest {
+        val localNode = Node(num = 100, user = User(id = "!100"))
+        val remoteNode =
+            Node(num = 456, user = User(id = "!456"), metadata = DeviceMetadata(firmware_version = "2.8.0"))
+        val packetFlow = MutableSharedFlow<MeshPacket>()
+        val beacon =
+            MeshBeaconConfig(broadcast_offer_region = Config.LoRaConfig.RegionCode.US, broadcast_message = "join us")
+        every { serviceRepository.meshPacketFlow } returns packetFlow
+        everySuspend { radioConfigUseCase.getChannel(any(), any(), any()) } calls
+            {
+                it.args.onRequestIdArg()(41)
+                41
+            }
+        everySuspend { radioConfigUseCase.getConfig(any(), any(), any()) } calls
+            {
+                it.args.onRequestIdArg()(42)
+                42
+            }
+        everySuspend { radioConfigUseCase.getModuleConfig(any(), any(), any()) } calls
+            {
+                it.args.onRequestIdArg()(43)
+                43
+            }
+        every { processRadioResponseUseCase(any(), 456, any()) } calls
+            {
+                val requestId = (it.args[0] as MeshPacket).decoded?.request_id
+
+                @Suppress("UNCHECKED_CAST")
+                val pendingRequestIds = it.args[2] as Set<Int>
+                when (requestId?.takeIf { id -> id in pendingRequestIds }) {
+                    41 ->
+                        RadioResponseResult.ChannelResponse(
+                            Channel(
+                                index = 0,
+                                role = Channel.Role.PRIMARY,
+                                settings = ChannelSettings(name = "LongFast"),
+                            ),
+                        )
+
+                    42 ->
+                        RadioResponseResult.ConfigResponse(
+                            Config(lora = Config.LoRaConfig(region = Config.LoRaConfig.RegionCode.US)),
+                        )
+
+                    43 -> RadioResponseResult.ModuleConfigResponse(ModuleConfig(mesh_beacon = beacon))
+
+                    else -> null
+                }
+            }
+        nodeRepository.setNodes(listOf(localNode, remoteNode))
+        nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100))
+        viewModel = createViewModel(destNum = 456)
+
+        viewModel.setResponseStateLoading(ModuleRoute.MESH_BEACON)
+        runCurrent()
+        assertEquals(3, (viewModel.radioConfigState.value.responseState as ResponseState.Loading).total)
+
+        packetFlow.emit(MeshPacket(decoded = Data(request_id = 41)))
+        packetFlow.emit(MeshPacket(decoded = Data(request_id = 42)))
+        runCurrent()
+        assertTrue(
+            viewModel.radioConfigState.value.responseState is ResponseState.Loading,
+            "two of three responses must not complete the read",
+        )
+        assertEquals(3, (viewModel.radioConfigState.value.responseState as ResponseState.Loading).total)
+
+        packetFlow.emit(MeshPacket(decoded = Data(request_id = 43)))
+        runCurrent()
+
+        assertEquals(ResponseState.Empty, viewModel.radioConfigState.value.responseState)
+        assertEquals(beacon, viewModel.radioConfigState.value.moduleConfig.mesh_beacon)
+        assertEquals(Config.LoRaConfig.RegionCode.US, viewModel.radioConfigState.value.radioConfig.lora?.region)
+        // Pins the getChannel(0) half of the fan-out: the primary channel is what the offer picker renders.
+        assertEquals(listOf("LongFast"), viewModel.radioConfigState.value.channelList.map { it.name })
+    }
+
+    @Test
+    fun `ModuleConfigResponse carrying mesh_beacon is merged and survives a later response without it`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        nodeRepository.setNodes(listOf(node))
+        val packetFlow = MutableSharedFlow<MeshPacket>()
+        every { serviceRepository.meshPacketFlow } returns packetFlow
+        viewModel = createViewModel()
+
+        val beacon =
+            MeshBeaconConfig(broadcast_offer_region = Config.LoRaConfig.RegionCode.EU_868, broadcast_message = "hi")
+        every { processRadioResponseUseCase(any(), 123, any()) } returns
+            RadioResponseResult.ModuleConfigResponse(ModuleConfig(mesh_beacon = beacon))
+        packetFlow.emit(MeshPacket())
+        // Pins the mesh_beacon merge line: without it the reply is dropped and the editor renders defaults.
+        assertEquals(beacon, viewModel.radioConfigState.value.moduleConfig.mesh_beacon)
+
+        every { processRadioResponseUseCase(any(), 123, any()) } returns
+            RadioResponseResult.ModuleConfigResponse(
+                ModuleConfig(telemetry = ModuleConfig.TelemetryConfig(device_update_interval = 300)),
+            )
+        packetFlow.emit(MeshPacket())
+        // Pins the `?: state.moduleConfig.mesh_beacon` fallback: a reply for another module keeps the beacon config.
+        assertEquals(beacon, viewModel.radioConfigState.value.moduleConfig.mesh_beacon)
+        assertEquals(300, viewModel.radioConfigState.value.moduleConfig.telemetry?.device_update_interval)
     }
 
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -1281,6 +1430,20 @@ class RadioConfigViewModelTest {
 
         verifySuspend { radioConfigUseCase.setModuleConfig(123, config, any()) }
         assertEquals(true, viewModel.radioConfigState.value.moduleConfig.mqtt?.enabled)
+    }
+
+    @Test
+    fun `setModuleConfig merges mesh_beacon into state before the radio answers`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        nodeRepository.setNodes(listOf(node))
+        viewModel = createViewModel()
+        val beacon = MeshBeaconConfig(broadcast_message = "join us")
+        everySuspend { radioConfigUseCase.setModuleConfig(any(), any(), any()) } returns 42
+
+        viewModel.setModuleConfig(ModuleConfig(mesh_beacon = beacon))
+
+        // Pins the optimistic mesh_beacon merge: a second save in the same session reads this, not the radio's reply.
+        assertEquals(beacon, viewModel.radioConfigState.value.moduleConfig.mesh_beacon)
     }
 
     @Test

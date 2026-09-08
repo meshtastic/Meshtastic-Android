@@ -61,9 +61,6 @@ enum class ModuleRoute(
     val type: Int = 0,
     val isSupported: (Capabilities) -> Boolean = { true },
     val isApplicable: (Config.DeviceConfig.Role?) -> Boolean = { true },
-    // False when the firmware has no ModuleConfigType to request this module per-request; the editor then relies on the
-    // connect-time config sync instead of a get (MeshBeacon: MeshBeaconConfig is in ModuleConfig but not in the enum).
-    val refreshable: Boolean = true,
     val hasReadFanOut: Boolean = false,
 ) {
     MQTT(Res.string.mqtt, SettingsRoute.MQTT, Res.drawable.ic_cloud, AdminMessage.ModuleConfigType.MQTT_CONFIG.value),
@@ -150,14 +147,15 @@ enum class ModuleRoute(
         isApplicable = { it == Config.DeviceConfig.Role.TAK || it == Config.DeviceConfig.Role.TAK_TRACKER },
     ),
 
-    // MeshBeaconConfig has no AdminMessage.ModuleConfigType value upstream — the editor reads from the connect-time
-    // config sync, so refreshable=false (no per-module get is issued). Gated to firmware that ships the beacon module.
+    // Reads the module config plus the LoRa config and the primary channel, which the editor's region gate and
+    // channel picker need on a remote node whose connect-time snapshot is empty.
     MESH_BEACON(
         Res.string.mesh_beacon,
         SettingsRoute.MeshBeacon,
         Res.drawable.ic_perm_scan_wifi,
+        AdminMessage.ModuleConfigType.MESHBEACON_CONFIG.value,
         isSupported = { it.supportsMeshBeacon },
-        refreshable = false,
+        hasReadFanOut = true,
     ),
     ;
 
