@@ -170,6 +170,7 @@
     <string name="node_sort_via_mqtt">via MQTT</string>
     <string name="nodedb_reset">Restablir NodeDB</string>
     <!-- NODES -->
+    <string name="nodes_unheard_remove">Eliminar</string>
     <string name="none">Cap (desactivat)</string>
     <string name="not_connected">No connectat</string>
     <!-- NOTIFICATIONS -->

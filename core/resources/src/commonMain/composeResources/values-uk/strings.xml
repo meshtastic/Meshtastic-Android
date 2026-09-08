@@ -845,6 +845,7 @@
     <string name="nodes_empty_searching_hint">Вузли поруч з'являтимуться тут у міру їх виявлення.</string>
     <string name="nodes_empty_searching_title">Пошук вузлів</string>
     <string name="nodes_queued_for_deletion">%1$d вузлів поставлено в чергу до видалення:</string>
+    <string name="nodes_unheard_remove">Видалити</string>
     <string name="none">Відсутнє (вимкнуте)</string>
     <string name="none_quality">Жоден</string>
     <string name="not_connected">Не підключено</string>

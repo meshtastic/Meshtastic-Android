@@ -750,6 +750,7 @@
     <string name="nodes_at_this_location">Noduri în această locație</string>
     <string name="nodes_empty_disconnected_title">Niciun dispozitiv conectat</string>
     <string name="nodes_queued_for_deletion">%1$d noduri aflate în așteptare pentru ștergere:</string>
+    <string name="nodes_unheard_remove">Eliminare</string>
     <string name="none">Niciunul (dezactivat)</string>
     <string name="none_quality">Niciunul</string>
     <string name="not_connected">Neconectat</string>

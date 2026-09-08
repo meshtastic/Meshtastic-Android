@@ -576,6 +576,7 @@
     <string name="nodes">Csomópontok</string>
     <string name="nodes_at_this_location">Csomópontok ezen a helyen</string>
     <string name="nodes_queued_for_deletion">%1$d csomópont vár törlésre:</string>
+    <string name="nodes_unheard_remove">Törlés</string>
     <string name="none">Egyik sem (letiltás)</string>
     <string name="none_quality">Semmi</string>
     <string name="not_connected">Nincs kapcsolat</string>

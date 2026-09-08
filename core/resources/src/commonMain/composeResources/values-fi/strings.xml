@@ -1334,6 +1334,7 @@
     <string name="nodes_empty_searching_hint">Lähistön radiot ilmestyvät tähän sitä mukaa kun niitä havaitaan.</string>
     <string name="nodes_empty_searching_title">Etsitään radioita</string>
     <string name="nodes_queued_for_deletion">%1$d laitetta jonossa poistettavaksi:</string>
+    <string name="nodes_unheard_remove">Poista</string>
     <string name="noise_floor">Kohinataso</string>
     <string name="noise_floor_definition">Radion vastaanottimen mittaama taustakohinan taso. Mitä pienempi arvo, sitä vähemmän radiotaustakohinaa ympäristössä yleensä on. Arvoa -85 dBm pidetään vilkkaan radiokanavan viitearvona, mutta se ei tarkoita automaattisesti yhteysongelmaa tai toimintahäiriötä.</string>
     <string name="noise_floor_no_reading">Kohinataso: Ei mittaustulosta</string>

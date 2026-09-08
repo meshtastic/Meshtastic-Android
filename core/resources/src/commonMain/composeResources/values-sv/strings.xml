@@ -859,6 +859,7 @@
     <string name="nodes_empty_disconnected_title">Ingen ansluten enhet</string>
     <string name="nodes_empty_searching_title">Söker efter noder</string>
     <string name="nodes_queued_for_deletion">%1$d noder köade för radering:</string>
+    <string name="nodes_unheard_remove">Ta bort</string>
     <string name="none">Ingen (inaktivera)</string>
     <string name="none_quality">Ingen</string>
     <string name="not_connected">Ej ansluten</string>

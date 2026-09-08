@@ -185,6 +185,7 @@
     <string name="node_sort_via_mqtt">per MQTT</string>
     <string name="nodedb_reset">NodeDB perkrauti</string>
     <!-- NODES -->
+    <string name="nodes_unheard_remove">Pašalinti</string>
     <string name="none">Nėra (išjungti)</string>
     <string name="none_quality">Nėra</string>
     <string name="not_connected">Neprijungtas</string>

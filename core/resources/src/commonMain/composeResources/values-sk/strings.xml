@@ -321,6 +321,7 @@
     <string name="node_sort_via_mqtt">cez MQTT</string>
     <string name="nodedb_reset">Reset databázy uzlov</string>
     <!-- NODES -->
+    <string name="nodes_unheard_remove">Odstrániť</string>
     <string name="none">Žiaden (zakázať)</string>
     <string name="none_quality">Žiadny</string>
     <string name="not_connected">Nepripojené</string>

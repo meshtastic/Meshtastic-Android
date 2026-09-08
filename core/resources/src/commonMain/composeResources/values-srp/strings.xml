@@ -333,6 +333,7 @@
     <!-- NODES -->
     <string name="nodes">Чворови</string>
     <string name="nodes_empty_disconnected_title">Нема повезаних уређаја</string>
+    <string name="nodes_unheard_remove">Уклони</string>
     <string name="none">Ништа (онемогућено)</string>
     <string name="none_quality">Без</string>
     <string name="not_connected">Није повезан</string>

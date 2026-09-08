@@ -373,6 +373,7 @@
     <string name="nodedb_reset">Redefinir NodeDB</string>
     <!-- NODES -->
     <string name="nodes">Nodes</string>
+    <string name="nodes_unheard_remove">Remover</string>
     <string name="none">Nenhum (desabilitado)</string>
     <string name="none_quality">Nenhum</string>
     <string name="not_connected">Desligado</string>

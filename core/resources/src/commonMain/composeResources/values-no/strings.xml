@@ -188,6 +188,7 @@
     <string name="node_sort_via_mqtt">via MQTT</string>
     <string name="nodedb_reset">NodeDB reset</string>
     <!-- NODES -->
+    <string name="nodes_unheard_remove">Fjern</string>
     <string name="none">Ingen (slå av)</string>
     <string name="none_quality">Ingen</string>
     <string name="not_connected">Ikke tilkoblet</string>

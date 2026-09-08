@@ -1337,6 +1337,7 @@
     <string name="nodes_empty_searching_hint">Ближайшие узлы будут появляться здесь по мере их обнаружения.</string>
     <string name="nodes_empty_searching_title">Поиск узлоов</string>
     <string name="nodes_queued_for_deletion">%1$d нод в очереди для удаления:</string>
+    <string name="nodes_unheard_remove">Удалить</string>
     <string name="noise_floor">Уровень шума</string>
     <string name="noise_floor_definition">Фоновый радиошум, измеряемый радиоприемником. Более низкие значения обычно указывают на более тихое окружение для приемника; -85 дБм — это ориентировочная отметка загруженности, а не жесткий порог отказа.</string>
     <string name="noise_floor_no_reading">Уровень шума: нет показаний</string>
@@ -1419,6 +1420,7 @@
     <string name="periodic_position_broadcast">Периодическое вещание позиции</string>
     <!-- PERMISSION -->
     <string name="permission_missing_31">Meshtastic требует разрешение на поиск и подключение к устройствам через Bluetooth. Вы можете отключить его, когда он не используется.</string>
+    <string name="permission_missing_pre31">В этой версии Android одно разрешение на местоположение охватывает две вещи: оно позволяет сканировать Bluetooth и отображает тебя на карте. Совместное использование твоей позиции остаётся выключенным, пока ты сам его не включишь.</string>
     <string name="permission_nearby_devices_summary">Найти и подключиться к ноде через Bluetooth</string>
     <string name="permission_notifications_summary">Оповещать о сообщениях, новых нодах и низком заряде батареи</string>
     <string name="permission_state_allowed">Разрешено</string>
@@ -1430,6 +1432,12 @@
     <string name="permissions">Разрешения</string>
     <string name="permissions_all_allowed">Все разрешено</string>
     <string name="permissions_hide">Скрыть разрешения</string>
+    <plurals name="permissions_need_attention">
+        <item quantity="one">%1$d требует внимания</item>
+        <item quantity="few">%1$d требуют внимания</item>
+        <item quantity="many">%1$d требуют внимания</item>
+        <item quantity="other">%1$d требуют внимания</item>
+    </plurals>
     <string name="permissions_nothing_needed">Ничто не требует вашего внимания</string>
     <string name="permissions_show">Показать разрешения</string>
     <string name="phone_location">Местоположение телефона</string>
@@ -1595,6 +1603,7 @@
     <string name="role_client_mute">Client Mute</string>
     <string name="role_client_mute_desc">Устройство, которое не пересылает пакеты с других устройств.</string>
     <string name="role_lost_and_found">Lost and Found</string>
+    <string name="role_lost_and_found_desc">Регулярно отправляет местоположение в виде сообщения в основной канал, чтобы помочь с восстановлением устройства.</string>
     <string name="role_repeater">Repeater</string>
     <string name="role_repeater_desc">Инфраструктурная нода для расширения покрытия сети путем передачи сообщений с минимальными накладными расходами. Не видна в списке нод.</string>
     <string name="role_router">Router</string>
@@ -1717,6 +1726,7 @@
     <string name="share_location_description">Используй GPS твоего телефона для отправки координат на твою ноду вместо аппаратного GPS на самой ноде.</string>
     <string name="share_to">Поделиться…</string>
     <string name="share_your_location_in_real_time">Делитесь своим местоположением в режиме реального времени и поддерживайте работу группы с функциями GPS.</string>
+    <string name="shared_contact_no_public_key">У этого контакта нет публичного ключа, поэтому его нельзя импортировать. Контакт без ключа стирает любой ключ, который твоя радиостанция уже хранит для этой ноды. Попроси отправителя снова поделиться им, когда его нода обменяется ключами.</string>
     <string name="short_name">Короткое имя</string>
     <string name="should_update">Чтобы использовать последние исправления и функции, обновите прошивку вашей ноды. \n\nПоследняя стабильная версия прошивки: %1$s</string>
     <string name="should_update_firmware">Рекомендуется обновление прошивки.</string>
@@ -1741,6 +1751,7 @@
     <string name="site_planner">Планировщик места</string>
     <string name="site_planner_antenna_gain_dbi">Усиление антенны (dBi)</string>
     <string name="site_planner_antenna_height_meters">Высота антенны (м)</string>
+    <string name="site_planner_browser_note">Смета откроется в твоем браузере. Чтобы добавить её на эту карту, кликни по значку передатчика там, выбери Экспорт › GeoJSON, а затем добавь скачанный файл через Управление слоями карты › Добавить слой. Используй экспорт в GeoJSON — KML создаёт наложение изображения на землю, которое эта карта не может отобразить.</string>
     <string name="site_planner_color_scale">Цветовая палитра</string>
     <string name="site_planner_estimate">Оценка покрытия</string>
     <string name="site_planner_estimating">Оценка покрытия…</string>
@@ -1778,6 +1789,7 @@
     <string name="ssid">Название сети</string>
     <string name="state_broadcast_seconds">Трансляция состояния (в секундах)</string>
     <string name="status_message">Состояние сообщения</string>
+    <string name="status_message_summary">Публичное сообщение о статусе, которое отправляется в сеть при изменении и каждые 12 часов.</string>
     <string name="stay_connected_anywhere">Оставайтесь на связи везде</string>
     <string name="stop_connecting">Остановить подключение</string>
     <string name="store_forward">Store &amp; Forward</string>
@@ -1921,6 +1933,8 @@
     <string name="translation_failed">Не удалось перевести сообщение</string>
     <string name="translation_model_download_failed">Скачивание модели перевода не удалось</string>
     <string name="translation_not_required">Сообщение уже на вашем языке</string>
+    <string name="transmit_disabled">Передача отключена</string>
+    <string name="transmit_disabled_summary">Это устройство может принимать данные, но ничего не отправляет через LoRa.</string>
     <string name="transmit_over_lora">Передать через LoRa</string>
     <!-- TRANSPORT -->
     <string name="transport">Транспорт</string>
@@ -1942,8 +1956,11 @@
     <string name="udp_enabled">UDP трансляция</string>
     <string name="undo">Отменить</string>
     <!-- UNITS -->
+    <string name="units">Единицы измерения</string>
     <string name="units_follow_system">По умолчанию</string>
+    <string name="units_imperial">Британская</string>
     <string name="units_metric">Метрическая</string>
+    <string name="units_scope_summary">Как это приложение показывает расстояние, высоту, скорость и температуру. Экран вашего устройства сам следует своей настройке отображения.</string>
     <!-- UNKNOWN -->
     <string name="unknown">Неизвестно</string>
     <string name="unknown_age">Неизвестный возраст</string>
@@ -1961,6 +1978,7 @@
     <string name="up_down_select_input_enabled">Вверх/Вниз/Выбирать включён</string>
     <string name="update_interval">Интервал опроса GPS</string>
     <string name="update_interval_seconds">Интервал обновления (в секундах)</string>
+    <string name="update_status">Обновить статус</string>
     <string name="updated">Обновлено</string>
     <string name="uplink_enabled">MQTT Uplink включён</string>
     <string name="uplink_feature_description">Сообщения из сети будут отправляться в публичный интернет через любую ноду настроенного шлюза.</string>
@@ -1968,6 +1986,7 @@
     <!-- URL -->
     <string name="url">URL-адрес</string>
     <string name="url_cannot_be_empty">URL не может быть пустым.</string>
+    <string name="url_must_be_http">URL-адрес должен начинаться с http:// или https://</string>
     <string name="url_must_contain_placeholders">URL должен содержать placeholders.</string>
     <string name="url_template">Шаблон URL</string>
     <string name="usb">USB</string>
@@ -2006,20 +2025,28 @@
     <string name="what_is_meshtastic">Что такое Meshtastic?</string>
     <string name="what_is_meshtastic_description">Открытая, автономная, децентрализованная mesh-сеть, работающая на доступных маломощных радиоустройствах.</string>
     <!-- WIFI -->
+    <string name="wifi_config">Параметры Wi-Fi</string>
     <string name="wifi_devices">Настройка Wi-Fi для mPWRD-OS</string>
+    <string name="wifi_enabled">Wi-Fi включен</string>
+    <string name="wifi_ip">Wi-Fi IP:</string>
     <string name="wifi_provision_available_networks">Доступные сети</string>
     <string name="wifi_provision_connect_failed">Не удалось подключиться: %1$s</string>
     <string name="wifi_provision_description">Предоставьте учетные данные для доступа к Wi-Fi на вашем устройстве с mPWRD-OS через Bluetooth.</string>
     <string name="wifi_provision_device_found">Найденное устройство</string>
+    <string name="wifi_provision_device_found_detail">Готов сканировать Wi-Fi сети.</string>
     <string name="wifi_provision_hidden_network">Скрытая сеть</string>
     <string name="wifi_provision_mpwrd_disclaimer">Узнайте больше о проекте mPWRD-OS\nhttps://github.com/mPWRD-OS</string>
     <string name="wifi_provision_no_networks">Сети не найдены</string>
+    <string name="wifi_provision_scan_failed">Не удалось найти Wi-Fi сети: %1$s</string>
     <string name="wifi_provision_scan_networks">Поиск сетей</string>
     <string name="wifi_provision_scanning_ble">Поиск устройства…</string>
     <string name="wifi_provision_scanning_wifi">Поиск…</string>
+    <string name="wifi_provision_sending_credentials">Применение конфигурации Wi-Fi…</string>
     <string name="wifi_provision_signal_strength">%1$d%</string>
     <string name="wifi_provision_ssid_label">Имя сети (SSID)</string>
     <string name="wifi_provision_ssid_placeholder">Введите или выберите сеть</string>
+    <string name="wifi_provision_status_applied">Wi-Fi успешно настроен!</string>
+    <string name="wifi_provision_status_failed">Не удалось применить конфигурацию Wi-Fi</string>
     <string name="wifi_provision_success_description">Ваше устройство mPWRD-OS подключилось к сети Wi-Fi.</string>
     <string name="wifi_provision_success_device_connected">Устройство подключено</string>
     <string name="wifi_provision_success_done">Готово</string>
@@ -2034,6 +2061,9 @@
     <string name="wifi_provision_success_ssh_unavailable">Команды SSH доступны после назначения IP-адреса.</string>
     <string name="wifi_provision_success_username">Имя пользователя</string>
     <string name="wifi_provisioning">Настройка Wi-Fi для mPWRD-OS</string>
+    <string name="wifi_qr_code_error">Неверный формат QR-кода Wi-Fi</string>
+    <string name="wifi_qr_code_scan">Сканировать QR-код WiFi</string>
+    <string name="wifi_rssi_threshold_defaults_to_80">Порог WiFi RSSI (по умолчанию -80)</string>
     <string name="wifi_unavailable">Нет подключения к Wi-Fi. Сканирование сети может не обнаружить ближайшие устройства.</string>
     <!-- WIND -->
     <string name="wind">Ветер</string>

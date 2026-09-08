@@ -1182,6 +1182,7 @@
     <string name="nodes_empty_searching_hint">I nodi vicini compariranno qui man mano che vengono scoperti.</string>
     <string name="nodes_empty_searching_title">Ricerca dei nodi</string>
     <string name="nodes_queued_for_deletion">%1$d nodi in coda per l'eliminazione:</string>
+    <string name="nodes_unheard_remove">Elimina</string>
     <string name="noise_floor">Rumore di fondo</string>
     <string name="noise_floor_definition">Il rumore RF di fondo misurato dal ricevitore radio. Valori più bassi indicano di solito un ambiente di ricezione più silenzioso; −85 dBm è un riferimento di ambiente trafficato, non una soglia di guasto.</string>
     <string name="noise_floor_no_reading">Rumore di fondo: nessuna lettura</string>

@@ -190,6 +190,7 @@
     <string name="node_sort_via_mqtt">Preko MQTT</string>
     <string name="nodedb_reset">Ponastavi NodeDB</string>
     <!-- NODES -->
+    <string name="nodes_unheard_remove">Odstrani</string>
     <string name="none">Brez (onemogoči)</string>
     <string name="none_quality">Brez</string>
     <string name="not_connected">Ni povezano</string>

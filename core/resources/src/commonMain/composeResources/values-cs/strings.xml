@@ -1204,6 +1204,7 @@
     <string name="nodes_empty_searching_hint">Zde se budou postupně zobrazovat nalezené uzly v okolí.</string>
     <string name="nodes_empty_searching_title">Vyhledávání uzlů</string>
     <string name="nodes_queued_for_deletion">%1$d uzlů zařazeno k odstranění:</string>
+    <string name="nodes_unheard_remove">Odstranit</string>
     <string name="noise_floor">Úroveň šumu</string>
     <string name="noise_floor_definition">Úroveň okolního rádiového šumu naměřená přijímačem. Nižší hodnoty obvykle znamenají klidnější rádiové prostředí; −85 dBm je orientační hodnota pro silné rušení, nikoli pevná hranice.</string>
     <string name="noise_floor_no_reading">Úroveň šumu: bez měření</string>

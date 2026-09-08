@@ -385,6 +385,7 @@
     <string name="nodeinfo_broadcast_interval">노드 정보 발송 주기</string>
     <!-- NODES -->
     <string name="nodes">노드</string>
+    <string name="nodes_unheard_remove">지우기</string>
     <string name="none">없음 (연결해제)</string>
     <string name="none_quality">없음</string>
     <string name="not_connected">연결되지 않음</string>

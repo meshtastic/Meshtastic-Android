@@ -303,6 +303,7 @@
     <string name="node_sort_via_mqtt">via MQTT</string>
     <string name="nodedb_reset">NodeDB reset</string>
     <!-- NODES -->
+    <string name="nodes_unheard_remove">Verwijder</string>
     <string name="none">Geen (uit)</string>
     <string name="none_quality">Geen</string>
     <string name="not_connected">Niet verbonden</string>

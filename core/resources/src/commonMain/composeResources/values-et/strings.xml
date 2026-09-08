@@ -1302,6 +1302,7 @@
     <string name="nodes_empty_searching_hint">Lähedal asuvad sõlmed kuvatakse siin kohe, kui need avastatakse.</string>
     <string name="nodes_empty_searching_title">Otsin võrgusõlmi</string>
     <string name="nodes_queued_for_deletion">%1$d eemaldatavat sõlme nimekirjas:</string>
+    <string name="nodes_unheard_remove">Eemalda</string>
     <string name="noise_floor">Müratase</string>
     <string name="noise_floor_definition">Raadiovastuvõtja poolt mõõdetud RF taustamüra. Madalamad väärtused näitavad tavaliselt vaiksemat vastuvõtukeskkonda; -85 dBm on võrdluspunkt, mitte tõsise rikke lävi.</string>
     <string name="noise_floor_no_reading">Müratase: Näitu pole</string>

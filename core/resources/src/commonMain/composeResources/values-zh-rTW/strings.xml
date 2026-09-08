@@ -895,6 +895,7 @@
     <string name="nodes_empty_searching_hint">附近的節點在被探索到時將顯示於此。</string>
     <string name="nodes_empty_searching_title">正在搜尋節點</string>
     <string name="nodes_queued_for_deletion">%1$d 個節點已排定移除：</string>
+    <string name="nodes_unheard_remove">移除</string>
     <string name="none">無（停用）</string>
     <string name="none_quality">無</string>
     <string name="not_connected">未連線</string>
