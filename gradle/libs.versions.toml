@@ -311,7 +311,7 @@ jserialcomm = { module = "com.fazecast:jSerialComm", version.ref = "jserialcomm"
 okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 okio-fakefilesystem = { module = "com.squareup.okio:okio-fakefilesystem", version.ref = "okio" }
 uri-kmp = { module = "com.eygraber:uri-kmp", version.ref = "uri-kmp" }
-kermit = { module = "co.touchlab:kermit", version = "2.1.0" }
+kermit = { module = "co.touchlab:kermit", version = "2.2.0" }
 # Debug-only leak/GC-thrash detector -- see feature/settings/.../debugging/DebugViewModel.kt and
 # core/data/.../manager/MeshMessageProcessorImpl.kt for the adversarial-mesh-fuzz bugs this class of
 # tooling is meant to catch going forward. Stable release (not the 3.0-alpha line).
