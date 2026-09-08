@@ -142,10 +142,11 @@ class TcpTransportTest {
         withContext(Dispatchers.Default) {
             val server = TestTcpServer.start()
             val connected = CompletableDeferred<Unit>()
+            val transportScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
             val transport =
                 TcpTransport(
                     dispatchers = testDispatchers(),
-                    scope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
+                    scope = transportScope,
                     listener =
                     object : TcpTransport.Listener {
                         override fun onConnected() {
@@ -177,6 +178,7 @@ class TcpTransportTest {
                 assertFalse(1 in nonces, "nonce 1 makes the firmware broadcast a NodeInfo ping; got $nonces")
             } finally {
                 transport.stop()
+                transportScope.cancel()
                 server.close()
             }
         }
