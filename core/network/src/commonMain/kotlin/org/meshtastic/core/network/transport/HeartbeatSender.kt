@@ -29,7 +29,9 @@ import kotlin.concurrent.atomics.ExperimentalAtomicApi
  *
  * Constructs and sends a `ToRadio(heartbeat = Heartbeat(nonce = ...))` message to keep the firmware's idle timer from
  * expiring. Each call uses a monotonically increasing nonce to prevent the firmware's per-connection duplicate-write
- * filter from silently dropping it.
+ * filter from silently dropping it. Nonce 1 is the firmware's NodeInfo-ping trigger since v2.7.23 (a mesh-wide NodeInfo
+ * broadcast with want_response), so keepalives must never use it: the counter starts at [FIRST_NONCE] and only counts
+ * up.
  *
  * @param sendToRadio callback that reports whether the transport accepted the encoded heartbeat bytes
  * @param afterHeartbeat optional suspend callback invoked after sending (e.g. to schedule a drain)
@@ -56,7 +58,7 @@ private constructor(
     ) : this(sendToRadio, afterHeartbeat, logTag, HeartbeatRejectionLogSink(rejectionLogger))
 
     @OptIn(ExperimentalAtomicApi::class)
-    private val nonce = AtomicInt(0)
+    private val nonce = AtomicInt(FIRST_NONCE)
     private val nonceMutex = Mutex()
 
     private val rejectionLogPolicy = HeartbeatRejectionLogPolicy()
@@ -90,6 +92,11 @@ private constructor(
         if (!accepted) return false
         afterHeartbeat?.invoke()
         return true
+    }
+
+    companion object {
+        /** First heartbeat nonce any sender emits; it sits past 1, the firmware's NodeInfo-ping trigger. */
+        const val FIRST_NONCE = 2
     }
 }
 

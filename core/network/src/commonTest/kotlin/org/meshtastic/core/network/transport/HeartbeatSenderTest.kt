@@ -56,7 +56,7 @@ class HeartbeatSenderTest {
 
         val message = ToRadio.ADAPTER.decode(sentPackets.single())
         val heartbeat = assertNotNull(message.heartbeat)
-        assertEquals(0, heartbeat.nonce)
+        assertEquals(HeartbeatSender.FIRST_NONCE, heartbeat.nonce)
         assertNull(message.packet)
     }
 
@@ -77,7 +77,7 @@ class HeartbeatSenderTest {
         accept = true
         assertTrue(sender.sendHeartbeat())
         assertEquals(1, afterHeartbeatCalls)
-        assertHeartbeats(sentPackets, 0)
+        assertHeartbeats(sentPackets, 2)
     }
 
     @Test
@@ -119,15 +119,15 @@ class HeartbeatSenderTest {
         val job = launchFiniteHeartbeatLoop(sender = sender, interval = interval, repeatCount = 3)
 
         runCurrent()
-        assertHeartbeats(sentPackets, 0)
+        assertHeartbeats(sentPackets, 2)
 
         advanceTimeBy(interval.inWholeMilliseconds)
         runCurrent()
-        assertHeartbeats(sentPackets, 0, 1)
+        assertHeartbeats(sentPackets, 2, 3)
 
         advanceTimeBy(interval.inWholeMilliseconds)
         runCurrent()
-        assertHeartbeats(sentPackets, 0, 1, 2)
+        assertHeartbeats(sentPackets, 2, 3, 4)
 
         job.cancel()
     }
@@ -142,13 +142,13 @@ class HeartbeatSenderTest {
         runCurrent()
         advanceTimeBy(interval.inWholeMilliseconds)
         runCurrent()
-        assertHeartbeats(sentPackets, 0, 1)
+        assertHeartbeats(sentPackets, 2, 3)
 
         job.cancel()
         advanceTimeBy(interval.inWholeMilliseconds * 5)
         runCurrent()
 
-        assertHeartbeats(sentPackets, 0, 1)
+        assertHeartbeats(sentPackets, 2, 3)
     }
 
     @Test
@@ -160,7 +160,7 @@ class HeartbeatSenderTest {
         runCurrent()
 
         assertEquals(0L, testScheduler.currentTime)
-        assertHeartbeats(sentPackets, 0, 1, 2)
+        assertHeartbeats(sentPackets, 2, 3, 4)
     }
 
     @Test
@@ -181,7 +181,22 @@ class HeartbeatSenderTest {
         runCurrent()
         secondJob.cancel()
 
-        assertHeartbeats(sentPackets, 0, 1, 2, 3)
+        assertHeartbeats(sentPackets, 2, 3, 4, 5)
+    }
+
+    @Test
+    fun `nonces are strictly increasing and never 1 the firmware NodeInfo-ping trigger`() = runTest {
+        val sentPackets = mutableListOf<ByteArray>()
+        val sender = HeartbeatSender(sendToRadio = { sentPackets.add(it) })
+
+        repeat(5) { assertTrue(sender.sendHeartbeat()) }
+
+        val nonces = sentPackets.map { assertNotNull(ToRadio.ADAPTER.decode(it).heartbeat).nonce }
+        assertEquals(5, nonces.size)
+        nonces.zipWithNext().forEachIndexed { index, (previous, next) ->
+            assertTrue(next > previous, "nonce at index ${index + 1} ($next) must exceed its predecessor ($previous)")
+        }
+        assertFalse(1 in nonces, "nonce 1 makes the firmware broadcast a NodeInfo ping; got $nonces")
     }
 
     private fun TestScope.launchRepeatingHeartbeatLoop(sender: HeartbeatSender, interval: Duration): Job =
