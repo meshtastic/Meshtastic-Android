@@ -22,7 +22,6 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.annotation.VisibleForTesting
 import androidx.collection.intSetOf
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.work.Configuration
@@ -103,6 +102,16 @@ open class MeshUtilApplication :
             workManagerFactory()
         }
 
+        startBackgroundInit()
+    }
+
+    /**
+     * Launches the best-effort init that does not have to finish before the first Activity: log cleanup, the
+     * previous-exit report, the widget preview, the active database, and discovery-scan recovery. Open so a test can
+     * boot the real Application without any of it — chiefly the database, whose connection is what makes an
+     * un-terminated Application unsafe.
+     */
+    protected open fun startBackgroundInit() {
         // Schedule periodic MeshLog cleanup. Off-main: WorkManager uses on-demand init here
         // (the startup provider is removed), so getInstance() opens WorkManager's Room DB.
         applicationScope.launch { scheduleMeshLogCleanup() }
@@ -171,12 +180,11 @@ open class MeshUtilApplication :
     }
 
     /**
-     * Stops the background init launched by [onCreate]. Robolectric never calls [onTerminate], so a unit test that
-     * boots this Application must call this itself — otherwise those jobs outlive the test on real
-     * [Dispatchers.Default] threads and their failures surface against whichever test is running next.
+     * Stops the background init launched by [startBackgroundInit]. Cancellation is not a join: work already inside an
+     * uninterruptible native call (a database open) runs on past this, which is why [onTerminate] still has to close
+     * the database afterwards.
      */
-    @VisibleForTesting
-    fun cancelBackgroundInit() {
+    private fun cancelBackgroundInit() {
         applicationScope.cancel()
     }
 

@@ -329,6 +329,20 @@ jobs:
           ./gradlew ${{ matrix.shard.tasks }} $kover_tasks -Pci=true --continue \
             "-Dscan.value.CI shard=${{ matrix.shard.name }}"
 
+      # A test fork that dies in native code (exit 134) names no test, and the JVM's crash report is the
+      # only thing that does -- it carries the crashing thread's Java frames. Without this the same
+      # ejection has to be diagnosed twice.
+      - name: Upload JVM crash reports (${{ matrix.shard.name }})
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: jvm-crash-${{ matrix.shard.name }}
+          path: |
+            **/hs_err_pid*.log
+            **/replay_pid*.log
+          if-no-files-found: ignore
+          retention-days: 7
+
       # Flags are tagged by logical module group (core/feature/app/desktop), matching
       # codecov.yml's flags/component_management — NOT by shard name. Shards are a CI
       # load-balancing detail; which shard happens to run a module must not change
