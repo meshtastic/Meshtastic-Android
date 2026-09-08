@@ -33,6 +33,7 @@ import org.meshtastic.core.repository.DisplayMirrorManager
 import org.meshtastic.core.repository.MirrorFrame
 import org.meshtastic.core.repository.MirrorPalette
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.proto.DisplayInfo
 
 @KoinViewModel
@@ -41,6 +42,7 @@ class DisplayMirrorViewModel(
     connectionStateProvider: ConnectionStateProvider,
     nodeRepository: NodeRepository,
     private val adminController: AdminController,
+    radioConfigRepository: RadioConfigRepository,
 ) : ViewModel() {
 
     val frame: StateFlow<MirrorFrame?> = displayMirrorManager.frame
@@ -55,6 +57,16 @@ class DisplayMirrorViewModel(
     /** Panel description from the connect handshake; null on display-less nodes and pre-DisplayInfo firmware. */
     val displayInfo: StateFlow<DisplayInfo?> =
         nodeRepository.ourNodeInfo.map { it?.metadata?.display }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    /**
+     * Managed mode locks the device out of configuration, and the mirror is not a read-only view: arming it is an admin
+     * write and the controls inject input. The Debug Panel route it lives on is deliberately exempt from the gate every
+     * other settings route carries, so the restriction has to be enforced here.
+     */
+    val managed: StateFlow<Boolean> =
+        radioConfigRepository.localConfigFlow
+            .map { it.security?.is_managed == true }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     private val _mirroring = MutableStateFlow(false)
     val mirroring: StateFlow<Boolean> = _mirroring.asStateFlow()
@@ -72,22 +84,38 @@ class DisplayMirrorViewModel(
                 }
             }
         }
+        // Managed mode can arrive mid-session with a stream already live; tear it down when it does.
+        viewModelScope.launch { managed.collect { if (it && _mirroring.value) setMirror(false) } }
     }
 
     fun setMirror(enabled: Boolean) {
+        // Disarming is always allowed - it is how a live stream is torn down when managed mode arrives.
+        if (enabled && managed.value) return
         adminController.setDisplayMirror(enabled)
         _mirroring.value = enabled
     }
 
-    fun requestFrame() = adminController.requestDisplayFrame()
+    fun requestFrame() {
+        if (managed.value) return
+        adminController.requestDisplayFrame()
+    }
 
-    fun sendKey(eventCode: Int) = adminController.sendInputEvent(eventCode)
+    fun sendKey(eventCode: Int) {
+        if (managed.value) return
+        adminController.sendInputEvent(eventCode)
+    }
 
     /** Forwards a typed character; the device UI receives it as a key press rather than a navigation event. */
-    fun sendChar(codePoint: Int) = adminController.sendInputEvent(INPUT_ANYKEY, kbChar = codePoint)
+    fun sendChar(codePoint: Int) {
+        if (managed.value) return
+        adminController.sendInputEvent(INPUT_ANYKEY, kbChar = codePoint)
+    }
 
     /** Forwards a tap/long-press on the mirrored image as a device touch event with panel coordinates. */
-    fun sendTouch(eventCode: Int, x: Int, y: Int) = adminController.sendInputEvent(eventCode, touchX = x, touchY = y)
+    fun sendTouch(eventCode: Int, x: Int, y: Int) {
+        if (managed.value) return
+        adminController.sendInputEvent(eventCode, touchX = x, touchY = y)
+    }
 
     /** Stops a live stream when the mirror UI goes away; safe to call redundantly. */
     fun stopMirroring() {
