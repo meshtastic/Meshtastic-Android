@@ -146,7 +146,7 @@ class TcpTransport(
 
     @Volatile private var timeoutEvents: Int = 0
 
-    private val heartbeatNonce = atomic(0)
+    private val heartbeatNonce = atomic(HeartbeatSender.FIRST_NONCE)
 
     /** Whether the transport is currently connected. */
     val isConnected: Boolean
@@ -182,7 +182,10 @@ class TcpTransport(
         bytesSent += payload.size
     }
 
-    /** Send a heartbeat packet with a monotonically-increasing nonce to keep the connection alive. */
+    /**
+     * Send a heartbeat packet with a monotonically-increasing nonce to keep the connection alive. Starts at
+     * [HeartbeatSender.FIRST_NONCE], past the firmware's NodeInfo-ping trigger.
+     */
     suspend fun sendHeartbeat() {
         val nonce = heartbeatNonce.getAndIncrement()
         val heartbeat = ToRadio(heartbeat = org.meshtastic.proto.Heartbeat(nonce = nonce))

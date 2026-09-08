@@ -40,9 +40,12 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.proto.ToRadio
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -134,6 +137,51 @@ class TcpTransportTest {
         }
     }
 
+    @Test
+    fun `heartbeat nonces are strictly increasing and never 1 the firmware NodeInfo-ping trigger`() = runTest {
+        withContext(Dispatchers.Default) {
+            val server = TestTcpServer.start()
+            val connected = CompletableDeferred<Unit>()
+            val transport =
+                TcpTransport(
+                    dispatchers = testDispatchers(),
+                    scope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
+                    listener =
+                    object : TcpTransport.Listener {
+                        override fun onConnected() {
+                            connected.complete(Unit)
+                        }
+
+                        override fun onDisconnected() = Unit
+
+                        override fun onPacketReceived(bytes: ByteArray) = Unit
+                    },
+                )
+
+            try {
+                transport.start("$LOCALHOST:${server.port}")
+                val conn = withTimeout(5_000) { server.awaitConnection() }
+                withTimeout(5_000) { connected.await() }
+                conn.drain(StreamFrameCodec.WAKE_BYTES.size)
+
+                repeat(3) { transport.sendHeartbeat() }
+
+                val nonces =
+                    List(3) {
+                        val frame = withTimeout(5_000) { conn.readFramed() }
+                        assertNotNull(ToRadio.ADAPTER.decode(frame).heartbeat, "frame $it is not a heartbeat").nonce
+                    }
+                nonces.zipWithNext().forEachIndexed { index, (previous, next) ->
+                    assertTrue(next > previous, "nonce at index ${index + 1} ($next) must exceed ($previous)")
+                }
+                assertFalse(1 in nonces, "nonce 1 makes the firmware broadcast a NodeInfo ping; got $nonces")
+            } finally {
+                transport.stop()
+                server.close()
+            }
+        }
+    }
+
     private fun testDispatchers() =
         CoroutineDispatchers(io = Dispatchers.Default, main = Dispatchers.Default, default = Dispatchers.Default)
 
@@ -178,6 +226,19 @@ class TcpTransportTest {
     ) {
         /** Reads and discards exactly [count] bytes. */
         suspend fun drain(count: Int) {
+            readExactly(count)
+        }
+
+        /** Reads one Meshtastic stream frame and returns its payload. */
+        suspend fun readFramed(): ByteArray {
+            val header = readExactly(StreamFrameCodec.HEADER_SIZE)
+            assertEquals(StreamFrameCodec.START1, header[0])
+            assertEquals(StreamFrameCodec.START2, header[1])
+            val length = ((header[2].toInt() and 0xff) shl 8) or (header[3].toInt() and 0xff)
+            return readExactly(length)
+        }
+
+        private suspend fun readExactly(count: Int): ByteArray {
             val buf = ByteArray(count)
             var off = 0
             while (off < count) {
@@ -186,6 +247,8 @@ class TcpTransportTest {
                 if (n == -1) break
                 off += n
             }
+            assertEquals(count, off, "peer closed before $count bytes arrived")
+            return buf
         }
 
         /** Writes a Meshtastic stream frame: [START1][START2][len MSB][len LSB][payload]. */
