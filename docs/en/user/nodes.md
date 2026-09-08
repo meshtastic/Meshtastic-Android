@@ -167,6 +167,8 @@ When a node's hardware is recognized, the detail view shows a collapsible **"I w
 
 A full, browsable directory of every link is also available at **Settings → Device Links**. The item is hidden while you have Settings open for a remote node.
 
+Some of these are affiliate links. Both places say so above the links: product links may be affiliate links, and purchases may earn Meshtastic a commission.
+
 ## When No Nodes Appear
 
 The list stays empty until your radio hears another node.

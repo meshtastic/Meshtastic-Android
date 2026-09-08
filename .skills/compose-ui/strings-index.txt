@@ -399,6 +399,7 @@ device_db_cache_limit
 device_db_cache_limit_summary
 device_gps
 device_links
+device_links_affiliate_disclosure
 device_links_i_want_one
 device_links_open_in_browser
 device_metrics_label_value

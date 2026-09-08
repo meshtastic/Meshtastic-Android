@@ -51,6 +51,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.DeviceLink
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.collapsed
+import org.meshtastic.core.resources.device_links_affiliate_disclosure
 import org.meshtastic.core.resources.device_links_i_want_one
 import org.meshtastic.core.resources.device_links_open_in_browser
 import org.meshtastic.core.resources.expanded
@@ -99,6 +100,13 @@ fun DeviceLinksSection(links: List<DeviceLink>, modifier: Modifier = Modifier) {
                 )
             }
             if (expanded) {
+                // The disclosure sits above the links it covers.
+                Text(
+                    text = stringResource(Res.string.device_links_affiliate_disclosure),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colorScheme.onSurfaceVariant,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp),
+                )
                 links.forEach { DeviceLinkRow(it) }
             }
         }
