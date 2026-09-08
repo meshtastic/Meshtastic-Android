@@ -42,9 +42,9 @@ data class Releases(
 @Serializable data class NetworkFirmwareReleases(@SerialName("releases") val releases: Releases = Releases())
 
 /**
- * The nightly-preview pointer published to `firmware-nightly/index.json` on meshtastic.github.io. Unlike the release
- * channels above it is not served by api.meshtastic.org, and only [version] is guaranteed present — [id] and [title]
- * are derived when absent, matching the web flasher's parsing.
+ * The nightly-preview pointer published to `index.json` at the root of the nightly host. Unlike the release channels
+ * above it is not served by api.meshtastic.org, and only [version] is guaranteed present — [id] and [title] are derived
+ * when absent, matching the web flasher's parsing.
  */
 @Serializable
 data class NetworkFirmwareNightly(
@@ -56,7 +56,7 @@ data class NetworkFirmwareNightly(
 
 /**
  * Normalizes the nightly pointer into the common release shape, or null when the pointer carries no usable version.
- * Nightly artifacts are served per-file from the fixed `firmware-nightly/` folder, so there is no release zip.
+ * Nightly artifacts are served per-file from the nightly host's root, so there is no release zip.
  */
 fun NetworkFirmwareNightly.asFirmwareRelease(): NetworkFirmwareRelease? {
     val resolvedId = id?.takeIf { it.isNotBlank() } ?: version.takeIf { it.isNotBlank() }?.let { "v$it" }

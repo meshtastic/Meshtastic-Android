@@ -19,9 +19,11 @@ package org.meshtastic.core.network.service
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
+import io.ktor.client.engine.mock.respondError
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.test.runTest
@@ -30,8 +32,45 @@ import org.meshtastic.core.model.FirmwareTarget
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertNull
 
 class ApiServiceTest {
+    @Test
+    fun `nightly pointer is fetched from the nightly host root`() = runTest {
+        var requested: String? = null
+        val engine = MockEngine { request ->
+            requested = request.url.toString()
+            respond(
+                content = """{"version":"2.8.1.0becda3","id":"v2.8.1.0becda3","commit":"0becda3"}""",
+                headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString()),
+            )
+        }
+        val client = HttpClient(engine)
+
+        try {
+            val nightly = ApiServiceImpl(client).getNightlyFirmware()
+
+            assertEquals("https://nightly.meshtastic.org/index.json", requested)
+            assertEquals("2.8.1.0becda3", nightly?.version)
+        } finally {
+            client.close()
+        }
+    }
+
+    @Test
+    fun `nightly pointer returns null when nothing is published`() = runTest {
+        // The host answers an unpublished nightly with its own HTML error page, so the status — not the body —
+        // is what distinguishes "gone" from "unreachable".
+        val engine = MockEngine { respondError(HttpStatusCode.NotFound, "<!doctype html><title>Not Found</title>") }
+        val client = HttpClient(engine)
+
+        try {
+            assertNull(ApiServiceImpl(client).getNightlyFirmware())
+        } finally {
+            client.close()
+        }
+    }
+
     @Test
     fun `service decodes release manifest served as octet stream`() = runTest {
         val manifestUrl = "https://downloads.example/firmware/manifest.json"

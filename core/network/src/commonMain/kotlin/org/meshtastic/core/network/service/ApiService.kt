@@ -32,13 +32,17 @@ import org.meshtastic.core.model.NetworkDeviceHardware
 import org.meshtastic.core.model.NetworkDeviceLinksResponse
 import org.meshtastic.core.model.NetworkFirmwareNightly
 import org.meshtastic.core.model.NetworkFirmwareReleases
+import org.meshtastic.core.network.HttpClientDefaults
 
 /**
- * Pointer to the nightly preview build published by CI to meshtastic.github.io. Served from GitHub Pages raw content
- * (not api.meshtastic.org) as `text/plain`, so it is parsed manually rather than via content negotiation.
+ * Pointer to the nightly preview build published by CI, served at the root of [HttpClientDefaults.NIGHTLY_BASE_URL]
+ * rather than by api.meshtastic.org.
+ *
+ * Decoded manually rather than via content negotiation so that a 404 — nothing currently published — can be told apart
+ * from a transport failure. The not-found body is the host's HTML error page, which content negotiation would reject
+ * before the status could be inspected.
  */
-private const val NIGHTLY_INDEX_URL =
-    "https://raw.githubusercontent.com/meshtastic/meshtastic.github.io/master/firmware-nightly/index.json"
+private const val NIGHTLY_INDEX_URL = "${HttpClientDefaults.NIGHTLY_BASE_URL}/index.json"
 
 private val firmwareJson = Json {
     isLenient = true
@@ -67,7 +71,7 @@ interface ApiService {
     suspend fun getFirmwareReleaseManifest(manifestUrl: String): FirmwareReleaseManifest
 
     /**
-     * Fetches the nightly preview build pointer from meshtastic.github.io. Returns null when no nightly is currently
+     * Fetches the nightly preview build pointer from the nightly host. Returns null when no nightly is currently
      * published (HTTP 404); throws on transport or server errors so callers can distinguish "gone" from "unreachable".
      */
     suspend fun getNightlyFirmware(): NetworkFirmwareNightly?

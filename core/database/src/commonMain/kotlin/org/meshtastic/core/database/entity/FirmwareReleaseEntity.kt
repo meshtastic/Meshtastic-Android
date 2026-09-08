@@ -74,7 +74,7 @@ enum class FirmwareReleaseType {
     STABLE,
     ALPHA,
 
-    /** Nightly preview from meshtastic.github.io's `firmware-nightly/` folder; gated behind the modules unlock. */
+    /** Nightly preview from the nightly host's root; gated behind the modules unlock. */
     NIGHTLY,
     LOCAL,
 }
