@@ -55,6 +55,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
@@ -717,16 +718,20 @@ private fun remapBoundary(
  * Displays `@!<hex>` tokens as `@FriendlyName` and applies live inline-markdown styling (bold/italic/strikethrough/
  * code) while typing. Both are presentation-only via [OutputTransformation]: the stored buffer keeps the hex wire form
  * and the raw markdown delimiters, so the bytes sent are unchanged.
+ *
+ * [candidatesById] is read on every transform, so the caller can hand the field one long-lived instance and still feed
+ * it the latest node names. A fresh instance while the field is focused restarts the IME session, which on Android
+ * hides and re-shows the keyboard.
  */
 @OptIn(ExperimentalFoundationApi::class)
-private fun mentionOutputTransformation(candidatesById: Map<String, MentionCandidate>) = OutputTransformation {
+private fun mentionOutputTransformation(candidatesById: () -> Map<String, MentionCandidate>) = OutputTransformation {
     val source = toString()
     // Fast path: plain text with no mention tokens or markdown delimiters — skip all scanning.
     val hasMention = source.indexOf('@') >= 0
     val needsStyle = hasMention || source.any { it in LIVE_STYLE_DELIMITER_SET }
     if (!needsStyle) return@OutputTransformation
 
-    val plan = mentionOutputPlan(source, candidatesById)
+    val plan = mentionOutputPlan(source, candidatesById())
     for (replacement in plan.replacements.asReversed()) {
         replace(replacement.range.first, replacement.range.last + 1, replacement.text)
     }
@@ -749,14 +754,15 @@ private fun mentionOutputTransformation(candidatesById: Map<String, MentionCandi
  * @param isEnabled Whether the input field should be enabled.
  * @param textFieldState The [TextFieldState] managing the input's text.
  * @param mentionCandidates Identity-stable node-id → mention entry. Only changes when a node's id or display name
- *   changes — telemetry-only updates leave this map structurally identical, preventing recomposition churn.
+ *   changes — telemetry-only updates leave this map structurally identical, preventing recomposition churn. A change is
+ *   fed to the field's [OutputTransformation] through a state holder, never by replacing the transformation.
  * @param modifier The modifier for this composable.
  * @param maxByteSize The maximum allowed size of the message in bytes.
  * @param onSendMessage Callback invoked when the send button is pressed or send IME action is triggered.
  */
 @Suppress("LongMethod", "CyclomaticComplexMethod") // Due to multiple parts of the OutlinedTextField
 @Composable
-private fun MessageInput(
+internal fun MessageInput(
     isEnabled: Boolean,
     isHomoglyphEncodingEnabled: Boolean,
     textFieldState: TextFieldState,
@@ -783,7 +789,10 @@ private fun MessageInput(
     val isOverLimit = currentByteLength > maxByteSize
     val canSend = !isOverLimit && currentText.isNotEmpty() && isEnabled
 
-    val mentionOutput = remember(mentionCandidates) { mentionOutputTransformation(mentionCandidates) }
+    // One transformation for the field's whole life: a new instance replaces the transformed state and restarts the
+    // IME session, so the latest candidates are read through this holder instead.
+    val candidates = rememberUpdatedState(mentionCandidates)
+    val mentionOutput = remember { mentionOutputTransformation { candidates.value } }
     val mentionQuery by
         remember(textFieldState) {
             derivedStateOf { currentMentionQuery(textFieldState.text.toString(), textFieldState.selection) }
