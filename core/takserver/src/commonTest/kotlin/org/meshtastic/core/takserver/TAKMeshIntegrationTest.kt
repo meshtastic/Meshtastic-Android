@@ -272,15 +272,28 @@ class TAKMeshIntegrationTest {
     }
 
     @Test
-    fun `inbound compressed V1 packet is not broadcast to TAK clients`() = runTest(UnconfinedTestDispatcher()) {
-        val h = TestHarness()
+    fun `compressed V1 packet is dropped on a legacy radio`() = runTest(UnconfinedTestDispatcher()) {
+        // A 2.7.x radio delivers the compressed original alongside its own decompressed copy, so rendering this one
+        // would surface a duplicate contact whose callsign is unishox2 bytes decoded as text.
+        val h = TestHarness(nodeRepository = FakeNodeRepository(firmwareVersion = "2.7.0.0"))
         h.integration.start(backgroundScope)
 
-        // Firmware <= 2.7.x delivers the compressed original alongside its decompressed copy. Rendering it would
-        // surface a duplicate contact whose callsign is unishox2 bytes decoded as text.
         h.serviceRepository.emitMeshPacket(createV1PliMeshPacket(isCompressed = true))
 
         assertTrue(h.serverManager.broadcasts.isEmpty(), "Compressed V1 packet must not reach TAK clients")
+    }
+
+    @Test
+    fun `compressed V1 packet is still broadcast on a V2 radio`() = runTest(UnconfinedTestDispatcher()) {
+        // A 2.8+ radio is a port 78 passthrough and never decompresses port 72, so this is the only copy of the
+        // legacy peer's PLI that arrives. Dropping it would lose the contact entirely (spec 005 US5).
+        val h = TestHarness(nodeRepository = FakeNodeRepository(firmwareVersion = "2.8.0.0"))
+        h.integration.start(backgroundScope)
+
+        h.serviceRepository.emitMeshPacket(createV1PliMeshPacket(isCompressed = true))
+
+        assertTrue(h.serverManager.broadcasts.isNotEmpty(), "Legacy peer's PLI must still reach TAK clients")
+        assertTrue(h.serverManager.broadcasts.first().type.startsWith("a-f-"))
     }
 
     @Test

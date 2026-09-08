@@ -439,23 +439,24 @@ class TAKMeshIntegration(
      * GeoChat interop; new typed payloads (shapes, markers, routes, etc.) still require a v2-capable radio (firmware >=
      * 2.8.0).
      *
-     * Packets flagged `is_compressed` are skipped — see the comment inline for why the radio delivers them alongside a
-     * decompressed copy.
+     * Packets flagged `is_compressed` are skipped only when the local radio is 2.7.x — that firmware, and only that
+     * firmware, also delivers a decompressed copy. See the inline comment for the details.
      */
     private suspend fun handleV1Packet(payload: okio.ByteString) {
         try {
             val takPacket = TAKPacket.ADAPTER.decode(payload)
-            // Firmware <= 2.7.x unishox2-compresses contact.callsign / device_callsign for LoRa transport and sets
-            // is_compressed. On receive it decompresses into a *copy* and sends that to the phone, but the original
-            // compressed packet is delivered as well (AtakPluginModule::alterReceivedProtobuf allocates a copy rather
-            // than rewriting mp in place, as the transmit branch does). We therefore see every PLI twice.
+            // A *local* 2.7.x radio unishox2-decompresses inbound port 72 traffic into a copy and sends that to the
+            // phone, but AtakPluginModule::alterReceivedProtobuf never rewrites mp the way its transmit branch does,
+            // so MeshService forwards the compressed original as well. Both reach us, and the compressed one converts
+            // with raw unishox2 bytes in its string fields — they decode as replacement characters, and ATAK renders a
+            // second contact with an unreadable callsign that is re-sent with every PLI and cannot be dismissed.
             //
-            // The compressed twin cannot be rendered here: this module has no unishox2 implementation, so its string
-            // fields decode as replacement characters and ATAK surfaces them as a second contact with an unreadable
-            // callsign, re-broadcast on every PLI and impossible to dismiss. Skip it and keep the decompressed copy,
-            // which carries identical position, team and telemetry.
-            if (takPacket.is_compressed) {
-                Logger.d { "Skip compressed V1 packet; the radio also delivers a decompressed copy" }
+            // Only skip it when the local radio is 2.7.x, because only then is the decompressed twin guaranteed. A
+            // 2.8+ radio is a port 78 passthrough and does not decompress port 72 at all, so a compressed packet from
+            // a legacy peer is the only copy that will ever arrive; dropping it would lose the contact entirely
+            // (spec 005 US5). Rendering a garbled callsign at a correct position is the better failure there.
+            if (takPacket.is_compressed && !useTakV2()) {
+                Logger.d { "Skip compressed V1 packet; the local 2.7.x radio also delivers a decompressed copy" }
                 return
             }
             val cotMessage = takPacket.toCoTMessage() ?: return
