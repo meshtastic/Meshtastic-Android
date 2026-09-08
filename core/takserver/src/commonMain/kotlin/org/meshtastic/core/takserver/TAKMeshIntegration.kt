@@ -434,14 +434,31 @@ class TAKMeshIntegration(
     }
 
     /**
-     * v1 receive path (firmware <= 2.7.x): decode bare protobuf [TAKPacket] (no compression) from port 72 (ATAK_PLUGIN)
-     * and convert to CoT for forwarding to attached TAK clients. Kept indefinitely so users on stable 2.7.x firmware
-     * retain PLI + GeoChat interop; new typed payloads (shapes, markers, routes, etc.) still require a v2-capable radio
-     * (firmware >= 2.8.0).
+     * v1 receive path (firmware <= 2.7.x): decode bare protobuf [TAKPacket] from port 72 (ATAK_PLUGIN) and convert to
+     * CoT for forwarding to attached TAK clients. Kept indefinitely so users on stable 2.7.x firmware retain PLI +
+     * GeoChat interop; new typed payloads (shapes, markers, routes, etc.) still require a v2-capable radio (firmware >=
+     * 2.8.0).
+     *
+     * Packets flagged `is_compressed` are skipped only when the local radio is 2.7.x — that firmware, and only that
+     * firmware, also delivers a decompressed copy. See the inline comment for the details.
      */
     private suspend fun handleV1Packet(payload: okio.ByteString) {
         try {
             val takPacket = TAKPacket.ADAPTER.decode(payload)
+            // A *local* 2.7.x radio unishox2-decompresses inbound port 72 traffic into a copy and sends that to the
+            // phone, but AtakPluginModule::alterReceivedProtobuf never rewrites mp the way its transmit branch does,
+            // so MeshService forwards the compressed original as well. Both reach us, and the compressed one converts
+            // with raw unishox2 bytes in its string fields — they decode as replacement characters, and ATAK renders a
+            // second contact with an unreadable callsign that is re-sent with every PLI and cannot be dismissed.
+            //
+            // Only skip it when the local radio is 2.7.x, because only then is the decompressed twin guaranteed. A
+            // 2.8+ radio is a port 78 passthrough and does not decompress port 72 at all, so a compressed packet from
+            // a legacy peer is the only copy that will ever arrive; dropping it would lose the contact entirely
+            // (spec 005 US5). Rendering a garbled callsign at a correct position is the better failure there.
+            if (takPacket.is_compressed && !useTakV2()) {
+                Logger.d { "Skip compressed V1 packet; the local 2.7.x radio also delivers a decompressed copy" }
+                return
+            }
             val cotMessage = takPacket.toCoTMessage() ?: return
             takServerManager.broadcast(cotMessage)
             Logger.d { "V1 → TAK clients: ${cotMessage.type}" }
