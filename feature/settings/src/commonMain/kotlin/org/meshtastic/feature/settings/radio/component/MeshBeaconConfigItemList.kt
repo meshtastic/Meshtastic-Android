@@ -90,9 +90,9 @@ private fun Int.withFlag(flag: Int, on: Boolean): Int = if (on) this or flag els
 private fun Int.hasFlag(flag: Int): Boolean = (this and flag) != 0
 
 /**
- * Editor for `ModuleConfig.MeshBeaconConfig` (design#140, Android issue #6931). Reads from the connect-time config sync
- * (there is no `ModuleConfigType` beacon value to request per-module) and writes via `AdminMessage.setModuleConfig`.
- * Flag edits are read-modify-write so unknown bits survive.
+ * Editor for `ModuleConfig.MeshBeaconConfig` (design#140, Android issue #6931). Reads via
+ * `AdminMessage.getModuleConfigRequest(MESHBEACON_CONFIG)` and writes via `AdminMessage.setModuleConfig`. Flag edits
+ * are read-modify-write so unknown bits survive.
  *
  * The region and offered/transmit preset are never user-chosen here: the radio's own LoRa region and configured preset
  * are always stamped in on save (`stampBeaconConfigForSave`), so the beacon can never transmit region or preset

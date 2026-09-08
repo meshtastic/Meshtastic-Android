@@ -621,6 +621,7 @@ open class RadioConfigViewModel(
                         paxcounter = config.paxcounter ?: state.moduleConfig.paxcounter,
                         statusmessage = config.statusmessage ?: state.moduleConfig.statusmessage,
                         tak = config.tak ?: state.moduleConfig.tak,
+                        mesh_beacon = config.mesh_beacon ?: state.moduleConfig.mesh_beacon,
                     ),
                 )
             }
@@ -835,13 +836,6 @@ open class RadioConfigViewModel(
     private fun setResponseStateLoading(route: Enum<*>, showOverlay: Boolean) {
         val destNum = destNum ?: destNode.value?.num ?: return
 
-        // A module without a per-module get (no ModuleConfigType, e.g. MeshBeacon) reads from the connect-time config
-        // sync — just select the route and render, skipping the loading/request round-trip that would never complete.
-        if (route is ModuleRoute && !route.refreshable) {
-            _radioConfigState.update { it.copy(route = route.name, responseState = ResponseState.Empty) }
-            return
-        }
-
         _radioConfigState.update {
             it.copy(route = route.name, responseState = ResponseState.Loading(showOverlay = showOverlay))
         }
@@ -926,6 +920,21 @@ open class RadioConfigViewModel(
             safeLaunch(tag = "getRingtone") {
                 radioConfigUseCase.getRingtone(destNum, onRequestId = ::registerReadRequestId)
             }
+        }
+        if (route == ModuleRoute.MESH_BEACON) {
+            // The beacon editor gates on the radio's LoRa region and offers its channels, neither of which a remote
+            // session has until read. Firmware without the module never answers the module get, so skip it there.
+            safeLaunch(tag = "getChannel0ForMeshBeacon") {
+                radioConfigUseCase.getChannel(destNum, 0, onRequestId = ::registerReadRequestId)
+            }
+            safeLaunch(tag = "getLoraConfigForMeshBeacon") {
+                radioConfigUseCase.getConfig(
+                    destNum,
+                    AdminMessage.ConfigType.LORA_CONFIG.value,
+                    onRequestId = ::registerReadRequestId,
+                )
+            }
+            if (!Capabilities(radioConfigState.value.metadata?.firmware_version).supportsMeshBeacon) return
         }
         safeLaunch(tag = "getModuleConfig") {
             radioConfigUseCase.getModuleConfig(destNum, route.type, onRequestId = ::registerReadRequestId)
@@ -1344,6 +1353,7 @@ open class RadioConfigViewModel(
                             paxcounter = response.paxcounter ?: state.moduleConfig.paxcounter,
                             statusmessage = response.statusmessage ?: state.moduleConfig.statusmessage,
                             tak = response.tak ?: state.moduleConfig.tak,
+                            mesh_beacon = response.mesh_beacon ?: state.moduleConfig.mesh_beacon,
                         ),
                     )
                 }

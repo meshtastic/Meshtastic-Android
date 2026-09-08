@@ -379,10 +379,12 @@ configuration settings screen. Constraints are sourced from two layers:
 
 ### Mesh Beacon (`ModuleConfig.MeshBeaconConfig`)
 
-Gated behind the `supportsMeshBeacon` capability. There is no `AdminMessage.ModuleConfigType`
-value for this module, so the editor reads from the connect-time config sync (no per-module
-refresh) and writes via `AdminMessage.setModuleConfig`. Flag edits are read-modify-write so
-`FLAG_LEGACY_SPLIT` and any unknown bits survive.
+Gated behind the `supportsMeshBeacon` capability. The editor reads via
+`AdminMessage.getModuleConfigRequest(MESHBEACON_CONFIG)` plus the LoRa config and channel 0
+(the region gate and the offer-channel picker need both on a remote node) and writes via
+`AdminMessage.setModuleConfig`. Flag edits are read-modify-write so `FLAG_LEGACY_SPLIT` and any
+unknown bits survive. Over remote admin only the primary channel is read, so the picker offers
+the primary only there.
 
 | Field | Type | Validation | Notes |
 |-------|------|------------|-------|
