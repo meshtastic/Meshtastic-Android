@@ -46,6 +46,16 @@ object HttpClientDefaults {
      * reached from a browser at all (meshtastic/api#134).
      */
     const val API_BASE_URL = "https://apiv2.meshtastic.org/"
+
+    /**
+     * Base URL for the nightly firmware channel. Absolute, and not routed through [API_BASE_URL] — the nightly build is
+     * published outside the API, flat at this host's root: `index.json` alongside every per-target artifact.
+     *
+     * Replaces the `firmware-nightly/` folder on meshtastic.github.io, which can lag behind this host. The version
+     * pointer and the artifacts must both be read from this host: the two publishers sit on different firmware commits,
+     * so a version taken from one resolves artifact filenames that do not exist on the other.
+     */
+    const val NIGHTLY_BASE_URL = "https://nightly.meshtastic.org"
 }
 
 /**

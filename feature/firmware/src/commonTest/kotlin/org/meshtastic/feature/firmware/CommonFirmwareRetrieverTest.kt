@@ -43,6 +43,9 @@ abstract class CommonFirmwareRetrieverTest {
     protected companion object {
         const val BASE_URL = "https://raw.githubusercontent.com/meshtastic/meshtastic.github.io/master"
 
+        /** Nightly artifacts are served flat at this host's root, not from a folder under [BASE_URL]. */
+        const val NIGHTLY_BASE_URL = "https://nightly.meshtastic.org"
+
         val TEST_RELEASE = FirmwareRelease(id = "v2.7.17", zipUrl = "https://example.com/esp32-s3.zip")
 
         val TEST_HARDWARE =
@@ -338,38 +341,38 @@ abstract class CommonFirmwareRetrieverTest {
     }
 
     // -----------------------------------------------------------------------
-    // Nightly channel (fixed firmware-nightly/ folder, no release zip)
+    // Nightly channel (flat at the nightly host root, no release zip)
     // -----------------------------------------------------------------------
 
     @Test
-    fun `nightly release resolves from the fixed firmware-nightly folder`() = runTest {
+    fun `nightly release resolves from the nightly host root`() = runTest {
         val handler = FakeFirmwareFileHandler()
         val retriever = FirmwareRetriever(handler)
         val nightly = FirmwareRelease(id = "v2.8.0.f52e2ea", zipUrl = "", releaseType = FirmwareReleaseType.NIGHTLY)
 
-        handler.textResponses["$BASE_URL/firmware-nightly/firmware-heltec-v3-2.8.0.f52e2ea.mt.json"] =
+        handler.textResponses["$NIGHTLY_BASE_URL/firmware-heltec-v3-2.8.0.f52e2ea.mt.json"] =
             """{"files":[{"name":"firmware-heltec-v3-2.8.0.f52e2ea.bin","md5":"","bytes":0,"part_name":"app0"}]}"""
-        handler.existingUrls.add("$BASE_URL/firmware-nightly/firmware-heltec-v3-2.8.0.f52e2ea.bin")
+        handler.existingUrls.add("$NIGHTLY_BASE_URL/firmware-heltec-v3-2.8.0.f52e2ea.bin")
 
         val result = retriever.retrieveEsp32Firmware(nightly, TEST_HARDWARE) {}
 
-        assertNotNull(result, "Nightly should resolve from firmware-nightly/, not firmware-<version>/")
+        assertNotNull(result, "Nightly should resolve from the nightly host, not a folder under $BASE_URL")
         assertEquals("firmware-heltec-v3-2.8.0.f52e2ea.bin", result.fileName)
-        assertTrue(handler.checkedUrls.none { "firmware-2.8.0.f52e2ea/" in it }, "versioned folder must not be used")
+        assertTrue(handler.checkedUrls.none { BASE_URL in it }, "meshtastic.github.io must not be used for nightly")
         assertTrue(
-            "$BASE_URL/firmware-nightly/firmware-heltec-v3-2.8.0.f52e2ea.mt.json" in handler.fetchedTextUrls,
-            "manifest must be fetched from firmware-nightly/",
+            "$NIGHTLY_BASE_URL/firmware-heltec-v3-2.8.0.f52e2ea.mt.json" in handler.fetchedTextUrls,
+            "manifest must be fetched from the nightly host root",
         )
     }
 
     @Test
-    fun `nightly ota zip resolves from the fixed firmware-nightly folder`() = runTest {
+    fun `nightly ota zip resolves from the nightly host root`() = runTest {
         val handler = FakeFirmwareFileHandler()
         val retriever = FirmwareRetriever(handler)
         val hardware = DeviceHardware(hwModelSlug = "RAK4631", platformioTarget = "rak4631", architecture = "nrf52840")
         val nightly = FirmwareRelease(id = "v2.8.0.f52e2ea", zipUrl = "", releaseType = FirmwareReleaseType.NIGHTLY)
 
-        handler.existingUrls.add("$BASE_URL/firmware-nightly/firmware-rak4631-2.8.0.f52e2ea-ota.zip")
+        handler.existingUrls.add("$NIGHTLY_BASE_URL/firmware-rak4631-2.8.0.f52e2ea-ota.zip")
 
         val result = retriever.retrieveOtaFirmware(nightly, hardware) {}
 
@@ -388,6 +391,23 @@ abstract class CommonFirmwareRetrieverTest {
 
         assertNull(result)
         assertTrue(handler.downloadedUrls.isEmpty(), "no zip download may be attempted when zipUrl is blank")
+    }
+
+    @Test
+    fun `stable release keeps using the versioned folder on meshtastic github io`() = runTest {
+        val handler = FakeFirmwareFileHandler()
+        val retriever = FirmwareRetriever(handler)
+        val stable = FirmwareRelease(id = "v2.8.0", zipUrl = "", releaseType = FirmwareReleaseType.STABLE)
+
+        handler.existingUrls.add("$BASE_URL/firmware-2.8.0/firmware-heltec-v3-2.8.0.bin")
+
+        val result = retriever.retrieveEsp32Firmware(stable, TEST_HARDWARE) {}
+
+        assertNotNull(result, "stable must resolve from the versioned folder")
+        assertTrue(
+            handler.checkedUrls.none { NIGHTLY_BASE_URL in it },
+            "the nightly host serves no versioned folders, so stable must never be looked up there",
+        )
     }
 
     // -----------------------------------------------------------------------

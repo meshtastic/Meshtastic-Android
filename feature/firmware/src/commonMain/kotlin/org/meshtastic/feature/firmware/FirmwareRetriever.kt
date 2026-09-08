@@ -23,10 +23,12 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.network.HttpClientDefaults
 import org.meshtastic.feature.firmware.ota.FirmwareHashUtil
 
 private val KNOWN_ARCHS = setOf("esp32-s3", "esp32-c3", "esp32-c6", "nrf52840", "rp2040", "stm32", "esp32")
 
+/** Host serving the versioned `firmware-<version>/` artifact folders. The nightly channel is published elsewhere. */
 private const val FIRMWARE_BASE_URL = "https://raw.githubusercontent.com/meshtastic/meshtastic.github.io/master"
 
 /** Radix for the hex flash addresses in maintenance-image diagnostics. */
@@ -225,7 +227,7 @@ open class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
         hardware: DeviceHardware,
         onProgress: (Float) -> Unit,
     ): FirmwareArtifact? {
-        val manifestUrl = "$FIRMWARE_BASE_URL/${release.artifactFolder}/firmware-$target-$version.mt.json"
+        val manifestUrl = "${release.artifactBaseUrl}/firmware-$target-$version.mt.json"
 
         val text = fileHandler.fetchText(manifestUrl)
         if (text == null) {
@@ -299,7 +301,7 @@ open class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
         val version = release.id.removePrefix("v")
         val target = hardware.platformioTarget.ifEmpty { hardware.hwModelSlug }
         val filename = preferredFilename ?: "firmware-$target-$version$fileSuffix"
-        val directUrl = "$FIRMWARE_BASE_URL/${release.artifactFolder}/$filename"
+        val directUrl = "${release.artifactBaseUrl}/$filename"
 
         if (fileHandler.checkUrlExists(directUrl)) {
             try {
@@ -331,12 +333,20 @@ open class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
     }
 
     /**
-     * The meshtastic.github.io folder holding this release's artifacts. Nightly builds live in the fixed
-     * `firmware-nightly/` folder (mirroring the web flasher); everything else uses the versioned folder.
+     * Base URL holding this release's artifacts. Nightly builds sit flat at the root of the nightly host (mirroring the
+     * web flasher); stable and alpha use the versioned folder on meshtastic.github.io, which that host does not serve.
+     *
+     * A nightly must resolve against the same host its version pointer came from — the nightly host and
+     * meshtastic.github.io publish different firmware commits, so a filename built from the other host's version does
+     * not exist.
      */
-    private val FirmwareRelease.artifactFolder: String
+    private val FirmwareRelease.artifactBaseUrl: String
         get() =
-            if (releaseType == FirmwareReleaseType.NIGHTLY) "firmware-nightly" else "firmware-${id.removePrefix("v")}"
+            if (releaseType == FirmwareReleaseType.NIGHTLY) {
+                HttpClientDefaults.NIGHTLY_BASE_URL
+            } else {
+                "$FIRMWARE_BASE_URL/firmware-${id.removePrefix("v")}"
+            }
 
     private fun resolveZipUrl(url: String, targetArch: String): String {
         for (arch in KNOWN_ARCHS) {
