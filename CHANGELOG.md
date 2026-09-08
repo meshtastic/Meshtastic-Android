@@ -11,11 +11,14 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 #### 🏗️ Features
 * feat(node): add an update-status shortcut to the local node menu by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7047
+* feat: mark nodes not heard since the LoRa config changed by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7055
+* chore: device link disclosure by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7068
 #### 🖥️ Desktop
 * fix(desktop): use standard SPDX license identifier for RPM packaging by @RCGV1 in https://github.com/meshtastic/Meshtastic-Android/pull/7043
 #### 🛠️ Fixes
 * fix(mqtt): downgrade unparseable-payload decode logs from error to warn by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7040
 * fix(node): gate direct messages on holding a public key by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7050
+* fix(takserver): skip compressed v1 TAK packets to stop duplicate contacts by @texaskst in https://github.com/meshtastic/Meshtastic-Android/pull/7020
 #### 📝 Other Changes
 * refactor(map): retire the maps-utils workarounds its 5.1 fixes made stale by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7046
 
