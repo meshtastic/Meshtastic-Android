@@ -2,8 +2,8 @@
 <html class="no-js" lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
-    <title>sendHeartbeat</title>
-<link href="../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../";</script>
+    <title>Companion</title>
+<link href="../../../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../../../";</script>
     <script>document.documentElement.classList.replace("no-js", "js");</script>
     <script>const storage = localStorage.getItem("dokka-dark-mode")
       if (storage == null) {
@@ -18,22 +18,22 @@
         }
       }
     </script>
-<script type="text/javascript" src="../../../../scripts/sourceset_dependencies.js" async></script>
-<link href="../../../../styles/style.css" rel="Stylesheet">
-<link href="../../../../styles/main.css" rel="Stylesheet">
-<link href="../../../../styles/prism.css" rel="Stylesheet">
-<link href="../../../../styles/logo-styles.css" rel="Stylesheet">
-<link href="../../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
-<script type="text/javascript" src="../../../../scripts/safe-local-storage_blocking.js"></script>
-<script type="text/javascript" src="../../../../scripts/navigation-loader.js" async></script>
-<script type="text/javascript" src="../../../../scripts/platform-content-handler.js" async></script>
-<script type="text/javascript" src="../../../../scripts/main.js" defer></script>
-<script type="text/javascript" src="../../../../scripts/prism.js" async></script>
-<script type="text/javascript" src="../../../../ui-kit/ui-kit.min.js" defer></script></head>
+<script type="text/javascript" src="../../../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../../../styles/style.css" rel="Stylesheet">
+<link href="../../../../../styles/main.css" rel="Stylesheet">
+<link href="../../../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../../../ui-kit/ui-kit.min.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../../../scripts/safe-local-storage_blocking.js"></script>
+<script type="text/javascript" src="../../../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../../../ui-kit/ui-kit.min.js" defer></script></head>
 <body>
 <div class="root">
     <header class="navigation theme-dark" id="navigation-wrapper" role="banner">
-<a class="library-name--link" href="../../../../index.html" tabindex="1">
+<a class="library-name--link" href="../../../../../index.html" tabindex="1">
                     Meshtastic App
             </a>        <button class="navigation-controls--btn navigation-controls--btn_toc ui-kit_mobile-only" id="toc-toggle" type="button">Toggle table of contents
         </button>
@@ -89,12 +89,36 @@
         </nav>
         <div id="resizer" class="resizer" data-item-type="BAR"></div>
         <div id="main" data-item-type="SECTION" role="main">
-<div class="main-content" data-page-type="member" id="content" pageids="core-network::org.meshtastic.core.network.transport/HeartbeatSender/sendHeartbeat/#/PointingToDeclaration//-1825752930">
-  <div class="breadcrumbs"><a href="../../index.html">core-network</a><span class="delimiter">/</span><a href="../index.html">org.meshtastic.core.network.transport</a><span class="delimiter">/</span><a href="index.html">HeartbeatSender</a><span class="delimiter">/</span><span class="current">sendHeartbeat</span></div>
+<div class="main-content" data-page-type="classlike" id="content" pageids="core-network::org.meshtastic.core.network.transport/HeartbeatSender.Companion///PointingToDeclaration//-1825752930">
+  <div class="breadcrumbs"><a href="../../../index.html">core-network</a><span class="delimiter">/</span><a href="../../index.html">org.meshtastic.core.network.transport</a><span class="delimiter">/</span><a href="../index.html">HeartbeatSender</a><span class="delimiter">/</span><span class="current">Companion</span></div>
   <div class="cover ">
-    <h1 class="cover"><span>send</span><wbr><span><span>Heartbeat</span></span></h1>
+    <h1 class="cover"><span><span>Companion</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:network/commonMain"><div class="symbol monospace"><span class="token keyword">object </span><a href="index.html">Companion</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/network/src/commonMain/kotlin/org/meshtastic/core/network/transport/HeartbeatSender.kt#L97">source</a>)</span></span></div></div></div>
   </div>
-  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:network/commonMain"><div class="symbol monospace"><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="send-heartbeat.html"><span class="token function">sendHeartbeat</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="source-link-wrapper"><span class="source-link" data-element-type="source-link">(<a href="https://github.com/meshtastic/Meshtastic-Android/blob/main/core/network/src/commonMain/kotlin/org/meshtastic/core/network/transport/HeartbeatSender.kt#L79">source</a>)</span></span></div><p class="paragraph">Sends a heartbeat to the radio.</p><p class="paragraph">The firmware responds to heartbeats by queuing a <code class="lang-kotlin">queueStatus</code> FromRadio packet, proving the link is alive and keeping the local node's lastHeard timestamp current.</p><p class="paragraph">Repeated rejections while disconnected are expected (e.g. a radio that left BLE range), so only the first <a href="../../../../core/network/org.meshtastic.core.network.transport/-heartbeat-rejection-log-policy/-companion/-d-e-f-a-u-l-t_-w-a-r-n_-l-i-m-i-t.html">HeartbeatRejectionLogPolicy.DEFAULT_WARN_LIMIT</a> consecutive rejections log at warn severity; later ones are demoted to debug until a successful send resets the streak.</p><span class="kdoc-tag"><h4 class="">Return</h4><p class="paragraph"><code class="lang-kotlin">true</code> when the transport accepted the heartbeat handoff.</p></span></div></div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="PROPERTY">
+        <h2 class="tableheader">Properties</h2>
+        <div class="table"><a data-name="-696457533%2FProperties%2F-1825752930" anchor-label="FIRST_NONCE" id="-696457533%2FProperties%2F-1825752930" data-filterable-set=":core:network/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:network/commonMain" data-filterable-set=":core:network/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-f-i-r-s-t_-n-o-n-c-e.html"><span>FIRST_</span><wbr><span>NONCE</span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-696457533%2FProperties%2F-1825752930"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:network/commonMain"><div class="symbol monospace"><span class="token keyword">const </span><span class="token keyword">val </span><a href="-f-i-r-s-t_-n-o-n-c-e.html">FIRST_NONCE</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span><span class="token constant">2</span></div><div class="brief "><p class="paragraph">First heartbeat nonce any sender emits; it sits past 1, the firmware's NodeInfo-ping trigger.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
     <div class="footer">
         <div class="footer--container">
