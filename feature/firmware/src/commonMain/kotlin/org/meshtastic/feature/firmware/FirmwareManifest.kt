@@ -35,8 +35,7 @@ import kotlinx.serialization.Serializable
  *
  * Example URL:
  * ```
- * https://raw.githubusercontent.com/meshtastic/meshtastic.github.io/master/
- *   firmware-2.7.17/firmware-t-deck-2.7.17.mt.json
+ * https://release.meshtastic.org/2.7.17/firmware-t-deck-2.7.17.mt.json
  * ```
  */
 @Serializable internal data class FirmwareManifest(val files: List<FirmwareManifestFile> = emptyList())

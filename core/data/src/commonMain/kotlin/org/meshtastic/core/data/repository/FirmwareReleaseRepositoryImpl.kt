@@ -60,7 +60,7 @@ open class FirmwareReleaseRepositoryImpl(
     private val releaseRefresher =
         SingleFlightRefresher(dispatchers.io, "FirmwareReleaseRepository") { fetchAndPersistReleases() }
 
-    /** Nightly lives on meshtastic.github.io, not in the API's release list, so it refreshes on its own flight. */
+    /** Nightly lives on its own host, not in the API's release list, so it refreshes on its own flight. */
     private val nightlyRefresher =
         SingleFlightRefresher(dispatchers.io, "FirmwareReleaseRepository.nightly") { fetchAndPersistNightly() }
 
@@ -113,7 +113,7 @@ open class FirmwareReleaseRepositoryImpl(
         shouldFetch = { cached ->
             cached == null || localDataSource.getLatestRelease(releaseType)?.isStale() != false
         },
-        // Nightly lives on meshtastic.github.io, not in the API's release list, so it refreshes on its own
+        // Nightly lives on its own host, not in the API's release list, so it refreshes on its own
         // path — regular (locked) users never hit the nightly URL because only unlocked UI collects that flow.
         fetch = {
             if (releaseType == FirmwareReleaseType.NIGHTLY) {

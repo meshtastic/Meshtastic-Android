@@ -35,7 +35,7 @@ class FirmwareReleaseRemoteDataSource(
     suspend fun getFirmwareReleaseManifest(manifestUrl: String): FirmwareReleaseManifest =
         withContext(dispatchers.io) { apiService.getFirmwareReleaseManifest(manifestUrl) }
 
-    /** The nightly preview pointer from meshtastic.github.io, or null when no nightly is published. */
+    /** The nightly preview pointer from the nightly host, or null when no nightly is published. */
     suspend fun getNightlyFirmware(): NetworkFirmwareNightly? =
         withContext(dispatchers.io) { apiService.getNightlyFirmware() }
 }

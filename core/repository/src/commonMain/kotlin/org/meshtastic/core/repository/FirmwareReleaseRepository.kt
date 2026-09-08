@@ -27,8 +27,8 @@ interface FirmwareReleaseRepository {
     val alphaRelease: Flow<FirmwareRelease?>
 
     /**
-     * A flow that provides the current NIGHTLY preview build, or null when none is published. Sourced from
-     * meshtastic.github.io rather than the API server, and surfaced only behind the hidden-features unlock.
+     * A flow that provides the current NIGHTLY preview build, or null when none is published. Sourced from the nightly
+     * host rather than the API server, and surfaced only behind the hidden-features unlock.
      */
     val nightlyRelease: Flow<FirmwareRelease?>
 
