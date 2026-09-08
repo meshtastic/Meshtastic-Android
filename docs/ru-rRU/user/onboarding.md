@@ -47,7 +47,7 @@ Bluetooth — это основной способ подключения тво
 
 ### Разрешение на доступ к местоположению
 
-> ℹ️ **Примечание:** Для Bluetooth на Android 12 и выше местоположение не требуется. **Android 11 and older** show one location step, on the Bluetooth screen, rather than two — those releases treat a Bluetooth scan as a location capability, so the app asks for Location instead of "Nearby devices". Asking twice would push you toward the point where Android stops offering the dialog at all (a second denial on Android 11; the "Don't ask again" checkbox on Android 10 and older). On **Android 12 and newer** the two are separate: "Nearby devices" is declared `neverForLocation`, and declining Location does not stop you finding or connecting to a radio.
+> ℹ️ **Примечание:** Для Bluetooth на Android 12 и выше местоположение не требуется. **Android 11 и старше** показывают один шаг для местоположения на экране Bluetooth, а не два — эти версии рассматривают сканирование Bluetooth как функцию определения местоположения, поэтому приложение запрашивает доступ к Местоположению вместо "Ближайшие устройства". Если спросить дважды, это приведёт к тому, что Android вообще перестанет показывать диалог (второй отказ на Android 11; галочка "Больше не спрашивать" на Android 10 и старее). На **Android 12 и новее** это два разных момента: "Ближайшие устройства" объявлены как `neverForLocation`, и отказ от доступа к местоположению не мешает находить или подключаться к радио.
 
 Meshtastic также использует местоположение для:
 
@@ -55,7 +55,7 @@ Meshtastic также использует местоположение для:
 - Вычисление расстояний до других нод
 - Обмен GPS-координатами с другими участниками сети (если включено)
 
-Grant **"While using the app"**. The app does not request background location — `ACCESS_BACKGROUND_LOCATION` is not in its manifest — so Android will not offer an "Always" option, and position updates happen while the app is in the foreground or running its foreground service.
+Предоставьте **"При использовании приложения"**. The app does not request background location — `ACCESS_BACKGROUND_LOCATION` is not in its manifest — so Android will not offer an "Always" option, and position updates happen while the app is in the foreground or running its foreground service.
 
 Declining leaves the rest of the app working: on Android 12 and newer, Bluetooth is unaffected and only the map position and position sharing are disabled. On Android 11 and older, Bluetooth scanning also stops, because that is the permission Android gates it behind — and system **Location Services** must also be switched on for a scan to return anything.
 
@@ -87,9 +87,9 @@ The section reads _All allowed_ when every permission is granted, _Nothing needs
 | **Not asked yet**                           | Requests it                                                                                  |
 | **Denied — tap to allow**                   | Explains what the permission is for, then asks again if you agree                            |
 | **Blocked — tap to open system settings**   | Android will no longer show its dialog, so this opens the page where you can turn it back on |
-| **Not required on this version of Android** | Nothing — the permission does not exist on your device                                       |
+| **Not required on this version of Android** | Ничего — разрешения на твоём устройстве нет                                                  |
 
-This matters most for notifications. If you decline them during setup, this row is the way back: Android stops showing the dialog once you have declined firmly (a second denial), at which point this row switches to **Blocked** and sends you to the system settings page instead. The notification prompt exists only on Android 13 and newer — on older versions notifications are on by default and managed from Android's own settings.
+This matters most for notifications. If you decline them during setup, this row is the way back: Android stops showing the dialog once you have declined firmly (a second denial), at which point this row switches to **Blocked** and sends you to the system settings page instead. Подсказка уведомлений есть только на Android 13 и новее — на более старых версиях уведомления включены по умолчанию и ими управляют через настройки самого Android.
 
 ## После настройки
 
