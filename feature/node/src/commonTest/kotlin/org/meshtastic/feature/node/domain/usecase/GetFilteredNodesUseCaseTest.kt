@@ -20,6 +20,7 @@ import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
@@ -41,6 +42,8 @@ class GetFilteredNodesUseCaseTest {
     @BeforeTest
     fun setUp() {
         nodeRepository = mock()
+        // The use case reads the local node number to exempt the connected node from excludeUnheard.
+        every { nodeRepository.myNodeInfo } returns MutableStateFlow(null)
         useCase = GetFilteredNodesUseCase(nodeRepository)
     }
 

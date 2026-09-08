@@ -53,8 +53,11 @@ enum class UsbFileSaveStep {
     ;
 
     /**
-     * True when writing this image destroys the device's application, making the *next* pass mandatory rather than
-     * optional. Drives back-navigation gating and the "no abort edge" retry behaviour.
+     * True when writing this image may leave the device without a usable application, making the *next* pass mandatory
+     * rather than optional. Drives back-navigation gating and the "no abort edge" retry behaviour.
+     *
+     * Deliberately conservative: a bootloader-driven factory erase leaves the application installed, but the user opted
+     * into erase-then-reinstall, and the sequence cannot know which erase path it will take until the drive is read.
      */
     val isDestructive: Boolean
         get() = this != Firmware
@@ -200,8 +203,15 @@ internal fun usbMaintenanceGate(
  * @property boardId The `Board-ID:` line — unique per board, and stable across bootloader vintages.
  * @property softDevice The installed SoftDevice, when the bootloader reports one. `null` on RP2040 (no SoftDevice
  *   exists) and on bootloaders predating the `uf2_init` that appends the line.
+ * @property factoryEraseFamily The UF2 family ID the bootloader will consume as a factory-erase command (its
+ *   `Factory-Erase:` line), when it advertises one. `null` on every bootloader shipped before OTAFIX PR #41 — those
+ *   silently ignore the file, so `null` means "use the SoftDevice-specific sketch", never "refuse".
  */
-internal data class MaintenanceVolume(val boardId: String, val softDevice: SoftDeviceVariant?)
+internal data class MaintenanceVolume(
+    val boardId: String,
+    val softDevice: SoftDeviceVariant?,
+    val factoryEraseFamily: Long? = null,
+)
 
 /** Outcome of vetting a user-picked volume before anything is written to it. */
 internal sealed interface VolumeInspection {
@@ -228,7 +238,13 @@ internal suspend fun inspectMaintenanceVolume(treeUri: CommonUri, fileHandler: F
             ?: return VolumeInspection.Rejected(UsbMaintenanceRefusal.NotABootloaderVolume)
     val boardId = parseUf2BoardId(info) ?: return VolumeInspection.Rejected(UsbMaintenanceRefusal.NotABootloaderVolume)
 
-    return VolumeInspection.Accepted(MaintenanceVolume(boardId = boardId, softDevice = parseUf2SoftDevice(info)))
+    return VolumeInspection.Accepted(
+        MaintenanceVolume(
+            boardId = boardId,
+            softDevice = parseUf2SoftDevice(info),
+            factoryEraseFamily = parseUf2FactoryEraseFamily(info),
+        ),
+    )
 }
 
 /** Which image to write, or why not. */
@@ -244,6 +260,10 @@ internal sealed interface MaintenanceImageChoice {
  * Total over both requests and every refusal, with no default image on any path. Called only after
  * [inspectMaintenanceVolume] accepts, and always before anything is written — so a refusal here costs the user a
  * message, never a half-flashed device.
+ *
+ * On nRF52 the bootloader-driven erase image wins whenever the volume advertises the family the manifest expects
+ * ([bootloaderEraseUf2For]): one board-agnostic file, no SoftDevice to reconcile, and the application survives. Any
+ * other volume takes the SoftDevice-specific sketch path exactly as before, refusals included.
  */
 internal fun chooseMaintenanceImage(
     manifest: MaintenanceUf2Manifest,
@@ -253,15 +273,18 @@ internal fun chooseMaintenanceImage(
 ): MaintenanceImageChoice = when (request) {
     UsbMaintenanceRequest.FactoryErase ->
         if (hardware.isNrf52Arc) {
-            when (val resolution = resolveNrfEraseImage(manifest, hardware.softDeviceVariant, volume.softDevice)) {
-                is EraseImageResolution.Resolved -> MaintenanceImageChoice.Resolved(resolution.asset)
+            bootloaderEraseUf2For(manifest, volume.factoryEraseFamily)?.let { MaintenanceImageChoice.Resolved(it) }
+                ?: when (
+                    val resolution = resolveNrfEraseImage(manifest, hardware.softDeviceVariant, volume.softDevice)
+                ) {
+                    is EraseImageResolution.Resolved -> MaintenanceImageChoice.Resolved(resolution.asset)
 
-                is EraseImageResolution.Conflict ->
-                    MaintenanceImageChoice.Refused(UsbMaintenanceRefusal.SoftDeviceConflict)
+                    is EraseImageResolution.Conflict ->
+                        MaintenanceImageChoice.Refused(UsbMaintenanceRefusal.SoftDeviceConflict)
 
-                EraseImageResolution.Unresolved ->
-                    MaintenanceImageChoice.Refused(UsbMaintenanceRefusal.UnknownSoftDevice)
-            }
+                    EraseImageResolution.Unresolved ->
+                        MaintenanceImageChoice.Refused(UsbMaintenanceRefusal.UnknownSoftDevice)
+                }
         } else {
             // RP2040: pico_erase is board-agnostic and there is no SoftDevice to reconcile, so an unresolved image
             // means the manifest lacks usable data rather than the architecture lacking a UF2 erase path.

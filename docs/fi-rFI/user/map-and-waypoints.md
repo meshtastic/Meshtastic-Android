@@ -2,7 +2,7 @@
 title: Kartta ja reittipisteet
 parent: Käyttöopas
 nav_order: 6
-last_updated: 2026-08-30
+last_updated: 2026-09-01
 description: Näytä radioiden sijainnit kartalla, luo ja jaa reittipisteitä, hallitse karttatasoja ja Site Planneria sekä säädä sijainnin jakamista ja tietosuoja-asetuksia.
 aliases:
   - kartta
@@ -161,11 +161,25 @@ Karttatiilet tallennetaan välimuistiin levylle, joten kartan siirtäminen ei la
 
 **Androidissa** tällä samalla näkymällä voidaan tuoda myös paikallinen `.mbtiles`-arkisto täysin offline-käyttöä varten.
 
-Offline area downloads are **F-Droid only**. Select a vector base map first — Liberty, Positron, or Dark —
-since a download is defined against a vector style and **Start Download** stays disabled over a raster one.
-Frame the area you want on screen, then tap **Start Download** in the layers sheet: that creates a paused
-pack covering the current zoom plus two levels deeper. Press play on the pack's row to actually download it.
-**Google Play** -versiot tuovat sen sijaan valmiita MBTiles-tiedostoja, eikä **työpöytä** tue kumpaakaan toimintoa.
+On **F-Droid**, select a vector base map first — Liberty, Positron, or Dark — since a download is defined
+against a vector style and **Start Download** stays disabled over a raster one. Frame the area you want on
+screen, then tap **Start Download** in the layers sheet: that creates a paused pack covering the current zoom
+plus two levels deeper. Press play on the pack's row to actually download it.
+
+On **Google Play**, the layers sheet's **Offline Manager** section downloads its own offline regions instead
+— water, roads and administrative boundaries extracted from the public Protomaps basemap dataset, drawn
+directly as map shapes rather than raster tiles. Frame the area you want, tap **Start Download**, and once
+it finishes flip **Show on map** to draw it (it's off by default so it never surprises you by covering up the
+live map). You can still import a pre-made `.mbtiles` archive here too, as before. **Desktop** has neither.
+
+### Going offline
+
+An **Offline** pill appears over the map whenever the device has no network connection. On **Google Play**
+builds, if you've imported a local `.mbtiles` archive, the map switches to it automatically the moment the
+network drops — no toggle to remember — and switches back once you're reconnected, as long as you haven't
+picked a different base map yourself in between. On **F-Droid**, a downloaded offline area keeps rendering on
+its own; the pill is purely informational there. **Desktop** has no offline downloads at all yet, so the pill
+is informational there too.
 
 ## Aiheeseen liittyvät aiheet
 

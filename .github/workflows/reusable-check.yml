@@ -254,6 +254,7 @@ jobs:
               :feature:intro:allTests
               :feature:map:allTests
               :feature:map-maplibre:allTests
+              :feature:map-terrain:allTests
               :feature:messaging:allTests
               :feature:node:allTests
               :feature:settings:allTests
@@ -267,6 +268,7 @@ jobs:
               :feature:intro:koverXmlReport
               :feature:map:koverXmlReport
               :feature:map-maplibre:koverXmlReport
+              :feature:map-terrain:koverXmlReport
               :feature:messaging:koverXmlReport
               :feature:node:koverXmlReport
               :feature:settings:koverXmlReport
@@ -551,6 +553,12 @@ jobs:
         # used everywhere instead of --no-isolated-projects: that flag only exists on 9.7+, so the property
         # survives a pin-back below 9.7 without editing this line.
         run: ./gradlew androidApp:assembleFdroidDebug androidApp:assembleGoogleDebug -Pci=true --parallel --configuration-cache -Dorg.gradle.isolated-projects=false --continue
+
+      # A dependency published for only some of our ABIs builds and installs cleanly and then
+      # crashes with UnsatisfiedLinkError on the others (#7001). Compare the splits here, where
+      # they are already built for every PR.
+      - name: Verify native library ABI parity
+        run: ./scripts/verify-abi-parity.sh
 
       - name: Upload debug artifact
         if: ${{ inputs.upload_artifacts }}

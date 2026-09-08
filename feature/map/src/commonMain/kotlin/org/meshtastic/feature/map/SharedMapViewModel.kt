@@ -18,6 +18,7 @@ package org.meshtastic.feature.map
 
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.LocaleUnitsProvider
+import org.meshtastic.core.network.repository.NetworkRepository
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NotificationPrefs
@@ -34,6 +35,7 @@ class SharedMapViewModel(
     radioConfigRepository: RadioConfigRepository,
     notificationPrefs: NotificationPrefs,
     localeUnitsProvider: LocaleUnitsProvider,
+    networkRepository: NetworkRepository,
 ) : BaseMapViewModel(
     mapPrefs,
     nodeRepository,
@@ -42,4 +44,5 @@ class SharedMapViewModel(
     radioConfigRepository,
     notificationPrefs,
     localeUnitsProvider,
+    networkRepository,
 )

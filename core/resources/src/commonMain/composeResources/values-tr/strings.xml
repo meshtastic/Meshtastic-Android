@@ -193,7 +193,6 @@
     <string name="encryption_enabled">Şifreleme etkin</string>
     <string name="encryption_error">Genel Anahtar Uyuşmazlığı</string>
     <string name="encryption_pkc">Genel Anahtar Şifrelemesi</string>
-    <string name="encryption_psk">Paylaşılan Anahtar</string>
     <!-- ENVIRONMENT -->
     <string name="environment">Çevre</string>
     <string name="environment_metrics_module_enabled">Çevre metrikleri modülü etkin</string>
@@ -407,6 +406,7 @@
     <string name="now">Şimdi</string>
     <string name="ntp_server">NTP sunucusu</string>
     <string name="number_of_records">Kayıt sayısı</string>
+    <!-- OFFLINE -->
     <string name="okay">Tamam</string>
     <!-- ONE -->
     <string name="one_day">24 Saat</string>

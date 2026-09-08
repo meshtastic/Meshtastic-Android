@@ -280,6 +280,35 @@ class CommandSenderImplTest {
         assertFalse(result.accepted)
     }
 
+    // --- lockdown direct dispatch ---
+
+    @Test
+    fun sendLockdownPassphrase_returnsDirectTransportAdmission() {
+        every { packetHandler.trySendToRadio(any<ToRadio>()) } returns true
+
+        assertTrue(commandSender.sendLockdownPassphrase("secret", boots = 3, hours = 4, maxSessionSeconds = 5))
+
+        every { packetHandler.trySendToRadio(any<ToRadio>()) } returns false
+        assertFalse(commandSender.sendLockdownPassphrase("secret", boots = 3, hours = 4, maxSessionSeconds = 5))
+    }
+
+    @Test
+    fun sendLockdownPassphrase_returnsFalseWhenLocalNodeIdentityIsUnavailable() {
+        every { nodeManager.myNodeNum } returns MutableStateFlow(null)
+
+        assertFalse(commandSender.sendLockdownPassphrase("secret"))
+        verify(exactly(0)) { packetHandler.trySendToRadio(any<ToRadio>()) }
+    }
+
+    @Test
+    fun sendLockNow_returnsDirectTransportAdmission() {
+        every { packetHandler.trySendToRadio(any<ToRadio>()) } returns true
+        assertTrue(commandSender.sendLockNow())
+
+        every { packetHandler.trySendToRadio(any<ToRadio>()) } returns false
+        assertFalse(commandSender.sendLockNow())
+    }
+
     // --- sendAdminImmediate ---
 
     @Test

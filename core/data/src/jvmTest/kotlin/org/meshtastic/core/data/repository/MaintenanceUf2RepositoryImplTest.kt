@@ -92,10 +92,18 @@ class MaintenanceUf2RepositoryImplTest {
     private fun manifestWithBoard(boardId: String, slug: String = "wiscore_rak4631_board") =
         MaintenanceUf2Manifest(otafixByBoardId = mapOf(boardId to OtafixAssetEntry(slug, "1".repeat(64))))
 
+    private val bootloaderErase =
+        EraseImageEntry(
+            fileName = "meshtastic_factory_erase.uf2",
+            sha256 = "3".repeat(64),
+            expectedFamilyId = 0x4D455348L,
+        )
+
     private fun manifestWithErase(softDevice: String) = MaintenanceUf2Manifest(
         erase =
         MaintenanceUf2EraseSet(
             nrf52 = mapOf(softDevice to EraseImageEntry(fileName = "nrf_erase.uf2", sha256 = "2".repeat(64))),
+            nrf52Bootloader = bootloaderErase,
             rp2040 = pico,
         ),
     )
@@ -161,6 +169,21 @@ class MaintenanceUf2RepositoryImplTest {
         val snapshot = repository.getSnapshot()
 
         assertEquals(listOf("7.3.0"), snapshot.erase?.nrf52?.keys?.toList())
+        assertEquals(
+            bootloaderErase,
+            snapshot.erase?.nrf52Bootloader,
+            "the bootloader erase entry round-trips the cache",
+        )
+    }
+
+    @Test
+    fun aManifestWithoutTheBootloaderEraseEntryStillDecodes() = runBlocking {
+        // Every manifest published before the entry existed, and every cache row written from one.
+        api.response =
+            manifestWithErase("7.3.0").copy(erase = manifestWithErase("7.3.0").erase?.copy(nrf52Bootloader = null))
+        repository.reconcile()
+
+        assertEquals(null, repository.getSnapshot().erase?.nrf52Bootloader)
     }
 
     @Test

@@ -153,6 +153,10 @@ class FakeNodeRepository :
         _nodeDBbyNum.value = _nodeDBbyNum.value - nodeNums.toSet()
     }
 
+    override suspend fun markAllHeardOnCurrentLora() {
+        _nodeDBbyNum.value = _nodeDBbyNum.value.mapValues { (_, n) -> n.copy(heardOnCurrentLora = true) }
+    }
+
     override suspend fun setNodeNotes(num: Int, notes: String) {
         val node = _nodeDBbyNum.value[num] ?: return
         _nodeDBbyNum.value = _nodeDBbyNum.value + (num to node.copy(notes = notes))

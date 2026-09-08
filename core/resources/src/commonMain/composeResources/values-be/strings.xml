@@ -204,6 +204,7 @@
     <string name="none_quality">Нічога</string>
     <string name="not_connected">Не злучана</string>
     <!-- NOTIFICATIONS -->
+    <!-- OFFLINE -->
     <string name="okay">Добра</string>
     <string name="oled_type">Тып OLED</string>
     <!-- ONE -->

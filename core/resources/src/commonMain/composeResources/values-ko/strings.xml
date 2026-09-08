@@ -179,7 +179,6 @@
     <string name="encryption_enabled">암호화 사용</string>
     <string name="encryption_error">공개 키가 일치하지 않습니다</string>
     <string name="encryption_pkc">공개 키 암호화</string>
-    <string name="encryption_psk">공유 키</string>
     <!-- ENVIRONMENT -->
     <string name="environment">환경</string>
     <string name="environment_metrics_module_enabled">환경 메트릭 모듈 사용</string>
@@ -394,6 +393,7 @@
     <string name="notifications_on_message_receipt">메시지 수신 알림</string>
     <string name="now">지금</string>
     <string name="ntp_server">NTP 서버</string>
+    <!-- OFFLINE -->
     <string name="okay">확인</string>
     <!-- ONE -->
     <string name="one_day">24 시간</string>

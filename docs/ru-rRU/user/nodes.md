@@ -2,7 +2,7 @@
 title: Ноды
 parent: Руководство пользователя
 nav_order: 4
-last_updated: 2026-08-30
+last_updated: 2026-09-04
 description: Просматривайте, фильтруйте и сортируйте ноды сети — просматривайте подробности, качество сигнала, роли и быстрые действия.
 aliases:
   - node-list
@@ -78,13 +78,13 @@ There is no separate "away" tier.
 
 У нод рядом с именем отображаются значки статуса шифрования:
 
-| Значок            | Значение                                                                                                                   |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| 🔒 Заблокировано  | Связь использует PKI (инфраструктуру публичных ключей) — сквозное шифрование с проверкой идентичности   |
-| 🔓 Разблокировано | Связь использует общий канал PSK — зашифровано, но личность не проверяется индивидуально                                   |
-| ⚠️ Несовпадение   | Несовпадение открытого ключа — ключ ноды изменился с последнего раза (разберитесь, прежде чем доверять) |
+| Значок            | Значение                                                                                                                                          |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🔒 Заблокировано  | Связь использует PKI (инфраструктуру публичных ключей) — сквозное шифрование с проверкой идентичности                          |
+| 🔓 Разблокировано | No public key has been received for this node, so it cannot be direct messaged — use **Request User Info** on the node detail page to ask for one |
+| ⚠️ Несовпадение   | Несовпадение открытого ключа — ключ ноды изменился с последнего раза (разберитесь, прежде чем доверять)                        |
 
-> 💡 **Совет:** Шифрование PKI (прошивка 2.5+) обеспечивает более надёжную защиту, чем общий PSK для канала, потому что у каждой ноды есть уникальная пара ключей. Если видишь предупреждение о несоответствии ключа, нода могла быть сброшена или скомпрометирована.
+> 💡 **Tip:** Direct messages always use PKI, so the radio needs the other node's public key before it can send one. It refuses the send rather than falling back to channel encryption. Keys arrive inside node info, which is why an open lock usually clears itself once that node is heard from properly. Если видишь предупреждение о несоответствии ключа, нода могла быть сброшена или скомпрометирована.
 
 To clear a mismatch, first confirm through another trusted channel that the key change was intentional — a factory reset causes one. Then touch & hold the node, choose **Remove**, and let the two radios exchange keys again the next time yours hears it.
 
@@ -101,6 +101,11 @@ To clear a mismatch, first confirm through another trusted channel that the key 
   - Игнорировать/разблокировать
   - Удалить
 
+Touch & hold **your own node** instead and you get one action, **Update status**, which opens the
+User settings screen with the cursor already in the Status Message field. It only appears while the
+radio is connected and running firmware 2.8 or newer — see
+[Settings — Radio & User](settings-radio-user.md) for the field itself.
+
 ## Sharing a Contact
 
 On a node's detail screen, tap **Share Contact** to produce a link and a QR code for that node. From the same dialog, **Write to NFC tag** saves the link to a writable NFC tag that anyone can tap to open.
@@ -115,14 +120,14 @@ To add someone else's contact, use the import button on the node list and choose
 
 ### Переключатели фильтра
 
-| Фильтр                       | Описание                                                                                                                                                                                          |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Hide offline nodes**       | Показывать только ноды, услышанные за последние 2 часа                                                                                                                                            |
-| **Only show direct nodes**   | Show only nodes your radio heard directly, with no relay in between                                                                                                                               |
-| **Включить неизвестные**     | Show nodes that haven't sent user info yet. **On by default**, so a node heard before its info arrives stays visible and messageable; these carry a badge marking them incomplete |
-| **Исключить инфраструктуру** | Hide infrastructure-role nodes (Router, Router Late, Client Base, and legacy Repeater nodes) and any node that cannot be messaged, whatever its role                           |
-| **Исключить MQTT**           | Скрыть ноды, слышимые только через интернет-мост MQTT                                                                                                                                             |
-| **Only show ignored Nodes**  | Replace the list with the nodes you have ignored. Every other node is hidden while this is on, and a banner appears at the top of the list to take you back                       |
+| Фильтр                       | Описание                                                                                                                                                                                                                                                   |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Hide offline nodes**       | Показывать только ноды, услышанные за последние 2 часа                                                                                                                                                                                                     |
+| **Only show direct nodes**   | Show only nodes your radio heard directly, with no relay in between                                                                                                                                                                                        |
+| **Включить неизвестные**     | Show nodes that haven't sent user info yet. **On by default**, so a node heard before its info arrives stays visible; these carry a badge marking them incomplete, and cannot be direct messaged until their user info brings a public key |
+| **Исключить инфраструктуру** | Hide infrastructure-role nodes (Router, Router Late, Client Base, and legacy Repeater nodes) and any node that cannot be messaged, whatever its role                                                                                    |
+| **Исключить MQTT**           | Скрыть ноды, слышимые только через интернет-мост MQTT                                                                                                                                                                                                      |
+| **Only show ignored Nodes**  | Replace the list with the nodes you have ignored. Every other node is hidden while this is on, and a banner appears at the top of the list to take you back                                                                                |
 
 ### Параметры сортировки
 

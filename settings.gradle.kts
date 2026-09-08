@@ -112,6 +112,7 @@ include(
     ":feature:connections",
     ":feature:map",
     ":feature:map-maplibre",
+    ":feature:map-terrain",
     ":feature:node",
     ":feature:settings",
     ":feature:discovery",

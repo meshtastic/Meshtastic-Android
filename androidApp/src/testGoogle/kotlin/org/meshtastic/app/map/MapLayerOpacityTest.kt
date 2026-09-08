@@ -86,7 +86,7 @@ class MapLayerOpacityTest {
         val point =
             """
             {"type":"FeatureCollection","features":[{"type":"Feature",
-              "properties":{"icon-url":"https://example.org/tower.png"},
+              "properties":{"icon-url":"files/tower.png"},
               "geometry":{"type":"Point","coordinates":[0,0]}}]}
             """
                 .trimIndent()

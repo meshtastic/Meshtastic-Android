@@ -26,6 +26,8 @@ import okio.Path
 import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.safeCatching
 import org.meshtastic.feature.map.geojson.geoJsonIconUrls
+import org.meshtastic.feature.map.geojson.rewriteGeoJsonIconUrls
+import org.meshtastic.feature.map.geojson.trustedGeoJsonIconUrls
 import org.meshtastic.feature.map.kml.KmlGroundOverlay
 import org.meshtastic.feature.map.kml.KmlToGeoJson
 import org.meshtastic.feature.map.kml.corners
@@ -85,6 +87,7 @@ fun rememberRenderableLayers(manager: MapLayersManager, layers: List<MapLayerIte
                             id = layer.id,
                             uri = conversion.geoJsonUri,
                             refreshToken = layer.refreshToken,
+                            icons = conversion.icons,
                             groundOverlays = conversion.groundOverlays,
                         )
                     }
@@ -106,7 +109,11 @@ fun rememberRenderableLayers(manager: MapLayersManager, layers: List<MapLayerIte
         }
     }
 
-    return renderable.map { layer -> layer.copy(icons = icons["${layer.id}@${layer.refreshToken}"].orEmpty()) }
+    return renderable.map { layer ->
+        layer.copy(
+            icons = if (layer.icons.isNotEmpty()) layer.icons else icons["${layer.id}@${layer.refreshToken}"].orEmpty(),
+        )
+    }
 }
 
 /**
@@ -129,7 +136,11 @@ private fun MapLayerItem.conversionKey(): String = "$id@$refreshToken"
 private fun CustomLayer.conversionKey(): String = "$id@$refreshToken"
 
 /** What one KML conversion produced: the GeoJSON file's URI and the draped images. */
-internal data class ConvertedKml(val geoJsonUri: String, val groundOverlays: List<LayerGroundOverlay>)
+internal data class ConvertedKml(
+    val geoJsonUri: String,
+    val groundOverlays: List<LayerGroundOverlay>,
+    val icons: Set<String>,
+)
 
 /**
  * Converts one KML or KMZ import: GeoJSON to a cache file, ground-overlay images extracted beside it, and the overlay
@@ -153,13 +164,25 @@ private suspend fun convertKmlLayer(manager: MapLayersManager, layer: MapLayerIt
             val imagesIntact =
                 cachedOverlays?.all { (fs.metadataOrNull(it.imagePath.toLocalPath())?.size ?: 0L) > 0L } == true
             if (imagesIntact && (fs.metadataOrNull(target)?.size ?: 0L) > 0L) {
-                return@safeCatching ConvertedKml("$FILE_URI_PREFIX$target", cachedOverlays.orEmpty())
+                val geoJson = fs.read(target) { readUtf8() }
+                return@safeCatching ConvertedKml(
+                    geoJsonUri = "$FILE_URI_PREFIX$target",
+                    groundOverlays = cachedOverlays.orEmpty(),
+                    icons = trustedGeoJsonIconUrls(geoJson),
+                )
             }
 
             val bytes = manager.readLayerBytes(layer) ?: return@safeCatching null
             val document = readKmlDocument(bytes) ?: return@safeCatching null
             val conversion = KmlToGeoJson.convertDocument(document)
             val overlays = resolveGroundOverlays(layer, bytes, conversion.groundOverlays, dir)
+            val geoJsonWithLocalIcons =
+                rewritePackedIconUrls(
+                    layer = layer,
+                    bytes = bytes,
+                    geoJson = conversion.geoJson ?: EMPTY_FEATURE_COLLECTION,
+                    dir = dir,
+                )
             if (conversion.geoJson == null && overlays.isEmpty()) {
                 Logger.withTag(TAG).w { "Nothing mappable in an imported KML layer" }
                 return@safeCatching null
@@ -170,14 +193,42 @@ private suspend fun convertKmlLayer(manager: MapLayersManager, layer: MapLayerIt
             // target and moved into place, so a conversion cut short by leaving the screen cannot leave a half-file
             // that the cache check above would then trust.
             val partial = dir / "${target.name}.part"
-            fs.write(partial) { writeUtf8(conversion.geoJson ?: EMPTY_FEATURE_COLLECTION) }
+            fs.write(partial) { writeUtf8(geoJsonWithLocalIcons) }
             fs.atomicMove(partial, target)
             writeOverlaySidecar(sidecar, overlays)
-            ConvertedKml("$FILE_URI_PREFIX$target", overlays)
+            ConvertedKml(
+                geoJsonUri = "$FILE_URI_PREFIX$target",
+                groundOverlays = overlays,
+                icons = trustedGeoJsonIconUrls(geoJsonWithLocalIcons),
+            )
         }
             .onFailure { Logger.withTag(TAG).w(it) { "Could not convert an imported KML layer" } }
             .getOrNull()
     }
+
+private fun rewritePackedIconUrls(layer: MapLayerItem, bytes: ByteArray, geoJson: String, dir: Path): String {
+    val iconPaths = geoJsonIconUrls(geoJson)
+    val packed = readKmlArchiveImages(bytes, iconPaths)
+    return if (iconPaths.isEmpty() || packed.isEmpty()) {
+        geoJson
+    } else {
+        val fs = mapLayerFileSystem()
+        val replacements =
+            iconPaths
+                .mapIndexedNotNull { index, iconPath ->
+                    val image = packed[iconPath] ?: return@mapIndexedNotNull null
+                    val extension =
+                        iconPath.substringAfterLast('.', "png").takeIf {
+                            it.length <= MAX_EXTENSION_LENGTH && it.isNotEmpty() && it.all(Char::isLetterOrDigit)
+                        } ?: "png"
+                    val path = dir / "${layer.conversionKey()}-icon-$index.$extension"
+                    fs.write(path) { write(image) }
+                    iconPath to "$FILE_URI_PREFIX$path"
+                }
+                .toMap()
+        rewriteGeoJsonIconUrls(geoJson, replacements)
+    }
+}
 
 /**
  * Resolve each overlay's image to a file in the cache. A KMZ-packed image is extracted; anything else — above all the

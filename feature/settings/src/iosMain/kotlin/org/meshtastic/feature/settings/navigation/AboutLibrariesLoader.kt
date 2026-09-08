@@ -16,6 +16,15 @@
  */
 package org.meshtastic.feature.settings.navigation
 
+import okio.FileSystem
+import okio.Path.Companion.toPath
+import platform.Foundation.NSBundle
+
 actual fun getAboutLibrariesJson(): String {
-    return "" // TODO: Implement reading aboutlibraries.json on iOS
+    val path = NSBundle.mainBundle.pathForResource(name = "aboutlibraries", ofType = "json") ?: return ""
+    return try {
+        FileSystem.SYSTEM.read(path.toPath()) { readUtf8() }
+    } catch (_: Exception) {
+        ""
+    }
 }

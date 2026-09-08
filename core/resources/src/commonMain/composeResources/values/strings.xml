@@ -624,8 +624,6 @@
     <string name="encryption_error_text">The public key does not match the recorded key. You may remove the node and let it exchange keys again, but this may indicate a more security problem. Contact the user through another trusted channel, to determine if the key change was due to a factory reset or other intentional action.</string>
     <string name="encryption_pkc">Public Key Encryption</string>
     <string name="encryption_pkc_text">Direct messages are using the new public key infrastructure for encryption.</string>
-    <string name="encryption_psk">Shared Key</string>
-    <string name="encryption_psk_text">Only channel messages can be sent/received. Direct Messages require the Public Key Infrastructure feature in 2.5+ firmware.</string>
     <string name="env_metrics_log">Environment Metrics</string>
     <!-- ENVIRONMENT -->
     <string name="environment">Environment</string>
@@ -1060,6 +1058,8 @@
     <string name="map_download_status_complete">Complete</string>
     <string name="map_download_status_downloading">Downloading</string>
     <string name="map_download_status_paused">Paused</string>
+    <string name="map_engine_unavailable">Map unavailable on this device</string>
+    <string name="map_engine_unavailable_detail">This build of the app does not include the map renderer for your phone's processor. Everything else works normally.</string>
     <string name="map_filter">Map Filter\n</string>
     <string name="map_filter_all_roles">All</string>
     <string name="map_filter_display_title">Display</string>
@@ -1070,7 +1070,22 @@
     <string name="map_layer_formats">Map layers support .kml, .kmz, or GeoJSON formats.</string>
     <string name="map_layer_opacity">Opacity: %1$d%</string>
     <string name="map_node_popup_details">%1$s&lt;br&gt;Last heard: %2$s&lt;br&gt;Last position: %3$s&lt;br&gt;Battery: %4$s</string>
+    <string name="map_offline_banner">Offline — showing cached map data</string>
+    <string name="map_offline_download_failed_build">No offline map data available right now — try again later</string>
+    <string name="map_offline_download_failed_io">Download failed — check your connection and try again</string>
+    <string name="map_offline_download_failed_region_limit">Too many offline regions downloaded already — delete one first</string>
+    <string name="map_offline_download_failed_storage">Downloaded regions are using too much storage — delete one first</string>
+    <string name="map_offline_download_failed_tile_limit">Selected area is too large — zoom in or pick a smaller region</string>
+    <string name="map_offline_download_terrain">Download Terrain</string>
+    <string name="map_offline_downloading_progress">Downloading… %1$d / %2$d tiles</string>
     <string name="map_offline_manager">Offline Manager</string>
+    <string name="map_offline_region_label">%1$s, %2$s  %3$s</string>
+    <string name="map_offline_show_on_map">Show on map</string>
+    <string name="map_offline_terrain_contours">Contours</string>
+    <string name="map_offline_terrain_download_complete">Terrain download complete</string>
+    <string name="map_offline_terrain_download_failed_io">Terrain download failed — check your connection and try again</string>
+    <string name="map_offline_terrain_download_failed_tile_limit">Selected area is too large for terrain — zoom in or pick a smaller region</string>
+    <string name="map_offline_terrain_downloading_progress">Downloading terrain… %1$d / %2$d tiles</string>
     <string name="map_overlay_hillshade">Hillshade</string>
     <string name="map_overlay_precipitation">Precipitation</string>
     <string name="map_overlay_weather_radar">Weather radar</string>
@@ -1086,6 +1101,7 @@
     <string name="map_style_selection">Map style selection</string>
     <string name="map_subDescription">bearing: %1$d° distance: %2$s</string>
     <string name="map_tile_download_estimate">Tile download estimate:</string>
+    <string name="map_tile_download_estimate_detail">%1$s %2$s %3$s</string>
     <string name="map_tile_limit_reached">Tile limit reached (%1$d)</string>
     <string name="map_tile_source">Tile Source</string>
     <string name="map_type_hybrid">Hybrid</string>
@@ -1283,6 +1299,8 @@
     <string name="no_network_devices_hint">Ensure you're connected to the same network as the device.</string>
     <string name="no_network_devices_seen">No network devices seen</string>
     <string name="no_pax_metrics_logs">No PAX metrics available.</string>
+    <string name="no_public_key">No public key</string>
+    <string name="no_public_key_text">This node has not shared a public key, so direct messages to it cannot be sent. Request User Info to ask for one.</string>
     <string name="no_usb_devices_found">No USB devices found</string>
     <string name="no_usb_devices_hint">Connect a device with a USB data cable to use serial.</string>
     <string name="no_usb_devices_seen">No USB devices detected</string>
@@ -1293,6 +1311,7 @@
     <string name="node_count_total">%1$d total</string>
     <string name="node_filter_exclude_infrastructure">Exclude infrastructure</string>
     <string name="node_filter_exclude_mqtt">Exclude MQTT</string>
+    <string name="node_filter_exclude_unheard">Hide unheard nodes</string>
     <string name="node_filter_ignored">You are viewing ignored nodes,\nPress to return to the node list.</string>
     <string name="node_filter_include_unknown">Include unknown</string>
     <string name="node_filter_only_direct">Only show direct nodes</string>
@@ -1329,6 +1348,7 @@
     <string name="node_list_help_node_details">Node Details</string>
     <string name="node_list_help_title">Node List Help</string>
     <string name="node_list_long_click_label">Node options</string>
+    <string name="node_not_heard_on_current_lora">Not heard since you changed settings</string>
     <string name="node_number">Node Number</string>
     <string name="node_request_send_failed">Couldn't send request. Try again.</string>
     <string name="node_restarting">Restarting…</string>
@@ -1351,6 +1371,10 @@
     <string name="nodes_empty_searching_hint">Nearby nodes will appear here as they're discovered.</string>
     <string name="nodes_empty_searching_title">Searching for nodes</string>
     <string name="nodes_queued_for_deletion">%1$d nodes queued for deletion:</string>
+    <string name="nodes_unheard_banner">%1$d nodes not heard since you changed settings</string>
+    <string name="nodes_unheard_banner_one">1 node not heard since you changed settings</string>
+    <string name="nodes_unheard_keep">Keep</string>
+    <string name="nodes_unheard_remove">Remove</string>
     <string name="noise_floor">Noise Floor</string>
     <string name="noise_floor_definition">The background RF noise measured by the radio receiver. Lower values usually indicate a quieter receiver environment; -85 dBm is a busy reference point, not a hard failure threshold.</string>
     <string name="noise_floor_no_reading">Noise Floor: No reading</string>
@@ -1373,8 +1397,13 @@
     <string name="now">Now</string>
     <string name="ntp_server">NTP server</string>
     <string name="number_of_records">Number of records</string>
+    <!-- OFFLINE -->
     <string name="offline_maps">Offline maps</string>
     <string name="offline_maps_empty">No areas downloaded yet</string>
+    <string name="offline_terrain_cache_detail">%1$s: %2$s · %3$s</string>
+    <string name="offline_terrain_empty">No terrain downloaded yet</string>
+    <string name="offline_terrain_manager">Offline Terrain</string>
+    <string name="offline_terrain_regional_detail">Includes high-detail regional terrain</string>
     <string name="ok_to_mqtt">Ok to MQTT</string>
     <string name="okay">OK</string>
     <string name="oled_type">OLED type</string>
@@ -1594,6 +1623,7 @@
     <string name="request_pax_metrics">Pax Metrics</string>
     <string name="request_power_metrics">Power Metrics</string>
     <string name="request_telemetry">Request Telemetry</string>
+    <string name="request_user_info">Request User Info</string>
     <string name="requesting_from">Requesting %1$s from %2$s</string>
     <string name="resend">Resend</string>
     <string name="reset">Reset</string>
@@ -1740,6 +1770,7 @@
     <string name="share_location_description">Use your phone GPS to send locations to your node instead of using a hardware GPS on your node.</string>
     <string name="share_to">Share to…</string>
     <string name="share_your_location_in_real_time">Share your location in real-time and keep your group coordinated with integrated GPS features.</string>
+    <string name="shared_contact_no_public_key">This contact has no public key, so it cannot be imported. A contact without one clears any key your radio already holds for that node. Ask the sender to share it again once their node has exchanged keys.</string>
     <string name="short_name">Short Name</string>
     <string name="should_update">To benefit from the latest fixes and features, please update your node firmware.\n\nLatest stable firmware version: %1$s</string>
     <string name="should_update_firmware">Firmware Update Recommended.</string>
@@ -1987,6 +2018,7 @@
     <string name="up_down_select_input_enabled">Up/Down/Select input enabled</string>
     <string name="update_interval">GPS Polling Interval</string>
     <string name="update_interval_seconds">Update interval (seconds)</string>
+    <string name="update_status">Update status</string>
     <string name="updated">Updated</string>
     <string name="uplink_enabled">MQTT Uplink Enabled</string>
     <string name="uplink_feature_description">Messages from the mesh will be sent to the public internet through any node's configured gateway.</string>

@@ -255,7 +255,6 @@
     <string name="encryption_enabled">Criptografia ativada</string>
     <string name="encryption_error">Chave pública não confere</string>
     <string name="encryption_pkc">Criptografia de Chave Pública</string>
-    <string name="encryption_psk">Chave Compartilhada</string>
     <!-- ENVIRONMENT -->
     <string name="environment">Ambiente</string>
     <string name="environment_metrics_module_enabled">Módulo de métricas do ambiente ativado</string>
@@ -508,6 +507,7 @@
     <string name="notifications_on_message_receipt">Notificações no recibo de mensagem</string>
     <string name="ntp_server">Servidor NTP</string>
     <string name="number_of_records">Número de registros</string>
+    <!-- OFFLINE -->
     <string name="okay">Ok</string>
     <!-- ONE -->
     <string name="one_day">24 Horas</string>

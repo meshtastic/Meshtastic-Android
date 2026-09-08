@@ -61,12 +61,12 @@ import org.meshtastic.core.resources.encryption_error
 import org.meshtastic.core.resources.encryption_error_text
 import org.meshtastic.core.resources.encryption_pkc
 import org.meshtastic.core.resources.encryption_pkc_text
-import org.meshtastic.core.resources.encryption_psk
-import org.meshtastic.core.resources.encryption_psk_text
 import org.meshtastic.core.resources.error
 import org.meshtastic.core.resources.ic_key_off
 import org.meshtastic.core.resources.ic_lock
 import org.meshtastic.core.resources.ic_lock_open
+import org.meshtastic.core.resources.no_public_key
+import org.meshtastic.core.resources.no_public_key_text
 import org.meshtastic.core.resources.security_icon_help_dismiss
 import org.meshtastic.core.resources.security_icon_help_show_all
 import org.meshtastic.core.resources.security_icon_help_show_less
@@ -100,7 +100,7 @@ fun NodeKeyStatusIcon(
             when {
                 mismatchKey -> Res.string.encryption_error to Res.string.encryption_error_text
                 hasPKC -> Res.string.encryption_pkc to Res.string.encryption_pkc_text
-                else -> Res.string.encryption_psk to Res.string.encryption_psk_text
+                else -> Res.string.no_public_key to Res.string.no_public_key_text
             }
         KeyStatusDialog(title, text, publicKey) { showEncryptionDialog = false }
     }
@@ -120,7 +120,7 @@ fun NodeKeyStatusIcon(
                 when {
                     mismatchKey -> Res.string.encryption_error
                     hasPKC -> Res.string.encryption_pkc
-                    else -> Res.string.encryption_psk
+                    else -> Res.string.no_public_key
                 },
             ),
             tint = tint,
@@ -164,13 +164,14 @@ enum class NodeKeySecurityState(
         descriptionResId = Res.string.encryption_pkc,
     ),
 
-    // State for shared key encryption
-    PSK(
+    // State for a node we hold no public key for: the radio refuses a direct message rather than
+    // falling back to the channel key.
+    NO_KEY(
         icon = Res.drawable.ic_lock_open,
         color = { colorScheme.StatusYellow },
-        title = Res.string.encryption_psk,
-        helpTextResId = Res.string.encryption_psk_text,
-        descriptionResId = Res.string.encryption_psk,
+        title = Res.string.no_public_key,
+        helpTextResId = Res.string.no_public_key_text,
+        descriptionResId = Res.string.no_public_key,
     ),
 }
 
@@ -300,7 +301,7 @@ private fun KeyStatusDialogPkcPreview() {
 @PreviewLightDark
 @Composable
 private fun KeyStatusDialogPskPreview() {
-    AppTheme { KeyStatusDialog(title = Res.string.encryption_psk, text = Res.string.encryption_psk_text, key = null) }
+    AppTheme { KeyStatusDialog(title = Res.string.no_public_key, text = Res.string.no_public_key_text, key = null) }
 }
 
 @Preview

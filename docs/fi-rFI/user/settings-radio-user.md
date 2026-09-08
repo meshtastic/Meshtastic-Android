@@ -2,7 +2,7 @@
 title: Asetukset — Radio ja käyttäjä
 parent: Käyttöopas
 nav_order: 7
-last_updated: 2026-08-30
+last_updated: 2026-09-04
 description: Määritä radion laitteisto, LoRa-esiasetukset, käyttäjäprofiili, sijainnin jakaminen, virranhallinta ja tietoturva.
 aliases:
   - asetukset
@@ -48,7 +48,10 @@ On **Settings → User**.
 
 The footer appears as soon as you change something. **Discard** throws the change away, and the other button writes it to the radio: it reads **Save & restart** on the screens the firmware applies with a reboot — Position, Network, Bluetooth, Security, and most module screens — and **Save** everywhere else.
 
-Tilaviesti tallennetaan samalla **Tallenna**-painikkeella, mutta se ei koskaan käynnistä radiota uudelleen. Kuten muitakin tämän näkymän asetuksia, sitä voidaan muokata etähallittavassa radiossa.
+Tilaviesti tallennetaan samalla **Tallenna**-painikkeella, mutta se ei koskaan käynnistä radiota uudelleen. Kuten muitakin tämän näkymän asetuksia, sitä voidaan muokata etähallittavassa radiossa. For your own radio there is a
+shortcut while it is connected: touch & hold your node in the [node list](nodes.md) and choose
+**Update status**. Older firmware and a disconnected radio have no shortcut — the field above is
+still the way in.
 
 ## Asetukset
 

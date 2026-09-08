@@ -413,8 +413,6 @@
     <string name="encryption_error_text">Публичният ключ не съвпада със записания ключ. Можете да премахнете възела и да го оставите да обмени ключове отново, но това може да показва по-сериозен проблем със сигурността. Свържете се с потребителя чрез друг надежден канал, за да определите дали промяната на ключа се дължи на фабрично нулиране или друго умишлено действие.</string>
     <string name="encryption_pkc">Криптиране с публичния ключ</string>
     <string name="encryption_pkc_text">Директните съобщения използват новата инфраструктура с публичен ключ за криптиране.</string>
-    <string name="encryption_psk">Споделен ключ</string>
-    <string name="encryption_psk_text">Могат да се изпращат/получават само съобщения в каналите. Директните съобщения изискват функцията Инфраструктура с публичен ключ във фърмуер 2.5+.</string>
     <string name="env_metrics_log">Показатели на околната среда</string>
     <!-- ENVIRONMENT -->
     <string name="environment">Околна среда</string>
@@ -881,6 +879,7 @@
     <string name="now">Сега</string>
     <string name="ntp_server">NTP сървър</string>
     <string name="number_of_records">Брой записи</string>
+    <!-- OFFLINE -->
     <string name="okay">Добре</string>
     <string name="oled_type">Тип на OLED</string>
     <!-- ONE -->

@@ -92,7 +92,6 @@
     <!-- ENCRYPTION -->
     <string name="encryption_error">Përputhje e Gabuar e Çelësit Publik</string>
     <string name="encryption_pkc">Kriptimi me Çelës Publik</string>
-    <string name="encryption_psk">Çelësi i Përbashkët</string>
     <!-- ENVIRONMENT -->
     <string name="error">Gabim</string>
     <string name="error_duty_cycle">Cikli i detyrës ka arritur kufirin. Nuk mund të dërgoni mesazhe tani, ju lutem provoni përsëri më vonë.</string>
@@ -192,6 +191,7 @@
     <string name="none_quality">Asnjë</string>
     <string name="not_connected">Nuk është lidhur</string>
     <!-- NOTIFICATIONS -->
+    <!-- OFFLINE -->
     <string name="okay">Mirë</string>
     <!-- ONE -->
     <string name="one_day">24 Orë</string>

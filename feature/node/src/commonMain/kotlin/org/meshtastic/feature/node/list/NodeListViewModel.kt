@@ -39,6 +39,7 @@ import org.meshtastic.core.model.NodeSortOption
 import org.meshtastic.core.repository.AdminController
 import org.meshtastic.core.repository.ConnectionStateProvider
 import org.meshtastic.core.repository.DeviceHardwareRepository
+import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
@@ -64,6 +65,7 @@ class NodeListViewModel(
     private val nodeRequestActions: NodeRequestActions,
     private val getFilteredNodesUseCase: GetFilteredNodesUseCase,
     val nodeFilterPreferences: NodeFilterPreferences,
+    private val nodeManager: NodeManager,
     localeUnitsProvider: LocaleUnitsProvider,
 ) : ViewModel() {
 
@@ -116,12 +118,25 @@ class NodeListViewModel(
             )
         }
 
+    /**
+     * The unheard filter may only narrow the list once the firmware has proven it reports the field AND the handshake's
+     * NodeInfo install has completed. Between setFirmwareVersion flipping the capability and that install landing,
+     * cached rows can still carry a false from a previous session, and the filter would hide valid nodes until each was
+     * rewritten.
+     */
+    private val unheardFilterAllowed: Flow<Boolean> =
+        combine(nodeManager.reportsHeardOnCurrentLora, nodeManager.isNodeDbReady) { reportsHeard, dbReady ->
+            reportsHeard && dbReady
+        }
+
     private val nodeFilter: Flow<NodeFilterState> =
-        combine(_nodeFilterText, filterToggles, nodeFilterPreferences.excludeMqtt) {
-                filterText,
-                filterToggles,
-                excludeMqtt,
-            ->
+        combine(
+            _nodeFilterText,
+            filterToggles,
+            nodeFilterPreferences.excludeMqtt,
+            nodeFilterPreferences.excludeUnheard,
+            unheardFilterAllowed,
+        ) { filterText, filterToggles, excludeMqtt, excludeUnheard, unheardAllowed ->
             NodeFilterState(
                 filterText = filterText,
                 includeUnknown = filterToggles.includeUnknown,
@@ -130,6 +145,7 @@ class NodeListViewModel(
                 onlyDirect = filterToggles.onlyDirect,
                 showIgnored = filterToggles.showIgnored,
                 excludeMqtt = excludeMqtt,
+                excludeUnheard = excludeUnheard && unheardAllowed,
             )
         }
 
@@ -154,10 +170,25 @@ class NodeListViewModel(
     val nodeList: StateFlow<List<Node>> =
         combine(nodeFilter, nodeSortOption, ::Pair)
             .flatMapLatest { (filter, sort) -> getFilteredNodesUseCase.invoke(filter, sort) }
+            .heardWhileUnsupported()
             .stateInWhileSubscribed(initialValue = emptyList())
 
     val unfilteredNodeList: StateFlow<List<Node>> =
-        nodeRepository.getNodes().stateInWhileSubscribed(initialValue = emptyList())
+        nodeRepository.getNodes().heardWhileUnsupported().stateInWhileSubscribed(initialValue = emptyList())
+
+    /**
+     * Presents every node as heard while the firmware cannot report the field. The database is normalized
+     * asynchronously when unsupported firmware connects; until that write lands, rows can still carry a false written
+     * by a previous radio, and the marker, banner and removal offer would otherwise act on it.
+     */
+    private fun Flow<List<Node>>.heardWhileUnsupported(): Flow<List<Node>> =
+        combine(this, nodeManager.reportsHeardOnCurrentLora) { nodes, reportsHeard ->
+            if (reportsHeard) {
+                nodes
+            } else {
+                nodes.map { if (it.heardOnCurrentLora) it else it.copy(heardOnCurrentLora = true) }
+            }
+        }
 
     private val _deviceImageUrls = MutableStateFlow<Map<Int, String>>(emptyMap())
 
@@ -246,6 +277,7 @@ data class NodeFilterState(
     val onlyDirect: Boolean = false,
     val showIgnored: Boolean = false,
     val excludeMqtt: Boolean = false,
+    val excludeUnheard: Boolean = false,
 ) {
     /** True if any user-applied filter is narrowing the visible node set. Unknown nodes are shown unless opted out. */
     val isActive: Boolean
@@ -255,7 +287,8 @@ data class NodeFilterState(
                 excludeInfrastructure ||
                 onlyOnline ||
                 onlyDirect ||
-                excludeMqtt
+                excludeMqtt ||
+                excludeUnheard
 }
 
 data class NodeFilterToggles(

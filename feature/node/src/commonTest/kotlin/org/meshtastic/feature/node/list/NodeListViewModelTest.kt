@@ -31,6 +31,7 @@ import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeSortOption
 import org.meshtastic.core.repository.ConnectionStateProvider
+import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.testing.FakeDeviceHardwareRepository
 import org.meshtastic.core.testing.FakeLocaleUnitsProvider
@@ -55,6 +56,7 @@ class NodeListViewModelTest {
     private val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
     private val connectionStateProvider: ConnectionStateProvider = mock(MockMode.autofill)
     private val nodeFilterPreferences: NodeFilterPreferences = mock(MockMode.autofill)
+    private val nodeManager: NodeManager = mock(MockMode.autofill)
     private val localeUnitsProvider = FakeLocaleUnitsProvider()
     private val nodeManagementActions: NodeManagementActions = mock(MockMode.autofill)
     private val nodeRequestActions: NodeRequestActions = mock(MockMode.autofill)
@@ -77,6 +79,9 @@ class NodeListViewModelTest {
         every { nodeFilterPreferences.onlyDirect } returns MutableStateFlow(false)
         every { nodeFilterPreferences.showIgnored } returns MutableStateFlow(false)
         every { nodeFilterPreferences.excludeMqtt } returns MutableStateFlow(false)
+        every { nodeFilterPreferences.excludeUnheard } returns MutableStateFlow(false)
+        every { nodeManager.reportsHeardOnCurrentLora } returns MutableStateFlow(true)
+        every { nodeManager.isNodeDbReady } returns MutableStateFlow(true)
 
         every { getFilteredNodesUseCase(any(), any()) } returns MutableStateFlow(emptyList())
 
@@ -95,6 +100,7 @@ class NodeListViewModelTest {
         nodeRequestActions = nodeRequestActions,
         getFilteredNodesUseCase = getFilteredNodesUseCase,
         nodeFilterPreferences = nodeFilterPreferences,
+        nodeManager = nodeManager,
         localeUnitsProvider = localeUnitsProvider,
     )
 

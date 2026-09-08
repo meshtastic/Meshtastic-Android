@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import okio.ByteString.Companion.toByteString
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.model.Node
@@ -38,10 +39,12 @@ import org.meshtastic.core.model.util.compareUsers
 import org.meshtastic.core.model.util.userFieldsToString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.cancel
+import org.meshtastic.core.resources.close
 import org.meshtastic.core.resources.import_known_shared_contact_text
 import org.meshtastic.core.resources.import_label
 import org.meshtastic.core.resources.import_shared_contact
 import org.meshtastic.core.resources.public_key_changed
+import org.meshtastic.core.resources.shared_contact_no_public_key
 import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.theme.AppTheme
@@ -82,6 +85,10 @@ fun SharedContactDialogContent(
     onImport: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // A contact with no key cannot be imported: firmware assigns public_key unconditionally, so importing one
+    // clears the key the radio already holds and turns a working conversation into a failing one.
+    val hasPublicKey = (sharedContact.user?.public_key?.size ?: 0) > 0
+
     MeshtasticDialog(
         modifier = modifier,
         titleRes = Res.string.import_shared_contact,
@@ -91,6 +98,13 @@ fun SharedContactDialogContent(
                 val chipNode = node ?: Node(num = sharedContact.node_num, user = sharedContact.user ?: User())
                 Box(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp), contentAlignment = Alignment.Center) {
                     NodeChip(node = chipNode)
+                }
+                if (!hasPublicKey) {
+                    Text(
+                        text = stringResource(Res.string.shared_contact_no_public_key),
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                    HorizontalDivider()
                 }
                 if (node != null) {
                     Text(text = stringResource(Res.string.import_known_shared_contact_text))
@@ -107,12 +121,16 @@ fun SharedContactDialogContent(
                 }
             }
         },
-        dismissText = stringResource(Res.string.cancel),
+        dismissText = stringResource(if (hasPublicKey) Res.string.cancel else Res.string.close),
         onDismiss = onDismiss,
         confirmText = stringResource(Res.string.import_label),
-        onConfirm = onImport,
+        onConfirm = onImport.takeIf { hasPublicKey },
     )
 }
+
+/** A contact with no key is refused, so the golden needs a real one to render the import path. */
+@Suppress("MagicNumber")
+private val PREVIEW_PUBLIC_KEY = ByteArray(32) { 0x2B.toByte() }.toByteString()
 
 // Public because the screenshot-tests module renders this preview as a golden test.
 @Suppress("MagicNumber", "PreviewPublic")
@@ -125,7 +143,13 @@ fun PreviewSharedContactImportAlert() {
                 sharedContact =
                 SharedContact(
                     node_num = 13444,
-                    user = User(id = "!00003484", long_name = "John Doe", short_name = "JD"),
+                    user =
+                    User(
+                        id = "!00003484",
+                        long_name = "John Doe",
+                        short_name = "JD",
+                        public_key = PREVIEW_PUBLIC_KEY,
+                    ),
                 ),
                 node = null,
                 onDismiss = {},

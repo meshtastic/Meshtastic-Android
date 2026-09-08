@@ -36,6 +36,8 @@ kotlin {
             implementation(projects.core.datastore)
             implementation(projects.core.model)
             implementation(projects.core.navigation)
+            // NetworkRepository backs the offline-basemap auto-fallback (see OfflineFallback.kt).
+            implementation(projects.core.network)
             implementation(projects.core.prefs)
             implementation(projects.core.repository)
             implementation(libs.meshtastic.protobufs)

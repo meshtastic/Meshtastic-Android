@@ -9,13 +9,30 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
+#### 🏗️ Features
+* feat(node): add an update-status shortcut to the local node menu by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7047
+#### 🖥️ Desktop
+* fix(desktop): use standard SPDX license identifier for RPM packaging by @RCGV1 in https://github.com/meshtastic/Meshtastic-Android/pull/7043
 #### 🛠️ Fixes
-* fix(map): gate the MapLibre waypoint editor on isModifiableBy by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6969
-* fix(ai): bound assistant messages at what the send path will actually encode by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6970
-* fix(firmware): hide USB maintenance where the platform cannot run it by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6974
-* fix(map): resolve the persisted basemap before the map first renders by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6978
+* fix(mqtt): downgrade unparseable-payload decode logs from error to warn by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7040
+* fix(node): gate direct messages on holding a public key by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7050
+#### 📝 Other Changes
+* refactor(map): retire the maps-utils workarounds its 5.1 fixes made stale by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7046
 
-### Internal (v2.8.2-internal.4)
+### Internal (v2.8.2-internal.6)
+Changes since [`v2.8.2-closed.1`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.2-closed.1):
+
+#### 🏗️ Features
+* feat(network): configure HTTP client engines and add platform User-Agent headers by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7008
+* feat(ui): blend noise floor into signal quality rating (design#15) by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7009
+* feat(map): offline banner and Google basemap auto-fallback on connectivity loss by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6998
+#### 🛠️ Fixes
+* fix(network): point the API base URL at the R2-backed apiv2 host by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7004
+* fix(settings): floor the beacon broadcast-target list at one row by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7010
+* fix(settings): re-learn the node number when the first region set renumbers the radio by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7021
+* fix(connections): scope region warnings to the active connection by @jeremiah-k in https://github.com/meshtastic/Meshtastic-Android/pull/7015
+
+### Closed Beta (v2.8.2-closed.1)
 Changes since [`v2.8.1`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.1):
 
 #### 🏗️ Features
@@ -67,6 +84,10 @@ Changes since [`v2.8.1`](https://github.com/meshtastic/Meshtastic-Android/releas
 * fix(settings): drop the beacon single-target scalars protobufs reserved by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6942
 * fix(node): scroll traceroute/log history detail popups by @beecho01 in https://github.com/meshtastic/Meshtastic-Android/pull/6708
 * fix(ui): show device roles by name, and stop doubling two percent signs by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6962
+* fix(map): gate the MapLibre waypoint editor on isModifiableBy by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6969
+* fix(ai): bound assistant messages at what the send path will actually encode by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6970
+* fix(firmware): hide USB maintenance where the platform cannot run it by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6974
+* fix(map): resolve the persisted basemap before the map first renders by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6978
 #### 📝 Other Changes
 * refactor(settings): edit the status message on the user screen by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/6951
 

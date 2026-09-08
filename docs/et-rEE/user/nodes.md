@@ -2,7 +2,7 @@
 title: Sõlmed
 parent: Kasutusjuhend
 nav_order: 4
-last_updated: 2026-08-30
+last_updated: 2026-09-04
 description: Browse, filter, and sort mesh nodes — view details, signal quality, roles, and quick actions.
 aliases:
   - sõlmede loend
@@ -78,13 +78,13 @@ Most users should keep the default **Client** role. Consider a different role wh
 
 Sõlmed kuvavad oma nime kõrval krüpteerimisoleku ikoone:
 
-| Ikoon           | Tähendus                                                                                                                         |
-| --------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| 🔒 Lukustatud   | Suhtlus kasutab PKI-d (avaliku võtme infrastruktuuri) – otsast lõpuni krüpteeritud kontrollitud identiteediga |
-| 🔓 Lukust lahti | Suhtlus kasutab jagatud kanali PSK – krüpteeritud, kuid isikut pole individuaalselt kontrollitud                                 |
-| ⚠️ Ebakõla      | Avaliku võtme mittevastavus — sõlme võti on viimasest nägemisest saadik muutunud (enne usaldamist uuri)       |
+| Ikoon           | Tähendus                                                                                                                                          |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🔒 Lukustatud   | Suhtlus kasutab PKI-d (avaliku võtme infrastruktuuri) – otsast lõpuni krüpteeritud kontrollitud identiteediga                  |
+| 🔓 Lukust lahti | No public key has been received for this node, so it cannot be direct messaged — use **Request User Info** on the node detail page to ask for one |
+| ⚠️ Ebakõla      | Avaliku võtme mittevastavus — sõlme võti on viimasest nägemisest saadik muutunud (enne usaldamist uuri)                        |
 
-> 💡 **Vihje:** PKI krüpteering (püsivara 2,5+) pakub tugevamat turvalisust kui kanali PSK, kuna igal sõlmel on unikaalne võtmepaar. Kui näed võtme mittevastavuse hoiatust, võib sõlm olla lähtestatud või ohustatud.
+> 💡 **Tip:** Direct messages always use PKI, so the radio needs the other node's public key before it can send one. It refuses the send rather than falling back to channel encryption. Keys arrive inside node info, which is why an open lock usually clears itself once that node is heard from properly. Kui näed võtme mittevastavuse hoiatust, võib sõlm olla lähtestatud või ohustatud.
 
 To clear a mismatch, first confirm through another trusted channel that the key change was intentional — a factory reset causes one. Then touch & hold the node, choose **Remove**, and let the two radios exchange keys again the next time yours hears it.
 
@@ -101,6 +101,11 @@ From the node list, you can:
   - Ignore/unignore
   - Eemalda
 
+Touch & hold **your own node** instead and you get one action, **Update status**, which opens the
+User settings screen with the cursor already in the Status Message field. It only appears while the
+radio is connected and running firmware 2.8 or newer — see
+[Settings — Radio & User](settings-radio-user.md) for the field itself.
+
 ## Sharing a Contact
 
 On a node's detail screen, tap **Share Contact** to produce a link and a QR code for that node. From the same dialog, **Write to NFC tag** saves the link to a writable NFC tag that anyone can tap to open.
@@ -115,14 +120,14 @@ Sõlmede filtreerimiseks nime või lühinime järgi tipi otsinguväljal. Filter 
 
 ### Filter Toggles
 
-| Filtreeri                   | Kirjeldus                                                                                                                                                                                         |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Hide offline nodes**      | Näita ainult viimase 2 tunni jooksul kuuldud sõlmi                                                                                                                                                |
-| **Only show direct nodes**  | Show only nodes your radio heard directly, with no relay in between                                                                                                                               |
-| **Include unknown**         | Show nodes that haven't sent user info yet. **On by default**, so a node heard before its info arrives stays visible and messageable; these carry a badge marking them incomplete |
-| **Exclude infrastructure**  | Hide infrastructure-role nodes (Router, Router Late, Client Base, and legacy Repeater nodes) and any node that cannot be messaged, whatever its role                           |
-| **Välista MQTT**            | Peida ainult MQTT internetisilla kaudu kuuldavad sõlmed                                                                                                                                           |
-| **Only show ignored Nodes** | Replace the list with the nodes you have ignored. Every other node is hidden while this is on, and a banner appears at the top of the list to take you back                       |
+| Filtreeri                   | Kirjeldus                                                                                                                                                                                                                                                  |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Hide offline nodes**      | Näita ainult viimase 2 tunni jooksul kuuldud sõlmi                                                                                                                                                                                                         |
+| **Only show direct nodes**  | Show only nodes your radio heard directly, with no relay in between                                                                                                                                                                                        |
+| **Include unknown**         | Show nodes that haven't sent user info yet. **On by default**, so a node heard before its info arrives stays visible; these carry a badge marking them incomplete, and cannot be direct messaged until their user info brings a public key |
+| **Exclude infrastructure**  | Hide infrastructure-role nodes (Router, Router Late, Client Base, and legacy Repeater nodes) and any node that cannot be messaged, whatever its role                                                                                    |
+| **Välista MQTT**            | Peida ainult MQTT internetisilla kaudu kuuldavad sõlmed                                                                                                                                                                                                    |
+| **Only show ignored Nodes** | Replace the list with the nodes you have ignored. Every other node is hidden while this is on, and a banner appears at the top of the list to take you back                                                                                |
 
 ### Sorteerimisvalikud
 

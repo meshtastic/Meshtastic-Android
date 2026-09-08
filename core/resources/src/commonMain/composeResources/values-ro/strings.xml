@@ -339,8 +339,6 @@
     <string name="encryption_error_text">Cheia publică nu corespunde cu cheia înregistrată. Puteți elimina nodul și permiteți schimbul de chei din nou, dar acest lucru poate indica o problemă de securitate mai gravă. Contactați utilizatorul printr-un alt canal de încredere, pentru a determina dacă schimbarea cheii s-a datorat unei resetări la setările din fabrică sau unei alte acțiuni intenționate.</string>
     <string name="encryption_pkc">Criptare cu cheie publică</string>
     <string name="encryption_pkc_text">Mesajele directe utilizează noua infrastructură cu cheie publică pentru criptare.</string>
-    <string name="encryption_psk">Cheie partajată</string>
-    <string name="encryption_psk_text">Se pot trimite/primi numai mesaje de canal. Mesajele directe necesită infrastructura cu chei publice din firmware-ul 2.5+.</string>
     <string name="env_metrics_log">Indicatori de mediu</string>
     <!-- ENVIRONMENT -->
     <string name="environment">Mediu</string>
@@ -767,6 +765,7 @@
     <string name="now">Acum</string>
     <string name="ntp_server">Server NTP</string>
     <string name="number_of_records">Numarul de inregistrari</string>
+    <!-- OFFLINE -->
     <string name="ok_to_mqtt">Acceptă MQTT</string>
     <string name="okay">Ok</string>
     <string name="oled_type">Tip OLED</string>

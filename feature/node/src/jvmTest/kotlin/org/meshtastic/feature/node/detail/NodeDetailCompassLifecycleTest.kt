@@ -51,6 +51,7 @@ import org.meshtastic.core.domain.usecase.session.EnsureRemoteAdminSessionUseCas
 import org.meshtastic.core.domain.usecase.session.ObserveRemoteAdminSessionStatusUseCase
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.SessionStatus
+import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.QueryController
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
@@ -153,6 +154,8 @@ class NodeDetailCompassLifecycleTest {
     private fun createNodeDetailViewModel(node: Node): NodeDetailViewModel {
         val getNodeDetailsUseCase: GetNodeDetailsUseCase = mock()
         val observeSessionStatus: ObserveRemoteAdminSessionStatusUseCase = mock()
+        val packetRepository: PacketRepository = mock()
+        every { packetRepository.getContacts() } returns flowOf(emptyMap())
         every { getNodeDetailsUseCase(any()) } returns
             flowOf(
                 NodeDetailUiState(
@@ -169,6 +172,7 @@ class NodeDetailCompassLifecycleTest {
             nodeRequestActions = mock<NodeRequestActions>(),
             queryController = mock<QueryController>(),
             getNodeDetailsUseCase = getNodeDetailsUseCase,
+            packetRepository = packetRepository,
             ensureRemoteAdminSession = mock<EnsureRemoteAdminSessionUseCase>(),
             observeRemoteAdminSessionStatus = observeSessionStatus,
             snackbarManager = SnackbarManager(),

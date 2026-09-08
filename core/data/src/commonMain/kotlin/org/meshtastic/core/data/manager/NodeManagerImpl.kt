@@ -33,6 +33,7 @@ import org.meshtastic.core.common.di.ServiceScope
 import org.meshtastic.core.common.util.clampTimestampToNow
 import org.meshtastic.core.common.util.crc32
 import org.meshtastic.core.common.util.handledLaunch
+import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
@@ -335,6 +336,23 @@ class NodeManagerImpl(
         firmwareEdition.value = edition
     }
 
+    // A StateFlow rather than a plain field: setFirmwareVersion, clear, loadCachedNodeDB and the install paths run
+    // on different coroutines, so reads need atomic visibility, and the UI needs to observe it to suppress the
+    // unheard consumers until the database normalization has landed.
+    override val reportsHeardOnCurrentLora = MutableStateFlow(false)
+
+    override fun setFirmwareVersion(version: String?, session: RadioSessionContext?) {
+        val supported = Capabilities(version).supportsHeardOnCurrentLora
+        reportsHeardOnCurrentLora.value = supported
+        // Normalize in the database, not just in nodeState: the node list renders from the repository flows, which
+        // read rows directly and would otherwise still see a false written by a radio whose firmware could report it.
+        // Bound to the originating session lease: a delayed write from a superseded session would otherwise resolve
+        // the next session's database and clear flags that session had legitimately set.
+        if (!supported) {
+            radioInterfaceService.launchSessionWork(scope, session) { nodeRepository.markAllHeardOnCurrentLora() }
+        }
+    }
+
     companion object {
         private const val NODE_PERSISTENCE_LANE_COUNT = 64
         private const val TIME_MS_TO_S = 1000L
@@ -419,7 +437,12 @@ class NodeManagerImpl(
             // process-wide nodeDBbyNum StateFlow. The StateFlow is a stateIn cache over SharingStarted.Eagerly and
             // can briefly retain the PREVIOUS database's map after a currentDb switch, which would resurrect retired
             // or stale rows on the new session.
-            val snapshot = nodeRepository.getNodeDbSnapshot()
+            // Cached rows may carry a flag written by a different radio. The connected device's NodeInfo dump
+            // repopulates real values when it reports them, so "heard" is the only safe resting state here.
+            val snapshot =
+                nodeRepository.getNodeDbSnapshot().mapValues { (_, node) ->
+                    if (reportsHeardOnCurrentLora.value) node else node.copy(heardOnCurrentLora = true)
+                }
             val persistedLocalNum = nodeRepository.myNodeInfo.value?.myNodeNum
             nodeState.update { state ->
                 if (generation != sessionGeneration.value) {
@@ -474,6 +497,7 @@ class NodeManagerImpl(
         myNodeNum.value = null
         myDeviceId.value = null
         firmwareEdition.value = null
+        reportsHeardOnCurrentLora.value = false
         _connectionIdentity.value = null
     }
 
@@ -747,15 +771,17 @@ class NodeManagerImpl(
         node.copy(nodeStatus = status?.takeIf { it.isNotEmpty() })
 
     override fun installNodeInfo(info: ProtoNodeInfo) {
+        val reportsHeard = reportsHeardOnCurrentLora.value
         // Stage-2 configuration installation persists the complete node snapshot through installConfig.
-        updateNodeState(info.num, channel = 0) { node -> applyNodeInfo(node, info) }
+        updateNodeState(info.num, channel = 0) { node -> applyNodeInfo(node, info, reportsHeard) }
     }
 
     override suspend fun installNodeInfoAndPersist(info: ProtoNodeInfo) {
-        updateNodeAndPersist(info.num) { node -> applyNodeInfo(node, info) }
+        val reportsHeard = reportsHeardOnCurrentLora.value
+        updateNodeAndPersist(info.num) { node -> applyNodeInfo(node, info, reportsHeard) }
     }
 
-    private fun applyNodeInfo(node: Node, info: ProtoNodeInfo): Node {
+    private fun applyNodeInfo(node: Node, info: ProtoNodeInfo, reportsHeard: Boolean): Node {
         var next = node
         val user = info.user
         if (user != null && !shouldPreserveExistingUser(node.user, user)) {
@@ -771,6 +797,10 @@ class NodeManagerImpl(
             val timed = position.copy(time = clampTimestampToNow(position.time))
             next = next.copy(position = preservingKnownPrecision(timed, next.position))
         }
+        // Firmware that predates the field never sends it, and a proto3 bool decodes as false - which would mark
+        // every node unheard. Normalize rather than skip: a value persisted by a previous radio must not survive
+        // into a session whose firmware cannot report it.
+        next = next.copy(heardOnCurrentLora = !reportsHeard || info.heard_on_current_lora)
         return next.copy(
             lastHeard = clampTimestampToNow(info.last_heard),
             deviceMetrics = info.device_metrics ?: next.deviceMetrics,

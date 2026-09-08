@@ -147,6 +147,8 @@ class TAKMeshIntegrationTest {
 
         override suspend fun setNodeNotes(num: Int, notes: String) {}
 
+        override suspend fun markAllHeardOnCurrentLora() {}
+
         override suspend fun upsert(node: Node) {}
 
         override suspend fun installConfig(mi: MyNodeInfo, nodes: List<Node>): List<Int> = emptyList()

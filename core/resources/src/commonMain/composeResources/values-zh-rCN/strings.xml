@@ -572,8 +572,6 @@
     <string name="encryption_error_text">公钥与输入的密钥不匹配。 您可以移除该节点并让它再次交换密钥，但这可能会出现密钥泄露问题。 请通过另一个受信任的频道来联系用户，以确定密钥更改是否由于出厂重置或其他故意操作。</string>
     <string name="encryption_pkc">公钥加密</string>
     <string name="encryption_pkc_text">私信消息正在使用新的公用钥匙加密。</string>
-    <string name="encryption_psk">共享密钥</string>
-    <string name="encryption_psk_text">只能发送/接收频道消息。私信需要2.5及以上版本固件中的公钥加密。</string>
     <string name="env_metrics_log">传感器指标</string>
     <!-- ENVIRONMENT -->
     <string name="environment">环境</string>
@@ -1213,6 +1211,7 @@
     <string name="now">当前</string>
     <string name="ntp_server">NTP 服务器</string>
     <string name="number_of_records">记录数</string>
+    <!-- OFFLINE -->
     <string name="ok_to_mqtt">使用MQTT</string>
     <string name="okay">确定</string>
     <string name="oled_type">OLED 类型</string>

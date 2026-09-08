@@ -565,8 +565,6 @@
     <string name="encryption_error_text">公開鍵が記録されている鍵と一致しません。ノードを削除して鍵を再交換させることもできますが、これはより深刻なセキュリティ上の問題を示している可能性があります。鍵の変更が工場出荷時リセットやその他の意図的な操作によるものかどうかを確認するため、別の信頼できる手段でユーザーに連絡してください。</string>
     <string name="encryption_pkc">公開鍵暗号化</string>
     <string name="encryption_pkc_text">ダイレクトメッセージは、暗号化に新しい公開鍵基盤を使用しています。</string>
-    <string name="encryption_psk">共有鍵</string>
-    <string name="encryption_psk_text">チャンネルメッセージのみ送受信できます。ダイレクトメッセージには、2.5 以降のファームウェアの公開鍵基盤機能が必要です。</string>
     <string name="env_metrics_log">環境メトリクス</string>
     <!-- ENVIRONMENT -->
     <string name="environment">環境</string>
@@ -1198,6 +1196,7 @@
     <string name="now">今</string>
     <string name="ntp_server">NTPサーバー</string>
     <string name="number_of_records">サーバーの最大保管レコード数  (デフォルト 約11,000レコード)</string>
+    <!-- OFFLINE -->
     <string name="ok_to_mqtt">MQTT への送信を許可</string>
     <string name="okay">OK</string>
     <string name="oled_type">OLED タイプ</string>

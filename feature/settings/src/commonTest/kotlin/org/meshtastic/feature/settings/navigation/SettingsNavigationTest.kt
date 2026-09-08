@@ -61,6 +61,13 @@ class SettingsNavigationTest {
     }
 
     @Test
+    fun `the local node status message shortcut keeps a local session active`() {
+        val stack = listOf<NavKey>(NodesRoute.Nodes, SettingsRoute.UserStatusMessage)
+
+        assertEquals(SettingsRadioConfigSession.Local, settingsRadioConfigSession(stack))
+    }
+
+    @Test
     fun `non radio settings route outside settings tab stays inactive`() {
         val stack = listOf<NavKey>(NodesRoute.Nodes, SettingsRoute.FilterSettings)
 

@@ -41,12 +41,14 @@ import org.meshtastic.core.resources.remove_favorite
 import org.meshtastic.core.resources.remove_ignored
 import org.meshtastic.core.resources.trace_route
 import org.meshtastic.core.resources.unmute
+import org.meshtastic.core.resources.update_status
 import org.meshtastic.core.ui.icon.DeleteNode
 import org.meshtastic.core.ui.icon.DoDisturb
 import org.meshtastic.core.ui.icon.Favorite
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Message
 import org.meshtastic.core.ui.icon.NotFavorite
+import org.meshtastic.core.ui.icon.Notes
 import org.meshtastic.core.ui.icon.Route
 import org.meshtastic.core.ui.icon.VolumeOff
 import org.meshtastic.core.ui.icon.VolumeUp
@@ -81,6 +83,23 @@ fun NodeContextMenu(
         DropdownMenuGroup(shapes = MenuDefaults.groupShapes()) {
             IgnoreMenuItem(node, onIgnore, onDismiss)
             RemoveMenuItem(node, onRemove, onDismiss)
+        }
+    }
+}
+
+/** A menu of its own: favoriting, muting, messaging or removing yourself is meaningless (design#115). */
+@Composable
+fun LocalNodeContextMenu(expanded: Boolean, onUpdateStatus: () -> Unit, onDismiss: () -> Unit) {
+    DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
+        DropdownMenuGroup(shapes = MenuDefaults.groupShapes()) {
+            DropdownMenuItem(
+                onClick = {
+                    onUpdateStatus()
+                    onDismiss()
+                },
+                leadingIcon = { Icon(imageVector = MeshtasticIcons.Notes, contentDescription = null) },
+                text = { Text(text = stringResource(Res.string.update_status)) },
+            )
         }
     }
 }

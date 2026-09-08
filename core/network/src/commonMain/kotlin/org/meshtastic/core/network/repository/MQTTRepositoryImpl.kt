@@ -304,11 +304,13 @@ class MQTTRepositoryImpl(
                 json.decodeFromString<MqttJsonPayload>(jsonStr)
                 trySend(MqttClientProxyMessage(topic = topic, text = jsonStr, retained = msg.retain))
             } catch (e: JsonDecodingException) {
-                Logger.e(e) { "Failed to parse MQTT JSON: ${e.shortMessage} (path: ${e.path})" }
+                // Warn, not error: a non-conforming payload recurs for as long as a busy public broker
+                // stays subscribed, not an app defect worth a non-fatal per message.
+                Logger.w(e) { "Failed to parse MQTT JSON: ${e.shortMessage} (path: ${e.path})" }
             } catch (e: SerializationException) {
-                Logger.e(e) { "Failed to parse MQTT JSON: ${e.message}" }
+                Logger.w(e) { "Failed to parse MQTT JSON: ${e.message}" }
             } catch (e: IllegalArgumentException) {
-                Logger.e(e) { "Failed to parse MQTT JSON: ${e.message}" }
+                Logger.w(e) { "Failed to parse MQTT JSON: ${e.message}" }
             }
         } else {
             // Drop provably-undeliverable downlink packets before spending BLE bandwidth on
@@ -557,7 +559,7 @@ private const val PKI_CHANNEL_ID = "PKI"
  */
 internal fun isUndeliverableDownlink(payload: ByteArray, myId: String?): Boolean {
     // Decode without a logger: this is fail-open and, on a public broker, may see arbitrary bytes on the binary
-    // topic. Passing Logger would emit an error log per unparseable downlink — expensive noise for an expected case.
+    // topic. Passing Logger would emit a warn log per unparseable downlink — expensive noise for an expected case.
     val envelope = ServiceEnvelope.ADAPTER.decodeOrNull(payload) ?: return false // fail open on garbage
     // Guards — never drop: PKI-channel traffic (accepted without decryption) or our own echoed-back
     // packets (used as implicit ACKs).

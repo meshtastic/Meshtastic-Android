@@ -22,6 +22,7 @@ import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -32,17 +33,21 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.animateFloatingActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -59,6 +64,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeListDensity
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.channel_invalid
@@ -69,6 +75,10 @@ import org.meshtastic.core.resources.nodes_empty_disconnected_hint
 import org.meshtastic.core.resources.nodes_empty_disconnected_title
 import org.meshtastic.core.resources.nodes_empty_searching_hint
 import org.meshtastic.core.resources.nodes_empty_searching_title
+import org.meshtastic.core.resources.nodes_unheard_banner
+import org.meshtastic.core.resources.nodes_unheard_banner_one
+import org.meshtastic.core.resources.nodes_unheard_keep
+import org.meshtastic.core.resources.nodes_unheard_remove
 import org.meshtastic.core.resources.set_up_connection
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MeshtasticImportFAB
@@ -82,12 +92,22 @@ import org.meshtastic.core.ui.icon.Info
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.NoDevice
 import org.meshtastic.core.ui.icon.Nodes
+import org.meshtastic.core.ui.icon.SignalOff
+import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
 import org.meshtastic.core.ui.util.parseDeepLinkOrInvalid
+import org.meshtastic.feature.node.component.LocalNodeContextMenu
 import org.meshtastic.feature.node.component.NodeContextMenu
 import org.meshtastic.feature.node.component.NodeCountSummary
 import org.meshtastic.feature.node.component.NodeFilterTextField
 import org.meshtastic.feature.node.component.NodeHopHistogramSheet
 import org.meshtastic.feature.node.component.NodeListHelp
+
+/**
+ * design#115: status message editing is offered on the connected local node only, and only where the firmware has the
+ * module — absent, never disabled, everywhere else.
+ */
+internal fun canEditStatusMessage(node: Node, ourNode: Node?, connectionState: ConnectionState): Boolean =
+    node.num == ourNode?.num && connectionState == ConnectionState.Connected && node.capabilities.supportsStatusMessage
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -101,6 +121,7 @@ fun NodeListScreen(
     activeNodeId: Int? = null,
     onHandleDeepLink: (org.meshtastic.core.common.util.CommonUri, onInvalid: () -> Unit) -> Unit = { _, _ -> },
     onNavigateToConnections: () -> Unit = {},
+    onEditStatusMessage: () -> Unit = {},
 ) {
     val showToast = org.meshtastic.core.ui.util.rememberShowToastResource()
     val scope = rememberCoroutineScope()
@@ -116,6 +137,19 @@ fun NodeListScreen(
     val onlineNodeCount by viewModel.onlineNodeCount.collectAsStateWithLifecycle(0)
     val totalNodeCount by viewModel.totalNodeCount.collectAsStateWithLifecycle(0)
     val unfilteredNodes by viewModel.unfilteredNodeList.collectAsStateWithLifecycle()
+    // Favorites and our own node are never offered for removal: a favorite is an explicit keep, and the connected
+    // radio is not something the node list may delete. ourNode and unfilteredNodes come from independent flows, so
+    // the list can already contain the local node while ourNode is still null. Offer nothing until it is known,
+    // rather than risk removing the user's own node from the radio.
+    val unheardNodes =
+        remember(unfilteredNodes, ourNode) {
+            val ourNum = ourNode?.num
+            if (ourNum == null) {
+                emptyList()
+            } else {
+                unfilteredNodes.filter { !it.heardOnCurrentLora && !it.isFavorite && it.num != ourNum }
+            }
+        }
     val deviceImageUrls by viewModel.deviceImageUrls.collectAsStateWithLifecycle()
     val ignoredNodeCount = unfilteredNodes.count { it.isIgnored }
 
@@ -228,6 +262,11 @@ fun NodeListScreen(
                             totalCount = totalNodeCount,
                             modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
                         )
+                        UnheardNodesBanner(
+                            unheardNodes = unheardNodes,
+                            onRemoveAll = { unheardNodes.forEach(viewModel::removeNode) },
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
+                        )
                         NodeFilterTextField(
                             modifier = Modifier.fillMaxWidth(),
                             filterText = state.filter.filterText,
@@ -249,6 +288,8 @@ fun NodeListScreen(
                             ignoredNodeCount = ignoredNodeCount,
                             excludeMqtt = state.filter.excludeMqtt,
                             onToggleExcludeMqtt = { viewModel.nodeFilterPreferences.toggleExcludeMqtt() },
+                            excludeUnheard = state.filter.excludeUnheard,
+                            onToggleExcludeUnheard = { viewModel.nodeFilterPreferences.toggleExcludeUnheard() },
                         )
                     }
                 }
@@ -257,8 +298,12 @@ fun NodeListScreen(
                     var expanded by remember { mutableStateOf(false) }
 
                     Box(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
+                        val isThisNode = node.num == ourNode?.num
+                        val canEditStatus = canEditStatusMessage(node, ourNode, connectionState)
+                        // Our own node only earns a long press while it has something to offer, or it opens an
+                        // empty menu.
                         val longClick =
-                            if (node.num != ourNode?.num) {
+                            if (!isThisNode || canEditStatus) {
                                 { expanded = true }
                             } else {
                                 null
@@ -305,8 +350,13 @@ fun NodeListScreen(
                                     deviceImageUrl = deviceImageUrls[node.user.hw_model.value],
                                 )
                         }
-                        val isThisNode = remember(node) { ourNode?.num == node.num }
-                        if (!isThisNode) {
+                        if (canEditStatus) {
+                            LocalNodeContextMenu(
+                                expanded = expanded,
+                                onUpdateStatus = onEditStatusMessage,
+                                onDismiss = { expanded = false },
+                            )
+                        } else if (!isThisNode) {
                             NodeContextMenu(
                                 expanded = expanded,
                                 node = node,
@@ -393,6 +443,67 @@ private fun NodeListEmptyState(
         if (!isConnected) {
             Spacer(modifier = Modifier.height(16.dp))
             Button(onClick = onNavigateToConnections) { Text(stringResource(Res.string.set_up_connection)) }
+        }
+    }
+}
+
+/**
+ * Offers to remove the nodes the radio has not heard since its LoRa settings changed.
+ *
+ * Shown as an offer, never an automatic removal: the app's node DB is deliberately a superset of the radio's, and a
+ * node may simply be out of range rather than on another channel — it comes back on its own when next heard.
+ *
+ * Dismissal is per-composition rather than saved, and re-arms whenever the count rises, so a later config change offers
+ * again instead of staying silent.
+ */
+@Composable
+private fun UnheardNodesBanner(unheardNodes: List<Node>, onRemoveAll: () -> Unit, modifier: Modifier = Modifier) {
+    var dismissed by remember { mutableStateOf(false) }
+    var previousCount by remember { mutableIntStateOf(0) }
+    val count = unheardNodes.size
+
+    // Re-arm on any rise, not only above a historical maximum: dismissing at 3, dropping to 1 and rising to 2 is
+    // still a new config change worth offering for.
+    LaunchedEffect(count) {
+        if (count > previousCount) dismissed = false
+        previousCount = count
+    }
+
+    if (count == 0 || dismissed) return
+
+    Card(
+        modifier = modifier,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
+    ) {
+        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Icon(
+                    imageVector = MeshtasticIcons.SignalOff,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.StatusOrange,
+                    modifier = Modifier.size(20.dp),
+                )
+                Text(
+                    text =
+                    if (count == 1) {
+                        stringResource(Res.string.nodes_unheard_banner_one)
+                    } else {
+                        stringResource(Res.string.nodes_unheard_banner, count)
+                    },
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.align(Alignment.End)) {
+                TextButton(onClick = { dismissed = true }) { Text(stringResource(Res.string.nodes_unheard_keep)) }
+                TextButton(
+                    onClick = {
+                        onRemoveAll()
+                        dismissed = true
+                    },
+                ) {
+                    Text(stringResource(Res.string.nodes_unheard_remove))
+                }
+            }
         }
     }
 }

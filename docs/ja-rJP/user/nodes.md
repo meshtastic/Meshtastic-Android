@@ -2,7 +2,7 @@
 title: ノード
 parent: User Guide
 nav_order: 4
-last_updated: 2026-08-30
+last_updated: 2026-09-04
 description: メッシュノードの閲覧・絞り込み・並べ替え。詳細、信号品質、役割、クイック操作を確認できます。
 aliases:
   - node-list
@@ -78,13 +78,13 @@ There is no separate "away" tier.
 
 ノードは、名前の横に暗号化ステータスのアイコンを表示します：
 
-| アイコン     | 意味                                                  |
-| -------- | --------------------------------------------------- |
-| 🔒 ロック   | 通信は PKI（公開鍵基盤）を使用します。本人性が検証された、エンドツーエンドの暗号化です       |
-| 🔓 ロック解除 | 通信は共有チャンネルの PSK を使用します。暗号化されていますが、本人性は個別には検証されていません |
-| ⚠️ 不一致   | 公開鍵の不一致。前回確認時からノードの鍵が変わっています（信頼する前に調べてください）         |
+| アイコン     | 意味                                                                                                                                                |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 🔒 ロック   | 通信は PKI（公開鍵基盤）を使用します。本人性が検証された、エンドツーエンドの暗号化です                                                                                                     |
+| 🔓 ロック解除 | No public key has been received for this node, so it cannot be direct messaged — use **Request User Info** on the node detail page to ask for one |
+| ⚠️ 不一致   | 公開鍵の不一致。前回確認時からノードの鍵が変わっています（信頼する前に調べてください）                                                                                                       |
 
-> 💡 **ヒント：** PKI 暗号化（ファームウェア 2.5 以降）は、各ノードが固有の鍵ペアを持つため、チャンネル PSK より強力なセキュリティを提供します。 鍵の不一致の警告が表示された場合、そのノードはリセットされたか、侵害された可能性があります。
+> 💡 **Tip:** Direct messages always use PKI, so the radio needs the other node's public key before it can send one. It refuses the send rather than falling back to channel encryption. Keys arrive inside node info, which is why an open lock usually clears itself once that node is heard from properly. 鍵の不一致の警告が表示された場合、そのノードはリセットされたか、侵害された可能性があります。
 
 To clear a mismatch, first confirm through another trusted channel that the key change was intentional — a factory reset causes one. Then touch & hold the node, choose **Remove**, and let the two radios exchange keys again the next time yours hears it.
 
@@ -101,6 +101,11 @@ To clear a mismatch, first confirm through another trusted channel that the key 
   - 無視／無視の解除
   - 削除
 
+Touch & hold **your own node** instead and you get one action, **Update status**, which opens the
+User settings screen with the cursor already in the Status Message field. It only appears while the
+radio is connected and running firmware 2.8 or newer — see
+[Settings — Radio & User](settings-radio-user.md) for the field itself.
+
 ## Sharing a Contact
 
 On a node's detail screen, tap **Share Contact** to produce a link and a QR code for that node. From the same dialog, **Write to NFC tag** saves the link to a writable NFC tag that anyone can tap to open.
@@ -115,14 +120,14 @@ To add someone else's contact, use the import button on the node list and choose
 
 ### 絞り込みトグル
 
-| 絞り込み                        | 説明                                                                                                                                                                                                |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Hide offline nodes**      | 過去 2 時間以内に受信したノードのみを表示します                                                                                                                                                                         |
-| **Only show direct nodes**  | Show only nodes your radio heard directly, with no relay in between                                                                                                                               |
-| **不明なノードを含む**               | Show nodes that haven't sent user info yet. **On by default**, so a node heard before its info arrives stays visible and messageable; these carry a badge marking them incomplete |
-| **インフラを除外**                 | Hide infrastructure-role nodes (Router, Router Late, Client Base, and legacy Repeater nodes) and any node that cannot be messaged, whatever its role                           |
-| **MQTT を除外**                | MQTT のインターネットブリッジ経由でのみ受信したノードを非表示にします                                                                                                                                                             |
-| **Only show ignored Nodes** | Replace the list with the nodes you have ignored. Every other node is hidden while this is on, and a banner appears at the top of the list to take you back                       |
+| 絞り込み                        | 説明                                                                                                                                                                                                                                                         |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Hide offline nodes**      | 過去 2 時間以内に受信したノードのみを表示します                                                                                                                                                                                                                                  |
+| **Only show direct nodes**  | Show only nodes your radio heard directly, with no relay in between                                                                                                                                                                                        |
+| **不明なノードを含む**               | Show nodes that haven't sent user info yet. **On by default**, so a node heard before its info arrives stays visible; these carry a badge marking them incomplete, and cannot be direct messaged until their user info brings a public key |
+| **インフラを除外**                 | Hide infrastructure-role nodes (Router, Router Late, Client Base, and legacy Repeater nodes) and any node that cannot be messaged, whatever its role                                                                                    |
+| **MQTT を除外**                | MQTT のインターネットブリッジ経由でのみ受信したノードを非表示にします                                                                                                                                                                                                                      |
+| **Only show ignored Nodes** | Replace the list with the nodes you have ignored. Every other node is hidden while this is on, and a banner appears at the top of the list to take you back                                                                                |
 
 ### 並べ替えオプション
 

@@ -535,8 +535,6 @@
     <string name="encryption_error_text">Der öffentliche Schlüssel stimmt nicht mit dem gespeicherten Schlüssel überein. Sie können den Knoten entfernen und den Schlüsselaustausch erneut durchführen lassen. Dies könnte jedoch auf ein schwerwiegenderes Sicherheitsproblem hindeuten. Kontaktieren Sie den Benutzer über einen anderen vertrauenswürdigen Kanal, um zu klären, ob die Schlüsseländerung auf ein Zurücksetzen auf Werkseinstellungen oder eine andere absichtliche Handlung zurückzuführen ist.</string>
     <string name="encryption_pkc">Verschlüsselung mit öffentlichen Schlüssel</string>
     <string name="encryption_pkc_text">Direktnachrichten verwenden zur den öffentlichen Knotenschlüssel zur Verschlüsselung.</string>
-    <string name="encryption_psk">Geteilter Schlüssel</string>
-    <string name="encryption_psk_text">Es können nur Kanalnachrichten gesendet/empfangen werden. Direktnachrichten erfordern die Verschlüsselung mit öffentlichem Knotenschlüssel seit Firmware 2.5+.</string>
     <string name="env_metrics_log">Umweltdaten</string>
     <!-- ENVIRONMENT -->
     <string name="environment">Umgebung</string>
@@ -1107,6 +1105,7 @@
     <string name="now">Jetzt</string>
     <string name="ntp_server">NTP Server</string>
     <string name="number_of_records">Anzahl Einträge</string>
+    <!-- OFFLINE -->
     <string name="offline_maps">Offline Karten</string>
     <string name="ok_to_mqtt">OK für MQTT</string>
     <string name="okay">OK</string>

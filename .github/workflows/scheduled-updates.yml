@@ -221,11 +221,13 @@ jobs:
             # a degraded response (missing erase set or empty board map) must never
             # replace the bundled seed.
             board_count=$(jq -r 'if (.otafixByBoardId | type) == "object" then (.otafixByBoardId | length) else 0 end' "$temp_uf2_file" 2>/dev/null || echo 0)
-            has_erase=$(jq -r 'if (.erase | type) == "object" then 1 else 0 end' "$temp_uf2_file" 2>/dev/null || echo 0)
+            # .erase.nrf52Bootloader is required too: the bundled seed carries it, and a manifest without it
+            # would silently drop the bootloader-driven erase path from every offline install.
+            has_erase=$(jq -r 'if (.erase | type) == "object" and (.erase.nrf52Bootloader | type) == "object" then 1 else 0 end' "$temp_uf2_file" 2>/dev/null || echo 0)
             if [ "$board_count" -eq 0 ] || [ "$has_erase" -ne 1 ]; then
-              echo "::warning::Maintenance UF2 API response is missing the erase set or board map. Skipping to protect the bundled seed."
+              echo "::warning::Maintenance UF2 API response is missing the erase set (incl. erase.nrf52Bootloader) or board map. Skipping to protect the bundled seed."
               echo "status=error" >> "$GITHUB_OUTPUT"
-              echo "detail=degraded maintenance UF2 manifest (no erase set or empty board map)" >> "$GITHUB_OUTPUT"
+              echo "detail=degraded maintenance UF2 manifest (no erase set, no erase.nrf52Bootloader, or empty board map)" >> "$GITHUB_OUTPUT"
             elif [ ! -f "$uf2_file_path" ] || ! jq --sort-keys . "$temp_uf2_file" | diff -q - <(jq --sort-keys . "$uf2_file_path"); then
               echo "Changes detected in maintenance UF2 manifest or local file missing. Updating $uf2_file_path."
               jq . "$temp_uf2_file" > "$uf2_file_path"
@@ -263,7 +265,7 @@ jobs:
           fi
 
       - name: Sync with Crowdin
-        uses: crowdin/github-action@71fdb8814261dd703be4ca7c6450d21b1868da4b # v3
+        uses: crowdin/github-action@0d5670f539973aea2f01abce61a8989934df0025 # v3
         with:
           base_url: 'https://meshtastic.crowdin.com/api/v2'
           config: 'crowdin.yml'

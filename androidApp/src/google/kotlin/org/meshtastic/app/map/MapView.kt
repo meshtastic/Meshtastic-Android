@@ -102,7 +102,6 @@ import com.google.maps.android.data.renderer.mapview.MapViewRenderer
 import com.google.maps.android.data.renderer.model.DataLayer
 import com.google.maps.android.data.renderer.model.Feature
 import com.google.maps.android.data.renderer.model.Geometry
-import com.google.maps.android.data.renderer.model.LineString
 import com.google.maps.android.data.renderer.model.LineStyle
 import com.google.maps.android.data.renderer.model.MultiGeometry
 import com.google.maps.android.data.renderer.model.PointGeometry
@@ -124,6 +123,11 @@ import org.meshtastic.app.map.component.MapTypeDropdown
 import org.meshtastic.app.map.component.NodeClusterMarkers
 import org.meshtastic.app.map.component.WaypointMarkers
 import org.meshtastic.app.map.model.NodeClusterItem
+import org.meshtastic.app.map.offline.pmtiles.OfflineRegionExtractor
+import org.meshtastic.app.map.offline.pmtiles.OfflineVectorOverlay
+import org.meshtastic.app.map.offline.pmtiles.component.OfflineRegionManagerSection
+import org.meshtastic.app.map.offline.terrain.ContourOverlay
+import org.meshtastic.app.map.offline.terrain.HillshadeTileProvider
 import org.meshtastic.app.map.tiles.RasterBasemap
 import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.common.util.nowSeconds
@@ -183,11 +187,13 @@ import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.component.MapControlsOverlay
 import org.meshtastic.feature.map.component.MapFilterSheet
 import org.meshtastic.feature.map.component.NodeTrackFilterMenu
+import org.meshtastic.feature.map.component.OfflineStatusBanner
 import org.meshtastic.feature.map.component.RasterOverlayToggles
 import org.meshtastic.feature.map.component.SitePlannerLaunch
 import org.meshtastic.feature.map.component.WaypointInfoDialog
 import org.meshtastic.feature.map.component.mapFilterActions
 import org.meshtastic.feature.map.component.toSitePlannerParams
+import org.meshtastic.feature.map.geojson.sanitizeImportedIconUrl
 import org.meshtastic.feature.map.includes
 import org.meshtastic.feature.map.kml.ICON_URL_PROPERTY
 import org.meshtastic.feature.map.kml.KmlGroundOverlay
@@ -195,6 +201,7 @@ import org.meshtastic.feature.map.layers.LayerType
 import org.meshtastic.feature.map.layers.MapLayerItem
 import org.meshtastic.feature.map.layers.opacityOf
 import org.meshtastic.feature.map.layers.toPickedMapFile
+import org.meshtastic.feature.map.terrain.MapterhornEndpoints
 import org.meshtastic.feature.map.tiles.mapAttributionText
 import org.meshtastic.feature.map.tracerouteNodeSelection
 import org.meshtastic.proto.BoundingBox
@@ -260,6 +267,9 @@ private const val BOX_AUTHORING_MIN_CORNER_DELTA = 1e-4
 /** Above the raster basemap at -1, below every marker and shape the mesh draws at 0 and up. */
 private const val OVERLAY_Z_INDEX = -0.5f
 
+/** Below the offline vector layer's own water/roads/boundaries (-0.75f) so those still draw on top of the shading. */
+private const val TERRAIN_HILLSHADE_Z_INDEX = -0.9f
+
 /** Clears Google's own logo and the zoom controls, both of which sit along the bottom edge. */
 private val ATTRIBUTION_BOTTOM_PADDING = 4.dp
 private const val ATTRIBUTION_SCRIM_ALPHA = 0.7f
@@ -318,6 +328,10 @@ fun MapView(
 
     val selectedGoogleMapType by mapViewModel.selectedGoogleMapType.collectAsStateWithLifecycle()
     val currentRasterBasemap by mapViewModel.selectedRasterBasemap.collectAsStateWithLifecycle()
+    val offlineOverlayEnabled by mapViewModel.offlineOverlayEnabled.collectAsStateWithLifecycle()
+    val terrainHillshadeEnabled by mapViewModel.terrainHillshadeEnabled.collectAsStateWithLifecycle()
+    val terrainContoursEnabled by mapViewModel.terrainContoursEnabled.collectAsStateWithLifecycle()
+    val mapNetworkAvailable by mapViewModel.mapNetworkAvailable.collectAsStateWithLifecycle()
     val enabledOverlayIds by mapViewModel.enabledOverlayIds.collectAsStateWithLifecycle()
     val layerOpacity by mapViewModel.layerOpacity.collectAsStateWithLifecycle()
 
@@ -669,6 +683,51 @@ fun MapView(
                 }
             }
 
+            // The downloaded region (if any) covering what's on screen — shared by the offline vector overlay and
+            // offline terrain below, each gated by its own toggle rather than each other's.
+            val visibleBounds = cameraPositionState.projection?.visibleRegion?.latLngBounds
+            val coveringRegion = visibleBounds?.let { mapViewModel.offlineRegionCovering(it) }
+
+            // The offline vector overlay, drawn only while the user has switched it on and a downloaded region
+            // actually covers what's on screen — see MapViewModel.offlineOverlayEnabled/offlineRegionCovering.
+            if (offlineOverlayEnabled) {
+                coveringRegion?.let { region ->
+                    OfflineVectorOverlay(
+                        region = region,
+                        archiveFile = mapViewModel.offlineRegionArchiveFile(region.id),
+                        cameraPositionState = cameraPositionState,
+                    )
+                }
+            }
+
+            // Offline terrain (hillshade + contours) — independent of the vector overlay's own toggle, gated only
+            // by its own two switches and whether the covering region actually has terrain downloaded. See
+            // MapViewModel.terrainHillshadeEnabled/terrainContoursEnabled and OfflineRegionManagerSection.
+            if (coveringRegion?.hasTerrain == true) {
+                if (terrainHillshadeEnabled) {
+                    key(coveringRegion.id) {
+                        val hillshadeProvider =
+                            remember(coveringRegion.id) {
+                                HillshadeTileProvider(mapViewModel.terrainStoreForRegion(coveringRegion.id))
+                            }
+                        TileOverlay(
+                            tileProvider = hillshadeProvider,
+                            fadeIn = true,
+                            transparency = 0f,
+                            zIndex = TERRAIN_HILLSHADE_Z_INDEX,
+                        )
+                    }
+                }
+                if (terrainContoursEnabled) {
+                    ContourOverlay(
+                        region = coveringRegion,
+                        store = mapViewModel.terrainStoreForRegion(coveringRegion.id),
+                        cameraPositionState = cameraPositionState,
+                        metric = displayUnits == MeasurementSystem.METRIC,
+                    )
+                }
+            }
+
             // Overlays composite over whichever basemap is in use, and stay below the mesh drawn above them.
             mapViewModel.availableOverlays
                 .filter { it.id in enabledOverlayIds }
@@ -741,6 +800,11 @@ fun MapView(
                     )
             }
         }
+
+        OfflineStatusBanner(
+            visible = !mapNetworkAvailable,
+            modifier = Modifier.align(Alignment.TopStart).padding(top = 8.dp, start = 8.dp),
+        )
 
         // Scale bar
         ScaleBar(
@@ -883,12 +947,30 @@ fun MapView(
 
         // Tile credit. OpenStreetMap's and Esri's tile policies both require it, and unlike MapLibre — which has an
         // attribution ornament of its own — the Google map has nowhere to put it but here.
+        //
+        // The offline vector layer's own credit is folded in here too, not left to the archive's metadata table
+        // alone: an on-disk-only attribution is invisible to anyone who never opens the offline-region manager
+        // sheet, which is exactly the gap this mirrors from the sibling iOS app's own terrain layer. The offline
+        // terrain layer's own credit (Mapterhorn) is folded in the same way, whenever hillshade or contours are
+        // actually rendering.
+        val attributionCoveringRegion =
+            cameraPositionState.projection?.visibleRegion?.latLngBounds?.let { mapViewModel.offlineRegionCovering(it) }
+        val offlineRegionActive = offlineOverlayEnabled && attributionCoveringRegion != null
+        val terrainActive =
+            attributionCoveringRegion?.hasTerrain == true && (terrainHillshadeEnabled || terrainContoursEnabled)
         val attributionText =
-            remember(currentRasterBasemap, enabledOverlayIds) {
-                mapAttributionText(
-                    basemap = (currentRasterBasemap as? RasterBasemap.Remote)?.spec,
-                    overlays = mapViewModel.availableOverlays.filter { it.id in enabledOverlayIds }.map { it.spec },
-                )
+            remember(currentRasterBasemap, enabledOverlayIds, offlineRegionActive, terrainActive) {
+                val baseAttribution =
+                    mapAttributionText(
+                        basemap = (currentRasterBasemap as? RasterBasemap.Remote)?.spec,
+                        overlays = mapViewModel.availableOverlays.filter { it.id in enabledOverlayIds }.map { it.spec },
+                    )
+                buildList {
+                    if (baseAttribution.isNotEmpty()) add(baseAttribution)
+                    if (offlineRegionActive) add(OfflineRegionExtractor.ATTRIBUTION)
+                    if (terrainActive) add(MapterhornEndpoints.ATTRIBUTION)
+                }
+                    .joinToString(" · ")
             }
         if (attributionText.isNotEmpty()) {
             Text(
@@ -1001,7 +1083,37 @@ fun MapView(
 
     // --- Bottom sheets & dialogs ---
     if (showLayersBottomSheet) {
-        ModalBottomSheet(onDismissRequest = { showLayersBottomSheet = false }) {
+        ModalBottomSheet(
+            onDismissRequest = {
+                showLayersBottomSheet = false
+                mapViewModel.clearOfflineDownloadState()
+                mapViewModel.clearTerrainDownloadState()
+            },
+        ) {
+            val offlineRegions by mapViewModel.offlineRegions.collectAsStateWithLifecycle()
+            val offlineDownloadState by mapViewModel.offlineDownloadState.collectAsStateWithLifecycle()
+            val terrainDownloadState by mapViewModel.terrainDownloadState.collectAsStateWithLifecycle()
+            val terrainDownloadRegionId by mapViewModel.terrainDownloadRegionId.collectAsStateWithLifecycle()
+            OfflineRegionManagerSection(
+                visibleBounds = cameraPositionState.projection?.visibleRegion?.latLngBounds,
+                currentZoom = cameraPositionState.position.zoom.toInt(),
+                regions = offlineRegions,
+                downloadState = offlineDownloadState,
+                offlineOverlayEnabled = offlineOverlayEnabled,
+                estimateTileCount = mapViewModel::estimateOfflineTileCount,
+                onDownload = mapViewModel::downloadOfflineRegion,
+                onDeleteRegion = mapViewModel::deleteOfflineRegion,
+                onToggleOfflineOverlay = mapViewModel::setOfflineOverlayEnabled,
+                terrainDownloadState = terrainDownloadState,
+                terrainDownloadRegionId = terrainDownloadRegionId,
+                terrainHillshadeEnabled = terrainHillshadeEnabled,
+                terrainContoursEnabled = terrainContoursEnabled,
+                onDownloadTerrain = mapViewModel::downloadTerrainForRegion,
+                onToggleHillshade = mapViewModel::setTerrainHillshadeEnabled,
+                onToggleContours = mapViewModel::setTerrainContoursEnabled,
+            )
+            HorizontalDivider()
+
             // The raster overlays sit above the imported-layer manager, matching where the MapLibre map puts them.
             RasterOverlayToggles(
                 available = mapViewModel.availableOverlays,
@@ -1552,9 +1664,9 @@ private fun parseMapLayer(layerType: LayerType, stream: InputStream): DataLayer?
  * A parsed custom overlay (KML/KMZ/GeoJSON) plus the machinery to draw it on the map.
  *
  * Each [show] creates a fresh single-use [MapViewRenderer] and [hide] tears it down with [MapViewRenderer.clear].
- * Renderers are deliberately not reused: clear() cancels their icon-loading scope for good, and per-feature removal
- * ([MapViewRenderer.removeFeature]) silently no-ops for MultiGeometry features (the renderer keys rendered map objects
- * by internal per-geometry copies), so clear() is the only teardown that reliably takes everything off the map.
+ * Renderers are deliberately not reused: clear() cancels their icon-loading scope for good, so a hidden layer holds
+ * nothing live and every re-show starts with a working one. Reuse would buy nothing — an opacity change or a refresh
+ * rebuilds this object outright, leaving the visibility toggle as the only re-show path.
  */
 private class RenderedMapLayer(
     private val map: GmsGoogleMap,
@@ -1632,11 +1744,13 @@ private fun RenderedMapLayer.safeHide() {
 /**
  * Apply simplestyle-spec (https://github.com/mapbox/simplestyle-spec) properties to a parsed GeoJSON layer.
  *
- * The maps-utils GeoJSON mapper reads `fill`/`stroke`/`stroke-width`/`fill-opacity`/`stroke-opacity` itself, but misses
- * several things this app relies on for Meshtastic Site Planner coverage exports: the legacy `color` fallback,
- * `rgb()`/`rgba()` colors, a default fill opacity so stacked contour bands read as a gradient, and polygon styling for
- * MultiPolygon features (the mapper styles any multi-geometry as a line). Rebuild each feature's style from its
- * properties so the coverage draws in its dBm colors instead of the default black outline.
+ * The maps-utils GeoJSON mapper reads `fill`/`stroke`/`stroke-width`/`fill-opacity`/`stroke-opacity` itself, but
+ * attaches no style at all to a feature carrying none of those keys — which is every Meshtastic Site Planner coverage
+ * export that predates them, and leaves the opacity slider nothing to fade. So each feature's style is resolved here,
+ * adding what the mapper does not cover: the legacy `color` fallback, `rgb()`/`rgba()` colors, `stroke-opacity` on
+ * lines, a default fill opacity so stacked contour bands read as a gradient, and the imported `icon-url` it has no
+ * marker styling for. Geometry is classified the way the mapper classifies it, except that a point without an
+ * `icon-url` is left alone — the mapper styles no point at all, and there is nothing of ours to add.
  */
 internal fun DataLayer.applySimpleStyleSpec(): DataLayer = copy(features = features.map { it.applySimpleStyleSpec() })
 
@@ -1650,6 +1764,13 @@ internal fun Feature.applySimpleStyleSpec(): Feature {
         }
     val strokeWidth = stringProperty("stroke-width")?.toFloatOrNull() ?: DEFAULT_GEOJSON_STROKE_WIDTH
     return when {
+        // A KML icon reaches us as the `icon-url` the converter writes; the mapper reads no icon property at all, and
+        // sorts a MultiPoint into the line branch below, so without this the map loses the icons it has always drawn.
+        geometry.isPointLike() ->
+            stringProperty(ICON_URL_PROPERTY)?.let(::sanitizeImportedIconUrl)?.let {
+                copy(style = PointStyle(iconUrl = it))
+            } ?: this
+
         geometry.isPolygonal() ->
             copy(
                 style =
@@ -1660,16 +1781,7 @@ internal fun Feature.applySimpleStyleSpec(): Feature {
                 ),
             )
 
-        geometry.isLinear() -> copy(style = LineStyle(color = stroke ?: AndroidColor.BLACK, width = strokeWidth))
-
-        // A KML icon reaches us as the `icon-url` the converter writes; maps-utils' GeoJSON mapper reads no icon
-        // property at all, so without this the Google map would silently lose the icons it has always drawn.
-        geometry.isPointLike() ->
-            stringProperty(ICON_URL_PROPERTY)
-                ?.takeIf { it.isNotBlank() }
-                ?.let { copy(style = PointStyle(iconUrl = it)) } ?: this
-
-        else -> this // Mixed geometry collections keep the mapper's style.
+        else -> copy(style = LineStyle(color = stroke ?: AndroidColor.BLACK, width = strokeWidth))
     }
 }
 
@@ -1714,13 +1826,9 @@ private fun Int.scaleAlpha(opacity: Float): Int = AndroidColor.argb(
 private fun Geometry.isPointLike(): Boolean = this is PointGeometry ||
     (this is MultiGeometry && geometries.isNotEmpty() && geometries.all { it is PointGeometry })
 
-/** Polygon or MultiPolygon (a multi-geometry whose members are all polygons). */
+/** Polygon or MultiPolygon — recursive, so a nested collection is classified the way the mapper classifies it. */
 private fun Geometry.isPolygonal(): Boolean =
-    this is ModelPolygon || (this is MultiGeometry && geometries.isNotEmpty() && geometries.all { it is ModelPolygon })
-
-/** LineString or MultiLineString (a multi-geometry whose members are all line strings). */
-private fun Geometry.isLinear(): Boolean =
-    this is LineString || (this is MultiGeometry && geometries.isNotEmpty() && geometries.all { it is LineString })
+    this is ModelPolygon || (this is MultiGeometry && geometries.isNotEmpty() && geometries.all { it.isPolygonal() })
 
 private fun Feature.stringProperty(key: String): String? = properties[key] as? String
 

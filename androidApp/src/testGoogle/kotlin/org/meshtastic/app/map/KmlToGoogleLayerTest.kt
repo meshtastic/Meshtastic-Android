@@ -49,12 +49,25 @@ class KmlToGoogleLayerTest {
         <?xml version="1.0" encoding="UTF-8"?>
         <kml xmlns="http://www.opengis.net/kml/2.2"><Document>
           <Style id="tower"><IconStyle><Icon>
-            <href>https://example.org/tower.png</href>
+            <href>files/tower.png</href>
           </Icon></IconStyle></Style>
           <Placemark><name>Repeater</name><styleUrl>#tower</styleUrl>
             <Point><coordinates>-107.62,34.07</coordinates></Point></Placemark>
           <Placemark><name>Plain</name>
             <Point><coordinates>-107.60,34.05</coordinates></Point></Placemark>
+        </Document></kml>
+        """
+            .trimIndent()
+
+    private val kmlWithRemoteIcon =
+        """
+        <?xml version="1.0" encoding="UTF-8"?>
+        <kml xmlns="http://www.opengis.net/kml/2.2"><Document>
+          <Style id="tower"><IconStyle><Icon>
+            <href>https://example.org/tower.png</href>
+          </Icon></IconStyle></Style>
+          <Placemark><name>Repeater</name><styleUrl>#tower</styleUrl>
+            <Point><coordinates>-107.62,34.07</coordinates></Point></Placemark>
         </Document></kml>
         """
             .trimIndent()
@@ -110,21 +123,28 @@ class KmlToGoogleLayerTest {
     fun `a placemark's icon reaches the style maps-utils renders`() {
         // maps-utils' GeoJSON mapper reads no icon property of its own, so without the mapping this test guards, the
         // Google map would silently lose the icons it has drawn all along.
-        val layer = assertNotNull(layerFrom(kmlWithIcon))
+        val layer = assertNotNull(layerFrom(kmz(kmlWithIcon, imageEntry = "files/tower.png")))
         val styles = layer.features.map { it.style }
 
         assertTrue(
-            styles.any { it is PointStyle && it.iconUrl == "https://example.org/tower.png" },
+            styles.any { it is PointStyle && it.iconUrl == "files/tower.png" },
             "no feature carried the icon: $styles",
         )
     }
 
     @Test
     fun `a placemark with no icon is left with the mapper's own style`() {
-        val layer = assertNotNull(layerFrom(kmlWithIcon))
+        val layer = assertNotNull(layerFrom(kmz(kmlWithIcon, imageEntry = "files/tower.png")))
         val iconed = layer.features.count { (it.style as? PointStyle)?.iconUrl != null }
 
         assertEquals(1, iconed)
+    }
+
+    @Test
+    fun `a remote icon url is stripped before maps utils sees it`() {
+        val layer = assertNotNull(layerFrom(kmlWithRemoteIcon))
+
+        assertTrue(layer.features.none { (it.style as? PointStyle)?.iconUrl != null })
     }
 
     @Test

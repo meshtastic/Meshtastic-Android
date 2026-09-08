@@ -143,8 +143,7 @@ fun GenericMetricChart(
                 getXStep = { model, _, _ -> maxOf(model.getXDeltaGcd(), MIN_X_STEP_SECONDS) },
             ),
             modelProducer = modelProducer,
-            // Guard against Vico's canvas restore underflow (see chartRestoreUnderflowGuard).
-            modifier = modifier.chartRestoreUnderflowGuard(),
+            modifier = modifier,
             scrollState = vicoScrollState,
             zoomState = zoomState,
         )

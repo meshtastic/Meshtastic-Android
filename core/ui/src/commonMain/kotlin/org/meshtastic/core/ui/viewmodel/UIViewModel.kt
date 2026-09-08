@@ -204,13 +204,9 @@ class UIViewModel(
         hourTtl: Int = 0,
         maxSessionSeconds: Int = 0,
         disable: Boolean = false,
-    ) {
-        lockdownCoordinator.submitPassphrase(passphrase, bootTtl, hourTtl, maxSessionSeconds, disable)
-    }
+    ): Boolean = lockdownCoordinator.submitPassphrase(passphrase, bootTtl, hourTtl, maxSessionSeconds, disable)
 
-    fun sendLockNow() {
-        lockdownCoordinator.lockNow()
-    }
+    fun sendLockNow(): Boolean = lockdownCoordinator.lockNow()
 
     fun clearLockdownState() {
         serviceRepository.clearLockdownState()

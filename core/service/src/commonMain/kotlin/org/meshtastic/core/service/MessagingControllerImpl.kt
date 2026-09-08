@@ -111,17 +111,24 @@ internal class MessagingControllerImpl(
     override suspend fun sendSharedContact(nodeNum: Int): Boolean {
         val myNum = nodeManager.myNodeNum.value ?: return false
         val nodeDef = nodeRepository.getNode(NodeAddress.numToDefaultId(nodeNum))
-        val contact =
-            SharedContact(node_num = nodeDef.num, user = nodeDef.user, manually_verified = nodeDef.manuallyVerified)
-        return safeCatching { commandSender.sendAdminAwait(myNum) { AdminMessage(add_contact = contact) } }
-            .getOrDefault(false)
+        // Firmware assigns public_key unconditionally, so a keyless contact clears the key the radio already holds.
+        return if (nodeDef.user.public_key.size == 0) {
+            Logger.w { "sendSharedContact rejected: no public key on file for node $nodeNum" }
+            false
+        } else {
+            val contact =
+                SharedContact(node_num = nodeDef.num, user = nodeDef.user, manually_verified = nodeDef.manuallyVerified)
+            safeCatching { commandSender.sendAdminAwait(myNum) { AdminMessage(add_contact = contact) } }
+                .getOrDefault(false)
+        }
     }
 
     override suspend fun importContact(contact: SharedContact) {
         val myNum = nodeManager.myNodeNum.value ?: return
         val user = contact.user
-        if (contact.node_num == 0 || user == null) {
-            Logger.w { "importContact rejected: missing node_num or user (node_num=${contact.node_num})" }
+        // An empty key is not a no-op on the radio: it overwrites a stored key and breaks a working conversation.
+        if (contact.node_num == 0 || user == null || user.public_key.size == 0) {
+            Logger.w { "importContact rejected: missing node_num, user or public key (node_num=${contact.node_num})" }
             return
         }
         // Cross-platform policy: honor the verification state encoded by the sharer as-is

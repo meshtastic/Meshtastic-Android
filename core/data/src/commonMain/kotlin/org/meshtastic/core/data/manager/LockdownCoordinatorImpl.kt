@@ -127,14 +127,22 @@ class LockdownCoordinatorImpl(
                 }
             if (stored != null) {
                 Logger.i { "Lockdown: Auto-unlocking with stored passphrase" }
-                wasAutoAttempt = true
-                commandSender.sendLockdownPassphrase(
-                    stored.passphrase,
-                    stored.boots,
-                    stored.hours,
-                    stored.maxSessionSeconds,
-                )
-                return
+                // A fresh LOCKED status ends any previous auto-attempt outcome. Only an admitted replay arms failure
+                // handling for the new attempt.
+                wasAutoAttempt = false
+                val dispatched =
+                    commandSender.sendLockdownPassphrase(
+                        stored.passphrase,
+                        stored.boots,
+                        stored.hours,
+                        stored.maxSessionSeconds,
+                    )
+                if (dispatched) {
+                    wasAutoAttempt = true
+                    serviceRepository.setLockdownState(LockdownState.AwaitingResponse)
+                    return
+                }
+                Logger.w { "Lockdown: Auto-unlock command was not accepted by the active transport" }
             }
         }
         serviceRepository.setLockdownState(LockdownState.Locked(lockReason))
@@ -212,13 +220,21 @@ class LockdownCoordinatorImpl(
         hours: Int,
         maxSessionSeconds: Int,
         disable: Boolean,
-    ) {
+    ): Boolean {
+        if (!commandSender.sendLockdownPassphrase(passphrase, boots, hours, maxSessionSeconds, disable)) {
+            Logger.w { "Lockdown: Passphrase command was not accepted by the active transport" }
+            return false
+        }
+
         wasAutoAttempt = false
         wasLockNow = false
         if (disable) {
-            // Turning lockdown OFF: the device will reboot to DISABLED, so there is nothing to re-save. Drop any
-            // stored passphrase now so a later reconnect doesn't auto-unlock a device the user just disabled.
+            // Turning lockdown OFF: the device will reboot to DISABLED, so there is nothing to re-save. Clear the
+            // stored passphrase only after transport admission succeeds so a rejected request remains retryable.
             pendingPassphrase = null
+            pendingBoots = LockdownPassphraseStore.DEFAULT_BOOTS
+            pendingHours = 0
+            pendingMaxSessionSeconds = 0
             val deviceAddress = radioInterfaceService.getDeviceAddress()
             if (deviceAddress != null) {
                 try {
@@ -233,13 +249,18 @@ class LockdownCoordinatorImpl(
             pendingHours = hours
             pendingMaxSessionSeconds = maxSessionSeconds
         }
-        serviceRepository.setLockdownState(LockdownState.None)
-        commandSender.sendLockdownPassphrase(passphrase, boots, hours, maxSessionSeconds, disable)
+        serviceRepository.setLockdownState(LockdownState.AwaitingResponse)
+        return true
     }
 
-    override fun lockNow() {
-        wasLockNow = true
-        commandSender.sendLockNow()
+    override fun lockNow(): Boolean {
+        val dispatched = commandSender.sendLockNow()
+        if (dispatched) {
+            wasLockNow = true
+        } else {
+            Logger.w { "Lockdown: Lock Now command was not accepted by the active transport" }
+        }
+        return dispatched
     }
 
     private fun resetTransientState() {

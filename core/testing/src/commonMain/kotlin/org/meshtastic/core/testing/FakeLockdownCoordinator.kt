@@ -29,6 +29,8 @@ class FakeLockdownCoordinator : LockdownCoordinator {
     var lastHours: Int? = null
     var lastMaxSessionSeconds: Int? = null
     var lastDisable: Boolean = false
+    var submitAccepted: Boolean = true
+    var lockNowAccepted: Boolean = true
     var lockNowCalled = false
 
     override fun onConnect() {
@@ -53,15 +55,17 @@ class FakeLockdownCoordinator : LockdownCoordinator {
         hours: Int,
         maxSessionSeconds: Int,
         disable: Boolean,
-    ) {
+    ): Boolean {
         lastPassphrase = passphrase
         lastBoots = boots
         lastHours = hours
         lastMaxSessionSeconds = maxSessionSeconds
         lastDisable = disable
+        return submitAccepted
     }
 
-    override fun lockNow() {
+    override fun lockNow(): Boolean {
         lockNowCalled = true
+        return lockNowAccepted
     }
 }

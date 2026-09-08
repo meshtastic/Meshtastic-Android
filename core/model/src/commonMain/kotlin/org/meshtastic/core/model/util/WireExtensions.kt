@@ -26,7 +26,9 @@ import okio.ByteString.Companion.toByteString
 fun <T : Message<T, *>> ProtoAdapter<T>.decodeOrNull(bytes: ByteString?, logger: Logger? = null): T? {
     if (bytes == null) return null
     return runCatching { decode(bytes) }
-        .onFailure { exception -> logger?.e(exception) { "Failed to decode proto message" } }
+        // Warn, not error: this helper's contract is "return null instead of throwing", so a failure
+        // here is expected for callers decoding payloads of uncertain provenance, not by itself a defect.
+        .onFailure { exception -> logger?.w(exception) { "Failed to decode proto message" } }
         .getOrNull()
 }
 
@@ -36,7 +38,7 @@ fun <T : Message<T, *>> ProtoAdapter<T>.decodeOrNull(bytes: ByteString?, logger:
  * Convenience overload for ByteArray inputs, automatically converting to ByteString.
  *
  * @param bytes The ByteArray to decode, or null
- * @param logger Optional logger for error reporting
+ * @param logger Optional logger for warn-level failure reporting
  * @return The decoded message, or null if bytes is null or decoding fails
  */
 fun <T : Message<T, *>> ProtoAdapter<T>.decodeOrNull(bytes: ByteArray?, logger: Logger? = null): T? {

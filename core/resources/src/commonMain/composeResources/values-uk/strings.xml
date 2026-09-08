@@ -393,8 +393,6 @@
     <string name="encryption_error_text">Публічний ключ не збігається із записаним ключем. Ви можете видалити вузол і дозволити йому обмінятися ключами знову, але це може свідчити про проблему з безпекою. Зв’яжіться з користувачем через інший довірений канал, щоб з’ясувати, чи була зміна ключа наслідком скидання до заводських налаштувань або іншої навмисної дії.</string>
     <string name="encryption_pkc">Шифрування з відкритим ключем</string>
     <string name="encryption_pkc_text">Для шифрування особистих повідомлень використовується нова система публічних ключів.</string>
-    <string name="encryption_psk">Спільний ключ</string>
-    <string name="encryption_psk_text">Доступні лише повідомлення в каналах. Прямі повідомлення потребують підтримки Pki, яка з'явилася у версіях прошивки 2.5+ та вище.</string>
     <string name="env_metrics_log">Показники довкілля</string>
     <!-- ENVIRONMENT -->
     <string name="environment">Середовище</string>
@@ -860,6 +858,7 @@
     <string name="now">Зараз</string>
     <string name="ntp_server">NTP-сервер</string>
     <string name="number_of_records">Кількість записів</string>
+    <!-- OFFLINE -->
     <string name="ok_to_mqtt">MQTT: Готово</string>
     <string name="okay">Гаразд</string>
     <string name="oled_type">Тип OLED</string>

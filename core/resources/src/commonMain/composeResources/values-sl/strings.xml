@@ -94,7 +94,6 @@
     <!-- ENCRYPTION -->
     <string name="encryption_error">Neujemanje javnega ključa</string>
     <string name="encryption_pkc">Šifriranje javnega ključa</string>
-    <string name="encryption_psk">Skupni ključ</string>
     <!-- ENVIRONMENT -->
     <string name="error">Napaka</string>
     <string name="error_duty_cycle">Dosežena je omejitev delovnega cikla. Trenutno ne morete pošiljati sporočil, poskusite kasneje.</string>
@@ -195,6 +194,7 @@
     <string name="none_quality">Brez</string>
     <string name="not_connected">Ni povezano</string>
     <!-- NOTIFICATIONS -->
+    <!-- OFFLINE -->
     <string name="okay">V redu</string>
     <!-- ONE -->
     <string name="one_day">24 Ur</string>

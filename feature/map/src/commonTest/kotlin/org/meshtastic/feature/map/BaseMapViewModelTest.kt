@@ -33,6 +33,7 @@ import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
+import org.meshtastic.core.network.repository.NetworkRepository
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.testing.FakeLocaleUnitsProvider
@@ -62,6 +63,7 @@ class BaseMapViewModelTest {
     private val showIgnored = MutableStateFlow(false)
     private val packetRepository: PacketRepository = mock()
     private val localeUnitsProvider = FakeLocaleUnitsProvider()
+    private val networkRepository: NetworkRepository = mock()
 
     @BeforeTest
     fun setUp() {
@@ -85,6 +87,7 @@ class BaseMapViewModelTest {
 
         waypointPacketsFlow = MutableStateFlow(emptyList())
         every { packetRepository.getWaypoints() } returns waypointPacketsFlow
+        every { networkRepository.networkAvailable } returns MutableStateFlow(true)
 
         viewModel =
             BaseMapViewModel(
@@ -95,6 +98,7 @@ class BaseMapViewModelTest {
                 radioConfigRepository = radioConfigRepository,
                 notificationPrefs = FakeNotificationPrefs(),
                 localeUnitsProvider = localeUnitsProvider,
+                networkRepository = networkRepository,
             )
     }
 

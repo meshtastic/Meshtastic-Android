@@ -429,8 +429,6 @@
     <string name="encryption_error_text">公開金鑰與先前記錄不符。您可以移除此節點並重新進行金鑰交換,但這可能代表有更嚴重的安全性問題。建議透過其他可靠的通訊方式聯繫該使用者,確認金鑰改變是否為重設裝置或其他有意的操作。</string>
     <string name="encryption_pkc">加密公鑰</string>
     <string name="encryption_pkc_text">私訊功能已改用新的公開金鑰基礎建設加密。</string>
-    <string name="encryption_psk">共用金鑰</string>
-    <string name="encryption_psk_text">目前只能使用頻道訊息，無法使用私訊功能。若要使用私訊功能，請將韌體更新至 2.5 以上版本。</string>
     <string name="env_metrics_log">環境計量資料</string>
     <!-- ENVIRONMENT -->
     <string name="environment">環境</string>
@@ -912,6 +910,7 @@
     <string name="now">現在</string>
     <string name="ntp_server">時間伺服器</string>
     <string name="number_of_records">紀錄數目</string>
+    <!-- OFFLINE -->
     <string name="ok_to_mqtt">允許轉發至 MQTT</string>
     <string name="okay">好的</string>
     <string name="oled_type">OLED 類型</string>

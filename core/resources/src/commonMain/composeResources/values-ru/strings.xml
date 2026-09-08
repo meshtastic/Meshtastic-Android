@@ -163,6 +163,8 @@
     <string name="bluetooth_permission_blocked_notice_pre31">Разрешение на определение местоположения выключено, и Android больше не будет спрашивать. Включи его в настройках приложения, чтобы сканировать устройства Bluetooth, или подключись через Wi-Fi или USB.</string>
     <string name="bluetooth_permission_blocked_rationale">Доступ к ближайшим устройствам выключен, и Android больше не будет спрашивать. Включи его в настройках приложения чтобы сканировать и подключаться по Bluetooth.</string>
     <string name="bluetooth_permission_blocked_rationale_pre31">Разрешение на определение местоположения выключено, и Android больше не будет спрашивать. Включи его в настройках приложения, чтобы сканировать и подключаться через Bluetooth.</string>
+    <string name="bluetooth_permission_denied_notice">Без доступа к устройствам поблизости Meshtastic не сможет найти или подключиться к твоей радиостанции по Bluetooth. Ты всё ещё можешь подключиться через Wi-Fi или USB.</string>
+    <string name="bluetooth_permission_denied_notice_pre31">Без разрешения на доступ к местоположению Android блокирует сканирование Bluetooth, поэтому Meshtastic не может найти твою радиостанцию. Ты всё ещё можешь подключиться через Wi-Fi или USB.</string>
     <string name="bluetooth_scan_location_services_disabled">Службы определения местоположения отключены. Включите их, чтобы искать ближайшие устройства.</string>
     <string name="bluetooth_scan_missing_permission">Сканирование Bluetooth требует разрешения. Дайте разрешение на поиск устройств поблизости (или местоположения).</string>
     <string name="bluetooth_scan_start_failed">Невозможно запустить сканирование Bluetooth. Попробуй снова или включи/выключи Bluetooth, если проблема не исчезнет.</string>
@@ -175,6 +177,7 @@
     <string name="bold_heading">Выделять заголовок жирным</string>
     <string name="bonding_failed_permissions">Сопряжение не удалось. Дай соседнему устройству разрешения и попробуй снова.</string>
     <string name="bonding_failed_retry">Сопряжение не завершилось. Попробуй снова.</string>
+    <string name="boot_reconnect_blocked_message">Разрешение на доступ к ближайшим устройствам выключено, поэтому к твоему радио нельзя подключиться через Bluetooth. Нажми, чтобы включить его снова.</string>
     <string name="boot_reconnect_blocked_title">Meshtastic не может переподключиться</string>
     <string name="bottom_nav_settings">Настройки</string>
     <string name="broadcast_interval">Период рассылки</string>
@@ -189,6 +192,7 @@
     </plurals>
     <string name="calculating">Вычисление…</string>
     <string name="call_sign">Позывной</string>
+    <string name="call_sign_summary">Твой позывной радиолюбителя, до 7 символов</string>
     <string name="camera_permission">Разрешение камеры</string>
     <string name="camera_permission_rationale">Разреши доступ к камере, для сканирования QR-кодов.</string>
     <string name="camera_unavailable">Камера не может запуститься. Попробуй снова или закрой сканер и открой заново.</string>
@@ -223,6 +227,7 @@
     <string name="chirpy_assistant_title">Весёлый помощник</string>
     <string name="chirpy_checking">Проверка доступности Chirpy…</string>
     <string name="chirpy_downloading">Chirpy загружается…</string>
+    <string name="chirpy_downloading_progress">Загрузка модели Chirpy: %1$d%</string>
     <string name="chirpy_downloading_subtitle">Это произошло только один раз. Chirpy скоро будет готов!</string>
     <string name="chirpy_error_busy">Ух ё! Канал сейчас совершенно перегружен из-за сильного трафика! 📶 Давай подождём свободного промежутка и попробуем передать снова.</string>
     <string name="chirpy_error_model_unavailable">Моя батарея заряжается или моя прошивка всё ещё загружается! 🔋 Дай мне немного времени, чтобы синхронизироваться и загрузиться!</string>
@@ -237,6 +242,7 @@
     <string name="chirpy_thinking">Chirpy прокладывает маршрут через сеть… 📡</string>
     <string name="choose_contrast">Уровень контрастности</string>
     <string name="choose_theme">Выберите тему</string>
+    <string name="choose_units">Выбрать единицы</string>
     <!-- CLEAN -->
     <string name="clean_node_database_confirmation">Это приведет к удалению %1$d нод из вашей базы данных. Это действие не может быть отменено.</string>
     <string name="clean_node_database_description">Осторожно: Это удаляет ноды из базы данных в приложении и устройства.\nВыбор является суммирующим</string>
@@ -299,6 +305,7 @@
     <string name="config_lora_region_summary">Регион, в котором вы будете использовать ваше радио.</string>
     <string name="config_network_eth_enabled_summary">Включение Ethernet отключит Bluetooth-соединение с приложением. TCP-соединения не доступны на устройствах Apple.</string>
     <string name="config_network_udp_enabled_summary">Включить вещание пакетов через UDP в локальной сети.</string>
+    <string name="config_network_wifi_enabled_summary">Включение WiFi отключит Bluetooth-подключение к приложению.</string>
     <string name="config_position_broadcast_secs_summary">Максимальное время между передачами позиции нодой.</string>
     <string name="config_position_broadcast_smart_minimum_distance_summary">Минимальное расстояние для умной рассылки координаты.</string>
     <string name="config_position_broadcast_smart_minimum_interval_secs_summary">Чем меньше расстояние, тем быстрее будет отправляться обновление позицию.</string>
@@ -589,6 +596,7 @@
     <string name="downlink_enabled">MQTT Downlink включён</string>
     <string name="downlink_feature_description">Сообщения от публичного интернет шлюза пересылаются в локальную сетку. Из-за политики нулевого хоста, трафик сервера MQTT по умолчанию не будет распространяться дальше, чем это устройство.</string>
     <string name="download">Скачать</string>
+    <string name="download_this_area">Загрузить этот регион</string>
     <string name="duplicated_public_key_title">Обнаружен дубликат открытого ключа</string>
     <string name="dynamic">Динамический</string>
     <string name="easily_set_up_private_mesh_networks">Легко создать частные сети для защищённой и надежной связи в удаленных районах.</string>
@@ -617,8 +625,6 @@
     <string name="encryption_error_text">Открытый ключ не соответствует записанному ключу. Вы можете удалить ноду и позволить ей снова обменяться ключами, но это может указывать на серьезную проблему с безопасностью. Свяжитесь с пользователем по другому надежному каналу чтобы определить, произошла ли смена ключа в результате сброса настроек или другого преднамеренного действия.</string>
     <string name="encryption_pkc">Общий ключ шифрования</string>
     <string name="encryption_pkc_text">Прямые сообщения используют новую инфраструктуру открытого ключа для шифрования.</string>
-    <string name="encryption_psk">Общедоступный ключ</string>
-    <string name="encryption_psk_text">Только сообщения каналов могут быть отправлены/получены. Прямые сообщения требуют поддержки Инфраструктуры Открытого Ключа (PKI) в 2.5+ прошивке.</string>
     <string name="env_metrics_log">Метрики окружения</string>
     <!-- ENVIRONMENT -->
     <string name="environment">Окружающая среда</string>
@@ -736,6 +742,7 @@
     <string name="firmware_update_method_ble">BLE OTA (по воздуху)</string>
     <string name="firmware_update_method_detail">Обновить по %1$s</string>
     <string name="firmware_update_method_usb">Передача файлов через USB</string>
+    <string name="firmware_update_method_wifi">Wi-Fi OTA</string>
     <string name="firmware_update_missing_target">Информация о целевой прошивке недоступна для этого устройства.</string>
     <string name="firmware_update_nightly">Ночные сборки</string>
     <string name="firmware_update_no_device">Нет подключенных устройств</string>
@@ -847,6 +854,7 @@
     <string name="gps_transmit_gpio">GPIO передачи GPS</string>
     <string name="grant_permission">Дать разрешение</string>
     <string name="green">Зеленый</string>
+    <string name="ham_long_name_summary">Необязательно. Добавляется к твоему позывному, например, KD2ABC//Attic Heltec</string>
     <string name="hardware">Оборудование</string>
     <string name="hardware_model">Модель оборудования</string>
     <string name="heading">Курс</string>
@@ -951,6 +959,7 @@
     <string name="loading">Загрузка</string>
     <!-- LOCAL -->
     <string name="local_mbtiles_file">Локальный файл MBTiles</string>
+    <string name="local_network_permission">Доступ к локальной сети</string>
     <string name="local_network_permission_denied_hint">Доступ к локальной сети для Meshtastic выключен. Если это радиоустройство в твоей локальной сети, подключение не удастся, пока не разрешишь доступ к локальной сети в системных настройках.</string>
     <string name="local_stats_bad">Плохие: %1$d</string>
     <string name="local_stats_battery">Батарея: %1$d</string>
@@ -967,6 +976,7 @@
     <string name="local_stats_utilization">ChUtil: %1$s% | AirTX: %2$s%</string>
     <!-- LOCATION -->
     <string name="location_disabled">Доступ к местоположению выключен, невозможно отправлять координаты в сеть.</string>
+    <string name="location_permission">Доступ к местоположению</string>
     <string name="location_sharing">Поделиться местоположением</string>
     <!-- LOCKDOWN -->
     <string name="lockdown_backoff">Попробуй снова через %1$d секунд.</string>
@@ -1033,6 +1043,7 @@
     <string name="map">Карта сети</string>
     <string name="map_cache_info">Емкость кэша: %1$d MB\nИспользование кэша: %2$d MB</string>
     <string name="map_cache_manager">Менеджер кэша</string>
+    <string name="map_cache_megabytes">%1$s МБ</string>
     <string name="map_cache_size">Текущий размер кэша</string>
     <string name="map_cache_tiles">%1$d файла</string>
     <string name="map_clear_tiles">Очистить загруженные файлы</string>
@@ -1040,13 +1051,29 @@
     <string name="map_download_errors">Скачивание завершено с %1$d ошибок</string>
     <string name="map_download_region">Скачать Регион</string>
     <string name="map_download_status_complete">Полнота</string>
+    <string name="map_download_status_downloading">Загрузка</string>
+    <string name="map_download_status_paused">Пауза</string>
+    <string name="map_engine_unavailable">Карта недоступна на этом устройстве</string>
     <string name="map_filter">Фильтр карты\n</string>
     <string name="map_filter_all_roles">Всё</string>
     <string name="map_filter_display_title">Дисплей</string>
     <string name="map_filter_nodes_title">Ноды</string>
+    <string name="map_filter_roles_title">Роли ноды</string>
+    <string name="map_filter_show_ignored">Показать игнорируемые ноды</string>
+    <string name="map_filter_title">Фильтр карты</string>
     <string name="map_layer_formats">Слои карты поддерживают форматы .kml, .kmz или GeoJSON.</string>
+    <string name="map_layer_opacity">Прозрачность: %1$d%</string>
     <string name="map_node_popup_details">%1$s&lt;br&gt;Последняя активность: %2$s&lt;br&gt;Последняя позиция: %3$s&lt;br&gt;Заряд: %4$s</string>
+    <string name="map_offline_banner">Оффлайн — отображение кэшированных данных</string>
+    <string name="map_offline_download_terrain">Скачать ландшафт</string>
+    <string name="map_offline_downloading_progress">Загрузка… %1$d / %2$d плиток</string>
     <string name="map_offline_manager">Оффлайн менеджер</string>
+    <string name="map_offline_region_label">%1$s, %2$s  %3$s</string>
+    <string name="map_offline_show_on_map">Показать на карте</string>
+    <string name="map_offline_terrain_contours">Контуры</string>
+    <string name="map_overlay_hillshade">Тень на склоне</string>
+    <string name="map_overlay_precipitation">Осадки</string>
+    <string name="map_overlay_weather_radar">Метеорадары</string>
     <string name="map_purge_fail">Ошибка очистки кэша SQL, подробности в logcat</string>
     <string name="map_purge_success">Кэш SQL очищен для %1$s</string>
     <string name="map_reporting">Отчёты по карте</string>
@@ -1059,6 +1086,8 @@
     <string name="map_style_selection">Выбор стиля карты</string>
     <string name="map_subDescription">азимут: %1$d° расстояние: %2$s</string>
     <string name="map_tile_download_estimate">Предполагаемое время загрузки файла:</string>
+    <string name="map_tile_download_estimate_detail">%1$s %2$s %3$s</string>
+    <string name="map_tile_limit_reached">Достигнут предел плитки (%1$d)</string>
     <string name="map_tile_source">Источник файла</string>
     <string name="map_type_hybrid">Смешанный</string>
     <string name="map_type_normal">Обычный</string>
@@ -1327,6 +1356,7 @@
     <string name="now">Только что</string>
     <string name="ntp_server">NTP-сервер</string>
     <string name="number_of_records">Количество записей</string>
+    <!-- OFFLINE -->
     <string name="ok_to_mqtt">ОК в MQTT</string>
     <string name="okay">Лады</string>
     <string name="oled_type">Тип OLED</string>
@@ -1382,6 +1412,7 @@
     <string name="pax_total_format">PAX: %1$d</string>
     <string name="pax_total_marker">PAX: %1$s</string>
     <string name="pax_wifi_format">W:%1$d</string>
+    <string name="pax_wifi_marker">Wi-Fi: %1$s</string>
     <string name="paxcounter">Счётчик прохожих</string>
     <string name="paxcounter_config">Настройки Paxcounter</string>
     <string name="paxcounter_enabled">Paxcounter включен</string>
@@ -1541,6 +1572,7 @@
     <string name="request_pax_metrics">Метрика прохожих</string>
     <string name="request_power_metrics">Метрики мощности</string>
     <string name="request_telemetry">Запрос телеметрии</string>
+    <string name="request_user_info">Запросить User Info</string>
     <string name="requesting_from">Запрашиваю %1$s у %2$s</string>
     <string name="resend">Отправить</string>
     <string name="reset">Сброс</string>

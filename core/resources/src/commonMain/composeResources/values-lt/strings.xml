@@ -91,7 +91,6 @@
     <!-- ENCRYPTION -->
     <string name="encryption_error">Viešojo rakto neatitikimas</string>
     <string name="encryption_pkc">Viešojo rakto šifruotė</string>
-    <string name="encryption_psk">Viešas raktas</string>
     <!-- ENVIRONMENT -->
     <string name="error">Klaida</string>
     <string name="error_duty_cycle">Pasiektas veikimo ciklo limitas. Šiuo metu negalima siųsti žinučių, bandykite vėliau.</string>
@@ -190,6 +189,7 @@
     <string name="none_quality">Nėra</string>
     <string name="not_connected">Neprijungtas</string>
     <!-- NOTIFICATIONS -->
+    <!-- OFFLINE -->
     <string name="okay">Gerai</string>
     <!-- ONE -->
     <string name="one_day">24 Valandos</string>

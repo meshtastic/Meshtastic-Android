@@ -151,6 +151,8 @@ interface CommandSender {
      *
      * @param disable when `true`, instructs the device to decrypt storage back to plaintext and leave lockdown (the off
      *   switch). The device reboots and reconnects reporting `DISABLED`.
+     * @return `true` when the active transport accepted the command for asynchronous handoff, or `false` when the
+     *   command could not be dispatched. Firmware acceptance is reported separately through `LockdownStatus`.
      */
     fun sendLockdownPassphrase(
         passphrase: String,
@@ -158,8 +160,12 @@ interface CommandSender {
         hours: Int = 0,
         maxSessionSeconds: Int = 0,
         disable: Boolean = false,
-    )
+    ): Boolean
 
-    /** Sends a Lock Now command to immediately lock a locked-firmware device. */
-    fun sendLockNow()
+    /**
+     * Sends a Lock Now command to immediately lock a locked-firmware device.
+     *
+     * @return `true` when the active transport accepted the command for asynchronous handoff.
+     */
+    fun sendLockNow(): Boolean
 }

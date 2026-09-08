@@ -176,7 +176,6 @@
     <!-- ENCRYPTION -->
     <string name="encryption_error">Неусаглашеност јавних кључева</string>
     <string name="encryption_pkc">Шифровање јавним кључем</string>
-    <string name="encryption_psk">Дељени кључ</string>
     <string name="env_metrics_log">Метрике сензора</string>
     <!-- ENVIRONMENT -->
     <string name="environment">Окружење</string>
@@ -340,6 +339,7 @@
     <string name="notes">Белешке</string>
     <!-- NOTIFICATIONS -->
     <string name="number_of_records">Број записа</string>
+    <!-- OFFLINE -->
     <string name="ok_to_mqtt">Позитиван за MQTT</string>
     <string name="okay">Океј</string>
     <!-- ONE -->

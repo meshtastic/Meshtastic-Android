@@ -34,6 +34,7 @@ import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.model.TracerouteOverlay
 import org.meshtastic.core.model.geofence.activeWaypointPackets
 import org.meshtastic.core.model.isFromLocal
+import org.meshtastic.core.network.repository.NetworkRepository
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NotificationPrefs
@@ -68,9 +69,18 @@ open class BaseMapViewModel(
     private val radioConfigRepository: RadioConfigRepository,
     private val notificationPrefs: NotificationPrefs,
     localeUnitsProvider: LocaleUnitsProvider,
+    networkRepository: NetworkRepository,
 ) : ViewModel() {
 
     val myNodeInfo = nodeRepository.myNodeInfo
+
+    /**
+     * Whether the device currently has network connectivity, for the offline-basemap banner and (on the Google flavor)
+     * the auto-fallback in [org.meshtastic.app.map.MapViewModel]. Optimistically `true` until the first emission
+     * arrives, so the map never flashes an "offline" banner on cold start.
+     */
+    val mapNetworkAvailable: StateFlow<Boolean> =
+        networkRepository.networkAvailable.stateInWhileSubscribed(initialValue = true)
 
     /**
      * Display units (metric/imperial) for distance/altitude/speed formatting across map surfaces. Tracks locale changes

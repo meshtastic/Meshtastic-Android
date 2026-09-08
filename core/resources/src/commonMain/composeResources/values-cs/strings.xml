@@ -19,9 +19,12 @@
     <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Zpráva od %1$s: %2$s</string>
+    <string name="a11y_node_battery">baterie %1$d%</string>
     <string name="a11y_node_favorite">oblíbené</string>
     <string name="a11y_node_offline">offline</string>
     <string name="a11y_node_online">online</string>
+    <string name="a11y_node_role">role %1$s</string>
+    <string name="a11y_node_signal">signál: %1$s</string>
     <string name="a11y_nodes_at_hop">Skok %1$d: %2$d uzlů</string>
     <string name="about">O aplikaci</string>
     <string name="accept">Přijmout</string>
@@ -59,6 +62,9 @@
     <string name="advanced_device_gps">Pokročilé nastavení GPS zařízení</string>
     <string name="advanced_title">Rozšířené</string>
     <!-- AIR -->
+    <string name="air_quality">Kvalita ovzduší</string>
+    <string name="air_quality_icon">Ikona kvality ovzduší</string>
+    <string name="air_quality_metrics_log">Metriky kvality ovzduší</string>
     <string name="air_quality_metrics_module_enabled">Modul měření kvality ovzduší povolen</string>
     <string name="air_quality_metrics_update_interval_seconds">Interval aktualizace měření kvality ovzduší</string>
     <string name="air_util_definition">Procento vysílacího času použitého během poslední hodiny.</string>
@@ -236,11 +242,13 @@
     <!-- CLEAR -->
     <string name="clear">Vymazat</string>
     <string name="clear_position_track_message">Zaznamenaná GPS trasa tohoto uzlu bude trvale smazána. Tuto akci nelze vrátit zpět.</string>
+    <string name="clear_position_track_title">Vymazat trasu polohy?</string>
     <string name="clear_selection">Zrušit výběr</string>
     <string name="clear_time_zone">Vymazat časové pásmo</string>
     <string name="client_notification">Oznámení klienta</string>
     <string name="close">Zavřít</string>
     <string name="close_selection">Zavřít výběr</string>
+    <string name="co2">CO₂</string>
     <string name="collapse_chart">Sbalit graf</string>
     <string name="communicate_off_the_grid">Komunikujte off-the-grid s přáteli a komunitou bez mobilních služeb.</string>
     <!-- COMPASS -->
@@ -420,6 +428,7 @@
     <string name="discovery_connection_warning">Nejste připojeni. Připojte se k zařízení Meshtastic a spusťte vyhledávání.</string>
     <string name="discovery_delete_session">Smazat relaci</string>
     <string name="discovery_delete_session_confirm">Opravdu chcete tuto relaci vyhledávání odstranit? Tuto akci nelze vrátit zpět.</string>
+    <string name="discovery_dwell_minutes">%1$d min</string>
     <string name="discovery_dwell_progress">Naslouchání na %1$s, %2$s zbývá</string>
     <string name="discovery_dwell_time">Doba poslechu</string>
     <string name="discovery_dwell_time_description">Doba poslechu na každé předvolbě</string>
@@ -543,8 +552,6 @@
     <string name="encryption_error_text">Veřejný klíč neodpovídá uloženému klíči. Můžete uzel odebrat a nechat jej znovu vyměnit klíče, ale může to znamenat bezpečnostní problém. Kontaktujte uživatele jiným důvěryhodným kanálem a ověřte, zda ke změně klíče došlo v důsledku továrního resetu nebo jiné úmyslné akce.</string>
     <string name="encryption_pkc">Šifrování veřejného klíče</string>
     <string name="encryption_pkc_text">Přímé zprávy používají novou infrastrukturu veřejných klíčů pro šifrování.</string>
-    <string name="encryption_psk">Sdílený klíč</string>
-    <string name="encryption_psk_text">Lze odesílat a přijímat pouze kanálové zprávy. Přímé zprávy vyžadují funkci infrastruktury veřejných klíčů (PKI) ve firmwaru verze 2.5 a vyšší.</string>
     <string name="env_metrics_log">Metriky prostředí</string>
     <!-- ENVIRONMENT -->
     <string name="environment">Životní prostředí</string>
@@ -705,6 +712,7 @@
     <!-- FORMAT -->
     <string name="free_memory">Volná paměť</string>
     <string name="free_memory_description">Dostupná systémová paměť v bajtech</string>
+    <string name="freq">Frekv</string>
     <string name="frequency_slot">Frekvenční slot</string>
     <string name="friendly_name">Přezdívka</string>
     <string name="gas_resistance">Odpor plynu</string>
@@ -801,6 +809,7 @@
     <string name="ipv4_mode">Režim IPv4</string>
     <string name="json_output_enabled">JSON výstup povolen</string>
     <string name="jump_to_latest_from">%1$s</string>
+    <string name="jump_to_latest_from_and_more">%1$s +%2$d</string>
     <!-- KEY -->
     <string name="key_backup_deleted">Záloha klíče byla odstraněna</string>
     <string name="key_backup_not_found">Pro tento uzel nebyla nalezena žádná záloha klíče</string>
@@ -817,6 +826,7 @@
     <string name="latitude">Zeměpisná šířka</string>
     <!-- LAYER -->
     <string name="layer_subtitle">%1$s • %2$s</string>
+    <string name="layer_type_coverage">Odhad pokrytí</string>
     <string name="learn_more">Zjistit více</string>
     <string name="led_heartbeat">Blikání LED při provozu</string>
     <string name="led_state">Stav LED</string>
@@ -928,12 +938,29 @@
     <string name="map_download_errors">Stahování dokončeno s %1$d chybami</string>
     <string name="map_download_region">Stáhnout oblast</string>
     <string name="map_download_status_complete">Dokončeno</string>
+    <string name="map_download_status_downloading">Stahování</string>
+    <string name="map_engine_unavailable">Mapa není na tomto zařízení k dispozici</string>
+    <string name="map_filter">Filtr mapy\n</string>
     <string name="map_filter_all_roles">Vše</string>
     <string name="map_filter_display_title">Obrazovka</string>
     <string name="map_filter_nodes_title">Uzly</string>
+    <string name="map_filter_roles_title">Role uzlu</string>
+    <string name="map_filter_show_ignored">Zobrazit ignorované uzly</string>
+    <string name="map_filter_title">Filtrovat mapu</string>
     <string name="map_layer_formats">Mapové vrstvy podporují formáty .kml, .kmz nebo GeoJSON.</string>
+    <string name="map_layer_opacity">Průhlednost: %1$d%</string>
     <string name="map_node_popup_details">%1$s&lt;br&gt;Poslední příjem: %2$s&lt;br&gt;Poslední pozice: %3$s&lt;br&gt;Baterie: %4$s</string>
+    <string name="map_offline_download_failed_io">Stahování se nezdařilo — zkontrolujte připojení a zkuste to znovu</string>
+    <string name="map_offline_download_terrain">Stáhnout terén</string>
+    <string name="map_offline_downloading_progress">Stahování… %1$d / %2$d dlaždic</string>
     <string name="map_offline_manager">Správce Offline</string>
+    <string name="map_offline_region_label">%1$s, %2$s  %3$s</string>
+    <string name="map_offline_show_on_map">Zobrazit na mapě</string>
+    <string name="map_offline_terrain_download_complete">Stahování terénu dokončeno</string>
+    <string name="map_offline_terrain_download_failed_io">Stahování terénu se nezdařilo - zkontrolujte připojení a zkuste to znovu</string>
+    <string name="map_offline_terrain_download_failed_tile_limit">Vybraná oblast je pro terén příliš velká — přibližte mapu nebo vyberte menší oblast</string>
+    <string name="map_offline_terrain_downloading_progress">Stahování terénu… %1$d / %2$d dlaždic</string>
+    <string name="map_overlay_weather_radar">Meteorologický radar</string>
     <string name="map_purge_fail">Vyčištění mezipaměti SQL selhalo, podrobnosti naleznete v logcat</string>
     <string name="map_purge_success">Mezipaměť SQL vyčištěna pro %1$s</string>
     <string name="map_reporting">Hlášení mapy</string>
@@ -943,8 +970,10 @@
     <string name="map_reporting_summary">Váš uzel bude pravidelně odesílat nešifrovaný mapový paket na konfigurovaný MQTT server, který zahrnuje id, dlouhé a krátké jméno. přibližné umístění, hardwarový model, role, verze firmwaru, region LoRa, předvolba modemu a název primárního kanálu.</string>
     <string name="map_select_download_region">Vyberte oblast stahování</string>
     <string name="map_start_download">Zahájit stahování</string>
+    <string name="map_style_selection">Výběr stylu mapy</string>
     <string name="map_subDescription">směr: %1$d° vzdálenost: %2$s</string>
     <string name="map_tile_download_estimate">Odhad stažení dlaždic:</string>
+    <string name="map_tile_download_estimate_detail">%1$s %2$s %3$s</string>
     <string name="map_tile_source">Zdroj dlaždic</string>
     <string name="map_type_hybrid">Hybridní</string>
     <string name="map_type_normal">Normální</string>
@@ -956,6 +985,7 @@
     <string name="mesh_beacon">Mesh maják</string>
     <string name="mesh_beacon_broadcast">Vysílat maják</string>
     <string name="mesh_beacon_broadcast_summary">Pravidelně oznamovat tuto mesh síť okolním uzlům</string>
+    <string name="mesh_beacon_channel_number">Kanál: %1$d</string>
     <string name="mesh_beacon_channels_title">Kanály Mesh majáku</string>
     <string name="mesh_beacon_invitations_title">Pozvánky do mesh sítí</string>
     <string name="mesh_beacon_listen">Naslouchat majákům</string>
@@ -967,6 +997,7 @@
     <string name="mesh_beacon_offer_channel">Kanál: %1$s</string>
     <string name="mesh_beacon_offer_dismiss">Zavřít</string>
     <string name="mesh_beacon_offer_preset">Předvolba: %1$s</string>
+    <string name="mesh_beacon_offer_region">Region: %1$s</string>
     <string name="mesh_beacon_offer_signal">Signál: %1$s / %2$s</string>
     <string name="mesh_beacon_on_preset">Vysílací profil</string>
     <string name="mesh_beacon_preset_none">Žádný</string>
@@ -995,18 +1026,32 @@
     <string name="message_delivery_status">Stav doručení zprávy</string>
     <string name="message_device_managed">Toto rádio je spravováno vzdáleným správcem a změny může provádět jen on.</string>
     <string name="message_input_label">Zpráva</string>
+    <string name="message_routing_error_admin_bad_session_key">Relace správce vypršela</string>
     <string name="message_routing_error_admin_bad_session_key_detail">Klíč relace správce chybí, vypršela jeho platnost nebo je neplatný. Před dalším pokusem si vyžádejte novou relaci.</string>
+    <string name="message_routing_error_admin_public_key_unauthorized">Klíč správce není autorizován</string>
+    <string name="message_routing_error_admin_public_key_unauthorized_detail">Vzdálený uzel neautorizuje váš klíč správce.</string>
+    <string name="message_routing_error_bad_request">Neplatný požadavek</string>
+    <string name="message_routing_error_bad_request_detail">Cílový uzel tento požadavek odmítl jako neplatný.</string>
     <string name="message_routing_error_duty_cycle_limit_detail">Místní limity vysílacího času dočasně blokují odesílání. Před dalším pokusem chvíli počkejte.</string>
     <string name="message_routing_error_got_nak_detail">Uzel tuto zprávu odmítl. Zkuste to znovu, až se změní trasa.</string>
     <string name="message_routing_error_max_retransmit">Nepodařilo se doručit do mesh sítě</string>
     <string name="message_routing_error_max_retransmit_detail">Žádný uzel tuto zprávu nepotvrdil. Zkuste to znovu, až budete mít lepší signál nebo větší pokrytí mesh sítě.</string>
+    <string name="message_routing_error_no_channel">Neshoda kanálu/klíče</string>
+    <string name="message_routing_error_no_channel_detail">Odesílatel nebo příjemce nemohl pro tuto zprávu použít odpovídající kanál/klíč.</string>
+    <string name="message_routing_error_no_interface">Žádné rádiové rozhraní</string>
+    <string name="message_routing_error_no_interface_detail">Odesílatel nemá pro tuto zprávu žádné použitelné rádiové rozhraní.</string>
+    <string name="message_routing_error_no_response">Žádná odpověď aplikace</string>
     <string name="message_routing_error_no_response_detail">Cílové zařízení požadavek přijalo, ale žádná aplikace ani modul neodpověděly. Zkuste to znovu, až bude příjemce dostupný.</string>
     <string name="message_routing_error_no_route_detail">V mesh síti nebyla nalezena žádná cesta k cílovému uzlu. Zkuste to znovu, až bude dostupných více uzlů.</string>
     <string name="message_routing_error_not_authorized">Neautorizováno</string>
+    <string name="message_routing_error_not_authorized_detail">Cílový uzel tento požadavek odmítl, protože k němu nemáte oprávnění.</string>
     <string name="message_routing_error_pki_failed">Nepodařilo se odeslat šifrovanou zprávu</string>
     <string name="message_routing_error_pki_failed_detail">Šifrovanou cestu pro odeslání se nepodařilo použít. Počkejte, až se synchronizují informace o uzlu nebo klíče, a poté to zkuste znovu.</string>
+    <string name="message_routing_error_pki_send_fail_public_key">Klíč příjemce není k dispozici</string>
     <string name="message_routing_error_pki_send_fail_public_key_detail">Váš uzel zatím nemá veřejný klíč příjemce. Počkejte, až se synchronizují informace o uzlu, a poté to zkuste znovu.</string>
+    <string name="message_routing_error_pki_unknown_pubkey">Příjemce potřebuje váš klíč</string>
     <string name="message_routing_error_pki_unknown_pubkey_detail">Příjemce zatím nezná váš veřejný klíč. Váš uzel může své informace sdílet automaticky; zkuste to znovu, až se synchronizují.</string>
+    <string name="message_routing_error_rate_limit_exceeded">Dočasně omezeno</string>
     <string name="message_routing_error_rate_limit_exceeded_detail">Zprávy se odesílají příliš rychle. Před dalším pokusem počkejte.</string>
     <string name="message_routing_error_timeout_detail">Ve stanoveném čase nebylo přijato žádné potvrzení. Zkuste to znovu, až budete mít lepší signál nebo větší pokrytí mesh sítě.</string>
     <string name="message_routing_error_too_large">Zpráva je příliš dlouhá pro odeslání</string>
@@ -1019,6 +1064,7 @@
     <string name="message_status_unknown">Neznámé</string>
     <string name="message_translated_label">Překlad</string>
     <string name="messages">Zprávy</string>
+    <string name="metric_channel_label">%1$s %2$d</string>
     <string name="micrograms_per_cubic_meter">μg/m3</string>
     <string name="min">Min</string>
     <string name="minimum_broadcast_seconds">Minimální vysílání (sekundy)</string>
@@ -1088,6 +1134,8 @@
     <string name="no_network_devices_hint">Ujistěte se, že jste připojeni ke stejné síti jako zařízení.</string>
     <string name="no_network_devices_seen">Nenalezena žádná síťová zařízení</string>
     <string name="no_pax_metrics_logs">Metriky PAX nejsou k dispozici.</string>
+    <string name="no_public_key">Žádný veřejný klíč</string>
+    <string name="no_public_key_text">Tento uzel nesdílel veřejný klíč, takže mu nelze posílat přímé zprávy. Požádejte o informace o uživateli.</string>
     <string name="no_usb_devices_found">Nenalezena žádná USB zařízení</string>
     <string name="no_usb_devices_hint">Připojte zařízení datovým USB kabelem, chcete-li použít sériové připojení.</string>
     <string name="no_usb_devices_seen">Nebyla nalezena žádná USB zařízení</string>
@@ -1107,23 +1155,33 @@
     <string name="node_filter_title">Filtrovat podle</string>
     <string name="node_id">Identifikátor uzlu</string>
     <string name="node_incomplete">Nedokončeno</string>
+    <string name="node_incomplete_description">Informace o uzlu ještě nebyly přijaty</string>
     <string name="node_layout_channel">Kanál</string>
     <string name="node_layout_compact">Kompaktní</string>
     <string name="node_layout_compact_fields_header">Kompaktní pole</string>
-    <string name="node_layout_complete">Dokončeno</string>
+    <string name="node_layout_complete">Kompletní</string>
     <string name="node_layout_complete_description">Kompletní rozložení zobrazuje všechna dostupná data uzlu. Pole bez dat jsou automaticky skryta.</string>
     <string name="node_layout_device_role">Zařízení a Role</string>
     <string name="node_layout_distance_and_bearing">Vzdálenost a směr</string>
+    <string name="node_layout_help_signal_bad">Signál je špatný. SNR je 5,5 až 7,5 dB pod limitem SNR nastaveným vaším modemem.</string>
+    <string name="node_layout_help_signal_fair">Signál je slabý. SNR je méně než 5,5 dB pod limitem SNR nastaveným vaším modemem.</string>
+    <string name="node_layout_help_signal_good">Signál je silný. SNR je nad limitem SNR nastaveným vaším modemem.</string>
+    <string name="node_layout_help_signal_indicator">Hodnotí SNR podle limitu SNR zvoleného modemového profilu a výsledek zobrazuje pomocí barevné ikony s popiskem. RSSI se zobrazuje, ale do hodnocení se nezapočítává.</string>
+    <string name="node_layout_help_signal_none">Signál není použitelný. SNR je o více než 7,5 dB pod limitem SNR nastaveným vaším modemem.</string>
     <string name="node_layout_hops_away">Počet skoků</string>
     <string name="node_layout_last_heard_time">Čas posledního zachycení</string>
     <string name="node_layout_log_icons">Metriky prostředí</string>
+    <string name="node_layout_no_preview_available">Nejsou k dispozici žádné uzly pro náhled.</string>
     <string name="node_layout_power">Napájení</string>
     <string name="node_layout_preview">Náhled</string>
+    <string name="node_layout_relative_last_heard">Relativní čas posledního zachycení</string>
     <string name="node_layout_section_title">Rozložení uzlu</string>
     <string name="node_layout_signal_direct_only">Signál (pouze přímé spojení)</string>
     <string name="node_layout_signal_quality_indicator">Indikátor kvality signálu</string>
+    <string name="node_list_click_label">Otevřít podrobnosti uzlu</string>
     <string name="node_list_help_node_details">Detaily uzlu</string>
     <string name="node_list_help_title">Nápověda pro seznam uzlů</string>
+    <string name="node_list_long_click_label">Možnosti uzlu</string>
     <string name="node_number">Číslo uzlu</string>
     <string name="node_request_send_failed">Požadavek se nepodařilo odeslat. Zkuste to znovu.</string>
     <string name="node_restarting">Restartování…</string>
@@ -1168,7 +1226,13 @@
     <string name="now">Nyní</string>
     <string name="ntp_server">NTP server</string>
     <string name="number_of_records">Počet záznamů</string>
+    <!-- OFFLINE -->
     <string name="offline_maps">Offline mapy</string>
+    <string name="offline_maps_empty">Zatím nebyly staženy žádné oblasti</string>
+    <string name="offline_terrain_cache_detail">%1$s: %2$s · %3$s</string>
+    <string name="offline_terrain_empty">Zatím nebyl stažen žádný terén</string>
+    <string name="offline_terrain_manager">Offline terén</string>
+    <string name="offline_terrain_regional_detail">Obsahuje podrobný terén dané oblasti</string>
     <string name="ok_to_mqtt">OK do MQTT</string>
     <string name="okay">OK</string>
     <string name="oled_type">Typ OLED displeje</string>
@@ -1312,6 +1376,8 @@
     <string name="quick_chat_show">Zobrazit nabídku rychlého chatu</string>
     <string name="radiation">Radiace</string>
     <string name="radio_configuration">Nastavení zařízení</string>
+    <string name="rainfall_1h">Déšť (1h)</string>
+    <string name="rainfall_24h">Déšť (24h)</string>
     <string name="range_test">Zkouška dosahu</string>
     <string name="range_test_config">Nastavení testu pokrytí</string>
     <string name="range_test_enabled">Test pokrytí povolen</string>
@@ -1368,6 +1434,7 @@
     <string name="request_pax_metrics">Metriky Pax</string>
     <string name="request_power_metrics">Metriky napájení</string>
     <string name="request_telemetry">Vyžádat telemetrii</string>
+    <string name="request_user_info">Vyžádat informace o uživateli</string>
     <string name="requesting_from">Vyžádání %1$s od %2$s</string>
     <string name="resend">Poslat znovu</string>
     <string name="reset">Reset</string>
@@ -1376,6 +1443,9 @@
     <string name="restore_keys_confirmation">Obnoví zálohované veřejné a soukromé klíče tohoto uzlu.</string>
     <string name="retry">Zkusit znovu</string>
     <string name="ringtone">Vyzváněcí tón</string>
+    <string name="ringtone_file_empty">Soubor je prázdný</string>
+    <string name="ringtone_import_error">Chyba při importu: %1$s</string>
+    <string name="ringtone_imported">Importované vyzvánění</string>
     <!-- ROLE -->
     <string name="role">Role zařízení</string>
     <string name="role_client_base_desc">Pakety od oblíbených uzlů nebo směrované k nim jsou označeny jako ROUTER_LATE, ostatní pakety jako CLIENT.</string>
@@ -1397,11 +1467,16 @@
     <string name="rotary_encoder_1_enabled">Rotační enkodér #1 povolen</string>
     <string name="router_role_confirmation_text">Seznámil jsem se s &lt;a href="https://meshtastic.org/docs/configuration/radio/device/#roles"&gt;dokumentací k rolím zařízení&lt;/a&gt; a příspěvkem na blogu o &lt;a href="http://meshtastic.org/blog/choosing-the-right-device-role"&gt;výběru správné role zařízení&lt;/a&gt;.</string>
     <!-- ROUTING -->
+    <string name="routing_error_admin_public_key_unauthorized">Klíč správce není autorizován</string>
     <string name="routing_error_got_nak">Obdrženo negativní potvrzení</string>
     <string name="routing_error_max_retransmit">Nepodařilo se doručit do mesh sítě</string>
     <string name="routing_error_no_route">Žádná trasa</string>
     <string name="routing_error_none">Potvrzený příjem</string>
+    <string name="routing_error_not_authorized">Neautorizováno</string>
     <string name="routing_error_pki_failed">Nepodařilo se odeslat šifrovanou zprávu</string>
+    <string name="routing_error_pki_send_fail_public_key">Klíč příjemce není k dispozici</string>
+    <string name="routing_error_pki_unknown_pubkey">Příjemce potřebuje váš klíč</string>
+    <string name="routing_error_rate_limit_exceeded">Dočasně omezeno</string>
     <string name="routing_error_timeout">Vypršel čas spojení</string>
     <string name="routing_error_too_large">Zpráva je příliš dlouhá pro odeslání</string>
     <string name="rssi">RSSI</string>
@@ -1484,12 +1559,14 @@
     <string name="share_location_description">Použijte GPS telefonu k odesílání polohy do svého uzlu namísto použití hardwarového GPS přímo na uzlu.</string>
     <string name="share_to">Sdílet do…</string>
     <string name="share_your_location_in_real_time">Sdílejte svou polohu v reálném čase a udržujte svou skupinu koordinovanou díky integrovaným funkcím GPS.</string>
+    <string name="shared_contact_no_public_key">Tento kontakt nemá žádný veřejný klíč, takže jej nelze importovat. Kontakt bez něj vymaže všechny klíče, které vaše rádio již pro daný uzel drží. Požádejte odesílatele, aby jej znovu sdílel, jakmile si jeho uzel vymění klíče.</string>
     <string name="short_name">Krátké jméno</string>
     <string name="should_update">Chcete-li využít nejnovějších oprav a funkcí, aktualizujte firmware vašeho uzlu.\n\nPoslední stabilní verze firmwaru: %1$s</string>
     <string name="should_update_firmware">Doporučena aktualizace firmwaru.</string>
     <!-- SHOW -->
     <string name="show_full_message_timestamps">Zobrazovat úplná časová razítka zpráv</string>
     <string name="show_full_message_timestamps_summary">Vždy zobrazovat datum a čas v záhlaví konverzací a při akcích se zprávami</string>
+    <string name="show_iaq_legend">Zobrazit legendu kvality ovzduší</string>
     <string name="show_layer">Zobrazit vrstvu</string>
     <string name="show_original">Zobrazit originál</string>
     <string name="show_password">Zobrazit heslo</string>
@@ -1527,7 +1604,11 @@
     <string name="smart_position">Chytrá poloha</string>
     <string name="snr">SNR</string>
     <string name="snr_definition">Poměr signálu k šumu (SNR) je veličina používaná k vyjádření poměru mezi úrovní požadovaného signálu a úrovní šumu na pozadí. V Meshtastic a dalších bezdrátových systémech vyšší hodnota SNR značí čistší signál, což může zvýšit spolehlivost a kvalitu přenosu dat.</string>
+    <string name="soil_moisture">Vlhkost půdy</string>
+    <string name="soil_temperature">Teplota půdy</string>
     <string name="speed">Rychlost</string>
+    <string name="speed_kmh">%1$d Km/h</string>
+    <string name="speed_mph">%1$d mph</string>
     <string name="ssid">SSID</string>
     <string name="state_broadcast_seconds">Vysílání stavu (v sekundách)</string>
     <string name="status_message">Stavová zpráva</string>
@@ -1549,6 +1630,8 @@
     <!-- TAK -->
     <string name="tak">TAK (ATAK)</string>
     <string name="tak_config">Nastavení TAK</string>
+    <string name="tak_role">Role člena</string>
+    <string name="tak_role_unspecified">Nespecifikováno</string>
     <string name="tak_server">TAK server</string>
     <string name="tak_server_channel">TAK mesh kanál</string>
     <string name="tak_server_channel_desc">Kanál Meshtastic používaný pro odchozí provoz TAK</string>
@@ -1640,6 +1723,8 @@
     <string name="translation_downloading">Stahování překladového modelu…</string>
     <string name="translation_model_download_failed">Stažení překladového modelu se nezdařilo</string>
     <string name="translation_not_required">Zpráva je již ve vašem jazyce</string>
+    <string name="transmit_disabled">Vysílání je vypnuté</string>
+    <string name="transmit_disabled_summary">Toto zařízení může přijímat, ale přes LoRa nebude nic vysílat.</string>
     <string name="transmit_over_lora">Přenos přes LoRa</string>
     <!-- TRANSPORT -->
     <string name="transport">Přenos</string>
@@ -1680,6 +1765,7 @@
     <string name="up_down_select_input_enabled">Vstup Nahoru/Dolů/Výběr povolen</string>
     <string name="update_interval">Interval aktualizace GPS</string>
     <string name="update_interval_seconds">Interval aktualizace (v sekundách)</string>
+    <string name="update_status">Aktualizovat stav</string>
     <string name="updated">Aktualizováno</string>
     <string name="uplink_enabled">Odesílání MQTT dat povoleno</string>
     <string name="uplink_feature_description">Zprávy z mesh sítě budou odesílány do veřejného internetu prostřednictvím libovolného uzlu, který má nakonfigurovanou bránu.</string>
@@ -1756,6 +1842,8 @@
     <string name="wifi_provision_success_ssh_unavailable">Příkaz SSH bude k dispozici po přidělení IP adresy.</string>
     <string name="wifi_provision_success_username">Uživatelské jméno</string>
     <string name="wifi_provisioning">Nastavení Wi-Fi pro mPWRD-OS</string>
+    <string name="wifi_qr_code_error">Neplatný formát Wi-Fi QR kódu</string>
+    <string name="wifi_qr_code_scan">Naskenovat QR kód Wi-Fi</string>
     <string name="wifi_unavailable">Nejste připojeni k Wi-Fi. Vyhledávání v síti nemusí najít zařízení v okolí.</string>
     <!-- WIND -->
     <string name="wind">Vítr</string>

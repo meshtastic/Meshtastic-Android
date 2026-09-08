@@ -90,7 +90,6 @@
     <!-- ENCRYPTION -->
     <string name="encryption_error">المفتاح العام غير متطابق</string>
     <string name="encryption_pkc">تشفير المفتاح العام</string>
-    <string name="encryption_psk">مفتاح مشترك</string>
     <!-- ENVIRONMENT -->
     <string name="error">غلط</string>
     <!-- EXPORT -->
@@ -178,6 +177,7 @@
     <string name="none_quality">لا يوجد</string>
     <string name="not_connected">غير متصل</string>
     <!-- NOTIFICATIONS -->
+    <!-- OFFLINE -->
     <string name="okay">حسنا</string>
     <!-- ONE -->
     <string name="one_day">24 ساعات</string>

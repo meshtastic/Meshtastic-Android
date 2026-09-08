@@ -122,7 +122,7 @@ class ProfileRoundTripTest {
 
         viewModel =
             RadioConfigViewModel(
-                destNum = null,
+                initialDestNum = null,
                 radioConfigRepository = radioConfigRepository,
                 packetRepository = packetRepository,
                 serviceRepository = serviceRepository,
@@ -146,6 +146,7 @@ class ProfileRoundTripTest {
                 securityKeyBackupStore = securityKeyBackupStore,
                 snackbarManager = snackbarManager,
                 nodeRestartTracker = nodeRestartTracker,
+                connectionManager = mock(MockMode.autofill),
             )
     }
 

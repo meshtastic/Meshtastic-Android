@@ -2,7 +2,7 @@
 title: Settings — Radio & User
 parent: User Guide
 nav_order: 7
-last_updated: 2026-08-30
+last_updated: 2026-09-04
 description: Configure your radio hardware, LoRa presets, user profile, position sharing, power management, and security.
 aliases:
   - ustawienia
@@ -49,7 +49,10 @@ On **Settings → User**.
 The footer appears as soon as you change something. **Discard** throws the change away, and the other button writes it to the radio: it reads **Save & restart** on the screens the firmware applies with a reboot — Position, Network, Bluetooth, Security, and most module screens — and **Save** everywhere else.
 
 The status message is saved with the same **Save**, but it never reboots the node — and, like the
-rest of this screen, it can be edited on a remote node you administer.
+rest of this screen, it can be edited on a remote node you administer. For your own radio there is a
+shortcut while it is connected: touch & hold your node in the [node list](nodes.md) and choose
+**Update status**. Older firmware and a disconnected radio have no shortcut — the field above is
+still the way in.
 
 ## Konfiguracja
 

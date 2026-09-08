@@ -74,6 +74,24 @@ class ProcessRadioResponseUseCaseTest {
     }
 
     @Test
+    fun `routing ack from a node other than the addressed one is reported instead of dropped`() {
+        val packet =
+            MeshPacket(
+                from = 456,
+                decoded =
+                Data(
+                    portnum = PortNum.ROUTING_APP,
+                    request_id = 42,
+                    payload = Routing(error_reason = Routing.Error.NONE).encode().toByteString(),
+                ),
+            )
+
+        val result = useCase(packet, 123, setOf(42))
+
+        assertEquals(RadioResponseResult.UnexpectedAckSender(from = 456), result)
+    }
+
+    @Test
     fun `invoke with metadata response returns metadata result`() {
         // Arrange
         val metadata = DeviceMetadata(firmware_version = "2.5.0")

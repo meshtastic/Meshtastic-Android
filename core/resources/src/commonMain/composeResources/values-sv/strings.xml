@@ -424,8 +424,6 @@
     <string name="encryption_error">Publik nyckel matchar inte</string>
     <string name="encryption_pkc">Kryptering med Publik nyckel</string>
     <string name="encryption_pkc_text">Direktmeddelanden använder den nya publika nyckelinfrastrukturen (PKI) för kryptering.</string>
-    <string name="encryption_psk">Delad nyckel</string>
-    <string name="encryption_psk_text">Endast kanalmeddelanden kan skickas/tas emot. Direkta meddelanden kräver funktionen Public Key Infrastructure i 2.5+ fast programvara.</string>
     <string name="env_metrics_log">Miljövärden</string>
     <!-- ENVIRONMENT -->
     <string name="environment">Miljö</string>
@@ -876,6 +874,7 @@
     <string name="now">Nu</string>
     <string name="ntp_server">NTP-server</string>
     <string name="number_of_records">Antal poster</string>
+    <!-- OFFLINE -->
     <string name="ok_to_mqtt">Ok till MQTT</string>
     <string name="okay">Okej</string>
     <string name="oled_type">OLED-typ</string>
