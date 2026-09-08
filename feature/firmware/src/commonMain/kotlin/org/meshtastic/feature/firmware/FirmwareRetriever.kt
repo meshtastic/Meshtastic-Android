@@ -28,9 +28,6 @@ import org.meshtastic.feature.firmware.ota.FirmwareHashUtil
 
 private val KNOWN_ARCHS = setOf("esp32-s3", "esp32-c3", "esp32-c6", "nrf52840", "rp2040", "stm32", "esp32")
 
-/** Host serving the versioned `firmware-<version>/` artifact folders. The nightly channel is published elsewhere. */
-private const val FIRMWARE_BASE_URL = "https://raw.githubusercontent.com/meshtastic/meshtastic.github.io/master"
-
 /** Radix for the hex flash addresses in maintenance-image diagnostics. */
 private const val HEX_RADIX = 16
 
@@ -333,19 +330,19 @@ open class FirmwareRetriever(private val fileHandler: FirmwareFileHandler) {
     }
 
     /**
-     * Base URL holding this release's artifacts. Nightly builds sit flat at the root of the nightly host (mirroring the
-     * web flasher); stable and alpha use the versioned folder on meshtastic.github.io, which that host does not serve.
+     * Base URL holding this release's artifacts. Nightly builds sit flat at the root of the nightly host; stable and
+     * alpha use a per-version directory on the release host. Structurally the same split as the web flasher's
+     * `getFirmwareBaseUrl`.
      *
-     * A nightly must resolve against the same host its version pointer came from — the nightly host and
-     * meshtastic.github.io publish different firmware commits, so a filename built from the other host's version does
-     * not exist.
+     * A release must resolve against the host its version came from. The two buckets track different firmware commits,
+     * so a filename built from the other host's version does not exist.
      */
     private val FirmwareRelease.artifactBaseUrl: String
         get() =
             if (releaseType == FirmwareReleaseType.NIGHTLY) {
                 HttpClientDefaults.NIGHTLY_BASE_URL
             } else {
-                "$FIRMWARE_BASE_URL/firmware-${id.removePrefix("v")}"
+                "${HttpClientDefaults.RELEASE_BASE_URL}/${id.removePrefix("v")}"
             }
 
     private fun resolveZipUrl(url: String, targetArch: String): String {
