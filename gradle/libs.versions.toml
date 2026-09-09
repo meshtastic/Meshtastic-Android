@@ -13,11 +13,11 @@ datastore = "1.2.1"
 glance = "1.2.0"
 lifecycle = "2.11.0"
 jetbrains-lifecycle = "2.11.0"
-navigation3 = "1.1.1"
-# navigation3-runtime is AndroidX's own KMP artifact (androidx.navigation3:navigation3-runtime),
-# separate from the JetBrains navigation3-ui mirror above — the mirror never published past 1.1.1,
-# so this ref moves independently and is deliberately ahead.
-navigation3-runtime = "1.1.7"
+navigation3 = "1.2.0-beta01"
+# navigation3-runtime is AndroidX's own KMP artifact, separate from the JetBrains
+# navigation3-ui mirror above; the two refs move independently and the mirror does not
+# publish every AndroidX version, so they are not always equal.
+navigation3-runtime = "1.2.0-beta01"
 navigationevent = "1.1.0"
 paging = "3.5.1"
 room = "3.0.3"
