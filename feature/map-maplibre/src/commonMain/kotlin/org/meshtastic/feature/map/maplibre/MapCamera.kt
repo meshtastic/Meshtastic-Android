@@ -16,7 +16,7 @@
  */
 package org.meshtastic.feature.map.maplibre
 
-import org.maplibre.compose.camera.CameraState
+import org.maplibre.compose.map.MapState
 
 /**
  * Steps the camera zoom by [delta], clamped to [range].
@@ -25,9 +25,9 @@ import org.maplibre.compose.camera.CameraState
  * wants buttons has to do this itself, and the clamp matters: pushing past a source's maximum zoom leaves the renderer
  * with no tiles to draw.
  */
-internal suspend fun CameraState.zoomBy(delta: Double, range: ClosedFloatingPointRange<Float>) {
-    val target = (position.zoom + delta).coerceIn(range.start.toDouble(), range.endInclusive.toDouble())
-    if (target != position.zoom) animateTo(position.copy(zoom = target))
+internal suspend fun MapState.zoomBy(delta: Double, range: ClosedFloatingPointRange<Float>) {
+    val target = (cameraPosition.zoom + delta).coerceIn(range.start.toDouble(), range.endInclusive.toDouble())
+    if (target != cameraPosition.zoom) animateCameraPosition(cameraPosition.copy(zoom = target))
 }
 
 /** One zoom level per button press, which is what both predecessors' zoom controls did. */

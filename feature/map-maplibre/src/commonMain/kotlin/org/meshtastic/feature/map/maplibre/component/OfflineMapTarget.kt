@@ -34,16 +34,17 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
+import org.maplibre.compose.map.DefaultMapRuntime
 import org.maplibre.compose.offline.DownloadProgress
 import org.maplibre.compose.offline.DownloadStatus
 import org.maplibre.compose.offline.OfflineManager
 import org.maplibre.compose.offline.OfflinePack
 import org.maplibre.compose.offline.OfflinePackDefinition
-import org.maplibre.compose.offline.rememberOfflineManager
 import org.maplibre.spatialk.geojson.BoundingBox
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.ioDispatcher
@@ -86,9 +87,13 @@ internal class OfflineMapTarget(
  */
 @Composable
 internal fun OfflineMapsSection(target: OfflineMapTarget, onShowRegion: (BoundingBox) -> Unit) {
-    val manager = rememberOfflineManager()
+    // 0.16.0 moved the manager onto the runtime; `rememberOfflineManager()` is gone. The default runtime is
+    // the one every map here uses, so its packs are the ones the user sees on the map.
+    val manager = DefaultMapRuntime.instance.offlineManager
     val scope = rememberCoroutineScope()
     val packs = manager.packs
+    // A pack definition now carries the pixel ratio it was downloaded at, so the tiles match this display.
+    val pixelRatio = LocalDensity.current.density
 
     val range = target.zoomRange()
     val estimate = target.bounds()?.tileCount(range.first, range.last) ?: 0L
@@ -106,7 +111,7 @@ internal fun OfflineMapsSection(target: OfflineMapTarget, onShowRegion: (Boundin
         DownloadEstimateLines(estimate = estimate, range = range)
 
         Button(
-            onClick = { scope.launch { manager.downloadVisibleArea(target) } },
+            onClick = { scope.launch { manager.downloadVisibleArea(target, pixelRatio) } },
             enabled = target.styleUrl != null && estimate > 0L,
             modifier = Modifier.padding(vertical = 8.dp),
         ) {
@@ -244,7 +249,7 @@ private fun OfflinePackRow(
  * Creates the pack only. A created pack is paused, and stays that way until the user presses play on its row —
  * [OfflineManager.resume] is deliberately not called here, so a download never starts itself.
  */
-private suspend fun OfflineManager.downloadVisibleArea(target: OfflineMapTarget): Boolean {
+private suspend fun OfflineManager.downloadVisibleArea(target: OfflineMapTarget, pixelRatio: Float): Boolean {
     val styleUrl = target.styleUrl
     val bounds = target.bounds()
     if (styleUrl == null || bounds == null) return false
@@ -256,6 +261,7 @@ private suspend fun OfflineManager.downloadVisibleArea(target: OfflineMapTarget)
             OfflinePackDefinition.TilePyramid(
                 styleUrl = styleUrl,
                 bounds = bounds,
+                pixelRatio = pixelRatio,
                 minZoom = range.first,
                 maxZoom = range.last,
             ),

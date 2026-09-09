@@ -17,25 +17,26 @@
 package org.meshtastic.feature.map.maplibre
 
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.v2.runComposeUiTest
-import org.maplibre.compose.camera.rememberCameraState
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.map_engine_unavailable
-import org.meshtastic.feature.map.maplibre.component.BasemapSelection
-import org.meshtastic.feature.map.maplibre.style.Basemaps
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 /**
  * The crash in #7001 is a missing native library, and a missing library is an `UnsatisfiedLinkError` — an `Error`, not
- * an `Exception`. The probe has to survive exactly that, and the map surfaces have to stop before composing MapLibre
- * when it says no.
+ * an `Exception`. The probe has to survive exactly that, and the map screen has to stop before reaching MapLibre when
+ * it says no.
+ *
+ * The guard is the first statement of [MapLibreMapViewProvider.MapView], and this test leans on that: nothing else in
+ * this module's Koin graph is available here, so anything composed past the guard would fail with a Koin error rather
+ * than the notice. A guard that drifts later in the function fails this test rather than passing it quietly.
  */
 @OptIn(ExperimentalTestApi::class)
 class MapLibreRuntimeTest {
@@ -51,19 +52,18 @@ class MapLibreRuntimeTest {
     }
 
     @Test
-    fun `the secondary map surface composes the fallback and never its content`() = runComposeUiTest {
-        var contentCompositions = 0
+    fun `the map screen composes the fallback and nothing else`() = runComposeUiTest {
         setContent {
             CompositionLocalProvider(LocalMapLibreRuntimeProbe provides { false }) {
-                SecondaryMapSurface(
-                    basemaps = BasemapSelection(Basemaps.default, emptyList(), emptyList()) {},
-                    cameraState = rememberCameraState(),
-                ) {
-                    contentCompositions++
-                }
+                MapLibreMapViewProvider()
+                    .MapView(
+                        modifier = Modifier,
+                        navigateToNodeDetails = {},
+                        waypointId = null,
+                        sitePlannerNodeNum = null,
+                    )
             }
         }
         onNodeWithText(getString(Res.string.map_engine_unavailable)).assertIsDisplayed()
-        assertEquals(0, contentCompositions, "map content must not be composed without an engine to draw it")
     }
 }

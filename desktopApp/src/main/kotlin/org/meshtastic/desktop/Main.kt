@@ -73,8 +73,8 @@ import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
-import org.maplibre.compose.desktop.ProvideMapHost
-import org.maplibre.compose.desktop.rememberAwtComposeMapHost
+import org.maplibre.compose.desktop.ProvideMapPresentationHost
+import org.maplibre.compose.desktop.rememberAwtComposeMapPresentationHost
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.common.log.InMemoryLogBuffer
 import org.meshtastic.core.common.util.CommonUri
@@ -410,7 +410,7 @@ private fun ApplicationScope.MeshtasticWindow(
 
         CoilImageLoaderSetup()
         // Each window hands MapLibre its own GPU context; the map composites into Compose from there.
-        ProvideMapHost(host = rememberAwtComposeMapHost(window)) {
+        ProvideMapPresentationHost(host = rememberAwtComposeMapPresentationHost(window)) {
             CompositionLocalProvider(
                 LocalEventBranding provides eventEdition,
                 LocalMapViewProvider provides desktopMapViewProvider(),

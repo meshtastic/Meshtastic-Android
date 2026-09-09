@@ -17,6 +17,7 @@
 package org.meshtastic.feature.map.maplibre
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -26,42 +27,54 @@ import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import org.koin.compose.koinInject
-import org.maplibre.compose.camera.CameraState
+import org.maplibre.compose.camera.CameraPosition
+import org.maplibre.compose.map.MapState
 import org.maplibre.spatialk.geojson.Position
 import org.meshtastic.core.repository.MapCameraPosition
 import org.meshtastic.core.repository.MapPrefs
 
 /**
- * Restores the map to wherever the user left it, and keeps that saved.
+ * Reads back the camera the user left the map on.
  *
  * The OSMdroid map did this and the Google flavor still does; the MapLibre map lost it in the cutover even though
- * `MapPrefs.setCameraPosition` and its stored value survived untouched. Returns null until the stored position has been
- * read, then whether there was one — the caller needs that to decide between the remembered view and framing the mesh,
- * and must not do either while the answer is unknown.
+ * `MapPrefs.setCameraPosition` and its stored value survived untouched.
+ *
+ * The stored position is handed to `rememberMapState` as its initial camera rather than written to the map afterwards,
+ * which is what maplibre-compose 0.16.0 made possible — a map created at the remembered position opens there instead of
+ * opening on a default and then moving.
+ *
+ * Pair with [SaveCameraPosition], which is what keeps the value up to date.
  */
 @Composable
-internal fun rememberRestoredCamera(cameraState: CameraState): Boolean? {
+internal fun rememberRestoredCamera(): RestoredCamera? {
     val mapPrefs: MapPrefs = koinInject()
-    var restored by remember { mutableStateOf<Boolean?>(null) }
+    var restored by remember { mutableStateOf<RestoredCamera?>(null) }
 
     LaunchedEffect(Unit) {
         val saved = mapPrefs.awaitCameraPosition()
-        if (saved != null) {
-            cameraState.position =
-                cameraState.position.copy(
-                    target = Position(longitude = saved.longitude, latitude = saved.latitude),
-                    zoom = saved.zoom,
-                )
-        }
-        restored = saved != null
+        restored =
+            RestoredCamera(
+                saved?.let {
+                    CameraPosition(target = Position(longitude = it.longitude, latitude = it.latitude), zoom = it.zoom)
+                },
+            )
     }
 
-    LaunchedEffect(restored) {
-        // Saving only starts once the restore has been attempted, and only while the camera is settled. Writing
-        // before that would overwrite the remembered view with wherever the map happened to open.
-        if (restored == null) return@LaunchedEffect
+    return restored
+}
 
-        snapshotFlow { cameraState.position.takeUnless { cameraState.isCameraMoving } }
+/**
+ * Keeps the stored camera position in step with [mapState].
+ *
+ * Only writes while the camera is settled: saving mid-gesture would store every frame of a pan, and the value that
+ * matters is the one the user stopped on.
+ */
+@Composable
+internal fun SaveCameraPosition(mapState: MapState) {
+    val mapPrefs: MapPrefs = koinInject()
+
+    LaunchedEffect(mapState) {
+        snapshotFlow { mapState.cameraPosition.takeUnless { mapState.isCameraMoving } }
             .filterNotNull()
             .distinctUntilChanged()
             .collect { position ->
@@ -74,6 +87,12 @@ internal fun rememberRestoredCamera(cameraState: CameraState): Boolean? {
                 )
             }
     }
-
-    return restored
 }
+
+/**
+ * Where the user left the map, once that is known.
+ *
+ * [position] is null when there was nothing stored, which is the caller's cue to frame the mesh instead. The whole
+ * value is null while the answer is still being read, and the caller must do neither until it arrives.
+ */
+@Immutable internal class RestoredCamera(val position: CameraPosition?)

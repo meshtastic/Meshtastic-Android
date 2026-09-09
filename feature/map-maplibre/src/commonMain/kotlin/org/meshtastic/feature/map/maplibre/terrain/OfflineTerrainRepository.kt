@@ -177,8 +177,9 @@ class OfflineTerrainRepository(private val fileSystem: FileSystem, private val b
     }
 
     /**
-     * The `file://` URL template [rememberRasterDemSource][org.maplibre.compose.sources.rememberRasterDemSource]
-     * (hillshade) can use to reach [source]'s downloaded tiles directly, matching [TerrainTileStore]'s own
+     * The `file://` URL template
+     * [rememberRasterDemTileSource][org.maplibre.compose.sources.rememberRasterDemTileSource] (hillshade) can use to
+     * reach [source]'s downloaded tiles directly, matching [TerrainTileStore]'s own
      * `<baseDir>/<source>/<zoom>/<x>/<y>.webp` layout.
      *
      * `baseDir` is always an absolute path (see [terrainStorageDirectory]'s platform actuals), so this yields a
@@ -188,7 +189,7 @@ class OfflineTerrainRepository(private val fileSystem: FileSystem, private val b
      * The directory portion is percent-encoded before interpolation — a Desktop/JVM user-data path can legitimately
      * contain characters reserved in a URL (a space in a Windows/macOS username is the common case, `#`/`%` less so but
      * just as real) — while the trailing `{z}/{x}/{y}` placeholders are appended afterwards, literally, so
-     * [rememberRasterDemSource]'s own substitution still sees them unescaped.
+     * [rememberRasterDemTileSource]'s own substitution still sees them unescaped.
      */
     fun tileUrlTemplate(source: TerrainSource): String {
         val encodedDir = (baseDir / TILES_DIR_NAME / source.dirName).toString().percentEncodeUrlReserved()

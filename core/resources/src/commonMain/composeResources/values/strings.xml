@@ -563,6 +563,9 @@
     <string name="doc_keywords_translate">translate,crowdin,localization,language,i18n,contribute</string>
     <string name="doc_keywords_units">units,locale,metric,imperial,temperature,distance</string>
     <string name="doc_keywords_widget">widget,home screen,local stats,glance,battery,utilization</string>
+    <string name="doc_loading">Loading documentation…</string>
+    <string name="doc_no_documentation">No documentation available</string>
+    <string name="doc_no_results">No results found</string>
     <string name="doc_search_placeholder">Search documentation…</string>
     <string name="doc_section_developer">Developer Guide</string>
     <string name="doc_section_user">User Guide</string>
