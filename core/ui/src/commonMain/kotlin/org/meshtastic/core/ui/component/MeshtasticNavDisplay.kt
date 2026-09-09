@@ -20,12 +20,15 @@ import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.VerticalDragHandle
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.layout.PaneExpansionState
+import androidx.compose.material3.adaptive.layout.ThreePaneScaffoldScope
 import androidx.compose.material3.adaptive.layout.rememberPaneExpansionState
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.material3.adaptive.navigation3.rememberSupportingPaneSceneStrategy
@@ -47,9 +50,6 @@ import co.touchlab.kermit.Logger
 import org.meshtastic.core.navigation.MultiBackstack
 import org.meshtastic.core.navigation.rumViewName
 import org.meshtastic.core.repository.PlatformAnalytics
-
-/** Duration in milliseconds for the shared crossfade transition between navigation scenes. */
-private const val TRANSITION_DURATION_MS = 350
 
 /**
  * Shared [NavDisplay] wrapper that configures the standard Meshtastic entry decorators, scene strategies, and
@@ -106,34 +106,12 @@ fun MeshtasticNavDisplay(
     val listDetailSceneStrategy =
         rememberListDetailSceneStrategy<NavKey>(
             paneExpansionState = rememberPaneExpansionState(),
-            paneExpansionDragHandle = { state ->
-                val interactionSource = remember { MutableInteractionSource() }
-                VerticalDragHandle(
-                    modifier =
-                    Modifier.paneExpansionDraggable(
-                        state = state,
-                        minTouchTargetSize = 48.dp,
-                        interactionSource = interactionSource,
-                    ),
-                    interactionSource = interactionSource,
-                )
-            },
+            paneExpansionDragHandle = { state -> PaneExpansionDragHandle(state) },
         )
     val supportingPaneSceneStrategy =
         rememberSupportingPaneSceneStrategy<NavKey>(
             paneExpansionState = rememberPaneExpansionState(),
-            paneExpansionDragHandle = { state ->
-                val interactionSource = remember { MutableInteractionSource() }
-                VerticalDragHandle(
-                    modifier =
-                    Modifier.paneExpansionDraggable(
-                        state = state,
-                        minTouchTargetSize = 48.dp,
-                        interactionSource = interactionSource,
-                    ),
-                    interactionSource = interactionSource,
-                )
-            },
+            paneExpansionDragHandle = { state -> PaneExpansionDragHandle(state) },
         )
 
     val saveableDecorator = rememberSaveableStateHolderNavEntryDecorator<NavKey>()
@@ -141,6 +119,9 @@ fun MeshtasticNavDisplay(
 
     val activeDecorators =
         remember(backStack, saveableDecorator, vmStoreDecorator) { listOf(saveableDecorator, vmStoreDecorator) }
+
+    // Fades are alpha, not movement, so they follow the theme's effects spec rather than a spatial one.
+    val fadeSpec = MaterialTheme.motionScheme.defaultEffectsSpec<Float>()
 
     SharedTransitionLayout {
         NavDisplay(
@@ -157,12 +138,28 @@ fun MeshtasticNavDisplay(
             // NavDisplay falls back to SinglePaneSceneStrategy automatically when none of these compute a Scene.
             sceneStrategies = listOf(DialogSceneStrategy(), listDetailSceneStrategy, supportingPaneSceneStrategy),
             sharedTransitionScope = this@SharedTransitionLayout,
-            transitionSpec = meshtasticTransitionSpec(),
-            popTransitionSpec = meshtasticTransitionSpec(),
-            predictivePopTransitionSpec = meshtasticPredictivePopTransitionSpec(),
+            transitionSpec = meshtasticTransitionSpec(fadeSpec),
+            popTransitionSpec = meshtasticTransitionSpec(fadeSpec),
+            predictivePopTransitionSpec = meshtasticPredictivePopTransitionSpec(fadeSpec),
             modifier = modifier,
         )
     }
+}
+
+/** Drag handle shared by the list-detail and supporting-pane scene strategies, with a 48.dp touch-target floor. */
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
+@Composable
+private fun ThreePaneScaffoldScope.PaneExpansionDragHandle(state: PaneExpansionState) {
+    val interactionSource = remember { MutableInteractionSource() }
+    VerticalDragHandle(
+        modifier =
+        Modifier.paneExpansionDraggable(
+            state = state,
+            minTouchTargetSize = 48.dp,
+            interactionSource = interactionSource,
+        ),
+        interactionSource = interactionSource,
+    )
 }
 
 internal class ScreenViewTracker(private val analytics: PlatformAnalytics) {
@@ -183,19 +180,15 @@ internal class ScreenViewTracker(private val analytics: PlatformAnalytics) {
 }
 
 /** Shared crossfade [ContentTransform] used for both forward and pop navigation. */
-private fun meshtasticTransitionSpec(): AnimatedContentTransitionScope<Scene<NavKey>>.() -> ContentTransform = {
-    ContentTransform(
-        fadeIn(animationSpec = tween(TRANSITION_DURATION_MS)),
-        fadeOut(animationSpec = tween(TRANSITION_DURATION_MS)),
-    )
+private fun meshtasticTransitionSpec(
+    fadeSpec: FiniteAnimationSpec<Float>,
+): AnimatedContentTransitionScope<Scene<NavKey>>.() -> ContentTransform = {
+    ContentTransform(fadeIn(animationSpec = fadeSpec), fadeOut(animationSpec = fadeSpec))
 }
 
 /** Crossfade transition for predictive back gestures (Android 14+). */
-private fun meshtasticPredictivePopTransitionSpec():
-    AnimatedContentTransitionScope<Scene<NavKey>>.(Int) -> ContentTransform =
-    {
-        ContentTransform(
-            fadeIn(animationSpec = tween(TRANSITION_DURATION_MS)),
-            fadeOut(animationSpec = tween(TRANSITION_DURATION_MS)),
-        )
-    }
+private fun meshtasticPredictivePopTransitionSpec(
+    fadeSpec: FiniteAnimationSpec<Float>,
+): AnimatedContentTransitionScope<Scene<NavKey>>.(Int) -> ContentTransform = {
+    ContentTransform(fadeIn(animationSpec = fadeSpec), fadeOut(animationSpec = fadeSpec))
+}
