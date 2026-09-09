@@ -31,11 +31,12 @@ import org.maplibre.compose.expressions.dsl.convertToColor
 import org.maplibre.compose.expressions.dsl.feature
 import org.maplibre.compose.expressions.dsl.not
 import org.maplibre.compose.expressions.dsl.step
+import org.maplibre.compose.interaction.ClickResult
 import org.maplibre.compose.layers.CircleLayer
 import org.maplibre.compose.layers.FillLayer
 import org.maplibre.compose.layers.SymbolLayer
+import org.maplibre.compose.map.LocalMapState
 import org.maplibre.compose.sources.GeoJsonOptions
-import org.maplibre.compose.util.ClickResult
 import org.maplibre.spatialk.geojson.BoundingBox
 import org.maplibre.spatialk.geojson.Point
 import org.maplibre.spatialk.geojson.Position
@@ -135,6 +136,10 @@ internal fun NodeLayers(
     // no longer block the caller), and onClick is not a suspending callback.
     val clusterScope = rememberCoroutineScope()
 
+    // 0.16.0 moved the cluster queries off the source and onto its style handle. Read the state here, in
+    // composition, and resolve the handle at click time — see the comment at the query itself.
+    val mapState = checkNotNull(LocalMapState.current)
+
     val nodeSource =
         rememberFeatureSource(
             nodes,
@@ -173,12 +178,16 @@ internal fun NodeLayers(
                     val centre = (clusterFeature.geometry as? Point)?.coordinates
                     if (centre != null) {
                         clusterScope.launch {
+                            // A handle belongs to the style generation it was read from, so it is resolved per
+                            // click rather than remembered: switching basemap replaces the style and any handle
+                            // held across that switch is stale. Null while no style is loaded.
+                            val handle = mapState.style.sources[nodeSource] ?: return@launch
                             // A cluster that can still be broken apart is worth zooming into. One that cannot is
                             // nodes sitting on the same spot, so zooming would do nothing — list them instead.
-                            val expansionZoom = nodeSource.getClusterExpansionZoom(clusterFeature)
+                            val expansionZoom = handle.getClusterExpansionZoom(clusterFeature)
                             if (expansionZoom <= NO_EXPANSION_ZOOM) {
                                 onClusterMembers(
-                                    nodeSource
+                                    handle
                                         .getClusterLeaves(clusterFeature, CLUSTER_LEAF_LIMIT, CLUSTER_LEAF_OFFSET)
                                         .toClusterMembers(),
                                 )

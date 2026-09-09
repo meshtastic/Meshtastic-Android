@@ -36,15 +36,15 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
-import org.maplibre.compose.camera.CameraState
-import org.maplibre.compose.camera.rememberCameraState
+import org.maplibre.compose.camera.CameraPosition
 import org.maplibre.compose.location.BearingUpdate
 import org.maplibre.compose.location.LocationPermission
 import org.maplibre.compose.location.LocationState
+import org.maplibre.compose.location.rememberDefaultHeadingProvider
 import org.maplibre.compose.location.rememberDefaultLocationProvider
-import org.maplibre.compose.location.rememberDefaultOrientationProvider
 import org.maplibre.compose.location.rememberLocationState
 import org.maplibre.compose.location.rememberSystemSettingsLauncher
+import org.maplibre.compose.map.MapState
 import org.meshtastic.core.ui.util.KeepScreenOn
 import org.meshtastic.core.ui.util.MapViewProvider
 import org.meshtastic.feature.map.SharedMapViewModel
@@ -136,14 +136,29 @@ class MapLibreMapViewProvider(
         if (!LocalMapLibreRuntimeProbe.current()) return MapEngineUnavailable(modifier)
 
         val viewModel: SharedMapViewModel = koinViewModel()
-        // Null for the one frame before the basemap preference has loaded from disk; see rememberBasemapSelection.
-        val basemaps = rememberBasemapSelection(customBasemaps()) ?: return
+        // Both are null for the one frame before their stored value has been read from disk: the basemap preference
+        // (see rememberBasemapSelection) and the remembered camera (see rememberRestoredCamera). The map must not
+        // open on a default and then jump, nor frame the mesh over a view the user chose.
+        val basemaps = rememberBasemapSelection(customBasemaps())
+        val restored = rememberRestoredCamera()
+        if (basemaps == null || restored == null) return
 
-        val cameraState = rememberCameraState()
-        val location = rememberLocationControls(cameraState)
-
+        val location = rememberLocationControls()
         val waypoints = rememberWaypointEditing()
         val screen = rememberMapScreenState(waypointId = waypointId, sitePlannerNodeNum = sitePlannerNodeNum)
+
+        val mapState =
+            rememberMapScreenMapState(
+                basemap = basemaps.current,
+                restored = restored,
+                screen = screen,
+                waypoints = waypoints,
+                location = location,
+                customLayers = customLayers(),
+                navigateToNodeDetails = navigateToNodeDetails,
+            )
+
+        SaveCameraPosition(mapState)
 
         // Following the user means the screen is the thing being watched — the Google flavor holds it awake for the
         // same reason, and a map that sleeps mid-walk is the one complaint a location-follow feature always draws.
@@ -151,33 +166,21 @@ class MapLibreMapViewProvider(
 
         Box(modifier = modifier.fillMaxSize()) {
             MeshMap(
-                viewModel = viewModel,
-                navigateToNodeDetails = navigateToNodeDetails,
+                mapState = mapState,
                 modifier = Modifier.fillMaxSize(),
                 basemap = basemaps.current,
-                overlays = screen.overlays,
-                layerOpacity = koinInject<LayerOpacityStore>().opacity.collectAsState().value,
-                customLayers = customLayers(),
-                cameraState = cameraState,
-                locationState = location.state,
-                followLocation = location.following,
-                bearingUpdate = location.bearingUpdate,
-                frameOnNodes = rememberRestoredCamera(cameraState) == false,
-                onWaypointClick = { screen.infoWaypointId = it },
-                onClusterMembers = { screen.clusterMembers = it },
                 onMapLongClick = waypoints.onLongPress,
                 onMapClick = waypoints.onMapTap,
-                boxCorner = waypoints.firstCorner,
             )
 
-            MapZoom(cameraState = cameraState, basemap = basemaps.current)
+            MapZoom(mapState = mapState, basemap = basemaps.current)
 
             OfflineIndicator(viewModel)
 
             MapToolbar(
                 basemaps = basemaps,
                 location = location,
-                cameraState = cameraState,
+                mapState = mapState,
                 overlays = screen.overlays,
                 onOverlaysChange = { screen.overlays = it },
                 basemapMenuExtra = basemapMenuExtra,
@@ -191,12 +194,12 @@ class MapLibreMapViewProvider(
             SitePlannerSlot(
                 open = screen.plannerOpen,
                 nodeNum = sitePlannerNodeNum,
-                cameraState = cameraState,
+                mapState = mapState,
                 planner = sitePlanner,
                 onDismiss = { screen.plannerOpen = false },
             )
 
-            BoxAuthoringSlot(editing = waypoints, cameraState = cameraState)
+            BoxAuthoringSlot(editing = waypoints, mapState = mapState)
 
             WaypointDialogs(
                 viewModel = viewModel,
@@ -207,6 +210,37 @@ class MapLibreMapViewProvider(
             )
         }
     }
+}
+
+/** The mesh map's state, wired to everything this screen feeds into it. */
+@Composable
+private fun rememberMapScreenMapState(
+    basemap: Basemap,
+    restored: RestoredCamera,
+    screen: MapScreenState,
+    waypoints: WaypointEditing,
+    location: LocationControls,
+    customLayers: List<CustomLayer>,
+    navigateToNodeDetails: (Int) -> Unit,
+): MapState {
+    val viewModel: SharedMapViewModel = koinViewModel()
+    return rememberMeshMapState(
+        viewModel = viewModel,
+        navigateToNodeDetails = navigateToNodeDetails,
+        basemap = basemap,
+        initialCameraPosition = restored.position ?: CameraPosition(),
+        overlays = screen.overlays,
+        layerOpacity = koinInject<LayerOpacityStore>().opacity.collectAsState().value,
+        customLayers = customLayers,
+        onClusterMembers = { screen.clusterMembers = it },
+        onWaypointClick = { screen.infoWaypointId = it },
+        boxCorner = waypoints.firstCorner,
+        locationState = location.state,
+        followLocation = location.following,
+        bearingUpdate = location.bearingUpdate,
+        // Only when there was nothing stored: a remembered view is the user's own and is not yanked away.
+        frameOnNodes = restored.position == null,
+    )
 }
 
 /** The "you're offline" pill, top-start so it never collides with the toolbar's top-center controls. */
@@ -248,12 +282,12 @@ private fun rememberMapScreenState(waypointId: Int?, sitePlannerNodeNum: Int?): 
  * dialogs — clear of the zoom pair and the attribution row that share that edge.
  */
 @Composable
-private fun BoxScope.BoxAuthoringSlot(editing: WaypointEditing, cameraState: CameraState) {
+private fun BoxScope.BoxAuthoringSlot(editing: WaypointEditing, mapState: MapState) {
     if (editing.boxDraft == null) return
 
     BoxAuthoringBar(
         onCancel = editing.onCancelBox,
-        onUseVisibleRegion = { cameraState.viewport?.visibleBoundingBox?.let(editing.onUseVisibleRegion) },
+        onUseVisibleRegion = { mapState.viewport?.visibleBounds?.toBoundingBox()?.let(editing.onUseVisibleRegion) },
         modifier =
         Modifier.align(Alignment.BottomCenter)
             .padding(start = AUTHORING_BAR_SIDE.dp, end = AUTHORING_BAR_SIDE.dp, bottom = AUTHORING_BAR_BOTTOM.dp),
@@ -295,7 +329,7 @@ private fun ClusterMembersSlot(members: List<ClusterMember>, onPick: (Int) -> Un
 private fun SitePlannerSlot(
     open: Boolean,
     nodeNum: Int?,
-    cameraState: CameraState,
+    mapState: MapState,
     planner: (@Composable (SitePlannerSession) -> Unit)?,
     onDismiss: () -> Unit,
 ) {
@@ -306,8 +340,10 @@ private fun SitePlannerSlot(
     planner(
         SitePlannerSession(
             nodeNum = nodeNum,
-            mapCenter = { cameraState.position.target },
-            moveTo = { target -> scope.launch { cameraState.animateTo(cameraState.position.copy(target = target)) } },
+            mapCenter = { mapState.cameraPosition.target },
+            moveTo = { target ->
+                scope.launch { mapState.animateCameraPosition(mapState.cameraPosition.copy(target = target)) }
+            },
             onDismiss = onDismiss,
         ),
     )
@@ -326,7 +362,7 @@ private fun SitePlannerSlot(
 private fun BoxScope.MapToolbar(
     basemaps: BasemapSelection,
     location: LocationControls,
-    cameraState: CameraState,
+    mapState: MapState,
     overlays: List<MapOverlay>,
     onOverlaysChange: (List<MapOverlay>) -> Unit,
     basemapMenuExtra: @Composable () -> Unit,
@@ -344,9 +380,18 @@ private fun BoxScope.MapToolbar(
         modifier = Modifier.align(Alignment.TopCenter).padding(top = TOOLBAR_INSET.dp),
         onToggleFilterMenu = { filterMenuExpanded = !filterMenuExpanded },
         filtersActive = filterState.isNarrowing,
-        bearing = cameraState.position.bearing.toFloat(),
+        bearing = mapState.cameraPosition.bearing.toFloat(),
         followPhoneBearing = location.followingBearing,
-        onCompassClick = location.onCompassClick,
+        // Matches the Google flavor: while following, the compass toggles heading-lock; otherwise it straightens
+        // the map back to north. Assembled here because it needs both the controls and the map state, and the
+        // controls are built before the state exists.
+        onCompassClick = {
+            if (location.following) {
+                location.onToggleBearingLock()
+            } else {
+                scope.launch { mapState.animateCameraPosition(mapState.cameraPosition.copy(bearing = 0.0)) }
+            }
+        },
         filterDropdownContent = {
             if (filterMenuExpanded) {
                 MapFilterSheet(
@@ -364,9 +409,9 @@ private fun BoxScope.MapToolbar(
                 offlineTarget =
                 OfflineMapTarget(
                     styleUrl = (basemaps.current as? Basemap.Vector)?.styleUri,
-                    bounds = { cameraState.viewport?.visibleBoundingBox },
-                    zoom = { cameraState.position.zoom },
-                    showRegion = { box -> scope.launch { cameraState.animateTo(boundingBox = box) } },
+                    bounds = { mapState.viewport?.visibleBounds?.toBoundingBox() },
+                    zoom = { mapState.cameraPosition.zoom },
+                    showRegion = { box -> scope.launch { mapState.animateCameraToBounds(box) } },
                 ),
                 offlineMapsSupported = offlineMapsSupported,
                 extra = layersSheetExtra,
@@ -385,10 +430,10 @@ private class LocationControls(
     val following: Boolean,
     val followingBearing: Boolean,
     val onToggleFollow: () -> Unit,
-    val onCompassClick: () -> Unit,
+    val onToggleBearingLock: () -> Unit,
 ) {
     val bearingUpdate: BearingUpdate
-        get() = if (followingBearing) BearingUpdate.TRACK_ORIENTATION else BearingUpdate.IGNORE
+        get() = if (followingBearing) BearingUpdate.TRACK_HEADING else BearingUpdate.IGNORE
 }
 
 /**
@@ -399,9 +444,7 @@ private class LocationControls(
  * fused location lives behind the separate `location-runtime-gms` artifact and must never enter an F-Droid build.
  */
 @Composable
-private fun rememberLocationControls(cameraState: CameraState): LocationControls {
-    val scope = rememberCoroutineScope()
-
+private fun rememberLocationControls(): LocationControls {
     var following by remember { mutableStateOf(false) }
     var followingBearing by remember { mutableStateOf(false) }
     var enableAfterPermission by remember { mutableStateOf(false) }
@@ -410,7 +453,7 @@ private fun rememberLocationControls(cameraState: CameraState): LocationControls
         rememberLocationState(
             enabled = following,
             provider = rememberDefaultLocationProvider(),
-            orientationProvider = rememberDefaultOrientationProvider(),
+            headingProvider = rememberDefaultHeadingProvider(),
         )
     val settingsLauncher = rememberSystemSettingsLauncher()
 
@@ -446,15 +489,9 @@ private fun rememberLocationControls(cameraState: CameraState): LocationControls
                 }
             }
         },
-        // Matches the Google flavor: while following, the compass toggles heading-lock; otherwise it straightens the
-        // map back to north.
-        onCompassClick = {
-            if (following) {
-                followingBearing = !followingBearing
-            } else {
-                scope.launch { cameraState.animateTo(cameraState.position.copy(bearing = 0.0)) }
-            }
-        },
+        // Only the heading-lock half lives here; straightening the map to north needs the map state, which does
+        // not exist yet at this point — see MapToolbar.
+        onToggleBearingLock = { followingBearing = !followingBearing },
     )
 }
 

@@ -27,9 +27,13 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import org.maplibre.compose.camera.CameraState
-import org.maplibre.compose.map.MapOptions
+import org.maplibre.compose.camera.CameraPosition
+import org.maplibre.compose.interaction.MapInteractions
+import org.maplibre.compose.map.CameraConstraints
+import org.maplibre.compose.map.MapState
+import org.maplibre.compose.map.MapUiOptions
 import org.maplibre.compose.map.MaplibreMap
+import org.maplibre.compose.map.rememberMapState
 import org.maplibre.spatialk.geojson.BoundingBox
 import org.meshtastic.feature.map.component.MapEngineUnavailable
 import org.meshtastic.feature.map.maplibre.component.BasemapSelection
@@ -41,41 +45,66 @@ import org.meshtastic.feature.map.maplibre.style.toBaseStyle
 import org.meshtastic.feature.map.maplibre.style.zoomRange
 
 /**
- * The map surface the maps outside the main one all draw on.
+ * The map state the maps outside the main one all share.
  *
  * They differ in what they draw and which controls they carry, but not in how the map itself is set up: the chosen
  * basemap supplies both the style and the zoom range it can actually serve, and a raster basemap needs a layer of its
  * own over the empty style. Repeating that in four places is how three of them ended up with slightly different
  * versions of it.
  *
+ * Since maplibre-compose 0.16.0 the style content is declared here, on the state, rather than in a trailing block on
+ * `MaplibreMap` — the state owns the base style and the sources and layers over it, and the composable only presents
+ * it. The state is returned so the caller can drive the camera and hang its chrome off the same one.
+ *
  * [content] is a plain `@Composable`, matching the layer composables it will hold — `NodeLayers` and
- * `RasterBasemapLayer` are declared that way and compose inside `MaplibreMap` without the applier annotation. Spelling
- * `@MaplibreComposable` here is what spotless and detekt disagree about formatting.
+ * `RasterBasemapLayer` are declared that way and compose inside the style block without the applier annotation.
+ * Spelling `@MaplibreComposable` here is what spotless and detekt disagree about formatting.
  *
  * The raster underlay is composed **before** [content] and must stay that way: layers stack in composition order, so a
  * basemap added afterwards paints over the mesh data instead of sitting under it.
  */
 @Composable
-internal fun SecondaryMapSurface(
+internal fun rememberSecondaryMapState(
     basemaps: BasemapSelection,
-    cameraState: CameraState,
-    modifier: Modifier = Modifier.fillMaxSize(),
-    options: MapOptions = SecondaryMapOptions,
+    initialCameraPosition: CameraPosition = CameraPosition(),
     content: @Composable () -> Unit,
-) {
-    // Same guard as MeshMap: the secondary maps compose MaplibreMap directly, so they crash the same way.
-    if (!LocalMapLibreRuntimeProbe.current()) return MapEngineUnavailable(modifier)
-
-    MaplibreMap(
-        baseStyle = basemaps.current.toBaseStyle(),
-        cameraState = cameraState,
-        modifier = modifier,
-        options = options,
-        zoomRange = basemaps.current.zoomRange(),
-    ) {
+): MapState =
+    rememberMapState(baseStyle = basemaps.current.toBaseStyle(), initialCameraPosition = initialCameraPosition) {
         (basemaps.current as? Basemap.Raster)?.let { RasterBasemapLayer(it) }
         content()
     }
+
+/**
+ * The map surface the maps outside the main one all draw on.
+ *
+ * Presents [mapState] and nothing else: what gets drawn is declared by [rememberSecondaryMapState], which the caller
+ * holds so it can also frame the camera and place the chrome.
+ *
+ * [basemaps] must be the same selection that state was built with: it supplies the zoom range the camera is held to,
+ * and a different value here would clamp the camera to a range the loaded style cannot serve.
+ */
+@Composable
+internal fun SecondaryMapSurface(
+    mapState: MapState,
+    basemaps: BasemapSelection,
+    modifier: Modifier = Modifier.fillMaxSize(),
+    interactions: MapInteractions = SecondaryMapInteractions,
+    uiOptions: MapUiOptions = MapUiOptions.Standard,
+) {
+    // Same guard as MeshMap, and in the same place: the state is pure Kotlin, the map view is what loads the
+    // native library. The style content is never composed without a presentation, so it stops here too.
+    if (!LocalMapLibreRuntimeProbe.current()) return MapEngineUnavailable(modifier)
+
+    val zoomRange = basemaps.current.zoomRange()
+    MaplibreMap(
+        modifier = modifier,
+        state = mapState,
+        // Honour what the source can actually serve, as the OSMdroid map did.
+        cameraConstraints =
+        CameraConstraints(minZoom = zoomRange.start.toDouble(), maxZoom = zoomRange.endInclusive.toDouble()),
+        interactions = interactions,
+        uiOptions = uiOptions,
+    )
 }
 
 /**
@@ -87,13 +116,13 @@ internal fun SecondaryMapSurface(
  */
 @Composable
 internal fun BoxScope.SecondaryMapChrome(
-    cameraState: CameraState,
+    mapState: MapState,
     basemaps: BasemapSelection,
     filterMenu: (@Composable (expanded: Boolean, onDismissRequest: () -> Unit) -> Unit)? = null,
 ) {
-    MapZoom(cameraState = cameraState, basemap = basemaps.current)
+    MapZoom(mapState = mapState, basemap = basemaps.current)
     SecondaryMapControls(
-        cameraState = cameraState,
+        mapState = mapState,
         basemaps = basemaps,
         modifier = Modifier.align(Alignment.TopCenter).padding(top = TOOLBAR_INSET.dp),
         filterMenu = filterMenu,
@@ -103,27 +132,29 @@ internal fun BoxScope.SecondaryMapChrome(
 /**
  * Frames [bounds] once the map can report a viewport.
  *
- * Fitting a bounding box needs a viewport size, and on first composition there is none — the fit silently lands on a
- * default instead, which is what made these maps open zoomed past the very thing they exist to show. Null bounds is a
- * no-op, which covers having nothing to frame yet.
+ * Fitting before the map reports a viewport silently lands on a default instead, and that is what made these maps open
+ * zoomed past the very thing they exist to show. Null bounds is a no-op, which covers having nothing to frame yet.
  *
  * [key] is what re-frames the camera, and it is deliberately the caller's choice rather than the bounds themselves:
  * each map has its own answer for when the user would want the camera moved under them.
  */
 @Composable
 internal fun FitBoundsOnceVisible(
-    cameraState: CameraState,
+    mapState: MapState,
     key: Any?,
     padding: PaddingValues = SecondaryMapFitPadding,
     bounds: () -> BoundingBox?,
 ) {
-    val hasViewport = cameraState.viewport != null
     // The effect restarts on [key], not on `bounds`, so it must read the current lambda rather than the one captured
     // when it last restarted — otherwise a recomposition that passes new bounds keeps framing the old ones.
     val currentBounds by rememberUpdatedState(bounds)
+    // Gated on the viewport rather than letting `fitCameraToBounds` wait for one inside the effect. Both reach the
+    // same camera, but waiting inside leaves the call cancellable for the whole time the map has yet to render,
+    // and it is cancelled by user input as well as by [key]: a fit lost that way is not retried until [key]
+    // changes again, which for these maps may be never.
+    val hasViewport = mapState.viewport != null
     LaunchedEffect(key, hasViewport) {
-        if (hasViewport) {
-            currentBounds()?.let { cameraState.jumpTo(boundingBox = it, padding = padding) }
-        }
+        if (!hasViewport) return@LaunchedEffect
+        currentBounds()?.let { mapState.fitCameraToBounds(it, padding = padding) }
     }
 }

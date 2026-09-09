@@ -12,13 +12,11 @@
 # fails once it turns up, so an entry cannot outlive its reason: the dependency bump that
 # closes the gap goes red until the line is deleted with it.
 #
-# fdroid armeabi-v7a: no 32-bit ARM build of MapLibre exists yet. Upstream merged it on
-# 2026-08-24 (maplibre-native-ffi #658/#659/#660); the release carrying it, and the
-# maplibre-compose bump onto it, are what remove these two lines. Until then the app shows
-# a message instead of a map on those devices (#7005).
+# Empty since maplibre-compose 0.16.0, whose maplibre-native FFI ships armeabi-v7a: that
+# closed the only gap this list ever held (fdroid armeabi-v7a libjniMaplibreNativeC.so and
+# libmaplibre-native-c.so, #7005), and the check went red until the lines came out with the
+# bump, which is what it is for.
 ABI_PARITY_KNOWN_GAPS="
-fdroid armeabi-v7a libjniMaplibreNativeC.so
-fdroid armeabi-v7a libmaplibre-native-c.so
 "
 
 # apk_libs <apk> <abi> — basenames of the libs under lib/<abi>/ in the APK, one per line.

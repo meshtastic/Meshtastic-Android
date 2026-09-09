@@ -41,16 +41,15 @@ import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import org.jetbrains.compose.resources.stringResource
 import org.maplibre.compose.camera.CameraPosition
-import org.maplibre.compose.camera.rememberCameraState
 import org.maplibre.compose.expressions.dsl.asBoolean
 import org.maplibre.compose.expressions.dsl.const
 import org.maplibre.compose.expressions.dsl.feature
 import org.maplibre.compose.expressions.dsl.not
 import org.maplibre.compose.expressions.value.LineCap
+import org.maplibre.compose.interaction.ClickResult
+import org.maplibre.compose.interaction.MapInteractions
 import org.maplibre.compose.layers.LineLayer
-import org.maplibre.compose.map.GestureOptions
-import org.maplibre.compose.map.MapOptions
-import org.maplibre.compose.util.ClickResult
+import org.maplibre.compose.map.MapUiOptions
 import org.maplibre.spatialk.geojson.BoundingBox
 import org.maplibre.spatialk.geojson.Feature
 import org.maplibre.spatialk.geojson.FeatureCollection
@@ -103,13 +102,21 @@ fun MapLibreInlineMap(
     // Null for the one frame before the basemap preference has loaded from disk; see rememberBasemapSelection.
     val basemaps = rememberBasemapSelection(customBasemaps()) ?: return
     val target = GeoPosition(longitude = node.longitude, latitude = node.latitude)
-    val cameraState = rememberCameraState(CameraPosition(target = target, zoom = INLINE_ZOOM))
+    val mapState =
+        rememberSecondaryMapState(basemaps, CameraPosition(target = target, zoom = INLINE_ZOOM)) {
+            val source = rememberFeatureSource(node) { nodesToFeatureCollection(listOf(node)) }
+
+            // The node-detail sheet is where a degraded position matters most — it is the screen a user opens to ask
+            // how precisely this node is placed. The Google mini-map draws the circle; this one left it out.
+            NodePrecisionLayer(id = "inline-precision", nodes = listOf(node))
+            NodeChipLayer(id = "inline-node", source = source, nodes = listOf(node))
+        }
 
     // Follows the node as fresh positions arrive, as the Google mini-map does. Guarded on the current target so the
-    // first composition — which rememberCameraState has already centred — does not animate to where the camera is.
+    // first composition does not animate to where the camera already is.
     LaunchedEffect(target) {
-        if (cameraState.position.target != target) {
-            cameraState.animateTo(cameraState.position.copy(target = target))
+        if (mapState.cameraPosition.target != target) {
+            mapState.animateCameraPosition(mapState.cameraPosition.copy(target = target))
         }
     }
 
@@ -121,16 +128,9 @@ fun MapLibreInlineMap(
     // The same control every other map uses, at the same size. A shrunken variant was tried and looked out of place
     // against the rest of the map chrome for the ~25% of height it saved.
     Box(modifier = modifier) {
-        SecondaryMapSurface(basemaps = basemaps, cameraState = cameraState, options = InlineMapOptions) {
-            val source = rememberFeatureSource(node) { nodesToFeatureCollection(listOf(node)) }
+        SecondaryMapSurface(mapState = mapState, basemaps = basemaps, uiOptions = InlineMapUiOptions)
 
-            // The node-detail sheet is where a degraded position matters most — it is the screen a user opens to ask
-            // how precisely this node is placed. The Google mini-map draws the circle; this one left it out.
-            NodePrecisionLayer(id = "inline-precision", nodes = listOf(node))
-            NodeChipLayer(id = "inline-node", source = source, nodes = listOf(node))
-        }
-
-        MapZoom(cameraState = cameraState, basemap = basemaps.current)
+        MapZoom(mapState = mapState, basemap = basemaps.current)
     }
 }
 
@@ -149,21 +149,23 @@ fun MapLibreTracerouteMap(
     modifier: Modifier = Modifier,
     customBasemaps: @Composable () -> List<Basemap.Raster> = { customRasterBasemaps() },
 ) {
-    val cameraState = rememberCameraState()
     // Null for the one frame before the basemap preference has loaded from disk; see rememberBasemapSelection.
     val basemaps = rememberBasemapSelection(customBasemaps()) ?: return
     val hops = (forwardRoute + returnRoute).distinct().mapNotNull { nodeLookup[it] }
 
-    // Keyed on the hops: the route is what this map exists to frame, so a different route should re-frame it. The
-    // padding is what keeps the outermost hops clear of the toolbar and the legend.
-    FitBoundsOnceVisible(cameraState = cameraState, key = hops) { nodesBoundingBox(hops) }
-
-    Box(modifier = modifier) {
-        SecondaryMapSurface(basemaps = basemaps, cameraState = cameraState) {
+    val mapState =
+        rememberSecondaryMapState(basemaps) {
             TracerouteLayers(forwardRoute = forwardRoute, returnRoute = returnRoute, nodeLookup = nodeLookup)
             TracerouteHopLayers(hops)
         }
-        SecondaryMapChrome(cameraState = cameraState, basemaps = basemaps)
+
+    // Keyed on the hops: the route is what this map exists to frame, so a different route should re-frame it. The
+    // padding is what keeps the outermost hops clear of the toolbar and the legend.
+    FitBoundsOnceVisible(mapState = mapState, key = hops) { nodesBoundingBox(hops) }
+
+    Box(modifier = modifier) {
+        SecondaryMapSurface(mapState = mapState, basemaps = basemaps)
+        SecondaryMapChrome(mapState = mapState, basemaps = basemaps)
     }
 }
 
@@ -189,7 +191,6 @@ fun MapLibreDiscoveryMap(
     customBasemaps: @Composable () -> List<Basemap.Raster> = { customRasterBasemaps() },
 ) {
     val scanner = GeoPosition(longitude = userLongitude, latitude = userLatitude)
-    val cameraState = rememberCameraState(CameraPosition(target = scanner, zoom = DETAIL_ZOOM))
     // Null for the one frame before the basemap preference has loaded from disk; see rememberBasemapSelection.
     val basemaps = rememberBasemapSelection(customBasemaps()) ?: return
     // The node itself, not its index. The feature carries an index into `located`, which is only meaningful for
@@ -203,18 +204,21 @@ fun MapLibreDiscoveryMap(
     // list to agree on.
     val located = remember(nodes) { nodes.filter { it.latitude != 0.0 || it.longitude != 0.0 } }
 
-    // Frame the scanner together with everything it heard, which is the OSMdroid map's behaviour and the only view
-    // that answers the question this map is opened to answer. Opening at a fixed zoom on the scanner put every
-    // discovered node off screen. Keyed on the located nodes, so a scan that hears another one re-frames to include it.
-    FitBoundsOnceVisible(cameraState = cameraState, key = located) { discoveryBoundingBox(scanner, located) }
-
-    Box(modifier = modifier) {
-        SecondaryMapSurface(basemaps = basemaps, cameraState = cameraState) {
+    val mapState =
+        rememberSecondaryMapState(basemaps, CameraPosition(target = scanner, zoom = DETAIL_ZOOM)) {
             DiscoveryTopologyLayer(scanner = scanner, nodes = located)
             DiscoveredNodeLayers(nodes = located, onNodeClick = { selectedNode = located.getOrNull(it) })
             ScannerLayer(scanner = scanner, label = stringResource(Res.string.you))
         }
-        SecondaryMapChrome(cameraState = cameraState, basemaps = basemaps)
+
+    // Frame the scanner together with everything it heard, which is the OSMdroid map's behaviour and the only view
+    // that answers the question this map is opened to answer. Opening at a fixed zoom on the scanner put every
+    // discovered node off screen. Keyed on the located nodes, so a scan that hears another one re-frames to include it.
+    FitBoundsOnceVisible(mapState = mapState, key = located) { discoveryBoundingBox(scanner, located) }
+
+    Box(modifier = modifier) {
+        SecondaryMapSurface(mapState = mapState, basemaps = basemaps)
+        SecondaryMapChrome(mapState = mapState, basemaps = basemaps)
 
         // The signal figures the Google map shows in a marker snippet. A MapLibre marker is a layer feature and has no
         // snippet, so the tapped node's numbers go at the foot of the map.
@@ -385,9 +389,12 @@ private fun ScannerLayer(scanner: GeoPosition, label: String) {
  * two-finger drag pitches the map with nothing on screen to put it back. The Google flavor makes the same call with
  * `tiltGesturesEnabled = isMainMode`, and the OSMdroid map never had tilt at all. Rotation stays, which is what Google
  * does too.
+ *
+ * Says that directly now: 0.16.0 replaced the per-gesture flags with camera capabilities, and the old
+ * `isDragRotateTiltEnabled = false` had bundled rotation in with tilt, so a mouse drag could not rotate these maps
+ * either despite the intent above. It can now.
  */
-internal val SecondaryMapOptions =
-    MapOptions(gestureOptions = GestureOptions(isDragRotateTiltEnabled = false, isTwoFingerTiltEnabled = false))
+internal val SecondaryMapInteractions = MapInteractions { camera { tilt { enabled = false } } }
 
 /**
  * Gestures off entirely, for the mini-map embedded in the node detail sheet.
@@ -396,25 +403,26 @@ internal val SecondaryMapOptions =
  * one the column is also trying to read. The Google flavor resolves it the same way, turning off scroll, zoom, rotate
  * and tilt in its own `InlineMap` and leaving the zoom buttons as the only way in. Keyboard pan and zoom stay: they
  * cost the column nothing and are the desktop's route to the same thing.
+ *
+ * The gesture families are switched off one by one rather than with `MapUiOptions.None`, which would also take the keys
+ * and the feature taps this map still wants. Momentum needs no separate mention: the gestures that could carry it are
+ * gone.
  */
-internal val InlineMapOptions =
-    MapOptions(
-        gestureOptions =
-        GestureOptions(
-            isDragPanEnabled = false,
-            isDragRotateTiltEnabled = false,
-            isPinchZoomEnabled = false,
-            isTwoFingerRotateEnabled = false,
-            isTwoFingerTiltEnabled = false,
-            isTwoFingerTapZoomEnabled = false,
-            isScrollZoomEnabled = false,
-            isDoubleClickZoomEnabled = false,
-            isQuickZoomEnabled = false,
-            isFlingEnabled = false,
-            isPinchZoomVelocityEnabled = false,
-            isRotateVelocityEnabled = false,
-        ),
-    )
+internal val InlineMapUiOptions = MapUiOptions {
+    bindings {
+        drag { enabled = false }
+        transform {
+            pan { enabled = false }
+            zoom { enabled = false }
+            rotate { enabled = false }
+            tilt { enabled = false }
+        }
+        scroll { enabled = false }
+        doubleTap { enabled = false }
+        twoFingerTap { enabled = false }
+        tapDrag { enabled = false }
+    }
+}
 
 /** Keeps a floating toolbar clear of the top edge, matching the main map's own inset. */
 internal const val TOOLBAR_INSET = 8
