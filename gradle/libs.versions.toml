@@ -25,7 +25,7 @@ koin = "4.2.2"
 koin-plugin = "1.1.0"
 
 # Kotlin
-kotlin = "2.4.10"
+kotlin = "2.4.20"
 kotlinx-coroutines-android = "1.11.0"
 kotlinx-datetime = "0.8.0-0.6.x-compat"
 kotlinx-serialization = "1.11.0"
