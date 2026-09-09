@@ -1,13 +1,24 @@
 name: Verify Flatpak Offline Build
 
 on:
+  # Changing the generator or the manifest is the one case worth gating pre-merge:
+  # break it and every later run is red, with nothing else covering it.
   pull_request:
     branches: [ main ]
     paths:
       - 'scripts/verify-flatpak/**'
+      - '.github/workflows/verify-flatpak.yml'
+  # The dependency surface the manifest captures is verified post-merge. This is not a
+  # required check and never ran in the merge queue, so per-PR it cost ~2 runner slots
+  # for a signal that blocks nothing; post-merge still catches a break within one merge,
+  # and `main` itself was previously never verified at all.
+  push:
+    branches: [ main ]
+    paths:
+      - 'scripts/verify-flatpak/**'
+      - '.github/workflows/verify-flatpak.yml'
       - 'build.gradle.kts'
       - 'settings.gradle.kts'
-      - '.github/workflows/verify-flatpak.yml'
       # The desktop module's build config shapes the uber jar the flatpak wraps.
       - 'desktopApp/**'
       # The offline manifest pins the Gradle distribution independently of the wrapper —
@@ -15,17 +26,22 @@ on:
       - 'gradle/wrapper/**'
       # build.gradle.kts reads compose-multiplatform from the catalog (#6911), so a
       # catalog-only bump changes the manifest's platform URLs. Deliberately the whole
-      # file and not a key filter: nearly every Renovate PR lands here so this over-runs,
-      # but a filter naming today's keys goes stale silently the moment the manifest
-      # reads another one — which is the failure #6911 existed to remove.
+      # file and not a key filter: a filter naming today's keys goes stale silently the
+      # moment the manifest reads another one — the failure #6911 existed to remove.
       - 'gradle/libs.versions.toml'
+  # Drift no path filter can see: a Flathub runtime bump, or an upstream artifact that
+  # moved or vanished. Nothing in this repo changes, so no other trigger would fire.
+  schedule:
+    - cron: '0 4 * * *'
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: flatpak-verify-${{ github.event.pull_request.number || github.ref }}
+  # Keyed on the event as well: a nightly and a push to main share github.ref, and
+  # without it cancel-in-progress lets one kill the other.
+  group: flatpak-verify-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -34,6 +50,8 @@ jobs:
   # reusable-check.yml documents avoiding. Each leg now captures sources on its own arch.
   verify-flatpak:
     name: Verify Flatpak Offline Build (${{ matrix.arch }})
+    # Matches the other scheduled workflows: without it every fork runs the nightly.
+    if: github.repository == 'meshtastic/Meshtastic-Android'
     runs-on: ${{ matrix.arch == 'aarch64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
     timeout-minutes: 60
     strategy:
@@ -141,9 +159,9 @@ jobs:
           echo "### ✅ Offline Flatpak build succeeded (${{ matrix.arch }})" >> "$GITHUB_STEP_SUMMARY"
 
       # The build succeeding IS the verification; bundling costs ~2 min per arch for an
-      # artifact nobody installs from a PR. Kept for dispatch, where a tester wants it.
+      # artifact nobody installs from CI. Dispatch only, where a tester asked for it.
       - name: Export .flatpak bundle
-        if: github.event_name != 'pull_request'
+        if: github.event_name == 'workflow_dispatch'
         working-directory: ${{ runner.temp }}/org.meshtastic.MeshtasticDesktop
         env:
           ARCH: ${{ matrix.arch }}
@@ -153,7 +171,7 @@ jobs:
             --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
-        if: github.event_name != 'pull_request'
+        if: github.event_name == 'workflow_dispatch'
         with:
           name: meshtastic-desktop-flatpak-${{ matrix.arch }}
           path: ${{ runner.temp }}/org.meshtastic.MeshtasticDesktop/org.meshtastic.MeshtasticDesktop.${{ matrix.arch }}.flatpak
