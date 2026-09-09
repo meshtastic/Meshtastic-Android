@@ -252,6 +252,12 @@ class FakeRadioController :
 
     override suspend fun refreshMetadata(destNum: Int) {}
 
+    override fun setDisplayMirror(enabled: Boolean) {}
+
+    override fun requestDisplayFrame() {}
+
+    override fun sendInputEvent(eventCode: Int, kbChar: Int, touchX: Int, touchY: Int) {}
+
     override suspend fun setLocalConfig(config: Config) {
         if (throwOnSetLocalConfig) error("Fake local config write failure")
         if (rejectLocalConfigWritesRemaining > 0) {

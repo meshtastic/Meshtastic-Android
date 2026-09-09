@@ -214,8 +214,8 @@ private fun AdvancedSection(isManaged: Boolean, isOtaCapable: Boolean, enabled: 
             onClick = { onNavigate(DiscoveryRoute.DiscoveryGraph) },
         )
 
-        // Always enabled: the Debug Panel reads app-local logs only — no radio connection,
-        // pending config response, or managed-mode restriction applies to it.
+        // Always enabled so logs stay reachable with no radio attached. Anything on this route that
+        // is NOT read-only must gate itself: it does not inherit `enabled` (see DisplayMirrorViewModel).
         ListItem(
             text = stringResource(Res.string.debug_panel),
             leadingIcon = MeshtasticIcons.BugReport,
