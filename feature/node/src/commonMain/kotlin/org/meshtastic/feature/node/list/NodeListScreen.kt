@@ -17,6 +17,7 @@
 package org.meshtastic.feature.node.list
 
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
@@ -31,6 +32,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.layout.LazyLayoutCacheWindow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -110,7 +112,7 @@ internal fun canEditStatusMessage(node: Node, ourNode: Node?, connectionState: C
     node.num == ourNode?.num && connectionState == ConnectionState.Connected && node.capabilities.supportsStatusMessage
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun NodeListScreen(
     navigateToNodeDetails: (Int) -> Unit,
@@ -153,7 +155,7 @@ fun NodeListScreen(
     val deviceImageUrls by viewModel.deviceImageUrls.collectAsStateWithLifecycle()
     val ignoredNodeCount = unfilteredNodes.count { it.isIgnored }
 
-    val listState = rememberLazyListState()
+    val listState = rememberLazyListState(cacheWindow = LazyLayoutCacheWindow(ahead = 300.dp, behind = 100.dp))
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(scrollToTopEvents) {

@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.layout.LazyLayoutCacheWindow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -142,6 +143,7 @@ private const val COUNTER_VISIBLE_WITHIN_BYTES = 20
  * @param onNavigateBack Callback to navigate back from this screen.
  */
 @Suppress("LongMethod", "CyclomaticComplexMethod")
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MessageScreen(
     contactKey: String,
@@ -246,7 +248,8 @@ fun MessageScreen(
 
     val inSelectionMode by remember { derivedStateOf { selectedMessageIds.value.isNotEmpty() } }
 
-    val listState = rememberLazyListState()
+    // The message list is reverseLayout; ahead is still the scroll direction, toward older messages.
+    val listState = rememberLazyListState(cacheWindow = LazyLayoutCacheWindow(ahead = 300.dp, behind = 100.dp))
 
     // Track unread messages using lightweight metadata queries
     val hasUnreadMessages by viewModel.hasUnreadMessages.collectAsStateWithLifecycle()
