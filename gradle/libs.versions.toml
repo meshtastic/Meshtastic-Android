@@ -14,6 +14,10 @@ glance = "1.2.0"
 lifecycle = "2.11.0"
 jetbrains-lifecycle = "2.11.0"
 navigation3 = "1.1.1"
+# navigation3-runtime is AndroidX's own KMP artifact (androidx.navigation3:navigation3-runtime),
+# separate from the JetBrains navigation3-ui mirror above — the mirror never published past 1.1.1,
+# so this ref moves independently and is deliberately ahead.
+navigation3-runtime = "1.1.7"
 navigationevent = "1.1.0"
 paging = "3.5.1"
 room = "3.0.2"
@@ -150,6 +154,7 @@ jetbrains-lifecycle-runtime-compose = { module = "org.jetbrains.androidx.lifecyc
 jetbrains-lifecycle-viewmodel-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "jetbrains-lifecycle" }
 jetbrains-lifecycle-viewmodel-navigation3 = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "jetbrains-lifecycle" }
 jetbrains-navigation3-ui = { module = "org.jetbrains.androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
+androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3-runtime" }
 jetbrains-navigationevent-compose = { module = "org.jetbrains.androidx.navigationevent:navigationevent-compose", version.ref = "navigationevent" }
 androidx-paging-common = { module = "androidx.paging:paging-common", version.ref = "paging" }
 androidx-paging-compose = { module = "androidx.paging:paging-compose", version.ref = "paging" }

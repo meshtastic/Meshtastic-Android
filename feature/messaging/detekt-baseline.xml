@@ -15,7 +15,7 @@
     <ID>LambdaParameterEventTrailing:QuickChat.kt:onNavigateUp: () -> Unit</ID>
     <ID>ModifierMissing:Contacts.kt:@Suppress("LongMethod", "CyclomaticComplexMethod", "LongParameterList") @Composable fun ContactsScreen</ID>
     <ID>ModifierMissing:DeliveryInfoDialog.kt:@Composable fun DeliveryInfo</ID>
-    <ID>ModifierMissing:Message.kt:@Suppress("LongMethod", "CyclomaticComplexMethod") @Composable fun MessageScreen</ID>
+    <ID>ModifierMissing:Message.kt:@Suppress("LongMethod", "CyclomaticComplexMethod") @OptIn(ExperimentalFoundationApi::class) @Composable fun MessageScreen</ID>
     <ID>ModifierMissing:MessageActionsBottomSheet.kt:@Suppress("LongMethod") @Composable fun MessageActionsContent</ID>
     <ID>ModifierMissing:MessageScreenComponents.kt:@Composable fun ReplySnippet</ID>
     <ID>ModifierMissing:MessageScreenComponents.kt:@OptIn(ExperimentalMaterial3Api::class) @Composable fun ActionModeTopBar</ID>
