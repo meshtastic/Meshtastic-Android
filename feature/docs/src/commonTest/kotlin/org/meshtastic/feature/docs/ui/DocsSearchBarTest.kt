@@ -16,17 +16,17 @@
  */
 package org.meshtastic.feature.docs.ui
 
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.v2.runComposeUiTest
 import kotlin.test.Test
-import kotlin.test.assertEquals
 
-@OptIn(ExperimentalTestApi::class)
+@OptIn(ExperimentalTestApi::class, ExperimentalMaterial3Api::class)
 class DocsSearchBarTest {
 
     @Test
@@ -46,15 +46,17 @@ class DocsSearchBarTest {
         var received: String? = null
         setContent { DocsSearchBar(query = "bluetooth", onQueryChange = { received = it }) }
         onNodeWithContentDescription("Clear search").performClick()
-        runOnIdle { assertEquals("", received) }
+        // The clear edit is reported back through a snapshotFlow hop, not synchronously.
+        waitUntil(timeoutMillis = 5_000) { received == "" }
     }
 
     @Test
     fun textInput_callsOnQueryChange() = runComposeUiTest {
         val queries = mutableListOf<String>()
         setContent { DocsSearchBar(query = "", onQueryChange = { queries += it }) }
-        // OutlinedTextField placeholder is not findable by text; use semantics matcher
-        onNode(hasSetTextAction()).performTextInput("mesh")
-        runOnIdle { assertEquals("mesh", queries.last()) }
+        // Focusing this field also drives SearchBarState toward Expanded, which mounts a second,
+        // shared inputField instance in the (unrendered-here) overlay - target the collapsed one by tag.
+        onNodeWithTag(DOCS_SEARCH_BAR_INPUT_FIELD_TAG).performTextInput("mesh")
+        waitUntil(timeoutMillis = 5_000) { queries.lastOrNull() == "mesh" }
     }
 }
