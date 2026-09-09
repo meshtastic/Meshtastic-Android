@@ -94,10 +94,14 @@ private fun ImportedLayer(layer: CustomLayer, opacity: Float) {
     // top — a ground overlay is a basemap-like backdrop, not a marker.
     layer.groundOverlays.forEachIndexed { index, overlay -> GroundOverlayLayer(layer.id, index, overlay, opacity) }
 
-    val fill = coalesce(feature["fill"].asString(), feature["color"].asString())
-    val stroke = coalesce(feature["stroke"].asString(), feature["color"].asString())
+    // The untyped property goes into coalesce and the conversion happens on the result: since 0.16.0 an
+    // assertion *inside* coalesce aborts on a null input rather than falling through to the next value, so
+    // asserting first would make a feature with no "fill" skip "color" too.
+    val fill = coalesce(feature["fill"], feature["color"])
+    val stroke = coalesce(feature["stroke"], feature["color"])
     val strokeColor = stroke.convertToColor(const(CustomLayerBlue))
-    val strokeWidth = coalesce(feature["stroke-width"].asNumber(), const(DEFAULT_STROKE_WIDTH)).dp
+    // One key, so the assertion's own fallback does the job coalesce used to.
+    val strokeWidth = feature["stroke-width"].asNumber(const(DEFAULT_STROKE_WIDTH)).dp
 
     // One source, three layers, each filtered to the geometry it can actually draw. Unfiltered, the fill layer
     // painted a LineString's vertices as a solid wedge and the circle layer put a dot on every polygon corner —
@@ -109,7 +113,7 @@ private fun ImportedLayer(layer: CustomLayer, opacity: Float) {
         color = fill.convertToColor(const(CustomLayerBlue)),
         // The layer's own opacity scales whatever the feature asked for, rather than replacing it: an import that
         // styles some features translucent stays relatively translucent as the whole layer fades.
-        opacity = coalesce(feature["fill-opacity"].asNumber(), const(DEFAULT_FILL_OPACITY)) * const(opacity),
+        opacity = feature["fill-opacity"].asNumber(const(DEFAULT_FILL_OPACITY)) * const(opacity),
     )
     LineLayer(
         id = "custom-${layer.id}-line",
@@ -124,7 +128,7 @@ private fun ImportedLayer(layer: CustomLayer, opacity: Float) {
             GeometryType.MultiPolygon,
         ),
         color = strokeColor,
-        opacity = coalesce(feature["stroke-opacity"].asNumber(), const(1f)) * const(opacity),
+        opacity = feature["stroke-opacity"].asNumber(const(1f)) * const(opacity),
         width = strokeWidth,
     )
     CircleLayer(
@@ -150,7 +154,7 @@ private fun ImportedLayer(layer: CustomLayer, opacity: Float) {
             filter = iconIsOneOf(icons.keys),
             iconImage =
             switch(
-                input = coalesce(feature[ICON_URL_PROPERTY].asString(), const("")),
+                input = feature[ICON_URL_PROPERTY].asString(const("")),
                 *icons.map { (url, painter) -> case(url, image(painter, ICON_SIZE)) }.toTypedArray(),
                 // Unreachable given the filter, and required: `switch` has no way to say "draw nothing".
                 fallback = image(icons.values.first(), ICON_SIZE),

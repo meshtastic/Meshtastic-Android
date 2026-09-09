@@ -130,12 +130,16 @@ wrapper "matching splits pass, universal ignored" even 0 "google: all splits shi
 tree gap google debug armeabi-v7a=liba.so arm64-v8a=liba.so,libengine.so
 wrapper "unrecorded gap fails with the lib named" gap 1 "armeabi-v7a/libengine.so"
 
+# The two cases that used to live here drove the wrapper through the *checked-in* allowlist:
+# one asserted the recorded fdroid gap was excused and counted, the other that the gap
+# closing failed until the lines went. maplibre-compose 0.16.0 closed that gap and the lines
+# are gone, so neither case has anything real to drive and both would now assert the
+# opposite of what the script does. Cases 3 and 5 cover excused and stale entries against
+# the classifier directly, with allowlists they set themselves, so only the end-to-end
+# variants are lost. This keeps the `*/release` glob those cases also happened to exercise.
 MAPLIBRE="libjniMaplibreNativeC.so,libmaplibre-native-c.so"
-tree known fdroid release armeabi-v7a=liba.so "arm64-v8a=liba.so,$MAPLIBRE"
-wrapper "the recorded fdroid gap passes and is counted" known 0 "fdroid: splits match apart from 2 recorded known gap(s)"
-
-tree stale fdroid release "armeabi-v7a=liba.so,$MAPLIBRE" "arm64-v8a=liba.so,$MAPLIBRE"
-wrapper "the recorded gap closing fails until the lines go" stale 1 "known-gap entries whose library is now present"
+tree rel fdroid release "armeabi-v7a=liba.so,$MAPLIBRE" "arm64-v8a=liba.so,$MAPLIBRE"
+wrapper "release splits are scanned, not just debug" rel 0 "fdroid: all splits ship the same native libraries"
 
 tree single google debug arm64-v8a=liba.so
 wrapper "a lone split is nothing to compare, so no APKs were checked" single 1 "no split APKs found"

@@ -23,8 +23,8 @@ import org.maplibre.compose.layers.HillshadeLayer
 import org.maplibre.compose.layers.RasterLayer
 import org.maplibre.compose.sources.RasterDemEncoding
 import org.maplibre.compose.sources.TileSetOptions
-import org.maplibre.compose.sources.rememberRasterDemSource
-import org.maplibre.compose.sources.rememberRasterSource
+import org.maplibre.compose.sources.rememberRasterDemTileSource
+import org.maplibre.compose.sources.rememberRasterTileSource
 import org.meshtastic.feature.map.layers.opacityOf
 import org.meshtastic.feature.map.maplibre.style.Basemap
 import org.meshtastic.feature.map.maplibre.style.MapOverlay
@@ -42,7 +42,7 @@ internal fun RasterTileSpec.toTileSetOptions(): TileSetOptions =
  */
 @Composable
 internal fun RasterBasemapLayer(basemap: Basemap.Raster) {
-    val source = rememberRasterSource(tiles = basemap.spec.tiles, options = basemap.spec.toTileSetOptions())
+    val source = rememberRasterTileSource(tiles = basemap.spec.tiles, options = basemap.spec.toTileSetOptions())
     RasterLayer(id = "basemap-${basemap.id}", source = source)
 }
 
@@ -60,7 +60,8 @@ internal fun MapOverlayLayers(overlays: List<MapOverlay>, opacity: Map<String, F
             is MapOverlay.Hillshade -> HillshadeOverlayLayer(overlay, layerOpacity)
 
             is MapOverlay.Raster -> {
-                val source = rememberRasterSource(tiles = overlay.spec.tiles, options = overlay.spec.toTileSetOptions())
+                val source =
+                    rememberRasterTileSource(tiles = overlay.spec.tiles, options = overlay.spec.toTileSetOptions())
                 RasterLayer(id = "overlay-${overlay.id}", source = source, opacity = const(layerOpacity))
             }
         }
@@ -77,7 +78,7 @@ internal fun MapOverlayLayers(overlays: List<MapOverlay>, opacity: Map<String, F
 @Composable
 private fun HillshadeOverlayLayer(overlay: MapOverlay.Hillshade, opacity: Float) {
     val source =
-        rememberRasterDemSource(
+        rememberRasterDemTileSource(
             tiles = overlay.spec.tiles,
             options = overlay.spec.toTileSetOptions(),
             // Not the default. MapLibre assumes Mapbox Terrain-RGB; every keyless public DEM is

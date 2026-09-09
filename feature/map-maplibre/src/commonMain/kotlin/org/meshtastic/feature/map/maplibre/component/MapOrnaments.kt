@@ -16,14 +16,10 @@
  */
 package org.meshtastic.feature.map.maplibre.component
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import org.maplibre.compose.overlay.DisappearingScaleBar
-import org.maplibre.compose.overlay.ExpandingAttributionButton
-import org.maplibre.compose.overlay.MaplibreLogo
+import org.maplibre.compose.overlay.include
 import org.maplibre.compose.overlay.MapOverlay as MaplibreOverlay
 
 /**
@@ -41,20 +37,11 @@ import org.maplibre.compose.overlay.MapOverlay as MaplibreOverlay
  */
 internal val MeshMapOrnaments: MaplibreOverlay = MaplibreOverlay {
     DisappearingScaleBar(
-        metersPerDp = cameraState.viewport?.metersPerDpAtTarget ?: 0.0,
-        zoom = cameraState.position.zoom,
+        metersPerDp = mapState.viewport?.metersPerDpAtTarget ?: 0.0,
+        zoom = mapState.cameraPosition.zoom,
         modifier = Modifier.align(Alignment.TopStart),
     )
 
-    // Read before entering the Row, whose scope shadows this one.
-    val camera = cameraState
-    val style = styleState
-    Row(
-        modifier = Modifier.align(Alignment.BottomStart).fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        MaplibreLogo()
-        ExpandingAttributionButton(cameraState = camera, styleState = style)
-    }
+    // The logo and the attribution button, in the places `MapOverlay.Default` puts them.
+    include(MaplibreOverlay.AttributionOnly)
 }
