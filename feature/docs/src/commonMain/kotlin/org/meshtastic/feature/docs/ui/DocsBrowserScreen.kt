@@ -33,16 +33,23 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.doc_loading
+import org.meshtastic.core.resources.doc_no_documentation
+import org.meshtastic.core.resources.doc_no_results
 import org.meshtastic.core.ui.icon.ArrowBack
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.feature.docs.model.AIDocAssistantSessionState
@@ -73,6 +80,8 @@ fun DocsBrowserScreen(
     onChirpySubmit: () -> Unit = {},
     onChirpyNavigateToPage: (String) -> Unit = {},
 ) {
+    val searchScrollBehavior = SearchBarDefaults.enterAlwaysSearchBarScrollBehavior()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -89,48 +98,30 @@ fun DocsBrowserScreen(
                 ChirpyFab(modelReadiness = modelReadiness, onClick = onChirpyToggle)
             }
         },
-        modifier = modifier,
+        modifier = modifier.nestedScroll(searchScrollBehavior.nestedScrollConnection),
     ) { innerPadding ->
         Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
             DocsSearchBar(
                 query = searchQuery,
                 onQueryChange = onSearchQueryChange,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                scrollBehavior = searchScrollBehavior,
+                expandedContent = {
+                    DocsResultsContent(
+                        pages = pages,
+                        isLoading = isLoading,
+                        searchQuery = searchQuery,
+                        onSelectPage = onSelectPage,
+                    )
+                },
             )
 
-            when {
-                isLoading -> {
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        CircularProgressIndicator()
-                        Text(
-                            text = "Loading documentation...",
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(top = 16.dp),
-                        )
-                    }
-                }
-
-                pages.isEmpty() -> {
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        Text(
-                            text = if (searchQuery.isNotBlank()) "No results found" else "No documentation available",
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                    }
-                }
-
-                else -> {
-                    DocsTocList(pages = pages, onSelectPage = onSelectPage)
-                }
-            }
+            DocsResultsContent(
+                pages = pages,
+                isLoading = isLoading,
+                searchQuery = searchQuery,
+                onSelectPage = onSelectPage,
+            )
         }
 
         if (showChirpy) {
@@ -142,6 +133,54 @@ fun DocsBrowserScreen(
                 onDismiss = onChirpyDismiss,
                 onNavigateToPage = onChirpyNavigateToPage,
             )
+        }
+    }
+}
+
+/** The loading / empty / results states shown below the search field, shared between the inline and expanded bar. */
+@Composable
+private fun DocsResultsContent(
+    pages: List<DocPage>,
+    isLoading: Boolean,
+    searchQuery: String,
+    onSelectPage: (String) -> Unit,
+) {
+    when {
+        isLoading -> {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                CircularProgressIndicator()
+                Text(
+                    text = stringResource(Res.string.doc_loading),
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(top = 16.dp),
+                )
+            }
+        }
+
+        pages.isEmpty() -> {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(
+                    text =
+                    if (searchQuery.isNotBlank()) {
+                        stringResource(Res.string.doc_no_results)
+                    } else {
+                        stringResource(Res.string.doc_no_documentation)
+                    },
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+            }
+        }
+
+        else -> {
+            DocsTocList(pages = pages, onSelectPage = onSelectPage)
         }
     }
 }
