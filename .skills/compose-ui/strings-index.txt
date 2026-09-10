@@ -1716,12 +1716,18 @@ set_your_region
 settings
 ### SHARE ###
 share
+share_action
 share_by_tap_subtext
-share_channels_qr
+share_channels
+share_channels_add_hint
+share_channels_replace_hint
+share_channels_subject
 share_connected_node
 share_contact
+share_contact_subject
 share_location
 share_location_description
+share_qr_subtext
 share_to
 share_your_location_in_real_time
 shared_contact_no_public_key
