@@ -101,23 +101,6 @@ class NodeListViewModel(
 
     private val _nodeFilterText = savedStateHandle.getStateFlow(KEY_FILTER_TEXT, "")
 
-    private val filterToggles =
-        combine(
-            nodeFilterPreferences.includeUnknown,
-            nodeFilterPreferences.excludeInfrastructure,
-            nodeFilterPreferences.onlyOnline,
-            nodeFilterPreferences.onlyDirect,
-            nodeFilterPreferences.showIgnored,
-        ) { includeUnknown, excludeInfrastructure, onlyOnline, onlyDirect, showIgnored ->
-            NodeFilterToggles(
-                includeUnknown = includeUnknown,
-                excludeInfrastructure = excludeInfrastructure,
-                onlyOnline = onlyOnline,
-                onlyDirect = onlyDirect,
-                showIgnored = showIgnored,
-            )
-        }
-
     /**
      * The unheard filter may only narrow the list once the firmware has proven it reports the field AND the handshake's
      * NodeInfo install has completed. Between setFirmwareVersion flipping the capability and that install landing,
@@ -129,23 +112,18 @@ class NodeListViewModel(
             reportsHeard && dbReady
         }
 
+    // Three flows regardless of how many filters exist: the store hands back all of them as one value.
     private val nodeFilter: Flow<NodeFilterState> =
-        combine(
-            _nodeFilterText,
-            filterToggles,
-            nodeFilterPreferences.excludeMqtt,
-            nodeFilterPreferences.excludeUnheard,
-            unheardFilterAllowed,
-        ) { filterText, filterToggles, excludeMqtt, excludeUnheard, unheardAllowed ->
+        combine(_nodeFilterText, nodeFilterPreferences.filters, unheardFilterAllowed) { text, prefs, unheardAllowed ->
             NodeFilterState(
-                filterText = filterText,
-                includeUnknown = filterToggles.includeUnknown,
-                excludeInfrastructure = filterToggles.excludeInfrastructure,
-                onlyOnline = filterToggles.onlyOnline,
-                onlyDirect = filterToggles.onlyDirect,
-                showIgnored = filterToggles.showIgnored,
-                excludeMqtt = excludeMqtt,
-                excludeUnheard = excludeUnheard && unheardAllowed,
+                filterText = text,
+                includeUnknown = prefs.includeUnknown,
+                excludeInfrastructure = prefs.excludeInfrastructure,
+                onlyOnline = prefs.onlyOnline,
+                onlyDirect = prefs.onlyDirect,
+                showIgnored = prefs.showIgnored,
+                excludeMqtt = prefs.excludeMqtt,
+                excludeUnheard = prefs.excludeUnheard && unheardAllowed,
             )
         }
 
@@ -290,11 +268,3 @@ data class NodeFilterState(
                 excludeMqtt ||
                 excludeUnheard
 }
-
-data class NodeFilterToggles(
-    val includeUnknown: Boolean = true,
-    val excludeInfrastructure: Boolean = false,
-    val onlyOnline: Boolean = false,
-    val onlyDirect: Boolean = false,
-    val showIgnored: Boolean = false,
-)

@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.prefs.ui
 
+import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
@@ -35,6 +36,7 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.prefs.cachedFlow
 import org.meshtastic.core.prefs.di.UiDataStore
+import org.meshtastic.core.repository.NodeFilterPrefs
 import org.meshtastic.core.repository.UiPrefs
 
 @Single
@@ -83,53 +85,13 @@ class UiPrefsImpl(private val dataStore: UiDataStore, dispatchers: CoroutineDisp
     }
 
     // Defaults on so nodes heard before their NodeInfo arrives stay visible and messageable (design#16).
-    override val includeUnknown: StateFlow<Boolean> =
-        dataStore.data.map { it[KEY_INCLUDE_UNKNOWN] ?: true }.stateIn(scope, SharingStarted.Lazily, true)
+    override val nodeFilters: StateFlow<NodeFilterPrefs> =
+        dataStore.data.map { it.toNodeFilterPrefs() }.stateIn(scope, SharingStarted.Lazily, NodeFilterPrefs())
 
-    override fun setIncludeUnknown(value: Boolean) {
-        scope.launch { dataStore.edit { it[KEY_INCLUDE_UNKNOWN] = value } }
-    }
-
-    override val excludeInfrastructure: StateFlow<Boolean> =
-        dataStore.data.map { it[KEY_EXCLUDE_INFRASTRUCTURE] ?: false }.stateIn(scope, SharingStarted.Lazily, false)
-
-    override fun setExcludeInfrastructure(value: Boolean) {
-        scope.launch { dataStore.edit { it[KEY_EXCLUDE_INFRASTRUCTURE] = value } }
-    }
-
-    override val onlyOnline: StateFlow<Boolean> =
-        dataStore.data.map { it[KEY_ONLY_ONLINE] ?: false }.stateIn(scope, SharingStarted.Lazily, false)
-
-    override fun setOnlyOnline(value: Boolean) {
-        scope.launch { dataStore.edit { it[KEY_ONLY_ONLINE] = value } }
-    }
-
-    override val onlyDirect: StateFlow<Boolean> =
-        dataStore.data.map { it[KEY_ONLY_DIRECT] ?: false }.stateIn(scope, SharingStarted.Lazily, false)
-
-    override fun setOnlyDirect(value: Boolean) {
-        scope.launch { dataStore.edit { it[KEY_ONLY_DIRECT] = value } }
-    }
-
-    override val showIgnored: StateFlow<Boolean> =
-        dataStore.data.map { it[KEY_SHOW_IGNORED] ?: false }.stateIn(scope, SharingStarted.Lazily, false)
-
-    override fun setShowIgnored(value: Boolean) {
-        scope.launch { dataStore.edit { it[KEY_SHOW_IGNORED] = value } }
-    }
-
-    override val excludeMqtt: StateFlow<Boolean> =
-        dataStore.data.map { it[KEY_EXCLUDE_MQTT] ?: false }.stateIn(scope, SharingStarted.Lazily, false)
-
-    override fun setExcludeMqtt(value: Boolean) {
-        scope.launch { dataStore.edit { it[KEY_EXCLUDE_MQTT] = value } }
-    }
-
-    override val excludeUnheard: StateFlow<Boolean> =
-        dataStore.data.map { it[KEY_EXCLUDE_UNHEARD] ?: false }.stateIn(scope, SharingStarted.Lazily, false)
-
-    override fun setExcludeUnheard(value: Boolean) {
-        scope.launch { dataStore.edit { it[KEY_EXCLUDE_UNHEARD] = value } }
+    override fun updateNodeFilters(transform: (NodeFilterPrefs) -> NodeFilterPrefs) {
+        // Read-modify-write inside edit{}, which is transactional — the same lost-update guard updateHiddenLayerUrls
+        // uses. Writing every key rather than the changed one keeps this a single pure transform.
+        scope.launch { dataStore.edit { it.writeNodeFilterPrefs(transform(it.toNodeFilterPrefs())) } }
     }
 
     override val hasShownNotPairedWarning: StateFlow<Boolean> =
@@ -316,6 +278,26 @@ class UiPrefsImpl(private val dataStore: UiDataStore, dispatchers: CoroutineDisp
 
     override fun setShouldShowTelemetry(value: Boolean) {
         scope.launch { dataStore.edit { it[NodeListLayoutPreferences.KEY_SHOW_TELEMETRY] = value } }
+    }
+
+    private fun Preferences.toNodeFilterPrefs() = NodeFilterPrefs(
+        includeUnknown = this[KEY_INCLUDE_UNKNOWN] ?: NodeFilterPrefs().includeUnknown,
+        excludeInfrastructure = this[KEY_EXCLUDE_INFRASTRUCTURE] ?: false,
+        onlyOnline = this[KEY_ONLY_ONLINE] ?: false,
+        onlyDirect = this[KEY_ONLY_DIRECT] ?: false,
+        showIgnored = this[KEY_SHOW_IGNORED] ?: false,
+        excludeMqtt = this[KEY_EXCLUDE_MQTT] ?: false,
+        excludeUnheard = this[KEY_EXCLUDE_UNHEARD] ?: false,
+    )
+
+    private fun MutablePreferences.writeNodeFilterPrefs(prefs: NodeFilterPrefs) {
+        this[KEY_INCLUDE_UNKNOWN] = prefs.includeUnknown
+        this[KEY_EXCLUDE_INFRASTRUCTURE] = prefs.excludeInfrastructure
+        this[KEY_ONLY_ONLINE] = prefs.onlyOnline
+        this[KEY_ONLY_DIRECT] = prefs.onlyDirect
+        this[KEY_SHOW_IGNORED] = prefs.showIgnored
+        this[KEY_EXCLUDE_MQTT] = prefs.excludeMqtt
+        this[KEY_EXCLUDE_UNHEARD] = prefs.excludeUnheard
     }
 
     companion object {

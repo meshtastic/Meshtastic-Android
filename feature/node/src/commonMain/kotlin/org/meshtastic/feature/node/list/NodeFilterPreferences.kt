@@ -24,13 +24,8 @@ import org.meshtastic.core.repository.UiPrefs
 @Single
 @Suppress("TooManyFunctions")
 open class NodeFilterPreferences constructor(private val uiPrefs: UiPrefs) {
-    open val includeUnknown = uiPrefs.includeUnknown
-    open val excludeInfrastructure = uiPrefs.excludeInfrastructure
-    open val onlyOnline = uiPrefs.onlyOnline
-    open val onlyDirect = uiPrefs.onlyDirect
-    open val showIgnored = uiPrefs.showIgnored
-    open val excludeMqtt = uiPrefs.excludeMqtt
-    open val excludeUnheard = uiPrefs.excludeUnheard
+    /** Every node-list filter as one value; see [org.meshtastic.core.repository.NodeFilterPrefs]. */
+    open val filters = uiPrefs.nodeFilters
 
     // Node list layout preferences
     open val nodeListDensity = uiPrefs.nodeListDensity
@@ -92,30 +87,30 @@ open class NodeFilterPreferences constructor(private val uiPrefs: UiPrefs) {
     }
 
     open fun toggleIncludeUnknown() {
-        uiPrefs.setIncludeUnknown(!includeUnknown.value)
+        uiPrefs.updateNodeFilters { it.copy(includeUnknown = !it.includeUnknown) }
     }
 
     open fun toggleExcludeInfrastructure() {
-        uiPrefs.setExcludeInfrastructure(!excludeInfrastructure.value)
+        uiPrefs.updateNodeFilters { it.copy(excludeInfrastructure = !it.excludeInfrastructure) }
     }
 
     open fun toggleOnlyOnline() {
-        uiPrefs.setOnlyOnline(!onlyOnline.value)
+        uiPrefs.updateNodeFilters { it.copy(onlyOnline = !it.onlyOnline) }
     }
 
     open fun toggleOnlyDirect() {
-        uiPrefs.setOnlyDirect(!onlyDirect.value)
+        uiPrefs.updateNodeFilters { it.copy(onlyDirect = !it.onlyDirect) }
     }
 
     open fun toggleShowIgnored() {
-        uiPrefs.setShowIgnored(!showIgnored.value)
+        uiPrefs.updateNodeFilters { it.copy(showIgnored = !it.showIgnored) }
     }
 
     open fun toggleExcludeMqtt() {
-        uiPrefs.setExcludeMqtt(!excludeMqtt.value)
+        uiPrefs.updateNodeFilters { it.copy(excludeMqtt = !it.excludeMqtt) }
     }
 
     open fun toggleExcludeUnheard() {
-        uiPrefs.setExcludeUnheard(!excludeUnheard.value)
+        uiPrefs.updateNodeFilters { it.copy(excludeUnheard = !it.excludeUnheard) }
     }
 }

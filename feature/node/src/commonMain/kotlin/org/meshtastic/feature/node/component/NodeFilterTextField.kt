@@ -79,29 +79,14 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Search
 import org.meshtastic.core.ui.icon.Sort
 
-@Suppress("LongParameterList")
 @Composable
 fun NodeFilterTextField(
-    modifier: Modifier = Modifier,
     filterText: String,
     onTextChange: (String) -> Unit,
     currentSortOption: NodeSortOption,
     onSortSelect: (NodeSortOption) -> Unit,
-    includeUnknown: Boolean,
-    onToggleIncludeUnknown: () -> Unit,
-    excludeInfrastructure: Boolean,
-    onToggleExcludeInfrastructure: () -> Unit,
-    onlyOnline: Boolean,
-    onToggleOnlyOnline: () -> Unit,
-    onlyDirect: Boolean,
-    onToggleOnlyDirect: () -> Unit,
-    showIgnored: Boolean,
-    onToggleShowIgnored: () -> Unit,
-    ignoredNodeCount: Int,
-    excludeUnheard: Boolean,
-    onToggleExcludeUnheard: () -> Unit,
-    excludeMqtt: Boolean,
-    onToggleExcludeMqtt: () -> Unit,
+    toggles: NodeFilterToggles,
+    modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier.background(MaterialTheme.colorScheme.background)) {
         Row {
@@ -111,32 +96,15 @@ fun NodeFilterTextField(
                 modifier = Modifier.align(Alignment.CenterVertically),
                 currentSortOption = currentSortOption,
                 onSortSelect = onSortSelect,
-                toggles =
-                NodeFilterToggles(
-                    includeUnknown = includeUnknown,
-                    onToggleIncludeUnknown = onToggleIncludeUnknown,
-                    excludeInfrastructure = excludeInfrastructure,
-                    onToggleExcludeInfrastructure = onToggleExcludeInfrastructure,
-                    onlyOnline = onlyOnline,
-                    onToggleOnlyOnline = onToggleOnlyOnline,
-                    onlyDirect = onlyDirect,
-                    onToggleOnlyDirect = onToggleOnlyDirect,
-                    showIgnored = showIgnored,
-                    onToggleShowIgnored = onToggleShowIgnored,
-                    ignoredNodeCount = ignoredNodeCount,
-                    excludeMqtt = excludeMqtt,
-                    onToggleExcludeMqtt = onToggleExcludeMqtt,
-                    excludeUnheard = excludeUnheard,
-                    onToggleExcludeUnheard = onToggleExcludeUnheard,
-                ),
+                toggles = toggles,
             )
         }
-        if (showIgnored) {
+        if (toggles.showIgnored) {
             Box(
                 modifier =
                 Modifier.fillMaxWidth()
                     .background(MaterialTheme.colorScheme.surfaceDim)
-                    .clickable { onToggleShowIgnored() }
+                    .clickable { toggles.onToggleShowIgnored() }
                     .padding(vertical = 16.dp, horizontal = 24.dp),
             ) {
                 Text(
