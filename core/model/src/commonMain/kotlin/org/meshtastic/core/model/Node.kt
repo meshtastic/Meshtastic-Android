@@ -74,6 +74,11 @@ data class Node(
     val nodeStatus: String? = null,
     /** The transport mechanism this node was last heard over (see [MeshPacket.TransportMechanism]). */
     val lastTransport: Int = 0,
+    /**
+     * False once a different public key arrived for a node one is already stored for. The stored key stands; this
+     * records the refusal. See [mismatchKey], which is what the UI asks.
+     */
+    val keyMatch: Boolean = true,
 ) {
     val capabilities: Capabilities by lazy { Capabilities(metadata?.firmware_version) }
 
@@ -92,8 +97,16 @@ data class Node(
     val hasPKC
         get() = (publicKey ?: user.public_key).size > 0
 
+    /**
+     * True when a different public key has arrived for this node than the one on file.
+     *
+     * Two shapes, because the app used to record a mismatch by overwriting the stored key with [ERROR_BYTE_STRING]. It
+     * now keeps the key and clears [keyMatch] instead — firmware drops the NodeInfo outright rather than overwrite, so
+     * destroying the trusted key handed any mesh or MQTT peer a way to break PKC direct messages to a contact. Rows
+     * written before that change still carry the sentinel, so both still read as a mismatch.
+     */
     val mismatchKey
-        get() = (publicKey ?: user.public_key) == ERROR_BYTE_STRING
+        get() = !keyMatch || (publicKey ?: user.public_key) == ERROR_BYTE_STRING
 
     /**
      * Last measured SNR in dB, or null when this node has no reading yet ([snr] still holds [SNR_UNSET]).

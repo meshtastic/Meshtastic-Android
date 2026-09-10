@@ -582,7 +582,7 @@ class NodeManagerImplTest {
     }
 
     @Test
-    fun `handleReceivedUser sets empty publicKey when key mismatch clears user key`() {
+    fun `handleReceivedUser keeps the stored key when a different one arrives`() {
         val nodeNum = 1234
         val existingPk = ByteArray(32) { (it + 1).toByte() }.toByteString()
         val existingUser =
@@ -607,9 +607,14 @@ class NodeManagerImplTest {
         nodeManager.handleReceivedUser(nodeNum, incomingUser)
 
         val result = nodeManager.nodeDBbyNodeNum[nodeNum]!!
-        // Key mismatch: newUser gets public_key cleared to EMPTY, and publicKey should match
-        assertEquals(ByteString.EMPTY, result.publicKey)
-        assertEquals(ByteString.EMPTY, result.user.public_key)
+        // First-wins, matching firmware: anyone can broadcast a NodeInfo under this node's number, so the substitute
+        // is refused rather than applied. Clearing the key here would break PKC direct messages to the contact on the
+        // word of whoever sent it.
+        assertEquals(existingPk, result.publicKey)
+        assertEquals(existingPk, result.user.public_key)
+        // The refusal is still surfaced — the row reads as a mismatch without the key having been destroyed.
+        assertFalse(result.keyMatch)
+        assertTrue(result.mismatchKey)
     }
 
     @Test

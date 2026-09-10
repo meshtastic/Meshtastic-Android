@@ -1131,10 +1131,14 @@ class NodeManagerImpl(
             // Prefer node.publicKey when valid (the authoritative stored key); fall back to node.user.public_key.
             val existingKey = resolveNodePublicKeyHint(node)
             val keyMatch = existingKey == null || existingKey == incomingKey
-            val newUser = if (keyMatch) sanitizedUser else sanitizedUser.copy(public_key = ByteString.EMPTY)
+            // First-wins, matching the DAO and the firmware: a different key for a node we already hold one for is
+            // refused and recorded, never applied. Clearing the stored key here would break PKC direct messages to
+            // that contact on the word of whoever sent the substitute.
+            val newUser = if (keyMatch) sanitizedUser else sanitizedUser.copy(public_key = existingKey)
             node.copy(
                 user = newUser,
                 publicKey = newUser.public_key,
+                keyMatch = node.keyMatch && keyMatch,
                 channel = channel,
                 manuallyVerified = manuallyVerified,
             )

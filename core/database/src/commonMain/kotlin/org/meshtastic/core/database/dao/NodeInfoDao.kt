@@ -142,17 +142,22 @@ interface NodeInfoDao {
      * This function implements safety checks to prevent public key conflicts (PKC) and ensure robust handling of key
      * updates.
      *
+     * First-wins: once a valid key is stored it is never replaced by a different inbound one. That would let any mesh
+     * or MQTT peer destroy a contact's trusted key by broadcasting a NodeInfo under their node number, breaking PKC
+     * direct messages until the node is deleted and re-added. Firmware refuses the same substitution
+     * (`NodeDB::updateUser` logs "Public Key mismatch, drop NodeInfo" and keeps its copy), so overwriting here threw
+     * away a key the radio itself still held.
+     *
      * @param existingNode The current state of the node in the database.
      * @param incomingNode The new node data being upserted.
-     * @return The resolved [ByteString] for the public key:
-     * - [NodeEntity.ERROR_BYTE_STRING]: If there is a mismatch between a valid existing key and a new incoming key.
-     * - `incomingNode.publicKey`: If the incoming key is new, matches the existing one, or if recovering from an error
-     *   state.
-     * - `existingNode.publicKey`: If the incoming update has no key, or if the user is licensed but already has a valid
-     *   key (prevents wiping).
-     * - [ByteString.EMPTY]: If the user is licensed and didn't previously have a key (or if key is explicitly cleared).
+     * @return the resolved key, and whether it matched:
+     * - the stored key with `keyMatch = false`: a *different* valid key arrived; the refusal is recorded, not applied.
+     * - `incomingNode.publicKey`: the incoming key is new or matches the stored one.
+     * - `existingNode.publicKey`: the incoming update has no key, or the user is licensed but already has a valid key
+     *   (prevents wiping).
+     * - [ByteString.EMPTY]: the user is licensed and had no key before (or the key is explicitly cleared).
      */
-    private fun resolvePublicKey(existingNode: NodeEntity, incomingNode: NodeEntity): ByteString? {
+    private fun resolvePublicKey(existingNode: NodeEntity, incomingNode: NodeEntity): ResolvedPublicKey {
         val existingKey = existingNode.publicKey ?: existingNode.user.public_key
         val incomingKey = incomingNode.publicKey
 
@@ -162,21 +167,24 @@ interface NodeInfoDao {
         return when {
             incomingHasKey -> {
                 if (existingHasKey && incomingKey != existingKey) {
-                    // Actual mismatch between two non-empty keys
-                    NodeEntity.ERROR_BYTE_STRING
+                    // A different key for a node we already hold one for: keep ours, record the refusal.
+                    ResolvedPublicKey(existingKey, keyMatch = false)
                 } else {
-                    // New key, same key, or recovery from Error state
-                    incomingKey
+                    // New key, same key, or recovery from a legacy sentinel row.
+                    ResolvedPublicKey(incomingKey, keyMatch = true)
                 }
             }
 
-            existingHasKey -> existingKey
+            existingHasKey -> ResolvedPublicKey(existingKey, existingNode.keyMatch)
 
-            incomingNode.user.is_licensed -> ByteString.EMPTY
+            incomingNode.user.is_licensed -> ResolvedPublicKey(ByteString.EMPTY, keyMatch = true)
 
-            else -> existingKey
+            else -> ResolvedPublicKey(existingKey, existingNode.keyMatch)
         }
     }
+
+    /** A resolved public key and whether the inbound one matched it — see [resolvePublicKey]. */
+    private data class ResolvedPublicKey(val key: ByteString?, val keyMatch: Boolean)
 
     /**
      * Handles the validation logic when upserting an existing node.
@@ -211,6 +219,7 @@ interface NodeInfoDao {
             return incomingNode.copy(
                 user = existingNode.user,
                 publicKey = existingNode.publicKey,
+                keyMatch = existingNode.keyMatch,
                 longName = existingNode.longName,
                 shortName = existingNode.shortName,
                 manuallyVerified = existingNode.manuallyVerified,
@@ -219,16 +228,18 @@ interface NodeInfoDao {
             )
         }
 
-        val resolvedKey =
+        val resolved =
             if (trustIncomingKey && (incomingNode.publicKey?.size ?: 0) == KEY_SIZE) {
-                incomingNode.publicKey
+                // The connected radio is authoritative for its own key, so this also clears any recorded mismatch.
+                ResolvedPublicKey(incomingNode.publicKey, keyMatch = true)
             } else {
                 resolvePublicKey(existingNode, incomingNode)
             }
 
         return incomingNode.copy(
-            user = incomingNode.user.copy(public_key = resolvedKey ?: ByteString.EMPTY),
-            publicKey = resolvedKey,
+            user = incomingNode.user.copy(public_key = resolved.key ?: ByteString.EMPTY),
+            publicKey = resolved.key,
+            keyMatch = resolved.keyMatch,
             notes = resolvedNotes,
             powerChannelLabels = resolvedPowerChannelLabels,
         )

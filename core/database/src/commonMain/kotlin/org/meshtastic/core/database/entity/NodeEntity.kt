@@ -70,6 +70,7 @@ data class NodeWithRelations(
         manuallyVerified = node.manuallyVerified,
         signsPackets = node.signsPackets,
         heardOnCurrentLora = node.heardOnCurrentLora,
+        keyMatch = node.keyMatch,
     )
 
     fun toEntity() = with(node) {
@@ -99,6 +100,7 @@ data class NodeWithRelations(
             lastTransport = lastTransport,
             signsPackets = signsPackets,
             heardOnCurrentLora = heardOnCurrentLora,
+            keyMatch = keyMatch,
         )
     }
 }
@@ -164,6 +166,17 @@ data class NodeEntity(
      * firmware that does not report it, are never shown as unheard.
      */
     @ColumnInfo(name = "heard_on_current_lora", defaultValue = "1") var heardOnCurrentLora: Boolean = true,
+    /**
+     * False once a *different* public key has arrived for a node one is already stored for.
+     *
+     * The stored key stands (first-wins) and this records the refusal, matching firmware — which drops the whole
+     * NodeInfo on a key mismatch rather than overwriting — and Meshtastic-Apple. Overwriting the trusted key instead
+     * would let any mesh or MQTT peer destroy it by broadcasting a NodeInfo under that node's number.
+     *
+     * Defaults true so rows written before this column existed are not read as mismatched; those rows record a mismatch
+     * the old way, as [ERROR_BYTE_STRING] in [publicKey].
+     */
+    @ColumnInfo(name = "key_match", defaultValue = "1") var keyMatch: Boolean = true,
 ) {
     val deviceMetrics: org.meshtastic.proto.DeviceMetrics?
         get() = deviceTelemetry.device_metrics
@@ -231,5 +244,6 @@ data class NodeEntity(
         lastTransport = lastTransport,
         signsPackets = signsPackets,
         heardOnCurrentLora = heardOnCurrentLora,
+        keyMatch = keyMatch,
     )
 }

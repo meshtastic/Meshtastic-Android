@@ -29,6 +29,7 @@ import org.meshtastic.proto.User
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
@@ -109,14 +110,29 @@ abstract class CommonNodeInfoDaoTest {
     }
 
     @Test
-    fun `a remote node changing its key is recorded as a mismatch`() = runTest {
+    fun `a remote node changing its key keeps the stored key and records the refusal`() = runTest {
         createDb()
-        val first = ByteArray(32) { 1 }.toByteString()
-        val second = ByteArray(32) { 2 }.toByteString()
-        dao.upsert(NodeEntity(num = 1, user = User(id = "!1", public_key = first)))
-        dao.upsert(NodeEntity(num = 1, user = User(id = "!1", public_key = second)))
+        val trusted = ByteArray(32) { 1 }.toByteString()
+        val substitute = ByteArray(32) { 2 }.toByteString()
+        dao.upsert(NodeEntity(num = 1, user = User(id = "!1", public_key = trusted)))
+        dao.upsert(NodeEntity(num = 1, user = User(id = "!1", public_key = substitute)))
 
-        assertEquals(NodeEntity.ERROR_BYTE_STRING, dao.getNodeByNum(1)?.node?.publicKey)
+        // First-wins: anyone can broadcast a NodeInfo under another node's number, so the substitute is refused
+        // rather than applied. Overwriting would break PKC direct messages to that contact.
+        val stored = dao.getNodeByNum(1)?.node
+        assertEquals(trusted, stored?.publicKey)
+        assertEquals(trusted, stored?.user?.public_key)
+        assertFalse(stored?.keyMatch ?: true)
+    }
+
+    @Test
+    fun `the stored key surviving a substitution still reads as a mismatch to the UI`() = runTest {
+        createDb()
+        val trusted = ByteArray(32) { 1 }.toByteString()
+        dao.upsert(NodeEntity(num = 1, user = User(id = "!1", public_key = trusted)))
+        dao.upsert(NodeEntity(num = 1, user = User(id = "!1", public_key = ByteArray(32) { 2 }.toByteString())))
+
+        assertTrue(dao.getNodeByNum(1)!!.toModel().mismatchKey)
     }
 
     @Test
@@ -134,6 +150,7 @@ abstract class CommonNodeInfoDaoTest {
         val stored = dao.getNodeByNum(own)?.node
         assertEquals(after, stored?.publicKey)
         assertEquals(after, stored?.user?.public_key)
+        assertTrue(stored?.keyMatch ?: false)
     }
 
     @Test
