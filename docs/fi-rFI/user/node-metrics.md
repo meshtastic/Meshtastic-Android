@@ -2,7 +2,7 @@
 title: Radion mittarit
 parent: Käyttöopas
 nav_order: 5
-last_updated: 2026-08-30
+last_updated: 2026-09-09
 description: Telemetrianäkymät jokaiselle verkon radiolle — laitteen kunto, ympäristöanturit, ilmanlaatu, signaalin laatu, virta, reitinselvitys ja sijaintihistoria.
 aliases:
   - mittarit
@@ -114,7 +114,7 @@ Radiosignaalin laatutiedot:
 
 ### Signaalin laadun viitearvot
 
-Signaalin laatu arvioidaan **SNR**-arvon perusteella suhteessa käytössä olevan LoRa-modeemiesiasetuksen **demodulaation alarajaan**, ei kiinteiden raja-arvojen perusteella. Sama SNR-arvo voi tarkoittaa eri asioita eri esiasetuksilla (esim. `-15 dB` on hyvä LongSlow-esiasetuksella, mutta käyttökelvoton ShortFast-esiasetuksella). RSSI näytetään, mutta sitä ei käytetä arvioinnissa. Taulukossa _raja_ tarkoittaa esiasetuksen SNR-rajaa.
+Signaalin laatu arvioidaan **SNR**-arvon perusteella suhteessa käytössä olevan LoRa-modeemiesiasetuksen **demodulaation alarajaan**, ei kiinteiden raja-arvojen perusteella. Sama SNR-arvo voi tarkoittaa eri asioita eri esiasetuksilla (esim. `-15 dB` on hyvä LongSlow-esiasetuksella, mutta käyttökelvoton ShortFast-esiasetuksella). When RSSI and a noise-floor reading are both available, the app also rates their difference against the preset limit and uses the worse rating. Otherwise, RSSI is display-only. Taulukossa _raja_ tarkoittaa esiasetuksen SNR-rajaa.
 
 | Laatu       | Kriteerit                          |
 | ----------- | ---------------------------------- |

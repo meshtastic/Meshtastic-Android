@@ -2,7 +2,7 @@
 title: Node Metrics
 parent: User Guide
 nav_order: 5
-last_updated: 2026-08-30
+last_updated: 2026-09-09
 description: Telemetry dashboards for each mesh node — device health, environment sensors, air quality, signal quality, power, traceroute, and position history.
 aliases:
   - metrics
@@ -114,7 +114,7 @@ Radio signal quality information:
 
 ### Signal Quality Reference
 
-Die Signalqualität wird auf der Grundlage des **Signal-Rauschabstand im Verhältnis zur Demodulationsschwelle der aktiven LoRa-Modem-Voreinstellung** bewertet, nicht anhand fester Schwellenwerte – ein bestimmter Wert des Signal-Rauschabstand hat je nach Voreinstellung unterschiedliche Bedeutungen (z. B. sind −15 dB bei „LongSlow“ in Ordnung, bei „ShortFast“ jedoch unbrauchbar). RSSI is shown but is not part of the rating. In the table, _limit_ is the preset's SNR limit.
+Die Signalqualität wird auf der Grundlage des **Signal-Rauschabstand im Verhältnis zur Demodulationsschwelle der aktiven LoRa-Modem-Voreinstellung** bewertet, nicht anhand fester Schwellenwerte – ein bestimmter Wert des Signal-Rauschabstand hat je nach Voreinstellung unterschiedliche Bedeutungen (z. B. sind −15 dB bei „LongSlow“ in Ordnung, bei „ShortFast“ jedoch unbrauchbar). When RSSI and a noise-floor reading are both available, the app also rates their difference against the preset limit and uses the worse rating. Otherwise, RSSI is display-only. In the table, _limit_ is the preset's SNR limit.
 
 | Quality                  | Criteria                                                         |
 | ------------------------ | ---------------------------------------------------------------- |

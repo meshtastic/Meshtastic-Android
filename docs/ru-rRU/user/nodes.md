@@ -2,7 +2,7 @@
 title: Ноды
 parent: Руководство пользователя
 nav_order: 4
-last_updated: 2026-09-04
+last_updated: 2026-09-09
 description: Просматривайте, фильтруйте и сортируйте ноды сети — просматривайте подробности, качество сигнала, роли и быстрые действия.
 aliases:
   - node-list
@@ -148,6 +148,8 @@ To add someone else's contact, use the import button on the node list and choose
 ## Детали ноды
 
 Нажатие на ноду открывает подробный вид с полной информацией. Смотри [Метрики ноды](node-metrics) для полной информации о метриках и телеметрии.
+
+Signal quality is rated against your modem preset. The same SNR can be good on a long-range preset and poor on a faster one. Traceroute and neighbor-info SNR colors use that preset too. RSSI text has its own strength colors; it affects the quality rating only when a noise-floor reading is also available.
 
 The Details card carries the node's short name, role, IDs, last heard time, hops away, uptime, and its SNR and RSSI:
 

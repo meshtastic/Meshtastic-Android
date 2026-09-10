@@ -2,7 +2,7 @@
 title: Настройки - Радио и пользователь
 parent: Руководство пользователя
 nav_order: 7
-last_updated: 2026-09-04
+last_updated: 2026-09-09
 description: Настройте ваше радиоустройство, пресеты LoRa, пользовательский профиль, обмен местоположением, управление питанием и безопасность.
 aliases:
   - настройки
@@ -111,13 +111,13 @@ The Lite, Narrow, Medium Turbo, and Tiny presets need firmware 2.8 or newer — 
 | Short Slow         | ~5 км   | 6.25 kbps | -10 дБ                   | Пригородная зона с коротким диапазоном; умеренная плотность застройки                                                                                                                                         |
 | Medium Fast        | ~5 км   | 3.52 kbps | −12.5 дБ | Пригородные районы; умеренная плотность застройки                                                                                                                                                             |
 | Medium Slow        | ~8 км   | 1.95 kbps | -15 дБ                   | Пригородный/сельский; умеренный диапазон со сниженной скоростью                                                                                                                                               |
-| Long Turbo         | ~10 км  | 1.34 kbps | −12.5 дБ | Диапазон, похожий на Long Fast, но с полосой пропускания 500 кГц; более высокая пропускная способность                                                                                                        |
+| Long Turbo         | ~10 км  | 1.34 kbps | −17.5 дБ | Диапазон, похожий на Long Fast, но с полосой пропускания 500 кГц; более высокая пропускная способность                                                                                                        |
 | Long Fast          | ~10 км  | 1.1 кб/с  | −17.5 дБ | **Общее использование (по умолчанию)** — сбалансированный диапазон и скорость                                                                                                              |
 | Long Moderate      | ~20 км  | 0.34 кб/с | −17.5 дБ | Сельская местность с некоторым рельефом; случайное использование                                                                                                                                              |
 | Lite Fast          | ~5 км   | 1.76 kbps | −12.5 дБ | Диапазон RU 866 МГц SRD (ширина полосы 125 кГц); аналогично Medium Fast                                                                                                                    |
 | Lite Slow          | ~10 км  | 0.98 kbps | -15 дБ                   | Диапазон RU 866 МГц SRD (ширина полосы 125 кГц); аналогично Long Fast                                                                                                                      |
-| Narrow Fast        | ~5 км   | 2.28 kbps | -10 дБ                   | Диапазон RU 868 МГц (полоса пропускания 62,5 кГц); предотвращает помехи с другими устройствами                                                                                             |
-| Narrow Slow        | ~10 км  | 1.30 kbps | −12.5 дБ | Диапазон RU 868 МГц (ширина полосы 62,5 кГц); аналогично Long Fast                                                                                                                         |
+| Narrow Fast        | ~5 км   | 2.28 kbps | −7.5 дБ  | Диапазон RU 868 МГц (полоса пропускания 62,5 кГц); предотвращает помехи с другими устройствами                                                                                             |
+| Narrow Slow        | ~10 км  | 1.30 kbps | -10 дБ                   | Диапазон RU 868 МГц (ширина полосы 62,5 кГц); аналогично Long Fast                                                                                                                         |
 | Medium Turbo       | ~5 км   | 7.0 kbps  | −12.5 дБ | Like Medium Fast but with 500 kHz bandwidth; not legal in every region. Needs firmware 2.8 or newer                                                                           |
 | Tiny Fast          | ~10 км  | 0.68 kbps | −7.5 дБ  | Amateur bands that cap occupied bandwidth; these presets use 15.6 kHz. Needs firmware 2.8 or newer, an SX126x or SX127x radio, and a TCXO of ±5 ppm or better |
 | Tiny Slow          | ~20 км  | 0.33 kbps | -10 дБ                   | Same band restrictions as Tiny Fast, longer range. Same firmware, radio, and TCXO requirements                                                                                                |

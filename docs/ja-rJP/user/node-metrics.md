@@ -2,7 +2,7 @@
 title: ノードメトリクス
 parent: User Guide
 nav_order: 5
-last_updated: 2026-08-30
+last_updated: 2026-09-09
 description: 各メッシュノードのテレメトリダッシュボード。デバイスの状態、環境センサー、大気質、信号品質、電力、ルート追跡、位置履歴を表示します。
 aliases:
   - metrics
@@ -114,7 +114,7 @@ CO₂ readings are color-coded by severity so you can read air quality at a glan
 
 ### 信号品質の目安
 
-信号品質は、固定のしきい値ではなく、**現在の LoRa モデムプリセットの復調限界に対する SNR** で評価されます。同じ SNR でもプリセットによって意味が異なります（例：−15 dB は LongSlow では問題ありませんが、ShortFast では使い物になりません）。 RSSI は表示されますが、評価には含まれません。 In the table, _limit_ is the preset's SNR limit.
+信号品質は、固定のしきい値ではなく、**現在の LoRa モデムプリセットの復調限界に対する SNR** で評価されます。同じ SNR でもプリセットによって意味が異なります（例：−15 dB は LongSlow では問題ありませんが、ShortFast では使い物になりません）。 When RSSI and a noise-floor reading are both available, the app also rates their difference against the preset limit and uses the worse rating. Otherwise, RSSI is display-only. In the table, _limit_ is the preset's SNR limit.
 
 | 品質 | 基準                                                    |
 | -- | ----------------------------------------------------- |

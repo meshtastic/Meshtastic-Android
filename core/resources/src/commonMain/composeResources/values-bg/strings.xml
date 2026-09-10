@@ -19,6 +19,7 @@
     <!-- A11Y -->
     <string name="a11y_label_value">%1$s: %2$s</string>
     <string name="a11y_message_from">Съобщение от %1$s: %2$s</string>
+    <string name="a11y_node_battery">батерия %1$d%</string>
     <string name="a11y_node_favorite">любим</string>
     <string name="a11y_node_last_heard">последно чут %1$s</string>
     <string name="a11y_node_offline">офлайн</string>
@@ -131,12 +132,14 @@
     </plurals>
     <string name="bold_heading">Удебелен заглавен шрифт</string>
     <string name="bonding_failed_permissions">Сдвояването не е успешно. Предоставете разрешения на устройството наблизо и опитайте отново.</string>
+    <string name="bonding_failed_retry">Сдвояването не завърши. Опитайте да сдвоите отново.</string>
     <string name="bottom_nav_settings">Настройки</string>
     <string name="broadcast_interval">Интервал на излъчване</string>
     <string name="button_gpio">GPIO за бутон</string>
     <string name="buzzer_gpio">GPIO за зумер</string>
     <string name="calculating">Изчисляване…</string>
     <string name="call_sign">Опознавателен знак</string>
+    <string name="call_sign_summary">Вашият радиолюбителски опознавателен знак, до 7 знака</string>
     <string name="camera_permission">Разрешение за камерата</string>
     <string name="camera_permission_rationale">Разрешаване на достъп до камерата за сканиране на QR кодове.</string>
     <string name="cancel">Отказ</string>
@@ -166,6 +169,7 @@
     <string name="chirpy_suggested_pages_help">Ето някои страници с документация, които биха могли да помогнат:</string>
     <string name="choose_contrast">Ниво на контраста</string>
     <string name="choose_theme">Избор на тема</string>
+    <string name="choose_units">Изберете единици</string>
     <!-- CLEAN -->
     <string name="clean_node_database_confirmation">Това ще премахне %1$d възела от вашата база данни. Това действие не може да бъде отменено.</string>
     <string name="clean_node_database_title">Почистване на базата данни с възлите</string>
@@ -214,6 +218,7 @@
     <string name="config_lora_modem_preset_summary">Налични предварително зададени настройки на модема, по подразбиране е Дълъг Бърз.</string>
     <string name="config_lora_region_summary">Регионът, където ще използвате радиостанциите си.</string>
     <string name="config_network_eth_enabled_summary">Активирането на Ethernet ще деактивира Bluetooth връзката с приложението. TCP връзки с възли не са налични на устройства на Apple.</string>
+    <string name="config_network_wifi_enabled_summary">Активирането на Wi-Fi ще деактивира Bluetooth връзката с приложението.</string>
     <string name="config_position_broadcast_secs_summary">Максималният интервал, който може да изтече, без възела да излъчи позиция.</string>
     <string name="config_position_broadcast_smart_minimum_interval_secs_summary">Най-бързо ще бъдат изпратени актуализации на позицията, ако е спазено минималното разстояние.</string>
     <string name="config_saved_restarting">Възелът се рестартира и ще бъде за кратко недостъпен.</string>
@@ -333,6 +338,7 @@
     <string name="discovery_scan_progress">Напредък на сканирането</string>
     <string name="discovery_start_scan_disabled">Бутонът за стартиране на сканиране е деактивиран. %1$s</string>
     <string name="discovery_start_scan_reason_24ghz_unsupported">радио хардуерът не поддържа 2.4 GHz</string>
+    <string name="discovery_start_scan_reason_not_connected">устройството не е свързано</string>
     <string name="discovery_stat_analysis">Анализ</string>
     <string name="discovery_stat_avg_channel_utilization">Средно използване на канала</string>
     <string name="discovery_stat_channel_utilization">Използване на канала</string>
@@ -365,6 +371,9 @@
     <string name="dns">DNS</string>
     <!-- DOC -->
     <string name="doc_clear_search">Изчистване на търсенето</string>
+    <string name="doc_loading">Зареждане на документацията…</string>
+    <string name="doc_no_documentation">Няма налична документация</string>
+    <string name="doc_no_results">Няма намерени резултати</string>
     <string name="doc_search_placeholder">Търсене в документацията…</string>
     <string name="doc_section_developer">Ръководство за разработчици</string>
     <string name="doc_section_user">Ръководство за потребители</string>
@@ -385,6 +394,7 @@
     <string name="doc_title_tak">Интеграция с TAK</string>
     <string name="doc_title_telemetry">Телеметрия &amp; Сензори</string>
     <string name="doc_title_translate">Превод на приложението</string>
+    <string name="documentation">Документация</string>
     <string name="done">Готово</string>
     <string name="dont_show_again_for_device">Да не се показва отново за това устройство</string>
     <string name="downlink_feature_description">Съобщенията от шлюза към публичния интернет се препращат към локалната mesh мрежа. Поради политиката за нулев отскок, трафикът от MQTT сървъра по подразбиране няма да се разпространява по-далеч от това устройство.</string>
@@ -429,6 +439,7 @@
     <string name="ethernet_ip">Ethernet IP:</string>
     <string name="exchange_position">Размяна на позиция</string>
     <string name="expand_chart">Разгъване на диаграмата</string>
+    <string name="expanded">Разгъната</string>
     <string name="expires">Изтича</string>
     <!-- EXPORT -->
     <string name="export_configuration">Експортиране на конфигурацията</string>
@@ -459,6 +470,7 @@
     <string name="firmware_edition">Версия на фърмуера</string>
     <string name="firmware_event_ended_banner">%1$s приключи. Върнете се към стандартния фърмуер на Meshtastic, за да възстановите нормалните функции.</string>
     <string name="firmware_event_ended_button">Актуализиране на фърмуера</string>
+    <string name="firmware_maintenance_unsupported_device">Това устройство не поддържа изтриване от приложението.</string>
     <string name="firmware_old">Фърмуерът на радиото е твърде стар, за да общува с това приложение. За повече информация относно това вижте <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">нашето ръководство за инсталиране на фърмуер</a>.</string>
     <string name="firmware_recovery_button">Възобновяване на актуализацията на фърмуера</string>
     <string name="firmware_too_old">Необходима е актуализация на фърмуера.</string>
@@ -491,16 +503,20 @@
     <string name="firmware_update_method_ble">BLE OTA</string>
     <string name="firmware_update_method_detail">Актуализиране чрез %1$s</string>
     <string name="firmware_update_method_usb">Прехвърляне на файл през USB</string>
+    <string name="firmware_update_method_wifi">Wi-Fi OTA</string>
     <string name="firmware_update_nightly">Нощен</string>
     <string name="firmware_update_no_device">Няма свързано устройство</string>
     <string name="firmware_update_node_info_missing">Липсва информация за потребителя на възела.</string>
     <string name="firmware_update_not_found_in_release">Не е намерен фърмуер за %1$s в изданието.</string>
     <string name="firmware_update_open">Отваряне на актуализациите на фърмуера</string>
     <string name="firmware_update_ota_failed">OTA актуализацията не е успешна: %1$s</string>
+    <string name="firmware_update_preparing_flash">Подготовка на устройството: изтриване на флаша. Това може да отнеме до минута...</string>
     <string name="firmware_update_rebooting">Рестартиране в DFU...</string>
     <string name="firmware_update_release_notes">Бележки за изданието</string>
     <string name="firmware_update_retry">Опитайте отново</string>
+    <string name="firmware_update_retrying_upload">Устройството не отговори. Повторен опит за качване (опит %1$d/%2$d)...</string>
     <string name="firmware_update_save_dfu_file">Моля, запазете .uf2 файла на DFU устройството си.</string>
+    <string name="firmware_update_searching_device">Търсене на OTA устройство в мрежата...</string>
     <string name="firmware_update_select_file">Изберете локален файл</string>
     <string name="firmware_update_source_local">Източник: Локален файл</string>
     <string name="firmware_update_stable">Стабилен</string>
@@ -545,6 +561,7 @@
     <string name="geofence_remove_area">Премахване на областта</string>
     <string name="geofence_set_area">Задаване на област на картата</string>
     <string name="get_started">Започнете</string>
+    <string name="github_repository">GitHub хранилище</string>
     <string name="good">Добър</string>
     <!-- GPIO -->
     <string name="gpio">GPIO</string>
@@ -599,6 +616,7 @@
     <string name="ip_port">Порт:</string>
     <string name="ipv4_mode">Режим на IPv4</string>
     <string name="jump_to_latest_from">%1$s</string>
+    <string name="jump_to_latest_from_and_more">%1$s +%2$d</string>
     <!-- KEY -->
     <string name="key_verification_final_title">Проверката на ключа е завършена</string>
     <string name="key_verification_request_title">Заявка за проверка на ключ</string>
@@ -676,6 +694,7 @@
     <string name="map">Карта на Mesh</string>
     <string name="map_cache_info">Капацитет: %1$d MB\nИзползвани: %2$d MB</string>
     <string name="map_cache_manager">Мениджър на кеш</string>
+    <string name="map_cache_megabytes">%1$s MB</string>
     <string name="map_cache_size">Текущ размер на свалените данни</string>
     <string name="map_cache_tiles">%1$d плочки</string>
     <string name="map_clear_tiles">Изчистване на свалените карти</string>
@@ -683,6 +702,7 @@
     <string name="map_download_errors">Свалянето приключи с %1$d грешки</string>
     <string name="map_download_region">Сваляне на регион</string>
     <string name="map_download_status_complete">Пълно</string>
+    <string name="map_download_status_downloading">Изтегляне</string>
     <string name="map_filter">Филтър на картата\n</string>
     <string name="map_filter_all_roles">Всички</string>
     <string name="map_filter_display_title">Дисплей</string>
@@ -690,6 +710,9 @@
     <string name="map_layer_formats">Слоевете на картата поддържат формати .kml, .kmz или GeoJSON.</string>
     <string name="map_node_popup_details">%1$s&lt;br&gt;Последно чут: %2$s&lt;br&gt;Последна позиция: %3$s&lt;br&gt;Батерия: %4$s</string>
     <string name="map_offline_manager">Управление извън линия</string>
+    <string name="map_offline_region_label">%1$s, %2$s  %3$s</string>
+    <string name="map_offline_show_on_map">Показване на картата</string>
+    <string name="map_offline_terrain_contours">Контури</string>
     <string name="map_purge_fail">Изчистването на SQL кеша е неуспешно, вижте logcat за подробности</string>
     <string name="map_purge_success">Свалените SQL данни бяха изчистени успешно за %1$s</string>
     <string name="map_reporting_consent_header">Съгласие за споделяне на некриптирани данни от възела чрез MQTT</string>
@@ -700,14 +723,17 @@
     <string name="map_style_selection">Избор на стил на картата</string>
     <string name="map_subDescription">посока: %1$d° разстояние: %2$s</string>
     <string name="map_tile_download_estimate">Прогноза за изтегляне на картинки:</string>
+    <string name="map_tile_download_estimate_detail">%1$s %2$s %3$s</string>
     <string name="map_tile_source">Източник на карти</string>
     <string name="map_type_hybrid">Хибриден</string>
     <string name="map_type_normal">Нормален</string>
     <string name="map_type_satellite">Сателит</string>
     <string name="map_type_terrain">Терен</string>
     <string name="mark_as_read">Маркиране като прочетено</string>
+    <string name="mark_unread_selected">Маркиране като непрочетено</string>
     <string name="max">Макс</string>
     <!-- MESH -->
+    <string name="mesh_beacon_channel_number">Канал %1$d</string>
     <string name="mesh_beacon_listen">Слушане за маяци</string>
     <string name="mesh_beacon_offer_add">Добавяне на канал</string>
     <string name="mesh_beacon_offer_channel">Канал: %1$s</string>

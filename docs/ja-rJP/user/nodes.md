@@ -2,7 +2,7 @@
 title: ノード
 parent: User Guide
 nav_order: 4
-last_updated: 2026-09-04
+last_updated: 2026-09-09
 description: メッシュノードの閲覧・絞り込み・並べ替え。詳細、信号品質、役割、クイック操作を確認できます。
 aliases:
   - node-list
@@ -148,6 +148,8 @@ To add someone else's contact, use the import button on the node list and choose
 ## ノードの詳細
 
 ノードをタップすると、詳しい情報を含む詳細ビューが開きます。 メトリクスとテレメトリの詳細については、[ノードメトリクス](node-metrics) を参照してください。
+
+Signal quality is rated against your modem preset. The same SNR can be good on a long-range preset and poor on a faster one. Traceroute and neighbor-info SNR colors use that preset too. RSSI text has its own strength colors; it affects the quality rating only when a noise-floor reading is also available.
 
 The Details card carries the node's short name, role, IDs, last heard time, hops away, uptime, and its SNR and RSSI:
 

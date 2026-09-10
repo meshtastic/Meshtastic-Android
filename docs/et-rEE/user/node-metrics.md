@@ -2,7 +2,7 @@
 title: Sõlme mõõdikud
 parent: Kasutusjuhend
 nav_order: 5
-last_updated: 2026-08-30
+last_updated: 2026-09-09
 description: Telemeetria armatuurlauad iga võrgusõlme kohta – seadme tervis, keskkonnaandurid, õhu kvaliteet, signaali kvaliteet, võimsus, marsruut ja asukoha ajalugu.
 aliases:
   - meetriline
@@ -114,7 +114,7 @@ Radio signal quality information:
 
 ### Signal Quality Reference
 
-Signaali kvaliteeti hinnatakse **SNR-i põhjal, mis on seotud aktiivse LoRa modemi eelseadistuse demodulatsiooni alumise piiriga**, mitte fikseeritud läviväärtuste põhjal – antud SNR tähendab erinevatel eelseadistustel erinevat väärtust (nt −15 dB on LongSlow režiimil hea, kuid ShortFast režiimil mittekasutatav). RSSI on kuvatud, aga see ei ole osa hinnangust. In the table, _limit_ is the preset's SNR limit.
+Signaali kvaliteeti hinnatakse **SNR-i põhjal, mis on seotud aktiivse LoRa modemi eelseadistuse demodulatsiooni alumise piiriga**, mitte fikseeritud läviväärtuste põhjal – antud SNR tähendab erinevatel eelseadistustel erinevat väärtust (nt −15 dB on LongSlow režiimil hea, kuid ShortFast režiimil mittekasutatav). When RSSI and a noise-floor reading are both available, the app also rates their difference against the preset limit and uses the worse rating. Otherwise, RSSI is display-only. In the table, _limit_ is the preset's SNR limit.
 
 | Kvaliteet | Kriteerium                                |
 | --------- | ----------------------------------------- |
