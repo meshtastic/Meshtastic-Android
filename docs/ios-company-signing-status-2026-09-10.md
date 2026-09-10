@@ -1,6 +1,23 @@
 # iOS 公司簽章設定與驗證 — 2026-09-10
 
-## 最新狀態：NTsocial Build 1／MeshLink Build 2 已上傳並選入版本
+## 最新狀態：已核准聲明並發佈，DSA 聯絡驗證進行中
+
+- 使用者已明確同意全部待確認事項並授權完成兩款 App 送審；不再等待重複的公司法律確認。
+- NTsocial 的七類 App Privacy 回答與 MeshLink 的「不收集資料」均已發佈，Apple 頁面顯示
+  `由 chia tze huang 於數秒鐘前發佈`。兩款內容版權均選擇具有第三方內容必要權利，且顯示已儲存。
+- NTsocial Build 1 的出口回答已儲存：使用非 Apple 系統的標準加密演算法，法國不發佈。
+  缺少出口合規資訊提示已解除；供應頁已驗證 174 個國家或地區於 App 發佈時供應，法國未供應。
+- 公司 DSA 已依授權選擇貿易商，填入公司註冊地址及已確認的公開電話、電子郵件。
+  Apple 已啟動電子郵件驗證；工具尚未讀到驗證成功。驗證碼不寫入文件或證據檔。
+  操作期間 Chrome／獨立 App Store Connect 視窗開始只回傳空白 AX，已請使用者在 Apple 頁面完成
+  電子郵件與後續可能的電話驗證，並回覆結果。Xcode 仍能讀取，不能把此問題誤判為整台 Mac 鎖定。
+- 兩款仍未送審、未獲核准或公開。下方「待使用者確認」為先前歷史狀態，已由本節授權取代。
+- 真機與隔離無線電的測試資格已取得使用者確認。兩支公司 profile 涵蓋的 iPhone 15 仍連線且
+  Developer Mode enabled；本次尚未清除、安装或啟動真機產品。主 App Release 的正式 relay URL
+  寫在 production runtime，Debug 的 cloud-state 隔離旗標只改本機目錄，不能當成後端歷史隔離。
+  需保持網路及歷史來源隔離，使用全新資料完成 Gateway／RF 驗證，不能套用舊 field profile。
+
+## 前階段：NTsocial Build 1／MeshLink Build 2 已上傳並選入版本
 
 - MeshLink `1.0.0 (2)` 來源 `9c85b42d76a8f2415c18ce614d4dbc28bd6224f0`，約 11:32（台北）
   經 Xcode Organizer 上傳成功。CLI 的 account lookup 失敗保留為歷史紀錄；GUI 上傳已成功。
