@@ -29,12 +29,11 @@ class KoinConventionPlugin : Plugin<Project> {
 
             // Configure Koin K2 Compiler Plugin (1.1.0+)
             extensions.configure(KoinGradleExtension::class.java) {
-                // 1.1.0 moved validation to the entry points, which suits this graph's shape, but
-                // its definition index still can't resolve two structural patterns here: modules
-                // reached through FlavorModule's nested `includes` are invisible to it, and DSL
-                // declarations (desktopApp's whole root, workManagerFactory()) are never indexed at
-                // all. Every entry point therefore fails on definitions that exist. Runtime graph
-                // verification is handled by KoinVerificationTest instead.
+                // Off because the plugin's index does not reach two things this graph needs: the
+                // @Module(includes = ...) chain in androidApp's flavor source sets, and the
+                // WorkerFactory that Koin's own workManagerFactory() declares. Both produce
+                // KOIN-D001/D002 on definitions that exist, so every entry point fails.
+                // KoinVerificationTest verifies the graph at runtime instead.
                 compileSafety.set(false)
             }
 
