@@ -2,7 +2,7 @@
 title: Seaded — raadio ja kasutaja
 parent: Kasutusjuhend
 nav_order: 7
-last_updated: 2026-09-04
+last_updated: 2026-09-09
 description: Configure your radio hardware, LoRa presets, user profile, position sharing, power management, and security.
 aliases:
   - sätted
@@ -111,13 +111,13 @@ The Lite, Narrow, Medium Turbo, and Tiny presets need firmware 2.8 or newer — 
 | Short Slow         | ~5 km   | 6.25 kbps | −10 dB     | Äärelinna lühimaa; mõõdukas hoonestustihedus                                                                                                                                                                  |
 | Medium Fast        | ~5 km   | 3.52 kbps | −12,5 dB   | Suburban areas; moderate building density                                                                                                                                                                     |
 | Medium Slow        | ~8 km   | 1.95 kbps | −15 dB     | Suburban/rural; moderate range with slower speed                                                                                                                                                              |
-| Long Turbo         | ~10 km  | 1.34 kbps | −12,5 dB   | Sarnane ulatus kui Pikk Kauge, aga 500 kHz ribalaiusega; kiirem läbilaskevõime                                                                                                                                |
+| Long Turbo         | ~10 km  | 1.34 kbps | −17,5 dB   | Sarnane ulatus kui Pikk Kauge, aga 500 kHz ribalaiusega; kiirem läbilaskevõime                                                                                                                                |
 | Long Fast          | ~10 km  | 1,1 kbps                  | −17,5 dB   | **General use (default)** — balanced range and speed                                                                                                                                       |
 | Long Moderate      | ~20 km  | 0,34 kbps                 | −17,5 dB   | Maapiirkond, mõningase maastikuga; aeg-ajalt kasutatav                                                                                                                                                        |
 | Lite Fast          | ~5 km   | 1.76 kbps | −12,5 dB   | EL 866 MHz SRD sagedusala (125 kHz ribalaius); võrreldav Medium Fast                                                                                                                       |
 | Lite Slow          | ~10 km  | 0.98 kbps | −15 dB     | EL 866 MHz SRD sagedusala (125 kHz ribalaius); võrreldav Long Fast                                                                                                                         |
-| Narrow Fast        | ~5 km   | 2.28 kbps | −10 dB     | EL 868 MHz sagedusala (62,5 kHz sagedusriba); väldib häireid teiste seadmetega                                                                                                             |
-| Narrow Slow        | ~10 km  | 1.30 kbps | −12,5 dB   | EL 868 MHz sagedusala (62,5 kHz ribalaius); võrreldav Long Fast                                                                                                                            |
+| Narrow Fast        | ~5 km   | 2.28 kbps | −7,5 dB    | EL 868 MHz sagedusala (62,5 kHz sagedusriba); väldib häireid teiste seadmetega                                                                                                             |
+| Narrow Slow        | ~10 km  | 1.30 kbps | −10 dB     | EL 868 MHz sagedusala (62,5 kHz ribalaius); võrreldav Long Fast                                                                                                                            |
 | Medium Turbo       | ~5 km   | 7.0 kbps  | −12,5 dB   | Like Medium Fast but with 500 kHz bandwidth; not legal in every region. Needs firmware 2.8 or newer                                                                           |
 | Tiny Fast          | ~10 km  | 0.68 kbps | −7,5 dB    | Amateur bands that cap occupied bandwidth; these presets use 15.6 kHz. Needs firmware 2.8 or newer, an SX126x or SX127x radio, and a TCXO of ±5 ppm or better |
 | Tiny Slow          | ~20 km  | 0.33 kbps | −10 dB     | Same band restrictions as Tiny Fast, longer range. Same firmware, radio, and TCXO requirements                                                                                                |

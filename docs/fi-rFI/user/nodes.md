@@ -2,7 +2,7 @@
 title: Laitteet
 parent: Käyttöopas
 nav_order: 4
-last_updated: 2026-09-04
+last_updated: 2026-09-09
 description: Selaa, suodata ja lajittele verkon radioita — tarkastele tietoja, signaalin laatua, rooleja ja pikatoimintoja.
 aliases:
   - radiolista
@@ -148,6 +148,8 @@ Avaa pylväskaavio, joka näyttää radioiden määrän kullakin hyppyetäisyyde
 ## Radion tiedot
 
 Radion napauttaminen avaa tietonäkymän, jossa on kattavat tiedot. Katso [Radion mittarit](node-metrics) saadaksesi täydelliset tiedot mittareista ja telemetriasta.
+
+Signal quality is rated against your modem preset. The same SNR can be good on a long-range preset and poor on a faster one. Traceroute and neighbor-info SNR colors use that preset too. RSSI text has its own strength colors; it affects the quality rating only when a noise-floor reading is also available.
 
 The Details card carries the node's short name, role, IDs, last heard time, hops away, uptime, and its SNR and RSSI:
 

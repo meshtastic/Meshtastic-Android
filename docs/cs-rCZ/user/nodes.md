@@ -2,7 +2,7 @@
 title: Uzly
 parent: User Guide
 nav_order: 4
-last_updated: 2026-09-04
+last_updated: 2026-09-09
 description: Browse, filter, and sort mesh nodes — view details, signal quality, roles, and quick actions.
 aliases:
   - node-list
@@ -148,6 +148,8 @@ Tap the hop-histogram icon in the node list's app bar to open a bar chart of how
 ## Node Detail
 
 Tapping a node opens the detail view with comprehensive information. See [Node Metrics](node-metrics) for full details on metrics and telemetry.
+
+Signal quality is rated against your modem preset. The same SNR can be good on a long-range preset and poor on a faster one. Traceroute and neighbor-info SNR colors use that preset too. RSSI text has its own strength colors; it affects the quality rating only when a noise-floor reading is also available.
 
 The Details card carries the node's short name, role, IDs, last heard time, hops away, uptime, and its SNR and RSSI:
 
