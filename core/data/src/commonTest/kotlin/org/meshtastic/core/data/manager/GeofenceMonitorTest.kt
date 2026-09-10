@@ -62,19 +62,34 @@ class GeofenceMonitorTest {
     // Geofence centred at (10, 20), 1 km radius.
     private val centerLatI = 100_000_000
     private val centerLonI = 200_000_000
-    private val inside = Position.Builder().also { wb ->wb.latitude_i = centerLatI; wb.longitude_i = centerLonI}.build() // distance 0
-    private val outside = Position.Builder().also { wb ->wb.latitude_i = 110_000_000; wb.longitude_i = centerLonI}.build() // ~111 km north
+    private val inside =
+        Position.Builder()
+            .also { wb ->
+                wb.latitude_i = centerLatI
+                wb.longitude_i = centerLonI
+            }
+            .build() // distance 0
+    private val outside =
+        Position.Builder()
+            .also { wb ->
+                wb.latitude_i = 110_000_000
+                wb.longitude_i = centerLonI
+            }
+            .build() // ~111 km north
 
-    private fun waypoint(enter: Boolean = true, exit: Boolean = false, favoritesOnly: Boolean = false) = Waypoint.Builder().also { wb ->
-    wb.id = 42
-    wb.latitude_i = centerLatI
-    wb.longitude_i = centerLonI
-    wb.name = "Base"
-    wb.geofence_radius = 1000
-    wb.notify_on_enter = enter
-    wb.notify_on_exit = exit
-    wb.notify_favorites_only = favoritesOnly
-    }.build()
+    private fun waypoint(enter: Boolean = true, exit: Boolean = false, favoritesOnly: Boolean = false) =
+        Waypoint.Builder()
+            .also { wb ->
+                wb.id = 42
+                wb.latitude_i = centerLatI
+                wb.longitude_i = centerLonI
+                wb.name = "Base"
+                wb.geofence_radius = 1000
+                wb.notify_on_enter = enter
+                wb.notify_on_exit = exit
+                wb.notify_favorites_only = favoritesOnly
+            }
+            .build()
 
     private data class Mocks(
         val packetRepository: PacketRepository,

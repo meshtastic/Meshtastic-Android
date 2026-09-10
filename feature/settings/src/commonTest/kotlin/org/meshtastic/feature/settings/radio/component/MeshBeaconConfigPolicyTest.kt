@@ -46,16 +46,29 @@ class MeshBeaconConfigPolicyTest {
     @Test
     fun beaconPresetConstraint_mapPresent_usesFirmwareGroup() {
         val map =
-            LoRaRegionPresetMap.Builder().also { wb ->
-            wb.groups = listOf(
-                                LoRaPresetGroup.Builder().also { wb ->
-                                wb.presets = listOf(ModemPreset.SHORT_FAST, ModemPreset.SHORT_TURBO)
-                                wb.default_preset = ModemPreset.SHORT_FAST
-                                wb.licensed_only = true
-                                }.build(),
-                            )
-            wb.region_groups = listOf(LoRaRegionPresets.Builder().also { wb ->wb.region = RegionCode.US; wb.group_index = 0}.build())
-            }.build()
+            LoRaRegionPresetMap.Builder()
+                .also { wb ->
+                    wb.groups =
+                        listOf(
+                            LoRaPresetGroup.Builder()
+                                .also { wb ->
+                                    wb.presets = listOf(ModemPreset.SHORT_FAST, ModemPreset.SHORT_TURBO)
+                                    wb.default_preset = ModemPreset.SHORT_FAST
+                                    wb.licensed_only = true
+                                }
+                                .build(),
+                        )
+                    wb.region_groups =
+                        listOf(
+                            LoRaRegionPresets.Builder()
+                                .also { wb ->
+                                    wb.region = RegionCode.US
+                                    wb.group_index = 0
+                                }
+                                .build(),
+                        )
+                }
+                .build()
 
         val constraint = beaconPresetConstraint(map, RegionCode.US)
 
@@ -66,7 +79,13 @@ class MeshBeaconConfigPolicyTest {
 
     @Test
     fun beaconPresetConstraint_mapPresentButRegionMissing_fallsBackToConservative() {
-        val map = LoRaRegionPresetMap.Builder().also { wb ->wb.groups = emptyList(); wb.region_groups = emptyList()}.build()
+        val map =
+            LoRaRegionPresetMap.Builder()
+                .also { wb ->
+                    wb.groups = emptyList()
+                    wb.region_groups = emptyList()
+                }
+                .build()
 
         val constraint = beaconPresetConstraint(map, RegionCode.JP)
 
@@ -102,7 +121,7 @@ class MeshBeaconConfigPolicyTest {
 
     @Test
     fun beaconOfferChannelIndex_nullChannel_returnsNull() {
-        val channelList = listOf(ChannelSettings.Builder().also { wb ->wb.name = "Primary"}.build())
+        val channelList = listOf(ChannelSettings.Builder().also { wb -> wb.name = "Primary" }.build())
 
         assertNull(beaconOfferChannelIndex(null, selectableBeaconChannels(channelList)))
     }
@@ -111,18 +130,48 @@ class MeshBeaconConfigPolicyTest {
     fun beaconOfferChannelIndex_matchByNameAndPsk_returnsIndex() {
         val channelList =
             listOf(
-                ChannelSettings.Builder().also { wb ->wb.name = "Primary"; wb.psk = "a".encodeUtf8()}.build(),
-                ChannelSettings.Builder().also { wb ->wb.name = "Secondary"; wb.psk = "b".encodeUtf8()}.build(),
+                ChannelSettings.Builder()
+                    .also { wb ->
+                        wb.name = "Primary"
+                        wb.psk = "a".encodeUtf8()
+                    }
+                    .build(),
+                ChannelSettings.Builder()
+                    .also { wb ->
+                        wb.name = "Secondary"
+                        wb.psk = "b".encodeUtf8()
+                    }
+                    .build(),
             )
-        val offer = ChannelSettings.Builder().also { wb ->wb.name = "Secondary"; wb.psk = "b".encodeUtf8()}.build()
+        val offer =
+            ChannelSettings.Builder()
+                .also { wb ->
+                    wb.name = "Secondary"
+                    wb.psk = "b".encodeUtf8()
+                }
+                .build()
 
         assertEquals(1, beaconOfferChannelIndex(offer, selectableBeaconChannels(channelList)))
     }
 
     @Test
     fun beaconOfferChannelIndex_noRadioChannelMatches_returnsNull() {
-        val channelList = listOf(ChannelSettings.Builder().also { wb ->wb.name = "Primary"; wb.psk = "a".encodeUtf8()}.build())
-        val offer = ChannelSettings.Builder().also { wb ->wb.name = "Stale"; wb.psk = "z".encodeUtf8()}.build()
+        val channelList =
+            listOf(
+                ChannelSettings.Builder()
+                    .also { wb ->
+                        wb.name = "Primary"
+                        wb.psk = "a".encodeUtf8()
+                    }
+                    .build(),
+            )
+        val offer =
+            ChannelSettings.Builder()
+                .also { wb ->
+                    wb.name = "Stale"
+                    wb.psk = "z".encodeUtf8()
+                }
+                .build()
 
         assertNull(beaconOfferChannelIndex(offer, selectableBeaconChannels(channelList)))
     }
@@ -132,7 +181,16 @@ class MeshBeaconConfigPolicyTest {
         // A blank/empty offer's identity coincidentally matches the placeholder secondary in the RAW list; once
         // filtered through selectableBeaconChannels that slot is gone, so the match must not go through (design#140
         // Q2) -- otherwise the offer picker would silently select an excluded, never-rendered item.
-        val channelList = listOf(ChannelSettings.Builder().also { wb ->wb.name = "Primary"; wb.psk = "a".encodeUtf8()}.build(), ChannelSettings.Builder().build())
+        val channelList =
+            listOf(
+                ChannelSettings.Builder()
+                    .also { wb ->
+                        wb.name = "Primary"
+                        wb.psk = "a".encodeUtf8()
+                    }
+                    .build(),
+                ChannelSettings.Builder().build(),
+            )
         val offer = ChannelSettings.Builder().build()
 
         assertNull(beaconOfferChannelIndex(offer, selectableBeaconChannels(channelList)))
@@ -142,9 +200,19 @@ class MeshBeaconConfigPolicyTest {
     fun selectableBeaconChannels_placeholderSecondaryExcluded_followingRealSlotKeepsTrueIndex() {
         val channelList =
             listOf(
-                ChannelSettings.Builder().also { wb ->wb.name = "Primary"; wb.psk = "a".encodeUtf8()}.build(),
+                ChannelSettings.Builder()
+                    .also { wb ->
+                        wb.name = "Primary"
+                        wb.psk = "a".encodeUtf8()
+                    }
+                    .build(),
                 ChannelSettings.Builder().build(), // placeholder secondary: blank name, empty psk
-                ChannelSettings.Builder().also { wb ->wb.name = "Real"; wb.psk = "b".encodeUtf8()}.build(),
+                ChannelSettings.Builder()
+                    .also { wb ->
+                        wb.name = "Real"
+                        wb.psk = "b".encodeUtf8()
+                    }
+                    .build(),
             )
 
         val selectable = selectableBeaconChannels(channelList)
@@ -163,7 +231,11 @@ class MeshBeaconConfigPolicyTest {
 
     @Test
     fun selectableBeaconChannels_nameOnlySecondaryKept() {
-        val channelList = listOf(ChannelSettings.Builder().also { wb ->wb.name = "Primary"}.build(), ChannelSettings.Builder().also { wb ->wb.name = "Named"}.build())
+        val channelList =
+            listOf(
+                ChannelSettings.Builder().also { wb -> wb.name = "Primary" }.build(),
+                ChannelSettings.Builder().also { wb -> wb.name = "Named" }.build(),
+            )
 
         val selectable = selectableBeaconChannels(channelList)
 
@@ -172,7 +244,11 @@ class MeshBeaconConfigPolicyTest {
 
     @Test
     fun selectableBeaconChannels_pskOnlySecondaryKept() {
-        val channelList = listOf(ChannelSettings.Builder().also { wb ->wb.name = "Primary"}.build(), ChannelSettings.Builder().also { wb ->wb.psk = "b".encodeUtf8()}.build())
+        val channelList =
+            listOf(
+                ChannelSettings.Builder().also { wb -> wb.name = "Primary" }.build(),
+                ChannelSettings.Builder().also { wb -> wb.psk = "b".encodeUtf8() }.build(),
+            )
 
         val selectable = selectableBeaconChannels(channelList)
 
@@ -183,7 +259,11 @@ class MeshBeaconConfigPolicyTest {
     fun selectableBeaconChannels_oneBytePskCleartextSentinelSecondaryKept() {
         // A raw ChannelSettings.psk of size 1 (firmware's cleartext sentinel is a single 0x00 byte) is not padding:
         // isChannelPlaceholder only treats size == 0 as placeholder.
-        val channelList = listOf(ChannelSettings.Builder().also { wb ->wb.name = "Primary"}.build(), ChannelSettings.Builder().also { wb ->wb.psk = "\u0000".encodeUtf8()}.build())
+        val channelList =
+            listOf(
+                ChannelSettings.Builder().also { wb -> wb.name = "Primary" }.build(),
+                ChannelSettings.Builder().also { wb -> wb.psk = "\u0000".encodeUtf8() }.build(),
+            )
 
         val selectable = selectableBeaconChannels(channelList)
 
@@ -193,27 +273,30 @@ class MeshBeaconConfigPolicyTest {
     @Test
     fun stampBeaconConfigForSave_stampsRegionAndPresetOnConfigAndTargets() {
         val radioLora =
-            Config.LoRaConfig.Builder().also { wb ->wb.region = RegionCode.EU_868; wb.modem_preset = ModemPreset.MEDIUM_FAST; wb.use_preset = true}.build()
+            Config.LoRaConfig.Builder()
+                .also { wb ->
+                    wb.region = RegionCode.EU_868
+                    wb.modem_preset = ModemPreset.MEDIUM_FAST
+                    wb.use_preset = true
+                }
+                .build()
         val config =
             MeshBeaconConfig.Builder()
-            .also { wb ->
-                wb.broadcast_offer_region = RegionCode.US
-                wb.broadcast_offer_preset = ModemPreset.LONG_FAST
-                wb.broadcast_targets = listOf(
-                    MeshBeaconConfig.BroadcastTarget.Builder()
-                    .also { wb ->
-                        wb.region = RegionCode.JP
-                    }
-                    .build(),
-                    MeshBeaconConfig.BroadcastTarget.Builder()
-                    .also { wb ->
-                        wb.region = RegionCode.CN
-                        wb.preset = ModemPreset.SHORT_FAST
-                    }
-                    .build(),
-                )
-            }
-            .build()
+                .also { wb ->
+                    wb.broadcast_offer_region = RegionCode.US
+                    wb.broadcast_offer_preset = ModemPreset.LONG_FAST
+                    wb.broadcast_targets =
+                        listOf(
+                            MeshBeaconConfig.BroadcastTarget.Builder().also { wb -> wb.region = RegionCode.JP }.build(),
+                            MeshBeaconConfig.BroadcastTarget.Builder()
+                                .also { wb ->
+                                    wb.region = RegionCode.CN
+                                    wb.preset = ModemPreset.SHORT_FAST
+                                }
+                                .build(),
+                        )
+                }
+                .build()
 
         val stamped = stampBeaconConfigForSave(config, config, radioLora, channelList = emptyList())
 
@@ -231,12 +314,17 @@ class MeshBeaconConfigPolicyTest {
         // running config" semantics (module_config.proto). Region is the one field every target always gets, per
         // save-time stamping (behavior 1), regardless of the row's own null fields.
         val radioLora =
-            Config.LoRaConfig.Builder().also { wb ->wb.region = RegionCode.EU_868; wb.modem_preset = ModemPreset.MEDIUM_FAST; wb.use_preset = true}.build()
-        val config = MeshBeaconConfig.Builder()
-        .also { wb ->
-            wb.broadcast_targets = listOf(MeshBeaconConfig.BroadcastTarget.Builder().build())
-        }
-        .build()
+            Config.LoRaConfig.Builder()
+                .also { wb ->
+                    wb.region = RegionCode.EU_868
+                    wb.modem_preset = ModemPreset.MEDIUM_FAST
+                    wb.use_preset = true
+                }
+                .build()
+        val config =
+            MeshBeaconConfig.Builder()
+                .also { wb -> wb.broadcast_targets = listOf(MeshBeaconConfig.BroadcastTarget.Builder().build()) }
+                .build()
 
         val stamped = stampBeaconConfigForSave(config, config, radioLora, channelList = emptyList())
 
@@ -249,13 +337,21 @@ class MeshBeaconConfigPolicyTest {
     @Test
     fun stampBeaconConfigForSave_untouchedOfferChannel_defaultsToPrimary() {
         val radioLora =
-            Config.LoRaConfig.Builder().also { wb ->wb.region = RegionCode.US; wb.modem_preset = ModemPreset.LONG_FAST; wb.use_preset = true}.build()
-        val primary = ChannelSettings.Builder().also { wb ->wb.name = "Primary"; wb.psk = "a".encodeUtf8()}.build()
-        val config = MeshBeaconConfig.Builder()
-        .also { wb ->
-            wb.broadcast_offer_channel = null
-        }
-        .build()
+            Config.LoRaConfig.Builder()
+                .also { wb ->
+                    wb.region = RegionCode.US
+                    wb.modem_preset = ModemPreset.LONG_FAST
+                    wb.use_preset = true
+                }
+                .build()
+        val primary =
+            ChannelSettings.Builder()
+                .also { wb ->
+                    wb.name = "Primary"
+                    wb.psk = "a".encodeUtf8()
+                }
+                .build()
+        val config = MeshBeaconConfig.Builder().also { wb -> wb.broadcast_offer_channel = null }.build()
 
         val stamped = stampBeaconConfigForSave(config, config, radioLora, channelList = listOf(primary))
 
@@ -266,16 +362,29 @@ class MeshBeaconConfigPolicyTest {
     @Test
     fun stampBeaconConfigForSave_alreadySetOfferChannel_isKeptEvenIfStale() {
         val radioLora =
-            Config.LoRaConfig.Builder().also { wb ->wb.region = RegionCode.US; wb.modem_preset = ModemPreset.LONG_FAST; wb.use_preset = true}.build()
-        val stale = ChannelSettings.Builder().also { wb ->wb.name = "Stale"; wb.psk = "z".encodeUtf8()}.build()
-        val config = MeshBeaconConfig.Builder()
-        .also { wb ->
-            wb.broadcast_offer_channel = stale
-        }
-        .build()
+            Config.LoRaConfig.Builder()
+                .also { wb ->
+                    wb.region = RegionCode.US
+                    wb.modem_preset = ModemPreset.LONG_FAST
+                    wb.use_preset = true
+                }
+                .build()
+        val stale =
+            ChannelSettings.Builder()
+                .also { wb ->
+                    wb.name = "Stale"
+                    wb.psk = "z".encodeUtf8()
+                }
+                .build()
+        val config = MeshBeaconConfig.Builder().also { wb -> wb.broadcast_offer_channel = stale }.build()
 
         val stamped =
-            stampBeaconConfigForSave(config, config, radioLora, channelList = listOf(ChannelSettings.Builder().also { wb ->wb.name = "Primary"}.build()))
+            stampBeaconConfigForSave(
+                config,
+                config,
+                radioLora,
+                channelList = listOf(ChannelSettings.Builder().also { wb -> wb.name = "Primary" }.build()),
+            )
 
         assertEquals("Stale", stamped.broadcast_offer_channel?.name)
         assertEquals("z".encodeUtf8(), stamped.broadcast_offer_channel?.psk)
@@ -286,54 +395,82 @@ class MeshBeaconConfigPolicyTest {
         // A beacon invites a stranger's radio to join this channel: the radio's own index/id/uplink/downlink/module
         // flags have no meaning there and must never leak onto someone else's node.
         val radioLora =
-            Config.LoRaConfig.Builder().also { wb ->wb.region = RegionCode.US; wb.modem_preset = ModemPreset.LONG_FAST; wb.use_preset = true}.build()
+            Config.LoRaConfig.Builder()
+                .also { wb ->
+                    wb.region = RegionCode.US
+                    wb.modem_preset = ModemPreset.LONG_FAST
+                    wb.use_preset = true
+                }
+                .build()
         val fullChannel =
-            ChannelSettings.Builder().also { wb ->
-            wb.name = "Primary"
-            wb.psk = "a".encodeUtf8()
-            wb.channel_num = 5
-            wb.id = 42
-            wb.uplink_enabled = true
-            wb.downlink_enabled = true
-            }.build()
-        val config = MeshBeaconConfig.Builder()
-        .also { wb ->
-            wb.broadcast_offer_channel = null
-        }
-        .build()
+            ChannelSettings.Builder()
+                .also { wb ->
+                    wb.name = "Primary"
+                    wb.psk = "a".encodeUtf8()
+                    wb.channel_num = 5
+                    wb.id = 42
+                    wb.uplink_enabled = true
+                    wb.downlink_enabled = true
+                }
+                .build()
+        val config = MeshBeaconConfig.Builder().also { wb -> wb.broadcast_offer_channel = null }.build()
 
         val stamped = stampBeaconConfigForSave(config, config, radioLora, channelList = listOf(fullChannel))
 
-        assertEquals(ChannelSettings.Builder().also { wb ->wb.name = "Primary"; wb.psk = "a".encodeUtf8()}.build(), stamped.broadcast_offer_channel)
+        assertEquals(
+            ChannelSettings.Builder()
+                .also { wb ->
+                    wb.name = "Primary"
+                    wb.psk = "a".encodeUtf8()
+                }
+                .build(),
+            stamped.broadcast_offer_channel,
+        )
     }
 
     @Test
     fun stampBeaconConfigForSave_customParams_preservesStoredBroadcastFieldsVerbatim() {
         val radioLora =
-            Config.LoRaConfig.Builder().also { wb ->wb.region = RegionCode.US; wb.modem_preset = ModemPreset.LONG_FAST; wb.use_preset = false}.build()
+            Config.LoRaConfig.Builder()
+                .also { wb ->
+                    wb.region = RegionCode.US
+                    wb.modem_preset = ModemPreset.LONG_FAST
+                    wb.use_preset = false
+                }
+                .build()
         val listenFlag = MeshBeaconConfig.Flags.FLAG_LISTEN_ENABLED.value
         val broadcastFlag = MeshBeaconConfig.Flags.FLAG_BROADCAST_ENABLED.value
         val stored =
             MeshBeaconConfig.Builder()
-            .also { wb ->
-                wb.flags = listenFlag or broadcastFlag
-                wb.broadcast_message = "Stored message"
-                wb.broadcast_interval_secs = 3600
-                wb.broadcast_offer_region = RegionCode.EU_868
-                wb.broadcast_offer_preset = ModemPreset.MEDIUM_FAST
-                wb.broadcast_offer_channel = ChannelSettings.Builder().also { wb ->wb.name = "Stored"; wb.psk = "s".encodeUtf8()}.build()
-                wb.broadcast_targets = listOf(MeshBeaconConfig.BroadcastTarget.Builder()
                 .also { wb ->
-                    wb.region = RegionCode.EU_868
-                    wb.channel_index = 1
+                    wb.flags = listenFlag or broadcastFlag
+                    wb.broadcast_message = "Stored message"
+                    wb.broadcast_interval_secs = 3600
+                    wb.broadcast_offer_region = RegionCode.EU_868
+                    wb.broadcast_offer_preset = ModemPreset.MEDIUM_FAST
+                    wb.broadcast_offer_channel =
+                        ChannelSettings.Builder()
+                            .also { wb ->
+                                wb.name = "Stored"
+                                wb.psk = "s".encodeUtf8()
+                            }
+                            .build()
+                    wb.broadcast_targets =
+                        listOf(
+                            MeshBeaconConfig.BroadcastTarget.Builder()
+                                .also { wb ->
+                                    wb.region = RegionCode.EU_868
+                                    wb.channel_index = 1
+                                }
+                                .build(),
+                        )
                 }
-                .build())
-            }
-            .build()
+                .build()
         // The form differs on every broadcast field, plus clears the BROADCAST flag (the only edit the gated UI
         // actually allows) -- none of the broadcast field edits should survive the save.
         val form =
-            stored.newBuilder()
+            stored
+                .newBuilder()
                 .also { wb ->
                     wb.flags = listenFlag
                     wb.broadcast_message = "Edited but discarded"
@@ -346,7 +483,12 @@ class MeshBeaconConfigPolicyTest {
                 .build()
 
         val stamped =
-            stampBeaconConfigForSave(form, stored, radioLora, channelList = listOf(ChannelSettings.Builder().also { wb ->wb.name = "Primary"}.build()))
+            stampBeaconConfigForSave(
+                form,
+                stored,
+                radioLora,
+                channelList = listOf(ChannelSettings.Builder().also { wb -> wb.name = "Primary" }.build()),
+            )
 
         assertEquals(stored.broadcast_message, stamped.broadcast_message)
         assertEquals(stored.broadcast_interval_secs, stamped.broadcast_interval_secs)
@@ -360,11 +502,7 @@ class MeshBeaconConfigPolicyTest {
 
     @Test
     fun selectBeaconTargetChannel_noPresetYet_preselectsCurrentPreset() {
-        val target = MeshBeaconConfig.BroadcastTarget.Builder()
-        .also { wb ->
-            wb.preset = null
-        }
-        .build()
+        val target = MeshBeaconConfig.BroadcastTarget.Builder().also { wb -> wb.preset = null }.build()
 
         val updated = selectBeaconTargetChannel(target, channelIndex = 2, currentPreset = ModemPreset.SHORT_FAST)
 
@@ -374,11 +512,8 @@ class MeshBeaconConfigPolicyTest {
 
     @Test
     fun selectBeaconTargetChannel_presetAlreadyChosen_isNotOverwritten() {
-        val target = MeshBeaconConfig.BroadcastTarget.Builder()
-        .also { wb ->
-            wb.preset = ModemPreset.LONG_MODERATE
-        }
-        .build()
+        val target =
+            MeshBeaconConfig.BroadcastTarget.Builder().also { wb -> wb.preset = ModemPreset.LONG_MODERATE }.build()
 
         val updated = selectBeaconTargetChannel(target, channelIndex = 3, currentPreset = ModemPreset.SHORT_FAST)
 
@@ -388,12 +523,13 @@ class MeshBeaconConfigPolicyTest {
 
     @Test
     fun selectBeaconTargetChannel_defaultSentinel_clearsChannelAndLeavesPresetUntouched() {
-        val target = MeshBeaconConfig.BroadcastTarget.Builder()
-        .also { wb ->
-            wb.channel_index = 2
-            wb.preset = null
-        }
-        .build()
+        val target =
+            MeshBeaconConfig.BroadcastTarget.Builder()
+                .also { wb ->
+                    wb.channel_index = 2
+                    wb.preset = null
+                }
+                .build()
 
         val updated = selectBeaconTargetChannel(target, channelIndex = null, currentPreset = ModemPreset.SHORT_FAST)
 
@@ -406,12 +542,13 @@ class MeshBeaconConfigPolicyTest {
     fun selectBeaconTargetChannel_defaultSentinelWithConcretePreset_presetUnchanged() {
         // Same as the null-preset case above, but with a preset the user has already deliberately chosen -- the
         // regression this guards is "Default" silently resetting a concrete preset, not just leaving null alone.
-        val target = MeshBeaconConfig.BroadcastTarget.Builder()
-        .also { wb ->
-            wb.channel_index = 2
-            wb.preset = ModemPreset.SHORT_FAST
-        }
-        .build()
+        val target =
+            MeshBeaconConfig.BroadcastTarget.Builder()
+                .also { wb ->
+                    wb.channel_index = 2
+                    wb.preset = ModemPreset.SHORT_FAST
+                }
+                .build()
 
         val updated = selectBeaconTargetChannel(target, channelIndex = null, currentPreset = ModemPreset.LONG_FAST)
 
@@ -428,12 +565,15 @@ class MeshBeaconConfigPolicyTest {
 
     @Test
     fun seedBeaconTargets_nonEmptyStoredList_isUnchanged() {
-        val stored = listOf(MeshBeaconConfig.BroadcastTarget.Builder()
-        .also { wb ->
-            wb.channel_index = 1
-            wb.preset = ModemPreset.LONG_FAST
-        }
-        .build())
+        val stored =
+            listOf(
+                MeshBeaconConfig.BroadcastTarget.Builder()
+                    .also { wb ->
+                        wb.channel_index = 1
+                        wb.preset = ModemPreset.LONG_FAST
+                    }
+                    .build(),
+            )
 
         val seeded = seedBeaconTargets(stored)
 
@@ -444,12 +584,13 @@ class MeshBeaconConfigPolicyTest {
     fun initialBeaconFormState_emptyStoredConfig_seedsFormTargetsThroughTheProductionPath() {
         // Calls the exact function MeshBeaconConfigScreen calls to build formState's initial value -- not
         // seedBeaconTargets directly -- so this breaks if the screen's wiring to it ever comes apart.
-        val loaded = MeshBeaconConfig.Builder()
-        .also { wb ->
-            wb.broadcast_message = "hi"
-            wb.broadcast_targets = emptyList()
-        }
-        .build()
+        val loaded =
+            MeshBeaconConfig.Builder()
+                .also { wb ->
+                    wb.broadcast_message = "hi"
+                    wb.broadcast_targets = emptyList()
+                }
+                .build()
 
         val initial = initialBeaconFormState(loaded)
 
@@ -459,16 +600,8 @@ class MeshBeaconConfigPolicyTest {
 
     @Test
     fun initialBeaconFormState_nonEmptyStoredConfig_isUnchanged() {
-        val stored = listOf(MeshBeaconConfig.BroadcastTarget.Builder()
-        .also { wb ->
-            wb.channel_index = 3
-        }
-        .build())
-        val loaded = MeshBeaconConfig.Builder()
-        .also { wb ->
-            wb.broadcast_targets = stored
-        }
-        .build()
+        val stored = listOf(MeshBeaconConfig.BroadcastTarget.Builder().also { wb -> wb.channel_index = 3 }.build())
+        val loaded = MeshBeaconConfig.Builder().also { wb -> wb.broadcast_targets = stored }.build()
 
         val initial = initialBeaconFormState(loaded)
 
@@ -479,35 +612,29 @@ class MeshBeaconConfigPolicyTest {
     fun removeBeaconTarget_removingOneOfSeveral_dropsOnlyThatRow() {
         val targets =
             listOf(
-                MeshBeaconConfig.BroadcastTarget.Builder()
-                .also { wb ->
-                    wb.channel_index = 0
-                }
-                .build(),
-                MeshBeaconConfig.BroadcastTarget.Builder()
-                .also { wb ->
-                    wb.channel_index = 1
-                }
-                .build(),
+                MeshBeaconConfig.BroadcastTarget.Builder().also { wb -> wb.channel_index = 0 }.build(),
+                MeshBeaconConfig.BroadcastTarget.Builder().also { wb -> wb.channel_index = 1 }.build(),
             )
 
         val updated = removeBeaconTarget(targets, index = 0)
 
-        assertEquals(listOf(MeshBeaconConfig.BroadcastTarget.Builder()
-        .also { wb ->
-            wb.channel_index = 1
-        }
-        .build()), updated)
+        assertEquals(
+            listOf(MeshBeaconConfig.BroadcastTarget.Builder().also { wb -> wb.channel_index = 1 }.build()),
+            updated,
+        )
     }
 
     @Test
     fun removeBeaconTarget_removingTheOnlyRow_reseedsADefaultRowInstead() {
-        val targets = listOf(MeshBeaconConfig.BroadcastTarget.Builder()
-        .also { wb ->
-            wb.channel_index = 4
-            wb.preset = ModemPreset.SHORT_FAST
-        }
-        .build())
+        val targets =
+            listOf(
+                MeshBeaconConfig.BroadcastTarget.Builder()
+                    .also { wb ->
+                        wb.channel_index = 4
+                        wb.preset = ModemPreset.SHORT_FAST
+                    }
+                    .build(),
+            )
 
         val updated = removeBeaconTarget(targets, index = 0)
 

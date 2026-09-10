@@ -62,7 +62,7 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val config = Config.Builder().also { wb ->wb.bluetooth = it}.build()
+            val config = Config.Builder().also { wb -> wb.bluetooth = it }.build()
             viewModel.setConfig(config)
         },
     ) {
@@ -72,7 +72,9 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     title = stringResource(Res.string.bluetooth_enabled),
                     checked = formState.value.enabled,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.enabled = it }.build() },
+                    onCheckedChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.enabled = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -86,14 +88,18 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     selectedItem =
                     formState.value.mode.takeUnless { it.name == "UNRECOGNIZED" }
                         ?: Config.BluetoothConfig.PairingMode.RANDOM_PIN,
-                    onItemSelected = { formState.value = formState.value.newBuilder().also { wb -> wb.mode = it }.build() },
+                    onItemSelected = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.mode = it }.build()
+                    },
                 )
                 HorizontalDivider()
                 FixedPinPreference(
                     pinValue = formState.value.fixed_pin,
                     enabled = state.connected,
                     focusManager = focusManager,
-                    onPinChange = { formState.value = formState.value.newBuilder().also { wb -> wb.fixed_pin = it }.build() },
+                    onPinChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.fixed_pin = it }.build()
+                    },
                 )
             }
         }

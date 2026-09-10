@@ -204,7 +204,13 @@ fun EditListPreferencePreview() {
                 title = "Available pins",
                 list =
                 listOf(
-                    RemoteHardwarePin.Builder().also { wb ->wb.gpio_pin = 12; wb.name = "Front door"; wb.type = RemoteHardwarePinType.DIGITAL_READ}.build(),
+                    RemoteHardwarePin.Builder()
+                        .also { wb ->
+                            wb.gpio_pin = 12
+                            wb.name = "Front door"
+                            wb.type = RemoteHardwarePinType.DIGITAL_READ
+                        }
+                        .build(),
                 ),
                 maxCount = 4,
                 enabled = true,

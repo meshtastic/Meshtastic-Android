@@ -69,7 +69,7 @@ class SecurityConfigScreenTest {
         onNodeWithText(encodedPublicKey).assertDoesNotExist()
 
         // Firmware 2.8 redacts the remote private key, so only the public key changes when the delayed response lands.
-        securityConfig = Config.SecurityConfig.Builder().also { wb ->wb.public_key = publicKey}.build()
+        securityConfig = Config.SecurityConfig.Builder().also { wb -> wb.public_key = publicKey }.build()
         waitForIdle()
 
         onNodeWithText(encodedPublicKey).assertIsDisplayed()
@@ -93,7 +93,8 @@ class SecurityConfigScreenTest {
 
     @Test
     fun `private key is redacted for a remote node until a new one is entered`() {
-        val remote = Config.SecurityConfig.Builder().also { wb ->wb.public_key = ByteArray(32) { 1 }.toByteString()}.build()
+        val remote =
+            Config.SecurityConfig.Builder().also { wb -> wb.public_key = ByteArray(32) { 1 }.toByteString() }.build()
         assertTrue(isPrivateKeyRedacted(remote, isLocal = false))
 
         // The local node always reports its own key, so nothing is withheld there.

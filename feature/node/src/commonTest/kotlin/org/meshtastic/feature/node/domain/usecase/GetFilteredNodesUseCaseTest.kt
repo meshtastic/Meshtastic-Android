@@ -59,7 +59,15 @@ class GetFilteredNodesUseCaseTest {
         signsPackets: Boolean = false,
         publicKey: ByteString? = null,
     ): Node {
-        val user = User.Builder().also { wb ->wb.id = "!$num"; wb.long_name = name; wb.short_name = "N$num"; wb.role = role}.build()
+        val user =
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!$num"
+                    wb.long_name = name
+                    wb.short_name = "N$num"
+                    wb.role = role
+                }
+                .build()
         return Node(
             num = num,
             user = user,

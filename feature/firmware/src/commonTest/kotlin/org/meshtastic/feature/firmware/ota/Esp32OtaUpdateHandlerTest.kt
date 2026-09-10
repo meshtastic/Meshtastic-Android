@@ -139,7 +139,9 @@ class Esp32OtaUpdateHandlerTest {
         // that can fire too early (or too late) under slower host timing.
         confirmationMessage?.let { msg ->
             radioController.onRequestRebootOta = { _, _, _, _ ->
-                radioController.setClientNotification(ClientNotification.Builder().also { wb ->wb.message = msg}.build())
+                radioController.setClientNotification(
+                    ClientNotification.Builder().also { wb -> wb.message = msg }.build(),
+                )
             }
         }
 

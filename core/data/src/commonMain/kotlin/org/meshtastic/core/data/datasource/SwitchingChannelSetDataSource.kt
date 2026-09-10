@@ -71,7 +71,8 @@ class SwitchingChannelSetDataSource(
     /** Atomically updates supplied [ChannelSet] fields while preserving fields omitted by the caller. */
     suspend fun updateChannelSet(settingsList: List<ChannelSettings>?, loraConfig: Config.LoRaConfig?) {
         mutate { current ->
-            current.newBuilder()
+            current
+                .newBuilder()
                 .also { wb ->
                     wb.settings = settingsList ?: current.settings
                     wb.lora_config = loraConfig ?: current.lora_config

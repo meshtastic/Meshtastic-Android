@@ -56,7 +56,7 @@ fun StoreForwardConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val config = ModuleConfig.Builder().also { wb ->wb.store_forward = it}.build()
+            val config = ModuleConfig.Builder().also { wb -> wb.store_forward = it }.build()
             viewModel.setModuleConfig(config)
         },
     ) {
@@ -66,7 +66,9 @@ fun StoreForwardConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit
                     title = stringResource(Res.string.store_forward_enabled),
                     checked = formState.value.enabled,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.enabled = it }.build() },
+                    onCheckedChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.enabled = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -74,7 +76,9 @@ fun StoreForwardConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit
                     title = stringResource(Res.string.heartbeat),
                     checked = formState.value.heartbeat,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.heartbeat = it }.build() },
+                    onCheckedChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.heartbeat = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -83,7 +87,9 @@ fun StoreForwardConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit
                     value = formState.value.records,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.newBuilder().also { wb -> wb.records = it }.build() },
+                    onValueChanged = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.records = it }.build()
+                    },
                 )
                 HorizontalDivider()
                 EditTextPreference(
@@ -91,7 +97,9 @@ fun StoreForwardConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit
                     value = formState.value.history_return_max,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.newBuilder().also { wb -> wb.history_return_max = it }.build() },
+                    onValueChanged = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.history_return_max = it }.build()
+                    },
                 )
                 HorizontalDivider()
                 EditTextPreference(
@@ -99,14 +107,19 @@ fun StoreForwardConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit
                     value = formState.value.history_return_window,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.newBuilder().also { wb -> wb.history_return_window = it }.build() },
+                    onValueChanged = {
+                        formState.value =
+                            formState.value.newBuilder().also { wb -> wb.history_return_window = it }.build()
+                    },
                 )
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.server),
                     checked = formState.value.is_server,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.is_server = it }.build() },
+                    onCheckedChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.is_server = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
             }

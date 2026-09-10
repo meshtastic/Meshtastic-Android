@@ -184,7 +184,7 @@ fun MeshBeaconConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, 
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
             val stamped = stampBeaconConfigForSave(it, meshBeaconConfig, radioLora, state.channelList)
-            viewModel.setModuleConfig(ModuleConfig.Builder().also { wb ->wb.mesh_beacon = stamped}.build())
+            viewModel.setModuleConfig(ModuleConfig.Builder().also { wb -> wb.mesh_beacon = stamped }.build())
         },
     ) {
         item {
@@ -204,7 +204,11 @@ fun MeshBeaconConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, 
                     checked = formState.value.flags.hasFlag(listenFlag),
                     enabled = state.connected,
                     onCheckedChange = {
-                        formState.value = formState.value.newBuilder().also { wb -> wb.flags = formState.value.flags.withFlag(listenFlag, it) }.build()
+                        formState.value =
+                            formState.value
+                                .newBuilder()
+                                .also { wb -> wb.flags = formState.value.flags.withFlag(listenFlag, it) }
+                                .build()
                     },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
@@ -216,7 +220,10 @@ fun MeshBeaconConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, 
                     enabled = broadcastGate.toggleEnabled,
                     onCheckedChange = {
                         formState.value =
-                            formState.value.newBuilder().also { wb -> wb.flags = formState.value.flags.withFlag(broadcastFlag, it) }.build()
+                            formState.value
+                                .newBuilder()
+                                .also { wb -> wb.flags = formState.value.flags.withFlag(broadcastFlag, it) }
+                                .build()
                     },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
@@ -239,7 +246,8 @@ fun MeshBeaconConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, 
                         keyboardOptions = KeyboardOptions.Default,
                         keyboardActions = KeyboardActions.Default,
                         onValueChanged = {
-                            formState.value = formState.value.newBuilder().also { wb -> wb.broadcast_message = it }.build()
+                            formState.value =
+                                formState.value.newBuilder().also { wb -> wb.broadcast_message = it }.build()
                         },
                     )
                     HorizontalDivider()
@@ -277,7 +285,11 @@ fun MeshBeaconConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, 
                         selectedItem = storedIntervalSecs,
                         enabled = broadcastGate.sectionsEnabled,
                         onItemSelected = {
-                            formState.value = formState.value.newBuilder().also { wb -> wb.broadcast_interval_secs = it.toInt() }.build()
+                            formState.value =
+                                formState.value
+                                    .newBuilder()
+                                    .also { wb -> wb.broadcast_interval_secs = it.toInt() }
+                                    .build()
                         },
                     )
                 }
@@ -294,7 +306,8 @@ fun MeshBeaconConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, 
                         channelItems = channelItems,
                         enabled = broadcastGate.sectionsEnabled,
                         onChannelSelect = { chosen ->
-                            formState.value = formState.value.newBuilder().also { wb -> wb.broadcast_offer_channel = chosen }.build()
+                            formState.value =
+                                formState.value.newBuilder().also { wb -> wb.broadcast_offer_channel = chosen }.build()
                         },
                     )
                 }

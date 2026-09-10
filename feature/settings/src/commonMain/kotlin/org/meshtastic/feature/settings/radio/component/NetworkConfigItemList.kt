@@ -134,7 +134,14 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
             if (!handled) {
                 val (ssid, psk) = extractWifiCredentials(contents)
                 if (ssid != null && psk != null) {
-                    formState.value = formState.value.newBuilder().also { wb -> wb.wifi_ssid = ssid; wb.wifi_psk = psk }.build()
+                    formState.value =
+                        formState.value
+                            .newBuilder()
+                            .also { wb ->
+                                wb.wifi_ssid = ssid
+                                wb.wifi_psk = psk
+                            }
+                            .build()
                 } else {
                     showScanErrorDialog = true
                 }
@@ -158,7 +165,7 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val config = Config.Builder().also { wb ->wb.network = it}.build()
+            val config = Config.Builder().also { wb -> wb.network = it }.build()
             viewModel.setConfig(config)
         },
     ) {
@@ -198,7 +205,9 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
                     title = stringResource(Res.string.wifi_enabled),
                     summary = stringResource(Res.string.config_network_wifi_enabled_summary),
                     checked = formState.value.wifi_enabled,
-                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.wifi_enabled = it }.build() },
+                    onCheckedChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.wifi_enabled = it }.build()
+                    },
                     enabled = state.connected,
                 )
                 if (formState.value.wifi_enabled) {
@@ -212,7 +221,9 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
                         keyboardOptions =
                         KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
                         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                        onValueChanged = { formState.value = formState.value.newBuilder().also { wb -> wb.wifi_ssid = it }.build() },
+                        onValueChanged = {
+                            formState.value = formState.value.newBuilder().also { wb -> wb.wifi_ssid = it }.build()
+                        },
                     )
                     HorizontalDivider()
                     EditPasswordPreference(
@@ -221,7 +232,9 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
                         maxSize = 64, // wifi_psk max_size:65
                         enabled = state.connected,
                         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                        onValueChanged = { formState.value = formState.value.newBuilder().also { wb -> wb.wifi_psk = it }.build() },
+                        onValueChanged = {
+                            formState.value = formState.value.newBuilder().also { wb -> wb.wifi_psk = it }.build()
+                        },
                     )
                     HorizontalDivider()
                     @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -248,7 +261,9 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
                         title = stringResource(Res.string.ethernet_enabled),
                         summary = stringResource(Res.string.config_network_eth_enabled_summary),
                         checked = formState.value.eth_enabled,
-                        onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.eth_enabled = it }.build() },
+                        onCheckedChange = {
+                            formState.value = formState.value.newBuilder().also { wb -> wb.eth_enabled = it }.build()
+                        },
                         enabled = state.connected,
                     )
                 }
@@ -265,7 +280,9 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
                     keyboardOptions =
                     KeyboardOptions.Default.copy(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.newBuilder().also { wb -> wb.ntp_server = it }.build() },
+                    onValueChanged = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.ntp_server = it }.build()
+                    },
                 )
                 HorizontalDivider()
                 EditTextPreference(
@@ -277,7 +294,9 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
                     keyboardOptions =
                     KeyboardOptions.Default.copy(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.newBuilder().also { wb -> wb.rsyslog_server = it }.build() },
+                    onValueChanged = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.rsyslog_server = it }.build()
+                    },
                 )
                 HorizontalDivider()
                 SwitchPreference(
@@ -295,7 +314,8 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
                                 formState.value.enabled_protocols and
                                     Config.NetworkConfig.ProtocolFlags.UDP_BROADCAST.value.inv()
                             }
-                        formState.value = formState.value.newBuilder().also { wb -> wb.enabled_protocols = flags }.build()
+                        formState.value =
+                            formState.value.newBuilder().also { wb -> wb.enabled_protocols = flags }.build()
                     },
                     enabled = state.connected,
                 )
@@ -304,7 +324,9 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
                     title = stringResource(Res.string.ipv4_mode),
                     enabled = state.connected,
                     selectedItem = formState.value.address_mode,
-                    onItemSelected = { formState.value = formState.value.newBuilder().also { wb -> wb.address_mode = it }.build() },
+                    onItemSelected = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.address_mode = it }.build()
+                    },
                     itemLabel = { it.name },
                 )
                 if (formState.value.address_mode == Config.NetworkConfig.AddressMode.STATIC) {
@@ -314,7 +336,13 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
                         title = stringResource(Res.string.wifi_ip),
                         value = ipv4.ip,
                         enabled = state.connected,
-                        onValueChanged = { formState.value = formState.value.newBuilder().also { wb -> wb.ipv4_config = ipv4.newBuilder().also { wb -> wb.ip = it }.build() }.build() },
+                        onValueChanged = {
+                            formState.value =
+                                formState.value
+                                    .newBuilder()
+                                    .also { wb -> wb.ipv4_config = ipv4.newBuilder().also { wb -> wb.ip = it }.build() }
+                                    .build()
+                        },
                         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     )
                     HorizontalDivider()
@@ -323,7 +351,13 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
                         value = ipv4.gateway,
                         enabled = state.connected,
                         onValueChanged = {
-                            formState.value = formState.value.newBuilder().also { wb -> wb.ipv4_config = ipv4.newBuilder().also { wb -> wb.gateway = it }.build() }.build()
+                            formState.value =
+                                formState.value
+                                    .newBuilder()
+                                    .also { wb ->
+                                        wb.ipv4_config = ipv4.newBuilder().also { wb -> wb.gateway = it }.build()
+                                    }
+                                    .build()
                         },
                         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     )
@@ -333,7 +367,13 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
                         value = ipv4.subnet,
                         enabled = state.connected,
                         onValueChanged = {
-                            formState.value = formState.value.newBuilder().also { wb -> wb.ipv4_config = ipv4.newBuilder().also { wb -> wb.subnet = it }.build() }.build()
+                            formState.value =
+                                formState.value
+                                    .newBuilder()
+                                    .also { wb ->
+                                        wb.ipv4_config = ipv4.newBuilder().also { wb -> wb.subnet = it }.build()
+                                    }
+                                    .build()
                         },
                         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     )
@@ -342,7 +382,15 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
                         title = stringResource(Res.string.dns),
                         value = ipv4.dns,
                         enabled = state.connected,
-                        onValueChanged = { formState.value = formState.value.newBuilder().also { wb -> wb.ipv4_config = ipv4.newBuilder().also { wb -> wb.dns = it }.build() }.build() },
+                        onValueChanged = {
+                            formState.value =
+                                formState.value
+                                    .newBuilder()
+                                    .also { wb ->
+                                        wb.ipv4_config = ipv4.newBuilder().also { wb -> wb.dns = it }.build()
+                                    }
+                                    .build()
+                        },
                         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     )
                 }

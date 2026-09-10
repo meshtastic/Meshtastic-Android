@@ -156,7 +156,7 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val config = Config.Builder().also { wb ->wb.lora = it}.build()
+            val config = Config.Builder().also { wb -> wb.lora = it }.build()
             viewModel.setConfig(config)
         },
     ) {
@@ -197,7 +197,8 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                                 current = formState.value.modem_preset,
                             )
                         formState.value =
-                            formState.value.newBuilder()
+                            formState.value
+                                .newBuilder()
                                 .also { wb ->
                                     wb.region = region
                                     wb.modem_preset = preset
@@ -210,7 +211,9 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     title = stringResource(Res.string.use_modem_preset),
                     checked = formState.value.use_preset,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.use_preset = it }.build() },
+                    onCheckedChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.use_preset = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -234,7 +237,9 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                         enabled = state.connected,
                         items = presetItems,
                         selectedItem = formState.value.modem_preset,
-                        onItemSelected = { formState.value = formState.value.newBuilder().also { wb -> wb.modem_preset = it }.build() },
+                        onItemSelected = {
+                            formState.value = formState.value.newBuilder().also { wb -> wb.modem_preset = it }.build()
+                        },
                     )
                 } else {
                     ManualModemSettings(
@@ -254,7 +259,9 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     title = stringResource(Res.string.ignore_mqtt),
                     checked = formState.value.ignore_mqtt,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.ignore_mqtt = it }.build() },
+                    onCheckedChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.ignore_mqtt = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -262,7 +269,9 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     title = stringResource(Res.string.ok_to_mqtt),
                     checked = formState.value.config_ok_to_mqtt,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.config_ok_to_mqtt = it }.build() },
+                    onCheckedChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.config_ok_to_mqtt = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -270,7 +279,9 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     title = stringResource(Res.string.tx_enabled),
                     checked = formState.value.tx_enabled,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.tx_enabled = it }.build() },
+                    onCheckedChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.tx_enabled = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -278,7 +289,10 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     title = stringResource(Res.string.override_duty_cycle),
                     checked = formState.value.override_duty_cycle,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.override_duty_cycle = it }.build() },
+                    onCheckedChange = {
+                        formState.value =
+                            formState.value.newBuilder().also { wb -> wb.override_duty_cycle = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -288,7 +302,9 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     summary = stringResource(Res.string.config_lora_hop_limit_summary),
                     items = hopLimitItems,
                     selectedItem = formState.value.hop_limit,
-                    onItemSelected = { formState.value = formState.value.newBuilder().also { wb -> wb.hop_limit = it }.build() },
+                    onItemSelected = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.hop_limit = it }.build()
+                    },
                     enabled = state.connected,
                 )
                 HorizontalDivider()
@@ -316,7 +332,10 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     title = stringResource(Res.string.sx126x_rx_boosted_gain),
                     checked = formState.value.sx126x_rx_boosted_gain,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.sx126x_rx_boosted_gain = it }.build() },
+                    onCheckedChange = {
+                        formState.value =
+                            formState.value.newBuilder().also { wb -> wb.sx126x_rx_boosted_gain = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -332,7 +351,9 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onFocusChanged = { isFocusedOverride = it.isFocused },
-                    onValueChanged = { formState.value = formState.value.newBuilder().also { wb -> wb.override_frequency = it }.build() },
+                    onValueChanged = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.override_frequency = it }.build()
+                    },
                 )
                 HorizontalDivider()
                 SignedIntegerEditTextPreference(
@@ -340,7 +361,9 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     value = formState.value.tx_power,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.newBuilder().also { wb -> wb.tx_power = it }.build() },
+                    onValueChanged = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.tx_power = it }.build()
+                    },
                 )
                 if (viewModel.hasPaFan) {
                     HorizontalDivider()
@@ -348,7 +371,10 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                         title = stringResource(Res.string.pa_fan_disabled),
                         checked = formState.value.pa_fan_disabled,
                         enabled = state.connected,
-                        onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.pa_fan_disabled = it }.build() },
+                        onCheckedChange = {
+                            formState.value =
+                                formState.value.newBuilder().also { wb -> wb.pa_fan_disabled = it }.build()
+                        },
                         containerColor = CardDefaults.cardColors().containerColor,
                     )
                 }

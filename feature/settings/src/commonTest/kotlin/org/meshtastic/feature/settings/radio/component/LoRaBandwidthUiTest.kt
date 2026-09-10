@@ -43,7 +43,14 @@ class LoRaBandwidthUiTest {
     @Test
     fun invalidPersistedValues_explainWhyAndCannotSendUntilReplaced() = runComposeUiTest {
         val initialConfig =
-            Config.LoRaConfig.Builder().also { wb ->wb.use_preset = false; wb.region = RegionCode.LORA_24; wb.bandwidth = 125; wb.hop_limit = 1}.build()
+            Config.LoRaConfig.Builder()
+                .also { wb ->
+                    wb.use_preset = false
+                    wb.region = RegionCode.LORA_24
+                    wb.bandwidth = 125
+                    wb.hop_limit = 1
+                }
+                .build()
         lateinit var configState: ConfigState<Config.LoRaConfig>
         var savedConfig: Config.LoRaConfig? = null
 

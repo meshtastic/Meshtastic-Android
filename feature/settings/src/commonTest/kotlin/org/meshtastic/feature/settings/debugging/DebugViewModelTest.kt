@@ -210,14 +210,22 @@ class DebugViewModelTest {
 
     @Test
     fun `decodePayloadFromMeshLog decodes various portnums`() {
-        val position = org.meshtastic.proto.Position.Builder().also { wb ->wb.latitude_i = 10000000; wb.longitude_i = 20000000}.build()
+        val position =
+            org.meshtastic.proto.Position.Builder()
+                .also { wb ->
+                    wb.latitude_i = 10000000
+                    wb.longitude_i = 20000000
+                }
+                .build()
         val packet =
             org.meshtastic.core.testing.TestDataFactory.createTestPacket(
                 decoded =
-                org.meshtastic.proto.Data.Builder().also { wb ->
-                wb.portnum = org.meshtastic.proto.PortNum.POSITION_APP
-                wb.payload = okio.ByteString.Companion.of(*position.encode())
-                }.build(),
+                org.meshtastic.proto.Data.Builder()
+                    .also { wb ->
+                        wb.portnum = org.meshtastic.proto.PortNum.POSITION_APP
+                        wb.payload = okio.ByteString.Companion.of(*position.encode())
+                    }
+                    .build(),
             )
         val log =
             org.meshtastic.core.model.MeshLog(
@@ -225,7 +233,7 @@ class DebugViewModelTest {
                 message_type = "Packet",
                 received_date = 1L,
                 raw_message = "raw",
-                fromRadio = org.meshtastic.proto.FromRadio.Builder().also { wb ->wb.packet = packet}.build(),
+                fromRadio = org.meshtastic.proto.FromRadio.Builder().also { wb -> wb.packet = packet }.build(),
             )
 
         // This is a private method but we can test it via toUiState
@@ -252,7 +260,7 @@ class DebugViewModelTest {
                 message_type = "Packet",
                 received_date = 1L,
                 raw_message = "",
-                fromRadio = org.meshtastic.proto.FromRadio.Builder().also { wb ->wb.packet = packet}.build(),
+                fromRadio = org.meshtastic.proto.FromRadio.Builder().also { wb -> wb.packet = packet }.build(),
             ),
         )
 

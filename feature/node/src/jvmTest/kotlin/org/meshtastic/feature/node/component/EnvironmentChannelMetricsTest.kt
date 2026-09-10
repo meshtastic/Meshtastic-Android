@@ -51,7 +51,14 @@ class EnvironmentChannelMetricsTest {
     @Test
     fun oneWireChannelsKeepTheirChannelNumber() = runComposeUiTest {
         // A gap in the middle must not renumber the channels above it.
-        setEnvironmentMetrics(EnvironmentMetricsProto.Builder().also { wb -> wb.one_wire_temperature_ch0 = 10f; wb.one_wire_temperature_ch2 = 30f }.build())
+        setEnvironmentMetrics(
+            EnvironmentMetricsProto.Builder()
+                .also { wb ->
+                    wb.one_wire_temperature_ch0 = 10f
+                    wb.one_wire_temperature_ch2 = 30f
+                }
+                .build(),
+        )
         onNodeWithText("1-Wire Temp 1").assertIsDisplayed()
         onNodeWithText("1-Wire Temp 3").assertIsDisplayed()
         onNodeWithText("1-Wire Temp 2").assertDoesNotExist()
@@ -72,7 +79,14 @@ class EnvironmentChannelMetricsTest {
 
     @Test
     fun adcChannelsKeepTheirChannelNumber() = runComposeUiTest {
-        setEnvironmentMetrics(EnvironmentMetricsProto.Builder().also { wb -> wb.adc_voltage_ch1 = 3.3f; wb.adc_voltage_ch7 = 1.8f }.build())
+        setEnvironmentMetrics(
+            EnvironmentMetricsProto.Builder()
+                .also { wb ->
+                    wb.adc_voltage_ch1 = 3.3f
+                    wb.adc_voltage_ch7 = 1.8f
+                }
+                .build(),
+        )
         onNodeWithText("ADC Voltage 2").assertIsDisplayed()
         onNodeWithText("3.30 V").assertIsDisplayed()
         onNodeWithText("ADC Voltage 8").assertIsDisplayed()
@@ -81,7 +95,10 @@ class EnvironmentChannelMetricsTest {
 
     private fun ComposeUiTest.setEnvironmentMetrics(metrics: EnvironmentMetricsProto) = setContent {
         MaterialTheme {
-            EnvironmentMetrics(node = Node(num = 1, environmentMetrics = metrics), displayUnits = MeasurementSystem.METRIC)
+            EnvironmentMetrics(
+                node = Node(num = 1, environmentMetrics = metrics),
+                displayUnits = MeasurementSystem.METRIC,
+            )
         }
     }
 }

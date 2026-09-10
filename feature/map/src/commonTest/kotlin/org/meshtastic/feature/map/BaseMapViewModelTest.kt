@@ -167,7 +167,13 @@ class BaseMapViewModelTest {
 
     private fun positioned(num: Int, isIgnored: Boolean = false) = Node(
         num = num,
-        position = Position.Builder().also { wb ->wb.latitude_i = 450_000_000; wb.longitude_i = -1_220_000_000}.build(),
+        position =
+        Position.Builder()
+            .also { wb ->
+                wb.latitude_i = 450_000_000
+                wb.longitude_i = -1_220_000_000
+            }
+            .build(),
         isIgnored = isIgnored,
     )
 
@@ -280,6 +286,13 @@ class BaseMapViewModelTest {
     private fun waypointPacket(id: Int, expire: Int): DataPacket = DataPacket(
         to = NodeAddress.ID_BROADCAST,
         channel = 0,
-        waypoint = Waypoint.Builder().also { wb ->wb.id = id; wb.name = "Waypoint $id"; wb.expire = expire}.build(),
+        waypoint =
+        Waypoint.Builder()
+            .also { wb ->
+                wb.id = id
+                wb.name = "Waypoint $id"
+                wb.expire = expire
+            }
+            .build(),
     )
 }

@@ -36,7 +36,12 @@ class PowerMetricsZeroVoltageTest {
     @Test
     fun zeroVoltageChannelIsShown() = runComposeUiTest {
         setPowerMetrics(
-            PowerMetricsProto.Builder().also { wb -> wb.ch1_voltage = 0f; wb.ch1_current = 0f }.build(),
+            PowerMetricsProto.Builder()
+                .also { wb ->
+                    wb.ch1_voltage = 0f
+                    wb.ch1_current = 0f
+                }
+                .build(),
         )
         onNodeWithText("0.00V").assertIsDisplayed()
         onNodeWithText("0.0mA").assertIsDisplayed()

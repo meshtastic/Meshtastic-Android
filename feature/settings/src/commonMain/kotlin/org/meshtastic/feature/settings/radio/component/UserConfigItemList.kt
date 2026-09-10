@@ -168,7 +168,9 @@ fun UserConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, focusS
                     (formState.value.is_unmessagable ?: false) ||
                         (!capabilities.canToggleUnmessageable && formState.value.role.isUnmessageableRole()),
                     enabled = formState.value.is_unmessagable != null || capabilities.canToggleUnmessageable,
-                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.is_unmessagable = it }.build() },
+                    onCheckedChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.is_unmessagable = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -182,11 +184,18 @@ fun UserConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, focusS
                         // being entered: one too wide to be a callsign is demoted to the ham long name rather than
                         // discarded, and abandoning onboarding does not leave a stray separator behind.
                         formState.value =
-                            formState.value.newBuilder().also { wb -> wb.is_licensed = licensed; wb.long_name = when {
-                                    !state.isLocal -> longName
-                                    licensed -> HamName.forOnboarding(longName)
-                                    else -> HamName.forUnlicensing(longName)
-                                } }.build()
+                            formState.value
+                                .newBuilder()
+                                .also { wb ->
+                                    wb.is_licensed = licensed
+                                    wb.long_name =
+                                        when {
+                                            !state.isLocal -> longName
+                                            licensed -> HamName.forOnboarding(longName)
+                                            else -> HamName.forUnlicensing(longName)
+                                        }
+                                }
+                                .build()
                     },
                 )
             }
@@ -228,7 +237,14 @@ private fun statusMessagePrefill(config: ModuleConfig.StatusMessageConfig?, broa
 private fun RadioConfigViewModel.save(user: User, userDirty: Boolean, statusMessage: String, statusDirty: Boolean) {
     if (userDirty) saveUserConfig(user)
     if (statusDirty) {
-        setModuleConfig(ModuleConfig.Builder().also { wb ->wb.statusmessage = ModuleConfig.StatusMessageConfig.Builder().also { wb ->wb.node_status = statusMessage}.build()}.build())
+        setModuleConfig(
+            ModuleConfig.Builder()
+                .also { wb ->
+                    wb.statusmessage =
+                        ModuleConfig.StatusMessageConfig.Builder().also { wb -> wb.node_status = statusMessage }.build()
+                }
+                .build(),
+        )
     }
 }
 
@@ -332,7 +348,10 @@ internal fun UserNameFields(
                 keyboardOptions = keyboardOptions,
                 keyboardActions = keyboardActions,
                 modifier = Modifier.testTag(HAM_LONG_NAME_TEST_TAG),
-                onValueChanged = { formState.value = formState.value.newBuilder().also { wb -> wb.long_name = HamName.compose(callSign, it) }.build() },
+                onValueChanged = {
+                    formState.value =
+                        formState.value.newBuilder().also { wb -> wb.long_name = HamName.compose(callSign, it) }.build()
+                },
             )
         }
         HorizontalDivider()
@@ -345,7 +364,9 @@ internal fun UserNameFields(
             keyboardOptions = keyboardOptions,
             keyboardActions = keyboardActions,
             modifier = Modifier.testTag(USER_SHORT_NAME_TEST_TAG),
-            onValueChanged = { formState.value = formState.value.newBuilder().also { wb -> wb.short_name = it }.build() },
+            onValueChanged = {
+                formState.value = formState.value.newBuilder().also { wb -> wb.short_name = it }.build()
+            },
         )
     }
 }

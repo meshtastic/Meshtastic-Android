@@ -30,16 +30,18 @@ class TelemetryChannelsTest {
     @Test
     fun oneWireAccessorReadsEveryChannelInOrder() {
         val metrics =
-            EnvironmentMetrics.Builder().also { wb ->
-            wb.one_wire_temperature_ch0 = 0f
-            wb.one_wire_temperature_ch1 = 1f
-            wb.one_wire_temperature_ch2 = 2f
-            wb.one_wire_temperature_ch3 = 3f
-            wb.one_wire_temperature_ch4 = 4f
-            wb.one_wire_temperature_ch5 = 5f
-            wb.one_wire_temperature_ch6 = 6f
-            wb.one_wire_temperature_ch7 = 7f
-            }.build()
+            EnvironmentMetrics.Builder()
+                .also { wb ->
+                    wb.one_wire_temperature_ch0 = 0f
+                    wb.one_wire_temperature_ch1 = 1f
+                    wb.one_wire_temperature_ch2 = 2f
+                    wb.one_wire_temperature_ch3 = 3f
+                    wb.one_wire_temperature_ch4 = 4f
+                    wb.one_wire_temperature_ch5 = 5f
+                    wb.one_wire_temperature_ch6 = 6f
+                    wb.one_wire_temperature_ch7 = 7f
+                }
+                .build()
 
         for (channel in 0 until TELEMETRY_CHANNEL_COUNT) {
             assertEquals(channel.toFloat(), metrics.oneWireTemperature(channel))
@@ -49,16 +51,18 @@ class TelemetryChannelsTest {
     @Test
     fun adcAccessorReadsEveryChannelInOrder() {
         val metrics =
-            EnvironmentMetrics.Builder().also { wb ->
-            wb.adc_voltage_ch0 = 0f
-            wb.adc_voltage_ch1 = 1f
-            wb.adc_voltage_ch2 = 2f
-            wb.adc_voltage_ch3 = 3f
-            wb.adc_voltage_ch4 = 4f
-            wb.adc_voltage_ch5 = 5f
-            wb.adc_voltage_ch6 = 6f
-            wb.adc_voltage_ch7 = 7f
-            }.build()
+            EnvironmentMetrics.Builder()
+                .also { wb ->
+                    wb.adc_voltage_ch0 = 0f
+                    wb.adc_voltage_ch1 = 1f
+                    wb.adc_voltage_ch2 = 2f
+                    wb.adc_voltage_ch3 = 3f
+                    wb.adc_voltage_ch4 = 4f
+                    wb.adc_voltage_ch5 = 5f
+                    wb.adc_voltage_ch6 = 6f
+                    wb.adc_voltage_ch7 = 7f
+                }
+                .build()
 
         for (channel in 0 until TELEMETRY_CHANNEL_COUNT) {
             assertEquals(channel.toFloat(), metrics.adcVoltage(channel))
@@ -67,7 +71,13 @@ class TelemetryChannelsTest {
 
     @Test
     fun measuredZeroIsDistinctFromAbsentChannel() {
-        val reported = EnvironmentMetrics.Builder().also { wb ->wb.one_wire_temperature_ch3 = 0f; wb.adc_voltage_ch3 = 0f}.build()
+        val reported =
+            EnvironmentMetrics.Builder()
+                .also { wb ->
+                    wb.one_wire_temperature_ch3 = 0f
+                    wb.adc_voltage_ch3 = 0f
+                }
+                .build()
 
         assertEquals(0f, reported.oneWireTemperature(3))
         assertEquals(0f, reported.adcVoltage(3))
@@ -77,7 +87,13 @@ class TelemetryChannelsTest {
 
     @Test
     fun outOfRangeChannelIsNullRatherThanAnError() {
-        val metrics = EnvironmentMetrics.Builder().also { wb ->wb.one_wire_temperature_ch0 = 1f; wb.adc_voltage_ch0 = 1f}.build()
+        val metrics =
+            EnvironmentMetrics.Builder()
+                .also { wb ->
+                    wb.one_wire_temperature_ch0 = 1f
+                    wb.adc_voltage_ch0 = 1f
+                }
+                .build()
 
         assertNull(metrics.oneWireTemperature(TELEMETRY_CHANNEL_COUNT))
         assertNull(metrics.adcVoltage(TELEMETRY_CHANNEL_COUNT))
@@ -108,7 +124,7 @@ class TelemetryChannelsTest {
     @Suppress("DEPRECATION")
     @Test
     fun legacyListIsLiftedOntoPerChannelFields() {
-        val stored = EnvironmentMetrics.Builder().also { wb ->wb.one_wire_temperature = listOf(10f, 0f, 30f)}.build()
+        val stored = EnvironmentMetrics.Builder().also { wb -> wb.one_wire_temperature = listOf(10f, 0f, 30f) }.build()
 
         val lifted = stored.withLegacyOneWireTemperatures()
 
@@ -122,7 +138,13 @@ class TelemetryChannelsTest {
     @Suppress("DEPRECATION")
     @Test
     fun perChannelValuesWinOverLegacyList() {
-        val mixed = EnvironmentMetrics.Builder().also { wb ->wb.one_wire_temperature = listOf(10f, 20f); wb.one_wire_temperature_ch0 = 99f}.build()
+        val mixed =
+            EnvironmentMetrics.Builder()
+                .also { wb ->
+                    wb.one_wire_temperature = listOf(10f, 20f)
+                    wb.one_wire_temperature_ch0 = 99f
+                }
+                .build()
 
         val lifted = mixed.withLegacyOneWireTemperatures()
 
@@ -133,7 +155,8 @@ class TelemetryChannelsTest {
     @Suppress("DEPRECATION")
     @Test
     fun legacyListLongerThanTheChannelRangeIsTruncated() {
-        val stored = EnvironmentMetrics.Builder().also { wb ->wb.one_wire_temperature = List(12) { it.toFloat() }}.build()
+        val stored =
+            EnvironmentMetrics.Builder().also { wb -> wb.one_wire_temperature = List(12) { it.toFloat() } }.build()
 
         val lifted = stored.withLegacyOneWireTemperatures()
 
@@ -143,7 +166,7 @@ class TelemetryChannelsTest {
 
     @Test
     fun absentLegacyListLeavesMetricsUnchanged() {
-        val metrics = EnvironmentMetrics.Builder().also { wb ->wb.temperature = 21f}.build()
+        val metrics = EnvironmentMetrics.Builder().also { wb -> wb.temperature = 21f }.build()
 
         assertEquals(metrics, metrics.withLegacyOneWireTemperatures())
     }

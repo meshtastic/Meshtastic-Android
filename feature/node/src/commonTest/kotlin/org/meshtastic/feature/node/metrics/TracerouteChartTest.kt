@@ -63,14 +63,25 @@ class TracerouteChartTest {
         received_date = receivedDateMillis,
         raw_message = "",
         fromRadio =
-        FromRadio.Builder().also { wb ->
-        wb.packet = MeshPacket.Builder().also { wb ->
-                    wb.id = id
-                    wb.from = LOCAL_NODE
-                    wb.to = REMOTE_NODE
-                    wb.decoded = Data.Builder().also { wb ->wb.portnum = PortNum.TRACEROUTE_APP; wb.want_response = true}.build()
-                    }.build()
-        }.build(),
+        FromRadio.Builder()
+            .also { wb ->
+                wb.packet =
+                    MeshPacket.Builder()
+                        .also { wb ->
+                            wb.id = id
+                            wb.from = LOCAL_NODE
+                            wb.to = REMOTE_NODE
+                            wb.decoded =
+                                Data.Builder()
+                                    .also { wb ->
+                                        wb.portnum = PortNum.TRACEROUTE_APP
+                                        wb.want_response = true
+                                    }
+                                    .build()
+                        }
+                        .build()
+            }
+            .build(),
     )
 
     /**
@@ -92,29 +103,39 @@ class TracerouteChartTest {
         // snr_back must have one entry per node in route_back for fullRouteDiscovery to wrap it
         val snrBack = intermediateRouteBack?.map { DUMMY_SNR } ?: emptyList()
         val rd =
-            RouteDiscovery.Builder().also { wb ->
-            wb.route = intermediateRoute
-            wb.route_back = intermediateRouteBack ?: emptyList()
-            wb.snr_back = snrBack
-            }.build()
+            RouteDiscovery.Builder()
+                .also { wb ->
+                    wb.route = intermediateRoute
+                    wb.route_back = intermediateRouteBack ?: emptyList()
+                    wb.snr_back = snrBack
+                }
+                .build()
         return MeshLog(
             uuid = "res-$requestId",
             message_type = "TRACEROUTE",
             received_date = receivedDateMillis,
             raw_message = "",
             fromRadio =
-            FromRadio.Builder().also { wb ->
-            wb.packet = MeshPacket.Builder().also { wb ->
-                            wb.from = REMOTE_NODE
-                            wb.to = LOCAL_NODE
-                            wb.hop_start = hopStart
-                            wb.decoded = Data.Builder().also { wb ->
-                                                wb.portnum = PortNum.TRACEROUTE_APP
-                                                wb.request_id = requestId
-                                                wb.payload = RouteDiscovery.ADAPTER.encode(rd).toByteString()
-                                                }.build()
-                            }.build()
-            }.build(),
+            FromRadio.Builder()
+                .also { wb ->
+                    wb.packet =
+                        MeshPacket.Builder()
+                            .also { wb ->
+                                wb.from = REMOTE_NODE
+                                wb.to = LOCAL_NODE
+                                wb.hop_start = hopStart
+                                wb.decoded =
+                                    Data.Builder()
+                                        .also { wb ->
+                                            wb.portnum = PortNum.TRACEROUTE_APP
+                                            wb.request_id = requestId
+                                            wb.payload = RouteDiscovery.ADAPTER.encode(rd).toByteString()
+                                        }
+                                        .build()
+                            }
+                            .build()
+                }
+                .build(),
         )
     }
 

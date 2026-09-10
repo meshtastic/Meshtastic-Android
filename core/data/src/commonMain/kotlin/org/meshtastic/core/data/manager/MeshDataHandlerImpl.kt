@@ -606,8 +606,7 @@ class MeshDataHandlerImpl(
             val contactKey = dataPacket.contactKey(myNodeNum)
 
             val fromNode = nodeManager.nodeDBbyNodeNum[packet.from] ?: Node(num = packet.from)
-            val fromUser =
-                fromNode.user.newBuilder().also { wb -> wb.id = fromNode.user.id.ifEmpty { fromId } }.build()
+            val fromUser = fromNode.user.newBuilder().also { wb -> wb.id = fromNode.user.id.ifEmpty { fromId } }.build()
 
             val reaction =
                 Reaction(

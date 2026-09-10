@@ -46,10 +46,22 @@ class MapNodePolicyTest {
         publicKey: ByteString? = null,
     ) = Node(
         num = num,
-        position = Position.Builder().also { wb ->wb.latitude_i = (latitude * 1e7).toInt(); wb.longitude_i = (longitude * 1e7).toInt()}.build(),
+        position =
+        Position.Builder()
+            .also { wb ->
+                wb.latitude_i = (latitude * 1e7).toInt()
+                wb.longitude_i = (longitude * 1e7).toInt()
+            }
+            .build(),
         lastHeard = lastHeard,
         isFavorite = isFavorite,
-        user = User.Builder().also { wb ->wb.short_name = shortName; wb.role = role}.build(),
+        user =
+        User.Builder()
+            .also { wb ->
+                wb.short_name = shortName
+                wb.role = role
+            }
+            .build(),
         hopsAway = hopsAway,
         viaMqtt = viaMqtt,
         isIgnored = isIgnored,

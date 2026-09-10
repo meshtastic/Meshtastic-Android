@@ -203,10 +203,12 @@ internal fun rememberWaypointEditing(): WaypointEditing {
         onLongPress = { position ->
             if (isConnected && box.draft == null) {
                 pending =
-                    Waypoint.Builder().also { wb ->
-                    wb.latitude_i = (position.latitude / DEG_SCALE).toInt()
-                    wb.longitude_i = (position.longitude / DEG_SCALE).toInt()
-                    }.build()
+                    Waypoint.Builder()
+                        .also { wb ->
+                            wb.latitude_i = (position.latitude / DEG_SCALE).toInt()
+                            wb.longitude_i = (position.longitude / DEG_SCALE).toInt()
+                        }
+                        .build()
             }
         },
         pending = pending,
@@ -323,13 +325,12 @@ internal fun boundingBoxFromCorners(a: Position, b: Position): ProtoBoundingBox 
 private const val MIN_CORNER_DELTA_DEG = 1e-4
 
 /** A new waypoint arrives with id 0 and no icon; it needs both before it goes on air. */
-private fun Waypoint.readyToSend(nextPacketId: () -> Int): Waypoint =
-    this.newBuilder()
-        .also { wb ->
-            wb.id = if (id == 0) nextPacketId() else id
-            wb.icon = icon.waypointIconOrDefault()
-        }
-        .build()
+private fun Waypoint.readyToSend(nextPacketId: () -> Int): Waypoint = this.newBuilder()
+    .also { wb ->
+        wb.id = if (id == 0) nextPacketId() else id
+        wb.icon = icon.waypointIconOrDefault()
+    }
+    .build()
 
 /** Waypoint coordinates travel as degrees scaled by 1e7. */
 private const val DEG_SCALE = 1e-7

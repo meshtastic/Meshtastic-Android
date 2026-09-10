@@ -51,20 +51,57 @@ class UIViewModelImportSummaryTest {
 
     @Test
     fun ota_status_notifications_are_suppressed() {
-        assertTrue(ClientNotification.Builder().also { wb ->wb.message = "Rebooting to WiFi OTA"}.build().isOtaStatusNotification())
-        assertTrue(ClientNotification.Builder().also { wb ->wb.message = "Rebooting to BLE OTA"}.build().isOtaStatusNotification())
         assertTrue(
-            ClientNotification.Builder().also { wb ->wb.message = "Cannot start OTA: OTA Loader partition not found."}.build().isOtaStatusNotification(),
+            ClientNotification.Builder()
+                .also { wb -> wb.message = "Rebooting to WiFi OTA" }
+                .build()
+                .isOtaStatusNotification(),
         )
-        assertTrue(ClientNotification.Builder().also { wb ->wb.message = "OTA Loader does not support WiFi"}.build().isOtaStatusNotification())
-        assertTrue(ClientNotification.Builder().also { wb ->wb.message = "Unable to switch to the OTA partition."}.build().isOtaStatusNotification())
+        assertTrue(
+            ClientNotification.Builder()
+                .also { wb -> wb.message = "Rebooting to BLE OTA" }
+                .build()
+                .isOtaStatusNotification(),
+        )
+        assertTrue(
+            ClientNotification.Builder()
+                .also { wb -> wb.message = "Cannot start OTA: OTA Loader partition not found." }
+                .build()
+                .isOtaStatusNotification(),
+        )
+        assertTrue(
+            ClientNotification.Builder()
+                .also { wb -> wb.message = "OTA Loader does not support WiFi" }
+                .build()
+                .isOtaStatusNotification(),
+        )
+        assertTrue(
+            ClientNotification.Builder()
+                .also { wb -> wb.message = "Unable to switch to the OTA partition." }
+                .build()
+                .isOtaStatusNotification(),
+        )
     }
 
     @Test
     fun non_ota_status_notifications_are_not_suppressed() {
-        assertFalse(ClientNotification.Builder().also { wb ->wb.message = "Low battery"}.build().isOtaStatusNotification())
-        assertFalse(ClientNotification.Builder().also { wb ->wb.message = "Key verification requested"}.build().isOtaStatusNotification())
-        assertFalse(ClientNotification.Builder().also { wb ->wb.message = "ROTATE credentials"}.build().isOtaStatusNotification())
-        assertFalse(ClientNotification.Builder().also { wb ->wb.message = "Quota exceeded"}.build().isOtaStatusNotification())
+        assertFalse(
+            ClientNotification.Builder().also { wb -> wb.message = "Low battery" }.build().isOtaStatusNotification(),
+        )
+        assertFalse(
+            ClientNotification.Builder()
+                .also { wb -> wb.message = "Key verification requested" }
+                .build()
+                .isOtaStatusNotification(),
+        )
+        assertFalse(
+            ClientNotification.Builder()
+                .also { wb -> wb.message = "ROTATE credentials" }
+                .build()
+                .isOtaStatusNotification(),
+        )
+        assertFalse(
+            ClientNotification.Builder().also { wb -> wb.message = "Quota exceeded" }.build().isOtaStatusNotification(),
+        )
     }
 }

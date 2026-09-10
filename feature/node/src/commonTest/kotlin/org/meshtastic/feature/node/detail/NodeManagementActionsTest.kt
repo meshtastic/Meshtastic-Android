@@ -74,7 +74,7 @@ class NodeManagementActionsTest {
 
     @Test
     fun requestRemoveNode_shows_confirmation_alert() {
-        val node = Node(num = 123, user = User.Builder().also { wb ->wb.long_name = "Test Node"}.build())
+        val node = Node(num = 123, user = User.Builder().also { wb -> wb.long_name = "Test Node" }.build())
 
         actions.requestRemoveNode(testScope, node)
 
@@ -97,7 +97,7 @@ class NodeManagementActionsTest {
     fun requestRemoveNode_invokes_onAfterRemove_when_user_confirms() {
         val realAlertManager = AlertManager()
         val actionsWithRealAlert = actionsWith(radioController, realAlertManager)
-        val node = Node(num = 123, user = User.Builder().also { wb ->wb.long_name = "Test Node"}.build())
+        val node = Node(num = 123, user = User.Builder().also { wb -> wb.long_name = "Test Node" }.build())
         var afterRemoveCalled = false
 
         actionsWithRealAlert.requestRemoveNode(testScope, node) { afterRemoveCalled = true }
@@ -111,7 +111,7 @@ class NodeManagementActionsTest {
     fun requestRemoveNode_success_callback_failure_is_not_reported_as_radio_rejection() {
         val realAlertManager = AlertManager()
         val actionsWithRealAlert = actionsWith(radioController, realAlertManager)
-        val node = Node(num = 123, user = User.Builder().also { wb ->wb.long_name = "Test Node"}.build())
+        val node = Node(num = 123, user = User.Builder().also { wb -> wb.long_name = "Test Node" }.build())
         nodeRepository.setNodes(listOf(node))
 
         actionsWithRealAlert.requestRemoveNode(testScope, node) { throw PacketQueueRejectedException("callback") }
@@ -126,7 +126,7 @@ class NodeManagementActionsTest {
         val rejectedRadio = mock<RadioController>()
         val realAlertManager = AlertManager()
         val rejectedActions = actionsWith(rejectedRadio, realAlertManager)
-        val node = Node(num = 123, user = User.Builder().also { wb ->wb.long_name = "Test Node"}.build())
+        val node = Node(num = 123, user = User.Builder().also { wb -> wb.long_name = "Test Node" }.build())
         var afterRemoveCalled = false
         nodeRepository.setNodes(listOf(node))
         every { rejectedRadio.generatePacketId() } returns 7
@@ -146,7 +146,7 @@ class NodeManagementActionsTest {
         val unavailableRadio = mock<RadioController>()
         val realAlertManager = AlertManager()
         val unavailableActions = actionsWith(unavailableRadio, realAlertManager)
-        val node = Node(num = 123, user = User.Builder().also { wb ->wb.long_name = "Test Node"}.build())
+        val node = Node(num = 123, user = User.Builder().also { wb -> wb.long_name = "Test Node" }.build())
         var afterRemoveCalled = false
         nodeRepository.setNodes(listOf(node))
         every { unavailableRadio.generatePacketId() } returns 7

@@ -123,21 +123,26 @@ object TAKPacketV2Conversion {
                 }
             }
 
-            return TAKPacketV2.Builder().also { wb ->
-            wb.cot_type_id = CotType.CotType_b_t_f
-            wb.how = CotHow.CotHow_h_g_i_g_o
-            wb.callsign = callsign
-            wb.device_callsign = smuggledCallsign
-            wb.uid = uid
-            wb.team = teamEnum
-            wb.role = roleEnum
-            wb.battery = battery
-            wb.chat = GeoChat.Builder().also { wb ->
-                            wb.message = localChat.message
-                            wb.to = toUid ?: if (toCallsign == null) "All Chat Rooms" else null
-                            wb.to_callsign = toCallsign
-                            }.build()
-            }.build()
+            return TAKPacketV2.Builder()
+                .also { wb ->
+                    wb.cot_type_id = CotType.CotType_b_t_f
+                    wb.how = CotHow.CotHow_h_g_i_g_o
+                    wb.callsign = callsign
+                    wb.device_callsign = smuggledCallsign
+                    wb.uid = uid
+                    wb.team = teamEnum
+                    wb.role = roleEnum
+                    wb.battery = battery
+                    wb.chat =
+                        GeoChat.Builder()
+                            .also { wb ->
+                                wb.message = localChat.message
+                                wb.to = toUid ?: if (toCallsign == null) "All Chat Rooms" else null
+                                wb.to_callsign = toCallsign
+                            }
+                            .build()
+                }
+                .build()
         }
 
         // Fallback: wrap the whole detail XML in raw_detail for unmapped types
@@ -145,21 +150,23 @@ object TAKPacketV2Conversion {
         val detailBytes = parsedDetailXml?.encodeToByteArray()
         if (detailBytes != null) {
             val callsign = contact?.callsign ?: "UNKNOWN"
-            return TAKPacketV2.Builder().also { wb ->
-            wb.cot_type_id = cotTypeEnum
-            wb.cot_type_str = cotTypeStr
-            wb.how = howEnum
-            wb.callsign = callsign
-            wb.device_callsign = uid
-            wb.uid = uid
-            wb.team = teamEnum
-            wb.role = roleEnum
-            wb.latitude_i = (latitude * TAK_COORDINATE_SCALE).toInt()
-            wb.longitude_i = (longitude * TAK_COORDINATE_SCALE).toInt()
-            wb.altitude = if (hae >= TAK_UNKNOWN_POINT_VALUE || hae.isNaN()) 0 else hae.toInt()
-            wb.battery = battery
-            wb.raw_detail = detailBytes.toByteString()
-            }.build()
+            return TAKPacketV2.Builder()
+                .also { wb ->
+                    wb.cot_type_id = cotTypeEnum
+                    wb.cot_type_str = cotTypeStr
+                    wb.how = howEnum
+                    wb.callsign = callsign
+                    wb.device_callsign = uid
+                    wb.uid = uid
+                    wb.team = teamEnum
+                    wb.role = roleEnum
+                    wb.latitude_i = (latitude * TAK_COORDINATE_SCALE).toInt()
+                    wb.longitude_i = (longitude * TAK_COORDINATE_SCALE).toInt()
+                    wb.altitude = if (hae >= TAK_UNKNOWN_POINT_VALUE || hae.isNaN()) 0 else hae.toInt()
+                    wb.battery = battery
+                    wb.raw_detail = detailBytes.toByteString()
+                }
+                .build()
         }
 
         Logger.w { "Cannot convert CoT to TAKPacketV2 for type $type (no parsed detail)" }

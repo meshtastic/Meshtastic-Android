@@ -53,7 +53,7 @@ fun RemoteHardwareConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Un
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val config = ModuleConfig.Builder().also { wb ->wb.remote_hardware = it}.build()
+            val config = ModuleConfig.Builder().also { wb -> wb.remote_hardware = it }.build()
             viewModel.setModuleConfig(config)
         },
     ) {
@@ -63,7 +63,9 @@ fun RemoteHardwareConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Un
                     title = stringResource(Res.string.remote_hardware_enabled),
                     checked = formState.value.enabled,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.enabled = it }.build() },
+                    onCheckedChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.enabled = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -71,7 +73,10 @@ fun RemoteHardwareConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Un
                     title = stringResource(Res.string.allow_undefined_pin_access),
                     checked = formState.value.allow_undefined_pin_access,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.allow_undefined_pin_access = it }.build() },
+                    onCheckedChange = {
+                        formState.value =
+                            formState.value.newBuilder().also { wb -> wb.allow_undefined_pin_access = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -81,7 +86,9 @@ fun RemoteHardwareConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Un
                     maxCount = 4, // available_pins max_count:4
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValuesChanged = { list -> formState.value = formState.value.newBuilder().also { wb -> wb.available_pins = list }.build() },
+                    onValuesChanged = { list ->
+                        formState.value = formState.value.newBuilder().also { wb -> wb.available_pins = list }.build()
+                    },
                 )
             }
         }

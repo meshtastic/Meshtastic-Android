@@ -212,13 +212,21 @@ class MeshToCotBroadcasterTest {
         ) = Node(
             num = num,
             user =
-            org.meshtastic.proto.User.Builder().also { wb ->
-            wb.id = "!" + num.toUInt().toString(16).padStart(8, '0')
-            wb.short_name = "WOLF"
-            wb.long_name = "Wolf Ridge Relay"
-            wb.hw_model = hwModel
-            }.build(),
-            position = org.meshtastic.proto.Position.Builder().also { wb ->wb.latitude_i = latitudeI; wb.longitude_i = longitudeI}.build(),
+            org.meshtastic.proto.User.Builder()
+                .also { wb ->
+                    wb.id = "!" + num.toUInt().toString(16).padStart(8, '0')
+                    wb.short_name = "WOLF"
+                    wb.long_name = "Wolf Ridge Relay"
+                    wb.hw_model = hwModel
+                }
+                .build(),
+            position =
+            org.meshtastic.proto.Position.Builder()
+                .also { wb ->
+                    wb.latitude_i = latitudeI
+                    wb.longitude_i = longitudeI
+                }
+                .build(),
             lastHeard = lastHeard,
         )
 

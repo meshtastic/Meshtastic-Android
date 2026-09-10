@@ -144,10 +144,16 @@ class ConnectionsViewModelTest {
             // No lora config yet: absence of the flag is not a disabled transmitter.
             assertEquals(false, awaitItem())
 
-            configFlow.value = LocalConfig.Builder().also { wb ->wb.lora = Config.LoRaConfig.Builder().also { wb ->wb.tx_enabled = false}.build()}.build()
+            configFlow.value =
+                LocalConfig.Builder()
+                    .also { wb -> wb.lora = Config.LoRaConfig.Builder().also { wb -> wb.tx_enabled = false }.build() }
+                    .build()
             assertEquals(true, awaitItem())
 
-            configFlow.value = LocalConfig.Builder().also { wb ->wb.lora = Config.LoRaConfig.Builder().also { wb ->wb.tx_enabled = true}.build()}.build()
+            configFlow.value =
+                LocalConfig.Builder()
+                    .also { wb -> wb.lora = Config.LoRaConfig.Builder().also { wb -> wb.tx_enabled = true }.build() }
+                    .build()
             assertEquals(false, awaitItem())
 
             cancelAndIgnoreRemainingEvents()
@@ -165,7 +171,16 @@ class ConnectionsViewModelTest {
     @Test
     fun `connection status stays lifecycle-only when region is unset`() = runTest {
         val configFlow =
-            MutableStateFlow(LocalConfig.Builder().also { wb ->wb.lora = Config.LoRaConfig.Builder().also { wb ->wb.region = Config.LoRaConfig.RegionCode.UNSET}.build()}.build())
+            MutableStateFlow(
+                LocalConfig.Builder()
+                    .also { wb ->
+                        wb.lora =
+                            Config.LoRaConfig.Builder()
+                                .also { wb -> wb.region = Config.LoRaConfig.RegionCode.UNSET }
+                                .build()
+                    }
+                    .build(),
+            )
         every { radioConfigRepository.localConfigFlow } returns configFlow
         val vm = newViewModel()
 
@@ -179,7 +194,10 @@ class ConnectionsViewModelTest {
                 assertEquals(false, awaitItem())
 
                 nodeRepository.setOurNode(
-                    org.meshtastic.core.model.Node(num = 2, user = User.Builder().also { wb ->wb.hw_model = HardwareModel.TBEAM}.build()),
+                    org.meshtastic.core.model.Node(
+                        num = 2,
+                        user = User.Builder().also { wb -> wb.hw_model = HardwareModel.TBEAM }.build(),
+                    ),
                 )
                 connectionIdentity.value =
                     ConnectionIdentity(sessionGeneration = 2, address = "test", nodeNum = 2, deviceId = null)
@@ -204,7 +222,10 @@ class ConnectionsViewModelTest {
 
             // A cached node whose num matches the fresh session identity can become warning-ready before Connected.
             nodeRepository.setOurNode(
-                org.meshtastic.core.model.Node(num = 7, user = User.Builder().also { wb ->wb.hw_model = HardwareModel.TBEAM}.build()),
+                org.meshtastic.core.model.Node(
+                    num = 7,
+                    user = User.Builder().also { wb -> wb.hw_model = HardwareModel.TBEAM }.build(),
+                ),
             )
             connectionIdentity.value =
                 ConnectionIdentity(sessionGeneration = 3, address = "test", nodeNum = 7, deviceId = null)
@@ -235,7 +256,10 @@ class ConnectionsViewModelTest {
             assertEquals(false, awaitItem())
 
             nodeRepository.setOurNode(
-                org.meshtastic.core.model.Node(num = 7, user = User.Builder().also { wb ->wb.hw_model = HardwareModel.TBEAM}.build()),
+                org.meshtastic.core.model.Node(
+                    num = 7,
+                    user = User.Builder().also { wb -> wb.hw_model = HardwareModel.TBEAM }.build(),
+                ),
             )
             connectionIdentity.value =
                 ConnectionIdentity(sessionGeneration = 3, address = "first", nodeNum = 7, deviceId = null)
@@ -250,7 +274,10 @@ class ConnectionsViewModelTest {
             assertEquals(false, vm.activeNodeInfoReady.value)
 
             nodeRepository.setOurNode(
-                org.meshtastic.core.model.Node(num = 8, user = User.Builder().also { wb ->wb.hw_model = HardwareModel.TBEAM}.build()),
+                org.meshtastic.core.model.Node(
+                    num = 8,
+                    user = User.Builder().also { wb -> wb.hw_model = HardwareModel.TBEAM }.build(),
+                ),
             )
             assertEquals(true, awaitItem())
 
@@ -319,7 +346,12 @@ class ConnectionsViewModelTest {
         )
         nodeRepository.setMyId("!local")
         nodeRepository.setMyNodeInfo(TestDataFactory.createMyNodeInfo(firmwareVersion = "2.7.0", pioEnv = target))
-        nodeRepository.setOurNode(org.meshtastic.core.model.Node(num = 1, user = User.Builder().also { wb ->wb.hw_model = HardwareModel.TBEAM}.build()))
+        nodeRepository.setOurNode(
+            org.meshtastic.core.model.Node(
+                num = 1,
+                user = User.Builder().also { wb -> wb.hw_model = HardwareModel.TBEAM }.build(),
+            ),
+        )
         radioPrefs.setDevAddr("x:connected")
         firmwareReleaseRepository.setManifestTargets("v2.8.0", setOf(target))
         firmwareReleaseRepository.setStableRelease(FirmwareRelease(id = "v2.8.0"))
@@ -350,7 +382,12 @@ class ConnectionsViewModelTest {
         )
         nodeRepository.setMyId("!local")
         nodeRepository.setMyNodeInfo(TestDataFactory.createMyNodeInfo(firmwareVersion = "2.7.0", pioEnv = target))
-        nodeRepository.setOurNode(org.meshtastic.core.model.Node(num = 1, user = User.Builder().also { wb ->wb.hw_model = HardwareModel.TBEAM}.build()))
+        nodeRepository.setOurNode(
+            org.meshtastic.core.model.Node(
+                num = 1,
+                user = User.Builder().also { wb -> wb.hw_model = HardwareModel.TBEAM }.build(),
+            ),
+        )
         radioPrefs.setDevAddr("x:connected")
         firmwareReleaseRepository.setManifestTargets("v2.8.0", setOf(target))
         firmwareReleaseRepository.setStableRelease(FirmwareRelease(id = "v2.8.0"))
@@ -374,7 +411,12 @@ class ConnectionsViewModelTest {
         )
         nodeRepository.setMyId("!local")
         nodeRepository.setMyNodeInfo(TestDataFactory.createMyNodeInfo(firmwareVersion = "2.7.0", pioEnv = target))
-        nodeRepository.setOurNode(org.meshtastic.core.model.Node(num = 1, user = User.Builder().also { wb ->wb.hw_model = HardwareModel.TBEAM}.build()))
+        nodeRepository.setOurNode(
+            org.meshtastic.core.model.Node(
+                num = 1,
+                user = User.Builder().also { wb -> wb.hw_model = HardwareModel.TBEAM }.build(),
+            ),
+        )
         radioPrefs.setDevAddr("x:connected")
         firmwareReleaseRepository.setStableRelease(FirmwareRelease(id = "v2.8.0", lastUpdated = 0))
         serviceRepository.setConnectionState(ConnectionState.Connected)
@@ -395,7 +437,12 @@ class ConnectionsViewModelTest {
         )
         nodeRepository.setMyId("!local")
         nodeRepository.setMyNodeInfo(TestDataFactory.createMyNodeInfo(firmwareVersion = "2.7.0", pioEnv = target))
-        nodeRepository.setOurNode(org.meshtastic.core.model.Node(num = 1, user = User.Builder().also { wb ->wb.hw_model = HardwareModel.TBEAM}.build()))
+        nodeRepository.setOurNode(
+            org.meshtastic.core.model.Node(
+                num = 1,
+                user = User.Builder().also { wb -> wb.hw_model = HardwareModel.TBEAM }.build(),
+            ),
+        )
         radioPrefs.setDevAddr("x:connected")
         firmwareReleaseRepository.setManifestTargets("v2.8.0", setOf("t-echo"))
         firmwareReleaseRepository.setStableRelease(FirmwareRelease(id = "v2.8.0"))

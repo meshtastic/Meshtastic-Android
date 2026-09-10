@@ -35,7 +35,7 @@ class ExportProfileUseCaseTest {
     @Test
     fun `invoke writes encoded profile to output stream`() {
         // Arrange
-        val profile = DeviceProfile.Builder().also { wb ->wb.long_name = "Export Node"}.build()
+        val profile = DeviceProfile.Builder().also { wb -> wb.long_name = "Export Node" }.build()
         val buffer = Buffer()
 
         // Act

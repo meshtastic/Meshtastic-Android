@@ -118,7 +118,8 @@ class FakeRadioConfigRepository :
         channelSetUpdates += ChannelSetUpdate(settingsList, loraConfig)
         val current = channelSetBacking.value
         channelSetBacking.value =
-            current.newBuilder()
+            current
+                .newBuilder()
                 .also { wb ->
                     wb.settings = settingsList ?: current.settings
                     wb.lora_config = loraConfig ?: current.lora_config

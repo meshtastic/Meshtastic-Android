@@ -27,16 +27,26 @@ import kotlin.test.assertTrue
 class WaypointToGeofenceTest {
 
     private val box =
-        BoundingBox.Builder().also { wb ->
-        wb.longitude_west_i = 200_000_000
-        wb.latitude_south_i = 100_000_000
-        wb.longitude_east_i = 210_000_000
-        wb.latitude_north_i = 110_000_000
-        }.build()
+        BoundingBox.Builder()
+            .also { wb ->
+                wb.longitude_west_i = 200_000_000
+                wb.latitude_south_i = 100_000_000
+                wb.longitude_east_i = 210_000_000
+                wb.latitude_north_i = 110_000_000
+            }
+            .build()
 
     @Test
     fun radiusOnlyDecodesCircleNoBox() {
-        val wp = Waypoint.Builder().also { wb ->wb.id = 1; wb.latitude_i = 100_000_000; wb.longitude_i = 200_000_000; wb.geofence_radius = 500}.build()
+        val wp =
+            Waypoint.Builder()
+                .also { wb ->
+                    wb.id = 1
+                    wb.latitude_i = 100_000_000
+                    wb.longitude_i = 200_000_000
+                    wb.geofence_radius = 500
+                }
+                .build()
         val geofence = wp.toGeofence()
         assertNotNullCircleAt(geofence?.circle, 10.0, 20.0, 500)
         assertNull(geofence?.box)
@@ -44,7 +54,13 @@ class WaypointToGeofenceTest {
 
     @Test
     fun boxOnlyDecodesBoxNoCircle() {
-        val wp = Waypoint.Builder().also { wb ->wb.id = 1; wb.bounding_box = box}.build()
+        val wp =
+            Waypoint.Builder()
+                .also { wb ->
+                    wb.id = 1
+                    wb.bounding_box = box
+                }
+                .build()
         val geofence = wp.toGeofence()
         assertNull(geofence?.circle)
         assertEquals(GeofenceBox(south = 10.0, west = 20.0, north = 11.0, east = 21.0), geofence?.box)
@@ -52,20 +68,30 @@ class WaypointToGeofenceTest {
 
     @Test
     fun neitherShapeDecodesToNull() {
-        assertNull(Waypoint.Builder().also { wb ->wb.id = 1}.build().toGeofence())
-        assertNull(Waypoint.Builder().also { wb ->wb.id = 1; wb.geofence_radius = 0}.build().toGeofence())
+        assertNull(Waypoint.Builder().also { wb -> wb.id = 1 }.build().toGeofence())
+        assertNull(
+            Waypoint.Builder()
+                .also { wb ->
+                    wb.id = 1
+                    wb.geofence_radius = 0
+                }
+                .build()
+                .toGeofence(),
+        )
     }
 
     @Test
     fun bothShapesDecode() {
         val wp =
-            Waypoint.Builder().also { wb ->
-            wb.id = 1
-            wb.latitude_i = 100_000_000
-            wb.longitude_i = 200_000_000
-            wb.geofence_radius = 500
-            wb.bounding_box = box
-            }.build()
+            Waypoint.Builder()
+                .also { wb ->
+                    wb.id = 1
+                    wb.latitude_i = 100_000_000
+                    wb.longitude_i = 200_000_000
+                    wb.geofence_radius = 500
+                    wb.bounding_box = box
+                }
+                .build()
         val geofence = wp.toGeofence()
         assertNotNullCircleAt(geofence?.circle, 10.0, 20.0, 500)
         assertEquals(GeofenceBox(south = 10.0, west = 20.0, north = 11.0, east = 21.0), geofence?.box)
@@ -84,32 +110,57 @@ class WaypointToGeofenceTest {
                     wb.latitude_north_i = 100_000_000 // 10
                 }
                 .build()
-        val geofence = Waypoint.Builder().also { wb ->wb.id = 1; wb.bounding_box = inverted}.build().toGeofence()
+        val geofence =
+            Waypoint.Builder()
+                .also { wb ->
+                    wb.id = 1
+                    wb.bounding_box = inverted
+                }
+                .build()
+                .toGeofence()
         assertEquals(GeofenceBox(south = 10.0, west = 20.0, north = 11.0, east = 21.0), geofence?.box)
     }
 
     @Test
     fun notifiesOnCrossingTruthTable() {
-        assertFalse(Waypoint.Builder().also { wb ->wb.id = 1}.build().notifiesOnCrossing)
-        assertTrue(Waypoint.Builder().also { wb ->wb.id = 1; wb.notify_on_enter = true}.build().notifiesOnCrossing)
-        assertTrue(Waypoint.Builder().also { wb ->wb.id = 1; wb.notify_on_exit = true}.build().notifiesOnCrossing)
+        assertFalse(Waypoint.Builder().also { wb -> wb.id = 1 }.build().notifiesOnCrossing)
+        assertTrue(
+            Waypoint.Builder()
+                .also { wb ->
+                    wb.id = 1
+                    wb.notify_on_enter = true
+                }
+                .build()
+                .notifiesOnCrossing,
+        )
+        assertTrue(
+            Waypoint.Builder()
+                .also { wb ->
+                    wb.id = 1
+                    wb.notify_on_exit = true
+                }
+                .build()
+                .notifiesOnCrossing,
+        )
     }
 
     /** R2: geofence fields survive an unrelated edit and a proto encode/decode round-trip. */
     @Test
     fun geofenceFieldsSurviveEditAndRoundTrip() {
         val original =
-            Waypoint.Builder().also { wb ->
-            wb.id = 7
-            wb.latitude_i = 100_000_000
-            wb.longitude_i = 200_000_000
-            wb.name = "old"
-            wb.geofence_radius = 500
-            wb.bounding_box = box
-            wb.notify_on_enter = true
-            wb.notify_on_exit = true
-            wb.notify_favorites_only = true
-            }.build()
+            Waypoint.Builder()
+                .also { wb ->
+                    wb.id = 7
+                    wb.latitude_i = 100_000_000
+                    wb.longitude_i = 200_000_000
+                    wb.name = "old"
+                    wb.geofence_radius = 500
+                    wb.bounding_box = box
+                    wb.notify_on_enter = true
+                    wb.notify_on_exit = true
+                    wb.notify_favorites_only = true
+                }
+                .build()
         val edited = original.newBuilder().also { wb -> wb.name = "new" }.build()
         assertEquals(500, edited.geofence_radius)
         assertEquals(box, edited.bounding_box)

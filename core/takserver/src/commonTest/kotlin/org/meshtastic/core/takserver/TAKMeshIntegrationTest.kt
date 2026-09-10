@@ -304,9 +304,17 @@ class TAKMeshIntegrationTest {
         h.integration.start(backgroundScope)
 
         val textPacket =
-            MeshPacket.Builder().also { wb ->
-            wb.decoded = Data.Builder().also { wb ->wb.portnum = PortNum.TEXT_MESSAGE_APP; wb.payload = "hello".encodeToByteArray().toByteString()}.build()
-            }.build()
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                wb.payload = "hello".encodeToByteArray().toByteString()
+                            }
+                            .build()
+                }
+                .build()
         h.serviceRepository.emitMeshPacket(textPacket)
 
         assertTrue(h.serverManager.broadcasts.isEmpty())
@@ -466,24 +474,46 @@ class TAKMeshIntegrationTest {
 
     private fun createV1PliMeshPacket(isCompressed: Boolean = false): MeshPacket {
         val takPacket =
-            TAKPacket.Builder().also { wb ->
-            wb.is_compressed = isCompressed
-            wb.contact = org.meshtastic.proto.Contact.Builder().also { wb ->wb.callsign = "BRAVO"; wb.device_callsign = "bravo-uid"}.build()
-            wb.pli = org.meshtastic.proto.PLI.Builder().also { wb ->
-                            wb.latitude_i = 330000000
-                            wb.longitude_i = -840000000
-                            wb.altitude = 100
-                            wb.speed = 0
-                            wb.course = 0
-                            }.build()
-            wb.group = org.meshtastic.proto.Group.Builder().also { wb ->
-                            wb.team = org.meshtastic.proto.Team.Cyan
-                            wb.role = org.meshtastic.proto.MemberRole.TeamMember
-                            }.build()
-            wb.status = org.meshtastic.proto.Status.Builder().also { wb ->wb.battery = 85}.build()
-            }.build()
-        return MeshPacket.Builder().also { wb ->
-        wb.decoded = Data.Builder().also { wb ->wb.portnum = PortNum.ATAK_PLUGIN; wb.payload = TAKPacket.ADAPTER.encode(takPacket).toByteString()}.build()
-        }.build()
+            TAKPacket.Builder()
+                .also { wb ->
+                    wb.is_compressed = isCompressed
+                    wb.contact =
+                        org.meshtastic.proto.Contact.Builder()
+                            .also { wb ->
+                                wb.callsign = "BRAVO"
+                                wb.device_callsign = "bravo-uid"
+                            }
+                            .build()
+                    wb.pli =
+                        org.meshtastic.proto.PLI.Builder()
+                            .also { wb ->
+                                wb.latitude_i = 330000000
+                                wb.longitude_i = -840000000
+                                wb.altitude = 100
+                                wb.speed = 0
+                                wb.course = 0
+                            }
+                            .build()
+                    wb.group =
+                        org.meshtastic.proto.Group.Builder()
+                            .also { wb ->
+                                wb.team = org.meshtastic.proto.Team.Cyan
+                                wb.role = org.meshtastic.proto.MemberRole.TeamMember
+                            }
+                            .build()
+                    wb.status = org.meshtastic.proto.Status.Builder().also { wb -> wb.battery = 85 }.build()
+                }
+                .build()
+        return MeshPacket.Builder()
+            .also { wb ->
+                wb.decoded =
+                    Data.Builder()
+                        .also { wb ->
+                            wb.portnum = PortNum.ATAK_PLUGIN
+                            wb.payload = TAKPacket.ADAPTER.encode(takPacket).toByteString()
+                        }
+                        .build()
+            }
+            .build()
     }
 }

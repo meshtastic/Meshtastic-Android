@@ -32,8 +32,26 @@ class ActiveWaypointsTest {
     /** The P1 regression: re-broadcasts of the same waypoint are separate rows; latest transmission must win. */
     @Test
     fun latestTransmissionWinsPerWaypointId() {
-        val old = packet(Waypoint.Builder().also { wb ->wb.id = 42; wb.geofence_radius = 100; wb.expire = 0}.build())
-        val new = packet(Waypoint.Builder().also { wb ->wb.id = 42; wb.geofence_radius = 5000; wb.expire = 0}.build())
+        val old =
+            packet(
+                Waypoint.Builder()
+                    .also { wb ->
+                        wb.id = 42
+                        wb.geofence_radius = 100
+                        wb.expire = 0
+                    }
+                    .build(),
+            )
+        val new =
+            packet(
+                Waypoint.Builder()
+                    .also { wb ->
+                        wb.id = 42
+                        wb.geofence_radius = 5000
+                        wb.expire = 0
+                    }
+                    .build(),
+            )
 
         val active = listOf(old, new).activeWaypointPackets(now)
 
@@ -43,9 +61,36 @@ class ActiveWaypointsTest {
 
     @Test
     fun expiredWaypointsAreDropped() {
-        val expired = packet(Waypoint.Builder().also { wb ->wb.id = 1; wb.geofence_radius = 100; wb.expire = 500}.build()) // before now=1000
-        val active = packet(Waypoint.Builder().also { wb ->wb.id = 2; wb.geofence_radius = 100; wb.expire = 2000}.build()) // after now
-        val never = packet(Waypoint.Builder().also { wb ->wb.id = 3; wb.geofence_radius = 100; wb.expire = 0}.build()) // never expires
+        val expired =
+            packet(
+                Waypoint.Builder()
+                    .also { wb ->
+                        wb.id = 1
+                        wb.geofence_radius = 100
+                        wb.expire = 500
+                    }
+                    .build(),
+            ) // before now=1000
+        val active =
+            packet(
+                Waypoint.Builder()
+                    .also { wb ->
+                        wb.id = 2
+                        wb.geofence_radius = 100
+                        wb.expire = 2000
+                    }
+                    .build(),
+            ) // after now
+        val never =
+            packet(
+                Waypoint.Builder()
+                    .also { wb ->
+                        wb.id = 3
+                        wb.geofence_radius = 100
+                        wb.expire = 0
+                    }
+                    .build(),
+            ) // never expires
 
         val result = listOf(expired, active, never).activeWaypointPackets(now)
 
@@ -56,7 +101,13 @@ class ActiveWaypointsTest {
 
     private val myNodeNum = 7
 
-    private fun geofence(id: Int) = Waypoint.Builder().also { wb ->wb.id = id; wb.geofence_radius = 100; wb.notify_on_enter = true}.build()
+    private fun geofence(id: Int) = Waypoint.Builder()
+        .also { wb ->
+            wb.id = id
+            wb.geofence_radius = 100
+            wb.notify_on_enter = true
+        }
+        .build()
 
     private fun localPacket(wp: Waypoint) = DataPacket(to = "!abcdabcd", channel = 0, waypoint = wp) // from = ^local
 
@@ -83,7 +134,15 @@ class ActiveWaypointsTest {
 
     @Test
     fun geofencesToMonitorDropsWaypointsWithNoCrossingNotifications() {
-        val silent = localPacket(Waypoint.Builder().also { wb ->wb.id = 1; wb.geofence_radius = 100}.build()) // notify_on_enter/exit both false
+        val silent =
+            localPacket(
+                Waypoint.Builder()
+                    .also { wb ->
+                        wb.id = 1
+                        wb.geofence_radius = 100
+                    }
+                    .build(),
+            ) // notify_on_enter/exit both false
 
         assertTrue(listOf(silent).geofencesToMonitor(myNodeNum, optedInIds = emptySet()).isEmpty())
     }

@@ -115,7 +115,9 @@ class MeshMessageProcessorImpl(
         val proto =
             safeCatching { FromRadio.ADAPTER.decode(bytes) }
                 .getOrElse { primaryException ->
-                    safeCatching { FromRadio.Builder().also { wb ->wb.log_record = LogRecord.ADAPTER.decode(bytes)}.build() }
+                    safeCatching {
+                        FromRadio.Builder().also { wb -> wb.log_record = LogRecord.ADAPTER.decode(bytes) }.build()
+                    }
                         .getOrElse {
                             Logger.e(primaryException) {
                                 "Failed to parse radio packet (len=${bytes.size}). Not a valid FromRadio or LogRecord."
@@ -274,7 +276,7 @@ class MeshMessageProcessorImpl(
                 raw_message = packet.toString(),
                 fromNum = if (packet.from == myNodeNum) MeshLog.NODE_NUM_LOCAL else packet.from,
                 portNum = decoded.portnum.value,
-                fromRadio = FromRadio.Builder().also { wb ->wb.packet = packet}.build(),
+                fromRadio = FromRadio.Builder().also { wb -> wb.packet = packet }.build(),
             )
         val logJob = insertMeshLog(log, session)
 

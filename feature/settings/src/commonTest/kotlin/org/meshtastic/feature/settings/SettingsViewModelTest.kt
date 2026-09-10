@@ -279,16 +279,24 @@ class SettingsViewModelTest {
                     fromNum = senderNodeNum,
                     portNum = PortNum.TEXT_MESSAGE_APP.value,
                     fromRadio =
-                    FromRadio.Builder().also { wb ->
-                    wb.packet = MeshPacket.Builder().also { wb ->
-                                            wb.from = senderNodeNum
-                                            wb.rx_snr = 5.0f
-                                            wb.decoded = Data.Builder().also { wb ->
-                                                                        wb.portnum = PortNum.TEXT_MESSAGE_APP
-                                                                        wb.payload = "Hello settings".encodeUtf8()
-                                                                        }.build()
-                                            }.build()
-                    }.build(),
+                    FromRadio.Builder()
+                        .also { wb ->
+                            wb.packet =
+                                MeshPacket.Builder()
+                                    .also { wb ->
+                                        wb.from = senderNodeNum
+                                        wb.rx_snr = 5.0f
+                                        wb.decoded =
+                                            Data.Builder()
+                                                .also { wb ->
+                                                    wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                                    wb.payload = "Hello settings".encodeUtf8()
+                                                }
+                                                .build()
+                                    }
+                                    .build()
+                        }
+                        .build(),
                 ),
                 MeshLog(
                     uuid = "filtered-out",
@@ -298,16 +306,24 @@ class SettingsViewModelTest {
                     fromNum = senderNodeNum,
                     portNum = PortNum.RANGE_TEST_APP.value,
                     fromRadio =
-                    FromRadio.Builder().also { wb ->
-                    wb.packet = MeshPacket.Builder().also { wb ->
-                                            wb.from = senderNodeNum
-                                            wb.rx_snr = 6.0f
-                                            wb.decoded = Data.Builder().also { wb ->
-                                                                        wb.portnum = PortNum.RANGE_TEST_APP
-                                                                        wb.payload = "Ignore me".encodeUtf8()
-                                                                        }.build()
-                                            }.build()
-                    }.build(),
+                    FromRadio.Builder()
+                        .also { wb ->
+                            wb.packet =
+                                MeshPacket.Builder()
+                                    .also { wb ->
+                                        wb.from = senderNodeNum
+                                        wb.rx_snr = 6.0f
+                                        wb.decoded =
+                                            Data.Builder()
+                                                .also { wb ->
+                                                    wb.portnum = PortNum.RANGE_TEST_APP
+                                                    wb.payload = "Ignore me".encodeUtf8()
+                                                }
+                                                .build()
+                                    }
+                                    .build()
+                        }
+                        .build(),
                 ),
             ),
         )

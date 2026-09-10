@@ -35,12 +35,17 @@ class MetricsStateTest {
     fun oldestTimestampIncludesLocalStatsTelemetry() {
         val state =
             MetricsState(
-                deviceMetrics = listOf(Telemetry.Builder().also { wb ->wb.time = 200}.build()),
+                deviceMetrics = listOf(Telemetry.Builder().also { wb -> wb.time = 200 }.build()),
                 localStats = listOf(localStatsTelemetry(time = 100)),
             )
 
         assertEquals(100L, state.oldestTimestampSeconds())
     }
 
-    private fun localStatsTelemetry(time: Int) = Telemetry.Builder().also { wb ->wb.time = time; wb.local_stats = LocalStats.Builder().also { wb ->wb.noise_floor = -101}.build()}.build()
+    private fun localStatsTelemetry(time: Int) = Telemetry.Builder()
+        .also { wb ->
+            wb.time = time
+            wb.local_stats = LocalStats.Builder().also { wb -> wb.noise_floor = -101 }.build()
+        }
+        .build()
 }

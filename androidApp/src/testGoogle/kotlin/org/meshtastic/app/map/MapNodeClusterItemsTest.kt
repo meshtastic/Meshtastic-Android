@@ -133,13 +133,22 @@ class MapNodeClusterItemsTest {
     private fun testNodes(count: Int): List<Node> = List(count) { index ->
         Node(
             num = index + 1,
-            user = User.Builder().also { wb ->wb.id = "!${index + 1}"; wb.long_name = "Node ${index + 1}"; wb.short_name = "N$index"}.build(),
+            user =
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!${index + 1}"
+                    wb.long_name = "Node ${index + 1}"
+                    wb.short_name = "N$index"
+                }
+                .build(),
             position =
-            Position.Builder().also { wb ->
-            wb.latitude_i = 210_000_000 + index
-            wb.longitude_i = -1_570_000_000 + index
-            wb.time = 1_700_000_000
-            }.build(),
+            Position.Builder()
+                .also { wb ->
+                    wb.latitude_i = 210_000_000 + index
+                    wb.longitude_i = -1_570_000_000 + index
+                    wb.time = 1_700_000_000
+                }
+                .build(),
         )
     }
 

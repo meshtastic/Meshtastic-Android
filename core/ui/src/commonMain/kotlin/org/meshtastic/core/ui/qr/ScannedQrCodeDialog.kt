@@ -120,7 +120,8 @@ fun ScannedQrCodeDialog(
                 // When replacing, apply the incoming LoRa configuration but preserve certain
                 // locally safe fields such as MQTT flags and TX power. This prevents QR codes
                 // from unintentionally overriding device-specific power limits (e.g. E22 caps).
-                incoming.newBuilder()
+                incoming
+                    .newBuilder()
                     .also { wb ->
                         wb.lora_config =
                             incoming.lora_config
@@ -153,17 +154,20 @@ fun ScannedQrCodeDialog(
 
     val selectedChannelSet =
         if (shouldReplace) {
-            channelSet.newBuilder()
+            channelSet
+                .newBuilder()
                 .also { wb ->
                     wb.settings = channelSet.settings.filterIndexed { i, _ -> channelSelections.getOrNull(i) == true }
                 }
                 .build()
         } else {
-            channelSet.newBuilder()
+            channelSet
+                .newBuilder()
                 .also { wb ->
                     wb.settings =
                         channelSet.settings.filterIndexed { i, _ ->
-                            // Primary (index 0) is always kept; existing secondaries can be dropped to free a slot for the
+                            // Primary (index 0) is always kept; existing secondaries can be dropped to free a slot for
+                            // the
                             // incoming channel when the radio is full (Apple FR-017 "replace a secondary, never the
                             // primary").
                             i == 0 || channelSelections.getOrNull(i) == true
@@ -361,9 +365,19 @@ private fun ScannedQrCodeDialogPreview() {
     AppTheme {
         ScannedQrCodeDialog(
             channels =
-            ChannelSet.Builder().also { wb ->wb.settings = listOf(Channel.default.settings); wb.lora_config = Channel.default.loraConfig}.build(),
+            ChannelSet.Builder()
+                .also { wb ->
+                    wb.settings = listOf(Channel.default.settings)
+                    wb.lora_config = Channel.default.loraConfig
+                }
+                .build(),
             incoming =
-            ChannelSet.Builder().also { wb ->wb.settings = listOf(Channel.default.settings); wb.lora_config = Channel.default.loraConfig}.build(),
+            ChannelSet.Builder()
+                .also { wb ->
+                    wb.settings = listOf(Channel.default.settings)
+                    wb.lora_config = Channel.default.loraConfig
+                }
+                .build(),
             onDismiss = {},
             onConfirm = {},
         )

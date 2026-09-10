@@ -971,7 +971,9 @@ class SharedRadioInterfaceService(
                 _connectionState.value != ConnectionState.Disconnected
             ) {
                 ignoreExceptionSuspend {
-                    currentTransport.handleSendToRadio(ToRadio.Builder().also { wb ->wb.disconnect = true}.build().encode())
+                    currentTransport.handleSendToRadio(
+                        ToRadio.Builder().also { wb -> wb.disconnect = true }.build().encode(),
+                    )
                     delay(POLITE_DISCONNECT_DRAIN_MS)
                 }
             }

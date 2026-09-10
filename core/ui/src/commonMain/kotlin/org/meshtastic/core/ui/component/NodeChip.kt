@@ -80,14 +80,32 @@ fun NodeChip(modifier: Modifier = Modifier, node: Node, onClick: ((Node) -> Unit
 @Preview
 @Composable
 fun NodeChipPreview() {
-    val user = User.Builder().also { wb ->wb.short_name = "JD"; wb.long_name = "John Doe"}.build()
+    val user =
+        User.Builder()
+            .also { wb ->
+                wb.short_name = "JD"
+                wb.long_name = "John Doe"
+            }
+            .build()
     val node =
         Node(
             num = 13444,
             user = user,
             isIgnored = false,
-            paxcounter = Paxcount.Builder().also { wb ->wb.ble = 10; wb.wifi = 5}.build(),
-            environmentMetrics = EnvironmentMetrics.Builder().also { wb ->wb.temperature = 25f; wb.relative_humidity = 60f}.build(),
+            paxcounter =
+            Paxcount.Builder()
+                .also { wb ->
+                    wb.ble = 10
+                    wb.wifi = 5
+                }
+                .build(),
+            environmentMetrics =
+            EnvironmentMetrics.Builder()
+                .also { wb ->
+                    wb.temperature = 25f
+                    wb.relative_humidity = 60f
+                }
+                .build(),
         )
     AppTheme { NodeChip(node = node) }
 }

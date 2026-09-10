@@ -96,11 +96,19 @@ class TelemetryPacketHandlerImplTest {
 
     private fun makeTelemetryPacket(from: Int, telemetry: Telemetry): MeshPacket {
         val payload = telemetry.encode().toByteString()
-        return MeshPacket.Builder().also { wb ->
-        wb.from = from
-        wb.decoded = Data.Builder().also { wb ->wb.portnum = PortNum.TELEMETRY_APP; wb.payload = payload}.build()
-        wb.rx_time = 1700000000
-        }.build()
+        return MeshPacket.Builder()
+            .also { wb ->
+                wb.from = from
+                wb.decoded =
+                    Data.Builder()
+                        .also { wb ->
+                            wb.portnum = PortNum.TELEMETRY_APP
+                            wb.payload = payload
+                        }
+                        .build()
+                wb.rx_time = 1700000000
+            }
+            .build()
     }
 
     private fun makeDataPacket(from: Int): DataPacket = DataPacket(
@@ -117,7 +125,18 @@ class TelemetryPacketHandlerImplTest {
     @Test
     fun `local device metrics updates telemetry on connectionManager`() = testScope.runTest {
         val telemetry =
-            Telemetry.Builder().also { wb ->wb.time = 1700000000; wb.device_metrics = DeviceMetrics.Builder().also { wb ->wb.battery_level = 80; wb.voltage = 4.1f}.build()}.build()
+            Telemetry.Builder()
+                .also { wb ->
+                    wb.time = 1700000000
+                    wb.device_metrics =
+                        DeviceMetrics.Builder()
+                            .also { wb ->
+                                wb.battery_level = 80
+                                wb.voltage = 4.1f
+                            }
+                            .build()
+                }
+                .build()
         val packet = makeTelemetryPacket(myNodeNum, telemetry)
         val dataPacket = makeDataPacket(myNodeNum)
 
@@ -133,7 +152,18 @@ class TelemetryPacketHandlerImplTest {
     @Test
     fun `remote device metrics updates node but not connectionManager`() = testScope.runTest {
         val telemetry =
-            Telemetry.Builder().also { wb ->wb.time = 1700000000; wb.device_metrics = DeviceMetrics.Builder().also { wb ->wb.battery_level = 90; wb.voltage = 4.2f}.build()}.build()
+            Telemetry.Builder()
+                .also { wb ->
+                    wb.time = 1700000000
+                    wb.device_metrics =
+                        DeviceMetrics.Builder()
+                            .also { wb ->
+                                wb.battery_level = 90
+                                wb.voltage = 4.2f
+                            }
+                            .build()
+                }
+                .build()
         val packet = makeTelemetryPacket(remoteNodeNum, telemetry)
         val dataPacket = makeDataPacket(remoteNodeNum)
 
@@ -148,10 +178,18 @@ class TelemetryPacketHandlerImplTest {
     @Test
     fun `environment metrics updates node with environment data`() = testScope.runTest {
         val telemetry =
-            Telemetry.Builder().also { wb ->
-            wb.time = 1700000000
-            wb.environment_metrics = EnvironmentMetrics.Builder().also { wb ->wb.temperature = 25.5f; wb.relative_humidity = 60.0f}.build()
-            }.build()
+            Telemetry.Builder()
+                .also { wb ->
+                    wb.time = 1700000000
+                    wb.environment_metrics =
+                        EnvironmentMetrics.Builder()
+                            .also { wb ->
+                                wb.temperature = 25.5f
+                                wb.relative_humidity = 60.0f
+                            }
+                            .build()
+                }
+                .build()
         val packet = makeTelemetryPacket(remoteNodeNum, telemetry)
         val dataPacket = makeDataPacket(remoteNodeNum)
 
@@ -165,7 +203,13 @@ class TelemetryPacketHandlerImplTest {
 
     @Test
     fun `power metrics updates node with power data`() = testScope.runTest {
-        val telemetry = Telemetry.Builder().also { wb ->wb.time = 1700000000; wb.power_metrics = PowerMetrics.Builder().also { wb ->wb.ch1_voltage = 3.3f}.build()}.build()
+        val telemetry =
+            Telemetry.Builder()
+                .also { wb ->
+                    wb.time = 1700000000
+                    wb.power_metrics = PowerMetrics.Builder().also { wb -> wb.ch1_voltage = 3.3f }.build()
+                }
+                .build()
         val packet = makeTelemetryPacket(remoteNodeNum, telemetry)
         val dataPacket = makeDataPacket(remoteNodeNum)
 
@@ -179,7 +223,19 @@ class TelemetryPacketHandlerImplTest {
 
     @Test
     fun `telemetry with time 0 gets time from dataPacket`() = testScope.runTest {
-        val telemetry = Telemetry.Builder().also { wb ->wb.time = 0; wb.device_metrics = DeviceMetrics.Builder().also { wb ->wb.battery_level = 50; wb.voltage = 3.8f}.build()}.build()
+        val telemetry =
+            Telemetry.Builder()
+                .also { wb ->
+                    wb.time = 0
+                    wb.device_metrics =
+                        DeviceMetrics.Builder()
+                            .also { wb ->
+                                wb.battery_level = 50
+                                wb.voltage = 3.8f
+                            }
+                            .build()
+                }
+                .build()
         val packet = makeTelemetryPacket(myNodeNum, telemetry)
         val dataPacket = makeDataPacket(myNodeNum)
 
@@ -193,7 +249,13 @@ class TelemetryPacketHandlerImplTest {
 
     @Test
     fun `handleTelemetry with null decoded payload returns early`() = testScope.runTest {
-        val packet = MeshPacket.Builder().also { wb ->wb.from = myNodeNum; wb.decoded = null}.build()
+        val packet =
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.from = myNodeNum
+                    wb.decoded = null
+                }
+                .build()
         val dataPacket = makeDataPacket(myNodeNum)
 
         handler.handleTelemetry(packet, dataPacket, myNodeNum, radioSession)
@@ -204,10 +266,18 @@ class TelemetryPacketHandlerImplTest {
     @Test
     fun `handleTelemetry with empty payload bytes returns early`() = testScope.runTest {
         val packet =
-            MeshPacket.Builder().also { wb ->
-            wb.from = myNodeNum
-            wb.decoded = Data.Builder().also { wb ->wb.portnum = PortNum.TELEMETRY_APP; wb.payload = okio.ByteString.EMPTY}.build()
-            }.build()
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.from = myNodeNum
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.TELEMETRY_APP
+                                wb.payload = okio.ByteString.EMPTY
+                            }
+                            .build()
+                }
+                .build()
         val dataPacket = makeDataPacket(myNodeNum)
 
         handler.handleTelemetry(packet, dataPacket, myNodeNum, radioSession)
@@ -220,7 +290,18 @@ class TelemetryPacketHandlerImplTest {
     @Test
     fun `healthy battery level does not trigger low battery notification`() = testScope.runTest {
         val telemetry =
-            Telemetry.Builder().also { wb ->wb.time = 1700000000; wb.device_metrics = DeviceMetrics.Builder().also { wb ->wb.battery_level = 80; wb.voltage = 4.0f}.build()}.build()
+            Telemetry.Builder()
+                .also { wb ->
+                    wb.time = 1700000000
+                    wb.device_metrics =
+                        DeviceMetrics.Builder()
+                            .also { wb ->
+                                wb.battery_level = 80
+                                wb.voltage = 4.0f
+                            }
+                            .build()
+                }
+                .build()
         val packet = makeTelemetryPacket(myNodeNum, telemetry)
         val dataPacket = makeDataPacket(myNodeNum)
 

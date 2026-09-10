@@ -139,7 +139,8 @@ data class NodeEntity(
     var snr: Float = Float.MAX_VALUE,
     var rssi: Int = Int.MAX_VALUE,
     @ColumnInfo(name = "last_heard") var lastHeard: Int = 0, // the last time we've seen this node in secs since 1970
-    @ColumnInfo(name = "device_metrics", typeAffinity = ColumnInfo.BLOB) var deviceTelemetry: Telemetry = Telemetry.Builder().build(),
+    @ColumnInfo(name = "device_metrics", typeAffinity = ColumnInfo.BLOB)
+    var deviceTelemetry: Telemetry = Telemetry.Builder().build(),
     var channel: Int = 0,
     @ColumnInfo(name = "via_mqtt") var viaMqtt: Boolean = false,
     @ColumnInfo(name = "hops_away") var hopsAway: Int = -1,
@@ -148,7 +149,8 @@ data class NodeEntity(
     @ColumnInfo(name = "is_muted", defaultValue = "0") var isMuted: Boolean = false,
     @ColumnInfo(name = "environment_metrics", typeAffinity = ColumnInfo.BLOB)
     var environmentTelemetry: Telemetry = Telemetry.Builder().build(),
-    @ColumnInfo(name = "power_metrics", typeAffinity = ColumnInfo.BLOB) var powerTelemetry: Telemetry = Telemetry.Builder().build(),
+    @ColumnInfo(name = "power_metrics", typeAffinity = ColumnInfo.BLOB)
+    var powerTelemetry: Telemetry = Telemetry.Builder().build(),
     @ColumnInfo(name = "air_quality_metrics", typeAffinity = ColumnInfo.BLOB, defaultValue = "x''")
     var airQualityTelemetry: Telemetry = Telemetry.Builder().build(),
     @ColumnInfo(typeAffinity = ColumnInfo.BLOB) var paxcounter: Paxcount = Paxcount.Builder().build(),

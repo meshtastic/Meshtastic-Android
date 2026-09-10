@@ -543,7 +543,8 @@ class DiscoveryScanEngine(
                 Config.Builder()
                     .also { wb ->
                         wb.lora =
-                            base.newBuilder()
+                            base
+                                .newBuilder()
                                 .also { wb ->
                                     wb.use_preset = true
                                     wb.modem_preset = target.preset.modemPreset
@@ -561,7 +562,8 @@ class DiscoveryScanEngine(
                 Config.Builder()
                     .also { wb ->
                         wb.lora =
-                            base.newBuilder()
+                            base
+                                .newBuilder()
                                 .also { wb ->
                                     wb.use_preset = true
                                     wb.modem_preset = target.preset.modemPreset
@@ -574,7 +576,15 @@ class DiscoveryScanEngine(
             )
             currentCoroutineContext().ensureActive()
             mutex.withLock { tunedPrimaryChannel = true }
-            radioController.setLocalChannel(Channel.Builder().also { wb ->wb.index = 0; wb.role = Channel.Role.PRIMARY; wb.settings = target.channel}.build())
+            radioController.setLocalChannel(
+                Channel.Builder()
+                    .also { wb ->
+                        wb.index = 0
+                        wb.role = Channel.Role.PRIMARY
+                        wb.settings = target.channel
+                    }
+                    .build(),
+            )
             Logger.i { "DiscoveryScanEngine: shifted to ${target.label} (custom channel)" }
         }
         // The firmware often restarts the radio or reboots after a LoRa config change.

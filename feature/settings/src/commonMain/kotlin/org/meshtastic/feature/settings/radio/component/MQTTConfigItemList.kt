@@ -104,10 +104,14 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val mqttConfig = state.moduleConfig.mqtt ?: ModuleConfig.MQTTConfig.Builder().build()
     val formState = rememberConfigState(initialValue = mqttConfig)
 
-    val currentMapReportSettings = formState.value.map_report_settings ?: ModuleConfig.MapReportSettings.Builder().build()
+    val currentMapReportSettings =
+        formState.value.map_report_settings ?: ModuleConfig.MapReportSettings.Builder().build()
     if (!currentMapReportSettings.should_report_location) {
         val settings =
-            currentMapReportSettings.newBuilder().also { wb -> wb.should_report_location = viewModel.shouldReportLocation(destNum).value }.build()
+            currentMapReportSettings
+                .newBuilder()
+                .also { wb -> wb.should_report_location = viewModel.shouldReportLocation(destNum).value }
+                .build()
         formState.value = formState.value.newBuilder().also { wb -> wb.map_report_settings = settings }.build()
     }
 
@@ -129,7 +133,7 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val config = ModuleConfig.Builder().also { wb ->wb.mqtt = it}.build()
+            val config = ModuleConfig.Builder().also { wb -> wb.mqtt = it }.build()
             viewModel.setModuleConfig(config)
         },
     ) {
@@ -161,7 +165,9 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     title = stringResource(Res.string.mqtt_enabled),
                     checked = formState.value.enabled,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.enabled = it }.build() },
+                    onCheckedChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.enabled = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -183,7 +189,9 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     keyboardOptions =
                     KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.newBuilder().also { wb -> wb.username = it }.build() },
+                    onValueChanged = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.username = it }.build()
+                    },
                 )
                 HorizontalDivider()
                 EditPasswordPreference(
@@ -192,14 +200,18 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     maxSize = 63, // password max_size:64
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.newBuilder().also { wb -> wb.password = it }.build() },
+                    onValueChanged = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.password = it }.build()
+                    },
                 )
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.encryption_enabled),
                     checked = formState.value.encryption_enabled,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.encryption_enabled = it }.build() },
+                    onCheckedChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.encryption_enabled = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -207,7 +219,9 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     title = stringResource(Res.string.json_output_enabled),
                     checked = formState.value.json_enabled,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.json_enabled = it }.build() },
+                    onCheckedChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.json_enabled = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -217,7 +231,9 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     title = stringResource(Res.string.tls_enabled),
                     checked = formState.value.tls_enabled || enforceTls,
                     enabled = state.connected && !enforceTls,
-                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.tls_enabled = it }.build() },
+                    onCheckedChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.tls_enabled = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -230,14 +246,19 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     keyboardOptions =
                     KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.newBuilder().also { wb -> wb.root = it }.build() },
+                    onValueChanged = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.root = it }.build()
+                    },
                 )
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.proxy_to_client_enabled),
                     checked = formState.value.proxy_to_client_enabled,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.proxy_to_client_enabled = it }.build() },
+                    onCheckedChange = {
+                        formState.value =
+                            formState.value.newBuilder().also { wb -> wb.proxy_to_client_enabled = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
             }
@@ -245,27 +266,34 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
 
         item {
             TitledCard(title = stringResource(Res.string.map_reporting)) {
-                val mapReportSettings = formState.value.map_report_settings ?: ModuleConfig.MapReportSettings.Builder().build()
+                val mapReportSettings =
+                    formState.value.map_report_settings ?: ModuleConfig.MapReportSettings.Builder().build()
                 MapReportingPreference(
                     mapReportingEnabled = formState.value.map_reporting_enabled,
                     onMapReportingEnabledChanged = {
-                        formState.value = formState.value.newBuilder().also { wb -> wb.map_reporting_enabled = it }.build()
+                        formState.value =
+                            formState.value.newBuilder().also { wb -> wb.map_reporting_enabled = it }.build()
                     },
                     shouldReportLocation = mapReportSettings.should_report_location,
                     onShouldReportLocationChanged = {
                         viewModel.setShouldReportLocation(destNum, it)
-                        val settings = mapReportSettings.newBuilder().also { wb -> wb.should_report_location = it }.build()
-                        formState.value = formState.value.newBuilder().also { wb -> wb.map_report_settings = settings }.build()
+                        val settings =
+                            mapReportSettings.newBuilder().also { wb -> wb.should_report_location = it }.build()
+                        formState.value =
+                            formState.value.newBuilder().also { wb -> wb.map_report_settings = settings }.build()
                     },
                     positionPrecision = mapReportSettings.position_precision,
                     onPositionPrecisionChanged = {
                         val settings = mapReportSettings.newBuilder().also { wb -> wb.position_precision = it }.build()
-                        formState.value = formState.value.newBuilder().also { wb -> wb.map_report_settings = settings }.build()
+                        formState.value =
+                            formState.value.newBuilder().also { wb -> wb.map_report_settings = settings }.build()
                     },
                     publishIntervalSecs = mapReportSettings.publish_interval_secs,
                     onPublishIntervalSecsChanged = {
-                        val settings = mapReportSettings.newBuilder().also { wb -> wb.publish_interval_secs = it }.build()
-                        formState.value = formState.value.newBuilder().also { wb -> wb.map_report_settings = settings }.build()
+                        val settings =
+                            mapReportSettings.newBuilder().also { wb -> wb.publish_interval_secs = it }.build()
+                        formState.value =
+                            formState.value.newBuilder().also { wb -> wb.map_report_settings = settings }.build()
                     },
                     enabled = state.connected,
                 )

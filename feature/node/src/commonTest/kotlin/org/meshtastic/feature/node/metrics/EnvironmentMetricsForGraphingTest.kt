@@ -29,7 +29,12 @@ class EnvironmentMetricsForGraphingTest {
 
     private val now = nowSeconds.toInt()
 
-    private fun telemetry(time: Int = now, env: EnvironmentMetrics) = Telemetry.Builder().also { wb ->wb.time = time; wb.environment_metrics = env}.build()
+    private fun telemetry(time: Int = now, env: EnvironmentMetrics) = Telemetry.Builder()
+        .also { wb ->
+            wb.time = time
+            wb.environment_metrics = env
+        }
+        .build()
 
     // ---- Empty input ----
 
@@ -48,8 +53,8 @@ class EnvironmentMetricsForGraphingTest {
     fun useFahrenheit_convertsTemperatureMinMax() {
         val metrics =
             listOf(
-                telemetry(env = EnvironmentMetrics.Builder().also { wb ->wb.temperature = 0f}.build()),
-                telemetry(env = EnvironmentMetrics.Builder().also { wb ->wb.temperature = 100f}.build()),
+                telemetry(env = EnvironmentMetrics.Builder().also { wb -> wb.temperature = 0f }.build()),
+                telemetry(env = EnvironmentMetrics.Builder().also { wb -> wb.temperature = 100f }.build()),
             )
         val result = EnvironmentMetricsState(metrics).environmentMetricsForGraphing(useFahrenheit = true)
 
@@ -63,8 +68,8 @@ class EnvironmentMetricsForGraphingTest {
     fun useFahrenheit_convertsSoilTemperature() {
         val metrics =
             listOf(
-                telemetry(env = EnvironmentMetrics.Builder().also { wb ->wb.soil_temperature = 20f}.build()),
-                telemetry(env = EnvironmentMetrics.Builder().also { wb ->wb.soil_temperature = 30f}.build()),
+                telemetry(env = EnvironmentMetrics.Builder().also { wb -> wb.soil_temperature = 20f }.build()),
+                telemetry(env = EnvironmentMetrics.Builder().also { wb -> wb.soil_temperature = 30f }.build()),
             )
         val result = EnvironmentMetricsState(metrics).environmentMetricsForGraphing(useFahrenheit = true)
 
@@ -78,7 +83,8 @@ class EnvironmentMetricsForGraphingTest {
 
     @Test
     fun humidity_zeroFilteredOut() {
-        val metrics = listOf(telemetry(env = EnvironmentMetrics.Builder().also { wb ->wb.relative_humidity = 0.0f}.build()))
+        val metrics =
+            listOf(telemetry(env = EnvironmentMetrics.Builder().also { wb -> wb.relative_humidity = 0.0f }.build()))
         val result = EnvironmentMetricsState(metrics).environmentMetricsForGraphing()
 
         assertFalse(result.shouldPlot[Environment.HUMIDITY.ordinal])
@@ -88,8 +94,8 @@ class EnvironmentMetricsForGraphingTest {
     fun humidity_nonZeroIncluded() {
         val metrics =
             listOf(
-                telemetry(env = EnvironmentMetrics.Builder().also { wb ->wb.relative_humidity = 45f}.build()),
-                telemetry(env = EnvironmentMetrics.Builder().also { wb ->wb.relative_humidity = 65f}.build()),
+                telemetry(env = EnvironmentMetrics.Builder().also { wb -> wb.relative_humidity = 45f }.build()),
+                telemetry(env = EnvironmentMetrics.Builder().also { wb -> wb.relative_humidity = 65f }.build()),
             )
         val result = EnvironmentMetricsState(metrics).environmentMetricsForGraphing()
 
@@ -102,7 +108,8 @@ class EnvironmentMetricsForGraphingTest {
 
     @Test
     fun iaq_intMinValueFilteredOut() {
-        val metrics = listOf(telemetry(env = EnvironmentMetrics.Builder().also { wb ->wb.iaq = Int.MIN_VALUE}.build()))
+        val metrics =
+            listOf(telemetry(env = EnvironmentMetrics.Builder().also { wb -> wb.iaq = Int.MIN_VALUE }.build()))
         val result = EnvironmentMetricsState(metrics).environmentMetricsForGraphing()
 
         assertFalse(result.shouldPlot[Environment.IAQ.ordinal])
@@ -111,7 +118,10 @@ class EnvironmentMetricsForGraphingTest {
     @Test
     fun iaq_validValueIncluded() {
         val metrics =
-            listOf(telemetry(env = EnvironmentMetrics.Builder().also { wb ->wb.iaq = 50}.build()), telemetry(env = EnvironmentMetrics.Builder().also { wb ->wb.iaq = 150}.build()))
+            listOf(
+                telemetry(env = EnvironmentMetrics.Builder().also { wb -> wb.iaq = 50 }.build()),
+                telemetry(env = EnvironmentMetrics.Builder().also { wb -> wb.iaq = 150 }.build()),
+            )
         val result = EnvironmentMetricsState(metrics).environmentMetricsForGraphing()
 
         assertTrue(result.shouldPlot[Environment.IAQ.ordinal])
@@ -123,7 +133,10 @@ class EnvironmentMetricsForGraphingTest {
 
     @Test
     fun soilMoisture_intMinValueFilteredOut() {
-        val metrics = listOf(telemetry(env = EnvironmentMetrics.Builder().also { wb ->wb.soil_moisture = Int.MIN_VALUE}.build()))
+        val metrics =
+            listOf(
+                telemetry(env = EnvironmentMetrics.Builder().also { wb -> wb.soil_moisture = Int.MIN_VALUE }.build()),
+            )
         val result = EnvironmentMetricsState(metrics).environmentMetricsForGraphing()
 
         assertFalse(result.shouldPlot[Environment.SOIL_MOISTURE.ordinal])
@@ -133,8 +146,8 @@ class EnvironmentMetricsForGraphingTest {
     fun soilMoisture_validValueIncluded() {
         val metrics =
             listOf(
-                telemetry(env = EnvironmentMetrics.Builder().also { wb ->wb.soil_moisture = 30}.build()),
-                telemetry(env = EnvironmentMetrics.Builder().also { wb ->wb.soil_moisture = 70}.build()),
+                telemetry(env = EnvironmentMetrics.Builder().also { wb -> wb.soil_moisture = 30 }.build()),
+                telemetry(env = EnvironmentMetrics.Builder().also { wb -> wb.soil_moisture = 70 }.build()),
             )
         val result = EnvironmentMetricsState(metrics).environmentMetricsForGraphing()
 
@@ -147,8 +160,8 @@ class EnvironmentMetricsForGraphingTest {
     fun barometricPressure_onLeftAxis() {
         val metrics =
             listOf(
-                telemetry(env = EnvironmentMetrics.Builder().also { wb ->wb.barometric_pressure = 1013.25f}.build()),
-                telemetry(env = EnvironmentMetrics.Builder().also { wb ->wb.barometric_pressure = 1020.50f}.build()),
+                telemetry(env = EnvironmentMetrics.Builder().also { wb -> wb.barometric_pressure = 1013.25f }.build()),
+                telemetry(env = EnvironmentMetrics.Builder().also { wb -> wb.barometric_pressure = 1020.50f }.build()),
             )
         val result = EnvironmentMetricsState(metrics).environmentMetricsForGraphing()
 
@@ -160,7 +173,10 @@ class EnvironmentMetricsForGraphingTest {
     @Test
     fun barometricPressure_doesNotAffectRightAxis() {
         // Only pressure, no other metrics
-        val metrics = listOf(telemetry(env = EnvironmentMetrics.Builder().also { wb ->wb.barometric_pressure = 1013.25f}.build()))
+        val metrics =
+            listOf(
+                telemetry(env = EnvironmentMetrics.Builder().also { wb -> wb.barometric_pressure = 1013.25f }.build()),
+            )
         val result = EnvironmentMetricsState(metrics).environmentMetricsForGraphing()
 
         // rightMinMax should be 0/1 defaults since no right-axis metrics
@@ -173,7 +189,10 @@ class EnvironmentMetricsForGraphingTest {
     @Test
     fun lux_plotted() {
         val metrics =
-            listOf(telemetry(env = EnvironmentMetrics.Builder().also { wb ->wb.lux = 500f}.build()), telemetry(env = EnvironmentMetrics.Builder().also { wb ->wb.lux = 1200f}.build()))
+            listOf(
+                telemetry(env = EnvironmentMetrics.Builder().also { wb -> wb.lux = 500f }.build()),
+                telemetry(env = EnvironmentMetrics.Builder().also { wb -> wb.lux = 1200f }.build()),
+            )
         val result = EnvironmentMetricsState(metrics).environmentMetricsForGraphing()
 
         assertTrue(result.shouldPlot[Environment.LUX.ordinal])
@@ -184,7 +203,10 @@ class EnvironmentMetricsForGraphingTest {
     @Test
     fun uvLux_plotted() {
         val metrics =
-            listOf(telemetry(env = EnvironmentMetrics.Builder().also { wb ->wb.uv_lux = 2f}.build()), telemetry(env = EnvironmentMetrics.Builder().also { wb ->wb.uv_lux = 8f}.build()))
+            listOf(
+                telemetry(env = EnvironmentMetrics.Builder().also { wb -> wb.uv_lux = 2f }.build()),
+                telemetry(env = EnvironmentMetrics.Builder().also { wb -> wb.uv_lux = 8f }.build()),
+            )
         val result = EnvironmentMetricsState(metrics).environmentMetricsForGraphing()
 
         assertTrue(result.shouldPlot[Environment.UV_LUX.ordinal])
@@ -194,8 +216,8 @@ class EnvironmentMetricsForGraphingTest {
     fun windSpeed_plotted() {
         val metrics =
             listOf(
-                telemetry(env = EnvironmentMetrics.Builder().also { wb ->wb.wind_speed = 5f}.build()),
-                telemetry(env = EnvironmentMetrics.Builder().also { wb ->wb.wind_speed = 25f}.build()),
+                telemetry(env = EnvironmentMetrics.Builder().also { wb -> wb.wind_speed = 5f }.build()),
+                telemetry(env = EnvironmentMetrics.Builder().also { wb -> wb.wind_speed = 25f }.build()),
             )
         val result = EnvironmentMetricsState(metrics).environmentMetricsForGraphing()
 
@@ -206,8 +228,8 @@ class EnvironmentMetricsForGraphingTest {
     fun radiation_positiveValuesOnly() {
         val metrics =
             listOf(
-                telemetry(env = EnvironmentMetrics.Builder().also { wb ->wb.radiation = 0f}.build()),
-                telemetry(env = EnvironmentMetrics.Builder().also { wb ->wb.radiation = 0.15f}.build()),
+                telemetry(env = EnvironmentMetrics.Builder().also { wb -> wb.radiation = 0f }.build()),
+                telemetry(env = EnvironmentMetrics.Builder().also { wb -> wb.radiation = 0.15f }.build()),
             )
         val result = EnvironmentMetricsState(metrics).environmentMetricsForGraphing()
 
@@ -222,7 +244,17 @@ class EnvironmentMetricsForGraphingTest {
     @Test
     fun oneWireChannels_plotIndependently() {
         val metrics =
-            listOf(telemetry(env = EnvironmentMetrics.Builder().also { wb ->wb.one_wire_temperature_ch0 = 10f; wb.one_wire_temperature_ch7 = 40f}.build()))
+            listOf(
+                telemetry(
+                    env =
+                    EnvironmentMetrics.Builder()
+                        .also { wb ->
+                            wb.one_wire_temperature_ch0 = 10f
+                            wb.one_wire_temperature_ch7 = 40f
+                        }
+                        .build(),
+                ),
+            )
         val result = EnvironmentMetricsState(metrics).environmentMetricsForGraphing()
 
         assertTrue(result.shouldPlot[Environment.ONE_WIRE_TEMP_1.ordinal])
@@ -233,7 +265,10 @@ class EnvironmentMetricsForGraphingTest {
 
     @Test
     fun oneWireChannels_convertToFahrenheit() {
-        val metrics = listOf(telemetry(env = EnvironmentMetrics.Builder().also { wb ->wb.one_wire_temperature_ch2 = 100f}.build()))
+        val metrics =
+            listOf(
+                telemetry(env = EnvironmentMetrics.Builder().also { wb -> wb.one_wire_temperature_ch2 = 100f }.build()),
+            )
         val result = EnvironmentMetricsState(metrics).environmentMetricsForGraphing(useFahrenheit = true)
 
         assertTrue(result.shouldPlot[Environment.ONE_WIRE_TEMP_3.ordinal])
@@ -243,7 +278,10 @@ class EnvironmentMetricsForGraphingTest {
     /** 0°C is a real probe reading, not a "no sensor" sentinel — the series must still plot. */
     @Test
     fun oneWireChannel_zeroIsPlotted() {
-        val metrics = listOf(telemetry(env = EnvironmentMetrics.Builder().also { wb ->wb.one_wire_temperature_ch0 = 0f}.build()))
+        val metrics =
+            listOf(
+                telemetry(env = EnvironmentMetrics.Builder().also { wb -> wb.one_wire_temperature_ch0 = 0f }.build()),
+            )
         val result = EnvironmentMetricsState(metrics).environmentMetricsForGraphing()
 
         assertTrue(result.shouldPlot[Environment.ONE_WIRE_TEMP_1.ordinal])
@@ -251,7 +289,18 @@ class EnvironmentMetricsForGraphingTest {
 
     @Test
     fun adcChannels_plotIndependently() {
-        val metrics = listOf(telemetry(env = EnvironmentMetrics.Builder().also { wb ->wb.adc_voltage_ch0 = 3.3f; wb.adc_voltage_ch7 = 1.8f}.build()))
+        val metrics =
+            listOf(
+                telemetry(
+                    env =
+                    EnvironmentMetrics.Builder()
+                        .also { wb ->
+                            wb.adc_voltage_ch0 = 3.3f
+                            wb.adc_voltage_ch7 = 1.8f
+                        }
+                        .build(),
+                ),
+            )
         val result = EnvironmentMetricsState(metrics).environmentMetricsForGraphing()
 
         assertTrue(result.shouldPlot[Environment.ADC_VOLTAGE_1.ordinal])
@@ -262,7 +311,8 @@ class EnvironmentMetricsForGraphingTest {
     /** 0 V is a real reading on an unloaded ADC input — the series must still plot. */
     @Test
     fun adcChannel_zeroIsPlotted() {
-        val metrics = listOf(telemetry(env = EnvironmentMetrics.Builder().also { wb ->wb.adc_voltage_ch3 = 0f}.build()))
+        val metrics =
+            listOf(telemetry(env = EnvironmentMetrics.Builder().also { wb -> wb.adc_voltage_ch3 = 0f }.build()))
         val result = EnvironmentMetricsState(metrics).environmentMetricsForGraphing()
 
         assertTrue(result.shouldPlot[Environment.ADC_VOLTAGE_4.ordinal])
@@ -272,7 +322,8 @@ class EnvironmentMetricsForGraphingTest {
     /** ADC voltages are volts already; the Fahrenheit setting must not touch them. */
     @Test
     fun adcChannels_areNotUnitConverted() {
-        val metrics = listOf(telemetry(env = EnvironmentMetrics.Builder().also { wb ->wb.adc_voltage_ch0 = 100f}.build()))
+        val metrics =
+            listOf(telemetry(env = EnvironmentMetrics.Builder().also { wb -> wb.adc_voltage_ch0 = 100f }.build()))
         val result = EnvironmentMetricsState(metrics).environmentMetricsForGraphing(useFahrenheit = true)
 
         assertEquals(100f, result.rightMinMax.second, 0.01f)
@@ -280,7 +331,8 @@ class EnvironmentMetricsForGraphingTest {
 
     @Test
     fun adcChannel_nanFilteredOut() {
-        val metrics = listOf(telemetry(env = EnvironmentMetrics.Builder().also { wb ->wb.adc_voltage_ch0 = Float.NaN}.build()))
+        val metrics =
+            listOf(telemetry(env = EnvironmentMetrics.Builder().also { wb -> wb.adc_voltage_ch0 = Float.NaN }.build()))
         val result = EnvironmentMetricsState(metrics).environmentMetricsForGraphing()
 
         assertFalse(result.shouldPlot[Environment.ADC_VOLTAGE_1.ordinal])
@@ -290,7 +342,8 @@ class EnvironmentMetricsForGraphingTest {
 
     @Test
     fun nanTemperature_filteredOut() {
-        val metrics = listOf(telemetry(env = EnvironmentMetrics.Builder().also { wb ->wb.temperature = Float.NaN}.build()))
+        val metrics =
+            listOf(telemetry(env = EnvironmentMetrics.Builder().also { wb -> wb.temperature = Float.NaN }.build()))
         val result = EnvironmentMetricsState(metrics).environmentMetricsForGraphing()
 
         assertFalse(result.shouldPlot[Environment.TEMPERATURE.ordinal])
@@ -298,7 +351,10 @@ class EnvironmentMetricsForGraphingTest {
 
     @Test
     fun nanHumidity_filteredOut() {
-        val metrics = listOf(telemetry(env = EnvironmentMetrics.Builder().also { wb ->wb.relative_humidity = Float.NaN}.build()))
+        val metrics =
+            listOf(
+                telemetry(env = EnvironmentMetrics.Builder().also { wb -> wb.relative_humidity = Float.NaN }.build()),
+            )
         val result = EnvironmentMetricsState(metrics).environmentMetricsForGraphing()
 
         assertFalse(result.shouldPlot[Environment.HUMIDITY.ordinal])
@@ -306,7 +362,10 @@ class EnvironmentMetricsForGraphingTest {
 
     @Test
     fun nanPressure_filteredOut() {
-        val metrics = listOf(telemetry(env = EnvironmentMetrics.Builder().also { wb ->wb.barometric_pressure = Float.NaN}.build()))
+        val metrics =
+            listOf(
+                telemetry(env = EnvironmentMetrics.Builder().also { wb -> wb.barometric_pressure = Float.NaN }.build()),
+            )
         val result = EnvironmentMetricsState(metrics).environmentMetricsForGraphing()
 
         assertFalse(result.shouldPlot[Environment.BAROMETRIC_PRESSURE.ordinal])
@@ -320,22 +379,33 @@ class EnvironmentMetricsForGraphingTest {
             listOf(
                 telemetry(
                     env =
-                    EnvironmentMetrics.Builder().also { wb ->
-                    wb.temperature = Float.NaN
-                    wb.relative_humidity = 50f
-                    wb.barometric_pressure = Float.NaN
-                    }.build(),
+                    EnvironmentMetrics.Builder()
+                        .also { wb ->
+                            wb.temperature = Float.NaN
+                            wb.relative_humidity = 50f
+                            wb.barometric_pressure = Float.NaN
+                        }
+                        .build(),
                 ),
                 telemetry(
                     env =
-                    EnvironmentMetrics.Builder().also { wb ->
-                    wb.temperature = 20f
-                    wb.relative_humidity = Float.NaN
-                    wb.barometric_pressure = 1015f
-                    }.build(),
+                    EnvironmentMetrics.Builder()
+                        .also { wb ->
+                            wb.temperature = 20f
+                            wb.relative_humidity = Float.NaN
+                            wb.barometric_pressure = 1015f
+                        }
+                        .build(),
                 ),
                 telemetry(
-                    env = EnvironmentMetrics.Builder().also { wb ->wb.temperature = 25f; wb.relative_humidity = 60f; wb.barometric_pressure = 1020f}.build(),
+                    env =
+                    EnvironmentMetrics.Builder()
+                        .also { wb ->
+                            wb.temperature = 25f
+                            wb.relative_humidity = 60f
+                            wb.barometric_pressure = 1020f
+                        }
+                        .build(),
                 ),
             )
         val result = EnvironmentMetricsState(metrics).environmentMetricsForGraphing()
@@ -355,19 +425,23 @@ class EnvironmentMetricsForGraphingTest {
             listOf(
                 telemetry(
                     env =
-                    EnvironmentMetrics.Builder().also { wb ->
-                    wb.temperature = Float.NaN
-                    wb.relative_humidity = Float.NaN
-                    wb.barometric_pressure = Float.NaN
-                    }.build(),
+                    EnvironmentMetrics.Builder()
+                        .also { wb ->
+                            wb.temperature = Float.NaN
+                            wb.relative_humidity = Float.NaN
+                            wb.barometric_pressure = Float.NaN
+                        }
+                        .build(),
                 ),
                 telemetry(
                     env =
-                    EnvironmentMetrics.Builder().also { wb ->
-                    wb.temperature = Float.NaN
-                    wb.relative_humidity = Float.NaN
-                    wb.barometric_pressure = Float.NaN
-                    }.build(),
+                    EnvironmentMetrics.Builder()
+                        .also { wb ->
+                            wb.temperature = Float.NaN
+                            wb.relative_humidity = Float.NaN
+                            wb.barometric_pressure = Float.NaN
+                        }
+                        .build(),
                 ),
             )
         val result = EnvironmentMetricsState(metrics).environmentMetricsForGraphing()
@@ -385,8 +459,24 @@ class EnvironmentMetricsForGraphingTest {
     fun multipleMetrics_rightAxisMinMaxSpansAll() {
         val metrics =
             listOf(
-                telemetry(env = EnvironmentMetrics.Builder().also { wb ->wb.temperature = 10f; wb.relative_humidity = 80f}.build()),
-                telemetry(env = EnvironmentMetrics.Builder().also { wb ->wb.temperature = 30f; wb.relative_humidity = 40f}.build()),
+                telemetry(
+                    env =
+                    EnvironmentMetrics.Builder()
+                        .also { wb ->
+                            wb.temperature = 10f
+                            wb.relative_humidity = 80f
+                        }
+                        .build(),
+                ),
+                telemetry(
+                    env =
+                    EnvironmentMetrics.Builder()
+                        .also { wb ->
+                            wb.temperature = 30f
+                            wb.relative_humidity = 40f
+                        }
+                        .build(),
+                ),
             )
         val result = EnvironmentMetricsState(metrics).environmentMetricsForGraphing()
 
@@ -407,8 +497,8 @@ class EnvironmentMetricsForGraphingTest {
         // does not have explicit handling for it. This test documents that current behavior.
         val metrics =
             listOf(
-                telemetry(env = EnvironmentMetrics.Builder().also { wb ->wb.gas_resistance = 100f}.build()),
-                telemetry(env = EnvironmentMetrics.Builder().also { wb ->wb.gas_resistance = 500f}.build()),
+                telemetry(env = EnvironmentMetrics.Builder().also { wb -> wb.gas_resistance = 100f }.build()),
+                telemetry(env = EnvironmentMetrics.Builder().also { wb -> wb.gas_resistance = 500f }.build()),
             )
         val result = EnvironmentMetricsState(metrics).environmentMetricsForGraphing()
 

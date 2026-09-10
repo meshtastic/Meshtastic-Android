@@ -199,7 +199,13 @@ class AndroidNotificationManagerTest {
     @Test
     fun `client notification identity cancels the notification posted with that identity`() = runTest {
         val manager = AndroidNotificationManager(context)
-        val clientNotification = ClientNotification.Builder().also { wb ->wb.message = "Protected position advisory"; wb.reply_id = 123}.build()
+        val clientNotification =
+            ClientNotification.Builder()
+                .also { wb ->
+                    wb.message = "Protected position advisory"
+                    wb.reply_id = 123
+                }
+                .build()
         val id = clientNotification.notificationId()
 
         manager.dispatch(
@@ -275,8 +281,22 @@ class AndroidNotificationManagerTest {
         val manager = AndroidNotificationManager(context)
         // A near-miss of the protected-position predicate (message differs slightly), so it takes the plain
         // dispatch path — but reply_id/time still change on every firmware reply, exactly like the real advisory.
-        val first = ClientNotification.Builder().also { wb ->wb.message = "Location sharing is disabled"; wb.reply_id = 100; wb.time = 1_000}.build()
-        val second = ClientNotification.Builder().also { wb ->wb.message = "Location sharing is disabled"; wb.reply_id = 200; wb.time = 2_000}.build()
+        val first =
+            ClientNotification.Builder()
+                .also { wb ->
+                    wb.message = "Location sharing is disabled"
+                    wb.reply_id = 100
+                    wb.time = 1_000
+                }
+                .build()
+        val second =
+            ClientNotification.Builder()
+                .also { wb ->
+                    wb.message = "Location sharing is disabled"
+                    wb.reply_id = 200
+                    wb.time = 2_000
+                }
+                .build()
 
         listOf(first, second).forEach { cn ->
             manager.dispatchClientNotification(
@@ -296,7 +316,13 @@ class AndroidNotificationManagerTest {
     @Test
     fun `generic client notification does not enable only-alert-once`() = runTest {
         val manager = AndroidNotificationManager(context)
-        val clientNotification = ClientNotification.Builder().also { wb ->wb.message = "Generic warning"; wb.reply_id = 123}.build()
+        val clientNotification =
+            ClientNotification.Builder()
+                .also { wb ->
+                    wb.message = "Generic warning"
+                    wb.reply_id = 123
+                }
+                .build()
 
         manager.dispatchClientNotification(
             Notification(
@@ -365,10 +391,12 @@ class AndroidNotificationManagerTest {
         channelIds.forEach { channelId -> systemNotificationManager.deleteNotificationChannel(channelId) }
     }
 
-    private fun protectedPositionAdvisory(replyId: Int, time: Int) = ClientNotification.Builder().also { wb ->
-    wb.message = "Location sharing is disabled on this channel"
-    wb.reply_id = replyId
-    wb.time = time
-    wb.level = LogRecord.Level.WARNING
-    }.build()
+    private fun protectedPositionAdvisory(replyId: Int, time: Int) = ClientNotification.Builder()
+        .also { wb ->
+            wb.message = "Location sharing is disabled on this channel"
+            wb.reply_id = replyId
+            wb.time = time
+            wb.level = LogRecord.Level.WARNING
+        }
+        .build()
 }

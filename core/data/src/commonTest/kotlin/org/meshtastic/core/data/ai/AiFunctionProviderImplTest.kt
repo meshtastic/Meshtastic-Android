@@ -99,7 +99,14 @@ class AiFunctionProviderImplTest {
         val testNode =
             Node(
                 num = 0xabc,
-                user = User.Builder().also { wb ->wb.id = "!00000abc"; wb.long_name = "Alice"; wb.short_name = "AL"}.build(),
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!00000abc"
+                        wb.long_name = "Alice"
+                        wb.short_name = "AL"
+                    }
+                    .build(),
                 lastHeard = 1_700_000_000,
                 snr = 5.5f,
                 rssi = -70,
@@ -122,7 +129,18 @@ class AiFunctionProviderImplTest {
     @Test
     fun getNodeDetails_returns_null_position_when_no_fix() = runTest {
         // Node with (0.0, 0.0) position and time=0 → no valid position
-        val testNode = Node(num = 1, user = User.Builder().also { wb ->wb.id = "!00000001"; wb.long_name = "NoGPS"; wb.short_name = "NG"}.build())
+        val testNode =
+            Node(
+                num = 1,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!00000001"
+                        wb.long_name = "NoGPS"
+                        wb.short_name = "NG"
+                    }
+                    .build(),
+            )
         val nodeMap = MutableStateFlow(mapOf(1 to testNode))
         every { nodeRepository.nodeDBbyNum } returns nodeMap
 
@@ -151,7 +169,18 @@ class AiFunctionProviderImplTest {
     fun getNodeDetails_round_trips_high_bit_node_num() = runTest {
         // A node num with the high bit set (-1 == 0xFFFFFFFF) must format and parse as the canonical
         // "!ffffffff", not the signed "!-1" — regression guard for the node-ID hex fix.
-        val testNode = Node(num = -1, user = User.Builder().also { wb ->wb.id = "!ffffffff"; wb.long_name = "HighBit"; wb.short_name = "HB"}.build())
+        val testNode =
+            Node(
+                num = -1,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!ffffffff"
+                        wb.long_name = "HighBit"
+                        wb.short_name = "HB"
+                    }
+                    .build(),
+            )
         val nodeMap = MutableStateFlow(mapOf(-1 to testNode))
         every { nodeRepository.nodeDBbyNum } returns nodeMap
 
@@ -320,12 +349,14 @@ class AiFunctionProviderImplTest {
         // Data proto's framing fails here instead of in the send queue.
         fun encodesWithinLimit(byteCount: Int): Boolean {
             val data =
-                Data.Builder().also { wb ->
-                wb.portnum = PortNum.TEXT_MESSAGE_APP
-                wb.payload = ByteArray(byteCount) { 'a'.code.toByte() }.toByteString()
-                wb.reply_id = 0
-                wb.emoji = 0
-                }.build()
+                Data.Builder()
+                    .also { wb ->
+                        wb.portnum = PortNum.TEXT_MESSAGE_APP
+                        wb.payload = ByteArray(byteCount) { 'a'.code.toByte() }.toByteString()
+                        wb.reply_id = 0
+                        wb.emoji = 0
+                    }
+                    .build()
             return Data.ADAPTER.isWithinSizeLimit(data, Constants.DATA_PAYLOAD_LEN.value)
         }
 

@@ -69,7 +69,12 @@ abstract class CommonChannelViewModelTest {
 
     @Test
     fun `isManaged returns true when security is managed`() = runTest {
-        val config = LocalConfig.Builder().also { wb ->wb.security = Config.SecurityConfig.Builder().also { wb ->wb.is_managed = true}.build()}.build()
+        val config =
+            LocalConfig.Builder()
+                .also { wb ->
+                    wb.security = Config.SecurityConfig.Builder().also { wb -> wb.is_managed = true }.build()
+                }
+                .build()
         every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(config)
         viewModel = ChannelViewModel(radioController, radioConfigRepository, analytics)
 

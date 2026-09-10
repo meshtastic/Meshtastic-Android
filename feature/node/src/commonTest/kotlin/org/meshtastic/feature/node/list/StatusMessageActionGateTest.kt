@@ -29,8 +29,10 @@ import kotlin.test.assertTrue
  */
 class StatusMessageActionGateTest {
 
-    private fun node(num: Int, firmware: String?) =
-        Node(num = num, metadata = firmware?.let { DeviceMetadata.Builder().also { wb ->wb.firmware_version = it}.build() })
+    private fun node(num: Int, firmware: String?) = Node(
+        num = num,
+        metadata = firmware?.let { DeviceMetadata.Builder().also { wb -> wb.firmware_version = it }.build() },
+    )
 
     private val ourNode = node(num = 1, firmware = "2.8.0")
 

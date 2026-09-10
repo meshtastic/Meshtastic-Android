@@ -94,7 +94,7 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
         onConfirm = {
             formState.value = it
             showKeyGenerationDialog = false
-            val config = Config.Builder().also { wb ->wb.security = formState.value}.build()
+            val config = Config.Builder().also { wb -> wb.security = formState.value }.build()
             viewModel.setConfig(config)
         },
         onDismiss = { showKeyGenerationDialog = false },
@@ -110,7 +110,7 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val config = Config.Builder().also { wb ->wb.security = it}.build()
+            val config = Config.Builder().also { wb -> wb.security = it }.build()
             viewModel.setConfig(config)
         },
     ) {
@@ -119,7 +119,10 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                 selectedPolicy = formState.value.packet_signature_policy,
                 connected = state.connected,
                 supported = state.metadata?.has_xeddsa,
-                onPolicyChange = { policy -> formState.value = formState.value.newBuilder().also { wb -> wb.packet_signature_policy = policy }.build() },
+                onPolicyChange = { policy ->
+                    formState.value =
+                        formState.value.newBuilder().also { wb -> wb.packet_signature_policy = policy }.build()
+                },
             )
         }
         item {
@@ -164,7 +167,9 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                     maxCount = 3,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValuesChanged = { formState.value = formState.value.newBuilder().also { wb -> wb.admin_key = it }.build() },
+                    onValuesChanged = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.admin_key = it }.build()
+                    },
                 )
             }
         }
@@ -175,7 +180,9 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                     summary = stringResource(Res.string.config_security_serial_enabled),
                     checked = formState.value.serial_enabled,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.serial_enabled = it }.build() },
+                    onCheckedChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.serial_enabled = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -184,7 +191,10 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                     summary = stringResource(Res.string.config_security_debug_log_api_enabled),
                     checked = formState.value.debug_log_api_enabled,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.debug_log_api_enabled = it }.build() },
+                    onCheckedChange = {
+                        formState.value =
+                            formState.value.newBuilder().also { wb -> wb.debug_log_api_enabled = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
             }
@@ -196,7 +206,9 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                     summary = stringResource(Res.string.config_security_is_managed),
                     checked = formState.value.is_managed,
                     enabled = state.connected && formState.value.admin_key.isNotEmpty(),
-                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.is_managed = it }.build() },
+                    onCheckedChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.is_managed = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -332,7 +344,13 @@ fun PrivateKeyRegenerateDialog(
                 // and set the second to left-most bit of f[31].
                 f[0] = (f[0].toInt() and 0xF8).toByte()
                 f[31] = ((f[31].toInt() and 0x7F) or 0x40).toByte()
-                val securityInput = Config.SecurityConfig.Builder().also { wb ->wb.private_key = f.toByteString(); wb.public_key = ByteString.EMPTY}.build()
+                val securityInput =
+                    Config.SecurityConfig.Builder()
+                        .also { wb ->
+                            wb.private_key = f.toByteString()
+                            wb.public_key = ByteString.EMPTY
+                        }
+                        .build()
                 onConfirm(securityInput)
             },
         )

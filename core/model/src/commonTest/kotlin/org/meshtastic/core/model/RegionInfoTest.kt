@@ -30,15 +30,14 @@ import kotlin.test.assertNotNull
  */
 class RegionInfoTest {
 
-    private fun lora(region: RegionCode, preset: ModemPreset, channelNum: Int = 0) =
-        LoRaConfig.Builder()
-            .also { wb ->
-                wb.use_preset = true
-                wb.modem_preset = preset
-                wb.region = region
-                wb.channel_num = channelNum
-            }
-            .build()
+    private fun lora(region: RegionCode, preset: ModemPreset, channelNum: Int = 0) = LoRaConfig.Builder()
+        .also { wb ->
+            wb.use_preset = true
+            wb.modem_preset = preset
+            wb.region = region
+            wb.channel_num = channelNum
+        }
+        .build()
 
     /**
      * Every region the firmware's region table defines must be selectable in the app. The proto enum is a superset

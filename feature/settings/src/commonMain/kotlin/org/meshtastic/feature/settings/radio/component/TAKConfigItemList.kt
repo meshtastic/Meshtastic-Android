@@ -144,7 +144,7 @@ fun TAKConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         responseState = effectiveResponseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val config = ModuleConfig.Builder().also { wb ->wb.tak = it}.build()
+            val config = ModuleConfig.Builder().also { wb -> wb.tak = it }.build()
             viewModel.setModuleConfig(config)
         },
     ) {
@@ -212,7 +212,8 @@ fun TakServerScreen(onBack: () -> Unit) {
     val isTakServerEnabled by takPrefs.isTakServerEnabled.collectAsStateWithLifecycle()
     val isMeshToCotEnabled by takPrefs.isMeshToCotEnabled.collectAsStateWithLifecycle()
     val takServerChannel by takPrefs.takServerChannel.collectAsStateWithLifecycle()
-    val channelSet by radioConfigRepository.channelSetFlow.collectAsStateWithLifecycle(initialValue = ChannelSet.Builder().build())
+    val channelSet by
+        radioConfigRepository.channelSetFlow.collectAsStateWithLifecycle(initialValue = ChannelSet.Builder().build())
     // Options come from the radio's configured channels; the persisted index is appended as a bare
     // number when it isn't among them (no radio connected yet, or the channel list shrank) so the
     // dropdown never renders an empty selection.

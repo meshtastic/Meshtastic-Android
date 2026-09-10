@@ -158,8 +158,8 @@ class MeshMessageProcessorImplTest {
     @Test
     fun `handleFromRadio dispatches non-packet variants to fromRadioDispatcher`() = runTest(testDispatcher) {
         processor = createProcessor(backgroundScope)
-        val logRecord = LogRecord.Builder().also { wb ->wb.message = "test log"}.build()
-        val fromRadio = FromRadio.Builder().also { wb ->wb.log_record = logRecord}.build()
+        val logRecord = LogRecord.Builder().also { wb -> wb.message = "test log" }.build()
+        val fromRadio = FromRadio.Builder().also { wb -> wb.log_record = logRecord }.build()
         val bytes = fromRadio.encode()
 
         processor.handleFromRadio(frame(bytes), myNodeNum)
@@ -173,7 +173,7 @@ class MeshMessageProcessorImplTest {
         processor = createProcessor(backgroundScope)
         // Encode a raw LogRecord (not wrapped in FromRadio) — first decode as FromRadio fails,
         // fallback decode as LogRecord succeeds
-        val logRecord = LogRecord.Builder().also { wb ->wb.message = "fallback log"}.build()
+        val logRecord = LogRecord.Builder().also { wb -> wb.message = "fallback log" }.build()
         val bytes = logRecord.encode()
 
         processor.handleFromRadio(frame(bytes), myNodeNum)
@@ -198,7 +198,10 @@ class MeshMessageProcessorImplTest {
     fun `stale session frame is dropped before dispatch or persistence`() = runTest(testDispatcher) {
         processor = createProcessor(backgroundScope)
         activeSession.value = RadioSessionContext(generation = 4L, address = session.address)
-        val fromRadio = FromRadio.Builder().also { wb ->wb.log_record = LogRecord.Builder().also { wb ->wb.message = "stale"}.build()}.build()
+        val fromRadio =
+            FromRadio.Builder()
+                .also { wb -> wb.log_record = LogRecord.Builder().also { wb -> wb.message = "stale" }.build() }
+                .build()
 
         processor.handleFromRadio(frame(fromRadio.encode()), myNodeNum)
         advanceUntilIdle()
@@ -211,7 +214,10 @@ class MeshMessageProcessorImplTest {
     @Test
     fun `session revoked after decode cannot reach packet handlers`() = runTest(testDispatcher) {
         processor = createProcessor(backgroundScope)
-        val fromRadio = FromRadio.Builder().also { wb ->wb.log_record = LogRecord.Builder().also { wb ->wb.message = "revoked"}.build()}.build()
+        val fromRadio =
+            FromRadio.Builder()
+                .also { wb -> wb.log_record = LogRecord.Builder().also { wb -> wb.message = "revoked" }.build() }
+                .build()
         everySuspend { radioInterfaceService.runWhileSessionActive(session, any()) } returns false
 
         processor.handleFromRadio(frame(fromRadio.encode()), myNodeNum)
@@ -249,14 +255,27 @@ class MeshMessageProcessorImplTest {
                 releasePersistence.await()
             }
         val packet =
-            MeshPacket.Builder().also { wb ->
-            wb.id = 9
-            wb.from = 999
-            wb.decoded = Data.Builder().also { wb ->wb.portnum = PortNum.TEXT_MESSAGE_APP; wb.payload = ByteString.EMPTY}.build()
-            wb.rx_time = 1000
-            }.build()
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = 9
+                    wb.from = 999
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                wb.payload = ByteString.EMPTY
+                            }
+                            .build()
+                    wb.rx_time = 1000
+                }
+                .build()
 
-        val processing = async { processor.handleFromRadio(frame(FromRadio.Builder().also { wb ->wb.packet = packet}.build().encode()), myNodeNum) }
+        val processing = async {
+            processor.handleFromRadio(
+                frame(FromRadio.Builder().also { wb -> wb.packet = packet }.build().encode()),
+                myNodeNum,
+            )
+        }
         persistenceStarted.await()
 
         assertFalse(processing.isCompleted, "session authority must remain held until node persistence finishes")
@@ -270,14 +289,25 @@ class MeshMessageProcessorImplTest {
         every { nodeManager.myNodeNum } returns MutableStateFlow(myNodeNum)
         processor = createProcessor(backgroundScope)
         val packet =
-            MeshPacket.Builder().also { wb ->
-            wb.id = 10
-            wb.from = myNodeNum
-            wb.decoded = Data.Builder().also { wb ->wb.portnum = PortNum.TEXT_MESSAGE_APP; wb.payload = ByteString.EMPTY}.build()
-            wb.rx_time = 1
-            }.build()
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = 10
+                    wb.from = myNodeNum
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                wb.payload = ByteString.EMPTY
+                            }
+                            .build()
+                    wb.rx_time = 1
+                }
+                .build()
 
-        processor.handleFromRadio(frame(FromRadio.Builder().also { wb ->wb.packet = packet}.build().encode()), myNodeNum)
+        processor.handleFromRadio(
+            frame(FromRadio.Builder().also { wb -> wb.packet = packet }.build().encode()),
+            myNodeNum,
+        )
         advanceUntilIdle()
 
         verifySuspend(mode = VerifyMode.exactly(1)) { nodeManager.updateNodeAndPersist(myNodeNum, any(), any()) }
@@ -287,7 +317,10 @@ class MeshMessageProcessorImplTest {
     fun `replacement generation refreshes the local node without waiting for the prior throttle`() =
         runTest(testDispatcher) {
             processor = createProcessor(backgroundScope)
-            val fromRadio = FromRadio.Builder().also { wb ->wb.log_record = LogRecord.Builder().also { wb ->wb.message = "alive"}.build()}.build()
+            val fromRadio =
+                FromRadio.Builder()
+                    .also { wb -> wb.log_record = LogRecord.Builder().also { wb -> wb.message = "alive" }.build() }
+                    .build()
 
             processor.handleFromRadio(frame(fromRadio.encode()), myNodeNum)
             advanceUntilIdle()
@@ -306,7 +339,10 @@ class MeshMessageProcessorImplTest {
         // receivedData collector, which would cancel the collection and silently deafen the radio (a remote DoS).
         // Regression guard for the safeCatching in processFromRadio: before that fix this call rethrew and failed.
         every { fromRadioDispatcher.handleFromRadio(any(), any()) } throws RuntimeException("hostile packet")
-        val fromRadio = FromRadio.Builder().also { wb ->wb.log_record = LogRecord.Builder().also { wb ->wb.message = "boom"}.build()}.build() // routes to fromRadioDispatcher
+        val fromRadio =
+            FromRadio.Builder()
+                .also { wb -> wb.log_record = LogRecord.Builder().also { wb -> wb.message = "boom" }.build() }
+                .build() // routes to fromRadioDispatcher
 
         processor.handleFromRadio(frame(fromRadio.encode()), myNodeNum) // must return normally, not throw
         advanceUntilIdle()
@@ -324,12 +360,20 @@ class MeshMessageProcessorImplTest {
         isNodeDbReady.value = false
 
         val packet =
-            MeshPacket.Builder().also { wb ->
-            wb.id = 1
-            wb.from = 999
-            wb.decoded = Data.Builder().also { wb ->wb.portnum = PortNum.TEXT_MESSAGE_APP; wb.payload = ByteString.EMPTY}.build()
-            wb.rx_time = 1000
-            }.build()
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = 1
+                    wb.from = 999
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                wb.payload = ByteString.EMPTY
+                            }
+                            .build()
+                    wb.rx_time = 1000
+                }
+                .build()
 
         processor.handleReceivedMeshPacket(packet, myNodeNum)
         advanceUntilIdle()
@@ -344,12 +388,20 @@ class MeshMessageProcessorImplTest {
         isNodeDbReady.value = false
 
         val packet =
-            MeshPacket.Builder().also { wb ->
-            wb.id = 1
-            wb.from = 999
-            wb.decoded = Data.Builder().also { wb ->wb.portnum = PortNum.TEXT_MESSAGE_APP; wb.payload = ByteString.EMPTY}.build()
-            wb.rx_time = 1000
-            }.build()
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = 1
+                    wb.from = 999
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                wb.payload = ByteString.EMPTY
+                            }
+                            .build()
+                    wb.rx_time = 1000
+                }
+                .build()
 
         processor.handleReceivedMeshPacket(packet, myNodeNum)
         advanceUntilIdle()
@@ -376,12 +428,20 @@ class MeshMessageProcessorImplTest {
 
         listOf(1, 2).forEach { id ->
             processor.handleReceivedMeshPacket(
-                MeshPacket.Builder().also { wb ->
-                wb.id = id
-                wb.from = 999
-                wb.decoded = Data.Builder().also { wb ->wb.portnum = PortNum.TEXT_MESSAGE_APP; wb.payload = ByteString.EMPTY}.build()
-                wb.rx_time = 1000 + id
-                }.build(),
+                MeshPacket.Builder()
+                    .also { wb ->
+                        wb.id = id
+                        wb.from = 999
+                        wb.decoded =
+                            Data.Builder()
+                                .also { wb ->
+                                    wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                    wb.payload = ByteString.EMPTY
+                                }
+                                .build()
+                        wb.rx_time = 1000 + id
+                    }
+                    .build(),
                 myNodeNum,
             )
         }
@@ -403,14 +463,25 @@ class MeshMessageProcessorImplTest {
         isNodeDbReady.value = true
         everySuspend { radioInterfaceService.runWithSessionLease(session, any()) } returns false
         val packet =
-            MeshPacket.Builder().also { wb ->
-            wb.id = 6
-            wb.from = 999
-            wb.decoded = Data.Builder().also { wb ->wb.portnum = PortNum.TEXT_MESSAGE_APP; wb.payload = ByteString.EMPTY}.build()
-            wb.rx_time = 1000
-            }.build()
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = 6
+                    wb.from = 999
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                wb.payload = ByteString.EMPTY
+                            }
+                            .build()
+                    wb.rx_time = 1000
+                }
+                .build()
 
-        processor.handleFromRadio(frame(FromRadio.Builder().also { wb ->wb.packet = packet}.build().encode()), myNodeNum)
+        processor.handleFromRadio(
+            frame(FromRadio.Builder().also { wb -> wb.packet = packet }.build().encode()),
+            myNodeNum,
+        )
         advanceUntilIdle()
 
         verifySuspend(mode = VerifyMode.exactly(0)) { meshLogRepository.insert(any()) }
@@ -427,21 +498,42 @@ class MeshMessageProcessorImplTest {
                 processedIds += (it.args[0] as MeshPacket).id
             }
         val oldPacket =
-            MeshPacket.Builder().also { wb ->
-            wb.id = 7
-            wb.from = 999
-            wb.decoded = Data.Builder().also { wb ->wb.portnum = PortNum.TEXT_MESSAGE_APP; wb.payload = ByteString.EMPTY}.build()
-            wb.rx_time = 1000
-            }.build()
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = 7
+                    wb.from = 999
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                wb.payload = ByteString.EMPTY
+                            }
+                            .build()
+                    wb.rx_time = 1000
+                }
+                .build()
 
-        processor.handleFromRadio(frame(FromRadio.Builder().also { wb ->wb.packet = oldPacket}.build().encode()), myNodeNum)
+        processor.handleFromRadio(
+            frame(FromRadio.Builder().also { wb -> wb.packet = oldPacket }.build().encode()),
+            myNodeNum,
+        )
         advanceUntilIdle()
 
         val replacementSession = RadioSessionContext(generation = 4L, address = session.address)
         activeSession.value = replacementSession
-        val replacementPacket = oldPacket.newBuilder().also { wb -> wb.id = 8; wb.rx_time = 1001 }.build()
+        val replacementPacket =
+            oldPacket
+                .newBuilder()
+                .also { wb ->
+                    wb.id = 8
+                    wb.rx_time = 1001
+                }
+                .build()
         processor.handleFromRadio(
-            frame(FromRadio.Builder().also { wb ->wb.packet = replacementPacket}.build().encode(), replacementSession),
+            frame(
+                FromRadio.Builder().also { wb -> wb.packet = replacementPacket }.build().encode(),
+                replacementSession,
+            ),
             myNodeNum,
         )
         advanceUntilIdle()
@@ -462,12 +554,20 @@ class MeshMessageProcessorImplTest {
         // packets are accumulated properly.
         repeat(5) { i ->
             val packet =
-                MeshPacket.Builder().also { wb ->
-                wb.id = i
-                wb.from = 999
-                wb.decoded = Data.Builder().also { wb ->wb.portnum = PortNum.TEXT_MESSAGE_APP; wb.payload = ByteString.EMPTY}.build()
-                wb.rx_time = 1000 + i
-                }.build()
+                MeshPacket.Builder()
+                    .also { wb ->
+                        wb.id = i
+                        wb.from = 999
+                        wb.decoded =
+                            Data.Builder()
+                                .also { wb ->
+                                    wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                    wb.payload = ByteString.EMPTY
+                                }
+                                .build()
+                        wb.rx_time = 1000 + i
+                    }
+                    .build()
             processor.handleReceivedMeshPacket(packet, myNodeNum)
         }
         advanceUntilIdle()
@@ -498,19 +598,35 @@ class MeshMessageProcessorImplTest {
             RuntimeException("corrupted NodeInfo")
 
         val poisoned =
-            MeshPacket.Builder().also { wb ->
-            wb.id = 1
-            wb.from = 999
-            wb.decoded = Data.Builder().also { wb ->wb.portnum = PortNum.NODEINFO_APP; wb.payload = ByteString.EMPTY}.build()
-            wb.rx_time = 1000
-            }.build()
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = 1
+                    wb.from = 999
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.NODEINFO_APP
+                                wb.payload = ByteString.EMPTY
+                            }
+                            .build()
+                    wb.rx_time = 1000
+                }
+                .build()
         val healthy =
-            MeshPacket.Builder().also { wb ->
-            wb.id = 2
-            wb.from = 998
-            wb.decoded = Data.Builder().also { wb ->wb.portnum = PortNum.TEXT_MESSAGE_APP; wb.payload = ByteString.EMPTY}.build()
-            wb.rx_time = 1001
-            }.build()
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = 2
+                    wb.from = 998
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                wb.payload = ByteString.EMPTY
+                            }
+                            .build()
+                    wb.rx_time = 1001
+                }
+                .build()
 
         processor.handleReceivedMeshPacket(poisoned, myNodeNum)
         processor.handleReceivedMeshPacket(healthy, myNodeNum)
@@ -537,7 +653,12 @@ class MeshMessageProcessorImplTest {
                     wb.id = 1
                     wb.from = myNodeNum
                     wb.decoded =
-                        Data.Builder().also { wb -> wb.portnum = PortNum.TEXT_MESSAGE_APP; wb.payload = ByteString.EMPTY }.build()
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                wb.payload = ByteString.EMPTY
+                            }
+                            .build()
                     wb.rx_time = 0 // should be replaced with current time
                 }
                 .build()
@@ -554,12 +675,20 @@ class MeshMessageProcessorImplTest {
         isNodeDbReady.value = true
 
         val packet =
-            MeshPacket.Builder().also { wb ->
-            wb.id = 2
-            wb.from = myNodeNum
-            wb.decoded = Data.Builder().also { wb ->wb.portnum = PortNum.TEXT_MESSAGE_APP; wb.payload = ByteString.EMPTY}.build()
-            wb.rx_time = 1700000000
-            }.build()
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = 2
+                    wb.from = myNodeNum
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                wb.payload = ByteString.EMPTY
+                            }
+                            .build()
+                    wb.rx_time = 1700000000
+                }
+                .build()
 
         processor.handleReceivedMeshPacket(packet, myNodeNum)
         advanceUntilIdle()
@@ -578,7 +707,12 @@ class MeshMessageProcessorImplTest {
                     wb.id = 3
                     wb.from = myNodeNum
                     wb.decoded =
-                        Data.Builder().also { wb -> wb.portnum = PortNum.TEXT_MESSAGE_APP; wb.payload = ByteString.EMPTY }.build()
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                wb.payload = ByteString.EMPTY
+                            }
+                            .build()
                     wb.rx_time = null // radio had no clock at reception
                 }
                 .build()
@@ -599,12 +733,20 @@ class MeshMessageProcessorImplTest {
         isNodeDbReady.value = true
 
         val packet =
-            MeshPacket.Builder().also { wb ->
-            wb.id = 10
-            wb.from = 999
-            wb.decoded = Data.Builder().also { wb ->wb.portnum = PortNum.TEXT_MESSAGE_APP; wb.payload = ByteString.EMPTY}.build()
-            wb.rx_time = 1700000000
-            }.build()
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = 10
+                    wb.from = 999
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                wb.payload = ByteString.EMPTY
+                            }
+                            .build()
+                    wb.rx_time = 1700000000
+                }
+                .build()
 
         processor.handleReceivedMeshPacket(packet, myNodeNum)
         advanceUntilIdle()
@@ -620,13 +762,21 @@ class MeshMessageProcessorImplTest {
 
         val senderNode = 999
         val packet =
-            MeshPacket.Builder().also { wb ->
-            wb.id = 10
-            wb.from = senderNode
-            wb.decoded = Data.Builder().also { wb ->wb.portnum = PortNum.TEXT_MESSAGE_APP; wb.payload = ByteString.EMPTY}.build()
-            wb.rx_time = 1700000000
-            wb.channel = 1
-            }.build()
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = 10
+                    wb.from = senderNode
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                wb.payload = ByteString.EMPTY
+                            }
+                            .build()
+                    wb.rx_time = 1700000000
+                    wb.channel = 1
+                }
+                .build()
 
         processor.handleReceivedMeshPacket(packet, myNodeNum)
         advanceUntilIdle()
@@ -642,7 +792,14 @@ class MeshMessageProcessorImplTest {
         processor = createProcessor(backgroundScope)
         isNodeDbReady.value = true
 
-        val packet = MeshPacket.Builder().also { wb ->wb.id = 1; wb.from = 999; wb.decoded = null}.build()
+        val packet =
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = 1
+                    wb.from = 999
+                    wb.decoded = null
+                }
+                .build()
 
         processor.handleReceivedMeshPacket(packet, myNodeNum)
         advanceUntilIdle()
@@ -660,12 +817,20 @@ class MeshMessageProcessorImplTest {
         isNodeDbReady.value = true
 
         val packet =
-            MeshPacket.Builder().also { wb ->
-            wb.id = 10
-            wb.from = 999
-            wb.decoded = Data.Builder().also { wb ->wb.portnum = PortNum.TEXT_MESSAGE_APP; wb.payload = ByteString.EMPTY}.build()
-            wb.rx_time = 1700000000
-            }.build()
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = 10
+                    wb.from = 999
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                wb.payload = ByteString.EMPTY
+                            }
+                            .build()
+                    wb.rx_time = 1700000000
+                }
+                .build()
 
         processor.handleReceivedMeshPacket(packet, null)
         advanceUntilIdle()
@@ -690,12 +855,20 @@ class MeshMessageProcessorImplTest {
         isNodeDbReady.value = true // DB ready, our node number still unknown
 
         val packet =
-            MeshPacket.Builder().also { wb ->
-            wb.id = 11
-            wb.from = 999
-            wb.decoded = Data.Builder().also { wb ->wb.portnum = PortNum.TEXT_MESSAGE_APP; wb.payload = ByteString.EMPTY}.build()
-            wb.rx_time = 1700000000
-            }.build()
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = 11
+                    wb.from = 999
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                wb.payload = ByteString.EMPTY
+                            }
+                            .build()
+                    wb.rx_time = 1700000000
+                }
+                .build()
         processor.handleReceivedMeshPacket(packet, null)
         advanceUntilIdle()
         verifySuspend(mode = VerifyMode.not) { serviceRepository.emitMeshPacket(any()) }
@@ -723,12 +896,20 @@ class MeshMessageProcessorImplTest {
         isNodeDbReady.value = false
 
         val packet =
-            MeshPacket.Builder().also { wb ->
-            wb.id = 1
-            wb.from = 999
-            wb.decoded = Data.Builder().also { wb ->wb.portnum = PortNum.TEXT_MESSAGE_APP; wb.payload = ByteString.EMPTY}.build()
-            wb.rx_time = 1000
-            }.build()
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = 1
+                    wb.from = 999
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                wb.payload = ByteString.EMPTY
+                            }
+                            .build()
+                    wb.rx_time = 1000
+                }
+                .build()
         processor.handleReceivedMeshPacket(packet, myNodeNum)
         advanceUntilIdle()
 
@@ -747,8 +928,8 @@ class MeshMessageProcessorImplTest {
     @Test
     fun `FromRadio log_record variant is logged as MeshLog`() = runTest(testDispatcher) {
         processor = createProcessor(backgroundScope)
-        val logRecord = LogRecord.Builder().also { wb ->wb.message = "device log"}.build()
-        val fromRadio = FromRadio.Builder().also { wb ->wb.log_record = logRecord}.build()
+        val logRecord = LogRecord.Builder().also { wb -> wb.message = "device log" }.build()
+        val fromRadio = FromRadio.Builder().also { wb -> wb.log_record = logRecord }.build()
         val bytes = fromRadio.encode()
 
         processor.handleFromRadio(frame(bytes), myNodeNum)

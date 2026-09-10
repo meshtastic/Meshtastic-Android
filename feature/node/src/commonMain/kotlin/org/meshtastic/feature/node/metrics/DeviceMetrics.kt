@@ -378,17 +378,22 @@ private fun DeviceMetricsChartPreview() {
     val now = nowSeconds.toInt()
     val telemetries =
         List(20) { i ->
-            Telemetry.Builder().also { wb ->
-            wb.time = now - (19 - i) * 60 * 60
-            // 1-hour intervals, oldest first
-            wb.device_metrics = org.meshtastic.proto.DeviceMetrics.Builder().also { wb ->
-                            wb.battery_level = 80 - i
-                            wb.voltage = 3.7f - i * 0.02f
-                            wb.channel_utilization = 10f + i * 2
-                            wb.air_util_tx = 5f + i
-                            wb.uptime_seconds = 3600 + i * 300
-                            }.build()
-            }.build()
+            Telemetry.Builder()
+                .also { wb ->
+                    wb.time = now - (19 - i) * 60 * 60
+                    // 1-hour intervals, oldest first
+                    wb.device_metrics =
+                        org.meshtastic.proto.DeviceMetrics.Builder()
+                            .also { wb ->
+                                wb.battery_level = 80 - i
+                                wb.voltage = 3.7f - i * 0.02f
+                                wb.channel_utilization = 10f + i * 2
+                                wb.air_util_tx = 5f + i
+                                wb.uptime_seconds = 3600 + i * 300
+                            }
+                            .build()
+                }
+                .build()
         }
     AppTheme {
         DeviceMetricsChart(
@@ -496,16 +501,21 @@ private fun DeviceMetricsCard(
 fun DeviceMetricsCardPreview() {
     val now = 1700000000
     val telemetry =
-        Telemetry.Builder().also { wb ->
-        wb.time = now
-        wb.device_metrics = org.meshtastic.proto.DeviceMetrics.Builder().also { wb ->
-                    wb.battery_level = 75
-                    wb.voltage = 3.65f
-                    wb.channel_utilization = 22.5f
-                    wb.air_util_tx = 12.0f
-                    wb.uptime_seconds = 7200
-                    }.build()
-        }.build()
+        Telemetry.Builder()
+            .also { wb ->
+                wb.time = now
+                wb.device_metrics =
+                    org.meshtastic.proto.DeviceMetrics.Builder()
+                        .also { wb ->
+                            wb.battery_level = 75
+                            wb.voltage = 3.65f
+                            wb.channel_utilization = 22.5f
+                            wb.air_util_tx = 12.0f
+                            wb.uptime_seconds = 7200
+                        }
+                        .build()
+            }
+            .build()
     AppTheme {
         DeviceMetricsCard(
             telemetry = telemetry,
@@ -523,19 +533,22 @@ private fun DeviceMetricsScreenPreview() {
     val now = nowSeconds.toInt()
     val telemetries =
         List(24) { i ->
-            Telemetry.Builder().also { wb ->
-            wb.time = now - (23 - i) * 60 * 60
-            // 1-hour intervals, oldest first
-            wb.device_metrics = org.meshtastic.proto.DeviceMetrics.Builder()
-                                .also { wb ->
-                                    wb.battery_level = 85 - i * 2 // Battery decreases over time
-                                    wb.voltage = 3.8f - i * 0.01f // Voltage decreases slightly
-                                    wb.channel_utilization = 15f + i * 1.5f // Channel utilization increases
-                                    wb.air_util_tx = 8f + i * 0.8f // Air utilization increases
-                                    wb.uptime_seconds = 3600 + i * 3600 // Uptime increases by 1 hour each
-                                }
-                                .build()
-            }.build()
+            Telemetry.Builder()
+                .also { wb ->
+                    wb.time = now - (23 - i) * 60 * 60
+                    // 1-hour intervals, oldest first
+                    wb.device_metrics =
+                        org.meshtastic.proto.DeviceMetrics.Builder()
+                            .also { wb ->
+                                wb.battery_level = 85 - i * 2 // Battery decreases over time
+                                wb.voltage = 3.8f - i * 0.01f // Voltage decreases slightly
+                                wb.channel_utilization = 15f + i * 1.5f // Channel utilization increases
+                                wb.air_util_tx = 8f + i * 0.8f // Air utilization increases
+                                wb.uptime_seconds = 3600 + i * 3600 // Uptime increases by 1 hour each
+                            }
+                            .build()
+                }
+                .build()
         }
 
     AppTheme {

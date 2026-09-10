@@ -59,7 +59,18 @@ class ConversationShortcutPublisherTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val shortcutManager = context.getSystemService(ShortcutManager::class.java)!!
 
-    private val hawk = Node(num = 7, user = User.Builder().also { wb ->wb.id = "!00000007"; wb.long_name = "Hawk Ridge"; wb.short_name = "HAWK"}.build())
+    private val hawk =
+        Node(
+            num = 7,
+            user =
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!00000007"
+                    wb.long_name = "Hawk Ridge"
+                    wb.short_name = "HAWK"
+                }
+                .build(),
+        )
 
     private val packetRepository: PacketRepository = mock(MockMode.autofill)
     private val nodeRepository: NodeRepository = mock(MockMode.autofill)
@@ -81,10 +92,16 @@ class ConversationShortcutPublisherTest {
         // Primary channel with an empty name (resolves to the preset name) plus one named secondary channel.
         every { radioConfigRepository.channelSetFlow } returns
             flowOf(
-                ChannelSet.Builder().also { wb ->
-                wb.settings = listOf(MeshChannel.default.settings, ChannelSettings.Builder().also { wb ->wb.name = "Beta"}.build())
-                wb.lora_config = MeshChannel.default.loraConfig
-                }.build(),
+                ChannelSet.Builder()
+                    .also { wb ->
+                        wb.settings =
+                            listOf(
+                                MeshChannel.default.settings,
+                                ChannelSettings.Builder().also { wb -> wb.name = "Beta" }.build(),
+                            )
+                        wb.lora_config = MeshChannel.default.loraConfig
+                    }
+                    .build(),
             )
     }
 

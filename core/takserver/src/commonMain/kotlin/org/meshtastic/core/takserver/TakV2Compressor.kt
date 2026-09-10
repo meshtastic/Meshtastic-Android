@@ -330,33 +330,35 @@ internal object TakV2Compressor {
             org.meshtastic.proto.GeoPointSource.fromValue(data.altSrc)
                 ?: org.meshtastic.proto.GeoPointSource.GeoPointSource_Unspecified
 
-        return TAKPacketV2.Builder().also { wb ->
-        wb.cot_type_id = cotType
-        wb.cot_type_str = data.cotTypeStr ?: ""
-        wb.how = how
-        wb.callsign = data.callsign
-        wb.team = team
-        wb.role = role
-        wb.latitude_i = data.latitudeI
-        wb.longitude_i = data.longitudeI
-        wb.altitude = data.altitude
-        wb.speed = data.speed
-        wb.course = data.course
-        wb.battery = data.battery
-        wb.geo_src = geoSrc
-        wb.alt_src = altSrc
-        wb.uid = data.uid
-        wb.device_callsign = data.deviceCallsign
-        wb.stale_seconds = data.staleSeconds
-        wb.tak_version = data.takVersion
-        wb.tak_device = data.takDevice
-        wb.tak_platform = data.takPlatform
-        wb.tak_os = data.takOs
-        wb.endpoint = data.endpoint
-        wb.phone = data.phone
-        // v0.4.0: PLI is implicit — no payload_variant is set for a PLI (the
-        // bool pli oneof arm was removed). Pli/None simply set no oneof field.
-        wb.chat = (data.payload as? TakPacketV2Data.Payload.Chat)?.let { chat ->
+        return TAKPacketV2.Builder()
+            .also { wb ->
+                wb.cot_type_id = cotType
+                wb.cot_type_str = data.cotTypeStr ?: ""
+                wb.how = how
+                wb.callsign = data.callsign
+                wb.team = team
+                wb.role = role
+                wb.latitude_i = data.latitudeI
+                wb.longitude_i = data.longitudeI
+                wb.altitude = data.altitude
+                wb.speed = data.speed
+                wb.course = data.course
+                wb.battery = data.battery
+                wb.geo_src = geoSrc
+                wb.alt_src = altSrc
+                wb.uid = data.uid
+                wb.device_callsign = data.deviceCallsign
+                wb.stale_seconds = data.staleSeconds
+                wb.tak_version = data.takVersion
+                wb.tak_device = data.takDevice
+                wb.tak_platform = data.takPlatform
+                wb.tak_os = data.takOs
+                wb.endpoint = data.endpoint
+                wb.phone = data.phone
+                // v0.4.0: PLI is implicit — no payload_variant is set for a PLI (the
+                // bool pli oneof arm was removed). Pli/None simply set no oneof field.
+                wb.chat =
+                    (data.payload as? TakPacketV2Data.Payload.Chat)?.let { chat ->
                         WireGeoChat.Builder()
                             .also { wb ->
                                 wb.message = chat.message
@@ -376,7 +378,8 @@ internal object TakV2Compressor {
                             }
                             .build()
                     }
-        wb.aircraft = (data.payload as? TakPacketV2Data.Payload.Aircraft)?.let { ac ->
+                wb.aircraft =
+                    (data.payload as? TakPacketV2Data.Payload.Aircraft)?.let { ac ->
                         WireAircraftTrack.Builder()
                             .also { wb ->
                                 wb.icao = ac.icao
@@ -391,7 +394,8 @@ internal object TakV2Compressor {
                             }
                             .build()
                     }
-        wb.shape = (data.payload as? TakPacketV2Data.Payload.DrawnShape)?.let { s ->
+                wb.shape =
+                    (data.payload as? TakPacketV2Data.Payload.DrawnShape)?.let { s ->
                         WireDrawnShape.Builder()
                             .also { wb ->
                                 wb.kind = WireDrawnShape.Kind.fromValue(s.kind) ?: WireDrawnShape.Kind.Kind_Unspecified
@@ -419,7 +423,8 @@ internal object TakV2Compressor {
                             }
                             .build()
                     }
-        wb.marker = (data.payload as? TakPacketV2Data.Payload.Marker)?.let { m ->
+                wb.marker =
+                    (data.payload as? TakPacketV2Data.Payload.Marker)?.let { m ->
                         WireMarker.Builder()
                             .also { wb ->
                                 wb.kind = WireMarker.Kind.fromValue(m.kind) ?: WireMarker.Kind.Kind_Unspecified
@@ -433,7 +438,8 @@ internal object TakV2Compressor {
                             }
                             .build()
                     }
-        wb.rab = (data.payload as? TakPacketV2Data.Payload.RangeAndBearing)?.let { r ->
+                wb.rab =
+                    (data.payload as? TakPacketV2Data.Payload.RangeAndBearing)?.let { r ->
                         WireRangeAndBearing.Builder()
                             .also { wb ->
                                 wb.anchor =
@@ -452,7 +458,8 @@ internal object TakV2Compressor {
                             }
                             .build()
                     }
-        wb.route = (data.payload as? TakPacketV2Data.Payload.Route)?.let { rt ->
+                wb.route =
+                    (data.payload as? TakPacketV2Data.Payload.Route)?.let { rt ->
                         WireRoute.Builder()
                             .also { wb ->
                                 wb.method = WireRoute.Method.fromValue(rt.method) ?: WireRoute.Method.Method_Unspecified
@@ -482,7 +489,8 @@ internal object TakV2Compressor {
                             }
                             .build()
                     }
-        wb.casevac = (data.payload as? TakPacketV2Data.Payload.CasevacReport)?.let { c ->
+                wb.casevac =
+                    (data.payload as? TakPacketV2Data.Payload.CasevacReport)?.let { c ->
                         WireCasevacReport.Builder()
                             .also { wb ->
                                 wb.precedence =
@@ -509,17 +517,20 @@ internal object TakV2Compressor {
                             }
                             .build()
                     }
-        wb.emergency = (data.payload as? TakPacketV2Data.Payload.EmergencyAlert)?.let { e ->
+                wb.emergency =
+                    (data.payload as? TakPacketV2Data.Payload.EmergencyAlert)?.let { e ->
                         WireEmergencyAlert.Builder()
                             .also { wb ->
                                 wb.type =
-                                    WireEmergencyAlert.Type.fromValue(e.type) ?: WireEmergencyAlert.Type.Type_Unspecified
+                                    WireEmergencyAlert.Type.fromValue(e.type)
+                                        ?: WireEmergencyAlert.Type.Type_Unspecified
                                 wb.authoring_uid = e.authoringUid
                                 wb.cancel_reference_uid = e.cancelReferenceUid
                             }
                             .build()
                     }
-        wb.task = (data.payload as? TakPacketV2Data.Payload.TaskRequest)?.let { t ->
+                wb.task =
+                    (data.payload as? TakPacketV2Data.Payload.TaskRequest)?.let { t ->
                         WireTaskRequest.Builder()
                             .also { wb ->
                                 wb.task_type = t.taskType
@@ -529,17 +540,19 @@ internal object TakV2Compressor {
                                     WireTaskRequest.Priority.fromValue(t.priority)
                                         ?: WireTaskRequest.Priority.Priority_Unspecified
                                 wb.status =
-                                    WireTaskRequest.Status.fromValue(t.status) ?: WireTaskRequest.Status.Status_Unspecified
+                                    WireTaskRequest.Status.fromValue(t.status)
+                                        ?: WireTaskRequest.Status.Status_Unspecified
                                 wb.note = t.note
                             }
                             .build()
                     }
-        wb.raw_detail = (data.payload as? TakPacketV2Data.Payload.RawDetail)?.bytes?.toByteString()
-        // TAKTALK voice/text message (m-t-t).  Without this, m-t-t events
-        // would compress with no payload set, the receiver's wireToSdkData
-        // would fall through to Payload.None, and TAKTALK plugin would
-        // never see the rebuilt CoT event for TTS playback.
-        wb.taktalk = (data.payload as? TakPacketV2Data.Payload.TakTalk)?.let { tt ->
+                wb.raw_detail = (data.payload as? TakPacketV2Data.Payload.RawDetail)?.bytes?.toByteString()
+                // TAKTALK voice/text message (m-t-t).  Without this, m-t-t events
+                // would compress with no payload set, the receiver's wireToSdkData
+                // would fall through to Payload.None, and TAKTALK plugin would
+                // never see the rebuilt CoT event for TTS playback.
+                wb.taktalk =
+                    (data.payload as? TakPacketV2Data.Payload.TakTalk)?.let { tt ->
                         WireTakTalkMessage.Builder()
                             .also { wb ->
                                 wb.text = tt.text
@@ -549,9 +562,10 @@ internal object TakV2Compressor {
                             }
                             .build()
                     }
-        // TAKTALK room/membership broadcast (y-).  Required for receivers
-        // to resolve TAKTALK room UUIDs to friendly names + rosters.
-        wb.taktalk_room = (data.payload as? TakPacketV2Data.Payload.TakTalkRoom)?.let { room ->
+                // TAKTALK room/membership broadcast (y-).  Required for receivers
+                // to resolve TAKTALK room UUIDs to friendly names + rosters.
+                wb.taktalk_room =
+                    (data.payload as? TakPacketV2Data.Payload.TakTalkRoom)?.let { room ->
                         @Suppress("DEPRECATION")
                         WireTakTalkRoomData.Builder()
                             .also { wb ->
@@ -567,12 +581,16 @@ internal object TakV2Compressor {
                             }
                             .build()
                     }
-        // Directed-routing recipient list (<marti><dest …/>…</marti>).
-        // Empty list = broadcast (default); populated for TAKTALK m-t-t
-        // and directed b-t-f DMs. Encode an explicit Marti only when
-        // there is at least one destination — the wrapper costs wire
-        // bytes for no benefit on broadcast packets.
-        wb.marti = data.marti.takeIf { it.isNotEmpty() }?.let { org.meshtastic.proto.Marti.Builder().also { wb ->wb.dest_callsign = it}.build() }
-        }.build()
+                // Directed-routing recipient list (<marti><dest …/>…</marti>).
+                // Empty list = broadcast (default); populated for TAKTALK m-t-t
+                // and directed b-t-f DMs. Encode an explicit Marti only when
+                // there is at least one destination — the wrapper costs wire
+                // bytes for no benefit on broadcast packets.
+                wb.marti =
+                    data.marti
+                        .takeIf { it.isNotEmpty() }
+                        ?.let { org.meshtastic.proto.Marti.Builder().also { wb -> wb.dest_callsign = it }.build() }
+            }
+            .build()
     }
 }

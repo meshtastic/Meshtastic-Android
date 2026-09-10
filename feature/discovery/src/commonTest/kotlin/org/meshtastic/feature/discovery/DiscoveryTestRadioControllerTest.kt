@@ -35,7 +35,12 @@ class DiscoveryTestRadioControllerTest {
         val restored =
             controller.restoreLocalConfiguration(
                 expectedDeviceAddress = null,
-                config = Config.Builder().also { wb ->wb.lora = Config.LoRaConfig.Builder().also { wb ->wb.use_preset = true}.build()}.build(),
+                config =
+                Config.Builder()
+                    .also { wb ->
+                        wb.lora = Config.LoRaConfig.Builder().also { wb -> wb.use_preset = true }.build()
+                    }
+                    .build(),
                 primaryChannel = null,
             )
 
@@ -62,7 +67,10 @@ class DiscoveryTestRadioControllerTest {
             writeEntered.complete(Unit)
             releaseWrite.await()
         }
-        val config = Config.Builder().also { wb ->wb.lora = Config.LoRaConfig.Builder().also { wb ->wb.use_preset = true}.build()}.build()
+        val config =
+            Config.Builder()
+                .also { wb -> wb.lora = Config.LoRaConfig.Builder().also { wb -> wb.use_preset = true }.build() }
+                .build()
 
         val restore = async {
             controller.restoreLocalConfiguration(

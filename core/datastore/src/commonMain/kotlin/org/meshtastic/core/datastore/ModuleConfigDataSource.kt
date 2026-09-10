@@ -54,31 +54,41 @@ class ModuleConfigDataSource(private val moduleConfigStore: CoreModuleConfigData
             config.external_notification != null ->
                 current.newBuilder().also { wb -> wb.external_notification = config.external_notification }.build()
 
-            config.store_forward != null -> current.newBuilder().also { wb -> wb.store_forward = config.store_forward }.build()
+            config.store_forward != null ->
+                current.newBuilder().also { wb -> wb.store_forward = config.store_forward }.build()
 
-            config.range_test != null -> current.newBuilder().also { wb -> wb.range_test = config.range_test }.build()
+            config.range_test != null ->
+                current.newBuilder().also { wb -> wb.range_test = config.range_test }.build()
 
             config.telemetry != null -> current.newBuilder().also { wb -> wb.telemetry = config.telemetry }.build()
 
-            config.canned_message != null -> current.newBuilder().also { wb -> wb.canned_message = config.canned_message }.build()
+            config.canned_message != null ->
+                current.newBuilder().also { wb -> wb.canned_message = config.canned_message }.build()
 
             config.audio != null -> current.newBuilder().also { wb -> wb.audio = config.audio }.build()
 
-            config.remote_hardware != null -> current.newBuilder().also { wb -> wb.remote_hardware = config.remote_hardware }.build()
+            config.remote_hardware != null ->
+                current.newBuilder().also { wb -> wb.remote_hardware = config.remote_hardware }.build()
 
-            config.neighbor_info != null -> current.newBuilder().also { wb -> wb.neighbor_info = config.neighbor_info }.build()
+            config.neighbor_info != null ->
+                current.newBuilder().also { wb -> wb.neighbor_info = config.neighbor_info }.build()
 
-            config.ambient_lighting != null -> current.newBuilder().also { wb -> wb.ambient_lighting = config.ambient_lighting }.build()
+            config.ambient_lighting != null ->
+                current.newBuilder().also { wb -> wb.ambient_lighting = config.ambient_lighting }.build()
 
-            config.detection_sensor != null -> current.newBuilder().also { wb -> wb.detection_sensor = config.detection_sensor }.build()
+            config.detection_sensor != null ->
+                current.newBuilder().also { wb -> wb.detection_sensor = config.detection_sensor }.build()
 
-            config.paxcounter != null -> current.newBuilder().also { wb -> wb.paxcounter = config.paxcounter }.build()
+            config.paxcounter != null ->
+                current.newBuilder().also { wb -> wb.paxcounter = config.paxcounter }.build()
 
-            config.statusmessage != null -> current.newBuilder().also { wb -> wb.statusmessage = config.statusmessage }.build()
+            config.statusmessage != null ->
+                current.newBuilder().also { wb -> wb.statusmessage = config.statusmessage }.build()
 
             config.tak != null -> current.newBuilder().also { wb -> wb.tak = config.tak }.build()
 
-            config.mesh_beacon != null -> current.newBuilder().also { wb -> wb.mesh_beacon = config.mesh_beacon }.build()
+            config.mesh_beacon != null ->
+                current.newBuilder().also { wb -> wb.mesh_beacon = config.mesh_beacon }.build()
 
             else -> current
         }

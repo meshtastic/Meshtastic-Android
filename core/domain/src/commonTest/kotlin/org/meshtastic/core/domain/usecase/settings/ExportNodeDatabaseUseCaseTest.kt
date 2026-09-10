@@ -106,14 +106,28 @@ class ExportNodeDatabaseUseCaseTest {
             Node(
                 num = 7,
                 user =
-                User.Builder().also { wb ->
-                wb.id = "!00000007"
-                wb.long_name = "Base Camp"
-                wb.short_name = "BASE"
-                wb.hw_model = HardwareModel.TBEAM
-                }.build(),
-                position = Position.Builder().also { wb ->wb.latitude_i = 450000000; wb.longitude_i = -930000000}.build(),
-                deviceMetrics = DeviceMetrics.Builder().also { wb ->wb.battery_level = 85; wb.voltage = 3.9f}.build(),
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!00000007"
+                        wb.long_name = "Base Camp"
+                        wb.short_name = "BASE"
+                        wb.hw_model = HardwareModel.TBEAM
+                    }
+                    .build(),
+                position =
+                Position.Builder()
+                    .also { wb ->
+                        wb.latitude_i = 450000000
+                        wb.longitude_i = -930000000
+                    }
+                    .build(),
+                deviceMetrics =
+                DeviceMetrics.Builder()
+                    .also { wb ->
+                        wb.battery_level = 85
+                        wb.voltage = 3.9f
+                    }
+                    .build(),
                 publicKey = key,
                 isFavorite = true,
                 viaMqtt = true,

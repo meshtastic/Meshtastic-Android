@@ -378,7 +378,8 @@ class NodeManagerImpl(
          */
         internal fun preservingKnownPrecision(incoming: ProtoPosition, stored: ProtoPosition): ProtoPosition =
             if (isRedundantCoarsePosition(incoming, stored)) {
-                incoming.newBuilder()
+                incoming
+                    .newBuilder()
                     .also { wb ->
                         wb.latitude_i = stored.latitude_i
                         wb.longitude_i = stored.longitude_i
@@ -792,7 +793,11 @@ class NodeManagerImpl(
         if (user != null && !shouldPreserveExistingUser(node.user, user)) {
             var newUser =
                 user.let {
-                    if (it.is_licensed == true) it.newBuilder().also { wb -> wb.public_key = ByteString.EMPTY }.build() else it
+                    if (it.is_licensed == true) {
+                        it.newBuilder().also { wb -> wb.public_key = ByteString.EMPTY }.build()
+                    } else {
+                        it
+                    }
                 }
             if (info.via_mqtt && !newUser.long_name.endsWith(" (MQTT)")) {
                 newUser = newUser.newBuilder().also { wb -> wb.long_name = "${newUser.long_name} (MQTT)" }.build()
@@ -1116,12 +1121,14 @@ class NodeManagerImpl(
         return Node(
             num = num,
             user =
-            User.Builder().also { wb ->
-            wb.id = userId
-            wb.long_name = "Meshtastic ${userId.takeLast(GENERATED_NODE_NAME_SUFFIX_LENGTH)}"
-            wb.short_name = userId.takeLast(GENERATED_NODE_NAME_SUFFIX_LENGTH)
-            wb.hw_model = HardwareModel.UNSET
-            }.build(),
+            User.Builder()
+                .also { wb ->
+                    wb.id = userId
+                    wb.long_name = "Meshtastic ${userId.takeLast(GENERATED_NODE_NAME_SUFFIX_LENGTH)}"
+                    wb.short_name = userId.takeLast(GENERATED_NODE_NAME_SUFFIX_LENGTH)
+                    wb.hw_model = HardwareModel.UNSET
+                }
+                .build(),
             channel = channel,
         )
     }

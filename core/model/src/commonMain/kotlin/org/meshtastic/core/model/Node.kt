@@ -245,7 +245,14 @@ data class Node(
             val safeUserId = userId.padStart(DEFAULT_ID_SUFFIX_LENGTH, '0').takeLast(DEFAULT_ID_SUFFIX_LENGTH)
             val longName = "$fallbackNamePrefix $safeUserId"
             val defaultUser =
-                User.Builder().also { wb ->wb.id = userId; wb.long_name = longName; wb.short_name = safeUserId; wb.hw_model = HardwareModel.UNSET}.build()
+                User.Builder()
+                    .also { wb ->
+                        wb.id = userId
+                        wb.long_name = longName
+                        wb.short_name = safeUserId
+                        wb.hw_model = HardwareModel.UNSET
+                    }
+                    .build()
             return Node(num = nodeNum, user = defaultUser)
         }
     }

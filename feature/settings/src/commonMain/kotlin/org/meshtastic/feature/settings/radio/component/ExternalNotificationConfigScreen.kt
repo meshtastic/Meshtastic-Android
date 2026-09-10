@@ -76,7 +76,8 @@ fun ExternalNotificationConfigScreenCommon(
     viewModel: RadioConfigViewModel,
 ) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
-    val extNotificationConfig = state.moduleConfig.external_notification ?: ModuleConfig.ExternalNotificationConfig.Builder().build()
+    val extNotificationConfig =
+        state.moduleConfig.external_notification ?: ModuleConfig.ExternalNotificationConfig.Builder().build()
     val ringtone = state.ringtone
     val formState = rememberConfigState(initialValue = extNotificationConfig)
     var ringtoneInput by rememberSaveable(ringtone) { mutableStateOf(ringtone) }
@@ -97,7 +98,7 @@ fun ExternalNotificationConfigScreenCommon(
                 viewModel.setRingtone(ringtoneInput)
             }
             if (formState.value != extNotificationConfig) {
-                val config = ModuleConfig.Builder().also { wb ->wb.external_notification = formState.value}.build()
+                val config = ModuleConfig.Builder().also { wb -> wb.external_notification = formState.value }.build()
                 viewModel.setModuleConfig(config)
             }
         },
@@ -108,7 +109,9 @@ fun ExternalNotificationConfigScreenCommon(
                     title = stringResource(Res.string.external_notification_enabled),
                     checked = formState.value.enabled,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.enabled = it }.build() },
+                    onCheckedChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.enabled = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
             }
@@ -120,7 +123,9 @@ fun ExternalNotificationConfigScreenCommon(
                     title = stringResource(Res.string.alert_message_led),
                     checked = formState.value.alert_message,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.alert_message = it }.build() },
+                    onCheckedChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.alert_message = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -128,7 +133,10 @@ fun ExternalNotificationConfigScreenCommon(
                     title = stringResource(Res.string.alert_message_buzzer),
                     checked = formState.value.alert_message_buzzer,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.alert_message_buzzer = it }.build() },
+                    onCheckedChange = {
+                        formState.value =
+                            formState.value.newBuilder().also { wb -> wb.alert_message_buzzer = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -136,7 +144,10 @@ fun ExternalNotificationConfigScreenCommon(
                     title = stringResource(Res.string.alert_message_vibra),
                     checked = formState.value.alert_message_vibra,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.alert_message_vibra = it }.build() },
+                    onCheckedChange = {
+                        formState.value =
+                            formState.value.newBuilder().also { wb -> wb.alert_message_vibra = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
             }
@@ -148,7 +159,9 @@ fun ExternalNotificationConfigScreenCommon(
                     title = stringResource(Res.string.alert_bell_led),
                     checked = formState.value.alert_bell,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.alert_bell = it }.build() },
+                    onCheckedChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.alert_bell = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -156,7 +169,9 @@ fun ExternalNotificationConfigScreenCommon(
                     title = stringResource(Res.string.alert_bell_buzzer),
                     checked = formState.value.alert_bell_buzzer,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.alert_bell_buzzer = it }.build() },
+                    onCheckedChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.alert_bell_buzzer = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -164,7 +179,9 @@ fun ExternalNotificationConfigScreenCommon(
                     title = stringResource(Res.string.alert_bell_vibra),
                     checked = formState.value.alert_bell_vibra,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.alert_bell_vibra = it }.build() },
+                    onCheckedChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.alert_bell_vibra = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
             }
@@ -178,7 +195,9 @@ fun ExternalNotificationConfigScreenCommon(
                     items = gpio,
                     selectedItem = formState.value.output.toLong(),
                     enabled = state.connected,
-                    onItemSelected = { formState.value = formState.value.newBuilder().also { wb -> wb.output = it.toInt() }.build() },
+                    onItemSelected = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.output = it.toInt() }.build()
+                    },
                 )
                 if (formState.value.output != 0) {
                     HorizontalDivider()
@@ -186,7 +205,9 @@ fun ExternalNotificationConfigScreenCommon(
                         title = stringResource(Res.string.output_led_active_high),
                         checked = formState.value.active,
                         enabled = state.connected,
-                        onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.active = it }.build() },
+                        onCheckedChange = {
+                            formState.value = formState.value.newBuilder().also { wb -> wb.active = it }.build()
+                        },
                         containerColor = CardDefaults.cardColors().containerColor,
                     )
                 }
@@ -196,7 +217,10 @@ fun ExternalNotificationConfigScreenCommon(
                     items = gpio,
                     selectedItem = formState.value.output_buzzer.toLong(),
                     enabled = state.connected,
-                    onItemSelected = { formState.value = formState.value.newBuilder().also { wb -> wb.output_buzzer = it.toInt() }.build() },
+                    onItemSelected = {
+                        formState.value =
+                            formState.value.newBuilder().also { wb -> wb.output_buzzer = it.toInt() }.build()
+                    },
                 )
                 if (formState.value.output_buzzer != 0) {
                     HorizontalDivider()
@@ -204,7 +228,9 @@ fun ExternalNotificationConfigScreenCommon(
                         title = stringResource(Res.string.use_pwm_buzzer),
                         checked = formState.value.use_pwm,
                         enabled = state.connected,
-                        onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.use_pwm = it }.build() },
+                        onCheckedChange = {
+                            formState.value = formState.value.newBuilder().also { wb -> wb.use_pwm = it }.build()
+                        },
                         containerColor = CardDefaults.cardColors().containerColor,
                     )
                 }
@@ -214,7 +240,10 @@ fun ExternalNotificationConfigScreenCommon(
                     items = gpio,
                     selectedItem = formState.value.output_vibra.toLong(),
                     enabled = state.connected,
-                    onItemSelected = { formState.value = formState.value.newBuilder().also { wb -> wb.output_vibra = it.toInt() }.build() },
+                    onItemSelected = {
+                        formState.value =
+                            formState.value.newBuilder().also { wb -> wb.output_vibra = it.toInt() }.build()
+                    },
                 )
                 HorizontalDivider()
                 val outputItems = remember { IntervalConfiguration.OUTPUT.allowedIntervals }
@@ -223,7 +252,9 @@ fun ExternalNotificationConfigScreenCommon(
                     items = outputItems.map { it.value to it.toDisplayString() },
                     selectedItem = formState.value.output_ms.toLong(),
                     enabled = state.connected,
-                    onItemSelected = { formState.value = formState.value.newBuilder().also { wb -> wb.output_ms = it.toInt() }.build() },
+                    onItemSelected = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.output_ms = it.toInt() }.build()
+                    },
                 )
                 HorizontalDivider()
                 val nagItems = remember { IntervalConfiguration.NAG_TIMEOUT.allowedIntervals }
@@ -232,7 +263,10 @@ fun ExternalNotificationConfigScreenCommon(
                     items = nagItems.map { it.value to it.toDisplayString() },
                     selectedItem = formState.value.nag_timeout.toLong(),
                     enabled = state.connected,
-                    onItemSelected = { formState.value = formState.value.newBuilder().also { wb -> wb.nag_timeout = it.toInt() }.build() },
+                    onItemSelected = {
+                        formState.value =
+                            formState.value.newBuilder().also { wb -> wb.nag_timeout = it.toInt() }.build()
+                    },
                 )
                 HorizontalDivider()
                 EditTextPreference(
@@ -258,7 +292,9 @@ fun ExternalNotificationConfigScreenCommon(
                     title = stringResource(Res.string.use_i2s_as_buzzer),
                     checked = formState.value.use_i2s_as_buzzer,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.use_i2s_as_buzzer = it }.build() },
+                    onCheckedChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.use_i2s_as_buzzer = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
             }

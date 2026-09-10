@@ -25,12 +25,14 @@ import kotlin.test.assertTrue
 
 class RxTimeExtensionsTest {
 
-    private fun loraPacket(rxTime: Int?) = MeshPacket.Builder().also { wb ->
-    wb.rx_time = rxTime
-    wb.hop_start = 3
-    wb.hop_limit = 3
-    wb.transport_mechanism = MeshPacket.TransportMechanism.TRANSPORT_LORA
-    }.build()
+    private fun loraPacket(rxTime: Int?) = MeshPacket.Builder()
+        .also { wb ->
+            wb.rx_time = rxTime
+            wb.hop_start = 3
+            wb.hop_limit = 3
+            wb.transport_mechanism = MeshPacket.TransportMechanism.TRANSPORT_LORA
+        }
+        .build()
 
     @Test
     fun `rxTimeOrNull returns the stamped time`() {

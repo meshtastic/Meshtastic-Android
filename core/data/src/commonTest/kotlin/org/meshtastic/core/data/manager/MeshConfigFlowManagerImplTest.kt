@@ -107,7 +107,13 @@ class MeshConfigFlowManagerImplTest {
             .build()
 
     private val metadata =
-        DeviceMetadata.Builder().also { wb ->wb.firmware_version = "2.6.0"; wb.hw_model = HardwareModel.HELTEC_V3; wb.hasWifi = false}.build()
+        DeviceMetadata.Builder()
+            .also { wb ->
+                wb.firmware_version = "2.6.0"
+                wb.hw_model = HardwareModel.HELTEC_V3
+                wb.hasWifi = false
+            }
+            .build()
 
     @BeforeTest
     fun setUp() {
@@ -265,7 +271,7 @@ class MeshConfigFlowManagerImplTest {
         activeSessionFlow.value = nextSession
 
         assertFalse(manager.handleLocalMetadata(metadata, nextSession))
-        assertFalse(manager.handleNodeInfo(NodeInfo.Builder().also { wb ->wb.num = 100}.build(), nextSession))
+        assertFalse(manager.handleNodeInfo(NodeInfo.Builder().also { wb -> wb.num = 100 }.build(), nextSession))
         assertFalse(manager.handleConfigComplete(HandshakeConstants.CONFIG_NONCE, nextSession))
         advanceUntilIdle()
 
@@ -432,7 +438,13 @@ class MeshConfigFlowManagerImplTest {
     @Test
     fun `Stage 1 complete with old firmware logs warning but continues handshake`() = testScope.runTest {
         val oldMetadata =
-            DeviceMetadata.Builder().also { wb ->wb.firmware_version = "2.3.0"; wb.hw_model = HardwareModel.HELTEC_V3; wb.hasWifi = false}.build()
+            DeviceMetadata.Builder()
+                .also { wb ->
+                    wb.firmware_version = "2.3.0"
+                    wb.hw_model = HardwareModel.HELTEC_V3
+                    wb.hasWifi = false
+                }
+                .build()
         handleMyInfo(protoMyNodeInfo)
         advanceUntilIdle()
         manager.handleLocalMetadata(oldMetadata)
@@ -512,8 +524,8 @@ class MeshConfigFlowManagerImplTest {
         runCurrent()
 
         // Now in ReceivingNodeInfo
-        manager.handleNodeInfo(NodeInfo.Builder().also { wb ->wb.num = 100}.build())
-        manager.handleNodeInfo(NodeInfo.Builder().also { wb ->wb.num = 200}.build())
+        manager.handleNodeInfo(NodeInfo.Builder().also { wb -> wb.num = 100 }.build())
+        manager.handleNodeInfo(NodeInfo.Builder().also { wb -> wb.num = 200 }.build())
 
         assertEquals(2, manager.newNodeCount)
     }
@@ -526,7 +538,7 @@ class MeshConfigFlowManagerImplTest {
         handleMyInfo(protoMyNodeInfo)
         advanceUntilIdle()
 
-        manager.handleNodeInfo(NodeInfo.Builder().also { wb ->wb.num = 100}.build())
+        manager.handleNodeInfo(NodeInfo.Builder().also { wb -> wb.num = 100 }.build())
         assertEquals(1, manager.newNodeCount)
 
         manager.handleLocalMetadata(metadata)
@@ -537,14 +549,14 @@ class MeshConfigFlowManagerImplTest {
         manager.handleConfigComplete(HandshakeConstants.NODE_INFO_NONCE)
         advanceUntilIdle()
 
-        verify { nodeManager.installNodeInfo(NodeInfo.Builder().also { wb ->wb.num = 100}.build()) }
+        verify { nodeManager.installNodeInfo(NodeInfo.Builder().also { wb -> wb.num = 100 }.build()) }
         verifySuspend { connectionManager.onNodeDbReady() }
     }
 
     @Test
     fun `handleNodeInfo ignored outside Stage 2`() = testScope.runTest {
         // State is Idle
-        manager.handleNodeInfo(NodeInfo.Builder().also { wb ->wb.num = 999}.build())
+        manager.handleNodeInfo(NodeInfo.Builder().also { wb -> wb.num = 999 }.build())
 
         assertEquals(0, manager.newNodeCount)
     }
@@ -553,7 +565,7 @@ class MeshConfigFlowManagerImplTest {
 
     @Test
     fun `active session completes metadata node info and both handshake stages`() = testScope.runTest {
-        val nodeInfo = NodeInfo.Builder().also { wb ->wb.num = 100}.build()
+        val nodeInfo = NodeInfo.Builder().also { wb -> wb.num = 100 }.build()
         val testNode = org.meshtastic.core.testing.TestDataFactory.createTestNode(num = nodeInfo.num)
         every { nodeManager.nodeDBbyNodeNum } returns mapOf(nodeInfo.num to testNode)
 
@@ -579,8 +591,8 @@ class MeshConfigFlowManagerImplTest {
 
     @Test
     fun `session revocation during Stage 2 stops remaining persistence and publication`() = testScope.runTest {
-        val firstNode = NodeInfo.Builder().also { wb ->wb.num = 100}.build()
-        val secondNode = NodeInfo.Builder().also { wb ->wb.num = 200}.build()
+        val firstNode = NodeInfo.Builder().also { wb -> wb.num = 100 }.build()
+        val secondNode = NodeInfo.Builder().also { wb -> wb.num = 200 }.build()
         val testNode = org.meshtastic.core.testing.TestDataFactory.createTestNode(num = firstNode.num)
         every { nodeManager.nodeDBbyNodeNum } returns mapOf(firstNode.num to testNode)
         every { nodeManager.installNodeInfo(any()) } calls { activeSessionFlow.value = null }
@@ -619,7 +631,7 @@ class MeshConfigFlowManagerImplTest {
         advanceTimeBy(STAGE_TRANSITION_ADVANCE_MS)
         runCurrent()
 
-        manager.handleNodeInfo(NodeInfo.Builder().also { wb ->wb.num = 100}.build())
+        manager.handleNodeInfo(NodeInfo.Builder().also { wb -> wb.num = 100 }.build())
         manager.handleConfigComplete(HandshakeConstants.NODE_INFO_NONCE)
         advanceUntilIdle()
 
@@ -753,7 +765,13 @@ class MeshConfigFlowManagerImplTest {
 
     @Test
     fun `handleFileInfo delegates to radioConfigRepository`() = testScope.runTest {
-        val fileInfo = FileInfo.Builder().also { wb ->wb.file_name = "firmware.bin"; wb.size_bytes = 1024}.build()
+        val fileInfo =
+            FileInfo.Builder()
+                .also { wb ->
+                    wb.file_name = "firmware.bin"
+                    wb.size_bytes = 1024
+                }
+                .build()
         manager.handleFileInfo(fileInfo)
         advanceUntilIdle()
 
@@ -791,7 +809,7 @@ class MeshConfigFlowManagerImplTest {
         verify { connectionManager.onRadioConfigLoaded() }
 
         // Receive NodeInfo during Stage 2
-        manager.handleNodeInfo(NodeInfo.Builder().also { wb ->wb.num = 100}.build())
+        manager.handleNodeInfo(NodeInfo.Builder().also { wb -> wb.num = 100 }.build())
         assertEquals(1, manager.newNodeCount)
 
         // Stage 2 complete
@@ -830,7 +848,9 @@ class MeshConfigFlowManagerImplTest {
 
     @Test
     fun `handleMyInfo applies the event node-event default for event firmware`() = testScope.runTest {
-        handleMyInfo(protoMyNodeInfo.newBuilder().also { wb -> wb.firmware_edition = FirmwareEdition.DEFCON }.build())
+        handleMyInfo(
+            protoMyNodeInfo.newBuilder().also { wb -> wb.firmware_edition = FirmwareEdition.DEFCON }.build(),
+        )
         advanceUntilIdle()
 
         verify { notificationPrefs.applyEventFirmwareNodeEventDefault(isEventFirmware = true) }
@@ -848,7 +868,9 @@ class MeshConfigFlowManagerImplTest {
     fun `handleMyInfo treats DIY_EDITION as event firmware`() = testScope.runTest {
         // Any non-vanilla edition counts, including the DIY catch-all — it has no branding metadata but the same
         // notification noise problem.
-        handleMyInfo(protoMyNodeInfo.newBuilder().also { wb -> wb.firmware_edition = FirmwareEdition.DIY_EDITION }.build())
+        handleMyInfo(
+            protoMyNodeInfo.newBuilder().also { wb -> wb.firmware_edition = FirmwareEdition.DIY_EDITION }.build(),
+        )
         advanceUntilIdle()
 
         verify { notificationPrefs.applyEventFirmwareNodeEventDefault(isEventFirmware = true) }
@@ -886,7 +908,13 @@ class MeshConfigFlowManagerImplTest {
 
     @Test
     fun `handleFileInfo calls onHandshakeProgress`() = testScope.runTest {
-        val fileInfo = FileInfo.Builder().also { wb ->wb.file_name = "firmware.bin"; wb.size_bytes = 1024}.build()
+        val fileInfo =
+            FileInfo.Builder()
+                .also { wb ->
+                    wb.file_name = "firmware.bin"
+                    wb.size_bytes = 1024
+                }
+                .build()
         manager.handleFileInfo(fileInfo)
         advanceUntilIdle()
 
@@ -897,7 +925,7 @@ class MeshConfigFlowManagerImplTest {
     fun `handleNodeInfo during Stage 1 calls onHandshakeProgress`() = testScope.runTest {
         handleMyInfo(protoMyNodeInfo)
         advanceUntilIdle()
-        manager.handleNodeInfo(NodeInfo.Builder().also { wb ->wb.num = 100}.build())
+        manager.handleNodeInfo(NodeInfo.Builder().also { wb -> wb.num = 100 }.build())
 
         // handleMyInfo fires one call; handleNodeInfo in ReceivingConfig adds exactly one more.
         verify(mode = VerifyMode.exactly(2)) { connectionManager.onHandshakeProgress() }
@@ -914,7 +942,7 @@ class MeshConfigFlowManagerImplTest {
         runCurrent()
 
         // Now in ReceivingNodeInfo — a NodeInfo packet must reset the watchdog.
-        manager.handleNodeInfo(NodeInfo.Builder().also { wb ->wb.num = 100}.build())
+        manager.handleNodeInfo(NodeInfo.Builder().also { wb -> wb.num = 100 }.build())
 
         // Prior calls: handleMyInfo(1) + handleLocalMetadata(1) + handleConfigOnlyComplete(1) = 3.
         // handleNodeInfo adds exactly one more.
@@ -938,7 +966,7 @@ class MeshConfigFlowManagerImplTest {
     @Test
     fun `handleNodeInfo outside active handshake does not call onHandshakeProgress`() = testScope.runTest {
         // State is Idle — NodeInfo is ignored and must not reset the watchdog.
-        manager.handleNodeInfo(NodeInfo.Builder().also { wb ->wb.num = 999}.build())
+        manager.handleNodeInfo(NodeInfo.Builder().also { wb -> wb.num = 999 }.build())
 
         verify(mode = VerifyMode.not) { connectionManager.onHandshakeProgress() }
     }
@@ -962,7 +990,7 @@ class MeshConfigFlowManagerImplTest {
         manager.handleConfigComplete(HandshakeConstants.CONFIG_NONCE)
         advanceTimeBy(STAGE_TRANSITION_ADVANCE_MS)
         runCurrent()
-        manager.handleNodeInfo(NodeInfo.Builder().also { wb ->wb.num = 100}.build())
+        manager.handleNodeInfo(NodeInfo.Builder().also { wb -> wb.num = 100 }.build())
         manager.handleConfigComplete(HandshakeConstants.NODE_INFO_NONCE)
         advanceUntilIdle()
 
@@ -990,7 +1018,7 @@ class MeshConfigFlowManagerImplTest {
         manager.handleConfigComplete(HandshakeConstants.CONFIG_NONCE)
         advanceTimeBy(STAGE_TRANSITION_ADVANCE_MS)
         runCurrent()
-        manager.handleNodeInfo(NodeInfo.Builder().also { wb ->wb.num = 100}.build())
+        manager.handleNodeInfo(NodeInfo.Builder().also { wb -> wb.num = 100 }.build())
         manager.handleConfigComplete(HandshakeConstants.NODE_INFO_NONCE)
         advanceUntilIdle()
 
@@ -1029,7 +1057,7 @@ class MeshConfigFlowManagerImplTest {
         manager.handleConfigComplete(HandshakeConstants.CONFIG_NONCE)
         advanceTimeBy(STAGE_TRANSITION_ADVANCE_MS)
         runCurrent()
-        manager.handleNodeInfo(NodeInfo.Builder().also { wb ->wb.num = 100}.build())
+        manager.handleNodeInfo(NodeInfo.Builder().also { wb -> wb.num = 100 }.build())
 
         // Drive Stage 2 complete. handleNodeInfoComplete runs synchronously: state becomes
         // Complete, onHandshakeComplete() fires (cancelling the watchdog), then the async DB

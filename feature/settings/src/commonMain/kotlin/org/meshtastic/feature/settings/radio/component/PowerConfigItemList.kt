@@ -61,7 +61,7 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val config = Config.Builder().also { wb ->wb.power = it}.build()
+            val config = Config.Builder().also { wb -> wb.power = it }.build()
             viewModel.setConfig(config)
         },
     ) {
@@ -72,7 +72,9 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     summary = stringResource(Res.string.config_power_is_power_saving_summary),
                     checked = formState.value.is_power_saving,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.is_power_saving = it }.build() },
+                    onCheckedChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.is_power_saving = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -83,7 +85,11 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     enabled = state.connected,
                     items = items.map { it.value to it.toDisplayString() },
                     onItemSelected = {
-                        formState.value = formState.value.newBuilder().also { wb -> wb.on_battery_shutdown_after_secs = it.toInt() }.build()
+                        formState.value =
+                            formState.value
+                                .newBuilder()
+                                .also { wb -> wb.on_battery_shutdown_after_secs = it.toInt() }
+                                .build()
                     },
                 )
                 HorizontalDivider()
@@ -92,7 +98,11 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     checked = formState.value.adc_multiplier_override > 0f,
                     enabled = state.connected,
                     onCheckedChange = {
-                        formState.value = formState.value.newBuilder().also { wb -> wb.adc_multiplier_override = if (it) 1.0f else 0.0f }.build()
+                        formState.value =
+                            formState.value
+                                .newBuilder()
+                                .also { wb -> wb.adc_multiplier_override = if (it) 1.0f else 0.0f }
+                                .build()
                     },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
@@ -103,7 +113,10 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                         value = formState.value.adc_multiplier_override,
                         enabled = state.connected,
                         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                        onValueChanged = { formState.value = formState.value.newBuilder().also { wb -> wb.adc_multiplier_override = it }.build() },
+                        onValueChanged = {
+                            formState.value =
+                                formState.value.newBuilder().also { wb -> wb.adc_multiplier_override = it }.build()
+                        },
                     )
                 }
                 HorizontalDivider()
@@ -113,14 +126,19 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     selectedItem = formState.value.wait_bluetooth_secs.toLong(),
                     enabled = state.connected,
                     items = waitBluetoothItems.map { it.value to it.toDisplayString() },
-                    onItemSelected = { formState.value = formState.value.newBuilder().also { wb -> wb.wait_bluetooth_secs = it.toInt() }.build() },
+                    onItemSelected = {
+                        formState.value =
+                            formState.value.newBuilder().also { wb -> wb.wait_bluetooth_secs = it.toInt() }.build()
+                    },
                 )
                 HorizontalDivider()
                 val sdsSecsItems = remember { IntervalConfiguration.ALL.allowedIntervals }
                 DropDownPreference(
                     title = stringResource(Res.string.super_deep_sleep_duration_seconds),
                     selectedItem = formState.value.sds_secs.toLong(),
-                    onItemSelected = { formState.value = formState.value.newBuilder().also { wb -> wb.sds_secs = it.toInt() }.build() },
+                    onItemSelected = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.sds_secs = it.toInt() }.build()
+                    },
                     enabled = state.connected,
                     items = sdsSecsItems.map { it.value to it.toDisplayString() },
                 )
@@ -131,7 +149,10 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     selectedItem = formState.value.min_wake_secs.toLong(),
                     enabled = state.connected,
                     items = minWakeItems.map { it.value to it.toDisplayString() },
-                    onItemSelected = { formState.value = formState.value.newBuilder().also { wb -> wb.min_wake_secs = it.toInt() }.build() },
+                    onItemSelected = {
+                        formState.value =
+                            formState.value.newBuilder().also { wb -> wb.min_wake_secs = it.toInt() }.build()
+                    },
                 )
                 HorizontalDivider()
                 EditTextPreference(
@@ -139,7 +160,10 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     value = formState.value.device_battery_ina_address,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.newBuilder().also { wb -> wb.device_battery_ina_address = it }.build() },
+                    onValueChanged = {
+                        formState.value =
+                            formState.value.newBuilder().also { wb -> wb.device_battery_ina_address = it }.build()
+                    },
                 )
             }
         }

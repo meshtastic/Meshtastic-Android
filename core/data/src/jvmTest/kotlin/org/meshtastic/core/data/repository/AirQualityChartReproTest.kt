@@ -113,22 +113,35 @@ class AirQualityChartReproTest {
     )
 
     /** Brian's real reading: pm10_standard=1, pm25_standard=2, pm100_standard=2. */
-    private fun brianAirQualityTelemetry() = Telemetry.Builder().also { wb ->
-    wb.air_quality_metrics = AirQualityMetrics.Builder().also { wb ->
-            wb.pm10_standard = 1
-            wb.pm25_standard = 2
-            wb.pm100_standard = 2
-            wb.pm10_environmental = 1
-            wb.pm25_environmental = 2
-            wb.pm100_environmental = 2
-            }.build()
-    }.build()
+    private fun brianAirQualityTelemetry() = Telemetry.Builder()
+        .also { wb ->
+            wb.air_quality_metrics =
+                AirQualityMetrics.Builder()
+                    .also { wb ->
+                        wb.pm10_standard = 1
+                        wb.pm25_standard = 2
+                        wb.pm100_standard = 2
+                        wb.pm10_environmental = 1
+                        wb.pm25_environmental = 2
+                        wb.pm100_environmental = 2
+                    }
+                    .build()
+        }
+        .build()
 
-    private fun airQualityPacket() = MeshPacket.Builder().also { wb ->
-    wb.from = localNum
-    wb.rx_time = 1_700_000_000
-    wb.decoded = Data.Builder().also { wb ->wb.payload = brianAirQualityTelemetry().encode().toByteString(); wb.portnum = PortNum.TELEMETRY_APP}.build()
-    }.build()
+    private fun airQualityPacket() = MeshPacket.Builder()
+        .also { wb ->
+            wb.from = localNum
+            wb.rx_time = 1_700_000_000
+            wb.decoded =
+                Data.Builder()
+                    .also { wb ->
+                        wb.payload = brianAirQualityTelemetry().encode().toByteString()
+                        wb.portnum = PortNum.TELEMETRY_APP
+                    }
+                    .build()
+        }
+        .build()
 
     private fun airQualityLog(fromNum: Int) = MeshLog(
         uuid = "aq-$fromNum",
@@ -137,7 +150,7 @@ class AirQualityChartReproTest {
         raw_message = "",
         fromNum = fromNum,
         portNum = PortNum.TELEMETRY_APP.value,
-        fromRadio = FromRadio.Builder().also { wb ->wb.packet = airQualityPacket()}.build(),
+        fromRadio = FromRadio.Builder().also { wb -> wb.packet = airQualityPacket() }.build(),
     )
 
     /** Checkpoint 1: the parse + query round-trip preserves the air-quality payload (rules out content loss). */

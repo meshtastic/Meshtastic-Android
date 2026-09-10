@@ -54,7 +54,7 @@ data class Channel(val settings: ChannelSettings = default.settings, val loraCon
         // The default channel that devices ship with
         val default =
             Channel(
-                ChannelSettings.Builder().also { wb ->wb.psk = defaultPSK.toByteString()}.build(),
+                ChannelSettings.Builder().also { wb -> wb.psk = defaultPSK.toByteString() }.build(),
                 // references: NodeDB::installDefaultConfig / Channels::initDefaultChannel
                 LoRaConfig.Builder()
                     .also { wb ->

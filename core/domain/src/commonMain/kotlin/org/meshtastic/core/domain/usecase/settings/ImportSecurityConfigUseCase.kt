@@ -36,6 +36,11 @@ open class ImportSecurityConfigUseCase {
         val privateKey = stored.privateKeyBase64.decodeBase64()
         requireNotNull(publicKey) { "public_key is not valid base64" }
         requireNotNull(privateKey) { "private_key is not valid base64" }
-        Config.SecurityConfig.Builder().also { wb ->wb.public_key = publicKey; wb.private_key = privateKey}.build()
+        Config.SecurityConfig.Builder()
+            .also { wb ->
+                wb.public_key = publicKey
+                wb.private_key = privateKey
+            }
+            .build()
     }
 }

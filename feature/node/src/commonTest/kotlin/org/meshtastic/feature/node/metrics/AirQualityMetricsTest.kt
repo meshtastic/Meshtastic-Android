@@ -31,11 +31,22 @@ import kotlin.test.assertNull
  */
 class AirQualityMetricsTest {
 
-    private fun telemetry(aq: AirQualityMetrics) = Telemetry.Builder().also { wb ->wb.air_quality_metrics = aq}.build()
+    private fun telemetry(aq: AirQualityMetrics) =
+        Telemetry.Builder().also { wb -> wb.air_quality_metrics = aq }.build()
 
     @Test
     fun `getValue returns present non-zero readings`() {
-        val t = telemetry(AirQualityMetrics.Builder().also { wb ->wb.pm10_standard = 1; wb.pm25_standard = 2; wb.pm100_standard = 3; wb.co2 = 800}.build())
+        val t =
+            telemetry(
+                AirQualityMetrics.Builder()
+                    .also { wb ->
+                        wb.pm10_standard = 1
+                        wb.pm25_standard = 2
+                        wb.pm100_standard = 3
+                        wb.co2 = 800
+                    }
+                    .build(),
+            )
         assertEquals(1f, AirQuality.PM1_0.getValue(t))
         assertEquals(2f, AirQuality.PM2_5.getValue(t))
         assertEquals(3f, AirQuality.PM10.getValue(t))
@@ -45,7 +56,17 @@ class AirQualityMetricsTest {
     @Test
     fun `getValue plots a present-zero reading instead of suppressing it`() {
         // BUG B regression: clean air reads 0 µg/m³ and must chart as 0f, not be dropped to null.
-        val t = telemetry(AirQualityMetrics.Builder().also { wb ->wb.pm10_standard = 0; wb.pm25_standard = 0; wb.pm100_standard = 0; wb.co2 = 0}.build())
+        val t =
+            telemetry(
+                AirQualityMetrics.Builder()
+                    .also { wb ->
+                        wb.pm10_standard = 0
+                        wb.pm25_standard = 0
+                        wb.pm100_standard = 0
+                        wb.co2 = 0
+                    }
+                    .build(),
+            )
         assertEquals(0f, AirQuality.PM1_0.getValue(t))
         assertEquals(0f, AirQuality.PM2_5.getValue(t))
         assertEquals(0f, AirQuality.PM10.getValue(t))
@@ -55,7 +76,7 @@ class AirQualityMetricsTest {
     @Test
     fun `getValue returns null for an absent field so a partial-sensor node does not chart spurious series`() {
         // A CO2-only node leaves the PM fields unset (Wire decodes an unset optional uint32 to null).
-        val t = telemetry(AirQualityMetrics.Builder().also { wb ->wb.co2 = 450}.build())
+        val t = telemetry(AirQualityMetrics.Builder().also { wb -> wb.co2 = 450 }.build())
         assertNull(AirQuality.PM1_0.getValue(t))
         assertNull(AirQuality.PM2_5.getValue(t))
         assertNull(AirQuality.PM10.getValue(t))
@@ -74,13 +95,17 @@ class AirQualityMetricsTest {
     fun `metricsWithData drops selected series that have no reading so the legend is not ever-present`() {
         // Issue 5873, CO2-only node: PM2.5 is default-selected but never reported, so it must not survive into the
         // legend.
-        val co2Only = listOf(sample(AirQualityMetrics.Builder().also { wb ->wb.co2 = 450}.build()))
+        val co2Only = listOf(sample(AirQualityMetrics.Builder().also { wb -> wb.co2 = 450 }.build()))
         assertEquals(listOf(AirQuality.CO2), metricsWithData(listOf(AirQuality.PM2_5, AirQuality.CO2), co2Only))
     }
 
     @Test
     fun `metricsWithData keeps a series once it has any reading in the frame`() {
-        val mixed = listOf(sample(AirQualityMetrics.Builder().also { wb ->wb.co2 = 450}.build()), sample(AirQualityMetrics.Builder().also { wb ->wb.pm25_standard = 8}.build()))
+        val mixed =
+            listOf(
+                sample(AirQualityMetrics.Builder().also { wb -> wb.co2 = 450 }.build()),
+                sample(AirQualityMetrics.Builder().also { wb -> wb.pm25_standard = 8 }.build()),
+            )
         assertEquals(
             listOf(AirQuality.PM2_5, AirQuality.CO2),
             metricsWithData(listOf(AirQuality.PM2_5, AirQuality.CO2), mixed),
@@ -91,7 +116,7 @@ class AirQualityMetricsTest {
 
     @Test
     fun `getValue for AQI comes from the sample derived value rather than the telemetry`() {
-        val t = telemetry(AirQualityMetrics.Builder().also { wb ->wb.pm25_standard = 25}.build())
+        val t = telemetry(AirQualityMetrics.Builder().also { wb -> wb.pm25_standard = 25 }.build())
         assertNull(AirQuality.AQI.getValue(t), "AQI is not a proto field, so a bare Telemetry has none")
         assertEquals(78f, AirQuality.AQI.getValue(AirQualitySample(t, aqi = 78)))
         assertNull(AirQuality.AQI.getValue(AirQualitySample(t, aqi = null)))
@@ -100,7 +125,10 @@ class AirQualityMetricsTest {
     @Test
     fun `getValue for AQI plots a zero AQI instead of suppressing it`() {
         // Pristine air is AQI 0 - a real value, and the same present-and-zero rule the PM series follow.
-        assertEquals(0f, AirQuality.AQI.getValue(AirQualitySample(telemetry(AirQualityMetrics.Builder().build()), aqi = 0)))
+        assertEquals(
+            0f,
+            AirQuality.AQI.getValue(AirQualitySample(telemetry(AirQualityMetrics.Builder().build()), aqi = 0)),
+        )
     }
 
     @Test
@@ -122,7 +150,14 @@ class AirQualityMetricsTest {
     @Test
     fun `withNowCastAqi gives a CO2-only node no AQI so the series is never offered`() {
         val co2Only =
-            (0..3).map { hour -> Telemetry.Builder().also { wb ->wb.time = HOUR * hour; wb.air_quality_metrics = AirQualityMetrics.Builder().also { wb ->wb.co2 = 450}.build()}.build() }
+            (0..3).map { hour ->
+                Telemetry.Builder()
+                    .also { wb ->
+                        wb.time = HOUR * hour
+                        wb.air_quality_metrics = AirQualityMetrics.Builder().also { wb -> wb.co2 = 450 }.build()
+                    }
+                    .build()
+            }
         val samples = withNowCastAqi(co2Only)
         assertEquals(emptyList(), samples.mapNotNull { it.aqi })
         assertEquals(emptyList(), metricsWithData(listOf(AirQuality.AQI), samples))
@@ -148,13 +183,12 @@ class AirQualityMetricsTest {
         assertEquals(53, samples[3].aqi)
     }
 
-    private fun hourlyTelemetry(hoursFromStart: Int, pm25: Int) =
-        Telemetry.Builder()
-            .also { wb ->
-                wb.time = HOUR * hoursFromStart
-                wb.air_quality_metrics = AirQualityMetrics.Builder().also { wb -> wb.pm25_standard = pm25 }.build()
-            }
-            .build()
+    private fun hourlyTelemetry(hoursFromStart: Int, pm25: Int) = Telemetry.Builder()
+        .also { wb ->
+            wb.time = HOUR * hoursFromStart
+            wb.air_quality_metrics = AirQualityMetrics.Builder().also { wb -> wb.pm25_standard = pm25 }.build()
+        }
+        .build()
 
     private fun sample(aq: AirQualityMetrics, aqi: Int? = null) = AirQualitySample(telemetry(aq), aqi)
 

@@ -27,12 +27,15 @@ class ChannelSetReplacementTest {
 
     @Test
     fun `replacement plan normalizes padding and duplicates before slot validation`() {
-        val primary = ChannelSettings.Builder().also { wb ->wb.name = "Primary"}.build()
-        val uniqueSecondaries = (1..7).map { ChannelSettings.Builder().also { wb ->wb.name = "Secondary $it"}.build() }
+        val primary = ChannelSettings.Builder().also { wb -> wb.name = "Primary" }.build()
+        val uniqueSecondaries =
+            (1..7).map { ChannelSettings.Builder().also { wb -> wb.name = "Secondary $it" }.build() }
         val rawSettings = listOf(primary, ChannelSettings.Builder().build(), primary) + uniqueSecondaries
 
         val plan =
-            ChannelSet.Builder().also { wb ->wb.settings = rawSettings}.build()
+            ChannelSet.Builder()
+                .also { wb -> wb.settings = rawSettings }
+                .build()
                 .toChannelReplacementPlan(
                     currentSettings = emptyList(),
                     fallbackLoraConfig = null,
@@ -48,9 +51,11 @@ class ChannelSetReplacementTest {
     @Test
     fun `replacement plan rejects empty profile channel set before producing writes`() {
         assertFailsWith<IllegalArgumentException> {
-            ChannelSet.Builder().also { wb ->wb.settings = emptyList()}.build()
+            ChannelSet.Builder()
+                .also { wb -> wb.settings = emptyList() }
+                .build()
                 .toChannelReplacementPlan(
-                    currentSettings = listOf(ChannelSettings.Builder().also { wb ->wb.name = "Existing"}.build()),
+                    currentSettings = listOf(ChannelSettings.Builder().also { wb -> wb.name = "Existing" }.build()),
                     fallbackLoraConfig = null,
                     requirePrimary = true,
                 )

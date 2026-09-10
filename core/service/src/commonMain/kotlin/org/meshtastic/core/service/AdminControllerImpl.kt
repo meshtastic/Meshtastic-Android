@@ -89,12 +89,14 @@ internal class AdminControllerImpl(
     // ── Owner ───────────────────────────────────────────────────────────────
 
     override suspend fun setOwner(destNum: Int, user: User, packetId: Int) {
-        commandSender.sendAdmin(destNum, packetId) { AdminMessage.Builder().also { wb ->wb.set_owner = user}.build() }
+        commandSender.sendAdmin(destNum, packetId) { AdminMessage.Builder().also { wb -> wb.set_owner = user }.build() }
         nodeManager.handleReceivedUser(destNum, user)
     }
 
     override suspend fun getOwner(destNum: Int, packetId: Int) {
-        commandSender.sendAdmin(destNum, packetId, wantResponse = true) { AdminMessage.Builder().also { wb ->wb.get_owner_request = true}.build() }
+        commandSender.sendAdmin(destNum, packetId, wantResponse = true) {
+            AdminMessage.Builder().also { wb -> wb.get_owner_request = true }.build()
+        }
     }
 
     override suspend fun setHamMode(destNum: Int, hamParameters: HamParameters, packetId: Int) {
@@ -106,17 +108,21 @@ internal class AdminControllerImpl(
         // values to keep a re-send (e.g. a callsign edit while already licensed) from wiping overrides.
         val lora = radioConfigRepository.localConfigFlow.firstOrNull()?.lora ?: Config.LoRaConfig.Builder().build()
         val params =
-            hamParameters.newBuilder()
+            hamParameters
+                .newBuilder()
                 .also { wb ->
                     wb.tx_power = lora.tx_power
                     wb.frequency = lora.override_frequency
                 }
                 .build()
-        commandSender.sendAdmin(destNum, packetId) { AdminMessage.Builder().also { wb ->wb.set_ham_mode = params}.build() }
+        commandSender.sendAdmin(destNum, packetId) {
+            AdminMessage.Builder().also { wb -> wb.set_ham_mode = params }.build()
+        }
         val currentUser = nodeManager.nodeDBbyNodeNum[destNum]?.user ?: User.Builder().build()
         nodeManager.handleReceivedUser(
             destNum,
-            currentUser.newBuilder()
+            currentUser
+                .newBuilder()
                 .also { wb ->
                     wb.long_name = HamName.compose(hamParameters.call_sign, hamParameters.long_name)
                     wb.short_name = hamParameters.short_name
@@ -129,12 +135,14 @@ internal class AdminControllerImpl(
     // ── Configuration ─────────────────────────────────────────────────────────
 
     override suspend fun setLocalConfig(config: Config) {
-        commandSender.sendAdmin(myNodeNum) { AdminMessage.Builder().also { wb ->wb.set_config = config}.build() }
+        commandSender.sendAdmin(myNodeNum) { AdminMessage.Builder().also { wb -> wb.set_config = config }.build() }
         scope.handledLaunch { radioConfigRepository.setLocalConfig(config) }
     }
 
     override suspend fun setConfig(destNum: Int, config: Config, packetId: Int) {
-        commandSender.sendAdmin(destNum, packetId) { AdminMessage.Builder().also { wb ->wb.set_config = config}.build() }
+        commandSender.sendAdmin(destNum, packetId) {
+            AdminMessage.Builder().also { wb -> wb.set_config = config }.build()
+        }
         if (destNum == nodeManager.myNodeNum.value) {
             scope.handledLaunch { radioConfigRepository.setLocalConfig(config) }
         }
@@ -143,15 +151,19 @@ internal class AdminControllerImpl(
     override suspend fun getConfig(destNum: Int, configType: Int, packetId: Int) {
         commandSender.sendAdmin(destNum, packetId, wantResponse = true) {
             if (configType == AdminMessage.ConfigType.SESSIONKEY_CONFIG.value) {
-                AdminMessage.Builder().also { wb ->wb.get_device_metadata_request = true}.build()
+                AdminMessage.Builder().also { wb -> wb.get_device_metadata_request = true }.build()
             } else {
-                AdminMessage.Builder().also { wb ->wb.get_config_request = AdminMessage.ConfigType.fromValue(configType)}.build()
+                AdminMessage.Builder()
+                    .also { wb -> wb.get_config_request = AdminMessage.ConfigType.fromValue(configType) }
+                    .build()
             }
         }
     }
 
     override suspend fun setModuleConfig(destNum: Int, config: ModuleConfig, packetId: Int) {
-        commandSender.sendAdmin(destNum, packetId) { AdminMessage.Builder().also { wb ->wb.set_module_config = config}.build() }
+        commandSender.sendAdmin(destNum, packetId) {
+            AdminMessage.Builder().also { wb -> wb.set_module_config = config }.build()
+        }
         if (destNum == nodeManager.myNodeNum.value) {
             config.statusmessage?.let { sm -> nodeManager.updateNodeStatus(destNum, sm.node_status) }
             scope.handledLaunch { radioConfigRepository.setLocalModuleConfig(config) }
@@ -160,19 +172,23 @@ internal class AdminControllerImpl(
 
     override suspend fun getModuleConfig(destNum: Int, moduleConfigType: Int, packetId: Int) {
         commandSender.sendAdmin(destNum, packetId, wantResponse = true) {
-            AdminMessage.Builder().also { wb ->wb.get_module_config_request = AdminMessage.ModuleConfigType.fromValue(moduleConfigType)}.build()
+            AdminMessage.Builder()
+                .also { wb -> wb.get_module_config_request = AdminMessage.ModuleConfigType.fromValue(moduleConfigType) }
+                .build()
         }
     }
 
     // ── Channels ────────────────────────────────────────────────────────────
 
     override suspend fun setLocalChannel(channel: Channel) {
-        commandSender.sendAdmin(myNodeNum) { AdminMessage.Builder().also { wb ->wb.set_channel = channel}.build() }
+        commandSender.sendAdmin(myNodeNum) { AdminMessage.Builder().also { wb -> wb.set_channel = channel }.build() }
         scope.handledLaunch { radioConfigRepository.updateChannelSettings(channel) }
     }
 
     override suspend fun setRemoteChannel(destNum: Int, channel: Channel, packetId: Int) {
-        commandSender.sendAdmin(destNum, packetId) { AdminMessage.Builder().also { wb ->wb.set_channel = channel}.build() }
+        commandSender.sendAdmin(destNum, packetId) {
+            AdminMessage.Builder().also { wb -> wb.set_channel = channel }.build()
+        }
         if (destNum == nodeManager.myNodeNum.value) {
             scope.handledLaunch { radioConfigRepository.updateChannelSettings(channel) }
         }
@@ -180,33 +196,41 @@ internal class AdminControllerImpl(
 
     override suspend fun getChannel(destNum: Int, index: Int, packetId: Int) {
         commandSender.sendAdmin(destNum, packetId, wantResponse = true) {
-            AdminMessage.Builder().also { wb ->wb.get_channel_request = index + 1}.build()
+            AdminMessage.Builder().also { wb -> wb.get_channel_request = index + 1 }.build()
         }
     }
 
     // ── Ringtone & Canned Messages ─────────────────────────────────────────
 
     override suspend fun setRingtone(destNum: Int, ringtone: String) {
-        commandSender.sendAdmin(destNum) { AdminMessage.Builder().also { wb ->wb.set_ringtone_message = ringtone}.build() }
+        commandSender.sendAdmin(destNum) {
+            AdminMessage.Builder().also { wb -> wb.set_ringtone_message = ringtone }.build()
+        }
     }
 
     override suspend fun getRingtone(destNum: Int, packetId: Int) {
-        commandSender.sendAdmin(destNum, packetId, wantResponse = true) { AdminMessage.Builder().also { wb ->wb.get_ringtone_request = true}.build() }
+        commandSender.sendAdmin(destNum, packetId, wantResponse = true) {
+            AdminMessage.Builder().also { wb -> wb.get_ringtone_request = true }.build()
+        }
     }
 
     override suspend fun setCannedMessages(destNum: Int, messages: String) {
-        commandSender.sendAdmin(destNum) { AdminMessage.Builder().also { wb ->wb.set_canned_message_module_messages = messages}.build() }
+        commandSender.sendAdmin(destNum) {
+            AdminMessage.Builder().also { wb -> wb.set_canned_message_module_messages = messages }.build()
+        }
     }
 
     override suspend fun setTime(destNum: Int, packetId: Int) {
         Logger.i { "Set time requested for node $destNum" }
         // Resolve the timestamp at send time so the value is as fresh as possible when it leaves the phone.
-        commandSender.sendAdmin(destNum, packetId) { AdminMessage.Builder().also { wb ->wb.set_time_only = nowSeconds.toInt()}.build() }
+        commandSender.sendAdmin(destNum, packetId) {
+            AdminMessage.Builder().also { wb -> wb.set_time_only = nowSeconds.toInt() }.build()
+        }
     }
 
     override suspend fun getCannedMessages(destNum: Int, packetId: Int) {
         commandSender.sendAdmin(destNum, packetId, wantResponse = true) {
-            AdminMessage.Builder().also { wb ->wb.get_canned_message_module_messages_request = true}.build()
+            AdminMessage.Builder().also { wb -> wb.get_canned_message_module_messages_request = true }.build()
         }
     }
 
@@ -220,37 +244,54 @@ internal class AdminControllerImpl(
 
     override suspend fun getDeviceConnectionStatus(destNum: Int, packetId: Int) {
         commandSender.sendAdmin(destNum, packetId, wantResponse = true) {
-            AdminMessage.Builder().also { wb ->wb.get_device_connection_status_request = true}.build()
+            AdminMessage.Builder().also { wb -> wb.get_device_connection_status_request = true }.build()
         }
     }
 
     override suspend fun reboot(destNum: Int, packetId: Int) {
         Logger.i { "Reboot requested for node $destNum" }
-        commandSender.sendAdmin(destNum, packetId) { AdminMessage.Builder().also { wb ->wb.reboot_seconds = DEFAULT_DELAY_SECONDS}.build() }
+        commandSender.sendAdmin(destNum, packetId) {
+            AdminMessage.Builder().also { wb -> wb.reboot_seconds = DEFAULT_DELAY_SECONDS }.build()
+        }
     }
 
     override suspend fun rebootToDfu(nodeNum: Int) {
-        commandSender.sendAdmin(nodeNum) { AdminMessage.Builder().also { wb ->wb.enter_dfu_mode_request = true}.build() }
+        commandSender.sendAdmin(nodeNum) {
+            AdminMessage.Builder().also { wb -> wb.enter_dfu_mode_request = true }.build()
+        }
     }
 
     override suspend fun requestRebootOta(requestId: Int, destNum: Int, mode: Int, hash: ByteArray?) {
         val otaMode = OTAMode.fromValue(mode) ?: OTAMode.NO_REBOOT_OTA
         val otaEvent =
-            AdminMessage.OTAEvent.Builder().also { wb ->wb.reboot_ota_mode = otaMode; wb.ota_hash = hash?.toByteString() ?: ByteString.EMPTY}.build()
-        commandSender.sendAdmin(destNum, requestId) { AdminMessage.Builder().also { wb ->wb.ota_request = otaEvent}.build() }
+            AdminMessage.OTAEvent.Builder()
+                .also { wb ->
+                    wb.reboot_ota_mode = otaMode
+                    wb.ota_hash = hash?.toByteString() ?: ByteString.EMPTY
+                }
+                .build()
+        commandSender.sendAdmin(destNum, requestId) {
+            AdminMessage.Builder().also { wb -> wb.ota_request = otaEvent }.build()
+        }
     }
 
     override suspend fun shutdown(destNum: Int, packetId: Int) {
-        commandSender.sendAdmin(destNum, packetId) { AdminMessage.Builder().also { wb ->wb.shutdown_seconds = DEFAULT_DELAY_SECONDS}.build() }
+        commandSender.sendAdmin(destNum, packetId) {
+            AdminMessage.Builder().also { wb -> wb.shutdown_seconds = DEFAULT_DELAY_SECONDS }.build()
+        }
     }
 
     override suspend fun factoryReset(destNum: Int, packetId: Int) {
         Logger.i { "Factory reset requested for node $destNum" }
-        commandSender.sendAdmin(destNum, packetId) { AdminMessage.Builder().also { wb ->wb.factory_reset_device = 1}.build() }
+        commandSender.sendAdmin(destNum, packetId) {
+            AdminMessage.Builder().also { wb -> wb.factory_reset_device = 1 }.build()
+        }
     }
 
     override suspend fun nodedbReset(destNum: Int, packetId: Int, preserveFavorites: Boolean) {
-        commandSender.sendAdmin(destNum, packetId) { AdminMessage.Builder().also { wb ->wb.nodedb_reset = preserveFavorites}.build() }
+        commandSender.sendAdmin(destNum, packetId) {
+            AdminMessage.Builder().also { wb -> wb.nodedb_reset = preserveFavorites }.build()
+        }
     }
 
     // ── Edit Settings (transactional) ───────────────────────────────────────
@@ -309,18 +350,22 @@ internal class AdminControllerImpl(
         private val stagedProjections = mutableListOf<suspend () -> Unit>()
 
         override suspend fun setOwner(user: User) {
-            commandSender.sendAdmin(destNum, commandSender.generatePacketId()) { AdminMessage.Builder().also { wb ->wb.set_owner = user}.build() }
+            commandSender.sendAdmin(destNum, commandSender.generatePacketId()) {
+                AdminMessage.Builder().also { wb -> wb.set_owner = user }.build()
+            }
             stageProjection { nodeManager.handleReceivedUser(destNum, user) }
         }
 
         override suspend fun setConfig(config: Config) {
-            commandSender.sendAdmin(destNum, commandSender.generatePacketId()) { AdminMessage.Builder().also { wb ->wb.set_config = config}.build() }
+            commandSender.sendAdmin(destNum, commandSender.generatePacketId()) {
+                AdminMessage.Builder().also { wb -> wb.set_config = config }.build()
+            }
             if (isLocalDestination) stageProjection { radioConfigRepository.setLocalConfig(config) }
         }
 
         override suspend fun setModuleConfig(config: ModuleConfig) {
             commandSender.sendAdmin(destNum, commandSender.generatePacketId()) {
-                AdminMessage.Builder().also { wb ->wb.set_module_config = config}.build()
+                AdminMessage.Builder().also { wb -> wb.set_module_config = config }.build()
             }
             if (isLocalDestination) {
                 stageProjection {
@@ -334,7 +379,9 @@ internal class AdminControllerImpl(
         // set, so the operation adding channel writes must reconcile that set after the transaction; mirroring slots
         // here could expose a partial cache if a later write or commit fails.
         override suspend fun setChannel(channel: Channel) =
-            commandSender.sendAdmin(destNum, commandSender.generatePacketId()) { AdminMessage.Builder().also { wb ->wb.set_channel = channel}.build() }
+            commandSender.sendAdmin(destNum, commandSender.generatePacketId()) {
+                AdminMessage.Builder().also { wb -> wb.set_channel = channel }.build()
+            }
 
         override suspend fun setFixedPosition(position: Position) {
             val removesFixedPosition = position.isFixedPositionRemoval()
@@ -377,7 +424,11 @@ internal class AdminControllerImpl(
 
     /** Requires the begin boundary to be admitted before any transactional settings writes are issued. */
     private suspend fun requireBeginBoundaryAccepted(destNum: Int) {
-        if (!commandSender.sendAdminAwait(destNum) { AdminMessage.Builder().also { wb ->wb.begin_edit_settings = true}.build() }) {
+        if (
+            !commandSender.sendAdminAwait(destNum) {
+                AdminMessage.Builder().also { wb -> wb.begin_edit_settings = true }.build()
+            }
+        ) {
             throw EditSettingsTransactionException(editSettingsBoundaryFailureMessage("begin"))
         }
     }
@@ -388,7 +439,10 @@ internal class AdminControllerImpl(
      * prevents a rebooting transport write from overtaking an uncommitted settings transaction.
      */
     private suspend fun requireCommitBoundaryAccepted(destNum: Int, isLocalDestination: Boolean) {
-        val result = commandSender.sendAdminAwaitResult(destNum) { AdminMessage.Builder().also { wb ->wb.commit_edit_settings = true}.build() }
+        val result =
+            commandSender.sendAdminAwaitResult(destNum) {
+                AdminMessage.Builder().also { wb -> wb.commit_edit_settings = true }.build()
+            }
         val uncertainAfterDispatch =
             isLocalDestination &&
                 result.dispatched &&

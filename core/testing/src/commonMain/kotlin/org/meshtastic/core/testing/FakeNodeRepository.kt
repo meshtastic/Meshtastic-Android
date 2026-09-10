@@ -70,12 +70,13 @@ class FakeNodeRepository :
 
     override fun effectiveLogNodeId(nodeNum: Int): Flow<Int> = MutableStateFlow(0)
 
-    override fun getNode(userId: String): Node =
-        _nodeDBbyNum.value.values.find { it.user.id == userId } ?: Node(num = 0, user = User.Builder().also { wb ->wb.id = userId}.build())
+    override fun getNode(userId: String): Node = _nodeDBbyNum.value.values.find { it.user.id == userId }
+        ?: Node(num = 0, user = User.Builder().also { wb -> wb.id = userId }.build())
 
     override fun getUser(nodeNum: Int): User = _nodeDBbyNum.value[nodeNum]?.user ?: User.Builder().build()
 
-    override fun getUser(userId: String): User = _nodeDBbyNum.value.values.find { it.user.id == userId }?.user ?: User.Builder().build()
+    override fun getUser(userId: String): User =
+        _nodeDBbyNum.value.values.find { it.user.id == userId }?.user ?: User.Builder().build()
 
     override fun getNodes(
         sort: NodeSortOption,

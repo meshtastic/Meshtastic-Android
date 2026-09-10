@@ -51,12 +51,19 @@ class HistoryManagerImpl(
             historyReturnMax: Int,
         ): StoreAndForward {
             val history =
-                StoreAndForward.History.Builder().also { wb ->
-                wb.last_request = lastRequest.coerceAtLeast(0)
-                wb.window = historyReturnWindow.coerceAtLeast(0)
-                wb.history_messages = historyReturnMax.coerceAtLeast(0)
-                }.build()
-            return StoreAndForward.Builder().also { wb ->wb.rr = StoreAndForward.RequestResponse.CLIENT_HISTORY; wb.history = history}.build()
+                StoreAndForward.History.Builder()
+                    .also { wb ->
+                        wb.last_request = lastRequest.coerceAtLeast(0)
+                        wb.window = historyReturnWindow.coerceAtLeast(0)
+                        wb.history_messages = historyReturnMax.coerceAtLeast(0)
+                    }
+                    .build()
+            return StoreAndForward.Builder()
+                .also { wb ->
+                    wb.rr = StoreAndForward.RequestResponse.CLIENT_HISTORY
+                    wb.history = history
+                }
+                .build()
         }
 
         fun resolveHistoryRequestParameters(window: Int, max: Int): Pair<Int, Int> {
@@ -100,13 +107,21 @@ class HistoryManagerImpl(
 
         val accepted =
             packetHandler.sendToRadioForConnection(
-                MeshPacket.Builder().also { wb ->
-                wb.from = nodeNum
-                wb.to = nodeNum
-                wb.id = commandSender.generatePacketId()
-                wb.decoded = Data.Builder().also { wb ->wb.portnum = PortNum.STORE_FORWARD_APP; wb.payload = request.encode().toByteString()}.build()
-                wb.priority = MeshPacket.Priority.BACKGROUND
-                }.build(),
+                MeshPacket.Builder()
+                    .also { wb ->
+                        wb.from = nodeNum
+                        wb.to = nodeNum
+                        wb.id = commandSender.generatePacketId()
+                        wb.decoded =
+                            Data.Builder()
+                                .also { wb ->
+                                    wb.portnum = PortNum.STORE_FORWARD_APP
+                                    wb.payload = request.encode().toByteString()
+                                }
+                                .build()
+                        wb.priority = MeshPacket.Priority.BACKGROUND
+                    }
+                    .build(),
                 expectedConnectionVersion,
             )
         if (!accepted) throw PacketQueueRejectedException("History replay")

@@ -81,7 +81,19 @@ class NodeItemDistanceUnitsTest {
 
     private fun node(num: Int, latitudeI: Int, longitudeI: Int): Node = Node(
         num = num,
-        user = User.Builder().also { wb ->wb.id = "!$num"; wb.long_name = "Node $num"}.build(),
-        position = Position.Builder().also { wb ->wb.latitude_i = latitudeI; wb.longitude_i = longitudeI}.build(),
+        user =
+        User.Builder()
+            .also { wb ->
+                wb.id = "!$num"
+                wb.long_name = "Node $num"
+            }
+            .build(),
+        position =
+        Position.Builder()
+            .also { wb ->
+                wb.latitude_i = latitudeI
+                wb.longitude_i = longitudeI
+            }
+            .build(),
     )
 }

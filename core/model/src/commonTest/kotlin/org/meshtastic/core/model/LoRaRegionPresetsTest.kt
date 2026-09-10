@@ -31,31 +31,57 @@ class LoRaRegionPresetsTest {
 
     // group 0: standard US presets (unlicensed). group 1: a licensed-only region.
     private val map =
-        LoRaRegionPresetMap.Builder().also { wb ->
-        wb.groups = listOf(
-                        LoRaPresetGroup.Builder().also { wb ->
-                        wb.presets = listOf(ModemPreset.LONG_FAST, ModemPreset.LONG_SLOW, ModemPreset.SHORT_FAST)
-                        wb.default_preset = ModemPreset.LONG_FAST
-                        wb.licensed_only = false
-                        }.build(),
-                        LoRaPresetGroup.Builder().also { wb ->
-                        wb.presets = listOf(ModemPreset.TINY_FAST, ModemPreset.TINY_SLOW)
-                        wb.default_preset = ModemPreset.TINY_FAST
-                        wb.licensed_only = true
-                        }.build(),
+        LoRaRegionPresetMap.Builder()
+            .also { wb ->
+                wb.groups =
+                    listOf(
+                        LoRaPresetGroup.Builder()
+                            .also { wb ->
+                                wb.presets =
+                                    listOf(ModemPreset.LONG_FAST, ModemPreset.LONG_SLOW, ModemPreset.SHORT_FAST)
+                                wb.default_preset = ModemPreset.LONG_FAST
+                                wb.licensed_only = false
+                            }
+                            .build(),
+                        LoRaPresetGroup.Builder()
+                            .also { wb ->
+                                wb.presets = listOf(ModemPreset.TINY_FAST, ModemPreset.TINY_SLOW)
+                                wb.default_preset = ModemPreset.TINY_FAST
+                                wb.licensed_only = true
+                            }
+                            .build(),
                         // group 2: models EU_N_868's superset advertising - LONG_FAST is legal but not the default.
-                        LoRaPresetGroup.Builder().also { wb ->
-                        wb.presets = listOf(ModemPreset.LONG_FAST, ModemPreset.MEDIUM_FAST)
-                        wb.default_preset = ModemPreset.MEDIUM_FAST
-                        wb.licensed_only = false
-                        }.build(),
+                        LoRaPresetGroup.Builder()
+                            .also { wb ->
+                                wb.presets = listOf(ModemPreset.LONG_FAST, ModemPreset.MEDIUM_FAST)
+                                wb.default_preset = ModemPreset.MEDIUM_FAST
+                                wb.licensed_only = false
+                            }
+                            .build(),
                     )
-        wb.region_groups = listOf(
-                        LoRaRegionPresets.Builder().also { wb ->wb.region = RegionCode.US; wb.group_index = 0}.build(),
-                        LoRaRegionPresets.Builder().also { wb ->wb.region = RegionCode.UA_433; wb.group_index = 1}.build(),
-                        LoRaRegionPresets.Builder().also { wb ->wb.region = RegionCode.EU_N_868; wb.group_index = 2}.build(),
+                wb.region_groups =
+                    listOf(
+                        LoRaRegionPresets.Builder()
+                            .also { wb ->
+                                wb.region = RegionCode.US
+                                wb.group_index = 0
+                            }
+                            .build(),
+                        LoRaRegionPresets.Builder()
+                            .also { wb ->
+                                wb.region = RegionCode.UA_433
+                                wb.group_index = 1
+                            }
+                            .build(),
+                        LoRaRegionPresets.Builder()
+                            .also { wb ->
+                                wb.region = RegionCode.EU_N_868
+                                wb.group_index = 2
+                            }
+                            .build(),
                     )
-        }.build()
+            }
+            .build()
 
     @Test
     fun `null map imposes no constraint`() {
@@ -74,10 +100,20 @@ class LoRaRegionPresetsTest {
     @Test
     fun `out of range group_index is treated as unconstrained`() {
         val broken =
-            LoRaRegionPresetMap.Builder().also { wb ->
-            wb.groups = emptyList()
-            wb.region_groups = listOf(LoRaRegionPresets.Builder().also { wb ->wb.region = RegionCode.US; wb.group_index = 5}.build())
-            }.build()
+            LoRaRegionPresetMap.Builder()
+                .also { wb ->
+                    wb.groups = emptyList()
+                    wb.region_groups =
+                        listOf(
+                            LoRaRegionPresets.Builder()
+                                .also { wb ->
+                                    wb.region = RegionCode.US
+                                    wb.group_index = 5
+                                }
+                                .build(),
+                        )
+                }
+                .build()
         assertNull(broken.constraintFor(RegionCode.US))
     }
 
@@ -85,10 +121,28 @@ class LoRaRegionPresetsTest {
     fun `a group with no presets is treated as unconstrained`() {
         // A degenerate/malformed group must degrade to the full preset list, not an empty picker.
         val empty =
-            LoRaRegionPresetMap.Builder().also { wb ->
-            wb.groups = listOf(LoRaPresetGroup.Builder().also { wb ->wb.presets = emptyList(); wb.licensed_only = false}.build())
-            wb.region_groups = listOf(LoRaRegionPresets.Builder().also { wb ->wb.region = RegionCode.US; wb.group_index = 0}.build())
-            }.build()
+            LoRaRegionPresetMap.Builder()
+                .also { wb ->
+                    wb.groups =
+                        listOf(
+                            LoRaPresetGroup.Builder()
+                                .also { wb ->
+                                    wb.presets = emptyList()
+                                    wb.licensed_only = false
+                                }
+                                .build(),
+                        )
+                    wb.region_groups =
+                        listOf(
+                            LoRaRegionPresets.Builder()
+                                .also { wb ->
+                                    wb.region = RegionCode.US
+                                    wb.group_index = 0
+                                }
+                                .build(),
+                        )
+                }
+                .build()
         assertNull(empty.constraintFor(RegionCode.US))
         assertEquals(ModemPreset.LONG_FAST, empty.repairPresetFor(RegionCode.US, ModemPreset.LONG_FAST))
     }
@@ -129,17 +183,30 @@ class LoRaRegionPresetsTest {
 
     // A malformed map whose advertised default is not in its own legal set.
     private val oddMap =
-        LoRaRegionPresetMap.Builder().also { wb ->
-        wb.groups = listOf(
-                        LoRaPresetGroup.Builder().also { wb ->
-                        wb.presets = listOf(ModemPreset.MEDIUM_FAST, ModemPreset.MEDIUM_SLOW)
-                        wb.default_preset = ModemPreset.LONG_FAST
-                        // not in presets
-                        wb.licensed_only = false
-                        }.build(),
+        LoRaRegionPresetMap.Builder()
+            .also { wb ->
+                wb.groups =
+                    listOf(
+                        LoRaPresetGroup.Builder()
+                            .also { wb ->
+                                wb.presets = listOf(ModemPreset.MEDIUM_FAST, ModemPreset.MEDIUM_SLOW)
+                                wb.default_preset = ModemPreset.LONG_FAST
+                                // not in presets
+                                wb.licensed_only = false
+                            }
+                            .build(),
                     )
-        wb.region_groups = listOf(LoRaRegionPresets.Builder().also { wb ->wb.region = RegionCode.US; wb.group_index = 0}.build())
-        }.build()
+                wb.region_groups =
+                    listOf(
+                        LoRaRegionPresets.Builder()
+                            .also { wb ->
+                                wb.region = RegionCode.US
+                                wb.group_index = 0
+                            }
+                            .build(),
+                    )
+            }
+            .build()
 
     @Test
     fun `repair falls back to the first legal preset when the default is not in the group`() {
@@ -219,21 +286,21 @@ class LoRaRegionPresetsTest {
             .also { wb ->
                 wb.groups =
                     map.groups +
-                        LoRaPresetGroup.Builder()
-                            .also { wb ->
-                                wb.presets = listOf(ModemPreset.LONG_FAST)
-                                wb.default_preset = ModemPreset.LONG_FAST
-                                wb.licensed_only = false
-                            }
-                            .build()
+                    LoRaPresetGroup.Builder()
+                        .also { wb ->
+                            wb.presets = listOf(ModemPreset.LONG_FAST)
+                            wb.default_preset = ModemPreset.LONG_FAST
+                            wb.licensed_only = false
+                        }
+                        .build()
                 wb.region_groups =
                     map.region_groups +
-                        LoRaRegionPresets.Builder()
-                            .also { wb ->
-                                wb.region = RegionCode.UNSET
-                                wb.group_index = 3
-                            }
-                            .build()
+                    LoRaRegionPresets.Builder()
+                        .also { wb ->
+                            wb.region = RegionCode.UNSET
+                            wb.group_index = 3
+                        }
+                        .build()
             }
             .build()
 

@@ -58,7 +58,7 @@ fun PaxcounterConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) 
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val config = ModuleConfig.Builder().also { wb ->wb.paxcounter = it}.build()
+            val config = ModuleConfig.Builder().also { wb -> wb.paxcounter = it }.build()
             viewModel.setModuleConfig(config)
         },
     ) {
@@ -68,7 +68,9 @@ fun PaxcounterConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) 
                     title = stringResource(Res.string.paxcounter_enabled),
                     checked = formState.value.enabled,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.enabled = it }.build() },
+                    onCheckedChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.enabled = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -79,7 +81,11 @@ fun PaxcounterConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) 
                     enabled = state.connected,
                     items = items.map { it.value to it.toDisplayString() },
                     onItemSelected = {
-                        formState.value = formState.value.newBuilder().also { wb -> wb.paxcounter_update_interval = it.toInt() }.build()
+                        formState.value =
+                            formState.value
+                                .newBuilder()
+                                .also { wb -> wb.paxcounter_update_interval = it.toInt() }
+                                .build()
                     },
                 )
                 HorizontalDivider()
@@ -88,7 +94,9 @@ fun PaxcounterConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) 
                     value = formState.value.wifi_threshold,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.newBuilder().also { wb -> wb.wifi_threshold = it }.build() },
+                    onValueChanged = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.wifi_threshold = it }.build()
+                    },
                 )
                 HorizontalDivider()
                 SignedIntegerEditTextPreference(
@@ -96,7 +104,9 @@ fun PaxcounterConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) 
                     value = formState.value.ble_threshold,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.newBuilder().also { wb -> wb.ble_threshold = it }.build() },
+                    onValueChanged = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.ble_threshold = it }.build()
+                    },
                 )
             }
         }

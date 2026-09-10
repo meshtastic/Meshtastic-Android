@@ -100,20 +100,27 @@ internal fun stampBeaconConfigForSave(
     radioLora: Config.LoRaConfig,
     channelList: List<ChannelSettings>,
 ): MeshBeaconConfig = if (radioLora.use_preset) {
-    form.newBuilder()
+    form
+        .newBuilder()
         .also { wb ->
             wb.broadcast_offer_region = radioLora.region
             wb.broadcast_offer_preset = radioLora.modem_preset
             wb.broadcast_offer_channel =
                 (form.broadcast_offer_channel ?: channelList.getOrNull(0))?.let {
-                    ChannelSettings.Builder().also { wb -> wb.name = it.name; wb.psk = it.psk }.build()
+                    ChannelSettings.Builder()
+                        .also { wb ->
+                            wb.name = it.name
+                            wb.psk = it.psk
+                        }
+                        .build()
                 }
             wb.broadcast_targets =
                 form.broadcast_targets.map { it.newBuilder().also { wb -> wb.region = radioLora.region }.build() }
         }
         .build()
 } else {
-    form.newBuilder()
+    form
+        .newBuilder()
         .also { wb ->
             wb.broadcast_message = stored.broadcast_message
             wb.broadcast_interval_secs = stored.broadcast_interval_secs
@@ -135,7 +142,8 @@ internal fun selectBeaconTargetChannel(
     target: MeshBeaconConfig.BroadcastTarget,
     channelIndex: Int?,
     currentPreset: ModemPreset,
-): MeshBeaconConfig.BroadcastTarget = target.newBuilder()
+): MeshBeaconConfig.BroadcastTarget = target
+    .newBuilder()
     .also { wb ->
         wb.channel_index = channelIndex
         wb.preset = if (channelIndex != null) target.preset ?: currentPreset else target.preset

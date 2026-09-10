@@ -52,7 +52,14 @@ class DecodePaxFromLogTest {
 
     @Test
     fun binaryProto_validPaxcount_decoded() {
-        val pax = ProtoPaxcount.Builder().also { wb -> wb.wifi = 10; wb.ble = 5; wb.uptime = 3600 }.build()
+        val pax =
+            ProtoPaxcount.Builder()
+                .also { wb ->
+                    wb.wifi = 10
+                    wb.ble = 5
+                    wb.uptime = 3600
+                }
+                .build()
         val payload = ProtoPaxcount.ADAPTER.encode(pax)
         val log = meshLogWithPacket(payload, wantResponse = false)
 
@@ -65,7 +72,14 @@ class DecodePaxFromLogTest {
 
     @Test
     fun binaryProto_wantResponse_returnsNull() {
-        val pax = ProtoPaxcount.Builder().also { wb -> wb.wifi = 10; wb.ble = 5; wb.uptime = 100 }.build()
+        val pax =
+            ProtoPaxcount.Builder()
+                .also { wb ->
+                    wb.wifi = 10
+                    wb.ble = 5
+                    wb.uptime = 100
+                }
+                .build()
         val payload = ProtoPaxcount.ADAPTER.encode(pax)
         val log = meshLogWithPacket(payload, wantResponse = true)
 
@@ -74,7 +88,14 @@ class DecodePaxFromLogTest {
 
     @Test
     fun binaryProto_allZeroValues_returnsNull() {
-        val pax = ProtoPaxcount.Builder().also { wb -> wb.wifi = 0; wb.ble = 0; wb.uptime = 0 }.build()
+        val pax =
+            ProtoPaxcount.Builder()
+                .also { wb ->
+                    wb.wifi = 0
+                    wb.ble = 0
+                    wb.uptime = 0
+                }
+                .build()
         val payload = ProtoPaxcount.ADAPTER.encode(pax)
         val log = meshLogWithPacket(payload, wantResponse = false)
 
@@ -83,7 +104,14 @@ class DecodePaxFromLogTest {
 
     @Test
     fun binaryProto_wrongPortNum_returnsNull() {
-        val pax = ProtoPaxcount.Builder().also { wb -> wb.wifi = 10; wb.ble = 5; wb.uptime = 100 }.build()
+        val pax =
+            ProtoPaxcount.Builder()
+                .also { wb ->
+                    wb.wifi = 10
+                    wb.ble = 5
+                    wb.uptime = 100
+                }
+                .build()
         val payload = ProtoPaxcount.ADAPTER.encode(pax)
         val log = meshLogWithPacket(payload, wantResponse = false, portNum = PortNum.POSITION_APP)
 
@@ -94,7 +122,14 @@ class DecodePaxFromLogTest {
 
     @Test
     fun base64Fallback_validPayload_decoded() {
-        val pax = ProtoPaxcount.Builder().also { wb -> wb.wifi = 7; wb.ble = 3; wb.uptime = 500 }.build()
+        val pax =
+            ProtoPaxcount.Builder()
+                .also { wb ->
+                    wb.wifi = 7
+                    wb.ble = 3
+                    wb.uptime = 500
+                }
+                .build()
         val bytes = ProtoPaxcount.ADAPTER.encode(pax)
         val base64 = okio.ByteString.of(*bytes).base64()
         val log = MeshLog(uuid = "test", message_type = "pax", received_date = 0, raw_message = base64)
@@ -135,9 +170,16 @@ class DecodePaxFromLogTest {
         wantResponse: Boolean,
         portNum: PortNum = PortNum.PAXCOUNTER_APP,
     ): MeshLog {
-        val data = Data.Builder().also { wb ->wb.portnum = portNum; wb.payload = payload.toByteString(); wb.want_response = wantResponse}.build()
-        val packet = MeshPacket.Builder().also { wb ->wb.decoded = data}.build()
-        val fromRadio = FromRadio.Builder().also { wb ->wb.packet = packet}.build()
+        val data =
+            Data.Builder()
+                .also { wb ->
+                    wb.portnum = portNum
+                    wb.payload = payload.toByteString()
+                    wb.want_response = wantResponse
+                }
+                .build()
+        val packet = MeshPacket.Builder().also { wb -> wb.decoded = data }.build()
+        val fromRadio = FromRadio.Builder().also { wb -> wb.packet = packet }.build()
         return MeshLog(
             uuid = "test",
             message_type = "packet",

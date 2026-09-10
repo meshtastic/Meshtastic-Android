@@ -60,7 +60,7 @@ class RadioConfigUseCaseTest {
 
     @Test
     fun `setOwner calls radioController`() = runTest {
-        val user = User.Builder().also { wb ->wb.long_name = "New Name"}.build()
+        val user = User.Builder().also { wb -> wb.long_name = "New Name" }.build()
         useCase.setOwner(1234, user)
         // Verify call implicitly or by adding tracking to FakeRadioController if needed.
         // FakeRadioController already has getPacketId returning 1.
@@ -68,7 +68,16 @@ class RadioConfigUseCaseTest {
 
     @Test
     fun `setHamMode calls radioController and returns packetId`() = runTest {
-        val packetId = useCase.setHamMode(1234, HamParameters.Builder().also { wb ->wb.call_sign = "KK7ABC"; wb.short_name = "KK7A"}.build())
+        val packetId =
+            useCase.setHamMode(
+                1234,
+                HamParameters.Builder()
+                    .also { wb ->
+                        wb.call_sign = "KK7ABC"
+                        wb.short_name = "KK7A"
+                    }
+                    .build(),
+            )
         assertEquals(1, packetId)
     }
 
@@ -80,13 +89,19 @@ class RadioConfigUseCaseTest {
 
     @Test
     fun `setConfig calls radioController`() = runTest {
-        val config = Config.Builder().also { wb ->wb.lora = Config.LoRaConfig.Builder().also { wb ->wb.use_preset = true}.build()}.build()
+        val config =
+            Config.Builder()
+                .also { wb -> wb.lora = Config.LoRaConfig.Builder().also { wb -> wb.use_preset = true }.build() }
+                .build()
         useCase.setConfig(1234, config)
     }
 
     @Test
     fun `setModuleConfig calls radioController`() = runTest {
-        val config = ModuleConfig.Builder().also { wb ->wb.mqtt = ModuleConfig.MQTTConfig.Builder().also { wb ->wb.enabled = true}.build()}.build()
+        val config =
+            ModuleConfig.Builder()
+                .also { wb -> wb.mqtt = ModuleConfig.MQTTConfig.Builder().also { wb -> wb.enabled = true }.build() }
+                .build()
         useCase.setModuleConfig(1234, config)
     }
 

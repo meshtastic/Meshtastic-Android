@@ -43,9 +43,11 @@ class ChannelViewModel(
 
     val connectionState = radioController.connectionState
 
-    val localConfig = radioConfigRepository.localConfigFlow.stateInWhileSubscribed(initialValue = LocalConfig.Builder().build())
+    val localConfig =
+        radioConfigRepository.localConfigFlow.stateInWhileSubscribed(initialValue = LocalConfig.Builder().build())
 
-    val channels = radioConfigRepository.channelSetFlow.stateInWhileSubscribed(initialValue = ChannelSet.Builder().build())
+    val channels =
+        radioConfigRepository.channelSetFlow.stateInWhileSubscribed(initialValue = ChannelSet.Builder().build())
 
     // managed mode disables all access to configuration
     val isManaged: Boolean
@@ -101,6 +103,6 @@ class ChannelViewModel(
 
     private inline fun updateLoraConfig(crossinline body: (Config.LoRaConfig) -> Config.LoRaConfig) {
         val data = body(localConfig.value.lora ?: Config.LoRaConfig.Builder().build())
-        setConfig(Config.Builder().also { wb ->wb.lora = data}.build())
+        setConfig(Config.Builder().also { wb -> wb.lora = data }.build())
     }
 }

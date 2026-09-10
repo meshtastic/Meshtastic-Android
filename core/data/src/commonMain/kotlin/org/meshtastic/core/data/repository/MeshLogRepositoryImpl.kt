@@ -128,7 +128,8 @@ open class MeshLogRepositoryImpl(
         if (decoded.want_response == true) return@runCatching null
 
         val telemetry = Telemetry.ADAPTER.decode(decoded.payload)
-        telemetry.newBuilder()
+        telemetry
+            .newBuilder()
             .also { wb ->
                 wb.time = (log.received_date / MILLIS_PER_SEC).toInt()
                 wb.environment_metrics = telemetry.environment_metrics?.withSentinelsForAbsentReadings()

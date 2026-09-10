@@ -58,7 +58,7 @@ fun AudioConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val config = ModuleConfig.Builder().also { wb ->wb.audio = it}.build()
+            val config = ModuleConfig.Builder().also { wb -> wb.audio = it }.build()
             viewModel.setModuleConfig(config)
         },
     ) {
@@ -68,7 +68,9 @@ fun AudioConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     title = stringResource(Res.string.codec_2_enabled),
                     checked = formState.value.codec2_enabled,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.codec2_enabled = it }.build() },
+                    onCheckedChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.codec2_enabled = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -77,14 +79,18 @@ fun AudioConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     value = formState.value.ptt_pin,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.newBuilder().also { wb -> wb.ptt_pin = it }.build() },
+                    onValueChanged = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.ptt_pin = it }.build()
+                    },
                 )
                 DropDownPreference(
                     title = stringResource(Res.string.codec2_sample_rate),
                     enabled = state.connected,
                     items = ModuleConfig.AudioConfig.Audio_Baud.entries.map { it to it.name },
                     selectedItem = formState.value.bitrate,
-                    onItemSelected = { formState.value = formState.value.newBuilder().also { wb -> wb.bitrate = it }.build() },
+                    onItemSelected = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.bitrate = it }.build()
+                    },
                 )
                 HorizontalDivider()
                 EditTextPreference(
@@ -92,28 +98,36 @@ fun AudioConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     value = formState.value.i2s_ws,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.newBuilder().also { wb -> wb.i2s_ws = it }.build() },
+                    onValueChanged = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.i2s_ws = it }.build()
+                    },
                 )
                 EditTextPreference(
                     title = stringResource(Res.string.i2s_data_in),
                     value = formState.value.i2s_sd,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.newBuilder().also { wb -> wb.i2s_sd = it }.build() },
+                    onValueChanged = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.i2s_sd = it }.build()
+                    },
                 )
                 EditTextPreference(
                     title = stringResource(Res.string.i2s_data_out),
                     value = formState.value.i2s_din,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.newBuilder().also { wb -> wb.i2s_din = it }.build() },
+                    onValueChanged = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.i2s_din = it }.build()
+                    },
                 )
                 EditTextPreference(
                     title = stringResource(Res.string.i2s_clock),
                     value = formState.value.i2s_sck,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.newBuilder().also { wb -> wb.i2s_sck = it }.build() },
+                    onValueChanged = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.i2s_sck = it }.build()
+                    },
                 )
             }
         }

@@ -66,7 +66,7 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val config = ModuleConfig.Builder().also { wb ->wb.telemetry = it}.build()
+            val config = ModuleConfig.Builder().also { wb -> wb.telemetry = it }.build()
             viewModel.setModuleConfig(config)
         },
     ) {
@@ -78,7 +78,10 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                         summary = stringResource(Res.string.device_telemetry_enabled_summary),
                         checked = formState.value.device_telemetry_enabled,
                         enabled = state.connected,
-                        onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.device_telemetry_enabled = it }.build() },
+                        onCheckedChange = {
+                            formState.value =
+                                formState.value.newBuilder().also { wb -> wb.device_telemetry_enabled = it }.build()
+                        },
                         containerColor = CardDefaults.cardColors().containerColor,
                     )
                     HorizontalDivider()
@@ -89,14 +92,20 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     selectedItem = formState.value.device_update_interval.toLong(),
                     enabled = state.connected,
                     items = items.map { it.value to it.toDisplayString() },
-                    onItemSelected = { formState.value = formState.value.newBuilder().also { wb -> wb.device_update_interval = it.toInt() }.build() },
+                    onItemSelected = {
+                        formState.value =
+                            formState.value.newBuilder().also { wb -> wb.device_update_interval = it.toInt() }.build()
+                    },
                 )
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.environment_metrics_module_enabled),
                     checked = formState.value.environment_measurement_enabled,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.environment_measurement_enabled = it }.build() },
+                    onCheckedChange = {
+                        formState.value =
+                            formState.value.newBuilder().also { wb -> wb.environment_measurement_enabled = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -107,7 +116,11 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     enabled = state.connected,
                     items = envItems.map { it.value to it.toDisplayString() },
                     onItemSelected = {
-                        formState.value = formState.value.newBuilder().also { wb -> wb.environment_update_interval = it.toInt() }.build()
+                        formState.value =
+                            formState.value
+                                .newBuilder()
+                                .also { wb -> wb.environment_update_interval = it.toInt() }
+                                .build()
                     },
                 )
                 HorizontalDivider()
@@ -115,7 +128,10 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     title = stringResource(Res.string.environment_metrics_on_screen_enabled),
                     checked = formState.value.environment_screen_enabled,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.environment_screen_enabled = it }.build() },
+                    onCheckedChange = {
+                        formState.value =
+                            formState.value.newBuilder().also { wb -> wb.environment_screen_enabled = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -123,7 +139,10 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     title = stringResource(Res.string.environment_metrics_use_fahrenheit),
                     checked = formState.value.environment_display_fahrenheit,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.environment_display_fahrenheit = it }.build() },
+                    onCheckedChange = {
+                        formState.value =
+                            formState.value.newBuilder().also { wb -> wb.environment_display_fahrenheit = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -131,7 +150,10 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     title = stringResource(Res.string.air_quality_metrics_module_enabled),
                     checked = formState.value.air_quality_enabled,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.air_quality_enabled = it }.build() },
+                    onCheckedChange = {
+                        formState.value =
+                            formState.value.newBuilder().also { wb -> wb.air_quality_enabled = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -141,14 +163,20 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     selectedItem = formState.value.air_quality_interval.toLong(),
                     enabled = state.connected,
                     items = airItems.map { it.value to it.toDisplayString() },
-                    onItemSelected = { formState.value = formState.value.newBuilder().also { wb -> wb.air_quality_interval = it.toInt() }.build() },
+                    onItemSelected = {
+                        formState.value =
+                            formState.value.newBuilder().also { wb -> wb.air_quality_interval = it.toInt() }.build()
+                    },
                 )
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.power_metrics_module_enabled),
                     checked = formState.value.power_measurement_enabled,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.power_measurement_enabled = it }.build() },
+                    onCheckedChange = {
+                        formState.value =
+                            formState.value.newBuilder().also { wb -> wb.power_measurement_enabled = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -158,14 +186,20 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     selectedItem = formState.value.power_update_interval.toLong(),
                     enabled = state.connected,
                     items = powerItems.map { it.value to it.toDisplayString() },
-                    onItemSelected = { formState.value = formState.value.newBuilder().also { wb -> wb.power_update_interval = it.toInt() }.build() },
+                    onItemSelected = {
+                        formState.value =
+                            formState.value.newBuilder().also { wb -> wb.power_update_interval = it.toInt() }.build()
+                    },
                 )
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.power_metrics_on_screen_enabled),
                     checked = formState.value.power_screen_enabled,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.power_screen_enabled = it }.build() },
+                    onCheckedChange = {
+                        formState.value =
+                            formState.value.newBuilder().also { wb -> wb.power_screen_enabled = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
             }

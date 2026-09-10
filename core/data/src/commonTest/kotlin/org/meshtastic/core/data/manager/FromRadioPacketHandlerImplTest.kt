@@ -118,8 +118,8 @@ class FromRadioPacketHandlerImplTest {
 
     @Test
     fun `handleFromRadio routes MY_INFO to configFlowManager`() {
-        val myInfo = MyNodeInfo.Builder().also { wb ->wb.my_node_num = 1234}.build()
-        val proto = FromRadio.Builder().also { wb ->wb.my_info = myInfo}.build()
+        val myInfo = MyNodeInfo.Builder().also { wb -> wb.my_node_num = 1234 }.build()
+        val proto = FromRadio.Builder().also { wb -> wb.my_info = myInfo }.build()
 
         handle(proto)
 
@@ -128,8 +128,8 @@ class FromRadioPacketHandlerImplTest {
 
     @Test
     fun `handleFromRadio routes METADATA to configFlowManager`() {
-        val metadata = DeviceMetadata.Builder().also { wb ->wb.firmware_version = "v1.0"}.build()
-        val proto = FromRadio.Builder().also { wb ->wb.metadata = metadata}.build()
+        val metadata = DeviceMetadata.Builder().also { wb -> wb.firmware_version = "v1.0" }.build()
+        val proto = FromRadio.Builder().also { wb -> wb.metadata = metadata }.build()
 
         handle(proto)
 
@@ -139,7 +139,7 @@ class FromRadioPacketHandlerImplTest {
     @Test
     fun `handleFromRadio routes NODE_INFO to configFlowManager and updates status`() {
         val nodeInfo = ProtoNodeInfo.Builder().also { wb -> wb.num = 1234 }.build()
-        val proto = FromRadio.Builder().also { wb ->wb.node_info = nodeInfo}.build()
+        val proto = FromRadio.Builder().also { wb -> wb.node_info = nodeInfo }.build()
 
         every { configFlowManager.newNodeCount } returns 1
 
@@ -152,7 +152,7 @@ class FromRadioPacketHandlerImplTest {
     @Test
     fun `handleFromRadio routes CONFIG_COMPLETE_ID to configFlowManager`() {
         val nonce = 69420
-        val proto = FromRadio.Builder().also { wb ->wb.config_complete_id = nonce}.build()
+        val proto = FromRadio.Builder().also { wb -> wb.config_complete_id = nonce }.build()
 
         handle(proto)
 
@@ -165,7 +165,7 @@ class FromRadioPacketHandlerImplTest {
         val nodeInfo = ProtoNodeInfo.Builder().also { wb -> wb.num = 1234 }.build()
         every { configFlowManager.handleNodeInfo(nodeInfo, session) } returns false
 
-        handle(FromRadio.Builder().also { wb ->wb.node_info = nodeInfo}.build())
+        handle(FromRadio.Builder().also { wb -> wb.node_info = nodeInfo }.build())
 
         verify { configFlowManager.handleNodeInfo(nodeInfo, session) }
         verify(mode = VerifyMode.exactly(0)) { serviceRepository.setConnectionProgress(any()) }
@@ -176,7 +176,7 @@ class FromRadioPacketHandlerImplTest {
         val nonce = 69420
         every { configFlowManager.handleConfigComplete(nonce, session) } returns false
 
-        handle(FromRadio.Builder().also { wb ->wb.config_complete_id = nonce}.build())
+        handle(FromRadio.Builder().also { wb -> wb.config_complete_id = nonce }.build())
 
         verify { configFlowManager.handleConfigComplete(nonce, session) }
         assertFalse(lockdownCoordinator.configCompleteCalled)
@@ -203,7 +203,7 @@ class FromRadioPacketHandlerImplTest {
                 }
             }
 
-        handle(FromRadio.Builder().also { wb ->wb.node_info = nodeInfo}.build())
+        handle(FromRadio.Builder().also { wb -> wb.node_info = nodeInfo }.build())
 
         verify(mode = VerifyMode.exactly(0)) { serviceRepository.setConnectionProgress(any()) }
     }
@@ -211,15 +211,15 @@ class FromRadioPacketHandlerImplTest {
     @Test
     fun `revoked session skips direct packet-dispatch branches`() {
         every { radioInterfaceService.runIfSessionActive(session, any()) } returns false
-        val proxyMessage = MqttClientProxyMessage.Builder().also { wb ->wb.topic = "test/topic"}.build()
-        val queueStatus = QueueStatus.Builder().also { wb ->wb.free = 10}.build()
+        val proxyMessage = MqttClientProxyMessage.Builder().also { wb -> wb.topic = "test/topic" }.build()
+        val queueStatus = QueueStatus.Builder().also { wb -> wb.free = 10 }.build()
         val xmodemPacket = XModem.Builder().build()
-        val lockdownStatus = LockdownStatus.Builder().also { wb ->wb.state = LockdownStatus.State.LOCKED}.build()
+        val lockdownStatus = LockdownStatus.Builder().also { wb -> wb.state = LockdownStatus.State.LOCKED }.build()
 
-        handle(FromRadio.Builder().also { wb ->wb.mqttClientProxyMessage = proxyMessage}.build())
-        handle(FromRadio.Builder().also { wb ->wb.queueStatus = queueStatus}.build())
-        handle(FromRadio.Builder().also { wb ->wb.xmodemPacket = xmodemPacket}.build())
-        handle(FromRadio.Builder().also { wb ->wb.lockdown_status = lockdownStatus}.build())
+        handle(FromRadio.Builder().also { wb -> wb.mqttClientProxyMessage = proxyMessage }.build())
+        handle(FromRadio.Builder().also { wb -> wb.queueStatus = queueStatus }.build())
+        handle(FromRadio.Builder().also { wb -> wb.xmodemPacket = xmodemPacket }.build())
+        handle(FromRadio.Builder().also { wb -> wb.lockdown_status = lockdownStatus }.build())
 
         verify(mode = VerifyMode.exactly(0)) { mqttManager.handleMqttProxyMessage(any()) }
         verify(mode = VerifyMode.exactly(0)) { packetHandler.handleQueueStatus(any()) }
@@ -229,8 +229,14 @@ class FromRadioPacketHandlerImplTest {
 
     @Test
     fun `handleFromRadio routes LOCKDOWN_STATUS to lockdownCoordinator`() {
-        val lockdownStatus = LockdownStatus.Builder().also { wb ->wb.state = LockdownStatus.State.LOCKED; wb.lock_reason = "token_missing"}.build()
-        val proto = FromRadio.Builder().also { wb ->wb.lockdown_status = lockdownStatus}.build()
+        val lockdownStatus =
+            LockdownStatus.Builder()
+                .also { wb ->
+                    wb.state = LockdownStatus.State.LOCKED
+                    wb.lock_reason = "token_missing"
+                }
+                .build()
+        val proto = FromRadio.Builder().also { wb -> wb.lockdown_status = lockdownStatus }.build()
 
         handle(proto)
 
@@ -239,8 +245,8 @@ class FromRadioPacketHandlerImplTest {
 
     @Test
     fun `handleFromRadio routes QUEUESTATUS to packetHandler`() {
-        val queueStatus = QueueStatus.Builder().also { wb ->wb.free = 10}.build()
-        val proto = FromRadio.Builder().also { wb ->wb.queueStatus = queueStatus}.build()
+        val queueStatus = QueueStatus.Builder().also { wb -> wb.free = 10 }.build()
+        val proto = FromRadio.Builder().also { wb -> wb.queueStatus = queueStatus }.build()
 
         handle(proto)
 
@@ -249,8 +255,11 @@ class FromRadioPacketHandlerImplTest {
 
     @Test
     fun `handleFromRadio routes CONFIG to configHandler`() {
-        val config = Config.Builder().also { wb ->wb.lora = Config.LoRaConfig.Builder().also { wb ->wb.use_preset = true}.build()}.build()
-        val proto = FromRadio.Builder().also { wb ->wb.config = config}.build()
+        val config =
+            Config.Builder()
+                .also { wb -> wb.lora = Config.LoRaConfig.Builder().also { wb -> wb.use_preset = true }.build() }
+                .build()
+        val proto = FromRadio.Builder().also { wb -> wb.config = config }.build()
 
         handle(proto)
 
@@ -259,8 +268,11 @@ class FromRadioPacketHandlerImplTest {
 
     @Test
     fun `handleFromRadio routes MODULE_CONFIG to configHandler`() {
-        val moduleConfig = ModuleConfig.Builder().also { wb ->wb.mqtt = ModuleConfig.MQTTConfig.Builder().also { wb ->wb.enabled = true}.build()}.build()
-        val proto = FromRadio.Builder().also { wb ->wb.moduleConfig = moduleConfig}.build()
+        val moduleConfig =
+            ModuleConfig.Builder()
+                .also { wb -> wb.mqtt = ModuleConfig.MQTTConfig.Builder().also { wb -> wb.enabled = true }.build() }
+                .build()
+        val proto = FromRadio.Builder().also { wb -> wb.moduleConfig = moduleConfig }.build()
 
         handle(proto)
 
@@ -269,8 +281,8 @@ class FromRadioPacketHandlerImplTest {
 
     @Test
     fun `handleFromRadio routes CHANNEL to configHandler`() {
-        val channel = Channel.Builder().also { wb ->wb.index = 0}.build()
-        val proto = FromRadio.Builder().also { wb ->wb.channel = channel}.build()
+        val channel = Channel.Builder().also { wb -> wb.index = 0 }.build()
+        val proto = FromRadio.Builder().also { wb -> wb.channel = channel }.build()
 
         handle(proto)
 
@@ -280,7 +292,7 @@ class FromRadioPacketHandlerImplTest {
     @Test
     fun `handleFromRadio routes REGION_PRESETS to configHandler`() {
         val map = LoRaRegionPresetMap.Builder().build()
-        val proto = FromRadio.Builder().also { wb ->wb.region_presets = map}.build()
+        val proto = FromRadio.Builder().also { wb -> wb.region_presets = map }.build()
 
         handle(proto)
 
@@ -289,8 +301,8 @@ class FromRadioPacketHandlerImplTest {
 
     @Test
     fun `handleFromRadio routes MQTT_CLIENT_PROXY_MESSAGE to mqttManager`() {
-        val proxyMsg = MqttClientProxyMessage.Builder().also { wb ->wb.topic = "test/topic"}.build()
-        val proto = FromRadio.Builder().also { wb ->wb.mqttClientProxyMessage = proxyMsg}.build()
+        val proxyMsg = MqttClientProxyMessage.Builder().also { wb -> wb.topic = "test/topic" }.build()
+        val proto = FromRadio.Builder().also { wb -> wb.mqttClientProxyMessage = proxyMsg }.build()
 
         handle(proto)
 
@@ -299,8 +311,8 @@ class FromRadioPacketHandlerImplTest {
 
     @Test
     fun `handleFromRadio routes CLIENTNOTIFICATION to serviceRepository`() {
-        val notification = ClientNotification.Builder().also { wb ->wb.message = "test"}.build()
-        val proto = FromRadio.Builder().also { wb ->wb.clientNotification = notification}.build()
+        val notification = ClientNotification.Builder().also { wb -> wb.message = "test" }.build()
+        val proto = FromRadio.Builder().also { wb -> wb.clientNotification = notification }.build()
 
         // Note: getString() from Compose Resources requires Skiko native lib which
         // is not available in headless JVM tests. We test the parts that don't trigger it.
@@ -318,7 +330,7 @@ class FromRadioPacketHandlerImplTest {
         val notification = protectedPositionAdvisory(replyId = 100, time = 1_000)
         every { notificationManager.suppressClientNotificationModal(notification) } returns true
 
-        handle(FromRadio.Builder().also { wb ->wb.clientNotification = notification}.build())
+        handle(FromRadio.Builder().also { wb -> wb.clientNotification = notification }.build())
 
         verify(mode = VerifyMode.exactly(0)) { serviceRepository.setClientNotification(any()) }
         verifySuspend(mode = VerifyMode.exactly(1)) { radioInterfaceService.runWithSessionLease(session, any()) }
@@ -329,7 +341,7 @@ class FromRadioPacketHandlerImplTest {
         val notification = protectedPositionAdvisory(replyId = 200, time = 2_000)
         every { notificationManager.suppressClientNotificationModal(notification) } returns false
 
-        handle(FromRadio.Builder().also { wb ->wb.clientNotification = notification}.build())
+        handle(FromRadio.Builder().also { wb -> wb.clientNotification = notification }.build())
 
         verify { serviceRepository.setClientNotification(notification) }
         verifySuspend { radioInterfaceService.runWithSessionLease(session, any()) }
@@ -337,10 +349,10 @@ class FromRadioPacketHandlerImplTest {
 
     @Test
     fun `stale client notification is discarded before publication`() {
-        val notification = ClientNotification.Builder().also { wb ->wb.message = "stale"}.build()
+        val notification = ClientNotification.Builder().also { wb -> wb.message = "stale" }.build()
         every { radioInterfaceService.runIfSessionActive(session, any()) } returns false
 
-        handle(FromRadio.Builder().also { wb ->wb.clientNotification = notification}.build())
+        handle(FromRadio.Builder().also { wb -> wb.clientNotification = notification }.build())
 
         verify(mode = VerifyMode.exactly(0)) { serviceRepository.setClientNotification(any()) }
         verifySuspend(mode = VerifyMode.exactly(0)) { notificationManager.dispatchClientNotification(any(), any()) }
@@ -348,10 +360,10 @@ class FromRadioPacketHandlerImplTest {
 
     @Test
     fun `client alert is skipped when the session retires after publication`() {
-        val notification = ClientNotification.Builder().also { wb ->wb.message = "retired"}.build()
+        val notification = ClientNotification.Builder().also { wb -> wb.message = "retired" }.build()
         everySuspend { radioInterfaceService.runWithSessionLease(session, any()) } returns false
 
-        handle(FromRadio.Builder().also { wb ->wb.clientNotification = notification}.build())
+        handle(FromRadio.Builder().also { wb -> wb.clientNotification = notification }.build())
 
         verify { serviceRepository.setClientNotification(notification) }
         verifySuspend(mode = VerifyMode.exactly(0)) { notificationManager.dispatchClientNotification(any(), any()) }
@@ -359,26 +371,55 @@ class FromRadioPacketHandlerImplTest {
 
     @Test
     fun `OTA status client notifications are identified`() {
-        assertTrue(ClientNotification.Builder().also { wb ->wb.message = "Rebooting to WiFi OTA"}.build().isOtaStatusNotification())
-        assertTrue(ClientNotification.Builder().also { wb ->wb.message = "OTA Loader does not support WiFi"}.build().isOtaStatusNotification())
         assertTrue(
-            ClientNotification.Builder().also { wb ->wb.message = "Cannot start OTA: OTA Loader partition not found."}.build().isOtaStatusNotification(),
+            ClientNotification.Builder()
+                .also { wb -> wb.message = "Rebooting to WiFi OTA" }
+                .build()
+                .isOtaStatusNotification(),
         )
-        assertTrue(ClientNotification.Builder().also { wb ->wb.message = "Unable to switch to the OTA partition."}.build().isOtaStatusNotification())
+        assertTrue(
+            ClientNotification.Builder()
+                .also { wb -> wb.message = "OTA Loader does not support WiFi" }
+                .build()
+                .isOtaStatusNotification(),
+        )
+        assertTrue(
+            ClientNotification.Builder()
+                .also { wb -> wb.message = "Cannot start OTA: OTA Loader partition not found." }
+                .build()
+                .isOtaStatusNotification(),
+        )
+        assertTrue(
+            ClientNotification.Builder()
+                .also { wb -> wb.message = "Unable to switch to the OTA partition." }
+                .build()
+                .isOtaStatusNotification(),
+        )
     }
 
     @Test
     fun `non OTA client notifications are not identified as OTA status`() {
-        assertFalse(ClientNotification.Builder().also { wb ->wb.message = "test"}.build().isOtaStatusNotification())
-        assertFalse(ClientNotification.Builder().also { wb ->wb.message = "Low battery"}.build().isOtaStatusNotification())
-        assertFalse(ClientNotification.Builder().also { wb ->wb.message = "ROTATE credentials"}.build().isOtaStatusNotification())
-        assertFalse(ClientNotification.Builder().also { wb ->wb.message = "Quota exceeded"}.build().isOtaStatusNotification())
+        assertFalse(ClientNotification.Builder().also { wb -> wb.message = "test" }.build().isOtaStatusNotification())
+        assertFalse(
+            ClientNotification.Builder().also { wb -> wb.message = "Low battery" }.build().isOtaStatusNotification(),
+        )
+        assertFalse(
+            ClientNotification.Builder()
+                .also { wb -> wb.message = "ROTATE credentials" }
+                .build()
+                .isOtaStatusNotification(),
+        )
+        assertFalse(
+            ClientNotification.Builder().also { wb -> wb.message = "Quota exceeded" }.build().isOtaStatusNotification(),
+        )
     }
 
-    private fun protectedPositionAdvisory(replyId: Int, time: Int) = ClientNotification.Builder().also { wb ->
-    wb.message = "Location sharing is disabled on this channel"
-    wb.reply_id = replyId
-    wb.time = time
-    wb.level = LogRecord.Level.WARNING
-    }.build()
+    private fun protectedPositionAdvisory(replyId: Int, time: Int) = ClientNotification.Builder()
+        .also { wb ->
+            wb.message = "Location sharing is disabled on this channel"
+            wb.reply_id = replyId
+            wb.time = time
+            wb.level = LogRecord.Level.WARNING
+        }
+        .build()
 }

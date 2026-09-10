@@ -34,13 +34,15 @@ import kotlin.test.assertNotNull
  */
 class SnrExtensionsTest {
 
-    private fun loraPacket(snr: Float) = MeshPacket.Builder().also { wb ->
-    wb.rx_time = 1_700_000_000
-    wb.rx_snr = snr
-    wb.hop_start = 3
-    wb.hop_limit = 3
-    wb.transport_mechanism = MeshPacket.TransportMechanism.TRANSPORT_LORA
-    }.build()
+    private fun loraPacket(snr: Float) = MeshPacket.Builder()
+        .also { wb ->
+            wb.rx_time = 1_700_000_000
+            wb.rx_snr = snr
+            wb.hop_start = 3
+            wb.hop_limit = 3
+            wb.transport_mechanism = MeshPacket.TransportMechanism.TRANSPORT_LORA
+        }
+        .build()
 
     @Test
     fun `snrOrNull reports a negative reading`() {

@@ -95,35 +95,51 @@ object ReplayFuzz {
 
     /** A valid `FromRadio` carrying hostile content. Variant chosen by [random]. Corpus for handler/UI fuzzing. */
     fun adversarialFromRadio(random: Random): FromRadio = if (random.nextBoolean()) {
-        FromRadio.Builder().also { wb ->wb.node_info = adversarialNode(random)}.build()
+        FromRadio.Builder().also { wb -> wb.node_info = adversarialNode(random) }.build()
     } else {
-        FromRadio.Builder().also { wb ->wb.packet = adversarialPacket(random)}.build()
+        FromRadio.Builder().also { wb -> wb.packet = adversarialPacket(random) }.build()
     }
 
     /** A NodeInfo with extreme identity, signal, and location values — the kind a malicious node could advertise. */
-    fun adversarialNode(random: Random): NodeInfo = NodeInfo.Builder().also { wb ->
-    wb.num = random.nextInt()
-    wb.snr = HOSTILE_FLOATS.random(random)
-    wb.last_heard = random.nextInt()
-    wb.hops_away = random.nextInt()
-    wb.user = User.Builder().also { wb ->
-            wb.id = "!${random.nextInt().toUInt().toString(16)}"
-            wb.long_name = hostileString(random)
-            wb.short_name = hostileString(random)
-            }.build()
-    // Unconstrained, so trivially outside the valid +/-90 deg / +/-180 deg ranges (stored x 1e7).
-    wb.position = Position.Builder().also { wb ->wb.latitude_i = random.nextInt(); wb.longitude_i = random.nextInt()}.build()
-    }.build()
+    fun adversarialNode(random: Random): NodeInfo = NodeInfo.Builder()
+        .also { wb ->
+            wb.num = random.nextInt()
+            wb.snr = HOSTILE_FLOATS.random(random)
+            wb.last_heard = random.nextInt()
+            wb.hops_away = random.nextInt()
+            wb.user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!${random.nextInt().toUInt().toString(16)}"
+                        wb.long_name = hostileString(random)
+                        wb.short_name = hostileString(random)
+                    }
+                    .build()
+            // Unconstrained, so trivially outside the valid +/-90 deg / +/-180 deg ranges (stored x 1e7).
+            wb.position =
+                Position.Builder()
+                    .also { wb ->
+                        wb.latitude_i = random.nextInt()
+                        wb.longitude_i = random.nextInt()
+                    }
+                    .build()
+        }
+        .build()
 
     /** A MeshPacket with extreme envelope fields and a random (malformed-for-its-portnum) decoded payload. */
-    fun adversarialPacket(random: Random): MeshPacket = MeshPacket.Builder().also { wb ->
-    wb.id = random.nextInt()
-    wb.to = random.nextInt()
-    wb.channel = random.nextInt()
-    wb.rx_time = random.nextInt()
-    wb.hop_limit = random.nextInt()
-    wb.decoded = Data.Builder().also { wb ->wb.payload = randomBytes(random, MAX_PAYLOAD_LEN).toByteString()}.build()
-    }.build()
+    fun adversarialPacket(random: Random): MeshPacket = MeshPacket.Builder()
+        .also { wb ->
+            wb.id = random.nextInt()
+            wb.to = random.nextInt()
+            wb.channel = random.nextInt()
+            wb.rx_time = random.nextInt()
+            wb.hop_limit = random.nextInt()
+            wb.decoded =
+                Data.Builder()
+                    .also { wb -> wb.payload = randomBytes(random, MAX_PAYLOAD_LEN).toByteString() }
+                    .build()
+        }
+        .build()
 
     /** Encodes the three replay sections (mirrors `replay_server.py --export` / [ReplayRadioTransport]'s reader). */
     fun asset(config: List<FromRadio>, nodes: List<FromRadio>, packets: List<FromRadio>): ByteArray {

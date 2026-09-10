@@ -62,7 +62,8 @@ class PacketAuthenticitySettingTest {
                     connected = true,
                     supported = true,
                     onPolicyChange = { policy ->
-                        updatedConfig = updatedConfig.newBuilder().also { wb -> wb.packet_signature_policy = policy }.build()
+                        updatedConfig =
+                            updatedConfig.newBuilder().also { wb -> wb.packet_signature_policy = policy }.build()
                     },
                 )
             }

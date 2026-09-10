@@ -126,13 +126,13 @@ constructor(
 
     private suspend fun AdminEditScope.installConfig(config: LocalConfig?) {
         config?.let { lc ->
-            lc.device?.let { setConfig(Config.Builder().also { wb ->wb.device = it}.build()) }
-            lc.position?.let { setConfig(Config.Builder().also { wb ->wb.position = it}.build()) }
-            lc.power?.let { setConfig(Config.Builder().also { wb ->wb.power = it}.build()) }
-            lc.network?.let { setConfig(Config.Builder().also { wb ->wb.network = it}.build()) }
-            lc.display?.let { setConfig(Config.Builder().also { wb ->wb.display = it}.build()) }
-            lc.bluetooth?.let { setConfig(Config.Builder().also { wb ->wb.bluetooth = it}.build()) }
-            lc.security?.let { setConfig(Config.Builder().also { wb ->wb.security = it}.build()) }
+            lc.device?.let { setConfig(Config.Builder().also { wb -> wb.device = it }.build()) }
+            lc.position?.let { setConfig(Config.Builder().also { wb -> wb.position = it }.build()) }
+            lc.power?.let { setConfig(Config.Builder().also { wb -> wb.power = it }.build()) }
+            lc.network?.let { setConfig(Config.Builder().also { wb -> wb.network = it }.build()) }
+            lc.display?.let { setConfig(Config.Builder().also { wb -> wb.display = it }.build()) }
+            lc.bluetooth?.let { setConfig(Config.Builder().also { wb -> wb.bluetooth = it }.build()) }
+            lc.security?.let { setConfig(Config.Builder().also { wb -> wb.security = it }.build()) }
         }
     }
 
@@ -150,24 +150,34 @@ constructor(
     }
 
     private suspend fun AdminEditScope.installModuleConfigPart1(lmc: LocalModuleConfig) {
-        lmc.mqtt?.let { setModuleConfig(ModuleConfig.Builder().also { wb ->wb.mqtt = it}.build()) }
-        lmc.serial?.let { setModuleConfig(ModuleConfig.Builder().also { wb ->wb.serial = it}.build()) }
-        lmc.external_notification?.let { setModuleConfig(ModuleConfig.Builder().also { wb ->wb.external_notification = it}.build()) }
-        lmc.store_forward?.let { setModuleConfig(ModuleConfig.Builder().also { wb ->wb.store_forward = it}.build()) }
-        lmc.range_test?.let { setModuleConfig(ModuleConfig.Builder().also { wb ->wb.range_test = it}.build()) }
-        lmc.telemetry?.let { setModuleConfig(ModuleConfig.Builder().also { wb ->wb.telemetry = it}.build()) }
-        lmc.canned_message?.let { setModuleConfig(ModuleConfig.Builder().also { wb ->wb.canned_message = it}.build()) }
-        lmc.audio?.let { setModuleConfig(ModuleConfig.Builder().also { wb ->wb.audio = it}.build()) }
+        lmc.mqtt?.let { setModuleConfig(ModuleConfig.Builder().also { wb -> wb.mqtt = it }.build()) }
+        lmc.serial?.let { setModuleConfig(ModuleConfig.Builder().also { wb -> wb.serial = it }.build()) }
+        lmc.external_notification?.let {
+            setModuleConfig(ModuleConfig.Builder().also { wb -> wb.external_notification = it }.build())
+        }
+        lmc.store_forward?.let { setModuleConfig(ModuleConfig.Builder().also { wb -> wb.store_forward = it }.build()) }
+        lmc.range_test?.let { setModuleConfig(ModuleConfig.Builder().also { wb -> wb.range_test = it }.build()) }
+        lmc.telemetry?.let { setModuleConfig(ModuleConfig.Builder().also { wb -> wb.telemetry = it }.build()) }
+        lmc.canned_message?.let {
+            setModuleConfig(ModuleConfig.Builder().also { wb -> wb.canned_message = it }.build())
+        }
+        lmc.audio?.let { setModuleConfig(ModuleConfig.Builder().also { wb -> wb.audio = it }.build()) }
     }
 
     private suspend fun AdminEditScope.installModuleConfigPart2(lmc: LocalModuleConfig) {
-        lmc.remote_hardware?.let { setModuleConfig(ModuleConfig.Builder().also { wb ->wb.remote_hardware = it}.build()) }
-        lmc.neighbor_info?.let { setModuleConfig(ModuleConfig.Builder().also { wb ->wb.neighbor_info = it}.build()) }
-        lmc.ambient_lighting?.let { setModuleConfig(ModuleConfig.Builder().also { wb ->wb.ambient_lighting = it}.build()) }
-        lmc.detection_sensor?.let { setModuleConfig(ModuleConfig.Builder().also { wb ->wb.detection_sensor = it}.build()) }
-        lmc.paxcounter?.let { setModuleConfig(ModuleConfig.Builder().also { wb ->wb.paxcounter = it}.build()) }
-        lmc.statusmessage?.let { setModuleConfig(ModuleConfig.Builder().also { wb ->wb.statusmessage = it}.build()) }
-        lmc.tak?.let { setModuleConfig(ModuleConfig.Builder().also { wb ->wb.tak = it}.build()) }
+        lmc.remote_hardware?.let {
+            setModuleConfig(ModuleConfig.Builder().also { wb -> wb.remote_hardware = it }.build())
+        }
+        lmc.neighbor_info?.let { setModuleConfig(ModuleConfig.Builder().also { wb -> wb.neighbor_info = it }.build()) }
+        lmc.ambient_lighting?.let {
+            setModuleConfig(ModuleConfig.Builder().also { wb -> wb.ambient_lighting = it }.build())
+        }
+        lmc.detection_sensor?.let {
+            setModuleConfig(ModuleConfig.Builder().also { wb -> wb.detection_sensor = it }.build())
+        }
+        lmc.paxcounter?.let { setModuleConfig(ModuleConfig.Builder().also { wb -> wb.paxcounter = it }.build()) }
+        lmc.statusmessage?.let { setModuleConfig(ModuleConfig.Builder().also { wb -> wb.statusmessage = it }.build()) }
+        lmc.tak?.let { setModuleConfig(ModuleConfig.Builder().also { wb -> wb.tak = it }.build()) }
     }
 
     private suspend fun AdminEditScope.installChannelsAndLora(
@@ -175,6 +185,6 @@ constructor(
         loraConfig: Config.LoRaConfig?,
     ) {
         replacementPlan?.channelWrites?.forEach { setChannel(it) }
-        loraConfig?.let { setConfig(Config.Builder().also { wb ->wb.lora = it}.build()) }
+        loraConfig?.let { setConfig(Config.Builder().also { wb -> wb.lora = it }.build()) }
     }
 }

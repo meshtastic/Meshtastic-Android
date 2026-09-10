@@ -563,7 +563,9 @@ class MeshConnectionManagerImpl(
     override fun startConfigOnly() {
         stageProgressSignals.value = 0
         armStageGuard(1, HANDSHAKE_TIMEOUT_STAGE1)
-        packetHandler.sendToRadio(ToRadio.Builder().also { wb ->wb.want_config_id = HandshakeConstants.CONFIG_NONCE}.build())
+        packetHandler.sendToRadio(
+            ToRadio.Builder().also { wb -> wb.want_config_id = HandshakeConstants.CONFIG_NONCE }.build(),
+        )
     }
 
     override fun clearRadioConfig() {
@@ -577,7 +579,9 @@ class MeshConnectionManagerImpl(
     override fun startNodeInfoOnly() {
         stageProgressSignals.value = 0
         armStageGuard(2, HANDSHAKE_TIMEOUT_STAGE2)
-        packetHandler.sendToRadio(ToRadio.Builder().also { wb ->wb.want_config_id = HandshakeConstants.NODE_INFO_NONCE}.build())
+        packetHandler.sendToRadio(
+            ToRadio.Builder().also { wb -> wb.want_config_id = HandshakeConstants.NODE_INFO_NONCE }.build(),
+        )
     }
 
     override fun onRadioConfigLoaded() {
@@ -601,7 +605,9 @@ class MeshConnectionManagerImpl(
         // config/node-info bursts avoids the GATT contention that pushed the old
         // onRadioConfigLoaded-time send out of Stage 1. Must bypass the outbound packet queue:
         // it only drains once Connected, which would hold this until after the backlog flush.
-        commandSender.sendAdminImmediate(myNodeNum) { AdminMessage.Builder().also { wb ->wb.set_time_only = nowSeconds.toInt()}.build() }
+        commandSender.sendAdminImmediate(myNodeNum) {
+            AdminMessage.Builder().also { wb -> wb.set_time_only = nowSeconds.toInt() }.build()
+        }
     }
 
     override suspend fun onNodeDbReady() {
@@ -645,7 +651,7 @@ class MeshConnectionManagerImpl(
                                 expectedConnectionVersion = connectedLifecycle.version,
                                 wantResponse = true,
                             ) {
-                                AdminMessage.Builder().also { wb ->wb.get_owner_request = true}.build()
+                                AdminMessage.Builder().also { wb -> wb.get_owner_request = true }.build()
                             }
                         }
                     }

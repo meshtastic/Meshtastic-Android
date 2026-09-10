@@ -101,8 +101,30 @@ class FuzzyNameResolverTest {
         val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
         val nodes =
             mapOf(
-                1 to Node(num = 1, user = User.Builder().also { wb ->wb.id = "!00000001"; wb.long_name = "Alice"; wb.short_name = "AL"}.build()),
-                2 to Node(num = 2, user = User.Builder().also { wb ->wb.id = "!00000002"; wb.long_name = "Bob"; wb.short_name = "BO"}.build()),
+                1 to
+                    Node(
+                        num = 1,
+                        user =
+                        User.Builder()
+                            .also { wb ->
+                                wb.id = "!00000001"
+                                wb.long_name = "Alice"
+                                wb.short_name = "AL"
+                            }
+                            .build(),
+                    ),
+                2 to
+                    Node(
+                        num = 2,
+                        user =
+                        User.Builder()
+                            .also { wb ->
+                                wb.id = "!00000002"
+                                wb.long_name = "Bob"
+                                wb.short_name = "BO"
+                            }
+                            .build(),
+                    ),
             )
         every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(nodes)
 
@@ -120,8 +142,30 @@ class FuzzyNameResolverTest {
         val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
         val nodes =
             mapOf(
-                1 to Node(num = 1, user = User.Builder().also { wb ->wb.id = "!00000001"; wb.long_name = "Alexander"; wb.short_name = "AX"}.build()),
-                2 to Node(num = 2, user = User.Builder().also { wb ->wb.id = "!00000002"; wb.long_name = "Bob"; wb.short_name = "BO"}.build()),
+                1 to
+                    Node(
+                        num = 1,
+                        user =
+                        User.Builder()
+                            .also { wb ->
+                                wb.id = "!00000001"
+                                wb.long_name = "Alexander"
+                                wb.short_name = "AX"
+                            }
+                            .build(),
+                    ),
+                2 to
+                    Node(
+                        num = 2,
+                        user =
+                        User.Builder()
+                            .also { wb ->
+                                wb.id = "!00000002"
+                                wb.long_name = "Bob"
+                                wb.short_name = "BO"
+                            }
+                            .build(),
+                    ),
             )
         every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(nodes)
 
@@ -138,8 +182,30 @@ class FuzzyNameResolverTest {
         val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
         val nodes =
             mapOf(
-                1 to Node(num = 1, user = User.Builder().also { wb ->wb.id = "!00000001"; wb.long_name = "Alice Smith"; wb.short_name = "AS"}.build()),
-                2 to Node(num = 2, user = User.Builder().also { wb ->wb.id = "!00000002"; wb.long_name = "Alice Jones"; wb.short_name = "AJ"}.build()),
+                1 to
+                    Node(
+                        num = 1,
+                        user =
+                        User.Builder()
+                            .also { wb ->
+                                wb.id = "!00000001"
+                                wb.long_name = "Alice Smith"
+                                wb.short_name = "AS"
+                            }
+                            .build(),
+                    ),
+                2 to
+                    Node(
+                        num = 2,
+                        user =
+                        User.Builder()
+                            .also { wb ->
+                                wb.id = "!00000002"
+                                wb.long_name = "Alice Jones"
+                                wb.short_name = "AJ"
+                            }
+                            .build(),
+                    ),
             )
         every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(nodes)
 
@@ -167,7 +233,21 @@ class FuzzyNameResolverTest {
     fun resolveNodeName_not_found_when_no_match() {
         val nodeRepository: NodeRepository = mock(MockMode.autofill)
         val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
-        val nodes = mapOf(1 to Node(num = 1, user = User.Builder().also { wb ->wb.id = "!00000001"; wb.long_name = "Alice"; wb.short_name = "AL"}.build()))
+        val nodes =
+            mapOf(
+                1 to
+                    Node(
+                        num = 1,
+                        user =
+                        User.Builder()
+                            .also { wb ->
+                                wb.id = "!00000001"
+                                wb.long_name = "Alice"
+                                wb.short_name = "AL"
+                            }
+                            .build(),
+                    ),
+            )
         every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(nodes)
 
         val resolver = FuzzyNameResolver(nodeRepository, radioConfigRepository)
@@ -183,7 +263,15 @@ class FuzzyNameResolverTest {
         val nodeRepository: NodeRepository = mock(MockMode.autofill)
         val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
         val channelSet =
-            ChannelSet.Builder().also { wb ->wb.settings = listOf(ChannelSettings.Builder().also { wb ->wb.name = "General"}.build(), ChannelSettings.Builder().also { wb ->wb.name = "Emergency"}.build())}.build()
+            ChannelSet.Builder()
+                .also { wb ->
+                    wb.settings =
+                        listOf(
+                            ChannelSettings.Builder().also { wb -> wb.name = "General" }.build(),
+                            ChannelSettings.Builder().also { wb -> wb.name = "Emergency" }.build(),
+                        )
+                }
+                .build()
         every { radioConfigRepository.channelSetFlow } returns flowOf(channelSet)
 
         val resolver = FuzzyNameResolver(nodeRepository, radioConfigRepository)
@@ -199,7 +287,15 @@ class FuzzyNameResolverTest {
         val nodeRepository: NodeRepository = mock(MockMode.autofill)
         val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
         val channelSet =
-            ChannelSet.Builder().also { wb ->wb.settings = listOf(ChannelSettings.Builder().also { wb ->wb.name = "admin"}.build(), ChannelSettings.Builder().also { wb ->wb.name = "General"}.build())}.build()
+            ChannelSet.Builder()
+                .also { wb ->
+                    wb.settings =
+                        listOf(
+                            ChannelSettings.Builder().also { wb -> wb.name = "admin" }.build(),
+                            ChannelSettings.Builder().also { wb -> wb.name = "General" }.build(),
+                        )
+                }
+                .build()
         every { radioConfigRepository.channelSetFlow } returns flowOf(channelSet)
 
         val resolver = FuzzyNameResolver(nodeRepository, radioConfigRepository)
@@ -213,7 +309,7 @@ class FuzzyNameResolverTest {
     fun resolveChannelName_not_found_when_empty() = runTest {
         val nodeRepository: NodeRepository = mock(MockMode.autofill)
         val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
-        val channelSet = ChannelSet.Builder().also { wb ->wb.settings = emptyList()}.build()
+        val channelSet = ChannelSet.Builder().also { wb -> wb.settings = emptyList() }.build()
         every { radioConfigRepository.channelSetFlow } returns flowOf(channelSet)
 
         val resolver = FuzzyNameResolver(nodeRepository, radioConfigRepository)

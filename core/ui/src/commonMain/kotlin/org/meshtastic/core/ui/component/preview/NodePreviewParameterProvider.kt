@@ -32,26 +32,38 @@ class NodePreviewParameterProvider : PreviewParameterProvider<Node> {
         Node(
             num = 1955,
             user =
-            User.Builder().also { wb ->
-            wb.id = "mickeyMouseId"
-            wb.long_name = "Mickey Mouse"
-            wb.short_name = "MM"
-            wb.hw_model = HardwareModel.TBEAM
-            wb.role = Config.DeviceConfig.Role.ROUTER
-            }.build(),
-            position = Position.Builder().also { wb ->wb.latitude_i = 338125110; wb.longitude_i = -1179189760; wb.altitude = 138; wb.sats_in_view = 4}.build(),
+            User.Builder()
+                .also { wb ->
+                    wb.id = "mickeyMouseId"
+                    wb.long_name = "Mickey Mouse"
+                    wb.short_name = "MM"
+                    wb.hw_model = HardwareModel.TBEAM
+                    wb.role = Config.DeviceConfig.Role.ROUTER
+                }
+                .build(),
+            position =
+            Position.Builder()
+                .also { wb ->
+                    wb.latitude_i = 338125110
+                    wb.longitude_i = -1179189760
+                    wb.altitude = 138
+                    wb.sats_in_view = 4
+                }
+                .build(),
             lastHeard = 1700000000,
             channel = 0,
             snr = 12.5F,
             rssi = -42,
             deviceMetrics =
-            DeviceMetrics.Builder().also { wb ->
-            wb.channel_utilization = 2.4F
-            wb.air_util_tx = 3.5F
-            wb.battery_level = 85
-            wb.voltage = 3.7F
-            wb.uptime_seconds = 3600
-            }.build(),
+            DeviceMetrics.Builder()
+                .also { wb ->
+                    wb.channel_utilization = 2.4F
+                    wb.air_util_tx = 3.5F
+                    wb.battery_level = 85
+                    wb.voltage = 3.7F
+                    wb.uptime_seconds = 3600
+                }
+                .build(),
             isFavorite = true,
             hopsAway = 0,
         )
@@ -60,12 +72,14 @@ class NodePreviewParameterProvider : PreviewParameterProvider<Node> {
         mickeyMouse.copy(
             num = 1928,
             user =
-            User.Builder().also { wb ->
-            wb.long_name = "Minnie Mouse"
-            wb.short_name = "MiMo"
-            wb.id = "minnieMouseId"
-            wb.hw_model = HardwareModel.HELTEC_V3
-            }.build(),
+            User.Builder()
+                .also { wb ->
+                    wb.long_name = "Minnie Mouse"
+                    wb.short_name = "MiMo"
+                    wb.id = "minnieMouseId"
+                    wb.hw_model = HardwareModel.HELTEC_V3
+                }
+                .build(),
             snr = 12.5F,
             rssi = -42,
             position = Position.Builder().build(),
@@ -75,40 +89,61 @@ class NodePreviewParameterProvider : PreviewParameterProvider<Node> {
     private val donaldDuck =
         Node(
             num = 1934,
-            position = Position.Builder().also { wb ->wb.latitude_i = 338052347; wb.longitude_i = -1179208460; wb.altitude = 121; wb.sats_in_view = 66}.build(),
+            position =
+            Position.Builder()
+                .also { wb ->
+                    wb.latitude_i = 338052347
+                    wb.longitude_i = -1179208460
+                    wb.altitude = 121
+                    wb.sats_in_view = 66
+                }
+                .build(),
             lastHeard = 1699999700,
             channel = 0,
             snr = 12.5F,
             rssi = -42,
             deviceMetrics =
-            DeviceMetrics.Builder().also { wb ->
-            wb.channel_utilization = 2.4F
-            wb.air_util_tx = 3.5F
-            wb.battery_level = 85
-            wb.voltage = 3.7F
-            wb.uptime_seconds = 3600
-            }.build(),
+            DeviceMetrics.Builder()
+                .also { wb ->
+                    wb.channel_utilization = 2.4F
+                    wb.air_util_tx = 3.5F
+                    wb.battery_level = 85
+                    wb.voltage = 3.7F
+                    wb.uptime_seconds = 3600
+                }
+                .build(),
             user =
-            User.Builder().also { wb ->
-            wb.id = "donaldDuckId"
-            wb.long_name = "Donald Duck, the Grand Duck of the Ducks"
-            wb.short_name = "DoDu"
-            wb.hw_model = HardwareModel.HELTEC_V3
-            wb.public_key = ByteArray(32) { 1 }.toByteString()
-            }.build(),
+            User.Builder()
+                .also { wb ->
+                    wb.id = "donaldDuckId"
+                    wb.long_name = "Donald Duck, the Grand Duck of the Ducks"
+                    wb.short_name = "DoDu"
+                    wb.hw_model = HardwareModel.HELTEC_V3
+                    wb.public_key = ByteArray(32) { 1 }.toByteString()
+                }
+                .build(),
             environmentMetrics =
-            EnvironmentMetrics.Builder().also { wb ->
-            wb.temperature = 28.0F
-            wb.relative_humidity = 50.0F
-            wb.barometric_pressure = 1013.25F
-            wb.gas_resistance = 0.0F
-            wb.voltage = 3.7F
-            wb.current = 0.0F
-            wb.iaq = 100
-            wb.soil_temperature = 28.0F
-            wb.soil_moisture = 50
-            }.build(),
-            paxcounter = Paxcount.Builder().also { wb ->wb.wifi = 30; wb.ble = 39; wb.uptime = 420}.build(),
+            EnvironmentMetrics.Builder()
+                .also { wb ->
+                    wb.temperature = 28.0F
+                    wb.relative_humidity = 50.0F
+                    wb.barometric_pressure = 1013.25F
+                    wb.gas_resistance = 0.0F
+                    wb.voltage = 3.7F
+                    wb.current = 0.0F
+                    wb.iaq = 100
+                    wb.soil_temperature = 28.0F
+                    wb.soil_moisture = 50
+                }
+                .build(),
+            paxcounter =
+            Paxcount.Builder()
+                .also { wb ->
+                    wb.wifi = 30
+                    wb.ble = 39
+                    wb.uptime = 420
+                }
+                .build(),
             isFavorite = true,
             hopsAway = 2,
         )
@@ -116,7 +151,14 @@ class NodePreviewParameterProvider : PreviewParameterProvider<Node> {
     val unknown =
         donaldDuck.copy(
             user =
-            User.Builder().also { wb ->wb.id = "myId"; wb.long_name = "Meshtastic myId"; wb.short_name = "myId"; wb.hw_model = HardwareModel.UNSET}.build(),
+            User.Builder()
+                .also { wb ->
+                    wb.id = "myId"
+                    wb.long_name = "Meshtastic myId"
+                    wb.short_name = "myId"
+                    wb.hw_model = HardwareModel.UNSET
+                }
+                .build(),
             environmentMetrics = EnvironmentMetrics.Builder().build(),
             paxcounter = Paxcount.Builder().build(),
         )

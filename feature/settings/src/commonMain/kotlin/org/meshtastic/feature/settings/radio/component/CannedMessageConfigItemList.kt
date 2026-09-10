@@ -78,7 +78,7 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
                 viewModel.setCannedMessages(messagesInput)
             }
             if (formState.value != cannedMessageConfig) {
-                val config = ModuleConfig.Builder().also { wb ->wb.canned_message = formState.value}.build()
+                val config = ModuleConfig.Builder().also { wb -> wb.canned_message = formState.value }.build()
                 viewModel.setModuleConfig(config)
             }
         },
@@ -89,7 +89,9 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
                     title = stringResource(Res.string.canned_message_enabled),
                     checked = formState.value.enabled,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.enabled = it }.build() },
+                    onCheckedChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.enabled = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -97,7 +99,9 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
                     title = stringResource(Res.string.rotary_encoder_1_enabled),
                     checked = formState.value.rotary1_enabled,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.rotary1_enabled = it }.build() },
+                    onCheckedChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.rotary1_enabled = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -106,28 +110,38 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
                     value = formState.value.inputbroker_pin_a,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.newBuilder().also { wb -> wb.inputbroker_pin_a = it }.build() },
+                    onValueChanged = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.inputbroker_pin_a = it }.build()
+                    },
                 )
                 EditTextPreference(
                     title = stringResource(Res.string.gpio_pin_for_rotary_encoder_b_port),
                     value = formState.value.inputbroker_pin_b,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.newBuilder().also { wb -> wb.inputbroker_pin_b = it }.build() },
+                    onValueChanged = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.inputbroker_pin_b = it }.build()
+                    },
                 )
                 EditTextPreference(
                     title = stringResource(Res.string.gpio_pin_for_rotary_encoder_press_port),
                     value = formState.value.inputbroker_pin_press,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.newBuilder().also { wb -> wb.inputbroker_pin_press = it }.build() },
+                    onValueChanged = {
+                        formState.value =
+                            formState.value.newBuilder().also { wb -> wb.inputbroker_pin_press = it }.build()
+                    },
                 )
                 DropDownPreference(
                     title = stringResource(Res.string.generate_input_event_on_press),
                     enabled = state.connected,
                     items = ModuleConfig.CannedMessageConfig.InputEventChar.entries.map { it to it.name },
                     selectedItem = formState.value.inputbroker_event_press,
-                    onItemSelected = { formState.value = formState.value.newBuilder().also { wb -> wb.inputbroker_event_press = it }.build() },
+                    onItemSelected = {
+                        formState.value =
+                            formState.value.newBuilder().also { wb -> wb.inputbroker_event_press = it }.build()
+                    },
                 )
                 HorizontalDivider()
                 DropDownPreference(
@@ -135,7 +149,10 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
                     enabled = state.connected,
                     items = ModuleConfig.CannedMessageConfig.InputEventChar.entries.map { it to it.name },
                     selectedItem = formState.value.inputbroker_event_cw,
-                    onItemSelected = { formState.value = formState.value.newBuilder().also { wb -> wb.inputbroker_event_cw = it }.build() },
+                    onItemSelected = {
+                        formState.value =
+                            formState.value.newBuilder().also { wb -> wb.inputbroker_event_cw = it }.build()
+                    },
                 )
                 HorizontalDivider()
                 DropDownPreference(
@@ -143,14 +160,19 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
                     enabled = state.connected,
                     items = ModuleConfig.CannedMessageConfig.InputEventChar.entries.map { it to it.name },
                     selectedItem = formState.value.inputbroker_event_ccw,
-                    onItemSelected = { formState.value = formState.value.newBuilder().also { wb -> wb.inputbroker_event_ccw = it }.build() },
+                    onItemSelected = {
+                        formState.value =
+                            formState.value.newBuilder().also { wb -> wb.inputbroker_event_ccw = it }.build()
+                    },
                 )
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.up_down_select_input_enabled),
                     checked = formState.value.updown1_enabled,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.updown1_enabled = it }.build() },
+                    onCheckedChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.updown1_enabled = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -163,13 +185,17 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
                     keyboardOptions =
                     KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.newBuilder().also { wb -> wb.allow_input_source = it }.build() },
+                    onValueChanged = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.allow_input_source = it }.build()
+                    },
                 )
                 SwitchPreference(
                     title = stringResource(Res.string.send_bell),
                     checked = formState.value.send_bell,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.send_bell = it }.build() },
+                    onCheckedChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.send_bell = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()

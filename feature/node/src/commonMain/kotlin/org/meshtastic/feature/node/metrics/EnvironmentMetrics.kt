@@ -616,27 +616,35 @@ private fun EnvironmentMetricsContent(
 @Composable
 fun PreviewEnvironmentMetricsContent() {
     val fakeEnvMetrics =
-        org.meshtastic.proto.EnvironmentMetrics.Builder().also { wb ->
-        wb.temperature = 22.5f
-        wb.relative_humidity = 55.0f
-        wb.barometric_pressure = 1013.25f
-        wb.soil_moisture = 33
-        wb.soil_temperature = 18.0f
-        wb.lux = 100.0f
-        wb.uv_lux = 100.0f
-        wb.voltage = 3.7f
-        wb.current = 0.12f
-        wb.iaq = 100
-        wb.radiation = 0.15f
-        wb.gas_resistance = 1200.0f
-        wb.wind_speed = 5.2f
-        wb.wind_direction = 225
-        wb.wind_gust = 8.1f
-        wb.wind_lull = 2.3f
-        wb.rainfall_1h = 1.5f
-        wb.rainfall_24h = 12.3f
-        }.build()
-    val fakeTelemetry = Telemetry.Builder().also { wb ->wb.time = 1700000000; wb.environment_metrics = fakeEnvMetrics}.build()
+        org.meshtastic.proto.EnvironmentMetrics.Builder()
+            .also { wb ->
+                wb.temperature = 22.5f
+                wb.relative_humidity = 55.0f
+                wb.barometric_pressure = 1013.25f
+                wb.soil_moisture = 33
+                wb.soil_temperature = 18.0f
+                wb.lux = 100.0f
+                wb.uv_lux = 100.0f
+                wb.voltage = 3.7f
+                wb.current = 0.12f
+                wb.iaq = 100
+                wb.radiation = 0.15f
+                wb.gas_resistance = 1200.0f
+                wb.wind_speed = 5.2f
+                wb.wind_direction = 225
+                wb.wind_gust = 8.1f
+                wb.wind_lull = 2.3f
+                wb.rainfall_1h = 1.5f
+                wb.rainfall_24h = 12.3f
+            }
+            .build()
+    val fakeTelemetry =
+        Telemetry.Builder()
+            .also { wb ->
+                wb.time = 1700000000
+                wb.environment_metrics = fakeEnvMetrics
+            }
+            .build()
     AppTheme {
         Surface {
             EnvironmentMetricsContent(

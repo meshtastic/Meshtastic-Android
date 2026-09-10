@@ -667,10 +667,12 @@ fun MapView(
             onMapLongClick = { latLng ->
                 if (isMainMode && isConnected && boxAuthoringDraft == null) {
                     editingWaypoint =
-                        Waypoint.Builder().also { wb ->
-                        wb.latitude_i = (latLng.latitude / DEG_D).toInt()
-                        wb.longitude_i = (latLng.longitude / DEG_D).toInt()
-                        }.build()
+                        Waypoint.Builder()
+                            .also { wb ->
+                                wb.latitude_i = (latLng.latitude / DEG_D).toInt()
+                                wb.longitude_i = (latLng.longitude / DEG_D).toInt()
+                            }
+                            .build()
                 }
             },
         ) {
@@ -1897,12 +1899,14 @@ private suspend fun FusedLocationProviderClient.awaitLastLocation(): Location? =
 }
 
 /** Builds a proto [BoundingBox] (degrees ×1e7) from two opposite corner taps. */
-private fun boundingBoxFromCorners(a: LatLng, b: LatLng): BoundingBox = BoundingBox.Builder().also { wb ->
-wb.longitude_west_i = (minOf(a.longitude, b.longitude) / DEG_D).toInt()
-wb.latitude_south_i = (minOf(a.latitude, b.latitude) / DEG_D).toInt()
-wb.longitude_east_i = (maxOf(a.longitude, b.longitude) / DEG_D).toInt()
-wb.latitude_north_i = (maxOf(a.latitude, b.latitude) / DEG_D).toInt()
-}.build()
+private fun boundingBoxFromCorners(a: LatLng, b: LatLng): BoundingBox = BoundingBox.Builder()
+    .also { wb ->
+        wb.longitude_west_i = (minOf(a.longitude, b.longitude) / DEG_D).toInt()
+        wb.latitude_south_i = (minOf(a.latitude, b.latitude) / DEG_D).toInt()
+        wb.longitude_east_i = (maxOf(a.longitude, b.longitude) / DEG_D).toInt()
+        wb.latitude_north_i = (maxOf(a.latitude, b.latitude) / DEG_D).toInt()
+    }
+    .build()
 
 // endregion
 

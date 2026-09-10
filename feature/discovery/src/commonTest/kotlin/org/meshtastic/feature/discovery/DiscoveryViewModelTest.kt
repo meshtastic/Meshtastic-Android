@@ -49,16 +49,18 @@ class DiscoveryViewModelTest {
         MeshBeaconOffer(
             fromNodeNum = 456,
             beacon =
-            MeshBeacon.Builder().also { wb ->
-            wb.message = "Join us"
-            wb.offer_channel = ChannelSettings.Builder().also { wb ->wb.name = "PartyNet"}.build()
-            wb.offer_preset = ModemPreset.LONG_FAST
-            }.build(),
+            MeshBeacon.Builder()
+                .also { wb ->
+                    wb.message = "Join us"
+                    wb.offer_channel = ChannelSettings.Builder().also { wb -> wb.name = "PartyNet" }.build()
+                    wb.offer_preset = ModemPreset.LONG_FAST
+                }
+                .build(),
         )
 
     @Test
     fun `offer for an unconfigured channel passes through both filters`() {
-        val channels = listOf(ChannelSettings.Builder().also { wb ->wb.name = "HomeMesh"}.build())
+        val channels = listOf(ChannelSettings.Builder().also { wb -> wb.name = "HomeMesh" }.build())
 
         val offers = filterAlreadyJoinedOffers(listOf(partyNetOffer), radioLora, channels)
         val beaconChannels = filterAlreadyJoinedBeaconChannels(listOf(partyNetOffer), radioLora, channels)
@@ -69,7 +71,7 @@ class DiscoveryViewModelTest {
 
     @Test
     fun `offer matching a configured channel is dropped from both filters`() {
-        val channels = listOf(ChannelSettings.Builder().also { wb ->wb.name = "PartyNet"}.build())
+        val channels = listOf(ChannelSettings.Builder().also { wb -> wb.name = "PartyNet" }.build())
 
         val offers = filterAlreadyJoinedOffers(listOf(partyNetOffer), radioLora, channels)
         val beaconChannels = filterAlreadyJoinedBeaconChannels(listOf(partyNetOffer), radioLora, channels)
@@ -97,7 +99,7 @@ class DiscoveryViewModelTest {
             filterAlreadyJoinedBeaconChannels(
                 listOf(partyNetOffer, duplicate),
                 radioLora,
-                listOf(ChannelSettings.Builder().also { wb ->wb.name = "HomeMesh"}.build()),
+                listOf(ChannelSettings.Builder().also { wb -> wb.name = "HomeMesh" }.build()),
             )
         assertEquals(1, beaconChannels.size)
     }
@@ -108,7 +110,8 @@ class DiscoveryViewModelTest {
         // reactive at presentation time, not a one-shot decision baked in when the offer arrived.
         val offersFlow = MutableStateFlow(listOf(partyNetOffer))
         val loraFlow = MutableStateFlow<LoRaConfig?>(radioLora)
-        val channelsFlow = MutableStateFlow(listOf(ChannelSettings.Builder().also { wb ->wb.name = "PartyNet"}.build()))
+        val channelsFlow =
+            MutableStateFlow(listOf(ChannelSettings.Builder().also { wb -> wb.name = "PartyNet" }.build()))
 
         val results = mutableListOf<List<MeshBeaconOffer>>()
         val job = launch {
@@ -125,7 +128,7 @@ class DiscoveryViewModelTest {
         assertEquals(listOf(partyNetOffer), results.last())
 
         // The user re-adds an unrelated channel; still not a match, offer stays visible.
-        channelsFlow.value = listOf(ChannelSettings.Builder().also { wb ->wb.name = "HomeMesh"}.build())
+        channelsFlow.value = listOf(ChannelSettings.Builder().also { wb -> wb.name = "HomeMesh" }.build())
         runCurrent()
         assertEquals(listOf(partyNetOffer), results.last())
 

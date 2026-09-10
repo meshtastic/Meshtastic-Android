@@ -147,7 +147,11 @@ class XModemManagerImpl(private val packetHandler: PacketHandler) : XModemManage
     }
 
     private fun sendControl(control: XModem.Control) {
-        packetHandler.sendToRadio(ToRadio.Builder().also { wb ->wb.xmodemPacket = XModem.Builder().also { wb ->wb.control = control}.build()}.build())
+        packetHandler.sendToRadio(
+            ToRadio.Builder()
+                .also { wb -> wb.xmodemPacket = XModem.Builder().also { wb -> wb.control = control }.build() }
+                .build(),
+        )
     }
 
     private fun reset() {

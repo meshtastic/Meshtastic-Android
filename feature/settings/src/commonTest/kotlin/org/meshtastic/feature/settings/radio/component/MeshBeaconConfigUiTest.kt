@@ -91,9 +91,21 @@ class MeshBeaconConfigUiTest {
     @Test
     fun requiredOfferedChannel_defaultsToPrimaryAndStampsRegionAndPresetOnSave() = runComposeUiTest {
         val radioLora =
-            Config.LoRaConfig.Builder().also { wb ->wb.region = RegionCode.US; wb.modem_preset = ModemPreset.MEDIUM_FAST; wb.use_preset = true}.build()
+            Config.LoRaConfig.Builder()
+                .also { wb ->
+                    wb.region = RegionCode.US
+                    wb.modem_preset = ModemPreset.MEDIUM_FAST
+                    wb.use_preset = true
+                }
+                .build()
         // channel_num deliberately set: proves the save path narrows to name+psk, not the whole ChannelSettings.
-        val primary = ChannelSettings.Builder().also { wb ->wb.name = "Primary"; wb.channel_num = 7}.build()
+        val primary =
+            ChannelSettings.Builder()
+                .also { wb ->
+                    wb.name = "Primary"
+                    wb.channel_num = 7
+                }
+                .build()
         val channelList = listOf(primary)
         val initialConfig = MeshBeaconConfig.Builder().build()
         lateinit var configState: ConfigState<MeshBeaconConfig>
@@ -121,7 +133,11 @@ class MeshBeaconConfigUiTest {
                             channelItems = channelList.mapIndexed { index, s -> DropDownItem(index, s.name) },
                             enabled = true,
                             onChannelSelect = {
-                                configState.value = configState.value.newBuilder().also { wb -> wb.broadcast_offer_channel = it }.build()
+                                configState.value =
+                                    configState.value
+                                        .newBuilder()
+                                        .also { wb -> wb.broadcast_offer_channel = it }
+                                        .build()
                             },
                         )
                     }
@@ -130,12 +146,17 @@ class MeshBeaconConfigUiTest {
         }
 
         // Never touched the picker: mark the form dirty another way, then save with the untouched offer channel.
-        runOnIdle { configState.value = configState.value.newBuilder().also { wb -> wb.broadcast_message = "hi" }.build() }
+        runOnIdle {
+            configState.value = configState.value.newBuilder().also { wb -> wb.broadcast_message = "hi" }.build()
+        }
 
         onNodeWithText(getString(Res.string.save_changes)).assertIsEnabled().performClick()
 
         runOnIdle {
-            assertEquals(ChannelSettings.Builder().also { wb ->wb.name = "Primary"}.build(), savedConfig?.broadcast_offer_channel)
+            assertEquals(
+                ChannelSettings.Builder().also { wb -> wb.name = "Primary" }.build(),
+                savedConfig?.broadcast_offer_channel,
+            )
             assertEquals(RegionCode.US, savedConfig?.broadcast_offer_region)
             assertEquals(ModemPreset.MEDIUM_FAST, savedConfig?.broadcast_offer_preset)
         }
@@ -143,13 +164,18 @@ class MeshBeaconConfigUiTest {
 
     @Test
     fun customParamsRadio_storedBroadcastOff_toggleDisabledAndSectionsHidden() = runComposeUiTest {
-        val radioLora = Config.LoRaConfig.Builder().also { wb ->wb.region = RegionCode.US; wb.use_preset = false}.build()
+        val radioLora =
+            Config.LoRaConfig.Builder()
+                .also { wb ->
+                    wb.region = RegionCode.US
+                    wb.use_preset = false
+                }
+                .build()
         val broadcastFlag = MeshBeaconConfig.Flags.FLAG_BROADCAST_ENABLED.value
-        val storedConfig = MeshBeaconConfig.Builder()
-        .also { wb ->
-            wb.flags = MeshBeaconConfig.Flags.FLAG_LISTEN_ENABLED.value
-        }
-        .build()
+        val storedConfig =
+            MeshBeaconConfig.Builder()
+                .also { wb -> wb.flags = MeshBeaconConfig.Flags.FLAG_LISTEN_ENABLED.value }
+                .build()
         lateinit var configState: ConfigState<MeshBeaconConfig>
 
         setContent {
@@ -173,11 +199,17 @@ class MeshBeaconConfigUiTest {
                             enabled = gate.toggleEnabled,
                             onCheckedChange = {
                                 configState.value =
-                                    configState.value.newBuilder().also { wb -> wb.flags = if (it) {
-                                            configState.value.flags or broadcastFlag
-                                        } else {
-                                            configState.value.flags and broadcastFlag.inv()
-                                        } }.build()
+                                    configState.value
+                                        .newBuilder()
+                                        .also { wb ->
+                                            wb.flags =
+                                                if (it) {
+                                                    configState.value.flags or broadcastFlag
+                                                } else {
+                                                    configState.value.flags and broadcastFlag.inv()
+                                                }
+                                        }
+                                        .build()
                             },
                         )
                         Text(getString(Res.string.mesh_beacon_broadcast_requires_preset))
@@ -196,14 +228,16 @@ class MeshBeaconConfigUiTest {
 
     @Test
     fun customParamsRadio_storedBroadcastOn_sectionsVisibleButDisabledAndToggleCanSwitchOff() = runComposeUiTest {
-        val radioLora = Config.LoRaConfig.Builder().also { wb ->wb.region = RegionCode.US; wb.use_preset = false}.build()
+        val radioLora =
+            Config.LoRaConfig.Builder()
+                .also { wb ->
+                    wb.region = RegionCode.US
+                    wb.use_preset = false
+                }
+                .build()
         val broadcastFlag = MeshBeaconConfig.Flags.FLAG_BROADCAST_ENABLED.value
         val listenFlag = MeshBeaconConfig.Flags.FLAG_LISTEN_ENABLED.value
-        val storedConfig = MeshBeaconConfig.Builder()
-        .also { wb ->
-            wb.flags = listenFlag or broadcastFlag
-        }
-        .build()
+        val storedConfig = MeshBeaconConfig.Builder().also { wb -> wb.flags = listenFlag or broadcastFlag }.build()
         lateinit var configState: ConfigState<MeshBeaconConfig>
 
         setContent {
@@ -227,11 +261,17 @@ class MeshBeaconConfigUiTest {
                             enabled = gate.toggleEnabled,
                             onCheckedChange = {
                                 configState.value =
-                                    configState.value.newBuilder().also { wb -> wb.flags = if (it) {
-                                            configState.value.flags or broadcastFlag
-                                        } else {
-                                            configState.value.flags and broadcastFlag.inv()
-                                        } }.build()
+                                    configState.value
+                                        .newBuilder()
+                                        .also { wb ->
+                                            wb.flags =
+                                                if (it) {
+                                                    configState.value.flags or broadcastFlag
+                                                } else {
+                                                    configState.value.flags and broadcastFlag.inv()
+                                                }
+                                        }
+                                        .build()
                             },
                         )
                     }
@@ -245,7 +285,10 @@ class MeshBeaconConfigUiTest {
                                 isError = false,
                                 keyboardOptions = KeyboardOptions.Default,
                                 keyboardActions = KeyboardActions.Default,
-                                onValueChanged = { configState.value = configState.value.newBuilder().also { wb -> wb.broadcast_message = it }.build() },
+                                onValueChanged = {
+                                    configState.value =
+                                        configState.value.newBuilder().also { wb -> wb.broadcast_message = it }.build()
+                                },
                             )
                         }
                     }
@@ -264,7 +307,13 @@ class MeshBeaconConfigUiTest {
     @Test
     fun emptyChannelList_offerPickerShowsDisabledPlaceholderRow() = runComposeUiTest {
         val radioLora =
-            Config.LoRaConfig.Builder().also { wb ->wb.region = RegionCode.US; wb.modem_preset = ModemPreset.LONG_FAST; wb.use_preset = true}.build()
+            Config.LoRaConfig.Builder()
+                .also { wb ->
+                    wb.region = RegionCode.US
+                    wb.modem_preset = ModemPreset.LONG_FAST
+                    wb.use_preset = true
+                }
+                .build()
         lateinit var configState: ConfigState<MeshBeaconConfig>
 
         setContent {
@@ -277,7 +326,10 @@ class MeshBeaconConfigUiTest {
                     radioLora = radioLora,
                     channelItems = emptyList(),
                     enabled = true,
-                    onChannelSelect = { configState.value = configState.value.newBuilder().also { wb -> wb.broadcast_offer_channel = it }.build() },
+                    onChannelSelect = {
+                        configState.value =
+                            configState.value.newBuilder().also { wb -> wb.broadcast_offer_channel = it }.build()
+                    },
                 )
             }
         }
@@ -287,7 +339,13 @@ class MeshBeaconConfigUiTest {
 
     @Test
     fun customParamsRadio_emptyChannelListListenOnlyEdit_saveButtonEnabled() = runComposeUiTest {
-        val radioLora = Config.LoRaConfig.Builder().also { wb ->wb.region = RegionCode.US; wb.use_preset = false}.build()
+        val radioLora =
+            Config.LoRaConfig.Builder()
+                .also { wb ->
+                    wb.region = RegionCode.US
+                    wb.use_preset = false
+                }
+                .build()
         val listenFlag = MeshBeaconConfig.Flags.FLAG_LISTEN_ENABLED.value
         val initialConfig = MeshBeaconConfig.Builder().build()
         val emptyChannelList = emptyList<ChannelSettings>()
@@ -321,11 +379,17 @@ class MeshBeaconConfigUiTest {
                             enabled = true,
                             onCheckedChange = {
                                 configState.value =
-                                    configState.value.newBuilder().also { wb -> wb.flags = if (it) {
-                                            configState.value.flags or listenFlag
-                                        } else {
-                                            configState.value.flags and listenFlag.inv()
-                                        } }.build()
+                                    configState.value
+                                        .newBuilder()
+                                        .also { wb ->
+                                            wb.flags =
+                                                if (it) {
+                                                    configState.value.flags or listenFlag
+                                                } else {
+                                                    configState.value.flags and listenFlag.inv()
+                                                }
+                                        }
+                                        .build()
                             },
                         )
                     }
@@ -409,12 +473,14 @@ class MeshBeaconConfigUiTest {
             AppTheme {
                 targetsState = remember {
                     mutableStateOf(
-                        listOf(MeshBeaconConfig.BroadcastTarget.Builder()
-                        .also { wb ->
-                            wb.channel_index = 0
-                            wb.preset = ModemPreset.LONG_FAST
-                        }
-                        .build()),
+                        listOf(
+                            MeshBeaconConfig.BroadcastTarget.Builder()
+                                .also { wb ->
+                                    wb.channel_index = 0
+                                    wb.preset = ModemPreset.LONG_FAST
+                                }
+                                .build(),
+                        ),
                     )
                 }
                 BroadcastTargetsCard(
@@ -451,12 +517,14 @@ class MeshBeaconConfigUiTest {
             AppTheme {
                 targetsState = remember {
                     mutableStateOf(
-                        listOf(MeshBeaconConfig.BroadcastTarget.Builder()
-                        .also { wb ->
-                            wb.channel_index = 0
-                            wb.preset = ModemPreset.LONG_FAST
-                        }
-                        .build()),
+                        listOf(
+                            MeshBeaconConfig.BroadcastTarget.Builder()
+                                .also { wb ->
+                                    wb.channel_index = 0
+                                    wb.preset = ModemPreset.LONG_FAST
+                                }
+                                .build(),
+                        ),
                     )
                 }
                 BroadcastTargetsCard(

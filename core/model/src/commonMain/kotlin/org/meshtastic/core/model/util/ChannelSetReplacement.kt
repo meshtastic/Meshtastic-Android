@@ -85,15 +85,18 @@ fun getChannelReplacementList(
     if (endIndex < 0) return@buildList
     for (index in 0..endIndex) {
         add(
-            Channel.Builder().also { wb ->
-            wb.role = when (index) {
-                                0 -> if (new.isEmpty()) Channel.Role.DISABLED else Channel.Role.PRIMARY
-                                in 1..new.lastIndex -> Channel.Role.SECONDARY
-                                else -> Channel.Role.DISABLED
-                            }
-            wb.index = index
-            wb.settings = new.getOrNull(index) ?: ChannelSettings.Builder().build()
-            }.build(),
+            Channel.Builder()
+                .also { wb ->
+                    wb.role =
+                        when (index) {
+                            0 -> if (new.isEmpty()) Channel.Role.DISABLED else Channel.Role.PRIMARY
+                            in 1..new.lastIndex -> Channel.Role.SECONDARY
+                            else -> Channel.Role.DISABLED
+                        }
+                    wb.index = index
+                    wb.settings = new.getOrNull(index) ?: ChannelSettings.Builder().build()
+                }
+                .build(),
         )
     }
 }

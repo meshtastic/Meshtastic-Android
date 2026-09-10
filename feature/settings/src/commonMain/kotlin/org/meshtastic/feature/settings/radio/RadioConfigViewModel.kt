@@ -464,7 +464,13 @@ open class RadioConfigViewModel(
             expectRestartIfLocal(RebootBehavior.ALWAYS)
             radioConfigUseCase.setHamMode(
                 destNum,
-                HamParameters.Builder().also { wb ->wb.call_sign = callSign; wb.short_name = user.short_name; wb.long_name = longName}.build(),
+                HamParameters.Builder()
+                    .also { wb ->
+                        wb.call_sign = callSign
+                        wb.short_name = user.short_name
+                        wb.long_name = longName
+                    }
+                    .build(),
                 onRequestId = ::registerWriteRequestId,
             )
         }
@@ -578,15 +584,18 @@ open class RadioConfigViewModel(
             _radioConfigState.update { state ->
                 state.copy(
                     radioConfig =
-                    state.radioConfig.newBuilder()
+                    state.radioConfig
+                        .newBuilder()
                         .also { wb ->
                             wb.device = config.device ?: state.radioConfig.device
                             wb.position = config.position ?: state.radioConfig.position
                             wb.power = config.power ?: state.radioConfig.power
                             wb.network = config.network ?: state.radioConfig.network
                             wb.display = config.display ?: state.radioConfig.display
-                            // LoRa is intentionally NOT applied optimistically: the firmware can clamp or region-swap
-                            // (e.g. EU sibling) a LoRa write and applies it live, so the form must reflect the device's
+                            // LoRa is intentionally NOT applied optimistically: the firmware can clamp or
+                            // region-swap
+                            // (e.g. EU sibling) a LoRa write and applies it live, so the form must reflect the
+                            // device's
                             // actual value. It is re-read from the device when the LoRa screen is next opened.
                             wb.bluetooth = config.bluetooth ?: state.radioConfig.bluetooth
                             wb.security = config.security ?: state.radioConfig.security
@@ -606,7 +615,8 @@ open class RadioConfigViewModel(
             _radioConfigState.update { state ->
                 state.copy(
                     moduleConfig =
-                    state.moduleConfig.newBuilder()
+                    state.moduleConfig
+                        .newBuilder()
                         .also { wb ->
                             wb.mqtt = config.mqtt ?: state.moduleConfig.mqtt
                             wb.serial = config.serial ?: state.moduleConfig.serial
@@ -771,7 +781,7 @@ open class RadioConfigViewModel(
             }
             importSecurityConfigUseCase(stored)
                 .onSuccess {
-                    setConfig(Config.Builder().also { wb ->wb.security = it}.build())
+                    setConfig(Config.Builder().also { wb -> wb.security = it }.build())
                     snackbarManager.showSnackbar(message = UiText.Resource(Res.string.key_backup_restored).resolve())
                 }
                 .onFailure {
@@ -1320,7 +1330,8 @@ open class RadioConfigViewModel(
                 _radioConfigState.update { state ->
                     state.copy(
                         radioConfig =
-                        state.radioConfig.newBuilder()
+                        state.radioConfig
+                            .newBuilder()
                             .also { wb ->
                                 wb.device = response.device ?: state.radioConfig.device
                                 wb.position = response.position ?: state.radioConfig.position
@@ -1342,7 +1353,8 @@ open class RadioConfigViewModel(
                 _radioConfigState.update { state ->
                     state.copy(
                         moduleConfig =
-                        state.moduleConfig.newBuilder()
+                        state.moduleConfig
+                            .newBuilder()
                             .also { wb ->
                                 wb.mqtt = response.mqtt ?: state.moduleConfig.mqtt
                                 wb.serial = response.serial ?: state.moduleConfig.serial
@@ -1355,8 +1367,10 @@ open class RadioConfigViewModel(
                                 wb.audio = response.audio ?: state.moduleConfig.audio
                                 wb.remote_hardware = response.remote_hardware ?: state.moduleConfig.remote_hardware
                                 wb.neighbor_info = response.neighbor_info ?: state.moduleConfig.neighbor_info
-                                wb.ambient_lighting = response.ambient_lighting ?: state.moduleConfig.ambient_lighting
-                                wb.detection_sensor = response.detection_sensor ?: state.moduleConfig.detection_sensor
+                                wb.ambient_lighting =
+                                    response.ambient_lighting ?: state.moduleConfig.ambient_lighting
+                                wb.detection_sensor =
+                                    response.detection_sensor ?: state.moduleConfig.detection_sensor
                                 wb.paxcounter = response.paxcounter ?: state.moduleConfig.paxcounter
                                 wb.statusmessage = response.statusmessage ?: state.moduleConfig.statusmessage
                                 wb.tak = response.tak ?: state.moduleConfig.tak

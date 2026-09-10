@@ -29,12 +29,30 @@ class BooleanProvider : PreviewParameterProvider<Boolean> {
     override val values: Sequence<Boolean> = sequenceOf(false, true)
 }
 
-private val user = User.Builder().also { wb ->wb.short_name = "\uD83E\uDEE0"; wb.long_name = "John Doe"}.build()
+private val user =
+    User.Builder()
+        .also { wb ->
+            wb.short_name = "\uD83E\uDEE0"
+            wb.long_name = "John Doe"
+        }
+        .build()
 val previewNode =
     Node(
         num = 13444,
         user = user,
         isIgnored = false,
-        paxcounter = Paxcount.Builder().also { wb ->wb.ble = 10; wb.wifi = 5}.build(),
-        environmentMetrics = EnvironmentMetrics.Builder().also { wb ->wb.temperature = 25f; wb.relative_humidity = 60f}.build(),
+        paxcounter =
+        Paxcount.Builder()
+            .also { wb ->
+                wb.ble = 10
+                wb.wifi = 5
+            }
+            .build(),
+        environmentMetrics =
+        EnvironmentMetrics.Builder()
+            .also { wb ->
+                wb.temperature = 25f
+                wb.relative_humidity = 60f
+            }
+            .build(),
     )

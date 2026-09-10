@@ -38,7 +38,13 @@ class UnclusteredNodesTest {
 
     private fun node(num: Int, latitude: Double, longitude: Double) = Node(
         num = num,
-        position = Position.Builder().also { wb ->wb.latitude_i = (latitude * 1e7).toInt(); wb.longitude_i = (longitude * 1e7).toInt()}.build(),
+        position =
+        Position.Builder()
+            .also { wb ->
+                wb.latitude_i = (latitude * 1e7).toInt()
+                wb.longitude_i = (longitude * 1e7).toInt()
+            }
+            .build(),
     )
 
     /** [count] nodes on the same spot, which is what a crowded venue looks like. */

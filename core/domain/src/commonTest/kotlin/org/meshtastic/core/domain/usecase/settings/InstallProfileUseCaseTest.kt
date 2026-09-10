@@ -75,7 +75,13 @@ class InstallProfileUseCaseTest {
 
     @Test
     fun `invoke calls begin and commit edit settings`() = runTest {
-        useCase(1234, DeviceProfile.Builder().build(), User.Builder().build(), currentLoraConfig = null, isLocal = false)
+        useCase(
+            1234,
+            DeviceProfile.Builder().build(),
+            User.Builder().build(),
+            currentLoraConfig = null,
+            isLocal = false,
+        )
 
         assertTrue(radioController.editSettingsCalled)
     }
@@ -83,40 +89,54 @@ class InstallProfileUseCaseTest {
     @Test
     fun `invoke installs all sections of a full profile`() = runTest {
         val profile =
-            DeviceProfile.Builder().also { wb ->
-            wb.long_name = "Full Node"
-            wb.short_name = "FULL"
-            wb.config = org.meshtastic.proto.LocalConfig.Builder().also { wb ->
-                            wb.device = DeviceConfig.Builder().build()
-                            wb.position = PositionConfig.Builder().build()
-                            wb.power = PowerConfig.Builder().build()
-                            wb.network = NetworkConfig.Builder().build()
-                            wb.display = DisplayConfig.Builder().build()
-                            wb.lora = LoRaConfig.Builder().build()
-                            wb.bluetooth = BluetoothConfig.Builder().build()
-                            wb.security = SecurityConfig.Builder().build()
-                            }.build()
-            wb.module_config = org.meshtastic.proto.LocalModuleConfig.Builder().also { wb ->
-                            wb.mqtt = MQTTConfig.Builder().build()
-                            wb.serial = SerialConfig.Builder().build()
-                            wb.external_notification = ExternalNotificationConfig.Builder().build()
-                            wb.store_forward = StoreForwardConfig.Builder().build()
-                            wb.range_test = RangeTestConfig.Builder().build()
-                            wb.telemetry = TelemetryConfig.Builder().build()
-                            wb.canned_message = CannedMessageConfig.Builder().build()
-                            wb.audio = AudioConfig.Builder().build()
-                            wb.remote_hardware = RemoteHardwareConfig.Builder().build()
-                            wb.neighbor_info = NeighborInfoConfig.Builder().build()
-                            wb.ambient_lighting = AmbientLightingConfig.Builder().build()
-                            wb.detection_sensor = DetectionSensorConfig.Builder().build()
-                            wb.paxcounter = PaxcounterConfig.Builder().build()
-                            wb.statusmessage = StatusMessageConfig.Builder().build()
-                            wb.tak = TAKConfig.Builder().build()
-                            }.build()
-            wb.fixed_position = org.meshtastic.proto.Position.Builder().build()
-            }.build()
+            DeviceProfile.Builder()
+                .also { wb ->
+                    wb.long_name = "Full Node"
+                    wb.short_name = "FULL"
+                    wb.config =
+                        org.meshtastic.proto.LocalConfig.Builder()
+                            .also { wb ->
+                                wb.device = DeviceConfig.Builder().build()
+                                wb.position = PositionConfig.Builder().build()
+                                wb.power = PowerConfig.Builder().build()
+                                wb.network = NetworkConfig.Builder().build()
+                                wb.display = DisplayConfig.Builder().build()
+                                wb.lora = LoRaConfig.Builder().build()
+                                wb.bluetooth = BluetoothConfig.Builder().build()
+                                wb.security = SecurityConfig.Builder().build()
+                            }
+                            .build()
+                    wb.module_config =
+                        org.meshtastic.proto.LocalModuleConfig.Builder()
+                            .also { wb ->
+                                wb.mqtt = MQTTConfig.Builder().build()
+                                wb.serial = SerialConfig.Builder().build()
+                                wb.external_notification = ExternalNotificationConfig.Builder().build()
+                                wb.store_forward = StoreForwardConfig.Builder().build()
+                                wb.range_test = RangeTestConfig.Builder().build()
+                                wb.telemetry = TelemetryConfig.Builder().build()
+                                wb.canned_message = CannedMessageConfig.Builder().build()
+                                wb.audio = AudioConfig.Builder().build()
+                                wb.remote_hardware = RemoteHardwareConfig.Builder().build()
+                                wb.neighbor_info = NeighborInfoConfig.Builder().build()
+                                wb.ambient_lighting = AmbientLightingConfig.Builder().build()
+                                wb.detection_sensor = DetectionSensorConfig.Builder().build()
+                                wb.paxcounter = PaxcounterConfig.Builder().build()
+                                wb.statusmessage = StatusMessageConfig.Builder().build()
+                                wb.tak = TAKConfig.Builder().build()
+                            }
+                            .build()
+                    wb.fixed_position = org.meshtastic.proto.Position.Builder().build()
+                }
+                .build()
 
-        useCase(1234, profile, org.meshtastic.proto.User.Builder().also { wb ->wb.long_name = "Old"}.build(), currentLoraConfig = null, isLocal = false)
+        useCase(
+            1234,
+            profile,
+            org.meshtastic.proto.User.Builder().also { wb -> wb.long_name = "Old" }.build(),
+            currentLoraConfig = null,
+            isLocal = false,
+        )
 
         assertTrue(radioController.editSettingsCalled)
     }
@@ -125,7 +145,18 @@ class InstallProfileUseCaseTest {
     fun `fixed position queue rejection aborts profile installation after closing the edit transaction`() = runTest {
         val rejection = PacketQueueRejectedException("Fixed position")
         radioController.onSetFixedPosition = { _, _ -> throw rejection }
-        val profile = DeviceProfile.Builder().also { wb ->wb.fixed_position = org.meshtastic.proto.Position.Builder().also { wb ->wb.latitude_i = 1; wb.longitude_i = 1}.build()}.build()
+        val profile =
+            DeviceProfile.Builder()
+                .also { wb ->
+                    wb.fixed_position =
+                        org.meshtastic.proto.Position.Builder()
+                            .also { wb ->
+                                wb.latitude_i = 1
+                                wb.longitude_i = 1
+                            }
+                            .build()
+                }
+                .build()
 
         val failure =
             assertFailsWith<PacketQueueRejectedException> {
@@ -145,9 +176,21 @@ class InstallProfileUseCaseTest {
 
     @Test
     fun `invoke installs is_unmessagable but never auto-installs is_licensed`() = runTest {
-        val profile = DeviceProfile.Builder().also { wb ->wb.is_unmessagable = true; wb.is_licensed = true}.build()
+        val profile =
+            DeviceProfile.Builder()
+                .also { wb ->
+                    wb.is_unmessagable = true
+                    wb.is_licensed = true
+                }
+                .build()
 
-        useCase(1234, profile, User.Builder().also { wb ->wb.long_name = "Old"}.build(), currentLoraConfig = null, isLocal = false)
+        useCase(
+            1234,
+            profile,
+            User.Builder().also { wb -> wb.long_name = "Old" }.build(),
+            currentLoraConfig = null,
+            isLocal = false,
+        )
 
         assertEquals(true, radioController.lastSetOwnerUser?.is_unmessagable)
         assertEquals(false, radioController.lastSetOwnerUser?.is_licensed)
@@ -155,8 +198,8 @@ class InstallProfileUseCaseTest {
 
     @Test
     fun `invoke normalizes channels refreshes local cache and writes URL LoRa once`() = runTest {
-        val primary = ChannelSettings.Builder().also { wb ->wb.name = "Node A Primary"}.build()
-        val secondary = ChannelSettings.Builder().also { wb ->wb.name = "Node A Secondary"}.build()
+        val primary = ChannelSettings.Builder().also { wb -> wb.name = "Node A Primary" }.build()
+        val secondary = ChannelSettings.Builder().also { wb -> wb.name = "Node A Secondary" }.build()
         val urlLoraConfig =
             LoRaConfig.Builder()
                 .also { wb ->
@@ -174,24 +217,37 @@ class InstallProfileUseCaseTest {
                 }
                 .build()
         val currentLoraConfig = LoRaConfig.Builder().also { wb -> wb.region = LoRaConfig.RegionCode.ANZ }.build()
-        val oldSettings = listOf(ChannelSettings.Builder().also { wb ->wb.name = "Node B Primary"}.build())
+        val oldSettings = listOf(ChannelSettings.Builder().also { wb -> wb.name = "Node B Primary" }.build())
         val cachedLoraConfig = LoRaConfig.Builder().also { wb -> wb.region = LoRaConfig.RegionCode.EU_433 }.build()
-        radioConfigRepository.setChannelSet(ChannelSet.Builder().also { wb ->wb.settings = oldSettings; wb.lora_config = cachedLoraConfig}.build())
+        radioConfigRepository.setChannelSet(
+            ChannelSet.Builder()
+                .also { wb ->
+                    wb.settings = oldSettings
+                    wb.lora_config = cachedLoraConfig
+                }
+                .build(),
+        )
         val exportedProfile =
-            DeviceProfile.Builder().also { wb ->
-            wb.config = org.meshtastic.proto.LocalConfig.Builder().also { wb ->wb.lora = profileLoraConfig}.build()
-            wb.channel_url = ChannelSet.Builder().also { wb ->
-                            wb.settings = listOf(primary, ChannelSettings.Builder().build(), primary, secondary)
-                            wb.lora_config = urlLoraConfig
-                            }.build()
-                                .getChannelUrl()
-                                .toString()
-            }.build()
+            DeviceProfile.Builder()
+                .also { wb ->
+                    wb.config =
+                        org.meshtastic.proto.LocalConfig.Builder().also { wb -> wb.lora = profileLoraConfig }.build()
+                    wb.channel_url =
+                        ChannelSet.Builder()
+                            .also { wb ->
+                                wb.settings = listOf(primary, ChannelSettings.Builder().build(), primary, secondary)
+                                wb.lora_config = urlLoraConfig
+                            }
+                            .build()
+                            .getChannelUrl()
+                            .toString()
+                }
+                .build()
 
         useCase(
             4321,
             exportedProfile,
-            User.Builder().also { wb ->wb.long_name = "Node B"}.build(),
+            User.Builder().also { wb -> wb.long_name = "Node B" }.build(),
             currentLoraConfig = currentLoraConfig,
             isLocal = true,
         )
@@ -217,32 +273,61 @@ class InstallProfileUseCaseTest {
         assertEquals(listOf(primary, secondary), radioConfigRepository.currentChannelSet.settings)
         assertEquals(urlLoraConfig, radioConfigRepository.currentChannelSet.lora_config)
         assertEquals(
-            listOf(FakeRadioController.ConfigWrite(destination = 4321, config = Config.Builder().also { wb ->wb.lora = urlLoraConfig}.build())),
+            listOf(
+                FakeRadioController.ConfigWrite(
+                    destination = 4321,
+                    config = Config.Builder().also { wb -> wb.lora = urlLoraConfig }.build(),
+                ),
+            ),
             radioController.configWrites,
         )
         assertEquals(
             channelWrites.map { SettingsOperation.SetChannel(it.channel) } +
-                SettingsOperation.SetConfig(Config.Builder().also { wb ->wb.lora = urlLoraConfig}.build()),
+                SettingsOperation.SetConfig(Config.Builder().also { wb -> wb.lora = urlLoraConfig }.build()),
             radioController.settingsOperations,
         )
     }
 
     @Test
     fun `invoke treats blank channel URL as absent and installs profile LoRa once`() = runTest {
-        val oldSettings = listOf(ChannelSettings.Builder().also { wb ->wb.name = "Keep Me"}.build())
+        val oldSettings = listOf(ChannelSettings.Builder().also { wb -> wb.name = "Keep Me" }.build())
         val currentLoraConfig = LoRaConfig.Builder().also { wb -> wb.region = LoRaConfig.RegionCode.EU_868 }.build()
         val profileLoraConfig = LoRaConfig.Builder().also { wb -> wb.region = LoRaConfig.RegionCode.US }.build()
         val cachedLoraConfig = LoRaConfig.Builder().also { wb -> wb.region = LoRaConfig.RegionCode.ANZ }.build()
-        radioConfigRepository.setChannelSet(ChannelSet.Builder().also { wb ->wb.settings = oldSettings; wb.lora_config = cachedLoraConfig}.build())
+        radioConfigRepository.setChannelSet(
+            ChannelSet.Builder()
+                .also { wb ->
+                    wb.settings = oldSettings
+                    wb.lora_config = cachedLoraConfig
+                }
+                .build(),
+        )
         val profile =
-            DeviceProfile.Builder().also { wb ->wb.channel_url = " \t\n"; wb.config = org.meshtastic.proto.LocalConfig.Builder().also { wb ->wb.lora = profileLoraConfig}.build()}.build()
+            DeviceProfile.Builder()
+                .also { wb ->
+                    wb.channel_url = " \t\n"
+                    wb.config =
+                        org.meshtastic.proto.LocalConfig.Builder().also { wb -> wb.lora = profileLoraConfig }.build()
+                }
+                .build()
 
-        useCase(4321, profile, User.Builder().also { wb ->wb.long_name = "Node B"}.build(), currentLoraConfig = currentLoraConfig, isLocal = true)
+        useCase(
+            4321,
+            profile,
+            User.Builder().also { wb -> wb.long_name = "Node B" }.build(),
+            currentLoraConfig = currentLoraConfig,
+            isLocal = true,
+        )
 
         assertTrue(radioController.editSettingsCalled)
         assertTrue(radioController.localChannels.isEmpty())
         assertEquals(
-            listOf(FakeRadioController.ConfigWrite(destination = 4321, config = Config.Builder().also { wb ->wb.lora = profileLoraConfig}.build())),
+            listOf(
+                FakeRadioController.ConfigWrite(
+                    destination = 4321,
+                    config = Config.Builder().also { wb -> wb.lora = profileLoraConfig }.build(),
+                ),
+            ),
             radioController.configWrites,
         )
         assertEquals(
@@ -256,14 +341,34 @@ class InstallProfileUseCaseTest {
     @Test
     fun `invoke replaces local channels and preserves cached LoRa when no LoRa write is needed`() = runTest {
         val cachedLoraConfig = LoRaConfig.Builder().also { wb -> wb.region = LoRaConfig.RegionCode.ANZ }.build()
-        val importedPrimary = ChannelSettings.Builder().also { wb ->wb.name = "Imported Primary"}.build()
+        val importedPrimary = ChannelSettings.Builder().also { wb -> wb.name = "Imported Primary" }.build()
         radioConfigRepository.setChannelSet(
-            ChannelSet.Builder().also { wb ->wb.settings = listOf(ChannelSettings.Builder().also { wb ->wb.name = "Old Primary"}.build()); wb.lora_config = cachedLoraConfig}.build(),
+            ChannelSet.Builder()
+                .also { wb ->
+                    wb.settings = listOf(ChannelSettings.Builder().also { wb -> wb.name = "Old Primary" }.build())
+                    wb.lora_config = cachedLoraConfig
+                }
+                .build(),
         )
         val profile =
-            DeviceProfile.Builder().also { wb ->wb.channel_url = ChannelSet.Builder().also { wb ->wb.settings = listOf(importedPrimary)}.build().getChannelUrl().toString()}.build()
+            DeviceProfile.Builder()
+                .also { wb ->
+                    wb.channel_url =
+                        ChannelSet.Builder()
+                            .also { wb -> wb.settings = listOf(importedPrimary) }
+                            .build()
+                            .getChannelUrl()
+                            .toString()
+                }
+                .build()
 
-        useCase(4321, profile, User.Builder().also { wb ->wb.long_name = "Node B"}.build(), currentLoraConfig = cachedLoraConfig, isLocal = true)
+        useCase(
+            4321,
+            profile,
+            User.Builder().also { wb -> wb.long_name = "Node B" }.build(),
+            currentLoraConfig = cachedLoraConfig,
+            isLocal = true,
+        )
 
         assertTrue(radioController.localConfigs.isEmpty())
         assertEquals(listOf(importedPrimary), radioConfigRepository.currentChannelSet.settings)
@@ -273,36 +378,71 @@ class InstallProfileUseCaseTest {
     @Test
     fun `invoke skips redundant LoRa write when desired config is already active`() = runTest {
         val currentLoraConfig = LoRaConfig.Builder().also { wb -> wb.region = LoRaConfig.RegionCode.US }.build()
-        val profile = DeviceProfile.Builder().also { wb ->wb.config = org.meshtastic.proto.LocalConfig.Builder().also { wb ->wb.lora = currentLoraConfig}.build()}.build()
+        val profile =
+            DeviceProfile.Builder()
+                .also { wb ->
+                    wb.config =
+                        org.meshtastic.proto.LocalConfig.Builder().also { wb -> wb.lora = currentLoraConfig }.build()
+                }
+                .build()
 
-        useCase(4321, profile, User.Builder().also { wb ->wb.long_name = "Node B"}.build(), currentLoraConfig = currentLoraConfig, isLocal = false)
+        useCase(
+            4321,
+            profile,
+            User.Builder().also { wb -> wb.long_name = "Node B" }.build(),
+            currentLoraConfig = currentLoraConfig,
+            isLocal = false,
+        )
 
         assertTrue(radioController.localConfigs.isEmpty())
     }
 
     @Test
     fun `invoke does not replace local cache for a remote profile install`() = runTest {
-        val oldSettings = listOf(ChannelSettings.Builder().also { wb ->wb.name = "Local Primary"}.build())
-        val remotePrimary = ChannelSettings.Builder().also { wb ->wb.name = "Remote Primary"}.build()
+        val oldSettings = listOf(ChannelSettings.Builder().also { wb -> wb.name = "Local Primary" }.build())
+        val remotePrimary = ChannelSettings.Builder().also { wb -> wb.name = "Remote Primary" }.build()
         val cachedChannelSet =
-            ChannelSet.Builder().also { wb ->wb.settings = oldSettings; wb.lora_config = LoRaConfig.Builder().also { wb -> wb.region = LoRaConfig.RegionCode.ANZ }.build()}.build()
+            ChannelSet.Builder()
+                .also { wb ->
+                    wb.settings = oldSettings
+                    wb.lora_config = LoRaConfig.Builder().also { wb -> wb.region = LoRaConfig.RegionCode.ANZ }.build()
+                }
+                .build()
         radioConfigRepository.setChannelSet(cachedChannelSet)
         val profile =
-            DeviceProfile.Builder().also { wb ->
-            wb.channel_url = ChannelSet.Builder().also { wb ->
-                            wb.settings = listOf(remotePrimary)
-                            wb.lora_config = LoRaConfig.Builder().also { wb -> wb.region = LoRaConfig.RegionCode.US }.build()
-                            }.build()
-                                .getChannelUrl()
-                                .toString()
-            }.build()
+            DeviceProfile.Builder()
+                .also { wb ->
+                    wb.channel_url =
+                        ChannelSet.Builder()
+                            .also { wb ->
+                                wb.settings = listOf(remotePrimary)
+                                wb.lora_config =
+                                    LoRaConfig.Builder().also { wb -> wb.region = LoRaConfig.RegionCode.US }.build()
+                            }
+                            .build()
+                            .getChannelUrl()
+                            .toString()
+                }
+                .build()
 
-        useCase(4321, profile, User.Builder().also { wb ->wb.long_name = "Remote"}.build(), currentLoraConfig = null, isLocal = false)
+        useCase(
+            4321,
+            profile,
+            User.Builder().also { wb -> wb.long_name = "Remote" }.build(),
+            currentLoraConfig = null,
+            isLocal = false,
+        )
 
         assertEquals(
             FakeRadioController.ChannelWrite(
                 4321,
-                Channel.Builder().also { wb ->wb.index = 0; wb.role = Channel.Role.PRIMARY; wb.settings = remotePrimary}.build(),
+                Channel.Builder()
+                    .also { wb ->
+                        wb.index = 0
+                        wb.role = Channel.Role.PRIMARY
+                        wb.settings = remotePrimary
+                    }
+                    .build(),
             ),
             radioController.channelWrites.first(),
         )
@@ -312,23 +452,43 @@ class InstallProfileUseCaseTest {
 
     @Test
     fun `invoke leaves local cache unchanged when a channel write fails`() = runTest {
-        val oldSettings = listOf(ChannelSettings.Builder().also { wb ->wb.name = "Local Primary"}.build())
+        val oldSettings = listOf(ChannelSettings.Builder().also { wb -> wb.name = "Local Primary" }.build())
         val cachedChannelSet =
-            ChannelSet.Builder().also { wb ->wb.settings = oldSettings; wb.lora_config = LoRaConfig.Builder().also { wb -> wb.region = LoRaConfig.RegionCode.ANZ }.build()}.build()
+            ChannelSet.Builder()
+                .also { wb ->
+                    wb.settings = oldSettings
+                    wb.lora_config = LoRaConfig.Builder().also { wb -> wb.region = LoRaConfig.RegionCode.ANZ }.build()
+                }
+                .build()
         radioConfigRepository.setChannelSet(cachedChannelSet)
         radioController.failChannelWriteAfter = 2
         val profile =
-            DeviceProfile.Builder().also { wb ->
-            wb.channel_url = ChannelSet.Builder().also { wb ->
-                            wb.settings = listOf(ChannelSettings.Builder().also { wb ->wb.name = "Imported Primary"}.build())
-                            wb.lora_config = LoRaConfig.Builder().also { wb -> wb.region = LoRaConfig.RegionCode.US }.build()
-                            }.build()
-                                .getChannelUrl()
-                                .toString()
-            }.build()
+            DeviceProfile.Builder()
+                .also { wb ->
+                    wb.channel_url =
+                        ChannelSet.Builder()
+                            .also { wb ->
+                                wb.settings =
+                                    listOf(
+                                        ChannelSettings.Builder().also { wb -> wb.name = "Imported Primary" }.build(),
+                                    )
+                                wb.lora_config =
+                                    LoRaConfig.Builder().also { wb -> wb.region = LoRaConfig.RegionCode.US }.build()
+                            }
+                            .build()
+                            .getChannelUrl()
+                            .toString()
+                }
+                .build()
 
         assertFailsWith<IllegalStateException> {
-            useCase(4321, profile, User.Builder().also { wb ->wb.long_name = "Local"}.build(), currentLoraConfig = null, isLocal = true)
+            useCase(
+                4321,
+                profile,
+                User.Builder().also { wb -> wb.long_name = "Local" }.build(),
+                currentLoraConfig = null,
+                isLocal = true,
+            )
         }
 
         assertEquals(cachedChannelSet, radioConfigRepository.currentChannelSet)
@@ -337,29 +497,46 @@ class InstallProfileUseCaseTest {
     @Test
     fun `invoke rejects an empty channel set before opening the transaction`() = runTest {
         val destinationPrimary =
-            Channel.Builder().also { wb ->wb.role = Channel.Role.PRIMARY; wb.index = 0; wb.settings = ChannelSettings.Builder().also { wb ->wb.name = "Node B Primary"}.build()}.build()
+            Channel.Builder()
+                .also { wb ->
+                    wb.role = Channel.Role.PRIMARY
+                    wb.index = 0
+                    wb.settings = ChannelSettings.Builder().also { wb -> wb.name = "Node B Primary" }.build()
+                }
+                .build()
         radioController.channelWrites.add(
             FakeRadioController.ChannelWrite(destination = null, channel = destinationPrimary),
         )
         val profile =
-            DeviceProfile.Builder().also { wb ->
-            wb.long_name = "Must Not Apply"
-            wb.channel_url = ChannelSet.Builder().also { wb ->
-                            wb.settings = emptyList()
-                            wb.lora_config =
-                                LoRaConfig.Builder()
-                                    .also { wb ->
-                                        wb.use_preset = true
-                                        wb.region = LoRaConfig.RegionCode.US
-                                    }
-                                    .build()
-                            }.build()
-                                .getChannelUrl()
-                                .toString()
-            }.build()
+            DeviceProfile.Builder()
+                .also { wb ->
+                    wb.long_name = "Must Not Apply"
+                    wb.channel_url =
+                        ChannelSet.Builder()
+                            .also { wb ->
+                                wb.settings = emptyList()
+                                wb.lora_config =
+                                    LoRaConfig.Builder()
+                                        .also { wb ->
+                                            wb.use_preset = true
+                                            wb.region = LoRaConfig.RegionCode.US
+                                        }
+                                        .build()
+                            }
+                            .build()
+                            .getChannelUrl()
+                            .toString()
+                }
+                .build()
 
         assertFailsWith<MalformedMeshtasticUrlException> {
-            useCase(4321, profile, User.Builder().also { wb ->wb.long_name = "Node B"}.build(), currentLoraConfig = null, isLocal = true)
+            useCase(
+                4321,
+                profile,
+                User.Builder().also { wb -> wb.long_name = "Node B" }.build(),
+                currentLoraConfig = null,
+                isLocal = true,
+            )
         }
 
         assertFalse(radioController.editSettingsCalled)
@@ -370,11 +547,23 @@ class InstallProfileUseCaseTest {
 
     @Test
     fun `invoke rejects a malformed channel URL before opening the transaction`() = runTest {
-        val profile = DeviceProfile.Builder().also { wb ->wb.long_name = "Must Not Apply"; wb.channel_url = "https://example.com/not-a-channel"}.build()
+        val profile =
+            DeviceProfile.Builder()
+                .also { wb ->
+                    wb.long_name = "Must Not Apply"
+                    wb.channel_url = "https://example.com/not-a-channel"
+                }
+                .build()
 
         val error =
             assertFailsWith<MalformedMeshtasticUrlException> {
-                useCase(4321, profile, User.Builder().also { wb ->wb.long_name = "Node B"}.build(), currentLoraConfig = null, isLocal = true)
+                useCase(
+                    4321,
+                    profile,
+                    User.Builder().also { wb -> wb.long_name = "Node B" }.build(),
+                    currentLoraConfig = null,
+                    isLocal = true,
+                )
             }
 
         assertFalse(radioController.editSettingsCalled)

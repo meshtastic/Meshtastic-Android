@@ -69,13 +69,36 @@ class TAKPacketConversionTest {
     @Test
     fun testTAKPacketToCoTMessagePLI() {
         val takPacket =
-            TAKPacket.Builder().also { wb ->
-            wb.is_compressed = false
-            wb.contact = Contact.Builder().also { wb ->wb.callsign = "Alice"; wb.device_callsign = "!5678"}.build()
-            wb.group = Group.Builder().also { wb ->wb.team = Team.Cyan; wb.role = MemberRole.HQ}.build()
-            wb.status = Status.Builder().also { wb ->wb.battery = 85}.build()
-            wb.pli = PLI.Builder().also { wb ->wb.latitude_i = 300000000; wb.longitude_i = -800000000; wb.altitude = 50; wb.speed = 5; wb.course = 90}.build()
-            }.build()
+            TAKPacket.Builder()
+                .also { wb ->
+                    wb.is_compressed = false
+                    wb.contact =
+                        Contact.Builder()
+                            .also { wb ->
+                                wb.callsign = "Alice"
+                                wb.device_callsign = "!5678"
+                            }
+                            .build()
+                    wb.group =
+                        Group.Builder()
+                            .also { wb ->
+                                wb.team = Team.Cyan
+                                wb.role = MemberRole.HQ
+                            }
+                            .build()
+                    wb.status = Status.Builder().also { wb -> wb.battery = 85 }.build()
+                    wb.pli =
+                        PLI.Builder()
+                            .also { wb ->
+                                wb.latitude_i = 300000000
+                                wb.longitude_i = -800000000
+                                wb.altitude = 50
+                                wb.speed = 5
+                                wb.course = 90
+                            }
+                            .build()
+                }
+                .build()
 
         val cot = takPacket.toCoTMessage()
         assertNotNull(cot)
@@ -138,11 +161,25 @@ class TAKPacketConversionTest {
     @Test
     fun testParseSmuggledMessageId() {
         val takPacket =
-            TAKPacket.Builder().also { wb ->
-            wb.is_compressed = false
-            wb.contact = Contact.Builder().also { wb ->wb.callsign = "Alice"; wb.device_callsign = "alice-device-456|msg-789"}.build()
-            wb.chat = GeoChat.Builder().also { wb ->wb.message = "Hi Bob"; wb.to = "Bob"}.build()
-            }.build()
+            TAKPacket.Builder()
+                .also { wb ->
+                    wb.is_compressed = false
+                    wb.contact =
+                        Contact.Builder()
+                            .also { wb ->
+                                wb.callsign = "Alice"
+                                wb.device_callsign = "alice-device-456|msg-789"
+                            }
+                            .build()
+                    wb.chat =
+                        GeoChat.Builder()
+                            .also { wb ->
+                                wb.message = "Hi Bob"
+                                wb.to = "Bob"
+                            }
+                            .build()
+                }
+                .build()
 
         val cot = takPacket.toCoTMessage()
         assertNotNull(cot)

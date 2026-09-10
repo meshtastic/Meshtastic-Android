@@ -31,7 +31,17 @@ class WaypointFeaturesTest {
     fun `a waypoint with both coordinates becomes a feature`() {
         val features =
             waypointsToFeatureCollection(
-                listOf(packet(Waypoint.Builder().also { wb ->wb.id = 1; wb.latitude_i = 416_000_000; wb.longitude_i = -936_000_000}.build())),
+                listOf(
+                    packet(
+                        Waypoint.Builder()
+                            .also { wb ->
+                                wb.id = 1
+                                wb.latitude_i = 416_000_000
+                                wb.longitude_i = -936_000_000
+                            }
+                            .build(),
+                    ),
+                ),
             )
 
         assertEquals(1, features.features.size)
@@ -40,8 +50,24 @@ class WaypointFeaturesTest {
     @Test
     fun `a waypoint missing one coordinate is dropped rather than pinned to the equator`() {
         // Substituting 0 for the absent ordinate put a confident marker at the wrong place, which is worse than none.
-        val latitudeOnly = packet(Waypoint.Builder().also { wb ->wb.id = 2; wb.latitude_i = 416_000_000}.build())
-        val longitudeOnly = packet(Waypoint.Builder().also { wb ->wb.id = 3; wb.longitude_i = -936_000_000}.build())
+        val latitudeOnly =
+            packet(
+                Waypoint.Builder()
+                    .also { wb ->
+                        wb.id = 2
+                        wb.latitude_i = 416_000_000
+                    }
+                    .build(),
+            )
+        val longitudeOnly =
+            packet(
+                Waypoint.Builder()
+                    .also { wb ->
+                        wb.id = 3
+                        wb.longitude_i = -936_000_000
+                    }
+                    .build(),
+            )
 
         assertTrue(waypointsToFeatureCollection(listOf(latitudeOnly, longitudeOnly)).features.isEmpty())
     }
@@ -49,7 +75,19 @@ class WaypointFeaturesTest {
     @Test
     fun `null island is still dropped`() {
         assertTrue(
-            waypointsToFeatureCollection(listOf(packet(Waypoint.Builder().also { wb ->wb.id = 4; wb.latitude_i = 0; wb.longitude_i = 0}.build())))
+            waypointsToFeatureCollection(
+                listOf(
+                    packet(
+                        Waypoint.Builder()
+                            .also { wb ->
+                                wb.id = 4
+                                wb.latitude_i = 0
+                                wb.longitude_i = 0
+                            }
+                            .build(),
+                    ),
+                ),
+            )
                 .features
                 .isEmpty(),
         )

@@ -107,7 +107,15 @@ class MeshConfigHandlerImplTest {
     @Test
     fun `start wires localConfig flow from repository`() = runTest(testDispatcher) {
         handler = createHandler(backgroundScope)
-        val config = LocalConfig.Builder().also { wb ->wb.device = Config.DeviceConfig.Builder().also { wb ->wb.role = Config.DeviceConfig.Role.ROUTER}.build()}.build()
+        val config =
+            LocalConfig.Builder()
+                .also { wb ->
+                    wb.device =
+                        Config.DeviceConfig.Builder()
+                            .also { wb -> wb.role = Config.DeviceConfig.Role.ROUTER }
+                            .build()
+                }
+                .build()
         localConfigFlow.value = config
         advanceUntilIdle()
 
@@ -117,7 +125,10 @@ class MeshConfigHandlerImplTest {
     @Test
     fun `start wires moduleConfig flow from repository`() = runTest(testDispatcher) {
         handler = createHandler(backgroundScope)
-        val config = LocalModuleConfig.Builder().also { wb ->wb.mqtt = ModuleConfig.MQTTConfig.Builder().also { wb ->wb.enabled = true}.build()}.build()
+        val config =
+            LocalModuleConfig.Builder()
+                .also { wb -> wb.mqtt = ModuleConfig.MQTTConfig.Builder().also { wb -> wb.enabled = true }.build() }
+                .build()
         moduleConfigFlow.value = config
         advanceUntilIdle()
 
@@ -129,7 +140,15 @@ class MeshConfigHandlerImplTest {
     @Test
     fun `handleDeviceConfig persists config and updates progress`() = runTest(testDispatcher) {
         handler = createHandler(backgroundScope)
-        val config = Config.Builder().also { wb ->wb.device = Config.DeviceConfig.Builder().also { wb ->wb.role = Config.DeviceConfig.Role.CLIENT}.build()}.build()
+        val config =
+            Config.Builder()
+                .also { wb ->
+                    wb.device =
+                        Config.DeviceConfig.Builder()
+                            .also { wb -> wb.role = Config.DeviceConfig.Role.CLIENT }
+                            .build()
+                }
+                .build()
         handler.handleDeviceConfig(config, session)
         advanceUntilIdle()
 
@@ -140,7 +159,15 @@ class MeshConfigHandlerImplTest {
     @Test
     fun `stale session cannot persist config or advance handshake`() = runTest(testDispatcher) {
         handler = createHandler(backgroundScope)
-        val config = Config.Builder().also { wb ->wb.device = Config.DeviceConfig.Builder().also { wb ->wb.role = Config.DeviceConfig.Role.CLIENT}.build()}.build()
+        val config =
+            Config.Builder()
+                .also { wb ->
+                    wb.device =
+                        Config.DeviceConfig.Builder()
+                            .also { wb -> wb.role = Config.DeviceConfig.Role.CLIENT }
+                            .build()
+                }
+                .build()
         every { radioInterfaceService.runIfSessionActive(session, any()) } returns false
 
         assertFalse(handler.handleDeviceConfig(config, session))
@@ -154,7 +181,15 @@ class MeshConfigHandlerImplTest {
     @Test
     fun `active session persists device config and advances handshake`() = runTest(testDispatcher) {
         handler = createHandler(backgroundScope)
-        val config = Config.Builder().also { wb ->wb.device = Config.DeviceConfig.Builder().also { wb ->wb.role = Config.DeviceConfig.Role.CLIENT}.build()}.build()
+        val config =
+            Config.Builder()
+                .also { wb ->
+                    wb.device =
+                        Config.DeviceConfig.Builder()
+                            .also { wb -> wb.role = Config.DeviceConfig.Role.CLIENT }
+                            .build()
+                }
+                .build()
         every { radioInterfaceService.runIfSessionActive(session, any()) } calls
             {
                 @Suppress("UNCHECKED_CAST")
@@ -181,7 +216,15 @@ class MeshConfigHandlerImplTest {
     @Test
     fun `revoked session cannot complete queued config persistence`() = runTest(testDispatcher) {
         handler = createHandler(backgroundScope)
-        val config = Config.Builder().also { wb ->wb.device = Config.DeviceConfig.Builder().also { wb ->wb.role = Config.DeviceConfig.Role.CLIENT}.build()}.build()
+        val config =
+            Config.Builder()
+                .also { wb ->
+                    wb.device =
+                        Config.DeviceConfig.Builder()
+                            .also { wb -> wb.role = Config.DeviceConfig.Role.CLIENT }
+                            .build()
+                }
+                .build()
         every { radioInterfaceService.runIfSessionActive(session, any()) } calls
             {
                 @Suppress("UNCHECKED_CAST")
@@ -204,13 +247,13 @@ class MeshConfigHandlerImplTest {
         handler = createHandler(backgroundScope)
         val configs =
             listOf(
-                Config.Builder().also { wb ->wb.position = Config.PositionConfig.Builder().build()}.build(),
-                Config.Builder().also { wb ->wb.power = Config.PowerConfig.Builder().build()}.build(),
-                Config.Builder().also { wb ->wb.network = Config.NetworkConfig.Builder().build()}.build(),
-                Config.Builder().also { wb ->wb.display = Config.DisplayConfig.Builder().build()}.build(),
-                Config.Builder().also { wb ->wb.lora = Config.LoRaConfig.Builder().build()}.build(),
-                Config.Builder().also { wb ->wb.bluetooth = Config.BluetoothConfig.Builder().build()}.build(),
-                Config.Builder().also { wb ->wb.security = Config.SecurityConfig.Builder().build()}.build(),
+                Config.Builder().also { wb -> wb.position = Config.PositionConfig.Builder().build() }.build(),
+                Config.Builder().also { wb -> wb.power = Config.PowerConfig.Builder().build() }.build(),
+                Config.Builder().also { wb -> wb.network = Config.NetworkConfig.Builder().build() }.build(),
+                Config.Builder().also { wb -> wb.display = Config.DisplayConfig.Builder().build() }.build(),
+                Config.Builder().also { wb -> wb.lora = Config.LoRaConfig.Builder().build() }.build(),
+                Config.Builder().also { wb -> wb.bluetooth = Config.BluetoothConfig.Builder().build() }.build(),
+                Config.Builder().also { wb -> wb.security = Config.SecurityConfig.Builder().build() }.build(),
             )
 
         for (config in configs) {
@@ -227,7 +270,10 @@ class MeshConfigHandlerImplTest {
     @Test
     fun `handleModuleConfig persists config and updates progress`() = runTest(testDispatcher) {
         handler = createHandler(backgroundScope)
-        val config = ModuleConfig.Builder().also { wb ->wb.mqtt = ModuleConfig.MQTTConfig.Builder().also { wb ->wb.enabled = true}.build()}.build()
+        val config =
+            ModuleConfig.Builder()
+                .also { wb -> wb.mqtt = ModuleConfig.MQTTConfig.Builder().also { wb -> wb.enabled = true }.build() }
+                .build()
         handler.handleModuleConfig(config, session)
         advanceUntilIdle()
 
@@ -241,7 +287,13 @@ class MeshConfigHandlerImplTest {
         val myNum = 123
         every { nodeManager.myNodeNum } returns MutableStateFlow<Int?>(myNum)
 
-        val config = ModuleConfig.Builder().also { wb ->wb.statusmessage = ModuleConfig.StatusMessageConfig.Builder().also { wb ->wb.node_status = "Active"}.build()}.build()
+        val config =
+            ModuleConfig.Builder()
+                .also { wb ->
+                    wb.statusmessage =
+                        ModuleConfig.StatusMessageConfig.Builder().also { wb -> wb.node_status = "Active" }.build()
+                }
+                .build()
         handler.handleModuleConfig(config, session)
         advanceUntilIdle()
 
@@ -253,7 +305,13 @@ class MeshConfigHandlerImplTest {
         handler = createHandler(backgroundScope)
         every { nodeManager.myNodeNum } returns MutableStateFlow<Int?>(null)
 
-        val config = ModuleConfig.Builder().also { wb ->wb.statusmessage = ModuleConfig.StatusMessageConfig.Builder().also { wb ->wb.node_status = "Active"}.build()}.build()
+        val config =
+            ModuleConfig.Builder()
+                .also { wb ->
+                    wb.statusmessage =
+                        ModuleConfig.StatusMessageConfig.Builder().also { wb -> wb.node_status = "Active" }.build()
+                }
+                .build()
         handler.handleModuleConfig(config, session)
         advanceUntilIdle()
         // No crash — updateNodeStatus should not be called
@@ -263,7 +321,13 @@ class MeshConfigHandlerImplTest {
     fun `module config remains persisted when node status persistence fails`() = runTest(testDispatcher) {
         handler = createHandler(backgroundScope)
         val myNum = 123
-        val config = ModuleConfig.Builder().also { wb ->wb.statusmessage = ModuleConfig.StatusMessageConfig.Builder().also { wb ->wb.node_status = "Active"}.build()}.build()
+        val config =
+            ModuleConfig.Builder()
+                .also { wb ->
+                    wb.statusmessage =
+                        ModuleConfig.StatusMessageConfig.Builder().also { wb -> wb.node_status = "Active" }.build()
+                }
+                .build()
         every { nodeManager.myNodeNum } returns MutableStateFlow<Int?>(myNum)
         everySuspend { nodeManager.updateNodeStatusAndPersist(myNum, "Active") } calls
             {
@@ -286,7 +350,13 @@ class MeshConfigHandlerImplTest {
         val statusStarted = CompletableDeferred<Unit>()
         val releaseStatus = CompletableDeferred<Unit>()
         val myNum = 123
-        val config = ModuleConfig.Builder().also { wb ->wb.statusmessage = ModuleConfig.StatusMessageConfig.Builder().also { wb ->wb.node_status = "Active"}.build()}.build()
+        val config =
+            ModuleConfig.Builder()
+                .also { wb ->
+                    wb.statusmessage =
+                        ModuleConfig.StatusMessageConfig.Builder().also { wb -> wb.node_status = "Active" }.build()
+                }
+                .build()
         every { nodeManager.myNodeNum } returns MutableStateFlow<Int?>(myNum)
         everySuspend { nodeManager.updateNodeStatusAndPersist(myNum, "Active") } calls
             {
@@ -312,7 +382,7 @@ class MeshConfigHandlerImplTest {
     @Test
     fun `handleChannel persists channel settings`() = runTest(testDispatcher) {
         handler = createHandler(backgroundScope)
-        val channel = Channel.Builder().also { wb ->wb.index = 0}.build()
+        val channel = Channel.Builder().also { wb -> wb.index = 0 }.build()
         handler.handleChannel(channel, session)
         advanceUntilIdle()
 
@@ -340,7 +410,7 @@ class MeshConfigHandlerImplTest {
                 deviceId = null,
             )
 
-        val channel = Channel.Builder().also { wb ->wb.index = 2}.build()
+        val channel = Channel.Builder().also { wb -> wb.index = 2 }.build()
         handler.handleChannel(channel, session)
         advanceUntilIdle()
 
@@ -352,7 +422,7 @@ class MeshConfigHandlerImplTest {
         handler = createHandler(backgroundScope)
         every { nodeManager.getMyNodeInfo() } returns null
 
-        val channel = Channel.Builder().also { wb ->wb.index = 0}.build()
+        val channel = Channel.Builder().also { wb -> wb.index = 0 }.build()
         handler.handleChannel(channel, session)
         advanceUntilIdle()
 
@@ -376,7 +446,15 @@ class MeshConfigHandlerImplTest {
     @Test
     fun `handleDeviceConfig calls onHandshakeProgress`() = runTest(testDispatcher) {
         handler = createHandler(backgroundScope)
-        val config = Config.Builder().also { wb ->wb.device = Config.DeviceConfig.Builder().also { wb ->wb.role = Config.DeviceConfig.Role.CLIENT}.build()}.build()
+        val config =
+            Config.Builder()
+                .also { wb ->
+                    wb.device =
+                        Config.DeviceConfig.Builder()
+                            .also { wb -> wb.role = Config.DeviceConfig.Role.CLIENT }
+                            .build()
+                }
+                .build()
         handler.handleDeviceConfig(config, session)
         advanceUntilIdle()
 
@@ -386,7 +464,10 @@ class MeshConfigHandlerImplTest {
     @Test
     fun `handleModuleConfig calls onHandshakeProgress`() = runTest(testDispatcher) {
         handler = createHandler(backgroundScope)
-        val config = ModuleConfig.Builder().also { wb ->wb.mqtt = ModuleConfig.MQTTConfig.Builder().also { wb ->wb.enabled = true}.build()}.build()
+        val config =
+            ModuleConfig.Builder()
+                .also { wb -> wb.mqtt = ModuleConfig.MQTTConfig.Builder().also { wb -> wb.enabled = true }.build() }
+                .build()
         handler.handleModuleConfig(config, session)
         advanceUntilIdle()
 
@@ -398,7 +479,7 @@ class MeshConfigHandlerImplTest {
         handler = createHandler(backgroundScope)
         every { nodeManager.getMyNodeInfo() } returns null
 
-        val channel = Channel.Builder().also { wb ->wb.index = 0}.build()
+        val channel = Channel.Builder().also { wb -> wb.index = 0 }.build()
         handler.handleChannel(channel, session)
         advanceUntilIdle()
 

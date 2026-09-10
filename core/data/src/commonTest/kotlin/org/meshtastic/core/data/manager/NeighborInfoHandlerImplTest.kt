@@ -55,11 +55,37 @@ class NeighborInfoHandlerImplTest {
 
     @Test
     fun `handleNeighborInfo stores lastNeighborInfo when from own node`() {
-        val ni = NeighborInfo.Builder().also { wb ->wb.node_id = myNodeNum; wb.neighbors = listOf(Neighbor.Builder().also { wb ->wb.node_id = 100; wb.snr = 5.0f}.build())}.build()
+        val ni =
+            NeighborInfo.Builder()
+                .also { wb ->
+                    wb.node_id = myNodeNum
+                    wb.neighbors =
+                        listOf(
+                            Neighbor.Builder()
+                                .also { wb ->
+                                    wb.node_id = 100
+                                    wb.snr = 5.0f
+                                }
+                                .build(),
+                        )
+                }
+                .build()
         val packet = createPacketWithNeighborInfo(from = myNodeNum, ni = ni)
 
-        every { nodeRepository.getUser(100) } returns User.Builder().also { wb ->wb.long_name = "Alice"; wb.short_name = "AL"}.build()
-        every { nodeRepository.getUser(myNodeNum) } returns User.Builder().also { wb ->wb.long_name = "Me"; wb.short_name = "ME"}.build()
+        every { nodeRepository.getUser(100) } returns
+            User.Builder()
+                .also { wb ->
+                    wb.long_name = "Alice"
+                    wb.short_name = "AL"
+                }
+                .build()
+        every { nodeRepository.getUser(myNodeNum) } returns
+            User.Builder()
+                .also { wb ->
+                    wb.long_name = "Me"
+                    wb.short_name = "ME"
+                }
+                .build()
 
         handler.handleNeighborInfo(packet)
 
@@ -69,11 +95,37 @@ class NeighborInfoHandlerImplTest {
     @Test
     fun `handleNeighborInfo does not store lastNeighborInfo when from remote node`() {
         val remoteNode = 99999
-        val ni = NeighborInfo.Builder().also { wb ->wb.node_id = remoteNode; wb.neighbors = listOf(Neighbor.Builder().also { wb ->wb.node_id = 200; wb.snr = 3.0f}.build())}.build()
+        val ni =
+            NeighborInfo.Builder()
+                .also { wb ->
+                    wb.node_id = remoteNode
+                    wb.neighbors =
+                        listOf(
+                            Neighbor.Builder()
+                                .also { wb ->
+                                    wb.node_id = 200
+                                    wb.snr = 3.0f
+                                }
+                                .build(),
+                        )
+                }
+                .build()
         val packet = createPacketWithNeighborInfo(from = remoteNode, ni = ni)
 
-        every { nodeRepository.getUser(200) } returns User.Builder().also { wb ->wb.long_name = "Bob"; wb.short_name = "BO"}.build()
-        every { nodeRepository.getUser(remoteNode) } returns User.Builder().also { wb ->wb.long_name = "Remote"; wb.short_name = "RM"}.build()
+        every { nodeRepository.getUser(200) } returns
+            User.Builder()
+                .also { wb ->
+                    wb.long_name = "Bob"
+                    wb.short_name = "BO"
+                }
+                .build()
+        every { nodeRepository.getUser(remoteNode) } returns
+            User.Builder()
+                .also { wb ->
+                    wb.long_name = "Remote"
+                    wb.short_name = "RM"
+                }
+                .build()
 
         handler.handleNeighborInfo(packet)
 
@@ -83,15 +135,49 @@ class NeighborInfoHandlerImplTest {
     @Test
     fun `handleNeighborInfo sets response on serviceRepository`() {
         val ni =
-            NeighborInfo.Builder().also { wb ->
-            wb.node_id = myNodeNum
-            wb.neighbors = listOf(Neighbor.Builder().also { wb ->wb.node_id = 100; wb.snr = 5.5f}.build(), Neighbor.Builder().also { wb ->wb.node_id = 200; wb.snr = -2.0f}.build())
-            }.build()
+            NeighborInfo.Builder()
+                .also { wb ->
+                    wb.node_id = myNodeNum
+                    wb.neighbors =
+                        listOf(
+                            Neighbor.Builder()
+                                .also { wb ->
+                                    wb.node_id = 100
+                                    wb.snr = 5.5f
+                                }
+                                .build(),
+                            Neighbor.Builder()
+                                .also { wb ->
+                                    wb.node_id = 200
+                                    wb.snr = -2.0f
+                                }
+                                .build(),
+                        )
+                }
+                .build()
         val packet = createPacketWithNeighborInfo(from = myNodeNum, ni = ni)
 
-        every { nodeRepository.getUser(100) } returns User.Builder().also { wb ->wb.long_name = "Alice"; wb.short_name = "AL"}.build()
-        every { nodeRepository.getUser(200) } returns User.Builder().also { wb ->wb.long_name = "Bob"; wb.short_name = "BO"}.build()
-        every { nodeRepository.getUser(myNodeNum) } returns User.Builder().also { wb ->wb.long_name = "Me"; wb.short_name = "ME"}.build()
+        every { nodeRepository.getUser(100) } returns
+            User.Builder()
+                .also { wb ->
+                    wb.long_name = "Alice"
+                    wb.short_name = "AL"
+                }
+                .build()
+        every { nodeRepository.getUser(200) } returns
+            User.Builder()
+                .also { wb ->
+                    wb.long_name = "Bob"
+                    wb.short_name = "BO"
+                }
+                .build()
+        every { nodeRepository.getUser(myNodeNum) } returns
+            User.Builder()
+                .also { wb ->
+                    wb.long_name = "Me"
+                    wb.short_name = "ME"
+                }
+                .build()
 
         handler.handleNeighborInfo(packet)
 
@@ -100,7 +186,7 @@ class NeighborInfoHandlerImplTest {
 
     @Test
     fun `handleNeighborInfo ignores packet with null decoded`() {
-        val packet = MeshPacket.Builder().also { wb ->wb.from = myNodeNum}.build()
+        val packet = MeshPacket.Builder().also { wb -> wb.from = myNodeNum }.build()
         handler.handleNeighborInfo(packet)
         assertNull(handler.lastNeighborInfo)
     }
@@ -108,11 +194,37 @@ class NeighborInfoHandlerImplTest {
     @Test
     fun `recordStartTime and handleNeighborInfo includes duration`() {
         val requestId = 42
-        val ni = NeighborInfo.Builder().also { wb ->wb.node_id = myNodeNum; wb.neighbors = listOf(Neighbor.Builder().also { wb ->wb.node_id = 100; wb.snr = 1.0f}.build())}.build()
+        val ni =
+            NeighborInfo.Builder()
+                .also { wb ->
+                    wb.node_id = myNodeNum
+                    wb.neighbors =
+                        listOf(
+                            Neighbor.Builder()
+                                .also { wb ->
+                                    wb.node_id = 100
+                                    wb.snr = 1.0f
+                                }
+                                .build(),
+                        )
+                }
+                .build()
         val packet = createPacketWithNeighborInfo(from = myNodeNum, ni = ni, requestId = requestId)
 
-        every { nodeRepository.getUser(100) } returns User.Builder().also { wb ->wb.long_name = "Alice"; wb.short_name = "AL"}.build()
-        every { nodeRepository.getUser(myNodeNum) } returns User.Builder().also { wb ->wb.long_name = "Me"; wb.short_name = "ME"}.build()
+        every { nodeRepository.getUser(100) } returns
+            User.Builder()
+                .also { wb ->
+                    wb.long_name = "Alice"
+                    wb.short_name = "AL"
+                }
+                .build()
+        every { nodeRepository.getUser(myNodeNum) } returns
+            User.Builder()
+                .also { wb ->
+                    wb.long_name = "Me"
+                    wb.short_name = "ME"
+                }
+                .build()
 
         handler.recordStartTime(requestId)
         handler.handleNeighborInfo(packet)
@@ -122,6 +234,17 @@ class NeighborInfoHandlerImplTest {
 
     private fun createPacketWithNeighborInfo(from: Int, ni: NeighborInfo, requestId: Int = 0): MeshPacket {
         val encoded = NeighborInfo.ADAPTER.encode(ni).toByteString()
-        return MeshPacket.Builder().also { wb ->wb.from = from; wb.decoded = Data.Builder().also { wb ->wb.payload = encoded; wb.request_id = requestId}.build()}.build()
+        return MeshPacket.Builder()
+            .also { wb ->
+                wb.from = from
+                wb.decoded =
+                    Data.Builder()
+                        .also { wb ->
+                            wb.payload = encoded
+                            wb.request_id = requestId
+                        }
+                        .build()
+            }
+            .build()
     }
 }

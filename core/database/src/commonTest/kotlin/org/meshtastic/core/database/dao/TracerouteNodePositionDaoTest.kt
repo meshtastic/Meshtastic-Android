@@ -65,8 +65,12 @@ class TracerouteNodePositionDaoTest {
         )
     }
 
-    private fun position(nodeNum: Int) =
-        TracerouteNodePositionEntity(logUuid = logUuid, requestId = 1, nodeNum = nodeNum, position = Position.Builder().build())
+    private fun position(nodeNum: Int) = TracerouteNodePositionEntity(
+        logUuid = logUuid,
+        requestId = 1,
+        nodeNum = nodeNum,
+        position = Position.Builder().build(),
+    )
 
     @Test
     fun testReplaceByLogUuidIsAtomic() = runTest {

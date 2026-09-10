@@ -26,20 +26,25 @@ import kotlin.test.assertNull
 @Suppress("MagicNumber")
 class EnvironmentChartUnitsTest {
 
-    private fun telemetry(env: EnvironmentMetrics) = Telemetry.Builder().also { wb ->wb.time = nowSeconds.toInt(); wb.environment_metrics = env}.build()
+    private fun telemetry(env: EnvironmentMetrics) = Telemetry.Builder()
+        .also { wb ->
+            wb.time = nowSeconds.toInt()
+            wb.environment_metrics = env
+        }
+        .build()
 
     // ---- chartValue ----
 
     @Test
     fun windSpeedMetricIsConvertedToKph() {
-        val t = telemetry(EnvironmentMetrics.Builder().also { wb ->wb.wind_speed = 10f}.build())
+        val t = telemetry(EnvironmentMetrics.Builder().also { wb -> wb.wind_speed = 10f }.build())
 
         assertEquals(36f, chartValue(Environment.WIND_SPEED, t, isImperial = false)!!, 0.001f)
     }
 
     @Test
     fun windSpeedImperialIsConvertedToMph() {
-        val t = telemetry(EnvironmentMetrics.Builder().also { wb ->wb.wind_speed = 10f}.build())
+        val t = telemetry(EnvironmentMetrics.Builder().also { wb -> wb.wind_speed = 10f }.build())
 
         assertEquals(22.3694f, chartValue(Environment.WIND_SPEED, t, isImperial = true)!!, 0.001f)
     }
@@ -47,7 +52,7 @@ class EnvironmentChartUnitsTest {
     /** 0 m/s is a real reading (dead calm), so it must survive conversion rather than read as missing. */
     @Test
     fun windSpeedZeroIsPreserved() {
-        val t = telemetry(EnvironmentMetrics.Builder().also { wb ->wb.wind_speed = 0f}.build())
+        val t = telemetry(EnvironmentMetrics.Builder().also { wb -> wb.wind_speed = 0f }.build())
 
         assertEquals(0f, chartValue(Environment.WIND_SPEED, t, isImperial = true)!!, 0.001f)
     }
@@ -62,7 +67,7 @@ class EnvironmentChartUnitsTest {
     /** Temperatures are converted upstream by the view model, so the chart must not convert them again. */
     @Test
     fun temperatureIsNotConvertedHere() {
-        val t = telemetry(EnvironmentMetrics.Builder().also { wb ->wb.temperature = 20f}.build())
+        val t = telemetry(EnvironmentMetrics.Builder().also { wb -> wb.temperature = 20f }.build())
 
         assertEquals(20f, chartValue(Environment.TEMPERATURE, t, isImperial = true)!!, 0.001f)
     }
@@ -92,7 +97,7 @@ class EnvironmentChartUnitsTest {
     /** ADC readings are already in volts, so the chart must not unit-convert them. */
     @Test
     fun adcVoltageIsNotConverted() {
-        val t = telemetry(EnvironmentMetrics.Builder().also { wb ->wb.adc_voltage_ch0 = 3.3f}.build())
+        val t = telemetry(EnvironmentMetrics.Builder().also { wb -> wb.adc_voltage_ch0 = 3.3f }.build())
 
         assertEquals(3.3f, chartValue(Environment.ADC_VOLTAGE_1, t, isImperial = true)!!, 0.001f)
     }

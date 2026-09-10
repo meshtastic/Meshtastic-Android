@@ -166,7 +166,9 @@ class ReplayRadioTransport(
     }
 
     private fun complete(nonce: Int) {
-        lifecycle.runIfOpen { callback.handleFromRadio(FromRadio.Builder().also { wb ->wb.config_complete_id = nonce}.build().encode()) }
+        lifecycle.runIfOpen {
+            callback.handleFromRadio(FromRadio.Builder().also { wb -> wb.config_complete_id = nonce }.build().encode())
+        }
     }
 
     private suspend fun streamPackets() {

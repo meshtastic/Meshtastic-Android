@@ -54,28 +54,72 @@ class WaypointInfoSlotTest {
 
     @Test
     fun `a waypoint locked to our own node is still editable`() = runComposeUiTest {
-        setContent { InfoSlot(waypoint = Waypoint.Builder().also { wb ->wb.id = 1; wb.locked_to = myNodeNum}.build(), isConnected = true) }
+        setContent {
+            InfoSlot(
+                waypoint =
+                Waypoint.Builder()
+                    .also { wb ->
+                        wb.id = 1
+                        wb.locked_to = myNodeNum
+                    }
+                    .build(),
+                isConnected = true,
+            )
+        }
 
         onNodeWithText(getString(Res.string.edit)).assertIsDisplayed()
     }
 
     @Test
     fun `an unlocked waypoint is editable while connected`() = runComposeUiTest {
-        setContent { InfoSlot(waypoint = Waypoint.Builder().also { wb ->wb.id = 1; wb.locked_to = 0}.build(), isConnected = true) }
+        setContent {
+            InfoSlot(
+                waypoint =
+                Waypoint.Builder()
+                    .also { wb ->
+                        wb.id = 1
+                        wb.locked_to = 0
+                    }
+                    .build(),
+                isConnected = true,
+            )
+        }
 
         onNodeWithText(getString(Res.string.edit)).assertIsDisplayed()
     }
 
     @Test
     fun `editing is withheld while disconnected because saving re-broadcasts`() = runComposeUiTest {
-        setContent { InfoSlot(waypoint = Waypoint.Builder().also { wb ->wb.id = 1; wb.locked_to = 0}.build(), isConnected = false) }
+        setContent {
+            InfoSlot(
+                waypoint =
+                Waypoint.Builder()
+                    .also { wb ->
+                        wb.id = 1
+                        wb.locked_to = 0
+                    }
+                    .build(),
+                isConnected = false,
+            )
+        }
 
         onNodeWithText(getString(Res.string.edit)).assertDoesNotExist()
     }
 
     @Test
     fun `a waypoint locked to another node offers no editor`() = runComposeUiTest {
-        setContent { InfoSlot(waypoint = Waypoint.Builder().also { wb ->wb.id = 1; wb.locked_to = otherNodeNum}.build(), isConnected = true) }
+        setContent {
+            InfoSlot(
+                waypoint =
+                Waypoint.Builder()
+                    .also { wb ->
+                        wb.id = 1
+                        wb.locked_to = otherNodeNum
+                    }
+                    .build(),
+                isConnected = true,
+            )
+        }
 
         onNodeWithText(getString(Res.string.edit)).assertDoesNotExist()
     }
@@ -83,7 +127,18 @@ class WaypointInfoSlotTest {
     @Test
     fun `a waypoint locked to another node can still be dropped locally`() = runComposeUiTest {
         // Dropping our own copy is not a mesh operation, so a foreign lock does not withhold it.
-        setContent { InfoSlot(waypoint = Waypoint.Builder().also { wb ->wb.id = 1; wb.locked_to = otherNodeNum}.build(), isConnected = false) }
+        setContent {
+            InfoSlot(
+                waypoint =
+                Waypoint.Builder()
+                    .also { wb ->
+                        wb.id = 1
+                        wb.locked_to = otherNodeNum
+                    }
+                    .build(),
+                isConnected = false,
+            )
+        }
 
         onNodeWithText(getString(Res.string.delete_for_me)).assertIsDisplayed()
     }

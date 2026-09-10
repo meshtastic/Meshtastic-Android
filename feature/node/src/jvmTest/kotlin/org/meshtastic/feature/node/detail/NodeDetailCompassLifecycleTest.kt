@@ -98,8 +98,20 @@ class NodeDetailCompassLifecycleTest {
             val node =
                 Node(
                     num = 1234,
-                    user = User.Builder().also { wb ->wb.id = "!000004d2"; wb.long_name = "Compass target"}.build(),
-                    position = Position.Builder().also { wb ->wb.latitude_i = 10000000; wb.longitude_i = 10000000}.build(),
+                    user =
+                    User.Builder()
+                        .also { wb ->
+                            wb.id = "!000004d2"
+                            wb.long_name = "Compass target"
+                        }
+                        .build(),
+                    position =
+                    Position.Builder()
+                        .also { wb ->
+                            wb.latitude_i = 10000000
+                            wb.longitude_i = 10000000
+                        }
+                        .build(),
                 )
             val nodeDetailViewModel = createNodeDetailViewModel(node)
             viewModelStore.put("node-detail", nodeDetailViewModel)

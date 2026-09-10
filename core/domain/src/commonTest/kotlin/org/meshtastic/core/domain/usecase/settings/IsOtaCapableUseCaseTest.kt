@@ -64,7 +64,7 @@ class IsOtaCapableUseCaseTest {
     @Test
     fun `invoke returns true when ota capable`() = runTest {
         // Arrange
-        val node = Node(num = 123, user = User.Builder().also { wb ->wb.hw_model = HardwareModel.TBEAM}.build())
+        val node = Node(num = 123, user = User.Builder().also { wb -> wb.hw_model = HardwareModel.TBEAM }.build())
         dev.mokkery.every { nodeRepository.ourNodeInfo } returns MutableStateFlow(node)
         dev.mokkery.every { radioController.connectionState } returns
             MutableStateFlow(org.meshtastic.core.model.ConnectionState.Connected)
@@ -88,7 +88,7 @@ class IsOtaCapableUseCaseTest {
     @Test
     fun `invoke returns false when ota not capable`() = runTest {
         // Arrange
-        val node = Node(num = 123, user = User.Builder().also { wb ->wb.hw_model = HardwareModel.TBEAM}.build())
+        val node = Node(num = 123, user = User.Builder().also { wb -> wb.hw_model = HardwareModel.TBEAM }.build())
         dev.mokkery.every { nodeRepository.ourNodeInfo } returns MutableStateFlow(node)
         dev.mokkery.every { radioController.connectionState } returns
             MutableStateFlow(org.meshtastic.core.model.ConnectionState.Connected)
@@ -106,7 +106,7 @@ class IsOtaCapableUseCaseTest {
     @Test
     fun `invoke returns true when requires Dfu and actively supported`() = runTest {
         // Arrange
-        val node = Node(num = 123, user = User.Builder().also { wb ->wb.hw_model = HardwareModel.TBEAM}.build())
+        val node = Node(num = 123, user = User.Builder().also { wb -> wb.hw_model = HardwareModel.TBEAM }.build())
         dev.mokkery.every { nodeRepository.ourNodeInfo } returns MutableStateFlow(node)
         dev.mokkery.every { radioController.connectionState } returns
             MutableStateFlow(org.meshtastic.core.model.ConnectionState.Connected)
@@ -130,7 +130,7 @@ class IsOtaCapableUseCaseTest {
     @Test
     fun `invoke returns false when hardware model is UNSET`() = runTest {
         // Arrange
-        val node = Node(num = 123, user = User.Builder().also { wb ->wb.hw_model = HardwareModel.UNSET}.build())
+        val node = Node(num = 123, user = User.Builder().also { wb -> wb.hw_model = HardwareModel.UNSET }.build())
         dev.mokkery.every { nodeRepository.ourNodeInfo } returns MutableStateFlow(node)
         dev.mokkery.every { radioController.connectionState } returns
             MutableStateFlow(org.meshtastic.core.model.ConnectionState.Connected)
@@ -170,7 +170,7 @@ class IsOtaCapableUseCaseTest {
 
     @Test
     fun `invoke returns false when address is not ota capable`() = runTest {
-        val node = Node(num = 123, user = User.Builder().also { wb ->wb.hw_model = HardwareModel.TBEAM}.build())
+        val node = Node(num = 123, user = User.Builder().also { wb -> wb.hw_model = HardwareModel.TBEAM }.build())
         dev.mokkery.every { nodeRepository.ourNodeInfo } returns MutableStateFlow(node)
         dev.mokkery.every { radioController.connectionState } returns
             MutableStateFlow(org.meshtastic.core.model.ConnectionState.Connected)

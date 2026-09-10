@@ -52,13 +52,18 @@ object TAKPacketConversion {
     fun CoTMessage.toTAKPacket(): TAKPacket? {
         val group =
             this.group?.let {
-                Group.Builder().also { wb ->
-                wb.role = MemberRole.fromValue(TakConversionHelpers.getMemberRoleValue(it.role)) ?: MemberRole.Unspecifed
-                wb.team = Team.fromValue(TakConversionHelpers.getTeamValue(it.name)) ?: Team.Unspecifed_Color
-                }.build()
+                Group.Builder()
+                    .also { wb ->
+                        wb.role =
+                            MemberRole.fromValue(TakConversionHelpers.getMemberRoleValue(it.role))
+                                ?: MemberRole.Unspecifed
+                        wb.team = Team.fromValue(TakConversionHelpers.getTeamValue(it.name)) ?: Team.Unspecifed_Color
+                    }
+                    .build()
             }
 
-        val status = this.status?.let { Status.Builder().also { wb ->wb.battery = it.battery.coerceAtLeast(0)}.build() }
+        val status =
+            this.status?.let { Status.Builder().also { wb -> wb.battery = it.battery.coerceAtLeast(0) }.build() }
 
         if (type.startsWith("a-f-G") || type.startsWith("a-f-g")) {
             return createPliPacket(group, status)
@@ -73,17 +78,35 @@ object TAKPacketConversion {
     }
 
     private fun CoTMessage.createPliPacket(group: Group?, status: Status?): TAKPacket {
-        val contact = this.contact?.let { Contact.Builder().also { wb ->wb.callsign = it.callsign; wb.device_callsign = this.uid}.build() }
+        val contact =
+            this.contact?.let {
+                Contact.Builder()
+                    .also { wb ->
+                        wb.callsign = it.callsign
+                        wb.device_callsign = this.uid
+                    }
+                    .build()
+            }
         val pli =
-            PLI.Builder().also { wb ->
-            wb.latitude_i = (latitude * TAK_COORDINATE_SCALE).toInt()
-            wb.longitude_i = (longitude * TAK_COORDINATE_SCALE).toInt()
-            wb.altitude = if (hae >= TAK_UNKNOWN_POINT_VALUE || hae.isNaN()) 0 else hae.toInt()
-            wb.speed = track?.speed?.coerceAtLeast(0.0)?.toInt() ?: 0
-            wb.course = track?.course?.coerceAtLeast(0.0)?.toInt() ?: 0
-            }.build()
+            PLI.Builder()
+                .also { wb ->
+                    wb.latitude_i = (latitude * TAK_COORDINATE_SCALE).toInt()
+                    wb.longitude_i = (longitude * TAK_COORDINATE_SCALE).toInt()
+                    wb.altitude = if (hae >= TAK_UNKNOWN_POINT_VALUE || hae.isNaN()) 0 else hae.toInt()
+                    wb.speed = track?.speed?.coerceAtLeast(0.0)?.toInt() ?: 0
+                    wb.course = track?.course?.coerceAtLeast(0.0)?.toInt() ?: 0
+                }
+                .build()
 
-        return TAKPacket.Builder().also { wb ->wb.is_compressed = false; wb.contact = contact; wb.group = group; wb.status = status; wb.pli = pli}.build()
+        return TAKPacket.Builder()
+            .also { wb ->
+                wb.is_compressed = false
+                wb.contact = contact
+                wb.group = group
+                wb.status = status
+                wb.pli = pli
+            }
+            .build()
     }
 
     private fun CoTMessage.createChatPacket(group: Group?, status: Status?): TAKPacket? {
@@ -108,7 +131,12 @@ object TAKPacketConversion {
                     } else {
                         it.endpoint ?: ""
                     }
-                Contact.Builder().also { wb ->wb.callsign = it.callsign; wb.device_callsign = smuggledCallsign}.build()
+                Contact.Builder()
+                    .also { wb ->
+                        wb.callsign = it.callsign
+                        wb.device_callsign = smuggledCallsign
+                    }
+                    .build()
             }
 
         if (localChat.chatroom.startsWith(this.uid) || this.uid.startsWith("GeoChat")) {
@@ -121,13 +149,23 @@ object TAKPacketConversion {
         }
 
         val chat =
-            GeoChat.Builder().also { wb ->
-            wb.message = chatMsg
-            wb.to = toUid ?: if (toCallsign == null) "All Chat Rooms" else null
-            wb.to_callsign = toCallsign
-            }.build()
+            GeoChat.Builder()
+                .also { wb ->
+                    wb.message = chatMsg
+                    wb.to = toUid ?: if (toCallsign == null) "All Chat Rooms" else null
+                    wb.to_callsign = toCallsign
+                }
+                .build()
 
-        return TAKPacket.Builder().also { wb ->wb.is_compressed = false; wb.contact = contact; wb.group = group; wb.status = status; wb.chat = chat}.build()
+        return TAKPacket.Builder()
+            .also { wb ->
+                wb.is_compressed = false
+                wb.contact = contact
+                wb.group = group
+                wb.status = status
+                wb.chat = chat
+            }
+            .build()
     }
 
     fun TAKPacket.toCoTMessage(): CoTMessage? {

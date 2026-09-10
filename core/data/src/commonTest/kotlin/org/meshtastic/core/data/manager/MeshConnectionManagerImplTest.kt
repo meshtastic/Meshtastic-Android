@@ -290,22 +290,31 @@ class MeshConnectionManagerImplTest {
         manager = createManager(backgroundScope)
         radioConnectionState.value = ConnectionState.Connected
         advanceUntilIdle()
-        nodeRepository.updateLocalStats(LocalStats.Builder().also { wb ->wb.noise_floor = -70}.build())
+        nodeRepository.updateLocalStats(LocalStats.Builder().also { wb -> wb.noise_floor = -70 }.build())
 
         radioConnectionState.value = ConnectionState.Disconnected
         advanceUntilIdle()
 
-        assertEquals(LocalStats.Builder().build(), nodeRepository.localStats.value, "Disconnect should reset to \"no reading yet\"")
+        assertEquals(
+            LocalStats.Builder().build(),
+            nodeRepository.localStats.value,
+            "Disconnect should reset to \"no reading yet\"",
+        )
     }
 
     @Test
     fun `DeviceSleep behavior when power saving is off maps to Disconnected`() = runTest(testDispatcher) {
         // Power saving disabled + Role CLIENT
         val config =
-            LocalConfig.Builder().also { wb ->
-            wb.power = Config.PowerConfig.Builder().also { wb ->wb.is_power_saving = false}.build()
-            wb.device = Config.DeviceConfig.Builder().also { wb ->wb.role = Config.DeviceConfig.Role.CLIENT}.build()
-            }.build()
+            LocalConfig.Builder()
+                .also { wb ->
+                    wb.power = Config.PowerConfig.Builder().also { wb -> wb.is_power_saving = false }.build()
+                    wb.device =
+                        Config.DeviceConfig.Builder()
+                            .also { wb -> wb.role = Config.DeviceConfig.Role.CLIENT }
+                            .build()
+                }
+                .build()
         every { radioConfigRepository.localConfigFlow } returns flowOf(config)
         every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
 
@@ -325,7 +334,12 @@ class MeshConnectionManagerImplTest {
     @Test
     fun `DeviceSleep behavior when power saving is on stays in DeviceSleep`() = runTest(testDispatcher) {
         // Power saving enabled
-        val config = LocalConfig.Builder().also { wb ->wb.power = Config.PowerConfig.Builder().also { wb ->wb.is_power_saving = true}.build()}.build()
+        val config =
+            LocalConfig.Builder()
+                .also { wb ->
+                    wb.power = Config.PowerConfig.Builder().also { wb -> wb.is_power_saving = true }.build()
+                }
+                .build()
         every { radioConfigRepository.localConfigFlow } returns flowOf(config)
 
         manager = createManager(backgroundScope)
@@ -357,10 +371,19 @@ class MeshConnectionManagerImplTest {
     @Test
     fun `onNodeDbReady starts MQTT and requests history`() = runTest(testDispatcher) {
         val moduleConfig =
-            LocalModuleConfig.Builder().also { wb ->
-            wb.mqtt = ModuleConfig.MQTTConfig.Builder().also { wb ->wb.enabled = true; wb.proxy_to_client_enabled = true}.build()
-            wb.store_forward = ModuleConfig.StoreForwardConfig.Builder().also { wb ->wb.enabled = true}.build()
-            }.build()
+            LocalModuleConfig.Builder()
+                .also { wb ->
+                    wb.mqtt =
+                        ModuleConfig.MQTTConfig.Builder()
+                            .also { wb ->
+                                wb.enabled = true
+                                wb.proxy_to_client_enabled = true
+                            }
+                            .build()
+                    wb.store_forward =
+                        ModuleConfig.StoreForwardConfig.Builder().also { wb -> wb.enabled = true }.build()
+                }
+                .build()
         moduleConfigFlow.value = moduleConfig
         everySuspend { commandSender.requestTelemetry(any(), any(), any()) } returns Unit
         every { nodeManager.myNodeNum } returns MutableStateFlow(123)
@@ -394,7 +417,14 @@ class MeshConnectionManagerImplTest {
             "MQTT and history collectors must be active; additional collectors are allowed",
         )
         serviceRepository.setConnectionState(ConnectionState.Disconnected)
-        delayedModuleConfig.emit(LocalModuleConfig.Builder().also { wb ->wb.store_forward = ModuleConfig.StoreForwardConfig.Builder().also { wb ->wb.enabled = true}.build()}.build())
+        delayedModuleConfig.emit(
+            LocalModuleConfig.Builder()
+                .also { wb ->
+                    wb.store_forward =
+                        ModuleConfig.StoreForwardConfig.Builder().also { wb -> wb.enabled = true }.build()
+                }
+                .build(),
+        )
         runCurrent()
 
         verifySuspend(exactly(0)) { historyManager.requestHistoryReplay(any(), any(), any(), any(), any()) }
@@ -406,7 +436,13 @@ class MeshConnectionManagerImplTest {
         var historyAttempts = 0
         val telemetryAttempts = mutableMapOf<Int, Int>()
         val admissionVersions = mutableListOf<Long>()
-        moduleConfigFlow.value = LocalModuleConfig.Builder().also { wb ->wb.store_forward = ModuleConfig.StoreForwardConfig.Builder().also { wb ->wb.enabled = true}.build()}.build()
+        moduleConfigFlow.value =
+            LocalModuleConfig.Builder()
+                .also { wb ->
+                    wb.store_forward =
+                        ModuleConfig.StoreForwardConfig.Builder().also { wb -> wb.enabled = true }.build()
+                }
+                .build()
         everySuspend { commandSender.sendAdminForConnection(any(), any(), any(), any(), any()) } calls
             { call ->
                 admissionVersions += call.arg<Long>(1)
@@ -515,10 +551,21 @@ class MeshConnectionManagerImplTest {
         // Router with ls_secs=3600 — previously this created a 3630s timeout.
         // With the cap, it should be clamped to 300s.
         val config =
-            LocalConfig.Builder().also { wb ->
-            wb.power = Config.PowerConfig.Builder().also { wb ->wb.is_power_saving = true; wb.ls_secs = 3600}.build()
-            wb.device = Config.DeviceConfig.Builder().also { wb ->wb.role = Config.DeviceConfig.Role.ROUTER}.build()
-            }.build()
+            LocalConfig.Builder()
+                .also { wb ->
+                    wb.power =
+                        Config.PowerConfig.Builder()
+                            .also { wb ->
+                                wb.is_power_saving = true
+                                wb.ls_secs = 3600
+                            }
+                            .build()
+                    wb.device =
+                        Config.DeviceConfig.Builder()
+                            .also { wb -> wb.role = Config.DeviceConfig.Role.ROUTER }
+                            .build()
+                }
+                .build()
         every { radioConfigRepository.localConfigFlow } returns flowOf(config)
         every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
 
@@ -550,7 +597,12 @@ class MeshConnectionManagerImplTest {
     @Test
     fun `rapid state transitions are serialized by connectionMutex`() = runTest(testDispatcher) {
         // Power saving enabled so DeviceSleep is preserved (not mapped to Disconnected)
-        val config = LocalConfig.Builder().also { wb ->wb.power = Config.PowerConfig.Builder().also { wb ->wb.is_power_saving = true}.build()}.build()
+        val config =
+            LocalConfig.Builder()
+                .also { wb ->
+                    wb.power = Config.PowerConfig.Builder().also { wb -> wb.is_power_saving = true }.build()
+                }
+                .build()
         every { radioConfigRepository.localConfigFlow } returns flowOf(config)
         every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
 
@@ -596,7 +648,18 @@ class MeshConnectionManagerImplTest {
         runTest(standardDispatcher) {
             // Power saving enabled with ls_secs=0 so the sleep timeout boundary is just before the
             // Stage 1 handshake watchdog. That keeps this test isolated to sleep-timeout behavior.
-            val config = LocalConfig.Builder().also { wb ->wb.power = Config.PowerConfig.Builder().also { wb ->wb.is_power_saving = true; wb.ls_secs = 0}.build()}.build()
+            val config =
+                LocalConfig.Builder()
+                    .also { wb ->
+                        wb.power =
+                            Config.PowerConfig.Builder()
+                                .also { wb ->
+                                    wb.is_power_saving = true
+                                    wb.ls_secs = 0
+                                }
+                                .build()
+                    }
+                    .build()
             every { radioConfigRepository.localConfigFlow } returns flowOf(config)
             every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
 

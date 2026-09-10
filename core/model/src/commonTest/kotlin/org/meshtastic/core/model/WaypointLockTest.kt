@@ -28,17 +28,39 @@ class WaypointLockTest {
 
     @Test
     fun unlockedWaypointIsNotLocked() {
-        assertFalse(Waypoint.Builder().also { wb ->wb.id = 1; wb.locked_to = 0}.build().isLocked)
+        assertFalse(
+            Waypoint.Builder()
+                .also { wb ->
+                    wb.id = 1
+                    wb.locked_to = 0
+                }
+                .build()
+                .isLocked,
+        )
     }
 
     @Test
     fun lockedWaypointIsLocked() {
-        assertTrue(Waypoint.Builder().also { wb ->wb.id = 1; wb.locked_to = myNodeNum}.build().isLocked)
+        assertTrue(
+            Waypoint.Builder()
+                .also { wb ->
+                    wb.id = 1
+                    wb.locked_to = myNodeNum
+                }
+                .build()
+                .isLocked,
+        )
     }
 
     @Test
     fun unlockedWaypointIsModifiableByAnyone() {
-        val wp = Waypoint.Builder().also { wb ->wb.id = 1; wb.locked_to = 0}.build()
+        val wp =
+            Waypoint.Builder()
+                .also { wb ->
+                    wb.id = 1
+                    wb.locked_to = 0
+                }
+                .build()
         assertTrue(wp.isModifiableBy(myNodeNum))
         assertTrue(wp.isModifiableBy(otherNodeNum))
         // Editable by anyone includes the "identity unknown" case.
@@ -47,7 +69,13 @@ class WaypointLockTest {
 
     @Test
     fun lockedWaypointIsModifiableOnlyByOwner() {
-        val wp = Waypoint.Builder().also { wb ->wb.id = 1; wb.locked_to = myNodeNum}.build()
+        val wp =
+            Waypoint.Builder()
+                .also { wb ->
+                    wb.id = 1
+                    wb.locked_to = myNodeNum
+                }
+                .build()
         assertTrue(wp.isModifiableBy(myNodeNum))
         assertFalse(wp.isModifiableBy(otherNodeNum))
         assertFalse(wp.isModifiableBy(null))
@@ -60,7 +88,23 @@ class WaypointLockTest {
      */
     @Test
     fun placeholderLockShutsOutTheCreatorButRealOwnerLockDoesNot() {
-        assertFalse(Waypoint.Builder().also { wb ->wb.id = 1; wb.locked_to = 1}.build().isModifiableBy(myNodeNum))
-        assertTrue(Waypoint.Builder().also { wb ->wb.id = 1; wb.locked_to = myNodeNum}.build().isModifiableBy(myNodeNum))
+        assertFalse(
+            Waypoint.Builder()
+                .also { wb ->
+                    wb.id = 1
+                    wb.locked_to = 1
+                }
+                .build()
+                .isModifiableBy(myNodeNum),
+        )
+        assertTrue(
+            Waypoint.Builder()
+                .also { wb ->
+                    wb.id = 1
+                    wb.locked_to = myNodeNum
+                }
+                .build()
+                .isModifiableBy(myNodeNum),
+        )
     }
 }

@@ -39,7 +39,7 @@ class NodeItemZeroMetricsTest {
 
     @Test
     fun nodeItem_showsZeroTemperature() = runComposeUiTest {
-        setNodeItem(EnvironmentMetrics.Builder().also { wb ->wb.temperature = 0f}.build())
+        setNodeItem(EnvironmentMetrics.Builder().also { wb -> wb.temperature = 0f }.build())
         onNodeWithText("0.0°C").assertIsDisplayed()
     }
 
@@ -51,7 +51,14 @@ class NodeItemZeroMetricsTest {
 
     @Test
     fun nodeItem_showsZeroVoltageAndCurrent() = runComposeUiTest {
-        setNodeItem(EnvironmentMetrics.Builder().also { wb ->wb.voltage = 0f; wb.current = 0f}.build())
+        setNodeItem(
+            EnvironmentMetrics.Builder()
+                .also { wb ->
+                    wb.voltage = 0f
+                    wb.current = 0f
+                }
+                .build(),
+        )
         onNodeWithText("0.00 V").assertIsDisplayed()
         onNodeWithText("0.0 mA").assertIsDisplayed()
     }
@@ -65,7 +72,14 @@ class NodeItemZeroMetricsTest {
 
     @Test
     fun nodeItem_showsZeroSoilReadings() = runComposeUiTest {
-        setNodeItem(EnvironmentMetrics.Builder().also { wb ->wb.soil_temperature = 0f; wb.soil_moisture = 0}.build())
+        setNodeItem(
+            EnvironmentMetrics.Builder()
+                .also { wb ->
+                    wb.soil_temperature = 0f
+                    wb.soil_moisture = 0
+                }
+                .build(),
+        )
         onNodeWithText("0.0°C").assertIsDisplayed()
         onNodeWithText("0%").assertIsDisplayed()
     }
@@ -80,20 +94,20 @@ class NodeItemZeroMetricsTest {
     @Test
     fun nodeItem_showsSoilMoistureWithoutSoilTemperature() = runComposeUiTest {
         // The old guard required a non-zero soil temperature before moisture was drawn at all.
-        setNodeItem(EnvironmentMetrics.Builder().also { wb ->wb.soil_moisture = 42}.build())
+        setNodeItem(EnvironmentMetrics.Builder().also { wb -> wb.soil_moisture = 42 }.build())
         onNodeWithText("42%").assertIsDisplayed()
     }
 
     @Test
     fun nodeItem_hidesOutOfRangeSoilMoisture() = runComposeUiTest {
         // A sensor fault reporting 101% is not a reading — matches Node.getTelemetryStrings.
-        setNodeItem(EnvironmentMetrics.Builder().also { wb ->wb.soil_moisture = 101}.build())
+        setNodeItem(EnvironmentMetrics.Builder().also { wb -> wb.soil_moisture = 101 }.build())
         onNodeWithText("101%").assertDoesNotExist()
     }
 
     @Test
     fun nodeItemCompact_showsZeroTemperature() = runComposeUiTest {
-        setNodeItemCompact(EnvironmentMetrics.Builder().also { wb ->wb.temperature = 0f}.build())
+        setNodeItemCompact(EnvironmentMetrics.Builder().also { wb -> wb.temperature = 0f }.build())
         onNodeWithText("0.0°C").assertIsDisplayed()
     }
 
@@ -121,6 +135,15 @@ class NodeItemZeroMetricsTest {
         }
     }
 
-    private fun node(metrics: EnvironmentMetrics) =
-        Node(num = 2, user = User.Builder().also { wb ->wb.id = "!2"; wb.long_name = "Sensor"}.build(), environmentMetrics = metrics)
+    private fun node(metrics: EnvironmentMetrics) = Node(
+        num = 2,
+        user =
+        User.Builder()
+            .also { wb ->
+                wb.id = "!2"
+                wb.long_name = "Sensor"
+            }
+            .build(),
+        environmentMetrics = metrics,
+    )
 }

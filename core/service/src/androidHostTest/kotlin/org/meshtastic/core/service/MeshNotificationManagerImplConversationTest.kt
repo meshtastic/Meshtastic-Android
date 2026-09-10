@@ -66,8 +66,30 @@ class MeshNotificationManagerImplConversationTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val systemNotificationManager = context.getSystemService(NotificationManager::class.java)!!
 
-    private val sender = Node(num = 7, user = User.Builder().also { wb ->wb.id = "!00000007"; wb.long_name = "Hawk Ridge"; wb.short_name = "HAWK"}.build())
-    private val me = Node(num = 42, user = User.Builder().also { wb ->wb.id = "!0000002a"; wb.long_name = "Me Node"; wb.short_name = "ME"}.build())
+    private val sender =
+        Node(
+            num = 7,
+            user =
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!00000007"
+                    wb.long_name = "Hawk Ridge"
+                    wb.short_name = "HAWK"
+                }
+                .build(),
+        )
+    private val me =
+        Node(
+            num = 42,
+            user =
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!0000002a"
+                    wb.long_name = "Me Node"
+                    wb.short_name = "ME"
+                }
+                .build(),
+        )
 
     private val packetRepository: PacketRepository = mock(MockMode.autofill)
     private val nodeRepository: NodeRepository = mock(MockMode.autofill)
@@ -106,10 +128,12 @@ class MeshNotificationManagerImplConversationTest {
         everySuspend { nodeRepository.getNode(any()) } returns sender
         every { radioConfigRepository.channelSetFlow } returns
             flowOf(
-                ChannelSet.Builder().also { wb ->
-                wb.settings = listOf(MeshChannel.default.settings)
-                wb.lora_config = MeshChannel.default.loraConfig
-                }.build(),
+                ChannelSet.Builder()
+                    .also { wb ->
+                        wb.settings = listOf(MeshChannel.default.settings)
+                        wb.lora_config = MeshChannel.default.loraConfig
+                    }
+                    .build(),
             )
     }
 

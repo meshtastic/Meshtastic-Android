@@ -102,7 +102,7 @@ fun EditChannelDialog(
                     enabled = true,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChange = {
-                        val fullPsk = Channel(ChannelSettings.Builder().also { wb ->wb.psk = it}.build()).psk
+                        val fullPsk = Channel(ChannelSettings.Builder().also { wb -> wb.psk = it }.build()).psk
                         if (fullPsk.size in setOf(0, 16, 32)) {
                             pskEditState = pskEditState.copy(generatedPskForName = false, pskExplicitlyEdited = true)
                             channelInput = channelInput.newBuilder().also { wb -> wb.psk = it }.build()
@@ -110,8 +110,7 @@ fun EditChannelDialog(
                     },
                     onGenerateKey = {
                         pskEditState = pskEditState.copy(generatedPskForName = false, pskExplicitlyEdited = true)
-                        channelInput =
-                            channelInput.newBuilder().also { wb -> wb.psk = Channel.getRandomKey() }.build()
+                        channelInput = channelInput.newBuilder().also { wb -> wb.psk = Channel.getRandomKey() }.build()
                     },
                 )
 
@@ -140,8 +139,10 @@ fun EditChannelDialog(
                     enabled = true,
                     value = moduleSettings.position_precision,
                     onValueChanged = {
-                        val updatedModule = moduleSettings.newBuilder().also { wb -> wb.position_precision = it }.build()
-                        channelInput = channelInput.newBuilder().also { wb -> wb.module_settings = updatedModule }.build()
+                        val updatedModule =
+                            moduleSettings.newBuilder().also { wb -> wb.position_precision = it }.build()
+                        channelInput =
+                            channelInput.newBuilder().also { wb -> wb.module_settings = updatedModule }.build()
                     },
                 )
             }
@@ -182,7 +183,13 @@ internal fun ChannelSettings.applyChannelNameEdit(
             else -> pskEditState.generatedPskForName
         }
     return ChannelNameUpdate(
-        settings = this.newBuilder().also { wb -> wb.name = name; wb.psk = nextPsk }.build(),
+        settings =
+        this.newBuilder()
+            .also { wb ->
+                wb.name = name
+                wb.psk = nextPsk
+            }
+            .build(),
         pskEditState = pskEditState.copy(generatedPskForName = nextGeneratedPskForName),
     )
 }

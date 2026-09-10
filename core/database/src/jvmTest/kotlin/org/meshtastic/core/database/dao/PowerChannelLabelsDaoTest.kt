@@ -43,7 +43,14 @@ class PowerChannelLabelsDaoTest {
 
     private fun node(num: Int, labels: List<String> = emptyList()) = NodeEntity(
         num = num,
-        user = User.Builder().also { wb ->wb.id = "!$num"; wb.long_name = "Node $num"; wb.hw_model = HardwareModel.TBEAM}.build(),
+        user =
+        User.Builder()
+            .also { wb ->
+                wb.id = "!$num"
+                wb.long_name = "Node $num"
+                wb.hw_model = HardwareModel.TBEAM
+            }
+            .build(),
         powerChannelLabels = labels,
     )
 

@@ -63,7 +63,17 @@ fun DeviceListItemPreview() {
 @PreviewLightDark
 @Composable
 private fun DeviceListItemWithLongNamePreview() {
-    val node = Node(num = 13444, user = User.Builder().also { wb ->wb.short_name = "AB12"; wb.long_name = "James' Rooftop Solar Repeater"}.build())
+    val node =
+        Node(
+            num = 13444,
+            user =
+            User.Builder()
+                .also { wb ->
+                    wb.short_name = "AB12"
+                    wb.long_name = "James' Rooftop Solar Repeater"
+                }
+                .build(),
+        )
     val device = DeviceListEntry.Tcp(name = "Meshtastic_ab12", fullAddress = "s192.168.1.101", node = node)
     AppTheme { DeviceListItem(connectionState = ConnectionState.Disconnected, device = device, onSelect = {}) }
 }

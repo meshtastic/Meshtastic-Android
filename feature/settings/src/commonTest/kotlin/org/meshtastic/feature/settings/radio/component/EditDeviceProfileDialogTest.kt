@@ -36,12 +36,21 @@ class EditDeviceProfileDialogTest {
 
     private val title = "Export configuration"
     private val deviceProfile =
-        DeviceProfile.Builder().also { wb ->
-        wb.long_name = "Long name"
-        wb.short_name = "Short name"
-        wb.channel_url = "https://meshtastic.org/e/#CgMSAQESBggBQANIAQ"
-        wb.fixed_position = Position.Builder().also { wb ->wb.latitude_i = 327766650; wb.longitude_i = -967969890; wb.altitude = 138}.build()
-        }.build()
+        DeviceProfile.Builder()
+            .also { wb ->
+                wb.long_name = "Long name"
+                wb.short_name = "Short name"
+                wb.channel_url = "https://meshtastic.org/e/#CgMSAQESBggBQANIAQ"
+                wb.fixed_position =
+                    Position.Builder()
+                        .also { wb ->
+                            wb.latitude_i = 327766650
+                            wb.longitude_i = -967969890
+                            wb.altitude = 138
+                        }
+                        .build()
+            }
+            .build()
 
     @Test
     fun testEditDeviceProfileDialog_showsDialogTitle() = runComposeUiTest {

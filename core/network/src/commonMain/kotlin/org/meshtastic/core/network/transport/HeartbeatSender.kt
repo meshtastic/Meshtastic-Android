@@ -81,7 +81,13 @@ private constructor(
             nonceMutex.withLock {
                 val n = nonce.load()
                 Logger.v { "[$logTag] Sending ToRadio heartbeat (nonce=$n)" }
-                val admitted = sendToRadio(ToRadio.Builder().also { wb ->wb.heartbeat = Heartbeat.Builder().also { wb ->wb.nonce = n}.build()}.build().encode())
+                val admitted =
+                    sendToRadio(
+                        ToRadio.Builder()
+                            .also { wb -> wb.heartbeat = Heartbeat.Builder().also { wb -> wb.nonce = n }.build() }
+                            .build()
+                            .encode(),
+                    )
                 if (admitted) nonce.fetchAndAdd(1)
                 admitted to rejectionLogPolicy.record(admitted)
             }
