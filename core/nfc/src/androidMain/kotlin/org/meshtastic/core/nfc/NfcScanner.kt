@@ -161,33 +161,38 @@ private inline fun withTag(tech: TagTechnology, block: () -> Boolean): Boolean =
 } catch (e: FormatException) {
     Logger.w(e) { "Malformed NDEF message" }
     false
+} catch (e: SecurityException) {
+    // The framework invalidates a Tag handle once the tag leaves the field, and every call here
+    // then throws this rather than IOException. Letting it escape strands the caller's armed-write
+    // UI with no result, so it reports as an ordinary write failure.
+    Logger.w(e) { "Tag went out of range before the write completed" }
+    false
 } finally {
-    try {
-        tech.close()
-    } catch (e: IOException) {
-        Logger.w(e) { "Error closing NDEF" }
-    }
+    closeQuietly(tech)
 }
 
 private fun handleNfcTag(tag: Tag, onResult: (String?) -> Unit) {
     val ndef = Ndef.get(tag) ?: return
     try {
         ndef.connect()
-        val ndefMessage = ndef.ndefMessage ?: return
-        for (record in ndefMessage.records) {
-            val payload = record.toUri()?.toString()
-            if (payload != null) {
-                onResult(payload)
-                break
-            }
-        }
+        ndef.ndefMessage?.records?.firstNotNullOfOrNull { it.toUri()?.toString() }?.let(onResult)
     } catch (e: IOException) {
         Logger.w(e) { "Error reading NDEF tag" }
+    } catch (e: SecurityException) {
+        // Runs on a binder thread, so an escaping exception takes the process with it.
+        Logger.w(e) { "Tag went out of range before the read completed" }
     } finally {
-        try {
-            ndef.close()
-        } catch (e: IOException) {
-            Logger.w(e) { "Error closing NDEF" }
-        }
+        closeQuietly(ndef)
+    }
+}
+
+/** Closes [tech], swallowing the failures a stale tag handle produces. */
+private fun closeQuietly(tech: TagTechnology) {
+    try {
+        tech.close()
+    } catch (e: IOException) {
+        Logger.w(e) { "Error closing NDEF" }
+    } catch (e: SecurityException) {
+        Logger.w(e) { "Tag already gone when closing NDEF" }
     }
 }
