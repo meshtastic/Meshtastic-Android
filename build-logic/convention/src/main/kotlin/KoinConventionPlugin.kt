@@ -29,9 +29,10 @@ class KoinConventionPlugin : Plugin<Project> {
 
             // Configure Koin K2 Compiler Plugin (1.1.0+)
             extensions.configure(KoinGradleExtension::class.java) {
-                // Missing definitions and qualifier mismatches fail the build. Every module's graph
-                // is declared with @Module, which is what the assembled index can see.
-                compileSafety.set(true)
+                // Validation is whole-graph and happens at the @KoinApplication entry points, so
+                // it is only enabled there. A library module validates locally, cannot see the
+                // assembled graph, and reports KOIN-D003 on definitions its consumers supply.
+                compileSafety.set(path == ":androidApp" || path == ":desktopApp")
             }
 
             val koinAnnotations = libs.findLibrary("koin-annotations").get()
