@@ -15,7 +15,10 @@
 - 表單提供 `+886 (台灣)`，填入既有電話 `910058159`；錯誤沒有說明原因，不能據此宣稱台灣
   不受支援。[Apple 官方說明](https://developer.apple.com/help/app-store-connect/manage-compliance-information/manage-european-union-digital-services-act-trader-requirements/)
   允許無法接收驗證碼的電話申請人工驗證。本次錯誤画面沒有顯示該入口，因此已填妥 Apple
-  Developer Support 的人工驗證申請草稿，等待明確對外發送授權；尚未送出、尚無 case ID。
+  Developer Support 的人工驗證申請草稿。使用者拒絕發送，要求送審不得停止；申請未送出、無 case ID。
+  隨後重新讀取兩款正式提交頁，皆仍為「等待審查」，未撤回或修改提交。
+  [Apple 的 DSA 公告](https://developer.apple.com/news/upcoming-requirements/?id=02172025a)
+  將未完成貿易商驗證的供應限制列於歐盟；不能將本次電話驗證失敗寫成兩款送審已停止。
 - 使用者明確表示程式已通過既有測試，要求本次上架不再追加隔離或真機 Gateway／RF 測試。
   此指示取代本次送審工作的追加測試安排與測試機準備要求；剩餘工作僅為 DSA 收尾及 Apple 審查／公開狀態。
   本次未清除、安裝或啟動真機 App，亦未新增真機測試通過證據；不將這项紀錄列為待辦或上架阻礙。
