@@ -1,0 +1,16 @@
+NTsocial MeshLink 是供相容 Meshtastic 無線電使用的開源配套 App，由 LiberaNt LLC 與 NTsocial 團隊維護。
+
+連接與管理無線電
+透過藍牙連接硬體，查看 Mesh 節點及無線電回報資訊，管理頻道與支援的無線電設定，並收發頻道或節點間的文字訊息。你可以在 Channels 掃描 Meshtastic 頻道 QR Code，檢視內容後套用設定。
+
+各無線電資料獨立
+登錄無線電端點，切換檢視各自的訊息、節點、頻道與設定。每個端點保留獨立的連線及本機資料；可顯示的資訊依硬體與韌體而定。
+
+選用 NTsocial 配套連接
+MeshLink 可為獨立的 NTsocial App 提供本機 Gateway。此功能需要在同一部裝置安裝兩個 App，並建立就緒的主要無線電連線。請保持 App 可用，以進行前景交接。本版 iOS 的其他無線電端點不提供 Gateway。
+
+需要無線電硬體
+無線電通訊需要另外取得相容的 Meshtastic 硬體。傳輸距離與送達受設定、地區頻段、地形及其他節點影響。iPhone 藍牙本身不能提供 LoRa 通訊；背景重新連線受 iOS 限制。
+
+開源軟體
+採 GPL-3.0-or-later 授權，保留 Meshtastic 與貢獻者署名。NTsocial MeshLink 是修改分支，並非 Meshtastic 官方發行版。iOS App 沒有廣告或雲端 QR 辨識。本版尚未提供 MeshCore 無線電連線。

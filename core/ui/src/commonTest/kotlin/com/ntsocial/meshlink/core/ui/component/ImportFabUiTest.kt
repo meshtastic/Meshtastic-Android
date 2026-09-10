@@ -32,6 +32,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
+import com.ntsocial.meshlink.core.ui.util.ChannelsOnlyBarcodeScanner
+import com.ntsocial.meshlink.core.ui.util.LocalBarcodeScannerProvider
 import com.ntsocial.meshlink.core.ui.util.LocalBarcodeScannerSupported
 import com.ntsocial.meshlink.core.ui.util.LocalNfcScannerSupported
 import org.meshtastic.proto.SharedContact
@@ -79,6 +81,28 @@ class ImportFabUiTest {
 
         // Verify menu items are visible using their tags
         onNodeWithTag("nfc_import").assertDoesNotExist()
+        onNodeWithTag("qr_import").assertDoesNotExist()
+        onNodeWithTag("url_import").assertIsDisplayed()
+    }
+
+    @Test
+    fun importFab_doesNotExposeChannelsOnlyScannerToGeneralImports() = runComposeUiTest {
+        setContent {
+            CompositionLocalProvider(
+                LocalBarcodeScannerProvider provides
+                    {
+                        object : ChannelsOnlyBarcodeScanner {
+                            override val isSupported = true
+
+                            override fun startChannelScan() =
+                                error("General import must not start a Channels-only scan")
+                        }
+                    },
+            ) {
+                MeshtasticImportFAB(onImport = {}, isContactContext = true, testTag = "import_fab")
+            }
+        }
+        onNodeWithTag("import_fab").performClick()
         onNodeWithTag("qr_import").assertDoesNotExist()
         onNodeWithTag("url_import").assertIsDisplayed()
     }

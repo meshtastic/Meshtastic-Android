@@ -25,9 +25,11 @@
 package com.ntsocial.meshlink.core.ble
 
 import com.ntsocial.meshlink.core.di.CoroutineDispatchers
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import java.io.IOException
 import java.nio.charset.StandardCharsets
 import java.util.Base64
 import kotlin.test.Test
@@ -114,6 +116,43 @@ class JvmDesktopBluetoothPairingServiceTest {
         val otherService = pairingService(FakePairingProcessRunner(successResult("Paired")), isWindows = false)
         val otherRepository = KableBluetoothRepository(otherService)
         assertTrue(otherRepository.isBonded(device.address))
+    }
+
+    @Test
+    fun `every helper exception keeps pairing fail closed`() = runTest(dispatcher) {
+        listOf(IOException("launch"), SecurityException("denied"), IllegalStateException("helper defect"))
+            .forEach { failure ->
+                val service = pairingService(failingRunner(failure))
+                val error = assertFailsWith<BlePairingException> { service.ensurePaired("AA:BB:CC:DD:EE:FF") }
+                assertEquals(BlePairingFailure.PLATFORM_FAILURE, error.failure)
+                assertCauseRetained(error, failure)
+                assertTrue(error.classifyBleException()?.isPermanent == true)
+            }
+    }
+
+    @Test
+    fun `coroutine cancellation is propagated without reclassification`() = runTest(dispatcher) {
+        val cancellation = CancellationException("cancel helper")
+        val service = pairingService(failingRunner(cancellation))
+        val error = assertFailsWith<CancellationException> { service.ensurePaired("AA:BB:CC:DD:EE:FF") }
+        assertCauseRetained(error, cancellation)
+    }
+
+    @Test
+    fun `fatal helper errors are not converted to user pairing failures`() = runTest(dispatcher) {
+        val failure = AssertionError("fatal helper error")
+        val service = pairingService(failingRunner(failure))
+        val error = assertFailsWith<AssertionError> { service.ensurePaired("AA:BB:CC:DD:EE:FF") }
+        assertCauseRetained(error, failure)
+    }
+
+    private fun assertCauseRetained(actual: Throwable, expected: Throwable) {
+        // Coroutine stack-trace recovery may copy exceptions while retaining the original as their cause.
+        assertTrue(generateSequence(actual) { it.cause }.any { it === expected })
+    }
+
+    private fun failingRunner(failure: Throwable) = object : WindowsPairingProcessRunner {
+        override fun run(encodedCommand: String, timeoutMillis: Long): WindowsPairingProcessResult = throw failure
     }
 
     private fun pairingService(

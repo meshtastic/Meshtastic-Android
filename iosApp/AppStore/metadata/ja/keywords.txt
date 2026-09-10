@@ -1,0 +1,1 @@
+Meshtastic,LoRa,Bluetooth,無線,メッシュ,オフライン,チャンネル,ノード

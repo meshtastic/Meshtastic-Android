@@ -64,3 +64,6 @@ firebase-debug.log
 /coil/
 /kable/
 .opencode/
+
+# Local Apple organization signing settings
+/iosApp/Config/Signing.local.xcconfig

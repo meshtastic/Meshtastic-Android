@@ -1,0 +1,2 @@
+// Optional local organization signing settings. CI may supply the same build setting.
+#include? "Signing.local.xcconfig"

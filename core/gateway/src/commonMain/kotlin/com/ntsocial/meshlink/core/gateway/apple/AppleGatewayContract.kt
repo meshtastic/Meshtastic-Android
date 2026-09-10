@@ -27,7 +27,7 @@ package com.ntsocial.meshlink.core.gateway.apple
 /** Language-neutral constants for the Apple App Group Gateway boundary. */
 object AppleGatewayContract {
     const val SCHEMA_VERSION = 1
-    const val APP_GROUP_IDENTIFIER = "group.com.ntsocial.meshlink.gateway"
+    const val APP_GROUP_IDENTIFIER = "group.com.ntsocial.gateway"
     const val KEYCHAIN_ACCESS_GROUP_SUFFIX = "com.ntsocial.meshlink.gateway"
     const val PARENT_CALLER_ID = "com.ntsocial.ios"
     const val COMPANION_BUNDLE_IDENTIFIER = "com.ntsocial.meshlink.ios"

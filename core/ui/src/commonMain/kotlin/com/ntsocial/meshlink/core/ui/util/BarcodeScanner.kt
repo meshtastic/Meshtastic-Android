@@ -27,3 +27,12 @@ package com.ntsocial.meshlink.core.ui.util
 interface BarcodeScanner {
     fun startScan()
 }
+
+/** A Channels-only host must never launch its camera through a general import action. */
+interface ChannelsOnlyBarcodeScanner : BarcodeScanner {
+    val isSupported: Boolean
+
+    override fun startScan() = Unit
+
+    fun startChannelScan()
+}

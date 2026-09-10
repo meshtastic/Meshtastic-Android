@@ -1,0 +1,9 @@
+No account or sign-in is required. This app controls separately obtained compatible Meshtastic Bluetooth radios. It does not simulate radio delivery without hardware.
+
+1. Launch the app, choose a language, and allow Bluetooth.
+2. Power on a compatible Meshtastic radio and use Connections to scan, select, and pair it. Complete any hardware PIN prompt.
+3. Once configuration is loaded, inspect Messages, Nodes, Channels, and supported settings. A second compatible radio on matching channel/region settings is needed to verify over-the-air text exchange.
+4. In Channels, open the QR scanner to test camera permission and scan a Meshtastic channel QR code. Review the proposed change before applying it.
+5. The optional local Gateway integrates with NTsocial (com.ntsocial.ios, App Store ID 6810478003). Both company-signed apps share group.com.ntsocial.gateway and a company Keychain group. Only the primary radio publishes Gateway channels on iOS. Keep the apps open for foreground handoff. The companion is optional for standalone radio use.
+
+The bluetooth-central background mode supports the existing radio connection/restoration subject to iOS limits. The app does not promise permanent background execution. Source/license attribution is included in the app and project. No MeshCore transport is offered.

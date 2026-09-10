@@ -17,6 +17,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		A3000000000000000000000F /* Signing.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config/Signing.xcconfig; sourceTree = "<group>"; };
 		A30000000000000000000001 /* NTsocialMeshLinkApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NTsocialMeshLinkApp.swift; sourceTree = "<group>"; };
 		A30000000000000000000002 /* ComposeRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComposeRootView.swift; sourceTree = "<group>"; };
 		A3000000000000000000000E /* BarcodeScannerHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarcodeScannerHost.swift; sourceTree = "<group>"; };
@@ -46,6 +47,7 @@
 		A20000000000000000000001 = {
 			isa = PBXGroup;
 			children = (
+				A3000000000000000000000F /* Signing.xcconfig */,
 				A20000000000000000000003 /* NTsocialMeshLink */,
 				A20000000000000000000004 /* Tools */,
 				A20000000000000000000002 /* Products */,
@@ -257,6 +259,7 @@
 		};
 		A60000000000000000000003 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = A3000000000000000000000F /* Signing.xcconfig */;
 			buildSettings = {
 				ARCHS = arm64;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -293,6 +296,7 @@
 		};
 		A60000000000000000000004 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = A3000000000000000000000F /* Signing.xcconfig */;
 			buildSettings = {
 				ARCHS = arm64;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;

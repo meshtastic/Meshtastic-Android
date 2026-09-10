@@ -146,18 +146,7 @@ class JvmDesktopBluetoothPairingService(
         val normalizedAddress = normalizeBluetoothAddress(address)
         val script = buildWindowsPairingScript(normalizedAddress)
         val encodedCommand = Base64.getEncoder().encodeToString(script.toByteArray(StandardCharsets.UTF_16LE))
-        val result =
-            try {
-                withContext(dispatchers.io) { processRunner.run(encodedCommand, PAIRING_TIMEOUT_MILLIS) }
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                throw BlePairingException(
-                    failure = BlePairingFailure.PLATFORM_FAILURE,
-                    message = "Windows could not start Bluetooth pairing. Select the device and try again.",
-                    cause = e,
-                )
-            }
+        val result = runPairingProcess(encodedCommand)
 
         if (result.timedOut) {
             throw BlePairingException(
@@ -168,6 +157,22 @@ class JvmDesktopBluetoothPairingService(
 
         return pairingOutcomeFrom(result.output)
     }
+
+    private suspend fun runPairingProcess(encodedCommand: String): WindowsPairingProcessResult {
+        val result = runCatching {
+            withContext(dispatchers.io) { processRunner.run(encodedCommand, PAIRING_TIMEOUT_MILLIS) }
+        }
+        val failure = result.exceptionOrNull()
+        if (failure is CancellationException) throw failure
+        if (failure is Exception) throw pairingProcessFailure(failure)
+        return result.getOrThrow()
+    }
+
+    private fun pairingProcessFailure(cause: Exception) = BlePairingException(
+        failure = BlePairingFailure.PLATFORM_FAILURE,
+        message = "Windows could not start Bluetooth pairing. Select the device and try again.",
+        cause = cause,
+    )
 
     internal companion object {
         private const val PAIRING_TIMEOUT_MILLIS = 120_000L
@@ -195,65 +200,67 @@ class JvmDesktopBluetoothPairingService(
 
             return when (status) {
                 "Paired" -> DesktopBluetoothPairingOutcome.PAIRED
-
                 "AlreadyPaired" -> DesktopBluetoothPairingOutcome.ALREADY_PAIRED
-
-                "NotFound" ->
-                    throw BlePairingException(
-                        failure = BlePairingFailure.DEVICE_NOT_FOUND,
-                        message = "Windows could not find the selected Bluetooth device. Scan and try again.",
-                    )
-
-                "NotReadyToPair",
-                "OperationAlreadyInProgress",
-                ->
-                    throw BlePairingException(
-                        failure = BlePairingFailure.NOT_READY,
-                        message = "The Bluetooth device is not ready to pair. Wait a moment and select it again.",
-                    )
-
-                "PairingCanceled" ->
-                    throw BlePairingException(
-                        failure = BlePairingFailure.CANCELED,
-                        message = "Bluetooth pairing was canceled. Select the device to try again.",
-                    )
-
-                "ConnectionRejected",
-                "RejectedByHandler",
-                ->
-                    throw BlePairingException(
-                        failure = BlePairingFailure.REJECTED,
-                        message = "The Bluetooth device rejected pairing. Confirm its pairing mode and try again.",
-                    )
-
-                "AuthenticationTimeout" ->
-                    throw BlePairingException(
-                        failure = BlePairingFailure.TIMED_OUT,
-                        message = "Bluetooth PIN authentication timed out. Select the device to try again.",
-                    )
-
-                "AuthenticationFailure",
-                "ProtectionLevelCouldNotBeMet",
-                ->
-                    throw BlePairingException(
-                        failure = BlePairingFailure.AUTHENTICATION_FAILED,
-                        message = "Bluetooth PIN authentication failed. Confirm the PIN and try again.",
-                    )
-
-                "AccessDenied",
-                "AuthenticationNotAllowed",
-                ->
-                    throw BlePairingException(
-                        failure = BlePairingFailure.ACCESS_DENIED,
-                        message = "Windows denied Bluetooth pairing access.",
-                    )
-
-                else ->
-                    throw BlePairingException(
-                        failure = BlePairingFailure.PLATFORM_FAILURE,
-                        message = "Windows Bluetooth pairing failed ($status).",
-                    )
+                else -> throw pairingFailure(status)
             }
+        }
+
+        private fun pairingFailure(status: String): BlePairingException = when (status) {
+            "NotFound" ->
+                BlePairingException(
+                    failure = BlePairingFailure.DEVICE_NOT_FOUND,
+                    message = "Windows could not find the selected Bluetooth device. Scan and try again.",
+                )
+
+            "NotReadyToPair",
+            "OperationAlreadyInProgress",
+            ->
+                BlePairingException(
+                    failure = BlePairingFailure.NOT_READY,
+                    message = "The Bluetooth device is not ready to pair. Wait a moment and select it again.",
+                )
+
+            "PairingCanceled" ->
+                BlePairingException(
+                    failure = BlePairingFailure.CANCELED,
+                    message = "Bluetooth pairing was canceled. Select the device to try again.",
+                )
+
+            "ConnectionRejected",
+            "RejectedByHandler",
+            ->
+                BlePairingException(
+                    failure = BlePairingFailure.REJECTED,
+                    message = "The Bluetooth device rejected pairing. Confirm its pairing mode and try again.",
+                )
+
+            "AuthenticationTimeout" ->
+                BlePairingException(
+                    failure = BlePairingFailure.TIMED_OUT,
+                    message = "Bluetooth PIN authentication timed out. Select the device to try again.",
+                )
+
+            "AuthenticationFailure",
+            "ProtectionLevelCouldNotBeMet",
+            ->
+                BlePairingException(
+                    failure = BlePairingFailure.AUTHENTICATION_FAILED,
+                    message = "Bluetooth PIN authentication failed. Confirm the PIN and try again.",
+                )
+
+            "AccessDenied",
+            "AuthenticationNotAllowed",
+            ->
+                BlePairingException(
+                    failure = BlePairingFailure.ACCESS_DENIED,
+                    message = "Windows denied Bluetooth pairing access.",
+                )
+
+            else ->
+                BlePairingException(
+                    failure = BlePairingFailure.PLATFORM_FAILURE,
+                    message = "Windows Bluetooth pairing failed ($status).",
+                )
         }
 
         internal fun buildWindowsPairingScript(normalizedAddress: String): String =

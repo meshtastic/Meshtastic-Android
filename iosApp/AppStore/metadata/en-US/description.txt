@@ -1,0 +1,16 @@
+NTsocial MeshLink is an open-source companion for compatible Meshtastic radios, maintained by LiberaNt LLC and the NTsocial team.
+
+CONNECT AND MANAGE YOUR RADIO
+Connect over Bluetooth, view nearby mesh nodes and information reported by your radio, manage channels and supported radio settings, and exchange channel or direct text messages. Scan a Meshtastic channel QR code from Channels to review and apply its configuration.
+
+KEEP RADIO SESSIONS SEPARATE
+Register radio endpoints and switch between their messages, nodes, channels, and settings. Each endpoint keeps its own session and local data. Available information depends on the connected hardware and firmware.
+
+OPTIONAL NTSOCIAL COMPANION
+MeshLink can provide a local Gateway for the separate NTsocial app. This integration requires both apps on the same device and a ready primary-radio connection. Keep both apps available for the foreground handoff. Additional radio endpoints do not provide the iOS Gateway in this release.
+
+HARDWARE REQUIRED
+Radio communication requires separately obtained, compatible Meshtastic hardware. Delivery and range depend on radio configuration, regional settings, terrain, and other nodes. iPhone Bluetooth alone does not provide LoRa communication. Background reconnection is subject to iOS restrictions.
+
+OPEN SOURCE
+Licensed under GPL-3.0-or-later, with attribution to Meshtastic and its contributors. NTsocial MeshLink is a modified fork, not an official Meshtastic release. The iOS app has no advertising or cloud QR recognition. MeshCore radio connectivity is not available in this release.

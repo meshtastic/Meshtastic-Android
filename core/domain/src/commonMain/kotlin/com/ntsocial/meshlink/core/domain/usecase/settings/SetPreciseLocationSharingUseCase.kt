@@ -103,26 +103,33 @@ open class SetPreciseLocationSharingUseCase(
                         )
                     )
         if (!policyVerified) return@mutation result
-        if (nodeRepository.myNodeInfo.value?.myNodeNum != nodeNum) {
-            return@mutation ChannelReliabilityResult.SESSION_UNAVAILABLE
-        }
-        if (
-            !PreciseLocationChannelSetPlanner.matchesPolicy(
-                radioConfigRepository.channelSetFlow.first(),
-                channelIndex,
-                expectedChannelIdentity,
+        enableVerifiedFeed(nodeNum, channelIndex, expectedChannelIdentity)
+    }
+
+    /** Called while the original channel mutation lease is still held. */
+    private suspend fun enableVerifiedFeed(
+        nodeNum: Int,
+        channelIndex: Int,
+        expectedChannelIdentity: String,
+    ): ChannelReliabilityResult = when {
+        nodeRepository.myNodeInfo.value?.myNodeNum != nodeNum -> ChannelReliabilityResult.SESSION_UNAVAILABLE
+
+        !PreciseLocationChannelSetPlanner.matchesPolicy(
+            radioConfigRepository.channelSetFlow.first(),
+            channelIndex,
+            expectedChannelIdentity,
+        ) -> ChannelReliabilityResult.READBACK_FAILED
+
+        else -> {
+            uiPrefs.setPreciseLocationSharing(
+                nodeNum = nodeNum,
+                provide = true,
+                channelIndex = channelIndex,
+                channelIdentity = expectedChannelIdentity,
+                cleanupPending = false,
             )
-        ) {
-            return@mutation ChannelReliabilityResult.READBACK_FAILED
+            ChannelReliabilityResult.VERIFIED
         }
-        uiPrefs.setPreciseLocationSharing(
-            nodeNum = nodeNum,
-            provide = true,
-            channelIndex = channelIndex,
-            channelIdentity = expectedChannelIdentity,
-            cleanupPending = false,
-        )
-        ChannelReliabilityResult.VERIFIED
     }
 
     private suspend fun awaitReconnectVerification(

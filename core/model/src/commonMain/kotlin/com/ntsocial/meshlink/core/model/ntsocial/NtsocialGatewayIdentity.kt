@@ -165,7 +165,7 @@ object NtsocialGatewayIdentity {
         .firstOrNull()
         ?: nodeNum
             ?.takeIf { it != 0 }
-            ?.let { value -> "!${value.toUInt().toString(16).padStart(NODE_ID_HEX_LENGTH, '0')}" }
+            ?.let { value -> "!${value.toUInt().toString(NODE_ID_HEX_RADIX).padStart(NODE_ID_HEX_LENGTH, '0')}" }
 
     private fun digest(vararg parts: ByteString): ByteString = framed(*parts).sha256()
 
@@ -185,4 +185,5 @@ object NtsocialGatewayIdentity {
     }
 
     private const val NODE_ID_HEX_LENGTH = 8
+    private const val NODE_ID_HEX_RADIX = 16
 }

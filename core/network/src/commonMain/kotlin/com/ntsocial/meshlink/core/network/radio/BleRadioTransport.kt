@@ -235,6 +235,27 @@ class BleRadioTransport(
             }
     }
 
+    private suspend fun bondIfNeeded(device: BleDevice) {
+        // Bond before connecting: firmware may require an encrypted link,
+        // and without a bond Android fails with status 5 or 133.
+        // No-op on Desktop/JVM where the OS handles pairing automatically.
+        if (!bluetoothRepository.isBonded(address)) {
+            Logger.i { "[$address] Device not bonded, initiating bonding" }
+            @Suppress("TooGenericExceptionCaught")
+            try {
+                bluetoothRepository.bond(device)
+                Logger.i { "[$address] Bonding successful" }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: BlePairingException) {
+                Logger.w(e) { "[$address] Explicit Bluetooth pairing did not complete" }
+                throw e
+            } catch (e: Exception) {
+                Logger.w(e) { "[$address] Bonding failed, attempting connection anyway" }
+            }
+        }
+    }
+
     /**
      * Performs a single BLE connect-and-wait cycle.
      *
@@ -250,24 +271,7 @@ class BleRadioTransport(
 
         val state =
             try {
-                // Bond before connecting: firmware may require an encrypted link,
-                // and without a bond Android fails with status 5 or 133.
-                // No-op on Desktop/JVM where the OS handles pairing automatically.
-                if (!bluetoothRepository.isBonded(address)) {
-                    Logger.i { "[$address] Device not bonded, initiating bonding" }
-                    @Suppress("TooGenericExceptionCaught")
-                    try {
-                        bluetoothRepository.bond(device)
-                        Logger.i { "[$address] Bonding successful" }
-                    } catch (e: CancellationException) {
-                        throw e
-                    } catch (e: BlePairingException) {
-                        Logger.w(e) { "[$address] Explicit Bluetooth pairing did not complete" }
-                        throw e
-                    } catch (e: Exception) {
-                        Logger.w(e) { "[$address] Bonding failed, attempting connection anyway" }
-                    }
-                }
+                bondIfNeeded(device)
 
                 bleConnection.connectAndAwait(device, CONNECTION_TIMEOUT)
             } finally {

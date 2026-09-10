@@ -1,0 +1,1 @@
+Connect a compatible Meshtastic radio over Bluetooth to manage channels, view nodes, and exchange text. An open-source companion from LiberaNt LLC.

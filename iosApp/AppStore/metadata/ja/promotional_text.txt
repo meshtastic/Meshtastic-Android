@@ -1,0 +1,1 @@
+対応するMeshtastic無線機をBluetoothで接続。チャンネル管理、ノード確認、テキスト通信に対応するLiberaNt LLCのオープンソースアプリ。

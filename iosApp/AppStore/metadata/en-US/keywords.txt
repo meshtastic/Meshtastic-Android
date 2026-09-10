@@ -1,0 +1,1 @@
+meshtastic,lora,bluetooth,radio,mesh,offgrid,channels,nodes,companion

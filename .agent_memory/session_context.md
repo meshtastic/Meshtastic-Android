@@ -1,4 +1,171 @@
+## 2026-09-10 — 公司發行憑證與商店建檔
+
+使用者確認建立 Apple Distribution 後，Xcode 已建立 LiberaNt LLC (D524H699HW) 發行憑證；
+本機 find-identity 確認存在，私鑰未匯出。App Store Connect 兩個記錄已建：NTsocial
+6810478003、NTsocial MeshLink 6810479958，均 Prepare for Submission，尚未上傳／送審。
+新的 company App Group group.com.ntsocial.gateway 在兩個實際 Development-signed Release
+artifacts 中驗證成功；共享 Keychain 一致。詳見 docs/ios-company-signing-status-2026-09-10.md。
+使用者明確要求略過官網舊隱私文案，稍後自行修改；不得再將網站清理當成本次上傳阻礙。
+App Privacy 仍照事實填寫。現修復已知八項 Detekt，保留跨平台行為、iOS Channels-only scanner。
+Native/Android/Windows 完整 gate 已通過：2,025 tasks，103 executed、1,922 up-to-date，exit 0。不得把簽章預檢 archive 當最新固定來源發行候選。
+
 # Agent Session Context - NTsocial MeshLink Android, Windows & iOS
+
+## 2026-09-10 - Company App Group migrated; goal expanded to two App Store submissions
+- User explicitly abandoned the original App Group, rejected the interim Team-ID-suffixed name, and retired
+  all old personal signing configuration. Final product App Group is `group.com.ntsocial.gateway` for both
+  `com.ntsocial.meshlink.ios` and `com.ntsocial.ios`, both under the one LiberaNt LLC team `D524H699HW`.
+  Source contracts, Info.plists, effective entitlements, parent archive/baseline guards and current guidance
+  are synchronized. Shared Keychain suffix remains `com.ntsocial.meshlink.gateway`; parent private group first.
+- Xcode signed out the old personal Apple Account. Removed the unused parent Personal.entitlements file,
+  its SwiftPM exclusion and the active Personal-Team fallback instructions. Historical evidence is preserved.
+  Company account remains; both app configurations use company Team ID. No personal certificates were revoked.
+- Xcode automatically provisioned both company App IDs with the new group. New Development profiles grant
+  group.com.ntsocial.gateway; parent profile also retains the unused interim group and Wi-Fi Aware/Hotspot.
+  The actual parent Release device build succeeded and codesign verification proves only the final new App
+  Group in the signature, matching company shared/private Keychain and existing networking entitlements.
+  It is development-signed (`get-task-allow=true`), not App Store distribution. MeshLink Release archive is
+  still running (exec session 85627); parent build session 83135 completed. No actual device installs this turn.
+- Full MeshLink checks for the final group: 2,097 tasks, 128 executed / 1,969 up-to-date, exit 1 only for the
+  known eight Detekt findings. Parent release baseline and focused AppleGateway/MeshLink Swift 45 tests passed.
+  Artifacts under `.agent_artifacts/ios-company-signing-2026-09-10/company-app-group/`; parent build at
+  `/tmp/NTsocialCompanyAppGroupDerivedData/Build/Products/Release-iphoneos/NTSocialApp.app`.
+- User explicitly expanded today's goal to publishing BOTH products on App Store. Created active goal with
+  tools.create_goal; do not mark complete from setup/upload/submission alone. Apple review/public availability
+  remains an external requirement. Company Distribution certificate creation is prepared in Xcode's menu;
+  action-time confirmation was requested and remains unanswered. Never treat the separate terms reply as cert consent.
+- App Store Connect Terms of Service V100 (2018-06-04) acceptance was explicitly approved by user and completed.
+  Both App records now visibly exist under LiberaNt LLC: NTsocial ID `6810478003`, MeshLink ID `6810479958`,
+  each iOS 1.0 Prepare for Submission. Original Bundle IDs preserved, primary en-US, SKUs ntsocial-ios and
+  ntsocial-meshlink-ios. No builds uploaded or review submitted yet. Chrome store tab `543619531` on browser `1`.
+- Current public privacy/legal pages are materially stale versus parent Cloud/persistence/crypto source.
+  Community standards page exists. Checked-in parent Store descriptions/review notes also stale (Basic-only,
+  no central server); must update source-aligned copy and public policy before truthful privacy answers.
+  DSA trader banner remains in App Store Connect; export classification, screenshots, signed release candidate,
+  current physical evidence and root static failures still require work. Old App Group Support draft is obsolete
+  and must not be sent. No delegation authorized; do not spawn subagents.
+
+## 2026-09-10 - Old Personal Team group still listed after Xcode refresh
+- User completed old account login. Xcode now lists the old account's Personal Team. Read-only inspection
+  at approximately 09:33 Taipei used an independent ignored `GroupOwnershipProbe` project with team
+  `HN23VK3A6R`, manual signing, `CODE_SIGNING_ALLOWED=NO`, empty bundle ID, and an empty App Groups
+  entitlement array. No original group identifier was populated in this probe's entitlement file.
+- Signing & Capabilities shows the old Personal Team and an unchecked `group.com.ntsocial.meshlink.gateway`
+  in its App Groups list. Clicked refresh; it disabled during refresh, then re-enabled with the same group
+  still listed and no account/update error. This is refreshed Xcode team-inventory evidence in addition to
+  the old signed profile evidence, strongly supporting the original group remaining with the old team.
+  It is not an Apple Support backend confirmation or an old-team Portal group detail page, and does not
+  establish that deletion would immediately release it for the company. Profile expiry is not release proof.
+- Probe artifacts are ignored under `.agent_artifacts/ios-company-signing-2026-09-10/PersonalTeamGroupProbe/`.
+  Product signing remains company `D524H699HW`; no old group selected/created/deleted, no bundle registration,
+  no certificate creation, no support send, and no actual-device work. Pending Distribution/support send
+  confirmations remain unanswered. Current task was ownership investigation; no group migration authorized.
+- Updated `docs/ios-company-signing-status-2026-09-10.md`. Xcode remains on the read-only probe group view
+  for user inspection. Company Apple Portal and unsent Support draft tabs remain open from earlier work.
+
+## 2026-09-10 - Old Personal Team App Group evidence found; account login pending
+- User explicitly requested checking whether the old personal account still holds the original App Group.
+  Local old Apple Development certificate identifies Personal Team `HN23VK3A6R`; Xcode presently lists only
+  the organization Apple Account. Opened Xcode Add Apple Account for the old certificate's account and stopped
+  at the secure password field. Asked user to complete password/2FA in Xcode and say logged in; no password,
+  OTP, key bytes, or credential-store entries were read. Company/project signing settings were not changed.
+- Direct historical evidence found in the retained Xcode DerivedData NTSocialApp.app embedded.mobileprovision:
+  profile `iOS Team Provisioning Profile: com.ntsocial.ios`, TeamIdentifier `HN23VK3A6R`, application identifier
+  `HN23VK3A6R.com.ntsocial.ios`, and App Groups includes `group.com.ntsocial.meshlink.gateway`. Creation and
+  expiration in Taipei are 2026-09-03 07:54:03 and 2026-09-10 07:54:03. This proves the old team previously
+  had a profile authorizing this group, not current Portal ownership or automatic release upon profile expiry.
+- Safe metadata/hash summary saved to ignored `.agent_artifacts/ios-company-signing-2026-09-10/old-personal-profile-evidence.json`;
+  main signing report updated. No group deletion/migration, certificate creation, support message, or device
+  mutation occurred. Pending Distribution/support permissions remain unanswered; continue old account read-only
+  verification after user completes login. Support draft can be updated with this new evidence before any send.
+
+## 2026-09-10 - App Group recovery options clarified
+- User asked how to resolve the rejected original App Group. Explained two distinct paths: verify/recover the
+  original group's ownership with the old team/Apple Support, or explicitly migrate both apps to a new company
+  App Group while preserving both original Bundle IDs. A new group means a new shared container; retained
+  old-group data would require an explicit migration. New-group availability is not yet checked.
+- Existing Group ID appears in both apps' Info.plist/entitlements and the Kotlin/Swift AppleGatewayContract
+  sources, so a migration cannot be a portal-only or entitlement-only change. Shared Keychain authorization
+  must still match the company prefix. No group migration was authorized or performed by this explanatory turn.
+- Pending Distribution-certificate and Apple Support send confirmations remain unanswered. The original group
+  is unavailable to the company, but its present owner and any release timeline are unverified.
+
+## 2026-09-10 - Company signing implementation; original App Group blocked by Apple
+- User explicitly requested all five company-signing/profile/dual-App verification steps. MeshLink now has
+  optional `iosApp/Config/Signing.xcconfig` referenced by Debug/Release and a Git-ignored local config selecting
+  `D524H699HW`. Original Bundle ID and entitlement file are preserved. Both effective configurations were
+  verified with `xcodebuild -showBuildSettings`. Parent `NTsocial_release` already had uncommitted optional
+  signing config; its existing changes were preserved and both effective configurations verified on the same
+  team. Parent sources were read only, not modified. Shared Gateway App Group/Keychain suffixes match.
+- Actual company Portal registration of `group.com.ntsocial.meshlink.gateway` failed with identifier not
+  available; the company's App Groups list was empty. Xcode independently displays the same error. The current
+  owning team remains unknown; prior Personal Team ownership is a hypothesis, not verified fact. No alternate
+  App Group, entitlement stripping, identifier deletion, or certificate revocation was performed.
+- Xcode's LiberaNt LLC Manage Certificates -> Apple Distribution menu is prepared. The computer-use tool's
+  action-time security confirmation was requested; no user response yet, so no Distribution certificate/private
+  key has been created. Existing company Apple Development identity is locally usable and has OU D524H699HW.
+- Apple Developer Support contact form is filled with the exact company, identifiers, error, and request to
+  investigate/release/reassign the original App Group after ownership verification. Explicit permission to send
+  this external message was requested and is pending; nothing sent and no case ID. Support tab and Portal tab
+  are retained for handoff. Continue from the pending forms rather than creating duplicate requests.
+- Full MeshLink validation ran 2,097 actionable tasks; formatting/builds/tests/KMP/lints succeeded, root exit 1
+  only for the same eight pre-existing Detekt findings. Runtime JVM 26 and Gateway JVM 39 tests have no failures.
+  Parent focused AppleGateway tests pass 45/45. Signing-disabled Simulator Debug build/install/launch passes
+  on a newly created empty iOS 26.5/iPhone 17 simulator; process stayed at PID 82608. The build retains the
+  AppIntents metadata-extraction warning. Actual Release archive exits 65 for missing App Group capability/
+  identifier/entitlement in the wildcard company profile. No signed archive/IPA or true-device install occurred.
+- Main report: `docs/ios-company-signing-status-2026-09-10.md`; detailed logs in ignored
+  `.agent_artifacts/ios-company-signing-2026-09-10/`. Parent Release also needs existing Hotspot/Wi-Fi Aware
+  entitlements provisioned. Real device work must retain the parent's empty-data baseline and isolate historical
+  transports; the current request reauthorizes testing but does not authorize restoring old test state.
+
+## 2026-09-10 - Company iOS signing readiness assessment
+- User asked whether company Xcode signing, App Groups, and provisioning should be completed before the
+  upcoming release. Read-only inspection confirms they are required next steps; registration alone is insufficient.
+- Live LiberaNt LLC / `D524H699HW` portal shows no registered App Groups, one Development certificate, and
+  no listed provisioning profiles. Local Xcode has a company wildcard development profile `D524H699HW.*`
+  with `get-task-allow=true`, no App Group entitlement, and wildcard company Keychain authorization. It is
+  not a distribution profile for MeshLink. Local valid signing identities are development identities only.
+- MeshLink Debug/Release both use automatic signing and `$(NTSOCIAL_DEVELOPMENT_TEAM)`. Source already
+  declares `group.com.ntsocial.meshlink.gateway` and `$(AppIdentifierPrefix)com.ntsocial.meshlink.gateway`.
+- Recommended sequence: supply the company team for Debug/Release; register and associate the Gateway App Group
+  with both exact App IDs (`com.ntsocial.meshlink.ios` and `com.ntsocial.ios`); verify matching shared-Keychain
+  entitlements in both signed Apps; configure development and App Store Connect distribution signing/profile
+  resources (Xcode automatic management is supported); inspect the resulting signed Release archive and perform
+  two-App physical-device Gateway validation before TestFlight/store claims. Parent source was not inspected or
+  modified in this assessment. No new certificate/key, profile, capability, group association, or source setting
+  was created/changed, and nothing was uploaded. Any future credential creation or new cross-App data access
+  through the UI needs the applicable action-time confirmation.
+
+## 2026-09-10 - Original iOS Bundle ID successfully registered under LiberaNt LLC
+- After the user said continue, the live Apple Developer portal initially listed `com.ntsocial.ios` and the
+  wildcard App ID under `LiberaNt LLC` / Team ID `D524H699HW`. Registered a new explicit App ID with description
+  `NTsocial MeshLink` and the exact original Bundle ID `com.ntsocial.meshlink.ios`.
+- Clicked Register and verified the resulting company Identifiers list visibly contains
+  `NTsocial MeshLink` / `com.ntsocial.meshlink.ios`. This supersedes the pending availability/registration status
+  in the earlier preflight below. No alternative Bundle ID was used and no old identifier was deleted.
+- Registration used the portal defaults (In-App Purchase automatically enabled; App Groups unchecked).
+  No App Group association, Keychain configuration, certificate/profile generation, Xcode team change,
+  device installation, or App Store Connect app creation/upload was performed. Existing source still uses
+  `NTSOCIAL_DEVELOPMENT_TEAM`; future company signing should supply verified team `D524H699HW` and separately
+  configure/verify the existing Gateway App Group and Keychain entitlements before claiming signed integration.
+- Portal evidence: https://developer.apple.com/account/resources/identifiers/list (authenticated company view),
+  retained as the browser deliverable. Only session memory changed locally; Android/Windows and product source
+  are unchanged. Documentation diff checks apply; no product build was needed for identifier registration.
+
+## 2026-09-10 - iOS company Bundle ID registration preflight (pending browser continuation)
+- User explicitly authorized registering the original iOS Bundle ID under the paid US company developer account;
+  preserving `com.ntsocial.meshlink.ios` is mandatory. Xcode Debug and Release still use that exact identifier,
+  and signing team remains parameterized by `NTSOCIAL_DEVELOPMENT_TEAM`.
+- Live Apple Developer account UI verified organization `LiberaNt LLC`, Team ID `D524H699HW`, Apple Developer
+  Program membership, Account Holder role, and renewal date September 5, 2027. No credentials were captured.
+- The Identifiers navigation was blocked because another Chrome extension UI was open. The Apple account tab
+  was retained for handoff; user was asked to complete/dismiss the extension UI and say continue. No registration,
+  App Group binding, provisioning, signing, or source-configuration changes were submitted. Bundle availability
+  remains unverified; do not describe the old identifier as released or the company registration as complete.
+- Apple account help states Personal Team App IDs expire after seven days, but actual availability of this
+  identifier still requires the registration service result. Existing App Group and Keychain entitlement
+  identities remain unchanged. Android and Windows are unaffected; no product build was needed for this preflight.
 
 
 ## 2026-09-03 - iOS expired Apple Gateway route automatic-recovery remediation

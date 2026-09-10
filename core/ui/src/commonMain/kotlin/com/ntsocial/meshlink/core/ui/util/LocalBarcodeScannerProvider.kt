@@ -39,17 +39,3 @@ val LocalBarcodeScannerProvider =
     }
 
 val LocalBarcodeScannerSupported = compositionLocalOf { false }
-
-/** Scanner capability reserved for the endpoint-scoped Channels destination. */
-val LocalChannelBarcodeScannerProvider =
-    compositionLocalOf<@Composable (onResult: (String?) -> Unit) -> BarcodeScanner> {
-        {
-            object : BarcodeScanner {
-                override fun startScan() {
-                    // Default NO-OP
-                }
-            }
-        }
-    }
-
-val LocalChannelBarcodeScannerSupported = compositionLocalOf { false }

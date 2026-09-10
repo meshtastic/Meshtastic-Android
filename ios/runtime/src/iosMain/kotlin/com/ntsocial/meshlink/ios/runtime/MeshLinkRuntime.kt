@@ -36,8 +36,8 @@ import com.ntsocial.meshlink.core.repository.ChannelOperationLock
 import com.ntsocial.meshlink.core.repository.RadioInterfaceService
 import com.ntsocial.meshlink.core.repository.ServiceRepository
 import com.ntsocial.meshlink.core.ui.util.BarcodeScanner
-import com.ntsocial.meshlink.core.ui.util.LocalChannelBarcodeScannerProvider
-import com.ntsocial.meshlink.core.ui.util.LocalChannelBarcodeScannerSupported
+import com.ntsocial.meshlink.core.ui.util.ChannelsOnlyBarcodeScanner
+import com.ntsocial.meshlink.core.ui.util.LocalBarcodeScannerProvider
 import kotlinx.coroutines.MainScope
 import org.koin.compose.KoinIsolatedContext
 import platform.UIKit.UIViewController
@@ -109,8 +109,7 @@ object MeshLinkRuntime {
     @Composable
     private fun IosPlatformProviders() {
         CompositionLocalProvider(
-            LocalChannelBarcodeScannerProvider provides { onResult -> rememberIosBarcodeScanner(onResult) },
-            LocalChannelBarcodeScannerSupported provides barcodeScannerCoordinator.isSupported,
+            LocalBarcodeScannerProvider provides { onResult -> rememberIosBarcodeScanner(onResult) },
         ) {
             IosShellApp(shellController)
         }
@@ -120,8 +119,11 @@ object MeshLinkRuntime {
     private fun rememberIosBarcodeScanner(onResult: (String?) -> Unit): BarcodeScanner {
         val currentOnResult = rememberUpdatedState(onResult)
         return remember {
-            object : BarcodeScanner {
-                override fun startScan() {
+            object : ChannelsOnlyBarcodeScanner {
+                override val isSupported: Boolean
+                    get() = barcodeScannerCoordinator.isSupported
+
+                override fun startChannelScan() {
                     barcodeScannerCoordinator.startScan { contents -> currentOnResult.value(contents) }
                 }
             }

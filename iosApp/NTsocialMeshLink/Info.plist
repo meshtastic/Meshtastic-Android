@@ -48,7 +48,7 @@
 	<key>NSCameraUsageDescription</key>
 	<string>NTsocial MeshLink uses the camera to scan Meshtastic channel QR codes. QR contents are processed on this device.</string>
 	<key>NTSocialMeshLinkAppGroupIdentifier</key>
-	<string>group.com.ntsocial.meshlink.gateway</string>
+	<string>group.com.ntsocial.gateway</string>
 	<key>NTsocialGatewayKeychainAccessGroup</key>
 	<string>$(AppIdentifierPrefix)com.ntsocial.meshlink.gateway</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>

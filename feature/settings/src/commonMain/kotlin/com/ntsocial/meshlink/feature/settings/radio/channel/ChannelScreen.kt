@@ -109,10 +109,9 @@ import com.ntsocial.meshlink.core.ui.icon.MeshtasticIcons
 import com.ntsocial.meshlink.core.ui.icon.QrCode
 import com.ntsocial.meshlink.core.ui.icon.QrCodeScanner
 import com.ntsocial.meshlink.core.ui.qr.ScannedQrCodeDialog
+import com.ntsocial.meshlink.core.ui.util.ChannelsOnlyBarcodeScanner
 import com.ntsocial.meshlink.core.ui.util.LocalBarcodeScannerProvider
 import com.ntsocial.meshlink.core.ui.util.LocalBarcodeScannerSupported
-import com.ntsocial.meshlink.core.ui.util.LocalChannelBarcodeScannerProvider
-import com.ntsocial.meshlink.core.ui.util.LocalChannelBarcodeScannerSupported
 import com.ntsocial.meshlink.core.ui.util.SnackbarManager
 import com.ntsocial.meshlink.core.ui.util.rememberQrCodePainter
 import com.ntsocial.meshlink.core.ui.util.rememberShowToastResource
@@ -199,18 +198,15 @@ fun ChannelScreen(
     val showToast = rememberShowToastResource()
     val snackbarManager = koinInject<SnackbarManager>()
     val invalidChannelMessage = stringResource(Res.string.channel_invalid)
-    val isGeneralBarcodeScannerSupported = LocalBarcodeScannerSupported.current
-    val generalBarcodeScannerProvider = LocalBarcodeScannerProvider.current
-    val isChannelBarcodeScannerSupported = LocalChannelBarcodeScannerSupported.current
-    val channelBarcodeScannerProvider = LocalChannelBarcodeScannerProvider.current
-    val isBarcodeScannerSupported = isGeneralBarcodeScannerSupported || isChannelBarcodeScannerSupported
-    val barcodeScannerProvider =
-        if (isChannelBarcodeScannerSupported) channelBarcodeScannerProvider else generalBarcodeScannerProvider
-    val barcodeScanner = barcodeScannerProvider { contents ->
-        contents?.let { url ->
-            viewModel.requestChannelUrl(url) { snackbarManager.showSnackbar(invalidChannelMessage) }
+    val barcodeScanner =
+        LocalBarcodeScannerProvider.current { contents ->
+            contents?.let { url ->
+                viewModel.requestChannelUrl(url) { snackbarManager.showSnackbar(invalidChannelMessage) }
+            }
         }
-    }
+
+    val channelsOnlyScanner = barcodeScanner as? ChannelsOnlyBarcodeScanner
+    val isBarcodeScannerSupported = LocalBarcodeScannerSupported.current || channelsOnlyScanner?.isSupported == true
 
     LaunchedEffect(channelOperationResult) {
         val result = channelOperationResult ?: return@LaunchedEffect
@@ -289,7 +285,16 @@ fun ChannelScreen(
                 onNavigateUp = onNavigateUp,
                 actions = {
                     if (isBarcodeScannerSupported) {
-                        IconButton(onClick = barcodeScanner::startScan, enabled = enabled) {
+                        IconButton(
+                            onClick = {
+                                if (channelsOnlyScanner != null) {
+                                    channelsOnlyScanner.startChannelScan()
+                                } else {
+                                    barcodeScanner.startScan()
+                                }
+                            },
+                            enabled = enabled,
+                        ) {
                             Icon(
                                 imageVector = MeshtasticIcons.QrCodeScanner,
                                 contentDescription = stringResource(Res.string.scan_channels_qr),
