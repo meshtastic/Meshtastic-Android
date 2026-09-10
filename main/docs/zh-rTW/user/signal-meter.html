@@ -28,7 +28,7 @@ Each modem preset has an SNR limit: the lowest SNR at which that preset can stil
 
 ## Rating Signal Quality
 
-The app rates signal quality (None, Bad, Fair, or Good) from SNR alone, measured against the active preset's SNR limit. It does not factor in RSSI: without knowing the local noise floor, RSSI alone cannot say whether a signal is decodable. RSSI is still available — on the node detail screen and in the metrics charts.
+The app rates signal quality (None, Bad, Fair, or Good) from SNR relative to the active preset's SNR limit. When RSSI and a noise-floor reading are both available, it also rates the difference between them against that limit and uses the worse rating. Otherwise, it uses SNR alone.
 
 Because the rating is relative to the preset, the same SNR rates differently on different presets. An SNR of −16 dB rates Good on Long Fast (SNR limit −17.5 dB) but None on Short Fast (SNR limit −7.5 dB). Let `limit` be the active preset's SNR limit:
 
@@ -159,7 +159,7 @@ Meshtastic is a project that allows you to use inexpensive LoRa radios as a long
 
 The icon never goes blank, so count the bars carefully: a single bar means None, not a weak but usable link, and Good is a solid wedge rather than a set of bars. A gray three-bar icon labeled Unknown is a different state again — the packet carried no SNR measurement at all, which is not the same as measuring one and finding it too weak.
 
-&gt; ℹ️ **Note:** Traceroute hop colors use fixed thresholds (−7 dB / −15 dB); the per-node signal meter uses the preset-relative rating instead.
+&gt; ℹ️ **Note:** Traceroute and neighbor-info SNR colors use the active preset's limits too. RSSI text has separate strength colors: green above −115 dBm, yellow above −120 dBm, orange above −126 dBm, and red at or below −126 dBm.
 
 ## Diagnosing Local Interference
 

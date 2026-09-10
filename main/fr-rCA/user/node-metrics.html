@@ -245,7 +245,7 @@
 
 <h3 id="signal-quality-reference">Signal Quality Reference</h3>
 
-<p>Signal quality is rated from <strong>SNR relative to the active LoRa modem preset’s demodulation floor</strong>, not from fixed thresholds — a given SNR means different things on different presets (e.g. −15 dB is fine on LongSlow but unusable on ShortFast). RSSI is shown but is not part of the rating. In the table, <em>limit</em> is the preset’s SNR limit.</p>
+<p>Signal quality is rated from <strong>SNR relative to the active LoRa modem preset’s demodulation floor</strong>, not from fixed thresholds — a given SNR means different things on different presets (e.g. −15 dB is fine on LongSlow but unusable on ShortFast). When RSSI and a noise-floor reading are both available, the app also rates their difference against the preset limit and uses the worse rating. Otherwise, RSSI is display-only. In the table, <em>limit</em> is the preset’s SNR limit.</p>
 
 <table>
   <thead>
