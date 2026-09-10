@@ -40,6 +40,11 @@
 - 證據根目錄 `.agent_artifacts/ios-company-signing-2026-09-10/`：
   `release/MeshLink-9c85b42d7-uploaded-export/verified-signing.json`、
   `native-test-harness/isolated-results/summary.json`、`store-screenshots-upload/manifest.json`。
+- 12:25（台北）追加 MeshLink Release Simulator build 成功，保留 `1.0.0 (2)`、原 Bundle ID、
+  iOS 17 minimum、iPhone／iPad device family、`bluetooth-central`，並確認預設／繁體中文／日文
+  Compose 資源封裝。這是 signing-disabled Simulator artifact，未替換已上傳的 Distribution IPA。
+  AppIntents metadata extraction skipped 警告仍存在；Mac 鎖定，尚未安裝或啟動此 Release Simulator App。
+  Log：`meshlink-release-simulator.log`；摘要：`release/meshlink-release-simulator-evidence.json`。
 
 ## 前階段：兩個 Build 1 已上傳與語言修復
 

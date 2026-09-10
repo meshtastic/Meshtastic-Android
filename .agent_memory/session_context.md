@@ -2282,3 +2282,11 @@ Native/Android/Windows 完整 gate 已通過：2,025 tasks，103 executed、1,92
 - DSA trader branch inspected; registered company address is prefilled/read-only. Public phone and support email were prepared but Next/final verification was not submitted; cancelled draft to continue preflight. Asked user to confirm trader status and public contact details. Existing rights question superseded by a combined question covering both apps.
 - Native Simulator access again reports Mac locked. New combined user action request covers unlocking Mac and enabling Chrome extension Allow access to file URLs; file upload is still blocked, 0 screenshots uploaded.
 - Current working Chrome tab 543619558 is on MeshLink App Information with Content Rights modal open, neither radio selected. Pending combined privacy, combined content rights, France and DSA replies remain unanswered. No obsolete popup/old-account/support approval is required.
+
+### 2026-09-10 12:25 — Release Simulator build completed during approval wait
+
+- Built MeshLink Release for generic iOS Simulator with signing disabled; xcodebuild exited 0. Build 2, original bundle, iOS 17 minimum, both device families, bluetooth-central and three resource locales verified from the built App. Evidence: `release/meshlink-release-simulator-evidence.json` under the existing ignored artifact root.
+- App path: `MeshLinkReleaseSimulator/Build/Products/Release-iphonesimulator/NTsocial MeshLink.app`. Executable SHA-256 `82dfc6a5e337a8ad993ce35a5ac16a6793af4d16973c8631acf244f110147dc6`. AppIntents metadata skipped warning remains. Not installed/launched, no physical test or screenshot upload.
+- Unified exec session 92308 completed successfully; do not restart or wait on it. No live build job remains.
+- CUA revalidated Mac locked. Browser tab 543619558 connection timed out twice and reset the JS runtime; old `storePage`/`fullBrowser` bindings no longer exist. On next use, obey the first-call entry-point rule and reselect the existing tab; no new browser form mutations occurred.
+- Pending user-input condition now conservatively verified across two goal turns (do not count context compaction as a turn). Continue to keep the goal active here; a third consecutive verified impasse can satisfy the blocked threshold if no new meaningful authorized work is available.
