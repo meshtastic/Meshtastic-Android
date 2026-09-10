@@ -42,7 +42,7 @@ import org.meshtastic.proto.Telemetry
  *
  * Android-only concepts (notification channels, foreground-service state updates) are intentionally no-ops.
  *
- * Registered manually in `desktopPlatformStubsModule` -- do **not** add `@Single` to avoid double-registration with the
+ * Registered manually in `DesktopRuntimeModule` -- do **not** add `@Single` to avoid double-registration with the
  * `@ComponentScan("org.meshtastic.desktop")` in [DesktopDiModule][org.meshtastic.desktop.di.DesktopDiModule].
  */
 @Suppress("TooManyFunctions")

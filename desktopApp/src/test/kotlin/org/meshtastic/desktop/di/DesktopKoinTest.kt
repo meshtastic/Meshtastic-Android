@@ -22,24 +22,21 @@ import io.ktor.client.engine.HttpClientEngine
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import org.koin.core.annotation.KoinExperimentalAPI
-import org.koin.dsl.koinApplication
-import org.koin.dsl.module
-import org.koin.dsl.onClose
+import org.koin.plugin.module.dsl.koinApplication
 import org.koin.test.verify.verify
 import org.meshtastic.core.ble.BleLogFormat
 import org.meshtastic.core.ble.BleLogLevel
 import kotlin.test.Test
-import kotlin.test.assertTrue
 
-@OptIn(KoinExperimentalAPI::class)
 class DesktopKoinTest {
 
+    @OptIn(KoinExperimentalAPI::class)
     @Test
     fun `verify desktop koin modules`() {
-        // This test validates the full Koin DI graph for the Desktop target.
-        // It includes the main desktopModule (repositories, use cases, ViewModels, stubs)
-        // and the desktopPlatformModule (DataStores, Room database, lifecycle).
-        module { includes(desktopModule(), desktopPlatformModule()) }
+        // Validates the full Koin DI graph for the Desktop target: the core KMP modules (repositories, use cases,
+        // ViewModels) plus the desktop-specific platform, datastore, runtime, stub and AI modules.
+        DesktopKoinModule()
+            .module()
             .verify(
                 extraTypes =
                 listOf(
@@ -61,18 +58,10 @@ class DesktopKoinTest {
     }
 
     @Test
-    fun `closing a koin container fires onClose for instantiated singles`() {
-        // Pins the mechanism desktopModule() relies on: LinuxNotificationSender's native teardown
-        // (notify_uninit) runs only because Koin invokes onClose when the container closes, which
-        // Main.kt triggers via stopKoin() once the Compose application loop returns. A Koin upgrade
-        // that changed this would silently reinstate the leak, so it is asserted rather than assumed.
-        var closed = false
-        val app = koinApplication {
-            modules(module { single<AutoCloseable> { AutoCloseable { closed = true } }.onClose { it?.close() } })
-        }
-        app.koin.get<AutoCloseable>() // onClose only fires for singles that were actually instantiated
+    fun `typed bootstrap loads the module graph`() {
+        // koinApplication<T>() is a K2 compiler plugin stub. If the plugin fails to transform it, the stub throws
+        // NotImplementedError at runtime. This is the production bootstrap path Main.kt takes via startKoin<T>.
+        val app = koinApplication<DesktopKoinApp>()
         app.close()
-
-        assertTrue(closed, "Expected Koin to invoke onClose when the container is closed")
     }
 }

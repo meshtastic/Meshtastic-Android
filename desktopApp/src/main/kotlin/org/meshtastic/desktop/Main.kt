@@ -71,8 +71,9 @@ import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
-import org.koin.core.context.startKoin
+import org.koin.core.context.GlobalContext
 import org.koin.core.context.stopKoin
+import org.koin.plugin.module.dsl.startKoin
 import org.maplibre.compose.desktop.ProvideMapPresentationHost
 import org.maplibre.compose.desktop.rememberAwtComposeMapPresentationHost
 import org.meshtastic.core.common.BuildConfigProvider
@@ -105,11 +106,11 @@ import org.meshtastic.core.ui.util.LocalTracerouteMapProvider
 import org.meshtastic.core.ui.util.rememberOpenUrl
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.desktop.data.DesktopPreferencesDataSource
-import org.meshtastic.desktop.di.desktopModule
-import org.meshtastic.desktop.di.desktopPlatformModule
+import org.meshtastic.desktop.di.DesktopKoinApp
 import org.meshtastic.desktop.map.DesktopTracerouteMap
 import org.meshtastic.desktop.map.desktopMapViewProvider
 import org.meshtastic.desktop.notification.DesktopOS
+import org.meshtastic.desktop.notification.NativeNotificationSender
 import org.meshtastic.desktop.ui.DesktopMainScreen
 import org.meshtastic.feature.map.MapScreen
 import org.meshtastic.feature.map.SharedMapViewModel
@@ -156,7 +157,7 @@ fun main(args: Array<String>) {
             // Keep console output and also capture into the in-memory buffer the Debug screen views/exports.
             Logger.setLogWriters(listOf(platformLogWriter(), InMemoryLogBuffer))
             Logger.i { "Meshtastic Desktop — Starting" }
-            startKoin { modules(desktopPlatformModule(), desktopModule()) }
+            startKoin<DesktopKoinApp> {}
         }
         val systemLocale = remember { Locale.getDefault() }
         val uiViewModel = remember { koinApp.koin.get<UIViewModel>() }
@@ -167,9 +168,11 @@ fun main(args: Array<String>) {
         ThemeAndLocaleProvider(uiViewModel)
     }
 
-    // Runs on the main thread with the UI already gone. Closing the container fires the `onClose` callbacks that
-    // release native handles — currently libnotify's process-wide state in LinuxNotificationSender. Guarded because
-    // a teardown failure must not turn a clean quit into a non-zero exit.
+    // Runs on the main thread with the UI already gone. The native sender must be closed before the container goes,
+    // because it owns libnotify's process-wide handle on Linux. Both guarded: a teardown failure must not turn a
+    // clean quit into a non-zero exit.
+    runCatching { (GlobalContext.get().get<NativeNotificationSender>() as? AutoCloseable)?.close() }
+        .onFailure { Logger.w(it) { "Closing the native notification sender failed during shutdown" } }
     runCatching { stopKoin() }.onFailure { Logger.w(it) { "stopKoin() failed during shutdown" } }
     Logger.i { "Meshtastic Desktop — Stopped" }
 
