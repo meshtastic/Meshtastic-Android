@@ -76,7 +76,7 @@ import org.meshtastic.proto.Config
 import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
 import org.meshtastic.proto.Config.LoRaConfig.RegionCode
 
-private val SPREAD_FACTOR_RANGE = 7..12
+private val SPREAD_FACTOR_RANGE = 5..12
 private val CODING_RATE_RANGE = 5..8
 
 /**
