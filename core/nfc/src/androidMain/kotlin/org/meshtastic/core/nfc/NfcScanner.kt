@@ -23,6 +23,8 @@ import android.nfc.NdefRecord
 import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.nfc.tech.Ndef
+import android.nfc.tech.NdefFormatable
+import android.nfc.tech.TagTechnology
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -104,42 +106,66 @@ fun NfcWriterEffect(url: String, onResult: (Boolean) -> Unit, onNfcDisabled: (()
 }
 
 private fun writeNdefUrl(tag: Tag, url: String): Boolean {
-    val ndef = Ndef.get(tag)
-    if (ndef == null) {
-        Logger.w { "Tag does not support NDEF" }
-        return false
-    }
     val message = NdefMessage(NdefRecord.createUri(url))
-    return try {
-        ndef.connect()
-        when {
-            !ndef.isWritable -> {
-                Logger.w { "NDEF tag is read-only" }
-                false
-            }
+    val ndef = Ndef.get(tag)
+    // A tag that has never been NDEF-formatted exposes NdefFormatable and no Ndef: blank
+    // Ultralight/Classic, or an NTAG whose capability container was zeroed. format() writes both.
+    val formatable = if (ndef == null) NdefFormatable.get(tag) else null
 
-            ndef.maxSize < message.byteArrayLength -> {
-                Logger.w { "NDEF tag too small: ${ndef.maxSize} < ${message.byteArrayLength}" }
-                false
-            }
+    return when {
+        ndef != null -> writeToNdef(ndef, message)
 
-            else -> {
-                ndef.writeNdefMessage(message)
-                true
-            }
+        formatable != null -> formatAndWrite(formatable, message)
+
+        else -> {
+            Logger.w { "Tag supports neither NDEF nor NDEF formatting" }
+            false
         }
+    }
+}
+
+private fun writeToNdef(ndef: Ndef, message: NdefMessage): Boolean = withTag(ndef) {
+    when {
+        !ndef.isWritable -> {
+            Logger.w { "NDEF tag is read-only" }
+            false
+        }
+
+        ndef.maxSize < message.byteArrayLength -> {
+            Logger.w { "NDEF tag too small: ${ndef.maxSize} < ${message.byteArrayLength}" }
+            false
+        }
+
+        else -> {
+            ndef.writeNdefMessage(message)
+            true
+        }
+    }
+}
+
+private fun formatAndWrite(formatable: NdefFormatable, message: NdefMessage): Boolean = withTag(formatable) {
+    // format() lays down the capability container and the NDEF message in one pass; a tag too
+    // small for the message fails here as IOException, so there is no maxSize to check first.
+    formatable.format(message)
+    Logger.i { "Formatted unformatted tag and wrote NDEF" }
+    true
+}
+
+/** Connects [tech], runs [block], and always closes. Reports every failure mode as `false`. */
+private inline fun withTag(tech: TagTechnology, block: () -> Boolean): Boolean = try {
+    tech.connect()
+    block()
+} catch (e: IOException) {
+    Logger.w(e) { "Error writing NDEF tag" }
+    false
+} catch (e: FormatException) {
+    Logger.w(e) { "Malformed NDEF message" }
+    false
+} finally {
+    try {
+        tech.close()
     } catch (e: IOException) {
-        Logger.w(e) { "Error writing NDEF tag" }
-        false
-    } catch (e: FormatException) {
-        Logger.w(e) { "Malformed NDEF message" }
-        false
-    } finally {
-        try {
-            ndef.close()
-        } catch (e: IOException) {
-            Logger.w(e) { "Error closing NDEF" }
-        }
+        Logger.w(e) { "Error closing NDEF" }
     }
 }
 
