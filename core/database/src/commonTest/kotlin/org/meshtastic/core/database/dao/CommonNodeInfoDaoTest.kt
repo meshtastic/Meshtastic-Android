@@ -127,11 +127,27 @@ abstract class CommonNodeInfoDaoTest {
         // What a 2.8 upgrade or a factory reset does: the same radio comes back under a new key.
         val after = ByteArray(32) { 2 }.toByteString()
         dao.upsert(NodeEntity(num = own, user = User(id = "!own", public_key = before)))
-        dao.upsert(NodeEntity(num = own, user = User(id = "!own", public_key = after)))
+
+        // Through installConfig, which is the local link. selfNum comes from the device's own MyNodeInfo there.
+        dao.installConfig(myNodeInfo, listOf(NodeEntity(num = own, user = User(id = "!own", public_key = after))))
 
         val stored = dao.getNodeByNum(own)?.node
         assertEquals(after, stored?.publicKey)
         assertEquals(after, stored?.user?.public_key)
+    }
+
+    @Test
+    fun `a mesh packet claiming the local node number cannot replace the stored key`() = runTest {
+        createDb()
+        val own = myNodeInfo.myNodeNum
+        val real = ByteArray(32) { 1 }.toByteString()
+        dao.upsert(NodeEntity(num = own, user = User(id = "!own", public_key = real)))
+
+        // The single-upsert path carries mesh-received NodeInfo, and `from` is attacker controlled, so matching the
+        // local node number proves only that the sender claimed it.
+        dao.upsert(NodeEntity(num = own, user = User(id = "!own", public_key = ByteArray(32) { 9 }.toByteString())))
+
+        assertEquals(NodeEntity.ERROR_BYTE_STRING, dao.getNodeByNum(own)?.node?.publicKey)
     }
 
     @Test

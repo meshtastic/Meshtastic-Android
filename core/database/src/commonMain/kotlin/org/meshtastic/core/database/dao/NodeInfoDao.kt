@@ -73,10 +73,10 @@ interface NodeInfoDao {
         return if (existingNodeEntity == null) {
             handleNewNodeUpsertValidation(incomingNode)
         } else {
-            // The connected radio is authoritative for its own key: there is no mesh hop to spoof, and a 2.8 upgrade
-            // or factory reset legitimately re-keys it. Without this its own new key reads as a substitution.
-            val isLocalNode = incomingNode.num == getMyNodeEntity()?.myNodeNum
-            handleExistingNodeUpsertValidation(existingNodeEntity, incomingNode, trustIncomingKey = isLocalNode)
+            // Never trusted here, whatever the number says: this path carries mesh-received NodeInfo, so matching the
+            // local node number only proves the sender claimed it. The radio's own key is trusted in installConfig,
+            // where selfNum comes from the device over the local link.
+            handleExistingNodeUpsertValidation(existingNodeEntity, incomingNode)
         }
     }
 

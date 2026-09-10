@@ -509,7 +509,8 @@ fun NodeSecurityIcons(
     iconSize: Dp = 20.dp,
     isThisNode: Boolean = false,
 ) {
-    NodeSecurityIcon(node = thatNode, modifier = modifier.size(iconSize), isOwnNode = isThisNode)
+    // iconSize sizes the glyph, not the button: sizing the IconButton would shrink the touch target below 44dp.
+    NodeSecurityIcon(node = thatNode, modifier = modifier, iconSize = iconSize, isOwnNode = isThisNode)
 }
 
 @Composable

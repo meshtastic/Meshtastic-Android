@@ -17,6 +17,7 @@
 package org.meshtastic.core.ui.component
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -47,6 +48,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import okio.ByteString
 import org.jetbrains.compose.resources.StringResource
@@ -181,22 +183,34 @@ fun NodeSecurityIndicator.Glyph(modifier: Modifier = Modifier) {
  * Decided once in [NodeSecurityIndicator], so no surface can contradict another. [isOwnNode] reads as verified.
  */
 @Composable
-fun NodeSecurityIcon(node: Node, modifier: Modifier = Modifier, isOwnNode: Boolean = false) {
+fun NodeSecurityIcon(
+    node: Node,
+    modifier: Modifier = Modifier,
+    iconSize: Dp = DEFAULT_GLYPH_SIZE,
+    isOwnNode: Boolean = false,
+) {
     NodeSecurityIcon(
         indicator = NodeSecurityIndicator.of(node, isOwnNode),
         modifier = modifier,
+        iconSize = iconSize,
         publicKey = node.user.public_key,
     )
 }
 
 /** [NodeSecurityIcon] for a state resolved elsewhere — the DM thread's own header, say. */
 @Composable
-fun NodeSecurityIcon(indicator: NodeSecurityIndicator, modifier: Modifier = Modifier, publicKey: ByteString? = null) {
+fun NodeSecurityIcon(
+    indicator: NodeSecurityIndicator,
+    modifier: Modifier = Modifier,
+    iconSize: Dp = DEFAULT_GLYPH_SIZE,
+    publicKey: ByteString? = null,
+) {
     var showDialog by remember { mutableStateOf(false) }
     if (showDialog) {
         NodeSecurityDialog(indicator = indicator, key = publicKey, onDismiss = { showDialog = false })
     }
-    IconButton(onClick = { showDialog = true }, modifier = modifier) { indicator.Glyph() }
+    // The button keeps its own minimum touch target; only the glyph inside it takes iconSize.
+    IconButton(onClick = { showDialog = true }, modifier = modifier) { indicator.Glyph(Modifier.size(iconSize)) }
 }
 
 /**
@@ -215,6 +229,9 @@ fun NodeKeyStatusIcon(
         NodeSecurityIndicator.resolve(firmwareVersion = null, hasPublicKey = hasPKC, mismatchKey = mismatchKey)
     NodeSecurityIcon(indicator = indicator, modifier = modifier, publicKey = publicKey)
 }
+
+/** The glyph size a row uses when it does not ask for one. */
+private val DEFAULT_GLYPH_SIZE = 20.dp
 
 /** The legend order, weakest claim last — the same reading order as the help sheet on the other clients. */
 private val LEGEND_ORDER =
@@ -307,7 +324,8 @@ private fun SecurityLegend() {
     ) {
         LEGEND_ORDER.forEach { state ->
             Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = {}) { state.Glyph() }
+                // Content, not a control: an IconButton here is focusable and activatable but does nothing.
+                Box(modifier = Modifier.size(48.dp), contentAlignment = Alignment.Center) { state.Glyph() }
                 Column(modifier = Modifier.padding(start = 16.dp)) {
                     Text(text = stringResource(state.title), style = MaterialTheme.typography.titleMedium)
                     Text(text = stringResource(state.helpText), style = MaterialTheme.typography.bodyMedium)
