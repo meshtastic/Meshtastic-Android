@@ -1,6 +1,47 @@
 # iOS 公司簽章設定與驗證 — 2026-09-10
 
-## 最新狀態：兩個 Build 1 均已上傳；送審資料與語言修復進行中
+## 最新狀態：NTsocial Build 1／MeshLink Build 2 已上傳並選入版本
+
+- MeshLink `1.0.0 (2)` 來源 `9c85b42d76a8f2415c18ce614d4dbc28bd6224f0`，約 11:32（台北）
+  經 Xcode Organizer 上傳成功。CLI 的 account lookup 失敗保留為歷史紀錄；GUI 上傳已成功。
+  實際上傳後由 Organizer 匯出的 IPA SHA-256：
+  `18d93da06f1ab4ca877c431892b1bda3478718bf8019e9dc1da9db41a890c720`。
+  `codesign --verify --deep --strict`、公司 Distribution authority、Store profile、原 Bundle ID、
+  唯一 App Group、共享 Keychain 及 `get-task-allow=false` 再驗證通過。
+- Apple 已處理兩個候選 build；主 App Build 1 與 MeshLink Build 2 已選入並儲存於版本頁。
+  MeshLink 出口合規回答已儲存，缺少出口合規資訊提示解除。iOS Gateway 的 HMAC/SHA 用於
+  驗證／完整性，未找到 iOS App 內的資料機密性加解密實作；無線電端 AES 不在 App 內執行。
+  主 App 另含 WebRTC 標準加密程式，Apple 要求法國發行文件；是否先排除法國已詢問使用者，尚未代答。
+- 兩個 App 的三語介紹／副標題已儲存。主 App 類別為社交，Apple 計算分級 13+；
+  MeshLink 類別為工具程式，分級 4+。各地區可能有不同分級。
+- 主 App 隱私草稿已填完七類：訊息、照片／影片、其他使用者內容、使用者識別碼、產品互動、
+  效能資料、其他診斷資料；均為 App 功能用途、與識別碼連結、不追蹤。依據是 iOS Cloud relay、
+  Worker SQL/KV/R2 與已啟用的 observability 設定。MeshLink 保持「不收集資料」草稿。
+  兩款最終發佈法律確認仍待使用者回覆，並未代為確認。
+- 已準備 22 張原生 Simulator 截圖及 SHA-256 清單。含 alpha 的截圖另以原尺寸 JPEG 匯出，
+  未修改畫面內容。Chrome `fileChooser.setFiles` 回傳 `Not allowed`；已依工具指示請使用者開啟
+  ChatGPT 瀏覽器擴充功能的「允許存取檔案網址」。截圖尚未上傳。
+- 實際啟用 `iosSimulatorArm64Test` 的 link/run 後，裸測試執行檔因缺少 `bluetooth-central`
+  Info.plist 中止。將同一 executable 放入具有該模式的獨立測試 App bundle 後，合併執行為
+  27 passed／1 failed：兩次 process-root 建構之間仍有未結束的 DataStore scopes，並有非同步
+  Gateway 目錄清理競態。每個案例以新程序獨立執行則 28／28 通過、無 uncaught exception。
+  這不是合併 native gate 通過，也沒有修改或弱化正式 App 的 Bluetooth restoration。
+- 兩個 App 已保存免費定價，限定 iPhone／iPad，取消未驗證的 Mac／Vision Pro 供應。
+  MeshLink 已設 175 個地區於發佈時供應；主 App 供應地區仍待法國選擇。
+  兩個產品三語隱私網址均已補齊。重新執行 Apple 送審預檢後，MeshLink 只列出
+  iPhone／iPad 截圖、隱私回答發佈與內容版權；主 App 另列出口合規資訊。
+  兩款皆不再列出缺少隱私網址，尚未建立審查提交項目。
+- 免費 App 協議有效（2026-09-03 至 2027-09-04）；未簽署與目前免費定價無關的付費 App 協議。
+  DSA 貿易商分支已展開核對公司既有地址，並準備聯絡資料；分類及公開電話／電子郵件
+  待使用者確認，已取消草稿視窗，未提交驗證或公開。不得將未回覆視為同意。
+  內容版權確認已擴及兩個 App，取代先前僅問主 App 的問題。Mac 鎖定仍阻止原生 UI 操作。
+- 兩個產品仍未送審、未核准、未公開。本次沒有執行實機 Gateway／RF 或 TestFlight 安裝。
+  主 App 地區、兩款內容版權與公司 DSA 欄位仍在處理，不能宣稱 Production ready。
+- 證據根目錄 `.agent_artifacts/ios-company-signing-2026-09-10/`：
+  `release/MeshLink-9c85b42d7-uploaded-export/verified-signing.json`、
+  `native-test-harness/isolated-results/summary.json`、`store-screenshots-upload/manifest.json`。
+
+## 前階段：兩個 Build 1 已上傳與語言修復
 
 - MeshLink `1.0.0 (1)` 從 `83f433b796816b431e5f822e95f2ebb7a5042247` 封存、匯出，
   10:38:03（台北）上傳成功。IPA SHA-256 `8c13d423d1c14fb2c9d6f8f048bc776a64f670dc7f355ae9d6058c2c6552b370`。

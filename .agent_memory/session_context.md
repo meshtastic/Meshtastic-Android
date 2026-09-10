@@ -2260,3 +2260,25 @@ Native/Android/Windows 完整 gate 已通過：2,025 tasks，103 executed、1,92
 - Fresh English and Traditional Chinese first selection verified in dedicated iPhone simulators; persisted English iPhone and Japanese iPad also verified after upgrade. No production device data touched.
 - Full gate passed, 2,025 tasks (99 executed, 1,926 up-to-date), evidence `.agent_artifacts/ios-company-signing-2026-09-10/meshlink-build2-full-gate.log`. Build 2 archive/upload next.
 - NTsocial en-US/zh-Hant/ja version descriptions entered; final store requirements still pending.
+
+
+### 2026-09-10 12:07 — Current App Store candidates and remaining form work
+
+- NTsocial Build 1 (aaeef7e6) and MeshLink Build 2 (9c85b42d7) uploaded, processed by Apple and selected/saved in version 1.0.0. MeshLink Organizer export SHA-256 18d93da06f1ab4ca877c431892b1bda3478718bf8019e9dc1da9db41a890c720; exact Distribution signing/profile/entitlements verified.
+- MeshLink export compliance answer saved and Missing Compliance removed; authentication/integrity HMAC is distinct from radio firmware confidentiality encryption. Parent external WebRTC crypto triggers France documentation; user decision to exclude France or supply paperwork pending.
+- Parent seven privacy types configured, App Functionality, linked, no tracking. Server observability/logs enabled in wrangler.toml, so Performance/Other Diagnostics included. Both final privacy publish attestations awaiting combined user confirmation. Website untouched per user.
+- MeshLink Utilities category, three subtitles, free USD 0.00 equivalent saved. 175 territories set for app release; Mac/Vision availability unchecked for iPhone/iPad scope. Parent Social Networking, three subtitles and Apple-calculated 13+ saved.
+- Native runtime test executable really linked/run. Bare host crashed for absent bluetooth-central Info.plist. App-bundle harness combined run is 27 pass/1 fail due repeated root/DataStore teardown; all 28 pass in fresh individual processes, no uncaught exceptions. Do not call combined native gate green.
+- 22 Simulator screenshots prepared, with original-size JPEG format exports for alpha PNGs, no content edits. No screenshot uploaded: Chrome setFiles returns Not allowed, documented requirement is user enabling Allow access to file URLs in ChatGPT browser extension. Mac also locked for native UI.
+- MeshLink Add for Review attempted to inspect mandatory validation: missing iPhone/iPad screenshots, published App Privacy, content rights and privacy URL (checking remaining localizations). No review submission created.
+- Working Chrome tab 543619558 via fullBrowser.tabs.get; old555 returns Debugger unattached. Original pending Mesh privacy modal remains on531. Parent privacy dialog can be reopened after user reply.
+- No physical install/Gateway/RF/TestFlight run this session; two iPhone15 devices connected. No production historical data restored. No push.
+
+### 2026-09-10 — Final form preflight after localized privacy URLs
+
+- Re-ran Add for Review on both products. MeshLink missing only iPhone/iPad screenshots, published privacy answers and content rights. NTsocial has those plus export compliance. Neither preflight created a review submission; localized privacy URL errors are resolved.
+- Parent free price saved; availability remains unset pending the France decision. MeshLink 175-territory availability is saved for release, not live. Both Mac/Vision availability options remain unchecked.
+- Business shows active Free Apps Agreement (2026-09-03 to 2027-09-04). Paid Apps Agreement is new and was not accepted for these free products.
+- DSA trader branch inspected; registered company address is prefilled/read-only. Public phone and support email were prepared but Next/final verification was not submitted; cancelled draft to continue preflight. Asked user to confirm trader status and public contact details. Existing rights question superseded by a combined question covering both apps.
+- Native Simulator access again reports Mac locked. New combined user action request covers unlocking Mac and enabling Chrome extension Allow access to file URLs; file upload is still blocked, 0 screenshots uploaded.
+- Current working Chrome tab 543619558 is on MeshLink App Information with Content Rights modal open, neither radio selected. Pending combined privacy, combined content rights, France and DSA replies remain unanswered. No obsolete popup/old-account/support approval is required.

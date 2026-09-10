@@ -77,8 +77,8 @@ Use Compose Multiplatform, Navigation 3, and the repository's existing architect
   Compose text locale alone did not control Compose Resources on the pinned version. Simulator evidence
   reproduced persisted English with Chinese UI, then verified English first launch and restored Japanese
   after the fix. Android and Desktop hosts do not use this setter; JVM/Android runtime test targets are no-op.
-  Both products' Build 1 IPAs were uploaded under the company team with the new App Group; MeshLink Build 2
-  is being prepared for this correction. Upload does not establish submission, approval or Gateway RF proof.
+  Company-signed NTsocial Build 1 and corrected MeshLink Build 2 are uploaded and selected in App Store
+  Connect. Both retain the new App Group. Upload does not establish submission, approval or Gateway RF proof.
   Current evidence: [company release status](docs/ios-company-signing-status-2026-09-10.md).
 - **iOS recent fixes:** Restored BLE sessions use verified peripheral ownership, bounded recovery,
   cancellation cleanup, and a lease for unclaimed sessions. Native durable rows carry explicit Gateway
