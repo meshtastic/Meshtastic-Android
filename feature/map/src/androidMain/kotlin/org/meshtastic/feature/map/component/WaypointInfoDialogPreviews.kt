@@ -22,6 +22,10 @@ import org.meshtastic.core.common.util.MeasurementSystem
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.proto.Waypoint
 
+// Sample coordinates for the previews below. Exempt as named arguments until the
+// buildersOnly rewrite turned them into assignments; the previews themselves are
+// covered by MagicNumber's ignoreAnnotated.
+@Suppress("MagicNumber")
 private fun sampleGeofence(lockedTo: Int) = Waypoint.Builder()
     .also { wb ->
         wb.id = 42

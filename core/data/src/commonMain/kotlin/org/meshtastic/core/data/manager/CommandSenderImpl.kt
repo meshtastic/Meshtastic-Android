@@ -278,7 +278,7 @@ class CommandSenderImpl(
                     wb.latitude_i = Position.degI(currentPosition.latitude)
                     wb.longitude_i = Position.degI(currentPosition.longitude)
                     wb.altitude = currentPosition.altitude
-                    wb.time = (nowMillis / 1000L).toInt()
+                    wb.time = (nowMillis / MILLIS_PER_SECOND).toInt()
                 }
                 .build()
         enqueueOrThrow(
@@ -444,7 +444,7 @@ class CommandSenderImpl(
                                                     wb.node_id = 0
                                                     // Dummy node ID that can be intercepted
                                                     wb.snr = 0f
-                                                    wb.last_rx_time = (nowMillis / 1000L).toInt()
+                                                    wb.last_rx_time = (nowMillis / MILLIS_PER_SECOND).toInt()
                                                     wb.node_broadcast_interval_secs = oneHour
                                                 }
                                                 .build(),
