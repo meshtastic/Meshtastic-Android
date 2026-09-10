@@ -2319,3 +2319,16 @@ Native/Android/Windows 完整 gate 已通過：2,025 tasks，103 executed、1,92
 - Both were actual Submit for Review actions followed by submitted confirmation, not only draft additions. No approval/public release yet. release/app-store-submission-result.json retains evidence.
 - User reported prior DSA email/phone verification done, but Business still requires final compliance. Current iab DSA wizard again at email OTP after approved trader/contacts; new code requested. Do not record OTP values.
 - iPhone Mirroring now at Mac password unlock. No phone app clear/install/launch this run. Need finish approved fresh-data physical Gateway/RF tests without historical production/cloud/peer hydration.
+
+
+## 2026-09-10 — User cancelled additional release device tests
+
+- User explicitly states the apps already passed testing and no further isolation or physical Gateway testing is needed. Stop this release task's additional physical tests and remove the device reset/isolation/Mirroring-unlock request from pending work. This supersedes the earlier fresh-test authorization for this submission, without inventing new test evidence.
+- Both existing Apple review submissions remain intact. Remaining work: DSA final verification/compliance save and Apple review/publication status. Do not make further physical tests a blocker or ask for another testing confirmation.
+
+## 2026-09-10 — DSA retry reached phone verification; manual support draft prepared
+
+- Retried the approved company DSA flow in the existing working iab tab. Email verification advanced to the phone step; Apple then showed: `目前無法傳送驗證碼至此電話號碼，請稍後再試。` The error state exposed no manual-verification option, and Business still requires compliance. No email OTP is currently needed. Do not store codes or label the company verified.
+- The country-code selector includes `+886 (台灣)` and the authorized national number is `910058159`. The underlying send failure is unknown; it does not prove Taiwan numbers are unsupported. The user asked about an unattended US number; no replacement number was supplied or saved.
+- Apple's current DSA help explicitly permits requesting manual verification for phone numbers unable to receive codes. Prepared, but did not send, a support request in iab tab 3 under Membership and Account / Agreements and Contracts / Email. It requests manual verification of the existing Taiwan contact, explains the exact error, and identifies both already-submitted apps. Explicit authorization to send the new external support message is pending; no support case ID exists.
+- Current CUA bindings: `dsaPage` / `storeTab` tab 1 Business, `dsaSupportPage` / `dsaSupportTab` tab 3 filled support form, `dsaSupportMessage` exact prepared text. Reuse browser ID 2. The user may interact concurrently; read fresh UI after locator errors rather than blindly retrying.

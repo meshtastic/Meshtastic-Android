@@ -8,11 +8,17 @@
   [Apple 審查記錄](https://appstoreconnect.apple.com/apps/6810478003/distribution/reviewsubmissions/details/cc889031-4818-4d14-b1da-ee65f874f41d)。
 - NTsocial MeshLink `1.0.0 (2)`：提交 ID `9f715b15-67f5-4379-b79c-1eae18d2192c`。
   [Apple 審查記錄](https://appstoreconnect.apple.com/apps/6810479958/distribution/reviewsubmissions/details/9f715b15-67f5-4379-b79c-1eae18d2192c)。
-- 使用者回覆已完成先前電子郵件／電話驗證，但新登入的 Business 頁面仍要求完成公司 DSA。
-  已依既有授權續填貿易商與聯絡資訊；Apple 再次發送電子郵件驗證碼，待完成這次驗證及最終儲存。
-  不把使用者完成其中一步或收到驗證碼等同於公司 DSA 最終核准。
-- 真機 Gateway／RF 測試尚未完成。iPhone Mirroring 要求 Mac 本機登入，未輸入或取得使用者密碼；
-  兩支裝置仍可由 CoreDevice 讀取，iOS 26.6.1，Developer Mode enabled。尚未清除、安裝或啟動真機 App。
+- 已依使用者要求重新進行公司 DSA 驗證，畫面已由電子郵件驗證進入「驗證電話號碼」。
+  Apple 隨即顯示「目前無法傳送驗證碼至此電話號碼，請稍後再試。」；關閉錯誤後只有
+  一般錯誤及「完成」按鈕，Business 仍要求完成合規。此次已確認阻礙是電話驗證碼發送失敗，
+  不再索取電子郵件驗證碼，亦未取得公司 DSA 最終完成證據。
+- 表單提供 `+886 (台灣)`，填入既有電話 `910058159`；錯誤沒有說明原因，不能據此宣稱台灣
+  不受支援。[Apple 官方說明](https://developer.apple.com/help/app-store-connect/manage-compliance-information/manage-european-union-digital-services-act-trader-requirements/)
+  允許無法接收驗證碼的電話申請人工驗證。本次錯誤画面沒有顯示該入口，因此已填妥 Apple
+  Developer Support 的人工驗證申請草稿，等待明確對外發送授權；尚未送出、尚無 case ID。
+- 使用者明確表示程式已通過既有測試，要求本次上架不再追加隔離或真機 Gateway／RF 測試。
+  此指示取代本次送審工作的追加測試安排與測試機準備要求；剩餘工作僅為 DSA 收尾及 Apple 審查／公開狀態。
+  本次未清除、安裝或啟動真機 App，亦未新增真機測試通過證據；不將這项紀錄列為待辦或上架阻礙。
 - Apple 尚未核准，兩款尚未公開；自動核准後發佈選項已保留。
   機器可讀證據：`release/app-store-submission-result.json`。下方未送審段落為前階段歷史紀錄。
 
