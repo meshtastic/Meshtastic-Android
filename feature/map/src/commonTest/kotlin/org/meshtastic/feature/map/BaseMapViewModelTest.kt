@@ -17,8 +17,10 @@
 package org.meshtastic.feature.map
 
 import app.cash.turbine.test
+import dev.mokkery.answering.calls
 import dev.mokkery.answering.returns
 import dev.mokkery.every
+import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -34,6 +36,7 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
 import org.meshtastic.core.network.repository.NetworkRepository
+import org.meshtastic.core.repository.MapFilterPrefs
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.testing.FakeLocaleUnitsProvider
@@ -42,6 +45,7 @@ import org.meshtastic.core.testing.FakeNotificationPrefs
 import org.meshtastic.core.testing.FakeRadioConfigRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.testing.TestDataFactory
+import org.meshtastic.proto.Config
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.Waypoint
 import kotlin.test.AfterTest
@@ -60,7 +64,7 @@ class BaseMapViewModelTest {
     private lateinit var radioConfigRepository: FakeRadioConfigRepository
     private lateinit var waypointPacketsFlow: MutableStateFlow<List<DataPacket>>
     private val mapPrefs: MapPrefs = mock()
-    private val showIgnored = MutableStateFlow(false)
+    private val storedFilters = MutableStateFlow(MapFilterPrefs())
     private val packetRepository: PacketRepository = mock()
     private val localeUnitsProvider = FakeLocaleUnitsProvider()
     private val networkRepository: NetworkRepository = mock()
@@ -73,17 +77,12 @@ class BaseMapViewModelTest {
         radioConfigRepository = FakeRadioConfigRepository()
         radioController.setConnectionState(ConnectionState.Disconnected)
 
-        every { mapPrefs.showOnlyFavorites } returns MutableStateFlow(false)
-        every { mapPrefs.showWaypointsOnMap } returns MutableStateFlow(false)
-        every { mapPrefs.showPrecisionCircleOnMap } returns MutableStateFlow(false)
-        every { mapPrefs.lastHeardFilter } returns MutableStateFlow(0L)
-        every { mapPrefs.lastHeardTrackFilter } returns MutableStateFlow(0L)
-        every { mapPrefs.onlyOnlineOnMap } returns MutableStateFlow(false)
-        every { mapPrefs.onlyDirectOnMap } returns MutableStateFlow(false)
-        every { mapPrefs.excludeMqttOnMap } returns MutableStateFlow(false)
-        every { mapPrefs.showIgnoredOnMap } returns showIgnored
-        every { mapPrefs.includeUnknownOnMap } returns MutableStateFlow(true)
-        every { mapPrefs.excludedMapRoles } returns MutableStateFlow(emptySet())
+        storedFilters.value = MapFilterPrefs(showWaypoints = false, showPrecisionCircle = false)
+        every { mapPrefs.mapFilters } returns storedFilters
+        every { mapPrefs.updateMapFilters(any()) } calls
+            { (transform: (MapFilterPrefs) -> MapFilterPrefs) ->
+                storedFilters.value = transform(storedFilters.value)
+            }
 
         waypointPacketsFlow = MutableStateFlow(emptyList())
         every { packetRepository.getWaypoints() } returns waypointPacketsFlow
@@ -158,7 +157,7 @@ class BaseMapViewModelTest {
         // Set on the prefs flow, after the view model was built: that is the DataStore-arrives-late case, which
         // used to be lost because the view model snapshotted `.value` into a mirror nothing updated.
         nodeRepository.setNodes(listOf(positioned(1), positioned(2, isIgnored = true)))
-        showIgnored.value = true
+        storedFilters.value = storedFilters.value.copy(showIgnored = true)
 
         viewModel.nodesWithPosition.test {
             assertEquals(listOf(1, 2), awaitItem().map { it.num }.sorted())
@@ -261,6 +260,21 @@ class BaseMapViewModelTest {
             )
             cancelAndIgnoreRemainingEvents()
         }
+    }
+
+    @Test
+    fun `toggling a role keeps role names this build does not know`() {
+        // decodeExcludedRoles drops names the current protobufs do not define, so decoding and re-encoding on every
+        // toggle would silently discard a role a newer build excluded.
+        storedFilters.value = storedFilters.value.copy(excludedRoles = setOf("ROLE_FROM_A_NEWER_BUILD"))
+
+        viewModel.toggleRoleExcluded(Config.DeviceConfig.Role.ROUTER)
+
+        assertEquals(setOf("ROLE_FROM_A_NEWER_BUILD", "ROUTER"), storedFilters.value.excludedRoles)
+
+        viewModel.toggleRoleExcluded(Config.DeviceConfig.Role.ROUTER)
+
+        assertEquals(setOf("ROLE_FROM_A_NEWER_BUILD"), storedFilters.value.excludedRoles)
     }
 
     private fun waypointPacket(id: Int, expire: Int): DataPacket = DataPacket(

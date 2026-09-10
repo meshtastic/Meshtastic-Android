@@ -105,34 +105,16 @@ interface UiPrefs {
 
     fun setNodeSort(value: Int)
 
-    val includeUnknown: StateFlow<Boolean>
+    /**
+     * Every node-list filter, as one value.
+     *
+     * One flow rather than one per toggle: the store already holds them together, and splitting them apart only to
+     * recombine them downstream costs a `combine` argument per filter — a cap the typed overloads hit at five.
+     */
+    val nodeFilters: StateFlow<NodeFilterPrefs>
 
-    fun setIncludeUnknown(value: Boolean)
-
-    val excludeInfrastructure: StateFlow<Boolean>
-
-    fun setExcludeInfrastructure(value: Boolean)
-
-    val onlyOnline: StateFlow<Boolean>
-
-    fun setOnlyOnline(value: Boolean)
-
-    val onlyDirect: StateFlow<Boolean>
-
-    fun setOnlyDirect(value: Boolean)
-
-    val showIgnored: StateFlow<Boolean>
-
-    fun setShowIgnored(value: Boolean)
-
-    val excludeMqtt: StateFlow<Boolean>
-
-    /** Hide nodes not heard since the radio's current LoRa config took effect. */
-    val excludeUnheard: StateFlow<Boolean>
-
-    fun setExcludeMqtt(value: Boolean)
-
-    fun setExcludeUnheard(value: Boolean)
+    /** Applies [transform] to the stored filters. Read-modify-write happens inside the store's own transaction. */
+    fun updateNodeFilters(transform: (NodeFilterPrefs) -> NodeFilterPrefs)
 
     val hasShownNotPairedWarning: StateFlow<Boolean>
 
@@ -280,60 +262,14 @@ interface MapPrefs {
      */
     suspend fun awaitMapStyle(): Int
 
-    val showOnlyFavorites: StateFlow<Boolean>
-
-    fun setShowOnlyFavorites(show: Boolean)
-
-    val showWaypointsOnMap: StateFlow<Boolean>
-
-    fun setShowWaypointsOnMap(show: Boolean)
-
-    val showPrecisionCircleOnMap: StateFlow<Boolean>
-
-    fun setShowPrecisionCircleOnMap(show: Boolean)
-
-    val lastHeardFilter: StateFlow<Long>
-
-    fun setLastHeardFilter(seconds: Long)
-
-    val lastHeardTrackFilter: StateFlow<Long>
-
-    fun setLastHeardTrackFilter(seconds: Long)
-
     /**
-     * Node filters shared with the node list's vocabulary, persisted separately: a user filtering the map to routers
-     * has not asked for the same of their contact list.
+     * Every map filter, as one value — the same shape, and for the same reason, as [UiPrefs.nodeFilters]. The map keeps
+     * its own copy of the node-list vocabulary: filtering the map to routers is not a statement about the contact list.
      */
-    val onlyOnlineOnMap: StateFlow<Boolean>
+    val mapFilters: StateFlow<MapFilterPrefs>
 
-    fun setOnlyOnlineOnMap(only: Boolean)
-
-    val onlyDirectOnMap: StateFlow<Boolean>
-
-    fun setOnlyDirectOnMap(only: Boolean)
-
-    val excludeMqttOnMap: StateFlow<Boolean>
-
-    fun setExcludeMqttOnMap(exclude: Boolean)
-
-    val showIgnoredOnMap: StateFlow<Boolean>
-
-    fun setShowIgnoredOnMap(show: Boolean)
-
-    val includeUnknownOnMap: StateFlow<Boolean>
-
-    fun setIncludeUnknownOnMap(include: Boolean)
-
-    /**
-     * Names of the device roles the user has switched off on the map.
-     *
-     * Excluded rather than included, and by name rather than ordinal: an included set would make nodes reporting a role
-     * added by future firmware invisible with no way to discover why, and `ROUTER_CLIENT = 3` is already a deprecated
-     * slot.
-     */
-    val excludedMapRoles: StateFlow<Set<String>>
-
-    fun setExcludedMapRoles(roles: Set<String>)
+    /** Applies [transform] to the stored filters. Read-modify-write happens inside the store's own transaction. */
+    fun updateMapFilters(transform: (MapFilterPrefs) -> MapFilterPrefs)
 
     /** URIs of imported map layers the user has toggled off; a layer is visible unless its URI is in this set. */
     val hiddenLayerUrls: StateFlow<Set<String>>

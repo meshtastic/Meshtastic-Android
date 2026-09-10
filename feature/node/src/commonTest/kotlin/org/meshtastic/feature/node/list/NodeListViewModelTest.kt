@@ -31,6 +31,7 @@ import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeSortOption
 import org.meshtastic.core.repository.ConnectionStateProvider
+import org.meshtastic.core.repository.NodeFilterPrefs
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.testing.FakeDeviceHardwareRepository
@@ -73,13 +74,7 @@ class NodeListViewModelTest {
         every { connectionStateProvider.connectionState } returns MutableStateFlow(ConnectionState.Disconnected)
 
         every { nodeFilterPreferences.nodeSortOption } returns MutableStateFlow(NodeSortOption.LAST_HEARD)
-        every { nodeFilterPreferences.includeUnknown } returns MutableStateFlow(true)
-        every { nodeFilterPreferences.excludeInfrastructure } returns MutableStateFlow(false)
-        every { nodeFilterPreferences.onlyOnline } returns MutableStateFlow(false)
-        every { nodeFilterPreferences.onlyDirect } returns MutableStateFlow(false)
-        every { nodeFilterPreferences.showIgnored } returns MutableStateFlow(false)
-        every { nodeFilterPreferences.excludeMqtt } returns MutableStateFlow(false)
-        every { nodeFilterPreferences.excludeUnheard } returns MutableStateFlow(false)
+        every { nodeFilterPreferences.filters } returns MutableStateFlow(NodeFilterPrefs())
         every { nodeManager.reportsHeardOnCurrentLora } returns MutableStateFlow(true)
         every { nodeManager.isNodeDbReady } returns MutableStateFlow(true)
 

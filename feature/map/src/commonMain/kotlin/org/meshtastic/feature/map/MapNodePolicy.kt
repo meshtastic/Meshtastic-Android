@@ -79,14 +79,25 @@ object MapNodePolicy {
      */
     private fun Node.passesFilters(filterState: BaseMapViewModel.MapFilterState, nowSeconds: Long): Boolean {
         val secondsSinceHeard = nowSeconds - lastHeard
-        val cutoff = filterState.lastHeardFilter.seconds
-        return (!filterState.onlyFavorites || isFavorite) &&
+        return passesIdentityFilters(filterState) && passesReachabilityFilters(filterState, secondsSinceHeard)
+    }
+
+    /** Who the node is: favourited, ignored, its role, and whether its name has arrived yet. */
+    private fun Node.passesIdentityFilters(filterState: BaseMapViewModel.MapFilterState): Boolean =
+        (!filterState.onlyFavorites || isFavorite) &&
             (!isIgnored || filterState.showIgnored) &&
             user.role !in filterState.excludedRoles &&
-            (!filterState.onlyOnline || secondsSinceHeard <= ONLINE_WINDOW_SECONDS) &&
+            (filterState.includeUnknown || user.short_name.isNotEmpty())
+
+    /** How the node is reachable: online, hop count, bearer, and how recently it was heard. */
+    private fun Node.passesReachabilityFilters(
+        filterState: BaseMapViewModel.MapFilterState,
+        secondsSinceHeard: Long,
+    ): Boolean {
+        val cutoff = filterState.lastHeardFilter.seconds
+        return (!filterState.onlyOnline || secondsSinceHeard <= ONLINE_WINDOW_SECONDS) &&
             (!filterState.onlyDirect || hopsAway == 0) &&
             (!filterState.excludeMqtt || !viaMqtt) &&
-            (filterState.includeUnknown || user.short_name.isNotEmpty()) &&
             (cutoff == LastHeardFilter.Any.seconds || secondsSinceHeard <= cutoff)
     }
 }
