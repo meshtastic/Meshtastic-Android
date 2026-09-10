@@ -29,10 +29,9 @@ class KoinConventionPlugin : Plugin<Project> {
 
             // Configure Koin K2 Compiler Plugin (1.1.0+)
             extensions.configure(KoinGradleExtension::class.java) {
-                // Missing definitions and qualifier mismatches fail the build. :desktopApp is
-                // excluded until its DSL graph moves to @Module: the assembled graph does not reach
-                // DSL definitions, so every cross-module call site there lands as a false KOIN-D003.
-                compileSafety.set(path != ":desktopApp")
+                // Missing definitions and qualifier mismatches fail the build. Every module's graph
+                // is declared with @Module, which is what the assembled index can see.
+                compileSafety.set(true)
             }
 
             val koinAnnotations = libs.findLibrary("koin-annotations").get()
