@@ -533,6 +533,9 @@ doc_keywords_telemetry
 doc_keywords_translate
 doc_keywords_units
 doc_keywords_widget
+doc_loading
+doc_no_documentation
+doc_no_results
 doc_search_placeholder
 doc_section_developer
 doc_section_user
@@ -1713,6 +1716,7 @@ set_your_region
 settings
 ### SHARE ###
 share
+share_by_tap_subtext
 share_channels_qr
 share_connected_node
 share_contact

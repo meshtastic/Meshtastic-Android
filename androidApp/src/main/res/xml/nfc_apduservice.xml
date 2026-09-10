@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (c) 2025 Meshtastic LLC
+  ~ Copyright (c) 2026 Meshtastic LLC
   ~
   ~ This program is free software: you can redistribute it and/or modify
   ~ it under the terms of the GNU General Public License as published by
@@ -15,8 +15,14 @@
   ~ You should have received a copy of the GNU General Public License
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
-<resources>
-    <string name="app_name">Meshtastic</string>
-    <string name="app_description">Off-grid mesh networking for secure, long-range communications via LoRa radio.</string>
-    <string name="nfc_tag_emulation_service">Meshtastic contact and channel sharing</string>
-</resources>
+<host-apdu-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/nfc_tag_emulation_service"
+    android:requireDeviceUnlock="true">
+
+    <!-- The NFC Forum NDEF Tag Application. Readers select this AID to read any Type 4 tag. -->
+    <aid-group
+        android:category="other"
+        android:description="@string/nfc_tag_emulation_service">
+        <aid-filter android:name="D2760000850101" />
+    </aid-group>
+</host-apdu-service>

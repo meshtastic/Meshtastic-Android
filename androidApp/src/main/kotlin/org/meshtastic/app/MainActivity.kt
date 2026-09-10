@@ -19,6 +19,7 @@ package org.meshtastic.app
 import android.app.PendingIntent
 import android.app.TaskStackBuilder
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.hardware.usb.UsbManager
 import android.net.Uri
@@ -59,6 +60,7 @@ import org.meshtastic.app.ui.MainScreen
 import org.meshtastic.core.barcode.rememberBarcodeScanner
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.network.repository.UsbRepository
+import org.meshtastic.core.nfc.NfcEmulatorEffect
 import org.meshtastic.core.nfc.NfcScannerEffect
 import org.meshtastic.core.nfc.NfcWriterEffect
 import org.meshtastic.core.resources.Res
@@ -81,6 +83,8 @@ import org.meshtastic.core.ui.util.LocalEventBranding
 import org.meshtastic.core.ui.util.LocalInlineMapProvider
 import org.meshtastic.core.ui.util.LocalMapMainScreenProvider
 import org.meshtastic.core.ui.util.LocalMapViewProvider
+import org.meshtastic.core.ui.util.LocalNfcEmulationSupported
+import org.meshtastic.core.ui.util.LocalNfcEmulatorProvider
 import org.meshtastic.core.ui.util.LocalNfcScannerProvider
 import org.meshtastic.core.ui.util.LocalNfcScannerSupported
 import org.meshtastic.core.ui.util.LocalNfcWriterProvider
@@ -224,6 +228,9 @@ class MainActivity : AppCompatActivity() {
             LocalNfcWriterProvider provides { url, onResult, onDisabled -> NfcWriterEffect(url, onResult, onDisabled) },
             LocalBarcodeScannerSupported provides true,
             LocalNfcScannerSupported provides true,
+            LocalNfcEmulatorProvider provides { url -> NfcEmulatorEffect(url) },
+            LocalNfcEmulationSupported provides
+                packageManager.hasSystemFeature(PackageManager.FEATURE_NFC_HOST_CARD_EMULATION),
             LocalAnalyticsIntroProvider provides { AnalyticsIntro() },
             LocalMapViewProvider provides getMapViewProvider(),
             LocalSitePlannerAvailable provides true,
