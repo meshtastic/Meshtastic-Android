@@ -199,7 +199,7 @@ class AndroidNotificationManagerTest {
     @Test
     fun `client notification identity cancels the notification posted with that identity`() = runTest {
         val manager = AndroidNotificationManager(context)
-        val clientNotification = ClientNotification(message = "Protected position advisory", reply_id = 123)
+        val clientNotification = ClientNotification.Builder().also { wb ->wb.message = "Protected position advisory"; wb.reply_id = 123}.build()
         val id = clientNotification.notificationId()
 
         manager.dispatch(
@@ -233,11 +233,11 @@ class AndroidNotificationManagerTest {
                 advisory.copy(level = LogRecord.Level.INFO),
                 advisory.copy(reply_id = 0),
                 advisory.copy(reply_id = null),
-                advisory.copy(key_verification_number_inform = KeyVerificationNumberInform()),
-                advisory.copy(key_verification_number_request = KeyVerificationNumberRequest()),
-                advisory.copy(key_verification_final = KeyVerificationFinal()),
-                advisory.copy(duplicated_public_key = DuplicatedPublicKey()),
-                advisory.copy(low_entropy_key = LowEntropyKey()),
+                advisory.copy(key_verification_number_inform = KeyVerificationNumberInform.Builder().build()),
+                advisory.copy(key_verification_number_request = KeyVerificationNumberRequest.Builder().build()),
+                advisory.copy(key_verification_final = KeyVerificationFinal.Builder().build()),
+                advisory.copy(duplicated_public_key = DuplicatedPublicKey.Builder().build()),
+                advisory.copy(low_entropy_key = LowEntropyKey.Builder().build()),
                 advisory.copy(message = "Rebooting to WiFi OTA"),
             )
 
@@ -275,8 +275,8 @@ class AndroidNotificationManagerTest {
         val manager = AndroidNotificationManager(context)
         // A near-miss of the protected-position predicate (message differs slightly), so it takes the plain
         // dispatch path — but reply_id/time still change on every firmware reply, exactly like the real advisory.
-        val first = ClientNotification(message = "Location sharing is disabled", reply_id = 100, time = 1_000)
-        val second = ClientNotification(message = "Location sharing is disabled", reply_id = 200, time = 2_000)
+        val first = ClientNotification.Builder().also { wb ->wb.message = "Location sharing is disabled"; wb.reply_id = 100; wb.time = 1_000}.build()
+        val second = ClientNotification.Builder().also { wb ->wb.message = "Location sharing is disabled"; wb.reply_id = 200; wb.time = 2_000}.build()
 
         listOf(first, second).forEach { cn ->
             manager.dispatchClientNotification(
@@ -296,7 +296,7 @@ class AndroidNotificationManagerTest {
     @Test
     fun `generic client notification does not enable only-alert-once`() = runTest {
         val manager = AndroidNotificationManager(context)
-        val clientNotification = ClientNotification(message = "Generic warning", reply_id = 123)
+        val clientNotification = ClientNotification.Builder().also { wb ->wb.message = "Generic warning"; wb.reply_id = 123}.build()
 
         manager.dispatchClientNotification(
             Notification(
@@ -365,10 +365,10 @@ class AndroidNotificationManagerTest {
         channelIds.forEach { channelId -> systemNotificationManager.deleteNotificationChannel(channelId) }
     }
 
-    private fun protectedPositionAdvisory(replyId: Int, time: Int) = ClientNotification(
-        message = "Location sharing is disabled on this channel",
-        reply_id = replyId,
-        time = time,
-        level = LogRecord.Level.WARNING,
-    )
+    private fun protectedPositionAdvisory(replyId: Int, time: Int) = ClientNotification.Builder().also { wb ->
+    wb.message = "Location sharing is disabled on this channel"
+    wb.reply_id = replyId
+    wb.time = time
+    wb.level = LogRecord.Level.WARNING
+    }.build()
 }

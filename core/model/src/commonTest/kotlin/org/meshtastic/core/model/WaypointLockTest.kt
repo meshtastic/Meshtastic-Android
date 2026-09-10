@@ -28,17 +28,17 @@ class WaypointLockTest {
 
     @Test
     fun unlockedWaypointIsNotLocked() {
-        assertFalse(Waypoint(id = 1, locked_to = 0).isLocked)
+        assertFalse(Waypoint.Builder().also { wb ->wb.id = 1; wb.locked_to = 0}.build().isLocked)
     }
 
     @Test
     fun lockedWaypointIsLocked() {
-        assertTrue(Waypoint(id = 1, locked_to = myNodeNum).isLocked)
+        assertTrue(Waypoint.Builder().also { wb ->wb.id = 1; wb.locked_to = myNodeNum}.build().isLocked)
     }
 
     @Test
     fun unlockedWaypointIsModifiableByAnyone() {
-        val wp = Waypoint(id = 1, locked_to = 0)
+        val wp = Waypoint.Builder().also { wb ->wb.id = 1; wb.locked_to = 0}.build()
         assertTrue(wp.isModifiableBy(myNodeNum))
         assertTrue(wp.isModifiableBy(otherNodeNum))
         // Editable by anyone includes the "identity unknown" case.
@@ -47,7 +47,7 @@ class WaypointLockTest {
 
     @Test
     fun lockedWaypointIsModifiableOnlyByOwner() {
-        val wp = Waypoint(id = 1, locked_to = myNodeNum)
+        val wp = Waypoint.Builder().also { wb ->wb.id = 1; wb.locked_to = myNodeNum}.build()
         assertTrue(wp.isModifiableBy(myNodeNum))
         assertFalse(wp.isModifiableBy(otherNodeNum))
         assertFalse(wp.isModifiableBy(null))
@@ -60,7 +60,7 @@ class WaypointLockTest {
      */
     @Test
     fun placeholderLockShutsOutTheCreatorButRealOwnerLockDoesNot() {
-        assertFalse(Waypoint(id = 1, locked_to = 1).isModifiableBy(myNodeNum))
-        assertTrue(Waypoint(id = 1, locked_to = myNodeNum).isModifiableBy(myNodeNum))
+        assertFalse(Waypoint.Builder().also { wb ->wb.id = 1; wb.locked_to = 1}.build().isModifiableBy(myNodeNum))
+        assertTrue(Waypoint.Builder().also { wb ->wb.id = 1; wb.locked_to = myNodeNum}.build().isModifiableBy(myNodeNum))
     }
 }

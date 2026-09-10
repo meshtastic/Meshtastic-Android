@@ -85,16 +85,15 @@ fun getChannelReplacementList(
     if (endIndex < 0) return@buildList
     for (index in 0..endIndex) {
         add(
-            Channel(
-                role =
-                when (index) {
-                    0 -> if (new.isEmpty()) Channel.Role.DISABLED else Channel.Role.PRIMARY
-                    in 1..new.lastIndex -> Channel.Role.SECONDARY
-                    else -> Channel.Role.DISABLED
-                },
-                index = index,
-                settings = new.getOrNull(index) ?: ChannelSettings(),
-            ),
+            Channel.Builder().also { wb ->
+            wb.role = when (index) {
+                                0 -> if (new.isEmpty()) Channel.Role.DISABLED else Channel.Role.PRIMARY
+                                in 1..new.lastIndex -> Channel.Role.SECONDARY
+                                else -> Channel.Role.DISABLED
+                            }
+            wb.index = index
+            wb.settings = new.getOrNull(index) ?: ChannelSettings.Builder().build()
+            }.build(),
         )
     }
 }
@@ -110,7 +109,7 @@ fun normalizeReplacementSettings(
     loraConfig: Config.LoRaConfig?,
 ): List<ChannelSettings> {
     if (settings.size <= 1) return settings
-    val effectiveLora = loraConfig ?: Config.LoRaConfig()
+    val effectiveLora = loraConfig ?: Config.LoRaConfig.Builder().build()
     val primary = settings.first()
     val seen = mutableSetOf<ChannelIdentity>()
     if (!primary.isChannelPlaceholder()) {

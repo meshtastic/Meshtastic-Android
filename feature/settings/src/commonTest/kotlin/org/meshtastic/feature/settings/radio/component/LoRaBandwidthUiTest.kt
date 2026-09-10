@@ -43,7 +43,7 @@ class LoRaBandwidthUiTest {
     @Test
     fun invalidPersistedValues_explainWhyAndCannotSendUntilReplaced() = runComposeUiTest {
         val initialConfig =
-            Config.LoRaConfig(use_preset = false, region = RegionCode.LORA_24, bandwidth = 125, hop_limit = 1)
+            Config.LoRaConfig.Builder().also { wb ->wb.use_preset = false; wb.region = RegionCode.LORA_24; wb.bandwidth = 125; wb.hop_limit = 1}.build()
         lateinit var configState: ConfigState<Config.LoRaConfig>
         var savedConfig: Config.LoRaConfig? = null
 
@@ -80,14 +80,14 @@ class LoRaBandwidthUiTest {
             }
         }
 
-        runOnIdle { configState.value = configState.value.copy(hop_limit = 2) }
+        runOnIdle { configState.value = configState.value.newBuilder().also { wb -> wb.hop_limit = 2 }.build() }
 
         onNodeWithText("Unsupported (125 kHz)").assertIsDisplayed()
         onNodeWithText(getString(Res.string.bandwidth_unsupported_summary)).assertIsDisplayed()
         onNodeWithText(getString(Res.string.save_changes)).assertIsNotEnabled().performClick()
         runOnIdle { assertNull(savedConfig) }
 
-        runOnIdle { configState.value = configState.value.copy(bandwidth = 0) }
+        runOnIdle { configState.value = configState.value.newBuilder().also { wb -> wb.bandwidth = 0 }.build() }
         onNodeWithText("Default (812.5 kHz)").assertIsDisplayed()
         onNodeWithText(getString(Res.string.save_changes)).assertIsEnabled().performClick()
 

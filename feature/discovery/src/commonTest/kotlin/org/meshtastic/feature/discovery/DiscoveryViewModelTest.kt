@@ -38,21 +38,27 @@ import kotlin.test.assertTrue
  */
 class DiscoveryViewModelTest {
 
-    private val radioLora = LoRaConfig(use_preset = true, modem_preset = ModemPreset.LONG_FAST)
+    private val radioLora =
+        LoRaConfig.Builder()
+            .also { wb ->
+                wb.use_preset = true
+                wb.modem_preset = ModemPreset.LONG_FAST
+            }
+            .build()
     private val partyNetOffer =
         MeshBeaconOffer(
             fromNodeNum = 456,
             beacon =
-            MeshBeacon(
-                message = "Join us",
-                offer_channel = ChannelSettings(name = "PartyNet"),
-                offer_preset = ModemPreset.LONG_FAST,
-            ),
+            MeshBeacon.Builder().also { wb ->
+            wb.message = "Join us"
+            wb.offer_channel = ChannelSettings.Builder().also { wb ->wb.name = "PartyNet"}.build()
+            wb.offer_preset = ModemPreset.LONG_FAST
+            }.build(),
         )
 
     @Test
     fun `offer for an unconfigured channel passes through both filters`() {
-        val channels = listOf(ChannelSettings(name = "HomeMesh"))
+        val channels = listOf(ChannelSettings.Builder().also { wb ->wb.name = "HomeMesh"}.build())
 
         val offers = filterAlreadyJoinedOffers(listOf(partyNetOffer), radioLora, channels)
         val beaconChannels = filterAlreadyJoinedBeaconChannels(listOf(partyNetOffer), radioLora, channels)
@@ -63,7 +69,7 @@ class DiscoveryViewModelTest {
 
     @Test
     fun `offer matching a configured channel is dropped from both filters`() {
-        val channels = listOf(ChannelSettings(name = "PartyNet"))
+        val channels = listOf(ChannelSettings.Builder().also { wb ->wb.name = "PartyNet"}.build())
 
         val offers = filterAlreadyJoinedOffers(listOf(partyNetOffer), radioLora, channels)
         val beaconChannels = filterAlreadyJoinedBeaconChannels(listOf(partyNetOffer), radioLora, channels)
@@ -76,7 +82,11 @@ class DiscoveryViewModelTest {
     fun `filtering never mutates the offers list it is given`() {
         // The repository itself must never be touched by presentation-time filtering (spec: reactive, not destructive).
         val original = listOf(partyNetOffer)
-        filterAlreadyJoinedOffers(original, LoRaConfig(use_preset = true), listOf(ChannelSettings(name = "PartyNet")))
+        filterAlreadyJoinedOffers(
+            original,
+            LoRaConfig.Builder().also { wb -> wb.use_preset = true }.build(),
+            listOf(ChannelSettings.Builder().also { wb -> wb.name = "PartyNet" }.build()),
+        )
         assertEquals(1, original.size)
     }
 
@@ -87,7 +97,7 @@ class DiscoveryViewModelTest {
             filterAlreadyJoinedBeaconChannels(
                 listOf(partyNetOffer, duplicate),
                 radioLora,
-                listOf(ChannelSettings(name = "HomeMesh")),
+                listOf(ChannelSettings.Builder().also { wb ->wb.name = "HomeMesh"}.build()),
             )
         assertEquals(1, beaconChannels.size)
     }
@@ -98,7 +108,7 @@ class DiscoveryViewModelTest {
         // reactive at presentation time, not a one-shot decision baked in when the offer arrived.
         val offersFlow = MutableStateFlow(listOf(partyNetOffer))
         val loraFlow = MutableStateFlow<LoRaConfig?>(radioLora)
-        val channelsFlow = MutableStateFlow(listOf(ChannelSettings(name = "PartyNet")))
+        val channelsFlow = MutableStateFlow(listOf(ChannelSettings.Builder().also { wb ->wb.name = "PartyNet"}.build()))
 
         val results = mutableListOf<List<MeshBeaconOffer>>()
         val job = launch {
@@ -115,7 +125,7 @@ class DiscoveryViewModelTest {
         assertEquals(listOf(partyNetOffer), results.last())
 
         // The user re-adds an unrelated channel; still not a match, offer stays visible.
-        channelsFlow.value = listOf(ChannelSettings(name = "HomeMesh"))
+        channelsFlow.value = listOf(ChannelSettings.Builder().also { wb ->wb.name = "HomeMesh"}.build())
         runCurrent()
         assertEquals(listOf(partyNetOffer), results.last())
 

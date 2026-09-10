@@ -30,7 +30,7 @@ import org.meshtastic.proto.Config
 class ChannelTest {
     @Test
     fun channelUrlGood() {
-        val ch = ChannelSet(settings = listOf(Channel.default.settings), lora_config = Channel.default.loraConfig)
+        val ch = ChannelSet.Builder().also { wb ->wb.settings = listOf(Channel.default.settings); wb.lora_config = Channel.default.loraConfig}.build()
         val channelUrl = ch.getChannelUrl()
 
         Assert.assertTrue(channelUrl.toString().startsWith(CHANNEL_URL_PREFIX))

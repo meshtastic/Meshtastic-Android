@@ -374,7 +374,7 @@ class RadioControllerImplTest {
     fun connectionStateAndClientNotificationDelegateToServiceRepository() = runTest {
         val serviceRepository = ServiceRepositoryImpl()
         val controller = createController(scope = backgroundScope, serviceRepository = serviceRepository)
-        val notification = ClientNotification()
+        val notification = ClientNotification.Builder().build()
 
         assertSame(serviceRepository.connectionState, controller.connectionState)
         assertSame(serviceRepository.clientNotification, controller.clientNotification)
@@ -417,7 +417,7 @@ class RadioControllerImplTest {
     @Test
     fun localChannelDoesNotPersistWhenQueueRejects() = runTest {
         val controller = createController(scope = backgroundScope, myNodeNum = 456)
-        val channel = Channel(index = 0, role = Channel.Role.PRIMARY, settings = ChannelSettings(name = "Primary"))
+        val channel = Channel.Builder().also { wb ->wb.index = 0; wb.role = Channel.Role.PRIMARY; wb.settings = ChannelSettings.Builder().also { wb ->wb.name = "Primary"}.build()}.build()
         val rejection = PacketQueueRejectedException("Admin command")
         everySuspend { commandSender.sendAdmin(any(), any(), any(), any()) } throws rejection
 
@@ -445,12 +445,12 @@ class RadioControllerImplTest {
         val controller = createController(scope = backgroundScope)
         val nodeNum = 321
         val user =
-            User(
-                id = NodeAddress.numToDefaultId(nodeNum),
-                long_name = "Remote Node",
-                short_name = "RN",
-                public_key = TEST_PUBLIC_KEY,
-            )
+            User.Builder().also { wb ->
+            wb.id = NodeAddress.numToDefaultId(nodeNum)
+            wb.long_name = "Remote Node"
+            wb.short_name = "RN"
+            wb.public_key = TEST_PUBLIC_KEY
+            }.build()
         val node = Node(num = nodeNum, user = user, manuallyVerified = true)
         every { nodeRepository.getNode(NodeAddress.numToDefaultId(nodeNum)) } returns node
         everySuspend { commandSender.sendAdminAwait(any(), any(), any(), any()) } returns true
@@ -674,7 +674,7 @@ class RadioControllerImplTest {
     @Test
     fun sendReactionPersistsToDatabase() = runTest {
         val controller = createController(scope = backgroundScope)
-        val user = User(id = "!abcd1234", long_name = "Test", short_name = "T")
+        val user = User.Builder().also { wb ->wb.id = "!abcd1234"; wb.long_name = "Test"; wb.short_name = "T"}.build()
         val node = Node(num = 1234, user = user)
         every { nodeManager.nodeDBbyNodeNum } returns mapOf(1234 to node)
         every { nodeManager.getMyId() } returns "!abcd1234"
@@ -700,7 +700,7 @@ class RadioControllerImplTest {
     @Test
     fun sendReactionDoesNotPersistWhenQueueRejects() = runTest {
         val controller = createController(scope = backgroundScope)
-        val user = User(id = "!abcd1234", long_name = "Test", short_name = "T")
+        val user = User.Builder().also { wb ->wb.id = "!abcd1234"; wb.long_name = "Test"; wb.short_name = "T"}.build()
         every { nodeManager.nodeDBbyNodeNum } returns mapOf(1234 to Node(num = 1234, user = user))
         every { nodeManager.getMyId() } returns "!abcd1234"
         val rejection = PacketQueueRejectedException("Reaction")
@@ -722,7 +722,7 @@ class RadioControllerImplTest {
     @Test
     fun sendReactionFallsBackToQueuedWhenSenderLeavesStatusNull() = runTest {
         val controller = createController(scope = backgroundScope)
-        val user = User(id = "!abcd1234", long_name = "Test", short_name = "T")
+        val user = User.Builder().also { wb ->wb.id = "!abcd1234"; wb.long_name = "Test"; wb.short_name = "T"}.build()
         every { nodeManager.nodeDBbyNodeNum } returns mapOf(1234 to Node(num = 1234, user = user))
         every { nodeManager.getMyId() } returns "!abcd1234"
         everySuspend { commandSender.sendData(any()) } calls { (it.args[0] as DataPacket).status = null }
@@ -737,7 +737,7 @@ class RadioControllerImplTest {
     @Test
     fun setFavoriteSendsAdminAndUpdatesState() = runTest {
         val controller = createController(scope = backgroundScope)
-        val node = Node(num = 99, user = User(id = "!node99"), isFavorite = false)
+        val node = Node(num = 99, user = User.Builder().also { wb ->wb.id = "!node99"}.build(), isFavorite = false)
         every { nodeManager.nodeDBbyNodeNum } returns mapOf(99 to node)
 
         controller.setFavorite(99, favorite = true)
@@ -749,7 +749,7 @@ class RadioControllerImplTest {
     @Test
     fun setFavoriteIsNoOpWhenAlreadyInRequestedState() = runTest {
         val controller = createController(scope = backgroundScope)
-        val node = Node(num = 99, user = User(id = "!node99"), isFavorite = true)
+        val node = Node(num = 99, user = User.Builder().also { wb ->wb.id = "!node99"}.build(), isFavorite = true)
         every { nodeManager.nodeDBbyNodeNum } returns mapOf(99 to node)
 
         controller.setFavorite(99, favorite = true)
@@ -761,7 +761,7 @@ class RadioControllerImplTest {
     @Test
     fun setIgnoredSendsAdminUpdatesStateAndFiltersPackets() = runTest {
         val controller = createController(scope = backgroundScope)
-        val node = Node(num = 99, user = User(id = "!node99"), isIgnored = false)
+        val node = Node(num = 99, user = User.Builder().also { wb ->wb.id = "!node99"}.build(), isIgnored = false)
         every { nodeManager.nodeDBbyNodeNum } returns mapOf(99 to node)
 
         controller.setIgnored(99, ignored = true)
@@ -775,7 +775,7 @@ class RadioControllerImplTest {
     @Test
     fun toggleMutedSendsAdminAndUpdatesState() = runTest {
         val controller = createController(scope = backgroundScope)
-        val node = Node(num = 99, user = User(id = "!node99"), isMuted = false)
+        val node = Node(num = 99, user = User.Builder().also { wb ->wb.id = "!node99"}.build(), isMuted = false)
         every { nodeManager.nodeDBbyNodeNum } returns mapOf(99 to node)
 
         controller.toggleMuted(99)
@@ -904,8 +904,8 @@ class RadioControllerImplTest {
         everySuspend { commandSender.sendAdminAwaitResult(any(), any(), any(), any()) } returns acceptedSendResult()
 
         controller.editLocalSettings {
-            setChannel(Channel(index = 0, role = Channel.Role.PRIMARY, settings = ChannelSettings(name = "A")))
-            setChannel(Channel(index = 1, role = Channel.Role.SECONDARY, settings = ChannelSettings(name = "B")))
+            setChannel(Channel.Builder().also { wb ->wb.index = 0; wb.role = Channel.Role.PRIMARY; wb.settings = ChannelSettings.Builder().also { wb ->wb.name = "A"}.build()}.build())
+            setChannel(Channel.Builder().also { wb ->wb.index = 1; wb.role = Channel.Role.SECONDARY; wb.settings = ChannelSettings.Builder().also { wb ->wb.name = "B"}.build()}.build())
         }
         advanceUntilIdle()
 
@@ -943,9 +943,9 @@ class RadioControllerImplTest {
             }
 
         controller.editLocalSettings {
-            setChannel(Channel(index = 0, role = Channel.Role.PRIMARY, settings = ChannelSettings(name = "Primary")))
+            setChannel(Channel.Builder().also { wb ->wb.index = 0; wb.role = Channel.Role.PRIMARY; wb.settings = ChannelSettings.Builder().also { wb ->wb.name = "Primary"}.build()}.build())
             setChannel(
-                Channel(index = 1, role = Channel.Role.SECONDARY, settings = ChannelSettings(name = "Secondary")),
+                Channel.Builder().also { wb ->wb.index = 1; wb.role = Channel.Role.SECONDARY; wb.settings = ChannelSettings.Builder().also { wb ->wb.name = "Secondary"}.build()}.build(),
             )
         }
 
@@ -961,9 +961,9 @@ class RadioControllerImplTest {
         val controller = createController(scope = backgroundScope, myNodeNum = 1234)
         val commitStarted = CompletableDeferred<Unit>()
         val releaseCommit = CompletableDeferred<Unit>()
-        val user = User(id = "!000004d2", long_name = "Committed owner")
-        val config = Config(device = Config.DeviceConfig())
-        val moduleConfig = ModuleConfig(statusmessage = ModuleConfig.StatusMessageConfig(node_status = "Ready"))
+        val user = User.Builder().also { wb ->wb.id = "!000004d2"; wb.long_name = "Committed owner"}.build()
+        val config = Config.Builder().also { wb ->wb.device = Config.DeviceConfig.Builder().build()}.build()
+        val moduleConfig = ModuleConfig.Builder().also { wb ->wb.statusmessage = ModuleConfig.StatusMessageConfig.Builder().also { wb ->wb.node_status = "Ready"}.build()}.build()
         val fixedPosition = Position(latitude = 47.6, longitude = -122.3, altitude = 42)
         everySuspend { commandSender.sendAdminAwait(any(), any(), any(), any()) } returns true
         everySuspend { commandSender.sendAdminAwaitResult(any(), any(), any(), any()) } calls
@@ -1003,9 +1003,9 @@ class RadioControllerImplTest {
     @Test
     fun editSettingsRetainsInterleavedStagedLocalProjections() = runTest {
         val controller = createController(scope = backgroundScope, myNodeNum = 1234)
-        val user = User(id = "!000004d2", long_name = "Concurrent owner")
-        val config = Config(device = Config.DeviceConfig())
-        val moduleConfig = ModuleConfig(statusmessage = ModuleConfig.StatusMessageConfig(node_status = "Ready"))
+        val user = User.Builder().also { wb ->wb.id = "!000004d2"; wb.long_name = "Concurrent owner"}.build()
+        val config = Config.Builder().also { wb ->wb.device = Config.DeviceConfig.Builder().build()}.build()
+        val moduleConfig = ModuleConfig.Builder().also { wb ->wb.statusmessage = ModuleConfig.StatusMessageConfig.Builder().also { wb ->wb.node_status = "Ready"}.build()}.build()
         everySuspend { commandSender.sendAdminAwait(any(), any(), any(), any()) } returns true
         everySuspend { commandSender.sendAdminAwaitResult(any(), any(), any(), any()) } returns acceptedSendResult()
         everySuspend { commandSender.sendAdmin(any(), any(), any(), any()) } returns Unit
@@ -1067,8 +1067,8 @@ class RadioControllerImplTest {
     @Test
     fun editSettingsContinuesLocalProjectionReconciliationAfterProjectionFailure() = runTest {
         val controller = createController(scope = backgroundScope, myNodeNum = 1234)
-        val user = User(id = "!000004d2", long_name = "Committed owner")
-        val config = Config(device = Config.DeviceConfig())
+        val user = User.Builder().also { wb ->wb.id = "!000004d2"; wb.long_name = "Committed owner"}.build()
+        val config = Config.Builder().also { wb ->wb.device = Config.DeviceConfig.Builder().build()}.build()
         everySuspend { commandSender.sendAdminAwait(any(), any(), any(), any()) } returns true
         everySuspend { commandSender.sendAdminAwaitResult(any(), any(), any(), any()) } returns acceptedSendResult()
         every { nodeManager.handleReceivedUser(any(), any(), any(), any(), any()) } throws
@@ -1092,9 +1092,9 @@ class RadioControllerImplTest {
 
         assertFailsWith<EditSettingsTransactionException> {
             controller.editLocalSettings {
-                setOwner(User(id = "!000004d2", long_name = "Uncommitted owner"))
-                setConfig(Config(device = Config.DeviceConfig()))
-                setModuleConfig(ModuleConfig(statusmessage = ModuleConfig.StatusMessageConfig(node_status = "Stale")))
+                setOwner(User.Builder().also { wb ->wb.id = "!000004d2"; wb.long_name = "Uncommitted owner"}.build())
+                setConfig(Config.Builder().also { wb ->wb.device = Config.DeviceConfig.Builder().build()}.build())
+                setModuleConfig(ModuleConfig.Builder().also { wb ->wb.statusmessage = ModuleConfig.StatusMessageConfig.Builder().also { wb ->wb.node_status = "Stale"}.build()}.build())
                 setFixedPosition(Position(latitude = 1.0, longitude = 2.0, altitude = 3))
             }
         }
@@ -1117,10 +1117,10 @@ class RadioControllerImplTest {
         val failure =
             assertFailsWith<IllegalArgumentException> {
                 controller.editLocalSettings {
-                    setOwner(User(id = "!000004d2", long_name = "Rolled back owner"))
-                    setConfig(Config(device = Config.DeviceConfig()))
+                    setOwner(User.Builder().also { wb ->wb.id = "!000004d2"; wb.long_name = "Rolled back owner"}.build())
+                    setConfig(Config.Builder().also { wb ->wb.device = Config.DeviceConfig.Builder().build()}.build())
                     setModuleConfig(
-                        ModuleConfig(statusmessage = ModuleConfig.StatusMessageConfig(node_status = "Rolled back")),
+                        ModuleConfig.Builder().also { wb ->wb.statusmessage = ModuleConfig.StatusMessageConfig.Builder().also { wb ->wb.node_status = "Rolled back"}.build()}.build(),
                     )
                     setFixedPosition(Position(latitude = 4.0, longitude = 5.0, altitude = 6))
                     throw blockFailure
@@ -1163,7 +1163,7 @@ class RadioControllerImplTest {
             assertFailsWith<EditSettingsTransactionException> {
                 controller.editLocalSettings {
                     setChannel(
-                        Channel(index = 0, role = Channel.Role.PRIMARY, settings = ChannelSettings(name = "Primary")),
+                        Channel.Builder().also { wb ->wb.index = 0; wb.role = Channel.Role.PRIMARY; wb.settings = ChannelSettings.Builder().also { wb ->wb.name = "Primary"}.build()}.build(),
                     )
                 }
             }
@@ -1188,7 +1188,7 @@ class RadioControllerImplTest {
         val failure =
             assertFailsWith<IllegalArgumentException> {
                 controller.editLocalSettings {
-                    setChannel(Channel(index = 0, role = Channel.Role.PRIMARY, settings = ChannelSettings(name = "A")))
+                    setChannel(Channel.Builder().also { wb ->wb.index = 0; wb.role = Channel.Role.PRIMARY; wb.settings = ChannelSettings.Builder().also { wb ->wb.name = "A"}.build()}.build())
                 }
             }
 
@@ -1495,7 +1495,7 @@ class RadioControllerImplTest {
 
         val job = launch {
             controller.editLocalSettings {
-                setOwner(User(id = "!000004d2", long_name = "Cancelled owner"))
+                setOwner(User.Builder().also { wb ->wb.id = "!000004d2"; wb.long_name = "Cancelled owner"}.build())
                 blockStarted.complete(Unit)
                 keepBlockOpen.await()
             }
@@ -1515,10 +1515,10 @@ class RadioControllerImplTest {
         val controller = createController(scope = backgroundScope)
         // A QR-scanned contact arrives with manually_verified = false (proto default).
         val contact =
-            SharedContact(
-                node_num = 42,
-                user = User(id = "!0000002a", long_name = "Test", public_key = TEST_PUBLIC_KEY),
-            )
+            SharedContact.Builder().also { wb ->
+            wb.node_num = 42
+            wb.user = User.Builder().also { wb ->wb.id = "!0000002a"; wb.long_name = "Test"; wb.public_key = TEST_PUBLIC_KEY}.build()
+            }.build()
 
         var sentMessage: AdminMessage? = null
         everySuspend { commandSender.sendAdmin(any(), any(), any(), any()) } calls
@@ -1540,11 +1540,11 @@ class RadioControllerImplTest {
         val controller = createController(scope = backgroundScope)
         // A contact shared as already verified stays verified on import.
         val contact =
-            SharedContact(
-                node_num = 42,
-                user = User(id = "!0000002a", long_name = "Test", public_key = TEST_PUBLIC_KEY),
-                manually_verified = true,
-            )
+            SharedContact.Builder().also { wb ->
+            wb.node_num = 42
+            wb.user = User.Builder().also { wb ->wb.id = "!0000002a"; wb.long_name = "Test"; wb.public_key = TEST_PUBLIC_KEY}.build()
+            wb.manually_verified = true
+            }.build()
 
         var sentMessage: AdminMessage? = null
         everySuspend { commandSender.sendAdmin(any(), any(), any(), any()) } calls
@@ -1563,10 +1563,10 @@ class RadioControllerImplTest {
     @Test
     fun setHamModeSendsAdminWithEchoedLoraValuesAndUpdatesUser() = runTest {
         val controller = createController(scope = backgroundScope, myNodeNum = 123)
-        val existingUser = User(id = "!0000007b", long_name = "Old Name", short_name = "OLD")
+        val existingUser = User.Builder().also { wb ->wb.id = "!0000007b"; wb.long_name = "Old Name"; wb.short_name = "OLD"}.build()
         every { nodeManager.nodeDBbyNodeNum } returns mapOf(123 to Node(num = 123, user = existingUser))
         every { radioConfigRepository.localConfigFlow } returns
-            MutableStateFlow(LocalConfig(lora = Config.LoRaConfig(tx_power = 20, override_frequency = 915.5f)))
+            MutableStateFlow(LocalConfig.Builder().also { wb ->wb.lora = Config.LoRaConfig.Builder().also { wb ->wb.tx_power = 20; wb.override_frequency = 915.5f}.build()}.build())
 
         var sentMessage: AdminMessage? = null
         everySuspend { commandSender.sendAdmin(any(), any(), any(), any()) } calls
@@ -1577,7 +1577,7 @@ class RadioControllerImplTest {
 
         controller.setHamMode(
             123,
-            HamParameters(call_sign = "KK7ABC", short_name = "KK7A", long_name = "Attic Heltec"),
+            HamParameters.Builder().also { wb ->wb.call_sign = "KK7ABC"; wb.short_name = "KK7A"; wb.long_name = "Attic Heltec"}.build(),
             42,
         )
 
@@ -1593,7 +1593,13 @@ class RadioControllerImplTest {
         verify {
             nodeManager.handleReceivedUser(
                 123,
-                existingUser.copy(long_name = "KK7ABC//Attic Heltec", short_name = "KK7A", is_licensed = true),
+                existingUser.newBuilder()
+                    .also { wb ->
+                        wb.long_name = "KK7ABC//Attic Heltec"
+                        wb.short_name = "KK7A"
+                        wb.is_licensed = true
+                    }
+                    .build(),
                 0,
                 false,
             )
@@ -1603,18 +1609,24 @@ class RadioControllerImplTest {
     @Test
     fun setHamModeWithoutALongNameNamesTheNodeAfterTheCallSignAlone() = runTest {
         val controller = createController(scope = backgroundScope, myNodeNum = 123)
-        val existingUser = User(id = "!0000007b", long_name = "Old Name", short_name = "OLD")
+        val existingUser = User.Builder().also { wb ->wb.id = "!0000007b"; wb.long_name = "Old Name"; wb.short_name = "OLD"}.build()
         every { nodeManager.nodeDBbyNodeNum } returns mapOf(123 to Node(num = 123, user = existingUser))
-        every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(LocalConfig())
+        every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(LocalConfig.Builder().build())
         everySuspend { commandSender.sendAdmin(any(), any(), any(), any()) } returns Unit
 
-        controller.setHamMode(123, HamParameters(call_sign = "KK7ABC", short_name = "KK7A"), 42)
+        controller.setHamMode(123, HamParameters.Builder().also { wb ->wb.call_sign = "KK7ABC"; wb.short_name = "KK7A"}.build(), 42)
 
         // long_name is optional: firmware leaves the bare call sign rather than a dangling "//".
         verify {
             nodeManager.handleReceivedUser(
                 123,
-                existingUser.copy(long_name = "KK7ABC", short_name = "KK7A", is_licensed = true),
+                existingUser.newBuilder()
+                    .also { wb ->
+                        wb.long_name = "KK7ABC"
+                        wb.short_name = "KK7A"
+                        wb.is_licensed = true
+                    }
+                    .build(),
                 0,
                 false,
             )
@@ -1625,7 +1637,7 @@ class RadioControllerImplTest {
     fun setHamModeWithNoCachedLoraConfigSendsProtoDefaults() = runTest {
         val controller = createController(scope = backgroundScope, myNodeNum = 123)
         every { nodeManager.nodeDBbyNodeNum } returns emptyMap()
-        every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(LocalConfig())
+        every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(LocalConfig.Builder().build())
 
         var sentMessage: AdminMessage? = null
         everySuspend { commandSender.sendAdmin(any(), any(), any(), any()) } calls
@@ -1634,7 +1646,7 @@ class RadioControllerImplTest {
                 sentMessage = (it.args[3] as () -> AdminMessage)()
             }
 
-        controller.setHamMode(123, HamParameters(call_sign = "KK7ABC", short_name = "KK7A"), 42)
+        controller.setHamMode(123, HamParameters.Builder().also { wb ->wb.call_sign = "KK7ABC"; wb.short_name = "KK7A"}.build(), 42)
 
         val ham = sentMessage?.set_ham_mode
         assertEquals(0, ham?.tx_power)
@@ -1643,7 +1655,7 @@ class RadioControllerImplTest {
         verify {
             nodeManager.handleReceivedUser(
                 123,
-                User(long_name = "KK7ABC", short_name = "KK7A", is_licensed = true),
+                User.Builder().also { wb ->wb.long_name = "KK7ABC"; wb.short_name = "KK7A"; wb.is_licensed = true}.build(),
                 0,
                 false,
             )
@@ -1654,7 +1666,7 @@ class RadioControllerImplTest {
     fun setHamModeIgnoresRemoteDestinations() = runTest {
         val controller = createController(scope = backgroundScope, myNodeNum = 123)
 
-        controller.setHamMode(456, HamParameters(call_sign = "KK7ABC", short_name = "KK7A"), 42)
+        controller.setHamMode(456, HamParameters.Builder().also { wb ->wb.call_sign = "KK7ABC"; wb.short_name = "KK7A"}.build(), 42)
 
         verifySuspend(exactly(0)) { commandSender.sendAdmin(any(), any(), any(), any()) }
         verify(exactly(0)) { nodeManager.handleReceivedUser(any(), any(), any(), any()) }
@@ -1663,7 +1675,7 @@ class RadioControllerImplTest {
     @Test
     fun importContactReturnsEarlyWhenDisconnected() = runTest {
         val controller = createController(scope = backgroundScope, myNodeNum = null)
-        val contact = SharedContact(node_num = 42, user = User(id = "!0000002a"))
+        val contact = SharedContact.Builder().also { wb ->wb.node_num = 42; wb.user = User.Builder().also { wb ->wb.id = "!0000002a"}.build()}.build()
 
         controller.importContact(contact)
 
@@ -1674,7 +1686,7 @@ class RadioControllerImplTest {
     fun sendSharedContactRejectsNodeWithNoPublicKey() = runTest {
         val controller = createController(scope = backgroundScope)
         val nodeNum = 321
-        val user = User(id = NodeAddress.numToDefaultId(nodeNum), long_name = "Heard Only", short_name = "HO")
+        val user = User.Builder().also { wb ->wb.id = NodeAddress.numToDefaultId(nodeNum); wb.long_name = "Heard Only"; wb.short_name = "HO"}.build()
         every { nodeRepository.getNode(NodeAddress.numToDefaultId(nodeNum)) } returns Node(num = nodeNum, user = user)
 
         val result = controller.sendSharedContact(nodeNum)
@@ -1686,7 +1698,7 @@ class RadioControllerImplTest {
     @Test
     fun importContactRejectsEmptyPublicKey() = runTest {
         val controller = createController(scope = backgroundScope)
-        val contact = SharedContact(node_num = 42, user = User(id = "!0000002a", long_name = "Test"))
+        val contact = SharedContact.Builder().also { wb ->wb.node_num = 42; wb.user = User.Builder().also { wb ->wb.id = "!0000002a"; wb.long_name = "Test"}.build()}.build()
 
         controller.importContact(contact)
 

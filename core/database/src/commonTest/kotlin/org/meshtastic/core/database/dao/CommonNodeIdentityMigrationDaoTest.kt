@@ -86,13 +86,13 @@ abstract class CommonNodeIdentityMigrationDaoTest {
     ) = NodeEntity(
         num = num,
         user =
-        User(
-            id = NodeAddress.numToDefaultId(num),
-            long_name = longName,
-            short_name = longName.takeLast(4),
-            hw_model = HardwareModel.TBEAM,
-            public_key = key,
-        ),
+        User.Builder().also { wb ->
+        wb.id = NodeAddress.numToDefaultId(num)
+        wb.long_name = longName
+        wb.short_name = longName.takeLast(4)
+        wb.hw_model = HardwareModel.TBEAM
+        wb.public_key = key
+        }.build(),
         notes = notes,
         isFavorite = isFavorite,
         lastHeard = 1000,

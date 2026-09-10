@@ -72,7 +72,7 @@ class SharedContactViewModelTest {
 
     @Test
     fun `addSharedContact delegates to serviceRepository`() = runTest(testDispatcher) {
-        val contact = SharedContact(node_num = 123)
+        val contact = SharedContact.Builder().also { wb ->wb.node_num = 123}.build()
 
         val job = viewModel.addSharedContact(contact)
         job.join()

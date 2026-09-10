@@ -98,7 +98,7 @@ class SettingsViewModelTest {
         databaseManager = FakeDatabaseManager()
         notificationPrefs = FakeNotificationPrefs()
 
-        every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(LocalConfig())
+        every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(LocalConfig.Builder().build())
         every { buildConfigProvider.versionName } returns "3.0.0-test"
 
         val isOtaCapableUseCase: IsOtaCapableUseCase = mock(MockMode.autofill)
@@ -279,18 +279,16 @@ class SettingsViewModelTest {
                     fromNum = senderNodeNum,
                     portNum = PortNum.TEXT_MESSAGE_APP.value,
                     fromRadio =
-                    FromRadio(
-                        packet =
-                        MeshPacket(
-                            from = senderNodeNum,
-                            rx_snr = 5.0f,
-                            decoded =
-                            Data(
-                                portnum = PortNum.TEXT_MESSAGE_APP,
-                                payload = "Hello settings".encodeUtf8(),
-                            ),
-                        ),
-                    ),
+                    FromRadio.Builder().also { wb ->
+                    wb.packet = MeshPacket.Builder().also { wb ->
+                                            wb.from = senderNodeNum
+                                            wb.rx_snr = 5.0f
+                                            wb.decoded = Data.Builder().also { wb ->
+                                                                        wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                                                        wb.payload = "Hello settings".encodeUtf8()
+                                                                        }.build()
+                                            }.build()
+                    }.build(),
                 ),
                 MeshLog(
                     uuid = "filtered-out",
@@ -300,17 +298,16 @@ class SettingsViewModelTest {
                     fromNum = senderNodeNum,
                     portNum = PortNum.RANGE_TEST_APP.value,
                     fromRadio =
-                    FromRadio(
-                        packet =
-                        MeshPacket(
-                            from = senderNodeNum,
-                            rx_snr = 6.0f,
-                            decoded = Data(
-                                portnum = PortNum.RANGE_TEST_APP,
-                                payload = "Ignore me".encodeUtf8(),
-                            ),
-                        ),
-                    ),
+                    FromRadio.Builder().also { wb ->
+                    wb.packet = MeshPacket.Builder().also { wb ->
+                                            wb.from = senderNodeNum
+                                            wb.rx_snr = 6.0f
+                                            wb.decoded = Data.Builder().also { wb ->
+                                                                        wb.portnum = PortNum.RANGE_TEST_APP
+                                                                        wb.payload = "Ignore me".encodeUtf8()
+                                                                        }.build()
+                                            }.build()
+                    }.build(),
                 ),
             ),
         )

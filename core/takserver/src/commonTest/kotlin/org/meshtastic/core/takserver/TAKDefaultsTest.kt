@@ -90,19 +90,19 @@ class TAKDefaultsTest {
 
     @Test
     fun `toTakCallsign prefers short_name`() {
-        val user = User(id = "!1234", long_name = "Long Name", short_name = "SN")
+        val user = User.Builder().also { wb ->wb.id = "!1234"; wb.long_name = "Long Name"; wb.short_name = "SN"}.build()
         assertEquals("SN", user.toTakCallsign())
     }
 
     @Test
     fun `toTakCallsign falls back to long_name when short_name is blank`() {
-        val user = User(id = "!1234", long_name = "Long Name", short_name = "")
+        val user = User.Builder().also { wb ->wb.id = "!1234"; wb.long_name = "Long Name"; wb.short_name = ""}.build()
         assertEquals("Long Name", user.toTakCallsign())
     }
 
     @Test
     fun `toTakCallsign falls back to id when both names are blank`() {
-        val user = User(id = "!1234", long_name = "", short_name = "")
+        val user = User.Builder().also { wb ->wb.id = "!1234"; wb.long_name = ""; wb.short_name = ""}.build()
         assertEquals("!1234", user.toTakCallsign())
     }
 

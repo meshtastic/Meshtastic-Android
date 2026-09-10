@@ -212,7 +212,7 @@ data class ReactionEntity(
 )
 
 suspend fun ReactionEntity.toReaction(getNode: suspend (userId: String?) -> Node?): Reaction {
-    val user = getNode(userId)?.user ?: org.meshtastic.proto.User(id = userId)
+    val user = getNode(userId)?.user ?: org.meshtastic.proto.User.Builder().also { wb ->wb.id = userId}.build()
     return Reaction(
         replyId = replyId,
         user = user,

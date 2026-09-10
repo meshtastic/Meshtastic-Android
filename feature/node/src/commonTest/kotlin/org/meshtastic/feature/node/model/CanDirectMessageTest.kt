@@ -38,7 +38,7 @@ class CanDirectMessageTest {
         role: Config.DeviceConfig.Role = Config.DeviceConfig.Role.CLIENT,
     ) = Node(
         num = 1,
-        user = User(id = "!00000001", public_key = publicKey, is_unmessagable = isUnmessagable, role = role),
+        user = User.Builder().also { wb ->wb.id = "!00000001"; wb.public_key = publicKey; wb.is_unmessagable = isUnmessagable; wb.role = role}.build(),
     )
 
     @Test

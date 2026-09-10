@@ -188,7 +188,7 @@ class TcpTransport(
      */
     suspend fun sendHeartbeat() {
         val nonce = heartbeatNonce.getAndIncrement()
-        val heartbeat = ToRadio(heartbeat = org.meshtastic.proto.Heartbeat(nonce = nonce))
+        val heartbeat = ToRadio.Builder().also { wb ->wb.heartbeat = org.meshtastic.proto.Heartbeat.Builder().also { wb ->wb.nonce = nonce}.build()}.build()
         sendPacket(heartbeat.encode())
     }
 

@@ -287,12 +287,12 @@ abstract class CommonPacketDaoTest {
         createDb()
         insertSentPacket(packetId = 8009, status = MessageStatus.DELIVERED)
         val outgoing =
-            MeshPacket(
-                from = myNodeNum,
-                to = NodeAddress.NODENUM_BROADCAST,
-                id = 8009,
-                decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP),
-            )
+            MeshPacket.Builder().also { wb ->
+            wb.from = myNodeNum
+            wb.to = NodeAddress.NODENUM_BROADCAST
+            wb.id = 8009
+            wb.decoded = Data.Builder().also { wb ->wb.portnum = PortNum.TEXT_MESSAGE_APP}.build()
+            }.build()
 
         val prior = assertNotNull(packetDao.applyOutgoingQueueStatus(outgoing, MessageStatus.ENROUTE))
 

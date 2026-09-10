@@ -42,7 +42,7 @@ import kotlin.test.assertTrue
 class SecurityConfigScreenTest {
     @Test
     fun `delayed remote public key updates display and copy without recreating screen`() = runComposeUiTest {
-        var securityConfig by mutableStateOf(Config.SecurityConfig())
+        var securityConfig by mutableStateOf(Config.SecurityConfig.Builder().build())
         var renderedFormState: ConfigState<Config.SecurityConfig>? = null
         var copiedPublicKey: ByteString? = null
 
@@ -69,7 +69,7 @@ class SecurityConfigScreenTest {
         onNodeWithText(encodedPublicKey).assertDoesNotExist()
 
         // Firmware 2.8 redacts the remote private key, so only the public key changes when the delayed response lands.
-        securityConfig = Config.SecurityConfig(public_key = publicKey)
+        securityConfig = Config.SecurityConfig.Builder().also { wb ->wb.public_key = publicKey}.build()
         waitForIdle()
 
         onNodeWithText(encodedPublicKey).assertIsDisplayed()
@@ -80,7 +80,8 @@ class SecurityConfigScreenTest {
         // A local private-key edit invalidates the device-derived public key for both render and copy.
         runOnIdle {
             val formState = checkNotNull(renderedFormState)
-            formState.value = formState.value.copy(private_key = ByteArray(32) { 7 }.toByteString())
+            formState.value =
+                formState.value.newBuilder().also { wb -> wb.private_key = ByteArray(32) { 7 }.toByteString() }.build()
         }
         waitForIdle()
 
@@ -92,11 +93,11 @@ class SecurityConfigScreenTest {
 
     @Test
     fun `private key is redacted for a remote node until a new one is entered`() {
-        val remote = Config.SecurityConfig(public_key = ByteArray(32) { 1 }.toByteString())
+        val remote = Config.SecurityConfig.Builder().also { wb ->wb.public_key = ByteArray(32) { 1 }.toByteString()}.build()
         assertTrue(isPrivateKeyRedacted(remote, isLocal = false))
 
         // The local node always reports its own key, so nothing is withheld there.
-        val local = remote.copy(private_key = ByteArray(32) { 2 }.toByteString())
+        val local = remote.newBuilder().also { wb -> wb.private_key = ByteArray(32) { 2 }.toByteString() }.build()
         assertFalse(isPrivateKeyRedacted(local, isLocal = true))
         assertFalse(isPrivateKeyRedacted(remote, isLocal = true))
 

@@ -86,10 +86,10 @@ abstract class CommonMeshLogRepositoryTest {
     @Test
     fun `parseTelemetryLog preserves zero temperature`() = runTest(testDispatcher) {
         val zeroTemp = 0.0f
-        val telemetry = Telemetry(environment_metrics = EnvironmentMetrics(temperature = zeroTemp))
+        val telemetry = Telemetry.Builder().also { wb ->wb.environment_metrics = EnvironmentMetrics.Builder().also { wb ->wb.temperature = zeroTemp}.build()}.build()
 
         val meshPacket =
-            MeshPacket(decoded = Data(payload = telemetry.encode().toByteString(), portnum = PortNum.TELEMETRY_APP))
+            MeshPacket.Builder().also { wb ->wb.decoded = Data.Builder().also { wb ->wb.payload = telemetry.encode().toByteString(); wb.portnum = PortNum.TELEMETRY_APP}.build()}.build()
 
         val meshLog =
             MeshLog(
@@ -99,7 +99,7 @@ abstract class CommonMeshLogRepositoryTest {
                 raw_message = "",
                 fromNum = 0,
                 portNum = PortNum.TELEMETRY_APP.value,
-                fromRadio = FromRadio(packet = meshPacket),
+                fromRadio = FromRadio.Builder().also { wb ->wb.packet = meshPacket}.build(),
             )
 
         repository.insert(meshLog)
@@ -142,9 +142,9 @@ abstract class CommonMeshLogRepositoryTest {
                 0, // asEntity will map it if we pass localNodeNum to asEntity, but here we set it manually
                 portNum = port,
                 fromRadio =
-                FromRadio(
-                    packet = MeshPacket(from = localNodeNum, decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP)),
-                ),
+                FromRadio.Builder().also { wb ->
+                wb.packet = MeshPacket.Builder().also { wb ->wb.from = localNodeNum; wb.decoded = Data.Builder().also { wb ->wb.portnum = PortNum.TEXT_MESSAGE_APP}.build()}.build()
+                }.build(),
             )
         repository.insert(log)
 
@@ -164,28 +164,28 @@ abstract class CommonMeshLogRepositoryTest {
             telemetryLog(
                 uuid = "local-stats",
                 nodeNum = nodeNum,
-                telemetry = Telemetry(local_stats = LocalStats(noise_floor = -112)),
+                telemetry = Telemetry.Builder().also { wb ->wb.local_stats = LocalStats.Builder().also { wb ->wb.noise_floor = -112}.build()}.build(),
                 receivedDate = nowMillis + 3,
             )
         val deviceLog =
             telemetryLog(
                 uuid = "device",
                 nodeNum = nodeNum,
-                telemetry = Telemetry(device_metrics = DeviceMetrics(battery_level = 80)),
+                telemetry = Telemetry.Builder().also { wb ->wb.device_metrics = DeviceMetrics.Builder().also { wb ->wb.battery_level = 80}.build()}.build(),
                 receivedDate = nowMillis + 2,
             )
         val environmentLog =
             telemetryLog(
                 uuid = "environment",
                 nodeNum = nodeNum,
-                telemetry = Telemetry(environment_metrics = EnvironmentMetrics(temperature = 21f)),
+                telemetry = Telemetry.Builder().also { wb ->wb.environment_metrics = EnvironmentMetrics.Builder().also { wb ->wb.temperature = 21f}.build()}.build(),
                 receivedDate = nowMillis + 1,
             )
         val localStatsRequestLog =
             telemetryLog(
                 uuid = "local-stats-request",
                 nodeNum = nodeNum,
-                telemetry = Telemetry(local_stats = LocalStats()),
+                telemetry = Telemetry.Builder().also { wb ->wb.local_stats = LocalStats.Builder().build()}.build(),
                 receivedDate = nowMillis,
                 wantResponse = true,
             )
@@ -241,7 +241,7 @@ abstract class CommonMeshLogRepositoryTest {
         // Firmware before 2.8 emitted the repeated field; stored logs must still chart after the repoint.
         @Suppress("DEPRECATION")
         val telemetry =
-            Telemetry(environment_metrics = EnvironmentMetrics(one_wire_temperature = listOf(11f, 0f, 33f)))
+            Telemetry.Builder().also { wb ->wb.environment_metrics = EnvironmentMetrics.Builder().also { wb ->wb.one_wire_temperature = listOf(11f, 0f, 33f)}.build()}.build()
         repository.insert(telemetryLog("legacy-one-wire", 0, telemetry, nowMillis))
 
         val metrics = repository.getTelemetryFrom(0).first().single().environment_metrics
@@ -257,7 +257,7 @@ abstract class CommonMeshLogRepositoryTest {
 
     @Test
     fun `parseTelemetryLog normalizes absent per-channel readings to NaN`() = runTest(testDispatcher) {
-        val telemetry = Telemetry(environment_metrics = EnvironmentMetrics(temperature = 21f))
+        val telemetry = Telemetry.Builder().also { wb ->wb.environment_metrics = EnvironmentMetrics.Builder().also { wb ->wb.temperature = 21f}.build()}.build()
         repository.insert(telemetryLog("absent-channels", 0, telemetry, nowMillis))
 
         val metrics = repository.getTelemetryFrom(0).first().single().environment_metrics
@@ -273,7 +273,7 @@ abstract class CommonMeshLogRepositoryTest {
     fun `parseTelemetryLog preserves zero per-channel readings`() = runTest(testDispatcher) {
         // 0 V on an unloaded ADC input and 0°C on a probe are measurements, not "no sensor" sentinels.
         val telemetry =
-            Telemetry(environment_metrics = EnvironmentMetrics(one_wire_temperature_ch0 = 0f, adc_voltage_ch0 = 0f))
+            Telemetry.Builder().also { wb ->wb.environment_metrics = EnvironmentMetrics.Builder().also { wb ->wb.one_wire_temperature_ch0 = 0f; wb.adc_voltage_ch0 = 0f}.build()}.build()
         repository.insert(telemetryLog("zero-channels", 0, telemetry, nowMillis))
 
         val metrics = repository.getTelemetryFrom(0).first().single().environment_metrics
@@ -297,17 +297,15 @@ abstract class CommonMeshLogRepositoryTest {
         fromNum = nodeNum,
         portNum = PortNum.TELEMETRY_APP.value,
         fromRadio =
-        FromRadio(
-            packet =
-            MeshPacket(
-                from = nodeNum,
-                decoded =
-                Data(
-                    payload = telemetry.encode().toByteString(),
-                    portnum = PortNum.TELEMETRY_APP,
-                    want_response = wantResponse,
-                ),
-            ),
-        ),
+        FromRadio.Builder().also { wb ->
+        wb.packet = MeshPacket.Builder().also { wb ->
+                    wb.from = nodeNum
+                    wb.decoded = Data.Builder().also { wb ->
+                                    wb.payload = telemetry.encode().toByteString()
+                                    wb.portnum = PortNum.TELEMETRY_APP
+                                    wb.want_response = wantResponse
+                                    }.build()
+                    }.build()
+        }.build(),
     )
 }

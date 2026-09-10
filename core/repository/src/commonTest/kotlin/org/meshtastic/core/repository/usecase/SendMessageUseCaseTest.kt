@@ -76,7 +76,7 @@ class SendMessageUseCaseTest {
     @Test
     fun `invoke with broadcast message simply sends data packet`() = runTest {
         // Arrange
-        val ourNode = Node(num = 1, user = User(id = "!1234"))
+        val ourNode = Node(num = 1, user = User.Builder().also { wb ->wb.id = "!1234"}.build())
         nodeRepository.setOurNode(ourNode)
         appPreferences.homoglyph.setHomoglyphEncodingEnabled(false)
 
@@ -91,7 +91,7 @@ class SendMessageUseCaseTest {
     @Test
     fun `invoke reports a message_send analytics action`() = runTest {
         // Arrange
-        val ourNode = Node(num = 1, user = User(id = "!1234"))
+        val ourNode = Node(num = 1, user = User.Builder().also { wb ->wb.id = "!1234"}.build())
         nodeRepository.setOurNode(ourNode)
         appPreferences.homoglyph.setHomoglyphEncodingEnabled(false)
 
@@ -118,12 +118,12 @@ class SendMessageUseCaseTest {
         val ourNode =
             Node(
                 num = 1,
-                user = User(id = "!local", role = Config.DeviceConfig.Role.CLIENT),
-                metadata = DeviceMetadata(firmware_version = "2.0.0"),
+                user = User.Builder().also { wb ->wb.id = "!local"; wb.role = Config.DeviceConfig.Role.CLIENT}.build(),
+                metadata = DeviceMetadata.Builder().also { wb ->wb.firmware_version = "2.0.0"}.build(),
             )
         nodeRepository.setOurNode(ourNode)
 
-        val destNode = Node(num = 12345, user = User(id = "!dest"))
+        val destNode = Node(num = 12345, user = User.Builder().also { wb ->wb.id = "!dest"}.build())
         nodeRepository.upsert(destNode)
 
         appPreferences.homoglyph.setHomoglyphEncodingEnabled(false)
@@ -142,12 +142,12 @@ class SendMessageUseCaseTest {
         val ourNode =
             Node(
                 num = 1,
-                user = User(id = "!local", role = Config.DeviceConfig.Role.CLIENT),
-                metadata = DeviceMetadata(firmware_version = "2.7.12"),
+                user = User.Builder().also { wb ->wb.id = "!local"; wb.role = Config.DeviceConfig.Role.CLIENT}.build(),
+                metadata = DeviceMetadata.Builder().also { wb ->wb.firmware_version = "2.7.12"}.build(),
             )
         nodeRepository.setOurNode(ourNode)
 
-        val destNode = Node(num = 67890, user = User(id = "!dest"))
+        val destNode = Node(num = 67890, user = User.Builder().also { wb ->wb.id = "!dest"}.build())
         nodeRepository.upsert(destNode)
 
         appPreferences.homoglyph.setHomoglyphEncodingEnabled(false)
@@ -182,12 +182,12 @@ class SendMessageUseCaseTest {
         val ourNode =
             Node(
                 num = 1,
-                user = User(id = "!local", role = Config.DeviceConfig.Role.CLIENT),
-                metadata = DeviceMetadata(firmware_version = "2.7.12"),
+                user = User.Builder().also { wb ->wb.id = "!local"; wb.role = Config.DeviceConfig.Role.CLIENT}.build(),
+                metadata = DeviceMetadata.Builder().also { wb ->wb.firmware_version = "2.7.12"}.build(),
             )
         nodeRepository.setOurNode(ourNode)
 
-        val destNode = Node(num = 0x70fdde9b.toInt(), user = User(id = "!70fdde9b"))
+        val destNode = Node(num = 0x70fdde9b.toInt(), user = User.Builder().also { wb ->wb.id = "!70fdde9b"}.build())
         nodeRepository.upsert(destNode)
 
         appPreferences.homoglyph.setHomoglyphEncodingEnabled(false)
@@ -207,12 +207,12 @@ class SendMessageUseCaseTest {
         val ourNode =
             Node(
                 num = 1,
-                user = User(id = "!local", role = Config.DeviceConfig.Role.CLIENT),
-                metadata = DeviceMetadata(firmware_version = "2.7.12"),
+                user = User.Builder().also { wb ->wb.id = "!local"; wb.role = Config.DeviceConfig.Role.CLIENT}.build(),
+                metadata = DeviceMetadata.Builder().also { wb ->wb.firmware_version = "2.7.12"}.build(),
             )
         nodeRepository.setOurNode(ourNode)
 
-        val destNode = Node(num = 0x12345678, user = User(id = "!12345678"))
+        val destNode = Node(num = 0x12345678, user = User.Builder().also { wb ->wb.id = "!12345678"}.build())
         nodeRepository.upsert(destNode)
 
         appPreferences.homoglyph.setHomoglyphEncodingEnabled(false)
@@ -231,12 +231,12 @@ class SendMessageUseCaseTest {
         val ourNode =
             Node(
                 num = 1,
-                user = User(id = "!local", role = Config.DeviceConfig.Role.CLIENT),
-                metadata = DeviceMetadata(firmware_version = "2.0.0"),
+                user = User.Builder().also { wb ->wb.id = "!local"; wb.role = Config.DeviceConfig.Role.CLIENT}.build(),
+                metadata = DeviceMetadata.Builder().also { wb ->wb.firmware_version = "2.0.0"}.build(),
             )
         nodeRepository.setOurNode(ourNode)
 
-        val destNode = Node(num = 0xABCDEF01.toInt(), user = User(id = "!abcdef01"))
+        val destNode = Node(num = 0xABCDEF01.toInt(), user = User.Builder().also { wb ->wb.id = "!abcdef01"}.build())
         nodeRepository.upsert(destNode)
 
         appPreferences.homoglyph.setHomoglyphEncodingEnabled(false)

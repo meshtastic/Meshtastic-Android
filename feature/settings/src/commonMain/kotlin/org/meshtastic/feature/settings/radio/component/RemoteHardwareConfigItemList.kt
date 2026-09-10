@@ -40,7 +40,7 @@ import org.meshtastic.proto.ModuleConfig
 @Composable
 fun RemoteHardwareConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
-    val remoteHardwareConfig = state.moduleConfig.remote_hardware ?: ModuleConfig.RemoteHardwareConfig()
+    val remoteHardwareConfig = state.moduleConfig.remote_hardware ?: ModuleConfig.RemoteHardwareConfig.Builder().build()
     val formState = rememberConfigState(initialValue = remoteHardwareConfig)
     val focusManager = LocalFocusManager.current
 
@@ -53,7 +53,7 @@ fun RemoteHardwareConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Un
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val config = ModuleConfig(remote_hardware = it)
+            val config = ModuleConfig.Builder().also { wb ->wb.remote_hardware = it}.build()
             viewModel.setModuleConfig(config)
         },
     ) {
@@ -63,7 +63,7 @@ fun RemoteHardwareConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Un
                     title = stringResource(Res.string.remote_hardware_enabled),
                     checked = formState.value.enabled,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy(enabled = it) },
+                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.enabled = it }.build() },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -71,7 +71,7 @@ fun RemoteHardwareConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Un
                     title = stringResource(Res.string.allow_undefined_pin_access),
                     checked = formState.value.allow_undefined_pin_access,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy(allow_undefined_pin_access = it) },
+                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.allow_undefined_pin_access = it }.build() },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -81,7 +81,7 @@ fun RemoteHardwareConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Un
                     maxCount = 4, // available_pins max_count:4
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValuesChanged = { list -> formState.value = formState.value.copy(available_pins = list) },
+                    onValuesChanged = { list -> formState.value = formState.value.newBuilder().also { wb -> wb.available_pins = list }.build() },
                 )
             }
         }

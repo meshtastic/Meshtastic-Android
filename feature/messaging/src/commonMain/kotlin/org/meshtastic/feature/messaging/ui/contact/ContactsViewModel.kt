@@ -71,7 +71,7 @@ class ContactsViewModel(
 
     val unreadCountTotal = packetRepository.getUnreadCountTotal().stateInWhileSubscribed(0)
 
-    val channels = radioConfigRepository.channelSetFlow.stateInWhileSubscribed(initialValue = ChannelSet())
+    val channels = radioConfigRepository.channelSetFlow.stateInWhileSubscribed(initialValue = ChannelSet.Builder().build())
 
     // Combine node info and myId to reduce argument count in subsequent combines
     private val identityFlow: Flow<Pair<MyNodeInfo?, String?>> =

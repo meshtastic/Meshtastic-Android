@@ -124,12 +124,12 @@ abstract class CommonPacketRepositoryTest {
         val firstId = repository.savePacket(0, "0!aaaa0001", first, 1L)
         val secondId = repository.savePacket(0, "0!aaaa0001", second, 2L)
         val meshPacket =
-            MeshPacket(
-                from = 1,
-                to = 0xAAAA0001.toInt(),
-                id = 77,
-                decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP),
-            )
+            MeshPacket.Builder().also { wb ->
+            wb.from = 1
+            wb.to = 0xAAAA0001.toInt()
+            wb.id = 77
+            wb.decoded = Data.Builder().also { wb ->wb.portnum = PortNum.TEXT_MESSAGE_APP}.build()
+            }.build()
 
         assertNotEquals(firstId, secondId)
         assertEquals("first", repository.getPacketByPersistedId(firstId)?.text)
@@ -309,12 +309,12 @@ abstract class CommonPacketRepositoryTest {
 
         val updated =
             repository.updateOutgoingMessageStatus(
-                MeshPacket(
-                    from = 0x11111111,
-                    to = 0x22222222,
-                    id = packetId,
-                    decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP),
-                ),
+                MeshPacket.Builder().also { wb ->
+                wb.from = 0x11111111
+                wb.to = 0x22222222
+                wb.id = packetId
+                wb.decoded = Data.Builder().also { wb ->wb.portnum = PortNum.TEXT_MESSAGE_APP}.build()
+                }.build(),
                 MessageStatus.ENROUTE,
             )
 
@@ -402,5 +402,5 @@ abstract class CommonPacketRepositoryTest {
         assertNull(pagedCandidates.singleOrNull())
     }
 
-    private fun testNode(id: String?): Node = Node(num = 0, user = User(id = id.orEmpty()))
+    private fun testNode(id: String?): Node = Node(num = 0, user = User.Builder().also { wb ->wb.id = id.orEmpty()}.build())
 }

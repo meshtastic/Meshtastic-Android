@@ -103,17 +103,17 @@ class NodeTest {
 
     @Test
     fun isUnknownUser_falseWhenHardwareModelIsKnown() {
-        val node = Node(num = 1, user = User(hw_model = HardwareModel.TLORA_V2))
+        val node = Node(num = 1, user = User.Builder().also { wb ->wb.hw_model = HardwareModel.TLORA_V2}.build())
 
         assertFalse(node.isUnknownUser)
     }
 
     @Test
     fun validPosition_returnsPositionOnlyForValidCoordinates() {
-        val validPosition = Position(latitude_i = 377749000, longitude_i = -1224194000)
+        val validPosition = Position.Builder().also { wb ->wb.latitude_i = 377749000; wb.longitude_i = -1224194000}.build()
         val validNode = Node(num = 1, position = validPosition)
-        val zeroNode = Node(num = 2, position = Position(latitude_i = 0, longitude_i = 0))
-        val outOfRangeNode = Node(num = 3, position = Position(latitude_i = 910000000, longitude_i = -1224194000))
+        val zeroNode = Node(num = 2, position = Position.Builder().also { wb ->wb.latitude_i = 0; wb.longitude_i = 0}.build())
+        val outOfRangeNode = Node(num = 3, position = Position.Builder().also { wb ->wb.latitude_i = 910000000; wb.longitude_i = -1224194000}.build())
 
         assertEquals(validPosition, validNode.validPosition)
         assertEquals(null, zeroNode.validPosition)
@@ -123,7 +123,7 @@ class NodeTest {
     @Test
     fun hasPKC_usesUserPublicKeyWhenNodeKeyIsMissing() {
         val key = ByteArray(32) { (it + 1).toByte() }.toByteString()
-        val node = Node(num = 1, user = User(public_key = key))
+        val node = Node(num = 1, user = User.Builder().also { wb ->wb.public_key = key}.build())
 
         assertTrue(node.hasPKC)
         assertFalse(node.mismatchKey)
@@ -139,7 +139,7 @@ class NodeTest {
 
     @Test
     fun matchesSearch_isCaseInsensitiveForNonAsciiLetters() {
-        val node = Node(num = 1, user = User(long_name = "KOLSÅS", short_name = "KOLS"))
+        val node = Node(num = 1, user = User.Builder().also { wb ->wb.long_name = "KOLSÅS"; wb.short_name = "KOLS"}.build())
 
         // #6750: "kols" matched via ASCII-only SQL LIKE folding, but "kolså" did not.
         assertTrue(node.matchesSearch("kols"))
@@ -150,7 +150,7 @@ class NodeTest {
 
     @Test
     fun matchesSearch_matchesHexAndDecimalNodeId() {
-        val node = Node(num = -1, user = User(id = "!ffffffff"))
+        val node = Node(num = -1, user = User.Builder().also { wb ->wb.id = "!ffffffff"}.build())
 
         assertTrue(node.matchesSearch("ffffffff"))
         assertTrue(node.matchesSearch("4294967295"))
@@ -163,5 +163,5 @@ class NodeTest {
     }
 
     private fun nodeWithPosition(num: Int, latitudeI: Int, longitudeI: Int): Node =
-        Node(num = num, position = Position(latitude_i = latitudeI, longitude_i = longitudeI))
+        Node(num = num, position = Position.Builder().also { wb ->wb.latitude_i = latitudeI; wb.longitude_i = longitudeI}.build())
 }

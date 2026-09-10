@@ -25,7 +25,7 @@ import org.meshtastic.proto.LocalStats
 
 /** Serializer for the [LocalStats] object defined in telemetry.proto. */
 object LocalStatsSerializer : OkioSerializer<LocalStats> {
-    override val defaultValue: LocalStats = LocalStats()
+    override val defaultValue: LocalStats = LocalStats.Builder().build()
 
     override suspend fun readFrom(source: BufferedSource): LocalStats {
         try {

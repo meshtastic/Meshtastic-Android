@@ -83,12 +83,12 @@ class StoreForwardPacketHandlerImplTest {
 
     private fun makeSfPacket(from: Int, sf: StoreAndForward): MeshPacket {
         val payload = sf.encode().toByteString()
-        return MeshPacket(from = from, decoded = Data(portnum = PortNum.STORE_FORWARD_APP, payload = payload))
+        return MeshPacket.Builder().also { wb ->wb.from = from; wb.decoded = Data.Builder().also { wb ->wb.portnum = PortNum.STORE_FORWARD_APP; wb.payload = payload}.build()}.build()
     }
 
     private fun makeSfppPacket(from: Int, sfpp: StoreForwardPlusPlus): MeshPacket {
         val payload = sfpp.encode().toByteString()
-        return MeshPacket(from = from, decoded = Data(portnum = PortNum.STORE_FORWARD_APP, payload = payload))
+        return MeshPacket.Builder().also { wb ->wb.from = from; wb.decoded = Data.Builder().also { wb ->wb.portnum = PortNum.STORE_FORWARD_APP; wb.payload = payload}.build()}.build()
     }
 
     private fun makeDataPacket(from: Int): DataPacket = DataPacket(
@@ -105,9 +105,9 @@ class StoreForwardPacketHandlerImplTest {
     @Test
     fun `handleStoreAndForward stats creates text data packet`() = testScope.runTest {
         val sf =
-            StoreAndForward(
-                stats = StoreAndForward.Statistics(messages_total = 100, messages_saved = 50, messages_max = 200),
-            )
+            StoreAndForward.Builder().also { wb ->
+            wb.stats = StoreAndForward.Statistics.Builder().also { wb ->wb.messages_total = 100; wb.messages_saved = 50; wb.messages_max = 200}.build()
+            }.build()
         val packet = makeSfPacket(999, sf)
         val dataPacket = makeDataPacket(999)
 
@@ -122,10 +122,9 @@ class StoreForwardPacketHandlerImplTest {
     @Test
     fun `handleStoreAndForward history creates text packet and updates last request`() = testScope.runTest {
         val sf =
-            StoreAndForward(
-                history =
-                StoreAndForward.History(history_messages = 42, window = 3600000, last_request = 1700000000),
-            )
+            StoreAndForward.Builder().also { wb ->
+            wb.history = StoreAndForward.History.Builder().also { wb ->wb.history_messages = 42; wb.window = 3600000; wb.last_request = 1700000000}.build()
+            }.build()
         val packet = makeSfPacket(999, sf)
         val dataPacket = makeDataPacket(999)
 
@@ -140,7 +139,7 @@ class StoreForwardPacketHandlerImplTest {
 
     @Test
     fun `handleStoreAndForward heartbeat does not crash`() = testScope.runTest {
-        val sf = StoreAndForward(heartbeat = StoreAndForward.Heartbeat(period = 900, secondary = 1))
+        val sf = StoreAndForward.Builder().also { wb ->wb.heartbeat = StoreAndForward.Heartbeat.Builder().also { wb ->wb.period = 900; wb.secondary = 1}.build()}.build()
         val packet = makeSfPacket(999, sf)
         val dataPacket = makeDataPacket(999)
 
@@ -154,10 +153,10 @@ class StoreForwardPacketHandlerImplTest {
     @Test
     fun `handleStoreAndForward text with broadcast rr sets to broadcast`() = testScope.runTest {
         val sf =
-            StoreAndForward(
-                text = "Hello from router".encodeToByteArray().toByteString(),
-                rr = StoreAndForward.RequestResponse.ROUTER_TEXT_BROADCAST,
-            )
+            StoreAndForward.Builder().also { wb ->
+            wb.text = "Hello from router".encodeToByteArray().toByteString()
+            wb.rr = StoreAndForward.RequestResponse.ROUTER_TEXT_BROADCAST
+            }.build()
         val packet = makeSfPacket(999, sf)
         val dataPacket = makeDataPacket(999)
 
@@ -170,10 +169,10 @@ class StoreForwardPacketHandlerImplTest {
     @Test
     fun `handleStoreAndForward text without broadcast rr preserves destination`() = testScope.runTest {
         val sf =
-            StoreAndForward(
-                text = "Direct message".encodeToByteArray().toByteString(),
-                rr = StoreAndForward.RequestResponse.ROUTER_TEXT_DIRECT,
-            )
+            StoreAndForward.Builder().also { wb ->
+            wb.text = "Direct message".encodeToByteArray().toByteString()
+            wb.rr = StoreAndForward.RequestResponse.ROUTER_TEXT_DIRECT
+            }.build()
         val packet = makeSfPacket(999, sf)
         val dataPacket = makeDataPacket(999)
 
@@ -187,7 +186,7 @@ class StoreForwardPacketHandlerImplTest {
 
     @Test
     fun `handleStoreAndForward with null payload returns early`() = testScope.runTest {
-        val packet = MeshPacket(from = 999, decoded = null)
+        val packet = MeshPacket.Builder().also { wb ->wb.from = 999; wb.decoded = null}.build()
         val dataPacket = makeDataPacket(999)
 
         handler.handleStoreAndForward(packet, dataPacket, myNodeNum)
@@ -199,7 +198,7 @@ class StoreForwardPacketHandlerImplTest {
 
     @Test
     fun `handleStoreAndForward with no fields set does not crash`() = testScope.runTest {
-        val sf = StoreAndForward()
+        val sf = StoreAndForward.Builder().build()
         val packet = makeSfPacket(999, sf)
         val dataPacket = makeDataPacket(999)
 
@@ -213,14 +212,14 @@ class StoreForwardPacketHandlerImplTest {
     @Test
     fun `handleStoreForwardPlusPlus LINK_PROVIDE with message_hash updates status`() = testScope.runTest {
         val sfpp =
-            StoreForwardPlusPlus(
-                sfpp_message_type = StoreForwardPlusPlus.SFPP_message_type.LINK_PROVIDE,
-                encapsulated_id = 42,
-                encapsulated_from = 1000,
-                encapsulated_to = 2000,
-                message_hash = ByteString.of(0x01, 0x02, 0x03, 0x04),
-                commit_hash = ByteString.EMPTY,
-            )
+            StoreForwardPlusPlus.Builder().also { wb ->
+            wb.sfpp_message_type = StoreForwardPlusPlus.SFPP_message_type.LINK_PROVIDE
+            wb.encapsulated_id = 42
+            wb.encapsulated_from = 1000
+            wb.encapsulated_to = 2000
+            wb.message_hash = ByteString.of(0x01, 0x02, 0x03, 0x04)
+            wb.commit_hash = ByteString.EMPTY
+            }.build()
         val packet = makeSfppPacket(999, sfpp)
 
         handler.handleStoreForwardPlusPlus(packet)
@@ -233,13 +232,13 @@ class StoreForwardPacketHandlerImplTest {
     fun `SFPP update from a retired same-address generation is rejected`() = testScope.runTest {
         val oldSession = RadioSessionContext(generation = 4L, address = "ble:same")
         val sfpp =
-            StoreForwardPlusPlus(
-                sfpp_message_type = StoreForwardPlusPlus.SFPP_message_type.LINK_PROVIDE,
-                encapsulated_id = 42,
-                encapsulated_from = 1000,
-                encapsulated_to = 2000,
-                message_hash = ByteString.of(0x01, 0x02, 0x03, 0x04),
-            )
+            StoreForwardPlusPlus.Builder().also { wb ->
+            wb.sfpp_message_type = StoreForwardPlusPlus.SFPP_message_type.LINK_PROVIDE
+            wb.encapsulated_id = 42
+            wb.encapsulated_from = 1000
+            wb.encapsulated_to = 2000
+            wb.message_hash = ByteString.of(0x01, 0x02, 0x03, 0x04)
+            }.build()
         val packet = makeSfppPacket(999, sfpp)
         everySuspend { radioInterfaceService.runWithSessionLease(oldSession, any()) } returns false
 
@@ -256,11 +255,11 @@ class StoreForwardPacketHandlerImplTest {
     @Test
     fun `handleStoreForwardPlusPlus CANON_ANNOUNCE updates status by hash`() = testScope.runTest {
         val sfpp =
-            StoreForwardPlusPlus(
-                sfpp_message_type = StoreForwardPlusPlus.SFPP_message_type.CANON_ANNOUNCE,
-                message_hash = ByteString.of(0xAA.toByte(), 0xBB.toByte()),
-                encapsulated_rxtime = 1700000000,
-            )
+            StoreForwardPlusPlus.Builder().also { wb ->
+            wb.sfpp_message_type = StoreForwardPlusPlus.SFPP_message_type.CANON_ANNOUNCE
+            wb.message_hash = ByteString.of(0xAA.toByte(), 0xBB.toByte())
+            wb.encapsulated_rxtime = 1700000000
+            }.build()
         val packet = makeSfppPacket(999, sfpp)
 
         handler.handleStoreForwardPlusPlus(packet)
@@ -273,7 +272,7 @@ class StoreForwardPacketHandlerImplTest {
 
     @Test
     fun `handleStoreForwardPlusPlus CHAIN_QUERY logs info without crash`() = testScope.runTest {
-        val sfpp = StoreForwardPlusPlus(sfpp_message_type = StoreForwardPlusPlus.SFPP_message_type.CHAIN_QUERY)
+        val sfpp = StoreForwardPlusPlus.Builder().also { wb ->wb.sfpp_message_type = StoreForwardPlusPlus.SFPP_message_type.CHAIN_QUERY}.build()
         val packet = makeSfppPacket(999, sfpp)
 
         handler.handleStoreForwardPlusPlus(packet)
@@ -285,7 +284,7 @@ class StoreForwardPacketHandlerImplTest {
 
     @Test
     fun `handleStoreForwardPlusPlus LINK_REQUEST logs info without crash`() = testScope.runTest {
-        val sfpp = StoreForwardPlusPlus(sfpp_message_type = StoreForwardPlusPlus.SFPP_message_type.LINK_REQUEST)
+        val sfpp = StoreForwardPlusPlus.Builder().also { wb ->wb.sfpp_message_type = StoreForwardPlusPlus.SFPP_message_type.LINK_REQUEST}.build()
         val packet = makeSfppPacket(999, sfpp)
 
         handler.handleStoreForwardPlusPlus(packet)
@@ -297,7 +296,7 @@ class StoreForwardPacketHandlerImplTest {
 
     @Test
     fun `handleStoreForwardPlusPlus with null payload returns early`() = testScope.runTest {
-        val packet = MeshPacket(from = 999, decoded = null)
+        val packet = MeshPacket.Builder().also { wb ->wb.from = 999; wb.decoded = null}.build()
 
         handler.handleStoreForwardPlusPlus(packet)
         advanceUntilIdle()
@@ -309,14 +308,14 @@ class StoreForwardPacketHandlerImplTest {
     @Test
     fun `handleStoreForwardPlusPlus LINK_PROVIDE_FIRSTHALF handled as link provide`() = testScope.runTest {
         val sfpp =
-            StoreForwardPlusPlus(
-                sfpp_message_type = StoreForwardPlusPlus.SFPP_message_type.LINK_PROVIDE_FIRSTHALF,
-                encapsulated_id = 55,
-                encapsulated_from = 1000,
-                encapsulated_to = 2000,
-                message_hash = ByteString.of(0x01, 0x02),
-                commit_hash = ByteString.EMPTY,
-            )
+            StoreForwardPlusPlus.Builder().also { wb ->
+            wb.sfpp_message_type = StoreForwardPlusPlus.SFPP_message_type.LINK_PROVIDE_FIRSTHALF
+            wb.encapsulated_id = 55
+            wb.encapsulated_from = 1000
+            wb.encapsulated_to = 2000
+            wb.message_hash = ByteString.of(0x01, 0x02)
+            wb.commit_hash = ByteString.EMPTY
+            }.build()
         val packet = makeSfppPacket(999, sfpp)
 
         handler.handleStoreForwardPlusPlus(packet)
@@ -328,14 +327,14 @@ class StoreForwardPacketHandlerImplTest {
     @Test
     fun `handleStoreForwardPlusPlus LINK_PROVIDE_SECONDHALF handled as link provide`() = testScope.runTest {
         val sfpp =
-            StoreForwardPlusPlus(
-                sfpp_message_type = StoreForwardPlusPlus.SFPP_message_type.LINK_PROVIDE_SECONDHALF,
-                encapsulated_id = 56,
-                encapsulated_from = 1000,
-                encapsulated_to = 2000,
-                message_hash = ByteString.of(0x03, 0x04),
-                commit_hash = ByteString.EMPTY,
-            )
+            StoreForwardPlusPlus.Builder().also { wb ->
+            wb.sfpp_message_type = StoreForwardPlusPlus.SFPP_message_type.LINK_PROVIDE_SECONDHALF
+            wb.encapsulated_id = 56
+            wb.encapsulated_from = 1000
+            wb.encapsulated_to = 2000
+            wb.message_hash = ByteString.of(0x03, 0x04)
+            wb.commit_hash = ByteString.EMPTY
+            }.build()
         val packet = makeSfppPacket(999, sfpp)
 
         handler.handleStoreForwardPlusPlus(packet)
@@ -349,14 +348,16 @@ class StoreForwardPacketHandlerImplTest {
     @Test
     fun `handleStoreForwardPlusPlus LINK_PROVIDE with commit_hash sets SFPP_CONFIRMED`() = testScope.runTest {
         val sfpp =
-            StoreForwardPlusPlus(
-                sfpp_message_type = StoreForwardPlusPlus.SFPP_message_type.LINK_PROVIDE,
-                encapsulated_id = 77,
-                encapsulated_from = 1000,
-                encapsulated_to = 2000,
-                message_hash = ByteString.of(0x01, 0x02),
-                commit_hash = ByteString.of(0xAA.toByte()), // non-empty
-            )
+            StoreForwardPlusPlus.Builder()
+                .also { wb ->
+                    wb.sfpp_message_type = StoreForwardPlusPlus.SFPP_message_type.LINK_PROVIDE
+                    wb.encapsulated_id = 77
+                    wb.encapsulated_from = 1000
+                    wb.encapsulated_to = 2000
+                    wb.message_hash = ByteString.of(0x01, 0x02)
+                    wb.commit_hash = ByteString.of(0xAA.toByte()) // non-empty
+                }
+                .build()
         val packet = makeSfppPacket(999, sfpp)
 
         handler.handleStoreForwardPlusPlus(packet)
@@ -371,7 +372,7 @@ class StoreForwardPacketHandlerImplTest {
     fun `handleStoreAndForward with malformed payload does not crash`() = testScope.runTest {
         val malformedPayload = ByteString.of(0xFF.toByte(), 0xFE.toByte(), 0x07, 0x0E)
         val packet =
-            MeshPacket(from = 999, decoded = Data(portnum = PortNum.STORE_FORWARD_APP, payload = malformedPayload))
+            MeshPacket.Builder().also { wb ->wb.from = 999; wb.decoded = Data.Builder().also { wb ->wb.portnum = PortNum.STORE_FORWARD_APP; wb.payload = malformedPayload}.build()}.build()
         val dataPacket = makeDataPacket(999)
 
         // Should not throw — the handler catches the IOException from proto decoding

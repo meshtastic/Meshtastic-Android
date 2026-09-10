@@ -43,7 +43,7 @@ import org.meshtastic.core.model.Channel as ModelChannel
 class ProtoExtensionsTest {
     @Test
     fun index_zero_emits_primary_with_new_settings_even_when_unchanged_from_old() {
-        val same = ChannelSettings(name = "Main", psk = byteArrayOf(1, 2, 3).toByteString())
+        val same = ChannelSettings.Builder().also { wb ->wb.name = "Main"; wb.psk = byteArrayOf(1, 2, 3).toByteString()}.build()
 
         val result = getChannelReplacementList(new = listOf(same), currentSettings = listOf(same))
 
@@ -55,8 +55,8 @@ class ProtoExtensionsTest {
 
     @Test
     fun secondary_indices_emit_secondary_with_new_settings_even_when_unchanged_from_old() {
-        val primary = ChannelSettings(name = "Main")
-        val secondary = ChannelSettings(name = "Chat")
+        val primary = ChannelSettings.Builder().also { wb ->wb.name = "Main"}.build()
+        val secondary = ChannelSettings.Builder().also { wb ->wb.name = "Chat"}.build()
 
         val result =
             getChannelReplacementList(new = listOf(primary, secondary), currentSettings = listOf(primary, secondary))
@@ -71,12 +71,12 @@ class ProtoExtensionsTest {
 
     @Test
     fun old_trailing_indices_beyond_new_are_emitted_as_disabled_with_empty_settings() {
-        val primary = ChannelSettings(name = "Main")
+        val primary = ChannelSettings.Builder().also { wb ->wb.name = "Main"}.build()
 
         val result =
             getChannelReplacementList(
                 new = listOf(primary),
-                currentSettings = listOf(primary, ChannelSettings(name = "Old")),
+                currentSettings = listOf(primary, ChannelSettings.Builder().also { wb ->wb.name = "Old"}.build()),
             )
 
         // index 0 PRIMARY (new), index 1 DISABLED (trailing old slot)
@@ -85,7 +85,7 @@ class ProtoExtensionsTest {
         assertEquals(primary, result[0].settings)
         assertEquals(Channel.Role.DISABLED, result[1].role)
         assertEquals(1, result[1].index)
-        assertEquals(ChannelSettings(), result[1].settings)
+        assertEquals(ChannelSettings.Builder().build(), result[1].settings)
     }
 
     @Test
@@ -98,7 +98,7 @@ class ProtoExtensionsTest {
     @Test
     fun empty_new_with_non_empty_current_emits_disabled_for_every_current_index() {
         val currentSettings =
-            listOf(ChannelSettings(name = "A"), ChannelSettings(name = "B"), ChannelSettings(name = "C"))
+            listOf(ChannelSettings.Builder().also { wb ->wb.name = "A"}.build(), ChannelSettings.Builder().also { wb ->wb.name = "B"}.build(), ChannelSettings.Builder().also { wb ->wb.name = "C"}.build())
 
         val result = getChannelReplacementList(new = emptyList(), currentSettings = currentSettings)
 
@@ -106,18 +106,18 @@ class ProtoExtensionsTest {
         result.forEachIndexed { i, channel ->
             assertEquals(Channel.Role.DISABLED, channel.role, "index $i should be DISABLED")
             assertEquals(i, channel.index)
-            assertEquals(ChannelSettings(), channel.settings, "index $i should carry empty settings")
+            assertEquals(ChannelSettings.Builder().build(), channel.settings, "index $i should carry empty settings")
         }
     }
 
     @Test
     fun single_entry_new_with_multi_entry_current_emits_primary_then_disabled_trailing() {
-        val newPrimary = ChannelSettings(name = "Imported")
+        val newPrimary = ChannelSettings.Builder().also { wb ->wb.name = "Imported"}.build()
         val currentSettings =
             listOf(
-                ChannelSettings(name = "CurrentPrimary"),
-                ChannelSettings(name = "CurrentSecondary"),
-                ChannelSettings(name = "CurrentTertiary"),
+                ChannelSettings.Builder().also { wb ->wb.name = "CurrentPrimary"}.build(),
+                ChannelSettings.Builder().also { wb ->wb.name = "CurrentSecondary"}.build(),
+                ChannelSettings.Builder().also { wb ->wb.name = "CurrentTertiary"}.build(),
             )
 
         val result = getChannelReplacementList(new = listOf(newPrimary), currentSettings = currentSettings)
@@ -128,15 +128,15 @@ class ProtoExtensionsTest {
         assertEquals(newPrimary, result[0].settings)
         assertEquals(Channel.Role.DISABLED, result[1].role)
         assertEquals(Channel.Role.DISABLED, result[2].role)
-        assertEquals(ChannelSettings(), result[1].settings)
-        assertEquals(ChannelSettings(), result[2].settings)
+        assertEquals(ChannelSettings.Builder().build(), result[1].settings)
+        assertEquals(ChannelSettings.Builder().build(), result[2].settings)
     }
 
     @Test
     fun new_larger_than_old_emits_primary_plus_secondaries_for_every_new_index() {
-        val primary = ChannelSettings(name = "Main")
-        val secondaryA = ChannelSettings(name = "Chat")
-        val secondaryB = ChannelSettings(name = "Data")
+        val primary = ChannelSettings.Builder().also { wb ->wb.name = "Main"}.build()
+        val secondaryA = ChannelSettings.Builder().also { wb ->wb.name = "Chat"}.build()
+        val secondaryB = ChannelSettings.Builder().also { wb ->wb.name = "Data"}.build()
 
         val result =
             getChannelReplacementList(new = listOf(primary, secondaryA, secondaryB), currentSettings = listOf(primary))
@@ -157,7 +157,7 @@ class ProtoExtensionsTest {
     fun replacement_list_rejects_minimum_slot_count_above_maximum_slot_count() {
         assertFailsWith<IllegalArgumentException> {
             getChannelReplacementList(
-                new = listOf(ChannelSettings(name = "Main")),
+                new = listOf(ChannelSettings.Builder().also { wb ->wb.name = "Main"}.build()),
                 currentSettings = emptyList(),
                 minimumSlotCount = 2,
                 maximumSlotCount = 1,
@@ -171,15 +171,15 @@ class ProtoExtensionsTest {
         val radioConfigRepository = FakeRadioConfigRepository()
         val oldSettings =
             listOf(
-                ChannelSettings(name = "Old Primary"),
-                ChannelSettings(name = "Old Secondary"),
-                ChannelSettings(name = "Old Tertiary"),
+                ChannelSettings.Builder().also { wb ->wb.name = "Old Primary"}.build(),
+                ChannelSettings.Builder().also { wb ->wb.name = "Old Secondary"}.build(),
+                ChannelSettings.Builder().also { wb ->wb.name = "Old Tertiary"}.build(),
             )
-        val importedSettings = listOf(ChannelSettings(name = "Imported"), ChannelSettings(name = "Private"))
-        radioConfigRepository.setChannelSet(ChannelSet(settings = oldSettings))
+        val importedSettings = listOf(ChannelSettings.Builder().also { wb ->wb.name = "Imported"}.build(), ChannelSettings.Builder().also { wb ->wb.name = "Private"}.build())
+        radioConfigRepository.setChannelSet(ChannelSet.Builder().also { wb ->wb.settings = oldSettings}.build())
 
         importChannelSet(
-            channelSet = ChannelSet(settings = importedSettings),
+            channelSet = ChannelSet.Builder().also { wb ->wb.settings = importedSettings}.build(),
             radioController = radioController,
             radioConfigRepository = radioConfigRepository,
         )
@@ -199,7 +199,7 @@ class ProtoExtensionsTest {
             radioController.localChannels.map { it.role },
         )
         assertEquals(
-            importedSettings + List(6) { ChannelSettings() },
+            importedSettings + List(6) { ChannelSettings.Builder().build() },
             radioController.localChannels.map { it.settings ?: error("Channel write omitted settings") },
         )
         assertEquals(importedSettings, radioConfigRepository.currentChannelSet.settings)
@@ -211,18 +211,18 @@ class ProtoExtensionsTest {
         val radioConfigRepository = FakeRadioConfigRepository()
         val oldSettings =
             listOf(
-                ChannelSettings(name = "Old Primary"),
-                ChannelSettings(name = "Old Secondary"),
-                ChannelSettings(name = "Old Tertiary"),
+                ChannelSettings.Builder().also { wb ->wb.name = "Old Primary"}.build(),
+                ChannelSettings.Builder().also { wb ->wb.name = "Old Secondary"}.build(),
+                ChannelSettings.Builder().also { wb ->wb.name = "Old Tertiary"}.build(),
             )
-        val importedSettings = listOf(ChannelSettings(name = "Imported"), ChannelSettings(name = "Private"))
-        radioConfigRepository.setChannelSet(ChannelSet(settings = oldSettings))
+        val importedSettings = listOf(ChannelSettings.Builder().also { wb ->wb.name = "Imported"}.build(), ChannelSettings.Builder().also { wb ->wb.name = "Private"}.build())
+        radioConfigRepository.setChannelSet(ChannelSet.Builder().also { wb ->wb.settings = oldSettings}.build())
 
         // A write failing inside the editLocalSettings session propagates out before the post-session cache
         // replace, so the local cache stays exactly as it was — nothing partially applied.
         assertFailsWith<IllegalStateException> {
             importChannelSet(
-                channelSet = ChannelSet(settings = importedSettings),
+                channelSet = ChannelSet.Builder().also { wb ->wb.settings = importedSettings}.build(),
                 radioController = radioController,
                 radioConfigRepository = radioConfigRepository,
             )
@@ -235,13 +235,13 @@ class ProtoExtensionsTest {
     fun import_rejects_imported_settings_beyond_slot_count_before_writing() = runTest {
         val radioController = FakeRadioController()
         val radioConfigRepository = FakeRadioConfigRepository()
-        val oldSettings = listOf(ChannelSettings(name = "Old"))
-        val oversizedSettings = (0..8).map { index -> ChannelSettings(name = "Imported $index") }
-        radioConfigRepository.setChannelSet(ChannelSet(settings = oldSettings))
+        val oldSettings = listOf(ChannelSettings.Builder().also { wb ->wb.name = "Old"}.build())
+        val oversizedSettings = (0..8).map { index -> ChannelSettings.Builder().also { wb ->wb.name = "Imported $index"}.build() }
+        radioConfigRepository.setChannelSet(ChannelSet.Builder().also { wb ->wb.settings = oldSettings}.build())
 
         assertFailsWith<IllegalArgumentException> {
             importChannelSet(
-                channelSet = ChannelSet(settings = oversizedSettings),
+                channelSet = ChannelSet.Builder().also { wb ->wb.settings = oversizedSettings}.build(),
                 radioController = radioController,
                 radioConfigRepository = radioConfigRepository,
             )
@@ -255,12 +255,12 @@ class ProtoExtensionsTest {
     fun replacement_apply_ignores_cached_settings_beyond_slot_count() = runTest {
         val radioController = FakeRadioController()
         val radioConfigRepository = FakeRadioConfigRepository()
-        val oldSettings = (0..9).map { index -> ChannelSettings(name = "Old $index") }
-        val importedSettings = listOf(ChannelSettings(name = "Imported"))
-        radioConfigRepository.setChannelSet(ChannelSet(settings = oldSettings))
+        val oldSettings = (0..9).map { index -> ChannelSettings.Builder().also { wb ->wb.name = "Old $index"}.build() }
+        val importedSettings = listOf(ChannelSettings.Builder().also { wb ->wb.name = "Imported"}.build())
+        radioConfigRepository.setChannelSet(ChannelSet.Builder().also { wb ->wb.settings = oldSettings}.build())
 
         importChannelSet(
-            channelSet = ChannelSet(settings = importedSettings),
+            channelSet = ChannelSet.Builder().also { wb ->wb.settings = importedSettings}.build(),
             radioController = radioController,
             radioConfigRepository = radioConfigRepository,
         )
@@ -273,19 +273,19 @@ class ProtoExtensionsTest {
     fun replacement_apply_normalizes_oversized_raw_import_under_limit_before_writing() = runTest {
         val radioController = FakeRadioController()
         val radioConfigRepository = FakeRadioConfigRepository()
-        radioConfigRepository.setChannelSet(ChannelSet(settings = listOf(ChannelSettings(name = "Old"))))
+        radioConfigRepository.setChannelSet(ChannelSet.Builder().also { wb ->wb.settings = listOf(ChannelSettings.Builder().also { wb ->wb.name = "Old"}.build())}.build())
         // 9 raw entries: 7 unique valid secondaries + 2 blank placeholders -> normalizes to 7 (under the 8-slot limit).
-        val ch0 = ChannelSettings(name = "Ch0", psk = byteArrayOf(1).toByteString())
-        val ch1 = ChannelSettings(name = "Ch1", psk = byteArrayOf(2).toByteString())
-        val ch2 = ChannelSettings(name = "Ch2", psk = byteArrayOf(3).toByteString())
-        val ch3 = ChannelSettings(name = "Ch3", psk = byteArrayOf(4).toByteString())
-        val ch4 = ChannelSettings(name = "Ch4", psk = byteArrayOf(5).toByteString())
-        val ch5 = ChannelSettings(name = "Ch5", psk = byteArrayOf(6).toByteString())
-        val ch6 = ChannelSettings(name = "Ch6", psk = byteArrayOf(7).toByteString())
-        val raw = listOf(ch0, ch1, ChannelSettings(), ch2, ch3, ChannelSettings(), ch4, ch5, ch6)
+        val ch0 = ChannelSettings.Builder().also { wb ->wb.name = "Ch0"; wb.psk = byteArrayOf(1).toByteString()}.build()
+        val ch1 = ChannelSettings.Builder().also { wb ->wb.name = "Ch1"; wb.psk = byteArrayOf(2).toByteString()}.build()
+        val ch2 = ChannelSettings.Builder().also { wb ->wb.name = "Ch2"; wb.psk = byteArrayOf(3).toByteString()}.build()
+        val ch3 = ChannelSettings.Builder().also { wb ->wb.name = "Ch3"; wb.psk = byteArrayOf(4).toByteString()}.build()
+        val ch4 = ChannelSettings.Builder().also { wb ->wb.name = "Ch4"; wb.psk = byteArrayOf(5).toByteString()}.build()
+        val ch5 = ChannelSettings.Builder().also { wb ->wb.name = "Ch5"; wb.psk = byteArrayOf(6).toByteString()}.build()
+        val ch6 = ChannelSettings.Builder().also { wb ->wb.name = "Ch6"; wb.psk = byteArrayOf(7).toByteString()}.build()
+        val raw = listOf(ch0, ch1, ChannelSettings.Builder().build(), ch2, ch3, ChannelSettings.Builder().build(), ch4, ch5, ch6)
 
         importChannelSet(
-            channelSet = ChannelSet(settings = raw),
+            channelSet = ChannelSet.Builder().also { wb ->wb.settings = raw}.build(),
             radioController = radioController,
             radioConfigRepository = radioConfigRepository,
         )
@@ -298,15 +298,15 @@ class ProtoExtensionsTest {
     fun replacement_apply_rejects_settings_still_oversized_after_normalization_drops_placeholders() = runTest {
         val radioController = FakeRadioController()
         val radioConfigRepository = FakeRadioConfigRepository()
-        radioConfigRepository.setChannelSet(ChannelSet(settings = listOf(ChannelSettings(name = "Old"))))
+        radioConfigRepository.setChannelSet(ChannelSet.Builder().also { wb ->wb.settings = listOf(ChannelSettings.Builder().also { wb ->wb.name = "Old"}.build())}.build())
         // 10 raw entries: 9 genuinely unique + 1 blank placeholder. Normalization drops the blank
         // (-> 9) but the result still exceeds the 8-slot limit, so the post-normalize bounds check
         // must reject before any write or cache mutation.
-        val unique = (1..9).map { ChannelSettings(name = "Ch$it", psk = byteArrayOf(it.toByte(), 0).toByteString()) }
+        val unique = (1..9).map { ChannelSettings.Builder().also { wb ->wb.name = "Ch$it"; wb.psk = byteArrayOf(it.toByte(), 0).toByteString()}.build() }
 
         assertFailsWith<IllegalArgumentException> {
             importChannelSet(
-                channelSet = ChannelSet(settings = unique + ChannelSettings()),
+                channelSet = ChannelSet.Builder().also { wb ->wb.settings = unique + ChannelSettings.Builder().build()}.build(),
                 radioController = radioController,
                 radioConfigRepository = radioConfigRepository,
             )
@@ -322,9 +322,9 @@ class ProtoExtensionsTest {
         // Device is on MEDIUM_FAST. The import omits lora_config, so identity resolution must fall
         // back to the device's current preset to detect this duplicate.
         radioConfigRepository.setLocalConfigDirect(
-            LocalConfig(
-                lora = Config.LoRaConfig(use_preset = true, modem_preset = Config.LoRaConfig.ModemPreset.MEDIUM_FAST),
-            ),
+            LocalConfig.Builder().also { wb ->
+            wb.lora = Config.LoRaConfig.Builder().also { wb ->wb.use_preset = true; wb.modem_preset = Config.LoRaConfig.ModemPreset.MEDIUM_FAST}.build()
+            }.build(),
         )
         // Primary carries an explicit preset name; the secondary has an empty name that resolves to
         // the preset display name. Under MEDIUM_FAST the secondary resolves to "MediumFast" and
@@ -332,11 +332,11 @@ class ProtoExtensionsTest {
         // and survive — so asserting the secondary is dropped proves the current-local preset was
         // used for identity (a regression to Config.LoRaConfig() would fail this test).
         val psk = byteArrayOf(1, 2, 3).toByteString()
-        val primary = ChannelSettings(name = "MediumFast", psk = psk)
-        val unnamedSecondary = ChannelSettings(psk = psk)
+        val primary = ChannelSettings.Builder().also { wb ->wb.name = "MediumFast"; wb.psk = psk}.build()
+        val unnamedSecondary = ChannelSettings.Builder().also { wb ->wb.psk = psk}.build()
 
         importChannelSet(
-            channelSet = ChannelSet(settings = listOf(primary, unnamedSecondary)), // no lora_config
+            channelSet = ChannelSet.Builder().also { wb ->wb.settings = listOf(primary, unnamedSecondary)}.build(), // no lora_config
             radioController = radioController,
             radioConfigRepository = radioConfigRepository,
         )
@@ -349,43 +349,43 @@ class ProtoExtensionsTest {
     fun imported_lora_config_is_written_inside_the_same_transaction_when_it_differs() = runTest {
         val radioController = FakeRadioController()
         val radioConfigRepository = FakeRadioConfigRepository()
-        val imported = Config.LoRaConfig(region = Config.LoRaConfig.RegionCode.US)
+        val imported = Config.LoRaConfig.Builder().also { wb ->wb.region = Config.LoRaConfig.RegionCode.US}.build()
         radioConfigRepository.setLocalConfigDirect(
-            LocalConfig(lora = Config.LoRaConfig(region = Config.LoRaConfig.RegionCode.EU_868)),
+            LocalConfig.Builder().also { wb ->wb.lora = Config.LoRaConfig.Builder().also { wb ->wb.region = Config.LoRaConfig.RegionCode.EU_868}.build()}.build(),
         )
-        radioConfigRepository.setChannelSet(ChannelSet(settings = listOf(ChannelSettings(name = "Old"))))
+        radioConfigRepository.setChannelSet(ChannelSet.Builder().also { wb ->wb.settings = listOf(ChannelSettings.Builder().also { wb ->wb.name = "Old"}.build())}.build())
 
         importChannelSet(
-            channelSet = ChannelSet(settings = listOf(ChannelSettings(name = "Imported")), lora_config = imported),
+            channelSet = ChannelSet.Builder().also { wb ->wb.settings = listOf(ChannelSettings.Builder().also { wb ->wb.name = "Imported"}.build()); wb.lora_config = imported}.build(),
             radioController = radioController,
             radioConfigRepository = radioConfigRepository,
         )
 
         // LoRa write is the last op in the edit session, with no settle delays around it.
-        assertEquals(listOf(Config(lora = imported)), radioController.localConfigs)
+        assertEquals(listOf(Config.Builder().also { wb ->wb.lora = imported}.build()), radioController.localConfigs)
         assertEquals(imported, radioConfigRepository.currentChannelSet.lora_config)
     }
 
     @Test
     fun imported_lora_config_is_not_written_when_absent_or_unchanged() = runTest {
-        val current = Config.LoRaConfig(region = Config.LoRaConfig.RegionCode.US)
+        val current = Config.LoRaConfig.Builder().also { wb ->wb.region = Config.LoRaConfig.RegionCode.US}.build()
 
         val absent = FakeRadioController()
         val absentRepo = FakeRadioConfigRepository()
-        absentRepo.setLocalConfigDirect(LocalConfig(lora = current))
-        absentRepo.setChannelSet(ChannelSet(settings = listOf(ChannelSettings(name = "Old"))))
+        absentRepo.setLocalConfigDirect(LocalConfig.Builder().also { wb ->wb.lora = current}.build())
+        absentRepo.setChannelSet(ChannelSet.Builder().also { wb ->wb.settings = listOf(ChannelSettings.Builder().also { wb ->wb.name = "Old"}.build())}.build())
         importChannelSet(
-            channelSet = ChannelSet(settings = listOf(ChannelSettings(name = "Imported"))), // no lora_config
+            channelSet = ChannelSet.Builder().also { wb ->wb.settings = listOf(ChannelSettings.Builder().also { wb ->wb.name = "Imported"}.build())}.build(), // no lora_config
             radioController = absent,
             radioConfigRepository = absentRepo,
         )
 
         val unchanged = FakeRadioController()
         val unchangedRepo = FakeRadioConfigRepository()
-        unchangedRepo.setLocalConfigDirect(LocalConfig(lora = current))
-        unchangedRepo.setChannelSet(ChannelSet(settings = listOf(ChannelSettings(name = "Old"))))
+        unchangedRepo.setLocalConfigDirect(LocalConfig.Builder().also { wb ->wb.lora = current}.build())
+        unchangedRepo.setChannelSet(ChannelSet.Builder().also { wb ->wb.settings = listOf(ChannelSettings.Builder().also { wb ->wb.name = "Old"}.build())}.build())
         importChannelSet(
-            channelSet = ChannelSet(settings = listOf(ChannelSettings(name = "Imported")), lora_config = current),
+            channelSet = ChannelSet.Builder().also { wb ->wb.settings = listOf(ChannelSettings.Builder().also { wb ->wb.name = "Imported"}.build()); wb.lora_config = current}.build(),
             radioController = unchanged,
             radioConfigRepository = unchangedRepo,
         )
@@ -398,7 +398,7 @@ class ProtoExtensionsTest {
 
     @Test
     fun preview_existing_channels_are_always_shown_and_selected() {
-        val existing = listOf(ChannelSettings(name = "A"), ChannelSettings(name = "B"))
+        val existing = listOf(ChannelSettings.Builder().also { wb ->wb.name = "A"}.build(), ChannelSettings.Builder().also { wb ->wb.name = "B"}.build())
 
         val preview = getChannelPreviewForAdd(existing, emptyList(), ModelChannel.default.loraConfig, maxChannels = 8)
 
@@ -408,7 +408,7 @@ class ProtoExtensionsTest {
 
     @Test
     fun preview_unique_incoming_channels_are_shown_and_selected() {
-        val incoming = listOf(ChannelSettings(name = "C"), ChannelSettings(name = "D"))
+        val incoming = listOf(ChannelSettings.Builder().also { wb ->wb.name = "C"}.build(), ChannelSettings.Builder().also { wb ->wb.name = "D"}.build())
 
         val preview = getChannelPreviewForAdd(emptyList(), incoming, ModelChannel.default.loraConfig, maxChannels = 8)
 
@@ -418,7 +418,7 @@ class ProtoExtensionsTest {
 
     @Test
     fun preview_incoming_duplicate_of_existing_is_omitted() {
-        val channel = ChannelSettings(name = "Test", psk = byteArrayOf(1).toByteString())
+        val channel = ChannelSettings.Builder().also { wb ->wb.name = "Test"; wb.psk = byteArrayOf(1).toByteString()}.build()
 
         val preview =
             getChannelPreviewForAdd(listOf(channel), listOf(channel), ModelChannel.default.loraConfig, maxChannels = 8)
@@ -428,8 +428,8 @@ class ProtoExtensionsTest {
 
     @Test
     fun preview_duplicate_inside_incoming_keeps_first_and_omits_later() {
-        val a = ChannelSettings(name = "A", psk = byteArrayOf(1).toByteString())
-        val b = ChannelSettings(name = "B", psk = byteArrayOf(2).toByteString())
+        val a = ChannelSettings.Builder().also { wb ->wb.name = "A"; wb.psk = byteArrayOf(1).toByteString()}.build()
+        val b = ChannelSettings.Builder().also { wb ->wb.name = "B"; wb.psk = byteArrayOf(2).toByteString()}.build()
 
         val preview =
             getChannelPreviewForAdd(emptyList(), listOf(a, a, b), ModelChannel.default.loraConfig, maxChannels = 8)
@@ -441,8 +441,8 @@ class ProtoExtensionsTest {
 
     @Test
     fun preview_same_name_different_psk_remains_visible() {
-        val existingChan = ChannelSettings(name = "A", psk = byteArrayOf(1).toByteString())
-        val incomingChan = ChannelSettings(name = "A", psk = byteArrayOf(2).toByteString())
+        val existingChan = ChannelSettings.Builder().also { wb ->wb.name = "A"; wb.psk = byteArrayOf(1).toByteString()}.build()
+        val incomingChan = ChannelSettings.Builder().also { wb ->wb.name = "A"; wb.psk = byteArrayOf(2).toByteString()}.build()
 
         val preview =
             getChannelPreviewForAdd(
@@ -459,8 +459,8 @@ class ProtoExtensionsTest {
     @Test
     fun preview_same_psk_different_name_remains_visible() {
         val psk = byteArrayOf(1, 2).toByteString()
-        val existingChan = ChannelSettings(name = "A", psk = psk)
-        val incomingChan = ChannelSettings(name = "B", psk = psk)
+        val existingChan = ChannelSettings.Builder().also { wb ->wb.name = "A"; wb.psk = psk}.build()
+        val incomingChan = ChannelSettings.Builder().also { wb ->wb.name = "B"; wb.psk = psk}.build()
 
         val preview =
             getChannelPreviewForAdd(
@@ -477,8 +477,8 @@ class ProtoExtensionsTest {
     @Test
     fun preview_empty_name_default_matches_explicit_preset_name_and_is_omitted() {
         val loraConfig = ModelChannel.default.loraConfig
-        val existingChan = ChannelSettings(psk = byteArrayOf(1).toByteString()) // resolves to "LongFast"
-        val incomingChan = ChannelSettings(name = "LongFast", psk = byteArrayOf(1).toByteString())
+        val existingChan = ChannelSettings.Builder().also { wb ->wb.psk = byteArrayOf(1).toByteString()}.build() // resolves to "LongFast"
+        val incomingChan = ChannelSettings.Builder().also { wb ->wb.name = "LongFast"; wb.psk = byteArrayOf(1).toByteString()}.build()
 
         val preview = getChannelPreviewForAdd(listOf(existingChan), listOf(incomingChan), loraConfig, maxChannels = 8)
 
@@ -488,8 +488,8 @@ class ProtoExtensionsTest {
     @Test
     fun preview_explicit_preset_name_matches_empty_name_default_and_is_omitted() {
         val loraConfig = ModelChannel.default.loraConfig
-        val existingChan = ChannelSettings(name = "LongFast", psk = byteArrayOf(1).toByteString())
-        val incomingChan = ChannelSettings(psk = byteArrayOf(1).toByteString()) // resolves to "LongFast"
+        val existingChan = ChannelSettings.Builder().also { wb ->wb.name = "LongFast"; wb.psk = byteArrayOf(1).toByteString()}.build()
+        val incomingChan = ChannelSettings.Builder().also { wb ->wb.psk = byteArrayOf(1).toByteString()}.build() // resolves to "LongFast"
 
         val preview = getChannelPreviewForAdd(listOf(existingChan), listOf(incomingChan), loraConfig, maxChannels = 8)
 
@@ -500,9 +500,9 @@ class ProtoExtensionsTest {
     fun preview_psk_marker_matches_expanded_default_key_and_is_omitted() {
         val loraConfig = ModelChannel.default.loraConfig
         val expandedPsk =
-            ModelChannel(settings = ChannelSettings(psk = byteArrayOf(1).toByteString()), loraConfig = loraConfig).psk
-        val markerChan = ChannelSettings(name = "Test", psk = byteArrayOf(1).toByteString())
-        val expandedChan = ChannelSettings(name = "Test", psk = expandedPsk)
+            ModelChannel(settings = ChannelSettings.Builder().also { wb ->wb.psk = byteArrayOf(1).toByteString()}.build(), loraConfig = loraConfig).psk
+        val markerChan = ChannelSettings.Builder().also { wb ->wb.name = "Test"; wb.psk = byteArrayOf(1).toByteString()}.build()
+        val expandedChan = ChannelSettings.Builder().also { wb ->wb.name = "Test"; wb.psk = expandedPsk}.build()
 
         val preview = getChannelPreviewForAdd(listOf(markerChan), listOf(expandedChan), loraConfig, maxChannels = 8)
 
@@ -511,9 +511,9 @@ class ProtoExtensionsTest {
 
     @Test
     fun preview_non_long_fast_preset_default_duplicate_is_omitted() {
-        val loraConfig = Config.LoRaConfig(use_preset = true, modem_preset = Config.LoRaConfig.ModemPreset.MEDIUM_FAST)
-        val existingChan = ChannelSettings(psk = byteArrayOf(1).toByteString()) // resolves to "MediumFast"
-        val incomingChan = ChannelSettings(name = "MediumFast", psk = byteArrayOf(1).toByteString())
+        val loraConfig = Config.LoRaConfig.Builder().also { wb ->wb.use_preset = true; wb.modem_preset = Config.LoRaConfig.ModemPreset.MEDIUM_FAST}.build()
+        val existingChan = ChannelSettings.Builder().also { wb ->wb.psk = byteArrayOf(1).toByteString()}.build() // resolves to "MediumFast"
+        val incomingChan = ChannelSettings.Builder().also { wb ->wb.name = "MediumFast"; wb.psk = byteArrayOf(1).toByteString()}.build()
 
         val preview = getChannelPreviewForAdd(listOf(existingChan), listOf(incomingChan), loraConfig, maxChannels = 8)
 
@@ -522,9 +522,9 @@ class ProtoExtensionsTest {
 
     @Test
     fun preview_omitted_duplicates_do_not_consume_capacity() {
-        val existing = listOf(ChannelSettings(name = "A"), ChannelSettings(name = "B"))
-        val dup = ChannelSettings(name = "A")
-        val unique = listOf(ChannelSettings(name = "C"), ChannelSettings(name = "D"), ChannelSettings(name = "E"))
+        val existing = listOf(ChannelSettings.Builder().also { wb ->wb.name = "A"}.build(), ChannelSettings.Builder().also { wb ->wb.name = "B"}.build())
+        val dup = ChannelSettings.Builder().also { wb ->wb.name = "A"}.build()
+        val unique = listOf(ChannelSettings.Builder().also { wb ->wb.name = "C"}.build(), ChannelSettings.Builder().also { wb ->wb.name = "D"}.build(), ChannelSettings.Builder().also { wb ->wb.name = "E"}.build())
 
         val preview =
             getChannelPreviewForAdd(existing, listOf(dup) + unique, ModelChannel.default.loraConfig, maxChannels = 5)
@@ -539,13 +539,13 @@ class ProtoExtensionsTest {
 
     @Test
     fun preview_over_capacity_unique_incoming_remains_visible_but_unchecked() {
-        val existing = listOf(ChannelSettings(name = "A"), ChannelSettings(name = "B"))
+        val existing = listOf(ChannelSettings.Builder().also { wb ->wb.name = "A"}.build(), ChannelSettings.Builder().also { wb ->wb.name = "B"}.build())
         val incoming =
             listOf(
-                ChannelSettings(name = "C"),
-                ChannelSettings(name = "D"),
-                ChannelSettings(name = "E"),
-                ChannelSettings(name = "F"),
+                ChannelSettings.Builder().also { wb ->wb.name = "C"}.build(),
+                ChannelSettings.Builder().also { wb ->wb.name = "D"}.build(),
+                ChannelSettings.Builder().also { wb ->wb.name = "E"}.build(),
+                ChannelSettings.Builder().also { wb ->wb.name = "F"}.build(),
             )
 
         val preview = getChannelPreviewForAdd(existing, incoming, ModelChannel.default.loraConfig, maxChannels = 4)
@@ -560,8 +560,8 @@ class ProtoExtensionsTest {
 
     @Test
     fun preview_existing_at_max_omits_nothing_but_all_incoming_unchecked() {
-        val existing = (1..8).map { ChannelSettings(name = "Ch$it") }
-        val incoming = listOf(ChannelSettings(name = "New"))
+        val existing = (1..8).map { ChannelSettings.Builder().also { wb ->wb.name = "Ch$it"}.build() }
+        val incoming = listOf(ChannelSettings.Builder().also { wb ->wb.name = "New"}.build())
 
         val preview = getChannelPreviewForAdd(existing, incoming, ModelChannel.default.loraConfig, maxChannels = 8)
 
@@ -572,12 +572,12 @@ class ProtoExtensionsTest {
 
     @Test
     fun preview_settings_and_selections_are_always_size_matched() {
-        val existing = listOf(ChannelSettings(name = "A"), ChannelSettings(name = "B"))
+        val existing = listOf(ChannelSettings.Builder().also { wb ->wb.name = "A"}.build(), ChannelSettings.Builder().also { wb ->wb.name = "B"}.build())
         val incoming =
             listOf(
-                ChannelSettings(name = "A", psk = byteArrayOf(1).toByteString()), // duplicate of existing
-                ChannelSettings(name = "C"),
-                ChannelSettings(name = "D"),
+                ChannelSettings.Builder().also { wb ->wb.name = "A"; wb.psk = byteArrayOf(1).toByteString()}.build(), // duplicate of existing
+                ChannelSettings.Builder().also { wb ->wb.name = "C"}.build(),
+                ChannelSettings.Builder().also { wb ->wb.name = "D"}.build(),
             )
 
         val preview = getChannelPreviewForAdd(existing, incoming, ModelChannel.default.loraConfig, maxChannels = 8)
@@ -603,26 +603,26 @@ class ProtoExtensionsTest {
 
     @Test
     fun normalize_single_element_passes_through() {
-        val primary = ChannelSettings(name = "Solo", psk = byteArrayOf(1).toByteString())
+        val primary = ChannelSettings.Builder().also { wb ->wb.name = "Solo"; wb.psk = byteArrayOf(1).toByteString()}.build()
 
         assertEquals(listOf(primary), normalizeReplacementSettings(listOf(primary), ModelChannel.default.loraConfig))
     }
 
     @Test
     fun normalize_drops_blank_placeholder_secondary() {
-        val primary = ChannelSettings(name = "Main", psk = byteArrayOf(1, 2).toByteString())
-        val real = ChannelSettings(name = "Chat", psk = byteArrayOf(3).toByteString())
+        val primary = ChannelSettings.Builder().also { wb ->wb.name = "Main"; wb.psk = byteArrayOf(1, 2).toByteString()}.build()
+        val real = ChannelSettings.Builder().also { wb ->wb.name = "Chat"; wb.psk = byteArrayOf(3).toByteString()}.build()
 
         val result =
-            normalizeReplacementSettings(listOf(primary, ChannelSettings(), real), ModelChannel.default.loraConfig)
+            normalizeReplacementSettings(listOf(primary, ChannelSettings.Builder().build(), real), ModelChannel.default.loraConfig)
 
         assertEquals(listOf(primary, real), result)
     }
 
     @Test
     fun normalize_preserves_blank_primary() {
-        val blankPrimary = ChannelSettings()
-        val real = ChannelSettings(name = "Chat", psk = byteArrayOf(3).toByteString())
+        val blankPrimary = ChannelSettings.Builder().build()
+        val real = ChannelSettings.Builder().also { wb ->wb.name = "Chat"; wb.psk = byteArrayOf(3).toByteString()}.build()
 
         // Slot 0 is always preserved, even when blank (deliberate disable signal).
         val result = normalizeReplacementSettings(listOf(blankPrimary, real), ModelChannel.default.loraConfig)
@@ -634,8 +634,8 @@ class ProtoExtensionsTest {
 
     @Test
     fun normalize_blank_primary_does_not_seed_duplicate_tracking() {
-        val blankPrimary = ChannelSettings()
-        val publicSecondary = ChannelSettings(psk = byteArrayOf(1).toByteString())
+        val blankPrimary = ChannelSettings.Builder().build()
+        val publicSecondary = ChannelSettings.Builder().also { wb ->wb.psk = byteArrayOf(1).toByteString()}.build()
 
         val result =
             normalizeReplacementSettings(listOf(blankPrimary, publicSecondary), ModelChannel.default.loraConfig)
@@ -645,8 +645,8 @@ class ProtoExtensionsTest {
 
     @Test
     fun normalize_drops_semantic_duplicate_secondary() {
-        val primary = ChannelSettings(name = "Main", psk = byteArrayOf(1).toByteString())
-        val dup = ChannelSettings(name = "Main", psk = byteArrayOf(1).toByteString())
+        val primary = ChannelSettings.Builder().also { wb ->wb.name = "Main"; wb.psk = byteArrayOf(1).toByteString()}.build()
+        val dup = ChannelSettings.Builder().also { wb ->wb.name = "Main"; wb.psk = byteArrayOf(1).toByteString()}.build()
 
         val result = normalizeReplacementSettings(listOf(primary, dup), ModelChannel.default.loraConfig)
 
@@ -655,8 +655,8 @@ class ProtoExtensionsTest {
 
     @Test
     fun normalize_keeps_same_name_different_psk() {
-        val primary = ChannelSettings(name = "A", psk = byteArrayOf(1).toByteString())
-        val other = ChannelSettings(name = "A", psk = byteArrayOf(2).toByteString())
+        val primary = ChannelSettings.Builder().also { wb ->wb.name = "A"; wb.psk = byteArrayOf(1).toByteString()}.build()
+        val other = ChannelSettings.Builder().also { wb ->wb.name = "A"; wb.psk = byteArrayOf(2).toByteString()}.build()
 
         val result = normalizeReplacementSettings(listOf(primary, other), ModelChannel.default.loraConfig)
 
@@ -666,8 +666,8 @@ class ProtoExtensionsTest {
     @Test
     fun normalize_keeps_same_psk_different_name() {
         val psk = byteArrayOf(1, 2).toByteString()
-        val primary = ChannelSettings(name = "A", psk = psk)
-        val other = ChannelSettings(name = "B", psk = psk)
+        val primary = ChannelSettings.Builder().also { wb ->wb.name = "A"; wb.psk = psk}.build()
+        val other = ChannelSettings.Builder().also { wb ->wb.name = "B"; wb.psk = psk}.build()
 
         val result = normalizeReplacementSettings(listOf(primary, other), ModelChannel.default.loraConfig)
 
@@ -676,18 +676,18 @@ class ProtoExtensionsTest {
 
     @Test
     fun normalize_compacts_valid_secondaries_into_sequential_slots() {
-        val primary = ChannelSettings(name = "Main", psk = byteArrayOf(1).toByteString())
-        val b = ChannelSettings(name = "B", psk = byteArrayOf(2).toByteString())
-        val c = ChannelSettings(name = "C", psk = byteArrayOf(3).toByteString())
+        val primary = ChannelSettings.Builder().also { wb ->wb.name = "Main"; wb.psk = byteArrayOf(1).toByteString()}.build()
+        val b = ChannelSettings.Builder().also { wb ->wb.name = "B"; wb.psk = byteArrayOf(2).toByteString()}.build()
+        val c = ChannelSettings.Builder().also { wb ->wb.name = "C"; wb.psk = byteArrayOf(3).toByteString()}.build()
 
         // blank + duplicate mixed in; valid B and C must compact to slots 1 and 2 with no gap
         val result =
             normalizeReplacementSettings(
                 listOf(
                     primary,
-                    ChannelSettings(),
+                    ChannelSettings.Builder().build(),
                     b,
-                    ChannelSettings(name = "Main", psk = byteArrayOf(1).toByteString()),
+                    ChannelSettings.Builder().also { wb ->wb.name = "Main"; wb.psk = byteArrayOf(1).toByteString()}.build(),
                     c,
                 ),
                 ModelChannel.default.loraConfig,
@@ -698,9 +698,9 @@ class ProtoExtensionsTest {
 
     @Test
     fun normalize_null_lora_falls_back_to_defaults_without_crashing() {
-        val primary = ChannelSettings(name = "Main", psk = byteArrayOf(1).toByteString())
+        val primary = ChannelSettings.Builder().also { wb ->wb.name = "Main"; wb.psk = byteArrayOf(1).toByteString()}.build()
 
-        val result = normalizeReplacementSettings(listOf(primary, ChannelSettings()), loraConfig = null)
+        val result = normalizeReplacementSettings(listOf(primary, ChannelSettings.Builder().build()), loraConfig = null)
 
         assertEquals(listOf(primary), result)
     }
@@ -710,7 +710,7 @@ class ProtoExtensionsTest {
         // Primary is always preserved (even blank); both blank placeholder secondaries are dropped.
         val result =
             normalizeReplacementSettings(
-                listOf(ChannelSettings(), ChannelSettings(), ChannelSettings()),
+                listOf(ChannelSettings.Builder().build(), ChannelSettings.Builder().build(), ChannelSettings.Builder().build()),
                 ModelChannel.default.loraConfig,
             )
 

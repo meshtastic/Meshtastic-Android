@@ -102,7 +102,7 @@ class HistoryManagerImplTest {
                 .requestHistoryReplay(
                     trigger = "test",
                     myNodeNum = null,
-                    storeForwardConfig = ModuleConfig.StoreForwardConfig(enabled = true),
+                    storeForwardConfig = ModuleConfig.StoreForwardConfig.Builder().also { wb ->wb.enabled = true}.build(),
                     transport = "BLE",
                     expectedConnectionVersion = 17L,
                 )
@@ -121,7 +121,7 @@ class HistoryManagerImplTest {
                 .requestHistoryReplay(
                     trigger = "test",
                     myNodeNum = 123,
-                    storeForwardConfig = ModuleConfig.StoreForwardConfig(enabled = true),
+                    storeForwardConfig = ModuleConfig.StoreForwardConfig.Builder().also { wb ->wb.enabled = true}.build(),
                     transport = "BLE",
                     expectedConnectionVersion = 17L,
                 )
@@ -142,7 +142,7 @@ class HistoryManagerImplTest {
             .requestHistoryReplay(
                 trigger = "test",
                 myNodeNum = 123,
-                storeForwardConfig = ModuleConfig.StoreForwardConfig(enabled = true),
+                storeForwardConfig = ModuleConfig.StoreForwardConfig.Builder().also { wb ->wb.enabled = true}.build(),
                 transport = "BLE",
                 expectedConnectionVersion = 17L,
             )
@@ -171,7 +171,7 @@ class HistoryManagerImplTest {
                 .requestHistoryReplay(
                     trigger = "test",
                     myNodeNum = 123,
-                    storeForwardConfig = ModuleConfig.StoreForwardConfig(enabled = true),
+                    storeForwardConfig = ModuleConfig.StoreForwardConfig.Builder().also { wb ->wb.enabled = true}.build(),
                     transport = "BLE",
                     expectedConnectionVersion = 23L,
                 )

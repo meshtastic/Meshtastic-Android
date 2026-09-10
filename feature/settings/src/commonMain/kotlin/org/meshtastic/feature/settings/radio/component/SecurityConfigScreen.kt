@@ -85,7 +85,7 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val firmwareVersion = state.metadata?.firmware_version
     val capabilities = remember(firmwareVersion) { Capabilities(firmwareVersion) }
-    val securityConfig = state.radioConfig.security ?: Config.SecurityConfig()
+    val securityConfig = state.radioConfig.security ?: Config.SecurityConfig.Builder().build()
     val formState = rememberConfigState(initialValue = securityConfig)
 
     var showKeyGenerationDialog by rememberSaveable { mutableStateOf(false) }
@@ -94,7 +94,7 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
         onConfirm = {
             formState.value = it
             showKeyGenerationDialog = false
-            val config = Config(security = formState.value)
+            val config = Config.Builder().also { wb ->wb.security = formState.value}.build()
             viewModel.setConfig(config)
         },
         onDismiss = { showKeyGenerationDialog = false },
@@ -110,7 +110,7 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val config = Config(security = it)
+            val config = Config.Builder().also { wb ->wb.security = it}.build()
             viewModel.setConfig(config)
         },
     ) {
@@ -119,7 +119,7 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                 selectedPolicy = formState.value.packet_signature_policy,
                 connected = state.connected,
                 supported = state.metadata?.has_xeddsa,
-                onPolicyChange = { policy -> formState.value = formState.value.copy(packet_signature_policy = policy) },
+                onPolicyChange = { policy -> formState.value = formState.value.newBuilder().also { wb -> wb.packet_signature_policy = policy }.build() },
             )
         }
         item {
@@ -164,7 +164,7 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                     maxCount = 3,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValuesChanged = { formState.value = formState.value.copy(admin_key = it) },
+                    onValuesChanged = { formState.value = formState.value.newBuilder().also { wb -> wb.admin_key = it }.build() },
                 )
             }
         }
@@ -175,7 +175,7 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                     summary = stringResource(Res.string.config_security_serial_enabled),
                     checked = formState.value.serial_enabled,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy(serial_enabled = it) },
+                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.serial_enabled = it }.build() },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -184,7 +184,7 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                     summary = stringResource(Res.string.config_security_debug_log_api_enabled),
                     checked = formState.value.debug_log_api_enabled,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy(debug_log_api_enabled = it) },
+                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.debug_log_api_enabled = it }.build() },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
             }
@@ -196,7 +196,7 @@ fun SecurityConfigScreenCommon(viewModel: RadioConfigViewModel, onBack: () -> Un
                     summary = stringResource(Res.string.config_security_is_managed),
                     checked = formState.value.is_managed,
                     enabled = state.connected && formState.value.admin_key.isNotEmpty(),
-                    onCheckedChange = { formState.value = formState.value.copy(is_managed = it) },
+                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.is_managed = it }.build() },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -259,7 +259,7 @@ internal fun SecurityPublicKeyPreference(
         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
         onValueChange = {
             if (it.size == 32) {
-                formState.value = formState.value.copy(public_key = it)
+                formState.value = formState.value.newBuilder().also { wb -> wb.public_key = it }.build()
             }
         },
         trailingIcon = { publicKeyCopyButton(publicKey) },
@@ -298,7 +298,7 @@ internal fun SecurityPrivateKeyPreference(
         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
         onValueChange = {
             if (it.size == PRIVATE_KEY_SIZE) {
-                formState.value = formState.value.copy(private_key = it)
+                formState.value = formState.value.newBuilder().also { wb -> wb.private_key = it }.build()
             }
         },
         trailingIcon =
@@ -332,7 +332,7 @@ fun PrivateKeyRegenerateDialog(
                 // and set the second to left-most bit of f[31].
                 f[0] = (f[0].toInt() and 0xF8).toByte()
                 f[31] = ((f[31].toInt() and 0x7F) or 0x40).toByte()
-                val securityInput = Config.SecurityConfig(private_key = f.toByteString(), public_key = ByteString.EMPTY)
+                val securityInput = Config.SecurityConfig.Builder().also { wb ->wb.private_key = f.toByteString(); wb.public_key = ByteString.EMPTY}.build()
                 onConfirm(securityInput)
             },
         )

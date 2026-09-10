@@ -210,14 +210,14 @@ class DebugViewModelTest {
 
     @Test
     fun `decodePayloadFromMeshLog decodes various portnums`() {
-        val position = org.meshtastic.proto.Position(latitude_i = 10000000, longitude_i = 20000000)
+        val position = org.meshtastic.proto.Position.Builder().also { wb ->wb.latitude_i = 10000000; wb.longitude_i = 20000000}.build()
         val packet =
             org.meshtastic.core.testing.TestDataFactory.createTestPacket(
                 decoded =
-                org.meshtastic.proto.Data(
-                    portnum = org.meshtastic.proto.PortNum.POSITION_APP,
-                    payload = okio.ByteString.Companion.of(*position.encode()),
-                ),
+                org.meshtastic.proto.Data.Builder().also { wb ->
+                wb.portnum = org.meshtastic.proto.PortNum.POSITION_APP
+                wb.payload = okio.ByteString.Companion.of(*position.encode())
+                }.build(),
             )
         val log =
             org.meshtastic.core.model.MeshLog(
@@ -225,7 +225,7 @@ class DebugViewModelTest {
                 message_type = "Packet",
                 received_date = 1L,
                 raw_message = "raw",
-                fromRadio = org.meshtastic.proto.FromRadio(packet = packet),
+                fromRadio = org.meshtastic.proto.FromRadio.Builder().also { wb ->wb.packet = packet}.build(),
             )
 
         // This is a private method but we can test it via toUiState
@@ -252,7 +252,7 @@ class DebugViewModelTest {
                 message_type = "Packet",
                 received_date = 1L,
                 raw_message = "",
-                fromRadio = org.meshtastic.proto.FromRadio(packet = packet),
+                fromRadio = org.meshtastic.proto.FromRadio.Builder().also { wb ->wb.packet = packet}.build(),
             ),
         )
 
@@ -282,7 +282,7 @@ class DebugViewModelTest {
                 message_type = "Packet",
                 received_date = 1L,
                 raw_message = "",
-                fromRadio = org.meshtastic.proto.FromRadio(packet = packet),
+                fromRadio = org.meshtastic.proto.FromRadio.Builder().also { wb -> wb.packet = packet }.build(),
             ),
         )
 
@@ -300,7 +300,7 @@ class DebugViewModelTest {
                 message_type = "Packet",
                 received_date = 1L,
                 raw_message = "",
-                fromRadio = org.meshtastic.proto.FromRadio(packet = packet),
+                fromRadio = org.meshtastic.proto.FromRadio.Builder().also { wb -> wb.packet = packet }.build(),
             ),
         )
 
@@ -318,7 +318,14 @@ class DebugViewModelTest {
                 received_date = 1L,
                 raw_message = "node_info {\n  num: 3735928559\n}",
                 fromRadio =
-                org.meshtastic.proto.FromRadio(node_info = org.meshtastic.proto.NodeInfo(num = 0xDEADBEEF.toInt())),
+                org.meshtastic.proto.FromRadio.Builder()
+                    .also { wb ->
+                        wb.node_info =
+                            org.meshtastic.proto.NodeInfo.Builder()
+                                .also { wb -> wb.num = 0xDEADBEEF.toInt() }
+                                .build()
+                    }
+                    .build(),
             ),
         )
 

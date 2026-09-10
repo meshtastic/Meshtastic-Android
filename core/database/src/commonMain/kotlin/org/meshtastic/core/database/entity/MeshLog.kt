@@ -52,7 +52,7 @@ data class MeshLog(
     @ColumnInfo(name = "from_num", defaultValue = "0") val fromNum: Int = 0,
     @ColumnInfo(name = "port_num", defaultValue = "0") val portNum: Int = 0,
     @ColumnInfo(name = "from_radio", typeAffinity = ColumnInfo.BLOB, defaultValue = "x''")
-    val fromRadio: FromRadio = FromRadio(),
+    val fromRadio: FromRadio = FromRadio.Builder().build(),
 ) {
 
     val meshPacket: MeshPacket?

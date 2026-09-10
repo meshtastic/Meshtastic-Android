@@ -44,7 +44,7 @@ class SwitchingChannelSetDataSourceTest {
     @AfterTest fun tearDown() = dbProvider.close()
 
     private fun secondary(index: Int, name: String) =
-        Channel(index = index, settings = ChannelSettings(name = name), role = Channel.Role.SECONDARY)
+        Channel.Builder().also { wb ->wb.index = index; wb.settings = ChannelSettings.Builder().also { wb ->wb.name = name}.build(); wb.role = Channel.Role.SECONDARY}.build()
 
     @Test
     fun `updateChannelSettings places channel at its index`() = runTest(testDispatcher) {
@@ -69,16 +69,16 @@ class SwitchingChannelSetDataSourceTest {
 
     @Test
     fun `disabled channels are ignored`() = runTest(testDispatcher) {
-        dataSource.updateChannelSettings(Channel(index = 0, role = Channel.Role.DISABLED))
+        dataSource.updateChannelSettings(Channel.Builder().also { wb ->wb.index = 0; wb.role = Channel.Role.DISABLED}.build())
         assertTrue(dataSource.channelSetFlow.first().settings.isEmpty())
     }
 
     @Test
     fun `replaceAllSettings replaces the whole list`() = runTest(testDispatcher) {
         dataSource.updateChannelSettings(secondary(0, "old"))
-        val originalLora = Config.LoRaConfig(channel_num = 4)
+        val originalLora = Config.LoRaConfig.Builder().also { wb ->wb.channel_num = 4}.build()
         dataSource.setLoraConfig(originalLora)
-        dataSource.replaceAllSettings(listOf(ChannelSettings(name = "a"), ChannelSettings(name = "b")))
+        dataSource.replaceAllSettings(listOf(ChannelSettings.Builder().also { wb ->wb.name = "a"}.build(), ChannelSettings.Builder().also { wb ->wb.name = "b"}.build()))
 
         val set = dataSource.channelSetFlow.first()
         assertEquals(listOf("a", "b"), set.settings.map { it.name })
@@ -87,18 +87,18 @@ class SwitchingChannelSetDataSourceTest {
 
     @Test
     fun `updateChannelSet atomically replaces settings and lora`() = runTest(testDispatcher) {
-        val settings = listOf(ChannelSettings(name = "new"))
-        val lora = Config.LoRaConfig(channel_num = 7)
+        val settings = listOf(ChannelSettings.Builder().also { wb ->wb.name = "new"}.build())
+        val lora = Config.LoRaConfig.Builder().also { wb ->wb.channel_num = 7}.build()
 
         dataSource.updateChannelSet(settingsList = settings, loraConfig = lora)
 
-        assertEquals(ChannelSet(settings = settings, lora_config = lora), dataSource.channelSetFlow.first())
+        assertEquals(ChannelSet.Builder().also { wb ->wb.settings = settings; wb.lora_config = lora}.build(), dataSource.channelSetFlow.first())
     }
 
     @Test
     fun `setLoraConfig preserves existing channel settings`() = runTest(testDispatcher) {
         dataSource.updateChannelSettings(secondary(0, "keep"))
-        dataSource.setLoraConfig(Config.LoRaConfig(channel_num = 7))
+        dataSource.setLoraConfig(Config.LoRaConfig.Builder().also { wb ->wb.channel_num = 7}.build())
 
         val set = dataSource.channelSetFlow.first()
         assertEquals("keep", set.settings.single().name)

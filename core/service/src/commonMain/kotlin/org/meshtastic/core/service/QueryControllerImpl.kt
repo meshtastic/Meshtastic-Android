@@ -38,7 +38,7 @@ internal class QueryControllerImpl(
         get() = nodeManager.myNodeNum.value ?: 0
 
     override suspend fun refreshMetadata(destNum: Int) {
-        commandSender.sendAdmin(destNum, wantResponse = true) { AdminMessage(get_device_metadata_request = true) }
+        commandSender.sendAdmin(destNum, wantResponse = true) { AdminMessage.Builder().also { wb ->wb.get_device_metadata_request = true}.build() }
     }
 
     override suspend fun requestPosition(destNum: Int, currentPosition: Position) {

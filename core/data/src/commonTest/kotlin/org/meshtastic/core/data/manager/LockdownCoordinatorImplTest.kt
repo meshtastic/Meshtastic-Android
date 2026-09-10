@@ -140,14 +140,14 @@ class LockdownCoordinatorImplTest {
 
     @Test
     fun `NEEDS_PROVISION sets NeedsProvision state`() {
-        coordinator.handleLockdownStatus(LockdownStatus(state = LockdownStatus.State.NEEDS_PROVISION))
+        coordinator.handleLockdownStatus(LockdownStatus.Builder().also { wb ->wb.state = LockdownStatus.State.NEEDS_PROVISION}.build())
         assertIs<LockdownState.NeedsProvision>(serviceRepo.lockdownState.value)
     }
 
     @Test
     fun `NEEDS_PROVISION after lockNow does not trigger LockNowAcknowledged`() {
         coordinator.lockNow()
-        coordinator.handleLockdownStatus(LockdownStatus(state = LockdownStatus.State.NEEDS_PROVISION))
+        coordinator.handleLockdownStatus(LockdownStatus.Builder().also { wb ->wb.state = LockdownStatus.State.NEEDS_PROVISION}.build())
 
         // wasLockNow is only checked in handleLocked, not handleNeedsProvision
         assertIs<LockdownState.NeedsProvision>(serviceRepo.lockdownState.value)
@@ -157,7 +157,7 @@ class LockdownCoordinatorImplTest {
     fun `STATE_UNSPECIFIED leaves current state unchanged`() {
         serviceRepo.setLockdownState(LockdownState.Locked("needs_auth"))
 
-        coordinator.handleLockdownStatus(LockdownStatus(state = LockdownStatus.State.STATE_UNSPECIFIED))
+        coordinator.handleLockdownStatus(LockdownStatus.Builder().also { wb ->wb.state = LockdownStatus.State.STATE_UNSPECIFIED}.build())
 
         val state = serviceRepo.lockdownState.value
         assertIs<LockdownState.Locked>(state)
@@ -172,7 +172,7 @@ class LockdownCoordinatorImplTest {
     fun `LOCKED with no stored passphrase sets Locked state`() {
         radioService.setDeviceAddress(testDeviceAddress)
         coordinator.handleLockdownStatus(
-            LockdownStatus(state = LockdownStatus.State.LOCKED, lock_reason = "needs_auth"),
+            LockdownStatus.Builder().also { wb ->wb.state = LockdownStatus.State.LOCKED; wb.lock_reason = "needs_auth"}.build(),
         )
         val state = serviceRepo.lockdownState.value
         assertIs<LockdownState.Locked>(state)
@@ -182,7 +182,7 @@ class LockdownCoordinatorImplTest {
     @Test
     fun `LOCKED with no device address sets Locked state`() {
         radioService.setDeviceAddress(null)
-        coordinator.handleLockdownStatus(LockdownStatus(state = LockdownStatus.State.LOCKED))
+        coordinator.handleLockdownStatus(LockdownStatus.Builder().also { wb ->wb.state = LockdownStatus.State.LOCKED}.build())
         assertIs<LockdownState.Locked>(serviceRepo.lockdownState.value)
     }
 
@@ -198,7 +198,7 @@ class LockdownCoordinatorImplTest {
         commandSender.onLockdownPassphraseDispatchAttempt = { stateDuringDispatch = serviceRepo.lockdownState.value }
 
         coordinator.handleLockdownStatus(
-            LockdownStatus(state = LockdownStatus.State.LOCKED, lock_reason = "needs_auth"),
+            LockdownStatus.Builder().also { wb ->wb.state = LockdownStatus.State.LOCKED; wb.lock_reason = "needs_auth"}.build(),
         )
 
         assertEquals("secret", commandSender.lastPassphrase)
@@ -214,12 +214,12 @@ class LockdownCoordinatorImplTest {
         passphraseStore.saved[testDeviceAddress] = StoredPassphrase("secret", 10, 24)
 
         // Establish a previous successful auto-unlock so a stale auto-attempt marker would be observable below.
-        coordinator.handleLockdownStatus(LockdownStatus(state = LockdownStatus.State.LOCKED))
-        coordinator.handleLockdownStatus(LockdownStatus(state = LockdownStatus.State.UNLOCKED))
+        coordinator.handleLockdownStatus(LockdownStatus.Builder().also { wb ->wb.state = LockdownStatus.State.LOCKED}.build())
+        coordinator.handleLockdownStatus(LockdownStatus.Builder().also { wb ->wb.state = LockdownStatus.State.UNLOCKED}.build())
         commandSender.lockdownPassphraseDispatchAccepted = false
 
         coordinator.handleLockdownStatus(
-            LockdownStatus(state = LockdownStatus.State.LOCKED, lock_reason = "needs_auth"),
+            LockdownStatus.Builder().also { wb ->wb.state = LockdownStatus.State.LOCKED; wb.lock_reason = "needs_auth"}.build(),
         )
 
         val state = serviceRepo.lockdownState.value
@@ -228,7 +228,7 @@ class LockdownCoordinatorImplTest {
         assertEquals("secret", passphraseStore.saved[testDeviceAddress]?.passphrase)
 
         // A later failure must not be treated as an auto-attempt that never left the app.
-        coordinator.handleLockdownStatus(LockdownStatus(state = LockdownStatus.State.UNLOCK_FAILED))
+        coordinator.handleLockdownStatus(LockdownStatus.Builder().also { wb ->wb.state = LockdownStatus.State.UNLOCK_FAILED}.build())
         assertEquals("secret", passphraseStore.saved[testDeviceAddress]?.passphrase)
     }
 
@@ -238,7 +238,7 @@ class LockdownCoordinatorImplTest {
         passphraseStore.getThrows = RuntimeException("crypto failure")
 
         coordinator.handleLockdownStatus(
-            LockdownStatus(state = LockdownStatus.State.LOCKED, lock_reason = "needs_auth"),
+            LockdownStatus.Builder().also { wb ->wb.state = LockdownStatus.State.LOCKED; wb.lock_reason = "needs_auth"}.build(),
         )
 
         assertIs<LockdownState.Locked>(serviceRepo.lockdownState.value)
@@ -255,11 +255,11 @@ class LockdownCoordinatorImplTest {
         coordinator.submitPassphrase("mypass", boots = 20, hours = 48)
 
         coordinator.handleLockdownStatus(
-            LockdownStatus(
-                state = LockdownStatus.State.UNLOCKED,
-                boots_remaining = 19,
-                valid_until_epoch = 1_700_000_000,
-            ),
+            LockdownStatus.Builder().also { wb ->
+            wb.state = LockdownStatus.State.UNLOCKED
+            wb.boots_remaining = 19
+            wb.valid_until_epoch = 1_700_000_000
+            }.build(),
         )
 
         assertTrue(serviceRepo.sessionAuthorized.value)
@@ -283,10 +283,10 @@ class LockdownCoordinatorImplTest {
 
         // Trigger auto-replay
         coordinator.handleLockdownStatus(
-            LockdownStatus(state = LockdownStatus.State.LOCKED, lock_reason = "needs_auth"),
+            LockdownStatus.Builder().also { wb ->wb.state = LockdownStatus.State.LOCKED; wb.lock_reason = "needs_auth"}.build(),
         )
         // Then unlock succeeds
-        coordinator.handleLockdownStatus(LockdownStatus(state = LockdownStatus.State.UNLOCKED, boots_remaining = 49))
+        coordinator.handleLockdownStatus(LockdownStatus.Builder().also { wb ->wb.state = LockdownStatus.State.UNLOCKED; wb.boots_remaining = 49}.build())
 
         // Store should still have original values (pendingPassphrase was null during auto-replay)
         assertEquals("original", passphraseStore.saved[testDeviceAddress]?.passphrase)
@@ -299,7 +299,7 @@ class LockdownCoordinatorImplTest {
         passphraseStore.saveThrows = RuntimeException("disk full")
         coordinator.submitPassphrase("mypass", boots = 10, hours = 0)
 
-        coordinator.handleLockdownStatus(LockdownStatus(state = LockdownStatus.State.UNLOCKED))
+        coordinator.handleLockdownStatus(LockdownStatus.Builder().also { wb ->wb.state = LockdownStatus.State.UNLOCKED}.build())
 
         // Session should still be authorized even if save fails
         assertTrue(serviceRepo.sessionAuthorized.value)
@@ -311,7 +311,7 @@ class LockdownCoordinatorImplTest {
         radioService.setDeviceAddress(null)
         coordinator.submitPassphrase("mypass", boots = 10, hours = 0)
 
-        coordinator.handleLockdownStatus(LockdownStatus(state = LockdownStatus.State.UNLOCKED, boots_remaining = 10))
+        coordinator.handleLockdownStatus(LockdownStatus.Builder().also { wb ->wb.state = LockdownStatus.State.UNLOCKED; wb.boots_remaining = 10}.build())
 
         assertTrue(serviceRepo.sessionAuthorized.value)
         assertIs<LockdownState.Unlocked>(serviceRepo.lockdownState.value)
@@ -322,7 +322,7 @@ class LockdownCoordinatorImplTest {
     fun `UNLOCKED converts uint32 epoch correctly`() {
         coordinator.submitPassphrase("p", boots = 1, hours = 1)
         // Use a large unsigned value that would be negative as Int: 0xFFFF_FFFF = -1 as Int
-        coordinator.handleLockdownStatus(LockdownStatus(state = LockdownStatus.State.UNLOCKED, valid_until_epoch = -1))
+        coordinator.handleLockdownStatus(LockdownStatus.Builder().also { wb ->wb.state = LockdownStatus.State.UNLOCKED; wb.valid_until_epoch = -1}.build())
 
         // -1 as Int -> toUInt().toLong() = 4_294_967_295L
         val tokenInfo = serviceRepo.lockdownTokenInfo.value
@@ -337,7 +337,7 @@ class LockdownCoordinatorImplTest {
     fun `UNLOCK_FAILED with no backoff sets UnlockFailed state`() {
         coordinator.submitPassphrase("wrong", boots = 10, hours = 0)
         coordinator.handleLockdownStatus(
-            LockdownStatus(state = LockdownStatus.State.UNLOCK_FAILED, backoff_seconds = 0),
+            LockdownStatus.Builder().also { wb ->wb.state = LockdownStatus.State.UNLOCK_FAILED; wb.backoff_seconds = 0}.build(),
         )
         assertIs<LockdownState.UnlockFailed>(serviceRepo.lockdownState.value)
     }
@@ -346,7 +346,7 @@ class LockdownCoordinatorImplTest {
     fun `UNLOCK_FAILED with backoff sets UnlockBackoff state`() {
         coordinator.submitPassphrase("wrong", boots = 10, hours = 0)
         coordinator.handleLockdownStatus(
-            LockdownStatus(state = LockdownStatus.State.UNLOCK_FAILED, backoff_seconds = 30),
+            LockdownStatus.Builder().also { wb ->wb.state = LockdownStatus.State.UNLOCK_FAILED; wb.backoff_seconds = 30}.build(),
         )
         val state = serviceRepo.lockdownState.value
         assertIs<LockdownState.UnlockBackoff>(state)
@@ -359,12 +359,12 @@ class LockdownCoordinatorImplTest {
 
         coordinator.submitPassphrase("wrong", boots = 10, hours = 0)
         coordinator.handleLockdownStatus(
-            LockdownStatus(state = LockdownStatus.State.UNLOCK_FAILED, backoff_seconds = 0),
+            LockdownStatus.Builder().also { wb ->wb.state = LockdownStatus.State.UNLOCK_FAILED; wb.backoff_seconds = 0}.build(),
         )
 
         coordinator.submitPassphrase("correct", boots = 25, hours = 12)
         coordinator.handleLockdownStatus(
-            LockdownStatus(state = LockdownStatus.State.UNLOCKED, boots_remaining = 24, valid_until_epoch = 1234),
+            LockdownStatus.Builder().also { wb ->wb.state = LockdownStatus.State.UNLOCKED; wb.boots_remaining = 24; wb.valid_until_epoch = 1234}.build(),
         )
 
         val stored = passphraseStore.saved[testDeviceAddress]
@@ -384,11 +384,11 @@ class LockdownCoordinatorImplTest {
 
         // Trigger auto-replay
         coordinator.handleLockdownStatus(
-            LockdownStatus(state = LockdownStatus.State.LOCKED, lock_reason = "needs_auth"),
+            LockdownStatus.Builder().also { wb ->wb.state = LockdownStatus.State.LOCKED; wb.lock_reason = "needs_auth"}.build(),
         )
         // Then failure
         coordinator.handleLockdownStatus(
-            LockdownStatus(state = LockdownStatus.State.UNLOCK_FAILED, backoff_seconds = 0),
+            LockdownStatus.Builder().also { wb ->wb.state = LockdownStatus.State.UNLOCK_FAILED; wb.backoff_seconds = 0}.build(),
         )
 
         assertNull(passphraseStore.saved[testDeviceAddress])
@@ -400,9 +400,9 @@ class LockdownCoordinatorImplTest {
         radioService.setDeviceAddress(testDeviceAddress)
         passphraseStore.saved[testDeviceAddress] = StoredPassphrase("stale", 5, 0)
 
-        coordinator.handleLockdownStatus(LockdownStatus(state = LockdownStatus.State.LOCKED))
+        coordinator.handleLockdownStatus(LockdownStatus.Builder().also { wb ->wb.state = LockdownStatus.State.LOCKED}.build())
         coordinator.handleLockdownStatus(
-            LockdownStatus(state = LockdownStatus.State.UNLOCK_FAILED, backoff_seconds = 60),
+            LockdownStatus.Builder().also { wb ->wb.state = LockdownStatus.State.UNLOCK_FAILED; wb.backoff_seconds = 60}.build(),
         )
 
         val state = serviceRepo.lockdownState.value
@@ -416,9 +416,9 @@ class LockdownCoordinatorImplTest {
         passphraseStore.saved[testDeviceAddress] = StoredPassphrase("stale", 5, 0)
         passphraseStore.clearThrows = RuntimeException("crypto failure")
 
-        coordinator.handleLockdownStatus(LockdownStatus(state = LockdownStatus.State.LOCKED))
+        coordinator.handleLockdownStatus(LockdownStatus.Builder().also { wb ->wb.state = LockdownStatus.State.LOCKED}.build())
         coordinator.handleLockdownStatus(
-            LockdownStatus(state = LockdownStatus.State.UNLOCK_FAILED, backoff_seconds = 0),
+            LockdownStatus.Builder().also { wb ->wb.state = LockdownStatus.State.UNLOCK_FAILED; wb.backoff_seconds = 0}.build(),
         )
 
         assertIs<LockdownState.Locked>(serviceRepo.lockdownState.value)
@@ -434,7 +434,7 @@ class LockdownCoordinatorImplTest {
         assertTrue(commandSender.lockNowCalled)
 
         coordinator.handleLockdownStatus(
-            LockdownStatus(state = LockdownStatus.State.LOCKED, lock_reason = "needs_auth"),
+            LockdownStatus.Builder().also { wb ->wb.state = LockdownStatus.State.LOCKED; wb.lock_reason = "needs_auth"}.build(),
         )
 
         assertIs<LockdownState.LockNowAcknowledged>(serviceRepo.lockdownState.value)
@@ -448,7 +448,7 @@ class LockdownCoordinatorImplTest {
 
         assertFalse(coordinator.lockNow())
         coordinator.handleLockdownStatus(
-            LockdownStatus(state = LockdownStatus.State.LOCKED, lock_reason = "needs_auth"),
+            LockdownStatus.Builder().also { wb ->wb.state = LockdownStatus.State.LOCKED; wb.lock_reason = "needs_auth"}.build(),
         )
 
         assertIs<LockdownState.Locked>(serviceRepo.lockdownState.value)
@@ -463,7 +463,7 @@ class LockdownCoordinatorImplTest {
         // After reconnect, LOCKED should not trigger LockNowAcknowledged
         radioService.setDeviceAddress(testDeviceAddress)
         coordinator.handleLockdownStatus(
-            LockdownStatus(state = LockdownStatus.State.LOCKED, lock_reason = "needs_auth"),
+            LockdownStatus.Builder().also { wb ->wb.state = LockdownStatus.State.LOCKED; wb.lock_reason = "needs_auth"}.build(),
         )
 
         assertIs<LockdownState.Locked>(serviceRepo.lockdownState.value)
@@ -490,7 +490,7 @@ class LockdownCoordinatorImplTest {
 
         // Subsequent LOCKED should not trigger LockNowAcknowledged.
         radioService.setDeviceAddress(testDeviceAddress)
-        coordinator.handleLockdownStatus(LockdownStatus(state = LockdownStatus.State.LOCKED))
+        coordinator.handleLockdownStatus(LockdownStatus.Builder().also { wb ->wb.state = LockdownStatus.State.LOCKED}.build())
         assertIs<LockdownState.Locked>(serviceRepo.lockdownState.value)
     }
 
@@ -507,7 +507,7 @@ class LockdownCoordinatorImplTest {
         assertEquals("needs_auth", state.lockReason)
 
         // A later status must not persist credentials from a command that never left the app.
-        coordinator.handleLockdownStatus(LockdownStatus(state = LockdownStatus.State.UNLOCKED))
+        coordinator.handleLockdownStatus(LockdownStatus.Builder().also { wb ->wb.state = LockdownStatus.State.UNLOCKED}.build())
         assertNull(passphraseStore.saved[testDeviceAddress])
     }
 
@@ -551,7 +551,7 @@ class LockdownCoordinatorImplTest {
         radioService.setDeviceAddress(testDeviceAddress)
         passphraseStore.saved[testDeviceAddress] = StoredPassphrase("stale", 50, 0)
 
-        coordinator.handleLockdownStatus(LockdownStatus(state = LockdownStatus.State.DISABLED))
+        coordinator.handleLockdownStatus(LockdownStatus.Builder().also { wb ->wb.state = LockdownStatus.State.DISABLED}.build())
 
         assertIs<LockdownState.Disabled>(serviceRepo.lockdownState.value)
         assertFalse(serviceRepo.sessionAuthorized.value)

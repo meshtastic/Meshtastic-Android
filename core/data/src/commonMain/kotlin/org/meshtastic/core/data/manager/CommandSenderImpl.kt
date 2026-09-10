@@ -81,8 +81,8 @@ class CommandSenderImpl(
 ) : CommandSender {
     private val currentPacketId = atomic(Random(nowMillis).nextLong().absoluteValue)
 
-    private val localConfig = MutableStateFlow(LocalConfig())
-    private val channelSet = MutableStateFlow(ChannelSet())
+    private val localConfig = MutableStateFlow(LocalConfig.Builder().build())
+    private val channelSet = MutableStateFlow(ChannelSet.Builder().build())
 
     init {
         radioConfigRepository.localConfigFlow.onEach { localConfig.value = it }.launchIn(scope)
@@ -143,12 +143,12 @@ class CommandSenderImpl(
 
         // Use Wire extension for accurate size validation
         val data =
-            Data(
-                portnum = PortNum.fromValue(p.dataType) ?: PortNum.UNKNOWN_APP,
-                payload = bytes,
-                reply_id = p.replyId ?: 0,
-                emoji = p.emoji,
-            )
+            Data.Builder().also { wb ->
+            wb.portnum = PortNum.fromValue(p.dataType) ?: PortNum.UNKNOWN_APP
+            wb.payload = bytes
+            wb.reply_id = p.replyId ?: 0
+            wb.emoji = p.emoji
+            }.build()
 
         if (!Data.ADAPTER.isWithinSizeLimit(data, Constants.DATA_PAYLOAD_LEN.value)) {
             val actualSize = Data.ADAPTER.encodedSize(data)
@@ -175,12 +175,12 @@ class CommandSenderImpl(
                 hopLimit = if (p.hopLimit > 0) p.hopLimit else computeHopLimit(),
                 channel = p.channel,
                 decoded =
-                Data(
-                    portnum = PortNum.fromValue(p.dataType) ?: PortNum.UNKNOWN_APP,
-                    payload = p.bytes ?: ByteString.EMPTY,
-                    reply_id = p.replyId ?: 0,
-                    emoji = p.emoji,
-                ),
+                Data.Builder().also { wb ->
+                wb.portnum = PortNum.fromValue(p.dataType) ?: PortNum.UNKNOWN_APP
+                wb.payload = p.bytes ?: ByteString.EMPTY
+                wb.reply_id = p.replyId ?: 0
+                wb.emoji = p.emoji
+                }.build(),
             )
         return packetHandler.sendToRadio(meshPacket)
     }
@@ -204,7 +204,8 @@ class CommandSenderImpl(
         to = destNum,
         id = requestId.nonZeroRequestId(),
         wantResponse = wantResponse,
-        adminMessage = initFn().copy(session_passkey = sessionManager.getPasskey(destNum)),
+        adminMessage =
+        initFn().newBuilder().also { wb -> wb.session_passkey = sessionManager.getPasskey(destNum) }.build(),
     )
 
     override suspend fun sendAdmin(destNum: Int, requestId: Int, wantResponse: Boolean, initFn: () -> AdminMessage) {
@@ -226,9 +227,10 @@ class CommandSenderImpl(
     }
 
     override fun sendAdminImmediate(destNum: Int, initFn: () -> AdminMessage) {
-        val adminMsg = initFn().copy(session_passkey = sessionManager.getPasskey(destNum))
+        val adminMsg =
+            initFn().newBuilder().also { wb -> wb.session_passkey = sessionManager.getPasskey(destNum) }.build()
         val packet = buildAdminPacket(to = destNum, adminMessage = adminMsg)
-        packetHandler.sendToRadio(ToRadio(packet = packet))
+        packetHandler.sendToRadio(ToRadio.Builder().also { wb ->wb.packet = packet}.build())
     }
 
     override suspend fun sendAdminAwaitResult(
@@ -250,11 +252,11 @@ class CommandSenderImpl(
                 channel = if (destNum == null) 0 else getChannelIndex(destNum),
                 priority = MeshPacket.Priority.BACKGROUND,
                 decoded =
-                Data(
-                    portnum = PortNum.POSITION_APP,
-                    payload = pos.encode().toByteString(),
-                    want_response = wantResponse,
-                ),
+                Data.Builder().also { wb ->
+                wb.portnum = PortNum.POSITION_APP
+                wb.payload = pos.encode().toByteString()
+                wb.want_response = wantResponse
+                }.build(),
             ),
             "Position update",
         )
@@ -265,23 +267,25 @@ class CommandSenderImpl(
 
     override suspend fun requestPosition(destNum: Int, currentPosition: Position) {
         val meshPosition =
-            ProtoPosition(
-                latitude_i = Position.degI(currentPosition.latitude),
-                longitude_i = Position.degI(currentPosition.longitude),
-                altitude = currentPosition.altitude,
-                time = (nowMillis / 1000L).toInt(),
-            )
+            ProtoPosition.Builder()
+                .also { wb ->
+                    wb.latitude_i = Position.degI(currentPosition.latitude)
+                    wb.longitude_i = Position.degI(currentPosition.longitude)
+                    wb.altitude = currentPosition.altitude
+                    wb.time = (nowMillis / 1000L).toInt()
+                }
+                .build()
         enqueueOrThrow(
             buildMeshPacket(
                 to = destNum,
                 channel = getChannelIndex(destNum),
                 priority = MeshPacket.Priority.BACKGROUND,
                 decoded =
-                Data(
-                    portnum = PortNum.POSITION_APP,
-                    payload = meshPosition.encode().toByteString(),
-                    want_response = true,
-                ),
+                Data.Builder().also { wb ->
+                wb.portnum = PortNum.POSITION_APP
+                wb.payload = meshPosition.encode().toByteString()
+                wb.want_response = true
+                }.build(),
             ),
             "Position request",
         )
@@ -309,11 +313,11 @@ class CommandSenderImpl(
                 to = destNum,
                 channel = getChannelIndex(destNum),
                 decoded =
-                Data(
-                    portnum = PortNum.NODEINFO_APP,
-                    want_response = true,
-                    payload = myNode.user.encode().toByteString(),
-                ),
+                Data.Builder().also { wb ->
+                wb.portnum = PortNum.NODEINFO_APP
+                wb.want_response = true
+                wb.payload = myNode.user.encode().toByteString()
+                }.build(),
             ),
             "User-info request",
         )
@@ -327,7 +331,7 @@ class CommandSenderImpl(
                 wantAck = true,
                 id = effectiveRequestId,
                 channel = getChannelIndex(destNum),
-                decoded = Data(portnum = PortNum.TRACEROUTE_APP, want_response = true, dest = destNum),
+                decoded = Data.Builder().also { wb ->wb.portnum = PortNum.TRACEROUTE_APP; wb.want_response = true; wb.dest = destNum}.build(),
             ),
             "Traceroute request",
         )
@@ -361,18 +365,18 @@ class CommandSenderImpl(
 
         if (type == TelemetryType.PAX) {
             portNum = PortNum.PAXCOUNTER_APP
-            payloadBytes = Paxcount().encode().toByteString()
+            payloadBytes = Paxcount.Builder().build().encode().toByteString()
         } else {
             portNum = PortNum.TELEMETRY_APP
             payloadBytes =
-                Telemetry(
-                    device_metrics = if (type == TelemetryType.DEVICE) DeviceMetrics() else null,
-                    environment_metrics = if (type == TelemetryType.ENVIRONMENT) EnvironmentMetrics() else null,
-                    air_quality_metrics = if (type == TelemetryType.AIR_QUALITY) AirQualityMetrics() else null,
-                    power_metrics = if (type == TelemetryType.POWER) PowerMetrics() else null,
-                    local_stats = if (type == TelemetryType.LOCAL_STATS) LocalStats() else null,
-                    host_metrics = if (type == TelemetryType.HOST) HostMetrics() else null,
-                )
+                Telemetry.Builder().also { wb ->
+                wb.device_metrics = if (type == TelemetryType.DEVICE) DeviceMetrics.Builder().build() else null
+                wb.environment_metrics = if (type == TelemetryType.ENVIRONMENT) EnvironmentMetrics.Builder().build() else null
+                wb.air_quality_metrics = if (type == TelemetryType.AIR_QUALITY) AirQualityMetrics.Builder().build() else null
+                wb.power_metrics = if (type == TelemetryType.POWER) PowerMetrics.Builder().build() else null
+                wb.local_stats = if (type == TelemetryType.LOCAL_STATS) LocalStats.Builder().build() else null
+                wb.host_metrics = if (type == TelemetryType.HOST) HostMetrics.Builder().build() else null
+                }.build()
                     .encode()
                     .toByteString()
         }
@@ -382,7 +386,7 @@ class CommandSenderImpl(
                 to = destNum,
                 id = effectiveRequestId,
                 channel = getChannelIndex(destNum),
-                decoded = Data(portnum = portNum, payload = payloadBytes, want_response = true, dest = destNum),
+                decoded = Data.Builder().also { wb ->wb.portnum = portNum; wb.payload = payloadBytes; wb.want_response = true; wb.dest = destNum}.build(),
             ),
             "Telemetry request",
             expectedConnectionVersion,
@@ -399,20 +403,20 @@ class CommandSenderImpl(
                         ?: run {
                             val oneHour = 1.hours.inWholeMinutes.toInt()
                             Logger.d { "No stored neighbor info from connected radio, sending dummy data" }
-                            NeighborInfo(
-                                node_id = myNum,
-                                last_sent_by_id = myNum,
-                                node_broadcast_interval_secs = oneHour,
-                                neighbors =
-                                listOf(
-                                    Neighbor(
-                                        node_id = 0, // Dummy node ID that can be intercepted
-                                        snr = 0f,
-                                        last_rx_time = (nowMillis / 1000L).toInt(),
-                                        node_broadcast_interval_secs = oneHour,
-                                    ),
-                                ),
-                            )
+                            NeighborInfo.Builder().also { wb ->
+                            wb.node_id = myNum
+                            wb.last_sent_by_id = myNum
+                            wb.node_broadcast_interval_secs = oneHour
+                            wb.neighbors = listOf(
+                                                                Neighbor.Builder().also { wb ->
+                                                                wb.node_id = 0
+                                                                // Dummy node ID that can be intercepted
+                                                                wb.snr = 0f
+                                                                wb.last_rx_time = (nowMillis / 1000L).toInt()
+                                                                wb.node_broadcast_interval_secs = oneHour
+                                                                }.build(),
+                                                            )
+                            }.build()
                         }
 
                 // Send the neighbor info from our connected radio to ourselves (simulated)
@@ -422,11 +426,11 @@ class CommandSenderImpl(
                     id = effectiveRequestId,
                     channel = getChannelIndex(destNum),
                     decoded =
-                    Data(
-                        portnum = PortNum.NEIGHBORINFO_APP,
-                        payload = neighborInfoToSend.encode().toByteString(),
-                        want_response = true,
-                    ),
+                    Data.Builder().also { wb ->
+                    wb.portnum = PortNum.NEIGHBORINFO_APP
+                    wb.payload = neighborInfoToSend.encode().toByteString()
+                    wb.want_response = true
+                    }.build(),
                 )
             } else {
                 // Send request to remote
@@ -435,7 +439,7 @@ class CommandSenderImpl(
                     wantAck = true,
                     id = effectiveRequestId,
                     channel = getChannelIndex(destNum),
-                    decoded = Data(portnum = PortNum.NEIGHBORINFO_APP, want_response = true, dest = destNum),
+                    decoded = Data.Builder().also { wb ->wb.portnum = PortNum.NEIGHBORINFO_APP; wb.want_response = true; wb.dest = destNum}.build(),
                 )
             }
         enqueueOrThrow(packet, "Neighbor-info request")
@@ -456,32 +460,32 @@ class CommandSenderImpl(
                 0
             }
         val lockdownAuth =
-            LockdownAuth(
-                passphrase = passphrase.encodeToByteArray().toByteString(),
-                boots_remaining = boots.coerceAtLeast(0),
-                valid_until_epoch = validUntilEpoch,
-                max_session_seconds = maxSessionSeconds.coerceAtLeast(0),
-                disable = disable,
-            )
-        return sendLockdownAdmin(AdminMessage(lockdown_auth = lockdownAuth))
+            LockdownAuth.Builder().also { wb ->
+            wb.passphrase = passphrase.encodeToByteArray().toByteString()
+            wb.boots_remaining = boots.coerceAtLeast(0)
+            wb.valid_until_epoch = validUntilEpoch
+            wb.max_session_seconds = maxSessionSeconds.coerceAtLeast(0)
+            wb.disable = disable
+            }.build()
+        return sendLockdownAdmin(AdminMessage.Builder().also { wb ->wb.lockdown_auth = lockdownAuth}.build())
     }
 
-    override fun sendLockNow(): Boolean = sendLockdownAdmin(AdminMessage(lockdown_auth = LockdownAuth(lock_now = true)))
+    override fun sendLockNow(): Boolean = sendLockdownAdmin(AdminMessage.Builder().also { wb ->wb.lockdown_auth = LockdownAuth.Builder().also { wb ->wb.lock_now = true}.build()}.build())
 
     private fun sendLockdownAdmin(adminMessage: AdminMessage): Boolean {
         val myNum = nodeManager.myNodeNum.value ?: return false
         val packet =
-            MeshPacket(
-                to = myNum,
-                id = generatePacketId(),
-                channel = 0,
-                want_ack = true,
-                hop_limit = DEFAULT_HOP_LIMIT,
-                hop_start = DEFAULT_HOP_LIMIT,
-                priority = MeshPacket.Priority.RELIABLE,
-                decoded = Data(portnum = PortNum.ADMIN_APP, payload = adminMessage.encode().toByteString()),
-            )
-        return packetHandler.trySendToRadio(ToRadio(packet = packet))
+            MeshPacket.Builder().also { wb ->
+            wb.to = myNum
+            wb.id = generatePacketId()
+            wb.channel = 0
+            wb.want_ack = true
+            wb.hop_limit = DEFAULT_HOP_LIMIT
+            wb.hop_start = DEFAULT_HOP_LIMIT
+            wb.priority = MeshPacket.Priority.RELIABLE
+            wb.decoded = Data.Builder().also { wb ->wb.portnum = PortNum.ADMIN_APP; wb.payload = adminMessage.encode().toByteString()}.build()
+            }.build()
+        return packetHandler.trySendToRadio(ToRadio.Builder().also { wb ->wb.packet = packet}.build())
     }
 
     fun resolveNodeNum(address: NodeAddress): Int = when (address) {
@@ -524,19 +528,19 @@ class CommandSenderImpl(
             actualChannel = 0
         }
 
-        return MeshPacket(
-            from = nodeManager.myNodeNum.value ?: 0,
-            to = to,
-            id = id,
-            want_ack = wantAck,
-            hop_limit = actualHopLimit,
-            hop_start = actualHopLimit,
-            priority = priority,
-            pki_encrypted = pkiEncrypted,
-            public_key = publicKey,
-            channel = actualChannel,
-            decoded = decoded,
-        )
+        return MeshPacket.Builder().also { wb ->
+        wb.from = nodeManager.myNodeNum.value ?: 0
+        wb.to = to
+        wb.id = id
+        wb.want_ack = wantAck
+        wb.hop_limit = actualHopLimit
+        wb.hop_start = actualHopLimit
+        wb.priority = priority
+        wb.pki_encrypted = pkiEncrypted
+        wb.public_key = publicKey
+        wb.channel = actualChannel
+        wb.decoded = decoded
+        }.build()
     }
 
     private fun buildAdminPacket(
@@ -552,11 +556,11 @@ class CommandSenderImpl(
             channel = getAdminChannelIndex(to),
             priority = MeshPacket.Priority.RELIABLE,
             decoded =
-            Data(
-                want_response = wantResponse,
-                portnum = PortNum.ADMIN_APP,
-                payload = adminMessage.encode().toByteString(),
-            ),
+            Data.Builder().also { wb ->
+            wb.want_response = wantResponse
+            wb.portnum = PortNum.ADMIN_APP
+            wb.payload = adminMessage.encode().toByteString()
+            }.build(),
         )
 
     companion object {

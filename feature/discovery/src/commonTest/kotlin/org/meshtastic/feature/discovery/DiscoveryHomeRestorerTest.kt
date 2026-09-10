@@ -66,7 +66,7 @@ class DiscoveryHomeRestorerTest {
             DiscoveryHomeRestorePlan(
                 sessionId = 1L,
                 deviceAddress = firstDevice,
-                loraConfig = Config.LoRaConfig(use_preset = true),
+                loraConfig = Config.LoRaConfig.Builder().also { wb ->wb.use_preset = true}.build(),
                 primaryChannel = null,
                 restorePrimaryChannel = false,
                 finalStatus = DiscoverySessionStatus.COMPLETE,
@@ -100,7 +100,7 @@ class DiscoveryHomeRestorerTest {
             DiscoveryHomeRestorePlan(
                 sessionId = 1L,
                 deviceAddress = device,
-                loraConfig = Config.LoRaConfig(use_preset = true),
+                loraConfig = Config.LoRaConfig.Builder().also { wb ->wb.use_preset = true}.build(),
                 primaryChannel = null,
                 restorePrimaryChannel = false,
                 finalStatus = DiscoverySessionStatus.COMPLETE,
@@ -156,7 +156,7 @@ class DiscoveryHomeRestorerTest {
             DiscoveryHomeRestorePlan(
                 sessionId = 7L,
                 deviceAddress = device,
-                loraConfig = Config.LoRaConfig(use_preset = true),
+                loraConfig = Config.LoRaConfig.Builder().also { wb ->wb.use_preset = true}.build(),
                 primaryChannel = null,
                 restorePrimaryChannel = false,
                 finalStatus = DiscoverySessionStatus.COMPLETE,
@@ -186,7 +186,7 @@ class DiscoveryHomeRestorerTest {
             DiscoveryHomeRestorePlan(
                 sessionId = 1L,
                 deviceAddress = device,
-                loraConfig = Config.LoRaConfig(use_preset = true),
+                loraConfig = Config.LoRaConfig.Builder().also { wb ->wb.use_preset = true}.build(),
                 primaryChannel = null,
                 restorePrimaryChannel = false,
                 finalStatus = DiscoverySessionStatus.COMPLETE,
@@ -217,7 +217,7 @@ class DiscoveryHomeRestorerTest {
             DiscoveryHomeRestorePlan(
                 sessionId = 7L,
                 deviceAddress = firstDevice,
-                loraConfig = Config.LoRaConfig(use_preset = true),
+                loraConfig = Config.LoRaConfig.Builder().also { wb ->wb.use_preset = true}.build(),
                 primaryChannel = null,
                 restorePrimaryChannel = false,
                 finalStatus = DiscoverySessionStatus.COMPLETE,
@@ -247,7 +247,7 @@ class DiscoveryHomeRestorerTest {
                     homePreset = homePreset,
                     completionStatus = DiscoverySessionStatus.INTERRUPTED,
                     deviceAddress = device,
-                    homeLoraConfig = Config.LoRaConfig(use_preset = true),
+                    homeLoraConfig = Config.LoRaConfig.Builder().also { wb ->wb.use_preset = true}.build(),
                 ),
             )
         }
@@ -284,8 +284,8 @@ class DiscoveryHomeRestorerTest {
         val restored =
             radioController.restoreLocalConfiguration(
                 expectedDeviceAddress = "x:STALE",
-                config = Config(lora = Config.LoRaConfig(use_preset = true)),
-                primaryChannel = Channel(index = 0),
+                config = Config.Builder().also { wb ->wb.lora = Config.LoRaConfig.Builder().also { wb ->wb.use_preset = true}.build()}.build(),
+                primaryChannel = Channel.Builder().also { wb ->wb.index = 0}.build(),
             )
 
         assertFalse(restored)
@@ -321,7 +321,7 @@ class DiscoveryHomeRestorerTest {
             DiscoveryHomeRestorePlan(
                 sessionId = sessionId,
                 deviceAddress = device,
-                loraConfig = Config.LoRaConfig(use_preset = true),
+                loraConfig = Config.LoRaConfig.Builder().also { wb ->wb.use_preset = true}.build(),
                 primaryChannel = null,
                 restorePrimaryChannel = true,
                 finalStatus = DiscoverySessionStatus.FAILED,
@@ -348,7 +348,7 @@ class DiscoveryHomeRestorerTest {
                 failLocalConfigWritesRemaining = 2
             }
         val discoveryDao = SharedInMemoryDiscoveryDao()
-        val loraConfig = Config.LoRaConfig(use_preset = true)
+        val loraConfig = Config.LoRaConfig.Builder().also { wb ->wb.use_preset = true}.build()
         val sessionId =
             discoveryDao.insertSession(
                 DiscoverySessionEntity(
@@ -406,7 +406,7 @@ class DiscoveryHomeRestorerTest {
         val serviceRepository = FakeServiceRepository().apply { setConnectionState(ConnectionState.Connected) }
         val radioController = DiscoveryTestRadioController().apply { selectedDeviceAddress = device }
         val discoveryDao = SharedInMemoryDiscoveryDao()
-        val loraConfig = Config.LoRaConfig(use_preset = true)
+        val loraConfig = Config.LoRaConfig.Builder().also { wb ->wb.use_preset = true}.build()
         val sessionId =
             discoveryDao.insertSession(
                 DiscoverySessionEntity(
@@ -463,7 +463,7 @@ class DiscoveryHomeRestorerTest {
                 acceptConditionalRestore = false
             }
         val discoveryDao = SharedInMemoryDiscoveryDao()
-        val loraConfig = Config.LoRaConfig(use_preset = true)
+        val loraConfig = Config.LoRaConfig.Builder().also { wb ->wb.use_preset = true}.build()
         val sessionId =
             discoveryDao.insertSession(
                 DiscoverySessionEntity(
@@ -527,7 +527,7 @@ class DiscoveryHomeRestorerTest {
                 acceptConditionalRestore = false
             }
         val discoveryDao = SharedInMemoryDiscoveryDao()
-        val loraConfig = Config.LoRaConfig(use_preset = true)
+        val loraConfig = Config.LoRaConfig.Builder().also { wb ->wb.use_preset = true}.build()
         val sessionId =
             discoveryDao.insertSession(
                 DiscoverySessionEntity(
@@ -585,7 +585,7 @@ class DiscoveryHomeRestorerTest {
                 onLocalConfigWriteAttempt = { serviceRepository.setConnectionState(ConnectionState.Disconnected) }
             }
         val discoveryDao = SharedInMemoryDiscoveryDao()
-        val loraConfig = Config.LoRaConfig(use_preset = true)
+        val loraConfig = Config.LoRaConfig.Builder().also { wb ->wb.use_preset = true}.build()
         val sessionId =
             discoveryDao.insertSession(
                 DiscoverySessionEntity(
@@ -650,7 +650,7 @@ class DiscoveryHomeRestorerTest {
                 failLocalConfigWritesRemaining = Int.MAX_VALUE
             }
         val discoveryDao = SharedInMemoryDiscoveryDao()
-        val loraConfig = Config.LoRaConfig(use_preset = true)
+        val loraConfig = Config.LoRaConfig.Builder().also { wb ->wb.use_preset = true}.build()
         val sessionId =
             discoveryDao.insertSession(
                 DiscoverySessionEntity(
@@ -715,7 +715,7 @@ class DiscoveryHomeRestorerTest {
                 failLocalConfigWritesRemaining = Int.MAX_VALUE
             }
         val backingDao = SharedInMemoryDiscoveryDao()
-        val loraConfig = Config.LoRaConfig(use_preset = true)
+        val loraConfig = Config.LoRaConfig.Builder().also { wb ->wb.use_preset = true}.build()
         val sessionId =
             backingDao.insertSession(
                 DiscoverySessionEntity(

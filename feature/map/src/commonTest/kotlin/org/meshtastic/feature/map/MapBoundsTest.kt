@@ -28,7 +28,7 @@ class MapBoundsTest {
 
     private fun node(num: Int, latitude: Double, longitude: Double) = Node(
         num = num,
-        position = Position(latitude_i = (latitude * 1e7).toInt(), longitude_i = (longitude * 1e7).toInt()),
+        position = Position.Builder().also { wb ->wb.latitude_i = (latitude * 1e7).toInt(); wb.longitude_i = (longitude * 1e7).toInt()}.build(),
     )
 
     @Test

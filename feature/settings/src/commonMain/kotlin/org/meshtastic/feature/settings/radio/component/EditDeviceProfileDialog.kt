@@ -91,27 +91,24 @@ fun EditDeviceProfileDialog(
         confirmText = stringResource(Res.string.save),
         onConfirm = {
             val result =
-                DeviceProfile(
-                    long_name = if (state[ProfileField.LONG_NAME] == true) deviceProfile.long_name else null,
-                    short_name = if (state[ProfileField.SHORT_NAME] == true) deviceProfile.short_name else null,
-                    channel_url = if (state[ProfileField.CHANNEL_URL] == true) deviceProfile.channel_url else null,
-                    config = if (state[ProfileField.CONFIG] == true) deviceProfile.config else null,
-                    module_config =
-                    if (state[ProfileField.MODULE_CONFIG] == true) {
-                        deviceProfile.module_config
-                    } else {
-                        null
-                    },
-                    fixed_position =
-                    if (state[ProfileField.FIXED_POSITION] == true) {
-                        deviceProfile.fixed_position
-                    } else {
-                        null
-                    },
-                    is_unmessagable =
-                    if (state[ProfileField.UNMESSAGABLE] == true) deviceProfile.is_unmessagable else null,
-                    is_licensed = if (state[ProfileField.LICENSED] == true) deviceProfile.is_licensed else null,
-                )
+                DeviceProfile.Builder().also { wb ->
+                wb.long_name = if (state[ProfileField.LONG_NAME] == true) deviceProfile.long_name else null
+                wb.short_name = if (state[ProfileField.SHORT_NAME] == true) deviceProfile.short_name else null
+                wb.channel_url = if (state[ProfileField.CHANNEL_URL] == true) deviceProfile.channel_url else null
+                wb.config = if (state[ProfileField.CONFIG] == true) deviceProfile.config else null
+                wb.module_config = if (state[ProfileField.MODULE_CONFIG] == true) {
+                                        deviceProfile.module_config
+                                    } else {
+                                        null
+                                    }
+                wb.fixed_position = if (state[ProfileField.FIXED_POSITION] == true) {
+                                        deviceProfile.fixed_position
+                                    } else {
+                                        null
+                                    }
+                wb.is_unmessagable = if (state[ProfileField.UNMESSAGABLE] == true) deviceProfile.is_unmessagable else null
+                wb.is_licensed = if (state[ProfileField.LICENSED] == true) deviceProfile.is_licensed else null
+                }.build()
             onConfirm(result)
         },
         modifier = modifier,

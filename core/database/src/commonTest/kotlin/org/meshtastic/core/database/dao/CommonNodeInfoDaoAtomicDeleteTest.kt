@@ -102,8 +102,8 @@ abstract class CommonNodeInfoDaoAtomicDeleteTest {
     }
 
     private suspend fun seedNodeAndMetadata(nodeNum: Int, label: String) {
-        dao.upsert(NodeEntity(num = nodeNum, user = User(id = "!node-$label")))
-        dao.upsert(MetadataEntity(num = nodeNum, proto = DeviceMetadata(firmware_version = label)))
+        dao.upsert(NodeEntity(num = nodeNum, user = User.Builder().also { wb ->wb.id = "!node-$label"}.build()))
+        dao.upsert(MetadataEntity(num = nodeNum, proto = DeviceMetadata.Builder().also { wb ->wb.firmware_version = label}.build()))
     }
 
     private companion object {

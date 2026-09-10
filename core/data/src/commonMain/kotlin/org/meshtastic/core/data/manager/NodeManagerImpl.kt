@@ -378,11 +378,13 @@ class NodeManagerImpl(
          */
         internal fun preservingKnownPrecision(incoming: ProtoPosition, stored: ProtoPosition): ProtoPosition =
             if (isRedundantCoarsePosition(incoming, stored)) {
-                incoming.copy(
-                    latitude_i = stored.latitude_i,
-                    longitude_i = stored.longitude_i,
-                    precision_bits = stored.precision_bits,
-                )
+                incoming.newBuilder()
+                    .also { wb ->
+                        wb.latitude_i = stored.latitude_i
+                        wb.longitude_i = stored.longitude_i
+                        wb.precision_bits = stored.precision_bits
+                    }
+                    .build()
             } else {
                 incoming
             }
@@ -721,15 +723,18 @@ class NodeManagerImpl(
             val newPos =
                 when {
                     isZeroPos ->
-                        p.copy(
-                            time = posTime,
-                            latitude_i = node.position.latitude_i,
-                            longitude_i = node.position.longitude_i,
-                            altitude = p.altitude ?: node.position.altitude,
-                            sats_in_view = p.sats_in_view,
-                        )
+                        p.newBuilder()
+                            .also { wb ->
+                                wb.time = posTime
+                                wb.latitude_i = node.position.latitude_i
+                                wb.longitude_i = node.position.longitude_i
+                                wb.altitude = p.altitude ?: node.position.altitude
+                                wb.sats_in_view = p.sats_in_view
+                            }
+                            .build()
 
-                    else -> preservingKnownPrecision(p.copy(time = posTime), node.position)
+                    else ->
+                        preservingKnownPrecision(p.newBuilder().also { wb -> wb.time = posTime }.build(), node.position)
                 }
 
             node.copy(position = newPos, lastHeard = newLastHeard)
@@ -785,16 +790,19 @@ class NodeManagerImpl(
         var next = node
         val user = info.user
         if (user != null && !shouldPreserveExistingUser(node.user, user)) {
-            var newUser = user.let { if (it.is_licensed == true) it.copy(public_key = ByteString.EMPTY) else it }
+            var newUser =
+                user.let {
+                    if (it.is_licensed == true) it.newBuilder().also { wb -> wb.public_key = ByteString.EMPTY }.build() else it
+                }
             if (info.via_mqtt && !newUser.long_name.endsWith(" (MQTT)")) {
-                newUser = newUser.copy(long_name = "${newUser.long_name} (MQTT)")
+                newUser = newUser.newBuilder().also { wb -> wb.long_name = "${newUser.long_name} (MQTT)" }.build()
             }
             next = next.copy(user = newUser, publicKey = newUser.public_key)
         }
         info.position?.let { position ->
             // The NodeDB snapshot from the connected device carries the coarsened position for nodes on a
             // precision-limited channel; do not let it clobber a more precise coordinate we already hold (#6360).
-            val timed = position.copy(time = clampTimestampToNow(position.time))
+            val timed = position.newBuilder().also { wb -> wb.time = clampTimestampToNow(position.time) }.build()
             next = next.copy(position = preservingKnownPrecision(timed, next.position))
         }
         // Firmware that predates the field never sends it, and a proto3 bool decodes as false - which would mark
@@ -1108,12 +1116,12 @@ class NodeManagerImpl(
         return Node(
             num = num,
             user =
-            User(
-                id = userId,
-                long_name = "Meshtastic ${userId.takeLast(GENERATED_NODE_NAME_SUFFIX_LENGTH)}",
-                short_name = userId.takeLast(GENERATED_NODE_NAME_SUFFIX_LENGTH),
-                hw_model = HardwareModel.UNSET,
-            ),
+            User.Builder().also { wb ->
+            wb.id = userId
+            wb.long_name = "Meshtastic ${userId.takeLast(GENERATED_NODE_NAME_SUFFIX_LENGTH)}"
+            wb.short_name = userId.takeLast(GENERATED_NODE_NAME_SUFFIX_LENGTH)
+            wb.hw_model = HardwareModel.UNSET
+            }.build(),
             channel = channel,
         )
     }
@@ -1136,7 +1144,7 @@ class NodeManagerImpl(
             // refused and recorded, never applied. Clearing the stored key here would break PKC direct messages to
             // that contact on the word of whoever sent the substitute.
             val keptKey = if (incomingKey == null || keyMismatch) existingKey else incomingKey
-            val newUser = p.copy(public_key = keptKey ?: ByteString.EMPTY)
+            val newUser = p.newBuilder().also { wb -> wb.public_key = keptKey ?: ByteString.EMPTY }.build()
             node.copy(
                 user = newUser,
                 publicKey = newUser.public_key,

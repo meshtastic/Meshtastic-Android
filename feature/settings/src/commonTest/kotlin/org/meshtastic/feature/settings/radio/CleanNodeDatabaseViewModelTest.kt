@@ -72,7 +72,7 @@ class CleanNodeDatabaseViewModelTest {
 
     @Test
     fun `getNodesToDelete calls useCase and updates state`() = runTest {
-        val nodes = listOf(Node(num = 1, user = org.meshtastic.proto.User(id = "!1")))
+        val nodes = listOf(Node(num = 1, user = org.meshtastic.proto.User.Builder().also { wb ->wb.id = "!1"}.build()))
         everySuspend { cleanNodeDatabaseUseCase.getNodesToClean(any(), any(), any()) } returns nodes
 
         viewModel.getNodesToDelete()
@@ -83,7 +83,7 @@ class CleanNodeDatabaseViewModelTest {
     @Test
     fun `cleanNodes calls useCase and clears state`() = runTest {
         // First set some nodes to delete
-        val nodes = listOf(Node(num = 1, user = org.meshtastic.proto.User(id = "!1")))
+        val nodes = listOf(Node(num = 1, user = org.meshtastic.proto.User.Builder().also { wb ->wb.id = "!1"}.build()))
         everySuspend { cleanNodeDatabaseUseCase.getNodesToClean(any(), any(), any()) } returns nodes
         viewModel.getNodesToDelete()
 

@@ -46,7 +46,7 @@ class FakeRadioControllerRestoreTest {
         assertTrue(
             controller.restoreLocalConfiguration(
                 expectedDeviceAddress = "x:DEVICE",
-                config = Config(),
+                config = Config.Builder().build(),
                 primaryChannel = null,
             ),
         )
@@ -55,8 +55,8 @@ class FakeRadioControllerRestoreTest {
     @Test
     fun restoreRequiresSelectedDeviceOwnership() = runTest {
         val controller = FakeRadioController().apply { selectedDeviceAddress = "x:CURRENT" }
-        val channel = Channel(index = 0, settings = ChannelSettings(name = "Primary"))
-        val config = Config(lora = Config.LoRaConfig(use_preset = true))
+        val channel = Channel.Builder().also { wb ->wb.index = 0; wb.settings = ChannelSettings.Builder().also { wb ->wb.name = "Primary"}.build()}.build()
+        val config = Config.Builder().also { wb ->wb.lora = Config.LoRaConfig.Builder().also { wb ->wb.use_preset = true}.build()}.build()
 
         assertFalse(
             controller.restoreLocalConfiguration(
@@ -82,8 +82,8 @@ class FakeRadioControllerRestoreTest {
     @Test
     fun restoreRejectsMissingSelectedDeviceOwnership() = runTest {
         val controller = FakeRadioController()
-        val channel = Channel(index = 0, settings = ChannelSettings(name = "Primary"))
-        val config = Config(lora = Config.LoRaConfig(use_preset = true))
+        val channel = Channel.Builder().also { wb ->wb.index = 0; wb.settings = ChannelSettings.Builder().also { wb ->wb.name = "Primary"}.build()}.build()
+        val config = Config.Builder().also { wb ->wb.lora = Config.LoRaConfig.Builder().also { wb ->wb.use_preset = true}.build()}.build()
 
         val restored =
             controller.restoreLocalConfiguration(
@@ -104,8 +104,8 @@ class FakeRadioControllerRestoreTest {
                 selectedDeviceAddress = "x:CURRENT"
                 throwOnSetLocalConfig = true
             }
-        val channel = Channel(index = 0, settings = ChannelSettings(name = "Primary"))
-        val config = Config(lora = Config.LoRaConfig(use_preset = true))
+        val channel = Channel.Builder().also { wb ->wb.index = 0; wb.settings = ChannelSettings.Builder().also { wb ->wb.name = "Primary"}.build()}.build()
+        val config = Config.Builder().also { wb ->wb.lora = Config.LoRaConfig.Builder().also { wb ->wb.use_preset = true}.build()}.build()
 
         assertFailsWith<IllegalStateException> {
             controller.restoreLocalConfiguration(
@@ -129,7 +129,7 @@ class FakeRadioControllerRestoreTest {
             writeEntered.complete(Unit)
             releaseWrite.await()
         }
-        val config = Config(lora = Config.LoRaConfig(use_preset = true))
+        val config = Config.Builder().also { wb ->wb.lora = Config.LoRaConfig.Builder().also { wb ->wb.use_preset = true}.build()}.build()
 
         val restore = async {
             controller.restoreLocalConfiguration(

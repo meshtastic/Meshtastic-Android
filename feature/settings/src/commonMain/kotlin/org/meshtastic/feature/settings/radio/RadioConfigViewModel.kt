@@ -131,10 +131,10 @@ data class RadioConfigState(
     val connected: Boolean = false,
     val route: String = "",
     val metadata: DeviceMetadata? = null,
-    val userConfig: User = User(),
+    val userConfig: User = User.Builder().build(),
     val channelList: List<ChannelSettings> = emptyList(),
-    val radioConfig: LocalConfig = LocalConfig(),
-    val moduleConfig: LocalModuleConfig = LocalModuleConfig(),
+    val radioConfig: LocalConfig = LocalConfig.Builder().build(),
+    val moduleConfig: LocalModuleConfig = LocalModuleConfig.Builder().build(),
     val ringtone: String = "",
     val cannedMessageMessages: String = "",
     val deviceConnectionStatus: DeviceConnectionStatus? = null,
@@ -307,7 +307,7 @@ open class RadioConfigViewModel(
         _radioConfigState.update { it.copy(nodeDbResetPreserveFavorites = preserveFavorites) }
     }
 
-    private val _currentDeviceProfile = MutableStateFlow(DeviceProfile())
+    private val _currentDeviceProfile = MutableStateFlow(DeviceProfile.Builder().build())
     val currentDeviceProfile
         get() = _currentDeviceProfile.value
 
@@ -363,8 +363,8 @@ open class RadioConfigViewModel(
                                 isLocal = false,
                                 pioEnv = null,
                                 channelList = emptyList(),
-                                radioConfig = LocalConfig(),
-                                moduleConfig = LocalModuleConfig(),
+                                radioConfig = LocalConfig.Builder().build(),
+                                moduleConfig = LocalModuleConfig.Builder().build(),
                             )
                         }
                     }
@@ -464,7 +464,7 @@ open class RadioConfigViewModel(
             expectRestartIfLocal(RebootBehavior.ALWAYS)
             radioConfigUseCase.setHamMode(
                 destNum,
-                HamParameters(call_sign = callSign, short_name = user.short_name, long_name = longName),
+                HamParameters.Builder().also { wb ->wb.call_sign = callSign; wb.short_name = user.short_name; wb.long_name = longName}.build(),
                 onRequestId = ::registerWriteRequestId,
             )
         }
@@ -578,18 +578,20 @@ open class RadioConfigViewModel(
             _radioConfigState.update { state ->
                 state.copy(
                     radioConfig =
-                    state.radioConfig.copy(
-                        device = config.device ?: state.radioConfig.device,
-                        position = config.position ?: state.radioConfig.position,
-                        power = config.power ?: state.radioConfig.power,
-                        network = config.network ?: state.radioConfig.network,
-                        display = config.display ?: state.radioConfig.display,
-                        // LoRa is intentionally NOT applied optimistically: the firmware can clamp or region-swap
-                        // (e.g. EU sibling) a LoRa write and applies it live, so the form must reflect the device's
-                        // actual value. It is re-read from the device when the LoRa screen is next opened.
-                        bluetooth = config.bluetooth ?: state.radioConfig.bluetooth,
-                        security = config.security ?: state.radioConfig.security,
-                    ),
+                    state.radioConfig.newBuilder()
+                        .also { wb ->
+                            wb.device = config.device ?: state.radioConfig.device
+                            wb.position = config.position ?: state.radioConfig.position
+                            wb.power = config.power ?: state.radioConfig.power
+                            wb.network = config.network ?: state.radioConfig.network
+                            wb.display = config.display ?: state.radioConfig.display
+                            // LoRa is intentionally NOT applied optimistically: the firmware can clamp or region-swap
+                            // (e.g. EU sibling) a LoRa write and applies it live, so the form must reflect the device's
+                            // actual value. It is re-read from the device when the LoRa screen is next opened.
+                            wb.bluetooth = config.bluetooth ?: state.radioConfig.bluetooth
+                            wb.security = config.security ?: state.radioConfig.security
+                        }
+                        .build(),
                 )
             }
             expectRestartIfLocal(config.saveRebootBehavior())
@@ -604,25 +606,27 @@ open class RadioConfigViewModel(
             _radioConfigState.update { state ->
                 state.copy(
                     moduleConfig =
-                    state.moduleConfig.copy(
-                        mqtt = config.mqtt ?: state.moduleConfig.mqtt,
-                        serial = config.serial ?: state.moduleConfig.serial,
-                        external_notification =
-                        config.external_notification ?: state.moduleConfig.external_notification,
-                        store_forward = config.store_forward ?: state.moduleConfig.store_forward,
-                        range_test = config.range_test ?: state.moduleConfig.range_test,
-                        telemetry = config.telemetry ?: state.moduleConfig.telemetry,
-                        canned_message = config.canned_message ?: state.moduleConfig.canned_message,
-                        audio = config.audio ?: state.moduleConfig.audio,
-                        remote_hardware = config.remote_hardware ?: state.moduleConfig.remote_hardware,
-                        neighbor_info = config.neighbor_info ?: state.moduleConfig.neighbor_info,
-                        ambient_lighting = config.ambient_lighting ?: state.moduleConfig.ambient_lighting,
-                        detection_sensor = config.detection_sensor ?: state.moduleConfig.detection_sensor,
-                        paxcounter = config.paxcounter ?: state.moduleConfig.paxcounter,
-                        statusmessage = config.statusmessage ?: state.moduleConfig.statusmessage,
-                        tak = config.tak ?: state.moduleConfig.tak,
-                        mesh_beacon = config.mesh_beacon ?: state.moduleConfig.mesh_beacon,
-                    ),
+                    state.moduleConfig.newBuilder()
+                        .also { wb ->
+                            wb.mqtt = config.mqtt ?: state.moduleConfig.mqtt
+                            wb.serial = config.serial ?: state.moduleConfig.serial
+                            wb.external_notification =
+                                config.external_notification ?: state.moduleConfig.external_notification
+                            wb.store_forward = config.store_forward ?: state.moduleConfig.store_forward
+                            wb.range_test = config.range_test ?: state.moduleConfig.range_test
+                            wb.telemetry = config.telemetry ?: state.moduleConfig.telemetry
+                            wb.canned_message = config.canned_message ?: state.moduleConfig.canned_message
+                            wb.audio = config.audio ?: state.moduleConfig.audio
+                            wb.remote_hardware = config.remote_hardware ?: state.moduleConfig.remote_hardware
+                            wb.neighbor_info = config.neighbor_info ?: state.moduleConfig.neighbor_info
+                            wb.ambient_lighting = config.ambient_lighting ?: state.moduleConfig.ambient_lighting
+                            wb.detection_sensor = config.detection_sensor ?: state.moduleConfig.detection_sensor
+                            wb.paxcounter = config.paxcounter ?: state.moduleConfig.paxcounter
+                            wb.statusmessage = config.statusmessage ?: state.moduleConfig.statusmessage
+                            wb.tak = config.tak ?: state.moduleConfig.tak
+                            wb.mesh_beacon = config.mesh_beacon ?: state.moduleConfig.mesh_beacon
+                        }
+                        .build(),
                 )
             }
             expectRestartIfLocal(config.saveRebootBehavior())
@@ -767,7 +771,7 @@ open class RadioConfigViewModel(
             }
             importSecurityConfigUseCase(stored)
                 .onSuccess {
-                    setConfig(Config(security = it))
+                    setConfig(Config.Builder().also { wb ->wb.security = it}.build())
                     snackbarManager.showSnackbar(message = UiText.Resource(Res.string.key_backup_restored).resolve())
                 }
                 .onFailure {
@@ -1285,9 +1289,9 @@ open class RadioConfigViewModel(
                             channelList =
                             state.channelList.toMutableList().apply {
                                 val index = response.index
-                                val settings = response.settings ?: ChannelSettings()
+                                val settings = response.settings ?: ChannelSettings.Builder().build()
                                 // Make sure list is large enough
-                                while (size <= index) add(ChannelSettings())
+                                while (size <= index) add(ChannelSettings.Builder().build())
                                 set(index, settings)
                             },
                         )
@@ -1316,16 +1320,18 @@ open class RadioConfigViewModel(
                 _radioConfigState.update { state ->
                     state.copy(
                         radioConfig =
-                        state.radioConfig.copy(
-                            device = response.device ?: state.radioConfig.device,
-                            position = response.position ?: state.radioConfig.position,
-                            power = response.power ?: state.radioConfig.power,
-                            network = response.network ?: state.radioConfig.network,
-                            display = response.display ?: state.radioConfig.display,
-                            lora = response.lora ?: state.radioConfig.lora,
-                            bluetooth = response.bluetooth ?: state.radioConfig.bluetooth,
-                            security = response.security ?: state.radioConfig.security,
-                        ),
+                        state.radioConfig.newBuilder()
+                            .also { wb ->
+                                wb.device = response.device ?: state.radioConfig.device
+                                wb.position = response.position ?: state.radioConfig.position
+                                wb.power = response.power ?: state.radioConfig.power
+                                wb.network = response.network ?: state.radioConfig.network
+                                wb.display = response.display ?: state.radioConfig.display
+                                wb.lora = response.lora ?: state.radioConfig.lora
+                                wb.bluetooth = response.bluetooth ?: state.radioConfig.bluetooth
+                                wb.security = response.security ?: state.radioConfig.security
+                            }
+                            .build(),
                     )
                 }
                 if (!isLateRemoteRead) incrementCompleted()
@@ -1336,25 +1342,27 @@ open class RadioConfigViewModel(
                 _radioConfigState.update { state ->
                     state.copy(
                         moduleConfig =
-                        state.moduleConfig.copy(
-                            mqtt = response.mqtt ?: state.moduleConfig.mqtt,
-                            serial = response.serial ?: state.moduleConfig.serial,
-                            external_notification =
-                            response.external_notification ?: state.moduleConfig.external_notification,
-                            store_forward = response.store_forward ?: state.moduleConfig.store_forward,
-                            range_test = response.range_test ?: state.moduleConfig.range_test,
-                            telemetry = response.telemetry ?: state.moduleConfig.telemetry,
-                            canned_message = response.canned_message ?: state.moduleConfig.canned_message,
-                            audio = response.audio ?: state.moduleConfig.audio,
-                            remote_hardware = response.remote_hardware ?: state.moduleConfig.remote_hardware,
-                            neighbor_info = response.neighbor_info ?: state.moduleConfig.neighbor_info,
-                            ambient_lighting = response.ambient_lighting ?: state.moduleConfig.ambient_lighting,
-                            detection_sensor = response.detection_sensor ?: state.moduleConfig.detection_sensor,
-                            paxcounter = response.paxcounter ?: state.moduleConfig.paxcounter,
-                            statusmessage = response.statusmessage ?: state.moduleConfig.statusmessage,
-                            tak = response.tak ?: state.moduleConfig.tak,
-                            mesh_beacon = response.mesh_beacon ?: state.moduleConfig.mesh_beacon,
-                        ),
+                        state.moduleConfig.newBuilder()
+                            .also { wb ->
+                                wb.mqtt = response.mqtt ?: state.moduleConfig.mqtt
+                                wb.serial = response.serial ?: state.moduleConfig.serial
+                                wb.external_notification =
+                                    response.external_notification ?: state.moduleConfig.external_notification
+                                wb.store_forward = response.store_forward ?: state.moduleConfig.store_forward
+                                wb.range_test = response.range_test ?: state.moduleConfig.range_test
+                                wb.telemetry = response.telemetry ?: state.moduleConfig.telemetry
+                                wb.canned_message = response.canned_message ?: state.moduleConfig.canned_message
+                                wb.audio = response.audio ?: state.moduleConfig.audio
+                                wb.remote_hardware = response.remote_hardware ?: state.moduleConfig.remote_hardware
+                                wb.neighbor_info = response.neighbor_info ?: state.moduleConfig.neighbor_info
+                                wb.ambient_lighting = response.ambient_lighting ?: state.moduleConfig.ambient_lighting
+                                wb.detection_sensor = response.detection_sensor ?: state.moduleConfig.detection_sensor
+                                wb.paxcounter = response.paxcounter ?: state.moduleConfig.paxcounter
+                                wb.statusmessage = response.statusmessage ?: state.moduleConfig.statusmessage
+                                wb.tak = response.tak ?: state.moduleConfig.tak
+                                wb.mesh_beacon = response.mesh_beacon ?: state.moduleConfig.mesh_beacon
+                            }
+                            .build(),
                     )
                 }
                 if (!isLateRemoteRead) incrementCompleted()
@@ -1495,13 +1503,13 @@ internal suspend fun applyManualChannelUpdatePlan(
 
 private fun MutableList<ChannelSettings>.applyManualChannelWrite(channel: Channel) {
     while (size <= channel.index) {
-        add(ChannelSettings())
+        add(ChannelSettings.Builder().build())
     }
     this[channel.index] =
         if (channel.role == Channel.Role.DISABLED) {
-            ChannelSettings()
+            ChannelSettings.Builder().build()
         } else {
-            channel.settings ?: ChannelSettings()
+            channel.settings ?: ChannelSettings.Builder().build()
         }
 }
 

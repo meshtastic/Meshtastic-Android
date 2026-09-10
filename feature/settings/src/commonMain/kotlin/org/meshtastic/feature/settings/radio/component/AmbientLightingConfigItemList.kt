@@ -46,7 +46,7 @@ private const val MAX_RGB_VALUE = 255
 @Composable
 fun AmbientLightingConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
-    val ambientLightingConfig = state.moduleConfig.ambient_lighting ?: ModuleConfig.AmbientLightingConfig()
+    val ambientLightingConfig = state.moduleConfig.ambient_lighting ?: ModuleConfig.AmbientLightingConfig.Builder().build()
     val formState = rememberConfigState(initialValue = ambientLightingConfig)
     val focusManager = LocalFocusManager.current
 
@@ -59,7 +59,7 @@ fun AmbientLightingConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> U
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val config = ModuleConfig(ambient_lighting = it)
+            val config = ModuleConfig.Builder().also { wb ->wb.ambient_lighting = it}.build()
             viewModel.setModuleConfig(config)
         },
     ) {
@@ -69,7 +69,7 @@ fun AmbientLightingConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> U
                     title = stringResource(Res.string.led_state),
                     checked = formState.value.led_state,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy(led_state = it) },
+                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.led_state = it }.build() },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -100,7 +100,7 @@ private fun LedColorFields(
             keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
             onValueChanged = {
                 if (it in 0..MAX_LED_CURRENT) {
-                    onConfigChange(config.copy(current = it))
+                    onConfigChange(config.newBuilder().also { wb -> wb.current = it }.build())
                 }
             },
         )
@@ -112,7 +112,7 @@ private fun LedColorFields(
             keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
             onValueChanged = {
                 if (it in 0..MAX_RGB_VALUE) {
-                    onConfigChange(config.copy(red = it))
+                    onConfigChange(config.newBuilder().also { wb -> wb.red = it }.build())
                 }
             },
         )
@@ -124,7 +124,7 @@ private fun LedColorFields(
             keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
             onValueChanged = {
                 if (it in 0..MAX_RGB_VALUE) {
-                    onConfigChange(config.copy(green = it))
+                    onConfigChange(config.newBuilder().also { wb -> wb.green = it }.build())
                 }
             },
         )
@@ -136,7 +136,7 @@ private fun LedColorFields(
             keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
             onValueChanged = {
                 if (it in 0..MAX_RGB_VALUE) {
-                    onConfigChange(config.copy(blue = it))
+                    onConfigChange(config.newBuilder().also { wb -> wb.blue = it }.build())
                 }
             },
         )

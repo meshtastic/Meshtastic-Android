@@ -67,7 +67,11 @@ class TelemetryPacketHandlerImpl(
         val payload = packet.decoded?.payload ?: return
         val telemetry =
             (Telemetry.ADAPTER.decodeOrNull(payload, Logger) ?: return).let {
-                if (it.time == 0) it.copy(time = (dataPacket.time.milliseconds.inWholeSeconds).toInt()) else it
+                if (it.time == 0) {
+                    it.newBuilder().also { wb -> wb.time = (dataPacket.time.milliseconds.inWholeSeconds).toInt() }.build()
+                } else {
+                    it
+                }
             }
         Logger.d { "Telemetry from ${packet.from}: ${Telemetry.ADAPTER.toOneLiner(telemetry)}" }
         val fromNum = packet.from

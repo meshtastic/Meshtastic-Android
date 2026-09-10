@@ -385,11 +385,11 @@ internal class DiscoveryHomeRestorer(
         val primaryChannel =
             plan.primaryChannel
                 ?.takeIf { plan.restorePrimaryChannel }
-                ?.let { Channel(index = 0, role = Channel.Role.PRIMARY, settings = it) }
+                ?.let { Channel.Builder().also { wb ->wb.index = 0; wb.role = Channel.Role.PRIMARY; wb.settings = it}.build() }
         val restored =
             radioController.restoreLocalConfiguration(
                 expectedDeviceAddress = plan.deviceAddress,
-                config = Config(lora = plan.loraConfig),
+                config = Config.Builder().also { wb ->wb.lora = plan.loraConfig}.build(),
                 primaryChannel = primaryChannel,
             )
         if (!restored) return false

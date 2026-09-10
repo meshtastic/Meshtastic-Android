@@ -27,7 +27,7 @@ import kotlin.test.assertTrue
 class HostMetricsTest {
 
     private fun telemetry(time: Int, hostMetrics: HostMetrics? = null) =
-        Telemetry(time = time, host_metrics = hostMetrics)
+        Telemetry.Builder().also { wb ->wb.time = time; wb.host_metrics = hostMetrics}.build()
 
     @Test
     fun buildHostMetricsChartData_filters_missing_and_non_positive_values() {
@@ -36,9 +36,9 @@ class HostMetricsTest {
                 listOf(
                     telemetry(
                         time = 100,
-                        hostMetrics = HostMetrics(load1 = 150, load5 = 0, load15 = 225, freemem_bytes = 2_097_152L),
+                        hostMetrics = HostMetrics.Builder().also { wb ->wb.load1 = 150; wb.load5 = 0; wb.load15 = 225; wb.freemem_bytes = 2_097_152L}.build(),
                     ),
-                    telemetry(time = 200, hostMetrics = HostMetrics(load1 = 0, load5 = 320, freemem_bytes = 0L)),
+                    telemetry(time = 200, hostMetrics = HostMetrics.Builder().also { wb ->wb.load1 = 0; wb.load5 = 320; wb.freemem_bytes = 0L}.build()),
                     telemetry(time = 300, hostMetrics = null),
                 ),
             )
@@ -57,9 +57,9 @@ class HostMetricsTest {
                 listOf(
                     telemetry(
                         time = 100,
-                        hostMetrics = HostMetrics(load1 = 0, load5 = 0, load15 = 0, freemem_bytes = 0L),
+                        hostMetrics = HostMetrics.Builder().also { wb ->wb.load1 = 0; wb.load5 = 0; wb.load15 = 0; wb.freemem_bytes = 0L}.build(),
                     ),
-                    telemetry(time = 200, hostMetrics = HostMetrics()),
+                    telemetry(time = 200, hostMetrics = HostMetrics.Builder().build()),
                     telemetry(time = 300, hostMetrics = null),
                 ),
             )

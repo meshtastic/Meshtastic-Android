@@ -35,19 +35,19 @@ class ChannelSetDataSource(private val channelSetStore: CoreChannelSetDataStore)
             // dataStore.data throws an IOException when an error is encountered when reading data
             if (exception is IOException) {
                 Logger.e { "Error reading DeviceConfig settings: ${exception.message}" }
-                emit(ChannelSet())
+                emit(ChannelSet.Builder().build())
             } else {
                 throw exception
             }
         }
 
     suspend fun clearChannelSet() {
-        channelSetStore.updateData { ChannelSet() }
+        channelSetStore.updateData { ChannelSet.Builder().build() }
     }
 
     /** Replaces all [ChannelSettings] in a single atomic operation. */
     suspend fun replaceAllSettings(settingsList: List<ChannelSettings>) {
-        channelSetStore.updateData { it.copy(settings = settingsList) }
+        channelSetStore.updateData { it.newBuilder().also { wb -> wb.settings = settingsList }.build() }
     }
 
     /** Updates the [ChannelSettings] list with the provided channel. */
@@ -57,15 +57,15 @@ class ChannelSetDataSource(private val channelSetStore: CoreChannelSetDataStore)
             val settings = preference.settings.toMutableList()
             // Resize to fit channel
             while (settings.size <= channel.index) {
-                settings.add(ChannelSettings())
+                settings.add(ChannelSettings.Builder().build())
             }
             // use setSettings() to ensure settingsList and channel indexes match
-            settings[channel.index] = channel.settings ?: ChannelSettings()
-            preference.copy(settings = settings)
+            settings[channel.index] = channel.settings ?: ChannelSettings.Builder().build()
+            preference.newBuilder().also { wb -> wb.settings = settings }.build()
         }
     }
 
     suspend fun setLoraConfig(config: Config.LoRaConfig) {
-        channelSetStore.updateData { it.copy(lora_config = config) }
+        channelSetStore.updateData { it.newBuilder().also { wb -> wb.lora_config = config }.build() }
     }
 }

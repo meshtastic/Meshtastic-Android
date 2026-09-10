@@ -188,9 +188,9 @@ class DiscoveryScanEngineTest {
     private val radioConfigRepository =
         FakeRadioConfigRepository().apply {
             setLocalConfigDirect(
-                LocalConfig(
-                    lora = Config.LoRaConfig(use_preset = true, modem_preset = ChannelOption.LONG_FAST.modemPreset),
-                ),
+                LocalConfig.Builder().also { wb ->
+                wb.lora = Config.LoRaConfig.Builder().also { wb ->wb.use_preset = true; wb.modem_preset = ChannelOption.LONG_FAST.modemPreset}.build()
+                }.build(),
             )
         }
     private val collectorRegistry = FakeCollectorRegistry()
@@ -266,8 +266,8 @@ class DiscoveryScanEngineTest {
 
     private fun createNodeWithPosition(num: Int, latI: Int = 0, lonI: Int = 0) = Node(
         num = num,
-        user = User(id = "!${num.toString(16)}", short_name = "T$num", long_name = "Test Node $num"),
-        position = Position(latitude_i = latI, longitude_i = lonI),
+        user = User.Builder().also { wb ->wb.id = "!${num.toString(16)}"; wb.short_name = "T$num"; wb.long_name = "Test Node $num"}.build(),
+        position = Position.Builder().also { wb ->wb.latitude_i = latI; wb.longitude_i = lonI}.build(),
     )
 
     private fun createPositionMeshPacket(
@@ -277,15 +277,15 @@ class DiscoveryScanEngineTest {
         snr: Float = 5.5f,
         rssi: Int = -70,
     ): MeshPacket {
-        val posPayload = Position.ADAPTER.encode(Position(latitude_i = latI, longitude_i = lonI)).toByteString()
-        val data = Data(portnum = PortNum.POSITION_APP, payload = posPayload)
-        return MeshPacket(from = from, decoded = data, rx_snr = snr, rx_rssi = rssi)
+        val posPayload = Position.ADAPTER.encode(Position.Builder().also { wb ->wb.latitude_i = latI; wb.longitude_i = lonI}.build()).toByteString()
+        val data = Data.Builder().also { wb ->wb.portnum = PortNum.POSITION_APP; wb.payload = posPayload}.build()
+        return MeshPacket.Builder().also { wb ->wb.from = from; wb.decoded = data; wb.rx_snr = snr; wb.rx_rssi = rssi}.build()
     }
 
     private fun createTelemetryWithLocalStats(from: Int, localStats: LocalStats): MeshPacket {
-        val telPayload = Telemetry.ADAPTER.encode(Telemetry(local_stats = localStats)).toByteString()
-        val data = Data(portnum = PortNum.TELEMETRY_APP, payload = telPayload)
-        return MeshPacket(from = from, decoded = data)
+        val telPayload = Telemetry.ADAPTER.encode(Telemetry.Builder().also { wb ->wb.local_stats = localStats}.build()).toByteString()
+        val data = Data.Builder().also { wb ->wb.portnum = PortNum.TELEMETRY_APP; wb.payload = telPayload}.build()
+        return MeshPacket.Builder().also { wb ->wb.from = from; wb.decoded = data}.build()
     }
 
     private fun createDataPacket(from: Int): DataPacket = DataPacket(
@@ -517,14 +517,14 @@ class DiscoveryScanEngineTest {
             delay(100)
         }
 
-        val posPayload = Position.ADAPTER.encode(Position(latitude_i = 377749300)).toByteString()
+        val posPayload = Position.ADAPTER.encode(Position.Builder().also { wb ->wb.latitude_i = 377749300}.build()).toByteString()
         val meshPacket =
-            MeshPacket(
-                from = 12345,
-                decoded = Data(portnum = PortNum.POSITION_APP, payload = posPayload),
-                rx_snr = 5.5f,
-                rx_rssi = null,
-            )
+            MeshPacket.Builder().also { wb ->
+            wb.from = 12345
+            wb.decoded = Data.Builder().also { wb ->wb.portnum = PortNum.POSITION_APP; wb.payload = posPayload}.build()
+            wb.rx_snr = 5.5f
+            wb.rx_rssi = null
+            }.build()
         engine.onPacketReceived(meshPacket, createDataPacket(from = 12345))
         engine.stopScan()
 
@@ -546,17 +546,17 @@ class DiscoveryScanEngineTest {
 
         // Send a telemetry packet with local_stats
         val localStats =
-            LocalStats(
-                num_packets_tx = 100,
-                num_packets_rx = 200,
-                num_packets_rx_bad = 5,
-                num_rx_dupe = 10,
-                num_tx_relay = 15,
-                num_tx_relay_canceled = 2,
-                num_online_nodes = 3,
-                num_total_nodes = 10,
-                uptime_seconds = 3600,
-            )
+            LocalStats.Builder().also { wb ->
+            wb.num_packets_tx = 100
+            wb.num_packets_rx = 200
+            wb.num_packets_rx_bad = 5
+            wb.num_rx_dupe = 10
+            wb.num_tx_relay = 15
+            wb.num_tx_relay_canceled = 2
+            wb.num_online_nodes = 3
+            wb.num_total_nodes = 10
+            wb.uptime_seconds = 3600
+            }.build()
         val meshPacket = createTelemetryWithLocalStats(from = 12345, localStats = localStats)
         val dataPacket = createDataPacket(from = 12345)
 
@@ -941,7 +941,7 @@ class DiscoveryScanEngineTest {
 
     @Test
     fun scanIsRefusedWhenHomeLoraConfigCannotBeCaptured() = runTest {
-        radioConfigRepository.setLocalConfigDirect(LocalConfig())
+        radioConfigRepository.setLocalConfigDirect(LocalConfig.Builder().build())
         val engine = createEngine(this)
 
         engine.startScan(listOf(ChannelOption.SHORT_FAST), dwellDurationSeconds = 60)
@@ -996,7 +996,7 @@ class DiscoveryScanEngineTest {
         selectDevice(secondDevice)
         val secondDeviceHome = ChannelOption.LONG_SLOW
         radioConfigRepository.setLocalConfigDirect(
-            LocalConfig(lora = Config.LoRaConfig(use_preset = true, modem_preset = secondDeviceHome.modemPreset)),
+            LocalConfig.Builder().also { wb ->wb.lora = Config.LoRaConfig.Builder().also { wb ->wb.use_preset = true; wb.modem_preset = secondDeviceHome.modemPreset}.build()}.build(),
         )
         serviceRepository.setConnectionState(ConnectionState.Connected)
         engine.startScan(listOf(ChannelOption.MEDIUM_FAST), dwellDurationSeconds = 60)
@@ -1048,7 +1048,7 @@ class DiscoveryScanEngineTest {
         homePreset: String = "LONG_FAST",
         completionStatus: String = DiscoverySessionStatus.IN_PROGRESS,
         homeLoraConfig: Config.LoRaConfig? =
-            Config.LoRaConfig(use_preset = true, modem_preset = ChannelOption.LONG_FAST.modemPreset),
+            Config.LoRaConfig.Builder().also { wb ->wb.use_preset = true; wb.modem_preset = ChannelOption.LONG_FAST.modemPreset}.build(),
     ) {
         discoveryDao.seedSession(
             DiscoverySessionEntity(

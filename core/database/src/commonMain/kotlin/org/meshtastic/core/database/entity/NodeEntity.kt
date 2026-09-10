@@ -50,16 +50,16 @@ data class NodeWithRelations(
         snr = node.snr,
         rssi = node.rssi,
         lastHeard = node.lastHeard,
-        deviceMetrics = node.deviceMetrics ?: org.meshtastic.proto.DeviceMetrics(),
+        deviceMetrics = node.deviceMetrics ?: org.meshtastic.proto.DeviceMetrics.Builder().build(),
         channel = node.channel,
         viaMqtt = node.viaMqtt,
         hopsAway = node.hopsAway,
         isFavorite = node.isFavorite,
         isIgnored = node.isIgnored,
         isMuted = node.isMuted,
-        environmentMetrics = node.environmentMetrics ?: org.meshtastic.proto.EnvironmentMetrics(),
-        powerMetrics = node.powerMetrics ?: org.meshtastic.proto.PowerMetrics(),
-        airQualityMetrics = node.airQualityMetrics ?: org.meshtastic.proto.AirQualityMetrics(),
+        environmentMetrics = node.environmentMetrics ?: org.meshtastic.proto.EnvironmentMetrics.Builder().build(),
+        powerMetrics = node.powerMetrics ?: org.meshtastic.proto.PowerMetrics.Builder().build(),
+        airQualityMetrics = node.airQualityMetrics ?: org.meshtastic.proto.AirQualityMetrics.Builder().build(),
         paxcounter = node.paxcounter,
         publicKey = node.publicKey ?: node.user.public_key,
         notes = node.notes,
@@ -130,16 +130,16 @@ data class MetadataEntity(
 )
 data class NodeEntity(
     @PrimaryKey(autoGenerate = false) val num: Int, // This is immutable, and used as a key
-    @ColumnInfo(typeAffinity = ColumnInfo.BLOB) var user: User = User(),
+    @ColumnInfo(typeAffinity = ColumnInfo.BLOB) var user: User = User.Builder().build(),
     @ColumnInfo(name = "long_name") var longName: String? = null,
     @ColumnInfo(name = "short_name") var shortName: String? = null, // used in includeUnknown filter
-    @ColumnInfo(typeAffinity = ColumnInfo.BLOB) var position: WirePosition = WirePosition(),
+    @ColumnInfo(typeAffinity = ColumnInfo.BLOB) var position: WirePosition = WirePosition.Builder().build(),
     var latitude: Double = 0.0,
     var longitude: Double = 0.0,
     var snr: Float = Float.MAX_VALUE,
     var rssi: Int = Int.MAX_VALUE,
     @ColumnInfo(name = "last_heard") var lastHeard: Int = 0, // the last time we've seen this node in secs since 1970
-    @ColumnInfo(name = "device_metrics", typeAffinity = ColumnInfo.BLOB) var deviceTelemetry: Telemetry = Telemetry(),
+    @ColumnInfo(name = "device_metrics", typeAffinity = ColumnInfo.BLOB) var deviceTelemetry: Telemetry = Telemetry.Builder().build(),
     var channel: Int = 0,
     @ColumnInfo(name = "via_mqtt") var viaMqtt: Boolean = false,
     @ColumnInfo(name = "hops_away") var hopsAway: Int = -1,
@@ -147,11 +147,11 @@ data class NodeEntity(
     @ColumnInfo(name = "is_ignored", defaultValue = "0") var isIgnored: Boolean = false,
     @ColumnInfo(name = "is_muted", defaultValue = "0") var isMuted: Boolean = false,
     @ColumnInfo(name = "environment_metrics", typeAffinity = ColumnInfo.BLOB)
-    var environmentTelemetry: Telemetry = Telemetry(),
-    @ColumnInfo(name = "power_metrics", typeAffinity = ColumnInfo.BLOB) var powerTelemetry: Telemetry = Telemetry(),
+    var environmentTelemetry: Telemetry = Telemetry.Builder().build(),
+    @ColumnInfo(name = "power_metrics", typeAffinity = ColumnInfo.BLOB) var powerTelemetry: Telemetry = Telemetry.Builder().build(),
     @ColumnInfo(name = "air_quality_metrics", typeAffinity = ColumnInfo.BLOB, defaultValue = "x''")
-    var airQualityTelemetry: Telemetry = Telemetry(),
-    @ColumnInfo(typeAffinity = ColumnInfo.BLOB) var paxcounter: Paxcount = Paxcount(),
+    var airQualityTelemetry: Telemetry = Telemetry.Builder().build(),
+    @ColumnInfo(typeAffinity = ColumnInfo.BLOB) var paxcounter: Paxcount = Paxcount.Builder().build(),
     @ColumnInfo(name = "public_key") var publicKey: ByteString? = null,
     @ColumnInfo(name = "notes", defaultValue = "") var notes: String = "",
     @ColumnInfo(name = "power_channel_labels", defaultValue = "[]") var powerChannelLabels: List<String> = emptyList(),
@@ -206,7 +206,7 @@ data class NodeEntity(
         get() = (publicKey ?: user.public_key).size > 0
 
     fun setPosition(p: WirePosition, defaultTime: Int = currentTime()) {
-        position = p.copy(time = if (p.time != 0) p.time else defaultTime)
+        position = p.newBuilder().also { wb -> wb.time = if (p.time != 0) p.time else defaultTime }.build()
         latitude = degD(p.latitude_i ?: 0)
         longitude = degD(p.longitude_i ?: 0)
     }
@@ -235,16 +235,16 @@ data class NodeEntity(
         snr = snr,
         rssi = rssi,
         lastHeard = lastHeard,
-        deviceMetrics = deviceMetrics ?: org.meshtastic.proto.DeviceMetrics(),
+        deviceMetrics = deviceMetrics ?: org.meshtastic.proto.DeviceMetrics.Builder().build(),
         channel = channel,
         viaMqtt = viaMqtt,
         hopsAway = hopsAway,
         isFavorite = isFavorite,
         isIgnored = isIgnored,
         isMuted = isMuted,
-        environmentMetrics = environmentMetrics ?: org.meshtastic.proto.EnvironmentMetrics(),
-        powerMetrics = powerMetrics ?: org.meshtastic.proto.PowerMetrics(),
-        airQualityMetrics = airQualityMetrics ?: org.meshtastic.proto.AirQualityMetrics(),
+        environmentMetrics = environmentMetrics ?: org.meshtastic.proto.EnvironmentMetrics.Builder().build(),
+        powerMetrics = powerMetrics ?: org.meshtastic.proto.PowerMetrics.Builder().build(),
+        airQualityMetrics = airQualityMetrics ?: org.meshtastic.proto.AirQualityMetrics.Builder().build(),
         paxcounter = paxcounter,
         publicKey = publicKey ?: user.public_key,
         notes = notes,

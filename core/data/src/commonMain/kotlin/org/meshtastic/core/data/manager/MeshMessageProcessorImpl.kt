@@ -115,7 +115,7 @@ class MeshMessageProcessorImpl(
         val proto =
             safeCatching { FromRadio.ADAPTER.decode(bytes) }
                 .getOrElse { primaryException ->
-                    safeCatching { FromRadio(log_record = LogRecord.ADAPTER.decode(bytes)) }
+                    safeCatching { FromRadio.Builder().also { wb ->wb.log_record = LogRecord.ADAPTER.decode(bytes)}.build() }
                         .getOrElse {
                             Logger.e(primaryException) {
                                 "Failed to parse radio packet (len=${bytes.size}). Not a valid FromRadio or LogRecord."
@@ -184,7 +184,8 @@ class MeshMessageProcessorImpl(
     /** Test seam for packet-only fixtures with explicit transport authority. */
     internal suspend fun handleReceivedMeshPacket(packet: MeshPacket, myNodeNum: Int?, session: RadioSessionContext) {
         // Single normalization point: every consumer downstream of this copy sees a stamped packet.
-        val preparedPacket = packet.copy(rx_time = packet.rxTimeOrNull() ?: nowSeconds.toInt())
+        val preparedPacket =
+            packet.newBuilder().also { wb -> wb.rx_time = packet.rxTimeOrNull() ?: nowSeconds.toInt() }.build()
 
         // Require myNodeNum to be known before storing: processReceivedMeshPacket only keys a local packet under
         // NODE_NUM_LOCAL when packet.from == myNodeNum. If myNodeNum is still null (early in a (re)connect, before
@@ -273,7 +274,7 @@ class MeshMessageProcessorImpl(
                 raw_message = packet.toString(),
                 fromNum = if (packet.from == myNodeNum) MeshLog.NODE_NUM_LOCAL else packet.from,
                 portNum = decoded.portnum.value,
-                fromRadio = FromRadio(packet = packet),
+                fromRadio = FromRadio.Builder().also { wb ->wb.packet = packet}.build(),
             )
         val logJob = insertMeshLog(log, session)
 

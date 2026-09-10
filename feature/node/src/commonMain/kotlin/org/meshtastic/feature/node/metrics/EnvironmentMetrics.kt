@@ -579,7 +579,7 @@ private fun EnvironmentMetricsContent(
     isImperial: Boolean,
     timeTextOverride: String? = null,
 ) {
-    val envMetrics = telemetry.environment_metrics ?: org.meshtastic.proto.EnvironmentMetrics()
+    val envMetrics = telemetry.environment_metrics ?: org.meshtastic.proto.EnvironmentMetrics.Builder().build()
     val time = telemetry.time.toLong() * MS_PER_SEC
     Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
         /* Time and Temperature */
@@ -616,27 +616,27 @@ private fun EnvironmentMetricsContent(
 @Composable
 fun PreviewEnvironmentMetricsContent() {
     val fakeEnvMetrics =
-        org.meshtastic.proto.EnvironmentMetrics(
-            temperature = 22.5f,
-            relative_humidity = 55.0f,
-            barometric_pressure = 1013.25f,
-            soil_moisture = 33,
-            soil_temperature = 18.0f,
-            lux = 100.0f,
-            uv_lux = 100.0f,
-            voltage = 3.7f,
-            current = 0.12f,
-            iaq = 100,
-            radiation = 0.15f,
-            gas_resistance = 1200.0f,
-            wind_speed = 5.2f,
-            wind_direction = 225,
-            wind_gust = 8.1f,
-            wind_lull = 2.3f,
-            rainfall_1h = 1.5f,
-            rainfall_24h = 12.3f,
-        )
-    val fakeTelemetry = Telemetry(time = 1700000000, environment_metrics = fakeEnvMetrics)
+        org.meshtastic.proto.EnvironmentMetrics.Builder().also { wb ->
+        wb.temperature = 22.5f
+        wb.relative_humidity = 55.0f
+        wb.barometric_pressure = 1013.25f
+        wb.soil_moisture = 33
+        wb.soil_temperature = 18.0f
+        wb.lux = 100.0f
+        wb.uv_lux = 100.0f
+        wb.voltage = 3.7f
+        wb.current = 0.12f
+        wb.iaq = 100
+        wb.radiation = 0.15f
+        wb.gas_resistance = 1200.0f
+        wb.wind_speed = 5.2f
+        wb.wind_direction = 225
+        wb.wind_gust = 8.1f
+        wb.wind_lull = 2.3f
+        wb.rainfall_1h = 1.5f
+        wb.rainfall_24h = 12.3f
+        }.build()
+    val fakeTelemetry = Telemetry.Builder().also { wb ->wb.time = 1700000000; wb.environment_metrics = fakeEnvMetrics}.build()
     AppTheme {
         Surface {
             EnvironmentMetricsContent(

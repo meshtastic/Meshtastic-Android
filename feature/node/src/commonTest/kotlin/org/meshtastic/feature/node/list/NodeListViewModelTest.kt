@@ -69,8 +69,8 @@ class NodeListViewModelTest {
         radioController = FakeRadioController()
         radioInterfaceService = FakeRadioInterfaceService()
 
-        every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(org.meshtastic.proto.LocalConfig())
-        every { radioConfigRepository.deviceProfileFlow } returns MutableStateFlow(org.meshtastic.proto.DeviceProfile())
+        every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(org.meshtastic.proto.LocalConfig.Builder().build())
+        every { radioConfigRepository.deviceProfileFlow } returns MutableStateFlow(org.meshtastic.proto.DeviceProfile.Builder().build())
         every { connectionStateProvider.connectionState } returns MutableStateFlow(ConnectionState.Disconnected)
 
         every { nodeFilterPreferences.nodeSortOption } returns MutableStateFlow(NodeSortOption.LAST_HEARD)

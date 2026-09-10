@@ -47,7 +47,7 @@ class DataLayerHeartbeatSender(private val packetHandler: PacketHandler) {
     fun sendHeartbeat(tag: String = "handshake") {
         try {
             val n = nonce.getAndIncrement()
-            packetHandler.sendToRadio(ToRadio(heartbeat = Heartbeat(nonce = n)))
+            packetHandler.sendToRadio(ToRadio.Builder().also { wb ->wb.heartbeat = Heartbeat.Builder().also { wb ->wb.nonce = n}.build()}.build())
             Logger.d { "[$tag] Heartbeat enqueued (nonce=$n)" }
         } catch (e: Exception) {
             Logger.w(e) { "[$tag] Failed to enqueue heartbeat; proceeding" }

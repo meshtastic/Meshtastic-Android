@@ -51,10 +51,10 @@ class MeshConfigHandlerImpl(
     private val scope: ServiceScope,
 ) : MeshConfigHandler {
 
-    private val _localConfig = MutableStateFlow(LocalConfig())
+    private val _localConfig = MutableStateFlow(LocalConfig.Builder().build())
     override val localConfig = _localConfig.asStateFlow()
 
-    private val _moduleConfig = MutableStateFlow(LocalModuleConfig())
+    private val _moduleConfig = MutableStateFlow(LocalModuleConfig.Builder().build())
     override val moduleConfig = _moduleConfig.asStateFlow()
 
     init {

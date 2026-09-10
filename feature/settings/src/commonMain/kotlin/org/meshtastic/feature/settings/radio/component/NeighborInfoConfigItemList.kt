@@ -41,7 +41,7 @@ import org.meshtastic.proto.ModuleConfig
 @Composable
 fun NeighborInfoConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
-    val neighborInfoConfig = state.moduleConfig.neighbor_info ?: ModuleConfig.NeighborInfoConfig()
+    val neighborInfoConfig = state.moduleConfig.neighbor_info ?: ModuleConfig.NeighborInfoConfig.Builder().build()
     val formState = rememberConfigState(initialValue = neighborInfoConfig)
     val focusManager = LocalFocusManager.current
 
@@ -54,7 +54,7 @@ fun NeighborInfoConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val config = ModuleConfig(neighbor_info = it)
+            val config = ModuleConfig.Builder().also { wb ->wb.neighbor_info = it}.build()
             viewModel.setModuleConfig(config)
         },
     ) {
@@ -64,7 +64,7 @@ fun NeighborInfoConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit
                     title = stringResource(Res.string.neighbor_info_enabled),
                     checked = formState.value.enabled,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy(enabled = it) },
+                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.enabled = it }.build() },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -73,7 +73,7 @@ fun NeighborInfoConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit
                     value = formState.value.update_interval,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy(update_interval = it) },
+                    onValueChanged = { formState.value = formState.value.newBuilder().also { wb -> wb.update_interval = it }.build() },
                 )
                 HorizontalDivider()
                 SwitchPreference(
@@ -81,7 +81,7 @@ fun NeighborInfoConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit
                     summary = stringResource(Res.string.config_device_transmitOverLora_summary),
                     checked = formState.value.transmit_over_lora,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy(transmit_over_lora = it) },
+                    onCheckedChange = { formState.value = formState.value.newBuilder().also { wb -> wb.transmit_over_lora = it }.build() },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
             }

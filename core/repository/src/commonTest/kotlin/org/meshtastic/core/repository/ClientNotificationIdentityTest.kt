@@ -27,29 +27,29 @@ class ClientNotificationIdentityTest {
 
     @Test
     fun `identity is stable across reply_id and time on an otherwise identical repeat`() {
-        val first = ClientNotification(message = "Location sharing is disabled", reply_id = 100, time = 1_000)
-        val second = ClientNotification(message = "Location sharing is disabled", reply_id = 200, time = 2_000)
+        val first = ClientNotification.Builder().also { wb ->wb.message = "Location sharing is disabled"; wb.reply_id = 100; wb.time = 1_000}.build()
+        val second = ClientNotification.Builder().also { wb ->wb.message = "Location sharing is disabled"; wb.reply_id = 200; wb.time = 2_000}.build()
 
         assertEquals(first.notificationId(), second.notificationId())
     }
 
     @Test
     fun `identity differs when the message differs`() {
-        val first = ClientNotification(message = "Location sharing is disabled", reply_id = 100)
-        val second = ClientNotification(message = "Quota exceeded", reply_id = 100)
+        val first = ClientNotification.Builder().also { wb ->wb.message = "Location sharing is disabled"; wb.reply_id = 100}.build()
+        val second = ClientNotification.Builder().also { wb ->wb.message = "Quota exceeded"; wb.reply_id = 100}.build()
 
         assertNotEquals(first.notificationId(), second.notificationId())
     }
 
     @Test
     fun `identity differs when the payload variant differs`() {
-        val generic = ClientNotification(message = "Compromised keys detected", level = LogRecord.Level.WARNING)
+        val generic = ClientNotification.Builder().also { wb ->wb.message = "Compromised keys detected"; wb.level = LogRecord.Level.WARNING}.build()
         val structured =
-            ClientNotification(
-                message = "Compromised keys detected",
-                level = LogRecord.Level.WARNING,
-                duplicated_public_key = DuplicatedPublicKey(),
-            )
+            ClientNotification.Builder().also { wb ->
+            wb.message = "Compromised keys detected"
+            wb.level = LogRecord.Level.WARNING
+            wb.duplicated_public_key = DuplicatedPublicKey.Builder().build()
+            }.build()
 
         assertNotEquals(generic.notificationId(), structured.notificationId())
     }

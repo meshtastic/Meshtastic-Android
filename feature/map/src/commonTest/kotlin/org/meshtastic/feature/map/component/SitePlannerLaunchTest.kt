@@ -44,5 +44,5 @@ class SitePlannerLaunchTest {
     }
 
     private fun positionedNode(num: Int, latitudeI: Int, longitudeI: Int): Node =
-        Node(num = num, position = Position(latitude_i = latitudeI, longitude_i = longitudeI))
+        Node(num = num, position = Position.Builder().also { wb ->wb.latitude_i = latitudeI; wb.longitude_i = longitudeI}.build())
 }

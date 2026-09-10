@@ -64,7 +64,7 @@ class AdminPacketHandlerImplTest {
 
     private fun makePacket(from: Int, adminMessage: AdminMessage): MeshPacket {
         val payload = adminMessage.encode().toByteString()
-        return MeshPacket(from = from, decoded = Data(portnum = PortNum.ADMIN_APP, payload = payload))
+        return MeshPacket.Builder().also { wb ->wb.from = from; wb.decoded = Data.Builder().also { wb ->wb.portnum = PortNum.ADMIN_APP; wb.payload = payload}.build()}.build()
     }
 
     private fun handle(packet: MeshPacket) = handler.handleAdminMessage(packet, myNodeNum, session)
@@ -74,7 +74,7 @@ class AdminPacketHandlerImplTest {
     @Test
     fun `session passkey is updated when present`() {
         val passkey = ByteString.of(1, 2, 3, 4)
-        val adminMsg = AdminMessage(session_passkey = passkey)
+        val adminMsg = AdminMessage.Builder().also { wb ->wb.session_passkey = passkey}.build()
         val packet = makePacket(myNodeNum, adminMsg)
 
         handle(packet)
@@ -84,7 +84,7 @@ class AdminPacketHandlerImplTest {
 
     @Test
     fun `empty session passkey does not record refresh`() {
-        val adminMsg = AdminMessage(session_passkey = ByteString.EMPTY)
+        val adminMsg = AdminMessage.Builder().also { wb ->wb.session_passkey = ByteString.EMPTY}.build()
         val packet = makePacket(myNodeNum, adminMsg)
 
         handle(packet)
@@ -95,8 +95,8 @@ class AdminPacketHandlerImplTest {
 
     @Test
     fun `get_config_response from own node delegates to configHandler`() {
-        val config = Config(device = Config.DeviceConfig(role = Config.DeviceConfig.Role.CLIENT))
-        val adminMsg = AdminMessage(get_config_response = config)
+        val config = Config.Builder().also { wb ->wb.device = Config.DeviceConfig.Builder().also { wb ->wb.role = Config.DeviceConfig.Role.CLIENT}.build()}.build()
+        val adminMsg = AdminMessage.Builder().also { wb ->wb.get_config_response = config}.build()
         val packet = makePacket(myNodeNum, adminMsg)
 
         handle(packet)
@@ -106,8 +106,8 @@ class AdminPacketHandlerImplTest {
 
     @Test
     fun `get_config_response from remote node is ignored`() {
-        val config = Config(device = Config.DeviceConfig())
-        val adminMsg = AdminMessage(get_config_response = config)
+        val config = Config.Builder().also { wb ->wb.device = Config.DeviceConfig.Builder().build()}.build()
+        val adminMsg = AdminMessage.Builder().also { wb ->wb.get_config_response = config}.build()
         val packet = makePacket(99999, adminMsg)
 
         handle(packet)
@@ -118,8 +118,8 @@ class AdminPacketHandlerImplTest {
 
     @Test
     fun `get_module_config_response from own node delegates to configHandler`() {
-        val moduleConfig = ModuleConfig(mqtt = ModuleConfig.MQTTConfig(enabled = true))
-        val adminMsg = AdminMessage(get_module_config_response = moduleConfig)
+        val moduleConfig = ModuleConfig.Builder().also { wb ->wb.mqtt = ModuleConfig.MQTTConfig.Builder().also { wb ->wb.enabled = true}.build()}.build()
+        val adminMsg = AdminMessage.Builder().also { wb ->wb.get_module_config_response = moduleConfig}.build()
         val packet = makePacket(myNodeNum, adminMsg)
 
         handle(packet)
@@ -129,8 +129,8 @@ class AdminPacketHandlerImplTest {
 
     @Test
     fun `get_module_config_response from remote node updates node status`() {
-        val moduleConfig = ModuleConfig(statusmessage = ModuleConfig.StatusMessageConfig(node_status = "Battery Low"))
-        val adminMsg = AdminMessage(get_module_config_response = moduleConfig)
+        val moduleConfig = ModuleConfig.Builder().also { wb ->wb.statusmessage = ModuleConfig.StatusMessageConfig.Builder().also { wb ->wb.node_status = "Battery Low"}.build()}.build()
+        val adminMsg = AdminMessage.Builder().also { wb ->wb.get_module_config_response = moduleConfig}.build()
         val remoteNode = 99999
         val packet = makePacket(remoteNode, adminMsg)
 
@@ -141,8 +141,8 @@ class AdminPacketHandlerImplTest {
 
     @Test
     fun `get_module_config_response from remote without status message does not crash`() {
-        val moduleConfig = ModuleConfig(mqtt = ModuleConfig.MQTTConfig(enabled = true))
-        val adminMsg = AdminMessage(get_module_config_response = moduleConfig)
+        val moduleConfig = ModuleConfig.Builder().also { wb ->wb.mqtt = ModuleConfig.MQTTConfig.Builder().also { wb ->wb.enabled = true}.build()}.build()
+        val adminMsg = AdminMessage.Builder().also { wb ->wb.get_module_config_response = moduleConfig}.build()
         val packet = makePacket(99999, adminMsg)
 
         handle(packet)
@@ -153,8 +153,8 @@ class AdminPacketHandlerImplTest {
 
     @Test
     fun `get_channel_response from own node delegates to configHandler`() {
-        val channel = Channel(index = 0)
-        val adminMsg = AdminMessage(get_channel_response = channel)
+        val channel = Channel.Builder().also { wb ->wb.index = 0}.build()
+        val adminMsg = AdminMessage.Builder().also { wb ->wb.get_channel_response = channel}.build()
         val packet = makePacket(myNodeNum, adminMsg)
 
         handle(packet)
@@ -164,8 +164,8 @@ class AdminPacketHandlerImplTest {
 
     @Test
     fun `get_channel_response from remote node is ignored`() {
-        val channel = Channel(index = 0)
-        val adminMsg = AdminMessage(get_channel_response = channel)
+        val channel = Channel.Builder().also { wb ->wb.index = 0}.build()
+        val adminMsg = AdminMessage.Builder().also { wb ->wb.get_channel_response = channel}.build()
         val packet = makePacket(99999, adminMsg)
 
         handle(packet)
@@ -176,8 +176,8 @@ class AdminPacketHandlerImplTest {
 
     @Test
     fun `device metadata from own node delegates to configFlowManager`() {
-        val metadata = DeviceMetadata(firmware_version = "2.6.0", hw_model = HardwareModel.HELTEC_V3)
-        val adminMsg = AdminMessage(get_device_metadata_response = metadata)
+        val metadata = DeviceMetadata.Builder().also { wb ->wb.firmware_version = "2.6.0"; wb.hw_model = HardwareModel.HELTEC_V3}.build()
+        val adminMsg = AdminMessage.Builder().also { wb ->wb.get_device_metadata_response = metadata}.build()
         val packet = makePacket(myNodeNum, adminMsg)
 
         handle(packet)
@@ -187,8 +187,8 @@ class AdminPacketHandlerImplTest {
 
     @Test
     fun `device metadata from remote node delegates to nodeManager`() {
-        val metadata = DeviceMetadata(firmware_version = "2.5.0", hw_model = HardwareModel.TBEAM)
-        val adminMsg = AdminMessage(get_device_metadata_response = metadata)
+        val metadata = DeviceMetadata.Builder().also { wb ->wb.firmware_version = "2.5.0"; wb.hw_model = HardwareModel.TBEAM}.build()
+        val adminMsg = AdminMessage.Builder().also { wb ->wb.get_device_metadata_response = metadata}.build()
         val remoteNode = 99999
         val packet = makePacket(remoteNode, adminMsg)
 
@@ -201,7 +201,7 @@ class AdminPacketHandlerImplTest {
 
     @Test
     fun `packet with null decoded payload is ignored`() {
-        val packet = MeshPacket(from = myNodeNum, decoded = null)
+        val packet = MeshPacket.Builder().also { wb ->wb.from = myNodeNum; wb.decoded = null}.build()
         handle(packet)
         // No crash
     }
@@ -209,7 +209,7 @@ class AdminPacketHandlerImplTest {
     @Test
     fun `packet with empty payload bytes is ignored`() {
         val packet =
-            MeshPacket(from = myNodeNum, decoded = Data(portnum = PortNum.ADMIN_APP, payload = ByteString.EMPTY))
+            MeshPacket.Builder().also { wb ->wb.from = myNodeNum; wb.decoded = Data.Builder().also { wb ->wb.portnum = PortNum.ADMIN_APP; wb.payload = ByteString.EMPTY}.build()}.build()
         handle(packet)
         // No crash — decodes as default AdminMessage with no fields set
     }
@@ -217,8 +217,8 @@ class AdminPacketHandlerImplTest {
     @Test
     fun `combined admin message with passkey and config response`() {
         val passkey = ByteString.of(5, 6, 7, 8)
-        val config = Config(lora = Config.LoRaConfig())
-        val adminMsg = AdminMessage(session_passkey = passkey, get_config_response = config)
+        val config = Config.Builder().also { wb ->wb.lora = Config.LoRaConfig.Builder().build()}.build()
+        val adminMsg = AdminMessage.Builder().also { wb ->wb.session_passkey = passkey; wb.get_config_response = config}.build()
         val packet = makePacket(myNodeNum, adminMsg)
 
         handle(packet)

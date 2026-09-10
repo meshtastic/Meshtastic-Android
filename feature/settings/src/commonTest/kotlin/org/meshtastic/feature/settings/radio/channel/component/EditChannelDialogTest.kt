@@ -67,7 +67,7 @@ class EditChannelDialogTest {
 
     @Test
     fun `generated name psk is restored to default when name is cleared after reopen`() {
-        val generatedSettings = ChannelSettings(name = "custom", psk = Channel.getRandomKey())
+        val generatedSettings = ChannelSettings.Builder().also { wb ->wb.name = "custom"; wb.psk = Channel.getRandomKey()}.build()
 
         val update =
             generatedSettings.applyChannelNameEdit(

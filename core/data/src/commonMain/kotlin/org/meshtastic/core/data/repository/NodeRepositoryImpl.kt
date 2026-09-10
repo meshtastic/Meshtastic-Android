@@ -91,7 +91,7 @@ class NodeRepositoryImpl(
         localStatsDataSource.localStatsFlow.stateIn(
             processLifecycle.coroutineScope,
             SharingStarted.Eagerly,
-            LocalStats(),
+            LocalStats.Builder().build(),
         )
 
     /** Update the cached local stats telemetry. */
@@ -176,10 +176,13 @@ class NodeRepositoryImpl(
                 fallbackId
             }
 
-        return found?.copy(
-            long_name = found.long_name.takeIf { it.isNotBlank() } ?: defaultLong,
-            short_name = found.short_name.takeIf { it.isNotBlank() } ?: defaultShort,
-        ) ?: User(id = userId, long_name = defaultLong, short_name = defaultShort)
+        return found?.newBuilder()
+            ?.also { wb ->
+                wb.long_name = found.long_name.takeIf { it.isNotBlank() } ?: defaultLong
+                wb.short_name = found.short_name.takeIf { it.isNotBlank() } ?: defaultShort
+            }
+            ?.build()
+            ?: User.Builder().also { wb -> wb.id = userId; wb.long_name = defaultLong; wb.short_name = defaultShort }.build()
     }
 
     /** Returns a flow of nodes filtered and sorted according to the parameters. */
@@ -286,16 +289,16 @@ class NodeRepositoryImpl(
         snr = snr,
         rssi = rssi,
         lastHeard = lastHeard,
-        deviceTelemetry = org.meshtastic.proto.Telemetry(device_metrics = deviceMetrics),
+        deviceTelemetry = org.meshtastic.proto.Telemetry.Builder().also { wb ->wb.device_metrics = deviceMetrics}.build(),
         channel = channel,
         viaMqtt = viaMqtt,
         hopsAway = hopsAway,
         isFavorite = isFavorite,
         isIgnored = isIgnored,
         isMuted = isMuted,
-        environmentTelemetry = org.meshtastic.proto.Telemetry(environment_metrics = environmentMetrics),
-        powerTelemetry = org.meshtastic.proto.Telemetry(power_metrics = powerMetrics),
-        airQualityTelemetry = org.meshtastic.proto.Telemetry(air_quality_metrics = airQualityMetrics),
+        environmentTelemetry = org.meshtastic.proto.Telemetry.Builder().also { wb ->wb.environment_metrics = environmentMetrics}.build(),
+        powerTelemetry = org.meshtastic.proto.Telemetry.Builder().also { wb ->wb.power_metrics = powerMetrics}.build(),
+        airQualityTelemetry = org.meshtastic.proto.Telemetry.Builder().also { wb ->wb.air_quality_metrics = airQualityMetrics}.build(),
         paxcounter = paxcounter,
         publicKey = publicKey,
         notes = notes,

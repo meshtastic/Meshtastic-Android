@@ -66,8 +66,8 @@ class TAKMeshIntegrationTest {
     // FakeTAKServerManager lives in its own file in this source set, shared with MeshToCotBroadcasterTest.
 
     private class FakeMeshConfigHandler : MeshConfigHandler {
-        override val localConfig: StateFlow<LocalConfig> = MutableStateFlow(LocalConfig())
-        override val moduleConfig: StateFlow<LocalModuleConfig> = MutableStateFlow(LocalModuleConfig())
+        override val localConfig: StateFlow<LocalConfig> = MutableStateFlow(LocalConfig.Builder().build())
+        override val moduleConfig: StateFlow<LocalModuleConfig> = MutableStateFlow(LocalModuleConfig.Builder().build())
 
         override fun handleDeviceConfig(config: Config, session: RadioSessionContext): Boolean = true
 
@@ -107,7 +107,7 @@ class TAKMeshIntegrationTest {
 
         override val ourNodeInfo: StateFlow<Node?> = MutableStateFlow(null)
         override val myId: StateFlow<String?> = MutableStateFlow(null)
-        override val localStats: StateFlow<LocalStats> = MutableStateFlow(LocalStats())
+        override val localStats: StateFlow<LocalStats> = MutableStateFlow(LocalStats.Builder().build())
         override val nodeDBbyNum: StateFlow<Map<Int, Node>> = MutableStateFlow(emptyMap())
 
         override suspend fun getNodeDbSnapshot(): Map<Int, Node> = nodeDBbyNum.value
@@ -121,9 +121,9 @@ class TAKMeshIntegrationTest {
 
         override fun getNode(userId: String): Node = Node(num = 0)
 
-        override fun getUser(nodeNum: Int): User = User()
+        override fun getUser(nodeNum: Int): User = User.Builder().build()
 
-        override fun getUser(userId: String): User = User()
+        override fun getUser(userId: String): User = User.Builder().build()
 
         override fun getNodes(
             sort: NodeSortOption,
@@ -304,10 +304,9 @@ class TAKMeshIntegrationTest {
         h.integration.start(backgroundScope)
 
         val textPacket =
-            MeshPacket(
-                decoded =
-                Data(portnum = PortNum.TEXT_MESSAGE_APP, payload = "hello".encodeToByteArray().toByteString()),
-            )
+            MeshPacket.Builder().also { wb ->
+            wb.decoded = Data.Builder().also { wb ->wb.portnum = PortNum.TEXT_MESSAGE_APP; wb.payload = "hello".encodeToByteArray().toByteString()}.build()
+            }.build()
         h.serviceRepository.emitMeshPacket(textPacket)
 
         assertTrue(h.serverManager.broadcasts.isEmpty())
@@ -467,26 +466,24 @@ class TAKMeshIntegrationTest {
 
     private fun createV1PliMeshPacket(isCompressed: Boolean = false): MeshPacket {
         val takPacket =
-            TAKPacket(
-                is_compressed = isCompressed,
-                contact = org.meshtastic.proto.Contact(callsign = "BRAVO", device_callsign = "bravo-uid"),
-                pli =
-                org.meshtastic.proto.PLI(
-                    latitude_i = 330000000,
-                    longitude_i = -840000000,
-                    altitude = 100,
-                    speed = 0,
-                    course = 0,
-                ),
-                group =
-                org.meshtastic.proto.Group(
-                    team = org.meshtastic.proto.Team.Cyan,
-                    role = org.meshtastic.proto.MemberRole.TeamMember,
-                ),
-                status = org.meshtastic.proto.Status(battery = 85),
-            )
-        return MeshPacket(
-            decoded = Data(portnum = PortNum.ATAK_PLUGIN, payload = TAKPacket.ADAPTER.encode(takPacket).toByteString()),
-        )
+            TAKPacket.Builder().also { wb ->
+            wb.is_compressed = isCompressed
+            wb.contact = org.meshtastic.proto.Contact.Builder().also { wb ->wb.callsign = "BRAVO"; wb.device_callsign = "bravo-uid"}.build()
+            wb.pli = org.meshtastic.proto.PLI.Builder().also { wb ->
+                            wb.latitude_i = 330000000
+                            wb.longitude_i = -840000000
+                            wb.altitude = 100
+                            wb.speed = 0
+                            wb.course = 0
+                            }.build()
+            wb.group = org.meshtastic.proto.Group.Builder().also { wb ->
+                            wb.team = org.meshtastic.proto.Team.Cyan
+                            wb.role = org.meshtastic.proto.MemberRole.TeamMember
+                            }.build()
+            wb.status = org.meshtastic.proto.Status.Builder().also { wb ->wb.battery = 85}.build()
+            }.build()
+        return MeshPacket.Builder().also { wb ->
+        wb.decoded = Data.Builder().also { wb ->wb.portnum = PortNum.ATAK_PLUGIN; wb.payload = TAKPacket.ADAPTER.encode(takPacket).toByteString()}.build()
+        }.build()
     }
 }

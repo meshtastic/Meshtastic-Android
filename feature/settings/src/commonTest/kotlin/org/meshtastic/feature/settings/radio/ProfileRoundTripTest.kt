@@ -104,10 +104,10 @@ class ProfileRoundTripTest {
         Dispatchers.setMain(testDispatcher)
         fileService = InMemoryFileService()
 
-        every { radioConfigRepository.deviceProfileFlow } returns MutableStateFlow(DeviceProfile())
-        every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(LocalConfig())
-        every { radioConfigRepository.channelSetFlow } returns MutableStateFlow(ChannelSet())
-        every { radioConfigRepository.moduleConfigFlow } returns MutableStateFlow(LocalModuleConfig())
+        every { radioConfigRepository.deviceProfileFlow } returns MutableStateFlow(DeviceProfile.Builder().build())
+        every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(LocalConfig.Builder().build())
+        every { radioConfigRepository.channelSetFlow } returns MutableStateFlow(ChannelSet.Builder().build())
+        every { radioConfigRepository.moduleConfigFlow } returns MutableStateFlow(LocalModuleConfig.Builder().build())
         every { radioConfigRepository.deviceUIConfigFlow } returns MutableStateFlow(null)
         every { radioConfigRepository.fileManifestFlow } returns MutableStateFlow(emptyList())
         every { radioConfigRepository.loraRegionPresetMapFlow } returns MutableStateFlow(null)
@@ -158,65 +158,58 @@ class ProfileRoundTripTest {
     @Test
     fun `profile export then import round trips representative DeviceProfile`() = runTest {
         assertRoundTrip(
-            DeviceProfile(
-                long_name = "Round Trip Node",
-                short_name = "RTN",
-                channel_url = "https://meshtastic.org/e/#CgMSAQESBggBQANIAQ",
-                config =
-                LocalConfig(
-                    device = Config.DeviceConfig(role = Config.DeviceConfig.Role.ROUTER, button_gpio = 7),
-                    lora = Config.LoRaConfig(hop_limit = 5, use_preset = true),
-                    power = Config.PowerConfig(is_power_saving = true, ls_secs = 300),
-                    network =
-                    Config.NetworkConfig(
-                        wifi_enabled = true,
-                        wifi_ssid = "mesh-ssid",
-                        wifi_psk = "mesh-pass",
-                        ntp_server = "meshtastic.pool.ntp.org",
-                    ),
-                ),
-                module_config =
-                LocalModuleConfig(
-                    mqtt =
-                    ModuleConfig.MQTTConfig(
-                        enabled = true,
-                        proxy_to_client_enabled = true,
-                        root = "msh/US/test",
-                        json_enabled = true,
-                    ),
-                    telemetry =
-                    ModuleConfig.TelemetryConfig(
-                        device_update_interval = 300,
-                        environment_measurement_enabled = true,
-                        power_measurement_enabled = true,
-                    ),
-                    canned_message =
-                    ModuleConfig.CannedMessageConfig(
-                        rotary1_enabled = true,
-                        inputbroker_pin_a = 12,
-                        inputbroker_pin_b = 13,
-                        send_bell = true,
-                    ),
-                    statusmessage = ModuleConfig.StatusMessageConfig(node_status = "Ready to mesh"),
-                ),
-                fixed_position = Position(latitude_i = 327766650, longitude_i = -967969890, altitude = 138),
-                ringtone = "tones/notify.mp3",
-                canned_messages = "Alpha|Bravo|Charlie",
-            ),
+            DeviceProfile.Builder().also { wb ->
+            wb.long_name = "Round Trip Node"
+            wb.short_name = "RTN"
+            wb.channel_url = "https://meshtastic.org/e/#CgMSAQESBggBQANIAQ"
+            wb.config = LocalConfig.Builder().also { wb ->
+                            wb.device = Config.DeviceConfig.Builder().also { wb ->wb.role = Config.DeviceConfig.Role.ROUTER; wb.button_gpio = 7}.build()
+                            wb.lora = Config.LoRaConfig.Builder().also { wb ->wb.hop_limit = 5; wb.use_preset = true}.build()
+                            wb.power = Config.PowerConfig.Builder().also { wb ->wb.is_power_saving = true; wb.ls_secs = 300}.build()
+                            wb.network = Config.NetworkConfig.Builder().also { wb ->
+                                                wb.wifi_enabled = true
+                                                wb.wifi_ssid = "mesh-ssid"
+                                                wb.wifi_psk = "mesh-pass"
+                                                wb.ntp_server = "meshtastic.pool.ntp.org"
+                                                }.build()
+                            }.build()
+            wb.module_config = LocalModuleConfig.Builder().also { wb ->
+                            wb.mqtt = ModuleConfig.MQTTConfig.Builder().also { wb ->
+                                                wb.enabled = true
+                                                wb.proxy_to_client_enabled = true
+                                                wb.root = "msh/US/test"
+                                                wb.json_enabled = true
+                                                }.build()
+                            wb.telemetry = ModuleConfig.TelemetryConfig.Builder().also { wb ->
+                                                wb.device_update_interval = 300
+                                                wb.environment_measurement_enabled = true
+                                                wb.power_measurement_enabled = true
+                                                }.build()
+                            wb.canned_message = ModuleConfig.CannedMessageConfig.Builder().also { wb ->
+                                                wb.rotary1_enabled = true
+                                                wb.inputbroker_pin_a = 12
+                                                wb.inputbroker_pin_b = 13
+                                                wb.send_bell = true
+                                                }.build()
+                            wb.statusmessage = ModuleConfig.StatusMessageConfig.Builder().also { wb ->wb.node_status = "Ready to mesh"}.build()
+                            }.build()
+            wb.fixed_position = Position.Builder().also { wb ->wb.latitude_i = 327766650; wb.longitude_i = -967969890; wb.altitude = 138}.build()
+            wb.ringtone = "tones/notify.mp3"
+            wb.canned_messages = "Alpha|Bravo|Charlie"
+            }.build(),
         )
     }
 
     @Test
-    fun `profile export then import round trips empty DeviceProfile`() = runTest { assertRoundTrip(DeviceProfile()) }
+    fun `profile export then import round trips empty DeviceProfile`() = runTest { assertRoundTrip(DeviceProfile.Builder().build()) }
 
     @Test
     fun `profile export then import round trips partially populated DeviceProfile`() = runTest {
         assertRoundTrip(
-            DeviceProfile(
-                long_name = "Partial Node",
-                module_config =
-                LocalModuleConfig(statusmessage = ModuleConfig.StatusMessageConfig(node_status = "Standing by")),
-            ),
+            DeviceProfile.Builder().also { wb ->
+            wb.long_name = "Partial Node"
+            wb.module_config = LocalModuleConfig.Builder().also { wb ->wb.statusmessage = ModuleConfig.StatusMessageConfig.Builder().also { wb ->wb.node_status = "Standing by"}.build()}.build()
+            }.build(),
         )
     }
 

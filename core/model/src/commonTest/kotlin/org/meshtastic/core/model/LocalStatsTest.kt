@@ -25,13 +25,13 @@ class LocalStatsTest {
 
     @Test
     fun `the never-reported sentinel maps to null`() {
-        assertNull(LocalStats(noise_floor = 0).noiseFloorOrNull)
-        assertNull(LocalStats().noiseFloorOrNull)
+        assertNull(LocalStats.Builder().also { wb ->wb.noise_floor = 0}.build().noiseFloorOrNull)
+        assertNull(LocalStats.Builder().build().noiseFloorOrNull)
     }
 
     @Test
     fun `a real reading passes through unchanged`() {
-        assertEquals(-70, LocalStats(noise_floor = -70).noiseFloorOrNull)
-        assertEquals(1, LocalStats(noise_floor = 1).noiseFloorOrNull)
+        assertEquals(-70, LocalStats.Builder().also { wb ->wb.noise_floor = -70}.build().noiseFloorOrNull)
+        assertEquals(1, LocalStats.Builder().also { wb ->wb.noise_floor = 1}.build().noiseFloorOrNull)
     }
 }

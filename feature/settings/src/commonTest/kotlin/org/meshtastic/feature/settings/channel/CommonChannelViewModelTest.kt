@@ -56,8 +56,8 @@ abstract class CommonChannelViewModelTest {
     @BeforeTest
     fun setupRepo() {
         Dispatchers.setMain(testDispatcher)
-        every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(LocalConfig())
-        every { radioConfigRepository.channelSetFlow } returns MutableStateFlow(ChannelSet())
+        every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(LocalConfig.Builder().build())
+        every { radioConfigRepository.channelSetFlow } returns MutableStateFlow(ChannelSet.Builder().build())
 
         viewModel = ChannelViewModel(radioController, radioConfigRepository, analytics)
     }
@@ -69,7 +69,7 @@ abstract class CommonChannelViewModelTest {
 
     @Test
     fun `isManaged returns true when security is managed`() = runTest {
-        val config = LocalConfig(security = Config.SecurityConfig(is_managed = true))
+        val config = LocalConfig.Builder().also { wb ->wb.security = Config.SecurityConfig.Builder().also { wb ->wb.is_managed = true}.build()}.build()
         every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(config)
         viewModel = ChannelViewModel(radioController, radioConfigRepository, analytics)
 

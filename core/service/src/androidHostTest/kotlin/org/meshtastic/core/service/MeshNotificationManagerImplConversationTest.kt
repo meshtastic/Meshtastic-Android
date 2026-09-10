@@ -66,8 +66,8 @@ class MeshNotificationManagerImplConversationTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val systemNotificationManager = context.getSystemService(NotificationManager::class.java)!!
 
-    private val sender = Node(num = 7, user = User(id = "!00000007", long_name = "Hawk Ridge", short_name = "HAWK"))
-    private val me = Node(num = 42, user = User(id = "!0000002a", long_name = "Me Node", short_name = "ME"))
+    private val sender = Node(num = 7, user = User.Builder().also { wb ->wb.id = "!00000007"; wb.long_name = "Hawk Ridge"; wb.short_name = "HAWK"}.build())
+    private val me = Node(num = 42, user = User.Builder().also { wb ->wb.id = "!0000002a"; wb.long_name = "Me Node"; wb.short_name = "ME"}.build())
 
     private val packetRepository: PacketRepository = mock(MockMode.autofill)
     private val nodeRepository: NodeRepository = mock(MockMode.autofill)
@@ -101,15 +101,15 @@ class MeshNotificationManagerImplConversationTest {
         systemNotificationManager.cancelAll()
         every { nodeRepository.ourNodeInfo } returns MutableStateFlow(me)
         every { nodeRepository.myNodeInfo } returns MutableStateFlow<MyNodeInfo?>(null)
-        every { nodeRepository.localStats } returns MutableStateFlow(org.meshtastic.proto.LocalStats())
+        every { nodeRepository.localStats } returns MutableStateFlow(org.meshtastic.proto.LocalStats.Builder().build())
         every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(mapOf(7 to sender, 42 to me))
         everySuspend { nodeRepository.getNode(any()) } returns sender
         every { radioConfigRepository.channelSetFlow } returns
             flowOf(
-                ChannelSet(
-                    settings = listOf(MeshChannel.default.settings),
-                    lora_config = MeshChannel.default.loraConfig,
-                ),
+                ChannelSet.Builder().also { wb ->
+                wb.settings = listOf(MeshChannel.default.settings)
+                wb.lora_config = MeshChannel.default.loraConfig
+                }.build(),
             )
     }
 

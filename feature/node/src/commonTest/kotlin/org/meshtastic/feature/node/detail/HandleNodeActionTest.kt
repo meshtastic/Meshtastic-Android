@@ -78,7 +78,7 @@ class HandleNodeActionTest {
 
     @Test
     fun `remove action delegates to viewModel and does not navigate up immediately`() = runTest(testDispatcher) {
-        val node = Node(num = 1234, user = User(id = "!1234"))
+        val node = Node(num = 1234, user = User.Builder().also { wb ->wb.id = "!1234"}.build())
         every { nodeManagementActions.requestRemoveNode(any(), any(), any()) } returns Unit
         val viewModel = createViewModel()
         var navigateUpCalled = false
@@ -100,7 +100,7 @@ class HandleNodeActionTest {
     fun `direct message to a keyless node with a thread opens that thread`() = runTest(testDispatcher) {
         // The message action is only visible for a keyless node because a thread exists. getDirectMessageRoute
         // would fall back to node.channel and open a different, empty conversation.
-        val node = Node(num = 1234, user = User(id = "!000004d2"))
+        val node = Node(num = 1234, user = User.Builder().also { wb ->wb.id = "!000004d2"}.build())
         val viewModel = createViewModel()
         var route: String? = null
 
@@ -118,8 +118,8 @@ class HandleNodeActionTest {
 
     @Test
     fun `direct message to a keyed node uses the computed route rather than an old thread`() = runTest(testDispatcher) {
-        val node = Node(num = 1234, user = User(id = "!000004d2", public_key = TEST_KEY))
-        val ourNode = Node(num = 9999, user = User(id = "!0000270f", public_key = TEST_KEY))
+        val node = Node(num = 1234, user = User.Builder().also { wb ->wb.id = "!000004d2"; wb.public_key = TEST_KEY}.build())
+        val ourNode = Node(num = 9999, user = User.Builder().also { wb ->wb.id = "!0000270f"; wb.public_key = TEST_KEY}.build())
         val viewModel = createViewModel()
         var route: String? = null
 

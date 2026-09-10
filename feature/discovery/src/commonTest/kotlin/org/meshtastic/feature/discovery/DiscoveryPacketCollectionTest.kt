@@ -67,9 +67,9 @@ class DiscoveryPacketCollectionTest {
     private val radioConfigRepository =
         FakeRadioConfigRepository().apply {
             setLocalConfigDirect(
-                LocalConfig(
-                    lora = Config.LoRaConfig(use_preset = true, modem_preset = ChannelOption.LONG_FAST.modemPreset),
-                ),
+                LocalConfig.Builder().also { wb ->
+                wb.lora = Config.LoRaConfig.Builder().also { wb ->wb.use_preset = true; wb.modem_preset = ChannelOption.LONG_FAST.modemPreset}.build()
+                }.build(),
             )
         }
     private val collectorRegistry = PacketTestCollectorRegistry()
@@ -281,22 +281,22 @@ class DiscoveryPacketCollectionTest {
     )
 
     private fun positionPacket(from: Int, latI: Int, lonI: Int, snr: Float = 5.5f, rssi: Int = -70): MeshPacket {
-        val posPayload = Position.ADAPTER.encode(Position(latitude_i = latI, longitude_i = lonI)).toByteString()
-        val data = Data(portnum = PortNum.POSITION_APP, payload = posPayload)
-        return MeshPacket(from = from, decoded = data, rx_snr = snr, rx_rssi = rssi)
+        val posPayload = Position.ADAPTER.encode(Position.Builder().also { wb ->wb.latitude_i = latI; wb.longitude_i = lonI}.build()).toByteString()
+        val data = Data.Builder().also { wb ->wb.portnum = PortNum.POSITION_APP; wb.payload = posPayload}.build()
+        return MeshPacket.Builder().also { wb ->wb.from = from; wb.decoded = data; wb.rx_snr = snr; wb.rx_rssi = rssi}.build()
     }
 
     private fun textMessagePacket(from: Int): MeshPacket {
-        val data = Data(portnum = PortNum.TEXT_MESSAGE_APP, payload = "hello".encodeToByteArray().toByteString())
-        return MeshPacket(from = from, decoded = data, rx_snr = 3.0f, rx_rssi = -80)
+        val data = Data.Builder().also { wb ->wb.portnum = PortNum.TEXT_MESSAGE_APP; wb.payload = "hello".encodeToByteArray().toByteString()}.build()
+        return MeshPacket.Builder().also { wb ->wb.from = from; wb.decoded = data; wb.rx_snr = 3.0f; wb.rx_rssi = -80}.build()
     }
 
     private fun neighborInfoPacket(from: Int, neighborNodeIds: List<Int>): MeshPacket {
-        val neighbors = neighborNodeIds.map { Neighbor(node_id = it) }
-        val ni = NeighborInfo(node_id = from, neighbors = neighbors)
+        val neighbors = neighborNodeIds.map { Neighbor.Builder().also { wb ->wb.node_id = it}.build() }
+        val ni = NeighborInfo.Builder().also { wb ->wb.node_id = from; wb.neighbors = neighbors}.build()
         val payload = NeighborInfo.ADAPTER.encode(ni).toByteString()
-        val data = Data(portnum = PortNum.NEIGHBORINFO_APP, payload = payload)
-        return MeshPacket(from = from, decoded = data)
+        val data = Data.Builder().also { wb ->wb.portnum = PortNum.NEIGHBORINFO_APP; wb.payload = payload}.build()
+        return MeshPacket.Builder().also { wb ->wb.from = from; wb.decoded = data}.build()
     }
 
     private fun dataPacket(from: Int) = DataPacket(

@@ -33,14 +33,13 @@ class EnvironmentMetricsTest {
         val expectedSoilTemperatureFahrenheit = celsiusToFahrenheit(initialSoilTemperatureCelsius)
 
         val telemetry =
-            Telemetry(
-                environment_metrics =
-                EnvironmentMetrics(
-                    temperature = initialTemperatureCelsius,
-                    soil_temperature = initialSoilTemperatureCelsius,
-                ),
-                time = 1000,
-            )
+            Telemetry.Builder().also { wb ->
+            wb.environment_metrics = EnvironmentMetrics.Builder().also { wb ->
+                            wb.temperature = initialTemperatureCelsius
+                            wb.soil_temperature = initialSoilTemperatureCelsius
+                            }.build()
+            wb.time = 1000
+            }.build()
 
         val data = listOf(telemetry)
 

@@ -127,7 +127,7 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `USER route reads the status message config on capable firmware`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"), metadata = DeviceMetadata(firmware_version = "2.8.0"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build(), metadata = DeviceMetadata.Builder().also { wb ->wb.firmware_version = "2.8.0"}.build())
         nodeRepository.setNodes(listOf(node))
         viewModel = createViewModel(destNum = 123)
 
@@ -141,7 +141,7 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `USER route skips the status message config on firmware without the module`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"), metadata = DeviceMetadata(firmware_version = "2.7.21"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build(), metadata = DeviceMetadata.Builder().also { wb ->wb.firmware_version = "2.7.21"}.build())
         nodeRepository.setNodes(listOf(node))
         viewModel = createViewModel(destNum = 123)
 
@@ -153,9 +153,9 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `MESH_BEACON route on a remote node reads the beacon module config plus LoRa config and channel 0`() = runTest {
-        val localNode = Node(num = 100, user = User(id = "!100"))
+        val localNode = Node(num = 100, user = User.Builder().also { wb ->wb.id = "!100"}.build())
         val remoteNode =
-            Node(num = 456, user = User(id = "!456"), metadata = DeviceMetadata(firmware_version = "2.8.0"))
+            Node(num = 456, user = User.Builder().also { wb ->wb.id = "!456"}.build(), metadata = DeviceMetadata.Builder().also { wb ->wb.firmware_version = "2.8.0"}.build())
         nodeRepository.setNodes(listOf(localNode, remoteNode))
         nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100))
         viewModel = createViewModel(destNum = 456)
@@ -178,9 +178,9 @@ class RadioConfigViewModelTest {
     @Test
     fun `MESH_BEACON route skips the module get on firmware without the module but still reads LoRa and channel 0`() =
         runTest {
-            val localNode = Node(num = 100, user = User(id = "!100"))
+            val localNode = Node(num = 100, user = User.Builder().also { wb ->wb.id = "!100"}.build())
             val remoteNode =
-                Node(num = 456, user = User(id = "!456"), metadata = DeviceMetadata(firmware_version = "2.7.21"))
+                Node(num = 456, user = User.Builder().also { wb ->wb.id = "!456"}.build(), metadata = DeviceMetadata.Builder().also { wb ->wb.firmware_version = "2.7.21"}.build())
             nodeRepository.setNodes(listOf(localNode, remoteNode))
             nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100))
             viewModel = createViewModel(destNum = 456)
@@ -197,12 +197,12 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `MESH_BEACON remote read completes only after all three responses land`() = runTest {
-        val localNode = Node(num = 100, user = User(id = "!100"))
+        val localNode = Node(num = 100, user = User.Builder().also { wb ->wb.id = "!100"}.build())
         val remoteNode =
-            Node(num = 456, user = User(id = "!456"), metadata = DeviceMetadata(firmware_version = "2.8.0"))
+            Node(num = 456, user = User.Builder().also { wb ->wb.id = "!456"}.build(), metadata = DeviceMetadata.Builder().also { wb ->wb.firmware_version = "2.8.0"}.build())
         val packetFlow = MutableSharedFlow<MeshPacket>()
         val beacon =
-            MeshBeaconConfig(broadcast_offer_region = Config.LoRaConfig.RegionCode.US, broadcast_message = "join us")
+            MeshBeaconConfig.Builder().also { wb -> wb.broadcast_offer_region = Config.LoRaConfig.RegionCode.US; wb.broadcast_message = "join us" }.build()
         every { serviceRepository.meshPacketFlow } returns packetFlow
         everySuspend { radioConfigUseCase.getChannel(any(), any(), any()) } calls
             {
@@ -228,19 +228,19 @@ class RadioConfigViewModelTest {
                 when (requestId?.takeIf { id -> id in pendingRequestIds }) {
                     41 ->
                         RadioResponseResult.ChannelResponse(
-                            Channel(
-                                index = 0,
-                                role = Channel.Role.PRIMARY,
-                                settings = ChannelSettings(name = "LongFast"),
-                            ),
+                            Channel.Builder().also { wb ->
+                            wb.index = 0
+                            wb.role = Channel.Role.PRIMARY
+                            wb.settings = ChannelSettings.Builder().also { wb ->wb.name = "LongFast"}.build()
+                            }.build(),
                         )
 
                     42 ->
                         RadioResponseResult.ConfigResponse(
-                            Config(lora = Config.LoRaConfig(region = Config.LoRaConfig.RegionCode.US)),
+                            Config.Builder().also { wb ->wb.lora = Config.LoRaConfig.Builder().also { wb ->wb.region = Config.LoRaConfig.RegionCode.US}.build()}.build(),
                         )
 
-                    43 -> RadioResponseResult.ModuleConfigResponse(ModuleConfig(mesh_beacon = beacon))
+                    43 -> RadioResponseResult.ModuleConfigResponse(ModuleConfig.Builder().also { wb ->wb.mesh_beacon = beacon}.build())
 
                     else -> null
                 }
@@ -253,8 +253,8 @@ class RadioConfigViewModelTest {
         runCurrent()
         assertEquals(3, (viewModel.radioConfigState.value.responseState as ResponseState.Loading).total)
 
-        packetFlow.emit(MeshPacket(decoded = Data(request_id = 41)))
-        packetFlow.emit(MeshPacket(decoded = Data(request_id = 42)))
+        packetFlow.emit(MeshPacket.Builder().also { wb ->wb.decoded = Data.Builder().also { wb ->wb.request_id = 41}.build()}.build())
+        packetFlow.emit(MeshPacket.Builder().also { wb ->wb.decoded = Data.Builder().also { wb ->wb.request_id = 42}.build()}.build())
         runCurrent()
         assertTrue(
             viewModel.radioConfigState.value.responseState is ResponseState.Loading,
@@ -262,7 +262,7 @@ class RadioConfigViewModelTest {
         )
         assertEquals(3, (viewModel.radioConfigState.value.responseState as ResponseState.Loading).total)
 
-        packetFlow.emit(MeshPacket(decoded = Data(request_id = 43)))
+        packetFlow.emit(MeshPacket.Builder().also { wb ->wb.decoded = Data.Builder().also { wb ->wb.request_id = 43}.build()}.build())
         runCurrent()
 
         assertEquals(ResponseState.Empty, viewModel.radioConfigState.value.responseState)
@@ -274,25 +274,25 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `ModuleConfigResponse carrying mesh_beacon is merged and survives a later response without it`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         nodeRepository.setNodes(listOf(node))
         val packetFlow = MutableSharedFlow<MeshPacket>()
         every { serviceRepository.meshPacketFlow } returns packetFlow
         viewModel = createViewModel()
 
         val beacon =
-            MeshBeaconConfig(broadcast_offer_region = Config.LoRaConfig.RegionCode.EU_868, broadcast_message = "hi")
+            MeshBeaconConfig.Builder().also { wb -> wb.broadcast_offer_region = Config.LoRaConfig.RegionCode.EU_868; wb.broadcast_message = "hi" }.build()
         every { processRadioResponseUseCase(any(), 123, any()) } returns
-            RadioResponseResult.ModuleConfigResponse(ModuleConfig(mesh_beacon = beacon))
-        packetFlow.emit(MeshPacket())
+            RadioResponseResult.ModuleConfigResponse(ModuleConfig.Builder().also { wb ->wb.mesh_beacon = beacon}.build())
+        packetFlow.emit(MeshPacket.Builder().build())
         // Pins the mesh_beacon merge line: without it the reply is dropped and the editor renders defaults.
         assertEquals(beacon, viewModel.radioConfigState.value.moduleConfig.mesh_beacon)
 
         every { processRadioResponseUseCase(any(), 123, any()) } returns
             RadioResponseResult.ModuleConfigResponse(
-                ModuleConfig(telemetry = ModuleConfig.TelemetryConfig(device_update_interval = 300)),
+                ModuleConfig.Builder().also { wb ->wb.telemetry = ModuleConfig.TelemetryConfig.Builder().also { wb ->wb.device_update_interval = 300}.build()}.build(),
             )
-        packetFlow.emit(MeshPacket())
+        packetFlow.emit(MeshPacket.Builder().build())
         // Pins the `?: state.moduleConfig.mesh_beacon` fallback: a reply for another module keeps the beacon config.
         assertEquals(beacon, viewModel.radioConfigState.value.moduleConfig.mesh_beacon)
         assertEquals(300, viewModel.radioConfigState.value.moduleConfig.telemetry?.device_update_interval)
@@ -339,10 +339,10 @@ class RadioConfigViewModelTest {
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
 
-        every { radioConfigRepository.deviceProfileFlow } returns MutableStateFlow(DeviceProfile())
-        every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(LocalConfig())
-        every { radioConfigRepository.channelSetFlow } returns MutableStateFlow(ChannelSet())
-        every { radioConfigRepository.moduleConfigFlow } returns MutableStateFlow(LocalModuleConfig())
+        every { radioConfigRepository.deviceProfileFlow } returns MutableStateFlow(DeviceProfile.Builder().build())
+        every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(LocalConfig.Builder().build())
+        every { radioConfigRepository.channelSetFlow } returns MutableStateFlow(ChannelSet.Builder().build())
+        every { radioConfigRepository.moduleConfigFlow } returns MutableStateFlow(LocalModuleConfig.Builder().build())
         every { radioConfigRepository.deviceUIConfigFlow } returns MutableStateFlow(null)
         every { radioConfigRepository.fileManifestFlow } returns MutableStateFlow(emptyList())
         every { radioConfigRepository.loraRegionPresetMapFlow } returns MutableStateFlow(null)
@@ -410,7 +410,7 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `local save acked by a renumbered radio re-runs the handshake and completes the save`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         nodeRepository.setNodes(listOf(node))
         nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
         val packetFlow = MutableSharedFlow<MeshPacket>()
@@ -422,7 +422,7 @@ class RadioConfigViewModelTest {
             }
         viewModel = createViewModel(processRadioResponseUseCase = ProcessRadioResponseUseCase())
 
-        viewModel.setConfig(Config(lora = Config.LoRaConfig(region = Config.LoRaConfig.RegionCode.US)))
+        viewModel.setConfig(Config.Builder().also { wb ->wb.lora = Config.LoRaConfig.Builder().also { wb ->wb.region = Config.LoRaConfig.RegionCode.US}.build()}.build())
         runCurrent()
         assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Loading)
 
@@ -436,7 +436,7 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `a session opened on the connected node by number follows it after the renumber`() = runTest {
-        nodeRepository.setNodes(listOf(Node(num = 123, user = User(id = "!123"))))
+        nodeRepository.setNodes(listOf(Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())))
         nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
         val packetFlow = MutableSharedFlow<MeshPacket>()
         every { serviceRepository.meshPacketFlow } returns packetFlow
@@ -453,7 +453,7 @@ class RadioConfigViewModelTest {
         viewModel = createViewModel(destNum = 123, processRadioResponseUseCase = ProcessRadioResponseUseCase())
         assertTrue(viewModel.radioConfigState.value.isLocal)
 
-        viewModel.setConfig(Config(lora = Config.LoRaConfig(region = Config.LoRaConfig.RegionCode.US)))
+        viewModel.setConfig(Config.Builder().also { wb ->wb.lora = Config.LoRaConfig.Builder().also { wb ->wb.region = Config.LoRaConfig.RegionCode.US}.build()}.build())
         runCurrent()
         packetFlow.emit(routingAck(requestId = 91, from = 456))
         runCurrent()
@@ -462,11 +462,11 @@ class RadioConfigViewModelTest {
 
         // The re-handshake lands: the radio reports its new number and is installed under it.
         nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 456))
-        nodeRepository.setNodes(listOf(Node(num = 456, user = User(id = "!456"))))
+        nodeRepository.setNodes(listOf(Node(num = 456, user = User.Builder().also { wb ->wb.id = "!456"}.build())))
         runCurrent()
         assertTrue(viewModel.radioConfigState.value.isLocal)
 
-        viewModel.setConfig(Config(lora = Config.LoRaConfig(region = Config.LoRaConfig.RegionCode.US)))
+        viewModel.setConfig(Config.Builder().also { wb ->wb.lora = Config.LoRaConfig.Builder().also { wb ->wb.region = Config.LoRaConfig.RegionCode.US}.build()}.build())
         runCurrent()
         assertEquals(listOf(123, 456), writeTargets)
     }
@@ -474,7 +474,7 @@ class RadioConfigViewModelTest {
     @Test
     fun `remote save acked by an unexpected node neither re-handshakes nor completes`() = runTest {
         nodeRepository.setNodes(
-            listOf(Node(num = 123, user = User(id = "!123")), Node(num = 200, user = User(id = "!200"))),
+            listOf(Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build()), Node(num = 200, user = User.Builder().also { wb ->wb.id = "!200"}.build())),
         )
         nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
         val packetFlow = MutableSharedFlow<MeshPacket>()
@@ -486,7 +486,7 @@ class RadioConfigViewModelTest {
             }
         viewModel = createViewModel(destNum = 200, processRadioResponseUseCase = ProcessRadioResponseUseCase())
 
-        viewModel.setConfig(Config(lora = Config.LoRaConfig(region = Config.LoRaConfig.RegionCode.US)))
+        viewModel.setConfig(Config.Builder().also { wb ->wb.lora = Config.LoRaConfig.Builder().also { wb ->wb.region = Config.LoRaConfig.RegionCode.US}.build()}.build())
         runCurrent()
         assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Loading)
 
@@ -503,11 +503,11 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `setConfig calls useCase`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         nodeRepository.setNodes(listOf(node))
         viewModel = createViewModel()
 
-        val config = Config(device = Config.DeviceConfig(role = Config.DeviceConfig.Role.ROUTER))
+        val config = Config.Builder().also { wb ->wb.device = Config.DeviceConfig.Builder().also { wb ->wb.role = Config.DeviceConfig.Role.ROUTER}.build()}.build()
         everySuspend { radioConfigUseCase.setConfig(any(), any(), any()) } returns 42
 
         viewModel.setConfig(config)
@@ -543,11 +543,11 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `processPacketResponse updates state on metadata result`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         nodeRepository.setNodes(listOf(node))
 
-        val packet = MeshPacket()
-        val metadata = DeviceMetadata(firmware_version = "3.0.0")
+        val packet = MeshPacket.Builder().build()
+        val metadata = DeviceMetadata.Builder().also { wb ->wb.firmware_version = "3.0.0"}.build()
         val packetFlow = MutableSharedFlow<MeshPacket>()
 
         every { serviceRepository.meshPacketFlow } returns packetFlow
@@ -621,9 +621,9 @@ class RadioConfigViewModelTest {
     fun `setMqttProxyActive true restarts proxy using current device module config`() = runTest {
         every { radioConfigRepository.moduleConfigFlow } returns
             MutableStateFlow(
-                LocalModuleConfig(
-                    mqtt = org.meshtastic.proto.ModuleConfig.MQTTConfig(enabled = true, proxy_to_client_enabled = true),
-                ),
+                LocalModuleConfig.Builder().also { wb ->
+                wb.mqtt = org.meshtastic.proto.ModuleConfig.MQTTConfig.Builder().also { wb ->wb.enabled = true; wb.proxy_to_client_enabled = true}.build()
+                }.build(),
             )
         every { mqttManager.startProxy(any(), any()) } returns Unit
         viewModel = createViewModel()
@@ -637,7 +637,7 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `setMqttProxyActive true is a no-op start when device MQTT is disabled`() = runTest {
-        every { radioConfigRepository.moduleConfigFlow } returns MutableStateFlow(LocalModuleConfig())
+        every { radioConfigRepository.moduleConfigFlow } returns MutableStateFlow(LocalModuleConfig.Builder().build())
         every { mqttManager.startProxy(any(), any()) } returns Unit
         viewModel = createViewModel()
         runCurrent()
@@ -670,12 +670,12 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `updateChannels calls useCase for each changed channel`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         nodeRepository.setNodes(listOf(node))
         viewModel = createViewModel()
 
-        val old = listOf(ChannelSettings(name = "Old"))
-        val new = listOf(ChannelSettings(name = "New"))
+        val old = listOf(ChannelSettings.Builder().also { wb ->wb.name = "Old"}.build())
+        val new = listOf(ChannelSettings.Builder().also { wb ->wb.name = "New"}.build())
 
         everySuspend { radioConfigUseCase.setRemoteChannel(any(), any(), any()) } returns 42
 
@@ -687,13 +687,13 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `updateChannels writes changed channels sequentially in index order`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         nodeRepository.setNodes(listOf(node))
         viewModel = createViewModel()
 
-        val channelA = ChannelSettings(name = "A")
-        val channelB = ChannelSettings(name = "B")
-        val channelC = ChannelSettings(name = "C")
+        val channelA = ChannelSettings.Builder().also { wb ->wb.name = "A"}.build()
+        val channelB = ChannelSettings.Builder().also { wb ->wb.name = "B"}.build()
+        val channelC = ChannelSettings.Builder().also { wb ->wb.name = "C"}.build()
         val old = listOf(channelA, channelB, channelC)
         val new = listOf(channelA, channelC, channelB)
         val writtenIndexes = mutableListOf<Int>()
@@ -722,16 +722,16 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `updateChannels waits for all ordered writes before success`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         val packetFlow = MutableSharedFlow<MeshPacket>()
         every { serviceRepository.meshPacketFlow } returns packetFlow
         every { processRadioResponseUseCase(any(), 123, any()) } returns RadioResponseResult.Success
         nodeRepository.setNodes(listOf(node))
         viewModel = createViewModel()
 
-        val channelA = ChannelSettings(name = "A")
-        val channelB = ChannelSettings(name = "B")
-        val channelC = ChannelSettings(name = "C")
+        val channelA = ChannelSettings.Builder().also { wb ->wb.name = "A"}.build()
+        val channelB = ChannelSettings.Builder().also { wb ->wb.name = "B"}.build()
+        val channelC = ChannelSettings.Builder().also { wb ->wb.name = "C"}.build()
         val old = listOf(channelA, channelB, channelC)
         val new = listOf(channelA, channelC, channelB)
         var nextPacketId = 40
@@ -746,7 +746,7 @@ class RadioConfigViewModelTest {
         viewModel.updateChannels(new, old)
         runCurrent()
 
-        packetFlow.emit(MeshPacket(decoded = Data(request_id = 41)))
+        packetFlow.emit(MeshPacket.Builder().also { wb ->wb.decoded = Data.Builder().also { wb ->wb.request_id = 41}.build()}.build())
         runCurrent()
 
         val midBatchState = viewModel.radioConfigState.value.responseState
@@ -757,7 +757,7 @@ class RadioConfigViewModelTest {
         advanceTimeBy(MANUAL_CHANNEL_WRITE_DELAY.inWholeMilliseconds)
         runCurrent()
 
-        packetFlow.emit(MeshPacket(decoded = Data(request_id = 42)))
+        packetFlow.emit(MeshPacket.Builder().also { wb ->wb.decoded = Data.Builder().also { wb ->wb.request_id = 42}.build()}.build())
         runCurrent()
 
         assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Success)
@@ -765,9 +765,9 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `routing error stops remaining manual channel writes`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         val packetFlow = MutableSharedFlow<MeshPacket>()
-        val old = listOf(ChannelSettings(name = "A"), ChannelSettings(name = "B"), ChannelSettings(name = "C"))
+        val old = listOf(ChannelSettings.Builder().also { wb ->wb.name = "A"}.build(), ChannelSettings.Builder().also { wb ->wb.name = "B"}.build(), ChannelSettings.Builder().also { wb ->wb.name = "C"}.build())
         val new = listOf(old[0], old[2], old[1])
         val writtenIndexes = mutableListOf<Int>()
 
@@ -789,7 +789,7 @@ class RadioConfigViewModelTest {
         runCurrent()
         assertEquals(listOf(1), writtenIndexes)
 
-        packetFlow.emit(MeshPacket(decoded = Data(request_id = 41)))
+        packetFlow.emit(MeshPacket.Builder().also { wb ->wb.decoded = Data.Builder().also { wb ->wb.request_id = 41}.build()}.build())
         runCurrent()
         advanceTimeBy(MANUAL_CHANNEL_WRITE_DELAY.inWholeMilliseconds + 1)
         runCurrent()
@@ -800,11 +800,11 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `routing error cancels manual channel batches queued behind the active batch`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         val packetFlow = MutableSharedFlow<MeshPacket>()
-        val old = listOf(ChannelSettings(name = "A"), ChannelSettings(name = "B"), ChannelSettings(name = "C"))
+        val old = listOf(ChannelSettings.Builder().also { wb ->wb.name = "A"}.build(), ChannelSettings.Builder().also { wb ->wb.name = "B"}.build(), ChannelSettings.Builder().also { wb ->wb.name = "C"}.build())
         val firstUpdate = listOf(old[0], old[2], old[1])
-        val secondUpdate = listOf(old[0], ChannelSettings(name = "D"), old[2])
+        val secondUpdate = listOf(old[0], ChannelSettings.Builder().also { wb ->wb.name = "D"}.build(), old[2])
         val writtenIndexes = mutableListOf<Int>()
 
         every { serviceRepository.meshPacketFlow } returns packetFlow
@@ -826,7 +826,7 @@ class RadioConfigViewModelTest {
         viewModel.updateChannels(secondUpdate, old)
         runCurrent()
 
-        packetFlow.emit(MeshPacket(decoded = Data(request_id = 41)))
+        packetFlow.emit(MeshPacket.Builder().also { wb ->wb.decoded = Data.Builder().also { wb ->wb.request_id = 41}.build()}.build())
         runCurrent()
         advanceUntilIdle()
 
@@ -836,14 +836,14 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `updateChannels reconciles applied channel writes when ordered write fails`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         val old = fourChannelFixture()
         val (channelA, _, _, channelD) = old
         val new = listOf(channelA, channelD)
         val partiallyApplied = listOf(channelA, channelD, old[2], old[3])
         val writtenIndexes = mutableListOf<Int>()
 
-        every { radioConfigRepository.channelSetFlow } returns MutableStateFlow(ChannelSet(settings = old))
+        every { radioConfigRepository.channelSetFlow } returns MutableStateFlow(ChannelSet.Builder().also { wb ->wb.settings = old}.build())
         nodeRepository.setNodes(listOf(node))
         nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
         viewModel = createViewModel()
@@ -871,7 +871,7 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `updateChannels serializes overlapping channel saves`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         val old = fourChannelFixture()
         val (channelA, _, channelC, channelD) = old
         val firstNew = listOf(channelA, channelD)
@@ -879,7 +879,7 @@ class RadioConfigViewModelTest {
         val writtenChannels = mutableListOf<String>()
         var firstWrite = true
 
-        every { radioConfigRepository.channelSetFlow } returns MutableStateFlow(ChannelSet(settings = old))
+        every { radioConfigRepository.channelSetFlow } returns MutableStateFlow(ChannelSet.Builder().also { wb ->wb.settings = old}.build())
         nodeRepository.setNodes(listOf(node))
         viewModel = createViewModel()
         runCurrent()
@@ -906,12 +906,12 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `updateChannels does not start manual batch while another radio request is pending`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         nodeRepository.setNodes(listOf(node))
         viewModel = createViewModel()
 
-        val old = listOf(ChannelSettings(name = "Old"))
-        val new = listOf(ChannelSettings(name = "New"))
+        val old = listOf(ChannelSettings.Builder().also { wb ->wb.name = "Old"}.build())
+        val new = listOf(ChannelSettings.Builder().also { wb ->wb.name = "New"}.build())
 
         everySuspend { radioConfigUseCase.getOwner(any(), any()) } calls
             {
@@ -936,12 +936,12 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `aborted manual batch preserves unrelated pending request`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         val packetFlow = MutableSharedFlow<MeshPacket>()
         val old = fourChannelFixture()
         val (channelA, _, _, channelD) = old
         val new = listOf(channelA, channelD)
-        val owner = User(id = "!123", long_name = "Updated")
+        val owner = User.Builder().also { wb ->wb.id = "!123"; wb.long_name = "Updated"}.build()
         var writeCount = 0
 
         every { serviceRepository.meshPacketFlow } returns packetFlow
@@ -974,7 +974,7 @@ class RadioConfigViewModelTest {
         advanceTimeBy(MANUAL_CHANNEL_WRITE_DELAY.inWholeMilliseconds)
         runCurrent()
 
-        packetFlow.emit(MeshPacket(decoded = Data(request_id = 42)))
+        packetFlow.emit(MeshPacket.Builder().also { wb ->wb.decoded = Data.Builder().also { wb ->wb.request_id = 42}.build()}.build())
         runCurrent()
 
         assertEquals(owner, viewModel.radioConfigState.value.userConfig)
@@ -982,7 +982,7 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `aborted manual batch cancels batch timeout before packet id reuse`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         val old = fourChannelFixture()
         val (channelA, _, _, channelD) = old
         val new = listOf(channelA, channelD)
@@ -1020,9 +1020,9 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `applyManualChannelUpdatePlan paces writes except after final channel`() = runTest {
-        val channelA = Channel(index = 1, role = Channel.Role.SECONDARY, settings = ChannelSettings(name = "A"))
-        val channelB = Channel(index = 2, role = Channel.Role.DISABLED, settings = ChannelSettings())
-        val channelC = Channel(index = 3, role = Channel.Role.DISABLED, settings = ChannelSettings())
+        val channelA = Channel.Builder().also { wb ->wb.index = 1; wb.role = Channel.Role.SECONDARY; wb.settings = ChannelSettings.Builder().also { wb ->wb.name = "A"}.build()}.build()
+        val channelB = Channel.Builder().also { wb ->wb.index = 2; wb.role = Channel.Role.DISABLED; wb.settings = ChannelSettings.Builder().build()}.build()
+        val channelC = Channel.Builder().also { wb ->wb.index = 3; wb.role = Channel.Role.DISABLED; wb.settings = ChannelSettings.Builder().build()}.build()
         val writtenIndexes = mutableListOf<Int>()
         val registeredRequestIds = mutableListOf<Int>()
         val delays = mutableListOf<Duration>()
@@ -1030,8 +1030,8 @@ class RadioConfigViewModelTest {
         val result =
             applyManualChannelUpdatePlan(
                 updatePlan = listOf(channelA, channelB, channelC),
-                currentSettings = listOf(ChannelSettings(name = "old")),
-                finalSettings = listOf(ChannelSettings(name = "new")),
+                currentSettings = listOf(ChannelSettings.Builder().also { wb ->wb.name = "old"}.build()),
+                finalSettings = listOf(ChannelSettings.Builder().also { wb ->wb.name = "new"}.build()),
                 writeChannel = { channel, onRequestId ->
                     writtenIndexes.add(channel.index)
                     val id = channel.index + 100
@@ -1044,16 +1044,16 @@ class RadioConfigViewModelTest {
 
         assertEquals(listOf(1, 2, 3), writtenIndexes)
         assertEquals(listOf(101, 102, 103), result.packetIds)
-        assertEquals(listOf(ChannelSettings(name = "new")), result.finalSettings)
+        assertEquals(listOf(ChannelSettings.Builder().also { wb ->wb.name = "new"}.build()), result.finalSettings)
         assertEquals(listOf(101, 102, 103), registeredRequestIds)
         assertEquals(listOf(MANUAL_CHANNEL_WRITE_DELAY, MANUAL_CHANNEL_WRITE_DELAY), delays)
     }
 
     @Test
     fun `applyManualChannelUpdatePlan invokes onInterrupted when writeChannel fails mid-plan`() = runTest {
-        val channelA = Channel(index = 1, role = Channel.Role.SECONDARY, settings = ChannelSettings(name = "A"))
-        val channelB = Channel(index = 2, role = Channel.Role.SECONDARY, settings = ChannelSettings(name = "B"))
-        val channelC = Channel(index = 3, role = Channel.Role.SECONDARY, settings = ChannelSettings(name = "C"))
+        val channelA = Channel.Builder().also { wb ->wb.index = 1; wb.role = Channel.Role.SECONDARY; wb.settings = ChannelSettings.Builder().also { wb ->wb.name = "A"}.build()}.build()
+        val channelB = Channel.Builder().also { wb ->wb.index = 2; wb.role = Channel.Role.SECONDARY; wb.settings = ChannelSettings.Builder().also { wb ->wb.name = "B"}.build()}.build()
+        val channelC = Channel.Builder().also { wb ->wb.index = 3; wb.role = Channel.Role.SECONDARY; wb.settings = ChannelSettings.Builder().also { wb ->wb.name = "C"}.build()}.build()
         val writtenIndexes = mutableListOf<Int>()
 
         var interrupted: InterruptedManualChannelUpdate? = null
@@ -1062,8 +1062,8 @@ class RadioConfigViewModelTest {
             assertFailsWith<IllegalStateException> {
                 applyManualChannelUpdatePlan(
                     updatePlan = listOf(channelA, channelB, channelC),
-                    currentSettings = listOf(ChannelSettings(name = "old")),
-                    finalSettings = listOf(ChannelSettings(name = "new")),
+                    currentSettings = listOf(ChannelSettings.Builder().also { wb ->wb.name = "old"}.build()),
+                    finalSettings = listOf(ChannelSettings.Builder().also { wb ->wb.name = "new"}.build()),
                     writeChannel = { channel, onRequestId ->
                         writtenIndexes.add(channel.index)
                         if (channel.index == 2) throw IllegalStateException("boom")
@@ -1087,14 +1087,14 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `setResponseStateLoading for REBOOT calls useCase after config response`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         nodeRepository.setNodes(listOf(node))
 
         val packetFlow = MutableSharedFlow<MeshPacket>()
         every { serviceRepository.meshPacketFlow } returns packetFlow
         // AdminRoute first sends a session key config request; the admin action fires
         // only after the actual ConfigResponse (not a routing ACK / Success).
-        every { processRadioResponseUseCase(any(), any(), any()) } returns RadioResponseResult.ConfigResponse(Config())
+        every { processRadioResponseUseCase(any(), any(), any()) } returns RadioResponseResult.ConfigResponse(Config.Builder().build())
 
         viewModel = createViewModel()
 
@@ -1103,21 +1103,21 @@ class RadioConfigViewModelTest {
         viewModel.setResponseStateLoading(AdminRoute.REBOOT)
 
         // Emit a config response packet to trigger processPacketResponse -> sendAdminRequest
-        packetFlow.emit(MeshPacket())
+        packetFlow.emit(MeshPacket.Builder().build())
 
         verifySuspend { adminActionsUseCase.reboot(123, any()) }
     }
 
     @Test
     fun `setResponseStateLoading for FACTORY_RESET calls useCase after config response`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         nodeRepository.setNodes(listOf(node))
 
         val packetFlow = MutableSharedFlow<MeshPacket>()
         every { serviceRepository.meshPacketFlow } returns packetFlow
         // AdminRoute first sends a session key config request; the admin action fires
         // only after the actual ConfigResponse (not a routing ACK / Success).
-        every { processRadioResponseUseCase(any(), any(), any()) } returns RadioResponseResult.ConfigResponse(Config())
+        every { processRadioResponseUseCase(any(), any(), any()) } returns RadioResponseResult.ConfigResponse(Config.Builder().build())
 
         viewModel = createViewModel()
 
@@ -1126,7 +1126,7 @@ class RadioConfigViewModelTest {
         viewModel.setResponseStateLoading(AdminRoute.FACTORY_RESET)
 
         // Emit a config response packet to trigger processPacketResponse -> sendAdminRequest
-        packetFlow.emit(MeshPacket())
+        packetFlow.emit(MeshPacket.Builder().build())
 
         verifySuspend { adminActionsUseCase.factoryReset(123, any(), any()) }
     }
@@ -1135,13 +1135,13 @@ class RadioConfigViewModelTest {
     fun `NODEDB_RESET marks an expected local restart`() = runTest {
         // Firmware reboots after a nodedb reset, so a local reset must open the restart window (like FACTORY_RESET)
         // or the ensuing transport drop surfaces as a surprise disconnect instead of "restarting".
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         nodeRepository.setNodes(listOf(node))
         nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
 
         val packetFlow = MutableSharedFlow<MeshPacket>()
         every { serviceRepository.meshPacketFlow } returns packetFlow
-        every { processRadioResponseUseCase(any(), any(), any()) } returns RadioResponseResult.ConfigResponse(Config())
+        every { processRadioResponseUseCase(any(), any(), any()) } returns RadioResponseResult.ConfigResponse(Config.Builder().build())
 
         viewModel = createViewModel()
         runCurrent()
@@ -1149,7 +1149,7 @@ class RadioConfigViewModelTest {
         everySuspend { adminActionsUseCase.nodedbReset(any(), any(), any(), any()) } returns 42
 
         viewModel.setResponseStateLoading(AdminRoute.NODEDB_RESET)
-        packetFlow.emit(MeshPacket())
+        packetFlow.emit(MeshPacket.Builder().build())
         advanceUntilIdle()
 
         verifySuspend { adminActionsUseCase.nodedbReset(123, any(), any(), any()) }
@@ -1162,7 +1162,7 @@ class RadioConfigViewModelTest {
         // Connected, so onConnected never re-fired to close it early). A manual channel batch shares the save shape
         // (empty route + Loading); a transient drop inside the stale window must not flip the incomplete batch to
         // success and silently misreport a partial channel write.
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         nodeRepository.setNodes(listOf(node))
         nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
 
@@ -1179,7 +1179,7 @@ class RadioConfigViewModelTest {
                 it.args.onRequestIdArg()(77)
                 77
             }
-        viewModel.updateChannels(listOf(ChannelSettings(name = "New")), listOf(ChannelSettings(name = "Old")))
+        viewModel.updateChannels(listOf(ChannelSettings.Builder().also { wb ->wb.name = "New"}.build()), listOf(ChannelSettings.Builder().also { wb ->wb.name = "Old"}.build()))
         runCurrent()
 
         assertTrue(nodeRestartTracker.restartExpected.value)
@@ -1205,11 +1205,11 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `setOwner calls useCase`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         nodeRepository.setNodes(listOf(node))
         viewModel = createViewModel()
 
-        val user = User(long_name = "Test User")
+        val user = User.Builder().also { wb ->wb.long_name = "Test User"}.build()
         everySuspend { radioConfigUseCase.setOwner(any(), any(), any()) } returns 42
 
         viewModel.setOwner(user)
@@ -1219,31 +1219,31 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `saveUserConfig sends setHamMode for licensed local node`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         nodeRepository.setNodes(listOf(node))
         nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
         viewModel = createViewModel()
 
-        val user = User(long_name = "KK7ABC", short_name = "KK7A", is_licensed = true)
+        val user = User.Builder().also { wb ->wb.long_name = "KK7ABC"; wb.short_name = "KK7A"; wb.is_licensed = true}.build()
         everySuspend { radioConfigUseCase.setHamMode(any(), any(), any()) } returns 42
 
         viewModel.saveUserConfig(user)
 
         verifySuspend {
-            radioConfigUseCase.setHamMode(123, HamParameters(call_sign = "KK7ABC", short_name = "KK7A"), any())
+            radioConfigUseCase.setHamMode(123, HamParameters.Builder().also { wb ->wb.call_sign = "KK7ABC"; wb.short_name = "KK7A"}.build(), any())
         }
         verifySuspend(exactly(0)) { radioConfigUseCase.setOwner(any(), any(), any()) }
     }
 
     @Test
     fun `saveUserConfig splits a composed ham name into call sign and long name`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         nodeRepository.setNodes(listOf(node))
         nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
         viewModel = createViewModel()
 
         // The User form carries the composed name firmware builds; set_ham_mode wants the halves back.
-        val user = User(long_name = "KK7ABC//Attic Heltec", short_name = "KK7A", is_licensed = true)
+        val user = User.Builder().also { wb ->wb.long_name = "KK7ABC//Attic Heltec"; wb.short_name = "KK7A"; wb.is_licensed = true}.build()
         everySuspend { radioConfigUseCase.setHamMode(any(), any(), any()) } returns 42
 
         viewModel.saveUserConfig(user)
@@ -1251,7 +1251,7 @@ class RadioConfigViewModelTest {
         verifySuspend {
             radioConfigUseCase.setHamMode(
                 123,
-                HamParameters(call_sign = "KK7ABC", short_name = "KK7A", long_name = "Attic Heltec"),
+                HamParameters.Builder().also { wb ->wb.call_sign = "KK7ABC"; wb.short_name = "KK7A"; wb.long_name = "Attic Heltec"}.build(),
                 any(),
             )
         }
@@ -1259,12 +1259,12 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `saveUserConfig sends setOwner for unlicensed user`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         nodeRepository.setNodes(listOf(node))
         nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
         viewModel = createViewModel()
 
-        val user = User(long_name = "Test User", short_name = "TU")
+        val user = User.Builder().also { wb ->wb.long_name = "Test User"; wb.short_name = "TU"}.build()
         everySuspend { radioConfigUseCase.setOwner(any(), any(), any()) } returns 42
 
         viewModel.saveUserConfig(user)
@@ -1275,13 +1275,13 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `saveUserConfig never sends setHamMode to a remote node`() = runTest {
-        val localNode = Node(num = 100, user = User(id = "!100"))
-        val remoteNode = Node(num = 456, user = User(id = "!456"))
+        val localNode = Node(num = 100, user = User.Builder().also { wb ->wb.id = "!100"}.build())
+        val remoteNode = Node(num = 456, user = User.Builder().also { wb ->wb.id = "!456"}.build())
         nodeRepository.setNodes(listOf(localNode, remoteNode))
         nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100))
         viewModel = createViewModel(destNum = 456)
 
-        val user = User(long_name = "KK7ABC", short_name = "KK7A", is_licensed = true)
+        val user = User.Builder().also { wb ->wb.long_name = "KK7ABC"; wb.short_name = "KK7A"; wb.is_licensed = true}.build()
         everySuspend { radioConfigUseCase.setOwner(any(), any(), any()) } returns 42
 
         viewModel.saveUserConfig(user)
@@ -1292,19 +1292,19 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `saveUserConfig routes subsequent licensed saves to setOwner`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         nodeRepository.setNodes(listOf(node))
         nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
         viewModel = createViewModel()
 
-        val user = User(long_name = "KK7ABC", short_name = "KK7A", is_licensed = true)
+        val user = User.Builder().also { wb ->wb.long_name = "KK7ABC"; wb.short_name = "KK7A"; wb.is_licensed = true}.build()
         everySuspend { radioConfigUseCase.setHamMode(any(), any(), any()) } returns 42
         everySuspend { radioConfigUseCase.setOwner(any(), any(), any()) } returns 43
 
         // First save transitions OFF→ON and onboards via set_ham_mode.
         viewModel.saveUserConfig(user)
         // A later save while already licensed must use set_owner so other owner fields propagate.
-        val edited = user.copy(short_name = "KK7B")
+        val edited = user.newBuilder().also { wb -> wb.short_name = "KK7B" }.build()
         viewModel.saveUserConfig(edited)
 
         verifySuspend(exactly(1)) { radioConfigUseCase.setHamMode(any(), any(), any()) }
@@ -1313,11 +1313,11 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `saveUserConfig routes licensed save to setOwner when myNodeInfo is absent`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         nodeRepository.setNodes(listOf(node))
         viewModel = createViewModel()
 
-        val user = User(long_name = "KK7ABC", short_name = "KK7A", is_licensed = true)
+        val user = User.Builder().also { wb ->wb.long_name = "KK7ABC"; wb.short_name = "KK7A"; wb.is_licensed = true}.build()
         everySuspend { radioConfigUseCase.setOwner(any(), any(), any()) } returns 42
 
         viewModel.saveUserConfig(user)
@@ -1328,7 +1328,7 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `setRingtone calls useCase`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         nodeRepository.setNodes(listOf(node))
         viewModel = createViewModel()
 
@@ -1342,7 +1342,7 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `setCannedMessages calls useCase`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         nodeRepository.setNodes(listOf(node))
         viewModel = createViewModel()
 
@@ -1356,8 +1356,8 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `setRingtone retires the pending route read without stranding loading`() = runTest {
-        val localNode = Node(num = 100, user = User(id = "!100"))
-        val remoteNode = Node(num = 456, user = User(id = "!456"))
+        val localNode = Node(num = 100, user = User.Builder().also { wb ->wb.id = "!100"}.build())
+        val remoteNode = Node(num = 456, user = User.Builder().also { wb ->wb.id = "!456"}.build())
         everySuspend { radioConfigUseCase.getRingtone(any(), any()) } calls
             {
                 it.args.onRequestIdArg()(41)
@@ -1383,8 +1383,8 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `setCannedMessages retires the pending route read without stranding loading`() = runTest {
-        val localNode = Node(num = 100, user = User(id = "!100"))
-        val remoteNode = Node(num = 456, user = User(id = "!456"))
+        val localNode = Node(num = 100, user = User.Builder().also { wb ->wb.id = "!100"}.build())
+        val remoteNode = Node(num = 456, user = User.Builder().also { wb ->wb.id = "!456"}.build())
         everySuspend { radioConfigUseCase.getCannedMessages(any(), any()) } calls
             {
                 it.args.onRequestIdArg()(43)
@@ -1410,7 +1410,7 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `destNum from SavedStateHandle resolves destNode`() = runTest {
-        val node = Node(num = 456, user = User(id = "!456"))
+        val node = Node(num = 456, user = User.Builder().also { wb ->wb.id = "!456"}.build())
         nodeRepository.setNodes(listOf(node))
         viewModel = createViewModel(destNum = 456)
         assertEquals(456, viewModel.destNode.value?.num)
@@ -1418,12 +1418,12 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `setModuleConfig calls useCase`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         nodeRepository.setNodes(listOf(node))
         viewModel = createViewModel()
 
         val config =
-            org.meshtastic.proto.ModuleConfig(mqtt = org.meshtastic.proto.ModuleConfig.MQTTConfig(enabled = true))
+            org.meshtastic.proto.ModuleConfig.Builder().also { wb ->wb.mqtt = org.meshtastic.proto.ModuleConfig.MQTTConfig.Builder().also { wb ->wb.enabled = true}.build()}.build()
         everySuspend { radioConfigUseCase.setModuleConfig(any(), any(), any()) } returns 42
 
         viewModel.setModuleConfig(config)
@@ -1434,13 +1434,13 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `setModuleConfig merges mesh_beacon into state before the radio answers`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         nodeRepository.setNodes(listOf(node))
         viewModel = createViewModel()
-        val beacon = MeshBeaconConfig(broadcast_message = "join us")
+        val beacon = MeshBeaconConfig.Builder().also { wb -> wb.broadcast_message = "join us" }.build()
         everySuspend { radioConfigUseCase.setModuleConfig(any(), any(), any()) } returns 42
 
-        viewModel.setModuleConfig(ModuleConfig(mesh_beacon = beacon))
+        viewModel.setModuleConfig(ModuleConfig.Builder().also { wb ->wb.mesh_beacon = beacon}.build())
 
         // Pins the optimistic mesh_beacon merge: a second save in the same session reads this, not the radio's reply.
         assertEquals(beacon, viewModel.radioConfigState.value.moduleConfig.mesh_beacon)
@@ -1448,7 +1448,7 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `setFixedPosition calls useCase`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         nodeRepository.setNodes(listOf(node))
         viewModel = createViewModel()
 
@@ -1462,7 +1462,7 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `removeFixedPosition calls useCase`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         nodeRepository.setNodes(listOf(node))
         viewModel = createViewModel()
 
@@ -1475,11 +1475,11 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `installProfile calls useCase`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         nodeRepository.setNodes(listOf(node))
         viewModel = createViewModel()
 
-        val profile = DeviceProfile()
+        val profile = DeviceProfile.Builder().build()
         everySuspend { installProfileUseCase(any(), any(), any(), any(), any()) } returns Unit
 
         viewModel.installProfile(profile)
@@ -1489,10 +1489,10 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `installProfile surfaces malformed channel URL in snackbar`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         nodeRepository.setNodes(listOf(node))
         viewModel = createViewModel()
-        val profile = DeviceProfile(channel_url = "not-a-channel-url")
+        val profile = DeviceProfile.Builder().also { wb ->wb.channel_url = "not-a-channel-url"}.build()
         everySuspend { installProfileUseCase(any(), any(), any(), any(), any()) } calls
             {
                 throw MalformedMeshtasticUrlException("bad profile")
@@ -1510,7 +1510,7 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `processPacketResponse updates state on various results`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         nodeRepository.setNodes(listOf(node))
         val packetFlow = MutableSharedFlow<MeshPacket>()
         every { serviceRepository.meshPacketFlow } returns packetFlow
@@ -1518,43 +1518,43 @@ class RadioConfigViewModelTest {
         viewModel = createViewModel()
 
         // ConfigResponse
-        val configResponse = Config(lora = Config.LoRaConfig(hop_limit = 5))
+        val configResponse = Config.Builder().also { wb ->wb.lora = Config.LoRaConfig.Builder().also { wb ->wb.hop_limit = 5}.build()}.build()
         every { processRadioResponseUseCase(any(), 123, any()) } returns
             RadioResponseResult.ConfigResponse(configResponse)
-        packetFlow.emit(MeshPacket())
+        packetFlow.emit(MeshPacket.Builder().build())
         assertEquals(5, viewModel.radioConfigState.value.radioConfig.lora?.hop_limit)
 
         // ModuleConfigResponse
         val moduleResponse =
-            org.meshtastic.proto.ModuleConfig(
-                telemetry = org.meshtastic.proto.ModuleConfig.TelemetryConfig(device_update_interval = 300),
-            )
+            org.meshtastic.proto.ModuleConfig.Builder().also { wb ->
+            wb.telemetry = org.meshtastic.proto.ModuleConfig.TelemetryConfig.Builder().also { wb ->wb.device_update_interval = 300}.build()
+            }.build()
         every { processRadioResponseUseCase(any(), 123, any()) } returns
             RadioResponseResult.ModuleConfigResponse(moduleResponse)
-        packetFlow.emit(MeshPacket())
+        packetFlow.emit(MeshPacket.Builder().build())
         assertEquals(300, viewModel.radioConfigState.value.moduleConfig.telemetry?.device_update_interval)
 
         // Owner
-        val user = User(long_name = "New Name")
+        val user = User.Builder().also { wb ->wb.long_name = "New Name"}.build()
         every { processRadioResponseUseCase(any(), 123, any()) } returns RadioResponseResult.Owner(user)
-        packetFlow.emit(MeshPacket())
+        packetFlow.emit(MeshPacket.Builder().build())
         assertEquals("New Name", viewModel.radioConfigState.value.userConfig.long_name)
 
         // Ringtone
         every { processRadioResponseUseCase(any(), 123, any()) } returns RadioResponseResult.Ringtone("bell.mp3")
-        packetFlow.emit(MeshPacket())
+        packetFlow.emit(MeshPacket.Builder().build())
         assertEquals("bell.mp3", viewModel.radioConfigState.value.ringtone)
 
         // Error
         every { processRadioResponseUseCase(any(), 123, any()) } returns
             RadioResponseResult.Error(org.meshtastic.core.resources.UiText.DynamicString("Fail"))
-        packetFlow.emit(MeshPacket())
+        packetFlow.emit(MeshPacket.Builder().build())
         assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Error)
     }
 
     @Test
     fun `routing error clears request timeout without replacing the specific failure`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         nodeRepository.setNodes(listOf(node))
         val packetFlow = MutableSharedFlow<MeshPacket>()
         every { serviceRepository.meshPacketFlow } returns packetFlow
@@ -1571,7 +1571,7 @@ class RadioConfigViewModelTest {
 
         val failure = org.meshtastic.core.resources.UiText.DynamicString("Max Retransmission Reached")
         every { processRadioResponseUseCase(any(), 123, any()) } returns RadioResponseResult.Error(failure)
-        packetFlow.emit(MeshPacket())
+        packetFlow.emit(MeshPacket.Builder().build())
         runCurrent()
 
         assertEquals(ResponseState.Error(failure), viewModel.radioConfigState.value.responseState)
@@ -1584,11 +1584,11 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `remote read accepts response after max retransmit before request deadline`() = runTest {
-        val localNode = Node(num = 100, user = User(id = "!100"))
-        val remoteNode = Node(num = 456, user = User(id = "!456"))
+        val localNode = Node(num = 100, user = User.Builder().also { wb ->wb.id = "!100"}.build())
+        val remoteNode = Node(num = 456, user = User.Builder().also { wb ->wb.id = "!456"}.build())
         val packetFlow = MutableSharedFlow<MeshPacket>()
         val maxRetransmit = org.meshtastic.core.resources.UiText.DynamicString("Max Retransmission Reached")
-        val config = Config(device = Config.DeviceConfig(node_info_broadcast_secs = 900))
+        val config = Config.Builder().also { wb ->wb.device = Config.DeviceConfig.Builder().also { wb ->wb.node_info_broadcast_secs = 900}.build()}.build()
         var response: RadioResponseResult = RadioResponseResult.Error(maxRetransmit, Routing.Error.MAX_RETRANSMIT)
 
         every { serviceRepository.meshPacketFlow } returns packetFlow
@@ -1604,13 +1604,13 @@ class RadioConfigViewModelTest {
 
         viewModel.loadConfigRoute(ConfigRoute.DEVICE)
         runCurrent()
-        packetFlow.emit(MeshPacket(decoded = Data(request_id = 42)))
+        packetFlow.emit(MeshPacket.Builder().also { wb ->wb.decoded = Data.Builder().also { wb ->wb.request_id = 42}.build()}.build())
         runCurrent()
 
         assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Loading)
 
         response = RadioResponseResult.ConfigResponse(config)
-        packetFlow.emit(MeshPacket(decoded = Data(request_id = 42)))
+        packetFlow.emit(MeshPacket.Builder().also { wb ->wb.decoded = Data.Builder().also { wb ->wb.request_id = 42}.build()}.build())
         runCurrent()
 
         assertEquals(config.device, viewModel.radioConfigState.value.radioConfig.device)
@@ -1623,8 +1623,8 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `remote read surfaces max retransmit at deadline and accepts later response`() = runTest {
-        val localNode = Node(num = 100, user = User(id = "!100"))
-        val remoteNode = Node(num = 456, user = User(id = "!456"))
+        val localNode = Node(num = 100, user = User.Builder().also { wb ->wb.id = "!100"}.build())
+        val remoteNode = Node(num = 456, user = User.Builder().also { wb ->wb.id = "!456"}.build())
         val packetFlow = MutableSharedFlow<MeshPacket>()
         val maxRetransmit = org.meshtastic.core.resources.UiText.DynamicString("Max Retransmission Reached")
         var nextRequestId = 42
@@ -1635,7 +1635,7 @@ class RadioConfigViewModelTest {
                 it.args.onRequestIdArg()(nextRequestId)
                 nextRequestId
             }
-        val config = Config(device = Config.DeviceConfig(node_info_broadcast_secs = 900))
+        val config = Config.Builder().also { wb ->wb.device = Config.DeviceConfig.Builder().also { wb ->wb.node_info_broadcast_secs = 900}.build()}.build()
         var response: RadioResponseResult = RadioResponseResult.Error(maxRetransmit, Routing.Error.MAX_RETRANSMIT)
         every { processRadioResponseUseCase(any(), 456, any()) } calls
             {
@@ -1648,7 +1648,7 @@ class RadioConfigViewModelTest {
 
         viewModel.loadConfigRoute(ConfigRoute.DEVICE)
         runCurrent()
-        packetFlow.emit(MeshPacket(decoded = Data(request_id = 42)))
+        packetFlow.emit(MeshPacket.Builder().also { wb ->wb.decoded = Data.Builder().also { wb ->wb.request_id = 42}.build()}.build())
         runCurrent()
 
         assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Loading)
@@ -1665,13 +1665,13 @@ class RadioConfigViewModelTest {
         assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Loading)
 
         response = RadioResponseResult.Success
-        packetFlow.emit(MeshPacket(decoded = Data(request_id = 42)))
+        packetFlow.emit(MeshPacket.Builder().also { wb ->wb.decoded = Data.Builder().also { wb ->wb.request_id = 42}.build()}.build())
         runCurrent()
         assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Loading)
 
         response = RadioResponseResult.ConfigResponse(config)
         advanceTimeBy(5_000)
-        packetFlow.emit(MeshPacket(decoded = Data(request_id = 42)))
+        packetFlow.emit(MeshPacket.Builder().also { wb ->wb.decoded = Data.Builder().also { wb ->wb.request_id = 42}.build()}.build())
         runCurrent()
 
         assertEquals(config.device, viewModel.radioConfigState.value.radioConfig.device)
@@ -1684,11 +1684,11 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `late remote read clears its deadline error without a retry`() = runTest {
-        val localNode = Node(num = 100, user = User(id = "!100"))
-        val remoteNode = Node(num = 456, user = User(id = "!456"))
+        val localNode = Node(num = 100, user = User.Builder().also { wb ->wb.id = "!100"}.build())
+        val remoteNode = Node(num = 456, user = User.Builder().also { wb ->wb.id = "!456"}.build())
         val packetFlow = MutableSharedFlow<MeshPacket>()
         val maxRetransmit = org.meshtastic.core.resources.UiText.DynamicString("Max Retransmission Reached")
-        val config = Config(device = Config.DeviceConfig(node_info_broadcast_secs = 900))
+        val config = Config.Builder().also { wb ->wb.device = Config.DeviceConfig.Builder().also { wb ->wb.node_info_broadcast_secs = 900}.build()}.build()
         var response: RadioResponseResult = RadioResponseResult.Error(maxRetransmit, Routing.Error.MAX_RETRANSMIT)
 
         every { serviceRepository.meshPacketFlow } returns packetFlow
@@ -1709,14 +1709,14 @@ class RadioConfigViewModelTest {
 
         viewModel.loadConfigRoute(ConfigRoute.DEVICE)
         runCurrent()
-        packetFlow.emit(MeshPacket(decoded = Data(request_id = 42)))
+        packetFlow.emit(MeshPacket.Builder().also { wb ->wb.decoded = Data.Builder().also { wb ->wb.request_id = 42}.build()}.build())
         runCurrent()
         advanceTimeBy(30_001)
         runCurrent()
         assertEquals(ResponseState.Error(maxRetransmit), viewModel.radioConfigState.value.responseState)
 
         response = RadioResponseResult.ConfigResponse(config)
-        packetFlow.emit(MeshPacket(decoded = Data(request_id = 42)))
+        packetFlow.emit(MeshPacket.Builder().also { wb ->wb.decoded = Data.Builder().also { wb ->wb.request_id = 42}.build()}.build())
         runCurrent()
 
         assertEquals(config.device, viewModel.radioConfigState.value.radioConfig.device)
@@ -1725,12 +1725,12 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `late owner read is retained when the user route reads only the owner`() = runTest {
-        val localNode = Node(num = 100, user = User(id = "!100"))
+        val localNode = Node(num = 100, user = User.Builder().also { wb ->wb.id = "!100"}.build())
         val remoteNode =
-            Node(num = 456, user = User(id = "!456"), metadata = DeviceMetadata(firmware_version = "2.7.21"))
+            Node(num = 456, user = User.Builder().also { wb ->wb.id = "!456"}.build(), metadata = DeviceMetadata.Builder().also { wb ->wb.firmware_version = "2.7.21"}.build())
         val packetFlow = MutableSharedFlow<MeshPacket>()
         val maxRetransmit = org.meshtastic.core.resources.UiText.DynamicString("Max Retransmission Reached")
-        val owner = User(id = "!456", long_name = "Late")
+        val owner = User.Builder().also { wb ->wb.id = "!456"; wb.long_name = "Late"}.build()
         var response: RadioResponseResult = RadioResponseResult.Error(maxRetransmit, Routing.Error.MAX_RETRANSMIT)
 
         every { serviceRepository.meshPacketFlow } returns packetFlow
@@ -1751,7 +1751,7 @@ class RadioConfigViewModelTest {
 
         viewModel.loadConfigRoute(ConfigRoute.USER)
         runCurrent()
-        packetFlow.emit(MeshPacket(decoded = Data(request_id = 42)))
+        packetFlow.emit(MeshPacket.Builder().also { wb ->wb.decoded = Data.Builder().also { wb ->wb.request_id = 42}.build()}.build())
         runCurrent()
         advanceTimeBy(30_001)
         runCurrent()
@@ -1760,7 +1760,7 @@ class RadioConfigViewModelTest {
         // Firmware without the status message module answers one get, so the route is a single-response read
         // whatever ConfigRoute.USER.hasReadFanOut says, and the late owner still lands.
         response = RadioResponseResult.Owner(owner)
-        packetFlow.emit(MeshPacket(decoded = Data(request_id = 42)))
+        packetFlow.emit(MeshPacket.Builder().also { wb ->wb.decoded = Data.Builder().also { wb ->wb.request_id = 42}.build()}.build())
         runCurrent()
 
         assertEquals(owner, viewModel.radioConfigState.value.userConfig)
@@ -1769,10 +1769,10 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `late remote read routing ack cannot complete a newer save`() = runTest {
-        val localNode = Node(num = 100, user = User(id = "!100"))
-        val remoteNode = Node(num = 456, user = User(id = "!456"))
+        val localNode = Node(num = 100, user = User.Builder().also { wb ->wb.id = "!100"}.build())
+        val remoteNode = Node(num = 456, user = User.Builder().also { wb ->wb.id = "!456"}.build())
         val packetFlow = MutableSharedFlow<MeshPacket>()
-        val config = Config(device = Config.DeviceConfig(node_info_broadcast_secs = 900))
+        val config = Config.Builder().also { wb ->wb.device = Config.DeviceConfig.Builder().also { wb ->wb.node_info_broadcast_secs = 900}.build()}.build()
 
         every { serviceRepository.meshPacketFlow } returns packetFlow
         everySuspend { radioConfigUseCase.getConfig(any(), any(), any()) } calls
@@ -1806,7 +1806,7 @@ class RadioConfigViewModelTest {
         runCurrent()
         assertEquals(ResponseState.Loading(), viewModel.radioConfigState.value.responseState)
 
-        packetFlow.emit(MeshPacket(decoded = Data(request_id = 42)))
+        packetFlow.emit(MeshPacket.Builder().also { wb ->wb.decoded = Data.Builder().also { wb ->wb.request_id = 42}.build()}.build())
         runCurrent()
 
         assertEquals(
@@ -1815,19 +1815,19 @@ class RadioConfigViewModelTest {
             "the retained read ACK must not consume the active save request",
         )
 
-        packetFlow.emit(MeshPacket(decoded = Data(request_id = 43)))
+        packetFlow.emit(MeshPacket.Builder().also { wb ->wb.decoded = Data.Builder().also { wb ->wb.request_id = 43}.build()}.build())
         runCurrent()
         assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Success)
     }
 
     @Test
     fun `newer save supersedes a retained read and its retry`() = runTest {
-        val localNode = Node(num = 100, user = User(id = "!100"))
-        val remoteNode = Node(num = 456, user = User(id = "!456"))
+        val localNode = Node(num = 100, user = User.Builder().also { wb ->wb.id = "!100"}.build())
+        val remoteNode = Node(num = 456, user = User.Builder().also { wb ->wb.id = "!456"}.build())
         val packetFlow = MutableSharedFlow<MeshPacket>()
         val maxRetransmit = org.meshtastic.core.resources.UiText.DynamicString("Max Retransmission Reached")
-        val staleConfig = Config(device = Config.DeviceConfig(node_info_broadcast_secs = 900))
-        val savedConfig = Config(device = Config.DeviceConfig(node_info_broadcast_secs = 300))
+        val staleConfig = Config.Builder().also { wb ->wb.device = Config.DeviceConfig.Builder().also { wb ->wb.node_info_broadcast_secs = 900}.build()}.build()
+        val savedConfig = Config.Builder().also { wb ->wb.device = Config.DeviceConfig.Builder().also { wb ->wb.node_info_broadcast_secs = 300}.build()}.build()
         var nextReadId = 42
 
         every { serviceRepository.meshPacketFlow } returns packetFlow
@@ -1869,7 +1869,7 @@ class RadioConfigViewModelTest {
         runCurrent()
         assertEquals(ResponseState.Loading(), viewModel.radioConfigState.value.responseState)
 
-        packetFlow.emit(MeshPacket(decoded = Data(request_id = 42)))
+        packetFlow.emit(MeshPacket.Builder().also { wb ->wb.decoded = Data.Builder().also { wb ->wb.request_id = 42}.build()}.build())
         runCurrent()
         assertEquals(
             ResponseState.Loading(),
@@ -1878,7 +1878,7 @@ class RadioConfigViewModelTest {
         )
         assertEquals(savedConfig.device, viewModel.radioConfigState.value.radioConfig.device)
 
-        packetFlow.emit(MeshPacket(decoded = Data(request_id = 44)))
+        packetFlow.emit(MeshPacket.Builder().also { wb ->wb.decoded = Data.Builder().also { wb ->wb.request_id = 44}.build()}.build())
         runCurrent()
         assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Success)
 
@@ -1889,11 +1889,11 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `remote write keeps max retransmit terminal`() = runTest {
-        val localNode = Node(num = 100, user = User(id = "!100"))
-        val remoteNode = Node(num = 456, user = User(id = "!456"))
+        val localNode = Node(num = 100, user = User.Builder().also { wb ->wb.id = "!100"}.build())
+        val remoteNode = Node(num = 456, user = User.Builder().also { wb ->wb.id = "!456"}.build())
         val packetFlow = MutableSharedFlow<MeshPacket>()
         val maxRetransmit = org.meshtastic.core.resources.UiText.DynamicString("Max Retransmission Reached")
-        val config = Config(device = Config.DeviceConfig(node_info_broadcast_secs = 900))
+        val config = Config.Builder().also { wb ->wb.device = Config.DeviceConfig.Builder().also { wb ->wb.node_info_broadcast_secs = 900}.build()}.build()
 
         every { serviceRepository.meshPacketFlow } returns packetFlow
         everySuspend { radioConfigUseCase.setConfig(any(), any(), any()) } calls
@@ -1909,7 +1909,7 @@ class RadioConfigViewModelTest {
 
         viewModel.setConfig(config)
         runCurrent()
-        packetFlow.emit(MeshPacket(decoded = Data(request_id = 42)))
+        packetFlow.emit(MeshPacket.Builder().also { wb ->wb.decoded = Data.Builder().also { wb ->wb.request_id = 42}.build()}.build())
         runCurrent()
 
         assertEquals(ResponseState.Error(maxRetransmit), viewModel.radioConfigState.value.responseState)
@@ -1921,7 +1921,7 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `Admin actions call correct useCases`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         nodeRepository.setNodes(listOf(node))
         val packetFlow = MutableSharedFlow<MeshPacket>()
         every { serviceRepository.meshPacketFlow } returns packetFlow
@@ -1932,27 +1932,27 @@ class RadioConfigViewModelTest {
         everySuspend { adminActionsUseCase.shutdown(any(), any()) } returns 42
         // Set metadata to allow shutdown
         every { processRadioResponseUseCase(any(), 123, any()) } returns
-            RadioResponseResult.Metadata(DeviceMetadata(canShutdown = true))
-        packetFlow.emit(MeshPacket())
+            RadioResponseResult.Metadata(DeviceMetadata.Builder().also { wb ->wb.canShutdown = true}.build())
+        packetFlow.emit(MeshPacket.Builder().build())
 
         viewModel.setResponseStateLoading(AdminRoute.SHUTDOWN)
         // AdminRoute fires sendAdminRequest after receiving ConfigResponse (session key),
         // not after a routing ACK (Success).
-        every { processRadioResponseUseCase(any(), 123, any()) } returns RadioResponseResult.ConfigResponse(Config())
-        packetFlow.emit(MeshPacket())
+        every { processRadioResponseUseCase(any(), 123, any()) } returns RadioResponseResult.ConfigResponse(Config.Builder().build())
+        packetFlow.emit(MeshPacket.Builder().build())
         verifySuspend { adminActionsUseCase.shutdown(123, any()) }
 
         // NODEDB_RESET
         everySuspend { adminActionsUseCase.nodedbReset(any(), any(), any(), any()) } returns 42
         viewModel.setResponseStateLoading(AdminRoute.NODEDB_RESET)
-        every { processRadioResponseUseCase(any(), 123, any()) } returns RadioResponseResult.ConfigResponse(Config())
-        packetFlow.emit(MeshPacket())
+        every { processRadioResponseUseCase(any(), 123, any()) } returns RadioResponseResult.ConfigResponse(Config.Builder().build())
+        packetFlow.emit(MeshPacket.Builder().build())
         verifySuspend { adminActionsUseCase.nodedbReset(123, any(), any(), any()) }
     }
 
     @Test
     fun `setResponseStateLoading for various routes calls correct useCases`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         nodeRepository.setNodes(listOf(node))
         viewModel = createViewModel()
 
@@ -1982,7 +1982,7 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `loadConfigRoute hides progress overlay for local settings refresh`() = runTest {
-        val localNode = Node(num = 123, user = User(id = "!123"))
+        val localNode = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         nodeRepository.setNodes(listOf(localNode))
         nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
         viewModel = createViewModel(destNum = null)
@@ -2003,8 +2003,8 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `loadConfigRoute shows progress overlay for remote settings refresh`() = runTest {
-        val localNode = Node(num = 100, user = User(id = "!100"))
-        val remoteNode = Node(num = 456, user = User(id = "!456"))
+        val localNode = Node(num = 100, user = User.Builder().also { wb ->wb.id = "!100"}.build())
+        val remoteNode = Node(num = 456, user = User.Builder().also { wb ->wb.id = "!456"}.build())
         nodeRepository.setNodes(listOf(localNode, remoteNode))
         nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100))
         viewModel = createViewModel(destNum = 456)
@@ -2025,7 +2025,7 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `registerRequestId timeout clears request and sets error`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         nodeRepository.setNodes(listOf(node))
         viewModel = createViewModel()
 
@@ -2051,8 +2051,8 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `ensureLoadingForRemote sets loading state for remote nodes`() = runTest {
-        val localNode = Node(num = 100, user = User(id = "!100"))
-        val remoteNode = Node(num = 456, user = User(id = "!456"))
+        val localNode = Node(num = 100, user = User.Builder().also { wb ->wb.id = "!100"}.build())
+        val remoteNode = Node(num = 456, user = User.Builder().also { wb ->wb.id = "!456"}.build())
         nodeRepository.setNodes(listOf(localNode, remoteNode))
         nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100))
 
@@ -2077,8 +2077,8 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `ensureLoadingForRemote is no-op when already loading`() = runTest {
-        val localNode = Node(num = 100, user = User(id = "!100"))
-        val remoteNode = Node(num = 456, user = User(id = "!456"))
+        val localNode = Node(num = 100, user = User.Builder().also { wb ->wb.id = "!100"}.build())
+        val remoteNode = Node(num = 456, user = User.Builder().also { wb ->wb.id = "!456"}.build())
         nodeRepository.setNodes(listOf(localNode, remoteNode))
         nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100))
 
@@ -2095,7 +2095,7 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `local destination exposes its PlatformIO target`() = runTest {
-        val localNode = Node(num = 100, user = User(id = "!100"))
+        val localNode = Node(num = 100, user = User.Builder().also { wb ->wb.id = "!100"}.build())
         nodeRepository.setNodes(listOf(localNode))
         nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100, pioEnv = "tlora-v2-1-1_8"))
 
@@ -2108,7 +2108,7 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `local destination updates its PlatformIO target when identity is unchanged`() = runTest {
-        val localNode = Node(num = 100, user = User(id = "!100"))
+        val localNode = Node(num = 100, user = User.Builder().also { wb ->wb.id = "!100"}.build())
         nodeRepository.setNodes(listOf(localNode))
         nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100, pioEnv = "tlora-t3s3-v1"))
         val localVm = createViewModel(destNum = 100)
@@ -2140,8 +2140,8 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `remote destination never inherits gateway PlatformIO target`() = runTest {
-        val localNode = Node(num = 100, user = User(id = "!100"))
-        val remoteNode = Node(num = 456, user = User(id = "!456"))
+        val localNode = Node(num = 100, user = User.Builder().also { wb ->wb.id = "!100"}.build())
+        val remoteNode = Node(num = 456, user = User.Builder().also { wb ->wb.id = "!456"}.build())
         nodeRepository.setNodes(listOf(localNode, remoteNode))
         nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100, pioEnv = "tlora-v2-1-1_8"))
 
@@ -2154,7 +2154,7 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `loraRegionPresetMapFlow populates state`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         nodeRepository.setNodes(listOf(node))
         val mapFlow = MutableStateFlow<LoRaRegionPresetMap?>(null)
         every { radioConfigRepository.loraRegionPresetMapFlow } returns mapFlow
@@ -2163,7 +2163,7 @@ class RadioConfigViewModelTest {
 
         assertEquals(null, viewModel.radioConfigState.value.loraRegionPresetMap)
 
-        val map = LoRaRegionPresetMap(groups = listOf(LoRaPresetGroup(licensed_only = true)))
+        val map = LoRaRegionPresetMap.Builder().also { wb ->wb.groups = listOf(LoRaPresetGroup.Builder().also { wb ->wb.licensed_only = true}.build())}.build()
         mapFlow.value = map
         runCurrent()
 
@@ -2172,7 +2172,11 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `localIsLicensed tracks the destination node's is_licensed flag`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123", is_licensed = true))
+        val node =
+            Node(
+                num = 123,
+                user = User.Builder().also { wb -> wb.id = "!123"; wb.is_licensed = true }.build(),
+            )
         nodeRepository.setNodes(listOf(node))
         viewModel = createViewModel()
         runCurrent()
@@ -2185,26 +2189,26 @@ class RadioConfigViewModelTest {
         // A firmware region swap (e.g. EU sibling) is applied live; the form must reflect the device's actual
         // value, which is re-read on next LoRa-screen entry — NOT applied optimistically here, and the save ACK
         // must not trigger an in-place re-read (that would suppress the normal save-success UX).
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         nodeRepository.setNodes(listOf(node))
         nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
         val packetFlow = MutableSharedFlow<MeshPacket>()
         every { serviceRepository.meshPacketFlow } returns packetFlow
         every { radioConfigRepository.localConfigFlow } returns
-            MutableStateFlow(LocalConfig(lora = Config.LoRaConfig(region = Config.LoRaConfig.RegionCode.EU_868)))
+            MutableStateFlow(LocalConfig.Builder().also { wb ->wb.lora = Config.LoRaConfig.Builder().also { wb ->wb.region = Config.LoRaConfig.RegionCode.EU_868}.build()}.build())
         viewModel = createViewModel(destNum = 123)
         runCurrent()
 
         everySuspend { radioConfigUseCase.setConfig(any(), any(), any()) } returns 42
 
-        viewModel.setConfig(Config(lora = Config.LoRaConfig(region = Config.LoRaConfig.RegionCode.US)))
+        viewModel.setConfig(Config.Builder().also { wb ->wb.lora = Config.LoRaConfig.Builder().also { wb ->wb.region = Config.LoRaConfig.RegionCode.US}.build()}.build())
         runCurrent()
 
         // The optimistic state still reflects the device's value, not the requested region.
         assertEquals(Config.LoRaConfig.RegionCode.EU_868, viewModel.radioConfigState.value.radioConfig.lora?.region)
 
         every { processRadioResponseUseCase(any(), 123, any()) } returns RadioResponseResult.Success
-        packetFlow.emit(MeshPacket(decoded = Data(request_id = 42)))
+        packetFlow.emit(MeshPacket.Builder().also { wb ->wb.decoded = Data.Builder().also { wb ->wb.request_id = 42}.build()}.build())
         runCurrent()
 
         verifySuspend(exactly(0)) { radioConfigUseCase.getConfig(any(), any(), any()) }
@@ -2212,24 +2216,24 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `backupSecurityKeys refuses to persist empty keys`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         nodeRepository.setNodes(listOf(node))
         viewModel = createViewModel()
 
         // Empty SecurityConfig is the fallback before the device's config response arrives — backing it up and later
         // restoring it would wipe the device's real keys with blanks.
-        viewModel.backupSecurityKeys(Config.SecurityConfig())
+        viewModel.backupSecurityKeys(Config.SecurityConfig.Builder().build())
 
         verify(exactly(0)) { securityKeyBackupStore.save(any(), any(), any(), any()) }
     }
 
     @Test
     fun `backupSecurityKeys persists real keys`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         nodeRepository.setNodes(listOf(node))
         viewModel = createViewModel()
 
-        val config = Config.SecurityConfig(public_key = "pub".encodeUtf8(), private_key = "priv".encodeUtf8())
+        val config = Config.SecurityConfig.Builder().also { wb ->wb.public_key = "pub".encodeUtf8(); wb.private_key = "priv".encodeUtf8()}.build()
         viewModel.backupSecurityKeys(config)
 
         // Pin the exact base64 so a public/private swap or encoding change is caught.
@@ -2238,7 +2242,7 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `restoreSecurityKeys is a no-op when no backup exists`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         nodeRepository.setNodes(listOf(node))
         viewModel = createViewModel()
         every { securityKeyBackupStore.get(123) } returns null
@@ -2250,26 +2254,26 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `restoreSecurityKeys pushes decoded config to the device on success`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         nodeRepository.setNodes(listOf(node))
         viewModel = createViewModel()
 
         val stored = StoredSecurityKeys(publicKeyBase64 = "cHVi", privateKeyBase64 = "cHJpdg==", timestamp = 1L)
-        val decoded = Config.SecurityConfig(public_key = "pub".encodeUtf8(), private_key = "priv".encodeUtf8())
+        val decoded = Config.SecurityConfig.Builder().also { wb ->wb.public_key = "pub".encodeUtf8(); wb.private_key = "priv".encodeUtf8()}.build()
         every { securityKeyBackupStore.get(123) } returns stored
         every { importSecurityConfigUseCase(stored) } returns Result.success(decoded)
         everySuspend { radioConfigUseCase.setConfig(any(), any(), any()) } returns 42
 
         viewModel.restoreSecurityKeys()
 
-        verifySuspend { radioConfigUseCase.setConfig(123, Config(security = decoded), any()) }
+        verifySuspend { radioConfigUseCase.setConfig(123, Config.Builder().also { wb ->wb.security = decoded}.build(), any()) }
     }
 
     private fun fourChannelFixture() = listOf(
-        ChannelSettings(name = "A"),
-        ChannelSettings(name = "B"),
-        ChannelSettings(name = "C"),
-        ChannelSettings(name = "D"),
+        ChannelSettings.Builder().also { wb ->wb.name = "A"}.build(),
+        ChannelSettings.Builder().also { wb ->wb.name = "B"}.build(),
+        ChannelSettings.Builder().also { wb ->wb.name = "C"}.build(),
+        ChannelSettings.Builder().also { wb ->wb.name = "D"}.build(),
     )
 
     private fun myNodeInfo(myNodeNum: Int, pioEnv: String? = null) = MyNodeInfo(
@@ -2292,7 +2296,7 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `local reboot-applying config save opens the restart window`() = runTest {
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         nodeRepository.setNodes(listOf(node))
         nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
         viewModel = createViewModel()
@@ -2300,7 +2304,7 @@ class RadioConfigViewModelTest {
         everySuspend { radioConfigUseCase.setConfig(any(), any(), any()) } returns 42
 
         nodeRestartTracker.onConnected()
-        viewModel.setConfig(Config(network = Config.NetworkConfig(wifi_enabled = true)))
+        viewModel.setConfig(Config.Builder().also { wb ->wb.network = Config.NetworkConfig.Builder().also { wb ->wb.wifi_enabled = true}.build()}.build())
         runCurrent()
 
         assertTrue(nodeRestartTracker.restartExpected.value)
@@ -2310,7 +2314,7 @@ class RadioConfigViewModelTest {
     fun `reboot-applying save resolves to restarting-success when the node drops`() = runTest {
         // The reboot the save triggers eats the routing ACK; the transport-drop during the restart window is the
         // real confirmation, so the save dialog must show success ("restarting") rather than a 30s timeout error.
-        val node = Node(num = 123, user = User(id = "!123"))
+        val node = Node(num = 123, user = User.Builder().also { wb ->wb.id = "!123"}.build())
         nodeRepository.setNodes(listOf(node))
         nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 123))
         val connFlow = MutableStateFlow<ConnectionState>(ConnectionState.Connected)
@@ -2324,7 +2328,7 @@ class RadioConfigViewModelTest {
             }
 
         nodeRestartTracker.onConnected()
-        viewModel.setConfig(Config(network = Config.NetworkConfig(wifi_enabled = true)))
+        viewModel.setConfig(Config.Builder().also { wb ->wb.network = Config.NetworkConfig.Builder().also { wb ->wb.wifi_enabled = true}.build()}.build())
         runCurrent()
         assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Loading)
 
@@ -2337,8 +2341,8 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `remote config save does not open the restart window`() = runTest {
-        val localNode = Node(num = 100, user = User(id = "!100"))
-        val remoteNode = Node(num = 456, user = User(id = "!456"))
+        val localNode = Node(num = 100, user = User.Builder().also { wb ->wb.id = "!100"}.build())
+        val remoteNode = Node(num = 456, user = User.Builder().also { wb ->wb.id = "!456"}.build())
         nodeRepository.setNodes(listOf(localNode, remoteNode))
         nodeRepository.setMyNodeInfo(myNodeInfo(myNodeNum = 100))
         viewModel = createViewModel(destNum = 456)
@@ -2346,7 +2350,7 @@ class RadioConfigViewModelTest {
         everySuspend { radioConfigUseCase.setConfig(any(), any(), any()) } returns 42
 
         nodeRestartTracker.onConnected()
-        viewModel.setConfig(Config(network = Config.NetworkConfig(wifi_enabled = true)))
+        viewModel.setConfig(Config.Builder().also { wb ->wb.network = Config.NetworkConfig.Builder().also { wb ->wb.wifi_enabled = true}.build()}.build())
         runCurrent()
 
         assertFalse(nodeRestartTracker.restartExpected.value)
@@ -2358,12 +2362,11 @@ class RadioConfigViewModelTest {
 private fun List<Any?>.onRequestIdArg(): (Int) -> Unit = last() as (Int) -> Unit
 
 /** A real ROUTING_APP ack for [requestId] as the radio would deliver it, sent by node [from]. */
-private fun routingAck(requestId: Int, from: Int) = MeshPacket(
-    from = from,
-    decoded =
-    Data(
-        portnum = PortNum.ROUTING_APP,
-        request_id = requestId,
-        payload = ByteString.of(*Routing(error_reason = Routing.Error.NONE).encode()),
-    ),
-)
+private fun routingAck(requestId: Int, from: Int) = MeshPacket.Builder().also { wb ->
+wb.from = from
+wb.decoded = Data.Builder().also { wb ->
+    wb.portnum = PortNum.ROUTING_APP
+    wb.request_id = requestId
+    wb.payload = ByteString.of(*Routing.Builder().also { wb ->wb.error_reason = Routing.Error.NONE}.build().encode())
+    }.build()
+}.build()

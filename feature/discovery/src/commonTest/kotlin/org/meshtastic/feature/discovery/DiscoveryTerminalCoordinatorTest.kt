@@ -82,7 +82,7 @@ class DiscoveryTerminalCoordinatorTest {
             DiscoveryHomeRestorePlan(
                 sessionId = sessionId,
                 deviceAddress = device,
-                loraConfig = Config.LoRaConfig(use_preset = true),
+                loraConfig = Config.LoRaConfig.Builder().also { wb ->wb.use_preset = true}.build(),
                 primaryChannel = null,
                 restorePrimaryChannel = false,
                 finalStatus = DiscoverySessionStatus.STOPPED,

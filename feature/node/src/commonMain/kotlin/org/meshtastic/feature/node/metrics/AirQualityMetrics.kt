@@ -431,28 +431,41 @@ private fun AirQualityMetricsCard(
 fun PreviewAirQualityCards() {
     val readings =
         listOf(
-            Telemetry(
-                time = 1700000000,
-                air_quality_metrics =
-                AirQualityMetricsProto(
-                    pm10_standard = 4,
-                    pm25_standard = 9,
-                    pm100_standard = 12,
-                    co2 = 620,
-                    co2_temperature = 21.5f,
-                    co2_humidity = 58f,
-                ),
-            ) to "2023-11-14 20:13",
-            Telemetry(
-                time = 1700003600,
-                air_quality_metrics =
-                AirQualityMetricsProto(pm10_standard = 6, pm25_standard = 14, pm100_standard = 19, co2 = 1450),
-            ) to "2023-11-14 21:13",
-            Telemetry(
-                time = 1700007200,
-                air_quality_metrics =
-                AirQualityMetricsProto(pm10_standard = 11, pm25_standard = 25, pm100_standard = 33, co2 = 2300),
-            ) to "2023-11-14 22:13",
+            Telemetry.Builder().also { wb ->
+            wb.time = 1700000000
+            wb.air_quality_metrics = AirQualityMetricsProto.Builder()
+                                .also { wb ->
+                                    wb.pm10_standard = 4
+                                    wb.pm25_standard = 9
+                                    wb.pm100_standard = 12
+                                    wb.co2 = 620
+                                    wb.co2_temperature = 21.5f
+                                    wb.co2_humidity = 58f
+                                }
+                                .build()
+            }.build() to "2023-11-14 20:13",
+            Telemetry.Builder().also { wb ->
+            wb.time = 1700003600
+            wb.air_quality_metrics = AirQualityMetricsProto.Builder()
+                                .also { wb ->
+                                    wb.pm10_standard = 6
+                                    wb.pm25_standard = 14
+                                    wb.pm100_standard = 19
+                                    wb.co2 = 1450
+                                }
+                                .build()
+            }.build() to "2023-11-14 21:13",
+            Telemetry.Builder().also { wb ->
+            wb.time = 1700007200
+            wb.air_quality_metrics = AirQualityMetricsProto.Builder()
+                                .also { wb ->
+                                    wb.pm10_standard = 11
+                                    wb.pm25_standard = 25
+                                    wb.pm100_standard = 33
+                                    wb.co2 = 2300
+                                }
+                                .build()
+            }.build() to "2023-11-14 22:13",
         )
     // Newest first, matching the list view; AQI is derived rather than read from the proto, so the first row has too
     // little history to show one.

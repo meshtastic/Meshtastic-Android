@@ -190,7 +190,16 @@ class MQTTRepositoryImplTest {
     @Test
     fun `empty address substitutes the public broker's well-known credentials`() {
         // Mirrors firmware PubSubConfig: lockdown-redacted (zeroed) configs must not connect anonymously.
-        val creds = effectiveCredentials(ModuleConfig.MQTTConfig(address = "", username = "", password = ""))
+        val creds =
+            effectiveCredentials(
+                ModuleConfig.MQTTConfig.Builder()
+                    .also { wb ->
+                        wb.address = ""
+                        wb.username = ""
+                        wb.password = ""
+                    }
+                    .build(),
+            )
         assertEquals("meshdev" to "large4cats", creds)
     }
 
@@ -201,19 +210,19 @@ class MQTTRepositoryImplTest {
 
     @Test
     fun `empty address ignores stored credentials entirely - firmware parity`() {
-        val creds = effectiveCredentials(ModuleConfig.MQTTConfig(address = "", username = "custom", password = "pw"))
+        val creds = effectiveCredentials(ModuleConfig.MQTTConfig.Builder().also { wb ->wb.address = ""; wb.username = "custom"; wb.password = "pw"}.build())
         assertEquals("meshdev" to "large4cats", creds)
     }
 
     @Test
     fun `explicit address uses the stored credentials as-is`() {
-        val config = ModuleConfig.MQTTConfig(address = "broker.example.com", username = "user", password = "pass")
+        val config = ModuleConfig.MQTTConfig.Builder().also { wb ->wb.address = "broker.example.com"; wb.username = "user"; wb.password = "pass"}.build()
         assertEquals("user" to "pass", effectiveCredentials(config))
     }
 
     @Test
     fun `explicit default server address uses the stored credentials as-is - firmware parity`() {
-        val config = ModuleConfig.MQTTConfig(address = "mqtt.meshtastic.org", username = "user", password = "pass")
+        val config = ModuleConfig.MQTTConfig.Builder().also { wb ->wb.address = "mqtt.meshtastic.org"; wb.username = "user"; wb.password = "pass"}.build()
         assertEquals("user" to "pass", effectiveCredentials(config))
     }
 
@@ -253,29 +262,28 @@ class MQTTRepositoryImplTest {
         val radioConfigRepository =
             FakeRadioConfigRepository().apply {
                 setChannelSet(
-                    ChannelSet(
-                        settings =
-                        listOf(
-                            ChannelSettings(
-                                name = "alpha",
-                                downlink_enabled = true,
-                                psk = byteArrayOf(1).toByteString(),
-                            ),
-                            ChannelSettings(
-                                name = "beta",
-                                downlink_enabled = false,
-                                psk = byteArrayOf(2).toByteString(),
-                            ),
-                            ChannelSettings(
-                                name = "gamma",
-                                downlink_enabled = true,
-                                psk = byteArrayOf(3).toByteString(),
-                            ),
-                        ),
-                    ),
+                    ChannelSet.Builder().also { wb ->
+                    wb.settings = listOf(
+                                                ChannelSettings.Builder().also { wb ->
+                                                wb.name = "alpha"
+                                                wb.downlink_enabled = true
+                                                wb.psk = byteArrayOf(1).toByteString()
+                                                }.build(),
+                                                ChannelSettings.Builder().also { wb ->
+                                                wb.name = "beta"
+                                                wb.downlink_enabled = false
+                                                wb.psk = byteArrayOf(2).toByteString()
+                                                }.build(),
+                                                ChannelSettings.Builder().also { wb ->
+                                                wb.name = "gamma"
+                                                wb.downlink_enabled = true
+                                                wb.psk = byteArrayOf(3).toByteString()
+                                                }.build(),
+                                            )
+                    }.build(),
                 )
                 setLocalModuleConfigDirect(
-                    LocalModuleConfig(mqtt = ModuleConfig.MQTTConfig(root = "custom", json_enabled = true)),
+                    LocalModuleConfig.Builder().also { wb ->wb.mqtt = ModuleConfig.MQTTConfig.Builder().also { wb ->wb.root = "custom"; wb.json_enabled = true}.build()}.build(),
                 )
             }
         val harness = createHarness(radioConfigRepository = radioConfigRepository)
@@ -314,7 +322,7 @@ class MQTTRepositoryImplTest {
                 radioConfigRepository =
                 FakeRadioConfigRepository().apply {
                     setLocalModuleConfigDirect(
-                        LocalModuleConfig(mqtt = ModuleConfig.MQTTConfig(json_enabled = true)),
+                        LocalModuleConfig.Builder().also { wb ->wb.mqtt = ModuleConfig.MQTTConfig.Builder().also { wb ->wb.json_enabled = true}.build()}.build(),
                     )
                 },
             )
@@ -658,50 +666,52 @@ class MQTTRepositoryImplTest {
     private fun envelopeBytes(
         channelId: String = "LongFast",
         gatewayId: String = "!aabbccdd",
-        packet: MeshPacket? = MeshPacket(),
+        packet: MeshPacket? = MeshPacket.Builder().build(),
     ): ByteArray =
-        ServiceEnvelope.ADAPTER.encode(ServiceEnvelope(packet = packet, channel_id = channelId, gateway_id = gatewayId))
+        ServiceEnvelope.ADAPTER.encode(ServiceEnvelope.Builder().also { wb ->wb.packet = packet; wb.channel_id = channelId; wb.gateway_id = gatewayId}.build())
 
     @Test
     fun `payload-less packet is undeliverable`() {
         // The observed LongFast flood: a packet with neither decoded nor encrypted set.
-        val bytes = envelopeBytes(packet = MeshPacket(from = 1, to = 2))
+        val bytes = envelopeBytes(packet = MeshPacket.Builder().also { wb ->wb.from = 1; wb.to = 2}.build())
         assertTrue(isUndeliverableDownlink(bytes, myId = "!12345678"))
     }
 
     @Test
     fun `decoded packet is deliverable`() {
-        val bytes = envelopeBytes(packet = MeshPacket(decoded = Data()))
+        val bytes = envelopeBytes(packet = MeshPacket.Builder().also { wb ->wb.decoded = Data.Builder().build()}.build())
         assertFalse(isUndeliverableDownlink(bytes, myId = "!12345678"))
     }
 
     @Test
     fun `encrypted packet is deliverable`() {
-        val bytes = envelopeBytes(packet = MeshPacket(encrypted = byteArrayOf(1, 2, 3).toByteString()))
+        val bytes = envelopeBytes(packet = MeshPacket.Builder().also { wb ->wb.encrypted = byteArrayOf(1, 2, 3).toByteString()}.build())
         assertFalse(isUndeliverableDownlink(bytes, myId = "!12345678"))
     }
 
     @Test
     fun `PKI payload-less packet is deliverable - guard`() {
-        val bytes = envelopeBytes(channelId = "PKI", packet = MeshPacket(from = 1))
+        val bytes = envelopeBytes(channelId = "PKI", packet = MeshPacket.Builder().also { wb ->wb.from = 1}.build())
         assertFalse(isUndeliverableDownlink(bytes, myId = "!12345678"))
     }
 
     @Test
     fun `own echo payload-less packet is deliverable - guard`() {
-        val bytes = envelopeBytes(gatewayId = "!12345678", packet = MeshPacket(from = 1))
+        val bytes = envelopeBytes(gatewayId = "!12345678", packet = MeshPacket.Builder().also { wb ->wb.from = 1}.build())
         assertFalse(isUndeliverableDownlink(bytes, myId = "!12345678"))
     }
 
     @Test
     fun `a different gateway's payload-less packet is undeliverable`() {
-        val bytes = envelopeBytes(gatewayId = "!deadbeef", packet = MeshPacket(from = 1))
+        val bytes =
+            envelopeBytes(gatewayId = "!deadbeef", packet = MeshPacket.Builder().also { wb -> wb.from = 1 }.build())
         assertTrue(isUndeliverableDownlink(bytes, myId = "!12345678"))
     }
 
     @Test
     fun `null myId does not suppress dropping`() {
-        val bytes = envelopeBytes(gatewayId = "!deadbeef", packet = MeshPacket(from = 1))
+        val bytes =
+            envelopeBytes(gatewayId = "!deadbeef", packet = MeshPacket.Builder().also { wb -> wb.from = 1 }.build())
         assertTrue(isUndeliverableDownlink(bytes, myId = null))
     }
 
@@ -721,8 +731,14 @@ class MQTTRepositoryImplTest {
     @Test
     fun `payload-less downlink stubs are dropped before forwarding`() = runTest {
         val harness = createHarness()
-        val stub = envelopeBytes(packet = MeshPacket(from = 1, to = 2)) // no payload → dropped
-        val real = envelopeBytes(packet = MeshPacket(decoded = Data())) // has payload → forwarded
+        val stub =
+            envelopeBytes(
+                packet = MeshPacket.Builder().also { wb -> wb.from = 1; wb.to = 2 }.build(),
+            ) // no payload → dropped
+        val real =
+            envelopeBytes(
+                packet = MeshPacket.Builder().also { wb -> wb.decoded = Data.Builder().build() }.build(),
+            ) // has payload → forwarded
 
         val nextMessage = backgroundScope.async { harness.repository.proxyMessageFlow.first() }
         runCurrent()
@@ -762,16 +778,20 @@ class MQTTRepositoryImplTest {
 
     private fun defaultRadioConfigRepository(): FakeRadioConfigRepository = FakeRadioConfigRepository().apply {
         setChannelSet(
-            ChannelSet(
-                settings =
-                listOf(
-                    ChannelSettings(
-                        name = "alpha",
-                        downlink_enabled = true,
-                        psk = byteArrayOf(1).toByteString(),
-                    ),
-                ),
-            ),
+            ChannelSet.Builder()
+                .also { wb ->
+                    wb.settings =
+                        listOf(
+                            ChannelSettings.Builder()
+                                .also { wb ->
+                                    wb.name = "alpha"
+                                    wb.downlink_enabled = true
+                                    wb.psk = byteArrayOf(1).toByteString()
+                                }
+                                .build(),
+                        )
+                }
+                .build(),
         )
     }
 

@@ -139,7 +139,7 @@ class ImportFabUiTest {
 
     @Test
     fun importFab_showsSharedContactDialog_whenProvided() = runComposeUiTest {
-        val contact = SharedContact(user = User(long_name = "Suzume Goddess"), node_num = 1)
+        val contact = SharedContact.Builder().also { wb ->wb.user = User.Builder().also { wb ->wb.long_name = "Suzume Goddess"}.build(); wb.node_num = 1}.build()
         setContent {
             MeshtasticImportFAB(
                 onImport = {},

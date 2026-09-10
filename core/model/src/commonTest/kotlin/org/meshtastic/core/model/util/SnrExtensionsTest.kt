@@ -34,13 +34,13 @@ import kotlin.test.assertNotNull
  */
 class SnrExtensionsTest {
 
-    private fun loraPacket(snr: Float) = MeshPacket(
-        rx_time = 1_700_000_000,
-        rx_snr = snr,
-        hop_start = 3,
-        hop_limit = 3,
-        transport_mechanism = MeshPacket.TransportMechanism.TRANSPORT_LORA,
-    )
+    private fun loraPacket(snr: Float) = MeshPacket.Builder().also { wb ->
+    wb.rx_time = 1_700_000_000
+    wb.rx_snr = snr
+    wb.hop_start = 3
+    wb.hop_limit = 3
+    wb.transport_mechanism = MeshPacket.TransportMechanism.TRANSPORT_LORA
+    }.build()
 
     @Test
     fun `snrOrNull reports a negative reading`() {
@@ -68,6 +68,6 @@ class SnrExtensionsTest {
     fun `snrOrNull does not conflate a zero reading with an unknown one`() {
         // Regression guard for the rx_time seam's pattern being copied over verbatim.
         assertEquals(0f, loraPacket(0f).snrOrNull())
-        assertEquals(null, MeshPacket().rxTimeOrNull())
+        assertEquals(null, MeshPacket.Builder().build().rxTimeOrNull())
     }
 }

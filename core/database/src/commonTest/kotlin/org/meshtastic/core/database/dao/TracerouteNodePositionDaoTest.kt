@@ -66,7 +66,7 @@ class TracerouteNodePositionDaoTest {
     }
 
     private fun position(nodeNum: Int) =
-        TracerouteNodePositionEntity(logUuid = logUuid, requestId = 1, nodeNum = nodeNum, position = Position())
+        TracerouteNodePositionEntity(logUuid = logUuid, requestId = 1, nodeNum = nodeNum, position = Position.Builder().build())
 
     @Test
     fun testReplaceByLogUuidIsAtomic() = runTest {
@@ -134,7 +134,7 @@ class TracerouteNodePositionDaoTest {
                 logUuid = "nonexistent-log",
                 requestId = 1,
                 nodeNum = 99,
-                position = Position(),
+                position = Position.Builder().build(),
             )
         assertFailsWith<IllegalArgumentException> {
             tracerouteDao.replaceByLogUuid(logUuid, listOf(position(30), badEntity))

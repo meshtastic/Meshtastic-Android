@@ -95,7 +95,7 @@ fun SharedContactDialogContent(
         text = {
             Column {
                 // Node identity badge: the same node identity chip used across the app (Design Standards §1).
-                val chipNode = node ?: Node(num = sharedContact.node_num, user = sharedContact.user ?: User())
+                val chipNode = node ?: Node(num = sharedContact.node_num, user = sharedContact.user ?: User.Builder().build())
                 Box(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp), contentAlignment = Alignment.Center) {
                     NodeChip(node = chipNode)
                 }
@@ -115,9 +115,9 @@ fun SharedContactDialogContent(
                         )
                     }
                     HorizontalDivider()
-                    Text(text = compareUsers(node.user, sharedContact.user ?: User()))
+                    Text(text = compareUsers(node.user, sharedContact.user ?: User.Builder().build()))
                 } else {
-                    Text(text = userFieldsToString(sharedContact.user ?: User()))
+                    Text(text = userFieldsToString(sharedContact.user ?: User.Builder().build()))
                 }
             }
         },
@@ -141,16 +141,15 @@ fun PreviewSharedContactImportAlert() {
         Box(modifier = Modifier.fillMaxSize()) {
             SharedContactDialogContent(
                 sharedContact =
-                SharedContact(
-                    node_num = 13444,
-                    user =
-                    User(
-                        id = "!00003484",
-                        long_name = "John Doe",
-                        short_name = "JD",
-                        public_key = PREVIEW_PUBLIC_KEY,
-                    ),
-                ),
+                SharedContact.Builder().also { wb ->
+                wb.node_num = 13444
+                wb.user = User.Builder().also { wb ->
+                                    wb.id = "!00003484"
+                                    wb.long_name = "John Doe"
+                                    wb.short_name = "JD"
+                                    wb.public_key = PREVIEW_PUBLIC_KEY
+                                    }.build()
+                }.build(),
                 node = null,
                 onDismiss = {},
                 onImport = {},

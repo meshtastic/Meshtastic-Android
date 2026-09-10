@@ -35,21 +35,23 @@ class PowerMetricsZeroVoltageTest {
 
     @Test
     fun zeroVoltageChannelIsShown() = runComposeUiTest {
-        setPowerMetrics(PowerMetricsProto(ch1_voltage = 0f, ch1_current = 0f))
+        setPowerMetrics(
+            PowerMetricsProto.Builder().also { wb -> wb.ch1_voltage = 0f; wb.ch1_current = 0f }.build(),
+        )
         onNodeWithText("0.00V").assertIsDisplayed()
         onNodeWithText("0.0mA").assertIsDisplayed()
     }
 
     @Test
     fun absentChannelIsHidden() = runComposeUiTest {
-        setPowerMetrics(PowerMetricsProto())
+        setPowerMetrics(PowerMetricsProto.Builder().build())
         onNodeWithText("0.00V").assertDoesNotExist()
         onNodeWithText("0.0mA").assertDoesNotExist()
     }
 
     @Test
     fun reportedVoltageWithoutCurrentShowsVoltageOnly() = runComposeUiTest {
-        setPowerMetrics(PowerMetricsProto(ch1_voltage = 3.7f))
+        setPowerMetrics(PowerMetricsProto.Builder().also { wb -> wb.ch1_voltage = 3.7f }.build())
         onNodeWithText("3.70V").assertIsDisplayed()
         onNodeWithText("0.0mA").assertDoesNotExist()
     }

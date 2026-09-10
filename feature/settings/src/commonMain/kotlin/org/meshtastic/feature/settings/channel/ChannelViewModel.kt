@@ -43,9 +43,9 @@ class ChannelViewModel(
 
     val connectionState = radioController.connectionState
 
-    val localConfig = radioConfigRepository.localConfigFlow.stateInWhileSubscribed(initialValue = LocalConfig())
+    val localConfig = radioConfigRepository.localConfigFlow.stateInWhileSubscribed(initialValue = LocalConfig.Builder().build())
 
-    val channels = radioConfigRepository.channelSetFlow.stateInWhileSubscribed(initialValue = ChannelSet())
+    val channels = radioConfigRepository.channelSetFlow.stateInWhileSubscribed(initialValue = ChannelSet.Builder().build())
 
     // managed mode disables all access to configuration
     val isManaged: Boolean
@@ -54,13 +54,13 @@ class ChannelViewModel(
     var txEnabled: Boolean
         get() = localConfig.value.lora?.tx_enabled == true
         set(value) {
-            updateLoraConfig { it.copy(tx_enabled = value) }
+            updateLoraConfig { it.newBuilder().also { wb -> wb.tx_enabled = value }.build() }
         }
 
     var region: Config.LoRaConfig.RegionCode
         get() = localConfig.value.lora?.region ?: Config.LoRaConfig.RegionCode.UNSET
         set(value) {
-            updateLoraConfig { it.copy(region = value) }
+            updateLoraConfig { it.newBuilder().also { wb -> wb.region = value }.build() }
         }
 
     private val _requestChannelSet = MutableStateFlow<ChannelSet?>(null)
@@ -100,7 +100,7 @@ class ChannelViewModel(
     }
 
     private inline fun updateLoraConfig(crossinline body: (Config.LoRaConfig) -> Config.LoRaConfig) {
-        val data = body(localConfig.value.lora ?: Config.LoRaConfig())
-        setConfig(Config(lora = data))
+        val data = body(localConfig.value.lora ?: Config.LoRaConfig.Builder().build())
+        setConfig(Config.Builder().also { wb ->wb.lora = data}.build())
     }
 }

@@ -536,11 +536,21 @@ class DiscoveryScanEngine(
         // Start from the captured original config so unrelated fields (hop_limit, tx_power, tx_enabled, …) are carried
         // over instead of zeroed by a fresh LoRaConfig — a from-scratch config can e.g. break the dwell-boundary
         // NeighborInfo request. Only the preset (and, for custom channels, region + channel_num) is overridden.
-        val base = originalLoRaConfig ?: Config.LoRaConfig()
+        val base = originalLoRaConfig ?: Config.LoRaConfig.Builder().build()
         if (target.channel == null) {
             // Public-preset target — dwell on the preset using the radio's existing primary channel (unchanged).
             radioController.setLocalConfig(
-                Config(lora = base.copy(use_preset = true, modem_preset = target.preset.modemPreset)),
+                Config.Builder()
+                    .also { wb ->
+                        wb.lora =
+                            base.newBuilder()
+                                .also { wb ->
+                                    wb.use_preset = true
+                                    wb.modem_preset = target.preset.modemPreset
+                                }
+                                .build()
+                    }
+                    .build(),
             )
             Logger.i { "DiscoveryScanEngine: shifted to ${target.label} (use_preset=true)" }
         } else {
@@ -548,19 +558,23 @@ class DiscoveryScanEngine(
             // frequency from the new name, then tune the primary channel to the offered name+PSK so nodes on that mesh
             // are heard. The original primary channel is restored after the scan.
             radioController.setLocalConfig(
-                Config(
-                    lora =
-                    base.copy(
-                        use_preset = true,
-                        modem_preset = target.preset.modemPreset,
-                        region = target.region ?: base.region,
-                        channel_num = 0,
-                    ),
-                ),
+                Config.Builder()
+                    .also { wb ->
+                        wb.lora =
+                            base.newBuilder()
+                                .also { wb ->
+                                    wb.use_preset = true
+                                    wb.modem_preset = target.preset.modemPreset
+                                    wb.region = target.region ?: base.region
+                                    wb.channel_num = 0
+                                }
+                                .build()
+                    }
+                    .build(),
             )
             currentCoroutineContext().ensureActive()
             mutex.withLock { tunedPrimaryChannel = true }
-            radioController.setLocalChannel(Channel(index = 0, role = Channel.Role.PRIMARY, settings = target.channel))
+            radioController.setLocalChannel(Channel.Builder().also { wb ->wb.index = 0; wb.role = Channel.Role.PRIMARY; wb.settings = target.channel}.build())
             Logger.i { "DiscoveryScanEngine: shifted to ${target.label} (custom channel)" }
         }
         // The firmware often restarts the radio or reboots after a LoRa config change.

@@ -89,7 +89,7 @@ fun ChannelConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
             title = stringResource(Res.string.channels),
             onBack = onBack,
             settingsList = state.channelList,
-            loraConfig = state.radioConfig.lora ?: Config.LoRaConfig(),
+            loraConfig = state.radioConfig.lora ?: Config.LoRaConfig.Builder().build(),
             maxChannels = viewModel.maxChannels,
             firmwareVersion = state.metadata?.firmware_version ?: "0.0.0",
             enabled = state.connected,
@@ -168,7 +168,7 @@ private fun ChannelConfigScreen(
     if (showEditChannelDialog != null) {
         val index = showEditChannelDialog ?: return
         EditChannelDialog(
-            channelSettings = settingsListInput.getOrNull(index) ?: ChannelSettings(),
+            channelSettings = settingsListInput.getOrNull(index) ?: ChannelSettings.Builder().build(),
             modemPresetName = modemPresetName,
             initialPskEditState = pskEditStatesInput.getOrElse(index) { ChannelPskEditState() },
             onAddClick = { settings, pskEditState ->

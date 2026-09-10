@@ -88,13 +88,13 @@ class MigrationTest {
         insertPacket(channel = 0, text = "Message Ch0")
 
         // Old settings: Channel 0 has PSK_A
-        val oldSettings = listOf(ChannelSettings(psk = pskBytes, name = "LongFast"))
+        val oldSettings = listOf(ChannelSettings.Builder().also { wb ->wb.psk = pskBytes; wb.name = "LongFast"}.build())
 
         // New settings: Channel 0 has PSK_A, Channel 1 has PSK_A
         val newSettings =
             listOf(
-                ChannelSettings(psk = pskBytes, name = "LongFast"),
-                ChannelSettings(psk = pskBytes, name = "NewChan"),
+                ChannelSettings.Builder().also { wb ->wb.psk = pskBytes; wb.name = "LongFast"}.build(),
+                ChannelSettings.Builder().also { wb ->wb.psk = pskBytes; wb.name = "NewChan"}.build(),
             )
 
         // Perform migration
@@ -113,9 +113,9 @@ class MigrationTest {
         insertPacket(channel = 0, text = "Msg A")
         insertPacket(channel = 1, text = "Msg B")
 
-        val oldSettings = listOf(ChannelSettings(psk = pskA, name = "A"), ChannelSettings(psk = pskB, name = "B"))
+        val oldSettings = listOf(ChannelSettings.Builder().also { wb ->wb.psk = pskA; wb.name = "A"}.build(), ChannelSettings.Builder().also { wb ->wb.psk = pskB; wb.name = "B"}.build())
 
-        val newSettings = listOf(ChannelSettings(psk = pskB, name = "B"), ChannelSettings(psk = pskA, name = "A"))
+        val newSettings = listOf(ChannelSettings.Builder().also { wb ->wb.psk = pskB; wb.name = "B"}.build(), ChannelSettings.Builder().also { wb ->wb.psk = pskA; wb.name = "A"}.build())
 
         packetDao.migrateChannelsByPSK(oldSettings, newSettings)
 
@@ -131,10 +131,10 @@ class MigrationTest {
         insertPacket(channel = 0, text = "Msg A1")
         insertPacket(channel = 1, text = "Msg A2")
 
-        val oldSettings = listOf(ChannelSettings(psk = pskA, name = "A1"), ChannelSettings(psk = pskA, name = "A2"))
+        val oldSettings = listOf(ChannelSettings.Builder().also { wb ->wb.psk = pskA; wb.name = "A1"}.build(), ChannelSettings.Builder().also { wb ->wb.psk = pskA; wb.name = "A2"}.build())
 
         // Swap positions but keep names and PSKs
-        val newSettings = listOf(ChannelSettings(psk = pskA, name = "A2"), ChannelSettings(psk = pskA, name = "A1"))
+        val newSettings = listOf(ChannelSettings.Builder().also { wb ->wb.psk = pskA; wb.name = "A2"}.build(), ChannelSettings.Builder().also { wb ->wb.psk = pskA; wb.name = "A1"}.build())
 
         packetDao.migrateChannelsByPSK(oldSettings, newSettings)
 
@@ -149,10 +149,10 @@ class MigrationTest {
 
         insertPacket(channel = 0, text = "Msg A")
 
-        val oldSettings = listOf(ChannelSettings(psk = pskA, name = "A"))
+        val oldSettings = listOf(ChannelSettings.Builder().also { wb ->wb.psk = pskA; wb.name = "A"}.build())
 
         // New settings has two identical channels (same PSK, same Name)
-        val newSettings = listOf(ChannelSettings(psk = pskA, name = "A"), ChannelSettings(psk = pskA, name = "A"))
+        val newSettings = listOf(ChannelSettings.Builder().also { wb ->wb.psk = pskA; wb.name = "A"}.build(), ChannelSettings.Builder().also { wb ->wb.psk = pskA; wb.name = "A"}.build())
 
         packetDao.migrateChannelsByPSK(oldSettings, newSettings)
 

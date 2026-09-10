@@ -62,27 +62,27 @@ fun EnvironmentMetrics.adcVoltage(channel: Int): Float? = when (channel) {
 
 /** Returns a copy with 1-Wire [channel] set to [value]; an out-of-range [channel] is a no-op. */
 fun EnvironmentMetrics.withOneWireTemperature(channel: Int, value: Float?): EnvironmentMetrics = when (channel) {
-    0 -> copy(one_wire_temperature_ch0 = value)
-    1 -> copy(one_wire_temperature_ch1 = value)
-    2 -> copy(one_wire_temperature_ch2 = value)
-    3 -> copy(one_wire_temperature_ch3 = value)
-    4 -> copy(one_wire_temperature_ch4 = value)
-    5 -> copy(one_wire_temperature_ch5 = value)
-    6 -> copy(one_wire_temperature_ch6 = value)
-    7 -> copy(one_wire_temperature_ch7 = value)
+    0 -> this.newBuilder().also { wb ->wb.one_wire_temperature_ch0 = value}.build()
+    1 -> this.newBuilder().also { wb ->wb.one_wire_temperature_ch1 = value}.build()
+    2 -> this.newBuilder().also { wb ->wb.one_wire_temperature_ch2 = value}.build()
+    3 -> this.newBuilder().also { wb ->wb.one_wire_temperature_ch3 = value}.build()
+    4 -> this.newBuilder().also { wb ->wb.one_wire_temperature_ch4 = value}.build()
+    5 -> this.newBuilder().also { wb ->wb.one_wire_temperature_ch5 = value}.build()
+    6 -> this.newBuilder().also { wb ->wb.one_wire_temperature_ch6 = value}.build()
+    7 -> this.newBuilder().also { wb ->wb.one_wire_temperature_ch7 = value}.build()
     else -> this
 }
 
 /** Returns a copy with ADC [channel] set to [value]; an out-of-range [channel] is a no-op. */
 fun EnvironmentMetrics.withAdcVoltage(channel: Int, value: Float?): EnvironmentMetrics = when (channel) {
-    0 -> copy(adc_voltage_ch0 = value)
-    1 -> copy(adc_voltage_ch1 = value)
-    2 -> copy(adc_voltage_ch2 = value)
-    3 -> copy(adc_voltage_ch3 = value)
-    4 -> copy(adc_voltage_ch4 = value)
-    5 -> copy(adc_voltage_ch5 = value)
-    6 -> copy(adc_voltage_ch6 = value)
-    7 -> copy(adc_voltage_ch7 = value)
+    0 -> this.newBuilder().also { wb ->wb.adc_voltage_ch0 = value}.build()
+    1 -> this.newBuilder().also { wb ->wb.adc_voltage_ch1 = value}.build()
+    2 -> this.newBuilder().also { wb ->wb.adc_voltage_ch2 = value}.build()
+    3 -> this.newBuilder().also { wb ->wb.adc_voltage_ch3 = value}.build()
+    4 -> this.newBuilder().also { wb ->wb.adc_voltage_ch4 = value}.build()
+    5 -> this.newBuilder().also { wb ->wb.adc_voltage_ch5 = value}.build()
+    6 -> this.newBuilder().also { wb ->wb.adc_voltage_ch6 = value}.build()
+    7 -> this.newBuilder().also { wb ->wb.adc_voltage_ch7 = value}.build()
     else -> this
 }
 

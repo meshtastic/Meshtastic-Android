@@ -22,11 +22,17 @@ import org.meshtastic.proto.Position as ProtoPosition
 
 /** Converts the model position to the exact protobuf payload used by fixed-position admin commands. */
 fun Position.toFixedPositionProto(): ProtoPosition =
-    ProtoPosition(latitude_i = Position.degI(latitude), longitude_i = Position.degI(longitude), altitude = altitude)
+    ProtoPosition.Builder()
+        .also { wb ->
+            wb.latitude_i = Position.degI(latitude)
+            wb.longitude_i = Position.degI(longitude)
+            wb.altitude = altitude
+        }
+        .build()
 
 /** Builds the device admin command for setting or removing a fixed position. */
 fun Position.toFixedPositionAdminMessage(): AdminMessage = if (isFixedPositionRemoval()) {
-    AdminMessage(remove_fixed_position = true)
+    AdminMessage.Builder().also { wb ->wb.remove_fixed_position = true}.build()
 } else {
-    AdminMessage(set_fixed_position = toFixedPositionProto())
+    AdminMessage.Builder().also { wb ->wb.set_fixed_position = toFixedPositionProto()}.build()
 }
