@@ -235,16 +235,28 @@ class AndroidNotificationManagerTest {
         val advisory = protectedPositionAdvisory(replyId = 123, time = 1_000)
         val nearMisses =
             listOf(
-                advisory.copy(message = "Location sharing is disabled"),
-                advisory.copy(level = LogRecord.Level.INFO),
-                advisory.copy(reply_id = 0),
-                advisory.copy(reply_id = null),
-                advisory.copy(key_verification_number_inform = KeyVerificationNumberInform.Builder().build()),
-                advisory.copy(key_verification_number_request = KeyVerificationNumberRequest.Builder().build()),
-                advisory.copy(key_verification_final = KeyVerificationFinal.Builder().build()),
-                advisory.copy(duplicated_public_key = DuplicatedPublicKey.Builder().build()),
-                advisory.copy(low_entropy_key = LowEntropyKey.Builder().build()),
-                advisory.copy(message = "Rebooting to WiFi OTA"),
+                advisory.newBuilder().also { wb -> wb.message = "Location sharing is disabled" }.build(),
+                advisory.newBuilder().also { wb -> wb.level = LogRecord.Level.INFO }.build(),
+                advisory.newBuilder().also { wb -> wb.reply_id = 0 }.build(),
+                advisory.newBuilder().also { wb -> wb.reply_id = null }.build(),
+                advisory
+                    .newBuilder()
+                    .also { wb -> wb.key_verification_number_inform = KeyVerificationNumberInform.Builder().build() }
+                    .build(),
+                advisory
+                    .newBuilder()
+                    .also { wb -> wb.key_verification_number_request = KeyVerificationNumberRequest.Builder().build() }
+                    .build(),
+                advisory
+                    .newBuilder()
+                    .also { wb -> wb.key_verification_final = KeyVerificationFinal.Builder().build() }
+                    .build(),
+                advisory
+                    .newBuilder()
+                    .also { wb -> wb.duplicated_public_key = DuplicatedPublicKey.Builder().build() }
+                    .build(),
+                advisory.newBuilder().also { wb -> wb.low_entropy_key = LowEntropyKey.Builder().build() }.build(),
+                advisory.newBuilder().also { wb -> wb.message = "Rebooting to WiFi OTA" }.build(),
             )
 
         nearMisses.forEach { notification ->

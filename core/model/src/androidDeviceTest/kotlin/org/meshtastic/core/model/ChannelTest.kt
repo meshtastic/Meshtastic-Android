@@ -77,7 +77,14 @@ class ChannelTest {
             // Skip UNRECOGNIZED if it exists (Wire generates it sometimes) or generic UNSET values if applicable
             if (preset.name == "UNSET" || preset.name == "UNRECOGNIZED") return@forEach
 
-            val loraConfig = Channel.default.loraConfig.copy(use_preset = true, modem_preset = preset)
+            val loraConfig =
+                Channel.default.loraConfig
+                    .newBuilder()
+                    .also { wb ->
+                        wb.use_preset = true
+                        wb.modem_preset = preset
+                    }
+                    .build()
             val channel = Channel(loraConfig = loraConfig)
 
             // We want to ensure it is NOT "Invalid"

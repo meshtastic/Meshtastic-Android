@@ -98,7 +98,7 @@ class MapNodeClusterItemsTest {
 
         runOnIdle {
             val node = nodes.single()
-            nodes = listOf(node.copy(user = node.user.copy(short_name = "NEW")))
+            nodes = listOf(node.copy(user = node.user.newBuilder().also { wb -> wb.short_name = "NEW" }.build()))
         }
         waitForIdle()
         val changedNodeItems = latestItems

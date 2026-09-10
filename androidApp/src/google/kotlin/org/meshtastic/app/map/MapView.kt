@@ -657,7 +657,7 @@ fun MapView(
                         // would yield a zero-area box, so ignore it and keep waiting for a valid second corner.
                         boxAuthoringSecondCorner = latLng
                         val box = boundingBoxFromCorners(first, latLng)
-                        editingWaypoint = boxAuthoringDraft?.copy(bounding_box = box)
+                        editingWaypoint = boxAuthoringDraft?.newBuilder()?.also { wb -> wb.bounding_box = box }?.build()
                         boxAuthoringDraft = null
                         boxAuthoringFirstCorner = null
                         boxAuthoringSecondCorner = null
@@ -824,9 +824,11 @@ fun MapView(
                     onSend = { updatedWp ->
                         var finalWp = updatedWp
                         if (updatedWp.id == 0) {
-                            finalWp = finalWp.copy(id = mapViewModel.generatePacketId())
+                            finalWp =
+                                finalWp.newBuilder().also { wb -> wb.id = mapViewModel.generatePacketId() }.build()
                         }
-                        finalWp = finalWp.copy(icon = finalWp.icon.waypointIconOrDefault())
+                        finalWp =
+                            finalWp.newBuilder().also { wb -> wb.icon = finalWp.icon.waypointIconOrDefault() }.build()
                         mapViewModel.sendWaypoint(finalWp)
                         editingWaypoint = null
                     },
@@ -834,7 +836,7 @@ fun MapView(
                         // Broadcast the removal (expire=1) only for waypoints we're allowed to modify mesh-wide
                         // (unlocked, or locked to us); otherwise just drop our local copy below.
                         if (wpToDelete.isModifiableBy(myNodeNum) && isConnected && wpToDelete.id != 0) {
-                            mapViewModel.sendWaypoint(wpToDelete.copy(expire = 1))
+                            mapViewModel.sendWaypoint(wpToDelete.newBuilder().also { wb -> wb.expire = 1 }.build())
                         }
                         mapViewModel.deleteWaypoint(wpToDelete.id)
                         editingWaypoint = null
@@ -859,7 +861,7 @@ fun MapView(
                     },
                     onDeleteForEveryone = {
                         Logger.d { "User deleted waypoint ${waypoint.id} for everyone" }
-                        mapViewModel.sendWaypoint(waypoint.copy(expire = 1))
+                        mapViewModel.sendWaypoint(waypoint.newBuilder().also { wb -> wb.expire = 1 }.build())
                         mapViewModel.deleteWaypoint(waypoint.id)
                         deletingWaypoint = null
                     },
@@ -929,7 +931,8 @@ fun MapView(
                             val bounds = cameraPositionState.projection?.visibleRegion?.latLngBounds
                             if (bounds != null) {
                                 val box = boundingBoxFromCorners(bounds.southwest, bounds.northeast)
-                                editingWaypoint = boxAuthoringDraft?.copy(bounding_box = box)
+                                editingWaypoint =
+                                    boxAuthoringDraft?.newBuilder()?.also { wb -> wb.bounding_box = box }?.build()
                                 boxAuthoringDraft = null
                                 boxAuthoringFirstCorner = null
                                 boxAuthoringSecondCorner = null

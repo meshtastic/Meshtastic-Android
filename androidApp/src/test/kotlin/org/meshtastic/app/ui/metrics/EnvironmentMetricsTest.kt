@@ -56,13 +56,18 @@ class EnvironmentMetricsTest {
                     val metrics = tel.environment_metrics!!
                     val temperatureFahrenheit = celsiusToFahrenheit(metrics.temperature ?: 0f)
                     val soilTemperatureFahrenheit = celsiusToFahrenheit(metrics.soil_temperature ?: 0f)
-                    tel.copy(
-                        environment_metrics =
-                        metrics.copy(
-                            temperature = temperatureFahrenheit,
-                            soil_temperature = soilTemperatureFahrenheit,
-                        ),
-                    )
+                    tel.newBuilder()
+                        .also { wb ->
+                            wb.environment_metrics =
+                                metrics
+                                    .newBuilder()
+                                    .also { wb ->
+                                        wb.temperature = temperatureFahrenheit
+                                        wb.soil_temperature = soilTemperatureFahrenheit
+                                    }
+                                    .build()
+                        }
+                        .build()
                 }
             } else {
                 data
