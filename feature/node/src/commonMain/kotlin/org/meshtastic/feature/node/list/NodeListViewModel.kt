@@ -122,6 +122,8 @@ class NodeListViewModel(
                 onlyOnline = prefs.onlyOnline,
                 onlyDirect = prefs.onlyDirect,
                 showIgnored = prefs.showIgnored,
+                onlySigned = prefs.onlySigned,
+                onlyEncrypted = prefs.onlyEncrypted,
                 excludeMqtt = prefs.excludeMqtt,
                 excludeUnheard = prefs.excludeUnheard && unheardAllowed,
             )
@@ -254,6 +256,8 @@ data class NodeFilterState(
     val onlyOnline: Boolean = false,
     val onlyDirect: Boolean = false,
     val showIgnored: Boolean = false,
+    val onlySigned: Boolean = false,
+    val onlyEncrypted: Boolean = false,
     val excludeMqtt: Boolean = false,
     val excludeUnheard: Boolean = false,
 ) {
@@ -265,6 +269,8 @@ data class NodeFilterState(
                 excludeInfrastructure ||
                 onlyOnline ||
                 onlyDirect ||
+                onlySigned ||
+                onlyEncrypted ||
                 excludeMqtt ||
                 excludeUnheard
 }

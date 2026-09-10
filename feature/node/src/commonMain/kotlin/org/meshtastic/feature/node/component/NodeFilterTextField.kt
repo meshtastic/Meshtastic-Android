@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -68,16 +69,21 @@ import org.meshtastic.core.resources.node_filter_exclude_unheard
 import org.meshtastic.core.resources.node_filter_ignored
 import org.meshtastic.core.resources.node_filter_include_unknown
 import org.meshtastic.core.resources.node_filter_only_direct
+import org.meshtastic.core.resources.node_filter_only_encrypted
 import org.meshtastic.core.resources.node_filter_only_online
+import org.meshtastic.core.resources.node_filter_only_signed
 import org.meshtastic.core.resources.node_filter_placeholder
 import org.meshtastic.core.resources.node_filter_show_ignored
 import org.meshtastic.core.resources.node_filter_title
 import org.meshtastic.core.resources.node_sort_button
 import org.meshtastic.core.resources.node_sort_title
+import org.meshtastic.core.ui.component.SignedNodeIcon
 import org.meshtastic.core.ui.icon.Close
+import org.meshtastic.core.ui.icon.Lock
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Search
 import org.meshtastic.core.ui.icon.Sort
+import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 
 @Composable
 fun NodeFilterTextField(
@@ -135,6 +141,10 @@ data class NodeFilterToggles(
     val onToggleExcludeUnheard: () -> Unit,
     val excludeMqtt: Boolean,
     val onToggleExcludeMqtt: () -> Unit,
+    val onlySigned: Boolean,
+    val onToggleOnlySigned: () -> Unit,
+    val onlyEncrypted: Boolean,
+    val onToggleOnlyEncrypted: () -> Unit,
 )
 
 @Composable
@@ -259,6 +269,27 @@ private fun NodeSortButton(
                     }
                 } else {
                     null
+                },
+            )
+
+            DropdownMenuCheck(
+                text = stringResource(Res.string.node_filter_only_signed),
+                checked = toggles.onlySigned,
+                onClick = toggles.onToggleOnlySigned,
+                trailing = { SignedNodeIcon(Modifier.size(20.dp)) },
+            )
+
+            DropdownMenuCheck(
+                text = stringResource(Res.string.node_filter_only_encrypted),
+                checked = toggles.onlyEncrypted,
+                onClick = toggles.onToggleOnlyEncrypted,
+                trailing = {
+                    Icon(
+                        imageVector = MeshtasticIcons.Lock,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.StatusGreen,
+                        modifier = Modifier.size(20.dp),
+                    )
                 },
             )
 

@@ -70,6 +70,8 @@ class MapPrefsImpl(private val dataStore: MapDataStore, dispatchers: CoroutineDi
             showPrecisionCircle = this[KEY_SHOW_PRECISION_CIRCLE_PREF] ?: defaults.showPrecisionCircle,
             onlyOnline = this[KEY_ONLY_ONLINE_PREF] ?: defaults.onlyOnline,
             onlyDirect = this[KEY_ONLY_DIRECT_PREF] ?: defaults.onlyDirect,
+            onlySigned = this[KEY_ONLY_SIGNED_PREF] ?: defaults.onlySigned,
+            onlyEncrypted = this[KEY_ONLY_ENCRYPTED_PREF] ?: defaults.onlyEncrypted,
             excludeMqtt = this[KEY_EXCLUDE_MQTT_PREF] ?: defaults.excludeMqtt,
             showIgnored = this[KEY_SHOW_IGNORED_PREF] ?: defaults.showIgnored,
             includeUnknown = this[KEY_INCLUDE_UNKNOWN_PREF] ?: defaults.includeUnknown,
@@ -85,6 +87,8 @@ class MapPrefsImpl(private val dataStore: MapDataStore, dispatchers: CoroutineDi
         this[KEY_SHOW_PRECISION_CIRCLE_PREF] = prefs.showPrecisionCircle
         this[KEY_ONLY_ONLINE_PREF] = prefs.onlyOnline
         this[KEY_ONLY_DIRECT_PREF] = prefs.onlyDirect
+        this[KEY_ONLY_SIGNED_PREF] = prefs.onlySigned
+        this[KEY_ONLY_ENCRYPTED_PREF] = prefs.onlyEncrypted
         this[KEY_EXCLUDE_MQTT_PREF] = prefs.excludeMqtt
         this[KEY_SHOW_IGNORED_PREF] = prefs.showIgnored
         this[KEY_INCLUDE_UNKNOWN_PREF] = prefs.includeUnknown
@@ -167,6 +171,8 @@ class MapPrefsImpl(private val dataStore: MapDataStore, dispatchers: CoroutineDi
         val KEY_LAYER_OPACITY_PREF = stringSetPreferencesKey("layer_opacity")
         val KEY_ONLY_ONLINE_PREF = booleanPreferencesKey("map_only_online")
         val KEY_ONLY_DIRECT_PREF = booleanPreferencesKey("map_only_direct")
+        val KEY_ONLY_SIGNED_PREF = booleanPreferencesKey("map_only_signed")
+        val KEY_ONLY_ENCRYPTED_PREF = booleanPreferencesKey("map_only_encrypted")
         val KEY_EXCLUDE_MQTT_PREF = booleanPreferencesKey("map_exclude_mqtt")
         val KEY_SHOW_IGNORED_PREF = booleanPreferencesKey("map_show_ignored")
         val KEY_INCLUDE_UNKNOWN_PREF = booleanPreferencesKey("map_include_unknown")

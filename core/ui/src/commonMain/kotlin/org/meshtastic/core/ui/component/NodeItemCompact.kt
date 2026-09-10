@@ -211,6 +211,7 @@ fun NodeItemCompact(
                 // Row 1: Identity — name + PKC + favorite
                 CompactNameRow(
                     thatNode = thatNode,
+                    isThisNode = isThisNode,
                     longName = longName,
                     style = style,
                     isIgnored = isIgnored,
@@ -257,6 +258,7 @@ fun NodeItemCompact(
 @Composable
 private fun CompactNameRow(
     thatNode: Node,
+    isThisNode: Boolean,
     longName: String,
     style: FontStyle,
     isIgnored: Boolean,
@@ -268,7 +270,7 @@ private fun CompactNameRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        NodeSecurityIcons(thatNode, iconSize = 18.dp)
+        NodeSecurityIcons(thatNode, iconSize = 18.dp, isThisNode = isThisNode)
         Text(
             text = longName,
             style = MaterialTheme.typography.titleMediumEmphasized.copy(fontStyle = style),

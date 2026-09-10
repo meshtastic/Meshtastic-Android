@@ -73,7 +73,10 @@ interface NodeInfoDao {
         return if (existingNodeEntity == null) {
             handleNewNodeUpsertValidation(incomingNode)
         } else {
-            handleExistingNodeUpsertValidation(existingNodeEntity, incomingNode)
+            // The connected radio is authoritative for its own key: there is no mesh hop to spoof, and a 2.8 upgrade
+            // or factory reset legitimately re-keys it. Without this its own new key reads as a substitution.
+            val isLocalNode = incomingNode.num == getMyNodeEntity()?.myNodeNum
+            handleExistingNodeUpsertValidation(existingNodeEntity, incomingNode, trustIncomingKey = isLocalNode)
         }
     }
 
@@ -185,10 +188,11 @@ interface NodeInfoDao {
      * 2. **Update**: If it's a normal update, we validate the public key using [resolvePublicKey] to prevent conflicts
      *    or accidental key wiping, and then update the node.
      *
-     * [trustIncomingKey] skips the mismatch check and accepts a valid incoming key as-is. Set only for the local node
-     * during a config install: the connected device is authoritative for its own key over the local link, and an
-     * erase-and-reflash legitimately re-keys it (a mismatch there would otherwise poison the local node with
-     * [NodeEntity.ERROR_BYTE_STRING] and break PKI traffic until app data is cleared).
+     * [trustIncomingKey] skips the mismatch check and accepts a valid incoming key as-is. Set only for the local node:
+     * the connected device is authoritative for its own key over the local link, and an erase-and-reflash, a factory
+     * reset or a 2.8 re-key legitimately changes it (a mismatch there would otherwise poison the local node with
+     * [NodeEntity.ERROR_BYTE_STRING] and break PKI traffic until app data is cleared). Every other node keeps
+     * first-wins.
      */
     @Suppress("CyclomaticComplexMethod", "MagicNumber")
     private fun handleExistingNodeUpsertValidation(

@@ -18,6 +18,7 @@ package org.meshtastic.core.database.dao
 
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.database.MeshtasticDatabase
 import org.meshtastic.core.database.entity.MyNodeEntity
@@ -105,6 +106,32 @@ abstract class CommonNodeInfoDaoTest {
         dao.deleteNode(1)
         val result = dao.getNodeByNum(1)
         assertEquals(null, result)
+    }
+
+    @Test
+    fun `a remote node changing its key is recorded as a mismatch`() = runTest {
+        createDb()
+        val first = ByteArray(32) { 1 }.toByteString()
+        val second = ByteArray(32) { 2 }.toByteString()
+        dao.upsert(NodeEntity(num = 1, user = User(id = "!1", public_key = first)))
+        dao.upsert(NodeEntity(num = 1, user = User(id = "!1", public_key = second)))
+
+        assertEquals(NodeEntity.ERROR_BYTE_STRING, dao.getNodeByNum(1)?.node?.publicKey)
+    }
+
+    @Test
+    fun `the connected radio re-keying replaces its stored key rather than flagging a mismatch`() = runTest {
+        createDb()
+        val own = myNodeInfo.myNodeNum
+        val before = ByteArray(32) { 1 }.toByteString()
+        // What a 2.8 upgrade or a factory reset does: the same radio comes back under a new key.
+        val after = ByteArray(32) { 2 }.toByteString()
+        dao.upsert(NodeEntity(num = own, user = User(id = "!own", public_key = before)))
+        dao.upsert(NodeEntity(num = own, user = User(id = "!own", public_key = after)))
+
+        val stored = dao.getNodeByNum(own)?.node
+        assertEquals(after, stored?.publicKey)
+        assertEquals(after, stored?.user?.public_key)
     }
 
     @Test

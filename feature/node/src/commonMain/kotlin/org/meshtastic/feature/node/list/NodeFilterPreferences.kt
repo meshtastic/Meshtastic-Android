@@ -106,6 +106,14 @@ open class NodeFilterPreferences constructor(private val uiPrefs: UiPrefs) {
         uiPrefs.updateNodeFilters { it.copy(showIgnored = !it.showIgnored) }
     }
 
+    open fun toggleOnlySigned() {
+        uiPrefs.updateNodeFilters { it.copy(onlySigned = !it.onlySigned) }
+    }
+
+    open fun toggleOnlyEncrypted() {
+        uiPrefs.updateNodeFilters { it.copy(onlyEncrypted = !it.onlyEncrypted) }
+    }
+
     open fun toggleExcludeMqtt() {
         uiPrefs.updateNodeFilters { it.copy(excludeMqtt = !it.excludeMqtt) }
     }

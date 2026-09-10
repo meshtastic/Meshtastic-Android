@@ -533,6 +533,9 @@ doc_keywords_telemetry
 doc_keywords_translate
 doc_keywords_units
 doc_keywords_widget
+doc_loading
+doc_no_documentation
+doc_no_results
 doc_search_placeholder
 doc_section_developer
 doc_section_user
@@ -1280,7 +1283,9 @@ node_filter_exclude_unheard
 node_filter_ignored
 node_filter_include_unknown
 node_filter_only_direct
+node_filter_only_encrypted
 node_filter_only_online
+node_filter_only_signed
 node_filter_placeholder
 node_filter_show_ignored
 node_filter_title
@@ -1682,11 +1687,16 @@ security_icon_insecure_no_precise
 security_icon_insecure_precise_only
 security_icon_secure
 security_icon_warning_precise_mqtt
+security_legend_any_version
+security_legend_legacy_firmware
+security_legend_signing_firmware
 security_signed_message_info
 security_signed_node
 security_signed_node_desc
 security_signed_node_help
 security_signed_verified
+security_verified_contact
+security_verified_contact_help
 select
 select_all
 selected

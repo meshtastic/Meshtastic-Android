@@ -498,24 +498,18 @@ internal fun StatusAwareLastHeard(
     )
 }
 
-/** Key status (always status-colored) + the signed-node shield. */
+/**
+ * The node's one security indicator (design#149) — verification state on 2.8, the PKI locks below it, always
+ * status-colored. [isThisNode] marks the connected radio, which reads as verified.
+ */
 @Composable
-fun NodeSecurityIcons(thatNode: Node, modifier: Modifier = Modifier, iconSize: Dp = 20.dp) {
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        if (thatNode.signsPackets) {
-            NodeSignedStatusIcon(modifier = Modifier.size(iconSize))
-        }
-        NodeKeyStatusIcon(
-            hasPKC = thatNode.hasPKC,
-            mismatchKey = thatNode.mismatchKey,
-            publicKey = thatNode.user.public_key,
-            modifier = Modifier.size(iconSize),
-        )
-    }
+fun NodeSecurityIcons(
+    thatNode: Node,
+    modifier: Modifier = Modifier,
+    iconSize: Dp = 20.dp,
+    isThisNode: Boolean = false,
+) {
+    NodeSecurityIcon(node = thatNode, modifier = modifier.size(iconSize), isOwnNode = isThisNode)
 }
 
 @Composable
@@ -538,7 +532,7 @@ private fun NodeItemHeader(
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         NodeChip(node = thatNode)
-        NodeSecurityIcons(thatNode)
+        NodeSecurityIcons(thatNode, isThisNode = isThisNode)
 
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Row(

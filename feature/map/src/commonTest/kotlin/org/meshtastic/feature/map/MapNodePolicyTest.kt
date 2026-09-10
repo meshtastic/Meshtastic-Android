@@ -16,7 +16,10 @@
  */
 package org.meshtastic.feature.map
 
+import okio.ByteString
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.Node.Companion.PUBLIC_KEY_SIZE
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.User
@@ -39,6 +42,8 @@ class MapNodePolicyTest {
         viaMqtt: Boolean = false,
         isIgnored: Boolean = false,
         shortName: String = "ABCD",
+        signsPackets: Boolean = false,
+        publicKey: ByteString? = null,
     ) = Node(
         num = num,
         position = Position(latitude_i = (latitude * 1e7).toInt(), longitude_i = (longitude * 1e7).toInt()),
@@ -48,6 +53,8 @@ class MapNodePolicyTest {
         hopsAway = hopsAway,
         viaMqtt = viaMqtt,
         isIgnored = isIgnored,
+        signsPackets = signsPackets,
+        publicKey = publicKey,
     )
 
     @Suppress("LongParameterList")
@@ -57,6 +64,8 @@ class MapNodePolicyTest {
         excludedRoles: Set<Config.DeviceConfig.Role> = emptySet(),
         onlyOnline: Boolean = false,
         onlyDirect: Boolean = false,
+        onlySigned: Boolean = false,
+        onlyEncrypted: Boolean = false,
         excludeMqtt: Boolean = false,
         showIgnored: Boolean = false,
         includeUnknown: Boolean = true,
@@ -69,6 +78,8 @@ class MapNodePolicyTest {
         excludedRoles = excludedRoles,
         onlyOnline = onlyOnline,
         onlyDirect = onlyDirect,
+        onlySigned = onlySigned,
+        onlyEncrypted = onlyEncrypted,
         excludeMqtt = excludeMqtt,
         showIgnored = showIgnored,
         includeUnknown = includeUnknown,
@@ -208,5 +219,28 @@ class MapNodePolicyTest {
                 includeUnknown = false,
             )
         assertEquals(listOf(1), visible(listOf(mine), state, now = 100_000, mine = 1))
+    }
+
+    @Test
+    fun `the signed filter keeps only nodes whose signature the radio verified`() {
+        val nodes = listOf(node(1, 1.0, 1.0), node(2, 1.0, 1.0, signsPackets = true))
+
+        assertEquals(listOf(1, 2), visible(nodes, filters()))
+        assertEquals(listOf(2), visible(nodes, filters(onlySigned = true)))
+    }
+
+    @Test
+    fun `the encrypted filter keeps a key on file and drops one that stopped matching`() {
+        val key = ByteArray(PUBLIC_KEY_SIZE) { 1 }.toByteString()
+        val nodes =
+            listOf(
+                node(1, 1.0, 1.0),
+                node(2, 1.0, 1.0, publicKey = key),
+                // A mismatch is not a key you can safely encrypt to, so it is excluded rather than counted.
+                node(3, 1.0, 1.0, publicKey = Node.ERROR_BYTE_STRING),
+            )
+
+        assertEquals(listOf(1, 2, 3), visible(nodes, filters()))
+        assertEquals(listOf(2), visible(nodes, filters(onlyEncrypted = true)))
     }
 }

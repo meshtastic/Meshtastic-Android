@@ -286,6 +286,8 @@ class UiPrefsImpl(private val dataStore: UiDataStore, dispatchers: CoroutineDisp
         onlyOnline = this[KEY_ONLY_ONLINE] ?: false,
         onlyDirect = this[KEY_ONLY_DIRECT] ?: false,
         showIgnored = this[KEY_SHOW_IGNORED] ?: false,
+        onlySigned = this[KEY_ONLY_SIGNED] ?: false,
+        onlyEncrypted = this[KEY_ONLY_ENCRYPTED] ?: false,
         excludeMqtt = this[KEY_EXCLUDE_MQTT] ?: false,
         excludeUnheard = this[KEY_EXCLUDE_UNHEARD] ?: false,
     )
@@ -296,6 +298,8 @@ class UiPrefsImpl(private val dataStore: UiDataStore, dispatchers: CoroutineDisp
         this[KEY_ONLY_ONLINE] = prefs.onlyOnline
         this[KEY_ONLY_DIRECT] = prefs.onlyDirect
         this[KEY_SHOW_IGNORED] = prefs.showIgnored
+        this[KEY_ONLY_SIGNED] = prefs.onlySigned
+        this[KEY_ONLY_ENCRYPTED] = prefs.onlyEncrypted
         this[KEY_EXCLUDE_MQTT] = prefs.excludeMqtt
         this[KEY_EXCLUDE_UNHEARD] = prefs.excludeUnheard
     }
@@ -315,6 +319,8 @@ class UiPrefsImpl(private val dataStore: UiDataStore, dispatchers: CoroutineDisp
         val KEY_EXCLUDE_INFRASTRUCTURE = booleanPreferencesKey("exclude-infrastructure")
         val KEY_ONLY_ONLINE = booleanPreferencesKey("only-online")
         val KEY_ONLY_DIRECT = booleanPreferencesKey("only-direct")
+        val KEY_ONLY_SIGNED = booleanPreferencesKey("only-signed")
+        val KEY_ONLY_ENCRYPTED = booleanPreferencesKey("only-encrypted")
         val KEY_SHOW_IGNORED = booleanPreferencesKey("show-ignored")
         val KEY_EXCLUDE_MQTT = booleanPreferencesKey("exclude-mqtt")
         val KEY_EXCLUDE_UNHEARD = booleanPreferencesKey("exclude-unheard")
