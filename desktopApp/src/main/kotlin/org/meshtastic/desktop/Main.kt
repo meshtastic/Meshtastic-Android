@@ -147,6 +147,7 @@ private fun svgPainterResource(path: String, density: Density): Painter = rememb
 
 @OptIn(ExperimentalCoilApi::class)
 fun main(args: Array<String>) {
+    installQuitHandler()
     // exitProcessOnExit = false is what makes the shutdown block below reachable at all: with the default (true),
     // application() calls System.exit(0) itself as soon as the Compose loop ends, and control never returns here.
     // Do not "simplify" this back to a bare application {} — that silently disables every teardown that follows.
@@ -159,6 +160,7 @@ fun main(args: Array<String>) {
             Logger.i { "Meshtastic Desktop — Starting" }
             startKoin<DesktopKoinApp> {}
         }
+        LaunchedEffect(Unit) { publishExitApplication(::exitApplication) }
         val systemLocale = remember { Locale.getDefault() }
         val uiViewModel = remember { koinApp.koin.get<UIViewModel>() }
         val httpClient = remember { koinApp.koin.get<HttpClient>() }
