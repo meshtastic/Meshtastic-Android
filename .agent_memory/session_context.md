@@ -2224,3 +2224,39 @@ Native/Android/Windows 完整 gate 已通過：2,025 tasks，103 executed、1,92
   Historical Sept3 signed iOS BLE/READY and user-confirmed native two-way messaging remain bounded evidence;
   iOS Room observed iOS-origin DELIVERED and Android-origin RECEIVED, not independently captured Android receipt.
   Search memory by date/topic: older entries were both prepended and appended, not globally sorted.
+
+
+## 2026-09-10 11:02 — App Store uploads and new locale QA finding
+
+
+- MeshLink `1.0.0 (1)` 從 `83f433b796816b431e5f822e95f2ebb7a5042247` 封存、匯出，
+  10:38:03（台北）上傳成功。IPA SHA-256 `8c13d423d1c14fb2c9d6f8f048bc776a64f670dc7f355ae9d6058c2c6552b370`。
+- NTsocial `1.0.0 (1)` 從乾淨來源 `aaeef7e641317589bd3466baee7a087d28c13e7b` 封存、匯出，
+  10:54:46（台北）上傳成功。IPA SHA-256 `620DFBC7B4A112A514EA9F89893ED90B19E8F0B408C297B17515CF66A1DD9611`。
+  Apple 接受上傳，但記錄 WebRTC.framework dSYM 缺失警告；未宣稱該框架的 crash 符號齊全。
+- 兩個 exported IPA 均驗證 Team `D524H699HW`、原 Bundle ID、唯一 App Group
+  `group.com.ntsocial.gateway`、共享 Keychain `D524H699HW.com.ntsocial.meshlink.gateway`，
+  以及 `get-task-allow=false`。主 App 保留私有 Keychain 優先、Wi-Fi Aware Subscribe 與 Hotspot。
+  Store profile UUID：MeshLink `6bc78be3-349d-4814-b315-b941f0ab8a84`；
+  NTsocial `6f612191-efd7-486c-a5d5-c42a8cf89136`。
+- NTsocial 本機完整 gate 在 `3da95e1be4461f739dfc6503096f3e9e4520f619` 通過，包含 852 SwiftPM
+  tests（2 skipped、0 failure）、6 Release UI tests、5-device Simulator 截圖與 source-state-unchanged。
+  後續 commit 僅修正 archive helper 對 Apple profile 授權全集的驗證及啟用自動佈建；
+  baseline、tool selftests 與 13 項 profile 正反案例通過，實際 exported IPA 再驗證通過。
+- MeshLink 的 en-US、zh-Hant、ja 版本介紹均已儲存，英文副標題已儲存，Apple 計算並保存年齡分級 4+。
+  「不收集資料」與政策 URL 已存草稿；最終發佈法律確認已向使用者提出，尚未代答。
+- 截圖實測揭露 MeshLink 語言缺陷：全新 Simulator 選英文且 DataStore 保存 `en`，UI 仍顯示系統中文。
+  已開始限定在 iOS runtime 的資源語言修復；尚未完成修復後三語驗證或 Build 2 上傳。
+  Build 1 因此不作最終送審 candidate。
+- 兩個產品尚未送審、未獲核准或公開發行。真機 Gateway、TestFlight 與各 physical matrix 尚未在本次完成。
+  既有官網文字由使用者稍後處理，不修改官網；App Privacy 仍依各 iOS 產品實作填寫。
+- 證據與 IPA 備份：`.agent_artifacts/ios-company-signing-2026-09-10/release/`；
+  NTsocial gate：`/tmp/ntsocial-ios-appstore-parity-3da95e1b/summary.json`。
+
+
+### 2026-09-10 11:14 — MeshLink locale fix validated for Build 2
+
+- iOS resource locale now updates app-specific AppleLanguages before localized composition and recreates locale-keyed content. No-op JVM/Android test-host actual; Android/Windows production unaffected.
+- Fresh English and Traditional Chinese first selection verified in dedicated iPhone simulators; persisted English iPhone and Japanese iPad also verified after upgrade. No production device data touched.
+- Full gate passed, 2,025 tasks (99 executed, 1,926 up-to-date), evidence `.agent_artifacts/ios-company-signing-2026-09-10/meshlink-build2-full-gate.log`. Build 2 archive/upload next.
+- NTsocial en-US/zh-Hant/ja version descriptions entered; final store requirements still pending.

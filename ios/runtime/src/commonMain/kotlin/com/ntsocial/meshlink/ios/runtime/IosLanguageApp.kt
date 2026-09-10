@@ -33,6 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -82,13 +83,21 @@ internal fun IosShellApp(controller: IosShellController) {
 @Composable
 @Suppress("RestrictedApi")
 private fun IosAppLocale(languageTag: String, content: @Composable () -> Unit) {
-    if (languageTag.isBlank()) {
-        content()
-    } else {
-        val localeList = remember(languageTag) { LocaleList(languageTag) }
-        CompositionLocalProvider(LocalProvidableLocaleList provides localeList, content = content)
-    }
+    val inheritedLocaleList = LocalProvidableLocaleList.current
+    val localeList =
+        remember(languageTag, inheritedLocaleList) {
+            if (languageTag.isBlank()) {
+                inheritedLocaleList
+            } else {
+                applyIosResourceLanguage(languageTag)
+                LocaleList(languageTag)
+            }
+        }
+    CompositionLocalProvider(LocalProvidableLocaleList provides localeList) { key(languageTag) { content() } }
 }
+
+/** Applies the app-specific locale read by Compose Resources before composing localized content. */
+internal expect fun applyIosResourceLanguage(languageTag: String)
 
 @Composable
 private fun IosInitialLanguageSelection(uiPrefs: UiPrefs) {

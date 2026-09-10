@@ -35,7 +35,7 @@ Use Compose Multiplatform, Navigation 3, and the repository's existing architect
   implemented platform Gateway. Parent-worktree results in handovers are external evidence, not source
   implemented or independently revalidated in this repository.
 - **Version/toolchain snapshot:** `config.properties` sets Android `1.0.8 (9)`, Desktop's normal version
-  fallback `1.0.8`, min SDK 26, compile/target SDK 37. Xcode sets iOS `1.0.0 (1)` and deployment target
+  fallback `1.0.8`, min SDK 26, compile/target SDK 37. Xcode sets iOS `1.0.0 (2)` and deployment target
   17.0 independently. Checked-in versions include Gradle 9.5.0, AGP 9.3.2, Kotlin 2.3.21, CMP
   1.11.0-rc01, and Koin 4.2.1. Use JDK 21. Read the actual catalog/configuration before changing versions.
 
@@ -72,6 +72,14 @@ Use Compose Multiplatform, Navigation 3, and the repository's existing architect
   hints, and deep-link handoff are implemented. Each secondary endpoint is isolated; only legacy-primary
   may publish/admit Apple Gateway work. Unsupported OTA, file/backup/import/export, phone location,
   compass, and host notification capabilities remain hidden or fail closed.
+- **iOS release-language fix (2026-09-10):** The iOS runtime applies its persisted language to the
+  app-specific AppleLanguages preference before composing resources, and keys that composition by locale.
+  Compose text locale alone did not control Compose Resources on the pinned version. Simulator evidence
+  reproduced persisted English with Chinese UI, then verified English first launch and restored Japanese
+  after the fix. Android and Desktop hosts do not use this setter; JVM/Android runtime test targets are no-op.
+  Both products' Build 1 IPAs were uploaded under the company team with the new App Group; MeshLink Build 2
+  is being prepared for this correction. Upload does not establish submission, approval or Gateway RF proof.
+  Current evidence: [company release status](docs/ios-company-signing-status-2026-09-10.md).
 - **iOS recent fixes:** Restored BLE sessions use verified peripheral ownership, bounded recovery,
   cancellation cleanup, and a lease for unclaimed sessions. Native durable rows carry explicit Gateway
   provenance and drain ahead of gated Gateway work; a stable source identity alone never makes a native
