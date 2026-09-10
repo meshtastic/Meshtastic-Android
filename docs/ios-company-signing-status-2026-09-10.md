@@ -18,9 +18,11 @@
   效能資料、其他診斷資料；均為 App 功能用途、與識別碼連結、不追蹤。依據是 iOS Cloud relay、
   Worker SQL/KV/R2 與已啟用的 observability 設定。MeshLink 保持「不收集資料」草稿。
   兩款最終發佈法律確認仍待使用者回覆，並未代為確認。
-- 已準備 22 張原生 Simulator 截圖及 SHA-256 清單。含 alpha 的截圖另以原尺寸 JPEG 匯出，
-  未修改畫面內容。Chrome `fileChooser.setFiles` 回傳 `Not allowed`；已依工具指示請使用者開啟
-  ChatGPT 瀏覽器擴充功能的「允許存取檔案網址」。截圖尚未上傳。
+- 已向 Apple 上傳並保存 22 張截圖：NTsocial 三語 iPhone 各 3 張、英文 iPad 3 張；
+  MeshLink 英文／繁體中文 iPhone 各 3 張、英文／日文 iPad 各 2 張。其餘尺寸／語系沿用
+  已上傳的英文素材。上傳清單保留原始來源與 SHA-256；含 alpha 的原生截圖只轉為原尺寸 JPEG。
+  最初 extension `fileChooser.setFiles` 回傳 `Not allowed`，後續改用 Chrome 原生檔案視窗
+  上傳成功，未變更擴充功能權限。這項使用者操作請求已不再是上架阻礙。
 - 實際啟用 `iosSimulatorArm64Test` 的 link/run 後，裸測試執行檔因缺少 `bluetooth-central`
   Info.plist 中止。將同一 executable 放入具有該模式的獨立測試 App bundle 後，合併執行為
   27 passed／1 failed：兩次 process-root 建構之間仍有未結束的 DataStore scopes，並有非同步
@@ -28,13 +30,14 @@
   這不是合併 native gate 通過，也沒有修改或弱化正式 App 的 Bluetooth restoration。
 - 兩個 App 已保存免費定價，限定 iPhone／iPad，取消未驗證的 Mac／Vision Pro 供應。
   MeshLink 已設 175 個地區於發佈時供應；主 App 供應地區仍待法國選擇。
-  兩個產品三語隱私網址均已補齊。重新執行 Apple 送審預檢後，MeshLink 只列出
-  iPhone／iPad 截圖、隱私回答發佈與內容版權；主 App 另列出口合規資訊。
-  兩款皆不再列出缺少隱私網址，尚未建立審查提交項目。
+  兩個產品三語隱私網址均已補齊。截圖上傳後重新執行 Apple 送審預檢，MeshLink 只列出
+  隱私回答發佈與內容版權；主 App 另列出口合規資訊。兩款皆不再列出缺少截圖或隱私網址，
+  尚未建立審查提交項目。
 - 免費 App 協議有效（2026-09-03 至 2027-09-04）；未簽署與目前免費定價無關的付費 App 協議。
   DSA 貿易商分支已展開核對公司既有地址，並準備聯絡資料；分類及公開電話／電子郵件
   待使用者確認，已取消草稿視窗，未提交驗證或公開。不得將未回覆視為同意。
-  內容版權確認已擴及兩個 App，取代先前僅問主 App 的問題。Mac 鎖定仍阻止原生 UI 操作。
+  內容版權確認已擴及兩個 App，取代先前僅問主 App 的問題。Mac 鎖定已解除；
+  extension 分頁控制仍逾時，但 Chrome 原生 UI 可繼續操作。
 - 兩個產品仍未送審、未核准、未公開。本次沒有執行實機 Gateway／RF 或 TestFlight 安裝。
   主 App 地區、兩款內容版權與公司 DSA 欄位仍在處理，不能宣稱 Production ready。
 - 證據根目錄 `.agent_artifacts/ios-company-signing-2026-09-10/`：
@@ -43,8 +46,17 @@
 - 12:25（台北）追加 MeshLink Release Simulator build 成功，保留 `1.0.0 (2)`、原 Bundle ID、
   iOS 17 minimum、iPhone／iPad device family、`bluetooth-central`，並確認預設／繁體中文／日文
   Compose 資源封裝。這是 signing-disabled Simulator artifact，未替換已上傳的 Distribution IPA。
-  AppIntents metadata extraction skipped 警告仍存在；Mac 鎖定，尚未安裝或啟動此 Release Simulator App。
+  AppIntents metadata extraction skipped 警告仍存在。後續在專用 iPhone／iPad Simulator 安裝、
+  啟動並檢查 Connection、Settings、Channels，保存六張原始 QA 截圖，其中五張作英文商店素材。
+  未簽章 Simulator 的 App Group 顯示不可用屬此 artifact 的限制；iPad Settings 保留作 QA，
+  未拿來宣稱公司實機 Gateway 已就緒，也未作商店截圖。
   Log：`meshlink-release-simulator.log`；摘要：`release/meshlink-release-simulator-evidence.json`。
+- 真機安裝預檢：兩個同來源 archive 的 Development-signed App 具有正確公司 Team、App Group
+  與 Keychain，且 profiles 均涵蓋兩支已連線 iPhone 15。兩機皆已有 NTsocial `1.0.0 (1)`；
+  本次僅讀取安裝資訊，未安裝、啟動、清除或覆寫真機 App。依主 App 的空白資料／歷史隔離要求，
+  已詢問使用者可用的測試機與無線電，不能將 profile 資格核對當成實際 Gateway 驗證。
+  證據：`release/device-archive-install-preflight.json`、`release/device-profile-eligibility.json`、
+  `release/store-screenshot-upload-result.json`。
 
 ## 前階段：兩個 Build 1 已上傳與語言修復
 
