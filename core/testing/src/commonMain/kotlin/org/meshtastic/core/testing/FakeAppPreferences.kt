@@ -18,6 +18,7 @@ package org.meshtastic.core.testing
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.repository.AnalyticsPrefs
 import org.meshtastic.core.repository.AppFunctionsPrefs
@@ -115,7 +116,9 @@ class FakeUiPrefs : UiPrefs {
     override val nodeFilters = MutableStateFlow(NodeFilterPrefs())
 
     override fun updateNodeFilters(transform: (NodeFilterPrefs) -> NodeFilterPrefs) {
-        nodeFilters.value = transform(nodeFilters.value)
+        // update, not read-then-assign: the real one is transactional, and a fake that loses a concurrent write
+        // would pass tests the production path fails.
+        nodeFilters.update(transform)
     }
 
     override val hasShownNotPairedWarning = MutableStateFlow(false)
@@ -251,7 +254,7 @@ class FakeMapPrefs : MapPrefs {
     override val mapFilters = MutableStateFlow(MapFilterPrefs())
 
     override fun updateMapFilters(transform: (MapFilterPrefs) -> MapFilterPrefs) {
-        mapFilters.value = transform(mapFilters.value)
+        mapFilters.update(transform)
     }
 
     override val hiddenLayerUrls = MutableStateFlow<Set<String>>(emptySet())
