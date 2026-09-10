@@ -62,13 +62,26 @@ private fun dbmToWatts(dbm: Int): Double? = if (dbm <= 0) null else 10.0.pow((db
 @Suppress("MagicNumber")
 private fun sensitivityDbmFor(preset: ModemPreset?): Double = when (preset) {
     ModemPreset.SHORT_TURBO -> -126.0
+
     ModemPreset.SHORT_FAST -> -129.0
+
     ModemPreset.SHORT_SLOW -> -131.5
+
     ModemPreset.MEDIUM_FAST -> -134.0
+
     ModemPreset.MEDIUM_SLOW -> -136.5
+
+    // 500 kHz at SF11: the same spreading factor as LONG_FAST, but 3 dB more thermal noise in the wider passband —
+    // the 150 vs 153 dB link budgets in the radio-settings docs table.
+    ModemPreset.LONG_TURBO -> -136.0
+
     ModemPreset.LONG_FAST -> -139.0
+
     ModemPreset.LONG_MODERATE -> -142.0
+
     ModemPreset.LONG_SLOW -> -144.5
+
     ModemPreset.VERY_LONG_SLOW -> -147.5
+
     else -> SitePlannerParams.DEFAULT_RX_SENSITIVITY_DBM
 }

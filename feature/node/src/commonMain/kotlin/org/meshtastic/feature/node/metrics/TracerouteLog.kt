@@ -83,9 +83,12 @@ import org.meshtastic.core.ui.icon.Route
 import org.meshtastic.core.ui.theme.GraphColors
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
+import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
+import org.meshtastic.core.ui.util.LocalModemPreset
 import org.meshtastic.core.ui.util.annotateTraceroute
 import org.meshtastic.feature.node.component.CooldownIconButton
+import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
 import org.meshtastic.proto.RouteDiscovery
 
 /**
@@ -112,6 +115,8 @@ fun TracerouteLogScreen(
     val statusGreen = MaterialTheme.colorScheme.StatusGreen
     val statusYellow = MaterialTheme.colorScheme.StatusYellow
     val statusOrange = MaterialTheme.colorScheme.StatusOrange
+    val statusRed = MaterialTheme.colorScheme.StatusRed
+    val modemPreset = LocalModemPreset.current
 
     val headerTowardsStr = stringResource(Res.string.traceroute_route_towards_dest)
     val headerBackStr = stringResource(Res.string.traceroute_route_back_to_us)
@@ -182,6 +187,8 @@ fun TracerouteLogScreen(
                                 statusGreen = statusGreen,
                                 statusYellow = statusYellow,
                                 statusOrange = statusOrange,
+                                statusRed = statusRed,
+                                modemPreset = modemPreset,
                                 onViewOnMap = onViewOnMap,
                             )
                         },
@@ -320,6 +327,8 @@ private fun showTracerouteDetail(
     statusGreen: Color,
     statusYellow: Color,
     statusOrange: Color,
+    statusRed: Color,
+    modemPreset: ModemPreset?,
     onViewOnMap: (requestId: Int, responseLogUuid: String) -> Unit,
 ) {
     val result = point.result ?: return
@@ -338,6 +347,8 @@ private fun showTracerouteDetail(
                     statusGreen = statusGreen,
                     statusYellow = statusYellow,
                     statusOrange = statusOrange,
+                    statusRed = statusRed,
+                    modemPreset = modemPreset,
                 )
             val durationText = formatString(durationTemplate, NumberFormatter.format(seconds, 1))
             buildAnnotatedString {
