@@ -1,6 +1,22 @@
 # iOS 公司簽章設定與驗證 — 2026-09-10
 
-## 最新狀態：已核准聲明並發佈，DSA 聯絡驗證進行中
+## 最新狀態：兩款 App 已正式提交，正在等待 Apple 審查
+
+- 已在 Codex 內建瀏覽器登入 LiberaNt LLC，逐一執行「新增以供審查」及「提交以供審查」。
+  兩個產品各出現「已提交 1 個項目」及「正在等待審查」，不是僅加入提交草稿。
+- NTsocial `1.0.0 (1)`：提交 ID `cc889031-4818-4d14-b1da-ee65f874f41d`。
+  [Apple 審查記錄](https://appstoreconnect.apple.com/apps/6810478003/distribution/reviewsubmissions/details/cc889031-4818-4d14-b1da-ee65f874f41d)。
+- NTsocial MeshLink `1.0.0 (2)`：提交 ID `9f715b15-67f5-4379-b79c-1eae18d2192c`。
+  [Apple 審查記錄](https://appstoreconnect.apple.com/apps/6810479958/distribution/reviewsubmissions/details/9f715b15-67f5-4379-b79c-1eae18d2192c)。
+- 使用者回覆已完成先前電子郵件／電話驗證，但新登入的 Business 頁面仍要求完成公司 DSA。
+  已依既有授權續填貿易商與聯絡資訊；Apple 再次發送電子郵件驗證碼，待完成這次驗證及最終儲存。
+  不把使用者完成其中一步或收到驗證碼等同於公司 DSA 最終核准。
+- 真機 Gateway／RF 測試尚未完成。iPhone Mirroring 要求 Mac 本機登入，未輸入或取得使用者密碼；
+  兩支裝置仍可由 CoreDevice 讀取，iOS 26.6.1，Developer Mode enabled。尚未清除、安裝或啟動真機 App。
+- Apple 尚未核准，兩款尚未公開；自動核准後發佈選項已保留。
+  機器可讀證據：`release/app-store-submission-result.json`。下方未送審段落為前階段歷史紀錄。
+
+## 前階段：已核准聲明並發佈，DSA 聯絡驗證進行中
 
 - 使用者已明確同意全部待確認事項並授權完成兩款 App 送審；不再等待重複的公司法律確認。
 - NTsocial 的七類 App Privacy 回答與 MeshLink 的「不收集資料」均已發佈，Apple 頁面顯示

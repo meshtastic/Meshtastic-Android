@@ -2309,3 +2309,13 @@ Native/Android/Windows 完整 gate 已通過：2,025 tasks，103 executed、1,92
 - Published both privacy declarations; Apple UI confirmed publication. Saved Yes necessary third-party rights for both apps. Parent Build 1 external standard crypto / France No saved and compliance warning cleared. Parent availability saved and verified: 174 territories on release, France unavailable.
 - DSA trader/contact wizard initiated email verification. No verified completion observed. Native Chrome and then standalone ASC app AX became blank, though Xcode remains readable. User sent codes, but code submission could not be verified; asked user to complete email and any subsequent phone step directly. Never store OTP values in artifacts.
 - Neither app submitted yet. Physical devices both connected/developer enabled, but no new physical install/launch/clear. Parent Debug ISOLATE_CLOUD_STATE changes local folder only, not production backend. Fresh-state isolation remains required before real tests.
+
+
+## 2026-09-10 — Both App Store submissions confirmed Waiting for Review
+
+- Native Chrome/standalone ASC AX became unusable. Working Codex in-app browser was opened, and the user signed in to LiberaNt LLC. Reuse iab browser ID 2, current tab 1 DSA, tab 2 NTsocial submission; do not retry the failing Chrome extension.
+- MeshLink 1.0.0 (2) submitted and Apple confirmed Waiting for Review. Submission 9f715b15-67f5-4379-b79c-1eae18d2192c.
+- NTsocial 1.0.0 (1) submitted and Apple confirmed Waiting for Review. Submission cc889031-4818-4d14-b1da-ee65f874f41d.
+- Both were actual Submit for Review actions followed by submitted confirmation, not only draft additions. No approval/public release yet. release/app-store-submission-result.json retains evidence.
+- User reported prior DSA email/phone verification done, but Business still requires final compliance. Current iab DSA wizard again at email OTP after approved trader/contacts; new code requested. Do not record OTP values.
+- iPhone Mirroring now at Mac password unlock. No phone app clear/install/launch this run. Need finish approved fresh-data physical Gateway/RF tests without historical production/cloud/peer hydration.
