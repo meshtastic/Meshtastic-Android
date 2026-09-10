@@ -29,12 +29,10 @@ class KoinConventionPlugin : Plugin<Project> {
 
             // Configure Koin K2 Compiler Plugin (1.1.0+)
             extensions.configure(KoinGradleExtension::class.java) {
-                // Off because the plugin's index does not reach two things this graph needs: the
-                // @Module(includes = ...) chain in androidApp's flavor source sets, and the
-                // WorkerFactory that Koin's own workManagerFactory() declares. Both produce
-                // KOIN-D001/D002 on definitions that exist, so every entry point fails.
-                // KoinVerificationTest verifies the graph at runtime instead.
-                compileSafety.set(false)
+                // Missing definitions and qualifier mismatches fail the build. :desktopApp is
+                // excluded until its DSL graph moves to @Module: the assembled graph does not reach
+                // DSL definitions, so every cross-module call site there lands as a false KOIN-D003.
+                compileSafety.set(path != ":desktopApp")
             }
 
             val koinAnnotations = libs.findLibrary("koin-annotations").get()

@@ -19,6 +19,7 @@ package org.meshtastic.app.di
 import android.content.Context
 import okio.FileSystem
 import okio.Path.Companion.toOkioPath
+import org.koin.core.annotation.Configuration
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
 import org.meshtastic.app.ai.GeminiNanoDocAssistant
@@ -41,6 +42,7 @@ import org.meshtastic.feature.messaging.translation.MessageTranslationService
 
 /** Provides the on-device Gemini Nano AI assistant for the Google flavor. */
 @Module
+@Configuration
 class GoogleAiModule {
     @Single
     fun aiDocAssistant(
