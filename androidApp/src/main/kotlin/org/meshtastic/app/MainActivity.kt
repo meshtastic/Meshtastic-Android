@@ -42,7 +42,9 @@ import androidx.compose.runtime.remember
 import androidx.core.content.IntentCompat
 import androidx.core.net.toUri
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.compose.currentStateAsState
 import androidx.lifecycle.lifecycleScope
 import co.touchlab.kermit.Logger
 import com.eygraber.uri.toKmpUri
@@ -228,7 +230,15 @@ class MainActivity : AppCompatActivity() {
             LocalNfcWriterProvider provides { url, onResult, onDisabled -> NfcWriterEffect(url, onResult, onDisabled) },
             LocalBarcodeScannerSupported provides true,
             LocalNfcScannerSupported provides true,
-            LocalNfcEmulatorProvider provides { url -> NfcEmulatorEffect(url) },
+            // Arm card emulation only while the app is actually in the foreground. A share dialog left open behind a
+            // home-press stays composed, and a channel URL carries the channel PSK. This reads the activity's own
+            // lifecycle, not LocalLifecycleOwner: the effect is composed inside a Dialog, whose own lifecycle stays
+            // RESUMED when the activity is backgrounded.
+            LocalNfcEmulatorProvider provides
+                { url ->
+                    val lifecycleState by lifecycle.currentStateAsState()
+                    if (lifecycleState.isAtLeast(Lifecycle.State.RESUMED)) NfcEmulatorEffect(url)
+                },
             LocalNfcEmulationSupported provides
                 packageManager.hasSystemFeature(PackageManager.FEATURE_NFC_HOST_CARD_EMULATION),
             LocalAnalyticsIntroProvider provides { AnalyticsIntro() },

@@ -46,8 +46,11 @@ object NfcTagEmulation {
 }
 
 /**
- * Offers [url] to NFC readers for as long as this stays composed. Mirrors [NfcWriterEffect]: keep it composed while the
- * share surface is open, dispose to stop offering it.
+ * Offers [url] to NFC readers for as long as this effect stays composed.
+ *
+ * The effect does not police the foreground itself. Callers compose it only while the share surface is actually on
+ * screen and resumed; `MainActivity` holds that gate, because a dialog left open behind a home-press stays composed and
+ * arming through that would offer a channel PSK to any reader while the phone sits in a pocket.
  */
 @Composable
 fun NfcEmulatorEffect(url: String) {
