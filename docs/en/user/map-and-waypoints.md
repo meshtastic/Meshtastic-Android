@@ -43,7 +43,7 @@ The floating toolbar provides quick access to the compass, the map type and laye
 
 ### Filtering the Map
 
-Tap the filter button in the floating toolbar to open **Filter map**. **Display** controls what is drawn: **Only Favorites**, **Show Waypoints**, **Show Precision Circles**, and a slider that hides nodes not heard from recently. **Node roles** is a chip per device role, plus **All** to show every role; a selected chip means that role is shown. **Nodes** narrows the set further with **Hide offline nodes**, **Only show direct nodes**, **Exclude MQTT**, **Show ignored nodes**, **Include unknown**, **Signed only**, and **Encrypted only**. The last two follow the same rules as the node list's [security indicators](nodes).
+Tap the filter button in the floating toolbar to open **Filter map**. **Display** controls what is drawn: **Only Favorites**, **Show Waypoints**, **Show Precision Circles**, and a slider that hides nodes not heard from recently. **Node roles** is a chip per device role, plus **All** to show every role; a selected chip means that role is shown. **Nodes** narrows the set further with **Hide offline nodes**, **Only show direct nodes**, **Signed only**, **Encrypted only**, **Exclude MQTT**, **Show ignored nodes**, and **Include unknown** — the same rules as the node list's [filter toggles](nodes).
 
 A dot on the filter button means at least one filter is hiding something — check it before concluding the mesh is quiet. Turning **Show Waypoints** off hides every waypoint, including your own. **Show ignored nodes** adds them to the map rather than showing only them — unlike the node list's **Only show ignored Nodes**.
 
@@ -144,8 +144,9 @@ picker, all three offer the same raster base maps:
 Overlays can be toggled on top of any base map, from the layers sheet:
 
 - **Weather radar** — NOAA NEXRAD reflectivity (US coverage)
-- **Hillshade** — terrain relief. Useful for understanding why a link fails, since LoRa range is
-  limited by terrain
+- **Hillshade** — terrain relief from an online tile source, on **F-Droid** and **Desktop** only; Google
+  Play draws hillshade from downloaded offline terrain instead. Useful for understanding why a link
+  fails, since LoRa range is limited by terrain
 
 ### Adding your own tile source
 
@@ -178,17 +179,10 @@ the offline terrain described next does work there.
 Hillshade and elevation contours can be downloaded for offline use as well, so a downloaded area still
 shows why a link fails when there is no network. The terrain data comes from Mapterhorn and is credited on
 the map. On **Google Play**, each downloaded region in the **Offline Manager** list has a **Download Terrain**
-button and a **Contours** switch; terrain attaches to that region and shares its storage limit, and an area
+button and **Hillshade** and **Contours** switches; terrain attaches to that region and shares its storage limit, and an area
 too large for terrain asks you to zoom in or pick a smaller region. On **F-Droid** and **Desktop**, the
 layers sheet has an **Offline Terrain** section of its own: frame the area, tap **Start Download**, and the
 hillshade and contours draw from the downloaded tiles from then on.
-
-### When the map cannot load
-
-The F-Droid build for 32-bit phones ships without the map renderer, because the MapLibre engine is not
-published for that processor. On such a phone the map tab reads **Map unavailable on this device** and
-explains that everything else works normally. There is no setting to change; the rest of the app is
-unaffected.
 
 ### Going offline
 

@@ -19,7 +19,7 @@ Keep the last 5–8 entries and archive older ones by removing them.
 
 **September 2026** — [Nodes](user/nodes) — Nodes on firmware 2.8 show signed and verified identity icons in place of the PKI lock, and **Signed only** and **Encrypted only** filters join the node list and the map.
 
-**September 2026** — [Map & Waypoints](user/map-and-waypoints) — Offline terrain (hillshade and contours) downloads alongside offline regions on both Google Play and F-Droid.
+**September 2026** — [Map & Waypoints](user/map-and-waypoints) — Offline terrain (hillshade and contours) can be downloaded on Google Play, F-Droid, and Desktop.
 
 **August 2026** — [Local Mesh Discovery](user/discovery) — Mesh Beacon advertises the region and preset your radio actually uses, requires a region and a standard modem preset before it will broadcast, and hides invitations to channels your radio already has.
 
