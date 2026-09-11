@@ -168,6 +168,32 @@ abstract class CommonNodeInfoDaoTest {
     }
 
     @Test
+    fun `the legacy mismatch sentinel arriving as a key is neither refused nor stored`() = runTest {
+        createDb()
+        val trusted = ByteArray(32) { 1 }.toByteString()
+        dao.upsert(NodeEntity(num = 1, user = User(id = "!1", public_key = trusted)))
+
+        // A row that recorded a mismatch the old way carries the sentinel as its key. Re-upserting it through the
+        // repository must not read as a fresh substitution, and the sentinel is not a key anyone refused.
+        dao.upsert(NodeEntity(num = 1, user = User(id = "!1", public_key = NodeEntity.ERROR_BYTE_STRING)))
+        val remote = dao.getNodeByNum(1)?.node
+        assertEquals(trusted, remote?.publicKey)
+        assertTrue(remote?.keyMatch ?: false)
+        assertEquals(null, remote?.newPublicKey)
+
+        // Nor may the local link write it over the connected radio's real key. A key of its own, or the new-node
+        // guard would read this upsert as node 1 claiming a second number and never insert it.
+        val own = myNodeInfo.myNodeNum
+        val ownKey = ByteArray(32) { 3 }.toByteString()
+        dao.upsert(NodeEntity(num = own, user = User(id = "!own", public_key = ownKey)))
+        dao.installConfig(
+            myNodeInfo,
+            listOf(NodeEntity(num = own, user = User(id = "!own", public_key = NodeEntity.ERROR_BYTE_STRING))),
+        )
+        assertEquals(ownKey, dao.getNodeByNum(own)?.node?.publicKey)
+    }
+
+    @Test
     fun `the stored key surviving a substitution still reads as a mismatch to the UI`() = runTest {
         createDb()
         val trusted = ByteArray(32) { 1 }.toByteString()

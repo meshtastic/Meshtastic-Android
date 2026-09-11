@@ -89,7 +89,7 @@ interface NodeInfoDao {
     private suspend fun handleNewNodeUpsertValidation(newNode: NodeEntity): NodeEntity {
         // Check if the new node's public key (if present and not empty)
         // is already claimed by another existing node.
-        if ((newNode.publicKey?.size ?: 0) > 0) {
+        if (newNode.publicKey.isUsableKey()) {
             val nodeWithSamePK = findNodeByPublicKey(newNode.publicKey)
             if (nodeWithSamePK != null && nodeWithSamePK.num != newNode.num) {
                 // This is a potential impersonation attempt.
@@ -161,8 +161,8 @@ interface NodeInfoDao {
         val existingKey = existingNode.publicKey ?: existingNode.user.public_key
         val incomingKey = incomingNode.publicKey
 
-        val incomingHasKey = (incomingKey?.size ?: 0) == KEY_SIZE
-        val existingHasKey = existingKey.size == KEY_SIZE && existingKey != NodeEntity.ERROR_BYTE_STRING
+        val incomingHasKey = incomingKey.isUsableKey()
+        val existingHasKey = existingKey.isUsableKey()
 
         return when {
             incomingHasKey ->
@@ -201,6 +201,13 @@ interface NodeInfoDao {
         val keyMatch: Boolean,
         val newPublicKey: ByteString? = null,
     )
+
+    /**
+     * A key the DAO will act on: present, full length, and not the legacy mismatch sentinel. The sentinel is 32 bytes
+     * too, so a size check alone would record it as a refused key or, on the local link, write it over the real one.
+     */
+    private fun ByteString?.isUsableKey(): Boolean =
+        this != null && size == KEY_SIZE && this != NodeEntity.ERROR_BYTE_STRING
 
     /**
      * Handles the validation logic when upserting an existing node.
@@ -246,7 +253,7 @@ interface NodeInfoDao {
         }
 
         val resolved =
-            if (trustIncomingKey && (incomingNode.publicKey?.size ?: 0) == KEY_SIZE) {
+            if (trustIncomingKey && incomingNode.publicKey.isUsableKey()) {
                 // The connected radio is authoritative for its own key, so this also clears any recorded mismatch.
                 ResolvedPublicKey(incomingNode.publicKey, keyMatch = true)
             } else {
@@ -520,7 +527,7 @@ interface NodeInfoDao {
         }
 
         // Batch validate new nodes' public keys (one query instead of N)
-        val publicKeysToCheck = newNodes.mapNotNull { node -> node.publicKey?.takeIf { it.size > 0 } }.distinct()
+        val publicKeysToCheck = newNodes.mapNotNull { node -> node.publicKey?.takeIf { it.isUsableKey() } }.distinct()
         val pkConflicts =
             if (publicKeysToCheck.isNotEmpty()) {
                 publicKeysToCheck
@@ -532,7 +539,7 @@ interface NodeInfoDao {
             }
 
         for (newNode in newNodes) {
-            if ((newNode.publicKey?.size ?: 0) > 0) {
+            if (newNode.publicKey.isUsableKey()) {
                 val conflicting = pkConflicts[newNode.publicKey]
                 if (conflicting != null && conflicting.num != newNode.num) {
                     // Same key under a different num. Migrate when this is the connected device itself
