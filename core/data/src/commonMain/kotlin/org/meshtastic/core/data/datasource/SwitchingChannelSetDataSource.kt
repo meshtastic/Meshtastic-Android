@@ -54,7 +54,7 @@ class SwitchingChannelSetDataSource(
         dbManager
             .observeCurrentDb { db -> db.channelSetDao().observe() }
             .retryOnDbPoolFailure("channelSet")
-            .map { entity -> entity?.channelSet ?: ChannelSet() }
+            .map { entity -> entity?.channelSet ?: ChannelSet.Builder().build() }
             .distinctUntilChanged()
 
     suspend fun clearChannelSet() {
@@ -71,7 +71,13 @@ class SwitchingChannelSetDataSource(
     /** Atomically updates supplied [ChannelSet] fields while preserving fields omitted by the caller. */
     suspend fun updateChannelSet(settingsList: List<ChannelSettings>?, loraConfig: Config.LoRaConfig?) {
         mutate { current ->
-            current.copy(settings = settingsList ?: current.settings, lora_config = loraConfig ?: current.lora_config)
+            current
+                .newBuilder()
+                .also { wb ->
+                    wb.settings = settingsList ?: current.settings
+                    wb.lora_config = loraConfig ?: current.lora_config
+                }
+                .build()
         }
     }
 
@@ -81,10 +87,10 @@ class SwitchingChannelSetDataSource(
         mutate { current ->
             val settings = current.settings.toMutableList()
             while (settings.size <= channel.index) {
-                settings.add(ChannelSettings())
+                settings.add(ChannelSettings.Builder().build())
             }
-            settings[channel.index] = channel.settings ?: ChannelSettings()
-            current.copy(settings = settings)
+            settings[channel.index] = channel.settings ?: ChannelSettings.Builder().build()
+            current.newBuilder().also { wb -> wb.settings = settings }.build()
         }
     }
 
@@ -97,7 +103,7 @@ class SwitchingChannelSetDataSource(
             writeMutex.withLock {
                 dbManager.withDb { db ->
                     val dao = db.channelSetDao()
-                    val current = dao.get()?.channelSet ?: ChannelSet()
+                    val current = dao.get()?.channelSet ?: ChannelSet.Builder().build()
                     dao.upsert(ChannelSetEntity(channelSet = transform(current)))
                 }
             }

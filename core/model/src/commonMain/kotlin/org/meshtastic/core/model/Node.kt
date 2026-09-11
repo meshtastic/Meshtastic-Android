@@ -46,22 +46,22 @@ import org.meshtastic.proto.User
 data class Node(
     val num: Int,
     val metadata: DeviceMetadata? = null,
-    val user: User = User(),
-    val position: Position = Position(),
+    val user: User = User.Builder().build(),
+    val position: Position = Position.Builder().build(),
     val snr: Float = Float.MAX_VALUE,
     val rssi: Int = Int.MAX_VALUE,
     val lastHeard: Int = 0, // the last time we've seen this node in secs since 1970
-    val deviceMetrics: DeviceMetrics = DeviceMetrics(),
+    val deviceMetrics: DeviceMetrics = DeviceMetrics.Builder().build(),
     val channel: Int = 0,
     val viaMqtt: Boolean = false,
     val hopsAway: Int = -1,
     val isFavorite: Boolean = false,
     val isIgnored: Boolean = false,
     val isMuted: Boolean = false,
-    val environmentMetrics: EnvironmentMetrics = EnvironmentMetrics(),
-    val powerMetrics: PowerMetrics = PowerMetrics(),
-    val airQualityMetrics: AirQualityMetrics = AirQualityMetrics(),
-    val paxcounter: Paxcount = Paxcount(),
+    val environmentMetrics: EnvironmentMetrics = EnvironmentMetrics.Builder().build(),
+    val powerMetrics: PowerMetrics = PowerMetrics.Builder().build(),
+    val airQualityMetrics: AirQualityMetrics = AirQualityMetrics.Builder().build(),
+    val paxcounter: Paxcount = Paxcount.Builder().build(),
     val publicKey: ByteString? = null,
     val notes: String = "",
     /** User-editable labels per power-metrics channel (e.g. "Solar", "Battery"), indexed by channel - 1. */
@@ -125,13 +125,13 @@ data class Node(
         get() = rssi.takeIf { it != RSSI_UNSET }
 
     val hasEnvironmentMetrics: Boolean
-        get() = environmentMetrics != EnvironmentMetrics()
+        get() = environmentMetrics != EnvironmentMetrics.Builder().build()
 
     val hasPowerMetrics: Boolean
-        get() = powerMetrics != PowerMetrics()
+        get() = powerMetrics != PowerMetrics.Builder().build()
 
     val hasAirQualityMetrics: Boolean
-        get() = airQualityMetrics != AirQualityMetrics()
+        get() = airQualityMetrics != AirQualityMetrics.Builder().build()
 
     val batteryLevel
         get() = deviceMetrics.battery_level
@@ -245,7 +245,14 @@ data class Node(
             val safeUserId = userId.padStart(DEFAULT_ID_SUFFIX_LENGTH, '0').takeLast(DEFAULT_ID_SUFFIX_LENGTH)
             val longName = "$fallbackNamePrefix $safeUserId"
             val defaultUser =
-                User(id = userId, long_name = longName, short_name = safeUserId, hw_model = HardwareModel.UNSET)
+                User.Builder()
+                    .also { wb ->
+                        wb.id = userId
+                        wb.long_name = longName
+                        wb.short_name = safeUserId
+                        wb.hw_model = HardwareModel.UNSET
+                    }
+                    .build()
             return Node(num = nodeNum, user = defaultUser)
         }
     }

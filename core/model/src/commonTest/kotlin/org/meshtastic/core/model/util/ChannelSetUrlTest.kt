@@ -72,25 +72,32 @@ class ChannelSetUrlTest {
         return ChannelSet.ADAPTER.decode(bytes)
     }
 
-    private fun channelSet(channelCount: Int): ChannelSet = ChannelSet(
-        settings =
-        (0 until channelCount).map { index ->
-            ChannelSettings(
-                name = "Conference-$index",
-                psk = byteArrayOf(index.toByte(), (index + 16).toByte()).toByteString(),
-                module_settings = ModuleSettings(position_precision = index),
-            )
-        },
-        lora_config =
-        LoRaConfig(
-            use_preset = true,
-            modem_preset = ModemPreset.LONG_FAST,
-            region = RegionCode.US,
-            hop_limit = 5,
-            channel_num = 13,
-            tx_enabled = true,
-        ),
-    )
+    private fun channelSet(channelCount: Int): ChannelSet = ChannelSet.Builder()
+        .also { wb ->
+            wb.settings =
+                (0 until channelCount).map { index ->
+                    ChannelSettings.Builder()
+                        .also { wb ->
+                            wb.name = "Conference-$index"
+                            wb.psk = byteArrayOf(index.toByte(), (index + 16).toByte()).toByteString()
+                            wb.module_settings =
+                                ModuleSettings.Builder().also { wb -> wb.position_precision = index }.build()
+                        }
+                        .build()
+                }
+            wb.lora_config =
+                LoRaConfig.Builder()
+                    .also { wb ->
+                        wb.use_preset = true
+                        wb.modem_preset = ModemPreset.LONG_FAST
+                        wb.region = RegionCode.US
+                        wb.hop_limit = 5
+                        wb.channel_num = 13
+                        wb.tx_enabled = true
+                    }
+                    .build()
+        }
+        .build()
 
     private companion object {
         const val REPLACE_CHANNEL_URL = "https://meshtastic.org/e/#CgMSAQESBggBQANIAQ"

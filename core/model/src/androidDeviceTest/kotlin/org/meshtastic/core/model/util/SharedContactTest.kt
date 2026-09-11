@@ -29,7 +29,19 @@ class SharedContactTest {
 
     @Test
     fun testSharedContactUrlRoundTrip() {
-        val original = SharedContact(user = User(long_name = "Suzume", short_name = "SZ"), node_num = 12345)
+        val original =
+            SharedContact.Builder()
+                .also { wb ->
+                    wb.user =
+                        User.Builder()
+                            .also { wb ->
+                                wb.long_name = "Suzume"
+                                wb.short_name = "SZ"
+                            }
+                            .build()
+                    wb.node_num = 12345
+                }
+                .build()
         val url = original.getSharedContactUrl()
         val parsed = url.toSharedContact()
 
@@ -40,7 +52,13 @@ class SharedContactTest {
 
     @Test
     fun testWwwHostIsAccepted() {
-        val original = SharedContact(user = User(long_name = "Suzume"), node_num = 12345)
+        val original =
+            SharedContact.Builder()
+                .also { wb ->
+                    wb.user = User.Builder().also { wb -> wb.long_name = "Suzume" }.build()
+                    wb.node_num = 12345
+                }
+                .build()
         val urlStr = original.getSharedContactUrl().toString().replace("meshtastic.org", "www.meshtastic.org")
         val url = Uri.parse(urlStr)
         val contact = url.toSharedContact()
@@ -49,7 +67,13 @@ class SharedContactTest {
 
     @Test
     fun testLongPathIsAccepted() {
-        val original = SharedContact(user = User(long_name = "Suzume"), node_num = 12345)
+        val original =
+            SharedContact.Builder()
+                .also { wb ->
+                    wb.user = User.Builder().also { wb -> wb.long_name = "Suzume" }.build()
+                    wb.node_num = 12345
+                }
+                .build()
         val urlStr = original.getSharedContactUrl().toString().replace("/v/", "/contact/v/")
         val url = Uri.parse(urlStr)
         val contact = url.toSharedContact()
@@ -58,7 +82,13 @@ class SharedContactTest {
 
     @Test(expected = MalformedMeshtasticUrlException::class)
     fun testInvalidHostThrows() {
-        val original = SharedContact(user = User(long_name = "Suzume"), node_num = 12345)
+        val original =
+            SharedContact.Builder()
+                .also { wb ->
+                    wb.user = User.Builder().also { wb -> wb.long_name = "Suzume" }.build()
+                    wb.node_num = 12345
+                }
+                .build()
         val urlStr = original.getSharedContactUrl().toString().replace("meshtastic.org", "example.com")
         val url = Uri.parse(urlStr)
         url.toSharedContact()
@@ -66,7 +96,13 @@ class SharedContactTest {
 
     @Test(expected = MalformedMeshtasticUrlException::class)
     fun testInvalidPathThrows() {
-        val original = SharedContact(user = User(long_name = "Suzume"), node_num = 12345)
+        val original =
+            SharedContact.Builder()
+                .also { wb ->
+                    wb.user = User.Builder().also { wb -> wb.long_name = "Suzume" }.build()
+                    wb.node_num = 12345
+                }
+                .build()
         val urlStr = original.getSharedContactUrl().toString().replace("/v/", "/wrong/")
         val url = Uri.parse(urlStr)
         url.toSharedContact()

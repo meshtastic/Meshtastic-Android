@@ -54,9 +54,16 @@ data class Channel(val settings: ChannelSettings = default.settings, val loraCon
         // The default channel that devices ship with
         val default =
             Channel(
-                ChannelSettings(psk = defaultPSK.toByteString()),
+                ChannelSettings.Builder().also { wb -> wb.psk = defaultPSK.toByteString() }.build(),
                 // references: NodeDB::installDefaultConfig / Channels::initDefaultChannel
-                LoRaConfig(use_preset = true, modem_preset = ModemPreset.LONG_FAST, hop_limit = 3, tx_enabled = true),
+                LoRaConfig.Builder()
+                    .also { wb ->
+                        wb.use_preset = true
+                        wb.modem_preset = ModemPreset.LONG_FAST
+                        wb.hop_limit = 3
+                        wb.tx_enabled = true
+                    }
+                    .build(),
             )
 
         fun getRandomKey(size: Int = 32): ByteString = platformRandomBytes(size).toByteString()

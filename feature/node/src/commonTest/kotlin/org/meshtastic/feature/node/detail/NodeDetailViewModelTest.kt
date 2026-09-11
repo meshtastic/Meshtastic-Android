@@ -106,7 +106,7 @@ class NodeDetailViewModelTest {
 
     @Test
     fun `uiState emits updates from useCase`() = runTest(testDispatcher) {
-        val node = Node(num = 1234, user = User(id = "!1234"))
+        val node = Node(num = 1234, user = User.Builder().also { wb -> wb.id = "!1234" }.build())
         val stateFlow = MutableStateFlow(NodeDetailUiState(node = node))
         every { getNodeDetailsUseCase(1234) } returns stateFlow
 
@@ -122,7 +122,7 @@ class NodeDetailViewModelTest {
 
     @Test
     fun `handleNodeMenuAction delegates to nodeManagementActions for Mute`() = runTest(testDispatcher) {
-        val node = Node(num = 1234, user = User(id = "!1234"))
+        val node = Node(num = 1234, user = User.Builder().also { wb -> wb.id = "!1234" }.build())
         every { nodeManagementActions.requestMuteNode(any(), any()) } returns Unit
 
         viewModel.handleNodeMenuAction(NodeMenuAction.Mute(node))
@@ -132,7 +132,17 @@ class NodeDetailViewModelTest {
 
     @Test
     fun `handleNodeMenuAction delegates to nodeRequestActions for Traceroute`() = runTest(testDispatcher) {
-        val node = Node(num = 1234, user = User(id = "!1234", long_name = "Test Node"))
+        val node =
+            Node(
+                num = 1234,
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.id = "!1234"
+                        wb.long_name = "Test Node"
+                    }
+                    .build(),
+            )
         everySuspend { nodeRequestActions.requestTraceroute(any(), any()) } returns Unit
 
         viewModel.handleNodeMenuAction(NodeMenuAction.TraceRoute(node))

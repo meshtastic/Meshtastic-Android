@@ -46,7 +46,7 @@ import org.meshtastic.proto.ModuleConfig
 @Composable
 fun SerialConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
-    val serialConfig = state.moduleConfig.serial ?: ModuleConfig.SerialConfig()
+    val serialConfig = state.moduleConfig.serial ?: ModuleConfig.SerialConfig.Builder().build()
     val formState = rememberConfigState(initialValue = serialConfig)
     val focusManager = LocalFocusManager.current
 
@@ -59,7 +59,7 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val config = ModuleConfig(serial = it)
+            val config = ModuleConfig.Builder().also { wb -> wb.serial = it }.build()
             viewModel.setModuleConfig(config)
         },
     ) {
@@ -69,7 +69,9 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     title = stringResource(Res.string.serial_enabled),
                     checked = formState.value.enabled,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy(enabled = it) },
+                    onCheckedChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.enabled = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -77,7 +79,9 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     title = stringResource(Res.string.echo_enabled),
                     checked = formState.value.echo,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy(echo = it) },
+                    onCheckedChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.echo = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -86,7 +90,9 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     value = formState.value.rxd,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy(rxd = it) },
+                    onValueChanged = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.rxd = it }.build()
+                    },
                 )
                 HorizontalDivider()
                 EditTextPreference(
@@ -94,7 +100,9 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     value = formState.value.txd,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy(txd = it) },
+                    onValueChanged = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.txd = it }.build()
+                    },
                 )
                 HorizontalDivider()
                 DropDownPreference(
@@ -102,7 +110,9 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     enabled = state.connected,
                     items = ModuleConfig.SerialConfig.Serial_Baud.entries.map { it to it.name },
                     selectedItem = formState.value.baud,
-                    onItemSelected = { formState.value = formState.value.copy(baud = it) },
+                    onItemSelected = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.baud = it }.build()
+                    },
                 )
                 HorizontalDivider()
                 EditTextPreference(
@@ -110,7 +120,9 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     value = formState.value.timeout,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy(timeout = it) },
+                    onValueChanged = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.timeout = it }.build()
+                    },
                 )
                 HorizontalDivider()
                 DropDownPreference(
@@ -118,14 +130,19 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     enabled = state.connected,
                     items = ModuleConfig.SerialConfig.Serial_Mode.entries.map { it to it.name },
                     selectedItem = formState.value.mode,
-                    onItemSelected = { formState.value = formState.value.copy(mode = it) },
+                    onItemSelected = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.mode = it }.build()
+                    },
                 )
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.override_console_serial_port),
                     checked = formState.value.override_console_serial_port,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy(override_console_serial_port = it) },
+                    onCheckedChange = {
+                        formState.value =
+                            formState.value.newBuilder().also { wb -> wb.override_console_serial_port = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
             }

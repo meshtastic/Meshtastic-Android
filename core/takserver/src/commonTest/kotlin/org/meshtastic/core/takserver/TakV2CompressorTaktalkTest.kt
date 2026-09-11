@@ -43,18 +43,22 @@ class TakV2CompressorTaktalkTest {
     @Test
     fun `m-t-t taktalk message round-trips with voice marker`() {
         val original =
-            TAKPacketV2(
-                cot_type_id = CotType.CotType_m_t_t,
-                callsign = "ASPEN",
-                uid = "TAKTALK-MESSAGE-81b44b48-21c5-4edf-aab2-b6bd2ec1f52f",
-                taktalk =
-                TakTalkMessage(
-                    text = "Testing 123, testing 123.",
-                    chatroom_id = "1",
-                    lang = "English",
-                    from_voice = true,
-                ),
-            )
+            TAKPacketV2.Builder()
+                .also { wb ->
+                    wb.cot_type_id = CotType.CotType_m_t_t
+                    wb.callsign = "ASPEN"
+                    wb.uid = "TAKTALK-MESSAGE-81b44b48-21c5-4edf-aab2-b6bd2ec1f52f"
+                    wb.taktalk =
+                        TakTalkMessage.Builder()
+                            .also { wb ->
+                                wb.text = "Testing 123, testing 123."
+                                wb.chatroom_id = "1"
+                                wb.lang = "English"
+                                wb.from_voice = true
+                            }
+                            .build()
+                }
+                .build()
 
         val wire = TakV2Compressor.compress(original)
         val decompressed = TakV2Compressor.decompress(wire)
@@ -73,13 +77,22 @@ class TakV2CompressorTaktalkTest {
     @Test
     fun `m-t-t taktalk text-only message has from_voice false`() {
         val original =
-            TAKPacketV2(
-                cot_type_id = CotType.CotType_m_t_t,
-                callsign = "ETHEL",
-                uid = "TAKTALK-MESSAGE-text-only",
-                taktalk =
-                TakTalkMessage(text = "typed message", chatroom_id = "1", lang = "English", from_voice = false),
-            )
+            TAKPacketV2.Builder()
+                .also { wb ->
+                    wb.cot_type_id = CotType.CotType_m_t_t
+                    wb.callsign = "ETHEL"
+                    wb.uid = "TAKTALK-MESSAGE-text-only"
+                    wb.taktalk =
+                        TakTalkMessage.Builder()
+                            .also { wb ->
+                                wb.text = "typed message"
+                                wb.chatroom_id = "1"
+                                wb.lang = "English"
+                                wb.from_voice = false
+                            }
+                            .build()
+                }
+                .build()
 
         val decompressed = TakV2Compressor.decompress(TakV2Compressor.compress(original))
 
@@ -91,21 +104,25 @@ class TakV2CompressorTaktalkTest {
     @Test
     fun `y- taktalk room broadcast round-trips with participant list`() {
         val original =
-            TAKPacketV2(
-                cot_type_id = CotType.CotType_y,
-                uid = "ROOM-DATA-5eac9336-2698-4dbb-9fa2-62b100e469fe",
-                // v0.3.2: sender identity lives on envelope packet.callsign,
-                // not on the deprecated TakTalkRoomData.sender_callsign field.
-                // The SDK builder reconstitutes <sender-callsign> from envelope
-                // callsign on emit.
-                callsign = "ASPEN",
-                taktalk_room =
-                TakTalkRoomData(
-                    room_id = "30b2755c-c547-44ef-a0cc-cdbd8a15616f",
-                    room_name = "test",
-                    participants = listOf("ETHEL", "ASPEN"),
-                ),
-            )
+            TAKPacketV2.Builder()
+                .also { wb ->
+                    wb.cot_type_id = CotType.CotType_y
+                    wb.uid = "ROOM-DATA-5eac9336-2698-4dbb-9fa2-62b100e469fe"
+                    // v0.3.2: sender identity lives on envelope packet.callsign,
+                    // not on the deprecated TakTalkRoomData.sender_callsign field.
+                    // The SDK builder reconstitutes <sender-callsign> from envelope
+                    // callsign on emit.
+                    wb.callsign = "ASPEN"
+                    wb.taktalk_room =
+                        TakTalkRoomData.Builder()
+                            .also { wb ->
+                                wb.room_id = "30b2755c-c547-44ef-a0cc-cdbd8a15616f"
+                                wb.room_name = "test"
+                                wb.participants = listOf("ETHEL", "ASPEN")
+                            }
+                            .build()
+                }
+                .build()
 
         val decompressed = TakV2Compressor.decompress(TakV2Compressor.compress(original))
 
@@ -124,22 +141,27 @@ class TakV2CompressorTaktalkTest {
     @Test
     fun `m-t-t with marti round-trips dest callsigns and survives compression`() {
         val original =
-            TAKPacketV2(
-                cot_type_id = CotType.CotType_m_t_t,
-                uid = "TAKTALK-MESSAGE-marti-test-uuid",
-                callsign = "ASPEN",
-                taktalk =
-                TakTalkMessage(
-                    text = "Push-to-talk to ETHEL",
-                    chatroom_id = "1",
-                    lang = "English",
-                    from_voice = true,
-                ),
-                // Directed-routing recipient list. TAKTALK gates voice TTS on
-                // this list matching the receiver's callsign — a regression
-                // here silently breaks voice messaging end-to-end.
-                marti = org.meshtastic.proto.Marti(dest_callsign = listOf("ETHEL")),
-            )
+            TAKPacketV2.Builder()
+                .also { wb ->
+                    wb.cot_type_id = CotType.CotType_m_t_t
+                    wb.uid = "TAKTALK-MESSAGE-marti-test-uuid"
+                    wb.callsign = "ASPEN"
+                    wb.taktalk =
+                        TakTalkMessage.Builder()
+                            .also { wb ->
+                                wb.text = "Push-to-talk to ETHEL"
+                                wb.chatroom_id = "1"
+                                wb.lang = "English"
+                                wb.from_voice = true
+                            }
+                            .build()
+                    // Directed-routing recipient list. TAKTALK gates voice TTS on
+                    // this list matching the receiver's callsign — a regression
+                    // here silently breaks voice messaging end-to-end.
+                    wb.marti =
+                        org.meshtastic.proto.Marti.Builder().also { wb -> wb.dest_callsign = listOf("ETHEL") }.build()
+                }
+                .build()
 
         val decompressed = TakV2Compressor.decompress(TakV2Compressor.compress(original))
 
@@ -156,18 +178,22 @@ class TakV2CompressorTaktalkTest {
     @Test
     fun `b-t-f chat carries TAKTALK sidecars through compressor`() {
         val original =
-            TAKPacketV2(
-                cot_type_id = CotType.CotType_b_t_f,
-                callsign = "ASPEN",
-                uid = "GeoChat.test",
-                chat =
-                GeoChat(
-                    message = "Test message",
-                    lang = "English",
-                    room_id = "30b2755c-c547-44ef-a0cc-cdbd8a15616f",
-                    voice_profile_id = "", // empty marker `<voice_profile_id/>`
-                ),
-            )
+            TAKPacketV2.Builder()
+                .also { wb ->
+                    wb.cot_type_id = CotType.CotType_b_t_f
+                    wb.callsign = "ASPEN"
+                    wb.uid = "GeoChat.test"
+                    wb.chat =
+                        GeoChat.Builder()
+                            .also { wb ->
+                                wb.message = "Test message"
+                                wb.lang = "English"
+                                wb.room_id = "30b2755c-c547-44ef-a0cc-cdbd8a15616f"
+                                wb.voice_profile_id = "" // empty marker `<voice_profile_id/>`
+                            }
+                            .build()
+                }
+                .build()
 
         val decompressed = TakV2Compressor.decompress(TakV2Compressor.compress(original))
 
@@ -192,16 +218,20 @@ class TakV2CompressorTaktalkTest {
         // round-trip must not synthesize empty-string sidecars that would
         // change the rebuilt CoT XML for plain chat messages.
         val original =
-            TAKPacketV2(
-                cot_type_id = CotType.CotType_b_t_f,
-                callsign = "ALPHA-1",
-                uid = "GeoChat.plain",
-                chat =
-                GeoChat(
-                    message = "plain chat",
-                    // no lang, no room_id, no voice_profile_id
-                ),
-            )
+            TAKPacketV2.Builder()
+                .also { wb ->
+                    wb.cot_type_id = CotType.CotType_b_t_f
+                    wb.callsign = "ALPHA-1"
+                    wb.uid = "GeoChat.plain"
+                    wb.chat =
+                        GeoChat.Builder()
+                            .also { wb ->
+                                wb.message = "plain chat"
+                                // no lang, no room_id, no voice_profile_id
+                            }
+                            .build()
+                }
+                .build()
 
         val decompressed = TakV2Compressor.decompress(TakV2Compressor.compress(original))
 

@@ -128,10 +128,13 @@ open class MeshLogRepositoryImpl(
         if (decoded.want_response == true) return@runCatching null
 
         val telemetry = Telemetry.ADAPTER.decode(decoded.payload)
-        telemetry.copy(
-            time = (log.received_date / MILLIS_PER_SEC).toInt(),
-            environment_metrics = telemetry.environment_metrics?.withSentinelsForAbsentReadings(),
-        )
+        telemetry
+            .newBuilder()
+            .also { wb ->
+                wb.time = (log.received_date / MILLIS_PER_SEC).toInt()
+                wb.environment_metrics = telemetry.environment_metrics?.withSentinelsForAbsentReadings()
+            }
+            .build()
     }
         .getOrNull()
 
@@ -247,19 +250,21 @@ open class MeshLogRepositoryImpl(
 private fun EnvironmentMetrics.withSentinelsForAbsentReadings(): EnvironmentMetrics =
     withLegacyOneWireTemperatures().withScalarSentinels().withChannelSentinels()
 
-private fun EnvironmentMetrics.withScalarSentinels(): EnvironmentMetrics = copy(
-    temperature = temperature ?: Float.NaN,
-    relative_humidity = relative_humidity ?: Float.NaN,
-    soil_temperature = soil_temperature ?: Float.NaN,
-    barometric_pressure = barometric_pressure ?: Float.NaN,
-    gas_resistance = gas_resistance ?: Float.NaN,
-    voltage = voltage ?: Float.NaN,
-    current = current ?: Float.NaN,
-    lux = lux ?: Float.NaN,
-    uv_lux = uv_lux ?: Float.NaN,
-    iaq = iaq ?: Int.MIN_VALUE,
-    soil_moisture = soil_moisture ?: Int.MIN_VALUE,
-)
+private fun EnvironmentMetrics.withScalarSentinels(): EnvironmentMetrics = this.newBuilder()
+    .also { wb ->
+        wb.temperature = temperature ?: Float.NaN
+        wb.relative_humidity = relative_humidity ?: Float.NaN
+        wb.soil_temperature = soil_temperature ?: Float.NaN
+        wb.barometric_pressure = barometric_pressure ?: Float.NaN
+        wb.gas_resistance = gas_resistance ?: Float.NaN
+        wb.voltage = voltage ?: Float.NaN
+        wb.current = current ?: Float.NaN
+        wb.lux = lux ?: Float.NaN
+        wb.uv_lux = uv_lux ?: Float.NaN
+        wb.iaq = iaq ?: Int.MIN_VALUE
+        wb.soil_moisture = soil_moisture ?: Int.MIN_VALUE
+    }
+    .build()
 
 private fun EnvironmentMetrics.withChannelSentinels(): EnvironmentMetrics =
     (0 until TELEMETRY_CHANNEL_COUNT).fold(this) { metrics, channel ->

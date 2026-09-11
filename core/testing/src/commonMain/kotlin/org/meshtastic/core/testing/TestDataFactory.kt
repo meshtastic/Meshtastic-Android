@@ -49,8 +49,17 @@ object TestDataFactory {
         hwModel: org.meshtastic.proto.HardwareModel = org.meshtastic.proto.HardwareModel.UNSET,
         batteryLevel: Int? = 100,
     ): Node {
-        val user = User(id = userId, long_name = longName, short_name = shortName, hw_model = hwModel)
-        val metrics = org.meshtastic.proto.DeviceMetrics(battery_level = batteryLevel)
+        val user =
+            User.Builder()
+                .also { wb ->
+                    wb.id = userId
+                    wb.long_name = longName
+                    wb.short_name = shortName
+                    wb.hw_model = hwModel
+                }
+                .build()
+        val metrics =
+            org.meshtastic.proto.DeviceMetrics.Builder().also { wb -> wb.battery_level = batteryLevel }.build()
         return Node(
             num = num,
             user = user,
@@ -68,7 +77,14 @@ object TestDataFactory {
         to: Int = 0xffffffff.toInt(),
         decoded: org.meshtastic.proto.Data? = null,
         relayNode: Int = 0,
-    ) = org.meshtastic.proto.MeshPacket(from = from, to = to, decoded = decoded, relay_node = relayNode)
+    ) = org.meshtastic.proto.MeshPacket.Builder()
+        .also { wb ->
+            wb.from = from
+            wb.to = to
+            wb.decoded = decoded
+            wb.relay_node = relayNode
+        }
+        .build()
 
     /** Creates multiple test nodes with sequential IDs. */
     fun createTestNodes(count: Int, baseNum: Int = 1): List<Node> = (0 until count).map { i ->

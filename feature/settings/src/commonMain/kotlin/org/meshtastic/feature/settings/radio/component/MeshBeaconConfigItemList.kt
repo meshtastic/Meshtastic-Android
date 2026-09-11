@@ -108,7 +108,7 @@ private fun Int.hasFlag(flag: Int): Boolean = (this and flag) != 0
 @Composable
 fun MeshBeaconConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, modifier: Modifier = Modifier) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
-    val meshBeaconConfig = state.moduleConfig.mesh_beacon ?: MeshBeaconConfig()
+    val meshBeaconConfig = state.moduleConfig.mesh_beacon ?: MeshBeaconConfig.Builder().build()
     val radioLora = state.radioConfig.lora
 
     if (radioLora == null || radioLora.region == RegionCode.UNSET) {
@@ -184,7 +184,7 @@ fun MeshBeaconConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, 
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
             val stamped = stampBeaconConfigForSave(it, meshBeaconConfig, radioLora, state.channelList)
-            viewModel.setModuleConfig(ModuleConfig(mesh_beacon = stamped))
+            viewModel.setModuleConfig(ModuleConfig.Builder().also { wb -> wb.mesh_beacon = stamped }.build())
         },
     ) {
         item {
@@ -204,7 +204,11 @@ fun MeshBeaconConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, 
                     checked = formState.value.flags.hasFlag(listenFlag),
                     enabled = state.connected,
                     onCheckedChange = {
-                        formState.value = formState.value.copy(flags = formState.value.flags.withFlag(listenFlag, it))
+                        formState.value =
+                            formState.value
+                                .newBuilder()
+                                .also { wb -> wb.flags = formState.value.flags.withFlag(listenFlag, it) }
+                                .build()
                     },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
@@ -216,7 +220,10 @@ fun MeshBeaconConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, 
                     enabled = broadcastGate.toggleEnabled,
                     onCheckedChange = {
                         formState.value =
-                            formState.value.copy(flags = formState.value.flags.withFlag(broadcastFlag, it))
+                            formState.value
+                                .newBuilder()
+                                .also { wb -> wb.flags = formState.value.flags.withFlag(broadcastFlag, it) }
+                                .build()
                     },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
@@ -238,7 +245,10 @@ fun MeshBeaconConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, 
                         isError = false,
                         keyboardOptions = KeyboardOptions.Default,
                         keyboardActions = KeyboardActions.Default,
-                        onValueChanged = { formState.value = formState.value.copy(broadcast_message = it) },
+                        onValueChanged = {
+                            formState.value =
+                                formState.value.newBuilder().also { wb -> wb.broadcast_message = it }.build()
+                        },
                     )
                     HorizontalDivider()
                     val intervalOptions = remember { IntervalConfiguration.MESH_BEACON_BROADCAST.allowedIntervals }
@@ -275,7 +285,11 @@ fun MeshBeaconConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, 
                         selectedItem = storedIntervalSecs,
                         enabled = broadcastGate.sectionsEnabled,
                         onItemSelected = {
-                            formState.value = formState.value.copy(broadcast_interval_secs = it.toInt())
+                            formState.value =
+                                formState.value
+                                    .newBuilder()
+                                    .also { wb -> wb.broadcast_interval_secs = it.toInt() }
+                                    .build()
                         },
                     )
                 }
@@ -292,7 +306,8 @@ fun MeshBeaconConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, 
                         channelItems = channelItems,
                         enabled = broadcastGate.sectionsEnabled,
                         onChannelSelect = { chosen ->
-                            formState.value = formState.value.copy(broadcast_offer_channel = chosen)
+                            formState.value =
+                                formState.value.newBuilder().also { wb -> wb.broadcast_offer_channel = chosen }.build()
                         },
                     )
                 }
@@ -306,7 +321,9 @@ fun MeshBeaconConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, 
                     presetConstraint = presetConstraint,
                     presetsGated = presetsGated,
                     capabilities = capabilities,
-                    onChange = { formState.value = formState.value.copy(broadcast_targets = it) },
+                    onChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.broadcast_targets = it }.build()
+                    },
                 )
             }
         }
@@ -401,7 +418,10 @@ internal fun BroadcastTargetsCard(
             )
         }
         HorizontalDivider()
-        TextButton(onClick = { onChange(targets + MeshBeaconConfig.BroadcastTarget()) }, enabled = enabled) {
+        TextButton(
+            onClick = { onChange(targets + MeshBeaconConfig.BroadcastTarget.Builder().build()) },
+            enabled = enabled,
+        ) {
             Text(stringResource(Res.string.mesh_beacon_target_add))
         }
     }
@@ -471,7 +491,7 @@ private fun BroadcastTargetRow(
         items = nullablePresetItems,
         selectedItem = rowPreset,
         enabled = enabled,
-        onItemSelected = { sel -> onChange { it.copy(preset = sel) } },
+        onItemSelected = { sel -> onChange { it.newBuilder().also { wb -> wb.preset = sel }.build() } },
     )
     TextButton(onClick = onRemove, enabled = enabled) { Text(stringResource(Res.string.mesh_beacon_target_remove)) }
 }

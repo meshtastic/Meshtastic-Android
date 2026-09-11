@@ -100,24 +100,36 @@ internal fun stampBeaconConfigForSave(
     radioLora: Config.LoRaConfig,
     channelList: List<ChannelSettings>,
 ): MeshBeaconConfig = if (radioLora.use_preset) {
-    form.copy(
-        broadcast_offer_region = radioLora.region,
-        broadcast_offer_preset = radioLora.modem_preset,
-        broadcast_offer_channel =
-        (form.broadcast_offer_channel ?: channelList.getOrNull(0))?.let {
-            ChannelSettings(name = it.name, psk = it.psk)
-        },
-        broadcast_targets = form.broadcast_targets.map { it.copy(region = radioLora.region) },
-    )
+    form
+        .newBuilder()
+        .also { wb ->
+            wb.broadcast_offer_region = radioLora.region
+            wb.broadcast_offer_preset = radioLora.modem_preset
+            wb.broadcast_offer_channel =
+                (form.broadcast_offer_channel ?: channelList.getOrNull(0))?.let {
+                    ChannelSettings.Builder()
+                        .also { wb ->
+                            wb.name = it.name
+                            wb.psk = it.psk
+                        }
+                        .build()
+                }
+            wb.broadcast_targets =
+                form.broadcast_targets.map { it.newBuilder().also { wb -> wb.region = radioLora.region }.build() }
+        }
+        .build()
 } else {
-    form.copy(
-        broadcast_message = stored.broadcast_message,
-        broadcast_interval_secs = stored.broadcast_interval_secs,
-        broadcast_offer_region = stored.broadcast_offer_region,
-        broadcast_offer_preset = stored.broadcast_offer_preset,
-        broadcast_offer_channel = stored.broadcast_offer_channel,
-        broadcast_targets = stored.broadcast_targets,
-    )
+    form
+        .newBuilder()
+        .also { wb ->
+            wb.broadcast_message = stored.broadcast_message
+            wb.broadcast_interval_secs = stored.broadcast_interval_secs
+            wb.broadcast_offer_region = stored.broadcast_offer_region
+            wb.broadcast_offer_preset = stored.broadcast_offer_preset
+            wb.broadcast_offer_channel = stored.broadcast_offer_channel
+            wb.broadcast_targets = stored.broadcast_targets
+        }
+        .build()
 }
 
 /**
@@ -130,10 +142,13 @@ internal fun selectBeaconTargetChannel(
     target: MeshBeaconConfig.BroadcastTarget,
     channelIndex: Int?,
     currentPreset: ModemPreset,
-): MeshBeaconConfig.BroadcastTarget = target.copy(
-    channel_index = channelIndex,
-    preset = if (channelIndex != null) target.preset ?: currentPreset else target.preset,
-)
+): MeshBeaconConfig.BroadcastTarget = target
+    .newBuilder()
+    .also { wb ->
+        wb.channel_index = channelIndex
+        wb.preset = if (channelIndex != null) target.preset ?: currentPreset else target.preset
+    }
+    .build()
 
 /**
  * Seeds an empty stored `broadcast_targets` list with one default row (design#140 behavior 6: "one row saves as the
@@ -143,7 +158,7 @@ internal fun selectBeaconTargetChannel(
  * stored list is returned unchanged.
  */
 internal fun seedBeaconTargets(stored: List<MeshBeaconConfig.BroadcastTarget>): List<MeshBeaconConfig.BroadcastTarget> =
-    stored.ifEmpty { listOf(MeshBeaconConfig.BroadcastTarget()) }
+    stored.ifEmpty { listOf(MeshBeaconConfig.BroadcastTarget.Builder().build()) }
 
 /**
  * [MeshBeaconConfigScreen]'s actual `formState` initial value: [seedBeaconTargets] applied to the loaded config's
@@ -152,7 +167,7 @@ internal fun seedBeaconTargets(stored: List<MeshBeaconConfig.BroadcastTarget>): 
  * [seedBeaconTargets] and only asserting against it in isolation.
  */
 internal fun initialBeaconFormState(loaded: MeshBeaconConfig): MeshBeaconConfig =
-    loaded.copy(broadcast_targets = seedBeaconTargets(loaded.broadcast_targets))
+    loaded.newBuilder().also { wb -> wb.broadcast_targets = seedBeaconTargets(loaded.broadcast_targets) }.build()
 
 /**
  * Removes the target row at [index], keeping the list at a floor of one row (design#140 behavior 6: "no UI that changes
@@ -164,7 +179,7 @@ internal fun removeBeaconTarget(
     targets: List<MeshBeaconConfig.BroadcastTarget>,
     index: Int,
 ): List<MeshBeaconConfig.BroadcastTarget> =
-    targets.filterIndexed { i, _ -> i != index }.ifEmpty { listOf(MeshBeaconConfig.BroadcastTarget()) }
+    targets.filterIndexed { i, _ -> i != index }.ifEmpty { listOf(MeshBeaconConfig.BroadcastTarget.Builder().build()) }
 
 /** The three broadcast-half gating decisions design#140 Q1 hangs off `radioLora.use_preset` and the STORED flag. */
 internal data class BeaconBroadcastGate(

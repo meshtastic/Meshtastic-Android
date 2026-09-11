@@ -30,7 +30,7 @@ import org.meshtastic.proto.Config
 @PreviewLightDark
 @Composable
 fun PacketAuthenticityDefaultPreview() {
-    PacketAuthenticitySettingPreview(Config.SecurityConfig().packet_signature_policy)
+    PacketAuthenticitySettingPreview(Config.SecurityConfig.Builder().build().packet_signature_policy)
 }
 
 @PreviewLightDark

@@ -261,7 +261,11 @@ interface NodeInfoDao {
             }
 
         return incomingNode.copy(
-            user = incomingNode.user.copy(public_key = resolved.key ?: ByteString.EMPTY),
+            user =
+                incomingNode.user
+                    .newBuilder()
+                    .also { wb -> wb.public_key = resolved.key ?: ByteString.EMPTY }
+                    .build(),
             publicKey = resolved.key,
             keyMatch = resolved.keyMatch,
             newPublicKey = resolved.newPublicKey,

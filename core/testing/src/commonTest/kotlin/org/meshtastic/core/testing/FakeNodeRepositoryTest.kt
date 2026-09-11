@@ -33,9 +33,9 @@ class FakeNodeRepositoryTest {
     fun `getNodes sorting by name`() = runTest {
         val nodes =
             listOf(
-                Node(num = 1, user = User(long_name = "Charlie")),
-                Node(num = 2, user = User(long_name = "Alice")),
-                Node(num = 3, user = User(long_name = "Bob")),
+                Node(num = 1, user = User.Builder().also { wb -> wb.long_name = "Charlie" }.build()),
+                Node(num = 2, user = User.Builder().also { wb -> wb.long_name = "Alice" }.build()),
+                Node(num = 3, user = User.Builder().also { wb -> wb.long_name = "Bob" }.build()),
             )
         repository.setNodes(nodes)
 
@@ -49,8 +49,16 @@ class FakeNodeRepositoryTest {
 
     @Test
     fun `getUnknownNodes returns nodes with UNSET hw_model`() = runTest {
-        val node1 = Node(num = 1, user = User(hw_model = org.meshtastic.proto.HardwareModel.UNSET))
-        val node2 = Node(num = 2, user = User(hw_model = org.meshtastic.proto.HardwareModel.TLORA_V2))
+        val node1 =
+            Node(
+                num = 1,
+                user = User.Builder().also { wb -> wb.hw_model = org.meshtastic.proto.HardwareModel.UNSET }.build(),
+            )
+        val node2 =
+            Node(
+                num = 2,
+                user = User.Builder().also { wb -> wb.hw_model = org.meshtastic.proto.HardwareModel.TLORA_V2 }.build(),
+            )
         repository.setNodes(listOf(node1, node2))
 
         val result = repository.getUnknownNodes()
@@ -88,7 +96,8 @@ class FakeNodeRepositoryTest {
     fun `insertMetadata updates node metadata`() = runTest {
         val nodeNum = 1234
         repository.upsert(Node(num = nodeNum))
-        val metadata = org.meshtastic.proto.DeviceMetadata(firmware_version = "2.5.0")
+        val metadata =
+            org.meshtastic.proto.DeviceMetadata.Builder().also { wb -> wb.firmware_version = "2.5.0" }.build()
         repository.insertMetadata(nodeNum, metadata)
 
         val node = repository.nodeDBbyNum.value[nodeNum]

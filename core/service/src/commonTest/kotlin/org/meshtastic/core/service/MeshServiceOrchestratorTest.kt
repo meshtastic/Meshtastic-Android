@@ -121,7 +121,7 @@ class MeshServiceOrchestratorTest {
                 isSessionActive(it.args[0] as RadioSessionContext)
             }
         every { serviceRepository.meshPacketFlow } returns MutableSharedFlow()
-        every { meshConfigHandler.moduleConfig } returns MutableStateFlow(LocalModuleConfig())
+        every { meshConfigHandler.moduleConfig } returns MutableStateFlow(LocalModuleConfig.Builder().build())
         every { takPrefs.isTakServerEnabled } returns takEnabledFlow
         every { takPrefs.isMeshToCotEnabled } returns MutableStateFlow(false)
         every { takPrefs.takServerChannel } returns MutableStateFlow(0)
@@ -414,7 +414,11 @@ class MeshServiceOrchestratorTest {
                 activeSession = activeSession,
             )
         every { nodeManager.myNodeNum } returns MutableStateFlow(null)
-        val payload = FromRadio(my_info = MyNodeInfo(my_node_num = 42)).encode()
+        val payload =
+            FromRadio.Builder()
+                .also { wb -> wb.my_info = MyNodeInfo.Builder().also { wb -> wb.my_node_num = 42 }.build() }
+                .build()
+                .encode()
         val staleFrame = frame(payload, RadioSessionContext(generation = 1L, address = DEFAULT_ADDRESS))
         val freshFrame = frame(payload, RadioSessionContext(generation = 2L, address = DEFAULT_ADDRESS))
 

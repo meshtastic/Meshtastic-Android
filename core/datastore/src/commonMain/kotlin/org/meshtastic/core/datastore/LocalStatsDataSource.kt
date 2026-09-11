@@ -40,7 +40,7 @@ open class LocalStatsDataSourceImpl(private val localStatsStore: CoreLocalStatsD
         localStatsStore.data.catch { exception ->
             if (exception is IOException) {
                 Logger.e { "Error reading LocalStats: ${exception.message}" }
-                emit(LocalStats())
+                emit(LocalStats.Builder().build())
             } else {
                 throw exception
             }
@@ -51,6 +51,6 @@ open class LocalStatsDataSourceImpl(private val localStatsStore: CoreLocalStatsD
     }
 
     override suspend fun clearLocalStats() {
-        localStatsStore.updateData { LocalStats() }
+        localStatsStore.updateData { LocalStats.Builder().build() }
     }
 }

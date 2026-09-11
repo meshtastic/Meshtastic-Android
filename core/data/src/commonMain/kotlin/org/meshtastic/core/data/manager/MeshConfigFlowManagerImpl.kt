@@ -385,7 +385,7 @@ class MeshConfigFlowManagerImpl(
                     handshakeState.value = state.copy(metadata = metadata)
                     // Persist the metadata immediately, but never let a queued old-session write target the next
                     // session's selected database.
-                    if (metadata != DeviceMetadata()) {
+                    if (metadata != DeviceMetadata.Builder().build()) {
                         metadataNodeNum = state.rawMyNodeInfo.my_node_num
                     }
                     connectionManager.value.onHandshakeProgress()

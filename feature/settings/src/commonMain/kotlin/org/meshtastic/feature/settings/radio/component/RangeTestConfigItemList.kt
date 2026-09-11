@@ -41,7 +41,7 @@ import org.meshtastic.proto.ModuleConfig
 @Composable
 fun RangeTestConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
-    val rangeTestConfig = state.moduleConfig.range_test ?: ModuleConfig.RangeTestConfig()
+    val rangeTestConfig = state.moduleConfig.range_test ?: ModuleConfig.RangeTestConfig.Builder().build()
     val formState = rememberConfigState(initialValue = rangeTestConfig)
 
     val isPublicPrimaryChannel = (state.channelList.firstOrNull()?.psk?.size ?: 0) < 2
@@ -56,8 +56,9 @@ fun RangeTestConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val safeConfig = if (isPublicPrimaryChannel) it.copy(enabled = false) else it
-            val config = ModuleConfig(range_test = safeConfig)
+            val safeConfig =
+                if (isPublicPrimaryChannel) it.newBuilder().also { wb -> wb.enabled = false }.build() else it
+            val config = ModuleConfig.Builder().also { wb -> wb.range_test = safeConfig }.build()
             viewModel.setModuleConfig(config)
         },
     ) {
@@ -67,7 +68,9 @@ fun RangeTestConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     title = stringResource(Res.string.range_test_enabled),
                     checked = formState.value.enabled,
                     enabled = canConfigure || formState.value.enabled,
-                    onCheckedChange = { formState.value = formState.value.copy(enabled = it) },
+                    onCheckedChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.enabled = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -77,14 +80,18 @@ fun RangeTestConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     selectedItem = (formState.value.sender).toLong(),
                     enabled = canConfigure,
                     items = rangeItems.map { it.value to it.toDisplayString() },
-                    onItemSelected = { formState.value = formState.value.copy(sender = it.toInt()) },
+                    onItemSelected = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.sender = it.toInt() }.build()
+                    },
                 )
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.save_csv_in_storage_esp32_only),
                     checked = formState.value.save,
                     enabled = canConfigure,
-                    onCheckedChange = { formState.value = formState.value.copy(save = it) },
+                    onCheckedChange = {
+                        formState.value = formState.value.newBuilder().also { wb -> wb.save = it }.build()
+                    },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
             }

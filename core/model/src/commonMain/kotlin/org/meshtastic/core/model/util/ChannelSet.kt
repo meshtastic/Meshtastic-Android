@@ -65,7 +65,7 @@ fun CommonUri.toChannelSet(): ChannelSet {
         }
     val shouldAdd = fragment?.substringAfter('?', "")?.addParameter() ?: getBooleanQueryParameter("add", false)
 
-    return if (shouldAdd) url.copy(lora_config = null) else url
+    return if (shouldAdd) url.newBuilder().also { wb -> wb.lora_config = null }.build() else url
 }
 
 private fun String.addParameter(): Boolean? = split('&')
@@ -76,13 +76,13 @@ private fun String.addParameter(): Boolean? = split('&')
 /** @return A list of globally unique channel IDs usable with MQTT subscribe() */
 val ChannelSet.subscribeList: List<String>
     get() {
-        val loraConfig = this.lora_config ?: LoRaConfig()
+        val loraConfig = this.lora_config ?: LoRaConfig.Builder().build()
         return settings.filter { it.downlink_enabled }.map { Channel(it, loraConfig).name }
     }
 
 fun ChannelSet.getChannel(index: Int): Channel? = if (settings.size > index) {
     val s = settings[index]
-    Channel(s, lora_config ?: LoRaConfig())
+    Channel(s, lora_config ?: LoRaConfig.Builder().build())
 } else {
     null
 }
@@ -112,7 +112,14 @@ fun ChannelSettings.isAlreadyJoined(
 ): Boolean {
     val lora = currentLora ?: return false
     if (currentChannels.isEmpty()) return false
-    val offerLora = lora.copy(use_preset = true, modem_preset = offerPreset ?: lora.modem_preset)
+    val offerLora =
+        lora
+            .newBuilder()
+            .also { wb ->
+                wb.use_preset = true
+                wb.modem_preset = offerPreset ?: lora.modem_preset
+            }
+            .build()
     val offerIdentity = channelIdentity(offerLora)
     return currentChannels.withIndex().any { (index, settings) ->
         (index == 0 || !settings.isChannelPlaceholder()) && settings.channelIdentity(lora) == offerIdentity
@@ -162,7 +169,8 @@ fun MeshBeacon.beaconJoinOption(currentLora: LoRaConfig?, currentChannels: List<
     if (lora.channel_num != 0 || lora.numChannels <= 0) return BeaconJoinOption.SWITCH
     // Hash the *effective* names: an empty channel name resolves to its preset display name ("LongFast", …), which is
     // what firmware hashes for the slot — comparing raw "" on both sides would misclassify an unnamed primary.
-    val currentSlot = lora.channelNum(Channel(currentChannels.firstOrNull() ?: ChannelSettings(), lora).name)
+    val currentSlot =
+        lora.channelNum(Channel(currentChannels.firstOrNull() ?: ChannelSettings.Builder().build(), lora).name)
     val offeredSlot = lora.channelNum(Channel(offer, lora).name)
     return if (offeredSlot == currentSlot) BeaconJoinOption.ADD else BeaconJoinOption.SWITCH
 }
@@ -188,7 +196,7 @@ fun MeshBeacon.beaconJoinOption(currentLora: LoRaConfig?, currentChannels: List<
 fun MeshBeacon.toJoinChannelSet(option: BeaconJoinOption, currentLora: LoRaConfig?): ChannelSet? {
     val offerChannel = (offer_channel ?: return null).withoutPositionSharing()
     return when (option) {
-        BeaconJoinOption.ADD -> ChannelSet(settings = listOf(offerChannel))
+        BeaconJoinOption.ADD -> ChannelSet.Builder().also { wb -> wb.settings = listOf(offerChannel) }.build()
 
         BeaconJoinOption.SWITCH -> {
             // Start from the shared device default ([Channel.default] — use_preset=true, hop_limit/tx_enabled set,
@@ -198,13 +206,21 @@ fun MeshBeacon.toJoinChannelSet(option: BeaconJoinOption, currentLora: LoRaConfi
             // firmware re-derive the frequency from the offered channel name (Apple FR-006). This is sent as a full
             // LoRaConfig replacement, so carry region (a zero region disables transmit); the beacon proto advertises
             // no other RF fields.
-            val base = currentLora ?: LoRaConfig()
+            val base = currentLora ?: LoRaConfig.Builder().build()
             val loraConfig =
-                Channel.default.loraConfig.copy(
-                    modem_preset = offer_preset ?: base.modem_preset,
-                    region = if (offer_region != RegionCode.UNSET) offer_region else base.region,
-                )
-            ChannelSet(settings = listOf(offerChannel), lora_config = loraConfig)
+                Channel.default.loraConfig
+                    .newBuilder()
+                    .also { wb ->
+                        wb.modem_preset = offer_preset ?: base.modem_preset
+                        wb.region = if (offer_region != RegionCode.UNSET) offer_region else base.region
+                    }
+                    .build()
+            ChannelSet.Builder()
+                .also { wb ->
+                    wb.settings = listOf(offerChannel)
+                    wb.lora_config = loraConfig
+                }
+                .build()
         }
 
         BeaconJoinOption.NONE -> null
@@ -215,8 +231,15 @@ fun MeshBeacon.toJoinChannelSet(option: BeaconJoinOption, currentLora: LoRaConfi
  * Zeroes `position_precision` on the offered channel so joining a beaconed mesh never broadcasts our location to a mesh
  * of strangers (privacy-first; Apple sets `positionPrecision = 0` on both add and switch).
  */
-private fun ChannelSettings.withoutPositionSharing(): ChannelSettings =
-    copy(module_settings = (module_settings ?: ModuleSettings()).copy(position_precision = 0))
+private fun ChannelSettings.withoutPositionSharing(): ChannelSettings = this.newBuilder()
+    .also { wb ->
+        wb.module_settings =
+            (module_settings ?: ModuleSettings.Builder().build())
+                .newBuilder()
+                .also { wb -> wb.position_precision = 0 }
+                .build()
+    }
+    .build()
 
 /**
  * Return a URL that represents the [ChannelSet]
@@ -224,7 +247,10 @@ private fun ChannelSettings.withoutPositionSharing(): ChannelSettings =
  * @param upperCasePrefix portions of the URL can be upper case to make for more efficient QR codes
  */
 fun ChannelSet.getChannelUrl(upperCasePrefix: Boolean = false, shouldAdd: Boolean = false): CommonUri {
-    val channelBytes = ChannelSet.ADAPTER.encode(if (shouldAdd) copy(lora_config = null) else this)
+    val channelBytes =
+        ChannelSet.ADAPTER.encode(
+            if (shouldAdd) this.newBuilder().also { wb -> wb.lora_config = null }.build() else this,
+        )
     val enc = channelBytes.toByteString().base64Url().replace("=", "")
     val p = if (upperCasePrefix) CHANNEL_URL_PREFIX.uppercase() else CHANNEL_URL_PREFIX
     val query = if (shouldAdd) "?add=true" else ""

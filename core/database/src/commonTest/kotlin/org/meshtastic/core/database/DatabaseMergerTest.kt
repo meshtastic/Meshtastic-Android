@@ -96,7 +96,14 @@ class DatabaseMergerTest {
 
     private fun node(num: Int, notes: String = "") = NodeEntity(
         num = num,
-        user = User(id = "!$num", long_name = "Node $num", hw_model = HardwareModel.TBEAM),
+        user =
+        User.Builder()
+            .also { wb ->
+                wb.id = "!$num"
+                wb.long_name = "Node $num"
+                wb.hw_model = HardwareModel.TBEAM
+            }
+            .build(),
         notes = notes,
     )
 
@@ -123,7 +130,9 @@ class DatabaseMergerTest {
         dest.meshLogDao().insert(logEntry("destlog", PortNum.TELEMETRY_APP.value, time = 50))
         dest
             .nodeInfoDao()
-            .upsert(MetadataEntity(num = 10, proto = DeviceMetadata(), timestamp = 1000)) // newer than src
+            .upsert(
+                MetadataEntity(num = 10, proto = DeviceMetadata.Builder().build(), timestamp = 1000),
+            ) // newer than src
 
         // Secondary (source): two messages, notes for #20 (dest blank → fill) and a source-only node (#30 → insert),
         // the same reaction (dedupe) plus a new one, and a conflicting contact setting (dest's must win).
@@ -150,17 +159,21 @@ class DatabaseMergerTest {
                         logUuid = "srcposition",
                         requestId = 7,
                         nodeNum = 30,
-                        position = Position(),
+                        position = Position.Builder().build(),
                     ),
                 ),
             )
         source.nodeInfoDao().upsert(node(40)) // source-only node, no notes → still brought over
         source
             .nodeInfoDao()
-            .upsert(MetadataEntity(num = 10, proto = DeviceMetadata(), timestamp = 500)) // older → dest wins
+            .upsert(
+                MetadataEntity(num = 10, proto = DeviceMetadata.Builder().build(), timestamp = 500),
+            ) // older → dest wins
         source
             .nodeInfoDao()
-            .upsert(MetadataEntity(num = 30, proto = DeviceMetadata(), timestamp = 500)) // dest lacks → added
+            .upsert(
+                MetadataEntity(num = 30, proto = DeviceMetadata.Builder().build(), timestamp = 500),
+            ) // dest lacks → added
         val srcSession =
             source
                 .discoveryDao()

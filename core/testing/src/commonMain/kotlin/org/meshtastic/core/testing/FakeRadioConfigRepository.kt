@@ -43,16 +43,16 @@ class FakeRadioConfigRepository :
 
     data class ChannelSetUpdate(val settingsList: List<ChannelSettings>?, val loraConfig: Config.LoRaConfig?)
 
-    private val channelSetBacking = mutableStateFlow(ChannelSet())
+    private val channelSetBacking = mutableStateFlow(ChannelSet.Builder().build())
     override val channelSetFlow: Flow<ChannelSet> = channelSetBacking
 
-    private val localConfigBacking = mutableStateFlow(LocalConfig())
+    private val localConfigBacking = mutableStateFlow(LocalConfig.Builder().build())
     override val localConfigFlow: Flow<LocalConfig> = localConfigBacking
 
-    private val moduleConfigBacking = mutableStateFlow(LocalModuleConfig())
+    private val moduleConfigBacking = mutableStateFlow(LocalModuleConfig.Builder().build())
     override val moduleConfigFlow: Flow<LocalModuleConfig> = moduleConfigBacking
 
-    private val deviceProfileBacking = mutableStateFlow(DeviceProfile())
+    private val deviceProfileBacking = mutableStateFlow(DeviceProfile.Builder().build())
     override val deviceProfileFlow: Flow<DeviceProfile> = deviceProfileBacking
     val currentDeviceProfile: DeviceProfile
         get() = deviceProfileBacking.value
@@ -107,7 +107,7 @@ class FakeRadioConfigRepository :
     }
 
     override suspend fun clearChannelSet() {
-        channelSetBacking.value = ChannelSet()
+        channelSetBacking.value = ChannelSet.Builder().build()
     }
 
     override suspend fun replaceAllSettings(settingsList: List<ChannelSettings>) {
@@ -118,18 +118,24 @@ class FakeRadioConfigRepository :
         channelSetUpdates += ChannelSetUpdate(settingsList, loraConfig)
         val current = channelSetBacking.value
         channelSetBacking.value =
-            current.copy(settings = settingsList ?: current.settings, lora_config = loraConfig ?: current.lora_config)
+            current
+                .newBuilder()
+                .also { wb ->
+                    wb.settings = settingsList ?: current.settings
+                    wb.lora_config = loraConfig ?: current.lora_config
+                }
+                .build()
     }
 
     override suspend fun updateChannelSettings(channel: Channel) {
         val current = channelSetBacking.value.settings.toMutableList()
-        while (current.size <= channel.index) current.add(ChannelSettings())
-        current[channel.index] = channel.settings ?: ChannelSettings()
-        channelSetBacking.value = channelSetBacking.value.copy(settings = current)
+        while (current.size <= channel.index) current.add(ChannelSettings.Builder().build())
+        current[channel.index] = channel.settings ?: ChannelSettings.Builder().build()
+        channelSetBacking.value = channelSetBacking.value.newBuilder().also { wb -> wb.settings = current }.build()
     }
 
     override suspend fun clearLocalConfig() {
-        localConfigBacking.value = LocalConfig()
+        localConfigBacking.value = LocalConfig.Builder().build()
     }
 
     override suspend fun setLocalConfig(config: Config) {
@@ -137,7 +143,7 @@ class FakeRadioConfigRepository :
     }
 
     override suspend fun clearLocalModuleConfig() {
-        moduleConfigBacking.value = LocalModuleConfig()
+        moduleConfigBacking.value = LocalModuleConfig.Builder().build()
     }
 
     override suspend fun setLocalModuleConfig(config: ModuleConfig) {

@@ -30,7 +30,13 @@ import org.meshtastic.proto.Config
 class ChannelTest {
     @Test
     fun channelUrlGood() {
-        val ch = ChannelSet(settings = listOf(Channel.default.settings), lora_config = Channel.default.loraConfig)
+        val ch =
+            ChannelSet.Builder()
+                .also { wb ->
+                    wb.settings = listOf(Channel.default.settings)
+                    wb.lora_config = Channel.default.loraConfig
+                }
+                .build()
         val channelUrl = ch.getChannelUrl()
 
         Assert.assertTrue(channelUrl.toString().startsWith(CHANNEL_URL_PREFIX))
@@ -71,7 +77,14 @@ class ChannelTest {
             // Skip UNRECOGNIZED if it exists (Wire generates it sometimes) or generic UNSET values if applicable
             if (preset.name == "UNSET" || preset.name == "UNRECOGNIZED") return@forEach
 
-            val loraConfig = Channel.default.loraConfig.copy(use_preset = true, modem_preset = preset)
+            val loraConfig =
+                Channel.default.loraConfig
+                    .newBuilder()
+                    .also { wb ->
+                        wb.use_preset = true
+                        wb.modem_preset = preset
+                    }
+                    .build()
             val channel = Channel(loraConfig = loraConfig)
 
             // We want to ensure it is NOT "Invalid"

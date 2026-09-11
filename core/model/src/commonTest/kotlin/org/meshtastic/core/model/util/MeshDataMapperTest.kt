@@ -44,29 +44,39 @@ class MeshDataMapperTest {
 
     @Test
     fun toDataPacket_returnsNullWhenPacketHasNoDecodedData() {
-        assertNull(mapper.toDataPacket(MeshPacket(from = 0x12345678)))
+        assertNull(mapper.toDataPacket(MeshPacket.Builder().also { wb -> wb.from = 0x12345678 }.build()))
     }
 
     @Test
     fun toDataPacket_mapsMeshPacketFields() {
         val payload = "mesh payload".encodeUtf8()
         val packet =
-            MeshPacket(
-                from = 0x12345678,
-                to = 0x90ABCDEF.toInt(),
-                rx_time = 123,
-                id = 456,
-                decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP, payload = payload, reply_id = 789, emoji = 321),
-                hop_limit = 3,
-                channel = 4,
-                want_ack = true,
-                hop_start = 5,
-                rx_snr = 6.5f,
-                rx_rssi = -70,
-                relay_node = 77,
-                via_mqtt = true,
-                transport_mechanism = MeshPacket.TransportMechanism.TRANSPORT_MQTT,
-            )
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.from = 0x12345678
+                    wb.to = 0x90ABCDEF.toInt()
+                    wb.rx_time = 123
+                    wb.id = 456
+                    wb.decoded =
+                        Data.Builder()
+                            .also { wb ->
+                                wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                wb.payload = payload
+                                wb.reply_id = 789
+                                wb.emoji = 321
+                            }
+                            .build()
+                    wb.hop_limit = 3
+                    wb.channel = 4
+                    wb.want_ack = true
+                    wb.hop_start = 5
+                    wb.rx_snr = 6.5f
+                    wb.rx_rssi = -70
+                    wb.relay_node = 77
+                    wb.via_mqtt = true
+                    wb.transport_mechanism = MeshPacket.TransportMechanism.TRANSPORT_MQTT
+                }
+                .build()
 
         val mapped = mapper.toDataPacket(packet)
 
@@ -92,7 +102,14 @@ class MeshDataMapperTest {
 
     @Test
     fun toDataPacket_preservesAbsentRssiRatherThanCoercingToZero() {
-        val packet = MeshPacket(from = 1, to = 2, decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP))
+        val packet =
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.from = 1
+                    wb.to = 2
+                    wb.decoded = Data.Builder().also { wb -> wb.portnum = PortNum.TEXT_MESSAGE_APP }.build()
+                }
+                .build()
 
         val mapped = mapper.toDataPacket(packet)
 
@@ -102,7 +119,15 @@ class MeshDataMapperTest {
 
     @Test
     fun toDataPacket_keepsAReportedZeroRssiDistinctFromAbsent() {
-        val packet = MeshPacket(from = 1, to = 2, rx_rssi = 0, decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP))
+        val packet =
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.from = 1
+                    wb.to = 2
+                    wb.rx_rssi = 0
+                    wb.decoded = Data.Builder().also { wb -> wb.portnum = PortNum.TEXT_MESSAGE_APP }.build()
+                }
+                .build()
 
         val mapped = mapper.toDataPacket(packet)
 
@@ -113,13 +138,15 @@ class MeshDataMapperTest {
     @Test
     fun toDataPacket_usesPkcChannelWhenPacketIsPkiEncrypted() {
         val packet =
-            MeshPacket(
-                from = 1,
-                to = 2,
-                channel = 2,
-                pki_encrypted = true,
-                decoded = Data(portnum = PortNum.PRIVATE_APP),
-            )
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.from = 1
+                    wb.to = 2
+                    wb.channel = 2
+                    wb.pki_encrypted = true
+                    wb.decoded = Data.Builder().also { wb -> wb.portnum = PortNum.PRIVATE_APP }.build()
+                }
+                .build()
 
         val mapped = mapper.toDataPacket(packet)
 
@@ -130,14 +157,16 @@ class MeshDataMapperTest {
     @Test
     fun meshUser_mapsProtoFields() {
         val proto =
-            User(
-                id = "!cafebabe",
-                long_name = "Meshtastic User",
-                short_name = "MU",
-                hw_model = HardwareModel.TLORA_V2,
-                is_licensed = true,
-                role = Config.DeviceConfig.Role.ROUTER,
-            )
+            User.Builder()
+                .also { wb ->
+                    wb.id = "!cafebabe"
+                    wb.long_name = "Meshtastic User"
+                    wb.short_name = "MU"
+                    wb.hw_model = HardwareModel.TLORA_V2
+                    wb.is_licensed = true
+                    wb.role = Config.DeviceConfig.Role.ROUTER
+                }
+                .build()
 
         val user = MeshUser(proto)
 
@@ -151,7 +180,7 @@ class MeshDataMapperTest {
 
     @Test
     fun meshUser_defaultsEmptyFieldsFromEmptyProto() {
-        val user = MeshUser(User())
+        val user = MeshUser(User.Builder().build())
 
         assertEquals("", user.id)
         assertEquals("", user.longName)
@@ -164,16 +193,18 @@ class MeshDataMapperTest {
     @Test
     fun position_mapsScaledCoordinatesAndProvidedTime() {
         val proto =
-            Position(
-                latitude_i = 377749000,
-                longitude_i = -1224194000,
-                altitude = 15,
-                time = 456,
-                sats_in_view = 9,
-                ground_speed = 12,
-                ground_track = 180,
-                precision_bits = 7,
-            )
+            Position.Builder()
+                .also { wb ->
+                    wb.latitude_i = 377749000
+                    wb.longitude_i = -1224194000
+                    wb.altitude = 15
+                    wb.time = 456
+                    wb.sats_in_view = 9
+                    wb.ground_speed = 12
+                    wb.ground_track = 180
+                    wb.precision_bits = 7
+                }
+                .build()
 
         val position = DomainPosition(proto, defaultTime = 123)
 
@@ -189,7 +220,7 @@ class MeshDataMapperTest {
 
     @Test
     fun position_usesDefaultTimeAndZeroValuesForUnsetProtoFields() {
-        val position = DomainPosition(Position(), defaultTime = 789)
+        val position = DomainPosition(Position.Builder().build(), defaultTime = 789)
 
         assertEquals(0.0, position.latitude)
         assertEquals(0.0, position.longitude)
@@ -204,13 +235,15 @@ class MeshDataMapperTest {
     @Test
     fun deviceMetrics_mapsProtoFields() {
         val proto =
-            DeviceMetrics(
-                battery_level = 87,
-                voltage = 4.12f,
-                channel_utilization = 32.5f,
-                air_util_tx = 7.75f,
-                uptime_seconds = 3600,
-            )
+            DeviceMetrics.Builder()
+                .also { wb ->
+                    wb.battery_level = 87
+                    wb.voltage = 4.12f
+                    wb.channel_utilization = 32.5f
+                    wb.air_util_tx = 7.75f
+                    wb.uptime_seconds = 3600
+                }
+                .build()
 
         val metrics = DomainDeviceMetrics(proto, telemetryTime = 123)
 
@@ -224,7 +257,7 @@ class MeshDataMapperTest {
 
     @Test
     fun deviceMetrics_defaultsUnsetFieldsToZero() {
-        val metrics = DomainDeviceMetrics(DeviceMetrics(), telemetryTime = 222)
+        val metrics = DomainDeviceMetrics(DeviceMetrics.Builder().build(), telemetryTime = 222)
 
         assertEquals(222, metrics.time)
         assertEquals(0, metrics.batteryLevel)
@@ -237,19 +270,21 @@ class MeshDataMapperTest {
     @Test
     fun environmentMetrics_mapsTelemetryFields() {
         val proto =
-            EnvironmentMetrics(
-                temperature = 24.5f,
-                relative_humidity = 55.5f,
-                soil_temperature = 18.25f,
-                soil_moisture = 44,
-                barometric_pressure = 1013.2f,
-                gas_resistance = 10.5f,
-                voltage = 3.7f,
-                current = 0.8f,
-                iaq = 42,
-                lux = 321.5f,
-                uv_lux = 4.2f,
-            )
+            EnvironmentMetrics.Builder()
+                .also { wb ->
+                    wb.temperature = 24.5f
+                    wb.relative_humidity = 55.5f
+                    wb.soil_temperature = 18.25f
+                    wb.soil_moisture = 44
+                    wb.barometric_pressure = 1013.2f
+                    wb.gas_resistance = 10.5f
+                    wb.voltage = 3.7f
+                    wb.current = 0.8f
+                    wb.iaq = 42
+                    wb.lux = 321.5f
+                    wb.uv_lux = 4.2f
+                }
+                .build()
 
         val metrics = DomainEnvironmentMetrics.fromTelemetryProto(proto, time = 999)
 
@@ -270,19 +305,21 @@ class MeshDataMapperTest {
     @Test
     fun environmentMetrics_filtersSentinelAndInvalidValues() {
         val proto =
-            EnvironmentMetrics(
-                temperature = Float.NaN,
-                relative_humidity = 0.0f,
-                soil_temperature = Float.NaN,
-                soil_moisture = Int.MIN_VALUE,
-                barometric_pressure = Float.NaN,
-                gas_resistance = Float.NaN,
-                voltage = Float.NaN,
-                current = Float.NaN,
-                iaq = Int.MIN_VALUE,
-                lux = Float.NaN,
-                uv_lux = Float.NaN,
-            )
+            EnvironmentMetrics.Builder()
+                .also { wb ->
+                    wb.temperature = Float.NaN
+                    wb.relative_humidity = 0.0f
+                    wb.soil_temperature = Float.NaN
+                    wb.soil_moisture = Int.MIN_VALUE
+                    wb.barometric_pressure = Float.NaN
+                    wb.gas_resistance = Float.NaN
+                    wb.voltage = Float.NaN
+                    wb.current = Float.NaN
+                    wb.iaq = Int.MIN_VALUE
+                    wb.lux = Float.NaN
+                    wb.uv_lux = Float.NaN
+                }
+                .build()
 
         val metrics = DomainEnvironmentMetrics.fromTelemetryProto(proto, time = 111)
 

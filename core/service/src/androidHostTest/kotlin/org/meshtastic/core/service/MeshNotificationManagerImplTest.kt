@@ -162,7 +162,14 @@ class MeshNotificationManagerImplTest {
 
     @Test
     fun `service state seeds local stats before the local node row is available`() = runWithRenderScope { renderScope ->
-        val stats = LocalStats(uptime_seconds = 1, num_online_nodes = 2, num_total_nodes = 3)
+        val stats =
+            LocalStats.Builder()
+                .also { wb ->
+                    wb.uptime_seconds = 1
+                    wb.num_online_nodes = 2
+                    wb.num_total_nodes = 3
+                }
+                .build()
         every { nodeRepository.localStats } returns MutableStateFlow(stats)
         val notifications = createManager(renderScope)
         notifications.initChannels()
@@ -184,8 +191,18 @@ class MeshNotificationManagerImplTest {
         scope = scope.asServiceScope(),
     )
 
-    private fun populatedTelemetry() =
-        Telemetry(local_stats = LocalStats(uptime_seconds = 1, num_online_nodes = 1, num_total_nodes = 1))
+    private fun populatedTelemetry() = Telemetry.Builder()
+        .also { wb ->
+            wb.local_stats =
+                LocalStats.Builder()
+                    .also { wb ->
+                        wb.uptime_seconds = 1
+                        wb.num_online_nodes = 1
+                        wb.num_total_nodes = 1
+                    }
+                    .build()
+        }
+        .build()
 
     private fun activeServiceNotification() =
         systemNotificationManager.activeNotifications.singleOrNull { it.id == SERVICE_NOTIFY_ID }

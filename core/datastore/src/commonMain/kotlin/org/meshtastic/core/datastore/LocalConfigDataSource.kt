@@ -33,27 +33,27 @@ class LocalConfigDataSource(private val localConfigStore: CoreLocalConfigDataSto
             // dataStore.data throws an IOException when an error is encountered when reading data
             if (exception is IOException) {
                 Logger.e { "Error reading LocalConfig settings: ${exception.message}" }
-                emit(LocalConfig())
+                emit(LocalConfig.Builder().build())
             } else {
                 throw exception
             }
         }
 
     suspend fun clearLocalConfig() {
-        localConfigStore.updateData { LocalConfig() }
+        localConfigStore.updateData { LocalConfig.Builder().build() }
     }
 
     /** Updates [LocalConfig] from each [Config] oneOf. */
     suspend fun setLocalConfig(config: Config) = localConfigStore.updateData { current ->
         when {
-            config.device != null -> current.copy(device = config.device)
-            config.position != null -> current.copy(position = config.position)
-            config.power != null -> current.copy(power = config.power)
-            config.network != null -> current.copy(network = config.network)
-            config.display != null -> current.copy(display = config.display)
-            config.lora != null -> current.copy(lora = config.lora)
-            config.bluetooth != null -> current.copy(bluetooth = config.bluetooth)
-            config.security != null -> current.copy(security = config.security)
+            config.device != null -> current.newBuilder().also { wb -> wb.device = config.device }.build()
+            config.position != null -> current.newBuilder().also { wb -> wb.position = config.position }.build()
+            config.power != null -> current.newBuilder().also { wb -> wb.power = config.power }.build()
+            config.network != null -> current.newBuilder().also { wb -> wb.network = config.network }.build()
+            config.display != null -> current.newBuilder().also { wb -> wb.display = config.display }.build()
+            config.lora != null -> current.newBuilder().also { wb -> wb.lora = config.lora }.build()
+            config.bluetooth != null -> current.newBuilder().also { wb -> wb.bluetooth = config.bluetooth }.build()
+            config.security != null -> current.newBuilder().also { wb -> wb.security = config.security }.build()
             else -> current
         }
     }

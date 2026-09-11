@@ -134,7 +134,8 @@ class PacketHandlerImplTest {
 
     @Test
     fun `sendToRadio with ToRadio sends immediately`() {
-        val toRadio = ToRadio(packet = MeshPacket(id = 123))
+        val toRadio =
+            ToRadio.Builder().also { wb -> wb.packet = MeshPacket.Builder().also { wb -> wb.id = 123 }.build() }.build()
 
         handler.sendToRadio(toRadio)
 
@@ -143,7 +144,8 @@ class PacketHandlerImplTest {
 
     @Test
     fun `trySendToRadio reports direct transport admission`() {
-        val toRadio = ToRadio(packet = MeshPacket(id = 124))
+        val toRadio =
+            ToRadio.Builder().also { wb -> wb.packet = MeshPacket.Builder().also { wb -> wb.id = 124 }.build() }.build()
 
         assertTrue(handler.trySendToRadio(toRadio))
 
@@ -154,17 +156,19 @@ class PacketHandlerImplTest {
     @Test
     fun `sendToRadio updates status using the full outgoing packet identity`() = runTest(testDispatcher) {
         val packet =
-            MeshPacket(
-                from = 0x11111111,
-                to = 0x22222222,
-                id = 123,
-                decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP),
-            )
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.from = 0x11111111
+                    wb.to = 0x22222222
+                    wb.id = 123
+                    wb.decoded = Data.Builder().also { wb -> wb.portnum = PortNum.TEXT_MESSAGE_APP }.build()
+                }
+                .build()
 
         everySuspend { packetRepository.applyOutgoingQueueStatus(packet, MessageStatus.ENROUTE) } returns
             PersistedPacket(PERSISTED_ID, storedTextPacket(id = 123, status = MessageStatus.QUEUED))
 
-        handler.sendToRadio(ToRadio(packet = packet))
+        handler.sendToRadio(ToRadio.Builder().also { wb -> wb.packet = packet }.build())
         testScheduler.runCurrent()
 
         verifySuspend { packetRepository.applyOutgoingQueueStatus(packet, MessageStatus.ENROUTE) }
@@ -172,7 +176,7 @@ class PacketHandlerImplTest {
 
     @Test
     fun `sendToRadio with MeshPacket queues and sends when connected`() = runTest(testDispatcher) {
-        val packet = MeshPacket(id = 456)
+        val packet = MeshPacket.Builder().also { wb -> wb.id = 456 }.build()
         connectionStateFlow.value = ConnectionState.Connected
 
         handler.sendToRadio(packet)
@@ -191,7 +195,11 @@ class PacketHandlerImplTest {
 
         lifecycleFlow.value = ConnectionLifecycle(version = 13, state = ConnectionState.Connected)
 
-        val accepted = ownedHandler.sendToRadioForConnection(MeshPacket(id = 460), capturedVersion)
+        val accepted =
+            ownedHandler.sendToRadioForConnection(
+                MeshPacket.Builder().also { wb -> wb.id = 460 }.build(),
+                capturedVersion,
+            )
 
         assertFalse(accepted)
         verify(exactly(0)) { radioInterfaceService.trySendToRadio(any()) }
@@ -205,12 +213,25 @@ class PacketHandlerImplTest {
         val ownedHandler = handlerWithScope(testScope)
         val capturedVersion = lifecycleFlow.value.version
 
-        assertTrue(ownedHandler.sendToRadio(MeshPacket(id = 460)))
+        assertTrue(ownedHandler.sendToRadio(MeshPacket.Builder().also { wb -> wb.id = 460 }.build()))
         testScheduler.runCurrent()
-        assertTrue(ownedHandler.sendToRadioForConnection(MeshPacket(id = 461), capturedVersion))
+        assertTrue(
+            ownedHandler.sendToRadioForConnection(
+                MeshPacket.Builder().also { wb -> wb.id = 461 }.build(),
+                capturedVersion,
+            ),
+        )
         lifecycleFlow.value = ConnectionLifecycle(version = 13, state = ConnectionState.Connected)
 
-        ownedHandler.handleQueueStatus(QueueStatus(mesh_packet_id = 460, res = 0, free = 16))
+        ownedHandler.handleQueueStatus(
+            QueueStatus.Builder()
+                .also { wb ->
+                    wb.mesh_packet_id = 460
+                    wb.res = 0
+                    wb.free = 16
+                }
+                .build(),
+        )
         testScheduler.runCurrent()
 
         verify(exactly(1)) { radioInterfaceService.trySendToRadio(any()) }
@@ -222,7 +243,8 @@ class PacketHandlerImplTest {
         stoppedScope.cancel()
         val stoppedHandler = handlerWithScope(stoppedScope)
 
-        val result = stoppedHandler.sendToRadioAndAwaitResult(MeshPacket(id = 457))
+        val result =
+            stoppedHandler.sendToRadioAndAwaitResult(MeshPacket.Builder().also { wb -> wb.id = 457 }.build())
 
         assertEquals(AwaitedSendStatus.TRANSPORT_STOPPED, result.status)
         assertFalse(result.dispatched)
@@ -234,7 +256,7 @@ class PacketHandlerImplTest {
         stoppedScope.cancel()
         val stoppedHandler = handlerWithScope(stoppedScope)
 
-        val accepted = stoppedHandler.sendToRadio(MeshPacket(id = 459))
+        val accepted = stoppedHandler.sendToRadio(MeshPacket.Builder().also { wb -> wb.id = 459 }.build())
 
         assertFalse(accepted)
         verify(exactly(0)) { radioInterfaceService.trySendToRadio(any()) }
@@ -248,7 +270,7 @@ class PacketHandlerImplTest {
 
         val result =
             async(start = CoroutineStart.UNDISPATCHED) {
-                stoppedHandler.sendToRadioAndAwaitResult(MeshPacket(id = 458))
+                stoppedHandler.sendToRadioAndAwaitResult(MeshPacket.Builder().also { wb -> wb.id = 458 }.build())
             }
         serviceScope.cancel()
         testScheduler.runCurrent()
@@ -260,18 +282,21 @@ class PacketHandlerImplTest {
 
     @Test
     fun `handleQueueStatus completes deferred`() = runTest(testDispatcher) {
-        val packet = MeshPacket(id = 789)
+        val packet = MeshPacket.Builder().also { wb -> wb.id = 789 }.build()
         connectionStateFlow.value = ConnectionState.Connected
 
         handler.sendToRadio(packet)
         testScheduler.runCurrent()
 
         val status =
-            QueueStatus(
-                mesh_packet_id = 789,
-                res = 0, // Success
-                free = 1,
-            )
+            QueueStatus.Builder()
+                .also { wb ->
+                    wb.mesh_packet_id = 789
+                    wb.res = 0
+                    // Success
+                    wb.free = 1
+                }
+                .build()
 
         handler.handleQueueStatus(status)
         testScheduler.runCurrent()
@@ -283,10 +308,18 @@ class PacketHandlerImplTest {
         // through the synchronous local loopback — a success, not a queue failure.
         connectionStateFlow.value = ConnectionState.Connected
 
-        val result = async { handler.sendToRadioAndAwait(MeshPacket(id = 790)) }
+        val result = async { handler.sendToRadioAndAwait(MeshPacket.Builder().also { wb -> wb.id = 790 }.build()) }
         testScheduler.runCurrent()
 
-        handler.handleQueueStatus(QueueStatus(mesh_packet_id = 790, res = 35, free = 16))
+        handler.handleQueueStatus(
+            QueueStatus.Builder()
+                .also { wb ->
+                    wb.mesh_packet_id = 790
+                    wb.res = 35
+                    wb.free = 16
+                }
+                .build(),
+        )
         testScheduler.runCurrent()
 
         assertTrue(result.await())
@@ -299,10 +332,18 @@ class PacketHandlerImplTest {
         // this fix targets). Only the plain res=0 "accepted, now full" echo should be skipped.
         connectionStateFlow.value = ConnectionState.Connected
 
-        val result = async { handler.sendToRadioAndAwait(MeshPacket(id = 792)) }
+        val result = async { handler.sendToRadioAndAwait(MeshPacket.Builder().also { wb -> wb.id = 792 }.build()) }
         testScheduler.runCurrent()
 
-        handler.handleQueueStatus(QueueStatus(mesh_packet_id = 792, res = 35, free = 0))
+        handler.handleQueueStatus(
+            QueueStatus.Builder()
+                .also { wb ->
+                    wb.mesh_packet_id = 792
+                    wb.res = 35
+                    wb.free = 0
+                }
+                .build(),
+        )
         testScheduler.runCurrent()
 
         assertTrue(result.await())
@@ -311,10 +352,20 @@ class PacketHandlerImplTest {
     @Test
     fun `packet-specific accepted full queue status completes the matching queue stage`() = runTest(testDispatcher) {
         connectionStateFlow.value = ConnectionState.Connected
-        val result = async { handler.sendToRadioAndAwaitResult(MeshPacket(id = 793)) }
+        val result = async {
+            handler.sendToRadioAndAwaitResult(MeshPacket.Builder().also { wb -> wb.id = 793 }.build())
+        }
         testScheduler.runCurrent()
 
-        handler.handleQueueStatus(QueueStatus(mesh_packet_id = 793, res = 0, free = 0))
+        handler.handleQueueStatus(
+            QueueStatus.Builder()
+                .also { wb ->
+                    wb.mesh_packet_id = 793
+                    wb.res = 0
+                    wb.free = 0
+                }
+                .build(),
+        )
         testScheduler.runCurrent()
         assertFalse(result.isCompleted, "queue admission must not satisfy the strict routing waiter")
 
@@ -326,10 +377,20 @@ class PacketHandlerImplTest {
     fun `strict await treats queue rejection as failure`() = runTest(testDispatcher) {
         connectionStateFlow.value = ConnectionState.Connected
 
-        val result = async { handler.sendToRadioAndAwaitResult(MeshPacket(id = 791)) }
+        val result = async {
+            handler.sendToRadioAndAwaitResult(MeshPacket.Builder().also { wb -> wb.id = 791 }.build())
+        }
         testScheduler.runCurrent()
 
-        handler.handleQueueStatus(QueueStatus(mesh_packet_id = 791, res = 33, free = 16))
+        handler.handleQueueStatus(
+            QueueStatus.Builder()
+                .also { wb ->
+                    wb.mesh_packet_id = 791
+                    wb.res = 33
+                    wb.free = 16
+                }
+                .build(),
+        )
         testScheduler.runCurrent()
 
         val rejected = result.await()
@@ -341,9 +402,11 @@ class PacketHandlerImplTest {
     @Test
     fun `await response timeout starts after earlier queued packets`() = runTest(testDispatcher) {
         connectionStateFlow.value = ConnectionState.Connected
-        handler.sendToRadio(MeshPacket(id = 800))
-        handler.sendToRadio(MeshPacket(id = 801))
-        val result = async { handler.sendToRadioAndAwaitResult(MeshPacket(id = 802)) }
+        handler.sendToRadio(MeshPacket.Builder().also { wb -> wb.id = 800 }.build())
+        handler.sendToRadio(MeshPacket.Builder().also { wb -> wb.id = 801 }.build())
+        val result = async {
+            handler.sendToRadioAndAwaitResult(MeshPacket.Builder().also { wb -> wb.id = 802 }.build())
+        }
         testScheduler.runCurrent()
 
         // Let both earlier packets consume their full response windows. The awaited packet has not timed out
@@ -356,7 +419,15 @@ class PacketHandlerImplTest {
         testScheduler.runCurrent()
         assertFalse(result.isCompleted)
 
-        handler.handleQueueStatus(QueueStatus(mesh_packet_id = 802, res = 0, free = 16))
+        handler.handleQueueStatus(
+            QueueStatus.Builder()
+                .also { wb ->
+                    wb.mesh_packet_id = 802
+                    wb.res = 0
+                    wb.free = 16
+                }
+                .build(),
+        )
         testScheduler.runCurrent()
         assertFalse(result.isCompleted, "QueueStatus must not satisfy the strict routing waiter")
         handler.completeDispatchedResponse(dataRequestId = 802, complete = true)
@@ -371,10 +442,15 @@ class PacketHandlerImplTest {
         val storedPacket = storedTextPacket(id = 804, status = MessageStatus.QUEUED)
         everySuspend { packetRepository.applyOutgoingQueueStatus(any(), any()) } returns
             PersistedPacket(PERSISTED_ID, storedPacket)
-        handler.sendToRadio(MeshPacket(id = 803))
+        handler.sendToRadio(MeshPacket.Builder().also { wb -> wb.id = 803 }.build())
         val result = async {
             handler.sendToRadioAndAwaitResult(
-                MeshPacket(id = 804, decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP)),
+                MeshPacket.Builder()
+                    .also { wb ->
+                        wb.id = 804
+                        wb.decoded = Data.Builder().also { wb -> wb.portnum = PortNum.TEXT_MESSAGE_APP }.build()
+                    }
+                    .build(),
             )
         }
         testScheduler.runCurrent()
@@ -391,8 +467,10 @@ class PacketHandlerImplTest {
     @Test
     fun `queue stop skips persistence lookup for a non-persisted packet`() = runTest(testDispatcher) {
         connectionStateFlow.value = ConnectionState.Connected
-        handler.sendToRadio(MeshPacket(id = 820))
-        val queued = async { handler.sendToRadioAndAwaitResult(MeshPacket(id = 821)) }
+        handler.sendToRadio(MeshPacket.Builder().also { wb -> wb.id = 820 }.build())
+        val queued = async {
+            handler.sendToRadioAndAwaitResult(MeshPacket.Builder().also { wb -> wb.id = 821 }.build())
+        }
         testScheduler.runCurrent()
 
         handler.stopPacketQueue()
@@ -412,10 +490,21 @@ class PacketHandlerImplTest {
                 lookups++
                 if (lookups == 1) null else PersistedPacket(PERSISTED_ID, storedPacket)
             }
-        handler.sendToRadio(MeshPacket(id = 820))
+        handler.sendToRadio(MeshPacket.Builder().also { wb -> wb.id = 820 }.build())
         val queued = async {
             handler.sendToRadioAndAwaitResult(
-                MeshPacket(id = 822, decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP, emoji = 1)),
+                MeshPacket.Builder()
+                    .also { wb ->
+                        wb.id = 822
+                        wb.decoded =
+                            Data.Builder()
+                                .also { wb ->
+                                    wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                    wb.emoji = 1
+                                }
+                                .build()
+                    }
+                    .build(),
             )
         }
         testScheduler.runCurrent()
@@ -437,7 +526,7 @@ class PacketHandlerImplTest {
         val storedReaction =
             Reaction(
                 replyId = 1,
-                user = User(id = "!00000001"),
+                user = User.Builder().also { wb -> wb.id = "!00000001" }.build(),
                 emoji = "👍",
                 timestamp = 0,
                 snr = null,
@@ -453,10 +542,22 @@ class PacketHandlerImplTest {
                 if (lookups == 1) null else PersistedReaction(PERSISTED_REACTION_ID, storedReaction)
             }
 
-        handler.sendToRadio(MeshPacket(id = 820))
+        handler.sendToRadio(MeshPacket.Builder().also { wb -> wb.id = 820 }.build())
         val queued = async {
             handler.sendToRadioAndAwaitResult(
-                MeshPacket(id = 825, decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP, reply_id = 1, emoji = 1)),
+                MeshPacket.Builder()
+                    .also { wb ->
+                        wb.id = 825
+                        wb.decoded =
+                            Data.Builder()
+                                .also { wb ->
+                                    wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                    wb.reply_id = 1
+                                    wb.emoji = 1
+                                }
+                                .build()
+                    }
+                    .build(),
             )
         }
         testScheduler.runCurrent()
@@ -477,9 +578,24 @@ class PacketHandlerImplTest {
         everySuspend { packetRepository.applyOutgoingQueueStatus(any(), any()) } returns
             PersistedPacket(PERSISTED_ID, storedPacket)
 
-        handler.sendToRadio(MeshPacket(id = 823, decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP)))
+        handler.sendToRadio(
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = 823
+                    wb.decoded = Data.Builder().also { wb -> wb.portnum = PortNum.TEXT_MESSAGE_APP }.build()
+                }
+                .build(),
+        )
         testScheduler.runCurrent()
-        handler.handleQueueStatus(QueueStatus(mesh_packet_id = 823, res = 0, free = 16))
+        handler.handleQueueStatus(
+            QueueStatus.Builder()
+                .also { wb ->
+                    wb.mesh_packet_id = 823
+                    wb.res = 0
+                    wb.free = 16
+                }
+                .build(),
+        )
         testScheduler.runCurrent()
 
         testScheduler.advanceTimeBy(PacketHandlerImpl.SEND_ACK_TIMEOUT + 1.seconds)
@@ -494,10 +610,15 @@ class PacketHandlerImplTest {
         everySuspend { packetRepository.applyOutgoingQueueStatus(any(), any()) } returns
             PersistedPacket(PERSISTED_ID, storedPacket)
 
-        handler.sendToRadio(MeshPacket(id = 820))
+        handler.sendToRadio(MeshPacket.Builder().also { wb -> wb.id = 820 }.build())
         val queued = async {
             handler.sendToRadioAndAwaitResult(
-                MeshPacket(id = 824, decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP)),
+                MeshPacket.Builder()
+                    .also { wb ->
+                        wb.id = 824
+                        wb.decoded = Data.Builder().also { wb -> wb.portnum = PortNum.TEXT_MESSAGE_APP }.build()
+                    }
+                    .build(),
             )
         }
         testScheduler.runCurrent()
@@ -520,7 +641,12 @@ class PacketHandlerImplTest {
             PersistedPacket(PERSISTED_ID, storedPacket)
         val result = async {
             handler.sendToRadioAndAwaitResult(
-                MeshPacket(id = 807, decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP)),
+                MeshPacket.Builder()
+                    .also { wb ->
+                        wb.id = 807
+                        wb.decoded = Data.Builder().also { wb -> wb.portnum = PortNum.TEXT_MESSAGE_APP }.build()
+                    }
+                    .build(),
             )
         }
         testScheduler.runCurrent()
@@ -542,12 +668,25 @@ class PacketHandlerImplTest {
             PersistedPacket(PERSISTED_ID, storedPacket)
         val result = async {
             handler.sendToRadioAndAwaitResult(
-                MeshPacket(id = 817, decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP)),
+                MeshPacket.Builder()
+                    .also { wb ->
+                        wb.id = 817
+                        wb.decoded = Data.Builder().also { wb -> wb.portnum = PortNum.TEXT_MESSAGE_APP }.build()
+                    }
+                    .build(),
             )
         }
         testScheduler.runCurrent()
 
-        handler.handleQueueStatus(QueueStatus(mesh_packet_id = 817, res = 0, free = 16))
+        handler.handleQueueStatus(
+            QueueStatus.Builder()
+                .also { wb ->
+                    wb.mesh_packet_id = 817
+                    wb.res = 0
+                    wb.free = 16
+                }
+                .build(),
+        )
         handler.stopPacketQueue()
         testScheduler.runCurrent()
 
@@ -560,12 +699,24 @@ class PacketHandlerImplTest {
     @Test
     fun `disconnect drains queued responses without restarting the processor`() = runTest(testDispatcher) {
         connectionStateFlow.value = ConnectionState.Connected
-        val first = async { handler.sendToRadioAndAwaitResult(MeshPacket(id = 813)) }
-        val queued = async { handler.sendToRadioAndAwaitResult(MeshPacket(id = 814)) }
+        val first = async {
+            handler.sendToRadioAndAwaitResult(MeshPacket.Builder().also { wb -> wb.id = 813 }.build())
+        }
+        val queued = async {
+            handler.sendToRadioAndAwaitResult(MeshPacket.Builder().also { wb -> wb.id = 814 }.build())
+        }
         testScheduler.runCurrent()
 
         connectionStateFlow.value = ConnectionState.Disconnected
-        handler.handleQueueStatus(QueueStatus(mesh_packet_id = 813, res = 0, free = 16))
+        handler.handleQueueStatus(
+            QueueStatus.Builder()
+                .also { wb ->
+                    wb.mesh_packet_id = 813
+                    wb.res = 0
+                    wb.free = 16
+                }
+                .build(),
+        )
         testScheduler.runCurrent()
 
         val firstStopped = first.await()
@@ -580,7 +731,9 @@ class PacketHandlerImplTest {
     @Test
     fun `missing queue status does not terminate an admitted routing waiter`() = runTest(testDispatcher) {
         connectionStateFlow.value = ConnectionState.Connected
-        val result = async { handler.sendToRadioAndAwaitResult(MeshPacket(id = 805)) }
+        val result = async {
+            handler.sendToRadioAndAwaitResult(MeshPacket.Builder().also { wb -> wb.id = 805 }.build())
+        }
         testScheduler.runCurrent()
 
         testScheduler.advanceTimeBy(responseTimeoutCrossingMillis)
@@ -594,14 +747,24 @@ class PacketHandlerImplTest {
     @Test
     fun `late queue rejection still terminates a strict waiter after confirmation timeout`() = runTest(testDispatcher) {
         connectionStateFlow.value = ConnectionState.Connected
-        val result = async { handler.sendToRadioAndAwaitResult(MeshPacket(id = 824)) }
+        val result = async {
+            handler.sendToRadioAndAwaitResult(MeshPacket.Builder().also { wb -> wb.id = 824 }.build())
+        }
         testScheduler.runCurrent()
 
         testScheduler.advanceTimeBy(responseTimeoutCrossingMillis)
         testScheduler.runCurrent()
         assertFalse(result.isCompleted)
 
-        handler.handleQueueStatus(QueueStatus(mesh_packet_id = 824, res = 33, free = 16))
+        handler.handleQueueStatus(
+            QueueStatus.Builder()
+                .also { wb ->
+                    wb.mesh_packet_id = 824
+                    wb.res = 33
+                    wb.free = 16
+                }
+                .build(),
+        )
         testScheduler.runCurrent()
 
         val rejected = result.await()
@@ -612,7 +775,13 @@ class PacketHandlerImplTest {
     @Test
     fun `missing queue status does not fail a dispatched persisted packet`() = runTest(testDispatcher) {
         connectionStateFlow.value = ConnectionState.Connected
-        val packet = MeshPacket(id = 806, decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP))
+        val packet =
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = 806
+                    wb.decoded = Data.Builder().also { wb -> wb.portnum = PortNum.TEXT_MESSAGE_APP }.build()
+                }
+                .build()
         everySuspend { packetRepository.applyOutgoingQueueStatus(packet, MessageStatus.ENROUTE) } returns
             PersistedPacket(PERSISTED_ID, storedTextPacket(id = 806, status = MessageStatus.QUEUED))
 
@@ -627,7 +796,9 @@ class PacketHandlerImplTest {
 
     @Test
     fun `disconnected queue admission reports transport stopped`() = runTest(testDispatcher) {
-        val result = async { handler.sendToRadioAndAwaitResult(MeshPacket(id = 805)) }
+        val result = async {
+            handler.sendToRadioAndAwaitResult(MeshPacket.Builder().also { wb -> wb.id = 805 }.build())
+        }
         testScheduler.runCurrent()
 
         val stopped = result.await()
@@ -638,7 +809,7 @@ class PacketHandlerImplTest {
 
     @Test
     fun `disconnected fire and forget admission is rejected`() = runTest(testDispatcher) {
-        assertFalse(handler.sendToRadio(MeshPacket(id = 806)))
+        assertFalse(handler.sendToRadio(MeshPacket.Builder().also { wb -> wb.id = 806 }.build()))
 
         verify(exactly(0)) { radioInterfaceService.trySendToRadio(any()) }
     }
@@ -652,7 +823,12 @@ class PacketHandlerImplTest {
             PersistedPacket(PERSISTED_ID, storedPacket)
         val result = async {
             handler.sendToRadioAndAwaitResult(
-                MeshPacket(id = 808, decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP)),
+                MeshPacket.Builder()
+                    .also { wb ->
+                        wb.id = 808
+                        wb.decoded = Data.Builder().also { wb -> wb.portnum = PortNum.TEXT_MESSAGE_APP }.build()
+                    }
+                    .build(),
             )
         }
         testScheduler.runCurrent()
@@ -668,7 +844,9 @@ class PacketHandlerImplTest {
         every { radioInterfaceService.trySendToRadio(any()) } throws IllegalStateException("test send failure")
         connectionStateFlow.value = ConnectionState.Connected
 
-        val result = async { handler.sendToRadioAndAwaitResult(MeshPacket(id = 806)) }
+        val result = async {
+            handler.sendToRadioAndAwaitResult(MeshPacket.Builder().also { wb -> wb.id = 806 }.build())
+        }
         testScheduler.runCurrent()
 
         val failed = result.await()
@@ -679,18 +857,38 @@ class PacketHandlerImplTest {
     @Test
     fun `queue status without a packet id does not satisfy strict routing waiters`() = runTest(testDispatcher) {
         connectionStateFlow.value = ConnectionState.Connected
-        val first = async { handler.sendToRadioAndAwaitResult(MeshPacket(id = 820)) }
-        val second = async { handler.sendToRadioAndAwaitResult(MeshPacket(id = 821)) }
+        val first = async {
+            handler.sendToRadioAndAwaitResult(MeshPacket.Builder().also { wb -> wb.id = 820 }.build())
+        }
+        val second = async {
+            handler.sendToRadioAndAwaitResult(MeshPacket.Builder().also { wb -> wb.id = 821 }.build())
+        }
         testScheduler.runCurrent()
 
-        handler.handleQueueStatus(QueueStatus(mesh_packet_id = 0, res = 0, free = 16))
+        handler.handleQueueStatus(
+            QueueStatus.Builder()
+                .also { wb ->
+                    wb.mesh_packet_id = 0
+                    wb.res = 0
+                    wb.free = 16
+                }
+                .build(),
+        )
         testScheduler.runCurrent()
 
         assertFalse(first.isCompleted, "QueueStatus must not satisfy the first routing waiter")
         assertFalse(second.isCompleted)
         verify(exactly(2)) { radioInterfaceService.trySendToRadio(any()) }
 
-        handler.handleQueueStatus(QueueStatus(mesh_packet_id = 0, res = 0, free = 16))
+        handler.handleQueueStatus(
+            QueueStatus.Builder()
+                .also { wb ->
+                    wb.mesh_packet_id = 0
+                    wb.res = 0
+                    wb.free = 16
+                }
+                .build(),
+        )
         testScheduler.runCurrent()
         assertFalse(second.isCompleted, "QueueStatus must not satisfy the second routing waiter")
 
@@ -707,11 +905,19 @@ class PacketHandlerImplTest {
         handler.stopPacketQueue()
         testScheduler.runCurrent()
 
-        assertTrue(handler.sendToRadio(MeshPacket(id = 822)))
+        assertTrue(handler.sendToRadio(MeshPacket.Builder().also { wb -> wb.id = 822 }.build()))
         testScheduler.runCurrent()
 
         verify(exactly(1)) { radioInterfaceService.trySendToRadio(any()) }
-        handler.handleQueueStatus(QueueStatus(mesh_packet_id = 822, res = 0, free = 16))
+        handler.handleQueueStatus(
+            QueueStatus.Builder()
+                .also { wb ->
+                    wb.mesh_packet_id = 822
+                    wb.res = 0
+                    wb.free = 16
+                }
+                .build(),
+        )
         testScheduler.runCurrent()
     }
 
@@ -731,10 +937,17 @@ class PacketHandlerImplTest {
 
         val interrupted = async {
             handler.sendToRadioAndAwaitResult(
-                MeshPacket(id = 815, decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP)),
+                MeshPacket.Builder()
+                    .also { wb ->
+                        wb.id = 815
+                        wb.decoded = Data.Builder().also { wb -> wb.portnum = PortNum.TEXT_MESSAGE_APP }.build()
+                    }
+                    .build(),
             )
         }
-        val queued = async { handler.sendToRadioAndAwaitResult(MeshPacket(id = 816)) }
+        val queued = async {
+            handler.sendToRadioAndAwaitResult(MeshPacket.Builder().also { wb -> wb.id = 816 }.build())
+        }
         testScheduler.runCurrent()
 
         val stopped = interrupted.await()
@@ -742,17 +955,33 @@ class PacketHandlerImplTest {
         assertFalse(stopped.dispatched)
         verifySuspend { packetRepository.applyOutgoingQueueStatus(any(), MessageStatus.ERROR) }
 
-        handler.handleQueueStatus(QueueStatus(mesh_packet_id = 816, res = 0, free = 16))
+        handler.handleQueueStatus(
+            QueueStatus.Builder()
+                .also { wb ->
+                    wb.mesh_packet_id = 816
+                    wb.res = 0
+                    wb.free = 16
+                }
+                .build(),
+        )
         testScheduler.runCurrent()
         handler.completeDispatchedResponse(dataRequestId = 816, complete = true)
         val accepted = queued.await()
         assertEquals(AwaitedSendStatus.ACCEPTED, accepted.status)
         assertTrue(accepted.dispatched)
 
-        assertTrue(handler.sendToRadio(MeshPacket(id = 815)))
+        assertTrue(handler.sendToRadio(MeshPacket.Builder().also { wb -> wb.id = 815 }.build()))
         testScheduler.runCurrent()
         verify(exactly(3)) { radioInterfaceService.trySendToRadio(any()) }
-        handler.handleQueueStatus(QueueStatus(mesh_packet_id = 815, res = 0, free = 16))
+        handler.handleQueueStatus(
+            QueueStatus.Builder()
+                .also { wb ->
+                    wb.mesh_packet_id = 815
+                    wb.res = 0
+                    wb.free = 16
+                }
+                .build(),
+        )
         testScheduler.runCurrent()
     }
 
@@ -760,27 +989,40 @@ class PacketHandlerImplTest {
     fun `awaited packet without an id is rejected before dispatch`() = runTest(testDispatcher) {
         connectionStateFlow.value = ConnectionState.Connected
 
-        val result = handler.sendToRadioAndAwaitResult(MeshPacket())
+        val result = handler.sendToRadioAndAwaitResult(MeshPacket.Builder().build())
 
         assertEquals(AwaitedSendStatus.REJECTED, result.status)
         assertFalse(result.dispatched)
-        assertFalse(handler.sendToRadioAndAwait(MeshPacket()), "the Boolean compatibility API must map rejection")
+        assertFalse(
+            handler.sendToRadioAndAwait(MeshPacket.Builder().build()),
+            "the Boolean compatibility API must map rejection",
+        )
         verify(exactly(0)) { radioInterfaceService.trySendToRadio(any()) }
     }
 
     @Test
     fun `duplicate awaited packet id is rejected without replacing the original waiter`() = runTest(testDispatcher) {
         connectionStateFlow.value = ConnectionState.Connected
-        val original = async { handler.sendToRadioAndAwaitResult(MeshPacket(id = 809)) }
+        val original = async {
+            handler.sendToRadioAndAwaitResult(MeshPacket.Builder().also { wb -> wb.id = 809 }.build())
+        }
         testScheduler.runCurrent()
 
-        val duplicate = handler.sendToRadioAndAwaitResult(MeshPacket(id = 809))
+        val duplicate = handler.sendToRadioAndAwaitResult(MeshPacket.Builder().also { wb -> wb.id = 809 }.build())
 
         assertEquals(AwaitedSendStatus.REJECTED, duplicate.status)
         assertFalse(duplicate.dispatched)
         assertFalse(original.isCompleted)
 
-        handler.handleQueueStatus(QueueStatus(mesh_packet_id = 809, res = 0, free = 16))
+        handler.handleQueueStatus(
+            QueueStatus.Builder()
+                .also { wb ->
+                    wb.mesh_packet_id = 809
+                    wb.res = 0
+                    wb.free = 16
+                }
+                .build(),
+        )
         testScheduler.runCurrent()
         assertFalse(original.isCompleted)
         handler.completeDispatchedResponse(dataRequestId = 809, complete = true)
@@ -793,24 +1035,50 @@ class PacketHandlerImplTest {
     @Test
     fun `response received before dispatch is ignored and retains the queued id`() = runTest(testDispatcher) {
         connectionStateFlow.value = ConnectionState.Connected
-        handler.sendToRadio(MeshPacket(id = 816))
-        val queued = async { handler.sendToRadioAndAwaitResult(MeshPacket(id = 817)) }
+        handler.sendToRadio(MeshPacket.Builder().also { wb -> wb.id = 816 }.build())
+        val queued = async {
+            handler.sendToRadioAndAwaitResult(MeshPacket.Builder().also { wb -> wb.id = 817 }.build())
+        }
         testScheduler.runCurrent()
 
-        handler.handleQueueStatus(QueueStatus(mesh_packet_id = 817, res = 0, free = 16))
+        handler.handleQueueStatus(
+            QueueStatus.Builder()
+                .also { wb ->
+                    wb.mesh_packet_id = 817
+                    wb.res = 0
+                    wb.free = 16
+                }
+                .build(),
+        )
         handler.completeDispatchedResponse(dataRequestId = 817, complete = true)
         testScheduler.runCurrent()
 
         assertFalse(queued.isCompleted)
 
-        val duplicate = handler.sendToRadioAndAwaitResult(MeshPacket(id = 817))
+        val duplicate = handler.sendToRadioAndAwaitResult(MeshPacket.Builder().also { wb -> wb.id = 817 }.build())
         assertEquals(AwaitedSendStatus.REJECTED, duplicate.status)
 
-        handler.handleQueueStatus(QueueStatus(mesh_packet_id = 816, res = 0, free = 16))
+        handler.handleQueueStatus(
+            QueueStatus.Builder()
+                .also { wb ->
+                    wb.mesh_packet_id = 816
+                    wb.res = 0
+                    wb.free = 16
+                }
+                .build(),
+        )
         testScheduler.runCurrent()
 
         verify(exactly(2)) { radioInterfaceService.trySendToRadio(any()) }
-        handler.handleQueueStatus(QueueStatus(mesh_packet_id = 817, res = 0, free = 16))
+        handler.handleQueueStatus(
+            QueueStatus.Builder()
+                .also { wb ->
+                    wb.mesh_packet_id = 817
+                    wb.res = 0
+                    wb.free = 16
+                }
+                .build(),
+        )
         testScheduler.runCurrent()
         assertFalse(queued.isCompleted)
         handler.completeDispatchedResponse(dataRequestId = 817, complete = true)
@@ -818,19 +1086,37 @@ class PacketHandlerImplTest {
         val accepted = queued.await()
         assertEquals(AwaitedSendStatus.ACCEPTED, accepted.status)
         assertTrue(accepted.dispatched)
-        assertTrue(handler.sendToRadio(MeshPacket(id = 817)))
+        assertTrue(handler.sendToRadio(MeshPacket.Builder().also { wb -> wb.id = 817 }.build()))
         testScheduler.runCurrent()
-        handler.handleQueueStatus(QueueStatus(mesh_packet_id = 817, res = 0, free = 16))
+        handler.handleQueueStatus(
+            QueueStatus.Builder()
+                .also { wb ->
+                    wb.mesh_packet_id = 817
+                    wb.res = 0
+                    wb.free = 16
+                }
+                .build(),
+        )
         testScheduler.runCurrent()
     }
 
     @Test
     fun `routing rejection after dispatch completes awaited response as radio rejected`() = runTest(testDispatcher) {
         connectionStateFlow.value = ConnectionState.Connected
-        val result = async { handler.sendToRadioAndAwaitResult(MeshPacket(id = 818)) }
+        val result = async {
+            handler.sendToRadioAndAwaitResult(MeshPacket.Builder().also { wb -> wb.id = 818 }.build())
+        }
         testScheduler.runCurrent()
 
-        handler.handleQueueStatus(QueueStatus(mesh_packet_id = 818, res = 0, free = 16))
+        handler.handleQueueStatus(
+            QueueStatus.Builder()
+                .also { wb ->
+                    wb.mesh_packet_id = 818
+                    wb.res = 0
+                    wb.free = 16
+                }
+                .build(),
+        )
         testScheduler.runCurrent()
         handler.completeDispatchedResponse(dataRequestId = 818, complete = false)
         testScheduler.runCurrent()
@@ -843,11 +1129,21 @@ class PacketHandlerImplTest {
     @Test
     fun `late queue status cannot replace an already completed response`() = runTest(testDispatcher) {
         connectionStateFlow.value = ConnectionState.Connected
-        val result = async { handler.sendToRadioAndAwaitResult(MeshPacket(id = 819)) }
+        val result = async {
+            handler.sendToRadioAndAwaitResult(MeshPacket.Builder().also { wb -> wb.id = 819 }.build())
+        }
         testScheduler.runCurrent()
 
         handler.completeDispatchedResponse(dataRequestId = 819, complete = true)
-        handler.handleQueueStatus(QueueStatus(mesh_packet_id = 819, res = 33, free = 16))
+        handler.handleQueueStatus(
+            QueueStatus.Builder()
+                .also { wb ->
+                    wb.mesh_packet_id = 819
+                    wb.res = 33
+                    wb.free = 16
+                }
+                .build(),
+        )
         testScheduler.runCurrent()
 
         val accepted = result.await()
@@ -858,12 +1154,14 @@ class PacketHandlerImplTest {
     @Test
     fun `cancelling an awaiting caller does not release its queued packet id`() = runTest(testDispatcher) {
         connectionStateFlow.value = ConnectionState.Connected
-        handler.sendToRadio(MeshPacket(id = 811))
-        val awaiting = async { handler.sendToRadioAndAwaitResult(MeshPacket(id = 812)) }
+        handler.sendToRadio(MeshPacket.Builder().also { wb -> wb.id = 811 }.build())
+        val awaiting = async {
+            handler.sendToRadioAndAwaitResult(MeshPacket.Builder().also { wb -> wb.id = 812 }.build())
+        }
         testScheduler.runCurrent()
 
         awaiting.cancelAndJoin()
-        val duplicate = handler.sendToRadioAndAwaitResult(MeshPacket(id = 812))
+        val duplicate = handler.sendToRadioAndAwaitResult(MeshPacket.Builder().also { wb -> wb.id = 812 }.build())
 
         assertEquals(AwaitedSendStatus.REJECTED, duplicate.status)
         assertFalse(duplicate.dispatched)
@@ -875,10 +1173,20 @@ class PacketHandlerImplTest {
     @Test
     fun `service owned routing expiry times out an active strict waiter`() = runTest(testDispatcher) {
         connectionStateFlow.value = ConnectionState.Connected
-        val result = async { handler.sendToRadioAndAwaitResult(MeshPacket(id = 812)) }
+        val result = async {
+            handler.sendToRadioAndAwaitResult(MeshPacket.Builder().also { wb -> wb.id = 812 }.build())
+        }
         testScheduler.runCurrent()
 
-        handler.handleQueueStatus(QueueStatus(mesh_packet_id = 812, res = 0, free = 16))
+        handler.handleQueueStatus(
+            QueueStatus.Builder()
+                .also { wb ->
+                    wb.mesh_packet_id = 812
+                    wb.res = 0
+                    wb.free = 16
+                }
+                .build(),
+        )
         testScheduler.runCurrent()
         testScheduler.advanceTimeBy(PacketHandlerImpl.ROUTING_RESPONSE_TIMEOUT.inWholeMilliseconds)
         testScheduler.runCurrent()
@@ -891,23 +1199,43 @@ class PacketHandlerImplTest {
     @Test
     fun `cancelled strict await releases its packet id after service owned routing expiry`() = runTest(testDispatcher) {
         connectionStateFlow.value = ConnectionState.Connected
-        val awaiting = async { handler.sendToRadioAndAwaitResult(MeshPacket(id = 812)) }
+        val awaiting = async {
+            handler.sendToRadioAndAwaitResult(MeshPacket.Builder().also { wb -> wb.id = 812 }.build())
+        }
         testScheduler.runCurrent()
 
-        handler.handleQueueStatus(QueueStatus(mesh_packet_id = 812, res = 0, free = 16))
+        handler.handleQueueStatus(
+            QueueStatus.Builder()
+                .also { wb ->
+                    wb.mesh_packet_id = 812
+                    wb.res = 0
+                    wb.free = 16
+                }
+                .build(),
+        )
         testScheduler.runCurrent()
         awaiting.cancelAndJoin()
 
-        val duplicate = handler.sendToRadioAndAwaitResult(MeshPacket(id = 812))
+        val duplicate = handler.sendToRadioAndAwaitResult(MeshPacket.Builder().also { wb -> wb.id = 812 }.build())
         assertEquals(AwaitedSendStatus.REJECTED, duplicate.status)
         assertFalse(duplicate.dispatched)
 
         testScheduler.advanceTimeBy(PacketHandlerImpl.ROUTING_RESPONSE_TIMEOUT.inWholeMilliseconds)
         testScheduler.runCurrent()
 
-        val retry = async { handler.sendToRadioAndAwaitResult(MeshPacket(id = 812)) }
+        val retry = async {
+            handler.sendToRadioAndAwaitResult(MeshPacket.Builder().also { wb -> wb.id = 812 }.build())
+        }
         testScheduler.runCurrent()
-        handler.handleQueueStatus(QueueStatus(mesh_packet_id = 812, res = 0, free = 16))
+        handler.handleQueueStatus(
+            QueueStatus.Builder()
+                .also { wb ->
+                    wb.mesh_packet_id = 812
+                    wb.res = 0
+                    wb.free = 16
+                }
+                .build(),
+        )
         handler.completeDispatchedResponse(dataRequestId = 812, complete = true)
         testScheduler.runCurrent()
 
@@ -920,11 +1248,11 @@ class PacketHandlerImplTest {
     fun `fire and forget rejects invalid packet ids without throwing or replacing queued work`() =
         runTest(testDispatcher) {
             connectionStateFlow.value = ConnectionState.Connected
-            assertTrue(handler.sendToRadio(MeshPacket(id = 810)))
+            assertTrue(handler.sendToRadio(MeshPacket.Builder().also { wb -> wb.id = 810 }.build()))
             testScheduler.runCurrent()
 
-            assertFalse(handler.sendToRadio(MeshPacket(id = 810)))
-            assertFalse(handler.sendToRadio(MeshPacket()))
+            assertFalse(handler.sendToRadio(MeshPacket.Builder().also { wb -> wb.id = 810 }.build()))
+            assertFalse(handler.sendToRadio(MeshPacket.Builder().build()))
             testScheduler.runCurrent()
 
             verify(exactly(1)) { radioInterfaceService.trySendToRadio(any()) }
@@ -936,13 +1264,21 @@ class PacketHandlerImplTest {
     @Test
     fun `completed packet id can be reused by a later retry`() = runTest(testDispatcher) {
         connectionStateFlow.value = ConnectionState.Connected
-        assertTrue(handler.sendToRadio(MeshPacket(id = 810)))
+        assertTrue(handler.sendToRadio(MeshPacket.Builder().also { wb -> wb.id = 810 }.build()))
         testScheduler.runCurrent()
 
-        handler.handleQueueStatus(QueueStatus(mesh_packet_id = 810, res = 0, free = 16))
+        handler.handleQueueStatus(
+            QueueStatus.Builder()
+                .also { wb ->
+                    wb.mesh_packet_id = 810
+                    wb.res = 0
+                    wb.free = 16
+                }
+                .build(),
+        )
         testScheduler.runCurrent()
 
-        assertTrue(handler.sendToRadio(MeshPacket(id = 810)))
+        assertTrue(handler.sendToRadio(MeshPacket.Builder().also { wb -> wb.id = 810 }.build()))
         testScheduler.runCurrent()
 
         verify(exactly(2)) { radioInterfaceService.trySendToRadio(any()) }
@@ -953,7 +1289,7 @@ class PacketHandlerImplTest {
 
     @Test
     fun `strict await fails immediately while disconnected`() = runTest(testDispatcher) {
-        val result = handler.sendToRadioAndAwait(MeshPacket(id = 796))
+        val result = handler.sendToRadioAndAwait(MeshPacket.Builder().also { wb -> wb.id = 796 }.build())
 
         assertFalse(result)
         assertEquals(0, testScheduler.currentTime)
@@ -964,7 +1300,7 @@ class PacketHandlerImplTest {
         connectionStateFlow.value = ConnectionState.Connected
         every { radioInterfaceService.trySendToRadio(any()) } throws IllegalStateException("transport failed")
 
-        val result = async { handler.sendToRadioAndAwait(MeshPacket(id = 797)) }
+        val result = async { handler.sendToRadioAndAwait(MeshPacket.Builder().also { wb -> wb.id = 797 }.build()) }
         testScheduler.runCurrent()
 
         assertTrue(result.isCompleted)
@@ -975,10 +1311,18 @@ class PacketHandlerImplTest {
     fun `strict await does not complete on ordinary queue acceptance`() = runTest(testDispatcher) {
         connectionStateFlow.value = ConnectionState.Connected
 
-        val result = async { handler.sendToRadioAndAwait(MeshPacket(id = 793)) }
+        val result = async { handler.sendToRadioAndAwait(MeshPacket.Builder().also { wb -> wb.id = 793 }.build()) }
         testScheduler.runCurrent()
 
-        handler.handleQueueStatus(QueueStatus(mesh_packet_id = 793, res = 0, free = 16))
+        handler.handleQueueStatus(
+            QueueStatus.Builder()
+                .also { wb ->
+                    wb.mesh_packet_id = 793
+                    wb.res = 0
+                    wb.free = 16
+                }
+                .build(),
+        )
         testScheduler.runCurrent()
 
         assertFalse(result.isCompleted)
@@ -990,10 +1334,20 @@ class PacketHandlerImplTest {
     @Test
     fun `strict routing wait outlives the local queue response window`() = runTest(testDispatcher) {
         connectionStateFlow.value = ConnectionState.Connected
-        val result = async { handler.sendToRadioAndAwaitResult(MeshPacket(id = 822)) }
+        val result = async {
+            handler.sendToRadioAndAwaitResult(MeshPacket.Builder().also { wb -> wb.id = 822 }.build())
+        }
         testScheduler.runCurrent()
 
-        handler.handleQueueStatus(QueueStatus(mesh_packet_id = 822, res = 0, free = 16))
+        handler.handleQueueStatus(
+            QueueStatus.Builder()
+                .also { wb ->
+                    wb.mesh_packet_id = 822
+                    wb.res = 0
+                    wb.free = 16
+                }
+                .build(),
+        )
         testScheduler.runCurrent()
         testScheduler.advanceTimeBy(PacketHandlerImpl.RESPONSE_TIMEOUT + 1.seconds)
         testScheduler.runCurrent()
@@ -1007,9 +1361,17 @@ class PacketHandlerImplTest {
     fun `strict await succeeds on routing ack`() = runTest(testDispatcher) {
         connectionStateFlow.value = ConnectionState.Connected
 
-        val result = async { handler.sendToRadioAndAwait(MeshPacket(id = 794)) }
+        val result = async { handler.sendToRadioAndAwait(MeshPacket.Builder().also { wb -> wb.id = 794 }.build()) }
         testScheduler.runCurrent()
-        handler.handleQueueStatus(QueueStatus(mesh_packet_id = 794, res = 0, free = 16))
+        handler.handleQueueStatus(
+            QueueStatus.Builder()
+                .also { wb ->
+                    wb.mesh_packet_id = 794
+                    wb.res = 0
+                    wb.free = 16
+                }
+                .build(),
+        )
         testScheduler.runCurrent()
 
         assertFalse(result.isCompleted)
@@ -1023,15 +1385,35 @@ class PacketHandlerImplTest {
     fun `zero id synchronous loopback completes only the active queue entry`() = runTest(testDispatcher) {
         connectionStateFlow.value = ConnectionState.Connected
 
-        val awaitingRoutingAck = async { handler.sendToRadioAndAwait(MeshPacket(id = 798)) }
+        val awaitingRoutingAck = async {
+            handler.sendToRadioAndAwait(MeshPacket.Builder().also { wb -> wb.id = 798 }.build())
+        }
         testScheduler.runCurrent()
-        handler.handleQueueStatus(QueueStatus(mesh_packet_id = 798, res = 0, free = 16))
+        handler.handleQueueStatus(
+            QueueStatus.Builder()
+                .also { wb ->
+                    wb.mesh_packet_id = 798
+                    wb.res = 0
+                    wb.free = 16
+                }
+                .build(),
+        )
         testScheduler.runCurrent()
         assertFalse(awaitingRoutingAck.isCompleted)
 
-        val synchronousLoopback = async { handler.sendToRadioAndAwait(MeshPacket(id = 799)) }
+        val synchronousLoopback = async {
+            handler.sendToRadioAndAwait(MeshPacket.Builder().also { wb -> wb.id = 799 }.build())
+        }
         testScheduler.runCurrent()
-        handler.handleQueueStatus(QueueStatus(mesh_packet_id = 0, res = 35, free = 16))
+        handler.handleQueueStatus(
+            QueueStatus.Builder()
+                .also { wb ->
+                    wb.mesh_packet_id = 0
+                    wb.res = 35
+                    wb.free = 16
+                }
+                .build(),
+        )
         testScheduler.runCurrent()
 
         assertTrue(synchronousLoopback.await())
@@ -1045,9 +1427,17 @@ class PacketHandlerImplTest {
     fun `strict await fails on routing nak`() = runTest(testDispatcher) {
         connectionStateFlow.value = ConnectionState.Connected
 
-        val result = async { handler.sendToRadioAndAwait(MeshPacket(id = 795)) }
+        val result = async { handler.sendToRadioAndAwait(MeshPacket.Builder().also { wb -> wb.id = 795 }.build()) }
         testScheduler.runCurrent()
-        handler.handleQueueStatus(QueueStatus(mesh_packet_id = 795, res = 0, free = 16))
+        handler.handleQueueStatus(
+            QueueStatus.Builder()
+                .also { wb ->
+                    wb.mesh_packet_id = 795
+                    wb.res = 0
+                    wb.free = 16
+                }
+                .build(),
+        )
         testScheduler.runCurrent()
 
         handler.completeDispatchedResponse(795, complete = false)
@@ -1058,7 +1448,14 @@ class PacketHandlerImplTest {
     @Test
     fun `handleQueueStatus property test`() = runTest(testDispatcher) {
         checkAll(Arb.int(0, 10), Arb.int(0, 32), Arb.int(0, 100000)) { res, free, packetId ->
-            val status = QueueStatus(res = res, free = free, mesh_packet_id = packetId)
+            val status =
+                QueueStatus.Builder()
+                    .also { wb ->
+                        wb.res = res
+                        wb.free = free
+                        wb.mesh_packet_id = packetId
+                    }
+                    .build()
 
             // Ensure it doesn't crash on any input
             handler.handleQueueStatus(status)
@@ -1068,8 +1465,14 @@ class PacketHandlerImplTest {
 
     @Test
     fun `outgoing packets are logged with NODE_NUM_LOCAL`() = runTest(testDispatcher) {
-        val packet = MeshPacket(id = 123, decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP))
-        val toRadio = ToRadio(packet = packet)
+        val packet =
+            MeshPacket.Builder()
+                .also { wb ->
+                    wb.id = 123
+                    wb.decoded = Data.Builder().also { wb -> wb.portnum = PortNum.TEXT_MESSAGE_APP }.build()
+                }
+                .build()
+        val toRadio = ToRadio.Builder().also { wb -> wb.packet = packet }.build()
 
         handler.sendToRadio(toRadio)
         testScheduler.runCurrent()
@@ -1085,7 +1488,7 @@ class PacketHandlerImplTest {
 
     private fun reaction(id: Int, timestamp: Long = 0L, status: MessageStatus = MessageStatus.ENROUTE) = Reaction(
         replyId = 1,
-        user = User(id = "!00000001"),
+        user = User.Builder().also { wb -> wb.id = "!00000001" }.build(),
         emoji = "👍",
         timestamp = timestamp,
         snr = null,
@@ -1095,10 +1498,26 @@ class PacketHandlerImplTest {
         status = status,
     )
 
-    private fun outboundDataPacket(id: Int) = MeshPacket(id = id, decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP))
+    private fun outboundDataPacket(id: Int) = MeshPacket.Builder()
+        .also { wb ->
+            wb.id = id
+            wb.decoded = Data.Builder().also { wb -> wb.portnum = PortNum.TEXT_MESSAGE_APP }.build()
+        }
+        .build()
 
-    private fun outboundReaction(id: Int) =
-        MeshPacket(id = id, decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP, reply_id = 1, emoji = 1))
+    private fun outboundReaction(id: Int) = MeshPacket.Builder()
+        .also { wb ->
+            wb.id = id
+            wb.decoded =
+                Data.Builder()
+                    .also { wb ->
+                        wb.portnum = PortNum.TEXT_MESSAGE_APP
+                        wb.reply_id = 1
+                        wb.emoji = 1
+                    }
+                    .build()
+        }
+        .build()
 
     @Test
     fun `unacked ENROUTE send times out to a retryable ERROR TIMEOUT`() = runTest(testDispatcher) {
@@ -1106,7 +1525,7 @@ class PacketHandlerImplTest {
         everySuspend { packetRepository.applyOutgoingQueueStatus(any(), any()) } returns
             PersistedPacket(PERSISTED_ID, enrouteDataPacket(123, status = MessageStatus.QUEUED))
 
-        handler.sendToRadio(ToRadio(packet = outboundDataPacket(123)))
+        handler.sendToRadio(ToRadio.Builder().also { wb -> wb.packet = outboundDataPacket(123) }.build())
         testScheduler.advanceTimeBy(PacketHandlerImpl.SEND_ACK_TIMEOUT + 1.seconds)
         testScheduler.runCurrent()
 
@@ -1119,7 +1538,7 @@ class PacketHandlerImplTest {
         everySuspend { packetRepository.applyOutgoingQueueStatus(any(), any()) } returns
             PersistedPacket(PERSISTED_ID, enrouteDataPacket(124, status = MessageStatus.QUEUED))
 
-        handler.sendToRadio(ToRadio(packet = outboundDataPacket(124)))
+        handler.sendToRadio(ToRadio.Builder().also { wb -> wb.packet = outboundDataPacket(124) }.build())
         testScheduler.advanceTimeBy(PacketHandlerImpl.SEND_ACK_TIMEOUT - 1.seconds)
         testScheduler.runCurrent()
 
@@ -1133,7 +1552,7 @@ class PacketHandlerImplTest {
         everySuspend { packetRepository.applyOutgoingReactionQueueStatus(125, MessageStatus.ENROUTE) } returns
             PersistedReaction(PERSISTED_REACTION_ID, queued)
 
-        handler.sendToRadio(ToRadio(packet = outboundReaction(125)))
+        handler.sendToRadio(ToRadio.Builder().also { wb -> wb.packet = outboundReaction(125) }.build())
         testScheduler.runCurrent()
         testScheduler.advanceTimeBy(PacketHandlerImpl.SEND_ACK_TIMEOUT + 1.seconds)
         testScheduler.runCurrent()
@@ -1217,7 +1636,7 @@ class PacketHandlerImplTest {
         everySuspend { packetRepository.getEnroutePackets() } returns listOf(PersistedPacket(PERSISTED_ID, packet))
         everySuspend { packetRepository.getEnrouteReactions() } returns emptyList()
 
-        handler.sendToRadio(ToRadio(packet = outboundDataPacket(325)))
+        handler.sendToRadio(ToRadio.Builder().also { wb -> wb.packet = outboundDataPacket(325) }.build())
         testScheduler.runCurrent()
         repeat(3) {
             handler.rearmSendAckTimeouts()

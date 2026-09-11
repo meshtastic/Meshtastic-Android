@@ -107,7 +107,7 @@ class MockRadioTransportTest {
         try {
             val transport = MockRadioTransport(callback, scope, address = "")
 
-            transport.handleSendToRadio(ToRadio(want_config_id = HandshakeConstants.CONFIG_NONCE).encode())
+            transport.handleSendToRadio(wantConfig(HandshakeConstants.CONFIG_NONCE))
 
             assertEquals(1, callback.received.count { it.my_info != null }, "stage 1 must announce our node")
             assertNotNull(callback.received.firstNotNullOfOrNull { it.metadata }, "stage 1 must send metadata")
@@ -126,10 +126,10 @@ class MockRadioTransportTest {
         val scope = transportScope()
         try {
             val transport = MockRadioTransport(callback, scope, address = "")
-            transport.handleSendToRadio(ToRadio(want_config_id = HandshakeConstants.CONFIG_NONCE).encode())
+            transport.handleSendToRadio(wantConfig(HandshakeConstants.CONFIG_NONCE))
             callback.received.clear()
 
-            transport.handleSendToRadio(ToRadio(want_config_id = HandshakeConstants.NODE_INFO_NONCE).encode())
+            transport.handleSendToRadio(wantConfig(HandshakeConstants.NODE_INFO_NONCE))
 
             assertTrue(callback.received.none { it.my_info != null }, "re-sending my_info breaks stage 2")
             assertEquals(listOf(HandshakeConstants.NODE_INFO_NONCE), callback.completions)
@@ -144,10 +144,10 @@ class MockRadioTransportTest {
         val scope = transportScope()
         try {
             val transport = MockRadioTransport(callback, scope, address = "")
-            transport.handleSendToRadio(ToRadio(want_config_id = HandshakeConstants.CONFIG_NONCE).encode())
+            transport.handleSendToRadio(wantConfig(HandshakeConstants.CONFIG_NONCE))
             callback.received.clear()
 
-            transport.handleSendToRadio(ToRadio(want_config_id = HandshakeConstants.NODE_INFO_NONCE).encode())
+            transport.handleSendToRadio(wantConfig(HandshakeConstants.NODE_INFO_NONCE))
 
             val nodes = callback.nodeInfos
             assertTrue(nodes.size >= MIN_DEMO_NODES, "expected a populated node list, got ${nodes.size}")
@@ -188,7 +188,7 @@ class MockRadioTransportTest {
         try {
             val transport = MockRadioTransport(callback, scope, address = "")
 
-            transport.handleSendToRadio(ToRadio(want_config_id = 1234).encode())
+            transport.handleSendToRadio(wantConfig(1234))
 
             assertTrue(callback.received.isEmpty())
         } finally {
@@ -202,9 +202,9 @@ class MockRadioTransportTest {
         val scope = transportScope()
         try {
             val transport = MockRadioTransport(callback, scope, address = "")
-            transport.handleSendToRadio(ToRadio(want_config_id = HandshakeConstants.CONFIG_NONCE).encode())
+            transport.handleSendToRadio(wantConfig(HandshakeConstants.CONFIG_NONCE))
             val myNodeNum = assertNotNull(callback.received.firstNotNullOfOrNull { it.my_info }).my_node_num
-            transport.handleSendToRadio(ToRadio(want_config_id = HandshakeConstants.NODE_INFO_NONCE).encode())
+            transport.handleSendToRadio(wantConfig(HandshakeConstants.NODE_INFO_NONCE))
             callback.received.clear()
 
             testScheduler.advanceTimeBy(SEED_WINDOW_MS)
@@ -243,8 +243,8 @@ class MockRadioTransportTest {
         val scope = transportScope()
         try {
             val transport = MockRadioTransport(callback, scope, address = "")
-            transport.handleSendToRadio(ToRadio(want_config_id = HandshakeConstants.CONFIG_NONCE).encode())
-            transport.handleSendToRadio(ToRadio(want_config_id = HandshakeConstants.NODE_INFO_NONCE).encode())
+            transport.handleSendToRadio(wantConfig(HandshakeConstants.CONFIG_NONCE))
+            transport.handleSendToRadio(wantConfig(HandshakeConstants.NODE_INFO_NONCE))
             callback.received.clear()
 
             testScheduler.advanceTimeBy(SEED_WINDOW_MS)
@@ -293,8 +293,8 @@ class MockRadioTransportTest {
         val scope = transportScope()
         try {
             val transport = MockRadioTransport(callback, scope, address = "")
-            transport.handleSendToRadio(ToRadio(want_config_id = HandshakeConstants.CONFIG_NONCE).encode())
-            transport.handleSendToRadio(ToRadio(want_config_id = HandshakeConstants.NODE_INFO_NONCE).encode())
+            transport.handleSendToRadio(wantConfig(HandshakeConstants.CONFIG_NONCE))
+            transport.handleSendToRadio(wantConfig(HandshakeConstants.NODE_INFO_NONCE))
             // Drop the handshake frames before timing the seed pass. Asserting on a recorder that still holds them
             // would pass even if the simulator went silent the moment the handshake ended, which would leave close()
             // with nothing to stop and this test proving nothing.
@@ -309,15 +309,25 @@ class MockRadioTransportTest {
             // A text with want_ack leaves both a delayed ack and a delayed reply pending, so close() has more than the
             // telemetry ticker to cancel.
             transport.handleSendToRadio(
-                ToRadio(
-                    packet =
-                    MeshPacket(
-                        id = 1,
-                        to = BROADCAST_ADDR,
-                        want_ack = true,
-                        decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP, payload = "ping".encodeUtf8()),
-                    ),
-                )
+                ToRadio.Builder()
+                    .also { wb ->
+                        wb.packet =
+                            MeshPacket.Builder()
+                                .also { wb ->
+                                    wb.id = 1
+                                    wb.to = BROADCAST_ADDR
+                                    wb.want_ack = true
+                                    wb.decoded =
+                                        Data.Builder()
+                                            .also { wb ->
+                                                wb.portnum = PortNum.TEXT_MESSAGE_APP
+                                                wb.payload = "ping".encodeUtf8()
+                                            }
+                                            .build()
+                                }
+                                .build()
+                    }
+                    .build()
                     .encode(),
             )
 
@@ -343,7 +353,20 @@ class MockRadioTransportTest {
         val scope = transportScope()
         try {
             val transport = MockRadioTransport(callback = callback, scope = scope, address = "mock")
-            val outbound = ToRadio(packet = MeshPacket(id = 77, from = 1234, want_ack = true)).encode()
+            val outbound =
+                ToRadio.Builder()
+                    .also { wb ->
+                        wb.packet =
+                            MeshPacket.Builder()
+                                .also { wb ->
+                                    wb.id = 77
+                                    wb.from = 1234
+                                    wb.want_ack = true
+                                }
+                                .build()
+                    }
+                    .build()
+                    .encode()
 
             transport.start()
             assertTrue(transport.handleSendToRadio(outbound))
@@ -366,7 +389,20 @@ class MockRadioTransportTest {
         val scope = transportScope()
         try {
             val transport = MockRadioTransport(callback = callback, scope = scope, address = "mock")
-            val outbound = ToRadio(packet = MeshPacket(id = 77, from = 1234, want_ack = true)).encode()
+            val outbound =
+                ToRadio.Builder()
+                    .also { wb ->
+                        wb.packet =
+                            MeshPacket.Builder()
+                                .also { wb ->
+                                    wb.id = 77
+                                    wb.from = 1234
+                                    wb.want_ack = true
+                                }
+                                .build()
+                    }
+                    .build()
+                    .encode()
 
             transport.start()
             assertTrue(transport.handleSendToRadio(outbound))
@@ -409,14 +445,23 @@ class MockRadioTransportTest {
             val callback = RecordingCallback()
             val transport = MockRadioTransport(callback = callback, scope = scope, address = "mock")
             val outbound =
-                ToRadio(
-                    packet =
-                    MeshPacket(
-                        id = 77,
-                        decoded =
-                        Data(portnum = PortNum.ADMIN_APP, payload = byteArrayOf(0x80.toByte()).toByteString()),
-                    ),
-                )
+                ToRadio.Builder()
+                    .also { wb ->
+                        wb.packet =
+                            MeshPacket.Builder()
+                                .also { wb ->
+                                    wb.id = 77
+                                    wb.decoded =
+                                        Data.Builder()
+                                            .also { wb ->
+                                                wb.portnum = PortNum.ADMIN_APP
+                                                wb.payload = byteArrayOf(0x80.toByte()).toByteString()
+                                            }
+                                            .build()
+                                }
+                                .build()
+                    }
+                    .build()
 
             transport.start()
             assertTrue(transport.handleSendToRadio(outbound.encode()))
@@ -428,15 +473,28 @@ class MockRadioTransportTest {
             )
 
             val validRequestId = 78
-            val validAdmin = AdminMessage(get_config_request = AdminMessage.ConfigType.LORA_CONFIG)
+            val validAdmin =
+                AdminMessage.Builder()
+                    .also { wb -> wb.get_config_request = AdminMessage.ConfigType.LORA_CONFIG }
+                    .build()
             val validOutbound =
-                ToRadio(
-                    packet =
-                    MeshPacket(
-                        id = validRequestId,
-                        decoded = Data(portnum = PortNum.ADMIN_APP, payload = validAdmin.encode().toByteString()),
-                    ),
-                )
+                ToRadio.Builder()
+                    .also { wb ->
+                        wb.packet =
+                            MeshPacket.Builder()
+                                .also { wb ->
+                                    wb.id = validRequestId
+                                    wb.decoded =
+                                        Data.Builder()
+                                            .also { wb ->
+                                                wb.portnum = PortNum.ADMIN_APP
+                                                wb.payload = validAdmin.encode().toByteString()
+                                            }
+                                            .build()
+                                }
+                                .build()
+                    }
+                    .build()
             assertTrue(transport.handleSendToRadio(validOutbound.encode()))
             advanceTimeBy(ACK_WINDOW_MS)
             runCurrent()
@@ -464,3 +522,5 @@ class MockRadioTransportTest {
         const val ACK_WINDOW_MS = 3_000L
     }
 }
+
+private fun wantConfig(id: Int) = ToRadio.Builder().also { wb -> wb.want_config_id = id }.build().encode()

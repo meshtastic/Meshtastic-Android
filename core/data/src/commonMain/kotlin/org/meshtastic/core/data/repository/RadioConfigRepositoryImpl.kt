@@ -182,20 +182,22 @@ open class RadioConfigRepositoryImpl(
                 localConfig,
                 localModuleConfig,
             ->
-            DeviceProfile(
-                long_name = node?.user?.long_name,
-                short_name = node?.user?.short_name,
-                channel_url = channels.getChannelUrl().toString(),
-                config = localConfig,
-                module_config = localModuleConfig,
-                is_unmessagable = node?.user?.is_unmessagable,
-                is_licensed = node?.user?.is_licensed,
-                fixed_position =
-                if (node != null && localConfig.position?.fixed_position == true) {
-                    node.position
-                } else {
-                    null
-                },
-            )
+            DeviceProfile.Builder()
+                .also { wb ->
+                    wb.long_name = node?.user?.long_name
+                    wb.short_name = node?.user?.short_name
+                    wb.channel_url = channels.getChannelUrl().toString()
+                    wb.config = localConfig
+                    wb.module_config = localModuleConfig
+                    wb.is_unmessagable = node?.user?.is_unmessagable
+                    wb.is_licensed = node?.user?.is_licensed
+                    wb.fixed_position =
+                        if (node != null && localConfig.position?.fixed_position == true) {
+                            node.position
+                        } else {
+                            null
+                        }
+                }
+                .build()
         }
 }

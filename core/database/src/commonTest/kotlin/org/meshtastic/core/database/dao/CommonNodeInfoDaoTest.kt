@@ -77,7 +77,14 @@ abstract class CommonNodeInfoDaoTest {
         val node =
             NodeEntity(
                 num = 1234,
-                user = User(long_name = "Test Node", id = "!test", hw_model = org.meshtastic.proto.HardwareModel.TBEAM),
+                user =
+                User.Builder()
+                    .also { wb ->
+                        wb.long_name = "Test Node"
+                        wb.id = "!test"
+                        wb.hw_model = org.meshtastic.proto.HardwareModel.TBEAM
+                    }
+                    .build(),
                 lastHeard = (nowMillis / 1000).toInt(),
             )
         dao.upsert(node)
@@ -89,8 +96,8 @@ abstract class CommonNodeInfoDaoTest {
     @Test
     fun testNodeDBbyNum() = runTest {
         createDb()
-        val node1 = NodeEntity(num = 1, user = User(id = "!1"))
-        val node2 = NodeEntity(num = 2, user = User(id = "!2"))
+        val node1 = NodeEntity(num = 1, user = User.Builder().also { wb -> wb.id = "!1" }.build())
+        val node2 = NodeEntity(num = 2, user = User.Builder().also { wb -> wb.id = "!2" }.build())
         dao.putAll(listOf(node1, node2))
 
         val nodes = dao.nodeDBbyNum().first()
@@ -102,7 +109,7 @@ abstract class CommonNodeInfoDaoTest {
     @Test
     fun testDeleteNode() = runTest {
         createDb()
-        val node = NodeEntity(num = 1, user = User(id = "!1"))
+        val node = NodeEntity(num = 1, user = User.Builder().also { wb -> wb.id = "!1" }.build())
         dao.upsert(node)
         dao.deleteNode(1)
         val result = dao.getNodeByNum(1)
@@ -242,8 +249,8 @@ abstract class CommonNodeInfoDaoTest {
     @Test
     fun testClearNodeInfo() = runTest {
         createDb()
-        val node1 = NodeEntity(num = 1, user = User(id = "!1"), isFavorite = true)
-        val node2 = NodeEntity(num = 2, user = User(id = "!2"), isFavorite = false)
+        val node1 = NodeEntity(num = 1, user = User.Builder().also { wb -> wb.id = "!1" }.build(), isFavorite = true)
+        val node2 = NodeEntity(num = 2, user = User.Builder().also { wb -> wb.id = "!2" }.build(), isFavorite = false)
         dao.putAll(listOf(node1, node2))
 
         dao.clearNodeInfo(preserveFavorites = true)
