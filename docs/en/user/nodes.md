@@ -79,7 +79,7 @@ Each node carries one security icon beside its name in the node list. Tap it to 
 
 | Icon | Meaning | Shown for |
 |------|---------|-----------|
-| Person with a shield check (green) | **Verified contact** — you verified this node's key in person by exchanging contact QR codes, so its identity is confirmed. The strongest trust the list shows | Any firmware version |
+| Person with a shield check (green) | **Verified contact** — you verified this node's key in person by exchanging contact QR codes, so its identity is confirmed. The strongest trust the list shows. Your own connected node carries it too | Any firmware version |
 | Nodes icon with a shield check (green) | **Signed node** — this node signs its broadcasts with its identity key, so its identity is consistent over time, but you have not verified it in person. On firmware 2.8 the icon appears from the version alone, before any signed broadcast has been heard | Firmware 2.8 or newer, and any node whose signed broadcast your node has verified |
 | 🔒 Closed lock | A public key is on file and matches, so direct messages to this node are encrypted | Firmware before 2.8, or no reported version |
 | 🔓 Open lock | No public key has been received for this node, so it cannot be direct messaged — use **Request User Info** on the node detail page to ask for one | Firmware before 2.8, or no reported version |
@@ -132,7 +132,7 @@ Type in the search field to filter nodes by name or short name. The filter updat
 | **Exclude infrastructure** | Hide infrastructure-role nodes (Router, Router Late, Client Base, and legacy Repeater nodes) and any node that cannot be messaged, whatever its role |
 | **Exclude MQTT** | Hide nodes heard only via MQTT internet bridge |
 | **Signed only** | Show only nodes whose signed broadcasts your node has actually heard and verified. Stricter than the icon: a node on 2.8 shows as signed by its firmware version before any signed broadcast arrives, and a contact verified in person on older firmware is not signed at all |
-| **Encrypted only** | Show only nodes with a matching public key on file, so every node left can be direct messaged. A node with a key mismatch is excluded |
+| **Encrypted only** | Show nodes with a matching public key on file, the key an encrypted direct message needs. A node with a key mismatch is excluded |
 | **Only show ignored Nodes** | Replace the list with the nodes you have ignored. Every other node is hidden while this is on, and a banner appears at the top of the list to take you back |
 
 ### Sort Options
