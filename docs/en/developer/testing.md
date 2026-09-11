@@ -2,7 +2,7 @@
 title: Testing
 parent: Developer Guide
 nav_order: 7
-last_updated: 2026-08-29
+last_updated: 2026-09-11
 description: Testing strategy for the Meshtastic KMP project — test categories, screenshot pipeline, baseline profiles, and CI integration.
 aliases:
   - tests
@@ -20,7 +20,7 @@ Testing strategy and practices for the Meshtastic KMP project.
 
 Shared tests that run on all platforms:
 
-```bash
+```shell
 ./gradlew allTests
 ```
 
@@ -33,7 +33,7 @@ Shared tests that run on all platforms:
 
 Android-specific tests that run on JVM:
 
-```bash
+```shell
 ./gradlew test
 ```
 
@@ -62,7 +62,7 @@ Uses Android Gradle Plugin's native (layoutlib) screenshot testing framework, sp
 - **`:screenshot-tests`** — the **visual-regression gate**. CI runs `validateDebugScreenshotTest` on it; reframing one of these baselines is a real diff to review. Holds atomic, dual-purpose components.
 - **`:docs-screenshots`** — **generate-only**, *not* validated in CI. Holds doc-framed compositions whose framing is tuned for the docs site, so reframing a doc image never churns the regression gate.
 
-```bash
+```shell
 ./gradlew :screenshot-tests:updateDebugScreenshotTest    # record regression goldens
 ./gradlew :screenshot-tests:validateDebugScreenshotTest  # compare against goldens (CI gate)
 ./gradlew :docs-screenshots:updateDebugScreenshotTest    # record doc-framed composition images
@@ -77,7 +77,7 @@ The `:baselineprofile` module (#5735) generates a [Baseline Profile](https://dev
 
 The Macrobenchmark generator (`BaselineProfileGenerator`) and the before/after benchmark (`StartupBenchmark`) live in `baselineprofile/src/main/kotlin/org/meshtastic/baselineprofile/`. Both run on a device/emulator:
 
-```bash
+```shell
 ./gradlew :androidApp:generateGoogleReleaseBaselineProfile   # Generate the profile (commit the output)
 ./gradlew :androidApp:benchmarkGoogleReleaseBaselineProfile  # Quantify the cold-start win
 ```
@@ -90,7 +90,7 @@ Extending the journey past cold start needs a fake transport or a connected radi
 
 ## Test Organization
 
-```
+```text
 feature/my-feature/src/
 ├── commonTest/kotlin/org/meshtastic/feature/myfeature/
 │   ├── MyBusinessLogicTest.kt
@@ -119,7 +119,7 @@ feature/my-feature/src/
 
 ## Running Tests
 
-```bash
+```shell
 # All KMP tests
 ./gradlew allTests
 

@@ -2,7 +2,7 @@
 title: MQTT
 parent: User Guide
 nav_order: 11
-last_updated: 2026-08-30
+last_updated: 2026-09-11
 description: Bridge your mesh to the internet — MQTT broker setup, encryption layers, and map reporting.
 aliases:
   - mqtt
@@ -24,7 +24,7 @@ The MQTT module connects your node to an MQTT broker, allowing:
 
 ## How It Works
 
-```
+```text
 [Your Node] → Radio → [Gateway Node with Wi-Fi] → MQTT Broker → [Remote Gateway] → Radio → [Remote Node]
 ```
 

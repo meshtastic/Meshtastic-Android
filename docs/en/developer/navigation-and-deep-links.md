@@ -2,7 +2,7 @@
 title: Navigation & Deep Links
 parent: Developer Guide
 nav_order: 4
-last_updated: 2026-08-29
+last_updated: 2026-09-11
 description: How typed Navigation 3 routes and DeepLinkRouter work together, the supported deep link URIs, and how to add a new one.
 aliases:
   - deeplinks
@@ -144,6 +144,6 @@ These are called from the settings navigation composition.
 ## Testing
 
 Deep link routing is tested in:
-```
+```text
 core/navigation/src/commonTest/kotlin/org/meshtastic/core/navigation/DeepLinkRouterTest.kt
 ```

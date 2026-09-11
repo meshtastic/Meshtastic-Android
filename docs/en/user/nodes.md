@@ -73,19 +73,23 @@ Most users should keep the default **Client** role. Consider a different role wh
 
 > 💡 **Tip:** The mesh works best when most nodes are **Client** or **Router**. Too many Client Mute nodes reduce mesh resilience; too many Routers in a dense area can cause congestion. A good rule of thumb: one Router per 5–10 Clients in your area.
 
-### Encryption Indicators
+### Security indicators
 
-Nodes display encryption status icons next to their name:
+Each node carries one security icon beside its name, in the node list and on its detail screen. Tap the icon to read what it means, and choose **Show All Meanings** in that dialog for the full legend.
 
-| Icon | Meaning |
-|------|---------|
-| 🔒 Locked | Communication uses PKI (public key infrastructure) — end-to-end encrypted with verified identity |
-| 🔓 Unlocked | No public key has been received for this node, so it cannot be direct messaged — use **Request User Info** on the node detail page to ask for one |
-| ⚠️ Mismatch | Public key mismatch — the node's key has changed since last seen (investigate before trusting) |
+| Icon | Meaning | Shown for |
+|------|---------|-----------|
+| Person with a shield check (green) | **Verified contact** — you verified this node's key in person by exchanging contact QR codes, so its identity is confirmed. The strongest trust the list shows | Any firmware version |
+| Mesh icon with a shield check (green) | **Signed node** — your node verified this node's signed broadcasts with its identity key, so its identity is consistent over time, but you have not verified it in person | Firmware 2.8 or newer, and any node whose signature your node has verified |
+| 🔒 Closed lock | A public key is on file and matches, so direct messages to this node are encrypted | Firmware before 2.8, or no reported version |
+| 🔓 Open lock | No public key has been received for this node, so it cannot be direct messaged — use **Request User Info** on the node detail page to ask for one | Firmware before 2.8, or no reported version |
+| ⚠️ Mismatch | **Public key mismatch** — a different key arrived for this node after one was stored. Investigate before trusting | Any firmware version |
 
-> 💡 **Tip:** Direct messages always use PKI, so the radio needs the other node's public key before it can send one. It refuses the send rather than falling back to channel encryption. Keys arrive inside node info, which is why an open lock usually clears itself once that node is heard from properly. If you see a key mismatch warning, the node may have been reset or compromised.
+Every node on firmware 2.8 or newer signs its broadcasts, so on that firmware the signed state is the baseline and the locks are not shown. The **Security** row on the detail screen states the same result in words.
 
-To clear a mismatch, first confirm through another trusted channel that the key change was intentional — a factory reset causes one. Then touch & hold the node, choose **Remove**, and let the two radios exchange keys again the next time yours hears it.
+Direct messages always use public-key encryption, so your node needs the other node's public key before it can send one. It refuses the send rather than falling back to channel encryption. Keys arrive inside node info, which is why an open lock usually clears itself once that node is heard from properly.
+
+A mismatch never replaces the key you already hold. The app keeps the first key it recorded and refuses the new one, as the firmware does, so a stray or hostile node info cannot silently break encrypted messaging to a contact. To clear a mismatch, first confirm through another trusted channel that the key change was intentional — a factory reset causes one. Then touch & hold the node, choose **Remove**, and let the two nodes exchange keys again the next time yours hears it.
 
 ## Quick Actions
 
@@ -108,6 +112,8 @@ radio is connected and running firmware 2.8 or newer — see
 
 On a node's detail screen, tap **Share Contact** to produce a link and a QR code for that node. From the same dialog, **Share link** opens the Android share sheet (on desktop it copies the link instead), **Write to NFC tag** saves it to a writable NFC tag, and **Copy** puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved.
 
+Sharing your own contact this way marks it as verified in person, so whoever imports it sees the **Verified contact** icon rather than the signed one. Relaying someone else's contact passes on only what your app had already recorded about them.
+
 To add someone else's contact, use the import button on the node list and choose **Scan Shared Contact QR Code**, **Scan Shared Contact NFC**, or **Input Shared Contact URL**. The app asks you to confirm with **Import Shared Contact?**, and warns you when the contact is one you already have.
 
 ## Filtering & Sorting
@@ -125,6 +131,8 @@ Type in the search field to filter nodes by name or short name. The filter updat
 | **Include unknown** | Show nodes that haven't sent user info yet. **On by default**, so a node heard before its info arrives stays visible; these carry a badge marking them incomplete, and cannot be direct messaged until their user info brings a public key |
 | **Exclude infrastructure** | Hide infrastructure-role nodes (Router, Router Late, Client Base, and legacy Repeater nodes) and any node that cannot be messaged, whatever its role |
 | **Exclude MQTT** | Hide nodes heard only via MQTT internet bridge |
+| **Signed only** | Show only nodes whose signed broadcasts your node has verified — the signed and verified states in the security legend |
+| **Encrypted only** | Show only nodes with a matching public key on file, so every node left can be direct messaged. A node with a key mismatch is excluded |
 | **Only show ignored Nodes** | Replace the list with the nodes you have ignored. Every other node is hidden while this is on, and a banner appears at the top of the list to take you back |
 
 ### Sort Options
