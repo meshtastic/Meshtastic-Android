@@ -171,6 +171,8 @@ class NodeRadioTransport(
                 privateKey = record.privateKey
                 publicKey = record.publicKey
                 channels += MeshChannel(DEFAULT_CHANNEL, byteArrayOf(DEFAULT_PSK_INDEX))
+                // The library's default is 0, which nothing relays; the firmware's is 3.
+                hopLimit = DEFAULT_HOP_LIMIT
                 transports += bearers
                 clock = monotonicMs
                 epochSeconds = { System.currentTimeMillis() / MILLIS_PER_SECOND }
@@ -198,7 +200,8 @@ class NodeRadioTransport(
         live = LiveNode(job, session)
 
         // Collecting events is what opens every bearer; a node nobody collects never touches a radio.
-        nodeScope.launch { node.events.collect {} }
+        // Every event names its bearer, which is the only place that attribution exists.
+        nodeScope.launch { node.events.collect { event -> Logger.d { "node event: $event" } } }
         nodeScope.launch {
             session.fromRadio.collect { bytes -> lifecycle.runIfOpen { callback.handleFromRadio(bytes) } }
         }
@@ -292,6 +295,7 @@ class NodeRadioTransport(
         const val MILLIS_PER_SECOND = 1_000L
         const val DEFAULT_CHANNEL = "LongFast"
         const val DEFAULT_PSK_INDEX: Byte = 1
+        const val DEFAULT_HOP_LIMIT = 3
         const val UNSET_REGION = "UNSET"
         const val MAX_TX_POWER_DBM = 10
         const val MAX_LONG_NAME = 39
