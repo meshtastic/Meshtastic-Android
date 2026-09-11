@@ -109,6 +109,9 @@ jmdns = "3.6.3"
 qrcode-kotlin = "4.5.0"
 takpacket-sdk = "0.9.1"
 meshtastic-protobufs = "2.8.0.35-g3b3df2a-SNAPSHOT"
+# node-kmp, from ~/.m2 (-PuseMavenLocal=1), built against the protobufs pin above: Wire types are
+# binary compatible only at an exact match.
+meshtastic-node-kmp = "0.1.0-pb2.8.0.35-g3b3df2a-SNAPSHOT"
 
 # Gradle Plugins
 ccud = "2.8.0"
@@ -363,6 +366,12 @@ takpacket-sdk-kmp = { module = "org.meshtastic:takpacket-sdk", version.ref = "ta
 
 # Meshtastic Protobufs SDK (Wire-generated KMP models from meshtastic/protobufs)
 meshtastic-protobufs = { module = "org.meshtastic:protobufs", version.ref = "meshtastic-protobufs" }
+# meshtastic-node-kmp: the phone as a mesh node, served to this app over the firmware phone API in-process.
+meshtastic-node-core = { module = "org.meshtastic:node-core", version.ref = "meshtastic-node-kmp" }
+meshtastic-node-phone-api = { module = "org.meshtastic:node-phone-api", version.ref = "meshtastic-node-kmp" }
+meshtastic-node-transport-ble = { module = "org.meshtastic:node-transport-ble", version.ref = "meshtastic-node-kmp" }
+meshtastic-node-transport-ble-gatt = { module = "org.meshtastic:node-transport-ble-gatt", version.ref = "meshtastic-node-kmp" }
+meshtastic-node-transport-lora = { module = "org.meshtastic:node-transport-lora", version.ref = "meshtastic-node-kmp" }
 
 
 [bundles]

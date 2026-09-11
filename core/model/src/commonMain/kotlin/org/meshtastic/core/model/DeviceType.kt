@@ -34,6 +34,7 @@ enum class DeviceType {
 
                 InterfaceId.TCP -> TCP
 
+                InterfaceId.NODE,
                 InterfaceId.NOP,
                 InterfaceId.REPLAY,
                 null,

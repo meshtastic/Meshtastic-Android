@@ -20,6 +20,9 @@ package org.meshtastic.core.model
 enum class InterfaceId(val id: Char) {
     BLUETOOTH('x'),
     MOCK('m'),
+
+    /** This device as a mesh node, in-process (`NodeRadioTransport`). Behind the Demo Mode gate, like MOCK. */
+    NODE('p'),
     NOP('n'),
     REPLAY('r'),
     SERIAL('s'),

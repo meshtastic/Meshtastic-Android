@@ -26,6 +26,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.demo_mode
 import org.meshtastic.core.resources.demo_mode_replay
 import org.meshtastic.core.resources.getStringSuspend
+import org.meshtastic.core.resources.mesh_node_this_device
 import org.meshtastic.feature.connections.model.DeviceListEntry
 
 private const val SUFFIX_LENGTH = 4
@@ -142,5 +143,10 @@ internal suspend fun virtualDeviceEntries(showMock: Boolean, showReplay: Boolean
         } else {
             null
         }
-    return listOfNotNull(mock, replay)
+    val node =
+        DeviceListEntry.LocalNode(
+            safeCatchingAll { getStringSuspend(Res.string.mesh_node_this_device) }
+                .getOrDefault("This device (mesh node)"),
+        )
+    return listOfNotNull(mock, node, replay)
 }

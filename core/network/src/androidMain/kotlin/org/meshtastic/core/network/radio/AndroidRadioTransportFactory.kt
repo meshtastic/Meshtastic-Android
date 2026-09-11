@@ -90,6 +90,7 @@ class AndroidRadioTransportFactory(
         val rest = address.substring(1)
         return when (interfaceId) {
             InterfaceId.MOCK,
+            InterfaceId.NODE,
             InterfaceId.NOP,
             InterfaceId.REPLAY,
             InterfaceId.TCP,
@@ -113,6 +114,8 @@ class AndroidRadioTransportFactory(
 
         return when (interfaceId) {
             InterfaceId.MOCK -> MockRadioTransport(callback = service, scope = service.serviceScope, address = rest)
+
+            InterfaceId.NODE -> NodeRadioTransport(callback = service, scope = service.serviceScope, context = context)
 
             InterfaceId.REPLAY -> createReplayTransport(service, rest)
 

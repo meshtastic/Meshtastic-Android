@@ -49,6 +49,7 @@ abstract class BaseRadioTransportFactory(
             // from any web page through the verified meshtastic.org app link, so a drive-by deep link must not be able
             // to swap a user's real radio for a fake one.
             InterfaceId.MOCK.id,
+            InterfaceId.NODE.id,
             InterfaceId.REPLAY.id,
             -> mockTransportEnabled.value
 

@@ -1123,6 +1123,7 @@ mesh_beacon_target_remove
 mesh_beacon_targets
 mesh_map_location
 mesh_map_location_description
+mesh_node_this_device
 ### MESHTASTIC ###
 meshtastic
 meshtastic_alerts_notifications

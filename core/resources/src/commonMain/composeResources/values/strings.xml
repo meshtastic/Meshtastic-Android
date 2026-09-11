@@ -1159,6 +1159,7 @@
     <string name="mesh_beacon_targets">Broadcast targets</string>
     <string name="mesh_map_location">Mesh Map Location</string>
     <string name="mesh_map_location_description">Enables the blue location dot for your phone in the mesh map.</string>
+    <string name="mesh_node_this_device">This device as a mesh node</string>
     <!-- MESHTASTIC -->
     <string name="meshtastic">Meshtastic</string>
     <string name="meshtastic_alerts_notifications">Alert notifications</string>

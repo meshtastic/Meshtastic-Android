@@ -63,7 +63,15 @@ kotlin {
             }
         }
 
-        androidMain.dependencies { implementation(libs.usb.serial.android) }
+        androidMain.dependencies {
+            implementation(libs.usb.serial.android)
+            // The in-process node (NodeRadioTransport): this phone as a Meshtastic node, no radio in the path.
+            implementation(libs.meshtastic.node.core)
+            implementation(libs.meshtastic.node.phone.api)
+            implementation(libs.meshtastic.node.transport.ble)
+            implementation(libs.meshtastic.node.transport.ble.gatt)
+            implementation(libs.meshtastic.node.transport.lora)
+        }
 
         commonTest.dependencies {
             implementation(projects.core.testing)

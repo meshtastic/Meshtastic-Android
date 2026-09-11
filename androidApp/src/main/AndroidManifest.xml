@@ -36,6 +36,8 @@
 
     <!-- API 31+ Bluetooth permissions -->
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <!-- The in-process node advertises: mesh-peer GATT peripheral role and BLE-advertisement frames. -->
+    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN"
         android:usesPermissionFlags="neverForLocation"
         tools:targetApi="s" />

@@ -56,6 +56,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.action_select_device
 import org.meshtastic.core.resources.add
 import org.meshtastic.core.resources.bluetooth
+import org.meshtastic.core.resources.mesh_node_this_device
 import org.meshtastic.core.resources.network
 import org.meshtastic.core.resources.serial
 import org.meshtastic.core.ui.component.NodeChip
@@ -65,6 +66,7 @@ import org.meshtastic.core.ui.icon.Bluetooth
 import org.meshtastic.core.ui.icon.BluetoothConnected
 import org.meshtastic.core.ui.icon.BluetoothSearching
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.PhoneAndroid
 import org.meshtastic.core.ui.icon.Usb
 import org.meshtastic.core.ui.icon.Wifi
 import org.meshtastic.feature.connections.model.DeviceListEntry
@@ -111,6 +113,8 @@ fun DeviceListItem(
 
             is DeviceListEntry.Mock -> MeshtasticIcons.Add
 
+            is DeviceListEntry.LocalNode -> MeshtasticIcons.PhoneAndroid
+
             is DeviceListEntry.Replay -> MeshtasticIcons.Add
         }
 
@@ -120,6 +124,7 @@ fun DeviceListItem(
             is DeviceListEntry.Usb -> stringResource(Res.string.serial)
             is DeviceListEntry.Tcp -> stringResource(Res.string.network)
             is DeviceListEntry.Mock -> stringResource(Res.string.add)
+            is DeviceListEntry.LocalNode -> stringResource(Res.string.mesh_node_this_device)
             is DeviceListEntry.Replay -> stringResource(Res.string.add)
         }
 

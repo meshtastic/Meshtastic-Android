@@ -61,6 +61,8 @@ private fun Context.getBluetoothPermissions(): Array<String> {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         requiredPermissions.add(Manifest.permission.BLUETOOTH_SCAN)
         requiredPermissions.add(Manifest.permission.BLUETOOTH_CONNECT)
+        // The in-process node is a GATT peripheral and a BLE advertiser as well as a scanner.
+        requiredPermissions.add(Manifest.permission.BLUETOOTH_ADVERTISE)
     } else {
         // ACCESS_FINE_LOCATION is required for Bluetooth scanning on pre-S devices.
         requiredPermissions.add(Manifest.permission.ACCESS_FINE_LOCATION)

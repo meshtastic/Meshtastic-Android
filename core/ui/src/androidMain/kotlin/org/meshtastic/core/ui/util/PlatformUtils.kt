@@ -440,7 +440,11 @@ actual fun rememberBluetoothPermissionState(): PermissionUiState {
     }
     return rememberRuntimePermissionState(
         permissions =
-        arrayOf(android.Manifest.permission.BLUETOOTH_SCAN, android.Manifest.permission.BLUETOOTH_CONNECT),
+        arrayOf(
+            android.Manifest.permission.BLUETOOTH_SCAN,
+            android.Manifest.permission.BLUETOOTH_CONNECT,
+            android.Manifest.permission.BLUETOOTH_ADVERTISE,
+        ),
         requireAll = true,
     )
 }
