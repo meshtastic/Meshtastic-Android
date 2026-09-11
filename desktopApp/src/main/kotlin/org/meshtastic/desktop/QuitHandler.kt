@@ -18,6 +18,7 @@ package org.meshtastic.desktop
 
 import java.awt.Desktop
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.concurrent.thread
 
 /** Published by the composition so [installQuitHandler] can end the Compose loop from AppKit's quit thread. */
 private val exitApplicationRef = AtomicReference<(() -> Unit)?>(null)
@@ -38,9 +39,19 @@ internal fun installQuitHandler() {
         if (exitApplication == null) {
             response.performQuit()
         } else {
-            // Cancels the native quit because the shutdown this unblocks ends in exitProcess().
+            // Cancels the native quit because the shutdown this unblocks ends in exitProcess(). The watchdog is
+            // what stops a Compose loop that never returns from leaving the app un-quittable.
             exitApplication()
+            startQuitWatchdog()
             response.cancelQuit()
         }
     }
 }
+
+/** Quitting must not depend on the Compose loop returning: force the exit if the shutdown has not run in time. */
+private fun startQuitWatchdog() = thread(isDaemon = true, name = "quit-watchdog") {
+    Thread.sleep(QUIT_TIMEOUT_MS)
+    Runtime.getRuntime().halt(0)
+}
+
+private const val QUIT_TIMEOUT_MS = 5_000L
