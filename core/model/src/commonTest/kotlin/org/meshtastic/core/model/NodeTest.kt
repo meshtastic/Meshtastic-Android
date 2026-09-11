@@ -166,7 +166,7 @@ class NodeTest {
         Node(num = num, position = Position(latitude_i = latitudeI, longitude_i = longitudeI))
 
     @Test
-    fun `isUnheardOnCurrentLora is true only for a node heard over RF on another config`() {
+    fun `isUnheardOnCurrentLora is true for a node not heard on the config in force now`() {
         assertTrue(Node(num = 1, heardOnCurrentLora = false).isUnheardOnCurrentLora)
         assertFalse(Node(num = 1, heardOnCurrentLora = true).isUnheardOnCurrentLora)
     }

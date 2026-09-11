@@ -73,7 +73,7 @@ class NodeItemUnheardMarkerTest {
     }
 
     @Test
-    fun nodeItem_marksANodeHeardOverRfOnAnotherConfig() = runComposeUiTest {
+    fun nodeItem_marksANodeNotHeardOnTheConfigInForceNow() = runComposeUiTest {
         setNodeItem(viaMqtt = false)
         markerCount().assertCountEquals(1)
     }
@@ -85,7 +85,7 @@ class NodeItemUnheardMarkerTest {
     }
 
     @Test
-    fun nodeItemCompact_marksANodeHeardOverRfOnAnotherConfig() = runComposeUiTest {
+    fun nodeItemCompact_marksANodeNotHeardOnTheConfigInForceNow() = runComposeUiTest {
         setNodeItemCompact(viaMqtt = false)
         markerCount().assertCountEquals(1)
     }

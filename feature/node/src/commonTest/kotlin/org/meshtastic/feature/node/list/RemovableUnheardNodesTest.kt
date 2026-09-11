@@ -37,7 +37,7 @@ class RemovableUnheardNodesTest {
     ) = Node(num = num, heardOnCurrentLora = heardOnCurrentLora, viaMqtt = viaMqtt, isFavorite = isFavorite)
 
     @Test
-    fun offersANodeHeardOverRfOnAnotherConfig() {
+    fun offersANodeNotHeardOnTheConfigInForceNow() {
         val nodes = listOf(node(2), node(3, heardOnCurrentLora = true))
 
         assertEquals(listOf(2), selectRemovableUnheardNodes(nodes, ourNum).map { it.num })
