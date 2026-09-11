@@ -115,7 +115,11 @@ class NodeRadioTransport(
                 launch {
                     for (bytes in toRadio) {
                         val session = live?.session
-                        Logger.d { "ToRadio ${bytes.size} B: ${describe(bytes)} -> ${if (session == null) "no node yet" else "node"}" }
+                        Logger.d {
+                            "ToRadio ${bytes.size} B: ${describe(
+                                bytes,
+                            )} -> ${if (session == null) "no node yet" else "node"}"
+                        }
                         session?.toRadio(bytes)
                     }
                 }
@@ -186,6 +190,10 @@ class NodeRadioTransport(
             )
         val admin = AdminService(node, radio, overlay, clock = wallMs, store = settingsStore)
         stored?.let { admin.restore(it) }
+        // Persist the lora section through this node's own radio view. LocalRadio reports the bearer's
+        // region over any write, so the write that armed the bearer was stored as UNSET by the node
+        // that received it; only the node built from it can store it back as what it is.
+        stored?.config?.lora?.let { admin.setConfig(Config(lora = it)) }
         val session = PhoneApiSession(node, radio, nodeScope, admin)
         live = LiveNode(job, session)
 
@@ -260,9 +268,15 @@ class NodeRadioTransport(
         val msg = runCatching { ToRadio.ADAPTER.decode(bytes) }.getOrNull() ?: return "undecodable"
         val packet = msg.packet
         return when {
-            packet != null -> "packet id=${packet.id} to=!${(packet.to.toLong() and MASK32).toString(HEX)} port=${packet.decoded?.portnum}"
+            packet != null ->
+                "packet id=${packet.id} to=!${(packet.to.toLong() and MASK32).toString(
+                    HEX,
+                )} port=${packet.decoded?.portnum}"
+
             msg.want_config_id != null -> "want_config ${msg.want_config_id}"
+
             msg.heartbeat != null -> "heartbeat"
+
             else -> "other"
         }
     }
