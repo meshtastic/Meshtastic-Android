@@ -627,7 +627,7 @@
     <string name="encryption_error">Public key mismatch</string>
     <string name="encryption_error_text">The public key does not match the recorded key. You may remove the node and let it exchange keys again, but this may indicate a more security problem. Contact the user through another trusted channel, to determine if the key change was due to a factory reset or other intentional action.</string>
     <string name="encryption_pkc">Public Key Encryption</string>
-    <string name="encryption_pkc_text">Direct messages are using the new public key infrastructure for encryption.</string>
+    <string name="encryption_pkc_text">A public key is on file for this node, so interactions with it use public key encryption.</string>
     <string name="env_metrics_log">Environment Metrics</string>
     <!-- ENVIRONMENT -->
     <string name="environment">Environment</string>
@@ -1304,7 +1304,7 @@
     <string name="no_network_devices_seen">No network devices seen</string>
     <string name="no_pax_metrics_logs">No PAX metrics available.</string>
     <string name="no_public_key">No public key</string>
-    <string name="no_public_key_text">This node has not shared a public key, so direct messages to it cannot be sent. Request User Info to ask for one.</string>
+    <string name="no_public_key_text">This node has not shared a public key, so encrypted interactions with it are not possible. Request User Info to ask for one.</string>
     <string name="no_usb_devices_found">No USB devices found</string>
     <string name="no_usb_devices_hint">Connect a device with a USB data cable to use serial.</string>
     <string name="no_usb_devices_seen">No USB devices detected</string>
@@ -1319,7 +1319,9 @@
     <string name="node_filter_ignored">You are viewing ignored nodes,\nPress to return to the node list.</string>
     <string name="node_filter_include_unknown">Include unknown</string>
     <string name="node_filter_only_direct">Only show direct nodes</string>
+    <string name="node_filter_only_encrypted">Encrypted only</string>
     <string name="node_filter_only_online">Hide offline nodes</string>
+    <string name="node_filter_only_signed">Signed only</string>
     <string name="node_filter_placeholder">Filter</string>
     <string name="node_filter_show_ignored">Only show ignored Nodes</string>
     <string name="node_filter_title">Filter by</string>
@@ -1736,11 +1738,16 @@
     <string name="security_icon_insecure_precise_only">Insecure Channel, Precise Location</string>
     <string name="security_icon_secure">Secure</string>
     <string name="security_icon_warning_precise_mqtt">Warning: Insecure, Precise Location &amp; MQTT Uplink</string>
+    <string name="security_legend_any_version">Shown at any firmware version.</string>
+    <string name="security_legend_legacy_firmware">Shown for nodes on firmware before 2.8, or that report no version.</string>
+    <string name="security_legend_signing_firmware">Shown for nodes on firmware 2.8 or later, and for any node whose signature the radio has verified.</string>
     <string name="security_signed_message_info">Verified with the sender's key.</string>
     <string name="security_signed_node">Signed node</string>
     <string name="security_signed_node_desc">Verified automatically</string>
-    <string name="security_signed_node_help">This node signs its broadcasts with XEdDSA. Broadcasts you see from it are verified by the radio using its identity key.</string>
+    <string name="security_signed_node_help">The radio verified this node's signed broadcasts using its identity key, so its identity is consistent over time, but you have not verified it in person. Every node on firmware 2.8 or later signs its broadcasts.</string>
     <string name="security_signed_verified">Signed · verified</string>
+    <string name="security_verified_contact">Verified contact</string>
+    <string name="security_verified_contact_help">You verified this node's key in person, by exchanging contact QR codes, so its identity is confirmed. The strongest trust the list shows, and shown at any firmware version.</string>
     <string name="select">Select</string>
     <string name="select_all">Select all</string>
     <string name="selected">Selected</string>

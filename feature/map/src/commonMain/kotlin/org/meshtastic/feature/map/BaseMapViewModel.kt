@@ -145,6 +145,10 @@ open class BaseMapViewModel(
 
     fun toggleOnlyDirect() = mapPrefs.updateMapFilters { it.copy(onlyDirect = !it.onlyDirect) }
 
+    fun toggleOnlySigned() = mapPrefs.updateMapFilters { it.copy(onlySigned = !it.onlySigned) }
+
+    fun toggleOnlyEncrypted() = mapPrefs.updateMapFilters { it.copy(onlyEncrypted = !it.onlyEncrypted) }
+
     fun toggleExcludeMqtt() = mapPrefs.updateMapFilters { it.copy(excludeMqtt = !it.excludeMqtt) }
 
     fun toggleShowIgnored() = mapPrefs.updateMapFilters { it.copy(showIgnored = !it.showIgnored) }
@@ -222,6 +226,10 @@ open class BaseMapViewModel(
         val excludedRoles: Set<Config.DeviceConfig.Role> = emptySet(),
         val onlyOnline: Boolean = false,
         val onlyDirect: Boolean = false,
+        /** Show only nodes whose signed broadcasts the radio has verified (design#149). */
+        val onlySigned: Boolean = false,
+        /** Show only nodes a public key is on file for. */
+        val onlyEncrypted: Boolean = false,
         val excludeMqtt: Boolean = false,
         val showIgnored: Boolean = false,
         val includeUnknown: Boolean = true,
@@ -233,6 +241,8 @@ open class BaseMapViewModel(
                     excludedRoles.isNotEmpty() ||
                     onlyOnline ||
                     onlyDirect ||
+                    onlySigned ||
+                    onlyEncrypted ||
                     excludeMqtt ||
                     !includeUnknown ||
                     lastHeardFilter != LastHeardFilter.Any
@@ -251,6 +261,8 @@ open class BaseMapViewModel(
         excludedRoles = decodeExcludedRoles(prefs.excludedRoles),
         onlyOnline = prefs.onlyOnline,
         onlyDirect = prefs.onlyDirect,
+        onlySigned = prefs.onlySigned,
+        onlyEncrypted = prefs.onlyEncrypted,
         excludeMqtt = prefs.excludeMqtt,
         showIgnored = prefs.showIgnored,
         includeUnknown = prefs.includeUnknown,

@@ -51,7 +51,9 @@ import org.meshtastic.core.resources.map_filter_title
 import org.meshtastic.core.resources.node_filter_exclude_mqtt
 import org.meshtastic.core.resources.node_filter_include_unknown
 import org.meshtastic.core.resources.node_filter_only_direct
+import org.meshtastic.core.resources.node_filter_only_encrypted
 import org.meshtastic.core.resources.node_filter_only_online
+import org.meshtastic.core.resources.node_filter_only_signed
 import org.meshtastic.core.resources.only_favorites
 import org.meshtastic.core.resources.show_precision_circle
 import org.meshtastic.core.resources.show_waypoints
@@ -149,6 +151,16 @@ private fun NodeFilterToggles(filterState: BaseMapViewModel.MapFilterState, acti
         label = stringResource(Res.string.node_filter_only_direct),
         checked = filterState.onlyDirect,
         onToggle = actions.onToggleOnlyDirect,
+    )
+    FilterToggle(
+        label = stringResource(Res.string.node_filter_only_signed),
+        checked = filterState.onlySigned,
+        onToggle = actions.onToggleOnlySigned,
+    )
+    FilterToggle(
+        label = stringResource(Res.string.node_filter_only_encrypted),
+        checked = filterState.onlyEncrypted,
+        onToggle = actions.onToggleOnlyEncrypted,
     )
     FilterToggle(
         label = stringResource(Res.string.node_filter_exclude_mqtt),

@@ -31,6 +31,10 @@ data class NodeFilterPrefs(
     /** Show only nodes heard with no intervening hop. */
     val onlyDirect: Boolean = false,
     val showIgnored: Boolean = false,
+    /** Show only nodes whose signed broadcasts the radio has verified (design#149). */
+    val onlySigned: Boolean = false,
+    /** Show only nodes a public key is on file for, so direct messages to them are PKI-encrypted. */
+    val onlyEncrypted: Boolean = false,
     val excludeMqtt: Boolean = false,
     /** Hide nodes not heard since the radio's current LoRa config took effect. */
     val excludeUnheard: Boolean = false,
@@ -46,6 +50,8 @@ data class MapFilterPrefs(
     val showPrecisionCircle: Boolean = true,
     val onlyOnline: Boolean = false,
     val onlyDirect: Boolean = false,
+    val onlySigned: Boolean = false,
+    val onlyEncrypted: Boolean = false,
     val excludeMqtt: Boolean = false,
     val showIgnored: Boolean = false,
     val includeUnknown: Boolean = true,

@@ -73,6 +73,9 @@ interface NodeInfoDao {
         return if (existingNodeEntity == null) {
             handleNewNodeUpsertValidation(incomingNode)
         } else {
+            // Never trusted here, whatever the number says: this path carries mesh-received NodeInfo, so matching the
+            // local node number only proves the sender claimed it. The radio's own key is trusted in installConfig,
+            // where selfNum comes from the device over the local link.
             handleExistingNodeUpsertValidation(existingNodeEntity, incomingNode)
         }
     }
@@ -185,10 +188,11 @@ interface NodeInfoDao {
      * 2. **Update**: If it's a normal update, we validate the public key using [resolvePublicKey] to prevent conflicts
      *    or accidental key wiping, and then update the node.
      *
-     * [trustIncomingKey] skips the mismatch check and accepts a valid incoming key as-is. Set only for the local node
-     * during a config install: the connected device is authoritative for its own key over the local link, and an
-     * erase-and-reflash legitimately re-keys it (a mismatch there would otherwise poison the local node with
-     * [NodeEntity.ERROR_BYTE_STRING] and break PKI traffic until app data is cleared).
+     * [trustIncomingKey] skips the mismatch check and accepts a valid incoming key as-is. Set only for the local node:
+     * the connected device is authoritative for its own key over the local link, and an erase-and-reflash, a factory
+     * reset or a 2.8 re-key legitimately changes it (a mismatch there would otherwise poison the local node with
+     * [NodeEntity.ERROR_BYTE_STRING] and break PKI traffic until app data is cleared). Every other node keeps
+     * first-wins.
      */
     @Suppress("CyclomaticComplexMethod", "MagicNumber")
     private fun handleExistingNodeUpsertValidation(

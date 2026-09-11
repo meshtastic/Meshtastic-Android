@@ -294,6 +294,10 @@ fun NodeListScreen(
                                 onToggleExcludeUnheard = filterPrefs::toggleExcludeUnheard,
                                 excludeMqtt = state.filter.excludeMqtt,
                                 onToggleExcludeMqtt = filterPrefs::toggleExcludeMqtt,
+                                onlySigned = state.filter.onlySigned,
+                                onToggleOnlySigned = filterPrefs::toggleOnlySigned,
+                                onlyEncrypted = state.filter.onlyEncrypted,
+                                onToggleOnlyEncrypted = filterPrefs::toggleOnlyEncrypted,
                             ),
                         )
                     }

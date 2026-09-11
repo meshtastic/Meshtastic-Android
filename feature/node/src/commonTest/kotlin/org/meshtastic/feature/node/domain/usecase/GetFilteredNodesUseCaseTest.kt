@@ -24,7 +24,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
+import okio.ByteString
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.Node.Companion.PUBLIC_KEY_SIZE
 import org.meshtastic.core.model.NodeSortOption
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.feature.node.list.NodeFilterState
@@ -53,9 +56,18 @@ class GetFilteredNodesUseCaseTest {
         ignored: Boolean = false,
         name: String = "Node$num",
         viaMqtt: Boolean = false,
+        signsPackets: Boolean = false,
+        publicKey: ByteString? = null,
     ): Node {
         val user = User(id = "!$num", long_name = name, short_name = "N$num", role = role)
-        return Node(num = num, user = user, isIgnored = ignored, viaMqtt = viaMqtt)
+        return Node(
+            num = num,
+            user = user,
+            isIgnored = ignored,
+            viaMqtt = viaMqtt,
+            signsPackets = signsPackets,
+            publicKey = publicKey,
+        )
     }
 
     @Test
@@ -154,5 +166,31 @@ class GetFilteredNodesUseCaseTest {
 
         // Assert
         assertEquals(2, result.size)
+    }
+
+    @Test
+    fun `the signed filter keeps only nodes whose signature the radio verified`() = runTest {
+        val nodes = listOf(createNode(1), createNode(2, signsPackets = true))
+        every { nodeRepository.getNodes() } returns flowOf(nodes)
+
+        val result = useCase(NodeFilterState(onlySigned = true), NodeSortOption.LAST_HEARD).first()
+
+        assertEquals(listOf(2), result.map { it.num })
+    }
+
+    @Test
+    fun `the encrypted filter keeps a key on file and drops one that stopped matching`() = runTest {
+        val nodes =
+            listOf(
+                createNode(1),
+                createNode(2, publicKey = ByteArray(PUBLIC_KEY_SIZE) { 1 }.toByteString()),
+                // A mismatch is not a key you can safely encrypt to, so it is excluded rather than counted.
+                createNode(3, publicKey = Node.ERROR_BYTE_STRING),
+            )
+        every { nodeRepository.getNodes() } returns flowOf(nodes)
+
+        val result = useCase(NodeFilterState(onlyEncrypted = true), NodeSortOption.LAST_HEARD).first()
+
+        assertEquals(listOf(2), result.map { it.num })
     }
 }

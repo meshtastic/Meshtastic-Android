@@ -60,6 +60,7 @@ import org.meshtastic.core.common.util.MetricFormatter
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeAddress
+import org.meshtastic.core.model.NodeSecurityIndicator
 import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.a11y_label_value
@@ -78,18 +79,18 @@ import org.meshtastic.core.resources.public_key
 import org.meshtastic.core.resources.request_user_info
 import org.meshtastic.core.resources.role
 import org.meshtastic.core.resources.rssi
-import org.meshtastic.core.resources.security_signed_node
-import org.meshtastic.core.resources.security_signed_node_desc
+import org.meshtastic.core.resources.security
 import org.meshtastic.core.resources.short_name
 import org.meshtastic.core.resources.snr
 import org.meshtastic.core.resources.status_message
-import org.meshtastic.core.resources.supported
 import org.meshtastic.core.resources.transport
 import org.meshtastic.core.resources.uptime
 import org.meshtastic.core.resources.user_id
-import org.meshtastic.core.ui.component.SignedNodeDialog
+import org.meshtastic.core.ui.component.Glyph
+import org.meshtastic.core.ui.component.NodeSecurityDialog
 import org.meshtastic.core.ui.component.determineSignalQuality
 import org.meshtastic.core.ui.component.label
+import org.meshtastic.core.ui.component.title
 import org.meshtastic.core.ui.component.transportInfo
 import org.meshtastic.core.ui.icon.ArrowCircleUp
 import org.meshtastic.core.ui.icon.DeviceNumbers
@@ -102,11 +103,8 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Notes
 import org.meshtastic.core.ui.icon.Person
 import org.meshtastic.core.ui.icon.Rssi
-import org.meshtastic.core.ui.icon.ShieldCheck
 import org.meshtastic.core.ui.icon.Snr
-import org.meshtastic.core.ui.icon.Verified
 import org.meshtastic.core.ui.icon.role
-import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 import org.meshtastic.core.ui.util.LocalModemPreset
 import org.meshtastic.core.ui.util.LocalNoiseFloor
@@ -198,10 +196,8 @@ private fun MainNodeDetails(node: Node, isLocal: Boolean, onRequestUserInfo: (()
             SectionDivider()
             TransportRow(node)
         }
-        if (node.manuallyVerified || node.signsPackets) {
-            SectionDivider()
-            VerificationRow(node)
-        }
+        SectionDivider()
+        SecurityRow(node, isLocal)
         val publicKey = node.publicKey ?: node.user.public_key
         if (publicKey.size > 0) {
             SectionDivider()
@@ -352,42 +348,32 @@ private fun TransportRow(node: Node) {
     }
 }
 
-/** Trust signals: automatic XEdDSA signing (left, tappable) and user-asserted key verification (right). */
+/**
+ * The node's security state, read through the same [NodeSecurityIndicator] the list row's glyph uses so the two can
+ * never contradict each other (design#149, point 9). Tapping it opens the explanation and the full legend.
+ */
 @Composable
-private fun VerificationRow(node: Node) {
-    Row(modifier = Modifier.fillMaxWidth()) {
-        if (node.signsPackets) {
-            SignedNodeItem(Modifier.weight(1f))
-        } else {
-            Spacer(Modifier.weight(1f))
-        }
-        if (node.manuallyVerified) {
-            InfoItem(
-                label = stringResource(Res.string.supported),
-                value = "Verified",
-                icon = MeshtasticIcons.Verified,
-                modifier = Modifier.weight(1f),
-            )
-        } else {
-            Spacer(Modifier.weight(1f))
-        }
-    }
-}
-
-/** "Signed node" trust cell — tap opens the plain-language explanation ([SignedNodeDialog]). */
-@Composable
-private fun SignedNodeItem(modifier: Modifier = Modifier) {
+private fun SecurityRow(node: Node, isLocal: Boolean) {
+    val indicator = NodeSecurityIndicator.of(node, isOwnNode = isLocal)
     var showDialog by remember { mutableStateOf(false) }
-    if (showDialog) SignedNodeDialog(onDismiss = { showDialog = false })
-    InfoItem(
-        label = stringResource(Res.string.security_signed_node),
-        value = stringResource(Res.string.security_signed_node_desc),
-        icon = MeshtasticIcons.ShieldCheck,
-        modifier = modifier,
-        iconTint = MaterialTheme.colorScheme.StatusGreen,
-        iconSize = 20.dp,
-        onClick = { showDialog = true },
-    )
+    if (showDialog) {
+        NodeSecurityDialog(
+            indicator = indicator,
+            key = node.publicKey ?: node.user.public_key,
+            onDismiss = { showDialog = false },
+        )
+    }
+    Row(modifier = Modifier.fillMaxWidth()) {
+        InfoItem(
+            label = stringResource(Res.string.security),
+            value = stringResource(indicator.title),
+            modifier = Modifier.weight(1f),
+            onClick = { showDialog = true },
+        ) {
+            indicator.Glyph(Modifier.size(20.dp))
+        }
+        Spacer(Modifier.weight(1f))
+    }
 }
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalEncodingApi::class)

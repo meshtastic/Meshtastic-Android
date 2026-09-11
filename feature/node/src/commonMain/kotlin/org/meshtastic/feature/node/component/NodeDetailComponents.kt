@@ -85,7 +85,6 @@ internal fun SectionCard(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun InfoItem(
     label: String,
@@ -97,6 +96,28 @@ internal fun InfoItem(
     iconTint: Color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
     iconSize: Dp = 14.dp,
     onClick: (() -> Unit)? = null,
+) = InfoItem(
+    label = label,
+    value = value,
+    modifier = modifier,
+    valueStyle = valueStyle,
+    valueColor = valueColor,
+    onClick = onClick,
+) {
+    Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(iconSize), tint = iconTint)
+}
+
+/** [InfoItem] with the leading glyph as a slot, for a composite icon that is not a single [ImageVector]. */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+internal fun InfoItem(
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier,
+    valueStyle: TextStyle = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+    valueColor: Color = MaterialTheme.colorScheme.onSurface,
+    onClick: (() -> Unit)? = null,
+    icon: @Composable () -> Unit,
 ) {
     val clipboard: Clipboard = LocalClipboard.current
     val coroutineScope = rememberCoroutineScope()
@@ -121,7 +142,7 @@ internal fun InfoItem(
             },
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(iconSize), tint = iconTint)
+            icon()
             Spacer(Modifier.width(6.dp))
             Text(
                 text = label,
