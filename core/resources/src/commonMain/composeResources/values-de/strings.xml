@@ -534,7 +534,6 @@
     <string name="encryption_error">Öffentlicher Schlüssel stimmt nicht überein</string>
     <string name="encryption_error_text">Der öffentliche Schlüssel stimmt nicht mit dem gespeicherten Schlüssel überein. Sie können den Knoten entfernen und den Schlüsselaustausch erneut durchführen lassen. Dies könnte jedoch auf ein schwerwiegenderes Sicherheitsproblem hindeuten. Kontaktieren Sie den Benutzer über einen anderen vertrauenswürdigen Kanal, um zu klären, ob die Schlüsseländerung auf ein Zurücksetzen auf Werkseinstellungen oder eine andere absichtliche Handlung zurückzuführen ist.</string>
     <string name="encryption_pkc">Verschlüsselung mit öffentlichen Schlüssel</string>
-    <string name="encryption_pkc_text">Direktnachrichten verwenden zur den öffentlichen Knotenschlüssel zur Verschlüsselung.</string>
     <string name="env_metrics_log">Umweltdaten</string>
     <!-- ENVIRONMENT -->
     <string name="environment">Umgebung</string>
@@ -1413,7 +1412,6 @@
     <string name="settings">Einstellungen</string>
     <!-- SHARE -->
     <string name="share">Teilen</string>
-    <string name="share_channels_qr">QR-Code für Kanäle teilen</string>
     <string name="share_contact">Kontakt teilen</string>
     <string name="share_location">Standort teilen</string>
     <string name="share_location_description">Nutze das GPS deines Handys, um Positionen an deinen Knoten zu senden, anstatt eines GPS-Empfängers an deinem Knoten.</string>

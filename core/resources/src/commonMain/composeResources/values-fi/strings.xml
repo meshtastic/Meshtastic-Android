@@ -620,7 +620,6 @@
     <string name="encryption_error">Julkinen avain ei täsmää</string>
     <string name="encryption_error_text">Julkinen avain ei vastaa tallennettua avainta. Voit poistaa laitteen ja antaa sen vaihtaa avaimet uudelleen, mutta tämä saattaa viitata vakavampaan tietoturvaongelmaan. Ota yhteyttä käyttäjään toista luotettua kanavaa pitkin selvittääksesi, johtuuko avaimen vaihtuminen tehdasasetusten palautuksesta tai muusta tarkoituksellisesta toimenpiteestä.</string>
     <string name="encryption_pkc">Julkisen avaimen salaus</string>
-    <string name="encryption_pkc_text">Yksityisviesteissä käytetään uutta julkisen avaimen infrastruktuuria salaukseen.</string>
     <string name="env_metrics_log">Ympäristöarvot</string>
     <!-- ENVIRONMENT -->
     <string name="environment">Ympäristö</string>
@@ -1686,7 +1685,6 @@
     <string name="security_signed_message_info">Varmennettu lähettäjän avaimella.</string>
     <string name="security_signed_node">Allekirjoitettu radio</string>
     <string name="security_signed_node_desc">Varmennettu automaattisesti</string>
-    <string name="security_signed_node_help">Tämä radio allekirjoittaa lähetyksensä XEdDSA:lla. Tämän radion lähetykset, jotka näet, radio varmentaa sen identiteettiavaimella.</string>
     <string name="security_signed_verified">Allekirjoitettu · varmennettu</string>
     <string name="select">Valitse</string>
     <string name="select_all">Valitse kaikki</string>
@@ -1714,7 +1712,6 @@
     <string name="settings">asetukset</string>
     <!-- SHARE -->
     <string name="share">Jaa</string>
-    <string name="share_channels_qr">Jaa kanavien QR-koodi</string>
     <string name="share_connected_node">Jaa yhdistetty radio</string>
     <string name="share_contact">Jaa yhteystieto</string>
     <string name="share_location">Jaa sijainti</string>
@@ -2063,7 +2060,6 @@
     <!-- WRITE -->
     <string name="write_nfc">Kirjoita NFC-tunnisteeseen</string>
     <string name="write_nfc_failed">Tunnisteeseen kirjoittaminen epäonnistui. Käytä tyhjää, kirjoitettavaa NFC-tunnistetta ja pidä sitä paikallaan.</string>
-    <string name="write_nfc_subtext">Kirjoittaminen tallentaa tämän jakolinkin fyysiselle NFC-tunnisteelle. Kuka tahansa voi avata linkin napauttamalla tunnistetta puhelimellaan.</string>
     <string name="write_nfc_success">Kirjoitettu tunnisteeseen</string>
     <string name="write_nfc_text">Pidä kirjoitettavaa NFC-tunnistetta puhelimesi takapuolta vasten.</string>
     <string name="you">Sinä</string>

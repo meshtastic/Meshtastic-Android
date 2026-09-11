@@ -289,7 +289,6 @@
     <string name="encryption_enabled">Titkosítás engedélyezve</string>
     <string name="encryption_error">Publikus kulcs nem egyezik</string>
     <string name="encryption_pkc">Publikus Kulcs Titkosítás</string>
-    <string name="encryption_pkc_text">A közvetlen üzenetek az új nyilvános kulcsú infrastruktúrát használják titkosításhoz.</string>
     <string name="env_metrics_log">Környezeti metrikák</string>
     <!-- ENVIRONMENT -->
     <string name="environment">Környezet</string>

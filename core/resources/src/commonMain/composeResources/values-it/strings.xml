@@ -570,7 +570,6 @@
     <string name="encryption_error">Chiave pubblica errata</string>
     <string name="encryption_error_text">La chiave pubblica non corrisponde alla chiave salvata. È possibile rimuovere il nodo e lasciarlo scambiare le chiavi nuovamente, ma questo può indicare un problema di sicurezza più serio. Contattare l'utente attraverso un altro canale attendibile, per determinare se il cambiamento di chiave è dovuto a un ripristino di fabbrica o ad altre azioni intenzionali.</string>
     <string name="encryption_pkc">Crittografia a Chiave Pubblica</string>
-    <string name="encryption_pkc_text">I messaggi diretti stanno usando la crittografia basata sulla nuova infrastruttura a chiave pubblica.</string>
     <string name="env_metrics_log">Metriche Ambientali</string>
     <!-- ENVIRONMENT -->
     <string name="environment">Ambiente</string>
@@ -1494,7 +1493,6 @@
     <string name="security_signed_message_info">Verificato con la chiave del mittente.</string>
     <string name="security_signed_node">Nodo firmato</string>
     <string name="security_signed_node_desc">Verificato automaticamente</string>
-    <string name="security_signed_node_help">Questo nodo firma le sue trasmissioni con XEdDSA. Le trasmissioni che ricevi da esso vengono verificate dalla radio tramite la sua chiave d'identità.</string>
     <string name="security_signed_verified">Firmato · verificato</string>
     <string name="select">Seleziona</string>
     <string name="select_all">Seleziona tutti</string>
@@ -1522,7 +1520,6 @@
     <string name="settings">impostazioni</string>
     <!-- SHARE -->
     <string name="share">Condividi</string>
-    <string name="share_channels_qr">Condividi QR code dei canali</string>
     <string name="share_connected_node">Condividi il nodo connesso</string>
     <string name="share_contact">Condividi contatto</string>
     <string name="share_location">Condividi posizione</string>
@@ -1821,7 +1818,6 @@
     <!-- WRITE -->
     <string name="write_nfc">Scrivi su tag NFC</string>
     <string name="write_nfc_failed">Impossibile scrivere sul tag. Usa un tag NFC scrivibile e vuoto e tienilo fermo.</string>
-    <string name="write_nfc_subtext">La scrittura salva questo link di condivisione su un tag NFC fisico. Chiunque può toccare il tag con il telefono per aprirlo.</string>
     <string name="write_nfc_success">Scritto sul tag</string>
     <string name="write_nfc_text">Tieni un tag NFC scrivibile contro il retro del telefono.</string>
     <string name="you">Tu</string>

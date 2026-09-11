@@ -626,7 +626,6 @@
     <string name="encryption_error">Несоответствие публичного ключа</string>
     <string name="encryption_error_text">Открытый ключ не соответствует записанному ключу. Вы можете удалить ноду и позволить ей снова обменяться ключами, но это может указывать на серьезную проблему с безопасностью. Свяжитесь с пользователем по другому надежному каналу чтобы определить, произошла ли смена ключа в результате сброса настроек или другого преднамеренного действия.</string>
     <string name="encryption_pkc">Общий ключ шифрования</string>
-    <string name="encryption_pkc_text">Прямые сообщения используют новую инфраструктуру открытого ключа для шифрования.</string>
     <string name="env_metrics_log">Метрики окружения</string>
     <!-- ENVIRONMENT -->
     <string name="environment">Окружающая среда</string>
@@ -1698,7 +1697,6 @@
     <string name="security_signed_message_info">Проверено с помощью ключа отправителя.</string>
     <string name="security_signed_node">Подписанная нода</string>
     <string name="security_signed_node_desc">Автоматически проверено</string>
-    <string name="security_signed_node_help">Эта нода подписывает свои трансляции с помощью XEdDSA. Трансляции, которые ты видишь от неё, проверяются радио с использованием его ключа идентификации.</string>
     <string name="security_signed_verified">Подписано · проверено</string>
     <string name="select">Выбрать</string>
     <string name="select_all">Выбрать все</string>
@@ -1726,7 +1724,6 @@
     <string name="settings">настройки</string>
     <!-- SHARE -->
     <string name="share">Поделиться</string>
-    <string name="share_channels_qr">Поделиться QR-кодом каналов</string>
     <string name="share_connected_node">Поделиться подключенной нодой</string>
     <string name="share_contact">Отправить контакт</string>
     <string name="share_location">Поделиться геопозицией</string>
@@ -2081,7 +2078,6 @@
     <!-- WRITE -->
     <string name="write_nfc">Записать в NFC-метку</string>
     <string name="write_nfc_failed">Не удалось записать в метку. Используй пустую NFC-метку, которую можно записывать, и держи её неподвижно.</string>
-    <string name="write_nfc_subtext">Запись сохраняет эту ссылку для общего доступа на физический NFC-тег. Любой может коснуться тега своим телефоном, чтобы открыть его.</string>
     <string name="write_nfc_success">Написано для метки</string>
     <string name="write_nfc_text">Поднеси записываемую NFC-метку к задней части своего телефона.</string>
     <string name="you">Вы</string>

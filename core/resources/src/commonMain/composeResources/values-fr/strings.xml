@@ -548,7 +548,6 @@
     <string name="encryption_error">Non-concordance de clé publique</string>
     <string name="encryption_error_text">La clé publique ne correspond pas à la clé enregistrée. Vous pouvez supprimer le nœud et le laisser à nouveau échanger les clés, mais cela peut indiquer un problème de sécurité plus grave. Contactez l'utilisateur à travers un autre canal de confiance, pour déterminer si le changement de clé est dû à une réinitialisation d'usine ou à une autre action intentionnelle.</string>
     <string name="encryption_pkc">Chiffrement de clé publique</string>
-    <string name="encryption_pkc_text">Les messages directs utilisent la nouvelle infrastructure de clé publique pour le chiffrement.</string>
     <string name="env_metrics_log">Métriques d'environnement</string>
     <!-- ENVIRONMENT -->
     <string name="environment">Environnement</string>
@@ -1372,7 +1371,6 @@
     <string name="settings">paramètres</string>
     <!-- SHARE -->
     <string name="share">Partager</string>
-    <string name="share_channels_qr">Partager le code QR des canaux</string>
     <string name="share_contact">Partager le contact</string>
     <string name="share_location">Localisation partagée</string>
     <string name="share_to">Partager vers…</string>

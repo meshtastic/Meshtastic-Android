@@ -571,7 +571,6 @@
     <string name="encryption_error">公钥不匹配</string>
     <string name="encryption_error_text">公钥与输入的密钥不匹配。 您可以移除该节点并让它再次交换密钥，但这可能会出现密钥泄露问题。 请通过另一个受信任的频道来联系用户，以确定密钥更改是否由于出厂重置或其他故意操作。</string>
     <string name="encryption_pkc">公钥加密</string>
-    <string name="encryption_pkc_text">私信消息正在使用新的公用钥匙加密。</string>
     <string name="env_metrics_log">传感器指标</string>
     <!-- ENVIRONMENT -->
     <string name="environment">环境</string>
@@ -1502,7 +1501,6 @@
     <string name="security_signed_message_info">已通过发送方的密钥进行验证。</string>
     <string name="security_signed_node">已签名节点</string>
     <string name="security_signed_node_desc">自动验证通过</string>
-    <string name="security_signed_node_help">该节点使用 XEdDSA 算法对其广播进行签名。你看到的来自该节点的广播，均通过其身份密钥由无线电进行了验证。</string>
     <string name="security_signed_verified">已签名 · 已验证</string>
     <string name="select">选择</string>
     <string name="select_all">选择全部</string>
@@ -1530,7 +1528,6 @@
     <string name="settings">设置</string>
     <!-- SHARE -->
     <string name="share">分享</string>
-    <string name="share_channels_qr">共享频道二维码</string>
     <string name="share_connected_node">分享已连接的节点</string>
     <string name="share_contact">分享联系人</string>
     <string name="share_location">分享位置</string>
@@ -1833,7 +1830,6 @@
     <!-- WRITE -->
     <string name="write_nfc">写入 NFC 标签</string>
     <string name="write_nfc_failed">无法写入标签请使用一张可写入的空白 NFC 标签，并保持手机与标签贴合稳定。</string>
-    <string name="write_nfc_subtext">写入后，此共享链接将保存到实体 NFC 标签中。任何人都可以使用手机轻触该标签以打开链接。</string>
     <string name="write_nfc_success">数据已成功写入标签</string>
     <string name="write_nfc_text">请将一张可写入的 NFC 标签贴在手机背面。</string>
     <string name="you">你</string>
