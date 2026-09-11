@@ -58,8 +58,10 @@ import org.meshtastic.node.transport.lora.LoraModemPreset
 import org.meshtastic.node.transport.lora.LoraRegion
 import org.meshtastic.node.transport.lora.LoraTransport
 import org.meshtastic.node.transport.lora.asSection
+import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.BackupPreferences
 import org.meshtastic.proto.Config
+import org.meshtastic.proto.ToRadio
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -110,7 +112,13 @@ class NodeRadioTransport(
             AndroidBleContext.applicationContext = app
             AndroidLoraContext.applicationContext = app
             transportScope.launch {
-                launch { for (bytes in toRadio) live?.session?.toRadio(bytes) }
+                launch {
+                    for (bytes in toRadio) {
+                        val session = live?.session
+                        Logger.d { "ToRadio ${bytes.size} B: ${describe(bytes)} -> ${if (session == null) "no node yet" else "node"}" }
+                        session?.toRadio(bytes)
+                    }
+                }
                 bringUp(readSettings())
             }
         }
@@ -186,17 +194,20 @@ class NodeRadioTransport(
         nodeScope.launch {
             session.fromRadio.collect { bytes -> lifecycle.runIfOpen { callback.handleFromRadio(bytes) } }
         }
-        // drop(1): the replayed first emission is the overlay this node was just built from.
+        // drop(1): the replayed first emission is the overlay this node was just built from. The
+        // phone's own write is read from the overlay: LocalRadio reports the bearer's region over it,
+        // so preferences() can never show a region arriving.
         nodeScope.launch {
             overlay.state.drop(1).collect {
-                val current = admin.preferences()
-                if (current.config?.lora.retunes(built)) {
+                val written = overlay.config(AdminMessage.ConfigType.LORA_CONFIG)?.lora
+                Logger.d { "Node settings written; lora region=${written?.region} preset=${written?.modem_preset}" }
+                if (written.retunes(built)) {
                     Logger.i { "Node lora section changed, rebuilding the bearer" }
-                    rebuild(current)
+                    rebuild(admin.preferences().copy(config = admin.preferences().config?.copy(lora = written)))
                 }
             }
         }
-        Logger.i { "Node up on ${bearers.joinToString { it.name }}" }
+        Logger.i { "Node !${node.identity.nodeNum.toString(HEX)} up on ${bearers.joinToString { it.name }}" }
         callback.onConnect()
     }
 
@@ -244,6 +255,18 @@ class NodeRadioTransport(
         return LoraTransport(config, clock = monotonicMs, log = { line -> Logger.d { "lora: $line" } })
     }
 
+    /** One line about a phone's frame, for the log: which packet, to whom, on which port. */
+    private fun describe(bytes: ByteArray): String {
+        val msg = runCatching { ToRadio.ADAPTER.decode(bytes) }.getOrNull() ?: return "undecodable"
+        val packet = msg.packet
+        return when {
+            packet != null -> "packet id=${packet.id} to=!${(packet.to.toLong() and MASK32).toString(HEX)} port=${packet.decoded?.portnum}"
+            msg.want_config_id != null -> "want_config ${msg.want_config_id}"
+            msg.heartbeat != null -> "heartbeat"
+            else -> "other"
+        }
+    }
+
     private fun defaultLongName(): String = "${Build.MODEL} node".take(MAX_LONG_NAME)
 
     private fun defaultShortName(): String =
@@ -259,6 +282,8 @@ class NodeRadioTransport(
         const val MAX_TX_POWER_DBM = 10
         const val MAX_LONG_NAME = 39
         const val MAX_SHORT_NAME = 4
+        const val HEX = 16
+        const val MASK32 = 0xFFFF_FFFFL
     }
 }
 
