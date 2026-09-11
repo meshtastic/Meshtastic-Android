@@ -2,7 +2,7 @@
 title: Contributing
 parent: Developer Guide
 nav_order: 8
-last_updated: 2026-09-10
+last_updated: 2026-09-11
 description: Branch naming, commit style, PR workflow, and the verification gates a change must pass before merge.
 aliases:
   - contributing
@@ -48,7 +48,7 @@ Examples:
 ## Commit Messages
 
 Follow conventional commit style:
-```
+```text
 feat(docs): add in-app documentation browser
 fix(ble): handle reconnection timeout
 refactor(navigation): migrate to typed routes
@@ -76,7 +76,7 @@ Before submitting:
 - **Line length:** 120 characters maximum
 
 Run formatting:
-```bash
+```shell
 ./gradlew spotlessApply
 ```
 
@@ -91,12 +91,12 @@ Run formatting:
 ## Verification
 
 Full pre-merge verification:
-```bash
+```shell
 ./gradlew spotlessCheck detekt kmpSmokeCompile test allTests
 ```
 
 For docs-specific changes, also run:
-```bash
+```shell
 ./gradlew generateDocsBundle validateDocsBundle
 ```
 
