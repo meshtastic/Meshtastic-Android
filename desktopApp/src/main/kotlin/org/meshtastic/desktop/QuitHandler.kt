@@ -17,14 +17,25 @@
 package org.meshtastic.desktop
 
 import java.awt.Desktop
+import java.awt.desktop.QuitResponse
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.concurrent.thread
 
 /** Published by the composition so [installQuitHandler] can end the Compose loop from AppKit's quit thread. */
 private val exitApplicationRef = AtomicReference<(() -> Unit)?>(null)
 
-/** Hands the running composition's `exitApplication` to [installQuitHandler]. */
-internal fun publishExitApplication(exitApplication: () -> Unit) = exitApplicationRef.set(exitApplication)
+/** A quit that arrived before the composition published its callback, held until it can be honoured. */
+private val pendingQuitRef = AtomicReference<QuitResponse?>(null)
+
+/** Hands the running composition's `exitApplication` to [installQuitHandler], honouring a quit that beat it here. */
+internal fun publishExitApplication(exitApplication: () -> Unit) {
+    exitApplicationRef.set(exitApplication)
+    pendingQuitRef.getAndSet(null)?.let { response ->
+        exitApplication()
+        startQuitWatchdog()
+        response.cancelQuit()
+    }
+}
 
 /**
  * Routes macOS's AppKit quit (Cmd+Q and the app menu) into `exitApplication` so the shutdown in `main` runs at all.
@@ -37,7 +48,9 @@ internal fun installQuitHandler() {
     desktop.setQuitHandler { _, response ->
         val exitApplication = exitApplicationRef.get()
         if (exitApplication == null) {
-            response.performQuit()
+            // Quitting before the composition published its callback must not skip the shutdown: hold the
+            // response until publishExitApplication can run it.
+            pendingQuitRef.set(response)
         } else {
             // Cancels the native quit because the shutdown this unblocks ends in exitProcess(). The watchdog is
             // what stops a Compose loop that never returns from leaving the app un-quittable.
