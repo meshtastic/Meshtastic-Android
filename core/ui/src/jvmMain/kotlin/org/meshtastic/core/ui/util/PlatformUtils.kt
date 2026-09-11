@@ -19,7 +19,10 @@
 package org.meshtastic.core.ui.util
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalClipboard
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.common.util.CommonUri
@@ -32,6 +35,14 @@ import java.net.URI
 import javax.swing.JFileChooser
 
 /** JVM stub — NFC settings are not available on Desktop. */
+@Composable
+actual fun rememberShareText(): (text: String, subject: String) -> Unit {
+    // Desktop has no share sheet. The clipboard is the honest equivalent, and the caller's UI says so.
+    val clipboard = LocalClipboard.current
+    val scope = rememberCoroutineScope()
+    return { text, _ -> scope.launch { clipboard.setClipEntry(createClipEntry(text, sensitive = true)) } }
+}
+
 @Composable
 actual fun rememberOpenNfcSettings(): () -> Unit = { Logger.w { "NFC settings not available on JVM/Desktop" } }
 

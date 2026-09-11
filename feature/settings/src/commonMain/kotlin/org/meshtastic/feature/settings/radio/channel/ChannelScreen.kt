@@ -79,7 +79,10 @@ import org.meshtastic.core.resources.navigate_into_label
 import org.meshtastic.core.resources.replace
 import org.meshtastic.core.resources.reset
 import org.meshtastic.core.resources.reset_to_defaults
-import org.meshtastic.core.resources.share_channels_qr
+import org.meshtastic.core.resources.share_channels
+import org.meshtastic.core.resources.share_channels_add_hint
+import org.meshtastic.core.resources.share_channels_replace_hint
+import org.meshtastic.core.resources.share_channels_subject
 import org.meshtastic.core.ui.component.AdaptiveTwoPane
 import org.meshtastic.core.ui.component.ChannelSelection
 import org.meshtastic.core.ui.component.MainAppBar
@@ -281,6 +284,22 @@ fun ChannelScreen(
                 }
             }
             item {
+                // Replace is destructive on the recipient's radio, and the two words alone do not say so.
+                Text(
+                    text =
+                    stringResource(
+                        if (channelShareState.shouldAdd) {
+                            Res.string.share_channels_add_hint
+                        } else {
+                            Res.string.share_channels_replace_hint
+                        },
+                    ),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            item {
                 ModemPresetInfo(
                     modemPresetName = modemPresetName,
                     // Navigate straight to the LoRa screen: it re-reads the route on entry and renders from the
@@ -309,7 +328,12 @@ fun ChannelScreen(
 
 @Composable
 private fun ChannelShareDialog(uriString: String, onDismiss: () -> Unit) {
-    QrDialog(title = stringResource(Res.string.share_channels_qr), uriString = uriString, onDismiss = onDismiss)
+    QrDialog(
+        title = stringResource(Res.string.share_channels),
+        uriString = uriString,
+        onDismiss = onDismiss,
+        shareSubject = stringResource(Res.string.share_channels_subject),
+    )
 }
 
 @Composable

@@ -38,6 +38,8 @@ actual fun annotatedStringFromHtml(html: String, linkStyles: TextLinkStyles?): A
 
 @Composable actual fun rememberOpenUrl(): (url: String) -> Unit = { _ -> }
 
+@Composable actual fun rememberShareText(): (text: String, subject: String) -> Unit = { _, _ -> }
+
 @Composable
 actual fun rememberSaveFileLauncher(
     onUriReceived: (CommonUri) -> Unit,

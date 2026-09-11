@@ -24,6 +24,7 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.getSharedContactUrl
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.share_contact
+import org.meshtastic.core.resources.share_contact_subject
 import org.meshtastic.proto.SharedContact
 
 /**
@@ -37,7 +38,13 @@ fun SharedContactDialog(contact: Node?, onDismiss: () -> Unit) {
     if (contact == null) return
     val contactToShare = SharedContact(user = contact.user, node_num = contact.num)
     val uriString = contactToShare.getSharedContactUrl().toString()
-    QrDialog(title = stringResource(Res.string.share_contact), uriString = uriString, onDismiss = onDismiss)
+    QrDialog(
+        title = stringResource(Res.string.share_contact),
+        uriString = uriString,
+        onDismiss = onDismiss,
+        subtitle = contact.user?.long_name,
+        shareSubject = stringResource(Res.string.share_contact_subject),
+    )
 }
 
 /**

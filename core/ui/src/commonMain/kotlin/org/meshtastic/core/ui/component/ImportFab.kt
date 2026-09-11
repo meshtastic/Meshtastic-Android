@@ -46,7 +46,7 @@ import org.meshtastic.core.resources.scan_nfc
 import org.meshtastic.core.resources.scan_nfc_text
 import org.meshtastic.core.resources.scan_shared_contact_nfc
 import org.meshtastic.core.resources.scan_shared_contact_qr
-import org.meshtastic.core.resources.share_channels_qr
+import org.meshtastic.core.resources.share_channels
 import org.meshtastic.core.resources.share_connected_node
 import org.meshtastic.core.resources.url
 import org.meshtastic.core.ui.icon.LinkIcon
@@ -183,7 +183,7 @@ fun MeshtasticImportFAB(
     onShareChannels?.let {
         items.add(
             MenuFABItem(
-                label = stringResource(Res.string.share_channels_qr),
+                label = stringResource(Res.string.share_channels),
                 icon = MeshtasticIcons.QrCode2,
                 onClick = it,
                 testTag = "share_channels",
