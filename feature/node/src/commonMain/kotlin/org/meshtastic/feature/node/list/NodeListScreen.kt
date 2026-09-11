@@ -150,7 +150,7 @@ fun NodeListScreen(
             if (ourNum == null) {
                 emptyList()
             } else {
-                unfilteredNodes.filter { !it.heardOnCurrentLora && !it.isFavorite && it.num != ourNum }
+                unfilteredNodes.filter { it.isUnheardOnCurrentLora && !it.isFavorite && it.num != ourNum }
             }
         }
     val deviceImageUrls by viewModel.deviceImageUrls.collectAsStateWithLifecycle()

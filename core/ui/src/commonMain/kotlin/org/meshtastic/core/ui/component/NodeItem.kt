@@ -461,9 +461,10 @@ private fun MetricsGrid(items: List<@Composable () -> Unit>) {
  * [LastHeardInfo] tinted StatusGreen when [online] — the "online" affordance — rendered plain otherwise. Shared by the
  * complete and compact node rows.
  *
- * When [heardOnCurrentLora] is false the radio has not heard this node since its LoRa settings changed, so it cannot be
- * reached from here. That is a different claim from "offline" and takes precedence: an online node can still be
- * unreachable, and the online tint would say the opposite.
+ * When [heardOnCurrentLora] is false the radio has not heard this node on the LoRa configuration it is using now, so it
+ * cannot be reached from here. That is a different claim from "offline" and takes precedence: an online node can still
+ * be unreachable, and the online tint would say the opposite. Callers pass Node.isUnheardOnCurrentLora inverted, not
+ * the raw flag, so MQTT-only nodes are not presented as unreachable.
  */
 @Composable
 internal fun StatusAwareLastHeard(
@@ -560,7 +561,7 @@ private fun NodeItemHeader(
                     lastHeard = thatNode.lastHeard,
                     online = !isThisNode && thatNode.isOnline,
                     contentColor = contentColor,
-                    heardOnCurrentLora = isThisNode || thatNode.heardOnCurrentLora,
+                    heardOnCurrentLora = isThisNode || !thatNode.isUnheardOnCurrentLora,
                 )
             }
         }

@@ -58,6 +58,7 @@ class GetFilteredNodesUseCaseTest {
         viaMqtt: Boolean = false,
         signsPackets: Boolean = false,
         publicKey: ByteString? = null,
+        heardOnCurrentLora: Boolean = true,
     ): Node {
         val user = User(id = "!$num", long_name = name, short_name = "N$num", role = role)
         return Node(
@@ -67,6 +68,7 @@ class GetFilteredNodesUseCaseTest {
             viaMqtt = viaMqtt,
             signsPackets = signsPackets,
             publicKey = publicKey,
+            heardOnCurrentLora = heardOnCurrentLora,
         )
     }
 
@@ -192,5 +194,28 @@ class GetFilteredNodesUseCaseTest {
         val result = useCase(NodeFilterState(onlyEncrypted = true), NodeSortOption.LAST_HEARD).first()
 
         assertEquals(listOf(2), result.map { it.num })
+    }
+
+    @Test
+    fun `the unheard filter drops a node the radio can no longer reach`() = runTest {
+        val nodes = listOf(createNode(1), createNode(2, heardOnCurrentLora = false))
+        every { nodeRepository.getNodes() } returns flowOf(nodes)
+
+        val result = useCase(NodeFilterState(excludeUnheard = true), NodeSortOption.LAST_HEARD).first()
+
+        assertEquals(listOf(1), result.map { it.num })
+    }
+
+    @Test
+    fun `the unheard filter keeps an MQTT node the radio never heard over RF`() = runTest {
+        // The radio only marks a node heard on the current LoRa config when it arrives over RF, so an MQTT-only node
+        // reads false permanently. That is not the same as "went unreachable when the settings changed", and hiding it
+        // would empty the list on an MQTT-uplinked mesh.
+        val nodes = listOf(createNode(1, viaMqtt = true, heardOnCurrentLora = false), createNode(2))
+        every { nodeRepository.getNodes() } returns flowOf(nodes)
+
+        val result = useCase(NodeFilterState(excludeUnheard = true), NodeSortOption.LAST_HEARD).first()
+
+        assertEquals(listOf(1, 2), result.map { it.num }.sorted())
     }
 }

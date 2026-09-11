@@ -69,7 +69,11 @@ data class Node(
     val manuallyVerified: Boolean = false,
     /** True when this node signs its broadcasts via XEdDSA (NodeInfo.has_xeddsa_signed). Automatic trust. */
     val signsPackets: Boolean = false,
-    /** False when the radio has not heard this node since its current LoRa config took effect. */
+    /**
+     * False when the radio has not heard this node over RF on the LoRa configuration it is using now. The radio derives
+     * this rather than storing it, so returning to a configuration restores the previous answers. Ask
+     * [isUnheardOnCurrentLora] rather than this flag: false alone does not mean the node became unreachable.
+     */
     val heardOnCurrentLora: Boolean = true,
     val nodeStatus: String? = null,
     /** The transport mechanism this node was last heard over (see [MeshPacket.TransportMechanism]). */
@@ -83,6 +87,18 @@ data class Node(
     val newPublicKey: ByteString? = null,
 ) {
     val capabilities: Capabilities by lazy { Capabilities(metadata?.firmware_version) }
+
+    /**
+     * True when this node is one the radio can no longer reach on its current LoRa configuration: the radio has heard
+     * it over RF at some point, but not on the configuration in force now.
+     *
+     * [viaMqtt] nodes are excluded. They arrive over the internet rather than over our own radio, so the radio never
+     * marks them heard over RF and [heardOnCurrentLora] is false for them permanently - not because a setting changed.
+     * Presenting those as unreachable would badge every node on an MQTT-uplinked mesh and offer it for removal, and
+     * removing one is pointless because it returns on the next uplinked packet.
+     */
+    val isUnheardOnCurrentLora: Boolean
+        get() = !heardOnCurrentLora && !viaMqtt
 
     val isOnline: Boolean
         get() = isOnline(onlineTimeThreshold())
