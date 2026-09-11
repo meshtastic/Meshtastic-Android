@@ -89,13 +89,19 @@ data class Node(
     val capabilities: Capabilities by lazy { Capabilities(metadata?.firmware_version) }
 
     /**
-     * True when this node is one the radio can no longer reach on its current LoRa configuration: the radio has heard
-     * it over RF at some point, but not on the configuration in force now.
+     * True when the radio does not report having heard this node over RF on the LoRa configuration in force now, and it
+     * is not an [viaMqtt] node.
      *
-     * [viaMqtt] nodes are excluded. They arrive over the internet rather than over our own radio, so the radio never
-     * marks them heard over RF and [heardOnCurrentLora] is false for them permanently - not because a setting changed.
-     * Presenting those as unreachable would badge every node on an MQTT-uplinked mesh and offer it for removal, and
-     * removing one is pointless because it returns on the next uplinked packet.
+     * This is not a claim that the node was ever heard over RF. `heard_on_current_lora` is a single bool, and the radio
+     * does not expose its "heard over RF at least once" bit separately, so a node heard under different settings and a
+     * node never heard at all (one added as a shared contact, say) are indistinguishable here. Both read true. Callers
+     * that must not act on the second case need another signal - the removal offer relies on favourites, which is what
+     * firmware marks a contact.
+     *
+     * [viaMqtt] nodes are excluded because they arrive over the internet rather than over our own radio, so the radio
+     * never marks them heard over RF and [heardOnCurrentLora] is false for them permanently - not because a setting
+     * changed. Presenting those as unreachable would badge every node on an MQTT-uplinked mesh and offer it for
+     * removal, and removing one is pointless because it returns on the next uplinked packet.
      */
     val isUnheardOnCurrentLora: Boolean
         get() = !heardOnCurrentLora && !viaMqtt
