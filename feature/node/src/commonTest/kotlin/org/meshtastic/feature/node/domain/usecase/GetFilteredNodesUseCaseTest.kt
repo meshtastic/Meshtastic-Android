@@ -207,7 +207,7 @@ class GetFilteredNodesUseCaseTest {
     }
 
     @Test
-    fun `the unheard filter keeps an MQTT node, which reads unheard permanently`() = runTest {
+    fun `the unheard filter keeps an MQTT node which reads unheard permanently`() = runTest {
         // The radio only marks a node heard on the current LoRa config when it arrives over RF, so an MQTT-only node
         // reads false permanently. That is not the same as "went unreachable when the settings changed", and hiding it
         // would empty the list on an MQTT-uplinked mesh.
