@@ -50,6 +50,7 @@ import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.copy
 import org.meshtastic.core.resources.okay
 import org.meshtastic.core.resources.qr_code
+import org.meshtastic.core.resources.share_by_tap_subtext
 import org.meshtastic.core.resources.write_nfc
 import org.meshtastic.core.resources.write_nfc_failed
 import org.meshtastic.core.resources.write_nfc_subtext
@@ -59,6 +60,8 @@ import org.meshtastic.core.ui.icon.Copy
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Nfc
 import org.meshtastic.core.ui.theme.SemanticColors
+import org.meshtastic.core.ui.util.LocalNfcEmulationSupported
+import org.meshtastic.core.ui.util.LocalNfcEmulatorProvider
 import org.meshtastic.core.ui.util.LocalNfcScannerSupported
 import org.meshtastic.core.ui.util.LocalNfcWriterProvider
 import org.meshtastic.core.ui.util.SetScreenBrightness
@@ -77,11 +80,20 @@ fun QrDialog(title: String, uriString: String, onDismiss: () -> Unit) {
 
     val nfcSupported = LocalNfcScannerSupported.current
     val nfcWriter = LocalNfcWriterProvider.current
+    val hceSupported = LocalNfcEmulationSupported.current
+    val nfcEmulator = LocalNfcEmulatorProvider.current
     var isWritingNfc by rememberSaveable { mutableStateOf(false) }
     var showNfcDisabled by rememberSaveable { mutableStateOf(false) }
     var writeSucceeded by rememberSaveable { mutableStateOf<Boolean?>(null) }
 
     SetScreenBrightness(1f)
+
+    // Offer the same URL to readers for as long as this dialog is up. The exposure matches the
+    // QR already on screen, and arming ends with the dialog. An armed write takes the radio into
+    // reader mode, which suspends card emulation, so the two never contend.
+    if (hceSupported) {
+        nfcEmulator(uriString)
+    }
 
     if (isWritingNfc) {
         nfcWriter(
@@ -161,6 +173,15 @@ fun QrDialog(title: String, uriString: String, onDismiss: () -> Unit) {
                     ) {
                         Icon(imageVector = MeshtasticIcons.Copy, contentDescription = stringResource(Res.string.copy))
                     }
+                }
+
+                if (hceSupported) {
+                    Text(
+                        text = stringResource(Res.string.share_by_tap_subtext),
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
 
                 if (nfcSupported) {
