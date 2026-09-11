@@ -168,23 +168,30 @@ interface NodeInfoDao {
             incomingHasKey -> {
                 if (existingHasKey && incomingKey != existingKey) {
                     // A different key for a node we already hold one for: keep ours, record the refusal.
-                    ResolvedPublicKey(existingKey, keyMatch = false)
+                    ResolvedPublicKey(existingKey, keyMatch = false, newPublicKey = incomingKey)
                 } else {
                     // New key, same key, or recovery from a legacy sentinel row.
                     ResolvedPublicKey(incomingKey, keyMatch = true)
                 }
             }
 
-            existingHasKey -> ResolvedPublicKey(existingKey, existingNode.keyMatch)
+            existingHasKey -> ResolvedPublicKey(existingKey, existingNode.keyMatch, existingNode.newPublicKey)
 
             incomingNode.user.is_licensed -> ResolvedPublicKey(ByteString.EMPTY, keyMatch = true)
 
-            else -> ResolvedPublicKey(existingKey, existingNode.keyMatch)
+            else -> ResolvedPublicKey(existingKey, existingNode.keyMatch, existingNode.newPublicKey)
         }
     }
 
-    /** A resolved public key and whether the inbound one matched it — see [resolvePublicKey]. */
-    private data class ResolvedPublicKey(val key: ByteString?, val keyMatch: Boolean)
+    /**
+     * A resolved public key, whether the inbound one matched it, and the refused key when it did not — see
+     * [resolvePublicKey].
+     */
+    private data class ResolvedPublicKey(
+        val key: ByteString?,
+        val keyMatch: Boolean,
+        val newPublicKey: ByteString? = null,
+    )
 
     /**
      * Handles the validation logic when upserting an existing node.
@@ -220,6 +227,7 @@ interface NodeInfoDao {
                 user = existingNode.user,
                 publicKey = existingNode.publicKey,
                 keyMatch = existingNode.keyMatch,
+                newPublicKey = existingNode.newPublicKey,
                 longName = existingNode.longName,
                 shortName = existingNode.shortName,
                 manuallyVerified = existingNode.manuallyVerified,
@@ -240,6 +248,7 @@ interface NodeInfoDao {
             user = incomingNode.user.copy(public_key = resolved.key ?: ByteString.EMPTY),
             publicKey = resolved.key,
             keyMatch = resolved.keyMatch,
+            newPublicKey = resolved.newPublicKey,
             notes = resolvedNotes,
             powerChannelLabels = resolvedPowerChannelLabels,
         )

@@ -123,6 +123,46 @@ abstract class CommonNodeInfoDaoTest {
         assertEquals(trusted, stored?.publicKey)
         assertEquals(trusted, stored?.user?.public_key)
         assertFalse(stored?.keyMatch ?: true)
+        assertEquals(substitute, stored?.newPublicKey)
+    }
+
+    @Test
+    fun `the refused key is kept so the mismatch can name it`() = runTest {
+        createDb()
+        val trusted = ByteArray(32) { 1 }.toByteString()
+        val substitute = ByteArray(32) { 2 }.toByteString()
+        dao.upsert(NodeEntity(num = 1, user = User(id = "!1", public_key = trusted)))
+
+        // Nothing is refused yet, so there is no key to report.
+        assertEquals(null, dao.getNodeByNum(1)?.node?.newPublicKey)
+
+        dao.upsert(NodeEntity(num = 1, user = User(id = "!1", public_key = substitute)))
+        assertEquals(substitute, dao.getNodeByNum(1)?.node?.newPublicKey)
+
+        // A later packet carrying the key already on file resolves the mismatch, so the refused key goes with it.
+        dao.upsert(NodeEntity(num = 1, user = User(id = "!1", public_key = trusted)))
+        val settled = dao.getNodeByNum(1)?.node
+        assertTrue(settled?.keyMatch ?: false)
+        assertEquals(null, settled?.newPublicKey)
+    }
+
+    @Test
+    fun `the connected radio re-keying clears the refused key along with the mismatch`() = runTest {
+        createDb()
+        val own = myNodeInfo.myNodeNum
+        val before = ByteArray(32) { 1 }.toByteString()
+        dao.upsert(NodeEntity(num = own, user = User(id = "!own", public_key = before)))
+        dao.upsert(NodeEntity(num = own, user = User(id = "!own", public_key = ByteArray(32) { 9 }.toByteString())))
+        assertFalse(dao.getNodeByNum(own)?.node?.keyMatch ?: true)
+
+        // The local link is authoritative, so accepting the radio's own key also drops what was refused.
+        val after = ByteArray(32) { 2 }.toByteString()
+        dao.installConfig(myNodeInfo, listOf(NodeEntity(num = own, user = User(id = "!own", public_key = after))))
+
+        val stored = dao.getNodeByNum(own)?.node
+        assertEquals(after, stored?.publicKey)
+        assertTrue(stored?.keyMatch ?: false)
+        assertEquals(null, stored?.newPublicKey)
     }
 
     @Test

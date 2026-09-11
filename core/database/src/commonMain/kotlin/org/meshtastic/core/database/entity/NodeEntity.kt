@@ -177,6 +177,13 @@ data class NodeEntity(
      * the old way, as [ERROR_BYTE_STRING] in [publicKey].
      */
     @ColumnInfo(name = "key_match", defaultValue = "1") var keyMatch: Boolean = true,
+    /**
+     * The key that was refused, kept so the mismatch can be shown as more than a warning.
+     *
+     * Null whenever [keyMatch] is true. Rows that recorded a mismatch the old way, as [ERROR_BYTE_STRING] in
+     * [publicKey], have no rejected key to report and stay null.
+     */
+    @ColumnInfo(name = "new_public_key") var newPublicKey: ByteString? = null,
 ) {
     val deviceMetrics: org.meshtastic.proto.DeviceMetrics?
         get() = deviceTelemetry.device_metrics
