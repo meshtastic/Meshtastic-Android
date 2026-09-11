@@ -88,6 +88,12 @@ class CapabilitiesTest {
     }
 
     @Test
+    fun supportsRemoteShell_is_currently_unreleased() {
+        assertFalse(caps("2.7.22").supportsRemoteShell)
+        assertFalse(caps("3.0.0").supportsRemoteShell)
+    }
+
+    @Test
     fun supportsEsp32Ota_requires_V2_7_18() {
         assertFalse(caps("2.7.17").supportsEsp32Ota)
         assertTrue(caps("2.7.18").supportsEsp32Ota)
@@ -167,6 +173,7 @@ class CapabilitiesTest {
         assertFalse(c.supportsSecondaryChannelLocation)
         assertFalse(c.supportsStatusMessage)
         assertFalse(c.supportsTakConfig)
+        assertFalse(c.supportsRemoteShell)
         assertFalse(c.supportsEsp32Ota)
     }
 
@@ -177,5 +184,6 @@ class CapabilitiesTest {
         assertTrue(c.canSendVerifiedContacts)
         assertTrue(c.supportsStatusMessage)
         assertTrue(c.supportsTakConfig)
+        assertTrue(c.supportsRemoteShell)
     }
 }

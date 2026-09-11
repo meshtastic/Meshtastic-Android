@@ -61,6 +61,7 @@ import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioSessionContext
 import org.meshtastic.core.repository.RadioSessionLease
+import org.meshtastic.core.repository.RemoteShellHandler
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.StoreForwardPacketHandler
 import org.meshtastic.core.repository.TelemetryPacketHandler
@@ -106,6 +107,7 @@ class MeshDataHandlerTest {
     private val storeForwardHandler: StoreForwardPacketHandler = mock(MockMode.autofill)
     private val telemetryHandler: TelemetryPacketHandler = mock(MockMode.autofill)
     private val adminPacketHandler: AdminPacketHandler = mock(MockMode.autofill)
+    private val remoteShellHandler: RemoteShellHandler = mock(MockMode.autofill)
     private val radioInterfaceService: RadioInterfaceService = mock(MockMode.autofill)
     private val session = RadioSessionContext(generation = 7L, address = "tcp:test")
 
@@ -166,6 +168,7 @@ class MeshDataHandlerTest {
                 storeForwardHandler = storeForwardHandler,
                 telemetryHandler = telemetryHandler,
                 adminPacketHandler = adminPacketHandler,
+                remoteShellHandler = remoteShellHandler,
                 collectorRegistry = mock(MockMode.autofill),
                 // GeofenceMonitor is a final @Single (mokkery can't mock it) — use a real one over mocked
                 // collaborators. With no geofence-bearing waypoints emitted, onPositionReceived is a no-op.
