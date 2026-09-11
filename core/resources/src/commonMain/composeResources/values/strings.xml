@@ -1377,8 +1377,8 @@
     <string name="nodes_empty_searching_hint">Nearby nodes will appear here as they're discovered.</string>
     <string name="nodes_empty_searching_title">Searching for nodes</string>
     <string name="nodes_queued_for_deletion">%1$d nodes queued for deletion:</string>
-    <string name="nodes_unheard_banner">%1$d nodes not heard since you changed settings</string>
-    <string name="nodes_unheard_banner_one">1 node not heard since you changed settings</string>
+    <string name="nodes_unheard_banner">%1$d nodes not heard on your current LoRa settings</string>
+    <string name="nodes_unheard_banner_one">1 node not heard on your current LoRa settings</string>
     <string name="nodes_unheard_keep">Keep</string>
     <string name="nodes_unheard_remove">Remove</string>
     <string name="noise_floor">Noise Floor</string>
