@@ -164,7 +164,11 @@ abstract class CommonNodeInfoDaoTest {
         // local node number proves only that the sender claimed it.
         dao.upsert(NodeEntity(num = own, user = User(id = "!own", public_key = ByteArray(32) { 9 }.toByteString())))
 
-        assertEquals(NodeEntity.ERROR_BYTE_STRING, dao.getNodeByNum(own)?.node?.publicKey)
+        // First-wins keeps the stored key; the refusal is recorded and still reads as a mismatch to the UI.
+        val stored = dao.getNodeByNum(own)
+        assertEquals(real, stored?.node?.publicKey)
+        assertFalse(stored?.node?.keyMatch ?: true)
+        assertTrue(stored!!.toModel().mismatchKey)
     }
 
     @Test
