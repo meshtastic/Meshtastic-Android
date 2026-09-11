@@ -32,7 +32,7 @@ class KoinConventionPlugin : Plugin<Project> {
                 // Validation is whole-graph and happens at the @KoinApplication entry points, so
                 // it is only enabled there. A library module validates locally, cannot see the
                 // assembled graph, and reports KOIN-D003 on definitions its consumers supply.
-                compileSafety.set(path == ":androidApp" || path == ":desktopApp")
+                compileSafety.set(path in KOIN_ENTRY_POINTS)
             }
 
             val koinAnnotations = libs.findLibrary("koin-annotations").get()
@@ -77,3 +77,6 @@ class KoinConventionPlugin : Plugin<Project> {
         }
     }
 }
+
+/** Modules declaring a `@KoinApplication`. A new app target must be added here or it is never validated. */
+private val KOIN_ENTRY_POINTS = setOf(":androidApp", ":desktopApp")
