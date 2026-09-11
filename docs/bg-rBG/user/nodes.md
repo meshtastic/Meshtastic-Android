@@ -2,7 +2,7 @@
 title: Възли
 parent: Ръководство за потребители
 nav_order: 4
-last_updated: 2026-09-10
+last_updated: 2026-09-11
 description: Browse, filter, and sort mesh nodes — view details, signal quality, roles, and quick actions.
 aliases:
   - node-list
@@ -19,12 +19,12 @@ The Nodes screen lists every node visible on your mesh.
 
 The node list shows every node your radio has heard, including:
 
-- **Node name** — user-configured long name
-- **Short name** — 4-character identifier
+- **Име на възела** — зададено от потребителя дълго име
+- **Кратко име** — идентификатор от 4 знака
 - **Signal quality** — SNR, RSSI, and a quality word, shown only for nodes your radio heard directly. In the Complete layout a node reached through a relay shows its hop count here instead; a node heard only over MQTT shows neither
-- **Last heard** — time since last communication
-- **Distance** — estimated distance (if positions are shared)
-- **Battery** — remote node battery level (if telemetry is enabled)
+- **Последно чут** — време от последната комуникация
+- **Разстояние** — приблизително разстояние (ако се споделят местоположения)
+- **Батерия** — ниво на заряда на батерията на отдалечения възел (ако телеметрията е активирана)
 
 ### Choosing What the List Shows
 
@@ -108,7 +108,7 @@ radio is connected and running firmware 2.8 or newer — see
 
 ## Sharing a Contact
 
-On a node's detail screen, tap **Share Contact** to produce a link and a QR code for that node. From the same dialog, **Write to NFC tag** saves the link to a writable NFC tag that anyone can tap to open. While that dialog is open the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved.
+On a node's detail screen, tap **Share Contact** to produce a link and a QR code for that node. From the same dialog, **Share link** opens the Android share sheet (on desktop it copies the link instead), **Write to NFC tag** saves it to a writable NFC tag, and **Copy** puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved.
 
 To add someone else's contact, use the import button on the node list and choose **Scan Shared Contact QR Code**, **Scan Shared Contact NFC**, or **Input Shared Contact URL**. The app asks you to confirm with **Import Shared Contact?**, and warns you when the contact is one you already have.
 

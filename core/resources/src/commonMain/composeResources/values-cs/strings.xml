@@ -551,7 +551,6 @@
     <string name="encryption_error">Neshoda veřejného klíče</string>
     <string name="encryption_error_text">Veřejný klíč neodpovídá uloženému klíči. Můžete uzel odebrat a nechat jej znovu vyměnit klíče, ale může to znamenat bezpečnostní problém. Kontaktujte uživatele jiným důvěryhodným kanálem a ověřte, zda ke změně klíče došlo v důsledku továrního resetu nebo jiné úmyslné akce.</string>
     <string name="encryption_pkc">Šifrování veřejného klíče</string>
-    <string name="encryption_pkc_text">Přímé zprávy používají novou infrastrukturu veřejných klíčů pro šifrování.</string>
     <string name="env_metrics_log">Metriky prostředí</string>
     <!-- ENVIRONMENT -->
     <string name="environment">Životní prostředí</string>
@@ -1135,7 +1134,6 @@
     <string name="no_network_devices_seen">Nenalezena žádná síťová zařízení</string>
     <string name="no_pax_metrics_logs">Metriky PAX nejsou k dispozici.</string>
     <string name="no_public_key">Žádný veřejný klíč</string>
-    <string name="no_public_key_text">Tento uzel nesdílel veřejný klíč, takže mu nelze posílat přímé zprávy. Požádejte o informace o uživateli.</string>
     <string name="no_usb_devices_found">Nenalezena žádná USB zařízení</string>
     <string name="no_usb_devices_hint">Připojte zařízení datovým USB kabelem, chcete-li použít sériové připojení.</string>
     <string name="no_usb_devices_seen">Nebyla nalezena žádná USB zařízení</string>
@@ -1527,7 +1525,6 @@
     <string name="security_signed_message_info">Ověřeno klíčem odesílatele.</string>
     <string name="security_signed_node">Podepsaný uzel</string>
     <string name="security_signed_node_desc">Ověřeno automaticky</string>
-    <string name="security_signed_node_help">Tento uzel podepisuje své vysílání pomocí XEdDSA. Vysílání, která od něj přijímáte, rádio ověřuje pomocí jeho identitního klíče.</string>
     <string name="security_signed_verified">Podepsáno · ověřeno</string>
     <string name="select">Vybrat</string>
     <string name="select_all">Vybrat vše</string>
@@ -1553,7 +1550,6 @@
     <string name="settings">nastavení</string>
     <!-- SHARE -->
     <string name="share">Sdílet</string>
-    <string name="share_channels_qr">Sdílet QR kód kanálů</string>
     <string name="share_connected_node">Sdílet připojený uzel</string>
     <string name="share_contact">Sdílet kontakt</string>
     <string name="share_location">Sdílet polohu</string>
@@ -1855,7 +1851,6 @@
     <!-- WRITE -->
     <string name="write_nfc">Zapsat na NFC tag</string>
     <string name="write_nfc_failed">Nelze zapsat do tagu. Použijte zapisovatelný, prázdný NFC tag a podržte jej stabilně.</string>
-    <string name="write_nfc_subtext">Zápisem se tento odkaz pro sdílení uloží na NFC štítek. Kdokoli může přiložit telefon ke štítku a otevřít odkaz.</string>
     <string name="write_nfc_success">Zapsáno do tagu</string>
     <string name="write_nfc_text">Přidržte zapisovatelný NFC tag proti zadní straně telefonu.</string>
     <string name="you">Vy</string>

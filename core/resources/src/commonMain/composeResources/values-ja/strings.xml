@@ -564,7 +564,6 @@
     <string name="encryption_error">公開鍵が一致しません</string>
     <string name="encryption_error_text">公開鍵が記録されている鍵と一致しません。ノードを削除して鍵を再交換させることもできますが、これはより深刻なセキュリティ上の問題を示している可能性があります。鍵の変更が工場出荷時リセットやその他の意図的な操作によるものかどうかを確認するため、別の信頼できる手段でユーザーに連絡してください。</string>
     <string name="encryption_pkc">公開鍵暗号化</string>
-    <string name="encryption_pkc_text">ダイレクトメッセージは、暗号化に新しい公開鍵基盤を使用しています。</string>
     <string name="env_metrics_log">環境メトリクス</string>
     <!-- ENVIRONMENT -->
     <string name="environment">環境</string>
@@ -1486,7 +1485,6 @@
     <string name="security_signed_message_info">送信者の鍵で検証済み。</string>
     <string name="security_signed_node">署名済みノード</string>
     <string name="security_signed_node_desc">自動的に検証済み</string>
-    <string name="security_signed_node_help">このノードは XEdDSA でブロードキャストに署名します。表示されるブロードキャストは、無線機がそのアイデンティティ鍵を使って検証します。</string>
     <string name="security_signed_verified">署名済み・検証済み</string>
     <string name="select">選択</string>
     <string name="select_all">すべてを選択</string>
@@ -1514,7 +1512,6 @@
     <string name="settings">設定</string>
     <!-- SHARE -->
     <string name="share">シェア</string>
-    <string name="share_channels_qr">チャンネルのQRコードを共有</string>
     <string name="share_connected_node">接続中のノードを共有</string>
     <string name="share_contact">連絡先を共有</string>
     <string name="share_location">位置情報を共有</string>
@@ -1812,7 +1809,6 @@
     <!-- WRITE -->
     <string name="write_nfc">NFC タグに書き込む</string>
     <string name="write_nfc_failed">タグに書き込めませんでした。書き込み可能な空の NFC タグを使い、動かさずに近づけてください。</string>
-    <string name="write_nfc_subtext">書き込むと、この共有リンクが物理的な NFC タグに保存されます。誰でもスマートフォンでタグにタッチすると開けます。</string>
     <string name="write_nfc_success">タグに書き込みました</string>
     <string name="write_nfc_text">書き込み可能な NFC タグをスマートフォンの背面に近づけてください。</string>
     <string name="you">あなた</string>

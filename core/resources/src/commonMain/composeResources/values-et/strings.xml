@@ -607,7 +607,6 @@
     <string name="encryption_error">Kokkusobimatu avalik võti</string>
     <string name="encryption_error_text">Avalikvõti ei ühti salvestatud võtmele. Võid sõlme eemaldada ja lasta uuesti võtmeid vahetada, kuid see võib viidata tõsisemale turvaprobleemile. Võtke kasutajaga ühendust mõne muu usaldusväärse kanali kaudu, et teha kindlaks, kas võtmevahetus oli tingitud tehaseseadete taastamisest või muust tahtlikust toimingust.</string>
     <string name="encryption_pkc">Avaliku võtme krüpteerimine</string>
-    <string name="encryption_pkc_text">Otsesõnumid kasutavad krüpteerimiseks uut avaliku võtme infrastruktuuri.</string>
     <string name="env_metrics_log">Keskkonnamõõdikud</string>
     <!-- ENVIRONMENT -->
     <string name="environment">Keskkond</string>
@@ -1641,7 +1640,6 @@
     <string name="security_signed_message_info">Tõendatud saatja võtmega.</string>
     <string name="security_signed_node">Registreeritud sõlm</string>
     <string name="security_signed_node_desc">Tõendatud automaatselt</string>
-    <string name="security_signed_node_help">See sõlm allkirjastab oma leviedastused XEdDSA-ga. Raadio kontrollib sealt nähtavaid leviedastusi oma identiteedivõtme abil.</string>
     <string name="security_signed_verified">Registreeritud - tõendatud</string>
     <string name="select">Vali</string>
     <string name="select_all">Vali kõik</string>
@@ -1669,7 +1667,6 @@
     <string name="settings">sätted</string>
     <!-- SHARE -->
     <string name="share">Jaga</string>
-    <string name="share_channels_qr">Jaga kanalite QR koodi</string>
     <string name="share_connected_node">Jaga ühendatud sõlme</string>
     <string name="share_contact">Jaga kontakti</string>
     <string name="share_location">Jaga asukohta</string>
@@ -2006,7 +2003,6 @@
     <!-- WRITE -->
     <string name="write_nfc">Kirjuta NFC sildile</string>
     <string name="write_nfc_failed">Sildile ei õnnestunud kirjutada. Kasuta kirjutatavat, tühja NFC silti ja hoia seda paigal.</string>
-    <string name="write_nfc_subtext">Kirjutamine salvestab selle jagamislingi füüsilisele NFC-sildile. Igaüks saab silti oma telefoniga puudutates, et seda avada.</string>
     <string name="write_nfc_success">Kirjutatud sildile</string>
     <string name="write_nfc_text">Hoia kirjutatavat NFC silti telefoni tagakülje vastas.</string>
     <string name="you">Sina</string>

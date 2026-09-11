@@ -1,18 +1,18 @@
 ---
-title: Translate the App
-parent: User Guide
+title: Преведете приложението
+parent: Ръководство за потребителя
 nav_order: 17
 last_updated: 2026-08-30
-description: How the app and its documentation are translated via Crowdin, and guidelines for contributing translations.
+description: Как се превеждат приложението и документацията му чрез Crowdin, както и насоки за принос към преводите.
 aliases:
   - translate
   - crowdin
   - localization
 ---
 
-# Translate the App
+# Преведете приложението
 
-The app and its in-app docs are translated on Crowdin — this page shows how to contribute. The app uses [Crowdin](https://crowdin.com/) to manage community translations for both the user interface and in-app documentation.
+Приложението и придружаващата го документация се превеждат в Crowdin – на тази страница е обяснено как да се включите. Приложението използва [Crowdin](https://crowdin.com/) за управление на преводите, извършвани от общността, както за потребителския интерфейс, така и за документацията в самото приложение.
 
 ## What Gets Translated
 
@@ -33,15 +33,15 @@ The app and its in-app docs are translated on Crowdin — this page shows how to
 
 > 💡 **Tip:** Keep translations short. UI strings often appear in buttons, chips, or narrow columns. If a translation is significantly longer than the English original, consider abbreviating where the meaning stays clear.
 
-## Adding a New Language
+## Добавяне на нов език
 
-If your language is not yet listed on Crowdin:
+Ако езикът ви все още не е включен в списъка в Crowdin:
 
-1. Open an issue on [GitHub](https://github.com/meshtastic/Meshtastic-Android/issues/new) requesting the new locale.
-2. A maintainer will add the language to Crowdin and configure `crowdin.yml`.
-3. Once added, you can begin translating immediately.
+1. Отворете проблем в [GitHub](https://github.com/meshtastic/Meshtastic-Android/issues/new), като поискате новия език.
+2. Поддържащият ще добави езика в Crowdin и ще конфигурира `crowdin.yml`.
+3. След като бъде добавен, можете да започнете да превеждате веднага.
 
-## How Translations Are Organized
+## Как са организирани преводите
 
 The Android app uses **Compose Multiplatform resources** for all user-visible strings:
 
