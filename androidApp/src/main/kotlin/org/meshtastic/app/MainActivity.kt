@@ -229,7 +229,9 @@ class MainActivity : AppCompatActivity() {
             LocalNfcScannerProvider provides { onResult, onDisabled -> NfcScannerEffect(onResult, onDisabled) },
             LocalNfcWriterProvider provides { url, onResult, onDisabled -> NfcWriterEffect(url, onResult, onDisabled) },
             LocalBarcodeScannerSupported provides true,
-            LocalNfcScannerSupported provides true,
+            // Was a constant true, so the NFC affordance appeared on phones with no NFC radio and
+            // failed when used. uses-feature declares nfc as not required, so such devices do install.
+            LocalNfcScannerSupported provides packageManager.hasSystemFeature(PackageManager.FEATURE_NFC),
             // Arm card emulation only while the app is actually in the foreground. A share dialog left open behind a
             // home-press stays composed, and a channel URL carries the channel PSK. This reads the activity's own
             // lifecycle, not LocalLifecycleOwner: the effect is composed inside a Dialog, whose own lifecycle stays

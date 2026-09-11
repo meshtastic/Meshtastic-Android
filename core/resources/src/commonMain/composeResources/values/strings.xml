@@ -1774,12 +1774,18 @@
     <string name="settings">settings</string>
     <!-- SHARE -->
     <string name="share">Share</string>
-    <string name="share_by_tap_subtext">While this is open, another phone can take this by tapping yours. No tag needed.</string>
-    <string name="share_channels_qr">Share Channels QR Code</string>
+    <string name="share_action">Share link</string>
+    <string name="share_by_tap_subtext">While this is open, another phone can also take it by tapping yours.</string>
+    <string name="share_channels">Share Channels</string>
+    <string name="share_channels_add_hint">Adding keeps the channels they already have and appends yours.</string>
+    <string name="share_channels_replace_hint">Replacing overwrites every channel on their radio with yours.</string>
+    <string name="share_channels_subject">Meshtastic channels</string>
     <string name="share_connected_node">Share Connected Node</string>
     <string name="share_contact">Share Contact</string>
+    <string name="share_contact_subject">Meshtastic contact</string>
     <string name="share_location">Share Location</string>
     <string name="share_location_description">Use your phone GPS to send locations to your node instead of using a hardware GPS on your node.</string>
+    <string name="share_qr_subtext">Scan this code with another device's Meshtastic app to add it there.</string>
     <string name="share_to">Share to…</string>
     <string name="share_your_location_in_real_time">Share your location in real-time and keep your group coordinated with integrated GPS features.</string>
     <string name="shared_contact_no_public_key">This contact has no public key, so it cannot be imported. A contact without one clears any key your radio already holds for that node. Ask the sender to share it again once their node has exchanged keys.</string>
@@ -2129,7 +2135,7 @@
     <!-- WRITE -->
     <string name="write_nfc">Write to NFC tag</string>
     <string name="write_nfc_failed">Couldn't write to tag. Use a writable, empty NFC tag and hold it steady.</string>
-    <string name="write_nfc_subtext">Writing saves this share link to a physical NFC tag. Anyone can tap the tag with their phone to open it.</string>
+    <string name="write_nfc_subtext">Writing saves this link to an NFC tag anyone can tap.</string>
     <string name="write_nfc_success">Written to tag</string>
     <string name="write_nfc_text">Hold a writable NFC tag against the back of your phone.</string>
     <string name="you">You</string>

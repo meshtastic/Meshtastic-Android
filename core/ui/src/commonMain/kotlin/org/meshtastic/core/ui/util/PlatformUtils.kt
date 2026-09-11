@@ -34,6 +34,15 @@ import org.meshtastic.core.common.util.CommonUri
 /** Returns a function to open the platform's map application at the given coordinates. */
 @Composable expect fun rememberOpenMap(): (latitude: Double, longitude: Double, label: String) -> Unit
 
+/**
+ * Returns a function that hands [text] to the platform's share mechanism, so the user can send it through any app they
+ * have. [subject] titles the share where the platform shows one.
+ *
+ * Distinct from copying to the clipboard: the clipboard makes the user find the destination themselves, which is the
+ * difference between sharing with someone in the room and sharing with someone who is not.
+ */
+@Composable expect fun rememberShareText(): (text: String, subject: String) -> Unit
+
 /** Returns a function to open the platform's browser with the given URL. */
 @Composable expect fun rememberOpenUrl(): (url: String) -> Unit
 

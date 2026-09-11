@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import org.jetbrains.compose.resources.stringResource
@@ -34,6 +35,7 @@ import org.meshtastic.core.resources.write_nfc
 import org.meshtastic.core.resources.write_nfc_failed
 import org.meshtastic.core.resources.write_nfc_success
 import org.meshtastic.core.ui.component.MeshtasticDialog
+import org.meshtastic.core.ui.component.QrDialog
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Warning
 import org.meshtastic.core.ui.theme.AppTheme
@@ -174,6 +176,44 @@ fun PreviewComposableAlert() {
                     },
                 ),
             )
+        }
+    }
+}
+
+private const val PREVIEW_SHARE_URL =
+    "https://meshtastic.org/v/#CLGGyZIEEiQKCSE0MjUyNDMzMRIPUmVwbGF5IE9ic2VydmVyGgRSUExZKCs="
+
+@Suppress("PreviewPublic")
+@Preview(showBackground = true, name = "Share Dialog")
+@Composable
+fun PreviewShareDialog() {
+    AppTheme {
+        Box(modifier = Modifier.fillMaxSize()) {
+            QrDialog(
+                title = "Share Contact",
+                uriString = PREVIEW_SHARE_URL,
+                onDismiss = {},
+                subtitle = "Replay Observer",
+            )
+        }
+    }
+}
+
+/** The same dialog on a phone that can both write a tag and act as one, which adds two rows and a line of subtext. */
+@Suppress("PreviewPublic")
+@Preview(showBackground = true, name = "Share Dialog with NFC")
+@Composable
+fun PreviewShareDialogWithNfc() {
+    AppTheme {
+        CompositionLocalProvider(LocalNfcScannerSupported provides true, LocalNfcEmulationSupported provides true) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                QrDialog(
+                    title = "Share Contact",
+                    uriString = PREVIEW_SHARE_URL,
+                    onDismiss = {},
+                    subtitle = "Replay Observer",
+                )
+            }
         }
     }
 }
