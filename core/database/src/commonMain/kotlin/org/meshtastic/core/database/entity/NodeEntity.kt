@@ -71,6 +71,7 @@ data class NodeWithRelations(
         signsPackets = node.signsPackets,
         heardOnCurrentLora = node.heardOnCurrentLora,
         keyMatch = node.keyMatch,
+        newPublicKey = node.newPublicKey,
     )
 
     fun toEntity() = with(node) {
@@ -101,6 +102,7 @@ data class NodeWithRelations(
             signsPackets = signsPackets,
             heardOnCurrentLora = heardOnCurrentLora,
             keyMatch = keyMatch,
+            newPublicKey = newPublicKey,
         )
     }
 }
@@ -252,5 +254,6 @@ data class NodeEntity(
         signsPackets = signsPackets,
         heardOnCurrentLora = heardOnCurrentLora,
         keyMatch = keyMatch,
+        newPublicKey = newPublicKey,
     )
 }

@@ -380,6 +380,53 @@ class MeshtasticDatabaseMigrationTest {
         }
     }
 
+    /**
+     * 58→59 adds `nodes.key_match` and `nodes.new_public_key`, the record of a refused key substitution. `key_match`
+     * defaults to 1 so rows written before the column existed are not read as mismatched on first launch; those rows
+     * recorded a mismatch the old way, as the zero sentinel in `public_key`, and have no refused key to report, so
+     * `new_public_key` stays null. This proves both defaults and that the stored key survives the addition byte for
+     * byte, which is the whole point of first-wins.
+     */
+    @Test
+    fun keyMatchColumnsDefaultToMatchedAndPreserveNodes() = runTest {
+        val storedKeyHex = "01".repeat(PUBLIC_KEY_BYTES)
+        helper.createDatabase(KEY_MATCH_FROM_VERSION).use { connection ->
+            // Every NOT NULL column without a default in schema 58; the BLOBs are empty protos.
+            val columns =
+                "num, user, position, latitude, longitude, snr, rssi, last_heard, device_metrics, channel, " +
+                    "via_mqtt, hops_away, is_favorite, environment_metrics, power_metrics, paxcounter"
+            connection.execSQL(
+                "INSERT INTO nodes ($columns, long_name, public_key) VALUES " +
+                    "(42, x'', x'', 0.0, 0.0, 0.0, 0, 1000, x'', 0, 0, 1, 1, x'', x'', x'', " +
+                    "'Minnie Mouse', x'$storedKeyHex')",
+            )
+            connection.execSQL(
+                "INSERT INTO nodes ($columns, long_name) VALUES " +
+                    "(43, x'', x'', 0.0, 0.0, 0.0, 0, 2000, x'', 0, 0, 2, 0, x'', x'', x'', 'Mickey')",
+            )
+        }
+
+        helper.runMigrationsAndValidate(
+            KEY_MATCH_TO_VERSION,
+            listOf(MeshtasticDatabase.MIGRATION_52_53),
+        ).use { connection ->
+            // Both rows survive; neither reads as a mismatch, and neither has a refused key to report.
+            assertEquals(listOf("42", "43"), queryColumn(connection, "SELECT num FROM nodes ORDER BY num"))
+            assertEquals(listOf("1", "1"), queryColumn(connection, "SELECT key_match FROM nodes ORDER BY num"))
+            assertEquals(
+                listOf<String?>(null, null),
+                queryColumn(connection, "SELECT new_public_key FROM nodes ORDER BY num"),
+            )
+            // The stored key is exactly what was written; the column addition touched nothing.
+            assertEquals(
+                listOf(storedKeyHex.uppercase()),
+                queryColumn(connection, "SELECT hex(public_key) FROM nodes WHERE num = 42"),
+            )
+            assertEquals(listOf("Minnie Mouse"), queryColumn(connection, "SELECT long_name FROM nodes WHERE num = 42"))
+            assertEquals(listOf("1000"), queryColumn(connection, "SELECT last_heard FROM nodes WHERE num = 42"))
+        }
+    }
+
     private fun queryColumn(connection: SQLiteConnection, sql: String): List<String?> =
         connection.prepare(sql).use { statement ->
             buildList {
@@ -408,6 +455,9 @@ class MeshtasticDatabaseMigrationTest {
         const val PINNED_COLUMN_TO_VERSION = 57
         const val HEARD_ON_LORA_FROM_VERSION = 57
         const val HEARD_ON_LORA_TO_VERSION = 58
+        const val KEY_MATCH_FROM_VERSION = 58
+        const val KEY_MATCH_TO_VERSION = 59
+        const val PUBLIC_KEY_BYTES = 32
 
         /** Room's runtime FTS content-sync triggers, verbatim from the generated MeshtasticDatabase_Impl. */
         val FTS_SYNC_TRIGGERS =

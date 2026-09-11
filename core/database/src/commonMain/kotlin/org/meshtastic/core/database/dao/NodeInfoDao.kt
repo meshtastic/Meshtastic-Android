@@ -165,15 +165,24 @@ interface NodeInfoDao {
         val existingHasKey = existingKey.size == KEY_SIZE && existingKey != NodeEntity.ERROR_BYTE_STRING
 
         return when {
-            incomingHasKey -> {
-                if (existingHasKey && incomingKey != existingKey) {
-                    // A different key for a node we already hold one for: keep ours, record the refusal.
-                    ResolvedPublicKey(existingKey, keyMatch = false, newPublicKey = incomingKey)
-                } else {
-                    // New key, same key, or recovery from a legacy sentinel row.
-                    ResolvedPublicKey(incomingKey, keyMatch = true)
+            incomingHasKey ->
+                when {
+                    existingHasKey && incomingKey != existingKey ->
+                        // A different key for a node we already hold one for: keep ours, record the refusal.
+                        ResolvedPublicKey(existingKey, keyMatch = false, newPublicKey = incomingKey)
+
+                    existingHasKey ->
+                        // The key already on file. It settles nothing: a recorded refusal stands until the connected
+                        // radio speaks for itself, or the next legitimate beacon would hide the substitute.
+                        ResolvedPublicKey(
+                            incomingKey,
+                            keyMatch = existingNode.keyMatch && incomingNode.keyMatch,
+                            newPublicKey = incomingNode.newPublicKey ?: existingNode.newPublicKey,
+                        )
+
+                    // A first key, or recovery from a legacy sentinel row.
+                    else -> ResolvedPublicKey(incomingKey, keyMatch = true)
                 }
-            }
 
             existingHasKey -> ResolvedPublicKey(existingKey, existingNode.keyMatch, existingNode.newPublicKey)
 

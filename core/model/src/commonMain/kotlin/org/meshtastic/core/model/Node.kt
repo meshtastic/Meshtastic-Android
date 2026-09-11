@@ -79,6 +79,8 @@ data class Node(
      * records the refusal. See [mismatchKey], which is what the UI asks.
      */
     val keyMatch: Boolean = true,
+    /** The key a mismatch refused, kept so the warning can name it. Null whenever [keyMatch] is true. */
+    val newPublicKey: ByteString? = null,
 ) {
     val capabilities: Capabilities by lazy { Capabilities(metadata?.firmware_version) }
 

@@ -139,11 +139,13 @@ abstract class CommonNodeInfoDaoTest {
         dao.upsert(NodeEntity(num = 1, user = User(id = "!1", public_key = substitute)))
         assertEquals(substitute, dao.getNodeByNum(1)?.node?.newPublicKey)
 
-        // A later packet carrying the key already on file resolves the mismatch, so the refused key goes with it.
+        // The key already on file arriving again settles nothing: the refusal stands until the connected radio
+        // speaks for itself, or the next legitimate beacon would hide the substitute.
         dao.upsert(NodeEntity(num = 1, user = User(id = "!1", public_key = trusted)))
-        val settled = dao.getNodeByNum(1)?.node
-        assertTrue(settled?.keyMatch ?: false)
-        assertEquals(null, settled?.newPublicKey)
+        val stillFlagged = dao.getNodeByNum(1)?.node
+        assertEquals(trusted, stillFlagged?.publicKey)
+        assertFalse(stillFlagged?.keyMatch ?: true)
+        assertEquals(substitute, stillFlagged?.newPublicKey)
     }
 
     @Test

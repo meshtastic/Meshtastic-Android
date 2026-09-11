@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 59,
-    "identityHash": "7b2bc5b2865307ce3dee58fb7873289c",
+    "identityHash": "3a701cc22f7c57b09cac889f64cd9360",
     "entities": [
       {
         "tableName": "my_node",
@@ -86,7 +86,7 @@
       },
       {
         "tableName": "nodes",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`num` INTEGER NOT NULL, `user` BLOB NOT NULL, `long_name` TEXT, `short_name` TEXT, `position` BLOB NOT NULL, `latitude` REAL NOT NULL, `longitude` REAL NOT NULL, `snr` REAL NOT NULL, `rssi` INTEGER NOT NULL, `last_heard` INTEGER NOT NULL, `device_metrics` BLOB NOT NULL, `channel` INTEGER NOT NULL, `via_mqtt` INTEGER NOT NULL, `hops_away` INTEGER NOT NULL, `is_favorite` INTEGER NOT NULL, `is_ignored` INTEGER NOT NULL DEFAULT 0, `is_muted` INTEGER NOT NULL DEFAULT 0, `environment_metrics` BLOB NOT NULL, `power_metrics` BLOB NOT NULL, `air_quality_metrics` BLOB NOT NULL DEFAULT x'', `paxcounter` BLOB NOT NULL, `public_key` BLOB, `notes` TEXT NOT NULL DEFAULT '', `power_channel_labels` TEXT NOT NULL DEFAULT '[]', `manually_verified` INTEGER NOT NULL DEFAULT 0, `node_status` TEXT, `last_transport` INTEGER NOT NULL DEFAULT 0, `has_xeddsa_signed` INTEGER NOT NULL DEFAULT 0, `heard_on_current_lora` INTEGER NOT NULL DEFAULT 1, `key_match` INTEGER NOT NULL DEFAULT 1, PRIMARY KEY(`num`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`num` INTEGER NOT NULL, `user` BLOB NOT NULL, `long_name` TEXT, `short_name` TEXT, `position` BLOB NOT NULL, `latitude` REAL NOT NULL, `longitude` REAL NOT NULL, `snr` REAL NOT NULL, `rssi` INTEGER NOT NULL, `last_heard` INTEGER NOT NULL, `device_metrics` BLOB NOT NULL, `channel` INTEGER NOT NULL, `via_mqtt` INTEGER NOT NULL, `hops_away` INTEGER NOT NULL, `is_favorite` INTEGER NOT NULL, `is_ignored` INTEGER NOT NULL DEFAULT 0, `is_muted` INTEGER NOT NULL DEFAULT 0, `environment_metrics` BLOB NOT NULL, `power_metrics` BLOB NOT NULL, `air_quality_metrics` BLOB NOT NULL DEFAULT x'', `paxcounter` BLOB NOT NULL, `public_key` BLOB, `notes` TEXT NOT NULL DEFAULT '', `power_channel_labels` TEXT NOT NULL DEFAULT '[]', `manually_verified` INTEGER NOT NULL DEFAULT 0, `node_status` TEXT, `last_transport` INTEGER NOT NULL DEFAULT 0, `has_xeddsa_signed` INTEGER NOT NULL DEFAULT 0, `heard_on_current_lora` INTEGER NOT NULL DEFAULT 1, `key_match` INTEGER NOT NULL DEFAULT 1, `new_public_key` BLOB, PRIMARY KEY(`num`))",
         "fields": [
           {
             "fieldPath": "num",
@@ -273,6 +273,11 @@
             "affinity": "INTEGER",
             "notNull": true,
             "defaultValue": "1"
+          },
+          {
+            "fieldPath": "newPublicKey",
+            "columnName": "new_public_key",
+            "affinity": "BLOB"
           }
         ],
         "primaryKey": {
@@ -1822,7 +1827,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7b2bc5b2865307ce3dee58fb7873289c')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3a701cc22f7c57b09cac889f64cd9360')"
     ]
   }
 }
