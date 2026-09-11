@@ -193,7 +193,9 @@ fun NodeSecurityIcon(
         indicator = NodeSecurityIndicator.of(node, isOwnNode),
         modifier = modifier,
         iconSize = iconSize,
-        publicKey = node.user.public_key,
+        // The stored key, same source mismatchKey reads, so a mismatch dialog shows the sentinel not the advertised
+        // key.
+        publicKey = node.publicKey ?: node.user.public_key,
     )
 }
 
