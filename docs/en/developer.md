@@ -30,6 +30,8 @@ Things that trip up first-time contributors — check these before requesting re
 Keep the last 5–8 entries and trim older ones from the bottom.
 -->
 
+**September 2026** — [Documentation Style](developer/documentation-style) — Section 11 of the Meshtastic design standards is now the style guide for `docs/en/`; this page keeps only the repository mechanics, the in-app renderer's admonition form, and the prose rules the standards leave open.
+
 **August 2026** — [Documentation Style](developer/documentation-style) — New page: the house style guide for `docs/en/` prose, with rule IDs, a project word list, and the reasoning behind each convention.
 
 **August 2026** — Map tile sources are one shared catalogue in `feature/map` (`MapTileCatalogue`, `RasterTileSpec`), so both flavors draw the same raster base maps and overlays from one definition.

@@ -2,7 +2,7 @@
 title: Contributing
 parent: Developer Guide
 nav_order: 8
-last_updated: 2026-08-29
+last_updated: 2026-09-10
 description: Branch naming, commit style, PR workflow, and the verification gates a change must pass before merge.
 aliases:
   - contributing
@@ -100,7 +100,7 @@ For docs-specific changes, also run:
 ./gradlew generateDocsBundle validateDocsBundle
 ```
 
-Prose in `docs/en/` follows the house style — see [Documentation Style](documentation-style).
+Prose in `docs/en/` follows Section 11 of the [Meshtastic Client Design Standards](https://github.com/meshtastic/design/blob/master/standards/meshtastic_design_standards_v1_5.md) — see [Documentation Style](documentation-style) for what's specific to this repository.
 
 ## Getting Help
 
