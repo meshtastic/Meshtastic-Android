@@ -30,7 +30,7 @@ import org.meshtastic.desktop.DesktopBuildConfig
  * Synthetic [LifecycleOwner] that stays permanently in [Lifecycle.State.RESUMED]. Replaces Android's
  * `ProcessLifecycleOwner` for desktop.
  */
-private class DesktopProcessLifecycleOwner : LifecycleOwner {
+internal class DesktopProcessLifecycleOwner : LifecycleOwner {
     private val registry = LifecycleRegistry(this)
 
     init {
@@ -61,7 +61,11 @@ class DesktopPlatformModule {
         override val minFwVersion: String = DesktopBuildConfig.MIN_FW_VERSION
     }
 
+    // LifecycleRegistry holds its owner weakly, so the owner is a definition too:
+    // once it is collected, addObserver silently stops registering.
+    @Single internal fun processLifecycleOwner(): DesktopProcessLifecycleOwner = DesktopProcessLifecycleOwner()
+
     @Single
     @Named(PROCESS_LIFECYCLE)
-    fun processLifecycle(): Lifecycle = DesktopProcessLifecycleOwner().lifecycle
+    internal fun processLifecycle(owner: DesktopProcessLifecycleOwner): Lifecycle = owner.lifecycle
 }
