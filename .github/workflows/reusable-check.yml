@@ -106,7 +106,7 @@ jobs:
           install_jetbrains_jdk: 'true'
 
       - name: Lint, Analysis & KMP Smoke Compile
-        run: ./gradlew spotlessCheck detekt androidApp:lintFdroidDebug androidApp:lintGoogleDebug core:barcode:lintFdroidDebug core:barcode:lintGoogleDebug kmpSmokeCompile -Pci=true --continue
+        run: ./gradlew spotlessCheck detekt androidApp:lintFdroidDebug androidApp:lintGoogleDebug core:barcode:lintFdroidDebug core:barcode:lintGoogleDebug -Pci=true --continue
 
   # ── Screenshot Test Validation ──────────────────────────────────────
   screenshot-check:
@@ -197,7 +197,9 @@ jobs:
   # These lists are hand-maintained; pull-request.yml's check-changes job
   # guards them against drift (every module in settings.gradle.kts with test
   # sources must appear here or be explicitly exempted).
-  #   shard-core:    remaining core:* KMP module tests (allTests)
+  #   shard-core:    remaining core:* KMP module tests (allTests), plus kmpSmokeCompile,
+  #                  which is the only iOS compile :core:di, :core:nfc and :core:resources
+  #                  get. It lived in lint-check until a cold build there blew the 30m budget.
   #   shard-feature: feature:* KMP module tests + :core:service
   #   shard-app:     Pure-Android/JVM tests (androidApp, desktopApp,
   #                  core:barcode, feature:widget)
@@ -230,6 +232,7 @@ jobs:
               :core:takserver:allTests
               :core:testing:allTests
               :core:ui:allTests
+              kmpSmokeCompile
             kover: >-
               :core:ble:koverXmlReport
               :core:common:koverXmlReport
