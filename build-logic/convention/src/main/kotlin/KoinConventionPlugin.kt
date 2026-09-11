@@ -29,13 +29,10 @@ class KoinConventionPlugin : Plugin<Project> {
 
             // Configure Koin K2 Compiler Plugin (1.1.0+)
             extensions.configure(KoinGradleExtension::class.java) {
-                // 1.1.0 moved validation to the entry points, which suits this graph's shape, but
-                // its definition index still can't resolve two structural patterns here: modules
-                // reached through FlavorModule's nested `includes` are invisible to it, and DSL
-                // declarations (desktopApp's whole root, workManagerFactory()) are never indexed at
-                // all. Every entry point therefore fails on definitions that exist. Runtime graph
-                // verification is handled by KoinVerificationTest instead.
-                compileSafety.set(false)
+                // Validation is whole-graph and happens at the @KoinApplication entry points, so
+                // it is only enabled there. A library module validates locally, cannot see the
+                // assembled graph, and reports KOIN-D003 on definitions its consumers supply.
+                compileSafety.set(path in KOIN_ENTRY_POINTS)
             }
 
             val koinAnnotations = libs.findLibrary("koin-annotations").get()
@@ -80,3 +77,6 @@ class KoinConventionPlugin : Plugin<Project> {
         }
     }
 }
+
+/** Modules declaring a `@KoinApplication`. A new app target must be added here or it is never validated. */
+private val KOIN_ENTRY_POINTS = setOf(":androidApp", ":desktopApp")

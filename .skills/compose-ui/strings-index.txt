@@ -1723,6 +1723,7 @@ set_your_region
 settings
 ### SHARE ###
 share
+share_by_tap_subtext
 share_channels_qr
 share_connected_node
 share_contact

@@ -2,7 +2,7 @@
 title: Възли
 parent: Ръководство за потребители
 nav_order: 4
-last_updated: 2026-09-09
+last_updated: 2026-09-10
 description: Browse, filter, and sort mesh nodes — view details, signal quality, roles, and quick actions.
 aliases:
   - node-list
@@ -108,7 +108,7 @@ radio is connected and running firmware 2.8 or newer — see
 
 ## Sharing a Contact
 
-On a node's detail screen, tap **Share Contact** to produce a link and a QR code for that node. From the same dialog, **Write to NFC tag** saves the link to a writable NFC tag that anyone can tap to open.
+On a node's detail screen, tap **Share Contact** to produce a link and a QR code for that node. From the same dialog, **Write to NFC tag** saves the link to a writable NFC tag that anyone can tap to open. While that dialog is open the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved.
 
 To add someone else's contact, use the import button on the node list and choose **Scan Shared Contact QR Code**, **Scan Shared Contact NFC**, or **Input Shared Contact URL**. The app asks you to confirm with **Import Shared Contact?**, and warns you when the contact is one you already have.
 

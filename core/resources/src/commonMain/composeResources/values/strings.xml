@@ -1774,6 +1774,7 @@
     <string name="settings">settings</string>
     <!-- SHARE -->
     <string name="share">Share</string>
+    <string name="share_by_tap_subtext">While this is open, another phone can take this by tapping yours. No tag needed.</string>
     <string name="share_channels_qr">Share Channels QR Code</string>
     <string name="share_connected_node">Share Connected Node</string>
     <string name="share_contact">Share Contact</string>

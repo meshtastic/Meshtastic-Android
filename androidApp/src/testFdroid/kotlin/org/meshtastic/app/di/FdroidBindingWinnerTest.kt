@@ -16,27 +16,29 @@
  */
 package org.meshtastic.app.di
 
-import org.koin.core.annotation.Configuration
-import org.koin.core.annotation.Module
-import org.koin.core.annotation.Single
-import org.meshtastic.feature.discovery.ai.AlgorithmicSummaryProvider
-import org.meshtastic.feature.discovery.ai.DiscoverySummaryAiProvider
-import org.meshtastic.feature.docs.ai.AIDocAssistant
-import org.meshtastic.feature.docs.ai.KeywordFallbackAssistant
+import org.koin.plugin.module.dsl.koinApplication
 import org.meshtastic.feature.docs.translation.DocTranslationService
 import org.meshtastic.feature.docs.translation.NoOpDocTranslator
 import org.meshtastic.feature.messaging.translation.MessageTranslationService
 import org.meshtastic.feature.messaging.translation.NoOpMessageTranslator
+import kotlin.test.Test
+import kotlin.test.assertIs
 
-/** Provides keyword-only fallback AI assistant for the F-Droid flavor (no on-device model). */
-@Module
-@Configuration
-class FdroidAiModule {
-    @Single fun aiDocAssistant(fallback: KeywordFallbackAssistant): AIDocAssistant = fallback
+class FdroidBindingWinnerTest {
 
-    @Single fun discoverySummaryAiProvider(fallback: AlgorithmicSummaryProvider): DiscoverySummaryAiProvider = fallback
-
-    @Single fun docTranslationService(): DocTranslationService = NoOpDocTranslator()
-
-    @Single fun messageTranslationService(): MessageTranslationService = NoOpMessageTranslator()
+    @Test
+    fun `flavor bindings win over the shared graph`() {
+        // The flavor modules are @Configuration, which loads them before the ones listed in @KoinApplication, and
+        // Koin is last-wins. KoinVerificationTest only checks definitions exist, never which one survives, so a
+        // core-level default added later would silently take these over. Only the Fdroid no-ops are asserted:
+        // the Google flavor's MlKitMessageTranslator builds a RemoteModelManager in a field initializer.
+        val app = koinApplication<AndroidKoinApp>()
+        try {
+            val koin = app.koin
+            assertIs<NoOpMessageTranslator>(koin.get<MessageTranslationService>())
+            assertIs<NoOpDocTranslator>(koin.get<DocTranslationService>())
+        } finally {
+            app.close()
+        }
+    }
 }

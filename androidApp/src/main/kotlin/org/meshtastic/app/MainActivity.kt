@@ -19,6 +19,7 @@ package org.meshtastic.app
 import android.app.PendingIntent
 import android.app.TaskStackBuilder
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.hardware.usb.UsbManager
 import android.net.Uri
@@ -41,7 +42,9 @@ import androidx.compose.runtime.remember
 import androidx.core.content.IntentCompat
 import androidx.core.net.toUri
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.compose.currentStateAsState
 import androidx.lifecycle.lifecycleScope
 import co.touchlab.kermit.Logger
 import com.eygraber.uri.toKmpUri
@@ -59,6 +62,7 @@ import org.meshtastic.app.ui.MainScreen
 import org.meshtastic.core.barcode.rememberBarcodeScanner
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.network.repository.UsbRepository
+import org.meshtastic.core.nfc.NfcEmulatorEffect
 import org.meshtastic.core.nfc.NfcScannerEffect
 import org.meshtastic.core.nfc.NfcWriterEffect
 import org.meshtastic.core.resources.Res
@@ -81,6 +85,8 @@ import org.meshtastic.core.ui.util.LocalEventBranding
 import org.meshtastic.core.ui.util.LocalInlineMapProvider
 import org.meshtastic.core.ui.util.LocalMapMainScreenProvider
 import org.meshtastic.core.ui.util.LocalMapViewProvider
+import org.meshtastic.core.ui.util.LocalNfcEmulationSupported
+import org.meshtastic.core.ui.util.LocalNfcEmulatorProvider
 import org.meshtastic.core.ui.util.LocalNfcScannerProvider
 import org.meshtastic.core.ui.util.LocalNfcScannerSupported
 import org.meshtastic.core.ui.util.LocalNfcWriterProvider
@@ -224,6 +230,17 @@ class MainActivity : AppCompatActivity() {
             LocalNfcWriterProvider provides { url, onResult, onDisabled -> NfcWriterEffect(url, onResult, onDisabled) },
             LocalBarcodeScannerSupported provides true,
             LocalNfcScannerSupported provides true,
+            // Arm card emulation only while the app is actually in the foreground. A share dialog left open behind a
+            // home-press stays composed, and a channel URL carries the channel PSK. This reads the activity's own
+            // lifecycle, not LocalLifecycleOwner: the effect is composed inside a Dialog, whose own lifecycle stays
+            // RESUMED when the activity is backgrounded.
+            LocalNfcEmulatorProvider provides
+                { url ->
+                    val lifecycleState by lifecycle.currentStateAsState()
+                    if (lifecycleState.isAtLeast(Lifecycle.State.RESUMED)) NfcEmulatorEffect(url)
+                },
+            LocalNfcEmulationSupported provides
+                packageManager.hasSystemFeature(PackageManager.FEATURE_NFC_HOST_CARD_EMULATION),
             LocalAnalyticsIntroProvider provides { AnalyticsIntro() },
             LocalMapViewProvider provides getMapViewProvider(),
             LocalSitePlannerAvailable provides true,
