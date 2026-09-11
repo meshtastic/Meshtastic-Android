@@ -2,7 +2,7 @@
 title: MQTT
 parent: Kasutusjuhend
 nav_order: 11
-last_updated: 2026-08-30
+last_updated: 2026-09-11
 description: Silda oma võrk internetiga – MQTT maakleri seadistamine, krüpteerimiskihid ja kaardiaruandlus.
 aliases:
   - mqtt
@@ -25,7 +25,7 @@ MQTT moodul ühendab sinu sõlme MQTT vahendajaga, võimaldades:
 
 ## Kuidas see toimib
 
-```
+```text
 [Your Node] → Radio → [Gateway Node with Wi-Fi] → MQTT Broker → [Remote Gateway] → Radio → [Remote Node]
 ```
 

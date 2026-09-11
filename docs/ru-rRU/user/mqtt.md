@@ -2,7 +2,7 @@
 title: MQTT
 parent: Руководство пользователя
 nav_order: 11
-last_updated: 2026-08-30
+last_updated: 2026-09-11
 description: Подключите свою mesh-сеть к интернету — настройка MQTT-брокера, уровни шифрования и отчётность на карте.
 aliases:
   - mqtt
@@ -25,7 +25,7 @@ MQTT соединяет твою mesh-сеть Meshtastic с интернето�
 
 ## Как это работает
 
-```
+```text
 [Your Node] → Radio → [Gateway Node with Wi-Fi] → MQTT Broker → [Remote Gateway] → Radio → [Remote Node]
 ```
 

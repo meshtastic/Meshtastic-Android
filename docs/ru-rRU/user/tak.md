@@ -2,7 +2,7 @@
 title: Интеграция TAK
 parent: Руководство пользователя
 nav_order: 10
-last_updated: 2026-08-30
+last_updated: 2026-09-11
 description: Взаимодействие с ATAK и WinTAK — передача данных CoT о местоположении, роли TAK и настройка плагина.
 aliases:
   - tak
@@ -36,7 +36,7 @@ Meshtastic integrates with the Team Awareness Kit (TAK) ecosystem, enabling inte
 > ⚠️ **Warning:** The old **Meshtastic ATAK Plugin** is no longer part of this path and cannot
 > work. It bridged through the cross-process AIDL API, which was removed in app 2.8.0; the mesh
 > service is now in-process only. Do not install it. Interop today runs over the app's own local
-> TAK server plus the Mesh to CoT Converter, both described below, with stock ATAK/iTAK/WinTAK.
+> TAK server plus the Mesh to CoT Converter, both described in the following sections, with stock ATAK/iTAK/WinTAK.
 
 ### Настройки
 

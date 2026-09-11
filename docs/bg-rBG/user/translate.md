@@ -2,7 +2,7 @@
 title: Преведете приложението
 parent: Ръководство за потребителя
 nav_order: 17
-last_updated: 2026-08-30
+last_updated: 2026-09-11
 description: Как се превеждат приложението и документацията му чрез Crowdin, както и насоки за принос към преводите.
 aliases:
   - translate
@@ -45,7 +45,7 @@ aliases:
 
 The Android app uses **Compose Multiplatform resources** for all user-visible strings:
 
-```
+```text
 core/resources/src/commonMain/composeResources/
 ├── values/              ← English (default)
 │   └── strings.xml
@@ -58,7 +58,7 @@ core/resources/src/commonMain/composeResources/
 
 In-app documentation follows a similar pattern under `docs/`:
 
-```
+```text
 docs/
 ├── en/user/             ← English source (default)
 │   ├── onboarding.md

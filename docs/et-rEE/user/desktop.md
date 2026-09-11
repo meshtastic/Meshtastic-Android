@@ -2,7 +2,7 @@
 title: Desktop App
 parent: Kasutusjuhend
 nav_order: 14
-last_updated: 2026-08-30
+last_updated: 2026-09-11
 description: Meshtastic arvuti rakendus pakub samu võrgusuhtluse funktsioone Linuxis, macOS-is ja Windowsis.
 aliases:
   - töölaud
@@ -58,20 +58,20 @@ Bluetooth Low Energy is supported on desktop via the [Kable](https://github.com/
 
 ## Feature Parity
 
-| Feature                                                | Android | Desktop | Sõnumid                                                                                                                                                                                               |
-| ------------------------------------------------------ | ------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Messaging                                              | ✓       | ✓       | Full parity                                                                                                                                                                                           |
-| Sõlmede loend                                          | ✓       | ✓       | Full parity                                                                                                                                                                                           |
-| Kaart                                                  | ✓       | ✓       | Interactive MapLibre map, with base map and overlay pickers and custom tile sources. No offline downloads or local `.mbtiles` archives                                                |
-| Map layers (`.kml`/`.kmz`/GeoJSON)  | ✓       | ✓       | Same layer store and sheet as Android; imported files draw on the desktop map                                                                                                                         |
-| Saidi planeerija                                       | ✓       | ✓\*     | \*Opens in your browser on desktop; the estimate is not drawn on the desktop map                                                                                                                      |
-| Sätted                                                 | ✓       | ✓       | Full parity                                                                                                                                                                                           |
-| Sinihammas (BLE)                    | ✓       | ✓       | Kable'i kaudu töölauale                                                                                                                                                                               |
-| Püsivara uuendus                                       | ✓       | ✓       | In-app USB, BLE, and Wi-Fi (ESP32) update work the same as Android. The USB maintenance flow — nRF52/RP2040 factory erase and bootloader upgrade — is Android-only |
-| Märguanded                                             | ✓       | ✓       | Emakeelsed op.süsteemi märguanded                                                                                                                                                     |
-| Widgets                                                | ✓       | ✗       | Android-only                                                                                                                                                                                          |
-| TI assistent (Chirpy)               | ✓\*     | ✗       | Google flavor Android only                                                                                                                                                                            |
-| Rakenduse funktsioonid (süstemi TI) | ✓†      | ✗       | Google flavor Android only                                                                                                                                                                            |
+| Feature                                                | Android | Desktop | Sõnumid                                                                                                                                                                                                                                         |
+| ------------------------------------------------------ | ------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Messaging                                              | ✓       | ✓       | Full parity                                                                                                                                                                                                                                     |
+| Sõlmede loend                                          | ✓       | ✓       | Full parity                                                                                                                                                                                                                                     |
+| Kaart                                                  | ✓       | ✓       | Interactive MapLibre map, with base map and overlay pickers and custom tile sources. Offline terrain (hillshade and contours) can be downloaded; offline base-map packs and local `.mbtiles` archives cannot |
+| Map layers (`.kml`/`.kmz`/GeoJSON)  | ✓       | ✓       | Same layer store and sheet as Android; imported files draw on the desktop map                                                                                                                                                                   |
+| Saidi planeerija                                       | ✓       | ✓\*     | \*Opens in your browser on desktop; the estimate is not drawn on the desktop map                                                                                                                                                                |
+| Sätted                                                 | ✓       | ✓       | Full parity                                                                                                                                                                                                                                     |
+| Sinihammas (BLE)                    | ✓       | ✓       | Kable'i kaudu töölauale                                                                                                                                                                                                                         |
+| Püsivara uuendus                                       | ✓       | ✓       | In-app USB, BLE, and Wi-Fi (ESP32) update work the same as Android. The USB maintenance flow — nRF52/RP2040 factory erase and bootloader upgrade — is Android-only                                           |
+| Märguanded                                             | ✓       | ✓       | Emakeelsed op.süsteemi märguanded                                                                                                                                                                                               |
+| Widgets                                                | ✓       | ✗       | Android-only                                                                                                                                                                                                                                    |
+| TI assistent (Chirpy)               | ✓\*     | ✗       | Google flavor Android only                                                                                                                                                                                                                      |
+| Rakenduse funktsioonid (süstemi TI) | ✓†      | ✗       | Google flavor Android only                                                                                                                                                                                                                      |
 
 \*Chirpy tehisintellekti jaoks on vaja Google'i eriversioonidel Android 14+ ja toetatud riistvaraga.
 
@@ -122,7 +122,7 @@ Individual doc pages render with full formatting:
 
 ## Building from Source
 
-```bash
+```shell
 git clone https://github.com/meshtastic/Meshtastic-Android.git
 cd Meshtastic-Android
 ./gradlew :desktopApp:run
@@ -135,7 +135,7 @@ Nõuded:
 
 ## Known Limitations
 
-- Offline tile downloads and local `.mbtiles` archives are not available on desktop.
+- Offline base-map downloads and local `.mbtiles` archives are not available on desktop. Offline terrain is — see [Map & Waypoints](map-and-waypoints).
 - `.kml`/`.kmz`/GeoJSON layer import works — see
   [Map & Waypoints](map-and-waypoints#map-layers). Site Planner opens in your browser
   rather than in the app; to bring its coverage estimate onto the map, click the transmitter pin
