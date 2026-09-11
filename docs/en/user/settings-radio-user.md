@@ -83,7 +83,7 @@ On **Settings → LoRa**.
 | Transmit Power | Transmission power (dBm); 0 = max allowed for region | 0 (region max) |
 | Frequency Override | Overrides the computed operating frequency outright (MHz). It does not offset the calculated value — leave at 0 unless you know you need a specific frequency | 0 (use calculated) |
 | Use Preset | On by default. Turn it off to set Spread Factor, Coding Rate and Bandwidth by hand instead of taking them from the modem preset | On |
-| Spread Factor | Manual mode only: 5–12. Higher spreads further but slower. Spread factors 5 and 6 need a second-generation LoRa chip (SX126x, LR11xx, SX128x); on SX127x hardware the firmware clamps them to 7 | From preset |
+| Spread Factor | Manual mode only: 5–12. Higher spreads further but slower. Spread factors 5 and 6 are only available on second-generation LoRa chips (SX126x, LR11xx, SX128x) | From preset |
 | Coding Rate | Manual mode only: 5–8. More redundancy costs airtime | From preset |
 | Bandwidth | Manual mode only: the channel bandwidth in kHz, typed in directly. On the 2.4 GHz region the app offers a list of the bandwidths your radio supports instead, and a stored value that is not on that list shows as *Unsupported* and blocks saving until you pick a supported one | From preset |
 | Frequency Slot | Which slot within the region's band to use. 0 derives it from the primary channel name | 0 (automatic) |
