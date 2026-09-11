@@ -33,8 +33,13 @@ import org.meshtastic.proto.User
  * person is the in-person exchange. Relaying someone else's contact only passes on what was already recorded, it never
  * asserts verification on their behalf.
  */
-fun Node.toSharedContact(isOwnContact: Boolean = false): SharedContact =
-    SharedContact(node_num = num, user = user, manually_verified = isOwnContact || manuallyVerified)
+fun Node.toSharedContact(isOwnContact: Boolean = false): SharedContact = SharedContact.Builder()
+    .also { wb ->
+        wb.node_num = num
+        wb.user = user
+        wb.manually_verified = isOwnContact || manuallyVerified
+    }
+    .build()
 
 /**
  * Return a [SharedContact] that represents the contact encoded by the URL.
