@@ -13,10 +13,10 @@ reviews:
   auto_review:
     enabled: true
     drafts: false
-    # Review once when the PR goes ready, then on demand via `@coderabbitai review`.
-    # Re-reviewing every push turned 6-commit PRs into 8 review rounds, because each
-    # fix commit reopened a full pass. Batch the fixes, push, then ask for one re-review.
-    auto_incremental_review: false
+    # Review each push incrementally. With this off, a push got no review at all and the
+    # only way to re-review was `@coderabbitai full review`, which re-reads the whole diff
+    # and surfaces new findings on unchanged lines every round.
+    auto_incremental_review: true
     ignore_usernames:
       - renovate
       - renovate[bot]
