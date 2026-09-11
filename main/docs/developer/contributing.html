@@ -45,7 +45,7 @@ Examples:
 ## Commit Messages
 
 Follow conventional commit style:
-```
+```text
 feat(docs): add in-app documentation browser
 fix(ble): handle reconnection timeout
 refactor(navigation): migrate to typed routes
@@ -73,7 +73,7 @@ Before submitting:
 - **Line length:** 120 characters maximum
 
 Run formatting:
-```bash
+```shell
 ./gradlew spotlessApply
 ```
 
@@ -88,12 +88,12 @@ Run formatting:
 ## Verification
 
 Full pre-merge verification:
-```bash
+```shell
 ./gradlew spotlessCheck detekt kmpSmokeCompile test allTests
 ```
 
 For docs-specific changes, also run:
-```bash
+```shell
 ./gradlew generateDocsBundle validateDocsBundle
 ```
 
