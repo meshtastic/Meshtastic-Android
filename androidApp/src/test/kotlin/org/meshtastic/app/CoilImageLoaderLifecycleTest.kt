@@ -49,7 +49,10 @@ class CoilImageLoaderLifecycleTest {
 /**
  * Boots the production Application with its background init suppressed: what this asserts is the Koin/Coil wiring, and
  * the real [MeshUtilApplication.startBackgroundInit] opens a database whose connection can outlive the test.
+ *
+ * Must not be private: Robolectric instantiates the `@Config` application through `AppComponentFactory`, whose
+ * `Class.newInstance()` call cannot reach a package-private class.
  */
-private class ImageLoaderOnlyApplication : MeshUtilApplication() {
+internal class ImageLoaderOnlyApplication : MeshUtilApplication() {
     override fun startBackgroundInit() = Unit
 }
