@@ -197,7 +197,7 @@ fun NodeListScreen(
 
     var showShareContact by remember { mutableStateOf(false) }
     if (showShareContact) {
-        SharedContactDialog(contact = ourNode, onDismiss = { showShareContact = false })
+        SharedContactDialog(contact = ourNode, onDismiss = { showShareContact = false }, isOwnContact = true)
     }
 
     Scaffold(

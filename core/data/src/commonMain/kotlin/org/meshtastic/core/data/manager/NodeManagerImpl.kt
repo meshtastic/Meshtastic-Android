@@ -1127,14 +1127,21 @@ class NodeManagerImpl(
             node.copy(channel = channel, manuallyVerified = manuallyVerified)
         } else {
             val incomingKey = resolveValidatedPublicKeyHint(p.public_key)
-            val sanitizedUser = if (incomingKey == null) p.copy(public_key = ByteString.EMPTY) else p
             // Prefer node.publicKey when valid (the authoritative stored key); fall back to node.user.public_key.
             val existingKey = resolveNodePublicKeyHint(node)
-            val keyMatch = existingKey == null || existingKey == incomingKey
-            val newUser = if (keyMatch) sanitizedUser else sanitizedUser.copy(public_key = ByteString.EMPTY)
+            // Only two valid, different keys are a mismatch. A packet with no usable key says nothing about the one
+            // on file, so it neither flags nor clears anything, and the stored key stays.
+            val keyMismatch = existingKey != null && incomingKey != null && existingKey != incomingKey
+            // First-wins, matching the DAO and the firmware: a different key for a node we already hold one for is
+            // refused and recorded, never applied. Clearing the stored key here would break PKC direct messages to
+            // that contact on the word of whoever sent the substitute.
+            val keptKey = if (incomingKey == null || keyMismatch) existingKey else incomingKey
+            val newUser = p.copy(public_key = keptKey ?: ByteString.EMPTY)
             node.copy(
                 user = newUser,
                 publicKey = newUser.public_key,
+                keyMatch = node.keyMatch && !keyMismatch,
+                newPublicKey = if (keyMismatch) incomingKey else node.newPublicKey,
                 channel = channel,
                 manuallyVerified = manuallyVerified,
             )
