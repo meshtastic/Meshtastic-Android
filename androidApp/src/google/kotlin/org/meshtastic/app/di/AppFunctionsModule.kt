@@ -17,6 +17,7 @@
 package org.meshtastic.app.di
 
 import android.content.Context
+import org.koin.core.annotation.Configuration
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
@@ -29,6 +30,7 @@ import org.meshtastic.core.repository.AppFunctionsPrefs
 
 /** Provides AppFunctions integration for the Google flavor. */
 @Module
+@Configuration
 class AppFunctionsModule {
     @Single
     fun meshtasticAppFunctions(provider: AiFunctionProvider): MeshtasticAppFunctions = MeshtasticAppFunctions(provider)

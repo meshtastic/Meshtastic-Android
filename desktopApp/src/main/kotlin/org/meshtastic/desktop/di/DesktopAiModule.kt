@@ -14,9 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.app.di
+package org.meshtastic.desktop.di
 
-import org.koin.core.annotation.Configuration
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
 import org.meshtastic.feature.discovery.ai.AlgorithmicSummaryProvider
@@ -28,10 +27,10 @@ import org.meshtastic.feature.docs.translation.NoOpDocTranslator
 import org.meshtastic.feature.messaging.translation.MessageTranslationService
 import org.meshtastic.feature.messaging.translation.NoOpMessageTranslator
 
-/** Provides keyword-only fallback AI assistant for the F-Droid flavor (no on-device model). */
+/** Keyword-only fallback AI assistant and no-op translators for Desktop (no on-device model). */
 @Module
-@Configuration
-class FdroidAiModule {
+class DesktopAiModule {
+
     @Single fun aiDocAssistant(fallback: KeywordFallbackAssistant): AIDocAssistant = fallback
 
     @Single fun discoverySummaryAiProvider(fallback: AlgorithmicSummaryProvider): DiscoverySummaryAiProvider = fallback

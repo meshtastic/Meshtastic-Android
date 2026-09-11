@@ -39,7 +39,7 @@ import androidx.compose.ui.window.Notification as ComposeNotification
  * Native sends run on [Dispatchers.IO] within the suspending [dispatch] call, so the returned Boolean reflects the
  * resolved outcome (native success, or acceptance by the tray fallback) rather than an optimistic guess.
  *
- * Registered manually in `desktopPlatformStubsModule` -- do **not** add `@Single` to avoid double-registration with the
+ * Registered manually in `DesktopRuntimeModule` -- do **not** add `@Single` to avoid double-registration with the
  * `@ComponentScan("org.meshtastic.desktop")` in [DesktopDiModule][org.meshtastic.desktop.di.DesktopDiModule].
  */
 class DesktopNotificationManager(
