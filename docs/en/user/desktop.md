@@ -62,7 +62,7 @@ Bluetooth Low Energy is supported on desktop via the [Kable](https://github.com/
 |---------|---------|---------|-------|
 | Messaging | ✓ | ✓ | Full parity |
 | Node List | ✓ | ✓ | Full parity |
-| Map | ✓ | ✓ | Interactive MapLibre map, with base map and overlay pickers and custom tile sources. No offline downloads or local `.mbtiles` archives |
+| Map | ✓ | ✓ | Interactive MapLibre map, with base map and overlay pickers and custom tile sources. Offline terrain (hillshade and contours) can be downloaded; offline base-map packs and local `.mbtiles` archives cannot |
 | Map layers (`.kml`/`.kmz`/GeoJSON) | ✓ | ✓ | Same layer store and sheet as Android; imported files draw on the desktop map |
 | Site Planner | ✓ | ✓* | *Opens in your browser on desktop; the estimate is not drawn on the desktop map |
 | Settings | ✓ | ✓ | Full parity |
@@ -134,7 +134,7 @@ Requirements:
 
 ## Known Limitations
 
-- Offline tile downloads and local `.mbtiles` archives are not available on desktop.
+- Offline base-map downloads and local `.mbtiles` archives are not available on desktop. Offline terrain is — see [Map & Waypoints](map-and-waypoints).
 - `.kml`/`.kmz`/GeoJSON layer import works — see
   [Map & Waypoints](map-and-waypoints#map-layers). Site Planner opens in your browser
   rather than in the app; to bring its coverage estimate onto the map, click the transmitter pin

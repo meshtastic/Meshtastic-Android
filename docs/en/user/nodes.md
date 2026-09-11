@@ -80,7 +80,7 @@ Each node carries one security icon beside its name in the node list. Tap it to 
 | Icon | Meaning | Shown for |
 |------|---------|-----------|
 | Person with a shield check (green) | **Verified contact** — you verified this node's key in person by exchanging contact QR codes, so its identity is confirmed. The strongest trust the list shows | Any firmware version |
-| Nodes icon with a shield check (green) | **Signed node** — your node verified this node's signed broadcasts with its identity key, so its identity is consistent over time, but you have not verified it in person | Firmware 2.8 or newer, and any node whose signature your node has verified |
+| Nodes icon with a shield check (green) | **Signed node** — this node signs its broadcasts with its identity key, so its identity is consistent over time, but you have not verified it in person. On firmware 2.8 the icon appears from the version alone, before any signed broadcast has been heard | Firmware 2.8 or newer, and any node whose signed broadcast your node has verified |
 | 🔒 Closed lock | A public key is on file and matches, so direct messages to this node are encrypted | Firmware before 2.8, or no reported version |
 | 🔓 Open lock | No public key has been received for this node, so it cannot be direct messaged — use **Request User Info** on the node detail page to ask for one | Firmware before 2.8, or no reported version |
 | ⚠️ Mismatch | **Public key mismatch** — a different key arrived for this node after one was stored. Investigate before trusting | Any firmware version |
