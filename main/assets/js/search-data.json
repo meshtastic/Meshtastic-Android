@@ -25684,7 +25684,7 @@
   },"3669": {
     "doc": "Nodes",
     "title": "Sharing a Contact",
-    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Write to NFC tag saves the link to a writable NFC tag that anyone can tap to open. While that dialog is open the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
+    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Share link opens the Android share sheet (on desktop it copies the link instead), Write to NFC tag saves it to a writable NFC tag, and Copy puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
     "url": "/Meshtastic-Android/main/ca-rES/user/nodes.html#sharing-a-contact",
     
     "relUrl": "/ca-rES/user/nodes.html#sharing-a-contact"
@@ -25747,7 +25747,7 @@
   },"3678": {
     "doc": "Noder",
     "title": "Sharing a Contact",
-    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Write to NFC tag saves the link to a writable NFC tag that anyone can tap to open. While that dialog is open the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
+    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Share link opens the Android share sheet (on desktop it copies the link instead), Write to NFC tag saves it to a writable NFC tag, and Copy puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
     "url": "/Meshtastic-Android/main/sv-rSE/user/nodes.html#sharing-a-contact",
     
     "relUrl": "/sv-rSE/user/nodes.html#sharing-a-contact"
@@ -25810,7 +25810,7 @@
   },"3687": {
     "doc": "Knoten",
     "title": "Sharing a Contact",
-    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Write to NFC tag saves the link to a writable NFC tag that anyone can tap to open. While that dialog is open the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
+    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Share link opens the Android share sheet (on desktop it copies the link instead), Write to NFC tag saves it to a writable NFC tag, and Copy puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
     "url": "/Meshtastic-Android/main/de-rDE/user/nodes.html#sharing-a-contact",
     
     "relUrl": "/de-rDE/user/nodes.html#sharing-a-contact"
@@ -25873,7 +25873,7 @@
   },"3696": {
     "doc": "Nodes",
     "title": "Sharing a Contact",
-    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Write to NFC tag saves the link to a writable NFC tag that anyone can tap to open. While that dialog is open the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
+    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Share link opens the Android share sheet (on desktop it copies the link instead), Write to NFC tag saves it to a writable NFC tag, and Copy puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
     "url": "/Meshtastic-Android/main/nl-rNL/user/nodes.html#sharing-a-contact",
     
     "relUrl": "/nl-rNL/user/nodes.html#sharing-a-contact"
@@ -25936,7 +25936,7 @@
   },"3705": {
     "doc": "Nodes",
     "title": "Sharing a Contact",
-    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Write to NFC tag saves the link to a writable NFC tag that anyone can tap to open. While that dialog is open the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
+    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Share link opens the Android share sheet (on desktop it copies the link instead), Write to NFC tag saves it to a writable NFC tag, and Copy puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
     "url": "/Meshtastic-Android/main/ga-rIE/user/nodes.html#sharing-a-contact",
     
     "relUrl": "/ga-rIE/user/nodes.html#sharing-a-contact"
@@ -25999,7 +25999,7 @@
   },"3714": {
     "doc": "Węzły",
     "title": "Sharing a Contact",
-    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Write to NFC tag saves the link to a writable NFC tag that anyone can tap to open. While that dialog is open the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
+    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Share link opens the Android share sheet (on desktop it copies the link instead), Write to NFC tag saves it to a writable NFC tag, and Copy puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
     "url": "/Meshtastic-Android/main/pl-rPL/user/nodes.html#sharing-a-contact",
     
     "relUrl": "/pl-rPL/user/nodes.html#sharing-a-contact"
@@ -26062,7 +26062,7 @@
   },"3723": {
     "doc": "Чворови",
     "title": "Sharing a Contact",
-    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Write to NFC tag saves the link to a writable NFC tag that anyone can tap to open. While that dialog is open the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
+    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Share link opens the Android share sheet (on desktop it copies the link instead), Write to NFC tag saves it to a writable NFC tag, and Copy puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
     "url": "/Meshtastic-Android/main/sr-rLatn/user/nodes.html#sharing-a-contact",
     
     "relUrl": "/sr-rLatn/user/nodes.html#sharing-a-contact"
@@ -26125,7 +26125,7 @@
   },"3732": {
     "doc": "Nodes",
     "title": "Sharing a Contact",
-    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Write to NFC tag saves the link to a writable NFC tag that anyone can tap to open. While that dialog is open the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
+    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Share link opens the Android share sheet (on desktop it copies the link instead), Write to NFC tag saves it to a writable NFC tag, and Copy puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
     "url": "/Meshtastic-Android/main/lt-rLT/user/nodes.html#sharing-a-contact",
     
     "relUrl": "/lt-rLT/user/nodes.html#sharing-a-contact"
@@ -26188,7 +26188,7 @@
   },"3741": {
     "doc": "节点",
     "title": "Sharing a Contact",
-    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Write to NFC tag saves the link to a writable NFC tag that anyone can tap to open. While that dialog is open the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
+    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Share link opens the Android share sheet (on desktop it copies the link instead), Write to NFC tag saves it to a writable NFC tag, and Copy puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
     "url": "/Meshtastic-Android/main/zh-rCN/user/nodes.html#sharing-a-contact",
     
     "relUrl": "/zh-rCN/user/nodes.html#sharing-a-contact"
@@ -26251,7 +26251,7 @@
   },"3750": {
     "doc": "Чворови",
     "title": "Sharing a Contact",
-    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Write to NFC tag saves the link to a writable NFC tag that anyone can tap to open. While that dialog is open the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
+    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Share link opens the Android share sheet (on desktop it copies the link instead), Write to NFC tag saves it to a writable NFC tag, and Copy puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
     "url": "/Meshtastic-Android/main/srp/user/nodes.html#sharing-a-contact",
     
     "relUrl": "/srp/user/nodes.html#sharing-a-contact"
@@ -26314,7 +26314,7 @@
   },"3759": {
     "doc": "ノード",
     "title": "Sharing a Contact",
-    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Write to NFC tag saves the link to a writable NFC tag that anyone can tap to open. While that dialog is open the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
+    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Share link opens the Android share sheet (on desktop it copies the link instead), Write to NFC tag saves it to a writable NFC tag, and Copy puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
     "url": "/Meshtastic-Android/main/ja-rJP/user/nodes.html#sharing-a-contact",
     
     "relUrl": "/ja-rJP/user/nodes.html#sharing-a-contact"
@@ -26377,7 +26377,7 @@
   },"3768": {
     "doc": "節點",
     "title": "Sharing a Contact",
-    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Write to NFC tag saves the link to a writable NFC tag that anyone can tap to open. While that dialog is open the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
+    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Share link opens the Android share sheet (on desktop it copies the link instead), Write to NFC tag saves it to a writable NFC tag, and Copy puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
     "url": "/Meshtastic-Android/main/zh-rTW/user/nodes.html#sharing-a-contact",
     
     "relUrl": "/zh-rTW/user/nodes.html#sharing-a-contact"
@@ -26440,7 +26440,7 @@
   },"3777": {
     "doc": "Uzly",
     "title": "Sharing a Contact",
-    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Write to NFC tag saves the link to a writable NFC tag that anyone can tap to open. While that dialog is open the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
+    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Share link opens the Android share sheet (on desktop it copies the link instead), Write to NFC tag saves it to a writable NFC tag, and Copy puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
     "url": "/Meshtastic-Android/main/cs-rCZ/user/nodes.html#sharing-a-contact",
     
     "relUrl": "/cs-rCZ/user/nodes.html#sharing-a-contact"
@@ -26503,7 +26503,7 @@
   },"3786": {
     "doc": "Nodes",
     "title": "Sharing a Contact",
-    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Write to NFC tag saves the link to a writable NFC tag that anyone can tap to open. While that dialog is open the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
+    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Share link opens the Android share sheet (on desktop it copies the link instead), Write to NFC tag saves it to a writable NFC tag, and Copy puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
     "url": "/Meshtastic-Android/main/sk-rSK/user/nodes.html#sharing-a-contact",
     
     "relUrl": "/sk-rSK/user/nodes.html#sharing-a-contact"
@@ -26566,7 +26566,7 @@
   },"3795": {
     "doc": "Ноды",
     "title": "Sharing a Contact",
-    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Write to NFC tag saves the link to a writable NFC tag that anyone can tap to open. While that dialog is open the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
+    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Share link opens the Android share sheet (on desktop it copies the link instead), Write to NFC tag saves it to a writable NFC tag, and Copy puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
     "url": "/Meshtastic-Android/main/ru-rRU/user/nodes.html#sharing-a-contact",
     
     "relUrl": "/ru-rRU/user/nodes.html#sharing-a-contact"
@@ -26629,7 +26629,7 @@
   },"3804": {
     "doc": "Laitteet",
     "title": "Sharing a Contact",
-    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Write to NFC tag saves the link to a writable NFC tag that anyone can tap to open. While that dialog is open the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
+    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Share link opens the Android share sheet (on desktop it copies the link instead), Write to NFC tag saves it to a writable NFC tag, and Copy puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
     "url": "/Meshtastic-Android/main/fi-rFI/user/nodes.html#sharing-a-contact",
     
     "relUrl": "/fi-rFI/user/nodes.html#sharing-a-contact"
@@ -26692,7 +26692,7 @@
   },"3813": {
     "doc": "Nodelar",
     "title": "Sharing a Contact",
-    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Write to NFC tag saves the link to a writable NFC tag that anyone can tap to open. While that dialog is open the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
+    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Share link opens the Android share sheet (on desktop it copies the link instead), Write to NFC tag saves it to a writable NFC tag, and Copy puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
     "url": "/Meshtastic-Android/main/tr-rTR/user/nodes.html#sharing-a-contact",
     
     "relUrl": "/tr-rTR/user/nodes.html#sharing-a-contact"
@@ -26755,7 +26755,7 @@
   },"3822": {
     "doc": "Noduri",
     "title": "Sharing a Contact",
-    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Write to NFC tag saves the link to a writable NFC tag that anyone can tap to open. While that dialog is open the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
+    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Share link opens the Android share sheet (on desktop it copies the link instead), Write to NFC tag saves it to a writable NFC tag, and Copy puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
     "url": "/Meshtastic-Android/main/ro-rRO/user/nodes.html#sharing-a-contact",
     
     "relUrl": "/ro-rRO/user/nodes.html#sharing-a-contact"
@@ -26818,7 +26818,7 @@
   },"3831": {
     "doc": "Nodes",
     "title": "Sharing a Contact",
-    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Write to NFC tag saves the link to a writable NFC tag that anyone can tap to open. While that dialog is open the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
+    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Share link opens the Android share sheet (on desktop it copies the link instead), Write to NFC tag saves it to a writable NFC tag, and Copy puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
     "url": "/Meshtastic-Android/main/sl-rSI/user/nodes.html#sharing-a-contact",
     
     "relUrl": "/sl-rSI/user/nodes.html#sharing-a-contact"
@@ -26881,7 +26881,7 @@
   },"3840": {
     "doc": "Nodes",
     "title": "Sharing a Contact",
-    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Write to NFC tag saves the link to a writable NFC tag that anyone can tap to open. While that dialog is open the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
+    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Share link opens the Android share sheet (on desktop it copies the link instead), Write to NFC tag saves it to a writable NFC tag, and Copy puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
     "url": "/Meshtastic-Android/main/pt-rPT/user/nodes.html#sharing-a-contact",
     
     "relUrl": "/pt-rPT/user/nodes.html#sharing-a-contact"
@@ -26944,7 +26944,7 @@
   },"3849": {
     "doc": "Nodes",
     "title": "Sharing a Contact",
-    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Write to NFC tag saves the link to a writable NFC tag that anyone can tap to open. While that dialog is open the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
+    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Share link opens the Android share sheet (on desktop it copies the link instead), Write to NFC tag saves it to a writable NFC tag, and Copy puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
     "url": "/Meshtastic-Android/main/no-rNO/user/nodes.html#sharing-a-contact",
     
     "relUrl": "/no-rNO/user/nodes.html#sharing-a-contact"
@@ -27007,7 +27007,7 @@
   },"3858": {
     "doc": "Sõlmed",
     "title": "Sharing a Contact",
-    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Write to NFC tag saves the link to a writable NFC tag that anyone can tap to open. While that dialog is open the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
+    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Share link opens the Android share sheet (on desktop it copies the link instead), Write to NFC tag saves it to a writable NFC tag, and Copy puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
     "url": "/Meshtastic-Android/main/et-rEE/user/nodes.html#sharing-a-contact",
     
     "relUrl": "/et-rEE/user/nodes.html#sharing-a-contact"
@@ -27070,7 +27070,7 @@
   },"3867": {
     "doc": "노드",
     "title": "Sharing a Contact",
-    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Write to NFC tag saves the link to a writable NFC tag that anyone can tap to open. While that dialog is open the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
+    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Share link opens the Android share sheet (on desktop it copies the link instead), Write to NFC tag saves it to a writable NFC tag, and Copy puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
     "url": "/Meshtastic-Android/main/ko-rKR/user/nodes.html#sharing-a-contact",
     
     "relUrl": "/ko-rKR/user/nodes.html#sharing-a-contact"
@@ -27133,7 +27133,7 @@
   },"3876": {
     "doc": "Nœuds",
     "title": "Sharing a Contact",
-    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Write to NFC tag saves the link to a writable NFC tag that anyone can tap to open. While that dialog is open the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
+    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Share link opens the Android share sheet (on desktop it copies the link instead), Write to NFC tag saves it to a writable NFC tag, and Copy puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
     "url": "/Meshtastic-Android/main/fr-rFR/user/nodes.html#sharing-a-contact",
     
     "relUrl": "/fr-rFR/user/nodes.html#sharing-a-contact"
@@ -27196,7 +27196,7 @@
   },"3885": {
     "doc": "Nodes",
     "title": "Sharing a Contact",
-    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Write to NFC tag saves the link to a writable NFC tag that anyone can tap to open. While that dialog is open the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
+    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Share link opens the Android share sheet (on desktop it copies the link instead), Write to NFC tag saves it to a writable NFC tag, and Copy puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
     "url": "/Meshtastic-Android/main/gl-rES/user/nodes.html#sharing-a-contact",
     
     "relUrl": "/gl-rES/user/nodes.html#sharing-a-contact"
@@ -27259,7 +27259,7 @@
   },"3894": {
     "doc": "Nodi",
     "title": "Sharing a Contact",
-    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Write to NFC tag saves the link to a writable NFC tag that anyone can tap to open. While that dialog is open the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
+    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Share link opens the Android share sheet (on desktop it copies the link instead), Write to NFC tag saves it to a writable NFC tag, and Copy puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
     "url": "/Meshtastic-Android/main/it-rIT/user/nodes.html#sharing-a-contact",
     
     "relUrl": "/it-rIT/user/nodes.html#sharing-a-contact"
@@ -27322,7 +27322,7 @@
   },"3903": {
     "doc": "Nodes",
     "title": "Sharing a Contact",
-    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Write to NFC tag saves the link to a writable NFC tag that anyone can tap to open. While that dialog is open the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
+    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Share link opens the Android share sheet (on desktop it copies the link instead), Write to NFC tag saves it to a writable NFC tag, and Copy puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
     "url": "/Meshtastic-Android/main/be-rBY/user/nodes.html#sharing-a-contact",
     
     "relUrl": "/be-rBY/user/nodes.html#sharing-a-contact"
@@ -27385,7 +27385,7 @@
   },"3912": {
     "doc": "Nodes",
     "title": "Sharing a Contact",
-    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Write to NFC tag saves the link to a writable NFC tag that anyone can tap to open. While that dialog is open the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
+    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Share link opens the Android share sheet (on desktop it copies the link instead), Write to NFC tag saves it to a writable NFC tag, and Copy puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
     "url": "/Meshtastic-Android/main/sq-rAL/user/nodes.html#sharing-a-contact",
     
     "relUrl": "/sq-rAL/user/nodes.html#sharing-a-contact"
@@ -27448,7 +27448,7 @@
   },"3921": {
     "doc": "Nodos",
     "title": "Sharing a Contact",
-    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Write to NFC tag saves the link to a writable NFC tag that anyone can tap to open. While that dialog is open the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
+    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Share link opens the Android share sheet (on desktop it copies the link instead), Write to NFC tag saves it to a writable NFC tag, and Copy puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
     "url": "/Meshtastic-Android/main/es-rES/user/nodes.html#sharing-a-contact",
     
     "relUrl": "/es-rES/user/nodes.html#sharing-a-contact"
@@ -27511,7 +27511,7 @@
   },"3930": {
     "doc": "Csomópontok",
     "title": "Sharing a Contact",
-    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Write to NFC tag saves the link to a writable NFC tag that anyone can tap to open. While that dialog is open the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
+    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Share link opens the Android share sheet (on desktop it copies the link instead), Write to NFC tag saves it to a writable NFC tag, and Copy puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
     "url": "/Meshtastic-Android/main/hu-rHU/user/nodes.html#sharing-a-contact",
     
     "relUrl": "/hu-rHU/user/nodes.html#sharing-a-contact"
@@ -27560,7 +27560,7 @@
   },"3937": {
     "doc": "Възли",
     "title": "Списък с възли",
-    "content": "The node list shows every node your radio has heard, including: . | Node name — user-configured long name | Short name — 4-character identifier | Signal quality — SNR, RSSI, and a quality word, shown only for nodes your radio heard directly. In the Complete layout a node reached through a relay shows its hop count here instead; a node heard only over MQTT shows neither | Last heard — time since last communication | Distance — estimated distance (if positions are shared) | Battery — remote node battery level (if telemetry is enabled) | . Choosing What the List Shows . The list has two densities, set at Settings → Node Layout. Complete shows every field a node has reported and hides the ones it hasn’t. Compact fits more nodes on screen and lets you pick the fields yourself — Power, Last Heard Time, Relative Last Heard Time, Distance and Bearing, Hops Away, Signal (Direct Only), Channel, and Device &amp; Role. The Environment Metrics toggle applies to both densities. A preview above the toggles shows the effect before you leave the screen. Node Status Indicators . | Indicator | Meaning | . | Green last-heard time | Node heard within the last 2 hours | . | Plain last-heard time | Node not heard for over 2 hours | . | ⭐ Favorite | Node you marked as a favorite. | . There is no separate “away” tier. Node Roles . Nodes can be configured with different roles that affect their mesh behavior: . | Роля | Описание | . | Клиент | Standard end-user node | . | Client Base | Treats favorited-node traffic as Router Late priority; all other traffic as Client | . | Client Mute | Receives but doesn’t retransmit | . | Скрит клиент | Like Client Mute, plus hides from node list | . | Рутер | Prioritizes message forwarding; stays awake to relay | . | Router Late | Infrastructure node that rebroadcasts once, but only after all other modes (provides supplemental coverage) | . | Router Client | ⚠️ Deprecated (removed in firmware 2.3.15) — no longer selectable; use Router or Client instead | . | Repeater | ⚠️ Deprecated (removed in firmware 2.7.11) — no longer selectable; use Router instead | . | Тракер | Optimized for position reporting at regular intervals | . | Сензор | Optimized for telemetry reporting | . | TAK | Interoperates with TAK systems (sends/receives CoT) | . | TAK Tracker | TAK position reporting only | . | Загубено и намерено | Sends its position to the default channel as a text message at regular intervals, to help recover a lost radio | . Choosing a Role . Most users should keep the default Client role. Consider a different role when: . | Router — You have a node in a fixed, elevated location with reliable power (rooftop, hilltop). Routers stay awake continuously to relay messages for others and are essential for extending mesh coverage. Don’t use Router on battery-powered handheld radios. | Router Late — An infrastructure node that always rebroadcasts packets once but only after all other routing modes have had their turn. Provides supplemental coverage for local clusters without competing with primary routers. | Client Base — Treats traffic from/to your favorited nodes with Router Late priority (ensuring those messages get extra relay coverage) while handling everything else as a normal Client. | Client Mute — You want to receive mesh traffic but not contribute to relaying. Useful for monitoring-only radios or to reduce congestion in dense areas. | Tracker — An unattended radio whose sole purpose is broadcasting its GPS position (e.g., a vehicle, pet, or asset). Sleeps between broadcasts to conserve battery. | Sensor — An unattended radio reporting environmental telemetry (temperature, humidity, air quality). Similar power profile to Tracker. | TAK / TAK Tracker — Only needed if interoperating with ATAK/WinTAK systems. See TAK Integration for details. | . 💡 Tip: The mesh works best when most nodes are Client or Router. Too many Client Mute nodes reduce mesh resilience; too many Routers in a dense area can cause congestion. A good rule of thumb: one Router per 5–10 Clients in your area. Encryption Indicators . Nodes display encryption status icons next to their name: . | Icon | Meaning | . | 🔒 Locked | Communication uses PKI (public key infrastructure) — end-to-end encrypted with verified identity | . | 🔓 Unlocked | No public key has been received for this node, so it cannot be direct messaged — use Request User Info on the node detail page to ask for one | . | ⚠️ Mismatch | Public key mismatch — the node’s key has changed since last seen (investigate before trusting) | . 💡 Tip: Direct messages always use PKI, so the radio needs the other node’s public key before it can send one. It refuses the send rather than falling back to channel encryption. Keys arrive inside node info, which is why an open lock usually clears itself once that node is heard from properly. If you see a key mismatch warning, the node may have been reset or compromised. To clear a mismatch, first confirm through another trusted channel that the key change was intentional — a factory reset causes one. Then touch &amp; hold the node, choose Remove, and let the two radios exchange keys again the next time yours hears it. ",
+    "content": "The node list shows every node your radio has heard, including: . | Име на възела — зададено от потребителя дълго име | Кратко име — идентификатор от 4 знака | Signal quality — SNR, RSSI, and a quality word, shown only for nodes your radio heard directly. In the Complete layout a node reached through a relay shows its hop count here instead; a node heard only over MQTT shows neither | Последно чут — време от последната комуникация | Разстояние — приблизително разстояние (ако се споделят местоположения) | Батерия — ниво на заряда на батерията на отдалечения възел (ако телеметрията е активирана) | . Choosing What the List Shows . The list has two densities, set at Settings → Node Layout. Complete shows every field a node has reported and hides the ones it hasn’t. Compact fits more nodes on screen and lets you pick the fields yourself — Power, Last Heard Time, Relative Last Heard Time, Distance and Bearing, Hops Away, Signal (Direct Only), Channel, and Device &amp; Role. The Environment Metrics toggle applies to both densities. A preview above the toggles shows the effect before you leave the screen. Node Status Indicators . | Indicator | Meaning | . | Green last-heard time | Node heard within the last 2 hours | . | Plain last-heard time | Node not heard for over 2 hours | . | ⭐ Favorite | Node you marked as a favorite. | . There is no separate “away” tier. Node Roles . Nodes can be configured with different roles that affect their mesh behavior: . | Роля | Описание | . | Клиент | Standard end-user node | . | Client Base | Treats favorited-node traffic as Router Late priority; all other traffic as Client | . | Client Mute | Receives but doesn’t retransmit | . | Скрит клиент | Like Client Mute, plus hides from node list | . | Рутер | Prioritizes message forwarding; stays awake to relay | . | Router Late | Infrastructure node that rebroadcasts once, but only after all other modes (provides supplemental coverage) | . | Router Client | ⚠️ Deprecated (removed in firmware 2.3.15) — no longer selectable; use Router or Client instead | . | Repeater | ⚠️ Deprecated (removed in firmware 2.7.11) — no longer selectable; use Router instead | . | Тракер | Optimized for position reporting at regular intervals | . | Сензор | Optimized for telemetry reporting | . | TAK | Interoperates with TAK systems (sends/receives CoT) | . | TAK Tracker | TAK position reporting only | . | Загубено и намерено | Sends its position to the default channel as a text message at regular intervals, to help recover a lost radio | . Choosing a Role . Most users should keep the default Client role. Consider a different role when: . | Router — You have a node in a fixed, elevated location with reliable power (rooftop, hilltop). Routers stay awake continuously to relay messages for others and are essential for extending mesh coverage. Don’t use Router on battery-powered handheld radios. | Router Late — An infrastructure node that always rebroadcasts packets once but only after all other routing modes have had their turn. Provides supplemental coverage for local clusters without competing with primary routers. | Client Base — Treats traffic from/to your favorited nodes with Router Late priority (ensuring those messages get extra relay coverage) while handling everything else as a normal Client. | Client Mute — You want to receive mesh traffic but not contribute to relaying. Useful for monitoring-only radios or to reduce congestion in dense areas. | Tracker — An unattended radio whose sole purpose is broadcasting its GPS position (e.g., a vehicle, pet, or asset). Sleeps between broadcasts to conserve battery. | Sensor — An unattended radio reporting environmental telemetry (temperature, humidity, air quality). Similar power profile to Tracker. | TAK / TAK Tracker — Only needed if interoperating with ATAK/WinTAK systems. See TAK Integration for details. | . 💡 Tip: The mesh works best when most nodes are Client or Router. Too many Client Mute nodes reduce mesh resilience; too many Routers in a dense area can cause congestion. A good rule of thumb: one Router per 5–10 Clients in your area. Encryption Indicators . Nodes display encryption status icons next to their name: . | Icon | Meaning | . | 🔒 Locked | Communication uses PKI (public key infrastructure) — end-to-end encrypted with verified identity | . | 🔓 Unlocked | No public key has been received for this node, so it cannot be direct messaged — use Request User Info on the node detail page to ask for one | . | ⚠️ Mismatch | Public key mismatch — the node’s key has changed since last seen (investigate before trusting) | . 💡 Tip: Direct messages always use PKI, so the radio needs the other node’s public key before it can send one. It refuses the send rather than falling back to channel encryption. Keys arrive inside node info, which is why an open lock usually clears itself once that node is heard from properly. If you see a key mismatch warning, the node may have been reset or compromised. To clear a mismatch, first confirm through another trusted channel that the key change was intentional — a factory reset causes one. Then touch &amp; hold the node, choose Remove, and let the two radios exchange keys again the next time yours hears it. ",
     "url": "/Meshtastic-Android/main/bg-rBG/user/nodes.html#%D1%81%D0%BF%D0%B8%D1%81%D1%8A%D0%BA-%D1%81-%D0%B2%D1%8A%D0%B7%D0%BB%D0%B8",
     
     "relUrl": "/bg-rBG/user/nodes.html#списък-с-възли"
@@ -27574,7 +27574,7 @@
   },"3939": {
     "doc": "Възли",
     "title": "Sharing a Contact",
-    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Write to NFC tag saves the link to a writable NFC tag that anyone can tap to open. While that dialog is open the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
+    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Share link opens the Android share sheet (on desktop it copies the link instead), Write to NFC tag saves it to a writable NFC tag, and Copy puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
     "url": "/Meshtastic-Android/main/bg-rBG/user/nodes.html#sharing-a-contact",
     
     "relUrl": "/bg-rBG/user/nodes.html#sharing-a-contact"
@@ -27637,7 +27637,7 @@
   },"3948": {
     "doc": "Nœuds",
     "title": "Sharing a Contact",
-    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Write to NFC tag saves the link to a writable NFC tag that anyone can tap to open. While that dialog is open the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
+    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Share link opens the Android share sheet (on desktop it copies the link instead), Write to NFC tag saves it to a writable NFC tag, and Copy puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
     "url": "/Meshtastic-Android/main/fr-rCA/user/nodes.html#sharing-a-contact",
     
     "relUrl": "/fr-rCA/user/nodes.html#sharing-a-contact"
@@ -27700,7 +27700,7 @@
   },"3957": {
     "doc": "Nodes",
     "title": "Sharing a Contact",
-    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Write to NFC tag saves the link to a writable NFC tag that anyone can tap to open. While that dialog is open the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
+    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Share link opens the Android share sheet (on desktop it copies the link instead), Write to NFC tag saves it to a writable NFC tag, and Copy puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
     "url": "/Meshtastic-Android/main/hr-rHR/user/nodes.html#sharing-a-contact",
     
     "relUrl": "/hr-rHR/user/nodes.html#sharing-a-contact"
@@ -27763,7 +27763,7 @@
   },"3966": {
     "doc": "Nodes",
     "title": "Sharing a Contact",
-    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Write to NFC tag saves the link to a writable NFC tag that anyone can tap to open. While that dialog is open the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
+    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Share link opens the Android share sheet (on desktop it copies the link instead), Write to NFC tag saves it to a writable NFC tag, and Copy puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
     "url": "/Meshtastic-Android/main/el-rGR/user/nodes.html#sharing-a-contact",
     
     "relUrl": "/el-rGR/user/nodes.html#sharing-a-contact"
@@ -27826,7 +27826,7 @@
   },"3975": {
     "doc": "Nodes",
     "title": "Sharing a Contact",
-    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Write to NFC tag saves the link to a writable NFC tag that anyone can tap to open. While that dialog is open the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
+    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Share link opens the Android share sheet (on desktop it copies the link instead), Write to NFC tag saves it to a writable NFC tag, and Copy puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
     "url": "/Meshtastic-Android/main/ar-rSA/user/nodes.html#sharing-a-contact",
     
     "relUrl": "/ar-rSA/user/nodes.html#sharing-a-contact"
@@ -27889,7 +27889,7 @@
   },"3984": {
     "doc": "Nós",
     "title": "Sharing a Contact",
-    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Write to NFC tag saves the link to a writable NFC tag that anyone can tap to open. While that dialog is open the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
+    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Share link opens the Android share sheet (on desktop it copies the link instead), Write to NFC tag saves it to a writable NFC tag, and Copy puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
     "url": "/Meshtastic-Android/main/pt-rBR/user/nodes.html#sharing-a-contact",
     
     "relUrl": "/pt-rBR/user/nodes.html#sharing-a-contact"
@@ -27952,7 +27952,7 @@
   },"3993": {
     "doc": "Nodes",
     "title": "Sharing a Contact",
-    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Write to NFC tag saves the link to a writable NFC tag that anyone can tap to open. While that dialog is open the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
+    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Share link opens the Android share sheet (on desktop it copies the link instead), Write to NFC tag saves it to a writable NFC tag, and Copy puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
     "url": "/Meshtastic-Android/main/ht-rHT/user/nodes.html#sharing-a-contact",
     
     "relUrl": "/ht-rHT/user/nodes.html#sharing-a-contact"
@@ -28015,7 +28015,7 @@
   },"4002": {
     "doc": "Вузли",
     "title": "Sharing a Contact",
-    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Write to NFC tag saves the link to a writable NFC tag that anyone can tap to open. While that dialog is open the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
+    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Share link opens the Android share sheet (on desktop it copies the link instead), Write to NFC tag saves it to a writable NFC tag, and Copy puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
     "url": "/Meshtastic-Android/main/uk-rUA/user/nodes.html#sharing-a-contact",
     
     "relUrl": "/uk-rUA/user/nodes.html#sharing-a-contact"
@@ -28078,7 +28078,7 @@
   },"4011": {
     "doc": "Nodes",
     "title": "Sharing a Contact",
-    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Write to NFC tag saves the link to a writable NFC tag that anyone can tap to open. While that dialog is open the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
+    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Share link opens the Android share sheet (on desktop it copies the link instead), Write to NFC tag saves it to a writable NFC tag, and Copy puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
     "url": "/Meshtastic-Android/main/is-rIS/user/nodes.html#sharing-a-contact",
     
     "relUrl": "/is-rIS/user/nodes.html#sharing-a-contact"
@@ -28141,7 +28141,7 @@
   },"4020": {
     "doc": "Nodes",
     "title": "Sharing a Contact",
-    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Write to NFC tag saves the link to a writable NFC tag that anyone can tap to open. While that dialog is open the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
+    "content": "On a node’s detail screen, tap Share Contact to produce a link and a QR code for that node. From the same dialog, Share link opens the Android share sheet (on desktop it copies the link instead), Write to NFC tag saves it to a writable NFC tag, and Copy puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved. To add someone else’s contact, use the import button on the node list and choose Scan Shared Contact QR Code, Scan Shared Contact NFC, or Input Shared Contact URL. The app asks you to confirm with Import Shared Contact?, and warns you when the contact is one you already have. ",
     "url": "/Meshtastic-Android/main/iw-rIL/user/nodes.html#sharing-a-contact",
     
     "relUrl": "/iw-rIL/user/nodes.html#sharing-a-contact"
@@ -42055,56 +42055,56 @@
     
     "relUrl": "/hu-rHU/user/translate.html#related-topics"
   },"6008": {
-    "doc": "Translate the App",
-    "title": "Translate the App",
-    "content": "The app and its in-app docs are translated on Crowdin — this page shows how to contribute. The app uses Crowdin to manage community translations for both the user interface and in-app documentation. ",
+    "doc": "Преведете приложението",
+    "title": "Преведете приложението",
+    "content": "Приложението и придружаващата го документация се превеждат в Crowdin – на тази страница е обяснено как да се включите. Приложението използва Crowdin за управление на преводите, извършвани от общността, както за потребителския интерфейс, така и за документацията в самото приложение. ",
     "url": "/Meshtastic-Android/main/bg-rBG/user/translate.html",
     
     "relUrl": "/bg-rBG/user/translate.html"
   },"6009": {
-    "doc": "Translate the App",
+    "doc": "Преведете приложението",
     "title": "What Gets Translated",
     "content": "| Resource | Source Location | Бележки | . | UI strings | core/resources/src/commonMain/composeResources/values/strings.xml | Buttons, labels, messages, and all user-visible text | . | User Guide pages | docs/en/user/*.md | In-app documentation shown in Help &amp; Documentation | . | Fastlane metadata | fastlane/metadata/android/en-US/ | Google Play listing title, description, and changelogs | . ℹ️ Note: Developer Guide pages are English-only. Code-focused documentation targeting contributors is not translated. ",
     "url": "/Meshtastic-Android/main/bg-rBG/user/translate.html#what-gets-translated",
     
     "relUrl": "/bg-rBG/user/translate.html#what-gets-translated"
   },"6010": {
-    "doc": "Translate the App",
+    "doc": "Преведете приложението",
     "title": "Как да допринесете",
     "content": ". | Visit the Crowdin project. Open the Meshtastic Android Crowdin project and sign in or create a free account. | Choose your language. Select an existing language or request a new one by opening a GitHub issue. | Translate strings. Crowdin shows the English source on the left and your translation on the right. Translate each string and save. | Review context. Many strings include screenshots or context comments — check these to understand where the text appears in the app. A scheduled job pulls approved translations from Crowdin and opens a pull request; they ship once a maintainer merges it and a new build goes out. | . 💡 Tip: Keep translations short. UI strings often appear in buttons, chips, or narrow columns. If a translation is significantly longer than the English original, consider abbreviating where the meaning stays clear. ",
     "url": "/Meshtastic-Android/main/bg-rBG/user/translate.html#%D0%BA%D0%B0%D0%BA-%D0%B4%D0%B0-%D0%B4%D0%BE%D0%BF%D1%80%D0%B8%D0%BD%D0%B5%D1%81%D0%B5%D1%82%D0%B5",
     
     "relUrl": "/bg-rBG/user/translate.html#как-да-допринесете"
   },"6011": {
-    "doc": "Translate the App",
-    "title": "Adding a New Language",
-    "content": "If your language is not yet listed on Crowdin: . | Open an issue on GitHub requesting the new locale. | A maintainer will add the language to Crowdin and configure crowdin.yml. | Once added, you can begin translating immediately. | . ",
-    "url": "/Meshtastic-Android/main/bg-rBG/user/translate.html#adding-a-new-language",
+    "doc": "Преведете приложението",
+    "title": "Добавяне на нов език",
+    "content": "Ако езикът ви все още не е включен в списъка в Crowdin: . | Отворете проблем в GitHub, като поискате новия език. | Поддържащият ще добави езика в Crowdin и ще конфигурира crowdin.yml. | След като бъде добавен, можете да започнете да превеждате веднага. | . ",
+    "url": "/Meshtastic-Android/main/bg-rBG/user/translate.html#%D0%B4%D0%BE%D0%B1%D0%B0%D0%B2%D1%8F%D0%BD%D0%B5-%D0%BD%D0%B0-%D0%BD%D0%BE%D0%B2-%D0%B5%D0%B7%D0%B8%D0%BA",
     
-    "relUrl": "/bg-rBG/user/translate.html#adding-a-new-language"
+    "relUrl": "/bg-rBG/user/translate.html#добавяне-на-нов-език"
   },"6012": {
-    "doc": "Translate the App",
-    "title": "How Translations Are Organized",
+    "doc": "Преведете приложението",
+    "title": "Как са организирани преводите",
     "content": "The Android app uses Compose Multiplatform resources for all user-visible strings: . core/resources/src/commonMain/composeResources/ ├── values/ ← English (default) │ └── strings.xml ├── values-de/ ← German │ └── strings.xml ├── values-fr/ ← French │ └── strings.xml └── ... In-app documentation follows a similar pattern under docs/: . docs/ ├── en/user/ ← English source (default) │ ├── onboarding.md │ └── ... ├── fr-rFR/user/ ← French (France) │ ├── onboarding.md │ └── ... ├── de-rDE/user/ ← German (Germany) │ └── ... └── ... Doc locale folders use Android locale qualifiers, either {lang} or {lang}-r{REGION} (for example fr, fr-rFR, de-rDE, ja-rJP). The values-* folders for app strings use bare language codes instead (values-fr, values-de, values-ja), because crowdin.yml writes strings with %two_letters_code% and doc pages with %android_code%. The two sets do not line up one-to-one. The app automatically selects the correct locale based on your phone’s Language &amp; Region settings. A page that came from Crowdin is labeled Community translated under its title in the app. If a page has no Crowdin translation for your language yet, the Google-flavor Android build machine-translates the English source on the fly and labels it Auto-translated instead; F-Droid and desktop builds show the English page. Your Crowdin translation replaces the machine one as soon as it lands. ",
-    "url": "/Meshtastic-Android/main/bg-rBG/user/translate.html#how-translations-are-organized",
+    "url": "/Meshtastic-Android/main/bg-rBG/user/translate.html#%D0%BA%D0%B0%D0%BA-%D1%81%D0%B0-%D0%BE%D1%80%D0%B3%D0%B0%D0%BD%D0%B8%D0%B7%D0%B8%D1%80%D0%B0%D0%BD%D0%B8-%D0%BF%D1%80%D0%B5%D0%B2%D0%BE%D0%B4%D0%B8%D1%82%D0%B5",
     
-    "relUrl": "/bg-rBG/user/translate.html#how-translations-are-organized"
+    "relUrl": "/bg-rBG/user/translate.html#как-са-организирани-преводите"
   },"6013": {
-    "doc": "Translate the App",
+    "doc": "Преведете приложението",
     "title": "Translation Guidelines",
     "content": ". | Do not translate technical terms like “LoRa”, “MQTT”, “BLE”, “TAK”, “SNR”, or “RSSI” — these are universal. | Keep placeholders intact. Strings like %1$s or %d are filled in at runtime. Do not remove or reorder them unless the grammar of your language requires it. | Match tone. The app uses a friendly, direct voice. Avoid overly formal language. | Test if possible. Switch your phone’s language and open the app to see how translations look in context. | . ",
     "url": "/Meshtastic-Android/main/bg-rBG/user/translate.html#translation-guidelines",
     
     "relUrl": "/bg-rBG/user/translate.html#translation-guidelines"
   },"6014": {
-    "doc": "Translate the App",
+    "doc": "Преведете приложението",
     "title": "Въпроси?",
     "content": "If you have questions about a specific string’s context or need help getting started, open a discussion on the Meshtastic GitHub Discussions page. Thank you for helping expand the reach of Meshtastic. ",
     "url": "/Meshtastic-Android/main/bg-rBG/user/translate.html#%D0%B2%D1%8A%D0%BF%D1%80%D0%BE%D1%81%D0%B8",
     
     "relUrl": "/bg-rBG/user/translate.html#въпроси"
   },"6015": {
-    "doc": "Translate the App",
+    "doc": "Преведете приложението",
     "title": "Свързани теми",
     "content": ". | Units &amp; Locale — how the app picks number, date, and unit formats for your region | Help &amp; Documentation — the in-app docs browser these pages are published to | Onboarding — where a new user first meets the translated strings | . ",
     "url": "/Meshtastic-Android/main/bg-rBG/user/translate.html#%D1%81%D0%B2%D1%8A%D1%80%D0%B7%D0%B0%D0%BD%D0%B8-%D1%82%D0%B5%D0%BC%D0%B8",
