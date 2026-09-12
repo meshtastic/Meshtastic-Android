@@ -164,7 +164,7 @@
 
 <ul>
   <li><strong>Listen for beacons</strong> — receive invitations broadcast by other nodes.</li>
-  <li><strong>Broadcast a beacon</strong> — periodically advertise this mesh to nearby nodes, with an optional <strong>Beacon message</strong> of up to 100 bytes, a <strong>Broadcast interval</strong> picked from fixed intervals between 1 hour and 72 hours, and an <strong>Offered channel</strong> chosen from your radio’s own channels. The offered channel is required, and defaults to your primary channel.</li>
+  <li><strong>Broadcast a beacon</strong> — periodically advertise this mesh to nearby nodes, with an optional <strong>Beacon message</strong> of up to 100 bytes, a <strong>Broadcast interval</strong> picked from fixed intervals between 1 hour and 72 hours, and an <strong>Offered channel</strong> chosen from your radio’s own channels. The offered channel is required, and defaults to your primary channel. Over remote admin the picker offers the primary channel only.</li>
   <li><strong>Broadcast targets</strong> — optional extra destinations beyond the offered channel. <strong>Add target</strong> appends a row; each row picks a <strong>Channel</strong> and a <strong>Transmit preset</strong>, and <strong>Remove target</strong> deletes it. With no targets, the beacon goes out on the offered channel alone.</li>
 </ul>
 

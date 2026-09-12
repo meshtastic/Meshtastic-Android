@@ -31,7 +31,7 @@
 
 <h3 id="filtering-the-map">Filtering the Map</h3>
 
-<p>Tap the filter button in the floating toolbar to open <strong>Filter map</strong>. <strong>Display</strong> controls what is drawn: <strong>Only Favorites</strong>, <strong>Show Waypoints</strong>, <strong>Show Precision Circles</strong>, and a slider that hides nodes not heard from recently. <strong>Node roles</strong> is a chip per device role, plus <strong>All</strong> to show every role; a selected chip means that role is shown. <strong>Nodes</strong> narrows the set further with <strong>Hide offline nodes</strong>, <strong>Only show direct nodes</strong>, <strong>Exclude MQTT</strong>, <strong>Show ignored nodes</strong>, and <strong>Include unknown</strong>.</p>
+<p>Tap the filter button in the floating toolbar to open <strong>Filter map</strong>. <strong>Display</strong> controls what is drawn: <strong>Only Favorites</strong>, <strong>Show Waypoints</strong>, <strong>Show Precision Circles</strong>, and a slider that hides nodes not heard from recently. <strong>Node roles</strong> is a chip per device role, plus <strong>All</strong> to show every role; a selected chip means that role is shown. <strong>Nodes</strong> narrows the set further with <strong>Hide offline nodes</strong>, <strong>Only show direct nodes</strong>, <strong>Signed only</strong>, <strong>Encrypted only</strong>, <strong>Exclude MQTT</strong>, <strong>Show ignored nodes</strong>, and <strong>Include unknown</strong> — the same rules as the node list’s <a href="nodes">filter toggles</a>.</p>
 
 <p>A dot on the filter button means at least one filter is hiding something — check it before concluding the mesh is quiet. Turning <strong>Show Waypoints</strong> off hides every waypoint, including your own. <strong>Show ignored nodes</strong> adds them to the map rather than showing only them — unlike the node list’s <strong>Only show ignored Nodes</strong>.</p>
 
@@ -205,8 +205,9 @@ picker, all three offer the same raster base maps:</p>
 
 <ul>
   <li><strong>Weather radar</strong> — NOAA NEXRAD reflectivity (US coverage)</li>
-  <li><strong>Hillshade</strong> — terrain relief, on <strong>F-Droid</strong> and <strong>Desktop</strong> only. Useful for understanding why a
-link fails, since LoRa range is limited by terrain</li>
+  <li><strong>Hillshade</strong> — terrain relief from an online tile source, on <strong>F-Droid</strong> and <strong>Desktop</strong> only; Google
+Play draws hillshade from downloaded offline terrain instead. Useful for understanding why a link
+fails, since LoRa range is limited by terrain</li>
 </ul>
 
 <h3 id="adding-your-own-tile-source">Adding your own tile source</h3>
@@ -215,7 +216,7 @@ link fails, since LoRa range is limited by terrain</li>
 Tile Sources</strong> at the foot of the base map picker and paste a URL template using <code class="language-plaintext highlighter-rouge">{z}</code>, <code class="language-plaintext highlighter-rouge">{x}</code> and <code class="language-plaintext highlighter-rouge">{y}</code>
 — plus <code class="language-plaintext highlighter-rouge">{s}</code> if the provider uses rotating subdomains. A national mapping service, for example:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg
 </code></pre></div></div>
 
 <p>Tiles are cached on disk, so panning does not re-download what you were just looking at.</p>
@@ -231,7 +232,18 @@ plus two levels deeper. Press play on the pack’s row to actually download it.<
 — water, roads and administrative boundaries extracted from the public Protomaps basemap dataset, drawn
 directly as map shapes rather than raster tiles. Frame the area you want, tap <strong>Start Download</strong>, and once
 it finishes flip <strong>Show on map</strong> to draw it (it’s off by default so it never surprises you by covering up the
-live map). You can still import a pre-made <code class="language-plaintext highlighter-rouge">.mbtiles</code> archive here too, as before. <strong>Desktop</strong> has neither.</p>
+live map). You can still import a pre-made <code class="language-plaintext highlighter-rouge">.mbtiles</code> archive here too, as before. <strong>Desktop</strong> has neither, though
+the offline terrain described next does work there.</p>
+
+<h3 id="offline-terrain">Offline terrain</h3>
+
+<p>Hillshade and elevation contours can be downloaded for offline use as well, so a downloaded area still
+shows why a link fails when there is no network. The terrain data comes from Mapterhorn and is credited on
+the map. On <strong>Google Play</strong>, each downloaded region in the <strong>Offline Manager</strong> list has a <strong>Download Terrain</strong>
+button and <strong>Hillshade</strong> and <strong>Contours</strong> switches; terrain attaches to that region and shares its storage limit, and an area
+too large for terrain asks you to zoom in or pick a smaller region. On <strong>F-Droid</strong> and <strong>Desktop</strong>, the
+layers sheet has an <strong>Offline Terrain</strong> section of its own: frame the area, tap <strong>Start Download</strong>, and the
+hillshade and contours draw from the downloaded tiles from then on.</p>
 
 <h3 id="going-offline">Going offline</h3>
 
@@ -239,8 +251,8 @@ live map). You can still import a pre-made <code class="language-plaintext highl
 builds, if you’ve imported a local <code class="language-plaintext highlighter-rouge">.mbtiles</code> archive, the map switches to it automatically the moment the
 network drops — no toggle to remember — and switches back once you’re reconnected, as long as you haven’t
 picked a different base map yourself in between. On <strong>F-Droid</strong>, a downloaded offline area keeps rendering on
-its own; the pill is purely informational there. <strong>Desktop</strong> has no offline downloads at all yet, so the pill
-is informational there too.</p>
+its own; the pill is purely informational there. <strong>Desktop</strong> downloads offline terrain but no base-map
+packs, so the pill is informational there too.</p>
 
 <h2 id="related-topics">Related Topics</h2>
 

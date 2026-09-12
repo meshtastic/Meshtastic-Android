@@ -131,38 +131,52 @@
   <p>💡 <strong>Tip:</strong> The mesh works best when most nodes are <strong>Client</strong> or <strong>Router</strong>. Too many Client Mute nodes reduce mesh resilience; too many Routers in a dense area can cause congestion. A good rule of thumb: one Router per 5–10 Clients in your area.</p>
 </blockquote>
 
-<h3 id="encryption-indicators">Encryption Indicators</h3>
+<h3 id="security-indicators">Security indicators</h3>
 
-<p>Nodes display encryption status icons next to their name:</p>
+<p>Each node carries one security icon beside its name in the node list. Tap it to read what it means, and choose <strong>Show All Meanings</strong> in that dialog for the full legend. The detail screen shows the same state in words, as a <strong>Security</strong> row that opens the same dialog.</p>
 
 <table>
   <thead>
     <tr>
       <th>Icon</th>
       <th>Meaning</th>
+      <th>Shown for</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>🔒 Locked</td>
-      <td>Communication uses PKI (public key infrastructure) — end-to-end encrypted with verified identity</td>
+      <td>Person with a shield check (green)</td>
+      <td><strong>Verified contact</strong> — you verified this node’s key in person by exchanging contact QR codes, so its identity is confirmed. The strongest trust the list shows. Your own connected node carries it too</td>
+      <td>Any firmware version</td>
     </tr>
     <tr>
-      <td>🔓 Unlocked</td>
+      <td>Nodes icon with a shield check (green)</td>
+      <td><strong>Signed node</strong> — this node signs its broadcasts with its identity key, so its identity is consistent over time, but you have not verified it in person. On firmware 2.8 the icon appears from the version alone, before any signed broadcast has been heard</td>
+      <td>Firmware 2.8 or newer, and any node whose signed broadcast your node has verified</td>
+    </tr>
+    <tr>
+      <td>🔒 Closed lock</td>
+      <td>A public key is on file and matches, so direct messages to this node are encrypted</td>
+      <td>Firmware before 2.8, or no reported version</td>
+    </tr>
+    <tr>
+      <td>🔓 Open lock</td>
       <td>No public key has been received for this node, so it cannot be direct messaged — use <strong>Request User Info</strong> on the node detail page to ask for one</td>
+      <td>Firmware before 2.8, or no reported version</td>
     </tr>
     <tr>
       <td>⚠️ Mismatch</td>
-      <td>Public key mismatch — the node’s key has changed since last seen (investigate before trusting)</td>
+      <td><strong>Public key mismatch</strong> — a different key arrived for this node after one was stored. Investigate before trusting</td>
+      <td>Any firmware version</td>
     </tr>
   </tbody>
 </table>
 
-<blockquote>
-  <p>💡 <strong>Tip:</strong> Direct messages always use PKI, so the radio needs the other node’s public key before it can send one. It refuses the send rather than falling back to channel encryption. Keys arrive inside node info, which is why an open lock usually clears itself once that node is heard from properly. If you see a key mismatch warning, the node may have been reset or compromised.</p>
-</blockquote>
+<p>Every node on firmware 2.8 or newer signs its broadcasts, so on that firmware the signed state is the baseline and the locks are not shown.</p>
 
-<p>To clear a mismatch, first confirm through another trusted channel that the key change was intentional — a factory reset causes one. Then touch &amp; hold the node, choose <strong>Remove</strong>, and let the two radios exchange keys again the next time yours hears it.</p>
+<p>Direct messages always use public-key encryption, so your node needs the other node’s public key before it can send one. It refuses the send rather than falling back to channel encryption. Keys arrive inside node info, which is why an open lock usually clears itself once that node is heard from properly.</p>
+
+<p>A mismatch never replaces the key you already hold. The app keeps the first key it recorded and refuses the new one, as the firmware does, so a stray or hostile node info cannot silently break encrypted messaging to a contact. To clear a mismatch, first confirm through another trusted channel that the key change was intentional — a factory reset causes one. Then touch &amp; hold the node, choose <strong>Remove</strong>, and let the two nodes exchange keys again the next time yours hears it.</p>
 
 <h2 id="quick-actions">Quick Actions</h2>
 
@@ -190,6 +204,8 @@ radio is connected and running firmware 2.8 or newer — see
 <h2 id="sharing-a-contact">Sharing a Contact</h2>
 
 <p>On a node’s detail screen, tap <strong>Share Contact</strong> to produce a link and a QR code for that node. From the same dialog, <strong>Share link</strong> opens the Android share sheet (on desktop it copies the link instead), <strong>Write to NFC tag</strong> saves it to a writable NFC tag, and <strong>Copy</strong> puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved.</p>
+
+<p>Sharing your own contact this way marks it as verified in person, so whoever imports it sees the <strong>Verified contact</strong> icon rather than the signed one. Relaying someone else’s contact passes on only what your app had already recorded about them.</p>
 
 <p>To add someone else’s contact, use the import button on the node list and choose <strong>Scan Shared Contact QR Code</strong>, <strong>Scan Shared Contact NFC</strong>, or <strong>Input Shared Contact URL</strong>. The app asks you to confirm with <strong>Import Shared Contact?</strong>, and warns you when the contact is one you already have.</p>
 
@@ -228,6 +244,14 @@ radio is connected and running firmware 2.8 or newer — see
     <tr>
       <td><strong>Exclude MQTT</strong></td>
       <td>Hide nodes heard only via MQTT internet bridge</td>
+    </tr>
+    <tr>
+      <td><strong>Signed only</strong></td>
+      <td>Show only nodes whose signed broadcasts your node has actually heard and verified. Stricter than the icon: a node on 2.8 shows as signed by its firmware version before any signed broadcast arrives, and a contact verified in person on older firmware is not signed at all</td>
+    </tr>
+    <tr>
+      <td><strong>Encrypted only</strong></td>
+      <td>Show nodes with a matching public key on file, the key an encrypted direct message needs. A node with a key mismatch is excluded</td>
     </tr>
     <tr>
       <td><strong>Only show ignored Nodes</strong></td>

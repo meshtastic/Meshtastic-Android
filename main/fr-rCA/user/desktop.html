@@ -80,7 +80,7 @@
       <td>Carte</td>
       <td>✓</td>
       <td>✓</td>
-      <td>Interactive MapLibre map, with base map and overlay pickers and custom tile sources. No offline downloads or local <code class="language-plaintext highlighter-rouge">.mbtiles</code> archives</td>
+      <td>Interactive MapLibre map, with base map and overlay pickers and custom tile sources. Offline terrain (hillshade and contours) can be downloaded; offline base-map packs and local <code class="language-plaintext highlighter-rouge">.mbtiles</code> archives cannot</td>
     </tr>
     <tr>
       <td>Map layers (<code class="language-plaintext highlighter-rouge">.kml</code>/<code class="language-plaintext highlighter-rouge">.kmz</code>/GeoJSON)</td>
@@ -219,7 +219,7 @@
 
 <h2 id="building-from-source">Building from Source</h2>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone https://github.com/meshtastic/Meshtastic-Android.git
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone https://github.com/meshtastic/Meshtastic-Android.git
 <span class="nb">cd </span>Meshtastic-Android
 ./gradlew :desktopApp:run
 </code></pre></div></div>
@@ -234,7 +234,7 @@
 <h2 id="known-limitations">Known Limitations</h2>
 
 <ul>
-  <li>Offline tile downloads and local <code class="language-plaintext highlighter-rouge">.mbtiles</code> archives are not available on desktop.</li>
+  <li>Offline base-map downloads and local <code class="language-plaintext highlighter-rouge">.mbtiles</code> archives are not available on desktop. Offline terrain is — see <a href="map-and-waypoints">Map &amp; Waypoints</a>.</li>
   <li><code class="language-plaintext highlighter-rouge">.kml</code>/<code class="language-plaintext highlighter-rouge">.kmz</code>/GeoJSON layer import works — see
 <a href="map-and-waypoints#map-layers">Map &amp; Waypoints</a>. Site Planner opens in your browser
 rather than in the app; to bring its coverage estimate onto the map, click the transmitter pin

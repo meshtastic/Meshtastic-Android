@@ -78,7 +78,7 @@ only on radios with Wi-Fi or Ethernet, and <strong>Bluetooth</strong> only on ra
 <p>The status message is saved with the same <strong>Save</strong>, but it never reboots the node — and, like the
 rest of this screen, it can be edited on a remote node you administer. For your own radio there is a
 shortcut while it is connected: touch &amp; hold your node in the <a href="nodes.md">node list</a> and choose
-<strong>Update status</strong>. Older firmware and a disconnected radio have no shortcut — the field above is
+<strong>Update status</strong>. Older firmware and a disconnected node have no shortcut — the field itself is
 still the way in.</p>
 
 <h2 id="configuration">Configuration</h2>
@@ -154,7 +154,7 @@ still the way in.</p>
   <tbody>
     <tr>
       <td>Région</td>
-      <td>Regulatory region for frequency bands. You must set this before transmitting</td>
+      <td>Regulatory region for frequency bands. You must set this before transmitting. On firmware 2.8 or newer, the first region set also creates the node’s identity key and gives it a new node number</td>
       <td>Unset (must configure)</td>
     </tr>
     <tr>
@@ -184,7 +184,7 @@ still the way in.</p>
     </tr>
     <tr>
       <td>Facteur de propagation</td>
-      <td>Manual mode only: 7–12. Higher spreads further but slower</td>
+      <td>Manual mode only: 5–12. Higher spreads further but slower. On SX127x (RF95) radios the firmware does not accept 5 or 6 and uses 11 instead</td>
       <td>From preset</td>
     </tr>
     <tr>
