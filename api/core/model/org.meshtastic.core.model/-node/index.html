@@ -328,7 +328,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="heard-on-current-lora.html">heardOnCurrentLora</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">False when the radio has not heard this node since its current LoRa config took effect.</p></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="heard-on-current-lora.html">heardOnCurrentLora</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">False when the radio has not heard this node over RF on the LoRa configuration it is using now. The radio derives this rather than storing it, so returning to a configuration restores the previous answers. Ask <a href="is-unheard-on-current-lora.html">isUnheardOnCurrentLora</a> rather than this flag: false alone does not mean the node became unreachable.</p></div></div></div>
                 </div>
               </div>
             </div>
@@ -404,6 +404,21 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="is-online.html">isOnline</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1004525891%2FProperties%2F394437785" anchor-label="isUnheardOnCurrentLora" id="-1004525891%2FProperties%2F394437785" data-filterable-set=":core:model/commonMain"></a>
+          <div class="table-row table-row_content" data-filterable-current=":core:model/commonMain" data-filterable-set=":core:model/commonMain">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="is-unheard-on-current-lora.html"><span>is</span><wbr><span>Unheard</span><wbr><span>On</span><wbr><span>Current</span><wbr><span><span>Lora</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1004525891%2FProperties%2F394437785"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":core:model/commonMain"><div class="symbol monospace"><span class="token keyword">val </span><a href="is-unheard-on-current-lora.html">isUnheardOnCurrentLora</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/core/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">True when the radio does not report having heard this node over RF on the LoRa configuration in force now, and it is not an <a href="../../../../core/model/org.meshtastic.core.model/-node/--root--.html">viaMqtt</a> node.</p></div></div></div>
                 </div>
               </div>
             </div>
