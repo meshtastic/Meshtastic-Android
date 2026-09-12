@@ -108,10 +108,10 @@ mqttastic = "0.8.1"
 jmdns = "3.6.3"
 qrcode-kotlin = "4.5.0"
 takpacket-sdk = "0.9.1"
-meshtastic-protobufs = "2.8.0.35-g3b3df2a-SNAPSHOT"
+meshtastic-protobufs = "2.8.0.35-nodekmp-SNAPSHOT"
 # node-kmp, from ~/.m2 (-PuseMavenLocal=1), built against the protobufs pin above: Wire types are
 # binary compatible only at an exact match.
-meshtastic-node-kmp = "0.1.0-pb2.8.0.35-g3b3df2a-SNAPSHOT"
+meshtastic-node-kmp = "0.1.0-pb2.8.0.35-nodekmp-SNAPSHOT"
 
 # Gradle Plugins
 ccud = "2.8.0"
