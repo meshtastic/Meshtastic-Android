@@ -19,6 +19,7 @@ package org.meshtastic.core.network.radio
 import android.content.Context
 import android.os.Build
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -120,7 +121,15 @@ class NodeRadioTransport(
                                 bytes,
                             )} -> ${if (session == null) "no node yet" else "node"}"
                         }
-                        session?.toRadio(bytes)
+                        // A rebuild can close the session under a write in flight. That write is lost, as
+                        // it would be at a radio rebooting; the send loop and the process are not.
+                        try {
+                            session?.toRadio(bytes)
+                        } catch (e: CancellationException) {
+                            throw e
+                        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                            Logger.w(e) { "ToRadio write lost across a node rebuild" }
+                        }
                     }
                 }
                 bringUp(readSettings())
@@ -154,7 +163,10 @@ class NodeRadioTransport(
     /** Build the node from what is stored, wire the session to the app, and report Connected. */
     private suspend fun bringUp(stored: BackupPreferences?) {
         val record = identityStore.loadOrCreate()
-        val lora = loraTransport(stored?.config?.lora)
+        // The slot hashes the primary's name when it has one, and the preset's when it is empty -
+        // RadioInterface::applyModemConfig through Channels::getName.
+        val primaryName = stored?.channels?.channels?.firstOrNull()?.settings?.name.orEmpty()
+        val lora = loraTransport(stored?.config?.lora, primaryName)
         // A stick already on the port needs the system's USB permission; the request is a no-op without one.
         lora?.requestPermission()
         val bearers =
@@ -239,7 +251,7 @@ class NodeRadioTransport(
      * The LoRa bearer, built only once a region is stored - UNSET listens and refuses every transmit, so building it
      * early would only pin the USB port. The app's LoRa screen writes the region like it does on a radio.
      */
-    private fun loraTransport(stored: Config.LoRaConfig?): LoraTransport? {
+    private fun loraTransport(stored: Config.LoRaConfig?, primaryName: String): LoraTransport? {
         val regionName = stored?.region?.name?.takeIf { it != UNSET_REGION }
         val band = regionName?.let(LoraRegion::byName)
         if (stored == null || band == null) {
@@ -258,6 +270,7 @@ class NodeRadioTransport(
             LoraConfig(
                 region = band,
                 preset = preset,
+                channelName = primaryName,
                 channelNum = stored.channel_num,
                 overrideFrequencyMHz = stored.override_frequency.toDouble(),
                 txPowerDbm = stored.tx_power.takeIf { it > 0 }?.coerceAtMost(MAX_TX_POWER_DBM) ?: MAX_TX_POWER_DBM,
@@ -293,7 +306,9 @@ class NodeRadioTransport(
         const val TO_RADIO_BUFFER = 64
         const val NANOS_PER_MILLI = 1_000_000L
         const val MILLIS_PER_SECOND = 1_000L
-        const val DEFAULT_CHANNEL = "LongFast"
+
+        // Empty, as Channels::initDefaultChannel stores it: the node hashes it under the preset's name.
+        const val DEFAULT_CHANNEL = ""
         const val DEFAULT_PSK_INDEX: Byte = 1
         const val DEFAULT_HOP_LIMIT = 3
         const val UNSET_REGION = "UNSET"
