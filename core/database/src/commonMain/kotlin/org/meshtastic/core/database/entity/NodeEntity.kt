@@ -163,9 +163,11 @@ data class NodeEntity(
     /** True when this node signs its broadcasts via XEdDSA (NodeInfo.has_xeddsa_signed). */
     @ColumnInfo(name = "has_xeddsa_signed", defaultValue = "0") var signsPackets: Boolean = false,
     /**
-     * True when the radio has heard this node over RF since its current LoRa config took effect
-     * (NodeInfo.heard_on_current_lora). Defaults true so nodes stored before this column existed, and nodes from
-     * firmware that does not report it, are never shown as unheard.
+     * True when the radio has heard this node over RF on the LoRa configuration it is using now
+     * (NodeInfo.heard_on_current_lora). The radio derives this from the slot each node was heard on rather than
+     * clearing it on a config change, so returning to a configuration restores the previous answers. Defaults true so
+     * nodes stored before this column existed, and nodes from firmware that does not report it, are never shown as
+     * unheard.
      */
     @ColumnInfo(name = "heard_on_current_lora", defaultValue = "1") var heardOnCurrentLora: Boolean = true,
     /**

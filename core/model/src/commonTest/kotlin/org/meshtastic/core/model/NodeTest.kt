@@ -164,4 +164,19 @@ class NodeTest {
 
     private fun nodeWithPosition(num: Int, latitudeI: Int, longitudeI: Int): Node =
         Node(num = num, position = Position(latitude_i = latitudeI, longitude_i = longitudeI))
+
+    @Test
+    fun `isUnheardOnCurrentLora is true for a node not heard on the config in force now`() {
+        assertTrue(Node(num = 1, heardOnCurrentLora = false).isUnheardOnCurrentLora)
+        assertFalse(Node(num = 1, heardOnCurrentLora = true).isUnheardOnCurrentLora)
+    }
+
+    @Test
+    fun `isUnheardOnCurrentLora excludes MQTT nodes the radio never heard over RF`() {
+        // The radio sets the mark only on an RF hear, so a node that only ever arrives over MQTT reports false for
+        // the lifetime of the entry. Presenting that as "unreachable since you changed settings" would badge every
+        // node on an MQTT-uplinked mesh and offer it for removal, and removing one is pointless.
+        assertFalse(Node(num = 1, heardOnCurrentLora = false, viaMqtt = true).isUnheardOnCurrentLora)
+        assertFalse(Node(num = 1, heardOnCurrentLora = true, viaMqtt = true).isUnheardOnCurrentLora)
+    }
 }

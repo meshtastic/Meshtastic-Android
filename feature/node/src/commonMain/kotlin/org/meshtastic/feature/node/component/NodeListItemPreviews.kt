@@ -84,8 +84,8 @@ fun NodeItemCompleteActivePreview() {
 @PreviewLightDark
 @Composable
 fun NodeItemUnheardPreview() {
-    // Heard recently enough to count as online, but not since the radio's LoRa config changed. The unheard marker
-    // has to win over the online tint here: green would claim it is reachable.
+    // Heard recently enough to count as online, but not on the LoRa config the radio is using now. The unheard
+    // marker has to win over the online tint here: green would claim it is reachable.
     val unheardNode =
         previewNodes.minnieMouse.copy(
             lastHeard = (org.meshtastic.core.common.util.nowSeconds - 300).toInt(),
