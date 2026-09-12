@@ -2,7 +2,7 @@
 title: Tõlgi rakendus
 parent: Kasutusjuhend
 nav_order: 17
-last_updated: 2026-08-30
+last_updated: 2026-09-11
 description: Kuidas rakendust ja selle dokumentatsiooni Crowdini kaudu tõlgitakse ja tõlgete panustamise juhised.
 aliases:
   - tõlgi
@@ -45,7 +45,7 @@ Kui teie keelt Crowdinis veel pole:
 
 The Android app uses **Compose Multiplatform resources** for all user-visible strings:
 
-```
+```text
 core/resources/src/commonMain/composeResources/
 ├── values/              ← English (default)
 │   └── strings.xml
@@ -58,7 +58,7 @@ core/resources/src/commonMain/composeResources/
 
 Rakendusesisene dokumentatsioon järgib sarnast mustrit jaotises `docs/`:
 
-```
+```text
 docs/
 ├── en/user/             ← English source (default)
 │   ├── onboarding.md

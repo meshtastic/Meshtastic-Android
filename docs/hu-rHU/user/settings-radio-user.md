@@ -2,7 +2,7 @@
 title: Settings — Radio & User
 parent: User Guide
 nav_order: 7
-last_updated: 2026-09-09
+last_updated: 2026-09-11
 description: Configure your radio hardware, LoRa presets, user profile, position sharing, power management, and security.
 aliases:
   - beállítások
@@ -51,7 +51,7 @@ The footer appears as soon as you change something. **Discard** throws the chang
 The status message is saved with the same **Save**, but it never reboots the node — and, like the
 rest of this screen, it can be edited on a remote node you administer. For your own radio there is a
 shortcut while it is connected: touch & hold your node in the [node list](nodes.md) and choose
-**Update status**. Older firmware and a disconnected radio have no shortcut — the field above is
+**Update status**. Older firmware and a disconnected node have no shortcut — the field itself is
 still the way in.
 
 ## Configuration
@@ -77,13 +77,13 @@ On **Settings → LoRa**.
 
 | Setting                      | Leírás                                                                                                                                                                                                                                                                                                                            | Alapértelmezett                                |
 | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| Régió                        | Regulatory region for frequency bands. You must set this before transmitting                                                                                                                                                                                                                                      | Unset (must configure)      |
+| Régió                        | Regulatory region for frequency bands. You must set this before transmitting. On firmware 2.8 or newer, the first region set also creates the node's identity key and gives it a new node number                                                                                  | Unset (must configure)      |
 | Előbeállítások               | Speed/range tradeoff                                                                                                                                                                                                                                                                                                              | LongFast                                       |
 | Ugrások száma                | Maximum retransmit hops                                                                                                                                                                                                                                                                                                           | 3                                              |
 | Adásteljesítmény             | Transmission power (dBm); 0 = max allowed for region                                                                                                                                                                                                                                                           | 0 (region max)              |
 | Frekvencia felülbírálása     | Overrides the computed operating frequency outright (MHz). It does not offset the calculated value — leave at 0 unless you know you need a specific frequency                                                                                                                                  | 0 (use calculated)          |
 | Előbeállítás használata      | On by default. Turn it off to set Spread Factor, Coding Rate and Bandwidth by hand instead of taking them from the modem preset                                                                                                                                                                                   | On                                             |
-| Szórási Faktor               | Manual mode only: 7–12. Higher spreads further but slower                                                                                                                                                                                                                                         | From preset                                    |
+| Szórási Faktor               | Manual mode only: 5–12. Higher spreads further but slower. On SX127x (RF95) radios the firmware does not accept 5 or 6 and uses 11 instead                                                                                                                     | From preset                                    |
 | Kódolási ráta                | Manual mode only: 5–8. More redundancy costs airtime                                                                                                                                                                                                                                              | From preset                                    |
 | Sávszélesség                 | Manual mode only: the channel bandwidth in kHz, typed in directly. On the 2.4 GHz region the app offers a list of the bandwidths your radio supports instead, and a stored value that is not on that list shows as _Unsupported_ and blocks saving until you pick a supported one | From preset                                    |
 | Frekvencia sáv               | Which slot within the region's band to use. 0 derives it from the primary channel name                                                                                                                                                                                                                            | 0 (automatic)               |

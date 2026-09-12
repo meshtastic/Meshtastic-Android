@@ -2,7 +2,7 @@
 title: アプリを翻訳する
 parent: User Guide
 nav_order: 17
-last_updated: 2026-08-30
+last_updated: 2026-09-11
 description: アプリとそのドキュメントが Crowdin を通じてどう翻訳されるか、および翻訳に貢献するためのガイドラインを説明します。
 aliases:
   - translate
@@ -45,7 +45,7 @@ The app and its in-app docs are translated on Crowdin — this page shows how to
 
 Android アプリは、ユーザーに表示されるすべての文字列に **Compose Multiplatform リソース**を使用しています：
 
-```
+```text
 core/resources/src/commonMain/composeResources/
 ├── values/              ← 英語（デフォルト）
 │   └── strings.xml
@@ -58,7 +58,7 @@ core/resources/src/commonMain/composeResources/
 
 アプリ内ドキュメントも、`docs/` の下で同様のパターンに従います：
 
-```
+```text
 docs/
 ├── en/user/             ← 英語ソース（デフォルト）
 │   ├── onboarding.md

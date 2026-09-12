@@ -2,7 +2,7 @@
 title: Settings — Radio & User
 parent: User Guide
 nav_order: 7
-last_updated: 2026-09-09
+last_updated: 2026-09-11
 description: Configure your radio hardware, LoRa presets, user profile, position sharing, power management, and security.
 aliases:
   - 設定
@@ -51,7 +51,7 @@ The footer appears as soon as you change something. **Discard** throws the chang
 The status message is saved with the same **Save**, but it never reboots the node — and, like the
 rest of this screen, it can be edited on a remote node you administer. For your own radio there is a
 shortcut while it is connected: touch & hold your node in the [node list](nodes.md) and choose
-**Update status**. Older firmware and a disconnected radio have no shortcut — the field above is
+**Update status**. Older firmware and a disconnected node have no shortcut — the field itself is
 still the way in.
 
 ## 設定
@@ -77,13 +77,13 @@ On **Settings → LoRa**.
 
 | 設定         | 描述說明                                                                                                                                                                                                                                                                                                                              | 默認                                             |
 | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| 地區         | Regulatory region for frequency bands. You must set this before transmitting                                                                                                                                                                                                                                      | Unset (must configure)      |
+| 地區         | Regulatory region for frequency bands. You must set this before transmitting. On firmware 2.8 or newer, the first region set also creates the node's identity key and gives it a new node number                                                                                  | Unset (must configure)      |
 | 預設配置       | Speed/range tradeoff                                                                                                                                                                                                                                                                                                              | LongFast                                       |
 | 中繼次數       | Maximum retransmit hops                                                                                                                                                                                                                                                                                                           | 3                                              |
 | 傳輸功率       | Transmission power (dBm); 0 = max allowed for region                                                                                                                                                                                                                                                           | 0 (region max)              |
 | 手動設定頻率     | Overrides the computed operating frequency outright (MHz). It does not offset the calculated value — leave at 0 unless you know you need a specific frequency                                                                                                                                  | 0 (use calculated)          |
 | 使用預設值      | On by default. Turn it off to set Spread Factor, Coding Rate and Bandwidth by hand instead of taking them from the modem preset                                                                                                                                                                                   | On                                             |
-| 擴頻因子       | Manual mode only: 7–12. Higher spreads further but slower                                                                                                                                                                                                                                         | From preset                                    |
+| 擴頻因子       | Manual mode only: 5–12. Higher spreads further but slower. On SX127x (RF95) radios the firmware does not accept 5 or 6 and uses 11 instead                                                                                                                     | From preset                                    |
 | 編碼率        | Manual mode only: 5–8. More redundancy costs airtime                                                                                                                                                                                                                                              | From preset                                    |
 | 頻寬         | Manual mode only: the channel bandwidth in kHz, typed in directly. On the 2.4 GHz region the app offers a list of the bandwidths your radio supports instead, and a stored value that is not on that list shows as _Unsupported_ and blocks saving until you pick a supported one | From preset                                    |
 | 頻率槽        | Which slot within the region's band to use. 0 derives it from the primary channel name                                                                                                                                                                                                                            | 0 (automatic)               |

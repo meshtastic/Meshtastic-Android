@@ -2,7 +2,7 @@
 title: MQTT
 parent: 使用者指南
 nav_order: 11
-last_updated: 2026-08-30
+last_updated: 2026-09-11
 description: 將您的 mesh 網路橋接至網際網路 — MQTT 代理伺服器設定、加密層級與地圖回報。
 aliases:
   - MQTT
@@ -25,7 +25,7 @@ MQTT 模組可將您的節點連接至 MQTT 代理伺服器，實現以下功能
 
 ## 運作方式
 
-```
+```text
 [Your Node] → Radio → [Gateway Node with Wi-Fi] → MQTT Broker → [Remote Gateway] → Radio → [Remote Node]
 ```
 

@@ -74,19 +74,23 @@ There is no separate "away" tier.
 
 > 💡 **ヒント：** メッシュは、ほとんどのノードが**クライアント**または**ルーター**のときに最も良く機能します。 Too many Client Mute nodes reduce mesh resilience; too many Routers in a dense area can cause congestion. 目安としては、地域内のクライアント 5〜10 台につきルーター 1 台です。
 
-### 暗号化の表示
+### Security indicators
 
-ノードは、名前の横に暗号化ステータスのアイコンを表示します：
+Each node carries one security icon beside its name in the node list. Tap it to read what it means, and choose **Show All Meanings** in that dialog for the full legend. The detail screen shows the same state in words, as a **Security** row that opens the same dialog.
 
-| アイコン     | 意味                                                                                                                                                |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 🔒 ロック   | 通信は PKI（公開鍵基盤）を使用します。本人性が検証された、エンドツーエンドの暗号化です                                                                                                     |
-| 🔓 ロック解除 | No public key has been received for this node, so it cannot be direct messaged — use **Request User Info** on the node detail page to ask for one |
-| ⚠️ 不一致   | 公開鍵の不一致。前回確認時からノードの鍵が変わっています（信頼する前に調べてください）                                                                                                       |
+| アイコン                                                      | 意味                                                                                                                                                                                                                                                                                           | Shown for                                                                                         |
+| --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Person with a shield check (green)     | **Verified contact** — you verified this node's key in person by exchanging contact QR codes, so its identity is confirmed. The strongest trust the list shows. Your own connected node carries it too                                                       | Any firmware version                                                                              |
+| Nodes icon with a shield check (green) | **Signed node** — this node signs its broadcasts with its identity key, so its identity is consistent over time, but you have not verified it in person. On firmware 2.8 the icon appears from the version alone, before any signed broadcast has been heard | Firmware 2.8 or newer, and any node whose signed broadcast your node has verified |
+| 🔒 Closed lock                                            | A public key is on file and matches, so direct messages to this node are encrypted                                                                                                                                                                                                           | Firmware before 2.8, or no reported version                                       |
+| 🔓 Open lock                                              | No public key has been received for this node, so it cannot be direct messaged — use **Request User Info** on the node detail page to ask for one                                                                                                                                            | Firmware before 2.8, or no reported version                                       |
+| ⚠️ 不一致                                                    | **Public key mismatch** — a different key arrived for this node after one was stored. Investigate before trusting                                                                                                                                                            | Any firmware version                                                                              |
 
-> 💡 **Tip:** Direct messages always use PKI, so the radio needs the other node's public key before it can send one. It refuses the send rather than falling back to channel encryption. Keys arrive inside node info, which is why an open lock usually clears itself once that node is heard from properly. 鍵の不一致の警告が表示された場合、そのノードはリセットされたか、侵害された可能性があります。
+Every node on firmware 2.8 or newer signs its broadcasts, so on that firmware the signed state is the baseline and the locks are not shown.
 
-To clear a mismatch, first confirm through another trusted channel that the key change was intentional — a factory reset causes one. Then touch & hold the node, choose **Remove**, and let the two radios exchange keys again the next time yours hears it.
+Direct messages always use public-key encryption, so your node needs the other node's public key before it can send one. It refuses the send rather than falling back to channel encryption. Keys arrive inside node info, which is why an open lock usually clears itself once that node is heard from properly.
+
+A mismatch never replaces the key you already hold. The app keeps the first key it recorded and refuses the new one, as the firmware does, so a stray or hostile node info cannot silently break encrypted messaging to a contact. To clear a mismatch, first confirm through another trusted channel that the key change was intentional — a factory reset causes one. Then touch & hold the node, choose **Remove**, and let the two nodes exchange keys again the next time yours hears it.
 
 ## クイック操作
 
@@ -110,6 +114,8 @@ radio is connected and running firmware 2.8 or newer — see
 
 On a node's detail screen, tap **Share Contact** to produce a link and a QR code for that node. From the same dialog, **Share link** opens the Android share sheet (on desktop it copies the link instead), **Write to NFC tag** saves it to a writable NFC tag, and **Copy** puts it on the clipboard. While that dialog is open and in front of you, the phone also offers the same link to any NFC reader, so someone can take the contact by tapping their phone against yours with no tag involved.
 
+Sharing your own contact this way marks it as verified in person, so whoever imports it sees the **Verified contact** icon rather than the signed one. Relaying someone else's contact passes on only what your app had already recorded about them.
+
 To add someone else's contact, use the import button on the node list and choose **Scan Shared Contact QR Code**, **Scan Shared Contact NFC**, or **Input Shared Contact URL**. The app asks you to confirm with **Import Shared Contact?**, and warns you when the contact is one you already have.
 
 ## 絞り込みと並べ替え
@@ -120,14 +126,16 @@ To add someone else's contact, use the import button on the node list and choose
 
 ### 絞り込みトグル
 
-| 絞り込み                        | 説明                                                                                                                                                                                                                                                         |
-| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Hide offline nodes**      | 過去 2 時間以内に受信したノードのみを表示します                                                                                                                                                                                                                                  |
-| **Only show direct nodes**  | Show only nodes your radio heard directly, with no relay in between                                                                                                                                                                                        |
-| **不明なノードを含む**               | Show nodes that haven't sent user info yet. **On by default**, so a node heard before its info arrives stays visible; these carry a badge marking them incomplete, and cannot be direct messaged until their user info brings a public key |
-| **インフラを除外**                 | Hide infrastructure-role nodes (Router, Router Late, Client Base, and legacy Repeater nodes) and any node that cannot be messaged, whatever its role                                                                                    |
-| **MQTT を除外**                | MQTT のインターネットブリッジ経由でのみ受信したノードを非表示にします                                                                                                                                                                                                                      |
-| **Only show ignored Nodes** | Replace the list with the nodes you have ignored. Every other node is hidden while this is on, and a banner appears at the top of the list to take you back                                                                                |
+| 絞り込み                        | 説明                                                                                                                                                                                                                                                                                                                            |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Hide offline nodes**      | 過去 2 時間以内に受信したノードのみを表示します                                                                                                                                                                                                                                                                                                     |
+| **Only show direct nodes**  | Show only nodes your radio heard directly, with no relay in between                                                                                                                                                                                                                                                           |
+| **不明なノードを含む**               | Show nodes that haven't sent user info yet. **On by default**, so a node heard before its info arrives stays visible; these carry a badge marking them incomplete, and cannot be direct messaged until their user info brings a public key                                                                    |
+| **インフラを除外**                 | Hide infrastructure-role nodes (Router, Router Late, Client Base, and legacy Repeater nodes) and any node that cannot be messaged, whatever its role                                                                                                                                                       |
+| **MQTT を除外**                | MQTT のインターネットブリッジ経由でのみ受信したノードを非表示にします                                                                                                                                                                                                                                                                                         |
+| **Signed only**             | Show only nodes whose signed broadcasts your node has actually heard and verified. Stricter than the icon: a node on 2.8 shows as signed by its firmware version before any signed broadcast arrives, and a contact verified in person on older firmware is not signed at all |
+| **Encrypted only**          | Show nodes with a matching public key on file, the key an encrypted direct message needs. A node with a key mismatch is excluded                                                                                                                                                                              |
+| **Only show ignored Nodes** | Replace the list with the nodes you have ignored. Every other node is hidden while this is on, and a banner appears at the top of the list to take you back                                                                                                                                                   |
 
 ### 並べ替えオプション
 
