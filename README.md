@@ -50,7 +50,7 @@ What those two channels point at right now:
 | Channel | Currently | Released |
 |---|---|---|
 | **Latest release** | `v2.8.1` | 2026-08-20 |
-| **Open beta** | *none published right now* | — |
+| **Open beta** | `v2.8.2-open.1` | 2026-09-12 |
 
 <!-- END GENERATED STATUS -->
 
