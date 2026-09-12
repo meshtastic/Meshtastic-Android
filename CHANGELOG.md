@@ -9,19 +9,10 @@ See [GitHub Releases](https://github.com/meshtastic/Meshtastic-Android/releases)
 
 ### Unreleased (not yet in any build)
 
-#### 🏗️ Features
-* feat(nfc): share a contact or channel by tapping phones, no tag needed by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7124
-* feat(ui): share the link from the share dialog, and say what the dialog does by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7126
-* feat(node): signed and verified indicators in place of the PKI lock by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7117
-* fix(node): keep a contact's public key when a different one arrives by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7118
 #### 🛠️ Fixes
-* fix(lora): correct preset SNR floors and signal colors by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7110
-* fix(settings): allow all available spread factors by @gargomoma in https://github.com/meshtastic/Meshtastic-Android/pull/7119
-* fix(nfc): write to tags that have never been NDEF-formatted by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7123
-#### 📝 Other Changes
-* refactor(prefs): keep each surface's filters in one state object by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7120
+* fix(node): stop presenting MQTT-only nodes as unheard on the current LoRa by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7138
 
-### Internal (v2.8.2-internal.8)
+### Internal (v2.8.2-internal.9)
 Changes since [`v2.8.2-closed.1`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.2-closed.1):
 
 #### 🏗️ Features
@@ -34,6 +25,10 @@ Changes since [`v2.8.2-closed.1`](https://github.com/meshtastic/Meshtastic-Andro
 * feat(node): overflow the time frame selector instead of crushing it by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7097
 * perf: cache-window the hot lists, and modernize the nav3 and adaptive wiring by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7093
 * feat(docs): use the real M3 search bar for doc search by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7098
+* feat(nfc): share a contact or channel by tapping phones, no tag needed by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7124
+* feat(ui): share the link from the share dialog, and say what the dialog does by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7126
+* feat(node): signed and verified indicators in place of the PKI lock by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7117
+* fix(node): keep a contact's public key when a different one arrives by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7118
 #### 🖥️ Desktop
 * fix(desktop): use standard SPDX license identifier for RPM packaging by @RCGV1 in https://github.com/meshtastic/Meshtastic-Android/pull/7043
 #### 🛠️ Fixes
@@ -48,8 +43,12 @@ Changes since [`v2.8.2-closed.1`](https://github.com/meshtastic/Meshtastic-Andro
 * fix(settings): fetch Mesh Beacon config from remote-admin nodes by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7077
 * fix(messaging): keep the composer IME session stable while the node list changes by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7079
 * fix(network): never send heartbeat nonce 1, the firmware NodeInfo-ping trigger by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7078
+* fix(lora): correct preset SNR floors and signal colors by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7110
+* fix(settings): allow all available spread factors by @gargomoma in https://github.com/meshtastic/Meshtastic-Android/pull/7119
+* fix(nfc): write to tags that have never been NDEF-formatted by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7123
 #### 📝 Other Changes
 * refactor(map): retire the maps-utils workarounds its 5.1 fixes made stale by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7046
+* refactor(prefs): keep each surface's filters in one state object by @jamesarich in https://github.com/meshtastic/Meshtastic-Android/pull/7120
 
 ### Closed Beta (v2.8.2-closed.1)
 Changes since [`v2.8.1`](https://github.com/meshtastic/Meshtastic-Android/releases/tag/v2.8.1):
